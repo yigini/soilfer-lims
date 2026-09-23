@@ -68,13 +68,13 @@ export default function ManagerProgressOverview({
         },
         {
             key: 'completed',
-            label: t('dashboard.manager.stageCompleted', 'Completed / Released'),
-            count: stageCounts.completed ?? stageCounts.completedToday ?? 0,
+            label: t('dashboard.manager.stageCompleted', 'Approved / Released'),
+            count: stageCounts.completed ?? stageCounts.approved ?? stageCounts.completedToday ?? 0,
             subtext: (stageCounts.approvedToday ?? 0) > 0
                 ? t('dashboard.manager.approvedTodayCount', '{count} approved today', { count: stageCounts.approvedToday })
                 : null,
-            unit: t('dashboard.units.samples', { count: stageCounts.completed ?? stageCounts.completedToday ?? 0 }, 'samples'),
-            route: '/samples?status=SUBMITTED_FULL,APPROVED',
+            unit: t('dashboard.units.samples', { count: stageCounts.completed ?? stageCounts.approved ?? stageCounts.completedToday ?? 0 }, 'samples'),
+            route: '/samples?status=APPROVED',
             color: 'border-teal-200 dark:border-teal-800 bg-teal-50/50 dark:bg-teal-950/20 text-teal-700 dark:text-teal-300'
         }
     ];

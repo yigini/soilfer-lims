@@ -1277,17 +1277,17 @@ A focused correction was implemented on branch `fix/issue-120-manager-dashboard-
     5. Already `ACCEPTED` sample displays `READY_FOR_APPROVAL` badge (not `READY_FOR_REVIEW`) and excludes `DISPOSAL` from denominator.
     6. Mutually exclusive stage partitioning classifies candidates with strict precedence and isolates `RECEIVED` to `pendingIntake`.
     7. `RECEIVED` count-to-destination alignment: sample appears in Stage 1 intake destination and not in In Analysis destination.
-    8. Stage 5 Completed population counts authoritative `approvedAt` today, ignoring generic `updatedAt`, and includes `SUBMITTED_FULL`.
-    9. `COMPLETED` count-to-destination alignment: `COMPLETED` fixture appears in neither card nor destination, while canonical completed samples appear in both.
+    8. Stage 5 Approved / Released population counts authoritative `approvedAt` today, ignoring generic `updatedAt`, and strictly counts `APPROVED` samples.
+    9. Approved / Released count-to-destination alignment: Stage 5 route (`/samples?status=APPROVED`) matches card count exactly and omits unapproved `SUBMITTED_FULL` and `COMPLETED`.
 - **Client Build**:
   - `npm run build` in `client` passed cleanly without warnings or errors.
 - **Side-by-Side Browser CDP Journey** (`server/scripts/run_manager_dashboard_tasklist_side_by_side.cjs`):
   - Executed end-to-end on an isolated disposable database with realistic multi-technician fixture data:
-    1. `/` (Dashboard - Operational Overview): Verified h1 "Laboratory overview", Stage Pipeline (5 cards with accurate counts and ICU plurals, including Stage 5 "Completed / Released" with subtext "1 approved today"), Analysis Progress bars (33%, 100% with "Ready for Review" badge, and 100% with "Ready for Approval" badge), Technician Workload cards, and Unassigned Alert banner. Screenshot: `manager_dashboard_overview_verified.png`.
+    1. `/` (Dashboard - Operational Overview): Verified h1 "Laboratory overview", Stage Pipeline (5 cards with accurate counts and ICU plurals, including Stage 5 "Approved / Released" with subtext "1 approved today"), Analysis Progress bars (33%, 100% with "Ready for Review" badge, and 100% with "Ready for Approval" badge), Technician Workload cards, and Unassigned Alert banner. Screenshot: `manager_dashboard_overview_verified.png`.
     2. `/` (Dashboard - Pending Work Queue toggle): Verified toggle to work queue table preview with Action buttons. Screenshot: `manager_dashboard_queue_toggle_verified.png`.
     3. `/manager-queue` (Manager Task List): Verified dedicated execution workbench with Assign Work, Review Submissions, Final Approvals, and QC Exceptions tabs. Screenshot: `manager_tasklist_action_verified.png`.
     4. `/?labId=LAB-GTM` (Scoped System Admin Dashboard): Verified scoped overview matching Guatemala lab workload. Screenshot: `super_admin_scoped_dashboard_verified.png`.
-    5. `/samples?status=SUBMITTED_FULL,APPROVED` (Stage 5 Destination): Verified navigation from Stage 5 card loads matching approved specimens, includes `SUBMITTED_FULL` specimens, and omits both non-canonical `COMPLETED` and `RECEIVED` specimens. Screenshot: `manager_dashboard_stage5_destination_verified.png`.
+    5. `/samples?status=APPROVED` (Stage 5 Destination): Verified navigation from Stage 5 card loads matching approved specimens, and omits unapproved `SUBMITTED_FULL`, non-canonical `COMPLETED`, and `RECEIVED` specimens. Screenshot: `manager_dashboard_stage5_destination_verified.png`.
   - Machine-readable evidence log: `artifacts/evidence-journeys/manager_dashboard_overview_evidence.json` (Status: `VERIFIED`, 5/5 findings passed).
 
 #### 6. Independent Review Feedback Resolution (PR #141 / Comment 5796060402)
@@ -1310,9 +1310,19 @@ A focused correction was implemented on branch `fix/issue-120-manager-dashboard-
 - **Gap 2: Completed Population & Destination Route Parity**:
   - `completedCount` in `dashboardService.js` previously queried `status: { in: ['APPROVED', 'COMPLETED', 'SUBMITTED_FULL'] }`, whereas the released Samples Quick Filter and route `/samples?status=SUBMITTED_FULL,APPROVED` omits `COMPLETED` (in the SoilFER-LIMS schema, `COMPLETED` applies strictly to work items, not sample states).
   - Aligned `completedCount` strictly to `status: { in: ['APPROVED', 'SUBMITTED_FULL'] }`, ensuring 100% parity between card count and destination query without modifying released filter components.
-  - Verified with Contract Tests 8 & 9: non-canonical `COMPLETED` fixture is omitted from both card count and destination query results; canonical samples (`sampleApprovedToday`, `sampleApprovedPast`, `sampleSubmittedFull`) appear in both; card count matches destination sample count exactly.
 
-#### 8. Issue Status
+#### 8. Delta Review Feedback Resolution: Approved / Released Mutual Exclusivity (PR #141 / Comment 5797994081)
+- **Stage 4 & Stage 5 Non-Overlapping Partition**:
+  - `SUBMITTED_FULL` specimens with accepted work were properly counted in `stageCounts.finalApproval` (Stage 4), but `stageCounts.completed` also counted all `SUBMITTED_FULL` specimens, causing specimens ready for final authorization to be double-counted in both Stage 4 and Stage 5. `SUBMITTED_FULL` represents bench-complete analytical work awaiting final approval, not approved or released work.
+  - In `server/services/dashboardService.js`, updated `completedCount` to strictly query `status: 'APPROVED'` (and `approvedAt: { gte: dayStart, lt: dayEnd }` for `approvedToday`).
+  - In `client/src/components/dashboard/ManagerProgressOverview.jsx`, aligned the fifth card to "Approved / Released" (`dashboard.manager.stageCompleted`), pointing directly to destination route `/samples?status=APPROVED`. Updated localization in all 5 languages (`en`, `es`, `es-419`, `fr`, `pt`).
+  - Added dedicated contract fixture `sampleSubmittedFullAccepted` (`status: 'SUBMITTED_FULL'` with `ACCEPTED` work items):
+    - Counted in Stage 4: `stageCounts.finalApproval === 2` (`sampleApproval` + `sampleSubmittedFullAccepted`).
+    - Strictly excluded from Stage 5: `stageCounts.completed === 2` (`sampleApprovedToday` + `sampleApprovedPast`).
+    - Excluded from Stage 5 destination: `/samples?status=APPROVED` contains only the 2 approved specimens and omits `sampleSubmittedFullAccepted`.
+  - Zero double-counting across all 5 stages: `pendingIntake (1) + inProgress (1) + awaitingReview (1) + finalApproval (2) + completed (2) = 7`.
+
+#### 9. Issue Status
 - **Issue #120**: Remains **OPEN** (`Refs #120`). Follow-up PR #141 updated for independent review; no merge or deployment permitted until explicitly authorized.
 
 

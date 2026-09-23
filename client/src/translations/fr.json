@@ -368,7 +368,7 @@
       "stageInAnalysis": "En analyse",
       "stageAwaitingReview": "En attente de révision",
       "stageFinalApproval": "Approbation finale",
-      "stageCompleted": "Terminé / Publié",
+      "stageCompleted": "Approuvé / Publié",
       "stageCompletedToday": "Terminés aujourd'hui",
       "approvedTodayCount": "{count, plural, one {1 approuvé aujourd'hui} other {# approuvés aujourd'hui}}",
       "actionCenterTitle": "Liste des tâches opérationnelles du responsable",

@@ -368,7 +368,7 @@
       "stageInAnalysis": "In Analysis",
       "stageAwaitingReview": "Awaiting Review",
       "stageFinalApproval": "Final Approval",
-      "stageCompleted": "Completed / Released",
+      "stageCompleted": "Approved / Released",
       "stageCompletedToday": "Completed Today",
       "approvedTodayCount": "{count, plural, one {1 approved today} other {# approved today}}",
       "actionCenterTitle": "Manager Operational Task List",

@@ -432,11 +432,12 @@ async function getDashboardHome(user, options = {}) {
         const [completedCount, approvedTodayCount, totalSamplesCount] = await Promise.all([
             prisma.sample.count({
                 where: scopedWhere(sampleWhere, {
-                    status: { in: ['APPROVED', 'SUBMITTED_FULL'] }
+                    status: 'APPROVED'
                 })
             }),
             prisma.sample.count({
                 where: scopedWhere(sampleWhere, {
+                    status: 'APPROVED',
                     approvedAt: { gte: actorScope.dayStart, lt: actorScope.dayEnd }
                 })
             }),
@@ -454,6 +455,7 @@ async function getDashboardHome(user, options = {}) {
                 awaitingReview: stageAwaitingReviewCount,
                 finalApproval: approvalEligibleCount,
                 completed: completedCount,
+                approved: completedCount,
                 approvedToday: approvedTodayCount,
                 unassignedTasks: unassignedTasksCount,
                 totalSamples: totalSamplesCount

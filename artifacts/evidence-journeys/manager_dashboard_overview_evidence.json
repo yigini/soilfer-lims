@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-23T15:36:00.687Z",
+  "timestamp": "2026-09-23T19:35:10.435Z",
   "status": "VERIFIED",
   "findings": {
     "managerDashboardOperationalOverview": {
@@ -18,7 +18,7 @@
         "hasCompletedStage": true,
         "hasApprovedTodaySubtext": true,
         "hasStage5Route": true,
-        "progressBarsCount": 3,
+        "progressBarsCount": 4,
         "techCardsCount": 20
       }
     },
@@ -32,7 +32,7 @@
           "Count",
           "Action"
         ],
-        "rowsCount": 1
+        "rowsCount": 2
       }
     },
     "managerTaskListActions": {
@@ -57,10 +57,10 @@
     "stage5DestinationPopulation": {
       "verified": true,
       "details": {
-        "url": "/samples?status=SUBMITTED_FULL,APPROVED",
+        "url": "/samples?status=APPROVED",
         "hasSample4": true,
         "hasSample5": true,
-        "hasSampleSubFull": true,
+        "omitsSampleSubFull": true,
         "omitsSampleComp": true,
         "omitsSampleRec": true
       }

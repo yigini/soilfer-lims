@@ -281,6 +281,7 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
     let sampleApprovedToday;
     let sampleApprovedPast;
     let sampleSubmittedFull;
+    let sampleSubmittedFullAccepted;
     let sampleCompletedNoApprovedAt;
     let sampleReceived;
 
@@ -432,7 +433,7 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
             }
         });
 
-        // 6. Sample with SUBMITTED_FULL status (canonical completed at bench)
+        // 6. Sample with SUBMITTED_FULL status without accepted work (unapproved)
         sampleSubmittedFull = await prisma.sample.create({
             data: {
                 id: `SMP-STG-SFULL-${unique}`,
@@ -441,6 +442,30 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
                 assignedLab: stageLab.id,
                 status: 'SUBMITTED_FULL',
                 receptionDate: new Date('2026-09-18T10:00:00Z')
+            }
+        });
+
+        // 7. Sample with SUBMITTED_FULL status PLUS accepted analytical work (bench-complete, eligible for final approval)
+        sampleSubmittedFullAccepted = await prisma.sample.create({
+            data: {
+                id: `SMP-STG-SFULL-ACC-${unique}`,
+                originalId: `FLD-STG-SFULL-ACC-${unique}`,
+                labId: `L-STG-SFULL-ACC-${unique}`,
+                assignedLab: stageLab.id,
+                status: 'SUBMITTED_FULL',
+                receptionDate: new Date('2026-09-18T10:00:00Z'),
+                dryingStatus: 'DONE',
+                preparationStatus: 'DONE'
+            }
+        });
+        await prisma.workItem.create({
+            data: {
+                id: `WI-SFULL-ACC-1-${unique}`,
+                sampleId: sampleSubmittedFullAccepted.id,
+                analysis: 'PH_H2O',
+                status: 'ACCEPTED',
+                assignedTo: techAlpha.username,
+                assignedLab: stageLab.id
             }
         });
 
@@ -512,19 +537,20 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         expect(stageCounts.pendingIntake).toBe(1);
 
         // 2. The active candidates in analysis are partitioned strictly:
-        // - sampleApproval -> finalApproval (1)
-        // - sampleReview   -> awaitingReview (1)
-        // - sampleBench    -> inProgress (1)
-        expect(stageCounts.finalApproval).toBe(1);
+        // - sampleApproval            -> finalApproval (eligible)
+        // - sampleSubmittedFullAccepted -> finalApproval (eligible bench-complete with accepted work)
+        // - sampleReview              -> awaitingReview (has submitted work)
+        // - sampleBench               -> inProgress (active determinations underway)
+        expect(stageCounts.finalApproval).toBe(2);
         expect(stageCounts.awaitingReview).toBe(1);
         expect(stageCounts.inProgress).toBe(1);
 
         // sampleReceived must NEVER be double-counted in inProgress!
-        // Neither sampleApproval nor sampleReview can double-count into inProgress
-        expect(stageCounts.inProgress + stageCounts.awaitingReview + stageCounts.finalApproval).toBe(3);
+        // Neither sampleApproval nor sampleSubmittedFullAccepted nor sampleReview can double-count into inProgress
+        expect(stageCounts.inProgress + stageCounts.awaitingReview + stageCounts.finalApproval).toBe(4);
 
         // Total active pipeline stages (intake + inProgress + awaitingReview + finalApproval)
-        expect(stageCounts.pendingIntake + stageCounts.inProgress + stageCounts.awaitingReview + stageCounts.finalApproval).toBe(4);
+        expect(stageCounts.pendingIntake + stageCounts.inProgress + stageCounts.awaitingReview + stageCounts.finalApproval).toBe(5);
 
         // sampleReceived must NOT appear in analytical oversight progress monitor
         const oversight = res.body.progressOverview?.oversight || [];
@@ -556,7 +582,7 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         expect(inProgressIds).toContain(sampleBench.id);
     });
 
-    test('8. Stage 5 Completed population counts authoritative approvedAt today, ignoring updatedAt, and includes SUBMITTED_FULL', async () => {
+    test('8. Stage 5 Approved / Released population counts authoritative approvedAt today, ignoring updatedAt, and strictly counts APPROVED samples', async () => {
         const res = await request(app)
             .get('/api/dashboard/home')
             .set('Authorization', `Bearer ${stageManagerToken}`);
@@ -564,9 +590,12 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         expect(res.status).toBe(200);
         const stageCounts = res.body.progressOverview?.stageCounts;
 
-        // Completed population includes: sampleApprovedToday, sampleApprovedPast, sampleSubmittedFull
-        // OMITS sampleCompletedNoApprovedAt (status: 'COMPLETED')
-        expect(stageCounts.completed).toBe(3);
+        // Approved / Released population includes ONLY approved samples:
+        // sampleApprovedToday (status: 'APPROVED') and sampleApprovedPast (status: 'APPROVED')
+        // STRICTLY OMITS unapproved SUBMITTED_FULL specimens (sampleSubmittedFull, sampleSubmittedFullAccepted)
+        // and non-canonical COMPLETED status (sampleCompletedNoApprovedAt)
+        expect(stageCounts.completed).toBe(2);
+        expect(stageCounts.approved).toBe(2);
 
         // approvedToday must ONLY count sampleApprovedToday (approvedAt today)
         // sampleApprovedPast (approvedAt in past), sampleSubmittedFull (null approvedAt),
@@ -574,16 +603,16 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         expect(stageCounts.approvedToday).toBe(1);
     });
 
-    test('9. COMPLETED count-to-destination alignment: COMPLETED fixture appears in neither card nor destination, while canonical completed samples appear in both', async () => {
+    test('9. Approved / Released count-to-destination alignment: Stage 5 route (/samples?status=APPROVED) matches card count exactly and omits unapproved SUBMITTED_FULL and COMPLETED', async () => {
         const dashRes = await request(app)
             .get('/api/dashboard/home')
             .set('Authorization', `Bearer ${stageManagerToken}`);
         const cardCompletedCount = dashRes.body.progressOverview?.stageCounts?.completed;
 
-        // Stage 5 destination (/samples?status=SUBMITTED_FULL,APPROVED)
+        // Stage 5 destination (/samples?status=APPROVED)
         const destRes = await request(app)
             .get('/api/samples')
-            .query({ status: 'SUBMITTED_FULL,APPROVED' })
+            .query({ status: 'APPROVED' })
             .set('Authorization', `Bearer ${stageManagerToken}`);
 
         expect(destRes.status).toBe(200);
@@ -592,21 +621,25 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
 
         const sampleIds = samples.map(s => s.id);
 
-        // 1. Both card and destination include canonical finished/approved samples:
+        // 1. Both card and destination include canonical approved samples:
         expect(sampleIds).toContain(sampleApprovedToday.id);
         expect(sampleIds).toContain(sampleApprovedPast.id);
-        expect(sampleIds).toContain(sampleSubmittedFull.id);
 
-        // 2. Both card and destination omit active processing specimens:
+        // 2. Both card and destination strictly omit active, submitted, and review specimens:
         expect(sampleIds).not.toContain(sampleReview.id);
         expect(sampleIds).not.toContain(sampleApproval.id);
         expect(sampleIds).not.toContain(sampleBench.id);
         expect(sampleIds).not.toContain(sampleReceived.id);
 
-        // 3. COMPLETED fixture appears in NEITHER the card count nor the destination results:
+        // 3. SUBMITTED_FULL specimens (even with accepted work) appear in Final Approval, NOT Approved / Released:
+        expect(sampleIds).not.toContain(sampleSubmittedFullAccepted.id);
+        expect(sampleIds).not.toContain(sampleSubmittedFull.id);
+
+        // 4. COMPLETED fixture appears in NEITHER the card count nor the destination results:
         expect(sampleIds).not.toContain(sampleCompletedNoApprovedAt.id);
-        // Card count exactly equals destination results count
+
+        // 5. Card count exactly equals destination results count
         expect(sampleIds.length).toBe(cardCompletedCount);
-        expect(cardCompletedCount).toBe(3);
+        expect(cardCompletedCount).toBe(2);
     });
 });

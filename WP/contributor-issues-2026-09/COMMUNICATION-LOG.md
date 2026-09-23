@@ -369,5 +369,30 @@ User explicitly approved combined PR132/133 merge/deployment. Accepted heads0a7c
   - Production client build passed cleanly in 8.88s.
 - Pushed updated commit to PR #141. Issue #120 remains **OPEN**; candidate is unmerged and undeployed.
 
+### 2026-09-23 19:40 UTC — PR #141 delta review remediation: Approved / Released mutual exclusivity
+- Independent review on PR #141 at `8ff41f9` ([comment 5797994081](https://github.com/yigini/soilfer-lims/pull/141#issuecomment-5797994081)) identified that `SUBMITTED_FULL` samples with accepted work were still double-counted in both Final Approval and Completed / Released.
+- Remediations:
+  - `server/services/dashboardService.js`:
+    - Preserved final-approval candidate eligibility for `SUBMITTED_FULL` specimens with accepted work (`candidates` query retains `SUBMITTED_FULL`).
+    - Restricted `completedCount` to strictly query `status: 'APPROVED'` (and `approvedAt: { gte: dayStart, lt: dayEnd }` for `approvedToday`), isolating Stage 5 to a truthful, non-overlapping approved/released population.
+    - Updated `stageCounts` to return `completed: completedCount, approved: completedCount`.
+  - `client/src/components/dashboard/ManagerProgressOverview.jsx`:
+    - Relabeled Stage 5 card to "Approved / Released" (`dashboard.manager.stageCompleted`).
+    - Updated Stage 5 destination route to `/samples?status=APPROVED`.
+  - `client/src/translations/{en,es,es-419,fr,pt}.json`:
+    - Aligned translations for `dashboard.manager.stageCompleted` across all 5 supported locales ("Approved / Released", "Aprobado / Liberado", "Approuvé / Publié", "Aprovado / Liberado").
+  - `server/tests/contracts/manager_dashboard_overview.test.js`:
+    - Added dedicated fixture `sampleSubmittedFullAccepted` (`SUBMITTED_FULL` with an `ACCEPTED` determination).
+    - Updated Test 6 to verify `stageCounts.finalApproval === 2` (`sampleApproval` + `sampleSubmittedFullAccepted`), `inProgress === 1`, `awaitingReview === 1`, `pendingIntake === 1` (zero double-counting across active stages).
+    - Updated Test 8 & 9 to verify `stageCounts.completed === 2` and `stageCounts.approved === 2` (`sampleApprovedToday` + `sampleApprovedPast`), strictly excluding unapproved `sampleSubmittedFullAccepted`, `sampleSubmittedFull`, and `sampleCompletedNoApprovedAt`.
+    - Verified destination route `/samples?status=APPROVED` returns exactly 2 approved specimens (card count == destination results count) and excludes unapproved/active specimens.
+    - 9/9 contract tests passed in 7.34s.
+  - `server/scripts/run_manager_dashboard_tasklist_side_by_side.cjs`:
+    - Added accepted work item fixture for `sSubFull` (`SMP-GTM-SFULL`).
+    - Verified Step 5 destination navigates to `/samples?status=APPROVED`, displays approved specimens, and omits unapproved `sSubFull`, `sComp`, and `sRec`. All 5 browser journeys passed.
+  - Client Build:
+    - Production build (`npm run build`) passed cleanly in 27.90s.
+- Pushed updated commit to PR #141. Issue #120 remains **OPEN**; candidate is unmerged and undeployed.
+
 
 
