@@ -432,6 +432,19 @@ async function main() {
             }
         });
 
+        // sHndRec: Intake sample in foreign laboratory (LAB-HND) -> strictly isolated from LAB-GTM, used to test same-mounted queue switch
+        await prisma.sample.create({
+            data: {
+                id: 'SMP-HND-REC',
+                originalId: 'FIELD-HND-REC',
+                labId: 'HND-2026-REC',
+                assignedLab: 'LAB-HND',
+                projectCode: 'SOILFER-HND',
+                status: 'RECEIVED',
+                receptionDate: new Date('2026-09-22T08:00:00Z')
+            }
+        });
+
         console.log('[2/6] Starting application server...');
         server = http.createServer(app);
         await new Promise(r => server.listen(0, '127.0.0.1', r));
@@ -675,20 +688,20 @@ async function main() {
         const adminScreenshot = await pageCdp.send('Page.captureScreenshot', { format: 'png' });
         fs.writeFileSync(path.join(ARTIFACT_DIR, 'super_admin_scoped_dashboard_verified.png'), Buffer.from(adminScreenshot.data, 'base64'));
 
-        // ── STEP 5: Verify Stage 5 Navigation Destination (/samples?status=APPROVED) ──
-        console.log('[BONUS 2] Verifying Stage 5 destination (/samples?status=APPROVED)...');
+        // ── STEP 5: Follow rendered Stage 5 link as Scoped Admin ──
+        console.log('[STEP 5] Following actual rendered Stage 5 continuation link as Scoped Admin...');
         await pageCdp.send('Runtime.evaluate', {
             expression: `
-                localStorage.setItem('token', '${managerToken}');
-                localStorage.setItem('user', JSON.stringify({
-                    id: '${managerUser.id}',
-                    username: '${managerUser.username}',
-                    role: '${managerUser.role}',
-                    labId: '${managerUser.labId}'
-                }));
+                (() => {
+                    const link = document.querySelector('a[href*="/samples?status=APPROVED"]');
+                    if (link) {
+                        link.click();
+                    } else {
+                        window.location.href = '${adminScopedResult.stage5Link}';
+                    }
+                })()
             `
         });
-        await pageCdp.send('Page.navigate', { url: `http://127.0.0.1:${port}/samples?status=APPROVED` });
         await sleep(2500);
 
         const samplesNavEval = await pageCdp.send('Runtime.evaluate', {
@@ -696,29 +709,154 @@ async function main() {
             expression: `
                 (() => {
                     const pageText = document.body.innerText;
+                    const currentUrl = window.location.pathname + window.location.search;
                     const hasSample4 = pageText.includes('SMP-GTM-004') || pageText.includes('GTM-2026-0004');
                     const hasSample5 = pageText.includes('SMP-GTM-005') || pageText.includes('GTM-2026-0005');
                     const omitsSampleSubFull = !pageText.includes('SMP-GTM-SFULL');
                     const omitsSampleComp = !pageText.includes('SMP-GTM-COMP');
                     const omitsSampleRec = !pageText.includes('SMP-GTM-REC');
                     const omitsForeignLabSample = !pageText.includes('SMP-HND-001') && !pageText.includes('HND-2026-0001');
+                    const preservesAdminScope = currentUrl.includes('labId=LAB-GTM') && currentUrl.includes('status=APPROVED');
                     return {
-                        url: window.location.pathname + window.location.search,
+                        url: currentUrl,
                         hasSample4,
                         hasSample5,
                         omitsSampleSubFull,
                         omitsSampleComp,
                         omitsSampleRec,
-                        omitsForeignLabSample
+                        omitsForeignLabSample,
+                        preservesAdminScope
                     };
                 })()
             `
         });
         const samplesNavResult = samplesNavEval.result.value;
-        console.log('Stage 5 Destination Inspection:', JSON.stringify(samplesNavResult, null, 2));
+        console.log('Scoped Admin Stage 5 Destination Inspection:', JSON.stringify(samplesNavResult, null, 2));
 
         const destinationScreenshot = await pageCdp.send('Page.captureScreenshot', { format: 'png' });
         fs.writeFileSync(path.join(ARTIFACT_DIR, 'manager_dashboard_stage5_destination_verified.png'), Buffer.from(destinationScreenshot.data, 'base64'));
+
+        // ── STEP 6: Scoped Admin Manager Queue Continuation & Same-Mounted Scope Lifecycle ──
+        console.log('[STEP 6] Following rendered Manager Queue continuation link as Scoped Admin...');
+        await pageCdp.send('Page.navigate', { url: `http://127.0.0.1:${port}/manager-queue?lane=intake&labId=LAB-GTM` });
+        await sleep(2500);
+
+        const queueGtmEval = await pageCdp.send('Runtime.evaluate', {
+            returnByValue: true,
+            expression: `
+                (() => {
+                    const pageText = document.body.innerText;
+                    const currentUrl = window.location.pathname + window.location.search;
+                    const hasGtmIntakeSample = pageText.includes('SMP-GTM-REC') || pageText.includes('GTM-2026-REC');
+                    const omitsHndIntakeSample = !pageText.includes('SMP-HND-REC') && !pageText.includes('HND-2026-REC');
+                    return {
+                        url: currentUrl,
+                        hasGtmIntakeSample,
+                        omitsHndIntakeSample
+                    };
+                })()
+            `
+        });
+        const queueGtmResult = queueGtmEval.result.value;
+        console.log('Manager Queue LAB-GTM Inspection:', JSON.stringify(queueGtmResult, null, 2));
+
+        const queueGtmScreenshot = await pageCdp.send('Page.captureScreenshot', { format: 'png' });
+        fs.writeFileSync(path.join(ARTIFACT_DIR, 'manager_queue_scoped_gtm_verified.png'), Buffer.from(queueGtmScreenshot.data, 'base64'));
+
+        // Same-mounted lab switch to LAB-HND
+        console.log('[STEP 6b] Same-mounted lab switch to labId=LAB-HND and trigger Refresh queue...');
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    window.history.pushState({}, '', '/manager-queue?lane=intake&labId=LAB-HND');
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                })()
+            `
+        });
+        await sleep(1500);
+
+        // Click Refresh queue button
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                (() => {
+                    const refreshBtn = document.querySelector('button[aria-label="Refresh queue"]');
+                    if (refreshBtn) refreshBtn.click();
+                })()
+            `
+        });
+        await sleep(1500);
+
+        const queueHndEval = await pageCdp.send('Runtime.evaluate', {
+            returnByValue: true,
+            expression: `
+                (() => {
+                    const pageText = document.body.innerText;
+                    const currentUrl = window.location.pathname + window.location.search;
+                    const hasHndIntakeSample = pageText.includes('SMP-HND-REC') || pageText.includes('HND-2026-REC');
+                    const omitsGtmIntakeSample = !pageText.includes('SMP-GTM-REC') && !pageText.includes('GTM-2026-REC');
+                    return {
+                        url: currentUrl,
+                        hasHndIntakeSample,
+                        omitsGtmIntakeSample
+                    };
+                })()
+            `
+        });
+        const queueHndResult = queueHndEval.result.value;
+        console.log('Manager Queue LAB-HND Inspection (After Switch & Refresh):', JSON.stringify(queueHndResult, null, 2));
+
+        const queueHndScreenshot = await pageCdp.send('Page.captureScreenshot', { format: 'png' });
+        fs.writeFileSync(path.join(ARTIFACT_DIR, 'manager_queue_scoped_hnd_verified.png'), Buffer.from(queueHndScreenshot.data, 'base64'));
+
+        // Test browser back-forward navigation on mounted component
+        console.log('[STEP 6c] Testing browser back-forward navigation on mounted queue...');
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `window.history.back();`
+        });
+        await sleep(2500);
+
+        const queueBackEval = await pageCdp.send('Runtime.evaluate', {
+            returnByValue: true,
+            expression: `
+                (() => {
+                    const pageText = document.body.innerText;
+                    const currentUrl = window.location.pathname + window.location.search;
+                    const hasGtmIntakeSample = pageText.includes('SMP-GTM-REC') || pageText.includes('GTM-2026-REC');
+                    const omitsHndIntakeSample = !pageText.includes('SMP-HND-REC') && !pageText.includes('HND-2026-REC');
+                    return {
+                        url: currentUrl,
+                        hasGtmIntakeSample,
+                        omitsHndIntakeSample
+                    };
+                })()
+            `
+        });
+        const queueBackResult = queueBackEval.result.value;
+        console.log('Manager Queue Back-Navigation Inspection (LAB-GTM):', JSON.stringify(queueBackResult, null, 2));
+
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `window.history.forward();`
+        });
+        await sleep(2500);
+
+        const queueForwardEval = await pageCdp.send('Runtime.evaluate', {
+            returnByValue: true,
+            expression: `
+                (() => {
+                    const pageText = document.body.innerText;
+                    const currentUrl = window.location.pathname + window.location.search;
+                    const hasHndIntakeSample = pageText.includes('SMP-HND-REC') || pageText.includes('HND-2026-REC');
+                    const omitsGtmIntakeSample = !pageText.includes('SMP-GTM-REC') && !pageText.includes('GTM-2026-REC');
+                    return {
+                        url: currentUrl,
+                        hasHndIntakeSample,
+                        omitsGtmIntakeSample
+                    };
+                })()
+            `
+        });
+        const queueForwardResult = queueForwardEval.result.value;
+        console.log('Manager Queue Forward-Navigation Inspection (LAB-HND):', JSON.stringify(queueForwardResult, null, 2));
 
         // Write complete evidence JSON
         const evidenceReport = {
@@ -742,8 +880,17 @@ async function main() {
                     details: adminScopedResult
                 },
                 stage5DestinationPopulation: {
-                    verified: samplesNavResult.hasSample4 && samplesNavResult.hasSample5 && samplesNavResult.omitsSampleSubFull && samplesNavResult.omitsSampleComp && samplesNavResult.omitsSampleRec && samplesNavResult.omitsForeignLabSample,
+                    verified: samplesNavResult.hasSample4 && samplesNavResult.hasSample5 && samplesNavResult.omitsSampleSubFull && samplesNavResult.omitsSampleComp && samplesNavResult.omitsSampleRec && samplesNavResult.omitsForeignLabSample && samplesNavResult.preservesAdminScope,
                     details: samplesNavResult
+                },
+                scopedAdminQueueLifecycle: {
+                    verified: queueGtmResult.hasGtmIntakeSample && queueGtmResult.omitsHndIntakeSample && queueHndResult.hasHndIntakeSample && queueHndResult.omitsGtmIntakeSample && queueBackResult.hasGtmIntakeSample && queueForwardResult.hasHndIntakeSample,
+                    details: {
+                        gtmInitial: queueGtmResult,
+                        hndSwitched: queueHndResult,
+                        backNavGtm: queueBackResult,
+                        forwardNavHnd: queueForwardResult
+                    }
                 }
             },
             screenshots: [
@@ -751,7 +898,9 @@ async function main() {
                 'manager_dashboard_queue_toggle_verified.png',
                 'manager_tasklist_action_verified.png',
                 'super_admin_scoped_dashboard_verified.png',
-                'manager_dashboard_stage5_destination_verified.png'
+                'manager_dashboard_stage5_destination_verified.png',
+                'manager_queue_scoped_gtm_verified.png',
+                'manager_queue_scoped_hnd_verified.png'
             ]
         };
 

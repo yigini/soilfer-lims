@@ -1,5 +1,5 @@
 import { useAnalysisNames } from '../context/AnalysisCatalogueContext';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -46,6 +46,8 @@ const ManagerQueue = () => {
     const [activeTab, setActiveTab] = useState(initialTab);
     const [userSelected, setUserSelected] = useState(Boolean(laneParam));
     const selectedAnalysis = searchParams.get('analysis') || '';
+    const selectedLabId = (searchParams.get('labId') || searchParams.get('labs') || '').trim();
+    const activeRequestIdRef = useRef(0);
 
     // Batch inspection modal support for ?batchId=
     const batchIdParam = searchParams.get('batchId');
@@ -75,8 +77,12 @@ const ManagerQueue = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Live counts from dashboard API for tab badges
-    const { data: liveData, isLive, isStale, lastUpdated, refresh: refreshLive } = useRealtimeData('/api/dashboard/live', {
+    // Live counts from dashboard API for tab badges (scoped to selected lab when present)
+    const liveEndpoint = selectedLabId
+        ? `/api/dashboard/live?labId=${encodeURIComponent(selectedLabId)}`
+        : '/api/dashboard/live';
+
+    const { data: liveData, isLive, isStale, lastUpdated, refresh: refreshLive } = useRealtimeData(liveEndpoint, {
         interval: 15000,
         wsEvents: ['WORKITEM_CHANGED', 'WORKITEM_UPDATE'],
     });
@@ -85,8 +91,7 @@ const ManagerQueue = () => {
         setActiveTab(newTab);
         setUserSelected(true);
         const next = { lane: newTab };
-        const labId = searchParams.get('labId') || searchParams.get('labs');
-        if (labId) next.labId = labId;
+        if (selectedLabId) next.labId = selectedLabId;
         if (newTab === QUEUE_Tabs.ASSIGN && selectedAnalysis) {
             next.analysis = selectedAnalysis;
         }
@@ -125,16 +130,16 @@ const ManagerQueue = () => {
         }
     }, [liveData, laneParam, userSelected]);
 
-    // Fetch Trigger — now also polls
+    // Fetch Trigger — normalized selectedLabId in callback and dependencies
     const fetchQueueData = useCallback(async (page = 1) => {
+        const requestId = ++activeRequestIdRef.current;
         setLoading(true);
         setError(null);
         try {
             let endpoint = '';
             let params = { page, limit: 20 };
-            const labId = searchParams.get('labId') || searchParams.get('labs');
-            if (labId) {
-                params.labId = labId;
+            if (selectedLabId) {
+                params.labId = selectedLabId;
             }
 
             switch (activeTab) {
@@ -162,6 +167,11 @@ const ManagerQueue = () => {
             }
 
             const res = await axios.get(endpoint, { params });
+
+            // Invalidate stale in-flight responses if a newer request was dispatched
+            if (requestId !== activeRequestIdRef.current) {
+                return;
+            }
 
             if (res.data.rows && (activeTab === QUEUE_Tabs.APPROVE || activeTab === QUEUE_Tabs.EXCEPTIONS)) {
                 const total = res.data.total || res.data.rows.length;
@@ -294,11 +304,20 @@ const ManagerQueue = () => {
         } finally {
             setLoading(false);
         }
-    }, [activeTab, selectedAnalysis]);
-
-    useEffect(() => {
-        fetchQueueData(1);
-    }, [activeTab, fetchQueueData]);
+    }, [activeTab, selectedAnalysis, selectedLabId]);
+ 
+     useEffect(() => {
+         fetchQueueData(1);
+     }, [activeTab, fetchQueueData]);
+ 
+     // Clear stale data on lab scope change
+     const prevLabIdRef = useRef(selectedLabId);
+     useEffect(() => {
+         if (prevLabIdRef.current !== selectedLabId) {
+             prevLabIdRef.current = selectedLabId;
+             setData([]);
+         }
+     }, [selectedLabId]);
 
     // WebSocket-driven queue refresh (replaces old 15s polling)
     const { subscribeToEvent } = useNotifications();

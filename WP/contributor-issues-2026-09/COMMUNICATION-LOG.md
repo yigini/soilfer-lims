@@ -424,6 +424,39 @@ User explicitly approved combined PR132/133 merge/deployment. Accepted heads0a7c
   - Client Build: Production build (`npm run build`) passed cleanly in 15.38s.
 - Pushed updated commit to PR #141. Issue #120 remains **OPEN**; candidate is unmerged and undeployed; production hold maintained.
 
+### 2026-09-23 21:15 UTC — PR #141 review remediation: Lab-scope lifecycle normalization & scoped admin continuation
+- Independent delta review on PR #141 at `fc414859` ([comment 5802734888](https://github.com/yigini/soilfer-lims/pull/141#issuecomment-5802734888)) confirmed canonical readiness is corrected and both focused suites pass (21/21; CI35918078685 green), identifying one remaining lab-scope lifecycle gap in mounted `ManagerQueue`:
+  1. *ManagerQueue.jsx scope lifecycle & re-render*: Normalize selected lab outside callback; include `selectedLabId` in `useCallback` dependencies; invalidate stale in-flight requests and clear data on scope change; ensure `Refresh queue` button requests the updated lab; scope badge and auto-lane source (`liveEndpoint`) to `selectedLabId`.
+  2. *Scoped-admin browser evidence & continuation*: Maintain scoped admin identity (`adminToken`), follow actual rendered continuation links, assert destination scope, same-mounted lab switch, back-forward navigation, and queue refresh with second-lab fixture.
+  3. *Test 10 contract limitation labeling*: Label Test 10 in `manager_dashboard_overview.test.js` accurately as a pure route-builder logic contract and reference the mounted component test (`work/pr141-scope-mounted-review.cjs`) and browser CDP test.
+- Remediations:
+  - `client/src/pages/ManagerQueue.jsx`:
+    - Normalized `selectedLabId = (searchParams.get('labId') || searchParams.get('labs') || '').trim()`.
+    - Added `selectedLabId` to `fetchQueueData` dependencies `[activeTab, selectedAnalysis, selectedLabId]`.
+    - Added `prevLabIdRef` and stale data clearing effect on `selectedLabId` change.
+    - Enforced request-id checking inside `fetchQueueData` (`const requestId = ++activeRequestIdRef.current; if (requestId !== activeRequestIdRef.current) return;`), cleanly discarding delayed cross-lab responses.
+    - Scoped `liveEndpoint` for badges and auto-lane selection: `selectedLabId ? '/api/dashboard/live?labId=' + encodeURIComponent(selectedLabId) : '/api/dashboard/live'`.
+    - Guaranteed `Refresh queue` button (`aria-label="Refresh queue"`) dispatches with the updated `selectedLabId`.
+  - `server/app.js`:
+    - Extracted `qLabId = (req.query.labId || req.query.labs || '').trim()` in `/api/dashboard/live`.
+    - Defined `effectiveLabId` and scoped `sampleWhere`, `workWhere`, `subWhere`, `techs`, and `recentLogs` queries for `SUPER_ADMIN` with `qLabId`.
+  - `server/tests/contracts/manager_dashboard_overview.test.js`:
+    - Accurately labeled Test 10 limitation as a pure route-builder contract; noted mounted component lifecycle and browser execution are verified via `work/pr141-scope-mounted-review.cjs` and browser CDP execution.
+    - Added Test 11 verifying `/api/dashboard/live` KPI and log scoping for `SUPER_ADMIN` with `labId`.
+    - 12/12 contract tests pass; both focused suites pass 22/22 in 15.96s.
+  - Independent Mounted Component Test:
+    - Executed `work/pr141-scope-mounted-review.cjs`: 100% PASS with verified `initialRequests` (`LAB-A`), `afterLabChange` (`LAB-B`), `afterRefresh` (`LAB-B`), and `liveUrls` (`["/api/dashboard/live?labId=LAB-A", "/api/dashboard/live?labId=LAB-B"]`).
+  - Browser CDP Journey Runner (`server/scripts/run_manager_dashboard_tasklist_side_by_side.cjs`):
+    - Added second-lab intake fixture `SMP-HND-REC` for `LAB-HND`.
+    - Step 5: Maintained scoped admin identity (`adminToken`), followed actual rendered Stage 5 link (`/samples?status=APPROVED&labId=LAB-GTM`), asserted Guatemala samples present and Honduras foreign sample omitted (`omitsForeignLabSample: true`, `preservesAdminScope: true`).
+    - Step 6: Followed rendered Manager Queue continuation link as Scoped Admin (`/manager-queue?lane=intake&labId=LAB-GTM`), asserting Guatemala intake sample (`SMP-GTM-REC`) present and Honduras sample omitted.
+    - Step 6b: Executed same-mounted lab switch to `labId=LAB-HND`, triggered `Refresh queue` button, asserting Honduras intake sample (`SMP-HND-REC`) present and Guatemala sample omitted.
+    - Step 6c: Executed browser history back navigation to `LAB-GTM` and forward navigation to `LAB-HND`, asserting specimen isolation across mounted browser navigation.
+    - Machine-readable evidence: `artifacts/evidence-journeys/manager_dashboard_overview_evidence.json` (Status: `VERIFIED`, 6/6 findings passed).
+    - Refreshed screenshots: `manager_queue_scoped_gtm_verified.png`, `manager_queue_scoped_hnd_verified.png`.
+  - Client Build: Production build (`npm run build`) passed cleanly in 16.09s.
+- Ready to commit and push updated head to PR #141. Issue #120 remains strictly **OPEN**; candidate is unmerged and undeployed; production hold maintained.
+
 
 
 

@@ -1353,7 +1353,35 @@ A focused correction was implemented on branch `fix/issue-120-manager-dashboard-
     - Step 5 verified Stage 5 destination navigates to `/samples?status=APPROVED`, displays approved specimens for Guatemala, and strictly omits Honduras foreign sample `SMP-HND-001` (`omitsForeignLabSample: true`).
   - Machine-readable evidence log: `artifacts/evidence-journeys/manager_dashboard_overview_evidence.json` (Status: `VERIFIED`, 5/5 findings passed).
 
-#### 10. Issue Status
+#### 10. Review Feedback Resolution: Lab-Scope Lifecycle Normalization & Scoped Admin Continuation Verification (PR #141 / Comment 5802734888)
+- **Gap 1: ManagerQueue Scope Lifecycle & Re-render Normalization**:
+  - In `ManagerQueue.jsx`, `fetchQueueData` previously closed over `searchParams` without `selectedLabId` in its `useCallback` dependency array `[activeTab, selectedAnalysis]`. A same-mounted navigation from `?lane=intake&labId=LAB-A` to `?lane=intake&labId=LAB-B` did not recreate the callback or trigger refetching, and the `Refresh queue` button re-invoked the stale closure with the initial lab ID.
+  - Normalized `selectedLabId = (searchParams.get('labId') || searchParams.get('labs') || '').trim()` outside the callback.
+  - Added `selectedLabId` to `fetchQueueData` dependencies `[activeTab, selectedAnalysis, selectedLabId]`, ensuring React recreates the callback upon scope changes and triggers `useEffect([activeTab, fetchQueueData])`.
+  - Added `prevLabIdRef` and stale-data clearing effect (`useEffect(() => { if (prevLabIdRef.current !== selectedLabId) { prevLabIdRef.current = selectedLabId; setData([]); } }, [selectedLabId]);`) to clear stale data immediately on scope switch without race conditions.
+  - Guarded asynchronous data commits with `activeRequestIdRef`: tagged each dispatch with `const requestId = ++activeRequestIdRef.current` and aborted commits where `requestId !== activeRequestIdRef.current`, discarding delayed in-flight cross-lab responses.
+  - Scoped badge and auto-lane data source `liveEndpoint` to `selectedLabId ? '/api/dashboard/live?labId=' + encodeURIComponent(selectedLabId) : '/api/dashboard/live'`, preserving live badge accuracy and role authorization.
+  - Guaranteed `Refresh queue` button (`aria-label="Refresh queue"`) dispatches with the normalized `selectedLabId`.
+- **Gap 2: Backend Live Endpoint Scoping for Scoped Admin**:
+  - In `server/app.js`, `/api/dashboard/live` was updated to read `qLabId = (req.query.labId || req.query.labs || '').trim()`.
+  - Defined `effectiveLabId = (user.role === 'SUPER_ADMIN' && qLabId) ? qLabId : (user.role !== 'SUPER_ADMIN' ? user.labId : null)`.
+  - Scoped `sampleWhere`, `workWhere`, `subWhere`, `techs`, and `recentLogs` queries using `effectiveLabId` for `SUPER_ADMIN`, aligning the live adapter with `getDashboardHome`.
+- **Gap 3: Contract Test Labeling & Live Scoping Contract**:
+  - In `server/tests/contracts/manager_dashboard_overview.test.js`, labeled Test 10 accurately as a pure route-builder logic contract and noted that mounted component lifecycle and browser execution are verified via `work/pr141-scope-mounted-review.cjs` and browser CDP execution.
+  - Added Test 11 validating `GET /api/dashboard/live?labId=...` for `SUPER_ADMIN` returns scoped KPIs and logs, strictly isolating completed-today counts to the target laboratory.
+  - Both focused suites pass 22/22 (`dashboard_manager_views.test.js` + `manager_dashboard_overview.test.js`).
+- **Gap 4: Independent Mounted Component Test**:
+  - Ran `work/pr141-scope-mounted-review.cjs` (mocked router/API/context, no production access): verified initial request dispatches `labId: "LAB-A"`, mounted URL change dispatches `labId: "LAB-B"`, and `Refresh queue` button dispatches `labId: "LAB-B"`, with scoped live URLs (`["/api/dashboard/live?labId=LAB-A", "/api/dashboard/live?labId=LAB-B"]`).
+- **Gap 5: Scoped Admin Browser Continuation Journey & Same-Mounted Scope Lifecycle**:
+  - Added second-lab intake fixture `SMP-HND-REC` in `LAB-HND`.
+  - Step 5: Maintained scoped admin identity (`adminToken`), followed actual rendered Stage 5 link (`/samples?status=APPROVED&labId=LAB-GTM`), and verified destination URL, presence of Guatemala approved specimens, and omission of foreign Honduras specimen (`SMP-HND-001`).
+  - Step 6: Followed rendered Manager Queue continuation link as Scoped Admin (`/manager-queue?lane=intake&labId=LAB-GTM`), asserting Guatemala intake sample (`SMP-GTM-REC`) present and Honduras sample omitted.
+  - Step 6b: Executed same-mounted lab switch to `labId=LAB-HND`, triggered `Refresh queue` button, asserting Honduras intake sample (`SMP-HND-REC`) present and Guatemala sample omitted.
+  - Step 6c: Executed browser history back navigation to `LAB-GTM` and forward navigation to `LAB-HND`, asserting specimen isolation across mounted browser navigation.
+  - Machine-readable evidence: `artifacts/evidence-journeys/manager_dashboard_overview_evidence.json` (Status: `VERIFIED`, 6/6 findings passed).
+  - Recorded screenshots: `manager_queue_scoped_gtm_verified.png`, `manager_queue_scoped_hnd_verified.png`.
+
+#### 11. Issue Status
 - **Issue #120**: Remains **OPEN** (`Refs #120`). Follow-up PR #141 updated for independent review; no merge or deployment permitted until explicitly authorized.
 
 

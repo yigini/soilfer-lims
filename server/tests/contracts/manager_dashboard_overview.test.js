@@ -838,8 +838,11 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         expect(unscopedIds.length).toBeGreaterThan(2);
     });
 
-    test('10. Continuation links rendered in ManagerProgressOverview preserve activeLabId when scoped', () => {
-        // Pure route builder contract matching ManagerProgressOverview.jsx implementation:
+    test('10. Continuation links rendered in ManagerProgressOverview preserve activeLabId when scoped (Pure route-builder contract; mounted lifecycle verified in component & CDP suites)', () => {
+        // NOTE: Pure route builder contract matching ManagerProgressOverview.jsx buildRoute implementation.
+        // Full mounted component lifecycle (searchParams change, refetching, refresh button dispatch,
+        // and in-flight request invalidation) is verified via mounted React tests (work/pr141-scope-mounted-review.cjs)
+        // and browser CDP journey execution (server/scripts/run_manager_dashboard_tasklist_side_by_side.cjs).
         const buildRoute = (baseRoute, activeLabId) => {
             if (!activeLabId) return baseRoute;
             const separator = baseRoute.includes('?') ? '&' : '?';
@@ -863,5 +866,28 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         expect(buildRoute('/samples?status=APPROVED', '')).toBe('/samples?status=APPROVED');
         expect(buildRoute('/manager-queue?lane=assign', '')).toBe('/manager-queue?lane=assign');
         expect(buildRoute('/manager-queue', '')).toBe('/manager-queue');
+    });
+
+    test('11. /api/dashboard/live correctly scopes KPIs and recent logs when requested by SUPER_ADMIN with labId', async () => {
+        // Unscoped SUPER_ADMIN sees all labs:
+        const unscopedRes = await request(app)
+            .get('/api/dashboard/live')
+            .set('Authorization', `Bearer ${stageAdminToken}`);
+        expect(unscopedRes.status).toBe(200);
+        expect(unscopedRes.body.kpis).toBeDefined();
+        const unscopedCompletedToday = unscopedRes.body.kpis.completedToday;
+        // At least 2 completed today (sampleApprovedToday in stageLab + sampleOtherLabApproved in stageLab2)
+        expect(unscopedCompletedToday).toBeGreaterThanOrEqual(2);
+
+        // Scoped SUPER_ADMIN with ?labId=stageLab.id sees only stageLab samples:
+        const scopedRes = await request(app)
+            .get('/api/dashboard/live')
+            .query({ labId: stageLab.id })
+            .set('Authorization', `Bearer ${stageAdminToken}`);
+        expect(scopedRes.status).toBe(200);
+        expect(scopedRes.body.kpis).toBeDefined();
+        // stageLab has exactly 1 completedToday (sampleApprovedToday)
+        expect(scopedRes.body.kpis.completedToday).toBe(1);
+        expect(scopedRes.body.kpis.totalSamples).toBeLessThan(unscopedRes.body.kpis.totalSamples);
     });
 });
