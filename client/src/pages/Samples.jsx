@@ -13,11 +13,33 @@ import LabelPrintDialog from '../components/common/LabelPrintDialog';
 import ExportModal from '../components/common/ExportModal';
 import LegacyBackfillModal from '../components/projects/LegacyBackfillModal';
 
+const extractUrlState = (searchParams) => {
+    const urlView = searchParams.get('view') || 'daily';
+    const urlSearch = searchParams.get('search') || searchParams.get('q') || '';
+    const urlFilters = {};
+
+    if (searchParams.get('status')) urlFilters.status = searchParams.get('status');
+
+    // Canonical 'projects' with fallback to 'project' or 'projectId'
+    const projects = searchParams.get('projects') || searchParams.get('project') || searchParams.get('projectId');
+    if (projects) urlFilters.projects = projects;
+
+    // Canonical 'labs' with fallback to 'lab', 'labId', 'assignedLab'
+    const labs = searchParams.get('labs') || searchParams.get('lab') || searchParams.get('labId') || searchParams.get('assignedLab');
+    if (labs) urlFilters.labs = labs;
+
+    // Canonical 'countries' with fallback to 'country'
+    const countries = searchParams.get('countries') || searchParams.get('country');
+    if (countries) urlFilters.countries = countries;
+
+    return { view: urlView, search: urlSearch, filters: urlFilters };
+};
+
 const Samples = () => {
     const { token, user } = useAuth();
     const { showDialog } = useDialog();
     const { t } = useLanguage();
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     // Data State
     const [data, setData] = useState([]);
@@ -26,15 +48,10 @@ const Samples = () => {
     const [loading, setLoading] = useState(false);
 
     // Initial Filter State from URL
-    const initialFilters = {};
-    if (searchParams.get('status')) initialFilters.status = searchParams.get('status');
-    if (searchParams.get('projectId')) initialFilters.projectId = searchParams.get('projectId');
-    if (searchParams.get('labId')) initialFilters.labId = searchParams.get('labId');
-    if (searchParams.get('country')) initialFilters.country = searchParams.get('country');
-
-    const [view, setView] = useState(() => searchParams.get('view') || 'daily');
-    const [search, setSearch] = useState(searchParams.get('search') || searchParams.get('q') || '');
-    const [filters, setFilters] = useState(initialFilters);
+    const initialUrlState = extractUrlState(searchParams);
+    const [view, setView] = useState(() => initialUrlState.view);
+    const [search, setSearch] = useState(() => initialUrlState.search);
+    const [filters, setFilters] = useState(() => initialUrlState.filters);
     const [sort, setSort] = useState('attention');
     const [order, setOrder] = useState('desc');
 
@@ -94,6 +111,22 @@ const Samples = () => {
         }
     }, [token, meta.page, meta.limit, sort, order, search, view, filters]);
 
+    // Synchronize component state when URL search parameters change (e.g. notification deep link navigation)
+    useEffect(() => {
+        const urlState = extractUrlState(searchParams);
+        setView(prev => (prev !== urlState.view ? urlState.view : prev));
+        setSearch(prev => (prev !== urlState.search ? urlState.search : prev));
+        setFilters(prev => {
+            const prevKeys = Object.keys(prev);
+            const newKeys = Object.keys(urlState.filters);
+            if (prevKeys.length === newKeys.length && prevKeys.every(k => prev[k] === urlState.filters[k])) {
+                return prev;
+            }
+            return urlState.filters;
+        });
+        setMeta(prev => (prev.page === 1 ? prev : { ...prev, page: 1 }));
+    }, [searchParams]);
+
     const handleViewChange = (newView) => {
         setView(newView);
         // Clear quick status filter when changing views so the selected view takes effect
@@ -103,6 +136,16 @@ const Samples = () => {
             return next;
         });
         setMeta(prev => ({ ...prev, page: 1 }));
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            if (newView === 'daily') {
+                next.delete('view');
+            } else {
+                next.set('view', newView);
+            }
+            next.delete('status');
+            return next;
+        }, { replace: true });
     };
 
     useEffect(() => {
@@ -196,7 +239,18 @@ const Samples = () => {
     };
 
     const handleAdvancedApply = (newFilters) => { setFilters(newFilters); setMeta(prev => ({ ...prev, page: 1 })); };
-    const handleReset = () => { setFilters({}); setSearch(''); setMeta(prev => ({ ...prev, page: 1 })); };
+    const handleReset = () => {
+        setFilters({});
+        setSearch('');
+        setMeta(prev => ({ ...prev, page: 1 }));
+        setSearchParams(prev => {
+            const next = new URLSearchParams();
+            if (view && view !== 'daily') {
+                next.set('view', view);
+            }
+            return next;
+        }, { replace: true });
+    };
     const handleSelect = (id, checked) => { setSelected(prev => checked ? [...prev, id] : prev.filter(i => i !== id)); };
     const handleSelectAll = (checked) => { setSelected(checked ? data.map(d => d.id) : []); };
 

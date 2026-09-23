@@ -109,10 +109,13 @@ exports.searchExpectedSamples = async (req, res) => {
 exports.getSamples = async (req, res) => {
     const {
         page = 1, limit = 50, sort = 'attention', order = 'desc', search: qSearch,
-        status: qStatus, projects: qProjects, countries: qCountries,
-        assignedLab: qAssignedLab, labs: qLabs, originalId: qOriginalId,
+        status: qStatus, originalId: qOriginalId,
         view: qView
     } = req.query;
+
+    const qProjects = req.query.projects || req.query.project || req.query.projectId;
+    const qLabs = req.query.labs || req.query.lab || req.query.labId || req.query.assignedLab;
+    const qCountries = req.query.countries || req.query.country;
 
     try {
         const user = req.user;
@@ -130,19 +133,31 @@ exports.getSamples = async (req, res) => {
             altLabField: 'assignedLab'
         });
 
-        // Lab filter - explicit override
+        // Lab filter - explicit override (supports labs, lab, labId, assignedLab)
         if (qLabs) {
             const list = qLabs.split(',').map(s => s.trim());
-            baseWhere.assignedLab = { in: list };
+            if (!baseWhere.AND) baseWhere.AND = [];
+            baseWhere.AND.push({
+                OR: [
+                    { assignedLab: { in: list } },
+                    { labId: { in: list } }
+                ]
+            });
         }
 
-        // Project filter
+        // Project filter (supports projects, project, projectId)
         if (qProjects) {
             const list = qProjects.split(',').map(s => s.trim());
-            baseWhere.projectCode = { in: list };
+            if (!baseWhere.AND) baseWhere.AND = [];
+            baseWhere.AND.push({
+                OR: [
+                    { projectCode: { in: list } },
+                    { projectId: { in: list } }
+                ]
+            });
         }
 
-        // Country filter
+        // Country filter (supports countries, country)
         if (qCountries) {
             const list = qCountries.split(',').map(s => s.trim());
             baseWhere.country = { in: list };

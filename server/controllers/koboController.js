@@ -632,7 +632,7 @@ async function syncLabSubmissions(config, performedBy) {
                 title: '🌾 New Field Samples Collected',
                 message: `${newCount} new sample${newCount > 1 ? 's' : ''} synced from Kobo (${labInfo.name})`,
                 type: 'SUCCESS',
-                link: `/samples?project=${projectCode}&lab=${currentConfig.labId}`,
+                link: `/samples?view=expected&projects=${encodeURIComponent(projectCode)}&labs=${encodeURIComponent(currentConfig.labId)}`,
                 createdAt: new Date()
             }));
             await prisma.notification.createMany({ data: notifications });
