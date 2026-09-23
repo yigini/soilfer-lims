@@ -324,13 +324,11 @@ exports.getQueue = async (req, res) => {
             if (item.sample && !scopeGuard.canAccessEntity(user, item.sample, { entityType: 'Sample', labField: 'assignedLab', altLabField: 'labId' })) {
                 return false;
             }
-            const itemMatches = item.assignedLab === user.labId || item.labId === user.labId;
-            const itemHasLab = Boolean(item.assignedLab || item.labId);
-            if (itemHasLab && !itemMatches) return false;
+            const itemLab = item.assignedLab || (item.sample?.assignedLab || item.labId);
+            if (itemLab && itemLab !== user.labId) return false;
 
-            const sampleMatches = item.sample?.assignedLab === user.labId || item.sample?.labId === user.labId;
-            const sampleHasLab = Boolean(item.sample?.assignedLab || item.sample?.labId);
-            if (sampleHasLab && !sampleMatches) return false;
+            const sampleLab = item.sample?.assignedLab || item.sample?.labId;
+            if (sampleLab && sampleLab !== user.labId) return false;
 
             return true;
         });
@@ -753,14 +751,21 @@ exports.batchSave = async (req, res) => {
                 continue;
             }
 
+            // Scope check: Work item itself
+            const scopeGuard = require('../utils/scopeGuard');
+            if (!scopeGuard.canAccessEntity(user, item, { entityType: 'WorkItem', labField: 'assignedLab', altLabField: 'labId' })) {
+                errors.push({ workItemId: entry.workItemId, error: 'Access denied: Work item is in another laboratory', code: 'OUT_OF_SCOPE' });
+                continue;
+            }
+
             const sample = item.sample;
             if (!sample) {
                 errors.push({ workItemId: entry.workItemId, error: 'Sample not found' });
                 continue;
             }
 
-            if (!require('../utils/scopeGuard').canAccessEntity(user, sample, { labField: 'assignedLab', altLabField: 'labId' })) {
-                errors.push({ workItemId: entry.workItemId, error: 'Work is outside your laboratory scope.', code: 'OUT_OF_SCOPE' });
+            if (!scopeGuard.canAccessEntity(user, sample, { entityType: 'Sample', labField: 'assignedLab', altLabField: 'labId' })) {
+                errors.push({ workItemId: entry.workItemId, error: 'Access denied: Sample is in another laboratory', code: 'OUT_OF_SCOPE' });
                 continue;
             }
 
@@ -1755,7 +1760,17 @@ exports.previewCompletion = async (req, res) => {
             }
 
             const scopeGuard = require('../utils/scopeGuard');
-            if (item.sample && !scopeGuard.canAccessEntity(user, item.sample, { labField: 'assignedLab', altLabField: 'labId' })) {
+            if (!scopeGuard.canAccessEntity(user, item, { entityType: 'WorkItem', labField: 'assignedLab', altLabField: 'labId' })) {
+                excluded.push({
+                    workItemId: item.id,
+                    sampleId: item.sampleId,
+                    blockers: ['OUT_OF_SCOPE'],
+                    reasons: ['Work is outside your laboratory scope']
+                });
+                continue;
+            }
+
+            if (item.sample && !scopeGuard.canAccessEntity(user, item.sample, { entityType: 'Sample', labField: 'assignedLab', altLabField: 'labId' })) {
                 excluded.push({
                     workItemId: item.id,
                     sampleId: item.sampleId,

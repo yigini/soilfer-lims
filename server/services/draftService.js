@@ -51,14 +51,12 @@ async function saveDraft(user, {
         throw new Error('Access denied: Work item is outside your laboratory scope');
     }
     if (!scopeGuard.hasGlobalAccess(user) && user.labId) {
-        const itemMatches = workItem.assignedLab === user.labId || workItem.labId === user.labId;
-        const itemHasLab = Boolean(workItem.assignedLab || workItem.labId);
-        if (itemHasLab && !itemMatches) {
+        const itemLab = workItem.assignedLab || (workItem.sample?.assignedLab || workItem.labId);
+        if (itemLab && itemLab !== user.labId) {
             throw new Error('Access denied: Work item is in another laboratory');
         }
-        const sampleMatches = workItem.sample?.assignedLab === user.labId || workItem.sample?.labId === user.labId;
-        const sampleHasLab = Boolean(workItem.sample?.assignedLab || workItem.sample?.labId);
-        if (sampleHasLab && !sampleMatches) {
+        const sampleLab = workItem.sample?.assignedLab || workItem.sample?.labId;
+        if (sampleLab && sampleLab !== user.labId) {
             throw new Error('Access denied: Sample is in another laboratory');
         }
     }
@@ -183,20 +181,18 @@ function canAccessDraft(user, draft, workItem = null, sample = null) {
         if (!scopeGuard.canAccessEntity(user, wi, { entityType: 'WorkItem', labField: 'assignedLab', altLabField: 'labId' })) {
             return false;
         }
-        const itemMatches = wi.assignedLab === user.labId || wi.labId === user.labId;
-        const itemHasLab = Boolean(wi.assignedLab || wi.labId);
-        if (itemHasLab && !itemMatches) {
+        const itemLab = wi.assignedLab || (wi.sample?.assignedLab || wi.labId);
+        if (itemLab && itemLab !== user.labId) {
             return false;
         }
 
         const s = sample || wi.sample;
         if (s) {
-            if (!scopeGuard.canAccessEntity(user, s, { labField: 'assignedLab', altLabField: 'labId' })) {
+            if (!scopeGuard.canAccessEntity(user, s, { entityType: 'Sample', labField: 'assignedLab', altLabField: 'labId' })) {
                 return false;
             }
-            const sampleMatches = s.assignedLab === user.labId || s.labId === user.labId;
-            const sampleHasLab = Boolean(s.assignedLab || s.labId);
-            if (sampleHasLab && !sampleMatches) {
+            const sampleLab = s.assignedLab || s.labId;
+            if (sampleLab && sampleLab !== user.labId) {
                 return false;
             }
         }
