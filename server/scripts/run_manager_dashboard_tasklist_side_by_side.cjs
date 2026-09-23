@@ -247,14 +247,15 @@ async function main() {
             }
         });
 
-        // s2 has 2 items (both completed by tech2 -> Ready for review!)
+        // s2 has 2 analytical items (SUBMITTED by tech2) + 1 closure task (ARCHIVING)
+        // -> Ready for Review badge, 100% progress, closure task excluded!
         await prisma.workItem.create({
             data: {
                 id: 'WI-GTM-004',
                 sampleId: s2.id,
                 labId: s2.labId,
                 analysis: 'TEXTURE_HYDROMETER',
-                status: 'COMPLETED',
+                status: 'SUBMITTED',
                 assignedTo: 'tech_gtm_2',
                 assignedLab: 'LAB-GTM'
             }
@@ -265,9 +266,97 @@ async function main() {
                 sampleId: s2.id,
                 labId: s2.labId,
                 analysis: 'P_OLSEN',
-                status: 'COMPLETED',
+                status: 'SUBMITTED',
                 assignedTo: 'tech_gtm_2',
                 assignedLab: 'LAB-GTM'
+            }
+        });
+        await prisma.workItem.create({
+            data: {
+                id: 'WI-GTM-006-CL',
+                sampleId: s2.id,
+                labId: s2.labId,
+                analysis: 'ARCHIVING',
+                status: 'PENDING',
+                assignedLab: 'LAB-GTM'
+            }
+        });
+
+        // s3 has 2 analytical items (ACCEPTED) + 1 closure task (DISPOSAL)
+        // -> Ready for Approval badge, 100% progress, final approval eligible!
+        const s3 = await prisma.sample.create({
+            data: {
+                id: 'SMP-GTM-003',
+                originalId: 'FIELD-GTM-003',
+                labId: 'GTM-2026-0003',
+                assignedLab: 'LAB-GTM',
+                projectCode: 'SOILFER-GTM',
+                status: 'PROCESSING',
+                receptionDate: new Date('2026-09-21T11:00:00Z'),
+                dryingStatus: 'DONE',
+                preparationStatus: 'DONE'
+            }
+        });
+        await prisma.workItem.create({
+            data: {
+                id: 'WI-GTM-007',
+                sampleId: s3.id,
+                labId: s3.labId,
+                analysis: 'PH_H2O',
+                status: 'ACCEPTED',
+                assignedTo: 'tech_gtm_1',
+                assignedLab: 'LAB-GTM'
+            }
+        });
+        await prisma.workItem.create({
+            data: {
+                id: 'WI-GTM-008',
+                sampleId: s3.id,
+                labId: s3.labId,
+                analysis: 'EC_1_5',
+                status: 'ACCEPTED',
+                assignedTo: 'tech_gtm_1',
+                assignedLab: 'LAB-GTM'
+            }
+        });
+        await prisma.workItem.create({
+            data: {
+                id: 'WI-GTM-009-CL',
+                sampleId: s3.id,
+                labId: s3.labId,
+                analysis: 'DISPOSAL',
+                status: 'PENDING',
+                assignedLab: 'LAB-GTM'
+            }
+        });
+
+        // s4: Approved today (authoritative approvedAt)
+        await prisma.sample.create({
+            data: {
+                id: 'SMP-GTM-004',
+                originalId: 'FIELD-GTM-004',
+                labId: 'GTM-2026-0004',
+                assignedLab: 'LAB-GTM',
+                projectCode: 'SOILFER-GTM',
+                status: 'APPROVED',
+                receptionDate: new Date('2026-09-19T08:00:00Z'),
+                approvedAt: new Date(),
+                updatedAt: new Date()
+            }
+        });
+
+        // s5: Approved in the past, updated today
+        await prisma.sample.create({
+            data: {
+                id: 'SMP-GTM-005',
+                originalId: 'FIELD-GTM-005',
+                labId: 'GTM-2026-0005',
+                assignedLab: 'LAB-GTM',
+                projectCode: 'SOILFER-GTM',
+                status: 'APPROVED',
+                receptionDate: new Date('2026-09-01T08:00:00Z'),
+                approvedAt: new Date('2026-09-02T10:00:00Z'),
+                updatedAt: new Date()
             }
         });
 
@@ -354,7 +443,11 @@ async function main() {
                     const hasTechWorkload = pageTextUpper.includes('TECHNICIAN WORKLOAD') || pageTextUpper.includes('CARGA TÉCNICA');
                     const hasStagePipeline = pageTextUpper.includes('OPERATIONAL STAGE PIPELINE') || pageTextUpper.includes('FLUJO DE ETAPAS OPERATIVAS');
                     const hasBottleneckAlert = pageTextUpper.includes('UNASSIGNED') || pageTextUpper.includes('ASIGNACIÓN');
-                    const hasReadyBadge = pageTextUpper.includes('READY FOR REVIEW') || pageTextUpper.includes('LISTO PARA REVISIÓN');
+                    const hasReadyForReviewBadge = pageTextUpper.includes('READY FOR REVIEW') || pageTextUpper.includes('LISTO PARA REVISIÓN');
+                    const hasReadyForApprovalBadge = pageTextUpper.includes('READY FOR APPROVAL') || pageTextUpper.includes('LISTO PARA APROBACIÓN');
+                    const hasCompletedStage = pageTextUpper.includes('COMPLETED / RELEASED') || pageTextUpper.includes('COMPLETADAS / LIBERADAS');
+                    const hasApprovedTodaySubtext = pageTextUpper.includes('APPROVED TODAY') || pageTextUpper.includes('APROBADAS HOY');
+                    const hasStage5Route = Boolean(document.querySelector('a[href*="/samples?status=SUBMITTED_FULL,APPROVED"]'));
                     const progressBars = Array.from(document.querySelectorAll('.rounded-full[style*="width"]')).length;
                     const techCards = Array.from(document.querySelectorAll('div')).filter(d => d.innerText.includes('Mario Alvarez') || d.innerText.includes('Elena Fuentes')).length;
 
@@ -367,7 +460,11 @@ async function main() {
                         hasTechWorkload,
                         hasStagePipeline,
                         hasBottleneckAlert,
-                        hasReadyBadge,
+                        hasReadyForReviewBadge,
+                        hasReadyForApprovalBadge,
+                        hasCompletedStage,
+                        hasApprovedTodaySubtext,
+                        hasStage5Route,
                         progressBarsCount: progressBars,
                         techCardsCount: techCards
                     };
@@ -450,7 +547,7 @@ async function main() {
         fs.writeFileSync(path.join(ARTIFACT_DIR, 'manager_tasklist_action_verified.png'), Buffer.from(taskListScreenshot.data, 'base64'));
 
         // ── STEP 4: Scoped System Admin Verification (/?labId=LAB-GTM) ──
-        console.log('[BONUS] Verifying Scoped System Admin Dashboard (/?labId=LAB-GTM)...');
+        console.log('[BONUS 1] Verifying Scoped System Admin Dashboard (/?labId=LAB-GTM)...');
         await pageCdp.send('Runtime.evaluate', {
             expression: `
                 localStorage.setItem('token', '${adminToken}');
@@ -486,13 +583,50 @@ async function main() {
         const adminScreenshot = await pageCdp.send('Page.captureScreenshot', { format: 'png' });
         fs.writeFileSync(path.join(ARTIFACT_DIR, 'super_admin_scoped_dashboard_verified.png'), Buffer.from(adminScreenshot.data, 'base64'));
 
+        // ── STEP 5: Verify Stage 5 Navigation Destination (/samples?status=SUBMITTED_FULL,APPROVED) ──
+        console.log('[BONUS 2] Verifying Stage 5 destination (/samples?status=SUBMITTED_FULL,APPROVED)...');
+        await pageCdp.send('Runtime.evaluate', {
+            expression: `
+                localStorage.setItem('token', '${managerToken}');
+                localStorage.setItem('user', JSON.stringify({
+                    id: '${managerUser.id}',
+                    username: '${managerUser.username}',
+                    role: '${managerUser.role}',
+                    labId: '${managerUser.labId}'
+                }));
+            `
+        });
+        await pageCdp.send('Page.navigate', { url: `http://127.0.0.1:${port}/samples?status=SUBMITTED_FULL,APPROVED` });
+        await sleep(2500);
+
+        const samplesNavEval = await pageCdp.send('Runtime.evaluate', {
+            returnByValue: true,
+            expression: `
+                (() => {
+                    const pageText = document.body.innerText;
+                    const hasSample4 = pageText.includes('SMP-GTM-004') || pageText.includes('GTM-2026-0004');
+                    const hasSample5 = pageText.includes('SMP-GTM-005') || pageText.includes('GTM-2026-0005');
+                    return {
+                        url: window.location.pathname + window.location.search,
+                        hasSample4,
+                        hasSample5
+                    };
+                })()
+            `
+        });
+        const samplesNavResult = samplesNavEval.result.value;
+        console.log('Stage 5 Destination Inspection:', JSON.stringify(samplesNavResult, null, 2));
+
+        const destinationScreenshot = await pageCdp.send('Page.captureScreenshot', { format: 'png' });
+        fs.writeFileSync(path.join(ARTIFACT_DIR, 'manager_dashboard_stage5_destination_verified.png'), Buffer.from(destinationScreenshot.data, 'base64'));
+
         // Write complete evidence JSON
         const evidenceReport = {
             timestamp: new Date().toISOString(),
             status: 'VERIFIED',
             findings: {
                 managerDashboardOperationalOverview: {
-                    verified: dashOverviewResult.hasAnalysisProgress && dashOverviewResult.hasTechWorkload && dashOverviewResult.hasStagePipeline,
+                    verified: dashOverviewResult.hasAnalysisProgress && dashOverviewResult.hasTechWorkload && dashOverviewResult.hasStagePipeline && dashOverviewResult.hasReadyForReviewBadge && dashOverviewResult.hasReadyForApprovalBadge && dashOverviewResult.hasCompletedStage && dashOverviewResult.hasStage5Route,
                     details: dashOverviewResult
                 },
                 managerDashboardQueueToggle: {
@@ -506,13 +640,18 @@ async function main() {
                 scopedSystemAdminOverview: {
                     verified: adminScopedResult.hasAnalysisProgress && adminScopedResult.hasTechWorkload,
                     details: adminScopedResult
+                },
+                stage5DestinationPopulation: {
+                    verified: samplesNavResult.hasSample4 && samplesNavResult.hasSample5,
+                    details: samplesNavResult
                 }
             },
             screenshots: [
                 'manager_dashboard_overview_verified.png',
                 'manager_dashboard_queue_toggle_verified.png',
                 'manager_tasklist_action_verified.png',
-                'super_admin_scoped_dashboard_verified.png'
+                'super_admin_scoped_dashboard_verified.png',
+                'manager_dashboard_stage5_destination_verified.png'
             ]
         };
 

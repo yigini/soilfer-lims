@@ -27,7 +27,8 @@ export default function ManagerProgressOverview({
         inProgress: 0,
         awaitingReview: 0,
         finalApproval: 0,
-        completedToday: 0,
+        completed: 0,
+        approvedToday: 0,
         unassignedTasks: 0,
         totalSamples: 0
     };
@@ -66,11 +67,14 @@ export default function ManagerProgressOverview({
             color: 'border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300'
         },
         {
-            key: 'completedToday',
-            label: t('dashboard.manager.stageCompletedToday', 'Completed Today'),
-            count: stageCounts.completedToday ?? 0,
-            unit: t('dashboard.units.samples', { count: stageCounts.completedToday ?? 0 }, 'samples'),
-            route: '/samples?status=COMPLETED',
+            key: 'completed',
+            label: t('dashboard.manager.stageCompleted', 'Completed / Released'),
+            count: stageCounts.completed ?? stageCounts.completedToday ?? 0,
+            subtext: (stageCounts.approvedToday ?? 0) > 0
+                ? t('dashboard.manager.approvedTodayCount', '{count} approved today', { count: stageCounts.approvedToday })
+                : null,
+            unit: t('dashboard.units.samples', { count: stageCounts.completed ?? stageCounts.completedToday ?? 0 }, 'samples'),
+            route: '/samples?status=SUBMITTED_FULL,APPROVED',
             color: 'border-teal-200 dark:border-teal-800 bg-teal-50/50 dark:bg-teal-950/20 text-teal-700 dark:text-teal-300'
         }
     ];
@@ -84,7 +88,7 @@ export default function ManagerProgressOverview({
                         {t('dashboard.manager.stagePipeline', 'Operational Stage Pipeline')}
                     </h2>
                     <span className="text-[11px] text-sf-muted font-medium">
-                        {t('dashboard.manager.stagePipelineDesc', 'Active laboratory specimens across analytical lifecycle stages')}
+                        {t('dashboard.manager.stagePipelineDesc', 'Active laboratory specimens classified by primary lifecycle stage')}
                     </span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -100,13 +104,20 @@ export default function ManagerProgressOverview({
                                 </span>
                                 <ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
                             </div>
-                            <div className="mt-2.5 flex items-baseline gap-1.5">
-                                <span className="text-2xl font-black">
-                                    {st.count}
-                                </span>
-                                <span className="text-[10px] font-semibold opacity-70">
-                                    {st.unit}
-                                </span>
+                            <div>
+                                <div className="mt-2.5 flex items-baseline gap-1.5">
+                                    <span className="text-2xl font-black">
+                                        {st.count}
+                                    </span>
+                                    <span className="text-[10px] font-semibold opacity-70">
+                                        {st.unit}
+                                    </span>
+                                </div>
+                                {st.subtext && (
+                                    <div className="text-[10px] font-medium mt-1 opacity-80 truncate">
+                                        {st.subtext}
+                                    </div>
+                                )}
                             </div>
                         </Link>
                     ))}
@@ -142,12 +153,14 @@ export default function ManagerProgressOverview({
                         {oversight.length > 0 ? (
                             <div className="space-y-3">
                                 {oversight.map(s => {
-                                    const isComplete = s.progress === 100 || s.isReady;
-                                    const barColor = isComplete
+                                    const isComplete = s.progress === 100 || s.readiness === 'READY_FOR_APPROVAL' || s.readiness === 'APPROVED';
+                                    const barColor = (s.readiness === 'READY_FOR_APPROVAL' || s.readiness === 'APPROVED')
                                         ? 'bg-emerald-500'
-                                        : s.progress > 50
+                                        : s.readiness === 'READY_FOR_REVIEW'
                                             ? 'bg-blue-500'
-                                            : 'bg-amber-500';
+                                            : s.progress > 50
+                                                ? 'bg-blue-500'
+                                                : 'bg-amber-500';
 
                                     return (
                                         <button
@@ -185,9 +198,17 @@ export default function ManagerProgressOverview({
                                             </div>
 
                                             <div className="shrink-0 flex items-center gap-1.5 ml-2">
-                                                {isComplete ? (
+                                                {s.readiness === 'READY_FOR_APPROVAL' ? (
                                                     <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
+                                                        {t('dashboard.manager.readyForApproval', 'Ready for Approval')}
+                                                    </span>
+                                                ) : s.readiness === 'READY_FOR_REVIEW' ? (
+                                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
                                                         {t('dashboard.manager.readyForReview', 'Ready for Review')}
+                                                    </span>
+                                                ) : s.readiness === 'APPROVED' ? (
+                                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300">
+                                                        {t('dashboard.manager.approved', 'Approved')}
                                                     </span>
                                                 ) : (
                                                     <ArrowRight className="w-3.5 h-3.5 text-sf-muted group-hover:text-sf-primary transition-colors" />

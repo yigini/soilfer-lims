@@ -14,7 +14,7 @@ const {
     buildSampleScopeWhere,
     buildWorkItemScopeWhere
 } = require('./dashboardScope');
-const { canFinalApprove, GATE_ANALYSES } = require('./workEligibility');
+const { canFinalApprove, GATE_ANALYSES, NON_ANALYTICAL } = require('./workEligibility');
 
 const ALLOWED_ROLE_QUEUES = {
     SAMPLE_RECEPTION: ['reception.attention', 'reception.drafts', 'reception.expected', 'reception.receivedToday'],
@@ -277,9 +277,10 @@ async function getDashboardHome(user, options = {}) {
             select: { sampleId: true },
             distinct: ['sampleId']
         });
-        const reviewCount = reviewSamples.length;
+        const reviewSampleIds = new Set(reviewSamples.map(r => r.sampleId));
+        const reviewCount = reviewSampleIds.size;
 
-        // 3. Final approval eligible samples
+        // 3. Final approval eligible samples and stage partition
         // Strictly evaluates: physically received, accepted/processing, non-zero analytical items, all accepted
         const candidates = await prisma.sample.findMany({
             where: scopedWhere(sampleWhere, {
@@ -296,11 +297,27 @@ async function getDashboardHome(user, options = {}) {
             }
         });
 
+        // Stage partition with strict lifecycle precedence (Refs #120 / Point 3):
+        // 1. FINAL_APPROVAL: eligible for final approval (all ordered analytical work accepted, gates completed)
+        // 2. AWAITING_REVIEW: has work submitted awaiting manager review
+        // 3. IN_PROGRESS: active specimens undergoing bench determinations
         let approvalEligibleCount = 0;
+        let stageAwaitingReviewCount = 0;
+        let stageInProgressCount = 0;
+
         for (const s of candidates) {
             const orderLines = s.orderRevisions?.[0]?.lines || [];
             const evalResult = canFinalApprove(s, s.workItems, orderLines, user);
-            if (evalResult.allowed) approvalEligibleCount++;
+            const isApprovalEligible = evalResult.allowed;
+            const hasSubmittedWork = reviewSampleIds.has(s.id) || (s.workItems || []).some(w => w.status === 'SUBMITTED');
+
+            if (isApprovalEligible) {
+                approvalEligibleCount++;
+            } else if (hasSubmittedWork) {
+                stageAwaitingReviewCount++;
+            } else {
+                stageInProgressCount++;
+            }
         }
 
         // 4. Unassigned tasks
@@ -336,13 +353,31 @@ async function getDashboardHome(user, options = {}) {
         // 6. Build Progress & Bottleneck Overview for Manager Dashboard (Issue #120)
         const oversight = candidates
             .map(s => {
-                const analyticalWork = (s.workItems || []).filter(w => {
-                    const isGate = Array.isArray(GATE_ANALYSES) ? GATE_ANALYSES.includes(w.analysis) : GATE_ANALYSES?.has ? GATE_ANALYSES.has(w.analysis) : false;
-                    return !isGate;
-                });
+                // Denominator excludes all NON_ANALYTICAL methods (DRYING, PREPARATION, ARCHIVING, DISPOSAL, etc.)
+                const analyticalWork = (s.workItems || []).filter(w => !NON_ANALYTICAL.includes(w.analysis));
                 const total = analyticalWork.length;
-                const completed = analyticalWork.filter(w => ['COMPLETED', 'ACCEPTED'].includes(w.status)).length;
+                // Determination is complete at the bench if SUBMITTED, COMPLETED, or ACCEPTED
+                const completed = analyticalWork.filter(w => ['SUBMITTED', 'COMPLETED', 'ACCEPTED'].includes(w.status)).length;
+                const accepted = analyticalWork.filter(w => w.status === 'ACCEPTED').length;
                 const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+                const isAllAccepted = total > 0 && accepted === total;
+                const isAllDone = total > 0 && completed === total;
+
+                // Determine lifecycle readiness state:
+                // - READY_FOR_APPROVAL: all determinations accepted, review is finished
+                // - READY_FOR_REVIEW: all determinations submitted/done, awaiting manager review
+                // - APPROVED: sample already authorized/approved
+                // - IN_ANALYSIS: determinations actively underway
+                let readiness = 'IN_ANALYSIS';
+                if (['COMPLETED', 'APPROVED'].includes(s.status)) {
+                    readiness = 'APPROVED';
+                } else if (isAllAccepted) {
+                    readiness = 'READY_FOR_APPROVAL';
+                } else if (isAllDone) {
+                    readiness = 'READY_FOR_REVIEW';
+                }
+
                 return {
                     sampleId: s.id,
                     labId: s.labId || s.originalId || s.id,
@@ -351,8 +386,10 @@ async function getDashboardHome(user, options = {}) {
                     status: s.status,
                     total,
                     completed,
+                    accepted,
                     progress,
-                    isReady: total > 0 && completed === total
+                    readiness,
+                    isReady: isAllDone || isAllAccepted
                 };
             })
             .filter(s => s.total > 0)
@@ -392,14 +429,15 @@ async function getDashboardHome(user, options = {}) {
             };
         });
 
-        const [inProgressCount, completedTodayCount, totalSamplesCount] = await Promise.all([
+        const [completedCount, approvedTodayCount, totalSamplesCount] = await Promise.all([
             prisma.sample.count({
-                where: scopedWhere(sampleWhere, { status: { in: ['ACCEPTED', 'PROCESSING'] } })
+                where: scopedWhere(sampleWhere, {
+                    status: { in: ['APPROVED', 'COMPLETED', 'SUBMITTED_FULL'] }
+                })
             }),
             prisma.sample.count({
                 where: scopedWhere(sampleWhere, {
-                    status: { in: ['COMPLETED', 'APPROVED'] },
-                    updatedAt: { gte: actorScope.dayStart, lt: actorScope.dayEnd }
+                    approvedAt: { gte: actorScope.dayStart, lt: actorScope.dayEnd }
                 })
             }),
             prisma.sample.count({
@@ -412,10 +450,11 @@ async function getDashboardHome(user, options = {}) {
             techWorkload,
             stageCounts: {
                 pendingIntake: pendingIntakeCount,
-                inProgress: inProgressCount,
-                awaitingReview: reviewCount,
+                inProgress: stageInProgressCount,
+                awaitingReview: stageAwaitingReviewCount,
                 finalApproval: approvalEligibleCount,
-                completedToday: completedTodayCount,
+                completed: completedCount,
+                approvedToday: approvedTodayCount,
                 unassignedTasks: unassignedTasksCount,
                 totalSamples: totalSamplesCount
             }

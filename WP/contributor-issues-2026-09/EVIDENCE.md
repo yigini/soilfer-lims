@@ -1269,22 +1269,40 @@ A focused correction was implemented on branch `fix/issue-120-manager-dashboard-
 
 #### 5. Automated Tests & Headless Chrome CDP Verification
 - **Targeted Contract Tests**:
-  - `server/tests/contracts/manager_dashboard_overview.test.js` (3/3 passed in 2.07s):
+  - `server/tests/contracts/manager_dashboard_overview.test.js` (8/8 passed in 3.04s):
     1. `LAB_MANAGER` dashboard home includes `progressOverview` with analytical oversight and `techWorkload`.
     2. `SUPER_ADMIN` scoped to a lab receives matching `progressOverview`.
     3. Cross-lab isolation: Manager 2 in LAB-HND strictly does not see Manager 1 records or technicians.
+    4. Analytical progress denominator excludes closure tasks (`ARCHIVING`) and counts `SUBMITTED` work with `READY_FOR_REVIEW` badge.
+    5. Already `ACCEPTED` sample displays `READY_FOR_APPROVAL` badge (not `READY_FOR_REVIEW`) and excludes `DISPOSAL` from denominator.
+    6. Mutually exclusive stage partitioning classifies candidates with strict precedence (`FINAL_APPROVAL` > `AWAITING_REVIEW` > `IN_PROGRESS`).
+    7. Stage 5 Completed population counts authoritative `approvedAt` today, ignoring generic `updatedAt`.
+    8. Destination population contract matches Stage 5 route (`/samples?status=SUBMITTED_FULL,APPROVED`).
 - **Client Build**:
-  - `npm run build` in `client` passed cleanly in 7.66s without warnings or errors.
+  - `npm run build` in `client` passed cleanly in 7.22s without warnings or errors.
 - **Side-by-Side Browser CDP Journey** (`server/scripts/run_manager_dashboard_tasklist_side_by_side.cjs`):
   - Executed end-to-end on an isolated disposable database with realistic multi-technician fixture data:
-    1. `/` (Dashboard - Operational Overview): Verified h1 "Laboratory overview", Stage Pipeline (5 cards with accurate counts and ICU plurals), Analysis Progress bars (33% and 100% with "READY FOR REVIEW" badge), Technician Workload cards, and Unassigned Alert banner. Screenshot: `manager_dashboard_overview_verified.png`.
+    1. `/` (Dashboard - Operational Overview): Verified h1 "Laboratory overview", Stage Pipeline (5 cards with accurate counts and ICU plurals, including Stage 5 "Completed / Released" with subtext "1 approved today"), Analysis Progress bars (33%, 100% with "Ready for Review" badge, and 100% with "Ready for Approval" badge), Technician Workload cards, and Unassigned Alert banner. Screenshot: `manager_dashboard_overview_verified.png`.
     2. `/` (Dashboard - Pending Work Queue toggle): Verified toggle to work queue table preview with Action buttons. Screenshot: `manager_dashboard_queue_toggle_verified.png`.
     3. `/manager-queue` (Manager Task List): Verified dedicated execution workbench with Assign Work, Review Submissions, Final Approvals, and QC Exceptions tabs. Screenshot: `manager_tasklist_action_verified.png`.
     4. `/?labId=LAB-GTM` (Scoped System Admin Dashboard): Verified scoped overview matching Guatemala lab workload. Screenshot: `super_admin_scoped_dashboard_verified.png`.
-  - Machine-readable evidence log: `artifacts/evidence-journeys/manager_dashboard_overview_evidence.json` (Status: `VERIFIED`, 4/4 passed).
+    5. `/samples?status=SUBMITTED_FULL,APPROVED` (Stage 5 Destination): Verified navigation from Stage 5 card loads matching approved specimens. Screenshot: `manager_dashboard_stage5_destination_verified.png`.
+  - Machine-readable evidence log: `artifacts/evidence-journeys/manager_dashboard_overview_evidence.json` (Status: `VERIFIED`, 5/5 findings passed).
 
-#### 6. Issue Status
-- **Issue #120**: Remains **OPEN** (`Refs #120`). Follow-up PR opened as draft for independent review; no merge or deployment permitted until explicitly authorized.
+#### 6. Independent Review Feedback Resolution (PR #141 / Comment 5796060402)
+- **Gap 1: Analytical Progress Denominator & Lifecycle Badges**:
+  - Excluded all `NON_ANALYTICAL` methods (`DRYING`, `PREPARATION`, `ARCHIVING`, `ARCH`, `DISPOSAL`, `DISP`) from the denominator.
+  - Counted `SUBMITTED`, `COMPLETED`, and `ACCEPTED` in `completed` bench determinations.
+  - Fully `SUBMITTED` sample displays 100% progress with "Ready for Review" (`READY_FOR_REVIEW`) badge.
+  - Fully `ACCEPTED` sample displays 100% progress with "Ready for Approval" (`READY_FOR_APPROVAL`) badge, strictly eliminating the post-review "Ready for Review" badge regression.
+- **Gap 2: Completed Population, Authoritative Dates & Destination Alignment**:
+  - Replaced generic `updatedAt` with authoritative `approvedAt: { gte: dayStart, lt: dayEnd }` for `approvedToday`.
+  - Stage 5 card labeled "Completed / Released" with count matching `status in ['APPROVED', 'COMPLETED', 'SUBMITTED_FULL']`, subtext `{count} approved today`, and destination route `/samples?status=SUBMITTED_FULL,APPROVED` matching `SamplesFilterBar`.
+- **Gap 3: Mutually Exclusive Stage Partitioning**:
+  - Partitioned active specimens with strict precedence (`FINAL_APPROVAL` > `AWAITING_REVIEW` > `IN_PROGRESS`), eliminating double-counting across the pipeline cards.
+
+#### 7. Issue Status
+- **Issue #120**: Remains **OPEN** (`Refs #120`). Follow-up PR #141 updated for independent review; no merge or deployment permitted until explicitly authorized.
 
 
 

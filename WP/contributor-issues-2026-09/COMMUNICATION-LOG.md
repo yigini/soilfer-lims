@@ -332,3 +332,19 @@ User explicitly approved combined PR132/133 merge/deployment. Accepted heads0a7c
   - Isolated Headless Chrome CDP browser journey (`server/scripts/run_manager_dashboard_tasklist_side_by_side.cjs`) passed (4/4 steps verified, 4 screenshots captured).
 - Candidate prepared as draft PR (Refs #120) awaiting independent Codex review. No merge or production deployment performed. Issue #120 remains **OPEN**.
 
+### 2026-09-23 14:35 UTC — PR #141 review remediation: Denominator, Badges & Stage Partitioning
+- Independent review on PR #141 at `beb0320` ([comment 5796060402](https://github.com/yigini/soilfer-lims/pull/141#issuecomment-5796060402)) identified three bounded correctness gaps:
+  1. *Analytical Progress Denominator & Lifecycle Badges*: Denominator omitted `SUBMITTED` items and counted closure tasks (`ARCHIVING`, `DISPOSAL`); "Ready for Review" badge appeared post-review.
+  2. *Completed Today & Destination Alignment*: Generic `updatedAt` was used instead of authoritative `approvedAt`; Stage 5 card destination needed alignment with completed population.
+  3. *Mutually Exclusive Stage Partitioning*: Five stage cards could double-count the same sample across stages.
+- Remediations:
+  - `server/services/dashboardService.js`: Excluded all `NON_ANALYTICAL` methods from analytical denominator; included `SUBMITTED`, `COMPLETED`, and `ACCEPTED` in completed count; assigned `READY_FOR_APPROVAL` when determinations are accepted, `READY_FOR_REVIEW` when submitted/done, `APPROVED` when authorized, and `IN_ANALYSIS` otherwise. Enforced strict mutual exclusivity across candidate stages (`FINAL_APPROVAL` > `AWAITING_REVIEW` > `IN_PROGRESS`). Replaced generic `updatedAt` with `approvedAt: { gte: dayStart, lt: dayEnd }` for `approvedToday`.
+  - `client/src/components/dashboard/ManagerProgressOverview.jsx`: Stage 5 card labeled "Completed / Released" with count matching `['APPROVED', 'COMPLETED', 'SUBMITTED_FULL']`, subtext `{count} approved today`, and destination `/samples?status=SUBMITTED_FULL,APPROVED` matching `SamplesFilterBar`. Rendered distinct lifecycle badges (`Ready for Review` vs `Ready for Approval`).
+  - Translations: Updated in `en`, `es`, `es-419`, `fr`, and `pt`.
+- Verification:
+  - `server/tests/contracts/manager_dashboard_overview.test.js`: Added 5 focused contract tests covering submitted work, accepted work, closure task exclusion, strict stage partitioning, and authoritative `approvedAt` date filtering. 8/8 passed in 3.04s.
+  - Production client build passed cleanly in 7.22s.
+  - Isolated Browser CDP runner (`run_manager_dashboard_tasklist_side_by_side.cjs`) passed (5/5 steps verified: Overview, Queue toggle, Task List, Scoped Admin, Stage 5 destination). All 5 screenshots captured.
+- Pushed updated commit to PR #141. Issue #120 remains **OPEN**; candidate is unmerged and undeployed.
+
+

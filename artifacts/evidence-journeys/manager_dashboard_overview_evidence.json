@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-23T13:31:56.229Z",
+  "timestamp": "2026-09-23T14:32:57.525Z",
   "status": "VERIFIED",
   "findings": {
     "managerDashboardOperationalOverview": {
@@ -13,8 +13,12 @@
         "hasTechWorkload": true,
         "hasStagePipeline": true,
         "hasBottleneckAlert": true,
-        "hasReadyBadge": true,
-        "progressBarsCount": 2,
+        "hasReadyForReviewBadge": true,
+        "hasReadyForApprovalBadge": true,
+        "hasCompletedStage": true,
+        "hasApprovedTodaySubtext": true,
+        "hasStage5Route": true,
+        "progressBarsCount": 3,
         "techCardsCount": 20
       }
     },
@@ -49,12 +53,21 @@
         "hasAnalysisProgress": true,
         "hasTechWorkload": true
       }
+    },
+    "stage5DestinationPopulation": {
+      "verified": true,
+      "details": {
+        "url": "/samples?status=SUBMITTED_FULL,APPROVED",
+        "hasSample4": true,
+        "hasSample5": true
+      }
     }
   },
   "screenshots": [
     "manager_dashboard_overview_verified.png",
     "manager_dashboard_queue_toggle_verified.png",
     "manager_tasklist_action_verified.png",
-    "super_admin_scoped_dashboard_verified.png"
+    "super_admin_scoped_dashboard_verified.png",
+    "manager_dashboard_stage5_destination_verified.png"
   ]
 }
