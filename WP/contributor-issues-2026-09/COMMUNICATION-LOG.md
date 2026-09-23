@@ -353,7 +353,8 @@ User explicitly approved combined PR132/133 merge/deployment. Accepted heads0a7c
   2. *COMPLETED card-to-destination mismatch*: `dashboardService.js` counted non-canonical `COMPLETED` samples in `stageCounts.completed`, while the Stage 5 destination route `/samples?status=SUBMITTED_FULL,APPROVED` omitted `COMPLETED`.
 - Remediations:
   - `server/services/dashboardService.js`:
-    - Line 287: Restricted `candidates` query to `status: { in: ['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL'] }` with `receptionDate: { not: null }`. Cleanly isolates `RECEIVED` samples strictly to `pendingIntake` (Stage 1).
+    - Line 287: Excluded `'RECEIVED'` from `candidates` query (`status: { in: ['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL', 'SUBMITTED_FULL'] }`), cleanly isolating `RECEIVED` specimens to Stage 1 (`pendingIntake`) while preserving candidate evaluation for final approval.
+    - Line 318: Strictly gated `stageInProgressCount` to active bench specimen statuses (`['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL'].includes(s.status)`), ensuring neither `RECEIVED` nor `SUBMITTED_FULL` specimens ever increment `inProgress`.
     - Line 435: Restricted `completedCount` query to `status: { in: ['APPROVED', 'SUBMITTED_FULL'] }`, matching the released Samples Quick Filter route `/samples?status=SUBMITTED_FULL,APPROVED` and excluding non-canonical `COMPLETED` status.
   - `server/tests/contracts/manager_dashboard_overview.test.js`:
     - Added `sampleReceived` (`status: 'RECEIVED'`) and `sampleSubmittedFull` (`status: 'SUBMITTED_FULL'`) alongside existing `sampleCompletedNoApprovedAt` (`status: 'COMPLETED'`).
@@ -361,7 +362,7 @@ User explicitly approved combined PR132/133 merge/deployment. Accepted heads0a7c
     - Test 7: Verifies `RECEIVED` count-to-destination alignment: `/samples?status=RECEIVED,COLLECTED` contains `sampleReceived.id`, whereas `/samples?status=ACCEPTED,PROCESSING` omits it.
     - Test 8: Verifies `stageCounts.completed === 3` and `approvedToday === 1`.
     - Test 9: Verifies `COMPLETED` fixture appears in neither the card count nor destination results; canonical completed samples appear in both; card count equals destination sample count (3).
-    - 9/9 contract tests passed in 6.25s.
+    - 9/9 contract tests passed in 6.08s.
   - `server/scripts/run_manager_dashboard_tasklist_side_by_side.cjs`:
     - Added `sRec` (`RECEIVED`), `sSubFull` (`SUBMITTED_FULL`), `sComp` (`COMPLETED`) fixtures to isolated runner DB.
     - Verified Stage 5 destination contains canonical specimens and omits both `COMPLETED` and `RECEIVED` fixtures.
