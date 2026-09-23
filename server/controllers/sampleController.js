@@ -176,8 +176,7 @@ exports.getSamples = async (req, res) => {
         // Explicit status filter overrides view.
         const ACTIVE_LAB_STATUSES = [
             'RECEIVED', 'ACCEPTED', 'PROCESSING',
-            'SUBMITTED_PARTIAL', 'SUBMITTED_FULL', 'APPROVED',
-            'RECEIVED_REJECTED', 'REJECTED'
+            'SUBMITTED_PARTIAL'
         ];
         const EXPECTED_STATUSES = ['EXPECTED', 'COLLECTED'];
 
@@ -257,13 +256,11 @@ exports.getSamples = async (req, res) => {
                 views.daily += sc._count;
             } else if (sc.status === 'RECEIVED_REJECTED' || sc.status === 'REJECTED') {
                 lifecycle.REJECTED = (lifecycle.REJECTED || 0) + sc._count;
-                views.daily += sc._count;
             } else if (['PROCESSING', 'SUBMITTED_PARTIAL'].includes(sc.status)) {
                 lifecycle.ONGOING += sc._count;
                 views.daily += sc._count;
             } else if (['SUBMITTED_FULL', 'APPROVED'].includes(sc.status)) {
-                lifecycle.COMPLETED += sc._count;
-                views.daily += sc._count;
+                lifecycle.COMPLETED = (lifecycle.COMPLETED || 0) + sc._count;
             } else if (['ARCHIVED', 'DISPOSED'].includes(sc.status)) {
                 lifecycle.HISTORY += sc._count;
             }

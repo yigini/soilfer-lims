@@ -282,7 +282,7 @@ async function getDashboardHome(user, options = {}) {
         // Strictly evaluates: physically received, accepted/processing, non-zero analytical items, all accepted
         const candidates = await prisma.sample.findMany({
             where: scopedWhere(sampleWhere, {
-                status: { in: ['RECEIVED', 'ACCEPTED', 'PROCESSING'] },
+                status: { in: ['RECEIVED', 'ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL', 'SUBMITTED_FULL'] },
                 receptionDate: { not: null }
             }),
             include: {
@@ -1154,7 +1154,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
     if (queueKey === 'manager.finalApproval') {
         const candidates = options.candidates || await prisma.sample.findMany({
             where: scopedWhere(sampleWhere, {
-                status: { in: ['RECEIVED', 'ACCEPTED', 'PROCESSING'] },
+                status: { in: ['RECEIVED', 'ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL', 'SUBMITTED_FULL'] },
                 receptionDate: { not: null }
             }),
             include: {
