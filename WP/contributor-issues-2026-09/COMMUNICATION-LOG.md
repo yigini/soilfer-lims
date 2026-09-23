@@ -282,7 +282,8 @@ User explicitly approved combined PR132/133 merge/deployment. Accepted heads0a7c
 - All 27 read-only postflight verification checks passed:
   - Inventory (#125): `/api/inventory/alerts` returned 126 `outOfStock`, 126 `lowStock`, 2 `expired`, 2 `expiredLots`. All 126 active catalog items evaluate to `isOutOfStock: true` in `/api/inventory/items`, achieving 100% agreement between summary warnings and row badges.
   - Operational views & manager queues (#120): `/api/samples?view=daily` excludes all completed (`APPROVED`, `SUBMITTED_FULL`) and rejected (`RECEIVED_REJECTED`, `REJECTED`) samples; daily row count (5) matches `views.daily` facet (5); completed quick filter returns only finished/approved samples (count: 3); manager final approval queue queried without 200-item cap (status 200); dashboard home (207ms) and live dashboard (482ms) latencies within threshold.
-- Production write quiescence lifted and Apache proxy restored. Public health `https://lims.yigini.net/api/health` returned HTTP 200 (`status: ok`).
+- Production write quiescence lifted and Apache proxy restored. Following an independent read-only check noting that the saved `.live` config had been contaminated with the 503 rewrite rule during a rerun, the contaminated file was moved to `.contaminated`, and the clean original reverse proxy configuration was restored to `/etc/httpd/conf/extra/httpd-lims.conf` and `.live` (SHA256: `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20`).
+- Reloaded Apache; confirmed write block is completely removed: `POST /api/test-mutation` returned 404 (forwarded to Express container, not 503 rewrite); `GET /api/health` returned 200.
 - Exact production database counts conserved: Sample=36878, Project=5, WorkItem=90, Result=19, Report=4. Zero mutations to inventory stock or scientific records.
 - Issues #120 and #125 remain OPEN pending independent Codex live role acceptance. Tracked total: 6 closed, 12 open.
 

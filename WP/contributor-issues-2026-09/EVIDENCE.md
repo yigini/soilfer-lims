@@ -1129,17 +1129,26 @@ Following explicit user authorization on 23 September 2026 at ~07:08 UTC, PR #13
     - Dashboard Live Response Time: 482ms (< 2000ms threshold).
 - Post-checklist DB count verification: Samples=36,878, Projects=5 (0 mutations).
 
-#### 4. Production Resumption & Live Verification
+#### 4. Production Resumption, Proxy Correction & Live Verification
 - Restarted container in standard production mode (normal operation, without `DISABLE_BACKGROUND_JOBS`). Container healthy within 3 seconds.
-- Restored `/etc/httpd/conf/extra/httpd-lims.conf.live` and reloaded Apache.
-- Public Health: `https://lims.yigini.net/api/health` -> HTTP 200 (`{"status":"ok","uptime":13.78s}`).
-- Live Database Conservation:
-  - Exact verified row counts conserved: `Sample`: 36,878, `Project`: 5, `WorkItem`: 90, `Result`: 19, `Report`: 4.
+- **Proxy Configuration Correction & Ingress Write Resumption**:
+  - *Finding*: Post-deployment inspection identified that `/etc/httpd/conf/extra/httpd-lims.conf.live` had been contaminated with the `POST|PUT|PATCH|DELETE -> 503` `RewriteRule` during a rerun of the cutover script, leaving active Apache ingress returning 503 for mutating methods despite the application container being in normal mode.
+  - *Remediation*: The contaminated `.live` config was archived to `httpd-lims.conf.live.contaminated`. The clean, original reverse proxy configuration (without `RewriteEngine` / 503 rules) was restored to both `/etc/httpd/conf/extra/httpd-lims.conf` and `/etc/httpd/conf/extra/httpd-lims.conf.live`.
+  - *Configuration SHA256*: `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20` (both files identical, 0 rewrite rules present).
+  - *Syntax & Reload*: `apachectl configtest` passed (`Syntax OK`) and `systemctl reload httpd` executed cleanly.
+  - *Write Resumption Verification*: Verified that the ingress write block is completely cleared:
+    - `GET https://lims.yigini.net/api/health` -> HTTP 200 OK (`{"status":"ok"}`)
+    - `POST https://lims.yigini.net/api/test-mutation` -> HTTP 404 Not Found (forwarded through proxy to Express container; no 503 rewrite)
+    - `POST https://lims.yigini.net/api/auth/me` -> HTTP 404 Not Found (forwarded through proxy to Express container; no 503 rewrite)
+- **Live Database Conservation**:
+  - Exact verified row counts conserved post-proxy restoration:
+    `Sample`: 36,878, `Project`: 5, `WorkItem`: 90, `Result`: 19, `Report`: 4.
   - Zero modifications to production inventory stock or scientific records.
 
 #### 5. Issues Status
 - **Issue #120**: Fix deployed and verified on production. Remains **OPEN** pending independent live role acceptance.
 - **Issue #125**: Fix deployed and verified on production. Remains **OPEN** pending independent live role acceptance.
+
 
 
 
