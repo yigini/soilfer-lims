@@ -5,14 +5,14 @@ Repository: `https://github.com/yigini/soilfer-lims`
 Implementation Lead: Antigravity  
 Review & Communication Lead: Codex  
 Baseline Commit: `762c46e`  
-Current Production Release: `v3.5.19` (`c5ed62ebbe27fbd59147c77de5fedce8d773fe1d`)  
-Production Serving Image: `soilfer-lims:v3.5.19-c5ed62e` (sha256:`27b53a93016735f1c55a12b5f32db1592663c9ece92c69ab9b96da317b87f66a`)  
-Date: 2026-09-22  
+Current Production Release: `v3.5.23` (`3241d4efdb8562575815328a7396c794ee9c12ac`)  
+Production Serving Image: `soilfer-lims:v3.5.23-3241d4e` (sha256:`9b1d62aa3606c29e6fc63211c6c92970365d5e8197ff831f6ef4f5836ab2db6f`)  
+Date: 2026-09-23  
 
 Status Summary:
 - **Total Tracked Issues**: 18
-- **Independently Accepted & Closed**: 5 (#115, #116, #118, #119, #124)
-- **Open**: 13 (10 with fixes deployed/live awaiting individual workflow acceptance; 3 external/device/governance items)
+- **Independently Accepted & Closed**: 8 (#115, #116, #118, #119, #122, #124, #125, #126)
+- **Open**: 10 (7 with fixes deployed/live awaiting individual workflow acceptance: #113, #114, #117, #120, #121, #123, #128; 3 external/device/governance items: #102, #103, #104)
 
 Status Key:
 - **Reported**: Issue filed by contributor.
@@ -39,7 +39,7 @@ Status Key:
 | **#125** | 3 | Inventory aggregation anomalies, expired lots vs usable stock confusion | Reproduced & Implemented Locally | `278d32b` + working tree | `inventory_aggregation.test.js` (12/12 passed), `localization_and_user_display.test.js` (13/13 passed), client build (`vite build` clean in 13.31s) | `7516f0e` | Usable stock strictly aggregates available, non-expired lots; expired lots tracked separately without precedence masking; items at or below reorder threshold flagged as low stock; missing quantities represented truthfully as null (not 0); usableMissingQuantityLotCount tracked so mixed known/unknown lots treat usable stock as a subtotal (`≥ X`, `SUBTOTAL` badge) and distinguish confirmed low stock (`LOW`) from uncertainty (`LOW? (UNCERTAIN)` / `COUNT NEEDED`); GET /api/inventory/alerts is 100% pure (zero DB mutations); FEFO strictly excludes expired lots. UI displays OUT OF STOCK, EXPIRED, and SUBTOTAL badges without mutual masking; inventory subtotal and uncertainty badges localized across all 5 locales (#116). | Display/aggregation fix; zero schema changes. | Code LIVE in `v3.5.19`; Individual live workflow acceptance pending. OPEN |
 | **#117** | 3 | Failed reception criterion not persisting or reflecting in UI; Reception TDZ runtime crash before first render | Reproduced & Implemented Locally | `81487b1` | `reception_compliance.test.js` (18/18 passed), `reception_compliance_component.test.js` (12/12 passed), `reception_route_smoke.test.js` (6/6 passed including release prerequisite), isolated Headless Chrome CDP browser journey (6/6 passed, `reception_browser_journey.json`), client build (`vite build` clean) | `7516f0e` | Authoritative saved state reflects OK/N/A/FAIL with visible badge indicators; atomic single-event state update in ComplianceChecklist (`onChange(newValue)`) prevents stale-closure overwrite in parent Reception; non-conformance flag auto-syncs with failed checklist items and clears upon correction back to PASS unless custom reason supplied; rejected sample intake persists checklist and ncReason in receptionData and metadata.nonConformance, transitioning to RECEIVED_REJECTED; inspecting or resuming draft rehydrates checklistData truthfully. Resolved P1 TDZ ReferenceError by relocating mode-cleanup effect below checklistData useState declaration; verified in real isolated Headless Chrome (CDP) parent and child together (`reception_browser_journey_verified.png`), including fail selection, note entry, correction back to OK, and synthetic draft rehydration; route smoke tests enforce client/dist release prerequisite as explicit non-silent assertion. | Non-conformance requires explanation note. | Code LIVE in `v3.5.19`; Individual live workflow acceptance pending. OPEN |
 | **#113** | 3 | Reception compliance checklist and redundant/unauthorized dispositions | Reproduced & Implemented Locally | `81487b1` | `reception_compliance.test.js` (18/18 passed), `reception_compliance_component.test.js` (12/12 passed), `reception_route_smoke.test.js` (6/6 passed), isolated Headless Chrome CDP browser journey (6/6 passed, `reception_browser_journey.json`), client build (`vite build` clean) | `7516f0e` | Reception compliance checklist evaluation enforced upfront before sample creation, guaranteeing zero DB mutations on 400 rejection: all-pass admits sample routinely without redundant gates; permitted N/A (CoC strictly on walk-in) accepted; prohibited N/A (formal shipment CoC, or container/label/condition/quantity) rejected with 400 INVALID_CHECKLIST_NA and disabled in UI; incomplete, empty, or omitted checklist rejected with 400 INCOMPLETE_COMPLIANCE_CHECKLIST; legacy alias normalization fails closed on conflicting aliases and tracks unknown keys; failed check blocks routine acceptance for reception staff (403 COMPLIANCE_FAILURE_EXCEPTION_REQUIRED); staff self-authorization strictly prohibited; manager exception required to admit with ADMITTED_WITH_EXCEPTION in history. In real browser journey, verified Walk-in mode enables CoC N/A (`aria-checked="true"`), and switching Walk-in to Project mode triggers useEffect interactive cleanup resetting prohibited CoC N/A to undefined (`aria-checked="false"`). | Manager or admin exception required to admit failed compliance items. | Code LIVE in `v3.5.19`; Individual live workflow acceptance pending. OPEN |
-| **#120** | 4 | Dashboard vs manager task list conflation; large field registry overwhelming queues | Reproduced & Implemented Locally | `1ed46ef` | `dashboard_manager_views.test.js` (7/7 passed), client production build (`vite build` clean) | `7516f0e` | Daily lab queue defaults to physically received and active samples (`view=daily`, `ACTIVE_LAB_STATUSES = ['RECEIVED', 'ACCEPTED', 'PROCESSING', 'SUBMITTED']`); field arrivals awaiting intake separated (`view=expected`, `EXPECTED_STATUSES = ['EXPECTED', 'COLLECTED']`); full field registry accessible across all stages (`view=registry`); returned sample rows and `views.daily`/`views.expected` aggregation counts strictly agree; manager exceptions lane surfaces only unresolved QC failures; honest pagination units. | Provenance and Kobo records preserved without data loss. | Code LIVE in `v3.5.19`; Individual live workflow acceptance pending. OPEN |
+| **#120** | 4 | Dashboard vs manager task list conflation; large field registry overwhelming queues; Kobo notification deep link alignment and search/filter preservation across view switches | Reproduced & Implemented Locally | `1ed46ef` + `0341151` (PR #138) + `1ee1b0b` (PR #139) | `dashboard_manager_views.test.js` (7/7 passed), `operational_views_and_manager_queue.test.js` (10/10 passed), `kobo_notification_view_link.test.js` (5/5 passed), isolated Headless Chrome CDP mounted navigation journey (`run_samples_mounted_nav_evidence.cjs` 3/3 journeys exit code 0, `samples_mounted_nav_evidence.json`), client production build (`vite build` clean in 1m 6s) | `3241d4e` (v3.5.23) | Daily lab queue defaults to physically received and active samples (`view=daily`, `ACTIVE_LAB_STATUSES = ['RECEIVED', 'ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL']`); field arrivals awaiting intake separated (`view=expected`, `EXPECTED_STATUSES = ['EXPECTED', 'COLLECTED']`); full field registry accessible across all stages (`view=registry`); returned sample rows and `views.daily`/`views.expected` aggregation counts strictly agree; manager exceptions lane surfaces only unresolved QC failures; honest pagination units. Notification deep link in Kobo intake updated to route to Expected Arrivals view (`/samples?view=expected&expected=true&projectId=${project.id}&q=${encodeURIComponent(submissionCode)}`). Client Samples page preserves active search text and advanced filters (field ID, project, lab, batch) across view switches (`daily` <-> `expected` <-> `registry`), while clearing status filter on preset transitions; direct URL navigation, notification click, and Reset button verified in mounted browser CDP. Production release v3.5.23 verified on host with 28/28 postflight checks. | Kobo remains an optional external intake channel; core laboratory operations decoupled from Kobo availability; provenance and expected-arrival records preserved without data loss. | Code LIVE in `v3.5.23`; Individual live workflow acceptance pending. Strictly OPEN |
 | **#114** | 4 | Map centering issues, lack of fullscreen, map layer fallbacks, hardcoded lab coordinates | Reproduced & Implemented Locally | `81487b1` | `map_view.test.js` (16/16 passed), `lab_directory_and_auth_profile.test.js` (5/5 passed), client production build (`vite build` clean) | `7516f0e` | Removed fake hard-coded LAB_DEFAULT_COORDINATES dictionary; sourced authorized actual laboratory configuration from schema (Lab.location) and auth (user.lab, GET /api/labs/:id); documented GET /api/labs/:id public directory policy; verified auth and profile resolution for configured vs unconfigured laboratories (null location handled truthfully without fake fallbacks); scoped authorization proven: cross-lab directory lookup succeeds (200), whereas cross-lab operational workspace access fails closed (403 TARGET_OUTSIDE_SCOPE); parseCoordinates normalizes and validates geographic bounds; HTML5 Fullscreen API guarded with document.fullscreenEnabled and denial catch; Leaflet invalidateSize triggered on fullscreen toggle; Esri MLA terms and OpenStreetMap Tile Usage Policy cited. | Physical printer/GPS field checks pending. | Code LIVE in `v3.5.19`; Individual live/map acceptance and relevant field evidence pending. OPEN |
 | **#115** | 4 | Navigation order not reflecting canonical laboratory journey | Reproduced & Implemented Locally | `1ed46ef` + `0a7cbde` (PR #132) | `navigation_order.test.js` (7/7 passed), client production build (`vite build` clean) | `c5ed62e` (v3.5.19) | Reorganized navigation items into canonical laboratory journey sequence via production helper `client/src/navigationConfig.js`: Dashboard (`/`) -> Projects (`/projects`) -> Reception (`/reception`) -> Samples Registry (`/samples`) -> Manager Task List (`/manager-queue`) -> Quality Assurance (`/qa`) -> Data Results (`/results`) -> Result Reports (`/result-reports`) -> Spectral Library (`/spectral`) -> Inventory (`/inventory`) -> Equipment (`/equipment`) -> Staff (`/staff`) -> My Laboratory (`/my-lab`) -> Admin (`/admin`) -> About (`/about`). Order contract tests execute production module directly across all 6 roles. Independent live Spanish LAB_MANAGER verification confirmed sidebar order. | Role permissions unchanged. | **CLOSED** (2026-09-22 14:00:48 UTC; [Issue #115 comment 5777888265](https://github.com/yigini/soilfer-lims/issues/115#issuecomment-5777888265)) |
 | **#116** | 4 | Hardcoded English strings in Spanish/multilingual UI | Reproduced & Implemented Locally | `278d32b` + `0a7cbde` (PR #132) | `localization_and_user_display.test.js` (18/18 passed), 450 ICU checks passed, client production build (`vite build` clean) | `c5ed62e` (v3.5.19) | Removed hardcoded English strings across dashboard, manager task list, QA, navigation, and inventory in all 5 supported locales (`en`, `es`, `es-419`, `fr`, `pt`). Standardized manager action terminology to "Lista de tareas" in Spanish/Portuguese and "Manager Task List" in English; localized queue units, map controls, view selector pills, dynamic row descriptions/actions, decision tabs, and newly added inventory subtotal, count needed, confirmed low, and uncertain low stock badges; localized header Help button ("Ayuda" in Spanish, "Aide" in French, "Ajuda" in Portuguese, "Help" in English) across all locales. Scientific codes remain untranslated scientific symbols. Independent live Spanish LAB_MANAGER verification confirmed translated UI, visible "Ayuda" and "Plegar". | Translation files maintain valid JSON syntax. | **CLOSED** (2026-09-22 14:00:58 UTC; [Issue #116 comment 5777891149](https://github.com/yigini/soilfer-lims/issues/116#issuecomment-5777891149)) |
@@ -1147,7 +1147,75 @@ Following explicit user authorization on 23 September 2026 at ~07:08 UTC, PR #13
 
 #### 5. Issues Status
 - **Issue #120**: Fix deployed and verified on production. Remains **OPEN** pending independent live role acceptance.
-- **Issue #125**: Fix deployed and verified on production. Remains **OPEN** pending independent live role acceptance.
+- **Issue #125**: Fix deployed and verified on production. Closed following independent live acceptance (2026-09-23T07:36:27Z).
+
+---
+
+### 14. Production Release & Deployment Evidence: PR #139 (Commit 3241d4e — v3.5.23)
+
+Following explicit user authorization and product direction on 23 September 2026, PR #139 (Refs #120) was merged into `main` under repository protections and deployed to production host `46.19.33.37` following the established zero-mutation release sequence.
+
+#### 1. Strategic Product Direction Integration
+- **Primary Deliverable**: SoilFER LIMS is established as the principal software deliverable for laboratories in SoilFER countries, architected with a path to broader public use later.
+- **Decoupled Architecture**: Kobo is retained strictly as an optional proof-of-concept external intake channel and integration facility, never a blocking dependency for core laboratory workflows (intake, assignment, testing, review, reporting).
+- **Zero Disruption**: Existing Kobo connection configurations, explicit mappings, provenance records, and expected-arrival registry items are strictly preserved. No live connections are disconnected, deleted, or disabled.
+- **Intake Governance**: Registration of an expected sample via Kobo does not constitute physical receipt in the laboratory. Physical receipt remains gated by the reception compliance workflow.
+- **Policy Invariance**: Zero production policies or database structures modified by assumption.
+
+#### 2. Release Identification & Invariants
+- **Target Commit**: [`3241d4efdb8562575815328a7396c794ee9c12ac`](https://github.com/yigini/soilfer-lims/commit/3241d4efdb8562575815328a7396c794ee9c12ac) (`3241d4e`)
+- **PR #139 Merge Commit**: `3241d4efdb8562575815328a7396c794ee9c12ac` (Head: `1ee1b0b04b57a9f31878f1e3729a6160cbda23ed`, Refs #120)
+- **Main CI**: [Run 35845226171](https://github.com/yigini/soilfer-lims/actions/runs/35845226171) — **PASSED** (Test & Build in 4m17s)
+- **Production Container Image**: `soilfer-lims:v3.5.23-3241d4e` (Image ID `9b1d62aa3606`, Digest `sha256:9b1d62aa3606c29e6fc63211c6c92970365d5e8197ff831f6ef4f5836ab2db6f`, container ID `751f507c8f12`, started `2026-09-23T10:20:50.829683884Z`)
+- **Preserved Rollback Baseline**: `soilfer-lims:rollback-baseline` and `soilfer-lims:rollback-2f860cf` (`soilfer-lims:v3.5.22-2f860cf`, Image ID `45b51395458d`, Digest `sha256:45b51395458dbd06c7b149f35f44e96a648103c9827615c96e99e02d1c7a4a79`)
+- **Zero Schema Migrations**: Zero database schema changes or data modifications applied.
+
+#### 3. Ingress Quiescence, Writer Suppression & Backup
+- **Ingress Quiescence**:
+  - Apache configuration updated with rewrite rules returning HTTP 503 for all mutating methods (`POST|PUT|PATCH|DELETE`).
+  - Active check: POST returned 503; GET returned 200.
+- **Background Writer Suppression**:
+  - Active container stopped, terminating all internal background sync schedulers and workers.
+- **WAL Flush & Consistent Backup**:
+  - Flushed WAL via `PRAGMA wal_checkpoint(TRUNCATE);` (`0|0|0`).
+  - SQLite `.backup` created at `/opt/lims/backups/dev_release_3241d4e_consistent_20260923_122003.db`.
+  - SHA256 Checksum: `8aa1679095f1c9992f5ac477cbb087ea31e8f3c06b48ebaaaa23fc3b9650ac1d`.
+  - `PRAGMA integrity_check`: `ok`.
+  - `PRAGMA foreign_key_check`: `OK (0 errors)`.
+  - Exact Verified Row Counts: Samples=36,878, Projects=5, WorkItems=90, Results=19, Reports=4.
+
+#### 4. Postflight Container Verification
+- Started container with `DISABLE_BACKGROUND_JOBS=true`.
+- Confirmed zero scheduler logs; all background sync writers suppressed.
+- Executed read-only role/route postflight checklist (`/opt/lims/postflight_check.cjs`): **28/28 PASS**.
+  - All standard role / health / legacy route checks passed.
+  - Inventory (#125) checks passed (126 out of stock summary == 126 catalog rows).
+  - Operational views (#120) daily / completed / final approval queue passed.
+  - **PR #139 (#120) Expected Arrivals View & Deep Link Alignment**:
+    - `/api/samples?view=expected` returned 200 (836ms). Returned only expected/collected samples (0 invalid rows). Total expected rows on page: 50.
+    - `views.expected` facet (9,891) strictly matches `meta.total` (9,891).
+    - `/api/samples?view=expected&expected=true` returns consistent page size (50) and consistent total count (9,891).
+    - `/api/samples?view=registry` returned 200, exposing full registry total (9,899).
+- Post-checklist DB count verification: Samples=36,878, Projects=5 (0 mutations).
+
+#### 5. Production Resumption, Proxy Correction & Live Verification
+- Restarted container in standard production mode (normal operation, without `DISABLE_BACKGROUND_JOBS`). Container healthy within 3 seconds.
+- Restored clean reverse proxy configuration `/etc/httpd/conf/extra/httpd-lims.conf` from verified clean baseline (`/etc/httpd/conf/extra/httpd-lims.conf.clean`).
+- Restored configuration SHA256 verified: `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20`.
+- `apachectl configtest` passed (`Syntax OK`) and `systemctl reload httpd` executed cleanly.
+- Ingress write block completely cleared:
+  - `GET https://lims.yigini.net/api/health` -> HTTP 200 OK (`{"status":"ok"}`)
+  - `POST https://lims.yigini.net/api/test-mutation` -> HTTP 404 Not Found (forwarded through proxy to Express container; no 503 rewrite)
+- Static Asset Serving:
+  - `GET https://lims.yigini.net/` -> HTTP 200 OK (fresh frontend bundle with client assets).
+- Live Database Conservation:
+  - Exact verified row counts conserved:
+    `Sample`: 36,878, `Project`: 5, `WorkItem`: 90, `Result`: 19, `Report`: 4.
+  - Zero modifications to production inventory stock or scientific records.
+
+#### 6. Issue Status
+- **Issue #120**: Fix deployed and verified on production (`v3.5.23-3241d4e`). Remains **OPEN** pending independent live role acceptance.
+
 
 
 
