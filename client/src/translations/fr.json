@@ -1457,7 +1457,13 @@
     "lowConfirmedTitle": "Stock bas (confirmé sous le seuil de réapprovisionnement)",
     "lowUncertain": "BAS ? (INCERTAIN)",
     "lowUncertainTitle": "Le sous-total connu est inférieur au seuil de réapprovisionnement, mais des lots non comptés existent",
-    "missingQuantityTitle": "Quantité manquante sur un ou plusieurs lots"
+    "missingQuantityTitle": "Quantité manquante sur un ou plusieurs lots",
+    "outOfStock": "RUPTURE DE STOCK",
+    "showingLowOrOutOfStock": "Affichage : Articles en stock bas ou en rupture",
+    "showingExpired": "Affichage : Articles expirés",
+    "showingExpiringSoon": "Affichage : Articles à péremption proche",
+    "showingQuarantined": "Affichage : Articles en quarantaine",
+    "showingMissingQuantity": "Affichage : Articles avec quantité manquante"
   },
   "labs": {
     "title": "Gestion des Laboratoires",

@@ -101,7 +101,7 @@ function computeItemStockAggregation(item, now = new Date()) {
 
     const usableLots = lots.filter(isUsableLot);
     const expiredLots = lots.filter(isExpiredLot);
-    const quarantinedLots = lots.filter(l => l.status === 'QUARANTINED' && !isExpiredLot(l));
+    const quarantinedLots = lots.filter(l => l.status === 'QUARANTINED');
 
     let hasMissingQuantity = false;
     let missingQuantityLotCount = 0;
@@ -938,15 +938,26 @@ exports.getAlerts = async (req, res) => {
             return (order[a.severity] || 3) - (order[b.severity] || 3);
         });
 
+        // Banner chip counts must align with affected item rows in catalog (#125)
+        const countUniqueItems = (types) => {
+            const typeArr = Array.isArray(types) ? types : [types];
+            return new Set(alerts.filter(a => typeArr.includes(a.type)).map(a => a.itemId)).size;
+        };
+
         res.json({
-            alerts, counts: {
+            alerts,
+            counts: {
                 total: alerts.length,
-                expired: alerts.filter(a => a.type === 'EXPIRED').length,
-                expiringSoon: alerts.filter(a => a.type === 'EXPIRING_SOON').length,
-                lowStock: alerts.filter(a => a.type === 'LOW_STOCK' || a.type === 'OUT_OF_STOCK').length,
-                outOfStock: alerts.filter(a => a.type === 'OUT_OF_STOCK').length,
-                quarantined: alerts.filter(a => a.type === 'QUARANTINED').length,
-                missingQuantity: alerts.filter(a => a.type === 'MISSING_QUANTITY').length
+                expired: countUniqueItems('EXPIRED'),
+                expiringSoon: countUniqueItems('EXPIRING_SOON'),
+                lowStock: countUniqueItems(['LOW_STOCK', 'OUT_OF_STOCK']),
+                outOfStock: countUniqueItems('OUT_OF_STOCK'),
+                quarantined: countUniqueItems('QUARANTINED'),
+                missingQuantity: countUniqueItems('MISSING_QUANTITY'),
+                // Preserved lot-level counts for observability/diagnostics
+                expiredLots: alerts.filter(a => a.type === 'EXPIRED').length,
+                expiringSoonLots: alerts.filter(a => a.type === 'EXPIRING_SOON').length,
+                quarantinedLots: alerts.filter(a => a.type === 'QUARANTINED').length
             }
         });
     } catch (e) {

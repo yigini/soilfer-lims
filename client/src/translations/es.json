@@ -1457,7 +1457,13 @@
     "lowConfirmedTitle": "Stock bajo (confirmado por debajo del umbral de reorden)",
     "lowUncertain": "BAJO? (INCIERTO)",
     "lowUncertainTitle": "El subtotal conocido está por debajo del punto de reorden, pero existen lotes sin contar",
-    "missingQuantityTitle": "Cantidad no registrada en uno o más lotes"
+    "missingQuantityTitle": "Cantidad no registrada en uno o más lotes",
+    "outOfStock": "AGOTADO",
+    "showingLowOrOutOfStock": "Mostrando: Artículos con stock bajo o agotados",
+    "showingExpired": "Mostrando: Artículos vencidos",
+    "showingExpiringSoon": "Mostrando: Artículos por vencer",
+    "showingQuarantined": "Mostrando: Artículos en cuarentena",
+    "showingMissingQuantity": "Mostrando: Artículos con cantidad faltante"
   },
   "labs": {
     "title": "Gestión de Laboratorios",

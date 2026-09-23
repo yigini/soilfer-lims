@@ -75,12 +75,14 @@ async function main() {
         insertItem.run(itemId, 'GTM-LAB1', 'CHEMICAL', `Standard Reagent ${i}`, `R-${i}`, 'L', 5, 10, now.toISOString(), now.toISOString());
     }
 
-    // 2 items with expired lots
+    // 2 items with expired lots (ITEM-EXPLOT-125 has TWO expired lots to verify multi-lot item aggregation)
     for (let i = 125; i <= 126; i++) {
         const itemId = `ITEM-EXPLOT-${String(i).padStart(3, '0')}`;
         insertItem.run(itemId, 'GTM-LAB1', 'REAGENT', `Expired Buffer Solution ${i}`, `EXP-${i}`, 'mL', 10, 20, now.toISOString(), now.toISOString());
-        insertLot.run(`LOT-EXP-${i}`, itemId, 'GTM-LAB1', `LOT-EXP-${i}-001`, 50, 5, 'mL', 'AVAILABLE', pastDate, now.toISOString(), now.toISOString());
+        insertLot.run(`LOT-EXP-${i}-1`, itemId, 'GTM-LAB1', `LOT-EXP-${i}-001`, 50, 5, 'mL', 'AVAILABLE', pastDate, now.toISOString(), now.toISOString());
     }
+    // Add 2nd expired lot to ITEM-EXPLOT-125 (total 3 expired lots across 2 items)
+    insertLot.run('LOT-EXP-125-2', 'ITEM-EXPLOT-125', 'GTM-LAB1', 'LOT-EXP-125-002', 30, 2.5, 'mL', 'EXPIRED', pastDate, now.toISOString(), now.toISOString());
 
     tempDb.close();
 
@@ -247,8 +249,16 @@ async function main() {
     console.log('\n[ISSUE-125] FINAL VERIFICATION SUMMARY:');
     console.log(JSON.stringify(results, null, 2));
 
-    if (results.bannerLowStock126 && results.defaultOutOfStockBadges === 126 && results.expiredFilteredRows === 2) {
-        console.log('\n✅ ALL VERIFICATIONS PASSED: Summary counts and row badges 100% aligned!');
+    if (
+        results.bannerLowStock126 &&
+        results.bannerExpired2 &&
+        results.defaultRows === 126 &&
+        results.defaultOutOfStockBadges === 126 &&
+        results.defaultExpiredBadges === 2 &&
+        results.lowStockFilteredRows === 126 &&
+        results.expiredFilteredRows === 2
+    ) {
+        console.log('\n✅ ALL VERIFICATIONS PASSED: Summary counts, row badges, and 126 filtered rows 100% aligned!');
         process.exit(0);
     } else {
         console.error('\n❌ VERIFICATION FAILED: Mismatch detected!');

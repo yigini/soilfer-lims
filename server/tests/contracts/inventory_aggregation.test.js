@@ -584,5 +584,104 @@ describe('Inventory Stock Aggregation & Lifecycle Contracts (#125)', () => {
                 prisma.inventoryItem.findMany = originalFindMany;
             }
         });
+
+        test('15. Multi-lot items: banner chip counts match unique affected item rows while preserving per-lot alert details (#125)', async () => {
+            const prisma = require('../../prisma');
+            const originalFindMany = prisma.inventoryItem.findMany;
+            const pastDate1 = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString();
+            const pastDate2 = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString();
+            const soonDate1 = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString();
+            const soonDate2 = new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString();
+
+            // Item A: 2 expired lots, 2 expiring-soon lots, 2 quarantined lots
+            const itemA = {
+                id: 'item-multi-a',
+                name: 'Multi-Lot Reagent A',
+                shortCode: 'MLR-A',
+                reorderPoint: 10,
+                unitOfMeasure: 'mL',
+                labId: 'LAB-1',
+                isActive: true,
+                lots: [
+                    { id: 'lot-exp-1', lotNumber: 'EXP-001', currentQuantity: 5, status: 'AVAILABLE', expiryDate: pastDate1 },
+                    { id: 'lot-exp-2', lotNumber: 'EXP-002', currentQuantity: 10, status: 'EXPIRED', expiryDate: pastDate2 },
+                    { id: 'lot-soon-1', lotNumber: 'SOON-001', currentQuantity: 20, status: 'AVAILABLE', expiryDate: soonDate1 },
+                    { id: 'lot-soon-2', lotNumber: 'SOON-002', currentQuantity: 30, status: 'AVAILABLE', expiryDate: soonDate2 },
+                    { id: 'lot-quar-1', lotNumber: 'Q-001', currentQuantity: 15, status: 'QUARANTINED', expiryDate: soonDate2 },
+                    { id: 'lot-quar-2', lotNumber: 'Q-002', currentQuantity: 25, status: 'QUARANTINED', expiryDate: null }
+                ]
+            };
+
+            // Item B: 1 expired lot
+            const itemB = {
+                id: 'item-multi-b',
+                name: 'Single Expired Lot Reagent B',
+                shortCode: 'SELR-B',
+                reorderPoint: 5,
+                unitOfMeasure: 'g',
+                labId: 'LAB-1',
+                isActive: true,
+                lots: [
+                    { id: 'lot-exp-3', lotNumber: 'EXP-003', currentQuantity: 8, status: 'EXPIRED', expiryDate: pastDate1 }
+                ]
+            };
+
+            // Part 1: Single item with multiple lots -> chip count is 1, but per-lot alerts array has 2 of each
+            prisma.inventoryItem.findMany = jest.fn().mockResolvedValue([itemA]);
+
+            try {
+                const alertsResA = await request(app).get('/api/inventory/alerts');
+                expect(alertsResA.status).toBe(200);
+
+                // Chip counts align with affected item rows (1 item affected)
+                expect(alertsResA.body.counts.expired).toBe(1);
+                expect(alertsResA.body.counts.expiringSoon).toBe(1);
+                expect(alertsResA.body.counts.quarantined).toBe(1);
+
+                // Per-lot alert details are fully preserved
+                const expAlertsA = alertsResA.body.alerts.filter(a => a.type === 'EXPIRED');
+                expect(expAlertsA).toHaveLength(2);
+                expect(expAlertsA.map(a => a.lotNumber).sort()).toEqual(['EXP-001', 'EXP-002']);
+
+                const soonAlertsA = alertsResA.body.alerts.filter(a => a.type === 'EXPIRING_SOON');
+                expect(soonAlertsA).toHaveLength(2);
+                expect(soonAlertsA.map(a => a.lotNumber).sort()).toEqual(['SOON-001', 'SOON-002']);
+
+                const quarAlertsA = alertsResA.body.alerts.filter(a => a.type === 'QUARANTINED');
+                expect(quarAlertsA).toHaveLength(2);
+                expect(quarAlertsA.map(a => a.lotNumber).sort()).toEqual(['Q-001', 'Q-002']);
+
+                // Lot counts also preserved for diagnostics
+                expect(alertsResA.body.counts.expiredLots).toBe(2);
+                expect(alertsResA.body.counts.expiringSoonLots).toBe(2);
+                expect(alertsResA.body.counts.quarantinedLots).toBe(2);
+
+                // Part 2: Both items present -> 2 expired items, 3 expired lots total
+                prisma.inventoryItem.findMany = jest.fn().mockResolvedValue([itemA, itemB]);
+
+                const alertsResBoth = await request(app).get('/api/inventory/alerts');
+                expect(alertsResBoth.status).toBe(200);
+                expect(alertsResBoth.body.counts.expired).toBe(2); // exactly 2 item rows affected
+                expect(alertsResBoth.body.counts.expiredLots).toBe(3); // 3 lots total
+
+                const itemsRes = await request(app).get('/api/inventory/items');
+                expect(itemsRes.status).toBe(200);
+                expect(itemsRes.body).toHaveLength(2);
+
+                // Filter parity check: items filtered by hasExpired matches counts.expired exactly
+                const expiredItems = itemsRes.body.filter(i => i.hasExpired);
+                expect(expiredItems).toHaveLength(alertsResBoth.body.counts.expired); // 2 rows
+
+                // Filter parity check: items filtered by isExpiringSoon matches counts.expiringSoon
+                const expiringSoonItems = itemsRes.body.filter(i => i.isExpiringSoon);
+                expect(expiringSoonItems).toHaveLength(alertsResBoth.body.counts.expiringSoon); // 1 row
+
+                // Filter parity check: items filtered by hasQuarantined matches counts.quarantined
+                const quarantinedItems = itemsRes.body.filter(i => i.hasQuarantined);
+                expect(quarantinedItems).toHaveLength(alertsResBoth.body.counts.quarantined); // 1 row
+            } finally {
+                prisma.inventoryItem.findMany = originalFindMany;
+            }
+        });
     });
 });
