@@ -1216,6 +1216,229 @@ Following explicit user authorization and product direction on 23 September 2026
 #### 6. Issue Status
 - **Issue #120**: Fix deployed and verified on production (`v3.5.23-3241d4e`). Remains **OPEN** pending independent live role acceptance.
 
+---
+
+### 15. Issue #120 Follow-up: Laboratory Manager Dashboard Progress & Bottleneck Overview
+
+Following the v3.5.23 production deployment of PR #139, side-by-side inspection of the live system revealed that while Kobo expected arrivals routing and search/filter preservation are operational, the `LAB_MANAGER` Dashboard (`/`) and scoped System Admin Dashboard still rendered the 5 pending-action queues (`WorkQueue`), duplicating the actionable workbench of the Manager Task List (`/manager-queue`) rather than displaying a high-level operational progress, stage, and bottleneck overview.
+
+A focused correction was implemented on branch `fix/issue-120-manager-dashboard-progress` to complete the architectural separation requested in Issue #120:
+
+#### 1. Architectural Distinction & Component Design
+- **Laboratory Manager Dashboard (`/`)**:
+  - High-level operational overview for `LAB_MANAGER` and scoped `SUPER_ADMIN` with active laboratory selection (`progressOverview`).
+  - **Operational Stage Pipeline**: 5 lifecycle cards showing truthful, set-based counts across the analytical process:
+    - *Intake Acceptance*: Samples awaiting physical reception / admission.
+    - *In Analysis*: Active specimens undergoing analytical determinations (`ACCEPTED`, `PROCESSING`).
+    - *Awaiting Review*: Samples with submissions awaiting manager review (`PENDING_REVIEW`).
+    - *Final Approval*: Samples with all analytical determinations completed and ready for authorization.
+    - *Completed Today*: Samples authorized/approved today.
+  - **Sample Determination Progress Monitor**:
+    - Displays active samples undergoing laboratory determinations.
+    - Visual progress bars reflecting percentage completion across ordered methods.
+    - Honest determination ratio (`completed / total analyses`).
+    - Prominent `READY FOR REVIEW` badge when all analytical determinations are complete.
+    - Direct drill-down link to sample detail (`/samples/:id`).
+  - **Technician Workload & Bottlenecks**:
+    - Workload distribution cards per active bench technician showing assigned, completed, and pending determination counts.
+    - `High Workload` warning badge when pending determinations exceed threshold (>= 15).
+    - Prominent `Unassigned Determinations` warning banner with direct "Assign" action linking to the assignment lane.
+  - **Dashboard View Switcher**:
+    - Managers and scoped system administrators can toggle between `[ Operational Overview ]` and `[ Pending Work Queue ]` without losing dashboard context.
+  - **Direct Continuation Links**:
+    - Header button "Open manager task list" linking directly to `/manager-queue`.
+- **Manager Task List (`/manager-queue`)**:
+  - Remains the dedicated operational execution workbench for taking action on pending queues (QC Exceptions, New Intake, Assign Work, Review Submissions, Final Approvals).
+
+#### 2. Gate Determination Exclusion & Scientific Rigor
+- Analytical progress calculations strictly exclude preparation and conditioning gate analyses (`DRYING` and `PREPARATION` in `GATE_ANALYSES`).
+- This ensures sample progress bars reflect actual analytical method determinations (e.g. pH, EC, Walkley-Black OC, Hydrometer Texture, Olsen P) rather than gate setup phases.
+
+#### 3. Database & Policy Invariance
+- **Zero Schema Migrations**: All metrics and oversight data are computed via pure set-based aggregations in `server/services/dashboardService.js`.
+- **Zero Production Mutations**: No production samples, results, work items, or Kobo sync records were created, modified, or deleted.
+
+#### 4. Multilingual Localization (i18n)
+- Complete `dashboard.manager` dictionaries added across all 5 supported locales:
+  - English (`en.json`)
+  - Spanish (`es.json`)
+  - Latin American Spanish (`es-419.json`)
+  - French (`fr.json`)
+  - Portuguese (`pt.json`)
+- Dynamic unit pluralization correctly parameterized with `{ count }` supporting ICU format (`samples`, `analyses`).
+
+#### 5. Automated Tests & Headless Chrome CDP Verification
+- **Targeted Contract Tests**:
+  - `server/tests/contracts/manager_dashboard_overview.test.js` (9/9 passed in 6.25s):
+    1. `LAB_MANAGER` dashboard home includes `progressOverview` with analytical oversight and `techWorkload`.
+    2. `SUPER_ADMIN` scoped to a lab receives matching `progressOverview`.
+    3. Cross-lab isolation: Manager 2 in LAB-HND strictly does not see Manager 1 records or technicians.
+    4. Analytical progress denominator excludes closure tasks (`ARCHIVING`) and counts `SUBMITTED` work with `READY_FOR_REVIEW` badge.
+    5. Already `ACCEPTED` sample displays `READY_FOR_APPROVAL` badge (not `READY_FOR_REVIEW`) and excludes `DISPOSAL` from denominator.
+    6. Mutually exclusive stage partitioning classifies candidates with strict precedence and isolates `RECEIVED` to `pendingIntake`.
+    7. `RECEIVED` count-to-destination alignment: sample appears in Stage 1 intake destination and not in In Analysis destination.
+    8. Stage 5 Approved / Released population counts authoritative `approvedAt` today, ignoring generic `updatedAt`, and strictly counts `APPROVED` samples.
+    9. Approved / Released count-to-destination alignment: Stage 5 route (`/samples?status=APPROVED`) matches card count exactly and omits unapproved `SUBMITTED_FULL` and `COMPLETED`.
+- **Client Build**:
+  - `npm run build` in `client` passed cleanly without warnings or errors.
+- **Side-by-Side Browser CDP Journey** (`server/scripts/run_manager_dashboard_tasklist_side_by_side.cjs`):
+  - Executed end-to-end on an isolated disposable database with realistic multi-technician fixture data:
+    1. `/` (Dashboard - Operational Overview): Verified h1 "Laboratory overview", Stage Pipeline (5 cards with accurate counts and ICU plurals, including Stage 5 "Approved / Released" with subtext "1 approved today"), Analysis Progress bars (33%, 100% with "Ready for Review" badge, and 100% with "Ready for Approval" badge), Technician Workload cards, and Unassigned Alert banner. Screenshot: `manager_dashboard_overview_verified.png`.
+    2. `/` (Dashboard - Pending Work Queue toggle): Verified toggle to work queue table preview with Action buttons. Screenshot: `manager_dashboard_queue_toggle_verified.png`.
+    3. `/manager-queue` (Manager Task List): Verified dedicated execution workbench with Assign Work, Review Submissions, Final Approvals, and QC Exceptions tabs. Screenshot: `manager_tasklist_action_verified.png`.
+    4. `/?labId=LAB-GTM` (Scoped System Admin Dashboard): Verified scoped overview matching Guatemala lab workload. Screenshot: `super_admin_scoped_dashboard_verified.png`.
+    5. `/samples?status=APPROVED` (Stage 5 Destination): Verified navigation from Stage 5 card loads matching approved specimens, and omits unapproved `SUBMITTED_FULL`, non-canonical `COMPLETED`, and `RECEIVED` specimens. Screenshot: `manager_dashboard_stage5_destination_verified.png`.
+  - Machine-readable evidence log: `artifacts/evidence-journeys/manager_dashboard_overview_evidence.json` (Status: `VERIFIED`, 5/5 findings passed).
+
+#### 6. Independent Review Feedback Resolution (PR #141 / Comment 5796060402)
+- **Gap 1: Analytical Progress Denominator & Lifecycle Badges**:
+  - Excluded all `NON_ANALYTICAL` methods (`DRYING`, `PREPARATION`, `ARCHIVING`, `ARCH`, `DISPOSAL`, `DISP`) from the denominator.
+  - Counted `SUBMITTED`, `COMPLETED`, and `ACCEPTED` in `completed` bench determinations.
+  - Fully `SUBMITTED` sample displays 100% progress with "Ready for Review" (`READY_FOR_REVIEW`) badge.
+  - Fully `ACCEPTED` sample displays 100% progress with "Ready for Approval" (`READY_FOR_APPROVAL`) badge, strictly eliminating the post-review "Ready for Review" badge regression.
+- **Gap 2: Completed Population, Authoritative Dates & Destination Alignment**:
+  - Replaced generic `updatedAt` with authoritative `approvedAt: { gte: dayStart, lt: dayEnd }` for `approvedToday`.
+  - Stage 5 card labeled "Completed / Released" with subtext `{count} approved today` and destination route `/samples?status=SUBMITTED_FULL,APPROVED` matching `SamplesFilterBar`.
+- **Gap 3: Mutually Exclusive Stage Partitioning**:
+  - Partitioned active specimens with strict precedence (`FINAL_APPROVAL` > `AWAITING_REVIEW` > `IN_PROGRESS`), eliminating double-counting across the pipeline cards.
+
+#### 7. Delta Review Feedback Resolution (PR #141 / Comment 5796896939)
+- **Gap 1: Intake Isolation & Zero RECEIVED Double-Counting**:
+  - `candidates` query in `dashboardService.js` previously queried `status in ['RECEIVED', 'ACCEPTED', 'PROCESSING', ...]`. Since `pendingIntakeCount` separately counted `RECEIVED`, any `RECEIVED` specimen with `receptionDate` fell into the `else` branch of the candidate partition loop (`stageInProgressCount++`), causing it to be double-counted across both Intake and In Analysis cards.
+  - Excluded `RECEIVED` from `candidates` and strictly gated `stageInProgressCount` to active bench statuses (`['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL'].includes(s.status)`). This cleanly isolates `RECEIVED` specimens to Stage 1 (`pendingIntake`), preserves candidate evaluation for final approval, and prevents `RECEIVED` or non-active specimens from appearing in analytical oversight or `inProgress`.
+  - Verified with Contract Tests 6 & 7: `pendingIntake === 1`, `inProgress === 1`, `sampleReceived` is absent from `oversight`, present in `/samples?status=RECEIVED,COLLECTED`, and absent from `/samples?status=ACCEPTED,PROCESSING`.
+- **Gap 2: Completed Population & Destination Route Parity**:
+  - `completedCount` in `dashboardService.js` previously queried `status: { in: ['APPROVED', 'COMPLETED', 'SUBMITTED_FULL'] }`, whereas the released Samples Quick Filter and route `/samples?status=SUBMITTED_FULL,APPROVED` omits `COMPLETED` (in the SoilFER-LIMS schema, `COMPLETED` applies strictly to work items, not sample states).
+  - Aligned `completedCount` strictly to `status: { in: ['APPROVED', 'SUBMITTED_FULL'] }`, ensuring 100% parity between card count and destination query without modifying released filter components.
+
+#### 8. Delta Review Feedback Resolution: Approved / Released Mutual Exclusivity (PR #141 / Comment 5797994081)
+- **Stage 4 & Stage 5 Non-Overlapping Partition**:
+  - `SUBMITTED_FULL` specimens with accepted work were properly counted in `stageCounts.finalApproval` (Stage 4), but `stageCounts.completed` also counted all `SUBMITTED_FULL` specimens, causing specimens ready for final authorization to be double-counted in both Stage 4 and Stage 5. `SUBMITTED_FULL` represents bench-complete analytical work awaiting final approval, not approved or released work.
+  - In `server/services/dashboardService.js`, updated `completedCount` to strictly query `status: 'APPROVED'` (and `approvedAt: { gte: dayStart, lt: dayEnd }` for `approvedToday`).
+  - In `client/src/components/dashboard/ManagerProgressOverview.jsx`, aligned the fifth card to "Approved / Released" (`dashboard.manager.stageCompleted`), pointing directly to destination route `/samples?status=APPROVED`. Updated localization in all 5 languages (`en`, `es`, `es-419`, `fr`, `pt`).
+  - Added dedicated contract fixture `sampleSubmittedFullAccepted` (`status: 'SUBMITTED_FULL'` with `ACCEPTED` work items):
+    - Counted in Stage 4: `stageCounts.finalApproval === 2` (`sampleApproval` + `sampleSubmittedFullAccepted`).
+    - Strictly excluded from Stage 5: `stageCounts.completed === 2` (`sampleApprovedToday` + `sampleApprovedPast`).
+    - Excluded from Stage 5 destination: `/samples?status=APPROVED` contains only the 2 approved specimens and omits `sampleSubmittedFullAccepted`.
+  - Zero double-counting across all 5 stages: `pendingIntake (1) + inProgress (1) + awaitingReview (1) + finalApproval (2) + completed (2) = 7`.
+
+#### 9. Review Feedback Resolution: Canonical Final-Approval Eligibility for Readiness & Scoped Continuation Links (PR #141 / Comment 5801965350)
+- **Gap 1: Canonical Final-Approval Eligibility for Overview Readiness**:
+  - Previously, the sample determination overview assigned `READY_FOR_APPROVAL` based solely on existing analytical items being completed/accepted, which could prematurely flag a specimen as "Ready for Approval" even if required ordered analyses were missing or prerequisite operational gates (e.g. drying/preparation) were still incomplete.
+  - Reused the canonical final-approval evaluation engine (`canFinalApprove` from `services/workflowContract.js`) directly in `server/services/dashboardService.js`:
+    - Evaluates required ordered analyses from `orderLines` or `sample.requiredAnalyses` (excluding `NON_ANALYTICAL` and `GATE_ANALYSES`).
+    - Adjusts progress denominator to `Math.max(analyticalWork.length, allAnalyticalCodes.size)` so missing ordered analyses factor into progress calculation rather than falsely showing 100%.
+    - Counts `WAIVED` work items alongside `ACCEPTED` determinations (`['SUBMITTED', 'COMPLETED', 'ACCEPTED', 'WAIVED'].includes(w.status)`).
+    - Gates `readiness = 'READY_FOR_APPROVAL'` strictly when `canFinalApprove(sample, workItems, orderLines, user).allowed` is `true`.
+    - Samples with pending prerequisite gates or missing ordered work remain in `IN_ANALYSIS` (`isReady: false`) until all gates pass and all required analyses are accepted or waived.
+    - Verified with Contract Test 5b:
+      - `sampleMissingRequired` (accepted pH, missing required EC, pending drying gate): `total: 2`, `completed: 1`, `progress: 50%`, `readiness: 'IN_ANALYSIS'`, `isReady: false`, with blockers `PREREQUISITE_GATE_INCOMPLETE` and `ORDER_LINE_INCOMPLETE`.
+      - `sampleAcceptedWaived` (accepted pH + waived EC, completed gates): `total: 2`, `completed: 2`, `progress: 100%`, `readiness: 'READY_FOR_APPROVAL'`, `isReady: true`.
+- **Gap 2: Scoped-Admin Continuation Link Lab Preservation & Destination Real-Link Checks**:
+  - `ManagerProgressOverview.jsx`: Added helper `buildRoute` to preserve `labId=${encodeURIComponent(activeLabId)}` across all rendered stage continuation links (`/manager-queue?lane=intake`, `/samples?view=daily`, `/manager-queue?lane=review`, `/manager-queue?lane=approve`, `/samples?status=APPROVED`), the unassigned tasks alert (`/manager-queue?lane=assign`), and the overview task list button (`/manager-queue`).
+  - `DashboardShell.jsx`: Preserved `selectedLabId` on the header task list button (`/manager-queue?labId=...`).
+  - `ManagerQueue.jsx`: Preserved `labId` from search parameters across queue tab navigation (`handleTabChange`) and included `params.labId` in all manager queue data requests (`/api/samples`, `/api/work`, `/api/submissions`, `/api/dashboard/queues/*`).
+  - `workItemController.js` and `submissionController.js`: Added support for filtering by `labId` (`{ OR: [{ labId }, { assignedLab: labId }] }` and `assignedLab = labId` for `SUPER_ADMIN`), ensuring scoped administrators remain strictly isolated to the selected laboratory.
+  - Replaced test descriptions of invented destination URLs with real-link checks:
+    - Contract Test 7 validates real component rendered routes: `/manager-queue?lane=intake&labId=...` calls `/api/samples?status=RECEIVED,COLLECTED&labId=...` (returns Guatemala sample, omits bench sample and Honduras foreign lab sample); `/samples?view=daily&labId=...` calls `/api/samples?view=daily&labId=...` (returns active specimens, omits approved/released, unapproved completed, and Honduras sample).
+    - Contract Test 9 validates Stage 5 destination parity for Manager (implicit lab scope) and Scoped Admin (explicit `labId` parameter) to exactly 2 approved samples in `stageLab`, strictly omitting Honduras sample `sampleOtherLabApproved`, while verifying that unscoped Admin destination returns both labs.
+    - Contract Test 10 validates the pure route builder preserving `activeLabId` when scoped and returning clean paths when unparameterized.
+  - Isolated Headless Chrome CDP Browser Verification:
+    - Added second lab fixture (`LAB-HND`, Honduras) with approved sample `SMP-HND-001`.
+    - Step 4 verified Scoped System Admin on `/?labId=LAB-GTM` renders continuation links containing `labId=LAB-GTM`:
+      - Stage 1: `/manager-queue?lane=intake&labId=LAB-GTM` (`preservesLabIdInStage1Link: true`)
+      - Stage 2: `/samples?view=daily&labId=LAB-GTM` (`preservesLabIdInStage2Link: true`)
+      - Stage 5: `/samples?status=APPROVED&labId=LAB-GTM` (`preservesLabIdInStage5Link: true`)
+      - Task List: `/manager-queue?labId=LAB-GTM` (`preservesLabIdInTaskListLink: true`)
+    - Step 5 verified Stage 5 destination navigates to `/samples?status=APPROVED`, displays approved specimens for Guatemala, and strictly omits Honduras foreign sample `SMP-HND-001` (`omitsForeignLabSample: true`).
+  - Machine-readable evidence log: `artifacts/evidence-journeys/manager_dashboard_overview_evidence.json` (Status: `VERIFIED`, 5/5 findings passed).
+
+#### 10. Review Feedback Resolution: Lab-Scope Lifecycle Normalization & Scoped Admin Continuation Verification (PR #141 / Comment 5802734888)
+- **Gap 1: ManagerQueue Scope Lifecycle & Re-render Normalization**:
+  - In `ManagerQueue.jsx`, `fetchQueueData` previously closed over `searchParams` without `selectedLabId` in its `useCallback` dependency array `[activeTab, selectedAnalysis]`. A same-mounted navigation from `?lane=intake&labId=LAB-A` to `?lane=intake&labId=LAB-B` did not recreate the callback or trigger refetching, and the `Refresh queue` button re-invoked the stale closure with the initial lab ID.
+  - Normalized `selectedLabId = (searchParams.get('labId') || searchParams.get('labs') || '').trim()` outside the callback.
+  - Added `selectedLabId` to `fetchQueueData` dependencies `[activeTab, selectedAnalysis, selectedLabId]`, ensuring React recreates the callback upon scope changes and triggers `useEffect([activeTab, fetchQueueData])`.
+  - Added `prevLabIdRef` and stale-data clearing effect (`useEffect(() => { if (prevLabIdRef.current !== selectedLabId) { prevLabIdRef.current = selectedLabId; setData([]); } }, [selectedLabId]);`) to clear stale data immediately on scope switch without race conditions.
+  - Guarded asynchronous data commits with `activeRequestIdRef`: tagged each dispatch with `const requestId = ++activeRequestIdRef.current` and aborted commits where `requestId !== activeRequestIdRef.current`, discarding delayed in-flight cross-lab responses.
+  - Scoped badge and auto-lane data source `liveEndpoint` to `selectedLabId ? '/api/dashboard/live?labId=' + encodeURIComponent(selectedLabId) : '/api/dashboard/live'`, preserving live badge accuracy and role authorization.
+  - Guaranteed `Refresh queue` button (`aria-label="Refresh queue"`) dispatches with the normalized `selectedLabId`.
+- **Gap 2: Backend Live Endpoint Scoping for Scoped Admin**:
+  - In `server/app.js`, `/api/dashboard/live` was updated to read `qLabId = (req.query.labId || req.query.labs || '').trim()`.
+  - Defined `effectiveLabId = (user.role === 'SUPER_ADMIN' && qLabId) ? qLabId : (user.role !== 'SUPER_ADMIN' ? user.labId : null)`.
+  - Scoped `sampleWhere`, `workWhere`, `subWhere`, `techs`, and `recentLogs` queries using `effectiveLabId` for `SUPER_ADMIN`, aligning the live adapter with `getDashboardHome`.
+- **Gap 3: Contract Test Labeling & Live Scoping Contract**:
+  - In `server/tests/contracts/manager_dashboard_overview.test.js`, labeled Test 10 accurately as a pure route-builder logic contract and noted that mounted component lifecycle and browser execution are verified via `work/pr141-scope-mounted-review.cjs` and browser CDP execution.
+  - Added Test 11 validating `GET /api/dashboard/live?labId=...` for `SUPER_ADMIN` returns scoped KPIs and logs, strictly isolating completed-today counts to the target laboratory.
+  - Both focused suites pass 22/22 (`dashboard_manager_views.test.js` + `manager_dashboard_overview.test.js`).
+- **Gap 4: Independent Mounted Component Test**:
+  - Ran `work/pr141-scope-mounted-review.cjs` (mocked router/API/context, no production access): verified initial request dispatches `labId: "LAB-A"`, mounted URL change dispatches `labId: "LAB-B"`, and `Refresh queue` button dispatches `labId: "LAB-B"`, with scoped live URLs (`["/api/dashboard/live?labId=LAB-A", "/api/dashboard/live?labId=LAB-B"]`).
+- **Gap 5: Scoped Admin Browser Continuation Journey & Same-Mounted Scope Lifecycle**:
+  - Added second-lab intake fixture `SMP-HND-REC` in `LAB-HND`.
+  - Step 5: Maintained scoped admin identity (`adminToken`), followed actual rendered Stage 5 link (`/samples?status=APPROVED&labId=LAB-GTM`), and verified destination URL, presence of Guatemala approved specimens, and omission of foreign Honduras specimen (`SMP-HND-001`).
+  - Step 6: Followed rendered Manager Queue continuation link as Scoped Admin (`/manager-queue?lane=intake&labId=LAB-GTM`), asserting Guatemala intake sample (`SMP-GTM-REC`) present and Honduras sample omitted.
+  - Step 6b: Executed same-mounted lab switch to `labId=LAB-HND`, triggered `Refresh queue` button, asserting Honduras intake sample (`SMP-HND-REC`) present and Guatemala sample omitted.
+  - Step 6c: Executed browser history back navigation to `LAB-GTM` and forward navigation to `LAB-HND`, asserting specimen isolation across mounted browser navigation.
+  - Machine-readable evidence: `artifacts/evidence-journeys/manager_dashboard_overview_evidence.json` (Status: `VERIFIED`, 6/6 findings passed).
+  - Recorded screenshots: `manager_queue_scoped_gtm_verified.png`, `manager_queue_scoped_hnd_verified.png`.
+
+#### 11. Review Feedback Resolution: Bounded Delayed-Response Race Protection & Catch/Finally Request Guards (PR #141 / Comment 5803213112)
+- **Problem & Reproduction**:
+  - Review at head `a746a8b68a461df9eb891561de15a8b275d39737` noted that `useRealtimeData` lacked a request generation/URL guard. If a request for `LAB-A` is dispatched, scope changes to `LAB-B` (which resolves `pendingIntakes=2`), and then the delayed `LAB-A` response arrives with `pendingIntakes=91`, the delayed response overwrote the `LAB-B` badge counts.
+  - In `ManagerQueue.jsx`, the `catch` and `finally` blocks lacked the request generation guard present in the success path: a late `LAB-A` failure set the component's `error` state, and late `LAB-A` completion could end the `loading` spinner prematurely for `LAB-B`.
+  - Deterministic React reproduction: `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/pr141-live-race-review.cjs`.
+- **Bounded Remediation**:
+  1. `client/src/hooks/useRealtimeData.js`:
+     - Added `activeRequestIdRef` counter and `currentUrlRef` tracking.
+     - Implemented render-level scope transition guard: when `prevUrl !== url`, `setPrevUrl(url)`, `setData(null)`, `setDataHash('')`, `setLoading(true)`, `setError(null)`, `setIsStale(false)`, and `activeRequestIdRef.current++` immediately clears and withholds previous-scope counts during transition.
+     - Added unmount lifecycle tracking: `mountedRef.current = false` and `activeRequestIdRef.current++` upon unmount, clearing pending intervals and timeouts.
+     - In `fetchData`:
+       - Success path checks `if (!mountedRef.current || requestId !== activeRequestIdRef.current || requestUrl !== currentUrlRef.current) return;`
+       - Diff detection uses `dataHashRef.current` to prevent stale closure dependencies and unnecessary interval resets.
+       - Catch block guards error updates: `if (!mountedRef.current || requestId !== activeRequestIdRef.current || requestUrl !== currentUrlRef.current) return;`
+       - Finally block guards loading completion: `if (mountedRef.current && requestId === activeRequestIdRef.current && isInitial) setLoading(false);`
+       - Live indicator timeout is guarded by active request generation and mounted status.
+       - Same-scope `refresh()` preserves current data while fetching and updates on response.
+  2. `client/src/pages/ManagerQueue.jsx`:
+     - Added `isMountedRef` with unmount cleanup (`isMountedRef.current = false; activeRequestIdRef.current++;`).
+     - Success path checks `if (!isMountedRef.current || requestId !== activeRequestIdRef.current) return;`
+     - Catch block checks `if (!isMountedRef.current || requestId !== activeRequestIdRef.current) return;` so delayed cross-lab network errors never trigger error alerts on a newer active scope.
+     - Finally block checks `if (isMountedRef.current && requestId === activeRequestIdRef.current) setLoading(false);` so delayed cross-lab completions never terminate the active scope's loading spinner.
+- **Verification**:
+  - Independent reproduction script `work/pr141-live-race-review.cjs` passed cleanly: `afterNewResponse` and `afterLateOldResponse` both report `{ lab: "LAB-B", kpis: { pendingIntakes: 2 } }`.
+  - Independent mounted component test `work/pr141-scope-mounted-review.cjs` passed 100%.
+  - Dedicated mounted race suite `work/pr141-race-mounted-suite.cjs` passed **10/10 tests** covering:
+    - `useRealtimeData`: delayed A success after B success, delayed A error after B success, delayed A success while B is pending, delayed A error while B is pending, and unmount cleanup.
+    - `ManagerQueue`: delayed A error while B is in flight, delayed A error after B success, delayed A success after B success, delayed A completion loading guard, and unmount cleanup.
+  - Focused HTTP contracts: `server/tests/contracts/manager_dashboard_overview.test.js` (12/12) and `dashboard_manager_views.test.js` (10/10) passed **22/22** in 16.26s.
+  - Browser CDP suite `run_manager_dashboard_tasklist_side_by_side.cjs`: passed all 6 steps with verified scope retention, same-mounted switch, queue refresh, and back-forward navigation.
+  - Production client build `npm run build`: built cleanly in 15.05s.
+
+#### 12. Review Feedback Resolution: Overtaking Refresh Loading Clearance & Lifecycle Overlap Tests (PR #141 / Comment 5803474139)
+- **Problem & Reproduction**:
+  - Independent replay at head `dbb23e61824ce7ba5b15a113a82949edb8048993` confirmed that all 10 race tests and late-A response discards passed.
+  - A narrow regression was identified: `useRealtimeData`'s `finally` block previously required `isInitial` in addition to `requestId === activeRequestIdRef.current`. If an initial fetch (`isInitial = true`, request 1) was still pending when a manual `refresh()` or polling request (`isInitial = false`, request 2) was dispatched, the newer request settled with `isInitial = false` and did not clear `loading`, while the initial request was discarded as stale (`1 !== 2`). Consequently, `loading` remained `true` indefinitely after all requests settled.
+  - Reproduction script: `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/pr141-refresh-loading-review.cjs`.
+- **Bounded Remediation**:
+  - In `client/src/hooks/useRealtimeData.js`:
+    - Updated `finally` block to clear `loading` upon completion of the current active request:
+      ```javascript
+      finally {
+          if (mountedRef.current && requestId === activeRequestIdRef.current) {
+              setLoading(false);
+          }
+      }
+      ```
+    - Preserved unmount protection (`mountedRef.current`), stale-request discard (`requestId === activeRequestIdRef.current`), and ordinary background refresh non-flashing (since `isInitial = false` does not set `loading = true` during background fetch).
+- **Verification**:
+  - `work/pr141-refresh-loading-review.cjs`: passed cleanly with `afterRefresh.loading: false` and `afterAllSettled.loading: false`.
+  - Added initial-plus-refresh overlap tests (success, failure, ordinary refresh data retention) to `work/pr141-race-mounted-suite.cjs` (**13/13 passed**).
+  - Retained the complete mounted lifecycle suite in the repository at `server/scripts/verify_realtimedata_lifecycle.cjs` (**13/13 passed**).
+  - Production client build `npm run build`: built cleanly in 8.87s.
+
+#### 13. Issue Status
+- **Issue #120**: Remains **OPEN** (`Refs #120`). Follow-up PR #141 updated for independent review; no merge or deployment permitted until explicitly authorized.
+
+
 
 
 

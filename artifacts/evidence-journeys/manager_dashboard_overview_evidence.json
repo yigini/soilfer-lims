@@ -1,0 +1,113 @@
+{
+  "timestamp": "2026-09-23T21:35:10.006Z",
+  "status": "VERIFIED",
+  "findings": {
+    "managerDashboardOperationalOverview": {
+      "verified": true,
+      "details": {
+        "url": "/",
+        "h1": "Laboratory overview",
+        "kicker": "LABORATORY MANAGEMENT",
+        "subtitle": "Intake approval, analytical assignment, submission review, and final result authorization.",
+        "hasAnalysisProgress": true,
+        "hasTechWorkload": true,
+        "hasStagePipeline": true,
+        "hasBottleneckAlert": true,
+        "hasReadyForReviewBadge": true,
+        "hasReadyForApprovalBadge": true,
+        "hasCompletedStage": true,
+        "hasApprovedTodaySubtext": true,
+        "hasStage5Route": true,
+        "progressBarsCount": 4,
+        "techCardsCount": 20
+      }
+    },
+    "managerDashboardQueueToggle": {
+      "verified": true,
+      "details": {
+        "hasWorkQueueTable": true,
+        "tableHeaders": [
+          "Work / Item",
+          "State",
+          "Count",
+          "Action"
+        ],
+        "rowsCount": 2
+      }
+    },
+    "managerTaskListActions": {
+      "verified": true,
+      "details": {
+        "h1": "Manager Task List",
+        "subtitle": "Pending Actionable Items & QC Exceptions",
+        "hasAssignTab": true,
+        "hasIntakeTab": true,
+        "hasReviewTab": true,
+        "hasApproveTab": true
+      }
+    },
+    "scopedSystemAdminOverview": {
+      "verified": true,
+      "details": {
+        "h1": "System administrator dashboard",
+        "hasAnalysisProgress": true,
+        "hasTechWorkload": true,
+        "stage1Link": "/manager-queue?lane=intake&labId=LAB-GTM",
+        "stage2Link": "/samples?view=daily&labId=LAB-GTM",
+        "stage5Link": "/samples?status=APPROVED&labId=LAB-GTM",
+        "taskListLink": "/manager-queue?labId=LAB-GTM",
+        "preservesLabIdInStage1Link": true,
+        "preservesLabIdInStage2Link": true,
+        "preservesLabIdInStage5Link": true,
+        "preservesLabIdInTaskListLink": true
+      }
+    },
+    "stage5DestinationPopulation": {
+      "verified": true,
+      "details": {
+        "url": "/samples?status=APPROVED&labId=LAB-GTM",
+        "hasSample4": true,
+        "hasSample5": true,
+        "omitsSampleSubFull": true,
+        "omitsSampleComp": true,
+        "omitsSampleRec": true,
+        "omitsForeignLabSample": true,
+        "preservesAdminScope": true
+      }
+    },
+    "scopedAdminQueueLifecycle": {
+      "verified": true,
+      "details": {
+        "gtmInitial": {
+          "url": "/manager-queue?lane=intake&labId=LAB-GTM",
+          "hasGtmIntakeSample": true,
+          "omitsHndIntakeSample": true
+        },
+        "hndSwitched": {
+          "url": "/manager-queue?lane=intake&labId=LAB-HND",
+          "hasHndIntakeSample": true,
+          "omitsGtmIntakeSample": true
+        },
+        "backNavGtm": {
+          "url": "/manager-queue?lane=intake&labId=LAB-GTM",
+          "hasGtmIntakeSample": true,
+          "omitsHndIntakeSample": true
+        },
+        "forwardNavHnd": {
+          "url": "/manager-queue?lane=intake&labId=LAB-HND",
+          "hasHndIntakeSample": true,
+          "omitsGtmIntakeSample": true
+        }
+      }
+    }
+  },
+  "screenshots": [
+    "manager_dashboard_overview_verified.png",
+    "manager_dashboard_queue_toggle_verified.png",
+    "manager_tasklist_action_verified.png",
+    "super_admin_scoped_dashboard_verified.png",
+    "manager_dashboard_stage5_destination_verified.png",
+    "manager_queue_scoped_gtm_verified.png",
+    "manager_queue_scoped_hnd_verified.png"
+  ]
+}

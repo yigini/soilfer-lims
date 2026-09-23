@@ -306,14 +306,16 @@ app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 // ─── UNIFIED LIVE DASHBOARD ENDPOINT (Backward Compatibility) ───
 app.get('/api/dashboard/live', verifyToken, async (req, res) => {
     const user = req.user;
+    const qLabId = (req.query.labId || req.query.labs || '').trim();
+    const effectiveLabId = (user.role === 'SUPER_ADMIN' && qLabId) ? qLabId : (user.role !== 'SUPER_ADMIN' ? user.labId : null);
     try {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
         // Build RBAC scoping using central scopeGuard
         const scopeGuard = require('./utils/scopeGuard');
-        const sampleWhere = scopeGuard.buildScopedWhere(user, {}, { entityType: 'Sample' });
-        const workWhere = scopeGuard.buildScopedWhere(user, {}, { entityType: 'WorkItem' });
+        let sampleWhere = scopeGuard.buildScopedWhere(user, {}, { entityType: 'Sample' });
+        let workWhere = scopeGuard.buildScopedWhere(user, {}, { entityType: 'WorkItem' });
 
         // Safe query condition composer: prevents overwriting top-level scope OR clauses
         const composeWhere = (scope, condition) => {
@@ -321,6 +323,17 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
             if (!condition || Object.keys(condition).length === 0) return scope;
             return { AND: [scope, condition] };
         };
+
+        if (user.role === 'SUPER_ADMIN' && qLabId) {
+            const labCondition = {
+                OR: [
+                    { assignedLab: qLabId },
+                    { labId: qLabId }
+                ]
+            };
+            sampleWhere = composeWhere(sampleWhere, labCondition);
+            workWhere = composeWhere(workWhere, labCondition);
+        }
 
         // ── LAB_MANAGER / SUPER_ADMIN ──
         if (['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
@@ -343,10 +356,10 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
             let reviewQueue = [];
             try {
                 const subWhere = { status: 'PENDING_REVIEW' };
-                if (user.role !== 'SUPER_ADMIN' && user.labId) {
+                if (effectiveLabId) {
                     subWhere.OR = [
-                        { assignedLab: user.labId },
-                        { labId: user.labId }
+                        { assignedLab: effectiveLabId },
+                        { labId: effectiveLabId }
                     ];
                 }
                 const [subCount, submissions] = await Promise.all([
@@ -407,7 +420,7 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
 
             // Tech workload
             const techs = await prisma.user.findMany({
-                where: { role: 'LAB_TECHNICIAN', isActive: true, ...(user.labId ? { labId: user.labId } : {}) },
+                where: { role: 'LAB_TECHNICIAN', isActive: true, ...(effectiveLabId ? { labId: effectiveLabId } : {}) },
                 select: { id: true, username: true, name: true },
             });
             const techWorkload = techs.map(t => {
@@ -423,25 +436,25 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
 
             // Recent activity (last 10) scoped to laboratory
             let recentLogs;
-            if (user.role === 'SUPER_ADMIN') {
-                recentLogs = await prisma.auditLog.findMany({
-                    orderBy: { timestamp: 'desc' },
-                    take: 10,
-                });
-            } else if (user.labId) {
+            if (effectiveLabId) {
                 recentLogs = await prisma.$queryRaw`
                     SELECT DISTINCT a.* FROM AuditLog a
                     LEFT JOIN Sample s ON (a.sampleId = s.id OR a.entityId = s.id)
                     LEFT JOIN User u ON a.performedBy = u.username
                     WHERE (
-                        a.labId = ${user.labId}
-                        OR s.labId = ${user.labId}
-                        OR s.assignedLab = ${user.labId}
-                        OR u.labId = ${user.labId}
+                        a.labId = ${effectiveLabId}
+                        OR s.labId = ${effectiveLabId}
+                        OR s.assignedLab = ${effectiveLabId}
+                        OR u.labId = ${effectiveLabId}
                     )
                     ORDER BY a.timestamp DESC
                     LIMIT 10
                 `;
+            } else if (user.role === 'SUPER_ADMIN') {
+                recentLogs = await prisma.auditLog.findMany({
+                    orderBy: { timestamp: 'desc' },
+                    take: 10,
+                });
             } else {
                 recentLogs = await prisma.auditLog.findMany({
                     where: { performedBy: user.username },

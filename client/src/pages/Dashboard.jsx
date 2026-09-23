@@ -369,6 +369,7 @@ export default function Dashboard() {
             onRetryQueue={() => fetchQueueRows(activeQueue, queueData.page)}
             shiftNotes={roleConfig.shiftNotes}
             shortcuts={roleConfig.shortcuts}
+            progressOverview={homeData?.progressOverview}
         />
     );
 }

@@ -226,7 +226,7 @@ exports.createSubmission = async (req, res) => {
 
 exports.listSubmissions = async (req, res) => {
     const user = req.user;
-    const { status, type, sampleId } = req.query;
+    const { status, type, sampleId, labId } = req.query;
 
     try {
         const where = {};
@@ -236,7 +236,9 @@ exports.listSubmissions = async (req, res) => {
             where.submittedBy = user.username;
         } else if (user.role === 'LAB_MANAGER') {
             where.assignedLab = user.labId;
-        } else if (user.role !== 'SUPER_ADMIN') {
+        } else if (user.role === 'SUPER_ADMIN') {
+            if (labId) where.assignedLab = String(labId);
+        } else {
             return res.status(403).json({ error: 'Access denied' });
         }
 

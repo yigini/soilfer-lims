@@ -40,6 +40,7 @@ export function useRealtimeData(url, options = {}) {
         // Context not available — WS features disabled, polling still works
     }
 
+    const [prevUrl, setPrevUrl] = useState(url);
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -53,6 +54,34 @@ export function useRealtimeData(url, options = {}) {
     const mountedRef = useRef(true);
     const paramsRef = useRef(params);
     paramsRef.current = params;
+    const activeRequestIdRef = useRef(0);
+    const currentUrlRef = useRef(url);
+    currentUrlRef.current = url;
+    const dataHashRef = useRef('');
+    const liveTimeoutRef = useRef(null);
+
+    // If url changes, clear or withhold previous-scope counts and state immediately
+    if (prevUrl !== url) {
+        setPrevUrl(url);
+        setData(null);
+        setDataHash('');
+        setLoading(true);
+        setError(null);
+        setIsStale(false);
+        dataHashRef.current = '';
+        activeRequestIdRef.current++;
+    }
+
+    // Component unmount cleanup
+    useEffect(() => {
+        mountedRef.current = true;
+        return () => {
+            mountedRef.current = false;
+            activeRequestIdRef.current++;
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            if (liveTimeoutRef.current) clearTimeout(liveTimeoutRef.current);
+        };
+    }, []);
 
     // Simple hash for diff detection
     const hashData = useCallback((d) => {
@@ -66,18 +95,24 @@ export function useRealtimeData(url, options = {}) {
     const fetchData = useCallback(async (isInitial = false) => {
         if (!mountedRef.current || !enabled) return;
 
+        const requestId = ++activeRequestIdRef.current;
+        const requestUrl = url;
+
         try {
             if (isInitial) setLoading(true);
 
-            const res = await axios.get(url, { params: paramsRef.current });
+            const res = await axios.get(requestUrl, { params: paramsRef.current });
 
-            if (!mountedRef.current) return;
+            if (!mountedRef.current || requestId !== activeRequestIdRef.current || requestUrl !== currentUrlRef.current) {
+                return;
+            }
 
             const newHash = hashData(res.data);
 
             // Only update state if data actually changed
-            if (newHash !== dataHash) {
+            if (newHash !== dataHashRef.current) {
                 setData(res.data);
+                dataHashRef.current = newHash;
                 setDataHash(newHash);
             }
 
@@ -87,29 +122,35 @@ export function useRealtimeData(url, options = {}) {
             setError(null);
 
             // Flash the live indicator
-            setTimeout(() => {
-                if (mountedRef.current) setIsLive(false);
+            if (liveTimeoutRef.current) clearTimeout(liveTimeoutRef.current);
+            liveTimeoutRef.current = setTimeout(() => {
+                if (mountedRef.current && requestId === activeRequestIdRef.current) {
+                    setIsLive(false);
+                }
             }, 1000);
 
         } catch (err) {
-            if (!mountedRef.current) return;
+            if (!mountedRef.current || requestId !== activeRequestIdRef.current || requestUrl !== currentUrlRef.current) {
+                return;
+            }
             setError(err.response?.data?.error || err.message);
-            console.error(`[useRealtimeData] Failed to fetch ${url}:`, err.message);
+            console.error(`[useRealtimeData] Failed to fetch ${requestUrl}:`, err.message);
         } finally {
-            if (mountedRef.current && isInitial) setLoading(false);
+            if (mountedRef.current && requestId === activeRequestIdRef.current) {
+                setLoading(false);
+            }
         }
-    }, [url, enabled, dataHash, hashData]);
+    }, [url, enabled, hashData]);
 
     const refresh = useCallback(() => {
         return fetchData(false);
     }, [fetchData]);
 
-    // Initial fetch
+    // Initial fetch on mount or when url / enabled changes
     useEffect(() => {
-        mountedRef.current = true;
+        if (!enabled) return;
         fetchData(true);
-        return () => { mountedRef.current = false; };
-    }, [url, enabled]);
+    }, [url, enabled, fetchData]);
 
     // Polling
     useEffect(() => {

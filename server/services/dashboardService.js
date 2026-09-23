@@ -14,7 +14,7 @@ const {
     buildSampleScopeWhere,
     buildWorkItemScopeWhere
 } = require('./dashboardScope');
-const { canFinalApprove, GATE_ANALYSES } = require('./workEligibility');
+const { canFinalApprove, GATE_ANALYSES, NON_ANALYTICAL } = require('./workEligibility');
 
 const ALLOWED_ROLE_QUEUES = {
     SAMPLE_RECEPTION: ['reception.attention', 'reception.drafts', 'reception.expected', 'reception.receivedToday'],
@@ -112,6 +112,7 @@ async function getDashboardHome(user, options = {}) {
     let preview = { queueKey: '', unit: '', rows: [], total: 0, page: 1, pageSize: 10, hasMore: false };
     let recommendedQueue = '';
     let capabilities = {};
+    let progressOverview = null;
 
     // ── 1. SAMPLE_RECEPTION ──
     if (role === 'SAMPLE_RECEPTION') {
@@ -276,13 +277,14 @@ async function getDashboardHome(user, options = {}) {
             select: { sampleId: true },
             distinct: ['sampleId']
         });
-        const reviewCount = reviewSamples.length;
+        const reviewSampleIds = new Set(reviewSamples.map(r => r.sampleId));
+        const reviewCount = reviewSampleIds.size;
 
-        // 3. Final approval eligible samples
+        // 3. Final approval eligible samples and stage partition
         // Strictly evaluates: physically received, accepted/processing, non-zero analytical items, all accepted
         const candidates = await prisma.sample.findMany({
             where: scopedWhere(sampleWhere, {
-                status: { in: ['RECEIVED', 'ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL', 'SUBMITTED_FULL'] },
+                status: { in: ['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL', 'SUBMITTED_FULL'] },
                 receptionDate: { not: null }
             }),
             include: {
@@ -295,11 +297,29 @@ async function getDashboardHome(user, options = {}) {
             }
         });
 
+        // Stage partition with strict lifecycle precedence (Refs #120 / Point 3):
+        // 1. FINAL_APPROVAL: eligible for final approval (all ordered analytical work accepted, gates completed)
+        // 2. AWAITING_REVIEW: has work submitted awaiting manager review
+        // 3. IN_PROGRESS: active specimens undergoing bench determinations
         let approvalEligibleCount = 0;
+        let stageAwaitingReviewCount = 0;
+        let stageInProgressCount = 0;
+        const candidateEvals = new Map();
+
         for (const s of candidates) {
             const orderLines = s.orderRevisions?.[0]?.lines || [];
             const evalResult = canFinalApprove(s, s.workItems, orderLines, user);
-            if (evalResult.allowed) approvalEligibleCount++;
+            candidateEvals.set(s.id, evalResult);
+            const isApprovalEligible = evalResult.allowed;
+            const hasSubmittedWork = reviewSampleIds.has(s.id) || (s.workItems || []).some(w => w.status === 'SUBMITTED');
+
+            if (isApprovalEligible) {
+                approvalEligibleCount++;
+            } else if (hasSubmittedWork) {
+                stageAwaitingReviewCount++;
+            } else if (['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL'].includes(s.status)) {
+                stageInProgressCount++;
+            }
         }
 
         // 4. Unassigned tasks
@@ -331,6 +351,135 @@ async function getDashboardHome(user, options = {}) {
         }) || 'manager.review';
 
         preview = await getQueueRowsInternal(actorScope, recommendedQueue, { page: 1, pageSize: 10, catMap, isDryingApplicable, candidates });
+
+        // 6. Build Progress & Bottleneck Overview for Manager Dashboard (Issue #120)
+        const oversight = candidates
+            .map(s => {
+                const orderLines = s.orderRevisions?.[0]?.lines || [];
+                let requiredAnalysesToCheck = [];
+                if (Array.isArray(orderLines) && orderLines.length > 0) {
+                    requiredAnalysesToCheck = orderLines.filter(l => l.status === 'ACTIVE' && l.isRequired !== false).map(l => l.analysis);
+                } else if (s.requiredAnalyses) {
+                    try {
+                        const parsed = typeof s.requiredAnalyses === 'string' ? JSON.parse(s.requiredAnalyses) : s.requiredAnalyses;
+                        if (Array.isArray(parsed)) {
+                            requiredAnalysesToCheck = parsed;
+                        }
+                    } catch (e) {}
+                }
+                requiredAnalysesToCheck = requiredAnalysesToCheck.filter(code => !NON_ANALYTICAL.includes(code) && !GATE_ANALYSES.includes(code));
+
+                // Denominator excludes all NON_ANALYTICAL methods and gate analyses
+                const analyticalWork = (s.workItems || []).filter(w => !NON_ANALYTICAL.includes(w.analysis) && !GATE_ANALYSES.includes(w.analysis));
+                const allAnalyticalCodes = new Set([...requiredAnalysesToCheck, ...analyticalWork.map(w => w.analysis)]);
+                const total = Math.max(analyticalWork.length, allAnalyticalCodes.size);
+
+                // Determination is complete at the bench if SUBMITTED, COMPLETED, ACCEPTED, or WAIVED
+                const completed = analyticalWork.filter(w => ['SUBMITTED', 'COMPLETED', 'ACCEPTED', 'WAIVED'].includes(w.status)).length;
+                const accepted = analyticalWork.filter(w => ['ACCEPTED', 'WAIVED'].includes(w.status)).length;
+                const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+                const evalResult = candidateEvals.get(s.id) || canFinalApprove(s, s.workItems, orderLines, user);
+                const isApprovalEligible = evalResult.allowed;
+                const hasPendingWork = (s.workItems || []).some(w => ['SUBMITTED', 'COMPLETED'].includes(w.status));
+
+                // Determine lifecycle readiness state reusing canonical eligibility:
+                // - APPROVED: sample already authorized/approved
+                // - READY_FOR_APPROVAL: canonical final approval eligibility satisfied (all required work accepted/waived, gates passed)
+                // - READY_FOR_REVIEW: all determinations submitted/done at bench, awaiting manager review
+                // - IN_ANALYSIS: determinations actively underway or blocked by pending gates/missing required work
+                let readiness = 'IN_ANALYSIS';
+                if (['COMPLETED', 'APPROVED'].includes(s.status)) {
+                    readiness = 'APPROVED';
+                } else if (isApprovalEligible) {
+                    readiness = 'READY_FOR_APPROVAL';
+                } else if (total > 0 && completed === total && hasPendingWork) {
+                    readiness = 'READY_FOR_REVIEW';
+                }
+
+                return {
+                    sampleId: s.id,
+                    labId: s.labId || s.originalId || s.id,
+                    originalId: s.originalId || null,
+                    projectCode: s.projectCode || null,
+                    status: s.status,
+                    total,
+                    completed,
+                    accepted,
+                    progress,
+                    readiness,
+                    isReady: isApprovalEligible || readiness === 'READY_FOR_REVIEW' || readiness === 'APPROVED'
+                };
+            })
+            .filter(s => s.total > 0)
+            .sort((a, b) => {
+                const aActive = a.progress > 0 && a.progress < 100 ? 1 : 0;
+                const bActive = b.progress > 0 && b.progress < 100 ? 1 : 0;
+                if (aActive !== bActive) return bActive - aActive;
+                return b.progress - a.progress;
+            })
+            .slice(0, 15);
+
+        const labTechs = await prisma.user.findMany({
+            where: {
+                role: 'LAB_TECHNICIAN',
+                isActive: true,
+                ...(actorScope.activeLabId ? { labId: actorScope.activeLabId } : {})
+            },
+            select: { id: true, username: true, name: true }
+        });
+
+        const allScopedWork = await prisma.workItem.findMany({
+            where: scopedWhere(workWhere, {}),
+            select: { id: true, status: true, assignedTo: true }
+        });
+
+        const techWorkload = labTechs.map(t => {
+            const assignedItems = allScopedWork.filter(w => w.assignedTo === t.username);
+            const completed = assignedItems.filter(w => ['COMPLETED', 'ACCEPTED'].includes(w.status)).length;
+            const pending = assignedItems.filter(w => ['PENDING', 'ASSIGNED', 'IN_PROGRESS', 'NOT_ASSIGNED'].includes(w.status)).length;
+            return {
+                id: t.id,
+                username: t.username,
+                name: t.name || t.username,
+                assigned: assignedItems.length,
+                completed,
+                pending
+            };
+        });
+
+        const [completedCount, approvedTodayCount, totalSamplesCount] = await Promise.all([
+            prisma.sample.count({
+                where: scopedWhere(sampleWhere, {
+                    status: 'APPROVED'
+                })
+            }),
+            prisma.sample.count({
+                where: scopedWhere(sampleWhere, {
+                    status: 'APPROVED',
+                    approvedAt: { gte: actorScope.dayStart, lt: actorScope.dayEnd }
+                })
+            }),
+            prisma.sample.count({
+                where: scopedWhere(sampleWhere, {})
+            })
+        ]);
+
+        progressOverview = {
+            oversight,
+            techWorkload,
+            stageCounts: {
+                pendingIntake: pendingIntakeCount,
+                inProgress: stageInProgressCount,
+                awaitingReview: stageAwaitingReviewCount,
+                finalApproval: approvalEligibleCount,
+                completed: completedCount,
+                approved: completedCount,
+                approvedToday: approvedTodayCount,
+                unassignedTasks: unassignedTasksCount,
+                totalSamples: totalSamplesCount
+            }
+        };
     }
 
     // ── 4. MASTER_USER ──
@@ -579,9 +728,11 @@ async function getDashboardHome(user, options = {}) {
         recommendedQueue,
         metrics,
         preview,
+        ...(progressOverview ? { progressOverview } : {}),
         sections: {
             queue: 'available',
-            activity: 'available'
+            activity: 'available',
+            ...(progressOverview ? { progressOverview: 'available' } : {})
         }
     };
 }
