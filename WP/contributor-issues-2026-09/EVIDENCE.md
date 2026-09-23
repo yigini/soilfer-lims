@@ -1083,4 +1083,63 @@ Codex conducted independent live verification using existing Chrome LAB_MANAGER 
 - **Open (External / Hardware / Governance)**: 3 (#102 physical mobile devices, #103 user membership reconciliation hold, #104 separate laboratory dashboard investigation)
 - **Deployment Status**: Production is clean, healthy, and up-to-date on `v3.5.19` (`c5ed62e`). No further release or restart required.
 
+---
+
+### 13. Production Release & Deployment Evidence: PR #137 & PR #138 (Commit 2f860cf — v3.5.22)
+
+Following explicit user authorization on 23 September 2026 at ~07:08 UTC, PR #137 (Issue #125) and PR #138 (Issue #120) were merged into `main` under repository protections and deployed to production host `46.19.33.37`.
+
+#### 1. Release Identification & Invariants
+- **Target Commit**: [`2f860cf3c81d3e251632ef579bcd9d90802dcf13`](https://github.com/yigini/soilfer-lims/commit/2f860cf3c81d3e251632ef579bcd9d90802dcf13) (`2f860cf`)
+- **PR #137 Merge Commit**: `39f8f378d3b6de2d69e2900ad3efa9241322c0ae` (Head: `2eaf0a2724cb34b34940b9fce564c709d6409f37`, Refs #125)
+- **PR #138 Merge Commit**: `2f860cf3c81d3e251632ef579bcd9d90802dcf13` (Head: `0341151318c7bd417f33f2b9878f568b1f823f26`, Refs #120)
+- **Main CI**: [Run 35830294886](https://github.com/yigini/soilfer-lims/actions/runs/35830294886) — **PASSED** (Test & Build in 3m57s)
+- **Production Container Image**: `soilfer-lims:v3.5.22-2f860cf` (Image ID `45b51395458d`, Digest `sha256:45b51395458dbd06c7b149f35f44e96a648103c9827615c96e99e02d1c7a4a79`, container ID `d96a9707aa0f0d1d15107051ea372a2b31c70a5021111d5b61fc699cf09fb4b4`, started `2026-09-23T07:18:22.603431587Z`)
+- **Preserved Rollback Baseline**: `soilfer-lims:rollback-baseline` and `soilfer-lims:rollback-af7d5ac` (`soilfer-lims:v3.5.21-af7d5ac`, Image ID `d13c5b81d4ee`, Digest `sha256:d13c5b81d4ee5b5dd5c7d7a39e1dc9c8c2fd9f1119652168e1083d374c498251`)
+- **Zero Country/Project Migrations**: Deployed without database schema changes or data modifications.
+
+#### 2. Ingress Quiescence, Writer Suppression & Backup
+- **Ingress Quiescence**:
+  - Apache configuration updated with rewrite rules returning HTTP 503 for all mutating methods (`POST|PUT|PATCH|DELETE`).
+  - Active check: POST returned 503; GET returned 200.
+- **Background Writer Suppression**:
+  - Active container stopped, terminating all internal background sync schedulers and workers.
+- **WAL Flush & Consistent Backup**:
+  - Flushed WAL via `PRAGMA wal_checkpoint(TRUNCATE);` (`0|0|0`).
+  - SQLite `.backup` created at `/opt/lims/backups/dev_release_2f860cf_consistent_20260923_091736.db`.
+  - SHA256 Checksum: `8aa1679095f1c9992f5ac477cbb087ea31e8f3c06b48ebaaaa23fc3b9650ac1d`.
+  - `PRAGMA integrity_check`: `ok`.
+  - `PRAGMA foreign_key_check`: `OK (0 errors)`.
+  - Exact Verified Row Counts: Samples=36,878, Projects=5, WorkItems=90, Results=19, Reports=4.
+
+#### 3. Postflight Container Verification
+- Started container with `DISABLE_BACKGROUND_JOBS=true`.
+- Confirmed zero scheduler logs; all background sync writers suppressed.
+- Executed read-only role/route postflight checklist (`/opt/lims/postflight_check.cjs`): **27/27 PASS**.
+  - All standard role / health / legacy route checks passed.
+  - **PR #137 (#125) Inventory Verification**:
+    - `/api/inventory/alerts` returned 200 (39ms). Alert counts: `outOfStock=126`, `lowStock=126`, `expired=2`, `expiredLots=2`, `total=128`.
+    - `/api/inventory/items?limit=200` returned 200. Verified all 126 active items evaluate to `isOutOfStock: true` (124 without lots + 2 with expired lots), perfectly aligning summary alerts (126) with table row badges (126).
+    - Unique expired items (2) <= expired lots (2) verified.
+  - **PR #138 (#120) Operational Views & Manager Queue Verification**:
+    - `/api/samples?view=daily` returned 200 (488ms). Excludes `SUBMITTED_FULL`, `APPROVED`, `RECEIVED_REJECTED`, `REJECTED` (0 invalid rows). Daily row count (5) == `views.daily` facet (5).
+    - `/api/samples?status=SUBMITTED_FULL,APPROVED` returned 200. Returned 3 completed samples (all strictly `SUBMITTED_FULL` or `APPROVED`). `facets.lifecycle.COMPLETED`: 3.
+    - `/api/dashboard/queues/manager.finalApproval` returned 200 (120ms). Successfully queried without 200-item cap.
+    - Dashboard Home Response Time: 207ms (< 2000ms threshold).
+    - Dashboard Live Response Time: 482ms (< 2000ms threshold).
+- Post-checklist DB count verification: Samples=36,878, Projects=5 (0 mutations).
+
+#### 4. Production Resumption & Live Verification
+- Restarted container in standard production mode (normal operation, without `DISABLE_BACKGROUND_JOBS`). Container healthy within 3 seconds.
+- Restored `/etc/httpd/conf/extra/httpd-lims.conf.live` and reloaded Apache.
+- Public Health: `https://lims.yigini.net/api/health` -> HTTP 200 (`{"status":"ok","uptime":13.78s}`).
+- Live Database Conservation:
+  - Exact verified row counts conserved: `Sample`: 36,878, `Project`: 5, `WorkItem`: 90, `Result`: 19, `Report`: 4.
+  - Zero modifications to production inventory stock or scientific records.
+
+#### 5. Issues Status
+- **Issue #120**: Fix deployed and verified on production. Remains **OPEN** pending independent live role acceptance.
+- **Issue #125**: Fix deployed and verified on production. Remains **OPEN** pending independent live role acceptance.
+
+
 
