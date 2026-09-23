@@ -101,7 +101,9 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
                 country: 'GTM',
                 projectCode: 'PROJECT-A',
                 status: 'SUBMITTED_FULL',
-                receptionDate: new Date()
+                receptionDate: new Date(),
+                dryingStatus: 'DONE',
+                preparationStatus: 'DONE'
             }
         });
 
@@ -119,6 +121,18 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
                 submittedBy: techAUsername,
                 type: 'FULL',
                 submittedAt: new Date()
+            }
+        });
+
+        // 1g. Accepted analytical work item for sampleSubmittedFullA for final approval readiness (#120)
+        await prisma.workItem.create({
+            data: {
+                id: `wi-${sampleSubmittedFullA.id}`,
+                sampleId: sampleSubmittedFullA.id,
+                labId: labAId,
+                analysis: 'PH',
+                status: 'ACCEPTED',
+                assignedTo: techAUsername
             }
         });
 
@@ -365,5 +379,73 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
         expect(subRes.status).toBe(200);
         const subs = Array.isArray(subRes.body) ? subRes.body : (subRes.body.data || []);
         expect(subs.some(sub => sub.sampleId === sampleSubmittedFullA.id && sub.status === 'PENDING_REVIEW')).toBe(true);
+
+        // B. Final approval queue lists the eligible SUBMITTED_FULL sample
+        const appRes = await request(app)
+            .get('/api/dashboard/queues/manager.finalApproval')
+            .set('Authorization', `Bearer ${tokenManagerA}`);
+
+        expect(appRes.status).toBe(200);
+        const rows = appRes.body.rows || [];
+        expect(rows.some(r => r.sampleId === sampleSubmittedFullA.id || r.key === sampleSubmittedFullA.id)).toBe(true);
+        const fullItem = rows.find(r => r.sampleId === sampleSubmittedFullA.id || r.key === sampleSubmittedFullA.id);
+        expect(fullItem.status).toBe('Ready for final check');
+    });
+
+    test('10. Final approval candidates reconcile across dashboard home and queue without 200 cap (>200 candidate regression)', async () => {
+        const labCapId = `LAB-CAP-${Date.now()}`;
+        await prisma.lab.create({
+            data: { id: labCapId, name: 'Cap Test Lab', code: labCapId, country: 'GTM' }
+        });
+
+        const tokenManagerCap = await getAuthToken('LAB_MANAGER', labCapId, ['GTM'], ['PROJECT-CAP']);
+
+        // Create 215 eligible candidate samples to exceed previous take: 200 cap
+        const sampleCount = 215;
+        const now = new Date();
+        const capSamples = Array.from({ length: sampleCount }, (_, i) => ({
+            id: `SMP-CAP-${Date.now()}-${i}`,
+            originalId: `ORIG-CAP-${Date.now()}-${i}`,
+            assignedLab: labCapId,
+            labId: labCapId,
+            country: 'GTM',
+            projectCode: 'PROJECT-CAP',
+            status: 'SUBMITTED_FULL',
+            receptionDate: now,
+            dryingStatus: 'DONE',
+            preparationStatus: 'DONE'
+        }));
+        await prisma.sample.createMany({ data: capSamples });
+
+        const capWorkItems = capSamples.map(s => ({
+            id: `WI-${s.id}`,
+            sampleId: s.id,
+            labId: labCapId,
+            analysis: 'PH',
+            status: 'ACCEPTED'
+        }));
+        await prisma.workItem.createMany({ data: capWorkItems });
+
+        // 1. Dashboard home metric evaluates all 215 candidates (not capped at 200)
+        const homeRes = await request(app)
+            .get('/api/dashboard/home')
+            .set('Authorization', `Bearer ${tokenManagerCap}`);
+
+        expect(homeRes.status).toBe(200);
+        const metrics = homeRes.body.metrics || [];
+        const appMetric = metrics.find(m => m.key === 'manager.finalApproval');
+        expect(appMetric).toBeDefined();
+        expect(appMetric.value).toBe(sampleCount);
+
+        // 2. Dedicated final approval queue evaluates all 215 candidates
+        const queueRes = await request(app)
+            .get('/api/dashboard/queues/manager.finalApproval')
+            .set('Authorization', `Bearer ${tokenManagerCap}`);
+
+        expect(queueRes.status).toBe(200);
+        expect(queueRes.body.total).toBe(sampleCount);
+
+        // 3. Reconciled equality: dashboard badge agrees identically with queue total (>200)
+        expect(appMetric.value).toBe(queueRes.body.total);
     });
 });

@@ -292,8 +292,7 @@ async function getDashboardHome(user, options = {}) {
                     orderBy: { version: 'desc' },
                     take: 1
                 }
-            },
-            take: 200
+            }
         });
 
         let approvalEligibleCount = 0;
