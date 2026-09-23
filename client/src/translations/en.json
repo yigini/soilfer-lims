@@ -1457,7 +1457,13 @@
     "lowConfirmedTitle": "Low stock (confirmed below reorder threshold)",
     "lowUncertain": "LOW? (UNCERTAIN)",
     "lowUncertainTitle": "Known subtotal is below reorder point, but uncounted lots exist",
-    "missingQuantityTitle": "Missing quantity on one or more lots"
+    "missingQuantityTitle": "Missing quantity on one or more lots",
+    "outOfStock": "OUT OF STOCK",
+    "showingLowOrOutOfStock": "Showing: Low / Out of Stock Items",
+    "showingExpired": "Showing: Expired Items",
+    "showingExpiringSoon": "Showing: Expiring Soon Items",
+    "showingQuarantined": "Showing: Quarantined Items",
+    "showingMissingQuantity": "Showing: Missing Quantity Items"
   },
   "labs": {
     "title": "Laboratory Management",
