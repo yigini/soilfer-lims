@@ -69,7 +69,7 @@ exports.getQueue = async (req, res) => {
             }
 
             // 3. Central scope validation on the work item
-            if (!scopeGuard.canAccessEntity(user, target, { entityType: 'WorkItem', labField: 'labId', altLabField: 'assignedLab' })) {
+            if (!scopeGuard.canAccessEntity(user, target, { entityType: 'WorkItem', labField: 'assignedLab', altLabField: 'labId' })) {
                 return res.status(403).json({
                     error: 'FORBIDDEN',
                     message: 'Access denied to work item in another laboratory.'
@@ -85,7 +85,7 @@ exports.getQueue = async (req, res) => {
             }
 
             // 5. Conflicting sample/work-item laboratories check
-            const targetLab = target.labId || target.assignedLab;
+            const targetLab = target.assignedLab || ((target.labId !== target.sample?.id && target.labId !== target.sample?.labId) ? target.labId : target.sample?.assignedLab);
             const sampleLab = target.sample?.assignedLab || target.sample?.labId;
             if (targetLab && sampleLab && targetLab !== sampleLab) {
                 if (!scopeGuard.hasGlobalAccess(user) && (!user.labId || (user.labId !== targetLab || user.labId !== sampleLab))) {
@@ -188,7 +188,7 @@ exports.getQueue = async (req, res) => {
         const searchTerm = (search || q || '').trim();
         let matchingAnalyses = [];
         if (searchTerm) {
-            const matched = await prisma.analysis.findMany({
+            const matchedAnalyses = await prisma.analysis.findMany({
                 where: {
                     OR: [
                         { code: { contains: searchTerm } },
@@ -197,7 +197,7 @@ exports.getQueue = async (req, res) => {
                 },
                 select: { code: true }
             });
-            matchingAnalyses = matched.map(m => m.code);
+            matchingAnalyses = matchedAnalyses.map(m => m.code);
         }
 
         const isGlobal = scopeGuard.hasGlobalAccess(user);
@@ -223,28 +223,15 @@ exports.getQueue = async (req, res) => {
 
         const labScopeCondition = !isGlobal ? {
             AND: [
-                // 1. Work item must not be explicitly assigned to another lab
-                {
-                    OR: [
-                        { labId: user.labId },
-                        { labId: null }
-                    ]
-                },
+                // 1. Work item must belong to the user's lab (or be unassigned to any specific lab)
                 {
                     OR: [
                         { assignedLab: user.labId },
-                        { assignedLab: null }
+                        { AND: [{ assignedLab: null }, { labId: user.labId }] },
+                        { AND: [{ assignedLab: null }, { labId: null }] }
                     ]
                 },
-                // 2. Work item must have local lab association
-                {
-                    OR: [
-                        { labId: user.labId },
-                        { assignedLab: user.labId },
-                        { AND: [{ labId: null }, { assignedLab: null }] }
-                    ]
-                },
-                // 3. Linked sample must belong to this lab and must not have conflicting cross-lab assignment
+                // 2. Linked sample must belong to this lab and must not have conflicting cross-lab assignment
                 {
                     sample: {
                         OR: [
@@ -283,6 +270,8 @@ exports.getQueue = async (req, res) => {
                 { id: { contains: searchTerm } },
                 { analysis: { contains: searchTerm } },
                 ...(matchingAnalyses.length > 0 ? [{ analysis: { in: matchingAnalyses } }] : []),
+                { methodology: { name: { contains: searchTerm } } },
+                { methodology: { standard: { contains: searchTerm } } },
                 { sample: { labId: { contains: searchTerm } } },
                 { sample: { originalId: { contains: searchTerm } } },
                 { sample: { id: { contains: searchTerm } } },
@@ -293,6 +282,13 @@ exports.getQueue = async (req, res) => {
         let items = await prisma.workItem.findMany({
             where: whereClause,
             include: {
+                methodology: {
+                    select: {
+                        id: true,
+                        name: true,
+                        standard: true
+                    }
+                },
                 sample: {
                     select: {
                         id: true,
@@ -322,16 +318,19 @@ exports.getQueue = async (req, res) => {
             }
             if (isGlobal) return true;
 
-            if (!scopeGuard.canAccessEntity(user, item, { entityType: 'WorkItem', labField: 'labId', altLabField: 'assignedLab' })) {
+            if (!scopeGuard.canAccessEntity(user, item, { entityType: 'WorkItem', labField: 'assignedLab', altLabField: 'labId' })) {
                 return false;
             }
             if (item.sample && !scopeGuard.canAccessEntity(user, item.sample, { entityType: 'Sample', labField: 'assignedLab', altLabField: 'labId' })) {
                 return false;
             }
-            const itemLab = item.labId || item.assignedLab;
-            const sampleLab = item.sample?.assignedLab || item.sample?.labId;
-            if (itemLab && itemLab !== user.labId) return false;
-            if (sampleLab && sampleLab !== user.labId) return false;
+            const itemMatches = item.assignedLab === user.labId || item.labId === user.labId;
+            const itemHasLab = Boolean(item.assignedLab || item.labId);
+            if (itemHasLab && !itemMatches) return false;
+
+            const sampleMatches = item.sample?.assignedLab === user.labId || item.sample?.labId === user.labId;
+            const sampleHasLab = Boolean(item.sample?.assignedLab || item.sample?.labId);
+            if (sampleHasLab && !sampleMatches) return false;
 
             return true;
         });
@@ -350,6 +349,13 @@ exports.getQueue = async (req, res) => {
                     ...(labScopeCondition ? labScopeCondition : {})
                 },
                 include: {
+                    methodology: {
+                        select: {
+                            id: true,
+                            name: true,
+                            standard: true
+                        }
+                    },
                     sample: {
                         select: {
                             id: true,
@@ -366,10 +372,12 @@ exports.getQueue = async (req, res) => {
                 }
             });
             for (const swi of sampleWorkItems) {
-                if (scopeGuard.canAccessEntity(user, swi, { entityType: 'WorkItem' })) {
-                    const swiLab = swi.labId || swi.assignedLab;
-                    const swiSampleLab = swi.sample?.assignedLab || swi.sample?.labId;
-                    if (isGlobal || ((!swiLab || swiLab === user.labId) && (!swiSampleLab || swiSampleLab === user.labId))) {
+                if (scopeGuard.canAccessEntity(user, swi, { entityType: 'WorkItem', labField: 'assignedLab', altLabField: 'labId' })) {
+                    const swiMatches = swi.assignedLab === user.labId || swi.labId === user.labId;
+                    const swiHasLab = Boolean(swi.assignedLab || swi.labId);
+                    const swiSampleMatches = swi.sample?.assignedLab === user.labId || swi.sample?.labId === user.labId;
+                    const swiSampleHasLab = Boolean(swi.sample?.assignedLab || swi.sample?.labId);
+                    if (isGlobal || ((!swiHasLab || swiMatches) && (!swiSampleHasLab || swiSampleMatches))) {
                         if (!items.some(i => i.id === swi.id)) {
                             items.push(swi);
                         }
@@ -562,6 +570,8 @@ exports.getQueue = async (req, res) => {
                 analysisCode: code,
                 analysisName: groupsMap[code].analysisName,
                 methodologyId: item.methodologyId || null,
+                methodologyName: item.methodology?.name || null,
+                methodologyStandard: item.methodology?.standard || null,
                 methodRevision: item.methodRevision || 'rev1',
                 editorKind: isSpectral
                     ? 'SPECTRAL'

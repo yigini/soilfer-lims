@@ -44,19 +44,21 @@ async function saveDraft(user, {
     }
 
     const scopeGuard = require('../utils/scopeGuard');
-    if (!scopeGuard.canAccessEntity(user, workItem, { entityType: 'WorkItem', labField: 'labId', altLabField: 'assignedLab' })) {
+    if (!scopeGuard.canAccessEntity(user, workItem, { entityType: 'WorkItem', labField: 'assignedLab', altLabField: 'labId' })) {
         throw new Error('Access denied: Work item is outside your laboratory scope');
     }
     if (workItem.sample && !scopeGuard.canAccessEntity(user, workItem.sample, { labField: 'assignedLab', altLabField: 'labId' })) {
         throw new Error('Access denied: Work item is outside your laboratory scope');
     }
     if (!scopeGuard.hasGlobalAccess(user) && user.labId) {
-        const itemLab = workItem.labId || workItem.assignedLab;
-        const sampleLab = workItem.sample?.assignedLab || workItem.sample?.labId;
-        if (itemLab && itemLab !== user.labId) {
+        const itemMatches = workItem.assignedLab === user.labId || workItem.labId === user.labId;
+        const itemHasLab = Boolean(workItem.assignedLab || workItem.labId);
+        if (itemHasLab && !itemMatches) {
             throw new Error('Access denied: Work item is in another laboratory');
         }
-        if (sampleLab && sampleLab !== user.labId) {
+        const sampleMatches = workItem.sample?.assignedLab === user.labId || workItem.sample?.labId === user.labId;
+        const sampleHasLab = Boolean(workItem.sample?.assignedLab || workItem.sample?.labId);
+        if (sampleHasLab && !sampleMatches) {
             throw new Error('Access denied: Sample is in another laboratory');
         }
     }
@@ -178,11 +180,12 @@ function canAccessDraft(user, draft, workItem = null, sample = null) {
 
     const wi = workItem || draft.workItem;
     if (wi) {
-        if (!scopeGuard.canAccessEntity(user, wi, { entityType: 'WorkItem', labField: 'labId', altLabField: 'assignedLab' })) {
+        if (!scopeGuard.canAccessEntity(user, wi, { entityType: 'WorkItem', labField: 'assignedLab', altLabField: 'labId' })) {
             return false;
         }
-        const itemLab = wi.labId || wi.assignedLab;
-        if (itemLab && itemLab !== user.labId) {
+        const itemMatches = wi.assignedLab === user.labId || wi.labId === user.labId;
+        const itemHasLab = Boolean(wi.assignedLab || wi.labId);
+        if (itemHasLab && !itemMatches) {
             return false;
         }
 
@@ -191,8 +194,9 @@ function canAccessDraft(user, draft, workItem = null, sample = null) {
             if (!scopeGuard.canAccessEntity(user, s, { labField: 'assignedLab', altLabField: 'labId' })) {
                 return false;
             }
-            const sampleLab = s.assignedLab || s.labId;
-            if (sampleLab && sampleLab !== user.labId) {
+            const sampleMatches = s.assignedLab === user.labId || s.labId === user.labId;
+            const sampleHasLab = Boolean(s.assignedLab || s.labId);
+            if (sampleHasLab && !sampleMatches) {
                 return false;
             }
         }

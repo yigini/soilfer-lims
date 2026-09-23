@@ -237,8 +237,9 @@ function canAccessEntity(user, entity, options = {}) {
     // 1. Direct assignedTo check on entity or workItems
     if (entity.assignedTo && (entity.assignedTo === user.username || entity.assignedTo === user.id)) {
         if (labScope) {
-            const itemLab = entity[labField] || (altLabField && entity[altLabField]);
-            if (itemLab && itemLab !== labScope) {
+            const matchesLab = entity[labField] === labScope || (altLabField && entity[altLabField] === labScope);
+            const hasExplicitLab = Boolean(entity[labField] || (altLabField && entity[altLabField]));
+            if (hasExplicitLab && !matchesLab) {
                 return false;
             }
         }
@@ -249,11 +250,12 @@ function canAccessEntity(user, entity, options = {}) {
         const isAssigned = (wi.assignedTo === user.username || wi.assignedTo === user.id);
         if (!isAssigned) return false;
         if (labScope) {
-            const wiLab = wi.labId || wi.assignedLab;
-            const entityLab = entity[labField] || (altLabField && entity[altLabField]);
-            if ((wiLab && wiLab !== labScope) || (entityLab && entityLab !== labScope)) {
-                return false;
-            }
+            const wiMatchesLab = wi.labId === labScope || wi.assignedLab === labScope;
+            const wiHasLab = Boolean(wi.labId || wi.assignedLab);
+            if (wiHasLab && !wiMatchesLab) return false;
+            const entityMatchesLab = entity[labField] === labScope || (altLabField && entity[altLabField] === labScope);
+            const entityHasLab = Boolean(entity[labField] || (altLabField && entity[altLabField]));
+            if (entityHasLab && !entityMatchesLab) return false;
         }
         return true;
     })) {

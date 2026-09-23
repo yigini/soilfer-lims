@@ -53,9 +53,10 @@ export default function WorkbenchQueue({
                 const matchId = item.sampleId?.toLowerCase().includes(q);
                 const matchOrig = item.originalId?.toLowerCase().includes(q);
                 const matchWorkItemId = item.workItemId?.toLowerCase().includes(q) || item.id?.toLowerCase().includes(q);
+                const matchParam = item.analysis?.toLowerCase().includes(q) || item.analysisCode?.toLowerCase().includes(q) || getAnalysisDisplayName(item.analysis, item.analysisName).toLowerCase().includes(q);
+                const matchMethod = item.methodologyName?.toLowerCase().includes(q) || item.methodologyStandard?.toLowerCase().includes(q);
                 const matchProject = item.projectCode?.toLowerCase().includes(q);
-                const matchParam = item.analysis?.toLowerCase().includes(q) || getAnalysisDisplayName(item.analysis, item.analysisName).toLowerCase().includes(q);
-                if (!matchDisplayId && !matchLabId && !matchId && !matchOrig && !matchParam && !matchWorkItemId && !matchProject) return false;
+                if (!matchDisplayId && !matchLabId && !matchId && !matchOrig && !matchParam && !matchMethod && !matchWorkItemId && !matchProject) return false;
             }
 
             return true;

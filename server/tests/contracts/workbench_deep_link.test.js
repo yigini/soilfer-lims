@@ -380,4 +380,145 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         expect(res.status).toBe(400);
         expect(res.body.error).toBe('AMBIGUOUS_SAMPLE_IDENTIFIER');
     });
+
+    test('14. Realistic specimen code deep link (Issue #128): sample.labId and workItem.labId hold specimen identifier while assignedLab holds facility', async () => {
+        const ts = Date.now();
+        const specimenCode = `GHA0816-1-1C-S-${ts}`;
+        const workItemId = `WI-1789634536044-167-${ts}`;
+        const techAUsername = 'test_lab_technician_labdeepa';
+
+        const sampleReal = await prisma.sample.create({
+            data: {
+                id: specimenCode,
+                labId: specimenCode,
+                originalId: `FIELD-${specimenCode}`,
+                assignedLab: labAId,
+                status: 'SUBMITTED_PARTIAL',
+                dryingStatus: 'DONE',
+                preparationStatus: 'DONE',
+                projectCode: 'GTM-SOIL-01'
+            }
+        });
+
+        const workItemReal = await prisma.workItem.create({
+            data: {
+                id: workItemId,
+                sampleId: sampleReal.id,
+                labId: specimenCode,
+                assignedLab: labAId,
+                analysis: 'SOC',
+                status: 'ASSIGNED',
+                assignedTo: techAUsername,
+                version: 1
+            }
+        });
+
+        // Request deep link using workItemId and specimenCode
+        const res = await request(app)
+            .get('/api/workbench/queue')
+            .set('Authorization', `Bearer ${techAToken}`)
+            .query({
+                workItemId: workItemId,
+                sampleId: specimenCode
+            });
+
+        expect(res.status).toBe(200);
+        expect(res.body.targetScopedItem).toBe(workItemId);
+        const allItems = res.body.groups.flatMap(g => g.items);
+        const found = allItems.find(i => i.id === workItemId);
+        expect(found).toBeDefined();
+        expect(found.sampleId).toBe(specimenCode);
+        expect(found.laboratoryId).toBe(labAId);
+        expect(found.analysis).toBe('SOC');
+    });
+
+    test('15. Realistic specimen code deep link cross-lab rejection: Lab A tech requesting Lab B specimen code returns 403', async () => {
+        const ts = Date.now();
+        const specimenCodeB = `GHA-CROSS-B-${ts}`;
+        const workItemIdB = `WI-CROSS-B-${ts}`;
+        const techBUsername = 'test_lab_technician_labdeepb';
+
+        const sampleRealB = await prisma.sample.create({
+            data: {
+                id: specimenCodeB,
+                labId: specimenCodeB,
+                originalId: `FIELD-${specimenCodeB}`,
+                assignedLab: labBId,
+                status: 'SUBMITTED_PARTIAL',
+                dryingStatus: 'DONE',
+                preparationStatus: 'DONE',
+                projectCode: 'GTM-SOIL-01'
+            }
+        });
+
+        await prisma.workItem.create({
+            data: {
+                id: workItemIdB,
+                sampleId: sampleRealB.id,
+                labId: specimenCodeB,
+                assignedLab: labBId,
+                analysis: 'SOC',
+                status: 'ASSIGNED',
+                assignedTo: techBUsername,
+                version: 1
+            }
+        });
+
+        // Tech A in Lab A attempts to access Tech B's item in Lab B
+        const res = await request(app)
+            .get('/api/workbench/queue')
+            .set('Authorization', `Bearer ${techAToken}`)
+            .query({
+                workItemId: workItemIdB,
+                sampleId: specimenCodeB
+            });
+
+        expect(res.status).toBe(403);
+        expect(res.body.error).toBe('FORBIDDEN');
+    });
+
+    test('16. Specimen labId alone resolves assigned work item in technician lab', async () => {
+        const ts = Date.now();
+        const specimenCodeAlone = `SMP-ALONE-${ts}`;
+        const workItemIdAlone = `WI-ALONE-${ts}`;
+        const techAUsername = 'test_lab_technician_labdeepa';
+
+        await prisma.sample.create({
+            data: {
+                id: specimenCodeAlone,
+                labId: specimenCodeAlone,
+                originalId: `FIELD-${specimenCodeAlone}`,
+                assignedLab: labAId,
+                status: 'SUBMITTED_PARTIAL',
+                dryingStatus: 'DONE',
+                preparationStatus: 'DONE',
+                projectCode: 'GTM-SOIL-01'
+            }
+        });
+
+        await prisma.workItem.create({
+            data: {
+                id: workItemIdAlone,
+                sampleId: specimenCodeAlone,
+                labId: specimenCodeAlone,
+                assignedLab: labAId,
+                analysis: 'SOC',
+                status: 'ASSIGNED',
+                assignedTo: techAUsername,
+                version: 1
+            }
+        });
+
+        const res = await request(app)
+            .get('/api/workbench/queue')
+            .set('Authorization', `Bearer ${techAToken}`)
+            .query({
+                sampleId: specimenCodeAlone
+            });
+
+        expect(res.status).toBe(200);
+        const allItems = res.body.groups.flatMap(g => g.items);
+        const found = allItems.find(i => i.id === workItemIdAlone);
+        expect(found).toBeDefined();
+    });
 });
