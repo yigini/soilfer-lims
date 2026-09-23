@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-23T14:32:57.525Z",
+  "timestamp": "2026-09-23T15:19:33.824Z",
   "status": "VERIFIED",
   "findings": {
     "managerDashboardOperationalOverview": {
@@ -59,7 +59,10 @@
       "details": {
         "url": "/samples?status=SUBMITTED_FULL,APPROVED",
         "hasSample4": true,
-        "hasSample5": true
+        "hasSample5": true,
+        "hasSampleSubFull": true,
+        "omitsSampleComp": true,
+        "omitsSampleRec": true
       }
     }
   },

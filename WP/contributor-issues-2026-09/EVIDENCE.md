@@ -1269,24 +1269,25 @@ A focused correction was implemented on branch `fix/issue-120-manager-dashboard-
 
 #### 5. Automated Tests & Headless Chrome CDP Verification
 - **Targeted Contract Tests**:
-  - `server/tests/contracts/manager_dashboard_overview.test.js` (8/8 passed in 3.04s):
+  - `server/tests/contracts/manager_dashboard_overview.test.js` (9/9 passed in 6.25s):
     1. `LAB_MANAGER` dashboard home includes `progressOverview` with analytical oversight and `techWorkload`.
     2. `SUPER_ADMIN` scoped to a lab receives matching `progressOverview`.
     3. Cross-lab isolation: Manager 2 in LAB-HND strictly does not see Manager 1 records or technicians.
     4. Analytical progress denominator excludes closure tasks (`ARCHIVING`) and counts `SUBMITTED` work with `READY_FOR_REVIEW` badge.
     5. Already `ACCEPTED` sample displays `READY_FOR_APPROVAL` badge (not `READY_FOR_REVIEW`) and excludes `DISPOSAL` from denominator.
-    6. Mutually exclusive stage partitioning classifies candidates with strict precedence (`FINAL_APPROVAL` > `AWAITING_REVIEW` > `IN_PROGRESS`).
-    7. Stage 5 Completed population counts authoritative `approvedAt` today, ignoring generic `updatedAt`.
-    8. Destination population contract matches Stage 5 route (`/samples?status=SUBMITTED_FULL,APPROVED`).
+    6. Mutually exclusive stage partitioning classifies candidates with strict precedence and isolates `RECEIVED` to `pendingIntake`.
+    7. `RECEIVED` count-to-destination alignment: sample appears in Stage 1 intake destination and not in In Analysis destination.
+    8. Stage 5 Completed population counts authoritative `approvedAt` today, ignoring generic `updatedAt`, and includes `SUBMITTED_FULL`.
+    9. `COMPLETED` count-to-destination alignment: `COMPLETED` fixture appears in neither card nor destination, while canonical completed samples appear in both.
 - **Client Build**:
-  - `npm run build` in `client` passed cleanly in 7.22s without warnings or errors.
+  - `npm run build` in `client` passed cleanly without warnings or errors.
 - **Side-by-Side Browser CDP Journey** (`server/scripts/run_manager_dashboard_tasklist_side_by_side.cjs`):
   - Executed end-to-end on an isolated disposable database with realistic multi-technician fixture data:
     1. `/` (Dashboard - Operational Overview): Verified h1 "Laboratory overview", Stage Pipeline (5 cards with accurate counts and ICU plurals, including Stage 5 "Completed / Released" with subtext "1 approved today"), Analysis Progress bars (33%, 100% with "Ready for Review" badge, and 100% with "Ready for Approval" badge), Technician Workload cards, and Unassigned Alert banner. Screenshot: `manager_dashboard_overview_verified.png`.
     2. `/` (Dashboard - Pending Work Queue toggle): Verified toggle to work queue table preview with Action buttons. Screenshot: `manager_dashboard_queue_toggle_verified.png`.
     3. `/manager-queue` (Manager Task List): Verified dedicated execution workbench with Assign Work, Review Submissions, Final Approvals, and QC Exceptions tabs. Screenshot: `manager_tasklist_action_verified.png`.
     4. `/?labId=LAB-GTM` (Scoped System Admin Dashboard): Verified scoped overview matching Guatemala lab workload. Screenshot: `super_admin_scoped_dashboard_verified.png`.
-    5. `/samples?status=SUBMITTED_FULL,APPROVED` (Stage 5 Destination): Verified navigation from Stage 5 card loads matching approved specimens. Screenshot: `manager_dashboard_stage5_destination_verified.png`.
+    5. `/samples?status=SUBMITTED_FULL,APPROVED` (Stage 5 Destination): Verified navigation from Stage 5 card loads matching approved specimens, includes `SUBMITTED_FULL` specimens, and omits both non-canonical `COMPLETED` and `RECEIVED` specimens. Screenshot: `manager_dashboard_stage5_destination_verified.png`.
   - Machine-readable evidence log: `artifacts/evidence-journeys/manager_dashboard_overview_evidence.json` (Status: `VERIFIED`, 5/5 findings passed).
 
 #### 6. Independent Review Feedback Resolution (PR #141 / Comment 5796060402)
@@ -1297,11 +1298,21 @@ A focused correction was implemented on branch `fix/issue-120-manager-dashboard-
   - Fully `ACCEPTED` sample displays 100% progress with "Ready for Approval" (`READY_FOR_APPROVAL`) badge, strictly eliminating the post-review "Ready for Review" badge regression.
 - **Gap 2: Completed Population, Authoritative Dates & Destination Alignment**:
   - Replaced generic `updatedAt` with authoritative `approvedAt: { gte: dayStart, lt: dayEnd }` for `approvedToday`.
-  - Stage 5 card labeled "Completed / Released" with count matching `status in ['APPROVED', 'COMPLETED', 'SUBMITTED_FULL']`, subtext `{count} approved today`, and destination route `/samples?status=SUBMITTED_FULL,APPROVED` matching `SamplesFilterBar`.
+  - Stage 5 card labeled "Completed / Released" with subtext `{count} approved today` and destination route `/samples?status=SUBMITTED_FULL,APPROVED` matching `SamplesFilterBar`.
 - **Gap 3: Mutually Exclusive Stage Partitioning**:
   - Partitioned active specimens with strict precedence (`FINAL_APPROVAL` > `AWAITING_REVIEW` > `IN_PROGRESS`), eliminating double-counting across the pipeline cards.
 
-#### 7. Issue Status
+#### 7. Delta Review Feedback Resolution (PR #141 / Comment 5796896939)
+- **Gap 1: Intake Isolation & Zero RECEIVED Double-Counting**:
+  - `candidates` query in `dashboardService.js` previously queried `status in ['RECEIVED', 'ACCEPTED', 'PROCESSING', ...]`. Since `pendingIntakeCount` separately counted `RECEIVED`, any `RECEIVED` specimen with `receptionDate` fell into the `else` branch of the candidate partition loop (`stageInProgressCount++`), causing it to be double-counted across both Intake and In Analysis cards.
+  - Restricted `candidates` strictly to `status: { in: ['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL'] }` with `receptionDate: { not: null }`. This cleanly isolates `RECEIVED` specimens to Stage 1 (`pendingIntake`) and prevents them from appearing in analytical oversight.
+  - Verified with Contract Tests 6 & 7: `pendingIntake === 1`, `inProgress === 1`, `sampleReceived` is absent from `oversight`, present in `/samples?status=RECEIVED,COLLECTED`, and absent from `/samples?status=ACCEPTED,PROCESSING`.
+- **Gap 2: Completed Population & Destination Route Parity**:
+  - `completedCount` in `dashboardService.js` previously queried `status: { in: ['APPROVED', 'COMPLETED', 'SUBMITTED_FULL'] }`, whereas the released Samples Quick Filter and route `/samples?status=SUBMITTED_FULL,APPROVED` omits `COMPLETED` (in the SoilFER-LIMS schema, `COMPLETED` applies strictly to work items, not sample states).
+  - Aligned `completedCount` strictly to `status: { in: ['APPROVED', 'SUBMITTED_FULL'] }`, ensuring 100% parity between card count and destination query without modifying released filter components.
+  - Verified with Contract Tests 8 & 9: non-canonical `COMPLETED` fixture is omitted from both card count and destination query results; canonical samples (`sampleApprovedToday`, `sampleApprovedPast`, `sampleSubmittedFull`) appear in both; card count matches destination sample count exactly.
+
+#### 8. Issue Status
 - **Issue #120**: Remains **OPEN** (`Refs #120`). Follow-up PR #141 updated for independent review; no merge or deployment permitted until explicitly authorized.
 
 

@@ -360,6 +360,45 @@ async function main() {
             }
         });
 
+        // sRec: Physically received awaiting intake validation (RECEIVED) -> strictly in Stage 1
+        await prisma.sample.create({
+            data: {
+                id: 'SMP-GTM-REC',
+                originalId: 'FIELD-GTM-REC',
+                labId: 'GTM-2026-REC',
+                assignedLab: 'LAB-GTM',
+                projectCode: 'SOILFER-GTM',
+                status: 'RECEIVED',
+                receptionDate: new Date('2026-09-22T08:00:00Z')
+            }
+        });
+
+        // sSubFull: Completed at bench (SUBMITTED_FULL) -> counted in Stage 5, appears in destination
+        await prisma.sample.create({
+            data: {
+                id: 'SMP-GTM-SFULL',
+                originalId: 'FIELD-GTM-SFULL',
+                labId: 'GTM-2026-SFULL',
+                assignedLab: 'LAB-GTM',
+                projectCode: 'SOILFER-GTM',
+                status: 'SUBMITTED_FULL',
+                receptionDate: new Date('2026-09-18T10:00:00Z')
+            }
+        });
+
+        // sComp: Non-canonical status (COMPLETED) -> omitted from card count and destination
+        await prisma.sample.create({
+            data: {
+                id: 'SMP-GTM-COMP',
+                originalId: 'FIELD-GTM-COMP',
+                labId: 'GTM-2026-COMP',
+                assignedLab: 'LAB-GTM',
+                projectCode: 'SOILFER-GTM',
+                status: 'COMPLETED',
+                receptionDate: new Date('2026-09-10T10:00:00Z')
+            }
+        });
+
         console.log('[2/6] Starting application server...');
         server = http.createServer(app);
         await new Promise(r => server.listen(0, '127.0.0.1', r));
@@ -606,10 +645,16 @@ async function main() {
                     const pageText = document.body.innerText;
                     const hasSample4 = pageText.includes('SMP-GTM-004') || pageText.includes('GTM-2026-0004');
                     const hasSample5 = pageText.includes('SMP-GTM-005') || pageText.includes('GTM-2026-0005');
+                    const hasSampleSubFull = pageText.includes('SMP-GTM-SFULL') || pageText.includes('GTM-2026-SFULL');
+                    const omitsSampleComp = !pageText.includes('SMP-GTM-COMP');
+                    const omitsSampleRec = !pageText.includes('SMP-GTM-REC');
                     return {
                         url: window.location.pathname + window.location.search,
                         hasSample4,
-                        hasSample5
+                        hasSample5,
+                        hasSampleSubFull,
+                        omitsSampleComp,
+                        omitsSampleRec
                     };
                 })()
             `
@@ -642,7 +687,7 @@ async function main() {
                     details: adminScopedResult
                 },
                 stage5DestinationPopulation: {
-                    verified: samplesNavResult.hasSample4 && samplesNavResult.hasSample5,
+                    verified: samplesNavResult.hasSample4 && samplesNavResult.hasSample5 && samplesNavResult.hasSampleSubFull && samplesNavResult.omitsSampleComp && samplesNavResult.omitsSampleRec,
                     details: samplesNavResult
                 }
             },

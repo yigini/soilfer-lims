@@ -347,4 +347,26 @@ User explicitly approved combined PR132/133 merge/deployment. Accepted heads0a7c
   - Isolated Browser CDP runner (`run_manager_dashboard_tasklist_side_by_side.cjs`) passed (5/5 steps verified: Overview, Queue toggle, Task List, Scoped Admin, Stage 5 destination). All 5 screenshots captured.
 - Pushed updated commit to PR #141. Issue #120 remains **OPEN**; candidate is unmerged and undeployed.
 
+### 2026-09-23 15:20 UTC — PR #141 delta review remediation: Intake isolation & Completed destination parity
+- Independent Codex delta review on PR #141 at `9fc783e` ([comment 5796896939](https://github.com/yigini/soilfer-lims/pull/141#issuecomment-5796896939)) identified two remaining bounded correctness mismatches:
+  1. *RECEIVED double-counting*: `candidates` included `RECEIVED` samples with `receptionDate`, causing the stage partition's `else` branch to double-count them as `inProgress` while also counted in `pendingIntake`.
+  2. *COMPLETED card-to-destination mismatch*: `dashboardService.js` counted non-canonical `COMPLETED` samples in `stageCounts.completed`, while the Stage 5 destination route `/samples?status=SUBMITTED_FULL,APPROVED` omitted `COMPLETED`.
+- Remediations:
+  - `server/services/dashboardService.js`:
+    - Line 287: Restricted `candidates` query to `status: { in: ['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL'] }` with `receptionDate: { not: null }`. Cleanly isolates `RECEIVED` samples strictly to `pendingIntake` (Stage 1).
+    - Line 435: Restricted `completedCount` query to `status: { in: ['APPROVED', 'SUBMITTED_FULL'] }`, matching the released Samples Quick Filter route `/samples?status=SUBMITTED_FULL,APPROVED` and excluding non-canonical `COMPLETED` status.
+  - `server/tests/contracts/manager_dashboard_overview.test.js`:
+    - Added `sampleReceived` (`status: 'RECEIVED'`) and `sampleSubmittedFull` (`status: 'SUBMITTED_FULL'`) alongside existing `sampleCompletedNoApprovedAt` (`status: 'COMPLETED'`).
+    - Test 6: Verifies `stageCounts.pendingIntake === 1`, `stageCounts.inProgress === 1`, and `sampleReceived` is absent from `oversight`.
+    - Test 7: Verifies `RECEIVED` count-to-destination alignment: `/samples?status=RECEIVED,COLLECTED` contains `sampleReceived.id`, whereas `/samples?status=ACCEPTED,PROCESSING` omits it.
+    - Test 8: Verifies `stageCounts.completed === 3` and `approvedToday === 1`.
+    - Test 9: Verifies `COMPLETED` fixture appears in neither the card count nor destination results; canonical completed samples appear in both; card count equals destination sample count (3).
+    - 9/9 contract tests passed in 6.25s.
+  - `server/scripts/run_manager_dashboard_tasklist_side_by_side.cjs`:
+    - Added `sRec` (`RECEIVED`), `sSubFull` (`SUBMITTED_FULL`), `sComp` (`COMPLETED`) fixtures to isolated runner DB.
+    - Verified Stage 5 destination contains canonical specimens and omits both `COMPLETED` and `RECEIVED` fixtures.
+  - Production client build passed cleanly in 8.88s.
+- Pushed updated commit to PR #141. Issue #120 remains **OPEN**; candidate is unmerged and undeployed.
+
+
 

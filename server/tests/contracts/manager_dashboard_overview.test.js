@@ -280,7 +280,9 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
     let sampleBench;
     let sampleApprovedToday;
     let sampleApprovedPast;
+    let sampleSubmittedFull;
     let sampleCompletedNoApprovedAt;
+    let sampleReceived;
 
     beforeAll(async () => {
         const unique = Date.now() + 5000;
@@ -321,6 +323,18 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
             JWT_SECRET,
             { expiresIn: '1h' }
         );
+
+        // 0. Sample physically received awaiting intake validation (RECEIVED)
+        sampleReceived = await prisma.sample.create({
+            data: {
+                id: `SMP-STG-REC-${unique}`,
+                originalId: `FLD-STG-REC-${unique}`,
+                labId: `L-STG-REC-${unique}`,
+                assignedLab: stageLab.id,
+                status: 'RECEIVED',
+                receptionDate: new Date('2026-09-20T09:00:00Z')
+            }
+        });
 
         // 1. Sample with SUBMITTED work + Closure task (ARCHIVING)
         sampleReview = await prisma.sample.create({
@@ -418,7 +432,19 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
             }
         });
 
-        // 6. Sample completed with null approvedAt, updated today
+        // 6. Sample with SUBMITTED_FULL status (canonical completed at bench)
+        sampleSubmittedFull = await prisma.sample.create({
+            data: {
+                id: `SMP-STG-SFULL-${unique}`,
+                originalId: `FLD-STG-SFULL-${unique}`,
+                labId: `L-STG-SFULL-${unique}`,
+                assignedLab: stageLab.id,
+                status: 'SUBMITTED_FULL',
+                receptionDate: new Date('2026-09-18T10:00:00Z')
+            }
+        });
+
+        // 7. Sample with COMPLETED status (non-canonical sample status)
         sampleCompletedNoApprovedAt = await prisma.sample.create({
             data: {
                 id: `SMP-STG-COMP-${unique}`,
@@ -473,7 +499,7 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         expect(approvalItem.isReady).toBe(true);
     });
 
-    test('6. Mutually exclusive stage partitioning classifies candidates with strict precedence (FINAL_APPROVAL > AWAITING_REVIEW > IN_PROGRESS)', async () => {
+    test('6. Mutually exclusive stage partitioning classifies candidates with strict precedence and isolates RECEIVED to pendingIntake', async () => {
         const res = await request(app)
             .get('/api/dashboard/home')
             .set('Authorization', `Bearer ${stageManagerToken}`);
@@ -482,7 +508,10 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         const stageCounts = res.body.progressOverview?.stageCounts;
         expect(stageCounts).toBeDefined();
 
-        // The 3 active PROCESSING candidates must be partitioned without double-counting:
+        // 1. sampleReceived (status: 'RECEIVED') must be strictly in pendingIntake
+        expect(stageCounts.pendingIntake).toBe(1);
+
+        // 2. The active candidates in analysis are partitioned strictly:
         // - sampleApproval -> finalApproval (1)
         // - sampleReview   -> awaitingReview (1)
         // - sampleBench    -> inProgress (1)
@@ -490,11 +519,44 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         expect(stageCounts.awaitingReview).toBe(1);
         expect(stageCounts.inProgress).toBe(1);
 
+        // sampleReceived must NEVER be double-counted in inProgress!
         // Neither sampleApproval nor sampleReview can double-count into inProgress
         expect(stageCounts.inProgress + stageCounts.awaitingReview + stageCounts.finalApproval).toBe(3);
+
+        // Total active pipeline stages (intake + inProgress + awaitingReview + finalApproval)
+        expect(stageCounts.pendingIntake + stageCounts.inProgress + stageCounts.awaitingReview + stageCounts.finalApproval).toBe(4);
+
+        // sampleReceived must NOT appear in analytical oversight progress monitor
+        const oversight = res.body.progressOverview?.oversight || [];
+        expect(oversight.find(s => s.sampleId === sampleReceived.id)).toBeUndefined();
     });
 
-    test('7. Stage 5 Completed population counts authoritative approvedAt today, ignoring updatedAt', async () => {
+    test('7. RECEIVED count-to-destination alignment: sample appears in Stage 1 intake destination and not in In Analysis destination', async () => {
+        // Stage 1 destination (/samples?status=RECEIVED,COLLECTED)
+        const intakeRes = await request(app)
+            .get('/api/samples')
+            .query({ status: 'RECEIVED,COLLECTED' })
+            .set('Authorization', `Bearer ${stageManagerToken}`);
+
+        expect(intakeRes.status).toBe(200);
+        const intakeSamples = intakeRes.body.samples || intakeRes.body.data || intakeRes.body;
+        const intakeIds = intakeSamples.map(s => s.id);
+        expect(intakeIds).toContain(sampleReceived.id);
+
+        // Stage 2 destination (/samples?status=ACCEPTED,PROCESSING)
+        const inProgressRes = await request(app)
+            .get('/api/samples')
+            .query({ status: 'ACCEPTED,PROCESSING' })
+            .set('Authorization', `Bearer ${stageManagerToken}`);
+
+        expect(inProgressRes.status).toBe(200);
+        const inProgressSamples = inProgressRes.body.samples || inProgressRes.body.data || inProgressRes.body;
+        const inProgressIds = inProgressSamples.map(s => s.id);
+        expect(inProgressIds).not.toContain(sampleReceived.id);
+        expect(inProgressIds).toContain(sampleBench.id);
+    });
+
+    test('8. Stage 5 Completed population counts authoritative approvedAt today, ignoring updatedAt, and includes SUBMITTED_FULL', async () => {
         const res = await request(app)
             .get('/api/dashboard/home')
             .set('Authorization', `Bearer ${stageManagerToken}`);
@@ -502,33 +564,49 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         expect(res.status).toBe(200);
         const stageCounts = res.body.progressOverview?.stageCounts;
 
-        // Completed population includes: sampleApprovedToday, sampleApprovedPast, sampleCompletedNoApprovedAt
+        // Completed population includes: sampleApprovedToday, sampleApprovedPast, sampleSubmittedFull
+        // OMITS sampleCompletedNoApprovedAt (status: 'COMPLETED')
         expect(stageCounts.completed).toBe(3);
 
         // approvedToday must ONLY count sampleApprovedToday (approvedAt today)
-        // sampleApprovedPast (approvedAt in past) and sampleCompletedNoApprovedAt (null approvedAt) must be excluded
-        // even though both have updatedAt set to today!
+        // sampleApprovedPast (approvedAt in past), sampleSubmittedFull (null approvedAt),
+        // and sampleCompletedNoApprovedAt (null approvedAt) must be excluded
         expect(stageCounts.approvedToday).toBe(1);
     });
 
-    test('8. Destination population contract matches Stage 5 route (/samples?status=SUBMITTED_FULL,APPROVED)', async () => {
-        const res = await request(app)
+    test('9. COMPLETED count-to-destination alignment: COMPLETED fixture appears in neither card nor destination, while canonical completed samples appear in both', async () => {
+        const dashRes = await request(app)
+            .get('/api/dashboard/home')
+            .set('Authorization', `Bearer ${stageManagerToken}`);
+        const cardCompletedCount = dashRes.body.progressOverview?.stageCounts?.completed;
+
+        // Stage 5 destination (/samples?status=SUBMITTED_FULL,APPROVED)
+        const destRes = await request(app)
             .get('/api/samples')
             .query({ status: 'SUBMITTED_FULL,APPROVED' })
             .set('Authorization', `Bearer ${stageManagerToken}`);
 
-        expect(res.status).toBe(200);
-        const samples = res.body.samples || res.body.data || res.body;
+        expect(destRes.status).toBe(200);
+        const samples = destRes.body.samples || destRes.body.data || destRes.body;
         expect(Array.isArray(samples)).toBe(true);
 
         const sampleIds = samples.map(s => s.id);
-        // Must contain approved samples from stageLab
+
+        // 1. Both card and destination include canonical finished/approved samples:
         expect(sampleIds).toContain(sampleApprovedToday.id);
         expect(sampleIds).toContain(sampleApprovedPast.id);
+        expect(sampleIds).toContain(sampleSubmittedFull.id);
 
-        // Must NOT contain active processing specimens
+        // 2. Both card and destination omit active processing specimens:
         expect(sampleIds).not.toContain(sampleReview.id);
         expect(sampleIds).not.toContain(sampleApproval.id);
         expect(sampleIds).not.toContain(sampleBench.id);
+        expect(sampleIds).not.toContain(sampleReceived.id);
+
+        // 3. COMPLETED fixture appears in NEITHER the card count nor the destination results:
+        expect(sampleIds).not.toContain(sampleCompletedNoApprovedAt.id);
+        // Card count exactly equals destination results count
+        expect(sampleIds.length).toBe(cardCompletedCount);
+        expect(cardCompletedCount).toBe(3);
     });
 });

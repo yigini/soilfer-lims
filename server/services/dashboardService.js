@@ -284,7 +284,7 @@ async function getDashboardHome(user, options = {}) {
         // Strictly evaluates: physically received, accepted/processing, non-zero analytical items, all accepted
         const candidates = await prisma.sample.findMany({
             where: scopedWhere(sampleWhere, {
-                status: { in: ['RECEIVED', 'ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL', 'SUBMITTED_FULL'] },
+                status: { in: ['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL'] },
                 receptionDate: { not: null }
             }),
             include: {
@@ -432,7 +432,7 @@ async function getDashboardHome(user, options = {}) {
         const [completedCount, approvedTodayCount, totalSamplesCount] = await Promise.all([
             prisma.sample.count({
                 where: scopedWhere(sampleWhere, {
-                    status: { in: ['APPROVED', 'COMPLETED', 'SUBMITTED_FULL'] }
+                    status: { in: ['APPROVED', 'SUBMITTED_FULL'] }
                 })
             }),
             prisma.sample.count({
