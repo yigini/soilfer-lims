@@ -6,6 +6,7 @@ import QueueSummary from './QueueSummary';
 import WorkQueue from './WorkQueue';
 import ScopeSelector from './ScopeSelector';
 import UpdateStatus from './UpdateStatus';
+import ManagerProgressOverview from './ManagerProgressOverview';
 
 /**
  * DashboardShell
@@ -46,9 +47,21 @@ export default function DashboardShell({
     queueError = null,
     onRetryQueue,
     shiftNotes = null, // { title, items: [] }
-    shortcuts = [] // [{ label, route, description }]
+    shortcuts = [], // [{ label, route, description }]
+    progressOverview = null
 }) {
     const { t } = useLanguage();
+    const isManagerOverviewApplicable = Boolean((role === 'LAB_MANAGER' || (role === 'SUPER_ADMIN' && selectedLabId)) && progressOverview);
+    const [viewMode, setViewMode] = React.useState('overview');
+
+    const handleSelectQueueWithMode = (queueKey) => {
+        if (isManagerOverviewApplicable) {
+            setViewMode('queue');
+        }
+        if (onSelectQueue) {
+            onSelectQueue(queueKey);
+        }
+    };
     const hasSideContent = Boolean((shiftNotes && (shiftNotes.items?.length || shiftNotes.content)) || (shortcuts && shortcuts.length > 0));
     const [sideRailCollapsed, setSideRailCollapsed] = React.useState(() => {
         try {
@@ -132,32 +145,74 @@ export default function DashboardShell({
             <QueueSummary
                 metrics={metrics}
                 activeQueue={activeQueue}
-                onSelectQueue={onSelectQueue}
+                onSelectQueue={handleSelectQueueWithMode}
             />
 
-            {/* Main Content Grid (Queue Panel + Side Rail) */}
+            {/* Optional Manager View Mode Selector (Overview vs Work Queue) */}
+            {isManagerOverviewApplicable && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                    <div className="inline-flex p-1 bg-sf-inset rounded-xl border border-sf-divider text-xs font-bold">
+                        <button
+                            type="button"
+                            onClick={() => setViewMode('overview')}
+                            className={`px-3 py-1.5 rounded-lg transition-all ${viewMode === 'overview'
+                                ? 'bg-sf-surface text-sf-text shadow-sm'
+                                : 'text-sf-muted hover:text-sf-text'}`}
+                        >
+                            {t('dashboard.manager.operationalOverview', 'Operational Overview')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setViewMode('queue')}
+                            className={`px-3 py-1.5 rounded-lg transition-all ${viewMode === 'queue'
+                                ? 'bg-sf-surface text-sf-text shadow-sm'
+                                : 'text-sf-muted hover:text-sf-text'}`}
+                        >
+                            {t('dashboard.manager.pendingWorkQueue', 'Pending Work Queue')}
+                        </button>
+                    </div>
+
+                    <Link
+                        to="/manager-queue"
+                        className="text-xs font-bold text-sf-primary hover:underline inline-flex items-center gap-1 self-start sm:self-auto"
+                    >
+                        <span>{t('dashboard.manager.openTaskList', 'Open Manager Task List')}</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                    </Link>
+                </div>
+            )}
+
+            {/* Main Content Grid (Queue Panel / Overview + Side Rail) */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-                {/* Main Queue Column */}
+                {/* Main Content Column */}
                 <div className={hasSideContent && !sideRailCollapsed ? "xl:col-span-8 2xl:col-span-9 col-span-12" : "col-span-12"}>
-                    <WorkQueue
-                        queueKey={activeQueue}
-                        title={queueTitle}
-                        subtitle={queueSubtitle}
-                        availableQueues={availableQueues}
-                        onSelectQueue={onSelectQueue}
-                        rows={queueRows}
-                        total={queueTotal}
-                        page={queuePage}
-                        pageSize={queuePageSize}
-                        hasMore={queueHasMore}
-                        onPageChange={onQueuePageChange}
-                        isLoading={isQueueLoading}
-                        error={queueError}
-                        onRetry={onRetryQueue}
-                        sideRailCollapsed={sideRailCollapsed}
-                        onToggleSideRail={toggleSideRail}
-                        hasSideRail={hasSideContent}
-                    />
+                    {isManagerOverviewApplicable && viewMode === 'overview' ? (
+                        <ManagerProgressOverview
+                            progressOverview={progressOverview}
+                            activeLabId={selectedLabId}
+                            onSwitchToQueue={() => setViewMode('queue')}
+                        />
+                    ) : (
+                        <WorkQueue
+                            queueKey={activeQueue}
+                            title={queueTitle}
+                            subtitle={queueSubtitle}
+                            availableQueues={availableQueues}
+                            onSelectQueue={handleSelectQueueWithMode}
+                            rows={queueRows}
+                            total={queueTotal}
+                            page={queuePage}
+                            pageSize={queuePageSize}
+                            hasMore={queueHasMore}
+                            onPageChange={onQueuePageChange}
+                            isLoading={isQueueLoading}
+                            error={queueError}
+                            onRetry={onRetryQueue}
+                            sideRailCollapsed={sideRailCollapsed}
+                            onToggleSideRail={toggleSideRail}
+                            hasSideRail={hasSideContent}
+                        />
+                    )}
                 </div>
 
                 {/* Side Rail */}

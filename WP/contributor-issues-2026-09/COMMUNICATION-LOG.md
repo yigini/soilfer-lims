@@ -318,3 +318,17 @@ User explicitly approved combined PR132/133 merge/deployment. Accepted heads0a7c
 - PR139 merged as application commit `3241d4efdb8562575815328a7396c794ee9c12ac`, main CI35845226171 success, and serves in production v3.5.23. Agy recorded a fresh consistent backup, preserved rollback,28/28 read-only postflight, normal writers/clean proxy and no migration. Codex independently checked exact serving image sha256:9b1d62aa3606c29e6fc63211c6c92970365d5e8197ff831f6ef4f5836ab2db6f, healthy/public200, proxy without 503 and harmless public POST404.
 - Live read-only System Admin Chrome route `/samples?view=expected&projects=SOILFER-US&labs=GTM-LAB1` selected Expected Arrivals and displayed9,881 matching GTM field records. Search narrowed an existing ID to one; switching to Active Lab Work preserved search/project/lab scope; Clear removed URL/input filters. No production notification click, Kobo sync or sample mutation. Public #120 update: https://github.com/yigini/soilfer-lims/issues/120#issuecomment-5793460341 .
 - #120 stays open: current LAB_MANAGER dashboard source supplies pending-action metrics and renders WorkQueue; actual manager browser dashboard versus manager task list remains to be checked for the requested progress/stage/bottleneck distinction. One bounded role-specific check/correction and EVIDENCE.md link-description correction were queued to active Agy without interruption. No second deployment or closure claim.
+
+### 2026-09-23 13:30 UTC — #120 follow-up: Manager Dashboard Progress & Bottleneck Overview
+- Agy verified side-by-side gap: `/` (Dashboard) and `/manager-queue` previously both displayed the identical 5 pending-action queues without sample determination progress, stage counts, or bench bottleneck overviews.
+- Implemented focused correction on separate branch `fix/issue-120-manager-dashboard-progress`:
+  - `server/services/dashboardService.js`: Added set-based `progressOverview` aggregation for `LAB_MANAGER` and scoped `SUPER_ADMIN` with active lab selection. Computes analytical method determination progress (excluding gate analyses `DRYING` and `PREPARATION`), determination ratios, technician pending/done workloads, and 5-stage lifecycle pipeline counts.
+  - `client/src/components/dashboard/ManagerProgressOverview.jsx`: Created high-level overview rendering lifecycle stages, determination progress bars with "Ready for Review" badge, technician workload distribution cards, bottleneck warnings, and direct task list links.
+  - `client/src/components/dashboard/DashboardShell.jsx`: Integrated overview with view mode toggle (`[ Operational Overview ]` vs `[ Pending Work Queue ]`).
+  - `client/src/translations/{en,es,es-419,fr,pt}.json`: Added multilingual `dashboard.manager` dictionaries with parameterized ICU plurals.
+- Verification:
+  - Contract suite `server/tests/contracts/manager_dashboard_overview.test.js` passed (3/3).
+  - Production client build passed cleanly in 7.66s.
+  - Isolated Headless Chrome CDP browser journey (`server/scripts/run_manager_dashboard_tasklist_side_by_side.cjs`) passed (4/4 steps verified, 4 screenshots captured).
+- Candidate prepared as draft PR (Refs #120) awaiting independent Codex review. No merge or production deployment performed. Issue #120 remains **OPEN**.
+

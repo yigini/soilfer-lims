@@ -1,0 +1,60 @@
+{
+  "timestamp": "2026-09-23T13:31:56.229Z",
+  "status": "VERIFIED",
+  "findings": {
+    "managerDashboardOperationalOverview": {
+      "verified": true,
+      "details": {
+        "url": "/",
+        "h1": "Laboratory overview",
+        "kicker": "LABORATORY MANAGEMENT",
+        "subtitle": "Intake approval, analytical assignment, submission review, and final result authorization.",
+        "hasAnalysisProgress": true,
+        "hasTechWorkload": true,
+        "hasStagePipeline": true,
+        "hasBottleneckAlert": true,
+        "hasReadyBadge": true,
+        "progressBarsCount": 2,
+        "techCardsCount": 20
+      }
+    },
+    "managerDashboardQueueToggle": {
+      "verified": true,
+      "details": {
+        "hasWorkQueueTable": true,
+        "tableHeaders": [
+          "Work / Item",
+          "State",
+          "Count",
+          "Action"
+        ],
+        "rowsCount": 1
+      }
+    },
+    "managerTaskListActions": {
+      "verified": true,
+      "details": {
+        "h1": "Manager Task List",
+        "subtitle": "Pending Actionable Items & QC Exceptions",
+        "hasAssignTab": true,
+        "hasIntakeTab": true,
+        "hasReviewTab": true,
+        "hasApproveTab": true
+      }
+    },
+    "scopedSystemAdminOverview": {
+      "verified": true,
+      "details": {
+        "h1": "System administrator dashboard",
+        "hasAnalysisProgress": true,
+        "hasTechWorkload": true
+      }
+    }
+  },
+  "screenshots": [
+    "manager_dashboard_overview_verified.png",
+    "manager_dashboard_queue_toggle_verified.png",
+    "manager_tasklist_action_verified.png",
+    "super_admin_scoped_dashboard_verified.png"
+  ]
+}

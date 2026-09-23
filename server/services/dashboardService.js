@@ -112,6 +112,7 @@ async function getDashboardHome(user, options = {}) {
     let preview = { queueKey: '', unit: '', rows: [], total: 0, page: 1, pageSize: 10, hasMore: false };
     let recommendedQueue = '';
     let capabilities = {};
+    let progressOverview = null;
 
     // ── 1. SAMPLE_RECEPTION ──
     if (role === 'SAMPLE_RECEPTION') {
@@ -331,6 +332,94 @@ async function getDashboardHome(user, options = {}) {
         }) || 'manager.review';
 
         preview = await getQueueRowsInternal(actorScope, recommendedQueue, { page: 1, pageSize: 10, catMap, isDryingApplicable, candidates });
+
+        // 6. Build Progress & Bottleneck Overview for Manager Dashboard (Issue #120)
+        const oversight = candidates
+            .map(s => {
+                const analyticalWork = (s.workItems || []).filter(w => {
+                    const isGate = Array.isArray(GATE_ANALYSES) ? GATE_ANALYSES.includes(w.analysis) : GATE_ANALYSES?.has ? GATE_ANALYSES.has(w.analysis) : false;
+                    return !isGate;
+                });
+                const total = analyticalWork.length;
+                const completed = analyticalWork.filter(w => ['COMPLETED', 'ACCEPTED'].includes(w.status)).length;
+                const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+                return {
+                    sampleId: s.id,
+                    labId: s.labId || s.originalId || s.id,
+                    originalId: s.originalId || null,
+                    projectCode: s.projectCode || null,
+                    status: s.status,
+                    total,
+                    completed,
+                    progress,
+                    isReady: total > 0 && completed === total
+                };
+            })
+            .filter(s => s.total > 0)
+            .sort((a, b) => {
+                const aActive = a.progress > 0 && a.progress < 100 ? 1 : 0;
+                const bActive = b.progress > 0 && b.progress < 100 ? 1 : 0;
+                if (aActive !== bActive) return bActive - aActive;
+                return b.progress - a.progress;
+            })
+            .slice(0, 15);
+
+        const labTechs = await prisma.user.findMany({
+            where: {
+                role: 'LAB_TECHNICIAN',
+                isActive: true,
+                ...(actorScope.activeLabId ? { labId: actorScope.activeLabId } : {})
+            },
+            select: { id: true, username: true, name: true }
+        });
+
+        const allScopedWork = await prisma.workItem.findMany({
+            where: scopedWhere(workWhere, {}),
+            select: { id: true, status: true, assignedTo: true }
+        });
+
+        const techWorkload = labTechs.map(t => {
+            const assignedItems = allScopedWork.filter(w => w.assignedTo === t.username);
+            const completed = assignedItems.filter(w => ['COMPLETED', 'ACCEPTED'].includes(w.status)).length;
+            const pending = assignedItems.filter(w => ['PENDING', 'ASSIGNED', 'IN_PROGRESS', 'NOT_ASSIGNED'].includes(w.status)).length;
+            return {
+                id: t.id,
+                username: t.username,
+                name: t.name || t.username,
+                assigned: assignedItems.length,
+                completed,
+                pending
+            };
+        });
+
+        const [inProgressCount, completedTodayCount, totalSamplesCount] = await Promise.all([
+            prisma.sample.count({
+                where: scopedWhere(sampleWhere, { status: { in: ['ACCEPTED', 'PROCESSING'] } })
+            }),
+            prisma.sample.count({
+                where: scopedWhere(sampleWhere, {
+                    status: { in: ['COMPLETED', 'APPROVED'] },
+                    updatedAt: { gte: actorScope.dayStart, lt: actorScope.dayEnd }
+                })
+            }),
+            prisma.sample.count({
+                where: scopedWhere(sampleWhere, {})
+            })
+        ]);
+
+        progressOverview = {
+            oversight,
+            techWorkload,
+            stageCounts: {
+                pendingIntake: pendingIntakeCount,
+                inProgress: inProgressCount,
+                awaitingReview: reviewCount,
+                finalApproval: approvalEligibleCount,
+                completedToday: completedTodayCount,
+                unassignedTasks: unassignedTasksCount,
+                totalSamples: totalSamplesCount
+            }
+        };
     }
 
     // ── 4. MASTER_USER ──
@@ -579,9 +668,11 @@ async function getDashboardHome(user, options = {}) {
         recommendedQueue,
         metrics,
         preview,
+        ...(progressOverview ? { progressOverview } : {}),
         sections: {
             queue: 'available',
-            activity: 'available'
+            activity: 'available',
+            ...(progressOverview ? { progressOverview: 'available' } : {})
         }
     };
 }

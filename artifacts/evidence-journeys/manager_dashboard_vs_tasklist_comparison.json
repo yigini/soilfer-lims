@@ -1,0 +1,58 @@
+{
+  "timestamp": "2026-09-23T12:48:40.590Z",
+  "comparison": {
+    "dashboard": {
+      "url": "/",
+      "h1": "Laboratory overview",
+      "kicker": "LABORATORY MANAGEMENT",
+      "subtitle": "Intake approval, analytical assignment, submission review, and final result authorization.",
+      "metricButtons": [
+        "Needs a decision 0",
+        "Submitted work 0",
+        "Final approval 0",
+        "Assign work 1",
+        "Intake acceptance 0"
+      ],
+      "tableHeaders": [
+        "Work / Item",
+        "State",
+        "Count",
+        "Action"
+      ],
+      "rowCount": 1,
+      "sampleRow": "OC_WALKLEY_BLACK | OC_WALKLEY_BLACK | Analytical method | 1 unassigned work items ready for allocation to bench technicians. | \tUnassigned\t1determinations\t | Assign by method",
+      "sectionTitles": [
+        "Assign work",
+        "Manager Oversight & Review",
+        "Messages & Alerts"
+      ],
+      "hasAnalysisProgress": false,
+      "hasTechWorkload": false,
+      "hasBottlenecks": false,
+      "hasWorkQueue": true
+    },
+    "managerQueue": {
+      "url": "/manager-queue",
+      "h1": "Manager Task List",
+      "kicker": "",
+      "subtitle": "Pending Actionable Items & QC Exceptions",
+      "tabs": [
+        "More"
+      ],
+      "tableHeaders": [],
+      "itemCount": 0,
+      "sampleItem": null,
+      "sectionTitles": [
+        "GTM-2026-0001",
+        "Messages & Alerts"
+      ]
+    },
+    "finding": {
+      "dashboardLacksProgressOverview": true,
+      "dashboardLacksTechWorkload": true,
+      "dashboardLacksBottleneckOverview": true,
+      "dashboardRendersWorkQueueOnly": true,
+      "taskQueueConflationConfirmed": true
+    }
+  }
+}

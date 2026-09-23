@@ -1216,6 +1216,77 @@ Following explicit user authorization and product direction on 23 September 2026
 #### 6. Issue Status
 - **Issue #120**: Fix deployed and verified on production (`v3.5.23-3241d4e`). Remains **OPEN** pending independent live role acceptance.
 
+---
+
+### 15. Issue #120 Follow-up: Laboratory Manager Dashboard Progress & Bottleneck Overview
+
+Following the v3.5.23 production deployment of PR #139, side-by-side inspection of the live system revealed that while Kobo expected arrivals routing and search/filter preservation are operational, the `LAB_MANAGER` Dashboard (`/`) and scoped System Admin Dashboard still rendered the 5 pending-action queues (`WorkQueue`), duplicating the actionable workbench of the Manager Task List (`/manager-queue`) rather than displaying a high-level operational progress, stage, and bottleneck overview.
+
+A focused correction was implemented on branch `fix/issue-120-manager-dashboard-progress` to complete the architectural separation requested in Issue #120:
+
+#### 1. Architectural Distinction & Component Design
+- **Laboratory Manager Dashboard (`/`)**:
+  - High-level operational overview for `LAB_MANAGER` and scoped `SUPER_ADMIN` with active laboratory selection (`progressOverview`).
+  - **Operational Stage Pipeline**: 5 lifecycle cards showing truthful, set-based counts across the analytical process:
+    - *Intake Acceptance*: Samples awaiting physical reception / admission.
+    - *In Analysis*: Active specimens undergoing analytical determinations (`ACCEPTED`, `PROCESSING`).
+    - *Awaiting Review*: Samples with submissions awaiting manager review (`PENDING_REVIEW`).
+    - *Final Approval*: Samples with all analytical determinations completed and ready for authorization.
+    - *Completed Today*: Samples authorized/approved today.
+  - **Sample Determination Progress Monitor**:
+    - Displays active samples undergoing laboratory determinations.
+    - Visual progress bars reflecting percentage completion across ordered methods.
+    - Honest determination ratio (`completed / total analyses`).
+    - Prominent `READY FOR REVIEW` badge when all analytical determinations are complete.
+    - Direct drill-down link to sample detail (`/samples/:id`).
+  - **Technician Workload & Bottlenecks**:
+    - Workload distribution cards per active bench technician showing assigned, completed, and pending determination counts.
+    - `High Workload` warning badge when pending determinations exceed threshold (>= 15).
+    - Prominent `Unassigned Determinations` warning banner with direct "Assign" action linking to the assignment lane.
+  - **Dashboard View Switcher**:
+    - Managers and scoped system administrators can toggle between `[ Operational Overview ]` and `[ Pending Work Queue ]` without losing dashboard context.
+  - **Direct Continuation Links**:
+    - Header button "Open manager task list" linking directly to `/manager-queue`.
+- **Manager Task List (`/manager-queue`)**:
+  - Remains the dedicated operational execution workbench for taking action on pending queues (QC Exceptions, New Intake, Assign Work, Review Submissions, Final Approvals).
+
+#### 2. Gate Determination Exclusion & Scientific Rigor
+- Analytical progress calculations strictly exclude preparation and conditioning gate analyses (`DRYING` and `PREPARATION` in `GATE_ANALYSES`).
+- This ensures sample progress bars reflect actual analytical method determinations (e.g. pH, EC, Walkley-Black OC, Hydrometer Texture, Olsen P) rather than gate setup phases.
+
+#### 3. Database & Policy Invariance
+- **Zero Schema Migrations**: All metrics and oversight data are computed via pure set-based aggregations in `server/services/dashboardService.js`.
+- **Zero Production Mutations**: No production samples, results, work items, or Kobo sync records were created, modified, or deleted.
+
+#### 4. Multilingual Localization (i18n)
+- Complete `dashboard.manager` dictionaries added across all 5 supported locales:
+  - English (`en.json`)
+  - Spanish (`es.json`)
+  - Latin American Spanish (`es-419.json`)
+  - French (`fr.json`)
+  - Portuguese (`pt.json`)
+- Dynamic unit pluralization correctly parameterized with `{ count }` supporting ICU format (`samples`, `analyses`).
+
+#### 5. Automated Tests & Headless Chrome CDP Verification
+- **Targeted Contract Tests**:
+  - `server/tests/contracts/manager_dashboard_overview.test.js` (3/3 passed in 2.07s):
+    1. `LAB_MANAGER` dashboard home includes `progressOverview` with analytical oversight and `techWorkload`.
+    2. `SUPER_ADMIN` scoped to a lab receives matching `progressOverview`.
+    3. Cross-lab isolation: Manager 2 in LAB-HND strictly does not see Manager 1 records or technicians.
+- **Client Build**:
+  - `npm run build` in `client` passed cleanly in 7.66s without warnings or errors.
+- **Side-by-Side Browser CDP Journey** (`server/scripts/run_manager_dashboard_tasklist_side_by_side.cjs`):
+  - Executed end-to-end on an isolated disposable database with realistic multi-technician fixture data:
+    1. `/` (Dashboard - Operational Overview): Verified h1 "Laboratory overview", Stage Pipeline (5 cards with accurate counts and ICU plurals), Analysis Progress bars (33% and 100% with "READY FOR REVIEW" badge), Technician Workload cards, and Unassigned Alert banner. Screenshot: `manager_dashboard_overview_verified.png`.
+    2. `/` (Dashboard - Pending Work Queue toggle): Verified toggle to work queue table preview with Action buttons. Screenshot: `manager_dashboard_queue_toggle_verified.png`.
+    3. `/manager-queue` (Manager Task List): Verified dedicated execution workbench with Assign Work, Review Submissions, Final Approvals, and QC Exceptions tabs. Screenshot: `manager_tasklist_action_verified.png`.
+    4. `/?labId=LAB-GTM` (Scoped System Admin Dashboard): Verified scoped overview matching Guatemala lab workload. Screenshot: `super_admin_scoped_dashboard_verified.png`.
+  - Machine-readable evidence log: `artifacts/evidence-journeys/manager_dashboard_overview_evidence.json` (Status: `VERIFIED`, 4/4 passed).
+
+#### 6. Issue Status
+- **Issue #120**: Remains **OPEN** (`Refs #120`). Follow-up PR opened as draft for independent review; no merge or deployment permitted until explicitly authorized.
+
+
 
 
 
