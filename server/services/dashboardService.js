@@ -284,7 +284,7 @@ async function getDashboardHome(user, options = {}) {
         // Strictly evaluates: physically received, accepted/processing, non-zero analytical items, all accepted
         const candidates = await prisma.sample.findMany({
             where: scopedWhere(sampleWhere, {
-                status: { in: ['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL'] },
+                status: { in: ['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL', 'SUBMITTED_FULL'] },
                 receptionDate: { not: null }
             }),
             include: {
@@ -315,7 +315,7 @@ async function getDashboardHome(user, options = {}) {
                 approvalEligibleCount++;
             } else if (hasSubmittedWork) {
                 stageAwaitingReviewCount++;
-            } else {
+            } else if (['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL'].includes(s.status)) {
                 stageInProgressCount++;
             }
         }
