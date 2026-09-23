@@ -209,4 +209,159 @@ describe('Issue #123: Workbench Search & Multi-Field Query Contract', () => {
         // Lab B's work item must NOT be present
         expect(allItemsA.some(i => i.id === workItemB.id)).toBe(false);
     });
+
+    test('9. Specimen code labId work items are visible in default queue (Issue #123 root cause)', async () => {
+        const ts = Date.now();
+        const specimenCode = `GHA0816-QUEUE-${ts}`;
+        const techAUsername = 'test_lab_technician_labsearcha';
+
+        const sampleReal = await prisma.sample.create({
+            data: {
+                id: specimenCode,
+                labId: specimenCode,
+                originalId: `FIELD-${specimenCode}`,
+                assignedLab: labAId,
+                status: 'ACCEPTED',
+                projectCode: 'GTM-PRJ-01'
+            }
+        });
+
+        const workItemSpecimen = await prisma.workItem.create({
+            data: {
+                id: `WI-SPECIMEN-${ts}`,
+                sampleId: sampleReal.id,
+                labId: specimenCode,
+                assignedLab: labAId,
+                analysis: 'SOC',
+                status: 'ASSIGNED',
+                assignedTo: techAUsername,
+                version: 1
+            }
+        });
+
+        const res = await request(app)
+            .get('/api/workbench/queue')
+            .set('Authorization', `Bearer ${techAToken}`);
+
+        expect(res.status).toBe(200);
+        const allItems = res.body.groups.flatMap(g => g.items);
+        const found = allItems.find(i => i.id === workItemSpecimen.id);
+        expect(found).toBeDefined();
+        expect(found.sampleDisplayId).toBe(specimenCode);
+    });
+
+    test('10. Search by methodology name filters to work items with that methodology assigned', async () => {
+        const ts = Date.now();
+        const techAUsername = 'test_lab_technician_labsearcha';
+
+        const method = await prisma.methodology.create({
+            data: {
+                id: `METH-TEST-${ts}`,
+                analysisCode: 'PH',
+                name: `Potentiometric pH Method ${ts}`,
+                standard: `ISO-10390-${ts}`
+            }
+        });
+
+        const workItemWithMethod = await prisma.workItem.create({
+            data: {
+                id: `WI-METH-${ts}`,
+                sampleId: sampleA2.id,
+                analysis: 'PH',
+                status: 'ASSIGNED',
+                assignedTo: techAUsername,
+                labId: sampleA2.labId,
+                assignedLab: labAId,
+                methodologyId: method.id,
+                version: 1
+            }
+        });
+
+        const res = await request(app)
+            .get('/api/workbench/queue')
+            .set('Authorization', `Bearer ${techAToken}`)
+            .query({ search: `Potentiometric pH Method ${ts}` });
+
+        expect(res.status).toBe(200);
+        const allItems = res.body.groups.flatMap(g => g.items);
+        expect(allItems.some(i => i.id === workItemWithMethod.id)).toBe(true);
+    });
+
+    test('11. Search by methodology standard filters to work items with that methodology assigned', async () => {
+        const ts = Date.now();
+        const techAUsername = 'test_lab_technician_labsearcha';
+
+        const method = await prisma.methodology.create({
+            data: {
+                id: `METH-STD-${ts}`,
+                analysisCode: 'SOC',
+                name: `Sulfochromic Oxidation ${ts}`,
+                standard: `ISO-14235-${ts}`
+            }
+        });
+
+        const workItemWithStd = await prisma.workItem.create({
+            data: {
+                id: `WI-STD-${ts}`,
+                sampleId: sampleA1.id,
+                analysis: 'SOC',
+                status: 'ASSIGNED',
+                assignedTo: techAUsername,
+                labId: sampleA1.labId,
+                assignedLab: labAId,
+                methodologyId: method.id,
+                version: 1
+            }
+        });
+
+        const res = await request(app)
+            .get('/api/workbench/queue')
+            .set('Authorization', `Bearer ${techAToken}`)
+            .query({ search: `ISO-14235-${ts}` });
+
+        expect(res.status).toBe(200);
+        const allItems = res.body.groups.flatMap(g => g.items);
+        expect(allItems.some(i => i.id === workItemWithStd.id)).toBe(true);
+    });
+
+    test('12. Search by specimen labId (e.g. GHA0816-1-1C-S) filters to that sample', async () => {
+        const ts = Date.now();
+        const specimenCode = `GHA0816-SEARCH-${ts}`;
+        const techAUsername = 'test_lab_technician_labsearcha';
+
+        const sampleReal = await prisma.sample.create({
+            data: {
+                id: specimenCode,
+                labId: specimenCode,
+                originalId: `FIELD-${specimenCode}`,
+                assignedLab: labAId,
+                status: 'ACCEPTED',
+                projectCode: 'GTM-PRJ-01'
+            }
+        });
+
+        const workItemReal = await prisma.workItem.create({
+            data: {
+                id: `WI-GHA-SRCH-${ts}`,
+                sampleId: sampleReal.id,
+                labId: specimenCode,
+                assignedLab: labAId,
+                analysis: 'SOC',
+                status: 'ASSIGNED',
+                assignedTo: techAUsername,
+                version: 1
+            }
+        });
+
+        const res = await request(app)
+            .get('/api/workbench/queue')
+            .set('Authorization', `Bearer ${techAToken}`)
+            .query({ search: specimenCode });
+
+        expect(res.status).toBe(200);
+        const allItems = res.body.groups.flatMap(g => g.items);
+        expect(allItems.length).toBe(1);
+        expect(allItems[0].id).toBe(workItemReal.id);
+        expect(allItems[0].sampleDisplayId).toBe(specimenCode);
+    });
 });

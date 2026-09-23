@@ -198,6 +198,48 @@ function buildScopedWhere(user, existingWhere = {}, options = {}) {
 }
 
 /**
+ * Resolves the authoritative facility laboratory for an entity.
+ * - Explicit assignedLab is authoritative for facility scope.
+ * - If assignedLab is absent, linked sample assignedLab is checked.
+ * - If neither is present, falls back to legacy labId (or configured labField/altLabField).
+ */
+function resolveAuthoritativeLab(entity, labField, altLabField) {
+    if (!entity) return null;
+
+    // 1. Explicit assignedLab is authoritative for facility scope
+    if (entity.assignedLab && String(entity.assignedLab).trim() !== '') {
+        return String(entity.assignedLab).trim();
+    }
+
+    // 2. Linked sample's explicit assignedLab fallback for work items
+    if (entity.sample?.assignedLab && String(entity.sample.assignedLab).trim() !== '') {
+        return String(entity.sample.assignedLab).trim();
+    }
+
+    // 3. Configured primary labField if present and not 'assignedLab'
+    if (labField && labField !== 'assignedLab' && entity[labField] && String(entity[labField]).trim() !== '') {
+        return String(entity[labField]).trim();
+    }
+
+    // 4. Alt lab field fallback if not 'assignedLab'
+    if (altLabField && altLabField !== 'assignedLab' && entity[altLabField] && String(entity[altLabField]).trim() !== '') {
+        return String(entity[altLabField]).trim();
+    }
+
+    // 5. Direct entity.labId fallback
+    if (entity.labId && String(entity.labId).trim() !== '') {
+        return String(entity.labId).trim();
+    }
+
+    // 6. Linked sample labId fallback
+    if (entity.sample?.labId && String(entity.sample.labId).trim() !== '') {
+        return String(entity.sample.labId).trim();
+    }
+
+    return null;
+}
+
+/**
  * Validates that a fetched entity belongs to the user's lab scope.
  * Use this for POST-FETCH validation (e.g., after findUnique by ID).
  */
@@ -223,7 +265,7 @@ function canAccessEntity(user, entity, options = {}) {
     }
 
     const labScope = user.labId || null;
-    const { labField = 'labId', altLabField = 'assignedLab', entityType } = options;
+    const { labField = 'assignedLab', altLabField = 'labId', entityType } = options;
 
     // Strict technician assignment check:
     // If entity is a WorkItem and user is a LAB_TECHNICIAN, they can ONLY access work items assigned to them.
@@ -237,7 +279,7 @@ function canAccessEntity(user, entity, options = {}) {
     // 1. Direct assignedTo check on entity or workItems
     if (entity.assignedTo && (entity.assignedTo === user.username || entity.assignedTo === user.id)) {
         if (labScope) {
-            const itemLab = entity[labField] || (altLabField && entity[altLabField]);
+            const itemLab = resolveAuthoritativeLab(entity, labField, altLabField);
             if (itemLab && itemLab !== labScope) {
                 return false;
             }
@@ -249,8 +291,8 @@ function canAccessEntity(user, entity, options = {}) {
         const isAssigned = (wi.assignedTo === user.username || wi.assignedTo === user.id);
         if (!isAssigned) return false;
         if (labScope) {
-            const wiLab = wi.labId || wi.assignedLab;
-            const entityLab = entity[labField] || (altLabField && entity[altLabField]);
+            const wiLab = resolveAuthoritativeLab(wi, 'assignedLab', 'labId');
+            const entityLab = resolveAuthoritativeLab(entity, labField, altLabField);
             if ((wiLab && wiLab !== labScope) || (entityLab && entityLab !== labScope)) {
                 return false;
             }
@@ -266,8 +308,8 @@ function canAccessEntity(user, entity, options = {}) {
         if (entityType === 'WorkItem' && user.role === 'LAB_TECHNICIAN') {
             return false;
         }
-        if (entity[labField] === labScope) return true;
-        if (altLabField && entity[altLabField] === labScope) return true;
+        const entityLab = resolveAuthoritativeLab(entity, labField, altLabField);
+        if (entityLab === labScope) return true;
         if (entity.labLocation === labScope) return true;
     }
 
