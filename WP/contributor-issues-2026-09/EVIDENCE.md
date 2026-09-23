@@ -1413,7 +1413,29 @@ A focused correction was implemented on branch `fix/issue-120-manager-dashboard-
   - Browser CDP suite `run_manager_dashboard_tasklist_side_by_side.cjs`: passed all 6 steps with verified scope retention, same-mounted switch, queue refresh, and back-forward navigation.
   - Production client build `npm run build`: built cleanly in 15.05s.
 
-#### 12. Issue Status
+#### 12. Review Feedback Resolution: Overtaking Refresh Loading Clearance & Lifecycle Overlap Tests (PR #141 / Comment 5803474139)
+- **Problem & Reproduction**:
+  - Independent replay at head `dbb23e61824ce7ba5b15a113a82949edb8048993` confirmed that all 10 race tests and late-A response discards passed.
+  - A narrow regression was identified: `useRealtimeData`'s `finally` block previously required `isInitial` in addition to `requestId === activeRequestIdRef.current`. If an initial fetch (`isInitial = true`, request 1) was still pending when a manual `refresh()` or polling request (`isInitial = false`, request 2) was dispatched, the newer request settled with `isInitial = false` and did not clear `loading`, while the initial request was discarded as stale (`1 !== 2`). Consequently, `loading` remained `true` indefinitely after all requests settled.
+  - Reproduction script: `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/pr141-refresh-loading-review.cjs`.
+- **Bounded Remediation**:
+  - In `client/src/hooks/useRealtimeData.js`:
+    - Updated `finally` block to clear `loading` upon completion of the current active request:
+      ```javascript
+      finally {
+          if (mountedRef.current && requestId === activeRequestIdRef.current) {
+              setLoading(false);
+          }
+      }
+      ```
+    - Preserved unmount protection (`mountedRef.current`), stale-request discard (`requestId === activeRequestIdRef.current`), and ordinary background refresh non-flashing (since `isInitial = false` does not set `loading = true` during background fetch).
+- **Verification**:
+  - `work/pr141-refresh-loading-review.cjs`: passed cleanly with `afterRefresh.loading: false` and `afterAllSettled.loading: false`.
+  - Added initial-plus-refresh overlap tests (success, failure, ordinary refresh data retention) to `work/pr141-race-mounted-suite.cjs` (**13/13 passed**).
+  - Retained the complete mounted lifecycle suite in the repository at `server/scripts/verify_realtimedata_lifecycle.cjs` (**13/13 passed**).
+  - Production client build `npm run build`: built cleanly in 8.87s.
+
+#### 13. Issue Status
 - **Issue #120**: Remains **OPEN** (`Refs #120`). Follow-up PR #141 updated for independent review; no merge or deployment permitted until explicitly authorized.
 
 

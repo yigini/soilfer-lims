@@ -478,6 +478,20 @@ User explicitly approved combined PR132/133 merge/deployment. Accepted heads0a7c
   - Production client build: built in 15.05s.
 - Ready to commit and push updated head to PR #141. Issue #120 remains strictly **OPEN** (`Refs #120`); release remains held until acceptance; no production mutation.
 
+## 23 September 2026 — 23:49 CEST: Overtaking Refresh Loading Clearance & Lifecycle Overlap Tests Resolved
+- Context: Independent review at head `dbb23e61824ce7ba5b15a113a82949edb8048993` confirmed all 10 race tests passed, but noted that `useRealtimeData`'s `finally` required `isInitial`, causing `loading` to stay `true` if an overtaking refresh/poll completed before the initial request settled (reproduced via `work/pr141-refresh-loading-review.cjs`).
+- Remediation:
+  - `client/src/hooks/useRealtimeData.js`:
+    - Updated `finally` to clear `loading` upon completion of the current active request (`if (mountedRef.current && requestId === activeRequestIdRef.current) setLoading(false);`).
+    - Retained stale request and unmount guards.
+    - Preserved data retention during ordinary background refresh.
+- Verification:
+  - Reproduction `pr141-refresh-loading-review.cjs`: PASS (`loading: false`).
+  - Added initial-plus-refresh overlap tests (success, failure, ordinary refresh data preservation) to `work/pr141-race-mounted-suite.cjs` (13/13 passed).
+  - Retained complete mounted lifecycle suite in repo at `server/scripts/verify_realtimedata_lifecycle.cjs` (13/13 passed).
+  - Production client build: built in 8.87s.
+- Ready to commit and push updated head to PR #141. Issue #120 remains strictly **OPEN** (`Refs #120`); release remains held until acceptance; no production mutation.
+
 
 
 

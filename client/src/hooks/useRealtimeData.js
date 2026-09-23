@@ -136,7 +136,7 @@ export function useRealtimeData(url, options = {}) {
             setError(err.response?.data?.error || err.message);
             console.error(`[useRealtimeData] Failed to fetch ${requestUrl}:`, err.message);
         } finally {
-            if (mountedRef.current && requestId === activeRequestIdRef.current && isInitial) {
+            if (mountedRef.current && requestId === activeRequestIdRef.current) {
                 setLoading(false);
             }
         }
