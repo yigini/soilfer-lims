@@ -31,12 +31,24 @@ const SamplesFilterBar = ({
 
     const views = propViews || facets?.views || {};
 
+    // Synchronize local search input when external search prop updates (navigation, reset)
+    useEffect(() => {
+        setLocalSearch(search || '');
+    }, [search]);
+
     useEffect(() => {
         const handler = setTimeout(() => {
             if (localSearch !== search) onSearchChange(localSearch);
         }, 300);
         return () => clearTimeout(handler);
     }, [localSearch, search, onSearchChange]);
+
+    const handleViewClick = (newView) => {
+        if (localSearch !== search) {
+            onSearchChange(localSearch);
+        }
+        onViewChange?.(newView);
+    };
 
     const isFilterActive = (qf) => {
         const current = activeFilters[qf.param];
@@ -65,7 +77,7 @@ const SamplesFilterBar = ({
                 <div className="flex bg-sf-canvas p-1 rounded-xl border border-sf-divider gap-1 shrink-0 overflow-x-auto">
                     <button
                         type="button"
-                        onClick={() => onViewChange?.('daily')}
+                        onClick={() => handleViewClick('daily')}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                             view === 'daily'
                                 ? 'bg-emerald-600 text-white shadow-sm'
@@ -84,7 +96,7 @@ const SamplesFilterBar = ({
                     </button>
                     <button
                         type="button"
-                        onClick={() => onViewChange?.('expected')}
+                        onClick={() => handleViewClick('expected')}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                             view === 'expected'
                                 ? 'bg-indigo-600 text-white shadow-sm'
@@ -103,7 +115,7 @@ const SamplesFilterBar = ({
                     </button>
                     <button
                         type="button"
-                        onClick={() => onViewChange?.('registry')}
+                        onClick={() => handleViewClick('registry')}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                             view === 'registry'
                                 ? 'bg-slate-700 text-white shadow-sm'
@@ -135,7 +147,10 @@ const SamplesFilterBar = ({
                         />
                         {localSearch && (
                             <button
-                                onClick={() => setLocalSearch('')}
+                                onClick={() => {
+                                    setLocalSearch('');
+                                    onSearchChange('');
+                                }}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-sf-muted hover:text-sf-text"
                             >
                                 <X size={14} />
@@ -155,6 +170,7 @@ const SamplesFilterBar = ({
                                 return (
                                     <div key={qf.id} className="group relative">
                                         <button
+                                            data-testid={`qf-${qf.id}`}
                                             onClick={() => handleFilterClick(qf)}
                                             className={`
                                                 relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg 
@@ -193,7 +209,11 @@ const SamplesFilterBar = ({
                             {/* Clear All active filters */}
                             {hasActiveFilters && (
                                 <button
-                                    onClick={onReset}
+                                    data-testid="clear-all-filters"
+                                    onClick={() => {
+                                        setLocalSearch('');
+                                        onReset();
+                                    }}
                                     className="ml-0.5 p-1.5 text-sf-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
                                     title={t('samplesSection.filterBar.clearAll', 'Clear all filters')}
                                 >

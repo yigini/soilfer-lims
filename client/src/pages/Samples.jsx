@@ -55,6 +55,9 @@ const Samples = () => {
     const [sort, setSort] = useState('attention');
     const [order, setOrder] = useState('desc');
 
+    const searchRef = useRef(initialUrlState.search);
+    const filtersRef = useRef(initialUrlState.filters);
+
     // UI State
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selected, setSelected] = useState([]);
@@ -115,13 +118,20 @@ const Samples = () => {
     useEffect(() => {
         const urlState = extractUrlState(searchParams);
         setView(prev => (prev !== urlState.view ? urlState.view : prev));
-        setSearch(prev => (prev !== urlState.search ? urlState.search : prev));
+        setSearch(prev => {
+            if (prev !== urlState.search) {
+                searchRef.current = urlState.search;
+                return urlState.search;
+            }
+            return prev;
+        });
         setFilters(prev => {
             const prevKeys = Object.keys(prev);
             const newKeys = Object.keys(urlState.filters);
             if (prevKeys.length === newKeys.length && prevKeys.every(k => prev[k] === urlState.filters[k])) {
                 return prev;
             }
+            filtersRef.current = urlState.filters;
             return urlState.filters;
         });
         setMeta(prev => (prev.page === 1 ? prev : { ...prev, page: 1 }));
@@ -130,12 +140,12 @@ const Samples = () => {
     const handleViewChange = (newView) => {
         setView(newView);
         // Clear quick status filter when changing views so the selected view takes effect
-        setFilters(prev => {
-            const next = { ...prev };
-            delete next.status;
-            return next;
-        });
+        const nextFilters = { ...filtersRef.current };
+        delete nextFilters.status;
+        filtersRef.current = nextFilters;
+        setFilters(nextFilters);
         setMeta(prev => ({ ...prev, page: 1 }));
+
         setSearchParams(prev => {
             const next = new URLSearchParams(prev);
             if (newView === 'daily') {
@@ -143,7 +153,33 @@ const Samples = () => {
             } else {
                 next.set('view', newView);
             }
+            // Status is intentionally cleared when switching views
             next.delete('status');
+
+            // Explicitly preserve current search
+            const currentSearch = searchRef.current;
+            if (currentSearch && currentSearch.trim()) {
+                next.set('search', currentSearch.trim());
+            } else {
+                next.delete('search');
+                next.delete('q');
+            }
+
+            // Explicitly preserve advanced filters (projects, labs, countries)
+            ['projects', 'labs', 'countries'].forEach(key => {
+                if (nextFilters[key]) {
+                    next.set(key, nextFilters[key]);
+                } else {
+                    next.delete(key);
+                }
+            });
+            next.delete('project');
+            next.delete('projectId');
+            next.delete('lab');
+            next.delete('labId');
+            next.delete('assignedLab');
+            next.delete('country');
+
             return next;
         }, { replace: true });
     };
@@ -213,10 +249,25 @@ const Samples = () => {
         if (newPage > 0 && newPage <= meta.pages) setMeta(prev => ({ ...prev, page: newPage }));
     };
 
-    const handleSearchChange = (val) => { setSearch(val); setMeta(prev => ({ ...prev, page: 1 })); };
+    const handleSearchChange = (val) => {
+        const cleanVal = (val || '').trim();
+        searchRef.current = val || '';
+        setSearch(val || '');
+        setMeta(prev => ({ ...prev, page: 1 }));
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            if (cleanVal) {
+                next.set('search', cleanVal);
+            } else {
+                next.delete('search');
+                next.delete('q');
+            }
+            return next;
+        }, { replace: true });
+    };
 
     const handleQuickFilter = (param, value) => {
-        const current = filters[param] || '';
+        const current = filtersRef.current[param] || '';
         let currentList = current ? current.split(',').map(v => v.trim()) : [];
         const incomingList = String(value).split(',').map(v => v.trim());
 
@@ -234,12 +285,57 @@ const Samples = () => {
             newList = [...currentList, ...toAdd];
         }
 
-        setFilters(prev => ({ ...prev, [param]: newList.join(',') }));
+        const nextVal = newList.join(',');
+        const nextFilters = { ...filtersRef.current };
+        if (nextVal) {
+            nextFilters[param] = nextVal;
+        } else {
+            delete nextFilters[param];
+        }
+        filtersRef.current = nextFilters;
+        setFilters(nextFilters);
         setMeta(prev => ({ ...prev, page: 1 }));
+
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            if (nextVal) {
+                next.set(param, nextVal);
+            } else {
+                next.delete(param);
+            }
+            if (param === 'projects') { next.delete('project'); next.delete('projectId'); }
+            if (param === 'labs') { next.delete('lab'); next.delete('labId'); next.delete('assignedLab'); }
+            if (param === 'countries') { next.delete('country'); }
+            return next;
+        }, { replace: true });
     };
 
-    const handleAdvancedApply = (newFilters) => { setFilters(newFilters); setMeta(prev => ({ ...prev, page: 1 })); };
+    const handleAdvancedApply = (newFilters) => {
+        filtersRef.current = newFilters;
+        setFilters(newFilters);
+        setMeta(prev => ({ ...prev, page: 1 }));
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            ['status', 'projects', 'labs', 'countries'].forEach(key => {
+                if (newFilters[key]) {
+                    next.set(key, newFilters[key]);
+                } else {
+                    next.delete(key);
+                }
+            });
+            next.delete('project');
+            next.delete('projectId');
+            next.delete('lab');
+            next.delete('labId');
+            next.delete('assignedLab');
+            next.delete('country');
+            return next;
+        }, { replace: true });
+    };
+
     const handleReset = () => {
+        filtersRef.current = {};
+        searchRef.current = '';
         setFilters({});
         setSearch('');
         setMeta(prev => ({ ...prev, page: 1 }));

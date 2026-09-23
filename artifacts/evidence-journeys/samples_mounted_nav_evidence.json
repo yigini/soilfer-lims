@@ -1,0 +1,44 @@
+{
+  "timestamp": "2026-09-23T08:52:11.163Z",
+  "status": "PASS",
+  "issue": "#120 Acceptance: Mounted Samples Route & Parameter Lifecycle",
+  "pr": 139,
+  "environment": {
+    "node": "v24.13.0",
+    "database": "disposable_journey_samples_nav.db",
+    "isolationRefusalGuard": "ACTIVE"
+  },
+  "verifiedJourneys": {
+    "journeyA_sameMountedNotificationNavigation": {
+      "initialMountedView": "daily",
+      "navigatedToLink": "/samples?view=expected&projects=SOILFER-GTM&labs=LAB-GTM",
+      "expectedTabActive": true,
+      "dailyTabInactive": true,
+      "expectedArrivalsVisible": true,
+      "physicalDailySamplesExcluded": true,
+      "crossProjectSamplesExcluded": true,
+      "status": "PASS"
+    },
+    "journeyB_viewSwitchStatePreservation": {
+      "appliedSearch": "SMP-TEST-SEARCH",
+      "appliedStatusFilter": "EXPECTED",
+      "switchedToView": "daily",
+      "searchRetainedInDOM": true,
+      "searchRetainedInURL": true,
+      "projectScopeRetainedInURL": true,
+      "statusFilterClearedInURL": true,
+      "matchingDailySampleRendered": true,
+      "status": "PASS"
+    },
+    "journeyC_resetScopeClearing": {
+      "searchInputCleared": true,
+      "urlSearchParamCleared": true,
+      "urlProjectScopeCleared": true,
+      "urlLabScopeCleared": true,
+      "urlStatusScopeCleared": true,
+      "fullUnconstrainedViewRestored": true,
+      "screenshot": "artifacts/evidence-journeys/samples_mounted_nav_preservation.png",
+      "status": "PASS"
+    }
+  }
+}
