@@ -104,7 +104,7 @@ const LocationPicker = ({
     onPositionalUncertaintyChange,
     locationSource,
     onLocationSourceChange,
-    countryCode = 'GT',
+    countryCode = null,
     labCoordinates = null,
     siteName,
     onSiteNameChange,

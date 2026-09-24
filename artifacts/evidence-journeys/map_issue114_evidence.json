@@ -1,0 +1,164 @@
+{
+  "suite": "Map Centering, Fullscreen, Satellite Layers & Coordinate Safety (#114)",
+  "executedAt": "2026-09-24T06:55:31.657Z",
+  "provenance": {
+    "baselineReleaseSha": "dcc47066a6805f29ceeacd471fd402134654a460",
+    "baselineReleaseVersion": "v3.5.25",
+    "candidateBranch": "fix/issue-114-map-fallback-batch-state",
+    "candidateCommitSha": "8d28882090cc9dbba33bbea67e93f7ca97ea5c26",
+    "candidateDiffVsBaseline": "client/src/components/reception/LocationPicker.jsx |    2 +-\n client/src/components/reception/WalkInForm.jsx     |    7 +-\n client/src/pages/Reception.jsx                     |    1 +\n server/scripts/verify_issue_114_maps.cjs           | 1610 ++++++++++++++++++++\n .../contracts/reception_map_regression.test.js     |  191 +++\n 5 files changed, 1807 insertions(+), 4 deletions(-)",
+    "clientBuild": {
+      "builtAt": "2026-09-24T06:54:29.272Z",
+      "viteVersion": "5.4.21",
+      "entryAsset": "Reception-CNxGqGES.js"
+    },
+    "dbIsolation": {
+      "type": "SQLite (Isolated Synthetic Disposable)",
+      "runnerDir": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790232892685_h6cx4h",
+      "dbPath": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790232892685_h6cx4h\\disposable_journey_h6cx4h.db",
+      "refusalGuardVerified": true,
+      "productionHostBlocked": "46.19.33.37"
+    }
+  },
+  "attributionNotes": {
+    "pointerDragStatus": "Leaflet dragend handler simulation verified; genuine pointer-drag event acceptance pending",
+    "intakeStateStatus": "Client-side intake reuse cache (localStorage lastIntakeLocation) verified; actual saved-draft restore pending",
+    "step5FallbackDispatched": false
+  },
+  "summary": {
+    "totalSteps": 16,
+    "passedSteps": 16,
+    "allPassed": true,
+    "issue114Passed": true
+  },
+  "steps": [
+    {
+      "id": 1,
+      "title": "Auth Profile Sourced Laboratory Location (Harare)",
+      "issue": "#114",
+      "passed": true,
+      "details": "user.labLocation=\"-17.8292, 31.0522\", lab.country=\"ZW\"",
+      "timestamp": "2026-09-24T06:54:55.359Z"
+    },
+    {
+      "id": 2,
+      "title": "LocationPicker Mount in Walk-In Reception Console",
+      "issue": "#114",
+      "passed": true,
+      "details": "Leaflet .leaflet-container successfully mounted within WalkInForm",
+      "timestamp": "2026-09-24T06:55:00.944Z"
+    },
+    {
+      "id": 3,
+      "title": "Configured Lab Centering with Blank Sample Coordinates (Harare)",
+      "issue": "#114",
+      "passed": true,
+      "details": "Viewport center: [-17.8324, 31.0474], latInput=\"\", lngInput=\"\", markers=0",
+      "timestamp": "2026-09-24T06:55:01.338Z"
+    },
+    {
+      "id": 4,
+      "title": "Viewport Movement Does Not Silently Assign Sample Coordinates",
+      "issue": "#114",
+      "passed": true,
+      "details": "Pan verified (center shifted from [-17.8324, 31.0474] to [-19.0829, 32.3657]); sample coords remain blank: latInput=\"\", lngInput=\"\", markers=0 (Zero silent mutations)",
+      "timestamp": "2026-09-24T06:55:01.340Z"
+    },
+    {
+      "id": 5,
+      "title": "Deliberate Marker Placement, Uncertainty & Provenance",
+      "issue": "#114",
+      "passed": true,
+      "details": "Marker count=1, Lat=-19.082884, Lng=32.368473, Uncertainty=±2000m, Source=DESK_PIN, Confidence=null, Circles=1, fallbackDispatched=false, Client reuse cache: lat=-19.082884, lng=32.368473, uncertainty=±2000m, site=\"Mutara Farm\" (Intake reuse cache verified; actual draft save/restore pending)",
+      "timestamp": "2026-09-24T06:55:02.725Z"
+    },
+    {
+      "id": 6,
+      "title": "Deliberate Coordinate Adjustment & Leaflet Dragend Handler Simulation",
+      "issue": "#114",
+      "passed": true,
+      "details": "Adjusted via marker dragend handler simulation (real pointer-drag acceptance pending): [-17.835, 31.055], markers=1, intake reuse cache: [-17.835, 31.055]",
+      "timestamp": "2026-09-24T06:55:03.229Z"
+    },
+    {
+      "id": 7,
+      "title": "Satellite Layer Switch & Zero-Paid-Key Legal Attribution",
+      "issue": "#114",
+      "passed": true,
+      "details": "Attribution contains Esri: true, URL uses Esri World Imagery without paid keys",
+      "timestamp": "2026-09-24T06:55:04.444Z"
+    },
+    {
+      "id": 8,
+      "title": "Fullscreen Capability Guard & Error Handling",
+      "issue": "#114",
+      "passed": true,
+      "details": "Fullscreen enter and exit activated successfully in browser (entered: true, exited: true)",
+      "timestamp": "2026-09-24T06:55:05.769Z"
+    },
+    {
+      "id": 9,
+      "title": "Tile Error Fallback & Resilience Handling",
+      "issue": "#114",
+      "passed": true,
+      "details": "Satellite-to-standard fallback: true, Unavailable banner displayed: true, Retry recovery: true",
+      "timestamp": "2026-09-24T06:55:07.810Z"
+    },
+    {
+      "id": 10,
+      "title": "Sourced Laboratory Centering for Zambia (Lusaka Viewport)",
+      "issue": "#114",
+      "passed": true,
+      "details": "Lusaka Center: [-15.4219, 28.2788], sample coords blank: true, markers=0",
+      "timestamp": "2026-09-24T06:55:11.582Z"
+    },
+    {
+      "id": 11,
+      "title": "Sourced Laboratory Centering for Ethiopia (Addis Ababa Viewport)",
+      "issue": "#114",
+      "passed": true,
+      "details": "Addis Ababa Center: [9.0262, 38.7378], sample coords blank: true, markers=0",
+      "timestamp": "2026-09-24T06:55:15.338Z"
+    },
+    {
+      "id": 12,
+      "title": "Unconfigured Laboratory Neutral Centering Fallback",
+      "issue": "#114",
+      "passed": true,
+      "details": "Neutral fallback center resolved to [0.0000, 25.0049], matches neutral centroid [0, 25], sample coords blank: true, markers=0",
+      "timestamp": "2026-09-24T06:55:19.094Z"
+    },
+    {
+      "id": 13,
+      "title": "Existing Sample Coordinates Override Laboratory in Viewport",
+      "issue": "#114",
+      "passed": true,
+      "details": "Map centered on sample Kadoma field site: [-18.3300, 29.9100], overriding Harare lab location",
+      "timestamp": "2026-09-24T06:55:23.660Z"
+    },
+    {
+      "id": 14,
+      "title": "Project Mode SampleMap: Pre-Registered Sample With Field Coordinates",
+      "issue": "#114",
+      "passed": true,
+      "details": "Location Preview rendered SampleMap with Leaflet container: true, marker present: true",
+      "timestamp": "2026-09-24T06:55:27.590Z"
+    },
+    {
+      "id": 15,
+      "title": "Project Mode SampleMap: Truthful Missing-Coordinates Placeholder",
+      "issue": "#114",
+      "passed": true,
+      "details": "Rendered truthful placeholder \"No coordinates recorded in the field\", zero false map markers or misleading lab assignments",
+      "timestamp": "2026-09-24T06:55:31.498Z"
+    },
+    {
+      "id": 16,
+      "title": "Intake vs Field Preview Map-Editor Wiring Separation",
+      "issue": "#114",
+      "passed": true,
+      "details": "SampleMap is confirmed as a read-only field survey evidence preview; intake coordinate authoring is strictly bound to LocationPicker (walk-in intake & MetadataEditorModal), preventing silent or false lab coordinate assignment for missing field survey records",
+      "timestamp": "2026-09-24T06:55:31.498Z"
+    }
+  ]
+}

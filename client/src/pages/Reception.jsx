@@ -1893,6 +1893,7 @@ const Reception = () => {
                                         onPurposeSelect={handlePurposeSelect}
                                         errors={validationErrors}
                                         labCoordinates={labCoordinates}
+                                        countryCode={user?.lab?.country || user?.country}
                                     />
                                 ) : (
                                     <FieldProvenanceCard
