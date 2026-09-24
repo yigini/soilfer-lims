@@ -284,7 +284,11 @@ const BatchIntake = ({
                     <LabelPrintDialog
                         isOpen={isLabelModalOpen}
                         onClose={() => setIsLabelModalOpen(false)}
-                        samples={submissionResult.samples || samples}
+                        samples={(submissionResult.samples || samples).map(s => ({
+                            ...s,
+                            assignedLab: s.assignedLab || user?.labId || null,
+                            projectCode: s.projectCode || consignment.projectCode || null
+                        }))}
                     />
                 </div>
             </div>

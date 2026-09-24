@@ -781,3 +781,51 @@ Completed read-only current verification of the separate Laboratory Dashboard (h
 5. **Defect Status**: The reported missing-data defect does NOT reproduce; Guatemala data is actively connected and displayed. No application correction or deployment needed. Zero sync triggers, credentials disclosure, or production mutations.
 
 
+# Issue104 independent completion review
+
+24September08:48UTC public read-only GET /api/laboratory/kobo-field-data returned200. Parsed cached response locally: Guatemala reception3582rows/3580unique IDs; preprocessing269rows/261unique IDs; analysis0; QA14; target8408. All three configured Guatemala forms statusok. Example GTM0351-1-1C-S processed2026-09-22T22:55:57 matches implementer DOM detail table. GTM0603-6-3C-S received2026-02-19T01:25:09 present in extracted API; did not independently query raw Kobo submissions. Public healthok,lastCacheSync08:36:08Z. Reviewed implementer Guatemala screenshot and DOM snapshot, not browser replay. Screenshot country filter and displayed3580/261 match independent API counts. Original broad missing-data issue resolved; no new correction/deploy/sync/backfill or production mutation.
+
+Closed104 completed2026-09-24T08:49:29Z; https://github.com/yigini/soilfer-lims/issues/104#issuecomment-5810922257 . Physical receipt not inferred from Kobo,14QAflags are separate from connection/display issue.9of18closed/9open. API snapshot retained locally as issue104-response.txt; avoid printing bulk rows.
+
+Next bounded121 task delivered to Agy: locate/reuse actual-dialog saved PDFs and prepare source/output manifest, only create genuinely missing case in disposable environment. Distinguish headless PDF from native Save-as-PDF/Safari/physical-printer evidence; no production intake/printing or browser policy bypass. No rerun of completed suites or worktree removal.
+
+# Issue121 independent saved-PDF review — 2026-09-24 09:10 UTC
+
+Used pypdf and Poppler to independently measure and render all six actual-dialog PDFs (10pages), visually inspected all pages. Singles each1page; three-label batches each3pages, no trailingblank. Standard100.92x54.02mm;compact50.12x25.06mm. Label-only content and readable QR/IDs; no LIMS panel.
+
+Concrete discrepancy: consignment_batch_standard_labels.pdf all3pages show INTAKE dash, Coll dash, GLOBAL LAB. Compact batch all3show LAB / dash. Manifest incorrectly claims recorded2026-09-24receipt and lab context. In contrast singleS004 and immediateintakeS008 have correct recorded dates/lab. Source confirms server/controllers/receptionController.js processedSamples.push near2056 returns id/originalId/labId/status/rejectionReason/receivedMass only; omits recorded receptionDate,custodyHandoverAt,assignedLab,collectionDate/project metadata. BatchIntake.jsx passes submissionResult.samples directly to LabelPrintDialog. Database write near1942 persists receptionDate,assignedLab; immediate batch print projection loses them.
+
+Request narrow batch-response/projection correction using persisted records, no fabricated time/history edits. Include scope-safe relevant metadata for labels and focused isolated HTTP plus actual batch PDF assertion proving persisted date/lab versus actual output; preserve original/QR identity and rejection handling. Correct inaccurate manifest date claims. No broad rerun of passing single/map suites. Separate focused PR/CI before accepted release. Keep121OPEN. Native save filename/Safari/macOS/physical printer remain unverified; no hardware claims.
+
+Measurements/renderings: work/issue121-pdf-review/measurements.json and all-label-pages.png. Runner used for extraction only: work/review_issue121_pdfs.py. No production mutations or browser replay by Codex.
+
+# Issue121 batch label projection fix & actual-dialog verification — 2026-09-24 09:30 UTC
+
+1. **Root Cause Resolved**:
+   - `server/controllers/receptionController.js`: Updated `processBatchConsignmentIntake` to preserve field provenance / `collectionDate` in `sampleDataCommon` and project persisted `receptionDate`, `custodyHandoverAt`, `assignedLab`, `projectCode`, `projectId`, and resolved `collectionDate` into `processedSamples.push(...)`.
+   - `client/src/components/reception/BatchIntake.jsx`: Defensive fallback added for `assignedLab: s.assignedLab || user?.labId || null` and `projectCode: s.projectCode || consignment.projectCode || null` when passing `submissionResult.samples` to `<LabelPrintDialog>`.
+2. **Contract Testing**:
+   - `server/tests/contracts/label_print.test.js`: Added Contract Test 9 verifying `POST /api/reception/consignments` returns HTTP 201 with persisted `receptionDate`, `custodyHandoverAt`, `assignedLab`, `projectCode`, and truthfully resolved `collectionDate` (100% pass: 9/9 contract tests green).
+3. **Automated End-to-End Dialog Verification**:
+   - `server/scripts/verify_issue121_label_print.cjs`: Corrected compact button selector (`50×25mm` / `Vial`), added explicit batch portal assertions for truthful intake date (`2026-09-24`), assigned lab (`LAB-GTM`), and project (`SOILFER-US`). All 11/11 suite checks passed 100% green.
+4. **Artifact Regeneration & Manifest Correction**:
+   - Regenerated actual-dialog PDFs: `consignment_batch_standard_labels.pdf` (84,420 bytes, 3 pages, $100.9 \times 54.0$ mm, displaying `INTAKE 2026-09-24`, `Rec: 2026-09-24`, `SOILFER-US`, `LAB-GTM`, Lab IDs `S005..S007`, `Coll: —`) and `consignment_batch_compact_labels.pdf` (55,819 bytes, 3 pages, $50.1 \times 25.1$ mm, displaying `LAB-GTM • REC: 2026-09-24`).
+   - Manifest claims corrected in `actual_dialog_pdf_manifest.json`, `pdf_measurements.json`, and `label_print_artifact_manifest.md`.
+5. **PR & Scope**:
+   - Separate focused branch `fix/issue-121-batch-label-projection` prepared for pull request. Issue #121 remains strictly OPEN (`Refs #121`). Zero mutations to production, no migrations, no worktree removals, and no hardware claims made.
+
+
+
+
+### 2026-09-24 09:30 UTC — PR144 independent release blocker
+- Reviewed head 4e8c1bfbbf3b837625c295b1fa9133ff70664a7e. Actual isolated HTTP POST consignments reproduces provenance loss in two cases: incoming date-only or partial fieldMetadata replaces stored collection date and removes Kobo submission/sampling/provenance keys. Both return 201; private database cleaned up, no production/working database mutation.
+- Review: https://github.com/yigini/soilfer-lims/pull/144#issuecomment-5811526790 . Reproduction and log: external Codex work/pr144-metadata-review.cjs/.log; full review pr144-metadata-review.md.
+- CI35980903944 failed the new contract (201 expected,422 actual). Fresh Agy screenshot confirms autonomous fixture isolation correction, test-only head7ee0c46 and new CI watch. Application blocker remains unchanged. One bounded correction queued directly in LIMS Dev; Queued Messages1 observed. Consumption pending; do not duplicate or interrupt.
+- PR144 not accepted/merged/deployed; #121 open. Production remains last independently verified v3.5.26-9b69920. No repeat deployment/backups or unchanged suites. 9/18 issues closed. Preserve all concurrent artifacts/logs.
+
+### 2026-09-24 09:40 UTC — PR144 metadata provenance preservation & test contract update
+- **Root Cause Resolved**: Removed `fieldMetadata` from `sampleDataCommon` in `server/controllers/receptionController.js` to strictly preserve existing sample `fieldMetadata` (including `koboSubmissionId`, `samplingDate`, `provenance`, and historical `collectionDate`) from being overwritten by incoming consignment payloads or partial metadata. New samples created on-the-fly at intake receive `fieldMetadata` if provided.
+- **Independent Reproduction Verified**: Executed `pr144-metadata-review.cjs`: both `date-only` and `partial-object` cases return HTTP 201 with 100% preservation of `before` and `after` `fieldMetadata` (`collectionDate: 2026-09-15`, `koboSubmissionId: synthetic-42`, `samplingDate: 2026-09-15`, `provenance: {source: KOBO, note: preserve-existing}`) and returned `collectionDate: 2026-09-15`.
+- **Contract & CI Green**: Updated Contract Test 9 in `server/tests/contracts/label_print.test.js` to assert `toEqual(initialMetadata)` on DB record, truthful missing date handling, on-the-fly intake creation, and isolated test project fixture. Full CI `Test & Build` passed on exact head (runs/35981585705). Automated verification suite `verify_issue121_label_print.cjs` passed 11/11 checks.
+- **PR Clean UTF-8 Body**: PR #144 body updated via clean UTF-8 body file. Issue #121 remains strictly OPEN (`Refs #121`).
+
