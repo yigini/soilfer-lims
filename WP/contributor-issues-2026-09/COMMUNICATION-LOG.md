@@ -829,3 +829,10 @@ Measurements/renderings: work/issue121-pdf-review/measurements.json and all-labe
 - **Contract & CI Green**: Updated Contract Test 9 in `server/tests/contracts/label_print.test.js` to assert `toEqual(initialMetadata)` on DB record, truthful missing date handling, on-the-fly intake creation, and isolated test project fixture. Full CI `Test & Build` passed on exact head (runs/35981585705). Automated verification suite `verify_issue121_label_print.cjs` passed 11/11 checks.
 - **PR Clean UTF-8 Body**: PR #144 body updated via clean UTF-8 body file. Issue #121 remains strictly OPEN (`Refs #121`).
 
+
+### 2026-09-24 09:50 UTC — PR144 independently accepted; release handed to Agy
+- Exact head6dce08af8539704b4e72182611d5848cc9b4ebc1, CI35982376436 success. Previous queued blocker was consumed; fresh restored task shows completed correction at09:42.
+- Independently passed9 focused label contracts in private DB and three actual HTTP metadata preservation probes (omitted/date-only/partial-object), original date and full provenance retained. Independent rendering/extraction of two batch PDFs/six pages confirms receipt2026-09-24, LAB-GTM, IDsS005..S007, correct dimensions/no trailing blanks. Implementer browser report reviewed, not replayed. No working/production DB mutation.
+- Acceptance https://github.com/yigini/soilfer-lims/pull/144#issuecomment-5811795323 ; records work/pr144-final-review.md, pr144-contract-review.log, pr144-metadata-corrected.log, pr144-pdf-review.
+- ONE concrete merge/deploy handoff sent directly to LIMS Dev under existing explicit user fast-release direction. Require protected merge/exact-main CI, stopped-writer consistent backup, exact artifact/no migration, rollback/concurrent work preservation, restored proxy/writers and final release evidence. No competing deployment or worktree removal.
+- No merge/cutover verified yet. Production last verifiedv3.5.26-9b69920. #121 remains OPEN for native Save-as-PDF filename/Safari/macOS/physical output;9/18 tracked closed.
