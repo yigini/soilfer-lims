@@ -1730,4 +1730,46 @@ Executed the focused workflow acceptance runner (`server/scripts/verify_issue_11
   - Zero application defects identified; zero mutations, queries, or deployments to production host.
 - **Issue Lifecycle**: Both focused workflow acceptance requirements verified on released application. Issue #114 remains strictly **OPEN** (`Refs #114`) pending independent Codex review and formal issue closure.
 
+#### 18. PR #144 Production Release Execution & Live Verification (v3.5.27 — `d07ad62`)
 
+Following explicit independent acceptance by Codex at exact head `6dce08af8539704b4e72182611d5848cc9b4ebc1` ([PR #144 comment 5811795323](https://github.com/yigini/soilfer-lims/pull/144#issuecomment-5811795323) and `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/pr144-final-review.md`), the release was merged under branch protections and executed on host `46.19.33.37` (`lims.yigini.net`) under the established write-quiesced, stopped-container release protocol.
+
+##### A. Merge & Exact-Main CI Verification
+- **Merged PR**: PR #144 merged into `main` via `gh pr merge 144 --merge` as merge commit `d07ad622724703dde53c22a10ed63e26cf108306`.
+- **Target Release Version**: `v3.5.27` (`d07ad62`).
+- **Exact-Main CI Run**: GitHub Actions CI Run **35983605694** (Job ID: `107581018647`) on `main` passed 100% green (`✓ Test & Build in 4m14s`).
+
+##### B. Release Ledger & Artifact Summary
+- **Target Docker Image**: `soilfer-lims:v3.5.27-d07ad62`
+  - Image ID: `a092227c6f4a`
+  - Digest: `sha256:a092227c6f4a4ab45558f4d32bf8a12eb713894fdb4f8252fc1327a753136242`
+  - Build Archive: `source_d07ad62.tar.gz` (SHA256: `40c30055adf493aed27055e0753aa5b844bf74dff308a5c17a91d14814651b85`)
+- **Rollback Baseline Preserved**:
+  - Image Tags: `soilfer-lims:rollback-baseline` & `soilfer-lims:rollback-9b69920`
+  - Image ID: `4ec614b81c65`
+  - Digest: `sha256:4ec614b81c658b40d565967fcdf7fee8ad96b0efcea1952f6f6c21b4b13bf8c8`
+- **Pre-Release Log Preservation**:
+  - Container logs preserved prior to shutdown: `/opt/lims/pre_release_9b69920_20260924_120036.log`
+- **Write Quiescence & Ingress Protocol**:
+  - Enforced Apache 503 rewrite rule for mutating HTTP methods (`POST|PUT|PATCH|DELETE`). Verified `POST -> 503`, `GET -> 200`.
+  - Active container stopped; background sync writers terminated.
+  - WAL truncate checkpointed to zero pages (`PRAGMA wal_checkpoint(TRUNCATE)`: `0|0|0`).
+- **Consistent Backup (Zero Writers)**:
+  - Backup File: `/opt/lims/backups/dev_release_d07ad62_consistent_20260924_120036.db`
+  - Backup SHA256: `4667b402059333920f94ef21941acf84945e517766f23dc7de9499456d6e9387`
+  - Integrity Check: `ok`
+  - Foreign Key Check: `OK (0 errors)`
+  - Exact Row Counts: Samples=36878, Projects=5, WorkItems=90, Results=19, Reports=4.
+- **Zero Schema Migrations**: No schema alterations performed.
+- **Postflight Verification Suite (Background Jobs Suppressed)**:
+  - Container started with `DISABLE_BACKGROUND_JOBS=true`. Verified zero `KOBO_SCHEDULER` logs.
+  - Executed `/opt/lims/postflight_check.cjs` with 15 test suites covering all roles and historical regressions.
+  - Result: `=== POSTFLIGHT RESULT: ALL CHECKS PASSED ===`.
+  - Post-check database counts: Samples=36878, Projects=5 (zero mutation).
+- **Service Restoration & Write Resumption**:
+  - Production container started in full production mode (Container Started At: `2026-09-24T10:01:28.087956645Z`, status: healthy).
+  - Clean Apache reverse proxy configuration restored (SHA256: `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20`), configtest OK, httpd reloaded.
+  - Write resumption verified: `POST /api/test-mutation` returns 404 from Express (not 503 from Apache proxy).
+  - Public health verified: `GET https://lims.yigini.net/api/health` returns `{"status":"ok","uptime":1.97}`.
+- **Attribution Limits & Issue Lifecycle**:
+  - **Issue #121**: Strictly **OPEN** (`Refs #121`). Native Save-as-PDF filename, Safari/macOS print pagination, and physical thermal printer hardware remain explicitly unverified in production (zero hardware claims).
