@@ -760,3 +760,24 @@ Limits: runner metadata hardcodes released SHA/version; current application sour
 Agy still actively completing packaging/provenance at review; no duplicate handoff. #114 remains open for final released acceptance. Prior production release and issue counts unchanged. Do not rerun successful broad suites or mutate production merely for evidence.
 
 
+
+## 2026-09-24 08:32 UTC — focused map evidence finalized; separate dashboard investigation handed off
+Reviewed evidence-only commits dab7088/ec136ce; final EVIDENCE now correctly attributes pointer-drag and saved-draft checks as implementer-run/Codex-reviewed. No independent browser replay or production/mobile claim. No app correction/deployment needed; #114 remains open for final released-role acceptance. Public progress https://github.com/yigini/soilfer-lims/issues/114#issuecomment-5810670878 .
+Actual LIMS Dev idle/completed verified via restored window and fresh UI. Fresh #104 body/comments read: separate yigini.net/laboratory Guatemala reception display, historical3580 count from15September, asset a8xCZM6u3h7JyDYE2LBxEk. ONE bounded read-only investigation sent to idle Agy08:31; Working and gh issue104 fetch confirmed. Check existing configured mapping/endpoint/current display, one existing sample source-to-display, matching filters/count definitions/refresh metadata. No sync trigger/backfill/production configuration or data edits/access expansion/credentials/provider change; no external-dashboard deployment authorization. Report access limits truthfully. Preserve worktrees and do not rerun LIMS suites. All issue counts8closed/10open; no new production check or user decision.
+
+
+## 2026-09-24 08:45 UTC — Issue #104 read-only Laboratory Dashboard verification completed
+Completed read-only current verification of the separate Laboratory Dashboard (https://yigini.net/laboratory) and its KoBo endpoint (/api/laboratory/kobo-field-data):
+1. **Configuration & Form Mapping**:
+   - Reception: asset UID `a8xCZM6u3h7JyDYE2LBxEk` (`GUATEMALA_RECEPTION_UID`), record mode `repeat`, status `ok`. 96 submissions, 3,582 sample records extracted. Unique received samples: 3,580 (matching historical 15 Sep count).
+   - Preprocessing: asset UID `akcn8MfL2tqyYdvgEYe5ae` (`GUATEMALA_PREPROCESSING_UID`), record mode `repeat`, status `ok`. 11 submissions (up from 0 on 15 Sep), 269 sample records extracted, 261 unique preprocessed samples.
+   - Analysis: asset UID `aCubYc9JnUHAkrP3kYHeei` (`GUATEMALA_ANALYSIS_UID`), status `ok` (0 submissions).
+2. **Live Display Reconciled (Headless Chromium Screenshot Verified)**:
+   - Filter `🇬🇹 Guatemala`: Target 8,408; Received 3,580 (42.6% progress); Preprocessed 261 (7.3% of received); Fully Analysed 0 (0.0%); QA Issues 14 (all `duplicate_sample_id_in_form`).
+   - Detail Table: Top 5 entries display latest preprocessed samples (e.g. `GTM0351-1-1C-S`, `GTM0357-6-3C-S` dated 2026-09-22T22:55:57).
+   - Refresh Metadata: UI last refresh `24/09/2026, 10:37:39`; backend `lastCacheSync`: `2026-09-24T08:36:08.040Z`.
+3. **Sample Provenance Traced**: Example non-sensitive sample `GTM0603-6-3C-S` traced from KoBo asset `a8xCZM6u3h7JyDYE2LBxEk` repeat row -> extracted as `{country: 'Guatemala', sample_id: 'GTM0603-6-3C-S', parameter: 'Sample', status: 'received', date: '2026-02-19T01:25:09'}` -> rendered in detail table and aggregated into 3,580 received count.
+4. **Physical Receipt vs KoBo Distinction**: The 3,580 count reflects digital intake records in the KoBo survey form, distinct from physical sample acceptance/warehouse custody in SoilFER LIMS.
+5. **Defect Status**: The reported missing-data defect does NOT reproduce; Guatemala data is actively connected and displayed. No application correction or deployment needed. Zero sync triggers, credentials disclosure, or production mutations.
+
+
