@@ -1966,13 +1966,6 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                     village: s.village || defaults.village || null,
                     siteName: s.siteName || defaults.siteName || null,
 
-                    // Field provenance and collection date handling
-                    fieldMetadata: s.fieldMetadata
-                        ? (typeof s.fieldMetadata === 'string' ? s.fieldMetadata : JSON.stringify(s.fieldMetadata))
-                        : (s.collectionDate
-                            ? JSON.stringify({ collectionDate: s.collectionDate })
-                            : (existing?.fieldMetadata || null)),
-
                     // Stage E: Chain of Custody & Handover (RC-19)
                     custodyHandoverAt: s.custodyHandoverAt ? new Date(s.custodyHandoverAt) : (csgInput.custodyHandoverAt ? new Date(csgInput.custodyHandoverAt) : (csgInput.deliveredAt ? new Date(csgInput.deliveredAt) : now)),
                     custodyCarrierName: s.custodyCarrierName || csgInput.custodyCarrierName || csgInput.deliveredBy || null,
@@ -2012,6 +2005,9 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                             id: crypto.randomUUID(),
                             originalId,
                             ...sampleDataCommon,
+                            fieldMetadata: s.fieldMetadata
+                                ? (typeof s.fieldMetadata === 'string' ? s.fieldMetadata : JSON.stringify(s.fieldMetadata))
+                                : (s.collectionDate ? JSON.stringify({ collectionDate: s.collectionDate }) : null),
                             history: JSON.stringify(newHist)
                         }
                     });

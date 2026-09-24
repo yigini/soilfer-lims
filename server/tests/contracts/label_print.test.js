@@ -344,8 +344,14 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         const receptionToken = await getAuthToken('SAMPLE_RECEPTION', 'LAB-GTM', ['GTM'], [testProjectId]);
         const testExpectedId = `SMP-CSG-EXP-${runId}`;
         const testExpectedOrig = `FIELD-CSG-EXP-${runId}`;
+        const initialMetadata = {
+            collectionDate: '2026-09-15',
+            koboSubmissionId: `kobo-sub-${runId}`,
+            samplingDate: '2026-09-15',
+            provenance: { source: 'KOBO', note: 'preserve-existing' }
+        };
 
-        // Create pre-arrival EXPECTED sample with truthful collectionDate
+        // Create pre-arrival EXPECTED sample with full field/Kobo provenance
         await prisma.sample.create({
             data: {
                 id: testExpectedId,
@@ -354,11 +360,12 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
                 country: 'GTM',
                 projectCode: testProjectId,
                 status: 'EXPECTED',
-                fieldMetadata: JSON.stringify({ collectionDate: '2026-09-15' })
+                fieldMetadata: JSON.stringify(initialMetadata)
             }
         });
 
         const newSampleOrig = `FIELD-CSG-NEW-${runId}`;
+        const newSampleWithDateOrig = `FIELD-CSG-DATE-${runId}`;
         const custodyTime = '2026-09-24T08:30:00.000Z';
 
         const res = await request(app)
@@ -377,8 +384,13 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
                     requiredAnalyses: ['PH_H2O']
                 },
                 samples: [
-                    { originalId: testExpectedOrig, status: 'ACCEPTED' },
+                    // Case 1: Existing sample where incoming payload provides conflicting date-only or partial fieldMetadata
+                    { originalId: testExpectedOrig, status: 'ACCEPTED', collectionDate: '2026-09-20', fieldMetadata: { collectionDate: '2026-09-20' } },
+                    // Case 2: New sample without collection date (truthful missing handling)
                     { originalId: newSampleOrig, status: 'ACCEPTED' },
+                    // Case 3: New sample created at intake with collection date
+                    { originalId: newSampleWithDateOrig, status: 'ACCEPTED', collectionDate: '2026-09-22' },
+                    // Case 4: Rejected sample preserving rejection reason
                     { originalId: `FIELD-CSG-REJ-${runId}`, status: 'REJECTED', rejectionReason: 'Container damaged in transit' }
                 ]
             });
@@ -386,9 +398,9 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         expect(res.status).toBe(201);
         expect(res.body.success).toBe(true);
         expect(Array.isArray(res.body.samples)).toBe(true);
-        expect(res.body.samples.length).toBe(3);
+        expect(res.body.samples.length).toBe(4);
 
-        // Verify sample 1 (existing EXPECTED with collectionDate):
+        // Verify sample 1: Existing EXPECTED sample preserves historical collection date and Kobo provenance
         const s1 = res.body.samples.find(s => s.originalId === testExpectedOrig);
         expect(s1).toBeDefined();
         expect(s1.status).toBe('ACCEPTED');
@@ -397,9 +409,13 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         expect(s1.receptionDate).toBeDefined();
         expect(typeof s1.receptionDate).toBe('string');
         expect(s1.custodyHandoverAt).toBeDefined();
-        expect(s1.collectionDate).toBe('2026-09-15');
+        expect(s1.collectionDate).toBe('2026-09-15'); // Retains stored date, not overwritten by intake payload
 
-        // Verify sample 2 (new sample without collectionDate):
+        // Verify database persistence for sample 1: fieldMetadata is completely intact
+        const dbSample1 = await prisma.sample.findUnique({ where: { id: testExpectedId } });
+        expect(JSON.parse(dbSample1.fieldMetadata)).toEqual(initialMetadata);
+
+        // Verify sample 2: New sample without collectionDate
         const s2 = res.body.samples.find(s => s.originalId === newSampleOrig);
         expect(s2).toBeDefined();
         expect(s2.status).toBe('ACCEPTED');
@@ -410,17 +426,25 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         expect(s2.custodyHandoverAt).toBeDefined();
         expect(s2.collectionDate).toBeNull(); // Truthful missing collection date
 
-        // Verify sample 3 (rejected sample):
-        const s3 = res.body.samples.find(s => s.originalId === `FIELD-CSG-REJ-${runId}`);
+        // Verify sample 3: New sample created on the fly with collectionDate
+        const s3 = res.body.samples.find(s => s.originalId === newSampleWithDateOrig);
         expect(s3).toBeDefined();
-        expect(s3.status).toBe('RECEIVED_REJECTED');
-        expect(s3.rejectionReason).toBe('Container damaged in transit');
-        expect(s3.assignedLab).toBe('LAB-GTM');
-        expect(s3.receptionDate).toBeDefined();
+        expect(s3.status).toBe('ACCEPTED');
+        expect(s3.collectionDate).toBe('2026-09-22');
+        const dbSample3 = await prisma.sample.findUnique({ where: { id: s3.id } });
+        expect(JSON.parse(dbSample3.fieldMetadata)).toEqual({ collectionDate: '2026-09-22' });
+
+        // Verify sample 4: Rejected sample
+        const s4 = res.body.samples.find(s => s.originalId === `FIELD-CSG-REJ-${runId}`);
+        expect(s4).toBeDefined();
+        expect(s4.status).toBe('RECEIVED_REJECTED');
+        expect(s4.rejectionReason).toBe('Container damaged in transit');
+        expect(s4.assignedLab).toBe('LAB-GTM');
+        expect(s4.receptionDate).toBeDefined();
 
         // Cleanup
         await prisma.sample.deleteMany({
-            where: { originalId: { in: [testExpectedOrig, newSampleOrig, `FIELD-CSG-REJ-${runId}`] } }
+            where: { originalId: { in: [testExpectedOrig, newSampleOrig, newSampleWithDateOrig, `FIELD-CSG-REJ-${runId}`] } }
         }).catch(() => {});
         if (res.body.consignment?.id) {
             await prisma.consignment.delete({ where: { id: res.body.consignment.id } }).catch(() => {});

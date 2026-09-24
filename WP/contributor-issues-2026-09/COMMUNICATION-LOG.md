@@ -816,3 +816,16 @@ Measurements/renderings: work/issue121-pdf-review/measurements.json and all-labe
 
 
 
+
+### 2026-09-24 09:30 UTC — PR144 independent release blocker
+- Reviewed head 4e8c1bfbbf3b837625c295b1fa9133ff70664a7e. Actual isolated HTTP POST consignments reproduces provenance loss in two cases: incoming date-only or partial fieldMetadata replaces stored collection date and removes Kobo submission/sampling/provenance keys. Both return 201; private database cleaned up, no production/working database mutation.
+- Review: https://github.com/yigini/soilfer-lims/pull/144#issuecomment-5811526790 . Reproduction and log: external Codex work/pr144-metadata-review.cjs/.log; full review pr144-metadata-review.md.
+- CI35980903944 failed the new contract (201 expected,422 actual). Fresh Agy screenshot confirms autonomous fixture isolation correction, test-only head7ee0c46 and new CI watch. Application blocker remains unchanged. One bounded correction queued directly in LIMS Dev; Queued Messages1 observed. Consumption pending; do not duplicate or interrupt.
+- PR144 not accepted/merged/deployed; #121 open. Production remains last independently verified v3.5.26-9b69920. No repeat deployment/backups or unchanged suites. 9/18 issues closed. Preserve all concurrent artifacts/logs.
+
+### 2026-09-24 09:40 UTC — PR144 metadata provenance preservation & test contract update
+- **Root Cause Resolved**: Removed `fieldMetadata` from `sampleDataCommon` in `server/controllers/receptionController.js` to strictly preserve existing sample `fieldMetadata` (including `koboSubmissionId`, `samplingDate`, `provenance`, and historical `collectionDate`) from being overwritten by incoming consignment payloads or partial metadata. New samples created on-the-fly at intake receive `fieldMetadata` if provided.
+- **Independent Reproduction Verified**: Executed `pr144-metadata-review.cjs`: both `date-only` and `partial-object` cases return HTTP 201 with 100% preservation of `before` and `after` `fieldMetadata` (`collectionDate: 2026-09-15`, `koboSubmissionId: synthetic-42`, `samplingDate: 2026-09-15`, `provenance: {source: KOBO, note: preserve-existing}`) and returned `collectionDate: 2026-09-15`.
+- **Contract & CI Green**: Updated Contract Test 9 in `server/tests/contracts/label_print.test.js` to assert `toEqual(initialMetadata)` on DB record, truthful missing date handling, on-the-fly intake creation, and isolated test project fixture. Full CI `Test & Build` passed on exact head (runs/35981585705). Automated verification suite `verify_issue121_label_print.cjs` passed 11/11 checks.
+- **PR Clean UTF-8 Body**: PR #144 body updated via clean UTF-8 body file. Issue #121 remains strictly OPEN (`Refs #121`).
+
