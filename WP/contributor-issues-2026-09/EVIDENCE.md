@@ -1693,7 +1693,36 @@ Following explicit independent acceptance by Codex at exact head `4a712ca90e4319
   - Write resumption verified: `POST /api/test-mutation` returns 404 from Express (not 503 from Apache proxy).
   - Public health verified: `GET https://lims.yigini.net/api/health` returns `{"status":"ok","uptime":5.071517442}`.
 - **Attribution Limits & Issue Lifecycle**:
-  - Step 6 marker drag remains a Leaflet handler simulation; authentic pointer-drag event acceptance is pending independent role verification.
-  - `lastIntakeLocation` remains a client-side intake reuse cache (`localStorage`), not draft persistence; genuine draft save/restore acceptance is pending.
+  - Step 6 marker drag in broad suite was a Leaflet handler simulation; authentic pointer-drag event acceptance has now been independently verified via CDP pointer interaction in Section 17 below.
+  - `lastIntakeLocation` in `localStorage` is an intake reuse cache; authentic draft save and restore has now been independently verified from SQLite database records in Section 17 below.
   - **Issue #114**: Strictly **OPEN** (`Refs #114`) awaiting Codex live role acceptance on released code.
+
+#### 17. Issue #114 Workflow Acceptance: Pointer Marker Drag & Saved Draft Reopen Persistence Verification
+Executed the focused workflow acceptance runner (`server/scripts/verify_issue_114_drag_draft.cjs`) in a disposable reception-role browser environment on released code (`v3.5.26-9b69920` / `9b69920edd6762eba6271a16643d57bdaa316771`):
+
+1. **Authentic Pointer Marker Drag Acceptance (Test 1: PASS)**:
+   - Initial click on map placed pin at `[-17.832374, 31.050114]`, with uncertainty `±2000m` and source `DESK_PIN`.
+   - Bounding rect of `.leaflet-marker-icon` targeted at `(523, 410)`. Dispatched 20 sequential CDP `mouseMoved` / pointer drag steps (+120px East, -90px North) to `(643, 320)`, followed by `mouseReleased`.
+   - Captured real browser event stream on DOM: `pointerdown`, `mousedown`, `pointermove` (x20), `mousemove` (x20), `marker_dragstart`, `marker_drag` (x18), `pointerup`, `mouseup`, `marker_dragend`.
+   - Asserted coordinates changed to `[-16.88866, 32.367516]` (Δlat=0.943714, Δlng=1.317402).
+   - Asserted location source strictly preserved as `'DESK_PIN'` and positional uncertainty preserved as `±2000m`. Zero calls to `setLatLng` or `marker.fire('dragend')`.
+   - Visual Evidence: `artifacts/evidence-journeys/map_issue114_pointer_drag_verified.png` (179,276 bytes).
+
+2. **Save Draft Persistence & Reopen Form Restoration Acceptance (Test 2: PASS)**:
+   - Populated unrelated walk-in fields: Submitter ("Tinashe Moyo", phone `+263771234567`, org "Chitepo Smallholder Coop"), Crops ("Maize", rotation "Sorghum"), Land Use ("Cropland", management "Compound D 200kg/ha"), Depth ("0–20 cm"), Structured Location (Site "Mutara Block B", Village "Goromonzi", District "Mashonaland East", Landmark "Near borehole 4").
+   - Clicked UI "Save Draft" button (`handleSubmit('ACCEPTED', true)` -> `POST /api/reception/intake` with `isDraft: true`).
+   - Verified sample draft `W001` persisted in isolated SQLite database with `receptionData` and `fieldMetadata`. Dismissed "Draft Saved" success dialog and returned to reception console home.
+   - **Client Reuse Cache Decoupling**: Explicitly executed `localStorage.removeItem('lastIntakeLocation')` prior to lookup; verified `localStorage.getItem('lastIntakeLocation') === null` before draft was resumed.
+   - Located draft card `W001` in Incomplete Intakes list, clicked card, confirmed "Resume Draft?" modal with "Yes, Open".
+   - Verified WalkInForm rehydrated directly from SQLite draft record:
+     - Dragged coordinates restored: `[-16.88866, 32.367516]` matching dragged marker location.
+     - Marker on map restored: 1 marker at dragged coordinates with `±2000m` uncertainty circle.
+     - Location source restored: `'DESK_PIN'`.
+     - Positional uncertainty restored: `±2000m`.
+     - Unrelated fields restored from SQLite: Submitter ("Tinashe Moyo", `+263771234567`, "Chitepo Smallholder Coop"), Crops ("Maize", "Sorghum"), Land Use ("Cropland", "Compound D 200kg/ha"), Depth ("0–20 cm"), Site ("Mutara Block B", "Goromonzi", "Mashonaland East", "Near borehole 4").
+   - Visual Evidence: `artifacts/evidence-journeys/map_issue114_saved_draft_reopened.png` (158,176 bytes).
+
+- **Evidence Ledger**: `artifacts/evidence-journeys/map_issue114_drag_draft_evidence.json` (2,625 bytes, 2/2 passed).
+- **Issue Lifecycle**: Both focused workflow acceptance requirements verified on released application. Issue #114 remains strictly **OPEN** (`Refs #114`) pending independent Codex review and formal issue closure.
+
 

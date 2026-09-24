@@ -1,0 +1,67 @@
+{
+  "meta": {
+    "runId": "1790237350766_2rq5n",
+    "timestamp": "2026-09-24T08:09:10.766Z",
+    "headCommit": "9b69920edd6762eba6271a16643d57bdaa316771",
+    "version": "v3.5.26",
+    "database": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790237347903_2w8ghu\\disposable_journey_2w8ghu.db"
+  },
+  "tests": [
+    {
+      "id": 1,
+      "title": "Actual Pointer Marker Drag (Changed Coords, Preserved Source/Uncertainty)",
+      "passed": true,
+      "details": "Original coords: [-17.832374, 31.050114] -> Dragged coords: [-16.88866, 32.367516] (Δlat=0.943714, Δlng=1.317402). Source preserved as 'DESK_PIN'. Uncertainty preserved as ±2000m. Genuine pointer dispatch events verified without setLatLng or fire('dragend') substitution.",
+      "data": {
+        "initial": {
+          "lat": -17.832374,
+          "lng": 31.050114,
+          "uncert": 2000,
+          "source": "DESK_PIN"
+        },
+        "postDrag": {
+          "lat": -16.88866,
+          "lng": 32.367516,
+          "uncert": 2000,
+          "source": "DESK_PIN"
+        },
+        "coordDeltas": {
+          "lat": 0.9437139999999999,
+          "lng": 1.3174020000000013
+        },
+        "eventCount": 54
+      },
+      "timestamp": "2026-09-24T08:09:19.985Z"
+    },
+    {
+      "id": 2,
+      "title": "Actual Save Draft Action, Cache Decoupling & Reopened Form Field Restoration",
+      "passed": true,
+      "details": "Saved draft W001 persisted to SQLite and rehydrated via \"Resume Draft\" modal without client reuse cache (localStorage.lastIntakeLocation purged to null prior to lookup). Restored coordinates: [-16.88866, 32.367516] matching dragged location. Restored source: 'DESK_PIN'. Restored uncertainty: ±2000m. Unrelated fields restored from SQLite: Submitter=\"Tinashe Moyo\" (+263771234567), Crop=\"Maize\" (Prev: \"Sorghum\"), LandUse=\"Cropland\", Depth=\"0–20 cm\", Site=\"Mutara Block B\".",
+      "data": {
+        "draftId": "W001",
+        "originalId": "W001",
+        "restoredCoordinates": {
+          "lat": -16.88866,
+          "lng": 32.367516,
+          "markers": 1
+        },
+        "restoredUncertainty": 2000,
+        "restoredSource": "DESK_PIN",
+        "restoredSubmitter": {
+          "name": "Tinashe Moyo",
+          "phone": "+263771234567",
+          "org": "Chitepo Smallholder Coop"
+        },
+        "restoredAgronomy": {
+          "crop": "Maize",
+          "prevCrop": "Sorghum",
+          "landUse": "Cropland",
+          "depth": "0–20 cm"
+        },
+        "cacheDecoupledBeforeReopen": true
+      },
+      "timestamp": "2026-09-24T08:09:25.793Z"
+    }
+  ]
+}
