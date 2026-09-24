@@ -673,3 +673,21 @@ Direct idle LIMS Dev completion inspected. Reviewed05:46 report, changed runner 
 - Evidence ledger `artifacts/evidence-journeys/map_issue114_evidence.json` (7,053 bytes) updated with dynamic candidate provenance and attribution notes.
 - Packaging candidate PR on branch `fix/issue-114-map-fallback-batch-state` for exact-head CI.
 - Issue #114 remains strictly **OPEN** (`Refs #114`). Zero production mutations to `46.19.33.37`. Last verified production remains `v3.5.25-dcc4706`.
+
+## 2026-09-24 07:06 UTC — PR143 independently accepted; release handoff
+Exact candidate4a712ca90e4319316f7796238d5c3f3ba1668673 CI35966983047 green. Independent25 focused map/regression contracts passed using explicit node-only Jest config (no DB setup). Independent actual mounted baseline/candidate WalkInForm probe work/pr143-mounted-review.cjs confirms baseline source/uncertainty loss, candidate preserves DESK_PIN/500m/coordinates/unrelated fields and country ZW/absent-null. Picker/context mocked; no browser/database/network. Reviewed implementer browser report, not replayed; evidence8d28882 and final head client/server identical. Pointer drag is handler simulation and real saved-draft restore pending; do not overclaim cache evidence. Final review https://github.com/yigini/soilfer-lims/pull/143#issuecomment-5809389081 . #114 stays OPEN. ONE concrete merge/deploy handoff sent directly to idle LIMS Dev under existing user's fast reviewed-release direction. Protected merge/exact-main CI/current rollback/fresh stopped-writer verified backup/no migration/exact artifact/restored writers/postflight required. No new merge or release independently verified at dispatch; no competing cutover. Preserve concurrent work and avoid repeated approval/dispatch.
+
+## 2026-09-24 07:16 UTC — PR #143 deployed to production (v3.5.26-9b69920); postflight passed; Issue #114 OPEN
+- Executed safe write-quiesced production release of PR #143 (commit `9b6992014e7a8581eeb5c35ffc2725fa86c57f20`) following independent acceptance by Codex at exact candidate head `4a712ca90e4319316f7796238d5c3f3ba1668673` (CI 35966983047 green). Exact-main GitHub Actions CI 35967711696 passed 100% green.
+- Deploy executed on host 46.19.33.37 (`lims.yigini.net`) under established protocol:
+  - Docker Image: `soilfer-lims:v3.5.26-9b69920` (Image ID: `4ec614b81c65`, Digest: `sha256:4ec614b81c658b40d565967fcdf7fee8ad96b0efcea1952f6f6c21b4b13bf8c8`).
+  - Rollback Baseline Preserved: `soilfer-lims:rollback-baseline` & `soilfer-lims:rollback-dcc4706` (Image ID: `d1d0271c78d3`, Digest: `sha256:d1d0271c78d35c4ad69155cc296edb2bf9a4323b25864847d62c4aefc27a668a`).
+  - Pre-release logs preserved: `/opt/lims/pre_release_dcc4706_20260924_091458.log`.
+  - Ingress write quiescence enforced via Apache 503 rewrite rule (`POST -> 503`, `GET -> 200`). Background sync writers terminated.
+  - WAL checkpointed (`0|0|0`) and fresh consistent stopped-writer backup verified: `/opt/lims/backups/dev_release_9b69920_consistent_20260924_091458.db` (SHA256: `4667b402059333920f94ef21941acf84945e517766f23dc7de9499456d6e9387`, integrity `ok`, FK `OK (0 errors)`, Samples=36878, Projects=5, WorkItems=90, Results=19, Reports=4).
+  - Zero schema migrations executed.
+  - Background jobs suppressed (`DISABLE_BACKGROUND_JOBS=true`, zero `KOBO_SCHEDULER` logs); postflight verification suite `/opt/lims/postflight_check.cjs` passed 15/15 checks; DB row counts intact (Samples=36878, Projects=5).
+  - Service restored in full production mode (container started 2026-09-24T07:15:54.618014667Z, healthy). Clean Apache proxy config restored (SHA256: `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20`), httpd reloaded.
+  - Mutating traffic write resumption verified (`POST /api/test-mutation` -> 404 from Express). Public health verified: `GET https://lims.yigini.net/api/health` -> `{"status":"ok","uptime":5.071517442}`.
+- Step 6 marker drag remains Leaflet handler simulation; `lastIntakeLocation` remains client reuse cache; genuine pointer-drag and draft-restore acceptance stay pending. Issue #114 remains strictly **OPEN** (`Refs #114`) awaiting Codex live role acceptance.
+
