@@ -327,8 +327,21 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
     });
 
     test('9. POST /api/reception/consignments returns persisted receptionDate, custodyHandoverAt, assignedLab, projectCode, and collectionDate for batch label printing', async () => {
-        const receptionToken = await getAuthToken('SAMPLE_RECEPTION', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
         const runId = Date.now().toString(36);
+        const testProjectId = `PRJ-LBL-CSG-${runId}`;
+
+        // Create dedicated active project allowing consignment intake across all test environments
+        await prisma.project.create({
+            data: {
+                id: testProjectId,
+                code: testProjectId,
+                name: 'Batch Label Test Project',
+                status: 'ACTIVE',
+                projectType: 'OPEN_INTAKE'
+            }
+        });
+
+        const receptionToken = await getAuthToken('SAMPLE_RECEPTION', 'LAB-GTM', ['GTM'], [testProjectId]);
         const testExpectedId = `SMP-CSG-EXP-${runId}`;
         const testExpectedOrig = `FIELD-CSG-EXP-${runId}`;
 
@@ -339,7 +352,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
                 originalId: testExpectedOrig,
                 assignedLab: 'LAB-GTM',
                 country: 'GTM',
-                projectCode: 'SOILFER-US',
+                projectCode: testProjectId,
                 status: 'EXPECTED',
                 fieldMetadata: JSON.stringify({ collectionDate: '2026-09-15' })
             }
@@ -356,7 +369,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
                     deliveryNoteRef: `WAYBILL-${runId}`,
                     deliveredBy: 'Courier Carlos',
                     deliveredAt: custodyTime,
-                    projectCode: 'SOILFER-US'
+                    projectCode: testProjectId
                 },
                 defaults: {
                     receivedMass: 500,
@@ -380,7 +393,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         expect(s1).toBeDefined();
         expect(s1.status).toBe('ACCEPTED');
         expect(s1.assignedLab).toBe('LAB-GTM');
-        expect(s1.projectCode).toBe('SOILFER-US');
+        expect(s1.projectCode).toBe(testProjectId);
         expect(s1.receptionDate).toBeDefined();
         expect(typeof s1.receptionDate).toBe('string');
         expect(s1.custodyHandoverAt).toBeDefined();
@@ -391,7 +404,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         expect(s2).toBeDefined();
         expect(s2.status).toBe('ACCEPTED');
         expect(s2.assignedLab).toBe('LAB-GTM');
-        expect(s2.projectCode).toBe('SOILFER-US');
+        expect(s2.projectCode).toBe(testProjectId);
         expect(s2.receptionDate).toBeDefined();
         expect(typeof s2.receptionDate).toBe('string');
         expect(s2.custodyHandoverAt).toBeDefined();
@@ -412,5 +425,6 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         if (res.body.consignment?.id) {
             await prisma.consignment.delete({ where: { id: res.body.consignment.id } }).catch(() => {});
         }
+        await prisma.project.delete({ where: { id: testProjectId } }).catch(() => {});
     });
 });
