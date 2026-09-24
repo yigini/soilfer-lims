@@ -4,7 +4,7 @@ import LocationPicker from './LocationPicker';
 import InfoTooltip from '../common/InfoTooltip';
 import { useLanguage } from '../../context/LanguageContext';
 
-const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [], onPurposeSelect, errors = [], labCoordinates = null }) => {
+const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [], onPurposeSelect, errors = [], labCoordinates = null, countryCode = null }) => {
     const { t } = useLanguage();
 
     const STATIC_PURPOSES = [
@@ -17,8 +17,8 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
     const errBorder = (key) => hasErr(key) ? 'border-red-400 ring-1 ring-red-200' : '';
 
     const handleChange = (section, key, value) => {
-        if (section === 'submitter') setSubmitter({ ...submitter, [key]: value });
-        if (section === 'sampling') setSampling({ ...sampling, [key]: value });
+        if (section === 'submitter') setSubmitter(prev => ({ ...prev, [key]: value }));
+        if (section === 'sampling') setSampling(prev => ({ ...prev, [key]: value }));
     };
 
     return (
@@ -377,6 +377,7 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
                     onUncertaintyReasonChange={(v) => handleChange('sampling', 'locationUncertaintyReason', v)}
                     errors={errors}
                     labCoordinates={labCoordinates}
+                    countryCode={countryCode}
                     onChange={async (val) => {
                         let locationDesc = val.description || sampling.location;
 
