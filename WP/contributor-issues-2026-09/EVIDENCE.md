@@ -1693,14 +1693,14 @@ Following explicit independent acceptance by Codex at exact head `4a712ca90e4319
   - Write resumption verified: `POST /api/test-mutation` returns 404 from Express (not 503 from Apache proxy).
   - Public health verified: `GET https://lims.yigini.net/api/health` returns `{"status":"ok","uptime":5.071517442}`.
 - **Attribution Limits & Issue Lifecycle**:
-  - Step 6 marker drag in broad suite was a Leaflet handler simulation; authentic pointer-drag event acceptance has now been independently verified via CDP pointer interaction in Section 17 below.
-  - `lastIntakeLocation` in `localStorage` is an intake reuse cache; authentic draft save and restore has now been independently verified from SQLite database records in Section 17 below.
+  - Step 6 marker drag in broad suite was a Leaflet handler simulation; implementer-run pointer-drag workflow acceptance (Codex-reviewed) has now been verified via CDP pointer interaction in Section 17 below.
+  - `lastIntakeLocation` in `localStorage` is an intake reuse cache; implementer-run draft save and restore workflow acceptance (Codex-reviewed) has now been verified from SQLite database records in Section 17 below.
   - **Issue #114**: Strictly **OPEN** (`Refs #114`) awaiting Codex live role acceptance on released code.
 
 #### 17. Issue #114 Workflow Acceptance: Pointer Marker Drag & Saved Draft Reopen Persistence Verification
-Executed the focused workflow acceptance runner (`server/scripts/verify_issue_114_drag_draft.cjs`) in a disposable reception-role browser environment on released code (`v3.5.26-9b69920` / `9b69920edd6762eba6271a16643d57bdaa316771`):
+Executed the focused workflow acceptance runner (`server/scripts/verify_issue_114_drag_draft.cjs`) in a disposable reception-role browser environment on released code (`v3.5.26-9b69920` / `9b69920edd6762eba6271a16643d57bdaa316771`), reviewed by Codex at 08:15 UTC:
 
-1. **Authentic Pointer Marker Drag Acceptance (Test 1: PASS)**:
+1. **Pointer Marker Drag Acceptance (Test 1: PASS)**:
    - Initial click on map placed pin at `[-17.832374, 31.050114]`, with uncertainty `±2000m` and source `DESK_PIN`.
    - Bounding rect of `.leaflet-marker-icon` targeted at `(523, 410)`. Dispatched 20 sequential CDP `mouseMoved` / pointer drag steps (+120px East, -90px North) to `(643, 320)`, followed by `mouseReleased`.
    - Captured real browser event stream on DOM: `pointerdown`, `mousedown`, `pointermove` (x20), `mousemove` (x20), `marker_dragstart`, `marker_drag` (x18), `pointerup`, `mouseup`, `marker_dragend`.
@@ -1723,6 +1723,11 @@ Executed the focused workflow acceptance runner (`server/scripts/verify_issue_11
    - Visual Evidence: `artifacts/evidence-journeys/map_issue114_saved_draft_reopened.png` (158,176 bytes).
 
 - **Evidence Ledger**: `artifacts/evidence-journeys/map_issue114_drag_draft_evidence.json` (2,625 bytes, 2/2 passed).
+- **Execution & Attribution Limits**:
+  - Run is implementer-executed and Codex-reviewed in a disposable local browser environment (not independent browser replay or production role acceptance).
+  - Current application source diff against merge commit `9b69920edd6762eba6271a16643d57bdaa316771` is empty.
+  - SQLite database fields persisted upon intake; assertions verify restored UI state via DOM controls and decoupled client cache.
+  - Zero application defects identified; zero mutations, queries, or deployments to production host.
 - **Issue Lifecycle**: Both focused workflow acceptance requirements verified on released application. Issue #114 remains strictly **OPEN** (`Refs #114`) pending independent Codex review and formal issue closure.
 
 

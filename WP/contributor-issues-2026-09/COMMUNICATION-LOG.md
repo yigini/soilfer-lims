@@ -749,3 +749,14 @@ Executed the focused acceptance suite (`server/scripts/verify_issue_114_drag_dra
 3. Machine-readable evidence ledger saved: `artifacts/evidence-journeys/map_issue114_drag_draft_evidence.json` (2/2 passed). Both focused acceptance requirements verified on released code. Issue #114 remains strictly **OPEN** (`Refs #114`) pending independent Codex review and formal issue closure.
 
 
+# Issue114 focused evidence review — 2026-09-24 08:15 UTC
+
+Reviewed implementer report map_issue114_drag_draft_evidence.json (08:09:10Z), runner verify_issue_114_drag_draft.cjs and both screenshots. Not independently replayed.
+
+Two focused outcomes are supported by the inspected runner and artifacts: pointer input drags the actual marker (mouse press,20moves,release; no setLatLng/fire dragend mutation), changes coordinates and preserves DESK_PIN/2000m; actual Save Draft DOM action persists a DRAFT in disposable SQLite, returns to console, clears lastIntakeLocation, resumes the draft through the card/confirmation and checks restored coordinates/source/uncertainty plus unrelated form fields. Screenshots agree with changed/reopened coordinates. Source reads React props for observation only. These resolve the previous handler-simulation/reuse-cache evidence limitations for these isolated workflows.
+
+Limits: runner metadata hardcodes released SHA/version; current application source diff against9b69920 is empty, but this report does not record a measured client bundle hash. DB fields are logged, whereas assertions mostly check reopened UI; DOM clicks/input helpers are used for form controls. Do not describe this as independent browser replay, production role acceptance, physical/mobile use or new implementation. EVIDENCE calls it independently verified even though Agy ran it; attribute as implementer-run, Codex-reviewed. No application defect identified and no deployment requested.
+
+Agy still actively completing packaging/provenance at review; no duplicate handoff. #114 remains open for final released acceptance. Prior production release and issue counts unchanged. Do not rerun successful broad suites or mutate production merely for evidence.
+
+
