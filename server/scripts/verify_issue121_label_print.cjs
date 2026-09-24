@@ -940,7 +940,7 @@ async function main() {
             expression: `
                 (() => {
                     const buttons = Array.from(document.querySelectorAll('button'));
-                    const compactBtn = buttons.find(b => b.innerText && b.innerText.includes('Compact'));
+                    const compactBtn = buttons.find(b => b.innerText && (b.innerText.includes('50×25mm') || b.innerText.includes('Vial') || b.innerText.includes('Compact')));
                     if (compactBtn) compactBtn.click();
                 })()
             `
@@ -1106,6 +1106,18 @@ async function main() {
             throw new Error('Batch LabelPrintDialog did not open');
         }
 
+        const batchPortalText = (await pageCdp.send('Runtime.evaluate', {
+            expression: `document.querySelector('#label-print-portal')?.innerText || ''`
+        })).result.value;
+
+        const todayIso = new Date().toISOString().slice(0, 10);
+        const batchHasDate = batchPortalText.includes(todayIso);
+        const batchHasLab = batchPortalText.includes('LAB-GTM');
+        const batchHasProject = batchPortalText.includes('SOILFER-US');
+        console.log(`  - Batch portal truthful intake date (${todayIso}): ${batchHasDate ? 'PASS' : 'FAIL'}`);
+        console.log(`  - Batch portal truthful assigned lab (LAB-GTM): ${batchHasLab ? 'PASS' : 'FAIL'}`);
+        console.log(`  - Batch portal truthful project (SOILFER-US): ${batchHasProject ? 'PASS' : 'FAIL'}`);
+
         // Wait for all QR codes to finish generating
         await sleep(1000);
 
@@ -1147,7 +1159,7 @@ async function main() {
             expression: `
                 (() => {
                     const buttons = Array.from(document.querySelectorAll('button'));
-                    const compactBtn = buttons.find(b => b.innerText && b.innerText.includes('Compact'));
+                    const compactBtn = buttons.find(b => b.innerText && (b.innerText.includes('50×25mm') || b.innerText.includes('Vial') || b.innerText.includes('Compact')));
                     if (compactBtn) compactBtn.click();
                 })()
             `
@@ -1179,7 +1191,7 @@ async function main() {
         })).result.value;
         console.log(`  - Batch portal unmounts cleanly on close: ${batchPortalUnmounted ? 'PASS' : 'FAIL'}`);
 
-        const journey23Pass = batchTitlePass && batchStandardPass && batchTitleRestorePass && batchCompactPass && batchPortalUnmounted;
+        const journey23Pass = batchTitlePass && batchStandardPass && batchTitleRestorePass && batchCompactPass && batchPortalUnmounted && batchHasDate && batchHasLab && batchHasProject;
         testResults.push({
             category: 'Mounted Route Dialog Journey',
             testName: 'Journey 2.3: Authentic Mounted Batch Label Dialog Lifecycle (3 Samples: Standard & Compact)',
@@ -1188,6 +1200,9 @@ async function main() {
             pagePass: batchStandardPass,
             titleSwapPass: batchTitlePass,
             titleRestorePass: batchTitleRestorePass,
+            batchHasDate,
+            batchHasLab,
+            batchHasProject,
             passed: journey23Pass
         });
         console.log(`  - Overall: ${journey23Pass ? '✓ PASSED' : '✗ FAILED'}\n`);
@@ -1397,7 +1412,7 @@ async function main() {
             expression: `
                 (() => {
                     const buttons = Array.from(document.querySelectorAll('button'));
-                    const compactBtn = buttons.find(b => b.innerText && b.innerText.includes('Compact'));
+                    const compactBtn = buttons.find(b => b.innerText && (b.innerText.includes('50×25mm') || b.innerText.includes('Vial') || b.innerText.includes('Compact')));
                     if (compactBtn) compactBtn.click();
                 })()
             `

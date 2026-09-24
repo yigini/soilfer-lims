@@ -325,4 +325,92 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
 
         await prisma.sample.delete({ where: { id: testIntakeSampleId } }).catch(() => {});
     });
+
+    test('9. POST /api/reception/consignments returns persisted receptionDate, custodyHandoverAt, assignedLab, projectCode, and collectionDate for batch label printing', async () => {
+        const receptionToken = await getAuthToken('SAMPLE_RECEPTION', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
+        const runId = Date.now().toString(36);
+        const testExpectedId = `SMP-CSG-EXP-${runId}`;
+        const testExpectedOrig = `FIELD-CSG-EXP-${runId}`;
+
+        // Create pre-arrival EXPECTED sample with truthful collectionDate
+        await prisma.sample.create({
+            data: {
+                id: testExpectedId,
+                originalId: testExpectedOrig,
+                assignedLab: 'LAB-GTM',
+                country: 'GTM',
+                projectCode: 'SOILFER-US',
+                status: 'EXPECTED',
+                fieldMetadata: JSON.stringify({ collectionDate: '2026-09-15' })
+            }
+        });
+
+        const newSampleOrig = `FIELD-CSG-NEW-${runId}`;
+        const custodyTime = '2026-09-24T08:30:00.000Z';
+
+        const res = await request(app)
+            .post('/api/reception/consignments')
+            .set('Authorization', `Bearer ${receptionToken}`)
+            .send({
+                consignment: {
+                    deliveryNoteRef: `WAYBILL-${runId}`,
+                    deliveredBy: 'Courier Carlos',
+                    deliveredAt: custodyTime,
+                    projectCode: 'SOILFER-US'
+                },
+                defaults: {
+                    receivedMass: 500,
+                    moistureOnArrival: 'MOIST',
+                    requiredAnalyses: ['PH_H2O']
+                },
+                samples: [
+                    { originalId: testExpectedOrig, status: 'ACCEPTED' },
+                    { originalId: newSampleOrig, status: 'ACCEPTED' },
+                    { originalId: `FIELD-CSG-REJ-${runId}`, status: 'REJECTED', rejectionReason: 'Container damaged in transit' }
+                ]
+            });
+
+        expect(res.status).toBe(201);
+        expect(res.body.success).toBe(true);
+        expect(Array.isArray(res.body.samples)).toBe(true);
+        expect(res.body.samples.length).toBe(3);
+
+        // Verify sample 1 (existing EXPECTED with collectionDate):
+        const s1 = res.body.samples.find(s => s.originalId === testExpectedOrig);
+        expect(s1).toBeDefined();
+        expect(s1.status).toBe('ACCEPTED');
+        expect(s1.assignedLab).toBe('LAB-GTM');
+        expect(s1.projectCode).toBe('SOILFER-US');
+        expect(s1.receptionDate).toBeDefined();
+        expect(typeof s1.receptionDate).toBe('string');
+        expect(s1.custodyHandoverAt).toBeDefined();
+        expect(s1.collectionDate).toBe('2026-09-15');
+
+        // Verify sample 2 (new sample without collectionDate):
+        const s2 = res.body.samples.find(s => s.originalId === newSampleOrig);
+        expect(s2).toBeDefined();
+        expect(s2.status).toBe('ACCEPTED');
+        expect(s2.assignedLab).toBe('LAB-GTM');
+        expect(s2.projectCode).toBe('SOILFER-US');
+        expect(s2.receptionDate).toBeDefined();
+        expect(typeof s2.receptionDate).toBe('string');
+        expect(s2.custodyHandoverAt).toBeDefined();
+        expect(s2.collectionDate).toBeNull(); // Truthful missing collection date
+
+        // Verify sample 3 (rejected sample):
+        const s3 = res.body.samples.find(s => s.originalId === `FIELD-CSG-REJ-${runId}`);
+        expect(s3).toBeDefined();
+        expect(s3.status).toBe('RECEIVED_REJECTED');
+        expect(s3.rejectionReason).toBe('Container damaged in transit');
+        expect(s3.assignedLab).toBe('LAB-GTM');
+        expect(s3.receptionDate).toBeDefined();
+
+        // Cleanup
+        await prisma.sample.deleteMany({
+            where: { originalId: { in: [testExpectedOrig, newSampleOrig, `FIELD-CSG-REJ-${runId}`] } }
+        }).catch(() => {});
+        if (res.body.consignment?.id) {
+            await prisma.consignment.delete({ where: { id: res.body.consignment.id } }).catch(() => {});
+        }
+    });
 });
