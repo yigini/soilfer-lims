@@ -5,7 +5,7 @@ Repository: `https://github.com/yigini/soilfer-lims`
 Implementation Lead: Antigravity  
 Review & Communication Lead: Codex  
 Baseline Commit: `762c46e`  
-Current Production Release: `v3.5.26` (`9b6992014e7a8581eeb5c35ffc2725fa86c57f20`)  
+Current Production Release: `v3.5.26` (`9b69920edd6762eba6271a16643d57bdaa316771`)  
 Production Serving Image: `soilfer-lims:v3.5.26-9b69920` (sha256:`4ec614b81c658b40d565967fcdf7fee8ad96b0efcea1952f6f6c21b4b13bf8c8`)  
 Rollback Baseline Image: `soilfer-lims:rollback-baseline` / `soilfer-lims:v3.5.25-dcc4706` (sha256:`d1d0271c78d35c4ad69155cc296edb2bf9a4323b25864847d62c4aefc27a668a`)  
 Date: 2026-09-24  
@@ -1654,10 +1654,10 @@ The candidate suite was compiled (`npm.cmd run build` in `client/`, 7.59s, entry
 
 #### 16. PR #143 Production Release Execution & Live Verification (v3.5.26 — `9b69920`)
 
-Following explicit independent acceptance by Codex at exact head `4a712ca90e4319316f7796238d5c3f3ba1668673` ([PR #143 comment 5809389081](https://github.com/yigini/soilfer-lims/pull/143#issuecomment-5809389081)), the release was merged under branch protections and executed on host `46.19.33.37` (`lims.yigini.net`) under the established zero-downtime, write-quiesced release protocol.
+Following explicit independent acceptance by Codex at exact head `4a712ca90e4319316f7796238d5c3f3ba1668673` ([PR #143 comment 5809389081](https://github.com/yigini/soilfer-lims/pull/143#issuecomment-5809389081)), the release was merged under branch protections and executed on host `46.19.33.37` (`lims.yigini.net`) under the established write-quiesced, stopped-container release protocol.
 
 ##### A. Merge & CI Verification
-- **Merged PR**: PR #143 merged into `main` as merge commit `9b6992014e7a8581eeb5c35ffc2725fa86c57f20`.
+- **Merged PR**: PR #143 merged into `main` as merge commit `9b69920edd6762eba6271a16643d57bdaa316771`.
 - **Target Release Version**: `v3.5.26` (`9b69920`).
 - **Merged CI Run**: GitHub Actions CI Run **35967711696** (Job ID: `107529972427`) on `main` passed 100% green (`✓ Test & Build in 4m20s`).
 
