@@ -1,0 +1,89 @@
+{
+  "suite": "Reception Implementation Verification (#117 & #113) - Final Controls",
+  "executedAt": "2026-09-25T08:01:17.505Z",
+  "provenance": {
+    "sourceGitSha": "429ee38650ce094861a5c1cec8fcfced8d34343a",
+    "releaseVersion": "v3.5.25",
+    "workingHeadSha": "429ee38650ce094861a5c1cec8fcfced8d34343a",
+    "receptionFilesDiffVsReleased": "Clean working directory for components/reception",
+    "scopeGuard": {
+      "path": "server/utils/scopeGuard.js",
+      "commit": "db09aaa (PR #142)",
+      "authoritativeAssignedLab": true,
+      "description": "Resolves authoritative assignedLab for facility scope"
+    },
+    "clientBuild": {
+      "builtAt": "2026-09-25T07:59:59.100Z",
+      "viteVersion": "5.4.21",
+      "entryAsset": "Reception-DcbkS6KK.js",
+      "entryAssetHash": "7f63addebf6a98165a91dc1b0c01db6633633dffd78cefb2eeb9a12abf1b8ef3",
+      "indexAsset": "index-DTEVE5HW.js",
+      "indexAssetHash": "5e3e9c94817b8cc093211a15a1999b8ac58e59d0bad55f07013522651a427761",
+      "cssAsset": "index-DvT2i1qH.css",
+      "cssAssetHash": "2932e810bde9bc01eb66f53c6ed74ff95437eaae841954d4444334a2ee76d315"
+    },
+    "dbIsolation": {
+      "type": "SQLite (Isolated Synthetic Disposable)",
+      "runnerDir": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790323267759_xzqzu0",
+      "dbPath": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790323267759_xzqzu0\\disposable_journey_xzqzu0.db",
+      "refusalGuardVerified": true,
+      "productionHostBlocked": "46.19.33.37"
+    }
+  },
+  "environment": {
+    "browser": "Google Chrome Headless (CDP)",
+    "url": "http://127.0.0.1:49175/reception",
+    "database": {
+      "type": "SQLite (Isolated Synthetic Disposable)",
+      "runnerDir": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790323267759_xzqzu0",
+      "dbPath": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790323267759_xzqzu0\\disposable_journey_xzqzu0.db",
+      "isDisposable": true
+    },
+    "fixtures": {
+      "labId": "LAB-VERIFY-1790323270238_0mdla",
+      "receptionUser": "tech.reception.1790323270238_0mdla",
+      "managerUser": "mgr.reception.1790323270238_0mdla",
+      "projectId": "PRJ-VERIFY-1790323270238_0mdla"
+    }
+  },
+  "summary": {
+    "totalSteps": 4,
+    "passedSteps": 4,
+    "allPassed": true
+  },
+  "steps": [
+    {
+      "id": 1,
+      "title": "Reception Console & Walk-in Form Mounted",
+      "issue": "#113",
+      "passed": true,
+      "details": "Isolated check ready",
+      "timestamp": "2026-09-25T08:01:13.359Z"
+    },
+    {
+      "id": 2,
+      "title": "All-pass/permitted NA disables routine NC",
+      "issue": "#113",
+      "passed": true,
+      "details": "Routine NC disabled: true, Compliant badge present: true\nSpans: [\"Dashboard\",\"Sample Reception\",\"Samples\",\"Reports\",\"Equipment\",\"Projects\",\"About SoilFER\",\"Collapse\",\"Help\",\"Wedge Fast Mode\",\"Alt+W\",\"Standard Desk Typing Mode\",\"Suffix:\",\"?\",\"Scan\",\"1. ID & Field\",\"2. Condition\",\"3. Analyses\",\"4. Handover\",\"\",\"\",\"\",\"Phone\",\"Email\",\"WhatsApp\",\"In-Person\",\"\",\"\",\"\",\"\",\"\",\"Composite Sample?\",\"\",\"\",\"2\",\"\",\"Normal\",\"Medium\",\"Urgent\",\"Click map\",\"DD / DMS / UTM\",\"Current fix\",\"Municipality\",\"Reuse prior\",\"No coordinates\",\"±m\",\"m\",\"Standard\",\"+\",\"−\",\"|\",\"Field GPS (≤20m)\",\"Map pin / Paste (≤100m)\",\"Admin centroid / Text\",\"Next: Condition & Evidence\",\"→\",\"\",\"\",\"No analyses selected\",\"Next: Custody & Submit\",\"→\",\"Physical Arrival State & Desk Facts\",\"\",\"\",\"Req: 0g (0g tests + 100g archive)\",\"g\",\"\",\"\",\"+\",\"Stones / Gravel\",\"+\",\"Roots / Plant Debris\",\"+\",\"Plastic / Synthetics\",\"+\",\"Other Inclusions\",\"+\",\"Foreign Material Removed\",\"\",\"Add Photo\",\"\",\"All clear ✓\",\"Container Intact / Sealed\",\"OK\",\"\",\"Label Legible & Matches ID\",\"OK\",\"\",\"Sample Quantity Sufficient\",\"OK\",\"\",\"Sample Condition (Dry, No Contam.)\",\"OK\",\"\",\"Chain of Custody Present\",\"\",\"Flag as Non-Conformance\",\"ROUTINE COMPLIANT OUTCOME\",\"Other problem not covered by checklist\",\"Next: Analyses Selection\",\"→\",\"Chain of Custody & Physical Handover\",\"RC-19 IMMUTABLE HANDOVER\",\"Handover Timestamp\",\"Physical custody handover (distinct from entry time)\",\"Jane Receptionist\",\"Officer Sign-Off Confirmed\",\"Complete Intake\",\"SYNCHRONIZE & PRINT LABEL\",\"Notifications\",\"Chats\",\"LIMS\",\"•\",\"Laboratory Information Management System\",\"•\",\"© 2026\",\"•\",\"Built with\\ncare\",\"Dashboard\",\"\",\"Sample Reception\",\"Scan\",\"Samples\",\"More\"]",
+      "timestamp": "2026-09-25T08:01:15.431Z"
+    },
+    {
+      "id": 3,
+      "title": "Single combined description rendered for other problem",
+      "issue": "#113",
+      "passed": true,
+      "details": "Unified NC description textarea present: true, cbChecked: true, Props: {\"hasUnifiedDesc\":true,\"cbChecked\":true,\"checklistData\":{\"items\":{},\"nonConformance\":false,\"reason\":\"\"}}",
+      "timestamp": "2026-09-25T08:01:15.942Z"
+    },
+    {
+      "id": 4,
+      "title": "Independent problem survives item correction",
+      "issue": "#117",
+      "passed": true,
+      "details": "Other problem remained checked: true, Value preserved: Isolated chemical spill detected",
+      "timestamp": "2026-09-25T08:01:17.288Z"
+    }
+  ],
+  "implementerRun": true
+}

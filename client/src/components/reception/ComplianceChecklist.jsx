@@ -67,23 +67,29 @@ const ComplianceChecklist = ({
             [key]: { ...currentItems[key], status }
         };
         const anyFail = Object.values(newItems).some(it => it?.status === 'FAIL');
-        const wasFailBefore = Object.values(currentItems).some(it => it?.status === 'FAIL');
+        const wasAnyFail = Object.values(currentItems).some(it => it?.status === 'FAIL');
+
+        // Check if an independent other-problem was recorded or active
+        // Legacy draft: otherProblem is undefined, but nonConformance is true and no items failed.
+        const isLegacyOtherProblem = value?.otherProblem === undefined && value?.nonConformance === true && !wasAnyFail;
+        const hasOther = Boolean(value?.otherProblem === true || isLegacyOtherProblem);
 
         // Atomically determine non-conformance flag:
         // If any item is FAIL, nonConformance must be true.
         // If an item was corrected from FAIL and now zero items fail:
-        // preserve nonConformance only if user supplied a custom reason / general non-conformance.
-        let newNC = Boolean(value?.nonConformance);
+        // preserve nonConformance only if an other problem was recorded.
+        let newNC = false;
         if (anyFail) {
             newNC = true;
-        } else if (wasFailBefore && !anyFail) {
-            newNC = Boolean(value?.reason?.trim());
+        } else if (hasOther) {
+            newNC = true;
         }
 
         const newValue = {
             ...value,
             items: newItems,
-            nonConformance: newNC
+            nonConformance: newNC,
+            otherProblem: hasOther
         };
 
         // Single atomic state update to prevent stale-closure parent overwrite (#117, #113)
@@ -99,7 +105,7 @@ const ComplianceChecklist = ({
         onChange({ ...value, items: newItems });
     };
 
-    // Progress calculation
+    // Progress calculation & compliance assessment
     const totalItems = CHECKLIST_ITEMS.length;
     const checkedCount = CHECKLIST_ITEMS.filter(
         item => value?.items?.[item.key]?.status && value?.items?.[item.key]?.status !== undefined
@@ -111,6 +117,19 @@ const ComplianceChecklist = ({
         item => value?.items?.[item.key]?.status === 'FAIL'
     ).length;
     const pendingCount = totalItems - checkedCount;
+    const anyFail = failCount > 0;
+    const hasUnanswered = pendingCount > 0;
+
+    // Derived routine compliant outcome:
+    // All items checked, none failed, and every item is either PASS or permitted NA (#113)
+    const allCompliant = !hasUnanswered && !anyFail && CHECKLIST_ITEMS.every(item => {
+        const s = value?.items?.[item.key]?.status;
+        return s === 'PASS' || (s === 'NA' && isNAAllowed(item.key));
+    });
+
+    // Explicit other-problem route (uncovered by checklist):
+    const isLegacyOtherProblemRender = value?.otherProblem === undefined && value?.nonConformance === true && !anyFail;
+    const hasOtherProblem = Boolean(value?.otherProblem === true || isLegacyOtherProblemRender);
 
     return (
         <div className="space-y-4">
@@ -289,8 +308,15 @@ const ComplianceChecklist = ({
                         CHECKLIST_ITEMS.forEach(item => {
                             newItems[item.key] = { ...value?.items?.[item.key], status: 'PASS' };
                         });
-                        const newNC = Boolean(value?.reason?.trim());
-                        onChange({ ...value, items: newItems, nonConformance: newNC });
+                        const wasAnyFail = failCount > 0;
+                        const isLegacyOtherProblem = value?.otherProblem === undefined && value?.nonConformance === true && !wasAnyFail;
+                        const hasOther = Boolean(value?.otherProblem === true || isLegacyOtherProblem);
+                        onChange({
+                            ...value,
+                            items: newItems,
+                            nonConformance: hasOther,
+                            otherProblem: hasOther
+                        });
                     }}
                     className="text-xs text-emerald-600 hover:text-emerald-800 font-bold px-2 py-1 rounded hover:bg-emerald-50 transition-colors"
                 >
@@ -302,7 +328,15 @@ const ComplianceChecklist = ({
                         CHECKLIST_ITEMS.forEach(item => {
                             newItems[item.key] = { status: undefined, note: '' };
                         });
-                        onChange({ ...value, items: newItems, nonConformance: false, reason: '' });
+                        const wasAnyFail = failCount > 0;
+                        const isLegacyOtherProblem = value?.otherProblem === undefined && value?.nonConformance === true && !wasAnyFail;
+                        const hasOther = Boolean(value?.otherProblem === true || isLegacyOtherProblem);
+                        onChange({ 
+                            ...value, 
+                            items: newItems, 
+                            nonConformance: hasOther, 
+                            otherProblem: hasOther 
+                        });
                     }}
                     className="text-xs text-sf-muted hover:text-sf-text font-bold px-2 py-1 rounded hover:bg-sf-canvas transition-colors"
                 >
@@ -310,17 +344,25 @@ const ComplianceChecklist = ({
                 </button>
             </div>
 
-            {/* Non-Conformance flag */}
-            <div className={`pt-4 border-t transition-colors ${value?.nonConformance ? 'border-red-200 dark:border-red-800' : 'border-sf-divider'}`}>
-                <label className={`flex items-center gap-3 p-3 rounded-xl border-2 border-dashed cursor-pointer transition-all ${value?.nonConformance
-                    ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20'
-                    : 'border-sf-divider hover:border-red-200 hover:bg-red-50/30 dark:hover:bg-red-900/10'
-                    }`}>
+            {/* Routine Non-Conformance control (#113) */}
+            <div className={`pt-4 border-t transition-colors ${(value?.nonConformance && anyFail) ? 'border-red-200 dark:border-red-800' : 'border-sf-divider'}`}>
+                <label className={`flex items-center gap-3 p-3 rounded-xl border-2 border-dashed transition-all ${
+                    allCompliant
+                        ? 'border-sf-divider bg-sf-surface/50 opacity-50 cursor-not-allowed text-sf-muted'
+                        : (value?.nonConformance && anyFail)
+                            ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 cursor-pointer'
+                            : 'border-sf-divider hover:border-red-200 hover:bg-red-50/30 dark:hover:bg-red-900/10 cursor-pointer'
+                    }`}
+                    title={allCompliant ? t('reception.ncDisabledAllCompliant', 'All quality checks are compliant. Routine non-conformance is unavailable.') : (!anyFail && hasUnanswered) ? t('reception.ncDisabledIncomplete', 'Complete checklist or mark failed criteria to enable routine non-conformance.') : undefined}
+                >
                     <input
                         type="checkbox"
-                        checked={value?.nonConformance || false}
+                        aria-label="Flag as Non-Conformance"
+                        data-testid="routine-nc-checkbox"
+                        checked={Boolean(value?.nonConformance && anyFail)}
+                        disabled={allCompliant || !anyFail}
                         onChange={(e) => {
-                            const anyFail = Object.values(value?.items || {}).some(it => it?.status === 'FAIL');
+                            if (allCompliant || !anyFail) return;
                             const newNC = anyFail ? true : e.target.checked;
                             const newValue = {
                                 ...value,
@@ -331,75 +373,149 @@ const ComplianceChecklist = ({
                                 onNonConformance(newNC);
                             }
                         }}
-                        className="w-5 h-5 accent-red-600 rounded cursor-pointer"
+                        className="w-5 h-5 accent-red-600 rounded cursor-pointer disabled:cursor-not-allowed"
                     />
                     <div className="flex-1">
-                        <span className={`font-bold text-sm ${value?.nonConformance ? 'text-red-700 dark:text-red-400' : 'text-sf-muted'}`}>
-                            Flag as Non-Conformance
-                        </span>
+                        <div className="flex items-center gap-2">
+                            <span className={`font-bold text-sm ${allCompliant ? 'text-sf-muted' : (value?.nonConformance && anyFail) ? 'text-red-700 dark:text-red-400' : 'text-sf-muted'}`}>
+                                {t('reception.flagNonConformance', 'Flag as Non-Conformance')}
+                            </span>
+                            {allCompliant && (
+                                <span className="text-[10px] font-bold uppercase text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded">
+                                    {t('reception.routineCompliant', 'Routine Compliant Outcome')}
+                                </span>
+                            )}
+                        </div>
                         <p className="text-xs text-sf-muted mt-0.5">
-                            Flags this sample for manager review before processing can begin
+                            {allCompliant
+                                ? t('reception.ncDisabledHint', 'All quality checks are compliant. Routine non-conformance is unavailable.')
+                                : anyFail
+                                    ? t('reception.ncFailedHint', 'Flags this sample for manager review or rejection due to failed checklist criteria')
+                                    : t('reception.ncRoutineHint', 'Flags this sample for manager review before processing can begin')}
                         </p>
                     </div>
-                    <AlertCircle size={18} className={value?.nonConformance ? 'text-red-500' : 'text-sf-muted'} />
+                    <AlertCircle size={18} className={(value?.nonConformance && anyFail) ? 'text-red-500' : 'text-sf-muted'} />
                 </label>
+
+                {/* Clearly separate: Other problem not covered by checklist (#113) */}
+                <div className="pt-3 mt-3 border-t border-sf-divider">
+                    <div className={`rounded-xl border transition-all ${
+                        hasOtherProblem
+                            ? 'border-amber-400 dark:border-amber-600 bg-amber-50/50 dark:bg-amber-900/20'
+                            : 'border-sf-divider bg-sf-surface hover:border-amber-200 dark:hover:border-amber-800/40'
+                    }`}>
+                        <label className="flex items-center gap-3 p-3 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                id="other-problem-toggle"
+                                aria-label="Other problem not covered by checklist"
+                                data-testid="other-problem-checkbox"
+                                checked={hasOtherProblem}
+                                onChange={(e) => {
+                                    const checked = e.target.checked;
+                                    const newNC = checked ? true : anyFail;
+                                    const newValue = {
+                                        ...value,
+                                        otherProblem: checked,
+                                        nonConformance: newNC,
+                                        // Unified description doesn't need to clear reason on toggle unless we want to,
+                                        // but safely retaining it prevents data loss if toggled by mistake.
+                                        reason: value?.reason || ''
+                                    };
+                                    onChange(newValue);
+                                    if (onNonConformance) {
+                                        onNonConformance(newNC);
+                                    }
+                                }}
+                                className="w-5 h-5 accent-amber-600 rounded cursor-pointer"
+                            />
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                    <span className={`font-bold text-sm ${
+                                        hasOtherProblem ? 'text-amber-800 dark:text-amber-300' : 'text-sf-muted'
+                                    }`}>
+                                        {t('reception.otherProblemTitle', 'Other problem not covered by checklist')}
+                                    </span>
+                                    {hasOtherProblem && (
+                                        <span className="text-[10px] font-bold uppercase text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/50 px-2 py-0.5 rounded">
+                                            {t('reception.uncoveredException', 'Uncovered Exception')}
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-xs text-sf-muted mt-0.5">
+                                    {t('reception.otherProblemHint', 'Report exceptional sample defects or anomalies outside standard quality checks (requires manager authorization)')}
+                                </p>
+                            </div>
+                            <HelpCircle size={18} className={hasOtherProblem ? 'text-amber-600' : 'text-sf-muted'} />
+                        </label>
+                    </div>
+                </div>
+
+                {/* Unified Non-Conformance Description (Active when NC is true) */}
                 {value?.nonConformance && (
                     <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                        <label className="block text-xs font-bold text-red-600 mb-1 uppercase tracking-wider">
-                            Non-Conformance Description *
+                        <label className="block text-xs font-bold text-red-600 dark:text-red-400 mb-1 uppercase tracking-wider">
+                            {hasOtherProblem && anyFail 
+                                ? t('reception.combinedProblemDescription', 'Combined Problem Description (Checklist & Other) *')
+                                : hasOtherProblem 
+                                    ? t('reception.otherProblemDescription', 'Problem Description (Outside Checklist Criteria) *')
+                                    : t('reception.nonConformanceDescription', 'Non-Conformance Description *')}
                         </label>
                         <textarea
+                            data-testid="unified-nc-description"
                             className="w-full p-3 border border-red-300 dark:border-red-800 bg-sf-surface text-sf-text rounded-xl text-sm focus:ring-2 focus:ring-red-300 outline-none placeholder:text-red-300 dark:placeholder:text-red-700 resize-none"
-                            placeholder="Describe the issue requiring attention..."
+                            placeholder={t('reception.describeIssue', 'Describe the issue requiring attention...')}
                             value={value?.reason || ''}
                             onChange={(e) => onChange({ ...value, reason: e.target.value })}
                             rows={3}
                         />
+                    </div>
+                )}
 
-                        {/* Photographic Evidence Attachment */}
-                        <div className="mt-3 pt-2 border-t border-red-100 dark:border-red-900/30">
-                            <div className="flex items-center justify-between mb-2">
-                                <label className="text-xs font-bold text-red-700 dark:text-red-400 uppercase tracking-wider flex items-center gap-1.5">
-                                    <Camera size={14} /> Photographic Evidence ({photos.length})
+                {/* Photographic Evidence Attachment */}
+                {(value?.nonConformance || hasOtherProblem) && (
+                    <div className="mt-3 pt-2 border-t border-red-100 dark:border-red-900/30">
+                        <div className="flex items-center justify-between mb-2">
+                            <label className="text-xs font-bold text-red-700 dark:text-red-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <Camera size={14} /> Photographic Evidence ({photos.length})
+                            </label>
+                            {onUploadPhoto && (
+                                <label className="cursor-pointer bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-700 px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-red-200 dark:hover:bg-red-900/60 flex items-center gap-1 transition-colors">
+                                    {uploadingPhoto ? <Loader2 size={12} className="animate-spin" /> : <Camera size={12} />}
+                                    <span>{uploadingPhoto ? 'Uploading...' : 'Attach Photo'}</span>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        className="hidden"
+                                        disabled={uploadingPhoto}
+                                        onChange={onUploadPhoto}
+                                    />
                                 </label>
-                                {onUploadPhoto && (
-                                    <label className="cursor-pointer bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-700 px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-red-200 dark:hover:bg-red-900/60 flex items-center gap-1 transition-colors">
-                                        {uploadingPhoto ? <Loader2 size={12} className="animate-spin" /> : <Camera size={12} />}
-                                        <span>{uploadingPhoto ? 'Uploading...' : 'Attach Photo'}</span>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            multiple
-                                            className="hidden"
-                                            disabled={uploadingPhoto}
-                                            onChange={onUploadPhoto}
-                                        />
-                                    </label>
-                                )}
-                            </div>
-
-                            {photos.length > 0 ? (
-                                <div className="grid grid-cols-4 gap-2 pt-1">
-                                    {photos.map((url, idx) => (
-                                        <div key={idx} className="relative group rounded-lg overflow-hidden border border-red-200 dark:border-red-800 aspect-video bg-sf-canvas shadow-sm">
-                                            <img src={url} alt={`Evidence ${idx + 1}`} className="w-full h-full object-cover" />
-                                            {onRemovePhoto && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => onRemovePhoto(idx)}
-                                                    className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow"
-                                                    title="Remove"
-                                                >
-                                                    <X size={10} />
-                                                </button>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-[11px] text-sf-muted italic">No non-conformance photos attached yet.</p>
                             )}
                         </div>
+
+                        {photos.length > 0 ? (
+                            <div className="grid grid-cols-4 gap-2 pt-1">
+                                {photos.map((url, idx) => (
+                                    <div key={idx} className="relative group rounded-lg overflow-hidden border border-red-200 dark:border-red-800 aspect-video bg-sf-canvas shadow-sm">
+                                        <img src={url} alt={`Evidence ${idx + 1}`} className="w-full h-full object-cover" />
+                                        {onRemovePhoto && (
+                                            <button
+                                                type="button"
+                                                onClick={() => onRemovePhoto(idx)}
+                                                className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow"
+                                                title="Remove"
+                                            >
+                                                <X size={10} />
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-[11px] text-sf-muted italic">No non-conformance photos attached yet.</p>
+                        )}
                     </div>
                 )}
             </div>

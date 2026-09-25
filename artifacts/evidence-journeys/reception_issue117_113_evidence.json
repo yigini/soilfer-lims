@@ -1,0 +1,239 @@
+{
+  "suite": "Reception Implementation Verification (#117 & #113)",
+  "executedAt": "2026-09-25T06:59:09.471Z",
+  "provenance": {
+    "sourceGitSha": "dcc47066a6805f29ceeacd471fd402134654a460",
+    "releaseVersion": "v3.5.25",
+    "workingHeadSha": "7062542928b1c40032a327b2396592006516e2cb",
+    "receptionFilesDiffVsReleased": "0 differences (client/src/pages/Reception.jsx, client/src/components/reception/*, server/controllers/receptionController.js identical to dcc4706)",
+    "scopeGuard": {
+      "path": "server/utils/scopeGuard.js",
+      "commit": "db09aaa (PR #142, merged in dcc4706)",
+      "authoritativeAssignedLab": true,
+      "description": "Resolves authoritative assignedLab for facility scope"
+    },
+    "clientBuild": {
+      "builtAt": "2026-09-24T00:37:15.000Z",
+      "viteVersion": "5.4.21",
+      "entryAsset": "Reception-D76w_gqE.js",
+      "indexAsset": "index-BmIXiAyn.js",
+      "cssAsset": "index-C5d3ru5M.css"
+    },
+    "dbIsolation": {
+      "type": "SQLite (Isolated Synthetic Disposable)",
+      "runnerDir": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790319518182_ilwlcy",
+      "dbPath": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790319518182_ilwlcy\\disposable_journey_ilwlcy.db",
+      "refusalGuardVerified": true,
+      "productionHostBlocked": "46.19.33.37"
+    }
+  },
+  "environment": {
+    "browser": "Google Chrome Headless (CDP)",
+    "url": "http://127.0.0.1:49175/reception",
+    "database": {
+      "type": "SQLite (Isolated Synthetic Disposable)",
+      "runnerDir": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790319518182_ilwlcy",
+      "dbPath": "C:\\Users\\yigin\\Documents\\soilfer-lims\\server\\.tmp_journey_runner_1790319518182_ilwlcy\\disposable_journey_ilwlcy.db",
+      "isDisposable": true
+    },
+    "fixtures": {
+      "labId": "LAB-VERIFY-1790319521072_95zc3",
+      "receptionUser": "tech.reception.1790319521072_95zc3",
+      "managerUser": "mgr.reception.1790319521072_95zc3",
+      "projectId": "PRJ-VERIFY-1790319521072_95zc3"
+    }
+  },
+  "summary": {
+    "totalSteps": 23,
+    "passedSteps": 23,
+    "allPassed": true,
+    "issue117Passed": true,
+    "issue113Passed": true
+  },
+  "steps": [
+    {
+      "id": 1,
+      "title": "Reception Console First Render",
+      "issue": "#117",
+      "passed": true,
+      "details": "Rendered without crash or TDZ errors; initial modes accessible",
+      "timestamp": "2026-09-25T06:58:44.154Z"
+    },
+    {
+      "id": 2,
+      "title": "ComplianceChecklist Mount in Walk-in",
+      "issue": "#117",
+      "passed": true,
+      "details": "WalkInForm and ComplianceChecklist mounted together in Reception console",
+      "timestamp": "2026-09-25T06:58:44.213Z"
+    },
+    {
+      "id": 3,
+      "title": "Fail Selection Visual Red State & Badge",
+      "issue": "#117",
+      "passed": true,
+      "details": "aria-checked=true: true, red class: true, row badge: true",
+      "timestamp": "2026-09-25T06:58:44.528Z"
+    },
+    {
+      "id": 4,
+      "title": "Failure Note Entry in Criterion Field",
+      "issue": "#117",
+      "passed": true,
+      "details": "Entered failure explanation \"Container torn at top seam with sample spillage\" captured in DOM",
+      "timestamp": "2026-09-25T06:58:44.840Z"
+    },
+    {
+      "id": 5,
+      "title": "Non-Conformance Flow Auto-Sync & Visibility",
+      "issue": "#117",
+      "passed": true,
+      "details": "Flag checkbox auto-checked: true, textarea visible: true, Reject button visible: true",
+      "timestamp": "2026-09-25T06:58:44.841Z"
+    },
+    {
+      "id": 6,
+      "title": "Cancellation Preserves Fail State (Discard Flow)",
+      "issue": "#117",
+      "passed": true,
+      "details": "Discard confirm modal appeared: true, Fail state preserved on cancel: true",
+      "timestamp": "2026-09-25T06:58:45.559Z"
+    },
+    {
+      "id": 7,
+      "title": "Cancellation Preserves Fail State (Manager Gate)",
+      "issue": "#117",
+      "passed": true,
+      "details": "Manager Auth Required dialog displayed: true, Fail selection intact after dismiss: true",
+      "timestamp": "2026-09-25T06:58:46.755Z"
+    },
+    {
+      "id": 8,
+      "title": "Correction Back to OK Clears Note & Unflags NC",
+      "issue": "#117",
+      "passed": true,
+      "details": "OK aria-checked: true, Fail cleared: true, Note removed: true, Reject button hidden: true",
+      "timestamp": "2026-09-25T06:58:47.378Z"
+    },
+    {
+      "id": 9,
+      "title": "Real Timed 10s Autosave Persists Fail & Note",
+      "issue": "#117",
+      "passed": true,
+      "details": "Submitter=\"Alvaro Gutierrez\", Label Status=FAIL, Note=\"Handwritten label smudged by rain, ID unreadable\"",
+      "timestamp": "2026-09-25T06:58:57.895Z"
+    },
+    {
+      "id": 10,
+      "title": "Draft Restoration Rehydrates Fail State & Note",
+      "issue": "#117",
+      "passed": true,
+      "details": "Restore dialog appeared: true, DOM accurately restored Fail button, note, and NC flag: true",
+      "timestamp": "2026-09-25T06:58:58.722Z"
+    },
+    {
+      "id": 11,
+      "title": "Draft Save Button & Stored Answer Truth",
+      "issue": "#117",
+      "passed": true,
+      "details": "Sample ID: W001, Status: DRAFT, Checklist Label FAIL persisted: true, History records DRAFT: true",
+      "timestamp": "2026-09-25T06:58:59.759Z"
+    },
+    {
+      "id": 12,
+      "title": "Non-Conformance Rejection Flow & Audit History",
+      "issue": "#117",
+      "passed": true,
+      "details": "Result modal displayed RECEIVED_REJECTED: true, Sample ID: SMP-EXP-1790319521072_95zc3, History audit log recorded: true, Metadata preserved NC: true",
+      "timestamp": "2026-09-25T06:59:02.129Z"
+    },
+    {
+      "id": 13,
+      "title": "Routine Compliant Outcome (All Pass Browser Flow)",
+      "issue": "#113",
+      "passed": true,
+      "details": "Browser confirmed intake with 0 manager prompts: true, Lab ID: S001, Status: ACCEPTED, 5/5 PASS checklist persisted: true, History RECEIVED without exception: true, Routine NC disabled: true, Routine badge displayed: true, Other problem toggle present: true",
+      "timestamp": "2026-09-25T06:59:05.784Z"
+    },
+    {
+      "id": 14,
+      "title": "Walk-in CoC N/A Permitted Policy (Browser Flow)",
+      "issue": "#113",
+      "passed": true,
+      "details": "Browser confirmed intake with 0 manager prompts: true, Lab ID: W002, Status: ACCEPTED, CoC NA + 4 PASS persisted: true, History RECEIVED without exception: true, Routine NC disabled: true, Routine badge displayed: true",
+      "timestamp": "2026-09-25T06:59:09.427Z"
+    },
+    {
+      "id": 15,
+      "title": "Fail-Closed: Incomplete Checklist Blocked",
+      "issue": "#113",
+      "passed": true,
+      "details": "HTTP 400 INCOMPLETE_COMPLIANCE_CHECKLIST: Unanswered compliance checklist items: condition, coc. All items must be assessed before final acceptance., Zero DB mutations (sample created: false)",
+      "timestamp": "2026-09-25T06:59:09.432Z"
+    },
+    {
+      "id": 16,
+      "title": "Fail-Closed: Empty Checklist Blocked",
+      "issue": "#113",
+      "passed": true,
+      "details": "HTTP 400 INCOMPLETE_COMPLIANCE_CHECKLIST (empty items object), Zero DB mutations (sample created: false)",
+      "timestamp": "2026-09-25T06:59:09.434Z"
+    },
+    {
+      "id": 17,
+      "title": "Fail-Closed: Omitted Checklist Blocked",
+      "issue": "#113",
+      "passed": true,
+      "details": "HTTP 400 INCOMPLETE_COMPLIANCE_CHECKLIST (omitted property), Zero DB mutations (sample created: false)",
+      "timestamp": "2026-09-25T06:59:09.437Z"
+    },
+    {
+      "id": 18,
+      "title": "Fail-Closed: Prohibited Container N/A Blocked",
+      "issue": "#113",
+      "passed": true,
+      "details": "HTTP 400 INVALID_CHECKLIST_NA: Not Applicable (N/A) is not permitted for criteria: container., Zero DB mutations",
+      "timestamp": "2026-09-25T06:59:09.442Z"
+    },
+    {
+      "id": 19,
+      "title": "Fail-Closed: Shipment CoC N/A Prohibited",
+      "issue": "#113",
+      "passed": true,
+      "details": "HTTP 400 INVALID_CHECKLIST_NA on formal shipment, Zero DB mutations",
+      "timestamp": "2026-09-25T06:59:09.446Z"
+    },
+    {
+      "id": 20,
+      "title": "Fail-Closed: Staff Self-Authorization Prohibited",
+      "issue": "#113",
+      "passed": true,
+      "details": "HTTP 403 COMPLIANCE_FAILURE_EXCEPTION_REQUIRED: Client-forged authorizer stripped, Zero DB mutations",
+      "timestamp": "2026-09-25T06:59:09.448Z"
+    },
+    {
+      "id": 21,
+      "title": "Authorized Manager Exception Admission",
+      "issue": "#113",
+      "passed": true,
+      "details": "HTTP 200, Sample admitted as ACCEPTED, History records ADMITTED_WITH_EXCEPTION (true), Metadata records verifiedAuthorizer (true)",
+      "timestamp": "2026-09-25T06:59:09.458Z"
+    },
+    {
+      "id": 22,
+      "title": "Exception Reason Policy (>= 5 Chars Enforced)",
+      "issue": "#113",
+      "passed": true,
+      "details": "HTTP 403 COMPLIANCE_FAILURE_EXCEPTION_REQUIRED: Empty/short reason rejected, Zero DB mutations",
+      "timestamp": "2026-09-25T06:59:09.460Z"
+    },
+    {
+      "id": 23,
+      "title": "Uncovered-Problem Route Preserves Staff Audit Trail",
+      "issue": "#113",
+      "passed": true,
+      "details": "Staff blocked without approval: true, Manager approved with VOC screening exception: true, Audit trail preserved in history: true",
+      "timestamp": "2026-09-25T06:59:09.471Z"
+    }
+  ]
+}
