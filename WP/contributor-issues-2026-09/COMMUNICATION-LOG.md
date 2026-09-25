@@ -964,3 +964,23 @@ Published bounded final review https://github.com/yigini/soilfer-lims/pull/145#i
 ### 2026-09-25 08:18 UTC — final evidence packaging complete; focused files staged
 Consumed Codex final evidence review. Zero browser reruns and zero application code changes executed. Preserved raw 08:01 4/4 report (`reception_issue117_113_final_controls.json`), created explicit correction sidecar (`reception_issue117_113_final_controls_sidecar.json`) recording candidate/source hashes (`749aeb856...`), served bundle hashes (`Reception-DcbkS6KK.js` = `7f63addebf...`), metadata corrections (stale v3.5.25 template, working-tree vs HEAD cleanliness, filesystem mtime), and explicit scripted-event attribution limits (no reload or native pointer/keyboard hardware claims; correction/remount established by 21 contracts + 7 mounted transitions). Preserved old-build failure report (`reception_issue117_113_final_controls_old_build.json`) in repository artifacts confirming stale-build root cause. Updated future runner provenance generation and comments in `server/scripts/verify_isolated_controls.cjs` without rerunning. Added Section 19 and updated Ledger row 42 in `WP/contributor-issues-2026-09/EVIDENCE.md`. Kept unrelated TUF plan, scripts, and temporary runner directories untracked. Staging and committing focused packaging files.
 
+
+### 2026-09-25 08:28 UTC — PR145 final acceptance and safe-release handoff
+Independently reviewed final package30daeee1d07cd20354fdb5338ec569589177cc85 and green exact-head CI36112113080. Increment contains only runner/evidence/sidecar/docs; runtime source/schema unchanged from independently accepted429ee38. Raw and old-build reports preserved, attribution/corrections explicit, TUF plan/fixtures excluded. No more preparation/test loops required. Final acceptance https://github.com/yigini/soilfer-lims/pull/145#issuecomment-5829340422 ; work/pr145-final-review.md. Sent ONE direct continuation to idle LIMS Dev for existing-authorized merge/exact-main CI/safe release, Agy sole deployer; Codex will independently verify and close113 after release. No production operation performed by Codex.11/18 closed until release verified; all holds retained.
+Delivery confirmation08:28UTC: fresh second screenshot shows acceptance message consumed, pr145-final-review.md and prior release script read; Working/Cancel active. No duplicate dispatch.
+
+### 2026-09-25 08:36 UTC — PR145 production release executed; live verification complete
+PR145 merged into `main` via `gh pr merge 145 --merge` as merge commit `2ef64cd01d8e91a0764156ebfbc1add5442e5c15`. Exact-main GitHub Actions CI Run 36113116688 passed 100% green in 4m00s. Single-writer release protocol executed on host 46.19.33.37:
+1. Rollback baseline preserved: `soilfer-lims:rollback-baseline` & `soilfer-lims:rollback-d07ad62` (ID: `a092227c6f4a`, digest: `sha256:a092227c6f4a...`).
+2. Pre-release logs preserved: `/opt/lims/pre_release_d07ad62_20260925_103354.log`.
+3. Ingress write quiescence enforced via Apache 503 rewrite rule (`POST -> 503`, `GET -> 200`).
+4. Active container stopped; WAL checkpointed to zero pages (`0|0|0`).
+5. Consistent backup taken (`dev_release_2ef64cd_consistent_20260925_103354.db`, SHA256: `d9f6e33341...`). Integrity check `ok`, FK check `0 errors`, record counts intact (Samples=36878, Projects=5, WorkItems=90, Results=19, Reports=4).
+6. Postflight container started with `DISABLE_BACKGROUND_JOBS=true`. Verified zero scheduler logs.
+7. Postflight verification suite passed 100% across all 15 suites (`=== POSTFLIGHT RESULT: ALL CHECKS PASSED ===`).
+8. Post-check database counts verified intact (Samples=36878, Projects=5, zero mutation).
+9. Container restarted in full production mode (Image: `soilfer-lims:v3.5.28-2ef64cd`, ID: `cf3d71a49ef3`, Digest: `sha256:cf3d71a49ef3...`, StartedAt: `2026-09-25T08:34:48.736806007Z`).
+10. Clean Apache proxy configuration restored (SHA256: `f46aeaae33...`), configtest OK, httpd reloaded.
+11. Write resumption verified: `POST /api/test-mutation` returns 404 from Express. Public health verified: `GET https://lims.yigini.net/api/health` returns `status: "ok"`.
+Zero schema migrations, zero synthetic intake, zero permission alterations. Documented in EVIDENCE.md and COMMUNICATION-LOG.md. All worktrees, logs, and artifacts preserved. Codex independent release verification and closure of Issue #113 ready.
+
