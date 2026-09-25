@@ -436,6 +436,46 @@ function hasEvidenceChanged(existingMeta, existingEntry, incomingSampleData, inc
 }
 
 /**
+ * Detect whether an incoming occurrence's evidence fingerprint has already been recorded in revisions or conflicting submissions (da8b561 review)
+ */
+function isOccurrenceEvidenceRecorded(meta, currentConfig, submission, sampleData, incomingFp) {
+    if (!meta || !incomingFp) return false;
+    const occurrenceKey = `${currentConfig?.koboServerUrl || ''}:${currentConfig?.formId || ''}:${submission?._id}:${sampleData?.depth || 'D1'}`;
+
+    // 1. Check in meta.revisions
+    if (Array.isArray(meta.revisions)) {
+        for (const rev of meta.revisions) {
+            const matchesKey = rev.occurrenceKey ? rev.occurrenceKey === occurrenceKey : (
+                String(rev.kobo_id) === String(submission?._id) &&
+                String(rev.depth || '') === String(sampleData?.depth || '') &&
+                (!rev.sourceServerUrl || rev.sourceServerUrl === currentConfig?.koboServerUrl) &&
+                (!rev.sourceFormId || rev.sourceFormId === currentConfig?.formId)
+            );
+            if (matchesKey && rev.evidenceFingerprint && rev.evidenceFingerprint === incomingFp) {
+                return true;
+            }
+        }
+    }
+
+    // 2. Check in meta.conflictingSubmissions
+    if (Array.isArray(meta.conflictingSubmissions)) {
+        for (const conf of meta.conflictingSubmissions) {
+            const matchesKey = conf.occurrenceKey ? conf.occurrenceKey === occurrenceKey : (
+                String(conf.kobo_id) === String(submission?._id) &&
+                String(conf.depth || '') === String(sampleData?.depth || '') &&
+                (!conf.sourceServerUrl || conf.sourceServerUrl === currentConfig?.koboServerUrl) &&
+                (!conf.sourceFormId || conf.sourceFormId === currentConfig?.formId)
+            );
+            if (matchesKey && conf.evidenceFingerprint && conf.evidenceFingerprint === incomingFp) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/**
  * Internal: Sync submissions for a specific lab config
  */
 async function syncLabSubmissions(config, performedBy, options = {}) {
@@ -726,9 +766,15 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                                           (Array.isArray(meta.intraSubDuplicates) && meta.intraSubDuplicates.some(d => String(d.depth || '') === String(sampleData.depth || '')));
 
                     if (isPrimaryDepth) {
+                        const incomingFp = computeEvidenceFingerprint(sampleData, processedAttachments, submission);
                         const evidenceChanged = hasEvidenceChanged(meta, existingEntry, sampleData, processedAttachments, submission);
                         if (!evidenceChanged) {
                             // Unchanged primary replay: completely idempotent! Zero metadata/audit/hold changes (Finding 1)
+                            skippedCount++;
+                            continue;
+                        }
+                        if (isOccurrenceEvidenceRecorded(meta, currentConfig, submission, sampleData, incomingFp)) {
+                            // Revised primary replay with identical revised evidence: idempotent! Zero metadata/audit/hold changes (da8b561 review)
                             skippedCount++;
                             continue;
                         }
@@ -825,9 +871,14 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                     const isPrimaryDepth = String(meta.depth || '') === String(sampleData.depth || '') ||
                                           (Array.isArray(meta.intraSubDuplicates) && meta.intraSubDuplicates.some(d => String(d.depth || '') === String(sampleData.depth || '')));
                     if (isPrimaryDepth) {
+                        const incomingFp = computeEvidenceFingerprint(sampleData, processedAttachments, submission);
                         const evidenceChanged = hasEvidenceChanged(meta, existingSample, sampleData, processedAttachments, submission);
                         if (!evidenceChanged) {
                             // Unchanged primary replay - do not treat as conflict
+                            continue;
+                        }
+                        if (isOccurrenceEvidenceRecorded(meta, currentConfig, submission, sampleData, incomingFp)) {
+                            // Already recorded this exact revised evidence - skip idempotently (da8b561 review)
                             continue;
                         }
 
@@ -835,8 +886,9 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                         if (!Array.isArray(meta.revisions)) {
                             meta.revisions = [];
                         }
-                        const incomingFp = computeEvidenceFingerprint(sampleData, processedAttachments, submission);
+                        const occurrenceKey = `${currentConfig.koboServerUrl || ''}:${currentConfig.formId || ''}:${submission._id}:${sampleData.depth || 'D1'}`;
                         const revisionRecord = {
+                            occurrenceKey,
                             evidenceFingerprint: incomingFp,
                             sourceServerUrl: currentConfig.koboServerUrl,
                             sourceFormId: currentConfig.formId,

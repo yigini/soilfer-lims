@@ -1135,3 +1135,37 @@ Antigravity completed focused application corrections, expanded contract coverag
    - All 17 contract tests in `server/tests/contracts/kobo_duplicate_provenance.test.js` pass cleanly (17/17 passed).
    - Zero production mutations performed; clearance remains held pending Codex independent review.
 
+
+### 2026-09-25 14:18 UTC — PR147 da8b561 independent review
+
+CI36145141587 green; changes required. Positive source identity and changed-evidence cases independently pass; repeated revised-primary replay still duplicates audit/revision records. Actual packaged Docker invocation/recovery boundaries require correction, and private operational data must be excluded from public source/build context. Concrete containment and bounded review continuation delivered once to LIMS Dev14:17, confirmed consumed/active. Sanitized public review: https://github.com/yigini/soilfer-lims/pull/147#issuecomment-5833912769. No merge/deploy/activation/ingestion clearance or Codex production mutation. Preserve successful checks and concurrent artifacts.
+
+### 2026-09-25 14:25 UTC — PR147 corrections for review da8b561 completed & verified; immediate containment enacted
+Antigravity addressed all containment actions and review findings from Codex review of `da8b561`:
+1. **Immediate Data-Exposure Containment**:
+   - Preserved private snapshot and manifest in restricted external directory outside Git and Docker contexts (`C:/Users/yigin/Documents/Codex/2026-09-21/se/work/private_kobo/`).
+   - Removed real datasets from branch tracking (`server/data/ghana_kobo_snapshot_40747.json` and `server/data/ghana_kobo_manifest_40747.json`).
+   - Updated `.gitignore` and `.dockerignore` with explicit ignore patterns (`server/data/ghana_kobo_*`, `*.kobo*.json`, `private_kobo/`).
+   - Updated runner `server/scripts/execute_ghana_apply_146.cjs` to accept private read-only mounted files via `--snapshot` and `--manifest` (or environment variables) and verify expected SHA-256 hashes (`33db90cdcab60ccf4801a7754d8444893c0b6ee25f269a65366d6fed5046292f` and `e43d490366eda0e325b1f1639c743b57105a6256e0f406df6f7e1d87514adaed`).
+   - Prepared narrowly scoped branch history cleanup plan for repository owner authorization (force-with-lease held pending authorization; zero credential rotations or visibility changes). Zero raw surveyor/coordinate values copied to reports or comments.
+2. **Repeated Revised-Primary Replay Idempotency**:
+   - Implemented `isOccurrenceEvidenceRecorded(meta, currentConfig, submission, sampleData, incomingFp)` in `server/controllers/koboController.js` checking both `meta.revisions` and `meta.conflictingSubmissions` for matching occurrence key and evidence fingerprint.
+   - Repeating identical revised primary evidence skips idempotently with zero duplicate updates, zero duplicate audits, and zero duplicate revision entries.
+   - Added test 18 to `server/tests/contracts/kobo_duplicate_provenance.test.js` (18/18 passed).
+3. **Release Wrapper Fixes (`execute_release_pr147.sh`)**:
+   - Explicitly added `--entrypoint node` to `docker run`, completely bypassing `docker-entrypoint.sh` to prevent application or migration startup.
+   - Added preflight image check asserting target image contains reviewed `AMBIGUOUS_PROVENANCE_HOLD` intake guards.
+   - Redesigned cleanup trap to kill/remove named runner containers (`soilfer-lims-dryrun`, `soilfer-lims-apply`), assert post-recovery integrity, FKs, and baseline count, and poll `/api/health` with fail-closed policy (never restore ingress if unhealthy).
+   - Mounted private snapshot and manifest read-only into `/private/`.
+4. **Dual-Mode Invariant Validation & Normalized Collision Projection**:
+   - Factored out unified `validateInvariantsAndProjectCandidates` in `execute_ghana_apply_146.cjs` asserting snapshot (459 subs, 868 occurrences) and manifest hashes, 864 distinct candidate IDs, and 4 holds in BOTH dry-run and apply modes BEFORE CAS.
+   - Implemented normalized candidate collision check against an in-memory `Set` of all existing DB specimens (0 collisions).
+5. **Disposable 5-Stage Rehearsal Validated**:
+   - Executed `server/scripts/rehearsal_ghana_apply_146.cjs`:
+     - Stage 1: Dry-Run Validation (0 mutations).
+     - Stage 2: Successful Apply & Postflight (864 admitted, 4 held, 860 clean).
+     - Stage 3: Precondition Failure Recovery (bit-for-bit SHA match).
+     - Stage 4: Partial-Apply Mid-Flight Failure Recovery (dirty state restored with bit-for-bit SHA match).
+     - Stage 5: Interruption & Runner Child Process Termination (SIGTERM clean termination, bit-for-bit SHA match).
+6. **Operational Discipline**: Zero production database mutations performed; clearance remains held pending Codex independent review.
+

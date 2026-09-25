@@ -26,6 +26,9 @@ server/data/*
 !server/data/help/**
 server/uploads
 server/database.json
+server/data/ghana_kobo_*
+*.kobo*.json
+private_kobo/
 
 # IDE
 .vscode

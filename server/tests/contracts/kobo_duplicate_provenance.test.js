@@ -1320,4 +1320,88 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
         expect(conflictRecord.revisions.length).toBe(1);
         expect(conflictRecord.revisions[0].lat).toBe(5.1);
     });
+
+    test('18. Repeated revised-primary replay with identical revised evidence is idempotent (da8b561 review regression)', async () => {
+        const repeatRevBarcode = 'GHA-PRIM-REPEAT-' + SUFFIX;
+        const subId = 41020;
+
+        // Step 1: Initial admission of primary occurrence
+        koboService.fetchSubmissions.mockResolvedValueOnce([
+            {
+                _id: subId,
+                _uuid: 'uuid-prim-orig-' + SUFFIX,
+                _submission_time: '2026-09-24T23:00:00',
+                surveyor_name: 'surveyor_prim',
+                _attachments: [{ filename: 'orig.jpg', download_url: 'https://test/orig.jpg' }]
+            }
+        ]);
+        koboService.transformSubmission.mockReturnValueOnce([
+            {
+                original_id: repeatRevBarcode,
+                depth: 'D1',
+                site_id: 'SITE-PRIM-1',
+                lat: 5.5,
+                lng: -0.2,
+                collected_at: '2026-09-24',
+                kobo_submission_id: subId
+            }
+        ]);
+        const pass1 = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+        expect(pass1.newSamples).toBe(1);
+
+        // Step 2: Revised primary occurrence (changed coordinates)
+        const revisedSub = {
+            _id: subId,
+            _uuid: 'uuid-prim-rev-' + SUFFIX,
+            _submission_time: '2026-09-24T23:30:00',
+            surveyor_name: 'surveyor_prim',
+            _attachments: [{ filename: 'rev.jpg', download_url: 'https://test/rev.jpg' }]
+        };
+        const revisedTransform = {
+            original_id: repeatRevBarcode,
+            depth: 'D1',
+            site_id: 'SITE-PRIM-2',
+            lat: 6.66,
+            lng: -0.99,
+            collected_at: '2026-09-24',
+            kobo_submission_id: subId
+        };
+
+        koboService.fetchSubmissions.mockResolvedValueOnce([revisedSub]);
+        koboService.transformSubmission.mockReturnValueOnce([revisedTransform]);
+
+        const pass2 = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+        expect(pass2.newSamples).toBe(0);
+        expect(pass2.skipped).toBe(1);
+
+        const sampleAfterPass2 = await prisma.sample.findUnique({ where: { originalId: repeatRevBarcode } });
+        const metaPass2 = JSON.parse(sampleAfterPass2.metadata);
+        expect(metaPass2.revisions?.length).toBe(1);
+        expect(metaPass2.conflictingSubmissions?.length).toBe(1);
+        expect(metaPass2.provenanceHold?.status).toBe('AMBIGUOUS_PROVENANCE_HOLD');
+
+        const auditsAfterPass2 = await prisma.auditLog.findMany({
+            where: { entityId: sampleAfterPass2.id, action: 'KOBO_CONFLICTING_PROVENANCE' }
+        });
+        expect(auditsAfterPass2.length).toBe(1);
+
+        // Step 3: Replay the EXACT SAME revised submission
+        koboService.fetchSubmissions.mockResolvedValueOnce([revisedSub]);
+        koboService.transformSubmission.mockReturnValueOnce([revisedTransform]);
+
+        const pass3 = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+        expect(pass3.newSamples).toBe(0);
+        expect(pass3.skipped).toBe(1);
+
+        const sampleAfterPass3 = await prisma.sample.findUnique({ where: { originalId: repeatRevBarcode } });
+        const metaPass3 = JSON.parse(sampleAfterPass3.metadata);
+        // Invariants: zero duplicate revisions, zero duplicate conflict entries, zero duplicate audits
+        expect(metaPass3.revisions?.length).toBe(1);
+        expect(metaPass3.conflictingSubmissions?.length).toBe(1);
+
+        const auditsAfterPass3 = await prisma.auditLog.findMany({
+            where: { entityId: sampleAfterPass3.id, action: 'KOBO_CONFLICTING_PROVENANCE' }
+        });
+        expect(auditsAfterPass3.length).toBe(1); // STILL 1!
+    });
 });

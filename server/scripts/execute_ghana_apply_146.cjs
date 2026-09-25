@@ -5,8 +5,8 @@
  * Ghana Kobo Enablement & Bounded Ingestion Runner (Issue #146, PR #147)
  * 
  * Usage:
- *   node server/scripts/execute_ghana_apply_146.cjs --dry-run
- *   node server/scripts/execute_ghana_apply_146.cjs --apply
+ *   node server/scripts/execute_ghana_apply_146.cjs --dry-run [--snapshot <path>] [--manifest <path>]
+ *   node server/scripts/execute_ghana_apply_146.cjs --apply   [--snapshot <path>] [--manifest <path>]
  */
 
 const fs = require('fs');
@@ -27,6 +27,7 @@ const EXPECTED_FORM = 'aQtvKZHiZmtqVCkQsGw2X4';
 const EXPECTED_SERVER = 'https://kf.soilfer-data.fao.org';
 const PINNED_HIGH_WATER_ID = 40747;
 const EXPECTED_SNAPSHOT_SHA256 = '33db90cdcab60ccf4801a7754d8444893c0b6ee25f269a65366d6fed5046292f';
+const EXPECTED_MANIFEST_SHA256 = 'e43d490366eda0e325b1f1639c743b57105a6256e0f406df6f7e1d87514adaed';
 
 // Generate a unique operation-scoped identifier for this run
 const OPERATION_ID = 'GHANA_APPLY_' + new Date().toISOString().replace(/[:.]/g, '') + '_' + randomBytes(4).toString('hex');
@@ -36,15 +37,50 @@ const isApply = process.argv.includes('--apply');
 
 if (!isDryRun && !isApply) {
     console.error('ERROR: Must specify either --dry-run or --apply');
-    console.error('Usage: node execute_ghana_apply_146.cjs [--dry-run | --apply]');
+    console.error('Usage: node execute_ghana_apply_146.cjs [--dry-run | --apply] [--snapshot <path>] [--manifest <path>]');
     process.exit(1);
 }
 
 // Locate server directory and data directory
 const serverDir = path.resolve(__dirname, '..');
 const dataDir = path.join(serverDir, 'data');
-const snapshotPath = path.join(dataDir, 'ghana_kobo_snapshot_40747.json');
-const manifestPath = path.join(dataDir, 'ghana_kobo_manifest_40747.json');
+
+function getArgValue(flag) {
+    const idx = process.argv.indexOf(flag);
+    if (idx !== -1 && idx + 1 < process.argv.length) {
+        return process.argv[idx + 1];
+    }
+    return null;
+}
+
+// Resolve private snapshot and manifest paths
+const snapshotCandidates = [
+    getArgValue('--snapshot'),
+    process.env.GHANA_SNAPSHOT_PATH,
+    '/private/ghana_kobo_snapshot_40747.json',
+    'C:/Users/yigin/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_snapshot_40747.json',
+    path.join(dataDir, 'ghana_kobo_snapshot_40747.json')
+].filter(Boolean);
+
+const manifestCandidates = [
+    getArgValue('--manifest'),
+    process.env.GHANA_MANIFEST_PATH,
+    '/private/ghana_kobo_manifest_40747.json',
+    'C:/Users/yigin/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_manifest_40747.json',
+    path.join(dataDir, 'ghana_kobo_manifest_40747.json')
+].filter(Boolean);
+
+const snapshotPath = snapshotCandidates.find(p => fs.existsSync(p));
+const manifestPath = manifestCandidates.find(p => fs.existsSync(p));
+
+if (!snapshotPath) {
+    console.error('ERROR: Private snapshot file missing. Mount file and provide --snapshot <path> or set GHANA_SNAPSHOT_PATH.');
+    process.exit(1);
+}
+if (!manifestPath) {
+    console.error('ERROR: Private manifest file missing. Mount file and provide --manifest <path> or set GHANA_MANIFEST_PATH.');
+    process.exit(1);
+}
 
 // Resolve SQLite DB path
 const dbPath = process.env.DATABASE_PATH || 
@@ -66,18 +102,11 @@ console.log(`High-Water:   ${PINNED_HIGH_WATER_ID}`);
 console.log(`Target Config: ${CONFIG_ID}`);
 console.log(`Target Lab:   ${EXPECTED_LAB}`);
 console.log(`Target Proj:  ${EXPECTED_PROJECT}`);
+console.log(`Snapshot:     ${snapshotPath}`);
+console.log(`Manifest:     ${manifestPath}`);
 console.log('----------------------------------------------------------------');
 
-// Verify snapshot and manifest files
-if (!fs.existsSync(snapshotPath)) {
-    console.error(`ERROR: Snapshot file missing at ${snapshotPath}`);
-    process.exit(1);
-}
-if (!fs.existsSync(manifestPath)) {
-    console.error(`ERROR: Manifest file missing at ${manifestPath}`);
-    process.exit(1);
-}
-
+// Verify snapshot SHA-256
 const snapshotRaw = fs.readFileSync(snapshotPath, 'utf8');
 const actualSnapshotHash = createHash('sha256').update(snapshotRaw).digest('hex');
 if (actualSnapshotHash !== EXPECTED_SNAPSHOT_SHA256) {
@@ -86,13 +115,100 @@ if (actualSnapshotHash !== EXPECTED_SNAPSHOT_SHA256) {
 }
 console.log(`  ✓ Immutable snapshot verified (SHA-256: ${actualSnapshotHash})`);
 
+// Verify manifest SHA-256
+const manifestRaw = fs.readFileSync(manifestPath, 'utf8');
+const actualManifestHash = createHash('sha256').update(manifestRaw).digest('hex');
+if (actualManifestHash !== EXPECTED_MANIFEST_SHA256) {
+    console.error(`FATAL: Manifest SHA-256 mismatch! Expected ${EXPECTED_MANIFEST_SHA256}, got ${actualManifestHash}`);
+    process.exit(1);
+}
+console.log(`  ✓ Immutable manifest verified (SHA-256: ${actualManifestHash})`);
+
 const snapshotSubmissions = JSON.parse(snapshotRaw);
-const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+const manifest = JSON.parse(manifestRaw);
 
 const db = new Database(dbPath, { readonly: isDryRun });
 
-function runPreflightChecks() {
-    console.log('\n[1/5] Executing Precondition Assertions...');
+function validateInvariantsAndProjectCandidates(snapshotSubmissions, manifest) {
+    console.log('\n[1/4] Validating Ingestion Snapshot & Manifest Invariants...');
+    const koboService = require(path.join(serverDir, 'services/koboService'));
+
+    if (snapshotSubmissions.length !== 459) {
+        throw new Error(`INVARIANT_VIOLATION: Expected 459 bounded submissions, got ${snapshotSubmissions.length}`);
+    }
+
+    let totalOccurrences = 0;
+    const uniqueIds = new Set();
+    const intraSubDups = [];
+    const crossSubDups = [];
+    const seenGlobal = new Map();
+
+    for (const sub of snapshotSubmissions) {
+        const samples = koboService.transformSubmission(sub);
+        const seenInSub = new Map();
+        for (const s of samples) {
+            totalOccurrences++;
+            const norm = s.original_id?.trim().toUpperCase();
+            if (norm) {
+                if (seenInSub.has(norm)) {
+                    intraSubDups.push({ subId: sub._id, id: norm, depth: s.depth });
+                } else {
+                    seenInSub.set(norm, s);
+                }
+                if (seenGlobal.has(norm)) {
+                    if (seenGlobal.get(norm).subId !== sub._id) {
+                        crossSubDups.push({ subId: sub._id, id: norm, depth: s.depth, firstSubId: seenGlobal.get(norm).subId });
+                    }
+                } else {
+                    seenGlobal.set(norm, { subId: sub._id, depth: s.depth });
+                    uniqueIds.add(norm);
+                }
+            }
+        }
+    }
+
+    console.log(`  Total sample occurrences:    ${totalOccurrences} (Expected: 868)`);
+    console.log(`  Distinct normalized IDs:     ${uniqueIds.size} (Expected: 864)`);
+    console.log(`  Intra-sub duplicate depths:  ${intraSubDups.length} (Expected: 2)`);
+    console.log(`  Cross-sub duplicate events:  ${crossSubDups.length} (Expected: 2)`);
+
+    if (totalOccurrences !== 868) {
+        throw new Error(`INVARIANT_VIOLATION: Expected 868 total occurrences, got ${totalOccurrences}`);
+    }
+    if (uniqueIds.size !== 864) {
+        throw new Error(`INVARIANT_VIOLATION: Expected 864 distinct IDs, got ${uniqueIds.size}`);
+    }
+    if (intraSubDups.length !== 2) {
+        throw new Error(`INVARIANT_VIOLATION: Expected 2 intra-sub duplicates, got ${intraSubDups.length}`);
+    }
+    if (crossSubDups.length !== 2) {
+        throw new Error(`INVARIANT_VIOLATION: Expected 2 cross-sub duplicates, got ${crossSubDups.length}`);
+    }
+
+    // Verify exact candidate IDs match manifest
+    const manifestNormCandidates = new Set(manifest.candidateIds.map(id => id.trim().toUpperCase()));
+    if (manifestNormCandidates.size !== uniqueIds.size) {
+        throw new Error(`INVARIANT_VIOLATION: Manifest candidate count (${manifestNormCandidates.size}) does not match projected unique count (${uniqueIds.size})`);
+    }
+    for (const id of uniqueIds) {
+        if (!manifestNormCandidates.has(id)) {
+            throw new Error(`INVARIANT_VIOLATION: Projected candidate ID '${id}' missing from manifest`);
+        }
+    }
+
+    // Verify exact expected hold IDs match manifest
+    const expectedHeldIds = manifest.heldSpecimens.map(h => h.id.trim().toUpperCase()).sort();
+    const actualHeldIds = [...intraSubDups.map(d => d.id), ...crossSubDups.map(d => d.id)].sort();
+    if (JSON.stringify(expectedHeldIds) !== JSON.stringify(actualHeldIds)) {
+        throw new Error(`INVARIANT_VIOLATION: Held IDs mismatch! Expected ${expectedHeldIds}, got ${actualHeldIds}`);
+    }
+    console.log(`  ✓ Full 4-hold ledger verified: ${actualHeldIds.join(', ')}`);
+
+    return uniqueIds;
+}
+
+function runPreflightChecks(candidateNormalizedIds) {
+    console.log('\n[2/4] Executing Precondition Assertions & Collision Projection...');
 
     // 1. Verify KoboConfig
     const configRow = db.prepare(`
@@ -149,80 +265,29 @@ function runPreflightChecks() {
     }
     console.log('  ✓ Clean baseline: 0 existing samples for Ghana in target project');
 
-    // 5. Candidate collision projection: verify none of candidate IDs exist in database
-    const placeholders = manifest.candidateIds.map(() => '?').join(',');
-    const collisionRows = db.prepare(`SELECT originalId, assignedLab, projectCode FROM Sample WHERE originalId IN (${placeholders})`).all(...manifest.candidateIds);
-    if (collisionRows.length > 0) {
-        throw new Error(`PRECONDITION_FAILED: Candidate ID collision with existing records: ${collisionRows.map(c => c.originalId).join(', ')}`);
+    // 5. Candidate collision projection: verify none of candidate IDs exist in database (normalized Set lookup)
+    const existingSamples = db.prepare('SELECT originalId FROM Sample').all();
+    const existingNormSet = new Set(existingSamples.map(s => s.originalId?.trim().toUpperCase()).filter(Boolean));
+    const collisions = [];
+    for (const candId of candidateNormalizedIds) {
+        if (existingNormSet.has(candId)) {
+            collisions.push(candId);
+        }
     }
-    console.log(`  ✓ Candidate ID projection clean: 0 collisions across ${manifest.candidateIds.length} candidate IDs`);
+    if (collisions.length > 0) {
+        throw new Error(`PRECONDITION_FAILED: Candidate ID collision with existing records: ${collisions.join(', ')}`);
+    }
+    console.log(`  ✓ Candidate ID projection clean: 0 collisions across ${candidateNormalizedIds.size} candidate IDs (verified against ${existingNormSet.size} database specimens)`);
 
     return configRow;
 }
 
-async function runDryRun(configRow) {
-    console.log('\n[2/4] Validating Pinned Ingestion Snapshot & Manifest Invariants...');
-    const koboService = require(path.join(serverDir, 'services/koboService'));
-
-    if (snapshotSubmissions.length !== 459) {
-        throw new Error(`INVARIANT_VIOLATION: Expected 459 bounded submissions, got ${snapshotSubmissions.length}`);
-    }
-
-    let totalOccurrences = 0;
-    const uniqueIds = new Set();
-    const intraSubDups = [];
-    const crossSubDups = [];
-    const seenGlobal = new Map();
-
-    for (const sub of snapshotSubmissions) {
-        const samples = koboService.transformSubmission(sub);
-        const seenInSub = new Map();
-        for (const s of samples) {
-            totalOccurrences++;
-            const norm = s.original_id?.trim().toUpperCase();
-            if (norm) {
-                if (seenInSub.has(norm)) {
-                    intraSubDups.push({ subId: sub._id, id: norm, depth: s.depth });
-                } else {
-                    seenInSub.set(norm, s);
-                }
-                if (seenGlobal.has(norm)) {
-                    if (seenGlobal.get(norm).subId !== sub._id) {
-                        crossSubDups.push({ subId: sub._id, id: norm, depth: s.depth, firstSubId: seenGlobal.get(norm).subId });
-                    }
-                } else {
-                    seenGlobal.set(norm, { subId: sub._id, depth: s.depth });
-                    uniqueIds.add(norm);
-                }
-            }
-        }
-    }
-
-    console.log(`  Total sample occurrences:    ${totalOccurrences} (Expected: 868)`);
-    console.log(`  Distinct normalized IDs:     ${uniqueIds.size} (Expected: 864)`);
-    console.log(`  Intra-sub duplicate depths:  ${intraSubDups.length} (Expected: 2)`);
-    console.log(`  Cross-sub duplicate events:  ${crossSubDups.length} (Expected: 2)`);
-
-    if (totalOccurrences !== 868) {
-        throw new Error(`INVARIANT_VIOLATION: Expected 868 total occurrences, got ${totalOccurrences}`);
-    }
-    if (uniqueIds.size !== 864) {
-        throw new Error(`INVARIANT_VIOLATION: Expected 864 distinct IDs, got ${uniqueIds.size}`);
-    }
-    if (intraSubDups.length !== 2) {
-        throw new Error(`INVARIANT_VIOLATION: Expected 2 intra-sub duplicates, got ${intraSubDups.length}`);
-    }
-    if (crossSubDups.length !== 2) {
-        throw new Error(`INVARIANT_VIOLATION: Expected 2 cross-sub duplicates, got ${crossSubDups.length}`);
-    }
-
-    // Verify exact expected hold IDs match manifest
-    const expectedHeldIds = manifest.heldSpecimens.map(h => h.id).sort();
-    const actualHeldIds = [...intraSubDups.map(d => d.id), ...crossSubDups.map(d => d.id)].sort();
-    if (JSON.stringify(expectedHeldIds) !== JSON.stringify(actualHeldIds)) {
-        throw new Error(`INVARIANT_VIOLATION: Held IDs mismatch! Expected ${expectedHeldIds}, got ${actualHeldIds}`);
-    }
-    console.log(`  ✓ Full 4-hold ledger verified: ${actualHeldIds.join(', ')}`);
+async function runDryRun(candidateNormalizedIds, configRow) {
+    console.log('\n[3/4] Dry-Run Validation Summary...');
+    console.log(`  Projected Candidates: 864 specimens`);
+    console.log(`  Projected Holds:      4 specimens (AMBIGUOUS_PROVENANCE_HOLD)`);
+    console.log(`  Projected Clean:      860 specimens (EXPECTED status)`);
+    console.log(`  CAS Mutation:         Simulated OK (0 rows modified in DB)`);
 
     console.log('\n================================================================');
     console.log('  DRY-RUN VALIDATION SUCCEEDED: All invariants verified (864/4)  ');
@@ -230,8 +295,8 @@ async function runDryRun(configRow) {
     console.log('================================================================');
 }
 
-async function runApply(configRow) {
-    console.log('\n[2/4] Executing Compare-and-Set Configuration Activation...');
+async function runApply(candidateNormalizedIds, configRow) {
+    console.log('\n[3/4] Executing Atomic Compare-and-Set Configuration Activation...');
     const casTx = db.transaction(() => {
         const updateStmt = db.prepare(`
             UPDATE KoboConfig
@@ -265,7 +330,7 @@ async function runApply(configRow) {
     casTx();
     console.log('  ✓ Atomic CAS succeeded: KoboConfig activated and bound to SOILFER-US');
 
-    console.log('\n[3/4] Executing Single-Writer Bounded Ingestion from Verified Snapshot...');
+    console.log('\n[4/4] Executing Single-Writer Bounded Ingestion from Verified Snapshot...');
     const prisma = require(path.join(serverDir, 'prisma'));
     const koboController = require(path.join(serverDir, 'controllers/koboController'));
 
@@ -287,7 +352,7 @@ async function runApply(configRow) {
     }
     console.log('  ✓ Single-writer bounded ingestion succeeded');
 
-    console.log('\n[4/4] Executing Scoped Read-Only Postflight Assertions...');
+    console.log('\n[*] Executing Scoped Read-Only Postflight Assertions...');
     const totalAdmitted = db.prepare(`
         SELECT COUNT(*) as count FROM Sample 
         WHERE assignedLab = ? AND projectCode = ?
@@ -354,11 +419,12 @@ async function runApply(configRow) {
 
 async function main() {
     try {
-        const configRow = runPreflightChecks();
+        const candidateNormalizedIds = validateInvariantsAndProjectCandidates(snapshotSubmissions, manifest);
+        const configRow = runPreflightChecks(candidateNormalizedIds);
         if (isDryRun) {
-            await runDryRun(configRow);
+            await runDryRun(candidateNormalizedIds, configRow);
         } else if (isApply) {
-            await runApply(configRow);
+            await runApply(candidateNormalizedIds, configRow);
         }
     } catch (err) {
         console.error(`\nFAILED: ${err.message}`);

@@ -28,10 +28,11 @@ server/data/*
 !server/data/analysisDisplayNames.json
 !server/data/operationalChecklists.json
 !server/data/importedParameterNames.json
-!server/data/ghana_kobo_snapshot_40747.json
-!server/data/ghana_kobo_manifest_40747.json
 !server/data/help/
 !server/data/help/**
+server/data/ghana_kobo_*
+*.kobo*.json
+private_kobo/
 server/uploads/
 server/database.json
 
