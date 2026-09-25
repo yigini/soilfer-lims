@@ -410,7 +410,7 @@ exports.getSamples = async (req, res) => {
                 workItemProgress: { total: totalWI, completed: completedWI, items: progressItems },
                 hasInProgressWork, hasAssignedWork, hasReanalysisWork, pendingReview, attentionRank,
                 gatesComplete: s.dryingStatus === 'DONE' && s.preparationStatus === 'DONE',
-                nextAction: s.status === 'EXPECTED' ? 'Receive' :
+                nextAction: s.status === 'EXPECTED' ? (metadata?.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD' ? 'Reconcile' : 'Receive') :
                     s.status === 'RECEIVED' ? 'Accept' :
                         s.status === 'ACCEPTED' ? 'Process' : 'View'
             };
@@ -810,6 +810,19 @@ exports.receiveSample = async (req, res) => {
         if (currentStatus !== workflow.SAMPLE_STATES.EXPECTED && currentStatus !== 'COLLECTED') {
             return res.status(400).json({
                 error: `Cannot receive. Sample must be EXPECTED. Current: ${currentStatus}`
+            });
+        }
+
+        // Check for active provenance hold (Finding 4: Ambiguous specimen identity must remain visibly unresolved)
+        let sampleMeta = {};
+        try {
+            sampleMeta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
+        } catch (e) {}
+        if (sampleMeta.provenanceHold && sampleMeta.provenanceHold.status === 'AMBIGUOUS_PROVENANCE_HOLD') {
+            return res.status(409).json({
+                error: 'PROVENANCE_HOLD',
+                code: 'AMBIGUOUS_PROVENANCE_HOLD',
+                message: `Cannot receive sample '${sample.originalId}': Ambiguous field specimen identity. Reconciliation required before physical receipt. Reason: ${sampleMeta.provenanceHold.reason}`
             });
         }
 

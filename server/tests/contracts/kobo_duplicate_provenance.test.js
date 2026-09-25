@@ -32,6 +32,8 @@ process.env.JWT_SECRET = 'test-secret-kobo-dup-provenance';
 const prisma = require('../../prisma');
 const koboService = require('../../services/koboService');
 const koboController = require('../../controllers/koboController');
+const sampleController = require('../../controllers/sampleController');
+const sampleWorkspaceService = require('../../services/sampleWorkspaceService');
 
 // Mock external Kobo service calls
 jest.mock('../../services/koboService', () => ({
@@ -175,6 +177,9 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
 
         const meta = JSON.parse(sample.metadata);
         expect(meta.kobo_id).toBe(subId);
+        expect(meta.provenanceHold).toBeDefined();
+        expect(meta.provenanceHold.status).toBe('AMBIGUOUS_PROVENANCE_HOLD');
+        expect(sample.rejectionReason).toContain('PROVENANCE_HOLD');
         expect(meta.intraSubDuplicates).toBeDefined();
         expect(meta.intraSubDuplicates.length).toBe(1);
         expect(meta.intraSubDuplicates[0].depth).toBe('D2');
@@ -346,5 +351,343 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
             where: { originalId: barcode }
         });
         expect(count).toBe(1);
+    });
+
+    test('5. Foreign sample collision strictly avoids mutation, reports FOREIGN_SCOPE_COLLISION, and halts cursor', async () => {
+        const foreignBarcode = 'FOREIGN-BARCODE-' + SUFFIX;
+        const foreignSubId = 40600;
+
+        // Create a foreign sample belonging to GTM lab and different project
+        const foreignSample = await prisma.sample.create({
+            data: {
+                id: 'foreign-sample-' + SUFFIX,
+                originalId: foreignBarcode,
+                assignedLab: 'GTM-LAB1',
+                projectCode: 'SOILFER-GTM',
+                status: 'EXPECTED',
+                metadata: JSON.stringify({ kobo_id: 9999, originalData: 'DO_NOT_TOUCH' }),
+                fieldMetadata: JSON.stringify({})
+            }
+        });
+
+        // Config GHA attempts to sync a submission with this foreign barcode
+        const cursorBefore = (await prisma.koboConfig.findUnique({ where: { id: configGHA.id } })).lastSubmissionId;
+
+        koboService.fetchSubmissions.mockResolvedValueOnce([
+            {
+                _id: foreignSubId,
+                _uuid: 'uuid-foreign-' + SUFFIX,
+                _submission_time: '2026-09-24T14:00:00',
+                _attachments: [{ filename: 'foreign_photo.jpg' }]
+            }
+        ]);
+        koboService.transformSubmission.mockReturnValueOnce([
+            {
+                original_id: foreignBarcode,
+                depth: 'D1',
+                site_id: 'FOREIGN-SITE',
+                lat: 14.5,
+                lng: -90.5,
+                collected_at: '2026-09-24',
+                kobo_submission_id: foreignSubId
+            }
+        ]);
+
+        const result = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+
+        // Verify foreign sample was NOT mutated
+        const foreignSampleAfter = await prisma.sample.findUnique({
+            where: { id: foreignSample.id }
+        });
+        const metaAfter = JSON.parse(foreignSampleAfter.metadata);
+        expect(metaAfter.originalData).toBe('DO_NOT_TOUCH');
+        expect(metaAfter.conflictingSubmissions).toBeUndefined();
+
+        // Verify no audit log on foreign sample
+        const foreignAudits = await prisma.auditLog.findMany({
+            where: { entityId: foreignSample.id }
+        });
+        expect(foreignAudits.length).toBe(0);
+
+        // Verify skip reported
+        expect(result.skipped).toBe(1);
+        expect(result.skippedReasons).toBeDefined();
+        expect(result.skippedReasons.some(r => r.reason.includes('FOREIGN_SCOPE_COLLISION'))).toBe(true);
+
+        // Verify cursor did NOT advance past foreign collision
+        const configAfter = await prisma.koboConfig.findUnique({ where: { id: configGHA.id } });
+        expect(configAfter.lastSubmissionId).toBe(cursorBefore);
+    });
+
+    test('6. Duplicate branch enforces commit gates and rolls back transaction on revoked config', async () => {
+        const dupBarcode = 'GATE-TEST-' + SUFFIX;
+        const gateSub1 = 40650;
+        const gateSub2 = 40651;
+
+        // First submission creates sample
+        koboService.fetchSubmissions.mockResolvedValueOnce([
+            { _id: gateSub1, _uuid: 'uuid-gate-1-' + SUFFIX, _submission_time: '2026-09-24T15:00:00', _attachments: [] }
+        ]);
+        koboService.transformSubmission.mockReturnValueOnce([
+            { original_id: dupBarcode, depth: 'D1', site_id: 'GATE-SITE', lat: 8.1, lng: -1.1, collected_at: '2026-09-24', kobo_submission_id: gateSub1 }
+        ]);
+        const r1 = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+        expect(r1.newSamples).toBe(1);
+
+        try {
+            // Simulate race condition: config is revoked/deactivated after fetchSubmissions starts
+            koboService.fetchSubmissions.mockImplementationOnce(async () => {
+                await prisma.koboConfig.update({
+                    where: { id: configGHA.id },
+                    data: { isActive: false }
+                });
+                return [
+                    { _id: gateSub2, _uuid: 'uuid-gate-2-' + SUFFIX, _submission_time: '2026-09-24T15:05:00', _attachments: [] }
+                ];
+            });
+            koboService.transformSubmission.mockReturnValueOnce([
+                { original_id: dupBarcode, depth: 'D1', site_id: 'GATE-SITE', lat: 8.2, lng: -1.2, collected_at: '2026-09-24', kobo_submission_id: gateSub2 }
+            ]);
+
+            const r2 = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+            expect(r2.skippedReasons.some(r => r.reason.includes('CONFIG_REVOKED'))).toBe(true);
+        } finally {
+            // Guarantee restoration of active config for subsequent tests
+            await prisma.koboConfig.update({
+                where: { id: configGHA.id },
+                data: { isActive: true }
+            });
+        }
+    });
+
+    test('7. Conflict replay idempotency: repeating the conflicting submission does not append duplicate entries or duplicate audit rows', async () => {
+        const replayBarcode = 'REPLAY-TEST-' + SUFFIX;
+        const initialSubId = 40710;
+        const conflictSubId = 40711;
+
+        // 1. Initial sample
+        koboService.fetchSubmissions.mockResolvedValueOnce([
+            { _id: initialSubId, _uuid: 'uuid-40710-' + SUFFIX, _submission_time: '2026-09-24T16:00:00', _attachments: [] }
+        ]);
+        koboService.transformSubmission.mockReturnValueOnce([
+            { original_id: replayBarcode, depth: 'D1', site_id: 'SITE-R', lat: 6.0, lng: -1.0, collected_at: '2026-09-24', kobo_submission_id: initialSubId }
+        ]);
+        await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+
+        const sample = await prisma.sample.findUnique({ where: { originalId: replayBarcode } });
+
+        // 2. Conflicting submission
+        const conflictSub = {
+            _id: conflictSubId,
+            _uuid: 'uuid-40711-' + SUFFIX,
+            _submission_time: '2026-09-24T16:05:00',
+            surveyor_name: 'test_surveyor',
+            _attachments: [{ filename: 'conflict.jpg', download_url: 'https://test/conflict.jpg' }]
+        };
+        const conflictSample = {
+            original_id: replayBarcode,
+            depth: 'D1',
+            site_id: 'SITE-R',
+            lat: 6.05,
+            lng: -1.05,
+            collected_at: '2026-09-24',
+            kobo_submission_id: conflictSubId
+        };
+
+        // First pass of conflict
+        koboService.fetchSubmissions.mockResolvedValueOnce([conflictSub]);
+        koboService.transformSubmission.mockReturnValueOnce([conflictSample]);
+        await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+
+        let meta = JSON.parse((await prisma.sample.findUnique({ where: { id: sample.id } })).metadata);
+        expect(meta.conflictingSubmissions.length).toBe(1);
+
+        let audits = await prisma.auditLog.findMany({
+            where: { entityId: sample.id, action: 'KOBO_CONFLICTING_PROVENANCE' }
+        });
+        expect(audits.length).toBe(1);
+
+        // Replay same conflict pass
+        koboService.fetchSubmissions.mockResolvedValueOnce([conflictSub]);
+        koboService.transformSubmission.mockReturnValueOnce([conflictSample]);
+        await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+
+        meta = JSON.parse((await prisma.sample.findUnique({ where: { id: sample.id } })).metadata);
+        expect(meta.conflictingSubmissions.length).toBe(1); // STILL 1, no duplicate append
+
+        audits = await prisma.auditLog.findMany({
+            where: { entityId: sample.id, action: 'KOBO_CONFLICTING_PROVENANCE' }
+        });
+        expect(audits.length).toBe(1); // STILL 1, no duplicate audit row
+    });
+
+    test('8. Case-insensitive lookup preserves evidence on lowercase existing record in DB, advancing cursor cleanly', async () => {
+        const lowerBarcode = 'gha-case-insens-' + SUFFIX.toLowerCase();
+        const upperBarcode = lowerBarcode.toUpperCase();
+        const caseSubId = 40720;
+
+        // Insert lowercase sample directly in DB
+        const lowerSample = await prisma.sample.create({
+            data: {
+                id: 'sample-lower-' + SUFFIX,
+                originalId: lowerBarcode,
+                assignedLab: labGHA.id,
+                projectCode: projUS.code,
+                status: 'EXPECTED',
+                metadata: JSON.stringify({ kobo_id: 1111, initial: 'data' }),
+                fieldMetadata: JSON.stringify({})
+            }
+        });
+
+        // Submission presents uppercase barcode
+        koboService.fetchSubmissions.mockResolvedValueOnce([
+            {
+                _id: caseSubId,
+                _uuid: 'uuid-case-' + SUFFIX,
+                _submission_time: '2026-09-24T17:00:00',
+                _attachments: [{ filename: 'casing.jpg', download_url: 'https://test/casing.jpg' }]
+            }
+        ]);
+        koboService.transformSubmission.mockReturnValueOnce([
+            {
+                original_id: upperBarcode,
+                depth: 'D1',
+                site_id: 'SITE-CASE',
+                lat: 7.0,
+                lng: -2.0,
+                collected_at: '2026-09-24',
+                kobo_submission_id: caseSubId
+            }
+        ]);
+
+        const result = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+        expect(result.skipped).toBe(1);
+        expect(result.lastSubmissionId).toBe(String(caseSubId)); // Cursor advanced!
+
+        // Verify lowercase record in DB received the conflict
+        const sampleAfter = await prisma.sample.findUnique({ where: { id: lowerSample.id } });
+        const metaAfter = JSON.parse(sampleAfter.metadata);
+        expect(metaAfter.conflictingSubmissions).toBeDefined();
+        expect(metaAfter.conflictingSubmissions.length).toBe(1);
+        expect(metaAfter.conflictingSubmissions[0].kobo_id).toBe(caseSubId);
+    });
+
+    test('9. Ambiguous depth identity (D1/D2 duplicate barcode) receives durable hold, blocking downstream physical receipt with 409 AMBIGUOUS_PROVENANCE_HOLD', async () => {
+        const ambigBarcode = 'GHA-AMBIG-' + SUFFIX;
+        const ambigSubId = 40730;
+
+        koboService.fetchSubmissions.mockResolvedValueOnce([
+            {
+                _id: ambigSubId,
+                _uuid: 'uuid-ambig-' + SUFFIX,
+                _submission_time: '2026-09-24T18:00:00',
+                surveyor_name: 'test_surveyor',
+                _attachments: [
+                    {
+                        filename: 'd1_photo.jpg',
+                        download_url: 'https://test/d1_photo.jpg',
+                        question_xpath: 'photo_sample_d1'
+                    }
+                ]
+            }
+        ]);
+        koboService.transformSubmission.mockReturnValueOnce([
+            {
+                original_id: ambigBarcode,
+                depth: 'D1',
+                site_id: 'SITE-AMBIG',
+                lat: 9.0,
+                lng: -0.5,
+                collected_at: '2026-09-24',
+                kobo_submission_id: ambigSubId
+            },
+            {
+                original_id: ambigBarcode,
+                depth: 'D2',
+                site_id: 'SITE-AMBIG',
+                lat: 9.0,
+                lng: -0.5,
+                collected_at: '2026-09-24',
+                kobo_submission_id: ambigSubId
+            }
+        ]);
+
+        const syncRes = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+        expect(syncRes.newSamples).toBe(1);
+        expect(syncRes.skipped).toBe(1);
+
+        const ambigSample = await prisma.sample.findUnique({ where: { originalId: ambigBarcode } });
+        expect(ambigSample).toBeDefined();
+        expect(ambigSample.status).toBe('EXPECTED');
+        expect(ambigSample.rejectionReason).toContain('PROVENANCE_HOLD');
+
+        const meta = JSON.parse(ambigSample.metadata);
+        expect(meta.provenanceHold).toBeDefined();
+        expect(meta.provenanceHold.status).toBe('AMBIGUOUS_PROVENANCE_HOLD');
+        expect(meta.intraSubDuplicates[0].attachments[0].download_url).toBe('https://test/d1_photo.jpg');
+
+        // Workspace projection check
+        const adminUser = { id: 'usr-adm', username: 'admin', role: 'SUPER_ADMIN', labId: labGHA.id };
+        const ws = await sampleWorkspaceService.getSampleWorkspace(ambigSample.id, adminUser);
+        expect(ws.capabilities.canReceive.allowed).toBe(false);
+        expect(ws.capabilities.canReceive.reason).toContain('Ambiguous specimen identity');
+        expect(ws.nextAction.action).toBe('RECONCILE_HOLD');
+        expect(ws.integrity.issues.some(i => i.code === 'AMBIGUOUS_PROVENANCE_HOLD')).toBe(true);
+
+        // Attempt physical receipt via sampleController.receiveSample: must return 409 AMBIGUOUS_PROVENANCE_HOLD
+        const req = {
+            params: { id: ambigSample.id },
+            user: adminUser,
+            body: {}
+        };
+        let statusCode = null;
+        let jsonResponse = null;
+        const res = {
+            status: jest.fn(code => {
+                statusCode = code;
+                return res;
+            }),
+            json: jest.fn(data => {
+                jsonResponse = data;
+                return res;
+            })
+        };
+
+        await sampleController.receiveSample(req, res);
+        expect(statusCode).toBe(409);
+        expect(jsonResponse.code).toBe('AMBIGUOUS_PROVENANCE_HOLD');
+        expect(jsonResponse.message).toContain('Ambiguous field specimen identity');
+
+        // In contrast, a normal unambiguous sample receives cleanly
+        const normalBarcode = 'GHA-NORMAL-' + SUFFIX;
+        const normalSample = await prisma.sample.create({
+            data: {
+                id: 'normal-sample-' + SUFFIX,
+                originalId: normalBarcode,
+                assignedLab: labGHA.id,
+                projectCode: projUS.code,
+                status: 'EXPECTED',
+                metadata: JSON.stringify({ kobo_id: 1234 }),
+                fieldMetadata: JSON.stringify({})
+            }
+        });
+
+        const normalReq = {
+            params: { id: normalSample.id },
+            user: adminUser,
+            body: {}
+        };
+        let normalStatus = null;
+        const normalRes = {
+            status: jest.fn(code => {
+                normalStatus = code;
+                return normalRes;
+            }),
+            json: jest.fn(data => normalRes)
+        };
+        await sampleController.receiveSample(normalReq, normalRes);
+        expect(normalStatus).toBeNull(); // Clean 200 (res.json was called directly without error status)
+        const updatedNormal = await prisma.sample.findUnique({ where: { id: normalSample.id } });
+        expect(updatedNormal.status).toBe('RECEIVED');
     });
 });

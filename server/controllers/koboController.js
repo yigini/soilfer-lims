@@ -413,11 +413,17 @@ async function syncLabSubmissions(config, performedBy) {
         return { newSamples: 0, skipped: 0, message: 'No new submissions', lastSubmissionId: currentConfig.lastSubmissionId };
     }
 
-    // Get existing sample IDs to avoid duplicates
+    // Get existing sample records to avoid duplicates and map accurately
     const existingSamples = await prisma.sample.findMany({
-        select: { originalId: true }
+        select: { id: true, originalId: true, assignedLab: true, projectCode: true }
     });
-    const existingIds = new Set(existingSamples.map(s => s.originalId?.trim().toUpperCase()).filter(Boolean));
+    const existingSamplesByNormId = new Map();
+    for (const s of existingSamples) {
+        const norm = s.originalId?.trim().toUpperCase();
+        if (norm && !existingSamplesByNormId.has(norm)) {
+            existingSamplesByNormId.set(norm, s);
+        }
+    }
 
     // Parse field mapping
     const fieldMapping = currentConfig.fieldMapping ? JSON.parse(currentConfig.fieldMapping) : null;
@@ -428,6 +434,45 @@ async function syncLabSubmissions(config, performedBy) {
     let lastCommittedSubmissionId = currentConfig.lastSubmissionId;
     let hasRetriableSkip = false;
 
+    // Helper for commit-time verification gates inside transactions (Finding 1)
+    async function verifyCommitGates(tx) {
+        const commitLab = await tx.lab.findFirst({
+            where: { OR: [{ id: currentConfig.labId }, { code: currentConfig.labId }] }
+        });
+        if (!commitLab || !commitLab.isActive) {
+            throw new Error(`LAB_INACTIVE: Laboratory '${currentConfig.labId}' is inactive`);
+        }
+
+        const commitConfig = await tx.koboConfig.findUnique({
+            where: { id: currentConfig.id }
+        });
+        if (!commitConfig || !commitConfig.isActive || commitConfig.projectCode !== projectCode) {
+            throw new Error(`CONFIG_REVOKED: Kobo configuration '${currentConfig.id}' is inactive or remapped`);
+        }
+
+        const currentProject = await tx.project.findUnique({
+            where: { code: projectCode },
+            include: { projectLabs: true }
+        });
+        if (!currentProject) {
+            throw new Error(`PROJECT_NOT_FOUND: Project '${projectCode}' does not exist`);
+        }
+        const admission = projectPolicyService.canAdmitSample({
+            project: currentProject,
+            channel: 'KOBO',
+            labId: currentConfig.labId
+        });
+        if (!admission.allowed) {
+            throw new Error(`ADMISSION_POLICY_BLOCKED: Project '${projectCode}' admissions are ${currentProject?.status || 'BLOCKED'}: ${admission.reason}`);
+        }
+        const currentMembers = [currentProject.labId, ...(currentProject.projectLabs || []).map(pl => pl.labId)].filter(Boolean);
+        if (!currentMembers.includes(currentConfig.labId)) {
+            throw new Error(`MEMBERSHIP_REVOKED: Laboratory '${currentConfig.labId}' is not an authorized servicing laboratory for project '${projectCode}'`);
+        }
+
+        return { commitLab, commitConfig, currentProject };
+    }
+
     for (const submission of submissions) {
         // Transform submission to samples (could be 1 or 2 per submission)
         const rawSamples = koboService.transformSubmission(submission, fieldMapping, currentConfig.labId);
@@ -437,6 +482,20 @@ async function syncLabSubmissions(config, performedBy) {
         const seenInSub = new Map();
         const intraSubDuplicates = [];
         const crossSubDuplicates = [];
+        const foreignCollisions = [];
+
+        // Rich processed attachments preserving complete download URLs, questions, photo categories, and linkages (Finding 4)
+        const processedAttachments = (submission._attachments || []).map(a => ({
+            filename: a.filename?.split('/').pop() || a.filename,
+            category: categorizePhoto(a.question_xpath),
+            categoryLabel: photoLabel(categorizePhoto(a.question_xpath)),
+            question: a.question_xpath,
+            download_url: a.download_url,
+            download_small: a.download_small_url,
+            download_medium: a.download_medium_url,
+            download_large: a.download_large_url,
+            mimetype: a.mimetype
+        }));
 
         for (const sampleData of samples) {
             const normalizedId = sampleData.original_id?.trim().toUpperCase();
@@ -446,7 +505,7 @@ async function syncLabSubmissions(config, performedBy) {
                 continue;
             }
 
-            // Detect intra-submission duplicate barcode (e.g. surveyor entered same barcode for D1 and D2)
+            // 1. Detect intra-submission duplicate barcode (e.g. surveyor entered same barcode for D1 and D2)
             if (seenInSub.has(normalizedId)) {
                 skippedCount++;
                 intraSubDuplicates.push({
@@ -456,10 +515,22 @@ async function syncLabSubmissions(config, performedBy) {
                 continue;
             }
 
-            // Detect cross-submission duplicate (already exists in DB or prior committed batch)
-            if (existingIds.has(normalizedId)) {
+            // 2. Detect collision with existing specimens in database or prior committed batches
+            if (existingSamplesByNormId.has(normalizedId)) {
+                const existingEntry = existingSamplesByNormId.get(normalizedId);
+                const isForeign = (existingEntry.assignedLab && existingEntry.assignedLab !== currentConfig.labId) ||
+                                  (existingEntry.projectCode && existingEntry.projectCode !== projectCode);
+
+                if (isForeign) {
+                    // Foreign lab or project collision: foreign sample mutation strictly disallowed (Finding 1)
+                    skippedCount++;
+                    foreignCollisions.push({ sampleData, existingEntry });
+                    continue;
+                }
+
+                // Same lab & project: cross-submission duplicate
                 skippedCount++;
-                crossSubDuplicates.push(sampleData);
+                crossSubDuplicates.push({ sampleData, existingEntry });
                 continue;
             }
 
@@ -467,70 +538,155 @@ async function syncLabSubmissions(config, performedBy) {
             candidateSamples.push(sampleData);
         }
 
-        // Attach intra-submission duplicate occurrences to primary candidate sample
+        // Attach intra-submission duplicate occurrences to primary candidate sample and place on durable hold (Finding 4)
         for (const dup of intraSubDuplicates) {
             if (!dup.primarySample.intraSubDuplicates) {
                 dup.primarySample.intraSubDuplicates = [];
             }
             dup.primarySample.intraSubDuplicates.push({
+                sourceServerUrl: currentConfig.koboServerUrl,
+                sourceFormId: currentConfig.formId,
                 depth: dup.duplicateSample.depth,
                 site_id: dup.duplicateSample.site_id,
+                lat: dup.duplicateSample.lat,
+                lng: dup.duplicateSample.lng,
                 collected_at: dup.duplicateSample.collected_at,
                 kobo_submission_id: submission._id,
+                kobo_uuid: submission._uuid,
+                attachments: processedAttachments,
                 reason: 'INTRA_SUBMISSION_DUPLICATE_BARCODE'
             });
+            dup.primarySample.hasProvenanceHold = true;
+            dup.primarySample.provenanceHoldReason = 'INTRA_SUBMISSION_DUPLICATE_DEPTH: Field surveyor assigned identical barcode to D1 and D2';
         }
 
-        // If all candidate samples were permanent duplicates
+        // If foreign collisions were detected, halt cursor progression so foreign collisions are not skipped without resolution
+        if (foreignCollisions.length > 0) {
+            for (const fc of foreignCollisions) {
+                skippedReasons.push({
+                    originalId: fc.sampleData.original_id,
+                    reason: `FOREIGN_SCOPE_COLLISION: Specimen ID '${fc.sampleData.original_id}' belongs to lab '${fc.existingEntry.assignedLab}', project '${fc.existingEntry.projectCode}'; foreign mutation disallowed`
+                });
+            }
+            hasRetriableSkip = true;
+        }
+
+        // Helper to record cross-submission duplicate conflicting provenance inside a transaction
+        async function recordCrossSubDuplicates(tx) {
+            for (const { sampleData, existingEntry } of crossSubDuplicates) {
+                // Find existing sample using preserved casing from existingEntry (Finding 2)
+                const existingSample = await tx.sample.findFirst({
+                    where: { originalId: existingEntry.originalId }
+                });
+                if (!existingSample) {
+                    throw new Error(`EXISTING_SAMPLE_NOT_FOUND: Specimen '${existingEntry.originalId}' not found during duplicate provenance preservation`);
+                }
+
+                // Strictly enforce foreign scope isolation inside transaction (Finding 1)
+                if (
+                    (existingSample.assignedLab && existingSample.assignedLab !== currentConfig.labId) ||
+                    (existingSample.projectCode && existingSample.projectCode !== projectCode)
+                ) {
+                    throw new Error(`FOREIGN_SCOPE_COLLISION: Specimen '${existingSample.originalId}' belongs to foreign scope; mutation disallowed`);
+                }
+
+                let meta = {};
+                try {
+                    meta = JSON.parse(existingSample.metadata || '{}');
+                } catch (e) {
+                    meta = { _rawMetadataBackup: existingSample.metadata };
+                }
+
+                // Match source form/server identity and occurrence key (Finding 1, Finding 3)
+                const sourceServerUrl = currentConfig.koboServerUrl;
+                const sourceFormId = currentConfig.formId;
+                const occurrenceKey = `${sourceServerUrl || ''}:${sourceFormId || ''}:${submission._id}:${sampleData.depth || 'D1'}`;
+
+                const conflicting = Array.isArray(meta.conflictingSubmissions) ? meta.conflictingSubmissions : [];
+                const alreadyRecorded = conflicting.some(c => (
+                    (c.occurrenceKey && c.occurrenceKey === occurrenceKey) ||
+                    (String(c.kobo_id) === String(submission._id) && c.depth === sampleData.depth)
+                ));
+
+                if (alreadyRecorded) {
+                    // Idempotent repeat: already recorded, skip (Finding 3)
+                    continue;
+                }
+
+                conflicting.push({
+                    occurrenceKey,
+                    sourceServerUrl,
+                    sourceFormId,
+                    kobo_id: submission._id,
+                    kobo_uuid: submission._uuid,
+                    submission_time: submission._submission_time,
+                    surveyor: koboService.findValue(submission, ['surveyor_name', 'username']),
+                    site_id: sampleData.site_id,
+                    depth: sampleData.depth,
+                    lat: sampleData.lat,
+                    lng: sampleData.lng,
+                    collected_at: sampleData.collected_at,
+                    attachments: processedAttachments,
+                    recordedAt: new Date().toISOString()
+                });
+
+                meta.conflictingSubmissions = conflicting;
+
+                // Surface durable review/hold disposition (Finding 4)
+                meta.provenanceHold = {
+                    status: 'AMBIGUOUS_PROVENANCE_HOLD',
+                    reason: 'CONFLICTING_FIELD_SUBMISSIONS: Multiple field submissions claimed this barcode with conflicting survey evidence',
+                    primaryOccurrence: {
+                        kobo_id: meta.kobo_id,
+                        kobo_uuid: meta.kobo_uuid,
+                        submission_time: meta.submission_time,
+                        surveyor: meta.surveyor,
+                        site_id: meta.site_id
+                    },
+                    conflictingCount: conflicting.length,
+                    updatedAt: new Date().toISOString()
+                };
+
+                await tx.sample.update({
+                    where: { id: existingSample.id },
+                    data: {
+                        metadata: JSON.stringify(meta),
+                        rejectionReason: 'PROVENANCE_HOLD: Conflicting field submissions claimed this barcode'
+                    }
+                });
+
+                await tx.auditLog.create({
+                    data: {
+                        id: crypto.randomUUID(),
+                        entity: 'SAMPLE',
+                        entityId: existingSample.id,
+                        action: 'KOBO_CONFLICTING_PROVENANCE',
+                        performedBy: performedBy,
+                        timestamp: new Date()
+                    }
+                });
+            }
+        }
+
+        // If all candidate samples were duplicates
         if (candidateSamples.length === 0) {
-            // Preserve conflicting duplicate provenance for cross-submission duplicate records
             if (crossSubDuplicates.length > 0 && !hasRetriableSkip) {
                 try {
                     await prisma.$transaction(async (tx) => {
-                        for (const dupSample of crossSubDuplicates) {
-                            const normId = dupSample.original_id?.trim().toUpperCase();
-                            const existingSample = await tx.sample.findFirst({
-                                where: { originalId: normId }
-                            });
-                            if (existingSample) {
-                                let meta = {};
-                                try { meta = JSON.parse(existingSample.metadata || '{}'); } catch (e) {}
-                                if (String(meta.kobo_id) !== String(submission._id)) {
-                                    const conflicting = meta.conflictingSubmissions || [];
-                                    conflicting.push({
-                                        kobo_id: submission._id,
-                                        kobo_uuid: submission._uuid,
-                                        submission_time: submission._submission_time,
-                                        surveyor: koboService.findValue(submission, ['surveyor_name', 'username']),
-                                        site_id: dupSample.site_id,
-                                        depth: dupSample.depth,
-                                        lat: dupSample.lat,
-                                        lng: dupSample.lng,
-                                        collected_at: dupSample.collected_at,
-                                        attachments: (submission._attachments || []).map(a => a.filename),
-                                        recordedAt: new Date().toISOString()
-                                    });
-                                    meta.conflictingSubmissions = conflicting;
-                                    await tx.sample.update({
-                                        where: { id: existingSample.id },
-                                        data: { metadata: JSON.stringify(meta) }
-                                    });
-                                    await tx.auditLog.create({
-                                        data: {
-                                            id: crypto.randomUUID(),
-                                            entity: 'SAMPLE',
-                                            entityId: existingSample.id,
-                                            action: 'KOBO_CONFLICTING_PROVENANCE',
-                                            performedBy: performedBy,
-                                            timestamp: new Date()
-                                        }
-                                    });
-                                }
-                            }
-                        }
+                        await verifyCommitGates(tx);
+                        await recordCrossSubDuplicates(tx);
                     });
                 } catch (dupAuditErr) {
-                    console.warn('[KOBO] Conflicting duplicate provenance preservation notice:', dupAuditErr.message);
+                    console.error('[KOBO] Failed to preserve conflicting duplicate provenance:', dupAuditErr.message);
+                    skippedCount += crossSubDuplicates.length;
+                    for (const { sampleData } of crossSubDuplicates) {
+                        skippedReasons.push({
+                            originalId: sampleData.original_id,
+                            reason: 'PROVENANCE_PRESERVATION_FAILED: ' + dupAuditErr.message
+                        });
+                    }
+                    hasRetriableSkip = true;
+                    continue;
                 }
             }
 
@@ -560,57 +716,10 @@ async function syncLabSubmissions(config, performedBy) {
 
         try {
             await prisma.$transaction(async (tx) => {
-                // 1. Commit-time verification of active laboratory inside transaction
-                const commitLab = await tx.lab.findFirst({
-                    where: { OR: [{ id: currentConfig.labId }, { code: currentConfig.labId }] }
-                });
-                if (!commitLab || !commitLab.isActive) {
-                    throw new Error(`LAB_INACTIVE: Laboratory '${currentConfig.labId}' is inactive`);
-                }
-
-                // 2. Commit-time verification of active & non-remapped configuration
-                const commitConfig = await tx.koboConfig.findUnique({
-                    where: { id: currentConfig.id }
-                });
-                if (!commitConfig || !commitConfig.isActive || commitConfig.projectCode !== projectCode) {
-                    throw new Error(`CONFIG_REVOKED: Kobo configuration '${currentConfig.id}' is inactive or remapped`);
-                }
-
-                // 3. Commit-time verification of active project admissions and lab membership
-                const currentProject = await tx.project.findUnique({
-                    where: { code: projectCode },
-                    include: { projectLabs: true }
-                });
-                if (!currentProject) {
-                    throw new Error(`PROJECT_NOT_FOUND: Project '${projectCode}' does not exist`);
-                }
-                const admission = projectPolicyService.canAdmitSample({
-                    project: currentProject,
-                    channel: 'KOBO',
-                    labId: currentConfig.labId
-                });
-                if (!admission.allowed) {
-                    throw new Error(`ADMISSION_POLICY_BLOCKED: Project '${projectCode}' admissions are ${currentProject?.status || 'BLOCKED'}: ${admission.reason}`);
-                }
-                const currentMembers = [currentProject.labId, ...(currentProject.projectLabs || []).map(pl => pl.labId)].filter(Boolean);
-                if (!currentMembers.includes(currentConfig.labId)) {
-                    throw new Error(`MEMBERSHIP_REVOKED: Laboratory '${currentConfig.labId}' is not an authorized servicing laboratory for project '${projectCode}'`);
-                }
+                const { currentProject } = await verifyCommitGates(tx);
 
                 for (const sampleData of candidateSamples) {
                     const sampleId = crypto.randomUUID();
-
-                    const processedAttachments = (submission._attachments || []).map(a => ({
-                        filename: a.filename?.split('/').pop() || a.filename,
-                        category: categorizePhoto(a.question_xpath),
-                        categoryLabel: photoLabel(categorizePhoto(a.question_xpath)),
-                        question: a.question_xpath,
-                        download_url: a.download_url,
-                        download_small: a.download_small_url,
-                        download_medium: a.download_medium_url,
-                        download_large: a.download_large_url,
-                        mimetype: a.mimetype
-                    }));
 
                     const now = new Date().toISOString();
                     const fm = (value) => ({ value, source: 'KOBO', lastUpdatedAt: now, lastUpdatedBy: 'SYNC' });
@@ -642,6 +751,18 @@ async function syncLabSubmissions(config, performedBy) {
                         intraSubDuplicates: sampleData.intraSubDuplicates || undefined
                     };
 
+                    let rejectionReason = null;
+                    if (sampleData.hasProvenanceHold) {
+                        compactMeta.provenanceHold = {
+                            status: 'AMBIGUOUS_PROVENANCE_HOLD',
+                            reason: sampleData.provenanceHoldReason,
+                            duplicates: sampleData.intraSubDuplicates,
+                            updatedAt: now
+                        };
+                        fieldMetadata.provenanceHold = fm('AMBIGUOUS_PROVENANCE_HOLD');
+                        rejectionReason = 'PROVENANCE_HOLD: Ambiguous depth identity (D1/D2 duplicate barcode)';
+                    }
+
                     await tx.sample.create({
                         data: {
                             id: sampleId,
@@ -655,7 +776,8 @@ async function syncLabSubmissions(config, performedBy) {
                             status: workflow.SAMPLE_STATES.EXPECTED,
                             metadata: JSON.stringify(compactMeta),
                             fieldMetadata: JSON.stringify(fieldMetadata),
-                            receptionDate: null
+                            receptionDate: null,
+                            rejectionReason: rejectionReason
                         }
                     });
 
@@ -684,52 +806,21 @@ async function syncLabSubmissions(config, performedBy) {
                     }
                 }
 
-                for (const dupSample of crossSubDuplicates) {
-                    const normId = dupSample.original_id?.trim().toUpperCase();
-                    const existingSample = await tx.sample.findFirst({
-                        where: { originalId: normId }
-                    });
-                    if (existingSample) {
-                        let meta = {};
-                        try { meta = JSON.parse(existingSample.metadata || '{}'); } catch (e) {}
-                        if (String(meta.kobo_id) !== String(submission._id)) {
-                            const conflicting = meta.conflictingSubmissions || [];
-                            conflicting.push({
-                                kobo_id: submission._id,
-                                kobo_uuid: submission._uuid,
-                                submission_time: submission._submission_time,
-                                surveyor: koboService.findValue(submission, ['surveyor_name', 'username']),
-                                site_id: dupSample.site_id,
-                                depth: dupSample.depth,
-                                lat: dupSample.lat,
-                                lng: dupSample.lng,
-                                collected_at: dupSample.collected_at,
-                                attachments: (submission._attachments || []).map(a => a.filename),
-                                recordedAt: new Date().toISOString()
-                            });
-                            meta.conflictingSubmissions = conflicting;
-                            await tx.sample.update({
-                                where: { id: existingSample.id },
-                                data: { metadata: JSON.stringify(meta) }
-                            });
-                            await tx.auditLog.create({
-                                data: {
-                                    id: crypto.randomUUID(),
-                                    entity: 'SAMPLE',
-                                    entityId: existingSample.id,
-                                    action: 'KOBO_CONFLICTING_PROVENANCE',
-                                    performedBy: performedBy,
-                                    timestamp: new Date()
-                                }
-                            });
-                        }
-                    }
+                // If this submission also had crossSubDuplicates, record them inside the same transaction
+                if (crossSubDuplicates.length > 0) {
+                    await recordCrossSubDuplicates(tx);
                 }
             });
 
             newCount += candidateSamples.length;
             for (const sampleData of candidateSamples) {
-                existingIds.add(sampleData.original_id.trim().toUpperCase());
+                const norm = sampleData.original_id.trim().toUpperCase();
+                existingSamplesByNormId.set(norm, {
+                    id: sampleData.original_id,
+                    originalId: sampleData.original_id,
+                    assignedLab: currentConfig.labId,
+                    projectCode: projectCode
+                });
             }
 
             const subIdNum = Number(submission._id);
@@ -744,7 +835,8 @@ async function syncLabSubmissions(config, performedBy) {
                 err.message?.includes('ADMISSION_POLICY_BLOCKED') ||
                 err.message?.includes('MEMBERSHIP_REVOKED') ||
                 err.message?.includes('LAB_INACTIVE') ||
-                err.message?.includes('CONFIG_REVOKED')
+                err.message?.includes('CONFIG_REVOKED') ||
+                err.message?.includes('FOREIGN_SCOPE_COLLISION')
             ) {
                 skippedCount += candidateSamples.length;
                 for (const sampleData of candidateSamples) {
