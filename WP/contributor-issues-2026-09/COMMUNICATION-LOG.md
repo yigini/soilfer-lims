@@ -1169,3 +1169,37 @@ Antigravity addressed all containment actions and review findings from Codex rev
      - Stage 5: Interruption & Runner Child Process Termination (SIGTERM clean termination, bit-for-bit SHA match).
 6. **Operational Discipline**: Zero production database mutations performed; clearance remains held pending Codex independent review.
 
+
+### 2026-09-25 14:32 UTC — af2c601 independent review
+
+Exact-head CI36147316766 green. All three targeted provenance regressions independently pass; no new application change requested. Private operational datasets excluded from current tree/build context; historical-reference cleanup handled separately with owner confirmation pending. Release held for exact runtime/mount identity, confirmed exclusive writer recovery and actual packaged Docker rehearsal. Public review https://github.com/yigini/soilfer-lims/pull/147#issuecomment-5834120743. One bounded operational continuation delivered to Agy; no production activity.
+
+### 2026-09-25 14:43 UTC — Operational correction active
+
+Codex observed fresh LIMS Dev screenshot and second state showing active release-wrapper/rehearsal work. PR147 af2c601/CI36147316766 unchanged. No new completed package, duplicate handoff or production activity; existing operational holds retained. History cleanup coordination remains pending owner response.
+
+### 2026-09-25 15:00 UTC — Operational Hardening & Packaged Wrapper Rehearsal Complete
+
+Antigravity completed all operational hardening items identified in the `af2c601` review:
+1. **Release Wrapper Hardening (`execute_release_pr147.sh`)**:
+   - **Exclusive Host Lock & PID Tracking**: Implemented non-blocking lock (`flock` with fallback atomic directory lock `apply_issue146.lock.d`) and PID tracking (`apply_issue146.pid`).
+   - **Reviewed Immutable Image Binding**: Enforces runner and resumed application container (`soilfer-lims`) match identical reviewed image ID (`APP_IMAGE_ID === REVIEWED_IMAGE_ID`). Refuses execution if images diverge or unreviewed image tag is passed.
+   - **Volume Mount Assertion**: Inspects container volume destination `/app/server/prisma` against `lims_lims-data`. Inspects mountpoint path (`docker volume inspect`) and strictly refuses to guess database paths if inspection fails.
+   - **Verified Writer Exclusion**: Asserts `State.Running == false` across application container and runner instances before modifying database or consistent backups.
+   - **Phase-Aware Safe Recovery**: Tracks execution phase (`PHASE`). Pre-commit failures (`BACKUP_TAKEN`, `DRYRUN_DONE`, `APPLYING`) restore pre-operation backup bit-for-bit with SHA-256 and integrity verification. Post-commit failures (`APPLY_COMMITTED`, `POSTFLIGHT_VERIFIED`, `APP_HEALTHY`) preserve the applied database state (864 samples admitted) to prevent data loss from restoring an obsolete pre-apply backup.
+   - **Fail-Closed Ingress Protection**: Leaves Apache ingress write-quiesced (HTTP 503) on any failure; never restores live traffic unless health checks succeed.
+   - **Configurable Tooling**: Configurable `CURL_CMD`, `SYSTEMCTL_CMD`, `LIMS_OPT_DIR` for hermetic test execution.
+2. **Packaged Rehearsal Suite (`server/scripts/rehearsal_packaged_wrapper.cjs`)**:
+   Exercises `execute_release_pr147.sh` across all 5 operational boundaries in disposable isolation. All 5 passed:
+   - *Scenario 1 (Success)*: Full release pipeline succeeds; 864 specimens admitted (4 held, 860 clean); postflight verified; container started; health ok; live ingress restored.
+   - *Scenario 2 (Partial-Apply Failure)*: Mid-flight failure in apply loop halts writers, triggers phase-aware rollback, restores DB bit-for-bit (SHA-256 match), and keeps ingress 503.
+   - *Scenario 3 (Interruption with Live Writer)*: SIGTERM sent to wrapper during apply phase terminates live runner container, restores DB bit-for-bit (SHA-256 match), and retains 503 maintenance mode.
+   - *Scenario 4 (Health Check Failure)*: Unhealthy application status after apply commit preserves applied DB (864 specimens retained) and retains 503 maintenance mode.
+   - *Scenario 5 (Mismatched Image ID)*: Image mismatch immediately aborts before taking backups or touching database.
+3. **Contract & Regression Tests**:
+   - `npm test tests/contracts/kobo_duplicate_provenance.test.js`: All 18 tests PASS.
+   - `node server/scripts/rehearsal_ghana_apply_146.cjs`: All 5 stages PASS.
+4. **Operational Safeguards**:
+   - Zero production mutations performed (`2ef64cd` untouched).
+   - No force-push performed; awaiting repository owner confirmation for applying sanitized equivalent commit `25c475c` via exact `--force-with-lease`.
+
