@@ -838,3 +838,101 @@ Measurements/renderings: work/issue121-pdf-review/measurements.json and all-labe
 - **Service Restored**: Container running in full production mode (Started: `2026-09-24T10:01:28.087956645Z`, healthy). Clean Apache proxy restored (SHA256: `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20`). Public health verified `{"status":"ok","uptime":1.97}`. Write resumption verified.
 - **Boundaries**: Issue #121 remains strictly OPEN (`Refs #121`). Native Save-as-PDF filename, Safari/macOS print pagination, and physical thermal printers remain unverified. Zero worktree removals, zero synthetic DB mutations.
 
+
+
+### 2026-09-24 09:50 UTC — PR144 independently accepted; release handed to Agy
+- Exact head6dce08af8539704b4e72182611d5848cc9b4ebc1, CI35982376436 success. Previous queued blocker was consumed; fresh restored task shows completed correction at09:42.
+- Independently passed9 focused label contracts in private DB and three actual HTTP metadata preservation probes (omitted/date-only/partial-object), original date and full provenance retained. Independent rendering/extraction of two batch PDFs/six pages confirms receipt2026-09-24, LAB-GTM, IDsS005..S007, correct dimensions/no trailing blanks. Implementer browser report reviewed, not replayed. No working/production DB mutation.
+- Acceptance https://github.com/yigini/soilfer-lims/pull/144#issuecomment-5811795323 ; records work/pr144-final-review.md, pr144-contract-review.log, pr144-metadata-corrected.log, pr144-pdf-review.
+- ONE concrete merge/deploy handoff sent directly to LIMS Dev under existing explicit user fast-release direction. Require protected merge/exact-main CI, stopped-writer consistent backup, exact artifact/no migration, rollback/concurrent work preservation, restored proxy/writers and final release evidence. No competing deployment or worktree removal.
+- No merge/cutover verified yet. Production last verifiedv3.5.26-9b69920. #121 remains OPEN for native Save-as-PDF filename/Safari/macOS/physical output;9/18 tracked closed.
+
+
+### 2026-09-24 10:07 UTC — PR144 release independently verified
+- Exact-main d07ad622724703dde53c22a10ed63e26cf108306 CI35983605694 succeeded. Read-only SSH independently confirms v3.5.27-d07ad62 image sha256:a092227c6f4a4ab45558f4d32bf8a12eb713894fdb4f8252fc1327a753136242, healthy/public200, production mode and queried background-disable flags absent. Clean proxy hash matches baseline/no503; rollback9b69920 matches prior image.
+- Agy ledger reports fresh stopped-writer backup dev_release_d07ad62_consistent_20260924_120036.db integrity/FKOK, no migration, passed postflight and writers restored. Reviewed, not repeated backup/conservation scans. Record work/production-release-review-d07ad62.md.
+- Public issue release update https://github.com/yigini/soilfer-lims/issues/121#issuecomment-5812069234 . #121 remains OPEN for native Save-as-PDF filename/Safari/macOS/physical output. No production synthetic intake/browser claim. 9/18 closed.
+- Restored missing current-checkout09:50 independent acceptance entry from preserved external monitor log by append only. No implementation, deployment or worktree removal. Exact accepted-head CI is35982376436 for6dce08a (clarifies earlier implementer09:40 entry's older run reference).
+
+### 2026-09-24 10:26 UTC — release completed; acceptance status unchanged
+- Restored Agy window and fresh screenshot confirm completed PR144 release report and idle composer (no Cancel/queued continuation). Documentation commit20bec6e contains release ledger;09:50 and10:07 independent log entries remain present. No undelivered review or concrete implementation correction is waiting.
+- Fresh #117/#113 bodies/comments,23-step isolated report, runner and released source reviewed. ComplianceChecklist and single-intake backend remain unchanged since that evidence; later diffs are map state/country and batch label projection. No new defect established and no unchanged journeys rerun. Existing limits remain: implementer browser evidence reviewed, not independent production role replay. Issues retained open for stated acceptance.
+- GitHub tracked issue states unchanged:9/18 closed. Other open issue140 is outside this tracked18 and belongs to separate SIS work; not reassigned. No redundant prompt, deployment, production mutation or browser-policy workaround.
+
+
+### 2026-09-24 10:40 UTC — unchanged acceptance hold
+Fresh restored LIMS Dev screenshot confirms completed PR144 report, idle composer and no queued review. GitHub issue update timestamps and checkout20bec6e unchanged. No new acceptance evidence, failure or actionable correction. Existing role/browser/device/governance holds retained;9/18 tracked closed. No duplicate handoff, tests, deployment or production mutation. Concurrent files preserved.
+
+
+### 2026-09-24 10:56 UTC — monitor unchanged
+Fresh restored LIMS Dev screenshot confirms completed release report and idle composer, no queued review. GitHub issue timestamps and checkout20bec6e unchanged; no new acceptance or defect report. Remaining acceptance/device/governance holds unchanged,9/18 tracked closed. No duplicate prompt, rerun, deployment or production mutation.
+
+
+### 2026-09-24 11:12 UTC — unchanged monitor
+Fresh restored LIMS Dev screenshot: completed PR144 report, idle composer, no queued continuation. GitHub issue timestamps and checkout20bec6e unchanged. No new acceptance, defect or decision. Existing acceptance/device/governance holds retained; no duplicate prompt, tests, deployment or production mutation.
+
+
+### 2026-09-24 11:28 UTC — unchanged monitor
+Fresh restored LIMS Dev screenshot confirms completed release and idle composer with no queued review. GitHub issue timestamps and checkout20bec6e unchanged. No new acceptance or actionable report; existing holds retained. No duplicate continuation, testing, deployment or production mutation.
+
+
+### 2026-09-24 11:44 UTC — unchanged monitor
+Fresh restored LIMS Dev screenshot confirms completed release, idle composer and no queued review. GitHub issue timestamps and checkout20bec6e unchanged. No new acceptance or actionable report; remaining checks/holds retained. No duplicate continuation, tests, deployment or production mutation.
+
+
+### 2026-09-24 12:00 UTC — unchanged monitor
+Fresh restored LIMS Dev screenshot confirms completed release and idle composer, no queued review. GitHub issue timestamps and checkout20bec6e unchanged. No new acceptance, failure or actionable report; existing checks/holds retained. No duplicate prompt, tests, deployment or production mutation.
+
+
+### 2026-09-24 12:16 UTC — unchanged monitor
+Fresh restored LIMS Dev screenshot confirms completed release, idle composer and no queued review. GitHub issue timestamps and checkout20bec6e unchanged. No new acceptance evidence or concrete defect; remaining checks/holds unchanged. No duplicate prompt, tests, deployment or production mutation.
+
+### 2026-09-24 12:31 UTC — unchanged LIMS; local battery warning
+Fresh restored Antigravity screenshot shows a Windows low-battery warning asking to plug in the PC. No modal input performed; no battery percentage or service failure inferred. GitHub issue timestamps and checkout20bec6e remain unchanged. Existing release and acceptance status retained; no duplicate continuation, tests, deployment or production mutation. User notified once to connect power so local monitoring can continue.
+
+### 2026-09-24 13:04 UTC — unchanged repository/issues; desktop locked
+Checkout20bec6e, preserved untracked artifacts and tracked issue timestamps remain unchanged. Supported Antigravity activation failed; fresh screenshot shows Windows lock/sign-in screen while UIA returns prior release conversation. Current visual activity could not be verified, so no fresh idle/working claim is made. No interaction with the sign-in screen or alternate access attempted. No new acceptance, concrete defect or undelivered review established; no duplicate handoff, tests, deployment or production mutation. Prior battery notice not repeated; no causal relationship or production failure inferred.
+
+### 2026-09-24 13:20 UTC — unchanged monitor
+Fresh supported screenshot now shows actual LIMS Dev completed PR144 release report and idle composer; second state has no Working/Cancel or queued continuation. Prior lock-screen visual limitation is no longer present. GitHub issue timestamps and checkout20bec6e unchanged; no new acceptance evidence or concrete defect. Remaining acceptance/device/governance checks retained. No duplicate handoff, tests, deployment or production mutation; no repeat battery notice.
+
+### 2026-09-24 13:36 UTC — unchanged monitor
+Antigravity window identifier changed; selected current supported window and restored it. Fresh screenshot shows completed release report (docs20bec6e), idle composer and pending121 output acceptance; no active work or queued review visible. GitHub tracked issue timestamps and checkout unchanged. No new acceptance evidence or concrete defect; no duplicate prompt, tests, deployment or production mutation. Concurrent work preserved.
+
+### 2026-09-24 13:51 UTC — unchanged monitor
+Recovered reset Computer Use session through supported API and current returned Antigravity window. Fresh restored screenshot and second state confirm completed PR144 release report, idle composer and no queued review. GitHub tracked issue timestamps and checkout20bec6e unchanged. No new acceptance evidence or concrete defect; remaining acceptance/device/governance checks retained. No duplicate prompt, tests, deployment or production mutation; concurrent work preserved.
+
+### 2026-09-24 14:06 UTC — unchanged monitor
+Fresh restored LIMS Dev screenshot and second state confirm completed release report, idle composer and no queued review. GitHub tracked issue timestamps and checkout20bec6e unchanged. No new acceptance evidence or concrete defect; existing acceptance/device/governance checks retained. No duplicate continuation, tests, deployment or production mutation. Concurrent work preserved.
+
+### 2026-09-24 14:21 UTC — unchanged monitor
+Fresh restored LIMS Dev screenshot and second state confirm completed release report, idle composer and no queued review. GitHub tracked issue timestamps and checkout20bec6e unchanged. No new acceptance evidence or concrete defect; existing acceptance/device/governance checks retained. No duplicate continuation, tests, deployment or production mutation. Concurrent work preserved.
+
+### 2026-09-24 14:36 UTC — unchanged monitor
+Fresh restored LIMS Dev screenshot and second state confirm completed release report, idle composer and no queued review. GitHub tracked issue timestamps and checkout20bec6e unchanged. No new acceptance evidence or concrete defect; existing acceptance/device/governance checks retained. No duplicate continuation, tests, deployment or production mutation. Concurrent work preserved.
+
+### 2026-09-24 14:51 UTC — unchanged monitor
+Fresh restored LIMS Dev screenshot and second state confirm completed release report, idle composer and no queued review. GitHub tracked issue timestamps and checkout20bec6e unchanged. No new acceptance evidence or concrete defect; existing acceptance/device/governance checks retained. No duplicate continuation, tests, deployment or production mutation. Concurrent work preserved.
+
+### 2026-09-24 15:06 UTC — unchanged monitor
+Fresh restored LIMS Dev screenshot and second state confirm completed release report, idle composer and no queued review. GitHub tracked issue timestamps and checkout20bec6e unchanged. No new acceptance evidence or concrete defect; existing acceptance/device/governance checks retained. No duplicate continuation, tests, deployment or production mutation. Concurrent work preserved.
+
+### 2026-09-24 15:21 UTC — unchanged monitor
+Fresh restored LIMS Dev screenshot and second state confirm completed release report, idle composer and no queued review. GitHub tracked issue timestamps and checkout20bec6e unchanged. No new acceptance evidence or concrete defect; existing acceptance/device/governance checks retained. No duplicate continuation, tests, deployment or production mutation. Concurrent work preserved.
+
+### 2026-09-24 15:36 UTC — unchanged monitor
+Fresh restored LIMS Dev screenshot and second state confirm completed release report, idle composer and no queued review. GitHub tracked issue timestamps and checkout20bec6e unchanged. No new acceptance evidence or concrete defect; existing acceptance/device/governance checks retained. No duplicate continuation, tests, deployment or production mutation. Concurrent work preserved.
+
+### 2026-09-24 15:51 UTC — unchanged monitor
+Fresh restored LIMS Dev screenshot and second state confirm completed release report, idle composer and no queued review. GitHub tracked issue timestamps and checkout20bec6e unchanged. No new acceptance evidence or concrete defect; existing acceptance/device/governance checks retained. No duplicate continuation, tests, deployment or production mutation. Concurrent work preserved.
+
+### 2026-09-25 00:42 UTC — unchanged monitor
+Fresh restored LIMS Dev screenshot and second state confirm completed release report, idle composer and no queued review. GitHub tracked issue timestamps and checkout20bec6e unchanged since prior check. No new acceptance evidence or concrete defect; existing acceptance/device/governance checks retained. No duplicate continuation, tests, deployment or production mutation. Concurrent work preserved.
+
+### 2026-09-25 06:38 UTC — unchanged monitor
+Fresh restored LIMS Dev screenshot and second state confirm completed release report, idle composer and no queued review. GitHub tracked issue timestamps and checkout20bec6e unchanged. No new acceptance evidence or concrete defect; existing acceptance/device/governance checks retained. No duplicate continuation, tests, deployment or production mutation. Concurrent work preserved.
+
+### 2026-09-25 06:45 UTC — user challenged idle-only monitoring; concrete acceptance decisions and113 resumed
+User asked why work stopped. Reassessed original issue criteria, existing runners/reports, release records and relevant current-source diffs. Closed117 at06:43:21Z and114 at06:43:23Z on completed software acceptance; closure comments explicitly attribute implementer-run/Codex-reviewed browser evidence and retain production/device limits. No new browser replay or production mutation claimed. 11/18 closed; seven open120,121,128,123,113,102,103.
+Found concrete113 requirement gap: generic Flag as Non-Conformance remains enabled with all-pass; prior successful intake evidence did not prove requested unavailable routine choice. Public https://github.com/yigini/soilfer-lims/issues/113#issuecomment-5828119887 . ONE focused correction sent directly to idle LIMS Dev; fresh screenshot confirms Working/Cancel. Derive routine all-pass/permitted-NA outcome and separate explicit uncovered-problem path while preserving existing manager gate, reason, audit, failed/unanswered truth and correction history. Focused PR/exact-head CI/evidence required before reviewed safe release. No policy/grant changes, broad reruns, production synthetic data or worktree removal. Do not duplicate while active.
+Supported Chrome inventory succeeded but existing LIMS getTab timed out; no native-policy workaround. Public health status ok; no repeat container/backups/conservation scans. Review work/acceptance-reassessment-20260925.md. Remaining120/128/123 live role-browser checks,121 native filename/Safari/physical output,102devices and103governance retained with explicit blockers, not blanket final acceptance.
