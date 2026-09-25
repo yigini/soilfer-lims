@@ -67,10 +67,12 @@ const ComplianceChecklist = ({
             [key]: { ...currentItems[key], status }
         };
         const anyFail = Object.values(newItems).some(it => it?.status === 'FAIL');
-        const wasFailBefore = Object.values(currentItems).some(it => it?.status === 'FAIL');
+        const wasAnyFail = Object.values(currentItems).some(it => it?.status === 'FAIL');
 
         // Check if an independent other-problem was recorded or active
-        const hasOther = Boolean(value?.otherProblem || (wasFailBefore && !anyFail && value?.reason?.trim() && value?.otherProblem !== false));
+        // Legacy draft: otherProblem is undefined, but nonConformance is true and no items failed.
+        const isLegacyOtherProblem = value?.otherProblem === undefined && value?.nonConformance === true && !wasAnyFail;
+        const hasOther = Boolean(value?.otherProblem === true || isLegacyOtherProblem);
 
         // Atomically determine non-conformance flag:
         // If any item is FAIL, nonConformance must be true.
@@ -87,7 +89,7 @@ const ComplianceChecklist = ({
             ...value,
             items: newItems,
             nonConformance: newNC,
-            otherProblem: hasOther ? true : (anyFail ? value?.otherProblem : false)
+            otherProblem: hasOther
         };
 
         // Single atomic state update to prevent stale-closure parent overwrite (#117, #113)
@@ -126,7 +128,8 @@ const ComplianceChecklist = ({
     });
 
     // Explicit other-problem route (uncovered by checklist):
-    const hasOtherProblem = Boolean(value?.otherProblem || (!anyFail && value?.reason?.trim()));
+    const isLegacyOtherProblemRender = value?.otherProblem === undefined && value?.nonConformance === true && !anyFail;
+    const hasOtherProblem = Boolean(value?.otherProblem === true || isLegacyOtherProblemRender);
 
     return (
         <div className="space-y-4">
@@ -305,13 +308,14 @@ const ComplianceChecklist = ({
                         CHECKLIST_ITEMS.forEach(item => {
                             newItems[item.key] = { ...value?.items?.[item.key], status: 'PASS' };
                         });
-                        const hasOther = Boolean(value?.otherProblem || (!anyFail && value?.reason?.trim()));
+                        const wasAnyFail = failCount > 0;
+                        const isLegacyOtherProblem = value?.otherProblem === undefined && value?.nonConformance === true && !wasAnyFail;
+                        const hasOther = Boolean(value?.otherProblem === true || isLegacyOtherProblem);
                         onChange({
                             ...value,
                             items: newItems,
                             nonConformance: hasOther,
-                            otherProblem: hasOther,
-                            reason: hasOther ? (value?.reason || '') : ''
+                            otherProblem: hasOther
                         });
                     }}
                     className="text-xs text-emerald-600 hover:text-emerald-800 font-bold px-2 py-1 rounded hover:bg-emerald-50 transition-colors"
@@ -324,7 +328,15 @@ const ComplianceChecklist = ({
                         CHECKLIST_ITEMS.forEach(item => {
                             newItems[item.key] = { status: undefined, note: '' };
                         });
-                        onChange({ ...value, items: newItems, nonConformance: false, otherProblem: false, reason: '' });
+                        const wasAnyFail = failCount > 0;
+                        const isLegacyOtherProblem = value?.otherProblem === undefined && value?.nonConformance === true && !wasAnyFail;
+                        const hasOther = Boolean(value?.otherProblem === true || isLegacyOtherProblem);
+                        onChange({ 
+                            ...value, 
+                            items: newItems, 
+                            nonConformance: hasOther, 
+                            otherProblem: hasOther 
+                        });
                     }}
                     className="text-xs text-sf-muted hover:text-sf-text font-bold px-2 py-1 rounded hover:bg-sf-canvas transition-colors"
                 >
@@ -385,23 +397,6 @@ const ComplianceChecklist = ({
                     <AlertCircle size={18} className={(value?.nonConformance && anyFail) ? 'text-red-500' : 'text-sf-muted'} />
                 </label>
 
-                {/* Routine Non-Conformance Description (Active when items fail) */}
-                {value?.nonConformance && anyFail && (
-                    <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                        <label className="block text-xs font-bold text-red-600 mb-1 uppercase tracking-wider">
-                            {t('reception.nonConformanceDescription', 'Non-Conformance Description *')}
-                        </label>
-                        <textarea
-                            data-testid="routine-nc-description"
-                            className="w-full p-3 border border-red-300 dark:border-red-800 bg-sf-surface text-sf-text rounded-xl text-sm focus:ring-2 focus:ring-red-300 outline-none placeholder:text-red-300 dark:placeholder:text-red-700 resize-none"
-                            placeholder={t('reception.describeIssue', 'Describe the issue requiring attention...')}
-                            value={value?.reason || ''}
-                            onChange={(e) => onChange({ ...value, reason: e.target.value })}
-                            rows={3}
-                        />
-                    </div>
-                )}
-
                 {/* Clearly separate: Other problem not covered by checklist (#113) */}
                 <div className="pt-3 mt-3 border-t border-sf-divider">
                     <div className={`rounded-xl border transition-all ${
@@ -423,7 +418,9 @@ const ComplianceChecklist = ({
                                         ...value,
                                         otherProblem: checked,
                                         nonConformance: newNC,
-                                        reason: checked ? (value?.reason || '') : (anyFail ? value?.reason : '')
+                                        // Unified description doesn't need to clear reason on toggle unless we want to,
+                                        // but safely retaining it prevents data loss if toggled by mistake.
+                                        reason: value?.reason || ''
                                     };
                                     onChange(newValue);
                                     if (onNonConformance) {
@@ -451,33 +448,29 @@ const ComplianceChecklist = ({
                             </div>
                             <HelpCircle size={18} className={hasOtherProblem ? 'text-amber-600' : 'text-sf-muted'} />
                         </label>
-
-                        {hasOtherProblem && (
-                            <div className="p-3 pt-0 animate-in fade-in slide-in-from-top-1 duration-200">
-                                <label className="block text-xs font-bold text-amber-700 dark:text-amber-400 mb-1 uppercase tracking-wider">
-                                    {t('reception.otherProblemDescription', 'Problem Description (Outside Checklist Criteria) *')}
-                                </label>
-                                <textarea
-                                    id="other-problem-description"
-                                    data-testid="other-problem-description"
-                                    className="w-full p-2.5 border border-amber-300 dark:border-amber-700 bg-sf-surface text-sf-text rounded-lg text-sm focus:ring-2 focus:ring-amber-400 outline-none placeholder:text-amber-400/60 resize-none"
-                                    placeholder={t('reception.otherProblemPlaceholder', 'Describe the specific sample condition, odor, contamination, or defect outside standard criteria...')}
-                                    value={value?.reason || ''}
-                                    onChange={(e) => {
-                                        const newReason = e.target.value;
-                                        onChange({
-                                            ...value,
-                                            otherProblem: true,
-                                            reason: newReason,
-                                            nonConformance: true
-                                        });
-                                    }}
-                                    rows={2}
-                                />
-                            </div>
-                        )}
                     </div>
                 </div>
+
+                {/* Unified Non-Conformance Description (Active when NC is true) */}
+                {value?.nonConformance && (
+                    <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <label className="block text-xs font-bold text-red-600 dark:text-red-400 mb-1 uppercase tracking-wider">
+                            {hasOtherProblem && anyFail 
+                                ? t('reception.combinedProblemDescription', 'Combined Problem Description (Checklist & Other) *')
+                                : hasOtherProblem 
+                                    ? t('reception.otherProblemDescription', 'Problem Description (Outside Checklist Criteria) *')
+                                    : t('reception.nonConformanceDescription', 'Non-Conformance Description *')}
+                        </label>
+                        <textarea
+                            data-testid="unified-nc-description"
+                            className="w-full p-3 border border-red-300 dark:border-red-800 bg-sf-surface text-sf-text rounded-xl text-sm focus:ring-2 focus:ring-red-300 outline-none placeholder:text-red-300 dark:placeholder:text-red-700 resize-none"
+                            placeholder={t('reception.describeIssue', 'Describe the issue requiring attention...')}
+                            value={value?.reason || ''}
+                            onChange={(e) => onChange({ ...value, reason: e.target.value })}
+                            rows={3}
+                        />
+                    </div>
+                )}
 
                 {/* Photographic Evidence Attachment */}
                 {(value?.nonConformance || hasOtherProblem) && (

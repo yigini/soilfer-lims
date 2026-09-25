@@ -159,6 +159,7 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
         let checklistData = {
             items: { label: { status: 'FAIL' } },
             nonConformance: true,
+            otherProblem: true,
             reason: 'General package dampness noted at loading dock'
         };
         const onChange = (newValue) => { checklistData = newValue; };
@@ -403,7 +404,7 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
         expect(routineNcBox.props.checked).toBe(true);
 
         // Description textarea for routine non-conformance must be present
-        const descArea = findElement(tree, el => el.props && el.props['data-testid'] === 'routine-nc-description');
+        const descArea = findElement(tree, el => el.props && el.props['data-testid'] === 'unified-nc-description');
         expect(descArea).toBeDefined();
 
         const html = ReactDOMServer.renderToStaticMarkup(tree);
@@ -545,7 +546,7 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
         });
 
         // The other-problem description textarea is now visible
-        const otherDesc = findElement(tree, el => el.props && el.props['data-testid'] === 'other-problem-description');
+        const otherDesc = findElement(tree, el => el.props && el.props['data-testid'] === 'unified-nc-description');
         expect(otherDesc).toBeDefined();
 
         // Staff enters the uncovered problem description
@@ -729,5 +730,107 @@ describe('Reception Parent Page Component & Intake Mode Contracts (#113, #114, #
         expect(effectIndex).toBeGreaterThan(0);
         // Effect MUST be declared after checklistData useState declaration to prevent TDZ ReferenceError
         expect(effectIndex).toBeGreaterThan(stateDeclIndex);
+    });
+});
+describe('Codex Review: ComplianceChecklist Independent PR145 Bugfixes', () => {
+    test('Fix 1: Legacy uncovered-problem draft preserves effective exception flag on unrelated PASS', () => {
+        const legacyValue = {
+            items: {
+                container: { status: 'PASS' },
+                label: { status: undefined },
+                quantity: { status: 'PASS' },
+                condition: { status: 'PASS' },
+                coc: { status: 'PASS' }
+            },
+            nonConformance: true,
+            reason: 'Legacy independent solvent odor'
+            // otherProblem is undefined!
+        };
+
+        let lastVal = legacyValue;
+        const onChange = (v) => { lastVal = v; };
+
+        const tree = ComplianceChecklist({
+            value: legacyValue,
+            onChange,
+            isWalkIn: false
+        });
+        
+        const otherProblemCheckbox = findCheckboxByTestId(tree, 'other-problem-checkbox');
+        expect(otherProblemCheckbox.props.checked).toBe(true);
+
+        const labelPassBtn = findButtonByAriaLabel(tree, 'Label Legible & Matches ID: OK');
+        labelPassBtn.props.onClick();
+
+        expect(lastVal.nonConformance).toBe(true);
+        expect(lastVal.otherProblem).toBe(true);
+        expect(lastVal.reason).toBe('Legacy independent solvent odor');
+        expect(lastVal.items.label.status).toBe('PASS');
+    });
+
+    test('Fix 2: Routine-only FAIL + description -> PASS correctly clears Other checkbox', () => {
+        const failValue = {
+            items: {
+                container: { status: 'FAIL', note: 'Broken' },
+                label: { status: 'PASS' },
+                quantity: { status: 'PASS' },
+                condition: { status: 'PASS' },
+                coc: { status: 'PASS' }
+            },
+            nonConformance: true,
+            otherProblem: false,
+            reason: 'Container arrived completely shattered'
+        };
+
+        let lastVal = failValue;
+        const onChange = (v) => { lastVal = v; };
+
+        const tree = ComplianceChecklist({
+            value: failValue,
+            onChange,
+            isWalkIn: false
+        });
+        
+        const otherProblemCheckbox = findCheckboxByTestId(tree, 'other-problem-checkbox');
+        expect(otherProblemCheckbox.props.checked).toBe(false);
+
+        const containerPassBtn = findButtonByAriaLabel(tree, 'Container Intact / Sealed: OK');
+        containerPassBtn.props.onClick();
+
+        expect(lastVal.nonConformance).toBe(false);
+        expect(lastVal.otherProblem).toBe(false);
+    });
+
+    test('Fix 3: Unified description prevents overwrites (only one description textarea)', () => {
+        const combinedValue = {
+            items: { container: { status: 'FAIL', note: 'Broken' }, label: { status: 'PASS' } },
+            nonConformance: true,
+            otherProblem: true,
+            reason: 'Smells like solvents'
+        };
+
+        const tree = ComplianceChecklist({
+            value: combinedValue,
+            onChange: () => {},
+            isWalkIn: false
+        });
+        
+        // Find all input/textarea elements
+        const textareas = [];
+        const gatherTextareas = (node) => {
+            if (!node || typeof node !== 'object') return;
+            if (node.type === 'textarea' || node.type === 'input') {
+                if (node.props && node.props.placeholder && node.props.placeholder.includes('Describe the issue')) {
+                    textareas.push(node);
+                }
+            }
+            if (node.props && node.props.children) {
+                const children = Array.isArray(node.props.children) ? node.props.children : [node.props.children];
+                children.forEach(gatherTextareas);
+            }
+        };
+        gatherTextareas(tree);
+
+        expect(textareas.length).toBe(1);
     });
 });
