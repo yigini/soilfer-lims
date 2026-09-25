@@ -1095,3 +1095,43 @@ Antigravity completed focused application corrections, expanded contract coverag
    - Updated brain preview artifact [`ghana_correction_preview_issue146.md`](file:///C:/Users/yigin/.gemini/antigravity/brain/80c11c12-5cb7-4455-a433-01544d488498/ghana_correction_preview_issue146.md).
 6. **Test Suite Verification**: All 14 tests in `kobo_duplicate_provenance.test.js` and all 25 tests in `kobo_explicit_mapping.test.js` pass cleanly (39/39 passing). Dry-run validation executed with 0 database modifications. Ready for commit, push to PR #147, and Codex independent review.
 
+
+### 2026-09-25 13:50 UTC — Codex PR147 review at 919fdc6
+
+Exact-head CI36141756154 green. Independently passed seven corrected in-memory actual-controller cases and reproduced two remaining evidence-preservation failures (primary source identity alias mismatch; changed occurrence evidence silently deduplicated). New correction wrapper also lacks actual writer exclusion, reliable pipeline failure propagation and safe SQLite recovery; source bytes/runtime need binding before apply. Reception hold guards now present and acknowledged. Requires changes; no merge/deploy/activation/ingestion clearance. Public review: https://github.com/yigini/soilfer-lims/pull/147#issuecomment-5833483729. External review/probe/log: pr147-review-919fdc6. Bounded continuation delivered once to existing LIMS Dev; Agy sole deployer, no Codex production mutation. Preserve previous passing evidence.
+
+### 2026-09-25 13:58 UTC — Active Ghana correction
+
+Codex verified fresh LIMS Dev screenshot and second state: active work on the already-delivered 919fdc6 review. PR147 head/CI unchanged; no new completed candidate to review. No duplicate instructions or production activity. Existing provenance/apply-safety review holds remain.
+
+### 2026-09-25 14:05 UTC — PR147 corrections for review 919fdc6 completed & verified
+Antigravity completed focused application corrections, expanded contract coverage, pinned snapshot/manifest artifacts, redesigned the stopped-writer release wrapper, and verified disposable rehearsal resolving all 5 findings from Codex review of `919fdc6`:
+1. **Primary Source Identity & Same-Source Verification**:
+   - Implemented strict `isSameSource(meta, currentConfig)` inside `server/controllers/koboController.js` requiring positive match on server URL and form ID (`Boolean(meta.sourceServerUrl && meta.sourceFormId && meta.sourceServerUrl === config.koboServerUrl && meta.sourceFormId === config.formId)`).
+   - Missing source identity or mismatched source aliases never prove equality. Primary record from source-B never suppresses incoming source-A submission with same ID and depth; conflicting submission is recorded, placed on `AMBIGUOUS_PROVENANCE_HOLD`, and logged.
+   - Verified via Codex probe test and contract test 15.
+2. **Changed Evidence Fingerprinting & Append-Only Revision Trail**:
+   - Added deterministic SHA-256 fingerprinting `computeEvidenceFingerprint` across coordinates (`lat`, `lng`), `depth`, `site_id`, collection date (`collected_at`), and sorted attachment URLs/filenames (`processedAttachments`).
+   - Implemented `hasEvidenceChanged` detecting modifications across both new fingerprinted entries and legacy records without fingerprints.
+   - When a primary or conflicting occurrence is replayed with changed evidence (e.g. modified coordinates or attachments), it is **not** silently skipped. Instead, an append-only revision entry is recorded in `metadata.revisions`, sample is placed on `AMBIGUOUS_PROVENANCE_HOLD`, and `KOBO_CONFLICTING_PROVENANCE` audit log is created. Idempotent skipping occurs exclusively when both source identity and evidence fingerprint match identically.
+   - Verified via Codex probe test and contract tests 16 & 17.
+3. **Stopped-Writer Release Wrapper (`execute_release_pr147.sh`)**:
+   - Redesigned wrapper using stopped-writer release pattern: explicitly quiesces and stops the production container (`docker stop soilfer-lims`) before backup or execution.
+   - Replaced fragile pipeline with `set -euo pipefail` (no masked errors via `tee`).
+   - Corrected volume mount path to `/app/server/prisma` (matching production SQLite path `/app/server/prisma/dev.db`) and executed runner with root privileges (`--user 0:0`) in an isolated one-shot Docker container (`docker run --rm --network none ...`).
+   - Replaced in-process live file copy with trap-based external stopped-writer backup recovery.
+4. **Pinned Reviewed Snapshot Bytes & Audit Traceability**:
+   - Pinned immutable snapshot `server/data/ghana_kobo_snapshot_40747.json` (SHA-256: `33db90cdcab60ccf4801a7754d8444893c0b6ee25f269a65366d6fed5046292f`, 459 submissions <= 40747).
+   - Pinned candidate manifest `server/data/ghana_kobo_manifest_40747.json` (SHA-256: `e43d490366eda0e325b1f1639c743b57105a6256e0f406df6f7e1d87514adaed`, 864 distinct IDs, 860 clean expected, 4 held).
+   - Canonical runner `server/scripts/execute_ghana_apply_146.cjs` reads exclusively from the verified local snapshot with SHA-256 verification and logs a unique operation ID (`GHANA_APPLY_${timestamp}_${rand}`).
+   - Dry-run and apply share the exact same snapshot bytes, eliminating network drift.
+5. **Disposable Rehearsal Verification (`server/scripts/rehearsal_ghana_apply_146.cjs`)**:
+   - Automated 3-stage rehearsal script executed against isolated SQLite database:
+     - Stage 1: Dry-run read-only validation passed (preflight collision projection 0, 864 distinct candidates, 4 held, 860 clean, 0 mutations).
+     - Stage 2: Successful apply & scoped postflight passed (CAS update `changes === 1`, 864 samples admitted, 4 held on `AMBIGUOUS_PROVENANCE_HOLD`, 860 clean, integrity & FK checks clean).
+     - Stage 3: Controlled failure caught & external stopped-writer backup recovery proven with bit-for-bit SHA-256 match.
+6. **Documentation & Tests**:
+   - Corrected preview artifact `ghana_correction_preview_issue146.md` removing physical transect inferences (attributing differences to conflicting submitted coordinate evidence between submissions) and generalizing surveyor scopes.
+   - All 17 contract tests in `server/tests/contracts/kobo_duplicate_provenance.test.js` pass cleanly (17/17 passed).
+   - Zero production mutations performed; clearance remains held pending Codex independent review.
+
