@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PR #145 Evidence Correction Sidecar & Attribution Ledger",
+  "targetReport": {
+    "path": "artifacts/evidence-journeys/reception_issue117_113_final_controls.json",
+    "executedAt": "2026-09-25T08:01:17.505Z",
+    "summary": "4/4 steps passed"
+  },
+  "candidateProvenance": {
+    "applicationHeadCommit": "429ee38650ce094861a5c1cec8fcfced8d34343a",
+    "ciStatus": "Green (Run 36106785798)",
+    "sourceFile": "client/src/components/reception/ComplianceChecklist.jsx",
+    "sourceFileSha256": "749aeb8565af44edbc6c1f7e3d83ba136520474dc1ea802713a6fd30c92c663a",
+    "servedBuildAssets": {
+      "receptionBundle": {
+        "filename": "Reception-DcbkS6KK.js",
+        "sha256": "7f63addebf6a98165a91dc1b0c01db6633633dffd78cefb2eeb9a12abf1b8ef3",
+        "measurementMethod": "Disk file read from client/dist/assets/ served via Express static middleware (not captured HTTP response bodies)"
+      },
+      "indexBundle": {
+        "filename": "index-DTEVE5HW.js",
+        "sha256": "5e3e9c94817b8cc093211a15a1999b8ac58e59d0bad55f07013522651a427761"
+      },
+      "cssBundle": {
+        "filename": "index-DvT2i1qH.css",
+        "sha256": "2932e810bde9bc01eb66f53c6ed74ff95437eaae841954d4444334a2ee76d315"
+      }
+    }
+  },
+  "metadataCorrections": {
+    "releaseVersion": {
+      "reported": "v3.5.25",
+      "correction": "Inherited legacy template constant. Current repository baseline is post-v3.5.27 (commit d07ad62)."
+    },
+    "receptionFilesDiffVsReleased": {
+      "reported": "Clean working directory for components/reception",
+      "correction": "Measured working tree cleanliness relative to current candidate HEAD (429ee38), NOT a diff against baseline release v3.5.25."
+    },
+    "builtAt": {
+      "reported": "2026-09-25T07:59:59.100Z",
+      "correction": "Represents local filesystem modification time (mtime) of the built bundle on disk, not the Vite build initiation or commit timestamp."
+    }
+  },
+  "attributionLimitsAndMethodology": {
+    "interactionModel": "Scripted DOM clicks and native property setter / change events with React 18 _valueTracker adjustment (window.setCheck helper).",
+    "noHardwareOrReloadClaim": "The 4-step runner does NOT execute browser reload, does NOT claim real keyboard/pointer hardware interaction, and does NOT assert DOM exclusivity of a single textarea or intermediate FAIL state.",
+    "diagnosticPropsExtraction": "React props extracted in runner check 2/3 reflect initial empty component state and are not authoritative submitted state.",
+    "independentCoverageBasis": "Form-level correction, state survival, and serialized remount lifecycle are authoritative covered by 21 component contract tests (server/tests/contracts/reception_compliance_component.test.js) and 7 mounted React transitions (work/pr145-mounted-review-429ee38.cjs).",
+    "oldBuildPreservation": {
+      "path": "artifacts/evidence-journeys/reception_issue117_113_final_controls_old_build.json",
+      "executedAt": "2026-09-25T07:59:35.647Z",
+      "oldBundle": "Reception-vMhN-pX1.js",
+      "oldBundleSha256": "9576e28a56e552ca3f391c71af0fff7c4b82e71466243a299c11cc2c440d6192",
+      "result": "2/4 passed (failing steps 3 & 4 because old served bundle lacked unified-nc-description; preserved as proof of stale-build root cause, not app regression)."
+    }
+  },
+  "implementerAttribution": {
+    "executedBy": "Antigravity (Pair Programming Agent)",
+    "reviewedBy": "Codex (Independent Reviewer)",
+    "reviewReference": "C:/Users/yigin/Documents/Codex/2026-09-21/se/work/pr145-evidence-review-20260925.md",
+    "publicReviewComment": "https://github.com/yigini/soilfer-lims/pull/145#issuecomment-5829161361"
+  }
+}
