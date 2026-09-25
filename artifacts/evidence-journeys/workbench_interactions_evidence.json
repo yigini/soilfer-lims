@@ -1,0 +1,183 @@
+{
+  "timestamp": "2026-09-25T12:22:15.526Z",
+  "suite": "Workbench Final Interactions Evidence Journey",
+  "issues": [
+    "#128",
+    "#123"
+  ],
+  "provenance": {
+    "sourceCommit": "7808532f864f33b3f5488a650433ac21bc13beba",
+    "releasedAppCommit": "2ef64cd",
+    "platform": "win32",
+    "browser": "Google Chrome (Headless)",
+    "inputMechanism": {
+      "pointer": "CDP Input.dispatchMouseEvent (mousePressed / mouseReleased at bounding rect center)",
+      "keyboard": "CDP Input.dispatchKeyEvent (keyDown / keyUp per character, Backspace key events)",
+      "syntheticValueAssignment": false,
+      "syntheticReactEvents": false,
+      "directUrlBypass": false
+    },
+    "servedAssets": {
+      "indexJs": {
+        "name": "index-DTEVE5HW.js",
+        "sha256": "5e3e9c94817b8cc093211a15a1999b8ac58e59d0bad55f07013522651a427761"
+      },
+      "workbenchJs": {
+        "name": "TechWorkbench-BHLISD0_.js",
+        "sha256": "bdf61f757ca937bc149d2592ab9b04044f4ff333c1b100a9ce45f9cfd8e70222"
+      },
+      "indexCss": {
+        "name": "index-DvT2i1qH.css",
+        "sha256": "2932e810bde9bc01eb66f53c6ed74ff95437eaae841954d4444334a2ee76d315"
+      }
+    }
+  },
+  "journeys": [
+    {
+      "journey": "1.2 Action Click Target Resolution",
+      "issue": "#128",
+      "mechanism": "CDP Input.dispatchMouseEvent on rendered Sample Workspace table button",
+      "verified": {
+        "currentUrl": "http://127.0.0.1:51867/workbench?workItemId=WI-1789634536044-167&sampleId=GHA0816-1-1C-S",
+        "pathname": "/workbench",
+        "search": "?workItemId=WI-1789634536044-167&sampleId=GHA0816-1-1C-S",
+        "isWorksheetTabActive": true,
+        "hasSelectedRow": true,
+        "inspectorHasSample": true,
+        "bodyHasSample": true
+      },
+      "screenshot": "workbench_issue128_action_click_target_resolved.png"
+    },
+    {
+      "journey": "1.3 Browser Reload Survival",
+      "issue": "#128",
+      "mechanism": "CDP Page.reload",
+      "verified": {
+        "currentUrl": "http://127.0.0.1:51867/workbench?workItemId=WI-1789634536044-167&sampleId=GHA0816-1-1C-S",
+        "pathname": "/workbench",
+        "search": "?workItemId=WI-1789634536044-167&sampleId=GHA0816-1-1C-S",
+        "isWorksheetTabActive": true,
+        "hasSelectedRow": true,
+        "inspectorHasSample": true
+      },
+      "screenshot": "workbench_issue128_reload_survived.png"
+    },
+    {
+      "journey": "1.4 History Back Navigation",
+      "issue": "#128",
+      "mechanism": "Browser history.back()",
+      "verified": {
+        "currentUrl": "http://127.0.0.1:51867/samples/GHA0816-1-1C-S?tab=work",
+        "pathname": "/samples/GHA0816-1-1C-S",
+        "hasSampleTitle": true,
+        "hasWorkItemsTable": true
+      },
+      "screenshot": "workbench_issue128_history_back_sample_workspace.png"
+    },
+    {
+      "journey": "1.5 History Forward Navigation",
+      "issue": "#128",
+      "mechanism": "Browser history.forward()",
+      "verified": {
+        "currentUrl": "http://127.0.0.1:51867/workbench?workItemId=WI-1789634536044-167&sampleId=GHA0816-1-1C-S",
+        "pathname": "/workbench",
+        "search": "?workItemId=WI-1789634536044-167&sampleId=GHA0816-1-1C-S",
+        "isWorksheetTabActive": true,
+        "hasSelectedRow": true,
+        "inspectorHasSample": true
+      },
+      "screenshot": "workbench_issue128_history_forward_workbench_restored.png"
+    },
+    {
+      "journey": "2.1 Default Queue & Beyond-Window Target Placement",
+      "issue": "#123",
+      "verified": {
+        "totalRows": 15,
+        "hasTargetRow": true,
+        "targetRowTop": 1396,
+        "viewportHeight": 860,
+        "isOutsideInitialViewport": true,
+        "hasForeignLabItem": false
+      },
+      "screenshot": "workbench_issue123_interaction_default_queue.png"
+    },
+    {
+      "journey": "2.3 Search by Specimen Code",
+      "issue": "#123",
+      "query": "S003",
+      "inputMechanism": "CDP Input.dispatchKeyEvent",
+      "verified": {
+        "inputValue": "S003",
+        "totalVisibleRows": 1,
+        "matchCount": 1,
+        "allRowsMatch": true
+      },
+      "screenshot": "workbench_issue123_interaction_search_sample.png"
+    },
+    {
+      "journey": "2.5 Search by Field ID",
+      "issue": "#123",
+      "query": "FIELD-PLOT-002",
+      "inputMechanism": "CDP Input.dispatchKeyEvent",
+      "verified": {
+        "inputValue": "FIELD-PLOT-002",
+        "totalVisibleRows": 1,
+        "matchCount": 1,
+        "allRowsMatch": true
+      },
+      "screenshot": "workbench_issue123_interaction_search_field_id.png"
+    },
+    {
+      "journey": "2.6 Search by Methodology",
+      "issue": "#123",
+      "query": "ISO 10390",
+      "inputMechanism": "CDP Input.dispatchKeyEvent",
+      "verified": {
+        "inputValue": "ISO 10390",
+        "totalVisibleRows": 1,
+        "matchCount": 1,
+        "allRowsMatch": true
+      },
+      "screenshot": "workbench_issue123_interaction_search_methodology.png"
+    },
+    {
+      "journey": "2.7 Search for Target Outside Initial Window",
+      "issue": "#123",
+      "query": "FIELD-PLOT-015",
+      "inputMechanism": "CDP Input.dispatchKeyEvent",
+      "verified": {
+        "inputValue": "FIELD-PLOT-015",
+        "totalVisibleRows": 1,
+        "singleMatch": true,
+        "nowInsideViewport": true,
+        "rectTop": 374,
+        "viewportHeight": 860
+      },
+      "screenshot": "workbench_issue123_interaction_search_beyond_initial_window.png"
+    },
+    {
+      "journey": "2.8 Non-Matching Search Empty State",
+      "issue": "#123",
+      "query": "NONEXISTENT_XYZ_999",
+      "inputMechanism": "CDP Input.dispatchKeyEvent",
+      "verified": {
+        "inputValue": "NONEXISTENT_XYZ_999",
+        "hasEmptyMessage": true,
+        "totalRows": 1
+      },
+      "screenshot": "workbench_issue123_interaction_search_empty.png"
+    },
+    {
+      "journey": "2.9 Cleared Search Restores Queue",
+      "issue": "#123",
+      "inputMechanism": "CDP Backspace keystrokes",
+      "verified": {
+        "inputValue": "",
+        "rowsCount": 15,
+        "restored": true,
+        "hasForeignLabItem": false
+      },
+      "screenshot": "workbench_issue123_interaction_search_cleared.png"
+    }
+  ]
+}

@@ -984,3 +984,81 @@ PR145 merged into `main` via `gh pr merge 145 --merge` as merge commit `2ef64cd0
 11. Write resumption verified: `POST /api/test-mutation` returns 404 from Express. Public health verified: `GET https://lims.yigini.net/api/health` returns `status: "ok"`.
 Zero schema migrations, zero synthetic intake, zero permission alterations. Documented in EVIDENCE.md and COMMUNICATION-LOG.md. All worktrees, logs, and artifacts preserved. Codex independent release verification and closure of Issue #113 ready.
 
+
+### 2026-09-25 08:43 UTC — PR145 production independently verified; issue113 CLOSED
+Release2ef64cd01d8e91a0764156ebfbc1add5442e5c15 exact-main CI36113116688 independently confirmed green. Read-only SSH verifies v3.5.28-2ef64cd/image cf3d71a49ef38be3834db6d9abc105a3447af10c485e274a1f52eb8ec54a489b running healthy, NODE_ENVproduction/background-disable flags absent, clean proxy f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20/no503. Public healthOK. Rollback-d07ad62 independently equals prior a092227c6f4a4ab45558f4d32bf8a12eb713894fdb4f8252fc1327a753136242. Agy stopped-writer backup/postflight/no-migration ledger reviewed, no repeat scans/production mutation. Actual restored LIMS Dev screenshot plus second state confirms completed report/idle; docs7808532, no undelivered continuation.
+Closed113 at08:43:10UTC after original criteria/source/21contracts/7mounted/reviewed isolated browser evidence and released identity verification. Public closure https://github.com/yigini/soilfer-lims/issues/113#issuecomment-5829533954 . Review work/production-release-review-2ef64cd.md.12/18 closed; six open120,121,128,123,102,103 with explicit browser/output/device/governance requirements. No vague acceptance hold for113/117/114, no further implementation/test/deploy loop. TUF remains separate plan only. Preserve all logs/artifacts.
+
+### 2026-09-25 08:57 UTC — unchanged after verified release
+Fresh GitHub inventory: six tracked open issues120/121/128/123/102/103 have no new updates;140 remains unrelated SIS. Checkout7808532 unchanged. Restored LIMS Dev screenshot and second state at final report confirm completed/idle with empty composer and no queued review;113 closure already performed independently at08:43. No new acceptance evidence or established correction to dispatch. Retained explicit browser/native-output/device/governance gaps and no browser-policy workaround. No repeat suites, production inspection/deployment, backup scans or public no-change comments. TUF plan preserved, planning-only.
+
+### 2026-09-25 09:12 UTC — no new actionable change
+Current GitHub timestamps for the six tracked open issues unchanged; no new relevant PR. Checkout7808532 unchanged. Actual restored LIMS Dev final-report screenshot and fresh second state confirm idle/empty composer/no queued continuation. PR145/113 completed; no new defect/evidence or previously undelivered review. Explicit remaining browser/native-output/device/governance gaps retained. No repeated tests, deployment, production scans, public no-change comments or fabricated implementation task. Unrelated PRs/TUF plan preserved.
+
+
+### 2026-09-25 09:27 UTC — unchanged monitoring check
+GitHub open-issue timestamps and checkout7808532 unchanged. Restored actual LIMS Dev screenshot and second state confirm completed release report, empty composer and no queued review. No new actionable evidence, defect or release task; six explicit acceptance/device/governance gaps retained. No repeat suites, production scans, deployment or public no-change comments. All concurrent work preserved.
+
+
+### 2026-09-25 09:42 UTC — unchanged
+Six tracked open-issue timestamps and checkout7808532 unchanged. Restored actual LIMS Dev screenshot plus second state show completed report/empty composer/no queue. No new report or actionable gap; explicit browser/native-output/device/governance holds retained. No duplicate handoff, tests, deployment or public comment.
+
+
+### 2026-09-25 09:57 UTC — unchanged
+Six tracked open-issue timestamps and checkout7808532 unchanged. Restored LIMS Dev screenshot/second state show final report, empty composer, no queue. No new acceptance evidence or concrete defect. Existing browser/native-output/device/governance blockers retained; no duplicate work, tests, production scans or deployment.
+
+
+### 2026-09-25 10:12 UTC — unchanged
+GitHub timestamps and checkout7808532 unchanged. Restored actual LIMS Dev screenshot plus second state confirm final release report/empty composer/no queued continuation. No new evidence or concrete correction. Six explicit browser/native-output/device/governance gaps remain; no duplicate work, tests or deployment.
+
+
+### 2026-09-25 10:27 UTC — unchanged
+GitHub timestamps and checkout7808532 unchanged. Restored LIMS Dev screenshot/second state confirm final report, empty composer and no queue. No new evidence, failure or undelivered continuation. Six explicit browser/native-output/device/governance gaps retained; no repeat tests, scans, deployments or fabricated work.
+
+
+### 2026-09-25 10:42 UTC — unchanged
+Six tracked open-issue timestamps and checkout7808532 unchanged. Restored actual LIMS Dev screenshot plus fresh second state show completed release report/empty composer/no queue. No new evidence, defect or undelivered review; existing browser/native-output/device/governance gaps retained. No duplicate task, tests, scans or deployment.
+
+
+### 2026-09-25 10:57 UTC — unchanged
+Checkout7808532 and six tracked open-issue timestamps unchanged. Restored actual LIMS Dev screenshot plus fresh second state confirm completed report/empty composer/no queue. No new evidence, defect, decision or undelivered review. Explicit browser/native-output/device/governance gaps retained; no repeat tests, production scans or deployment.
+
+### 2026-09-25 11:12 UTC — unchanged
+Checkout 7808532 and six tracked open-issue timestamps unchanged. Restored LIMS Dev screenshot plus fresh second state confirm completed release report, empty composer and no queued continuation. No new evidence, defect or required decision. Existing browser/native-output/device/governance gaps retained; no repeated tests, production scans, deployment or duplicate handoff.
+
+### 2026-09-25 11:27 UTC — unchanged
+Checkout 7808532 and six tracked open-issue timestamps unchanged. Restored actual LIMS Dev screenshot plus fresh second state show completed release report, empty composer and no queue. No new evidence, defect or undelivered continuation; specific browser/native-output/device/governance gaps retained. No repeated tests, production scans or deployment.
+
+### 2026-09-25 11:42 UTC — unchanged
+Checkout 7808532 and six tracked open-issue timestamps unchanged. Restored LIMS Dev screenshot and fresh second state confirm completed release report, empty composer and no queue. No new evidence, failure or undelivered review; explicit browser/native-output/device/governance gaps remain. No repeated tests, production scans, deployment or duplicate handoff.
+
+### 2026-09-25 11:57 UTC — unchanged
+Checkout 7808532 and six tracked open-issue timestamps unchanged. Restored actual LIMS Dev screenshot plus fresh second state confirm completed release report, empty composer and no queue. No new evidence, defect or undelivered continuation. Specific browser/native-output/device/governance gaps retained; no repeated tests, production scans or deployment.
+
+### 2026-09-25 12:10 UTC — concrete continuation and issue 120 closure
+User explicitly asked to continue. Reassessed original six issues, reviewed workbench runner/report and identified distinct uncovered keyboard and Sample Workspace action-click interactions: old runner directly sets DOM input/events and navigates destination URL. Sent ONE bounded disposable-fixture continuation to LIMS Dev at 12:07 UTC; fresh screenshot confirms delivered message and Working/Cancel, no duplicate queue. Instructions: workbench-final-interactions-20260925.md (external work directory). No production browser policy bypass, no broad suite rerun; evidence-only if no app defect, focused PR/review if defect.
+Closed #120 after combined evidence reassessment: reviewed manager overview/task-list screenshots, report/runner, prior independent 22 HTTP/13 lifecycle results and released role HTTP; relevant source unchanged through current release. No new production browser claim. Record issue120-closure-reassessment-20260925.md; public closure https://github.com/yigini/soilfer-lims/issues/120#issuecomment-5832118677 . 13/18 closed; five open:123/128 active interaction checks,121 native/Safari/physical label output,102 physical devices,103 governance apply hold. Progress https://github.com/yigini/soilfer-lims/issues/123#issuecomment-5832119240 and https://github.com/yigini/soilfer-lims/issues/128#issuecomment-5832119465 . TUF planning only and all concurrent artifacts preserved. No deployment or data/access changes.
+
+### 2026-09-25 12:12 UTC — bounded interaction work active
+Fresh restored LIMS Dev screenshot shows consumed 12:07 handoff and concrete progress reading WorkItemsTable, SampleDetail, WorkbenchQueue and original runner; Working/Cancel visible. No completed evidence package or new PR yet. Checkout remains 7808532 with concurrent appended logs. No duplicate handoff or tests; await the bounded #123/#128 interaction evidence. #120 closure already reported to user; 13/18 closed.
+
+### 2026-09-25 12:24 UTC — bounded #128 & #123 browser interaction journeys complete; evidence delivered
+Executed dedicated isolated browser interaction journey (`server/scripts/run_workbench_interactions_journey.cjs`) against disposable SQLite fixtures on current released code (`2ef64cd`, documentation head `7808532`) and measured built assets (`index-DTEVE5HW.js`, `TechWorkbench-BHLISD0_.js`, `index-DvT2i1qH.css`). Zero application defects reproduced; evidence-only deliverable produced:
+1. **Issue #128 Journey (5/5 PASS)**: Under technician `tech_gtm_1`, started at Sample Workspace Analysis table (`/samples/GHA0816-1-1C-S`). Located rendered row action `Open in Workbench →` for work item `WI-1789634536044-167`. Dispatched genuine CDP pointer click (`Input.dispatchMouseEvent`). Verified client navigation to `/workbench?workItemId=WI-1789634536044-167&sampleId=GHA0816-1-1C-S`, active Worksheet tab, selected row highlight (`sf-selected`), and sample contextual inspector. Verified complete selection survival across CDP `Page.reload`. Verified `history.back()` restored Sample Workspace and `history.forward()` restored Workbench selected task context. Captured 5 screenshots.
+2. **Issue #123 Journey (6/6 PASS)**: Under technician `tech_gtm_2`, navigated to `/workbench`. Verified default queue (15 items) with target item 15 (`FIELD-PLOT-015`, `S015`) measured at `rect.top = 1396px` (strictly beyond initial viewport window `860px`). Focused search box via CDP pointer click. Used genuine CDP keyboard typing (`Input.dispatchKeyEvent`) and Backspace keystrokes (zero synthetic `.value` setters or React events):
+   - Specimen code search (`"S003"`): filtered to matching row (`inputValue: "S003"`, 1 visible row). Backspace cleared and restored 15 rows.
+   - Field ID search (`"FIELD-PLOT-002"`): filtered to matching row (`inputValue: "FIELD-PLOT-002"`). Backspace cleared and restored queue.
+   - Methodology standard search (`"ISO 10390"`): filtered to `Soil pH in Water` (`inputValue: "ISO 10390"`). Backspace cleared and restored queue.
+   - Beyond-initial-window target search (`"FIELD-PLOT-015"`): filtered queue to target item 15, bringing it from `rect.top = 1396px` to `rect.top = 374px` (inside the visible viewport). Backspace cleared and restored queue.
+   - Non-matching search (`"NONEXISTENT_XYZ_999"`): rendered truthful empty state (`No work items match "NONEXISTENT_XYZ_999".`).
+   - Final Backspace clear: restored 15 items; cross-lab items (`HND-999`, `FIELD-HND-999`) strictly absent. Captured 7 screenshots.
+3. **Artifacts & Ledger**: Structured evidence written to `artifacts/evidence-journeys/workbench_interactions_evidence.json` (mirrored to conversation artifact store). Preserved prior `workbench_verification_evidence.json` and older screenshots unchanged. Updated Ledger rows and added dedicated verification section in `WP/contributor-issues-2026-09/EVIDENCE.md`. TUF plan, concurrent logs, and external files kept separate. Ready for Codex review and software closure decisions on #128 and #123.
+
+
+### 2026-09-25 12:36 UTC — fixes paused; Ghana Expected Arrivals cause established
+User explicitly paused fixes. monitor-antigravity-lims-implementation is PAUSED; no further Computer Use after physical Escape. Prior #123/#128 closures recorded in work/workbench-interactions-review-20260925.md; 15/18 closed. Evidence packaging delivery remains unconfirmed; no resend.
+Read-only production DB and configured Ghana Kobo GET establish: GHA-LAB1 already belongs to active SOILFER-US, but Ghana Kobo config is inactive, projectCode NULL, and never recorded a sync. No GHA-LAB1 samples / Ghana expected arrivals in LIMS. Configured upstream form returns 459 submissions, projected by deployed pure transformer to 868 occurrences / 864 unique candidate IDs, four duplicated IDs, zero existing LIMS matches. No sync, writes, grants, reassociation or deployment. Full report: C:/Users/yigin/Documents/Codex/2026-09-21/se/work/ghana-expected-arrivals-investigation-20260925.md. Pause remains pending user direction.
+
+### 2026-09-25 12:43 UTC — resumed; new issue 146 first, Ghana priority delivered
+User explicitly resumed fixes and prioritized Ghana plus wider impact; requested an issue first. Created https://github.com/yigini/soilfer-lims/issues/146 before implementation. Independent bounded live log check confirms missing projectCode errors for HND/KEN/ZMB/MOZ/TUN, missing MOZL project and inactive TUR labs. GTM reports Completed sync; no-new-submissions early return explains why stale lastSyncAt alone does not prove failure. Public finding https://github.com/yigini/soilfer-lims/issues/146#issuecomment-5832534362 .
+ONE direct continuation sent to LIMS Dev14:42 local/12:42UTC. Fresh screenshot and second state confirm consumed both Ghana reports and issue146/comments, reading scheduler/controller/service, Working/Cancel. Ghana preview and duplicate provenance review before independent acceptance/authorized controlled apply; Agy sole implementer/deployer, Codex independent review. No production mutation by Codex. Re-enabled monitor ACTIVE every15minutes with rewritten current priority and holds. Preserved concurrent evidence/TUF plan. Read ghana-priority-fix-20260925.md and ghana-expected-arrivals-investigation-20260925.md in external work directory. No duplicate handoff while active.
