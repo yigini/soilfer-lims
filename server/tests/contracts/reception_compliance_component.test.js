@@ -81,6 +81,10 @@ function findInputByPlaceholder(vnode, placeholder) {
     return findElement(vnode, el => (el.type === 'input' || el.type === 'textarea') && el.props && el.props.placeholder === placeholder);
 }
 
+function findCheckboxByTestId(vnode, testId) {
+    return findElement(vnode, el => el.type === 'input' && el.props && el.props['data-testid'] === testId);
+}
+
 describe('Reception ComplianceChecklist Component & Parent State Contract (#113, #117)', () => {
     test('1. PASS selection atomically updates items without parent closure wipe', () => {
         // Model the exact Reception.jsx parent state holder and callbacks:
@@ -304,6 +308,256 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
         expect(checklistData.items.coc.status).toBeUndefined();
         expect(checklistData.items.coc.note).toBe('Farmer drop-off'); // Note preserved
         expect(checklistData.items.container.status).toBe('PASS');
+    });
+
+    test('8. All-Pass routine compliant outcome derives disabled ordinary NC control (#113)', () => {
+        let checklistData = {
+            items: {
+                container: { status: 'PASS' },
+                label: { status: 'PASS' },
+                quantity: { status: 'PASS' },
+                condition: { status: 'PASS' },
+                coc: { status: 'PASS' }
+            },
+            nonConformance: false,
+            reason: ''
+        };
+        const onChange = (val) => { checklistData = val; };
+
+        const tree = ComplianceChecklist({
+            value: checklistData,
+            onChange,
+            isWalkIn: false
+        });
+
+        // Routine NC checkbox must be disabled and unchecked
+        const routineNcBox = findCheckboxByTestId(tree, 'routine-nc-checkbox');
+        expect(routineNcBox).toBeDefined();
+        expect(routineNcBox.props.disabled).toBe(true);
+        expect(routineNcBox.props.checked).toBe(false);
+
+        // Static markup should render "Routine Compliant Outcome" badge
+        const html = ReactDOMServer.renderToStaticMarkup(tree);
+        expect(html).toContain('Routine Compliant Outcome');
+        expect(html).toContain('All quality checks are compliant. Routine non-conformance is unavailable.');
+
+        // Attempting to invoke onChange on disabled routine NC must not toggle
+        routineNcBox.props.onChange({ target: { checked: true } });
+        expect(checklistData.nonConformance).toBe(false);
+    });
+
+    test('9. Permitted Walk-in CoC N/A (4 PASS + CoC N/A) derives routine compliant outcome (#113)', () => {
+        let checklistData = {
+            items: {
+                container: { status: 'PASS' },
+                label: { status: 'PASS' },
+                quantity: { status: 'PASS' },
+                condition: { status: 'PASS' },
+                coc: { status: 'NA' }
+            },
+            nonConformance: false,
+            reason: ''
+        };
+        const onChange = (val) => { checklistData = val; };
+
+        const tree = ComplianceChecklist({
+            value: checklistData,
+            onChange,
+            isWalkIn: true
+        });
+
+        const routineNcBox = findCheckboxByTestId(tree, 'routine-nc-checkbox');
+        expect(routineNcBox).toBeDefined();
+        expect(routineNcBox.props.disabled).toBe(true);
+        expect(routineNcBox.props.checked).toBe(false);
+
+        const html = ReactDOMServer.renderToStaticMarkup(tree);
+        expect(html).toContain('Routine Compliant Outcome');
+        expect(checklistData.nonConformance).toBe(false);
+    });
+
+    test('10. Failed checklist criterion makes routine NC choice available and active (#113)', () => {
+        let checklistData = {
+            items: {
+                container: { status: 'FAIL', note: 'Container lid cracked' },
+                label: { status: 'PASS' },
+                quantity: { status: 'PASS' },
+                condition: { status: 'PASS' },
+                coc: { status: 'PASS' }
+            },
+            nonConformance: true,
+            reason: 'Container lid cracked'
+        };
+        const onChange = (val) => { checklistData = val; };
+
+        const tree = ComplianceChecklist({
+            value: checklistData,
+            onChange,
+            isWalkIn: false
+        });
+
+        // Routine NC checkbox must be enabled and checked
+        const routineNcBox = findCheckboxByTestId(tree, 'routine-nc-checkbox');
+        expect(routineNcBox).toBeDefined();
+        expect(routineNcBox.props.disabled).toBe(false);
+        expect(routineNcBox.props.checked).toBe(true);
+
+        // Description textarea for routine non-conformance must be present
+        const descArea = findElement(tree, el => el.props && el.props['data-testid'] === 'routine-nc-description');
+        expect(descArea).toBeDefined();
+
+        const html = ReactDOMServer.renderToStaticMarkup(tree);
+        expect(html).not.toContain('Routine Compliant Outcome');
+        expect(html).toContain('Non-Conformance Description');
+    });
+
+    test('11. Incomplete / unanswered checklist keeps routine NC choice unavailable (#113)', () => {
+        let checklistData = {
+            items: {
+                container: { status: 'PASS' },
+                label: { status: 'PASS' },
+                quantity: { status: 'PASS' }
+                // condition and coc are unanswered
+            },
+            nonConformance: false,
+            reason: ''
+        };
+        const onChange = (val) => { checklistData = val; };
+
+        const tree = ComplianceChecklist({
+            value: checklistData,
+            onChange,
+            isWalkIn: false
+        });
+
+        // Routine NC checkbox must be disabled and unchecked because checklist is incomplete and no fail
+        const routineNcBox = findCheckboxByTestId(tree, 'routine-nc-checkbox');
+        expect(routineNcBox).toBeDefined();
+        expect(routineNcBox.props.disabled).toBe(true);
+        expect(routineNcBox.props.checked).toBe(false);
+
+        const html = ReactDOMServer.renderToStaticMarkup(tree);
+        // "Routine Compliant Outcome" badge is NOT shown because 2 items are pending
+        expect(html).not.toContain('Routine Compliant Outcome');
+        expect(html).toContain('2 pending');
+    });
+
+    test('12. Correction lifecycle: failed item corrected to PASS clears or preserves other-problem (#113)', () => {
+        // Subcase A: Correction without other-problem clears NC
+        let checklistA = {
+            items: {
+                container: { status: 'FAIL', note: 'Bag punctured' },
+                label: { status: 'PASS' },
+                quantity: { status: 'PASS' },
+                condition: { status: 'PASS' },
+                coc: { status: 'PASS' }
+            },
+            nonConformance: true,
+            reason: ''
+        };
+        const onChangeA = (val) => { checklistA = val; };
+
+        let treeA = ComplianceChecklist({
+            value: checklistA,
+            onChange: onChangeA,
+            isWalkIn: false
+        });
+
+        // Correct container to PASS
+        const containerOkBtn = findButtonByAriaLabel(treeA, 'Container Intact / Sealed: OK');
+        containerOkBtn.props.onClick();
+
+        expect(checklistA.items.container.status).toBe('PASS');
+        expect(checklistA.nonConformance).toBe(false);
+
+        // Subcase B: Correction with independently recorded other-problem preserves NC and reason
+        let checklistB = {
+            items: {
+                container: { status: 'FAIL', note: 'Bag punctured' },
+                label: { status: 'PASS' },
+                quantity: { status: 'PASS' },
+                condition: { status: 'PASS' },
+                coc: { status: 'PASS' }
+            },
+            otherProblem: true,
+            reason: 'Distinct chemical solvent odor from sample',
+            nonConformance: true
+        };
+        const onChangeB = (val) => { checklistB = val; };
+
+        let treeB = ComplianceChecklist({
+            value: checklistB,
+            onChange: onChangeB,
+            isWalkIn: false
+        });
+
+        const containerOkBtnB = findButtonByAriaLabel(treeB, 'Container Intact / Sealed: OK');
+        containerOkBtnB.props.onClick();
+
+        expect(checklistB.items.container.status).toBe('PASS');
+        // All checklist items now pass, but independently recorded other-problem reason and NC are strictly preserved!
+        expect(checklistB.nonConformance).toBe(true);
+        expect(checklistB.otherProblem).toBe(true);
+        expect(checklistB.reason).toBe('Distinct chemical solvent odor from sample');
+    });
+
+    test('13. Clearly separate Other problem not covered by checklist route (#113)', () => {
+        let checklistData = {
+            items: {
+                container: { status: 'PASS' },
+                label: { status: 'PASS' },
+                quantity: { status: 'PASS' },
+                condition: { status: 'PASS' },
+                coc: { status: 'PASS' }
+            },
+            nonConformance: false,
+            reason: ''
+        };
+        const onChange = (val) => { checklistData = val; };
+
+        // Render in all-pass state
+        let tree = ComplianceChecklist({
+            value: checklistData,
+            onChange,
+            isWalkIn: false
+        });
+
+        // Routine NC is disabled
+        const routineNcBox = findCheckboxByTestId(tree, 'routine-nc-checkbox');
+        expect(routineNcBox.props.disabled).toBe(true);
+
+        // Other-problem checkbox is present, unchecked, and enabled
+        const otherProblemBox = findCheckboxByTestId(tree, 'other-problem-checkbox');
+        expect(otherProblemBox).toBeDefined();
+        expect(otherProblemBox.props.checked).toBe(false);
+
+        // Toggle "Other problem not covered by checklist"
+        otherProblemBox.props.onChange({ target: { checked: true } });
+
+        expect(checklistData.otherProblem).toBe(true);
+        expect(checklistData.nonConformance).toBe(true);
+
+        // Re-render with active other-problem
+        tree = ComplianceChecklist({
+            value: checklistData,
+            onChange,
+            isWalkIn: false
+        });
+
+        // The other-problem description textarea is now visible
+        const otherDesc = findElement(tree, el => el.props && el.props['data-testid'] === 'other-problem-description');
+        expect(otherDesc).toBeDefined();
+
+        // Staff enters the uncovered problem description
+        otherDesc.props.onChange({ target: { value: 'Container temperature measured 38C at reception' } });
+
+        expect(checklistData.reason).toBe('Container temperature measured 38C at reception');
+        expect(checklistData.nonConformance).toBe(true);
+
+        // Verify HTML markup renders Uncovered Exception badge
+        const html = ReactDOMServer.renderToStaticMarkup(tree);
+        expect(html).toContain('Uncovered Exception');
+        expect(html).toContain('Other problem not covered by checklist');
     });
 });
 
