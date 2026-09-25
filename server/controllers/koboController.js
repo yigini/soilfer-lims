@@ -406,6 +406,10 @@ async function syncLabSubmissions(config, performedBy) {
     );
 
     if (!submissions || submissions.length === 0) {
+        await prisma.koboConfig.update({
+            where: { id: currentConfig.id },
+            data: { lastSyncAt: new Date() }
+        });
         return { newSamples: 0, skipped: 0, message: 'No new submissions', lastSubmissionId: currentConfig.lastSubmissionId };
     }
 
@@ -413,7 +417,7 @@ async function syncLabSubmissions(config, performedBy) {
     const existingSamples = await prisma.sample.findMany({
         select: { originalId: true }
     });
-    const existingIds = new Set(existingSamples.map(s => s.originalId?.trim().toUpperCase()));
+    const existingIds = new Set(existingSamples.map(s => s.originalId?.trim().toUpperCase()).filter(Boolean));
 
     // Parse field mapping
     const fieldMapping = currentConfig.fieldMapping ? JSON.parse(currentConfig.fieldMapping) : null;
@@ -430,18 +434,106 @@ async function syncLabSubmissions(config, performedBy) {
         const samples = Array.isArray(rawSamples) ? rawSamples : (rawSamples ? [rawSamples] : []);
 
         const candidateSamples = [];
+        const seenInSub = new Map();
+        const intraSubDuplicates = [];
+        const crossSubDuplicates = [];
+
         for (const sampleData of samples) {
             const normalizedId = sampleData.original_id?.trim().toUpperCase();
 
-            if (!normalizedId || existingIds.has(normalizedId)) {
+            if (!normalizedId) {
                 skippedCount++;
                 continue;
             }
+
+            // Detect intra-submission duplicate barcode (e.g. surveyor entered same barcode for D1 and D2)
+            if (seenInSub.has(normalizedId)) {
+                skippedCount++;
+                intraSubDuplicates.push({
+                    primarySample: seenInSub.get(normalizedId),
+                    duplicateSample: sampleData
+                });
+                continue;
+            }
+
+            // Detect cross-submission duplicate (already exists in DB or prior committed batch)
+            if (existingIds.has(normalizedId)) {
+                skippedCount++;
+                crossSubDuplicates.push(sampleData);
+                continue;
+            }
+
+            seenInSub.set(normalizedId, sampleData);
             candidateSamples.push(sampleData);
+        }
+
+        // Attach intra-submission duplicate occurrences to primary candidate sample
+        for (const dup of intraSubDuplicates) {
+            if (!dup.primarySample.intraSubDuplicates) {
+                dup.primarySample.intraSubDuplicates = [];
+            }
+            dup.primarySample.intraSubDuplicates.push({
+                depth: dup.duplicateSample.depth,
+                site_id: dup.duplicateSample.site_id,
+                collected_at: dup.duplicateSample.collected_at,
+                kobo_submission_id: submission._id,
+                reason: 'INTRA_SUBMISSION_DUPLICATE_BARCODE'
+            });
         }
 
         // If all candidate samples were permanent duplicates
         if (candidateSamples.length === 0) {
+            // Preserve conflicting duplicate provenance for cross-submission duplicate records
+            if (crossSubDuplicates.length > 0 && !hasRetriableSkip) {
+                try {
+                    await prisma.$transaction(async (tx) => {
+                        for (const dupSample of crossSubDuplicates) {
+                            const normId = dupSample.original_id?.trim().toUpperCase();
+                            const existingSample = await tx.sample.findFirst({
+                                where: { originalId: normId }
+                            });
+                            if (existingSample) {
+                                let meta = {};
+                                try { meta = JSON.parse(existingSample.metadata || '{}'); } catch (e) {}
+                                if (String(meta.kobo_id) !== String(submission._id)) {
+                                    const conflicting = meta.conflictingSubmissions || [];
+                                    conflicting.push({
+                                        kobo_id: submission._id,
+                                        kobo_uuid: submission._uuid,
+                                        submission_time: submission._submission_time,
+                                        surveyor: koboService.findValue(submission, ['surveyor_name', 'username']),
+                                        site_id: dupSample.site_id,
+                                        depth: dupSample.depth,
+                                        lat: dupSample.lat,
+                                        lng: dupSample.lng,
+                                        collected_at: dupSample.collected_at,
+                                        attachments: (submission._attachments || []).map(a => a.filename),
+                                        recordedAt: new Date().toISOString()
+                                    });
+                                    meta.conflictingSubmissions = conflicting;
+                                    await tx.sample.update({
+                                        where: { id: existingSample.id },
+                                        data: { metadata: JSON.stringify(meta) }
+                                    });
+                                    await tx.auditLog.create({
+                                        data: {
+                                            id: crypto.randomUUID(),
+                                            entity: 'SAMPLE',
+                                            entityId: existingSample.id,
+                                            action: 'KOBO_CONFLICTING_PROVENANCE',
+                                            performedBy: performedBy,
+                                            timestamp: new Date()
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    });
+                } catch (dupAuditErr) {
+                    console.warn('[KOBO] Conflicting duplicate provenance preservation notice:', dupAuditErr.message);
+                }
+            }
+
             if (!hasRetriableSkip) {
                 const subIdNum = Number(submission._id);
                 const lastIdNum = Number(lastCommittedSubmissionId || 0);
@@ -546,7 +638,8 @@ async function syncLabSubmissions(config, performedBy) {
                         accessibility: koboService.findValue(submission, ['accessibility_status']),
                         sampling_succeeded: koboService.findValue(submission, ['sampling_succeeded', 'muestreo_exitoso']),
                         submission_time: submission._submission_time,
-                        attachments: processedAttachments
+                        attachments: processedAttachments,
+                        intraSubDuplicates: sampleData.intraSubDuplicates || undefined
                     };
 
                     await tx.sample.create({
@@ -576,6 +669,61 @@ async function syncLabSubmissions(config, performedBy) {
                             timestamp: new Date()
                         }
                     });
+
+                    if (sampleData.intraSubDuplicates && sampleData.intraSubDuplicates.length > 0) {
+                        await tx.auditLog.create({
+                            data: {
+                                id: crypto.randomUUID(),
+                                entity: 'SAMPLE',
+                                entityId: sampleId,
+                                action: 'KOBO_INTRA_SUBMISSION_DUPLICATE',
+                                performedBy: performedBy,
+                                timestamp: new Date()
+                            }
+                        });
+                    }
+                }
+
+                for (const dupSample of crossSubDuplicates) {
+                    const normId = dupSample.original_id?.trim().toUpperCase();
+                    const existingSample = await tx.sample.findFirst({
+                        where: { originalId: normId }
+                    });
+                    if (existingSample) {
+                        let meta = {};
+                        try { meta = JSON.parse(existingSample.metadata || '{}'); } catch (e) {}
+                        if (String(meta.kobo_id) !== String(submission._id)) {
+                            const conflicting = meta.conflictingSubmissions || [];
+                            conflicting.push({
+                                kobo_id: submission._id,
+                                kobo_uuid: submission._uuid,
+                                submission_time: submission._submission_time,
+                                surveyor: koboService.findValue(submission, ['surveyor_name', 'username']),
+                                site_id: dupSample.site_id,
+                                depth: dupSample.depth,
+                                lat: dupSample.lat,
+                                lng: dupSample.lng,
+                                collected_at: dupSample.collected_at,
+                                attachments: (submission._attachments || []).map(a => a.filename),
+                                recordedAt: new Date().toISOString()
+                            });
+                            meta.conflictingSubmissions = conflicting;
+                            await tx.sample.update({
+                                where: { id: existingSample.id },
+                                data: { metadata: JSON.stringify(meta) }
+                            });
+                            await tx.auditLog.create({
+                                data: {
+                                    id: crypto.randomUUID(),
+                                    entity: 'SAMPLE',
+                                    entityId: existingSample.id,
+                                    action: 'KOBO_CONFLICTING_PROVENANCE',
+                                    performedBy: performedBy,
+                                    timestamp: new Date()
+                                }
+                            });
+                        }
+                    }
                 }
             });
 
