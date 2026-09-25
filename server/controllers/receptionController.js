@@ -292,6 +292,19 @@ exports.processIntake = async (req, res) => {
         let isNewlyCreatedDeskSample = false;
 
         if (sample) {
+            // Check for active provenance hold (Finding 4: Ambiguous specimen identity must remain visibly unresolved)
+            let sampleMeta = {};
+            try {
+                sampleMeta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
+            } catch (e) {}
+            if (sampleMeta.provenanceHold && sampleMeta.provenanceHold.status === 'AMBIGUOUS_PROVENANCE_HOLD') {
+                return res.status(409).json({
+                    error: 'PROVENANCE_HOLD',
+                    code: 'AMBIGUOUS_PROVENANCE_HOLD',
+                    message: `Cannot process intake for sample '${sample.originalId}': Ambiguous field specimen identity. Reconciliation required before physical intake. Reason: ${sampleMeta.provenanceHold.reason}`
+                });
+            }
+
             // Authoritative: Existing sample's persisted project governs admission policy
             const persistedProjectId = sample.projectId || sample.projectCode;
             if (persistedProjectId) {
@@ -1701,9 +1714,22 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                         { id: { in: sampleOriginalIds } }
                     ]
                 },
-                select: { id: true, originalId: true, projectId: true, projectCode: true }
+                select: { id: true, originalId: true, projectId: true, projectCode: true, metadata: true }
             });
             for (const es of existingSamplesWithProj) {
+                // Check for active provenance hold (Finding 4: Ambiguous specimen identity must remain visibly unresolved)
+                let esMeta = {};
+                try {
+                    esMeta = typeof es.metadata === 'string' ? JSON.parse(es.metadata) : (es.metadata || {});
+                } catch (e) {}
+                if (esMeta.provenanceHold && esMeta.provenanceHold.status === 'AMBIGUOUS_PROVENANCE_HOLD') {
+                    return res.status(409).json({
+                        error: 'PROVENANCE_HOLD',
+                        code: 'AMBIGUOUS_PROVENANCE_HOLD',
+                        message: `Cannot process batch consignment intake: Sample '${es.originalId || es.id}' has an active provenance hold (${esMeta.provenanceHold.reason}). Physical intake is blocked pending field reconciliation.`
+                    });
+                }
+
                 if (es.projectId) projectRefs.add(String(es.projectId));
                 if (es.projectCode) projectRefs.add(String(es.projectCode));
 

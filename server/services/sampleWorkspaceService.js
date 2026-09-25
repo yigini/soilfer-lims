@@ -543,8 +543,10 @@ class SampleWorkspaceService {
                     : (sample.status !== 'EXPECTED' ? 'Sample already received' : (isReception ? null : 'Requires reception authority'))
             },
             canAcceptIntake: {
-                allowed: isReception && ['EXPECTED', 'RECEIVED'].includes(sample.status),
-                reason: isReception ? null : 'Requires reception or manager authority'
+                allowed: isReception && ['EXPECTED', 'RECEIVED'].includes(sample.status) && !(parsedMetadata?.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD'),
+                reason: (parsedMetadata?.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD')
+                    ? `Ambiguous specimen identity: ${parsedMetadata.provenanceHold.reason}`
+                    : (isReception ? null : 'Requires reception or manager authority')
             },
             canManageAnalyses: {
                 allowed: isManagerOrAdmin && !isDisposed,

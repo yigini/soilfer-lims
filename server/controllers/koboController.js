@@ -334,7 +334,7 @@ exports.syncAll = async (req, res) => {
 /**
  * Internal: Sync submissions for a specific lab config
  */
-async function syncLabSubmissions(config, performedBy) {
+async function syncLabSubmissions(config, performedBy, options = {}) {
     console.log(`[KOBO] Starting sync for ${config.labId}...`);
 
     // 1. Pre-fetch verification of active configuration
@@ -398,12 +398,18 @@ async function syncLabSubmissions(config, performedBy) {
     }
 
     // Fetch submissions from Kobo
-    const submissions = await koboService.fetchSubmissions(
+    let submissions = await koboService.fetchSubmissions(
         currentConfig.koboServerUrl,
         currentConfig.formId,
         currentConfig.apiToken,
         currentConfig.lastSubmissionId
     );
+
+    // If maxSubmissionId is specified via options or config, bound the ingestion
+    const maxSubId = options.maxSubmissionId || currentConfig.maxSubmissionId;
+    if (maxSubId && Array.isArray(submissions)) {
+        submissions = submissions.filter(s => Number(s._id) <= Number(maxSubId));
+    }
 
     if (!submissions || submissions.length === 0) {
         await prisma.koboConfig.update({
@@ -415,12 +421,32 @@ async function syncLabSubmissions(config, performedBy) {
 
     // Get existing sample records to avoid duplicates and map accurately
     const existingSamples = await prisma.sample.findMany({
-        select: { id: true, originalId: true, assignedLab: true, projectCode: true }
+        select: {
+            id: true,
+            originalId: true,
+            assignedLab: true,
+            projectCode: true,
+            status: true,
+            rejectionReason: true,
+            metadata: true,
+            fieldMetadata: true
+        }
     });
     const existingSamplesByNormId = new Map();
     for (const s of existingSamples) {
         const norm = s.originalId?.trim().toUpperCase();
-        if (norm && !existingSamplesByNormId.has(norm)) {
+        if (!norm) continue;
+        if (existingSamplesByNormId.has(norm)) {
+            const current = existingSamplesByNormId.get(norm);
+            if (!current.ambiguous) {
+                existingSamplesByNormId.set(norm, {
+                    ambiguous: true,
+                    samples: [current, s]
+                });
+            } else {
+                current.samples.push(s);
+            }
+        } else {
             existingSamplesByNormId.set(norm, s);
         }
     }
@@ -446,8 +472,15 @@ async function syncLabSubmissions(config, performedBy) {
         const commitConfig = await tx.koboConfig.findUnique({
             where: { id: currentConfig.id }
         });
-        if (!commitConfig || !commitConfig.isActive || commitConfig.projectCode !== projectCode) {
-            throw new Error(`CONFIG_REVOKED: Kobo configuration '${currentConfig.id}' is inactive or remapped`);
+        if (
+            !commitConfig ||
+            !commitConfig.isActive ||
+            commitConfig.projectCode !== projectCode ||
+            commitConfig.labId !== currentConfig.labId ||
+            commitConfig.formId !== currentConfig.formId ||
+            commitConfig.koboServerUrl !== currentConfig.koboServerUrl
+        ) {
+            throw new Error(`CONFIG_REVOKED: Kobo configuration '${currentConfig.id}' is inactive, remapped, or modified`);
         }
 
         const currentProject = await tx.project.findUnique({
@@ -518,17 +551,86 @@ async function syncLabSubmissions(config, performedBy) {
             // 2. Detect collision with existing specimens in database or prior committed batches
             if (existingSamplesByNormId.has(normalizedId)) {
                 const existingEntry = existingSamplesByNormId.get(normalizedId);
-                const isForeign = (existingEntry.assignedLab && existingEntry.assignedLab !== currentConfig.labId) ||
-                                  (existingEntry.projectCode && existingEntry.projectCode !== projectCode);
 
-                if (isForeign) {
-                    // Foreign lab or project collision: foreign sample mutation strictly disallowed (Finding 1)
+                // If multiple existing samples in DB normalize to this key, ambiguous DB match (Finding 3)
+                if (existingEntry.ambiguous) {
                     skippedCount++;
-                    foreignCollisions.push({ sampleData, existingEntry });
+                    foreignCollisions.push({
+                        sampleData,
+                        existingEntry: { assignedLab: 'AMBIGUOUS', projectCode: 'AMBIGUOUS' },
+                        reason: `AMBIGUOUS_DB_MATCH: Multiple existing specimens in database normalize to '${normalizedId}'; mutation disallowed`
+                    });
                     continue;
                 }
 
-                // Same lab & project: cross-submission duplicate
+                // Positive agreement requirement: both assignedLab and projectCode must be non-null and match (Finding 1 & 3)
+                const hasPositiveAgreement = Boolean(
+                    existingEntry.assignedLab &&
+                    existingEntry.projectCode &&
+                    existingEntry.assignedLab === currentConfig.labId &&
+                    existingEntry.projectCode === projectCode
+                );
+
+                if (!hasPositiveAgreement) {
+                    // Foreign lab, foreign project, or unknown/unassigned ownership: mutation strictly disallowed (Finding 1 & 3)
+                    skippedCount++;
+                    foreignCollisions.push({
+                        sampleData,
+                        existingEntry,
+                        reason: `FOREIGN_SCOPE_COLLISION: Specimen ID '${sampleData.original_id}' has unassigned or foreign scope (lab '${existingEntry.assignedLab}', project '${existingEntry.projectCode}'); required lab '${currentConfig.labId}', project '${projectCode}'; foreign mutation disallowed`
+                    });
+                    continue;
+                }
+
+                // Historical sample check: if existing sample is already past EXPECTED, mutation disallowed (Finding 3)
+                if (existingEntry.status && existingEntry.status !== workflow.SAMPLE_STATES.EXPECTED) {
+                    skippedCount++;
+                    foreignCollisions.push({
+                        sampleData,
+                        existingEntry,
+                        reason: `HISTORICAL_SAMPLE_COLLISION: Specimen ID '${sampleData.original_id}' is in status '${existingEntry.status}'; historical record mutation disallowed`
+                    });
+                    continue;
+                }
+
+                // Parse existing metadata to check for primary occurrence replay (Finding 1)
+                let meta = {};
+                try {
+                    meta = typeof existingEntry.metadata === 'string' ? JSON.parse(existingEntry.metadata) : (existingEntry.metadata || {});
+                } catch (e) {
+                    meta = {};
+                }
+
+                // Check if this incoming occurrence is from the SAME source server and form
+                const metaServer = meta.sourceServerUrl || meta.koboServerUrl;
+                const metaForm = meta.sourceFormId || meta.formId;
+                const isSameServerAndForm = (!metaServer || metaServer === currentConfig.koboServerUrl) &&
+                                            (!metaForm || metaForm === currentConfig.formId);
+
+                const isPrimarySubmission = isSameServerAndForm && String(meta.kobo_id) === String(submission._id);
+
+                if (isPrimarySubmission) {
+                    let existingDepth = meta.depth;
+                    if (!existingDepth && existingEntry.fieldMetadata) {
+                        try {
+                            const fm = typeof existingEntry.fieldMetadata === 'string' ? JSON.parse(existingEntry.fieldMetadata) : existingEntry.fieldMetadata;
+                            existingDepth = fm?.depth?.value || fm?.depth || null;
+                        } catch (_) {}
+                    }
+                    // Check if this occurrence matches the primary depth or one of intraSubDuplicates
+                    const isPrimaryDepth = (!existingDepth && !sampleData.depth) ||
+                                          (existingDepth && String(existingDepth) === String(sampleData.depth || '')) ||
+                                          (!existingDepth && String(sampleData.depth || '') === 'D1') ||
+                                          (Array.isArray(meta.intraSubDuplicates) && meta.intraSubDuplicates.some(d => String(d.depth || '') === String(sampleData.depth || '')));
+
+                    if (isPrimaryDepth) {
+                        // Unchanged primary replay: completely idempotent! Zero metadata/audit/hold changes (Finding 1)
+                        skippedCount++;
+                        continue;
+                    }
+                }
+
+                // Same lab & project, EXPECTED status: cross-submission duplicate
                 skippedCount++;
                 crossSubDuplicates.push({ sampleData, existingEntry });
                 continue;
@@ -565,7 +667,7 @@ async function syncLabSubmissions(config, performedBy) {
             for (const fc of foreignCollisions) {
                 skippedReasons.push({
                     originalId: fc.sampleData.original_id,
-                    reason: `FOREIGN_SCOPE_COLLISION: Specimen ID '${fc.sampleData.original_id}' belongs to lab '${fc.existingEntry.assignedLab}', project '${fc.existingEntry.projectCode}'; foreign mutation disallowed`
+                    reason: fc.reason || `FOREIGN_SCOPE_COLLISION: Specimen ID '${fc.sampleData.original_id}' belongs to lab '${fc.existingEntry.assignedLab}', project '${fc.existingEntry.projectCode}'; foreign mutation disallowed`
                 });
             }
             hasRetriableSkip = true;
@@ -582,12 +684,21 @@ async function syncLabSubmissions(config, performedBy) {
                     throw new Error(`EXISTING_SAMPLE_NOT_FOUND: Specimen '${existingEntry.originalId}' not found during duplicate provenance preservation`);
                 }
 
-                // Strictly enforce foreign scope isolation inside transaction (Finding 1)
-                if (
-                    (existingSample.assignedLab && existingSample.assignedLab !== currentConfig.labId) ||
-                    (existingSample.projectCode && existingSample.projectCode !== projectCode)
-                ) {
-                    throw new Error(`FOREIGN_SCOPE_COLLISION: Specimen '${existingSample.originalId}' belongs to foreign scope; mutation disallowed`);
+                // Positive agreement re-verification inside transaction (Finding 1 & 3)
+                const hasPositiveAgreement = Boolean(
+                    existingSample.assignedLab &&
+                    existingSample.projectCode &&
+                    existingSample.assignedLab === currentConfig.labId &&
+                    existingSample.projectCode === projectCode
+                );
+
+                if (!hasPositiveAgreement) {
+                    throw new Error(`FOREIGN_SCOPE_COLLISION: Specimen '${existingSample.originalId}' has lab '${existingSample.assignedLab}', project '${existingSample.projectCode}'; required lab '${currentConfig.labId}', project '${projectCode}'; mutation disallowed`);
+                }
+
+                // Historical sample check inside transaction (Finding 3)
+                if (existingSample.status && existingSample.status !== workflow.SAMPLE_STATES.EXPECTED) {
+                    throw new Error(`HISTORICAL_SAMPLE_COLLISION: Specimen '${existingSample.originalId}' is in status '${existingSample.status}'; historical record mutation disallowed`);
                 }
 
                 let meta = {};
@@ -597,15 +708,32 @@ async function syncLabSubmissions(config, performedBy) {
                     meta = { _rawMetadataBackup: existingSample.metadata };
                 }
 
-                // Match source form/server identity and occurrence key (Finding 1, Finding 3)
+                // Check again if this is the primary occurrence (Finding 1)
+                const isSameServerAndForm = (!meta.koboServerUrl || meta.koboServerUrl === currentConfig.koboServerUrl) &&
+                                            (!meta.formId || meta.formId === currentConfig.formId);
+
+                if (isSameServerAndForm && String(meta.kobo_id) === String(submission._id)) {
+                    const isPrimaryDepth = String(meta.depth || '') === String(sampleData.depth || '') ||
+                                          (Array.isArray(meta.intraSubDuplicates) && meta.intraSubDuplicates.some(d => String(d.depth || '') === String(sampleData.depth || '')));
+                    if (isPrimaryDepth) {
+                        // Unchanged primary replay - do not treat as conflict
+                        continue;
+                    }
+                }
+
+                // Match occurrence key strictly by source server, source form, submission ID, and depth (Finding 2 & 3)
                 const sourceServerUrl = currentConfig.koboServerUrl;
                 const sourceFormId = currentConfig.formId;
                 const occurrenceKey = `${sourceServerUrl || ''}:${sourceFormId || ''}:${submission._id}:${sampleData.depth || 'D1'}`;
 
                 const conflicting = Array.isArray(meta.conflictingSubmissions) ? meta.conflictingSubmissions : [];
                 const alreadyRecorded = conflicting.some(c => (
-                    (c.occurrenceKey && c.occurrenceKey === occurrenceKey) ||
-                    (String(c.kobo_id) === String(submission._id) && c.depth === sampleData.depth)
+                    c.occurrenceKey ? c.occurrenceKey === occurrenceKey : (
+                        String(c.sourceServerUrl || '') === String(sourceServerUrl || '') &&
+                        String(c.sourceFormId || '') === String(sourceFormId || '') &&
+                        String(c.kobo_id) === String(submission._id) &&
+                        String(c.depth || '') === String(sampleData.depth || '')
+                    )
                 ));
 
                 if (alreadyRecorded) {
@@ -647,12 +775,17 @@ async function syncLabSubmissions(config, performedBy) {
                     updatedAt: new Date().toISOString()
                 };
 
+                // IMPORTANT (Finding 3): Never overwrite existing rejectionReason on historical or pre-rejected records
+                const updateData = {
+                    metadata: JSON.stringify(meta)
+                };
+                if (existingSample.status === workflow.SAMPLE_STATES.EXPECTED && !existingSample.rejectionReason) {
+                    updateData.rejectionReason = 'PROVENANCE_HOLD: Conflicting field submissions claimed this barcode';
+                }
+
                 await tx.sample.update({
                     where: { id: existingSample.id },
-                    data: {
-                        metadata: JSON.stringify(meta),
-                        rejectionReason: 'PROVENANCE_HOLD: Conflicting field submissions claimed this barcode'
-                    }
+                    data: updateData
                 });
 
                 await tx.auditLog.create({
@@ -740,6 +873,9 @@ async function syncLabSubmissions(config, performedBy) {
                     const compactMeta = {
                         kobo_id: submission._id,
                         kobo_uuid: submission._uuid,
+                        sourceServerUrl: currentConfig.koboServerUrl,
+                        sourceFormId: currentConfig.formId,
+                        depth: sampleData.depth,
                         surveyor: koboService.findValue(submission, ['surveyor_name', 'username']),
                         site_id: sampleData.site_id,
                         province: koboService.findValue(submission, ['selected_province', 'provincia']),
@@ -762,6 +898,8 @@ async function syncLabSubmissions(config, performedBy) {
                         fieldMetadata.provenanceHold = fm('AMBIGUOUS_PROVENANCE_HOLD');
                         rejectionReason = 'PROVENANCE_HOLD: Ambiguous depth identity (D1/D2 duplicate barcode)';
                     }
+
+                    sampleData.persistedCompactMeta = compactMeta;
 
                     await tx.sample.create({
                         data: {
@@ -819,7 +957,15 @@ async function syncLabSubmissions(config, performedBy) {
                     id: sampleData.original_id,
                     originalId: sampleData.original_id,
                     assignedLab: currentConfig.labId,
-                    projectCode: projectCode
+                    projectCode: projectCode,
+                    status: workflow.SAMPLE_STATES.EXPECTED,
+                    metadata: JSON.stringify(sampleData.persistedCompactMeta || {
+                        kobo_id: submission._id,
+                        sourceServerUrl: currentConfig.koboServerUrl,
+                        sourceFormId: currentConfig.formId,
+                        depth: sampleData.depth
+                    }),
+                    fieldMetadata: JSON.stringify({ depth: { value: sampleData.depth } })
                 });
             }
 
@@ -836,7 +982,8 @@ async function syncLabSubmissions(config, performedBy) {
                 err.message?.includes('MEMBERSHIP_REVOKED') ||
                 err.message?.includes('LAB_INACTIVE') ||
                 err.message?.includes('CONFIG_REVOKED') ||
-                err.message?.includes('FOREIGN_SCOPE_COLLISION')
+                err.message?.includes('FOREIGN_SCOPE_COLLISION') ||
+                err.message?.includes('HISTORICAL_SAMPLE_COLLISION')
             ) {
                 skippedCount += candidateSamples.length;
                 for (const sampleData of candidateSamples) {

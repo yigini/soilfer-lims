@@ -1390,6 +1390,19 @@ exports.acceptSample = async (req, res) => {
             });
         }
 
+        // Check for active provenance hold (Finding 4: Ambiguous specimen identity must remain visibly unresolved)
+        let sampleMeta = {};
+        try {
+            sampleMeta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
+        } catch (e) {}
+        if (sampleMeta.provenanceHold && sampleMeta.provenanceHold.status === 'AMBIGUOUS_PROVENANCE_HOLD') {
+            return res.status(409).json({
+                error: 'PROVENANCE_HOLD',
+                code: 'AMBIGUOUS_PROVENANCE_HOLD',
+                message: `Cannot accept intake for sample '${sample.originalId}': Ambiguous field specimen identity. Reconciliation required before acceptance. Reason: ${sampleMeta.provenanceHold.reason}`
+            });
+        }
+
         // IDENTITY VERIFICATION
         // Lab ID is now assigned at reception to facilitate immediate labeling.
         const labId = sample.labId;
