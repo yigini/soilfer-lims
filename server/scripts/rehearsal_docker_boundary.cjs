@@ -130,7 +130,12 @@ function createSyntheticRunnerScript(dir) {
     const code = `#!/usr/bin/env node
 'use strict';
 const fs = require('fs');
-const Database = require('better-sqlite3');
+let Database;
+try {
+    Database = require('better-sqlite3');
+} catch (_) {
+    Database = require('/app/server/node_modules/better-sqlite3');
+}
 
 const isDryRun = process.argv.includes('--dry-run');
 const isApply = process.argv.includes('--apply');
@@ -194,7 +199,7 @@ if (isApply) {
 // Initialize database schema on disposable volume
 function initializeVolumeDb(volName) {
     const initCmd = `
-const Database = require('better-sqlite3');
+const Database = require('/app/server/node_modules/better-sqlite3');
 const db = new Database('/app/server/prisma/dev.db');
 db.exec(\`
     CREATE TABLE IF NOT EXISTS Lab (id TEXT PRIMARY KEY, code TEXT, name TEXT, country TEXT, isActive INTEGER, createdAt DATETIME, updatedAt DATETIME);
@@ -213,6 +218,8 @@ db.close();
     cp.execFileSync('docker', [
         'run', '--rm',
         '--entrypoint', 'node',
+        '-w', '/app/server',
+        '-e', 'NODE_PATH=/app/server/node_modules',
         '-v', `${volName}:/app/server/prisma`,
         REVIEWED_IMAGE_ID,
         '-e', initCmd
@@ -223,10 +230,12 @@ function queryVolumeDb(volName, sql) {
     const out = cp.execFileSync('docker', [
         'run', '--rm',
         '--entrypoint', 'node',
+        '-w', '/app/server',
+        '-e', 'NODE_PATH=/app/server/node_modules',
         '-v', `${volName}:/app/server/prisma`,
         REVIEWED_IMAGE_ID,
         '-e', `
-const Database = require('better-sqlite3');
+const Database = require('/app/server/node_modules/better-sqlite3');
 const db = new Database('/app/server/prisma/dev.db');
 const rows = db.prepare("${sql}").all();
 console.log(JSON.stringify(rows));
@@ -253,6 +262,8 @@ async function runRealDockerRehearsal() {
             '--entrypoint', 'node',
             '--network', 'none',
             '--user', '0:0',
+            '-w', '/app/server',
+            '-e', 'NODE_PATH=/app/server/node_modules',
             '-e', 'DATABASE_PATH=/app/server/prisma/dev.db',
             '-e', `GHANA_SNAPSHOT_PATH=/fixtures/snapshot.json`,
             '-e', `GHANA_MANIFEST_PATH=/fixtures/manifest.json`,
@@ -275,6 +286,8 @@ async function runRealDockerRehearsal() {
             '--entrypoint', 'node',
             '--network', 'none',
             '--user', '0:0',
+            '-w', '/app/server',
+            '-e', 'NODE_PATH=/app/server/node_modules',
             '-e', 'DATABASE_PATH=/app/server/prisma/dev.db',
             '-e', `GHANA_SNAPSHOT_PATH=/fixtures/snapshot.json`,
             '-e', `GHANA_MANIFEST_PATH=/fixtures/manifest.json`,
@@ -306,10 +319,12 @@ async function runRealDockerRehearsal() {
         cp.execFileSync('docker', [
             'run', '--rm',
             '--entrypoint', 'node',
+            '-w', '/app/server',
+            '-e', 'NODE_PATH=/app/server/node_modules',
             '-v', `${vol2}:/app/server/prisma`,
             REVIEWED_IMAGE_ID,
             '-e', `
-const Database = require('better-sqlite3');
+const Database = require('/app/server/node_modules/better-sqlite3');
 const db = new Database('/app/server/prisma/dev.db');
 db.backup('/app/server/prisma/pre_apply_backup.db').then(() => db.close());
 `
@@ -323,6 +338,8 @@ db.backup('/app/server/prisma/pre_apply_backup.db').then(() => db.close());
                 '--name', registerContainer(`lims_runner_fail_${TS}`),
                 '--entrypoint', 'node',
                 '--network', 'none',
+                '-w', '/app/server',
+                '-e', 'NODE_PATH=/app/server/node_modules',
                 '-e', 'DATABASE_PATH=/app/server/prisma/dev.db',
                 '-e', `GHANA_SNAPSHOT_PATH=/fixtures/snapshot.json`,
                 '-e', `GHANA_MANIFEST_PATH=/fixtures/manifest.json`,
@@ -418,6 +435,8 @@ try { fs.unlinkSync('/app/server/prisma/dev.db-shm'); } catch (_) {}
         cp.execFileSync('docker', [
             'run', '--rm',
             '--entrypoint', 'node',
+            '-w', '/app/server',
+            '-e', 'NODE_PATH=/app/server/node_modules',
             '-e', 'DATABASE_PATH=/app/server/prisma/dev.db',
             '-e', `GHANA_SNAPSHOT_PATH=/fixtures/snapshot.json`,
             '-e', `GHANA_MANIFEST_PATH=/fixtures/manifest.json`,
