@@ -114,6 +114,7 @@ function setupEnvironmentFixture(testDir, options = {}) {
         daemonUnavailable: options.daemonUnavailable || false,
         healthOk: options.healthOk !== false,
         failDuringApply: options.failDuringApply || false,
+        failInitialProxyReload: options.failInitialProxyReload || false,
         interruptDelayMs: options.interruptDelayMs || 0
     };
     fs.writeFileSync(stateFile, JSON.stringify(initialState, null, 2));
@@ -154,10 +155,27 @@ run().catch(err => {
     fs.chmodSync(path.join(mockBin, 'sqlite3'), '755');
 
     // Create mock systemctl executable
-    const systemctlScript = `#!/bin/sh
-exit 0
+    const systemctlJs = `'use strict';
+const fs = require('fs');
+const state = JSON.parse(fs.readFileSync('${stateFile.replace(/\\/g, '/')}', 'utf8'));
+if (process.argv.includes('reload') && process.argv.includes('httpd')) {
+    if (state.failInitialProxyReload) {
+        state.reloadCount = (state.reloadCount || 0) + 1;
+        fs.writeFileSync('${stateFile.replace(/\\/g, '/')}', JSON.stringify(state, null, 2));
+        if (state.reloadCount === 1) {
+            console.error('Job for httpd.service failed because the control process exited with error code.');
+            process.exit(1);
+        }
+    }
+}
+process.exit(0);
 `;
-    fs.writeFileSync(path.join(mockBin, 'systemctl'), systemctlScript);
+    fs.writeFileSync(path.join(mockBin, 'systemctl.cjs'), systemctlJs);
+    const systemctlShell = `#!/bin/sh
+DIR=\$(dirname "\$0")
+exec node "\$DIR/systemctl.cjs" "\$@"
+`;
+    fs.writeFileSync(path.join(mockBin, 'systemctl'), systemctlShell);
     fs.chmodSync(path.join(mockBin, 'systemctl'), '755');
 
     // Create mock curl executable
@@ -656,11 +674,45 @@ async function runAllPackagedRehearsals() {
         }
         console.log('  ✓ Rehearsal 8 PASSED: Mismatched image immediately refused execution; zero state modified');
 
+        console.log('\n[Packaged Rehearsal 9] Maintenance Transition Failure Restores Live Ingress Config...');
+        const dir9 = path.join(tmpDir, 'test_proxy_transition_fail');
+        const env9 = setupEnvironmentFixture(dir9, { failInitialProxyReload: true });
+        const res9 = runWrapperInTestEnv(dir9, {});
+
+        if (res9.status === 0) {
+            throw new Error('Scenario 9 should have failed when initial proxy reload fails');
+        }
+        if (!res9.stdout.includes('Failure occurred while transitioning to maintenance mode') ||
+            !res9.stdout.includes('Live reverse proxy configuration restored')) {
+            throw new Error('Scenario 9 missing maintenance transition recovery: ' + res9.stdout);
+        }
+
+        // Live container was not stopped
+        const state9 = JSON.parse(fs.readFileSync(env9.stateFile, 'utf8'));
+        if (!state9.containers['soilfer-lims'].running) {
+            throw new Error('Scenario 9 stopped live container during proxy transition failure!');
+        }
+
+        // Live proxy config restored
+        const apache9 = fs.readFileSync(path.join(env9.mockApache, 'httpd-lims.conf'), 'utf8');
+        if (!apache9.includes('LIVE REVERSE PROXY CONFIG') || apache9.includes('Write Quiescence Active')) {
+            throw new Error('Scenario 9 failed to restore live reverse proxy config!');
+        }
+
+        // Database untouched
+        const db9 = new Database(env9.fixtureDb, { readonly: true });
+        const samples9 = db9.prepare('SELECT COUNT(*) as c FROM Sample').get().c;
+        db9.close();
+        if (samples9 !== 1) {
+            throw new Error('Scenario 9 modified database during proxy transition failure!');
+        }
+        console.log('  ✓ Rehearsal 9 PASSED: Maintenance transition failure caught; live proxy config restored; app untouched');
+
         console.log('\n================================================================');
-        console.log('  ALL 8 SHELL WRAPPER MOCK REHEARSALS COMPLETED SUCCESSFULLY    ');
+        console.log('  ALL 9 SHELL WRAPPER MOCK REHEARSALS COMPLETED SUCCESSFULLY    ');
         console.log('  1. Success | 2. Partial-Apply | 3. Interrupt | 4. Health-Fail ');
         console.log('  5. Retagged Container | 6. Inspect Fail | 7. Preflight Presrv ');
-        console.log('  8. Unknown Tag Mismatch                                       ');
+        console.log('  8. Unknown Tag Mismatch | 9. Proxy Transition Rollback        ');
         console.log('================================================================\n');
 
     } finally {

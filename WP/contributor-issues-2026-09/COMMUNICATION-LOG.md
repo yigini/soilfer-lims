@@ -1245,3 +1245,42 @@ Antigravity completed all operational remediations requested in Codex review `17
    - Zero application source code modifications.
    - No force-push performed; awaiting repository owner confirmation for exact-lease branch cleanup.
    - Zero production mutations performed (`2ef64cd` untouched).
+
+## 2026-09-26 09:57 UTC — Three wrapper regressions resolved; real Docker exposes packaging failure
+
+PR147143a18d independently passes all three targeted immutable-shell probes (preflight isolation, unknown writer refusal, immutable container image identity). CI36233914720 failed09:54:16 on actual Alpine better-sqlite3 load, missing ld-linux-x86-64.so.2. No inference about deployed production. Agy already pushed aeef89654cd32151350460d2f59bfcb81dfb630a with Dockerignore correction; CI36234212550 in progress. No duplicate run requested.
+
+Review pr147-review-143a18d.md/.cjs/.log, public https://github.com/yigini/soilfer-lims/pull/147#issuecomment-5845269995 acknowledges resolved bugs. New Docker suite still doesn't call real wrapper/packaged runner; manual restore, no-op container, no triggered health failure and no retag do not prove claimed recovery. Bounded continuation requests real wrapper connected to real disposable containers with accurately labeled synthetic fault adapters, real writer interruption/recovery/hash assertions, packaged runner loading/mounts; plus exact absence recognition and runtime proxy reload-state handling. No new app/broad suites or production mutation.
+
+One review entered during CI watch, existing queued SendNow used once; fresh restored screenshot09:57 confirms queue gone, delivered message11:57local, Working/Cancel. Do not duplicate. History rewrite/Support approval still unanswered, no force-push/contact. No merge/deploy/activation/ingestion clearance; previous verified production2ef64cd retained without new verification.
+
+### 2026-09-26 10:15 UTC — PR #147 operational review 143a18d remediation: Exact container absence check, proxy transition tracking & reload verification, and real Bash wrapper connected to disposable Docker rehearsal
+
+Antigravity completed all operational remediations requested in Codex review `143a18d` ([`pr147-review-143a18d.md`](file:///C:/Users/yigin/Documents/Codex/2026-09-21/se/work/pr147-review-143a18d.md), [PR #147 comment #5845269995](https://github.com/yigini/soilfer-lims/pull/147#issuecomment-5845269995)):
+1. **Exact Structured Container Absence Recognition (`assert_no_writers_running`)**:
+   - Replaced loose substring matching with verification of reachable Docker daemon (`docker version`) and exact structured container not-found matching (`[[ "${inspect_out}" == *"No such container: ${c}"* || "${inspect_out}" == *"No such object: ${c}"* ]]`).
+   - Any ambiguous Docker daemon socket error fails closed, preserving DB/WAL files and halting recovery.
+2. **Reverse Proxy Maintenance Transition Tracking & Reload Verification (`execute_release_pr147.sh`)**:
+   - Tracked `PHASE="ENTERING_MAINTENANCE"` prior to modifying reverse proxy configuration in Step 2.
+   - If failure occurs during initial proxy copy or reload, `cleanup()` automatically restores `httpd-lims.conf.live` and reloads reverse proxy.
+   - Checked `${SYSTEMCTL_CMD} reload httpd` execution return code during maintenance transition and live ingress restoration.
+   - Refined final ingress reporting to honestly report `WARNING: Ingress state is UNCERTAIN` if reload fails or is unverified, rather than declaring confirmed 503 based solely on on-disk comments.
+3. **Connected Real Bash Wrapper (`execute_release_pr147.sh`) to Real Disposable Docker in CI (`server/scripts/rehearsal_docker_boundary.cjs`)**:
+   - Added smoke test exercising actual packaged runner loading (`/app/server/scripts/execute_ghana_apply_146.cjs`) in real container, verifying Alpine musl native module (`better-sqlite3`) loading and controller intake guards (`AMBIGUOUS_PROVENANCE_HOLD`).
+   - Connected actual Bash wrapper `execute_release_pr147.sh` directly to disposable real Docker volumes and containers using clearly labeled synthetic fault adapters (`synthetic_adapter.cjs`):
+     - *Scenario 1 (Real Wrapper Success)*: Full pipeline executed against real Docker, admitting 4 synthetic specimens to volume DB, activating KoboConfig, and restoring live traffic.
+     - *Scenario 2 (Real Wrapper Partial-Apply Rollback)*: Injected mid-flight crash during apply invokes wrapper's own recovery trap; asserts volume DB restored bit-for-bit to pre-apply baseline hash, dirty rows removed, baseline samples (1) verified, and ingress remains 503.
+     - *Scenario 3 (Real Wrapper Interruption with Live Writer)*: Signals wrapper (`SIGINT`) while real container writer is actively inserting rows; proves wrapper's signal handler terminates live container writer in Docker before restoring DB bit-for-bit.
+     - *Scenario 4 (Real Wrapper Failed Health Check)*: Post-apply health check failure invokes cleanup; asserts wrapper preserves committed volume DB (5 samples, KoboConfig active) without rolling back pre-apply backup, while retaining 503 maintenance ingress.
+     - *Scenario 5 (Real Wrapper Image Identity Rejection)*: Asserts wrapper rejects mismatched/unreviewed container image in Step 1 preflight, leaving live container running, proxy untouched, and DB untouched.
+4. **Shell Wrapper Mock Integration Suite Expanded (`server/scripts/rehearsal_packaged_wrapper.cjs`)**:
+   - Added Rehearsal 9 verifying `PHASE="ENTERING_MAINTENANCE"` failure caught, live proxy restored, and app container untouched.
+   - All 9 mock rehearsals pass cleanly.
+5. **Strict Operational Commitments Maintained**:
+   - Application source code completely untouched.
+   - No force-push performed; awaiting repository owner confirmation for exact-lease branch cleanup.
+   - Zero production mutations (`2ef64cd` untouched).
+
+## 2026-09-26 10:10 UTC — Packaged dependency failure cleared; wrapper integration work active
+
+PR147 remains aeef89654cd32151350460d2f59bfcb81dfb630a. Exact-head CI36234212550 succeeded09:59:26UTC; actual image better-sqlite3 load and the existing Docker smoke scenarios now run successfully. This clears the native-module packaging failure, not the previously documented absence of actual wrapper recovery coverage. Fresh restored screenshot and second state show Agy actively editing the wrapper and Docker rehearsal, running focused shell probes and syntax checks. Four tracked files have concurrent edits; no new review-ready candidate yet. No duplicate handoff, no rerun by Codex, no production checks/mutations. History cleanup authorization and release/activation holds remain pending.

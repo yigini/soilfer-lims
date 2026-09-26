@@ -22,6 +22,7 @@ LIMS_OPT_DIR=${LIMS_OPT_DIR:-"/opt/lims"}
 APACHE_CONF_DIR=${APACHE_CONF_DIR:-"/etc/httpd/conf/extra"}
 SYSTEMCTL_CMD=${SYSTEMCTL_CMD:-"systemctl"}
 CURL_CMD=${CURL_CMD:-"curl"}
+SQLITE3_CMD=${SQLITE3_CMD:-"sqlite3"}
 
 PRIVATE_SNAPSHOT=${PRIVATE_SNAPSHOT:-"${LIMS_OPT_DIR}/private_kobo/ghana_kobo_snapshot_40747.json"}
 PRIVATE_MANIFEST=${PRIVATE_MANIFEST:-"${LIMS_OPT_DIR}/private_kobo/ghana_kobo_manifest_40747.json"}
@@ -84,8 +85,8 @@ assert_no_writers_running() {
                         echo "FATAL: Container '$c' is still running after stop attempt!"
                         return 1
                     fi
-                elif [[ "${inspect_out}" == *"No such"* || "${inspect_out}" == *"not found"* ]]; then
-                    : # Cleanly removed
+                elif docker version >/dev/null 2>&1 && [[ "${inspect_out}" == *"No such container: ${c}"* || "${inspect_out}" == *"No such object: ${c}"* ]]; then
+                    : # Cleanly removed and confirmed absent by reachable daemon
                 else
                     echo "FATAL: Docker inspect failed for '$c' after stop attempt: ${inspect_out}"
                     return 1
@@ -97,9 +98,9 @@ assert_no_writers_running() {
                 return 1
             fi
         else
-            # Non-zero exit code: check if container positively does not exist
-            if [[ "${inspect_out}" == *"No such"* || "${inspect_out}" == *"not found"* ]]; then
-                : # Positively established absent container
+            # Non-zero exit code: require exact container-specific not-found from reachable daemon
+            if docker version >/dev/null 2>&1 && [[ "${inspect_out}" == *"No such container: ${c}"* || "${inspect_out}" == *"No such object: ${c}"* ]]; then
+                : # Positively established absent container from reachable daemon
             else
                 echo "FATAL: Docker inspect failed for '$c' (exit code ${inspect_rc}): ${inspect_out}"
                 return 1
@@ -133,6 +134,25 @@ cleanup() {
         if [ "${PHASE}" = "INIT" ]; then
             echo "Preflight check failed prior to maintenance or mutation."
             echo "Live application container and reverse proxy remain untouched."
+            rmdir "${LOCK_DIR}" 2>/dev/null || true
+            rm -f "${PID_FILE}" 2>/dev/null || true
+            exit ${exit_code}
+        fi
+
+        # Phase ENTERING_MAINTENANCE: Transitioning into maintenance mode failed before quiescence confirmed
+        if [ "${PHASE}" = "ENTERING_MAINTENANCE" ]; then
+            echo "Failure occurred while transitioning to maintenance mode."
+            if [ -f "${APACHE_CONF_DIR}/httpd-lims.conf.live" ]; then
+                echo "Attempting to restore live reverse proxy configuration..."
+                cp "${APACHE_CONF_DIR}/httpd-lims.conf.live" "${APACHE_CONF_DIR}/httpd-lims.conf" 2>/dev/null || true
+                if ${SYSTEMCTL_CMD} reload httpd 2>/dev/null; then
+                    echo "✓ Live reverse proxy configuration restored."
+                else
+                    echo "WARNING: Reverse proxy reload failed during ENTERING_MAINTENANCE cleanup! Ingress state is UNCERTAIN. Operator intervention required."
+                fi
+            else
+                echo "WARNING: Live proxy configuration backup (.live) not found! Ingress state is UNCERTAIN. Operator intervention required."
+            fi
             rmdir "${LOCK_DIR}" 2>/dev/null || true
             rm -f "${PID_FILE}" 2>/dev/null || true
             exit ${exit_code}
@@ -191,20 +211,32 @@ cleanup() {
         fi
 
         # If failure occurred during proxy restoration, re-apply and verify quiescence
+        local quiescence_reloaded=false
         if [ "${PHASE}" = "RESTORING_INGRESS" ]; then
             echo "Re-applying write-quiescence proxy config after restoration failure..."
             cp "${APACHE_CONF_DIR}/httpd-lims.conf.quiesce" "${APACHE_CONF_DIR}/httpd-lims.conf" 2>/dev/null || true
-            ${SYSTEMCTL_CMD} reload httpd 2>/dev/null || true
-            if grep -q "Write Quiescence Active" "${APACHE_CONF_DIR}/httpd-lims.conf" 2>/dev/null; then
+            if ${SYSTEMCTL_CMD} reload httpd 2>/dev/null; then
+                quiescence_reloaded=true
                 echo "✓ Ingress write quiescence re-confirmed active."
             else
-                echo "WARNING: Ingress state uncertain after proxy reload failure! Operator inspection required."
+                echo "WARNING: Reverse proxy reload failed during RESTORING_INGRESS recovery! Ingress state is UNCERTAIN."
             fi
         fi
 
-        # Fail-closed report: only report 503 if maintenance config is active
-        if grep -q "Write Quiescence Active" "${APACHE_CONF_DIR}/httpd-lims.conf" 2>/dev/null; then
-            echo "FATAL: Ingress remains write-quiesced (HTTP 503) to protect system. Operator intervention required."
+        # Honest Ingress Reporting: verify reload and on-disk config rather than assuming 503
+        if [ "${PHASE}" = "RESTORING_INGRESS" ]; then
+            if [ "${quiescence_reloaded}" = "true" ] && grep -q "Write Quiescence Active" "${APACHE_CONF_DIR}/httpd-lims.conf" 2>/dev/null; then
+                echo "FATAL: Ingress remains write-quiesced (HTTP 503) to protect system. Operator intervention required."
+            else
+                echo "WARNING: Ingress state is UNCERTAIN (proxy reload failed or unverified). Operator intervention required."
+            fi
+        elif [ "${PHASE}" != "INIT" ] && [ "${PHASE}" != "ENTERING_MAINTENANCE" ]; then
+            # Phases INGRESS_QUIESCED through APP_HEALTHY
+            if grep -q "Write Quiescence Active" "${APACHE_CONF_DIR}/httpd-lims.conf" 2>/dev/null; then
+                echo "FATAL: Ingress remains write-quiesced (HTTP 503) to protect system. Operator intervention required."
+            else
+                echo "WARNING: Ingress state is UNCERTAIN (quiescence config missing from disk). Operator intervention required."
+            fi
         fi
 
         # Retain lock throughout entire recovery; release only now
@@ -301,6 +333,7 @@ console.log('✓ Target image confirmed: contains reviewed AMBIGUOUS_PROVENANCE_
 
 # --- Step 2: Enforce Ingress Write Quiescence (Apache 503 Rewrite) ---
 echo "--- Step 2: Enforce Ingress Write Quiescence (Apache 503 Rewrite) ---"
+PHASE="ENTERING_MAINTENANCE"
 cp "${APACHE_CONF_DIR}/httpd-lims.conf" "${APACHE_CONF_DIR}/httpd-lims.conf.live"
 
 cat << 'APACHE_EOF' > "${APACHE_CONF_DIR}/httpd-lims.conf.quiesce"
@@ -340,7 +373,10 @@ cat << 'APACHE_EOF' > "${APACHE_CONF_DIR}/httpd-lims.conf.quiesce"
 APACHE_EOF
 
 cp "${APACHE_CONF_DIR}/httpd-lims.conf.quiesce" "${APACHE_CONF_DIR}/httpd-lims.conf"
-${SYSTEMCTL_CMD} reload httpd
+if ! ${SYSTEMCTL_CMD} reload httpd; then
+    echo "FATAL: Failed to reload reverse proxy with write quiescence configuration!"
+    exit 1
+fi
 echo "✓ Ingress write quiescence active (HTTP 503 for mutating requests, read-only allowed)"
 PHASE="INGRESS_QUIESCED"
 
@@ -356,12 +392,12 @@ PHASE="QUIESCED_WRITERS_STOPPED"
 
 # --- Step 4: Quiesced Database Checkpoint & Consistent Pre-Operation Backup ---
 echo "--- Step 4: Quiesced Database Checkpoint & Pre-Operation Consistent Backup ---"
-sqlite3 "${DB_PATH}" "PRAGMA wal_checkpoint(TRUNCATE);"
-sqlite3 "${DB_PATH}" ".backup '${BACKUP_CONSISTENT}'"
+${SQLITE3_CMD} "${DB_PATH}" "PRAGMA wal_checkpoint(TRUNCATE);"
+${SQLITE3_CMD} "${DB_PATH}" ".backup '${BACKUP_CONSISTENT}'"
 BACKUP_HASH=$(sha256sum "${BACKUP_CONSISTENT}" | awk '{print $1}')
-INTEGRITY=$(sqlite3 "${BACKUP_CONSISTENT}" "PRAGMA integrity_check;")
-FK_CHECK=$(sqlite3 "${BACKUP_CONSISTENT}" "PRAGMA foreign_key_check;")
-BASE_SAMPLES=$(sqlite3 "${BACKUP_CONSISTENT}" "SELECT count(*) FROM Sample;")
+INTEGRITY=$(${SQLITE3_CMD} "${BACKUP_CONSISTENT}" "PRAGMA integrity_check;")
+FK_CHECK=$(${SQLITE3_CMD} "${BACKUP_CONSISTENT}" "PRAGMA foreign_key_check;")
+BASE_SAMPLES=$(${SQLITE3_CMD} "${BACKUP_CONSISTENT}" "SELECT count(*) FROM Sample;")
 
 echo "  Consistent pre-operation backup saved: ${BACKUP_CONSISTENT}"
 echo "  Pre-operation SHA-256: ${BACKUP_HASH}"
@@ -425,10 +461,10 @@ echo "✓ Apply completed successfully! ${EXPECTED_APPLY_COUNT} Expected specime
 
 # --- Step 7: Post-Apply WAL Checkpoint & Integrity Audit ---
 echo "--- Step 7: Post-Apply WAL Checkpoint & Integrity Audit ---"
-sqlite3 "${DB_PATH}" "PRAGMA wal_checkpoint(TRUNCATE);"
-POST_INTEGRITY=$(sqlite3 "${DB_PATH}" "PRAGMA integrity_check;")
-POST_FK=$(sqlite3 "${DB_PATH}" "PRAGMA foreign_key_check;")
-POST_SAMPLES=$(sqlite3 "${DB_PATH}" "SELECT count(*) FROM Sample;")
+${SQLITE3_CMD} "${DB_PATH}" "PRAGMA wal_checkpoint(TRUNCATE);"
+POST_INTEGRITY=$(${SQLITE3_CMD} "${DB_PATH}" "PRAGMA integrity_check;")
+POST_FK=$(${SQLITE3_CMD} "${DB_PATH}" "PRAGMA foreign_key_check;")
+POST_SAMPLES=$(${SQLITE3_CMD} "${DB_PATH}" "SELECT count(*) FROM Sample;")
 EXPECTED_TOTAL=$((BASE_SAMPLES + EXPECTED_APPLY_COUNT))
 
 echo "  Post-apply Samples: ${POST_SAMPLES} (Expected: ${EXPECTED_TOTAL})"
@@ -457,18 +493,19 @@ fi
 
 docker start "${APP_CONTAINER_NAME}"
 APP_HEALTH_OK=false
-for i in $(seq 1 30); do
+HEALTH_RETRIES=${HEALTH_RETRIES:-30}
+for i in $(seq 1 "${HEALTH_RETRIES}"); do
     HEALTH=$(${CURL_CMD} -sf http://localhost:3000/api/health | grep -o '"status":"ok"' || true)
     if [ -n "$HEALTH" ]; then
         APP_HEALTH_OK=true
-        echo "✓ Application container healthy at second $i!"
+        echo "✓ Application container healthy at attempt $i!"
         break
     fi
     sleep 1
 done
 
 if [ "${APP_HEALTH_OK}" != "true" ]; then
-    echo "FATAL: Application container failed health check within 30 seconds!"
+    echo "FATAL: Application container failed health check within ${HEALTH_RETRIES} attempts!"
     exit 1
 fi
 PHASE="APP_HEALTHY"
