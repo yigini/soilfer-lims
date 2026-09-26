@@ -2,14 +2,23 @@
 'use strict';
 
 /**
- * Packaged Rehearsal for execute_release_pr147.sh (Issue #146, PR #147)
+ * Shell Wrapper Mock Integration Suite (Simulated Docker Environment)
+ * File: server/scripts/rehearsal_packaged_wrapper.cjs
  * 
- * Tests the actual bash release wrapper execute_release_pr147.sh in disposable isolation:
+ * Tests the execute_release_pr147.sh wrapper orchestration logic in disposable isolation
+ * with simulated Docker, Systemctl, and SQLite environments:
  *   1. Full packaged execution with --entrypoint node, private mounts, and verified writer exclusion
  *   2. Partial-apply mid-flight failure recovery (asserts all writers stopped, bit-for-bit DB restoration, ingress stays 503)
  *   3. Process interruption with live writer (asserts live writer stopped/killed, bit-for-bit restoration, ingress stays 503)
  *   4. Failed health check post-apply (asserts applied database preserved, ingress remains 503 maintenance)
- *   5. Mismatched image ID assertion (refuses execution before mutation)
+ *   5. Retagged old container rejection (asserts container immutable .Image must match reviewed runner image)
+ *   6. Docker inspect unavailable fails closed (asserts daemon failure halts DB recovery without corruption)
+ *   7. Preflight failure preserves live app & proxy (asserts INIT failures do not stop app or change proxy)
+ *   8. Mismatched image ID assertion (refuses execution before mutation)
+ * 
+ * Note: Real Docker container boundary verification (packaged container runtime,
+ * entrypoints, volume mounts, and live writer termination) is executed separately
+ * in isolated GitHub Actions CI via server/scripts/rehearsal_docker_boundary.cjs.
  * 
  * Usage:
  *   node server/scripts/rehearsal_packaged_wrapper.cjs
@@ -35,7 +44,8 @@ const tmpDir = path.join(serverDir, `.tmp_rehearsal_pkg_${Date.now()}`);
 fs.mkdirSync(tmpDir, { recursive: true });
 
 console.log('================================================================');
-console.log('  PACKAGED WRAPPER REHEARSAL: EXECUTE_RELEASE_PR147.SH          ');
+console.log('  SHELL WRAPPER MOCK INTEGRATION SUITE (SIMULATED DOCKER)       ');
+console.log('  Testing execute_release_pr147.sh Orchestration & Rollback     ');
 console.log('================================================================');
 console.log(`Fixture Dir: ${tmpDir}`);
 
@@ -94,8 +104,14 @@ function setupEnvironmentFixture(testDir, options = {}) {
     const stateFile = path.join(testDir, 'mock_state.json');
     const initialState = {
         containers: {
-            'soilfer-lims': { running: true, image: REVIEWED_IMAGE, imageId: REVIEWED_IMAGE_ID, mount: 'lims_lims-data' }
+            'soilfer-lims': {
+                running: options.appRunning !== false,
+                image: options.appImage || REVIEWED_IMAGE,
+                imageId: options.appImageId || REVIEWED_IMAGE_ID,
+                mount: 'lims_lims-data'
+            }
         },
+        daemonUnavailable: options.daemonUnavailable || false,
         healthOk: options.healthOk !== false,
         failDuringApply: options.failDuringApply || false,
         interruptDelayMs: options.interruptDelayMs || 0
@@ -175,19 +191,28 @@ const args = rawArgs[0] === '--' ? rawArgs.slice(1) : rawArgs;
 const stateFile = '${stateFile.replace(/\\/g, '/')}';
 const state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
 
+if (state.daemonUnavailable) {
+    console.error('Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?');
+    process.exit(1);
+}
+
 const cmd = args[0];
 
 if (cmd === 'volume' && args[1] === 'inspect') {
-    console.log('${mockVol.replace(/\\/g, '/')}');
-    process.exit(0);
+    if (args.includes('lims_lims-data')) {
+        console.log('${mockVol.replace(/\\/g, '/')}');
+        process.exit(0);
+    }
+    console.error('Error: No such volume: ' + args.slice(2).join(' '));
+    process.exit(1);
 }
 
 if (cmd === 'image' && args[1] === 'inspect') {
-    if (args.includes('${REVIEWED_IMAGE}')) {
+    if (args.includes('${REVIEWED_IMAGE}') || args.includes('${REVIEWED_IMAGE_ID}')) {
         console.log('${REVIEWED_IMAGE_ID}');
         process.exit(0);
     }
-    console.error('Image not found');
+    console.error('Error: No such image: ' + args.slice(2).join(' '));
     process.exit(1);
 }
 
@@ -196,15 +221,15 @@ if (cmd === 'inspect') {
     const format = args.includes('--format') ? args[args.indexOf('--format') + 1] : '';
     const container = state.containers[target];
     if (!container) {
-        if (format.includes('Running')) {
-            console.log('false');
-            process.exit(0);
-        }
-        console.error('No such container');
+        console.error('Error: No such container: ' + target);
         process.exit(1);
     }
     if (format.includes('Config.Image')) {
         console.log(container.image);
+        process.exit(0);
+    }
+    if (format.includes('.Image')) {
+        console.log(container.imageId || container.image);
         process.exit(0);
     }
     if (format.includes('State.Running')) {
@@ -221,6 +246,7 @@ if (cmd === 'inspect') {
 if (cmd === 'stop') {
     for (let i = 1; i < args.length; i++) {
         const c = args[i];
+        if (c.startsWith('-')) continue;
         if (state.containers[c]) {
             state.containers[c].running = false;
         }
@@ -232,6 +258,7 @@ if (cmd === 'stop') {
 if (cmd === 'rm') {
     for (let i = 1; i < args.length; i++) {
         const c = args[i];
+        if (c.startsWith('-')) continue;
         delete state.containers[c];
     }
     fs.writeFileSync(stateFile, JSON.stringify(state, null, 2));
@@ -239,7 +266,7 @@ if (cmd === 'rm') {
 }
 
 if (cmd === 'start') {
-    const c = args[1];
+    const c = args[args.length - 1];
     if (state.containers[c]) {
         state.containers[c].running = true;
     }
@@ -529,33 +556,111 @@ async function runAllPackagedRehearsals() {
         }
         console.log('  ✓ Rehearsal 4 PASSED: Failed health preserved applied database and retained 503 maintenance');
 
-        console.log('\n[Packaged Rehearsal 5] Mismatched Image Refuses Execution Before Mutation...');
-        const dir5 = path.join(tmpDir, 'test_mismatch_image');
-        const env5 = setupEnvironmentFixture(dir5, {});
-        // Call wrapper with an un-reviewed or mismatched image tag
-        const res5 = runWrapperInTestEnv(dir5, {}, ['soilfer-lims:unreviewed-tag']);
+        console.log('\n[Packaged Rehearsal 5] Retagged Old Container Rejection...');
+        const dir5 = path.join(tmpDir, 'test_retagged_container');
+        const env5 = setupEnvironmentFixture(dir5, {
+            appImage: REVIEWED_IMAGE,
+            appImageId: 'sha256:OLD_OUTDATED_CONTAINER_DIGEST'
+        });
+        const res5 = runWrapperInTestEnv(dir5, {});
 
         if (res5.status === 0) {
-            throw new Error('Scenario 5 should have refused execution with mismatched image');
+            throw new Error('Scenario 5 should have failed due to retagged old container');
         }
-        if (!res5.stdout.includes('Reviewed image') || !res5.stdout.includes('FATAL')) {
-            throw new Error('Scenario 5 missing image mismatch FATAL error');
+        if (!res5.stdout.includes('actual image ID') || !res5.stdout.includes('does not match reviewed runner image')) {
+            throw new Error('Scenario 5 missing retagged container FATAL error in stdout: ' + res5.stdout);
         }
 
         // Verify DB was untouched
         const db5 = new Database(env5.fixtureDb, { readonly: true });
         const samples5 = db5.prepare('SELECT COUNT(*) as c FROM Sample').get().c;
-        const cfg5 = db5.prepare('SELECT isActive, projectCode FROM KoboConfig WHERE id = ?').get(CONFIG_ID);
         db5.close();
-
-        if (samples5 !== 1 || cfg5.isActive !== 0) {
-            throw new Error('Scenario 5 modified database despite image mismatch!');
+        if (samples5 !== 1) {
+            throw new Error('Scenario 5 modified database despite container image mismatch!');
         }
-        console.log('  ✓ Rehearsal 5 PASSED: Mismatched image immediately refused execution; zero state modified');
+
+        // Verify live container was NOT stopped
+        const state5 = JSON.parse(fs.readFileSync(env5.stateFile, 'utf8'));
+        if (!state5.containers['soilfer-lims'].running) {
+            throw new Error('Scenario 5 stopped live container during preflight failure!');
+        }
+        console.log('  ✓ Rehearsal 5 PASSED: Retagged container rejected; live app container untouched');
+
+        console.log('\n[Packaged Rehearsal 6] Docker Inspect Unavailable Fails Closed...');
+        const dir6 = path.join(tmpDir, 'test_inspect_unavailable');
+        const env6 = setupEnvironmentFixture(dir6, { daemonUnavailable: true });
+        const res6 = runWrapperInTestEnv(dir6, {});
+
+        if (res6.status === 0) {
+            throw new Error('Scenario 6 should have failed when Docker daemon is unavailable');
+        }
+        if (!res6.stdout.includes('FATAL') && !res6.stderr.includes('Cannot connect')) {
+            throw new Error('Scenario 6 missing daemon unavailable error: ' + res6.stderr);
+        }
+
+        const db6 = new Database(env6.fixtureDb, { readonly: true });
+        const samples6 = db6.prepare('SELECT COUNT(*) as c FROM Sample').get().c;
+        db6.close();
+        if (samples6 !== 1) {
+            throw new Error('Scenario 6 modified database despite inspect failure!');
+        }
+        console.log('  ✓ Rehearsal 6 PASSED: Docker inspect failure fails closed; DB untouched');
+
+        console.log('\n[Packaged Rehearsal 7] Preflight Failure (INIT Phase) Preserves Live App & Proxy...');
+        const dir7 = path.join(tmpDir, 'test_preflight_init_fail');
+        const env7 = setupEnvironmentFixture(dir7, {});
+        // Run with nonexistent snapshot
+        const res7 = runWrapperInTestEnv(dir7, {
+            PRIVATE_SNAPSHOT: '/nonexistent/path/ghana_kobo_snapshot_40747.json'
+        });
+
+        if (res7.status === 0) {
+            throw new Error('Scenario 7 should have failed due to missing snapshot');
+        }
+        if (!res7.stdout.includes('Preflight check failed prior to maintenance or mutation') ||
+            !res7.stdout.includes('Live application container and reverse proxy remain untouched')) {
+            throw new Error('Scenario 7 missing preflight preservation notice');
+        }
+
+        const state7 = JSON.parse(fs.readFileSync(env7.stateFile, 'utf8'));
+        if (!state7.containers['soilfer-lims'].running) {
+            throw new Error('Scenario 7 stopped live container during preflight failure!');
+        }
+        const apacheLive7 = fs.readFileSync(path.join(env7.mockApache, 'httpd-lims.conf'), 'utf8');
+        if (!apacheLive7.includes('LIVE REVERSE PROXY CONFIG')) {
+            throw new Error('Scenario 7 mutated Apache reverse proxy during preflight failure!');
+        }
+        console.log('  ✓ Rehearsal 7 PASSED: Preflight failure preserved live app and live proxy untouched');
+
+        console.log('\n[Packaged Rehearsal 8] Mismatched Image Tag Refuses Execution Before Mutation...');
+        const dir8 = path.join(tmpDir, 'test_mismatch_image');
+        const env8 = setupEnvironmentFixture(dir8, {});
+        // Call wrapper with an un-reviewed or mismatched image tag
+        const res8 = runWrapperInTestEnv(dir8, {}, ['soilfer-lims:unreviewed-tag']);
+
+        if (res8.status === 0) {
+            throw new Error('Scenario 8 should have refused execution with mismatched image');
+        }
+        if (!res8.stdout.includes('Reviewed image') || !res8.stdout.includes('FATAL')) {
+            throw new Error('Scenario 8 missing image mismatch FATAL error');
+        }
+
+        // Verify DB was untouched
+        const db8 = new Database(env8.fixtureDb, { readonly: true });
+        const samples8 = db8.prepare('SELECT COUNT(*) as c FROM Sample').get().c;
+        const cfg8 = db8.prepare('SELECT isActive, projectCode FROM KoboConfig WHERE id = ?').get(CONFIG_ID);
+        db8.close();
+
+        if (samples8 !== 1 || cfg8.isActive !== 0) {
+            throw new Error('Scenario 8 modified database despite image mismatch!');
+        }
+        console.log('  ✓ Rehearsal 8 PASSED: Mismatched image immediately refused execution; zero state modified');
 
         console.log('\n================================================================');
-        console.log('  ALL 5 PACKAGED WRAPPER REHEARSALS COMPLETED SUCCESSFULLY      ');
-        console.log('  Success | Partial-Apply | Interrupt | Health-Fail | Image-Check');
+        console.log('  ALL 8 SHELL WRAPPER MOCK REHEARSALS COMPLETED SUCCESSFULLY    ');
+        console.log('  1. Success | 2. Partial-Apply | 3. Interrupt | 4. Health-Fail ');
+        console.log('  5. Retagged Container | 6. Inspect Fail | 7. Preflight Presrv ');
+        console.log('  8. Unknown Tag Mismatch                                       ');
         console.log('================================================================\n');
 
     } finally {

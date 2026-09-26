@@ -60,5 +60,12 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          load: true
           push: false
           tags: soilfer-lims:ci
+
+      - name: Run Real Disposable Docker Boundary Rehearsal
+        run: node server/scripts/rehearsal_docker_boundary.cjs
+        env:
+          IMAGE_TAG: soilfer-lims:ci
+          CI: true

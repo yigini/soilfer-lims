@@ -26,8 +26,10 @@ CURL_CMD=${CURL_CMD:-"curl"}
 PRIVATE_SNAPSHOT=${PRIVATE_SNAPSHOT:-"${LIMS_OPT_DIR}/private_kobo/ghana_kobo_snapshot_40747.json"}
 PRIVATE_MANIFEST=${PRIVATE_MANIFEST:-"${LIMS_OPT_DIR}/private_kobo/ghana_kobo_manifest_40747.json"}
 
-EXPECTED_SNAPSHOT_SHA="33db90cdcab60ccf4801a7754d8444893c0b6ee25f269a65366d6fed5046292f"
-EXPECTED_MANIFEST_SHA="e43d490366eda0e325b1f1639c743b57105a6256e0f406df6f7e1d87514adaed"
+EXPECTED_SNAPSHOT_SHA=${EXPECTED_SNAPSHOT_SHA:-"33db90cdcab60ccf4801a7754d8444893c0b6ee25f269a65366d6fed5046292f"}
+EXPECTED_MANIFEST_SHA=${EXPECTED_MANIFEST_SHA:-"e43d490366eda0e325b1f1639c743b57105a6256e0f406df6f7e1d87514adaed"}
+RUNNER_SCRIPT=${RUNNER_SCRIPT:-"/app/server/scripts/execute_ghana_apply_146.cjs"}
+EXPECTED_APPLY_COUNT=${EXPECTED_APPLY_COUNT:-864}
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_CONSISTENT="${LIMS_OPT_DIR}/backups/dev_pre_issue146_${TIMESTAMP}.db"
@@ -60,18 +62,46 @@ echo "$$" > "${PID_FILE}"
 # Track execution phase for phase-aware recovery decisions
 PHASE="INIT"
 
-# Assert no writers are running
+# Assert no writers are running (fail-closed: inspect failure is NOT treated as stopped)
 assert_no_writers_running() {
     local targets=("${APP_CONTAINER_NAME}" "${RUNNER_DRYRUN_NAME}" "${RUNNER_APPLY_NAME}")
     for c in "${targets[@]}"; do
-        local running
-        running=$(docker inspect "$c" --format '{{.State.Running}}' 2>/dev/null || echo "false")
-        if [ "${running}" = "true" ]; then
-            docker stop -t 5 "$c" 2>/dev/null || true
-            docker rm -f "$c" 2>/dev/null || true
-            running=$(docker inspect "$c" --format '{{.State.Running}}' 2>/dev/null || echo "false")
-            if [ "${running}" = "true" ]; then
-                echo "FATAL: Container '$c' is still running! Writer exclusion cannot be established."
+        local inspect_out
+        local inspect_rc=0
+        inspect_out=$(docker inspect "$c" --format '{{.State.Running}}' 2>&1) || inspect_rc=$?
+
+        if [ ${inspect_rc} -eq 0 ]; then
+            if [ "${inspect_out}" = "true" ]; then
+                echo "Container '$c' is running. Stopping container..."
+                docker stop -t 5 "$c" 2>/dev/null || true
+                if [ "$c" != "${APP_CONTAINER_NAME}" ]; then
+                    docker rm -f "$c" 2>/dev/null || true
+                fi
+                inspect_rc=0
+                inspect_out=$(docker inspect "$c" --format '{{.State.Running}}' 2>&1) || inspect_rc=$?
+                if [ ${inspect_rc} -eq 0 ]; then
+                    if [ "${inspect_out}" != "false" ]; then
+                        echo "FATAL: Container '$c' is still running after stop attempt!"
+                        return 1
+                    fi
+                elif [[ "${inspect_out}" == *"No such"* || "${inspect_out}" == *"not found"* ]]; then
+                    : # Cleanly removed
+                else
+                    echo "FATAL: Docker inspect failed for '$c' after stop attempt: ${inspect_out}"
+                    return 1
+                fi
+            elif [ "${inspect_out}" = "false" ]; then
+                : # Confirmed stopped
+            else
+                echo "FATAL: Unexpected docker inspect output for '$c': ${inspect_out}"
+                return 1
+            fi
+        else
+            # Non-zero exit code: check if container positively does not exist
+            if [[ "${inspect_out}" == *"No such"* || "${inspect_out}" == *"not found"* ]]; then
+                : # Positively established absent container
+            else
+                echo "FATAL: Docker inspect failed for '$c' (exit code ${inspect_rc}): ${inspect_out}"
                 return 1
             fi
         fi
@@ -84,9 +114,13 @@ cleanup() {
     local exit_code=$?
     local signal=${1:-"EXIT"}
 
-    # Remove directory lock and PID file if used
-    rmdir "${LOCK_DIR}" 2>/dev/null || true
-    rm -f "${PID_FILE}" 2>/dev/null || true
+    # Immediately disable all traps to prevent re-entrant or recursive calls
+    trap - SIGHUP SIGINT SIGTERM EXIT
+
+    # Signal arrival forces non-zero exit code
+    if [ "${signal}" != "EXIT" ] && [ ${exit_code} -eq 0 ]; then
+        exit_code=1
+    fi
 
     if [ ${exit_code} -ne 0 ] || [ "${signal}" != "EXIT" ]; then
         echo ""
@@ -95,14 +129,30 @@ cleanup() {
         echo "  Executing phase-aware safe recovery...                   "
         echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 
+        # Phase INIT: Preflight read-only checks failed before any service, proxy, or DB action
+        if [ "${PHASE}" = "INIT" ]; then
+            echo "Preflight check failed prior to maintenance or mutation."
+            echo "Live application container and reverse proxy remain untouched."
+            rmdir "${LOCK_DIR}" 2>/dev/null || true
+            rm -f "${PID_FILE}" 2>/dev/null || true
+            exit ${exit_code}
+        fi
+
         # 1. Terminate and remove all runner containers
-        docker stop -t 5 "${RUNNER_DRYRUN_NAME}" "${RUNNER_APPLY_NAME}" "${APP_CONTAINER_NAME}" 2>/dev/null || true
+        docker stop -t 5 "${RUNNER_DRYRUN_NAME}" "${RUNNER_APPLY_NAME}" 2>/dev/null || true
         docker rm -f "${RUNNER_DRYRUN_NAME}" "${RUNNER_APPLY_NAME}" 2>/dev/null || true
+
+        # If we entered mutating phases, ensure app container is stopped
+        if [ "${PHASE}" != "INGRESS_QUIESCED" ]; then
+            docker stop -t 5 "${APP_CONTAINER_NAME}" 2>/dev/null || true
+        fi
 
         # 2. Confirm all writers are stopped before manipulating database
         if ! assert_no_writers_running; then
             echo "FATAL: Could not confirm all writers stopped! Database recovery halted to prevent corruption."
             echo "Ingress remains write-blocked (503). Operator intervention required."
+            rmdir "${LOCK_DIR}" 2>/dev/null || true
+            rm -f "${PID_FILE}" 2>/dev/null || true
             exit 1
         fi
 
@@ -117,35 +167,57 @@ cleanup() {
                 if [ "${RESTORE_HASH}" != "${BACKUP_HASH}" ]; then
                     echo "FATAL: Restored DB hash (${RESTORE_HASH}) does not match pre-apply backup (${BACKUP_HASH})!"
                     echo "Ingress remains write-blocked (503). Operator intervention required."
+                    rmdir "${LOCK_DIR}" 2>/dev/null || true
+                    rm -f "${PID_FILE}" 2>/dev/null || true
                     exit 1
                 fi
 
-                REC_INTEGRITY=$(sqlite3 "${DB_PATH}" "PRAGMA integrity_check;")
-                REC_FK=$(sqlite3 "${DB_PATH}" "PRAGMA foreign_key_check;")
-                REC_SAMPLES=$(sqlite3 "${DB_PATH}" "SELECT count(*) FROM Sample;")
+                REC_INTEGRITY=$(${SQLITE3_CMD:-sqlite3} "${DB_PATH}" "PRAGMA integrity_check;")
+                REC_FK=$(${SQLITE3_CMD:-sqlite3} "${DB_PATH}" "PRAGMA foreign_key_check;")
+                REC_SAMPLES=$(${SQLITE3_CMD:-sqlite3} "${DB_PATH}" "SELECT count(*) FROM Sample;")
 
                 if [ "${REC_INTEGRITY}" != "ok" ] || [ -n "${REC_FK}" ] || [ "${REC_SAMPLES}" -ne "${BASE_SAMPLES}" ]; then
                     echo "FATAL: Restored database assertions failed!"
                     echo "Ingress remains write-blocked (503). Operator intervention required."
+                    rmdir "${LOCK_DIR}" 2>/dev/null || true
+                    rm -f "${PID_FILE}" 2>/dev/null || true
                     exit 1
                 fi
                 echo "✓ Database restored and bit-for-bit verified (Baseline samples: ${REC_SAMPLES}, Integrity: ok)"
             fi
-        elif [ "${PHASE}" = "APPLY_COMMITTED" ] || [ "${PHASE}" = "POSTFLIGHT_VERIFIED" ] || [ "${PHASE}" = "APP_HEALTHY" ]; then
+        elif [ "${PHASE}" = "APPLY_COMMITTED" ] || [ "${PHASE}" = "POSTFLIGHT_VERIFIED" ] || [ "${PHASE}" = "APP_HEALTHY" ] || [ "${PHASE}" = "RESTORING_INGRESS" ]; then
             echo "NOTICE: Apply operation already committed (864 samples admitted). Preserving applied database state."
             echo "Do NOT restore pre-apply backup; background writers/events may have occurred."
         fi
 
-        # 4. Fail-closed: NEVER restore live ingress on failure!
-        echo "FATAL: Ingress remains write-quiesced (HTTP 503) to protect system. Operator intervention required."
-        exit 1
+        # If failure occurred during proxy restoration, re-apply and verify quiescence
+        if [ "${PHASE}" = "RESTORING_INGRESS" ]; then
+            echo "Re-applying write-quiescence proxy config after restoration failure..."
+            cp "${APACHE_CONF_DIR}/httpd-lims.conf.quiesce" "${APACHE_CONF_DIR}/httpd-lims.conf" 2>/dev/null || true
+            ${SYSTEMCTL_CMD} reload httpd 2>/dev/null || true
+            if grep -q "Write Quiescence Active" "${APACHE_CONF_DIR}/httpd-lims.conf" 2>/dev/null; then
+                echo "✓ Ingress write quiescence re-confirmed active."
+            else
+                echo "WARNING: Ingress state uncertain after proxy reload failure! Operator inspection required."
+            fi
+        fi
+
+        # Fail-closed report: only report 503 if maintenance config is active
+        if grep -q "Write Quiescence Active" "${APACHE_CONF_DIR}/httpd-lims.conf" 2>/dev/null; then
+            echo "FATAL: Ingress remains write-quiesced (HTTP 503) to protect system. Operator intervention required."
+        fi
+
+        # Retain lock throughout entire recovery; release only now
+        rmdir "${LOCK_DIR}" 2>/dev/null || true
+        rm -f "${PID_FILE}" 2>/dev/null || true
+        exit ${exit_code}
     fi
 }
 
-trap 'cleanup 1 "HUP"' SIGHUP
-trap 'cleanup 1 "INT"' SIGINT
-trap 'cleanup 1 "TERM"' SIGTERM
-trap 'cleanup' EXIT
+trap 'cleanup "HUP"' SIGHUP
+trap 'cleanup "INT"' SIGINT
+trap 'cleanup "TERM"' SIGTERM
+trap 'cleanup "EXIT"' EXIT
 
 # --- Step 1: Pre-Execution Assertions (Images, Mounts, Files) ---
 echo "--- Step 1: Pre-Execution Environment & Image Assertions ---"
@@ -181,15 +253,14 @@ if [ -z "${REVIEWED_IMAGE_ID}" ]; then
 fi
 
 # 1.3 Inspect application container and assert image matches reviewed runner image
-APP_IMAGE=$(docker inspect "${APP_CONTAINER_NAME}" --format '{{.Config.Image}}' 2>/dev/null || true)
-if [ -z "${APP_IMAGE}" ]; then
+APP_CONTAINER_IMAGE_ID=$(docker inspect "${APP_CONTAINER_NAME}" --format '{{.Image}}' 2>/dev/null || true)
+if [ -z "${APP_CONTAINER_IMAGE_ID}" ]; then
     echo "FATAL: Application container '${APP_CONTAINER_NAME}' not found or inspect failed!"
     exit 1
 fi
-APP_IMAGE_ID=$(docker image inspect "${APP_IMAGE}" --format '{{.Id}}' 2>/dev/null || true)
 
-if [ "${REVIEWED_IMAGE_ID}" != "${APP_IMAGE_ID}" ]; then
-    echo "FATAL: Container '${APP_CONTAINER_NAME}' image (${APP_IMAGE} -> ${APP_IMAGE_ID}) does not match reviewed runner image (${REVIEWED_IMAGE} -> ${REVIEWED_IMAGE_ID})!"
+if [ "${REVIEWED_IMAGE_ID}" != "${APP_CONTAINER_IMAGE_ID}" ]; then
+    echo "FATAL: Container '${APP_CONTAINER_NAME}' actual image ID (${APP_CONTAINER_IMAGE_ID}) does not match reviewed runner image (${REVIEWED_IMAGE} -> ${REVIEWED_IMAGE_ID})!"
     echo "The reviewed image must be deployed to ${APP_CONTAINER_NAME} before running the correction wrapper."
     exit 1
 fi
@@ -217,7 +288,7 @@ echo "✓ Verified: Container '${APP_CONTAINER_NAME}' mounts volume '${VOLUME_NA
 
 # 1.6 Verify reviewed intake guards exist in reviewed image
 echo "Verifying reviewed intake guards in target image..."
-docker run --rm --entrypoint node --network none "${REVIEWED_IMAGE}" -e "
+docker run --rm --entrypoint node --network none "${REVIEWED_IMAGE_ID}" -e "
 const fs = require('fs');
 const rc = fs.readFileSync('/app/server/controllers/receptionController.js', 'utf8');
 const sc = fs.readFileSync('/app/server/controllers/sampleController.js', 'utf8');
@@ -271,6 +342,7 @@ APACHE_EOF
 cp "${APACHE_CONF_DIR}/httpd-lims.conf.quiesce" "${APACHE_CONF_DIR}/httpd-lims.conf"
 ${SYSTEMCTL_CMD} reload httpd
 echo "✓ Ingress write quiescence active (HTTP 503 for mutating requests, read-only allowed)"
+PHASE="INGRESS_QUIESCED"
 
 # --- Step 3: Quiesce Application Container & Confirm Writer Exclusion ---
 echo "--- Step 3: Quiesce Application Container & Schedulers ---"
@@ -322,8 +394,8 @@ docker run --rm \
   -v lims_lims-assets:/app/server/uploads \
   -v "${PRIVATE_SNAPSHOT}:/private/ghana_kobo_snapshot_40747.json:ro" \
   -v "${PRIVATE_MANIFEST}:/private/ghana_kobo_manifest_40747.json:ro" \
-  "${REVIEWED_IMAGE}" \
-  /app/server/scripts/execute_ghana_apply_146.cjs --dry-run | tee -a "${LOG_FILE}"
+  "${REVIEWED_IMAGE_ID}" \
+  "${RUNNER_SCRIPT}" --dry-run | tee -a "${LOG_FILE}"
 
 PHASE="DRYRUN_DONE"
 
@@ -344,12 +416,12 @@ docker run --rm \
   -v lims_lims-assets:/app/server/uploads \
   -v "${PRIVATE_SNAPSHOT}:/private/ghana_kobo_snapshot_40747.json:ro" \
   -v "${PRIVATE_MANIFEST}:/private/ghana_kobo_manifest_40747.json:ro" \
-  "${REVIEWED_IMAGE}" \
-  /app/server/scripts/execute_ghana_apply_146.cjs --apply | tee -a "${LOG_FILE}"
+  "${REVIEWED_IMAGE_ID}" \
+  "${RUNNER_SCRIPT}" --apply | tee -a "${LOG_FILE}"
 
 # The Commit Point has been reached successfully!
 PHASE="APPLY_COMMITTED"
-echo "✓ Apply completed successfully! 864 Expected specimens admitted."
+echo "✓ Apply completed successfully! ${EXPECTED_APPLY_COUNT} Expected specimens admitted."
 
 # --- Step 7: Post-Apply WAL Checkpoint & Integrity Audit ---
 echo "--- Step 7: Post-Apply WAL Checkpoint & Integrity Audit ---"
@@ -357,7 +429,7 @@ sqlite3 "${DB_PATH}" "PRAGMA wal_checkpoint(TRUNCATE);"
 POST_INTEGRITY=$(sqlite3 "${DB_PATH}" "PRAGMA integrity_check;")
 POST_FK=$(sqlite3 "${DB_PATH}" "PRAGMA foreign_key_check;")
 POST_SAMPLES=$(sqlite3 "${DB_PATH}" "SELECT count(*) FROM Sample;")
-EXPECTED_TOTAL=$((BASE_SAMPLES + 864))
+EXPECTED_TOTAL=$((BASE_SAMPLES + EXPECTED_APPLY_COUNT))
 
 echo "  Post-apply Samples: ${POST_SAMPLES} (Expected: ${EXPECTED_TOTAL})"
 echo "  Post-apply Integrity: ${POST_INTEGRITY}, FK: ${POST_FK:-OK}"
@@ -370,6 +442,19 @@ PHASE="POSTFLIGHT_VERIFIED"
 
 # --- Step 8: Restart Application Container & Verify Health ---
 echo "--- Step 8: Restart Application Container & Verify Health ---"
+
+# Recheck actual container identity and volume mount before resuming
+RESUME_APP_IMAGE_ID=$(docker inspect "${APP_CONTAINER_NAME}" --format '{{.Image}}' 2>/dev/null || true)
+if [ "${RESUME_APP_IMAGE_ID}" != "${REVIEWED_IMAGE_ID}" ]; then
+    echo "FATAL: Application container image changed before restart! Expected ${REVIEWED_IMAGE_ID}, got ${RESUME_APP_IMAGE_ID}"
+    exit 1
+fi
+RESUME_MOUNT=$(docker inspect "${APP_CONTAINER_NAME}" --format '{{range .Mounts}}{{if eq .Destination "/app/server/prisma"}}{{.Name}}{{end}}{{end}}' 2>/dev/null || true)
+if [ "${RESUME_MOUNT}" != "${VOLUME_NAME}" ]; then
+    echo "FATAL: Application container mount changed before restart! Expected ${VOLUME_NAME}, got ${RESUME_MOUNT}"
+    exit 1
+fi
+
 docker start "${APP_CONTAINER_NAME}"
 APP_HEALTH_OK=false
 for i in $(seq 1 30); do
@@ -390,8 +475,12 @@ PHASE="APP_HEALTHY"
 
 # --- Step 9: Restore Live Ingress Traffic ---
 echo "--- Step 9: Restore Live Ingress Traffic ---"
+PHASE="RESTORING_INGRESS"
 cp "${APACHE_CONF_DIR}/httpd-lims.conf.live" "${APACHE_CONF_DIR}/httpd-lims.conf"
-${SYSTEMCTL_CMD} reload httpd
+if ! ${SYSTEMCTL_CMD} reload httpd; then
+    echo "FATAL: Failed to reload Apache with live configuration!"
+    exit 1
+fi
 echo "✓ Live traffic restored."
 PHASE="COMPLETE"
 
@@ -402,5 +491,5 @@ rm -f "${PID_FILE}" 2>/dev/null || true
 
 echo "============================================================"
 echo "  GHANA CORRECTION COMPLETE & VERIFIED                     "
-echo "  864 Expected Specimens Admitted; 4 Held; 0 Regressions   "
+echo "  ${EXPECTED_APPLY_COUNT} Expected Specimens Admitted; 4 Held; 0 Regressions   "
 echo "============================================================"

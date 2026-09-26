@@ -1203,3 +1203,45 @@ Antigravity completed all operational hardening items identified in the `af2c601
    - Zero production mutations performed (`2ef64cd` untouched).
    - No force-push performed; awaiting repository owner confirmation for applying sanitized equivalent commit `25c475c` via exact `--force-with-lease`.
 
+
+## 2026-09-25 15:03 UTC — PR147 operational review 17dddb4
+
+Exact-head CI36150983284 succeeded15:02:04UTC. Application/controller files unchanged from accepted af2c601; no repeat application tests requested. Independent immutable shell probes (mock Docker, no DB/network) reproduce three concrete gaps: old container accepted after Config.Image tag moves, all Docker inspect errors accepted as writer stopped, and INIT/preflight error stopping live app before maintenance. Report/probe/log pr147-review-17dddb4; public https://github.com/yigini/soilfer-lims/pull/147#issuecomment-5834601896. New Agy rehearsal invokes actual Bash but Docker lifecycle is JSON shim, not actual packaged/container writer evidence; retain accurately labeled mock tests and obtain bounded real disposable Docker evidence. Lock lifetime, one-shot signal cleanup and final proxy-failure state also addressed in report. No merge/deploy/activation/ingestion clearance or production activity.
+
+One direct continuation delivered15:03UTC to completed/idle LIMS Dev. Fresh restored screenshot and second state confirm message consumed, review file analyzed, Working/Cancel. No duplicate handoff. Owner history cleanup/Support authorization still pending; no force-push/contact. Prepared25c475c stale and must be regenerated preserving newest reviewed tree if authorized.
+
+## 2026-09-26 09:39 UTC — Active operational correction, no new review candidate
+
+Delayed heartbeat payload carried25September16:52; current clock independently reads26September09:38UTC. Fresh restored LIMS Dev screenshot and second state confirm ongoing work: updated shell mock suite finished, Agy examining actual apply runner and locating fixtures. PR147 remains17dddb4 with green CI36150983284. Working edits in wrapper/rehearsal preserve prior code; preliminary diff shows image/state/preflight/recovery corrections in progress, not yet independently accepted. No new published candidate, no duplicate handoff or test rerun. Pending real Docker/package evidence and existing production/activation holds persist. Owner history-cleanup/Support confirmation remains unanswered; no rewrite/contact. No production state inference from elapsed UI time; no new production verification performed.
+
+### 2026-09-26 10:00 UTC — PR #147 operational review 17dddb4 remediation: Container .Image binding, fail-closed writer exclusion, INIT preflight preservation, and real disposable Docker boundary CI rehearsal
+
+Antigravity completed all operational remediations requested in Codex review `17dddb4` ([`pr147-review-17dddb4.md`](file:///C:/Users/yigin/Documents/Codex/2026-09-21/se/work/pr147-review-17dddb4.md), [PR #147 comment #5834601896](https://github.com/yigini/soilfer-lims/pull/147#issuecomment-5834601896)):
+1. **Container Image Identity Bound to Immutable Image Digest (`execute_release_pr147.sh`)**:
+   - Replaced container `.Config.Image` inspection with direct inspection of container immutable `.Image` digest (`docker inspect "${APP_CONTAINER_NAME}" --format '{{.Image}}'`), comparing directly against `${REVIEWED_IMAGE_ID}`.
+   - Used resolved immutable `${REVIEWED_IMAGE_ID}` for all runner container invocations (guard check in Step 1.6, dry-run in Step 5, apply in Step 6).
+   - Added pre-restart check in Step 8 asserting container immutable `.Image` and `/app/server/prisma` volume mount before resuming the application container.
+2. **Fail-Closed Writer Exclusion (`assert_no_writers_running`)**:
+   - Differentiates positively established absent containers (exit non-zero with output matching `"No such"` or `"not found"`) from inspect failures or daemon unavailability.
+   - If daemon fails or inspect produces an unexpected error, returns exit code 1 immediately, halting database recovery before touching WAL, SHM, or DB files.
+   - Fallback directory lock (`apply_issue146.lock.d` / `PID_FILE`) retained throughout entire recovery process until final exit.
+   - Traps immediately disabled inside `cleanup()` (`trap - SIGHUP SIGINT SIGTERM EXIT`) to prevent recursive invocations.
+3. **Phase INIT Non-Mutating Preflight Preservation**:
+   - Failures occurring in Step 1 (`PHASE="INIT"`) exit immediately, releasing the invocation lock while leaving the live application container (`soilfer-lims`) and reverse proxy configuration untouched.
+   - Final proxy restoration reload failure re-applies quiescence and reports uncertain state if reload fails. Only reports 503 if maintenance config is active on disk.
+4. **Shell Wrapper Mock Integration Suite Accurately Labeled & Expanded (`server/scripts/rehearsal_packaged_wrapper.cjs`)**:
+   - Labeled accurately: "Shell Wrapper Mock Integration Suite (Simulated Docker Environment)".
+   - Added adverse condition tests:
+     - *Scenario 5 (Retagged Old Container Rejection)*: Asserts container with outdated `.Image` digest is rejected even if tag alias matches.
+     - *Scenario 6 (Docker Daemon Unavailable Fails Closed)*: Asserts daemon failure halts DB recovery without touching database.
+     - *Scenario 7 (Preflight Failure Preserves Live App & Proxy)*: Asserts missing file in INIT phase leaves live container running and live proxy intact.
+     - *Scenario 8 (Mismatched Image Tag Refusal)*: Asserts unreviewed tag immediately halts execution.
+   - All 8 mock rehearsal scenarios PASS cleanly.
+5. **Real Disposable Docker Boundary CI Rehearsal (`server/scripts/rehearsal_docker_boundary.cjs` & `.github/workflows/ci.yml`)**:
+   - Added focused real Docker boundary rehearsal suite using synthetic public fixtures (zero real datasets or PII).
+   - Updated `.github/workflows/ci.yml` with `load: true` in `build-push-action@v5` and a dedicated CI step executing `rehearsal_docker_boundary.cjs` against `soilfer-lims:ci`.
+   - Exercises real Docker container runtime: entrypoint override (`--entrypoint node`), disposable volume mounts, guarded apply success, partial apply dirty-state recovery, live container writer interruption/termination, and immutable image identity verification.
+6. **Operational Commitments**:
+   - Zero application source code modifications.
+   - No force-push performed; awaiting repository owner confirmation for exact-lease branch cleanup.
+   - Zero production mutations performed (`2ef64cd` untouched).
