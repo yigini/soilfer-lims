@@ -57,7 +57,7 @@ function buildSampleWhere(auth, query = {}) {
         }
     }
 
-    // 2. Strict Laboratory Scoping (Fail-closed)
+    // 2. Strict Laboratory Scoping (Fail-closed; R4: assignedLab is authoritative, labId is accession)
     const isApiKey = auth?.type === 'API_KEY';
     const keyLabs = auth?.labs || [];
     const hasGlobalLab = keyLabs.includes('*') || (!isApiKey && auth?.role === 'SUPER_ADMIN');
@@ -66,33 +66,36 @@ function buildSampleWhere(auth, query = {}) {
         if (!hasGlobalLab) {
             if (!Array.isArray(keyLabs) || keyLabs.length === 0) {
                 // Deny: API key lacks explicit laboratory authorization
-                where.OR = [{ labId: '__denied__' }, { assignedLab: '__denied__' }];
-            } else if (query.labId) {
-                if (keyLabs.includes(query.labId)) {
-                    where.OR = [{ labId: query.labId }, { assignedLab: query.labId }];
+                where.assignedLab = '__denied__';
+            } else if (query.labId || query.assignedLab) {
+                const requested = query.assignedLab || query.labId;
+                if (keyLabs.includes(requested)) {
+                    where.assignedLab = requested;
                 } else {
-                    where.OR = [{ labId: '__denied__' }, { assignedLab: '__denied__' }];
+                    where.assignedLab = '__denied__';
                 }
             } else {
-                where.OR = [{ labId: { in: keyLabs } }, { assignedLab: { in: keyLabs } }];
+                where.assignedLab = { in: keyLabs };
             }
-        } else if (query.labId) {
-            where.OR = [{ labId: query.labId }, { assignedLab: query.labId }];
+        } else if (query.labId || query.assignedLab) {
+            where.assignedLab = query.assignedLab || query.labId;
         }
     } else {
         // JWT User scoping
-        if (query.labId) {
-            if (hasGlobalLab || keyLabs.includes(query.labId) || auth?.labId === query.labId) {
-                where.OR = [{ labId: query.labId }, { assignedLab: query.labId }];
+        const userLab = auth?.labId;
+        const requested = query.assignedLab || query.labId;
+        if (requested) {
+            if (hasGlobalLab || keyLabs.includes(requested) || userLab === requested) {
+                where.assignedLab = requested;
             } else {
-                where.OR = [{ labId: '__denied__' }, { assignedLab: '__denied__' }];
+                where.assignedLab = '__denied__';
             }
         } else if (!hasGlobalLab) {
-            const allowedLabs = keyLabs.length > 0 ? keyLabs : (auth?.labId ? [auth.labId] : []);
+            const allowedLabs = keyLabs.length > 0 ? keyLabs : (userLab ? [userLab] : []);
             if (allowedLabs.length > 0) {
-                where.OR = [{ labId: { in: allowedLabs } }, { assignedLab: { in: allowedLabs } }];
+                where.assignedLab = { in: allowedLabs };
             } else {
-                where.OR = [{ labId: '__denied__' }, { assignedLab: '__denied__' }];
+                where.assignedLab = '__denied__';
             }
         }
     }
@@ -164,8 +167,10 @@ function buildSampleWhere(auth, query = {}) {
 
 /**
  * Build Prisma `where` clause for Spectral queries enforcing release policy & lab/country scoping.
+ * Enforces parent specimen relationship and release constraints (R4, Probe 15).
  */
 function buildSpectralWhere(auth, query = {}) {
+    const parentSampleWhere = buildSampleWhere(auth, query);
     const where = {
         isCurrent: true
     };
@@ -182,40 +187,34 @@ function buildSpectralWhere(auth, query = {}) {
     if (query.qcStatus) where.qcStatus = query.qcStatus.toUpperCase();
     if (query.instrument || query.equipmentId) where.equipmentId = query.instrument || query.equipmentId;
 
-    // Laboratory scoping
-    const isApiKey = auth?.type === 'API_KEY';
-    const keyLabs = auth?.labs || [];
-    const hasGlobalLab = keyLabs.includes('*') || (!isApiKey && auth?.role === 'SUPER_ADMIN');
-
-    if (isApiKey) {
-        if (!hasGlobalLab) {
-            if (!Array.isArray(keyLabs) || keyLabs.length === 0) {
-                where.labId = '__denied__';
-            } else if (query.labId) {
-                where.labId = keyLabs.includes(query.labId) ? query.labId : '__denied__';
-            } else {
-                where.labId = { in: keyLabs };
-            }
-        } else if (query.labId) {
-            where.labId = query.labId;
-        }
-    } else if (!hasGlobalLab) {
-        const allowedLabs = keyLabs.length > 0 ? keyLabs : (auth?.labId ? [auth.labId] : []);
-        if (allowedLabs.length > 0) {
-            where.labId = query.labId ? (allowedLabs.includes(query.labId) ? query.labId : '__denied__') : { in: allowedLabs };
-        } else {
-            where.labId = '__denied__';
-        }
-    } else if (query.labId) {
-        where.labId = query.labId;
+    // Laboratory scoping directly on spectral row labId
+    if (parentSampleWhere.assignedLab) {
+        where.labId = parentSampleWhere.assignedLab;
     }
 
+    // Enforce parent sample release, project, country, and lab policy (R4, Probe 15)
+    where.sample = parentSampleWhere;
+
     return where;
+}
+
+/**
+ * Translates exchange spectral query into valid Prisma where clause for the SpectralData model.
+ * Prisma's SpectralData model has labId and sampleId columns, but no 'sample' relation.
+ */
+function toPrismaSpectralWhere(spectralWhere) {
+    if (!spectralWhere) return {};
+    const { sample, ...cleanWhere } = spectralWhere;
+    if (sample && !cleanWhere.labId && sample.assignedLab) {
+        cleanWhere.labId = sample.assignedLab;
+    }
+    return cleanWhere;
 }
 
 module.exports = {
     AUTHORIZED_RELEASE_STATUSES,
     isRestrictedConsumer,
     buildSampleWhere,
-    buildSpectralWhere
+    buildSpectralWhere,
+    toPrismaSpectralWhere
 };

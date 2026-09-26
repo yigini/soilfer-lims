@@ -56,6 +56,9 @@ const apiKeyAuth = async (req, res, next) => {
 
             req.sisAuth = {
                 type: 'API_KEY',
+                id: apiKey.id,
+                keyId: apiKey.id,
+                keyPrefix: apiKey.keyPrefix,
                 name: apiKey.name,
                 role: apiKey.role,
                 countries: apiKey.countries ? JSON.parse(apiKey.countries) : null,
@@ -82,6 +85,8 @@ const apiKeyAuth = async (req, res, next) => {
             const user = decision.user;
             req.sisAuth = {
                 type: 'JWT_USER',
+                id: user.id,
+                userId: user.id,
                 name: user.name || user.username,
                 role: user.role,
                 countries: user.countries ? JSON.parse(user.countries) : null,
@@ -114,6 +119,21 @@ const optionalApiKeyAuth = async (req, res, next) => {
 
 apiKeyAuth.optional = optionalApiKeyAuth;
 
+const requireRole = (allowedRoles = []) => (req, res, next) => {
+    if (!req.sisAuth) {
+        return res.status(401).json({ error: 'Unauthorized', message: 'Authentication required.' });
+    }
+    const role = req.sisAuth.role;
+    if (allowedRoles.length > 0 && !allowedRoles.includes(role) && role !== 'SUPER_ADMIN') {
+        return res.status(403).json({ error: 'FORBIDDEN', message: `Role '${role}' is not authorized for this operation.` });
+    }
+    return next();
+};
+
+apiKeyAuth.requireRole = requireRole;
+
 module.exports = apiKeyAuth;
 module.exports.optional = optionalApiKeyAuth;
+module.exports.requireRole = requireRole;
+
 

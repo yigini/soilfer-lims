@@ -374,7 +374,7 @@ components:
           type: array
           items:
             type: string
-          example: [opennsis, glosis, default]
+          example: [core-lossless-v2, opennsis, glosis, default]
         supportedMatrices:
           type: array
           items:
@@ -416,9 +416,15 @@ components:
       required:
         - specimenId
         - sourceSystemId
-        - laboratoryId
         - status
+        - publicationStatus
       properties:
+        schemaVersion:
+          type: string
+          example: "2026-09-issue140-v2"
+        sourceSystemId:
+          type: string
+          example: "soilfer-lims-core"
         specimenId:
           type: string
           example: "v2-specimen-001"
@@ -430,14 +436,13 @@ components:
           type: string
           nullable: true
           example: "LAB-2026-0042"
-        sourceSystemId:
-          type: string
-          example: "soilfer-lims-core"
         laboratoryId:
           type: string
+          nullable: true
           example: "GTM-LAB1"
         projectCode:
           type: string
+          nullable: true
           example: "SOILFER-GTM"
         country:
           type: string
@@ -447,159 +452,260 @@ components:
           example: "SOIL"
         status:
           type: string
-          enum: [APPROVED, RELEASED]
           example: "APPROVED"
-        spatial:
+        publicationStatus:
+          type: string
+          enum: [RELEASED, WITHDRAWN, HOLD, DRAFT]
+          example: "RELEASED"
+        profile:
           type: object
-          nullable: true
           properties:
-            type:
-              type: string
-              example: "Point"
-            coordinates:
-              type: array
-              items:
-                type: number
-              example: [-90.5069, 14.6349, 1500.0]
-            crs:
-              type: string
-              example: "urn:ogc:def:crs:OGC:1.3:CRS84"
-            uncertaintyMeters:
-              type: number
-              nullable: true
-        depth:
-          type: object
-          nullable: true
-          properties:
-            topCm:
-              type: number
-              nullable: true
-              example: 0.0
-            bottomCm:
-              type: number
-              nullable: true
-              example: 15.5
-            horizon:
+            code:
               type: string
               nullable: true
-              example: "Ap"
-        temporal:
+              example: "PLOT-ALPHA"
+            namespace:
+              type: string
+              example: "GTM:SOILFER-GTM"
+            key:
+              type: string
+              nullable: true
+              example: "GTM:SOILFER-GTM:PLOT-ALPHA"
+            relation:
+              type: string
+              enum: [SITE_POINT, COMPOSITE, CONFIRMED_PROFILE, UNSPECIFIED]
+              example: "SITE_POINT"
+        sampling:
           type: object
           properties:
             collectionDate:
               type: string
               nullable: true
               example: "2026-04-10"
+            collectionTimestamp:
+              type: string
+              format: date-time
+              nullable: true
+            collectorName:
+              type: string
+              nullable: true
+            depths:
+              type: object
+              properties:
+                topCm:
+                  type: number
+                  nullable: true
+                  example: 0.0
+                bottomCm:
+                  type: number
+                  nullable: true
+                  example: 20.0
+                horizon:
+                  type: string
+                  nullable: true
+                  example: "Ap"
+                intervalLabel:
+                  type: string
+                  nullable: true
+                  example: "0–20 cm"
+                unit:
+                  type: string
+                  example: "cm"
+            location:
+              type: object
+              nullable: true
+              properties:
+                type:
+                  type: string
+                  example: "Point"
+                coordinates:
+                  type: array
+                  items:
+                    type: number
+                  example: [-90.5069, 14.6349]
+                elevationMeters:
+                  type: number
+                  nullable: true
+                accuracyMeters:
+                  type: number
+                  nullable: true
+                source:
+                  type: string
+                  example: "FIELD_GPS"
+                srid:
+                  type: integer
+                  example: 4326
+            site:
+              type: object
+              nullable: true
+        receipt:
+          type: object
+          properties:
+            receptionDate:
+              type: string
+              nullable: true
+              example: "2026-04-12"
             receptionTimestamp:
               type: string
               format: date-time
               nullable: true
-            approvalTimestamp:
+            receivedBy:
+              type: string
+              nullable: true
+            receivedMassGrams:
+              type: number
+              nullable: true
+            moistureOnArrival:
+              type: number
+              nullable: true
+        qualityControl:
+          type: object
+          properties:
+            dryingStatus:
+              type: string
+              nullable: true
+            preparationStatus:
+              type: string
+              nullable: true
+            approvedBy:
+              type: string
+              nullable: true
+            approvedAt:
               type: string
               format: date-time
               nullable: true
-        profile:
-          type: object
-          properties:
-            namespace:
-              type: string
-              example: "SOILFER-GTM"
-            code:
-              type: string
-              nullable: true
-              example: "PLOT-ALPHA"
-            resolvedKey:
-              type: string
-              nullable: true
-              example: "SOILFER-GTM:PLOT-ALPHA"
-            relation:
-              type: string
-              example: "HORIZON_OF"
-        observationsCount:
-          type: integer
-          example: 8
-        hasSpectra:
-          type: boolean
-          example: true
+        qualityIssues:
+          type: array
+          items:
+            type: string
+        observations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Observation'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        publishedAt:
+          type: string
+          format: date-time
 
     Observation:
       type: object
       required:
         - observationId
         - specimenId
-        - analyte
+        - parameter
         - asMeasured
-        - metrology
+        - normalized
       properties:
         observationId:
           type: string
         specimenId:
           type: string
-        analyte:
-          type: object
-          properties:
-            code:
-              type: string
-              example: "PH_H2O"
-            name:
-              type: string
-              example: "Soil pH"
-            procedureUri:
-              type: string
-              format: uri
+        fieldSampleId:
+          type: string
+          nullable: true
+        labSampleId:
+          type: string
+          nullable: true
+        parameter:
+          type: string
+          example: "PH_H2O"
+        parameterCode:
+          type: string
+          example: "PH_H2O"
+        parameterName:
+          type: string
+          example: "Soil pH (H2O)"
         asMeasured:
           type: object
           properties:
             value:
               type: number
+              nullable: true
               example: 6.4
-            rawValue:
+            rawEntry:
               type: string
+              nullable: true
               example: "6.40"
             unit:
               type: string
+              nullable: true
               example: "pH_units"
         normalized:
           type: object
           properties:
             value:
               type: number
+              nullable: true
+              example: 6.4
             unit:
               type: string
-            qudtUri:
-              type: string
-              format: uri
-        metrology:
-          type: object
-          properties:
-            replicateNo:
-              type: integer
-              example: 1
-            basis:
-              type: string
-              example: "AIR_DRY"
-            censoring:
-              type: string
-              example: "NONE"
-            lod:
-              type: number
               nullable: true
-            loq:
-              type: number
-              nullable: true
+              example: "pH_units"
+        controlledUnit:
+          type: string
+          nullable: true
+        qudtUnit:
+          type: string
+          nullable: true
+        lod:
+          type: number
+          nullable: true
+        loq:
+          type: number
+          nullable: true
+        provenance:
+          type: string
+          enum: [MEASURED, PREDICTED, DERIVED, IMPORTED]
+          example: "MEASURED"
+        basis:
+          type: string
+          example: "AIR_DRY"
+        censoring:
+          type: string
+          example: "NONE"
+        replicateNo:
+          type: integer
+          example: 1
+        isValid:
+          type: boolean
+          example: true
         method:
           type: object
-          nullable: true
           properties:
             id:
               type: string
+              nullable: true
+            code:
+              type: string
+              nullable: true
             name:
               type: string
-            isoStandard:
+              nullable: true
+            standard:
               type: string
-        determinedAt:
+              nullable: true
+            procedureUri:
+              type: string
+              nullable: true
+            citation:
+              type: string
+              nullable: true
+        glosis:
+          type: object
+          nullable: true
+        analysedAt:
           type: string
           format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
 
     SpecimenListResponse:
       type: object
@@ -613,20 +719,22 @@ components:
         sourceSystemId:
           type: string
           example: soilfer-lims-core
+        boundaryTimestamp:
+          type: string
+          format: date-time
+        count:
+          type: integer
+        total:
+          type: integer
+        hasMore:
+          type: boolean
+        nextCursor:
+          type: string
+          nullable: true
         data:
           type: array
           items:
             $ref: '#/components/schemas/Specimen'
-        pagination:
-          type: object
-          properties:
-            nextCursor:
-              type: string
-              nullable: true
-            limit:
-              type: integer
-            count:
-              type: integer
 
     SpecimenDetailResponse:
       type: object
@@ -634,6 +742,12 @@ components:
         status:
           type: string
           example: success
+        schemaVersion:
+          type: string
+          example: 2026-09-issue140-v2
+        sourceSystemId:
+          type: string
+          example: soilfer-lims-core
         data:
           $ref: '#/components/schemas/Specimen'
 
@@ -643,13 +757,28 @@ components:
         status:
           type: string
           example: success
+        schemaVersion:
+          type: string
+          example: 2026-09-issue140-v2
+        sourceSystemId:
+          type: string
+          example: soilfer-lims-core
+        boundaryTimestamp:
+          type: string
+          format: date-time
+        count:
+          type: integer
+        total:
+          type: integer
+        hasMore:
+          type: boolean
+        nextCursor:
+          type: string
+          nullable: true
         data:
           type: array
           items:
             $ref: '#/components/schemas/Observation'
-        nextCursor:
-          type: string
-          nullable: true
 
     GeoJsonFeatureCollection:
       type: object
@@ -695,10 +824,11 @@ components:
       properties:
         profile:
           type: string
+          enum: [core-lossless-v2, opennsis]
           default: core-lossless-v2
-        pageSize:
+        ttlHours:
           type: integer
-          default: 100
+          default: 24
         filter:
           type: object
 
@@ -708,18 +838,26 @@ components:
         status:
           type: string
           example: success
+        schemaVersion:
+          type: string
+          example: 2026-09-issue140-v2
+        sourceSystemId:
+          type: string
+          example: soilfer-lims-core
         snapshotId:
           type: string
-        boundaryTimestamp:
+        connectionId:
+          type: string
+        highWaterTimestamp:
           type: string
           format: date-time
-        totalItems:
-          type: integer
-        totalPages:
+        totalSamples:
           type: integer
         expiresAt:
           type: string
           format: date-time
+        ttlHours:
+          type: integer
 
     ChangeFeedResponse:
       type: object
@@ -727,6 +865,12 @@ components:
         status:
           type: string
           example: success
+        schemaVersion:
+          type: string
+          example: 2026-09-issue140-v2
+        sourceSystemId:
+          type: string
+          example: soilfer-lims-core
         boundaryTimestamp:
           type: string
           format: date-time
@@ -742,38 +886,55 @@ components:
           items:
             type: object
             properties:
+              sequence:
+                type: integer
+              eventId:
+                type: string
               eventType:
                 type: string
-                enum: [PUBLICATION, WITHDRAWAL]
+                enum: [PUBLICATION, AMENDMENT, WITHDRAWAL]
               specimenId:
                 type: string
+              fieldSampleId:
+                type: string
+                nullable: true
+              labSampleId:
+                type: string
+                nullable: true
               timestamp:
                 type: string
                 format: date-time
-              specimen:
+              data:
                 $ref: '#/components/schemas/Specimen'
+                nullable: true
 
     ReceiptSubmissionRequest:
       type: object
-      required:
-        - consumerSystemId
       properties:
+        receiptId:
+          type: string
+          nullable: true
         snapshotId:
           type: string
-        consumerSystemId:
+          nullable: true
+        batchId:
           type: string
-        recordsReceived:
-          type: integer
+          nullable: true
         importedCount:
           type: integer
+          minimum: 0
+          default: 0
         quarantinedCount:
           type: integer
+          minimum: 0
+          default: 0
         checkpoint:
           type: string
-        status:
-          type: string
-        notes:
-          type: string
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string
 
     ReceiptSubmissionResponse:
       type: object
@@ -781,6 +942,12 @@ components:
         status:
           type: string
           example: success
+        schemaVersion:
+          type: string
+          example: 2026-09-issue140-v2
+        sourceSystemId:
+          type: string
+          example: soilfer-lims-core
         receipt:
           type: object
           properties:
@@ -793,6 +960,36 @@ components:
               format: date-time
             status:
               type: string
+              example: ACKNOWLEDGED
+
+    StatsResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        schemaVersion:
+          type: string
+          example: 2026-09-issue140-v2
+        sourceSystemId:
+          type: string
+          example: soilfer-lims-core
+        metrics:
+          type: object
+          properties:
+            totalEligibleSamples:
+              type: integer
+            publishedSamples:
+              type: integer
+            publishedObservations:
+              type: integer
+            publishedSpectra:
+              type: integer
+            registeredLabs:
+              type: integer
+            timestamp:
+              type: string
+              format: date-time
 
     ErrorResponse:
       type: object

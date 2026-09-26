@@ -49,6 +49,7 @@ Status Key:
 | **#103** | 5 | User membership reconciliation & country access grants | Open | Pending | Read-only discrepancy ledger (`docs/governance/membership-reconciliation-ledger.md`) | None (Gate) | Governance framework and illustrative archetypes mapped against real Prisma schema (`User.labId`, `User.projects`, `User.countries`, `ProjectLab`); scopeGuard global access rules documented (`SUPER_ADMIN` only); no invented junction tables; production migration hold strictly active. | Under production migration hold. | Reconciliation apply and access expansion NOT performed; governance hold remains. OPEN |
 | **#104** | 5 | Separate Laboratory Dashboard sample count discrepancy | Open | Pending | External reconciliation protocol (`docs/governance/external-dashboard-reconciliation.md`) | None (Gate) | Reconciled metric definitions (Field Registry vs Expected vs Active Lab Work); 3,580 distinguished as reporter snapshot (Luis, 15 Sept 2026); external dashboard architecture documented as unknown; protocol marked as preparation framework; synthetic backfill prohibited. | Requires reporter confirmation from Luis. | Separate dashboard discrepancy not established as fixed; investigation/reporter clarification pending. OPEN |
 | **#146** | 6 | Ghana Expected Arrivals & Kobo Intake Pipeline; duplicate barcode provenance, reception intake hold guards, bounded ingestion | Reproduced & Implemented Locally | `e5d5ebd` (PR #147) | `kobo_duplicate_provenance.test.js` (18/18), `rehearsal_packaged_wrapper.cjs` (9/9), `rehearsal_docker_boundary.cjs` (5/5 real Docker scenarios), CI Run 36236624897 (green in 7m5s) | `e5d5ebd` (v3.5.29) | Primary source coordinates (`sourceServerUrl`, `sourceFormId`, `depth`) persisted in `compactMeta`; original primary replay is 100% idempotent (0 changes); strict 4-coordinate deduplication; unknown/foreign records protected; durable `AMBIGUOUS_PROVENANCE_HOLD` on intra-submission duplicate depths with complete attachment descriptors; reception intake fail-closed guards return HTTP 409 and block workspace intake; production release executed with stopped-writer pre-operation consistent backup (`dev_pre_issue146_20260926_125855.db`, SHA: `94031034...`); atomic CAS activated KoboConfig for `GHA-LAB1` / `SOILFER-US`; single-writer bounded ingestion from verified snapshot admitted exactly 864 EXPECTED specimens (`receptionDate=null`), 4 placed on durable hold; post-apply DB count: 37,742 (36,878 + 864), integrity `ok`, FK `OK`; live reverse proxy traffic restored cleanly. | Historic public PR objects remain a separate unresolved privacy matter pending repository owner confirmation. Zero production mutations outside canonical runner. | Released to Production (`e5d5ebd` / `v3.5.29`); Ready for Codex Independent Post-Verification (`Refs #146`) |
+| **#140** | 8 | Safe LIMS–NSIS exchange gateway; durable state, pure adapter, monotonic change feed, fail-closed scoping, OpenNSIS handoff | Reproduced & Remediated | Corrected Head (PR pending) | `issue140_remediations.test.js` (15/15), `sis_adapter_service.test.js` (20/20), `test_issue140_probes.cjs` (16/16), `data_exchange_reference_client.cjs --verify` (isolated in-memory pass) | Pre-release | All 15 probe failure modes resolved: frozen snapshot items in `_exchange_snapshot_items`, monotonic sequence in `_exchange_journal`, idempotent delivery receipts, strict `assignedLab` scoping, parent sample binding on `buildSpectralWhere`, PII redaction (`collectorName: null`), strict ISO date parsing, non-coercion of empty strings/booleans. OpenNSIS ingestion remains an external receiver acceptance boundary. | Receiver integration and national database ingestion owned by external OpenNSIS maintainer. | Remediated; Awaiting Codex PR Technical Review before Safe Release (`Refs #140`) |
 
 
 ---
@@ -2117,45 +2118,42 @@ Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09
 - **Explicit Identities**: Injects `specimenId` (internal UUID), `fieldSampleId` (`originalId`), `labSampleId` (`labId`), `sourceSystemId` (`soilfer-lims-core`), and `laboratoryId` (`assignedLab`).
 - **Lossless Observation Extraction**: Retains all replicate determinations without analyte-key clobbering; incorporates GloSIS procedure URIs and QUDT unit URIs.
 - **V1/V2 Representations**: Dual export via `formatSampleV1` (backward-compatible additive fields) and `formatSampleV2` (clean structured SOSA/GloSIS payload).
-- **Unit Test Suite**: `server/tests/contracts/sis_adapter_service.test.js` (**17/17 tests passing**).
+- **Unit Test Suite**: `server/tests/contracts/sis_adapter_service.test.js` (**20/20 tests passing**).
 
 ##### Package P2: Shared Access & Publication Policy (`server/services/exchangePolicyService.js`)
 - **Centralized Policy Engine**: Shared `buildSampleWhere` and `buildSpectralWhere` enforcing release invariant (`status IN ('APPROVED', 'RELEASED')`) across all endpoints.
-- **Fail-Closed Laboratory Scoping (IR-14)**: API keys with empty or missing `labs` evaluate to `OR: [{ labId: '__denied__' }, { assignedLab: '__denied__' }]`, returning 0 records.
+- **Strict Authoritative Laboratory Scoping (R4, Probe 14)**: Uses `assignedLab` strictly as the analyzing laboratory identity. Sample accession code `labId` is never evaluated as an institution name, preventing accession matching from bypassing lab authorization.
+- **Bound Spectral Policy (R4, Probe 15)**: `buildSpectralWhere` directly joins and filters on parent sample release status, country, project, and laboratory scopes (`where.sample = buildSampleWhere(auth, query)`).
 - **Territory & Project Scoping**: Filters by permitted countries and parent/child projects.
 - **Legacy V1 Delegation**: Refactored `server/controllers/sisController.js` to delegate where-clause building to `exchangePolicyService.js` and formatting to `sisAdapterService.js`.
 - **Metrics Privacy & Pagination Safety**: `/stats` strictly scopes metrics to authorized labs and approved samples; `/sync` emits `hasMore: true` and an explicit warning if records exceed `limit`.
-- **Contract Test Suite**: `server/tests/contracts/nsis_policy_and_scoping.test.js` (**5/5 tests passing**).
 
 ##### Packages P3 & P4: Lossless V2 Representation & Durable State (`exchangeStateService.js`, `sisV2Controller.js`, `sisV2Routes.js`)
-- **Durable Exchange Storage**: Initialized SQLite tables `_exchange_snapshots`, `_exchange_receipts`, and `_exchange_journal` in `dev.db` via safe idempotent `CREATE TABLE IF NOT EXISTS` (zero schema migration risk).
-- **Resumable Snapshots**: `POST /api/v2/data-exchange/snapshots` generates point-in-time sequence boundaries with 24h TTL; `GET /snapshots/:id/pages` reads paginated items.
-- **Monotonic Change Feed**: `GET /api/v2/data-exchange/changes` provides continuous sync ordered by `(updatedAt, id)`. Returns opaque boundary cursors and enforces HTTP 410 (`CURSOR_EXPIRED`) on invalid/expired cursors.
-- **OpenNSIS Profile Enforcement**: `GET /api/v2/data-exchange/samples?profile=opennsis` strictly requires `labId IS NOT NULL`, preventing un-accessioned field drafts from polluting national accession registers.
-- **RFC 7946 Compliant GeoJSON**: `GET /api/v2/data-exchange/geojson` emits strict GeoJSON Points in WGS84; omits obsolete root `crs` object; stable string `id`.
-- **Contract Test Suite**: `server/tests/contracts/nsis_v2_exchange.test.js` (**8/8 tests passing**).
+- **Durable Versioned Migration**: Executed `server/scripts/migrate_exchange_journal_tables.cjs` to create/upgrade `_exchange_snapshots`, `_exchange_snapshot_items`, `_exchange_journal`, and `_exchange_receipts`.
+- **Frozen Immutable Snapshots (R2, Probes 1 & 2)**: At snapshot creation time, formatted specimen projections are frozen into `_exchange_snapshot_items`. Paged reads fetch exclusively from `_exchange_snapshot_items`, completely eliminating snapshot drift from subsequent result edits or timestamp advances.
+- **Monotonic Append-Only Journal (R1, Probes 4, 5, 6, 7)**: Continuous change feed reads from `_exchange_journal` with strictly monotonic sequence numbers (`sequence: 1, 2, ...`). Publishes `PUBLICATION` events on approval, `AMENDMENT` on result-only edits (fingerprinted via content hash), and `WITHDRAWAL` on cancellations or administrative holds.
+- **Strict Connection Identity & Credential Isolation (R3, Probe 3)**: Connection ID derives from immutable `apiKey.id` / `apiKey.keyPrefix` (`getConnectionId(auth)`). Different keys with the same display name cannot access each other's snapshots or receipts; `SUPER_ADMIN` role does not bypass connection ownership.
+- **Validated Idempotent Receipts (R3, Probe 8)**: Validates that referenced snapshots exist and belong to the connection; rejects negative counts with HTTP 400; enforces idempotency on `(connection_id, snapshot_id, checkpoint)` and `batch_id`.
+- **OpenNSIS Profile Enforcement**: `GET /api/v2/data-exchange/samples?profile=opennsis` strictly requires genuine laboratory accessions (`labId IS NOT NULL`). Rejects unsupported profiles with HTTP 400 `INVALID_PROFILE`.
+- **Truthful Scalar Validation (R5, R6, R7, Probes 9–13)**: Rejects boolean metadata coercion to zero coordinates, validates calendar dates strictly (rejecting invalid dates like `2026-99-99`), preserves LOD/LOQ/provenance, treats empty strings as null, namespacing includes country prefix (`{country}:{projectCode}`), relation defaults to `SITE_POINT` (no false `CONFIRMED_PROFILE` inference from depths), and redacts collector PII in public V2 exchange (`collectorName: null`).
 
 ##### Package P6: UI Connection Manager, Reference Client & Documentation
-- **UI Connection Manager**: Updated `client/src/components/admin/ApiKeyManager.jsx` with V2 endpoints, endpoint version filters (All, V2 Lossless, V1 Legacy), profile selector (`core-lossless-v2`, `opennsis`), cursor parameters, and contract version badges. Built successfully with Vite (2654 modules).
-- **Standalone Reference Client**: Created `server/scripts/data_exchange_reference_client.cjs`. Supports live workflows and self-verification mode (`--verify`). Tested in-process across all 10 contracts (**10/10 checks passing**).
-- **Authoritative V2 Specification**: `docs/data-exchange-api-v2.md` documenting architecture, endpoints, JSON schemas, and error models.
-- **OpenAPI 3.1 Specification**: `docs/openapi-data-exchange-v2.yaml`.
+- **UI Connection Manager**: Updated `client/src/components/admin/ApiKeyManager.jsx` with V2 endpoints, endpoint version filters, profile selector, cursor parameters, and contract version badges. Built cleanly with Vite.
+- **Isolated Non-Destructive Reference Client (R9)**: Updated `server/scripts/data_exchange_reference_client.cjs`. Verification mode (`--verify`) runs an isolated in-memory harness without touching `dev.db` or minting wildcard keys. Suppressed fabricated delivery receipts from ordinary runs (receipts require explicit `--receipt`).
+- **Authoritative V2 Specification & OpenAPI 3.1**: Updated `docs/data-exchange-api-v2.md` and `docs/openapi-data-exchange-v2.yaml` aligned with the exact implemented models.
 - **Operator Runbook**: `docs/nsis-operator-runbook.md` detailing key provisioning, fail-closed scoping, snapshot pruning, and emergency procedures.
-- **Additive V1 Documentation**: Updated `docs/nsis-exchange-v1.md` with additive property notes and V2 upgrade path.
 
 ##### Packages P5 & P7 Handoff: OpenNSIS Mapping & Joint Acceptance Protocol
 - **Mapping & Handoff Guide**: `docs/opennsis-connector-handoff-v1.md` establishing field-by-field mapping between LIMS V2 schema and OpenNSIS `owl2sql` relational tables.
-- **Specific Edge Case Handling**: Preserving decimal depths without rounding, truthful nulls, and multiple replicate determinations.
-- **4-Stage Joint Pilot Protocol**: Outlines Stage 1 (LIMS CI contract checks), Stage 2 (Sandbox credential provisioning), Stage 3 (Initial snapshot harvest), and Stage 4 (Continuous sync and delivery receipt loop).
+- **External Acceptance Boundary**: OpenNSIS code, connector implementation, and national database ingestion are maintained by the external OpenNSIS maintainer. LIMS provides the stable API, documentation, synthetic fixtures, and handoff package; receiver ingestion is never claimed without genuine external OpenNSIS evidence.
 
 #### 3. Verification & Test Summary
-- **Contract Test Suites (`npm test -- tests/contracts/`)**:
-  - `nsis_exchange.test.js`: 4/4 passing.
-  - `sis_adapter_service.test.js`: 17/17 passing.
-  - `nsis_policy_and_scoping.test.js`: 5/5 passing.
-  - `nsis_v2_exchange.test.js`: 8/8 passing.
-  - **Total Exchange Test Coverage**: **34/34 passing (100%)**.
-- **Reference Client Verification (`node scripts/data_exchange_reference_client.cjs --verify`)**:
-  - 10/10 contract checks passing in-process.
+- **Contract Test Suites (`npm.cmd test -- ...`)**:
+  - `sis_adapter_service.test.js`: **20/20 passing (100%)**.
+  - `issue140_remediations.test.js`: **15/15 passing (100%)**.
+- **Probe Verification (`node server/scripts/test_issue140_probes.cjs`)**:
+  - **16/16 probe remediations verified passing (100%)**.
+- **Reference Client Verification (`node server/scripts/data_exchange_reference_client.cjs --verify`)**:
+  - **Isolated synthetic verification passed (100%)**.
 - **Frontend Production Build (`npm run build`)**:
-  - Clean build in 34.92s with zero errors.
+  - Clean build in 15.30s with zero errors.

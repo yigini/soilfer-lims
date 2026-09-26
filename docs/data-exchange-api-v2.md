@@ -76,7 +76,7 @@ Public machine-discovery endpoint declaring server contract version, supported p
   "contractVersion": "2.0.0",
   "schemaVersion": "2026-09-issue140-v2",
   "sourceSystemId": "soilfer-lims-core",
-  "supportedProfiles": ["opennsis", "glosis", "default"],
+  "supportedProfiles": ["core-lossless-v2", "opennsis", "glosis", "default"],
   "supportedMatrices": ["SOIL", "PLANT", "WATER", "FERTILIZER"],
   "limits": {
     "defaultLimit": 50,
@@ -287,19 +287,32 @@ Provides calibrated spectral signatures (Vis-NIR 350–2500 nm and MIR 400–400
 ---
 
 ### 3.8 Resumable Export Snapshots (`POST /snapshots`, `GET /snapshots/:snapshotId/pages`)
-Allows consumers to freeze a point-in-time manifest across the dataset and harvest it page-by-page without drift from concurrent lab publications.
+Allows consumers to freeze a point-in-time manifest across the dataset and harvest it page-by-page without drift from concurrent lab publications. Frozen items are locked at snapshot creation time in `_exchange_snapshot_items`.
 
 - **Creation:** `POST /api/v2/data-exchange/snapshots`
-  - Body: `{ "profile": "core-lossless-v2", "pageSize": 100, "filter": { "country": "GTM" } }`
-  - Response: `{ "snapshotId": "snap_17904...", "boundaryTimestamp": "...", "totalItems": 1200, "totalPages": 12, "expiresAt": "..." }`
+  - Body: `{ "profile": "core-lossless-v2", "ttlHours": 24, "filter": { "country": "GTM" } }`
+  - Response:
+    ```json
+    {
+      "status": "success",
+      "schemaVersion": "2026-09-issue140-v2",
+      "sourceSystemId": "soilfer-lims-core",
+      "snapshotId": "snap_1790461148749_eb88d95e",
+      "connectionId": "key_auth_001",
+      "highWaterTimestamp": "2026-09-27T00:15:00.000Z",
+      "totalSamples": 1200,
+      "expiresAt": "2026-09-28T00:15:00.000Z",
+      "ttlHours": 24
+    }
+    ```
 - **Reading Pages:** `GET /api/v2/data-exchange/snapshots/:snapshotId/pages?limit=100&cursor=...`
-  - Returns items locked to the snapshot boundary sequence.
+  - Returns frozen items strictly locked to the snapshot creation state.
   - Snapshots persist for 24 hours (TTL) in durable exchange storage.
 
 ---
 
 ### 3.9 Continuous Synchronization Change Feed (`GET /changes`)
-Monotonically ordered feed of publication and withdrawal events for automated incremental harvesters.
+Monotonically ordered feed of publication, amendment, and withdrawal events from `_exchange_journal` for automated incremental harvesters.
 
 - **Auth:** Required (`X-API-Key`).
 - **HTTP Method:** `GET`
@@ -316,16 +329,21 @@ Monotonically ordered feed of publication and withdrawal events for automated in
 {
   "status": "success",
   "schemaVersion": "2026-09-issue140-v2",
+  "sourceSystemId": "soilfer-lims-core",
   "boundaryTimestamp": "2026-09-27T00:15:00.000Z",
   "count": 2,
   "hasMore": false,
-  "nextCursor": "eyJsYXN0VXBkYXRlZEF0IjoiMjAyNi0wOS0yN1QwMDoxNDowMC4wMDBaIiwibGFzdElkIjoidjItc3BlY2ltZW4tMSJ9",
+  "nextCursor": "eyJzZXEiOjIsInRpbWVzdGFtcCI6IjIwMjYtMDktMjdUMDA6MTQ6MDAuMDAwWiJ9",
   "changes": [
     {
+      "sequence": 1,
+      "eventId": "evt_550e8400_1790461148749_a1b2",
       "eventType": "PUBLICATION",
       "specimenId": "550e8400-e29b-41d4-a716-446655440000",
+      "fieldSampleId": "BAG-001",
+      "labSampleId": "ACC-001",
       "timestamp": "2026-09-27T00:14:00.000Z",
-      "specimen": { "specimenId": "...", "status": "APPROVED", "observationsCount": 8 }
+      "data": { "specimenId": "550e8400-e29b-41d4-a716-446655440000", "status": "APPROVED", "publicationStatus": "RELEASED", "observations": [...] }
     }
   ]
 }
@@ -345,7 +363,7 @@ The consumer should catch HTTP 410, create a new snapshot via `POST /snapshots`,
 ---
 
 ### 3.10 Consumer Delivery Receipts (`POST /receipts`)
-Enables external consumers (e.g. OpenNSIS ingestion pipeline) to acknowledge successful ingestion batches and record delivery receipts.
+Enables external consumers (e.g. OpenNSIS ingestion pipeline) to acknowledge successful ingestion batches and record delivery receipts. Idempotent on `(connection_id, snapshot_id, checkpoint)` or `batch_id`.
 
 - **Auth:** Required (`X-API-Key`).
 - **HTTP Method:** `POST`
@@ -355,13 +373,9 @@ Enables external consumers (e.g. OpenNSIS ingestion pipeline) to acknowledge suc
 ```json
 {
   "snapshotId": "snap_1790461148749_eb88d95e",
-  "consumerSystemId": "opennsis-kenya-pilot",
-  "recordsReceived": 100,
   "importedCount": 98,
   "quarantinedCount": 2,
-  "checkpoint": "eyJsYXN0VXBkYXRlZEF0IjoiMjAyNi0wOS...",
-  "status": "SUCCESS",
-  "notes": "Batch 1 ingested successfully with 2 spatial warnings."
+  "checkpoint": "harvest-batch-1"
 }
 ```
 
@@ -373,7 +387,7 @@ Enables external consumers (e.g. OpenNSIS ingestion pipeline) to acknowledge suc
   "sourceSystemId": "soilfer-lims-core",
   "receipt": {
     "receiptId": "rec_1790461148894_cb7fa653",
-    "connectionId": "Kenya National SIS Node",
+    "connectionId": "key_auth_001",
     "receivedAt": "2026-09-27T00:18:00.000Z",
     "status": "ACKNOWLEDGED"
   }

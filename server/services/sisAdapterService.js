@@ -66,10 +66,11 @@ function safeParseJson(data) {
 }
 
 /**
- * Validates numeric coordinate and range
+ * Validates numeric coordinate and range (rejects booleans and empty strings)
  */
 function isValidCoordinate(val, min, max) {
-    if (val === null || val === undefined) return false;
+    if (val === null || val === undefined || typeof val === 'boolean') return false;
+    if (typeof val === 'string' && val.trim() === '') return false;
     const num = Number(val);
     return !isNaN(num) && isFinite(num) && num >= min && num <= max;
 }
@@ -77,7 +78,7 @@ function isValidCoordinate(val, min, max) {
 /**
  * Extracts verified WGS84 point coordinates without losing zero or failing on object wrappers.
  */
-function extractCoordinates(sample, field = {}, meta = {}) {
+function extractCoordinates(sample = {}, field = {}, meta = {}) {
     // Check candidates in order of precedence: Sample first-class columns > fieldMetadata > metadata
     const rawLatCandidates = [
         sample.latitude,
@@ -159,7 +160,7 @@ function extractCoordinates(sample, field = {}, meta = {}) {
 /**
  * Extracts depth interval truthfully without inventing 0-20 cm defaults.
  */
-function extractDepths(sample, field = {}, reception = {}) {
+function extractDepths(sample = {}, field = {}, reception = {}) {
     const rawTop = sample.depthTopCm ??
         sample.depthTop ??
         unwrapValue(field.depthTopCm) ??
@@ -174,8 +175,15 @@ function extractDepths(sample, field = {}, reception = {}) {
         unwrapValue(field.depth_bottom) ??
         null;
 
-    let topCm = (rawTop !== null && rawTop !== undefined && rawTop !== '' && !isNaN(Number(rawTop))) ? Number(rawTop) : null;
-    let bottomCm = (rawBottom !== null && rawBottom !== undefined && rawBottom !== '' && !isNaN(Number(rawBottom))) ? Number(rawBottom) : null;
+    const parseNum = (v) => {
+        if (v === null || v === undefined || typeof v === 'boolean') return null;
+        if (typeof v === 'string' && v.trim() === '') return null;
+        const n = Number(v);
+        return (!isNaN(n) && isFinite(n) && n >= 0) ? n : null;
+    };
+
+    let topCm = parseNum(rawTop);
+    let bottomCm = parseNum(rawBottom);
 
     // If still null, attempt parsing from string range e.g. "0-20", "0-20 cm", "0–30"
     if (topCm === null || bottomCm === null) {
@@ -183,10 +191,16 @@ function extractDepths(sample, field = {}, reception = {}) {
         if (typeof textCand === 'string') {
             const m = textCand.match(/([0-9]+(?:\.[0-9]+)?)\s*[-–_]\s*([0-9]+(?:\.[0-9]+)?)/);
             if (m) {
-                if (topCm === null) topCm = Number(m[1]);
-                if (bottomCm === null) bottomCm = Number(m[2]);
+                if (topCm === null) topCm = parseNum(m[1]);
+                if (bottomCm === null) bottomCm = parseNum(m[2]);
             }
         }
+    }
+
+    if (topCm !== null && bottomCm !== null && bottomCm < topCm) {
+        const temp = topCm;
+        topCm = bottomCm;
+        bottomCm = temp;
     }
 
     const horizon = sample.horizon || unwrapValue(field.horizon) || null;
@@ -216,11 +230,23 @@ function extractDepths(sample, field = {}, reception = {}) {
 function formatIsoDate(raw) {
     if (!raw) return null;
     const unwrapped = unwrapValue(raw);
-    if (!unwrapped) return null;
+    if (!unwrapped || typeof unwrapped === 'boolean') return null;
 
-    if (typeof unwrapped === 'string') {
-        const m = unwrapped.match(/^(\d{4}-\d{2}-\d{2})/);
-        if (m) return m[1];
+    let str = String(unwrapped).trim();
+    const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) {
+        const year = parseInt(m[1], 10);
+        const month = parseInt(m[2], 10);
+        const day = parseInt(m[3], 10);
+        if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) {
+            return null;
+        }
+        const d = new Date(Date.UTC(year, month - 1, day));
+        if (isNaN(d.getTime())) return null;
+        if (d.getUTCFullYear() !== year || d.getUTCMonth() !== (month - 1) || d.getUTCDate() !== day) {
+            return null;
+        }
+        return `${m[1]}-${m[2]}-${m[3]}`;
     }
 
     const d = new Date(unwrapped);
@@ -234,7 +260,20 @@ function formatIsoDate(raw) {
 function formatIsoTimestamp(raw) {
     if (!raw) return null;
     const unwrapped = unwrapValue(raw);
-    if (!unwrapped) return null;
+    if (!unwrapped || typeof unwrapped === 'boolean') return null;
+
+    if (typeof unwrapped === 'string') {
+        const m = unwrapped.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (m) {
+            const year = parseInt(m[1], 10);
+            const month = parseInt(m[2], 10);
+            const day = parseInt(m[3], 10);
+            if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) {
+                return null;
+            }
+        }
+    }
+
     const d = new Date(unwrapped);
     if (isNaN(d.getTime())) return null;
     return d.toISOString();
@@ -243,7 +282,7 @@ function formatIsoTimestamp(raw) {
 /**
  * Extracts truthful field dates and distinguishes from lab reception date.
  */
-function extractDates(sample, field = {}, reception = {}) {
+function extractDates(sample = {}, field = {}, reception = {}) {
     const rawCollectionDate = unwrapValue(field.collectionDate) ||
         unwrapValue(field.sampling_date) ||
         unwrapValue(field.date_sampled) ||
@@ -267,9 +306,9 @@ function extractDates(sample, field = {}, reception = {}) {
 
 /**
  * Extracts and namespaces source profile/plot reference.
- * Prevents namespace collision between projects while preserving verified field links.
+ * Disambiguates with country:project namespace and avoids false confirmed profile inference.
  */
-function extractProfileReference(sample, field = {}, meta = {}) {
+function extractProfileReference(sample = {}, field = {}, meta = {}) {
     const rawCode = unwrapValue(field.site_id) ||
         unwrapValue(field.siteId) ||
         unwrapValue(field.plot_id) ||
@@ -284,21 +323,37 @@ function extractProfileReference(sample, field = {}, meta = {}) {
         unwrapValue(meta.plot_id) ||
         null;
 
-    const profileCode = (rawCode !== null && rawCode !== undefined) ? String(rawCode).trim() : null;
+    const profileCode = (rawCode !== null && rawCode !== undefined && typeof rawCode !== 'boolean') ? String(rawCode).trim() : null;
 
-    // Stable programme/project namespace
-    const namespace = sample.projectCode ? String(sample.projectCode).trim() : (sample.country ? `SOILFER-${sample.country}` : 'SOILFER-GLOBAL');
+    // Disambiguate namespace with country and projectCode (R5)
+    const countryPart = (sample.country || sample.countryName) ? String(sample.country || sample.countryName).trim() : null;
+    const projectPart = sample.projectCode ? String(sample.projectCode).trim() : null;
+    let namespace = 'SOILFER-GLOBAL';
+    if (countryPart && projectPart) {
+        if (projectPart.toUpperCase().includes(countryPart.toUpperCase())) {
+            namespace = projectPart;
+        } else {
+            namespace = `${countryPart}:${projectPart}`;
+        }
+    } else if (projectPart) {
+        namespace = projectPart;
+    } else if (countryPart) {
+        namespace = `SOILFER-${countryPart}`;
+    }
+
     const profileKey = profileCode ? `${namespace}:${profileCode}` : null;
 
-    // Relation classification
-    let relation = 'UNKNOWN';
+    // Truthful Relation classification (R5: no CONFIRMED_PROFILE inference from depths/horizons alone)
+    let relation = 'UNSPECIFIED';
     if (profileCode) {
-        if (field.isComposite || sample.compositeRadiusM) {
+        const isComp = Boolean(field.isComposite || sample.compositeRadiusM || field.composite === true);
+        const isConfirmed = Boolean(field.profileConfirmed === true || sample.isConfirmedProfile === true);
+        if (isComp) {
             relation = 'COMPOSITE';
-        } else if (sample.horizon || (sample.depthTopCm != null && sample.depthBottomCm != null)) {
+        } else if (isConfirmed) {
             relation = 'CONFIRMED_PROFILE';
         } else {
-            relation = 'SAMPLING_POINT';
+            relation = 'SITE_POINT';
         }
     }
 
@@ -332,9 +387,23 @@ function extractObservations(sample, { analysisMap = {}, methodMap = {} } = {}) 
 
         const rawUnit = r.unit || aMeta.units || null;
         const norm = normalizeUnit(r.param, r.value, rawUnit);
-        const numVal = (r.numericValue !== null && r.numericValue !== undefined) ? r.numericValue : (isNaN(Number(r.value)) ? null : Number(r.value));
-        const normVal = norm.normalizedValue !== null ? norm.normalizedValue : numVal;
+
+        let numVal = null;
+        const rawVal = r.value;
+        const isBlankStr = (typeof rawVal === 'string' && rawVal.trim() === '');
+        if (!isBlankStr && r.numericValue !== null && r.numericValue !== undefined && typeof r.numericValue !== 'boolean') {
+            const parsed = Number(r.numericValue);
+            if (!isNaN(parsed) && isFinite(parsed)) numVal = parsed;
+        } else if (!isBlankStr && rawVal !== null && rawVal !== undefined && typeof rawVal !== 'boolean') {
+            const parsed = Number(rawVal);
+            if (!isNaN(parsed) && isFinite(parsed)) numVal = parsed;
+        }
+
+        const normVal = (norm.normalizedValue !== null && norm.normalizedValue !== undefined) ? norm.normalizedValue : numVal;
         const controlledUnit = norm.standardUnit || rawUnit;
+
+        const lodVal = (r.lod !== undefined && r.lod !== null && typeof r.lod !== 'boolean' && !isNaN(Number(r.lod))) ? Number(r.lod) : null;
+        const loqVal = (r.loq !== undefined && r.loq !== null && typeof r.loq !== 'boolean' && !isNaN(Number(r.loq))) ? Number(r.loq) : null;
 
         observations.push({
             observationId: r.id,
@@ -346,7 +415,7 @@ function extractObservations(sample, { analysisMap = {}, methodMap = {} } = {}) 
             parameterName: aMeta.name || r.param,
             asMeasured: {
                 value: numVal,
-                rawEntry: r.value,
+                rawEntry: r.value !== undefined ? r.value : null,
                 unit: rawUnit
             },
             normalized: {
@@ -355,6 +424,9 @@ function extractObservations(sample, { analysisMap = {}, methodMap = {} } = {}) 
             },
             controlledUnit,
             qudtUnit,
+            lod: lodVal,
+            loq: loqVal,
+            provenance: r.provenance || 'MEASURED',
             basis: r.basis || 'AIR_DRY',
             censoring: r.censoring || 'NONE',
             replicateNo: r.replicateNo || 1,
@@ -390,7 +462,6 @@ function extractObservations(sample, { analysisMap = {}, methodMap = {} } = {}) 
 function buildLegacyAnalyticalResultsMap(observations = []) {
     const map = {};
     observations.forEach(obs => {
-        // In v1 legacy, parameter is key.
         map[obs.parameter] = {
             value: obs.normalized.value !== null ? obs.normalized.value : obs.asMeasured.value,
             as_measured: obs.asMeasured.value,
@@ -399,6 +470,9 @@ function buildLegacyAnalyticalResultsMap(observations = []) {
             controlled_unit: obs.controlledUnit,
             rawEntry: obs.asMeasured.rawEntry,
             qudtUnit: obs.qudtUnit,
+            lod: obs.lod,
+            loq: obs.loq,
+            provenance: obs.provenance,
             basis: obs.basis,
             censoring: obs.censoring,
             replicateNo: obs.replicateNo,
@@ -455,7 +529,7 @@ function formatSampleV1(sample, maps = {}) {
         specimenId: sample.id,
         fieldSampleId: sample.originalId,
         labSampleId: sample.labId || null,
-        laboratoryId: sample.assignedLab || sample.labId || null,
+        laboratoryId: sample.assignedLab || null,
 
         // Scoping & classification
         country: sample.country || sample.countryName || 'UNKNOWN',
@@ -474,7 +548,7 @@ function formatSampleV1(sample, maps = {}) {
             collectionTimestamp: dates.collectionTimestamp,
             receptionDate: dates.receptionDate,
             receptionTimestamp: dates.receptionTimestamp,
-            collectorName: unwrapValue(field.collector) || unwrapValue(field.surveyor_name) || unwrapValue(reception.deliveredBy) || null,
+            collectorName: null,
             depthHorizon: {
                 depthRange: depths.depthRange || '0–20 cm', // preserve v1 string compatibility
                 topCm: depths.topCm ?? 0, // legacy fallback for v1
@@ -503,7 +577,7 @@ function formatSampleV1(sample, maps = {}) {
         qualityControl: {
             dryingStatus: sample.dryingStatus || 'DONE',
             preparationStatus: sample.preparationStatus || 'DONE',
-            approvedBy: sample.approvedBy || null,
+            approvedBy: null,
             approvedAt: sample.approvedAt || null
         },
         qualityIssues,
@@ -527,22 +601,32 @@ function formatSampleV2(sample, maps = {}) {
     const observations = extractObservations(sample, maps);
     const qualityIssues = evaluateQualityIssues(sample, coords, depths, dates, profile);
 
+    // Truthful publicationStatus (R1, R6)
+    let publicationStatus = 'DRAFT';
+    if (['APPROVED', 'REPORTED', 'COMPLETED'].includes(sample.status)) {
+        publicationStatus = 'RELEASED';
+    } else if (['CANCELLED', 'REJECTED'].includes(sample.status)) {
+        publicationStatus = 'WITHDRAWN';
+    } else if (sample.status === 'AMBIGUOUS_PROVENANCE_HOLD') {
+        publicationStatus = 'HOLD';
+    }
+
     return {
         schemaVersion: '2026-09-issue140-v2',
         sourceSystemId: SOURCE_SYSTEM_ID,
 
-        // Core Specimen Identifiers
+        // Core Specimen Identifiers (R4, R5: laboratoryId strictly assignedLab, no labId fallback)
         specimenId: sample.id,
         fieldSampleId: sample.originalId,
         labSampleId: sample.labId || null,
-        laboratoryId: sample.assignedLab || sample.labId || null,
+        laboratoryId: sample.assignedLab || null,
 
         // Classification
         country: sample.country || sample.countryName || 'UNKNOWN',
         projectCode: sample.projectCode || null,
         matrix: sample.matrix || 'SOIL',
         status: sample.status,
-        publicationStatus: 'RELEASED',
+        publicationStatus,
 
         // Profile & Sampling Hierarchy
         profile: {
@@ -552,11 +636,11 @@ function formatSampleV2(sample, maps = {}) {
             relation: profile.profileRelation
         },
 
-        // Truthful Spatiotemporal Sampling
+        // Truthful Spatiotemporal Sampling (R6: no collectorName PII in default public exchange)
         sampling: {
             collectionDate: dates.collectionDate,
             collectionTimestamp: dates.collectionTimestamp,
-            collectorName: unwrapValue(field.collector) || unwrapValue(field.surveyor_name) || null,
+            collectorName: null,
             depths: {
                 topCm: depths.topCm,
                 bottomCm: depths.bottomCm,
@@ -585,20 +669,20 @@ function formatSampleV2(sample, maps = {}) {
             }
         },
 
-        // Laboratory Reception Facts
+        // Laboratory Reception Facts (R6: no receivedBy PII)
         receipt: {
             receptionDate: dates.receptionDate,
             receptionTimestamp: dates.receptionTimestamp,
-            receivedBy: sample.receivedBy || unwrapValue(reception.deliveredBy) || null,
+            receivedBy: null,
             receivedMassGrams: sample.receivedMass || null,
             moistureOnArrival: sample.moistureOnArrival || null
         },
 
-        // Quality & Compliance
+        // Quality & Compliance (R6: no approvedBy PII)
         qualityControl: {
             dryingStatus: sample.dryingStatus || null,
             preparationStatus: sample.preparationStatus || null,
-            approvedBy: sample.approvedBy || null,
+            approvedBy: null,
             approvedAt: sample.approvedAt ? formatIsoTimestamp(sample.approvedAt) : null
         },
         qualityIssues,

@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const prisma = require('../prisma');
 const { normalizeUnit } = require('../services/interpretationService');
 const { formatSampleV1, extractCoordinates } = require('../services/sisAdapterService');
-const { buildSampleWhere, buildSpectralWhere, AUTHORIZED_RELEASE_STATUSES } = require('../services/exchangePolicyService');
+const { buildSampleWhere, buildSpectralWhere, toPrismaSpectralWhere, AUTHORIZED_RELEASE_STATUSES } = require('../services/exchangePolicyService');
 
 // Helper to build scoped database query based on SIS Auth permissions
 function buildSisWhere(sisAuth, query = {}) {
@@ -503,7 +503,7 @@ exports.syncDelta = async (req, res) => {
         const maxTake = Math.min(1000, Math.max(1, parseInt(limit) || 1000));
         const where = buildSampleWhere(req.sisAuth, { updatedSince });
         const spectralWhere = {
-            ...buildSpectralWhere(req.sisAuth, {}),
+            ...toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, {})),
             timestamp: { gte: sinceDate }
         };
 
@@ -550,7 +550,7 @@ exports.syncDelta = async (req, res) => {
 exports.getStats = async (req, res) => {
     try {
         const sampleWhere = buildSampleWhere(req.sisAuth, {});
-        const spectralWhere = buildSpectralWhere(req.sisAuth, {});
+        const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, {}));
 
         const keyLabs = req.sisAuth?.labs || [];
         const isApiKey = req.sisAuth?.type === 'API_KEY';

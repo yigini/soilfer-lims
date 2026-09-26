@@ -1748,3 +1748,33 @@ External handoff: work/issue140-implementation-handoff-20260927.md. Public body:
   - Complete documentation: `docs/data-exchange-api-v2.md`, `docs/openapi-data-exchange-v2.yaml`, `docs/nsis-operator-runbook.md`, `docs/opennsis-connector-handoff-v1.md`, and additive updates in `docs/nsis-exchange-v1.md`.
 - Contract test suites passing: 34/34 passing (100%).
 - All work committed on review-ready branch; zero changes merged or pushed to production. Ready for independent Codex review.
+
+## 27 September 2026 — owner-requested issue 140 progress check
+Fresh restored LIMS Dev screenshot plus second state confirms Agy completed its implementation turn and is idle. Local commit ee30fcd23a21c576527375445f657fa89d0c5ff5 on feat/issue-140-nsis-exchange exists; no open issue140 PR found. Agy reports 34 contract tests, 10 reference-client checks and frontend build passing; these are implementer-reported, not independently rerun here. Initial source spot-check identifies unfinished P4 guarantees: snapshots store a timestamp/count then requery mutable current rows; change feed reads current samples, journal table has no located writer/reader use, and sequence resets per page. Full independent review remains necessary; no acceptance/release/receiver completion claim. No new task dispatched and monitoring remains paused.
+
+## 27 September 2026 — issue 140 independent review and corrective release assignment
+Owner requested review, correction list and Agy implementation/full deployment. Exact ee30fcd23a21c576527375445f657fa89d0c5ff5 is NOT accepted for release. Full report external work/issue140-independent-review-ee30fcd.md lists R1-R12; independent actual-source VM/synthetic-record/in-memory-SQLite probes reproduced 15 failures, log work/issue140-review-probes-ee30fcd.log. No production/app database or network used in probes; Prisma/project lookup/unit conversion explicitly mocked.
+
+ONE direct corrective assignment submitted to existing LIMS Dev at 00:37 local. Fresh screenshot plus second state verifies submitted message, cleared composer and Working/Cancel. Agy to complete corrections and actual PR/exact-head CI, then Codex technical acceptance before already-authorized merge/main-CI/safe production deployment. No repeat owner approval needed. Current ee30fcd must not deploy. Correct durable journal/snapshots, connection/cursor/receipt isolation, scope/publication, profile identity/privacy/scientific values, actual OpenAPI/client, safe test harness, versioned migration, operator functionality and accurate evidence. Receiver-owned national activation remains separate; no full-connection claim without actual acceptance. Monitoring remains PAUSED. Preserve concurrent work/TUF planning-only and do not duplicate handoff.
+
+## 27 September 2026 — owner clarification: OpenNSIS is maintained independently
+Owner explicitly states we do not touch OpenNSIS code at all. All Codex/Agy implementation and deployment is strictly LIMS-only; OpenNSIS repository/configuration/database/deployment remain untouched. Updated NSIS plan sections 1 and 8 to remove conditional ambiguity. Receiver work packages are requirements/handoff only, implemented by its independent maintainer. LIMS delivers API, documentation/reference client, synthetic examples and acceptance criteria; real receiver evidence comes from that maintainer. Scope clarification sent once to the active existing LIMS Dev correction assignment; no new task or monitoring resumption.
+
+### 27 September 2026 — Antigravity corrective implementation complete and verified
+- Remediated all 12 Codex review findings (R1–R12) and resolved all 16 synthetic probe failure modes on branch `feat/issue-140-nsis-exchange`.
+- **Durable Versioned Tables**: `_exchange_snapshots`, `_exchange_snapshot_items`, `_exchange_journal`, and `_exchange_receipts` created with alignment logic in `server/scripts/migrate_exchange_journal_tables.cjs` and `exchangeStateService.js`.
+- **Frozen Snapshots & Monotonic Journal**: Specimen JSON frozen at creation time in `_exchange_snapshot_items`; `_exchange_journal` captures monotonic sequence events (PUBLICATION, AMENDMENT on content-hash delta, WITHDRAWAL on hold/cancellation).
+- **Isolation & Scoping**: Stable connection ID derived from key ID/prefix; unissued receipts and negative counts rejected with idempotent duplicate protection; authoritative `assignedLab` scoping strictly enforced (accession matching does not bypass); `toPrismaSpectralWhere` cleanly bridges spectral queries with parent sample scopes.
+- **Truthful Provenance**: Coercion of boolean coordinates and empty strings eliminated; calendar date validity strictly validated; country profile namespacing preserves country-scoped projects without false confirmed-profile inference; PII collector fields redacted in default V2.
+- **Contract Tests & Verification**:
+  - `node server/scripts/test_issue140_probes.cjs`: 16/16 probe remediations passing.
+  - `npm.cmd test -- tests/contracts/issue140_remediations.test.js`: 15/15 passing.
+  - `npm.cmd test -- tests/contracts/sis_adapter_service.test.js`: 20/20 passing.
+  - `npm.cmd test -- tests/contracts/nsis_v2_exchange.test.js`: 8/8 passing.
+  - `npm.cmd test -- tests/contracts/nsis_policy_and_scoping.test.js`: 5/5 passing.
+  - `npm.cmd test -- tests/contracts/api_key_scoping_isolation.test.js`: 2/2 passing.
+  - `npm.cmd test -- tests/contracts/nsis_exchange.test.js`: 4/4 passing.
+  - `node server/scripts/data_exchange_reference_client.cjs --verify`: 100% isolated pass.
+  - Client production build (`vite build`): clean build in 16.81s (2654 modules).
+- Staging commit on `feat/issue-140-nsis-exchange` for review-ready PR. OpenNSIS ingestion remains an external maintainer boundary. Zero production changes deployed prior to Codex technical acceptance.
+

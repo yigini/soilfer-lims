@@ -10,11 +10,13 @@ Deliver a documented, secure, manageable connection through which OpenNSIS, and 
 
 LIMS remains the authority for specimens, laboratory identifiers, analyses, quality control, approval and released laboratory results. OpenNSIS remains the authority for its national site/profile/layer model, spatial interpretation, national catalogue and publication. The exchange is a read-only data service plus narrowly separated connection administration and optional delivery receipts. It does not give OpenNSIS laboratory write access.
 
+**Owner clarification, 27 September 2026: neither Codex nor Agy modifies OpenNSIS code, configuration, database or deployment. It is maintained by someone else.** All implementation and deployment assigned here is LIMS-only. OpenNSIS work listed below is a handoff to its maintainer, not an assignment to our agents. We supply the API contract, documentation, synthetic examples and acceptance criteria, and review receiver evidence supplied by that maintainer. Do not modify OpenNSIS merely to make an integration test pass or include its implementation in our completion claims.
+
 **Laboratory staff continue their existing work.** No new mandatory profile entry at reception, new approval stage, changed barcode scheme, automatic reassociation, historical result rewrite, or dependency on OpenNSIS availability is introduced. A sample lacking national spatial metadata can still be received, analysed and approved. Its suitability for a particular NSIS import is a separate, visible decision.
 
 Kobo is one possible provenance source. Manual intake, other field systems and existing records must also work. No connector assumes that using LIMS requires Kobo.
 
-On 27 September 2026 the owner explicitly authorized starting this plan in the existing Antigravity LIMS Dev task and announcing implementation on issue 140. Proceed through the LIMS work packages as one continuous assignment, resolving routine choices from source evidence and the safe defaults below. Record genuine cross-system/data-owner decisions without inventing semantics, and continue independent work while those decisions remain open. The established independent review and safe release process remains in force. This instruction does not authorize new grants, national production ingestion, changes in the OpenNSIS repository without its owner's assignment, or monitoring resumption. Existing monitoring remains paused.
+On 27 September 2026 the owner explicitly authorized starting this plan in the existing Antigravity LIMS Dev task and announcing implementation on issue 140. Proceed through the LIMS work packages as one continuous assignment, resolving routine choices from source evidence and the safe defaults below. Record genuine cross-system/data-owner decisions without inventing semantics, and continue independent work while those decisions remain open. The established independent review and safe release process remains in force. This instruction does not authorize new grants, national production ingestion, any OpenNSIS modification or deployment, or monitoring resumption. Existing monitoring remains paused.
 
 ## 2. What “seamless and connected” must mean
 
@@ -182,9 +184,9 @@ Scope revocation needs special treatment: never expose a newly unauthorized reco
 
 Expired cursors return a specific recovery response (proposed `410 CURSOR_EXPIRED`) with a new snapshot procedure. Version/source mismatches must not look like an empty successful page. After database restore or exchange rollback, use an epoch/version safeguard so old cursors cannot silently skip reused sequence numbers. Reconcile all already delivered revisions; do not reset counters and claim continuity.
 
-## 8. OpenNSIS implementation work package
+## 8. Handoff to the independent OpenNSIS maintainer
 
-The OpenNSIS owner implements and tests these changes in its own repository. No assumed authorization to modify or deploy that system is granted by this LIMS plan.
+The independent OpenNSIS maintainer owns implementation and testing in its repository. The items below describe receiver requirements and coordination topics only; Codex and Agy must not implement or deploy them in OpenNSIS.
 
 1. Server-side connector with approved HTTPS base URL, secure credential storage, connection identity and selected national target dataset/project. Prevent arbitrary URL fetching, redirect-based credential disclosure and unintended internal-network requests.
 2. Persist `sourceSystemId`, specimen/result identities, publication revisions and profile namespace crosswalks. Keep field and lab IDs as chain-of-custody attributes, not the sole upsert key.

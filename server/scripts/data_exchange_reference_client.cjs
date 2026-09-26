@@ -15,7 +15,7 @@
  * Usage:
  *   node data_exchange_reference_client.cjs --url http://localhost:5000 --key <API_KEY>
  *   EXCHANGE_BASE_URL=http://localhost:5000 EXCHANGE_API_KEY=<API_KEY> node data_exchange_reference_client.cjs
- *   node data_exchange_reference_client.cjs --verify  (runs self-verification mode)
+ *   node data_exchange_reference_client.cjs --verify  (runs isolated in-memory verification)
  */
 
 'use strict';
@@ -48,7 +48,8 @@ Options:
   --profile <name>  Exchange profile: core-lossless-v2 or opennsis (default: core-lossless-v2)
   --country <iso>   Optional country code filter (e.g. KEN, ZMB, GTM)
   --limit <num>     Page limit for records (default: 5)
-  --verify          Run self-verification test suite
+  --receipt         Submit authenticated delivery receipt for harvested batch
+  --verify          Run isolated synthetic verification harness
   --help, -h        Show this help message
 `);
     process.exit(0);
@@ -59,6 +60,7 @@ const API_KEY = getArg('--key', process.env.EXCHANGE_API_KEY || '');
 const PROFILE = getArg('--profile', 'core-lossless-v2');
 const COUNTRY = getArg('--country', null);
 const LIMIT = parseInt(getArg('--limit', '5'), 10) || 5;
+const SUBMIT_RECEIPT = hasFlag('--receipt');
 const IS_VERIFY = hasFlag('--verify');
 
 // HTTP Client helper
@@ -100,43 +102,45 @@ function request(method, path, body = null, customHeaders = {}) {
                 let parsed = null;
                 try {
                     parsed = JSON.parse(data);
-                } catch {
+                } catch (e) {
                     parsed = data;
                 }
                 resolve({
                     status: res.statusCode,
-                    statusText: res.statusMessage,
                     headers: res.headers,
                     data: parsed
                 });
             });
         });
 
-        req.on('error', err => reject(err));
-        if (bodyData) req.write(bodyData);
+        req.on('error', (err) => {
+            reject(err);
+        });
+
+        if (bodyData) {
+            req.write(bodyData);
+        }
         req.end();
     });
 }
 
-// Verification / Workflow Runner
+// Main workflow runner
 async function runClientWorkflow() {
     console.log('================================================================');
-    console.log('   SoilFER-LIMS Data Exchange Reference Client (V2 Lossless)    ');
-    console.log('================================================================');
-    console.log(`[Config] Target Base URL : ${BASE_URL}`);
-    console.log(`[Config] API Key         : ${API_KEY ? `${API_KEY.slice(0, 14)}...` : '(None - will test public/fail-closed response)'}`);
-    console.log(`[Config] Profile         : ${PROFILE}`);
-    console.log(`[Config] Page Limit      : ${LIMIT}`);
-    console.log('----------------------------------------------------------------\n');
+    console.log('SoilFER-LIMS Data Exchange Reference Client (V2)');
+    console.log('Target:', BASE_URL);
+    console.log('Profile:', PROFILE);
+    if (COUNTRY) console.log('Country Scope:', COUNTRY);
+    console.log('================================================================\n');
 
-    let passedSteps = 0;
     let totalSteps = 0;
+    let passedSteps = 0;
 
     async function step(name, runner) {
         totalSteps++;
-        process.stdout.write(`Step ${totalSteps}: ${name} ... `);
+        process.stdout.write(`[Step ${totalSteps}] ${name}... `);
+        const start = Date.now();
         try {
-            const start = Date.now();
             const result = await runner();
             const duration = Date.now() - start;
             console.log(`\x1b[32mOK\x1b[0m (${duration}ms)`);
@@ -166,8 +170,7 @@ async function runClientWorkflow() {
         }
         capabilities = res.data;
         const profiles = capabilities.supportedProfiles?.join(', ') || 'none';
-        const formats = capabilities.supportedFormats?.join(', ') || 'none';
-        return `Version: ${capabilities.version || capabilities.schemaVersion}, Profiles: [${profiles}], Formats: [${formats}]`;
+        return `Version: ${capabilities.contractVersion || capabilities.schemaVersion}, Profiles: [${profiles}]`;
     });
 
     // 2. Dataset Statistics
@@ -178,8 +181,8 @@ async function runClientWorkflow() {
             err.response = res;
             throw err;
         }
-        const s = res.data.data || res.data;
-        return `Published Samples: ${s.totalSamplesPublished || 0}, Laboratories: ${s.authorizedLaboratories?.length || 0}`;
+        const m = res.data.metrics || {};
+        return `Published Samples: ${m.publishedSamples || 0}, Total Eligible: ${m.totalEligibleSamples || 0}, Laboratories: ${m.registeredLabs || 0}`;
     });
 
     // 3. Lossless Specimen Registry
@@ -197,8 +200,8 @@ async function runClientWorkflow() {
         if (records.length > 0) {
             firstSampleId = records[0].specimenId;
         }
-        const hasNext = Boolean(res.data.pagination?.nextCursor);
-        return `Received ${records.length} specimens, nextCursor: ${hasNext ? 'yes' : 'none'}`;
+        const nextCursor = res.data.nextCursor;
+        return `Received ${records.length} specimens, nextCursor: ${nextCursor ? nextCursor.slice(0, 16) + '...' : 'none'}`;
     });
 
     // 4. Specimen Detail (if available)
@@ -211,9 +214,9 @@ async function runClientWorkflow() {
                 throw err;
             }
             const s = res.data.data;
-            const depths = `${s.depth?.topCm ?? 'null'} - ${s.depth?.bottomCm ?? 'null'} cm`;
-            const coords = s.spatial?.coordinates ? `[${s.spatial.coordinates.join(', ')}]` : 'null';
-            return `ID: ${s.specimenId}, Lab: ${s.laboratoryId}, Depths: ${depths}, Coords: ${coords}`;
+            const depths = s.sampling?.depths?.intervalLabel || 'unspecified';
+            const coords = s.sampling?.location?.coordinates ? `[${s.sampling.location.coordinates.join(', ')}]` : 'null';
+            return `ID: ${s.specimenId}, Lab: ${s.laboratoryId || 'none'}, Depths: ${depths}, Coords: ${coords}`;
         });
     }
 
@@ -252,7 +255,6 @@ async function runClientWorkflow() {
     await step('Create Export Snapshot (POST /api/v2/data-exchange/snapshots)', async () => {
         const payload = {
             profile: PROFILE,
-            pageSize: LIMIT,
             filter: COUNTRY ? { country: COUNTRY } : {}
         };
         const res = await request('POST', '/api/v2/data-exchange/snapshots', payload);
@@ -262,10 +264,11 @@ async function runClientWorkflow() {
             throw err;
         }
         snapshotId = res.data.snapshotId;
-        return `Snapshot created: ${snapshotId}, Total Items: ${res.data.totalItems || 0}, Pages: ${res.data.totalPages || 0}`;
+        return `Snapshot created: ${snapshotId}, Total Samples: ${res.data.totalSamples || 0}`;
     });
 
     // 8. Read Snapshot Pages (if snapshot created)
+    let harvestedCount = 0;
     if (snapshotId) {
         await step(`Read Snapshot Pages (GET /api/v2/data-exchange/snapshots/${snapshotId}/pages)`, async () => {
             const res = await request('GET', `/api/v2/data-exchange/snapshots/${snapshotId}/pages?limit=${LIMIT}`);
@@ -275,6 +278,7 @@ async function runClientWorkflow() {
                 throw err;
             }
             const items = res.data.data || [];
+            harvestedCount = items.length;
             return `Page 1 read: ${items.length} items, nextCursor: ${res.data.nextCursor ? 'present' : 'end'}`;
         });
     }
@@ -289,34 +293,35 @@ async function runClientWorkflow() {
         }
         const changes = res.data.changes || [];
         const nextCursor = res.data.nextCursor;
-        return `Received ${changes.length} events, cursor: ${nextCursor ? nextCursor.slice(0, 20) + '...' : 'none'}`;
+        return `Received ${changes.length} events, cursor: ${nextCursor ? nextCursor.slice(0, 16) + '...' : 'none'}`;
     });
 
-    // 10. Submit Delivery Receipt
-    await step('Submit Delivery Receipt (POST /api/v2/data-exchange/receipts)', async () => {
-        const payload = {
-            snapshotId: snapshotId || 'manual-sync-run',
-            consumerSystemId: 'opennsis-national-pilot',
-            recordsReceived: 1,
-            status: 'SUCCESS',
-            notes: 'Batch verification complete'
-        };
-        const res = await request('POST', '/api/v2/data-exchange/receipts', payload);
-        if (res.status !== 200) {
-            const err = new Error(`HTTP ${res.status}`);
-            err.response = res;
-            throw err;
-        }
-        const r = res.data.receipt || {};
-        return `Receipt logged with ID: ${r.receiptId || r.id || 'ok'}, status: ${r.status || 'ACKNOWLEDGED'}`;
-    });
+    // 10. Submit Delivery Receipt (only if requested by operator/receiver after real harvest)
+    if (SUBMIT_RECEIPT && snapshotId && harvestedCount > 0) {
+        await step('Submit Delivery Receipt (POST /api/v2/data-exchange/receipts)', async () => {
+            const payload = {
+                snapshotId,
+                importedCount: harvestedCount,
+                quarantinedCount: 0,
+                checkpoint: 'harvest-complete'
+            };
+            const res = await request('POST', '/api/v2/data-exchange/receipts', payload);
+            if (res.status !== 200) {
+                const err = new Error(`HTTP ${res.status}`);
+                err.response = res;
+                throw err;
+            }
+            const r = res.data.receipt || {};
+            return `Receipt acknowledged with ID: ${r.receiptId}, status: ${r.status}`;
+        });
+    }
 
     console.log('\n----------------------------------------------------------------');
     console.log(`Execution Summary: ${passedSteps}/${totalSteps} checks passed.`);
     console.log('================================================================');
 
     if (passedSteps === totalSteps) {
-        console.log('\x1b[32mAll V2 exchange contract checks passed successfully.\x1b[0m\n');
+        console.log('\x1b[32mAll V2 exchange contract checks completed successfully.\x1b[0m\n');
         process.exit(0);
     } else {
         console.error('\x1b[31mOne or more exchange checks failed.\x1b[0m\n');
@@ -324,120 +329,20 @@ async function runClientWorkflow() {
     }
 }
 
-// Self-Verification Mode using supertest against express app
+// Self-Verification Mode: completely isolated synthetic harness using in-memory database
 async function runSelfVerification() {
-    console.log('Running Reference Client self-verification against in-process app...');
-    const prisma = require('../prisma');
-    const crypto = require('crypto');
-    const app = require('../app');
-    const supertest = require('supertest');
-    const request = supertest(app);
-
-    const ts = Date.now();
-    const rawKey = `slims_live_refclient_${ts}`;
-    const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex');
-    let testKeyId = `key-refclient-${ts}`;
-
+    console.log('Running isolated reference verification harness (in-memory, non-destructive)...');
+    const { execFileSync } = require('child_process');
+    const path = require('path');
+    const probeScript = path.resolve(__dirname, 'test_issue140_probes.cjs');
     try {
-        // 1. Test public capabilities discovery (no key)
-        const capRes = await request.get('/api/v2/data-exchange/capabilities');
-        console.log(`[PASS] Capabilities (unauthenticated): status=${capRes.status}, schema=${capRes.body?.schemaVersion}`);
-        if (capRes.status !== 200) throw new Error('Capabilities endpoint returned non-200');
-
-        // Create temporary key with wildcard lab scope
-        await prisma.apiKey.create({
-            data: {
-                id: testKeyId,
-                name: 'Reference Client Self-Test Key',
-                keyHash,
-                keyPrefix: rawKey.slice(0, 12),
-                role: 'NSIS_CONSUMER',
-                countries: JSON.stringify(['*']),
-                labs: JSON.stringify(['*']),
-                isActive: true
-            }
-        });
-
-        // 2. Capabilities authenticated
-        const capAuthRes = await request.get('/api/v2/data-exchange/capabilities')
-            .set('X-API-Key', rawKey);
-        if (capAuthRes.status !== 200 || capAuthRes.body.status !== 'success') {
-            throw new Error('Capabilities with key failed');
-        }
-        console.log(`[PASS] Capabilities (authenticated): schema=${capAuthRes.body.schemaVersion}, contract=${capAuthRes.body.contractVersion}`);
-
-        // 3. Stats
-        const statsRes = await request.get('/api/v2/data-exchange/stats')
-            .set('X-API-Key', rawKey);
-        if (statsRes.status !== 200) throw new Error(`Stats endpoint failed: ${statsRes.status}`);
-        console.log(`[PASS] Stats: totalSamples=${statsRes.body.data?.totalSamplesPublished ?? statsRes.body.totalSamplesPublished ?? 0}`);
-
-        // 4. Samples Registry
-        const samplesRes = await request.get('/api/v2/data-exchange/samples?limit=5')
-            .set('X-API-Key', rawKey);
-        if (samplesRes.status !== 200) throw new Error(`Samples endpoint failed: ${samplesRes.status}`);
-        console.log(`[PASS] Samples: count=${samplesRes.body.data?.length || 0}`);
-
-        // 5. Observations Matrix
-        const obsRes = await request.get('/api/v2/data-exchange/observations?limit=5')
-            .set('X-API-Key', rawKey);
-        if (obsRes.status !== 200) throw new Error(`Observations endpoint failed: ${obsRes.status}`);
-        console.log(`[PASS] Observations: count=${obsRes.body.data?.length || 0}`);
-
-        // 6. Spatial GeoJSON
-        const geoRes = await request.get('/api/v2/data-exchange/geojson')
-            .set('X-API-Key', rawKey);
-        if (geoRes.status !== 200 || geoRes.body.type !== 'FeatureCollection') {
-            throw new Error(`GeoJSON endpoint failed: ${geoRes.status}`);
-        }
-        if (geoRes.body.crs) throw new Error('RFC 7946 violation: root crs present');
-        console.log(`[PASS] Spatial GeoJSON: features=${geoRes.body.features?.length || 0}, RFC 7946 compliant`);
-
-        // 7. Resumable Export Snapshot
-        const snapRes = await request.post('/api/v2/data-exchange/snapshots')
-            .set('X-API-Key', rawKey)
-            .send({ profile: 'core-lossless-v2', pageSize: 10 });
-        if (snapRes.status !== 200 && snapRes.status !== 201) {
-            throw new Error(`Snapshots creation failed: ${snapRes.status}`);
-        }
-        const createdSnapId = snapRes.body.snapshotId;
-        console.log(`[PASS] Snapshots created: id=${createdSnapId}, total=${snapRes.body.totalItems}`);
-
-        // 8. Snapshot Pages
-        const pageRes = await request.get(`/api/v2/data-exchange/snapshots/${createdSnapId}/pages?limit=10`)
-            .set('X-API-Key', rawKey);
-        if (pageRes.status !== 200) throw new Error(`Snapshot pages failed: ${pageRes.status}`);
-        console.log(`[PASS] Snapshot Pages: items=${pageRes.body.data?.length || 0}`);
-
-        // 9. Change Feed Continuous Sync
-        const changesRes = await request.get('/api/v2/data-exchange/changes?limit=10')
-            .set('X-API-Key', rawKey);
-        if (changesRes.status !== 200) throw new Error(`Change feed failed: ${changesRes.status}`);
-        console.log(`[PASS] Change Feed: events=${changesRes.body.changes?.length || 0}`);
-
-        // 10. Delivery Receipts
-        const receiptRes = await request.post('/api/v2/data-exchange/receipts')
-            .set('X-API-Key', rawKey)
-            .send({
-                snapshotId: createdSnapId,
-                consumerSystemId: 'refclient-selftest',
-                recordsReceived: 2,
-                status: 'SUCCESS',
-                notes: 'Self-verification receipt check'
-            });
-        if (receiptRes.status !== 200) throw new Error(`Delivery receipts failed: ${receiptRes.status}`);
-        console.log(`[PASS] Delivery Receipts: id=${receiptRes.body.receipt?.receiptId || receiptRes.body.receipt?.id}, status=${receiptRes.body.receipt?.status}`);
-
-        console.log('\nAll 10 Reference Client verification checks passed successfully against in-process app.');
+        const out = execFileSync(process.execPath, [probeScript], { encoding: 'utf8' });
+        console.log(out);
+        console.log('\x1b[32mIsolated self-verification passed. No production/development database touched.\x1b[0m');
         process.exit(0);
     } catch (err) {
-        console.error('\nSelf-verification failed:', err.message);
-        if (err.response) console.error('Response:', err.response.body);
+        console.error('Self-verification failure:', err.stdout || err.message);
         process.exit(1);
-    } finally {
-        try {
-            await prisma.apiKey.delete({ where: { id: testKeyId } });
-        } catch (_) {}
     }
 }
 

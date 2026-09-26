@@ -129,7 +129,7 @@ describe('Issue #140 Work Package P1: SIS Data Exchange Adapter Contracts', () =
             expect(profile.profileCode).toBe('PLOT-402');
             expect(profile.profileNamespace).toBe('SOILFER-US');
             expect(profile.profileKey).toBe('SOILFER-US:PLOT-402');
-            expect(profile.profileRelation).toBe('SAMPLING_POINT');
+            expect(profile.profileRelation).toBe('SITE_POINT');
         });
 
         test('unwraps nested profile code objects', () => {
@@ -140,12 +140,20 @@ describe('Issue #140 Work Package P1: SIS Data Exchange Adapter Contracts', () =
             expect(profile.profileKey).toBe('SOILFER-JPN:PIT-MOZ-12');
         });
 
-        test('returns null profileCode and UNKNOWN relation when absent', () => {
+        test('returns null profileCode and UNSPECIFIED relation when absent', () => {
             const sample = { projectCode: 'SOILFER-US' };
             const profile = extractProfileReference(sample, {}, {});
             expect(profile.profileCode).toBeNull();
             expect(profile.profileKey).toBeNull();
-            expect(profile.profileRelation).toBe('UNKNOWN');
+            expect(profile.profileRelation).toBe('UNSPECIFIED');
+        });
+
+        test('disambiguates shared programme projects with country prefix', () => {
+            const p1 = extractProfileReference({ projectCode: 'P', country: 'AAA' }, { site_id: 'POINT-1' });
+            const p2 = extractProfileReference({ projectCode: 'P', country: 'BBB' }, { site_id: 'POINT-1' });
+            expect(p1.profileKey).toBe('AAA:P:POINT-1');
+            expect(p2.profileKey).toBe('BBB:P:POINT-1');
+            expect(p1.profileKey).not.toBe(p2.profileKey);
         });
     });
 
@@ -186,6 +194,27 @@ describe('Issue #140 Work Package P1: SIS Data Exchange Adapter Contracts', () =
             expect(observations[1].observationId).toBe('res-2');
             expect(observations[1].replicateNo).toBe(2);
             expect(observations[1].asMeasured.value).toBe(6.6);
+        });
+
+        test('preserves LOD, LOQ, provenance and treats empty string as null value', () => {
+            const sample = {
+                results: [
+                    {
+                        id: 'blank-res',
+                        param: 'FE',
+                        value: '',
+                        isCurrent: true,
+                        lod: 0.05,
+                        loq: 0.1,
+                        provenance: 'PREDICTED'
+                    }
+                ]
+            };
+            const obs = extractObservations(sample)[0];
+            expect(obs.asMeasured.value).toBeNull();
+            expect(obs.lod).toBe(0.05);
+            expect(obs.loq).toBe(0.1);
+            expect(obs.provenance).toBe('PREDICTED');
         });
     });
 
@@ -250,7 +279,8 @@ describe('Issue #140 Work Package P1: SIS Data Exchange Adapter Contracts', () =
                     longitude: 36.82,
                     depthTopCm: 0,
                     depthBottomCm: 20,
-                    collectionDate: '2026-04-12'
+                    collectionDate: '2026-04-12',
+                    collector: 'Dr. John Doe'
                 }),
                 results: [
                     { id: 'r1', param: 'N_TOTAL', value: '0.15', numericValue: 0.15, unit: '%', isCurrent: true }
@@ -263,13 +293,23 @@ describe('Issue #140 Work Package P1: SIS Data Exchange Adapter Contracts', () =
             expect(v2.fieldSampleId).toBe('FIELD-BAG-88');
             expect(v2.labSampleId).toBe('LAB-ACCESS-100');
             expect(v2.laboratoryId).toBe('KEN-LAB1');
+            expect(v2.publicationStatus).toBe('RELEASED');
+            expect(v2.sampling.collectorName).toBeNull(); // Redacted in default V2
             expect(v2.profile.code).toBe('PLOT-KEN-5');
-            expect(v2.profile.key).toBe('SOILFER-US:PLOT-KEN-5');
+            expect(v2.profile.key).toBe('KEN:SOILFER-US:PLOT-KEN-5');
             expect(v2.sampling.location.coordinates).toEqual([36.82, -1.28]); // [lng, lat]
             expect(v2.sampling.depths.topCm).toBe(0);
             expect(v2.sampling.depths.bottomCm).toBe(20);
             expect(v2.observations).toHaveLength(1);
             expect(v2.observations[0].parameter).toBe('N_TOTAL');
+        });
+
+        test('unreleased status maps to DRAFT, cancelled to WITHDRAWN', () => {
+            const draft = formatSampleV2({ id: 's1', status: 'EXPECTED', results: [] });
+            expect(draft.publicationStatus).toBe('DRAFT');
+
+            const withdrawn = formatSampleV2({ id: 's2', status: 'CANCELLED', results: [] });
+            expect(withdrawn.publicationStatus).toBe('WITHDRAWN');
         });
     });
 });

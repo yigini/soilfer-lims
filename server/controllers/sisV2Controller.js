@@ -27,6 +27,7 @@ const {
 const {
     buildSampleWhere,
     buildSpectralWhere,
+    toPrismaSpectralWhere,
     AUTHORIZED_RELEASE_STATUSES
 } = require('../services/exchangePolicyService');
 const exchangeStateService = require('../services/exchangeStateService');
@@ -77,7 +78,7 @@ exports.getCapabilities = (req, res) => {
         contractVersion: '2.0.0',
         schemaVersion: '2026-09-issue140-v2',
         sourceSystemId: SOURCE_SYSTEM_ID,
-        supportedProfiles: ['opennsis', 'glosis', 'default'],
+        supportedProfiles: ['core-lossless-v2', 'opennsis', 'glosis', 'default'],
         supportedMatrices: ['SOIL', 'PLANT', 'WATER', 'FERTILIZER'],
         limits: {
             defaultLimit: 50,
@@ -187,7 +188,7 @@ exports.getSampleById = async (req, res) => {
                 where: {
                     AND: [
                         baseWhere,
-                        { OR: [{ id: specimenId }, { originalId: specimenId }, { labId: specimenId }] }
+                        { id: specimenId }
                     ]
                 },
                 include: { results: true, project: true }
@@ -204,11 +205,11 @@ exports.getSampleById = async (req, res) => {
 
         const formatted = formatSampleV2(sample, maps);
 
-        // Check spectral records
+        // Check spectral records with shared spectral authorization (R4)
+        const spectralWhere = buildSpectralWhere(req.sisAuth, {});
+        spectralWhere.sampleId = sample.id;
         const spectra = await prisma.spectralData.findMany({
-            where: {
-                OR: [{ sampleId: sample.id }, { sampleId: sample.originalId }]
-            },
+            where: spectralWhere,
             select: {
                 id: true,
                 modality: true,
@@ -464,7 +465,7 @@ exports.getGeoJson = async (req, res) => {
 exports.getStats = async (req, res) => {
     try {
         const sampleWhere = buildSampleWhere(req.sisAuth, {});
-        const spectralWhere = buildSpectralWhere(req.sisAuth, {});
+        const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, {}));
 
         const keyLabs = req.sisAuth?.labs || [];
         const isApiKey = req.sisAuth?.type === 'API_KEY';
@@ -501,25 +502,131 @@ exports.getStats = async (req, res) => {
 
 // ─── 7. GET /api/v2/data-exchange/spectra (Spectroscopy Records) ───
 exports.getSpectra = async (req, res) => {
-    // Delegate to existing spectral query with v2 formatting
-    const sisController = require('./sisController');
-    return sisController.getSpectra(req, res);
+    try {
+        const limit = Math.min(200, Math.max(1, parseInt(req.query.limit) || 50));
+        const cursor = req.query.cursor;
+        const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, req.query));
+        const where = { ...spectralWhere };
+
+        // Cursor decoding
+        const decoded = exchangeStateService.decodeCursor(cursor);
+        if (decoded && decoded.timestamp && decoded.id) {
+            where.AND = [
+                ...(where.AND || []),
+                {
+                    OR: [
+                        { timestamp: { lt: new Date(decoded.timestamp) } },
+                        {
+                            timestamp: new Date(decoded.timestamp),
+                            id: { lt: decoded.id }
+                        }
+                    ]
+                }
+            ];
+        }
+
+        const [total, spectra] = await Promise.all([
+            prisma.spectralData.count({ where: spectralWhere }),
+            prisma.spectralData.findMany({
+                where,
+                orderBy: [
+                    { timestamp: 'desc' },
+                    { id: 'desc' }
+                ],
+                take: limit + 1
+            })
+        ]);
+
+        const hasMore = spectra.length > limit;
+        const pageItems = hasMore ? spectra.slice(0, limit) : spectra;
+
+        const sampleIds = pageItems.map(s => s.sampleId).filter(Boolean);
+        let sampleMap = {};
+        if (sampleIds.length > 0) {
+            const linkedSamples = await prisma.sample.findMany({
+                where: { id: { in: sampleIds } },
+                select: { id: true, labId: true, originalId: true }
+            });
+            sampleMap = Object.fromEntries(linkedSamples.map(s => [s.id, s]));
+        }
+
+        let nextCursor = null;
+        if (hasMore && pageItems.length > 0) {
+            const last = pageItems[pageItems.length - 1];
+            nextCursor = exchangeStateService.encodeCursor({
+                timestamp: last.timestamp ? last.timestamp.toISOString() : new Date().toISOString(),
+                id: last.id
+            });
+        }
+
+        const data = pageItems.map(s => {
+            const smp = sampleMap[s.sampleId] || null;
+            return {
+                id: s.id,
+                specimenId: smp?.id || s.sampleId,
+                fieldSampleId: smp?.originalId || null,
+                labSampleId: smp?.labId || s.labId || null,
+                modality: s.modality,
+                instrument: s.equipmentId || null,
+                qcStatus: s.qcStatus,
+                status: s.status,
+                wavenumbers: s.wavelengths ? JSON.parse(s.wavelengths) : [],
+                absorbance: s.values ? JSON.parse(s.values) : [],
+                timestamp: s.timestamp ? s.timestamp.toISOString() : null
+            };
+        });
+
+        res.json({
+            status: 'success',
+            schemaVersion: '2026-09-issue140-v2',
+            sourceSystemId: SOURCE_SYSTEM_ID,
+            count: data.length,
+            total,
+            hasMore,
+            nextCursor,
+            data
+        });
+    } catch (err) {
+        console.error('[SIS_V2_SPECTRA_ERR]', err);
+        res.status(500).json({ error: 'Failed to retrieve spectral records.' });
+    }
 };
 
 // ─── 8. POST /api/v2/data-exchange/snapshots (Create Snapshot) ───
 exports.createSnapshot = async (req, res) => {
     try {
         const ttlHours = req.body?.ttlHours ? Number(req.body.ttlHours) : 24;
-        const snapshot = await exchangeStateService.createSnapshot(req.sisAuth, { ttlHours });
+        const profile = req.body?.profile || req.query?.profile || 'core-lossless-v2';
+
+        // Validate profile (R2, R8)
+        const allowedProfiles = ['core-lossless-v2', 'opennsis', 'default'];
+        if (profile && !allowedProfiles.includes(profile)) {
+            return res.status(400).json({
+                error: 'INVALID_PROFILE',
+                message: `Unsupported profile '${profile}'. Supported profiles: ${allowedProfiles.join(', ')}.`
+            });
+        }
+
+        const filter = req.body?.filter || {};
+        const maps = await getAnalysisMap();
+
+        const snapshot = await exchangeStateService.createSnapshot(req.sisAuth, {
+            ttlHours,
+            profile,
+            filter,
+            maps
+        });
+
         res.status(201).json({
             status: 'success',
             schemaVersion: '2026-09-issue140-v2',
             sourceSystemId: SOURCE_SYSTEM_ID,
+            profile,
             ...snapshot
         });
     } catch (err) {
-        console.error('[SIS_V2_CREATE_SNAPSHOT_ERR]', err);
-        res.status(500).json({ error: 'Failed to create export snapshot.' });
+        console.error('[SIS_V2_CREATE_SNAPSHOT_ERR]', err.message, err.stack);
+        res.status(500).json({ error: 'Failed to create export snapshot.', details: err.message });
     }
 };
 
@@ -528,9 +635,8 @@ exports.getSnapshotPages = async (req, res) => {
     try {
         const { snapshotId } = req.params;
         const { limit, cursor } = req.query;
-        const maps = await getAnalysisMap();
 
-        const result = await exchangeStateService.getSnapshotPage(snapshotId, req.sisAuth, { limit, cursor, maps });
+        const result = await exchangeStateService.getSnapshotPage(snapshotId, req.sisAuth, { limit, cursor });
         if (result.error) {
             return res.status(result.status || 400).json({
                 error: result.error,
@@ -572,8 +678,8 @@ exports.getChanges = async (req, res) => {
             ...result
         });
     } catch (err) {
-        console.error('[SIS_V2_CHANGES_ERR]', err);
-        res.status(500).json({ error: 'Failed to read change feed.' });
+        console.error('[SIS_V2_CHANGES_ERR]', err.message, err.stack);
+        res.status(500).json({ error: 'Failed to read change feed.', details: err.message });
     }
 };
 
@@ -581,6 +687,12 @@ exports.getChanges = async (req, res) => {
 exports.submitReceipt = async (req, res) => {
     try {
         const receipt = exchangeStateService.recordReceipt(req.sisAuth, req.body || {});
+        if (receipt.error) {
+            return res.status(receipt.status || 400).json({
+                error: receipt.error,
+                message: receipt.message
+            });
+        }
         res.status(200).json({
             status: 'success',
             schemaVersion: '2026-09-issue140-v2',
