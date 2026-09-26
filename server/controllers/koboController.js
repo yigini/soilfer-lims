@@ -332,6 +332,150 @@ exports.syncAll = async (req, res) => {
 };
 
 /**
+ * Strict positive source-identity verification (PR 147 / Review 919fdc6)
+ * Missing source identity must never prove equality.
+ */
+function isSameSource(meta, currentConfig) {
+    if (!meta || !currentConfig) return false;
+    const metaServer = meta.sourceServerUrl || meta.koboServerUrl;
+    const metaForm = meta.sourceFormId || meta.formId;
+    const configServer = currentConfig.koboServerUrl;
+    const configForm = currentConfig.formId;
+    if (!metaServer || !metaForm || !configServer || !configForm) {
+        return false;
+    }
+    return metaServer === configServer && metaForm === configForm;
+}
+
+/**
+ * Compute deterministic evidence fingerprint over coordinates, depth, site, collection date, and attachments
+ */
+function computeEvidenceFingerprint(sampleData, processedAttachments, submission) {
+    const rawAttachments = Array.isArray(processedAttachments) ? processedAttachments : (
+        Array.isArray(submission?._attachments) ? submission._attachments : []
+    );
+    const attachmentKeys = rawAttachments.map(a => {
+        return a.download_url || a.filename || '';
+    }).filter(Boolean).sort();
+
+    const payload = {
+        lat: sampleData?.lat != null ? Number(sampleData.lat) : null,
+        lng: sampleData?.lng != null ? Number(sampleData.lng) : null,
+        depth: sampleData?.depth ? String(sampleData.depth).trim() : null,
+        site_id: sampleData?.site_id ? String(sampleData.site_id).trim() : null,
+        collected_at: sampleData?.collected_at ? String(sampleData.collected_at).trim() : null,
+        attachments: attachmentKeys
+    };
+    return crypto.createHash('sha256').update(JSON.stringify(payload)).digest('hex').substring(0, 16);
+}
+
+/**
+ * Detect whether incoming survey evidence (coordinates, attachments, site) differs from existing recorded provenance
+ */
+function hasEvidenceChanged(existingMeta, existingEntry, incomingSampleData, incomingAttachments, submission) {
+    if (!existingMeta) return false;
+
+    // 1. If existing record has a stored evidence fingerprint, strictly compare fingerprints
+    if (existingMeta.evidenceFingerprint) {
+        const incomingFp = computeEvidenceFingerprint(incomingSampleData, incomingAttachments, submission);
+        return existingMeta.evidenceFingerprint !== incomingFp;
+    }
+
+    // 2. Field-by-field check for records without stored fingerprint
+    // Check coordinates
+    let existingLat = existingMeta.lat ?? existingMeta.latitude ?? null;
+    let existingLng = existingMeta.lng ?? existingMeta.longitude ?? null;
+    if (existingLat === null && existingEntry?.fieldMetadata) {
+        try {
+            const fm = typeof existingEntry.fieldMetadata === 'string' ? JSON.parse(existingEntry.fieldMetadata) : existingEntry.fieldMetadata;
+            existingLat = fm?.latitude?.value ?? fm?.latitude ?? null;
+            existingLng = fm?.longitude?.value ?? fm?.longitude ?? null;
+        } catch (_) {}
+    }
+    if (existingLat === null && existingEntry?.latitude != null) {
+        existingLat = existingEntry.latitude;
+        existingLng = existingEntry.longitude;
+    }
+    const incomingLat = incomingSampleData?.lat != null ? Number(incomingSampleData.lat) : null;
+    const incomingLng = incomingSampleData?.lng != null ? Number(incomingSampleData.lng) : null;
+
+    if (existingLat != null && incomingLat != null && Number(existingLat) !== incomingLat) {
+        return true;
+    }
+    if (existingLng != null && incomingLng != null && Number(existingLng) !== incomingLng) {
+        return true;
+    }
+
+    // Check attachments / photos
+    const existingAtts = (existingMeta.attachments || existingMeta.photos || []).map(a => a.download_url || a.filename).filter(Boolean);
+    const incomingAtts = (incomingAttachments || []).map(a => a.download_url || a.filename).filter(Boolean);
+
+    if (incomingAtts.length > 0) {
+        if (existingAtts.length > 0) {
+            const existingSorted = JSON.stringify([...existingAtts].sort());
+            const incomingSorted = JSON.stringify([...incomingAtts].sort());
+            if (existingSorted !== incomingSorted) {
+                return true;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    // Check site_id
+    if (existingMeta.site_id && incomingSampleData?.site_id && String(existingMeta.site_id).trim() !== String(incomingSampleData.site_id).trim()) {
+        return true;
+    }
+
+    // Check collected_at
+    if (existingMeta.collected_at && incomingSampleData?.collected_at && String(existingMeta.collected_at).trim() !== String(incomingSampleData.collected_at).trim()) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Detect whether an incoming occurrence's evidence fingerprint has already been recorded in revisions or conflicting submissions (da8b561 review)
+ */
+function isOccurrenceEvidenceRecorded(meta, currentConfig, submission, sampleData, incomingFp) {
+    if (!meta || !incomingFp) return false;
+    const occurrenceKey = `${currentConfig?.koboServerUrl || ''}:${currentConfig?.formId || ''}:${submission?._id}:${sampleData?.depth || 'D1'}`;
+
+    // 1. Check in meta.revisions
+    if (Array.isArray(meta.revisions)) {
+        for (const rev of meta.revisions) {
+            const matchesKey = rev.occurrenceKey ? rev.occurrenceKey === occurrenceKey : (
+                String(rev.kobo_id) === String(submission?._id) &&
+                String(rev.depth || '') === String(sampleData?.depth || '') &&
+                (!rev.sourceServerUrl || rev.sourceServerUrl === currentConfig?.koboServerUrl) &&
+                (!rev.sourceFormId || rev.sourceFormId === currentConfig?.formId)
+            );
+            if (matchesKey && rev.evidenceFingerprint && rev.evidenceFingerprint === incomingFp) {
+                return true;
+            }
+        }
+    }
+
+    // 2. Check in meta.conflictingSubmissions
+    if (Array.isArray(meta.conflictingSubmissions)) {
+        for (const conf of meta.conflictingSubmissions) {
+            const matchesKey = conf.occurrenceKey ? conf.occurrenceKey === occurrenceKey : (
+                String(conf.kobo_id) === String(submission?._id) &&
+                String(conf.depth || '') === String(sampleData?.depth || '') &&
+                (!conf.sourceServerUrl || conf.sourceServerUrl === currentConfig?.koboServerUrl) &&
+                (!conf.sourceFormId || conf.sourceFormId === currentConfig?.formId)
+            );
+            if (matchesKey && conf.evidenceFingerprint && conf.evidenceFingerprint === incomingFp) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/**
  * Internal: Sync submissions for a specific lab config
  */
 async function syncLabSubmissions(config, performedBy, options = {}) {
@@ -397,8 +541,8 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
         };
     }
 
-    // Fetch submissions from Kobo
-    let submissions = await koboService.fetchSubmissions(
+    // Fetch submissions from Kobo (or use verified snapshot override)
+    let submissions = options.submissionsOverride || await koboService.fetchSubmissions(
         currentConfig.koboServerUrl,
         currentConfig.formId,
         currentConfig.apiToken,
@@ -419,6 +563,9 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
         return { newSamples: 0, skipped: 0, message: 'No new submissions', lastSubmissionId: currentConfig.lastSubmissionId };
     }
 
+    // Parse field mapping
+    const fieldMapping = currentConfig.fieldMapping ? JSON.parse(currentConfig.fieldMapping) : null;
+
     // Get existing sample records to avoid duplicates and map accurately
     const existingSamples = await prisma.sample.findMany({
         select: {
@@ -429,7 +576,9 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
             status: true,
             rejectionReason: true,
             metadata: true,
-            fieldMetadata: true
+            fieldMetadata: true,
+            latitude: true,
+            longitude: true
         }
     });
     const existingSamplesByNormId = new Map();
@@ -450,9 +599,6 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
             existingSamplesByNormId.set(norm, s);
         }
     }
-
-    // Parse field mapping
-    const fieldMapping = currentConfig.fieldMapping ? JSON.parse(currentConfig.fieldMapping) : null;
 
     let newCount = 0;
     let skippedCount = 0;
@@ -601,12 +747,8 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                     meta = {};
                 }
 
-                // Check if this incoming occurrence is from the SAME source server and form
-                const metaServer = meta.sourceServerUrl || meta.koboServerUrl;
-                const metaForm = meta.sourceFormId || meta.formId;
-                const isSameServerAndForm = (!metaServer || metaServer === currentConfig.koboServerUrl) &&
-                                            (!metaForm || metaForm === currentConfig.formId);
-
+                // Check if this incoming occurrence is from the SAME source server and form (Finding 1)
+                const isSameServerAndForm = isSameSource(meta, currentConfig);
                 const isPrimarySubmission = isSameServerAndForm && String(meta.kobo_id) === String(submission._id);
 
                 if (isPrimarySubmission) {
@@ -624,8 +766,21 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                                           (Array.isArray(meta.intraSubDuplicates) && meta.intraSubDuplicates.some(d => String(d.depth || '') === String(sampleData.depth || '')));
 
                     if (isPrimaryDepth) {
-                        // Unchanged primary replay: completely idempotent! Zero metadata/audit/hold changes (Finding 1)
+                        const incomingFp = computeEvidenceFingerprint(sampleData, processedAttachments, submission);
+                        const evidenceChanged = hasEvidenceChanged(meta, existingEntry, sampleData, processedAttachments, submission);
+                        if (!evidenceChanged) {
+                            // Unchanged primary replay: completely idempotent! Zero metadata/audit/hold changes (Finding 1)
+                            skippedCount++;
+                            continue;
+                        }
+                        if (isOccurrenceEvidenceRecorded(meta, currentConfig, submission, sampleData, incomingFp)) {
+                            // Revised primary replay with identical revised evidence: idempotent! Zero metadata/audit/hold changes (da8b561 review)
+                            skippedCount++;
+                            continue;
+                        }
+                        // Primary occurrence revised with changed evidence! Record revision & apply hold (Finding 2)
                         skippedCount++;
+                        crossSubDuplicates.push({ sampleData, existingEntry, isPrimaryRevision: true });
                         continue;
                     }
                 }
@@ -709,14 +864,92 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                 }
 
                 // Check again if this is the primary occurrence (Finding 1)
-                const isSameServerAndForm = (!meta.koboServerUrl || meta.koboServerUrl === currentConfig.koboServerUrl) &&
-                                            (!meta.formId || meta.formId === currentConfig.formId);
+                const isSameServerAndForm = isSameSource(meta, currentConfig);
+                const isPrimarySubmission = isSameServerAndForm && String(meta.kobo_id) === String(submission._id);
 
-                if (isSameServerAndForm && String(meta.kobo_id) === String(submission._id)) {
+                if (isPrimarySubmission) {
                     const isPrimaryDepth = String(meta.depth || '') === String(sampleData.depth || '') ||
                                           (Array.isArray(meta.intraSubDuplicates) && meta.intraSubDuplicates.some(d => String(d.depth || '') === String(sampleData.depth || '')));
                     if (isPrimaryDepth) {
-                        // Unchanged primary replay - do not treat as conflict
+                        const incomingFp = computeEvidenceFingerprint(sampleData, processedAttachments, submission);
+                        const evidenceChanged = hasEvidenceChanged(meta, existingSample, sampleData, processedAttachments, submission);
+                        if (!evidenceChanged) {
+                            // Unchanged primary replay - do not treat as conflict
+                            continue;
+                        }
+                        if (isOccurrenceEvidenceRecorded(meta, currentConfig, submission, sampleData, incomingFp)) {
+                            // Already recorded this exact revised evidence - skip idempotently (da8b561 review)
+                            continue;
+                        }
+
+                        // Primary occurrence revised with changed evidence! Record revision append-only & apply hold (Finding 2)
+                        if (!Array.isArray(meta.revisions)) {
+                            meta.revisions = [];
+                        }
+                        const occurrenceKey = `${currentConfig.koboServerUrl || ''}:${currentConfig.formId || ''}:${submission._id}:${sampleData.depth || 'D1'}`;
+                        const revisionRecord = {
+                            occurrenceKey,
+                            evidenceFingerprint: incomingFp,
+                            sourceServerUrl: currentConfig.koboServerUrl,
+                            sourceFormId: currentConfig.formId,
+                            kobo_id: submission._id,
+                            kobo_uuid: submission._uuid,
+                            submission_time: submission._submission_time,
+                            surveyor: koboService.findValue(submission, ['surveyor_name', 'username']),
+                            site_id: sampleData.site_id,
+                            depth: sampleData.depth,
+                            lat: sampleData.lat,
+                            lng: sampleData.lng,
+                            collected_at: sampleData.collected_at,
+                            attachments: processedAttachments,
+                            reason: 'PRIMARY_OCCURRENCE_REVISED_EVIDENCE',
+                            recordedAt: new Date().toISOString()
+                        };
+                        meta.revisions.push(revisionRecord);
+
+                        if (!Array.isArray(meta.conflictingSubmissions)) {
+                            meta.conflictingSubmissions = [];
+                        }
+                        meta.conflictingSubmissions.push(revisionRecord);
+
+                        meta.provenanceHold = {
+                            status: 'AMBIGUOUS_PROVENANCE_HOLD',
+                            reason: 'REVISED_FIELD_EVIDENCE: Primary occurrence re-submitted with conflicting survey coordinates or attachments',
+                            primaryOccurrence: {
+                                kobo_id: meta.kobo_id,
+                                kobo_uuid: meta.kobo_uuid,
+                                submission_time: meta.submission_time,
+                                surveyor: meta.surveyor,
+                                site_id: meta.site_id,
+                                evidenceFingerprint: meta.evidenceFingerprint
+                            },
+                            revisionCount: meta.revisions.length,
+                            conflictingCount: meta.conflictingSubmissions.length,
+                            updatedAt: new Date().toISOString()
+                        };
+
+                        const updateData = {
+                            metadata: JSON.stringify(meta)
+                        };
+                        if (existingSample.status === workflow.SAMPLE_STATES.EXPECTED && !existingSample.rejectionReason) {
+                            updateData.rejectionReason = 'PROVENANCE_HOLD: Conflicting field submissions claimed this barcode';
+                        }
+
+                        await tx.sample.update({
+                            where: { id: existingSample.id },
+                            data: updateData
+                        });
+
+                        await tx.auditLog.create({
+                            data: {
+                                id: crypto.randomUUID(),
+                                entity: 'SAMPLE',
+                                entityId: existingSample.id,
+                                action: 'KOBO_CONFLICTING_PROVENANCE',
+                                performedBy: performedBy,
+                                timestamp: new Date()
+                            }
+                        });
                         continue;
                     }
                 }
@@ -727,7 +960,7 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                 const occurrenceKey = `${sourceServerUrl || ''}:${sourceFormId || ''}:${submission._id}:${sampleData.depth || 'D1'}`;
 
                 const conflicting = Array.isArray(meta.conflictingSubmissions) ? meta.conflictingSubmissions : [];
-                const alreadyRecorded = conflicting.some(c => (
+                const existingConflict = conflicting.find(c => (
                     c.occurrenceKey ? c.occurrenceKey === occurrenceKey : (
                         String(c.sourceServerUrl || '') === String(sourceServerUrl || '') &&
                         String(c.sourceFormId || '') === String(sourceFormId || '') &&
@@ -736,27 +969,50 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                     )
                 ));
 
-                if (alreadyRecorded) {
-                    // Idempotent repeat: already recorded, skip (Finding 3)
-                    continue;
-                }
+                if (existingConflict) {
+                    const conflictEvidenceChanged = hasEvidenceChanged(existingConflict, {}, sampleData, processedAttachments, submission);
+                    if (!conflictEvidenceChanged) {
+                        // Idempotent repeat: already recorded with identical evidence, skip (Finding 3)
+                        continue;
+                    }
 
-                conflicting.push({
-                    occurrenceKey,
-                    sourceServerUrl,
-                    sourceFormId,
-                    kobo_id: submission._id,
-                    kobo_uuid: submission._uuid,
-                    submission_time: submission._submission_time,
-                    surveyor: koboService.findValue(submission, ['surveyor_name', 'username']),
-                    site_id: sampleData.site_id,
-                    depth: sampleData.depth,
-                    lat: sampleData.lat,
-                    lng: sampleData.lng,
-                    collected_at: sampleData.collected_at,
-                    attachments: processedAttachments,
-                    recordedAt: new Date().toISOString()
-                });
+                    // Append revision to existing conflicting occurrence
+                    if (!Array.isArray(existingConflict.revisions)) {
+                        existingConflict.revisions = [];
+                    }
+                    existingConflict.revisions.push({
+                        evidenceFingerprint: existingConflict.evidenceFingerprint,
+                        lat: existingConflict.lat,
+                        lng: existingConflict.lng,
+                        collected_at: existingConflict.collected_at,
+                        attachments: existingConflict.attachments,
+                        recordedAt: existingConflict.recordedAt || existingConflict.recorded_at
+                    });
+                    existingConflict.evidenceFingerprint = computeEvidenceFingerprint(sampleData, processedAttachments, submission);
+                    existingConflict.lat = sampleData.lat;
+                    existingConflict.lng = sampleData.lng;
+                    existingConflict.collected_at = sampleData.collected_at;
+                    existingConflict.attachments = processedAttachments;
+                    existingConflict.recordedAt = new Date().toISOString();
+                } else {
+                    conflicting.push({
+                        occurrenceKey,
+                        evidenceFingerprint: computeEvidenceFingerprint(sampleData, processedAttachments, submission),
+                        sourceServerUrl,
+                        sourceFormId,
+                        kobo_id: submission._id,
+                        kobo_uuid: submission._uuid,
+                        submission_time: submission._submission_time,
+                        surveyor: koboService.findValue(submission, ['surveyor_name', 'username']),
+                        site_id: sampleData.site_id,
+                        depth: sampleData.depth,
+                        lat: sampleData.lat,
+                        lng: sampleData.lng,
+                        collected_at: sampleData.collected_at,
+                        attachments: processedAttachments,
+                        recordedAt: new Date().toISOString()
+                    });
+                }
 
                 meta.conflictingSubmissions = conflicting;
 
@@ -876,6 +1132,9 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                         sourceServerUrl: currentConfig.koboServerUrl,
                         sourceFormId: currentConfig.formId,
                         depth: sampleData.depth,
+                        lat: sampleData.lat,
+                        lng: sampleData.lng,
+                        collected_at: sampleData.collected_at,
                         surveyor: koboService.findValue(submission, ['surveyor_name', 'username']),
                         site_id: sampleData.site_id,
                         province: koboService.findValue(submission, ['selected_province', 'provincia']),
@@ -884,6 +1143,7 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                         sampling_succeeded: koboService.findValue(submission, ['sampling_succeeded', 'muestreo_exitoso']),
                         submission_time: submission._submission_time,
                         attachments: processedAttachments,
+                        evidenceFingerprint: computeEvidenceFingerprint(sampleData, processedAttachments, submission),
                         intraSubDuplicates: sampleData.intraSubDuplicates || undefined
                     };
 
@@ -914,6 +1174,8 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                             status: workflow.SAMPLE_STATES.EXPECTED,
                             metadata: JSON.stringify(compactMeta),
                             fieldMetadata: JSON.stringify(fieldMetadata),
+                            latitude: sampleData.lat != null ? Number(sampleData.lat) : null,
+                            longitude: sampleData.lng != null ? Number(sampleData.lng) : null,
                             receptionDate: null,
                             rejectionReason: rejectionReason
                         }

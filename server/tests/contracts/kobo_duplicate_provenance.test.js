@@ -1097,4 +1097,311 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
         const wsNormal = await sampleWorkspaceService.getSampleWorkspace(normalSample.id, recUser);
         expect(wsNormal.capabilities.canAcceptIntake.allowed).toBe(true);
     });
+
+    test('15. Source-B primary record does not suppress source-A submission with same ID and depth (Finding 1)', async () => {
+        const crossBarcode = 'GHA-PRIM-XFORM-' + SUFFIX;
+        const sharedId = 41001;
+
+        // Existing sample in DB was created by Source B (different form/server) as primary
+        await prisma.sample.create({
+            data: {
+                id: 'smp-b-' + SUFFIX,
+                originalId: crossBarcode,
+                assignedLab: labGHA.id,
+                projectCode: projUS.code,
+                projectId: projUS.id,
+                status: 'EXPECTED',
+                metadata: JSON.stringify({
+                    kobo_id: sharedId,
+                    kobo_uuid: 'uuid-b-' + SUFFIX,
+                    sourceServerUrl: 'https://source-b.test',
+                    sourceFormId: 'form-b',
+                    depth: 'D1'
+                })
+            }
+        });
+
+        // Incoming submission from configGHA (source-a/form-a) with identical kobo_id 41001 and depth D1
+        koboService.fetchSubmissions.mockResolvedValueOnce([
+            {
+                _id: sharedId,
+                _uuid: 'uuid-a-' + SUFFIX,
+                _submission_time: '2026-09-24T20:00:00',
+                surveyor_name: 'surveyor_a',
+                _attachments: []
+            }
+        ]);
+        koboService.transformSubmission.mockReturnValueOnce([
+            {
+                original_id: crossBarcode,
+                depth: 'D1',
+                site_id: 'SITE-A',
+                lat: 6.1,
+                lng: -0.3,
+                collected_at: '2026-09-24',
+                kobo_submission_id: sharedId
+            }
+        ]);
+
+        const syncResult = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+        expect(syncResult.newSamples).toBe(0);
+        expect(syncResult.skipped).toBe(1);
+
+        const updatedSample = await prisma.sample.findUnique({ where: { originalId: crossBarcode } });
+        const updatedMeta = JSON.parse(updatedSample.metadata);
+
+        // Must record conflicting submission from source-A, not suppress it
+        expect(updatedMeta.conflictingSubmissions).toBeDefined();
+        expect(updatedMeta.conflictingSubmissions.length).toBe(1);
+        expect(updatedMeta.conflictingSubmissions[0].sourceServerUrl).toBe(configGHA.koboServerUrl);
+        expect(updatedMeta.conflictingSubmissions[0].sourceFormId).toBe(configGHA.formId);
+        expect(updatedMeta.provenanceHold?.status).toBe('AMBIGUOUS_PROVENANCE_HOLD');
+
+        const audits = await prisma.auditLog.findMany({
+            where: { entityId: updatedSample.id, action: 'KOBO_CONFLICTING_PROVENANCE' }
+        });
+        expect(audits.length).toBe(1);
+    });
+
+    test('16. Primary occurrence replayed with changed coordinates or attachments creates revision hold (Finding 2)', async () => {
+        const revBarcode = 'GHA-PRIM-REV-' + SUFFIX;
+        const subId = 41002;
+
+        // Step 1: Initial admission of primary occurrence
+        koboService.fetchSubmissions.mockResolvedValueOnce([
+            {
+                _id: subId,
+                _uuid: 'uuid-rev-1-' + SUFFIX,
+                _submission_time: '2026-09-24T21:00:00',
+                surveyor_name: 'surveyor_prim',
+                _attachments: [{ filename: 'initial.jpg', download_url: 'https://source-a.test/initial.jpg' }]
+            }
+        ]);
+        koboService.transformSubmission.mockReturnValueOnce([
+            {
+                original_id: revBarcode,
+                depth: 'D1',
+                site_id: 'SITE-REV-1',
+                lat: 5.55,
+                lng: -0.22,
+                collected_at: '2026-09-24',
+                kobo_submission_id: subId
+            }
+        ]);
+
+        const pass1 = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+        expect(pass1.newSamples).toBe(1);
+
+        const sampleInitial = await prisma.sample.findUnique({ where: { originalId: revBarcode } });
+        expect(sampleInitial.rejectionReason).toBeNull();
+        const metaInitial = JSON.parse(sampleInitial.metadata);
+        expect(metaInitial.provenanceHold).toBeUndefined();
+
+        // Step 2: Replay same primary occurrence with changed coordinates and revised photo
+        koboService.fetchSubmissions.mockResolvedValueOnce([
+            {
+                _id: subId,
+                _uuid: 'uuid-rev-2-' + SUFFIX,
+                _submission_time: '2026-09-24T21:30:00',
+                surveyor_name: 'surveyor_prim',
+                _attachments: [{ filename: 'revised.jpg', download_url: 'https://source-a.test/revised.jpg' }]
+            }
+        ]);
+        koboService.transformSubmission.mockReturnValueOnce([
+            {
+                original_id: revBarcode,
+                depth: 'D1',
+                site_id: 'SITE-REV-2',
+                lat: 9.99, // Changed coordinates!
+                lng: -1.11,
+                collected_at: '2026-09-24',
+                kobo_submission_id: subId
+            }
+        ]);
+
+        const pass2 = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+        expect(pass2.newSamples).toBe(0);
+        expect(pass2.skipped).toBe(1);
+
+        const sampleRevised = await prisma.sample.findUnique({ where: { originalId: revBarcode } });
+        expect(sampleRevised.rejectionReason).toContain('PROVENANCE_HOLD');
+        const metaRevised = JSON.parse(sampleRevised.metadata);
+        expect(metaRevised.provenanceHold?.status).toBe('AMBIGUOUS_PROVENANCE_HOLD');
+        expect(metaRevised.revisions).toBeDefined();
+        expect(metaRevised.revisions.length).toBe(1);
+        expect(metaRevised.revisions[0].lat).toBe(9.99);
+
+        const audits = await prisma.auditLog.findMany({
+            where: { entityId: sampleRevised.id, action: 'KOBO_CONFLICTING_PROVENANCE' }
+        });
+        expect(audits.length).toBe(1);
+    });
+
+    test('17. Conflicting occurrence replayed with changed coordinates preserves revision append-only', async () => {
+        const confRevBarcode = 'GHA-CONF-REV-' + SUFFIX;
+        const primId = 41010;
+        const confId = 41011;
+
+        // Step 1: Initial admission of primary occurrence
+        koboService.fetchSubmissions.mockResolvedValueOnce([
+            {
+                _id: primId,
+                _uuid: 'uuid-prim-' + SUFFIX,
+                _submission_time: '2026-09-24T22:00:00',
+                surveyor_name: 'surveyor_p',
+                _attachments: []
+            }
+        ]);
+        koboService.transformSubmission.mockReturnValueOnce([
+            {
+                original_id: confRevBarcode,
+                depth: 'D1',
+                site_id: 'SITE-P',
+                lat: 5.0,
+                lng: -0.1,
+                collected_at: '2026-09-24',
+                kobo_submission_id: primId
+            }
+        ]);
+        await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+
+        // Step 2: Conflicting submission from surveyor B
+        koboService.fetchSubmissions.mockResolvedValueOnce([
+            {
+                _id: confId,
+                _uuid: 'uuid-conf-1-' + SUFFIX,
+                _submission_time: '2026-09-24T22:05:00',
+                surveyor_name: 'surveyor_c',
+                _attachments: []
+            }
+        ]);
+        koboService.transformSubmission.mockReturnValueOnce([
+            {
+                original_id: confRevBarcode,
+                depth: 'D1',
+                site_id: 'SITE-C1',
+                lat: 5.1,
+                lng: -0.2,
+                collected_at: '2026-09-24',
+                kobo_submission_id: confId
+            }
+        ]);
+        await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+
+        // Step 3: Replay conflicting submission with revised coordinates
+        koboService.fetchSubmissions.mockResolvedValueOnce([
+            {
+                _id: confId,
+                _uuid: 'uuid-conf-2-' + SUFFIX,
+                _submission_time: '2026-09-24T22:15:00',
+                surveyor_name: 'surveyor_c',
+                _attachments: []
+            }
+        ]);
+        koboService.transformSubmission.mockReturnValueOnce([
+            {
+                original_id: confRevBarcode,
+                depth: 'D1',
+                site_id: 'SITE-C2',
+                lat: 5.9, // Revised conflict coordinates
+                lng: -0.8,
+                collected_at: '2026-09-24',
+                kobo_submission_id: confId
+            }
+        ]);
+        await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+
+        const finalSample = await prisma.sample.findUnique({ where: { originalId: confRevBarcode } });
+        const finalMeta = JSON.parse(finalSample.metadata);
+        expect(finalMeta.conflictingSubmissions.length).toBe(1);
+        const conflictRecord = finalMeta.conflictingSubmissions[0];
+        expect(conflictRecord.lat).toBe(5.9);
+        expect(conflictRecord.revisions).toBeDefined();
+        expect(conflictRecord.revisions.length).toBe(1);
+        expect(conflictRecord.revisions[0].lat).toBe(5.1);
+    });
+
+    test('18. Repeated revised-primary replay with identical revised evidence is idempotent (da8b561 review regression)', async () => {
+        const repeatRevBarcode = 'GHA-PRIM-REPEAT-' + SUFFIX;
+        const subId = 41020;
+
+        // Step 1: Initial admission of primary occurrence
+        koboService.fetchSubmissions.mockResolvedValueOnce([
+            {
+                _id: subId,
+                _uuid: 'uuid-prim-orig-' + SUFFIX,
+                _submission_time: '2026-09-24T23:00:00',
+                surveyor_name: 'surveyor_prim',
+                _attachments: [{ filename: 'orig.jpg', download_url: 'https://test/orig.jpg' }]
+            }
+        ]);
+        koboService.transformSubmission.mockReturnValueOnce([
+            {
+                original_id: repeatRevBarcode,
+                depth: 'D1',
+                site_id: 'SITE-PRIM-1',
+                lat: 5.5,
+                lng: -0.2,
+                collected_at: '2026-09-24',
+                kobo_submission_id: subId
+            }
+        ]);
+        const pass1 = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+        expect(pass1.newSamples).toBe(1);
+
+        // Step 2: Revised primary occurrence (changed coordinates)
+        const revisedSub = {
+            _id: subId,
+            _uuid: 'uuid-prim-rev-' + SUFFIX,
+            _submission_time: '2026-09-24T23:30:00',
+            surveyor_name: 'surveyor_prim',
+            _attachments: [{ filename: 'rev.jpg', download_url: 'https://test/rev.jpg' }]
+        };
+        const revisedTransform = {
+            original_id: repeatRevBarcode,
+            depth: 'D1',
+            site_id: 'SITE-PRIM-2',
+            lat: 6.66,
+            lng: -0.99,
+            collected_at: '2026-09-24',
+            kobo_submission_id: subId
+        };
+
+        koboService.fetchSubmissions.mockResolvedValueOnce([revisedSub]);
+        koboService.transformSubmission.mockReturnValueOnce([revisedTransform]);
+
+        const pass2 = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+        expect(pass2.newSamples).toBe(0);
+        expect(pass2.skipped).toBe(1);
+
+        const sampleAfterPass2 = await prisma.sample.findUnique({ where: { originalId: repeatRevBarcode } });
+        const metaPass2 = JSON.parse(sampleAfterPass2.metadata);
+        expect(metaPass2.revisions?.length).toBe(1);
+        expect(metaPass2.conflictingSubmissions?.length).toBe(1);
+        expect(metaPass2.provenanceHold?.status).toBe('AMBIGUOUS_PROVENANCE_HOLD');
+
+        const auditsAfterPass2 = await prisma.auditLog.findMany({
+            where: { entityId: sampleAfterPass2.id, action: 'KOBO_CONFLICTING_PROVENANCE' }
+        });
+        expect(auditsAfterPass2.length).toBe(1);
+
+        // Step 3: Replay the EXACT SAME revised submission
+        koboService.fetchSubmissions.mockResolvedValueOnce([revisedSub]);
+        koboService.transformSubmission.mockReturnValueOnce([revisedTransform]);
+
+        const pass3 = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+        expect(pass3.newSamples).toBe(0);
+        expect(pass3.skipped).toBe(1);
+
+        const sampleAfterPass3 = await prisma.sample.findUnique({ where: { originalId: repeatRevBarcode } });
+        const metaPass3 = JSON.parse(sampleAfterPass3.metadata);
+        // Invariants: zero duplicate revisions, zero duplicate conflict entries, zero duplicate audits
+        expect(metaPass3.revisions?.length).toBe(1);
+        expect(metaPass3.conflictingSubmissions?.length).toBe(1);
+
+        const auditsAfterPass3 = await prisma.auditLog.findMany({
+            where: { entityId: sampleAfterPass3.id, action: 'KOBO_CONFLICTING_PROVENANCE' }
+        });
+        expect(auditsAfterPass3.length).toBe(1); // STILL 1!
+    });
 });
