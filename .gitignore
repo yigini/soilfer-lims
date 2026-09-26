@@ -30,6 +30,9 @@ server/data/*
 !server/data/importedParameterNames.json
 !server/data/help/
 !server/data/help/**
+server/data/ghana_kobo_*
+*.kobo*.json
+private_kobo/
 server/uploads/
 server/database.json
 

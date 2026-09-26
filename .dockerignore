@@ -1,4 +1,7 @@
 node_modules
+**/node_modules
+server/node_modules
+client/node_modules
 .git
 .gitignore
 .env
@@ -26,6 +29,9 @@ server/data/*
 !server/data/help/**
 server/uploads
 server/database.json
+server/data/ghana_kobo_*
+*.kobo*.json
+private_kobo/
 
 # IDE
 .vscode
