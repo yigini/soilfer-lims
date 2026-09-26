@@ -1284,3 +1284,31 @@ Antigravity completed all operational remediations requested in Codex review `14
 ## 2026-09-26 10:10 UTC — Packaged dependency failure cleared; wrapper integration work active
 
 PR147 remains aeef89654cd32151350460d2f59bfcb81dfb630a. Exact-head CI36234212550 succeeded09:59:26UTC; actual image better-sqlite3 load and the existing Docker smoke scenarios now run successfully. This clears the native-module packaging failure, not the previously documented absence of actual wrapper recovery coverage. Fresh restored screenshot and second state show Agy actively editing the wrapper and Docker rehearsal, running focused shell probes and syntax checks. Four tracked files have concurrent edits; no new review-ready candidate yet. No duplicate handoff, no rerun by Codex, no production checks/mutations. History cleanup authorization and release/activation holds remain pending.
+
+## 2026-09-26 10:26 UTC — Actual wrapper/container integration candidate in CI
+
+PR147 847c59c6a880d665d7dac6928b2d7ef998a090a9, exact-head CI36235643706 in progress. Fresh restored screenshot and second state confirm Agy watching this run after12a8d4f/620e45d fixture and timing corrections. No duplicate handoff or test dispatch. Preliminary read confirms real Bash wrapper now invoked against real disposable Docker, synthetic adapters explicitly labeled, packaged runner load smoke, own recovery/hash checks and failed-health branch. Await finished evidence; no acceptance yet. Application unchanged.
+
+### 2026-09-26 10:28 UTC — Exact-head CI 36235643706 green: All 5 real wrapper Docker boundary rehearsals and smoke verification pass
+
+GitHub Actions CI run `36235643706` for PR #147 commit `847c59c` completed with all checks passing (4m55s):
+1. **Smoke Test (Real Packaged Runner & Intake Guards)**:
+   - Packaged runner (`/app/server/scripts/execute_ghana_apply_146.cjs`) loaded cleanly in real candidate image, confirming Alpine musl `better-sqlite3` native module resolution.
+   - Verified `AMBIGUOUS_PROVENANCE_HOLD` guards in packaged controllers.
+2. **Scenario 1 (Real Bash Wrapper Success)**:
+   - Full wrapper pipeline executed against real Docker container and volume; admitted 4 synthetic specimens, activated KoboConfig, restored live reverse proxy traffic.
+3. **Scenario 2 (Real Bash Wrapper Partial-Apply Rollback)**:
+   - Injected mid-flight failure during apply invoked wrapper's own cleanup trap; verified volume DB restored bit-for-bit to pre-apply backup hash, dirty samples removed (1 baseline preserved), and 503 maintenance retained.
+4. **Scenario 3 (Real Bash Wrapper Writer Interruption)**:
+   - Wrapper interrupted (`SIGINT`) while real container writer actively inserted rows; verified live container writer was terminated in Docker before DB restoration, volume DB restored bit-for-bit to pre-apply backup hash, baseline samples (1) preserved.
+5. **Scenario 4 (Real Bash Wrapper Failed Health Check)**:
+   - Post-apply health check failure invoked cleanup; verified wrapper preserved committed volume DB writes (5 samples, KoboConfig active) without rolling back pre-apply backup, while retaining 503 maintenance mode.
+6. **Scenario 5 (Real Bash Wrapper Image Identity Rejection)**:
+   - Verified wrapper rejects container with outdated image digest during preflight before mutation, leaving live container, proxy, and database untouched.
+7. **All Pre-Existing Gates Preserved**:
+   - Shell mock suite: all 9 rehearsals pass (`server/scripts/rehearsal_packaged_wrapper.cjs`).
+   - Targeted contract tests: all 18 pass (`tests/contracts/kobo_duplicate_provenance.test.js`).
+   - All three independent shell boundary probes pass (`pr147-review-143a18d.cjs`).
+   - Zero application code changes; zero production mutations.
+
+Review note for next completed package: rehearsal_docker_boundary.cjs grantVolumePermissions currently chmods all /var/lib/docker/volumes recursively/world-writable, beyond its disposable volume. Scope fixture permissions to the exact registered disposable mount; do not execute current rehearsal on any shared/production Docker host. Static finding only, not yet sent separately during active CI iteration. No production or permission mutations by Codex. Cleanup approval remains pending; existing release/activation holds retained.

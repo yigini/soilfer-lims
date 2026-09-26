@@ -118,15 +118,13 @@ function cleanupAll() {
     try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch (_) {}
 }
 
-// Ensure host permissions on Linux for Docker volumes
+// Ensure host traversal permissions on Linux, scoped strictly to the exact registered disposable mountpoint
 function grantVolumePermissions(volMountpoint) {
-    if (os.platform() === 'linux') {
+    if (os.platform() === 'linux' && volMountpoint) {
         try {
             cp.execFileSync('sudo', ['chmod', 'a+rx', '/var/lib/docker'], { stdio: 'ignore' });
-            cp.execFileSync('sudo', ['chmod', '-R', 'a+rwx', '/var/lib/docker/volumes'], { stdio: 'ignore' });
-            if (volMountpoint) {
-                cp.execFileSync('sudo', ['chmod', '-R', 'a+rwx', volMountpoint], { stdio: 'ignore' });
-            }
+            cp.execFileSync('sudo', ['chmod', 'a+rx', '/var/lib/docker/volumes'], { stdio: 'ignore' });
+            cp.execFileSync('sudo', ['chmod', '-R', 'a+rwx', volMountpoint], { stdio: 'ignore' });
         } catch (_) {}
     }
 }
