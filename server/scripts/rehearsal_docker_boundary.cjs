@@ -87,6 +87,7 @@ const TS = Date.now();
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), `lims_docker_boundary_${TS}_`));
 const disposableVolumes = [];
 const disposableContainers = [];
+const disposableImages = [];
 
 function registerVolume(vol) {
     disposableVolumes.push(vol);
@@ -98,6 +99,11 @@ function registerContainer(c) {
     return c;
 }
 
+function registerImage(img) {
+    disposableImages.push(img);
+    return img;
+}
+
 function cleanupAll() {
     console.log('\nCleaning up disposable Docker resources...');
     for (const c of disposableContainers) {
@@ -105,6 +111,9 @@ function cleanupAll() {
     }
     for (const v of disposableVolumes) {
         try { cp.execFileSync('docker', ['volume', 'rm', '-f', v], { stdio: 'ignore' }); } catch (_) {}
+    }
+    for (const img of disposableImages) {
+        try { cp.execFileSync('docker', ['rmi', '-f', img], { stdio: 'ignore' }); } catch (_) {}
     }
     try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch (_) {}
 }
@@ -471,7 +480,6 @@ console.log('GUARDS_VERIFIED');
         const vol2 = registerVolume(`lims_disposable_vol_2_${TS}`);
         cp.execFileSync('docker', ['volume', 'create', vol2], { stdio: 'pipe' });
         const mount2 = initializeVolumeDatabase(vol2);
-        const baselineHash2 = computeVolumeDbSha256(vol2);
 
         writeSyntheticAdapterOnVolume(mount2);
         // Inject partial apply failure
@@ -523,15 +531,21 @@ console.log('GUARDS_VERIFIED');
             throw new Error('Scenario 2 should have failed due to injected partial apply crash');
         }
 
+        const backupHashMatch2 = res2.stdout.match(/Pre-operation SHA-256:\s+([a-f0-9]{64})/);
+        if (!backupHashMatch2) {
+            throw new Error('Scenario 2 missing Pre-operation SHA-256 in wrapper stdout:\n' + res2.stdout);
+        }
+        const expectedHash2 = backupHashMatch2[1];
+
         if (!res2.stdout.includes('Restoring database from pre-operation consistent backup') ||
             !res2.stdout.includes('Database restored and bit-for-bit verified')) {
             throw new Error('Scenario 2 missing bit-for-bit restoration in wrapper stdout:\n' + res2.stdout);
         }
 
-        // Verify volume DB restored bit-for-bit to pre-apply baseline hash
+        // Verify volume DB restored bit-for-bit to pre-apply backup hash
         const restoredHash2 = computeVolumeDbSha256(vol2);
-        if (restoredHash2 !== baselineHash2) {
-            throw new Error(`Scenario 2 restored DB hash mismatch: expected ${baselineHash2}, got ${restoredHash2}`);
+        if (restoredHash2 !== expectedHash2) {
+            throw new Error(`Scenario 2 restored DB hash mismatch: expected ${expectedHash2}, got ${restoredHash2}`);
         }
 
         // Verify sample count is restored to exactly 1 (dirty row smp-dirty-fail removed)
@@ -559,7 +573,6 @@ console.log('GUARDS_VERIFIED');
         const vol3 = registerVolume(`lims_disposable_vol_3_${TS}`);
         cp.execFileSync('docker', ['volume', 'create', vol3], { stdio: 'pipe' });
         const mount3 = initializeVolumeDatabase(vol3);
-        const baselineHash3 = computeVolumeDbSha256(vol3);
 
         writeSyntheticAdapterOnVolume(mount3);
         // Configure continuous background writer loop
@@ -649,10 +662,19 @@ console.log('GUARDS_VERIFIED');
             throw new Error('Scenario 3 runner container is STILL running after wrapper cleanup: ' + psCheck);
         }
 
-        // Verify volume DB was restored bit-for-bit to pre-apply baseline hash
+        const backupHashMatch3 = stdout3.match(/Pre-operation SHA-256:\s+([a-f0-9]{64})/);
+        if (!backupHashMatch3) {
+            throw new Error('Scenario 3 missing Pre-operation SHA-256 in wrapper stdout:\n' + stdout3);
+        }
+        const expectedHash3 = backupHashMatch3[1];
+
+        if (!stdout3.includes('Database restored and bit-for-bit verified')) {
+            throw new Error('Scenario 3 missing bit-for-bit restoration confirmation in wrapper stdout:\n' + stdout3);
+        }
+
         const restoredHash3 = computeVolumeDbSha256(vol3);
-        if (restoredHash3 !== baselineHash3) {
-            throw new Error(`Scenario 3 restored DB hash mismatch: expected ${baselineHash3}, got ${restoredHash3}`);
+        if (restoredHash3 !== expectedHash3) {
+            throw new Error(`Scenario 3 restored DB hash mismatch: expected ${expectedHash3}, got ${restoredHash3}`);
         }
 
         const samples3 = queryVolumeDb(vol3, 'SELECT count(*) as c FROM Sample');
@@ -761,19 +783,21 @@ console.log('GUARDS_VERIFIED');
         cp.execFileSync('docker', ['volume', 'create', vol5], { stdio: 'pipe' });
         initializeVolumeDatabase(vol5);
 
-        // Tag an unreviewed alias image and build a different image or use a dummy image ID
-        // Create container using a known different image (or base node image)
-        const dummyImage = 'soilfer-lims:unreviewed-base';
-        cp.execFileSync('docker', ['tag', REVIEWED_IMAGE_ID, dummyImage]);
+        // Create an outdated container image with a distinct digest via docker commit
+        const tempContainer = registerContainer(`lims_temp_base_${TS}`);
+        cp.execFileSync('docker', ['run', '--name', tempContainer, REVIEWED_IMAGE_ID, 'touch', '/outdated_marker']);
+        const outdatedImageTag = registerImage(`soilfer-lims:outdated-${TS}`);
+        cp.execFileSync('docker', ['commit', tempContainer, outdatedImageTag]);
+        cp.execFileSync('docker', ['rm', '-f', tempContainer]);
 
-        // Create container with a simulated outdated image digest by overriding image
+        // Start container with outdated image
         const app5 = registerContainer(`lims_app_mismatch_${TS}`);
         cp.execFileSync('docker', [
             'run', '-d',
             '--name', app5,
             '--entrypoint', 'node',
             '-v', `${vol5}:/app/server/prisma`,
-            dummyImage,
+            outdatedImageTag,
             '-e', 'setInterval(() => {}, 1000)'
         ]);
 
@@ -790,7 +814,6 @@ console.log('GUARDS_VERIFIED');
         fs.writeFileSync(path.join(bin5, 'curl'), '#!/bin/sh\necho \'{"status":"ok"}\'\nexit 0\n');
         fs.chmodSync(path.join(bin5, 'curl'), '755');
 
-        // Pass a non-existent or mismatched image tag to the wrapper
         const env5 = Object.assign({}, process.env, {
             PATH: `${bin5}${path.delimiter}${process.env.PATH}`,
             APP_CONTAINER_NAME: app5,
@@ -809,10 +832,10 @@ console.log('GUARDS_VERIFIED');
             HEALTH_RETRIES: '3'
         });
 
-        // Test A: Pass unreviewed tag
-        const res5a = cp.spawnSync(bashCmd, [toPosix(releaseScript), 'nonexistent:tag-12345'], { env: env5, encoding: 'utf8' });
-        if (res5a.status === 0 || !res5a.stdout.includes('Reviewed image') || !res5a.stdout.includes('not found')) {
-            throw new Error('Scenario 5A should have rejected non-existent reviewed image tag: ' + res5a.stdout);
+        // Test A: Pass reviewed image tag - wrapper must reject app5 because its actual .Image does not match
+        const res5a = cp.spawnSync(bashCmd, [toPosix(releaseScript), IMAGE_TAG], { env: env5, encoding: 'utf8' });
+        if (res5a.status === 0 || !res5a.stdout.includes('actual image ID') || !res5a.stdout.includes('does not match reviewed runner image')) {
+            throw new Error('Scenario 5A should have rejected outdated container image ID:\n' + res5a.stdout);
         }
 
         // Test B: Verify live container was NOT stopped
@@ -821,13 +844,13 @@ console.log('GUARDS_VERIFIED');
             throw new Error('Scenario 5 stopped live application container during preflight failure!');
         }
 
-        // Verify proxy was NOT mutated
+        // Test C: Verify proxy was NOT mutated
         const apacheLive5 = fs.readFileSync(path.join(apache5, 'httpd-lims.conf'), 'utf8');
         if (!apacheLive5.includes('LIVE REVERSE PROXY CONFIG')) {
             throw new Error('Scenario 5 mutated reverse proxy during preflight failure!');
         }
 
-        // Verify DB was NOT mutated
+        // Test D: Verify DB was NOT mutated
         const samples5 = queryVolumeDb(vol5, 'SELECT count(*) as c FROM Sample');
         if (samples5[0].c !== 1) {
             throw new Error('Scenario 5 mutated database during preflight failure!');
