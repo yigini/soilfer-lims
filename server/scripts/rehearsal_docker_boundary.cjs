@@ -629,25 +629,28 @@ console.log('GUARDS_VERIFIED');
         // Wait until apply runner container appears in Docker running state
         let applyContainerFound = false;
         let applyContainerName = '';
-        for (let i = 0; i < 60; i++) {
+        const deadline3 = Date.now() + 60000;
+        while (Date.now() < deadline3) {
             await new Promise(r => setTimeout(r, 100));
-            try {
-                const ps = cp.execFileSync('docker', ['ps', '--filter', 'name=soilfer-lims-apply', '--format', '{{.Names}}'], { encoding: 'utf8' }).trim();
-                if (ps && ps.includes('soilfer-lims-apply')) {
-                    applyContainerFound = true;
-                    applyContainerName = ps.split('\n')[0].trim();
-                    break;
-                }
-            } catch (_) {}
             if (stdout3.includes('Step 6: Execute Guarded Apply')) {
-                // If stdout shows Step 6, allow short moment for container writer to start
-                await new Promise(r => setTimeout(r, 200));
-                applyContainerFound = true;
-                break;
+                try {
+                    const ps = cp.execFileSync('docker', ['ps', '--filter', 'name=soilfer-lims-apply', '--format', '{{.Names}}'], { encoding: 'utf8' }).trim();
+                    if (ps && ps.includes('soilfer-lims-apply')) {
+                        applyContainerFound = true;
+                        applyContainerName = ps.split('\n')[0].trim();
+                        // Allow runner to actively insert rows to the volume before interrupt
+                        await new Promise(r => setTimeout(r, 300));
+                        break;
+                    }
+                } catch (_) {}
             }
         }
 
-        console.log(`  Live runner writer active inside Docker (${applyContainerName || 'detected'}). Sending SIGINT...`);
+        if (!applyContainerFound) {
+            throw new Error('Scenario 3 timed out waiting for apply runner container to start Step 6:\n' + stdout3);
+        }
+
+        console.log(`  Live runner writer active inside Docker (${applyContainerName}). Sending SIGINT...`);
         child3.kill('SIGINT');
 
         await new Promise(resolve => child3.on('close', resolve));
