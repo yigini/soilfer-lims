@@ -1,0 +1,825 @@
+openapi: 3.1.0
+info:
+  title: SoilFER-LIMS National SIS Data Exchange API (V2 Lossless)
+  version: 2.0.0
+  description: |
+    Authoritative machine-to-machine exchange gateway for SoilFER-LIMS.
+    Standardizes lossless soil chemistry, physical metrology, Vis-NIR/MIR spectra,
+    and geospatial provenance for ingestion into National Soil Information Systems (NSIS),
+    FAO OpenNSIS, and Global Soil Data Portals.
+  contact:
+    name: SoilFER Technical Team
+    url: https://github.com/yigini/soilfer-lims
+servers:
+  - url: https://lims.yigini.net/api/v2/data-exchange
+    description: Production Server
+  - url: http://localhost:5000/api/v2/data-exchange
+    description: Local Development Server
+
+security:
+  - ApiKeyAuth: []
+  - BearerAuth: []
+
+paths:
+  /capabilities:
+    get:
+      summary: Machine discovery of exchange capabilities and profiles
+      description: |
+        Returns the contract version, supported exchange profiles (core-lossless-v2, opennsis),
+        supported matrices, spatial reference constraints, and pagination limits.
+      security: []
+      responses:
+        '200':
+          description: Capabilities metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapabilitiesResponse'
+
+  /stats:
+    get:
+      summary: Dataset publication and metrology statistics
+      description: |
+        Returns aggregate counts of approved specimens, determinations, and laboratories
+        strictly scoped to the caller's authorized laboratory access (IR-14 compliant).
+      responses:
+        '200':
+          description: Scoped dataset statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /samples:
+    get:
+      summary: Paginated specimen registry and provenance
+      description: |
+        Retrieves physical specimens with truthful coordinates, unrounded depth intervals,
+        distinct collection/reception dates, and namespaced profiles.
+      parameters:
+        - name: profile
+          in: query
+          description: Exchange profile. Set to 'opennsis' to enforce genuine lab accession requirement.
+          schema:
+            type: string
+            enum: [core-lossless-v2, opennsis]
+            default: core-lossless-v2
+        - name: country
+          in: query
+          description: ISO-3166-1 alpha-3 country code filter
+          schema:
+            type: string
+            example: GTM
+        - name: project
+          in: query
+          description: Project code filter
+          schema:
+            type: string
+            example: SOILFER-GTM
+        - name: labId
+          in: query
+          description: Laboratory identifier filter
+          schema:
+            type: string
+            example: GTM-LAB1
+        - name: limit
+          in: query
+          description: Number of records to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 50
+        - name: cursor
+          in: query
+          description: Opaque boundary cursor for pagination
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated list of specimens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpecimenListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /samples/{specimenId}:
+    get:
+      summary: Retrieve complete specimen detail
+      description: Returns full specimen provenance, observations, and spectroscopy records.
+      parameters:
+        - name: specimenId
+          in: path
+          required: true
+          description: Unique specimen identifier
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Full specimen detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpecimenDetailResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /observations:
+    get:
+      summary: Lossless analytical observations matrix
+      description: |
+        Returns individual analytical determinations retaining all replicates, moisture basis,
+        censoring flags, detection limits, and method references.
+      parameters:
+        - name: param
+          in: query
+          description: Filter by analyte parameter code (e.g. PH_H2O, SOC_WALKLEY_BLACK)
+          schema:
+            type: string
+        - name: basis
+          in: query
+          description: Filter by analytical basis
+          schema:
+            type: string
+            enum: [AIR_DRY, OVEN_DRY_105, AS_RECEIVED]
+        - name: censoring
+          in: query
+          description: Filter by censoring flag
+          schema:
+            type: string
+            enum: [NONE, LT_LOD, GT_ULOD]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of analytical observations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservationListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /geojson:
+    get:
+      summary: RFC 7946 Spatial GeoJSON FeatureCollection
+      description: |
+        Streams GeoJSON Point features for GIS integration.
+        Coordinates are strictly WGS84 [lng, lat]. Root crs object is omitted per RFC 7946.
+      parameters:
+        - name: country
+          in: query
+          schema:
+            type: string
+        - name: labId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: GeoJSON FeatureCollection
+          content:
+            application/geo+json:
+              schema:
+                $ref: '#/components/schemas/GeoJsonFeatureCollection'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeoJsonFeatureCollection'
+
+  /spectra:
+    get:
+      summary: Spectroscopy dataset (MIR / Vis-NIR)
+      description: Returns calibrated spectral signatures linked to verified soil specimens.
+      parameters:
+        - name: modality
+          in: query
+          schema:
+            type: string
+            enum: [MIR, NIR]
+            default: MIR
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Spectral records list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+
+  /snapshots:
+    post:
+      summary: Create durable point-in-time export snapshot
+      description: |
+        Freezes a point-in-time sequence boundary for safe multi-page harvesting without drift.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SnapshotCreateRequest'
+      responses:
+        '201':
+          description: Snapshot created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SnapshotCreateResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /snapshots/{snapshotId}/pages:
+    get:
+      summary: Read pages from a durable snapshot
+      parameters:
+        - name: snapshotId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Snapshot page items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Specimen'
+                  nextCursor:
+                    type: string
+                    nullable: true
+
+  /changes:
+    get:
+      summary: Continuous synchronization change feed
+      description: |
+        Returns monotonically ordered publication and withdrawal events.
+        If the cursor has expired or is invalid, responds with HTTP 410 CURSOR_EXPIRED.
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+      responses:
+        '200':
+          description: Ordered change feed events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeFeedResponse'
+        '410':
+          description: Cursor expired. Consumer must reinitialize snapshot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /receipts:
+    post:
+      summary: Submit receiver delivery receipt
+      description: |
+        Allows external consumers to record successful batch ingestion receipts for audit trail.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReceiptSubmissionRequest'
+      responses:
+        '200':
+          description: Receipt recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiptSubmissionResponse'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: Machine-to-machine API key prefixed with slims_live_
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Bearer token or User JWT
+
+  schemas:
+    CapabilitiesResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        contractVersion:
+          type: string
+          example: "2.0.0"
+        schemaVersion:
+          type: string
+          example: 2026-09-issue140-v2
+        sourceSystemId:
+          type: string
+          example: soilfer-lims-core
+        supportedProfiles:
+          type: array
+          items:
+            type: string
+          example: [opennsis, glosis, default]
+        supportedMatrices:
+          type: array
+          items:
+            type: string
+          example: [SOIL, PLANT, WATER, FERTILIZER]
+        limits:
+          type: object
+          properties:
+            defaultLimit:
+              type: integer
+              example: 50
+            maxLimit:
+              type: integer
+              example: 500
+            snapshotTtlHours:
+              type: integer
+              example: 24
+
+    StatsResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          type: object
+          properties:
+            totalSamplesPublished:
+              type: integer
+            totalApprovedObservations:
+              type: integer
+            authorizedLaboratories:
+              type: array
+              items:
+                type: string
+
+    Specimen:
+      type: object
+      required:
+        - specimenId
+        - sourceSystemId
+        - laboratoryId
+        - status
+      properties:
+        specimenId:
+          type: string
+          example: "v2-specimen-001"
+        fieldSampleId:
+          type: string
+          nullable: true
+          example: "FIELD-GTM-1049"
+        labSampleId:
+          type: string
+          nullable: true
+          example: "LAB-2026-0042"
+        sourceSystemId:
+          type: string
+          example: "soilfer-lims-core"
+        laboratoryId:
+          type: string
+          example: "GTM-LAB1"
+        projectCode:
+          type: string
+          example: "SOILFER-GTM"
+        country:
+          type: string
+          example: "GTM"
+        matrix:
+          type: string
+          example: "SOIL"
+        status:
+          type: string
+          enum: [APPROVED, RELEASED]
+          example: "APPROVED"
+        spatial:
+          type: object
+          nullable: true
+          properties:
+            type:
+              type: string
+              example: "Point"
+            coordinates:
+              type: array
+              items:
+                type: number
+              example: [-90.5069, 14.6349, 1500.0]
+            crs:
+              type: string
+              example: "urn:ogc:def:crs:OGC:1.3:CRS84"
+            uncertaintyMeters:
+              type: number
+              nullable: true
+        depth:
+          type: object
+          nullable: true
+          properties:
+            topCm:
+              type: number
+              nullable: true
+              example: 0.0
+            bottomCm:
+              type: number
+              nullable: true
+              example: 15.5
+            horizon:
+              type: string
+              nullable: true
+              example: "Ap"
+        temporal:
+          type: object
+          properties:
+            collectionDate:
+              type: string
+              nullable: true
+              example: "2026-04-10"
+            receptionTimestamp:
+              type: string
+              format: date-time
+              nullable: true
+            approvalTimestamp:
+              type: string
+              format: date-time
+              nullable: true
+        profile:
+          type: object
+          properties:
+            namespace:
+              type: string
+              example: "SOILFER-GTM"
+            code:
+              type: string
+              nullable: true
+              example: "PLOT-ALPHA"
+            resolvedKey:
+              type: string
+              nullable: true
+              example: "SOILFER-GTM:PLOT-ALPHA"
+            relation:
+              type: string
+              example: "HORIZON_OF"
+        observationsCount:
+          type: integer
+          example: 8
+        hasSpectra:
+          type: boolean
+          example: true
+
+    Observation:
+      type: object
+      required:
+        - observationId
+        - specimenId
+        - analyte
+        - asMeasured
+        - metrology
+      properties:
+        observationId:
+          type: string
+        specimenId:
+          type: string
+        analyte:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "PH_H2O"
+            name:
+              type: string
+              example: "Soil pH"
+            procedureUri:
+              type: string
+              format: uri
+        asMeasured:
+          type: object
+          properties:
+            value:
+              type: number
+              example: 6.4
+            rawValue:
+              type: string
+              example: "6.40"
+            unit:
+              type: string
+              example: "pH_units"
+        normalized:
+          type: object
+          properties:
+            value:
+              type: number
+            unit:
+              type: string
+            qudtUri:
+              type: string
+              format: uri
+        metrology:
+          type: object
+          properties:
+            replicateNo:
+              type: integer
+              example: 1
+            basis:
+              type: string
+              example: "AIR_DRY"
+            censoring:
+              type: string
+              example: "NONE"
+            lod:
+              type: number
+              nullable: true
+            loq:
+              type: number
+              nullable: true
+        method:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            isoStandard:
+              type: string
+        determinedAt:
+          type: string
+          format: date-time
+
+    SpecimenListResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        schemaVersion:
+          type: string
+          example: 2026-09-issue140-v2
+        sourceSystemId:
+          type: string
+          example: soilfer-lims-core
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Specimen'
+        pagination:
+          type: object
+          properties:
+            nextCursor:
+              type: string
+              nullable: true
+            limit:
+              type: integer
+            count:
+              type: integer
+
+    SpecimenDetailResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          $ref: '#/components/schemas/Specimen'
+
+    ObservationListResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Observation'
+        nextCursor:
+          type: string
+          nullable: true
+
+    GeoJsonFeatureCollection:
+      type: object
+      required:
+        - type
+        - features
+      properties:
+        type:
+          type: string
+          enum: [FeatureCollection]
+        features:
+          type: array
+          items:
+            type: object
+            required:
+              - type
+              - geometry
+              - properties
+            properties:
+              type:
+                type: string
+                enum: [Feature]
+              id:
+                type: string
+              geometry:
+                type: object
+                required:
+                  - type
+                  - coordinates
+                properties:
+                  type:
+                    type: string
+                    enum: [Point]
+                  coordinates:
+                    type: array
+                    items:
+                      type: number
+              properties:
+                type: object
+
+    SnapshotCreateRequest:
+      type: object
+      properties:
+        profile:
+          type: string
+          default: core-lossless-v2
+        pageSize:
+          type: integer
+          default: 100
+        filter:
+          type: object
+
+    SnapshotCreateResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        snapshotId:
+          type: string
+        boundaryTimestamp:
+          type: string
+          format: date-time
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+        expiresAt:
+          type: string
+          format: date-time
+
+    ChangeFeedResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        boundaryTimestamp:
+          type: string
+          format: date-time
+        count:
+          type: integer
+        hasMore:
+          type: boolean
+        nextCursor:
+          type: string
+          nullable: true
+        changes:
+          type: array
+          items:
+            type: object
+            properties:
+              eventType:
+                type: string
+                enum: [PUBLICATION, WITHDRAWAL]
+              specimenId:
+                type: string
+              timestamp:
+                type: string
+                format: date-time
+              specimen:
+                $ref: '#/components/schemas/Specimen'
+
+    ReceiptSubmissionRequest:
+      type: object
+      required:
+        - consumerSystemId
+      properties:
+        snapshotId:
+          type: string
+        consumerSystemId:
+          type: string
+        recordsReceived:
+          type: integer
+        importedCount:
+          type: integer
+        quarantinedCount:
+          type: integer
+        checkpoint:
+          type: string
+        status:
+          type: string
+        notes:
+          type: string
+
+    ReceiptSubmissionResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        receipt:
+          type: object
+          properties:
+            receiptId:
+              type: string
+            connectionId:
+              type: string
+            receivedAt:
+              type: string
+              format: date-time
+            status:
+              type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        message:
+          type: string
+
+  responses:
+    UnauthorizedError:
+      description: Authentication failed or missing key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ForbiddenError:
+      description: Scoping violation (lab or country not permitted)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

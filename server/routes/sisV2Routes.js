@@ -1,0 +1,37 @@
+const express = require('express');
+const router = express.Router();
+const sisV2Controller = require('../controllers/sisV2Controller');
+const apiKeyAuth = require('../middleware/apiKeyAuth');
+
+// ─── PUBLIC / CONSUMER ENDPOINTS (V2 Secured with API Key or JWT) ───
+
+// 1. Capabilities & Contract Version (Public/Consumer Discovery)
+router.get('/capabilities', apiKeyAuth.optional, sisV2Controller.getCapabilities);
+
+// 2. Samples Registry & Specimen Detail
+router.get('/samples', apiKeyAuth, sisV2Controller.getSamples);
+router.get('/samples/:specimenId', apiKeyAuth, sisV2Controller.getSampleById);
+
+// 3. Lossless Analytical Chemistry Observations
+router.get('/observations', apiKeyAuth, sisV2Controller.getObservations);
+
+// 4. Spatial GeoJSON (RFC 7946 Compliant)
+router.get('/geojson', apiKeyAuth, sisV2Controller.getGeoJson);
+
+// 5. Dataset Statistics (Strictly Scoped)
+router.get('/stats', apiKeyAuth, sisV2Controller.getStats);
+
+// 6. Spectroscopy Dataset
+router.get('/spectra', apiKeyAuth, sisV2Controller.getSpectra);
+
+// 7. Resumable Export Snapshots
+router.post('/snapshots', apiKeyAuth, sisV2Controller.createSnapshot);
+router.get('/snapshots/:snapshotId/pages', apiKeyAuth, sisV2Controller.getSnapshotPages);
+
+// 8. Continuous Synchronization Change Feed
+router.get('/changes', apiKeyAuth, sisV2Controller.getChanges);
+
+// 9. Receiver Delivery Receipts
+router.post('/receipts', apiKeyAuth, sisV2Controller.submitReceipt);
+
+module.exports = router;

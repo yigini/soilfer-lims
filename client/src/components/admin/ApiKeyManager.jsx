@@ -33,10 +33,13 @@ const ApiKeyManager = () => {
     const [copied, setCopied] = useState(false);
 
     // API Explorer & Sandbox state
-    const [selectedEndpoint, setSelectedEndpoint] = useState('/api/v1/data-exchange/stats');
+    const [selectedEndpoint, setSelectedEndpoint] = useState('/api/v2/data-exchange/capabilities');
+    const [endpointFilter, setEndpointFilter] = useState('all'); // 'all' | 'v2' | 'v1'
     const [paramCountry, setParamCountry] = useState('');
+    const [paramProfile, setParamProfile] = useState('');
     const [paramLimit, setParamLimit] = useState(5);
     const [paramPage, setParamPage] = useState(1);
+    const [paramCursor, setParamCursor] = useState('');
     const [paramModality, setParamModality] = useState('MIR');
     const [paramSince, setParamSince] = useState('2026-01-01T00:00:00Z');
     const [customApiKey, setCustomApiKey] = useState('');
@@ -58,41 +61,98 @@ const ApiKeyManager = () => {
     ];
 
     const ENDPOINTS = [
+        // V2 Lossless Data Exchange Endpoints (Issue #140)
+        {
+            path: '/api/v2/data-exchange/capabilities',
+            title: 'Exchange Capabilities & Profiles',
+            desc: 'Discovery endpoint declaring supported exchange profiles (core-lossless-v2, opennsis), geometry constraints, horizons, and pagination limits.',
+            category: 'V2 System',
+            version: 'v2'
+        },
+        {
+            path: '/api/v2/data-exchange/stats',
+            title: 'Scoped Dataset Statistics',
+            desc: 'Aggregate metrics scoped strictly to authorized laboratories and published/approved sample statuses (IR-14 compliant).',
+            category: 'V2 System',
+            version: 'v2'
+        },
+        {
+            path: '/api/v2/data-exchange/samples',
+            title: 'Lossless Specimen Registry & Provenance',
+            desc: 'Soil specimen registry with truthful coordinates, unrounded depth horizons, distinct collection/reception dates, and namespaced profiles.',
+            category: 'V2 Core Data',
+            version: 'v2'
+        },
+        {
+            path: '/api/v2/data-exchange/observations',
+            title: 'Lossless Tabular Observations Matrix',
+            desc: 'Analytical chemistry observations retaining all replicate determinations, basis, censoring flags, and normalized units.',
+            category: 'V2 Core Data',
+            version: 'v2'
+        },
+        {
+            path: '/api/v2/data-exchange/geojson',
+            title: 'RFC 7946 Spatial GeoJSON FeatureCollection',
+            desc: 'Strict RFC 7946 GeoJSON points (WGS84, no obsolete crs object) with complete specimen metadata properties.',
+            category: 'V2 Spatial',
+            version: 'v2'
+        },
+        {
+            path: '/api/v2/data-exchange/spectra',
+            title: 'Lossless Spectroscopy Dataset (MIR/NIR)',
+            desc: 'Calibrated spectral signatures (MIR 400-4000 cm⁻¹ & Vis-NIR) linked to verified specimens.',
+            category: 'V2 Spectral',
+            version: 'v2'
+        },
+        {
+            path: '/api/v2/data-exchange/changes',
+            title: 'Monotonic Change Feed & Continuous Sync',
+            desc: 'Continuous synchronization feed with opaque boundary cursors, publication/withdrawal event types, and HTTP 410 cursor expiration guard.',
+            category: 'V2 ETL',
+            version: 'v2'
+        },
+        // V1 Compatibility Endpoints
         {
             path: '/api/v1/data-exchange/stats',
-            title: 'System Health & Statistics',
-            desc: 'Aggregate sample counts, approved determinations, laboratory active counts, and metrological metrics.',
-            category: 'System'
+            title: 'V1 System Health & Statistics',
+            desc: 'Aggregate sample counts, approved determinations, laboratory active counts, and metrological metrics (legacy).',
+            category: 'V1 Legacy',
+            version: 'v1'
         },
         {
             path: '/api/v1/data-exchange/samples',
-            title: 'Samples Registry & Provenance',
-            desc: 'Full sample registry with geospatial coordinates, depth horizons, field intake metadata, and lab tracking.',
-            category: 'Core Data'
+            title: 'V1 Samples Registry & Provenance',
+            desc: 'Sample registry formatted with v1 compatibility layer.',
+            category: 'V1 Legacy',
+            version: 'v1'
         },
         {
             path: '/api/v1/data-exchange/results',
-            title: 'Analytical Chemistry Matrix',
-            desc: 'Complete tabular soil determinations with method references, controlled units, analytical basis, and provenance.',
-            category: 'Core Data'
+            title: 'V1 Analytical Chemistry Matrix',
+            desc: 'Soil determinations with method references and controlled units (v1 legacy format).',
+            category: 'V1 Legacy',
+            version: 'v1'
         },
         {
             path: '/api/v1/data-exchange/geojson',
-            title: 'GIS Spatial FeatureCollection',
-            desc: 'RFC 7946 GeoJSON FeatureCollection stream optimized for QGIS, ArcGIS, Mapbox, and GeoNode ingestion.',
-            category: 'Spatial'
+            title: 'V1 GIS Spatial FeatureCollection',
+            desc: 'GeoJSON FeatureCollection formatted with v1 compatibility layer.',
+            category: 'V1 Legacy',
+            version: 'v1'
         },
         {
             path: '/api/v1/data-exchange/spectra',
-            title: 'Spectroscopy Dataset (NIR/MIR)',
-            desc: 'Calibrated spectral signatures (MIR 400-4000 cm⁻¹ & Vis-NIR) linked to physical soil specimens.',
-            category: 'Spectral'
+            title: 'V1 Spectroscopy Dataset (NIR/MIR)',
+            desc: 'Calibrated spectral signatures formatted with v1 compatibility layer.',
+            category: 'V1 Legacy',
+            version: 'v1'
         },
         {
             path: '/api/v1/data-exchange/sync',
-            title: 'Delta Synchronization (ETL)',
-            desc: 'Incremental harvesting endpoint returning records modified since a given timestamp.',
-            category: 'ETL'
+            title: 'V1 Delta Synchronization (ETL)',
+            desc: 'Timestamp-based delta synchronization endpoint (v1 legacy).',
+            category: 'V1 Legacy',
+            version: 'v1'
         }
     ];
 
@@ -189,9 +249,15 @@ const ApiKeyManager = () => {
     const buildSandboxUrl = () => {
         const params = new URLSearchParams();
         if (paramCountry) params.append('country', paramCountry);
-        if (selectedEndpoint.includes('/samples') || selectedEndpoint.includes('/results')) {
+        if (paramProfile) params.append('profile', paramProfile);
+        if (selectedEndpoint.includes('/samples') || selectedEndpoint.includes('/results') || selectedEndpoint.includes('/observations')) {
             if (paramLimit) params.append('limit', paramLimit);
-            if (paramPage && paramPage > 1) params.append('page', paramPage);
+            if (paramPage && paramPage > 1 && !selectedEndpoint.includes('/v2/')) params.append('page', paramPage);
+            if (paramCursor) params.append('cursor', paramCursor);
+        }
+        if (selectedEndpoint.includes('/changes')) {
+            if (paramLimit) params.append('limit', paramLimit);
+            if (paramCursor) params.append('cursor', paramCursor);
         }
         if (selectedEndpoint.includes('/spectra') && paramModality) {
             params.append('modality', paramModality);
@@ -270,10 +336,16 @@ const ApiKeyManager = () => {
                             <h2 className="text-xl font-black tracking-tight">National SIS & Data Exchange Gateway</h2>
                             <div className="flex items-center gap-2 mt-0.5">
                                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                                    Spec v1.0.0
+                                    Spec v2.0.0 (Issue #140 Lossless)
+                                </span>
+                                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                                    v1.0.0 Compatible
+                                </span>
+                                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                                    Fail-Closed Scoping (IR-14)
                                 </span>
                                 <span className="text-xs text-blue-200">
-                                    FAO OpenNSIS & Global Soil Partnership Interoperability
+                                    FAO OpenNSIS & GSP Interoperability
                                 </span>
                             </div>
                         </div>
@@ -509,21 +581,29 @@ const ApiKeyManager = () => {
                             <div>
                                 <h4 className="font-bold text-sf-text text-base">Select Your Target Endpoint</h4>
                                 <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                                    Depending on your application requirements, choose between tabular wet chemistry, spatial GIS layers, or delta synchronization:
+                                    Depending on your application requirements, choose between V2 lossless representations, RFC 7946 spatial layers, or continuous delta feeds:
                                 </p>
                             </div>
                             <ul className="space-y-2 text-xs text-sf-muted">
                                 <li className="flex items-center gap-2">
-                                    <Globe size={14} className="text-emerald-500 flex-shrink-0" />
-                                    <span><strong>/geojson</strong>: Direct GIS spatial layer (QGIS, ArcGIS).</span>
+                                    <Sparkles size={14} className="text-amber-500 flex-shrink-0" />
+                                    <span><strong>/api/v2/.../capabilities</strong>: Machine discovery of profiles & limits.</span>
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <Database size={14} className="text-blue-500 flex-shrink-0" />
-                                    <span><strong>/results</strong>: Laboratory chemistry with units and ISO methods.</span>
+                                    <span><strong>/api/v2/.../samples</strong>: Truthful coordinates, depth intervals & profiles.</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <Code2 size={14} className="text-indigo-500 flex-shrink-0" />
+                                    <span><strong>/api/v2/.../observations</strong>: Full replicate determinations & basis metadata.</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <Globe size={14} className="text-emerald-500 flex-shrink-0" />
+                                    <span><strong>/api/v2/.../geojson</strong>: RFC 7946 FeatureCollection (QGIS, GeoNode).</span>
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <RefreshCw size={14} className="text-purple-500 flex-shrink-0" />
-                                    <span><strong>/sync?since=...</strong>: Automated incremental ETL jobs.</span>
+                                    <span><strong>/api/v2/.../changes</strong>: Continuous monotonic change feed with cursors.</span>
                                 </li>
                             </ul>
                         </div>
@@ -569,17 +649,39 @@ const ApiKeyManager = () => {
                             </p>
                         </div>
 
-                        {/* Endpoint Selector */}
-                        <div className="space-y-1.5">
-                            <label className="block text-xs font-bold uppercase tracking-wider text-sf-muted">
-                                Target Endpoint
-                            </label>
+                        {/* Endpoint Selector & Version Filter */}
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <label className="block text-xs font-bold uppercase tracking-wider text-sf-muted">
+                                    Target Endpoint
+                                </label>
+                                <div className="flex items-center gap-1 bg-sf-canvas p-1 rounded-lg border border-sf-divider">
+                                    {[
+                                        { id: 'all', label: 'All' },
+                                        { id: 'v2', label: 'V2 Lossless' },
+                                        { id: 'v1', label: 'V1 Legacy' }
+                                    ].map((f) => (
+                                        <button
+                                            key={f.id}
+                                            type="button"
+                                            onClick={() => setEndpointFilter(f.id)}
+                                            className={`px-2 py-0.5 rounded text-[10px] font-bold transition ${
+                                                endpointFilter === f.id
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'text-gray-400 hover:text-sf-text'
+                                            }`}
+                                        >
+                                            {f.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                             <select
                                 value={selectedEndpoint}
                                 onChange={(e) => setSelectedEndpoint(e.target.value)}
                                 className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500"
                             >
-                                {ENDPOINTS.map((ep) => (
+                                {ENDPOINTS.filter(ep => endpointFilter === 'all' || ep.version === endpointFilter).map((ep) => (
                                     <option key={ep.path} value={ep.path}>
                                         [{ep.category}] {ep.title} ({ep.path})
                                     </option>
@@ -617,7 +719,23 @@ const ApiKeyManager = () => {
                                     </select>
                                 </div>
 
-                                {(selectedEndpoint.includes('/samples') || selectedEndpoint.includes('/results')) && (
+                                {(selectedEndpoint.includes('/samples') || selectedEndpoint.includes('/observations')) && selectedEndpoint.includes('/v2/') && (
+                                    <div>
+                                        <label className="block text-[11px] font-semibold text-sf-muted mb-1">
+                                            Exchange Profile
+                                        </label>
+                                        <select
+                                            value={paramProfile}
+                                            onChange={(e) => setParamProfile(e.target.value)}
+                                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs"
+                                        >
+                                            <option value="">Default (core-lossless-v2)</option>
+                                            <option value="opennsis">OpenNSIS (National Accession)</option>
+                                        </select>
+                                    </div>
+                                )}
+
+                                {(selectedEndpoint.includes('/samples') || selectedEndpoint.includes('/results') || selectedEndpoint.includes('/observations') || selectedEndpoint.includes('/changes')) && (
                                     <div>
                                         <label className="block text-[11px] font-semibold text-sf-muted mb-1">
                                             Limit (Records)
@@ -629,6 +747,21 @@ const ApiKeyManager = () => {
                                             min="1"
                                             max="100"
                                             className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs font-medium"
+                                        />
+                                    </div>
+                                )}
+
+                                {(selectedEndpoint.includes('/changes') || (selectedEndpoint.includes('/v2/') && (selectedEndpoint.includes('/samples') || selectedEndpoint.includes('/observations')))) && (
+                                    <div className="col-span-2">
+                                        <label className="block text-[11px] font-semibold text-sf-muted mb-1">
+                                            Opaque Boundary Cursor (Optional)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={paramCursor}
+                                            onChange={(e) => setParamCursor(e.target.value)}
+                                            placeholder="e.g. eyJsYXN0VXBkYXRlZEF0IjoiMjAy..."
+                                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs font-mono"
                                         />
                                     </div>
                                 )}

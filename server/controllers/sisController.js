@@ -1,134 +1,12 @@
 const crypto = require('crypto');
 const prisma = require('../prisma');
 const { normalizeUnit } = require('../services/interpretationService');
+const { formatSampleV1, extractCoordinates } = require('../services/sisAdapterService');
+const { buildSampleWhere, buildSpectralWhere, AUTHORIZED_RELEASE_STATUSES } = require('../services/exchangePolicyService');
 
 // Helper to build scoped database query based on SIS Auth permissions
 function buildSisWhere(sisAuth, query = {}) {
-    const where = {};
-
-    // 1. Status Filter - Enforce release policy invariant for external consumers and viewers
-    const isRestrictedConsumer = sisAuth?.type === 'API_KEY' || ['VIEWER', 'EXTERNAL_VIEWER', 'NSIS_CONSUMER'].includes(sisAuth?.role);
-    const AUTHORIZED_RELEASE_STATUSES = ['APPROVED', 'RELEASED'];
-
-    if (isRestrictedConsumer) {
-        // External consumers and viewers are strictly restricted to approved/released samples
-        if (query.status && (query.status === 'all' || query.status === '*')) {
-            where.status = { in: AUTHORIZED_RELEASE_STATUSES };
-        } else if (query.status) {
-            const requested = String(query.status).trim().toUpperCase();
-            if (AUTHORIZED_RELEASE_STATUSES.includes(requested)) {
-                where.status = requested;
-            } else {
-                // Requested status is not an approved release status; deny access per release policy invariant
-                where.status = '__denied_unapproved__';
-            }
-        } else {
-            where.status = { in: AUTHORIZED_RELEASE_STATUSES };
-        }
-    } else {
-        if (query.status && (query.status === 'all' || query.status === '*')) {
-            // Return all statuses
-        } else if (query.status) {
-            where.status = query.status.toUpperCase();
-        } else {
-            where.status = { not: 'CANCELLED' };
-        }
-    }
-
-    // 2. Country scoping - Intersect key permissions with query parameters
-    const keyCountries = sisAuth?.countries || [];
-    const hasGlobalCountry = keyCountries.length === 0 || keyCountries.includes('*');
-
-    if (query.country) {
-        if (hasGlobalCountry || keyCountries.includes(query.country)) {
-            where.country = query.country;
-        } else {
-            where.country = { in: [] }; // Deny: requested country outside authorized key scope
-        }
-    } else if (!hasGlobalCountry) {
-        where.country = { in: keyCountries };
-    }
-
-    // 3. Project scoping - Intersect key permissions with query parameters
-    const projectPolicyService = require('../services/projectPolicyService');
-    const keyProjects = sisAuth?.projects || [];
-    const hasGlobalProject = keyProjects.length === 0 || keyProjects.includes('*');
-
-    const expandedKeyProjects = new Set();
-    for (const kp of keyProjects) {
-        expandedKeyProjects.add(kp);
-        const children = projectPolicyService.getProgrammeChildProjectCodes(kp);
-        children.forEach(c => expandedKeyProjects.add(c));
-    }
-    const authorizedProjectList = Array.from(expandedKeyProjects);
-
-    if (query.project) {
-        const queryChildren = projectPolicyService.getProgrammeChildProjectCodes(query.project);
-        const targetProjects = queryChildren.length > 0 ? [query.project, ...queryChildren] : [query.project];
-
-        if (hasGlobalProject) {
-            where.projectCode = targetProjects.length === 1 ? targetProjects[0] : { in: targetProjects };
-        } else {
-            const allowed = targetProjects.filter(p => authorizedProjectList.includes(p));
-            if (allowed.length > 0) {
-                where.projectCode = allowed.length === 1 ? allowed[0] : { in: allowed };
-            } else {
-                where.projectCode = { in: [] }; // Deny: requested project outside authorized key scope
-            }
-        }
-    } else if (!hasGlobalProject) {
-        where.projectCode = { in: authorizedProjectList };
-    }
-
-    // 4. Lab scoping (SL-22: API keys without explicit lab access are strictly DENIED)
-    const isApiKey = sisAuth?.type === 'API_KEY';
-    const keyLabs = sisAuth?.labs || [];
-    const hasGlobalLab = keyLabs.includes('*') || (!isApiKey && sisAuth?.role === 'SUPER_ADMIN');
-
-    if (isApiKey) {
-        if (!hasGlobalLab) {
-            if (keyLabs.length === 0) {
-                // Deny: API key lacks explicit laboratory authorization
-                where.OR = [{ labId: '__denied__' }, { assignedLab: '__denied__' }];
-            } else if (query.labId) {
-                if (keyLabs.includes(query.labId)) {
-                    where.OR = [{ labId: query.labId }, { assignedLab: query.labId }];
-                } else {
-                    where.OR = [{ labId: '__denied__' }, { assignedLab: '__denied__' }];
-                }
-            } else {
-                where.OR = [{ labId: { in: keyLabs } }, { assignedLab: { in: keyLabs } }];
-            }
-        } else if (query.labId) {
-            where.OR = [{ labId: query.labId }, { assignedLab: query.labId }];
-        }
-    } else {
-        // JWT User scoping
-        if (query.labId) {
-            if (hasGlobalLab || keyLabs.includes(query.labId) || sisAuth?.labId === query.labId) {
-                where.OR = [{ labId: query.labId }, { assignedLab: query.labId }];
-            } else {
-                where.OR = [{ labId: '__denied__' }, { assignedLab: '__denied__' }];
-            }
-        } else if (!hasGlobalLab) {
-            const allowedLabs = keyLabs.length > 0 ? keyLabs : (sisAuth?.labId ? [sisAuth.labId] : []);
-            if (allowedLabs.length > 0) {
-                where.OR = [{ labId: { in: allowedLabs } }, { assignedLab: { in: allowedLabs } }];
-            } else {
-                where.OR = [{ labId: '__denied__' }, { assignedLab: '__denied__' }];
-            }
-        }
-    }
-
-    // 5. Incremental sync timestamp filter
-    if (query.updatedSince) {
-        const sinceDate = new Date(query.updatedSince);
-        if (!isNaN(sinceDate.getTime())) {
-            where.updatedAt = { gte: sinceDate };
-        }
-    }
-
-    return where;
+    return buildSampleWhere(sisAuth, query);
 }
 
 let cachedAnalysisMap = null;
@@ -172,116 +50,7 @@ async function getAnalysisMap() {
 
 // Helper to format a sample into harmonized SIS JSON structure (SOSA/SSN & GloSIS compliant)
 function formatSampleForSis(sample, { analysisMap = {}, methodMap = {} } = {}) {
-    let field = {};
-    try { field = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : (sample.fieldMetadata || {}); } catch(e) {}
-    
-    let meta = {};
-    try { meta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {}); } catch(e) {}
-
-    let reception = {};
-    try { reception = typeof sample.receptionData === 'string' ? JSON.parse(sample.receptionData) : (sample.receptionData || {}); } catch(e) {}
-
-    // Extract GPS
-    const lat = field.latitude || field.lat || field.gps_lat || (field.coordinates ? field.coordinates.lat : null) || meta.latitude || meta.lat || meta.gpsY || sample.latitude || null;
-    const lng = field.longitude || field.lng || field.gps_lng || (field.coordinates ? field.coordinates.lng : null) || meta.longitude || meta.lng || meta.gpsX || sample.longitude || null;
-    const accuracy = field.accuracy || field.gps_accuracy || (field.coordinates ? field.coordinates.accuracy : null) || meta.accuracy || null;
-
-    // Depth resolution (Sample columns > field metadata > reception)
-    const topCm = sample.depthTop ?? (field.depthTop !== undefined ? Number(field.depthTop) : 0);
-    const bottomCm = sample.depthBottom ?? (field.depthBottom !== undefined ? Number(field.depthBottom) : 20);
-    const horizonDesig = sample.horizon || field.horizon || field.depth || reception.depth || `${topCm}-${bottomCm} cm`;
-
-    // Build Results Map with genuine GloSIS Property & Used Procedure separation
-    const analyticalResults = {};
-    if (sample.results && Array.isArray(sample.results)) {
-        // Filter only current active results if present
-        const currentResults = sample.results.filter(r => r.isCurrent !== false);
-        currentResults.forEach(r => {
-            const aMeta = analysisMap[r.param] || {};
-            const methodObj = (r.methodologyId && methodMap[r.methodologyId]) ? methodMap[r.methodologyId] : aMeta.defaultMethod;
-
-            const procedureUri = methodObj?.glosisUri || aMeta.glosisUri || null;
-            const propertyUri = aMeta.glosisPropertyUri || (aMeta.glosisProperty ? `http://glosis.org/ont/property/${aMeta.glosisProperty}` : null);
-            const qudtUnit = methodObj?.qudtUnit || aMeta.qudtUnit || null;
-
-            const rawUnit = r.unit || aMeta.units || null;
-            const norm = normalizeUnit(r.param, r.value, rawUnit);
-            const numVal = r.numericValue !== null && r.numericValue !== undefined ? r.numericValue : (isNaN(Number(r.value)) ? r.value : Number(r.value));
-            const normVal = norm.normalizedValue !== null ? norm.normalizedValue : numVal;
-            const controlledUnit = norm.standardUnit || rawUnit;
-
-            analyticalResults[r.param] = {
-                value: normVal, // legacy alias points to normalised value
-                as_measured: numVal,
-                unit: rawUnit,
-                normalized: normVal,
-                controlled_unit: controlledUnit,
-                rawEntry: r.value,
-                qudtUnit: qudtUnit,
-                basis: r.basis || 'AIR_DRY',
-                censoring: r.censoring || 'NONE',
-                replicateNo: r.replicateNo || 1,
-                isValid: r.isValid !== false,
-                method: methodObj?.name || r.method || aMeta.methodLabel || null,
-                glosis: (propertyUri || procedureUri || aMeta.glosisAttribute) ? {
-                    propertyCode: aMeta.glosisProperty || null,
-                    propertyUri: propertyUri,
-                    usedProcedure: methodObj?.glosisProcedure || aMeta.glosisAttribute || null,
-                    usedProcedureUri: procedureUri,
-                    methodLabel: methodObj?.name || aMeta.methodLabel || null,
-                    standard: methodObj?.standard || null,
-                    citation: methodObj?.glosisCitation || aMeta.methodCitation || null
-                } : null,
-                analysedAt: r.analysedAt || r.updatedAt,
-                updatedAt: r.updatedAt
-            };
-        });
-    }
-
-    return {
-        id: sample.originalId || sample.id,
-        sampleId: sample.originalId || sample.id,
-        originalId: sample.originalId,
-        labId: sample.labId || null,
-        country: sample.country || sample.countryName || 'UNKNOWN',
-        projectCode: sample.projectCode || null,
-        status: sample.status,
-        provenance: {
-            collectionDate: field.collectionDate || field.sampling_date || reception.collectionDate || sample.receptionDate || null,
-            collectorName: field.collector || field.surveyor_name || reception.deliveredBy || null,
-            depthHorizon: {
-                depthRange: `${topCm}–${bottomCm} cm`,
-                topCm: topCm,
-                bottomCm: bottomCm,
-                horizon: horizonDesig,
-                unit: 'cm'
-            },
-            coordinates: lat !== null && lng !== null ? {
-                latitude: Number(lat),
-                longitude: Number(lng),
-                accuracyMeters: accuracy ? Number(accuracy) : null,
-                srid: 4326
-            } : null,
-            site: {
-                siteName: field.siteName || field.farm_name || reception.organization || null,
-                village: field.village || field.area || reception.areaVillage || null,
-                district: field.district || reception.district || null,
-                landUse: field.landUse || field.land_cover || reception.landUse || null,
-                currentCrop: field.crop || field.current_crop || reception.crop || null,
-                previousCrop: field.previousCrop || reception.previousCrop || null,
-                fertilizerHistory: field.management || field.fertilizer || reception.management || null
-            }
-        },
-        analyticalResults,
-        qualityControl: {
-            dryingStatus: sample.dryingStatus || 'DONE',
-            preparationStatus: sample.preparationStatus || 'DONE',
-            approvedBy: sample.approvedBy || null,
-            approvedAt: sample.approvedAt || null
-        },
-        createdAt: sample.createdAt,
-        updatedAt: sample.updatedAt
-    };
+    return formatSampleV1(sample, { analysisMap, methodMap });
 }
 
 // ─── 1. GET /api/v1/sis/samples (Paginated Registry) ───
@@ -718,7 +487,7 @@ exports.getSpectra = async (req, res) => {
 // ─── 6. GET /api/v1/sis/sync (Delta Sync ETL) ───
 exports.syncDelta = async (req, res) => {
     try {
-        const { updatedSince } = req.query;
+        const { updatedSince, limit } = req.query;
         if (!updatedSince) {
             return res.status(400).json({
                 error: 'Bad Request',
@@ -731,50 +500,38 @@ exports.syncDelta = async (req, res) => {
             return res.status(400).json({ error: 'Invalid ISO-8601 date format for updatedSince.' });
         }
 
-        const spectralWhere = { timestamp: { gte: sinceDate } };
-        const isApiKey = req.sisAuth?.type === 'API_KEY';
-        const keyLabs = req.sisAuth?.labs || [];
-        const hasGlobalLab = keyLabs.includes('*') || (!isApiKey && req.sisAuth?.role === 'SUPER_ADMIN');
+        const maxTake = Math.min(1000, Math.max(1, parseInt(limit) || 1000));
+        const where = buildSampleWhere(req.sisAuth, { updatedSince });
+        const spectralWhere = {
+            ...buildSpectralWhere(req.sisAuth, {}),
+            timestamp: { gte: sinceDate }
+        };
 
-        if (isApiKey) {
-            if (!hasGlobalLab) {
-                if (keyLabs.length === 0) {
-                    spectralWhere.labId = '__denied__';
-                } else {
-                    spectralWhere.labId = { in: keyLabs };
-                }
-            }
-        } else if (!hasGlobalLab) {
-            const allowedLabs = keyLabs.length > 0 ? keyLabs : (req.sisAuth?.labId ? [req.sisAuth.labId] : []);
-            if (allowedLabs.length > 0) {
-                spectralWhere.labId = { in: allowedLabs };
-            } else {
-                spectralWhere.labId = '__denied__';
-            }
-        }
-
-        const where = buildSisWhere(req.sisAuth, { updatedSince });
-
-        const [samples, spectra] = await Promise.all([
+        const [samples, spectra, maps] = await Promise.all([
             prisma.sample.findMany({
                 where,
                 include: { results: true },
                 orderBy: { updatedAt: 'asc' },
-                take: 1000
+                take: maxTake
             }),
             prisma.spectralData.findMany({
                 where: spectralWhere,
-                take: 1000,
+                take: maxTake,
                 orderBy: { timestamp: 'asc' }
-            })
+            }),
+            getAnalysisMap()
         ]);
+
+        const hasMoreSamples = samples.length >= maxTake;
+        const hasMoreSpectra = spectra.length >= maxTake;
 
         res.json({
             status: 'success',
             syncTimestamp: new Date().toISOString(),
             samplesCount: samples.length,
             spectraCount: spectra.length,
-            samples: samples.map(formatSampleForSis),
+            hasMore: hasMoreSamples || hasMoreSpectra,
+            samples: samples.map(s => formatSampleForSis(s, maps)),
             spectra: spectra.map(s => ({
                 id: s.id,
                 sampleId: s.sampleId,
@@ -792,42 +549,28 @@ exports.syncDelta = async (req, res) => {
 // ─── 7. GET /api/v1/sis/stats (Global / Regional Metrics) ───
 exports.getStats = async (req, res) => {
     try {
-        const sampleWhere = buildSisWhere(req.sisAuth, {});
-        const spectralWhere = {};
-        const isApiKey = req.sisAuth?.type === 'API_KEY';
+        const sampleWhere = buildSampleWhere(req.sisAuth, {});
+        const spectralWhere = buildSpectralWhere(req.sisAuth, {});
+
         const keyLabs = req.sisAuth?.labs || [];
+        const isApiKey = req.sisAuth?.type === 'API_KEY';
         const hasGlobalLab = keyLabs.includes('*') || (!isApiKey && req.sisAuth?.role === 'SUPER_ADMIN');
+        const labWhere = hasGlobalLab ? {} : { id: { in: keyLabs } };
 
-        if (isApiKey) {
-            if (!hasGlobalLab) {
-                if (keyLabs.length === 0) {
-                    spectralWhere.labId = '__denied__';
-                } else {
-                    spectralWhere.labId = { in: keyLabs };
-                }
-            }
-        } else if (!hasGlobalLab) {
-            const allowedLabs = keyLabs.length > 0 ? keyLabs : (req.sisAuth?.labId ? [req.sisAuth.labId] : []);
-            if (allowedLabs.length > 0) {
-                spectralWhere.labId = { in: allowedLabs };
-            } else {
-                spectralWhere.labId = '__denied__';
-            }
-        }
-
-        const [totalSamples, completedSamples, totalResults, totalSpectra, labsCount] = await Promise.all([
+        const [totalSamples, releasedSamples, totalResults, totalSpectra, labsCount] = await Promise.all([
             prisma.sample.count({ where: sampleWhere }),
-            prisma.sample.count({ where: { ...sampleWhere, status: 'COMPLETED' } }),
-            prisma.result.count({ where: { sample: sampleWhere } }),
+            prisma.sample.count({ where: { ...sampleWhere, status: { in: AUTHORIZED_RELEASE_STATUSES } } }),
+            prisma.result.count({ where: { sample: sampleWhere, isCurrent: true } }),
             prisma.spectralData.count({ where: spectralWhere }),
-            prisma.lab.count()
+            prisma.lab.count({ where: labWhere })
         ]);
 
         res.json({
             status: 'success',
             metrics: {
                 totalSamples,
-                completedSamples,
+                completedSamples: releasedSamples, // legacy alias for backward compatibility
+                approvedSamples: releasedSamples,
                 totalResults,
                 totalSpectra,
                 registeredLabs: labsCount,

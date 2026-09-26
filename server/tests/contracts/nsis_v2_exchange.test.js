@@ -1,0 +1,276 @@
+const request = require('supertest');
+const app = require('../../app');
+const prisma = require('../../prisma');
+const crypto = require('crypto');
+
+describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () => {
+    let testKey;
+    let sample1;
+    let sample2NoLabId;
+    let snapshotId;
+
+    beforeAll(async () => {
+        const timestamp = Date.now();
+
+        // 1. Sample with full lab accession and 2 replicate results
+        sample1 = await prisma.sample.create({
+            data: {
+                id: `v2-specimen-1-${timestamp}`,
+                originalId: `FIELD-V2-001-${timestamp}`,
+                labId: `LAB-2026-V2-001-${timestamp}`,
+                assignedLab: 'GTM-LAB1',
+                country: 'GTM',
+                projectCode: 'SOILFER-GTM',
+                status: 'APPROVED',
+                depthTopCm: 0,
+                depthBottomCm: 15.5,
+                horizon: 'Ap',
+                latitude: 14.6349,
+                longitude: -90.5069,
+                elevation: 1500,
+                fieldMetadata: JSON.stringify({
+                    site_id: { value: 'PLOT-ALPHA' },
+                    collectionDate: '2026-04-10',
+                    collector: 'Dr. Maria Perez'
+                }),
+                results: {
+                    create: [
+                        {
+                            id: `res-v2-1-${timestamp}`,
+                            param: 'PH_H2O',
+                            value: '6.4',
+                            numericValue: 6.4,
+                            unit: 'pH_units',
+                            replicateNo: 1,
+                            basis: 'AIR_DRY',
+                            censoring: 'NONE',
+                            isCurrent: true
+                        },
+                        {
+                            id: `res-v2-2-${timestamp}`,
+                            param: 'PH_H2O',
+                            value: '6.5',
+                            numericValue: 6.5,
+                            unit: 'pH_units',
+                            replicateNo: 2,
+                            basis: 'AIR_DRY',
+                            censoring: 'NONE',
+                            isCurrent: true
+                        }
+                    ]
+                }
+            }
+        });
+
+        // 2. Approved sample WITHOUT labId (walk-in or field registry without lab accession)
+        sample2NoLabId = await prisma.sample.create({
+            data: {
+                id: `v2-specimen-2-${timestamp}`,
+                originalId: `FIELD-V2-002-${timestamp}`,
+                labId: null, // No lab accession
+                assignedLab: 'GTM-LAB1',
+                country: 'GTM',
+                projectCode: 'SOILFER-GTM',
+                status: 'APPROVED',
+                depthTopCm: 15.5,
+                depthBottomCm: 30.0,
+                latitude: 14.6500,
+                longitude: -90.5200,
+                fieldMetadata: JSON.stringify({
+                    site_id: 'PLOT-ALPHA',
+                    collectionDate: '2026-04-10'
+                })
+            }
+        });
+
+        // API Key with access to GTM-LAB1
+        const rawKey = `slims_live_v2_${timestamp}`;
+        const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex');
+        testKey = await prisma.apiKey.create({
+            data: {
+                id: `key-v2-${timestamp}`,
+                name: 'V2 Test Pipeline',
+                keyHash,
+                keyPrefix: rawKey.slice(0, 12),
+                role: 'NSIS_CONSUMER',
+                labs: JSON.stringify(['GTM-LAB1']),
+                countries: JSON.stringify(['GTM']),
+                projects: JSON.stringify(['SOILFER-GTM']),
+                isActive: true
+            }
+        });
+        testKey.rawKey = rawKey;
+    });
+
+    afterAll(async () => {
+        // Clean up
+        await prisma.result.deleteMany({
+            where: { sampleId: { in: [sample1?.id, sample2NoLabId?.id].filter(Boolean) } }
+        }).catch(() => {});
+
+        await prisma.sample.deleteMany({
+            where: { id: { in: [sample1?.id, sample2NoLabId?.id].filter(Boolean) } }
+        }).catch(() => {});
+
+        await prisma.apiKey.deleteMany({
+            where: { id: testKey?.id }
+        }).catch(() => {});
+    });
+
+    test('1. GET /api/v2/data-exchange/capabilities advertises supported contracts & features', async () => {
+        const res = await request(app)
+            .get('/api/v2/data-exchange/capabilities')
+            .set('X-API-Key', testKey.rawKey);
+
+        expect(res.status).toBe(200);
+        expect(res.body.contractVersion).toBe('2.0.0');
+        expect(res.body.schemaVersion).toBe('2026-09-issue140-v2');
+        expect(res.body.supportedProfiles).toContain('opennsis');
+        expect(res.body.features.losslessObservations).toBe(true);
+        expect(res.body.features.resumableSnapshots).toBe(true);
+
+        // Verify legacy alias /api/v2/sis/capabilities
+        const aliasRes = await request(app)
+            .get('/api/v2/sis/capabilities')
+            .set('X-API-Key', testKey.rawKey);
+        expect(aliasRes.status).toBe(200);
+        expect(aliasRes.body.contractVersion).toBe('2.0.0');
+    });
+
+    test('2. GET /api/v2/data-exchange/samples returns structured V2 envelope and items', async () => {
+        const res = await request(app)
+            .get('/api/v2/data-exchange/samples')
+            .set('X-API-Key', testKey.rawKey);
+
+        expect(res.status).toBe(200);
+        expect(res.body.schemaVersion).toBe('2026-09-issue140-v2');
+        expect(res.body.count).toBeGreaterThanOrEqual(2);
+
+        const found = res.body.data.find(s => s.specimenId === sample1.id);
+        expect(found).toBeDefined();
+        expect(found.fieldSampleId).toBe(sample1.originalId);
+        expect(found.labSampleId).toBe(sample1.labId);
+        expect(found.profile.code).toBe('PLOT-ALPHA');
+        expect(found.profile.namespace).toBe('SOILFER-GTM');
+        expect(found.profile.key).toBe('SOILFER-GTM:PLOT-ALPHA');
+        expect(found.sampling.depths.topCm).toBe(0);
+        expect(found.sampling.depths.bottomCm).toBe(15.5);
+        expect(found.sampling.depths.horizon).toBe('Ap');
+        expect(found.sampling.location.coordinates).toEqual([-90.5069, 14.6349]); // [lng, lat]
+    });
+
+    test('3. Strict OpenNSIS Profile (?profile=opennsis) excludes specimens missing lab accession', async () => {
+        const res = await request(app)
+            .get('/api/v2/data-exchange/samples?profile=opennsis')
+            .set('X-API-Key', testKey.rawKey);
+
+        expect(res.status).toBe(200);
+        const specimenIds = res.body.data.map(s => s.specimenId);
+
+        // Sample 1 (has labId) is included
+        expect(specimenIds).toContain(sample1.id);
+
+        // Sample 2 (labId is null) is strictly excluded under OpenNSIS profile
+        expect(specimenIds).not.toContain(sample2NoLabId.id);
+    });
+
+    test('4. GET /api/v2/data-exchange/observations preserves all replicate determinations', async () => {
+        const res = await request(app)
+            .get(`/api/v2/data-exchange/observations?param=PH_H2O`)
+            .set('X-API-Key', testKey.rawKey);
+
+        expect(res.status).toBe(200);
+        expect(res.body.schemaVersion).toBe('2026-09-issue140-v2');
+
+        const sample1Obs = res.body.data.filter(o => o.specimenId === sample1.id);
+        expect(sample1Obs).toHaveLength(2); // Both replicates present!
+
+        const rep1 = sample1Obs.find(o => o.replicateNo === 1);
+        const rep2 = sample1Obs.find(o => o.replicateNo === 2);
+        expect(rep1.asMeasured.value).toBe(6.4);
+        expect(rep2.asMeasured.value).toBe(6.5);
+    });
+
+    test('5. GET /api/v2/data-exchange/geojson complies with RFC 7946 (no obsolete crs member)', async () => {
+        const res = await request(app)
+            .get('/api/v2/data-exchange/geojson')
+            .set('X-API-Key', testKey.rawKey);
+
+        expect(res.status).toBe(200);
+        expect(res.body.type).toBe('FeatureCollection');
+        expect(res.body.crs).toBeUndefined(); // RFC 7946 Section 4 removes CRS
+
+        const feature = res.body.features.find(f => f.id === sample1.id);
+        expect(feature).toBeDefined();
+        expect(feature.geometry.coordinates).toEqual([-90.5069, 14.6349]); // [lng, lat]
+        expect(feature.properties.specimenId).toBe(sample1.id);
+        expect(feature.properties.profile.code).toBe('PLOT-ALPHA');
+    });
+
+    test('6. POST /api/v2/data-exchange/snapshots creates bounded snapshot and reads pages', async () => {
+        // Create Snapshot
+        const createRes = await request(app)
+            .post('/api/v2/data-exchange/snapshots')
+            .set('X-API-Key', testKey.rawKey)
+            .send({ ttlHours: 24 });
+
+        expect(createRes.status).toBe(201);
+        expect(createRes.body.snapshotId).toBeDefined();
+        expect(createRes.body.totalSamples).toBeGreaterThanOrEqual(2);
+        snapshotId = createRes.body.snapshotId;
+
+        // Read Snapshot Pages
+        const pageRes = await request(app)
+            .get(`/api/v2/data-exchange/snapshots/${snapshotId}/pages?limit=10`)
+            .set('X-API-Key', testKey.rawKey);
+
+        expect(pageRes.status).toBe(200);
+        expect(pageRes.body.snapshotId).toBe(snapshotId);
+        expect(pageRes.body.count).toBeGreaterThanOrEqual(2);
+    });
+
+    test('7. Continuous synchronization change feed returns changes with cursor', async () => {
+        const res = await request(app)
+            .get('/api/v2/data-exchange/changes?limit=10')
+            .set('X-API-Key', testKey.rawKey);
+
+        expect(res.status).toBe(200);
+        expect(res.body.changes).toBeDefined();
+        expect(res.body.nextCursor).toBeDefined();
+        expect(res.body.count).toBeGreaterThanOrEqual(2);
+
+        // Test invalid cursor returns 410 CURSOR_EXPIRED
+        const invalidRes = await request(app)
+            .get('/api/v2/data-exchange/changes?cursor=invalid-non-base64')
+            .set('X-API-Key', testKey.rawKey);
+
+        expect(invalidRes.status).toBe(410);
+        expect(invalidRes.body.code).toBe('CURSOR_EXPIRED');
+    });
+
+    test('8. POST /api/v2/data-exchange/receipts logs delivery receipt without mutating DB samples', async () => {
+        const receiptPayload = {
+            snapshotId,
+            batchId: 'BATCH-001',
+            importedCount: 1,
+            quarantinedCount: 1,
+            checkpoint: 'seq_102',
+            errors: [{ specimenId: sample2NoLabId.id, reason: 'MISSING_LAB_ACCESSION' }]
+        };
+
+        const res = await request(app)
+            .post('/api/v2/data-exchange/receipts')
+            .set('X-API-Key', testKey.rawKey)
+            .send(receiptPayload);
+
+        expect(res.status).toBe(200);
+        expect(res.body.receipt.receiptId).toBeDefined();
+        expect(res.body.receipt.status).toBe('ACKNOWLEDGED');
+
+        // Confirm sample records were NOT mutated
+        const checkSample = await prisma.sample.findUnique({
+            where: { id: sample1.id }
+        });
+        expect(checkSample.status).toBe('APPROVED');
+    });
+});

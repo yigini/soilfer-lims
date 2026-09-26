@@ -1988,5 +1988,174 @@ Following technical acceptance by Codex at exact head `c01527afa7aedc8f6d90703ce
 - **Execution Log**: Saved on host at `/opt/lims/logs/apply_issue146_20260926_125855.log`.
 - **Status & Handoff**: Release complete and live. Codex independent read-only post-verification pending prior to closing Issue #146 (`Refs #146`).
 
+---
+
+### Phase 7: Priority Issue #148 Five-Configuration Kobo Project Mapping & Bounded Ingestion Production Apply Execution
+
+Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue148-final-review-20260926.md` and [Issue #148 comment 5846444313](https://github.com/yigini/soilfer-lims/issues/148#issuecomment-5846444313)), the five-configuration Kobo project mapping and bounded ingestion was executed on production host `46.19.33.37` (`lims.yigini.net`) under the established stopped-writer, write-quiesced, guarded apply protocol.
+
+#### 1. Initial Attempt & Verified Fail-Closed Recovery Trap
+- **Initial Execution**: Executed wrapper `execute_release_pr148.sh` (`6641db90d9455d74a847eddef2363ad2d2389a56933f65dd096f393ac49991e1`) using immutable image `soilfer-lims:v3.5.29-e5d5ebd` (`sha256:fe6b64efc4f0...`).
+- **Initial Backup**: Checkpointed WAL (`0|0|0`) and saved pre-operation consistent backup `/opt/lims/backups/dev_pre_issue148_20260926_144743.db` (SHA-256: `02fdeb8266757faa4e9ab86fcb351a70eba4e1e407ebceddf746b5dee27441a9`). Baseline sample count: 37,800, integrity `ok`, FK `OK`.
+- **Step 5 Dry-Run Interception**: The dry-run container failed with `FATAL EXECUTION ERROR: unable to open database file`. Lines 434–435 of `execute_release_pr148.sh` mounted `${VOLUME_NAME}:/app/server/prisma:ro`. In SQLite WAL mode, even read-only queries require write access to the volume directory to create/lock the shared-memory index file (`dev.db-shm`).
+- **Fail-Closed Trap Execution**: Halted before any database mutations; restored the database from the pre-operation consistent backup; verified restored database was bit-for-bit intact (37,800 records, integrity `ok`, FK `OK`); held ingress at HTTP 503.
+- **Service Resumption & Fix**: Operator safely restored live container and proxy (HTTP 200, 0 mutations). Aligned wrapper lines 434–435 with PR #147 (`execute_release_pr147.sh` line 433) by removing `:ro` from the volume mount lines (read-only safety enforced in node application logic via `--dry-run`).
+- **Updated Wrapper Checksum**: `/opt/lims/execute_release_pr148.sh` SHA-256: `dc34a62f9d518e0f657b533e4d060ea7280da35cdbb359b8fcaea1d7e188fe51`.
+
+#### 2. Guarded Successful Apply Execution Ledger
+- **Execution Script**: `/opt/lims/execute_release_pr148.sh` (`dc34a62f9d518e0f657b533e4d060ea7280da35cdbb359b8fcaea1d7e188fe51`) invoking canonical `/opt/lims/server/scripts/execute_kobo_correction_148.cjs` (`fd63483d49ca7784a35ba0e8e6d219f87faaec386fc70d21cbd29e8624563b96`).
+- **Immutable Container Image**: `soilfer-lims:v3.5.29-e5d5ebd` (Image ID `fe6b64efc4f0`, Digest `sha256:fe6b64efc4f046635a830f5568773fefa52e95e975444c1f61dff14800679c1b`).
+- **Verified Private Fixtures**:
+  - Snapshot: `/opt/lims/private_kobo/issue148_kobo_snapshot_bounded.json` (SHA-256: `8e2d50f0ee3f5b0f7e5b474921d18c54e44c2180675e0a7944c2b01e6379f809`).
+  - Manifest: `/opt/lims/private_kobo/issue148_kobo_manifest_bounded.json` (SHA-256: `f42ed9b3cc2e7fe8e27ef3b99cdba01dc280dae8687d2021651555abd7763da6`).
+  - Total submissions captured: 385.
+- **Pre-Operation Consistent Backup**:
+  - Flushed WAL via `PRAGMA wal_checkpoint(TRUNCATE);` (`0|0|0`).
+  - SQLite `.backup` created at `/opt/lims/backups/dev_pre_issue148_20260926_145658.db`.
+  - SHA-256 Checksum: `6ab8db9baed5fc7a62759ab16c340c72684337a9adf73f5cd69b92e1f54e0d2b`.
+  - Baseline Integrity: `ok`, Foreign Key Check: `OK (0 errors)`.
+  - Dynamic Baseline Sample Count: **37,800**.
+- **Dry-Run Validation**:
+  - Operation ID: `KOBO_CORRECTION_148_2026-09-26T125719275Z_8e1174f1`.
+  - Candidate Cohort Analysis: All 385 submissions transformed via `koboService.transformSubmission`, checked against `Sample` table for positive ownership agreement.
+  - Projected Admissions: exactly 634 new `EXPECTED` specimens, exactly 3 provenance holds, projected count 38,434 ($37,800 + 634$).
+  - Preconditions: All 5 candidate configs unmapped, active, matching cursors; target projects active; PRIMARY ProjectLab linkages verified; MOZL and TUR preserved untouched on hold.
+  - Zero database rows modified in dry-run mode.
+- **Guarded Apply Execution**:
+  - Operation ID: `KOBO_CORRECTION_148_2026-09-26T125810984Z_f7b83a7d`.
+  - **Atomic Compare-And-Swap (CAS)**:
+    - Updated 5 `KoboConfig` rows binding `koboServerUrl = 'https://kf.soilfer-data.fao.org'`, `projectCode IS NULL`, `isActive = 1`, and cursor bounds:
+      - `HND-LAB1` (`78cd0dc8-f04c-4bcf-9451-bc9507ee0623`): mapped to `SOILFER-US`, cursor `11035`.
+      - `TUN-LAB1` (`38744747-1d3f-4f4a-8523-6f251ecd1fba`): mapped to `SOILFER-JPN`, cursor `10135`.
+      - `KEN-LAB1` (`c630d7b4-5d44-4826-94e5-5851abbd2a46`): mapped to `SOILFER-US`, cursor `39774`.
+      - `MOZ-LAB1` (`6e60eebe-5d8d-4e13-8037-efeb8041b24c`): mapped to `SOILFER-JPN`, cursor `40410`.
+      - `ZMB-LAB1` (`897c1fb0-d83c-40cd-b513-b3e6e6b78172`): mapped to `SOILFER-US`, cursor `40750`.
+    - Logged 5 `ENABLE_KOBO_PROJECT_MAPPING` audit entries.
+  - **Single-Writer Bounded Ingestion via Canonical Controller**:
+    - `HND-LAB1`: 0 new samples, 0 skipped, cursor `11035`.
+    - `TUN-LAB1`: 0 new samples, 0 skipped, cursor `10135`.
+    - `KEN-LAB1`: 8 new samples, 0 skipped, cursor `39774`.
+    - `MOZ-LAB1`: 204 new samples, 1 skipped, cursor `40410`.
+    - `ZMB-LAB1`: 422 new samples, 2 skipped, cursor `40750`.
+    - Total newly admitted specimens: **exactly 634**.
+    - All 634 admitted specimens created with `status = 'EXPECTED'`, `receptionDate = null`, and `receivedBy = null`. Zero physical receptions recorded.
+  - **Durable Provenance Holds (Conflicting Field Submissions)**:
+    - Exactly 3 specimens placed on durable provenance hold:
+      1. `1769086026116` (`MOZ0078-6-1C`, `MOZ-LAB1`, `SOILFER-JPN`): Conflicting field submissions claimed this barcode; occurrence key `https://kf.soilfer-data.fao.org:aKDDwLku3FEU3hHyC8sHUt:40313:D1` stored under `metadata.conflictingSubmissions` (note: occurrence has 0 attachment descriptors; no photo attachments exist for this Mozambique occurrence).
+      2. `4ea91fe3-efbf-417f-a15a-36d6fefc5212` (`ZM-jDCMg`, `ZMB-LAB1`, `SOILFER-US`): Conflicting field submissions claimed this barcode; occurrence key `https://kf.soilfer-data.fao.org:aXhpApWo6jKUHmJ43PJMpj:40750:D1` stored under `metadata.conflictingSubmissions` (occurrence includes 8 photo attachment descriptors).
+      3. `76e75348-f574-4b63-8478-3e487a17c8b7` (`ZM-jxGMd`, `ZMB-LAB1`, `SOILFER-US`): Conflicting field submissions claimed this barcode; occurrence key `https://kf.soilfer-data.fao.org:aXhpApWo6jKUHmJ43PJMpj:40750:D2` stored under `metadata.conflictingSubmissions` (occurrence includes 8 photo attachment descriptors).
+    - All 3 specimens retain `status = 'EXPECTED'`, `receptionDate = null`, and `rejectionReason = 'PROVENANCE_HOLD: Conflicting field submissions claimed this barcode'`.
+    - Logged 3 `KOBO_CONFLICTING_PROVENANCE` audit entries.
+  - **Configurations Preserved on Hold**:
+    - `MOZL` (`ec5a5a67-3f5a-4682-88df-edb0e07e6485`): Reception-desk questionnaire (`aBVsGjc5q9PxBXk3cbEwQU`), preserved strictly untouched on hold (`projectCode = 'MOZL'`, `isActive = 1`, cursor `37371`).
+    - `TUR` (`00874e9b-e854-46b7-a35b-d5a2d67d71b3`): Inactive lab governance hold (`Lab.isActive = 0`), which is distinct from its three active unchanged `KoboConfig` rows (`KoboConfig.isActive = 1`), preserved strictly untouched on hold.
+
+#### 3. Post-Apply Verification, Health & Ingress Restoration
+- **Post-Apply WAL Checkpoint & Integrity**:
+  - `PRAGMA wal_checkpoint(TRUNCATE)`: `0|0|0`.
+  - Database Integrity Check: `ok`.
+  - Foreign Key Check: `OK (0 errors)`.
+  - Total Sample Count: **38,434** (Dynamic Baseline 37,800 + Admitted 634 = 38,434).
+  - Verified non-null receipts among `EXPECTED` specimens: **0** (`receptionDate IS NULL` and `receivedBy IS NULL` across all newly admitted records).
+- **AuditLog State**:
+  - `ENABLE_KOBO_PROJECT_MAPPING`: 5.
+  - `KOBO_CONFLICTING_PROVENANCE`: 5 (2 Ghana from PR #147 + 3 from Issue #148).
+  - Total Provenance Holds in DB: 7 (4 Ghana + 3 Mozambique/Zambia).
+- **Application Container Health & Image Binding**:
+  - Container `soilfer-lims` restarted with immutable image `soilfer-lims:v3.5.29-e5d5ebd`.
+  - Container verified healthy at attempt 4 (`GET http://localhost:3000/api/health` -> HTTP 200 `{"status":"ok"}`).
+- **Ingress Restoration & Write Resumption**:
+  - Apache reverse proxy configuration restored from clean `.live` file (SHA256: `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20`), verified via `systemctl reload httpd`.
+  - Write resumption verified: `POST /api/test-mutation` returns HTTP 404 from Express container (not 503 from Apache proxy).
+  - Public health verified: `GET https://lims.yigini.net/api/health` returns HTTP 200 `{"status":"ok"}`.
+- **Execution Log**: Saved on host at `/opt/lims/logs/apply_issue148_20260926_145658.log`.
+
+#### 4. Independent Verification & Closure by Codex
+- **Independent Verification Report**: `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue148-production-verification-20260926.md`.
+- **Public Closure Comment**: [Issue #148 comment 5846547537](https://github.com/yigini/soilfer-lims/issues/148#issuecomment-5846547537). Closed as completed at **2026-09-26T13:12:04Z**.
+- **Independent Verification Highlights**:
+  - Exactly 634 `CREATE_KOBO_SYNC` audit entries joined to distinct `Sample` records: KEN-LAB1/SOILFER-US: 8, MOZ-LAB1/SOILFER-JPN: 204, ZMB-LAB1/SOILFER-US: 422. Every record is `EXPECTED` with `receptionDate` and `receivedBy` null, matching source server/form, submission ID, and evidence fingerprint.
+  - All 5 candidate configurations active and mapped as reviewed, with pinned cursors (HND: 11035, KEN: 39774, MOZ: 40410, TUN: 10135, ZMB: 40750) and form/server identities.
+  - Scoped pre-operation backup comparison confirmed 3 held specimens' stored columns unchanged and prior metadata preserved; full MOZL/TUR `KoboConfig` rows unchanged; TUR lab remains inactive.
+  - Scoped `LAB_MANAGER` principal GETs independently return HTTP 200 for Expected Arrivals: HND: 3,933, KEN: 3,968, MOZ: 5,626, TUN: 4,815, ZMB: 9,265. Cohort search scope verified.
+  - Container image `sha256:fe6b64efc4f0...` healthy (started `2026-09-26T13:00:57Z`), clean proxy SHA-256 `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20`, public health `{"status":"ok"}`.
+- **Stand Down Directive**:
+  - Issue #148 officially closed as completed.
+  - Zero further apply, restart, backup, test suite, or release actions for Issues #146 or #148.
+  - Separate MOZL reception questionnaire mapping and TUR governance hold persist unchanged.
+  - Historical PR #147 public-history/PR-cache privacy cleanup remains pending repository owner authorization.
 
 
+---
+
+### Phase 8: Safe LIMS–NSIS Implementation & Work Package Delivery (GitHub Issue #140)
+
+#### 1. Authorization, Scope & Clean Worktree Branch
+- **Authoritative Plan**: `WP/nsis-exchange-issue140-v1/IMPLEMENTATION-PLAN.md` (authored and committed on PR branch).
+- **Git Branch**: `feat/issue-140-nsis-exchange` branched from clean, verified `main` (`27d7d86`).
+- **Core Assignment**: Deliver LIMS-owned packages P0–P4 and P6 through implementation, focused contract tests, API/operator documentation, reference client, and review-ready PR; prepare OpenNSIS mapping/connector handoff and joint acceptance material for P5/P7.
+- **Boundaries Preserved**:
+  - Zero disruption to physical laboratory workflows: intake, analysis, approval, and amendments remain autonomous.
+  - No mandatory profile entry imposed on reception staff.
+  - No synthetic depth intervals (missing depths remain truthful `null`, not `0–20 cm`).
+  - Strict publication invariant: external consumers strictly receive samples where `status IN ('APPROVED', 'RELEASED')`.
+  - Fail-closed laboratory authorization (IR-14): API keys missing explicit authorized laboratory scopes receive zero records.
+  - OpenNSIS owns national profile aggregation, spatial reconciliation, and national database ingestion; receiver ingestion is never claimed without genuine OpenNSIS delivery receipt evidence.
+
+#### 2. Package Deliverables & Implementation Ledger
+
+##### Package P0: Governance & Architecture
+- Enforced strict separation of concerns between laboratory testing domain and national spatial pedology domain.
+- Preserved historical analytical determinations; zero backfills or synthetic timestamp modifications.
+
+##### Package P1: Pure Provenance Adapter (`server/services/sisAdapterService.js`)
+- **Metadata Unwrapper**: Recursively unwraps primitive scalars and nested metadata objects (`{ value, source, timestamp, ... }`).
+- **Truthful WGS84 Point Coordinates**: Preserves exact `0.0` coordinates (equator / prime meridian) without falsy omission; bounds validation (`-90..90`, `-180..180`); extracts from nested `fieldMetadata`/`metadata`.
+- **Truthful Depth Horizons**: Preserves IEEE 754 decimal floats without integer truncation; preserves top zero (`0.0`); eliminates false `0–20 cm` defaults when missing (`null` preserved).
+- **Truthful Dates Separation**: Field `collectionDate` strictly isolated from laboratory physical `receptionDate`. Physical arrival is never inferred from GPS or barcode timestamps.
+- **Profile Code & Deterministic Namespacing**: Extracts `site_id`, `plot_id`, `profile_id`, resolving `{profileNamespace}:{profileKey}` with `HORIZON_OF` relation.
+- **Explicit Identities**: Injects `specimenId` (internal UUID), `fieldSampleId` (`originalId`), `labSampleId` (`labId`), `sourceSystemId` (`soilfer-lims-core`), and `laboratoryId` (`assignedLab`).
+- **Lossless Observation Extraction**: Retains all replicate determinations without analyte-key clobbering; incorporates GloSIS procedure URIs and QUDT unit URIs.
+- **V1/V2 Representations**: Dual export via `formatSampleV1` (backward-compatible additive fields) and `formatSampleV2` (clean structured SOSA/GloSIS payload).
+- **Unit Test Suite**: `server/tests/contracts/sis_adapter_service.test.js` (**17/17 tests passing**).
+
+##### Package P2: Shared Access & Publication Policy (`server/services/exchangePolicyService.js`)
+- **Centralized Policy Engine**: Shared `buildSampleWhere` and `buildSpectralWhere` enforcing release invariant (`status IN ('APPROVED', 'RELEASED')`) across all endpoints.
+- **Fail-Closed Laboratory Scoping (IR-14)**: API keys with empty or missing `labs` evaluate to `OR: [{ labId: '__denied__' }, { assignedLab: '__denied__' }]`, returning 0 records.
+- **Territory & Project Scoping**: Filters by permitted countries and parent/child projects.
+- **Legacy V1 Delegation**: Refactored `server/controllers/sisController.js` to delegate where-clause building to `exchangePolicyService.js` and formatting to `sisAdapterService.js`.
+- **Metrics Privacy & Pagination Safety**: `/stats` strictly scopes metrics to authorized labs and approved samples; `/sync` emits `hasMore: true` and an explicit warning if records exceed `limit`.
+- **Contract Test Suite**: `server/tests/contracts/nsis_policy_and_scoping.test.js` (**5/5 tests passing**).
+
+##### Packages P3 & P4: Lossless V2 Representation & Durable State (`exchangeStateService.js`, `sisV2Controller.js`, `sisV2Routes.js`)
+- **Durable Exchange Storage**: Initialized SQLite tables `_exchange_snapshots`, `_exchange_receipts`, and `_exchange_journal` in `dev.db` via safe idempotent `CREATE TABLE IF NOT EXISTS` (zero schema migration risk).
+- **Resumable Snapshots**: `POST /api/v2/data-exchange/snapshots` generates point-in-time sequence boundaries with 24h TTL; `GET /snapshots/:id/pages` reads paginated items.
+- **Monotonic Change Feed**: `GET /api/v2/data-exchange/changes` provides continuous sync ordered by `(updatedAt, id)`. Returns opaque boundary cursors and enforces HTTP 410 (`CURSOR_EXPIRED`) on invalid/expired cursors.
+- **OpenNSIS Profile Enforcement**: `GET /api/v2/data-exchange/samples?profile=opennsis` strictly requires `labId IS NOT NULL`, preventing un-accessioned field drafts from polluting national accession registers.
+- **RFC 7946 Compliant GeoJSON**: `GET /api/v2/data-exchange/geojson` emits strict GeoJSON Points in WGS84; omits obsolete root `crs` object; stable string `id`.
+- **Contract Test Suite**: `server/tests/contracts/nsis_v2_exchange.test.js` (**8/8 tests passing**).
+
+##### Package P6: UI Connection Manager, Reference Client & Documentation
+- **UI Connection Manager**: Updated `client/src/components/admin/ApiKeyManager.jsx` with V2 endpoints, endpoint version filters (All, V2 Lossless, V1 Legacy), profile selector (`core-lossless-v2`, `opennsis`), cursor parameters, and contract version badges. Built successfully with Vite (2654 modules).
+- **Standalone Reference Client**: Created `server/scripts/data_exchange_reference_client.cjs`. Supports live workflows and self-verification mode (`--verify`). Tested in-process across all 10 contracts (**10/10 checks passing**).
+- **Authoritative V2 Specification**: `docs/data-exchange-api-v2.md` documenting architecture, endpoints, JSON schemas, and error models.
+- **OpenAPI 3.1 Specification**: `docs/openapi-data-exchange-v2.yaml`.
+- **Operator Runbook**: `docs/nsis-operator-runbook.md` detailing key provisioning, fail-closed scoping, snapshot pruning, and emergency procedures.
+- **Additive V1 Documentation**: Updated `docs/nsis-exchange-v1.md` with additive property notes and V2 upgrade path.
+
+##### Packages P5 & P7 Handoff: OpenNSIS Mapping & Joint Acceptance Protocol
+- **Mapping & Handoff Guide**: `docs/opennsis-connector-handoff-v1.md` establishing field-by-field mapping between LIMS V2 schema and OpenNSIS `owl2sql` relational tables.
+- **Specific Edge Case Handling**: Preserving decimal depths without rounding, truthful nulls, and multiple replicate determinations.
+- **4-Stage Joint Pilot Protocol**: Outlines Stage 1 (LIMS CI contract checks), Stage 2 (Sandbox credential provisioning), Stage 3 (Initial snapshot harvest), and Stage 4 (Continuous sync and delivery receipt loop).
+
+#### 3. Verification & Test Summary
+- **Contract Test Suites (`npm test -- tests/contracts/`)**:
+  - `nsis_exchange.test.js`: 4/4 passing.
+  - `sis_adapter_service.test.js`: 17/17 passing.
+  - `nsis_policy_and_scoping.test.js`: 5/5 passing.
+  - `nsis_v2_exchange.test.js`: 8/8 passing.
+  - **Total Exchange Test Coverage**: **34/34 passing (100%)**.
+- **Reference Client Verification (`node scripts/data_exchange_reference_client.cjs --verify`)**:
+  - 10/10 contract checks passing in-process.
+- **Frontend Production Build (`npm run build`)**:
+  - Clean build in 34.92s with zero errors.

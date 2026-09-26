@@ -103,4 +103,17 @@ const apiKeyAuth = async (req, res, next) => {
     }
 };
 
+const optionalApiKeyAuth = async (req, res, next) => {
+    const apiKeyHeader = req.headers['x-api-key'];
+    const authHeader = req.headers['authorization'];
+    if (!apiKeyHeader && (!authHeader || !authHeader.startsWith('Bearer '))) {
+        return next();
+    }
+    return apiKeyAuth(req, res, next);
+};
+
+apiKeyAuth.optional = optionalApiKeyAuth;
+
 module.exports = apiKeyAuth;
+module.exports.optional = optionalApiKeyAuth;
+
