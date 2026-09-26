@@ -5,15 +5,15 @@ Repository: `https://github.com/yigini/soilfer-lims`
 Implementation Lead: Antigravity  
 Review & Communication Lead: Codex  
 Baseline Commit: `762c46e`  
-Current Production Release: `v3.5.28` (`2ef64cd01d8e91a0764156ebfbc1add5442e5c15`)  
-Production Serving Image: `soilfer-lims:v3.5.28-2ef64cd` (sha256:`cf3d71a49ef38be3834db6d9abc105a3447af10c485e274a1f52eb8ec54a489b`)  
-Rollback Baseline Image: `soilfer-lims:rollback-baseline` / `soilfer-lims:v3.5.27-d07ad62` (sha256:`a092227c6f4a4ab45558f4d32bf8a12eb713894fdb4f8252fc1327a753136242`)  
-Date: 2026-09-25  
+Current Production Release: `v3.5.29` (`e5d5ebdf9fa54a29fcbd4424d566eda8036920bd`)  
+Production Serving Image: `soilfer-lims:v3.5.29-e5d5ebd` (sha256:`fe6b64efc4f046635a830f5568773fefa52e95e975444c1f61dff14800679c1b`)  
+Rollback Baseline Image: `soilfer-lims:rollback-baseline` / `soilfer-lims:v3.5.28-2ef64cd` (sha256:`cf3d71a49ef38be3834db6d9abc105a3447af10c485e274a1f52eb8ec54a489b`)  
+Date: 2026-09-26  
 
 Status Summary:
-- **Total Tracked Issues**: 18
+- **Total Tracked Issues**: 19
 - **Independently Accepted & Closed**: 8 (#115, #116, #118, #119, #122, #124, #125, #126)
-- **Open**: 10 (7 with fixes deployed/live awaiting individual workflow acceptance: #113, #114, #117, #120, #121, #123, #128; 3 external/device/governance items: #102, #103, #104)
+- **Open**: 11 (8 with fixes deployed/live awaiting individual workflow acceptance: #113, #114, #117, #120, #121, #123, #128, #146; 3 external/device/governance items: #102, #103, #104)
 
 Status Key:
 - **Reported**: Issue filed by contributor.
@@ -48,6 +48,7 @@ Status Key:
 | **#102** | 5 | Physical mobile device testing (iOS Safari, Android Chrome) | Open | Pending | Mobile device testing execution sheet (`docs/test-sheets/mobile-device-testing.md`) | `7516f0e` | Real physical device testing sheet established covering touch targets, virtual keyboard pan/zoom, horizontal scrolling, sticky headers, camera permissions, and offline draft sync. Emulation alone is insufficient. | Requires physical device validation on deployed release candidate. | Actual iOS Safari / Android Chrome hardware evidence pending. OPEN |
 | **#103** | 5 | User membership reconciliation & country access grants | Open | Pending | Read-only discrepancy ledger (`docs/governance/membership-reconciliation-ledger.md`) | None (Gate) | Governance framework and illustrative archetypes mapped against real Prisma schema (`User.labId`, `User.projects`, `User.countries`, `ProjectLab`); scopeGuard global access rules documented (`SUPER_ADMIN` only); no invented junction tables; production migration hold strictly active. | Under production migration hold. | Reconciliation apply and access expansion NOT performed; governance hold remains. OPEN |
 | **#104** | 5 | Separate Laboratory Dashboard sample count discrepancy | Open | Pending | External reconciliation protocol (`docs/governance/external-dashboard-reconciliation.md`) | None (Gate) | Reconciled metric definitions (Field Registry vs Expected vs Active Lab Work); 3,580 distinguished as reporter snapshot (Luis, 15 Sept 2026); external dashboard architecture documented as unknown; protocol marked as preparation framework; synthetic backfill prohibited. | Requires reporter confirmation from Luis. | Separate dashboard discrepancy not established as fixed; investigation/reporter clarification pending. OPEN |
+| **#146** | 6 | Ghana Expected Arrivals & Kobo Intake Pipeline; duplicate barcode provenance, reception intake hold guards, bounded ingestion | Reproduced & Implemented Locally | `e5d5ebd` (PR #147) | `kobo_duplicate_provenance.test.js` (18/18), `rehearsal_packaged_wrapper.cjs` (9/9), `rehearsal_docker_boundary.cjs` (5/5 real Docker scenarios), CI Run 36236624897 (green in 7m5s) | `e5d5ebd` (v3.5.29) | Primary source coordinates (`sourceServerUrl`, `sourceFormId`, `depth`) persisted in `compactMeta`; original primary replay is 100% idempotent (0 changes); strict 4-coordinate deduplication; unknown/foreign records protected; durable `AMBIGUOUS_PROVENANCE_HOLD` on intra-submission duplicate depths with complete attachment descriptors; reception intake fail-closed guards return HTTP 409 and block workspace intake; production release executed with stopped-writer pre-operation consistent backup (`dev_pre_issue146_20260926_125855.db`, SHA: `94031034...`); atomic CAS activated KoboConfig for `GHA-LAB1` / `SOILFER-US`; single-writer bounded ingestion from verified snapshot admitted exactly 864 EXPECTED specimens (`receptionDate=null`), 4 placed on durable hold; post-apply DB count: 37,742 (36,878 + 864), integrity `ok`, FK `OK`; live reverse proxy traffic restored cleanly. | Historic public PR objects remain a separate unresolved privacy matter pending repository owner confirmation. Zero production mutations outside canonical runner. | Released to Production (`e5d5ebd` / `v3.5.29`); Ready for Codex Independent Post-Verification (`Refs #146`) |
 
 
 ---
@@ -1905,6 +1906,87 @@ Following Codex guidance in `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/w
 - **Evidence Ledger**: `artifacts/evidence-journeys/workbench_interactions_evidence.json` (mirrored to conversation artifacts directory).
 - **Preserved Old Reports**: Prior evidence ledger `artifacts/evidence-journeys/workbench_verification_evidence.json` and existing screenshots preserved without alteration.
 - **Application Defect Evaluation**: Zero defects reproduced. Both action-click deep-link navigation and keyboard search filtering behave correctly on released source/build. No code changes or new PR required; evidence-only deliverable.
+
+
+### Phase 6: Priority Issue #146 Ghana Expected Arrivals & Bounded Kobo Ingestion Release Execution (v3.5.29 — `e5d5ebd`)
+
+Following technical acceptance by Codex at exact head `c01527afa7aedc8f6d90703ce48d75756218f118` ([PR #147 comment 5845560003](https://github.com/yigini/soilfer-lims/pull/147#issuecomment-5845560003) and `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/pr147-final-review-c01527a.md`), PR #147 was squash merged into `main` with head-commit protection, verified through exact-main CI, and executed on host `46.19.33.37` (`lims.yigini.net`) under the established write-quiesced, stopped-container release and bounded apply protocol.
+
+#### 1. Squash Merge & Exact-Main CI Verification
+- **Merged PR**: PR #147 squash merged into `main` via `gh pr merge 147 --squash --match-head-commit c01527afa7aedc8f6d90703ce48d75756218f118`.
+- **Merge Commit on `main`**: `e5d5ebdf9fa54a29fcbd4424d566eda8036920bd` (Single parent `90b0abd8fafbbd95adb2ae382b34a169fce3ed99`; clean tree strictly identical to accepted `c01527a`).
+- **Target Release Version**: `v3.5.29` (`e5d5ebd`).
+- **PR Branch Preservation**: PR branch `fix/ghana-expected-arrivals-146` strictly preserved intact; no force-push, no history rewrite, no branch deletion (awaiting separate repository owner authorization for privacy remediation).
+- **Exact-Main CI Run**: GitHub Actions CI Run **36236624897** (Job ID: `108389461816`) on `main` passed 100% green in 7m5s (`✓ Test & Build`).
+
+#### 2. Release Ledger & Container Artifacts
+- **Target Docker Image**: `soilfer-lims:v3.5.29-e5d5ebd`
+  - Image ID: `fe6b64efc4f0`
+  - Digest: `sha256:fe6b64efc4f046635a830f5568773fefa52e95e975444c1f61dff14800679c1b`
+  - Build Context Archive: `source_e5d5ebd.tar.gz` (SHA256: `1c4b8ad7ed8204da7d622fb319fcb1a1bb2a5252c5ddf239f6d0cfcfee1d3f40`)
+- **Rollback Baseline Preserved**:
+  - Image Tags: `soilfer-lims:rollback-baseline` & `soilfer-lims:rollback-2ef64cd`
+  - Image ID: `cf3d71a49ef3`
+  - Digest: `sha256:cf3d71a49ef38be3834db6d9abc105a3447af10c485e274a1f52eb8ec54a489b`
+- **Pre-Release Log Preservation**: Container logs preserved prior to shutdown: `/opt/lims/pre_release_2ef64cd_20260926_125533.log`.
+- **Application Container Runtime Binding**: Container `soilfer-lims` deployed with immutable image `soilfer-lims:v3.5.29-e5d5ebd` (`sha256:fe6b64efc4f0...`), mounted to volumes `lims_lims-data:/app/server/prisma` and `lims_lims-assets:/app/server/uploads`.
+
+#### 3. Write Quiescence & Pre-Operation Consistent Backup
+- **Ingress Write Quiescence**: Enforced Apache 503 rewrite rule (`httpd-lims.conf.quiesce`). Mutating HTTP requests blocked with 503; read-only requests permitted.
+- **Application Writer Exclusion**: Active application container `soilfer-lims` stopped (`docker stop -t 10`). Confirmed zero running writers across application and runner containers via `assert_no_writers_running`.
+- **WAL Checkpoint & Consistent Backup**:
+  - WAL checkpoint executed (`PRAGMA wal_checkpoint(TRUNCATE)`: `0|0|0`).
+  - Consistent Backup File: `/opt/lims/backups/dev_pre_issue146_20260926_125855.db`
+  - Backup SHA-256: `940310341dd20a98c679f06853734c3d1f055d765aed35be6b3ccff704ad84a3`
+  - Baseline Integrity: `ok`
+  - Baseline Foreign Key Check: `OK (0 errors)`
+  - Baseline Sample Count: 36,878 specimens (36,878 non-Ghana, 0 Ghana in `SOILFER-US`).
+
+#### 4. Guarded Canonical Ghana Apply Execution
+- **Execution Script**: `/opt/lims/execute_release_pr147.sh` invoking canonical `/app/server/scripts/execute_ghana_apply_146.cjs`.
+- **Verified Private Fixtures**:
+  - Snapshot: `/opt/lims/private_kobo/ghana_kobo_snapshot_40747.json` (SHA-256: `33db90cdcab60ccf4801a7754d8444893c0b6ee25f269a65366d6fed5046292f`)
+  - Manifest: `/opt/lims/private_kobo/ghana_kobo_manifest_40747.json` (SHA-256: `e43d490366eda0e325b1f1639c743b57105a6256e0f406df6f7e1d87514adaed`)
+  - High-Water Cursor: `40747` (459 submissions).
+- **Dry-Run Validation**:
+  - Operation ID: `GHANA_APPLY_2026-09-26T105916457Z_28cfdcaf`
+  - Verified 868 occurrences, 864 distinct candidate IDs, 2 intra-submission duplicates, 2 cross-submission duplicate events.
+  - Candidate collision projection: 0 collisions against 36,878 existing specimens.
+  - CAS simulation: OK, 0 rows modified in DB.
+- **Guarded Apply Execution**:
+  - Operation ID: `GHANA_APPLY_2026-09-26T105917970Z_c1e8c9c1`
+  - Atomic CAS succeeded: KoboConfig `25731264-f02a-4172-8ef1-75512b7607a5` activated (`isActive=1`, `projectCode='SOILFER-US'`, `lastSubmissionId='40747'`).
+  - Single-writer bounded ingestion result: `{"newSamples":864,"skipped":4,"lastSubmissionId":"40747"}`.
+  - Admitted specimens: exactly 864 specimens created with status `EXPECTED` and `receptionDate = null`. Zero physical receptions recorded.
+  - Durable Provenance Holds: exactly 4 specimens placed on `AMBIGUOUS_PROVENANCE_HOLD`:
+    - `12282486-d172-438d-8acd-c293de93816c` (`GHA0288-3-1C-T`): `INTRA_SUBMISSION_DUPLICATE_DEPTH` (Field surveyor assigned identical barcode to D1 and D2)
+    - `e98b5911-3392-4add-a0ad-cc31eaaa4c34` (`GHA0417-2-1G-T`): `INTRA_SUBMISSION_DUPLICATE_DEPTH` (Field surveyor assigned identical barcode to D1 and D2)
+    - `a65a2d2f-0a79-417f-919a-f9a616e7a240` (`GHA0922-2-1G-S`): `CONFLICTING_FIELD_SUBMISSIONS` (Multiple field submissions claimed this barcode)
+    - `9ecae931-c24c-469f-832c-340191ff12dc` (`GHA0922-2-1G-T`): `CONFLICTING_FIELD_SUBMISSIONS` (Multiple field submissions claimed this barcode)
+  - Clean Unambiguous Specimens: exactly 860.
+  - Transactional Audit Entries Logged:
+    - `ENABLE_GHANA_KOBO_MAPPING`: 1
+    - `CREATE_KOBO_SYNC`: 864
+    - `KOBO_INTRA_SUBMISSION_DUPLICATE`: 2
+    - `KOBO_CONFLICTING_PROVENANCE`: 2
+
+#### 5. Post-Apply Verification, Health & Ingress Restoration
+- **Post-Apply WAL Checkpoint & Integrity**:
+  - `PRAGMA wal_checkpoint(TRUNCATE)`: `0|0|0`
+  - Integrity Check: `ok`
+  - Foreign Key Check: `OK (0 errors)`
+  - Total Sample Count: `37,742` (Baseline 36,878 + Admitted 864 = 37,742). Baseline samples intact.
+- **Other Country Configurations Preserved**:
+  - Kobo configurations for GTM-LAB1, HND-LAB1, KEN-LAB1, MOZ-LAB1, TUN-LAB1, TUR, and ZMB-LAB1 remain completely unchanged.
+- **Application Container Health**:
+  - Container `soilfer-lims` restarted with image `soilfer-lims:v3.5.29-e5d5ebd`.
+  - Container healthy at attempt 4 (`GET http://localhost:3000/api/health` -> HTTP 200 `{"status":"ok"}`).
+- **Ingress Restoration & Write Resumption**:
+  - Apache reverse proxy configuration restored from clean `.live` file (SHA256: `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20`), verified via `systemctl reload httpd`.
+  - Write resumption verified: `POST /api/test-mutation` returns HTTP 404 from Express (not 503 from Apache proxy).
+  - Public health verified: `GET https://lims.yigini.net/api/health` returns `{"status":"ok"}`.
+- **Execution Log**: Saved on host at `/opt/lims/logs/apply_issue146_20260926_125855.log`.
+- **Status & Handoff**: Release complete and live. Codex independent read-only post-verification pending prior to closing Issue #146 (`Refs #146`).
 
 
 

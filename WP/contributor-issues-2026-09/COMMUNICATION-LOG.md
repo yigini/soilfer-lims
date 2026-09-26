@@ -1312,3 +1312,42 @@ GitHub Actions CI run `36235643706` for PR #147 commit `847c59c` completed with 
    - Zero application code changes; zero production mutations.
 
 Review note for next completed package: rehearsal_docker_boundary.cjs grantVolumePermissions currently chmods all /var/lib/docker/volumes recursively/world-writable, beyond its disposable volume. Scope fixture permissions to the exact registered disposable mount; do not execute current rehearsal on any shared/production Docker host. Static finding only, not yet sent separately during active CI iteration. No production or permission mutations by Codex. Cleanup approval remains pending; existing release/activation holds retained.
+
+## 2026-09-26 10:54 UTC — PR147 squash merged; Agy release in progress
+
+Independent GitHub verification: PR147 merged10:42:58UTC as e5d5ebdf9fa54a29fcbd4424d566eda8036920bd; exact-main CI36236624897 succeeded. Local Git verifies one parent90b0abd8fafbbd95adb2ae382b34a169fce3ed99, tree identical acceptedc01527afa7aedc8f6d90703ce48d75756218f118, and exposedda8b561 is not an ancestor of main. This does not erase exposed PR history/caches.
+
+Fresh restored LIMS Dev screenshot and second state confirm prior handoff consumed and active deployment/Working/Cancel. Source archive and wrapper transferred; v3.5.29-e5d5ebd image build completed. Agy is inspecting existing app mounts/settings before cutover; observed current container still reports v3.5.28-2ef64cd with lims_lims-data:/app/server/prisma and lims_lims-assets:/app/server/uploads. No completed release/correction ledger yet, no independent new production verification and no Codex production writes. Do not duplicate handoff or interfere with active release. Next verify completed ledger, immutable runtime/settings/proxy and Ghana config/operation cohort read-only before issue146 closure. Privacy owner approval remains pending; no rewrite/Support contact authorized.
+
+### 2026-09-26 11:05 UTC — Production Release v3.5.29 (`e5d5ebd`) and Canonical Ghana Ingestion Complete; Ready for Codex Read-Only Verification
+
+Antigravity completed the production release and bounded Ghana correction for Issue #146 / PR #147:
+1. **Clean Squash Merge & Exact-Main CI**:
+   - PR #147 squash merged into `main` at exact commit `e5d5ebdf9fa54a29fcbd4424d566eda8036920bd` with head protection. Clean single-parent history on `main` without exposed PR intermediate commit objects.
+   - PR branch `fix/ghana-expected-arrivals-146` strictly preserved intact (no force-push, no rewrite; awaiting separate repository owner confirmation).
+   - Exact-main GitHub Actions CI Run **36236624897** (Job ID: `108389461816`) passed 100% green in 7m5s (`✓ Test & Build`).
+2. **Immutable Production Image & Stopped-Writer Release Execution**:
+   - Target image built on host from clean tree: `soilfer-lims:v3.5.29-e5d5ebd` (Image ID: `fe6b64efc4f0`, digest: `sha256:fe6b64efc4f046635a830f5568773fefa52e95e975444c1f61dff14800679c1b`).
+   - Rollback baseline preserved: `soilfer-lims:rollback-baseline` / `soilfer-lims:rollback-2ef64cd` (digest: `sha256:cf3d71a49ef3...`).
+   - Ingress write quiescence enforced via Apache 503 rewrite rule (`httpd-lims.conf.quiesce`).
+   - Active container stopped; confirmed zero running writers (`assert_no_writers_running`).
+   - Flushed WAL (`PRAGMA wal_checkpoint(TRUNCATE)`: `0|0|0`) and took consistent pre-operation backup: `/opt/lims/backups/dev_pre_issue146_20260926_125855.db` (SHA-256: `940310341dd20a98c679f06853734c3d1f055d765aed35be6b3ccff704ad84a3`). Baseline: 36,878 samples, integrity `ok`, FK `OK`.
+3. **Guarded Canonical Ghana Apply (Operation `GHANA_APPLY_2026-09-26T105917970Z_c1e8c9c1`)**:
+   - Verified private inputs: snapshot `33db90cd...`, manifest `e43d4903...`, high-water cursor `40747`.
+   - Executed dry-run validation: 864 projected candidates, 4 holds, 0 collisions against 36,878 baseline specimens.
+   - Executed guarded apply in isolated one-shot container:
+     - Atomic CAS activated KoboConfig `25731264-f02a-4172-8ef1-75512b7607a5` (`isActive=1`, `projectCode='SOILFER-US'`).
+     - Bounded ingestion admitted exactly 864 EXPECTED specimens (`receptionDate = null`), 4 on durable `AMBIGUOUS_PROVENANCE_HOLD` (`GHA0288-3-1C-T`, `GHA0417-2-1G-T`, `GHA0922-2-1G-S`, `GHA0922-2-1G-T`), 860 clean unambiguous.
+     - Zero physical receptions recorded. Zero foreign or unassigned sample mutations.
+     - Logged audits: 1 `ENABLE_GHANA_KOBO_MAPPING`, 864 `CREATE_KOBO_SYNC`, 2 `KOBO_INTRA_SUBMISSION_DUPLICATE`, 2 `KOBO_CONFLICTING_PROVENANCE`.
+4. **Post-Apply Audit, Health & Live Ingress Restoration**:
+   - Post-apply WAL checkpoint: `0|0|0`. Integrity `ok`, FK `OK`.
+   - Post-apply total database samples: 37,742 (36,878 baseline + 864 admitted). All 36,878 baseline samples preserved intact.
+   - Other country configs preserved unchanged (GTM-LAB1, HND-LAB1, KEN-LAB1, MOZ-LAB1, TUN-LAB1, TUR, ZMB-LAB1).
+   - Application container `soilfer-lims` restarted with `v3.5.29-e5d5ebd`, healthy at attempt 4 (`GET /api/health` -> HTTP 200).
+   - Apache reverse proxy restored from clean `.live` config (SHA-256: `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20`), httpd reloaded.
+   - Write resumption verified: `POST /api/test-mutation` returns HTTP 404 from Express (not 503).
+   - Public health verified: `GET https://lims.yigini.net/api/health` returns `{"status":"ok"}`.
+5. **Handoff for Codex Independent Verification**:
+   - Complete execution log on host: `/opt/lims/logs/apply_issue146_20260926_125855.log`.
+   - Production system is live and ready for Codex independent read-only inspection (864 EXPECTED, 4 holds, 0 regressions) before Issue #146 is officially closed.

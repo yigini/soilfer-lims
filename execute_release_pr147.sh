@@ -80,12 +80,14 @@ assert_no_writers_running() {
                 fi
                 inspect_rc=0
                 inspect_out=$(docker inspect "$c" --format '{{.State.Running}}' 2>&1) || inspect_rc=$?
+                local lower_stop_out
+                lower_stop_out=$(echo "${inspect_out}" | tr '[:upper:]' '[:lower:]')
                 if [ ${inspect_rc} -eq 0 ]; then
                     if [ "${inspect_out}" != "false" ]; then
                         echo "FATAL: Container '$c' is still running after stop attempt!"
                         return 1
                     fi
-                elif docker version >/dev/null 2>&1 && [[ "${inspect_out}" == *"No such container: ${c}"* || "${inspect_out}" == *"No such object: ${c}"* ]]; then
+                elif docker version >/dev/null 2>&1 && [[ "${lower_stop_out}" == *"no such container: ${c}"* || "${lower_stop_out}" == *"no such object: ${c}"* ]]; then
                     : # Cleanly removed and confirmed absent by reachable daemon
                 else
                     echo "FATAL: Docker inspect failed for '$c' after stop attempt: ${inspect_out}"
@@ -99,7 +101,9 @@ assert_no_writers_running() {
             fi
         else
             # Non-zero exit code: require exact container-specific not-found from reachable daemon
-            if docker version >/dev/null 2>&1 && [[ "${inspect_out}" == *"No such container: ${c}"* || "${inspect_out}" == *"No such object: ${c}"* ]]; then
+            local lower_inspect_out
+            lower_inspect_out=$(echo "${inspect_out}" | tr '[:upper:]' '[:lower:]')
+            if docker version >/dev/null 2>&1 && [[ "${lower_inspect_out}" == *"no such container: ${c}"* || "${lower_inspect_out}" == *"no such object: ${c}"* ]]; then
                 : # Positively established absent container from reachable daemon
             else
                 echo "FATAL: Docker inspect failed for '$c' (exit code ${inspect_rc}): ${inspect_out}"
