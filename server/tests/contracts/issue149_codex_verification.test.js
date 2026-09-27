@@ -259,4 +259,68 @@ describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts',
         expect(stale.status).toBe(410);
         expect(stale.body.code).toBe('AUTH_VERSION_MISMATCH');
     });
+
+    test('Check 10: API key with SUPER_ADMIN role does NOT bypass finite countries/projects or spatial projection', async () => {
+        const elevated = await provision('Role-bearing scoped key', { role: 'SUPER_ADMIN', capabilities: ['SNAPSHOT', 'RECEIPT'] });
+        const elevatedAuth = await authenticate(elevated.token);
+        expect(elevatedAuth.auth.type).toBe('API_KEY');
+        expect(elevatedAuth.auth.role).toBe('SUPER_ADMIN');
+        expect(elevatedAuth.auth.countries).toEqual(['AAA']);
+        expect(elevatedAuth.auth.projects).toEqual(['SYNTHETIC-PROJECT']);
+        expect(elevatedAuth.auth.capabilities.includes('SPATIAL')).toBe(false);
+
+        const r = await get('/api/v2/data-exchange/samples', elevated);
+        expect(r.status).toBe(200);
+        expect(r.body.data.length).toBe(1); // Scoped strictly to AAA & SYNTHETIC-PROJECT (sample-a only, not sample-b)
+        expect(r.body.data[0].sampling.location).toBeNull(); // Spatial location redacted
+
+        const guarded = await get('/api/v2/data-exchange/geojson', elevated);
+        expect(guarded.status).toBe(403);
+    });
+
+    test('Check 11: Idempotency replay with mismatched key returns 409 conflict and preserves second key', async () => {
+        const operationKey = 'synthetic-repeat-operation-' + Date.now();
+        const rotationA = await provision('Idempotency A');
+        const rotationB = await provision('Idempotency B');
+
+        const firstRotate = response();
+        await management.rotateApiKey({ user: admin, headers: { 'idempotency-key': operationKey }, params: { id: rotationA.keyId } }, firstRotate);
+        expect(firstRotate.statusCode).toBe(200);
+
+        const secondRotate = response();
+        await management.rotateApiKey({ user: admin, headers: { 'idempotency-key': operationKey }, params: { id: rotationB.keyId } }, secondRotate);
+        expect(secondRotate.statusCode).toBe(409);
+        expect(secondRotate.body.code).toBe('IDEMPOTENCY_CONFLICT');
+
+        const bKey = await prisma.apiKey.findUnique({ where: { id: rotationB.keyId } });
+        expect(bKey.isActive).toBe(true);
+    });
+
+    test('Check 12: Postcommit retry recovers committed rotation from durable storage after in-memory cache reset', async () => {
+        const operationKey = 'synthetic-durable-op-' + Date.now();
+        const rotationA = await provision('Durable Rotation');
+
+        const firstRotate = response();
+        await management.rotateApiKey({ user: admin, headers: { 'idempotency-key': operationKey }, params: { id: rotationA.keyId } }, firstRotate);
+        expect(firstRotate.statusCode).toBe(200);
+        const originalApiKey = firstRotate.body.apiKey;
+
+        // Reset module-local cache simulating process loss
+        delete require.cache[require.resolve('../../controllers/sisController')];
+        const freshManagement = require('../../controllers/sisController');
+        const retry = response();
+        await freshManagement.rotateApiKey({ user: admin, headers: { 'idempotency-key': operationKey }, params: { id: rotationA.keyId } }, retry);
+
+        expect(retry.statusCode).toBe(200);
+        expect(retry.body.apiKey).toBe(originalApiKey);
+    });
+
+    test('Check 13: Managed key with missing authoritative linkage fails closed (403)', async () => {
+        const unlinked = await provision('Removed linkage');
+        db.prepare('DELETE FROM _exchange_connection_keys WHERE api_key_id=?').run(unlinked.keyId);
+
+        const r = await get('/api/v2/data-exchange/samples', unlinked);
+        expect(r.status).toBe(403);
+        expect(r.body.code).toBe('CONNECTION_LINK_MISSING');
+    });
 });

@@ -18,22 +18,29 @@ const { normalizeUnit } = require('./interpretationService');
 // Source System Identifier (stable across hostnames / migrations)
 function resolveSourceSystemId(db) {
     if (process.env.SOURCE_SYSTEM_ID) return process.env.SOURCE_SYSTEM_ID;
-    try {
-        const { getSourceSystemId } = require('./exchangeStateService');
-        return getSourceSystemId(db);
-    } catch (e) {
-        if (e.code === 'MODULE_NOT_FOUND' || (e.message && e.message.includes('Unexpected dependency'))) {
-            return 'soilfer-lims-core';
-        }
-        throw e;
+    if (db) {
+        try {
+            const row = db.prepare("SELECT value FROM _exchange_meta WHERE key = 'source_system_id'").get();
+            if (row && row.value) return row.value;
+        } catch (e) {}
     }
+    try {
+        const { getDb } = require('./exchangeStateService');
+        const activeDb = getDb();
+        if (activeDb) {
+            const row = activeDb.prepare("SELECT value FROM _exchange_meta WHERE key = 'source_system_id'").get();
+            if (row && row.value) return row.value;
+        }
+    } catch (e) {}
+    return 'soilfer-lims-core';
 }
 
 const SOURCE_SYSTEM_ID = process.env.SOURCE_SYSTEM_ID || 'soilfer-lims-core';
 
 function hasSpatialCapability(auth) {
     if (!auth) return false;
-    if (auth.role === 'SUPER_ADMIN') return true;
+    // Platform-user JWT exception applies strictly to authenticated platform users, never to API_KEY principals
+    if (auth.type !== 'API_KEY' && auth.role === 'SUPER_ADMIN') return true;
     const caps = auth.capabilities;
     if (!Array.isArray(caps)) return false;
     return caps.includes('SPATIAL') || caps.includes('*');

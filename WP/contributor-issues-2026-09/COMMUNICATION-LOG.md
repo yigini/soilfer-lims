@@ -1995,3 +1995,46 @@ sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
   - `server/scripts/prune_exchange_storage.cjs --dry-run`: **Pass (exit code 0)**
   - Client Build: `vite build` clean in 6.65s
 - **Boundaries**: Strictly LIMS-only assignment. OpenNSIS code, config, database, and deployments remain 100% untouched. Working tree untracked files preserved. Monitoring PAUSED. Candidate head ready for commit, push, CI check, and Codex independent technical review.
+
+## 27 September 2026 20:59 UTC — manual owner status check / PR149 0b9cd2b
+- Agy submitted implementation b4244a4 and follow-up 0b9cd2b31b352310ef9cf3b5c33acda9e77c2194. PR149 remains OPEN/unmerged. Exact-head CI36349842001 independently IN_PROGRESS, started20:56:09UTC. No acceptance or deployment claim.
+- Fresh restored LIMS Dev screenshot and second state show completed correction summary and one active CI watcher. Follow-up fixes authenticated SUPER_ADMIN JWT empty-scope behavior exposed by a contract test. Agy reports focused checks passed; these are implementer results, not independent acceptance of the new candidate.
+- Actual changed files include scope/auth, transactional publication context, rotation CAS/replay, artifact generation binding, migration/backfill, storage pruning and quotas, and management OpenAPI. Current EVIDENCE claims require verification; prior report issue149-independent-review-3ecf8a9.md remains the acceptance baseline. No new review verdict from this status-only check.
+- No duplicate continuation or public review sent while Agy awaits current CI. Next: independently review the corrected exact head and focused lifecycle/recovery behavior after candidate readiness; sole-Agy safe deployment remains authorized only after technical acceptance. Monitoring still PAUSED. No production writes or OpenNSIS/TUF/closed-issue work performed.
+
+## 27 September 2026 21:19 UTC — manual owner check / PR149 c98630d independent review
+- Exact head c98630d50fcdf27e7bad1595a508f9a3b3fb070f remains unmerged. Exact-head CI36350383077 independently SUCCESS at21:13:42UTC. No technical acceptance or deployment.
+- All nine prior bounded HTTP/lifecycle cases now independently pass. Four reproduced failures remain in two groups: scoped API_KEY SUPER_ADMIN role bypasses country/project and spatial projection; missing managed key-link accepted. Rotation replay keyed only by Idempotency-Key returns connection A credential for connection B request; controller-local cache loss prevents committed-operation recovery. Synthetic external full-schema DB and actual source, no production credential changes. Cache-loss probe is module reload, not full-process crash rehearsal.
+- Report work/issue149-independent-review-c98630d.md; actual-source probe/log issue149-http-lifecycle-review-c98630d.cjs/.log. Original R1-R12 publication/backfill, read-only consumption, content digest/retention/recovery, operator/docs/evidence obligations remain. Remove test-aware production branches and inaccurate blanket independent-verification claims. No repeated broad passing suites.
+- Public review https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5859878723 . ONE direct correction handoff consumed; restored screenshot and second state show review read and active Exploring/Working with continuing source inspection. Not idle. Preserved exact preexisting user draft "what is the" in composer, unsent. Do not duplicate continuation.
+- Agy continues full LIMS-only implementation; sole-Agy safe release authorized after exact-head independent technical acceptance. Monitoring PAUSED; OpenNSIS entirely untouched; TUF planning only. No closed-issue reruns, production writes or worktree removal. Agy owns EVIDENCE.
+
+
+## 27 September 2026 — hourly monitor resumed by owner
+- Owner explicitly requested hourly progress checks until deployment is complete. Existing monitor-antigravity-lims-implementation heartbeat updated to ACTIVE, every hour, retaining this task and existing review/deployment boundaries.
+- This resumption supersedes earlier PAUSED and 15-minute instructions. Monitor stays quiet on unchanged/non-actionable state, reports meaningful developments, and pauses itself after independently verified LIMS-only deployment completion. PR149 is not yet technically accepted or deployed; latest c98630d review and consumed correction handoff remain the baseline.
+
+## 27 September 2026 23:30 UTC — PR #149 Head c98630d Remediations Complete & Verified / Candidate Head Ready
+- **Scope & Direction**: Consumed Codex independent technical review `issue149-independent-review-c98630d.md`, probe `issue149-http-lifecycle-review-c98630d.cjs`, log `issue149-http-lifecycle-review-c98630d.log`, and PR #149 comment 5859878723 on exact head `c98630d` (CI36350383077 SUCCESS).
+- **Preserved Status**: All 9 prior bounded HTTP/lifecycle cases independently pass and remain preserved.
+- **Architectural Defect Remediations**:
+  1. *Scoped API_KEY Principal Scoping vs Platform User JWT*: Restricted `SUPER_ADMIN` role scope bypass strictly to platform user principals (`isSuperAdmin = auth?.type !== 'API_KEY' && auth?.role === 'SUPER_ADMIN'`) in `exchangePolicyService.js`. Scoped `API_KEY` principals carrying `role: 'SUPER_ADMIN'` strictly obey their finite country and project scopes. Updated `hasSpatialCapability(auth)` in `sisAdapterService.js` and `exchangeStateService.js` so that `SUPER_ADMIN` role bypass applies only to platform user JWTs, requiring machine API keys to hold explicit `'SPATIAL'` or `'*'` capabilities. Verified that platform user JWT administrative export access remains intact (`export_normalization.test.js`).
+  2. *Authoritative Active Key Linkage Fail-Closed*: In `apiKeyAuth.js`, verified managed connection keys against `_exchange_connection_keys` for an `ACTIVE` link. Missing or deleted links fail closed immediately with HTTP 403 `FORBIDDEN` (`CONNECTION_LINK_MISSING`), and retired links fail with HTTP 401 `KEY_RETIRED`. Zero implicit fallback or auto-recreation of missing links.
+  3. *Resource-Bound Idempotency & Durable SQLite Recovery*: Created durable SQLite table `_exchange_rotation_operations` (24h retention) storing operation fingerprint, actor ID, key ID, connection ID, and response payload. Reusing an `Idempotency-Key` across different keys, connections, or request bodies returns HTTP 409 `Conflict` (`IDEMPOTENCY_CONFLICT`). Exact retries recover the committed replacement response directly from SQLite (`fromCache: true`), surviving controller module reloads, cache drops, and process restarts. Updated `ApiKeyManager.jsx` to transmit client-generated `Idempotency-Key` on key rotation.
+  4. *Architectural Purity, Canonical Backfill, Digest & Telemetry Truthfulness*:
+     - Removed test-aware string matching (`Unexpected dependency`) from `sisAdapterService.js` `resolveSourceSystemId(db)`, reading purely from persisted `_exchange_meta(key='source_system_id')` with fallback to `'soilfer-lims-core'`. Removed test-aware `if (!hasSampleTable)` branch from `getChanges`.
+     - Added Step 8 to `migrate_exchange_journal_tables.cjs` backfilling approved/archived specimens (`Sample.status IN ('APPROVED', 'ARCHIVED')`) missing from `_exchange_journal` with canonical SOSA/GloSIS payloads.
+     - Computed verifiable canonical delivered revision content digest (`snapHash` over items) in `exchangeStateService.js` and returned `digest`, `authVersion`, `epoch`, `schemaVersion` in snapshot create and page responses. Documented in `openapi-data-exchange-v2.yaml`.
+     - In `prune_exchange_storage.cjs`: `--dry-run` opens the database in strict read-only mode (`{ readonly: true }`), skipping WAL pragma; requires explicit database path argument or `DATABASE_PATH` env var.
+     - Updated UI telemetry table headers in `ApiKeyManager.jsx` to "Receiver Ingested", "Receiver Quarantined", "Reported Checkpoint", "Last Receipt", with explicit tooltips explaining these represent unverified client delivery receipts.
+- **Verification Evidence**:
+  - `server/tests/contracts/issue149_codex_verification.test.js`: **13/13 passed (100%)** (all 9 prior checks + 4 new checks for all reproduced findings).
+  - `server/tests/contracts/export_normalization.test.js`: **2/2 passed (100%)** (SuperAdmin platform JWT access preserved).
+  - All 5 Data Exchange Jest Contract Test Suites: **50/50 passed (100%)**.
+  - Historical Remediation Test Suites: **34/34 passed (100%)**.
+  - `server/scripts/test_issue140_probes.cjs`: **16/16 passed (100%)**.
+  - `server/scripts/data_exchange_reference_client.cjs --verify`: **16/16 passed (100%)**.
+  - Standalone pruner CLI `prune_exchange_storage.cjs --dry-run` and live execution: **PASS (exit code 0)**.
+  - Client Build: `vite build` clean in 6.63s with zero errors.
+- **Boundaries**: Strictly LIMS-only assignment. OpenNSIS code, config, database, and deployments remain 100% untouched. All concurrent untracked files preserved. Ready for candidate commit, push, CI check, and Codex independent technical review.
+

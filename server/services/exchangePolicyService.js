@@ -105,7 +105,8 @@ function buildSampleWhere(auth, query = {}) {
     }
 
     // 3. Country Scoping
-    const isSuperAdmin = auth?.role === 'SUPER_ADMIN';
+    // Platform-user JWT exception applies strictly to authenticated platform users, never to API_KEY principals
+    const isSuperAdmin = auth?.type !== 'API_KEY' && auth?.role === 'SUPER_ADMIN';
     if (!isSuperAdmin && Array.isArray(auth?.countries)) {
         if (auth.countries.includes('*')) {
             // Global wildcard scope

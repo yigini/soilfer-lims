@@ -1008,6 +1008,18 @@ components:
           format: date-time
         totalSamples:
           type: integer
+        digest:
+          type: string
+          description: Verifiable SHA-256 digest of canonical delivered revision content
+          example: 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+        authVersion:
+          type: integer
+          description: Authorization version of connection at snapshot creation
+          example: 1
+        epoch:
+          type: string
+          description: Active signing generation epoch
+          example: epoch-1
         expiresAt:
           type: string
           format: date-time

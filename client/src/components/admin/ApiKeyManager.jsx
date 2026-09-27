@@ -305,7 +305,12 @@ const ApiKeyManager = () => {
             onConfirm: async () => {
                 setRotatingKeyId(keyId);
                 try {
-                    const res = await axios.post(`/api/v1/data-exchange/keys/${keyId}/rotate`);
+                    const idempotencyKey = `rot_${keyId}_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+                    const res = await axios.post(`/api/v1/data-exchange/keys/${keyId}/rotate`, {}, {
+                        headers: {
+                            'Idempotency-Key': idempotencyKey
+                        }
+                    });
                     setGeneratedKey(res.data.apiKey);
                     fetchKeys();
                 } catch (err) {
@@ -693,7 +698,7 @@ const ApiKeyManager = () => {
                                         <th className="p-4">Status & Control</th>
                                         <th className="p-4">Auth Version & Capabilities</th>
                                         <th className="p-4">Authorized Scopes</th>
-                                        <th className="p-4">Receiver Ingestion Telemetry</th>
+                                        <th className="p-4">Receiver-Reported Telemetry</th>
                                         <th className="p-4 text-right">Actions</th>
                                     </tr>
                                 </thead>
@@ -777,19 +782,19 @@ const ApiKeyManager = () => {
                                             </td>
                                             <td className="p-4 space-y-1">
                                                 <div className="text-[11px]">
-                                                    <span className="text-sf-muted">Imported: </span>
+                                                    <span className="text-sf-muted">Receiver Ingested: </span>
                                                     <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                                                        {c.telemetry?.totalImported ?? 0}
+                                                        {c.telemetry?.receiverReportedImported ?? c.telemetry?.totalImported ?? 0}
                                                     </span>
                                                 </div>
                                                 <div className="text-[11px]">
-                                                    <span className="text-sf-muted">Quarantined: </span>
+                                                    <span className="text-sf-muted">Receiver Quarantined: </span>
                                                     <span className="font-bold text-amber-600 dark:text-amber-400">
-                                                        {c.telemetry?.totalQuarantined ?? 0}
+                                                        {c.telemetry?.receiverReportedQuarantined ?? c.telemetry?.totalQuarantined ?? 0}
                                                     </span>
                                                 </div>
                                                 <div className="text-[10px] font-mono text-sf-muted">
-                                                    Checkpoint: <span className="text-sf-text">{c.telemetry?.lastCheckpoint || 'None'}</span>
+                                                    Reported Checkpoint: <span className="text-sf-text">{c.telemetry?.lastReportedCheckpoint || c.telemetry?.lastCheckpoint || 'None'}</span>
                                                 </div>
                                                 <div className="text-[10px] text-sf-muted">
                                                     Last Receipt: <span className="text-sf-text">{c.telemetry?.lastReceiptAt ? new Date(c.telemetry.lastReceiptAt).toLocaleString() : 'Not reported'}</span>

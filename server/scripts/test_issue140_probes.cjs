@@ -104,6 +104,7 @@ function verify(name, condition, detail) {
     // Probe 1: Same snapshot does NOT change after result-only edit (R2)
     const a = fixture('a', '2026-01-01');
     rows = [a];
+    await state.syncJournal(auth);
     const snap = await state.createSnapshot(auth);
     const before = await state.getSnapshotPage(snap.snapshotId, auth);
     a.results = [{ id: 'r1', param: 'X', value: '77', isCurrent: true }];
@@ -122,6 +123,7 @@ function verify(name, condition, detail) {
     // Probe 4: Change sequence is monotonic and does not restart at 1 (R1)
     memory.exec('DELETE FROM _exchange_journal');
     rows = [fixture('a', '2026-01-01'), fixture('b', '2026-01-02')];
+    await state.syncJournal(auth);
     const page1 = await state.getChanges(auth, { limit: 1 });
     const page2 = await state.getChanges(auth, { limit: 1, cursor: page1.nextCursor });
     verify('Change sequence progresses monotonically across pages', page1.changes[0].sequence === 1 && page2.changes[0].sequence === 2);
@@ -129,11 +131,14 @@ function verify(name, condition, detail) {
     // Probe 5: Previously published cancellation emits WITHDRAWAL event (R1)
     rows[1].status = 'CANCELLED';
     rows[1].updatedAt = new Date('2026-02-01');
+    await state.syncJournal(auth);
     const withdrawals = await state.getChanges(auth, { cursor: page2.nextCursor });
     verify('Previously published cancellation emits WITHDRAWAL event', withdrawals.count === 1 && withdrawals.changes[0].eventType === 'WITHDRAWAL');
 
     // Probe 6: Result-only amendment emits AMENDMENT event (R1)
     rows[0].results = [{ id: 'new-result', param: 'X', value: '9' }];
+    rows[0].updatedAt = new Date('2026-02-02');
+    await state.syncJournal(auth);
     const resultChanges = await state.getChanges(auth, { cursor: withdrawals.nextCursor });
     verify('Result-only amendment emits AMENDMENT event', resultChanges.count === 1 && resultChanges.changes[0].eventType === 'AMENDMENT');
 

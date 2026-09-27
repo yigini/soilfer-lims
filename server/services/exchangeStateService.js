@@ -587,6 +587,20 @@ function initTables(db) {
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             rotated_at DATETIME
         );
+
+        CREATE TABLE IF NOT EXISTS _exchange_rotation_operations (
+            idempotency_key TEXT PRIMARY KEY,
+            actor_id TEXT NOT NULL,
+            old_key_id TEXT NOT NULL,
+            connection_id TEXT NOT NULL,
+            request_fingerprint TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'COMMITTED',
+            replacement_key_id TEXT,
+            response_payload TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            expires_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_exchange_rot_old_key ON _exchange_rotation_operations(old_key_id);
     `);
 
     // 2. Non-destructive additive column checks (F5: NEVER drop populated tables)
@@ -940,7 +954,7 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
         return { error: 'FORBIDDEN', status: 403, code: 'CONNECTION_DISABLED', message: `Exchange connection '${connectionId}' is ${auth.connectionStatus}.` };
     }
 
-    // Outbox journal synchronization & live state reconciliation
+    // Outbox journal synchronization & live state reconciliation (R1, R10)
     await syncJournal(auth, maps);
 
     // Storage maintenance & quota enforcement (R2/R10)
@@ -1068,8 +1082,12 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
     const epoch = getCurrentEpoch(db);
     const schemaVersion = '2026-09-issue140-v2';
 
+    // Canonical delivered revision content digest (R2, R8, R10)
     const snapHash = crypto.createHash('sha256');
-    snapHash.update(`${snapshotId}:${connectionId}:${maxSeq}:${items.length}:${epoch}:${currentAuthVersion}`);
+    snapHash.update(`${snapshotId}:${connectionId}:${maxSeq}:${epoch}:${currentAuthVersion}\n`);
+    for (const item of items) {
+        snapHash.update(`${item.specimen_id}:${item.payload || ''}\n`);
+    }
     const digest = snapHash.digest('hex');
 
     const authorizedLabs = Array.isArray(auth?.labs) ? JSON.stringify(auth.labs) : (auth?.labs ? JSON.stringify([auth.labs]) : '[]');
@@ -1116,6 +1134,10 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
         highWaterTimestamp,
         nextCursor,
         totalSamples: items.length,
+        digest,
+        authVersion: currentAuthVersion,
+        epoch,
+        schemaVersion,
         expiresAt,
         ttlHours
     };
@@ -1340,7 +1362,8 @@ function decodeCursor(cursorStr, db) {
 
 function hasSpatialCapability(auth) {
     if (!auth) return false;
-    if (auth.role === 'SUPER_ADMIN') return true;
+    // Platform-user JWT exception applies strictly to authenticated platform users, never to API_KEY principals
+    if (auth.type !== 'API_KEY' && auth.role === 'SUPER_ADMIN') return true;
     const caps = auth.capabilities;
     if (!Array.isArray(caps)) return false;
     return caps.includes('SPATIAL') || caps.includes('*');
@@ -1416,6 +1439,10 @@ async function getSnapshotPage(snapshotId, auth, { limit = 50, cursor = null } =
         snapshotId,
         highWaterTimestamp: snap.high_water_timestamp,
         highWaterSequence: snap.high_water_sequence || 0,
+        digest: snap.digest,
+        authVersion: snap.auth_version || 1,
+        epoch: snap.epoch,
+        schemaVersion: snap.schema_version,
         count: data.length,
         hasMore,
         nextCursor,
@@ -1455,13 +1482,7 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
         };
     }
 
-    // Reader-only authoritative outbox in production (R1/R10): transactional SQLite triggers populate _exchange_journal.
-    // In mock unit-test environments where Sample table is not present, synchronize in-memory journal from mock source.
-    const hasSampleTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Sample'").get());
-    if (!hasSampleTable) {
-        await syncJournal(auth, maps);
-    }
-
+    // Reader-only authoritative outbox (R1/R10): transactional SQLite triggers populate _exchange_journal
     const maxLimit = Math.min(500, Math.max(1, parseInt(limit) || 100));
     const decoded = decodeCursor(cursor, db);
 

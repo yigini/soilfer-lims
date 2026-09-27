@@ -143,6 +143,20 @@ function migrateExchangeTables(dbPath) {
                 created_at TEXT NOT NULL,
                 rotated_at TEXT
             );
+
+            CREATE TABLE IF NOT EXISTS _exchange_rotation_operations (
+                idempotency_key TEXT PRIMARY KEY,
+                actor_id TEXT NOT NULL,
+                old_key_id TEXT NOT NULL,
+                connection_id TEXT NOT NULL,
+                request_fingerprint TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'COMMITTED',
+                replacement_key_id TEXT,
+                response_payload TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                expires_at TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_exchange_rot_old_key ON _exchange_rotation_operations(old_key_id);
         `);
 
         // 2. Non-destructive additive column checks (F5: NEVER drop populated tables)
@@ -310,6 +324,60 @@ function migrateExchangeTables(dbPath) {
                         INSERT INTO _exchange_connection_keys (id, connection_id, api_key_id, key_status, created_at)
                         VALUES (?, ?, ?, 'ACTIVE', ?)
                     `).run(`conn_key_${crypto.randomUUID()}`, connId, key.id, new Date().toISOString());
+                }
+            }
+        }
+
+        // 8. Bounded canonical backfill: ensure released specimens are recorded in _exchange_journal (R1, R10)
+        // Establishes authoritative journaled publications at migration time before readers start
+        const hasSampleTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Sample'").get());
+        if (hasSampleTable) {
+            const unjournaled = db.prepare(`
+                SELECT s.* FROM Sample s
+                LEFT JOIN _exchange_journal j ON s.id = j.specimen_id
+                WHERE s.status IN ('APPROVED', 'ARCHIVED') AND j.specimen_id IS NULL
+                ORDER BY s.rowid ASC
+            `).all();
+            if (unjournaled.length > 0) {
+                let maxSeq = (db.prepare('SELECT MAX(sequence) as m FROM _exchange_journal').get()?.m || 0);
+                const insertJournal = db.prepare(`
+                    INSERT INTO _exchange_journal (
+                        sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
+                        country, project_code, laboratory_id, content_hash, payload, created_at
+                    ) VALUES (?, 'PUBLICATION', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `);
+                let formatSampleV2 = null;
+                try {
+                    const sisAdapter = require('../services/sisAdapterService');
+                    formatSampleV2 = sisAdapter.formatSampleV2;
+                } catch (e) {}
+
+                const nowIso = new Date().toISOString();
+                for (const sample of unjournaled) {
+                    maxSeq++;
+                    let payload = null;
+                    let hash = null;
+                    if (formatSampleV2) {
+                        try {
+                            const formatted = formatSampleV2(sample, {}, { internal: true });
+                            payload = JSON.stringify(formatted);
+                            hash = crypto.createHash('sha256').update(payload).digest('hex');
+                        } catch (e) {
+                            payload = null;
+                        }
+                    }
+                    insertJournal.run(
+                        maxSeq,
+                        sample.id,
+                        sample.originalId || null,
+                        sample.labId || null,
+                        sample.country || null,
+                        sample.projectCode || null,
+                        sample.assignedLab || null,
+                        hash,
+                        payload,
+                        sample.approvedAt ? new Date(sample.approvedAt).toISOString() : nowIso
+                    );
                 }
             }
         }

@@ -883,7 +883,20 @@ exports.revokeApiKey = async (req, res) => {
     }
 };
 
-const rotationReplayCache = new Map(); // idempotencyKey -> { timestamp, responseBody }
+const rotationReplayCache = new Map(); // idempotencyKey -> { keyId, actorId, connectionId, fingerprint, timestamp, responseBody }
+
+function cleanRotationReplayCache() {
+    const now = Date.now();
+    for (const [k, v] of rotationReplayCache.entries()) {
+        if (now - v.timestamp > 24 * 60 * 60 * 1000) {
+            rotationReplayCache.delete(k);
+        }
+    }
+    if (rotationReplayCache.size > 500) {
+        const oldestKeys = Array.from(rotationReplayCache.keys()).slice(0, 100);
+        oldestKeys.forEach(k => rotationReplayCache.delete(k));
+    }
+}
 
 exports.rotateApiKey = async (req, res) => {
     if (req.user?.role !== 'SUPER_ADMIN') {
@@ -893,12 +906,61 @@ exports.rotateApiKey = async (req, res) => {
     try {
         const { id } = req.params;
         const idempotencyKey = req.headers?.['idempotency-key'] || req.headers?.['x-idempotency-key'] || req.body?.idempotencyKey;
+        const actorId = req.user?.id || req.user?.username || 'admin';
+        const requestFingerprint = crypto.createHash('sha256').update(JSON.stringify({
+            actorId,
+            keyId: id,
+            body: req.body || {}
+        })).digest('hex');
 
-        // Idempotency check: short-lived cache replay for operator recovery (R10)
+        const { getDb } = require('../services/exchangeStateService');
+        const db = getDb();
+        const hasOpsTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_rotation_operations'").get());
+
+        // 1. Durable operation recovery & idempotency binding check (R3, R10, R11)
         if (idempotencyKey) {
-            const cached = rotationReplayCache.get(idempotencyKey);
-            if (cached && (Date.now() - cached.timestamp < 15 * 60 * 1000)) {
-                return res.status(200).json(cached.responseBody);
+            let existingOp = null;
+            if (hasOpsTable) {
+                try {
+                    existingOp = db.prepare('SELECT * FROM _exchange_rotation_operations WHERE idempotency_key = ?').get(idempotencyKey);
+                } catch (e) {}
+            }
+
+            if (existingOp) {
+                // Check if operation has expired (24h retention)
+                if (existingOp.expires_at && new Date(existingOp.expires_at) < new Date()) {
+                    db.prepare('DELETE FROM _exchange_rotation_operations WHERE idempotency_key = ?').run(idempotencyKey);
+                } else {
+                    // Strictly bind to requested key, authenticated actor, and request fingerprint
+                    if (existingOp.old_key_id !== id || existingOp.actor_id !== actorId || existingOp.request_fingerprint !== requestFingerprint) {
+                        return res.status(409).json({
+                            error: 'CONFLICT',
+                            code: 'IDEMPOTENCY_CONFLICT',
+                            message: `Idempotency key '${idempotencyKey}' has already been used for a different rotation operation or resource.`
+                        });
+                    }
+                    try {
+                        const payload = JSON.parse(existingOp.response_payload);
+                        return res.status(200).json(payload);
+                    } catch (e) {}
+                }
+            } else {
+                // Secondary check against memory cache
+                const memCached = rotationReplayCache.get(idempotencyKey);
+                if (memCached) {
+                    if (memCached.keyId !== id || memCached.actorId !== actorId || memCached.fingerprint !== requestFingerprint) {
+                        return res.status(409).json({
+                            error: 'CONFLICT',
+                            code: 'IDEMPOTENCY_CONFLICT',
+                            message: `Idempotency key '${idempotencyKey}' has already been used for a different rotation operation or resource.`
+                        });
+                    }
+                    if (Date.now() - memCached.timestamp < 24 * 60 * 60 * 1000) {
+                        return res.status(200).json(memCached.responseBody);
+                    } else {
+                        rotationReplayCache.delete(idempotencyKey);
+                    }
+                }
             }
         }
 
@@ -910,9 +972,6 @@ exports.rotateApiKey = async (req, res) => {
             return res.status(400).json({ error: 'Cannot rotate an inactive or revoked API Key.' });
         }
 
-        const { getDb } = require('../services/exchangeStateService');
-        const db = getDb();
-
         // Generate new key token
         const rawSecret = crypto.randomBytes(24).toString('hex');
         const fullApiKey = `slims_live_${rawSecret}`;
@@ -923,6 +982,9 @@ exports.rotateApiKey = async (req, res) => {
         const newKeyName = `${oldKey.name} (Rotated ${new Date().toISOString().slice(0, 10)})`;
         const now = new Date();
         const nowIso = now.toISOString();
+        const expiresAtIso = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
+
+        let successResponse = null;
 
         // Execute rotation as a single atomic transaction with CAS precondition inside transaction
         const rotateTransaction = db.transaction(() => {
@@ -961,50 +1023,89 @@ exports.rotateApiKey = async (req, res) => {
             );
 
             // 3. Link keys in _exchange_connection_keys
-            db.prepare(`
-                UPDATE _exchange_connection_keys
-                SET key_status = 'RETIRED', rotated_at = ?
-                WHERE connection_id = ? AND api_key_id = ?
-            `).run(nowIso, effectiveConnectionId, oldKey.id);
+            const hasKeysTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_connection_keys'").get());
+            if (hasKeysTable) {
+                db.prepare(`
+                    UPDATE _exchange_connection_keys
+                    SET key_status = 'RETIRED', rotated_at = ?
+                    WHERE connection_id = ? AND api_key_id = ?
+                `).run(nowIso, effectiveConnectionId, oldKey.id);
 
-            db.prepare(`
-                INSERT INTO _exchange_connection_keys (id, connection_id, api_key_id, key_status, created_at)
-                VALUES (?, ?, ?, 'ACTIVE', ?)
-            `).run(`conn_key_${crypto.randomUUID()}`, effectiveConnectionId, newKeyId, nowIso);
+                db.prepare(`
+                    INSERT INTO _exchange_connection_keys (id, connection_id, api_key_id, key_status, created_at)
+                    VALUES (?, ?, ?, 'ACTIVE', ?)
+                `).run(`conn_key_${crypto.randomUUID()}`, effectiveConnectionId, newKeyId, nowIso);
+            }
 
             // 4. Audit log
-            db.prepare(`
-                INSERT INTO AuditLog (id, entity, entityId, action, details, performedBy, timestamp)
-                VALUES (?, 'SIS_API_KEY', ?, 'SIS_KEY_ROTATED', ?, ?, ?)
-            `).run(
-                `audit-sis-rotate-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
-                newKeyId,
-                `Rotated API key from '${oldKey.id}' to '${newKeyId}' for connection '${effectiveConnectionId}'`,
-                req.user?.username || 'admin',
-                nowIso
-            );
+            const hasAudit = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='AuditLog'").get());
+            if (hasAudit) {
+                db.prepare(`
+                    INSERT INTO AuditLog (id, entity, entityId, action, details, performedBy, timestamp)
+                    VALUES (?, 'SIS_API_KEY', ?, 'SIS_KEY_ROTATED', ?, ?, ?)
+                `).run(
+                    `audit-sis-rotate-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
+                    newKeyId,
+                    `Rotated API key from '${oldKey.id}' to '${newKeyId}' for connection '${effectiveConnectionId}'`,
+                    req.user?.username || 'admin',
+                    nowIso
+                );
+            }
+
+            successResponse = {
+                status: 'success',
+                message: 'API Key rotated successfully. The old key has been revoked and the new key is active.',
+                apiKey: fullApiKey,
+                keyInfo: {
+                    id: newKeyId,
+                    name: newKeyName,
+                    connectionId: effectiveConnectionId,
+                    keyPrefix,
+                    role: oldKey.role,
+                    capabilities: oldKey.capabilities ? (typeof oldKey.capabilities === 'string' ? JSON.parse(oldKey.capabilities) : oldKey.capabilities) : [],
+                    expiresAt: oldKey.expiresAt
+                }
+            };
+
+            // 5. Durable operation record (R3, R10)
+            if (idempotencyKey && hasOpsTable) {
+                db.prepare(`
+                    INSERT INTO _exchange_rotation_operations (
+                        idempotency_key, actor_id, old_key_id, connection_id, request_fingerprint,
+                        status, replacement_key_id, response_payload, created_at, expires_at
+                    ) VALUES (?, ?, ?, ?, ?, 'COMMITTED', ?, ?, ?, ?)
+                    ON CONFLICT(idempotency_key) DO UPDATE SET
+                        response_payload = excluded.response_payload,
+                        replacement_key_id = excluded.replacement_key_id,
+                        status = excluded.status
+                `).run(
+                    idempotencyKey,
+                    actorId,
+                    oldKey.id,
+                    effectiveConnectionId,
+                    requestFingerprint,
+                    newKeyId,
+                    JSON.stringify(successResponse),
+                    nowIso,
+                    expiresAtIso
+                );
+
+                // Prune expired operations
+                db.prepare('DELETE FROM _exchange_rotation_operations WHERE expires_at < ?').run(nowIso);
+            }
         });
 
         // Run atomic transaction
         rotateTransaction();
 
-        const successResponse = {
-            status: 'success',
-            message: 'API Key rotated successfully. The old key has been revoked and the new key is active.',
-            apiKey: fullApiKey,
-            keyInfo: {
-                id: newKeyId,
-                name: newKeyName,
-                connectionId: effectiveConnectionId,
-                keyPrefix,
-                role: oldKey.role,
-                capabilities: oldKey.capabilities ? (typeof oldKey.capabilities === 'string' ? JSON.parse(oldKey.capabilities) : oldKey.capabilities) : [],
-                expiresAt: oldKey.expiresAt
-            }
-        };
-
+        // Memory cache update & pruning
         if (idempotencyKey) {
+            cleanRotationReplayCache();
             rotationReplayCache.set(idempotencyKey, {
+                keyId: id,
+                actorId,
+                connectionId: effectiveConnectionId,
+                fingerprint: requestFingerprint,
                 timestamp: Date.now(),
                 responseBody: successResponse
             });

@@ -135,15 +135,25 @@ const apiKeyAuth = async (req, res, next) => {
                         message: `Exchange connection '${effectiveConnectionId || `conn_${apiKey.id}`}' not found or unavailable.`
                     });
                 }
-            }
-
-            // Key retirement check
-            if (keyLink && keyLink.key_status && keyLink.key_status !== 'ACTIVE') {
-                return res.status(401).json({
-                    error: 'Unauthorized',
-                    code: 'KEY_RETIRED',
-                    message: `API Key '${apiKey.id}' has been retired or revoked.`
-                });
+            } else if (db) {
+                // When managed connection exists, require a valid, unambiguous ACTIVE key-to-current-connection link (R3, R4)
+                const hasKeysTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_connection_keys'").get());
+                if (hasKeysTable) {
+                    if (!keyLink) {
+                        return res.status(403).json({
+                            error: 'Forbidden',
+                            code: 'CONNECTION_LINK_MISSING',
+                            message: `API Key '${apiKey.id}' lacks an active authoritative connection linkage.`
+                        });
+                    }
+                    if (keyLink.key_status !== 'ACTIVE') {
+                        return res.status(401).json({
+                            error: 'Unauthorized',
+                            code: 'KEY_RETIRED',
+                            message: `API Key '${apiKey.id}' has been retired or revoked.`
+                        });
+                    }
+                }
             }
 
             // Authoritative connection status check: disabled connection halts all consumer requests
