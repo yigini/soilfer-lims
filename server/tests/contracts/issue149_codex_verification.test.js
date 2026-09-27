@@ -296,14 +296,23 @@ describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts',
         expect(bKey.isActive).toBe(true);
     });
 
-    test('Check 12: Postcommit retry recovers committed rotation from durable storage after in-memory cache reset', async () => {
+    test('Check 12: Postcommit retry recovers committed rotation from durable storage without plaintext secret, and rejects revoked replacement with 409', async () => {
         const operationKey = 'synthetic-durable-op-' + Date.now();
         const rotationA = await provision('Durable Rotation');
 
         const firstRotate = response();
         await management.rotateApiKey({ user: admin, headers: { 'idempotency-key': operationKey }, params: { id: rotationA.keyId } }, firstRotate);
         expect(firstRotate.statusCode).toBe(200);
-        const originalApiKey = firstRotate.body.apiKey;
+        expect(firstRotate.body.apiKey).toBeTruthy();
+        const replacementKeyId = firstRotate.body.keyInfo.id;
+
+        // Durable operation record must NOT persist plaintext secret token (hashed-at-rest / one-time display)
+        const op = db.prepare('SELECT response_payload, replacement_key_id FROM _exchange_rotation_operations WHERE idempotency_key = ?').get(operationKey);
+        expect(op).toBeDefined();
+        expect(op.replacement_key_id).toBe(replacementKeyId);
+        const parsedPayload = JSON.parse(op.response_payload);
+        expect(parsedPayload.apiKey).toBeUndefined();
+        expect(parsedPayload.alreadyRotated).toBe(true);
 
         // Reset module-local cache simulating process loss
         delete require.cache[require.resolve('../../controllers/sisController')];
@@ -312,7 +321,19 @@ describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts',
         await freshManagement.rotateApiKey({ user: admin, headers: { 'idempotency-key': operationKey }, params: { id: rotationA.keyId } }, retry);
 
         expect(retry.statusCode).toBe(200);
-        expect(retry.body.apiKey).toBe(originalApiKey);
+        expect(retry.body.apiKey).toBeUndefined(); // Raw secret is never stored in durable table
+        expect(retry.body.alreadyRotated).toBe(true);
+        expect(retry.body.keyInfo.id).toBe(replacementKeyId);
+
+        // Replay after replacement key revocation returns HTTP 409 KEY_REVOKED
+        const revokeRes = response();
+        await freshManagement.revokeApiKey({ user: admin, params: { id: replacementKeyId } }, revokeRes);
+        expect(revokeRes.statusCode).toBe(200);
+
+        const afterRevoke = response();
+        await freshManagement.rotateApiKey({ user: admin, headers: { 'idempotency-key': operationKey }, params: { id: rotationA.keyId } }, afterRevoke);
+        expect(afterRevoke.statusCode).toBe(409);
+        expect(afterRevoke.body.code).toBe('KEY_REVOKED');
     });
 
     test('Check 13: Managed key with missing authoritative linkage fails closed (403)', async () => {
@@ -322,5 +343,156 @@ describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts',
         const r = await get('/api/v2/data-exchange/samples', unlinked);
         expect(r.status).toBe(403);
         expect(r.body.code).toBe('CONNECTION_LINK_MISSING');
+    });
+
+    test('Check 14: Canonical migration backfill queries valid release evidence, includes observations, uses persisted identity, and emits non-null event IDs', async () => {
+        const tempDir = fs.mkdtempSync(path.join(path.resolve(__dirname, '../../..'), 'tmp-migration-verify-'));
+        const tempDbPath = path.join(tempDir, 'migration-test.db');
+        const tempDb = new Database(tempDbPath);
+        tempDb.exec(fs.readFileSync(path.resolve(__dirname, '../../scripts/schema/full_application_schema.sql'), 'utf8'));
+
+        const nowIso = new Date().toISOString();
+        const testSpecs = [
+            ['legacy-approved', 'APPROVED', nowIso],
+            ['legacy-unapproved-archive', 'ARCHIVED', null],
+            ['legacy-approved-disposed', 'DISPOSED', nowIso]
+        ];
+
+        for (const [id, status, approvedAt] of testSpecs) {
+            tempDb.prepare('INSERT INTO Sample (id, originalId, labId, assignedLab, country, projectCode, status, approvedAt, updatedAt, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+                .run(id, id + '-field', id + '-accession', 'SYNTHETIC-LAB', 'AAA', 'SYNTHETIC-PROJECT', status, approvedAt, nowIso, 12, 34);
+            tempDb.prepare('INSERT INTO Result (id, sampleId, param, value, numericValue, unit, isValid, isCurrent, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+                .run(id + '-result', id, 'PH_H2O', '6.2', 6.2, 'pH units', 1, 1, nowIso);
+        }
+        tempDb.close();
+
+        const migrateRes = require('../../scripts/migrate_exchange_journal_tables.cjs').migrateExchangeTables(tempDbPath);
+        expect(migrateRes.success).toBe(true);
+
+        const verifyDb = new Database(tempDbPath);
+        const backfill = verifyDb.prepare("SELECT specimen_id, id, payload FROM _exchange_journal WHERE specimen_id LIKE 'legacy-%' ORDER BY sequence").all();
+        const includedIds = backfill.map(x => x.specimen_id);
+
+        // Released specimens included, unapproved archive excluded
+        expect(includedIds).toContain('legacy-approved');
+        expect(includedIds).toContain('legacy-approved-disposed');
+        expect(includedIds).not.toContain('legacy-unapproved-archive');
+
+        // Check observations, identity, and non-null stable event ID
+        const approvedRow = backfill.find(x => x.specimen_id === 'legacy-approved');
+        expect(approvedRow).toBeDefined();
+        expect(approvedRow.id).toBeTruthy();
+        expect(approvedRow.id.startsWith('evt_')).toBe(true);
+
+        const payload = JSON.parse(approvedRow.payload);
+        expect(payload.observations).toBeDefined();
+        expect(payload.observations.length).toBe(1);
+        expect(payload.observations[0].parameter).toBe('PH_H2O');
+        expect(payload.observations[0].asMeasured.value).toBe(6.2);
+
+        const metaRow = verifyDb.prepare("SELECT value FROM _exchange_meta WHERE key = 'source_system_id'").get();
+        expect(payload.sourceSystemId).toBe(metaRow.value);
+        expect(payload.sourceSystemId).not.toBe('soilfer-lims-core');
+
+        verifyDb.close();
+        fs.rmSync(tempDir, { recursive: true, force: true });
+    });
+
+    test('Check 15: Reader operations do not mutate journal (snapshot creation is purely reader-driven)', async () => {
+        const key = await provision('Reader Snapshot Test');
+        const beforeCount = db.prepare('SELECT COUNT(*) n FROM _exchange_journal').get().n;
+
+        const snapRes = await post('/api/v2/data-exchange/snapshots', key, {});
+        expect(snapRes.status).toBe(201);
+
+        const afterCount = db.prepare('SELECT COUNT(*) n FROM _exchange_journal').get().n;
+        expect(afterCount).toBe(beforeCount); // Pure reader: no journal entries added
+    });
+
+    test('Check 16: Delivered content digest hashes permitted projection and matches client received projection byte-for-byte', async () => {
+        // 1. Non-SPATIAL principal
+        const noSpatialKey = await provision('Digest Non-Spatial', { capabilities: ['SNAPSHOT', 'RECEIPT'] });
+        const snapNoSpatial = await post('/api/v2/data-exchange/snapshots', noSpatialKey, {});
+        expect(snapNoSpatial.status).toBe(201);
+        const sidNoSpatial = snapNoSpatial.body.snapshotId;
+
+        const pageNoSpatial = await get(`/api/v2/data-exchange/snapshots/${sidNoSpatial}/pages`, noSpatialKey);
+        expect(pageNoSpatial.status).toBe(200);
+        expect(pageNoSpatial.body.data.every(s => !s.sampling?.location)).toBe(true);
+
+        const metaNoSpatial = db.prepare('SELECT * FROM _exchange_snapshots WHERE id=?').get(sidNoSpatial);
+        const prefixNoSpatial = `${metaNoSpatial.id}:${metaNoSpatial.connection_id}:${metaNoSpatial.high_water_sequence}:${metaNoSpatial.epoch}:${metaNoSpatial.auth_version}\n`;
+
+        const receivedHasher = crypto.createHash('sha256').update(prefixNoSpatial);
+        for (const s of pageNoSpatial.body.data) {
+            receivedHasher.update(`${s.specimenId}:${JSON.stringify(s)}\n`);
+        }
+        const receivedDigest = receivedHasher.digest('hex');
+
+        const storedHasher = crypto.createHash('sha256').update(prefixNoSpatial);
+        for (const item of db.prepare('SELECT specimen_id, body_json FROM _exchange_snapshot_items WHERE snapshot_id=? ORDER BY item_order').all(sidNoSpatial)) {
+            storedHasher.update(`${item.specimen_id}:${item.body_json}\n`);
+        }
+        const storedDigest = storedHasher.digest('hex');
+
+        expect(storedDigest).toBe(snapNoSpatial.body.digest);
+        expect(receivedDigest).toBe(snapNoSpatial.body.digest);
+
+        // 2. SPATIAL principal
+        const spatialKey = await provision('Digest Spatial', { capabilities: ['SPATIAL', 'SNAPSHOT', 'RECEIPT'] });
+        const snapSpatial = await post('/api/v2/data-exchange/snapshots', spatialKey, {});
+        expect(snapSpatial.status).toBe(201);
+        const sidSpatial = snapSpatial.body.snapshotId;
+
+        const pageSpatial = await get(`/api/v2/data-exchange/snapshots/${sidSpatial}/pages`, spatialKey);
+        expect(pageSpatial.status).toBe(200);
+        expect(pageSpatial.body.data.some(s => s.sampling?.location)).toBe(true);
+
+        const metaSpatial = db.prepare('SELECT * FROM _exchange_snapshots WHERE id=?').get(sidSpatial);
+        const prefixSpatial = `${metaSpatial.id}:${metaSpatial.connection_id}:${metaSpatial.high_water_sequence}:${metaSpatial.epoch}:${metaSpatial.auth_version}\n`;
+
+        const receivedSpatialHasher = crypto.createHash('sha256').update(prefixSpatial);
+        for (const s of pageSpatial.body.data) {
+            receivedSpatialHasher.update(`${s.specimenId}:${JSON.stringify(s)}\n`);
+        }
+        expect(receivedSpatialHasher.digest('hex')).toBe(snapSpatial.body.digest);
+    });
+
+    test('Check 17: Storage pruner accurately previews and deletes aged incremental batches and receipts', async () => {
+        const pruner = require('../../scripts/prune_exchange_storage.cjs');
+
+        // Create an aged incremental change batch (snapshot_id IS NULL)
+        const agedBatchId = 'batch_aged_incremental_' + Date.now();
+        const oldTimestamp = '2020-01-01T00:00:00.000Z';
+        db.prepare(`
+            INSERT INTO _exchange_batches (id, connection_id, snapshot_id, start_seq, end_seq, item_count, created_at, auth_version, epoch)
+            VALUES (?, 'conn-synthetic', NULL, 1, 10, 5, ?, 1, 'epoch-1')
+        `).run(agedBatchId, oldTimestamp);
+
+        const agedReceiptId = 'rcpt_aged_incremental_' + Date.now();
+        db.prepare(`
+            INSERT INTO _exchange_receipts (id, connection_id, snapshot_id, batch_id, imported_count, created_at, auth_version, epoch)
+            VALUES (?, 'conn-synthetic', NULL, ?, 5, ?, 1, 'epoch-1')
+        `).run(agedReceiptId, agedBatchId, oldTimestamp);
+
+        // Dry run preview
+        const preview = pruner.pruneExchangeStorage(databasePath, { dryRun: true });
+        expect(preview.prunedBatches).toBeGreaterThanOrEqual(1);
+        expect(preview.prunedReceipts).toBeGreaterThanOrEqual(1);
+
+        // Verify still exists during dry run
+        const batchCheck = db.prepare('SELECT id FROM _exchange_batches WHERE id = ?').get(agedBatchId);
+        expect(batchCheck).toBeDefined();
+
+        // Applied run
+        const applied = pruner.pruneExchangeStorage(databasePath, { dryRun: false });
+        expect(applied.prunedBatches).toBeGreaterThanOrEqual(1);
+        expect(applied.prunedReceipts).toBeGreaterThanOrEqual(1);
+
+        // Verify deleted after applied run
+        const batchCheckAfter = db.prepare('SELECT id FROM _exchange_batches WHERE id = ?').get(agedBatchId);
+        expect(batchCheckAfter).toBeUndefined();
+        const receiptCheckAfter = db.prepare('SELECT id FROM _exchange_receipts WHERE id = ?').get(agedReceiptId);
+        expect(receiptCheckAfter).toBeUndefined();
     });
 });

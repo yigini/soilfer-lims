@@ -15,24 +15,54 @@
 
 const { normalizeUnit } = require('./interpretationService');
 
+let cachedSourceSystemId = null;
+
+function getCachedSourceSystemId() {
+    return cachedSourceSystemId;
+}
+
+function setCachedSourceSystemId(id) {
+    if (id) {
+        cachedSourceSystemId = id;
+    }
+}
+
 // Source System Identifier (stable across hostnames / migrations)
 function resolveSourceSystemId(db) {
     if (process.env.SOURCE_SYSTEM_ID) return process.env.SOURCE_SYSTEM_ID;
-    if (db) {
+    if (cachedSourceSystemId) return cachedSourceSystemId;
+    if (db && typeof db.prepare === 'function') {
         try {
             const row = db.prepare("SELECT value FROM _exchange_meta WHERE key = 'source_system_id'").get();
-            if (row && row.value) return row.value;
-        } catch (e) {}
+            if (row && row.value) {
+                cachedSourceSystemId = row.value;
+                return row.value;
+            }
+        } catch (e) {
+            if (cachedSourceSystemId) return cachedSourceSystemId;
+            if (e.message && (e.message.includes('busy executing a query') || e.message.includes('database is locked'))) {
+                if (cachedSourceSystemId) return cachedSourceSystemId;
+            }
+            throw new Error(`Source system identity storage query failed: ${e.message}`);
+        }
     }
     try {
-        const { getDb } = require('./exchangeStateService');
-        const activeDb = getDb();
-        if (activeDb) {
-            const row = activeDb.prepare("SELECT value FROM _exchange_meta WHERE key = 'source_system_id'").get();
-            if (row && row.value) return row.value;
+        const { getSourceSystemId } = require('./exchangeStateService');
+        if (typeof getSourceSystemId === 'function') {
+            const id = getSourceSystemId(db);
+            if (id) {
+                cachedSourceSystemId = id;
+                return id;
+            }
         }
-    } catch (e) {}
-    return 'soilfer-lims-core';
+    } catch (e) {
+        if (cachedSourceSystemId) return cachedSourceSystemId;
+        if (!e.message?.includes('Unexpected dependency')) {
+            throw new Error(`Source system identity storage query failed: ${e.message}`);
+        }
+    }
+    if (cachedSourceSystemId) return cachedSourceSystemId;
+    throw new Error('Source system identity storage unavailable: database connection missing or uninitialized.');
 }
 
 const SOURCE_SYSTEM_ID = process.env.SOURCE_SYSTEM_ID || 'soilfer-lims-core';
@@ -581,7 +611,7 @@ function formatSampleV1(sample, maps = {}, options = {}) {
         labId: sample.labId || null,
 
         // Additive explicit identities (Issue #140 P1)
-        sourceSystemId: sample.sourceSystemId || resolveSourceSystemId(),
+        sourceSystemId: sample.sourceSystemId || options.sourceSystemId || resolveSourceSystemId(options.db),
         specimenId: sample.id,
         fieldSampleId: sample.originalId,
         labSampleId: sample.labId || null,
@@ -672,7 +702,7 @@ function formatSampleV2(sample, maps = {}, options = {}) {
 
     return {
         schemaVersion: '2026-09-issue140-v2',
-        sourceSystemId: sample.sourceSystemId || resolveSourceSystemId(),
+        sourceSystemId: sample.sourceSystemId || options.sourceSystemId || resolveSourceSystemId(options.db),
 
         // Core Specimen Identifiers (R4, R5: laboratoryId strictly assignedLab, no labId fallback)
         specimenId: sample.id,
@@ -770,5 +800,7 @@ module.exports = {
     buildLegacyAnalyticalResultsMap,
     evaluateQualityIssues,
     formatSampleV1,
-    formatSampleV2
+    formatSampleV2,
+    getCachedSourceSystemId,
+    setCachedSourceSystemId
 };

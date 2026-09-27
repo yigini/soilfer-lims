@@ -15,7 +15,7 @@ const path = require('path');
 const crypto = require('crypto');
 const prisma = require('../prisma');
 const { buildSampleWhere, AUTHORIZED_RELEASE_STATUSES } = require('./exchangePolicyService');
-const { formatSampleV2 } = require('./sisAdapterService');
+const { formatSampleV2, setCachedSourceSystemId } = require('./sisAdapterService');
 
 const dbPath = process.env.DATABASE_PATH ? path.resolve(process.env.DATABASE_PATH) : path.resolve(__dirname, '..', 'prisma', 'dev.db');
 
@@ -99,9 +99,14 @@ function rotateEpoch(db, reason = 'RESTORE_EVENT') {
     };
 }
 
+let cachedSourceSystemId = null;
+
 function getSourceSystemId(db) {
     if (process.env.SOURCE_SYSTEM_ID) {
         return process.env.SOURCE_SYSTEM_ID;
+    }
+    if (cachedSourceSystemId) {
+        return cachedSourceSystemId;
     }
     const metaDb = db || (dbInstance || getDb());
     if (!metaDb || typeof metaDb.prepare !== 'function') {
@@ -109,9 +114,15 @@ function getSourceSystemId(db) {
     }
     try {
         const row = metaDb.prepare("SELECT value FROM _exchange_meta WHERE key = 'source_system_id'").get();
-        if (row && row.value) return row.value;
+        if (row && row.value) {
+            cachedSourceSystemId = row.value;
+            if (typeof setCachedSourceSystemId === 'function') setCachedSourceSystemId(row.value);
+            return row.value;
+        }
         const newId = `soilfer-lims-node-${crypto.randomBytes(4).toString('hex')}`;
         metaDb.prepare("INSERT INTO _exchange_meta (key, value, updated_at) VALUES ('source_system_id', ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(newId, new Date().toISOString());
+        cachedSourceSystemId = newId;
+        if (typeof setCachedSourceSystemId === 'function') setCachedSourceSystemId(newId);
         return newId;
     } catch (e) {
         throw new Error(`Source system identity storage unavailable: ${e.message}`);
@@ -716,6 +727,11 @@ function initTables(db) {
         db.prepare("INSERT OR IGNORE INTO _exchange_meta (key, value, updated_at) VALUES ('epoch', 'epoch-1', ?)").run(new Date().toISOString());
         const sysId = process.env.SOURCE_SYSTEM_ID || `soilfer-lims-node-${crypto.randomBytes(4).toString('hex')}`;
         db.prepare("INSERT OR IGNORE INTO _exchange_meta (key, value, updated_at) VALUES ('source_system_id', ?, ?)").run(sysId, new Date().toISOString());
+        const row = db.prepare("SELECT value FROM _exchange_meta WHERE key = 'source_system_id'").get();
+        if (row && row.value) {
+            cachedSourceSystemId = row.value;
+            if (typeof setCachedSourceSystemId === 'function') setCachedSourceSystemId(row.value);
+        }
     } catch (e) {}
 
     ensureTriggers(db);
@@ -840,12 +856,13 @@ async function syncJournal(auth, maps = {}) {
 
             const currentHash = computeSampleContentHash(live);
             const eventTime = live.updatedAt ? new Date(live.updatedAt).toISOString() : new Date().toISOString();
+            const sourceSysId = getSourceSystemId(db);
 
             if (!latest) {
                 // If never previously journaled and currently in released status: PUBLICATION
                 currentMaxSeq++;
                 const evtId = `evt_${live.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
-                const formatted = formatSampleV2(live, maps, { internal: true });
+                const formatted = formatSampleV2(live, maps, { internal: true, db, sourceSystemId: sourceSysId });
                 insertJournalStmt.run(
                     evtId,
                     currentMaxSeq,
@@ -869,7 +886,7 @@ async function syncJournal(auth, maps = {}) {
                     if (liveApprovedTime > withdrawalTime) {
                         currentMaxSeq++;
                         const evtId = `evt_${live.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
-                        const formatted = formatSampleV2(live, maps, { internal: true });
+                        const formatted = formatSampleV2(live, maps, { internal: true, db, sourceSystemId: sourceSysId });
                         insertJournalStmt.run(
                             evtId,
                             currentMaxSeq,
@@ -889,7 +906,7 @@ async function syncJournal(auth, maps = {}) {
                     // Analytical results or metadata changed on released sample: AMENDMENT
                     currentMaxSeq++;
                     const evtId = `evt_${live.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
-                    const formatted = formatSampleV2(live, maps, { internal: true });
+                    const formatted = formatSampleV2(live, maps, { internal: true, db, sourceSystemId: sourceSysId });
                     insertJournalStmt.run(
                         evtId,
                         currentMaxSeq,
@@ -954,8 +971,7 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
         return { error: 'FORBIDDEN', status: 403, code: 'CONNECTION_DISABLED', message: `Exchange connection '${connectionId}' is ${auth.connectionStatus}.` };
     }
 
-    // Outbox journal synchronization & live state reconciliation (R1, R10)
-    await syncJournal(auth, maps);
+    // Pure reader operation: no outbox journal synchronization or mutation during snapshot creation (R1, R10)
 
     // Storage maintenance & quota enforcement (R2/R10)
     pruneExpiredSnapshots(db);
@@ -1082,10 +1098,30 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
     const epoch = getCurrentEpoch(db);
     const schemaVersion = '2026-09-issue140-v2';
 
+    // Permitted canonical projection for snapshot items (R2, R8, R10)
+    // Redact spatial coordinates if caller lacks SPATIAL capability so stored items and digest match delivered projection
+    const canAccessSpatial = hasSpatialCapability(auth);
+    const projectedItems = items.map(item => {
+        let payloadStr = item.payload || '';
+        if (!canAccessSpatial && payloadStr) {
+            try {
+                const parsed = JSON.parse(payloadStr);
+                if (parsed.sampling) {
+                    parsed.sampling.location = null;
+                }
+                payloadStr = JSON.stringify(parsed);
+            } catch (e) {}
+        }
+        return {
+            specimen_id: item.specimen_id,
+            payload: payloadStr
+        };
+    });
+
     // Canonical delivered revision content digest (R2, R8, R10)
     const snapHash = crypto.createHash('sha256');
     snapHash.update(`${snapshotId}:${connectionId}:${maxSeq}:${epoch}:${currentAuthVersion}\n`);
-    for (const item of items) {
+    for (const item of projectedItems) {
         snapHash.update(`${item.specimen_id}:${item.payload || ''}\n`);
     }
     const digest = snapHash.digest('hex');
@@ -1108,11 +1144,11 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
 
     const createTx = db.transaction(() => {
         insertSnap.run(
-            snapshotId, connectionId, maxSeq, highWaterTimestamp, items.length, expiresAt, now.toISOString(),
+            snapshotId, connectionId, maxSeq, highWaterTimestamp, projectedItems.length, expiresAt, now.toISOString(),
             authorizedLabs, authorizedCountries, authorizedProjects, currentAuthVersion, epoch, schemaVersion, digest
         );
-        for (let i = 0; i < items.length; i++) {
-            insertItem.run(snapshotId, items[i].specimen_id, i + 1, items[i].payload);
+        for (let i = 0; i < projectedItems.length; i++) {
+            insertItem.run(snapshotId, projectedItems[i].specimen_id, i + 1, projectedItems[i].payload);
         }
     });
 

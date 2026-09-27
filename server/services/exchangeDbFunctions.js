@@ -15,7 +15,7 @@
 
 const crypto = require('crypto');
 const path = require('path');
-const { formatSampleV2 } = require('./sisAdapterService');
+const { formatSampleV2, setCachedSourceSystemId, getCachedSourceSystemId } = require('./sisAdapterService');
 
 function normalizeSampleDataForHash(raw) {
     if (!raw) return {};
@@ -116,6 +116,17 @@ function computeSampleContentHash(s) {
 function registerDbFunctions(db) {
     if (!db || typeof db.function !== 'function') return;
     try {
+        let connSourceSystemId = null;
+        try {
+            const row = db.prepare("SELECT value FROM _exchange_meta WHERE key = 'source_system_id'").get();
+            if (row && row.value) {
+                connSourceSystemId = row.value;
+                if (typeof setCachedSourceSystemId === 'function') {
+                    setCachedSourceSystemId(connSourceSystemId);
+                }
+            }
+        } catch (e) {}
+
         db.function('exchange_compute_hash', { varargs: true }, (...args) => {
             let sampleObj = {};
             let resultsJson = '[]';
@@ -191,7 +202,8 @@ function registerDbFunctions(db) {
                 sampleObj.updatedAt = new Date();
             }
 
-            return JSON.stringify(formatSampleV2(sampleObj, {}, { internal: true }));
+            const sourceSysId = connSourceSystemId || (typeof getCachedSourceSystemId === 'function' ? getCachedSourceSystemId() : null);
+            return JSON.stringify(formatSampleV2(sampleObj, {}, { internal: true, db, sourceSystemId: sourceSysId }));
         });
     } catch (e) {}
 }

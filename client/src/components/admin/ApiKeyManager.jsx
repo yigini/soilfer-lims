@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { 
     Key, Plus, Trash2, Copy, CheckCircle2, Shield, Globe, 
@@ -34,6 +34,7 @@ const ApiKeyManager = () => {
     const [expiresDays, setExpiresDays] = useState(365);
     const [creating, setCreating] = useState(false);
     const [rotatingKeyId, setRotatingKeyId] = useState(null);
+    const rotationOperationsRef = useRef({});
 
     // Newly generated key modal
     const [generatedKey, setGeneratedKey] = useState(null);
@@ -297,6 +298,11 @@ const ApiKeyManager = () => {
     };
 
     const handleRotateKey = (keyId, keyName) => {
+        if (!rotationOperationsRef.current[keyId]) {
+            rotationOperationsRef.current[keyId] = `rot_${keyId}_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+        }
+        const idempotencyKey = rotationOperationsRef.current[keyId];
+
         showDialog({
             title: 'Rotate API Key?',
             message: `Are you sure you want to rotate "${keyName}"? The current secret token will be revoked immediately and a new secret key will be generated for the same connection identity and scopes.`,
@@ -305,19 +311,29 @@ const ApiKeyManager = () => {
             onConfirm: async () => {
                 setRotatingKeyId(keyId);
                 try {
-                    const idempotencyKey = `rot_${keyId}_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
                     const res = await axios.post(`/api/v1/data-exchange/keys/${keyId}/rotate`, {}, {
                         headers: {
                             'Idempotency-Key': idempotencyKey
                         }
                     });
-                    setGeneratedKey(res.data.apiKey);
+                    delete rotationOperationsRef.current[keyId];
+                    if (res.data?.apiKey) {
+                        setGeneratedKey(res.data.apiKey);
+                    } else if (res.data?.alreadyRotated) {
+                        showDialog({
+                            title: 'Key Rotation Completed',
+                            message: `Rotation was already committed for this key. The replacement key (Prefix: ${res.data.keyInfo?.keyPrefix || 'slims_live_...'}) is active.`,
+                            type: 'info'
+                        });
+                    }
                     fetchKeys();
                 } catch (err) {
                     showDialog({
                         title: 'Rotation Failed',
-                        message: err.response?.data?.message || err.response?.data?.error || err.message,
-                        type: 'error'
+                        message: `${err.response?.data?.message || err.response?.data?.error || err.message} (You can safely retry this operation using the retained operation key.)`,
+                        type: 'error',
+                        confirmText: 'Retry Rotation',
+                        onConfirm: () => handleRotateKey(keyId, keyName)
                     });
                 } finally {
                     setRotatingKeyId(null);

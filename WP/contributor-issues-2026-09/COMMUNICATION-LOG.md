@@ -2041,3 +2041,43 @@ sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
 - **Boundaries**: Strictly LIMS-only assignment. OpenNSIS code, config, database, and deployments remain 100% untouched. All concurrent untracked files preserved. Ready for Codex independent technical review response.
 
 
+
+## 27 September 2026 22:31 UTC — hourly PR149 review / accd4e0
+- Exact head accd4e0dbc451be9f02e135b83788048f5880775, exact-head CI36352929540 independently SUCCESS at21:54:30UTC; PR149 remains OPEN/unmerged, no deployment acceptance.
+- Four c98630d failures now independently fixed: scoped SUPER_ADMIN machine role, cross-resource rotation conflict, durable replay after controller-module cache loss, missing managed-link denial. Real schema/canonical migration/Prisma and mounted consumer HTTP; management thin adapters, cache-loss model not full-process crash.
+- Three original-plan packages remain blocking: (1) historical migration emits unapproved ARCHIVED publication, omits approved DISPOSED history and emits zero observations/fallback identity/null event ID; consumer snapshot reconstructs journal (4->7). (2) durable rotation response stores reusable raw secret in plaintext; replay after revoke claims active-success, UI has no retained retry operation. (3) digest hashes unredacted stored payload instead of delivered projection; incremental batch/receipt retention excludes normal null-snapshot artifacts (aged issued batch survives); reference-client resume/digest/snapshot-to-changes handoff incomplete.
+- Detailed report work/issue149-independent-review-accd4e0.md; focused-review-accd4e0 and followthrough-accd4e0 .cjs/.log. Retained external synthetic DB issue149-disposable-accd4e0-m5trSi/synthetic-review.db. Nine main checks/observations plus two service/pruner follow-through reproductions; not blanket acceptance. No ordinary/production data or credentials accessed, no broad unchanged suites.
+- Public review https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5860430352 . ONE continuation delivered22:30UTC and CONSUMED: fresh restored screenshot plus second state shows report and both probes read, Exploring/Working. Exact prior draft "what is the" restored unsent. Do not duplicate.
+- Hourly monitor ACTIVE until independently verified LIMS deployment, then pause. Sole-Agy safe-release authority applies after technical acceptance; no repeat approval. OpenNSIS entirely untouched, TUF planning only, no closed-issue reruns/worktree removal. Agy owns EVIDENCE.
+
+## 28 September 2026 00:50 UTC — PR #149 accd4e0 Three Packages Remediated & Verified / Candidate Head Ready
+- **Context & Review Input**: Addressed Codex independent review of PR #149 head `accd4e0` (`issue149-independent-review-accd4e0.md`, `issue149-focused-review-accd4e0.cjs/.log`, `issue149-followthrough-accd4e0.cjs/.log`, PR #149 comment 5860430352). Preserved all 4 previously fixed cases from `c98630d` (scoped SUPER_ADMIN machine role, cross-resource rotation conflict, durable recovery after module-cache loss, and missing managed-link denial).
+- **Remediations Completed Across Three Packages**:
+  1. *Package 1: Canonical Publication Migration & Pure Reader Operations (R1, R4, R5, R7, R10)*
+     - **Migration Backfill Release Evidence**: In `migrate_exchange_journal_tables.cjs`, backfill query selects specimens with `s.approvedAt IS NOT NULL AND s.status NOT IN ('CANCELLED', 'REJECTED')`. This correctly captures released historical specimens across lifecycle transitions (e.g. `DISPOSED`) while strictly excluding unapproved archived specimens.
+     - **Observation Preservation**: Migration Step 8 queries `Result` rows for each specimen (`WHERE sampleId = ? AND (isValid IS NULL OR isValid = 1) AND (isCurrent IS NULL OR isCurrent = 1)`), preventing blank observation arrays.
+     - **In-Transaction Persisted Identity**: Step 8 queries and passes current transaction `sourceSystemId` to `formatSampleV2`, avoiding secondary connection attempts or lock contention.
+     - **UUID Event Identifiers**: Migration backfill generates stable, non-null event IDs (`evt_${crypto.randomUUID()}`).
+     - **Fail-Closed Migration & Identity**: Step 8 aborts migration transaction if payload formatting fails. `resolveSourceSystemId` in `sisAdapterService.js` throws if storage is uninitialized and caches resolved identity in memory.
+     - **Pure Reader Snapshot Creation**: Removed `syncJournal` from `createSnapshot` in `exchangeStateService.js`. Snapshot creation is purely reader-driven and never mutates `_exchange_journal`.
+     - **SQLite UDF Identity Caching**: In `exchangeDbFunctions.js`, `registerDbFunctions(db)` caches `connSourceSystemId` while the connection is idle and passes it to `formatSampleV2` inside `exchange_format_payload`, avoiding `busy executing a query` errors during trigger statement execution.
+  2. *Package 2: Safe Rotation Delivery, Recovery & Client Retries (R3, R10, R11)*
+     - **Hashed-at-Rest Secrets**: In `sisController.js:rotateApiKey`, `_exchange_rotation_operations.response_payload` and memory cache store safe metadata (`alreadyRotated: true`, key prefix/id, scopes) without plaintext secret tokens. The raw secret is returned exclusively in the initial one-time HTTP 200 creation response.
+     - **Lifecycle Revalidation on Replay**: Replaying a committed rotation revalidates replacement key active status. If subsequently revoked/retired, returns HTTP 409 `KEY_REVOKED`.
+     - **In-Transaction Uniqueness Verification**: Explicit pre-check against `_exchange_rotation_operations` inside the transaction rejects duplicate concurrent requests with HTTP 409 `IDEMPOTENCY_CONFLICT` without `ON CONFLICT DO UPDATE`.
+     - **Stable Retry Operation Key in UI**: `ApiKeyManager.jsx` tracks `rotationOperationsRef` per key ID, reusing the same `Idempotency-Key` across retry clicks and handling recovery responses gracefully.
+  3. *Package 3: Verifiable Content Projection, Incremental Retention & Reference Client (R2, R8, R10, R11, R12)*
+     - **Permitted Projection Content Digest**: `createSnapshot` stores and hashes permitted projection items (redacting spatial data when caller lacks `SPATIAL` capability). Stored snapshot items and header `digest` match delivered projection byte-for-byte.
+     - **Incremental Storage Pruning**: In `prune_exchange_storage.cjs`, removed `snapshot_id IS NOT NULL` restrictions in dry-run and apply modes, ensuring aged incremental batches and receipts (`snapshot_id IS NULL`) are pruned.
+     - **Full Pagination, Digest Verification & Continuation Handoff**: In `data_exchange_reference_client.cjs`, raised pagination limit to 5,000 pages, verified delivered content digest against server `digest`, maintained persistent checkpoints, and passed snapshot continuation cursor into the continuous change feed.
+- **Verification Evidence**:
+  - `server/tests/contracts/issue149_codex_verification.test.js`: **17/17 passed (100%)** (all 13 prior checks + 4 new checks for all accd4e0 findings).
+  - `server/tests/contracts/issue140_remediations.test.js`: **15/15 passed (100%)**.
+  - `server/tests/contracts/nsis_v2_exchange.test.js`: **8/8 passed (100%)**.
+  - `server/tests/contracts/legacy_import.test.js`: **3/3 passed (100%)**.
+  - `server/scripts/data_exchange_reference_client.cjs --verify`: **16/16 passed (100%)**.
+  - `server/scripts/test_issue140_probes.cjs`: **16/16 passed (100%)**.
+  - Client Build: `vite build` clean in 16.34s with zero errors.
+- **Strict Boundaries Maintained**: LIMS-only changes; zero modifications to OpenNSIS; zero mutations to `dev.db`; untracked scripts preserved.
+
+

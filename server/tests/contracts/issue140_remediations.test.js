@@ -115,6 +115,7 @@ describe('Issue #140 Codex Remediations Contract Tests', () => {
         test('Probe 1: Snapshot remains frozen after subsequent result-only edit', async () => {
             const a = fixture('a', '2026-01-01');
             mockSamples = [a];
+            await stateService.syncJournal(auth);
 
             const snap = await stateService.createSnapshot(auth);
             const before = await stateService.getSnapshotPage(snap.snapshotId, auth);
@@ -131,6 +132,7 @@ describe('Issue #140 Codex Remediations Contract Tests', () => {
         test('Probe 2: Snapshot row does not disappear after sample updatedAt advances', async () => {
             const a = fixture('a', '2026-01-01');
             mockSamples = [a];
+            await stateService.syncJournal(auth);
 
             const snap = await stateService.createSnapshot(auth);
             expect(snap.totalSamples).toBe(1);
@@ -148,6 +150,7 @@ describe('Issue #140 Codex Remediations Contract Tests', () => {
     describe('R3: Connection Identity & Credential Isolation (Probe 3)', () => {
         test('Probe 3: Different credentials with same display name cannot access each others snapshots', async () => {
             mockSamples = [fixture('a', '2026-01-01')];
+            await stateService.syncJournal(auth);
             const snap = await stateService.createSnapshot(auth);
 
             // Access with different key ID but identical name
@@ -163,6 +166,7 @@ describe('Issue #140 Codex Remediations Contract Tests', () => {
             expect(badReceipt.error).toBe('INVALID_COUNT');
 
             mockSamples = Array.from({ length: 10 }, (_, i) => fixture(`s_${i}`, '2026-01-01'));
+            await stateService.syncJournal(auth);
             const snap = await stateService.createSnapshot(auth);
             const valid1 = stateService.recordReceipt(auth, { snapshotId: snap.snapshotId, importedCount: 10 });
             const valid2 = stateService.recordReceipt(auth, { snapshotId: snap.snapshotId, importedCount: 10 });

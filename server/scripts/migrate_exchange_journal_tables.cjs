@@ -255,7 +255,8 @@ function migrateExchangeTables(dbPath) {
 
         // Ensure source_system_id exists in _exchange_meta
         const existingSourceId = db.prepare("SELECT value FROM _exchange_meta WHERE key = 'source_system_id'").get();
-        if (!existingSourceId || !existingSourceId.value) {
+        let currentSourceId = existingSourceId?.value;
+        if (!currentSourceId) {
             const crypto = require('crypto');
             const initId = process.env.SOURCE_SYSTEM_ID || `soilfer-lims-node-${crypto.randomBytes(4).toString('hex')}`;
             db.prepare(`
@@ -263,7 +264,14 @@ function migrateExchangeTables(dbPath) {
                 VALUES ('source_system_id', ?, ?)
                 ON CONFLICT(key) DO NOTHING
             `).run(initId, new Date().toISOString());
+            currentSourceId = initId;
         }
+        try {
+            const sisAdapter = require('../services/sisAdapterService');
+            if (sisAdapter && typeof sisAdapter.setCachedSourceSystemId === 'function') {
+                sisAdapter.setCachedSourceSystemId(currentSourceId);
+            }
+        } catch (e) {}
 
         // 5. Create indexes now that all columns are guaranteed to exist
         db.exec(`
@@ -335,38 +343,56 @@ function migrateExchangeTables(dbPath) {
             const unjournaled = db.prepare(`
                 SELECT s.* FROM Sample s
                 LEFT JOIN _exchange_journal j ON s.id = j.specimen_id
-                WHERE s.status IN ('APPROVED', 'ARCHIVED') AND j.specimen_id IS NULL
+                WHERE s.approvedAt IS NOT NULL
+                  AND s.status NOT IN ('CANCELLED', 'REJECTED')
+                  AND j.specimen_id IS NULL
                 ORDER BY s.rowid ASC
             `).all();
             if (unjournaled.length > 0) {
                 let maxSeq = (db.prepare('SELECT MAX(sequence) as m FROM _exchange_journal').get()?.m || 0);
                 const insertJournal = db.prepare(`
                     INSERT INTO _exchange_journal (
-                        sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
+                        id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
                         country, project_code, laboratory_id, content_hash, payload, created_at
-                    ) VALUES (?, 'PUBLICATION', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, 'PUBLICATION', ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `);
-                let formatSampleV2 = null;
-                try {
-                    const sisAdapter = require('../services/sisAdapterService');
-                    formatSampleV2 = sisAdapter.formatSampleV2;
-                } catch (e) {}
+                
+                const sisAdapter = require('../services/sisAdapterService');
+                if (!sisAdapter || typeof sisAdapter.formatSampleV2 !== 'function') {
+                    throw new Error('Migration failure: sisAdapterService.formatSampleV2 is unavailable.');
+                }
 
+                const hasResultTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Result'").get());
+                const selectResults = hasResultTable
+                    ? db.prepare("SELECT * FROM Result WHERE sampleId = ? AND (isValid IS NULL OR isValid = 1) AND (isCurrent IS NULL OR isCurrent = 1) ORDER BY rowid ASC")
+                    : null;
+
+                const metaSourceId = db.prepare("SELECT value FROM _exchange_meta WHERE key = 'source_system_id'").get()?.value;
                 const nowIso = new Date().toISOString();
+
                 for (const sample of unjournaled) {
                     maxSeq++;
-                    let payload = null;
-                    let hash = null;
-                    if (formatSampleV2) {
-                        try {
-                            const formatted = formatSampleV2(sample, {}, { internal: true });
-                            payload = JSON.stringify(formatted);
-                            hash = crypto.createHash('sha256').update(payload).digest('hex');
-                        } catch (e) {
-                            payload = null;
-                        }
+                    if (selectResults) {
+                        sample.results = selectResults.all(sample.id);
+                    } else {
+                        sample.results = [];
                     }
+
+                    const formatted = sisAdapter.formatSampleV2(sample, {}, {
+                        internal: true,
+                        db,
+                        sourceSystemId: metaSourceId
+                    });
+                    if (!formatted || !formatted.specimenId) {
+                        throw new Error(`Migration failure: formatSampleV2 returned invalid payload for specimen ${sample.id}`);
+                    }
+
+                    const payload = JSON.stringify(formatted);
+                    const hash = crypto.createHash('sha256').update(payload).digest('hex');
+                    const eventId = `evt_${crypto.randomUUID()}`;
+
                     insertJournal.run(
+                        eventId,
                         maxSeq,
                         sample.id,
                         sample.originalId || null,

@@ -32,7 +32,10 @@ function source(rel, mocks) {
 }
 
 const normalize = { normalizeUnit: (p, v, u) => ({ normalizedValue: null, standardUnit: u }) };
-const adapter = source('server/services/sisAdapterService.js', { './interpretationService': normalize });
+const adapter = source('server/services/sisAdapterService.js', {
+    './interpretationService': normalize,
+    './exchangeStateService': { getSourceSystemId: () => 'synthetic-probe-source-system' }
+});
 const policy = source('server/services/exchangePolicyService.js', { './projectPolicyService': { getProgrammeChildProjectCodes: () => [] } });
 
 function matches(row, where) {
