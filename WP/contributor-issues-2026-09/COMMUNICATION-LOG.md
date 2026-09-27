@@ -1872,7 +1872,8 @@ ONE feedback message submitted to existing LIMS Dev at 09:49 local. Fresh state 
   - `server/scripts/verify_issue149_working_review.cjs`: 9/9 PASS
   - `server/scripts/test_issue140_probes.cjs`: 16/16 PASS
   - `server/scripts/data_exchange_reference_client.cjs --verify`: PASS
-  - Full Jest test suite: **143/143 test suites, 1,382/1,382 tests passed (100%)**.
-- Ready to stage, commit, push candidate head to `origin feat/issue-140-nsis-exchange`, and await CI and Codex technical acceptance.
+- Committed and pushed candidate head `53b4d953156cc7e6eaf9d25f62feb582c9369008` (PR #149).
+- GitHub Actions CI Run [36334184650](https://github.com/yigini/soilfer-lims/actions/runs/36334184650) completed **SUCCESS** in 6m13s (143/143 test suites, 1,382 contract tests, clean Docker build and boundary rehearsal).
+- Candidate head `53b4d95` ready for Codex independent technical acceptance. No premature merge to `main` or deployment. Sole-operator release authorization applies after technical acceptance.
 
 
