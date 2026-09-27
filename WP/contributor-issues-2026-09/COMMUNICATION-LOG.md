@@ -1960,9 +1960,11 @@ sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
   5. *OpenAPI 3.1 & UI Management*: Added `/connections` (GET/POST), `/connections/{id}` (PUT), and `/keys/{id}/rotate` (POST) paths and schemas to `docs/openapi-data-exchange-v2.yaml`. Added dedicated "Connections & Telemetry" tab in `ApiKeyManager.jsx` with connection status toggle, effective scopes & capabilities editor, and receiver telemetry (`lastReceiptAt`, `totalImported`, `totalQuarantined`, `lastCheckpoint`).
   6. *Fail-Closed Identity Storage*: Removed silent fallback to `'soilfer-lims-core'` from `resolveSourceSystemId(db)`, failing closed on identity storage errors.
 - **Verification Evidence**:
+  - Exact Candidate Head: `4864d7a7ffc3fa835ec979c32bb44ff749ff73a1`
+  - GitHub Actions CI Run: [Run 36346518144](https://github.com/yigini/soilfer-lims/actions/runs/36346518144) (**SUCCESS** in 7m52s)
   - `server/scripts/verify_issue149_3643053_remediations.cjs`: **10/10 passed (100%)** on isolated disposable SQLite database.
   - `server/tests/contracts/nsis_v2_exchange.test.js`: **8/8 passed (100%)**.
   - `server/tests/contracts/sis_adapter_service.test.js`: **20/20 passed (100%)**.
   - `npm run build` (`vite build` in `client/`): **Clean production build in 6.78s with zero errors**.
-- **Boundaries**: Strictly LIMS-only assignment. OpenNSIS code, configuration, database, and deployments remain 100% untouched. All concurrent untracked files preserved. Ready for candidate commit, push to `feat/issue-140-nsis-exchange`, CI monitoring, and Codex independent review response.
+- **Boundaries**: Strictly LIMS-only assignment. OpenNSIS code, configuration, database, and deployments remain 100% untouched. All concurrent untracked files preserved. Ready for Codex independent review response.
 

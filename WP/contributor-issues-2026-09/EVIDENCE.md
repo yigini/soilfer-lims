@@ -2349,8 +2349,8 @@ Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09
   - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-independent-review-3643053.md`
   - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-real-schema-review-3643053.cjs`
   - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-real-schema-review-3643053.log`
-  - [PR #149 comment 5859152613](https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5859152613)
-- **Candidate Head SHA**: Pending commit
+- **Candidate Head SHA**: `4864d7a7ffc3fa835ec979c32bb44ff749ff73a1`
+- **GitHub Actions CI Run**: [Run 36346518144](https://github.com/yigini/soilfer-lims/actions/runs/36346518144) (**SUCCESS** in 7m52s)
 - **Verification Scripts**:
   - `server/scripts/verify_issue149_3643053_remediations.cjs` (**10/10 passed, 100%**)
   - `server/scripts/verify_issue149_ccc08c2_remediations.cjs` (**10/10 passed, 100%**)
