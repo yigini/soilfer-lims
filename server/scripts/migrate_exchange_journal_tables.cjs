@@ -10,6 +10,7 @@
 
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const Database = require('better-sqlite3');
 
 function ensureColumns(db, tableName, colDefs) {
@@ -68,7 +69,11 @@ function migrateExchangeTables(dbPath) {
                 created_at TEXT NOT NULL,
                 authorized_labs TEXT,
                 authorized_countries TEXT,
-                authorized_projects TEXT
+                authorized_projects TEXT,
+                auth_version INTEGER DEFAULT 1,
+                epoch TEXT DEFAULT 'epoch-1',
+                schema_version TEXT DEFAULT '2026-09-issue140-v2',
+                digest TEXT
             );
 
             CREATE TABLE IF NOT EXISTS _exchange_snapshot_items (
@@ -88,7 +93,9 @@ function migrateExchangeTables(dbPath) {
                 quarantined_count INTEGER DEFAULT 0,
                 checkpoint TEXT,
                 details TEXT,
-                created_at TEXT NOT NULL
+                created_at TEXT NOT NULL,
+                auth_version INTEGER DEFAULT 1,
+                epoch TEXT DEFAULT 'epoch-1'
             );
 
             CREATE TABLE IF NOT EXISTS _exchange_batches (
@@ -98,7 +105,11 @@ function migrateExchangeTables(dbPath) {
                 start_seq INTEGER,
                 end_seq INTEGER,
                 item_count INTEGER NOT NULL,
-                created_at TEXT NOT NULL
+                created_at TEXT NOT NULL,
+                auth_version INTEGER DEFAULT 1,
+                epoch TEXT DEFAULT 'epoch-1',
+                schema_version TEXT DEFAULT '2026-09-issue140-v2',
+                digest TEXT
             );
 
             CREATE TABLE IF NOT EXISTS _exchange_meta (
@@ -152,7 +163,11 @@ function migrateExchangeTables(dbPath) {
             created_at: "TEXT DEFAULT ''",
             authorized_labs: "TEXT",
             authorized_countries: "TEXT",
-            authorized_projects: "TEXT"
+            authorized_projects: "TEXT",
+            auth_version: "INTEGER DEFAULT 1",
+            epoch: "TEXT DEFAULT 'epoch-1'",
+            schema_version: "TEXT DEFAULT '2026-09-issue140-v2'",
+            digest: "TEXT"
         });
 
         ensureColumns(db, '_exchange_snapshot_items', {
@@ -167,7 +182,9 @@ function migrateExchangeTables(dbPath) {
             quarantined_count: "INTEGER DEFAULT 0",
             checkpoint: "TEXT",
             details: "TEXT",
-            created_at: "TEXT DEFAULT ''"
+            created_at: "TEXT DEFAULT ''",
+            auth_version: "INTEGER DEFAULT 1",
+            epoch: "TEXT DEFAULT 'epoch-1'"
         });
 
         ensureColumns(db, '_exchange_journal', {
@@ -190,7 +207,11 @@ function migrateExchangeTables(dbPath) {
             start_seq: "INTEGER DEFAULT 0",
             end_seq: "INTEGER DEFAULT 0",
             item_count: "INTEGER DEFAULT 0",
-            created_at: "TEXT DEFAULT ''"
+            created_at: "TEXT DEFAULT ''",
+            auth_version: "INTEGER DEFAULT 1",
+            epoch: "TEXT DEFAULT 'epoch-1'",
+            schema_version: "TEXT DEFAULT '2026-09-issue140-v2'",
+            digest: "TEXT"
         });
 
         // 3. Monotonically re-sequence any legacy rows with missing, null, or zero sequence without guessing
@@ -255,6 +276,43 @@ function migrateExchangeTables(dbPath) {
             const { ensureTriggers } = require('../services/exchangeStateService');
             ensureTriggers(db);
         } catch (e) {}
+
+        // 7. Authoritative bounded backfill: migrate legacy active ApiKeys missing connection linkages (R3, F5)
+        // No GET-side recreation; all authoritative key-to-connection mappings established at migration time
+        const hasApiKeyTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='ApiKey'").get());
+        if (hasApiKeyTable) {
+            const activeKeys = db.prepare("SELECT * FROM ApiKey WHERE isActive = 1").all();
+            for (const key of activeKeys) {
+                const connId = key.connectionId || `conn_${key.id}`;
+                if (!key.connectionId) {
+                    db.prepare('UPDATE ApiKey SET connectionId = ? WHERE id = ?').run(connId, key.id);
+                }
+                const connRow = db.prepare('SELECT id FROM _exchange_connections WHERE id = ?').get(connId);
+                if (!connRow) {
+                    const nowIso = new Date().toISOString();
+                    db.prepare(`
+                        INSERT INTO _exchange_connections (id, name, capabilities, countries, projects, labs, auth_version, created_at, updated_at)
+                        VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)
+                    `).run(
+                        connId,
+                        key.name || 'Legacy Connection',
+                        key.capabilities || '[]',
+                        key.countries || null,
+                        key.projects || null,
+                        key.labs || '[]',
+                        nowIso,
+                        nowIso
+                    );
+                }
+                const linkRow = db.prepare('SELECT id FROM _exchange_connection_keys WHERE connection_id = ? AND api_key_id = ?').get(connId, key.id);
+                if (!linkRow) {
+                    db.prepare(`
+                        INSERT INTO _exchange_connection_keys (id, connection_id, api_key_id, key_status, created_at)
+                        VALUES (?, ?, ?, 'ACTIVE', ?)
+                    `).run(`conn_key_${crypto.randomUUID()}`, connId, key.id, new Date().toISOString());
+                }
+            }
+        }
     });
 
     runMigration();

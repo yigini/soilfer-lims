@@ -745,39 +745,23 @@ exports.createApiKey = async (req, res) => {
 
         const effectiveConnectionId = connectionId || `conn_${crypto.randomUUID()}`;
         const effectiveCaps = Array.isArray(capabilities) ? capabilities : (capabilities ? [capabilities] : []);
+        const newKeyId = crypto.randomUUID();
+        const now = new Date();
+        const nowIso = now.toISOString();
 
-        const newKey = await prisma.apiKey.create({
-            data: {
-                id: crypto.randomUUID(),
-                name,
-                keyHash,
-                keyPrefix,
-                role,
-                connectionId: effectiveConnectionId,
-                capabilities: JSON.stringify(effectiveCaps),
-                countries: countries && Array.isArray(countries) ? JSON.stringify(countries) : null,
-                projects: projects && Array.isArray(projects) ? JSON.stringify(projects) : null,
-                labs: JSON.stringify(effectiveLabs),
-                isActive: true,
-                createdBy: req.user?.username || 'admin',
-                expiresAt
-            }
-        });
+        const { getDb } = require('../services/exchangeStateService');
+        const db = getDb();
 
-        // Record in _exchange_connections & _exchange_connection_keys
-        try {
-            const { getDb } = require('../services/exchangeStateService');
-            const db = getDb();
-            const now = new Date().toISOString();
+        // Atomic provisioning transaction: ApiKey, _exchange_connections, _exchange_connection_keys, AuditLog
+        const provisionTx = db.transaction(() => {
+            // 1. Ensure managed connection exists
             const hasConnTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_connections'").get());
             if (hasConnTable) {
-                const connCols = new Set(db.prepare("PRAGMA table_info('_exchange_connections')").all().map(c => c.name));
-                const idCol = connCols.has('id') ? 'id' : (connCols.has('connection_id') ? 'connection_id' : null);
-                if (idCol) {
+                const existingConn = db.prepare('SELECT id FROM _exchange_connections WHERE id = ?').get(effectiveConnectionId);
+                if (!existingConn) {
                     db.prepare(`
-                        INSERT INTO _exchange_connections (${idCol}, name, capabilities, countries, projects, labs, created_at, updated_at)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                        ON CONFLICT(${idCol}) DO UPDATE SET updated_at = excluded.updated_at
+                        INSERT INTO _exchange_connections (id, name, capabilities, countries, projects, labs, auth_version, created_at, updated_at)
+                        VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)
                     `).run(
                         effectiveConnectionId,
                         name,
@@ -785,34 +769,59 @@ exports.createApiKey = async (req, res) => {
                         countries ? JSON.stringify(countries) : null,
                         projects ? JSON.stringify(projects) : null,
                         JSON.stringify(effectiveLabs),
-                        now,
-                        now
+                        nowIso,
+                        nowIso
                     );
                 }
             }
 
+            // 2. Insert ApiKey
+            db.prepare(`
+                INSERT INTO ApiKey (id, name, keyHash, keyPrefix, role, connectionId, capabilities, countries, projects, labs, isActive, createdBy, createdAt, updatedAt, expiresAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
+            `).run(
+                newKeyId,
+                name,
+                keyHash,
+                keyPrefix,
+                role,
+                effectiveConnectionId,
+                JSON.stringify(effectiveCaps),
+                countries && Array.isArray(countries) ? JSON.stringify(countries) : null,
+                projects && Array.isArray(projects) ? JSON.stringify(projects) : null,
+                JSON.stringify(effectiveLabs),
+                req.user?.username || 'admin',
+                nowIso,
+                nowIso,
+                expiresAt ? expiresAt.toISOString() : null
+            );
+
+            // 3. Link key in _exchange_connection_keys
             const hasKeysTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_connection_keys'").get());
             if (hasKeysTable) {
                 db.prepare(`
                     INSERT INTO _exchange_connection_keys (id, connection_id, api_key_id, key_status, created_at)
                     VALUES (?, ?, ?, 'ACTIVE', ?)
-                `).run(`conn_key_${crypto.randomUUID()}`, effectiveConnectionId, newKey.id, now);
+                `).run(`conn_key_${crypto.randomUUID()}`, effectiveConnectionId, newKeyId, nowIso);
             }
-        } catch (e) {
-            console.warn('[EXCHANGE_CONN_LINK_WARN]', e.message);
-        }
 
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-sis-key-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
-                entity: 'SIS_API_KEY',
-                entityId: newKey.id,
-                action: 'SIS_KEY_CREATED',
-                details: `Created API key '${name}' with connectionId: ${effectiveConnectionId}, capabilities: ${JSON.stringify(effectiveCaps)}, labs: ${JSON.stringify(effectiveLabs)}`,
-                performedBy: req.user?.username || 'admin',
-                timestamp: new Date()
+            // 4. Audit Log
+            const hasAuditTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='AuditLog'").get());
+            if (hasAuditTable) {
+                db.prepare(`
+                    INSERT INTO AuditLog (id, entity, entityId, action, details, performedBy, timestamp)
+                    VALUES (?, 'SIS_API_KEY', ?, 'SIS_KEY_CREATED', ?, ?, ?)
+                `).run(
+                    `audit-sis-key-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
+                    newKeyId,
+                    `Created API key '${name}' with connectionId: ${effectiveConnectionId}, capabilities: ${JSON.stringify(effectiveCaps)}, labs: ${JSON.stringify(effectiveLabs)}`,
+                    req.user?.username || 'admin',
+                    nowIso
+                );
             }
         });
+
+        provisionTx();
 
         // RETURN THE FULL API KEY ONLY ONCE ON CREATION
         res.json({
@@ -820,19 +829,19 @@ exports.createApiKey = async (req, res) => {
             message: 'API Key created successfully. Store this secret key safely as it will not be shown again.',
             apiKey: fullApiKey,
             keyInfo: {
-                id: newKey.id,
-                name: newKey.name,
+                id: newKeyId,
+                name,
                 connectionId: effectiveConnectionId,
                 capabilities: effectiveCaps,
-                keyPrefix: newKey.keyPrefix,
-                role: newKey.role,
-                labs,
-                expiresAt: newKey.expiresAt
+                keyPrefix,
+                role,
+                labs: effectiveLabs,
+                expiresAt
             }
         });
     } catch (err) {
         console.error('[SIS_CREATE_KEY_ERR]', err);
-        res.status(500).json({ error: 'Failed to generate API Key.' });
+        res.status(500).json({ error: 'Failed to generate API Key.', message: err.message });
     }
 };
 
@@ -874,6 +883,8 @@ exports.revokeApiKey = async (req, res) => {
     }
 };
 
+const rotationReplayCache = new Map(); // idempotencyKey -> { timestamp, responseBody }
+
 exports.rotateApiKey = async (req, res) => {
     if (req.user?.role !== 'SUPER_ADMIN') {
         return res.status(403).json({ error: 'Only Super Administrators can rotate SIS API keys.' });
@@ -881,6 +892,16 @@ exports.rotateApiKey = async (req, res) => {
 
     try {
         const { id } = req.params;
+        const idempotencyKey = req.headers?.['idempotency-key'] || req.headers?.['x-idempotency-key'] || req.body?.idempotencyKey;
+
+        // Idempotency check: short-lived cache replay for operator recovery (R10)
+        if (idempotencyKey) {
+            const cached = rotationReplayCache.get(idempotencyKey);
+            if (cached && (Date.now() - cached.timestamp < 15 * 60 * 1000)) {
+                return res.status(200).json(cached.responseBody);
+            }
+        }
+
         const oldKey = await prisma.apiKey.findUnique({ where: { id } });
         if (!oldKey) {
             return res.status(404).json({ error: 'API Key not found.' });
@@ -903,9 +924,22 @@ exports.rotateApiKey = async (req, res) => {
         const now = new Date();
         const nowIso = now.toISOString();
 
-        // Execute rotation as a single atomic transaction across ApiKey, connection keys, and audit log
+        // Execute rotation as a single atomic transaction with CAS precondition inside transaction
         const rotateTransaction = db.transaction(() => {
-            // 1. Insert new replacement key
+            // 1. CAS: Atomic retirement of old key verifying exactly 1 row affected
+            const casRes = db.prepare(`
+                UPDATE ApiKey
+                SET isActive = 0, updatedAt = ?
+                WHERE id = ? AND isActive = 1
+            `).run(nowIso, oldKey.id);
+
+            if (casRes.changes === 0) {
+                const err = new Error('API key has already been rotated or is no longer active.');
+                err.code = 'KEY_ALREADY_ROTATED';
+                throw err;
+            }
+
+            // 2. Insert new replacement key
             db.prepare(`
                 INSERT INTO ApiKey (id, name, keyHash, keyPrefix, role, connectionId, capabilities, countries, projects, labs, isActive, createdBy, createdAt, updatedAt, expiresAt)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
@@ -925,13 +959,6 @@ exports.rotateApiKey = async (req, res) => {
                 nowIso,
                 oldKey.expiresAt ? new Date(oldKey.expiresAt).toISOString() : null
             );
-
-            // 2. Deactivate/retire old key
-            db.prepare(`
-                UPDATE ApiKey
-                SET isActive = 0, updatedAt = ?
-                WHERE id = ?
-            `).run(nowIso, oldKey.id);
 
             // 3. Link keys in _exchange_connection_keys
             db.prepare(`
@@ -961,7 +988,7 @@ exports.rotateApiKey = async (req, res) => {
         // Run atomic transaction
         rotateTransaction();
 
-        res.json({
+        const successResponse = {
             status: 'success',
             message: 'API Key rotated successfully. The old key has been revoked and the new key is active.',
             apiKey: fullApiKey,
@@ -974,10 +1001,26 @@ exports.rotateApiKey = async (req, res) => {
                 capabilities: oldKey.capabilities ? (typeof oldKey.capabilities === 'string' ? JSON.parse(oldKey.capabilities) : oldKey.capabilities) : [],
                 expiresAt: oldKey.expiresAt
             }
-        });
+        };
+
+        if (idempotencyKey) {
+            rotationReplayCache.set(idempotencyKey, {
+                timestamp: Date.now(),
+                responseBody: successResponse
+            });
+        }
+
+        res.json(successResponse);
     } catch (err) {
+        if (err.code === 'KEY_ALREADY_ROTATED') {
+            return res.status(409).json({
+                error: 'CONFLICT',
+                code: 'KEY_ALREADY_ROTATED',
+                message: 'API Key has already been rotated or is no longer active.'
+            });
+        }
         console.error('[SIS_ROTATE_KEY_ERR]', err);
-        res.status(500).json({ error: 'Failed to rotate API Key.' });
+        res.status(500).json({ error: 'Failed to rotate API Key.', message: err.message });
     }
 };
 
@@ -999,21 +1042,41 @@ exports.listConnections = async (req, res) => {
 
         let receiptsSummary = {};
         try {
-            const receipts = db.prepare(`
-                SELECT connection_id, 
-                       MAX(created_at) as last_receipt_at,
+            // Find most recent receipt by chronological ordering (created_at DESC, rowid DESC)
+            // and compute receiver-reported totals (R11)
+            const latestReceipts = db.prepare(`
+                SELECT r.connection_id,
+                       r.checkpoint as last_checkpoint,
+                       r.created_at as last_receipt_at
+                FROM _exchange_receipts r
+                INNER JOIN (
+                    SELECT connection_id, MAX(rowid) as max_rowid
+                    FROM _exchange_receipts
+                    GROUP BY connection_id
+                ) latest ON r.rowid = latest.max_rowid
+            `).all();
+
+            const sumTotals = db.prepare(`
+                SELECT connection_id,
                        SUM(COALESCE(imported_count, 0)) as total_imported,
-                       SUM(COALESCE(quarantined_count, 0)) as total_quarantined,
-                       MAX(checkpoint) as last_checkpoint
+                       SUM(COALESCE(quarantined_count, 0)) as total_quarantined
                 FROM _exchange_receipts
                 GROUP BY connection_id
             `).all();
-            receipts.forEach(r => {
+
+            const sumsByConn = {};
+            sumTotals.forEach(s => { sumsByConn[s.connection_id] = s; });
+
+            latestReceipts.forEach(r => {
+                const s = sumsByConn[r.connection_id] || {};
                 receiptsSummary[r.connection_id] = {
                     lastReceiptAt: r.last_receipt_at,
-                    totalImported: r.total_imported || 0,
-                    totalQuarantined: r.total_quarantined || 0,
-                    lastCheckpoint: r.last_checkpoint
+                    totalImported: s.total_imported || 0,
+                    totalQuarantined: s.total_quarantined || 0,
+                    lastCheckpoint: r.last_checkpoint,
+                    receiverReportedImported: s.total_imported || 0,
+                    receiverReportedQuarantined: s.total_quarantined || 0,
+                    lastReportedCheckpoint: r.last_checkpoint
                 };
             });
         } catch (e) {}
@@ -1035,7 +1098,10 @@ exports.listConnections = async (req, res) => {
                 lastReceiptAt: null,
                 totalImported: 0,
                 totalQuarantined: 0,
-                lastCheckpoint: null
+                lastCheckpoint: null,
+                receiverReportedImported: 0,
+                receiverReportedQuarantined: 0,
+                lastReportedCheckpoint: null
             },
             createdAt: c.created_at,
             updatedAt: c.updated_at

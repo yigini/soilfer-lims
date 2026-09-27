@@ -343,6 +343,15 @@ paths:
                 $ref: '#/components/schemas/ReceiptSubmissionResponse'
 
   /connections:
+    servers:
+      - url: https://lims.yigini.net/api/v1/data-exchange
+        description: Production Administrative Server
+      - url: http://localhost:5000/api/v1/data-exchange
+        description: Local Administrative Server
+      - url: https://lims.yigini.net/api/v1/sis
+        description: Legacy Production SIS Alias
+      - url: http://localhost:5000/api/v1/sis
+        description: Legacy Local SIS Alias
     get:
       summary: List managed exchange connections
       description: |
@@ -397,6 +406,15 @@ paths:
           $ref: '#/components/responses/ForbiddenError'
 
   /connections/{id}:
+    servers:
+      - url: https://lims.yigini.net/api/v1/data-exchange
+        description: Production Administrative Server
+      - url: http://localhost:5000/api/v1/data-exchange
+        description: Local Administrative Server
+      - url: https://lims.yigini.net/api/v1/sis
+        description: Legacy Production SIS Alias
+      - url: http://localhost:5000/api/v1/sis
+        description: Legacy Local SIS Alias
     put:
       summary: Update exchange connection status, capabilities, or scopes
       description: |
@@ -422,10 +440,19 @@ paths:
           $ref: '#/components/responses/NotFoundError'
 
   /keys/{id}/rotate:
+    servers:
+      - url: https://lims.yigini.net/api/v1/data-exchange
+        description: Production Administrative Server
+      - url: http://localhost:5000/api/v1/data-exchange
+        description: Local Administrative Server
+      - url: https://lims.yigini.net/api/v1/sis
+        description: Legacy Production SIS Alias
+      - url: http://localhost:5000/api/v1/sis
+        description: Legacy Local SIS Alias
     post:
       summary: Atomic key rotation
       description: |
-        Rotates an existing active API key. Atomically creates a new replacement key linked to the same immutable connection identity, retires the old key, and records an audit log entry in a single transaction.
+        Rotates an existing active API key. Atomically retires the old key using a compare-and-swap (CAS) precondition, creates a new replacement key linked to the same immutable connection identity, and records an audit log entry in a single transaction. Replay with identical idempotency key returns the cached successful outcome.
       security:
         - BearerAuth: []
       parameters:
@@ -434,6 +461,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema:
+            type: string
+          description: Optional idempotency key for safe client retry and response recovery.
       responses:
         '200':
           description: Key rotated successfully
@@ -443,6 +476,24 @@ paths:
                 $ref: '#/components/schemas/KeyRotateResponse'
         '400':
           $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: Conflict — API key has already been rotated or is no longer active
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: CONFLICT
+                  code:
+                    type: string
+                    example: KEY_ALREADY_ROTATED
+                  message:
+                    type: string
+                    example: API Key has already been rotated or is no longer active.
         '500':
           description: Rotation aborted and rolled back cleanly; previous key remains active
 

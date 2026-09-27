@@ -101,11 +101,37 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
                 isActive: true
             }
         });
+        const connId = `conn_${testKey.id}`;
+        await prisma.apiKey.update({ where: { id: testKey.id }, data: { connectionId: connId } });
+        const { getDb } = require('../../services/exchangeStateService');
+        const db = getDb();
+        db.prepare(`
+            INSERT INTO _exchange_connections (id, name, capabilities, countries, projects, labs, auth_version, status, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, 1, 'ACTIVE', datetime('now'), datetime('now'))
+        `).run(
+            connId,
+            testKey.name,
+            testKey.capabilities,
+            testKey.countries,
+            testKey.projects,
+            testKey.labs
+        );
+        db.prepare(`
+            INSERT INTO _exchange_connection_keys (id, connection_id, api_key_id, key_status, created_at)
+            VALUES (?, ?, ?, 'ACTIVE', datetime('now'))
+        `).run(`conn_key_${timestamp}`, connId, testKey.id);
         testKey.rawKey = rawKey;
     });
 
     afterAll(async () => {
         // Clean up
+        try {
+            const { getDb } = require('../../services/exchangeStateService');
+            const db = getDb();
+            db.prepare('DELETE FROM _exchange_connections WHERE id = ?').run(`conn_${testKey?.id}`);
+            db.prepare('DELETE FROM _exchange_connection_keys WHERE api_key_id = ?').run(testKey?.id);
+        } catch (e) {}
+
         await prisma.result.deleteMany({
             where: { sampleId: { in: [sample1?.id, sample2NoLabId?.id].filter(Boolean) } }
         }).catch(() => {});

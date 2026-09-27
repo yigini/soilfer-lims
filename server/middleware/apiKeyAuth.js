@@ -3,6 +3,47 @@ const prisma = require('../prisma');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../config/auth');
 
+function parseScopeArray(val, isLab = false) {
+    if (val === null || val === undefined) return isLab ? [] : ['*'];
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string') {
+        try {
+            const parsed = JSON.parse(val);
+            if (Array.isArray(parsed)) return parsed;
+            return [parsed];
+        } catch (e) {
+            return [val];
+        }
+    }
+    return [];
+}
+
+function intersectScopeArrays(keyScope, connScope, isLab = false) {
+    const keyArr = parseScopeArray(keyScope, isLab);
+    const connArr = parseScopeArray(connScope, isLab);
+
+    if (isLab) {
+        if (keyArr.length === 0 || connArr.length === 0) {
+            return [];
+        }
+    }
+
+    const keyHasWildcard = keyArr.includes('*');
+    const connHasWildcard = connArr.includes('*');
+
+    if (keyHasWildcard && connHasWildcard) {
+        return ['*'];
+    }
+    if (keyHasWildcard) {
+        return connArr.filter(x => x !== '*');
+    }
+    if (connHasWildcard) {
+        return keyArr.filter(x => x !== '*');
+    }
+    const connSet = new Set(connArr);
+    return keyArr.filter(x => connSet.has(x) && x !== '*');
+}
+
 /**
  * Authentication Middleware for Soil Information System (SIS) Integration
  * Supports both:
@@ -62,13 +103,15 @@ const apiKeyAuth = async (req, res, next) => {
                 db = null;
             }
 
-            const effectiveConnectionId = apiKey.connectionId || `conn_${apiKey.id}`;
+            const effectiveConnectionId = apiKey.connectionId;
             let conn = null;
             let keyLink = null;
 
             if (db) {
                 try {
-                    conn = db.prepare('SELECT * FROM _exchange_connections WHERE id = ?').get(effectiveConnectionId);
+                    if (effectiveConnectionId) {
+                        conn = db.prepare('SELECT * FROM _exchange_connections WHERE id = ?').get(effectiveConnectionId);
+                    }
                     if (!conn) {
                         keyLink = db.prepare('SELECT connection_id, key_status FROM _exchange_connection_keys WHERE api_key_id = ?').get(apiKey.id);
                         if (keyLink && keyLink.connection_id) {
@@ -82,29 +125,16 @@ const apiKeyAuth = async (req, res, next) => {
                 }
             }
 
-            // Explicit legacy migration policy: auto-provision active connection record for legacy keys
-            if (!conn && db) {
-                try {
-                    const now = new Date().toISOString();
-                    db.prepare(`
-                        INSERT OR IGNORE INTO _exchange_connections (id, name, status, capabilities, countries, projects, labs, auth_version, created_at, updated_at)
-                        VALUES (?, ?, 'ACTIVE', ?, ?, ?, ?, 1, ?, ?)
-                    `).run(
-                        effectiveConnectionId,
-                        apiKey.name,
-                        apiKey.capabilities || '[]',
-                        apiKey.countries || null,
-                        apiKey.projects || null,
-                        apiKey.labs || '[]',
-                        now,
-                        now
-                    );
-                    db.prepare(`
-                        INSERT OR IGNORE INTO _exchange_connection_keys (id, connection_id, api_key_id, key_status, created_at)
-                        VALUES (?, ?, ?, 'ACTIVE', ?)
-                    `).run(`conn_key_${apiKey.id}`, effectiveConnectionId, apiKey.id, now);
-                    conn = db.prepare('SELECT * FROM _exchange_connections WHERE id = ?').get(effectiveConnectionId);
-                } catch (e) {}
+            // Managed connection/key relation must be authoritative and fail closed when absent, malformed or unavailable.
+            // Do NOT auto-recreate missing or deleted connections on GET/auth requests.
+            if (!conn) {
+                if (effectiveConnectionId || (req.baseUrl && req.baseUrl.startsWith('/api/v2'))) {
+                    return res.status(403).json({
+                        error: 'Forbidden',
+                        code: 'CONNECTION_NOT_FOUND',
+                        message: `Exchange connection '${effectiveConnectionId || `conn_${apiKey.id}`}' not found or unavailable.`
+                    });
+                }
             }
 
             // Key retirement check
@@ -125,6 +155,29 @@ const apiKeyAuth = async (req, res, next) => {
                 });
             }
 
+            // Optional rate limit per minute enforcement
+            if (conn && conn.rate_limit_per_min && Number(conn.rate_limit_per_min) > 0) {
+                const limit = Number(conn.rate_limit_per_min);
+                const now = Date.now();
+                if (!apiKeyAuth.rateLimitMap) {
+                    apiKeyAuth.rateLimitMap = new Map();
+                }
+                let tracker = apiKeyAuth.rateLimitMap.get(conn.id);
+                if (!tracker || now - tracker.windowStart > 60000) {
+                    tracker = { count: 1, windowStart: now };
+                    apiKeyAuth.rateLimitMap.set(conn.id, tracker);
+                } else {
+                    tracker.count++;
+                    if (tracker.count > limit) {
+                        return res.status(429).json({
+                            error: 'Too Many Requests',
+                            code: 'RATE_LIMIT_EXCEEDED',
+                            message: `Rate limit of ${limit} requests/min exceeded for connection '${conn.id}'.`
+                        });
+                    }
+                }
+            }
+
             // Fail-closed capability resolution:
             // If apiKey.capabilities is null/undefined, key has no capability grants (fails closed).
             // If present, intersect with authoritative connection capabilities.
@@ -138,64 +191,51 @@ const apiKeyAuth = async (req, res, next) => {
                     keyCaps = [];
                 }
 
+                let connCaps = [];
                 if (conn && conn.capabilities !== undefined && conn.capabilities !== null) {
-                    let connCaps = [];
                     try {
                         connCaps = typeof conn.capabilities === 'string' ? JSON.parse(conn.capabilities) : conn.capabilities;
                         if (!Array.isArray(connCaps)) connCaps = [];
                     } catch (e) {
                         connCaps = [];
                     }
-
-                    if (connCaps.includes('*')) {
-                        effectiveCapabilities = keyCaps;
-                    } else if (keyCaps.includes('*')) {
-                        effectiveCapabilities = connCaps;
-                    } else {
-                        effectiveCapabilities = keyCaps.filter(c => connCaps.includes(c));
-                    }
                 } else {
-                    effectiveCapabilities = keyCaps;
+                    connCaps = ['*'];
+                }
+
+                if (connCaps.includes('*') && keyCaps.includes('*')) {
+                    effectiveCapabilities = ['*'];
+                } else if (connCaps.includes('*')) {
+                    effectiveCapabilities = keyCaps.filter(c => c !== '*');
+                } else if (keyCaps.includes('*')) {
+                    effectiveCapabilities = connCaps.filter(c => c !== '*');
+                } else {
+                    effectiveCapabilities = keyCaps.filter(c => connCaps.includes(c) && c !== '*');
                 }
             }
 
-            // Scopes intersection
-            let effectiveCountries = apiKey.countries ? JSON.parse(apiKey.countries) : null;
-            let effectiveProjects = apiKey.projects ? JSON.parse(apiKey.projects) : null;
-            let effectiveLabs = apiKey.labs ? JSON.parse(apiKey.labs) : [];
+            // Scopes intersection: Total shared set operation
+            // When connection exists, intersect key and connection scopes (disjoint -> [], wildcard -> finite)
+            // When legacy unmanaged key (V1), use key scopes directly with default-deny on absent labs
+            let effectiveCountries;
+            let effectiveProjects;
+            let effectiveLabs;
 
             if (conn) {
-                if (conn.countries) {
-                    try {
-                        const connCountries = JSON.parse(conn.countries);
-                        if (Array.isArray(connCountries) && !connCountries.includes('*')) {
-                            effectiveCountries = effectiveCountries ? effectiveCountries.filter(c => connCountries.includes(c) || c === '*') : connCountries;
-                        }
-                    } catch (e) {}
-                }
-                if (conn.projects) {
-                    try {
-                        const connProjects = JSON.parse(conn.projects);
-                        if (Array.isArray(connProjects) && !connProjects.includes('*')) {
-                            effectiveProjects = effectiveProjects ? effectiveProjects.filter(p => connProjects.includes(p) || p === '*') : connProjects;
-                        }
-                    } catch (e) {}
-                }
-                if (conn.labs) {
-                    try {
-                        const connLabs = JSON.parse(conn.labs);
-                        if (Array.isArray(connLabs) && !connLabs.includes('*')) {
-                            effectiveLabs = effectiveLabs.filter(l => connLabs.includes(l));
-                        }
-                    } catch (e) {}
-                }
+                effectiveCountries = intersectScopeArrays(apiKey.countries, conn.countries, false);
+                effectiveProjects = intersectScopeArrays(apiKey.projects, conn.projects, false);
+                effectiveLabs = intersectScopeArrays(apiKey.labs, conn.labs, true);
+            } else {
+                effectiveCountries = parseScopeArray(apiKey.countries, false);
+                effectiveProjects = parseScopeArray(apiKey.projects, false);
+                effectiveLabs = parseScopeArray(apiKey.labs, true);
             }
 
             req.sisAuth = {
                 type: 'API_KEY',
                 id: apiKey.id,
                 keyId: apiKey.id,
-                connectionId: conn ? conn.id : effectiveConnectionId,
+                connectionId: conn ? conn.id : (apiKey.connectionId || `conn_${apiKey.id}`),
                 authVersion: conn ? (conn.auth_version || 1) : 1,
                 connectionStatus: conn ? (conn.status || 'ACTIVE') : 'ACTIVE',
                 keyPrefix: apiKey.keyPrefix,

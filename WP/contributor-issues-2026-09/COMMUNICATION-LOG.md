@@ -1968,3 +1968,30 @@ sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
   - `npm run build` (`vite build` in `client/`): **Clean production build in 6.78s with zero errors**.
 - **Boundaries**: Strictly LIMS-only assignment. OpenNSIS code, configuration, database, and deployments remain 100% untouched. All concurrent untracked files preserved. Ready for Codex independent review response.
 
+
+## 27 September 2026 20:20 UTC — owner requested deployment readiness check / PR149 3ecf8a9
+- Exact PR149 head 3ecf8a9da2f73d6dbce61ec59c683d5f5a963eb0 remains OPEN. Exact-head CI36347070855 independently SUCCESS, completed20:19:11UTC. No merge or deployment acceptance.
+- Prior live disable/capability/old-cursor enforcement and failed replacement INSERT rollback independently verified. Nine bounded full-schema/real-Prisma/actual publication UDF and mounted consumer HTTP checks reproduce disjoint/wildcard scope broadening, missing managed connection recreated ACTIVE, authorized journal/snapshot coordinate loss, concurrent double key rotation, and stale artifact receipt authorization-version gap. Management calls use request/response adapters; missing-parent and INSERT faults explicitly injected in synthetic external DB, no production incident claim.
+- Full review work/issue149-independent-review-3ecf8a9.md and probe/log issue149-http-lifecycle-review-3ecf8a9.cjs/.log. Final retained DB issue149-disposable-3ecf8a9-5Xgq4h/synthetic-review.db. Full original R1-R12 obligations remain; report identifies concrete publication/backfill/retention/quota/recovery/docs/operator gaps. No broad unchanged test suites rerun.
+- Public review https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5859474978 . ONE corrective continuation sent (initially queued behind CI watcher), now CONSUMED. Fresh restored screenshot plus second state confirms handoff in transcript, report analyzed L1-57, empty composer and active Exploring/Cancel at20:20UTC. Do not duplicate.
+- Agy continues original complete LIMS-only assignment. Existing owner authorization permits sole-Agy protected merge and safe release after independent exact-head acceptance, no further owner approval required. No current production change, live permission/credential mutation, OpenNSIS change, TUF implementation, closed issue rerun or worktree removal. Monitoring remains PAUSED; concurrent drafts preserved; Agy owns EVIDENCE.
+
+## 27 September 2026 21:00 UTC — PR #149 Head 3ecf8a9 Remediations Complete & Verified
+- **Scope & Direction**: Consumed independent technical review `issue149-independent-review-3ecf8a9.md`, adjacent probe `issue149-http-lifecycle-review-3ecf8a9.cjs` and `.log`, and PR #149 comment 5859474978.
+- **Architectural Defect Remediations**:
+  1. *Total Scope Intersection Fail-Closed*: `intersectScopeArrays` in `apiKeyAuth.js` implements total mathematical set intersection: wildcard intersected with finite scope yields the finite scope; disjoint finite scopes yield `[]` which fail closed in `buildSampleWhere` (`assignedLab: '__denied__'`). Missing managed connection fails closed with HTTP 403 `CONNECTION_NOT_FOUND` without GET-side auto-recreation.
+  2. *Authorized Exports Spatial Preservation*: UDF `exchange_format_payload` in `exchangeDbFunctions.js` explicitly passes `{ internal: true }`, ensuring transactional SQLite publication triggers preserve complete spatial coordinates inside `_exchange_journal`. Delivery-time projection filtering in `sisController.js`, `sisV2Controller.js`, and `exchangeStateService.js` enforces caller `SPATIAL` capability entitlement at response serialization time.
+  3. *Concurrent Rotation Precondition & Idempotent Replay*: In `rotateApiKey`, atomic CAS `UPDATE ApiKey SET isActive = 0 WHERE id = ? AND isActive = 1` inside database transaction returns HTTP 409 `KEY_ALREADY_ROTATED` on race. Idempotent replay cache keyed by `Idempotency-Key` or `clientKey` supports post-commit recovery without credential exposure.
+  4. *Durable Authorization-Version & Epoch Binding*: Persisted and validated `auth_version`, `epoch`, `schema_version`, and `digest` across `_exchange_snapshots`, `_exchange_batches`, and `_exchange_receipts`. `getSnapshot` and `recordReceipt` reject outdated generations with HTTP 410 `SNAPSHOT_EXPIRED` (`AUTH_VERSION_MISMATCH` / `EPOCH_MISMATCH`). `submitReceipt` preserves `receipt.code || receipt.error`.
+  5. *Original R1–R12 Obligations*: Reader-only outbox operation in production with trigger-based write-time capture and read-time reconciliation (`syncJournal`); bounded storage maintenance and snapshot quotas (`pruneExpiredSnapshots` and `server/scripts/prune_exchange_storage.cjs`); per-connection rate limiting via `conn.rate_limit_per_min`; OpenAPI 3.1 servers override to mounted `/api/v1/data-exchange` and `/api/v1/sis`; ordered receipt resolution (`ORDER BY created_at DESC, rowid DESC`) and honest receiver-reported telemetry in `listConnections`.
+- **Verification Evidence**:
+  - `server/tests/contracts/issue149_codex_verification.test.js`: **9/9 passed (100%)**
+  - All 7 Data Exchange Jest Contract Test Suites: **63/63 passed (100%)**
+  - `server/scripts/data_exchange_reference_client.cjs --verify`: **16/16 passed (100%)**
+  - `server/scripts/verify_issue149_3643053_remediations.cjs`: **10/10 passed (100%)**
+  - `server/scripts/verify_issue149_ccc08c2_remediations.cjs`: **10/10 passed (100%)**
+  - `server/scripts/verify_issue149_9850d78_remediations.cjs`: **14/14 passed (100%)**
+  - `server/scripts/test_issue140_probes.cjs`: **16/16 passed (100%)**
+  - `server/scripts/prune_exchange_storage.cjs --dry-run`: **Pass (exit code 0)**
+  - Client Build: `vite build` clean in 6.65s
+- **Boundaries**: Strictly LIMS-only assignment. OpenNSIS code, config, database, and deployments remain 100% untouched. Working tree untracked files preserved. Monitoring PAUSED. Candidate head ready for commit, push, CI check, and Codex independent technical review.

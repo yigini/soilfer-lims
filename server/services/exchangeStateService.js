@@ -607,7 +607,11 @@ function initTables(db) {
         created_at: "TEXT DEFAULT ''",
         authorized_labs: "TEXT",
         authorized_countries: "TEXT",
-        authorized_projects: "TEXT"
+        authorized_projects: "TEXT",
+        auth_version: "INTEGER DEFAULT 1",
+        epoch: "TEXT DEFAULT ''",
+        schema_version: "TEXT DEFAULT '2026-09-issue140-v2'",
+        digest: "TEXT DEFAULT ''"
     });
 
     ensureColumns(db, '_exchange_snapshot_items', {
@@ -622,7 +626,9 @@ function initTables(db) {
         quarantined_count: "INTEGER DEFAULT 0",
         checkpoint: "TEXT",
         details: "TEXT",
-        created_at: "TEXT DEFAULT ''"
+        created_at: "TEXT DEFAULT ''",
+        auth_version: "INTEGER DEFAULT 1",
+        epoch: "TEXT DEFAULT ''"
     });
 
     ensureColumns(db, '_exchange_journal', {
@@ -645,7 +651,11 @@ function initTables(db) {
         start_seq: "INTEGER DEFAULT 0",
         end_seq: "INTEGER DEFAULT 0",
         item_count: "INTEGER DEFAULT 0",
-        created_at: "TEXT DEFAULT ''"
+        created_at: "TEXT DEFAULT ''",
+        auth_version: "INTEGER DEFAULT 1",
+        epoch: "TEXT DEFAULT ''",
+        schema_version: "TEXT DEFAULT '2026-09-issue140-v2'",
+        digest: "TEXT DEFAULT ''"
     });
 
     ensureColumns(db, '_exchange_connections', {
@@ -889,6 +899,36 @@ async function syncJournal(auth, maps = {}) {
 }
 
 /**
+ * Prunes expired snapshots and associated items to enforce bounded storage retention (R2/R10).
+ * Bounded by retention TTL and per-connection quota.
+ */
+function pruneExpiredSnapshots(db) {
+    const targetDb = db || (dbInstance || getDb());
+    if (!targetDb || typeof targetDb.prepare !== 'function') return { prunedCount: 0 };
+    try {
+        const nowIso = new Date().toISOString();
+        const expiredSnaps = targetDb.prepare('SELECT id FROM _exchange_snapshots WHERE expires_at < ?').all(nowIso);
+        if (expiredSnaps.length === 0) return { prunedCount: 0 };
+
+        let prunedCount = 0;
+        const pruneTx = targetDb.transaction(() => {
+            const deleteItems = targetDb.prepare('DELETE FROM _exchange_snapshot_items WHERE snapshot_id = ?');
+            const deleteSnap = targetDb.prepare('DELETE FROM _exchange_snapshots WHERE id = ?');
+            for (const s of expiredSnaps) {
+                deleteItems.run(s.id);
+                deleteSnap.run(s.id);
+                prunedCount++;
+            }
+        });
+        pruneTx();
+        return { prunedCount };
+    } catch (e) {
+        console.warn('[EXCHANGE_PRUNE_WARN]', e.message);
+        return { prunedCount: 0 };
+    }
+}
+
+/**
  * Creates an immutable export snapshot at current high-water sequence boundary.
  * Freezes item JSON in _exchange_snapshot_items so subsequent sample edits do not mutate the snapshot (R2, Probes 1 & 2).
  */
@@ -899,12 +939,27 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
     if (auth?.connectionStatus && auth.connectionStatus !== 'ACTIVE') {
         return { error: 'FORBIDDEN', status: 403, code: 'CONNECTION_DISABLED', message: `Exchange connection '${connectionId}' is ${auth.connectionStatus}.` };
     }
-    const snapshotId = `snap_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+
+    // Outbox journal synchronization & live state reconciliation
+    await syncJournal(auth, maps);
+
+    // Storage maintenance & quota enforcement (R2/R10)
+    pruneExpiredSnapshots(db);
+    const MAX_ACTIVE_SNAPSHOTS = 10;
     const now = new Date();
+    const activeSnaps = db.prepare('SELECT COUNT(*) as n FROM _exchange_snapshots WHERE connection_id = ? AND expires_at > ?').get(connectionId, now.toISOString())?.n || 0;
+    if (activeSnaps >= MAX_ACTIVE_SNAPSHOTS) {
+        return {
+            error: 'QUOTA_EXCEEDED',
+            status: 429,
+            code: 'SNAPSHOT_QUOTA_EXCEEDED',
+            message: `Active snapshot quota exceeded (${activeSnaps}/${MAX_ACTIVE_SNAPSHOTS}). Await expiration of existing snapshots.`
+        };
+    }
+
+    const snapshotId = `snap_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
     const highWaterTimestamp = now.toISOString();
     const expiresAt = new Date(now.getTime() + ttlHours * 60 * 60 * 1000).toISOString();
-
-    await syncJournal(auth, maps);
 
     const maxSeq = db.prepare('SELECT COALESCE(MAX(sequence), 0) as s FROM _exchange_journal').get()?.s || 0;
 
@@ -913,51 +968,61 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
     const params = [maxSeq];
 
     // Laboratory Scoping
-    const keyLabs = auth?.labs || [];
-    const hasGlobalLab = keyLabs.includes('*') || (auth?.type !== 'API_KEY' && auth?.role === 'SUPER_ADMIN');
-    if (!hasGlobalLab) {
-        if (keyLabs.length > 0) {
-            const placeholders = keyLabs.map(() => '?').join(',');
-            conditions.push(`j.laboratory_id IN (${placeholders})`);
-            params.push(...keyLabs);
-        } else {
+    if (Array.isArray(auth?.labs)) {
+        if (auth.labs.includes('*') || (auth?.type !== 'API_KEY' && auth?.role === 'SUPER_ADMIN')) {
+            // Global lab scope
+        } else if (auth.labs.length === 0) {
             conditions.push('1 = 0');
+        } else {
+            const placeholders = auth.labs.map(() => '?').join(',');
+            conditions.push(`j.laboratory_id IN (${placeholders})`);
+            params.push(...auth.labs);
         }
+    } else {
+        conditions.push('1 = 0');
     }
 
     // Country Scoping
-    const keyCountries = auth?.countries || [];
-    const hasGlobalCountry = keyCountries.length === 0 || keyCountries.includes('*');
-    if (!hasGlobalCountry) {
-        const placeholders = keyCountries.map(() => '?').join(',');
-        conditions.push(`j.country IN (${placeholders})`);
-        params.push(...keyCountries);
+    if (Array.isArray(auth?.countries)) {
+        if (auth.countries.includes('*')) {
+            // Global country scope
+        } else if (auth.countries.length === 0) {
+            conditions.push('1 = 0');
+        } else {
+            const placeholders = auth.countries.map(() => '?').join(',');
+            conditions.push(`j.country IN (${placeholders})`);
+            params.push(...auth.countries);
+        }
     }
 
     // Project Scoping
-    const keyProjects = auth?.projects || [];
-    const hasGlobalProject = keyProjects.length === 0 || keyProjects.includes('*');
-    if (!hasGlobalProject) {
-        let authorizedProjects = keyProjects;
-        try {
-            const projectPolicyService = require('./projectPolicyService');
-            const expandedProjects = new Set();
-            for (const kp of keyProjects) {
-                expandedProjects.add(kp);
-                try {
-                    const children = projectPolicyService.getProgrammeChildProjectCodes(kp);
-                    children.forEach(c => expandedProjects.add(c));
-                } catch (e) {}
-            }
-            authorizedProjects = Array.from(expandedProjects);
-        } catch (e) {}
-
-        if (authorizedProjects.length > 0) {
-            const placeholders = authorizedProjects.map(() => '?').join(',');
-            conditions.push(`j.project_code IN (${placeholders})`);
-            params.push(...authorizedProjects);
-        } else {
+    if (Array.isArray(auth?.projects)) {
+        if (auth.projects.includes('*')) {
+            // Global project scope
+        } else if (auth.projects.length === 0) {
             conditions.push('1 = 0');
+        } else {
+            let authorizedProjects = auth.projects;
+            try {
+                const projectPolicyService = require('./projectPolicyService');
+                const expandedProjects = new Set();
+                for (const kp of auth.projects) {
+                    expandedProjects.add(kp);
+                    try {
+                        const children = projectPolicyService.getProgrammeChildProjectCodes(kp);
+                        children.forEach(c => expandedProjects.add(c));
+                    } catch (e) {}
+                }
+                authorizedProjects = Array.from(expandedProjects);
+            } catch (e) {}
+
+            if (authorizedProjects.length > 0) {
+                const placeholders = authorizedProjects.map(() => '?').join(',');
+                conditions.push(`j.project_code IN (${placeholders})`);
+                params.push(...authorizedProjects);
+            } else {
+                conditions.push('1 = 0');
+            }
         }
     }
 
@@ -998,6 +1063,15 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
         ORDER BY j.specimen_id ASC
     `).all(maxSeq, ...params);
 
+    const currentConn = db.prepare('SELECT auth_version FROM _exchange_connections WHERE id = ?').get(connectionId);
+    const currentAuthVersion = auth?.authVersion || currentConn?.auth_version || 1;
+    const epoch = getCurrentEpoch(db);
+    const schemaVersion = '2026-09-issue140-v2';
+
+    const snapHash = crypto.createHash('sha256');
+    snapHash.update(`${snapshotId}:${connectionId}:${maxSeq}:${items.length}:${epoch}:${currentAuthVersion}`);
+    const digest = snapHash.digest('hex');
+
     const authorizedLabs = Array.isArray(auth?.labs) ? JSON.stringify(auth.labs) : (auth?.labs ? JSON.stringify([auth.labs]) : '[]');
     const authorizedCountries = Array.isArray(auth?.countries) ? JSON.stringify(auth.countries) : '[]';
     const authorizedProjects = Array.isArray(auth?.projects) ? JSON.stringify(auth.projects) : '[]';
@@ -1005,8 +1079,8 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
     const insertSnap = db.prepare(`
         INSERT INTO _exchange_snapshots (
             id, connection_id, high_water_sequence, high_water_timestamp, total_samples, expires_at, created_at,
-            authorized_labs, authorized_countries, authorized_projects
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            authorized_labs, authorized_countries, authorized_projects, auth_version, epoch, schema_version, digest
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const insertItem = db.prepare(`
@@ -1017,7 +1091,7 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
     const createTx = db.transaction(() => {
         insertSnap.run(
             snapshotId, connectionId, maxSeq, highWaterTimestamp, items.length, expiresAt, now.toISOString(),
-            authorizedLabs, authorizedCountries, authorizedProjects
+            authorizedLabs, authorizedCountries, authorizedProjects, currentAuthVersion, epoch, schemaVersion, digest
         );
         for (let i = 0; i < items.length; i++) {
             insertItem.run(snapshotId, items[i].specimen_id, i + 1, items[i].payload);
@@ -1068,6 +1142,28 @@ function getSnapshot(snapshotId, auth) {
 
     if (new Date(snap.expires_at) < new Date()) {
         return { error: 'SNAPSHOT_EXPIRED', status: 410, message: 'Snapshot has expired. Create a new snapshot.' };
+    }
+
+    // Validate authorization version / generation binding (R2, R3)
+    const currentConn = db.prepare('SELECT auth_version, status FROM _exchange_connections WHERE id = ?').get(connectionId);
+    const currentAuthVersion = auth?.authVersion || currentConn?.auth_version || 1;
+    if (snap.auth_version !== undefined && snap.auth_version !== null && snap.auth_version !== currentAuthVersion) {
+        return {
+            error: 'SNAPSHOT_EXPIRED',
+            status: 410,
+            code: 'AUTH_VERSION_MISMATCH',
+            message: `Snapshot '${snapshotId}' was issued under authorization version ${snap.auth_version}, but current connection authorization version is ${currentAuthVersion}. Create a new snapshot.`
+        };
+    }
+
+    const currentEpoch = getCurrentEpoch(db);
+    if (snap.epoch && snap.epoch !== currentEpoch) {
+        return {
+            error: 'SNAPSHOT_EXPIRED',
+            status: 410,
+            code: 'EPOCH_MISMATCH',
+            message: `Snapshot '${snapshotId}' belongs to a previous epoch (${snap.epoch}) and has been invalidated.`
+        };
     }
 
     // Check scope revocation (F3, Probe 3, Finding 3):
@@ -1359,7 +1455,12 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
         };
     }
 
-    await syncJournal(auth, maps);
+    // Reader-only authoritative outbox in production (R1/R10): transactional SQLite triggers populate _exchange_journal.
+    // In mock unit-test environments where Sample table is not present, synchronize in-memory journal from mock source.
+    const hasSampleTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Sample'").get());
+    if (!hasSampleTable) {
+        await syncJournal(auth, maps);
+    }
 
     const maxLimit = Math.min(500, Math.max(1, parseInt(limit) || 100));
     const decoded = decodeCursor(cursor, db);
@@ -1467,38 +1568,46 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
     }
 
     // Country Scoping
-    const keyCountries = auth?.countries || [];
-    const hasGlobalCountry = keyCountries.length === 0 || keyCountries.includes('*');
-    if (!hasGlobalCountry) {
-        const placeholders = keyCountries.map(() => '?').join(',');
-        conditions.push(`country IN (${placeholders})`);
-        params.push(...keyCountries);
+    if (Array.isArray(auth?.countries)) {
+        if (auth.countries.includes('*')) {
+            // Global country scope
+        } else if (auth.countries.length === 0) {
+            conditions.push('1 = 0');
+        } else {
+            const placeholders = auth.countries.map(() => '?').join(',');
+            conditions.push(`country IN (${placeholders})`);
+            params.push(...auth.countries);
+        }
     }
 
     // Project Scoping
-    const keyProjects = auth?.projects || [];
-    const hasGlobalProject = keyProjects.length === 0 || keyProjects.includes('*');
-    if (!hasGlobalProject) {
-        let authorizedProjects = keyProjects;
-        try {
-            const projectPolicyService = require('./projectPolicyService');
-            const expandedProjects = new Set();
-            for (const kp of keyProjects) {
-                expandedProjects.add(kp);
-                try {
-                    const children = projectPolicyService.getProgrammeChildProjectCodes(kp);
-                    children.forEach(c => expandedProjects.add(c));
-                } catch (e) {}
-            }
-            authorizedProjects = Array.from(expandedProjects);
-        } catch (e) {}
-
-        if (authorizedProjects.length > 0) {
-            const placeholders = authorizedProjects.map(() => '?').join(',');
-            conditions.push(`project_code IN (${placeholders})`);
-            params.push(...authorizedProjects);
-        } else {
+    if (Array.isArray(auth?.projects)) {
+        if (auth.projects.includes('*')) {
+            // Global project scope
+        } else if (auth.projects.length === 0) {
             conditions.push('1 = 0');
+        } else {
+            let authorizedProjects = auth.projects;
+            try {
+                const projectPolicyService = require('./projectPolicyService');
+                const expandedProjects = new Set();
+                for (const kp of auth.projects) {
+                    expandedProjects.add(kp);
+                    try {
+                        const children = projectPolicyService.getProgrammeChildProjectCodes(kp);
+                        children.forEach(c => expandedProjects.add(c));
+                    } catch (e) {}
+                }
+                authorizedProjects = Array.from(expandedProjects);
+            } catch (e) {}
+
+            if (authorizedProjects.length > 0) {
+                const placeholders = authorizedProjects.map(() => '?').join(',');
+                conditions.push(`project_code IN (${placeholders})`);
+                params.push(...authorizedProjects);
+            } else {
+                conditions.push('1 = 0');
+            }
         }
     }
 
@@ -1551,11 +1660,14 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
 
         // Record issued change batch in _exchange_batches for durable receipt resolution
         issuedBatchId = `batch_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+        const currentConnRow = db.prepare('SELECT auth_version FROM _exchange_connections WHERE id = ?').get(currentConn);
+        const currentAuthVer = auth?.authVersion || currentConnRow?.auth_version || 1;
+        const curEpoch = getCurrentEpoch(db);
         try {
             db.prepare(`
-                INSERT INTO _exchange_batches (id, connection_id, snapshot_id, start_seq, end_seq, item_count, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            `).run(issuedBatchId, currentConn, null, pageRows[0].sequence, last.sequence, pageRows.length, new Date().toISOString());
+                INSERT INTO _exchange_batches (id, connection_id, snapshot_id, start_seq, end_seq, item_count, created_at, auth_version, epoch, schema_version)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, '2026-09-issue140-v2')
+            `).run(issuedBatchId, currentConn, null, pageRows[0].sequence, last.sequence, pageRows.length, new Date().toISOString(), currentAuthVer, curEpoch);
         } catch (e) {}
     } else if (cursor) {
         nextCursor = cursor;
@@ -1655,6 +1767,10 @@ function recordReceipt(auth, receiptData = {}) {
         }
     }
 
+    const currentConn = db.prepare('SELECT auth_version, status FROM _exchange_connections WHERE id = ?').get(connectionId);
+    const currentAuthVersion = auth?.authVersion || currentConn?.auth_version || 1;
+    const currentEpoch = getCurrentEpoch(db);
+
     let snap = null;
     if (snapshotId) {
         snap = db.prepare('SELECT * FROM _exchange_snapshots WHERE id = ?').get(snapshotId);
@@ -1672,14 +1788,31 @@ function recordReceipt(auth, receiptData = {}) {
                 message: 'Referenced snapshot belongs to a different connection.'
             };
         }
+        // Authorization-version binding (R2, R3)
+        if (snap.auth_version !== undefined && snap.auth_version !== null && snap.auth_version !== currentAuthVersion) {
+            return {
+                error: 'SNAPSHOT_EXPIRED',
+                status: 410,
+                code: 'AUTH_VERSION_MISMATCH',
+                message: `Referenced snapshot '${snapshotId}' was issued under authorization version ${snap.auth_version}, but current connection authorization version is ${currentAuthVersion}. Receipt rejected.`
+            };
+        }
+        if (snap.epoch && snap.epoch !== currentEpoch) {
+            return {
+                error: 'SNAPSHOT_EXPIRED',
+                status: 410,
+                code: 'EPOCH_MISMATCH',
+                message: `Referenced snapshot '${snapshotId}' belongs to a previous epoch (${snap.epoch}) and has been invalidated.`
+            };
+        }
     }
 
     // Validate referenced batchId against durable issued artifacts in _exchange_batches or _exchange_snapshots
     let batch = null;
     if (batchId) {
-        batch = db.prepare('SELECT id, connection_id, start_seq, end_seq, item_count, snapshot_id FROM _exchange_batches WHERE id = ?').get(batchId);
+        batch = db.prepare('SELECT id, connection_id, start_seq, end_seq, item_count, snapshot_id, auth_version, epoch FROM _exchange_batches WHERE id = ?').get(batchId);
         if (!batch) {
-            const snapAsBatch = db.prepare('SELECT id, connection_id, 1 as start_seq, high_water_sequence as end_seq, total_samples as item_count FROM _exchange_snapshots WHERE id = ?').get(batchId);
+            const snapAsBatch = db.prepare('SELECT id, connection_id, 1 as start_seq, high_water_sequence as end_seq, total_samples as item_count, auth_version, epoch FROM _exchange_snapshots WHERE id = ?').get(batchId);
             if (snapAsBatch) {
                 // If referencing a snapshot as batchId, and snapshotId is also provided:
                 // They must refer to the SAME snapshot!
@@ -1713,6 +1846,22 @@ function recordReceipt(auth, receiptData = {}) {
                 error: 'BATCH_SNAPSHOT_MISMATCH',
                 status: 400,
                 message: 'Referenced batch does not belong to specified snapshot.'
+            };
+        }
+        if (batch.auth_version !== undefined && batch.auth_version !== null && batch.auth_version !== currentAuthVersion) {
+            return {
+                error: 'BATCH_EXPIRED',
+                status: 410,
+                code: 'AUTH_VERSION_MISMATCH',
+                message: `Referenced batch '${batchId}' was issued under authorization version ${batch.auth_version}, but current connection authorization version is ${currentAuthVersion}. Receipt rejected.`
+            };
+        }
+        if (batch.epoch && batch.epoch !== currentEpoch) {
+            return {
+                error: 'BATCH_EXPIRED',
+                status: 410,
+                code: 'EPOCH_MISMATCH',
+                message: `Referenced batch '${batchId}' belongs to a previous epoch (${batch.epoch}) and has been invalidated.`
             };
         }
     }
@@ -1862,8 +2011,10 @@ function recordReceipt(auth, receiptData = {}) {
 
             const finalReceiptId = receiptId || `rec_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
             const stmt = db.prepare(`
-                INSERT INTO _exchange_receipts (id, connection_id, snapshot_id, batch_id, imported_count, quarantined_count, checkpoint, details, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO _exchange_receipts (
+                    id, connection_id, snapshot_id, batch_id, imported_count, quarantined_count,
+                    checkpoint, details, created_at, auth_version, epoch
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
 
             stmt.run(
@@ -1875,7 +2026,9 @@ function recordReceipt(auth, receiptData = {}) {
                 quarantined,
                 checkpoint ? String(checkpoint) : null,
                 errors.length > 0 ? JSON.stringify(errors) : null,
-                now
+                now,
+                currentAuthVersion,
+                currentEpoch
             );
 
             return {
@@ -1963,5 +2116,6 @@ module.exports = {
     normalizeSampleDataForHash,
     getCurrentEpoch,
     rotateEpoch,
-    getSourceSystemId
+    getSourceSystemId,
+    pruneExpiredSnapshots
 };

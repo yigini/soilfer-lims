@@ -191,7 +191,7 @@ function registerDbFunctions(db) {
                 sampleObj.updatedAt = new Date();
             }
 
-            return JSON.stringify(formatSampleV2(sampleObj));
+            return JSON.stringify(formatSampleV2(sampleObj, {}, { internal: true }));
         });
     } catch (e) {}
 }

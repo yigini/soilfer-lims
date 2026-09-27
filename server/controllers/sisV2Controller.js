@@ -804,7 +804,7 @@ exports.submitReceipt = async (req, res) => {
         if (receipt.error) {
             return res.status(receipt.status || 400).json({
                 error: receipt.error,
-                code: receipt.error,
+                code: receipt.code || receipt.error,
                 message: receipt.message
             });
         }

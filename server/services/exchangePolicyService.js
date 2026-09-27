@@ -105,52 +105,82 @@ function buildSampleWhere(auth, query = {}) {
     }
 
     // 3. Country Scoping
-    const keyCountries = auth?.countries || [];
-    const hasGlobalCountry = keyCountries.length === 0 || keyCountries.includes('*');
-
-    if (query.country) {
-        if (hasGlobalCountry || keyCountries.includes(query.country)) {
-            where.country = query.country;
+    if (Array.isArray(auth?.countries)) {
+        if (auth.countries.includes('*')) {
+            // Global wildcard scope
+            if (query.country) {
+                where.country = query.country;
+            }
+        } else if (auth.countries.length === 0) {
+            // Disjoint / empty scope -> access denied
+            where.country = { in: [] };
         } else {
-            where.country = { in: [] }; // Deny: country outside key scope
+            // Finite country scope
+            if (query.country) {
+                if (auth.countries.includes(query.country)) {
+                    where.country = query.country;
+                } else {
+                    where.country = { in: [] }; // Deny: country outside key scope
+                }
+            } else {
+                where.country = { in: auth.countries };
+            }
         }
-    } else if (!hasGlobalCountry) {
-        where.country = { in: keyCountries };
+    } else if (query.country) {
+        where.country = query.country;
     }
 
     // 4. Project Scoping
-    const keyProjects = auth?.projects || [];
-    const hasGlobalProject = keyProjects.length === 0 || keyProjects.includes('*');
+    if (Array.isArray(auth?.projects)) {
+        if (auth.projects.includes('*')) {
+            // Global wildcard scope
+            if (query.project) {
+                let targetProjects = [query.project];
+                try {
+                    const queryChildren = projectPolicyService.getProgrammeChildProjectCodes(query.project);
+                    if (queryChildren.length > 0) targetProjects = [query.project, ...queryChildren];
+                } catch (e) {}
+                where.projectCode = targetProjects.length === 1 ? targetProjects[0] : { in: targetProjects };
+            }
+        } else if (auth.projects.length === 0) {
+            // Disjoint / empty scope -> access denied
+            where.projectCode = { in: [] };
+        } else {
+            // Finite project scope with programme hierarchy expansion
+            const expandedKeyProjects = new Set();
+            for (const kp of auth.projects) {
+                expandedKeyProjects.add(kp);
+                try {
+                    const children = projectPolicyService.getProgrammeChildProjectCodes(kp);
+                    children.forEach(c => expandedKeyProjects.add(c));
+                } catch (e) {}
+            }
+            const authorizedProjectList = Array.from(expandedKeyProjects);
 
-    const expandedKeyProjects = new Set();
-    for (const kp of keyProjects) {
-        expandedKeyProjects.add(kp);
-        try {
-            const children = projectPolicyService.getProgrammeChildProjectCodes(kp);
-            children.forEach(c => expandedKeyProjects.add(c));
-        } catch (e) {}
-    }
-    const authorizedProjectList = Array.from(expandedKeyProjects);
+            if (query.project) {
+                let targetProjects = [query.project];
+                try {
+                    const queryChildren = projectPolicyService.getProgrammeChildProjectCodes(query.project);
+                    if (queryChildren.length > 0) targetProjects = [query.project, ...queryChildren];
+                } catch (e) {}
 
-    if (query.project) {
+                const allowed = targetProjects.filter(p => authorizedProjectList.includes(p));
+                if (allowed.length > 0) {
+                    where.projectCode = allowed.length === 1 ? allowed[0] : { in: allowed };
+                } else {
+                    where.projectCode = { in: [] }; // Deny: project outside key scope
+                }
+            } else {
+                where.projectCode = { in: authorizedProjectList };
+            }
+        }
+    } else if (query.project) {
         let targetProjects = [query.project];
         try {
             const queryChildren = projectPolicyService.getProgrammeChildProjectCodes(query.project);
             if (queryChildren.length > 0) targetProjects = [query.project, ...queryChildren];
         } catch (e) {}
-
-        if (hasGlobalProject) {
-            where.projectCode = targetProjects.length === 1 ? targetProjects[0] : { in: targetProjects };
-        } else {
-            const allowed = targetProjects.filter(p => authorizedProjectList.includes(p));
-            if (allowed.length > 0) {
-                where.projectCode = allowed.length === 1 ? allowed[0] : { in: allowed };
-            } else {
-                where.projectCode = { in: [] }; // Deny: project outside key scope
-            }
-        }
-    } else if (!hasGlobalProject) {
-        where.projectCode = { in: authorizedProjectList };
+        where.projectCode = targetProjects.length === 1 ? targetProjects[0] : { in: targetProjects };
     }
 
     // 5. Incremental / UpdatedSince Filter

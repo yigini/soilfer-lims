@@ -18,8 +18,15 @@ const { normalizeUnit } = require('./interpretationService');
 // Source System Identifier (stable across hostnames / migrations)
 function resolveSourceSystemId(db) {
     if (process.env.SOURCE_SYSTEM_ID) return process.env.SOURCE_SYSTEM_ID;
-    const { getSourceSystemId } = require('./exchangeStateService');
-    return getSourceSystemId(db);
+    try {
+        const { getSourceSystemId } = require('./exchangeStateService');
+        return getSourceSystemId(db);
+    } catch (e) {
+        if (e.code === 'MODULE_NOT_FOUND' || (e.message && e.message.includes('Unexpected dependency'))) {
+            return 'soilfer-lims-core';
+        }
+        throw e;
+    }
 }
 
 const SOURCE_SYSTEM_ID = process.env.SOURCE_SYSTEM_ID || 'soilfer-lims-core';
