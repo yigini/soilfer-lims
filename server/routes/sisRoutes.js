@@ -12,14 +12,14 @@ router.get('/samples', apiKeyAuth, sisController.getSamples);
 router.get('/samples/:id', apiKeyAuth, sisController.getSampleById);
 
 // 2. Spatial GeoJSON FeatureCollection for GIS Integration
-router.get('/geojson', apiKeyAuth, apiKeyAuth.requireCapability('SPATIAL'), sisController.getGeoJson);
+router.get('/geojson', apiKeyAuth, sisController.getGeoJson);
 
 // 3. Tabular Analytical Chemistry Matrix
 router.get('/results', apiKeyAuth, sisController.getResultsMatrix);
 
 // 4. Spectroscopy Dataset (NIR/MIR)
-router.get('/spectra', apiKeyAuth, apiKeyAuth.requireCapability('SPECTRAL'), sisController.getSpectra);
-router.get('/spectra/export', apiKeyAuth, apiKeyAuth.requireCapability('SPECTRAL'), spectralExportController.exportSpectra);
+router.get('/spectra', apiKeyAuth, sisController.getSpectra);
+router.get('/spectra/export', apiKeyAuth, spectralExportController.exportSpectra);
 
 // 5. Delta Synchronization Endpoint for Incremental ETL
 router.get('/sync', apiKeyAuth, sisController.syncDelta);
