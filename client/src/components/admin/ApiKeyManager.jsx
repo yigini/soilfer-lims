@@ -22,11 +22,14 @@ const ApiKeyManager = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [name, setName] = useState('');
     const [role, setRole] = useState('NSIS_CONSUMER');
+    const [selectedCapabilities, setSelectedCapabilities] = useState(['SPATIAL', 'SPECTRAL', 'SNAPSHOT', 'RECEIPT']);
+    const [customConnectionId, setCustomConnectionId] = useState('');
     const [selectedCountries, setSelectedCountries] = useState(['*']);
     const [availableLabs, setAvailableLabs] = useState([]);
     const [selectedLabs, setSelectedLabs] = useState([]);
     const [expiresDays, setExpiresDays] = useState(365);
     const [creating, setCreating] = useState(false);
+    const [rotatingKeyId, setRotatingKeyId] = useState(null);
 
     // Newly generated key modal
     const [generatedKey, setGeneratedKey] = useState(null);
@@ -199,6 +202,8 @@ const ApiKeyManager = () => {
                 role,
                 countries: selectedCountries.includes('*') ? null : selectedCountries,
                 labs: selectedLabs,
+                capabilities: selectedCapabilities,
+                connectionId: customConnectionId.trim() || undefined,
                 expiresDays: parseInt(expiresDays) || 365
             });
 
@@ -206,6 +211,8 @@ const ApiKeyManager = () => {
             setIsCreateModalOpen(false);
             setName('');
             setSelectedLabs([]);
+            setSelectedCapabilities(['SPATIAL', 'SPECTRAL', 'SNAPSHOT', 'RECEIPT']);
+            setCustomConnectionId('');
             fetchKeys();
         } catch (err) {
             showDialog({
@@ -216,6 +223,31 @@ const ApiKeyManager = () => {
         } finally {
             setCreating(false);
         }
+    };
+
+    const handleRotateKey = (keyId, keyName) => {
+        showDialog({
+            title: 'Rotate API Key?',
+            message: `Are you sure you want to rotate "${keyName}"? The current secret token will be revoked immediately and a new secret key will be generated for the same connection identity and scopes.`,
+            type: 'confirm',
+            confirmText: 'Rotate Key',
+            onConfirm: async () => {
+                setRotatingKeyId(keyId);
+                try {
+                    const res = await axios.post(`/api/v1/data-exchange/keys/${keyId}/rotate`);
+                    setGeneratedKey(res.data.apiKey);
+                    fetchKeys();
+                } catch (err) {
+                    showDialog({
+                        title: 'Rotation Failed',
+                        message: err.response?.data?.message || err.response?.data?.error || err.message,
+                        type: 'error'
+                    });
+                } finally {
+                    setRotatingKeyId(null);
+                }
+            }
+        });
     };
 
     const handleRevokeKey = (keyId, keyName) => {
@@ -441,63 +473,97 @@ const ApiKeyManager = () => {
                             <table className="w-full text-left text-sm">
                                 <thead className="bg-sf-canvas/50 border-b border-sf-divider text-xs font-bold uppercase text-sf-muted">
                                     <tr>
-                                        <th className="p-4">Integration / Consumer</th>
+                                        <th className="p-4">Integration & Connection</th>
                                         <th className="p-4">Key Identifier</th>
-                                        <th className="p-4">Role & Scope</th>
+                                        <th className="p-4">Capabilities & Scope</th>
                                         <th className="p-4">Created / Last Used</th>
                                         <th className="p-4">Status</th>
                                         <th className="p-4 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-sf-divider">
-                                    {keys.map((k) => (
-                                        <tr key={k.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition">
-                                            <td className="p-4">
-                                                <div className="font-bold text-sf-text">{k.name}</div>
-                                                <div className="text-xs text-gray-400">Owner: {k.createdBy || 'Administrator'}</div>
-                                            </td>
-                                            <td className="p-4 font-mono text-xs text-blue-600 dark:text-blue-400 font-bold">
-                                                {k.keyPrefix}••••••••
-                                            </td>
-                                            <td className="p-4 space-y-1">
-                                                <span className="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-bold">
-                                                    {k.role}
-                                                </span>
-                                                <div className="text-xs text-gray-500">
-                                                    Territory: {k.countries?.join(', ') || 'Global (*)'}
-                                                </div>
-                                                <div className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
-                                                    Labs: {Array.isArray(k.labs) ? (k.labs.includes('*') ? 'All Laboratories (*)' : k.labs.join(', ')) : (k.labs ? (JSON.parse(k.labs).includes('*') ? 'All Laboratories (*)' : JSON.parse(k.labs).join(', ')) : 'None')}
-                                                </div>
-                                            </td>
-                                            <td className="p-4 text-xs text-gray-500 space-y-0.5">
-                                                <div>Created: {new Date(k.createdAt).toLocaleDateString()}</div>
-                                                <div>Used: {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString() : 'Never'}</div>
-                                            </td>
-                                            <td className="p-4">
-                                                {k.isActive ? (
-                                                    <span className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold inline-flex items-center gap-1.5">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Active
-                                                    </span>
-                                                ) : (
-                                                    <span className="px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-bold">
-                                                        Revoked
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="p-4 text-right">
-                                                {k.isActive && (
-                                                    <button
-                                                        onClick={() => handleRevokeKey(k.id, k.name)}
-                                                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition"
-                                                        title="Revoke API Key"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {keys.map((k) => {
+                                        const rawCaps = k.capabilities;
+                                        let caps = [];
+                                        if (Array.isArray(rawCaps)) caps = rawCaps;
+                                        else if (rawCaps) {
+                                            try { caps = JSON.parse(rawCaps); } catch (_) { caps = []; }
+                                        }
+                                        return (
+                                            <tr key={k.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition">
+                                                <td className="p-4">
+                                                    <div className="font-bold text-sf-text">{k.name}</div>
+                                                    <div className="text-xs font-mono text-gray-500 dark:text-gray-400 mt-0.5">
+                                                        Conn: <span className="font-semibold text-blue-600 dark:text-blue-400">{k.connectionId || ('conn_' + k.id)}</span>
+                                                    </div>
+                                                    <div className="text-[11px] text-gray-400">Owner: {k.createdBy || 'Administrator'}</div>
+                                                </td>
+                                                <td className="p-4 font-mono text-xs text-blue-600 dark:text-blue-400 font-bold">
+                                                    {k.keyPrefix}••••••••
+                                                </td>
+                                                <td className="p-4 space-y-1.5">
+                                                    <div className="flex flex-wrap items-center gap-1">
+                                                        <span className="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-bold">
+                                                            {k.role}
+                                                        </span>
+                                                        {caps.length > 0 ? caps.map(cap => (
+                                                            <span key={cap} className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                                                {cap}
+                                                            </span>
+                                                        )) : (
+                                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                                                                NO CAPS
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                        Territory: {k.countries?.join(', ') || 'Global (*)'}
+                                                    </div>
+                                                    <div className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+                                                        Labs: {Array.isArray(k.labs) ? (k.labs.includes('*') ? 'All Laboratories (*)' : k.labs.join(', ')) : (k.labs ? (JSON.parse(k.labs).includes('*') ? 'All Laboratories (*)' : JSON.parse(k.labs).join(', ')) : 'None')}
+                                                    </div>
+                                                </td>
+                                                <td className="p-4 text-xs text-gray-500 space-y-0.5">
+                                                    <div>Created: {new Date(k.createdAt).toLocaleDateString()}</div>
+                                                    <div>Used: {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString() : 'Never'}</div>
+                                                </td>
+                                                <td className="p-4">
+                                                    {k.isActive ? (
+                                                        <span className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold inline-flex items-center gap-1.5">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Active
+                                                        </span>
+                                                    ) : (
+                                                        <span className="px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-bold">
+                                                            Revoked
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="p-4 text-right">
+                                                    <div className="flex items-center justify-end gap-1">
+                                                        {k.isActive && (
+                                                            <button
+                                                                onClick={() => handleRotateKey(k.id, k.name)}
+                                                                disabled={rotatingKeyId === k.id}
+                                                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg transition disabled:opacity-50"
+                                                                title="Rotate API Key (Issues new secret token for existing connection ID)"
+                                                            >
+                                                                <RefreshCw size={16} className={rotatingKeyId === k.id ? 'animate-spin text-blue-600' : ''} />
+                                                            </button>
+                                                        )}
+                                                        {k.isActive && (
+                                                            <button
+                                                                onClick={() => handleRevokeKey(k.id, k.name)}
+                                                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition"
+                                                                title="Revoke API Key"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
@@ -959,6 +1025,22 @@ const ApiKeyManager = () => {
 
                             <div>
                                 <label className="block text-xs font-bold text-sf-muted mb-1 uppercase tracking-wider">
+                                    Connection Identifier (Optional)
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. conn_kenya_national_sis (leave blank for auto-generated)"
+                                    value={customConnectionId}
+                                    onChange={(e) => setCustomConnectionId(e.target.value)}
+                                    className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none"
+                                />
+                                <p className="text-[11px] text-gray-400 mt-1">
+                                    Persistent identity across key rotations. Distinct keys with different connections cannot acknowledge each other&apos;s snapshots.
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-sf-muted mb-1 uppercase tracking-wider">
                                     Access Role
                                 </label>
                                 <select
@@ -970,6 +1052,39 @@ const ApiKeyManager = () => {
                                     <option value="EXTERNAL_GIS">GIS Harvester (Spatial GeoJSON & Coordinates)</option>
                                     <option value="GLOBAL_HARVESTER">Global Soil Partnership (Global Sync)</option>
                                 </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-sf-muted mb-1 uppercase tracking-wider">
+                                    Granted Capabilities (Fine-Grained Permissions)
+                                </label>
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                    {[
+                                        { id: 'SPATIAL', label: 'SPATIAL', desc: 'GPS coordinates & GeoJSON points' },
+                                        { id: 'SPECTRAL', label: 'SPECTRAL', desc: 'MIR / Vis-NIR spectroscopy curves' },
+                                        { id: 'SNAPSHOT', label: 'SNAPSHOT', desc: 'Snapshot package creation & retrieval' },
+                                        { id: 'RECEIPT', label: 'RECEIPT', desc: 'Sequence receipt acknowledgement' }
+                                    ].map((cap) => (
+                                        <label key={cap.id} className="flex items-start gap-2 p-2 rounded-lg bg-sf-canvas/50 border border-sf-divider cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedCapabilities.includes(cap.id)}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setSelectedCapabilities([...selectedCapabilities, cap.id]);
+                                                    } else {
+                                                        setSelectedCapabilities(selectedCapabilities.filter(c => c !== cap.id));
+                                                    }
+                                                }}
+                                                className="rounded text-blue-600 mt-0.5"
+                                            />
+                                            <div>
+                                                <div className="font-mono font-bold text-[11px] text-sf-text">{cap.label}</div>
+                                                <div className="text-[10px] text-gray-400">{cap.desc}</div>
+                                            </div>
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
 
                             <div>

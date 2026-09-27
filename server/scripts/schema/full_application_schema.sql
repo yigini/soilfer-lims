@@ -863,6 +863,8 @@ CREATE TABLE "ApiKey" (
     "keyHash" TEXT NOT NULL,
     "keyPrefix" TEXT NOT NULL,
     "role" TEXT NOT NULL DEFAULT 'NSIS_CONSUMER',
+    "capabilities" TEXT,
+    "connectionId" TEXT,
     "countries" TEXT,
     "projects" TEXT,
     "labs" TEXT,
@@ -1379,3 +1381,38 @@ CREATE UNIQUE INDEX "StaffInvitation_tokenHash_key" ON "StaffInvitation"("tokenH
 
 -- CreateIndex
 CREATE UNIQUE INDEX "StaffRecoveryGrant_tokenHash_key" ON "StaffRecoveryGrant"("tokenHash");
+
+-- CreateIndex
+CREATE INDEX "ApiKey_connectionId_idx" ON "ApiKey"("connectionId");
+
+-- CreateTable
+CREATE TABLE "_exchange_connections" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "client_code" TEXT,
+    "organization" TEXT,
+    "contact_email" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'ACTIVE',
+    "capabilities" TEXT NOT NULL DEFAULT '[]',
+    "countries" TEXT,
+    "projects" TEXT,
+    "labs" TEXT,
+    "auth_version" INTEGER NOT NULL DEFAULT 1,
+    "rate_limit_per_min" INTEGER DEFAULT 120,
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CreateTable
+CREATE TABLE "_exchange_connection_keys" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "connection_id" TEXT NOT NULL,
+    "api_key_id" TEXT NOT NULL,
+    "key_status" TEXT NOT NULL DEFAULT 'ACTIVE',
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "rotated_at" DATETIME
+);
+
+-- CreateIndex
+CREATE INDEX "idx_exchange_conn_keys_conn" ON "_exchange_connection_keys"("connection_id");
+CREATE INDEX "idx_exchange_conn_keys_key" ON "_exchange_connection_keys"("api_key_id");

@@ -106,11 +106,42 @@ function migrateExchangeTables(dbPath) {
                 value TEXT NOT NULL,
                 updated_at TEXT NOT NULL DEFAULT ''
             );
+
+            CREATE TABLE IF NOT EXISTS _exchange_connections (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                client_code TEXT,
+                organization TEXT,
+                contact_email TEXT,
+                status TEXT NOT NULL DEFAULT 'ACTIVE',
+                capabilities TEXT NOT NULL DEFAULT '[]',
+                countries TEXT,
+                projects TEXT,
+                labs TEXT,
+                auth_version INTEGER NOT NULL DEFAULT 1,
+                rate_limit_per_min INTEGER DEFAULT 120,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS _exchange_connection_keys (
+                id TEXT PRIMARY KEY,
+                connection_id TEXT NOT NULL,
+                api_key_id TEXT NOT NULL,
+                key_status TEXT NOT NULL DEFAULT 'ACTIVE',
+                created_at TEXT NOT NULL,
+                rotated_at TEXT
+            );
         `);
 
         // 2. Non-destructive additive column checks (F5: NEVER drop populated tables)
         ensureColumns(db, '_exchange_meta', {
             updated_at: "TEXT DEFAULT ''"
+        });
+
+        ensureColumns(db, 'ApiKey', {
+            capabilities: "TEXT",
+            connectionId: "TEXT"
         });
 
         ensureColumns(db, '_exchange_snapshots', {
@@ -187,6 +218,18 @@ function migrateExchangeTables(dbPath) {
             ON CONFLICT(key) DO NOTHING
         `).run(new Date().toISOString());
 
+        // Ensure source_system_id exists in _exchange_meta
+        const existingSourceId = db.prepare("SELECT value FROM _exchange_meta WHERE key = 'source_system_id'").get();
+        if (!existingSourceId || !existingSourceId.value) {
+            const crypto = require('crypto');
+            const initId = process.env.SOURCE_SYSTEM_ID || `soilfer-lims-node-${crypto.randomBytes(4).toString('hex')}`;
+            db.prepare(`
+                INSERT INTO _exchange_meta (key, value, updated_at)
+                VALUES ('source_system_id', ?, ?)
+                ON CONFLICT(key) DO NOTHING
+            `).run(initId, new Date().toISOString());
+        }
+
         // 5. Create indexes now that all columns are guaranteed to exist
         db.exec(`
             CREATE INDEX IF NOT EXISTS idx_exchange_journal_seq ON _exchange_journal(sequence);
@@ -202,6 +245,8 @@ function migrateExchangeTables(dbPath) {
             CREATE UNIQUE INDEX IF NOT EXISTS uq_exchange_receipts_conn_snap ON _exchange_receipts(connection_id, snapshot_id) WHERE snapshot_id IS NOT NULL AND batch_id IS NULL AND checkpoint IS NULL;
             CREATE UNIQUE INDEX IF NOT EXISTS uq_exchange_receipts_conn_batch ON _exchange_receipts(connection_id, batch_id) WHERE batch_id IS NOT NULL AND snapshot_id IS NULL;
             CREATE INDEX IF NOT EXISTS idx_exchange_batches_conn ON _exchange_batches(connection_id, id);
+            CREATE INDEX IF NOT EXISTS idx_exchange_conn_keys_conn ON _exchange_connection_keys(connection_id);
+            CREATE INDEX IF NOT EXISTS idx_exchange_conn_keys_key ON _exchange_connection_keys(api_key_id);
             DROP TRIGGER IF EXISTS trg_sample_au;
         `);
 

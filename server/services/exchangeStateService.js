@@ -71,9 +71,9 @@ function rotateEpoch(db, reason = 'RESTORE_EVENT') {
         throw new Error('Epoch rotation failed: database connection missing or invalid.');
     }
     const current = getCurrentEpoch(metaDb);
-    const m = current.match(/^epoch-(\d+)$/);
-    const nextNum = m ? parseInt(m[1], 10) + 1 : Date.now();
-    const newEpoch = `epoch-${nextNum}`;
+    // Unrepeatable restore generation using timestamp + cryptographic nonce
+    const nonce = crypto.randomBytes(6).toString('hex');
+    const newEpoch = `epoch-${Date.now()}-${nonce}`;
     const now = new Date().toISOString();
 
     const rotateTx = metaDb.transaction(() => {
@@ -104,16 +104,17 @@ function getSourceSystemId(db) {
         return process.env.SOURCE_SYSTEM_ID;
     }
     const metaDb = db || (dbInstance || getDb());
+    if (!metaDb || typeof metaDb.prepare !== 'function') {
+        throw new Error('Source system identity storage unavailable: database connection missing or invalid.');
+    }
     try {
         const row = metaDb.prepare("SELECT value FROM _exchange_meta WHERE key = 'source_system_id'").get();
         if (row && row.value) return row.value;
         const newId = `soilfer-lims-node-${crypto.randomBytes(4).toString('hex')}`;
-        try {
-            metaDb.prepare("INSERT OR IGNORE INTO _exchange_meta (key, value, updated_at) VALUES ('source_system_id', ?, ?)").run(newId, new Date().toISOString());
-        } catch (ignoreErr) {}
+        metaDb.prepare("INSERT INTO _exchange_meta (key, value, updated_at) VALUES ('source_system_id', ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(newId, new Date().toISOString());
         return newId;
     } catch (e) {
-        return 'soilfer-lims-core';
+        throw new Error(`Source system identity storage unavailable: ${e.message}`);
     }
 }
 
@@ -562,18 +563,40 @@ function initTables(db) {
         );
 
         CREATE TABLE IF NOT EXISTS _exchange_connections (
-            connection_id TEXT PRIMARY KEY,
+            id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
+            client_code TEXT,
+            organization TEXT,
+            contact_email TEXT,
+            status TEXT NOT NULL DEFAULT 'ACTIVE',
+            capabilities TEXT NOT NULL DEFAULT '[]',
+            countries TEXT,
+            projects TEXT,
+            labs TEXT,
             auth_version INTEGER NOT NULL DEFAULT 1,
-            capabilities TEXT NOT NULL DEFAULT '["REGISTRY","OBSERVATIONS","CHANGES"]',
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            rate_limit_per_min INTEGER DEFAULT 120,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS _exchange_connection_keys (
+            id TEXT PRIMARY KEY,
+            connection_id TEXT NOT NULL,
+            api_key_id TEXT NOT NULL,
+            key_status TEXT NOT NULL DEFAULT 'ACTIVE',
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            rotated_at DATETIME
         );
     `);
 
     // 2. Non-destructive additive column checks (F5: NEVER drop populated tables)
     ensureColumns(db, '_exchange_meta', {
         updated_at: "TEXT DEFAULT ''"
+    });
+
+    ensureColumns(db, 'ApiKey', {
+        capabilities: "TEXT",
+        connectionId: "TEXT"
     });
 
     ensureColumns(db, '_exchange_snapshots', {
@@ -625,6 +648,26 @@ function initTables(db) {
         created_at: "TEXT DEFAULT ''"
     });
 
+    ensureColumns(db, '_exchange_connections', {
+        id: "TEXT",
+        connection_id: "TEXT",
+        client_code: "TEXT",
+        organization: "TEXT",
+        contact_email: "TEXT",
+        status: "TEXT DEFAULT 'ACTIVE'",
+        countries: "TEXT",
+        projects: "TEXT",
+        labs: "TEXT",
+        rate_limit_per_min: "INTEGER DEFAULT 120"
+    });
+
+    ensureColumns(db, '_exchange_connection_keys', {
+        id: "TEXT",
+        connection_id: "TEXT",
+        api_key_id: "TEXT",
+        key_status: "TEXT DEFAULT 'ACTIVE'"
+    });
+
     // 3. Create indexes now that all columns are guaranteed to exist
     try {
         db.exec(`
@@ -640,6 +683,8 @@ function initTables(db) {
             CREATE INDEX IF NOT EXISTS idx_exchange_journal_specimen ON _exchange_journal(specimen_id);
             CREATE INDEX IF NOT EXISTS idx_exchange_journal_scope ON _exchange_journal(laboratory_id, country, project_code);
             CREATE INDEX IF NOT EXISTS idx_exchange_batches_conn ON _exchange_batches(connection_id);
+            CREATE INDEX IF NOT EXISTS idx_exchange_conn_keys_conn ON _exchange_connection_keys(connection_id);
+            CREATE INDEX IF NOT EXISTS idx_exchange_conn_keys_key ON _exchange_connection_keys(api_key_id);
         `);
     } catch (e) {}
 
@@ -658,12 +703,9 @@ function initTables(db) {
 function getConnectionId(auth) {
     if (!auth) return 'anonymous';
     if (auth.connectionId) return String(auth.connectionId);
-    if (auth.keyId) return String(auth.keyId);
-    if (auth.id) return String(auth.id);
-    if (auth.keyPrefix) return String(auth.keyPrefix);
-    if (auth.name) {
-        return `conn_${crypto.createHash('sha256').update(String(auth.name)).digest('hex').substring(0, 16)}`;
-    }
+    if (auth.keyId) return `conn_${auth.keyId}`;
+    if (auth.id) return `conn_${auth.id}`;
+    if (auth.keyPrefix) return `conn_${auth.keyPrefix}`;
     return 'default-connection';
 }
 
@@ -1164,6 +1206,14 @@ function decodeCursor(cursorStr, db) {
     }
 }
 
+function hasSpatialCapability(auth) {
+    if (!auth) return false;
+    if (auth.role === 'SUPER_ADMIN') return true;
+    const caps = auth.capabilities;
+    if (!Array.isArray(caps)) return false;
+    return caps.includes('SPATIAL') || caps.includes('*');
+}
+
 /**
  * Reads paginated items within a snapshot boundary from frozen _exchange_snapshot_items (R2, F3).
  */
@@ -1221,7 +1271,14 @@ async function getSnapshotPage(snapshotId, auth, { limit = 50, cursor = null } =
         }, db);
     }
 
-    const data = pageRows.map(r => JSON.parse(r.body_json));
+    const canAccessSpatial = hasSpatialCapability(auth);
+    const data = pageRows.map(r => {
+        const item = JSON.parse(r.body_json);
+        if (!canAccessSpatial && item.sampling) {
+            item.sampling.location = null;
+        }
+        return item;
+    });
 
     return {
         snapshotId,
@@ -1474,11 +1531,15 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
         }, db);
     }
 
+    const canAccessSpatial = hasSpatialCapability(auth);
     const changes = pageRows.map(r => {
         let data = null;
         if (r.payload) {
             try {
                 data = JSON.parse(r.payload);
+                if (!canAccessSpatial && data && data.sampling) {
+                    data.sampling.location = null;
+                }
             } catch (e) {}
         }
         return {

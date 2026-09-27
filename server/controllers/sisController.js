@@ -49,8 +49,8 @@ async function getAnalysisMap() {
 }
 
 // Helper to format a sample into harmonized SIS JSON structure (SOSA/SSN & GloSIS compliant)
-function formatSampleForSis(sample, { analysisMap = {}, methodMap = {} } = {}) {
-    return formatSampleV1(sample, { analysisMap, methodMap });
+function formatSampleForSis(sample, { analysisMap = {}, methodMap = {} } = {}, options = {}) {
+    return formatSampleV1(sample, { analysisMap, methodMap }, options);
 }
 
 // ─── 1. GET /api/v1/sis/samples (Paginated Registry) ───
@@ -74,7 +74,7 @@ exports.getSamples = async (req, res) => {
             getAnalysisMap()
         ]);
 
-        const formatted = samples.map(s => formatSampleForSis(s, maps));
+        const formatted = samples.map(s => formatSampleForSis(s, maps, { auth: req.sisAuth }));
 
         res.json({
             status: 'success',
@@ -140,7 +140,7 @@ exports.getSampleById = async (req, res) => {
             }
         });
 
-        const formatted = formatSampleForSis(sample, maps);
+        const formatted = formatSampleForSis(sample, maps, { auth: req.sisAuth });
         formatted.spectralRecords = spectra;
 
         res.json({
@@ -172,7 +172,7 @@ exports.getGeoJson = async (req, res) => {
         const features = [];
 
         samples.forEach(s => {
-            const formatted = formatSampleForSis(s, maps);
+            const formatted = formatSampleForSis(s, maps, { auth: req.sisAuth });
             const coords = formatted.provenance.coordinates;
 
             if (coords && typeof coords.latitude === 'number' && typeof coords.longitude === 'number') {
@@ -680,6 +680,8 @@ exports.listApiKeys = async (req, res) => {
             name: k.name,
             keyPrefix: k.keyPrefix,
             role: k.role,
+            connectionId: k.connectionId || `conn_${k.id}`,
+            capabilities: k.capabilities ? (typeof k.capabilities === 'string' ? JSON.parse(k.capabilities) : k.capabilities) : [],
             countries: k.countries ? JSON.parse(k.countries) : ['*'],
             projects: k.projects ? JSON.parse(k.projects) : ['*'],
             labs: k.labs ? JSON.parse(k.labs) : [],
@@ -703,7 +705,7 @@ exports.createApiKey = async (req, res) => {
     }
 
     try {
-        const { name, role = 'NSIS_CONSUMER', countries, projects, labs, expiresDays = 365 } = req.body;
+        const { name, role = 'NSIS_CONSUMER', countries, projects, labs, capabilities, connectionId, expiresDays = 365 } = req.body;
 
         if (!name) {
             return res.status(400).json({ error: 'API Key name or consumer label is required.' });
@@ -741,6 +743,9 @@ exports.createApiKey = async (req, res) => {
             }
         }
 
+        const effectiveConnectionId = connectionId || `conn_${crypto.randomUUID()}`;
+        const effectiveCaps = Array.isArray(capabilities) ? capabilities : (capabilities ? [capabilities] : []);
+
         const newKey = await prisma.apiKey.create({
             data: {
                 id: crypto.randomUUID(),
@@ -748,6 +753,8 @@ exports.createApiKey = async (req, res) => {
                 keyHash,
                 keyPrefix,
                 role,
+                connectionId: effectiveConnectionId,
+                capabilities: JSON.stringify(effectiveCaps),
                 countries: countries && Array.isArray(countries) ? JSON.stringify(countries) : null,
                 projects: projects && Array.isArray(projects) ? JSON.stringify(projects) : null,
                 labs: JSON.stringify(effectiveLabs),
@@ -757,13 +764,51 @@ exports.createApiKey = async (req, res) => {
             }
         });
 
+        // Record in _exchange_connections & _exchange_connection_keys
+        try {
+            const { getDb } = require('../services/exchangeStateService');
+            const db = getDb();
+            const now = new Date().toISOString();
+            const hasConnTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_connections'").get());
+            if (hasConnTable) {
+                const connCols = new Set(db.prepare("PRAGMA table_info('_exchange_connections')").all().map(c => c.name));
+                const idCol = connCols.has('id') ? 'id' : (connCols.has('connection_id') ? 'connection_id' : null);
+                if (idCol) {
+                    db.prepare(`
+                        INSERT INTO _exchange_connections (${idCol}, name, capabilities, countries, projects, labs, created_at, updated_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        ON CONFLICT(${idCol}) DO UPDATE SET updated_at = excluded.updated_at
+                    `).run(
+                        effectiveConnectionId,
+                        name,
+                        JSON.stringify(effectiveCaps),
+                        countries ? JSON.stringify(countries) : null,
+                        projects ? JSON.stringify(projects) : null,
+                        JSON.stringify(effectiveLabs),
+                        now,
+                        now
+                    );
+                }
+            }
+
+            const hasKeysTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_connection_keys'").get());
+            if (hasKeysTable) {
+                db.prepare(`
+                    INSERT INTO _exchange_connection_keys (id, connection_id, api_key_id, key_status, created_at)
+                    VALUES (?, ?, ?, 'ACTIVE', ?)
+                `).run(`conn_key_${crypto.randomUUID()}`, effectiveConnectionId, newKey.id, now);
+            }
+        } catch (e) {
+            console.warn('[EXCHANGE_CONN_LINK_WARN]', e.message);
+        }
+
         await prisma.auditLog.create({
             data: {
                 id: `audit-sis-key-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
                 entity: 'SIS_API_KEY',
                 entityId: newKey.id,
                 action: 'SIS_KEY_CREATED',
-                details: `Created API key '${name}' with labs: ${JSON.stringify(effectiveLabs)}`,
+                details: `Created API key '${name}' with connectionId: ${effectiveConnectionId}, capabilities: ${JSON.stringify(effectiveCaps)}, labs: ${JSON.stringify(effectiveLabs)}`,
                 performedBy: req.user?.username || 'admin',
                 timestamp: new Date()
             }
@@ -777,6 +822,8 @@ exports.createApiKey = async (req, res) => {
             keyInfo: {
                 id: newKey.id,
                 name: newKey.name,
+                connectionId: effectiveConnectionId,
+                capabilities: effectiveCaps,
                 keyPrefix: newKey.keyPrefix,
                 role: newKey.role,
                 labs,
@@ -801,6 +848,13 @@ exports.revokeApiKey = async (req, res) => {
             data: { isActive: false }
         });
 
+        // Update connection keys mapping
+        try {
+            const { getDb } = require('../services/exchangeStateService');
+            const db = getDb();
+            db.prepare('UPDATE _exchange_connection_keys SET key_status = "REVOKED", rotated_at = ? WHERE api_key_id = ?').run(new Date().toISOString(), id);
+        } catch (e) {}
+
         await prisma.auditLog.create({
             data: {
                 id: `audit-sis-revoke-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
@@ -817,6 +871,224 @@ exports.revokeApiKey = async (req, res) => {
     } catch (err) {
         console.error('[SIS_REVOKE_KEY_ERR]', err);
         res.status(500).json({ error: 'Failed to revoke API Key.' });
+    }
+};
+
+exports.rotateApiKey = async (req, res) => {
+    if (req.user.role !== 'SUPER_ADMIN') {
+        return res.status(403).json({ error: 'Only Super Administrators can rotate SIS API keys.' });
+    }
+
+    try {
+        const { id } = req.params;
+        const oldKey = await prisma.apiKey.findUnique({ where: { id } });
+        if (!oldKey) {
+            return res.status(404).json({ error: 'API Key not found.' });
+        }
+
+        // Generate new key token
+        const rawSecret = crypto.randomBytes(24).toString('hex');
+        const fullApiKey = `slims_live_${rawSecret}`;
+        const keyHash = crypto.createHash('sha256').update(fullApiKey).digest('hex');
+        const keyPrefix = `slims_live_${rawSecret.substring(0, 8)}...`;
+
+        const effectiveConnectionId = oldKey.connectionId || `conn_${oldKey.id}`;
+
+        // Deactivate old key
+        await prisma.apiKey.update({
+            where: { id: oldKey.id },
+            data: { isActive: false }
+        });
+
+        // Create new active key linked to SAME connection
+        const newKey = await prisma.apiKey.create({
+            data: {
+                id: crypto.randomUUID(),
+                name: `${oldKey.name} (Rotated ${new Date().toISOString().slice(0, 10)})`,
+                keyHash,
+                keyPrefix,
+                role: oldKey.role,
+                connectionId: effectiveConnectionId,
+                capabilities: oldKey.capabilities,
+                countries: oldKey.countries,
+                projects: oldKey.projects,
+                labs: oldKey.labs,
+                isActive: true,
+                createdBy: req.user?.username || 'admin',
+                expiresAt: oldKey.expiresAt
+            }
+        });
+
+        // Record rotation in _exchange_connection_keys
+        try {
+            const { getDb } = require('../services/exchangeStateService');
+            const db = getDb();
+            const now = new Date().toISOString();
+            db.prepare(`
+                UPDATE _exchange_connection_keys
+                SET key_status = 'RETIRED', rotated_at = ?
+                WHERE connection_id = ? AND api_key_id = ?
+            `).run(now, effectiveConnectionId, oldKey.id);
+
+            db.prepare(`
+                INSERT INTO _exchange_connection_keys (id, connection_id, api_key_id, key_status, created_at)
+                VALUES (?, ?, ?, 'ACTIVE', ?)
+            `).run(`conn_key_${crypto.randomUUID()}`, effectiveConnectionId, newKey.id, now);
+        } catch (e) {}
+
+        await prisma.auditLog.create({
+            data: {
+                id: `audit-sis-rotate-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
+                entity: 'SIS_API_KEY',
+                entityId: newKey.id,
+                action: 'SIS_KEY_ROTATED',
+                details: `Rotated API key from '${oldKey.id}' to '${newKey.id}' for connection '${effectiveConnectionId}'`,
+                performedBy: req.user?.username || 'admin',
+                timestamp: new Date()
+            }
+        });
+
+        res.json({
+            status: 'success',
+            message: 'API Key rotated successfully. The old key has been revoked and the new key is active.',
+            apiKey: fullApiKey,
+            keyInfo: {
+                id: newKey.id,
+                name: newKey.name,
+                connectionId: effectiveConnectionId,
+                keyPrefix: newKey.keyPrefix,
+                role: newKey.role,
+                capabilities: newKey.capabilities ? JSON.parse(newKey.capabilities) : [],
+                expiresAt: newKey.expiresAt
+            }
+        });
+    } catch (err) {
+        console.error('[SIS_ROTATE_KEY_ERR]', err);
+        res.status(500).json({ error: 'Failed to rotate API Key.' });
+    }
+};
+
+exports.listConnections = async (req, res) => {
+    if (req.user.role !== 'SUPER_ADMIN') {
+        return res.status(403).json({ error: 'Only Super Administrators can list exchange connections.' });
+    }
+
+    try {
+        const { getDb } = require('../services/exchangeStateService');
+        const db = getDb();
+        const connections = db.prepare('SELECT * FROM _exchange_connections ORDER BY created_at DESC').all();
+        const keys = db.prepare('SELECT * FROM _exchange_connection_keys WHERE key_status = "ACTIVE"').all();
+        const keysByConn = {};
+        keys.forEach(k => {
+            if (!keysByConn[k.connection_id]) keysByConn[k.connection_id] = [];
+            keysByConn[k.connection_id].push(k.api_key_id);
+        });
+
+        const data = connections.map(c => ({
+            id: c.id,
+            name: c.name,
+            clientCode: c.client_code,
+            organization: c.organization,
+            contactEmail: c.contact_email,
+            status: c.status,
+            capabilities: c.capabilities ? JSON.parse(c.capabilities) : [],
+            countries: c.countries ? JSON.parse(c.countries) : ['*'],
+            projects: c.projects ? JSON.parse(c.projects) : ['*'],
+            labs: c.labs ? JSON.parse(c.labs) : [],
+            authVersion: c.auth_version,
+            activeKeyIds: keysByConn[c.id] || [],
+            createdAt: c.created_at,
+            updatedAt: c.updated_at
+        }));
+
+        res.json({ status: 'success', data });
+    } catch (err) {
+        console.error('[SIS_LIST_CONNS_ERR]', err);
+        res.status(500).json({ error: 'Failed to list exchange connections.' });
+    }
+};
+
+exports.createConnection = async (req, res) => {
+    if (req.user.role !== 'SUPER_ADMIN') {
+        return res.status(403).json({ error: 'Only Super Administrators can create exchange connections.' });
+    }
+
+    try {
+        const { name, clientCode, organization, contactEmail, capabilities = [], countries, projects, labs = [] } = req.body;
+        if (!name) return res.status(400).json({ error: 'Connection name is required.' });
+
+        const id = `conn_${crypto.randomUUID()}`;
+        const now = new Date().toISOString();
+        const { getDb } = require('../services/exchangeStateService');
+        const db = getDb();
+
+        db.prepare(`
+            INSERT INTO _exchange_connections (id, name, client_code, organization, contact_email, status, capabilities, countries, projects, labs, auth_version, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, 'ACTIVE', ?, ?, ?, ?, 1, ?, ?)
+        `).run(
+            id,
+            name,
+            clientCode || null,
+            organization || null,
+            contactEmail || null,
+            JSON.stringify(capabilities),
+            countries ? JSON.stringify(countries) : null,
+            projects ? JSON.stringify(projects) : null,
+            JSON.stringify(labs),
+            now,
+            now
+        );
+
+        res.json({
+            status: 'success',
+            message: 'Exchange connection created successfully.',
+            data: { id, name, clientCode, organization, capabilities, labs, status: 'ACTIVE', createdAt: now }
+        });
+    } catch (err) {
+        console.error('[SIS_CREATE_CONN_ERR]', err);
+        res.status(500).json({ error: 'Failed to create exchange connection.' });
+    }
+};
+
+exports.updateConnection = async (req, res) => {
+    if (req.user.role !== 'SUPER_ADMIN') {
+        return res.status(403).json({ error: 'Only Super Administrators can update exchange connections.' });
+    }
+
+    try {
+        const { id } = req.params;
+        const { name, status, capabilities, contactEmail, organization } = req.body;
+        const { getDb } = require('../services/exchangeStateService');
+        const db = getDb();
+
+        const conn = db.prepare('SELECT * FROM _exchange_connections WHERE id = ?').get(id);
+        if (!conn) return res.status(404).json({ error: 'Exchange connection not found.' });
+
+        const now = new Date().toISOString();
+        db.prepare(`
+            UPDATE _exchange_connections
+            SET name = COALESCE(?, name),
+                status = COALESCE(?, status),
+                capabilities = COALESCE(?, capabilities),
+                contact_email = COALESCE(?, contact_email),
+                organization = COALESCE(?, organization),
+                auth_version = auth_version + 1,
+                updated_at = ?
+            WHERE id = ?
+        `).run(
+            name || null,
+            status || null,
+            capabilities ? JSON.stringify(capabilities) : null,
+            contactEmail || null,
+            organization || null,
+            now,
+            id
+        );
+
+        res.json({ status: 'success', message: 'Exchange connection updated successfully.' });
+    } catch (err) {
+        console.error('[SIS_UPDATE_CONN_ERR]', err);
+        res.status(500).json({ error: 'Failed to update exchange connection.' });
     }
 };
 

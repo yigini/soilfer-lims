@@ -1909,3 +1909,36 @@ equireCapability middleware enforcing separation of SPATIAL, SPECTRAL, SNAPSHOT,
   - Contract test suites (issue140_remediations.test.js, 
 sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
 - Strictly LIMS-only assignment. OpenNSIS untouched. Ready for candidate commit, push, CI run, and Codex independent technical review.
+
+## 27 September 2026 18:30 UTC — manual status check / PR149 ccc08c2
+- Exact PR149 head ccc08c25d4ce53ec1013de02cdfc5d99b25d14fd remains OPEN. Exact-head CI36337603029 independently SUCCESS, completed17:43:17UTC. Fresh restored screenshots and second state confirmed Agy completed the candidate and awaited review.
+- Four prior failures independently fixed against actual production modules/full schema in an external synthetic DB: valid sequence receipt, rejected alias, invalid-result consistency, controlled cancellation interleaving. No claim of complete release acceptance.
+- Five bounded failures remain: persisted keys without capability grants pass all guards; equal display labels collapse different keys into one connection and allow foreign-snapshot receipt; samples expose coordinates with no spatial permission; envelope and specimen source identities differ; restoring older epoch metadata and incrementing reuses an already-issued epoch. Auth uses real persisted synthetic keys; controller request/response adapters are in-process, not HTTP/browser proof. Restore-state simulation is not a full recovery rehearsal.
+- Report work/issue149-independent-review-ccc08c2.md, actual-source script/log issue149-real-schema-review-ccc08c2.cjs/.log, retained external DB issue149-disposable-ccc08c2-Bkb2LH/synthetic-review.db. No ordinary/production/OpenNSIS writes. Original complete LIMS connection/operator/migration/recovery packages remain required; no merge/deploy clearance.
+- Public review https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5858568474 . ONE direct corrective continuation delivered18:30UTC; second fresh screenshot confirms handoff transcript, empty composer and Working/Cancel. Consumed; do not duplicate. Existing owner authorization remains sufficient for sole-Agy safe release after technical acceptance.
+- Monitoring stays PAUSED. OpenNSIS remains externally maintained and untouched; TUF planning only; concurrent drafts and all previously closed issue work preserved.
+
+### 27 September 2026 19:15 UTC — PR149 ccc08c2 independent review remediations complete & verified
+- Consumed independent review `issue149-independent-review-ccc08c2.md`, adjacent `issue149-real-schema-review-ccc08c2.cjs` and `.log`.
+- All 4 previously accepted fixes preserved:
+  1. Valid issued sequence receipts accepted (`recordReceipt` with `start_seq, end_seq`).
+  2. Unsupported checkpoint aliases strictly rejected (`cp_999999999` returns 400 `INVALID_CHECKPOINT`).
+  3. GET does not reintroduce invalid results (`isValid !== false && isValid !== 0`).
+  4. Controlled cancellation interleaving stays withdrawn (stale scan does not overwrite withdrawal; snapshot excludes cancelled specimen).
+- All 5 review defect findings comprehensively remediated and verified against real application schema:
+  1. **Fail-Closed Capability Authorization Model**: Real persisted keys with `capabilities: null` fail every capability guard (`SPATIAL`, `SPECTRAL`, `SNAPSHOT`, `RECEIPT`), returning HTTP 403 `FORBIDDEN` with code `INSUFFICIENT_CAPABILITY`. Schema updated in Prisma and DDL.
+  2. **Decoupled Immutable Connection Identity**: Stopped deriving `connectionId` by hashing `apiKey.name`. Identity is strictly derived from `apiKey.connectionId || ('conn_' + apiKey.id)`. Two distinct keys with the same display label now have distinct connection IDs (`conn_synthetic-key-1` vs `conn_synthetic-key-2`), and key B is strictly forbidden (HTTP 403 `FORBIDDEN`) from acknowledging key A's snapshot. Renaming a key leaves connection identity untouched. Implemented `_exchange_connections`, `_exchange_connection_keys`, and administrative management endpoints (`GET/POST /api/sis/connections`, `PUT /api/sis/connections/:id`, `POST /api/sis/keys/:id/rotate`).
+  3. **Field-Level Spatial Entitlement Across All Representations**: When caller lacks `SPATIAL` capability (including `capabilities: []` or `capabilities: null`), `sampling.location` and `provenance.coordinates` are redacted to `null` across all representations (`getSamples`, `getSampleById`, `getSnapshotPage`, `getChanges`, GeoJSON, spectra, `formatSampleV1`/`V2`).
+  4. **Single Installation Identity Throughout**: Envelope and specimen items agree with persistent installation identity dynamically resolved from `_exchange_meta` via `resolveSourceSystemId()`, replacing static fallback literals. `getSourceSystemId(db)` fails closed on database storage errors.
+  5. **Unrepeatable Restore Generation & Stopped-Writer Runbook**: `rotateEpoch` generates an unrepeatable cryptographic nonce + timestamp (`epoch-${Date.now()}-${crypto.randomBytes(6).toString('hex')}`), guaranteeing that restoring an older backup with an earlier epoch and incrementing can NEVER reproduce an earlier issued generation. Old cursors fail epoch verification with `EPOCH_MISMATCH` and return HTTP 410 `CURSOR_EXPIRED`. Documented complete recovery protocol in `docs/nsis-operator-runbook.md` Section 6 and created standalone CLI `server/scripts/rotate_exchange_epoch.cjs`.
+  6. **Administrative UI & Safe Key Rotation**: Updated `client/src/components/admin/ApiKeyManager.jsx` with Connection ID display and configuration, fine-grained capability badges and creation checkboxes (`SPATIAL`, `SPECTRAL`, `SNAPSHOT`, `RECEIPT`), and seamless single-click key rotation. Production client build passed cleanly in 15.64s.
+- **Verification Evidence**:
+  - `server/scripts/verify_issue149_ccc08c2_remediations.cjs`: **10/10 passed (100%)**
+  - `server/scripts/verify_issue149_9850d78_remediations.cjs`: **14/14 passed (100%)**
+  - `server/scripts/test_issue140_probes.cjs`: **16/16 passed (100%)**
+  - `server/tests/contracts/issue140_remediations.test.js`: **15/15 passed (100%)**
+  - `server/tests/contracts/sis_adapter_service.test.js`: **20/20 passed (100%)**
+  - `npm run build` (`vite build` in `client/`): **100% clean in 15.64s**
+- Completed honest architectural crosswalk against all original requirements R1-R12 and plan P0-P4/P6 in `EVIDENCE.md`.
+- Strictly LIMS-only assignment. OpenNSIS code, config, database, and deployments remain 100% untouched. Ready for candidate commit, push, CI check, and Codex independent technical review.
+

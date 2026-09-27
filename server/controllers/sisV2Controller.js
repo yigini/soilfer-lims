@@ -161,7 +161,7 @@ exports.getSamples = async (req, res) => {
             });
         }
 
-        const data = pageItems.map(s => formatSampleV2(s, maps));
+        const data = pageItems.map(s => formatSampleV2(s, maps, { auth: req.sisAuth }));
 
         res.json({
             status: 'success',
@@ -206,7 +206,7 @@ exports.getSampleById = async (req, res) => {
             });
         }
 
-        const formatted = formatSampleV2(sample, maps);
+        const formatted = formatSampleV2(sample, maps, { auth: req.sisAuth });
 
         // Check spectral records with shared spectral authorization (R4, F4)
         const spectralWhere = toPrismaSpectralWhere({
@@ -436,7 +436,7 @@ exports.getGeoJson = async (req, res) => {
         const features = [];
 
         samples.forEach(s => {
-            const v2 = formatSampleV2(s, maps);
+            const v2 = formatSampleV2(s, maps, { auth: req.sisAuth });
             const loc = v2.sampling.location;
 
             if (loc && Array.isArray(loc.coordinates) && loc.coordinates.length === 2) {

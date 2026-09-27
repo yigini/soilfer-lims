@@ -16,7 +16,25 @@
 const { normalizeUnit } = require('./interpretationService');
 
 // Source System Identifier (stable across hostnames / migrations)
+function resolveSourceSystemId(db) {
+    if (process.env.SOURCE_SYSTEM_ID) return process.env.SOURCE_SYSTEM_ID;
+    try {
+        const { getSourceSystemId } = require('./exchangeStateService');
+        return getSourceSystemId(db);
+    } catch (e) {
+        return 'soilfer-lims-core';
+    }
+}
+
 const SOURCE_SYSTEM_ID = process.env.SOURCE_SYSTEM_ID || 'soilfer-lims-core';
+
+function hasSpatialCapability(auth) {
+    if (!auth) return false;
+    if (auth.role === 'SUPER_ADMIN') return true;
+    const caps = auth.capabilities;
+    if (!Array.isArray(caps)) return false;
+    return caps.includes('SPATIAL') || caps.includes('*');
+}
 
 /**
  * Safely unwrap metadata values that may be primitive scalars, JSON strings, or { value, source, ... } wrappers.
@@ -529,7 +547,10 @@ function evaluateQualityIssues(sample, coords, depths, dates, profile) {
 /**
  * Main Harmonized Formatter for v1 API (with additive non-breaking fields).
  */
-function formatSampleV1(sample, maps = {}) {
+function formatSampleV1(sample, maps = {}, options = {}) {
+    const auth = options.auth || options.sisAuth;
+    const canAccessSpatial = auth === undefined ? true : hasSpatialCapability(auth);
+
     const field = safeParseJson(sample.fieldMetadata);
     const meta = safeParseJson(sample.metadata);
     const reception = safeParseJson(sample.receptionData);
@@ -550,7 +571,7 @@ function formatSampleV1(sample, maps = {}) {
         labId: sample.labId || null,
 
         // Additive explicit identities (Issue #140 P1)
-        sourceSystemId: sample.sourceSystemId || SOURCE_SYSTEM_ID,
+        sourceSystemId: sample.sourceSystemId || resolveSourceSystemId(),
         specimenId: sample.id,
         fieldSampleId: sample.originalId,
         labSampleId: sample.labId || null,
@@ -581,7 +602,7 @@ function formatSampleV1(sample, maps = {}) {
                 horizon: depths.horizon || `${depths.topCm ?? 0}-${depths.bottomCm ?? 20} cm`,
                 unit: 'cm'
             },
-            coordinates: coords ? {
+            coordinates: (coords && canAccessSpatial) ? {
                 latitude: coords.latitude,
                 longitude: coords.longitude,
                 accuracyMeters: coords.accuracyMeters,
@@ -614,7 +635,10 @@ function formatSampleV1(sample, maps = {}) {
 /**
  * Pure V2 Data Exchange Formatter (Strict, Lossless, Truthful).
  */
-function formatSampleV2(sample, maps = {}) {
+function formatSampleV2(sample, maps = {}, options = {}) {
+    const auth = options.auth || options.sisAuth;
+    const canAccessSpatial = auth === undefined ? true : hasSpatialCapability(auth);
+
     const field = safeParseJson(sample.fieldMetadata);
     const meta = safeParseJson(sample.metadata);
     const reception = safeParseJson(sample.receptionData);
@@ -638,7 +662,7 @@ function formatSampleV2(sample, maps = {}) {
 
     return {
         schemaVersion: '2026-09-issue140-v2',
-        sourceSystemId: sample.sourceSystemId || SOURCE_SYSTEM_ID,
+        sourceSystemId: sample.sourceSystemId || resolveSourceSystemId(),
 
         // Core Specimen Identifiers (R4, R5: laboratoryId strictly assignedLab, no labId fallback)
         specimenId: sample.id,
@@ -673,7 +697,7 @@ function formatSampleV2(sample, maps = {}) {
                 intervalLabel: depths.depthRange,
                 unit: 'cm'
             },
-            location: coords ? {
+            location: (coords && canAccessSpatial) ? {
                 type: 'Point',
                 coordinates: [coords.longitude, coords.latitude], // GeoJSON order: [lng, lat]
                 elevationMeters: coords.elevationMeters,
@@ -724,6 +748,8 @@ function formatSampleV2(sample, maps = {}) {
 
 module.exports = {
     SOURCE_SYSTEM_ID,
+    resolveSourceSystemId,
+    hasSpatialCapability,
     unwrapValue,
     safeParseJson,
     extractCoordinates,

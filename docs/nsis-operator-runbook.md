@@ -127,3 +127,55 @@ Expired snapshots can be cleaned up without affecting laboratory sample records:
 ```bash
 sqlite3 server/prisma/dev.db "DELETE FROM _exchange_snapshots WHERE expires_at < datetime('now');"
 ```
+
+---
+
+## 6. Stopped-Writer Database Restore & Epoch Invalidation Procedure (R5, R10)
+
+When restoring the SoilFER-LIMS database from a backup (e.g. disaster recovery, hardware migration, or test environment initialization), you **must** execute the stopped-writer epoch rotation before re-enabling external traffic. This ensures that a restored database incrementing an epoch can **never** reuse an already-issued generation, preventing replay of previously issued cursors or duplicate event processing.
+
+### 6.1 Step-by-Step Recovery Protocol
+
+1. **Stop Application Writers & Background Jobs:**
+   Quiesce all incoming traffic by stopping the LIMS server process and background synchronization tasks:
+   ```bash
+   # Systemd / PM2 / Docker stop
+   docker stop soilfer-lims-backend || systemctl stop soilfer-lims
+   ```
+
+2. **Restore Database File from Backup:**
+   Restore the SQLite database file to its target path (e.g. `server/prisma/dev.db`):
+   ```bash
+   cp /path/to/backup/dev_backup_YYYYMMDD.db server/prisma/dev.db
+   ```
+
+3. **Execute Stopped-Writer Epoch Rotation:**
+   Run the dedicated rotation utility while writers are stopped:
+   ```bash
+   node server/scripts/rotate_exchange_epoch.cjs --database server/prisma/dev.db --reason "DISASTER_RECOVERY_RESTORE"
+   ```
+   This generates an unrepeatable cryptographic nonce generation (e.g. `epoch-1790456789-a1b2c3`), updates `_exchange_meta`, and verifies trigger installation.
+
+4. **Verify Database Integrity & High-Water Journal Sequence:**
+   Run SQLite integrity checks to ensure the restored file is consistent:
+   ```bash
+   sqlite3 server/prisma/dev.db "PRAGMA integrity_check;"
+   sqlite3 server/prisma/dev.db "SELECT MAX(sequence) FROM _exchange_journal;"
+   ```
+
+5. **Re-enable External Traffic & Start Server:**
+   Restart the LIMS application server:
+   ```bash
+   docker start soilfer-lims-backend || systemctl start soilfer-lims
+   ```
+
+### 6.2 External Consumer Reconciliation Guidance
+
+Following an epoch rotation:
+- All cursors issued prior to the restore event carry the old epoch and will fail closed with HTTP 410 `CURSOR_EXPIRED` (`reason: 'EPOCH_MISMATCH'`).
+- External consumers (OpenNSIS / harvesters) encountering HTTP 410 must execute their re-baseline protocol:
+  1. Call `POST /api/v2/data-exchange/snapshots` to generate a fresh frozen snapshot.
+  2. Ingest snapshot items to re-establish current state.
+  3. Resume continuous sync from the snapshot's handoff cursor (`highWaterSequence`).
+  4. Submit an authenticated delivery receipt via `POST /api/v2/data-exchange/receipts`.
+

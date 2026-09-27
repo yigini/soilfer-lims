@@ -54,15 +54,24 @@ const apiKeyAuth = async (req, res, next) => {
                 data: { lastUsedAt: new Date() }
             }).catch(e => console.warn('[API_KEY] Failed to update lastUsedAt:', e.message));
 
+            let capabilities = null;
+            if (apiKey.capabilities) {
+                try {
+                    capabilities = typeof apiKey.capabilities === 'string' ? JSON.parse(apiKey.capabilities) : apiKey.capabilities;
+                } catch (e) {
+                    capabilities = null;
+                }
+            }
+
             req.sisAuth = {
                 type: 'API_KEY',
                 id: apiKey.id,
                 keyId: apiKey.id,
-                connectionId: apiKey.name ? `conn_${crypto.createHash('sha256').update(String(apiKey.name)).digest('hex').substring(0, 16)}` : `conn_${apiKey.id}`,
+                connectionId: apiKey.connectionId || `conn_${apiKey.id}`,
                 keyPrefix: apiKey.keyPrefix,
                 name: apiKey.name,
                 role: apiKey.role,
-                capabilities: apiKey.capabilities ? (typeof apiKey.capabilities === 'string' ? JSON.parse(apiKey.capabilities) : apiKey.capabilities) : null,
+                capabilities,
                 countries: apiKey.countries ? JSON.parse(apiKey.countries) : null,
                 projects: apiKey.projects ? JSON.parse(apiKey.projects) : null,
                 labs: apiKey.labs ? JSON.parse(apiKey.labs) : [] // SL-22: absent scope defaults to empty array (deny)
@@ -143,7 +152,7 @@ const requireCapability = (capability) => (req, res, next) => {
         return next();
     }
     const caps = req.sisAuth.capabilities;
-    if (Array.isArray(caps) && !caps.includes(capability) && !caps.includes('*')) {
+    if (!Array.isArray(caps) || (!caps.includes(capability) && !caps.includes('*'))) {
         return res.status(403).json({
             error: 'FORBIDDEN',
             code: 'INSUFFICIENT_CAPABILITY',

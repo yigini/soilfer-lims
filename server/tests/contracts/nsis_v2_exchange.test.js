@@ -97,6 +97,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
                 labs: JSON.stringify(['GTM-LAB1']),
                 countries: JSON.stringify(['GTM']),
                 projects: JSON.stringify(['SOILFER-GTM']),
+                capabilities: JSON.stringify(['SPATIAL', 'SPECTRAL', 'SNAPSHOT', 'RECEIPT']),
                 isActive: true
             }
         });
