@@ -2028,13 +2028,16 @@ sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
      - In `prune_exchange_storage.cjs`: `--dry-run` opens the database in strict read-only mode (`{ readonly: true }`), skipping WAL pragma; requires explicit database path argument or `DATABASE_PATH` env var.
      - Updated UI telemetry table headers in `ApiKeyManager.jsx` to "Receiver Ingested", "Receiver Quarantined", "Reported Checkpoint", "Last Receipt", with explicit tooltips explaining these represent unverified client delivery receipts.
 - **Verification Evidence**:
+  - Candidate Head SHA: `2ed61d1985474771aa113fa13101eb69b0fa5680` (`2ed61d1`)
+  - GitHub Actions Candidate CI Run: [Run 36352346662](https://github.com/yigini/soilfer-lims/actions/runs/36352346662) (**SUCCESS** in 8m29s; 144/144 test suites, 1,395/1,395 tests passed)
   - `server/tests/contracts/issue149_codex_verification.test.js`: **13/13 passed (100%)** (all 9 prior checks + 4 new checks for all reproduced findings).
   - `server/tests/contracts/export_normalization.test.js`: **2/2 passed (100%)** (SuperAdmin platform JWT access preserved).
-  - All 5 Data Exchange Jest Contract Test Suites: **50/50 passed (100%)**.
+  - All 7 Data Exchange Jest Contract Test Suites: **67/67 passed (100%)**.
   - Historical Remediation Test Suites: **34/34 passed (100%)**.
   - `server/scripts/test_issue140_probes.cjs`: **16/16 passed (100%)**.
   - `server/scripts/data_exchange_reference_client.cjs --verify`: **16/16 passed (100%)**.
   - Standalone pruner CLI `prune_exchange_storage.cjs --dry-run` and live execution: **PASS (exit code 0)**.
   - Client Build: `vite build` clean in 6.63s with zero errors.
-- **Boundaries**: Strictly LIMS-only assignment. OpenNSIS code, config, database, and deployments remain 100% untouched. All concurrent untracked files preserved. Ready for candidate commit, push, CI check, and Codex independent technical review.
+- **Boundaries**: Strictly LIMS-only assignment. OpenNSIS code, config, database, and deployments remain 100% untouched. All concurrent untracked files preserved. Ready for Codex independent technical review response.
+
 
