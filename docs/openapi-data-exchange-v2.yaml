@@ -342,6 +342,110 @@ paths:
               schema:
                 $ref: '#/components/schemas/ReceiptSubmissionResponse'
 
+  /connections:
+    get:
+      summary: List managed exchange connections
+      description: |
+        Returns administrative connections, active key linkages, granted capability scopes, and receiver ingestion telemetry.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of exchange connections
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ExchangeConnection'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    post:
+      summary: Create managed exchange connection
+      description: |
+        Provisions a named connection boundary with explicit capabilities (SPATIAL, SPECTRAL, SNAPSHOT, RECEIPT) and geographic/lab scopes.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectionCreateRequest'
+      responses:
+        '200':
+          description: Connection created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/ExchangeConnection'
+        '400':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /connections/{id}:
+    put:
+      summary: Update exchange connection status, capabilities, or scopes
+      description: |
+        Atomically updates connection status (ACTIVE, DISABLED), capabilities, or scopes. Increments auth_version to invalidate outstanding cursors and immediately halts or restricts associated API keys.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectionUpdateRequest'
+      responses:
+        '200':
+          description: Connection updated successfully
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /keys/{id}/rotate:
+    post:
+      summary: Atomic key rotation
+      description: |
+        Rotates an existing active API key. Atomically creates a new replacement key linked to the same immutable connection identity, retires the old key, and records an audit log entry in a single transaction.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Key rotated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyRotateResponse'
+        '400':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Rotation aborted and rolled back cleanly; previous key remains active
+
 components:
   securitySchemes:
     ApiKeyAuth:
@@ -962,34 +1066,186 @@ components:
               type: string
               example: ACKNOWLEDGED
 
-    StatsResponse:
+    ExchangeConnection:
+      type: object
+      properties:
+        id:
+          type: string
+          example: conn_8b2c4e1a
+        name:
+          type: string
+          example: National NSIS Integration Gateway
+        clientCode:
+          type: string
+          nullable: true
+          example: OPENNSIS_GHANA
+        organization:
+          type: string
+          nullable: true
+          example: Ministry of Food and Agriculture
+        contactEmail:
+          type: string
+          nullable: true
+          example: integration@mofa.gov.gh
+        status:
+          type: string
+          enum: [ACTIVE, DISABLED, SUSPENDED]
+          example: ACTIVE
+        capabilities:
+          type: array
+          items:
+            type: string
+            enum: [SPATIAL, SPECTRAL, SNAPSHOT, RECEIPT]
+          example: [SPATIAL, SNAPSHOT, RECEIPT]
+        countries:
+          type: array
+          items:
+            type: string
+          example: [GHA]
+        projects:
+          type: array
+          items:
+            type: string
+          example: ['*']
+        labs:
+          type: array
+          items:
+            type: string
+          example: [GHA-LAB-01]
+        authVersion:
+          type: integer
+          example: 2
+        activeKeyIds:
+          type: array
+          items:
+            type: string
+        telemetry:
+          type: object
+          properties:
+            lastReceiptAt:
+              type: string
+              format: date-time
+              nullable: true
+            totalImported:
+              type: integer
+              example: 450
+            totalQuarantined:
+              type: integer
+              example: 2
+            lastCheckpoint:
+              type: string
+              nullable: true
+              example: seq_450
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ConnectionCreateRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: National NSIS Integration Gateway
+        clientCode:
+          type: string
+          example: OPENNSIS_GHANA
+        organization:
+          type: string
+          example: Ministry of Agriculture
+        contactEmail:
+          type: string
+          example: ops@nsis.gov
+        capabilities:
+          type: array
+          items:
+            type: string
+            enum: [SPATIAL, SPECTRAL, SNAPSHOT, RECEIPT]
+          default: [SPATIAL, SNAPSHOT, RECEIPT]
+        countries:
+          type: array
+          items:
+            type: string
+          default: ['*']
+        projects:
+          type: array
+          items:
+            type: string
+          default: ['*']
+        labs:
+          type: array
+          items:
+            type: string
+          default: []
+
+    ConnectionUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, DISABLED, SUSPENDED]
+        capabilities:
+          type: array
+          items:
+            type: string
+            enum: [SPATIAL, SPECTRAL, SNAPSHOT, RECEIPT]
+        countries:
+          type: array
+          items:
+            type: string
+        projects:
+          type: array
+          items:
+            type: string
+        labs:
+          type: array
+          items:
+            type: string
+        contactEmail:
+          type: string
+        organization:
+          type: string
+
+    KeyRotateResponse:
       type: object
       properties:
         status:
           type: string
           example: success
-        schemaVersion:
+        message:
           type: string
-          example: 2026-09-issue140-v2
-        sourceSystemId:
+          example: API Key rotated successfully.
+        apiKey:
           type: string
-          example: soilfer-lims-core
-        metrics:
+          description: Newly issued plaintext API key token (returned only once)
+          example: slims_live_9f83...
+        keyInfo:
           type: object
           properties:
-            totalEligibleSamples:
-              type: integer
-            publishedSamples:
-              type: integer
-            publishedObservations:
-              type: integer
-            publishedSpectra:
-              type: integer
-            registeredLabs:
-              type: integer
-            timestamp:
+            id:
+              type: string
+            name:
+              type: string
+            connectionId:
+              type: string
+            keyPrefix:
+              type: string
+            role:
+              type: string
+            capabilities:
+              type: array
+              items:
+                type: string
+            expiresAt:
               type: string
               format: date-time
+              nullable: true
 
     ErrorResponse:
       type: object

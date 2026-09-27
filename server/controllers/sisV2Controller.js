@@ -111,8 +111,21 @@ exports.getCapabilities = (req, res) => {
     });
 };
 
+function checkConnectionActive(req, res) {
+    if (req.sisAuth?.connectionStatus && req.sisAuth.connectionStatus !== 'ACTIVE') {
+        res.status(403).json({
+            error: 'Forbidden',
+            code: 'CONNECTION_DISABLED',
+            message: `Exchange connection '${req.sisAuth.connectionId}' is ${req.sisAuth.connectionStatus}.`
+        });
+        return false;
+    }
+    return true;
+}
+
 // ─── 2. GET /api/v2/data-exchange/samples (Paginated Registry) ───
 exports.getSamples = async (req, res) => {
+    if (!checkConnectionActive(req, res)) return;
     try {
         const limit = Math.min(500, Math.max(1, parseInt(req.query.limit) || 50));
         const cursor = req.query.cursor;
@@ -182,6 +195,7 @@ exports.getSamples = async (req, res) => {
 
 // ─── 3. GET /api/v2/data-exchange/samples/:specimenId (Single Detail) ───
 exports.getSampleById = async (req, res) => {
+    if (!checkConnectionActive(req, res)) return;
     try {
         const { specimenId } = req.params;
         const baseWhere = buildSampleWhere(req.sisAuth, {});
@@ -240,6 +254,7 @@ exports.getSampleById = async (req, res) => {
 
 // ─── 4. GET /api/v2/data-exchange/observations (Lossless Results Array) ───
 exports.getObservations = async (req, res) => {
+    if (!checkConnectionActive(req, res)) return;
     try {
         const limit = Math.min(1000, Math.max(1, parseInt(req.query.limit) || 100));
         const cursor = req.query.cursor;
@@ -406,6 +421,7 @@ exports.getObservations = async (req, res) => {
 
 // ─── 5. GET /api/v2/data-exchange/geojson (RFC 7946 GeoJSON) ───
 exports.getGeoJson = async (req, res) => {
+    if (!checkConnectionActive(req, res)) return;
     try {
         const limit = Math.min(5000, Math.max(1, parseInt(req.query.limit) || 2000));
         const where = buildSampleWhere(req.sisAuth, req.query);
@@ -495,6 +511,7 @@ exports.getGeoJson = async (req, res) => {
 
 // ─── 6. GET /api/v2/data-exchange/stats (Scoped Metrics) ───
 exports.getStats = async (req, res) => {
+    if (!checkConnectionActive(req, res)) return;
     try {
         const sampleWhere = buildSampleWhere(req.sisAuth, {});
         const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, {}));
@@ -547,6 +564,7 @@ exports.getStats = async (req, res) => {
 
 // ─── 7. GET /api/v2/data-exchange/spectra (Spectroscopy Records) ───
 exports.getSpectra = async (req, res) => {
+    if (!checkConnectionActive(req, res)) return;
     try {
         const limit = Math.min(200, Math.max(1, parseInt(req.query.limit) || 50));
         const cursor = req.query.cursor;
@@ -671,6 +689,7 @@ exports.getSpectra = async (req, res) => {
 
 // ─── 8. POST /api/v2/data-exchange/snapshots (Create Snapshot) ───
 exports.createSnapshot = async (req, res) => {
+    if (!checkConnectionActive(req, res)) return;
     try {
         const ttlHours = req.body?.ttlHours ? Number(req.body.ttlHours) : 24;
         const profile = req.body?.profile || req.query?.profile || 'core-lossless-v2';
@@ -694,6 +713,14 @@ exports.createSnapshot = async (req, res) => {
             maps
         });
 
+        if (snapshot.error) {
+            return res.status(snapshot.status || 400).json({
+                error: snapshot.error,
+                code: snapshot.code || snapshot.error,
+                message: snapshot.message
+            });
+        }
+
         res.status(201).json({
             status: 'success',
             schemaVersion: '2026-09-issue140-v2',
@@ -709,6 +736,7 @@ exports.createSnapshot = async (req, res) => {
 
 // ─── 9. GET /api/v2/data-exchange/snapshots/:snapshotId/pages (Read Snapshot Pages) ───
 exports.getSnapshotPages = async (req, res) => {
+    if (!checkConnectionActive(req, res)) return;
     try {
         const { snapshotId } = req.params;
         const { limit, cursor } = req.query;
@@ -717,6 +745,7 @@ exports.getSnapshotPages = async (req, res) => {
         if (result.error) {
             return res.status(result.status || 400).json({
                 error: result.error,
+                code: result.code || result.error,
                 message: result.message
             });
         }
@@ -735,6 +764,7 @@ exports.getSnapshotPages = async (req, res) => {
 
 // ─── 10. GET /api/v2/data-exchange/changes (Change Feed / Continuous Sync) ───
 exports.getChanges = async (req, res) => {
+    if (!checkConnectionActive(req, res)) return;
     try {
         const { cursor, limit, profile, country, project, labId, assignedLab } = req.query;
         const maps = await getAnalysisMap();
@@ -749,7 +779,7 @@ exports.getChanges = async (req, res) => {
         if (result.error) {
             return res.status(result.status || 400).json({
                 error: result.error,
-                code: result.error,
+                code: result.code || result.error,
                 message: result.message
             });
         }
@@ -768,6 +798,7 @@ exports.getChanges = async (req, res) => {
 
 // ─── 11. POST /api/v2/data-exchange/receipts (Delivery Receipts) ───
 exports.submitReceipt = async (req, res) => {
+    if (!checkConnectionActive(req, res)) return;
     try {
         const receipt = exchangeStateService.recordReceipt(req.sisAuth, req.body || {});
         if (receipt.error) {

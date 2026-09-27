@@ -16,7 +16,11 @@ const ApiKeyManager = () => {
     // Core state
     const [keys, setKeys] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('keys'); // 'keys' | 'guide' | 'explorer'
+    const [connections, setConnections] = useState([]);
+    const [connectionsLoading, setConnectionsLoading] = useState(false);
+    const [editingConnection, setEditingConnection] = useState(null);
+    const [updatingConnection, setUpdatingConnection] = useState(false);
+    const [activeTab, setActiveTab] = useState('keys'); // 'keys' | 'connections' | 'guide' | 'explorer'
 
     // Key creation modal state
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -161,7 +165,20 @@ const ApiKeyManager = () => {
 
     useEffect(() => {
         fetchKeys();
+        fetchConnections();
     }, []);
+
+    const fetchConnections = async () => {
+        setConnectionsLoading(true);
+        try {
+            const res = await axios.get('/api/v1/data-exchange/connections');
+            setConnections(res.data.data || []);
+        } catch (err) {
+            console.error('Failed to fetch connections:', err);
+        } finally {
+            setConnectionsLoading(false);
+        }
+    };
 
     const fetchKeys = async () => {
         setLoading(true);
@@ -181,6 +198,60 @@ const ApiKeyManager = () => {
             console.error('Failed to fetch API keys or laboratories:', err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleToggleConnectionStatus = async (conn) => {
+        const newStatus = conn.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE';
+        try {
+            await axios.put(`/api/v1/data-exchange/connections/${conn.id}`, { status: newStatus });
+            await fetchConnections();
+            await fetchKeys();
+            showDialog({
+                title: 'Connection Status Updated',
+                message: `Connection "${conn.name}" is now ${newStatus}. Associated keys will have their access updated immediately.`,
+                type: 'info'
+            });
+        } catch (err) {
+            showDialog({
+                title: 'Status Update Failed',
+                message: err.response?.data?.message || err.message,
+                type: 'error'
+            });
+        }
+    };
+
+    const handleSaveConnectionEdit = async (e) => {
+        e.preventDefault();
+        if (!editingConnection) return;
+        setUpdatingConnection(true);
+        try {
+            await axios.put(`/api/v1/data-exchange/connections/${editingConnection.id}`, {
+                name: editingConnection.name,
+                status: editingConnection.status,
+                capabilities: editingConnection.capabilities,
+                countries: editingConnection.countries,
+                projects: editingConnection.projects,
+                labs: editingConnection.labs,
+                contactEmail: editingConnection.contactEmail,
+                organization: editingConnection.organization
+            });
+            setEditingConnection(null);
+            await fetchConnections();
+            await fetchKeys();
+            showDialog({
+                title: 'Connection Saved',
+                message: `Connection "${editingConnection.name}" was updated successfully. Auth version was incremented.`,
+                type: 'info'
+            });
+        } catch (err) {
+            showDialog({
+                title: 'Save Failed',
+                message: err.response?.data?.message || err.message,
+                type: 'error'
+            });
+        } finally {
+            setUpdatingConnection(false);
         }
     };
 
@@ -410,6 +481,16 @@ const ApiKeyManager = () => {
                     <Key size={16} /> Active API Keys ({keys.length})
                 </button>
                 <button
+                    onClick={() => setActiveTab('connections')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+                        activeTab === 'connections'
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                            : 'text-sf-muted hover:bg-sf-raised'
+                    }`}
+                >
+                    <Layers size={16} /> Connections & Telemetry ({connections.length})
+                </button>
+                <button
                     onClick={() => setActiveTab('guide')}
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
                         activeTab === 'guide'
@@ -568,6 +649,302 @@ const ApiKeyManager = () => {
                             </table>
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* TAB: CONNECTIONS & TELEMETRY */}
+            {activeTab === 'connections' && (
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h3 className="text-sm font-bold text-sf-text flex items-center gap-2">
+                                <Layers size={16} className="text-blue-500" /> Managed Exchange Connections & Receiver Telemetry
+                            </h3>
+                            <p className="text-xs text-sf-muted mt-0.5">
+                                Authoritative connection identities, capability grants, status lifecycle controls, and receiver ingestion telemetry.
+                            </p>
+                        </div>
+                        <button
+                            onClick={fetchConnections}
+                            disabled={connectionsLoading}
+                            className="px-3 py-1.5 bg-sf-raised hover:bg-sf-subtle text-sf-text rounded-xl text-xs font-semibold transition flex items-center gap-1.5 border border-sf-divider"
+                        >
+                            <RefreshCw size={14} className={connectionsLoading ? 'animate-spin' : ''} /> Refresh
+                        </button>
+                    </div>
+
+                    {connectionsLoading && connections.length === 0 ? (
+                        <div className="p-12 text-center text-sf-muted text-xs">
+                            <RefreshCw size={24} className="animate-spin mx-auto mb-2 text-blue-500" />
+                            Loading exchange connections...
+                        </div>
+                    ) : connections.length === 0 ? (
+                        <div className="p-8 text-center bg-sf-surface rounded-2xl border border-sf-divider text-sf-muted text-xs space-y-2">
+                            <Layers size={32} className="mx-auto text-sf-muted/50 mb-1" />
+                            <p className="font-semibold text-sf-text">No Managed Connections Configured</p>
+                            <p>Connections are provisioned when creating integration API keys or by platform administrators.</p>
+                        </div>
+                    ) : (
+                        <div className="bg-sf-surface rounded-2xl border border-sf-divider overflow-hidden shadow-sm">
+                            <table className="w-full text-left text-xs">
+                                <thead className="bg-sf-raised text-sf-muted uppercase font-bold text-[10px] tracking-wider border-b border-sf-divider">
+                                    <tr>
+                                        <th className="p-4">Connection & Identity</th>
+                                        <th className="p-4">Status & Control</th>
+                                        <th className="p-4">Auth Version & Capabilities</th>
+                                        <th className="p-4">Authorized Scopes</th>
+                                        <th className="p-4">Receiver Ingestion Telemetry</th>
+                                        <th className="p-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-sf-divider">
+                                    {connections.map((c) => (
+                                        <tr key={c.id} className="hover:bg-sf-raised/50 transition">
+                                            <td className="p-4 space-y-1">
+                                                <div className="font-bold text-sf-text text-sm flex items-center gap-1.5">
+                                                    {c.name}
+                                                </div>
+                                                <div className="text-[11px] font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-900 inline-block">
+                                                    {c.id}
+                                                </div>
+                                                {c.organization && (
+                                                    <div className="text-[11px] text-sf-muted">
+                                                        Org: <span className="font-medium text-sf-text">{c.organization}</span>
+                                                        {c.contactEmail && ` (${c.contactEmail})`}
+                                                    </div>
+                                                )}
+                                                {c.clientCode && (
+                                                    <div className="text-[10px] text-sf-muted">
+                                                        Client Code: <span className="font-mono text-sf-text">{c.clientCode}</span>
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className="p-4 space-y-2">
+                                                <div>
+                                                    {c.status === 'ACTIVE' ? (
+                                                        <span className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold inline-flex items-center gap-1.5">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Active
+                                                        </span>
+                                                    ) : (
+                                                        <span className="px-2.5 py-1 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 text-xs font-bold inline-flex items-center gap-1.5">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Disabled
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <button
+                                                    onClick={() => handleToggleConnectionStatus(c)}
+                                                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition border ${
+                                                        c.status === 'ACTIVE'
+                                                            ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900'
+                                                            : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900'
+                                                    }`}
+                                                >
+                                                    {c.status === 'ACTIVE' ? 'Disable Connection' : 'Enable Connection'}
+                                                </button>
+                                            </td>
+                                            <td className="p-4 space-y-1.5">
+                                                <span className="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-mono text-[11px] font-bold border border-indigo-200 dark:border-indigo-900 inline-block">
+                                                    Version {c.authVersion || 1}
+                                                </span>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {(c.capabilities || []).length > 0 ? (
+                                                        c.capabilities.map((cap) => (
+                                                            <span key={cap} className="px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-[10px] font-bold border border-blue-200 dark:border-blue-900">
+                                                                {cap}
+                                                            </span>
+                                                        ))
+                                                    ) : (
+                                                        <span className="text-[10px] text-sf-muted italic">None (Deny All)</span>
+                                                    )}
+                                                </div>
+                                                <div className="text-[10px] text-sf-muted">
+                                                    Active Keys Linked: <span className="font-bold text-sf-text">{c.activeKeyIds?.length || 0}</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-4 space-y-1">
+                                                <div className="text-[11px]">
+                                                    <span className="text-sf-muted">Countries: </span>
+                                                    <span className="font-medium text-sf-text">
+                                                        {(c.countries || []).join(', ') || 'All (*)'}
+                                                    </span>
+                                                </div>
+                                                <div className="text-[11px]">
+                                                    <span className="text-sf-muted">Labs: </span>
+                                                    <span className="font-medium text-sf-text">
+                                                        {c.labs?.length ? `${c.labs.length} laboratories` : 'None (Deny)'}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="p-4 space-y-1">
+                                                <div className="text-[11px]">
+                                                    <span className="text-sf-muted">Imported: </span>
+                                                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                                                        {c.telemetry?.totalImported ?? 0}
+                                                    </span>
+                                                </div>
+                                                <div className="text-[11px]">
+                                                    <span className="text-sf-muted">Quarantined: </span>
+                                                    <span className="font-bold text-amber-600 dark:text-amber-400">
+                                                        {c.telemetry?.totalQuarantined ?? 0}
+                                                    </span>
+                                                </div>
+                                                <div className="text-[10px] font-mono text-sf-muted">
+                                                    Checkpoint: <span className="text-sf-text">{c.telemetry?.lastCheckpoint || 'None'}</span>
+                                                </div>
+                                                <div className="text-[10px] text-sf-muted">
+                                                    Last Receipt: <span className="text-sf-text">{c.telemetry?.lastReceiptAt ? new Date(c.telemetry.lastReceiptAt).toLocaleString() : 'Not reported'}</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-4 text-right">
+                                                <button
+                                                    onClick={() => setEditingConnection(JSON.parse(JSON.stringify(c)))}
+                                                    className="px-3 py-1.5 bg-sf-raised hover:bg-sf-subtle text-sf-text rounded-xl text-xs font-bold transition border border-sf-divider inline-flex items-center gap-1.5"
+                                                >
+                                                    <Sliders size={14} /> Edit Scopes
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* EDIT CONNECTION MODAL */}
+            {editingConnection && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-sf-surface rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-sf-divider space-y-4 max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center border-b border-sf-divider pb-3">
+                            <div>
+                                <h3 className="text-base font-bold text-sf-text">Edit Exchange Connection</h3>
+                                <p className="text-xs text-sf-muted font-mono">{editingConnection.id}</p>
+                            </div>
+                            <button
+                                onClick={() => setEditingConnection(null)}
+                                className="p-1.5 rounded-lg text-sf-muted hover:bg-sf-raised"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSaveConnectionEdit} className="space-y-4 text-xs">
+                            <div>
+                                <label className="block text-sf-muted font-bold uppercase tracking-wider mb-1">
+                                    Connection Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editingConnection.name || ''}
+                                    onChange={(e) => setEditingConnection({ ...editingConnection, name: e.target.value })}
+                                    className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sf-text font-medium"
+                                    required
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-sf-muted font-bold uppercase tracking-wider mb-1">
+                                        Status
+                                    </label>
+                                    <select
+                                        value={editingConnection.status || 'ACTIVE'}
+                                        onChange={(e) => setEditingConnection({ ...editingConnection, status: e.target.value })}
+                                        className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sf-text font-medium"
+                                    >
+                                        <option value="ACTIVE">ACTIVE (Operational)</option>
+                                        <option value="DISABLED">DISABLED (Halt All Keys)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sf-muted font-bold uppercase tracking-wider mb-1">
+                                        Contact Email
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={editingConnection.contactEmail || ''}
+                                        onChange={(e) => setEditingConnection({ ...editingConnection, contactEmail: e.target.value })}
+                                        className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sf-text font-medium"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sf-muted font-bold uppercase tracking-wider mb-1.5">
+                                    Granted Capabilities
+                                </label>
+                                <div className="grid grid-cols-2 gap-2 p-3 bg-sf-canvas rounded-xl border border-sf-divider">
+                                    {[
+                                        { id: 'SPATIAL', label: 'SPATIAL (Exact GPS coordinates)' },
+                                        { id: 'SPECTRAL', label: 'SPECTRAL (Vis-NIR/MIR spectra)' },
+                                        { id: 'SNAPSHOT', label: 'SNAPSHOT (Point-in-time export)' },
+                                        { id: 'RECEIPT', label: 'RECEIPT (Delivery acknowledgements)' }
+                                    ].map((cap) => (
+                                        <label key={cap.id} className="flex items-center gap-2 cursor-pointer text-sf-text">
+                                            <input
+                                                type="checkbox"
+                                                checked={(editingConnection.capabilities || []).includes(cap.id)}
+                                                onChange={(e) => {
+                                                    const cur = editingConnection.capabilities || [];
+                                                    if (e.target.checked) {
+                                                        setEditingConnection({ ...editingConnection, capabilities: [...cur, cap.id] });
+                                                    } else {
+                                                        setEditingConnection({ ...editingConnection, capabilities: cur.filter(x => x !== cap.id) });
+                                                    }
+                                                }}
+                                                className="rounded text-blue-600"
+                                            />
+                                            <span className="font-semibold text-[11px]">{cap.label}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sf-muted font-bold uppercase tracking-wider mb-1.5">
+                                    Authorized Laboratories
+                                </label>
+                                <div className="p-3 bg-sf-canvas rounded-xl border border-sf-divider max-h-36 overflow-y-auto space-y-1.5">
+                                    {availableLabs.map((l) => (
+                                        <label key={l.id} className="flex items-center gap-2 cursor-pointer text-sf-text text-[11px]">
+                                            <input
+                                                type="checkbox"
+                                                checked={(editingConnection.labs || []).includes(l.id)}
+                                                onChange={(e) => {
+                                                    const cur = editingConnection.labs || [];
+                                                    if (e.target.checked) {
+                                                        setEditingConnection({ ...editingConnection, labs: [...cur, l.id] });
+                                                    } else {
+                                                        setEditingConnection({ ...editingConnection, labs: cur.filter(x => x !== l.id) });
+                                                    }
+                                                }}
+                                                className="rounded text-blue-600"
+                                            />
+                                            <span>{l.name || l.id} ({l.code || l.id})</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end gap-2 pt-2 border-t border-sf-divider">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditingConnection(null)}
+                                    className="px-4 py-2 text-sf-muted hover:text-sf-text font-bold"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={updatingConnection}
+                                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition shadow-md disabled:opacity-50"
+                                >
+                                    {updatingConnection ? 'Saving...' : 'Save Connection Changes'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
 

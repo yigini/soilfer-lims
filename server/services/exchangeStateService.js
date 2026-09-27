@@ -821,7 +821,7 @@ async function syncJournal(auth, maps = {}) {
                 // If never previously journaled and currently in released status: PUBLICATION
                 currentMaxSeq++;
                 const evtId = `evt_${live.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
-                const formatted = formatSampleV2(live, maps);
+                const formatted = formatSampleV2(live, maps, { internal: true });
                 insertJournalStmt.run(
                     evtId,
                     currentMaxSeq,
@@ -845,7 +845,7 @@ async function syncJournal(auth, maps = {}) {
                     if (liveApprovedTime > withdrawalTime) {
                         currentMaxSeq++;
                         const evtId = `evt_${live.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
-                        const formatted = formatSampleV2(live, maps);
+                        const formatted = formatSampleV2(live, maps, { internal: true });
                         insertJournalStmt.run(
                             evtId,
                             currentMaxSeq,
@@ -865,7 +865,7 @@ async function syncJournal(auth, maps = {}) {
                     // Analytical results or metadata changed on released sample: AMENDMENT
                     currentMaxSeq++;
                     const evtId = `evt_${live.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
-                    const formatted = formatSampleV2(live, maps);
+                    const formatted = formatSampleV2(live, maps, { internal: true });
                     insertJournalStmt.run(
                         evtId,
                         currentMaxSeq,
@@ -896,6 +896,9 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
     const db = getDb();
     ensureTriggers(db);
     const connectionId = getConnectionId(auth);
+    if (auth?.connectionStatus && auth.connectionStatus !== 'ACTIVE') {
+        return { error: 'FORBIDDEN', status: 403, code: 'CONNECTION_DISABLED', message: `Exchange connection '${connectionId}' is ${auth.connectionStatus}.` };
+    }
     const snapshotId = `snap_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
     const now = new Date();
     const highWaterTimestamp = now.toISOString();
@@ -1051,6 +1054,9 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
 function getSnapshot(snapshotId, auth) {
     const db = getDb();
     const connectionId = getConnectionId(auth);
+    if (auth?.connectionStatus && auth.connectionStatus !== 'ACTIVE') {
+        return { error: 'FORBIDDEN', status: 403, code: 'CONNECTION_DISABLED', message: `Exchange connection '${connectionId}' is ${auth.connectionStatus}.` };
+    }
     const stmt = db.prepare(`SELECT * FROM _exchange_snapshots WHERE id = ?`);
     const snap = stmt.get(snapshotId);
 
@@ -1153,11 +1159,24 @@ function getSnapshot(snapshotId, auth) {
  * Encodes an authenticated opaque cursor with HMAC integrity protection (Finding 3).
  */
 function encodeCursor(data, db) {
-    const secret = getCursorSecret(db);
-    const epoch = getCurrentEpoch(db);
+    const metaDb = db || (dbInstance || getDb());
+    const secret = getCursorSecret(metaDb);
+    const epoch = getCurrentEpoch(metaDb);
+
+    let authVersion = data.authVersion;
+    if (authVersion === undefined && data.connectionId && metaDb) {
+        try {
+            const row = metaDb.prepare('SELECT auth_version FROM _exchange_connections WHERE id = ?').get(data.connectionId);
+            if (row && row.auth_version !== undefined) {
+                authVersion = row.auth_version;
+            }
+        } catch (e) {}
+    }
+
     const payload = {
         v: 2,
         ...data,
+        authVersion: authVersion !== undefined ? authVersion : 1,
         profile: (data.profile && String(data.profile).trim().toLowerCase()) || 'default',
         epoch,
         issuedAt: Date.now()
@@ -1169,12 +1188,13 @@ function encodeCursor(data, db) {
 
 function decodeCursor(cursorStr, db) {
     if (!cursorStr) return null;
+    const metaDb = db || (dbInstance || getDb());
     try {
         const decoded = JSON.parse(Buffer.from(cursorStr, 'base64').toString('utf8'));
         if (decoded && decoded.p && decoded.s) {
             let secret;
             try {
-                secret = getCursorSecret(db);
+                secret = getCursorSecret(metaDb);
             } catch (err) {
                 return { invalid: true, reason: 'STATE_STORAGE_UNAVAILABLE', message: 'Cursor verification unavailable: signing state storage failed.' };
             }
@@ -1184,13 +1204,29 @@ function decodeCursor(cursorStr, db) {
             }
             let currentEpoch;
             try {
-                currentEpoch = getCurrentEpoch(db);
+                currentEpoch = getCurrentEpoch(metaDb);
             } catch (err) {
                 return { invalid: true, reason: 'STATE_STORAGE_UNAVAILABLE', message: 'Epoch verification unavailable: signing state storage failed.' };
             }
             if (decoded.p.epoch && decoded.p.epoch !== currentEpoch) {
                 return { invalid: true, expired: true, reason: 'EPOCH_MISMATCH', message: 'Cursor epoch mismatch.' };
             }
+
+            // Connection status and auth_version validation (R2, R3, R11)
+            if (decoded.p.connectionId && metaDb) {
+                try {
+                    const connRow = metaDb.prepare('SELECT status, auth_version FROM _exchange_connections WHERE id = ?').get(decoded.p.connectionId);
+                    if (connRow) {
+                        if (connRow.status && connRow.status !== 'ACTIVE') {
+                            return { invalid: true, expired: true, reason: 'CONNECTION_DISABLED', message: `Connection '${decoded.p.connectionId}' is ${connRow.status}.` };
+                        }
+                        if (decoded.p.authVersion !== undefined && decoded.p.authVersion !== connRow.auth_version) {
+                            return { invalid: true, expired: true, reason: 'AUTH_VERSION_MISMATCH', message: 'Cursor authorization version mismatch due to permission changes.' };
+                        }
+                    }
+                } catch (e) {}
+            }
+
             if (decoded.p.issuedAt && typeof decoded.p.issuedAt === 'number') {
                 const age = Date.now() - decoded.p.issuedAt;
                 if (age > 72 * 3600 * 1000) {
@@ -1301,6 +1337,9 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
     ensureTriggers(db);
 
     const currentConn = getConnectionId(auth);
+    if (auth?.connectionStatus && auth.connectionStatus !== 'ACTIVE') {
+        return { error: 'FORBIDDEN', status: 403, code: 'CONNECTION_DISABLED', message: `Exchange connection '${currentConn}' is ${auth.connectionStatus}.` };
+    }
 
     // F1, Probe 2: Fail closed immediately if key has empty laboratory scope
     if (auth?.type === 'API_KEY' && (!auth.labs || !Array.isArray(auth.labs) || auth.labs.length === 0)) {
@@ -1574,6 +1613,9 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
 function recordReceipt(auth, receiptData = {}) {
     const db = getDb();
     const connectionId = getConnectionId(auth);
+    if (auth?.connectionStatus && auth.connectionStatus !== 'ACTIVE') {
+        return { error: 'FORBIDDEN', status: 403, code: 'CONNECTION_DISABLED', message: `Exchange connection '${connectionId}' is ${auth.connectionStatus}.` };
+    }
     const { receiptId, snapshotId, batchId, importedCount, quarantinedCount, checkpoint, errors = [] } = receiptData;
     const now = new Date().toISOString();
 

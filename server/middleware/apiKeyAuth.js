@@ -54,12 +54,140 @@ const apiKeyAuth = async (req, res, next) => {
                 data: { lastUsedAt: new Date() }
             }).catch(e => console.warn('[API_KEY] Failed to update lastUsedAt:', e.message));
 
-            let capabilities = null;
-            if (apiKey.capabilities) {
+            const { getDb } = require('../services/exchangeStateService');
+            let db = null;
+            try {
+                db = getDb();
+            } catch (e) {
+                db = null;
+            }
+
+            const effectiveConnectionId = apiKey.connectionId || `conn_${apiKey.id}`;
+            let conn = null;
+            let keyLink = null;
+
+            if (db) {
                 try {
-                    capabilities = typeof apiKey.capabilities === 'string' ? JSON.parse(apiKey.capabilities) : apiKey.capabilities;
+                    conn = db.prepare('SELECT * FROM _exchange_connections WHERE id = ?').get(effectiveConnectionId);
+                    if (!conn) {
+                        keyLink = db.prepare('SELECT connection_id, key_status FROM _exchange_connection_keys WHERE api_key_id = ?').get(apiKey.id);
+                        if (keyLink && keyLink.connection_id) {
+                            conn = db.prepare('SELECT * FROM _exchange_connections WHERE id = ?').get(keyLink.connection_id);
+                        }
+                    } else {
+                        keyLink = db.prepare('SELECT key_status FROM _exchange_connection_keys WHERE connection_id = ? AND api_key_id = ?').get(conn.id, apiKey.id);
+                    }
                 } catch (e) {
-                    capabilities = null;
+                    console.warn('[API_KEY_AUTH] Failed to query connection state:', e.message);
+                }
+            }
+
+            // Explicit legacy migration policy: auto-provision active connection record for legacy keys
+            if (!conn && db) {
+                try {
+                    const now = new Date().toISOString();
+                    db.prepare(`
+                        INSERT OR IGNORE INTO _exchange_connections (id, name, status, capabilities, countries, projects, labs, auth_version, created_at, updated_at)
+                        VALUES (?, ?, 'ACTIVE', ?, ?, ?, ?, 1, ?, ?)
+                    `).run(
+                        effectiveConnectionId,
+                        apiKey.name,
+                        apiKey.capabilities || '[]',
+                        apiKey.countries || null,
+                        apiKey.projects || null,
+                        apiKey.labs || '[]',
+                        now,
+                        now
+                    );
+                    db.prepare(`
+                        INSERT OR IGNORE INTO _exchange_connection_keys (id, connection_id, api_key_id, key_status, created_at)
+                        VALUES (?, ?, ?, 'ACTIVE', ?)
+                    `).run(`conn_key_${apiKey.id}`, effectiveConnectionId, apiKey.id, now);
+                    conn = db.prepare('SELECT * FROM _exchange_connections WHERE id = ?').get(effectiveConnectionId);
+                } catch (e) {}
+            }
+
+            // Key retirement check
+            if (keyLink && keyLink.key_status && keyLink.key_status !== 'ACTIVE') {
+                return res.status(401).json({
+                    error: 'Unauthorized',
+                    code: 'KEY_RETIRED',
+                    message: `API Key '${apiKey.id}' has been retired or revoked.`
+                });
+            }
+
+            // Authoritative connection status check: disabled connection halts all consumer requests
+            if (conn && conn.status && conn.status !== 'ACTIVE') {
+                return res.status(403).json({
+                    error: 'Forbidden',
+                    code: 'CONNECTION_DISABLED',
+                    message: `Exchange connection '${conn.id}' is ${conn.status}.`
+                });
+            }
+
+            // Fail-closed capability resolution:
+            // If apiKey.capabilities is null/undefined, key has no capability grants (fails closed).
+            // If present, intersect with authoritative connection capabilities.
+            let effectiveCapabilities = null;
+            if (apiKey.capabilities !== null && apiKey.capabilities !== undefined) {
+                let keyCaps = [];
+                try {
+                    keyCaps = typeof apiKey.capabilities === 'string' ? JSON.parse(apiKey.capabilities) : apiKey.capabilities;
+                    if (!Array.isArray(keyCaps)) keyCaps = [];
+                } catch (e) {
+                    keyCaps = [];
+                }
+
+                if (conn && conn.capabilities !== undefined && conn.capabilities !== null) {
+                    let connCaps = [];
+                    try {
+                        connCaps = typeof conn.capabilities === 'string' ? JSON.parse(conn.capabilities) : conn.capabilities;
+                        if (!Array.isArray(connCaps)) connCaps = [];
+                    } catch (e) {
+                        connCaps = [];
+                    }
+
+                    if (connCaps.includes('*')) {
+                        effectiveCapabilities = keyCaps;
+                    } else if (keyCaps.includes('*')) {
+                        effectiveCapabilities = connCaps;
+                    } else {
+                        effectiveCapabilities = keyCaps.filter(c => connCaps.includes(c));
+                    }
+                } else {
+                    effectiveCapabilities = keyCaps;
+                }
+            }
+
+            // Scopes intersection
+            let effectiveCountries = apiKey.countries ? JSON.parse(apiKey.countries) : null;
+            let effectiveProjects = apiKey.projects ? JSON.parse(apiKey.projects) : null;
+            let effectiveLabs = apiKey.labs ? JSON.parse(apiKey.labs) : [];
+
+            if (conn) {
+                if (conn.countries) {
+                    try {
+                        const connCountries = JSON.parse(conn.countries);
+                        if (Array.isArray(connCountries) && !connCountries.includes('*')) {
+                            effectiveCountries = effectiveCountries ? effectiveCountries.filter(c => connCountries.includes(c) || c === '*') : connCountries;
+                        }
+                    } catch (e) {}
+                }
+                if (conn.projects) {
+                    try {
+                        const connProjects = JSON.parse(conn.projects);
+                        if (Array.isArray(connProjects) && !connProjects.includes('*')) {
+                            effectiveProjects = effectiveProjects ? effectiveProjects.filter(p => connProjects.includes(p) || p === '*') : connProjects;
+                        }
+                    } catch (e) {}
+                }
+                if (conn.labs) {
+                    try {
+                        const connLabs = JSON.parse(conn.labs);
+                        if (Array.isArray(connLabs) && !connLabs.includes('*')) {
+                            effectiveLabs = effectiveLabs.filter(l => connLabs.includes(l));
+                        }
+                    } catch (e) {}
                 }
             }
 
@@ -67,14 +195,16 @@ const apiKeyAuth = async (req, res, next) => {
                 type: 'API_KEY',
                 id: apiKey.id,
                 keyId: apiKey.id,
-                connectionId: apiKey.connectionId || `conn_${apiKey.id}`,
+                connectionId: conn ? conn.id : effectiveConnectionId,
+                authVersion: conn ? (conn.auth_version || 1) : 1,
+                connectionStatus: conn ? (conn.status || 'ACTIVE') : 'ACTIVE',
                 keyPrefix: apiKey.keyPrefix,
                 name: apiKey.name,
                 role: apiKey.role,
-                capabilities,
-                countries: apiKey.countries ? JSON.parse(apiKey.countries) : null,
-                projects: apiKey.projects ? JSON.parse(apiKey.projects) : null,
-                labs: apiKey.labs ? JSON.parse(apiKey.labs) : [] // SL-22: absent scope defaults to empty array (deny)
+                capabilities: effectiveCapabilities,
+                countries: effectiveCountries,
+                projects: effectiveProjects,
+                labs: effectiveLabs
             };
 
             return next();
@@ -147,8 +277,15 @@ const requireCapability = (capability) => (req, res, next) => {
     if (!req.sisAuth) {
         return res.status(401).json({ error: 'Unauthorized', message: 'Authentication required.' });
     }
+    if (req.sisAuth.connectionStatus && req.sisAuth.connectionStatus !== 'ACTIVE') {
+        return res.status(403).json({
+            error: 'FORBIDDEN',
+            code: 'CONNECTION_DISABLED',
+            message: `Exchange connection '${req.sisAuth.connectionId}' is ${req.sisAuth.connectionStatus}.`
+        });
+    }
     const role = req.sisAuth.role;
-    if (role === 'SUPER_ADMIN') {
+    if (req.sisAuth.type !== 'API_KEY' && role === 'SUPER_ADMIN') {
         return next();
     }
     const caps = req.sisAuth.capabilities;

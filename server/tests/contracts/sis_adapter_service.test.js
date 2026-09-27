@@ -287,7 +287,7 @@ describe('Issue #140 Work Package P1: SIS Data Exchange Adapter Contracts', () =
                 ]
             };
 
-            const v2 = formatSampleV2(sample);
+            const v2 = formatSampleV2(sample, {}, { auth: { capabilities: ['SPATIAL'] } });
             expect(v2.schemaVersion).toBe('2026-09-issue140-v2');
             expect(v2.specimenId).toBe('uuid-5678');
             expect(v2.fieldSampleId).toBe('FIELD-BAG-88');
@@ -302,6 +302,10 @@ describe('Issue #140 Work Package P1: SIS Data Exchange Adapter Contracts', () =
             expect(v2.sampling.depths.bottomCm).toBe(20);
             expect(v2.observations).toHaveLength(1);
             expect(v2.observations[0].parameter).toBe('N_TOTAL');
+
+            // Without SPATIAL capability or when omitted, location fails-closed to null
+            const v2Redacted = formatSampleV2(sample);
+            expect(v2Redacted.sampling.location).toBeNull();
         });
 
         test('unreleased status maps to DRAFT, cancelled to WITHDRAWN', () => {

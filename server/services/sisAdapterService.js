@@ -18,12 +18,8 @@ const { normalizeUnit } = require('./interpretationService');
 // Source System Identifier (stable across hostnames / migrations)
 function resolveSourceSystemId(db) {
     if (process.env.SOURCE_SYSTEM_ID) return process.env.SOURCE_SYSTEM_ID;
-    try {
-        const { getSourceSystemId } = require('./exchangeStateService');
-        return getSourceSystemId(db);
-    } catch (e) {
-        return 'soilfer-lims-core';
-    }
+    const { getSourceSystemId } = require('./exchangeStateService');
+    return getSourceSystemId(db);
 }
 
 const SOURCE_SYSTEM_ID = process.env.SOURCE_SYSTEM_ID || 'soilfer-lims-core';
@@ -549,7 +545,7 @@ function evaluateQualityIssues(sample, coords, depths, dates, profile) {
  */
 function formatSampleV1(sample, maps = {}, options = {}) {
     const auth = options.auth || options.sisAuth;
-    const canAccessSpatial = auth === undefined ? true : hasSpatialCapability(auth);
+    const canAccessSpatial = options.internal === true || hasSpatialCapability(auth);
 
     const field = safeParseJson(sample.fieldMetadata);
     const meta = safeParseJson(sample.metadata);
@@ -637,7 +633,7 @@ function formatSampleV1(sample, maps = {}, options = {}) {
  */
 function formatSampleV2(sample, maps = {}, options = {}) {
     const auth = options.auth || options.sisAuth;
-    const canAccessSpatial = auth === undefined ? true : hasSpatialCapability(auth);
+    const canAccessSpatial = options.internal === true || hasSpatialCapability(auth);
 
     const field = safeParseJson(sample.fieldMetadata);
     const meta = safeParseJson(sample.metadata);

@@ -246,7 +246,7 @@ exports.getResultsMatrix = async (req, res) => {
         });
 
         const rows = samples.map(s => {
-            const formatted = formatSampleForSis(s);
+            const formatted = formatSampleForSis(s, {}, { auth: req.sisAuth });
             const row = {
                 sample_id: formatted.id,
                 lab_id: formatted.labId,
@@ -597,7 +597,7 @@ exports.syncDelta = async (req, res) => {
             samplesCount: samples.length,
             spectraCount: authorizedSpectra.length,
             hasMore: hasMoreSamples || hasMoreSpectra,
-            samples: samples.map(s => formatSampleForSis(s, maps)),
+            samples: samples.map(s => formatSampleForSis(s, maps, { auth: req.sisAuth })),
             spectra: authorizedSpectra.map(s => ({
                 id: s.id,
                 sampleId: s.sampleId,
@@ -875,7 +875,7 @@ exports.revokeApiKey = async (req, res) => {
 };
 
 exports.rotateApiKey = async (req, res) => {
-    if (req.user.role !== 'SUPER_ADMIN') {
+    if (req.user?.role !== 'SUPER_ADMIN') {
         return res.status(403).json({ error: 'Only Super Administrators can rotate SIS API keys.' });
     }
 
@@ -885,81 +885,94 @@ exports.rotateApiKey = async (req, res) => {
         if (!oldKey) {
             return res.status(404).json({ error: 'API Key not found.' });
         }
+        if (!oldKey.isActive) {
+            return res.status(400).json({ error: 'Cannot rotate an inactive or revoked API Key.' });
+        }
+
+        const { getDb } = require('../services/exchangeStateService');
+        const db = getDb();
 
         // Generate new key token
         const rawSecret = crypto.randomBytes(24).toString('hex');
         const fullApiKey = `slims_live_${rawSecret}`;
         const keyHash = crypto.createHash('sha256').update(fullApiKey).digest('hex');
         const keyPrefix = `slims_live_${rawSecret.substring(0, 8)}...`;
-
+        const newKeyId = crypto.randomUUID();
         const effectiveConnectionId = oldKey.connectionId || `conn_${oldKey.id}`;
+        const newKeyName = `${oldKey.name} (Rotated ${new Date().toISOString().slice(0, 10)})`;
+        const now = new Date();
+        const nowIso = now.toISOString();
 
-        // Deactivate old key
-        await prisma.apiKey.update({
-            where: { id: oldKey.id },
-            data: { isActive: false }
-        });
-
-        // Create new active key linked to SAME connection
-        const newKey = await prisma.apiKey.create({
-            data: {
-                id: crypto.randomUUID(),
-                name: `${oldKey.name} (Rotated ${new Date().toISOString().slice(0, 10)})`,
+        // Execute rotation as a single atomic transaction across ApiKey, connection keys, and audit log
+        const rotateTransaction = db.transaction(() => {
+            // 1. Insert new replacement key
+            db.prepare(`
+                INSERT INTO ApiKey (id, name, keyHash, keyPrefix, role, connectionId, capabilities, countries, projects, labs, isActive, createdBy, createdAt, updatedAt, expiresAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
+            `).run(
+                newKeyId,
+                newKeyName,
                 keyHash,
                 keyPrefix,
-                role: oldKey.role,
-                connectionId: effectiveConnectionId,
-                capabilities: oldKey.capabilities,
-                countries: oldKey.countries,
-                projects: oldKey.projects,
-                labs: oldKey.labs,
-                isActive: true,
-                createdBy: req.user?.username || 'admin',
-                expiresAt: oldKey.expiresAt
-            }
-        });
+                oldKey.role,
+                effectiveConnectionId,
+                oldKey.capabilities,
+                oldKey.countries,
+                oldKey.projects,
+                oldKey.labs,
+                req.user?.username || 'admin',
+                nowIso,
+                nowIso,
+                oldKey.expiresAt ? new Date(oldKey.expiresAt).toISOString() : null
+            );
 
-        // Record rotation in _exchange_connection_keys
-        try {
-            const { getDb } = require('../services/exchangeStateService');
-            const db = getDb();
-            const now = new Date().toISOString();
+            // 2. Deactivate/retire old key
+            db.prepare(`
+                UPDATE ApiKey
+                SET isActive = 0, updatedAt = ?
+                WHERE id = ?
+            `).run(nowIso, oldKey.id);
+
+            // 3. Link keys in _exchange_connection_keys
             db.prepare(`
                 UPDATE _exchange_connection_keys
                 SET key_status = 'RETIRED', rotated_at = ?
                 WHERE connection_id = ? AND api_key_id = ?
-            `).run(now, effectiveConnectionId, oldKey.id);
+            `).run(nowIso, effectiveConnectionId, oldKey.id);
 
             db.prepare(`
                 INSERT INTO _exchange_connection_keys (id, connection_id, api_key_id, key_status, created_at)
                 VALUES (?, ?, ?, 'ACTIVE', ?)
-            `).run(`conn_key_${crypto.randomUUID()}`, effectiveConnectionId, newKey.id, now);
-        } catch (e) {}
+            `).run(`conn_key_${crypto.randomUUID()}`, effectiveConnectionId, newKeyId, nowIso);
 
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-sis-rotate-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
-                entity: 'SIS_API_KEY',
-                entityId: newKey.id,
-                action: 'SIS_KEY_ROTATED',
-                details: `Rotated API key from '${oldKey.id}' to '${newKey.id}' for connection '${effectiveConnectionId}'`,
-                performedBy: req.user?.username || 'admin',
-                timestamp: new Date()
-            }
+            // 4. Audit log
+            db.prepare(`
+                INSERT INTO AuditLog (id, entity, entityId, action, details, performedBy, timestamp)
+                VALUES (?, 'SIS_API_KEY', ?, 'SIS_KEY_ROTATED', ?, ?, ?)
+            `).run(
+                `audit-sis-rotate-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
+                newKeyId,
+                `Rotated API key from '${oldKey.id}' to '${newKeyId}' for connection '${effectiveConnectionId}'`,
+                req.user?.username || 'admin',
+                nowIso
+            );
         });
+
+        // Run atomic transaction
+        rotateTransaction();
 
         res.json({
             status: 'success',
             message: 'API Key rotated successfully. The old key has been revoked and the new key is active.',
             apiKey: fullApiKey,
             keyInfo: {
-                id: newKey.id,
-                name: newKey.name,
+                id: newKeyId,
+                name: newKeyName,
                 connectionId: effectiveConnectionId,
-                keyPrefix: newKey.keyPrefix,
-                role: newKey.role,
-                capabilities: newKey.capabilities ? JSON.parse(newKey.capabilities) : [],
-                expiresAt: newKey.expiresAt
+                keyPrefix,
+                role: oldKey.role,
+                capabilities: oldKey.capabilities ? (typeof oldKey.capabilities === 'string' ? JSON.parse(oldKey.capabilities) : oldKey.capabilities) : [],
+                expiresAt: oldKey.expiresAt
             }
         });
     } catch (err) {
@@ -969,7 +982,7 @@ exports.rotateApiKey = async (req, res) => {
 };
 
 exports.listConnections = async (req, res) => {
-    if (req.user.role !== 'SUPER_ADMIN') {
+    if (req.user?.role !== 'SUPER_ADMIN') {
         return res.status(403).json({ error: 'Only Super Administrators can list exchange connections.' });
     }
 
@@ -984,6 +997,27 @@ exports.listConnections = async (req, res) => {
             keysByConn[k.connection_id].push(k.api_key_id);
         });
 
+        let receiptsSummary = {};
+        try {
+            const receipts = db.prepare(`
+                SELECT connection_id, 
+                       MAX(created_at) as last_receipt_at,
+                       SUM(COALESCE(imported_count, 0)) as total_imported,
+                       SUM(COALESCE(quarantined_count, 0)) as total_quarantined,
+                       MAX(checkpoint) as last_checkpoint
+                FROM _exchange_receipts
+                GROUP BY connection_id
+            `).all();
+            receipts.forEach(r => {
+                receiptsSummary[r.connection_id] = {
+                    lastReceiptAt: r.last_receipt_at,
+                    totalImported: r.total_imported || 0,
+                    totalQuarantined: r.total_quarantined || 0,
+                    lastCheckpoint: r.last_checkpoint
+                };
+            });
+        } catch (e) {}
+
         const data = connections.map(c => ({
             id: c.id,
             name: c.name,
@@ -997,6 +1031,12 @@ exports.listConnections = async (req, res) => {
             labs: c.labs ? JSON.parse(c.labs) : [],
             authVersion: c.auth_version,
             activeKeyIds: keysByConn[c.id] || [],
+            telemetry: receiptsSummary[c.id] || {
+                lastReceiptAt: null,
+                totalImported: 0,
+                totalQuarantined: 0,
+                lastCheckpoint: null
+            },
             createdAt: c.created_at,
             updatedAt: c.updated_at
         }));
@@ -1009,7 +1049,7 @@ exports.listConnections = async (req, res) => {
 };
 
 exports.createConnection = async (req, res) => {
-    if (req.user.role !== 'SUPER_ADMIN') {
+    if (req.user?.role !== 'SUPER_ADMIN') {
         return res.status(403).json({ error: 'Only Super Administrators can create exchange connections.' });
     }
 
@@ -1051,13 +1091,13 @@ exports.createConnection = async (req, res) => {
 };
 
 exports.updateConnection = async (req, res) => {
-    if (req.user.role !== 'SUPER_ADMIN') {
+    if (req.user?.role !== 'SUPER_ADMIN') {
         return res.status(403).json({ error: 'Only Super Administrators can update exchange connections.' });
     }
 
     try {
         const { id } = req.params;
-        const { name, status, capabilities, contactEmail, organization } = req.body;
+        const { name, status, capabilities, contactEmail, organization, countries, projects, labs } = req.body;
         const { getDb } = require('../services/exchangeStateService');
         const db = getDb();
 
@@ -1065,25 +1105,24 @@ exports.updateConnection = async (req, res) => {
         if (!conn) return res.status(404).json({ error: 'Exchange connection not found.' });
 
         const now = new Date().toISOString();
-        db.prepare(`
-            UPDATE _exchange_connections
-            SET name = COALESCE(?, name),
-                status = COALESCE(?, status),
-                capabilities = COALESCE(?, capabilities),
-                contact_email = COALESCE(?, contact_email),
-                organization = COALESCE(?, organization),
-                auth_version = auth_version + 1,
-                updated_at = ?
-            WHERE id = ?
-        `).run(
-            name || null,
-            status || null,
-            capabilities ? JSON.stringify(capabilities) : null,
-            contactEmail || null,
-            organization || null,
-            now,
-            id
-        );
+        const updates = [];
+        const params = [];
+
+        if (name !== undefined) { updates.push('name = ?'); params.push(name); }
+        if (status !== undefined) { updates.push('status = ?'); params.push(status); }
+        if (capabilities !== undefined) { updates.push('capabilities = ?'); params.push(JSON.stringify(capabilities)); }
+        if (contactEmail !== undefined) { updates.push('contact_email = ?'); params.push(contactEmail); }
+        if (organization !== undefined) { updates.push('organization = ?'); params.push(organization); }
+        if (countries !== undefined) { updates.push('countries = ?'); params.push(countries ? JSON.stringify(countries) : null); }
+        if (projects !== undefined) { updates.push('projects = ?'); params.push(projects ? JSON.stringify(projects) : null); }
+        if (labs !== undefined) { updates.push('labs = ?'); params.push(JSON.stringify(labs)); }
+
+        updates.push('auth_version = auth_version + 1');
+        updates.push('updated_at = ?');
+        params.push(now);
+        params.push(id);
+
+        db.prepare(`UPDATE _exchange_connections SET ${updates.join(', ')} WHERE id = ?`).run(...params);
 
         res.json({ status: 'success', message: 'Exchange connection updated successfully.' });
     } catch (err) {

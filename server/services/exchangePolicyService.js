@@ -31,6 +31,10 @@ function isRestrictedConsumer(auth) {
  */
 function buildSampleWhere(auth, query = {}) {
     const where = {};
+    if (auth?.connectionStatus && auth.connectionStatus !== 'ACTIVE') {
+        where.id = '__denied_connection_disabled__';
+        return where;
+    }
     const restricted = isRestrictedConsumer(auth);
 
     // 1. Publication Release Policy
