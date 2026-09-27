@@ -251,7 +251,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
     test('8. POST /api/v2/data-exchange/receipts logs delivery receipt without mutating DB samples', async () => {
         const receiptPayload = {
             snapshotId,
-            batchId: 'BATCH-001',
+            batchId: snapshotId,
             importedCount: 1,
             quarantinedCount: 1,
             checkpoint: 'seq_102',

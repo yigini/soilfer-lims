@@ -1,8 +1,8 @@
 /**
  * Versioned Additive Migration: Exchange Journal & Resumable Snapshots
- * Issue #140 (Packages P1-P4, F5)
+ * Issue #140 (Packages P1-P4, F5, Codex Remediation)
  *
- * Creates/aligns durable, immutable exchange journal, snapshot items, and receipt auditing tables.
+ * Creates/aligns durable, immutable exchange journal, snapshot items, issued batches, and receipt auditing tables.
  * Safe, idempotent, non-destructive additive DDL. Zero mutations to core laboratory tables.
  */
 
@@ -41,7 +41,7 @@ function migrateExchangeTables(dbPath) {
     db.pragma('foreign_keys = ON');
 
     const runMigration = db.transaction(() => {
-        // 1. Immutable Publication Journal
+        // 1. Immutable Publication Journal & Resumable Snapshots
         db.exec(`
             CREATE TABLE IF NOT EXISTS _exchange_journal (
                 id TEXT PRIMARY KEY,
@@ -89,9 +89,29 @@ function migrateExchangeTables(dbPath) {
                 details TEXT,
                 created_at TEXT NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS _exchange_batches (
+                id TEXT PRIMARY KEY,
+                connection_id TEXT NOT NULL,
+                snapshot_id TEXT,
+                start_seq INTEGER,
+                end_seq INTEGER,
+                item_count INTEGER NOT NULL,
+                created_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS _exchange_meta (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL,
+                updated_at TEXT NOT NULL DEFAULT ''
+            );
         `);
 
         // 2. Non-destructive additive column checks (F5: NEVER drop populated tables)
+        ensureColumns(db, '_exchange_meta', {
+            updated_at: "TEXT DEFAULT ''"
+        });
+
         ensureColumns(db, '_exchange_snapshots', {
             high_water_timestamp: "TEXT DEFAULT ''",
             total_samples: "INTEGER DEFAULT 0",
@@ -118,9 +138,9 @@ function migrateExchangeTables(dbPath) {
         });
 
         ensureColumns(db, '_exchange_journal', {
-            sequence: "INTEGER DEFAULT 0",
-            event_type: "TEXT DEFAULT 'PUBLICATION'",
-            specimen_id: "TEXT DEFAULT ''",
+            sequence: "INTEGER",
+            event_type: "TEXT",
+            specimen_id: "TEXT",
             field_sample_id: "TEXT",
             lab_sample_id: "TEXT",
             country: "TEXT",
@@ -131,7 +151,35 @@ function migrateExchangeTables(dbPath) {
             created_at: "TEXT DEFAULT ''"
         });
 
-        // 3. Create indexes now that all columns are guaranteed to exist
+        ensureColumns(db, '_exchange_batches', {
+            connection_id: "TEXT DEFAULT ''",
+            snapshot_id: "TEXT",
+            start_seq: "INTEGER DEFAULT 0",
+            end_seq: "INTEGER DEFAULT 0",
+            item_count: "INTEGER DEFAULT 0",
+            created_at: "TEXT DEFAULT ''"
+        });
+
+        // 3. Monotonically re-sequence any legacy rows with missing, null, or zero sequence without guessing
+        const badSeqs = db.prepare('SELECT rowid, id FROM _exchange_journal WHERE sequence IS NULL OR sequence <= 0 ORDER BY created_at ASC, rowid ASC').all();
+        if (badSeqs.length > 0) {
+            let nextSeq = (db.prepare('SELECT MAX(sequence) as m FROM _exchange_journal WHERE sequence > 0').get()?.m || 0) + 1;
+            const upd = db.prepare('UPDATE _exchange_journal SET sequence = ? WHERE rowid = ?');
+            for (const row of badSeqs) {
+                upd.run(nextSeq++, row.rowid);
+            }
+        }
+
+        // 4. Record migration version metadata
+        const setMeta = db.prepare(`
+            INSERT INTO _exchange_meta (key, value, updated_at)
+            VALUES (?, ?, ?)
+            ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+        `);
+        setMeta.run('schema_version', '2', new Date().toISOString());
+        setMeta.run('epoch', 'epoch-1', new Date().toISOString());
+
+        // 5. Create indexes now that all columns are guaranteed to exist
         db.exec(`
             CREATE INDEX IF NOT EXISTS idx_exchange_journal_seq ON _exchange_journal(sequence);
             CREATE INDEX IF NOT EXISTS idx_exchange_journal_specimen ON _exchange_journal(specimen_id);
@@ -141,6 +189,12 @@ function migrateExchangeTables(dbPath) {
             CREATE INDEX IF NOT EXISTS idx_exchange_snapshot_items_order ON _exchange_snapshot_items(snapshot_id, item_order);
             CREATE INDEX IF NOT EXISTS idx_exchange_receipts_lookup ON _exchange_receipts(connection_id, snapshot_id, checkpoint);
             CREATE INDEX IF NOT EXISTS idx_exchange_receipts_batch ON _exchange_receipts(connection_id, batch_id);
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_exchange_receipts_conn_snap_chk ON _exchange_receipts(connection_id, snapshot_id, checkpoint) WHERE snapshot_id IS NOT NULL AND checkpoint IS NOT NULL;
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_exchange_receipts_conn_snap_batch ON _exchange_receipts(connection_id, snapshot_id, batch_id) WHERE snapshot_id IS NOT NULL AND batch_id IS NOT NULL;
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_exchange_receipts_conn_snap ON _exchange_receipts(connection_id, snapshot_id) WHERE snapshot_id IS NOT NULL AND batch_id IS NULL AND checkpoint IS NULL;
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_exchange_receipts_conn_batch ON _exchange_receipts(connection_id, batch_id) WHERE batch_id IS NOT NULL AND snapshot_id IS NULL;
+            CREATE INDEX IF NOT EXISTS idx_exchange_batches_conn ON _exchange_batches(connection_id, id);
+            DROP TRIGGER IF EXISTS trg_sample_au;
         `);
     });
 

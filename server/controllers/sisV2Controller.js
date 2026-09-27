@@ -24,12 +24,14 @@ const {
     extractProfileReference,
     extractObservations
 } = require('../services/sisAdapterService');
+const exchangePolicyService = require('../services/exchangePolicyService');
 const {
     buildSampleWhere,
     buildSpectralWhere,
     toPrismaSpectralWhere,
+    isRestrictedConsumer,
     AUTHORIZED_RELEASE_STATUSES
-} = require('../services/exchangePolicyService');
+} = exchangePolicyService;
 const exchangeStateService = require('../services/exchangeStateService');
 
 let cachedAnalysisMap = null;
@@ -567,15 +569,23 @@ exports.getSpectra = async (req, res) => {
 
         let total = 0;
         if (parentSampleWhere.assignedLab !== '__denied__' && parentSampleWhere.status !== '__denied_unapproved__') {
-            const allAuthParents = await prisma.sample.findMany({
-                where: parentSampleWhere,
-                select: { id: true }
-            });
-            const allAuthIds = allAuthParents.map(s => s.id);
-            if (allAuthIds.length > 0) {
-                total = await prisma.spectralData.count({
-                    where: { ...spectralWhere, sampleId: { in: allAuthIds } }
+            const isRestricted = exchangePolicyService.isRestrictedConsumer(req.sisAuth);
+            if (isRestricted) {
+                const allAuthParents = await prisma.sample.findMany({
+                    where: parentSampleWhere,
+                    select: { id: true }
                 });
+                const allAuthIds = allAuthParents.map(s => s.id);
+                if (allAuthIds.length > 0) {
+                    total = await prisma.spectralData.count({
+                        where: {
+                            ...toPrismaSpectralWhere(spectralWhere),
+                            sampleId: { in: allAuthIds }
+                        }
+                    });
+                }
+            } else {
+                total = await prisma.spectralData.count({ where: toPrismaSpectralWhere(spectralWhere) });
             }
         }
 

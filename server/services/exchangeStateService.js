@@ -18,9 +18,9 @@ const { buildSampleWhere, AUTHORIZED_RELEASE_STATUSES } = require('./exchangePol
 const { formatSampleV2 } = require('./sisAdapterService');
 
 const dbPath = process.env.DATABASE_PATH ? path.resolve(process.env.DATABASE_PATH) : path.resolve(__dirname, '..', 'prisma', 'dev.db');
+const CURSOR_SECRET = process.env.SESSION_SECRET || process.env.API_KEY_SECRET || 'soilfer-lims-exchange-cursor-v2';
 
 let dbInstance = null;
-const cursorConnectionMap = new Map();
 
 function getDb() {
     if (!dbInstance) {
@@ -42,6 +42,244 @@ function ensureColumns(db, tableName, colDefs) {
         }
     } catch (e) {
         // Table may not exist yet or in-memory dialect variance
+    }
+}
+
+function registerDbFunctions(db) {
+    try {
+        db.function('exchange_compute_hash', { varargs: true }, (id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata) => {
+            const dataToHash = {
+                id,
+                status,
+                originalId: originalId || null,
+                labId: labId || null,
+                assignedLab: assignedLab || null,
+                country: country || null,
+                projectCode: projectCode || null,
+                fieldMetadata: fieldMetadata || null,
+                latitude: null,
+                longitude: null,
+                elevation: null,
+                depthUpper: null,
+                depthLower: null,
+                collectionDate: null,
+                samplingDate: null,
+                receptionDate: null,
+                results: []
+            };
+            return crypto.createHash('sha256').update(JSON.stringify(dataToHash)).digest('hex');
+        });
+
+        db.function('exchange_format_payload', { varargs: true }, (id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, updatedAt) => {
+            const raw = {
+                id,
+                status,
+                originalId,
+                labId,
+                assignedLab,
+                country,
+                projectCode,
+                fieldMetadata,
+                updatedAt: updatedAt ? new Date(updatedAt) : new Date(),
+                results: []
+            };
+            return JSON.stringify(formatSampleV2(raw));
+        });
+    } catch (e) {}
+}
+
+function ensureTriggers(db) {
+    try {
+        registerDbFunctions(db);
+
+        const hasSample = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Sample'").get();
+        if (hasSample) {
+            db.exec(`
+                CREATE TRIGGER IF NOT EXISTS trg_sample_ai_publish AFTER INSERT ON Sample
+                FOR EACH ROW
+                WHEN NEW.status IN ('APPROVED', 'RELEASED')
+                BEGIN
+                    INSERT INTO _exchange_journal (
+                        id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
+                        country, project_code, laboratory_id, content_hash, payload, created_at
+                    )
+                    SELECT
+                        'evt_' || NEW.id || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                        (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                        'PUBLICATION',
+                        NEW.id,
+                        NEW.originalId,
+                        NEW.labId,
+                        NEW.country,
+                        NEW.projectCode,
+                        NEW.assignedLab,
+                        exchange_compute_hash(NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode, NEW.fieldMetadata),
+                        exchange_format_payload(NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode, NEW.fieldMetadata, NEW.updatedAt),
+                        datetime('now');
+                END;
+
+                CREATE TRIGGER IF NOT EXISTS trg_sample_au_publish AFTER UPDATE ON Sample
+                FOR EACH ROW
+                WHEN (OLD.status NOT IN ('APPROVED', 'RELEASED') OR OLD.status IS NULL)
+                 AND NEW.status IN ('APPROVED', 'RELEASED')
+                BEGIN
+                    INSERT INTO _exchange_journal (
+                        id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
+                        country, project_code, laboratory_id, content_hash, payload, created_at
+                    )
+                    SELECT
+                        'evt_' || NEW.id || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                        (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                        'PUBLICATION',
+                        NEW.id,
+                        NEW.originalId,
+                        NEW.labId,
+                        NEW.country,
+                        NEW.projectCode,
+                        NEW.assignedLab,
+                        exchange_compute_hash(NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode, NEW.fieldMetadata),
+                        exchange_format_payload(NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode, NEW.fieldMetadata, NEW.updatedAt),
+                        datetime('now');
+                END;
+
+                CREATE TRIGGER IF NOT EXISTS trg_sample_au_withdraw AFTER UPDATE ON Sample
+                FOR EACH ROW
+                WHEN OLD.status IN ('APPROVED', 'RELEASED')
+                 AND NEW.status IN ('CANCELLED', 'REJECTED', 'AMBIGUOUS_PROVENANCE_HOLD')
+                BEGIN
+                    INSERT INTO _exchange_journal (
+                        id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
+                        country, project_code, laboratory_id, content_hash, payload, created_at
+                    )
+                    SELECT
+                        'evt_' || NEW.id || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                        (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                        'WITHDRAWAL',
+                        NEW.id,
+                        NEW.originalId,
+                        NEW.labId,
+                        NEW.country,
+                        NEW.projectCode,
+                        NEW.assignedLab,
+                        exchange_compute_hash(NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode, NEW.fieldMetadata),
+                        NULL,
+                        datetime('now');
+                END;
+
+                CREATE TRIGGER IF NOT EXISTS trg_sample_au_amend AFTER UPDATE ON Sample
+                FOR EACH ROW
+                WHEN OLD.status IN ('APPROVED', 'RELEASED')
+                 AND NEW.status IN ('APPROVED', 'RELEASED')
+                 AND (
+                     (OLD.originalId IS NOT NEW.originalId) OR
+                     (OLD.labId IS NOT NEW.labId) OR
+                     (OLD.assignedLab IS NOT NEW.assignedLab) OR
+                     (OLD.country IS NOT NEW.country) OR
+                     (OLD.projectCode IS NOT NEW.projectCode) OR
+                     (OLD.fieldMetadata IS NOT NEW.fieldMetadata)
+                 )
+                BEGIN
+                    INSERT INTO _exchange_journal (
+                        id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
+                        country, project_code, laboratory_id, content_hash, payload, created_at
+                    )
+                    SELECT
+                        'evt_' || NEW.id || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                        (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                        'AMENDMENT',
+                        NEW.id,
+                        NEW.originalId,
+                        NEW.labId,
+                        NEW.country,
+                        NEW.projectCode,
+                        NEW.assignedLab,
+                        exchange_compute_hash(NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode, NEW.fieldMetadata),
+                        exchange_format_payload(NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode, NEW.fieldMetadata, NEW.updatedAt),
+                        datetime('now');
+                END;
+
+                CREATE TRIGGER IF NOT EXISTS trg_sample_ad_withdraw AFTER DELETE ON Sample
+                FOR EACH ROW
+                WHEN OLD.status IN ('APPROVED', 'RELEASED')
+                BEGIN
+                    INSERT INTO _exchange_journal (
+                        id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
+                        country, project_code, laboratory_id, content_hash, payload, created_at
+                    )
+                    SELECT
+                        'evt_' || OLD.id || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                        (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                        'WITHDRAWAL',
+                        OLD.id,
+                        OLD.originalId,
+                        OLD.labId,
+                        OLD.country,
+                        OLD.projectCode,
+                        OLD.assignedLab,
+                        exchange_compute_hash(OLD.id, 'DELETED', OLD.originalId, OLD.labId, OLD.assignedLab, OLD.country, OLD.projectCode, OLD.fieldMetadata),
+                        NULL,
+                        datetime('now');
+                END;
+            `);
+        }
+
+        const hasResult = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Result'").get();
+        if (hasResult) {
+            db.exec(`
+                CREATE TRIGGER IF NOT EXISTS trg_result_ai_amend AFTER INSERT ON Result
+                FOR EACH ROW
+                WHEN (SELECT status FROM Sample WHERE id = NEW.sampleId) IN ('APPROVED', 'RELEASED')
+                BEGIN
+                    INSERT INTO _exchange_journal (
+                        id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
+                        country, project_code, laboratory_id, content_hash, payload, created_at
+                    )
+                    SELECT
+                        'evt_' || NEW.sampleId || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                        (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                        'AMENDMENT',
+                        s.id,
+                        s.originalId,
+                        s.labId,
+                        s.country,
+                        s.projectCode,
+                        s.assignedLab,
+                        exchange_compute_hash(s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode, s.fieldMetadata),
+                        exchange_format_payload(s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode, s.fieldMetadata, s.updatedAt),
+                        datetime('now')
+                    FROM Sample s
+                    WHERE s.id = NEW.sampleId;
+                END;
+
+                CREATE TRIGGER IF NOT EXISTS trg_result_au_amend AFTER UPDATE ON Result
+                FOR EACH ROW
+                WHEN (OLD.value IS NOT NEW.value OR OLD.numericValue IS NOT NEW.numericValue OR OLD.isValid IS NOT NEW.isValid OR OLD.isCurrent IS NOT NEW.isCurrent)
+                 AND (SELECT status FROM Sample WHERE id = NEW.sampleId) IN ('APPROVED', 'RELEASED')
+                BEGIN
+                    INSERT INTO _exchange_journal (
+                        id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
+                        country, project_code, laboratory_id, content_hash, payload, created_at
+                    )
+                    SELECT
+                        'evt_' || NEW.sampleId || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                        (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                        'AMENDMENT',
+                        s.id,
+                        s.originalId,
+                        s.labId,
+                        s.country,
+                        s.projectCode,
+                        s.assignedLab,
+                        exchange_compute_hash(s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode, s.fieldMetadata),
+                        exchange_format_payload(s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode, s.fieldMetadata, s.updatedAt),
+                        datetime('now')
+                    FROM Sample s
+                    WHERE s.id = NEW.sampleId;
+                END;
+            `);
+        }
+    } catch (e) {
+        console.error('[EXCHANGE_TRIGGERS_ERR]', e);
     }
 }
 
@@ -94,9 +332,29 @@ function initTables(db) {
             payload TEXT,
             created_at TEXT NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS _exchange_batches (
+            id TEXT PRIMARY KEY,
+            connection_id TEXT NOT NULL,
+            snapshot_id TEXT,
+            start_seq INTEGER,
+            end_seq INTEGER,
+            item_count INTEGER NOT NULL,
+            created_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS _exchange_meta (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            updated_at TEXT NOT NULL DEFAULT ''
+        );
     `);
 
     // 2. Non-destructive additive column checks (F5: NEVER drop populated tables)
+    ensureColumns(db, '_exchange_meta', {
+        updated_at: "TEXT DEFAULT ''"
+    });
+
     ensureColumns(db, '_exchange_snapshots', {
         high_water_timestamp: "TEXT DEFAULT ''",
         total_samples: "INTEGER DEFAULT 0",
@@ -136,6 +394,15 @@ function initTables(db) {
         created_at: "TEXT DEFAULT ''"
     });
 
+    ensureColumns(db, '_exchange_batches', {
+        connection_id: "TEXT DEFAULT ''",
+        snapshot_id: "TEXT",
+        start_seq: "INTEGER DEFAULT 0",
+        end_seq: "INTEGER DEFAULT 0",
+        item_count: "INTEGER DEFAULT 0",
+        created_at: "TEXT DEFAULT ''"
+    });
+
     // 3. Create indexes now that all columns are guaranteed to exist
     try {
         db.exec(`
@@ -143,11 +410,18 @@ function initTables(db) {
             CREATE INDEX IF NOT EXISTS idx_exchange_snapshot_items_order ON _exchange_snapshot_items(snapshot_id, item_order);
             CREATE INDEX IF NOT EXISTS idx_exchange_receipts_lookup ON _exchange_receipts(connection_id, snapshot_id, checkpoint);
             CREATE INDEX IF NOT EXISTS idx_exchange_receipts_batch ON _exchange_receipts(connection_id, batch_id);
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_exchange_receipts_conn_snap_chk ON _exchange_receipts(connection_id, snapshot_id, checkpoint) WHERE snapshot_id IS NOT NULL AND checkpoint IS NOT NULL;
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_exchange_receipts_conn_snap_batch ON _exchange_receipts(connection_id, snapshot_id, batch_id) WHERE snapshot_id IS NOT NULL AND batch_id IS NOT NULL;
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_exchange_receipts_conn_snap ON _exchange_receipts(connection_id, snapshot_id) WHERE snapshot_id IS NOT NULL AND batch_id IS NULL AND checkpoint IS NULL;
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_exchange_receipts_conn_batch ON _exchange_receipts(connection_id, batch_id) WHERE batch_id IS NOT NULL AND snapshot_id IS NULL;
             CREATE INDEX IF NOT EXISTS idx_exchange_journal_seq ON _exchange_journal(sequence);
             CREATE INDEX IF NOT EXISTS idx_exchange_journal_specimen ON _exchange_journal(specimen_id);
             CREATE INDEX IF NOT EXISTS idx_exchange_journal_scope ON _exchange_journal(laboratory_id, country, project_code);
+            CREATE INDEX IF NOT EXISTS idx_exchange_batches_conn ON _exchange_batches(connection_id);
         `);
     } catch (e) {}
+
+    ensureTriggers(db);
 }
 
 /**
@@ -227,27 +501,6 @@ async function syncJournal(auth, maps = {}) {
         ]
     });
 
-    // Instrument samples with status transition tracker to capture intermediate cancellations & republications (F2, Probe 5)
-    for (const s of samples) {
-        if (!s._instrumented) {
-            let currentStatus = s.status;
-            const history = [];
-            Object.defineProperty(s, 'status', {
-                get() { return currentStatus; },
-                set(val) {
-                    if (val !== currentStatus) {
-                        history.push({ from: currentStatus, to: val, at: new Date().toISOString() });
-                        currentStatus = val;
-                    }
-                },
-                configurable: true,
-                enumerable: true
-            });
-            s._statusHistory = history;
-            s._instrumented = true;
-        }
-    }
-
     const getLatestStmt = db.prepare(`
         SELECT sequence, event_type, content_hash
         FROM _exchange_journal
@@ -276,50 +529,6 @@ async function syncJournal(auth, maps = {}) {
             const currentHash = computeSampleContentHash(s);
             const latest = getLatestStmt.get(s.id);
             const eventTime = s.updatedAt ? new Date(s.updatedAt).toISOString() : new Date().toISOString();
-
-            // Handle intermediate recorded status transitions (e.g. CANCELLED then APPROVED between polls)
-            if (s._statusHistory && s._statusHistory.length > 0) {
-                const transitions = s._statusHistory.splice(0, s._statusHistory.length);
-                for (const tr of transitions) {
-                    if (['CANCELLED', 'REJECTED', 'AMBIGUOUS_PROVENANCE_HOLD'].includes(tr.to)) {
-                        currentMaxSeq++;
-                        const evtId = `evt_${s.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
-                        insertJournalStmt.run(
-                            evtId,
-                            currentMaxSeq,
-                            'WITHDRAWAL',
-                            s.id,
-                            s.originalId,
-                            s.labId,
-                            s.country || s.countryName || null,
-                            s.projectCode || null,
-                            s.assignedLab || null,
-                            currentHash,
-                            null,
-                            tr.at || eventTime
-                        );
-                    } else if (AUTHORIZED_RELEASE_STATUSES.includes(tr.to)) {
-                        currentMaxSeq++;
-                        const evtId = `evt_${s.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
-                        const formatted = formatSampleV2(s, maps);
-                        insertJournalStmt.run(
-                            evtId,
-                            currentMaxSeq,
-                            'PUBLICATION',
-                            s.id,
-                            s.originalId,
-                            s.labId,
-                            s.country || s.countryName || null,
-                            s.projectCode || null,
-                            s.assignedLab || null,
-                            currentHash,
-                            JSON.stringify(formatted),
-                            tr.at || eventTime
-                        );
-                    }
-                }
-                continue;
-            }
 
             if (!latest) {
                 // If never previously journaled and currently in released status: PUBLICATION
@@ -474,48 +683,125 @@ function getSnapshot(snapshotId, auth) {
         return { error: 'SNAPSHOT_EXPIRED', status: 410, message: 'Snapshot has expired. Create a new snapshot.' };
     }
 
-    // Check scope revocation (F3, Probe 3):
-    // If the caller's key laboratory scope has been reduced or revoked since snapshot was created,
-    // the snapshot must fail-closed with 403 FORBIDDEN.
-    if (snap.authorized_labs) {
+    // Check scope revocation (F3, Probe 3, Finding 3):
+    // Validate effective authorization for labs, countries, and projects.
+    // Fail closed if metadata is malformed or credentials were reduced/revoked.
+    if (auth?.type === 'API_KEY') {
+        // 1. Laboratory scope validation
+        if (!snap.authorized_labs) {
+            return { error: 'FORBIDDEN', status: 403, message: 'Snapshot lacks required laboratory authorization metadata.' };
+        }
+        let snapLabs;
         try {
-            const snapLabs = JSON.parse(snap.authorized_labs);
-            if (Array.isArray(snapLabs) && snapLabs.length > 0 && !snapLabs.includes('*')) {
-                const currentLabs = auth?.labs || [];
-                if (!Array.isArray(currentLabs) || currentLabs.length === 0) {
-                    return { error: 'FORBIDDEN', status: 403, message: 'Current credentials lack laboratory scope (scope revoked).' };
+            snapLabs = JSON.parse(snap.authorized_labs);
+        } catch (e) {
+            return { error: 'FORBIDDEN', status: 403, message: 'Malformed snapshot laboratory scope metadata.' };
+        }
+        const currentLabs = auth.labs || [];
+        if (!Array.isArray(currentLabs) || currentLabs.length === 0) {
+            return { error: 'FORBIDDEN', status: 403, message: 'Current credentials lack laboratory scope (scope revoked).' };
+        }
+        if (!currentLabs.includes('*')) {
+            if (snapLabs.includes('*')) {
+                return { error: 'FORBIDDEN', status: 403, message: 'Wildcard laboratory scope has been revoked.' };
+            }
+            if (!snapLabs.every(l => currentLabs.includes(l))) {
+                return { error: 'FORBIDDEN', status: 403, message: 'Current credentials no longer authorized for snapshot laboratory scope.' };
+            }
+        }
+
+        // 2. Country scope validation
+        if (snap.authorized_countries) {
+            let snapCountries;
+            try {
+                snapCountries = JSON.parse(snap.authorized_countries);
+            } catch (e) {
+                return { error: 'FORBIDDEN', status: 403, message: 'Malformed snapshot country scope metadata.' };
+            }
+            const currentCountries = auth.countries || [];
+            if (!Array.isArray(currentCountries) || currentCountries.length === 0) {
+                return { error: 'FORBIDDEN', status: 403, message: 'Current credentials lack country scope (scope revoked).' };
+            }
+            if (!currentCountries.includes('*')) {
+                if (snapCountries.includes('*')) {
+                    return { error: 'FORBIDDEN', status: 403, message: 'Wildcard country scope has been revoked.' };
                 }
-                if (!currentLabs.includes('*')) {
-                    const hasAllLabs = snapLabs.every(l => currentLabs.includes(l));
-                    if (!hasAllLabs) {
-                        return { error: 'FORBIDDEN', status: 403, message: 'Current credentials no longer authorized for snapshot laboratory scope.' };
-                    }
+                if (!snapCountries.every(c => currentCountries.includes(c))) {
+                    return { error: 'FORBIDDEN', status: 403, message: 'Current credentials no longer authorized for snapshot country scope.' };
                 }
             }
-        } catch (e) {}
+        }
+
+        // 3. Project scope validation (including programme child project expansion)
+        if (snap.authorized_projects) {
+            let snapProjects;
+            try {
+                snapProjects = JSON.parse(snap.authorized_projects);
+            } catch (e) {
+                return { error: 'FORBIDDEN', status: 403, message: 'Malformed snapshot project scope metadata.' };
+            }
+            const currentProjects = auth.projects || [];
+            if (!Array.isArray(currentProjects) || currentProjects.length === 0) {
+                return { error: 'FORBIDDEN', status: 403, message: 'Current credentials lack project scope (scope revoked).' };
+            }
+            if (!currentProjects.includes('*')) {
+                if (snapProjects.includes('*')) {
+                    return { error: 'FORBIDDEN', status: 403, message: 'Wildcard project scope has been revoked.' };
+                }
+                const expandedCurrent = new Set(currentProjects);
+                try {
+                    const projectPolicyService = require('./projectPolicyService');
+                    for (const p of currentProjects) {
+                        const children = projectPolicyService.getProgrammeChildProjectCodes(p);
+                        if (children && Array.isArray(children)) {
+                            children.forEach(c => expandedCurrent.add(c));
+                        }
+                    }
+                } catch (e) {}
+                if (!snapProjects.every(p => expandedCurrent.has(p))) {
+                    return { error: 'FORBIDDEN', status: 403, message: 'Current credentials no longer authorized for snapshot project scope.' };
+                }
+            }
+        }
     }
 
     return { snapshot: snap };
 }
 
 /**
- * Encodes an opaque cursor for change feed or paginated queries.
+ * Encodes an authenticated opaque cursor with HMAC integrity protection (Finding 3).
  */
 function encodeCursor(data) {
-    return Buffer.from(JSON.stringify({ v: 2, ...data })).toString('base64');
+    const payload = { v: 2, ...data, epoch: 'epoch-1', issuedAt: Date.now() };
+    const raw = JSON.stringify(payload);
+    const sig = crypto.createHmac('sha256', CURSOR_SECRET).update(raw).digest('hex').slice(0, 16);
+    return Buffer.from(JSON.stringify({ p: payload, s: sig })).toString('base64');
 }
 
-/**
- * Decodes and validates an opaque cursor.
- */
 function decodeCursor(cursorStr) {
     if (!cursorStr) return null;
     try {
         const decoded = JSON.parse(Buffer.from(cursorStr, 'base64').toString('utf8'));
-        if (decoded && decoded.v === 2) return decoded;
-        return null;
+        if (decoded && decoded.p && decoded.s) {
+            const expectedSig = crypto.createHmac('sha256', CURSOR_SECRET).update(JSON.stringify(decoded.p)).digest('hex').slice(0, 16);
+            if (decoded.s !== expectedSig) {
+                return { invalid: true, reason: 'SIGNATURE_MISMATCH', message: 'Cursor signature verification failed.' };
+            }
+            if (decoded.p.epoch && decoded.p.epoch !== 'epoch-1') {
+                return { invalid: true, reason: 'EPOCH_MISMATCH', message: 'Cursor epoch mismatch.' };
+            }
+            if (decoded.p.issuedAt && typeof decoded.p.issuedAt === 'number') {
+                const age = Date.now() - decoded.p.issuedAt;
+                if (age > 30 * 24 * 3600 * 1000) {
+                    return { expired: true, message: 'Cursor has expired.' };
+                }
+            }
+            return decoded.p;
+        }
+        // Fail closed on unsigned or malformed cursor structures
+        return { invalid: true, reason: 'UNSIGNED_CURSOR', message: 'Cursor must be HMAC signed.' };
     } catch (e) {
-        return null;
+        return { expired: true, message: 'Malformed cursor payload.' };
     }
 }
 
@@ -526,18 +812,26 @@ async function getSnapshotPage(snapshotId, auth, { limit = 50, cursor = null } =
     const check = getSnapshot(snapshotId, auth);
     if (check.error) return check;
 
+    const connectionId = getConnectionId(auth);
     const snap = check.snapshot;
     const maxLimit = Math.min(500, Math.max(1, parseInt(limit) || 50));
     
     let offset = 0;
     if (cursor) {
         const decoded = decodeCursor(cursor);
-        if (!decoded) {
-            return { error: 'INVALID_CURSOR', status: 400, message: 'Malformed page cursor.' };
+        if (!decoded || decoded.invalid || decoded.expired) {
+            return {
+                error: decoded?.expired ? 'CURSOR_EXPIRED' : 'INVALID_CURSOR',
+                status: decoded?.expired ? 410 : 400,
+                message: decoded?.message || 'Malformed page cursor.'
+            };
         }
         // F3, Probe 6: Reject cursor for a different snapshot
         if (decoded.snapshotId && decoded.snapshotId !== snapshotId) {
             return { error: 'INVALID_CURSOR', status: 400, message: 'Cursor does not match the requested snapshot.' };
+        }
+        if (decoded.connectionId && decoded.connectionId !== connectionId) {
+            return { error: 'INVALID_CURSOR', status: 400, message: 'Cursor belongs to a different connection.' };
         }
         offset = decoded.itemOrder || 0;
     }
@@ -558,6 +852,7 @@ async function getSnapshotPage(snapshotId, auth, { limit = 50, cursor = null } =
     if (hasMore && pageRows.length > 0) {
         const last = pageRows[pageRows.length - 1];
         nextCursor = encodeCursor({
+            connectionId,
             snapshotId,
             itemOrder: last.item_order
         });
@@ -582,6 +877,7 @@ async function getSnapshotPage(snapshotId, auth, { limit = 50, cursor = null } =
  */
 async function getChanges(auth, { cursor = null, limit = 100, profile = null, filter = {}, maps = {} } = {}) {
     const db = getDb();
+    ensureTriggers(db);
 
     const currentConn = getConnectionId(auth);
 
@@ -594,6 +890,7 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
             nextCursor: cursor || encodeCursor({
                 connectionId: currentConn,
                 seq: 0,
+                profile: profile || null,
                 timestamp: new Date().toISOString()
             }),
             changes: []
@@ -607,11 +904,18 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
 
     let startSeq = 0;
     if (cursor) {
-        if (!decoded) {
+        if (!decoded || decoded.expired) {
             return {
                 error: 'CURSOR_EXPIRED',
                 status: 410,
-                message: 'Invalid or expired cursor. Please initialize a fresh synchronization snapshot.'
+                message: decoded?.message || 'Invalid or expired cursor.'
+            };
+        }
+        if (decoded.invalid) {
+            return {
+                error: 'INVALID_CURSOR',
+                status: 400,
+                message: decoded.message || 'Invalid cursor signature or format.'
             };
         }
         // F3, Probe 7: Cross-connection cursor rejection & dynamic binding
@@ -622,17 +926,12 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
                 message: 'Cursor belongs to a different connection.'
             };
         }
-        if (cursorConnectionMap.has(cursor)) {
-            const boundConn = cursorConnectionMap.get(cursor);
-            if (boundConn !== currentConn) {
-                return {
-                    error: 'INVALID_CURSOR',
-                    status: 400,
-                    message: 'Cursor belongs to a different connection.'
-                };
-            }
-        } else {
-            cursorConnectionMap.set(cursor, currentConn);
+        if (decoded.profile && profile && decoded.profile !== profile) {
+            return {
+                error: 'INVALID_CURSOR',
+                status: 400,
+                message: 'Cursor profile does not match requested profile.'
+            };
         }
         if (decoded.seq !== undefined && !isNaN(Number(decoded.seq))) {
             startSeq = Number(decoded.seq);
@@ -641,8 +940,8 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
             startSeq = row?.s || 0;
         } else {
             return {
-                error: 'CURSOR_EXPIRED',
-                status: 410,
+                error: 'INVALID_CURSOR',
+                status: 400,
                 message: 'Malformed cursor.'
             };
         }
@@ -747,36 +1046,61 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
     const pageRows = hasMore ? rows.slice(0, maxLimit) : rows;
 
     let nextCursor = null;
+    let issuedBatchId = null;
     if (pageRows.length > 0) {
         const last = pageRows[pageRows.length - 1];
         nextCursor = encodeCursor({
+            connectionId: currentConn,
             seq: last.sequence,
+            profile: profile || null,
+            filter: filter || {},
             timestamp: last.created_at
         });
-        if (cursor) {
-            cursorConnectionMap.set(nextCursor, currentConn);
-        }
+
+        // Record issued change batch in _exchange_batches for durable receipt resolution
+        issuedBatchId = `batch_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+        try {
+            db.prepare(`
+                INSERT INTO _exchange_batches (id, connection_id, snapshot_id, start_seq, end_seq, item_count, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            `).run(issuedBatchId, currentConn, null, pageRows[0].sequence, last.sequence, pageRows.length, new Date().toISOString());
+        } catch (e) {}
     } else if (cursor) {
         nextCursor = cursor;
     } else {
         nextCursor = encodeCursor({
-            seq: 0,
+            connectionId: currentConn,
+            seq: maxSeq,
+            profile: profile || null,
+            filter: filter || {},
             timestamp: new Date().toISOString()
         });
     }
 
-    const changes = pageRows.map(r => ({
-        sequence: r.sequence,
-        eventId: r.id,
-        eventType: r.event_type,
-        specimenId: r.specimen_id,
-        fieldSampleId: r.field_sample_id,
-        labSampleId: r.lab_sample_id,
-        timestamp: r.created_at,
-        data: r.payload ? JSON.parse(r.payload) : null
-    }));
+    const changes = pageRows.map(r => {
+        let data = null;
+        if (r.payload) {
+            try {
+                data = JSON.parse(r.payload);
+            } catch (e) {}
+        }
+        return {
+            id: r.id,
+            sequence: r.sequence,
+            eventType: r.event_type,
+            specimenId: r.specimen_id,
+            fieldSampleId: r.field_sample_id,
+            labSampleId: r.lab_sample_id,
+            country: r.country,
+            projectCode: r.project_code,
+            laboratoryId: r.laboratory_id,
+            timestamp: r.created_at,
+            data
+        };
+    });
 
     return {
+        batchId: issuedBatchId,
         boundaryTimestamp: new Date().toISOString(),
         count: changes.length,
         hasMore,
@@ -786,28 +1110,19 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
 }
 
 /**
- * Records an authenticated receiver delivery receipt (R3, F6, Probe 11).
- * Validates integer counts, validates issued snapshot/batch, and enforces idempotency.
+ * Records an authenticated receiver delivery receipt for snapshots or change batches.
+ * Resolves EVERY batch/snapshot against durable issued database artifacts (Finding 2).
  */
 function recordReceipt(auth, receiptData = {}) {
     const db = getDb();
     const connectionId = getConnectionId(auth);
+    const { receiptId, snapshotId, batchId, importedCount, quarantinedCount, checkpoint, errors = [] } = receiptData;
     const now = new Date().toISOString();
 
-    const {
-        receiptId = null,
-        snapshotId = null,
-        batchId = null,
-        importedCount = 0,
-        quarantinedCount = 0,
-        checkpoint = null,
-        errors = []
-    } = receiptData;
+    const imported = importedCount !== undefined ? Number(importedCount) : 0;
+    const quarantined = quarantinedCount !== undefined ? Number(quarantinedCount) : 0;
 
-    const imported = Number(importedCount);
-    const quarantined = Number(quarantinedCount);
-
-    // Validate integer non-negative counts (F6, Probe 11)
+    // Validate integer non-negative counts (F6, Probe 11, Finding 2)
     if (
         isNaN(imported) || imported < 0 || !Number.isInteger(imported) ||
         isNaN(quarantined) || quarantined < 0 || !Number.isInteger(quarantined)
@@ -819,9 +1134,17 @@ function recordReceipt(auth, receiptData = {}) {
         };
     }
 
-    // Validate referenced snapshotId exists and belongs to connection
+    if (!snapshotId && !batchId) {
+        return {
+            error: 'INVALID_RECEIPT',
+            status: 400,
+            message: 'Receipt must reference an issued snapshotId or batchId.'
+        };
+    }
+
+    let snap = null;
     if (snapshotId) {
-        const snap = db.prepare('SELECT * FROM _exchange_snapshots WHERE id = ?').get(snapshotId);
+        snap = db.prepare('SELECT * FROM _exchange_snapshots WHERE id = ?').get(snapshotId);
         if (!snap) {
             return {
                 error: 'SNAPSHOT_NOT_FOUND',
@@ -838,92 +1161,159 @@ function recordReceipt(auth, receiptData = {}) {
         }
     }
 
-    // Validate referenced batchId if it represents an unissued snapshot/batch (F6, Probe 11)
+    // Validate referenced batchId against durable issued artifacts in _exchange_batches or _exchange_snapshots
+    let batch = null;
     if (batchId) {
-        if (batchId === 'never-issued' || batchId === 'unissued-snap') {
+        batch = db.prepare('SELECT id, connection_id, item_count, snapshot_id FROM _exchange_batches WHERE id = ?').get(batchId);
+        if (!batch) {
+            const snapAsBatch = db.prepare('SELECT id, connection_id, total_samples as item_count FROM _exchange_snapshots WHERE id = ?').get(batchId);
+            if (snapAsBatch) {
+                batch = snapAsBatch;
+            }
+        }
+        if (!batch) {
             return {
                 error: 'BATCH_NOT_FOUND',
                 status: 404,
                 message: `Referenced batch '${batchId}' was not issued or does not exist.`
             };
         }
-        if (batchId.startsWith('snap_')) {
-            const snap = db.prepare('SELECT * FROM _exchange_snapshots WHERE id = ?').get(batchId);
-            if (!snap) {
-                return {
-                    error: 'BATCH_NOT_FOUND',
-                    status: 404,
-                    message: `Referenced batch '${batchId}' was not issued or does not exist.`
-                };
-            }
-            if (snap.connection_id !== connectionId) {
-                return {
-                    error: 'FORBIDDEN',
-                    status: 403,
-                    message: 'Referenced batch belongs to a different connection.'
-                };
-            }
+        if (batch.connection_id !== connectionId) {
+            return {
+                error: 'FORBIDDEN',
+                status: 403,
+                message: 'Referenced batch belongs to a different connection.'
+            };
+        }
+        if (snapshotId && batch.snapshot_id && batch.snapshot_id !== snapshotId) {
+            return {
+                error: 'BATCH_SNAPSHOT_MISMATCH',
+                status: 400,
+                message: 'Referenced batch does not belong to specified snapshot.'
+            };
         }
     }
 
-    // Idempotency check: if receipt for this connection & snapshotId & checkpoint (or batchId, or client receiptId) exists
-    let existing = null;
-    if (receiptId) {
-        existing = db.prepare('SELECT * FROM _exchange_receipts WHERE id = ? AND connection_id = ?').get(receiptId, connectionId);
-    } else if (snapshotId && checkpoint) {
-        existing = db.prepare('SELECT * FROM _exchange_receipts WHERE connection_id = ? AND snapshot_id = ? AND checkpoint = ?').get(connectionId, snapshotId, String(checkpoint));
-    } else if (batchId) {
-        existing = db.prepare('SELECT * FROM _exchange_receipts WHERE connection_id = ? AND batch_id = ?').get(connectionId, batchId);
-    }
-
-    if (existing) {
+    // Bounds checking on counts against issued artifacts
+    if (snap && (imported + quarantined > snap.total_samples)) {
         return {
-            receiptId: existing.id,
-            connectionId: existing.connection_id,
-            receivedAt: existing.created_at,
-            status: 'ACKNOWLEDGED',
-            idempotent: true,
-            receiverReported: {
-                importedCount: existing.imported_count,
-                quarantinedCount: existing.quarantined_count,
-                checkpoint: existing.checkpoint
-            },
-            verifiedImport: false
+            error: 'INVALID_COUNT',
+            status: 400,
+            message: `Reported counts (${imported + quarantined}) exceed total snapshot samples (${snap.total_samples}).`
+        };
+    }
+    if (batch && batch.item_count !== undefined && (imported + quarantined > batch.item_count)) {
+        return {
+            error: 'INVALID_COUNT',
+            status: 400,
+            message: `Reported counts (${imported + quarantined}) exceed batch item count (${batch.item_count}).`
         };
     }
 
-    const finalReceiptId = receiptId || `rec_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
-    const stmt = db.prepare(`
-        INSERT INTO _exchange_receipts (id, connection_id, snapshot_id, batch_id, imported_count, quarantined_count, checkpoint, details, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
+    // Database-enforced Idempotency within transaction
+    try {
+        const recordTx = db.transaction(() => {
+            let existing = null;
+            if (receiptId) {
+                existing = db.prepare('SELECT * FROM _exchange_receipts WHERE id = ? AND connection_id = ?').get(receiptId, connectionId);
+            } else if (snapshotId && checkpoint) {
+                existing = db.prepare('SELECT * FROM _exchange_receipts WHERE connection_id = ? AND snapshot_id = ? AND checkpoint = ?').get(connectionId, snapshotId, String(checkpoint));
+            } else if (snapshotId && batchId) {
+                existing = db.prepare('SELECT * FROM _exchange_receipts WHERE connection_id = ? AND snapshot_id = ? AND batch_id = ?').get(connectionId, snapshotId, batchId);
+            } else if (snapshotId) {
+                existing = db.prepare('SELECT * FROM _exchange_receipts WHERE connection_id = ? AND snapshot_id = ?').get(connectionId, snapshotId);
+            } else if (batchId) {
+                existing = db.prepare('SELECT * FROM _exchange_receipts WHERE connection_id = ? AND batch_id = ?').get(connectionId, batchId);
+            }
 
-    stmt.run(
-        finalReceiptId,
-        connectionId,
-        snapshotId,
-        batchId,
-        imported,
-        quarantined,
-        checkpoint ? String(checkpoint) : null,
-        errors.length > 0 ? JSON.stringify(errors) : null,
-        now
-    );
+            if (existing) {
+                return {
+                    receiptId: existing.id,
+                    connectionId: existing.connection_id,
+                    batchId: existing.batch_id || batchId || null,
+                    snapshotId: existing.snapshot_id || snapshotId || null,
+                    receivedAt: existing.created_at,
+                    status: 'ACKNOWLEDGED',
+                    idempotent: true,
+                    receiverReported: {
+                        importedCount: existing.imported_count,
+                        quarantinedCount: existing.quarantined_count,
+                        checkpoint: existing.checkpoint
+                    },
+                    verifiedImport: false
+                };
+            }
 
-    return {
-        receiptId: finalReceiptId,
-        connectionId,
-        batchId: batchId || null,
-        snapshotId: snapshotId || null,
-        receivedAt: now,
-        status: 'ACKNOWLEDGED',
-        receiverReported: {
-            importedCount: imported,
-            quarantinedCount: quarantined,
-            checkpoint: checkpoint ? String(checkpoint) : null
-        },
-        verifiedImport: false
-    };
+            const finalReceiptId = receiptId || `rec_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+            const stmt = db.prepare(`
+                INSERT INTO _exchange_receipts (id, connection_id, snapshot_id, batch_id, imported_count, quarantined_count, checkpoint, details, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `);
+
+            stmt.run(
+                finalReceiptId,
+                connectionId,
+                snapshotId,
+                batchId,
+                imported,
+                quarantined,
+                checkpoint ? String(checkpoint) : null,
+                errors.length > 0 ? JSON.stringify(errors) : null,
+                now
+            );
+
+            return {
+                receiptId: finalReceiptId,
+                connectionId,
+                batchId: batchId || null,
+                snapshotId: snapshotId || null,
+                receivedAt: now,
+                status: 'ACKNOWLEDGED',
+                idempotent: false,
+                receiverReported: {
+                    importedCount: imported,
+                    quarantinedCount: quarantined,
+                    checkpoint: checkpoint ? String(checkpoint) : null
+                },
+                verifiedImport: false
+            };
+        });
+
+        return recordTx();
+    } catch (e) {
+        if (e.message && e.message.includes('UNIQUE constraint failed')) {
+            let existing = null;
+            if (receiptId) {
+                existing = db.prepare('SELECT * FROM _exchange_receipts WHERE id = ? AND connection_id = ?').get(receiptId, connectionId);
+            } else if (snapshotId && checkpoint) {
+                existing = db.prepare('SELECT * FROM _exchange_receipts WHERE connection_id = ? AND snapshot_id = ? AND checkpoint = ?').get(connectionId, snapshotId, String(checkpoint));
+            } else if (snapshotId && batchId) {
+                existing = db.prepare('SELECT * FROM _exchange_receipts WHERE connection_id = ? AND snapshot_id = ? AND batch_id = ?').get(connectionId, snapshotId, batchId);
+            } else if (snapshotId) {
+                existing = db.prepare('SELECT * FROM _exchange_receipts WHERE connection_id = ? AND snapshot_id = ?').get(connectionId, snapshotId);
+            } else if (batchId) {
+                existing = db.prepare('SELECT * FROM _exchange_receipts WHERE connection_id = ? AND batch_id = ?').get(connectionId, batchId);
+            }
+            if (existing) {
+                return {
+                    receiptId: existing.id,
+                    connectionId: existing.connection_id,
+                    batchId: existing.batch_id || batchId || null,
+                    snapshotId: existing.snapshot_id || snapshotId || null,
+                    receivedAt: existing.created_at,
+                    status: 'ACKNOWLEDGED',
+                    idempotent: true,
+                    receiverReported: {
+                        importedCount: existing.imported_count,
+                        quarantinedCount: existing.quarantined_count,
+                        checkpoint: existing.checkpoint
+                    },
+                    verifiedImport: false
+                };
+            }
+        }
+        throw e;
+    }
 }
 
 module.exports = {

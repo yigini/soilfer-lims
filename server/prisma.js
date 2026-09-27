@@ -1,6 +1,9 @@
 const { PrismaClient } = require('./prisma_client');
 const path = require('path');
 
+// Ensure all SQLite connections have exchange UDFs registered for triggers
+require('./services/exchangeDbFunctions');
+
 // Prisma 7 uses TypeScript query compiler by default.
 // Engine type "client" requires an adapter (no native engine).
 // Use better-sqlite3 driver adapter on all platforms.

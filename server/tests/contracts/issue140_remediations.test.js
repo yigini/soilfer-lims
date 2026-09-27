@@ -157,12 +157,14 @@ describe('Issue #140 Codex Remediations Contract Tests', () => {
             expect(access.status).toBe(403);
         });
 
-        test('Probe 8: Rejects unissued snapshots and negative receipt counts, enforces idempotency', () => {
+        test('Probe 8: Rejects unissued snapshots and negative receipt counts, enforces idempotency', async () => {
             const badReceipt = stateService.recordReceipt(auth, { snapshotId: 'unissued-snap', importedCount: -50 });
             expect(badReceipt.error).toBe('INVALID_COUNT');
 
-            const valid1 = stateService.recordReceipt(auth, { batchId: 'batch-99', importedCount: 10 });
-            const valid2 = stateService.recordReceipt(auth, { batchId: 'batch-99', importedCount: 10 });
+            mockSamples = Array.from({ length: 10 }, (_, i) => fixture(`s_${i}`, '2026-01-01'));
+            const snap = await stateService.createSnapshot(auth);
+            const valid1 = stateService.recordReceipt(auth, { snapshotId: snap.snapshotId, importedCount: 10 });
+            const valid2 = stateService.recordReceipt(auth, { snapshotId: snap.snapshotId, importedCount: 10 });
 
             expect(valid1.receiptId).toBe(valid2.receiptId);
             expect(valid2.idempotent).toBe(true);

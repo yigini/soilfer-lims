@@ -118,11 +118,18 @@ exports.getSampleById = async (req, res) => {
             return res.status(404).json({ error: 'Sample not found in SoilFER registry.' });
         }
 
-        // Check spectral data
+        // Check spectral data with parent authorization & release constraints (Finding 4)
+        const { isRestrictedConsumer } = require('../services/exchangePolicyService');
+        const spectralWhere = {
+            sampleId: sample.id,
+            isCurrent: true
+        };
+        if (isRestrictedConsumer(req.sisAuth)) {
+            spectralWhere.status = { in: ['APPROVED', 'VALIDATED'] };
+        }
+
         const spectra = await prisma.spectralData.findMany({
-            where: {
-                OR: [{ sampleId: sample.id }, { sampleId: sample.originalId }]
-            },
+            where: spectralWhere,
             select: {
                 id: true,
                 modality: true,
@@ -303,22 +310,9 @@ exports.getSpectra = async (req, res) => {
             where.labId = { in: keyLabs };
         }
 
-        // Country scoping
-        const keyCountries = req.sisAuth?.countries || [];
-        const hasGlobalCountry = keyCountries.length === 0 || keyCountries.includes('*');
-        if (!hasGlobalCountry) {
-            const scopedSamples = await prisma.sample.findMany({
-                where: { country: { in: keyCountries } },
-                select: { id: true, labId: true, originalId: true }
-            });
-            const allowedIds = [];
-            scopedSamples.forEach(s => {
-                if (s.id) allowedIds.push(s.id);
-                if (s.labId) allowedIds.push(s.labId);
-                if (s.originalId) allowedIds.push(s.originalId);
-            });
-            where.sampleId = { in: allowedIds };
-        }
+        // Bounded Parent Specimen Traversal & Policy Enforcement (Finding 4)
+        const { buildSampleWhere, isRestrictedConsumer } = require('../services/exchangePolicyService');
+        const parentSampleWhere = buildSampleWhere(req.sisAuth, req.query);
 
         // SL-24: Cursor Pagination on (timestamp, id)
         if (cursor) {
@@ -343,23 +337,85 @@ exports.getSpectra = async (req, res) => {
             }
         }
 
-        // Fetch take + 1 to determine hasMore
-        const records = await prisma.spectralData.findMany({
-            where,
-            take: take + 1,
-            orderBy: [
-                { timestamp: 'desc' },
-                { id: 'desc' }
-            ],
-            include: {
-                equipment: {
-                    select: { id: true, name: true, model: true, manufacturer: true }
+        const restricted = isRestrictedConsumer(req.sisAuth);
+        const pageRecords = [];
+        let hasMore = false;
+        let lastCandidate = null;
+        const maxScanLimit = Math.max(take * 10, 100);
+        let scanned = 0;
+        let authorizedParentMap = {};
+
+        // Bounded authorized traversal over candidates avoiding hidden-page starvation (Finding 4)
+        while (pageRecords.length < take && scanned < maxScanLimit) {
+            const batchTake = Math.min(take * 2, maxScanLimit - scanned);
+            const batchWhere = { ...where };
+            if (lastCandidate) {
+                batchWhere.AND = [
+                    ...(where.AND || []),
+                    {
+                        OR: [
+                            { timestamp: { lt: lastCandidate.timestamp } },
+                            {
+                                timestamp: lastCandidate.timestamp,
+                                id: { lt: lastCandidate.id }
+                            }
+                        ]
+                    }
+                ];
+            }
+
+            const candidates = await prisma.spectralData.findMany({
+                where: batchWhere,
+                take: batchTake + 1,
+                orderBy: [
+                    { timestamp: 'desc' },
+                    { id: 'desc' }
+                ],
+                include: {
+                    equipment: {
+                        select: { id: true, name: true, model: true, manufacturer: true }
+                    }
+                }
+            });
+
+            if (candidates.length === 0) break;
+            const batchHasMore = candidates.length > batchTake;
+            const batchItems = batchHasMore ? candidates.slice(0, batchTake) : candidates;
+            lastCandidate = batchItems[batchItems.length - 1];
+            scanned += batchItems.length;
+
+            const sampleIds = [...new Set(batchItems.map(r => r.sampleId).filter(Boolean))];
+            if (sampleIds.length > 0) {
+                const authorizedParents = await prisma.sample.findMany({
+                    where: {
+                        AND: [
+                            parentSampleWhere,
+                            { id: { in: sampleIds } }
+                        ]
+                    },
+                    select: { id: true, labId: true, originalId: true, status: true, assignedLab: true, country: true, projectCode: true }
+                });
+                for (const p of authorizedParents) {
+                    authorizedParentMap[p.id] = p;
                 }
             }
-        });
 
-        const hasMore = records.length > take;
-        const pageRecords = hasMore ? records.slice(0, take) : records;
+            for (const cand of batchItems) {
+                const isAuth = !restricted ? true : Boolean(cand.sampleId && authorizedParentMap[cand.sampleId]);
+                if (isAuth) {
+                    pageRecords.push(cand);
+                    if (pageRecords.length === take) {
+                        hasMore = batchHasMore || (scanned < maxScanLimit);
+                        break;
+                    }
+                }
+            }
+
+            if (!batchHasMore) {
+                hasMore = false;
+                break;
+            }
+        }
 
         let nextCursor = null;
         if (hasMore && pageRecords.length > 0) {
@@ -370,48 +426,47 @@ exports.getSpectra = async (req, res) => {
             })).toString('base64');
         }
 
-        // SL-23: Paired Reference Chemistry
+        // SL-23: Paired Reference Chemistry (strictly for authorized released parents)
         const shouldAttachRef = withReference === true || withReference === 'true' || withReference === '1';
         let refMap = {};
-        if (shouldAttachRef) {
-            const sampleIds = [...new Set(pageRecords.map(r => r.sampleId).filter(Boolean))];
-            if (sampleIds.length > 0) {
-                const refResults = await prisma.result.findMany({
-                    where: {
-                        sampleId: { in: sampleIds },
-                        isCurrent: true,
-                        provenance: 'MEASURED'
-                    },
-                    select: {
-                        id: true,
-                        sampleId: true,
-                        param: true,
-                        value: true,
-                        numericValue: true,
-                        unit: true,
-                        methodologyId: true,
-                        basis: true,
-                        provenance: true
-                    }
-                });
-                for (const rf of refResults) {
-                    if (!refMap[rf.sampleId]) refMap[rf.sampleId] = [];
-                    const val = rf.numericValue !== null && rf.numericValue !== undefined ? rf.numericValue : (parseFloat(rf.value) || rf.value);
-                    refMap[rf.sampleId].push({
-                        param: rf.param,
-                        value: val,
-                        unit: rf.unit,
-                        method: rf.methodologyId,
-                        basis: rf.basis || 'AIR_DRY',
-                        provenance: rf.provenance || 'MEASURED',
-                        resultId: rf.id
-                    });
+        const validRefSampleIds = Object.keys(authorizedParentMap);
+        if (shouldAttachRef && validRefSampleIds.length > 0) {
+            const refResults = await prisma.result.findMany({
+                where: {
+                    sampleId: { in: validRefSampleIds },
+                    isCurrent: true,
+                    provenance: 'MEASURED'
+                },
+                select: {
+                    id: true,
+                    sampleId: true,
+                    param: true,
+                    value: true,
+                    numericValue: true,
+                    unit: true,
+                    methodologyId: true,
+                    basis: true,
+                    provenance: true
                 }
+            });
+            for (const rf of refResults) {
+                if (!refMap[rf.sampleId]) refMap[rf.sampleId] = [];
+                const val = rf.numericValue !== null && rf.numericValue !== undefined ? rf.numericValue : (parseFloat(rf.value) || rf.value);
+                refMap[rf.sampleId].push({
+                    param: rf.param,
+                    value: val,
+                    unit: rf.unit,
+                    method: rf.methodologyId,
+                    basis: rf.basis || 'AIR_DRY',
+                    provenance: rf.provenance || 'MEASURED',
+                    resultId: rf.id
+                });
             }
         }
 
         // SL-23: Rich Payload Format
         const formatted = pageRecords.map(r => {
+            const smp = authorizedParentMap[r.sampleId] || null;
             const axis = r.wavelengths ? JSON.parse(r.wavelengths) : [];
             const values = r.values ? JSON.parse(r.values) : [];
             const sampleRefs = refMap[r.sampleId] || [];
