@@ -2185,6 +2185,9 @@ Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09
 - **Review References**:
   - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-independent-review-b5ddd14.md`
   - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-working-review-20260927-0746.md`
+- **Corrected Head SHA**: `826ce145d4797fff4127a1ced6ffe94fb6f5f4bf`
+- **CI Run**: [GitHub Actions Run 36306035300](https://github.com/yigini/soilfer-lims/actions/runs/36306035300) (**SUCCESS** in 6m38s — 143/143 test suites, 1,382 automated contract tests, Docker boundary rehearsal)
+- **PR Submission Comment**: [PR #149 comment 5854217824](https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5854217824)
 - **Verification Scripts**:
   - `server/scripts/verify_issue149_working_review.cjs` (**9/9 passed, 100%**)
   - `server/scripts/verify_issue149_b5ddd14_remediations.cjs` (**8/8 passed, 100%**)
@@ -2194,6 +2197,7 @@ Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09
   - `server/tests/contracts/nsis_v2_exchange.test.js`: **8/8 passed (100%)**
   - `server/tests/contracts/spectral_stage_e.test.js`: **4/4 passed (100%)**
   - `server/tests/contracts/sis_adapter_service.test.js`: **20/20 passed (100%)**
+  - Complete backend test suite: **143/143 test suites, 1,382/1,382 tests passed (100%)**
 
 #### Remediated Findings Ledger
 

@@ -1807,5 +1807,12 @@ ONE feedback message submitted to existing LIMS Dev at 09:49 local. Fresh state 
   - `server/scripts/verify_issue149_b5ddd14_remediations.cjs`: **8/8 passed (100%)**
   - `server/scripts/test_issue140_probes.cjs`: **16/16 passed (100%)**
   - Jest contract suites (`issue140_remediations.test.js`, `nsis_v2_exchange.test.js`, `spectral_stage_e.test.js`): **27/27 passed (100%)**
-- Staging and committing all remediations on `feat/issue-140-nsis-exchange` for push and CI verification. Strictly LIMS-only; OpenNSIS untouched; zero production merge/release prior to Codex independent acceptance.
+  - Full backend test suite: **143/143 test suites, 1,382/1,382 automated contract and unit tests passed (100%)**
+- **Commit & CI Presentation**:
+  - Staged and committed on `feat/issue-140-nsis-exchange` as commit `826ce145d4797fff4127a1ced6ffe94fb6f5f4bf`.
+  - Pushed to remote PR #149.
+  - GitHub Actions CI Run [36306035300](https://github.com/yigini/soilfer-lims/actions/runs/36306035300) completed with status **SUCCESS** (6m38s).
+  - Formal remediation ledger posted to PR #149: [PR 149 comment 5854217824](https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5854217824).
+- Strictly LIMS-only assignment. OpenNSIS untouched. Awaiting Codex independent technical acceptance before authorized release execution.
+
 
