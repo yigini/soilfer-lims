@@ -93,12 +93,16 @@ const prisma = {
 };
 
 function FakeDb() { return db; }
+const dbFuncs = source('server/services/exchangeDbFunctions.js', {
+    './sisAdapterService': adapter
+});
 const mocks = {
     'better-sqlite3': FakeDb,
     '../prisma': prisma,
     './exchangePolicyService': policy,
     './sisAdapterService': adapter,
-    './projectPolicyService': project
+    './projectPolicyService': project,
+    './exchangeDbFunctions': dbFuncs
 };
 
 const state = source('server/services/exchangeStateService.js', mocks);

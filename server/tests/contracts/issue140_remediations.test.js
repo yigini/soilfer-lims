@@ -90,6 +90,7 @@ describe('Issue #140 Codex Remediations Contract Tests', () => {
                 if (name === '../prisma') return mockPrisma;
                 if (name === './exchangePolicyService') return policy;
                 if (name === './sisAdapterService') return adapter;
+                if (name === './exchangeDbFunctions') return require('../../services/exchangeDbFunctions');
                 if (['path', 'crypto'].includes(name)) return require(name);
                 throw new Error('Unexpected require: ' + name);
             },

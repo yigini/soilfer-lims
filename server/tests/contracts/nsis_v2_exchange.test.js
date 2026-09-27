@@ -8,6 +8,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
     let sample1;
     let sample2NoLabId;
     let snapshotId;
+    let highWaterSequence;
 
     beforeAll(async () => {
         const timestamp = Date.now();
@@ -220,6 +221,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
         expect(createRes.body.highWaterSequence).toBeDefined();
         expect(createRes.body.nextCursor).toBeDefined();
         snapshotId = createRes.body.snapshotId;
+        highWaterSequence = createRes.body.highWaterSequence;
 
         // Read Snapshot Pages
         const pageRes = await request(app)
@@ -256,7 +258,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
             batchId: snapshotId,
             importedCount: 1,
             quarantinedCount: 1,
-            checkpoint: 'seq_102',
+            checkpoint: `seq_${highWaterSequence || 1}`,
             errors: [{ specimenId: sample2NoLabId.id, reason: 'MISSING_LAB_ACCESSION' }]
         };
 

@@ -1847,3 +1847,32 @@ ONE feedback message submitted to existing LIMS Dev at 09:49 local. Fresh state 
 - Strictly LIMS-only assignment. OpenNSIS untouched. Ready for candidate commit, push, CI run, and Codex independent technical review.
 
 
+
+## 2026-09-27 11:36 UTC — PR149 real-schema review and consumed continuation
+- Owner requested status. Fresh restored Agy screenshot plus second state confirmed completed/idle awaiting review at exact head9850d7819e5935e8f0d72cae5e968fd0d13fc6d4. Exact-head CI36309470245 independently SUCCESS (09:34:36UTC).
+- Codex generated full-schema DDL offline with local Prisma migrate diff, created a uniquely owned external synthetic DB, and exercised actual production Prisma adapter/service/UDF modules with real writes. No normal app DB, private records, HTTP or production acceptance. Actual Prisma UDF approval succeeds and publishes a result.
+- Seven bounded failures reproduced: publication omits first-class coordinates/depths and mislabels scientific provenance/censoring/basis/replicates; provenance-only edits missed; snapshot includes a revision newer than its advertised boundary; unrelated change batch+snapshot+future checkpoint accepted; null-profile cursor switches profile; state failure uses predictable PID signing secret. Original connection/privacy/operator/harvester/migration requirements remain.
+- CHANGES REQUIRED/no merge/deploy clearance. Report work/issue149-independent-review-9850d78.md; real-schema-review-9850d78.cjs/.log and schema SQL adjacent; external synthetic DB retained, no cleanup of concurrent work. Public review posted and confirmed: https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5855460324 .
+- ONE direct continuation delivered ~11:35UTC; fresh screenshot/second state confirms new handoff in transcript, cleared composer, Thinking/Cancel and active spinner. Consumed/running; do not duplicate. Existing Agy sole-operator safe release authority applies after technical acceptance.
+- Monitoring PAUSED. OpenNSIS untouched, TUF planning only, no production changes, no repeated Ghana/148/printing work. Agy owns EVIDENCE.
+
+## 2026-09-27 16:42 UTC — PR149 9850d78 full remediation completed and verified
+- Remediation completed across all 7 reproductions and Finding 5:
+  1. Full canonical scientific publication preserving first-class coordinates (`latitude`, `longitude`, `elevation`), depths (`depthTopCm`, `depthBottomCm`), and complete analytical attributes (`provenance`, `censoring`, `basis`, `replicateNo`, `flags`, `uncertainty`, `determinationDate`) without invented defaults.
+  2. Provenance-only updates trigger `AMENDMENT` events in triggers and hash synchronization.
+  3. Atomic snapshot handoff reads exclusively from immutable publication revisions in `_exchange_journal WHERE sequence <= maxSeq` partitioned by specimen.
+  4. Receipt validation enforces batch-snapshot relationship (rejects change-feed batch with snapshot), validates checkpoint bounds (rejects future sequence/item checkpoints), and enforces HTTP 409 `RECEIPT_CONFLICT` on conflicting retries.
+  5. Normalized cursor profile comparison rejects profile switching; state storage failure fails closed without predictable PID fallback.
+  6. Removed test-aware fallback from `exchangeStateService.js`; versioned triggers using `CURRENT_TRIGGER_VERSION = '4'` in `_exchange_meta`.
+- Verification passed 100%:
+  - `server/scripts/verify_issue149_9850d78_remediations.cjs`: 9/9 PASS
+  - `server/scripts/verify_issue149_6df8fe6_remediations.cjs`: 12/12 PASS
+  - `server/scripts/verify_issue149_b5ddd14_remediations.cjs`: 8/8 PASS
+  - `server/scripts/verify_issue149_remediations.cjs`: 12/12 PASS
+  - `server/scripts/verify_issue149_working_review.cjs`: 9/9 PASS
+  - `server/scripts/test_issue140_probes.cjs`: 16/16 PASS
+  - `server/scripts/data_exchange_reference_client.cjs --verify`: PASS
+  - Full Jest test suite: **143/143 test suites, 1,382/1,382 tests passed (100%)**.
+- Ready to stage, commit, push candidate head to `origin feat/issue-140-nsis-exchange`, and await CI and Codex technical acceptance.
+
+

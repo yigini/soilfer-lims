@@ -36,7 +36,14 @@ function normalizeSampleDataForHash(raw) {
         unit: r.unit != null ? String(r.unit) : null,
         methodologyId: r.methodologyId != null ? String(r.methodologyId) : null,
         isValid: (r.isValid !== null && r.isValid !== undefined) ? (r.isValid ? 1 : 0) : 1,
-        isCurrent: (r.isCurrent !== null && r.isCurrent !== undefined) ? (r.isCurrent ? 1 : 0) : 1
+        isCurrent: (r.isCurrent !== null && r.isCurrent !== undefined) ? (r.isCurrent ? 1 : 0) : 1,
+        provenance: r.provenance != null ? String(r.provenance) : null,
+        censoring: r.censoring != null ? String(r.censoring) : null,
+        basis: r.basis != null ? String(r.basis) : null,
+        replicateNo: (r.replicateNo !== null && r.replicateNo !== undefined && !isNaN(Number(r.replicateNo))) ? Number(r.replicateNo) : 1,
+        flags: r.flags != null ? (typeof r.flags === 'object' ? JSON.stringify(r.flags) : String(r.flags)) : null,
+        uncertainty: (r.uncertainty !== null && r.uncertainty !== undefined && !isNaN(Number(r.uncertainty))) ? Number(r.uncertainty) : null,
+        determinationDate: r.determinationDate != null ? (r.determinationDate instanceof Date ? r.determinationDate.toISOString().split('T')[0] : String(r.determinationDate).split('T')[0]) : (r.analysedAt != null ? (r.analysedAt instanceof Date ? r.analysedAt.toISOString().split('T')[0] : String(r.analysedAt).split('T')[0]) : null)
     }));
     normResults.sort((a, b) => String(a.id || a.param || '').localeCompare(String(b.id || b.param || '')));
 
@@ -71,11 +78,16 @@ function normalizeSampleDataForHash(raw) {
         projectCode: raw.projectCode != null ? String(raw.projectCode) : null,
         fieldMetadata: raw.fieldMetadata != null ? (typeof raw.fieldMetadata === 'object' ? JSON.stringify(raw.fieldMetadata) : String(raw.fieldMetadata)) : null,
         metadata: raw.metadata != null ? (typeof raw.metadata === 'object' ? JSON.stringify(raw.metadata) : String(raw.metadata)) : null,
-        latitude: raw.latitude !== undefined && raw.latitude !== null ? Number(raw.latitude) : null,
-        longitude: raw.longitude !== undefined && raw.longitude !== null ? Number(raw.longitude) : null,
-        elevation: raw.elevation !== undefined && raw.elevation !== null ? Number(raw.elevation) : null,
-        depthUpper: raw.depthUpper !== undefined && raw.depthUpper !== null ? Number(raw.depthUpper) : null,
-        depthLower: raw.depthLower !== undefined && raw.depthLower !== null ? Number(raw.depthLower) : null,
+        latitude: (raw.latitude !== undefined && raw.latitude !== null && !isNaN(Number(raw.latitude))) ? Number(raw.latitude) : null,
+        longitude: (raw.longitude !== undefined && raw.longitude !== null && !isNaN(Number(raw.longitude))) ? Number(raw.longitude) : null,
+        elevation: (raw.elevation !== undefined && raw.elevation !== null && !isNaN(Number(raw.elevation))) ? Number(raw.elevation) : null,
+        depthTopCm: (raw.depthTopCm !== undefined && raw.depthTopCm !== null && !isNaN(Number(raw.depthTopCm))) ? Number(raw.depthTopCm) : null,
+        depthBottomCm: (raw.depthBottomCm !== undefined && raw.depthBottomCm !== null && !isNaN(Number(raw.depthBottomCm))) ? Number(raw.depthBottomCm) : null,
+        depthUpper: (raw.depthUpper !== undefined && raw.depthUpper !== null && !isNaN(Number(raw.depthUpper))) ? Number(raw.depthUpper) : (raw.depthTop !== undefined && raw.depthTop !== null && !isNaN(Number(raw.depthTop)) ? Number(raw.depthTop) : null),
+        depthLower: (raw.depthLower !== undefined && raw.depthLower !== null && !isNaN(Number(raw.depthLower))) ? Number(raw.depthLower) : (raw.depthBottom !== undefined && raw.depthBottom !== null && !isNaN(Number(raw.depthBottom)) ? Number(raw.depthBottom) : null),
+        horizon: raw.horizon != null ? String(raw.horizon) : null,
+        positionalUncertaintyM: (raw.positionalUncertaintyM !== undefined && raw.positionalUncertaintyM !== null && !isNaN(Number(raw.positionalUncertaintyM))) ? Number(raw.positionalUncertaintyM) : null,
+        locationSource: raw.locationSource != null ? String(raw.locationSource) : null,
         collectionDate: colDate,
         samplingDate: sampDate,
         receptionDate: recDate,
@@ -92,41 +104,58 @@ function registerDbFunctions(db) {
     if (!db || typeof db.function !== 'function') return;
     try {
         db.function('exchange_compute_hash', { varargs: true }, (...args) => {
-            let id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, resultsJson;
-            if (args.length >= 11) {
-                [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, resultsJson] = args;
-            } else if (args.length === 8) {
-                [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata] = args;
-            } else if (args.length === 9) {
-                [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata] = args;
+            let sampleObj = {};
+            let resultsJson = '[]';
+
+            if (args.length === 2 && typeof args[0] === 'string' && args[0].trim().startsWith('{')) {
+                try { sampleObj = JSON.parse(args[0]); } catch (e) {}
+                resultsJson = args[1];
+            } else if (args.length === 2 && typeof args[0] === 'object' && args[0] !== null) {
+                sampleObj = args[0];
+                resultsJson = args[1];
             } else {
-                [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, resultsJson] = args;
+                let id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate;
+                if (args.length >= 11) {
+                    [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, resultsJson] = args;
+                } else if (args.length === 8) {
+                    [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata] = args;
+                } else if (args.length === 9) {
+                    [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata] = args;
+                } else {
+                    [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, resultsJson] = args;
+                }
+                sampleObj = {
+                    id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate
+                };
             }
 
-            const raw = {
-                id,
-                status,
-                originalId,
-                labId,
-                assignedLab,
-                country,
-                projectCode,
-                fieldMetadata,
-                metadata,
-                receptionDate,
-                results: resultsJson
-            };
-            return computeSampleContentHash(raw);
+            sampleObj.results = resultsJson;
+            return computeSampleContentHash(sampleObj);
         });
 
         db.function('exchange_format_payload', { varargs: true }, (...args) => {
-            let id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, updatedAt, resultsJson;
-            if (args.length >= 12) {
-                [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, updatedAt, resultsJson] = args;
-            } else if (args.length === 9) {
-                [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, updatedAt] = args;
+            let sampleObj = {};
+            let resultsJson = '[]';
+
+            if (args.length === 2 && typeof args[0] === 'string' && args[0].trim().startsWith('{')) {
+                try { sampleObj = JSON.parse(args[0]); } catch (e) {}
+                resultsJson = args[1];
+            } else if (args.length === 2 && typeof args[0] === 'object' && args[0] !== null) {
+                sampleObj = args[0];
+                resultsJson = args[1];
             } else {
-                [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, updatedAt, resultsJson] = args;
+                let id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, updatedAt;
+                if (args.length >= 12) {
+                    [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, updatedAt, resultsJson] = args;
+                } else if (args.length === 9) {
+                    [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, updatedAt] = args;
+                } else {
+                    [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, updatedAt, resultsJson] = args;
+                }
+                sampleObj = {
+                    id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate,
+                    updatedAt: updatedAt ? new Date(updatedAt) : new Date()
+                };
             }
 
             let results = [];
@@ -137,25 +166,17 @@ function registerDbFunctions(db) {
             }
             if (!Array.isArray(results)) results = [];
 
-            const raw = {
-                id,
-                status,
-                originalId,
-                labId,
-                assignedLab,
-                country,
-                projectCode,
-                fieldMetadata,
-                metadata,
-                receptionDate,
-                updatedAt: updatedAt ? new Date(updatedAt) : new Date(),
-                results: results.map(r => ({
-                    ...r,
-                    isValid: r.isValid !== undefined ? Boolean(r.isValid) : true,
-                    isCurrent: r.isCurrent !== undefined ? Boolean(r.isCurrent) : true
-                }))
-            };
-            return JSON.stringify(formatSampleV2(raw));
+            sampleObj.results = results.map(r => ({
+                ...r,
+                isValid: r.isValid !== undefined ? Boolean(r.isValid) : true,
+                isCurrent: r.isCurrent !== undefined ? Boolean(r.isCurrent) : true
+            }));
+
+            if (!sampleObj.updatedAt) {
+                sampleObj.updatedAt = new Date();
+            }
+
+            return JSON.stringify(formatSampleV2(sampleObj));
         });
     } catch (e) {}
 }

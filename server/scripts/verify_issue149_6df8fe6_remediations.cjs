@@ -73,12 +73,16 @@ const prisma = {
 };
 
 function MemDb() { return db; }
+const dbFuncs = source('server/services/exchangeDbFunctions.js', {
+    './sisAdapterService': adapter
+});
 const state = source('server/services/exchangeStateService.js', {
     'better-sqlite3': MemDb,
     '../prisma': prisma,
     './exchangePolicyService': policy,
     './sisAdapterService': adapter,
-    './projectPolicyService': { getProgrammeChildProjectCodes: () => [] }
+    './projectPolicyService': { getProgrammeChildProjectCodes: () => [] },
+    './exchangeDbFunctions': dbFuncs
 });
 
 const auth = { type: 'API_KEY', keyId: 'KEY-1', role: 'NSIS_CONSUMER', labs: ['LAB-A'], countries: ['AAA', 'BBB'], projects: ['P-A'] };
@@ -170,15 +174,15 @@ const count = () => db.prepare('SELECT COUNT(*) n FROM _exchange_journal').get()
     console.log('✔ Contract 9 PASSED: Unrelated snapshot as batch and arbitrary checkpoints rejected.');
 
     // ── Contract 10: Conflicting retry returns 409 RECEIPT_CONFLICT; exact retry is idempotent ──
-    const goodReceipt = state.recordReceipt(auth, { snapshotId: validSnap.snapshotId, batchId: validSnap.snapshotId, importedCount: 1, checkpoint: 'seq_10' });
+    const goodReceipt = state.recordReceipt(auth, { snapshotId: validSnap.snapshotId, batchId: validSnap.snapshotId, importedCount: 1, checkpoint: `seq_${validSnap.highWaterSequence}` });
     assert.equal(goodReceipt.status, 'ACKNOWLEDGED');
     assert.equal(goodReceipt.idempotent, false);
 
-    const retryConflict = state.recordReceipt(auth, { snapshotId: validSnap.snapshotId, batchId: validSnap.snapshotId, importedCount: 0, quarantinedCount: 1, checkpoint: 'seq_10' });
+    const retryConflict = state.recordReceipt(auth, { snapshotId: validSnap.snapshotId, batchId: validSnap.snapshotId, importedCount: 0, quarantinedCount: 1, checkpoint: `seq_${validSnap.highWaterSequence}` });
     assert.equal(retryConflict.error, 'RECEIPT_CONFLICT', 'Contract 10: Conflicting counts return RECEIPT_CONFLICT');
     assert.equal(retryConflict.status, 409);
 
-    const retryExact = state.recordReceipt(auth, { snapshotId: validSnap.snapshotId, batchId: validSnap.snapshotId, importedCount: 1, checkpoint: 'seq_10' });
+    const retryExact = state.recordReceipt(auth, { snapshotId: validSnap.snapshotId, batchId: validSnap.snapshotId, importedCount: 1, checkpoint: `seq_${validSnap.highWaterSequence}` });
     assert.equal(retryExact.status, 'ACKNOWLEDGED');
     assert.equal(retryExact.idempotent, true, 'Contract 10: Exact retry acknowledged as idempotent');
     console.log('✔ Contract 10 PASSED: Conflicting retry returns 409 RECEIPT_CONFLICT; exact retry idempotent.');

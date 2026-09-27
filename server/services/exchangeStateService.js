@@ -34,6 +34,9 @@ function getCursorSecret(db) {
     if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
     if (process.env.API_KEY_SECRET) return process.env.API_KEY_SECRET;
     const metaDb = db || (dbInstance || getDb());
+    if (!metaDb || typeof metaDb.prepare !== 'function') {
+        throw new Error('Signing state storage unavailable: database connection required and no environment secret configured.');
+    }
     try {
         const row = metaDb.prepare("SELECT value FROM _exchange_meta WHERE key = 'cursor_signing_secret'").get();
         if (row && row.value) return row.value;
@@ -41,7 +44,7 @@ function getCursorSecret(db) {
         metaDb.prepare("INSERT OR REPLACE INTO _exchange_meta (key, value, updated_at) VALUES ('cursor_signing_secret', ?, ?)").run(generated, new Date().toISOString());
         return generated;
     } catch (e) {
-        return 'ephemeral_cursor_secret_' + (process.pid || '0');
+        throw new Error(`Signing state storage unavailable and no environment secret configured: ${e.message}`);
     }
 }
 
@@ -69,408 +72,287 @@ function ensureColumns(db, tableName, colDefs) {
     }
 }
 
-let normalizeSampleDataForHash, computeSampleContentHash, registerDbFunctions, installSqliteHooks;
+const {
+    normalizeSampleDataForHash,
+    computeSampleContentHash,
+    registerDbFunctions,
+    installSqliteHooks
+} = require('./exchangeDbFunctions');
 
-try {
-    const dbFuncs = require('./exchangeDbFunctions');
-    normalizeSampleDataForHash = dbFuncs.normalizeSampleDataForHash;
-    computeSampleContentHash = dbFuncs.computeSampleContentHash;
-    registerDbFunctions = dbFuncs.registerDbFunctions;
-    installSqliteHooks = dbFuncs.installSqliteHooks;
-} catch (e) {
-    // Inlined definitions for VM test harnesses where ./exchangeDbFunctions is not in the mock map
-    normalizeSampleDataForHash = function(raw) {
-        if (!raw) return {};
+const CURRENT_TRIGGER_VERSION = '4';
 
-        let results = [];
-        if (raw.results) {
-            if (typeof raw.results === 'string') {
-                try { results = JSON.parse(raw.results); } catch (err) {}
-            } else if (Array.isArray(raw.results)) {
-                results = raw.results;
-            }
-        }
-        const normResults = results.map(r => ({
-            id: r.id != null ? String(r.id) : null,
-            param: r.param != null ? String(r.param) : null,
-            value: r.value != null ? String(r.value) : null,
-            numericValue: (r.numericValue !== null && r.numericValue !== undefined && !isNaN(Number(r.numericValue))) ? Number(r.numericValue) : null,
-            unit: r.unit != null ? String(r.unit) : null,
-            methodologyId: r.methodologyId != null ? String(r.methodologyId) : null,
-            isValid: (r.isValid !== null && r.isValid !== undefined) ? (r.isValid ? 1 : 0) : 1,
-            isCurrent: (r.isCurrent !== null && r.isCurrent !== undefined) ? (r.isCurrent ? 1 : 0) : 1
-        }));
-        normResults.sort((a, b) => String(a.id || a.param || '').localeCompare(String(b.id || b.param || '')));
+function ensureTriggers(db, force = false) {
+    registerDbFunctions(db);
 
-        let recDate = null;
-        if (raw.receptionDate) {
-            const str = (raw.receptionDate instanceof Date) ? raw.receptionDate.toISOString() : String(raw.receptionDate);
-            const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
-            recDate = m ? `${m[1]}-${m[2]}-${m[3]}` : str;
-        }
-
-        let colDate = null;
-        if (raw.collectionDate) {
-            const str = (raw.collectionDate instanceof Date) ? raw.collectionDate.toISOString() : String(raw.collectionDate);
-            const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
-            colDate = m ? `${m[1]}-${m[2]}-${m[3]}` : str;
-        }
-
-        let sampDate = null;
-        if (raw.samplingDate) {
-            const str = (raw.samplingDate instanceof Date) ? raw.samplingDate.toISOString() : String(raw.samplingDate);
-            const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
-            sampDate = m ? `${m[1]}-${m[2]}-${m[3]}` : str;
-        }
-
-        return {
-            id: raw.id != null ? String(raw.id) : null,
-            status: raw.status != null ? String(raw.status) : null,
-            originalId: raw.originalId != null ? String(raw.originalId) : null,
-            labId: raw.labId != null ? String(raw.labId) : null,
-            assignedLab: raw.assignedLab != null ? String(raw.assignedLab) : null,
-            country: (raw.country || raw.countryName) != null ? String(raw.country || raw.countryName) : null,
-            projectCode: raw.projectCode != null ? String(raw.projectCode) : null,
-            fieldMetadata: raw.fieldMetadata != null ? (typeof raw.fieldMetadata === 'object' ? JSON.stringify(raw.fieldMetadata) : String(raw.fieldMetadata)) : null,
-            metadata: raw.metadata != null ? (typeof raw.metadata === 'object' ? JSON.stringify(raw.metadata) : String(raw.metadata)) : null,
-            latitude: raw.latitude !== undefined && raw.latitude !== null ? Number(raw.latitude) : null,
-            longitude: raw.longitude !== undefined && raw.longitude !== null ? Number(raw.longitude) : null,
-            elevation: raw.elevation !== undefined && raw.elevation !== null ? Number(raw.elevation) : null,
-            depthUpper: raw.depthUpper !== undefined && raw.depthUpper !== null ? Number(raw.depthUpper) : null,
-            depthLower: raw.depthLower !== undefined && raw.depthLower !== null ? Number(raw.depthLower) : null,
-            collectionDate: colDate,
-            samplingDate: sampDate,
-            receptionDate: recDate,
-            results: normResults
-        };
-    };
-
-    computeSampleContentHash = function(s) {
-        if (!s) return '';
-        return crypto.createHash('sha256').update(JSON.stringify(normalizeSampleDataForHash(s))).digest('hex');
-    };
-
-    registerDbFunctions = function(db) {
-        if (!db || typeof db.function !== 'function') return;
+    const hasMeta = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_meta'").get();
+    if (!force && hasMeta) {
         try {
-            db.function('exchange_compute_hash', { varargs: true }, (...args) => {
-                let id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, resultsJson;
-                if (args.length >= 11) {
-                    [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, resultsJson] = args;
-                } else if (args.length === 8) {
-                    [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata] = args;
-                } else if (args.length === 9) {
-                    [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata] = args;
-                } else {
-                    [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, resultsJson] = args;
-                }
-
-                const raw = {
-                    id,
-                    status,
-                    originalId,
-                    labId,
-                    assignedLab,
-                    country,
-                    projectCode,
-                    fieldMetadata,
-                    metadata,
-                    receptionDate,
-                    results: resultsJson
-                };
-                return computeSampleContentHash(raw);
-            });
-
-            db.function('exchange_format_payload', { varargs: true }, (...args) => {
-                let id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, updatedAt, resultsJson;
-                if (args.length >= 12) {
-                    [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, updatedAt, resultsJson] = args;
-                } else if (args.length === 9) {
-                    [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, updatedAt] = args;
-                } else {
-                    [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, updatedAt, resultsJson] = args;
-                }
-
-                let results = [];
-                if (resultsJson) {
-                    try {
-                        results = typeof resultsJson === 'string' ? JSON.parse(resultsJson) : resultsJson;
-                    } catch (err) {}
-                }
-                if (!Array.isArray(results)) results = [];
-
-                const raw = {
-                    id,
-                    status,
-                    originalId,
-                    labId,
-                    assignedLab,
-                    country,
-                    projectCode,
-                    fieldMetadata,
-                    metadata,
-                    receptionDate,
-                    updatedAt: updatedAt ? new Date(updatedAt) : new Date(),
-                    results: results.map(r => ({
-                        ...r,
-                        isValid: r.isValid !== undefined ? Boolean(r.isValid) : true,
-                        isCurrent: r.isCurrent !== undefined ? Boolean(r.isCurrent) : true
-                    }))
-                };
-                return JSON.stringify(formatSampleV2(raw));
-            });
-        } catch (err) {}
-    };
-
-    installSqliteHooks = function() {
-        try {
-            const betterSqlite3Path = require.resolve('better-sqlite3');
-            const OrigDb = require('better-sqlite3');
-            if (OrigDb.__exchangeHooksInstalled) return;
-
-            function WrappedDb(...args) {
-                const db = new OrigDb(...args);
-                registerDbFunctions(db);
-                return db;
+            const verRow = db.prepare("SELECT value FROM _exchange_meta WHERE key = 'exchange_triggers_version'").get();
+            if (verRow && verRow.value === CURRENT_TRIGGER_VERSION) {
+                return;
             }
-            WrappedDb.prototype = OrigDb.prototype;
-            WrappedDb.__exchangeHooksInstalled = true;
-            Object.assign(WrappedDb, OrigDb);
-            require.cache[betterSqlite3Path].exports = WrappedDb;
-        } catch (err) {}
+        } catch (e) {}
+    }
+
+    const hasSample = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Sample'").get();
+    if (!hasSample) return;
+
+    const sampleCols = new Set((db.prepare("PRAGMA table_info(Sample)").all() || []).map(c => c.name));
+    const hasResult = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Result'").get();
+    const resultCols = hasResult ? new Set((db.prepare("PRAGMA table_info(Result)").all() || []).map(c => c.name)) : new Set();
+
+    const buildSampleJsonObj = (prefix) => {
+        const fields = [
+            `'id', ${prefix}.id`,
+            `'status', ${prefix}.status`,
+            `'originalId', ${prefix}.originalId`,
+            `'labId', ${prefix}.labId`,
+            `'assignedLab', ${prefix}.assignedLab`,
+            `'country', ${prefix}.country`,
+            `'projectCode', ${prefix}.projectCode`,
+            `'fieldMetadata', ${prefix}.fieldMetadata`
+        ];
+        if (sampleCols.has('metadata')) fields.push(`'metadata', ${prefix}.metadata`);
+        if (sampleCols.has('receptionDate')) fields.push(`'receptionDate', ${prefix}.receptionDate`);
+        if (sampleCols.has('updatedAt')) fields.push(`'updatedAt', ${prefix}.updatedAt`);
+        if (sampleCols.has('latitude')) fields.push(`'latitude', ${prefix}.latitude`);
+        if (sampleCols.has('longitude')) fields.push(`'longitude', ${prefix}.longitude`);
+        if (sampleCols.has('elevation')) fields.push(`'elevation', ${prefix}.elevation`);
+        if (sampleCols.has('depthTopCm')) fields.push(`'depthTopCm', ${prefix}.depthTopCm`);
+        if (sampleCols.has('depthBottomCm')) fields.push(`'depthBottomCm', ${prefix}.depthBottomCm`);
+        if (sampleCols.has('depthTop')) fields.push(`'depthTop', ${prefix}.depthTop`);
+        if (sampleCols.has('depthBottom')) fields.push(`'depthBottom', ${prefix}.depthBottom`);
+        if (sampleCols.has('horizon')) fields.push(`'horizon', ${prefix}.horizon`);
+        if (sampleCols.has('positionalUncertaintyM')) fields.push(`'positionalUncertaintyM', ${prefix}.positionalUncertaintyM`);
+        if (sampleCols.has('locationSource')) fields.push(`'locationSource', ${prefix}.locationSource`);
+        return `json_object(${fields.join(', ')})`;
     };
-}
 
-function ensureTriggers(db) {
-    try {
-        registerDbFunctions(db);
+    const newSampleJson = buildSampleJsonObj('NEW');
+    const oldSampleJson = buildSampleJsonObj('OLD');
+    const sSampleJson = buildSampleJsonObj('s');
 
-        const hasSample = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Sample'").get();
-        if (hasSample) {
-            const sampleCols = new Set((db.prepare("PRAGMA table_info(Sample)").all() || []).map(c => c.name));
-            const hasResult = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Result'").get();
-            const resultCols = hasResult ? new Set((db.prepare("PRAGMA table_info(Result)").all() || []).map(c => c.name)) : new Set();
+    const resColParam = resultCols.has('param') ? 'r.param' : "''";
+    const resColValid = resultCols.has('isValid') ? 'r.isValid' : '1';
+    const resColCurr = resultCols.has('isCurrent') ? 'r.isCurrent' : '1';
+    const resColUnit = resultCols.has('unit') ? 'r.unit' : 'NULL';
+    const resColMeth = resultCols.has('methodologyId') ? 'r.methodologyId' : 'NULL';
+    const resColProv = resultCols.has('provenance') ? 'r.provenance' : "'MEASURED'";
+    const resColCens = resultCols.has('censoring') ? 'r.censoring' : "'NONE'";
+    const resColBasis = resultCols.has('basis') ? 'r.basis' : "'AIR_DRY'";
+    const resColRep = resultCols.has('replicateNo') ? 'r.replicateNo' : '1';
+    const resColFlags = resultCols.has('flags') ? 'r.flags' : 'NULL';
+    const resColUnc = resultCols.has('uncertainty') ? 'r.uncertainty' : 'NULL';
+    const resColDetDate = resultCols.has('determinationDate') ? 'r.determinationDate' : (resultCols.has('analysedAt') ? 'r.analysedAt' : 'NULL');
 
-            const colMeta = sampleCols.has('metadata') ? 'NEW.metadata' : 'NULL';
-            const colRecDate = sampleCols.has('receptionDate') ? 'NEW.receptionDate' : 'NULL';
-            const colOldMeta = sampleCols.has('metadata') ? 'OLD.metadata' : 'NULL';
-            const colOldRecDate = sampleCols.has('receptionDate') ? 'OLD.receptionDate' : 'NULL';
+    const resValidFilter = resultCols.has('isValid') ? '(r.isValid IS NULL OR r.isValid = 1)' : '1=1';
+    const resCurrFilter = resultCols.has('isCurrent') ? '(r.isCurrent IS NULL OR r.isCurrent = 1)' : '1=1';
 
-            const resultSubquery = hasResult
-                ? `(SELECT COALESCE(json_group_array(json_object(
-                    'id', r.id,
-                    'param', ${resultCols.has('param') ? 'r.param' : "''"},
-                    'value', r.value,
-                    'numericValue', r.numericValue,
-                    'isValid', ${resultCols.has('isValid') ? 'r.isValid' : '1'},
-                    'isCurrent', ${resultCols.has('isCurrent') ? 'r.isCurrent' : '1'},
-                    'unit', ${resultCols.has('unit') ? 'r.unit' : 'NULL'},
-                    'methodologyId', ${resultCols.has('methodologyId') ? 'r.methodologyId' : 'NULL'}
-                )), '[]') FROM Result r WHERE r.sampleId = NEW.id AND (${resultCols.has('isValid') ? '(r.isValid IS NULL OR r.isValid = 1)' : '1=1'}) AND (${resultCols.has('isCurrent') ? '(r.isCurrent IS NULL OR r.isCurrent = 1)' : '1=1'}))`
-                : `'[]'`;
+    const resultSubquery = hasResult
+        ? `(SELECT COALESCE(json_group_array(json_object(
+            'id', r.id,
+            'param', ${resColParam},
+            'value', r.value,
+            'numericValue', r.numericValue,
+            'isValid', ${resColValid},
+            'isCurrent', ${resColCurr},
+            'unit', ${resColUnit},
+            'methodologyId', ${resColMeth},
+            'provenance', ${resColProv},
+            'censoring', ${resColCens},
+            'basis', ${resColBasis},
+            'replicateNo', ${resColRep},
+            'flags', ${resColFlags},
+            'uncertainty', ${resColUnc},
+            'determinationDate', ${resColDetDate}
+        )), '[]') FROM Result r WHERE r.sampleId = NEW.id AND ${resValidFilter} AND ${resCurrFilter})`
+        : `'[]'`;
 
-            const amendMetaCond = sampleCols.has('metadata') ? ' OR (OLD.metadata IS NOT NEW.metadata)' : '';
-            const amendRecCond = sampleCols.has('receptionDate') ? ' OR (OLD.receptionDate IS NOT NEW.receptionDate)' : '';
+    const resSubForSample = hasResult
+        ? `(SELECT COALESCE(json_group_array(json_object(
+            'id', r.id,
+            'param', ${resColParam},
+            'value', r.value,
+            'numericValue', r.numericValue,
+            'isValid', ${resColValid},
+            'isCurrent', ${resColCurr},
+            'unit', ${resColUnit},
+            'methodologyId', ${resColMeth},
+            'provenance', ${resColProv},
+            'censoring', ${resColCens},
+            'basis', ${resColBasis},
+            'replicateNo', ${resColRep},
+            'flags', ${resColFlags},
+            'uncertainty', ${resColUnc},
+            'determinationDate', ${resColDetDate}
+        )), '[]') FROM Result r WHERE r.sampleId = s.id AND ${resValidFilter} AND ${resCurrFilter})`
+        : `'[]'`;
 
-            db.exec(`
-                DROP TRIGGER IF EXISTS trg_sample_ai_publish;
-                DROP TRIGGER IF EXISTS trg_sample_au_publish;
-                DROP TRIGGER IF EXISTS trg_sample_au_withdraw;
-                DROP TRIGGER IF EXISTS trg_sample_au_amend;
-                DROP TRIGGER IF EXISTS trg_sample_ad_withdraw;
+    const sampleAmendConds = [
+        'OLD.originalId IS NOT NEW.originalId',
+        'OLD.labId IS NOT NEW.labId',
+        'OLD.assignedLab IS NOT NEW.assignedLab',
+        'OLD.country IS NOT NEW.country',
+        'OLD.projectCode IS NOT NEW.projectCode',
+        'OLD.fieldMetadata IS NOT NEW.fieldMetadata'
+    ];
+    if (sampleCols.has('metadata')) sampleAmendConds.push('OLD.metadata IS NOT NEW.metadata');
+    if (sampleCols.has('receptionDate')) sampleAmendConds.push('OLD.receptionDate IS NOT NEW.receptionDate');
+    if (sampleCols.has('latitude')) sampleAmendConds.push('OLD.latitude IS NOT NEW.latitude');
+    if (sampleCols.has('longitude')) sampleAmendConds.push('OLD.longitude IS NOT NEW.longitude');
+    if (sampleCols.has('elevation')) sampleAmendConds.push('OLD.elevation IS NOT NEW.elevation');
+    if (sampleCols.has('depthTopCm')) sampleAmendConds.push('OLD.depthTopCm IS NOT NEW.depthTopCm');
+    if (sampleCols.has('depthBottomCm')) sampleAmendConds.push('OLD.depthBottomCm IS NOT NEW.depthBottomCm');
+    if (sampleCols.has('depthTop')) sampleAmendConds.push('OLD.depthTop IS NOT NEW.depthTop');
+    if (sampleCols.has('depthBottom')) sampleAmendConds.push('OLD.depthBottom IS NOT NEW.depthBottom');
+    if (sampleCols.has('horizon')) sampleAmendConds.push('OLD.horizon IS NOT NEW.horizon');
 
-                CREATE TRIGGER trg_sample_ai_publish AFTER INSERT ON Sample
-                FOR EACH ROW
-                WHEN NEW.status IN ('APPROVED', 'RELEASED')
-                BEGIN
-                    INSERT INTO _exchange_journal (
-                        id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
-                        country, project_code, laboratory_id, content_hash, payload, created_at
-                    )
-                    SELECT
-                        'evt_' || NEW.id || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
-                        (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
-                        'PUBLICATION',
-                        NEW.id,
-                        NEW.originalId,
-                        NEW.labId,
-                        NEW.country,
-                        NEW.projectCode,
-                        NEW.assignedLab,
-                        exchange_compute_hash(
-                            NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode,
-                            NEW.fieldMetadata, ${colMeta}, ${colRecDate},
-                            ${resultSubquery}
-                        ),
-                        exchange_format_payload(
-                            NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode,
-                            NEW.fieldMetadata, ${colMeta}, ${colRecDate}, NEW.updatedAt,
-                            ${resultSubquery}
-                        ),
-                        datetime('now');
-                END;
+    const resultAmendConds = [
+        'OLD.value IS NOT NEW.value',
+        'OLD.numericValue IS NOT NEW.numericValue'
+    ];
+    if (resultCols.has('isValid')) resultAmendConds.push('OLD.isValid IS NOT NEW.isValid');
+    if (resultCols.has('isCurrent')) resultAmendConds.push('OLD.isCurrent IS NOT NEW.isCurrent');
+    if (resultCols.has('unit')) resultAmendConds.push('OLD.unit IS NOT NEW.unit');
+    if (resultCols.has('methodologyId')) resultAmendConds.push('OLD.methodologyId IS NOT NEW.methodologyId');
+    if (resultCols.has('provenance')) resultAmendConds.push('OLD.provenance IS NOT NEW.provenance');
+    if (resultCols.has('censoring')) resultAmendConds.push('OLD.censoring IS NOT NEW.censoring');
+    if (resultCols.has('basis')) resultAmendConds.push('OLD.basis IS NOT NEW.basis');
+    if (resultCols.has('replicateNo')) resultAmendConds.push('OLD.replicateNo IS NOT NEW.replicateNo');
+    if (resultCols.has('flags')) resultAmendConds.push('OLD.flags IS NOT NEW.flags');
+    if (resultCols.has('uncertainty')) resultAmendConds.push('OLD.uncertainty IS NOT NEW.uncertainty');
+    if (resultCols.has('determinationDate')) resultAmendConds.push('OLD.determinationDate IS NOT NEW.determinationDate');
+    if (resultCols.has('analysedAt')) resultAmendConds.push('OLD.analysedAt IS NOT NEW.analysedAt');
 
-                CREATE TRIGGER trg_sample_au_publish AFTER UPDATE ON Sample
-                FOR EACH ROW
-                WHEN (OLD.status NOT IN ('APPROVED', 'RELEASED') OR OLD.status IS NULL)
-                 AND NEW.status IN ('APPROVED', 'RELEASED')
-                BEGIN
-                    INSERT INTO _exchange_journal (
-                        id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
-                        country, project_code, laboratory_id, content_hash, payload, created_at
-                    )
-                    SELECT
-                        'evt_' || NEW.id || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
-                        (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
-                        'PUBLICATION',
-                        NEW.id,
-                        NEW.originalId,
-                        NEW.labId,
-                        NEW.country,
-                        NEW.projectCode,
-                        NEW.assignedLab,
-                        exchange_compute_hash(
-                            NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode,
-                            NEW.fieldMetadata, ${colMeta}, ${colRecDate},
-                            ${resultSubquery}
-                        ),
-                        exchange_format_payload(
-                            NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode,
-                            NEW.fieldMetadata, ${colMeta}, ${colRecDate}, NEW.updatedAt,
-                            ${resultSubquery}
-                        ),
-                        datetime('now');
-                END;
+    const installTx = db.transaction(() => {
+        db.exec(`
+            DROP TRIGGER IF EXISTS trg_sample_ai_publish;
+            DROP TRIGGER IF EXISTS trg_sample_au_publish;
+            DROP TRIGGER IF EXISTS trg_sample_au_withdraw;
+            DROP TRIGGER IF EXISTS trg_sample_au_amend;
+            DROP TRIGGER IF EXISTS trg_sample_ad_withdraw;
 
-                CREATE TRIGGER trg_sample_au_withdraw AFTER UPDATE ON Sample
-                FOR EACH ROW
-                WHEN OLD.status IN ('APPROVED', 'RELEASED')
-                 AND NEW.status NOT IN ('APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED')
-                BEGIN
-                    INSERT INTO _exchange_journal (
-                        id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
-                        country, project_code, laboratory_id, content_hash, payload, created_at
-                    )
-                    SELECT
-                        'evt_' || NEW.id || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
-                        (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
-                        'WITHDRAWAL',
-                        NEW.id,
-                        NEW.originalId,
-                        NEW.labId,
-                        NEW.country,
-                        NEW.projectCode,
-                        NEW.assignedLab,
-                        exchange_compute_hash(
-                            NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode,
-                            NEW.fieldMetadata, ${colMeta}, ${colRecDate},
-                            ${resultSubquery}
-                        ),
-                        NULL,
-                        datetime('now');
-                END;
+            CREATE TRIGGER trg_sample_ai_publish AFTER INSERT ON Sample
+            FOR EACH ROW
+            WHEN NEW.status IN ('APPROVED', 'RELEASED')
+            BEGIN
+                INSERT INTO _exchange_journal (
+                    id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
+                    country, project_code, laboratory_id, content_hash, payload, created_at
+                )
+                SELECT
+                    'evt_' || NEW.id || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                    (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                    'PUBLICATION',
+                    NEW.id,
+                    NEW.originalId,
+                    NEW.labId,
+                    NEW.country,
+                    NEW.projectCode,
+                    NEW.assignedLab,
+                    exchange_compute_hash(${newSampleJson}, ${resultSubquery}),
+                    exchange_format_payload(${newSampleJson}, ${resultSubquery}),
+                    datetime('now');
+            END;
 
-                CREATE TRIGGER trg_sample_au_amend AFTER UPDATE ON Sample
-                FOR EACH ROW
-                WHEN OLD.status IN ('APPROVED', 'RELEASED')
-                 AND NEW.status IN ('APPROVED', 'RELEASED')
-                 AND (
-                     (OLD.originalId IS NOT NEW.originalId) OR
-                     (OLD.labId IS NOT NEW.labId) OR
-                     (OLD.assignedLab IS NOT NEW.assignedLab) OR
-                     (OLD.country IS NOT NEW.country) OR
-                     (OLD.projectCode IS NOT NEW.projectCode) OR
-                     (OLD.fieldMetadata IS NOT NEW.fieldMetadata)
-                     ${amendMetaCond}
-                     ${amendRecCond}
-                 )
-                BEGIN
-                    INSERT INTO _exchange_journal (
-                        id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
-                        country, project_code, laboratory_id, content_hash, payload, created_at
-                    )
-                    SELECT
-                        'evt_' || NEW.id || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
-                        (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
-                        'AMENDMENT',
-                        NEW.id,
-                        NEW.originalId,
-                        NEW.labId,
-                        NEW.country,
-                        NEW.projectCode,
-                        NEW.assignedLab,
-                        exchange_compute_hash(
-                            NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode,
-                            NEW.fieldMetadata, ${colMeta}, ${colRecDate},
-                            ${resultSubquery}
-                        ),
-                        exchange_format_payload(
-                            NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode,
-                            NEW.fieldMetadata, ${colMeta}, ${colRecDate}, NEW.updatedAt,
-                            ${resultSubquery}
-                        ),
-                        datetime('now');
-                END;
+            CREATE TRIGGER trg_sample_au_publish AFTER UPDATE ON Sample
+            FOR EACH ROW
+            WHEN (OLD.status NOT IN ('APPROVED', 'RELEASED') OR OLD.status IS NULL)
+             AND NEW.status IN ('APPROVED', 'RELEASED')
+            BEGIN
+                INSERT INTO _exchange_journal (
+                    id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
+                    country, project_code, laboratory_id, content_hash, payload, created_at
+                )
+                SELECT
+                    'evt_' || NEW.id || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                    (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                    'PUBLICATION',
+                    NEW.id,
+                    NEW.originalId,
+                    NEW.labId,
+                    NEW.country,
+                    NEW.projectCode,
+                    NEW.assignedLab,
+                    exchange_compute_hash(${newSampleJson}, ${resultSubquery}),
+                    exchange_format_payload(${newSampleJson}, ${resultSubquery}),
+                    datetime('now');
+            END;
 
-                CREATE TRIGGER trg_sample_ad_withdraw AFTER DELETE ON Sample
-                FOR EACH ROW
-                WHEN OLD.status IN ('APPROVED', 'RELEASED')
-                BEGIN
-                    INSERT INTO _exchange_journal (
-                        id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
-                        country, project_code, laboratory_id, content_hash, payload, created_at
-                    )
-                    SELECT
-                        'evt_' || OLD.id || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
-                        (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
-                        'WITHDRAWAL',
-                        OLD.id,
-                        OLD.originalId,
-                        OLD.labId,
-                        OLD.country,
-                        OLD.projectCode,
-                        OLD.assignedLab,
-                        exchange_compute_hash(
-                            OLD.id, 'DELETED', OLD.originalId, OLD.labId, OLD.assignedLab, OLD.country, OLD.projectCode,
-                            OLD.fieldMetadata, ${colOldMeta}, ${colOldRecDate},
-                            '[]'
-                        ),
-                        NULL,
-                        datetime('now');
-                END;
-            `);
-        }
+            CREATE TRIGGER trg_sample_au_withdraw AFTER UPDATE ON Sample
+            FOR EACH ROW
+            WHEN OLD.status IN ('APPROVED', 'RELEASED')
+             AND NEW.status NOT IN ('APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED')
+            BEGIN
+                INSERT INTO _exchange_journal (
+                    id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
+                    country, project_code, laboratory_id, content_hash, payload, created_at
+                )
+                SELECT
+                    'evt_' || NEW.id || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                    (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                    'WITHDRAWAL',
+                    NEW.id,
+                    NEW.originalId,
+                    NEW.labId,
+                    NEW.country,
+                    NEW.projectCode,
+                    NEW.assignedLab,
+                    exchange_compute_hash(${newSampleJson}, ${resultSubquery}),
+                    NULL,
+                    datetime('now');
+            END;
 
-        const hasResult = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Result'").get();
+            CREATE TRIGGER trg_sample_au_amend AFTER UPDATE ON Sample
+            FOR EACH ROW
+            WHEN OLD.status IN ('APPROVED', 'RELEASED')
+             AND NEW.status IN ('APPROVED', 'RELEASED')
+             AND (${sampleAmendConds.join(' OR ')})
+            BEGIN
+                INSERT INTO _exchange_journal (
+                    id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
+                    country, project_code, laboratory_id, content_hash, payload, created_at
+                )
+                SELECT
+                    'evt_' || NEW.id || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                    (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                    'AMENDMENT',
+                    NEW.id,
+                    NEW.originalId,
+                    NEW.labId,
+                    NEW.country,
+                    NEW.projectCode,
+                    NEW.assignedLab,
+                    exchange_compute_hash(${newSampleJson}, ${resultSubquery}),
+                    exchange_format_payload(${newSampleJson}, ${resultSubquery}),
+                    datetime('now');
+            END;
+
+            CREATE TRIGGER trg_sample_ad_withdraw AFTER DELETE ON Sample
+            FOR EACH ROW
+            WHEN OLD.status IN ('APPROVED', 'RELEASED')
+            BEGIN
+                INSERT INTO _exchange_journal (
+                    id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
+                    country, project_code, laboratory_id, content_hash, payload, created_at
+                )
+                SELECT
+                    'evt_' || OLD.id || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                    (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                    'WITHDRAWAL',
+                    OLD.id,
+                    OLD.originalId,
+                    OLD.labId,
+                    OLD.country,
+                    OLD.projectCode,
+                    OLD.assignedLab,
+                    exchange_compute_hash(${oldSampleJson}, '[]'),
+                    NULL,
+                    datetime('now');
+            END;
+        `);
+
         if (hasResult) {
-            const sampleCols = new Set((db.prepare("PRAGMA table_info(Sample)").all() || []).map(c => c.name));
-            const resultCols = new Set((db.prepare("PRAGMA table_info(Result)").all() || []).map(c => c.name));
-
-            const colMeta = sampleCols.has('metadata') ? 's.metadata' : 'NULL';
-            const colRecDate = sampleCols.has('receptionDate') ? 's.receptionDate' : 'NULL';
-
-            const resColParam = resultCols.has('param') ? 'r.param' : "''";
-            const resColValid = resultCols.has('isValid') ? 'r.isValid' : '1';
-            const resColCurr = resultCols.has('isCurrent') ? 'r.isCurrent' : '1';
-            const resColUnit = resultCols.has('unit') ? 'r.unit' : 'NULL';
-            const resColMeth = resultCols.has('methodologyId') ? 'r.methodologyId' : 'NULL';
-            const resValidFilter = resultCols.has('isValid') ? '(r.isValid IS NULL OR r.isValid = 1)' : '1=1';
-            const resCurrFilter = resultCols.has('isCurrent') ? '(r.isCurrent IS NULL OR r.isCurrent = 1)' : '1=1';
-
-            const resSubForSample = `(SELECT COALESCE(json_group_array(json_object(
-                'id', r.id, 'param', ${resColParam}, 'value', r.value, 'numericValue', r.numericValue,
-                'isValid', ${resColValid}, 'isCurrent', ${resColCurr}, 'unit', ${resColUnit}, 'methodologyId', ${resColMeth}
-            )), '[]') FROM Result r WHERE r.sampleId = s.id AND ${resValidFilter} AND ${resCurrFilter})`;
-
-            const auConditions = [
-                'OLD.value IS NOT NEW.value',
-                'OLD.numericValue IS NOT NEW.numericValue'
-            ];
-            if (resultCols.has('isValid')) auConditions.push('OLD.isValid IS NOT NEW.isValid');
-            if (resultCols.has('isCurrent')) auConditions.push('OLD.isCurrent IS NOT NEW.isCurrent');
-            if (resultCols.has('unit')) auConditions.push('OLD.unit IS NOT NEW.unit');
-            if (resultCols.has('methodologyId')) auConditions.push('OLD.methodologyId IS NOT NEW.methodologyId');
-
             db.exec(`
                 DROP TRIGGER IF EXISTS trg_result_ai_amend;
                 DROP TRIGGER IF EXISTS trg_result_au_amend;
@@ -494,16 +376,8 @@ function ensureTriggers(db) {
                         s.country,
                         s.projectCode,
                         s.assignedLab,
-                        exchange_compute_hash(
-                            s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode,
-                            s.fieldMetadata, ${colMeta}, ${colRecDate},
-                            ${resSubForSample}
-                        ),
-                        exchange_format_payload(
-                            s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode,
-                            s.fieldMetadata, ${colMeta}, ${colRecDate}, s.updatedAt,
-                            ${resSubForSample}
-                        ),
+                        exchange_compute_hash(${sSampleJson}, ${resSubForSample}),
+                        exchange_format_payload(${sSampleJson}, ${resSubForSample}),
                         datetime('now')
                     FROM Sample s
                     WHERE s.id = NEW.sampleId;
@@ -511,7 +385,7 @@ function ensureTriggers(db) {
 
                 CREATE TRIGGER trg_result_au_amend AFTER UPDATE ON Result
                 FOR EACH ROW
-                WHEN (${auConditions.join(' OR ')})
+                WHEN (${resultAmendConds.join(' OR ')})
                 AND (SELECT status FROM Sample WHERE id = NEW.sampleId) IN ('APPROVED', 'RELEASED')
                 BEGIN
                     INSERT INTO _exchange_journal (
@@ -528,16 +402,8 @@ function ensureTriggers(db) {
                         s.country,
                         s.projectCode,
                         s.assignedLab,
-                        exchange_compute_hash(
-                            s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode,
-                            s.fieldMetadata, ${colMeta}, ${colRecDate},
-                            ${resSubForSample}
-                        ),
-                        exchange_format_payload(
-                            s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode,
-                            s.fieldMetadata, ${colMeta}, ${colRecDate}, s.updatedAt,
-                            ${resSubForSample}
-                        ),
+                        exchange_compute_hash(${sSampleJson}, ${resSubForSample}),
+                        exchange_format_payload(${sSampleJson}, ${resSubForSample}),
                         datetime('now')
                     FROM Sample s
                     WHERE s.id = NEW.sampleId;
@@ -561,25 +427,21 @@ function ensureTriggers(db) {
                         s.country,
                         s.projectCode,
                         s.assignedLab,
-                        exchange_compute_hash(
-                            s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode,
-                            s.fieldMetadata, ${colMeta}, ${colRecDate},
-                            ${resSubForSample}
-                        ),
-                        exchange_format_payload(
-                            s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode,
-                            s.fieldMetadata, ${colMeta}, ${colRecDate}, s.updatedAt,
-                            ${resSubForSample}
-                        ),
+                        exchange_compute_hash(${sSampleJson}, ${resSubForSample}),
+                        exchange_format_payload(${sSampleJson}, ${resSubForSample}),
                         datetime('now')
                     FROM Sample s
                     WHERE s.id = OLD.sampleId;
                 END;
             `);
         }
-    } catch (e) {
-        console.error('[EXCHANGE_TRIGGERS_ERR]', e);
-    }
+
+        if (hasMeta) {
+            db.prepare("INSERT OR REPLACE INTO _exchange_meta (key, value, updated_at) VALUES ('exchange_triggers_version', ?, datetime('now'))").run(CURRENT_TRIGGER_VERSION);
+        }
+    });
+
+    installTx();
 }
 
 function initTables(db) {
@@ -876,17 +738,95 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
 
     const maxSeq = db.prepare('SELECT COALESCE(MAX(sequence), 0) as s FROM _exchange_journal').get()?.s || 0;
 
-    const sampleWhere = buildSampleWhere(auth, { ...filter, profile });
-    sampleWhere.updatedAt = { lte: now };
+    // Scoping conditions on _exchange_journal for immutable snapshot items
+    const conditions = ['j.sequence <= ?'];
+    const params = [maxSeq];
 
-    const samples = await prisma.sample.findMany({
-        where: sampleWhere,
-        include: { results: true },
-        orderBy: [
-            { updatedAt: 'desc' },
-            { id: 'desc' }
-        ]
-    });
+    // Laboratory Scoping
+    const keyLabs = auth?.labs || [];
+    const hasGlobalLab = keyLabs.includes('*') || (auth?.type !== 'API_KEY' && auth?.role === 'SUPER_ADMIN');
+    if (!hasGlobalLab) {
+        if (keyLabs.length > 0) {
+            const placeholders = keyLabs.map(() => '?').join(',');
+            conditions.push(`j.laboratory_id IN (${placeholders})`);
+            params.push(...keyLabs);
+        } else {
+            conditions.push('1 = 0');
+        }
+    }
+
+    // Country Scoping
+    const keyCountries = auth?.countries || [];
+    const hasGlobalCountry = keyCountries.length === 0 || keyCountries.includes('*');
+    if (!hasGlobalCountry) {
+        const placeholders = keyCountries.map(() => '?').join(',');
+        conditions.push(`j.country IN (${placeholders})`);
+        params.push(...keyCountries);
+    }
+
+    // Project Scoping
+    const keyProjects = auth?.projects || [];
+    const hasGlobalProject = keyProjects.length === 0 || keyProjects.includes('*');
+    if (!hasGlobalProject) {
+        let authorizedProjects = keyProjects;
+        try {
+            const projectPolicyService = require('./projectPolicyService');
+            const expandedProjects = new Set();
+            for (const kp of keyProjects) {
+                expandedProjects.add(kp);
+                try {
+                    const children = projectPolicyService.getProgrammeChildProjectCodes(kp);
+                    children.forEach(c => expandedProjects.add(c));
+                } catch (e) {}
+            }
+            authorizedProjects = Array.from(expandedProjects);
+        } catch (e) {}
+
+        if (authorizedProjects.length > 0) {
+            const placeholders = authorizedProjects.map(() => '?').join(',');
+            conditions.push(`j.project_code IN (${placeholders})`);
+            params.push(...authorizedProjects);
+        } else {
+            conditions.push('1 = 0');
+        }
+    }
+
+    // Strict OpenNSIS profile filter (specimen must possess lab accession)
+    if (profile === 'opennsis') {
+        conditions.push('j.lab_sample_id IS NOT NULL');
+    }
+
+    // Explicit query filter overrides (if authorized)
+    if (filter?.country) {
+        conditions.push('j.country = ?');
+        params.push(filter.country);
+    }
+    if (filter?.project) {
+        conditions.push('j.project_code = ?');
+        params.push(filter.project);
+    }
+    if (filter?.labId || filter?.assignedLab) {
+        conditions.push('j.laboratory_id = ?');
+        params.push(filter.assignedLab || filter.labId);
+    }
+
+    const whereSql = conditions.join(' AND ');
+
+    // Read latest published revision for each specimen up to maxSeq from immutable journal
+    const items = db.prepare(`
+        SELECT j.specimen_id, j.payload
+        FROM _exchange_journal j
+        INNER JOIN (
+            SELECT specimen_id, MAX(sequence) as max_seq
+            FROM _exchange_journal
+            WHERE sequence <= ?
+            GROUP BY specimen_id
+        ) latest ON j.specimen_id = latest.specimen_id AND j.sequence = latest.max_seq
+        WHERE ${whereSql}
+          AND j.event_type != 'WITHDRAWAL'
+          AND j.payload IS NOT NULL
+        ORDER BY j.specimen_id ASC
+    `).all(maxSeq, ...params);
 
     const authorizedLabs = Array.isArray(auth?.labs) ? JSON.stringify(auth.labs) : (auth?.labs ? JSON.stringify([auth.labs]) : '[]');
     const authorizedCountries = Array.isArray(auth?.countries) ? JSON.stringify(auth.countries) : '[]';
@@ -906,13 +846,11 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
 
     const createTx = db.transaction(() => {
         insertSnap.run(
-            snapshotId, connectionId, maxSeq, highWaterTimestamp, samples.length, expiresAt, now.toISOString(),
+            snapshotId, connectionId, maxSeq, highWaterTimestamp, items.length, expiresAt, now.toISOString(),
             authorizedLabs, authorizedCountries, authorizedProjects
         );
-        for (let i = 0; i < samples.length; i++) {
-            const s = samples[i];
-            const formatted = formatSampleV2(s, maps);
-            insertItem.run(snapshotId, s.id, i + 1, JSON.stringify(formatted));
+        for (let i = 0; i < items.length; i++) {
+            insertItem.run(snapshotId, items[i].specimen_id, i + 1, items[i].payload);
         }
     });
 
@@ -933,7 +871,7 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
         highWaterSequence: maxSeq,
         highWaterTimestamp,
         nextCursor,
-        totalSamples: samples.length,
+        totalSamples: items.length,
         expiresAt,
         ttlHours
     };
@@ -1050,7 +988,13 @@ function getSnapshot(snapshotId, auth) {
 function encodeCursor(data, db) {
     const epoch = getCurrentEpoch(db);
     const secret = getCursorSecret(db);
-    const payload = { v: 2, ...data, epoch, issuedAt: Date.now() };
+    const payload = {
+        v: 2,
+        ...data,
+        profile: (data.profile && String(data.profile).trim().toLowerCase()) || 'default',
+        epoch,
+        issuedAt: Date.now()
+    };
     const raw = JSON.stringify(payload);
     const sig = crypto.createHmac('sha256', secret).update(raw).digest('hex').slice(0, 16);
     return Buffer.from(JSON.stringify({ p: payload, s: sig })).toString('base64');
@@ -1061,7 +1005,12 @@ function decodeCursor(cursorStr, db) {
     try {
         const decoded = JSON.parse(Buffer.from(cursorStr, 'base64').toString('utf8'));
         if (decoded && decoded.p && decoded.s) {
-            const secret = getCursorSecret(db);
+            let secret;
+            try {
+                secret = getCursorSecret(db);
+            } catch (err) {
+                return { invalid: true, reason: 'STATE_STORAGE_UNAVAILABLE', message: 'Cursor verification unavailable: signing state storage failed.' };
+            }
             const expectedSig = crypto.createHmac('sha256', secret).update(JSON.stringify(decoded.p)).digest('hex').slice(0, 16);
             if (decoded.s !== expectedSig) {
                 return { invalid: true, reason: 'SIGNATURE_MISMATCH', message: 'Cursor signature verification failed.' };
@@ -1221,14 +1170,14 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
                 message: 'Cursor belongs to a different connection.'
             };
         }
-        // Profile binding: strictly enforce matching if cursor specified a profile
-        const reqProfile = profile || null;
-        const curProfile = decoded.profile || null;
-        if (curProfile !== null && curProfile !== reqProfile) {
+        // Profile binding: strictly enforce matching between cursor profile and requested profile
+        const reqProf = (profile && String(profile).trim().toLowerCase()) || 'default';
+        const curProf = (decoded.profile && String(decoded.profile).trim().toLowerCase()) || 'default';
+        if (curProf !== reqProf) {
             return {
                 error: 'INVALID_CURSOR',
                 status: 400,
-                message: 'Cursor profile does not match requested profile.'
+                message: `Cursor profile '${curProf}' does not match requested profile '${reqProf}'.`
             };
         }
         // Filter binding: compare requested filter with decoded.filter
@@ -1508,6 +1457,7 @@ function recordReceipt(auth, receiptData = {}) {
                         message: 'Referenced batch snapshot does not belong to specified snapshot.'
                     };
                 }
+                snapAsBatch.snapshot_id = snapAsBatch.id;
                 batch = snapAsBatch;
             }
         }
@@ -1525,12 +1475,50 @@ function recordReceipt(auth, receiptData = {}) {
                 message: 'Referenced batch belongs to a different connection.'
             };
         }
-        if (snapshotId && batch.snapshot_id && batch.snapshot_id !== snapshotId) {
+        if (snapshotId && (!batch.snapshot_id || batch.snapshot_id !== snapshotId)) {
             return {
                 error: 'BATCH_SNAPSHOT_MISMATCH',
                 status: 400,
                 message: 'Referenced batch does not belong to specified snapshot.'
             };
+        }
+    }
+
+    // Bounds checking on checkpoint sequence/item against issued artifacts
+    if (checkpoint !== undefined && checkpoint !== null && checkpoint !== '') {
+        const chkStr = String(checkpoint);
+        const mSeq = chkStr.match(/^seq_(\d+)$/);
+        if (mSeq) {
+            const seqNum = parseInt(mSeq[1], 10);
+            let maxAllowedSeq = 0;
+            if (batch && batch.end_seq) {
+                maxAllowedSeq = Math.max(maxAllowedSeq, batch.end_seq);
+            }
+            if (snap && snap.high_water_sequence) {
+                maxAllowedSeq = Math.max(maxAllowedSeq, snap.high_water_sequence);
+            }
+            if (!batch && !snap) {
+                maxAllowedSeq = db.prepare('SELECT MAX(sequence) as s FROM _exchange_journal').get()?.s || 0;
+            }
+            if (seqNum > maxAllowedSeq) {
+                return {
+                    error: 'INVALID_CHECKPOINT',
+                    status: 400,
+                    message: `Checkpoint sequence ${seqNum} exceeds maximum issued sequence (${maxAllowedSeq}).`
+                };
+            }
+        }
+        const mItem = chkStr.match(/^item_(\d+)$/);
+        if (mItem) {
+            const itemNum = parseInt(mItem[1], 10);
+            const maxItems = (snap ? snap.total_samples : 0) || (batch ? batch.item_count : 0);
+            if (maxItems > 0 && itemNum > maxItems) {
+                return {
+                    error: 'INVALID_CHECKPOINT',
+                    status: 400,
+                    message: `Checkpoint item ${itemNum} exceeds total items (${maxItems}).`
+                };
+            }
         }
     }
 
@@ -1569,11 +1557,15 @@ function recordReceipt(auth, receiptData = {}) {
             if (existing) {
                 const countMatch = (existing.imported_count === imported) && (existing.quarantined_count === quarantined);
                 const chkMatch = existing.checkpoint === (checkpoint ? String(checkpoint) : null);
-                if (!countMatch || !chkMatch) {
+                const snapMatch = (existing.snapshot_id || null) === (snapshotId || null);
+                const batchMatch = (existing.batch_id || null) === (batchId || null);
+                const detailsJson = errors.length > 0 ? JSON.stringify(errors) : null;
+                const detailsMatch = (existing.details || null) === detailsJson;
+                if (!countMatch || !chkMatch || !snapMatch || !batchMatch || !detailsMatch) {
                     return {
                         error: 'RECEIPT_CONFLICT',
                         status: 409,
-                        message: `Receipt conflict: receipt already exists with conflicting counts (imported: ${existing.imported_count}, quarantined: ${existing.quarantined_count}) or checkpoint.`
+                        message: 'Receipt conflict: receipt already exists under this identity with conflicting artifacts, counts, checkpoint, or error details.'
                     };
                 }
                 return {
@@ -1646,11 +1638,15 @@ function recordReceipt(auth, receiptData = {}) {
             if (existing) {
                 const countMatch = (existing.imported_count === imported) && (existing.quarantined_count === quarantined);
                 const chkMatch = existing.checkpoint === (checkpoint ? String(checkpoint) : null);
-                if (!countMatch || !chkMatch) {
+                const snapMatch = (existing.snapshot_id || null) === (snapshotId || null);
+                const batchMatch = (existing.batch_id || null) === (batchId || null);
+                const detailsJson = errors.length > 0 ? JSON.stringify(errors) : null;
+                const detailsMatch = (existing.details || null) === detailsJson;
+                if (!countMatch || !chkMatch || !snapMatch || !batchMatch || !detailsMatch) {
                     return {
                         error: 'RECEIPT_CONFLICT',
                         status: 409,
-                        message: `Receipt conflict: receipt already exists with conflicting counts (imported: ${existing.imported_count}, quarantined: ${existing.quarantined_count}) or checkpoint.`
+                        message: 'Receipt conflict: receipt already exists under this identity with conflicting artifacts, counts, checkpoint, or error details.'
                     };
                 }
                 return {

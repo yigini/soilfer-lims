@@ -71,11 +71,15 @@ const prisma = {
 };
 
 function FakeDb() { return memory; }
+const dbFuncs = source('server/services/exchangeDbFunctions.js', {
+    './sisAdapterService': adapter
+});
 const state = source('server/services/exchangeStateService.js', {
     'better-sqlite3': FakeDb,
     '../prisma': prisma,
     './exchangePolicyService': policy,
-    './sisAdapterService': adapter
+    './sisAdapterService': adapter,
+    './exchangeDbFunctions': dbFuncs
 });
 
 const authA = { type: 'API_KEY', keyId: 'key-A', role: 'NSIS_CONSUMER', labs: ['LAB-A'], countries: ['AAA'], projects: ['P-A'] };
@@ -102,7 +106,7 @@ function verifyRemediation(name, condition, detail) {
 (async () => {
     // Probe 1: Scoped journal prevents B from receiving A's payload
     rows = [row('a', 'LAB-A', 'AAA', 'P-A'), row('b', 'LAB-B', 'BBB', 'P-B')];
-    await state.getChanges(authA);
+    const aFeed = await state.getChanges(authA);
     const bFeed = await state.getChanges(authB);
     const bReceivedA = bFeed.changes.some(e => e.specimenId === 'a' && e.data?.country === 'AAA');
     verifyRemediation('B does NOT receive A payload from shared journal', !bReceivedA, { bChanges: bFeed.changes.map(e => e.specimenId) });
@@ -117,7 +121,7 @@ function verifyRemediation(name, condition, detail) {
     verifyRemediation('Scope revocation rejects access to prior snapshot (FORBIDDEN)', shrunken.error === 'FORBIDDEN', { error: shrunken.error });
 
     // Probe 4: Changed exported metadata generates new AMENDMENT event
-    const before = bFeed.nextCursor;
+    const before = aFeed.nextCursor;
     rows[0].fieldMetadata = JSON.stringify({ collectionDate: '2026-01-02', site_id: 'DIFFERENT' });
     const afterMeta = await state.getChanges(authA, { cursor: before });
     verifyRemediation('Changed exported metadata triggers AMENDMENT event in journal', afterMeta.count >= 1, { count: afterMeta.count });
@@ -162,7 +166,8 @@ function verifyRemediation(name, condition, detail) {
         'better-sqlite3': FakeDb,
         '../prisma': prisma,
         './exchangePolicyService': policy,
-        './sisAdapterService': adapter
+        './sisAdapterService': adapter,
+        './exchangeDbFunctions': dbFuncs
     });
     again.getDb();
     const retainedCount = memory.prepare('SELECT COUNT(*) n FROM _exchange_journal').get().n;

@@ -413,6 +413,20 @@ function extractObservations(sample, { analysisMap = {}, methodMap = {} } = {}) 
         const lodVal = (r.lod !== undefined && r.lod !== null && typeof r.lod !== 'boolean' && !isNaN(Number(r.lod))) ? Number(r.lod) : null;
         const loqVal = (r.loq !== undefined && r.loq !== null && typeof r.loq !== 'boolean' && !isNaN(Number(r.loq))) ? Number(r.loq) : null;
 
+        let parsedFlags = null;
+        if (r.flags !== undefined && r.flags !== null) {
+            if (typeof r.flags === 'string') {
+                try { parsedFlags = JSON.parse(r.flags); } catch (e) { parsedFlags = [r.flags]; }
+            } else if (Array.isArray(r.flags)) {
+                parsedFlags = r.flags;
+            } else {
+                parsedFlags = [r.flags];
+            }
+        }
+
+        const uncVal = (r.uncertainty !== undefined && r.uncertainty !== null && typeof r.uncertainty !== 'boolean' && !isNaN(Number(r.uncertainty))) ? Number(r.uncertainty) : null;
+        const detDate = r.determinationDate ? formatIsoDate(r.determinationDate) : (r.analysedAt ? formatIsoDate(r.analysedAt) : null);
+
         observations.push({
             observationId: r.id,
             specimenId: sample.id,
@@ -434,10 +448,13 @@ function extractObservations(sample, { analysisMap = {}, methodMap = {} } = {}) 
             qudtUnit,
             lod: lodVal,
             loq: loqVal,
-            provenance: r.provenance || 'MEASURED',
-            basis: r.basis || 'AIR_DRY',
-            censoring: r.censoring || 'NONE',
-            replicateNo: r.replicateNo || 1,
+            uncertainty: uncVal,
+            flags: parsedFlags,
+            determinationDate: detDate,
+            provenance: (r.provenance !== undefined && r.provenance !== null && r.provenance !== '') ? r.provenance : 'MEASURED',
+            basis: (r.basis !== undefined && r.basis !== null && r.basis !== '') ? r.basis : 'AIR_DRY',
+            censoring: (r.censoring !== undefined && r.censoring !== null && r.censoring !== '') ? r.censoring : 'NONE',
+            replicateNo: (r.replicateNo !== undefined && r.replicateNo !== null && !isNaN(Number(r.replicateNo))) ? Number(r.replicateNo) : 1,
             isValid: r.isValid !== false,
             method: {
                 id: r.methodologyId || null,
@@ -665,8 +682,8 @@ function formatSampleV2(sample, maps = {}) {
                 srid: 4326
             } : null,
             site: {
-                siteName: sanitizeText(unwrapValue(field.siteName) || unwrapValue(field.farm_name)),
-                village: sanitizeText(unwrapValue(field.village) || unwrapValue(field.area)),
+                siteName: sanitizeText(sample.siteName || unwrapValue(field.siteName) || unwrapValue(field.farm_name)),
+                village: sanitizeText(sample.village || unwrapValue(field.village) || unwrapValue(field.area)),
                 district: sanitizeText(unwrapValue(field.district)),
                 admin1: sanitizeText(sample.admin1 || unwrapValue(field.admin1)),
                 admin2: sanitizeText(sample.admin2 || unwrapValue(field.admin2)),

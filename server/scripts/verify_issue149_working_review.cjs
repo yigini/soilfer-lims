@@ -68,12 +68,16 @@ const prisma = {
 };
 
 function MemDb() { return db; }
+const dbFuncs = source('server/services/exchangeDbFunctions.js', {
+    './sisAdapterService': adapter
+});
 const state = source('server/services/exchangeStateService.js', {
     'better-sqlite3': MemDb,
     '../prisma': prisma,
     './exchangePolicyService': policy,
     './sisAdapterService': adapter,
-    './projectPolicyService': project
+    './projectPolicyService': project,
+    './exchangeDbFunctions': dbFuncs
 });
 
 const a = { type: 'API_KEY', keyId: 'A', role: 'NSIS_CONSUMER', labs: ['LAB-A'], countries: ['AAA'], projects: ['P-A'] };

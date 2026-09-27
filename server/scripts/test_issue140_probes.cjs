@@ -69,11 +69,15 @@ const prisma = {
 };
 
 function FakeDb() { return memory; }
+const dbFuncs = source('server/services/exchangeDbFunctions.js', {
+    './sisAdapterService': adapter
+});
 const state = source('server/services/exchangeStateService.js', {
     'better-sqlite3': FakeDb,
     '../prisma': prisma,
     './exchangePolicyService': policy,
-    './sisAdapterService': adapter
+    './sisAdapterService': adapter,
+    './exchangeDbFunctions': dbFuncs
 });
 
 const auth = { type: 'API_KEY', id: 'key-123', name: 'same display name', role: 'NSIS_CONSUMER', labs: ['LAB-A'], countries: ['AAA'], projects: ['P'] };
