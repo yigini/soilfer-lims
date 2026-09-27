@@ -105,7 +105,8 @@ function buildSampleWhere(auth, query = {}) {
     }
 
     // 3. Country Scoping
-    if (Array.isArray(auth?.countries)) {
+    const isSuperAdmin = auth?.role === 'SUPER_ADMIN';
+    if (!isSuperAdmin && Array.isArray(auth?.countries)) {
         if (auth.countries.includes('*')) {
             // Global wildcard scope
             if (query.country) {
@@ -131,7 +132,7 @@ function buildSampleWhere(auth, query = {}) {
     }
 
     // 4. Project Scoping
-    if (Array.isArray(auth?.projects)) {
+    if (!isSuperAdmin && Array.isArray(auth?.projects)) {
         if (auth.projects.includes('*')) {
             // Global wildcard scope
             if (query.project) {

@@ -272,8 +272,8 @@ const apiKeyAuth = async (req, res, next) => {
                 name: user.name || user.username,
                 role: user.role,
                 capabilities: user.role === 'SUPER_ADMIN' ? ['*'] : null,
-                countries: user.countries ? JSON.parse(user.countries) : null,
-                projects: user.projects ? JSON.parse(user.projects) : null,
+                countries: user.role === 'SUPER_ADMIN' ? ['*'] : (user.countries ? (typeof user.countries === 'string' ? JSON.parse(user.countries) : user.countries) : []),
+                projects: user.role === 'SUPER_ADMIN' ? ['*'] : (user.projects ? (typeof user.projects === 'string' ? JSON.parse(user.projects) : user.projects) : []),
                 labId: user.labId,
                 labs: user.role === 'SUPER_ADMIN' ? ['*'] : (user.labId ? [user.labId] : [])
             };
