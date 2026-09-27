@@ -145,8 +145,8 @@ function verify(name, condition, detail) {
     const badReceipt1 = state.recordReceipt(auth, { snapshotId: 'not-issued', importedCount: -50 });
     verify('Invalid/unissued receipt rejected', badReceipt1.error === 'INVALID_COUNT' || badReceipt1.error === 'SNAPSHOT_NOT_FOUND');
 
-    const validReceipt1 = state.recordReceipt(auth, { snapshotId: snap.snapshotId, importedCount: 1, checkpoint: 'cp-1' });
-    const validReceipt2 = state.recordReceipt(auth, { snapshotId: snap.snapshotId, importedCount: 1, checkpoint: 'cp-1' });
+    const validReceipt1 = state.recordReceipt(auth, { snapshotId: snap.snapshotId, importedCount: 1, checkpoint: 'item_1' });
+    const validReceipt2 = state.recordReceipt(auth, { snapshotId: snap.snapshotId, importedCount: 1, checkpoint: 'item_1' });
     verify('Delivery receipts are idempotent', validReceipt1.receiptId === validReceipt2.receiptId && validReceipt2.idempotent === true);
 
     // Probe 9: Profile reference disambiguated by country:project namespace, not confirmed profile from horizon (R5)

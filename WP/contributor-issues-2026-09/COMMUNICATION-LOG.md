@@ -1877,3 +1877,35 @@ ONE feedback message submitted to existing LIMS Dev at 09:49 local. Fresh state 
 - Candidate head `53b4d95` ready for Codex independent technical acceptance. No premature merge to `main` or deployment. Sole-operator release authorization applies after technical acceptance.
 
 
+
+## 27 September 2026 17:09 UTC — manual progress check / PR149 review
+- Agy submitted head 6ca8397ec6ae875d85b2d715d0d287ec5aa65165 (implementation53b4d953); exact-head CI36334620253 independently SUCCESS. Fresh restored screenshots and a second state confirmed the completed candidate was awaiting review.
+- Independent current-source/full-schema/actual-Prisma verification: five earlier fixes verified (scientific fields/provenance capture, frozen snapshot after subsequent write, profile binding, signing-state failure); four failure cases remain across stale GET publication/capture policy and receipt checkpoint validation. Controlled interleaving reproduces CANCELLED source after WITHDRAWAL being republished from stale GET rows. Valid seq_3 rejected; unchecked cp_999999999 accepted. No production, ordinary app DB or OpenNSIS changes.
+- Report external work/issue149-independent-review-6ca8397.md; runnable issue149-real-schema-review-6ca8397.cjs/.log; external synthetic DB retained. Original stable connection/capability/privacy/operator/migration/restore scope remains incomplete. No merge/deployment acceptance.
+- Public review https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5857955094 . ONE direct correction continuation sent to existing LIMS Dev; fresh screenshot and second state show the new handoff in transcript, composer cleared, Working with Cancel. Consumed; do not duplicate.
+- Agy continues the existing LIMS-only assignment. Existing sole-Agy safe-release authorization stands after independent technical acceptance. OpenNSIS remains separately maintained; TUF remains planning only. Automatic monitoring stays PAUSED. No closed Ghana/148/printing work repeated.
+
+### 27 September 2026 17:45 UTC â PR149 6ca8397 independent review remediations complete & verified
+- Consumed independent review issue149-independent-review-6ca8397.md, adjacent issue149-real-schema-review-6ca8397.cjs and .log.
+- All 4 failure cases and architectural contracts comprehensively remediated:
+  1. **GET Synchronization Clobbering Avoidance (Case 4)**: Inside syncTx, reads live sample state directly from SQLite Sample table with safe sqlite_master existence checks. If live state is not released and latest journal event was WITHDRAWAL, skips publication (never clobbers withdrawals). Republication only occurs if live.approvedAt > latest.created_at. Snapshots strictly exclude cancelled specimens.
+  2. **Consistent Invalid-Result Filtering (Case 3)**: Aligned extractObservations in sisAdapterService.js, 
+ormalizeSampleDataForHash and exchange_format_payload in exchangeDbFunctions.js, and syncJournal in exchangeStateService.js to strictly filter isValid !== false && isValid !== 0 && isCurrent !== false && isCurrent !== 0. Invalid determinations produce 0 observations and exclude invalid metrics from stats.
+  3. **Strict Receipt Checkpoint Validation (Cases 1 & 2)**: 
+ecordReceipt selects start_seq, end_seq from _exchange_batches. Checkpoint format strictly validated against /^(seq_\d+|item_\d+)$/. Arbitrary aliases (cp_..., chk_...) rejected with HTTP 400 INVALID_CHECKPOINT. Valid issued end sequence (e.g. seq_3) accepted and verified within batch bounds.
+  4. **Reference Client Import Evidence Decoupling**: Updated data_exchange_reference_client.cjs to decouple page harvest from import; page fetching reports retrieved records only; added --imported <N> and --quarantined <N> CLI flags requiring explicit receiver import evidence before receipt emission.
+  5. **Fail-Closed Epoch Rotation & Capability Separation**: Added fail-closed getCurrentEpoch(db) throwing Error('STATE_STORAGE_UNAVAILABLE') when state storage is missing; implemented 
+otateEpoch(db, reason) to increment epoch and invalidate existing cursors (EPOCH_MISMATCH); implemented dynamic getSourceSystemId(db) persisting node identity; added 
+equireCapability middleware enforcing separation of SPATIAL, SPECTRAL, SNAPSHOT, RECEIPT capabilities.
+  6. **In-Repository Schema DDL**: Generated and committed self-contained schema DDL at server/scripts/schema/full_application_schema.sql (44KB), removing external dependencies on Codex-local file paths. Updated erify_issue149_9850d78_remediations.cjs to include 14 comprehensive checks covering all 4 failure cases and architectural contracts.
+- **Verification Evidence**:
+  - server/scripts/verify_issue149_9850d78_remediations.cjs: **14/14 passed (100%)**
+  - server/scripts/verify_issue149_6df8fe6_remediations.cjs: **12/12 passed (100%)**
+  - server/scripts/verify_issue149_b5ddd14_remediations.cjs: **8/8 passed (100%)**
+  - server/scripts/verify_issue149_remediations.cjs: **12/12 passed (100%)**
+  - server/scripts/verify_issue149_working_review.cjs: **9/9 passed (100%)**
+  - server/scripts/test_issue140_probes.cjs: **16/16 passed (100%)**
+  - server/scripts/data_exchange_reference_client.cjs --verify: **PASSED**
+  - Contract test suites (issue140_remediations.test.js, 
+sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
+- Strictly LIMS-only assignment. OpenNSIS untouched. Ready for candidate commit, push, CI run, and Codex independent technical review.

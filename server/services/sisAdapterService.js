@@ -383,7 +383,7 @@ function extractObservations(sample, { analysisMap = {}, methodMap = {} } = {}) 
         return observations;
     }
 
-    const currentResults = sample.results.filter(r => r.isCurrent !== false);
+    const currentResults = sample.results.filter(r => r.isCurrent !== false && r.isCurrent !== 0 && r.isValid !== false && r.isValid !== 0);
 
     currentResults.forEach(r => {
         const aMeta = analysisMap[r.param] || {};
@@ -550,7 +550,7 @@ function formatSampleV1(sample, maps = {}) {
         labId: sample.labId || null,
 
         // Additive explicit identities (Issue #140 P1)
-        sourceSystemId: SOURCE_SYSTEM_ID,
+        sourceSystemId: sample.sourceSystemId || SOURCE_SYSTEM_ID,
         specimenId: sample.id,
         fieldSampleId: sample.originalId,
         labSampleId: sample.labId || null,
@@ -638,7 +638,7 @@ function formatSampleV2(sample, maps = {}) {
 
     return {
         schemaVersion: '2026-09-issue140-v2',
-        sourceSystemId: SOURCE_SYSTEM_ID,
+        sourceSystemId: sample.sourceSystemId || SOURCE_SYSTEM_ID,
 
         // Core Specimen Identifiers (R4, R5: laboratoryId strictly assignedLab, no labId fallback)
         specimenId: sample.id,

@@ -12,8 +12,8 @@ const databasePath = path.join(dir, 'verify-full-schema.db');
 process.env.DATABASE_PATH = databasePath;
 process.env.NODE_ENV = 'test';
 
-const codexSqlPath = 'C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-schema-9850d78.sql';
-const SQL = fs.readFileSync(codexSqlPath, 'utf8');
+const repoSqlPath = path.join(__dirname, 'schema', 'full_application_schema.sql');
+const SQL = fs.readFileSync(repoSqlPath, 'utf8');
 
 const Database = require('better-sqlite3');
 const setup = new Database(databasePath);
@@ -239,6 +239,97 @@ function pass(msg) {
     }
     assert.ok(threw, 'encodeCursor must fail closed (throw) on signing-state storage failure');
     pass('R7: Signing-state failure fails closed, completely eliminating predictable PID fallback');
+
+    // Rem 8: Receipt checkpoint validation: issued batch sequence accepted, unchecked aliases rejected
+    const changeFeed2 = await state.getChanges(auth);
+    const end = db.prepare('SELECT end_seq FROM _exchange_batches WHERE id=?').get(changeFeed2.batchId).end_seq;
+    assert.ok(end > 0, 'Issued batch must have valid positive end_seq');
+    const goodReceipt = state.recordReceipt(auth, {
+        batchId: changeFeed2.batchId,
+        importedCount: 0,
+        quarantinedCount: 0,
+        checkpoint: `seq_${end}`
+    });
+    assert.equal(goodReceipt.status, 'ACKNOWLEDGED', 'Valid issued change-batch sequence checkpoint must be accepted');
+    pass('R8: Valid issued change-batch sequence checkpoint accepted with start_seq/end_seq resolved');
+
+    const fakeReceipt = state.recordReceipt(auth, {
+        batchId: changeFeed2.batchId,
+        importedCount: 0,
+        quarantinedCount: 0,
+        checkpoint: 'cp_999999999'
+    });
+    assert.equal(fakeReceipt.error, 'INVALID_CHECKPOINT', 'Alternate checkpoint syntax must be rejected');
+    assert.equal(fakeReceipt.status, 400);
+    pass('R8b: Alternate checkpoint syntax aliases (cp_...) strictly rejected with 400 INVALID_CHECKPOINT');
+
+    // Rem 9: Invalid results (isValid=false) excluded from trigger capture and NOT republished by GET sync
+    await prisma.result.update({
+        where: { id: 'synthetic-result' },
+        data: { isValid: false }
+    });
+    const latestAfterInvalid = () => db.prepare('SELECT * FROM _exchange_journal ORDER BY sequence DESC LIMIT 1').get();
+    assert.equal(JSON.parse(latestAfterInvalid().payload).observations.length, 0, 'Trigger must exclude invalid results (0 observations)');
+    await state.getChanges(auth);
+    assert.equal(JSON.parse(latestAfterInvalid().payload).observations.length, 0, 'GET synchronization must NOT republish invalid results');
+    pass('R9: Transactional trigger capture and GET synchronization consistently exclude invalid results');
+
+    // Rem 10: Concurrency safety: Stale GET scan does not overwrite committed withdrawal
+    await prisma.result.update({
+        where: { id: 'synthetic-result' },
+        data: { isValid: true }
+    });
+    await state.getChanges(auth);
+
+    const origFindMany = prisma.sample.findMany;
+    let interleaved = false;
+    prisma.sample.findMany = async function(args) {
+        const rows = await origFindMany.call(this, args);
+        if (!interleaved) {
+            interleaved = true;
+            await prisma.sample.update({
+                where: { id: 'synthetic-sample' },
+                data: { status: 'CANCELLED' }
+            });
+            assert.equal(latestAfterInvalid().event_type, 'WITHDRAWAL', 'Sample cancellation must trigger WITHDRAWAL');
+        }
+        return rows;
+    };
+
+    let racing;
+    try {
+        racing = await state.createSnapshot(auth);
+    } finally {
+        prisma.sample.findMany = origFindMany;
+    }
+
+    const liveSample = await prisma.sample.findUnique({ where: { id: 'synthetic-sample' } });
+    const racingPage = await state.getSnapshotPage(racing.snapshotId, auth);
+
+    assert.equal(liveSample.status, 'CANCELLED');
+    assert.equal(latestAfterInvalid().event_type, 'WITHDRAWAL', 'Latest journal event must remain WITHDRAWAL, not overwritten by stale PUBLICATION');
+    assert.equal(racingPage.data.length, 0, 'Snapshot must not expose cancelled specimen');
+    pass('R10: Stale GET scan does not overwrite committed withdrawal; cancelled specimen excluded from snapshot');
+
+    // Rem 11: Fail-closed epoch restore protocol and installation source system identity
+    let epochStorageFailed = false;
+    try {
+        state.getCurrentEpoch(badState);
+    } catch (e) {
+        epochStorageFailed = true;
+        assert.ok(e.message.includes('Epoch state storage unavailable'));
+    }
+    assert.ok(epochStorageFailed, 'getCurrentEpoch must fail closed on storage failure');
+
+    const curEpoch = state.getCurrentEpoch(db);
+    assert.ok(curEpoch.startsWith('epoch-'));
+    const rotated = state.rotateEpoch(db, 'DISASTER_RECOVERY_TEST');
+    assert.equal(rotated.previousEpoch, curEpoch);
+    assert.notEqual(rotated.currentEpoch, curEpoch);
+
+    const sourceSysId = state.getSourceSystemId(db);
+    assert.ok(sourceSysId && typeof sourceSysId === 'string' && sourceSysId.length > 0);
+    pass('R11: Epoch restore protocol rotates epoch fail-closed, and installation identity is provisioned');
 
     console.log(`\nALL ${passedCount} REMEDIATIONS VERIFIED SUCCESSFULLY!`);
 })().catch(e => {

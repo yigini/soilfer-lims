@@ -33,6 +33,7 @@ const {
     AUTHORIZED_RELEASE_STATUSES
 } = exchangePolicyService;
 const exchangeStateService = require('../services/exchangeStateService');
+const getSourceSystemId = () => (exchangeStateService.getSourceSystemId ? exchangeStateService.getSourceSystemId() : SOURCE_SYSTEM_ID);
 
 let cachedAnalysisMap = null;
 let cachedMethodMap = null;
@@ -79,7 +80,7 @@ exports.getCapabilities = (req, res) => {
         status: 'success',
         contractVersion: '2.0.0',
         schemaVersion: '2026-09-issue140-v2',
-        sourceSystemId: SOURCE_SYSTEM_ID,
+        sourceSystemId: getSourceSystemId(),
         supportedProfiles: ['core-lossless-v2', 'opennsis', 'glosis', 'default'],
         supportedMatrices: ['SOIL', 'PLANT', 'WATER', 'FERTILIZER'],
         limits: {
@@ -165,7 +166,7 @@ exports.getSamples = async (req, res) => {
         res.json({
             status: 'success',
             schemaVersion: '2026-09-issue140-v2',
-            sourceSystemId: SOURCE_SYSTEM_ID,
+            sourceSystemId: getSourceSystemId(),
             boundaryTimestamp: new Date().toISOString(),
             count: data.length,
             total,
@@ -228,7 +229,7 @@ exports.getSampleById = async (req, res) => {
         res.json({
             status: 'success',
             schemaVersion: '2026-09-issue140-v2',
-            sourceSystemId: SOURCE_SYSTEM_ID,
+            sourceSystemId: getSourceSystemId(),
             data: formatted
         });
     } catch (err) {
@@ -246,6 +247,7 @@ exports.getObservations = async (req, res) => {
 
         const resultWhere = {
             isCurrent: true,
+            OR: [{ isValid: true }, { isValid: null }],
             sample: sampleWhere
         };
 
@@ -275,8 +277,11 @@ exports.getObservations = async (req, res) => {
             ];
         }
 
+        
+
+
         const [total, results, maps] = await Promise.all([
-            prisma.result.count({ where: { isCurrent: true, sample: sampleWhere } }),
+            prisma.result.count({ where: { isCurrent: true, OR: [{ isValid: true }, { isValid: null }], sample: sampleWhere } }),
             prisma.result.findMany({
                 where: resultWhere,
                 include: { sample: true },
@@ -385,7 +390,7 @@ exports.getObservations = async (req, res) => {
         res.json({
             status: 'success',
             schemaVersion: '2026-09-issue140-v2',
-            sourceSystemId: SOURCE_SYSTEM_ID,
+            sourceSystemId: getSourceSystemId(),
             boundaryTimestamp: new Date().toISOString(),
             count: observations.length,
             total,
@@ -478,7 +483,7 @@ exports.getGeoJson = async (req, res) => {
         res.json({
             type: 'FeatureCollection',
             schemaVersion: '2026-09-issue140-v2',
-            sourceSystemId: SOURCE_SYSTEM_ID,
+            sourceSystemId: getSourceSystemId(),
             count: features.length,
             features
         });
@@ -502,7 +507,7 @@ exports.getStats = async (req, res) => {
         const [totalEligibleSamples, publishedSamples, publishedObservations, labsCount] = await Promise.all([
             prisma.sample.count({ where: sampleWhere }),
             prisma.sample.count({ where: { ...sampleWhere, status: { in: AUTHORIZED_RELEASE_STATUSES } } }),
-            prisma.result.count({ where: { isCurrent: true, sample: sampleWhere } }),
+            prisma.result.count({ where: { isCurrent: true, OR: [{ isValid: true }, { isValid: null }], sample: sampleWhere } }),
             prisma.lab.count({ where: labWhere })
         ]);
 
@@ -523,7 +528,7 @@ exports.getStats = async (req, res) => {
         res.json({
             status: 'success',
             schemaVersion: '2026-09-issue140-v2',
-            sourceSystemId: SOURCE_SYSTEM_ID,
+            sourceSystemId: getSourceSystemId(),
             metrics: {
                 totalEligibleSamples,
                 publishedSamples,
@@ -651,7 +656,7 @@ exports.getSpectra = async (req, res) => {
         res.json({
             status: 'success',
             schemaVersion: '2026-09-issue140-v2',
-            sourceSystemId: SOURCE_SYSTEM_ID,
+            sourceSystemId: getSourceSystemId(),
             count: data.length,
             total,
             hasMore,
@@ -692,7 +697,7 @@ exports.createSnapshot = async (req, res) => {
         res.status(201).json({
             status: 'success',
             schemaVersion: '2026-09-issue140-v2',
-            sourceSystemId: SOURCE_SYSTEM_ID,
+            sourceSystemId: getSourceSystemId(),
             profile,
             ...snapshot
         });
@@ -719,7 +724,7 @@ exports.getSnapshotPages = async (req, res) => {
         res.json({
             status: 'success',
             schemaVersion: '2026-09-issue140-v2',
-            sourceSystemId: SOURCE_SYSTEM_ID,
+            sourceSystemId: getSourceSystemId(),
             ...result
         });
     } catch (err) {
@@ -752,7 +757,7 @@ exports.getChanges = async (req, res) => {
         res.json({
             status: 'success',
             schemaVersion: '2026-09-issue140-v2',
-            sourceSystemId: SOURCE_SYSTEM_ID,
+            sourceSystemId: getSourceSystemId(),
             ...result
         });
     } catch (err) {
@@ -775,7 +780,7 @@ exports.submitReceipt = async (req, res) => {
         res.status(200).json({
             status: 'success',
             schemaVersion: '2026-09-issue140-v2',
-            sourceSystemId: SOURCE_SYSTEM_ID,
+            sourceSystemId: getSourceSystemId(),
             receipt
         });
     } catch (err) {

@@ -28,7 +28,8 @@ function normalizeSampleDataForHash(raw) {
             results = raw.results;
         }
     }
-    const normResults = results.map(r => ({
+    const activeResults = results.filter(r => r.isCurrent !== false && r.isCurrent !== 0 && r.isValid !== false && r.isValid !== 0);
+    const normResults = activeResults.map(r => ({
         id: r.id != null ? String(r.id) : null,
         param: r.param != null ? String(r.param) : null,
         value: r.value != null ? String(r.value) : null,
@@ -76,8 +77,10 @@ function normalizeSampleDataForHash(raw) {
         assignedLab: raw.assignedLab != null ? String(raw.assignedLab) : null,
         country: (raw.country || raw.countryName) != null ? String(raw.country || raw.countryName) : null,
         projectCode: raw.projectCode != null ? String(raw.projectCode) : null,
+        matrix: raw.matrix != null ? String(raw.matrix) : 'SOIL',
         fieldMetadata: raw.fieldMetadata != null ? (typeof raw.fieldMetadata === 'object' ? JSON.stringify(raw.fieldMetadata) : String(raw.fieldMetadata)) : null,
         metadata: raw.metadata != null ? (typeof raw.metadata === 'object' ? JSON.stringify(raw.metadata) : String(raw.metadata)) : null,
+        receptionData: raw.receptionData != null ? (typeof raw.receptionData === 'object' ? JSON.stringify(raw.receptionData) : String(raw.receptionData)) : null,
         latitude: (raw.latitude !== undefined && raw.latitude !== null && !isNaN(Number(raw.latitude))) ? Number(raw.latitude) : null,
         longitude: (raw.longitude !== undefined && raw.longitude !== null && !isNaN(Number(raw.longitude))) ? Number(raw.longitude) : null,
         elevation: (raw.elevation !== undefined && raw.elevation !== null && !isNaN(Number(raw.elevation))) ? Number(raw.elevation) : null,
@@ -91,6 +94,16 @@ function normalizeSampleDataForHash(raw) {
         collectionDate: colDate,
         samplingDate: sampDate,
         receptionDate: recDate,
+        siteName: raw.siteName != null ? String(raw.siteName) : null,
+        village: raw.village != null ? String(raw.village) : null,
+        admin1: raw.admin1 != null ? String(raw.admin1) : null,
+        admin2: raw.admin2 != null ? String(raw.admin2) : null,
+        receivedMass: (raw.receivedMass !== undefined && raw.receivedMass !== null && !isNaN(Number(raw.receivedMass))) ? Number(raw.receivedMass) : null,
+        moistureOnArrival: raw.moistureOnArrival != null ? String(raw.moistureOnArrival) : null,
+        dryingStatus: raw.dryingStatus != null ? String(raw.dryingStatus) : null,
+        preparationStatus: raw.preparationStatus != null ? String(raw.preparationStatus) : null,
+        rejectionReason: raw.rejectionReason != null ? String(raw.rejectionReason) : null,
+        approvedAt: raw.approvedAt != null ? (raw.approvedAt instanceof Date ? raw.approvedAt.toISOString() : String(raw.approvedAt)) : null,
         results: normResults
     };
 }
@@ -166,11 +179,13 @@ function registerDbFunctions(db) {
             }
             if (!Array.isArray(results)) results = [];
 
-            sampleObj.results = results.map(r => ({
-                ...r,
-                isValid: r.isValid !== undefined ? Boolean(r.isValid) : true,
-                isCurrent: r.isCurrent !== undefined ? Boolean(r.isCurrent) : true
-            }));
+            sampleObj.results = results
+                .filter(r => r.isCurrent !== false && r.isCurrent !== 0 && r.isValid !== false && r.isValid !== 0)
+                .map(r => ({
+                    ...r,
+                    isValid: true,
+                    isCurrent: true
+                }));
 
             if (!sampleObj.updatedAt) {
                 sampleObj.updatedAt = new Date();

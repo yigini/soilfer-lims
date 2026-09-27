@@ -50,11 +50,71 @@ function getCursorSecret(db) {
 
 function getCurrentEpoch(db) {
     const metaDb = db || (dbInstance || getDb());
+    if (!metaDb || typeof metaDb.prepare !== 'function') {
+        throw new Error('Epoch state storage unavailable: database connection missing or invalid.');
+    }
     try {
         const row = metaDb.prepare("SELECT value FROM _exchange_meta WHERE key = 'epoch'").get();
         if (row && row.value) return row.value;
-    } catch (e) {}
-    return 'epoch-1';
+        try {
+            metaDb.prepare("INSERT OR IGNORE INTO _exchange_meta (key, value, updated_at) VALUES ('epoch', 'epoch-1', ?)").run(new Date().toISOString());
+        } catch (ignoreErr) {}
+        return 'epoch-1';
+    } catch (e) {
+        throw new Error(`Epoch state storage unavailable: ${e.message}`);
+    }
+}
+
+function rotateEpoch(db, reason = 'RESTORE_EVENT') {
+    const metaDb = db || (dbInstance || getDb());
+    if (!metaDb || typeof metaDb.prepare !== 'function') {
+        throw new Error('Epoch rotation failed: database connection missing or invalid.');
+    }
+    const current = getCurrentEpoch(metaDb);
+    const m = current.match(/^epoch-(\d+)$/);
+    const nextNum = m ? parseInt(m[1], 10) + 1 : Date.now();
+    const newEpoch = `epoch-${nextNum}`;
+    const now = new Date().toISOString();
+
+    const rotateTx = metaDb.transaction(() => {
+        metaDb.prepare(`
+            INSERT INTO _exchange_meta (key, value, updated_at)
+            VALUES ('epoch', ?, ?)
+            ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+        `).run(newEpoch, now);
+
+        metaDb.prepare(`
+            INSERT INTO _exchange_meta (key, value, updated_at)
+            VALUES ('last_epoch_rotation_reason', ?, ?)
+            ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+        `).run(reason, now);
+    });
+
+    rotateTx();
+    return {
+        previousEpoch: current,
+        currentEpoch: newEpoch,
+        rotatedAt: now,
+        reason
+    };
+}
+
+function getSourceSystemId(db) {
+    if (process.env.SOURCE_SYSTEM_ID) {
+        return process.env.SOURCE_SYSTEM_ID;
+    }
+    const metaDb = db || (dbInstance || getDb());
+    try {
+        const row = metaDb.prepare("SELECT value FROM _exchange_meta WHERE key = 'source_system_id'").get();
+        if (row && row.value) return row.value;
+        const newId = `soilfer-lims-node-${crypto.randomBytes(4).toString('hex')}`;
+        try {
+            metaDb.prepare("INSERT OR IGNORE INTO _exchange_meta (key, value, updated_at) VALUES ('source_system_id', ?, ?)").run(newId, new Date().toISOString());
+        } catch (ignoreErr) {}
+        return newId;
+    } catch (e) {
+        return 'soilfer-lims-core';
+    }
 }
 
 function ensureColumns(db, tableName, colDefs) {
@@ -79,7 +139,7 @@ const {
     installSqliteHooks
 } = require('./exchangeDbFunctions');
 
-const CURRENT_TRIGGER_VERSION = '4';
+const CURRENT_TRIGGER_VERSION = '5';
 
 function ensureTriggers(db, force = false) {
     registerDbFunctions(db);
@@ -102,29 +162,22 @@ function ensureTriggers(db, force = false) {
     const resultCols = hasResult ? new Set((db.prepare("PRAGMA table_info(Result)").all() || []).map(c => c.name)) : new Set();
 
     const buildSampleJsonObj = (prefix) => {
-        const fields = [
-            `'id', ${prefix}.id`,
-            `'status', ${prefix}.status`,
-            `'originalId', ${prefix}.originalId`,
-            `'labId', ${prefix}.labId`,
-            `'assignedLab', ${prefix}.assignedLab`,
-            `'country', ${prefix}.country`,
-            `'projectCode', ${prefix}.projectCode`,
-            `'fieldMetadata', ${prefix}.fieldMetadata`
+        const candidateFields = [
+            'id', 'status', 'originalId', 'labId', 'assignedLab', 'country', 'countryName', 'projectCode',
+            'matrix', 'fieldMetadata', 'metadata', 'receptionData', 'receptionDate',
+            'latitude', 'longitude', 'elevation', 'depthTopCm', 'depthBottomCm', 'depthTop', 'depthBottom',
+            'horizon', 'positionalUncertaintyM', 'locationSource',
+            'siteName', 'village', 'admin1', 'admin2',
+            'receivedMass', 'moistureOnArrival', 'dryingStatus', 'preparationStatus',
+            'rejectionReason', 'approvedAt', 'approvedBy', 'acceptedAt', 'acceptedBy',
+            'createdAt', 'updatedAt'
         ];
-        if (sampleCols.has('metadata')) fields.push(`'metadata', ${prefix}.metadata`);
-        if (sampleCols.has('receptionDate')) fields.push(`'receptionDate', ${prefix}.receptionDate`);
-        if (sampleCols.has('updatedAt')) fields.push(`'updatedAt', ${prefix}.updatedAt`);
-        if (sampleCols.has('latitude')) fields.push(`'latitude', ${prefix}.latitude`);
-        if (sampleCols.has('longitude')) fields.push(`'longitude', ${prefix}.longitude`);
-        if (sampleCols.has('elevation')) fields.push(`'elevation', ${prefix}.elevation`);
-        if (sampleCols.has('depthTopCm')) fields.push(`'depthTopCm', ${prefix}.depthTopCm`);
-        if (sampleCols.has('depthBottomCm')) fields.push(`'depthBottomCm', ${prefix}.depthBottomCm`);
-        if (sampleCols.has('depthTop')) fields.push(`'depthTop', ${prefix}.depthTop`);
-        if (sampleCols.has('depthBottom')) fields.push(`'depthBottom', ${prefix}.depthBottom`);
-        if (sampleCols.has('horizon')) fields.push(`'horizon', ${prefix}.horizon`);
-        if (sampleCols.has('positionalUncertaintyM')) fields.push(`'positionalUncertaintyM', ${prefix}.positionalUncertaintyM`);
-        if (sampleCols.has('locationSource')) fields.push(`'locationSource', ${prefix}.locationSource`);
+        const fields = [];
+        for (const col of candidateFields) {
+            if (sampleCols.has(col)) {
+                fields.push(`'${col}', ${prefix}."${col}"`);
+            }
+        }
         return `json_object(${fields.join(', ')})`;
     };
 
@@ -188,24 +241,21 @@ function ensureTriggers(db, force = false) {
         )), '[]') FROM Result r WHERE r.sampleId = s.id AND ${resValidFilter} AND ${resCurrFilter})`
         : `'[]'`;
 
-    const sampleAmendConds = [
-        'OLD.originalId IS NOT NEW.originalId',
-        'OLD.labId IS NOT NEW.labId',
-        'OLD.assignedLab IS NOT NEW.assignedLab',
-        'OLD.country IS NOT NEW.country',
-        'OLD.projectCode IS NOT NEW.projectCode',
-        'OLD.fieldMetadata IS NOT NEW.fieldMetadata'
+    const candidateAmendCols = [
+        'originalId', 'labId', 'assignedLab', 'country', 'countryName', 'projectCode',
+        'matrix', 'fieldMetadata', 'metadata', 'receptionData', 'receptionDate',
+        'latitude', 'longitude', 'elevation', 'depthTopCm', 'depthBottomCm', 'depthTop', 'depthBottom',
+        'horizon', 'positionalUncertaintyM', 'locationSource',
+        'siteName', 'village', 'admin1', 'admin2',
+        'receivedMass', 'moistureOnArrival', 'dryingStatus', 'preparationStatus',
+        'rejectionReason', 'approvedAt'
     ];
-    if (sampleCols.has('metadata')) sampleAmendConds.push('OLD.metadata IS NOT NEW.metadata');
-    if (sampleCols.has('receptionDate')) sampleAmendConds.push('OLD.receptionDate IS NOT NEW.receptionDate');
-    if (sampleCols.has('latitude')) sampleAmendConds.push('OLD.latitude IS NOT NEW.latitude');
-    if (sampleCols.has('longitude')) sampleAmendConds.push('OLD.longitude IS NOT NEW.longitude');
-    if (sampleCols.has('elevation')) sampleAmendConds.push('OLD.elevation IS NOT NEW.elevation');
-    if (sampleCols.has('depthTopCm')) sampleAmendConds.push('OLD.depthTopCm IS NOT NEW.depthTopCm');
-    if (sampleCols.has('depthBottomCm')) sampleAmendConds.push('OLD.depthBottomCm IS NOT NEW.depthBottomCm');
-    if (sampleCols.has('depthTop')) sampleAmendConds.push('OLD.depthTop IS NOT NEW.depthTop');
-    if (sampleCols.has('depthBottom')) sampleAmendConds.push('OLD.depthBottom IS NOT NEW.depthBottom');
-    if (sampleCols.has('horizon')) sampleAmendConds.push('OLD.horizon IS NOT NEW.horizon');
+    const sampleAmendConds = [];
+    for (const col of candidateAmendCols) {
+        if (sampleCols.has(col)) {
+            sampleAmendConds.push(`OLD."${col}" IS NOT NEW."${col}"`);
+        }
+    }
 
     const resultAmendConds = [
         'OLD.value IS NOT NEW.value',
@@ -510,6 +560,15 @@ function initTables(db) {
             value TEXT NOT NULL,
             updated_at TEXT NOT NULL DEFAULT ''
         );
+
+        CREATE TABLE IF NOT EXISTS _exchange_connections (
+            connection_id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            auth_version INTEGER NOT NULL DEFAULT 1,
+            capabilities TEXT NOT NULL DEFAULT '["REGISTRY","OBSERVATIONS","CHANGES"]',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
     `);
 
     // 2. Non-destructive additive column checks (F5: NEVER drop populated tables)
@@ -584,6 +643,12 @@ function initTables(db) {
         `);
     } catch (e) {}
 
+    try {
+        db.prepare("INSERT OR IGNORE INTO _exchange_meta (key, value, updated_at) VALUES ('epoch', 'epoch-1', ?)").run(new Date().toISOString());
+        const sysId = process.env.SOURCE_SYSTEM_ID || `soilfer-lims-node-${crypto.randomBytes(4).toString('hex')}`;
+        db.prepare("INSERT OR IGNORE INTO _exchange_meta (key, value, updated_at) VALUES ('source_system_id', ?, ?)").run(sysId, new Date().toISOString());
+    } catch (e) {}
+
     ensureTriggers(db);
 }
 
@@ -644,39 +709,15 @@ async function syncJournal(auth, maps = {}) {
 
     const syncTx = db.transaction(() => {
         let currentMaxSeq = (getMaxSeqStmt.get()?.maxSeq || 0);
+        const hasSampleTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Sample'").get());
+        const hasResultTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Result'").get());
 
         for (const s of samples) {
-            const isReleasedStatus = AUTHORIZED_RELEASE_STATUSES.includes(s.status) || (['ARCHIVED', 'DISPOSED'].includes(s.status) && s.approvedAt);
-            const isWithdrawnStatus = !isReleasedStatus;
-            const currentHash = computeSampleContentHash(s);
-            const latest = getLatestStmt.get(s.id);
-            const eventTime = s.updatedAt ? new Date(s.updatedAt).toISOString() : new Date().toISOString();
-
-            if (!latest) {
-                // If never previously journaled and currently in released status: PUBLICATION
-                if (isReleasedStatus) {
-                    currentMaxSeq++;
-                    const evtId = `evt_${s.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
-                    const formatted = formatSampleV2(s, maps);
-                    insertJournalStmt.run(
-                        evtId,
-                        currentMaxSeq,
-                        'PUBLICATION',
-                        s.id,
-                        s.originalId,
-                        s.labId,
-                        s.country || s.countryName || null,
-                        s.projectCode || null,
-                        s.assignedLab || null,
-                        currentHash,
-                        JSON.stringify(formatted),
-                        eventTime
-                    );
-                }
-            } else {
-                // Was previously journaled
-                if (latest.event_type !== 'WITHDRAWAL' && isWithdrawnStatus) {
-                    // Status changed away from released (e.g. undoApproval to PROCESSING, CANCELLED, REJECTED, HOLD): WITHDRAWAL
+            // Live row check directly from SQLite within the transaction to prevent stale read races
+            const live = hasSampleTable ? db.prepare('SELECT * FROM Sample WHERE id = ?').get(s.id) : s;
+            if (!live) {
+                const latest = getLatestStmt.get(s.id);
+                if (latest && latest.event_type !== 'WITHDRAWAL') {
                     currentMaxSeq++;
                     const evtId = `evt_${s.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
                     insertJournalStmt.run(
@@ -689,26 +730,110 @@ async function syncJournal(auth, maps = {}) {
                         s.country || s.countryName || null,
                         s.projectCode || null,
                         s.assignedLab || null,
-                        currentHash,
+                        latest.content_hash,
                         null,
-                        eventTime
+                        new Date().toISOString()
                     );
-                } else if (isReleasedStatus && (latest.event_type === 'WITHDRAWAL' || latest.content_hash !== currentHash)) {
-                    // Content or analytical results changed or republished after withdrawal
+                }
+                continue;
+            }
+
+            const isReleasedStatus = AUTHORIZED_RELEASE_STATUSES.includes(live.status) || (['ARCHIVED', 'DISPOSED'].includes(live.status) && live.approvedAt);
+            const isWithdrawnStatus = !isReleasedStatus;
+            const latest = getLatestStmt.get(live.id);
+
+            if (isWithdrawnStatus) {
+                if (latest && latest.event_type !== 'WITHDRAWAL') {
+                    // Status changed away from released (e.g. undoApproval to PROCESSING, CANCELLED, REJECTED, HOLD): WITHDRAWAL
                     currentMaxSeq++;
-                    const eventType = (latest.event_type === 'WITHDRAWAL') ? 'PUBLICATION' : 'AMENDMENT';
-                    const evtId = `evt_${s.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
-                    const formatted = formatSampleV2(s, maps);
+                    const evtId = `evt_${live.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
+                    const eventTime = live.updatedAt ? new Date(live.updatedAt).toISOString() : new Date().toISOString();
                     insertJournalStmt.run(
                         evtId,
                         currentMaxSeq,
-                        eventType,
-                        s.id,
-                        s.originalId,
-                        s.labId,
-                        s.country || s.countryName || null,
-                        s.projectCode || null,
-                        s.assignedLab || null,
+                        'WITHDRAWAL',
+                        live.id,
+                        live.originalId,
+                        live.labId,
+                        live.country || live.countryName || null,
+                        live.projectCode || null,
+                        live.assignedLab || null,
+                        latest.content_hash,
+                        null,
+                        eventTime
+                    );
+                }
+                // If !latest, or latest is already WITHDRAWAL: DO NOTHING!
+                continue;
+            }
+
+            // Live sample is in released status.
+            // Fetch live results from SQLite if table exists to ensure 100% current results
+            const liveResults = hasResultTable ? db.prepare('SELECT * FROM Result WHERE sampleId = ?').all(live.id) : (s.results || []);
+            live.results = liveResults;
+
+            const currentHash = computeSampleContentHash(live);
+            const eventTime = live.updatedAt ? new Date(live.updatedAt).toISOString() : new Date().toISOString();
+
+            if (!latest) {
+                // If never previously journaled and currently in released status: PUBLICATION
+                currentMaxSeq++;
+                const evtId = `evt_${live.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
+                const formatted = formatSampleV2(live, maps);
+                insertJournalStmt.run(
+                    evtId,
+                    currentMaxSeq,
+                    'PUBLICATION',
+                    live.id,
+                    live.originalId,
+                    live.labId,
+                    live.country || live.countryName || null,
+                    live.projectCode || null,
+                    live.assignedLab || null,
+                    currentHash,
+                    JSON.stringify(formatted),
+                    eventTime
+                );
+            } else {
+                // Was previously journaled
+                if (latest.event_type === 'WITHDRAWAL') {
+                    // Was previously withdrawn. ONLY republish if live sample was genuinely re-approved AFTER withdrawal!
+                    const liveApprovedTime = live.approvedAt ? new Date(live.approvedAt).getTime() : 0;
+                    const withdrawalTime = new Date(latest.created_at).getTime();
+                    if (liveApprovedTime > withdrawalTime) {
+                        currentMaxSeq++;
+                        const evtId = `evt_${live.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
+                        const formatted = formatSampleV2(live, maps);
+                        insertJournalStmt.run(
+                            evtId,
+                            currentMaxSeq,
+                            'PUBLICATION',
+                            live.id,
+                            live.originalId,
+                            live.labId,
+                            live.country || live.countryName || null,
+                            live.projectCode || null,
+                            live.assignedLab || null,
+                            currentHash,
+                            JSON.stringify(formatted),
+                            eventTime
+                        );
+                    }
+                } else if (latest.content_hash !== currentHash) {
+                    // Analytical results or metadata changed on released sample: AMENDMENT
+                    currentMaxSeq++;
+                    const evtId = `evt_${live.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
+                    const formatted = formatSampleV2(live, maps);
+                    insertJournalStmt.run(
+                        evtId,
+                        currentMaxSeq,
+                        'AMENDMENT',
+                        live.id,
+                        live.originalId,
+                        live.labId,
+                        live.country || live.countryName || null,
+                        live.projectCode || null,
+                        live.assignedLab || null,
                         currentHash,
                         JSON.stringify(formatted),
                         eventTime
@@ -986,8 +1111,8 @@ function getSnapshot(snapshotId, auth) {
  * Encodes an authenticated opaque cursor with HMAC integrity protection (Finding 3).
  */
 function encodeCursor(data, db) {
-    const epoch = getCurrentEpoch(db);
     const secret = getCursorSecret(db);
+    const epoch = getCurrentEpoch(db);
     const payload = {
         v: 2,
         ...data,
@@ -1015,7 +1140,12 @@ function decodeCursor(cursorStr, db) {
             if (decoded.s !== expectedSig) {
                 return { invalid: true, reason: 'SIGNATURE_MISMATCH', message: 'Cursor signature verification failed.' };
             }
-            const currentEpoch = getCurrentEpoch(db);
+            let currentEpoch;
+            try {
+                currentEpoch = getCurrentEpoch(db);
+            } catch (err) {
+                return { invalid: true, reason: 'STATE_STORAGE_UNAVAILABLE', message: 'Epoch verification unavailable: signing state storage failed.' };
+            }
             if (decoded.p.epoch && decoded.p.epoch !== currentEpoch) {
                 return { invalid: true, expired: true, reason: 'EPOCH_MISMATCH', message: 'Cursor epoch mismatch.' };
             }
@@ -1409,15 +1539,15 @@ function recordReceipt(auth, receiptData = {}) {
         };
     }
 
-    // Checkpoint validation
+    // Checkpoint validation: strictly seq_<N> or item_<N>
     if (checkpoint !== undefined && checkpoint !== null && checkpoint !== '') {
         const chkStr = String(checkpoint);
-        const isValidCheckpoint = /^(seq_\d+|item_\d+|chk_\d+|cp[_\-]\d+|\d+|rec_[a-zA-Z0-9_\-]+)$/.test(chkStr);
+        const isValidCheckpoint = /^(seq_\d+|item_\d+)$/.test(chkStr);
         if (!isValidCheckpoint) {
             return {
                 error: 'INVALID_CHECKPOINT',
                 status: 400,
-                message: `Invalid checkpoint format '${chkStr}'. Checkpoint must be a valid sequence or item identifier.`
+                message: `Invalid checkpoint format '${chkStr}'. Checkpoint must be a valid sequence (seq_<N>) or item (item_<N>).`
             };
         }
     }
@@ -1444,9 +1574,9 @@ function recordReceipt(auth, receiptData = {}) {
     // Validate referenced batchId against durable issued artifacts in _exchange_batches or _exchange_snapshots
     let batch = null;
     if (batchId) {
-        batch = db.prepare('SELECT id, connection_id, item_count, snapshot_id FROM _exchange_batches WHERE id = ?').get(batchId);
+        batch = db.prepare('SELECT id, connection_id, start_seq, end_seq, item_count, snapshot_id FROM _exchange_batches WHERE id = ?').get(batchId);
         if (!batch) {
-            const snapAsBatch = db.prepare('SELECT id, connection_id, total_samples as item_count FROM _exchange_snapshots WHERE id = ?').get(batchId);
+            const snapAsBatch = db.prepare('SELECT id, connection_id, 1 as start_seq, high_water_sequence as end_seq, total_samples as item_count FROM _exchange_snapshots WHERE id = ?').get(batchId);
             if (snapAsBatch) {
                 // If referencing a snapshot as batchId, and snapshotId is also provided:
                 // They must refer to the SAME snapshot!
@@ -1490,34 +1620,76 @@ function recordReceipt(auth, receiptData = {}) {
         const mSeq = chkStr.match(/^seq_(\d+)$/);
         if (mSeq) {
             const seqNum = parseInt(mSeq[1], 10);
-            let maxAllowedSeq = 0;
-            if (batch && batch.end_seq) {
-                maxAllowedSeq = Math.max(maxAllowedSeq, batch.end_seq);
-            }
-            if (snap && snap.high_water_sequence) {
-                maxAllowedSeq = Math.max(maxAllowedSeq, snap.high_water_sequence);
-            }
-            if (!batch && !snap) {
-                maxAllowedSeq = db.prepare('SELECT MAX(sequence) as s FROM _exchange_journal').get()?.s || 0;
-            }
-            if (seqNum > maxAllowedSeq) {
+            if (seqNum < 1) {
                 return {
                     error: 'INVALID_CHECKPOINT',
                     status: 400,
-                    message: `Checkpoint sequence ${seqNum} exceeds maximum issued sequence (${maxAllowedSeq}).`
+                    message: `Checkpoint sequence must be a positive integer, got ${seqNum}.`
                 };
+            }
+            if (batch) {
+                if (batch.end_seq !== undefined && batch.end_seq !== null && seqNum > batch.end_seq) {
+                    return {
+                        error: 'INVALID_CHECKPOINT',
+                        status: 400,
+                        message: `Checkpoint sequence ${seqNum} exceeds maximum issued sequence (${batch.end_seq}).`
+                    };
+                }
+                if (batch.start_seq !== undefined && batch.start_seq !== null && batch.start_seq > 0 && seqNum < batch.start_seq) {
+                    return {
+                        error: 'INVALID_CHECKPOINT',
+                        status: 400,
+                        message: `Checkpoint sequence ${seqNum} is before batch start sequence (${batch.start_seq}).`
+                    };
+                }
+            }
+            if (snap && snap.high_water_sequence !== undefined && snap.high_water_sequence !== null) {
+                if (seqNum > snap.high_water_sequence) {
+                    return {
+                        error: 'INVALID_CHECKPOINT',
+                        status: 400,
+                        message: `Checkpoint sequence ${seqNum} exceeds maximum issued sequence (${snap.high_water_sequence}).`
+                    };
+                }
+            }
+            if (!batch && !snap) {
+                const maxAllowedSeq = db.prepare('SELECT MAX(sequence) as s FROM _exchange_journal').get()?.s || 0;
+                if (seqNum > maxAllowedSeq) {
+                    return {
+                        error: 'INVALID_CHECKPOINT',
+                        status: 400,
+                        message: `Checkpoint sequence ${seqNum} exceeds maximum issued sequence (${maxAllowedSeq}).`
+                    };
+                }
             }
         }
         const mItem = chkStr.match(/^item_(\d+)$/);
         if (mItem) {
             const itemNum = parseInt(mItem[1], 10);
-            const maxItems = (snap ? snap.total_samples : 0) || (batch ? batch.item_count : 0);
-            if (maxItems > 0 && itemNum > maxItems) {
+            if (itemNum < 1) {
                 return {
                     error: 'INVALID_CHECKPOINT',
                     status: 400,
-                    message: `Checkpoint item ${itemNum} exceeds total items (${maxItems}).`
+                    message: `Checkpoint item must be a positive integer, got ${itemNum}.`
                 };
+            }
+            if (snap && snap.total_samples !== undefined) {
+                if (snap.total_samples === 0 || itemNum > snap.total_samples) {
+                    return {
+                        error: 'INVALID_CHECKPOINT',
+                        status: 400,
+                        message: `Checkpoint item ${itemNum} exceeds total items (${snap.total_samples}).`
+                    };
+                }
+            }
+            if (batch && batch.item_count !== undefined) {
+                if (batch.item_count === 0 || itemNum > batch.item_count) {
+                    return {
+                        error: 'INVALID_CHECKPOINT',
+                        status: 400,
+                        message: `Checkpoint item ${itemNum} exceeds batch item count (${batch.item_count}).`
+                    };
+                }
             }
         }
     }
@@ -1685,5 +1857,8 @@ module.exports = {
     registerDbFunctions,
     installSqliteHooks,
     ensureTriggers,
-    normalizeSampleDataForHash
+    normalizeSampleDataForHash,
+    getCurrentEpoch,
+    rotateEpoch,
+    getSourceSystemId
 };

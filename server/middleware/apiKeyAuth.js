@@ -58,9 +58,11 @@ const apiKeyAuth = async (req, res, next) => {
                 type: 'API_KEY',
                 id: apiKey.id,
                 keyId: apiKey.id,
+                connectionId: apiKey.name ? `conn_${crypto.createHash('sha256').update(String(apiKey.name)).digest('hex').substring(0, 16)}` : `conn_${apiKey.id}`,
                 keyPrefix: apiKey.keyPrefix,
                 name: apiKey.name,
                 role: apiKey.role,
+                capabilities: apiKey.capabilities ? (typeof apiKey.capabilities === 'string' ? JSON.parse(apiKey.capabilities) : apiKey.capabilities) : null,
                 countries: apiKey.countries ? JSON.parse(apiKey.countries) : null,
                 projects: apiKey.projects ? JSON.parse(apiKey.projects) : null,
                 labs: apiKey.labs ? JSON.parse(apiKey.labs) : [] // SL-22: absent scope defaults to empty array (deny)
@@ -87,8 +89,10 @@ const apiKeyAuth = async (req, res, next) => {
                 type: 'JWT_USER',
                 id: user.id,
                 userId: user.id,
+                connectionId: `conn_user_${user.id}`,
                 name: user.name || user.username,
                 role: user.role,
+                capabilities: user.role === 'SUPER_ADMIN' ? ['*'] : null,
                 countries: user.countries ? JSON.parse(user.countries) : null,
                 projects: user.projects ? JSON.parse(user.projects) : null,
                 labId: user.labId,
@@ -130,10 +134,31 @@ const requireRole = (allowedRoles = []) => (req, res, next) => {
     return next();
 };
 
+const requireCapability = (capability) => (req, res, next) => {
+    if (!req.sisAuth) {
+        return res.status(401).json({ error: 'Unauthorized', message: 'Authentication required.' });
+    }
+    const role = req.sisAuth.role;
+    if (role === 'SUPER_ADMIN') {
+        return next();
+    }
+    const caps = req.sisAuth.capabilities;
+    if (Array.isArray(caps) && !caps.includes(capability) && !caps.includes('*')) {
+        return res.status(403).json({
+            error: 'FORBIDDEN',
+            code: 'INSUFFICIENT_CAPABILITY',
+            message: `Connection lacks required capability '${capability}'.`
+        });
+    }
+    return next();
+};
+
 apiKeyAuth.requireRole = requireRole;
+apiKeyAuth.requireCapability = requireCapability;
 
 module.exports = apiKeyAuth;
 module.exports.optional = optionalApiKeyAuth;
 module.exports.requireRole = requireRole;
+module.exports.requireCapability = requireCapability;
 
 

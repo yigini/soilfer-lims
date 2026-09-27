@@ -47,10 +47,12 @@ Options:
   --key <apiKey>    API key for authentication (default: EXCHANGE_API_KEY)
   --profile <name>  Exchange profile: core-lossless-v2 or opennsis (default: core-lossless-v2)
   --country <iso>   Optional country code filter (e.g. KEN, ZMB, GTM)
-  --limit <num>     Page limit for records (default: 5)
-  --receipt         Submit authenticated delivery receipt for harvested batch
-  --verify          Run isolated synthetic verification harness
-  --help, -h        Show this help message
+  --limit <num>       Page limit for records (default: 5)
+  --receipt           Submit authenticated delivery receipt with receiver-reported evidence
+  --imported <num>    Receiver-reported successfully imported specimen count
+  --quarantined <num> Receiver-reported quarantined specimen count (default: 0)
+  --verify            Run isolated synthetic verification harness
+  --help, -h          Show this help message
 `);
     process.exit(0);
 }
@@ -61,6 +63,8 @@ const PROFILE = getArg('--profile', 'core-lossless-v2');
 const COUNTRY = getArg('--country', null);
 const LIMIT = parseInt(getArg('--limit', '5'), 10) || 5;
 const SUBMIT_RECEIPT = hasFlag('--receipt');
+const IMPORTED_ARG = getArg('--imported', null);
+const QUARANTINED_ARG = getArg('--quarantined', null);
 const IS_VERIFY = hasFlag('--verify');
 
 // HTTP Client helper
@@ -294,7 +298,7 @@ async function runClientWorkflow() {
             } while (currentCursor && pageNum < 100);
 
             harvestedCount = totalHarvested;
-            return `Harvested ${totalHarvested} items across ${pageNum} page(s).`;
+            return `Retrieved ${totalHarvested} items across ${pageNum} page(s) (retrieval only; receiver import status pending).`;
         });
     }
 
@@ -311,14 +315,20 @@ async function runClientWorkflow() {
         return `Received ${changes.length} events, cursor: ${nextCursor ? nextCursor.slice(0, 16) + '...' : 'none'}`;
     });
 
-    // 10. Submit Delivery Receipt (only if requested by operator/receiver after real harvest)
-    if (SUBMIT_RECEIPT && snapshotId && harvestedCount > 0) {
+    // 10. Submit Delivery Receipt (requires explicit receiver-reported import evidence)
+    if (SUBMIT_RECEIPT && snapshotId) {
         await step('Submit Delivery Receipt (POST /api/v2/data-exchange/receipts)', async () => {
+            const importedCount = IMPORTED_ARG !== null ? parseInt(IMPORTED_ARG, 10) : null;
+            const quarantinedCount = QUARANTINED_ARG !== null ? parseInt(QUARANTINED_ARG, 10) : 0;
+            if (importedCount === null) {
+                return 'Receipt skipped: retrieval is not verified import. Provide --imported <count> with receiver-reported evidence to submit receipt.';
+            }
+            const reportedTotal = importedCount + quarantinedCount;
             const payload = {
                 snapshotId,
-                importedCount: harvestedCount,
-                quarantinedCount: 0,
-                checkpoint: `item_${harvestedCount}`
+                importedCount,
+                quarantinedCount,
+                checkpoint: reportedTotal > 0 ? `item_${reportedTotal}` : undefined
             };
             const res = await request('POST', '/api/v2/data-exchange/receipts', payload);
             if (res.status !== 200) {
@@ -327,7 +337,7 @@ async function runClientWorkflow() {
                 throw err;
             }
             const r = res.data.receipt || {};
-            return `Receipt acknowledged with ID: ${r.receiptId}, status: ${r.status}`;
+            return `Receipt acknowledged with ID: ${r.receiptId}, status: ${r.status} (receiver-reported: ${importedCount} imported, ${quarantinedCount} quarantined)`;
         });
     }
 
