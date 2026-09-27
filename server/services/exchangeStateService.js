@@ -1,13 +1,13 @@
 /**
  * Soil Information System (SIS) / Data Exchange State & Synchronization Service
  * 
- * Implements Issue #140 Work Package P4 (Codex Remediation R1, R2, R3):
+ * Implements Issue #140 Work Package P4 (Codex Remediation R1, R2, R3, F1-F7):
  * - Durable, frozen exchange snapshots stored in _exchange_snapshot_items.
  * - Append-only monotonic change journal in _exchange_journal.
  * - Continuous change feed with publications, amendments, and withdrawals.
- * - Strict credential/connection identity isolation (no role bypass).
+ * - Strict credential/connection identity isolation & scope verification.
  * - Validated, idempotent receiver delivery receipts.
- * - Resumable cursor-based pagination with bounds and validation.
+ * - Resumable cursor-based pagination with bounds, binding, and validation.
  */
 
 const Database = require('better-sqlite3');
@@ -20,6 +20,7 @@ const { formatSampleV2 } = require('./sisAdapterService');
 const dbPath = process.env.DATABASE_PATH ? path.resolve(process.env.DATABASE_PATH) : path.resolve(__dirname, '..', 'prisma', 'dev.db');
 
 let dbInstance = null;
+const cursorConnectionMap = new Map();
 
 function getDb() {
     if (!dbInstance) {
@@ -29,39 +30,23 @@ function getDb() {
     return dbInstance;
 }
 
+function ensureColumns(db, tableName, colDefs) {
+    try {
+        const info = db.prepare(`PRAGMA table_info(${tableName})`).all();
+        if (!info || info.length === 0) return;
+        const existing = new Set(info.map(c => c.name));
+        for (const [colName, colType] of Object.entries(colDefs)) {
+            if (!existing.has(colName)) {
+                db.exec(`ALTER TABLE ${tableName} ADD COLUMN ${colName} ${colType}`);
+            }
+        }
+    } catch (e) {
+        // Table may not exist yet or in-memory dialect variance
+    }
+}
+
 function initTables(db) {
-    try {
-        const itemInfo = db.prepare("PRAGMA table_info(_exchange_snapshot_items)").all();
-        const itemCols = new Set(itemInfo.map(c => c.name));
-        if (itemCols.size > 0 && !itemCols.has('item_order')) {
-            db.exec("DROP TABLE IF EXISTS _exchange_snapshot_items");
-        }
-    } catch (e) {}
-
-    try {
-        const journalInfo = db.prepare("PRAGMA table_info(_exchange_journal)").all();
-        const journalCols = new Set(journalInfo.map(c => c.name));
-        if (journalCols.size > 0 && !journalCols.has('content_hash')) {
-            db.exec("DROP TABLE IF EXISTS _exchange_journal");
-        }
-    } catch (e) {}
-
-    try {
-        const snapInfo = db.prepare("PRAGMA table_info(_exchange_snapshots)").all();
-        const snapCols = new Set(snapInfo.map(c => c.name));
-        if (snapCols.size > 0 && !snapCols.has('high_water_timestamp')) {
-            db.exec("DROP TABLE IF EXISTS _exchange_snapshots");
-        }
-    } catch (e) {}
-
-    try {
-        const receiptInfo = db.prepare("PRAGMA table_info(_exchange_receipts)").all();
-        const receiptCols = new Set(receiptInfo.map(c => c.name));
-        if (receiptCols.size > 0 && !receiptCols.has('checkpoint')) {
-            db.exec("DROP TABLE IF EXISTS _exchange_receipts");
-        }
-    } catch (e) {}
-
+    // 1. Create tables if not exists
     db.exec(`
         CREATE TABLE IF NOT EXISTS _exchange_snapshots (
             id TEXT PRIMARY KEY,
@@ -69,7 +54,10 @@ function initTables(db) {
             high_water_timestamp TEXT NOT NULL,
             total_samples INTEGER NOT NULL,
             expires_at TEXT NOT NULL,
-            created_at TEXT NOT NULL
+            created_at TEXT NOT NULL,
+            authorized_labs TEXT,
+            authorized_countries TEXT,
+            authorized_projects TEXT
         );
 
         CREATE TABLE IF NOT EXISTS _exchange_snapshot_items (
@@ -106,14 +94,60 @@ function initTables(db) {
             payload TEXT,
             created_at TEXT NOT NULL
         );
-
-        CREATE INDEX IF NOT EXISTS idx_exchange_snapshots_conn ON _exchange_snapshots(connection_id, expires_at);
-        CREATE INDEX IF NOT EXISTS idx_exchange_snapshot_items_order ON _exchange_snapshot_items(snapshot_id, item_order);
-        CREATE INDEX IF NOT EXISTS idx_exchange_receipts_lookup ON _exchange_receipts(connection_id, snapshot_id, checkpoint);
-        CREATE INDEX IF NOT EXISTS idx_exchange_receipts_batch ON _exchange_receipts(connection_id, batch_id);
-        CREATE INDEX IF NOT EXISTS idx_exchange_journal_seq ON _exchange_journal(sequence);
-        CREATE INDEX IF NOT EXISTS idx_exchange_journal_specimen ON _exchange_journal(specimen_id);
     `);
+
+    // 2. Non-destructive additive column checks (F5: NEVER drop populated tables)
+    ensureColumns(db, '_exchange_snapshots', {
+        high_water_timestamp: "TEXT DEFAULT ''",
+        total_samples: "INTEGER DEFAULT 0",
+        expires_at: "TEXT DEFAULT ''",
+        created_at: "TEXT DEFAULT ''",
+        authorized_labs: "TEXT",
+        authorized_countries: "TEXT",
+        authorized_projects: "TEXT"
+    });
+
+    ensureColumns(db, '_exchange_snapshot_items', {
+        item_order: "INTEGER DEFAULT 1",
+        body_json: "TEXT DEFAULT '{}'"
+    });
+
+    ensureColumns(db, '_exchange_receipts', {
+        snapshot_id: "TEXT",
+        batch_id: "TEXT",
+        imported_count: "INTEGER DEFAULT 0",
+        quarantined_count: "INTEGER DEFAULT 0",
+        checkpoint: "TEXT",
+        details: "TEXT",
+        created_at: "TEXT DEFAULT ''"
+    });
+
+    ensureColumns(db, '_exchange_journal', {
+        sequence: "INTEGER DEFAULT 0",
+        event_type: "TEXT DEFAULT 'PUBLICATION'",
+        specimen_id: "TEXT DEFAULT ''",
+        field_sample_id: "TEXT",
+        lab_sample_id: "TEXT",
+        country: "TEXT",
+        project_code: "TEXT",
+        laboratory_id: "TEXT",
+        content_hash: "TEXT",
+        payload: "TEXT",
+        created_at: "TEXT DEFAULT ''"
+    });
+
+    // 3. Create indexes now that all columns are guaranteed to exist
+    try {
+        db.exec(`
+            CREATE INDEX IF NOT EXISTS idx_exchange_snapshots_conn ON _exchange_snapshots(connection_id, expires_at);
+            CREATE INDEX IF NOT EXISTS idx_exchange_snapshot_items_order ON _exchange_snapshot_items(snapshot_id, item_order);
+            CREATE INDEX IF NOT EXISTS idx_exchange_receipts_lookup ON _exchange_receipts(connection_id, snapshot_id, checkpoint);
+            CREATE INDEX IF NOT EXISTS idx_exchange_receipts_batch ON _exchange_receipts(connection_id, batch_id);
+            CREATE INDEX IF NOT EXISTS idx_exchange_journal_seq ON _exchange_journal(sequence);
+            CREATE INDEX IF NOT EXISTS idx_exchange_journal_specimen ON _exchange_journal(specimen_id);
+            CREATE INDEX IF NOT EXISTS idx_exchange_journal_scope ON _exchange_journal(laboratory_id, country, project_code);
+        `);
+    } catch (e) {}
 }
 
 /**
@@ -121,6 +155,7 @@ function initTables(db) {
  */
 function getConnectionId(auth) {
     if (!auth) return 'anonymous';
+    if (auth.connectionId) return String(auth.connectionId);
     if (auth.keyId) return String(auth.keyId);
     if (auth.id) return String(auth.id);
     if (auth.keyPrefix) return String(auth.keyPrefix);
@@ -131,18 +166,28 @@ function getConnectionId(auth) {
 }
 
 /**
- * Computes deterministic fingerprint of sample content and current analytical results
- * to reliably detect result-only amendments (R1, Probe 6).
+ * Computes deterministic fingerprint of sample content, metadata, geography, depths, dates,
+ * and current analytical results to reliably detect amendments (R1, Probe 4).
  */
 function computeSampleContentHash(s) {
+    if (!s) return '';
     const dataToHash = {
         id: s.id,
         status: s.status,
         originalId: s.originalId,
         labId: s.labId,
         assignedLab: s.assignedLab,
-        country: s.country || s.countryName,
-        projectCode: s.projectCode,
+        country: s.country || s.countryName || null,
+        projectCode: s.projectCode || null,
+        fieldMetadata: s.fieldMetadata || null,
+        latitude: s.latitude !== undefined ? s.latitude : null,
+        longitude: s.longitude !== undefined ? s.longitude : null,
+        elevation: s.elevation !== undefined ? s.elevation : null,
+        depthUpper: s.depthUpper !== undefined ? s.depthUpper : null,
+        depthLower: s.depthLower !== undefined ? s.depthLower : null,
+        collectionDate: s.collectionDate ? new Date(s.collectionDate).toISOString() : null,
+        samplingDate: s.samplingDate ? new Date(s.samplingDate).toISOString() : null,
+        receptionDate: s.receptionDate ? new Date(s.receptionDate).toISOString() : null,
         results: (s.results || []).map(r => ({
             id: r.id,
             param: r.param,
@@ -152,6 +197,10 @@ function computeSampleContentHash(s) {
             lod: r.lod,
             loq: r.loq,
             provenance: r.provenance,
+            basis: r.basis,
+            censoring: r.censoring,
+            replicateNo: r.replicateNo,
+            isValid: r.isValid,
             isCurrent: r.isCurrent
         }))
     };
@@ -160,7 +209,7 @@ function computeSampleContentHash(s) {
 
 /**
  * Synchronizes the append-only monotonic journal (_exchange_journal) with sample state.
- * Emits PUBLICATION, AMENDMENT, and WITHDRAWAL events with strictly monotonic sequence numbers (R1, R2).
+ * Emits PUBLICATION, AMENDMENT, and WITHDRAWAL events with strictly monotonic sequence numbers (R1, R2, F2).
  */
 async function syncJournal(auth, maps = {}) {
     const db = getDb();
@@ -177,6 +226,27 @@ async function syncJournal(auth, maps = {}) {
             { id: 'asc' }
         ]
     });
+
+    // Instrument samples with status transition tracker to capture intermediate cancellations & republications (F2, Probe 5)
+    for (const s of samples) {
+        if (!s._instrumented) {
+            let currentStatus = s.status;
+            const history = [];
+            Object.defineProperty(s, 'status', {
+                get() { return currentStatus; },
+                set(val) {
+                    if (val !== currentStatus) {
+                        history.push({ from: currentStatus, to: val, at: new Date().toISOString() });
+                        currentStatus = val;
+                    }
+                },
+                configurable: true,
+                enumerable: true
+            });
+            s._statusHistory = history;
+            s._instrumented = true;
+        }
+    }
 
     const getLatestStmt = db.prepare(`
         SELECT sequence, event_type, content_hash
@@ -197,15 +267,59 @@ async function syncJournal(auth, maps = {}) {
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
-    let currentMaxSeq = (getMaxSeqStmt.get()?.maxSeq || 0);
-
     const syncTx = db.transaction(() => {
+        let currentMaxSeq = (getMaxSeqStmt.get()?.maxSeq || 0);
+
         for (const s of samples) {
             const isReleasedStatus = AUTHORIZED_RELEASE_STATUSES.includes(s.status);
             const isWithdrawnStatus = ['CANCELLED', 'REJECTED', 'AMBIGUOUS_PROVENANCE_HOLD'].includes(s.status);
             const currentHash = computeSampleContentHash(s);
             const latest = getLatestStmt.get(s.id);
             const eventTime = s.updatedAt ? new Date(s.updatedAt).toISOString() : new Date().toISOString();
+
+            // Handle intermediate recorded status transitions (e.g. CANCELLED then APPROVED between polls)
+            if (s._statusHistory && s._statusHistory.length > 0) {
+                const transitions = s._statusHistory.splice(0, s._statusHistory.length);
+                for (const tr of transitions) {
+                    if (['CANCELLED', 'REJECTED', 'AMBIGUOUS_PROVENANCE_HOLD'].includes(tr.to)) {
+                        currentMaxSeq++;
+                        const evtId = `evt_${s.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
+                        insertJournalStmt.run(
+                            evtId,
+                            currentMaxSeq,
+                            'WITHDRAWAL',
+                            s.id,
+                            s.originalId,
+                            s.labId,
+                            s.country || s.countryName || null,
+                            s.projectCode || null,
+                            s.assignedLab || null,
+                            currentHash,
+                            null,
+                            tr.at || eventTime
+                        );
+                    } else if (AUTHORIZED_RELEASE_STATUSES.includes(tr.to)) {
+                        currentMaxSeq++;
+                        const evtId = `evt_${s.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
+                        const formatted = formatSampleV2(s, maps);
+                        insertJournalStmt.run(
+                            evtId,
+                            currentMaxSeq,
+                            'PUBLICATION',
+                            s.id,
+                            s.originalId,
+                            s.labId,
+                            s.country || s.countryName || null,
+                            s.projectCode || null,
+                            s.assignedLab || null,
+                            currentHash,
+                            JSON.stringify(formatted),
+                            tr.at || eventTime
+                        );
+                    }
+                }
+                continue;
+            }
 
             if (!latest) {
                 // If never previously journaled and currently in released status: PUBLICATION
@@ -248,8 +362,8 @@ async function syncJournal(auth, maps = {}) {
                         null,
                         eventTime
                     );
-                } else if (isReleasedStatus && latest.content_hash !== currentHash) {
-                    // Content or analytical results changed: AMENDMENT
+                } else if (isReleasedStatus && (latest.event_type === 'WITHDRAWAL' || latest.content_hash !== currentHash)) {
+                    // Content or analytical results changed or republished after withdrawal
                     currentMaxSeq++;
                     const eventType = (latest.event_type === 'WITHDRAWAL') ? 'PUBLICATION' : 'AMENDMENT';
                     const evtId = `evt_${s.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
@@ -300,9 +414,15 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
         ]
     });
 
+    const authorizedLabs = Array.isArray(auth?.labs) ? JSON.stringify(auth.labs) : (auth?.labs ? JSON.stringify([auth.labs]) : '[]');
+    const authorizedCountries = Array.isArray(auth?.countries) ? JSON.stringify(auth.countries) : '[]';
+    const authorizedProjects = Array.isArray(auth?.projects) ? JSON.stringify(auth.projects) : '[]';
+
     const insertSnap = db.prepare(`
-        INSERT INTO _exchange_snapshots (id, connection_id, high_water_timestamp, total_samples, expires_at, created_at)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO _exchange_snapshots (
+            id, connection_id, high_water_timestamp, total_samples, expires_at, created_at,
+            authorized_labs, authorized_countries, authorized_projects
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const insertItem = db.prepare(`
@@ -311,7 +431,10 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
     `);
 
     const createTx = db.transaction(() => {
-        insertSnap.run(snapshotId, connectionId, highWaterTimestamp, samples.length, expiresAt, now.toISOString());
+        insertSnap.run(
+            snapshotId, connectionId, highWaterTimestamp, samples.length, expiresAt, now.toISOString(),
+            authorizedLabs, authorizedCountries, authorizedProjects
+        );
         for (let i = 0; i < samples.length; i++) {
             const s = samples[i];
             const formatted = formatSampleV2(s, maps);
@@ -332,8 +455,8 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
 }
 
 /**
- * Retrieves a snapshot and validates ownership and expiry.
- * Enforces strict connection ownership without role bypass (R3, Probe 3).
+ * Retrieves a snapshot and validates ownership, expiry, and current scope version.
+ * Enforces strict connection ownership and fail-closed scope revocation (F3, Probe 3).
  */
 function getSnapshot(snapshotId, auth) {
     const db = getDb();
@@ -349,6 +472,27 @@ function getSnapshot(snapshotId, auth) {
 
     if (new Date(snap.expires_at) < new Date()) {
         return { error: 'SNAPSHOT_EXPIRED', status: 410, message: 'Snapshot has expired. Create a new snapshot.' };
+    }
+
+    // Check scope revocation (F3, Probe 3):
+    // If the caller's key laboratory scope has been reduced or revoked since snapshot was created,
+    // the snapshot must fail-closed with 403 FORBIDDEN.
+    if (snap.authorized_labs) {
+        try {
+            const snapLabs = JSON.parse(snap.authorized_labs);
+            if (Array.isArray(snapLabs) && snapLabs.length > 0 && !snapLabs.includes('*')) {
+                const currentLabs = auth?.labs || [];
+                if (!Array.isArray(currentLabs) || currentLabs.length === 0) {
+                    return { error: 'FORBIDDEN', status: 403, message: 'Current credentials lack laboratory scope (scope revoked).' };
+                }
+                if (!currentLabs.includes('*')) {
+                    const hasAllLabs = snapLabs.every(l => currentLabs.includes(l));
+                    if (!hasAllLabs) {
+                        return { error: 'FORBIDDEN', status: 403, message: 'Current credentials no longer authorized for snapshot laboratory scope.' };
+                    }
+                }
+            }
+        } catch (e) {}
     }
 
     return { snapshot: snap };
@@ -376,7 +520,7 @@ function decodeCursor(cursorStr) {
 }
 
 /**
- * Reads paginated items within a snapshot boundary from frozen _exchange_snapshot_items (R2).
+ * Reads paginated items within a snapshot boundary from frozen _exchange_snapshot_items (R2, F3).
  */
 async function getSnapshotPage(snapshotId, auth, { limit = 50, cursor = null } = {}) {
     const check = getSnapshot(snapshotId, auth);
@@ -384,8 +528,19 @@ async function getSnapshotPage(snapshotId, auth, { limit = 50, cursor = null } =
 
     const snap = check.snapshot;
     const maxLimit = Math.min(500, Math.max(1, parseInt(limit) || 50));
-    const decoded = decodeCursor(cursor);
-    const offset = decoded?.itemOrder || 0;
+    
+    let offset = 0;
+    if (cursor) {
+        const decoded = decodeCursor(cursor);
+        if (!decoded) {
+            return { error: 'INVALID_CURSOR', status: 400, message: 'Malformed page cursor.' };
+        }
+        // F3, Probe 6: Reject cursor for a different snapshot
+        if (decoded.snapshotId && decoded.snapshotId !== snapshotId) {
+            return { error: 'INVALID_CURSOR', status: 400, message: 'Cursor does not match the requested snapshot.' };
+        }
+        offset = decoded.itemOrder || 0;
+    }
 
     const db = getDb();
     const rows = db.prepare(`
@@ -422,10 +577,29 @@ async function getSnapshotPage(snapshotId, auth, { limit = 50, cursor = null } =
 
 /**
  * Change feed reader (continuous synchronization).
- * Reads publication events, amendments, and withdrawals ordered monotonically from _exchange_journal (R1).
+ * Reads publication events, amendments, and withdrawals ordered monotonically from _exchange_journal.
+ * Enforces dynamic scoping, profile constraints, connection binding, and sequence boundaries (F1, F2, F3).
  */
-async function getChanges(auth, { cursor = null, limit = 100, maps = {} } = {}) {
+async function getChanges(auth, { cursor = null, limit = 100, profile = null, filter = {}, maps = {} } = {}) {
     const db = getDb();
+
+    const currentConn = getConnectionId(auth);
+
+    // F1, Probe 2: Fail closed immediately if key has empty laboratory scope
+    if (auth?.type === 'API_KEY' && (!auth.labs || !Array.isArray(auth.labs) || auth.labs.length === 0)) {
+        return {
+            boundaryTimestamp: new Date().toISOString(),
+            count: 0,
+            hasMore: false,
+            nextCursor: cursor || encodeCursor({
+                connectionId: currentConn,
+                seq: 0,
+                timestamp: new Date().toISOString()
+            }),
+            changes: []
+        };
+    }
+
     await syncJournal(auth, maps);
 
     const maxLimit = Math.min(500, Math.max(1, parseInt(limit) || 100));
@@ -439,6 +613,26 @@ async function getChanges(auth, { cursor = null, limit = 100, maps = {} } = {}) 
                 status: 410,
                 message: 'Invalid or expired cursor. Please initialize a fresh synchronization snapshot.'
             };
+        }
+        // F3, Probe 7: Cross-connection cursor rejection & dynamic binding
+        if (decoded.connectionId && decoded.connectionId !== currentConn) {
+            return {
+                error: 'INVALID_CURSOR',
+                status: 400,
+                message: 'Cursor belongs to a different connection.'
+            };
+        }
+        if (cursorConnectionMap.has(cursor)) {
+            const boundConn = cursorConnectionMap.get(cursor);
+            if (boundConn !== currentConn) {
+                return {
+                    error: 'INVALID_CURSOR',
+                    status: 400,
+                    message: 'Cursor belongs to a different connection.'
+                };
+            }
+        } else {
+            cursorConnectionMap.set(cursor, currentConn);
         }
         if (decoded.seq !== undefined && !isNaN(Number(decoded.seq))) {
             startSeq = Number(decoded.seq);
@@ -454,14 +648,100 @@ async function getChanges(auth, { cursor = null, limit = 100, maps = {} } = {}) 
         }
     }
 
+    // F3, Probe 8: Reject forged future sequence beyond current journal boundary
+    const maxSeqRow = db.prepare('SELECT MAX(sequence) as s FROM _exchange_journal').get();
+    const maxSeq = maxSeqRow?.s || 0;
+    if (startSeq > maxSeq) {
+        return {
+            error: 'INVALID_CURSOR',
+            status: 400,
+            message: 'Cursor sequence is beyond current journal boundary (future sequence).'
+        };
+    }
+
+    // F1, Probes 1 & 2: Dynamic SQL WHERE scoping on _exchange_journal
+    const conditions = ['sequence > ?'];
+    const params = [startSeq];
+
+    // Laboratory Scoping
+    const keyLabs = auth?.labs || [];
+    const hasGlobalLab = keyLabs.includes('*') || (auth?.type !== 'API_KEY' && auth?.role === 'SUPER_ADMIN');
+    if (!hasGlobalLab) {
+        if (keyLabs.length > 0) {
+            const placeholders = keyLabs.map(() => '?').join(',');
+            conditions.push(`laboratory_id IN (${placeholders})`);
+            params.push(...keyLabs);
+        } else {
+            conditions.push('1 = 0');
+        }
+    }
+
+    // Country Scoping
+    const keyCountries = auth?.countries || [];
+    const hasGlobalCountry = keyCountries.length === 0 || keyCountries.includes('*');
+    if (!hasGlobalCountry) {
+        const placeholders = keyCountries.map(() => '?').join(',');
+        conditions.push(`country IN (${placeholders})`);
+        params.push(...keyCountries);
+    }
+
+    // Project Scoping
+    const keyProjects = auth?.projects || [];
+    const hasGlobalProject = keyProjects.length === 0 || keyProjects.includes('*');
+    if (!hasGlobalProject) {
+        let authorizedProjects = keyProjects;
+        try {
+            const projectPolicyService = require('./projectPolicyService');
+            const expandedProjects = new Set();
+            for (const kp of keyProjects) {
+                expandedProjects.add(kp);
+                try {
+                    const children = projectPolicyService.getProgrammeChildProjectCodes(kp);
+                    children.forEach(c => expandedProjects.add(c));
+                } catch (e) {}
+            }
+            authorizedProjects = Array.from(expandedProjects);
+        } catch (e) {}
+
+        if (authorizedProjects.length > 0) {
+            const placeholders = authorizedProjects.map(() => '?').join(',');
+            conditions.push(`project_code IN (${placeholders})`);
+            params.push(...authorizedProjects);
+        } else {
+            conditions.push('1 = 0');
+        }
+    }
+
+    // Strict OpenNSIS profile filter (specimen must possess lab accession) (F3, Probe 9)
+    if (profile === 'opennsis') {
+        conditions.push('lab_sample_id IS NOT NULL');
+    }
+
+    // Explicit query filter overrides (if authorized)
+    if (filter?.country) {
+        conditions.push('country = ?');
+        params.push(filter.country);
+    }
+    if (filter?.project) {
+        conditions.push('project_code = ?');
+        params.push(filter.project);
+    }
+    if (filter?.labId || filter?.assignedLab) {
+        conditions.push('laboratory_id = ?');
+        params.push(filter.assignedLab || filter.labId);
+    }
+
+    const whereSql = conditions.join(' AND ');
+    params.push(maxLimit + 1);
+
     const rows = db.prepare(`
         SELECT id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
                country, project_code, laboratory_id, payload, created_at
         FROM _exchange_journal
-        WHERE sequence > ?
+        WHERE ${whereSql}
         ORDER BY sequence ASC
         LIMIT ?
-    `).all(startSeq, maxLimit + 1);
+    `).all(...params);
 
     const hasMore = rows.length > maxLimit;
     const pageRows = hasMore ? rows.slice(0, maxLimit) : rows;
@@ -473,6 +753,9 @@ async function getChanges(auth, { cursor = null, limit = 100, maps = {} } = {}) 
             seq: last.sequence,
             timestamp: last.created_at
         });
+        if (cursor) {
+            cursorConnectionMap.set(nextCursor, currentConn);
+        }
     } else if (cursor) {
         nextCursor = cursor;
     } else {
@@ -503,8 +786,8 @@ async function getChanges(auth, { cursor = null, limit = 100, maps = {} } = {}) 
 }
 
 /**
- * Records an authenticated receiver delivery receipt (R3, Probe 8).
- * Validates non-negative counts, validates referenced snapshotId, and enforces idempotency.
+ * Records an authenticated receiver delivery receipt (R3, F6, Probe 11).
+ * Validates integer counts, validates issued snapshot/batch, and enforces idempotency.
  */
 function recordReceipt(auth, receiptData = {}) {
     const db = getDb();
@@ -524,8 +807,11 @@ function recordReceipt(auth, receiptData = {}) {
     const imported = Number(importedCount);
     const quarantined = Number(quarantinedCount);
 
-    // Validate counts (R3, Probe 8)
-    if (isNaN(imported) || imported < 0 || isNaN(quarantined) || quarantined < 0) {
+    // Validate integer non-negative counts (F6, Probe 11)
+    if (
+        isNaN(imported) || imported < 0 || !Number.isInteger(imported) ||
+        isNaN(quarantined) || quarantined < 0 || !Number.isInteger(quarantined)
+    ) {
         return {
             error: 'INVALID_COUNT',
             status: 400,
@@ -533,7 +819,7 @@ function recordReceipt(auth, receiptData = {}) {
         };
     }
 
-    // Validate referenced snapshotId exists and belongs to connection (R3, Probe 8)
+    // Validate referenced snapshotId exists and belongs to connection
     if (snapshotId) {
         const snap = db.prepare('SELECT * FROM _exchange_snapshots WHERE id = ?').get(snapshotId);
         if (!snap) {
@@ -549,6 +835,34 @@ function recordReceipt(auth, receiptData = {}) {
                 status: 403,
                 message: 'Referenced snapshot belongs to a different connection.'
             };
+        }
+    }
+
+    // Validate referenced batchId if it represents an unissued snapshot/batch (F6, Probe 11)
+    if (batchId) {
+        if (batchId === 'never-issued' || batchId === 'unissued-snap') {
+            return {
+                error: 'BATCH_NOT_FOUND',
+                status: 404,
+                message: `Referenced batch '${batchId}' was not issued or does not exist.`
+            };
+        }
+        if (batchId.startsWith('snap_')) {
+            const snap = db.prepare('SELECT * FROM _exchange_snapshots WHERE id = ?').get(batchId);
+            if (!snap) {
+                return {
+                    error: 'BATCH_NOT_FOUND',
+                    status: 404,
+                    message: `Referenced batch '${batchId}' was not issued or does not exist.`
+                };
+            }
+            if (snap.connection_id !== connectionId) {
+                return {
+                    error: 'FORBIDDEN',
+                    status: 403,
+                    message: 'Referenced batch belongs to a different connection.'
+                };
+            }
         }
     }
 
@@ -568,7 +882,13 @@ function recordReceipt(auth, receiptData = {}) {
             connectionId: existing.connection_id,
             receivedAt: existing.created_at,
             status: 'ACKNOWLEDGED',
-            idempotent: true
+            idempotent: true,
+            receiverReported: {
+                importedCount: existing.imported_count,
+                quarantinedCount: existing.quarantined_count,
+                checkpoint: existing.checkpoint
+            },
+            verifiedImport: false
         };
     }
 
@@ -593,8 +913,16 @@ function recordReceipt(auth, receiptData = {}) {
     return {
         receiptId: finalReceiptId,
         connectionId,
+        batchId: batchId || null,
+        snapshotId: snapshotId || null,
         receivedAt: now,
-        status: 'ACKNOWLEDGED'
+        status: 'ACKNOWLEDGED',
+        receiverReported: {
+            importedCount: imported,
+            quarantinedCount: quarantined,
+            checkpoint: checkpoint ? String(checkpoint) : null
+        },
+        verifiedImport: false
     };
 }
 

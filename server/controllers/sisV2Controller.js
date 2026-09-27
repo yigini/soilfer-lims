@@ -205,9 +205,11 @@ exports.getSampleById = async (req, res) => {
 
         const formatted = formatSampleV2(sample, maps);
 
-        // Check spectral records with shared spectral authorization (R4)
-        const spectralWhere = buildSpectralWhere(req.sisAuth, {});
-        spectralWhere.sampleId = sample.id;
+        // Check spectral records with shared spectral authorization (R4, F4)
+        const spectralWhere = toPrismaSpectralWhere({
+            ...buildSpectralWhere(req.sisAuth, {}),
+            sampleId: sample.id
+        });
         const spectra = await prisma.spectralData.findMany({
             where: spectralWhere,
             select: {
@@ -309,16 +311,30 @@ exports.getObservations = async (req, res) => {
             const { normalizeUnit } = require('../services/interpretationService');
             const rawUnit = r.unit || aMeta.units || null;
             const norm = normalizeUnit(r.param, r.value, rawUnit);
-            const numVal = (r.numericValue !== null && r.numericValue !== undefined) ? r.numericValue : (isNaN(Number(r.value)) ? null : Number(r.value));
+
+            let numVal = null;
+            const rawVal = r.value;
+            const isBlankStr = (typeof rawVal === 'string' && rawVal.trim() === '');
+            if (!isBlankStr && r.numericValue !== null && r.numericValue !== undefined && typeof r.numericValue !== 'boolean') {
+                const parsed = Number(r.numericValue);
+                if (!isNaN(parsed) && isFinite(parsed)) numVal = parsed;
+            } else if (!isBlankStr && rawVal !== null && rawVal !== undefined && typeof rawVal !== 'boolean') {
+                const parsed = Number(rawVal);
+                if (!isNaN(parsed) && isFinite(parsed)) numVal = parsed;
+            }
+
             const normVal = norm.normalizedValue !== null ? norm.normalizedValue : numVal;
             const controlledUnit = norm.standardUnit || rawUnit;
+
+            const lodVal = (r.lod !== undefined && r.lod !== null && typeof r.lod !== 'boolean' && !isNaN(Number(r.lod))) ? Number(r.lod) : null;
+            const loqVal = (r.loq !== undefined && r.loq !== null && typeof r.loq !== 'boolean' && !isNaN(Number(r.loq))) ? Number(r.loq) : null;
 
             return {
                 observationId: r.id,
                 specimenId: s.id,
                 fieldSampleId: s.originalId,
                 labSampleId: s.labId || null,
-                laboratoryId: s.assignedLab || s.labId || null,
+                laboratoryId: s.assignedLab || null,
                 country: s.country,
                 projectCode: s.projectCode,
                 parameter: r.param,
@@ -335,6 +351,9 @@ exports.getObservations = async (req, res) => {
                 },
                 controlledUnit,
                 qudtUnit,
+                lod: lodVal,
+                loq: loqVal,
+                provenance: r.provenance || 'MEASURED',
                 basis: r.basis || 'AIR_DRY',
                 censoring: r.censoring || 'NONE',
                 replicateNo: r.replicateNo || 1,
@@ -384,6 +403,16 @@ exports.getGeoJson = async (req, res) => {
         const limit = Math.min(5000, Math.max(1, parseInt(req.query.limit) || 2000));
         const where = buildSampleWhere(req.sisAuth, req.query);
 
+        // Apply spatial bounding box query at database level before limit (F6)
+        if (req.query.bbox) {
+            const bboxParts = req.query.bbox.split(',').map(Number);
+            if (bboxParts.length === 4 && bboxParts.every(n => !isNaN(n))) {
+                const [minLng, minLat, maxLng, maxLat] = bboxParts;
+                where.latitude = { gte: minLat, lte: maxLat };
+                where.longitude = { gte: minLng, lte: maxLng };
+            }
+        }
+
         const [samples, maps] = await Promise.all([
             prisma.sample.findMany({
                 where,
@@ -406,20 +435,16 @@ exports.getGeoJson = async (req, res) => {
             if (loc && Array.isArray(loc.coordinates) && loc.coordinates.length === 2) {
                 const [lng, lat] = loc.coordinates;
 
-                if (req.query.bbox) {
-                    const [minLng, minLat, maxLng, maxLat] = req.query.bbox.split(',').map(Number);
-                    if (lng < minLng || lng > maxLng || lat < minLat || lat > maxLat) {
-                        return;
-                    }
-                }
-
-                // Summary of analytical parameters for GIS mapping
-                const resultsSummary = {};
-                v2.observations.forEach(obs => {
-                    const p = obs.parameter.toLowerCase();
-                    resultsSummary[p] = obs.normalized.value !== null ? obs.normalized.value : obs.asMeasured.value;
-                    resultsSummary[`${p}_unit`] = obs.controlledUnit || obs.asMeasured.unit;
-                });
+                // Lossless analytical observations array preserving replicates (F6)
+                const observationsList = v2.observations.map(obs => ({
+                    observationId: obs.observationId,
+                    parameter: obs.parameter,
+                    value: obs.normalized.value !== null ? obs.normalized.value : obs.asMeasured.value,
+                    unit: obs.controlledUnit || obs.asMeasured.unit,
+                    replicateNo: obs.replicateNo || 1,
+                    basis: obs.basis,
+                    censoring: obs.censoring
+                }));
 
                 features.push({
                     type: 'Feature',
@@ -441,7 +466,7 @@ exports.getGeoJson = async (req, res) => {
                         topCm: v2.sampling.depths.topCm,
                         bottomCm: v2.sampling.depths.bottomCm,
                         qualityIssues: v2.qualityIssues,
-                        observations: resultsSummary
+                        observations: observationsList
                     }
                 });
             }
@@ -472,13 +497,26 @@ exports.getStats = async (req, res) => {
         const hasGlobalLab = keyLabs.includes('*') || (!isApiKey && req.sisAuth?.role === 'SUPER_ADMIN');
         const labWhere = hasGlobalLab ? {} : { id: { in: keyLabs } };
 
-        const [totalEligibleSamples, publishedSamples, publishedObservations, publishedSpectra, labsCount] = await Promise.all([
+        const [totalEligibleSamples, publishedSamples, publishedObservations, labsCount] = await Promise.all([
             prisma.sample.count({ where: sampleWhere }),
             prisma.sample.count({ where: { ...sampleWhere, status: { in: AUTHORIZED_RELEASE_STATUSES } } }),
             prisma.result.count({ where: { isCurrent: true, sample: sampleWhere } }),
-            prisma.spectralData.count({ where: spectralWhere }),
             prisma.lab.count({ where: labWhere })
         ]);
+
+        let publishedSpectra = 0;
+        if (sampleWhere.assignedLab !== '__denied__' && sampleWhere.status !== '__denied_unapproved__') {
+            const authorizedParents = await prisma.sample.findMany({
+                where: { ...sampleWhere, status: { in: AUTHORIZED_RELEASE_STATUSES } },
+                select: { id: true }
+            });
+            const authorizedIds = authorizedParents.map(s => s.id);
+            if (authorizedIds.length > 0) {
+                publishedSpectra = await prisma.spectralData.count({
+                    where: { ...spectralWhere, sampleId: { in: authorizedIds } }
+                });
+            }
+        }
 
         res.json({
             status: 'success',
@@ -525,34 +563,58 @@ exports.getSpectra = async (req, res) => {
             ];
         }
 
-        const [total, spectra] = await Promise.all([
-            prisma.spectralData.count({ where: spectralWhere }),
-            prisma.spectralData.findMany({
-                where,
-                orderBy: [
-                    { timestamp: 'desc' },
-                    { id: 'desc' }
-                ],
-                take: limit + 1
-            })
-        ]);
+        const parentSampleWhere = buildSampleWhere(req.sisAuth, req.query);
+
+        let total = 0;
+        if (parentSampleWhere.assignedLab !== '__denied__' && parentSampleWhere.status !== '__denied_unapproved__') {
+            const allAuthParents = await prisma.sample.findMany({
+                where: parentSampleWhere,
+                select: { id: true }
+            });
+            const allAuthIds = allAuthParents.map(s => s.id);
+            if (allAuthIds.length > 0) {
+                total = await prisma.spectralData.count({
+                    where: { ...spectralWhere, sampleId: { in: allAuthIds } }
+                });
+            }
+        }
+
+        const spectra = await prisma.spectralData.findMany({
+            where,
+            orderBy: [
+                { timestamp: 'desc' },
+                { id: 'desc' }
+            ],
+            take: limit + 1
+        });
 
         const hasMore = spectra.length > limit;
-        const pageItems = hasMore ? spectra.slice(0, limit) : spectra;
+        const candidateItems = hasMore ? spectra.slice(0, limit) : spectra;
 
-        const sampleIds = pageItems.map(s => s.sampleId).filter(Boolean);
+        const sampleIds = candidateItems.map(s => s.sampleId).filter(Boolean);
         let sampleMap = {};
         if (sampleIds.length > 0) {
             const linkedSamples = await prisma.sample.findMany({
-                where: { id: { in: sampleIds } },
-                select: { id: true, labId: true, originalId: true }
+                where: {
+                    AND: [
+                        parentSampleWhere,
+                        { id: { in: sampleIds } }
+                    ]
+                },
+                select: { id: true, labId: true, originalId: true, status: true, assignedLab: true, country: true, projectCode: true }
             });
             sampleMap = Object.fromEntries(linkedSamples.map(s => [s.id, s]));
         }
 
+        // External consumers: strictly only retain spectra linked to authorized released parent specimens (F4)
+        const isRestricted = exchangePolicyService.isRestrictedConsumer(req.sisAuth);
+        const pageItems = isRestricted
+            ? candidateItems.filter(s => s.sampleId && sampleMap[s.sampleId])
+            : candidateItems;
+
         let nextCursor = null;
-        if (hasMore && pageItems.length > 0) {
-            const last = pageItems[pageItems.length - 1];
+        if (hasMore && candidateItems.length > 0) {
+            const last = candidateItems[candidateItems.length - 1];
             nextCursor = exchangeStateService.encodeCursor({
                 timestamp: last.timestamp ? last.timestamp.toISOString() : new Date().toISOString(),
                 id: last.id
@@ -659,10 +721,16 @@ exports.getSnapshotPages = async (req, res) => {
 // ─── 10. GET /api/v2/data-exchange/changes (Change Feed / Continuous Sync) ───
 exports.getChanges = async (req, res) => {
     try {
-        const { cursor, limit } = req.query;
+        const { cursor, limit, profile, country, project, labId, assignedLab } = req.query;
         const maps = await getAnalysisMap();
 
-        const result = await exchangeStateService.getChanges(req.sisAuth, { cursor, limit, maps });
+        const result = await exchangeStateService.getChanges(req.sisAuth, {
+            cursor,
+            limit,
+            profile,
+            filter: { country, project, labId: labId || assignedLab },
+            maps
+        });
         if (result.error) {
             return res.status(result.status || 400).json({
                 error: result.error,

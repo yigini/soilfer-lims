@@ -507,7 +507,7 @@ exports.syncDelta = async (req, res) => {
             timestamp: { gte: sinceDate }
         };
 
-        const [samples, spectra, maps] = await Promise.all([
+        const [samples, candidateSpectra, maps] = await Promise.all([
             prisma.sample.findMany({
                 where,
                 include: { results: true },
@@ -522,17 +522,28 @@ exports.syncDelta = async (req, res) => {
             getAnalysisMap()
         ]);
 
+        const candidateSampleIds = candidateSpectra.map(s => s.sampleId).filter(Boolean);
+        let authorizedSpectra = [];
+        if (candidateSampleIds.length > 0) {
+            const authorizedParents = await prisma.sample.findMany({
+                where: { AND: [where, { id: { in: candidateSampleIds } }] },
+                select: { id: true }
+            });
+            const authParentSet = new Set(authorizedParents.map(s => s.id));
+            authorizedSpectra = candidateSpectra.filter(s => s.sampleId && authParentSet.has(s.sampleId));
+        }
+
         const hasMoreSamples = samples.length >= maxTake;
-        const hasMoreSpectra = spectra.length >= maxTake;
+        const hasMoreSpectra = candidateSpectra.length >= maxTake;
 
         res.json({
             status: 'success',
             syncTimestamp: new Date().toISOString(),
             samplesCount: samples.length,
-            spectraCount: spectra.length,
+            spectraCount: authorizedSpectra.length,
             hasMore: hasMoreSamples || hasMoreSpectra,
             samples: samples.map(s => formatSampleForSis(s, maps)),
-            spectra: spectra.map(s => ({
+            spectra: authorizedSpectra.map(s => ({
                 id: s.id,
                 sampleId: s.sampleId,
                 modality: s.modality,
@@ -557,13 +568,26 @@ exports.getStats = async (req, res) => {
         const hasGlobalLab = keyLabs.includes('*') || (!isApiKey && req.sisAuth?.role === 'SUPER_ADMIN');
         const labWhere = hasGlobalLab ? {} : { id: { in: keyLabs } };
 
-        const [totalSamples, releasedSamples, totalResults, totalSpectra, labsCount] = await Promise.all([
+        const [totalSamples, releasedSamples, totalResults, labsCount] = await Promise.all([
             prisma.sample.count({ where: sampleWhere }),
             prisma.sample.count({ where: { ...sampleWhere, status: { in: AUTHORIZED_RELEASE_STATUSES } } }),
             prisma.result.count({ where: { sample: sampleWhere, isCurrent: true } }),
-            prisma.spectralData.count({ where: spectralWhere }),
             prisma.lab.count({ where: labWhere })
         ]);
+
+        let totalSpectra = 0;
+        if (sampleWhere.assignedLab !== '__denied__' && sampleWhere.status !== '__denied_unapproved__') {
+            const authorizedParents = await prisma.sample.findMany({
+                where: { ...sampleWhere, status: { in: AUTHORIZED_RELEASE_STATUSES } },
+                select: { id: true }
+            });
+            const authorizedIds = authorizedParents.map(s => s.id);
+            if (authorizedIds.length > 0) {
+                totalSpectra = await prisma.spectralData.count({
+                    where: { ...spectralWhere, sampleId: { in: authorizedIds } }
+                });
+            }
+        }
 
         res.json({
             status: 'success',

@@ -201,12 +201,26 @@ function buildSpectralWhere(auth, query = {}) {
 /**
  * Translates exchange spectral query into valid Prisma where clause for the SpectralData model.
  * Prisma's SpectralData model has labId and sampleId columns, but no 'sample' relation.
+ * Binds parent specimen authorization constraints to sampleId column (F4, Probe 10).
  */
 function toPrismaSpectralWhere(spectralWhere) {
     if (!spectralWhere) return {};
     const { sample, ...cleanWhere } = spectralWhere;
     if (sample && !cleanWhere.labId && sample.assignedLab) {
         cleanWhere.labId = sample.assignedLab;
+    }
+    // Bind parent specimen authorization to sampleId (F4, Probe 10)
+    if (sample) {
+        if (cleanWhere.sampleId) {
+            // Already bounded by specific sampleId
+        } else if (sample.id) {
+            cleanWhere.sampleId = sample.id;
+        } else if (sample.assignedLab === '__denied__' || (sample.status && sample.status === '__denied_unapproved__')) {
+            cleanWhere.sampleId = '__denied__';
+        } else {
+            // External consumers require authorized parent specimen link
+            cleanWhere.sampleId = { not: null };
+        }
     }
     return cleanWhere;
 }
