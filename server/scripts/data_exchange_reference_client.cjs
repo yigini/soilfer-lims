@@ -68,6 +68,10 @@ function request(method, path, body = null, customHeaders = {}) {
     return new Promise((resolve, reject) => {
         const fullUrl = new URL(path, BASE_URL);
         const isHttps = fullUrl.protocol === 'https:';
+        const isLocalhost = fullUrl.hostname === 'localhost' || fullUrl.hostname === '127.0.0.1' || fullUrl.hostname === '::1';
+        if (!isHttps && API_KEY && !isLocalhost) {
+            return reject(new Error(`Insecure transport rejected: API key must not be transmitted over unencrypted HTTP to remote host '${fullUrl.hostname}'. Use HTTPS.`));
+        }
         const client = isHttps ? https : http;
 
         const headers = {
@@ -271,15 +275,26 @@ async function runClientWorkflow() {
     let harvestedCount = 0;
     if (snapshotId) {
         await step(`Read Snapshot Pages (GET /api/v2/data-exchange/snapshots/${snapshotId}/pages)`, async () => {
-            const res = await request('GET', `/api/v2/data-exchange/snapshots/${snapshotId}/pages?limit=${LIMIT}`);
-            if (res.status !== 200) {
-                const err = new Error(`HTTP ${res.status}`);
-                err.response = res;
-                throw err;
-            }
-            const items = res.data.data || [];
-            harvestedCount = items.length;
-            return `Page 1 read: ${items.length} items, nextCursor: ${res.data.nextCursor ? 'present' : 'end'}`;
+            let pageNum = 0;
+            let currentCursor = null;
+            let totalHarvested = 0;
+            do {
+                pageNum++;
+                let path = `/api/v2/data-exchange/snapshots/${snapshotId}/pages?limit=${LIMIT}`;
+                if (currentCursor) path += `&cursor=${encodeURIComponent(currentCursor)}`;
+                const res = await request('GET', path);
+                if (res.status !== 200) {
+                    const err = new Error(`HTTP ${res.status}`);
+                    err.response = res;
+                    throw err;
+                }
+                const items = res.data.data || [];
+                totalHarvested += items.length;
+                currentCursor = res.data.nextCursor || null;
+            } while (currentCursor && pageNum < 100);
+
+            harvestedCount = totalHarvested;
+            return `Harvested ${totalHarvested} items across ${pageNum} page(s).`;
         });
     }
 
@@ -303,7 +318,7 @@ async function runClientWorkflow() {
                 snapshotId,
                 importedCount: harvestedCount,
                 quarantinedCount: 0,
-                checkpoint: 'harvest-complete'
+                checkpoint: `item_${harvestedCount}`
             };
             const res = await request('POST', '/api/v2/data-exchange/receipts', payload);
             if (res.status !== 200) {

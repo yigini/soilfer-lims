@@ -49,6 +49,14 @@ function unwrapValue(val) {
     return val;
 }
 
+function sanitizeText(val, maxLength = 255) {
+    if (val === null || val === undefined) return null;
+    if (typeof val === 'object') return null;
+    const str = String(val).trim();
+    if (!str) return null;
+    return str.slice(0, maxLength);
+}
+
 /**
  * Safely parse JSON object or string
  */
@@ -603,9 +611,9 @@ function formatSampleV2(sample, maps = {}) {
 
     // Truthful publicationStatus (R1, R6)
     let publicationStatus = 'DRAFT';
-    if (['APPROVED', 'REPORTED', 'COMPLETED'].includes(sample.status)) {
+    if (['APPROVED', 'RELEASED', 'REPORTED', 'COMPLETED'].includes(sample.status) || (['ARCHIVED', 'DISPOSED'].includes(sample.status) && sample.approvedAt)) {
         publicationStatus = 'RELEASED';
-    } else if (['CANCELLED', 'REJECTED'].includes(sample.status)) {
+    } else if (['CANCELLED', 'REJECTED', 'RECEIVED_REJECTED'].includes(sample.status)) {
         publicationStatus = 'WITHDRAWN';
     } else if (sample.status === 'AMBIGUOUS_PROVENANCE_HOLD') {
         publicationStatus = 'HOLD';
@@ -657,15 +665,15 @@ function formatSampleV2(sample, maps = {}) {
                 srid: 4326
             } : null,
             site: {
-                siteName: unwrapValue(field.siteName) || unwrapValue(field.farm_name) || null,
-                village: unwrapValue(field.village) || unwrapValue(field.area) || null,
-                district: unwrapValue(field.district) || null,
-                admin1: sample.admin1 || unwrapValue(field.admin1) || null,
-                admin2: sample.admin2 || unwrapValue(field.admin2) || null,
-                landUse: unwrapValue(field.landUse) || unwrapValue(field.land_cover) || null,
-                currentCrop: unwrapValue(field.crop) || unwrapValue(field.current_crop) || null,
-                previousCrop: unwrapValue(field.previousCrop) || null,
-                fertilizerHistory: unwrapValue(field.management) || unwrapValue(field.fertilizer) || null
+                siteName: sanitizeText(unwrapValue(field.siteName) || unwrapValue(field.farm_name)),
+                village: sanitizeText(unwrapValue(field.village) || unwrapValue(field.area)),
+                district: sanitizeText(unwrapValue(field.district)),
+                admin1: sanitizeText(sample.admin1 || unwrapValue(field.admin1)),
+                admin2: sanitizeText(sample.admin2 || unwrapValue(field.admin2)),
+                landUse: sanitizeText(unwrapValue(field.landUse) || unwrapValue(field.land_cover)),
+                currentCrop: sanitizeText(unwrapValue(field.crop) || unwrapValue(field.current_crop)),
+                previousCrop: sanitizeText(unwrapValue(field.previousCrop)),
+                fertilizerHistory: sanitizeText(unwrapValue(field.management) || unwrapValue(field.fertilizer))
             }
         },
 

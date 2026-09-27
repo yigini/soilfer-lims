@@ -217,6 +217,8 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
         expect(createRes.status).toBe(201);
         expect(createRes.body.snapshotId).toBeDefined();
         expect(createRes.body.totalSamples).toBeGreaterThanOrEqual(2);
+        expect(createRes.body.highWaterSequence).toBeDefined();
+        expect(createRes.body.nextCursor).toBeDefined();
         snapshotId = createRes.body.snapshotId;
 
         // Read Snapshot Pages
@@ -266,6 +268,22 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
         expect(res.status).toBe(200);
         expect(res.body.receipt.receiptId).toBeDefined();
         expect(res.body.receipt.status).toBe('ACKNOWLEDGED');
+
+        // Exact retry is idempotent
+        const retryExact = await request(app)
+            .post('/api/v2/data-exchange/receipts')
+            .set('X-API-Key', testKey.rawKey)
+            .send(receiptPayload);
+        expect(retryExact.status).toBe(200);
+        expect(retryExact.body.receipt.idempotent).toBe(true);
+
+        // Conflicting retry with different counts returns 409 RECEIPT_CONFLICT
+        const retryConflict = await request(app)
+            .post('/api/v2/data-exchange/receipts')
+            .set('X-API-Key', testKey.rawKey)
+            .send({ ...receiptPayload, importedCount: 0 });
+        expect(retryConflict.status).toBe(409);
+        expect(retryConflict.body.code).toBe('RECEIPT_CONFLICT');
 
         // Confirm sample records were NOT mutated
         const checkSample = await prisma.sample.findUnique({

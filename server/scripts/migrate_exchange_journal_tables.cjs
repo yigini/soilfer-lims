@@ -61,6 +61,7 @@ function migrateExchangeTables(dbPath) {
             CREATE TABLE IF NOT EXISTS _exchange_snapshots (
                 id TEXT PRIMARY KEY,
                 connection_id TEXT NOT NULL,
+                high_water_sequence INTEGER DEFAULT 0,
                 high_water_timestamp TEXT NOT NULL,
                 total_samples INTEGER NOT NULL,
                 expires_at TEXT NOT NULL,
@@ -113,6 +114,7 @@ function migrateExchangeTables(dbPath) {
         });
 
         ensureColumns(db, '_exchange_snapshots', {
+            high_water_sequence: "INTEGER DEFAULT 0",
             high_water_timestamp: "TEXT DEFAULT ''",
             total_samples: "INTEGER DEFAULT 0",
             expires_at: "TEXT DEFAULT ''",
@@ -177,7 +179,13 @@ function migrateExchangeTables(dbPath) {
             ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
         `);
         setMeta.run('schema_version', '2', new Date().toISOString());
-        setMeta.run('epoch', 'epoch-1', new Date().toISOString());
+
+        // Preserve existing epoch if set, default to epoch-1 if absent
+        db.prepare(`
+            INSERT INTO _exchange_meta (key, value, updated_at)
+            VALUES ('epoch', 'epoch-1', ?)
+            ON CONFLICT(key) DO NOTHING
+        `).run(new Date().toISOString());
 
         // 5. Create indexes now that all columns are guaranteed to exist
         db.exec(`
@@ -196,6 +204,12 @@ function migrateExchangeTables(dbPath) {
             CREATE INDEX IF NOT EXISTS idx_exchange_batches_conn ON _exchange_batches(connection_id, id);
             DROP TRIGGER IF EXISTS trg_sample_au;
         `);
+
+        // 6. Ensure triggers and UDFs are installed at migration time before writers resume
+        try {
+            const { ensureTriggers } = require('../services/exchangeStateService');
+            ensureTriggers(db);
+        } catch (e) {}
     });
 
     runMigration();

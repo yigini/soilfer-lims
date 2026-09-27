@@ -18,7 +18,6 @@ const { buildSampleWhere, AUTHORIZED_RELEASE_STATUSES } = require('./exchangePol
 const { formatSampleV2 } = require('./sisAdapterService');
 
 const dbPath = process.env.DATABASE_PATH ? path.resolve(process.env.DATABASE_PATH) : path.resolve(__dirname, '..', 'prisma', 'dev.db');
-const CURSOR_SECRET = process.env.SESSION_SECRET || process.env.API_KEY_SECRET || 'soilfer-lims-exchange-cursor-v2';
 
 let dbInstance = null;
 
@@ -28,6 +27,31 @@ function getDb() {
         initTables(dbInstance);
     }
     return dbInstance;
+}
+
+function getCursorSecret(db) {
+    if (process.env.SESSION_SECRET) return process.env.SESSION_SECRET;
+    if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
+    if (process.env.API_KEY_SECRET) return process.env.API_KEY_SECRET;
+    const metaDb = db || (dbInstance || getDb());
+    try {
+        const row = metaDb.prepare("SELECT value FROM _exchange_meta WHERE key = 'cursor_signing_secret'").get();
+        if (row && row.value) return row.value;
+        const generated = crypto.randomBytes(32).toString('hex');
+        metaDb.prepare("INSERT OR REPLACE INTO _exchange_meta (key, value, updated_at) VALUES ('cursor_signing_secret', ?, ?)").run(generated, new Date().toISOString());
+        return generated;
+    } catch (e) {
+        return 'ephemeral_cursor_secret_' + (process.pid || '0');
+    }
+}
+
+function getCurrentEpoch(db) {
+    const metaDb = db || (dbInstance || getDb());
+    try {
+        const row = metaDb.prepare("SELECT value FROM _exchange_meta WHERE key = 'epoch'").get();
+        if (row && row.value) return row.value;
+    } catch (e) {}
+    return 'epoch-1';
 }
 
 function ensureColumns(db, tableName, colDefs) {
@@ -45,32 +69,92 @@ function ensureColumns(db, tableName, colDefs) {
     }
 }
 
-function registerDbFunctions(db) {
-    try {
-        db.function('exchange_compute_hash', { varargs: true }, (id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata) => {
-            const dataToHash = {
-                id,
-                status,
-                originalId: originalId || null,
-                labId: labId || null,
-                assignedLab: assignedLab || null,
-                country: country || null,
-                projectCode: projectCode || null,
-                fieldMetadata: fieldMetadata || null,
-                latitude: null,
-                longitude: null,
-                elevation: null,
-                depthUpper: null,
-                depthLower: null,
-                collectionDate: null,
-                samplingDate: null,
-                receptionDate: null,
-                results: []
-            };
-            return crypto.createHash('sha256').update(JSON.stringify(dataToHash)).digest('hex');
-        });
+function normalizeSampleDataForHash(raw) {
+    if (!raw) return {};
 
-        db.function('exchange_format_payload', { varargs: true }, (id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, updatedAt) => {
+    let results = [];
+    if (raw.results) {
+        if (typeof raw.results === 'string') {
+            try { results = JSON.parse(raw.results); } catch (e) {}
+        } else if (Array.isArray(raw.results)) {
+            results = raw.results;
+        }
+    }
+    const normResults = results.map(r => ({
+        id: r.id != null ? String(r.id) : null,
+        param: r.param != null ? String(r.param) : null,
+        value: r.value != null ? String(r.value) : null,
+        numericValue: (r.numericValue !== null && r.numericValue !== undefined && !isNaN(Number(r.numericValue))) ? Number(r.numericValue) : null,
+        unit: r.unit != null ? String(r.unit) : null,
+        methodologyId: r.methodologyId != null ? String(r.methodologyId) : null,
+        isValid: (r.isValid !== null && r.isValid !== undefined) ? (r.isValid ? 1 : 0) : 1,
+        isCurrent: (r.isCurrent !== null && r.isCurrent !== undefined) ? (r.isCurrent ? 1 : 0) : 1
+    }));
+    normResults.sort((a, b) => String(a.id || a.param || '').localeCompare(String(b.id || b.param || '')));
+
+    let recDate = null;
+    if (raw.receptionDate) {
+        const str = (raw.receptionDate instanceof Date) ? raw.receptionDate.toISOString() : String(raw.receptionDate);
+        const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        recDate = m ? `${m[1]}-${m[2]}-${m[3]}` : str;
+    }
+
+    let colDate = null;
+    if (raw.collectionDate) {
+        const str = (raw.collectionDate instanceof Date) ? raw.collectionDate.toISOString() : String(raw.collectionDate);
+        const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        colDate = m ? `${m[1]}-${m[2]}-${m[3]}` : str;
+    }
+
+    let sampDate = null;
+    if (raw.samplingDate) {
+        const str = (raw.samplingDate instanceof Date) ? raw.samplingDate.toISOString() : String(raw.samplingDate);
+        const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        sampDate = m ? `${m[1]}-${m[2]}-${m[3]}` : str;
+    }
+
+    return {
+        id: raw.id != null ? String(raw.id) : null,
+        status: raw.status != null ? String(raw.status) : null,
+        originalId: raw.originalId != null ? String(raw.originalId) : null,
+        labId: raw.labId != null ? String(raw.labId) : null,
+        assignedLab: raw.assignedLab != null ? String(raw.assignedLab) : null,
+        country: (raw.country || raw.countryName) != null ? String(raw.country || raw.countryName) : null,
+        projectCode: raw.projectCode != null ? String(raw.projectCode) : null,
+        fieldMetadata: raw.fieldMetadata != null ? (typeof raw.fieldMetadata === 'object' ? JSON.stringify(raw.fieldMetadata) : String(raw.fieldMetadata)) : null,
+        metadata: raw.metadata != null ? (typeof raw.metadata === 'object' ? JSON.stringify(raw.metadata) : String(raw.metadata)) : null,
+        latitude: raw.latitude !== undefined && raw.latitude !== null ? Number(raw.latitude) : null,
+        longitude: raw.longitude !== undefined && raw.longitude !== null ? Number(raw.longitude) : null,
+        elevation: raw.elevation !== undefined && raw.elevation !== null ? Number(raw.elevation) : null,
+        depthUpper: raw.depthUpper !== undefined && raw.depthUpper !== null ? Number(raw.depthUpper) : null,
+        depthLower: raw.depthLower !== undefined && raw.depthLower !== null ? Number(raw.depthLower) : null,
+        collectionDate: colDate,
+        samplingDate: sampDate,
+        receptionDate: recDate,
+        results: normResults
+    };
+}
+
+function computeSampleContentHash(s) {
+    if (!s) return '';
+    return crypto.createHash('sha256').update(JSON.stringify(normalizeSampleDataForHash(s))).digest('hex');
+}
+
+function registerDbFunctions(db) {
+    if (!db || typeof db.function !== 'function') return;
+    try {
+        db.function('exchange_compute_hash', { varargs: true }, (...args) => {
+            let id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, resultsJson;
+            if (args.length >= 11) {
+                [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, resultsJson] = args;
+            } else if (args.length === 8) {
+                [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata] = args;
+            } else if (args.length === 9) {
+                [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata] = args;
+            } else {
+                [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, resultsJson] = args;
+            }
+
             const raw = {
                 id,
                 status,
@@ -80,13 +164,73 @@ function registerDbFunctions(db) {
                 country,
                 projectCode,
                 fieldMetadata,
+                metadata,
+                receptionDate,
+                results: resultsJson
+            };
+            return computeSampleContentHash(raw);
+        });
+
+        db.function('exchange_format_payload', { varargs: true }, (...args) => {
+            let id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, updatedAt, resultsJson;
+            if (args.length >= 12) {
+                [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, updatedAt, resultsJson] = args;
+            } else if (args.length === 9) {
+                [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, updatedAt] = args;
+            } else {
+                [id, status, originalId, labId, assignedLab, country, projectCode, fieldMetadata, metadata, receptionDate, updatedAt, resultsJson] = args;
+            }
+
+            let results = [];
+            if (resultsJson) {
+                try {
+                    results = typeof resultsJson === 'string' ? JSON.parse(resultsJson) : resultsJson;
+                } catch (e) {}
+            }
+            if (!Array.isArray(results)) results = [];
+
+            const raw = {
+                id,
+                status,
+                originalId,
+                labId,
+                assignedLab,
+                country,
+                projectCode,
+                fieldMetadata,
+                metadata,
+                receptionDate,
                 updatedAt: updatedAt ? new Date(updatedAt) : new Date(),
-                results: []
+                results: results.map(r => ({
+                    ...r,
+                    isValid: r.isValid !== undefined ? Boolean(r.isValid) : true,
+                    isCurrent: r.isCurrent !== undefined ? Boolean(r.isCurrent) : true
+                }))
             };
             return JSON.stringify(formatSampleV2(raw));
         });
     } catch (e) {}
 }
+
+function installSqliteHooks() {
+    try {
+        const betterSqlite3Path = require.resolve('better-sqlite3');
+        const OrigDb = require('better-sqlite3');
+        if (OrigDb.__exchangeHooksInstalled) return;
+
+        function WrappedDb(...args) {
+            const db = new OrigDb(...args);
+            registerDbFunctions(db);
+            return db;
+        }
+        WrappedDb.prototype = OrigDb.prototype;
+        WrappedDb.__exchangeHooksInstalled = true;
+        Object.assign(WrappedDb, OrigDb);
+        require.cache[betterSqlite3Path].exports = WrappedDb;
+    } catch (e) {}
+}
+
+installSqliteHooks();
 
 function ensureTriggers(db) {
     try {
@@ -94,8 +238,39 @@ function ensureTriggers(db) {
 
         const hasSample = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Sample'").get();
         if (hasSample) {
+            const sampleCols = new Set((db.prepare("PRAGMA table_info(Sample)").all() || []).map(c => c.name));
+            const hasResult = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Result'").get();
+            const resultCols = hasResult ? new Set((db.prepare("PRAGMA table_info(Result)").all() || []).map(c => c.name)) : new Set();
+
+            const colMeta = sampleCols.has('metadata') ? 'NEW.metadata' : 'NULL';
+            const colRecDate = sampleCols.has('receptionDate') ? 'NEW.receptionDate' : 'NULL';
+            const colOldMeta = sampleCols.has('metadata') ? 'OLD.metadata' : 'NULL';
+            const colOldRecDate = sampleCols.has('receptionDate') ? 'OLD.receptionDate' : 'NULL';
+
+            const resultSubquery = hasResult
+                ? `(SELECT COALESCE(json_group_array(json_object(
+                    'id', r.id,
+                    'param', ${resultCols.has('param') ? 'r.param' : "''"},
+                    'value', r.value,
+                    'numericValue', r.numericValue,
+                    'isValid', ${resultCols.has('isValid') ? 'r.isValid' : '1'},
+                    'isCurrent', ${resultCols.has('isCurrent') ? 'r.isCurrent' : '1'},
+                    'unit', ${resultCols.has('unit') ? 'r.unit' : 'NULL'},
+                    'methodologyId', ${resultCols.has('methodologyId') ? 'r.methodologyId' : 'NULL'}
+                )), '[]') FROM Result r WHERE r.sampleId = NEW.id AND (${resultCols.has('isValid') ? '(r.isValid IS NULL OR r.isValid = 1)' : '1=1'}) AND (${resultCols.has('isCurrent') ? '(r.isCurrent IS NULL OR r.isCurrent = 1)' : '1=1'}))`
+                : `'[]'`;
+
+            const amendMetaCond = sampleCols.has('metadata') ? ' OR (OLD.metadata IS NOT NEW.metadata)' : '';
+            const amendRecCond = sampleCols.has('receptionDate') ? ' OR (OLD.receptionDate IS NOT NEW.receptionDate)' : '';
+
             db.exec(`
-                CREATE TRIGGER IF NOT EXISTS trg_sample_ai_publish AFTER INSERT ON Sample
+                DROP TRIGGER IF EXISTS trg_sample_ai_publish;
+                DROP TRIGGER IF EXISTS trg_sample_au_publish;
+                DROP TRIGGER IF EXISTS trg_sample_au_withdraw;
+                DROP TRIGGER IF EXISTS trg_sample_au_amend;
+                DROP TRIGGER IF EXISTS trg_sample_ad_withdraw;
+
+                CREATE TRIGGER trg_sample_ai_publish AFTER INSERT ON Sample
                 FOR EACH ROW
                 WHEN NEW.status IN ('APPROVED', 'RELEASED')
                 BEGIN
@@ -113,12 +288,20 @@ function ensureTriggers(db) {
                         NEW.country,
                         NEW.projectCode,
                         NEW.assignedLab,
-                        exchange_compute_hash(NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode, NEW.fieldMetadata),
-                        exchange_format_payload(NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode, NEW.fieldMetadata, NEW.updatedAt),
+                        exchange_compute_hash(
+                            NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode,
+                            NEW.fieldMetadata, ${colMeta}, ${colRecDate},
+                            ${resultSubquery}
+                        ),
+                        exchange_format_payload(
+                            NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode,
+                            NEW.fieldMetadata, ${colMeta}, ${colRecDate}, NEW.updatedAt,
+                            ${resultSubquery}
+                        ),
                         datetime('now');
                 END;
 
-                CREATE TRIGGER IF NOT EXISTS trg_sample_au_publish AFTER UPDATE ON Sample
+                CREATE TRIGGER trg_sample_au_publish AFTER UPDATE ON Sample
                 FOR EACH ROW
                 WHEN (OLD.status NOT IN ('APPROVED', 'RELEASED') OR OLD.status IS NULL)
                  AND NEW.status IN ('APPROVED', 'RELEASED')
@@ -137,15 +320,23 @@ function ensureTriggers(db) {
                         NEW.country,
                         NEW.projectCode,
                         NEW.assignedLab,
-                        exchange_compute_hash(NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode, NEW.fieldMetadata),
-                        exchange_format_payload(NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode, NEW.fieldMetadata, NEW.updatedAt),
+                        exchange_compute_hash(
+                            NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode,
+                            NEW.fieldMetadata, ${colMeta}, ${colRecDate},
+                            ${resultSubquery}
+                        ),
+                        exchange_format_payload(
+                            NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode,
+                            NEW.fieldMetadata, ${colMeta}, ${colRecDate}, NEW.updatedAt,
+                            ${resultSubquery}
+                        ),
                         datetime('now');
                 END;
 
-                CREATE TRIGGER IF NOT EXISTS trg_sample_au_withdraw AFTER UPDATE ON Sample
+                CREATE TRIGGER trg_sample_au_withdraw AFTER UPDATE ON Sample
                 FOR EACH ROW
                 WHEN OLD.status IN ('APPROVED', 'RELEASED')
-                 AND NEW.status IN ('CANCELLED', 'REJECTED', 'AMBIGUOUS_PROVENANCE_HOLD')
+                 AND NEW.status NOT IN ('APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED')
                 BEGIN
                     INSERT INTO _exchange_journal (
                         id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
@@ -161,12 +352,16 @@ function ensureTriggers(db) {
                         NEW.country,
                         NEW.projectCode,
                         NEW.assignedLab,
-                        exchange_compute_hash(NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode, NEW.fieldMetadata),
+                        exchange_compute_hash(
+                            NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode,
+                            NEW.fieldMetadata, ${colMeta}, ${colRecDate},
+                            ${resultSubquery}
+                        ),
                         NULL,
                         datetime('now');
                 END;
 
-                CREATE TRIGGER IF NOT EXISTS trg_sample_au_amend AFTER UPDATE ON Sample
+                CREATE TRIGGER trg_sample_au_amend AFTER UPDATE ON Sample
                 FOR EACH ROW
                 WHEN OLD.status IN ('APPROVED', 'RELEASED')
                  AND NEW.status IN ('APPROVED', 'RELEASED')
@@ -177,6 +372,8 @@ function ensureTriggers(db) {
                      (OLD.country IS NOT NEW.country) OR
                      (OLD.projectCode IS NOT NEW.projectCode) OR
                      (OLD.fieldMetadata IS NOT NEW.fieldMetadata)
+                     ${amendMetaCond}
+                     ${amendRecCond}
                  )
                 BEGIN
                     INSERT INTO _exchange_journal (
@@ -193,12 +390,20 @@ function ensureTriggers(db) {
                         NEW.country,
                         NEW.projectCode,
                         NEW.assignedLab,
-                        exchange_compute_hash(NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode, NEW.fieldMetadata),
-                        exchange_format_payload(NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode, NEW.fieldMetadata, NEW.updatedAt),
+                        exchange_compute_hash(
+                            NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode,
+                            NEW.fieldMetadata, ${colMeta}, ${colRecDate},
+                            ${resultSubquery}
+                        ),
+                        exchange_format_payload(
+                            NEW.id, NEW.status, NEW.originalId, NEW.labId, NEW.assignedLab, NEW.country, NEW.projectCode,
+                            NEW.fieldMetadata, ${colMeta}, ${colRecDate}, NEW.updatedAt,
+                            ${resultSubquery}
+                        ),
                         datetime('now');
                 END;
 
-                CREATE TRIGGER IF NOT EXISTS trg_sample_ad_withdraw AFTER DELETE ON Sample
+                CREATE TRIGGER trg_sample_ad_withdraw AFTER DELETE ON Sample
                 FOR EACH ROW
                 WHEN OLD.status IN ('APPROVED', 'RELEASED')
                 BEGIN
@@ -216,7 +421,11 @@ function ensureTriggers(db) {
                         OLD.country,
                         OLD.projectCode,
                         OLD.assignedLab,
-                        exchange_compute_hash(OLD.id, 'DELETED', OLD.originalId, OLD.labId, OLD.assignedLab, OLD.country, OLD.projectCode, OLD.fieldMetadata),
+                        exchange_compute_hash(
+                            OLD.id, 'DELETED', OLD.originalId, OLD.labId, OLD.assignedLab, OLD.country, OLD.projectCode,
+                            OLD.fieldMetadata, ${colOldMeta}, ${colOldRecDate},
+                            '[]'
+                        ),
                         NULL,
                         datetime('now');
                 END;
@@ -225,8 +434,40 @@ function ensureTriggers(db) {
 
         const hasResult = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Result'").get();
         if (hasResult) {
+            const sampleCols = new Set((db.prepare("PRAGMA table_info(Sample)").all() || []).map(c => c.name));
+            const resultCols = new Set((db.prepare("PRAGMA table_info(Result)").all() || []).map(c => c.name));
+
+            const colMeta = sampleCols.has('metadata') ? 's.metadata' : 'NULL';
+            const colRecDate = sampleCols.has('receptionDate') ? 's.receptionDate' : 'NULL';
+
+            const resColParam = resultCols.has('param') ? 'r.param' : "''";
+            const resColValid = resultCols.has('isValid') ? 'r.isValid' : '1';
+            const resColCurr = resultCols.has('isCurrent') ? 'r.isCurrent' : '1';
+            const resColUnit = resultCols.has('unit') ? 'r.unit' : 'NULL';
+            const resColMeth = resultCols.has('methodologyId') ? 'r.methodologyId' : 'NULL';
+            const resValidFilter = resultCols.has('isValid') ? '(r.isValid IS NULL OR r.isValid = 1)' : '1=1';
+            const resCurrFilter = resultCols.has('isCurrent') ? '(r.isCurrent IS NULL OR r.isCurrent = 1)' : '1=1';
+
+            const resSubForSample = `(SELECT COALESCE(json_group_array(json_object(
+                'id', r.id, 'param', ${resColParam}, 'value', r.value, 'numericValue', r.numericValue,
+                'isValid', ${resColValid}, 'isCurrent', ${resColCurr}, 'unit', ${resColUnit}, 'methodologyId', ${resColMeth}
+            )), '[]') FROM Result r WHERE r.sampleId = s.id AND ${resValidFilter} AND ${resCurrFilter})`;
+
+            const auConditions = [
+                'OLD.value IS NOT NEW.value',
+                'OLD.numericValue IS NOT NEW.numericValue'
+            ];
+            if (resultCols.has('isValid')) auConditions.push('OLD.isValid IS NOT NEW.isValid');
+            if (resultCols.has('isCurrent')) auConditions.push('OLD.isCurrent IS NOT NEW.isCurrent');
+            if (resultCols.has('unit')) auConditions.push('OLD.unit IS NOT NEW.unit');
+            if (resultCols.has('methodologyId')) auConditions.push('OLD.methodologyId IS NOT NEW.methodologyId');
+
             db.exec(`
-                CREATE TRIGGER IF NOT EXISTS trg_result_ai_amend AFTER INSERT ON Result
+                DROP TRIGGER IF EXISTS trg_result_ai_amend;
+                DROP TRIGGER IF EXISTS trg_result_au_amend;
+                DROP TRIGGER IF EXISTS trg_result_ad_amend;
+
+                CREATE TRIGGER trg_result_ai_amend AFTER INSERT ON Result
                 FOR EACH ROW
                 WHEN (SELECT status FROM Sample WHERE id = NEW.sampleId) IN ('APPROVED', 'RELEASED')
                 BEGIN
@@ -244,17 +485,25 @@ function ensureTriggers(db) {
                         s.country,
                         s.projectCode,
                         s.assignedLab,
-                        exchange_compute_hash(s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode, s.fieldMetadata),
-                        exchange_format_payload(s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode, s.fieldMetadata, s.updatedAt),
+                        exchange_compute_hash(
+                            s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode,
+                            s.fieldMetadata, ${colMeta}, ${colRecDate},
+                            ${resSubForSample}
+                        ),
+                        exchange_format_payload(
+                            s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode,
+                            s.fieldMetadata, ${colMeta}, ${colRecDate}, s.updatedAt,
+                            ${resSubForSample}
+                        ),
                         datetime('now')
                     FROM Sample s
                     WHERE s.id = NEW.sampleId;
                 END;
 
-                CREATE TRIGGER IF NOT EXISTS trg_result_au_amend AFTER UPDATE ON Result
+                CREATE TRIGGER trg_result_au_amend AFTER UPDATE ON Result
                 FOR EACH ROW
-                WHEN (OLD.value IS NOT NEW.value OR OLD.numericValue IS NOT NEW.numericValue OR OLD.isValid IS NOT NEW.isValid OR OLD.isCurrent IS NOT NEW.isCurrent)
-                 AND (SELECT status FROM Sample WHERE id = NEW.sampleId) IN ('APPROVED', 'RELEASED')
+                WHEN (${auConditions.join(' OR ')})
+                AND (SELECT status FROM Sample WHERE id = NEW.sampleId) IN ('APPROVED', 'RELEASED')
                 BEGIN
                     INSERT INTO _exchange_journal (
                         id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
@@ -270,11 +519,52 @@ function ensureTriggers(db) {
                         s.country,
                         s.projectCode,
                         s.assignedLab,
-                        exchange_compute_hash(s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode, s.fieldMetadata),
-                        exchange_format_payload(s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode, s.fieldMetadata, s.updatedAt),
+                        exchange_compute_hash(
+                            s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode,
+                            s.fieldMetadata, ${colMeta}, ${colRecDate},
+                            ${resSubForSample}
+                        ),
+                        exchange_format_payload(
+                            s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode,
+                            s.fieldMetadata, ${colMeta}, ${colRecDate}, s.updatedAt,
+                            ${resSubForSample}
+                        ),
                         datetime('now')
                     FROM Sample s
                     WHERE s.id = NEW.sampleId;
+                END;
+
+                CREATE TRIGGER trg_result_ad_amend AFTER DELETE ON Result
+                FOR EACH ROW
+                WHEN (SELECT status FROM Sample WHERE id = OLD.sampleId) IN ('APPROVED', 'RELEASED')
+                BEGIN
+                    INSERT INTO _exchange_journal (
+                        id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
+                        country, project_code, laboratory_id, content_hash, payload, created_at
+                    )
+                    SELECT
+                        'evt_' || OLD.sampleId || '_' || (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                        (SELECT COALESCE(MAX(sequence), 0) + 1 FROM _exchange_journal),
+                        'AMENDMENT',
+                        s.id,
+                        s.originalId,
+                        s.labId,
+                        s.country,
+                        s.projectCode,
+                        s.assignedLab,
+                        exchange_compute_hash(
+                            s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode,
+                            s.fieldMetadata, ${colMeta}, ${colRecDate},
+                            ${resSubForSample}
+                        ),
+                        exchange_format_payload(
+                            s.id, s.status, s.originalId, s.labId, s.assignedLab, s.country, s.projectCode,
+                            s.fieldMetadata, ${colMeta}, ${colRecDate}, s.updatedAt,
+                            ${resSubForSample}
+                        ),
+                        datetime('now')
+                    FROM Sample s
+                    WHERE s.id = OLD.sampleId;
                 END;
             `);
         }
@@ -289,6 +579,7 @@ function initTables(db) {
         CREATE TABLE IF NOT EXISTS _exchange_snapshots (
             id TEXT PRIMARY KEY,
             connection_id TEXT NOT NULL,
+            high_water_sequence INTEGER DEFAULT 0,
             high_water_timestamp TEXT NOT NULL,
             total_samples INTEGER NOT NULL,
             expires_at TEXT NOT NULL,
@@ -356,6 +647,7 @@ function initTables(db) {
     });
 
     ensureColumns(db, '_exchange_snapshots', {
+        high_water_sequence: "INTEGER DEFAULT 0",
         high_water_timestamp: "TEXT DEFAULT ''",
         total_samples: "INTEGER DEFAULT 0",
         expires_at: "TEXT DEFAULT ''",
@@ -439,47 +731,6 @@ function getConnectionId(auth) {
     return 'default-connection';
 }
 
-/**
- * Computes deterministic fingerprint of sample content, metadata, geography, depths, dates,
- * and current analytical results to reliably detect amendments (R1, Probe 4).
- */
-function computeSampleContentHash(s) {
-    if (!s) return '';
-    const dataToHash = {
-        id: s.id,
-        status: s.status,
-        originalId: s.originalId,
-        labId: s.labId,
-        assignedLab: s.assignedLab,
-        country: s.country || s.countryName || null,
-        projectCode: s.projectCode || null,
-        fieldMetadata: s.fieldMetadata || null,
-        latitude: s.latitude !== undefined ? s.latitude : null,
-        longitude: s.longitude !== undefined ? s.longitude : null,
-        elevation: s.elevation !== undefined ? s.elevation : null,
-        depthUpper: s.depthUpper !== undefined ? s.depthUpper : null,
-        depthLower: s.depthLower !== undefined ? s.depthLower : null,
-        collectionDate: s.collectionDate ? new Date(s.collectionDate).toISOString() : null,
-        samplingDate: s.samplingDate ? new Date(s.samplingDate).toISOString() : null,
-        receptionDate: s.receptionDate ? new Date(s.receptionDate).toISOString() : null,
-        results: (s.results || []).map(r => ({
-            id: r.id,
-            param: r.param,
-            value: r.value,
-            numericValue: r.numericValue,
-            unit: r.unit,
-            lod: r.lod,
-            loq: r.loq,
-            provenance: r.provenance,
-            basis: r.basis,
-            censoring: r.censoring,
-            replicateNo: r.replicateNo,
-            isValid: r.isValid,
-            isCurrent: r.isCurrent
-        }))
-    };
-    return crypto.createHash('sha256').update(JSON.stringify(dataToHash)).digest('hex');
-}
 
 /**
  * Synchronizes the append-only monotonic journal (_exchange_journal) with sample state.
@@ -524,8 +775,8 @@ async function syncJournal(auth, maps = {}) {
         let currentMaxSeq = (getMaxSeqStmt.get()?.maxSeq || 0);
 
         for (const s of samples) {
-            const isReleasedStatus = AUTHORIZED_RELEASE_STATUSES.includes(s.status);
-            const isWithdrawnStatus = ['CANCELLED', 'REJECTED', 'AMBIGUOUS_PROVENANCE_HOLD'].includes(s.status);
+            const isReleasedStatus = AUTHORIZED_RELEASE_STATUSES.includes(s.status) || (['ARCHIVED', 'DISPOSED'].includes(s.status) && s.approvedAt);
+            const isWithdrawnStatus = !isReleasedStatus;
             const currentHash = computeSampleContentHash(s);
             const latest = getLatestStmt.get(s.id);
             const eventTime = s.updatedAt ? new Date(s.updatedAt).toISOString() : new Date().toISOString();
@@ -554,7 +805,7 @@ async function syncJournal(auth, maps = {}) {
             } else {
                 // Was previously journaled
                 if (latest.event_type !== 'WITHDRAWAL' && isWithdrawnStatus) {
-                    // Status changed to cancelled/held/rejected: WITHDRAWAL
+                    // Status changed away from released (e.g. undoApproval to PROCESSING, CANCELLED, REJECTED, HOLD): WITHDRAWAL
                     currentMaxSeq++;
                     const evtId = `evt_${s.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
                     insertJournalStmt.run(
@@ -605,11 +856,16 @@ async function syncJournal(auth, maps = {}) {
  */
 async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}, maps = {} } = {}) {
     const db = getDb();
+    ensureTriggers(db);
     const connectionId = getConnectionId(auth);
     const snapshotId = `snap_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
     const now = new Date();
     const highWaterTimestamp = now.toISOString();
     const expiresAt = new Date(now.getTime() + ttlHours * 60 * 60 * 1000).toISOString();
+
+    await syncJournal(auth, maps);
+
+    const maxSeq = db.prepare('SELECT COALESCE(MAX(sequence), 0) as s FROM _exchange_journal').get()?.s || 0;
 
     const sampleWhere = buildSampleWhere(auth, { ...filter, profile });
     sampleWhere.updatedAt = { lte: now };
@@ -629,9 +885,9 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
 
     const insertSnap = db.prepare(`
         INSERT INTO _exchange_snapshots (
-            id, connection_id, high_water_timestamp, total_samples, expires_at, created_at,
+            id, connection_id, high_water_sequence, high_water_timestamp, total_samples, expires_at, created_at,
             authorized_labs, authorized_countries, authorized_projects
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const insertItem = db.prepare(`
@@ -641,7 +897,7 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
 
     const createTx = db.transaction(() => {
         insertSnap.run(
-            snapshotId, connectionId, highWaterTimestamp, samples.length, expiresAt, now.toISOString(),
+            snapshotId, connectionId, maxSeq, highWaterTimestamp, samples.length, expiresAt, now.toISOString(),
             authorizedLabs, authorizedCountries, authorizedProjects
         );
         for (let i = 0; i < samples.length; i++) {
@@ -653,10 +909,21 @@ async function createSnapshot(auth, { ttlHours = 24, profile = null, filter = {}
 
     createTx();
 
+    const nextCursor = encodeCursor({
+        type: 'change',
+        connectionId,
+        seq: maxSeq,
+        profile: profile || null,
+        filter: filter || {},
+        timestamp: highWaterTimestamp
+    }, db);
+
     return {
         snapshotId,
         connectionId,
+        highWaterSequence: maxSeq,
         highWaterTimestamp,
+        nextCursor,
         totalSamples: samples.length,
         expiresAt,
         ttlHours
@@ -771,28 +1038,32 @@ function getSnapshot(snapshotId, auth) {
 /**
  * Encodes an authenticated opaque cursor with HMAC integrity protection (Finding 3).
  */
-function encodeCursor(data) {
-    const payload = { v: 2, ...data, epoch: 'epoch-1', issuedAt: Date.now() };
+function encodeCursor(data, db) {
+    const epoch = getCurrentEpoch(db);
+    const secret = getCursorSecret(db);
+    const payload = { v: 2, ...data, epoch, issuedAt: Date.now() };
     const raw = JSON.stringify(payload);
-    const sig = crypto.createHmac('sha256', CURSOR_SECRET).update(raw).digest('hex').slice(0, 16);
+    const sig = crypto.createHmac('sha256', secret).update(raw).digest('hex').slice(0, 16);
     return Buffer.from(JSON.stringify({ p: payload, s: sig })).toString('base64');
 }
 
-function decodeCursor(cursorStr) {
+function decodeCursor(cursorStr, db) {
     if (!cursorStr) return null;
     try {
         const decoded = JSON.parse(Buffer.from(cursorStr, 'base64').toString('utf8'));
         if (decoded && decoded.p && decoded.s) {
-            const expectedSig = crypto.createHmac('sha256', CURSOR_SECRET).update(JSON.stringify(decoded.p)).digest('hex').slice(0, 16);
+            const secret = getCursorSecret(db);
+            const expectedSig = crypto.createHmac('sha256', secret).update(JSON.stringify(decoded.p)).digest('hex').slice(0, 16);
             if (decoded.s !== expectedSig) {
                 return { invalid: true, reason: 'SIGNATURE_MISMATCH', message: 'Cursor signature verification failed.' };
             }
-            if (decoded.p.epoch && decoded.p.epoch !== 'epoch-1') {
-                return { invalid: true, reason: 'EPOCH_MISMATCH', message: 'Cursor epoch mismatch.' };
+            const currentEpoch = getCurrentEpoch(db);
+            if (decoded.p.epoch && decoded.p.epoch !== currentEpoch) {
+                return { invalid: true, expired: true, reason: 'EPOCH_MISMATCH', message: 'Cursor epoch mismatch.' };
             }
             if (decoded.p.issuedAt && typeof decoded.p.issuedAt === 'number') {
                 const age = Date.now() - decoded.p.issuedAt;
-                if (age > 30 * 24 * 3600 * 1000) {
+                if (age > 72 * 3600 * 1000) {
                     return { expired: true, message: 'Cursor has expired.' };
                 }
             }
@@ -815,10 +1086,11 @@ async function getSnapshotPage(snapshotId, auth, { limit = 50, cursor = null } =
     const connectionId = getConnectionId(auth);
     const snap = check.snapshot;
     const maxLimit = Math.min(500, Math.max(1, parseInt(limit) || 50));
+    const db = getDb();
     
     let offset = 0;
     if (cursor) {
-        const decoded = decodeCursor(cursor);
+        const decoded = decodeCursor(cursor, db);
         if (!decoded || decoded.invalid || decoded.expired) {
             return {
                 error: decoded?.expired ? 'CURSOR_EXPIRED' : 'INVALID_CURSOR',
@@ -826,8 +1098,11 @@ async function getSnapshotPage(snapshotId, auth, { limit = 50, cursor = null } =
                 message: decoded?.message || 'Malformed page cursor.'
             };
         }
-        // F3, Probe 6: Reject cursor for a different snapshot
-        if (decoded.snapshotId && decoded.snapshotId !== snapshotId) {
+        // F3, Probe 6: Reject cursor for a different snapshot or endpoint
+        if (decoded.type && decoded.type !== 'snapshot') {
+            return { error: 'INVALID_CURSOR', status: 400, message: 'Cursor is not a snapshot page cursor.' };
+        }
+        if (!decoded.snapshotId || decoded.snapshotId !== snapshotId) {
             return { error: 'INVALID_CURSOR', status: 400, message: 'Cursor does not match the requested snapshot.' };
         }
         if (decoded.connectionId && decoded.connectionId !== connectionId) {
@@ -836,7 +1111,6 @@ async function getSnapshotPage(snapshotId, auth, { limit = 50, cursor = null } =
         offset = decoded.itemOrder || 0;
     }
 
-    const db = getDb();
     const rows = db.prepare(`
         SELECT specimen_id, item_order, body_json
         FROM _exchange_snapshot_items
@@ -852,10 +1126,11 @@ async function getSnapshotPage(snapshotId, auth, { limit = 50, cursor = null } =
     if (hasMore && pageRows.length > 0) {
         const last = pageRows[pageRows.length - 1];
         nextCursor = encodeCursor({
+            type: 'snapshot',
             connectionId,
             snapshotId,
             itemOrder: last.item_order
-        });
+        }, db);
     }
 
     const data = pageRows.map(r => JSON.parse(r.body_json));
@@ -863,6 +1138,7 @@ async function getSnapshotPage(snapshotId, auth, { limit = 50, cursor = null } =
     return {
         snapshotId,
         highWaterTimestamp: snap.high_water_timestamp,
+        highWaterSequence: snap.high_water_sequence || 0,
         count: data.length,
         hasMore,
         nextCursor,
@@ -888,11 +1164,13 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
             count: 0,
             hasMore: false,
             nextCursor: cursor || encodeCursor({
+                type: 'change',
                 connectionId: currentConn,
                 seq: 0,
                 profile: profile || null,
+                filter: filter || {},
                 timestamp: new Date().toISOString()
-            }),
+            }, db),
             changes: []
         };
     }
@@ -900,7 +1178,7 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
     await syncJournal(auth, maps);
 
     const maxLimit = Math.min(500, Math.max(1, parseInt(limit) || 100));
-    const decoded = decodeCursor(cursor);
+    const decoded = decodeCursor(cursor, db);
 
     let startSeq = 0;
     if (cursor) {
@@ -918,6 +1196,14 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
                 message: decoded.message || 'Invalid cursor signature or format.'
             };
         }
+        // Endpoint context validation
+        if (decoded.type && decoded.type !== 'change') {
+            return {
+                error: 'INVALID_CURSOR',
+                status: 400,
+                message: 'Cursor is not a change-feed cursor.'
+            };
+        }
         // F3, Probe 7: Cross-connection cursor rejection & dynamic binding
         if (decoded.connectionId && decoded.connectionId !== currentConn) {
             return {
@@ -926,11 +1212,32 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
                 message: 'Cursor belongs to a different connection.'
             };
         }
-        if (decoded.profile && profile && decoded.profile !== profile) {
+        // Profile binding: strictly enforce matching if cursor specified a profile
+        const reqProfile = profile || null;
+        const curProfile = decoded.profile || null;
+        if (curProfile !== null && curProfile !== reqProfile) {
             return {
                 error: 'INVALID_CURSOR',
                 status: 400,
                 message: 'Cursor profile does not match requested profile.'
+            };
+        }
+        // Filter binding: compare requested filter with decoded.filter
+        const reqFilter = filter || {};
+        const curFilter = decoded.filter || {};
+        const filterMismatch = (reqFilter.country && reqFilter.country !== curFilter.country) ||
+            (curFilter.country && curFilter.country !== reqFilter.country) ||
+            (reqFilter.project && reqFilter.project !== curFilter.project) ||
+            (curFilter.project && curFilter.project !== reqFilter.project) ||
+            (reqFilter.assignedLab && reqFilter.assignedLab !== curFilter.assignedLab) ||
+            (curFilter.assignedLab && curFilter.assignedLab !== reqFilter.assignedLab) ||
+            (reqFilter.labId && reqFilter.labId !== curFilter.labId) ||
+            (curFilter.labId && curFilter.labId !== reqFilter.labId);
+        if (filterMismatch) {
+            return {
+                error: 'INVALID_CURSOR',
+                status: 400,
+                message: 'Cursor filter does not match requested filter.'
             };
         }
         if (decoded.seq !== undefined && !isNaN(Number(decoded.seq))) {
@@ -1050,12 +1357,13 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
     if (pageRows.length > 0) {
         const last = pageRows[pageRows.length - 1];
         nextCursor = encodeCursor({
+            type: 'change',
             connectionId: currentConn,
             seq: last.sequence,
             profile: profile || null,
             filter: filter || {},
             timestamp: last.created_at
-        });
+        }, db);
 
         // Record issued change batch in _exchange_batches for durable receipt resolution
         issuedBatchId = `batch_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
@@ -1069,12 +1377,13 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
         nextCursor = cursor;
     } else {
         nextCursor = encodeCursor({
+            type: 'change',
             connectionId: currentConn,
             seq: maxSeq,
             profile: profile || null,
             filter: filter || {},
             timestamp: new Date().toISOString()
-        });
+        }, db);
     }
 
     const changes = pageRows.map(r => {
@@ -1142,6 +1451,19 @@ function recordReceipt(auth, receiptData = {}) {
         };
     }
 
+    // Checkpoint validation
+    if (checkpoint !== undefined && checkpoint !== null && checkpoint !== '') {
+        const chkStr = String(checkpoint);
+        const isValidCheckpoint = /^(seq_\d+|item_\d+|chk_\d+|cp[_\-]\d+|\d+|rec_[a-zA-Z0-9_\-]+)$/.test(chkStr);
+        if (!isValidCheckpoint) {
+            return {
+                error: 'INVALID_CHECKPOINT',
+                status: 400,
+                message: `Invalid checkpoint format '${chkStr}'. Checkpoint must be a valid sequence or item identifier.`
+            };
+        }
+    }
+
     let snap = null;
     if (snapshotId) {
         snap = db.prepare('SELECT * FROM _exchange_snapshots WHERE id = ?').get(snapshotId);
@@ -1168,6 +1490,15 @@ function recordReceipt(auth, receiptData = {}) {
         if (!batch) {
             const snapAsBatch = db.prepare('SELECT id, connection_id, total_samples as item_count FROM _exchange_snapshots WHERE id = ?').get(batchId);
             if (snapAsBatch) {
+                // If referencing a snapshot as batchId, and snapshotId is also provided:
+                // They must refer to the SAME snapshot!
+                if (snapshotId && batchId !== snapshotId) {
+                    return {
+                        error: 'BATCH_SNAPSHOT_MISMATCH',
+                        status: 400,
+                        message: 'Referenced batch snapshot does not belong to specified snapshot.'
+                    };
+                }
                 batch = snapAsBatch;
             }
         }
@@ -1227,6 +1558,15 @@ function recordReceipt(auth, receiptData = {}) {
             }
 
             if (existing) {
+                const countMatch = (existing.imported_count === imported) && (existing.quarantined_count === quarantined);
+                const chkMatch = existing.checkpoint === (checkpoint ? String(checkpoint) : null);
+                if (!countMatch || !chkMatch) {
+                    return {
+                        error: 'RECEIPT_CONFLICT',
+                        status: 409,
+                        message: `Receipt conflict: receipt already exists with conflicting counts (imported: ${existing.imported_count}, quarantined: ${existing.quarantined_count}) or checkpoint.`
+                    };
+                }
                 return {
                     receiptId: existing.id,
                     connectionId: existing.connection_id,
@@ -1295,6 +1635,15 @@ function recordReceipt(auth, receiptData = {}) {
                 existing = db.prepare('SELECT * FROM _exchange_receipts WHERE connection_id = ? AND batch_id = ?').get(connectionId, batchId);
             }
             if (existing) {
+                const countMatch = (existing.imported_count === imported) && (existing.quarantined_count === quarantined);
+                const chkMatch = existing.checkpoint === (checkpoint ? String(checkpoint) : null);
+                if (!countMatch || !chkMatch) {
+                    return {
+                        error: 'RECEIPT_CONFLICT',
+                        status: 409,
+                        message: `Receipt conflict: receipt already exists with conflicting counts (imported: ${existing.imported_count}, quarantined: ${existing.quarantined_count}) or checkpoint.`
+                    };
+                }
                 return {
                     receiptId: existing.id,
                     connectionId: existing.connection_id,
@@ -1327,5 +1676,8 @@ module.exports = {
     getChanges,
     recordReceipt,
     encodeCursor,
-    decodeCursor
+    decodeCursor,
+    registerDbFunctions,
+    installSqliteHooks,
+    ensureTriggers
 };

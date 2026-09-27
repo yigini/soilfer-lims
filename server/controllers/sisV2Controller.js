@@ -671,7 +671,7 @@ exports.createSnapshot = async (req, res) => {
         const profile = req.body?.profile || req.query?.profile || 'core-lossless-v2';
 
         // Validate profile (R2, R8)
-        const allowedProfiles = ['core-lossless-v2', 'opennsis', 'default'];
+        const allowedProfiles = ['core-lossless-v2', 'opennsis', 'glosis', 'default'];
         if (profile && !allowedProfiles.includes(profile)) {
             return res.status(400).json({
                 error: 'INVALID_PROFILE',
@@ -768,6 +768,7 @@ exports.submitReceipt = async (req, res) => {
         if (receipt.error) {
             return res.status(receipt.status || 400).json({
                 error: receipt.error,
+                code: receipt.error,
                 message: receipt.message
             });
         }

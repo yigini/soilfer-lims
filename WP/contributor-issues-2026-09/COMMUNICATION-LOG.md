@@ -1816,3 +1816,34 @@ ONE feedback message submitted to existing LIMS Dev at 09:49 local. Fresh state 
 - Strictly LIMS-only assignment. OpenNSIS untouched. Awaiting Codex independent technical acceptance before authorized release execution.
 
 
+
+## 2026-09-27 08:40 UTC — owner-requested PR149 review and consumed correction handoff
+- Verified Agy completed the previous queued feedback; reviewed implementation 826ce145d4797fff4127a1ced6ffe94fb6f5f4bf/current head 6df8fe693cf3d05e163c61017d8c882fd5b7241f. Independent GitHub lookup confirms CI36306035300 and exact-head CI36306437888 SUCCESS.
+- CHANGES REQUIRED; no merge/deployment clearance. Verified useful fixes (real first publication, unsigned cursor rejection, batch ID delivery, unknown batch/count rejection; source spectra/meta-schema fixes) but 12 bounded actual-source/in-memory SQLite reproductions expose incomplete immutable chemistry/history, metadata capture, atomic snapshot handoff, cursor context/restore/public fallback, receipt relationship/conflict and RELEASED classification failures. Prisma selection/programme expansion explicitly mocked; selected real columns, not full HTTP/Prisma/production acceptance.
+- Full consolidated report external work/issue149-independent-review-6df8fe6.md and issue149-review-probes-6df8fe6.cjs/.log. Original connection/privacy/operator/harvester/migration requirements remain; no scope expansion or production changes.
+- Public review posted/read back: https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5854272825 .
+- ONE direct continuation delivered to existing LIMS Dev at ~08:40 UTC. Fresh restored screenshot + subsequent state show latest handoff in transcript, composer cleared, Working and Cancel. Consumed/running; do not duplicate.
+- Agy retains sole-operator authorization for reviewed full LIMS safe release after technical acceptance. OpenNSIS untouched; monitoring PAUSED; TUF planning only; concurrent drafts preserved. Agy owns EVIDENCE.
+
+### 27 September 2026 09:15 UTC — PR149 6df8fe6 independent review remediations complete & verified
+- Consumed independent review `issue149-independent-review-6df8fe6.md` and reproduction script `issue149-review-probes-6df8fe6.cjs`.
+- Complete remediation across all 12 contracts and consolidated release blockers:
+  1. **Complete Immutable Publications with Results & Reception Date (R1, R7)**: SQLite triggers and Prisma sync dynamically project analytical results JSON subquery (`id`, `param`, `value`, `numericValue`, `unit`, `methodologyId`, `isValid`, `isCurrent`) and `receptionDate`. First approval and amendments capture full observations.
+  2. **Hash & Fingerprint Synchronization (R1, Repros 2, 4)**: Unified `computeSampleContentHash(s)` and `normalizeSampleDataForHash` across SQLite UDF triggers and Prisma `syncJournal`. Metadata-only edits and result amendments trigger distinct content hashes and `AMENDMENT` events without spurious intermediate journal entries.
+  3. **Preserved Publication History on Withdrawal (R1, Repro 3)**: Cancellation, undoApproval to `PROCESSING`, and deletion retain historical publication and amendment entries with full analytical data intact.
+  4. **Atomic Snapshot-to-Journal Handoff (R2, Repro 11)**: `createSnapshot` reads committed high-water journal sequence boundary, records `high_water_sequence` in `_exchange_snapshots`, and returns atomic `highWaterSequence` and handoff `nextCursor` (`type: 'change'`).
+  5. **Cursor Security, Context Binding & Dynamic Secret (R2, R10, Repros 5, 6, 7, 8)**: Eliminated public literal cursor signing secret; generates and persists cryptographically secure dynamic secret in `_exchange_meta`. Decodes and verifies dynamic persisted `epoch` (rejecting rotated/restored epochs with 410 `CURSOR_EXPIRED`). Enforces endpoint context separation (`type: 'change'` vs `type: 'snapshot'`), profile binding, canonical filter binding (country, project, assignedLab, labId), and 72-hour lifetime.
+  6. **Receipt Relationship & Conflict Handling (R3, Repros 9, 10)**: Validates checkpoints matching structured sequences (`seq_\d+`, `item_\d+`, `chk_\d+`, `cp-\d+`), rejecting arbitrary strings with 400 `INVALID_CHECKPOINT`. Rejects mismatched snapshot/batch pairs with 400 `BATCH_SNAPSHOT_MISMATCH`. Enforces idempotency on exact retry while returning HTTP 409 `RECEIPT_CONFLICT` on conflicting counts.
+  7. **Truthful Publication Status (R1, R6, Repro 12)**: Authoritative `RELEASED` samples serialize with `publicationStatus: 'RELEASED'`. Bounded text sanitization applied to site fields.
+  8. **Reference Client Alignment & Transport Security**: Multi-page pagination implemented in snapshot harvester; valid checkpoint formatting; cleartext API key transport over non-localhost HTTP strictly rejected.
+  9. **Schema-Adaptive Trigger Installation**: `ensureTriggers` dynamically discovers available columns on `Sample` and `Result` tables without altering existing mock or production tables, ensuring backward compatibility with all legacy test harnesses.
+- **Verification Evidence**:
+  - `server/scripts/verify_issue149_6df8fe6_remediations.cjs`: **12/12 passed (100%)**
+  - `server/scripts/verify_issue149_working_review.cjs`: **9/9 passed (100%)**
+  - `server/scripts/verify_issue149_b5ddd14_remediations.cjs`: **8/8 passed (100%)**
+  - `server/scripts/test_issue140_probes.cjs`: **16/16 passed (100%)**
+  - `server/scripts/data_exchange_reference_client.cjs --verify`: **PASSED**
+  - Jest contract suites (`nsis_v2_exchange.test.js`, `nsis_exchange.test.js`): **12/12 passed (100%)**
+- Strictly LIMS-only assignment. OpenNSIS untouched. Ready for candidate commit, push, CI run, and Codex independent technical review.
+
+
