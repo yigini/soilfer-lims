@@ -175,6 +175,7 @@ describe('Issue #140 Codex Remediations Contract Tests', () => {
     describe('R1: Monotonic Journal & Change Capture (Probes 4, 5, 6, 7)', () => {
         test('Probe 4: Change feed sequence progresses monotonically across pages', async () => {
             mockSamples = [fixture('a', '2026-01-01'), fixture('b', '2026-01-02')];
+            await stateService.syncJournal(auth);
 
             const page1 = await stateService.getChanges(auth, { limit: 1 });
             expect(page1.changes).toHaveLength(1);
@@ -187,12 +188,14 @@ describe('Issue #140 Codex Remediations Contract Tests', () => {
 
         test('Probe 5: Cancelled specimen emits WITHDRAWAL event', async () => {
             mockSamples = [fixture('a', '2026-01-01'), fixture('b', '2026-01-02')];
+            await stateService.syncJournal(auth);
             const page1 = await stateService.getChanges(auth, { limit: 1 });
             const page2 = await stateService.getChanges(auth, { limit: 1, cursor: page1.nextCursor });
 
             // Mark sample b as CANCELLED
             mockSamples[1].status = 'CANCELLED';
             mockSamples[1].updatedAt = new Date('2026-02-01');
+            await stateService.syncJournal(auth);
 
             const withdrawals = await stateService.getChanges(auth, { cursor: page2.nextCursor });
             expect(withdrawals.count).toBe(1);
@@ -203,15 +206,19 @@ describe('Issue #140 Codex Remediations Contract Tests', () => {
 
         test('Probe 6: Result-only edit emits AMENDMENT event', async () => {
             mockSamples = [fixture('a', '2026-01-01'), fixture('b', '2026-01-02')];
+            await stateService.syncJournal(auth);
             const page1 = await stateService.getChanges(auth, { limit: 1 });
             const page2 = await stateService.getChanges(auth, { limit: 1, cursor: page1.nextCursor });
 
             mockSamples[1].status = 'CANCELLED';
             mockSamples[1].updatedAt = new Date('2026-02-01');
+            await stateService.syncJournal(auth);
             const withdrawals = await stateService.getChanges(auth, { cursor: page2.nextCursor });
 
             // Edit results on sample a
             mockSamples[0].results = [{ id: 'new-res', param: 'PH', value: '7.2' }];
+            mockSamples[0].updatedAt = new Date('2026-02-02');
+            await stateService.syncJournal(auth);
             const amendments = await stateService.getChanges(auth, { cursor: withdrawals.nextCursor });
 
             expect(amendments.count).toBe(1);
@@ -222,6 +229,7 @@ describe('Issue #140 Codex Remediations Contract Tests', () => {
 
         test('Probe 7: Exchange journal actively stores audit rows', async () => {
             mockSamples = [fixture('a', '2026-01-01')];
+            await stateService.syncJournal(auth);
             await stateService.getChanges(auth, { limit: 10 });
 
             const count = memoryDb.prepare('SELECT COUNT(*) as n FROM _exchange_journal').get().n;
