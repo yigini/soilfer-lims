@@ -1039,20 +1039,40 @@ exports.rotateApiKey = async (req, res) => {
                 }
             }
 
-            // 1. CAS: Atomic retirement of old key verifying exactly 1 row affected
-            const casRes = db.prepare(`
-                UPDATE ApiKey
-                SET isActive = 0, updatedAt = ?
-                WHERE id = ? AND isActive = 1
-            `).run(nowIso, oldKey.id);
+            // 1. CAS: Atomic transition of old key to ROTATING with bounded overlap verifying exactly 1 row affected
+            const hasKeysTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_connection_keys'").get());
+            if (hasKeysTable) {
+                const casRes = db.prepare(`
+                    UPDATE _exchange_connection_keys
+                    SET key_status = 'ROTATING', rotated_at = ?
+                    WHERE connection_id = ? AND api_key_id = ? AND key_status = 'ACTIVE'
+                `).run(nowIso, effectiveConnectionId, oldKey.id);
 
-            if (casRes.changes === 0) {
-                const err = new Error('API key has already been rotated or is no longer active.');
-                err.code = 'KEY_ALREADY_ROTATED';
-                throw err;
+                if (casRes.changes === 0) {
+                    const existingLink = db.prepare('SELECT key_status FROM _exchange_connection_keys WHERE connection_id = ? AND api_key_id = ?').get(effectiveConnectionId, oldKey.id);
+                    if (existingLink?.key_status === 'REVOKED') {
+                        const err = new Error('API key has been revoked.');
+                        err.code = 'KEY_REVOKED';
+                        throw err;
+                    }
+                    const err = new Error('API key has already been rotated or is no longer active.');
+                    err.code = 'KEY_ALREADY_ROTATED';
+                    throw err;
+                }
+            } else {
+                const casRes = db.prepare(`
+                    UPDATE ApiKey
+                    SET updatedAt = ?
+                    WHERE id = ? AND isActive = 1
+                `).run(nowIso, oldKey.id);
+                if (casRes.changes === 0) {
+                    const err = new Error('API key has already been rotated or is no longer active.');
+                    err.code = 'KEY_ALREADY_ROTATED';
+                    throw err;
+                }
             }
 
-            // 2. Insert new replacement key
+            // 2. Insert new replacement key (old key in ApiKey table remains isActive = 1 during bounded overlap!)
             db.prepare(`
                 INSERT INTO ApiKey (id, name, keyHash, keyPrefix, role, connectionId, capabilities, countries, projects, labs, isActive, createdBy, createdAt, updatedAt, expiresAt)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
@@ -1073,15 +1093,8 @@ exports.rotateApiKey = async (req, res) => {
                 oldKey.expiresAt ? new Date(oldKey.expiresAt).toISOString() : null
             );
 
-            // 3. Link keys in _exchange_connection_keys
-            const hasKeysTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_connection_keys'").get());
+            // 3. Link replacement key in _exchange_connection_keys
             if (hasKeysTable) {
-                db.prepare(`
-                    UPDATE _exchange_connection_keys
-                    SET key_status = 'RETIRED', rotated_at = ?
-                    WHERE connection_id = ? AND api_key_id = ?
-                `).run(nowIso, effectiveConnectionId, oldKey.id);
-
                 db.prepare(`
                     INSERT INTO _exchange_connection_keys (id, connection_id, api_key_id, key_status, created_at)
                     VALUES (?, ?, ?, 'ACTIVE', ?)
@@ -1097,7 +1110,7 @@ exports.rotateApiKey = async (req, res) => {
                 `).run(
                     `audit-sis-rotate-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
                     newKeyId,
-                    `Rotated API key from '${oldKey.id}' to '${newKeyId}' for connection '${effectiveConnectionId}'`,
+                    `Rotated API key from '${oldKey.id}' to '${newKeyId}' for connection '${effectiveConnectionId}' with bounded overlap`,
                     req.user?.username || 'admin',
                     nowIso
                 );
@@ -1106,8 +1119,11 @@ exports.rotateApiKey = async (req, res) => {
             // Safe metadata payload for replay/recovery: excludes plaintext secret token (R3, R10)
             durablePayload = {
                 status: 'success',
-                message: 'API Key rotation was already completed. The replacement key is active.',
+                message: 'API Key rotation is pending confirmation with bounded overlap. Old key remains active.',
                 alreadyRotated: true,
+                rotating: true,
+                oldKeyActive: true,
+                overlapGraceHours: 24,
                 keyInfo: {
                     id: newKeyId,
                     name: newKeyName,
@@ -1122,8 +1138,10 @@ exports.rotateApiKey = async (req, res) => {
             // Full response with one-time display secret returned strictly on initial creation
             successResponse = {
                 status: 'success',
-                message: 'API Key rotated successfully. The old key has been revoked and the new key is active.',
+                message: 'API Key rotated successfully with bounded overlap. Old key remains active for up to 24 hours awaiting verification.',
                 apiKey: fullApiKey,
+                oldKeyActive: true,
+                overlapGraceHours: 24,
                 keyInfo: durablePayload.keyInfo
             };
 
@@ -1359,6 +1377,77 @@ exports.updateConnection = async (req, res) => {
     } catch (err) {
         console.error('[SIS_UPDATE_CONN_ERR]', err);
         res.status(500).json({ error: 'Failed to update exchange connection.' });
+    }
+};
+
+/**
+ * Confirm API Key rotation (Plan Section 9, R3, R11).
+ * Completes replacement verification: retires old rotating key, leaving only replacement active.
+ */
+exports.confirmRotation = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { getDb } = require('../services/exchangeStateService');
+        const db = getDb();
+        const key = await prisma.apiKey.findUnique({ where: { id } });
+        if (!key) return res.status(404).json({ error: 'API Key not found.' });
+
+        const connId = key.connectionId || `conn_${key.id}`;
+        const hasKeysTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_connection_keys'").get());
+
+        if (hasKeysTable) {
+            const rotatingKeys = db.prepare("SELECT api_key_id FROM _exchange_connection_keys WHERE connection_id = ? AND key_status = 'ROTATING'").all(connId);
+            if (rotatingKeys.length > 0) {
+                db.prepare("UPDATE _exchange_connection_keys SET key_status = 'RETIRED' WHERE connection_id = ? AND key_status = 'ROTATING'").run(connId);
+                for (const rk of rotatingKeys) {
+                    db.prepare("UPDATE ApiKey SET isActive = 0 WHERE id = ?").run(rk.api_key_id);
+                }
+            }
+        }
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Key rotation confirmed. Prior key has been retired.',
+            connectionId: connId
+        });
+    } catch (err) {
+        return res.status(500).json({ error: 'Failed to confirm rotation: ' + err.message });
+    }
+};
+
+/**
+ * Abort API Key rotation (Plan Section 9, R3, R11).
+ * Restores original rotating key to ACTIVE and revokes unconfirmed replacement key.
+ */
+exports.abortRotation = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { getDb } = require('../services/exchangeStateService');
+        const db = getDb();
+        const key = await prisma.apiKey.findUnique({ where: { id } });
+        if (!key) return res.status(404).json({ error: 'API Key not found.' });
+
+        const connId = key.connectionId || `conn_${key.id}`;
+        const hasKeysTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_connection_keys'").get());
+
+        if (hasKeysTable) {
+            // Restore old rotating key to ACTIVE
+            db.prepare("UPDATE _exchange_connection_keys SET key_status = 'ACTIVE', rotated_at = NULL WHERE connection_id = ? AND key_status = 'ROTATING'").run(connId);
+            // Revoke any unconfirmed replacement key for this connection
+            const replacementKeys = db.prepare("SELECT api_key_id FROM _exchange_connection_keys WHERE connection_id = ? AND key_status = 'ACTIVE' AND api_key_id != ?").all(connId, id);
+            for (const rk of replacementKeys) {
+                db.prepare("UPDATE _exchange_connection_keys SET key_status = 'REVOKED' WHERE api_key_id = ?").run(rk.api_key_id);
+                db.prepare("UPDATE ApiKey SET isActive = 0 WHERE id = ?").run(rk.api_key_id);
+            }
+        }
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Key rotation aborted. Prior key remains active and replacement key has been revoked.',
+            connectionId: connId
+        });
+    } catch (err) {
+        return res.status(500).json({ error: 'Failed to abort rotation: ' + err.message });
     }
 };
 

@@ -151,7 +151,7 @@ const {
     installSqliteHooks
 } = require('./exchangeDbFunctions');
 
-const CURRENT_TRIGGER_VERSION = '5';
+const CURRENT_TRIGGER_VERSION = '6';
 
 function ensureTriggers(db, force = false) {
     registerDbFunctions(db);
@@ -286,6 +286,24 @@ function ensureTriggers(db, force = false) {
     if (resultCols.has('determinationDate')) resultAmendConds.push('OLD.determinationDate IS NOT NEW.determinationDate');
     if (resultCols.has('analysedAt')) resultAmendConds.push('OLD.analysedAt IS NOT NEW.analysedAt');
 
+    const isEligibleSql = (prefix) => {
+        const conds = [
+            `${prefix}.status IN ('APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED')`,
+            `${prefix}.approvedAt IS NOT NULL`
+        ];
+        const holdConds = [];
+        if (sampleCols.has('metadata')) {
+            holdConds.push(`(${prefix}.metadata IS NOT NULL AND json_valid(${prefix}.metadata) AND COALESCE(json_extract(${prefix}.metadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD')`);
+        }
+        if (sampleCols.has('fieldMetadata')) {
+            holdConds.push(`(${prefix}.fieldMetadata IS NOT NULL AND json_valid(${prefix}.fieldMetadata) AND COALESCE(json_extract(${prefix}.fieldMetadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD')`);
+        }
+        if (holdConds.length > 0) {
+            conds.push(`NOT (${holdConds.join(' OR ')})`);
+        }
+        return `(${conds.join(' AND ')})`;
+    };
+
     const installTx = db.transaction(() => {
         db.exec(`
             DROP TRIGGER IF EXISTS trg_sample_ai_publish;
@@ -296,7 +314,7 @@ function ensureTriggers(db, force = false) {
 
             CREATE TRIGGER trg_sample_ai_publish AFTER INSERT ON Sample
             FOR EACH ROW
-            WHEN NEW.status IN ('APPROVED', 'RELEASED')
+            WHEN ${isEligibleSql('NEW')}
             BEGIN
                 INSERT INTO _exchange_journal (
                     id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
@@ -319,8 +337,8 @@ function ensureTriggers(db, force = false) {
 
             CREATE TRIGGER trg_sample_au_publish AFTER UPDATE ON Sample
             FOR EACH ROW
-            WHEN (OLD.status NOT IN ('APPROVED', 'RELEASED') OR OLD.status IS NULL)
-             AND NEW.status IN ('APPROVED', 'RELEASED')
+            WHEN NOT ${isEligibleSql('OLD')}
+             AND ${isEligibleSql('NEW')}
             BEGIN
                 INSERT INTO _exchange_journal (
                     id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
@@ -343,8 +361,8 @@ function ensureTriggers(db, force = false) {
 
             CREATE TRIGGER trg_sample_au_withdraw AFTER UPDATE ON Sample
             FOR EACH ROW
-            WHEN OLD.status IN ('APPROVED', 'RELEASED')
-             AND NEW.status NOT IN ('APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED')
+            WHEN ${isEligibleSql('OLD')}
+             AND NOT ${isEligibleSql('NEW')}
             BEGIN
                 INSERT INTO _exchange_journal (
                     id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
@@ -367,8 +385,8 @@ function ensureTriggers(db, force = false) {
 
             CREATE TRIGGER trg_sample_au_amend AFTER UPDATE ON Sample
             FOR EACH ROW
-            WHEN OLD.status IN ('APPROVED', 'RELEASED')
-             AND NEW.status IN ('APPROVED', 'RELEASED')
+            WHEN ${isEligibleSql('OLD')}
+             AND ${isEligibleSql('NEW')}
              AND (${sampleAmendConds.join(' OR ')})
             BEGIN
                 INSERT INTO _exchange_journal (
@@ -392,7 +410,7 @@ function ensureTriggers(db, force = false) {
 
             CREATE TRIGGER trg_sample_ad_withdraw AFTER DELETE ON Sample
             FOR EACH ROW
-            WHEN OLD.status IN ('APPROVED', 'RELEASED')
+            WHEN ${isEligibleSql('OLD')}
             BEGIN
                 INSERT INTO _exchange_journal (
                     id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
@@ -422,7 +440,7 @@ function ensureTriggers(db, force = false) {
 
                 CREATE TRIGGER trg_result_ai_amend AFTER INSERT ON Result
                 FOR EACH ROW
-                WHEN (SELECT status FROM Sample WHERE id = NEW.sampleId) IN ('APPROVED', 'RELEASED')
+                WHEN (SELECT ${isEligibleSql('s')} FROM Sample s WHERE s.id = NEW.sampleId) = 1
                 BEGIN
                     INSERT INTO _exchange_journal (
                         id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
@@ -448,7 +466,7 @@ function ensureTriggers(db, force = false) {
                 CREATE TRIGGER trg_result_au_amend AFTER UPDATE ON Result
                 FOR EACH ROW
                 WHEN (${resultAmendConds.join(' OR ')})
-                AND (SELECT status FROM Sample WHERE id = NEW.sampleId) IN ('APPROVED', 'RELEASED')
+                AND (SELECT ${isEligibleSql('s')} FROM Sample s WHERE s.id = NEW.sampleId) = 1
                 BEGIN
                     INSERT INTO _exchange_journal (
                         id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
@@ -473,7 +491,7 @@ function ensureTriggers(db, force = false) {
 
                 CREATE TRIGGER trg_result_ad_amend AFTER DELETE ON Result
                 FOR EACH ROW
-                WHEN (SELECT status FROM Sample WHERE id = OLD.sampleId) IN ('APPROVED', 'RELEASED')
+                WHEN (SELECT ${isEligibleSql('s')} FROM Sample s WHERE s.id = OLD.sampleId) = 1
                 BEGIN
                     INSERT INTO _exchange_journal (
                         id, sequence, event_type, specimen_id, field_sample_id, lab_sample_id,
@@ -750,6 +768,32 @@ function getConnectionId(auth) {
 }
 
 
+function isProvenanceHeld(meta) {
+    if (!meta) return false;
+    try {
+        const parsed = typeof meta === 'string' ? JSON.parse(meta) : meta;
+        if (parsed && parsed.provenanceHold && parsed.provenanceHold.status === 'AMBIGUOUS_PROVENANCE_HOLD') {
+            return true;
+        }
+    } catch (e) {}
+    return false;
+}
+
+function isSpecimenEligible(sample) {
+    if (!sample) return false;
+    const status = sample.status;
+    if (!['APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED'].includes(status)) {
+        return false;
+    }
+    if (!sample.approvedAt) {
+        return false;
+    }
+    if (isProvenanceHeld(sample.metadata) || isProvenanceHeld(sample.fieldMetadata)) {
+        return false;
+    }
+    return true;
+}
+
 /**
  * Synchronizes the append-only monotonic journal (_exchange_journal) with sample state.
  * Emits PUBLICATION, AMENDMENT, and WITHDRAWAL events with strictly monotonic sequence numbers (R1, R2, F2).
@@ -820,13 +864,13 @@ async function syncJournal(auth, maps = {}) {
                 continue;
             }
 
-            const isReleasedStatus = AUTHORIZED_RELEASE_STATUSES.includes(live.status) || (['ARCHIVED', 'DISPOSED'].includes(live.status) && live.approvedAt);
-            const isWithdrawnStatus = !isReleasedStatus;
+            const isEligible = isSpecimenEligible(live);
+            const isWithdrawnStatus = !isEligible;
             const latest = getLatestStmt.get(live.id);
 
             if (isWithdrawnStatus) {
                 if (latest && latest.event_type !== 'WITHDRAWAL') {
-                    // Status changed away from released (e.g. undoApproval to PROCESSING, CANCELLED, REJECTED, HOLD): WITHDRAWAL
+                    // Status changed away from released/eligible (e.g. hold applied, unapproved, processing, cancelled): WITHDRAWAL
                     currentMaxSeq++;
                     const evtId = `evt_${live.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
                     const eventTime = live.updatedAt ? new Date(live.updatedAt).toISOString() : new Date().toISOString();
@@ -2174,5 +2218,7 @@ module.exports = {
     getCurrentEpoch,
     rotateEpoch,
     getSourceSystemId,
-    pruneExpiredSnapshots
+    pruneExpiredSnapshots,
+    isSpecimenEligible,
+    isProvenanceHeld
 };

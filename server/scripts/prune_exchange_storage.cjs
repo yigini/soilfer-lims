@@ -67,18 +67,12 @@ function pruneExchangeStorage(dbPath, options = {}) {
         }
 
         if (hasBatchesTable) {
-            const batchQuery = hasSnapTable
-                ? `SELECT COUNT(*) as c FROM _exchange_batches b WHERE b.created_at < ? OR (b.snapshot_id IS NOT NULL AND b.snapshot_id NOT IN (SELECT id FROM _exchange_snapshots))`
-                : `SELECT COUNT(*) as c FROM _exchange_batches b WHERE b.created_at < ?`;
-            const batchCount = db.prepare(batchQuery).get(batchReceiptCutoffIso);
+            const batchCount = db.prepare(`SELECT COUNT(*) as c FROM _exchange_batches WHERE created_at < ?`).get(batchReceiptCutoffIso);
             prunedBatches = batchCount?.c || 0;
         }
 
         if (hasReceiptsTable) {
-            const receiptQuery = hasSnapTable
-                ? `SELECT COUNT(*) as c FROM _exchange_receipts r WHERE r.created_at < ? OR (r.snapshot_id IS NOT NULL AND r.snapshot_id NOT IN (SELECT id FROM _exchange_snapshots))`
-                : `SELECT COUNT(*) as c FROM _exchange_receipts r WHERE r.created_at < ?`;
-            const receiptCount = db.prepare(receiptQuery).get(batchReceiptCutoffIso);
+            const receiptCount = db.prepare(`SELECT COUNT(*) as c FROM _exchange_receipts WHERE created_at < ?`).get(batchReceiptCutoffIso);
             prunedReceipts = receiptCount?.c || 0;
         }
 
@@ -119,18 +113,12 @@ function pruneExchangeStorage(dbPath, options = {}) {
         }
 
         if (hasBatchesTable) {
-            const delBatchQuery = hasSnapTable
-                ? `DELETE FROM _exchange_batches WHERE created_at < ? OR (snapshot_id IS NOT NULL AND snapshot_id NOT IN (SELECT id FROM _exchange_snapshots))`
-                : `DELETE FROM _exchange_batches WHERE created_at < ?`;
-            const delBatches = db.prepare(delBatchQuery).run(batchReceiptCutoffIso);
+            const delBatches = db.prepare(`DELETE FROM _exchange_batches WHERE created_at < ?`).run(batchReceiptCutoffIso);
             prunedBatches = delBatches.changes;
         }
 
         if (hasReceiptsTable) {
-            const delReceiptQuery = hasSnapTable
-                ? `DELETE FROM _exchange_receipts WHERE created_at < ? OR (snapshot_id IS NOT NULL AND snapshot_id NOT IN (SELECT id FROM _exchange_snapshots))`
-                : `DELETE FROM _exchange_receipts WHERE created_at < ?`;
-            const delReceipts = db.prepare(delReceiptQuery).run(batchReceiptCutoffIso);
+            const delReceipts = db.prepare(`DELETE FROM _exchange_receipts WHERE created_at < ?`).run(batchReceiptCutoffIso);
             prunedReceipts = delReceipts.changes;
         }
 

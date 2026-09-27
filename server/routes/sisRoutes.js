@@ -33,6 +33,8 @@ router.get('/keys', verifyToken, checkPermission('MANAGE_BRANDING'), sisControll
 router.post('/keys', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.createApiKey);
 router.delete('/keys/:id', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.revokeApiKey);
 router.post('/keys/:id/rotate', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.rotateApiKey);
+router.post('/keys/:id/confirm-rotation', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.confirmRotation);
+router.post('/keys/:id/abort-rotation', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.abortRotation);
 
 router.get('/connections', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.listConnections);
 router.post('/connections', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.createConnection);

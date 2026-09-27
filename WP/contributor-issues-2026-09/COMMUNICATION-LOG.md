@@ -2081,3 +2081,48 @@ sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
 - **Strict Boundaries Maintained**: LIMS-only changes; zero modifications to OpenNSIS; zero mutations to `dev.db`; untracked scripts preserved.
 
 
+
+## 27 September 2026 23:36 UTC — hourly PR149 independent review / 658bcd6
+- Exact head 658bcd61e6858046531d3a1e2d47f3a93334981f; exact-head CI36356818415 independently SUCCESS at22:59:26UTC. PR149 OPEN/unmerged, not technically accepted, no deployment.
+- Independent actual full schema/canonical migration/Prisma/auth/consumer HTTP plus normal reference CLI checks preserve six improvement groups: migration chemistry/identity/event IDs and archive/disposed eligibility examples; no stored raw rotation secret; revoked replacement replay denial; snapshot reader leaves journal4->4; delivered redacted digest over4pages; aged null-snapshot incremental batch pruning.
+- Four remaining original-plan packages: held approved specimens still delivered and real Prisma metadata hold emits coordinate-bearing AMENDMENT; migration also publishes PROCESSING with retained prior approval. Lost-first-response rotation revokes old key(401) then retry200 returns no secret; planned bounded overlap/verification/recovery absent. Actual normal CLI8/9 then400profile mismatch; second process ignores checkpoint and creates new snapshot. Prune preview0 receipts/apply1 deletes fresh receipt after expired parent removal.
+- Report work/issue149-independent-review-658bcd6.md; main probe/log issue149-focused-review-658bcd6.cjs/.log and hold-followthrough-658bcd6.cjs/.log. Eleven focused main checks plus one follow-through. External synthetic DB issue149-disposable-658bcd6-zmHnnP/synthetic-review.db retained; actual CLI logs adjacent. Management thin req/res; first-response loss deliberately modeled, not real outage/full-process crash. No ordinary/production data, credential or grant changes.
+- Public review https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5860869772 . ONE continuation delivered23:36UTC and CONSUMED: restored screenshot plus second state show report L1-56 and both probes read, Exploring/Working/Cancel. Exact preexisting draft "what is the" restored unsent. Do not duplicate continuation.
+- Hourly monitor ACTIVE until independently verified deployment, then pause same automation. Existing sole-Agy safe release authority applies after exact-head technical acceptance; no repeat owner approval. Original R1-R12 and full-plan docs/operator/recovery remain; no blanket passing-probe acceptance. OpenNSIS entirely untouched, TUF planning only, no closed-issue reruns or worktree removals. Agy owns EVIDENCE.
+
+## 28 September 2026 01:55 UTC — PR #149 658bcd6 Four Packages Remediated & Verified / Candidate Head Ready
+- **Context & Review Input**: Addressed Codex independent review of PR #149 head `658bcd6` (`issue149-independent-review-658bcd6.md`, `issue149-focused-review-658bcd6.cjs/.log`, `issue149-hold-followthrough-658bcd6.cjs/.log`, PR #149 comment 5860869772). Preserved all 6 independently verified groups (backfill chemistry/identity/event IDs, approved DISPOSED inclusion, unapproved ARCHIVED exclusion, no plaintext stored rotation secrets, revoked replacement replay denial, reader-only snapshots, delivered-projection digest, and incremental retention).
+- **Remediations Completed Across Four Packages**:
+  1. *Package 1: Publication Eligibility & Provenance-Hold Contract (R1, R4, R10)*
+     - **Unified Eligibility Predicate**: Implemented a shared eligibility contract across canonical migration backfill (`migrate_exchange_journal_tables.cjs`), database write triggers (`trg_sample_ai_publish`, `trg_sample_au_publish`, `trg_sample_au_withdraw`, `trg_sample_au_amend`, and result triggers in `exchangeStateService.js`), `syncJournal`, `buildSampleWhere`, snapshots, and stats.
+     - **Predicate Definition**: Specimen is eligible if and only if `status IN ('APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED') AND approvedAt IS NOT NULL AND COALESCE(json_extract(metadata, '$.provenanceHold.status'), '') != 'AMBIGUOUS_PROVENANCE_HOLD' AND COALESCE(json_extract(fieldMetadata, '$.provenanceHold.status'), '') != 'AMBIGUOUS_PROVENANCE_HOLD'`.
+     - **Exclusion of Provenance-Held & Unapproved Operational Specimens**: Migration backfill, change feed, and live samples projection strictly exclude specimens carrying `AMBIGUOUS_PROVENANCE_HOLD` and unapproved operational specimens (`PROCESSING` with historical approval timestamp).
+     - **Trigger Hold Follow-through**: Updated `trg_sample_au_withdraw` so that when a provenance hold is applied to an approved specimen, the trigger emits a `WITHDRAWAL` event with `payload = NULL` (never an `AMENDMENT` containing precise coordinates).
+  2. *Package 2: Safe Key Rotation Delivery, Recovery & Bounded Overlap (R3, R11; Plan Section 9)*
+     - **24-Hour Bounded Overlap**: In `sisController.js:rotateApiKey`, transition the old key to `ROTATING` in `_exchange_connection_keys` while leaving `isActive = 1` in `ApiKey` during the 24-hour grace window. The old key remains fully operational (HTTP 200) until replacement verification, preventing 401 outages if the initial response is lost.
+     - **Replacement Verification & Auto-Retirement**: In `apiKeyAuth.js`, when an `ACTIVE` replacement key authenticates for a connection, any prior `ROTATING` keys for that connection are automatically retired (`key_status = 'RETIRED'`, `ApiKey.isActive = 0`). Subsequent requests with the retired old key fail closed with HTTP 401 `KEY_RETIRED`.
+     - **Confirmation & Abort Endpoints**: Added `POST /api/v1/sis/keys/:id/confirm-rotation` and `POST /api/v1/sis/keys/:id/abort-rotation` (and `/api/v1/data-exchange/...`). Confirmation retires the old key; abort restores the old key to `ACTIVE` and revokes the unconfirmed replacement key.
+     - **Durable Recovery Payload**: `_exchange_rotation_operations` persists safe metadata (`alreadyRotated: true`, `rotating: true`, `oldKeyActive: true`, `overlapGraceHours: 24`) without plaintext secrets. Replays after replacement revocation return HTTP 409 `KEY_REVOKED`.
+     - **UI Rotation Lifecycle**: In `ApiKeyManager.jsx`, updated rotation dialog with bounded overlap notice, displayed "Key Rotation In Progress (Bounded Overlap)" on replays, and added manual Confirm/Abort rotation action handlers.
+  3. *Package 3: Reference Client Handoff, Atomic Checkpoints & Resume (R2, R8)*
+     - **Context Preservation in Change Feed**: In `data_exchange_reference_client.cjs`, query parameters `profile` and `country` are explicitly forwarded in the change feed request (`/api/v2/data-exchange/changes?limit=...&profile=...&country=...`), preventing HTTP 400 `Cursor profile 'core-lossless-v2' does not match requested profile 'default'`.
+     - **Atomic Durable Checkpoints**: Checkpoint writes use `saveCheckpointAtomic`, writing to a `.tmp` file before renaming atomically, preventing corrupt or partial checkpoint files on interruption.
+     - **Startup Resume Support**: At client startup, reads any existing checkpoint file. If a prior snapshot was completed and verified, it skips snapshot creation and pagination, resuming directly into the monotonic change feed.
+     - **Transport Resilience & Safety**: Wrapped HTTP requests in retry loop (up to 3 attempts with exponential backoff) with 15-second timeouts. Incomplete snapshot pagination throws an error rather than logging a successful step.
+  4. *Package 4: Storage Retention Preview vs Apply Alignment (R2, R10, R11)*
+     - **Decoupled Receipt & Artifact Retention**: In `prune_exchange_storage.cjs`, decoupled batch and receipt retention from parent snapshot deletion (`WHERE created_at < batchReceiptCutoffIso`). Fresh receipts on expired snapshots are preserved according to the nominal 30-day receipt retention window.
+     - **1:1 Alignment of Preview and Apply**: The preview predicate (`COUNT(*)`) and apply predicate (`DELETE`) are identical, ensuring `pruneExchangeStorage(..., { dryRun: true })` and live execution report matching counts.
+- **Verification Evidence**:
+  - `scratch/test_all_packages.js`: **All 6 tests passed (100%)**:
+    1. Migration backfill: included approved active and disposed; excluded unapproved archive, held approved, and unapproved processing.
+    2. Mounted change feed & samples route: no held or unapproved processing data exposed.
+    3. Hold follow-through via Prisma update: emitted `WITHDRAWAL` with `payload = NULL`.
+    4. Lost-response rotation: old key authenticates HTTP 200 during bounded overlap; replay does not leak secret; replacement key verifies and retires old key; old key returns HTTP 401 `KEY_RETIRED`; revoked replacement replay returns 409 `KEY_REVOKED`.
+    5. Storage pruner: preview and apply agree on 0 fresh receipts pruned on expired snapshot.
+    6. Reference client: Run 1 exits 0; Run 2 resumes from checkpoint with exit 0 and 0 duplicate snapshots.
+  - `server/tests/contracts/issue149_codex_verification.test.js`: **17/17 passed (100%)**.
+  - `server/tests/contracts/issue140_remediations.test.js`: **15/15 passed (100%)**.
+  - `server/tests/contracts/sis_adapter_service.test.js`: **20/20 passed (100%)**.
+  - `server/scripts/test_issue140_probes.cjs`: **16/16 passed (100%)**.
+  - Client Build: `vite build` clean in 6.72s with zero errors.
+- **Strict Boundaries Maintained**: Strictly LIMS-only codebase changes; zero modifications to OpenNSIS code, config, database, or deployments; zero mutations to `dev.db`; untracked release scripts preserved.

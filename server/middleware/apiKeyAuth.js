@@ -75,9 +75,18 @@ const apiKeyAuth = async (req, res, next) => {
                 where: { keyHash }
             });
 
-            if (!apiKey || !apiKey.isActive) {
+            if (!apiKey) {
                 return res.status(401).json({
                     error: 'Unauthorized',
+                    code: 'UNAUTHORIZED',
+                    message: 'Invalid or revoked API Key.'
+                });
+            }
+
+            if (!apiKey.isActive) {
+                return res.status(401).json({
+                    error: 'Unauthorized',
+                    code: 'KEY_RETIRED',
                     message: 'Invalid or revoked API Key.'
                 });
             }
@@ -113,12 +122,12 @@ const apiKeyAuth = async (req, res, next) => {
                         conn = db.prepare('SELECT * FROM _exchange_connections WHERE id = ?').get(effectiveConnectionId);
                     }
                     if (!conn) {
-                        keyLink = db.prepare('SELECT connection_id, key_status FROM _exchange_connection_keys WHERE api_key_id = ?').get(apiKey.id);
+                        keyLink = db.prepare('SELECT id, connection_id, key_status, rotated_at FROM _exchange_connection_keys WHERE api_key_id = ?').get(apiKey.id);
                         if (keyLink && keyLink.connection_id) {
                             conn = db.prepare('SELECT * FROM _exchange_connections WHERE id = ?').get(keyLink.connection_id);
                         }
                     } else {
-                        keyLink = db.prepare('SELECT key_status FROM _exchange_connection_keys WHERE connection_id = ? AND api_key_id = ?').get(conn.id, apiKey.id);
+                        keyLink = db.prepare('SELECT id, connection_id, key_status, rotated_at FROM _exchange_connection_keys WHERE connection_id = ? AND api_key_id = ?').get(conn.id, apiKey.id);
                     }
                 } catch (e) {
                     console.warn('[API_KEY_AUTH] Failed to query connection state:', e.message);
@@ -146,7 +155,34 @@ const apiKeyAuth = async (req, res, next) => {
                             message: `API Key '${apiKey.id}' lacks an active authoritative connection linkage.`
                         });
                     }
-                    if (keyLink.key_status !== 'ACTIVE') {
+                    if (keyLink.key_status === 'ACTIVE') {
+                        // Replacement verification: when active replacement key authenticates, retire any prior rotating keys
+                        try {
+                            const rotating = db.prepare("SELECT api_key_id FROM _exchange_connection_keys WHERE connection_id = ? AND key_status = 'ROTATING' AND api_key_id != ?").all(conn.id, apiKey.id);
+                            if (rotating.length > 0) {
+                                db.prepare("UPDATE _exchange_connection_keys SET key_status = 'RETIRED' WHERE connection_id = ? AND key_status = 'ROTATING' AND api_key_id != ?").run(conn.id, apiKey.id);
+                                for (const rk of rotating) {
+                                    db.prepare("UPDATE ApiKey SET isActive = 0 WHERE id = ?").run(rk.api_key_id);
+                                }
+                            }
+                        } catch (e) {}
+                    } else if (keyLink.key_status === 'ROTATING') {
+                        // Bounded overlap grace window (nominal 24 hours)
+                        const rotatedAt = keyLink.rotated_at ? new Date(keyLink.rotated_at).getTime() : 0;
+                        const age = Date.now() - rotatedAt;
+                        if (age > 24 * 3600 * 1000) {
+                            try {
+                                db.prepare("UPDATE _exchange_connection_keys SET key_status = 'RETIRED' WHERE id = ?").run(keyLink.id);
+                                db.prepare("UPDATE ApiKey SET isActive = 0 WHERE id = ?").run(apiKey.id);
+                            } catch (e) {}
+                            return res.status(401).json({
+                                error: 'Unauthorized',
+                                code: 'KEY_RETIRED',
+                                message: `API Key '${apiKey.id}' rotation overlap window has expired.`
+                            });
+                        }
+                        // Within bounded overlap: allow authentication
+                    } else {
                         return res.status(401).json({
                             error: 'Unauthorized',
                             code: 'KEY_RETIRED',

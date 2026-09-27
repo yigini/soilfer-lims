@@ -42,11 +42,18 @@ function matches(row, where) {
     return Object.entries(where).every(([k, v]) => {
         if (k === 'AND') return v.every(w => matches(row, w));
         if (k === 'OR') return v.some(w => matches(row, w));
+        if (k === 'NOT') return !matches(row, v);
         const a = row[k];
+        if (v === null) return a === null;
         if (v instanceof Date) return +a === +v;
         if (v && typeof v === 'object') return Object.entries(v).every(([op, b]) => ({
-            in: () => b.includes(a),
-            not: () => a !== b,
+            in: () => Array.isArray(b) && b.includes(a),
+            not: () => {
+                if (b === null) return a !== null && a !== undefined;
+                if (typeof b === 'object') return !matches({ [k]: a }, { [k]: b });
+                return a !== b;
+            },
+            contains: () => typeof a === 'string' && a.includes(b),
             lt: () => a < b,
             lte: () => a <= b,
             gt: () => a > b,
@@ -92,6 +99,7 @@ const fixture = (id, date) => ({
     country: 'AAA',
     projectCode: 'P',
     status: 'APPROVED',
+    approvedAt: new Date(date),
     updatedAt: new Date(date),
     createdAt: new Date(date),
     results: []

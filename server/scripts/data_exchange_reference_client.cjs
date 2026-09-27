@@ -24,6 +24,7 @@ const http = require('http');
 const https = require('https');
 const { URL } = require('url');
 const fs = require('fs');
+const path = require('path');
 const crypto = require('crypto');
 
 // Parse CLI arguments
@@ -38,6 +39,21 @@ function getArg(flag, fallback = null) {
 }
 const hasFlag = (flag) => args.includes(flag);
 const CHECKPOINT_FILE = getArg('--checkpoint', null);
+
+function saveCheckpointAtomic(filePath, data) {
+    if (!filePath) return;
+    try {
+        const dir = path.dirname(path.resolve(filePath));
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        const tmpFile = path.join(dir, `.tmp.${path.basename(filePath)}.${Date.now()}.${Math.random().toString(36).slice(2, 8)}`);
+        fs.writeFileSync(tmpFile, JSON.stringify(data, null, 2), 'utf8');
+        fs.renameSync(tmpFile, filePath);
+    } catch (e) {
+        console.warn(`[CHECKPOINT] Warning: failed to persist atomic checkpoint: ${e.message}`);
+    }
+}
 
 if (hasFlag('--help') || hasFlag('-h')) {
     console.log(`
@@ -70,69 +86,100 @@ const IMPORTED_ARG = getArg('--imported', null);
 const QUARANTINED_ARG = getArg('--quarantined', null);
 const IS_VERIFY = hasFlag('--verify');
 
-// HTTP Client helper
-function request(method, path, body = null, customHeaders = {}) {
-    return new Promise((resolve, reject) => {
-        const fullUrl = new URL(path, BASE_URL);
-        const isHttps = fullUrl.protocol === 'https:';
-        const isLocalhost = fullUrl.hostname === 'localhost' || fullUrl.hostname === '127.0.0.1' || fullUrl.hostname === '::1';
-        if (!isHttps && API_KEY && !isLocalhost) {
-            return reject(new Error(`Insecure transport rejected: API key must not be transmitted over unencrypted HTTP to remote host '${fullUrl.hostname}'. Use HTTPS.`));
-        }
-        const client = isHttps ? https : http;
+// HTTP Client helper with bounded retries and transport timeouts (R2, R8)
+function request(method, path, body = null, customHeaders = {}, maxRetries = 3) {
+    let attempt = 0;
+    const executeAttempt = () => {
+        return new Promise((resolve, reject) => {
+            const fullUrl = new URL(path, BASE_URL);
+            const isHttps = fullUrl.protocol === 'https:';
+            const isLocalhost = fullUrl.hostname === 'localhost' || fullUrl.hostname === '127.0.0.1' || fullUrl.hostname === '::1';
+            if (!isHttps && API_KEY && !isLocalhost) {
+                return reject(new Error(`Insecure transport rejected: API key must not be transmitted over unencrypted HTTP to remote host '${fullUrl.hostname}'. Use HTTPS.`));
+            }
+            const client = isHttps ? https : http;
 
-        const headers = {
-            'Accept': 'application/json',
-            'User-Agent': 'SoilFER-LIMS-Reference-Client/2.0',
-            ...customHeaders
-        };
-        if (API_KEY) {
-            headers['X-API-Key'] = API_KEY;
-        }
+            const headers = {
+                'Accept': 'application/json',
+                'User-Agent': 'SoilFER-LIMS-Reference-Client/2.0',
+                ...customHeaders
+            };
+            if (API_KEY) {
+                headers['X-API-Key'] = API_KEY;
+            }
 
-        let bodyData = null;
-        if (body) {
-            bodyData = typeof body === 'string' ? body : JSON.stringify(body);
-            headers['Content-Type'] = 'application/json';
-            headers['Content-Length'] = Buffer.byteLength(bodyData);
-        }
+            let bodyData = null;
+            if (body) {
+                bodyData = typeof body === 'string' ? body : JSON.stringify(body);
+                headers['Content-Type'] = 'application/json';
+                headers['Content-Length'] = Buffer.byteLength(bodyData);
+            }
 
-        const options = {
-            method,
-            hostname: fullUrl.hostname,
-            port: fullUrl.port || (isHttps ? 443 : 80),
-            path: fullUrl.pathname + fullUrl.search,
-            headers
-        };
+            const options = {
+                method,
+                hostname: fullUrl.hostname,
+                port: fullUrl.port || (isHttps ? 443 : 80),
+                path: fullUrl.pathname + fullUrl.search,
+                headers,
+                timeout: 15000
+            };
 
-        const req = client.request(options, (res) => {
-            let data = '';
-            res.setEncoding('utf8');
-            res.on('data', chunk => { data += chunk; });
-            res.on('end', () => {
-                let parsed = null;
-                try {
-                    parsed = JSON.parse(data);
-                } catch (e) {
-                    parsed = data;
-                }
-                resolve({
-                    status: res.statusCode,
-                    headers: res.headers,
-                    data: parsed
+            const req = client.request(options, (res) => {
+                let data = '';
+                res.setEncoding('utf8');
+                res.on('data', chunk => { data += chunk; });
+                res.on('end', () => {
+                    let parsed = null;
+                    try {
+                        parsed = JSON.parse(data);
+                    } catch (e) {
+                        parsed = data;
+                    }
+                    resolve({
+                        status: res.statusCode,
+                        headers: res.headers,
+                        data: parsed
+                    });
                 });
             });
-        });
 
-        req.on('error', (err) => {
-            reject(err);
-        });
+            req.on('timeout', () => {
+                req.destroy(new Error(`Request timeout (${options.timeout}ms)`));
+            });
 
-        if (bodyData) {
-            req.write(bodyData);
+            req.on('error', (err) => {
+                reject(err);
+            });
+
+            if (bodyData) {
+                req.write(bodyData);
+            }
+            req.end();
+        });
+    };
+
+    return (async function retryLoop() {
+        while (true) {
+            attempt++;
+            try {
+                const res = await executeAttempt();
+                if ([502, 503, 504].includes(res.status) && attempt <= maxRetries) {
+                    const delay = Math.min(2000, 200 * Math.pow(2, attempt - 1));
+                    await new Promise(r => setTimeout(r, delay));
+                    continue;
+                }
+                return res;
+            } catch (err) {
+                const isTransient = ['ECONNRESET', 'ETIMEDOUT', 'ECONNREFUSED', 'EAI_AGAIN'].includes(err.code) || (err.message && err.message.includes('timeout'));
+                if (isTransient && attempt <= maxRetries) {
+                    const delay = Math.min(2000, 200 * Math.pow(2, attempt - 1));
+                    await new Promise(r => setTimeout(r, delay));
+                    continue;
+                }
+                throw err;
+            }
         }
-        req.end();
-    });
+    })();
 }
 
 // Main workflow runner
@@ -261,11 +308,41 @@ async function runClientWorkflow() {
         return `RFC 7946 compliant FeatureCollection with ${fc.features?.length || 0} features`;
     });
 
-    // 7. Resumable Export Snapshot
-    let snapshotId = null;
+    // 7. Resumable Export Snapshot (with durable checkpoint reading & resume - R2, R8)
+    let existingCheckpoint = null;
+    if (CHECKPOINT_FILE && fs.existsSync(CHECKPOINT_FILE)) {
+        try {
+            existingCheckpoint = JSON.parse(fs.readFileSync(CHECKPOINT_FILE, 'utf8'));
+        } catch (e) {
+            console.warn(`[CHECKPOINT] Warning: failed to parse existing checkpoint: ${e.message}`);
+        }
+    }
+
+    let snapshotId = existingCheckpoint?.snapshotId || null;
     let snapshotMeta = null;
-    let snapshotContinuationCursor = null;
+    let snapshotContinuationCursor = existingCheckpoint?.nextCursor || null;
+    let skipSnapshotCreation = false;
+    let skipSnapshotPagination = false;
+
+    if (existingCheckpoint) {
+        if (existingCheckpoint.type === 'change_feed' && existingCheckpoint.nextCursor) {
+            skipSnapshotCreation = true;
+            skipSnapshotPagination = true;
+            snapshotContinuationCursor = existingCheckpoint.nextCursor;
+        } else if (existingCheckpoint.snapshotId && existingCheckpoint.completed) {
+            skipSnapshotCreation = true;
+            skipSnapshotPagination = true;
+            snapshotContinuationCursor = existingCheckpoint.nextCursor;
+        } else if (existingCheckpoint.snapshotId && !existingCheckpoint.completed) {
+            skipSnapshotCreation = true;
+            snapshotId = existingCheckpoint.snapshotId;
+        }
+    }
+
     await step('Create Export Snapshot (POST /api/v2/data-exchange/snapshots)', async () => {
+        if (skipSnapshotCreation) {
+            return `Snapshot resumed from checkpoint: ${snapshotId || 'prior export'} (skipped new creation)`;
+        }
         const payload = {
             profile: PROFILE,
             filter: COUNTRY ? { country: COUNTRY } : {}
@@ -279,21 +356,39 @@ async function runClientWorkflow() {
         snapshotMeta = res.data;
         snapshotId = res.data.snapshotId;
         snapshotContinuationCursor = res.data.nextCursor;
+        if (CHECKPOINT_FILE) {
+            saveCheckpointAtomic(CHECKPOINT_FILE, {
+                snapshotId,
+                completed: false,
+                pageNum: 0,
+                totalHarvested: 0,
+                nextCursor: snapshotContinuationCursor,
+                profile: PROFILE,
+                country: COUNTRY,
+                updatedAt: new Date().toISOString()
+            });
+        }
         return `Snapshot created: ${snapshotId}, Total Samples: ${res.data.totalSamples || 0}, Digest: ${res.data.digest ? res.data.digest.slice(0, 16) + '...' : 'none'}`;
     });
 
     // 8. Read Snapshot Pages (if snapshot created)
-    let harvestedCount = 0;
+    let harvestedCount = existingCheckpoint?.totalHarvested || 0;
     if (snapshotId) {
         await step(`Read Snapshot Pages (GET /api/v2/data-exchange/snapshots/${snapshotId}/pages)`, async () => {
-            let pageNum = 0;
-            let currentCursor = null;
-            let totalHarvested = 0;
+            if (skipSnapshotPagination) {
+                return `Snapshot previously verified and completed in checkpoint (${existingCheckpoint?.totalHarvested || 0} items). Resuming change feed.`;
+            }
+            let pageNum = existingCheckpoint?.pageNum || 0;
+            let currentCursor = existingCheckpoint?.nextCursor || null;
+            let totalHarvested = existingCheckpoint?.totalHarvested || 0;
             let isComplete = false;
             const MAX_PAGES = 5000;
 
-            const prefix = `${snapshotMeta.snapshotId}:${snapshotMeta.connectionId}:${snapshotMeta.highWaterSequence}:${snapshotMeta.epoch}:${snapshotMeta.authVersion}\n`;
-            const digestHasher = crypto.createHash('sha256').update(prefix);
+            let digestHasher = null;
+            if (snapshotMeta) {
+                const prefix = `${snapshotMeta.snapshotId}:${snapshotMeta.connectionId}:${snapshotMeta.highWaterSequence}:${snapshotMeta.epoch}:${snapshotMeta.authVersion}\n`;
+                digestHasher = crypto.createHash('sha256').update(prefix);
+            }
 
             do {
                 pageNum++;
@@ -307,8 +402,10 @@ async function runClientWorkflow() {
                 }
                 const items = res.data.data || [];
                 totalHarvested += items.length;
-                for (const item of items) {
-                    digestHasher.update(`${item.specimenId}:${JSON.stringify(item)}\n`);
+                if (digestHasher) {
+                    for (const item of items) {
+                        digestHasher.update(`${item.specimenId}:${JSON.stringify(item)}\n`);
+                    }
                 }
                 currentCursor = res.data.nextCursor || null;
                 if (!currentCursor) {
@@ -316,33 +413,47 @@ async function runClientWorkflow() {
                 }
 
                 if (CHECKPOINT_FILE) {
-                    try {
-                        fs.writeFileSync(CHECKPOINT_FILE, JSON.stringify({
-                            snapshotId,
-                            pageNum,
-                            totalHarvested,
-                            nextCursor: currentCursor,
-                            completed: isComplete,
-                            updatedAt: new Date().toISOString()
-                        }, null, 2));
-                    } catch (e) {}
+                    saveCheckpointAtomic(CHECKPOINT_FILE, {
+                        snapshotId,
+                        pageNum,
+                        totalHarvested,
+                        nextCursor: currentCursor || snapshotContinuationCursor,
+                        completed: isComplete,
+                        profile: PROFILE,
+                        country: COUNTRY,
+                        updatedAt: new Date().toISOString()
+                    });
                 }
             } while (currentCursor && pageNum < MAX_PAGES);
 
             harvestedCount = totalHarvested;
 
             if (!isComplete) {
-                return `WARNING: Snapshot pagination incomplete (reached page safety limit ${MAX_PAGES}). Retrieved ${totalHarvested} items (partial).`;
+                throw new Error(`Snapshot pagination incomplete: reached page safety limit ${MAX_PAGES}. Retrieved ${totalHarvested} items (partial).`);
             }
 
-            const computedDigest = digestHasher.digest('hex');
             let digestStatus = 'N/A';
-            if (snapshotMeta.digest) {
+            if (snapshotMeta && snapshotMeta.digest && digestHasher) {
+                const computedDigest = digestHasher.digest('hex');
                 if (computedDigest === snapshotMeta.digest) {
                     digestStatus = `VERIFIED (${computedDigest.slice(0, 16)}...)`;
                 } else {
                     throw new Error(`Snapshot delivered digest verification failed! Server: ${snapshotMeta.digest}, Client: ${computedDigest}`);
                 }
+            }
+
+            if (CHECKPOINT_FILE) {
+                saveCheckpointAtomic(CHECKPOINT_FILE, {
+                    snapshotId,
+                    pageNum,
+                    totalHarvested,
+                    nextCursor: snapshotContinuationCursor,
+                    completed: true,
+                    digestVerified: true,
+                    profile: PROFILE,
+                    country: COUNTRY,
+                    updatedAt: new Date().toISOString()
+                });
             }
 
             return `Retrieved ${totalHarvested} items across ${pageNum} page(s). Delivered digest: ${digestStatus} (retrieval only; receiver import status pending).`;
@@ -351,7 +462,10 @@ async function runClientWorkflow() {
 
     // 9. Change Feed Continuous Polling
     await step('Monotonic Change Feed (GET /api/v2/data-exchange/changes)', async () => {
-        let changeUrl = `/api/v2/data-exchange/changes?limit=${LIMIT}`;
+        let changeUrl = `/api/v2/data-exchange/changes?limit=${LIMIT}&profile=${encodeURIComponent(PROFILE)}`;
+        if (COUNTRY) {
+            changeUrl += `&country=${encodeURIComponent(COUNTRY)}`;
+        }
         if (snapshotContinuationCursor) {
             changeUrl += `&cursor=${encodeURIComponent(snapshotContinuationCursor)}`;
         }
@@ -364,14 +478,16 @@ async function runClientWorkflow() {
         const changes = res.data.changes || [];
         const nextCursor = res.data.nextCursor;
         if (CHECKPOINT_FILE && nextCursor) {
-            try {
-                fs.writeFileSync(CHECKPOINT_FILE, JSON.stringify({
-                    type: 'change_feed',
-                    nextCursor,
-                    eventsReceived: changes.length,
-                    updatedAt: new Date().toISOString()
-                }, null, 2));
-            } catch (e) {}
+            saveCheckpointAtomic(CHECKPOINT_FILE, {
+                type: 'change_feed',
+                snapshotId,
+                completed: true,
+                nextCursor,
+                eventsReceived: changes.length,
+                profile: PROFILE,
+                country: COUNTRY,
+                updatedAt: new Date().toISOString()
+            });
         }
         return `Received ${changes.length} events (resumed from snapshot continuation: ${Boolean(snapshotContinuationCursor)}), cursor: ${nextCursor ? nextCursor.slice(0, 16) + '...' : 'none'}`;
     });

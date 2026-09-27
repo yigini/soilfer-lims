@@ -14,7 +14,7 @@
 
 const projectPolicyService = require('./projectPolicyService');
 
-const AUTHORIZED_RELEASE_STATUSES = ['APPROVED', 'RELEASED'];
+const AUTHORIZED_RELEASE_STATUSES = ['APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED'];
 
 /**
  * Determine if authentication principal is an external or restricted consumer.
@@ -51,6 +51,22 @@ function buildSampleWhere(auth, query = {}) {
         } else {
             where.status = { in: AUTHORIZED_RELEASE_STATUSES };
         }
+        where.approvedAt = { not: null };
+        where.AND = [
+            ...(where.AND || []),
+            {
+                OR: [
+                    { metadata: null },
+                    { NOT: { metadata: { contains: 'AMBIGUOUS_PROVENANCE_HOLD' } } }
+                ]
+            },
+            {
+                OR: [
+                    { fieldMetadata: null },
+                    { NOT: { fieldMetadata: { contains: 'AMBIGUOUS_PROVENANCE_HOLD' } } }
+                ]
+            }
+        ];
     } else {
         if (query.status && (query.status === 'all' || query.status === '*')) {
             // unrestricted platform user requesting all statuses

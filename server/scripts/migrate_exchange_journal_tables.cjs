@@ -340,11 +340,22 @@ function migrateExchangeTables(dbPath) {
         // Establishes authoritative journaled publications at migration time before readers start
         const hasSampleTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Sample'").get());
         if (hasSampleTable) {
+            const sampleCols = new Set((db.prepare("PRAGMA table_info(Sample)").all() || []).map(c => c.name));
+            const holdConds = [];
+            if (sampleCols.has('metadata')) {
+                holdConds.push(`(s.metadata IS NOT NULL AND json_valid(s.metadata) AND COALESCE(json_extract(s.metadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD')`);
+            }
+            if (sampleCols.has('fieldMetadata')) {
+                holdConds.push(`(s.fieldMetadata IS NOT NULL AND json_valid(s.fieldMetadata) AND COALESCE(json_extract(s.fieldMetadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD')`);
+            }
+            const holdClause = holdConds.length > 0 ? `AND NOT (${holdConds.join(' OR ')})` : '';
+
             const unjournaled = db.prepare(`
                 SELECT s.* FROM Sample s
                 LEFT JOIN _exchange_journal j ON s.id = j.specimen_id
                 WHERE s.approvedAt IS NOT NULL
-                  AND s.status NOT IN ('CANCELLED', 'REJECTED')
+                  AND s.status IN ('APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED')
+                  ${holdClause}
                   AND j.specimen_id IS NULL
                 ORDER BY s.rowid ASC
             `).all();

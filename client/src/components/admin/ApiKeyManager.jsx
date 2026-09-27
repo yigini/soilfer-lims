@@ -305,7 +305,7 @@ const ApiKeyManager = () => {
 
         showDialog({
             title: 'Rotate API Key?',
-            message: `Are you sure you want to rotate "${keyName}"? The current secret token will be revoked immediately and a new secret key will be generated for the same connection identity and scopes.`,
+            message: `Are you sure you want to rotate "${keyName}"? A new secret key will be generated for the same connection identity and scopes with 24-hour bounded overlap (the prior key remains active until verified or confirmed to prevent disruption).`,
             type: 'confirm',
             confirmText: 'Rotate Key',
             onConfirm: async () => {
@@ -321,8 +321,10 @@ const ApiKeyManager = () => {
                         setGeneratedKey(res.data.apiKey);
                     } else if (res.data?.alreadyRotated) {
                         showDialog({
-                            title: 'Key Rotation Completed',
-                            message: `Rotation was already committed for this key. The replacement key (Prefix: ${res.data.keyInfo?.keyPrefix || 'slims_live_...'}) is active.`,
+                            title: res.data?.oldKeyActive ? 'Key Rotation In Progress (Bounded Overlap)' : 'Key Rotation Completed',
+                            message: res.data?.oldKeyActive
+                                ? `Rotation is pending confirmation for this key. The prior key remains active under bounded overlap while awaiting verification of the replacement key (Prefix: ${res.data.keyInfo?.keyPrefix || 'slims_live_...'}).`
+                                : `Rotation was already committed for this key. The replacement key (Prefix: ${res.data.keyInfo?.keyPrefix || 'slims_live_...'}) is active.`,
                             type: 'info'
                         });
                     }
@@ -337,6 +339,50 @@ const ApiKeyManager = () => {
                     });
                 } finally {
                     setRotatingKeyId(null);
+                }
+            }
+        });
+    };
+
+    const handleConfirmRotation = async (keyId) => {
+        try {
+            await axios.post(`/api/v1/data-exchange/keys/${keyId}/confirm-rotation`);
+            fetchKeys();
+            showDialog({
+                title: 'Rotation Confirmed',
+                message: 'Key rotation has been confirmed and prior rotating keys have been retired.',
+                type: 'info'
+            });
+        } catch (err) {
+            showDialog({
+                title: 'Confirmation Failed',
+                message: err.response?.data?.error || err.message,
+                type: 'error'
+            });
+        }
+    };
+
+    const handleAbortRotation = async (keyId) => {
+        showDialog({
+            title: 'Abort Key Rotation?',
+            message: 'Are you sure you want to abort this rotation? The original key will be restored to active status and the unconfirmed replacement key will be revoked.',
+            type: 'confirm',
+            confirmText: 'Abort Rotation',
+            onConfirm: async () => {
+                try {
+                    await axios.post(`/api/v1/data-exchange/keys/${keyId}/abort-rotation`);
+                    fetchKeys();
+                    showDialog({
+                        title: 'Rotation Aborted',
+                        message: 'Key rotation was aborted. Original key restored to active status.',
+                        type: 'info'
+                    });
+                } catch (err) {
+                    showDialog({
+                        title: 'Abort Failed',
+                        message: err.response?.data?.error || err.message,
+                        type: 'error'
+                    });
                 }
             }
         });

@@ -236,6 +236,15 @@ describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts',
         const statuses = [ra.statusCode, rb.statusCode].sort();
         expect(statuses).toEqual([200, 409]);
 
+        // During bounded overlap (Plan Section 9, R3, R11), exactly 1 replacement key is ACTIVE
+        const activeReplacementCount = db.prepare("SELECT COUNT(*) n FROM _exchange_connection_keys WHERE connection_id=? AND key_status='ACTIVE'").get(concurrent.connectionId).n;
+        expect(activeReplacementCount).toBe(1);
+
+        // After rotation confirmation / replacement verification, prior rotating key is retired
+        const confirmRes = response();
+        await management.confirmRotation({ user: admin, params: { id: concurrent.keyId } }, confirmRes);
+        expect(confirmRes.statusCode).toBe(200);
+
         const activeCount = db.prepare('SELECT COUNT(*) n FROM ApiKey WHERE connectionId=? AND isActive=1').get(concurrent.connectionId).n;
         expect(activeCount).toBe(1);
     });
