@@ -263,11 +263,62 @@ RFC 7946 compliant GeoJSON stream for GIS systems (QGIS, ArcGIS, GeoNode).
 - **HTTP Method:** `GET`
 - **Path:** `/api/v2/data-exchange/geojson`
 
+**Query Parameters:**
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `bbox` | string | No | Bounding box filter: `minLng,minLat,maxLng,maxLat` in WGS84 decimal degrees. |
+| `limit` | integer | No | Maximum features per page (default: 100, max: 500). |
+| `cursor` | string | No | Opaque HMAC-signed keyset pagination cursor from previous response. |
+| `profile` | string | No | Target schema profile (`core-lossless-v2`, `opennsis`, `glosis`, `default`). |
+| `country` | string | No | ISO country code filter (e.g. `GTM`, `AAA`). |
+| `project` | string | No | Project code filter (supports programme hierarchy expansion). |
+| `labId` / `assignedLab` | string | No | Operational laboratory filter (scoped to authorized key access). |
+| `updatedSince` | string | No | ISO 8601 UTC timestamp filter (`YYYY-MM-DDTHH:mm:ss.sssZ` or `+00:00`). |
+
 **Compliance Features:**
 - Coordinates in WGS84 `[longitude, latitude]` format.
-- Samples with null coordinates are omitted from spatial features.
+- Samples with null or invalid non-numeric coordinates are excluded from spatial features.
 - Root `crs` property is intentionally omitted per RFC 7946 §4.
 - Stable string feature `id` matching `specimenId`.
+- Resumable counting: `total` is an integer count of matching spatial features, or `null` if spatial aggregate counting is temporarily unavailable or incomplete. Harvesters should drain features using `hasMore` and `nextCursor`.
+
+**Response Example:**
+```json
+{
+  "type": "FeatureCollection",
+  "schemaVersion": "2026-09-issue140-v2",
+  "sourceSystemId": "soilfer-lims-core",
+  "total": 1200,
+  "count": 100,
+  "hasMore": true,
+  "nextCursor": "eyJ0eXBlIjoibGl2ZV9saXN0IiwiZW5kcG9pbnQiOiJnZW9qc29uIiwiY29ubmVjdGlvbklkIjoia2V5X2F1dGhfMDAxIiwiY2FjaGVkVG90YWwiOjEyMDB9",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-90.51327, 14.64072]
+      },
+      "properties": {
+        "specimenId": "550e8400-e29b-41d4-a716-446655440000",
+        "fieldSampleId": "BAG-001",
+        "labSampleId": "ACC-001",
+        "laboratoryId": "GTM-LAB1",
+        "country": "GTM",
+        "projectCode": "DEMO-GTM-2026",
+        "profile": "core-lossless-v2",
+        "collectionDate": "2026-04-12",
+        "depthRange": "0-20 cm",
+        "topCm": 0,
+        "bottomCm": 20,
+        "qualityIssues": [],
+        "observations": []
+      }
+    }
+  ]
+}
+```
 
 ---
 
@@ -291,16 +342,22 @@ Allows consumers to freeze a point-in-time manifest across the dataset and harve
 
 - **Creation:** `POST /api/v2/data-exchange/snapshots`
   - Body: `{ "profile": "core-lossless-v2", "ttlHours": 24, "filter": { "country": "GTM" } }`
-  - Response:
+  - Response (HTTP 201):
     ```json
     {
       "status": "success",
       "schemaVersion": "2026-09-issue140-v2",
       "sourceSystemId": "soilfer-lims-core",
+      "profile": "core-lossless-v2",
       "snapshotId": "snap_1790461148749_eb88d95e",
       "connectionId": "key_auth_001",
+      "highWaterSequence": 1200,
       "highWaterTimestamp": "2026-09-27T00:15:00.000Z",
+      "nextCursor": "eyJ0eXBlIjoiY2hhbmdlIiwiY29ubmVjdGlvbklkIjoia2V5X2F1dGhfMDAxIiwic2VxIjoxMjAwLCJ0aW1lc3RhbXAiOiIyMDI2LTA5LTI3VDAwOjE1OjAwLjAwMFoifQ==",
       "totalSamples": 1200,
+      "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "authVersion": 1,
+      "epoch": 1,
       "expiresAt": "2026-09-28T00:15:00.000Z",
       "ttlHours": 24
     }
@@ -323,6 +380,10 @@ Monotonically ordered feed of publication, amendment, and withdrawal events from
 |---|---|---|---|
 | `cursor` | string | No | Opaque boundary cursor received in previous response. |
 | `limit` | integer | No | Maximum number of events (default: 100, max: 500). |
+| `profile` | string | No | Schema profile filter (e.g. `core-lossless-v2`, `opennsis`). |
+| `country` | string | No | Country filter. |
+| `project` | string | No | Project filter. |
+| `labId` | string | No | Laboratory filter. |
 
 **Change Feed Event Schema:**
 ```json
@@ -330,35 +391,38 @@ Monotonically ordered feed of publication, amendment, and withdrawal events from
   "status": "success",
   "schemaVersion": "2026-09-issue140-v2",
   "sourceSystemId": "soilfer-lims-core",
+  "batchId": "batch_1790461149000_c4d2",
   "boundaryTimestamp": "2026-09-27T00:15:00.000Z",
-  "count": 2,
+  "count": 1,
   "hasMore": false,
-  "nextCursor": "eyJzZXEiOjIsInRpbWVzdGFtcCI6IjIwMjYtMDktMjdUMDA6MTQ6MDAuMDAwWiJ9",
+  "nextCursor": "eyJ0eXBlIjoiY2hhbmdlIiwiY29ubmVjdGlvbklkIjoia2V5X2F1dGhfMDAxIiwic2VxIjoxLCJ0aW1lc3RhbXAiOiIyMDI2LTA5LTI3VDAwOjE0OjAwLjAwMFoifQ==",
   "changes": [
     {
+      "id": "evt_1790461148749_a1b2c3d4",
       "sequence": 1,
-      "eventId": "evt_550e8400_1790461148749_a1b2",
       "eventType": "PUBLICATION",
       "specimenId": "550e8400-e29b-41d4-a716-446655440000",
       "fieldSampleId": "BAG-001",
       "labSampleId": "ACC-001",
+      "country": "GTM",
+      "projectCode": "DEMO-GTM-2026",
+      "laboratoryId": "GTM-LAB1",
       "timestamp": "2026-09-27T00:14:00.000Z",
-      "data": { "specimenId": "550e8400-e29b-41d4-a716-446655440000", "status": "APPROVED", "publicationStatus": "RELEASED", "observations": [...] }
+      "data": {
+        "specimenId": "550e8400-e29b-41d4-a716-446655440000",
+        "status": "APPROVED",
+        "publicationStatus": "RELEASED",
+        "observations": []
+      }
     }
   ]
 }
 ```
 
-**Cursor Expiration Behavior (HTTP 410):**
-If a consumer passes an invalid, malformed, or expired cursor, the gateway responds with HTTP 410:
-```json
-{
-  "error": "CURSOR_EXPIRED",
-  "code": "CURSOR_EXPIRED",
-  "message": "Invalid or expired cursor. Please initialize a fresh synchronization snapshot."
-}
-```
-The consumer should catch HTTP 410, create a new snapshot via `POST /snapshots`, and reset its checkpoint.
+**Cursor Error Behaviors (HTTP 400 vs 410):**
+The gateway strictly distinguishes invalid request syntax from expired/invalidated sync state:
+- **HTTP 400 Bad Request (`INVALID_CURSOR`):** Returned when a cursor is malformed, has an invalid signature, belongs to a different connection, specifies a mismatched profile or filter, or references a future sequence beyond the current journal boundary. The consumer should verify request parameters and signing.
+- **HTTP 410 Gone (`CURSOR_EXPIRED`):** Returned when a cursor has exceeded its 72-hour TTL, or has been invalidated due to a database restore/epoch change, connection deactivation, or permission modification (authorization version mismatch). The consumer must re-synchronize by requesting a new snapshot via `POST /snapshots` or starting from `cursor=null`.
 
 ---
 
@@ -375,11 +439,19 @@ Enables external consumers (e.g. OpenNSIS ingestion pipeline) to acknowledge suc
   "snapshotId": "snap_1790461148749_eb88d95e",
   "importedCount": 98,
   "quarantinedCount": 2,
-  "checkpoint": "harvest-batch-1"
+  "checkpoint": "seq_100"
 }
 ```
 
-**Response Example:**
+**Field Specifications:**
+- `snapshotId` (string, optional*): ID of the issued snapshot being acknowledged.
+- `batchId` (string, optional*): ID of the issued change feed batch being acknowledged. (*At least one of `snapshotId` or `batchId` must be provided).
+- `checkpoint` (string, optional): Monotonic delivery checkpoint. Must follow pattern `seq_<N>` (e.g. `seq_100` for sequence checkpoints) or `item_<N>` (e.g. `item_98` for snapshot items). Checkpoint numbers exceeding the referenced artifact's boundary are rejected.
+- `importedCount` (integer, required): Non-negative integer of specimens successfully ingested.
+- `quarantinedCount` (integer, required): Non-negative integer of specimens quarantined or flagged.
+- `errors` (array, optional): Optional list of ingestion error strings or diagnostic objects.
+
+**Response Example (HTTP 200):**
 ```json
 {
   "status": "success",
@@ -388,11 +460,28 @@ Enables external consumers (e.g. OpenNSIS ingestion pipeline) to acknowledge suc
   "receipt": {
     "receiptId": "rec_1790461148894_cb7fa653",
     "connectionId": "key_auth_001",
+    "batchId": null,
+    "snapshotId": "snap_1790461148749_eb88d95e",
     "receivedAt": "2026-09-27T00:18:00.000Z",
-    "status": "ACKNOWLEDGED"
+    "status": "ACKNOWLEDGED",
+    "idempotent": false,
+    "receiverReported": {
+      "importedCount": 98,
+      "quarantinedCount": 2,
+      "checkpoint": "seq_100"
+    },
+    "verifiedImport": false
   }
 }
 ```
+
+**Receipt Error Handling:**
+- `400 Bad Request` (`INVALID_RECEIPT`): Neither `snapshotId` nor `batchId` was provided.
+- `400 Bad Request` (`INVALID_CHECKPOINT`): Checkpoint format does not match `seq_<N>` or `item_<N>`, or exceeds issued sequence / item boundary.
+- `400 Bad Request` (`INVALID_COUNT`): Counts are negative or not integers.
+- `404 Not Found` (`SNAPSHOT_NOT_FOUND` / `BATCH_NOT_FOUND`): Referenced artifact was not issued or does not exist.
+- `409 Conflict` (`RECEIPT_CONFLICT`): A receipt with the same identity already exists but has conflicting counts, checkpoint, or error details.
+- `410 Gone` (`SNAPSHOT_EXPIRED` / `BATCH_EXPIRED`): The referenced artifact belongs to a previous epoch or authorization version.
 
 ---
 
@@ -400,11 +489,13 @@ Enables external consumers (e.g. OpenNSIS ingestion pipeline) to acknowledge suc
 
 | Status Code | Error Code | Description |
 |---|---|---|
-| `400 Bad Request` | `VALIDATION_ERROR` | Malformed parameters, invalid limit, or missing required fields. |
-| `401 Unauthorized` | `UNAUTHORIZED` | Missing, invalid, or revoked API key. |
-| `403 Forbidden` | `FORBIDDEN` | Scoping violation (accessing laboratory or country outside key permissions). |
-| `404 Not Found` | `NOT_FOUND` | Requested specimen or snapshot does not exist. |
-| `410 Gone` | `CURSOR_EXPIRED` | Pagination or change feed cursor expired. Consumer must re-synchronize. |
+| `400 Bad Request` | `VALIDATION_ERROR`, `INVALID_QUERY`, `INVALID_BBOX` | Malformed query parameters, invalid bounding box format/bounds, or missing required fields. |
+| `400 Bad Request` | `INVALID_CURSOR`, `INVALID_CHECKPOINT`, `INVALID_COUNT` | Malformed cursor payload, signature mismatch, invalid checkpoint syntax, or non-integer counts. |
+| `401 Unauthorized` | `UNAUTHORIZED` | Missing, invalid, or revoked API key / Bearer token. |
+| `403 Forbidden` | `FORBIDDEN`, `CONNECTION_DISABLED` | Scoping violation (accessing laboratory or country outside key permissions), or disabled connection. |
+| `404 Not Found` | `NOT_FOUND`, `SNAPSHOT_NOT_FOUND`, `BATCH_NOT_FOUND` | Requested specimen, snapshot, or batch does not exist. |
+| `409 Conflict` | `RECEIPT_CONFLICT` | Conflicting receipt submitted under existing identity. |
+| `410 Gone` | `CURSOR_EXPIRED`, `SNAPSHOT_EXPIRED`, `BATCH_EXPIRED` | Pagination cursor, snapshot, or change batch expired or invalidated by epoch/permission rotation. |
 | `500 Internal Error`| `INTERNAL_ERROR` | Unexpected server failure. Safe state preserved. |
 
 All error responses return structured JSON:

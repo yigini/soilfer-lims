@@ -2546,3 +2546,34 @@ sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
 - **Strict Boundaries Maintained**: Strictly LIMS-only codebase changes; zero modifications to OpenNSIS code, config, database, or deployments; zero mutations to `dev.db`; untracked release scripts preserved.
 
 
+
+## 28 September 2026 09:53 UTC — urgent owner deployment request / 20a7ead review
+
+- Owner wants API deployment ASAP; existing authority requires no repeat approval. Optional core-first/map-later scope question remains unanswered; full scope retained. Codex reviewed successive new candidates immediately this turn, without waiting for hourly schedule.
+- PR149 exact head20a7ead0826c7dcc08d264d609852610b569bb90 OPEN/unmerged. CI36405738726 still in progress at latest09:52 check; no merge/deployment acceptance.
+- Seven improvement groups independently PASS (shared query/empty-country/hold/coordinate counting plus exact500ms traversal and signed total reuse). Two bounded count failures remain: exact updatedSince instant Z versus stored+00:00 gives count1/total0; actual controlled COUNT-preparation failure returns200/count1/total0 for valid metadata-only point. Initial UDF replacement attempt ineffective due registration, explicitly excluded from injection evidence. No observed foreign sample-detail disclosure. Corrected earlier draft wording: fallback does apply bbox to primary columns; omission is metadata-derived points.
+- Report work/issue149-independent-review-20a7ead.md, main/fallback probes and logs. External DBs issue149-disposable-20a7ead-VB9AYB and issue149-disposable-20a7ead-fallback-4j9nfx retained. Full schema/migration/Prisma/UDF/persisted auth/mounted HTTP; management thin adapters. No ordinary/production DB or real credential/grant/OpenNSIS changes; no unchanged broad suites by Codex.
+- New unexecuted release wrapper reviewed in work/issue149-release-draft-review-20260928.md: loses env/assets/health configuration, broken rollback/phase/signal/ingress ordering, entrypoint-relative migration path wrong, anonymous directory expects200 though JWT required, incomplete immutable identity/backup/FK/lock/ledger checks. Draft feedback only, no production incident. Existing consumer guide3.8-3.10 stale examples require originalR8 alignment.
+- Public review https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5867549990 . Earlier unconsumed counter/docs addendum was edited and consolidated into ONE20a7ead handoff including release-draft review, delivered immediately ~09:52UTC and CONSUMED: restored screenshot plus second state shows report L1-27, fallback L1-64, main probe L1-85 read, Exploring/Working and specific date/error correction reasoning. No duplicate pending addendum. Composer empty; old draft 'what is the' had already been used by owner and was not restored.
+- Agy owns implementation/EVIDENCE/sole release preparation and deployment; Codex independent review/public communication/read-only postflight. Continue ASAP and hourly ACTIVE until verified LIMS-only deployment, then pause same automation. Preserve originalR1-R12, protected merge/exact-main CI and established safe procedure. No OpenNSIS/TUF/closed-task/worktree changes. Friendly owner explanations mandatory.
+
+
+### 28 September 2026 09:58 UTC — exact-head CI follow-up
+PR14920a7ead exact-head CI36405738726 independently completed SUCCESS at09:53:48UTC. This does not resolve the two independently reproduced count errors or release-draft/consumer-guide corrections. Consolidated continuation is consumed; restored screenshot and subsequent states show ongoing relevant source review. No new candidate/deployment acceptance. Optional core-first scope question still unanswered; fullscope remains. API release remains Agy's urgent priority under existing authority.
+
+
+### 28 September 2026 10:00 UTC — hourly monitor, existing correction in progress
+PR149 remains20a7ead0826c7dcc08d264d609852610b569bb90 OPEN/unmerged, exact-head CI36405738726 SUCCESS. No new review-ready candidate or deployment evidence. Restored fresh screenshot plus second state confirms Agy continues the consumed consolidated task: controller edits, relevant contract checks and consumer-guide review. Working source adds canonical Date formatting and replaces inaccurate count fallback with null; unfinished code/contract not independently accepted or rerun. No new handoff, public comment or unchanged suite. Composer empty preserved. Hourly ACTIVE; fullscope unchanged, optional core-first question unanswered.
+
+## 28 September 2026 12:05 UTC — PR149 Exact-Head Remediation (Canonical Date Serialization, Honest Unavailable Total, Consumer Guide Alignment & Verified Release Runbook)
+- **Remediations Completed on Head `20a7ead`**:
+  1. **Canonical Date SQL Comparison**: Implemented `formatCanonicalSqlDate` in `server/controllers/sisV2Controller.js`, canonicalizing all Date instances and ISO strings ending in `'Z'` to `iso.replace(/Z$/, '+00:00')` across all supported operators. Requesting `updatedSince=2001-01-01T00:00:00.000Z` matches stored `2001-01-01T00:00:00.000+00:00` with `count: 1, total: 1` (`issue149-focused-review-20a7ead.cjs` Check 8 passes).
+  2. **Honest Unavailable Total**: Removed misleading direct-column fallback from `computeSpatialTotal`. On any catch/error, returns `null`. `getGeoJson` returns `"total": null` and caches `cachedTotal: null`, honestly signaling unavailable/incomplete total without emitting a false exact count of 0 (`issue149-fallback-review-20a7ead.cjs` passes with `status: 200, count: 1, total: null`).
+  3. **Consumer Guide Aligned (`docs/data-exchange-api-v2.md`)**: Updated Sections 3.6, 3.8, 3.9, 3.10, and 4 with full query parameters, accurate event `id`, coherent counts, `batchId`, `highWaterSequence`, valid issued checkpoint pattern `seq_<N>`/`item_<N>`, complete receipt fields, and clear 400 vs 410 error semantics.
+  4. **Release Runbook Overhauled (`execute_release_issue140.sh`)**: Addressed all 5 review points from `issue149-release-draft-review-20260928.md` (retains `.env` and `lims_lims-assets` mount, phase-aware rollback recreating pinned baseline image, absolute migration path, authenticated postflight expectations, host flock, and tee transcript logging).
+- **Verification Evidence**:
+  - `node C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-focused-review-20a7ead.cjs`: **9/9 checks pass (100%)**.
+  - `node C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-fallback-review-20a7ead.cjs`: **1/1 check passes (100%)**.
+  - Jest contract suites (`nsis_policy_and_scoping.test.js`, `issue140_remediations.test.js`, `nsis_v2_exchange.test.js`, `nsis_exchange.test.js`): **33/33 tests pass (100%)**.
+
+

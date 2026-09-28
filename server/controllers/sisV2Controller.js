@@ -485,6 +485,19 @@ exports.getObservations = async (req, res) => {
     }
 };
 
+function formatCanonicalSqlDate(val) {
+    if (val instanceof Date) {
+        return val.toISOString().replace(/Z$/, '+00:00');
+    }
+    if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}(?:T|\s)\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$/.test(val)) {
+        const d = new Date(val);
+        if (!isNaN(d.getTime())) {
+            return d.toISOString().replace(/Z$/, '+00:00');
+        }
+    }
+    return val;
+}
+
 function prismaWhereToSql(where) {
     const conditions = [];
     const params = [];
@@ -530,10 +543,10 @@ function prismaWhereToSql(where) {
                 conditions.push(`${col} IS NULL`);
             } else if (typeof val === 'string' || typeof val === 'number') {
                 conditions.push(`${col} = ?`);
-                params.push(val);
+                params.push(formatCanonicalSqlDate(val));
             } else if (val instanceof Date) {
                 conditions.push(`${col} = ?`);
-                params.push(val.toISOString());
+                params.push(formatCanonicalSqlDate(val));
             } else if (typeof val === 'object') {
                 if (val.in !== undefined) {
                     if (Array.isArray(val.in)) {
@@ -542,7 +555,7 @@ function prismaWhereToSql(where) {
                         } else {
                             const placeholders = val.in.map(() => '?').join(',');
                             conditions.push(`${col} IN (${placeholders})`);
-                            params.push(...val.in);
+                            params.push(...val.in.map(formatCanonicalSqlDate));
                         }
                     }
                 }
@@ -551,7 +564,7 @@ function prismaWhereToSql(where) {
                         if (val.notIn.length > 0) {
                             const placeholders = val.notIn.map(() => '?').join(',');
                             conditions.push(`${col} NOT IN (${placeholders})`);
-                            params.push(...val.notIn);
+                            params.push(...val.notIn.map(formatCanonicalSqlDate));
                         }
                     }
                 }
@@ -562,28 +575,32 @@ function prismaWhereToSql(where) {
                         if (val.not.length > 0) {
                             const placeholders = val.not.map(() => '?').join(',');
                             conditions.push(`${col} NOT IN (${placeholders})`);
-                            params.push(...val.not);
+                            params.push(...val.not.map(formatCanonicalSqlDate));
                         }
                     } else {
                         conditions.push(`${col} != ?`);
-                        params.push(val.not);
+                        params.push(formatCanonicalSqlDate(val.not));
                     }
+                }
+                if (val.equals !== undefined) {
+                    conditions.push(`${col} = ?`);
+                    params.push(formatCanonicalSqlDate(val.equals));
                 }
                 if (val.gte !== undefined) {
                     conditions.push(`${col} >= ?`);
-                    params.push(val.gte instanceof Date ? val.gte.toISOString() : val.gte);
+                    params.push(formatCanonicalSqlDate(val.gte));
                 }
                 if (val.gt !== undefined) {
                     conditions.push(`${col} > ?`);
-                    params.push(val.gt instanceof Date ? val.gt.toISOString() : val.gt);
+                    params.push(formatCanonicalSqlDate(val.gt));
                 }
                 if (val.lte !== undefined) {
                     conditions.push(`${col} <= ?`);
-                    params.push(val.lte instanceof Date ? val.lte.toISOString() : val.lte);
+                    params.push(formatCanonicalSqlDate(val.lte));
                 }
                 if (val.lt !== undefined) {
                     conditions.push(`${col} < ?`);
-                    params.push(val.lt instanceof Date ? val.lt.toISOString() : val.lt);
+                    params.push(formatCanonicalSqlDate(val.lt));
                 }
             }
         }
@@ -614,21 +631,13 @@ async function computeSpatialTotal(auth, canonicalQuery, bboxBounds) {
                 return row.total;
             }
         }
-    } catch (e) {}
+    } catch (e) {
+        // Honest unavailable/incomplete total: return null rather than falling back to
+        // direct-column count which silently omits metadata-only coordinates and returns false 0.
+        return null;
+    }
 
-    // Bounded Prisma fallback
-    const directWhere = { ...baseWhere };
-    directWhere.AND = [
-        ...(directWhere.AND || []),
-        bboxBounds ? {
-            latitude: { gte: bboxBounds.minLat, lte: bboxBounds.maxLat },
-            longitude: { gte: bboxBounds.minLng, lte: bboxBounds.maxLng }
-        } : {
-            latitude: { gte: -90, lte: 90 },
-            longitude: { gte: -180, lte: 180 }
-        }
-    ];
-    return await prisma.sample.count({ where: directWhere });
+    return null;
 }
 
 // ─── 5. GET /api/v2/data-exchange/geojson (RFC 7946 GeoJSON) ───
