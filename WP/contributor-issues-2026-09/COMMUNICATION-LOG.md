@@ -2756,3 +2756,53 @@ PR149 remains20a7ead0826c7dcc08d264d609852610b569bb90 OPEN/unmerged, exact-head 
 - **Release Status**: Changes committed to `feat/issue-140-nsis-exchange` (PR #149) for exact-head CI. Code NOT LIVE YET.
 
 
+
+
+## 28 September 2026 20:29 UTC — accepted PR149 merged; release preparation, not live
+
+- This entry supersedes stale 15:10 review state. Candidate 0e733e7383f27bec88c0e3971d33233c1c8a6b71 was independently ACCEPTED16:04UTC for protected merge and the four-gate operator release. Fourteen extracted source/runtime/proxy checks passed; Docker effects stubbed, not actual recovery. Public acceptance https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5873818100 . ONE16:04 continuation consumed; subsequent owner Escape ended that turn before monitor/log refresh, not acceptance or monitoring authorization.
+- PR149 MERGED16:05:46UTC as48d0e526ded03232ac8516dd867f4b14923bdb58. Accepted and main Git tree identical236122d4afac35de2a89cb951b8cd87b1d3f769c. Exact-main CI36448529766/job109016979420 independently SUCCESS16:12:05UTC. No repeated passing suites.
+- Read-only SSH20:23:28UTC: old baseline still running healthy, soilfer-lims:v3.5.29-e5d5ebd/imagefe6b64efc4f046635a830f5568773fefa52e95e975444c1f61dff14800679c1b, same26Sep13:00:57 start. Actual production mode, suppression flags absent, existing data/assets mounts and health configuration; proxyf46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20. Public health20:27UTC200/ok. No new release live claim.
+- Fresh restored screenshot plus second state20:26UTC show existing LIMS Dev release task with main content comparison and source_48d0e52.tar.gz prepared, now Compacting/Cancel. Accessibility text stale; screenshots used. This proves preparation/compaction state, not completed build/cutover or continuing progress during compaction. Composer empty preserved. No duplicate handoff.
+- Report work/issue149-merge-release-status-20260928-2027.md; snapshot issue149-runtime-20260928-1905.json has actual20:23 timestamp internally despite nominal heartbeat1905 filename. Public update https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5877899213 . No completed ledger in EVIDENCE at this check; Agy owns EVIDENCE.
+- Continue existing authorized four gates from accepted main, including clean build/immutable identity, pinned artifact hashes/existing principals, real configuration/proxy proof, stopped-writer DB/WAL/assets backup/integrity/FK, additive migration, COMMITTED before writers/no old-DB restore after writes, bounded final verification. Agy sole deployer; Codex read-only independent runtime/ledger verification. No repeat owner approval. Hourly ACTIVE until independently verified live deployment, then pause same automation. OpenNSIS untouched/TUF planning only/no closed-task reruns/worktree removal.
+
+## 28 September 2026 20:45 UTC — PR #149 Production Release Execution & Live Verification (v3.5.30 — 48d0e52)
+
+- **Execution Context**: Executed the authorized 4-gate production release procedure for PR #149 (`feat/issue-140-nsis-exchange`), implementing the safe LIMS-NSIS Data Exchange Gateway (V2). Candidate `0e733e7383f27bec88c0e3971d33233c1c8a6b71` was independently accepted by Codex (`issue149-independent-acceptance-0e733e7.md`, comment 5873818100).
+- **Gate 1 (Protected Merge & Exact-Main CI)**:
+  - Candidate merged into `main` as merge commit `48d0e526ded03232ac8516dd867f4b14923bdb58` (`48d0e52`).
+  - Tree comparison `git diff 0e733e7..HEAD` confirmed 0 differences (clean merge).
+  - Exact-main GitHub Actions CI Run **36448529766** (job `109016979420`) passed **SUCCESS** in 6m 13s.
+- **Gate 2 (Clean Build & Immutable Provenance Binding)**:
+  - Clean Linux LF source archive generated from `48d0e52`: `source_48d0e52.tar.gz` (SHA-256: `76fe8d8a76e01d29a0c80e1a7287888060c7e9d5e5a3374ce44ec49b39c9956b`, 60,363,221 bytes).
+  - Uploaded to host `/opt/lims/source_48d0e52.tar.gz` and unpacked into `/opt/lims/build_48d0e52`.
+  - Built immutable Docker image `soilfer-lims:v3.5.30-48d0e52` (Image ID: `sha256:685af8a608d0015fbc582084cda50dc514089d44ba15bcbdbf283c21ae1e40fb`) with label `org.opencontainers.image.revision=48d0e526ded03232ac8516dd867f4b14923bdb58`.
+  - Release wrapper `execute_release_issue140.sh` verified: SHA-256 `b18ac623d351416a4cf97679d72f9409679ea68a494459258d5957c2a737494e`.
+  - Postflight suite `postflight_issue140.cjs` verified: SHA-256 `cb88ca593de1e2af3a0052a7ffb958eeb3933028764718eb624bfdfbc5fea4b5`.
+  - Bound explicit active principals: `POSTFLIGHT_ADMIN_ID=1770311018064` (SUPER_ADMIN) and `POSTFLIGHT_MANAGER_ID=user-mgr-gha` (LAB_MANAGER for `GHA-LAB1`).
+- **Gate 3 (Baseline & Runtime Configuration Verification)**:
+  - Baseline container inspected before quiescence: `soilfer-lims:v3.5.29-e5d5ebd` (ID: `fe6b64efc4f0...`), `NODE_ENV=production`, background writers active.
+  - Baseline tagged: `soilfer-lims:rollback-baseline` (`sha256:fe6b64efc4f0...`).
+  - Pre-quiescence live Apache proxy hash captured: `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20`.
+  - Target container started in pre-exposure mode with `DISABLE_BACKGROUND_JOBS=true`; confirmed zero Kobo sync activity.
+  - Final runtime container verified running target image ID, `NODE_ENV=production`, suppression flags removed, writers active.
+- **Gate 4 (Quiescence, Zero-Writer Backup, Additive Migration, Cutover & Verification)**:
+  - Ingress write quiescence enforced via Apache 503 rewrite; tested `POST -> 503`.
+  - Active container stopped (zero writers). SQLite WAL truncated (`0|0|0`).
+  - Baseline counts recorded: `Samples=38566, Results=19`.
+  - Consistent backup created: `/opt/lims/backups/dev_pre_issue140_20260928_223645.db` (SHA-256: `5b7a90fc3a1dd6c8d4f226301198613fc1ede671a89cd4572ed6a22d6b41eaac`). Integrity `ok`, FK 0 errors, counts `38566 / 19`.
+  - Additive database migration executed via target image: `migrate_exchange_journal_tables.cjs`. Post-migration integrity `ok`, FK 0 errors, counts strictly unchanged (`38566 / 19`).
+  - Dedicated read-only Issue #140 postflight suite executed inside container under quiescence: **31/31 checks passed (100% green, 0 failures)** across schema, public health/discovery, anonymous 401 rejections, projection policies, and scoped catalogue assertions.
+  - Transitioned to durable `PHASE="COMMITTED"` before production writers resumed; automatic database restore permanently disabled.
+  - Container restarted in full production mode; responded healthy at second 3.
+  - Live Apache proxy restored: configtest OK, httpd reloaded. Restored Apache configuration SHA-256 `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20` matched pre-quiescence live hash.
+  - Write resumption verified: unauthenticated `POST https://lims.yigini.net/api/v2/data-exchange/receipts` returned HTTP 401 Unauthorized (from API, not 503 from proxy).
+  - Post-exposure public smoke checks passed: `/api/health` -> 200, `/api/v2/data-exchange/capabilities` -> 200, `/api/labs/directory` -> 401, `/api/v2/data-exchange/stats` -> 401, `/api/v2/data-exchange/geojson` -> 401.
+- **Artifacts & Ledgers**:
+  - Release Ledger: `/opt/lims/logs/release_ledger_issue140_20260928_223645.json`
+  - Release Transcript: `/opt/lims/logs/release_issue140_20260928_223645.log`
+- **Deployment Status**: LIVE in production as `soilfer-lims:v3.5.30-48d0e52` on `lims.yigini.net`. Ready for independent post-release verification by Codex.
+
+
+

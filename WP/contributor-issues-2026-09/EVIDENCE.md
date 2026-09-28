@@ -3087,6 +3087,129 @@ Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09
 | **Restored Proxy Configuration Hash Proof** | `execute_release_issue140.sh` (Step 8 & Step 9) | Release ledger recorded pre-quiescence proxy hash only; did not assert or record restored live proxy hash parity after cutover. | Captures `APACHE_RESTORED_HASH` after reload, asserts strict equality with `APACHE_LIVE_HASH`, and records both live and restored hashes in release ledger JSON. | Step 8 captures and verifies restored hash; ledger binds `apacheLiveConfigSha256` and `apacheRestoredConfigSha256`. |
 | **Concrete 4-Gate Operator Procedure** | `EVIDENCE.md`, `COMMUNICATION-LOG.md` | Release evidence needed concrete definition of the 4 release gates rather than interpolated ledger claims prior to merge. | Defined the 4-gate procedure spanning candidate acceptance, protected merge + exact-main CI, artifact binding, baseline/runtime inspection, and safe cutover with stopped-writer backup. | 4-gate protocol defined in EVIDENCE.md and COMMUNICATION-LOG.md. |
 
+### Phase 13: Technical Acceptance, Protected Merge & Production Release Execution (v3.5.30 — `48d0e52`)
+
+- **Acceptance Reference**: Codex Independent Technical Acceptance `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-independent-acceptance-0e733e7.md` (16:04 UTC / 18:04 CEST)
+- **Public Acceptance Comment**: [PR #149 Acceptance Comment 5873818100](https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5873818100)
+- **Target Release Version**: `v3.5.30` (`48d0e52`)
+- **Release Target Host**: `46.19.33.37` (`lims.yigini.net`)
+- **Execution Date & Time**: 28 September 2026, 20:36:45 UTC (22:36:45 CEST)
+- **Deployment Status**: **LIVE IN PRODUCTION** (`status: "SUCCESS"`)
+
+#### 4-Gate Production Release Execution Summary
+
+##### Gate 1: Candidate Acceptance & Protected Merge
+- **Accepted Head**: `0e733e7383f27bec88c0e3971d33233c1c8a6b71` (PR #149).
+- **Protected Merge**: Merged into `main` as merge commit `48d0e526ded03232ac8516dd867f4b14923bdb58` (`48d0e52`).
+- **Tree Verification**: `git diff 0e733e7..HEAD` confirmed 0 differences (tree hash `236122d4afac35de2a89cb951b8cd87b1d3f769c`).
+- **Exact-Main CI Run**: GitHub Actions CI Run **36448529766** (job `109016979420`) passed **SUCCESS** in 6m 13s.
+
+##### Gate 2: Clean Build & Immutable Provenance Binding
+- **Source Archive**: Clean POSIX LF archive `source_48d0e52.tar.gz` (SHA-256: `76fe8d8a76e01d29a0c80e1a7287888060c7e9d5e5a3374ce44ec49b39c9956b`, 60,363,221 bytes).
+- **Production Build**: Unpacked to `/opt/lims/build_48d0e52` on production host; built Docker image `soilfer-lims:v3.5.30-48d0e52`.
+  - Image ID: `sha256:685af8a608d0015fbc582084cda50dc514089d44ba15bcbdbf283c21ae1e40fb`
+  - Revision Label: `org.opencontainers.image.revision=48d0e526ded03232ac8516dd867f4b14923bdb58`
+- **Pinned Artifact Hashes**:
+  - Release Wrapper (`execute_release_issue140.sh`): SHA-256 `b18ac623d351416a4cf97679d72f9409679ea68a494459258d5957c2a737494e`
+  - Postflight Suite (`postflight_issue140.cjs`): SHA-256 `cb88ca593de1e2af3a0052a7ffb958eeb3933028764718eb624bfdfbc5fea4b5`
+- **Explicit Existing Principals**:
+  - `POSTFLIGHT_ADMIN_ID`: `1770311018064` (SUPER_ADMIN)
+  - `POSTFLIGHT_MANAGER_ID`: `user-mgr-gha` (LAB_MANAGER for `GHA-LAB1`)
+
+##### Gate 3: Baseline & Runtime Configuration Verification
+- **Baseline Container Inspection**:
+  - Running Container: `soilfer-lims` (Image: `soilfer-lims:v3.5.29-e5d5ebd`, ID: `sha256:fe6b64efc4f046635a830f5568773fefa52e95e975444c1f61dff14800679c1b`).
+  - Baseline Tagged: `soilfer-lims:rollback-baseline`.
+  - Environment: Verified `NODE_ENV=production`, background suppression flags absent.
+  - Live Apache Hash: `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20`.
+- **Pre-Exposure Container**: Started with `-e DISABLE_BACKGROUND_JOBS=true`; confirmed zero Kobo sync scheduler activity.
+- **Final Runtime Container**: Target Image ID `sha256:685af8a608d0015fbc582084cda50dc514089d44ba15bcbdbf283c21ae1e40fb`, `NODE_ENV=production`, suppression flags removed, production writers active.
+
+##### Gate 4: Safe Cutover & Zero-Loss Verification
+- **Write Quiescence**: Apache 503 rewrite rule applied for mutating HTTP verbs (`POST|PUT|PATCH|DELETE`). Tested `POST https://lims.yigini.net/api/v2/data-exchange/receipts -> 503`.
+- **Zero-Writer Checkpoint & Backup**:
+  - Active container stopped.
+  - SQLite WAL truncated to 0 pages (`PRAGMA wal_checkpoint(TRUNCATE)`: `0|0|0`).
+  - Baseline row counts: `Samples=38566, Results=19`.
+  - Backup created: `/opt/lims/backups/dev_pre_issue140_20260928_223645.db`.
+  - Backup SHA-256: `5b7a90fc3a1dd6c8d4f226301198613fc1ede671a89cd4572ed6a22d6b41eaac`.
+  - Backup integrity check: `ok`, foreign key check: `OK (0 errors)`, row counts: `38566 / 19`.
+- **Additive Database Migration**: Executed `node /app/server/scripts/migrate_exchange_journal_tables.cjs /app/server/prisma/dev.db` using target image ID in disposable migration container.
+  - New tables created: `_exchange_journal`, `_exchange_snapshots`, `_exchange_connections`, `_exchange_connection_keys`, `_exchange_receipts`, `_exchange_meta`.
+  - Post-migration integrity `ok`, foreign keys `OK (0 errors)`.
+  - Post-migration row counts: `Samples=38566, Results=19` (strictly unaltered).
+- **Pre-Exposure Postflight Suite**: Executed `postflight_issue140.cjs` inside container under quiescence:
+  - Total Checks: **31/31 passed (100% green, 0 failures)**.
+  - Schema & integrity: 9/9 PASS.
+  - Public discovery & capabilities: 2/2 PASS.
+  - Anonymous 401 denials across protected routes: 11/11 PASS.
+  - SUPER_ADMIN projection policies & management: 4/4 PASS.
+  - LAB_MANAGER projection, 403 route denials, scoped catalogue isolation: 4/4 PASS.
+  - Forged token rejection fixture: 1/1 PASS.
+- **Production Cutover (COMMITTED Phase)**:
+  - Transitioned to durable `PHASE="COMMITTED"` before production writers resumed; automatic database restore permanently disabled to prevent overwriting new mutations.
+  - Production container started without background suppression; healthy at second 3.
+  - Apache live configuration restored and reloaded; configtest OK.
+  - Restored Apache hash: `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20` (strict equality with pre-quiescence live hash).
+  - Live write resumption verified: unauthenticated `POST https://lims.yigini.net/api/v2/data-exchange/receipts` returned HTTP 401 Unauthorized from API (not 503 from proxy).
+- **Public Smoke Verification**:
+  - `GET https://lims.yigini.net/api/health` -> HTTP 200 `{"status":"ok","uptime":24.4}`
+  - `GET https://lims.yigini.net/api/v2/data-exchange/capabilities` -> HTTP 200 `{"status":"success","contractVersion":"2.0.0",...}`
+  - `GET https://lims.yigini.net/api/labs/directory` -> HTTP 401 Unauthorized (protected)
+  - `GET https://lims.yigini.net/api/v2/data-exchange/stats` -> HTTP 401 Unauthorized (protected)
+  - `GET https://lims.yigini.net/api/v2/data-exchange/geojson` -> HTTP 401 Unauthorized (protected)
+
+#### Production Release Ledger (`release_ledger_issue140_20260928_223645.json`)
+
+```json
+{
+  "releaseId": "issue-140-pr149",
+  "executionTimestamp": "20260928_223645",
+  "status": "SUCCESS",
+  "targetImageInput": "soilfer-lims:v3.5.30-48d0e52",
+  "targetImageId": "sha256:685af8a608d0015fbc582084cda50dc514089d44ba15bcbdbf283c21ae1e40fb",
+  "finalRuntimeImageId": "sha256:685af8a608d0015fbc582084cda50dc514089d44ba15bcbdbf283c21ae1e40fb",
+  "imageSourceCommit": "48d0e526ded03232ac8516dd867f4b14923bdb58",
+  "expectedCommitSha": "48d0e526ded03232ac8516dd867f4b14923bdb58",
+  "mainCiRunId": "36448529766",
+  "postflightAdminId": "1770311018064",
+  "postflightManagerId": "user-mgr-gha",
+  "wrapperScriptSha256": "b18ac623d351416a4cf97679d72f9409679ea68a494459258d5957c2a737494e",
+  "apacheLiveConfigSha256": "f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20",
+  "apacheRestoredConfigSha256": "f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20",
+  "expectedPostflightSha": "cb88ca593de1e2af3a0052a7ffb958eeb3933028764718eb624bfdfbc5fea4b5",
+  "actualPostflightSha": "cb88ca593de1e2af3a0052a7ffb958eeb3933028764718eb624bfdfbc5fea4b5",
+  "baselineTag": "soilfer-lims:rollback-baseline",
+  "baselineImageId": "sha256:fe6b64efc4f046635a830f5568773fefa52e95e975444c1f61dff14800679c1b",
+  "backupFile": "/opt/lims/backups/dev_pre_issue140_20260928_223645.db",
+  "backupSha256": "5b7a90fc3a1dd6c8d4f226301198613fc1ede671a89cd4572ed6a22d6b41eaac",
+  "stoppedWriterCounts": {
+    "samples": 38566,
+    "results": 19
+  },
+  "runtimeConfiguration": {
+    "appContainerName": "soilfer-lims",
+    "nodeEnv": "production",
+    "dataVolume": "lims_lims-data",
+    "assetsVolume": "lims_lims-assets",
+    "envFile": "/opt/lims/.env",
+    "preExposureWriterHold": "DISABLE_BACKGROUND_JOBS=true",
+    "productionBackgroundJobs": "VERIFIED_ACTIVE",
+    "ingressQuiescence": "APACHE_503_REWRITE",
+    "ingressResumption": "HTTP_401_VERIFIED"
+  },
+  "serviceHealth": {
+    "publicHealthEndpoint": 200,
+    "capabilitiesEndpoint": 200,
+    "anonymousDirectoryPolicy": 401,
+    "anonymousStatsPolicy": 401,
+    "anonymousGeojsonPolicy": 401
+  },
+  "transcriptFile": "/opt/lims/logs/release_issue140_20260928_223645.log"
+}
+```
+
+
 
 
 
