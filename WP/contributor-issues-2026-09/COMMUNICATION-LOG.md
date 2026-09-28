@@ -2201,6 +2201,6 @@ sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
   - Full server contract test suite (`npm test -- tests/contracts/`): **136/136 test suites passed, 1,314/1,314 tests passed (100%)**.
   - Client Build: `vite build` clean in 7.58s with zero errors.
 - **Strict Boundaries Maintained**: Strictly LIMS-only codebase changes; zero modifications to OpenNSIS code, config, database, or deployments; zero mutations to `dev.db`; untracked release scripts preserved.
-- **Candidate Head & CI**: Candidate head committed on `feat/issue-140-nsis-exchange` (PR #149) with clean contract tests and production client build, ready for CI run and Codex independent verification.
+- **Candidate Head & CI**: Candidate head `9133d63` (`9133d631dfb1b8aa4df7fb459faef72da6bfdb05`) on `feat/issue-140-nsis-exchange` (PR #149); GitHub Actions CI run `36367548685` passed 100% green (6m20s, all 146 test suites passed, 1,414/1,414 tests passed, Docker boundary rehearsal passed). Ready for Codex independent verification.
 
 

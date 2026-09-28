@@ -2531,7 +2531,8 @@ Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09
   - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-independent-review-9ac1202.md`
   - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-focused-review-9ac1202.cjs/.log`
   - [PR #149 Review Comment 5861758421](https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5861758421)
-- **Candidate Head SHA**: `c6f0314a61ef4d40c6387146e5e553c9c931479e` (`c6f0314`)
+- **Candidate Head SHA**: `9133d631dfb1b8aa4df7fb459faef72da6bfdb05` (`9133d63`)
+- **GitHub Actions Candidate CI Run**: [Run 36367548685](https://github.com/yigini/soilfer-lims/actions/runs/36367548685) (**SUCCESS** in 6m20s; all 146 test suites, 1,414/1,414 tests passed, Docker boundary rehearsal passed)
 - **GitHub Actions CI Run on Prior Head (`9ac1202`)**: `36363871750` (SUCCESS at 00:59:41 UTC)
 - **Verification Suites & Probes**:
   - `server/scripts/verify_issue149_9ac1202_remediations.cjs`: **10/10 passed (100%)**
