@@ -151,7 +151,7 @@ function buildSampleWhere(auth, query = {}) {
                 // Deny: API key lacks explicit laboratory authorization
                 where.assignedLab = '__denied__';
             } else if (query.labId || query.assignedLab) {
-                const requested = query.assignedLab || query.labId;
+                const requested = query.labId || query.assignedLab;
                 if (keyLabs.includes(requested)) {
                     where.assignedLab = requested;
                 } else {
@@ -161,12 +161,12 @@ function buildSampleWhere(auth, query = {}) {
                 where.assignedLab = { in: keyLabs };
             }
         } else if (query.labId || query.assignedLab) {
-            where.assignedLab = query.assignedLab || query.labId;
+            where.assignedLab = query.labId || query.assignedLab;
         }
     } else {
         // JWT User scoping
         const userLab = auth?.labId;
-        const requested = query.assignedLab || query.labId;
+        const requested = query.labId || query.assignedLab;
         if (requested) {
             if (hasGlobalLab || keyLabs.includes(requested) || userLab === requested) {
                 where.assignedLab = requested;
@@ -187,28 +187,31 @@ function buildSampleWhere(auth, query = {}) {
     // Platform-user JWT exception applies strictly to authenticated platform users, never to API_KEY principals
     const isSuperAdmin = auth?.type !== 'API_KEY' && auth?.role === 'SUPER_ADMIN';
     if (!isSuperAdmin && Array.isArray(auth?.countries)) {
-        if (auth.countries.includes('*')) {
+        const authCountriesUpper = auth.countries.map(c => typeof c === 'string' ? c.trim().toUpperCase() : c);
+        const reqCountryUpper = (query.country !== undefined && query.country !== null && String(query.country).trim() !== '') ? String(query.country).trim().toUpperCase() : null;
+
+        if (authCountriesUpper.includes('*')) {
             // Global wildcard scope
-            if (query.country) {
-                where.country = query.country;
+            if (reqCountryUpper) {
+                where.country = reqCountryUpper;
             }
-        } else if (auth.countries.length === 0) {
+        } else if (authCountriesUpper.length === 0) {
             // Disjoint / empty scope -> access denied
             where.country = { in: [] };
         } else {
-            // Finite country scope
-            if (query.country) {
-                if (auth.countries.includes(query.country)) {
-                    where.country = query.country;
+            // Finite country scope (case-insensitive canonical match)
+            if (reqCountryUpper) {
+                if (authCountriesUpper.includes(reqCountryUpper)) {
+                    where.country = reqCountryUpper;
                 } else {
                     where.country = { in: [] }; // Deny: country outside key scope
                 }
             } else {
-                where.country = { in: auth.countries };
+                where.country = { in: authCountriesUpper };
             }
         }
     } else if (query.country) {
-        where.country = query.country;
+        where.country = String(query.country).trim().toUpperCase();
     }
 
     // 4. Project Scoping

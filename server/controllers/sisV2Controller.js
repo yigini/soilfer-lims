@@ -129,13 +129,22 @@ function checkConnectionActive(req, res) {
 exports.getSamples = async (req, res) => {
     if (!checkConnectionActive(req, res)) return;
     try {
-        const limit = Math.min(500, Math.max(1, parseInt(req.query.limit) || 50));
-        const cursor = req.query.cursor;
-        const where = buildSampleWhere(req.sisAuth, req.query);
+        const ctx = exchangeStateService.buildCanonicalQueryContext(req.query, 'samples');
+        if (!ctx.ok) {
+            return res.status(400).json({
+                error: 'Bad Request',
+                code: ctx.code,
+                message: ctx.error
+            });
+        }
+        const canonicalQuery = ctx.query;
+        const limit = Math.min(500, Math.max(1, parseInt(canonicalQuery.limit) || 50));
+        const cursor = canonicalQuery.cursor;
+        const where = buildSampleWhere(req.sisAuth, canonicalQuery);
 
         // Validate and decode cursor (R2, R8, R11)
         if (cursor) {
-            const cursorVal = exchangeStateService.validateLiveListCursor(cursor, req.sisAuth, 'samples', req.query);
+            const cursorVal = exchangeStateService.validateLiveListCursor(cursor, req.sisAuth, 'samples', canonicalQuery);
             if (!cursorVal.ok) {
                 return res.status(cursorVal.status).json({
                     error: cursorVal.status === 410 ? 'Gone' : 'Bad Request',
@@ -161,7 +170,7 @@ exports.getSamples = async (req, res) => {
         }
 
         const [total, samples, maps] = await Promise.all([
-            prisma.sample.count({ where: buildSampleWhere(req.sisAuth, req.query) }),
+            prisma.sample.count({ where: buildSampleWhere(req.sisAuth, canonicalQuery) }),
             prisma.sample.findMany({
                 where,
                 include: { results: true },
@@ -185,8 +194,8 @@ exports.getSamples = async (req, res) => {
                 type: 'live_list',
                 endpoint: 'samples',
                 connectionId: currentConn,
-                profile: (req.query.profile && String(req.query.profile).trim().toLowerCase()) || 'default',
-                filter: exchangeStateService.normalizeFilter(req.query, 'samples'),
+                profile: canonicalQuery.profile || 'default',
+                filter: ctx.filter,
                 lastUpdatedAt: last.updatedAt.toISOString(),
                 lastId: last.id
             });
@@ -275,9 +284,18 @@ exports.getSampleById = async (req, res) => {
 exports.getObservations = async (req, res) => {
     if (!checkConnectionActive(req, res)) return;
     try {
-        const limit = Math.min(1000, Math.max(1, parseInt(req.query.limit) || 100));
-        const cursor = req.query.cursor;
-        const sampleWhere = buildSampleWhere(req.sisAuth, req.query);
+        const ctx = exchangeStateService.buildCanonicalQueryContext(req.query, 'observations');
+        if (!ctx.ok) {
+            return res.status(400).json({
+                error: 'Bad Request',
+                code: ctx.code,
+                message: ctx.error
+            });
+        }
+        const canonicalQuery = ctx.query;
+        const limit = Math.min(1000, Math.max(1, parseInt(canonicalQuery.limit) || 100));
+        const cursor = canonicalQuery.cursor;
+        const sampleWhere = buildSampleWhere(req.sisAuth, canonicalQuery);
 
         const resultWhere = {
             isCurrent: true,
@@ -285,19 +303,19 @@ exports.getObservations = async (req, res) => {
             sample: sampleWhere
         };
 
-        if (req.query.param) {
-            resultWhere.param = req.query.param.toUpperCase();
+        if (canonicalQuery.param) {
+            resultWhere.param = canonicalQuery.param;
         }
-        if (req.query.censoring) {
-            resultWhere.censoring = req.query.censoring.toUpperCase();
+        if (canonicalQuery.censoring) {
+            resultWhere.censoring = canonicalQuery.censoring;
         }
-        if (req.query.basis) {
-            resultWhere.basis = req.query.basis.toUpperCase();
+        if (canonicalQuery.basis) {
+            resultWhere.basis = canonicalQuery.basis;
         }
 
         // Validate and decode cursor (R2, R8, R11)
         if (cursor) {
-            const cursorVal = exchangeStateService.validateLiveListCursor(cursor, req.sisAuth, 'observations', req.query);
+            const cursorVal = exchangeStateService.validateLiveListCursor(cursor, req.sisAuth, 'observations', canonicalQuery);
             if (!cursorVal.ok) {
                 return res.status(cursorVal.status).json({
                     error: cursorVal.status === 410 ? 'Gone' : 'Bad Request',
@@ -327,14 +345,14 @@ exports.getObservations = async (req, res) => {
             OR: [{ isValid: true }, { isValid: null }],
             sample: sampleWhere
         };
-        if (req.query.param) {
-            countWhere.param = req.query.param.toUpperCase();
+        if (canonicalQuery.param) {
+            countWhere.param = canonicalQuery.param;
         }
-        if (req.query.censoring) {
-            countWhere.censoring = req.query.censoring.toUpperCase();
+        if (canonicalQuery.censoring) {
+            countWhere.censoring = canonicalQuery.censoring;
         }
-        if (req.query.basis) {
-            countWhere.basis = req.query.basis.toUpperCase();
+        if (canonicalQuery.basis) {
+            countWhere.basis = canonicalQuery.basis;
         }
 
         const [total, results, maps] = await Promise.all([
@@ -362,8 +380,8 @@ exports.getObservations = async (req, res) => {
                 type: 'live_list',
                 endpoint: 'observations',
                 connectionId: currentConn,
-                profile: (req.query.profile && String(req.query.profile).trim().toLowerCase()) || 'default',
-                filter: exchangeStateService.normalizeFilter(req.query, 'observations'),
+                profile: canonicalQuery.profile || 'default',
+                filter: ctx.filter,
                 lastUpdatedAt: last.updatedAt.toISOString(),
                 lastId: last.id
             });
@@ -471,12 +489,21 @@ exports.getObservations = async (req, res) => {
 exports.getGeoJson = async (req, res) => {
     if (!checkConnectionActive(req, res)) return;
     try {
-        const limit = Math.min(500, Math.max(1, parseInt(req.query.limit) || 100));
+        const ctx = exchangeStateService.buildCanonicalQueryContext(req.query, 'geojson');
+        if (!ctx.ok) {
+            return res.status(400).json({
+                error: 'Bad Request',
+                code: ctx.code,
+                message: ctx.error
+            });
+        }
+        const canonicalQuery = ctx.query;
+        const limit = Math.min(500, Math.max(1, parseInt(canonicalQuery.limit) || 100));
 
         // Strict BBox validation (rejects empty components, non-finite, out of range) (R4, R7, R11)
         let bboxBounds = null;
-        if (req.query.bbox !== undefined) {
-            const rawBbox = String(req.query.bbox);
+        if (canonicalQuery.bbox !== undefined && canonicalQuery.bbox !== null) {
+            const rawBbox = String(canonicalQuery.bbox);
             const parts = rawBbox.split(',').map(s => s.trim());
             if (parts.length !== 4 || parts.some(p => p === '' || isNaN(Number(p)) || !isFinite(Number(p)))) {
                 return res.status(400).json({
@@ -497,10 +524,10 @@ exports.getGeoJson = async (req, res) => {
         }
 
         // Validate and decode cursor (R2, R8, R11)
-        const cursor = req.query.cursor;
+        const cursor = canonicalQuery.cursor;
         let decoded = null;
         if (cursor) {
-            const cursorVal = exchangeStateService.validateLiveListCursor(cursor, req.sisAuth, 'geojson', req.query);
+            const cursorVal = exchangeStateService.validateLiveListCursor(cursor, req.sisAuth, 'geojson', canonicalQuery);
             if (!cursorVal.ok) {
                 return res.status(cursorVal.status).json({
                     error: cursorVal.status === 410 ? 'Gone' : 'Bad Request',
@@ -526,20 +553,12 @@ exports.getGeoJson = async (req, res) => {
         }
 
         // Candidate query matching authorization and filter criteria
-        const candidateWhere = buildSampleWhere(req.sisAuth, req.query);
-        candidateWhere.AND = [
-            ...(candidateWhere.AND || []),
-            {
-                OR: [
-                    { latitude: { not: null } },
-                    { fieldMetadata: { not: null } },
-                    { metadata: { not: null } }
-                ]
-            }
-        ];
+        const candidateBaseWhere = buildSampleWhere(req.sisAuth, canonicalQuery);
+        candidateBaseWhere.AND = candidateBaseWhere.AND || [];
 
+        const notEmptyMeta = { not: null, notIn: ['', '{}', 'null'] };
         if (bboxBounds) {
-            candidateWhere.AND.push({
+            candidateBaseWhere.AND.push({
                 OR: [
                     {
                         AND: [
@@ -547,51 +566,110 @@ exports.getGeoJson = async (req, res) => {
                             { longitude: { gte: bboxBounds.minLng, lte: bboxBounds.maxLng } }
                         ]
                     },
-                    { metadata: { not: null } },
-                    { fieldMetadata: { not: null } }
+                    { metadata: notEmptyMeta },
+                    { fieldMetadata: notEmptyMeta }
+                ]
+            });
+        } else {
+            candidateBaseWhere.AND.push({
+                OR: [
+                    { latitude: { not: null } },
+                    { metadata: notEmptyMeta },
+                    { fieldMetadata: notEmptyMeta }
                 ]
             });
         }
 
-        const candidateSamples = await prisma.sample.findMany({
-            where: candidateWhere,
-            select: {
-                id: true,
-                updatedAt: true,
-                latitude: true,
-                longitude: true,
-                fieldMetadata: true,
-                metadata: true
-            },
-            orderBy: [
-                { updatedAt: 'desc' },
-                { id: 'desc' }
-            ],
-            take: 5000
-        });
-
-        // Resolve coordinates with shared extractCoordinates across columns and metadata (R4, R7, R11)
+        // Bounded seek/scan traversal across candidate batches (F1, R1/R4/R7/R11)
+        const BATCH_SIZE = 5000;
+        const MAX_SCAN_ROWS = 15000;
         const validSpatialCandidates = [];
-        for (const s of candidateSamples) {
-            const coords = extractCoordinates(s, safeParseJson(s.fieldMetadata), safeParseJson(s.metadata));
-            if (!coords || coords.latitude === null || coords.longitude === null) {
-                continue;
+        let scannedCount = 0;
+        let exhausted = false;
+        let lastScannedCandidate = null;
+        let lastBatchId = null;
+
+        while (scannedCount < MAX_SCAN_ROWS) {
+            const queryArgs = {
+                where: candidateBaseWhere,
+                select: {
+                    id: true,
+                    updatedAt: true,
+                    latitude: true,
+                    longitude: true,
+                    fieldMetadata: true,
+                    metadata: true
+                },
+                orderBy: [
+                    { updatedAt: 'desc' },
+                    { id: 'desc' }
+                ],
+                take: BATCH_SIZE
+            };
+            if (lastBatchId) {
+                queryArgs.cursor = { id: lastBatchId };
+                queryArgs.skip = 1;
             }
-            if (bboxBounds) {
-                if (
-                    coords.longitude < bboxBounds.minLng ||
-                    coords.longitude > bboxBounds.maxLng ||
-                    coords.latitude < bboxBounds.minLat ||
-                    coords.latitude > bboxBounds.maxLat
-                ) {
+
+            const batch = await prisma.sample.findMany(queryArgs);
+
+            if (batch.length === 0) {
+                exhausted = true;
+                break;
+            }
+
+            scannedCount += batch.length;
+            lastScannedCandidate = batch[batch.length - 1];
+            lastBatchId = lastScannedCandidate.id;
+
+            for (const s of batch) {
+                const coords = extractCoordinates(s, safeParseJson(s.fieldMetadata), safeParseJson(s.metadata));
+                if (!coords || coords.latitude === null || coords.longitude === null) {
                     continue;
                 }
+                if (bboxBounds) {
+                    if (
+                        coords.longitude < bboxBounds.minLng ||
+                        coords.longitude > bboxBounds.maxLng ||
+                        coords.latitude < bboxBounds.minLat ||
+                        coords.latitude > bboxBounds.maxLat
+                    ) {
+                        continue;
+                    }
+                }
+                validSpatialCandidates.push({
+                    id: s.id,
+                    updatedAt: s.updatedAt,
+                    coords
+                });
             }
-            validSpatialCandidates.push({
-                id: s.id,
-                updatedAt: s.updatedAt,
-                coords
-            });
+
+            // Check if we already have enough candidates past the cursor start point
+            if (decoded && (decoded.lastUpdatedAt || decoded.lastId)) {
+                const cursorTime = decoded.lastUpdatedAt ? new Date(decoded.lastUpdatedAt).getTime() : null;
+                const cursorId = decoded.lastId || null;
+                const foundIdx = validSpatialCandidates.findIndex(item => {
+                    const itemTime = item.updatedAt instanceof Date ? item.updatedAt.getTime() : new Date(item.updatedAt).getTime();
+                    if (cursorTime !== null) {
+                        if (itemTime < cursorTime) return true;
+                        if (itemTime === cursorTime && cursorId && item.id < cursorId) return true;
+                        return false;
+                    }
+                    if (cursorId && item.id < cursorId) return true;
+                    return false;
+                });
+                const curStart = (foundIdx !== -1) ? foundIdx : validSpatialCandidates.length;
+                if (validSpatialCandidates.length >= curStart + limit + 1) {
+                    break;
+                }
+            } else if (validSpatialCandidates.length >= limit + 1) {
+                break;
+            }
+
+            if (batch.length < BATCH_SIZE) {
+                exhausted = true;
+                break;
+            }
         }
 
         const total = validSpatialCandidates.length;
@@ -615,25 +693,27 @@ exports.getGeoJson = async (req, res) => {
         }
 
         const pageCandidates = validSpatialCandidates.slice(startIndex, startIndex + limit);
-        const hasMore = (startIndex + limit) < validSpatialCandidates.length;
+        const hasMore = (startIndex + limit) < validSpatialCandidates.length || (!exhausted && scannedCount >= MAX_SCAN_ROWS);
         const pageIds = pageCandidates.map(c => c.id);
 
         let nextCursor = null;
-        if (hasMore && pageCandidates.length > 0) {
-            const last = pageCandidates[pageCandidates.length - 1];
+        if (hasMore) {
             const currentConn = exchangeStateService.getConnectionId(req.sisAuth);
-            nextCursor = exchangeStateService.encodeCursor({
-                type: 'live_list',
-                endpoint: 'geojson',
-                connectionId: currentConn,
-                profile: (req.query.profile && String(req.query.profile).trim().toLowerCase()) || 'default',
-                filter: exchangeStateService.normalizeFilter(req.query, 'geojson'),
-                lastUpdatedAt: (last.updatedAt instanceof Date ? last.updatedAt : new Date(last.updatedAt)).toISOString(),
-                lastId: last.id
-            });
+            const anchorCandidate = pageCandidates.length > 0 ? pageCandidates[pageCandidates.length - 1] : lastScannedCandidate;
+            if (anchorCandidate) {
+                nextCursor = exchangeStateService.encodeCursor({
+                    type: 'live_list',
+                    endpoint: 'geojson',
+                    connectionId: currentConn,
+                    profile: canonicalQuery.profile || 'default',
+                    filter: ctx.filter,
+                    lastUpdatedAt: (anchorCandidate.updatedAt instanceof Date ? anchorCandidate.updatedAt : new Date(anchorCandidate.updatedAt)).toISOString(),
+                    lastId: anchorCandidate.id
+                });
+            }
         }
 
-        const detailWhere = buildSampleWhere(req.sisAuth, req.query);
+        const detailWhere = buildSampleWhere(req.sisAuth, canonicalQuery);
         detailWhere.AND = [
             ...(detailWhere.AND || []),
             { id: { in: pageIds } }
@@ -658,6 +738,18 @@ exports.getGeoJson = async (req, res) => {
 
             if (loc && Array.isArray(loc.coordinates) && loc.coordinates.length === 2) {
                 const [lng, lat] = loc.coordinates;
+
+                // Re-verify against bboxBounds on the fresh detail coordinates (F1, consistency race check)
+                if (bboxBounds) {
+                    if (
+                        lng < bboxBounds.minLng ||
+                        lng > bboxBounds.maxLng ||
+                        lat < bboxBounds.minLat ||
+                        lat > bboxBounds.maxLat
+                    ) {
+                        continue;
+                    }
+                }
 
                 // Lossless analytical observations array preserving replicates (F6)
                 const observationsList = v2.observations.map(obs => ({
@@ -717,8 +809,17 @@ exports.getGeoJson = async (req, res) => {
 exports.getStats = async (req, res) => {
     if (!checkConnectionActive(req, res)) return;
     try {
-        const sampleWhere = buildSampleWhere(req.sisAuth, req.query);
-        const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, req.query));
+        const ctx = exchangeStateService.buildCanonicalQueryContext(req.query, 'stats');
+        if (!ctx.ok) {
+            return res.status(400).json({
+                error: 'Bad Request',
+                code: ctx.code,
+                message: ctx.error
+            });
+        }
+        const canonicalQuery = ctx.query;
+        const sampleWhere = buildSampleWhere(req.sisAuth, canonicalQuery);
+        const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, canonicalQuery));
 
         const keyLabs = req.sisAuth?.labs || [];
         const isApiKey = req.sisAuth?.type === 'API_KEY';
@@ -769,14 +870,23 @@ exports.getStats = async (req, res) => {
 exports.getSpectra = async (req, res) => {
     if (!checkConnectionActive(req, res)) return;
     try {
-        const limit = Math.min(200, Math.max(1, parseInt(req.query.limit) || 50));
-        const cursor = req.query.cursor;
-        const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, req.query));
+        const ctx = exchangeStateService.buildCanonicalQueryContext(req.query, 'spectra');
+        if (!ctx.ok) {
+            return res.status(400).json({
+                error: 'Bad Request',
+                code: ctx.code,
+                message: ctx.error
+            });
+        }
+        const canonicalQuery = ctx.query;
+        const limit = Math.min(200, Math.max(1, parseInt(canonicalQuery.limit) || 50));
+        const cursor = canonicalQuery.cursor;
+        const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, canonicalQuery));
         const where = { ...spectralWhere };
 
         // Validate and decode cursor (R2, R8, R11)
         if (cursor) {
-            const cursorVal = exchangeStateService.validateLiveListCursor(cursor, req.sisAuth, 'spectra', req.query);
+            const cursorVal = exchangeStateService.validateLiveListCursor(cursor, req.sisAuth, 'spectra', canonicalQuery);
             if (!cursorVal.ok) {
                 return res.status(cursorVal.status).json({
                     error: cursorVal.status === 410 ? 'Gone' : 'Bad Request',
@@ -801,7 +911,7 @@ exports.getSpectra = async (req, res) => {
             }
         }
 
-        const parentSampleWhere = buildSampleWhere(req.sisAuth, req.query);
+        const parentSampleWhere = buildSampleWhere(req.sisAuth, canonicalQuery);
 
         let total = 0;
         if (parentSampleWhere.assignedLab !== '__denied__' && parentSampleWhere.status !== '__denied_unapproved__') {
@@ -866,8 +976,8 @@ exports.getSpectra = async (req, res) => {
                 type: 'live_list',
                 endpoint: 'spectra',
                 connectionId: currentConn,
-                profile: (req.query.profile && String(req.query.profile).trim().toLowerCase()) || 'default',
-                filter: exchangeStateService.normalizeFilter(req.query, 'spectra'),
+                profile: canonicalQuery.profile || 'default',
+                filter: ctx.filter,
                 timestamp: last.timestamp ? last.timestamp.toISOString() : new Date().toISOString(),
                 id: last.id
             });

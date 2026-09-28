@@ -808,6 +808,39 @@ function isSpecimenEligible(sample) {
 }
 
 /**
+ * Safely format stored SQLite UTC timestamp without local runtime timezone shift (R7, R8, R12).
+ * SQLite stores UTC timestamps without offset ('YYYY-MM-DD HH:MM:SS').
+ * Calling new Date(str).toISOString() in non-UTC runtimes (e.g. Europe/Rome) interprets
+ * zone-free strings as local time, shifting UTC instants.
+ */
+function formatStoredUtc(val) {
+    if (!val || (typeof val !== 'string' && !(val instanceof Date))) {
+        throw new Error(`Invalid stored timestamp: ${val}`);
+    }
+    if (val instanceof Date) {
+        if (isNaN(val.getTime())) throw new Error('Invalid Date timestamp');
+        return val.toISOString();
+    }
+    const str = val.trim();
+    if (!str) {
+        throw new Error('Empty stored timestamp');
+    }
+    // Check if string has explicit timezone indicator: Z or offset [+-]HH:MM
+    if (/([zZ]|[+-]\d{2}(?::?\d{2})?)$/.test(str)) {
+        const d = new Date(str);
+        if (isNaN(d.getTime())) throw new Error(`Invalid zoned timestamp: ${val}`);
+        return d.toISOString();
+    }
+    // Zone-free string (e.g. SQLite CURRENT_TIMESTAMP "YYYY-MM-DD HH:MM:SS" or "YYYY-MM-DDTHH:MM:SS")
+    const isoUtc = str.replace(' ', 'T') + 'Z';
+    const d = new Date(isoUtc);
+    if (isNaN(d.getTime())) {
+        throw new Error(`Invalid zone-free timestamp: ${val}`);
+    }
+    return d.toISOString();
+}
+
+/**
  * Synchronizes the append-only monotonic journal (_exchange_journal) with sample state.
  * Emits PUBLICATION, AMENDMENT, and WITHDRAWAL events with strictly monotonic sequence numbers (R1, R2, F2).
  */
@@ -941,7 +974,7 @@ async function syncJournal(auth, maps = {}) {
                 if (latest.event_type === 'WITHDRAWAL') {
                     // Was previously withdrawn. ONLY republish if live sample was genuinely re-approved AFTER withdrawal!
                     const liveApprovedTime = live.approvedAt ? new Date(live.approvedAt).getTime() : 0;
-                    const withdrawalTime = new Date(latest.created_at).getTime();
+                    const withdrawalTime = Date.parse(formatStoredUtc(latest.created_at));
                     if (liveApprovedTime > withdrawalTime) {
                         currentMaxSeq++;
                         const evtId = `evt_${live.id}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
@@ -1481,12 +1514,14 @@ function normalizeFilter(query = {}, endpoint = 'samples') {
         norm.project = null;
     }
 
-    const labRaw = query.labId || query.assignedLab;
-    if (labRaw !== undefined && labRaw !== null && String(labRaw).trim() !== '') {
-        norm.labId = String(labRaw).trim();
-    } else {
-        norm.labId = null;
+    const rawLabId = (query.labId !== undefined && query.labId !== null && String(query.labId).trim() !== '') ? String(query.labId).trim() : null;
+    const rawAssigned = (query.assignedLab !== undefined && query.assignedLab !== null && String(query.assignedLab).trim() !== '') ? String(query.assignedLab).trim() : null;
+    if (rawLabId && rawAssigned && rawLabId !== rawAssigned) {
+        const err = new Error(`Conflicting labId ('${rawLabId}') and assignedLab ('${rawAssigned}') query parameters.`);
+        err.code = 'INVALID_QUERY';
+        throw err;
     }
+    norm.labId = rawLabId || rawAssigned || null;
 
     if (query.updatedSince !== undefined && query.updatedSince !== null && String(query.updatedSince).trim() !== '') {
         norm.updatedSince = String(query.updatedSince).trim();
@@ -1502,12 +1537,44 @@ function normalizeFilter(query = {}, endpoint = 'samples') {
         norm.bbox = (query.bbox && String(query.bbox).trim() !== '') ? String(query.bbox).trim() : null;
     } else if (endpoint === 'spectra') {
         norm.modality = (query.modality && String(query.modality).trim() !== '') ? String(query.modality).trim().toUpperCase() : null;
-        const instRaw = query.instrument || query.equipmentId;
-        norm.instrument = (instRaw && String(instRaw).trim() !== '') ? String(instRaw).trim() : null;
+        const rawInst = (query.instrument !== undefined && query.instrument !== null && String(query.instrument).trim() !== '') ? String(query.instrument).trim() : null;
+        const rawEquip = (query.equipmentId !== undefined && query.equipmentId !== null && String(query.equipmentId).trim() !== '') ? String(query.equipmentId).trim() : null;
+        if (rawInst && rawEquip && rawInst !== rawEquip) {
+            const err = new Error(`Conflicting instrument ('${rawInst}') and equipmentId ('${rawEquip}') query parameters.`);
+            err.code = 'INVALID_QUERY';
+            throw err;
+        }
+        norm.instrument = rawInst || rawEquip || null;
         norm.qcStatus = (query.qcStatus && String(query.qcStatus).trim() !== '') ? String(query.qcStatus).trim().toUpperCase() : null;
     }
 
     return norm;
+}
+
+/**
+ * Builds a single canonical effective query context across live-list endpoints (R2, R8, R11).
+ * Detects alias conflicts, enforces consistent alias precedence, uppercase case-folding,
+ * and passes the canonical filter context to cursor validation and query builders.
+ */
+function buildCanonicalQueryContext(rawQuery = {}, endpoint = 'samples') {
+    try {
+        const norm = normalizeFilter(rawQuery, endpoint);
+        const query = {
+            ...rawQuery,
+            ...norm
+        };
+        if (norm.labId !== undefined && norm.labId !== null) {
+            query.labId = norm.labId;
+            query.assignedLab = norm.labId;
+        }
+        if (norm.instrument !== undefined && norm.instrument !== null) {
+            query.instrument = norm.instrument;
+            query.equipmentId = norm.instrument;
+        }
+        return { ok: true, query, filter: norm };
+    } catch (err) {
+        return { ok: false, error: err.message, code: err.code || 'INVALID_QUERY' };
+    }
 }
 
 /**
@@ -1596,7 +1663,17 @@ function validateLiveListCursor(cursorStr, auth, endpoint, query = {}, db) {
     }
 
     // 4. Query filter binding (symmetric normalized filter check):
-    const reqFilter = normalizeFilter(query, endpoint);
+    let reqFilter;
+    try {
+        reqFilter = normalizeFilter(query, endpoint);
+    } catch (err) {
+        return {
+            ok: false,
+            status: 400,
+            code: err.code || 'INVALID_QUERY',
+            message: err.message
+        };
+    }
     const curFilter = (decoded.filter && typeof decoded.filter === 'object') ? decoded.filter : {};
     const allKeys = new Set([...Object.keys(reqFilter), ...Object.keys(curFilter)]);
     for (const k of allKeys) {
@@ -1928,7 +2005,7 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
     }
     if (filter?.labId || filter?.assignedLab) {
         conditions.push('laboratory_id = ?');
-        params.push(filter.assignedLab || filter.labId);
+        params.push(filter.labId || filter.assignedLab);
     }
 
     const whereSql = conditions.join(' AND ');
@@ -1956,7 +2033,7 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
             seq: last.sequence,
             profile: profile || null,
             filter: filter || {},
-            timestamp: (last.created_at ? new Date(last.created_at).toISOString() : new Date().toISOString())
+            timestamp: formatStoredUtc(last.created_at)
         }, db);
 
         // Record issued change batch in _exchange_batches for durable receipt resolution
@@ -2004,7 +2081,7 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
             country: r.country,
             projectCode: r.project_code,
             laboratoryId: r.laboratory_id,
-            timestamp: (r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString()),
+            timestamp: formatStoredUtc(r.created_at),
             data
         };
     });
@@ -2298,7 +2375,7 @@ function recordReceipt(auth, receiptData = {}) {
                     connectionId: existing.connection_id,
                     batchId: existing.batch_id || batchId || null,
                     snapshotId: existing.snapshot_id || snapshotId || null,
-                    receivedAt: existing.created_at,
+                    receivedAt: formatStoredUtc(existing.created_at),
                     status: 'ACKNOWLEDGED',
                     idempotent: true,
                     receiverReported: {
@@ -2383,7 +2460,7 @@ function recordReceipt(auth, receiptData = {}) {
                     connectionId: existing.connection_id,
                     batchId: existing.batch_id || batchId || null,
                     snapshotId: existing.snapshot_id || snapshotId || null,
-                    receivedAt: existing.created_at,
+                    receivedAt: formatStoredUtc(existing.created_at),
                     status: 'ACKNOWLEDGED',
                     idempotent: true,
                     receiverReported: {
@@ -2422,5 +2499,7 @@ module.exports = {
     isSpecimenEligible,
     isProvenanceHeld,
     normalizeFilter,
+    buildCanonicalQueryContext,
+    formatStoredUtc,
     validateLiveListCursor
 };
