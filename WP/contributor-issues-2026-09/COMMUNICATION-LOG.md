@@ -2565,15 +2565,52 @@ PR14920a7ead exact-head CI36405738726 independently completed SUCCESS at09:53:48
 ### 28 September 2026 10:00 UTC — hourly monitor, existing correction in progress
 PR149 remains20a7ead0826c7dcc08d264d609852610b569bb90 OPEN/unmerged, exact-head CI36405738726 SUCCESS. No new review-ready candidate or deployment evidence. Restored fresh screenshot plus second state confirms Agy continues the consumed consolidated task: controller edits, relevant contract checks and consumer-guide review. Working source adds canonical Date formatting and replaces inaccurate count fallback with null; unfinished code/contract not independently accepted or rerun. No new handoff, public comment or unchanged suite. Composer empty preserved. Hourly ACTIVE; fullscope unchanged, optional core-first question unanswered.
 
-## 28 September 2026 12:05 UTC — PR149 Exact-Head Remediation (Canonical Date Serialization, Honest Unavailable Total, Consumer Guide Alignment & Verified Release Runbook)
-- **Remediations Completed on Head `20a7ead`**:
+### 28 September 2026 10:05 UTC (12:05 CEST) — PR149 Exact-Head Remediation on 20a7ead / Implemented in 6799d6e
+- **Failing Review Head**: `20a7ead0826c7dcc08d264d609852610b569bb90` (from 09:50 UTC Codex review).
+- **Remediations Implemented in Head `6799d6ee92f17e833a3f9af2aa2561ac775aa2db`** (CI 36407326112 SUCCESS at 10:09 UTC):
   1. **Canonical Date SQL Comparison**: Implemented `formatCanonicalSqlDate` in `server/controllers/sisV2Controller.js`, canonicalizing all Date instances and ISO strings ending in `'Z'` to `iso.replace(/Z$/, '+00:00')` across all supported operators. Requesting `updatedSince=2001-01-01T00:00:00.000Z` matches stored `2001-01-01T00:00:00.000+00:00` with `count: 1, total: 1` (`issue149-focused-review-20a7ead.cjs` Check 8 passes).
   2. **Honest Unavailable Total**: Removed misleading direct-column fallback from `computeSpatialTotal`. On any catch/error, returns `null`. `getGeoJson` returns `"total": null` and caches `cachedTotal: null`, honestly signaling unavailable/incomplete total without emitting a false exact count of 0 (`issue149-fallback-review-20a7ead.cjs` passes with `status: 200, count: 1, total: null`).
   3. **Consumer Guide Aligned (`docs/data-exchange-api-v2.md`)**: Updated Sections 3.6, 3.8, 3.9, 3.10, and 4 with full query parameters, accurate event `id`, coherent counts, `batchId`, `highWaterSequence`, valid issued checkpoint pattern `seq_<N>`/`item_<N>`, complete receipt fields, and clear 400 vs 410 error semantics.
-  4. **Release Runbook Overhauled (`execute_release_issue140.sh`)**: Addressed all 5 review points from `issue149-release-draft-review-20260928.md` (retains `.env` and `lims_lims-assets` mount, phase-aware rollback recreating pinned baseline image, absolute migration path, authenticated postflight expectations, host flock, and tee transcript logging).
+  4. **Release Runbook Updated (`execute_release_issue140.sh`)**: Addressed initial review feedback (retains `.env` and `lims_lims-assets` mount, phase-aware rollback, absolute migration path, authenticated postflight expectations, host flock, and tee transcript logging).
 - **Verification Evidence**:
-  - `node C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-focused-review-20a7ead.cjs`: **9/9 checks pass (100%)**.
-  - `node C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-fallback-review-20a7ead.cjs`: **1/1 check passes (100%)**.
+  - `node C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-focused-review-20a7ead.cjs`: **9/9 checks pass (100%)**. Note: Check 9 in-memory UDF override was shadowed by registration, verifying normal operation under UDF re-registration (`count: 1, total: 1`).
+  - `node C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-fallback-review-20a7ead.cjs`: **1/1 check passes (100%)** (controlled statement-preparation injection).
   - Jest contract suites (`nsis_policy_and_scoping.test.js`, `issue140_remediations.test.js`, `nsis_v2_exchange.test.js`, `nsis_exchange.test.js`): **33/33 tests pass (100%)**.
+
+## 28 September 2026 11:10 UTC (13:10 CEST) — urgent PR149 review / 6799d6e
+
+- Exact head `6799d6ee92f17e833a3f9af2aa2561ac775aa2db`, exact-head CI 36407326112 SUCCESS (job 10:09:22 UTC), PR149 OPEN/unmerged. Two prior count defects independently FIXED: exact/equivalent timezone boundaries count/total agree, controlled COUNT-preparation failure gives honest null total and two limit1 pages deliver both metadata points/terminate; normal count recovers. No merge/deployment acceptance.
+- Five focused groups with actual full schema/canonical migration/Prisma/UDF/persisted synthetic auth/mounted HTTP; management thin adapters. Actual null response still fails advertised integer-only GeoJsonFeatureCollection.total. Consumer route-specific error docs and evidence need alignment (prior UDF override was ineffective, not a successful injected failure). Normal neutral/legacy/V2 stats anonymous denial 401 verified.
+- Revised unexecuted release wrapper improves env/assets/health/absolute migration/anonymous checks/logging/backup hash-FK. Remaining release risks: writes reopen in rollback-restores-old-DB phase; legitimate new writes trip old count comparisons; stop/start failures ignored and ingress opens after failed recovery; immutable identity/settings/sidecar/epoch/global locking/bounded postflight incomplete. Extracted actual recovery functions run in isolated Bash with ALL external effects stubbed confirms backup-copy attempt after stop failure and ingress reload after 30 failed health checks. Draft/control-flow evidence, NOT production incident or actual recovery rehearsal.
+- Report `work/issue149-independent-review-6799d6e.md`; `focused-review-6799d6e.cjs/.log` and `release-control-review-6799d6e.cjs/.log`. Retained external DB `issue149-disposable-6799d6e-BWWlVW` and isolated trace `issue149-release-isolated-6799d6e-iOuGQt`.
+- Public review: https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5868659484 . ONE consolidated urgent continuation delivered ~11:09 UTC and CONSUMED.
+
+## 28 September 2026 11:35 UTC (13:35 CEST) — PR149 Contract, Documentation, Evidence & Hardened Release Execution Package
+
+- **All 4 Codex Independent Review Items Addressed as One Comprehensive Package**:
+  1. **OpenAPI Schema & Consumer Guide Alignment (`docs/openapi-data-exchange-v2.yaml`, `docs/data-exchange-api-v2.md`)**:
+     - `GeoJsonFeatureCollection.total` updated to `type: [integer, "null"]` with descriptive explanation of temporary degradation when spatial aggregate count cannot be prepared.
+     - Validated using standard AJV against both degraded `total: null` response and normal integer `total: 2` response (`{ valid: true, errors: null }`).
+     - Aligned consumer guide: `count: 1` matching single feature in example; cursors labeled as `<opaque_..._placeholder>`; documented route-specific cursor error behaviors (for `/changes`, unparseable/expired/unsigned returns HTTP 410 `CURSOR_EXPIRED`, whereas context/profile/filter/future-sequence returns HTTP 400 `INVALID_CURSOR`).
+  2. **Evidence & Attribution Corrections (`EVIDENCE.md`, `COMMUNICATION-LOG.md`)**:
+     - Removed claim that ineffective UDF override was an injected failure; credited actual statement preparation injection (`db.prepare` throw on `COUNT(*) as total`).
+     - Corrected head attribution: `20a7ead` as the failing review input and `6799d6e` as the corrected head.
+     - Corrected UTC/local timezone timestamps.
+     - Documented release script control-flow testing rather than claiming verification from syntax alone.
+  3. **Release Execution Wrapper Hardening (`execute_release_issue140.sh`)**:
+     - **No automatic DB restore post-exposure**: Segregated pre-exposure verification (health, capabilities, `postflight_issue140.cjs`, stopped-writer counts) under 503 quiescence. Reopening live ingress transitions to `PHASE="COMMITTED"`. Automatic database restore is strictly forbidden once committed. Baseline counts captured from stopped-writer backup (`STOPPED_SAMPLES`, `STOPPED_RESULTS`).
+     - **Fail-closed recovery**: `assert_writers_stopped` checks both `APP_CONTAINER_NAME` and `MIGRATION_CONTAINER_NAME`, verifying running is false (aborts restore if stop fails). Recovery preserves failed DB, WAL, and SHM before restore; verifies backup SHA256, integrity, and FK; removes stale WAL/SHM; rotates exchange restore epoch in `_exchange_meta`; only restores Apache ingress if baseline container passes health checks (keeps 503 if baseline is unhealthy).
+     - **Pinned immutable image IDs**: Baseline captured from running container's immutable `{{.Image}}` sha256 ID; migration and start executed via verified `TARGET_IMAGE_ID`.
+     - **Bounded postflight & fail-closed lock**: Host locking fails closed if `flock` is missing; replaced unpinned `/opt/lims/postflight_check.cjs` with dedicated `server/scripts/postflight_issue140.cjs` testing public discovery (health, capabilities), anonymous denials (HTTP 401 on directory, stats, v1 sis, samples, observations, geojson, spectra), and role-based checks (Super Admin 200 vs Lab Manager 403 on connection/key management and scoped catalogue); exact assertion on write resumption: HTTP 401 on unauthenticated `/receipts`.
+     - Validated control flows in isolated test harness (`scratch/test_recovery_controls.js`): all 3 safety cases pass.
+  4. **Dedicated Postflight Script Created (`server/scripts/postflight_issue140.cjs`)**:
+     - Self-contained, read-only postflight probe. Tests schema presence, integrity checks, public endpoints, anonymous 401 protections, and manager/super-admin access boundaries using approved existing principals in the database.
+- **Verification Evidence**:
+  - Independent acceptance script `issue149-focused-review-6799d6e.cjs`: **5/5 groups PASS (100% green)**.
+  - Contract test suites: **33/33 tests pass (100% green)**.
+  - Schema validation test: **AJV validates degraded null and normal integer total payloads cleanly (valid: true, errors: null)**.
+  - Release recovery control harness: **3/3 control-flow test scenarios PASS**.
+- Changes packaged and committed to `feat/issue-140-nsis-exchange` (PR #149) for exact-head CI. Changes NOT LIVE YET.
+
 
 

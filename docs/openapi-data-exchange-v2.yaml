@@ -1044,8 +1044,8 @@ components:
           type: string
           example: soilfer-lims-core
         total:
-          type: integer
-          description: Total eligible spatial features matching filter context
+          type: [integer, "null"]
+          description: Total eligible spatial features matching filter context, or null when spatial aggregate counting is temporarily unavailable.
         count:
           type: integer
           description: Number of spatial features delivered in this page

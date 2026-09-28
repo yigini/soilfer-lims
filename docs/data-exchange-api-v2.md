@@ -289,9 +289,9 @@ RFC 7946 compliant GeoJSON stream for GIS systems (QGIS, ArcGIS, GeoNode).
   "schemaVersion": "2026-09-issue140-v2",
   "sourceSystemId": "soilfer-lims-core",
   "total": 1200,
-  "count": 100,
+  "count": 1,
   "hasMore": true,
-  "nextCursor": "eyJ0eXBlIjoibGl2ZV9saXN0IiwiZW5kcG9pbnQiOiJnZW9qc29uIiwiY29ubmVjdGlvbklkIjoia2V5X2F1dGhfMDAxIiwiY2FjaGVkVG90YWwiOjEyMDB9",
+  "nextCursor": "<opaque_live_list_cursor_placeholder>",
   "features": [
     {
       "type": "Feature",
@@ -319,6 +319,7 @@ RFC 7946 compliant GeoJSON stream for GIS systems (QGIS, ArcGIS, GeoNode).
   ]
 }
 ```
+*(Note: Opaque cursors shown as `<..._placeholder>` are illustrative; runtime values are dynamic HMAC-signed tokens).*
 
 ---
 
@@ -353,7 +354,7 @@ Allows consumers to freeze a point-in-time manifest across the dataset and harve
       "connectionId": "key_auth_001",
       "highWaterSequence": 1200,
       "highWaterTimestamp": "2026-09-27T00:15:00.000Z",
-      "nextCursor": "eyJ0eXBlIjoiY2hhbmdlIiwiY29ubmVjdGlvbklkIjoia2V5X2F1dGhfMDAxIiwic2VxIjoxMjAwLCJ0aW1lc3RhbXAiOiIyMDI2LTA5LTI3VDAwOjE1OjAwLjAwMFoifQ==",
+      "nextCursor": "<opaque_change_cursor_placeholder>",
       "totalSamples": 1200,
       "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "authVersion": 1,
@@ -395,7 +396,7 @@ Monotonically ordered feed of publication, amendment, and withdrawal events from
   "boundaryTimestamp": "2026-09-27T00:15:00.000Z",
   "count": 1,
   "hasMore": false,
-  "nextCursor": "eyJ0eXBlIjoiY2hhbmdlIiwiY29ubmVjdGlvbklkIjoia2V5X2F1dGhfMDAxIiwic2VxIjoxLCJ0aW1lc3RhbXAiOiIyMDI2LTA5LTI3VDAwOjE0OjAwLjAwMFoifQ==",
+  "nextCursor": "<opaque_change_cursor_placeholder>",
   "changes": [
     {
       "id": "evt_1790461148749_a1b2c3d4",
@@ -419,10 +420,14 @@ Monotonically ordered feed of publication, amendment, and withdrawal events from
 }
 ```
 
-**Cursor Error Behaviors (HTTP 400 vs 410):**
-The gateway strictly distinguishes invalid request syntax from expired/invalidated sync state:
-- **HTTP 400 Bad Request (`INVALID_CURSOR`):** Returned when a cursor is malformed, has an invalid signature, belongs to a different connection, specifies a mismatched profile or filter, or references a future sequence beyond the current journal boundary. The consumer should verify request parameters and signing.
-- **HTTP 410 Gone (`CURSOR_EXPIRED`):** Returned when a cursor has exceeded its 72-hour TTL, or has been invalidated due to a database restore/epoch change, connection deactivation, or permission modification (authorization version mismatch). The consumer must re-synchronize by requesting a new snapshot via `POST /snapshots` or starting from `cursor=null`.
+**Route-Specific Cursor Error Behaviors (HTTP 400 vs 410):**
+The gateway strictly distinguishes invalid request syntax from expired/invalidated sync state based on the specific route contract:
+- **Change Feed (`GET /changes`):**
+  - **HTTP 410 Gone (`CURSOR_EXPIRED`):** Returned when a cursor has expired (>72h), has an invalid/unsigned format, or is rejected due to database restore/epoch change. *Action:* The consumer must not retry the unchanged cursor; it must re-synchronize by requesting a new snapshot via `POST /snapshots` or restarting from `cursor=null`.
+  - **HTTP 400 Bad Request (`INVALID_CURSOR`):** Returned on cursor context conflicts: connection mismatch (`Cursor belongs to a different connection`), profile mismatch, filter mismatch, or a forged future sequence exceeding the journal boundary.
+- **Live List Endpoints (`GET /samples`, `GET /observations`, `GET /geojson`, `GET /spectra`):**
+  - **HTTP 400 Bad Request (`INVALID_CURSOR`):** Returned if cursor is unparseable, malformed, HMAC signature fails, or cursor endpoint/context mismatches.
+  - **HTTP 410 Gone (`CURSOR_EXPIRED`):** Returned if cursor exceeds 72h TTL, belongs to a previous epoch, connection is disabled, or key permissions changed (auth version mismatch).
 
 ---
 
