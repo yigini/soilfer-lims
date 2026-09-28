@@ -577,7 +577,7 @@ paths:
                     example: KEY_REVOKED
                   message:
                     type: string
-                    example: Cannot confirm rotation: replacement key has been revoked.
+                    example: "Cannot confirm rotation: replacement key has been revoked."
 
   /keys/{id}/abort-rotation:
     servers:
@@ -637,7 +637,7 @@ paths:
                     example: KEY_REVOKED
                   message:
                     type: string
-                    example: Cannot abort rotation: original key has been revoked or is no longer in rotating status.
+                    example: "Cannot abort rotation: original key has been revoked or is no longer in rotating status."
 
 components:
   securitySchemes:
@@ -1150,6 +1150,21 @@ components:
 
     SnapshotCreateResponse:
       type: object
+      required:
+        - status
+        - schemaVersion
+        - sourceSystemId
+        - snapshotId
+        - connectionId
+        - highWaterSequence
+        - highWaterTimestamp
+        - nextCursor
+        - totalSamples
+        - digest
+        - authVersion
+        - epoch
+        - expiresAt
+        - ttlHours
       properties:
         status:
           type: string
@@ -1197,6 +1212,15 @@ components:
 
     ChangeFeedResponse:
       type: object
+      required:
+        - status
+        - schemaVersion
+        - sourceSystemId
+        - boundaryTimestamp
+        - count
+        - hasMore
+        - nextCursor
+        - changes
       properties:
         status:
           type: string
@@ -1226,6 +1250,12 @@ components:
           type: array
           items:
             type: object
+            required:
+              - sequence
+              - id
+              - eventType
+              - specimenId
+              - timestamp
             properties:
               sequence:
                 type: integer
@@ -1247,8 +1277,10 @@ components:
                 type: string
                 format: date-time
               data:
-                $ref: '#/components/schemas/Specimen'
-                nullable: true
+                description: Full canonical SOSA/GloSIS specimen payload (null for WITHDRAWAL events)
+                oneOf:
+                  - $ref: '#/components/schemas/Specimen'
+                  - type: 'null'
 
     ReceiptSubmissionRequest:
       type: object

@@ -22,7 +22,9 @@ const {
     extractDepths,
     extractDates,
     extractProfileReference,
-    extractObservations
+    extractObservations,
+    hasSpatialCapability,
+    safeParseJson
 } = require('../services/sisAdapterService');
 const exchangePolicyService = require('../services/exchangePolicyService');
 const {
@@ -131,21 +133,31 @@ exports.getSamples = async (req, res) => {
         const cursor = req.query.cursor;
         const where = buildSampleWhere(req.sisAuth, req.query);
 
-        // Cursor decoding
-        const decoded = exchangeStateService.decodeCursor(cursor);
-        if (decoded && decoded.lastUpdatedAt && decoded.lastId) {
-            where.AND = [
-                ...(where.AND || []),
-                {
-                    OR: [
-                        { updatedAt: { lt: new Date(decoded.lastUpdatedAt) } },
-                        {
-                            updatedAt: new Date(decoded.lastUpdatedAt),
-                            id: { lt: decoded.lastId }
-                        }
-                    ]
-                }
-            ];
+        // Validate and decode cursor (R2, R8, R11)
+        if (cursor) {
+            const cursorVal = exchangeStateService.validateLiveListCursor(cursor, req.sisAuth, 'samples', req.query);
+            if (!cursorVal.ok) {
+                return res.status(cursorVal.status).json({
+                    error: cursorVal.status === 410 ? 'Gone' : 'Bad Request',
+                    code: cursorVal.code,
+                    message: cursorVal.message
+                });
+            }
+            const decoded = cursorVal.decoded;
+            if (decoded && decoded.lastUpdatedAt && decoded.lastId) {
+                where.AND = [
+                    ...(where.AND || []),
+                    {
+                        OR: [
+                            { updatedAt: { lt: new Date(decoded.lastUpdatedAt) } },
+                            {
+                                updatedAt: new Date(decoded.lastUpdatedAt),
+                                id: { lt: decoded.lastId }
+                            }
+                        ]
+                    }
+                ];
+            }
         }
 
         const [total, samples, maps] = await Promise.all([
@@ -168,7 +180,17 @@ exports.getSamples = async (req, res) => {
         let nextCursor = null;
         if (hasMore && pageItems.length > 0) {
             const last = pageItems[pageItems.length - 1];
+            const currentConn = exchangeStateService.getConnectionId(req.sisAuth);
             nextCursor = exchangeStateService.encodeCursor({
+                type: 'live_list',
+                endpoint: 'samples',
+                connectionId: currentConn,
+                profile: (req.query.profile && String(req.query.profile).trim().toLowerCase()) || 'default',
+                filter: {
+                    country: req.query.country || null,
+                    project: req.query.project || null,
+                    labId: req.query.labId || null
+                },
                 lastUpdatedAt: last.updatedAt.toISOString(),
                 lastId: last.id
             });
@@ -277,24 +299,32 @@ exports.getObservations = async (req, res) => {
             resultWhere.basis = req.query.basis.toUpperCase();
         }
 
-        const decoded = exchangeStateService.decodeCursor(cursor);
-        if (decoded && decoded.lastUpdatedAt && decoded.lastId) {
-            resultWhere.AND = [
-                ...(resultWhere.AND || []),
-                {
-                    OR: [
-                        { updatedAt: { lt: new Date(decoded.lastUpdatedAt) } },
-                        {
-                            updatedAt: new Date(decoded.lastUpdatedAt),
-                            id: { lt: decoded.lastId }
-                        }
-                    ]
-                }
-            ];
+        // Validate and decode cursor (R2, R8, R11)
+        if (cursor) {
+            const cursorVal = exchangeStateService.validateLiveListCursor(cursor, req.sisAuth, 'observations', req.query);
+            if (!cursorVal.ok) {
+                return res.status(cursorVal.status).json({
+                    error: cursorVal.status === 410 ? 'Gone' : 'Bad Request',
+                    code: cursorVal.code,
+                    message: cursorVal.message
+                });
+            }
+            const decoded = cursorVal.decoded;
+            if (decoded && decoded.lastUpdatedAt && decoded.lastId) {
+                resultWhere.AND = [
+                    ...(resultWhere.AND || []),
+                    {
+                        OR: [
+                            { updatedAt: { lt: new Date(decoded.lastUpdatedAt) } },
+                            {
+                                updatedAt: new Date(decoded.lastUpdatedAt),
+                                id: { lt: decoded.lastId }
+                            }
+                        ]
+                    }
+                ];
+            }
         }
-
-        
-
 
         const countWhere = {
             isCurrent: true,
@@ -331,7 +361,20 @@ exports.getObservations = async (req, res) => {
         let nextCursor = null;
         if (hasMore && pageItems.length > 0) {
             const last = pageItems[pageItems.length - 1];
+            const currentConn = exchangeStateService.getConnectionId(req.sisAuth);
             nextCursor = exchangeStateService.encodeCursor({
+                type: 'live_list',
+                endpoint: 'observations',
+                connectionId: currentConn,
+                profile: (req.query.profile && String(req.query.profile).trim().toLowerCase()) || 'default',
+                filter: {
+                    country: req.query.country || null,
+                    project: req.query.project || null,
+                    labId: req.query.labId || null,
+                    param: req.query.param || null,
+                    censoring: req.query.censoring || null,
+                    basis: req.query.basis || null
+                },
                 lastUpdatedAt: last.updatedAt.toISOString(),
                 lastId: last.id
             });
@@ -439,21 +482,21 @@ exports.getObservations = async (req, res) => {
 exports.getGeoJson = async (req, res) => {
     if (!checkConnectionActive(req, res)) return;
     try {
-        const limit = Math.min(5000, Math.max(1, parseInt(req.query.limit) || 2000));
-        const where = buildSampleWhere(req.sisAuth, req.query);
+        const limit = Math.min(500, Math.max(1, parseInt(req.query.limit) || 100));
 
-        // Apply spatial bounding box query at database level before limit (F6)
-        if (req.query.bbox) {
-            const parts = String(req.query.bbox).split(',').map(s => s.trim());
-            const bboxParts = parts.map(Number);
-            if (parts.length !== 4 || bboxParts.some(n => isNaN(n))) {
+        // Strict BBox validation (rejects empty components, non-finite, out of range) (R4, R7, R11)
+        let bboxBounds = null;
+        if (req.query.bbox !== undefined) {
+            const rawBbox = String(req.query.bbox);
+            const parts = rawBbox.split(',').map(s => s.trim());
+            if (parts.length !== 4 || parts.some(p => p === '' || isNaN(Number(p)) || !isFinite(Number(p)))) {
                 return res.status(400).json({
                     error: 'Bad Request',
                     code: 'INVALID_BBOX',
                     message: "Invalid 'bbox' parameter. Must be 'minLng,minLat,maxLng,maxLat' formatted as 4 valid decimal numbers."
                 });
             }
-            const [minLng, minLat, maxLng, maxLat] = bboxParts;
+            const [minLng, minLat, maxLng, maxLat] = parts.map(Number);
             if (minLng < -180 || maxLng > 180 || minLat < -90 || maxLat > 90 || minLng > maxLng || minLat > maxLat) {
                 return res.status(400).json({
                     error: 'Bad Request',
@@ -461,58 +504,165 @@ exports.getGeoJson = async (req, res) => {
                     message: "Invalid 'bbox' coordinates. Must satisfy -180 <= minLng <= maxLng <= 180 and -90 <= minLat <= maxLat <= 90."
                 });
             }
-            where.latitude = { gte: minLat, lte: maxLat };
-            where.longitude = { gte: minLng, lte: maxLng };
+            bboxBounds = { minLng, minLat, maxLng, maxLat };
         }
 
+        // Validate and decode cursor (R2, R8, R11)
         const cursor = req.query.cursor;
-        const decoded = exchangeStateService.decodeCursor(cursor);
-        let cursorClause = undefined;
-        let skipClause = undefined;
-        if (decoded && decoded.lastId) {
-            cursorClause = { id: decoded.lastId };
-            skipClause = 1;
+        let decoded = null;
+        if (cursor) {
+            const cursorVal = exchangeStateService.validateLiveListCursor(cursor, req.sisAuth, 'geojson', req.query);
+            if (!cursorVal.ok) {
+                return res.status(cursorVal.status).json({
+                    error: cursorVal.status === 410 ? 'Gone' : 'Bad Request',
+                    code: cursorVal.code,
+                    message: cursorVal.message
+                });
+            }
+            decoded = cursorVal.decoded;
         }
 
-        const countWhere = buildSampleWhere(req.sisAuth, req.query);
-        if (req.query.bbox) {
-            const bboxParts = String(req.query.bbox).split(',').map(s => Number(s.trim()));
-            if (bboxParts.length === 4 && bboxParts.every(n => !isNaN(n))) {
-                countWhere.latitude = { gte: bboxParts[1], lte: bboxParts[3] };
-                countWhere.longitude = { gte: bboxParts[0], lte: bboxParts[2] };
+        // Spatial authorization check
+        if (!hasSpatialCapability(req.sisAuth)) {
+            return res.json({
+                type: 'FeatureCollection',
+                schemaVersion: '2026-09-issue140-v2',
+                sourceSystemId: getSourceSystemId(),
+                total: 0,
+                count: 0,
+                hasMore: false,
+                nextCursor: null,
+                features: []
+            });
+        }
+
+        // Candidate query matching authorization and filter criteria
+        const candidateWhere = buildSampleWhere(req.sisAuth, req.query);
+        candidateWhere.AND = [
+            ...(candidateWhere.AND || []),
+            {
+                OR: [
+                    { latitude: { not: null } },
+                    { fieldMetadata: { not: null } },
+                    { metadata: { not: null } }
+                ]
+            }
+        ];
+
+        if (bboxBounds) {
+            candidateWhere.AND.push({
+                OR: [
+                    {
+                        AND: [
+                            { latitude: { gte: bboxBounds.minLat, lte: bboxBounds.maxLat } },
+                            { longitude: { gte: bboxBounds.minLng, lte: bboxBounds.maxLng } }
+                        ]
+                    },
+                    { latitude: null },
+                    { longitude: null }
+                ]
+            });
+        }
+
+        const candidateSamples = await prisma.sample.findMany({
+            where: candidateWhere,
+            select: {
+                id: true,
+                updatedAt: true,
+                latitude: true,
+                longitude: true,
+                fieldMetadata: true,
+                metadata: true
+            },
+            orderBy: [
+                { updatedAt: 'desc' },
+                { id: 'desc' }
+            ]
+        });
+
+        // Resolve coordinates with shared extractCoordinates across columns and metadata (R4, R7, R11)
+        const validSpatialCandidates = [];
+        for (const s of candidateSamples) {
+            const coords = extractCoordinates(s, safeParseJson(s.fieldMetadata), safeParseJson(s.metadata));
+            if (coords.latitude === null || coords.longitude === null) {
+                continue;
+            }
+            if (bboxBounds) {
+                if (
+                    coords.longitude < bboxBounds.minLng ||
+                    coords.longitude > bboxBounds.maxLng ||
+                    coords.latitude < bboxBounds.minLat ||
+                    coords.latitude > bboxBounds.maxLat
+                ) {
+                    continue;
+                }
+            }
+            validSpatialCandidates.push({
+                id: s.id,
+                updatedAt: s.updatedAt,
+                coords
+            });
+        }
+
+        const total = validSpatialCandidates.length;
+
+        // Deterministic pagination using cursor anchor with timestamp/id fallback
+        let startIndex = 0;
+        if (decoded && (decoded.lastId || decoded.lastUpdatedAt)) {
+            const anchorIdx = decoded.lastId ? validSpatialCandidates.findIndex(item => item.id === decoded.lastId) : -1;
+            if (anchorIdx !== -1) {
+                startIndex = anchorIdx + 1;
+            } else if (decoded.lastUpdatedAt) {
+                const cursorTime = new Date(decoded.lastUpdatedAt).getTime();
+                const foundIdx = validSpatialCandidates.findIndex(item => {
+                    const itemTime = item.updatedAt instanceof Date ? item.updatedAt.getTime() : new Date(item.updatedAt).getTime();
+                    if (itemTime < cursorTime) return true;
+                    if (itemTime === cursorTime && decoded.lastId && item.id < decoded.lastId) return true;
+                    return false;
+                });
+                startIndex = (foundIdx !== -1) ? foundIdx : validSpatialCandidates.length;
+            } else {
+                startIndex = validSpatialCandidates.length;
             }
         }
 
-        const [total, samples, maps] = await Promise.all([
-            prisma.sample.count({ where: countWhere }),
-            prisma.sample.findMany({
-                where,
-                include: { results: true },
-                orderBy: [
-                    { updatedAt: 'desc' },
-                    { id: 'desc' }
-                ],
-                take: limit + 1,
-                ...(cursorClause ? { cursor: cursorClause, skip: skipClause } : {})
-            }),
-            getAnalysisMap()
-        ]);
-
-        const hasMore = samples.length > limit;
-        const pageSamples = hasMore ? samples.slice(0, limit) : samples;
+        const pageCandidates = validSpatialCandidates.slice(startIndex, startIndex + limit);
+        const hasMore = (startIndex + limit) < validSpatialCandidates.length;
+        const pageIds = pageCandidates.map(c => c.id);
 
         let nextCursor = null;
-        if (hasMore && pageSamples.length > 0) {
-            const last = pageSamples[pageSamples.length - 1];
+        if (hasMore && pageCandidates.length > 0) {
+            const last = pageCandidates[pageCandidates.length - 1];
+            const currentConn = exchangeStateService.getConnectionId(req.sisAuth);
             nextCursor = exchangeStateService.encodeCursor({
-                lastUpdatedAt: last.updatedAt.toISOString(),
+                type: 'live_list',
+                endpoint: 'geojson',
+                connectionId: currentConn,
+                profile: (req.query.profile && String(req.query.profile).trim().toLowerCase()) || 'default',
+                filter: {
+                    country: req.query.country || null,
+                    project: req.query.project || null,
+                    labId: req.query.labId || null,
+                    bbox: req.query.bbox ? String(req.query.bbox).trim() : null
+                },
+                lastUpdatedAt: (last.updatedAt instanceof Date ? last.updatedAt : new Date(last.updatedAt)).toISOString(),
                 lastId: last.id
             });
         }
 
-        const features = [];
+        const [pageSamples, maps] = await Promise.all([
+            pageIds.length > 0 ? prisma.sample.findMany({
+                where: { id: { in: pageIds } },
+                include: { results: true }
+            }) : Promise.resolve([]),
+            getAnalysisMap()
+        ]);
 
-        pageSamples.forEach(s => {
+        const sampleMap = new Map(pageSamples.map(s => [s.id, s]));
+        const orderedSamples = pageCandidates.map(c => sampleMap.get(c.id)).filter(Boolean);
+
+        const features = [];
+        for (const s of orderedSamples) {
             const v2 = formatSampleV2(s, maps, { auth: req.sisAuth });
             const loc = v2.sampling.location;
 
@@ -554,7 +704,7 @@ exports.getGeoJson = async (req, res) => {
                     }
                 });
             }
-        });
+        }
 
         // RFC 7946 strictly omits the obsolete crs object
         res.json({
@@ -634,21 +784,31 @@ exports.getSpectra = async (req, res) => {
         const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, req.query));
         const where = { ...spectralWhere };
 
-        // Cursor decoding
-        const decoded = exchangeStateService.decodeCursor(cursor);
-        if (decoded && decoded.timestamp && decoded.id) {
-            where.AND = [
-                ...(where.AND || []),
-                {
-                    OR: [
-                        { timestamp: { lt: new Date(decoded.timestamp) } },
-                        {
-                            timestamp: new Date(decoded.timestamp),
-                            id: { lt: decoded.id }
-                        }
-                    ]
-                }
-            ];
+        // Validate and decode cursor (R2, R8, R11)
+        if (cursor) {
+            const cursorVal = exchangeStateService.validateLiveListCursor(cursor, req.sisAuth, 'spectra', req.query);
+            if (!cursorVal.ok) {
+                return res.status(cursorVal.status).json({
+                    error: cursorVal.status === 410 ? 'Gone' : 'Bad Request',
+                    code: cursorVal.code,
+                    message: cursorVal.message
+                });
+            }
+            const decoded = cursorVal.decoded;
+            if (decoded && decoded.timestamp && decoded.id) {
+                where.AND = [
+                    ...(where.AND || []),
+                    {
+                        OR: [
+                            { timestamp: { lt: new Date(decoded.timestamp) } },
+                            {
+                                timestamp: new Date(decoded.timestamp),
+                                id: { lt: decoded.id }
+                            }
+                        ]
+                    }
+                ];
+            }
         }
 
         const parentSampleWhere = buildSampleWhere(req.sisAuth, req.query);
@@ -711,7 +871,20 @@ exports.getSpectra = async (req, res) => {
         let nextCursor = null;
         if (hasMore && candidateItems.length > 0) {
             const last = candidateItems[candidateItems.length - 1];
+            const currentConn = exchangeStateService.getConnectionId(req.sisAuth);
             nextCursor = exchangeStateService.encodeCursor({
+                type: 'live_list',
+                endpoint: 'spectra',
+                connectionId: currentConn,
+                profile: (req.query.profile && String(req.query.profile).trim().toLowerCase()) || 'default',
+                filter: {
+                    country: req.query.country || null,
+                    project: req.query.project || null,
+                    labId: req.query.labId || null,
+                    modality: req.query.modality ? req.query.modality.toUpperCase() : null,
+                    qcStatus: req.query.qcStatus ? req.query.qcStatus.toUpperCase() : null,
+                    instrument: req.query.instrument || req.query.equipmentId || null
+                },
                 timestamp: last.timestamp ? last.timestamp.toISOString() : new Date().toISOString(),
                 id: last.id
             });

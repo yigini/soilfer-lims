@@ -75,7 +75,7 @@ curl -s -X GET "https://<lims-domain>/api/v2/data-exchange/capabilities" | jq .
 Verify that the response returns:
 - `contractVersion: "2.0.0"`
 - `schemaVersion: "2026-09-issue140-v2"`
-- `supportedProfiles: ["opennsis", "glosis", "default"]`
+- `supportedProfiles: ["core-lossless-v2", "opennsis", "glosis", "default"]`
 
 ### 3.2 Running the Standalone Reference Client Verification
 SoilFER-LIMS includes an automated reference client verification mode (`--verify`) that executes an isolated synthetic probe harness (`server/scripts/test_issue140_probes.cjs`) against an in-memory SQLite instance, testing exchange contracts and invariants without mutating or accessing application databases:
@@ -92,13 +92,52 @@ ALL 16 PROBE REMEDIATIONS VERIFIED SUCCESSFULLY.
 Isolated self-verification passed. No production/development database touched.
 ```
 
+### 3.3 Operating the Reference Client Harvester & Export Management
+The reference client (`server/scripts/data_exchange_reference_client.cjs`) can be executed by operators or automated harvesters for durable export synchronization, bounded backlog draining, and state recovery:
+
+```bash
+# 1. Baseline Synchronization (creates initial snapshot and local checkpoint)
+EXCHANGE_API_KEY="<api-token>" node server/scripts/data_exchange_reference_client.cjs \
+  --url "https://<lims-domain>" \
+  --checkpoint "/var/opt/nsis-exchange/checkpoint.json" \
+  --export "/var/opt/nsis-exchange/export.json"
+
+# 2. Bounded Backlog Synchronization (constrains pages processed per invocation)
+EXCHANGE_API_KEY="<api-token>" node server/scripts/data_exchange_reference_client.cjs \
+  --url "https://<lims-domain>" \
+  --limit 100 \
+  --max-pages 5 \
+  --checkpoint "/var/opt/nsis-exchange/checkpoint.json" \
+  --export "/var/opt/nsis-exchange/export.json"
+# Note: If backlog remains (backlogRemaining: true), subsequent runs resume from checkpoint.nextCursor until drained.
+
+# 3. Continuous Incremental Catch-up / Resumption
+EXCHANGE_API_KEY="<api-token>" node server/scripts/data_exchange_reference_client.cjs \
+  --url "https://<lims-domain>" \
+  --checkpoint "/var/opt/nsis-exchange/checkpoint.json" \
+  --export "/var/opt/nsis-exchange/export.json"
+
+# 4. Re-baselining on Epoch Invalidation or Expiry (HTTP 410 CURSOR_EXPIRED)
+# If the server rotates epochs or cursors expire, archive the outdated checkpoint to force a clean re-baseline:
+mv /var/opt/nsis-exchange/checkpoint.json /var/opt/nsis-exchange/checkpoint.json.bak
+EXCHANGE_API_KEY="<api-token>" node server/scripts/data_exchange_reference_client.cjs \
+  --url "https://<lims-domain>" \
+  --checkpoint "/var/opt/nsis-exchange/checkpoint.json" \
+  --export "/var/opt/nsis-exchange/export.json"
+```
+
+Durable State & Checkpoint Guarantees:
+- **Atomic Persistence**: Checkpoint state is written via temporary file and atomic rename (`fs.renameSync`), ensuring process interruptions do not corrupt checkpoint progress.
+- **Export Durability**: Cumulative harvested items, amendments, and WITHDRAWAL events are preserved across interruptions and recovered idempotently without duplicate record IDs.
+- **Delivery Receipts**: When configured, the client transmits authenticated delivery receipts (`POST /api/v2/data-exchange/receipts`) acknowledging batch ingestion. Receiver system import counts and errors are tracked separately by the receiving NSIS pipeline.
+
 ---
 
 ## 4. Troubleshooting Common Operator Issues
 
 ### Issue 1: External Consumer Receives Empty Array (`data: []`)
 - **Cause A: Scoping Mismatch (IR-14)**: Check if the key's authorized laboratory scope matches the assigned laboratories of the samples. If the key was created without selecting any laboratory, fail-closed policy returns zero records.
-- **Cause B: Publication Lifecycle Policy**: External consumers strictly receive specimens that have completed formal laboratory approval (`approvedAt IS NOT NULL`), including approved specimens with subsequent archived or disposed retention lifecycle history (`status IN ('APPROVED', 'ARCHIVED', 'DISPOSED')`). Unapproved samples in `RECEIVED`, `PROCESSING`, `REVIEW`, or unapproved `ARCHIVED` status are excluded by design until laboratory approval.
+- **Cause B: Publication Lifecycle Policy**: External consumers strictly receive specimens that are currently in formal laboratory release (`status IN ('APPROVED', 'RELEASED')`), as well as specimens with subsequent retention history (`status IN ('ARCHIVED', 'DISPOSED')`) that possess prior laboratory approval (`approvedAt IS NOT NULL`). Unapproved samples in `RECEIVED`, `PROCESSING`, `REVIEW`, or unapproved `ARCHIVED`/`DISPOSED` status (`approvedAt IS NULL`) are excluded by design until laboratory approval.
 - **Resolution**: In **Active API Keys**, inspect the key's `labs` scope. If empty, revoke the key and re-issue with explicit laboratory scopes.
 
 ### Issue 2: Consumer Receives HTTP 410 `CURSOR_EXPIRED`
@@ -106,7 +145,7 @@ Isolated self-verification passed. No production/development database touched.
 - **Resolution**:
   1. The consumer should create a fresh snapshot via `POST /api/v2/data-exchange/snapshots`.
   2. Harvest the snapshot pages to re-baseline.
-  3. Resume continuous sync from the snapshot's final boundary cursor.
+  3. Resume continuous sync from the snapshot's final boundary cursor (`nextCursor`).
 
 ### Issue 3: OpenNSIS Ingestion Rejects Samples Without Laboratory Identifiers
 - **Cause**: OpenNSIS requires genuine laboratory accession identifiers (`labSampleId`) to map records into national accession registers.
@@ -121,18 +160,18 @@ Isolated self-verification passed. No production/development database touched.
 If an external consumer credential is leaked or compromised:
 1. Open **Admin Panel** > **Active API Keys**.
 2. Locate the compromised key and click **Revoke**.
-3. All requests using that key are rejected immediately by application middleware (`server/middleware/exchangeAuthMiddleware.js`) with HTTP 401 Unauthorized (`KEY_REVOKED`).
+3. All requests using that key are rejected immediately by application middleware (`server/middleware/apiKeyAuth.js`) with HTTP 401 Unauthorized (`KEY_REVOKED`).
 
 ### Database Storage Pruning & Retention Management
-Durable exchange tables (`_exchange_snapshots`, `_exchange_snapshot_items`, `_exchange_receipts`, `_exchange_batches`, `_exchange_rotation_operations`) are stored in the database configured via `DATABASE_PATH` (default: `server/prisma/dev.db`).
+Durable exchange tables (`_exchange_snapshots`, `_exchange_snapshot_items`, `_exchange_receipts`, `_exchange_batches`, `_exchange_rotation_operations`) are stored in the database configured via `DATABASE_PATH`.
 Snapshots automatically expire after their configured TTL (nominal 24 hours).
-To inspect or safely prune expired exchange storage without manual SQL deletion, use the non-destructive pruner utility:
+To inspect or safely prune expired exchange storage without manual SQL deletion, use the non-destructive pruner utility against the target database:
 ```bash
 # Preview expired exchange records without modifying database (dry run)
-node server/scripts/prune_exchange_storage.cjs "${DATABASE_PATH:-server/prisma/dev.db}" --dry-run
+node server/scripts/prune_exchange_storage.cjs "${DATABASE_PATH}" --dry-run
 
 # Safely prune expired snapshots, child items, obsolete batches/receipts, and expired rotation ops
-node server/scripts/prune_exchange_storage.cjs "${DATABASE_PATH:-server/prisma/dev.db}"
+node server/scripts/prune_exchange_storage.cjs "${DATABASE_PATH}"
 ```
 
 ---
@@ -151,23 +190,24 @@ When restoring the SoilFER-LIMS database from a backup (e.g. disaster recovery, 
    ```
 
 2. **Restore Database File from Backup:**
-   Restore the SQLite database file to its target path (e.g. `server/prisma/dev.db`):
+   Restore the SQLite database file from verified immutable backup storage to the configured target path (`${DATABASE_PATH}`):
    ```bash
-   cp /path/to/backup/dev_backup_YYYYMMDD.db server/prisma/dev.db
+   cp /path/to/backup/production_backup_YYYYMMDD.db "${DATABASE_PATH}"
    ```
 
 3. **Execute Stopped-Writer Epoch Rotation:**
    Run the dedicated rotation utility while writers are stopped:
    ```bash
-   node server/scripts/rotate_exchange_epoch.cjs --database server/prisma/dev.db --reason "DISASTER_RECOVERY_RESTORE"
+   node server/scripts/rotate_exchange_epoch.cjs --database "${DATABASE_PATH}" --reason "DISASTER_RECOVERY_RESTORE"
    ```
    This generates an unrepeatable cryptographic nonce generation (e.g. `epoch-1790456789-a1b2c3`), updates `_exchange_meta`, and verifies trigger installation.
 
-4. **Verify Database Integrity & High-Water Journal Sequence:**
-   Run SQLite integrity checks to ensure the restored file is consistent:
+4. **Verify Database Integrity, Foreign Keys, & High-Water Journal Sequence:**
+   Run SQLite integrity and constraint checks to ensure the restored file is consistent:
    ```bash
-   sqlite3 server/prisma/dev.db "PRAGMA integrity_check;"
-   sqlite3 server/prisma/dev.db "SELECT MAX(sequence) FROM _exchange_journal;"
+   sqlite3 "${DATABASE_PATH}" "PRAGMA integrity_check;"
+   sqlite3 "${DATABASE_PATH}" "PRAGMA foreign_key_check;"
+   sqlite3 "${DATABASE_PATH}" "SELECT MAX(sequence) FROM _exchange_journal;"
    ```
 
 5. **Re-enable External Traffic & Start Server:**
@@ -183,6 +223,6 @@ Following an epoch rotation:
 - External consumers (OpenNSIS / harvesters) encountering HTTP 410 must execute their re-baseline protocol:
   1. Call `POST /api/v2/data-exchange/snapshots` to generate a fresh frozen snapshot.
   2. Ingest snapshot items to re-establish current state.
-  3. Resume continuous sync from the snapshot's handoff cursor (`highWaterSequence`).
+  3. Resume continuous sync from the snapshot's handoff cursor (`nextCursor`, with `highWaterSequence` retained as a monotonic boundary value).
   4. Submit an authenticated delivery receipt via `POST /api/v2/data-exchange/receipts`.
 

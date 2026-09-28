@@ -384,6 +384,72 @@ cliApp.use('/api/v2/data-exchange', req('./routes/sisV2Routes'));
     assert.equal(validBbox.body.features.length, 2);
     report('PASS: GeoJSON validates bbox format & coordinates strictly');
 
+    // 16. Live list cursors fail closed on malformed, cross-connection, cross-endpoint, and old-epoch (P1)
+    const malformedGeo = await get('/api/v2/data-exchange/geojson?limit=1&cursor=not-a-cursor', reader);
+    assert.equal(malformedGeo.status, 400);
+    assert.equal(malformedGeo.body.code, 'INVALID_CURSOR');
+
+    const malformedSamples = await get('/api/v2/data-exchange/samples?limit=1&cursor=not-a-cursor', reader);
+    assert.equal(malformedSamples.status, 400);
+    assert.equal(malformedSamples.body.code, 'INVALID_CURSOR');
+
+    const otherReader = await provision('Other Connection For Context Test');
+    const crossConnGeo = await get('/api/v2/data-exchange/geojson?limit=1&cursor=' + encodeURIComponent(geo.body.nextCursor), otherReader);
+    assert.equal(crossConnGeo.status, 400);
+    assert.equal(crossConnGeo.body.code, 'CURSOR_CONTEXT_MISMATCH');
+
+    const crossEndpoint = await get('/api/v2/data-exchange/samples?limit=1&cursor=' + encodeURIComponent(geo.body.nextCursor), reader);
+    assert.equal(crossEndpoint.status, 400);
+    assert.equal(crossEndpoint.body.code, 'CURSOR_ENDPOINT_MISMATCH');
+
+    const oldGeoCursor = geo.body.nextCursor;
+    state.rotateEpoch(db, 'VERIFICATION_EPOCH_ROTATION');
+    const expiredGeo = await get('/api/v2/data-exchange/geojson?limit=1&cursor=' + encodeURIComponent(oldGeoCursor), reader);
+    assert.equal(expiredGeo.status, 410);
+    assert.equal(expiredGeo.body.code, 'CURSOR_EXPIRED');
+    report('PASS: Live list cursors fail closed on malformed, cross-connection, cross-endpoint, and old-epoch');
+
+    // 17. Strict BBox rejects empty components and out-of-range bounds (P2)
+    const emptyComponentBbox = await get('/api/v2/data-exchange/geojson?bbox=,,180,90', reader);
+    assert.equal(emptyComponentBbox.status, 400);
+    assert.equal(emptyComponentBbox.body.code, 'INVALID_BBOX');
+
+    const outOfRangeBbox = await get('/api/v2/data-exchange/geojson?bbox=200,0,10,10', reader);
+    assert.equal(outOfRangeBbox.status, 400);
+    assert.equal(outOfRangeBbox.body.code, 'INVALID_BBOX');
+    report('PASS: Strict BBox validation rejects empty string components and out-of-range bounds');
+
+    // 18. Shared spatial coordinate resolution: metadata-derived coordinates & truthful totals (P2)
+    await prisma.sample.update({
+        where: { id: 'legacy-approved' },
+        data: { latitude: null, longitude: null, metadata: JSON.stringify({ latitude: 12, longitude: 34 }) }
+    });
+    const fullGeo = await get('/api/v2/data-exchange/geojson?limit=100', reader);
+    const boxedGeo = await get('/api/v2/data-exchange/geojson?bbox=30,10,40,20&limit=100', reader);
+    assert.equal(fullGeo.body.features.length, 2);
+    assert.equal(boxedGeo.body.features.length, 2);
+    assert.ok(boxedGeo.body.features.some(f => f.id === 'legacy-approved' && f.geometry.coordinates[0] === 34 && f.geometry.coordinates[1] === 12));
+
+    await prisma.sample.update({
+        where: { id: 'legacy-approved' },
+        data: { metadata: null, latitude: null, longitude: null }
+    });
+    const ungeocodedGeo = await get('/api/v2/data-exchange/geojson?limit=100', reader);
+    assert.equal(ungeocodedGeo.body.total, 1);
+    assert.equal(ungeocodedGeo.body.count, 1);
+    assert.equal(ungeocodedGeo.body.hasMore, false);
+    report('PASS: Shared spatial coordinate resolution retains metadata coordinates and truthful total');
+
+    // 19. Canonical OpenAPI YAML parses cleanly and enforces required schema fields (P3)
+    const yaml = req('js-yaml');
+    const openapiDoc = yaml.load(fs.readFileSync(path.join(root, 'docs/openapi-data-exchange-v2.yaml'), 'utf8'));
+    assert.ok(openapiDoc.paths);
+    assert.equal(Object.keys(openapiDoc.paths).length, 16);
+    assert.ok(openapiDoc.components.schemas.SnapshotCreateResponse.required.includes('snapshotId'));
+    assert.ok(openapiDoc.components.schemas.ChangeFeedResponse.required.includes('changes'));
+    assert.ok(openapiDoc.components.schemas.ChangeFeedResponse.properties.changes.items.required.includes('eventType'));
+    report('PASS: Canonical OpenAPI YAML parses cleanly with 16 paths and strict schema required fields');
+
     console.log(`\n============================================================`);
     console.log(`ALL ${checks} VERIFICATION CHECKS PASSED.`);
     console.log(`============================================================\n`);

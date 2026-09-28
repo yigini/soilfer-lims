@@ -1449,10 +1449,133 @@ function decodeCursor(cursorStr, db) {
             return decoded.p;
         }
         // Fail closed on unsigned or malformed cursor structures
-        return { invalid: true, reason: 'UNSIGNED_CURSOR', message: 'Cursor must be HMAC signed.' };
+        return { invalid: true, expired: true, reason: 'UNSIGNED_CURSOR', message: 'Cursor must be HMAC signed.' };
     } catch (e) {
-        return { expired: true, message: 'Malformed cursor payload.' };
+        return { invalid: true, expired: true, reason: 'MALFORMED_CURSOR', message: 'Malformed cursor payload.' };
     }
+}
+
+/**
+ * Validates and decodes live list cursors (samples, observations, geojson, spectra).
+ * Enforces fail-closed validation on malformed/signature/expiry/epoch/connection/endpoint/filter changes (R2, R8, R11).
+ */
+function validateLiveListCursor(cursorStr, auth, endpoint, query = {}, db) {
+    if (!cursorStr) {
+        return { ok: true, decoded: null };
+    }
+    const metaDb = db || (dbInstance || getDb());
+    const decoded = decodeCursor(cursorStr, metaDb);
+
+    if (!decoded || typeof decoded !== 'object') {
+        return { ok: false, status: 400, code: 'INVALID_CURSOR', message: 'Cursor could not be parsed.' };
+    }
+
+    // Expiry / Epoch / Connection status / AuthVersion changes return 410 CURSOR_EXPIRED
+    if (decoded.reason === 'EPOCH_MISMATCH' || decoded.reason === 'AUTH_VERSION_MISMATCH' || decoded.reason === 'CONNECTION_DISABLED' || (decoded.expired && !decoded.invalid)) {
+        return {
+            ok: false,
+            status: 410,
+            code: 'CURSOR_EXPIRED',
+            message: decoded.message || 'Cursor has expired or was invalidated by database restore/rotation.'
+        };
+    }
+
+    if (decoded.invalid) {
+        return {
+            ok: false,
+            status: 400,
+            code: 'INVALID_CURSOR',
+            message: decoded.message || 'Cursor signature verification failed or cursor is malformed.'
+        };
+    }
+
+    if (decoded.expired) {
+        return {
+            ok: false,
+            status: 410,
+            code: 'CURSOR_EXPIRED',
+            message: decoded.message || 'Cursor has expired or was invalidated by database restore/rotation.'
+        };
+    }
+
+    // Context binding validations (original R2/R8/R11):
+    // 1. Connection binding:
+    const currentConn = getConnectionId(auth);
+    if (decoded.connectionId && decoded.connectionId !== currentConn) {
+        return {
+            ok: false,
+            status: 400,
+            code: 'CURSOR_CONTEXT_MISMATCH',
+            message: `Cursor was issued for connection '${decoded.connectionId}', not '${currentConn}'.`
+        };
+    }
+
+    // 2. Endpoint binding:
+    if (decoded.endpoint && decoded.endpoint !== endpoint) {
+        return {
+            ok: false,
+            status: 400,
+            code: 'CURSOR_ENDPOINT_MISMATCH',
+            message: `Cursor was issued for endpoint '${decoded.endpoint}', not '${endpoint}'.`
+        };
+    }
+
+    // 3. Profile binding:
+    const currentProfile = (query.profile && String(query.profile).trim().toLowerCase()) || 'default';
+    if (decoded.profile && decoded.profile !== currentProfile) {
+        return {
+            ok: false,
+            status: 400,
+            code: 'CURSOR_PROFILE_MISMATCH',
+            message: `Cursor profile '${decoded.profile}' does not match requested profile '${currentProfile}'.`
+        };
+    }
+
+    // 4. Query filter binding:
+    if (decoded.filter && typeof decoded.filter === 'object') {
+        const filterKeys = ['country', 'project', 'labId', 'param', 'censoring', 'basis', 'bbox', 'modality', 'qcStatus', 'instrument'];
+        for (const k of filterKeys) {
+            let requestedRaw = query[k];
+            if (k === 'instrument' && !requestedRaw) requestedRaw = query.equipmentId;
+            const requestedVal = (requestedRaw !== undefined && requestedRaw !== null) ? String(requestedRaw).trim() : null;
+            const cursorVal = (decoded.filter[k] !== undefined && decoded.filter[k] !== null) ? String(decoded.filter[k]).trim() : null;
+            if (requestedVal !== cursorVal) {
+                return {
+                    ok: false,
+                    status: 400,
+                    code: 'CURSOR_FILTER_MISMATCH',
+                    message: `Cursor query filter '${k}' (${cursorVal}) does not match requested filter (${requestedVal}).`
+                };
+            }
+        }
+    }
+
+    // 5. Live authorization / connection status verification:
+    if (decoded.connectionId && metaDb) {
+        try {
+            const connRow = metaDb.prepare('SELECT status, auth_version FROM _exchange_connections WHERE id = ?').get(decoded.connectionId);
+            if (connRow) {
+                if (connRow.status && connRow.status !== 'ACTIVE') {
+                    return {
+                        ok: false,
+                        status: 410,
+                        code: 'CURSOR_EXPIRED',
+                        message: `Connection '${decoded.connectionId}' is ${connRow.status}.`
+                    };
+                }
+                if (decoded.authVersion !== undefined && decoded.authVersion !== connRow.auth_version) {
+                    return {
+                        ok: false,
+                        status: 410,
+                        code: 'CURSOR_EXPIRED',
+                        message: 'Cursor authorization version mismatch due to permission changes.'
+                    };
+                }
+            }
+        } catch (e) {}
+    }
+
+    return { ok: true, decoded };
 }
 
 function hasSpatialCapability(auth) {
@@ -2235,5 +2358,6 @@ module.exports = {
     getSourceSystemId,
     pruneExpiredSnapshots,
     isSpecimenEligible,
-    isProvenanceHeld
+    isProvenanceHeld,
+    validateLiveListCursor
 };

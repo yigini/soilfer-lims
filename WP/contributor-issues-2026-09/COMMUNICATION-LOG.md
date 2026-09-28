@@ -2247,3 +2247,45 @@ sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
 
 
 
+
+
+## 28 September 2026 03:37 UTC — hourly PR149 independent review / 11338c1
+
+- Exact head `11338c16d8372daa8ef0f01a1273e27a99bbd442` (implementation `f1051d8`); exact-head CI36372303687 independently SUCCESS03:11:32 UTC. PR149 OPEN/unmerged; CHANGES REQUIRED, no merge/deployment acceptance.
+- Five improvement groups independently verified: whitespace hold/list/count coherence; filtered observation totals and country stats; static complete two-page spatial traversal and obvious malformed bbox rejection; normal CLI durable two-item snapshot plus all three amendments with bounded incomplete checkpoint and second-process drain; controlled exit77 after change checkpoint/before export reconstructs all four distinct events including withdrawal.
+- Remaining original packages: live-list malformed/old-epoch cursors silently restart and spatial cursor crosses same-grant connections (traversal confusion, not reproduced disclosure); metadata-derived valid points disappear inside bbox, missing geometry inflates documented feature total, empty bbox components become zero; canonical OpenAPI YAML parser failure line580 plus missing required response fields/actual limits and inaccurate operator publication/auth-module/explicit production DB recovery/opaque handoff guidance. Preserve original R1-R12 meanings and complete accurate evidence.
+- Eight focused checks plus three spatial/contract follow-through checks with actual schema/canonical migration/Prisma/UDF/persisted auth/mounted consumer HTTP/normal CLI. Management provisioning thin req/res. Controlled child-only exit after actual rename is not a power-loss/disk-durability test. External synthetic DBs `issue149-disposable-11338c1-PGjfkw` and `issue149-disposable-11338c1-contract-QX1wPC`, five CLI logs retained; earlier parser-stopped scratch preserved. No ordinary/production DB, real credentials/grants or OpenNSIS changes; no broad unchanged suite reruns.
+- Report `work/issue149-independent-review-11338c1.md`; probe/log `issue149-focused-review-11338c1.cjs/.log` and `issue149-contract-review-11338c1.cjs/.log`. Public review https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5862860580 . ONE direct continuation delivered and CONSUMED: fresh restored screenshot and subsequent states show report L1-63 and both probes read, Exploring3files/Working/Cancel. Exact prior draft `what is the` restored unsent. Do not duplicate continuation.
+- Hourly monitor ACTIVE until independently verified LIMS-only deployment, then pause same automation. Agy owns implementation/EVIDENCE/sole safe release; existing authority applies after independent exact-head acceptance, exact-main CI and established stopped-writer backup/immutable-image/migration/cutover/recovery. Codex independent review/public communication/read-only postflight. No repeat permission, OpenNSIS entirely untouched, TUF planning only, no closed-task reruns or worktree removal.
+
+## 28 September 2026 06:00 UTC — PR149 Remediations for Review 11338c1 (Packages 1, 2, 3)
+- **Review Addressed**: Codex independent review of PR #149 head `11338c1` (`work/issue149-independent-review-11338c1.md`, `issue149-focused-review-11338c1.cjs/.log`, `issue149-contract-review-11338c1.cjs/.log`, public comment `5862860580`).
+- **Preserved Protections**: Preserved all 5 improvement groups independently verified by Codex on `11338c1`: all-space metadata exclusion coherence, filtered observation parameter totals and country statistics, static two-page GeoJSON traversal, reference CLI bounded backlog traversal and durable consumable payload, controlled checkpoint-before-export interruption recovery.
+- **Package 1 (P1 - Reject Invalid Live-List Cursors & Bind Context, R2/R8/R11)**:
+  - Standardized live-list cursor contract (`validateLiveListCursor` in `exchangeStateService.js`) wired across `/samples`, `/observations`, `/geojson`, and `/spectra`.
+  - Fails closed on malformed cursors (HTTP 400 `INVALID_CURSOR`), cross-connection traversal (HTTP 400 `CURSOR_CONTEXT_MISMATCH`), wrong endpoint calls (HTTP 400 `CURSOR_ENDPOINT_MISMATCH`), mismatched profiles (HTTP 400 `CURSOR_PROFILE_MISMATCH`), filter parameter alterations (HTTP 400 `CURSOR_FILTER_MISMATCH`), and expired or post-epoch-rotation cursors (HTTP 410 `CURSOR_EXPIRED`).
+  - Next cursor encodes connection ID, profile, filter criteria, and timestamp/ID.
+  - GeoJSON pagination implements deterministic continuation: seeks anchor row by `id`, and if the anchor row was modified or deleted, seamlessly continues from `updatedAt < cursorUpdatedAt || (updatedAt === cursorUpdatedAt && id < lastId)`.
+- **Package 2 (P2 - Shared Spatial Coordinate Selection, Totals & GeoJSON Traversal, R4/R7/R11)**:
+  - Shared coordinate resolution: GeoJSON queries utilize shared `extractCoordinates(sample, field, meta)` across first-class columns and metadata candidates.
+  - Database selection candidate query matches records with column coordinates or non-null metadata, allowing metadata-derived points (e.g. `(34, 12)`) inside a containing bbox (e.g. `bbox=30,10,40,20`) to be retrieved and emitted without exclusion.
+  - Truthful GeoJSON total: `total` strictly reflects the number of eligible geocoded features matching filter criteria; ungeocoded specimens are never counted toward `total`.
+  - Strict BBox validation: rejects non-numeric or empty components (`bbox=,,180,90` -> HTTP 400 `INVALID_BBOX`), non-finite coordinates, and out-of-range values.
+  - Aligned GeoJSON limit: controller aligns with OpenAPI (`default: 100, maximum: 500`).
+- **Package 3 (P1/P2 - OpenAPI Contract Alignment & Runbook Accuracy, R8/R10/R11/R12)**:
+  - Canonical OpenAPI specification (`docs/openapi-data-exchange-v2.yaml`): enclosed unquoted colon examples at lines 580 and 640 in quotes; clean parse verified via `js-yaml.load()` (16 paths). Added comprehensive `required` arrays to `SnapshotCreateResponse` (14 fields), `ChangeFeedResponse` (8 fields), and change items (5 fields). Correctly modeled change `data` using `oneOf: [ { $ref: '#/components/schemas/Specimen' }, { type: 'null' } ]`.
+  - Corrected operator runbook (`docs/nsis-operator-runbook.md`):
+    - Publication policy: accurately documents current release policy (`status IN ('APPROVED', 'RELEASED')`, prior approved `status IN ('ARCHIVED', 'DISPOSED')` with `approvedAt IS NOT NULL`).
+    - Middleware reference: updated to `server/middleware/apiKeyAuth.js`.
+    - Stopped-writer recovery procedure: references `${DATABASE_PATH}` / production database mount and established stopped-writer backup, integrity, foreign key, and epoch rotation procedure.
+    - Handoff cursor: clarified as `nextCursor`, retaining `highWaterSequence` as a boundary value.
+    - Section 3.3: added detailed reference client harvester usage (`--checkpoint`, `--export`, bounded backlog, resume, re-baseline).
+- **Verification Evidence**:
+  - `server/scripts/verify_issue149_complete_remediations.cjs`: **19/19 passed (100%)**, covering all 19 checks in disposable SQLite.
+  - Isolated Codex reproduction harness: **11/11 passed (100%)** matching focused and contract probes.
+  - Standalone reference client verification (`data_exchange_reference_client.cjs --verify`): **16/16 passed (100%)**.
+  - Contract test suites (`tests/contracts/nsis_v2_exchange.test.js` & `sis_adapter_service.test.js`): **28/28 passed (100%)**.
+  - Client Build: `vite build` clean in 7.30s with zero errors.
+- **Strict Boundaries Maintained**: Strictly LIMS-only codebase changes; zero modifications to OpenNSIS code, config, database, or deployments; zero mutations to `dev.db`; untracked release scripts preserved.
+
+
