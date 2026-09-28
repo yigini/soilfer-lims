@@ -2168,3 +2168,39 @@ sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
 - **Candidate Head & Exact-Head CI Run**: Candidate head `8e4b0aa` (`feat/issue-140-nsis-exchange` PR #149); GitHub Actions CI run `36363451453` passed 100% green (`Test & Build in 6m21s`, all 144 test suites passed, Docker boundary rehearsal passed). Ready for Codex independent verification.
 
 
+
+## 28 September 2026 01:35 UTC — hourly PR149 independent review / 9ac1202
+- Exact head 9ac12029a5593b4d1f04a546292a33921f7310b5 (implementation8e4b0aa); exact-head CI36363871750 independently SUCCESS00:59:41UTC. PR149 OPEN/unmerged, CHANGES REQUIRED, no deployment acceptance.
+- Four improvements verified: escaped JSON hold exclusion from list/count/observations; sibling auth/abort isolation; exact replacement authentication retires old and replay reflects current state; failed-middle-page actual CLI halts dependent feed, preserves partial checkpoint and second process resumes two items with verified digest.
+- Three remaining original-plan packages: confirm resurrects explicitly revoked replacement (401->200), abort resurrects explicitly revoked original (401->200); canonical unknown metadata JSON null denied but observations returns it and sample total3/data2; controlled real CLI termination after last-page atomic checkpoint leaves snapshot_downloaded2items, next normal process re-downloads to4items and fails digest. Require authoritative monotonic lifecycle, one conservative semantic policy/fail-closed queries and complete durable phase recovery/context/incremental obligations. UI controls/docs are present by source inspection, no browser claim.
+- Eight focused actual fullschema/canonicalmigration/Prisma/UDF/auth/mountedconsumerHTTP/normalCLI checks in external synthetic DB issue149-disposable-9ac1202-bcfHVI/synthetic-review.db. Management thin req/res; explicit localHTTP400 and child-only preload exits77 after actual checkpoint rename, not uncontrolled crash/power-loss rehearsal. Four CLI logs retained. Report work/issue149-independent-review-9ac1202.md; probe/log issue149-focused-review-9ac1202.cjs/.log. No ordinary/production DB/real credential/OpenNSIS changes.
+- Public review https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5861758421 . ONE corrective continuation delivered01:34UTC and CONSUMED: fresh restored screenshot plus second state show report L1-62, probe L1-107 and log L1-10 read; Exploring/Working/Cancel and source review. Exact prior draft "what is the" restored unsent. Do not duplicate continuation.
+- Hourly monitor ACTIVE until independently verified LIMS-only deployment then pause same automation. Sole-Agy safe-release authority valid after independent exact-head acceptance, exact-main CI and established release procedure; no repeat permission. Preserve original R1-R12/full plan/operator/docs/recovery and accurate EVIDENCE; no narrow-probe acceptance or unchanged broad suites. OpenNSIS entirely untouched, TUF planning only, no closed-issue reruns/worktree removal. Agy owns EVIDENCE.
+
+## 28 September 2026 03:45 UTC — PR #149 9ac1202 Three Packages Remediated & Verified / Candidate Head Ready
+- **Context & Review Input**: Addressed Codex independent review of PR #149 head `9ac1202` (`issue149-independent-review-9ac1202.md`, `issue149-focused-review-9ac1202.cjs/.log`, PR #149 review comment 5861758421). Preserved all 4 independently verified passing groups: escaped JSON hold exclusion; sibling auth/abort isolation; exact replacement retirement and current replay state; failed-middle-page CLI halt with partial checkpoint and verified second-process resume.
+- **Remediations Completed Across Three Packages**:
+  1. *Package 1: Harmonized Semantic JSON Metadata Policy & Fail-Closed Scoping (R1, R4, R6)*:
+     - **Consistent Semantic Predicate**: Harmonized hold and validity evaluation across `exchangePolicyService.js` (`getHeldSampleIds`), triggers in `exchangeStateService.js` (bumped `CURRENT_TRIGGER_VERSION = '9'`), and migration script `migrate_exchange_journal_tables.cjs`. Evaluates `CASE WHEN col IS NULL OR TRIM(col) = '' THEN 0 WHEN NOT json_valid(col) THEN 1 WHEN json_type(col) != 'object' THEN 1 WHEN COALESCE(json_extract(col, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD' THEN 1 ELSE 0 END = 1`.
+     - **No Discrepancy on JSON Null**: Metadata containing valid JSON `null` (or primitives) is consistently treated as non-object/invalid by SQLite `json_type`, aligning `Sample.count`, `/samples` list, and `/observations` without returning phantom counts or leaking observations.
+     - **Fail-Closed Lookup Error Handling**: If `getHeldSampleIds` encounters an error, it throws immediately. In `buildSampleWhere`, any error sets `where.id = '__denied_held_lookup_failure__'`, completely blocking data disclosure without live metadata mutation.
+  2. *Package 2: Monotonic Revocation Preconditions & Operation Enforcement in Confirm/Abort (R3, R11)*:
+     - **Monotonic Revocation Authority**: Calling `confirmRotation` or `abortRotation` cannot resurrect an explicitly revoked credential.
+     - **Atomic Confirm Preconditions**: In `sisController.js:confirmRotation`, checks that replacement key is active (`replKey.isActive === 1 && replLink.key_status === 'ACTIVE'`) and unexpired. If revoked, returns HTTP 409 `KEY_REVOKED`. If expired, returns HTTP 409 `KEY_EXPIRED`.
+     - **Atomic Abort Preconditions**: In `sisController.js:abortRotation`, checks that original key is active and in rotating status (`oldKey.isActive === 1 && oldLink.key_status === 'ROTATING'`), unexpired, and within 24h grace window. If revoked, returns HTTP 409 `KEY_REVOKED`. If expired, returns HTTP 409 `KEY_EXPIRED` or `ROTATION_EXPIRED`.
+     - **Operation Precondition & Replay**: If no operation exists, both endpoints return HTTP 404 `ROTATION_NOT_FOUND` without fallback mutation of unrotated keys. Durable replay re-checks `replLink.key_status !== 'REVOKED'`.
+     - **Documentation**: Updated `docs/openapi-data-exchange-v2.yaml` and `docs/nsis-operator-runbook.md` with 409 error schemas and explicit lifecycle rules.
+  3. *Package 3: Reference Client Resume at Durable Last-Page Boundary (R2, R8)*:
+     - **Boundary Detection on Resume**: In `data_exchange_reference_client.cjs`, detects `isComplete = (existingCheckpoint?.type === 'snapshot_downloaded' || (currentCursor === null && harvestedItems.length > 0))`.
+     - **No Redundant Re-downloading**: When a process exits immediately after writing the final `snapshot_downloaded` checkpoint, a restarting process skips re-downloading page 1 (null cursor), preventing item duplication (2 -> 4).
+     - **Full Count & SHA-256 Digest Verification**: Verifies total item count against `snapshotMeta.totalSamples` and recalculates SHA-256 content digest over `harvestedItems`. Upon successful verification, writes `snapshot_completed` checkpoint (`completed: true, digestVerified: true`) and cleanly transitions to the change feed.
+- **Verification Evidence**:
+  - `server/scripts/verify_issue149_9ac1202_remediations.cjs`: **10/10 passed (100%)**.
+  - `server/tests/contracts/issue149_codex_9ac1202_remediations.test.js`: **6/6 passed (100%)**.
+  - `server/tests/contracts/issue149_codex_verification.test.js`: **17/17 passed (100%)**.
+  - Full server contract test suite (`npm test -- tests/contracts/`): **136/136 test suites passed, 1,314/1,314 tests passed (100%)**.
+  - Client Build: `vite build` clean in 7.58s with zero errors.
+- **Strict Boundaries Maintained**: Strictly LIMS-only codebase changes; zero modifications to OpenNSIS code, config, database, or deployments; zero mutations to `dev.db`; untracked release scripts preserved.
+- **Candidate Head & CI**: Candidate head committed on `feat/issue-140-nsis-exchange` (PR #149) with clean contract tests and production client build, ready for CI run and Codex independent verification.
+
+

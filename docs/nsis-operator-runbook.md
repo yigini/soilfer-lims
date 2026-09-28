@@ -56,6 +56,11 @@ To rotate an existing integration key without downtime or stranding credentials:
 6. **Manual Operator Controls (Confirm / Abort):**
    - **Confirm Rotation (`POST /api/v1/data-exchange/keys/:id/confirm-rotation`):** Click the green checkmark icon to immediately retire the prior rotating key and finalize the replacement credential.
    - **Abort Rotation (`POST /api/v1/data-exchange/keys/:id/abort-rotation`):** Click the rollback counter-clockwise arrow icon to abort an unconfirmed rotation. The prior key is restored to `ACTIVE` and the unconfirmed replacement key is revoked (`REVOKED`). Pre-existing independent sibling keys are never affected.
+7. **Authoritative Revocation & Monotonic Preconditions:**
+   - **Explicit Revocation is Authoritative & Irreversible:** Explicit revocation immediately denies consumer access (HTTP 401). Subsequent calls to `confirm-rotation` or `abort-rotation` cannot resurrect revoked credentials.
+   - **Atomic Confirm Preconditions:** Confirming a rotation strictly requires that the replacement key is currently active (`isActive = 1`, `key_status = 'ACTIVE'`) and unexpired. If the replacement key was explicitly revoked, the server rejects confirmation with HTTP 409 (`code: KEY_REVOKED`). If expired, it returns HTTP 409 (`code: KEY_EXPIRED`).
+   - **Atomic Abort Preconditions:** Aborting a rotation strictly requires that the original key is still in rotating state (`isActive = 1`, `key_status = 'ROTATING'`), unexpired, and within the 24-hour overlap grace window. If the original key was revoked, the server rejects abortion with HTTP 409 (`code: KEY_REVOKED`). If expired or outside grace period, it returns HTTP 409 (`code: KEY_EXPIRED` or `code: ROTATION_EXPIRED`).
+   - **Operation Boundary Enforcement:** If no active rotation operation is found for the specified key, requests fail with HTTP 404 (`ROTATION_NOT_FOUND`) rather than silently mutating unrotated keys.
 
 ---
 

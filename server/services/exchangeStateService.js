@@ -151,7 +151,7 @@ const {
     installSqliteHooks
 } = require('./exchangeDbFunctions');
 
-const CURRENT_TRIGGER_VERSION = '8';
+const CURRENT_TRIGGER_VERSION = '9';
 
 function ensureTriggers(db, force = false) {
     registerDbFunctions(db);
@@ -290,10 +290,22 @@ function ensureTriggers(db, force = false) {
         const statusCond = `(${prefix}.status IN ('APPROVED', 'RELEASED') OR (${prefix}.status IN ('ARCHIVED', 'DISPOSED') AND ${prefix}.approvedAt IS NOT NULL))`;
         const holdConds = [];
         if (sampleCols.has('metadata')) {
-            holdConds.push(`(${prefix}.metadata IS NOT NULL AND (NOT json_valid(${prefix}.metadata) OR COALESCE(json_extract(${prefix}.metadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD'))`);
+            holdConds.push(`(CASE
+                WHEN ${prefix}.metadata IS NULL OR TRIM(${prefix}.metadata) = '' THEN 0
+                WHEN NOT json_valid(${prefix}.metadata) THEN 1
+                WHEN json_type(${prefix}.metadata) != 'object' THEN 1
+                WHEN COALESCE(json_extract(${prefix}.metadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD' THEN 1
+                ELSE 0
+            END = 1)`);
         }
         if (sampleCols.has('fieldMetadata')) {
-            holdConds.push(`(${prefix}.fieldMetadata IS NOT NULL AND (NOT json_valid(${prefix}.fieldMetadata) OR COALESCE(json_extract(${prefix}.fieldMetadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD'))`);
+            holdConds.push(`(CASE
+                WHEN ${prefix}.fieldMetadata IS NULL OR TRIM(${prefix}.fieldMetadata) = '' THEN 0
+                WHEN NOT json_valid(${prefix}.fieldMetadata) THEN 1
+                WHEN json_type(${prefix}.fieldMetadata) != 'object' THEN 1
+                WHEN COALESCE(json_extract(${prefix}.fieldMetadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD' THEN 1
+                ELSE 0
+            END = 1)`);
         }
         if (holdConds.length > 0) {
             return `(${statusCond} AND NOT (${holdConds.join(' OR ')}))`;

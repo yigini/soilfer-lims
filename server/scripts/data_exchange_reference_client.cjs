@@ -331,15 +331,21 @@ async function runClientWorkflow() {
     let skipSnapshotPagination = false;
 
     if (existingCheckpoint) {
-        if (existingCheckpoint.type === 'change_feed' && existingCheckpoint.completed) {
+        // Validate context: profile and country
+        const profileMatch = !existingCheckpoint.profile || existingCheckpoint.profile === PROFILE;
+        const countryMatch = (existingCheckpoint.country || null) === (COUNTRY || null);
+        if (!profileMatch || !countryMatch) {
+            console.warn(`[WARN] Checkpoint context mismatch (Checkpoint: profile=${existingCheckpoint.profile}, country=${existingCheckpoint.country} vs Current: profile=${PROFILE}, country=${COUNTRY}). Starting fresh export.`);
+            existingCheckpoint = null;
+        } else if (existingCheckpoint.type === 'change_feed' && existingCheckpoint.completed) {
             skipSnapshotCreation = true;
             skipSnapshotPagination = true;
             snapshotContinuationCursor = existingCheckpoint.changeFeedCursor || existingCheckpoint.nextCursor;
-        } else if (existingCheckpoint.snapshotId && existingCheckpoint.completed) {
+        } else if (existingCheckpoint.snapshotId && existingCheckpoint.completed && existingCheckpoint.digestVerified) {
             skipSnapshotCreation = true;
             skipSnapshotPagination = true;
             snapshotContinuationCursor = existingCheckpoint.changeFeedCursor || existingCheckpoint.nextCursor;
-        } else if (existingCheckpoint.snapshotId && !existingCheckpoint.completed) {
+        } else if (existingCheckpoint.snapshotId) {
             skipSnapshotCreation = true;
             skipSnapshotPagination = false;
             snapshotId = existingCheckpoint.snapshotId;
@@ -397,47 +403,49 @@ async function runClientWorkflow() {
             let currentCursor = existingCheckpoint?.pageCursor || null;
             let harvestedItems = Array.isArray(existingCheckpoint?.harvestedItems) ? [...existingCheckpoint.harvestedItems] : [];
             let totalHarvested = harvestedItems.length;
-            let isComplete = false;
+            let isComplete = (existingCheckpoint?.type === 'snapshot_downloaded' || (currentCursor === null && harvestedItems.length > 0));
             const MAX_PAGES = 5000;
 
-            do {
-                pageNum++;
-                let path = `/api/v2/data-exchange/snapshots/${snapshotId}/pages?limit=${LIMIT}`;
-                if (currentCursor) path += `&cursor=${encodeURIComponent(currentCursor)}`;
-                const res = await request('GET', path);
-                if (res.status !== 200) {
-                    const err = new Error(`HTTP ${res.status}`);
-                    err.response = res;
-                    throw err;
-                }
-                const items = res.data.data || [];
-                harvestedItems.push(...items);
-                totalHarvested = harvestedItems.length;
+            if (!isComplete) {
+                do {
+                    pageNum++;
+                    let path = `/api/v2/data-exchange/snapshots/${snapshotId}/pages?limit=${LIMIT}`;
+                    if (currentCursor) path += `&cursor=${encodeURIComponent(currentCursor)}`;
+                    const res = await request('GET', path);
+                    if (res.status !== 200) {
+                        const err = new Error(`HTTP ${res.status}`);
+                        err.response = res;
+                        throw err;
+                    }
+                    const items = res.data.data || [];
+                    harvestedItems.push(...items);
+                    totalHarvested = harvestedItems.length;
 
-                currentCursor = res.data.nextCursor || null;
-                if (!currentCursor) {
-                    isComplete = true;
-                }
+                    currentCursor = res.data.nextCursor || null;
+                    if (!currentCursor) {
+                        isComplete = true;
+                    }
 
-                if (CHECKPOINT_FILE) {
-                    saveCheckpointAtomic(CHECKPOINT_FILE, {
-                        type: isComplete ? 'snapshot_downloaded' : 'snapshot_partial',
-                        snapshotId,
-                        snapshotMeta: snapshotMeta || existingCheckpoint?.snapshotMeta || null,
-                        pageNum,
-                        totalHarvested,
-                        harvestedItems,
-                        pageCursor: currentCursor,
-                        changeFeedCursor: snapshotContinuationCursor,
-                        nextCursor: snapshotContinuationCursor,
-                        completed: false, // strictly false until digest verification
-                        digestVerified: false,
-                        profile: PROFILE,
-                        country: COUNTRY,
-                        updatedAt: new Date().toISOString()
-                    });
-                }
-            } while (currentCursor && pageNum < MAX_PAGES);
+                    if (CHECKPOINT_FILE) {
+                        saveCheckpointAtomic(CHECKPOINT_FILE, {
+                            type: isComplete ? 'snapshot_downloaded' : 'snapshot_partial',
+                            snapshotId,
+                            snapshotMeta: snapshotMeta || existingCheckpoint?.snapshotMeta || null,
+                            pageNum,
+                            totalHarvested,
+                            harvestedItems,
+                            pageCursor: currentCursor,
+                            changeFeedCursor: snapshotContinuationCursor,
+                            nextCursor: snapshotContinuationCursor,
+                            completed: false, // strictly false until digest verification
+                            digestVerified: false,
+                            profile: PROFILE,
+                            country: COUNTRY,
+                            updatedAt: new Date().toISOString()
+                        });
+                    }
+                } while (currentCursor && pageNum < MAX_PAGES);
+            }
 
             harvestedCount = totalHarvested;
 

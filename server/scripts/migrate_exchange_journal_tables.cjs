@@ -343,10 +343,22 @@ function migrateExchangeTables(dbPath) {
             const sampleCols = new Set((db.prepare("PRAGMA table_info(Sample)").all() || []).map(c => c.name));
             const holdConds = [];
             if (sampleCols.has('metadata')) {
-                holdConds.push(`(s.metadata IS NOT NULL AND (NOT json_valid(s.metadata) OR COALESCE(json_extract(s.metadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD'))`);
+                holdConds.push(`(CASE
+                    WHEN s.metadata IS NULL OR TRIM(s.metadata) = '' THEN 0
+                    WHEN NOT json_valid(s.metadata) THEN 1
+                    WHEN json_type(s.metadata) != 'object' THEN 1
+                    WHEN COALESCE(json_extract(s.metadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD' THEN 1
+                    ELSE 0
+                END = 1)`);
             }
             if (sampleCols.has('fieldMetadata')) {
-                holdConds.push(`(s.fieldMetadata IS NOT NULL AND (NOT json_valid(s.fieldMetadata) OR COALESCE(json_extract(s.fieldMetadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD'))`);
+                holdConds.push(`(CASE
+                    WHEN s.fieldMetadata IS NULL OR TRIM(s.fieldMetadata) = '' THEN 0
+                    WHEN NOT json_valid(s.fieldMetadata) THEN 1
+                    WHEN json_type(s.fieldMetadata) != 'object' THEN 1
+                    WHEN COALESCE(json_extract(s.fieldMetadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD' THEN 1
+                    ELSE 0
+                END = 1)`);
             }
             const holdClause = holdConds.length > 0 ? `AND NOT (${holdConds.join(' OR ')})` : '';
 

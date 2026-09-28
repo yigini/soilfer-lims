@@ -540,7 +540,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFoundError'
         '409':
-          description: Conflict — rotation operation was already aborted
+          description: Conflict — replacement key revoked, replacement key expired, or rotation operation was previously aborted
           content:
             application/json:
               schema:
@@ -549,9 +549,13 @@ paths:
                   error:
                     type: string
                     example: CONFLICT
+                  code:
+                    type: string
+                    enum: [KEY_REVOKED, KEY_EXPIRED, ROTATION_ABORTED]
+                    example: KEY_REVOKED
                   message:
                     type: string
-                    example: Cannot confirm rotation: rotation operation was previously aborted.
+                    example: Cannot confirm rotation: replacement key has been revoked.
 
   /keys/{id}/abort-rotation:
     servers:
@@ -596,7 +600,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFoundError'
         '409':
-          description: Conflict — rotation operation was already confirmed
+          description: Conflict — original key revoked/not rotating, key expired, rotation window expired, or rotation operation was already confirmed
           content:
             application/json:
               schema:
@@ -607,10 +611,11 @@ paths:
                     example: CONFLICT
                   code:
                     type: string
-                    example: ROTATION_ALREADY_CONFIRMED
+                    enum: [KEY_REVOKED, KEY_EXPIRED, ROTATION_EXPIRED, ROTATION_ALREADY_CONFIRMED]
+                    example: KEY_REVOKED
                   message:
                     type: string
-                    example: Cannot abort rotation: rotation operation has already been confirmed and retired the prior key.
+                    example: Cannot abort rotation: original key has been revoked or is no longer in rotating status.
 
 components:
   securitySchemes:

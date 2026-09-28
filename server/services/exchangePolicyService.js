@@ -20,12 +20,12 @@ const AUTHORIZED_RELEASE_STATUSES = ['APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOS
 
 /**
  * Resolves IDs of samples currently on provenance hold using semantic JSON parsing.
- * Evaluates both metadata and fieldMetadata columns conservatively (fail-closed on malformed JSON).
+ * Evaluates both metadata and fieldMetadata columns conservatively (fail-closed on malformed JSON or non-object).
  */
 function getHeldSampleIds(db) {
+    let metaDb = db;
+    let createdInstance = false;
     try {
-        let metaDb = db;
-        let createdInstance = false;
         if (!metaDb) {
             try {
                 const { getDb } = require('./exchangeStateService');
@@ -44,11 +44,19 @@ function getHeldSampleIds(db) {
         }
         const cols = new Set((metaDb.prepare("PRAGMA table_info(Sample)").all() || []).map(c => c.name));
         const conds = [];
+        const holdCondition = (col) => `(CASE
+            WHEN ${col} IS NULL OR TRIM(${col}) = '' THEN 0
+            WHEN NOT json_valid(${col}) THEN 1
+            WHEN json_type(${col}) != 'object' THEN 1
+            WHEN COALESCE(json_extract(${col}, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD' THEN 1
+            ELSE 0
+        END = 1)`;
+
         if (cols.has('metadata')) {
-            conds.push("(metadata IS NOT NULL AND (NOT json_valid(metadata) OR COALESCE(json_extract(metadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD'))");
+            conds.push(holdCondition('metadata'));
         }
         if (cols.has('fieldMetadata')) {
-            conds.push("(fieldMetadata IS NOT NULL AND (NOT json_valid(fieldMetadata) OR COALESCE(json_extract(fieldMetadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD'))");
+            conds.push(holdCondition('fieldMetadata'));
         }
         if (conds.length === 0) {
             if (createdInstance && metaDb.open) metaDb.close();
@@ -58,7 +66,8 @@ function getHeldSampleIds(db) {
         if (createdInstance && metaDb.open) metaDb.close();
         return rows.map(r => r.id);
     } catch (e) {
-        return [];
+        if (createdInstance && metaDb && metaDb.open) metaDb.close();
+        throw new Error(`Failed to query held sample IDs: ${e.message}`);
     }
 }
 
@@ -104,18 +113,22 @@ function buildSampleWhere(auth, query = {}) {
         } else {
             where.OR = releaseOr;
         }
-        const heldIds = getHeldSampleIds();
-        if (heldIds.length > 0) {
-            if (typeof where.id === 'string') {
-                if (heldIds.includes(where.id)) where.id = '__denied_held__';
-            } else if (where.id && typeof where.id === 'object' && Array.isArray(where.id.in)) {
-                where.id.in = where.id.in.filter(id => !heldIds.includes(id));
-                if (where.id.in.length === 0) where.id = '__denied_held__';
-            } else if (where.id && typeof where.id === 'object' && Array.isArray(where.id.notIn)) {
-                where.id.notIn = Array.from(new Set([...where.id.notIn, ...heldIds]));
-            } else {
-                where.id = { notIn: heldIds };
+        try {
+            const heldIds = getHeldSampleIds();
+            if (heldIds.length > 0) {
+                if (typeof where.id === 'string') {
+                    if (heldIds.includes(where.id)) where.id = '__denied_held__';
+                } else if (where.id && typeof where.id === 'object' && Array.isArray(where.id.in)) {
+                    where.id.in = where.id.in.filter(id => !heldIds.includes(id));
+                    if (where.id.in.length === 0) where.id = '__denied_held__';
+                } else if (where.id && typeof where.id === 'object' && Array.isArray(where.id.notIn)) {
+                    where.id.notIn = Array.from(new Set([...where.id.notIn, ...heldIds]));
+                } else {
+                    where.id = { notIn: heldIds };
+                }
             }
+        } catch (err) {
+            where.id = '__denied_held_lookup_failure__';
         }
     } else {
         if (query.status && (query.status === 'all' || query.status === '*')) {
