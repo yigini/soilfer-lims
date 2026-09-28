@@ -2564,8 +2564,8 @@ Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09
   - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-focused-review-2bdab7a.cjs/.log`
   - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-followthrough-review-2bdab7a.cjs/.log`
   - [PR #149 Review Comment 5862247485](https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5862247485)
-- **Candidate Head SHA**: Pending commit
-- **GitHub Actions Candidate CI Run**: Pending push
+- **Candidate Head SHA**: `f1051d88b0f28ec63fdaa528196c25419d92e095` (`f1051d8`)
+- **GitHub Actions Candidate CI Run**: [Run 36371838913](https://github.com/yigini/soilfer-lims/actions/runs/36371838913) (**SUCCESS** in 6m6s; all test suites, client production build, and Docker boundary rehearsal verified)
 - **Verification Suites & Probes**:
   - `server/scripts/verify_issue149_complete_remediations.cjs`: **15/15 passed (100%)**
   - `server/scripts/data_exchange_reference_client.cjs --verify`: **16/16 passed (100%)**

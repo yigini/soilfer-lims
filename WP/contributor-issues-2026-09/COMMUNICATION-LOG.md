@@ -2243,5 +2243,7 @@ sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
   - `server/tests/contracts/nsis_v2_exchange.test.js` & `nsis_exchange.test.js`: **12/12 passed (100%)**.
   - Client Build: `vite build` clean in 7.20s with zero errors.
 - **Strict Boundaries Maintained**: Strictly LIMS-only codebase changes; zero modifications to OpenNSIS code, config, database, or deployments; zero mutations to `dev.db`; untracked release scripts preserved.
+- **Candidate Head & CI**: Candidate head `f1051d8` (`f1051d88b0f28ec63fdaa528196c25419d92e095`) on `feat/issue-140-nsis-exchange` (PR #149); GitHub Actions CI run `36371838913` passed 100% green (6m6s, all test suites passed, client production build clean, Docker boundary rehearsal passed). Ready for Codex independent verification.
+
 
 
