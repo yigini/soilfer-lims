@@ -2794,7 +2794,7 @@ PR149 remains20a7ead0826c7dcc08d264d609852610b569bb90 OPEN/unmerged, exact-head 
   - Consistent backup created: `/opt/lims/backups/dev_pre_issue140_20260928_223645.db` (SHA-256: `5b7a90fc3a1dd6c8d4f226301198613fc1ede671a89cd4572ed6a22d6b41eaac`). Integrity `ok`, FK 0 errors, counts `38566 / 19`.
   - Additive database migration executed via target image: `migrate_exchange_journal_tables.cjs`. Post-migration integrity `ok`, FK 0 errors, counts strictly unchanged (`38566 / 19`).
   - Dedicated read-only Issue #140 postflight suite executed inside container under quiescence: **31/31 checks passed (100% green, 0 failures)** across schema, public health/discovery, anonymous 401 rejections, projection policies, and scoped catalogue assertions.
-  - Transitioned to durable `PHASE="COMMITTED"` before production writers resumed; automatic database restore permanently disabled.
+  - Transitioned to in-process `PHASE="COMMITTED"` before production writers resumed (an in-process automatic-recovery boundary; not host reboot/power-loss durability); automatic database restore permanently disabled.
   - Container restarted in full production mode; responded healthy at second 3.
   - Live Apache proxy restored: configtest OK, httpd reloaded. Restored Apache configuration SHA-256 `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20` matched pre-quiescence live hash.
   - Write resumption verified: unauthenticated `POST https://lims.yigini.net/api/v2/data-exchange/receipts` returned HTTP 401 Unauthorized (from API, not 503 from proxy).
@@ -2803,6 +2803,34 @@ PR149 remains20a7ead0826c7dcc08d264d609852610b569bb90 OPEN/unmerged, exact-head 
   - Release Ledger: `/opt/lims/logs/release_ledger_issue140_20260928_223645.json`
   - Release Transcript: `/opt/lims/logs/release_issue140_20260928_223645.log`
 - **Deployment Status**: LIVE in production as `soilfer-lims:v3.5.30-48d0e52` on `lims.yigini.net`. Ready for independent post-release verification by Codex.
+
+## 28 September 2026 20:47 UTC — PR #149 LIMS-Only Production Deployment Independently Verified Complete
+
+- **Independent Review Reference**: `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-production-verification-20260928.md`
+- **Verification Result**: **ACCEPTED AS COMPLETE**. Hourly monitoring paused.
+- **Accepted Source & Artifact Binding**:
+  - Exact-main commit `48d0e526ded03232ac8516dd867f4b14923bdb58` tree identical to accepted candidate `0e733e7383f27bec88c0e3971d33233c1c8a6b71` (`236122d4afac35de2a89cb951b8cd87b1d3f769c`).
+  - Exact-main CI Run 36448529766 / job 109016979420 independently verified SUCCESS at 16:12:05 UTC.
+  - All 1,591 archive files in `/opt/lims/source_48d0e52.tar.gz` (SHA-256 `76fe8d8a76e01d29a0c80e1a7287888060c7e9d5e5a3374ce44ec49b39c9956b`, 60,363,221 bytes) and all 1,591 unpacked build files matched accepted Git blobs with zero extra files.
+  - Running container image ID `sha256:685af8a608d0015fbc582084cda50dc514089d44ba15bcbdbf283c21ae1e40fb` matches release ledger and revision label `48d0e526ded03232ac8516dd867f4b14923bdb58`.
+  - 207 deployed server/entrypoint/package source files hashed and confirmed matching accepted main.
+  - Public index HTML and its 8 unique referenced assets served by container match byte-for-byte; all returned 200 (served-artifact verification, not a new browser/device interaction test).
+  - Version distinction preserved: release tag `v3.5.30` is distinct from the unchanged application package / UI version `1.4.0`.
+  - Host wrapper SHA-256 `b18ac623d351416a4cf97679d72f9409679ea68a494459258d5957c2a737494e`; container postflight SHA-256 `cb88ca593de1e2af3a0052a7ffb958eeb3933028764718eb624bfdfbc5fea4b5`; migration script SHA-256 `fb09eb40948f7f8f585c6c9a60ce13349b2521c2c4e167188b42ce921109d15a`.
+- **Runtime Configuration & Volumes**:
+  - Live container `ab40b643cad8` healthy on target image; `NODE_ENV=production`; background suppression flags absent; `ALLOW_PRISMA_DB_PUSH` and `ALLOW_AUTO_SEED` absent; `/opt/lims/.env` matches container in memory without exposing values or credentials.
+  - Database and uploads volumes retained at `/app/server/prisma` and `/app/server/uploads`. Existing uploads volume was preserved; does not claim a separate uploads backup or a full field-by-field data-conservation comparison.
+  - Clean Apache proxy SHA-256 `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20` equals pre-release baseline.
+  - Consistent backup `/opt/lims/backups/dev_pre_issue140_20260928_223645.db` recomputed SHA-256 `5b7a90fc3a1dd6c8d4f226301198613fc1ede671a89cd4572ed6a22d6b41eaac` matches ledger.
+  - Wording clarification: `PHASE="COMMITTED"` is an in-process automatic-recovery boundary, not host reboot/power-loss durability.
+- **Independent Final Postflight Verification**:
+  - Executed pinned read-only postflight against live container with explicit existing principals (`POSTFLIGHT_ADMIN_ID=1770311018064`, `POSTFLIGHT_MANAGER_ID=user-mgr-gha`): **31/31 checks passed (0 failed)**.
+  - Public HTTPS GETs verified: `/api/health` -> 200/ok, `/api/v2/data-exchange/capabilities` -> 200/contract 2.0.0, directory 401, stats 401, GeoJSON 401.
+- **System Scope**:
+  - LIMS-only deployment independently verified complete.
+  - OpenNSIS receiver acceptance remains separate; OpenNSIS was completely untouched.
+  - No broad test reruns, new deployments, or credential modifications required.
+
 
 
 

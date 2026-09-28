@@ -3147,7 +3147,7 @@ Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09
   - LAB_MANAGER projection, 403 route denials, scoped catalogue isolation: 4/4 PASS.
   - Forged token rejection fixture: 1/1 PASS.
 - **Production Cutover (COMMITTED Phase)**:
-  - Transitioned to durable `PHASE="COMMITTED"` before production writers resumed; automatic database restore permanently disabled to prevent overwriting new mutations.
+  - Transitioned to in-process `PHASE="COMMITTED"` before production writers resumed (an in-process automatic-recovery boundary to prevent automated restore over active writers; not host reboot/power-loss durability); automatic database restore permanently disabled to prevent overwriting new mutations.
   - Production container started without background suppression; healthy at second 3.
   - Apache live configuration restored and reloaded; configtest OK.
   - Restored Apache hash: `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20` (strict equality with pre-quiescence live hash).
@@ -3208,6 +3208,34 @@ Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09
   "transcriptFile": "/opt/lims/logs/release_issue140_20260928_223645.log"
 }
 ```
+
+#### Independent Production Deployment Verification (Codex)
+
+- **Verification Document**: `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-production-verification-20260928.md` (28 September 2026, 20:47 UTC)
+- **Deployment Status**: **ACCEPTED AS COMPLETE**. Hourly monitoring paused.
+- **Accepted Source & Artifact Binding**:
+  - Accepted candidate `0e733e7383f27bec88c0e3971d33233c1c8a6b71` and merged `main` `48d0e526ded03232ac8516dd867f4b14923bdb58` have identical Git tree `236122d4afac35de2a89cb951b8cd87b1d3f769c`. PR #149 merged at 16:05:46 UTC; exact-main CI Run **36448529766** (job `109016979420`) independently verified SUCCESS at 16:12:05 UTC.
+  - Retained host archive `/opt/lims/source_48d0e52.tar.gz` (SHA-256: `76fe8d8a76e01d29a0c80e1a7287888060c7e9d5e5a3374ce44ec49b39c9956b`, 60,363,221 bytes). All 1,591 archive files match accepted Git blobs; all 1,591 unpacked build files match the archive with zero extra files.
+  - Actual running image ID (`sha256:685af8a608d0015fbc582084cda50dc514089d44ba15bcbdbf283c21ae1e40fb`) equals release ledger and revision label `48d0e526ded03232ac8516dd867f4b14923bdb58`.
+  - Hashed 207 deployed server/entrypoint/package source files against accepted `main`: all match, none missing.
+  - Public index HTML and its 8 unique referenced assets served by the container match byte-for-byte; all returned 200 (served-artifact verification, not a new browser/device interaction test).
+  - Version distinction preserved: release tag `v3.5.30` is distinct from the unchanged application package / UI version `1.4.0`.
+  - Host wrapper SHA-256 `b18ac623d351416a4cf97679d72f9409679ea68a494459258d5957c2a737494e`; container postflight SHA-256 `cb88ca593de1e2af3a0052a7ffb958eeb3933028764718eb624bfdfbc5fea4b5`; migration SHA-256 `fb09eb40948f7f8f585c6c9a60ce13349b2521c2c4e167188b42ce921109d15a`. All match retained accepted source.
+- **Actual Runtime & Configuration**:
+  - Live container `ab40b643cad82329ad5b4c18e7433d92bc96ac69c1ea018323626820573347e9` healthy and running on target image.
+  - `NODE_ENV=production`; PORT 3000; both scheduler suppression flags absent; `ALLOW_PRISMA_DB_PUSH` and `ALLOW_AUTO_SEED` absent. All 4 entries in `/opt/lims/.env` match the container in memory; no values or credentials exposed.
+  - Existing database and uploads volumes retained at `/app/server/prisma` and `/app/server/uploads`. Existing uploads volume was preserved; does not claim a separate uploads backup or a full field-by-field data-conservation comparison.
+  - Apache active; proxy SHA-256 `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20` equals pre-release baseline and ledger.
+  - Consistent backup `/opt/lims/backups/dev_pre_issue140_20260928_223645.db` recomputed SHA-256 `5b7a90fc3a1dd6c8d4f226301198613fc1ede671a89cd4572ed6a22d6b41eaac` matches ledger.
+  - Wording clarification: `PHASE="COMMITTED"` is an in-process automatic-recovery boundary, not host reboot/power-loss durability.
+- **Independent Final Postflight Verification**:
+  - Codex executed pinned read-only postflight once against final production container using explicit existing principals (`POSTFLIGHT_ADMIN_ID=1770311018064`, `POSTFLIGHT_MANAGER_ID=user-mgr-gha`): **31/31 passed (0 failed)**.
+  - Public HTTPS GET checks: health 200/ok, capabilities 200/contract 2.0.0, directory 401, stats 401, GeoJSON 401.
+- **Scope & System Boundaries**:
+  - LIMS-only deployment is accepted as complete.
+  - OpenNSIS receiver acceptance remains separate; OpenNSIS was completely untouched.
+  - No new production data/grants/credentials were modified. No broad test reruns or repeat release required.
+
 
 
 
