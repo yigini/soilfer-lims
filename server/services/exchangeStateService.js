@@ -1456,6 +1456,61 @@ function decodeCursor(cursorStr, db) {
 }
 
 /**
+ * Canonical filter normalization across all live-list endpoints (samples, observations, geojson, spectra).
+ * Ensures uniform case-folding, string trimming, and alias resolution (R2, R8, R11).
+ */
+function normalizeFilter(query = {}, endpoint = 'samples') {
+    const norm = {};
+
+    // Common filters across endpoints
+    if (query.status !== undefined && query.status !== null && String(query.status).trim() !== '') {
+        norm.status = String(query.status).trim().toUpperCase();
+    } else {
+        norm.status = null;
+    }
+
+    if (query.country !== undefined && query.country !== null && String(query.country).trim() !== '') {
+        norm.country = String(query.country).trim().toUpperCase();
+    } else {
+        norm.country = null;
+    }
+
+    if (query.project !== undefined && query.project !== null && String(query.project).trim() !== '') {
+        norm.project = String(query.project).trim();
+    } else {
+        norm.project = null;
+    }
+
+    const labRaw = query.labId || query.assignedLab;
+    if (labRaw !== undefined && labRaw !== null && String(labRaw).trim() !== '') {
+        norm.labId = String(labRaw).trim();
+    } else {
+        norm.labId = null;
+    }
+
+    if (query.updatedSince !== undefined && query.updatedSince !== null && String(query.updatedSince).trim() !== '') {
+        norm.updatedSince = String(query.updatedSince).trim();
+    } else {
+        norm.updatedSince = null;
+    }
+
+    if (endpoint === 'observations') {
+        norm.param = (query.param && String(query.param).trim() !== '') ? String(query.param).trim().toUpperCase() : null;
+        norm.censoring = (query.censoring && String(query.censoring).trim() !== '') ? String(query.censoring).trim().toUpperCase() : null;
+        norm.basis = (query.basis && String(query.basis).trim() !== '') ? String(query.basis).trim().toUpperCase() : null;
+    } else if (endpoint === 'geojson') {
+        norm.bbox = (query.bbox && String(query.bbox).trim() !== '') ? String(query.bbox).trim() : null;
+    } else if (endpoint === 'spectra') {
+        norm.modality = (query.modality && String(query.modality).trim() !== '') ? String(query.modality).trim().toUpperCase() : null;
+        const instRaw = query.instrument || query.equipmentId;
+        norm.instrument = (instRaw && String(instRaw).trim() !== '') ? String(instRaw).trim() : null;
+        norm.qcStatus = (query.qcStatus && String(query.qcStatus).trim() !== '') ? String(query.qcStatus).trim().toUpperCase() : null;
+    }
+
+    return norm;
+}
+
+/**
  * Validates and decodes live list cursors (samples, observations, geojson, spectra).
  * Enforces fail-closed validation on malformed/signature/expiry/epoch/connection/endpoint/filter changes (R2, R8, R11).
  */
@@ -1498,55 +1553,62 @@ function validateLiveListCursor(cursorStr, auth, endpoint, query = {}, db) {
         };
     }
 
-    // Context binding validations (original R2/R8/R11):
-    // 1. Connection binding:
+    // Must be a live list cursor (R2, R8, R11)
+    if (decoded.type !== 'live_list') {
+        return {
+            ok: false,
+            status: 400,
+            code: 'INVALID_CURSOR',
+            message: `Cursor type '${decoded.type || 'unknown'}' is not a valid live list cursor.`
+        };
+    }
+
+    // 1. Connection binding (required):
     const currentConn = getConnectionId(auth);
-    if (decoded.connectionId && decoded.connectionId !== currentConn) {
+    if (!decoded.connectionId || decoded.connectionId !== currentConn) {
         return {
             ok: false,
             status: 400,
             code: 'CURSOR_CONTEXT_MISMATCH',
-            message: `Cursor was issued for connection '${decoded.connectionId}', not '${currentConn}'.`
+            message: `Cursor was issued for connection '${decoded.connectionId || 'none'}', not '${currentConn}'.`
         };
     }
 
-    // 2. Endpoint binding:
-    if (decoded.endpoint && decoded.endpoint !== endpoint) {
+    // 2. Endpoint binding (required):
+    if (!decoded.endpoint || decoded.endpoint !== endpoint) {
         return {
             ok: false,
             status: 400,
             code: 'CURSOR_ENDPOINT_MISMATCH',
-            message: `Cursor was issued for endpoint '${decoded.endpoint}', not '${endpoint}'.`
+            message: `Cursor was issued for endpoint '${decoded.endpoint || 'none'}', not '${endpoint}'.`
         };
     }
 
-    // 3. Profile binding:
+    // 3. Profile binding (required):
     const currentProfile = (query.profile && String(query.profile).trim().toLowerCase()) || 'default';
-    if (decoded.profile && decoded.profile !== currentProfile) {
+    if (!decoded.profile || decoded.profile !== currentProfile) {
         return {
             ok: false,
             status: 400,
             code: 'CURSOR_PROFILE_MISMATCH',
-            message: `Cursor profile '${decoded.profile}' does not match requested profile '${currentProfile}'.`
+            message: `Cursor profile '${decoded.profile || 'none'}' does not match requested profile '${currentProfile}'.`
         };
     }
 
-    // 4. Query filter binding:
-    if (decoded.filter && typeof decoded.filter === 'object') {
-        const filterKeys = ['country', 'project', 'labId', 'param', 'censoring', 'basis', 'bbox', 'modality', 'qcStatus', 'instrument'];
-        for (const k of filterKeys) {
-            let requestedRaw = query[k];
-            if (k === 'instrument' && !requestedRaw) requestedRaw = query.equipmentId;
-            const requestedVal = (requestedRaw !== undefined && requestedRaw !== null) ? String(requestedRaw).trim() : null;
-            const cursorVal = (decoded.filter[k] !== undefined && decoded.filter[k] !== null) ? String(decoded.filter[k]).trim() : null;
-            if (requestedVal !== cursorVal) {
-                return {
-                    ok: false,
-                    status: 400,
-                    code: 'CURSOR_FILTER_MISMATCH',
-                    message: `Cursor query filter '${k}' (${cursorVal}) does not match requested filter (${requestedVal}).`
-                };
-            }
+    // 4. Query filter binding (symmetric normalized filter check):
+    const reqFilter = normalizeFilter(query, endpoint);
+    const curFilter = (decoded.filter && typeof decoded.filter === 'object') ? decoded.filter : {};
+    const allKeys = new Set([...Object.keys(reqFilter), ...Object.keys(curFilter)]);
+    for (const k of allKeys) {
+        const reqVal = reqFilter[k] !== undefined ? reqFilter[k] : null;
+        const curVal = curFilter[k] !== undefined ? curFilter[k] : null;
+        if (reqVal !== curVal) {
+            return {
+                ok: false,
+                status: 400,
+                code: 'CURSOR_FILTER_MISMATCH',
+                message: `Cursor query filter '${k}' (${curVal}) does not match requested filter (${reqVal}).`
+            };
         }
     }
 
@@ -1894,7 +1956,7 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
             seq: last.sequence,
             profile: profile || null,
             filter: filter || {},
-            timestamp: last.created_at
+            timestamp: (last.created_at ? new Date(last.created_at).toISOString() : new Date().toISOString())
         }, db);
 
         // Record issued change batch in _exchange_batches for durable receipt resolution
@@ -1942,7 +2004,7 @@ async function getChanges(auth, { cursor = null, limit = 100, profile = null, fi
             country: r.country,
             projectCode: r.project_code,
             laboratoryId: r.laboratory_id,
-            timestamp: r.created_at,
+            timestamp: (r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString()),
             data
         };
     });
@@ -2359,5 +2421,6 @@ module.exports = {
     pruneExpiredSnapshots,
     isSpecimenEligible,
     isProvenanceHeld,
+    normalizeFilter,
     validateLiveListCursor
 };

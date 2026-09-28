@@ -312,8 +312,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/Specimen'
                   nextCursor:
-                    type: string
-                    nullable: true
+                    type: [string, "null"]
 
   /changes:
     get:
@@ -726,20 +725,16 @@ components:
           type: string
           example: "v2-specimen-001"
         fieldSampleId:
-          type: string
-          nullable: true
+          type: [string, "null"]
           example: "FIELD-GTM-1049"
         labSampleId:
-          type: string
-          nullable: true
+          type: [string, "null"]
           example: "LAB-2026-0042"
         laboratoryId:
-          type: string
-          nullable: true
+          type: [string, "null"]
           example: "GTM-LAB1"
         projectCode:
-          type: string
-          nullable: true
+          type: [string, "null"]
           example: "SOILFER-GTM"
         country:
           type: string
@@ -758,15 +753,13 @@ components:
           type: object
           properties:
             code:
-              type: string
-              nullable: true
+              type: [string, "null"]
               example: "PLOT-ALPHA"
             namespace:
               type: string
               example: "GTM:SOILFER-GTM"
             key:
-              type: string
-              nullable: true
+              type: [string, "null"]
               example: "GTM:SOILFER-GTM:PLOT-ALPHA"
             relation:
               type: string
@@ -776,41 +769,33 @@ components:
           type: object
           properties:
             collectionDate:
-              type: string
-              nullable: true
+              type: [string, "null"]
               example: "2026-04-10"
             collectionTimestamp:
-              type: string
+              type: [string, "null"]
               format: date-time
-              nullable: true
             collectorName:
-              type: string
-              nullable: true
+              type: [string, "null"]
             depths:
               type: object
               properties:
                 topCm:
-                  type: number
-                  nullable: true
+                  type: [number, "null"]
                   example: 0.0
                 bottomCm:
-                  type: number
-                  nullable: true
+                  type: [number, "null"]
                   example: 20.0
                 horizon:
-                  type: string
-                  nullable: true
+                  type: [string, "null"]
                   example: "Ap"
                 intervalLabel:
-                  type: string
-                  nullable: true
+                  type: [string, "null"]
                   example: "0–20 cm"
                 unit:
                   type: string
                   example: "cm"
             location:
-              type: object
-              nullable: true
+              type: [object, "null"]
               properties:
                 type:
                   type: string
@@ -821,11 +806,9 @@ components:
                     type: number
                   example: [-90.5069, 14.6349]
                 elevationMeters:
-                  type: number
-                  nullable: true
+                  type: [number, "null"]
                 accuracyMeters:
-                  type: number
-                  nullable: true
+                  type: [number, "null"]
                 source:
                   type: string
                   example: "FIELD_GPS"
@@ -833,44 +816,34 @@ components:
                   type: integer
                   example: 4326
             site:
-              type: object
-              nullable: true
+              type: [object, "null"]
         receipt:
           type: object
           properties:
             receptionDate:
-              type: string
-              nullable: true
+              type: [string, "null"]
               example: "2026-04-12"
             receptionTimestamp:
-              type: string
+              type: [string, "null"]
               format: date-time
-              nullable: true
             receivedBy:
-              type: string
-              nullable: true
+              type: [string, "null"]
             receivedMassGrams:
-              type: number
-              nullable: true
+              type: [number, "null"]
             moistureOnArrival:
-              type: number
-              nullable: true
+              type: [number, "null"]
         qualityControl:
           type: object
           properties:
             dryingStatus:
-              type: string
-              nullable: true
+              type: [string, "null"]
             preparationStatus:
-              type: string
-              nullable: true
+              type: [string, "null"]
             approvedBy:
-              type: string
-              nullable: true
+              type: [string, "null"]
             approvedAt:
-              type: string
+              type: [string, "null"]
               format: date-time
-              nullable: true
         qualityIssues:
           type: array
           items:
@@ -903,11 +876,9 @@ components:
         specimenId:
           type: string
         fieldSampleId:
-          type: string
-          nullable: true
+          type: [string, "null"]
         labSampleId:
-          type: string
-          nullable: true
+          type: [string, "null"]
         parameter:
           type: string
           example: "PH_H2O"
@@ -921,40 +892,31 @@ components:
           type: object
           properties:
             value:
-              type: number
-              nullable: true
+              type: [number, "null"]
               example: 6.4
             rawEntry:
-              type: string
-              nullable: true
+              type: [string, "null"]
               example: "6.40"
             unit:
-              type: string
-              nullable: true
+              type: [string, "null"]
               example: "pH_units"
         normalized:
           type: object
           properties:
             value:
-              type: number
-              nullable: true
+              type: [number, "null"]
               example: 6.4
             unit:
-              type: string
-              nullable: true
+              type: [string, "null"]
               example: "pH_units"
         controlledUnit:
-          type: string
-          nullable: true
+          type: [string, "null"]
         qudtUnit:
-          type: string
-          nullable: true
+          type: [string, "null"]
         lod:
-          type: number
-          nullable: true
+          type: [number, "null"]
         loq:
-          type: number
-          nullable: true
+          type: [number, "null"]
         provenance:
           type: string
           enum: [MEASURED, PREDICTED, DERIVED, IMPORTED]
@@ -975,34 +937,25 @@ components:
           type: object
           properties:
             id:
-              type: string
-              nullable: true
+              type: [string, "null"]
             code:
-              type: string
-              nullable: true
+              type: [string, "null"]
             name:
-              type: string
-              nullable: true
+              type: [string, "null"]
             standard:
-              type: string
-              nullable: true
+              type: [string, "null"]
             procedureUri:
-              type: string
-              nullable: true
+              type: [string, "null"]
             citation:
-              type: string
-              nullable: true
+              type: [string, "null"]
         glosis:
-          type: object
-          nullable: true
+          type: [object, "null"]
         analysedAt:
-          type: string
+          type: [string, "null"]
           format: date-time
-          nullable: true
         updatedAt:
-          type: string
+          type: [string, "null"]
           format: date-time
-          nullable: true
 
     SpecimenListResponse:
       type: object
@@ -1026,8 +979,7 @@ components:
         hasMore:
           type: boolean
         nextCursor:
-          type: string
-          nullable: true
+          type: [string, "null"]
         data:
           type: array
           items:
@@ -1070,8 +1022,7 @@ components:
         hasMore:
           type: boolean
         nextCursor:
-          type: string
-          nullable: true
+          type: [string, "null"]
         data:
           type: array
           items:
@@ -1102,8 +1053,7 @@ components:
           type: boolean
           description: Indicates whether additional spatial features remain beyond current page
         nextCursor:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Signed opaque pagination continuation cursor
         features:
           type: array
@@ -1232,8 +1182,7 @@ components:
           type: string
           example: soilfer-lims-core
         batchId:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Unique batch identifier recorded for delivery receipt resolution
           example: batch_1727488000_a1b2c3d4
         boundaryTimestamp:
@@ -1244,8 +1193,7 @@ components:
         hasMore:
           type: boolean
         nextCursor:
-          type: string
-          nullable: true
+          type: [string, "null"]
         changes:
           type: array
           items:
@@ -1268,11 +1216,9 @@ components:
               specimenId:
                 type: string
               fieldSampleId:
-                type: string
-                nullable: true
+                type: [string, "null"]
               labSampleId:
-                type: string
-                nullable: true
+                type: [string, "null"]
               timestamp:
                 type: string
                 format: date-time
@@ -1286,14 +1232,11 @@ components:
       type: object
       properties:
         receiptId:
-          type: string
-          nullable: true
+          type: [string, "null"]
         snapshotId:
-          type: string
-          nullable: true
+          type: [string, "null"]
         batchId:
-          type: string
-          nullable: true
+          type: [string, "null"]
         importedCount:
           type: integer
           minimum: 0
@@ -1303,8 +1246,7 @@ components:
           minimum: 0
           default: 0
         checkpoint:
-          type: string
-          nullable: true
+          type: [string, "null"]
         errors:
           type: array
           items:
@@ -1346,16 +1288,13 @@ components:
           type: string
           example: National NSIS Integration Gateway
         clientCode:
-          type: string
-          nullable: true
+          type: [string, "null"]
           example: OPENNSIS_GHANA
         organization:
-          type: string
-          nullable: true
+          type: [string, "null"]
           example: Ministry of Food and Agriculture
         contactEmail:
-          type: string
-          nullable: true
+          type: [string, "null"]
           example: integration@mofa.gov.gh
         status:
           type: string
@@ -1393,9 +1332,8 @@ components:
           type: object
           properties:
             lastReceiptAt:
-              type: string
+              type: [string, "null"]
               format: date-time
-              nullable: true
             totalImported:
               type: integer
               example: 450
@@ -1403,8 +1341,7 @@ components:
               type: integer
               example: 2
             lastCheckpoint:
-              type: string
-              nullable: true
+              type: [string, "null"]
               example: seq_450
         createdAt:
           type: string
@@ -1513,9 +1450,8 @@ components:
               items:
                 type: string
             expiresAt:
-              type: string
+              type: [string, "null"]
               format: date-time
-              nullable: true
 
     ErrorResponse:
       type: object

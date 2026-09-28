@@ -186,11 +186,7 @@ exports.getSamples = async (req, res) => {
                 endpoint: 'samples',
                 connectionId: currentConn,
                 profile: (req.query.profile && String(req.query.profile).trim().toLowerCase()) || 'default',
-                filter: {
-                    country: req.query.country || null,
-                    project: req.query.project || null,
-                    labId: req.query.labId || null
-                },
+                filter: exchangeStateService.normalizeFilter(req.query, 'samples'),
                 lastUpdatedAt: last.updatedAt.toISOString(),
                 lastId: last.id
             });
@@ -367,14 +363,7 @@ exports.getObservations = async (req, res) => {
                 endpoint: 'observations',
                 connectionId: currentConn,
                 profile: (req.query.profile && String(req.query.profile).trim().toLowerCase()) || 'default',
-                filter: {
-                    country: req.query.country || null,
-                    project: req.query.project || null,
-                    labId: req.query.labId || null,
-                    param: req.query.param || null,
-                    censoring: req.query.censoring || null,
-                    basis: req.query.basis || null
-                },
+                filter: exchangeStateService.normalizeFilter(req.query, 'observations'),
                 lastUpdatedAt: last.updatedAt.toISOString(),
                 lastId: last.id
             });
@@ -558,8 +547,8 @@ exports.getGeoJson = async (req, res) => {
                             { longitude: { gte: bboxBounds.minLng, lte: bboxBounds.maxLng } }
                         ]
                     },
-                    { latitude: null },
-                    { longitude: null }
+                    { metadata: { not: null } },
+                    { fieldMetadata: { not: null } }
                 ]
             });
         }
@@ -577,14 +566,15 @@ exports.getGeoJson = async (req, res) => {
             orderBy: [
                 { updatedAt: 'desc' },
                 { id: 'desc' }
-            ]
+            ],
+            take: 5000
         });
 
         // Resolve coordinates with shared extractCoordinates across columns and metadata (R4, R7, R11)
         const validSpatialCandidates = [];
         for (const s of candidateSamples) {
             const coords = extractCoordinates(s, safeParseJson(s.fieldMetadata), safeParseJson(s.metadata));
-            if (coords.latitude === null || coords.longitude === null) {
+            if (!coords || coords.latitude === null || coords.longitude === null) {
                 continue;
             }
             if (bboxBounds) {
@@ -606,24 +596,22 @@ exports.getGeoJson = async (req, res) => {
 
         const total = validSpatialCandidates.length;
 
-        // Deterministic pagination using cursor anchor with timestamp/id fallback
+        // Deterministic pagination using immutable recorded ordering boundary (R4, R11)
         let startIndex = 0;
-        if (decoded && (decoded.lastId || decoded.lastUpdatedAt)) {
-            const anchorIdx = decoded.lastId ? validSpatialCandidates.findIndex(item => item.id === decoded.lastId) : -1;
-            if (anchorIdx !== -1) {
-                startIndex = anchorIdx + 1;
-            } else if (decoded.lastUpdatedAt) {
-                const cursorTime = new Date(decoded.lastUpdatedAt).getTime();
-                const foundIdx = validSpatialCandidates.findIndex(item => {
-                    const itemTime = item.updatedAt instanceof Date ? item.updatedAt.getTime() : new Date(item.updatedAt).getTime();
+        if (decoded && (decoded.lastUpdatedAt || decoded.lastId)) {
+            const cursorTime = decoded.lastUpdatedAt ? new Date(decoded.lastUpdatedAt).getTime() : null;
+            const cursorId = decoded.lastId || null;
+            const foundIdx = validSpatialCandidates.findIndex(item => {
+                const itemTime = item.updatedAt instanceof Date ? item.updatedAt.getTime() : new Date(item.updatedAt).getTime();
+                if (cursorTime !== null) {
                     if (itemTime < cursorTime) return true;
-                    if (itemTime === cursorTime && decoded.lastId && item.id < decoded.lastId) return true;
+                    if (itemTime === cursorTime && cursorId && item.id < cursorId) return true;
                     return false;
-                });
-                startIndex = (foundIdx !== -1) ? foundIdx : validSpatialCandidates.length;
-            } else {
-                startIndex = validSpatialCandidates.length;
-            }
+                }
+                if (cursorId && item.id < cursorId) return true;
+                return false;
+            });
+            startIndex = (foundIdx !== -1) ? foundIdx : validSpatialCandidates.length;
         }
 
         const pageCandidates = validSpatialCandidates.slice(startIndex, startIndex + limit);
@@ -639,20 +627,21 @@ exports.getGeoJson = async (req, res) => {
                 endpoint: 'geojson',
                 connectionId: currentConn,
                 profile: (req.query.profile && String(req.query.profile).trim().toLowerCase()) || 'default',
-                filter: {
-                    country: req.query.country || null,
-                    project: req.query.project || null,
-                    labId: req.query.labId || null,
-                    bbox: req.query.bbox ? String(req.query.bbox).trim() : null
-                },
+                filter: exchangeStateService.normalizeFilter(req.query, 'geojson'),
                 lastUpdatedAt: (last.updatedAt instanceof Date ? last.updatedAt : new Date(last.updatedAt)).toISOString(),
                 lastId: last.id
             });
         }
 
+        const detailWhere = buildSampleWhere(req.sisAuth, req.query);
+        detailWhere.AND = [
+            ...(detailWhere.AND || []),
+            { id: { in: pageIds } }
+        ];
+
         const [pageSamples, maps] = await Promise.all([
             pageIds.length > 0 ? prisma.sample.findMany({
-                where: { id: { in: pageIds } },
+                where: detailWhere,
                 include: { results: true }
             }) : Promise.resolve([]),
             getAnalysisMap()
@@ -663,6 +652,7 @@ exports.getGeoJson = async (req, res) => {
 
         const features = [];
         for (const s of orderedSamples) {
+            if (!s || !exchangeStateService.isSpecimenEligible(s)) continue;
             const v2 = formatSampleV2(s, maps, { auth: req.sisAuth });
             const loc = v2.sampling.location;
 
@@ -877,14 +867,7 @@ exports.getSpectra = async (req, res) => {
                 endpoint: 'spectra',
                 connectionId: currentConn,
                 profile: (req.query.profile && String(req.query.profile).trim().toLowerCase()) || 'default',
-                filter: {
-                    country: req.query.country || null,
-                    project: req.query.project || null,
-                    labId: req.query.labId || null,
-                    modality: req.query.modality ? req.query.modality.toUpperCase() : null,
-                    qcStatus: req.query.qcStatus ? req.query.qcStatus.toUpperCase() : null,
-                    instrument: req.query.instrument || req.query.equipmentId || null
-                },
+                filter: exchangeStateService.normalizeFilter(req.query, 'spectra'),
                 timestamp: last.timestamp ? last.timestamp.toISOString() : new Date().toISOString(),
                 id: last.id
             });
