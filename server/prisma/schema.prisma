@@ -1052,22 +1052,25 @@ model ReportAccessLog {
 // --- SOIL INFORMATION SYSTEM (SIS) INTEGRATION API KEYS ---
 
 model ApiKey {
-  id          String    @id
-  name        String
-  keyHash     String    @unique // Hashed or masked token
-  keyPrefix   String    // e.g. "slims_live_9f83..." for display
-  role        String    @default("NSIS_CONSUMER") // NSIS_CONSUMER, EXTERNAL_GIS, GLOBAL_HARVESTER
-  countries   String?   // JSON array: ["GTM", "HND"] or null for all
-  projects    String?   // JSON array: ["SoilFER-USA"] or null for all
-  labs        String?   // JSON array: ["LAB-GTM"] or null (absent = deny for spectra)
-  isActive    Boolean   @default(true)
-  createdBy   String?
-  lastUsedAt  DateTime?
-  expiresAt   DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           String    @id
+  name         String
+  keyHash      String    @unique // Hashed or masked token
+  keyPrefix    String    // e.g. "slims_live_9f83..." for display
+  role         String    @default("NSIS_CONSUMER") // NSIS_CONSUMER, EXTERNAL_GIS, GLOBAL_HARVESTER
+  capabilities String?   // JSON array: ["SPATIAL", "SPECTRAL", "SNAPSHOT", "RECEIPT"] or null
+  connectionId String?   // Persistent connection ID: conn_<uuid>
+  countries    String?   // JSON array: ["GTM", "HND"] or null for all
+  projects     String?   // JSON array: ["SoilFER-USA"] or null for all
+  labs         String?   // JSON array: ["LAB-GTM"] or null (absent = deny for spectra)
+  isActive     Boolean   @default(true)
+  createdBy    String?
+  lastUsedAt   DateTime?
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@index([keyHash])
+  @@index([connectionId])
 }
 
 // --- PACKAGE P2: TRANSACTIONAL FOUNDATIONS & SAMPLE WORKSPACE ---

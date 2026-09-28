@@ -11,6 +11,7 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
     let scanGtmId = 'test-stage-e-scan-gtm';
     let scanMozId = 'test-stage-e-scan-moz';
     let sampleGtmId = 'TEST-STAGEE-SMP-GTM';
+    let sampleMozId = 'TEST-STAGEE-SMP-MOZ';
     let resultId = 'TEST-STAGEE-RES-01';
 
     beforeAll(async () => {
@@ -22,7 +23,7 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
             where: { id: resultId }
         });
         await prisma.sample.deleteMany({
-            where: { id: sampleGtmId }
+            where: { id: { in: [sampleGtmId, sampleMozId] } }
         });
         await prisma.apiKey.deleteMany({
             where: {
@@ -79,6 +80,18 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
             }
         });
 
+        // Create sample in MOZ
+        await prisma.sample.create({
+            data: {
+                id: sampleMozId,
+                originalId: sampleMozId,
+                labId: 'LAB-MOZ',
+                assignedLab: 'LAB-MOZ',
+                status: 'APPROVED',
+                matrix: 'SOIL'
+            }
+        });
+
         // Create paired reference wet chemistry result
         await prisma.result.create({
             data: {
@@ -125,6 +138,7 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
         await prisma.spectralData.create({
             data: {
                 id: scanMozId,
+                sampleId: sampleMozId,
                 labId: 'LAB-MOZ',
                 filename: 'test_moz_nir.csv',
                 modality: 'NIR',
@@ -151,7 +165,7 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
             where: { id: resultId }
         });
         await prisma.sample.deleteMany({
-            where: { id: sampleGtmId }
+            where: { id: { in: [sampleGtmId, sampleMozId] } }
         });
         await prisma.apiKey.deleteMany({
             where: {

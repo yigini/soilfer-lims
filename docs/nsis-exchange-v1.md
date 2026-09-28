@@ -1,9 +1,15 @@
 # National Soil Information System (NSIS) Data Exchange Specification
-**Version:** 1.0.0  
-**Status:** Approved / Active Contract  
+**Version:** 1.0.0 (Legacy Compatible)  
+**Status:** Maintained / Backward Compatible  
+**Next Major Specification:** [Data Exchange API V2 (Lossless)](data-exchange-api-v2.md)  
 **Protocol:** RESTful JSON / GeoJSON over HTTPS  
 **Target Consumer:** National Soil Information Systems (NSIS), FAO OpenNSIS (`sis-database/owl2sql`), and Global Soil Data Portals  
-**Authoritative Reference:** SoilFER Build Specification Volume X (WP-38)
+**Authoritative Reference:** SoilFER Build Specification Volume X (WP-38) / GitHub Issue #140
+
+> [!NOTE]
+> **Specification V2 Available:** Version 2.0 of the exchange specification is now active at `/api/v2/data-exchange`.
+> V2 introduces pure lossless observation arrays, unrounded decimal depths, RFC 7946 compliance, resumable point-in-time snapshots, and continuous change feeds with boundary cursors.
+> New integrations should target the [V2 Specification](data-exchange-api-v2.md). Existing V1 consumers remain 100% compatible.
 
 ---
 
@@ -203,6 +209,13 @@ SoilFER-LIMS parameters are harmonized with the FAO OpenNSIS relational model (`
 ## 5. Compliance & Verification
 
 A connected laboratory must verify that:
-1. `GET /api/v1/data-exchange/stats` reports valid sample counts.
+1. `GET /api/v1/data-exchange/stats` reports valid sample counts scoped strictly to authorized laboratories.
 2. At least 100 analytical results validate schema constraints without parsing exceptions.
 3. GeoJSON coordinates fall within the sovereign country polygon.
+
+### 5.1 Backward-Compatible Additive Enhancements (Issue #140)
+The following additive non-breaking enhancements have been incorporated into V1 responses:
+- **Explicit Identifiers:** Responses now include `specimenId`, `fieldSampleId`, `labSampleId`, `sourceSystemId`, and `laboratoryId` alongside legacy attributes.
+- **Fail-Closed Security (IR-14):** All requests require explicit non-empty laboratory authorization (`labs`). Requests from keys with empty lab scope return zero records.
+- **Delta Sync Pagination Warning:** The `/sync` endpoint emits `hasMore: true` and an informational warning whenever additional records exist beyond the requested `limit`.
+

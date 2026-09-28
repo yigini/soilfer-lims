@@ -26,20 +26,76 @@ function parseOptionalCapacity(val) {
 
 router.use(verifyToken);
 
-// ─── GET /api/labs ─── Enriched list with stats
+// ─── GET /api/labs ─── Enriched list with stats (Operational Catalogue)
 router.get('/', async (req, res) => {
     try {
-        const labs = await prisma.lab.findMany({ orderBy: { createdAt: 'desc' } });
+        let labWhere = {};
+        if (req.user.role === 'SUPER_ADMIN') {
+            labWhere = {};
+        } else if (req.user.role === 'MASTER_USER' || req.user.role === 'COUNTRY_ADMIN') {
+            let userCountries = [];
+            if (req.user.countries) {
+                userCountries = Array.isArray(req.user.countries)
+                    ? req.user.countries
+                    : (typeof req.user.countries === 'string' ? JSON.parse(req.user.countries) : []);
+            }
+            if (userCountries.includes('*')) {
+                labWhere = {};
+            } else if (userCountries.length > 0) {
+                labWhere = { country: { in: userCountries } };
+            } else {
+                labWhere = { id: { in: [] } };
+            }
+        } else if (req.user.labId) {
+            labWhere = { id: req.user.labId };
+        } else if (req.user.projects) {
+            let projs = [];
+            try {
+                projs = Array.isArray(req.user.projects) ? req.user.projects : JSON.parse(req.user.projects);
+            } catch (e) {}
+            if (Array.isArray(projs) && projs.length > 0) {
+                const projectLabs = await prisma.project.findMany({
+                    where: { code: { in: projs } },
+                    select: { labId: true }
+                });
+                const pLabIds = projectLabs.map(p => p.labId).filter(Boolean);
+                labWhere = { id: { in: pLabIds } };
+            } else {
+                labWhere = { id: { in: [] } };
+            }
+        } else {
+            labWhere = { id: { in: [] } };
+        }
 
-        // Batch-fetch all related data in parallel
+        const labs = await prisma.lab.findMany({
+            where: labWhere,
+            orderBy: { createdAt: 'desc' }
+        });
+
+        const labIds = labs.map(l => l.id);
+        if (labIds.length === 0) {
+            return res.json([]);
+        }
+
+        // Batch-fetch all related data in parallel (scoped strictly to authorized laboratories)
         const [allProjects, allUsers, allSamples] = await Promise.all([
             prisma.project.findMany({
-                where: { OR: [{ labId: { not: null } }, { assignedLabIds: { not: null } }] },
+                where: {
+                    OR: [
+                        { labId: { in: labIds } },
+                        { assignedLabIds: { not: null } }
+                    ]
+                },
                 select: { id: true, code: true, name: true, status: true, labId: true, assignedLabIds: true }
             }),
-            prisma.user.groupBy({ by: ['labId', 'isActive'], _count: true }),
+            prisma.user.groupBy({
+                by: ['labId', 'isActive'],
+                where: { labId: { in: labIds } },
+                _count: true
+            }),
             prisma.sample.groupBy({
                 by: ['assignedLab', 'status'],
+                where: { assignedLab: { in: labIds } },
                 _count: true
             })
         ]);

@@ -1,6 +1,10 @@
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const { randomUUID: uuidv4 } = require('crypto');
+const { registerDbFunctions, installSqliteHooks } = require('./services/exchangeDbFunctions');
+
+// Install hooks so all better-sqlite3 connections receive exchange trigger UDFs
+installSqliteHooks();
 
 let Database;
 try {
@@ -11,6 +15,7 @@ try {
 
 const dbPath = process.env.DATABASE_PATH || path.join(__dirname, 'prisma/dev.db');
 const db = new Database(dbPath, { timeout: 5000 });
+registerDbFunctions(db);
 
 // Enable foreign keys, WAL mode, busy_timeout, and synchronous NORMAL
 db.pragma('journal_mode = WAL');

@@ -27,10 +27,17 @@ router.get('/sync', apiKeyAuth, sisController.syncDelta);
 // 6. Dataset Statistics
 router.get('/stats', apiKeyAuth, sisController.getStats);
 
-// ─── ADMIN API KEY MANAGEMENT (Platform Admins Only) ───
+// ─── ADMIN API KEY & CONNECTION MANAGEMENT (Platform Admins Only) ───
 
 router.get('/keys', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.listApiKeys);
 router.post('/keys', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.createApiKey);
 router.delete('/keys/:id', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.revokeApiKey);
+router.post('/keys/:id/rotate', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.rotateApiKey);
+router.post('/keys/:id/confirm-rotation', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.confirmRotation);
+router.post('/keys/:id/abort-rotation', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.abortRotation);
+
+router.get('/connections', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.listConnections);
+router.post('/connections', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.createConnection);
+router.put('/connections/:id', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.updateConnection);
 
 module.exports = router;

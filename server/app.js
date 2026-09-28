@@ -292,6 +292,8 @@ app.use('/api/messages', verifyToken, require('./routes/messageRoutes'));
 app.use('/api/help', require('./routes/helpRoutes'));
 app.use('/api/v1/data-exchange', require('./routes/sisRoutes')); // Neutral National Data Exchange API (v1)
 app.use('/api/v1/sis', require('./routes/sisRoutes')); // Legacy backward-compatible alias
+app.use('/api/v2/data-exchange', require('./routes/sisV2Routes')); // Neutral National Data Exchange API (v2)
+app.use('/api/v2/sis', require('./routes/sisV2Routes')); // V2 SIS alias
 // Kobo media proxy — no JWT auth because <img> tags can't send headers.
 // Security: (1) only proxies to known Kobo hosts from active configs, (2) HTTPS only, (3) URL scheme validation.
 const koboController = require('./controllers/koboController');

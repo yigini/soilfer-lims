@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const jwt = require('jsonwebtoken');
 
 process.env.NODE_ENV = 'test';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key-12345';
@@ -18,6 +17,8 @@ if (!process.env.DATABASE_PATH && fs.existsSync(tmpDbFile)) {
     }
 }
 
+require('../services/exchangeDbFunctions');
+const jwt = require('jsonwebtoken');
 const { usersDb } = require('../db');
 
 /**
