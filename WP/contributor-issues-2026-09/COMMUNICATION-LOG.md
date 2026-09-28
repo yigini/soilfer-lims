@@ -2416,3 +2416,41 @@ sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
 - **Strict Boundaries Maintained**: Strictly LIMS-only codebase changes; zero modifications to OpenNSIS code, config, database, or deployments; zero mutations to `dev.db`; untracked release scripts preserved.
 
 
+
+
+## 28 September 2026 08:18 UTC — owner status request / PR149 64d8512 review
+
+- Exact head `64d85122730c2ba2c51c2fd40800d01e05ff36e8`; exact-head CI36395316082 independently SUCCESS at 08:11:40 UTC. PR149 OPEN/unmerged, CHANGES REQUIRED; no merge/deployment acceptance.
+- Verified three improvements with actual HTTP: default/status=all/star same released total2; lowercase-to-uppercase strict profile continuation retains total2 and excludes missing accession; original equally dated 15,000 no-point prefix drains four pages [0,1,1,1] into three unique valid points and terminates. Prior manager UI/catalogue source unchanged; its already verified HTTP/React checks not rerun.
+- Remaining original spatial package has three reproduced failures: new >5,000 metadata fallback counts global rows without authorization/publication/hold/bbox/profile predicates. Finite key total3->4 after foreign-lab/project/country DRAFT point, then6 after held/outside-bbox additions while actual eligible features remain3; aggregate count exposure, no observed foreign sample-detail delivery. Two invalid non-null primary points with valid metadata fallback yield total0/count1/hasMorefalse/no cursor at limit1, while limit10 returns2, silently losing one. New seek omits timestamp equality on ID branch: 5,000 newer low IDs and 5,000 older high IDs produce three empty pages cycling aa/time2032 -> zz/time2031 -> aa/time2032, nine reads of same groups, never reach three older valid points. Require shared scoped semantic counting/projection and correct lexicographic database seek, preserve earlier fixes.
+- Six completed focused actual full-schema/canonical-migration/Prisma/UDF/persisted-auth/mounted-consumer-HTTP checks. Management provisioning thin adapters; candidate wrapper records actual results without substitution. External synthetic DB `issue149-disposable-64d8512-8QlISc/synthetic-review.db` and adjacent actual-review-responses.json retained; no harness failure. No ordinary/production DB, real grants/credentials or OpenNSIS changes; no unchanged manager/React/CLI/broad suites.
+- Report `work/issue149-independent-review-64d8512.md`; probe/log `issue149-focused-review-64d8512.cjs/.log`. Public https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5866128563 . Prior queued50835c5 handoff CONSUMED before candidate. ONE new continuation delivered around08:17 UTC and CONSUMED: fresh restored screenshot plus subsequent states show new transcript, report L1-56, probe L1-97, log L1-8 and controller read, Exploring4files/Working/Cancel. Exact draft `what is the` restored unsent. Do not duplicate.
+- Owner-facing answer remains friendly: manager-screen and filters fixed in proposed code, map totals/pagination still fail, changes not live, Agy now working on delivered corrections. Hourly monitoring stays ACTIVE until independently verified LIMS-only deployment, then pause same automation. Existing sole-Agy safe-release authority follows independent exact-head acceptance, protected merge/exact-main CI and established procedure; no repeat approval. Original R1-R12/full plan/operator/recovery and accurate EVIDENCE remain. Codex independent review/public communication/read-only postflight; OpenNSIS untouched, TUF planning only, no closed-task reruns/worktree removal.
+
+## 28 September 2026 10:35 UTC — PR149 Exact-Head Review Remediation Package (F1, F2, F3)
+
+- **Independent Review Remediation Complete**: Addressed all three remaining spatial package findings identified in Codex's exact-head review of `64d8512` (`issue149-independent-review-64d8512.md`):
+  1. **F1: Scoped Spatial Total Counter (Authorization/Publication/Filter Predicates at All Thresholds)**:
+     - Eliminated unscoped raw SQL fallback completely from `computeSpatialTotal` in `server/controllers/sisV2Controller.js`.
+     - Built `metadataCandidateWhere` starting directly from `baseWhere`, inheriting identical authentication scoping, publication eligibility (`APPROVED`/`RELEASED`), provenance hold exclusions, and profile filters.
+     - Candidate metadata is streamed in 5,000-row chunks using indexed `id > lastId` seek, applying `extractCoordinates` and verifying `bboxBounds` against extracted coordinates.
+     - Verified that foreign-lab DRAFT, held, and outside-bbox records are strictly excluded from total calculation (`total: 3` preserved) and are not delivered in features.
+  2. **F2: Accurate Coordinate Fallback & Scan-Derived Continuation**:
+     - Expanded `metadataCandidateWhere` to evaluate specimens whose column coordinates are invalid or outside bbox (e.g. `latitude = 999, longitude = 999`) but have non-empty metadata, allowing valid metadata coordinate fallback.
+     - Decoupled `hasMore` from `total > 0` gating, deriving continuation strictly from actual remaining/unchecked traversal state: `validSpatialCandidates.length > limit || (!exhausted && scannedCount >= MAX_SCAN_ROWS)`.
+     - Anchored cursor to `pageCandidates[limit - 1]` when `validSpatialCandidates.length > limit`, and `lastScannedCandidate` otherwise.
+     - Verified that limit 1 returns `total: 2`, `count: 1`, `hasMore: true`, and valid `nextCursor`, and limit 10 returns `count: 2`.
+  3. **F3: Compound Lexicographic Keyset Seek Boundary**:
+     - Replaced non-lexicographic seek predicate `updatedAt < seekUpdatedAt OR id < seekId` with compound ordering seek: `updatedAt < seekUpdatedAt OR (updatedAt >= seekUpdatedAt AND updatedAt <= seekUpdatedAt + 1000ms AND id < seekId)`.
+     - Bridges SQLite UTC string variations (`...Z` vs `...+00:00`) within equal millisecond timestamps while strictly preventing newer records from reentering the scan.
+     - Retained in-memory boundary filter (`sTime < targetTime || (sTime === targetTime && s.id < decoded.lastId)`).
+     - Verified mixed ordering (5,000 newer low IDs, 5,000 older high IDs, 3 valid older points) reaches all points across pages and terminates cleanly without duplicates.
+- **Verification Evidence**:
+  - Comprehensive focused review probe (`test_remediation.cjs`): all 6 checks verified FIXED (status aliases total 2, strict profile continuation total 2 without accession leakage, 15k prefix traversal delivers all 3 points, scoped count strictly excludes foreign/held/outside-bbox additions, valid metadata fallback counted and continued properly, mixed ordering seek terminates without cycling or duplicates).
+  - Contract test suites (`tests/contracts/nsis_v2_exchange.test.js`, `tests/contracts/sis_adapter_service.test.js`): **28/28 passed (100%)**
+  - Mounted manager HTTP suite (`issue149-manager-http-review-50835c5.cjs`): **4/4 passed (100%)**
+  - Actual React component suite (`issue149-manager-react-review-50835c5.cjs`): **5/5 passed (100%)**
+  - Client Build: `vite build` clean in 7.31s with zero errors.
+- **Strict Boundaries Maintained**: Strictly LIMS-only codebase changes; zero modifications to OpenNSIS code, config, database, or deployments; zero mutations to `dev.db`; untracked release scripts preserved.
+
+

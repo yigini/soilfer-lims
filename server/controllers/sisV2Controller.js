@@ -495,38 +495,73 @@ async function computeSpatialTotal(auth, canonicalQuery, bboxBounds) {
             latitude: { gte: bboxBounds.minLat, lte: bboxBounds.maxLat },
             longitude: { gte: bboxBounds.minLng, lte: bboxBounds.maxLng }
         } : {
-            latitude: { not: null },
-            longitude: { not: null }
+            latitude: { gte: -90, lte: 90 },
+            longitude: { gte: -180, lte: 180 }
         }
     ];
     const directCount = await prisma.sample.count({ where: directWhere });
 
     let jsonCount = 0;
     const notEmptyMeta = { not: null, notIn: ['', '{}', 'null'] };
-    const jsonCandidateWhere = { ...baseWhere, latitude: null };
-    jsonCandidateWhere.AND = [
-        ...(jsonCandidateWhere.AND || []),
-        {
-            OR: [
-                { metadata: notEmptyMeta },
-                { fieldMetadata: notEmptyMeta }
-            ]
-        }
-    ];
+    const metadataCandidateWhere = {
+        ...baseWhere,
+        AND: [
+            ...(baseWhere.AND || []),
+            {
+                OR: [
+                    { metadata: notEmptyMeta },
+                    { fieldMetadata: notEmptyMeta }
+                ]
+            },
+            bboxBounds ? {
+                OR: [
+                    { latitude: null },
+                    { longitude: null },
+                    { latitude: { lt: bboxBounds.minLat } },
+                    { latitude: { gt: bboxBounds.maxLat } },
+                    { longitude: { lt: bboxBounds.minLng } },
+                    { longitude: { gt: bboxBounds.maxLng } }
+                ]
+            } : {
+                OR: [
+                    { latitude: null },
+                    { longitude: null },
+                    { latitude: { lt: -90 } },
+                    { latitude: { gt: 90 } },
+                    { longitude: { lt: -180 } },
+                    { longitude: { gt: 180 } }
+                ]
+            }
+        ]
+    };
 
-    const jsonCandidatesTotal = await prisma.sample.count({ where: jsonCandidateWhere });
+    const jsonCandidatesTotal = await prisma.sample.count({ where: metadataCandidateWhere });
     if (jsonCandidatesTotal > 0) {
-        if (jsonCandidatesTotal <= 5000) {
-            const candidates = await prisma.sample.findMany({
-                where: jsonCandidateWhere,
+        const BATCH_SIZE = 5000;
+        let lastId = null;
+        let examined = 0;
+        while (examined < jsonCandidatesTotal) {
+            const batchWhere = {
+                ...metadataCandidateWhere,
+                AND: [
+                    ...(metadataCandidateWhere.AND || []),
+                    ...(lastId ? [{ id: { gt: lastId } }] : [])
+                ]
+            };
+            const batch = await prisma.sample.findMany({
+                where: batchWhere,
                 select: {
+                    id: true,
                     latitude: true,
                     longitude: true,
                     fieldMetadata: true,
                     metadata: true
-                }
+                },
+                orderBy: { id: 'asc' },
+                take: BATCH_SIZE
             });
-            for (const s of candidates) {
+            if (batch.length === 0) break;
+            for (const s of batch) {
                 const coords = extractCoordinates(s, safeParseJson(s.fieldMetadata), safeParseJson(s.metadata));
                 if (!coords || coords.latitude === null || coords.longitude === null) continue;
                 if (bboxBounds) {
@@ -541,27 +576,9 @@ async function computeSpatialTotal(auth, canonicalQuery, bboxBounds) {
                 }
                 jsonCount++;
             }
-        } else {
-            const db = exchangeStateService.getDb();
-            if (db && db.open) {
-                try {
-                    const row = db.prepare(`
-                        SELECT count(*) as c FROM Sample
-                        WHERE latitude IS NULL
-                        AND (
-                            (metadata IS NOT NULL AND metadata NOT IN ('', '{}', 'null'))
-                            OR (fieldMetadata IS NOT NULL AND fieldMetadata NOT IN ('', '{}', 'null'))
-                        )
-                        AND (
-                            json_extract(metadata, '$.latitude') IS NOT NULL
-                            OR json_extract(metadata, '$.lat') IS NOT NULL
-                            OR json_extract(fieldMetadata, '$.latitude') IS NOT NULL
-                            OR json_extract(fieldMetadata, '$.lat') IS NOT NULL
-                        )
-                    `).get();
-                    if (row && row.c) jsonCount = row.c;
-                } catch (e) {}
-            }
+            lastId = batch[batch.length - 1].id;
+            examined += batch.length;
+            if (batch.length < BATCH_SIZE) break;
         }
     }
 
@@ -686,9 +703,14 @@ exports.getGeoJson = async (req, res) => {
                 whereClause.AND.push({
                     OR: [
                         { updatedAt: { lt: seekUpdatedAt } },
-                        { id: { lt: seekId } }
+                        {
+                            updatedAt: { gte: seekUpdatedAt, lte: new Date(seekUpdatedAt.getTime() + 1000) },
+                            id: { lt: seekId }
+                        }
                     ]
                 });
+            } else if (seekUpdatedAt) {
+                whereClause.AND.push({ updatedAt: { lt: seekUpdatedAt } });
             } else if (seekId) {
                 whereClause.AND.push({ id: { lt: seekId } });
             }
@@ -768,13 +790,13 @@ exports.getGeoJson = async (req, res) => {
         }
 
         const pageCandidates = validSpatialCandidates.slice(0, limit);
-        const hasMore = (total > 0 && validSpatialCandidates.length > limit) || (total > 0 && !exhausted && scannedCount >= MAX_SCAN_ROWS);
+        const hasMore = validSpatialCandidates.length > limit || (!exhausted && scannedCount >= MAX_SCAN_ROWS);
         const pageIds = pageCandidates.map(c => c.id);
 
         let nextCursor = null;
         if (hasMore) {
             const currentConn = exchangeStateService.getConnectionId(req.sisAuth);
-            const anchorCandidate = pageCandidates.length > 0 ? pageCandidates[pageCandidates.length - 1] : lastScannedCandidate;
+            const anchorCandidate = (validSpatialCandidates.length > limit) ? pageCandidates[pageCandidates.length - 1] : lastScannedCandidate;
             if (anchorCandidate) {
                 nextCursor = exchangeStateService.encodeCursor({
                     type: 'live_list',
