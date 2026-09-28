@@ -238,7 +238,7 @@ const AdminPanel = () => {
                 )}
             </div>
 
-            <div className={`flex-1 overflow-y-auto ${activeTab === 'branding' || activeTab === 'lab-config' ? 'p-0' : 'card-base rounded-2xl shadow-sm border border-sf-divider p-6'}`}>
+            <div className={`flex-1 overflow-y-auto ${activeTab === 'branding' || activeTab === 'lab-config' || activeTab === 'api-keys' ? 'p-0' : 'card-base rounded-2xl shadow-sm border border-sf-divider p-6'}`}>
 
                 {activeTab === 'branding' && <BrandingManager />}
 

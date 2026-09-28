@@ -2,9 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { 
     Key, Plus, Trash2, Copy, CheckCircle2, Shield, Globe, 
-    Database, ExternalLink, Code2, RefreshCw, AlertTriangle, 
-    Layers, Terminal, Check, Play, BookOpen, Sparkles, 
-    Sliders, ArrowRight, Clock, Lock, CheckCheck, FileText, RotateCcw
+    Database, Code2, RefreshCw, Layers, Terminal, Check, Play, 
+    BookOpen, Sparkles, Sliders, Lock, CheckCheck, RotateCcw
 } from 'lucide-react';
 import { useDialog } from '../../context/DialogContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -83,7 +82,7 @@ const ApiKeyManager = () => {
         {
             path: '/api/v2/data-exchange/stats',
             title: 'Scoped Dataset Statistics',
-            desc: 'Aggregate metrics scoped strictly to authorized laboratories and published/approved sample statuses (IR-14 compliant).',
+            desc: 'Aggregate metrics scoped strictly to authorized laboratories and published/approved sample statuses (Scoped security compliance).',
             category: 'V2 System',
             version: 'v2'
         },
@@ -267,7 +266,7 @@ const ApiKeyManager = () => {
         if (!selectedLabs.length) {
             showDialog({
                 title: 'Laboratory Scope Required',
-                message: 'You must select at least one authorized laboratory for this integration key (IR-14).',
+                message: 'You must select at least one authorized laboratory for this integration key to enforce strict scoping.',
                 type: 'error'
             });
             return;
@@ -513,88 +512,108 @@ const ApiKeyManager = () => {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 w-full min-w-0 font-sans">
             {/* Header Banner */}
-            <div className="p-6 bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 rounded-3xl text-white shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border border-indigo-900/50">
-                <div className="space-y-1.5 max-w-2xl">
-                    <div className="flex items-center gap-2.5">
-                        <span className="p-2 bg-blue-500/20 text-blue-400 rounded-xl border border-blue-500/30">
+            <div className="card-base bg-sf-surface rounded-2xl border border-sf-divider p-5 sm:p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="space-y-2 max-w-3xl min-w-0">
+                    <div className="flex items-start sm:items-center gap-3">
+                        <span className="p-2.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 rounded-xl border border-emerald-200 dark:border-emerald-800/60 flex-shrink-0">
                             <Database size={22} />
                         </span>
-                        <div>
-                            <h2 className="text-xl font-black tracking-tight">National SIS & Data Exchange Gateway</h2>
-                            <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                                    Spec v2.0.0 (Issue #140 Lossless)
+                        <div className="min-w-0">
+                            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-sf-text">
+                                National SIS & Data Exchange Gateway
+                            </h2>
+                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1">
+                                <span className="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 whitespace-nowrap">
+                                    v2.0 Lossless Gateway
                                 </span>
-                                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                                    v1.0.0 Compatible
+                                <span className="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-sf-raised text-sf-text border border-sf-divider whitespace-nowrap">
+                                    v1.0 Compatible
                                 </span>
-                                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                                    Fail-Closed Scoping (IR-14)
+                                <span className="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/40 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800 whitespace-nowrap">
+                                    Strict Scope Control
                                 </span>
-                                <span className="text-xs text-blue-200">
-                                    FAO OpenNSIS & GSP Interoperability
+                                <span className="inline-flex items-center text-[11px] text-sf-muted whitespace-nowrap">
+                                    FAO OpenNSIS & GSP Interoperable
                                 </span>
                             </div>
                         </div>
                     </div>
-                    <p className="text-xs text-blue-100/80 leading-relaxed pt-1">
+                    <p className="text-xs text-sf-muted leading-relaxed pt-0.5">
                         Secure machine-to-machine interface for exporting verified laboratory chemistry, physical metrology, Vis-NIR/MIR spectra, and geospatial soil provenance to national soil information systems and GIS portals.
                     </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2.5">
+                <div className="flex items-center gap-2 self-stretch sm:self-auto flex-shrink-0">
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
-                        className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-blue-600/30"
+                        className="btn-primary w-full sm:w-auto flex items-center justify-center gap-2 text-xs font-bold whitespace-nowrap shadow-sm"
                     >
-                        <Plus size={16} /> Generate API Key
+                        <Plus size={16} /> <span>Generate API Key</span>
                     </button>
                 </div>
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex items-center gap-2 border-b border-sf-divider pb-2">
+            <div className="flex flex-wrap items-center gap-2 p-1.5 bg-sf-raised rounded-2xl border border-sf-divider w-fit max-w-full overflow-x-auto">
                 <button
                     onClick={() => setActiveTab('keys')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                         activeTab === 'keys'
-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                            : 'text-sf-muted hover:bg-sf-raised'
+                            ? 'bg-sf-surface text-emerald-800 dark:text-emerald-300 shadow-sm border border-sf-divider'
+                            : 'text-sf-muted hover:text-sf-text hover:bg-sf-hover'
                     }`}
                 >
-                    <Key size={16} /> Active API Keys ({keys.length})
+                    <Key size={15} className={activeTab === 'keys' ? 'text-emerald-700 dark:text-emerald-400' : 'text-sf-muted'} />
+                    <span>Active API Keys</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                        activeTab === 'keys'
+                            ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+                            : 'bg-sf-inset text-sf-muted'
+                    }`}>
+                        {keys.length}
+                    </span>
                 </button>
                 <button
                     onClick={() => setActiveTab('connections')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                         activeTab === 'connections'
-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                            : 'text-sf-muted hover:bg-sf-raised'
+                            ? 'bg-sf-surface text-emerald-800 dark:text-emerald-300 shadow-sm border border-sf-divider'
+                            : 'text-sf-muted hover:text-sf-text hover:bg-sf-hover'
                     }`}
                 >
-                    <Layers size={16} /> Connections & Telemetry ({connections.length})
+                    <Layers size={15} className={activeTab === 'connections' ? 'text-emerald-700 dark:text-emerald-400' : 'text-sf-muted'} />
+                    <span>Connections & Telemetry</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                        activeTab === 'connections'
+                            ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+                            : 'bg-sf-inset text-sf-muted'
+                    }`}>
+                        {connections.length}
+                    </span>
                 </button>
                 <button
                     onClick={() => setActiveTab('guide')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                         activeTab === 'guide'
-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                            : 'text-sf-muted hover:bg-sf-raised'
+                            ? 'bg-sf-surface text-emerald-800 dark:text-emerald-300 shadow-sm border border-sf-divider'
+                            : 'text-sf-muted hover:text-sf-text hover:bg-sf-hover'
                     }`}
                 >
-                    <BookOpen size={16} /> Step-by-Step Guide
+                    <BookOpen size={15} className={activeTab === 'guide' ? 'text-emerald-700 dark:text-emerald-400' : 'text-sf-muted'} />
+                    <span>Step-by-Step Guide</span>
                 </button>
                 <button
                     onClick={() => setActiveTab('explorer')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                         activeTab === 'explorer'
-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                            : 'text-sf-muted hover:bg-sf-raised'
+                            ? 'bg-sf-surface text-emerald-800 dark:text-emerald-300 shadow-sm border border-sf-divider'
+                            : 'text-sf-muted hover:text-sf-text hover:bg-sf-hover'
                     }`}
                 >
-                    <Play size={16} /> Live API Sandbox & Tester
+                    <Play size={15} className={activeTab === 'explorer' ? 'text-emerald-700 dark:text-emerald-400' : 'text-sf-muted'} />
+                    <span>Live API Sandbox</span>
                 </button>
             </div>
 
@@ -604,15 +623,15 @@ const ApiKeyManager = () => {
                     <div className="flex justify-between items-center">
                         <div>
                             <h3 className="text-sm font-bold text-sf-text flex items-center gap-2">
-                                <Key size={16} className="text-blue-500" /> Authorized External Consumer Keys
+                                <Key size={16} className="text-emerald-600 dark:text-emerald-400" /> Authorized External Consumer Keys
                             </h3>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-sf-muted">
                                 Cryptographically hashed API tokens. Keys can be scoped to specific countries or roles and revoked instantly.
                             </p>
                         </div>
                         <button
                             onClick={fetchKeys}
-                            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition rounded-lg hover:bg-sf-raised"
+                            className="p-2 text-sf-muted hover:text-sf-text transition rounded-lg hover:bg-sf-raised"
                             title="Refresh Keys"
                         >
                             <RefreshCw size={16} />
@@ -620,24 +639,24 @@ const ApiKeyManager = () => {
                     </div>
 
                     {loading ? (
-                        <div className="p-12 text-center text-gray-400 text-sm">Loading authorized keys...</div>
+                        <div className="p-12 text-center text-sf-muted text-sm">Loading authorized keys...</div>
                     ) : keys.length === 0 ? (
-                        <div className="p-12 text-center bg-sf-canvas/40 rounded-3xl border border-dashed border-gray-300 dark:border-gray-700 space-y-3">
-                            <Key size={40} className="mx-auto text-gray-400" />
+                        <div className="p-12 text-center bg-sf-canvas/40 rounded-3xl border border-dashed border-sf-divider space-y-3">
+                            <Key size={40} className="mx-auto text-sf-muted" />
                             <h4 className="font-bold text-sf-text">No Integration Keys Generated</h4>
-                            <p className="text-xs text-gray-500 max-w-md mx-auto">
+                            <p className="text-xs text-sf-muted max-w-md mx-auto">
                                 To connect your National Soil Information System (NSIS), QGIS, or an automated harvester, generate your first secure API key.
                             </p>
                             <button
                                 onClick={() => setIsCreateModalOpen(true)}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold inline-flex items-center gap-1.5 shadow-md"
+                                className="btn-primary inline-flex items-center gap-1.5 text-xs shadow-sm"
                             >
                                 <Plus size={14} /> Generate First Key
                             </button>
                         </div>
                     ) : (
                         <div className="overflow-x-auto rounded-2xl border border-sf-divider bg-sf-surface shadow-sm">
-                            <table className="w-full text-left text-sm">
+                            <table className="w-full text-left text-sm min-w-[700px]">
                                 <thead className="bg-sf-canvas/50 border-b border-sf-divider text-xs font-bold uppercase text-sf-muted">
                                     <tr>
                                         <th className="p-4">Integration & Connection</th>
@@ -654,27 +673,27 @@ const ApiKeyManager = () => {
                                         let caps = [];
                                         if (Array.isArray(rawCaps)) caps = rawCaps;
                                         else if (rawCaps) {
-                                            try { caps = JSON.parse(rawCaps); } catch (_) { caps = []; }
+                                             try { caps = JSON.parse(rawCaps); } catch (_) { caps = []; }
                                         }
                                         return (
-                                            <tr key={k.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition">
+                                            <tr key={k.id} className="hover:bg-sf-raised/50 transition">
                                                 <td className="p-4">
                                                     <div className="font-bold text-sf-text">{k.name}</div>
-                                                    <div className="text-xs font-mono text-gray-500 dark:text-gray-400 mt-0.5">
-                                                        Conn: <span className="font-semibold text-blue-600 dark:text-blue-400">{k.connectionId || ('conn_' + k.id)}</span>
+                                                    <div className="text-xs font-mono text-sf-muted mt-0.5">
+                                                        Conn: <span className="font-semibold text-emerald-700 dark:text-emerald-400">{k.connectionId || ('conn_' + k.id)}</span>
                                                     </div>
-                                                    <div className="text-[11px] text-gray-400">Owner: {k.createdBy || 'Administrator'}</div>
+                                                    <div className="text-[11px] text-sf-muted">Owner: {k.createdBy || 'Administrator'}</div>
                                                 </td>
-                                                <td className="p-4 font-mono text-xs text-blue-600 dark:text-blue-400 font-bold">
+                                                <td className="p-4 font-mono text-xs text-emerald-700 dark:text-emerald-400 font-bold">
                                                     {k.keyPrefix}••••••••
                                                 </td>
                                                 <td className="p-4 space-y-1.5">
                                                     <div className="flex flex-wrap items-center gap-1">
-                                                        <span className="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-bold">
+                                                        <span className="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold">
                                                             {k.role}
                                                         </span>
                                                         {caps.length > 0 ? caps.map(cap => (
-                                                            <span key={cap} className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                                            <span key={cap} className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-sf-raised text-sf-text border border-sf-divider">
                                                                 {cap}
                                                             </span>
                                                         )) : (
@@ -683,14 +702,14 @@ const ApiKeyManager = () => {
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <div className="text-xs text-gray-500">
+                                                    <div className="text-xs text-sf-muted">
                                                         Territory: {k.countries?.join(', ') || 'Global (*)'}
                                                     </div>
-                                                    <div className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+                                                    <div className="text-xs text-sf-muted font-medium">
                                                         Labs: {Array.isArray(k.labs) ? (k.labs.includes('*') ? 'All Laboratories (*)' : k.labs.join(', ')) : (k.labs ? (JSON.parse(k.labs).includes('*') ? 'All Laboratories (*)' : JSON.parse(k.labs).join(', ')) : 'None')}
                                                     </div>
                                                 </td>
-                                                <td className="p-4 text-xs text-gray-500 space-y-0.5">
+                                                <td className="p-4 text-xs text-sf-muted space-y-0.5">
                                                     <div>Created: {new Date(k.createdAt).toLocaleDateString()}</div>
                                                     <div>Used: {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString() : 'Never'}</div>
                                                 </td>
@@ -715,14 +734,14 @@ const ApiKeyManager = () => {
                                                             <>
                                                                 <button
                                                                     onClick={() => handleConfirmRotation(k.id)}
-                                                                    className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg transition"
+                                                                    className="p-2 text-sf-muted hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg transition"
                                                                     title="Confirm Rotation (Retires prior rotating key immediately)"
                                                                 >
                                                                     <CheckCheck size={16} />
                                                                 </button>
                                                                 <button
                                                                     onClick={() => handleAbortRotation(k.id)}
-                                                                    className="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg transition"
+                                                                    className="p-2 text-sf-muted hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg transition"
                                                                     title="Abort Rotation (Restores original key, revokes unconfirmed replacement)"
                                                                 >
                                                                     <RotateCcw size={16} />
@@ -733,16 +752,16 @@ const ApiKeyManager = () => {
                                                             <button
                                                                 onClick={() => handleRotateKey(k.id, k.name)}
                                                                 disabled={rotatingKeyId === k.id}
-                                                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg transition disabled:opacity-50"
+                                                                className="p-2 text-sf-muted hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg transition disabled:opacity-50"
                                                                 title="Rotate API Key (Issues new secret token for existing connection ID)"
                                                             >
-                                                                <RefreshCw size={16} className={rotatingKeyId === k.id ? 'animate-spin text-blue-600' : ''} />
+                                                                <RefreshCw size={16} className={rotatingKeyId === k.id ? 'animate-spin text-emerald-700' : ''} />
                                                             </button>
                                                         )}
                                                         {k.isActive && (
                                                             <button
                                                                 onClick={() => handleRevokeKey(k.id, k.name)}
-                                                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition"
+                                                                className="p-2 text-sf-muted hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition"
                                                                 title="Revoke API Key"
                                                             >
                                                                 <Trash2 size={16} />
@@ -766,7 +785,7 @@ const ApiKeyManager = () => {
                     <div className="flex justify-between items-center">
                         <div>
                             <h3 className="text-sm font-bold text-sf-text flex items-center gap-2">
-                                <Layers size={16} className="text-blue-500" /> Managed Exchange Connections & Receiver Telemetry
+                                <Layers size={16} className="text-emerald-600 dark:text-emerald-400" /> Managed Exchange Connections & Receiver Telemetry
                             </h3>
                             <p className="text-xs text-sf-muted mt-0.5">
                                 Authoritative connection identities, capability grants, status lifecycle controls, and receiver ingestion telemetry.
@@ -775,7 +794,7 @@ const ApiKeyManager = () => {
                         <button
                             onClick={fetchConnections}
                             disabled={connectionsLoading}
-                            className="px-3 py-1.5 bg-sf-raised hover:bg-sf-subtle text-sf-text rounded-xl text-xs font-semibold transition flex items-center gap-1.5 border border-sf-divider"
+                            className="px-3 py-1.5 bg-sf-raised hover:bg-sf-hover text-sf-text rounded-xl text-xs font-semibold transition flex items-center gap-1.5 border border-sf-divider"
                         >
                             <RefreshCw size={14} className={connectionsLoading ? 'animate-spin' : ''} /> Refresh
                         </button>
@@ -783,7 +802,7 @@ const ApiKeyManager = () => {
 
                     {connectionsLoading && connections.length === 0 ? (
                         <div className="p-12 text-center text-sf-muted text-xs">
-                            <RefreshCw size={24} className="animate-spin mx-auto mb-2 text-blue-500" />
+                            <RefreshCw size={24} className="animate-spin mx-auto mb-2 text-emerald-600" />
                             Loading exchange connections...
                         </div>
                     ) : connections.length === 0 ? (
@@ -793,8 +812,8 @@ const ApiKeyManager = () => {
                             <p>Connections are provisioned when creating integration API keys or by platform administrators.</p>
                         </div>
                     ) : (
-                        <div className="bg-sf-surface rounded-2xl border border-sf-divider overflow-hidden shadow-sm">
-                            <table className="w-full text-left text-xs">
+                        <div className="overflow-x-auto rounded-2xl border border-sf-divider bg-sf-surface shadow-sm">
+                            <table className="w-full text-left text-xs min-w-[750px]">
                                 <thead className="bg-sf-raised text-sf-muted uppercase font-bold text-[10px] tracking-wider border-b border-sf-divider">
                                     <tr>
                                         <th className="p-4">Connection & Identity</th>
@@ -812,7 +831,7 @@ const ApiKeyManager = () => {
                                                 <div className="font-bold text-sf-text text-sm flex items-center gap-1.5">
                                                     {c.name}
                                                 </div>
-                                                <div className="text-[11px] font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-900 inline-block">
+                                                <div className="text-[11px] font-mono text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800 inline-block font-semibold">
                                                     {c.id}
                                                 </div>
                                                 {c.organization && (
@@ -851,13 +870,13 @@ const ApiKeyManager = () => {
                                                 </button>
                                             </td>
                                             <td className="p-4 space-y-1.5">
-                                                <span className="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-mono text-[11px] font-bold border border-indigo-200 dark:border-indigo-900 inline-block">
+                                                <span className="px-2 py-0.5 rounded-md bg-sf-raised text-sf-text font-mono text-[11px] font-bold border border-sf-divider inline-block">
                                                     Version {c.authVersion || 1}
                                                 </span>
                                                 <div className="flex flex-wrap gap-1">
                                                     {(c.capabilities || []).length > 0 ? (
                                                         c.capabilities.map((cap) => (
-                                                            <span key={cap} className="px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-[10px] font-bold border border-blue-200 dark:border-blue-900">
+                                                            <span key={cap} className="px-1.5 py-0.5 rounded bg-sf-raised text-sf-text text-[10px] font-bold border border-sf-divider">
                                                                 {cap}
                                                             </span>
                                                         ))
@@ -914,7 +933,7 @@ const ApiKeyManager = () => {
                                             <td className="p-4 text-right">
                                                 <button
                                                     onClick={() => setEditingConnection(JSON.parse(JSON.stringify(c)))}
-                                                    className="px-3 py-1.5 bg-sf-raised hover:bg-sf-subtle text-sf-text rounded-xl text-xs font-bold transition border border-sf-divider inline-flex items-center gap-1.5"
+                                                    className="px-3 py-1.5 bg-sf-raised hover:bg-sf-hover text-sf-text rounded-xl text-xs font-bold transition border border-sf-divider inline-flex items-center gap-1.5"
                                                 >
                                                     <Sliders size={14} /> Edit Scopes
                                                 </button>
@@ -1009,7 +1028,7 @@ const ApiKeyManager = () => {
                                                         setEditingConnection({ ...editingConnection, capabilities: cur.filter(x => x !== cap.id) });
                                                     }
                                                 }}
-                                                className="rounded text-blue-600"
+                                                className="rounded text-emerald-700 focus:ring-emerald-500"
                                             />
                                             <span className="font-semibold text-[11px]">{cap.label}</span>
                                         </label>
@@ -1035,7 +1054,7 @@ const ApiKeyManager = () => {
                                                         setEditingConnection({ ...editingConnection, labs: cur.filter(x => x !== l.id) });
                                                     }
                                                 }}
-                                                className="rounded text-blue-600"
+                                                className="rounded text-emerald-700 focus:ring-emerald-500"
                                             />
                                             <span>{l.name || l.id} ({l.code || l.id})</span>
                                         </label>
@@ -1054,7 +1073,7 @@ const ApiKeyManager = () => {
                                 <button
                                     type="submit"
                                     disabled={updatingConnection}
-                                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition shadow-md disabled:opacity-50"
+                                    className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition shadow-sm disabled:opacity-50"
                                 >
                                     {updatingConnection ? 'Saving...' : 'Save Connection Changes'}
                                 </button>
@@ -1067,13 +1086,13 @@ const ApiKeyManager = () => {
             {/* TAB 2: STEP-BY-STEP USER GUIDE */}
             {activeTab === 'guide' && (
                 <div className="space-y-6">
-                    <div className="p-5 bg-blue-50 dark:bg-blue-950/40 rounded-2xl border border-blue-200 dark:border-blue-800 flex items-start gap-3">
-                        <Sparkles size={20} className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                    <div className="p-5 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800/60 flex items-start gap-3">
+                        <Sparkles size={20} className="text-emerald-700 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
                         <div className="space-y-1">
-                            <h4 className="text-sm font-bold text-blue-900 dark:text-blue-200">
+                            <h4 className="text-sm font-bold text-emerald-900 dark:text-emerald-200">
                                 How to Connect External Systems in 4 Simple Steps
                             </h4>
-                            <p className="text-xs text-blue-800/80 dark:text-blue-300/80 leading-relaxed">
+                            <p className="text-xs text-emerald-800/90 dark:text-emerald-300/90 leading-relaxed">
                                 SoilFER-LIMS provides automated data exchange with National Soil Information Systems (NSIS), FAO OpenNSIS, and GIS spatial portals. Follow this visual roadmap to integrate your platform.
                             </p>
                         </div>
@@ -1083,17 +1102,17 @@ const ApiKeyManager = () => {
                         {/* Step 1 */}
                         <div className="p-6 bg-sf-surface rounded-3xl border border-sf-divider shadow-sm space-y-4">
                             <div className="flex items-center justify-between">
-                                <span className="w-8 h-8 rounded-xl bg-blue-600 text-white font-black text-sm flex items-center justify-center">
+                                <span className="w-8 h-8 rounded-xl bg-emerald-700 text-white font-black text-sm flex items-center justify-center">
                                     1
                                 </span>
-                                <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/40 px-2.5 py-1 rounded-lg">
+                                <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 rounded-lg">
                                     Provisioning
                                 </span>
                             </div>
                             <div>
                                 <h4 className="font-bold text-sf-text text-base">Generate an Integration Key</h4>
-                                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                                    Click <strong>"Generate API Key"</strong>. Provide a descriptive label (e.g. <em>Guatemala NSIS Node</em>), pick an access role, and select the permitted country scope.
+                                <p className="text-xs text-sf-muted mt-1 leading-relaxed">
+                                    Click <strong>&quot;Generate API Key&quot;</strong>. Provide a descriptive label (e.g. <em>Guatemala NSIS Node</em>), pick an access role, and select the permitted country scope.
                                 </p>
                             </div>
                             <div className="p-3 bg-amber-50 dark:bg-amber-950/50 rounded-xl border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300 space-y-1">
@@ -1107,39 +1126,39 @@ const ApiKeyManager = () => {
                         {/* Step 2 */}
                         <div className="p-6 bg-sf-surface rounded-3xl border border-sf-divider shadow-sm space-y-4">
                             <div className="flex items-center justify-between">
-                                <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black text-sm flex items-center justify-center">
+                                <span className="w-8 h-8 rounded-xl bg-teal-700 text-white font-black text-sm flex items-center justify-center">
                                     2
                                 </span>
-                                <span className="text-xs font-bold uppercase tracking-wider text-sf-emerald bg-indigo-50 dark:bg-indigo-900/40 px-2.5 py-1 rounded-lg">
+                                <span className="text-xs font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800 px-2.5 py-1 rounded-lg">
                                     Authentication
                                 </span>
                             </div>
                             <div>
                                 <h4 className="font-bold text-sf-text text-base">Authenticate HTTP Requests</h4>
-                                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                                    Every HTTP request sent to SoilFER-LIMS must transmit the secret key via the <code className="font-mono text-sf-emerald font-bold">X-API-Key</code> request header.
+                                <p className="text-xs text-sf-muted mt-1 leading-relaxed">
+                                    Every HTTP request sent to SoilFER-LIMS must transmit the secret key via the <code className="font-mono text-emerald-700 dark:text-emerald-400 font-bold">X-API-Key</code> request header.
                                 </p>
                             </div>
-                            <div className="p-3 bg-gray-900 text-gray-200 rounded-xl font-mono text-xs space-y-1 border border-gray-800">
-                                <div className="text-gray-500 text-[10px]">// Example Request Header</div>
+                            <div className="p-3 bg-gray-950 text-gray-200 rounded-xl font-mono text-xs space-y-1 border border-sf-divider">
+                                <div className="text-sf-muted text-[10px]">{'// Example Request Header'}</div>
                                 <div className="text-emerald-400">X-API-Key: slims_live_abc123...</div>
-                                <div className="text-blue-300">Accept: application/json</div>
+                                <div className="text-teal-300">Accept: application/json</div>
                             </div>
                         </div>
 
                         {/* Step 3 */}
                         <div className="p-6 bg-sf-surface rounded-3xl border border-sf-divider shadow-sm space-y-4">
                             <div className="flex items-center justify-between">
-                                <span className="w-8 h-8 rounded-xl bg-purple-600 text-white font-black text-sm flex items-center justify-center">
+                                <span className="w-8 h-8 rounded-xl bg-slate-700 text-white font-black text-sm flex items-center justify-center">
                                     3
                                 </span>
-                                <span className="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/40 px-2.5 py-1 rounded-lg">
+                                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-sf-divider px-2.5 py-1 rounded-lg">
                                     Harvesting
                                 </span>
                             </div>
                             <div>
                                 <h4 className="font-bold text-sf-text text-base">Select Your Target Endpoint</h4>
-                                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                                <p className="text-xs text-sf-muted mt-1 leading-relaxed">
                                     Depending on your application requirements, choose between V2 lossless representations, RFC 7946 spatial layers, or continuous delta feeds:
                                 </p>
                             </div>
@@ -1149,15 +1168,15 @@ const ApiKeyManager = () => {
                                     <span><strong>/api/v2/.../capabilities</strong>: Machine discovery of profiles & limits.</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <Database size={14} className="text-blue-500 flex-shrink-0" />
+                                    <Database size={14} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                                     <span><strong>/api/v2/.../samples</strong>: Truthful coordinates, depth intervals & profiles.</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <Code2 size={14} className="text-indigo-500 flex-shrink-0" />
+                                    <Code2 size={14} className="text-teal-600 dark:text-teal-400 flex-shrink-0" />
                                     <span><strong>/api/v2/.../observations</strong>: Full replicate determinations & basis metadata.</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <Globe size={14} className="text-emerald-500 flex-shrink-0" />
+                                    <Globe size={14} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                                     <span><strong>/api/v2/.../geojson</strong>: RFC 7946 FeatureCollection (QGIS, GeoNode).</span>
                                 </li>
                                 <li className="flex items-center gap-2">
@@ -1170,22 +1189,22 @@ const ApiKeyManager = () => {
                         {/* Step 4 */}
                         <div className="p-6 bg-sf-surface rounded-3xl border border-sf-divider shadow-sm space-y-4">
                             <div className="flex items-center justify-between">
-                                <span className="w-8 h-8 rounded-xl bg-emerald-600 text-white font-black text-sm flex items-center justify-center">
+                                <span className="w-8 h-8 rounded-xl bg-emerald-700 text-white font-black text-sm flex items-center justify-center">
                                     4
                                 </span>
-                                <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-2.5 py-1 rounded-lg">
+                                <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 rounded-lg">
                                     Verification
                                 </span>
                             </div>
                             <div>
                                 <h4 className="font-bold text-sf-text text-base">Test Live with Built-in Sandbox</h4>
-                                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                                <p className="text-xs text-sf-muted mt-1 leading-relaxed">
                                     You can test your endpoints and preview real JSON responses directly inside the built-in Sandbox tool without writing code!
                                 </p>
                             </div>
                             <button
                                 onClick={() => setActiveTab('explorer')}
-                                className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20"
+                                className="btn-primary w-full py-2.5 px-4 flex items-center justify-center gap-2 shadow-sm"
                             >
                                 <Play size={14} /> Open Live API Sandbox
                             </button>
@@ -1201,9 +1220,9 @@ const ApiKeyManager = () => {
                     <div className="lg:col-span-5 space-y-4 bg-sf-surface p-6 rounded-3xl border border-sf-divider shadow-sm">
                         <div className="space-y-1">
                             <h3 className="text-sm font-bold text-sf-text flex items-center gap-2">
-                                <Sliders size={16} className="text-blue-500" /> Interactive Request Builder
+                                <Sliders size={16} className="text-emerald-600 dark:text-emerald-400" /> Interactive Request Builder
                             </h3>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-sf-muted">
                                 Configure endpoint parameters and run live queries against the active server.
                             </p>
                         </div>
@@ -1226,8 +1245,8 @@ const ApiKeyManager = () => {
                                             onClick={() => setEndpointFilter(f.id)}
                                             className={`px-2 py-0.5 rounded text-[10px] font-bold transition ${
                                                 endpointFilter === f.id
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'text-gray-400 hover:text-sf-text'
+                                                    ? 'bg-emerald-700 text-white'
+                                                    : 'text-sf-muted hover:text-sf-text'
                                             }`}
                                         >
                                             {f.label}
@@ -1238,7 +1257,7 @@ const ApiKeyManager = () => {
                             <select
                                 value={selectedEndpoint}
                                 onChange={(e) => setSelectedEndpoint(e.target.value)}
-                                className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-600 text-sf-text"
                             >
                                 {ENDPOINTS.filter(ep => endpointFilter === 'all' || ep.version === endpointFilter).map((ep) => (
                                     <option key={ep.path} value={ep.path}>
@@ -1246,7 +1265,7 @@ const ApiKeyManager = () => {
                                     </option>
                                 ))}
                             </select>
-                            <p className="text-[11px] text-gray-400 italic">
+                            <p className="text-[11px] text-sf-muted italic">
                                 {ENDPOINTS.find(ep => ep.path === selectedEndpoint)?.desc}
                             </p>
                         </div>
@@ -1265,7 +1284,7 @@ const ApiKeyManager = () => {
                                     <select
                                         value={paramCountry}
                                         onChange={(e) => setParamCountry(e.target.value)}
-                                        className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs"
+                                        className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs text-sf-text focus:ring-2 focus:ring-emerald-600 outline-none"
                                     >
                                         <option value="">All Permitted Countries</option>
                                         <option value="GTM">Guatemala (GTM)</option>
@@ -1286,7 +1305,7 @@ const ApiKeyManager = () => {
                                         <select
                                             value={paramProfile}
                                             onChange={(e) => setParamProfile(e.target.value)}
-                                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs"
+                                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs text-sf-text focus:ring-2 focus:ring-emerald-600 outline-none"
                                         >
                                             <option value="">Default (core-lossless-v2)</option>
                                             <option value="opennsis">OpenNSIS (National Accession)</option>
@@ -1305,7 +1324,7 @@ const ApiKeyManager = () => {
                                             onChange={(e) => setParamLimit(e.target.value)}
                                             min="1"
                                             max="100"
-                                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs font-medium"
+                                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs font-medium text-sf-text focus:ring-2 focus:ring-emerald-600 outline-none"
                                         />
                                     </div>
                                 )}
@@ -1320,7 +1339,7 @@ const ApiKeyManager = () => {
                                             value={paramCursor}
                                             onChange={(e) => setParamCursor(e.target.value)}
                                             placeholder="e.g. eyJsYXN0VXBkYXRlZEF0IjoiMjAy..."
-                                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs font-mono"
+                                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs font-mono text-sf-text focus:ring-2 focus:ring-emerald-600 outline-none"
                                         />
                                     </div>
                                 )}
@@ -1333,7 +1352,7 @@ const ApiKeyManager = () => {
                                         <select
                                             value={paramModality}
                                             onChange={(e) => setParamModality(e.target.value)}
-                                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs"
+                                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs text-sf-text focus:ring-2 focus:ring-emerald-600 outline-none"
                                         >
                                             <option value="MIR">Mid-Infrared (MIR 400-4000 cm⁻¹)</option>
                                             <option value="NIR">Vis-NIR (350-2500 nm)</option>
@@ -1351,7 +1370,7 @@ const ApiKeyManager = () => {
                                             value={paramSince}
                                             onChange={(e) => setParamSince(e.target.value)}
                                             placeholder="2026-01-01T00:00:00Z"
-                                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs font-mono"
+                                            className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-xs font-mono text-sf-text focus:ring-2 focus:ring-emerald-600 outline-none"
                                         />
                                     </div>
                                 )}
@@ -1368,9 +1387,9 @@ const ApiKeyManager = () => {
                                 value={customApiKey}
                                 onChange={(e) => setCustomApiKey(e.target.value)}
                                 placeholder="Auto: Uses Current Admin Session"
-                                className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-xs font-mono outline-none"
+                                className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-xs font-mono text-sf-text focus:ring-2 focus:ring-emerald-600 outline-none"
                             />
-                            <p className="text-[10px] text-gray-400">
+                            <p className="text-[10px] text-sf-muted">
                                 Leave blank to use your current logged-in browser session automatically.
                             </p>
                         </div>
@@ -1379,7 +1398,7 @@ const ApiKeyManager = () => {
                         <button
                             onClick={handleRunSandbox}
                             disabled={sandboxLoading}
-                            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 disabled:opacity-50"
+                            className="btn-primary w-full py-3 flex items-center justify-center gap-2 text-xs shadow-md disabled:opacity-50"
                         >
                             {sandboxLoading ? (
                                 <>
@@ -1401,7 +1420,7 @@ const ApiKeyManager = () => {
                         <div className="bg-gray-900 text-gray-200 rounded-3xl p-5 border border-gray-800 shadow-sm space-y-3">
                             <div className="flex justify-between items-center border-b border-gray-800 pb-3">
                                 <div className="flex items-center gap-2 text-xs font-bold">
-                                    <Terminal size={16} className="text-blue-400" />
+                                    <Terminal size={16} className="text-emerald-400" />
                                     <span>Ready-to-use Code Snippet</span>
                                 </div>
                                 <div className="flex items-center gap-1 bg-gray-800 p-1 rounded-xl">
@@ -1411,7 +1430,7 @@ const ApiKeyManager = () => {
                                             onClick={() => setSandboxCodeLang(lang)}
                                             className={`px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase transition ${
                                                 sandboxCodeLang === lang
-                                                    ? 'bg-blue-600 text-white'
+                                                    ? 'bg-emerald-700 text-white'
                                                     : 'text-gray-400 hover:text-white'
                                             }`}
                                         >
@@ -1422,7 +1441,7 @@ const ApiKeyManager = () => {
                             </div>
 
                             <div className="relative">
-                                <pre className="p-3.5 bg-black/40 rounded-2xl font-mono text-xs text-blue-300 overflow-x-auto leading-relaxed max-h-48">
+                                <pre className="p-3.5 bg-black/40 rounded-2xl font-mono text-xs text-emerald-300 overflow-x-auto leading-relaxed max-h-48">
                                     {generateSnippet()}
                                 </pre>
                                 <button
@@ -1440,7 +1459,7 @@ const ApiKeyManager = () => {
                         <div className="bg-sf-surface rounded-3xl p-5 border border-sf-divider shadow-sm space-y-3">
                             <div className="flex justify-between items-center border-b border-sf-divider pb-3">
                                 <div className="flex items-center gap-2">
-                                    <Code2 size={16} className="text-emerald-500" />
+                                    <Code2 size={16} className="text-emerald-600 dark:text-emerald-400" />
                                     <span className="text-xs font-bold text-sf-text uppercase tracking-wider">
                                         Server Response Payload
                                     </span>
@@ -1457,7 +1476,7 @@ const ApiKeyManager = () => {
                                             {sandboxStatus.code} {sandboxStatus.text}
                                         </span>
                                         {sandboxLatency && (
-                                            <span className="text-gray-400 font-mono text-[11px]">
+                                            <span className="text-sf-muted font-mono text-[11px]">
                                                 {sandboxLatency} ms
                                             </span>
                                         )}
@@ -1480,9 +1499,9 @@ const ApiKeyManager = () => {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="p-10 text-center text-gray-400 text-xs border border-dashed border-sf-divider rounded-2xl space-y-2">
-                                    <Terminal size={24} className="mx-auto text-gray-400" />
-                                    <div>Click <strong>"Execute Live Query"</strong> above to send a real request and view the response.</div>
+                                <div className="p-10 text-center text-sf-muted text-xs border border-dashed border-sf-divider rounded-2xl space-y-2">
+                                    <Terminal size={24} className="mx-auto text-sf-muted" />
+                                    <div>Click <strong>&quot;Execute Live Query&quot;</strong> above to send a real request and view the response.</div>
                                 </div>
                             )}
                         </div>
@@ -1495,9 +1514,9 @@ const ApiKeyManager = () => {
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in">
                     <div className="bg-sf-surface rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-sf-divider">
                         <div className="flex items-center gap-2 font-bold text-lg text-sf-text">
-                            <Key size={20} className="text-blue-600" /> Issue Integration Secret Key
+                            <Key size={20} className="text-emerald-700 dark:text-emerald-400" /> Issue Integration Secret Key
                         </div>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-sf-muted">
                             Create a cryptographically hashed access token for an external NSIS server, GIS system, or automated harvester.
                         </p>
 
@@ -1512,7 +1531,7 @@ const ApiKeyManager = () => {
                                     placeholder="e.g. Kenya National Soil Database"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sm font-medium focus:ring-2 focus:ring-emerald-600 outline-none text-sf-text"
                                 />
                             </div>
 
@@ -1525,9 +1544,9 @@ const ApiKeyManager = () => {
                                     placeholder="e.g. conn_kenya_national_sis (leave blank for auto-generated)"
                                     value={customConnectionId}
                                     onChange={(e) => setCustomConnectionId(e.target.value)}
-                                    className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sm font-mono focus:ring-2 focus:ring-emerald-600 outline-none text-sf-text"
                                 />
-                                <p className="text-[11px] text-gray-400 mt-1">
+                                <p className="text-[11px] text-sf-muted mt-1">
                                     Persistent identity across key rotations. Distinct keys with different connections cannot acknowledge each other&apos;s snapshots.
                                 </p>
                             </div>
@@ -1539,7 +1558,7 @@ const ApiKeyManager = () => {
                                 <select
                                     value={role}
                                     onChange={(e) => setRole(e.target.value)}
-                                    className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sm font-medium focus:ring-2 focus:ring-emerald-600 outline-none text-sf-text"
                                 >
                                     <option value="NSIS_CONSUMER">NSIS Consumer (Full Results & Metadata)</option>
                                     <option value="EXTERNAL_GIS">GIS Harvester (Spatial GeoJSON & Coordinates)</option>
@@ -1569,11 +1588,11 @@ const ApiKeyManager = () => {
                                                         setSelectedCapabilities(selectedCapabilities.filter(c => c !== cap.id));
                                                     }
                                                 }}
-                                                className="rounded text-blue-600 mt-0.5"
+                                                className="rounded text-emerald-700 focus:ring-emerald-600 mt-0.5"
                                             />
                                             <div>
                                                 <div className="font-mono font-bold text-[11px] text-sf-text">{cap.label}</div>
-                                                <div className="text-[10px] text-gray-400">{cap.desc}</div>
+                                                <div className="text-[10px] text-sf-muted">{cap.desc}</div>
                                             </div>
                                         </label>
                                     ))}
@@ -1602,7 +1621,7 @@ const ApiKeyManager = () => {
                                                         }
                                                     }
                                                 }}
-                                                className="rounded text-blue-600"
+                                                className="rounded text-emerald-700 focus:ring-emerald-600"
                                             />
                                             <span className="font-semibold">{c.label}</span>
                                         </label>
@@ -1626,7 +1645,7 @@ const ApiKeyManager = () => {
                                                     setSelectedLabs([]);
                                                 }
                                             }}
-                                            className="rounded text-blue-600"
+                                            className="rounded text-emerald-700 focus:ring-emerald-600"
                                         />
                                         <span>All Laboratories (Global Wildcard *)</span>
                                     </label>
@@ -1643,14 +1662,14 @@ const ApiKeyManager = () => {
                                                         setSelectedLabs(filtered.filter(x => x !== l.id));
                                                     }
                                                 }}
-                                                className="rounded text-blue-600"
+                                                className="rounded text-emerald-700 focus:ring-emerald-600"
                                             />
                                             <span className="font-semibold">{l.name || l.id} ({l.code || l.id})</span>
-                                            {l.country && <span className="text-[10px] text-gray-400">· {l.country}</span>}
+                                            {l.country && <span className="text-[10px] text-sf-muted">· {l.country}</span>}
                                         </label>
                                     ))}
                                     {availableLabs.length === 0 && (
-                                        <p className="text-xs text-gray-400 italic p-2">Loading laboratories...</p>
+                                        <p className="text-xs text-sf-muted italic p-2">Loading laboratories...</p>
                                     )}
                                 </div>
                             </div>
@@ -1662,7 +1681,7 @@ const ApiKeyManager = () => {
                                 <select
                                     value={expiresDays}
                                     onChange={(e) => setExpiresDays(e.target.value)}
-                                    className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sm font-medium outline-none"
+                                    className="w-full p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sm font-medium outline-none focus:ring-2 focus:ring-emerald-600 text-sf-text"
                                 >
                                     <option value="90">90 Days</option>
                                     <option value="180">180 Days</option>
@@ -1676,14 +1695,14 @@ const ApiKeyManager = () => {
                                 <button
                                     type="button"
                                     onClick={() => setIsCreateModalOpen(false)}
-                                    className="px-4 py-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-bold"
+                                    className="px-4 py-2 text-sf-muted hover:text-sf-text text-xs font-bold"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={creating}
-                                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md transition disabled:opacity-50"
+                                    className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-sm transition disabled:opacity-50"
                                 >
                                     {creating ? 'Generating...' : 'Generate Secret Key'}
                                 </button>
@@ -1721,7 +1740,7 @@ const ApiKeyManager = () => {
 
                         <button
                             onClick={() => setGeneratedKey(null)}
-                            className="w-full py-3 bg-slate-900 hover:bg-black text-white font-bold rounded-xl text-xs transition shadow-lg"
+                            className="w-full py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs transition shadow-sm"
                         >
                             I Have Saved This Key Securely
                         </button>
