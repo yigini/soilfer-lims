@@ -675,22 +675,40 @@ exports.listApiKeys = async (req, res) => {
             orderBy: { createdAt: 'desc' }
         });
 
-        const safeKeys = keys.map(k => ({
-            id: k.id,
-            name: k.name,
-            keyPrefix: k.keyPrefix,
-            role: k.role,
-            connectionId: k.connectionId || `conn_${k.id}`,
-            capabilities: k.capabilities ? (typeof k.capabilities === 'string' ? JSON.parse(k.capabilities) : k.capabilities) : [],
-            countries: k.countries ? JSON.parse(k.countries) : ['*'],
-            projects: k.projects ? JSON.parse(k.projects) : ['*'],
-            labs: k.labs ? JSON.parse(k.labs) : [],
-            isActive: k.isActive,
-            createdBy: k.createdBy,
-            lastUsedAt: k.lastUsedAt,
-            expiresAt: k.expiresAt,
-            createdAt: k.createdAt
-        }));
+        const { getDb } = require('../services/exchangeStateService');
+        const db = getDb();
+        const hasKeysTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_connection_keys'").get());
+        const linkMap = new Map();
+        if (hasKeysTable) {
+            try {
+                const links = db.prepare('SELECT api_key_id, key_status, rotated_at FROM _exchange_connection_keys').all();
+                links.forEach(l => linkMap.set(l.api_key_id, l));
+            } catch (e) {}
+        }
+
+        const safeKeys = keys.map(k => {
+            const link = linkMap.get(k.id);
+            const keyStatus = link?.key_status || (k.isActive ? 'ACTIVE' : 'REVOKED');
+            const isRotating = keyStatus === 'ROTATING';
+            return {
+                id: k.id,
+                name: k.name,
+                keyPrefix: k.keyPrefix,
+                role: k.role,
+                connectionId: k.connectionId || `conn_${k.id}`,
+                capabilities: k.capabilities ? (typeof k.capabilities === 'string' ? JSON.parse(k.capabilities) : k.capabilities) : [],
+                countries: k.countries ? JSON.parse(k.countries) : ['*'],
+                projects: k.projects ? JSON.parse(k.projects) : ['*'],
+                labs: k.labs ? JSON.parse(k.labs) : [],
+                isActive: k.isActive,
+                keyStatus,
+                isRotating,
+                createdBy: k.createdBy,
+                lastUsedAt: k.lastUsedAt,
+                expiresAt: k.expiresAt,
+                createdAt: k.createdAt
+            };
+        });
 
         res.json({ status: 'success', data: safeKeys });
     } catch (err) {
@@ -961,6 +979,14 @@ exports.rotateApiKey = async (req, res) => {
 
                     try {
                         const payload = JSON.parse(existingOp.response_payload);
+                        const currentOldKey = db.prepare('SELECT isActive FROM ApiKey WHERE id = ?').get(existingOp.old_key_id);
+                        const currentOldLink = db.prepare('SELECT key_status FROM _exchange_connection_keys WHERE api_key_id = ?').get(existingOp.old_key_id);
+                        const isOldActive = Boolean(currentOldKey?.isActive && currentOldLink?.key_status === 'ROTATING');
+                        payload.oldKeyActive = isOldActive;
+                        payload.rotating = (currentOldLink?.key_status === 'ROTATING');
+                        if (!isOldActive) {
+                            payload.message = 'API key rotation completed. Prior key has been retired.';
+                        }
                         return res.status(200).json(payload);
                     } catch (e) {}
                 }
@@ -996,7 +1022,11 @@ exports.rotateApiKey = async (req, res) => {
                     }
 
                     if (Date.now() - memCached.timestamp < 24 * 60 * 60 * 1000) {
-                        return res.status(200).json(memCached.responseBody);
+                        const currentOldKey = db.prepare('SELECT isActive FROM ApiKey WHERE id = ?').get(memCached.keyId);
+                        const currentOldLink = db.prepare('SELECT key_status FROM _exchange_connection_keys WHERE api_key_id = ?').get(memCached.keyId);
+                        const isOldActive = Boolean(currentOldKey?.isActive && currentOldLink?.key_status === 'ROTATING');
+                        const body = { ...memCached.responseBody, oldKeyActive: isOldActive, rotating: (currentOldLink?.key_status === 'ROTATING') };
+                        return res.status(200).json(body);
                     } else {
                         rotationReplayCache.delete(idempotencyKey);
                     }
@@ -1146,14 +1176,15 @@ exports.rotateApiKey = async (req, res) => {
             };
 
             // 5. Durable operation record (R3, R10): stores durablePayload without raw secrets
-            if (idempotencyKey && hasOpsTable) {
+            const effectiveOpId = idempotencyKey || `rot_op_${crypto.randomUUID()}`;
+            if (hasOpsTable) {
                 db.prepare(`
                     INSERT INTO _exchange_rotation_operations (
                         idempotency_key, actor_id, old_key_id, connection_id, request_fingerprint,
                         status, replacement_key_id, response_payload, created_at, expires_at
                     ) VALUES (?, ?, ?, ?, ?, 'COMMITTED', ?, ?, ?, ?)
                 `).run(
-                    idempotencyKey,
+                    effectiveOpId,
                     actorId,
                     oldKey.id,
                     effectiveConnectionId,
@@ -1393,16 +1424,61 @@ exports.confirmRotation = async (req, res) => {
         if (!key) return res.status(404).json({ error: 'API Key not found.' });
 
         const connId = key.connectionId || `conn_${key.id}`;
-        const hasKeysTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_connection_keys'").get());
+        const hasOpsTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_rotation_operations'").get());
 
-        if (hasKeysTable) {
-            const rotatingKeys = db.prepare("SELECT api_key_id FROM _exchange_connection_keys WHERE connection_id = ? AND key_status = 'ROTATING'").all(connId);
-            if (rotatingKeys.length > 0) {
-                db.prepare("UPDATE _exchange_connection_keys SET key_status = 'RETIRED' WHERE connection_id = ? AND key_status = 'ROTATING'").run(connId);
-                for (const rk of rotatingKeys) {
-                    db.prepare("UPDATE ApiKey SET isActive = 0 WHERE id = ?").run(rk.api_key_id);
+        if (hasOpsTable) {
+            const op = db.prepare(`
+                SELECT idempotency_key, old_key_id, replacement_key_id, connection_id, status
+                FROM _exchange_rotation_operations
+                WHERE (old_key_id = ? OR replacement_key_id = ? OR idempotency_key = ?)
+                ORDER BY created_at DESC LIMIT 1
+            `).get(id, id, id);
+
+            if (op) {
+                if (op.status === 'CONFIRMED') {
+                    return res.status(200).json({
+                        status: 'success',
+                        message: 'Key rotation already confirmed. Prior key has been retired.',
+                        connectionId: op.connection_id
+                    });
                 }
+                if (op.status === 'ABORTED') {
+                    return res.status(409).json({
+                        error: 'CONFLICT',
+                        code: 'ROTATION_ALREADY_ABORTED',
+                        message: 'Cannot confirm rotation: rotation operation was previously aborted.'
+                    });
+                }
+
+                const confirmTx = db.transaction(() => {
+                    db.prepare("UPDATE _exchange_rotation_operations SET status = 'CONFIRMED' WHERE idempotency_key = ?").run(op.idempotency_key);
+                    if (op.old_key_id) {
+                        db.prepare("UPDATE _exchange_connection_keys SET key_status = 'RETIRED' WHERE api_key_id = ? AND key_status = 'ROTATING'").run(op.old_key_id);
+                        db.prepare("UPDATE ApiKey SET isActive = 0 WHERE id = ?").run(op.old_key_id);
+                    }
+                    if (op.replacement_key_id) {
+                        db.prepare("UPDATE _exchange_connection_keys SET key_status = 'ACTIVE' WHERE api_key_id = ?").run(op.replacement_key_id);
+                        db.prepare("UPDATE ApiKey SET isActive = 1 WHERE id = ?").run(op.replacement_key_id);
+                    }
+                });
+                confirmTx();
+
+                return res.status(200).json({
+                    status: 'success',
+                    message: 'Key rotation confirmed. Prior key has been retired.',
+                    connectionId: op.connection_id
+                });
             }
+        }
+
+        // Fallback for single key without operation record (retires ONLY this key if rotating)
+        const hasKeysTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_connection_keys'").get());
+        if (hasKeysTable) {
+            const fallbackTx = db.transaction(() => {
+                db.prepare("UPDATE _exchange_connection_keys SET key_status = 'RETIRED' WHERE api_key_id = ? AND key_status = 'ROTATING'").run(id);
+                db.prepare("UPDATE ApiKey SET isActive = 0 WHERE id = ?").run(id);
+            });
+            fallbackTx();
         }
 
         return res.status(200).json({
@@ -1417,7 +1493,7 @@ exports.confirmRotation = async (req, res) => {
 
 /**
  * Abort API Key rotation (Plan Section 9, R3, R11).
- * Restores original rotating key to ACTIVE and revokes unconfirmed replacement key.
+ * Restores original rotating key to ACTIVE and revokes ONLY the unconfirmed replacement key.
  */
 exports.abortRotation = async (req, res) => {
     try {
@@ -1428,17 +1504,61 @@ exports.abortRotation = async (req, res) => {
         if (!key) return res.status(404).json({ error: 'API Key not found.' });
 
         const connId = key.connectionId || `conn_${key.id}`;
-        const hasKeysTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_connection_keys'").get());
+        const hasOpsTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_rotation_operations'").get());
 
-        if (hasKeysTable) {
-            // Restore old rotating key to ACTIVE
-            db.prepare("UPDATE _exchange_connection_keys SET key_status = 'ACTIVE', rotated_at = NULL WHERE connection_id = ? AND key_status = 'ROTATING'").run(connId);
-            // Revoke any unconfirmed replacement key for this connection
-            const replacementKeys = db.prepare("SELECT api_key_id FROM _exchange_connection_keys WHERE connection_id = ? AND key_status = 'ACTIVE' AND api_key_id != ?").all(connId, id);
-            for (const rk of replacementKeys) {
-                db.prepare("UPDATE _exchange_connection_keys SET key_status = 'REVOKED' WHERE api_key_id = ?").run(rk.api_key_id);
-                db.prepare("UPDATE ApiKey SET isActive = 0 WHERE id = ?").run(rk.api_key_id);
+        if (hasOpsTable) {
+            const op = db.prepare(`
+                SELECT idempotency_key, old_key_id, replacement_key_id, connection_id, status
+                FROM _exchange_rotation_operations
+                WHERE (old_key_id = ? OR replacement_key_id = ? OR idempotency_key = ?)
+                ORDER BY created_at DESC LIMIT 1
+            `).get(id, id, id);
+
+            if (op) {
+                if (op.status === 'CONFIRMED') {
+                    return res.status(409).json({
+                        error: 'CONFLICT',
+                        code: 'ROTATION_ALREADY_CONFIRMED',
+                        message: 'Cannot abort rotation: rotation operation has already been confirmed and retired the prior key.'
+                    });
+                }
+                if (op.status === 'ABORTED') {
+                    return res.status(200).json({
+                        status: 'success',
+                        message: 'Key rotation already aborted. Prior key remains active and replacement key has been revoked.',
+                        connectionId: op.connection_id
+                    });
+                }
+
+                const abortTx = db.transaction(() => {
+                    db.prepare("UPDATE _exchange_rotation_operations SET status = 'ABORTED' WHERE idempotency_key = ?").run(op.idempotency_key);
+                    if (op.old_key_id) {
+                        db.prepare("UPDATE _exchange_connection_keys SET key_status = 'ACTIVE', rotated_at = NULL WHERE api_key_id = ?").run(op.old_key_id);
+                        db.prepare("UPDATE ApiKey SET isActive = 1 WHERE id = ?").run(op.old_key_id);
+                    }
+                    if (op.replacement_key_id) {
+                        db.prepare("UPDATE _exchange_connection_keys SET key_status = 'REVOKED' WHERE api_key_id = ?").run(op.replacement_key_id);
+                        db.prepare("UPDATE ApiKey SET isActive = 0 WHERE id = ?").run(op.replacement_key_id);
+                    }
+                });
+                abortTx();
+
+                return res.status(200).json({
+                    status: 'success',
+                    message: 'Key rotation aborted. Prior key remains active and replacement key has been revoked.',
+                    connectionId: op.connection_id
+                });
             }
+        }
+
+        // Fallback for single key without operation record (restores ONLY this key if rotating)
+        const hasKeysTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_connection_keys'").get());
+        if (hasKeysTable) {
+            const fallbackTx = db.transaction(() => {
+                db.prepare("UPDATE _exchange_connection_keys SET key_status = 'ACTIVE', rotated_at = NULL WHERE api_key_id = ? AND key_status = 'ROTATING'").run(id);
+                db.prepare("UPDATE ApiKey SET isActive = 1 WHERE id = ?").run(id);
+            });
+            fallbackTx();
         }
 
         return res.status(200).json({

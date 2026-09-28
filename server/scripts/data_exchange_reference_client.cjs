@@ -42,17 +42,13 @@ const CHECKPOINT_FILE = getArg('--checkpoint', null);
 
 function saveCheckpointAtomic(filePath, data) {
     if (!filePath) return;
-    try {
-        const dir = path.dirname(path.resolve(filePath));
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-        const tmpFile = path.join(dir, `.tmp.${path.basename(filePath)}.${Date.now()}.${Math.random().toString(36).slice(2, 8)}`);
-        fs.writeFileSync(tmpFile, JSON.stringify(data, null, 2), 'utf8');
-        fs.renameSync(tmpFile, filePath);
-    } catch (e) {
-        console.warn(`[CHECKPOINT] Warning: failed to persist atomic checkpoint: ${e.message}`);
+    const dir = path.dirname(path.resolve(filePath));
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
     }
+    const tmpFile = path.join(dir, `.tmp.${path.basename(filePath)}.${Date.now()}.${Math.random().toString(36).slice(2, 8)}`);
+    fs.writeFileSync(tmpFile, JSON.stringify(data, null, 2), 'utf8');
+    fs.renameSync(tmpFile, filePath);
 }
 
 if (hasFlag('--help') || hasFlag('-h')) {
@@ -194,7 +190,14 @@ async function runClientWorkflow() {
     let totalSteps = 0;
     let passedSteps = 0;
 
-    async function step(name, runner) {
+    let failedRequiredStep = false;
+
+    async function step(name, runner, { required = false } = {}) {
+        if (failedRequiredStep) {
+            totalSteps++;
+            console.log(`[Step ${totalSteps}] ${name}... \x1b[33mSKIPPED\x1b[0m (prerequisite failed)`);
+            return false;
+        }
         totalSteps++;
         process.stdout.write(`[Step ${totalSteps}] ${name}... `);
         const start = Date.now();
@@ -212,6 +215,9 @@ async function runClientWorkflow() {
             console.error(`   └─> Error: ${err.message}`);
             if (err.response) {
                 console.error(`   └─> Server Status: ${err.response.status} - ${JSON.stringify(err.response.data)}`);
+            }
+            if (required) {
+                failedRequiredStep = true;
             }
             return false;
         }
@@ -319,23 +325,26 @@ async function runClientWorkflow() {
     }
 
     let snapshotId = existingCheckpoint?.snapshotId || null;
-    let snapshotMeta = null;
-    let snapshotContinuationCursor = existingCheckpoint?.nextCursor || null;
+    let snapshotMeta = existingCheckpoint?.snapshotMeta || null;
+    let snapshotContinuationCursor = existingCheckpoint?.changeFeedCursor || existingCheckpoint?.nextCursor || null;
     let skipSnapshotCreation = false;
     let skipSnapshotPagination = false;
 
     if (existingCheckpoint) {
-        if (existingCheckpoint.type === 'change_feed' && existingCheckpoint.nextCursor) {
+        if (existingCheckpoint.type === 'change_feed' && existingCheckpoint.completed) {
             skipSnapshotCreation = true;
             skipSnapshotPagination = true;
-            snapshotContinuationCursor = existingCheckpoint.nextCursor;
+            snapshotContinuationCursor = existingCheckpoint.changeFeedCursor || existingCheckpoint.nextCursor;
         } else if (existingCheckpoint.snapshotId && existingCheckpoint.completed) {
             skipSnapshotCreation = true;
             skipSnapshotPagination = true;
-            snapshotContinuationCursor = existingCheckpoint.nextCursor;
+            snapshotContinuationCursor = existingCheckpoint.changeFeedCursor || existingCheckpoint.nextCursor;
         } else if (existingCheckpoint.snapshotId && !existingCheckpoint.completed) {
             skipSnapshotCreation = true;
+            skipSnapshotPagination = false;
             snapshotId = existingCheckpoint.snapshotId;
+            snapshotMeta = existingCheckpoint.snapshotMeta || null;
+            snapshotContinuationCursor = existingCheckpoint.changeFeedCursor || snapshotMeta?.nextCursor || null;
         }
     }
 
@@ -358,10 +367,16 @@ async function runClientWorkflow() {
         snapshotContinuationCursor = res.data.nextCursor;
         if (CHECKPOINT_FILE) {
             saveCheckpointAtomic(CHECKPOINT_FILE, {
+                type: 'snapshot_partial',
                 snapshotId,
+                snapshotMeta,
                 completed: false,
+                digestVerified: false,
                 pageNum: 0,
                 totalHarvested: 0,
+                harvestedItems: [],
+                pageCursor: null,
+                changeFeedCursor: snapshotContinuationCursor,
                 nextCursor: snapshotContinuationCursor,
                 profile: PROFILE,
                 country: COUNTRY,
@@ -369,7 +384,7 @@ async function runClientWorkflow() {
             });
         }
         return `Snapshot created: ${snapshotId}, Total Samples: ${res.data.totalSamples || 0}, Digest: ${res.data.digest ? res.data.digest.slice(0, 16) + '...' : 'none'}`;
-    });
+    }, { required: true });
 
     // 8. Read Snapshot Pages (if snapshot created)
     let harvestedCount = existingCheckpoint?.totalHarvested || 0;
@@ -379,16 +394,11 @@ async function runClientWorkflow() {
                 return `Snapshot previously verified and completed in checkpoint (${existingCheckpoint?.totalHarvested || 0} items). Resuming change feed.`;
             }
             let pageNum = existingCheckpoint?.pageNum || 0;
-            let currentCursor = existingCheckpoint?.nextCursor || null;
-            let totalHarvested = existingCheckpoint?.totalHarvested || 0;
+            let currentCursor = existingCheckpoint?.pageCursor || null;
+            let harvestedItems = Array.isArray(existingCheckpoint?.harvestedItems) ? [...existingCheckpoint.harvestedItems] : [];
+            let totalHarvested = harvestedItems.length;
             let isComplete = false;
             const MAX_PAGES = 5000;
-
-            let digestHasher = null;
-            if (snapshotMeta) {
-                const prefix = `${snapshotMeta.snapshotId}:${snapshotMeta.connectionId}:${snapshotMeta.highWaterSequence}:${snapshotMeta.epoch}:${snapshotMeta.authVersion}\n`;
-                digestHasher = crypto.createHash('sha256').update(prefix);
-            }
 
             do {
                 pageNum++;
@@ -401,12 +411,9 @@ async function runClientWorkflow() {
                     throw err;
                 }
                 const items = res.data.data || [];
-                totalHarvested += items.length;
-                if (digestHasher) {
-                    for (const item of items) {
-                        digestHasher.update(`${item.specimenId}:${JSON.stringify(item)}\n`);
-                    }
-                }
+                harvestedItems.push(...items);
+                totalHarvested = harvestedItems.length;
+
                 currentCursor = res.data.nextCursor || null;
                 if (!currentCursor) {
                     isComplete = true;
@@ -414,11 +421,17 @@ async function runClientWorkflow() {
 
                 if (CHECKPOINT_FILE) {
                     saveCheckpointAtomic(CHECKPOINT_FILE, {
+                        type: isComplete ? 'snapshot_downloaded' : 'snapshot_partial',
                         snapshotId,
+                        snapshotMeta: snapshotMeta || existingCheckpoint?.snapshotMeta || null,
                         pageNum,
                         totalHarvested,
-                        nextCursor: currentCursor || snapshotContinuationCursor,
-                        completed: isComplete,
+                        harvestedItems,
+                        pageCursor: currentCursor,
+                        changeFeedCursor: snapshotContinuationCursor,
+                        nextCursor: snapshotContinuationCursor,
+                        completed: false, // strictly false until digest verification
+                        digestVerified: false,
                         profile: PROFILE,
                         country: COUNTRY,
                         updatedAt: new Date().toISOString()
@@ -432,22 +445,39 @@ async function runClientWorkflow() {
                 throw new Error(`Snapshot pagination incomplete: reached page safety limit ${MAX_PAGES}. Retrieved ${totalHarvested} items (partial).`);
             }
 
-            let digestStatus = 'N/A';
-            if (snapshotMeta && snapshotMeta.digest && digestHasher) {
-                const computedDigest = digestHasher.digest('hex');
-                if (computedDigest === snapshotMeta.digest) {
-                    digestStatus = `VERIFIED (${computedDigest.slice(0, 16)}...)`;
-                } else {
-                    throw new Error(`Snapshot delivered digest verification failed! Server: ${snapshotMeta.digest}, Client: ${computedDigest}`);
-                }
+            const meta = snapshotMeta || existingCheckpoint?.snapshotMeta;
+            if (!meta || !meta.digest) {
+                throw new Error(`Cannot verify snapshot digest: missing snapshot metadata in session or checkpoint.`);
             }
+
+            const prefix = `${meta.snapshotId}:${meta.connectionId}:${meta.highWaterSequence}:${meta.epoch}:${meta.authVersion}\n`;
+            const digestHasher = crypto.createHash('sha256').update(prefix);
+            for (const item of harvestedItems) {
+                digestHasher.update(`${item.specimenId}:${JSON.stringify(item)}\n`);
+            }
+            const computedDigest = digestHasher.digest('hex');
+
+            if (computedDigest !== meta.digest) {
+                throw new Error(`Snapshot delivered digest verification failed! Server: ${meta.digest}, Client: ${computedDigest}`);
+            }
+
+            if (meta.totalSamples !== undefined && totalHarvested !== meta.totalSamples) {
+                throw new Error(`Snapshot count mismatch! Server: ${meta.totalSamples}, Client: ${totalHarvested}`);
+            }
+
+            const digestStatus = `VERIFIED (${computedDigest.slice(0, 16)}...)`;
 
             if (CHECKPOINT_FILE) {
                 saveCheckpointAtomic(CHECKPOINT_FILE, {
+                    type: 'snapshot_completed',
                     snapshotId,
+                    snapshotMeta: meta,
                     pageNum,
                     totalHarvested,
-                    nextCursor: snapshotContinuationCursor,
+                    harvestedItems,
+                    pageCursor: null,
+                    changeFeedCursor: snapshotContinuationCursor || meta.nextCursor,
+                    nextCursor: snapshotContinuationCursor || meta.nextCursor,
                     completed: true,
                     digestVerified: true,
                     profile: PROFILE,
@@ -457,7 +487,7 @@ async function runClientWorkflow() {
             }
 
             return `Retrieved ${totalHarvested} items across ${pageNum} page(s). Delivered digest: ${digestStatus} (retrieval only; receiver import status pending).`;
-        });
+        }, { required: true });
     }
 
     // 9. Change Feed Continuous Polling
@@ -466,8 +496,9 @@ async function runClientWorkflow() {
         if (COUNTRY) {
             changeUrl += `&country=${encodeURIComponent(COUNTRY)}`;
         }
-        if (snapshotContinuationCursor) {
-            changeUrl += `&cursor=${encodeURIComponent(snapshotContinuationCursor)}`;
+        const cursorToUse = snapshotContinuationCursor || existingCheckpoint?.changeFeedCursor || existingCheckpoint?.nextCursor;
+        if (cursorToUse) {
+            changeUrl += `&cursor=${encodeURIComponent(cursorToUse)}`;
         }
         const res = await request('GET', changeUrl);
         if (res.status !== 200) {
@@ -481,15 +512,20 @@ async function runClientWorkflow() {
             saveCheckpointAtomic(CHECKPOINT_FILE, {
                 type: 'change_feed',
                 snapshotId,
+                snapshotMeta: snapshotMeta || existingCheckpoint?.snapshotMeta || null,
                 completed: true,
+                pageCursor: null,
+                changeFeedCursor: nextCursor,
                 nextCursor,
+                totalHarvested: harvestedCount,
+                digestVerified: true,
                 eventsReceived: changes.length,
                 profile: PROFILE,
                 country: COUNTRY,
                 updatedAt: new Date().toISOString()
             });
         }
-        return `Received ${changes.length} events (resumed from snapshot continuation: ${Boolean(snapshotContinuationCursor)}), cursor: ${nextCursor ? nextCursor.slice(0, 16) + '...' : 'none'}`;
+        return `Received ${changes.length} events (resumed from snapshot continuation: ${Boolean(cursorToUse)}), cursor: ${nextCursor ? nextCursor.slice(0, 16) + '...' : 'none'}`;
     });
 
     // 10. Submit Delivery Receipt (requires explicit receiver-reported import evidence)

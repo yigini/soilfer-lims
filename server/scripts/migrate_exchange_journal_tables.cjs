@@ -343,10 +343,10 @@ function migrateExchangeTables(dbPath) {
             const sampleCols = new Set((db.prepare("PRAGMA table_info(Sample)").all() || []).map(c => c.name));
             const holdConds = [];
             if (sampleCols.has('metadata')) {
-                holdConds.push(`(s.metadata IS NOT NULL AND json_valid(s.metadata) AND COALESCE(json_extract(s.metadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD')`);
+                holdConds.push(`(s.metadata IS NOT NULL AND (NOT json_valid(s.metadata) OR COALESCE(json_extract(s.metadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD'))`);
             }
             if (sampleCols.has('fieldMetadata')) {
-                holdConds.push(`(s.fieldMetadata IS NOT NULL AND json_valid(s.fieldMetadata) AND COALESCE(json_extract(s.fieldMetadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD')`);
+                holdConds.push(`(s.fieldMetadata IS NOT NULL AND (NOT json_valid(s.fieldMetadata) OR COALESCE(json_extract(s.fieldMetadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD'))`);
             }
             const holdClause = holdConds.length > 0 ? `AND NOT (${holdConds.join(' OR ')})` : '';
 

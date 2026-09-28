@@ -156,16 +156,23 @@ const apiKeyAuth = async (req, res, next) => {
                         });
                     }
                     if (keyLink.key_status === 'ACTIVE') {
-                        // Replacement verification: when active replacement key authenticates, retire any prior rotating keys
+                        // Replacement verification: when active replacement key authenticates, retire ONLY its bound prior rotating key
                         try {
-                            const rotating = db.prepare("SELECT api_key_id FROM _exchange_connection_keys WHERE connection_id = ? AND key_status = 'ROTATING' AND api_key_id != ?").all(conn.id, apiKey.id);
-                            if (rotating.length > 0) {
-                                db.prepare("UPDATE _exchange_connection_keys SET key_status = 'RETIRED' WHERE connection_id = ? AND key_status = 'ROTATING' AND api_key_id != ?").run(conn.id, apiKey.id);
-                                for (const rk of rotating) {
-                                    db.prepare("UPDATE ApiKey SET isActive = 0 WHERE id = ?").run(rk.api_key_id);
+                            const hasOpsTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_rotation_operations'").get());
+                            if (hasOpsTable) {
+                                const pendingOp = db.prepare("SELECT idempotency_key, old_key_id FROM _exchange_rotation_operations WHERE replacement_key_id = ? AND status = 'COMMITTED'").get(apiKey.id);
+                                if (pendingOp && pendingOp.old_key_id) {
+                                    const retireTx = db.transaction(() => {
+                                        db.prepare("UPDATE _exchange_rotation_operations SET status = 'CONFIRMED' WHERE idempotency_key = ?").run(pendingOp.idempotency_key);
+                                        db.prepare("UPDATE _exchange_connection_keys SET key_status = 'RETIRED' WHERE api_key_id = ? AND key_status = 'ROTATING'").run(pendingOp.old_key_id);
+                                        db.prepare("UPDATE ApiKey SET isActive = 0 WHERE id = ?").run(pendingOp.old_key_id);
+                                    });
+                                    retireTx();
                                 }
                             }
-                        } catch (e) {}
+                        } catch (e) {
+                            console.error('[API_KEY_AUTH_ROTATION_ERR]', e);
+                        }
                     } else if (keyLink.key_status === 'ROTATING') {
                         // Bounded overlap grace window (nominal 24 hours)
                         const rotatedAt = keyLink.rotated_at ? new Date(keyLink.rotated_at).getTime() : 0;

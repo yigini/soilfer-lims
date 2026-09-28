@@ -41,14 +41,21 @@ As an operator, your primary responsibilities are:
 6. **Securely Copy Secret Key:**
    The full plaintext secret key (prefixed with `slims_live_`) is displayed **once**. Provide this key to the external SIS administrator via secure credentials vault.
 
-### 2.2 Rotating an API Key
+### 2.2 Rotating an API Key (Operation-Bound Lifecycle & Bounded Overlap)
 
-To rotate an existing integration key without downtime:
-1. Generate a new API key following step 2.1 above.
-2. Deploy the new key to the external SIS consumer.
-3. Once the consumer is successfully harvesting with the new key, return to the **Active API Keys** table in SoilFER-LIMS.
-4. Click the **Trash / Revoke** icon next to the old key.
-5. Revocation is instantaneous; requests using the old key will immediately receive HTTP 401 (`UNAUTHORIZED`).
+To rotate an existing integration key without downtime or stranding credentials:
+1. Locate the active key in the **Managed Keys** table in SoilFER-LIMS.
+2. Click the **Rotate API Key** (refresh) icon in the actions column (or call `POST /api/v1/data-exchange/keys/:id/rotate` with an optional `Idempotency-Key` header).
+3. Securely copy the one-time replacement secret and deliver it to the external SIS consumer.
+4. **Bounded Overlap Window:**
+   - The prior key transitions to `ROTATING` status and remains functional for a bounded grace window (nominal 24 hours), preventing outages if rotation response delivery is interrupted.
+   - The UI displays an amber `Rotating (Grace Period)` badge.
+5. **Automatic Retirement on Verification:**
+   - As soon as the external SIS consumer sends its first authenticated request using the replacement key, SoilFER-LIMS automatically and atomically retires the bound old key (`RETIRED`, `isActive: false`).
+   - Sibling keys on the same connection remain completely unaffected.
+6. **Manual Operator Controls (Confirm / Abort):**
+   - **Confirm Rotation (`POST /api/v1/data-exchange/keys/:id/confirm-rotation`):** Click the green checkmark icon to immediately retire the prior rotating key and finalize the replacement credential.
+   - **Abort Rotation (`POST /api/v1/data-exchange/keys/:id/abort-rotation`):** Click the rollback counter-clockwise arrow icon to abort an unconfirmed rotation. The prior key is restored to `ACTIVE` and the unconfirmed replacement key is revoked (`REVOKED`). Pre-existing independent sibling keys are never affected.
 
 ---
 

@@ -4,7 +4,7 @@ import {
     Key, Plus, Trash2, Copy, CheckCircle2, Shield, Globe, 
     Database, ExternalLink, Code2, RefreshCw, AlertTriangle, 
     Layers, Terminal, Check, Play, BookOpen, Sparkles, 
-    Sliders, ArrowRight, Clock, Lock, CheckCheck, FileText
+    Sliders, ArrowRight, Clock, Lock, CheckCheck, FileText, RotateCcw
 } from 'lucide-react';
 import { useDialog } from '../../context/DialogContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -676,19 +676,41 @@ const ApiKeyManager = () => {
                                                     <div>Used: {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString() : 'Never'}</div>
                                                 </td>
                                                 <td className="p-4">
-                                                    {k.isActive ? (
+                                                    {(k.isRotating || k.keyStatus === 'ROTATING') ? (
+                                                        <span className="px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-bold inline-flex items-center gap-1.5" title="Rotating with bounded overlap grace period">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Rotating (Grace Period)
+                                                        </span>
+                                                    ) : k.isActive ? (
                                                         <span className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold inline-flex items-center gap-1.5">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Active
                                                         </span>
                                                     ) : (
                                                         <span className="px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-bold">
-                                                            Revoked
+                                                            {k.keyStatus === 'RETIRED' ? 'Retired' : 'Revoked'}
                                                         </span>
                                                     )}
                                                 </td>
                                                 <td className="p-4 text-right">
                                                     <div className="flex items-center justify-end gap-1">
-                                                        {k.isActive && (
+                                                        {(k.isRotating || k.keyStatus === 'ROTATING') && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => handleConfirmRotation(k.id)}
+                                                                    className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg transition"
+                                                                    title="Confirm Rotation (Retires prior rotating key immediately)"
+                                                                >
+                                                                    <CheckCheck size={16} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleAbortRotation(k.id)}
+                                                                    className="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg transition"
+                                                                    title="Abort Rotation (Restores original key, revokes unconfirmed replacement)"
+                                                                >
+                                                                    <RotateCcw size={16} />
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                        {k.isActive && !k.isRotating && k.keyStatus !== 'ROTATING' && (
                                                             <button
                                                                 onClick={() => handleRotateKey(k.id, k.name)}
                                                                 disabled={rotatingKeyId === k.id}

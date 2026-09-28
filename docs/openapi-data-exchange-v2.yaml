@@ -497,6 +497,121 @@ paths:
         '500':
           description: Rotation aborted and rolled back cleanly; previous key remains active
 
+  /keys/{id}/confirm-rotation:
+    servers:
+      - url: https://lims.yigini.net/api/v1/data-exchange
+        description: Production Administrative Server
+      - url: http://localhost:5000/api/v1/data-exchange
+        description: Local Administrative Server
+      - url: https://lims.yigini.net/api/v1/sis
+        description: Legacy Production SIS Alias
+      - url: http://localhost:5000/api/v1/sis
+        description: Legacy Local SIS Alias
+    post:
+      summary: Confirm pending API key rotation
+      description: |
+        Explicitly confirms an operation-bound API key rotation. Retires the bound prior rotating key immediately, activates the replacement key, and updates the rotation operation to CONFIRMED. Unrelated keys on the connection are preserved.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: API key ID or rotation operation idempotency key to confirm.
+      responses:
+        '200':
+          description: Rotation confirmed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Key rotation confirmed. Prior key has been retired.
+                  connectionId:
+                    type: string
+                    example: conn_sis_rwanda_01
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: Conflict — rotation operation was already aborted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: CONFLICT
+                  message:
+                    type: string
+                    example: Cannot confirm rotation: rotation operation was previously aborted.
+
+  /keys/{id}/abort-rotation:
+    servers:
+      - url: https://lims.yigini.net/api/v1/data-exchange
+        description: Production Administrative Server
+      - url: http://localhost:5000/api/v1/data-exchange
+        description: Local Administrative Server
+      - url: https://lims.yigini.net/api/v1/sis
+        description: Legacy Production SIS Alias
+      - url: http://localhost:5000/api/v1/sis
+        description: Legacy Local SIS Alias
+    post:
+      summary: Abort pending API key rotation
+      description: |
+        Aborts an ongoing operation-bound API key rotation. Atomically restores the original rotating key to ACTIVE status and revokes only the unconfirmed replacement key. Independent sibling credentials on the connection remain untouched.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: API key ID or rotation operation idempotency key to abort.
+      responses:
+        '200':
+          description: Rotation aborted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Key rotation aborted. Prior key remains active and replacement key has been revoked.
+                  connectionId:
+                    type: string
+                    example: conn_sis_rwanda_01
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: Conflict — rotation operation was already confirmed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: CONFLICT
+                  code:
+                    type: string
+                    example: ROTATION_ALREADY_CONFIRMED
+                  message:
+                    type: string
+                    example: Cannot abort rotation: rotation operation has already been confirmed and retired the prior key.
+
 components:
   securitySchemes:
     ApiKeyAuth:

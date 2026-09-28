@@ -174,7 +174,8 @@ exports.getSamples = async (req, res) => {
             });
         }
 
-        const data = pageItems.map(s => formatSampleV2(s, maps, { auth: req.sisAuth }));
+        const eligibleSamples = isRestrictedConsumer(req.sisAuth) ? pageItems.filter(s => exchangeStateService.isSpecimenEligible(s)) : pageItems;
+        const data = eligibleSamples.map(s => formatSampleV2(s, maps, { auth: req.sisAuth }));
 
         res.json({
             status: 'success',
@@ -213,7 +214,7 @@ exports.getSampleById = async (req, res) => {
             getAnalysisMap()
         ]);
 
-        if (!sample) {
+        if (!sample || (isRestrictedConsumer(req.sisAuth) && !exchangeStateService.isSpecimenEligible(sample))) {
             return res.status(404).json({
                 error: 'NOT_FOUND',
                 message: `Specimen '${specimenId}' not found or not authorized for publication.`

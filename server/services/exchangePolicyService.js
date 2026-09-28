@@ -12,9 +12,55 @@
  * - Enforces consistent eligibility across samples, detail, geojson, results, spectra, sync, and v2.
  */
 
+const path = require('path');
+const Database = require('better-sqlite3');
 const projectPolicyService = require('./projectPolicyService');
 
 const AUTHORIZED_RELEASE_STATUSES = ['APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED'];
+
+/**
+ * Resolves IDs of samples currently on provenance hold using semantic JSON parsing.
+ * Evaluates both metadata and fieldMetadata columns conservatively (fail-closed on malformed JSON).
+ */
+function getHeldSampleIds(db) {
+    try {
+        let metaDb = db;
+        let createdInstance = false;
+        if (!metaDb) {
+            try {
+                const { getDb } = require('./exchangeStateService');
+                metaDb = getDb();
+            } catch (e) {}
+        }
+        if (!metaDb) {
+            const dbPath = process.env.DATABASE_PATH ? path.resolve(process.env.DATABASE_PATH) : path.resolve(__dirname, '..', 'prisma', 'dev.db');
+            metaDb = new Database(dbPath, { timeout: 2000 });
+            createdInstance = true;
+        }
+        const hasSample = Boolean(metaDb.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Sample'").get());
+        if (!hasSample) {
+            if (createdInstance && metaDb.open) metaDb.close();
+            return [];
+        }
+        const cols = new Set((metaDb.prepare("PRAGMA table_info(Sample)").all() || []).map(c => c.name));
+        const conds = [];
+        if (cols.has('metadata')) {
+            conds.push("(metadata IS NOT NULL AND (NOT json_valid(metadata) OR COALESCE(json_extract(metadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD'))");
+        }
+        if (cols.has('fieldMetadata')) {
+            conds.push("(fieldMetadata IS NOT NULL AND (NOT json_valid(fieldMetadata) OR COALESCE(json_extract(fieldMetadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD'))");
+        }
+        if (conds.length === 0) {
+            if (createdInstance && metaDb.open) metaDb.close();
+            return [];
+        }
+        const rows = metaDb.prepare(`SELECT id FROM Sample WHERE ${conds.join(' OR ')}`).all();
+        if (createdInstance && metaDb.open) metaDb.close();
+        return rows.map(r => r.id);
+    } catch (e) {
+        return [];
+    }
+}
 
 /**
  * Determine if authentication principal is an external or restricted consumer.
@@ -58,21 +104,19 @@ function buildSampleWhere(auth, query = {}) {
         } else {
             where.OR = releaseOr;
         }
-        where.AND = [
-            ...(where.AND || []),
-            {
-                OR: [
-                    { metadata: null },
-                    { NOT: { metadata: { contains: 'AMBIGUOUS_PROVENANCE_HOLD' } } }
-                ]
-            },
-            {
-                OR: [
-                    { fieldMetadata: null },
-                    { NOT: { fieldMetadata: { contains: 'AMBIGUOUS_PROVENANCE_HOLD' } } }
-                ]
+        const heldIds = getHeldSampleIds();
+        if (heldIds.length > 0) {
+            if (typeof where.id === 'string') {
+                if (heldIds.includes(where.id)) where.id = '__denied_held__';
+            } else if (where.id && typeof where.id === 'object' && Array.isArray(where.id.in)) {
+                where.id.in = where.id.in.filter(id => !heldIds.includes(id));
+                if (where.id.in.length === 0) where.id = '__denied_held__';
+            } else if (where.id && typeof where.id === 'object' && Array.isArray(where.id.notIn)) {
+                where.id.notIn = Array.from(new Set([...where.id.notIn, ...heldIds]));
+            } else {
+                where.id = { notIn: heldIds };
             }
-        ];
+        }
     } else {
         if (query.status && (query.status === 'all' || query.status === '*')) {
             // unrestricted platform user requesting all statuses
@@ -271,6 +315,11 @@ function toPrismaSpectralWhere(spectralWhere) {
     if (sample) {
         if (cleanWhere.sampleId) {
             // Already bounded by specific sampleId
+            if (typeof cleanWhere.sampleId === 'string' && sample.id && typeof sample.id === 'object' && Array.isArray(sample.id.notIn)) {
+                if (sample.id.notIn.includes(cleanWhere.sampleId)) {
+                    cleanWhere.sampleId = '__denied_held__';
+                }
+            }
         } else if (sample.id) {
             cleanWhere.sampleId = sample.id;
         } else if (sample.assignedLab === '__denied__' || (sample.status && sample.status === '__denied_unapproved__')) {
@@ -288,5 +337,6 @@ module.exports = {
     isRestrictedConsumer,
     buildSampleWhere,
     buildSpectralWhere,
-    toPrismaSpectralWhere
+    toPrismaSpectralWhere,
+    getHeldSampleIds
 };

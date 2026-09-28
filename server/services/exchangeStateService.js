@@ -151,7 +151,7 @@ const {
     installSqliteHooks
 } = require('./exchangeDbFunctions');
 
-const CURRENT_TRIGGER_VERSION = '7';
+const CURRENT_TRIGGER_VERSION = '8';
 
 function ensureTriggers(db, force = false) {
     registerDbFunctions(db);
@@ -290,10 +290,10 @@ function ensureTriggers(db, force = false) {
         const statusCond = `(${prefix}.status IN ('APPROVED', 'RELEASED') OR (${prefix}.status IN ('ARCHIVED', 'DISPOSED') AND ${prefix}.approvedAt IS NOT NULL))`;
         const holdConds = [];
         if (sampleCols.has('metadata')) {
-            holdConds.push(`(${prefix}.metadata IS NOT NULL AND json_valid(${prefix}.metadata) AND COALESCE(json_extract(${prefix}.metadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD')`);
+            holdConds.push(`(${prefix}.metadata IS NOT NULL AND (NOT json_valid(${prefix}.metadata) OR COALESCE(json_extract(${prefix}.metadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD'))`);
         }
         if (sampleCols.has('fieldMetadata')) {
-            holdConds.push(`(${prefix}.fieldMetadata IS NOT NULL AND json_valid(${prefix}.fieldMetadata) AND COALESCE(json_extract(${prefix}.fieldMetadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD')`);
+            holdConds.push(`(${prefix}.fieldMetadata IS NOT NULL AND (NOT json_valid(${prefix}.fieldMetadata) OR COALESCE(json_extract(${prefix}.fieldMetadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD'))`);
         }
         if (holdConds.length > 0) {
             return `(${statusCond} AND NOT (${holdConds.join(' OR ')}))`;
@@ -769,11 +769,16 @@ function isProvenanceHeld(meta) {
     if (!meta) return false;
     try {
         const parsed = typeof meta === 'string' ? JSON.parse(meta) : meta;
-        if (parsed && parsed.provenanceHold && parsed.provenanceHold.status === 'AMBIGUOUS_PROVENANCE_HOLD') {
+        if (!parsed || typeof parsed !== 'object') {
             return true;
         }
-    } catch (e) {}
-    return false;
+        if (parsed.provenanceHold && parsed.provenanceHold.status === 'AMBIGUOUS_PROVENANCE_HOLD') {
+            return true;
+        }
+        return false;
+    } catch (e) {
+        return true;
+    }
 }
 
 function isSpecimenEligible(sample) {
