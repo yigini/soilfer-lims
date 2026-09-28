@@ -151,7 +151,7 @@ const {
     installSqliteHooks
 } = require('./exchangeDbFunctions');
 
-const CURRENT_TRIGGER_VERSION = '6';
+const CURRENT_TRIGGER_VERSION = '7';
 
 function ensureTriggers(db, force = false) {
     registerDbFunctions(db);
@@ -287,10 +287,7 @@ function ensureTriggers(db, force = false) {
     if (resultCols.has('analysedAt')) resultAmendConds.push('OLD.analysedAt IS NOT NEW.analysedAt');
 
     const isEligibleSql = (prefix) => {
-        const conds = [
-            `${prefix}.status IN ('APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED')`,
-            `${prefix}.approvedAt IS NOT NULL`
-        ];
+        const statusCond = `(${prefix}.status IN ('APPROVED', 'RELEASED') OR (${prefix}.status IN ('ARCHIVED', 'DISPOSED') AND ${prefix}.approvedAt IS NOT NULL))`;
         const holdConds = [];
         if (sampleCols.has('metadata')) {
             holdConds.push(`(${prefix}.metadata IS NOT NULL AND json_valid(${prefix}.metadata) AND COALESCE(json_extract(${prefix}.metadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD')`);
@@ -299,9 +296,9 @@ function ensureTriggers(db, force = false) {
             holdConds.push(`(${prefix}.fieldMetadata IS NOT NULL AND json_valid(${prefix}.fieldMetadata) AND COALESCE(json_extract(${prefix}.fieldMetadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD')`);
         }
         if (holdConds.length > 0) {
-            conds.push(`NOT (${holdConds.join(' OR ')})`);
+            return `(${statusCond} AND NOT (${holdConds.join(' OR ')}))`;
         }
-        return `(${conds.join(' AND ')})`;
+        return `(${statusCond})`;
     };
 
     const installTx = db.transaction(() => {
@@ -782,10 +779,9 @@ function isProvenanceHeld(meta) {
 function isSpecimenEligible(sample) {
     if (!sample) return false;
     const status = sample.status;
-    if (!['APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED'].includes(status)) {
-        return false;
-    }
-    if (!sample.approvedAt) {
+    const isCurrentRelease = status === 'APPROVED' || status === 'RELEASED';
+    const isApprovedHistory = (status === 'ARCHIVED' || status === 'DISPOSED') && Boolean(sample.approvedAt);
+    if (!isCurrentRelease && !isApprovedHistory) {
         return false;
     }
     if (isProvenanceHeld(sample.metadata) || isProvenanceHeld(sample.fieldMetadata)) {
@@ -804,6 +800,8 @@ async function syncJournal(auth, maps = {}) {
     // Query samples accessible to this connection across all statuses to track cancellations & holds
     const baseWhere = buildSampleWhere(auth, { status: '*' });
     delete baseWhere.status;
+    delete baseWhere.OR;
+    delete baseWhere.AND;
 
     const samples = await prisma.sample.findMany({
         where: baseWhere,

@@ -353,8 +353,7 @@ function migrateExchangeTables(dbPath) {
             const unjournaled = db.prepare(`
                 SELECT s.* FROM Sample s
                 LEFT JOIN _exchange_journal j ON s.id = j.specimen_id
-                WHERE s.approvedAt IS NOT NULL
-                  AND s.status IN ('APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED')
+                WHERE ((s.status IN ('APPROVED', 'RELEASED')) OR (s.status IN ('ARCHIVED', 'DISPOSED') AND s.approvedAt IS NOT NULL))
                   ${holdClause}
                   AND j.specimen_id IS NULL
                 ORDER BY s.rowid ASC

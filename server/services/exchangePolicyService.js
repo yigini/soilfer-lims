@@ -39,19 +39,25 @@ function buildSampleWhere(auth, query = {}) {
 
     // 1. Publication Release Policy
     if (restricted) {
+        const releaseOr = [
+            { status: { in: ['APPROVED', 'RELEASED'] } },
+            { status: { in: ['ARCHIVED', 'DISPOSED'] }, approvedAt: { not: null } }
+        ];
         if (query.status && (query.status === 'all' || query.status === '*')) {
-            where.status = { in: AUTHORIZED_RELEASE_STATUSES };
+            where.OR = releaseOr;
         } else if (query.status) {
             const requested = String(query.status).trim().toUpperCase();
-            if (AUTHORIZED_RELEASE_STATUSES.includes(requested)) {
+            if (['APPROVED', 'RELEASED'].includes(requested)) {
                 where.status = requested;
+            } else if (['ARCHIVED', 'DISPOSED'].includes(requested)) {
+                where.status = requested;
+                where.approvedAt = { not: null };
             } else {
                 where.status = '__denied_unapproved__';
             }
         } else {
-            where.status = { in: AUTHORIZED_RELEASE_STATUSES };
+            where.OR = releaseOr;
         }
-        where.approvedAt = { not: null };
         where.AND = [
             ...(where.AND || []),
             {
