@@ -24,6 +24,7 @@ POSTFLIGHT_MANAGER_ID=${POSTFLIGHT_MANAGER_ID:-""}
 EXPECTED_POSTFLIGHT_SHA=${EXPECTED_POSTFLIGHT_SHA:-"cb88ca593de1e2af3a0052a7ffb958eeb3933028764718eb624bfdfbc5fea4b5"}
 IMAGE_SOURCE_COMMIT=""
 APACHE_LIVE_HASH=""
+APACHE_RESTORED_HASH=""
 WRAPPER_SCRIPT_HASH=""
 if [ -f "$0" ]; then
     WRAPPER_SCRIPT_HASH=$(sha256sum "$0" 2>/dev/null | awk '{print $1}' || echo "unknown")
@@ -509,6 +510,32 @@ if [ -n "${INITIAL_FK}" ]; then
     exit 1
 fi
 
+# Verify active container baseline environment & writers before quiescence
+BASELINE_ENV_CHECK=""
+BASELINE_ENV_RC=0
+BASELINE_ENV_CHECK=$("${DOCKER_CMD}" inspect "${APP_CONTAINER_NAME}" --format '{{range .Config.Env}}{{println .}}{{end}}' 2>&1) || BASELINE_ENV_RC=$?
+
+if [ ${BASELINE_ENV_RC} -ne 0 ] || [ -z "${BASELINE_ENV_CHECK}" ]; then
+    echo "FATAL: Failed to inspect active baseline container environment: ${BASELINE_ENV_CHECK}"
+    exit 1
+fi
+
+if ! printf '%s\n' "${BASELINE_ENV_CHECK}" | grep -q '^NODE_ENV=production$'; then
+    echo "FATAL: Active baseline container does not have approved NODE_ENV=production!"
+    exit 1
+fi
+
+if printf '%s\n' "${BASELINE_ENV_CHECK}" | grep -q '^DISABLE_BACKGROUND_JOBS=true$'; then
+    echo "FATAL: Active baseline container has DISABLE_BACKGROUND_JOBS=true active before quiescence!"
+    exit 1
+fi
+
+if printf '%s\n' "${BASELINE_ENV_CHECK}" | grep -q '^ENABLE_BACKGROUND_JOBS=false$'; then
+    echo "FATAL: Active baseline container has ENABLE_BACKGROUND_JOBS=false active before quiescence!"
+    exit 1
+fi
+echo "Active baseline container verified: approved production mode (NODE_ENV=production, writers active)."
+
 # Preserve recent container logs before any action
 "${DOCKER_CMD}" logs --tail 200 "${APP_CONTAINER_NAME}" > "${LOG_DIR}/pre_release_${TIMESTAMP}.log" 2>&1 || true
 
@@ -745,6 +772,11 @@ if [ ${FINAL_ENV_RC} -ne 0 ] || [ -z "${FINAL_ENV_CHECK}" ]; then
     exit 1
 fi
 
+if ! printf '%s\n' "${FINAL_ENV_CHECK}" | grep -q '^NODE_ENV=production$'; then
+    echo "FATAL: Final production container does not have approved NODE_ENV=production!"
+    exit 1
+fi
+
 if printf '%s\n' "${FINAL_ENV_CHECK}" | grep -q '^DISABLE_BACKGROUND_JOBS=true$'; then
     echo "FATAL: Final production container unexpectedly retains DISABLE_BACKGROUND_JOBS setting!"
     exit 1
@@ -774,6 +806,17 @@ cp "${APACHE_CONF_DIR}/httpd-lims.conf.live" "${APACHE_CONF_DIR}/httpd-lims.conf
 "${APACHECTL_CMD}" configtest
 "${SYSTEMCTL_CMD}" reload httpd
 echo "Apache live routing restored; write operations re-enabled."
+
+# Verify restored Apache configuration matches pre-quiescence live hash
+if [ -f "${APACHE_CONF_DIR}/httpd-lims.conf" ]; then
+    APACHE_RESTORED_HASH=$(sha256sum "${APACHE_CONF_DIR}/httpd-lims.conf" 2>/dev/null | awk '{print $1}' || echo "unknown")
+    echo "Restored Apache configuration SHA256: ${APACHE_RESTORED_HASH}"
+    if [ -n "${APACHE_LIVE_HASH}" ] && [ "${APACHE_RESTORED_HASH}" != "${APACHE_LIVE_HASH}" ]; then
+        echo "FATAL: Restored Apache configuration SHA256 (${APACHE_RESTORED_HASH}) does not match pre-quiescence live configuration (${APACHE_LIVE_HASH})!"
+        exit 1
+    fi
+    echo "PASS: Restored Apache configuration matches pre-quiescence live hash."
+fi
 
 # Verify write resumption (Unauthenticated POST to /receipts must return HTTP 401, not 503 or 200)
 RESUME_POST_CODE=$("${CURL_CMD}" -s -o /dev/null -w "%{http_code}" -X POST https://lims.yigini.net/api/v2/data-exchange/receipts || true)
@@ -838,7 +881,8 @@ cat << LEDGER_JSON > "${LEDGER_FILE}"
   "postflightAdminId": "${POSTFLIGHT_ADMIN_ID:-unknown}",
   "postflightManagerId": "${POSTFLIGHT_MANAGER_ID:-unknown}",
   "wrapperScriptSha256": "${WRAPPER_SCRIPT_HASH:-unknown}",
-  "apacheConfigSha256": "${APACHE_LIVE_HASH:-unknown}",
+  "apacheLiveConfigSha256": "${APACHE_LIVE_HASH:-unknown}",
+  "apacheRestoredConfigSha256": "${APACHE_RESTORED_HASH:-unknown}",
   "expectedPostflightSha": "${EXPECTED_POSTFLIGHT_SHA}",
   "actualPostflightSha": "${ACTUAL_POSTFLIGHT_SHA}",
   "baselineTag": "${BASELINE_TAG}",
@@ -851,6 +895,7 @@ cat << LEDGER_JSON > "${LEDGER_FILE}"
   },
   "runtimeConfiguration": {
     "appContainerName": "${APP_CONTAINER_NAME}",
+    "nodeEnv": "production",
     "dataVolume": "${DATA_VOLUME}",
     "assetsVolume": "${ASSETS_VOLUME}",
     "envFile": "${LIMS_OPT_DIR}/.env",

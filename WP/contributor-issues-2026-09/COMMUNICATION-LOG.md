@@ -2722,3 +2722,37 @@ PR149 remains20a7ead0826c7dcc08d264d609852610b569bb90 OPEN/unmerged, exact-head 
 
 
 
+
+## 28 September 2026 15:10 UTC — PR149 83aedf0 independent review and continuation
+
+- Exact head `83aedf0c5eac09793185e16aa3841de547f666d5`; CI `36435749981` independently SUCCESS, job `108973114140` completed 14:30:57 UTC. PR OPEN/unmerged. No merge/deployment acceptance; API remains not live.
+- Principal/scope package independently verified across eleven actual postflight child runs: explicit existing IDs pass31/31; invalid/missing/wrong-role/inactive IDs fail; empty scope requires empty catalogue; actual authorized project-mapped lab passes; foreign catalogue and malformed project JSON negatives fail. Full actual schema/migration/Prisma/UDF/persisted synthetic users/project and mounted actual HTTP routes; health only thin fixture. Controlled foreign payloads are checker negatives, not observed application disclosure. Runtime permission source unchanged.
+- Seven prior extracted image/runtime controls now behave correctly. Remaining original final-runtime proof gap: NODE_ENV=test still exits0 and claims writers active although app.js113 suppresses schedulers. Missing NODE_ENV also passes without proving production mode (not necessarily disabled jobs). Nine actual extracted shell checks with recording Docker stubs; no actual image/runtime/production incident claim. Unchanged recovery/broad API/React/CLI suites not rerun.
+- Complete the existing release package through reviewed operator steps/proven procedure or wrapper: accepted candidate, protected merge/exact-main successful CI, clean source/build/immutable image binding, actual baseline/final production settings/mounts/health/proxy, pinned postflight/existing principals, stopped-writer backup/migration/cutover and bounded final verification. Future main SHA/CI are filled after merge. Nonempty CI input/configured paths are not actual verification; no automation redesign required. No repeat owner approval.
+- Report `work/issue149-independent-review-83aedf0.md`; `issue149-postflight-review-83aedf0.cjs/.log` and `issue149-release-identity-review-83aedf0.cjs/.log`. Initial postflight run completed eight cases then stopped on harness-only missing Project.status; corrected only fixture, retained initial log/DB. Final retained DB `issue149-disposable-postflight-83aedf0-Wf6wDz`; shell traces `issue149-release-identity-83aedf0-NY4Gad`. WrapperSHA `7d7e6160bccc1ab8437ae7f7913a40cf3a7d562579d60f3f49a1362a6b724234`; postflightSHA `cb88ca593de1e2af3a0052a7ffb958eeb3933028764718eb624bfdfbc5fea4b5`.
+- Public https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5872774283 . ONE focused continuation delivered15:09UTC and consumed: restored screenshot shows new transcript, reportL1-47, identityprobeL1-39/logL1-61 read, Exploring3files/Working/Cancel; composer empty preserved. Prior e980 task complete. Do not duplicate.
+- No ordinary/production DB, real credential/grant or OpenNSIS changes. Agy owns implementation/EVIDENCE/sole deployment; Codex review/public communication/read-only verification. Original R1-R12/full LIMS-only scope, no TUF implementation/closed-task reruns/worktree removal. Hourly ACTIVE until independently verified LIMS deployment, then pause the same automation.
+
+## 28 September 2026 15:35 UTC — PR #149 Remediation Package for Review 83aedf0
+
+- **Remediation Context**: Addressed the remaining final-runtime proof requirement and formalized the 4-gate reviewable operator release procedure identified in independent review `issue149-independent-review-83aedf0.md` (CI `36435749981` SUCCESS).
+- **Core Remediations**:
+  1. **Approved Production Mode & Schedulers Proof (`execute_release_issue140.sh`)**:
+     - Step 8 runtime inspection enforces `NODE_ENV=production` (`! printf '%s\n' "${FINAL_ENV_CHECK}" | grep -q '^NODE_ENV=production$'`). If `NODE_ENV` is missing, `test`, or non-production, inspection fails closed (`exit 1`) with `FATAL: Final production container does not have approved NODE_ENV=production!`.
+     - Also asserts absence of both suppression flags (`DISABLE_BACKGROUND_JOBS=true` and `ENABLE_BACKGROUND_JOBS=false`, per `server/app.js:113`).
+     - Step 1 before quiescence verifies active baseline container environment has `NODE_ENV=production` and neither suppression flag active.
+     - Captures restored Apache proxy configuration hash (`APACHE_RESTORED_HASH`), asserts strict equality with pre-quiescence `APACHE_LIVE_HASH`, and records both hashes in release ledger JSON.
+     - Step 9 ledger JSON records `nodeEnv: "production"`, `apacheLiveConfigSha256`, and `apacheRestoredConfigSha256`.
+  2. **Concrete 4-Gate Reviewable Operator Release Procedure**:
+     - Formally defined the complete 4-gate release procedure in EVIDENCE.md and COMMUNICATION-LOG.md:
+       - Gate 1: Candidate acceptance -> Protected merge into `main` -> Independently verified exact-main CI run on merge commit (merge SHA and CI Run ID filled after merge).
+       - Gate 2: Clean accepted-main build tied to immutable image ID and source revision. Pinned wrapper and postflight SHA256 hashes, with explicitly selected reviewed principals (`POSTFLIGHT_ADMIN_ID`, `POSTFLIGHT_MANAGER_ID`).
+       - Gate 3: Approved baseline and final container inspection: image ID, `NODE_ENV=production`, both background suppression flags absent, verified database and assets volume mounts, non-secret env preservation, container health configuration, and restored proxy SHA256 matching baseline.
+       - Gate 4: Stopped-writer consistent backup (`PRAGMA wal_checkpoint(TRUNCATE)` + SQLite `.backup`), additive migration, safe cutover with `PHASE="COMMITTED"` before production writers resume (never restoring an old database afterward), bounded postflight verification, and final public health / routing smoke verification.
+- **Verification Suites & Probes**:
+  - `scratch/verify_identity_83aedf0_hardened.cjs` (9/9 scenarios PASS): `correct-source` (exit 0), `wrong-source` (exit 1), `missing-expected` (exit 1), `missing-source` (exit 1), `production-enabled` (exit 0, writers active), `suppressed-alternate-flag` (exit 1), `final-inspect-failure` (exit 1), `test-mode` (exit 1, fails closed on `NODE_ENV=test`), `missing-node-env` (exit 1, fails closed on missing `NODE_ENV`).
+  - `issue149-release-control-review-e98030d.cjs` (4/4 scenarios PASS): `normal-recovery`, `meta-inspection-failure`, `sidecar-preservation-failure`, `cutover-health-failure`.
+  - `scratch/run_postflight_e98030d_probe.cjs` (4/4 scenarios PASS): 31/31 passed on explicit valid principals; invalid IDs, foreign catalogue, and zero-project-labs fail closed.
+- **Release Status**: Changes committed to `feat/issue-140-nsis-exchange` (PR #149) for exact-head CI. Code NOT LIVE YET.
+
+

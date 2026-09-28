@@ -3039,6 +3039,55 @@ Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09
 | **Image Source Provenance Validation** | `execute_release_issue140.sh` (Step 1) | Image source commit validation passed if `EXPECTED_COMMIT_SHA` was empty or if image labels/env lacked commit info. | Made `EXPECTED_COMMIT_SHA` mandatory in preflight; asserted `IMAGE_SOURCE_COMMIT` non-empty; strict equality check halts release (`exit 1`) on any mismatch or extraction failure. | `test_identity_review.cjs` Scenarios `missing-expected` (exit 1), `missing-source` (exit 1), `wrong-source` (exit 1), and `correct-source` (exit 0). |
 | **Runtime Environment Verification & Timeout Bounding** | `execute_release_issue140.sh` (Step 8) | 1. `docker inspect` failures were swallowed by `\|\| true`.<br>2. Checked only `DISABLE_BACKGROUND_JOBS=true`, ignoring `ENABLE_BACKGROUND_JOBS=false`.<br>3. Health check curl loop lacked bounded per-request timeouts. | 1. Captures `docker inspect` exit code (`FINAL_ENV_RC == 0`).<br>2. Asserts both `DISABLE_BACKGROUND_JOBS=true` and `ENABLE_BACKGROUND_JOBS=false` absent.<br>3. Added `--max-time 2` to curl health check commands. | `test_identity_review.cjs` Scenarios `suppressed-alternate-flag` (exit 1) and `final-inspect-failure` (exit 1). Syntax check passes. |
 
+### Phase 12: Head `83aedf0` Independent Review & Concrete Release Protocol (28 September 2026)
+
+- **Review Document**: `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-independent-review-83aedf0.md` (15:08 UTC / 17:08 CEST)
+- **Review Probes**:
+  - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-postflight-review-83aedf0.cjs/.log` (retained DB: `issue149-disposable-postflight-83aedf0-Wf6wDz`)
+  - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-release-identity-review-83aedf0.cjs/.log` (retained traces: `issue149-release-identity-83aedf0-NY4Gad`)
+  - [Public Review Comment 5872774283](https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5872774283)
+- **Candidate Head Branch**: `feat/issue-140-nsis-exchange` (PR #149)
+- **Reviewed Head**: `83aedf0c5eac09793185e16aa3841de547f666d5` (CI `36435749981` independently SUCCESS, job `108973114140` completed 14:30:57 UTC)
+
+#### Verified Improvements from Candidate `83aedf0`
+- **Principal / Scope Verification Fully Passed**: 11 actual postflight child executions independently confirmed that explicit valid IDs pass 31/31; invalid, missing, wrong-role, and inactive IDs fail with exit 1 (no fallback); empty project scope accepts only empty catalogue; project-mapped labs pass through actual HTTP; foreign catalogues and malformed JSON fail closed.
+- **Image Source Provenance Passed**: Correct source accepted; wrong source, missing expected commit, missing discovered commit, alternate suppression flag, and failed Docker inspect each reject with exit 1.
+- **Recovery Controls Unchanged & Sound**: Step 8 declares `PHASE="COMMITTED"` before production restart; 30-attempt health check failure never restores old database or reloads ingress (`backupRestoreAttempt: false, ingressReload: false`); WAL sidecar preservation and `_exchange_meta` query failures halt recovery safely.
+
+#### Implemented Release Verification Hardening
+
+1. **Complete Final Production Configuration Proof (`execute_release_issue140.sh`)**:
+   - **Step 8 Runtime Inspection**: In `server/app.js:113`, background schedulers are disabled if `NODE_ENV === 'test' || DISABLE_BACKGROUND_JOBS === 'true' || ENABLE_BACKGROUND_JOBS === 'false'`. Step 8 now strictly asserts `NODE_ENV=production` (`! printf '%s\n' "${FINAL_ENV_CHECK}" | grep -q '^NODE_ENV=production$'`). If `NODE_ENV` is missing, set to `test`, or anything other than `production`, inspection immediately fails closed (`exit 1`) with `FATAL: Final production container does not have approved NODE_ENV=production!`.
+   - **Baseline Environment Inspection Before Quiescence (Step 1)**: Inspects the active baseline container environment before Step 2 quiescence, asserting `NODE_ENV=production` and absence of both suppression flags. Fails closed if the baseline is non-production.
+   - **Restored Proxy Configuration Hash Parity**: After restoring Apache live configuration and executing `systemctl reload httpd` in Step 8, captures `APACHE_RESTORED_HASH=$(sha256sum "${APACHE_CONF_DIR}/httpd-lims.conf" ...)` and asserts strict equality with pre-quiescence `APACHE_LIVE_HASH`.
+   - **Ledger Binding**: Records `nodeEnv: "production"`, `apacheLiveConfigSha256`, and `apacheRestoredConfigSha256` in the release ledger JSON.
+
+2. **Concrete 4-Gate Reviewable Operator Release Procedure**:
+
+| Gate | Phase & Objective | Criteria & Verification Evidence |
+|---|---|---|
+| **Gate 1: Candidate Acceptance & Protected Merge** | PR acceptance, protected merge into `main`, and exact-main CI verification | - Independent candidate review acceptance on `feat/issue-140-nsis-exchange`.<br>- Merge PR #149 into `main` using repository protected branch rules.<br>- Independently verified exact-main GitHub Actions CI run on merge commit (merge SHA and CI Run ID recorded after merge, not pre-demanded). |
+| **Gate 2: Immutable Artifact & Provenance Binding** | Clean accepted-main build tied to immutable image ID, source revision, and pinned checks | - Production Docker image built from exact accepted-main commit.<br>- Verified `IMAGE_SOURCE_COMMIT` extracted from image labels/env strictly equals merge SHA.<br>- Release wrapper (`execute_release_issue140.sh`) and postflight (`postflight_issue140.cjs`) SHA-256 hashes pinned and verified.<br>- Explicit reviewed existing principals passed via `POSTFLIGHT_ADMIN_ID` and `POSTFLIGHT_MANAGER_ID`. |
+| **Gate 3: Baseline & Runtime Configuration Verification** | Secret-safe container environment, mounts, health, and proxy inspection | - Baseline inspection before quiescence: verifies active container running, image ID captured, `NODE_ENV=production`, neither suppression flag active, pre-quiescence Apache hash captured.<br>- Target container pre-exposure: `-e DISABLE_BACKGROUND_JOBS=true` enforced during postflight testing.<br>- Final production container: verifies target image ID, `NODE_ENV=production`, absence of `DISABLE_BACKGROUND_JOBS=true` and `ENABLE_BACKGROUND_JOBS=false`, volume mounts, and restored Apache proxy SHA-256 matching baseline. |
+| **Gate 4: Safe Cutover & Zero-Loss Verification** | Stopped-writer backup, additive migration, live exposure, and postflight verification | - Ingress quiescence enforced via Apache 503 rewrite.<br>- Background writers stopped; WAL truncate checkpointed (`0\|0\|0`); consistent SQLite `.backup` created and SHA-256 recorded.<br>- Additive schema migration applied via disposable migration container.<br>- `PHASE="COMMITTED"` asserted strictly before production restart (automatic restore permanently forbidden once writers resume).<br>- Container healthy within bounded curl loop (`--max-time 2`).<br>- Apache live proxy restored and verified; unauthenticated POST returns 401 (not 503); post-exposure public smoke checks pass (200 / 401). |
+
+#### Verification Probes & Results
+
+| Test Probe | Scope & Methodology | Result | Evidence / Details |
+|---|---|---|---|
+| `verify_identity_83aedf0_hardened.cjs` | 9 extracted image identity and runtime environment scenarios with stubbed Docker calls | **9/9 PASS** | 1. `correct-source`: exit 0, `accepted: true`<br>2. `wrong-source`: exit 1, `accepted: false`<br>3. `missing-expected`: exit 1, `accepted: false`<br>4. `missing-source`: exit 1, `accepted: false`<br>5. `production-enabled`: exit 0, `accepted: true, claimsWritersActive: true`<br>6. `suppressed-alternate-flag`: exit 1, `accepted: false`<br>7. `final-inspect-failure`: exit 1, `accepted: false`<br>8. `test-mode`: exit 1, `accepted: false` (**FAILS CLOSED** on `NODE_ENV=test`)<br>9. `missing-node-env`: exit 1, `accepted: false` (**FAILS CLOSED** on missing `NODE_ENV`) |
+| `issue149-release-control-review-e98030d.cjs` | 4 isolated release recovery and cutover scenarios with stubbed system/docker/curl calls | **4/4 PASS** | 1. `normal-recovery`: exit 17, restored, epoch rotated, `ingressReload: true`<br>2. `meta-inspection-failure`: exit 1, `ingressReload: false`<br>3. `sidecar-preservation-failure`: exit 1, `ingressReload: false`<br>4. `cutover-health-failure`: exit 1, `backupRestoreAttempt: false, ingressReload: false, healthChecks: 30` |
+| `run_postflight_e98030d_probe.cjs` | 4 postflight scenarios on disposable SQLite DB with mounted Express routes | **4/4 PASS** | 1. `actual-postflight-explicit-principals`: exit 0, **31/31 passed (100%)**.<br>2. `actual-postflight-invalid-explicit-principals`: exit 1, 22/24 passed (fails closed, no fallback).<br>3. `actual-postflight-country-scoped-foreign`: exit 1, 30/31 passed (fails closed).<br>4. `actual-postflight-zero-project-labs`: exit 1, 30/31 passed (injected same-country AAA foreign lab rejected). |
+
+#### Remediated Findings Ledger (Head `83aedf0` Package)
+
+| Item | Component(s) | Review Finding & Failure Mode | Comprehensive Remediation Implemented | Verification Evidence |
+|---|---|---|---|---|
+| **Production Mode Proof (`NODE_ENV=production`)** | `execute_release_issue140.sh` (Step 1 & Step 8) | Step 8 runtime check accepted `NODE_ENV=test` and missing `NODE_ENV`, falsely claiming production writers active despite `server/app.js:113` suppressing schedulers under `NODE_ENV === 'test'`. | Enforces `NODE_ENV=production` both before quiescence (Step 1) and in final runtime (Step 8). Non-production modes (`test`) and missing `NODE_ENV` fail closed (`exit 1`) with `FATAL: Final production container does not have approved NODE_ENV=production!`. | `verify_identity_83aedf0_hardened.cjs` Scenarios `test-mode` (exit 1) and `missing-node-env` (exit 1) both fail closed; `production-enabled` passes (exit 0). |
+| **Restored Proxy Configuration Hash Proof** | `execute_release_issue140.sh` (Step 8 & Step 9) | Release ledger recorded pre-quiescence proxy hash only; did not assert or record restored live proxy hash parity after cutover. | Captures `APACHE_RESTORED_HASH` after reload, asserts strict equality with `APACHE_LIVE_HASH`, and records both live and restored hashes in release ledger JSON. | Step 8 captures and verifies restored hash; ledger binds `apacheLiveConfigSha256` and `apacheRestoredConfigSha256`. |
+| **Concrete 4-Gate Operator Procedure** | `EVIDENCE.md`, `COMMUNICATION-LOG.md` | Release evidence needed concrete definition of the 4 release gates rather than interpolated ledger claims prior to merge. | Defined the 4-gate procedure spanning candidate acceptance, protected merge + exact-main CI, artifact binding, baseline/runtime inspection, and safe cutover with stopped-writer backup. | 4-gate protocol defined in EVIDENCE.md and COMMUNICATION-LOG.md. |
+
+
 
 
 
