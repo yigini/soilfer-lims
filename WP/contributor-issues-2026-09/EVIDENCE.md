@@ -2986,6 +2986,59 @@ Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09
 | **Scoped Catalogue Unconditional-Pass Branch** | `server/scripts/postflight_issue140.cjs` | Manager selection used `LIMIT 1`. When `labId` was null, country-scoped manager (e.g. `countries: ["AAA"]`) accepted foreign `BBB` catalogue without rejection. | Added explicit principal selection (env overrides -> synthetic -> deterministic). Validates country array (`labManager.countries`) and project scoping even when `labId` is null. Foreign injected catalogue rejected (`exit 1`). | `scratch/run_postflight_test.cjs` Scenario `actual-postflight-country-scoped-foreign`: exit 1, `[FAIL] LAB_MANAGER GET /api/labs (scoped catalogue)` (PASS). Normal run: 31/31 passed (exit 0). |
 | **Release Identity Ledger & Provenance** | `execute_release_issue140.sh`, `EVIDENCE.md` | Ledger lacked image source commit validation, proxy config hash, and verified runtime background jobs. Baseline cited stale `v3.5.26-9b69920` instead of verified `v3.5.29-e5d5ebd`. | Bound image source commit to `EXPECTED_COMMIT_SHA`, captured live Apache config SHA256, verified background jobs active, and reconciled baseline to `v3.5.29-e5d5ebd`. | Release ledger emits complete verified schema; EVIDENCE reconciled to `v3.5.29-e5d5ebd`. |
 
+### Phase 11: Head `e98030d` Independent Review & Release Integrity Hardening (28 September 2026)
+
+- **Review Document**: `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-independent-review-e98030d.md` (14:05 UTC / 16:05 CEST)
+- **Review Probes**:
+  - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-postflight-review-e98030d.cjs/.log`
+  - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-release-identity-review-e98030d.cjs/.log`
+  - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-release-control-review-e98030d.cjs/.log`
+  - [Public Review Comment 5871530223](https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5871530223)
+- **Candidate Head Branch**: `feat/issue-140-nsis-exchange` (PR #149)
+- **Reviewed Head**: `e98030db17e37b7f54216a12587f18cdaddc561d` (CI `36428480364` independently SUCCESS)
+
+#### Verified Improvements from Candidate `e98030d`
+- **Writer Boundary Safe**: `PHASE="COMMITTED"` strictly precedes production restart; isolated 30-health-failure probe performs no old-backup restoration over live production writers and keeps ingress at 503 (`backupRestoreAttempt: false, ingressReload: false`).
+- **Recovery Prerequisite Safety**: Failed WAL/SHM sidecar copy and failed `_exchange_meta` table inspection immediately abort recovery (`exit 1`) and keep ingress at 503. Positive normal recovery completes and restores cleanly.
+- **Explicit Principal Postflight**: Actual postflight with explicit existing principals passes 31/31 (100%), and prior null-lab foreign BBB fixture fails closed (`exit 1`).
+
+#### Remaining Release Remediation Packages Implemented
+
+1. **Package A: Principal Identity & Scoped Catalogue Fail-Closed (`postflight_issue140.cjs`)**:
+   - **Strict Principal Requirement**: Removed synthetic fallback names (`synthetic-admin`, `synthetic-manager`) and arbitrary ordered database records (`ORDER BY id ASC LIMIT 1`). The script now strictly requires `POSTFLIGHT_ADMIN_ID` and `POSTFLIGHT_MANAGER_ID`, failing closed (`exit 1`) if unspecified or if the target user is inactive or possesses the wrong role.
+   - **Catalogue Scope Resolution Alignment**: Aligned verification logic with actual application scoping precedence in `server/routes/labRoutes.js:30-68`:
+     - If manager has an assigned `labId`, effective allow-list is `[labManager.labId]`.
+     - If manager has `projects`, resolves project codes to distinct lab IDs from the `Project` table. If 0 labs resolve, effective allow-list is strictly empty (`expectedLabIds = []`).
+     - If effective allow-list is empty (`expectedLabIds.length === 0`), strictly asserts `labsRes.body.length === 0`. Any injected same-country or foreign lab is rejected (`[FAIL]`, exit 1).
+     - Any JSON parsing or DB query error fails closed rather than disabling restrictions.
+   - **Postflight Hash**: SHA256 recomputed and bound to `cb88ca593de1e2af3a0052a7ffb958eeb3933028764718eb624bfdfbc5fea4b5`.
+   - **Clarification**: Runtime API-key and manager authorization logic was not changed; only postflight verification and checker logic were hardened.
+
+2. **Package B: Concrete Source Identity & Final Runtime Proof (`execute_release_issue140.sh`)**:
+   - **Strict Image Source Provenance Gate**: Preflight asserts that `EXPECTED_COMMIT_SHA`, `MAIN_CI_RUN_ID`, `POSTFLIGHT_ADMIN_ID`, and `POSTFLIGHT_MANAGER_ID` are present and non-empty. In image source commit validation, fails closed (`exit 1`) if `EXPECTED_COMMIT_SHA` is missing, if `IMAGE_SOURCE_COMMIT` cannot be extracted from target image labels or environment, or if they mismatch.
+   - **Unswallowed Docker Runtime Inspection**: Removed `|| true` masking from `docker inspect`. Captures exit code `FINAL_ENV_RC`; non-zero exit or empty output immediately aborts (`exit 1`).
+   - **Dual Suppression Flag Checks**: Verifies that neither `DISABLE_BACKGROUND_JOBS=true` nor `ENABLE_BACKGROUND_JOBS=false` (per `server/app.js:113`) remains active in the final production runtime container.
+   - **Bounded Health Check Timeout**: Added `--max-time 2` to the 30-attempt health check curl loop (`http://127.0.0.1:3000/api/health`) to enforce real bounded execution.
+   - **Ledger Binding**: Release ledger JSON records `postflightAdminId` and `postflightManagerId` alongside verified source commit, CI run ID, and wrapper/postflight hashes.
+   - **Documentation Clarification**: `PHASE="COMMITTED"` provides in-process failure-path protection against automated rollback overwrites; it is not durable against host power loss. The 30 curl health checks are now strictly bounded by per-request `--max-time 2` limits.
+
+#### Verification Probes & Results
+
+| Test Probe | Scope & Methodology | Result | Evidence / Details |
+|---|---|---|---|
+| `run_postflight_e98030d_probe.cjs` | 4 postflight scenarios on disposable SQLite DB with mounted Express routes | **4/4 PASS** | 1. `actual-postflight-explicit-principals`: exit 0, **31/31 passed (100%)**.<br>2. `actual-postflight-invalid-explicit-principals`: exit 1, 22/24 passed (fails closed, no fallback).<br>3. `actual-postflight-country-scoped-foreign`: exit 1, 30/31 passed (fails closed).<br>4. `actual-postflight-zero-project-labs`: exit 1, 30/31 passed (injected same-country AAA foreign lab rejected). |
+| `test_identity_review.cjs` | 7 extracted image identity and runtime environment scenarios with stubbed Docker calls | **7/7 PASS** | 1. `correct-source`: exit 0, `accepted: true`<br>2. `wrong-source`: exit 1, `accepted: false`<br>3. `missing-expected`: exit 1, `accepted: false`<br>4. `missing-source`: exit 1, `accepted: false`<br>5. `production-enabled`: exit 0, `accepted: true, claimsWritersActive: true`<br>6. `suppressed-alternate-flag`: exit 1, `accepted: false`<br>7. `final-inspect-failure`: exit 1, `accepted: false` |
+| `issue149-release-control-review-e98030d.cjs` | 4 isolated release recovery and cutover scenarios with stubbed system/docker/curl calls | **4/4 PASS** | 1. `normal-recovery`: exit 17, restored, epoch rotated, `ingressReload: true`<br>2. `meta-inspection-failure`: exit 1, `ingressReload: false`<br>3. `sidecar-preservation-failure`: exit 1, `ingressReload: false`<br>4. `cutover-health-failure`: exit 1, `backupRestoreAttempt: false, ingressReload: false, healthChecks: 30` |
+
+#### Remediated Findings Ledger (Head `e98030d` Package)
+
+| Item | Component(s) | Review Finding & Failure Mode | Comprehensive Remediation Implemented | Verification Evidence |
+|---|---|---|---|---|
+| **Principal Identity Fail-Closed** | `server/scripts/postflight_issue140.cjs` | Missing or invalid explicit principal IDs fell back to synthetic-name users or arbitrary `ORDER BY id ASC LIMIT 1` database records, allowing checks to pass on unintended accounts. | Strictly requires `POSTFLIGHT_ADMIN_ID` and `POSTFLIGHT_MANAGER_ID`. Fails closed (`exit 1`) if missing, inactive, or role mismatched; completely removed synthetic-name and ordered DB record fallbacks. | `run_postflight_e98030d_probe.cjs` Scenario `actual-postflight-invalid-explicit-principals`: exit 1 (fails closed, no fallback). |
+| **Scoped Catalogue Allow-List Precedence** | `server/scripts/postflight_issue140.cjs` | When manager had null `labId` and project codes that resolved to zero labs, checker fell back to country checking only, permitting injected same-country foreign facilities to pass. | Mirrors `labRoutes.js:30-68` precedence: empty effective allow-list (`expectedLabIds = []`) strictly requires `labsRes.body.length === 0`. Rejects any returned facilities. Parse and DB query errors fail closed. | `run_postflight_e98030d_probe.cjs` Scenario `actual-postflight-zero-project-labs`: exit 1 (injected lab rejected). |
+| **Image Source Provenance Validation** | `execute_release_issue140.sh` (Step 1) | Image source commit validation passed if `EXPECTED_COMMIT_SHA` was empty or if image labels/env lacked commit info. | Made `EXPECTED_COMMIT_SHA` mandatory in preflight; asserted `IMAGE_SOURCE_COMMIT` non-empty; strict equality check halts release (`exit 1`) on any mismatch or extraction failure. | `test_identity_review.cjs` Scenarios `missing-expected` (exit 1), `missing-source` (exit 1), `wrong-source` (exit 1), and `correct-source` (exit 0). |
+| **Runtime Environment Verification & Timeout Bounding** | `execute_release_issue140.sh` (Step 8) | 1. `docker inspect` failures were swallowed by `\|\| true`.<br>2. Checked only `DISABLE_BACKGROUND_JOBS=true`, ignoring `ENABLE_BACKGROUND_JOBS=false`.<br>3. Health check curl loop lacked bounded per-request timeouts. | 1. Captures `docker inspect` exit code (`FINAL_ENV_RC == 0`).<br>2. Asserts both `DISABLE_BACKGROUND_JOBS=true` and `ENABLE_BACKGROUND_JOBS=false` absent.<br>3. Added `--max-time 2` to curl health check commands. | `test_identity_review.cjs` Scenarios `suppressed-alternate-flag` (exit 1) and `final-inspect-failure` (exit 1). Syntax check passes. |
+
 
 
 

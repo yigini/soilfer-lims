@@ -19,7 +19,9 @@ fi
 REVIEWED_IMAGE="$1"
 EXPECTED_COMMIT_SHA=${EXPECTED_COMMIT_SHA:-""}
 MAIN_CI_RUN_ID=${MAIN_CI_RUN_ID:-""}
-EXPECTED_POSTFLIGHT_SHA=${EXPECTED_POSTFLIGHT_SHA:-"0bb00ebc67171b0edb1f8d96b4d3997d0f738f834cfb44e4f0b1679e8a105ed8"}
+POSTFLIGHT_ADMIN_ID=${POSTFLIGHT_ADMIN_ID:-""}
+POSTFLIGHT_MANAGER_ID=${POSTFLIGHT_MANAGER_ID:-""}
+EXPECTED_POSTFLIGHT_SHA=${EXPECTED_POSTFLIGHT_SHA:-"cb88ca593de1e2af3a0052a7ffb958eeb3933028764718eb624bfdfbc5fea4b5"}
 IMAGE_SOURCE_COMMIT=""
 APACHE_LIVE_HASH=""
 WRAPPER_SCRIPT_HASH=""
@@ -416,6 +418,20 @@ trap 'cleanup_recovery EXIT' EXIT
 PHASE="PREFLIGHT"
 echo "--- Step 1: Preflight & Baseline Image Preservation ---"
 
+# Verify required release identity and principal parameters
+if [ -z "${EXPECTED_COMMIT_SHA:-}" ]; then
+    echo "FATAL: EXPECTED_COMMIT_SHA is required to bind release commit provenance!"
+    exit 1
+fi
+if [ -z "${MAIN_CI_RUN_ID:-}" ]; then
+    echo "FATAL: MAIN_CI_RUN_ID is required to bind exact-main CI provenance!"
+    exit 1
+fi
+if [ -z "${POSTFLIGHT_ADMIN_ID:-}" ] || [ -z "${POSTFLIGHT_MANAGER_ID:-}" ]; then
+    echo "FATAL: POSTFLIGHT_ADMIN_ID and POSTFLIGHT_MANAGER_ID are required to verify reviewed principal access!"
+    exit 1
+fi
+
 # Verify active container running
 ACTIVE_RUNNING=$("${DOCKER_CMD}" inspect "${APP_CONTAINER_NAME}" --format '{{.State.Running}}' 2>/dev/null || echo "false")
 if [ "${ACTIVE_RUNNING}" != "true" ]; then
@@ -442,17 +458,26 @@ if [ -z "${TARGET_IMAGE_ID}" ]; then
 fi
 echo "Target reviewed image verified: ${REVIEWED_IMAGE} (Image ID: ${TARGET_IMAGE_ID})"
 
-# Validate image source commit if EXPECTED_COMMIT_SHA is specified
+# Validate image source commit
+if [ -z "${EXPECTED_COMMIT_SHA:-}" ]; then
+    echo "FATAL: EXPECTED_COMMIT_SHA is required and must not be empty!"
+    exit 1
+fi
+
 IMAGE_SOURCE_COMMIT=$("${DOCKER_CMD}" inspect "${TARGET_IMAGE_ID}" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' 2>/dev/null || true)
 if [ -z "${IMAGE_SOURCE_COMMIT}" ]; then
     IMAGE_SOURCE_COMMIT=$("${DOCKER_CMD}" inspect "${TARGET_IMAGE_ID}" --format '{{range .Config.Env}}{{println .}}{{end}}' | grep '^GIT_COMMIT=' | cut -d= -f2 || true)
 fi
-if [ -n "${IMAGE_SOURCE_COMMIT}" ]; then
-    echo "Target image source commit: ${IMAGE_SOURCE_COMMIT}"
-    if [ -n "${EXPECTED_COMMIT_SHA:-}" ] && [ "${IMAGE_SOURCE_COMMIT}" != "${EXPECTED_COMMIT_SHA}" ]; then
-        echo "FATAL: Target image commit (${IMAGE_SOURCE_COMMIT}) does not match expected commit (${EXPECTED_COMMIT_SHA})!"
-        exit 1
-    fi
+
+if [ -z "${IMAGE_SOURCE_COMMIT}" ]; then
+    echo "FATAL: Could not extract source commit from target image (${TARGET_IMAGE_ID})!"
+    exit 1
+fi
+
+echo "Target image source commit: ${IMAGE_SOURCE_COMMIT}"
+if [ "${IMAGE_SOURCE_COMMIT}" != "${EXPECTED_COMMIT_SHA}" ]; then
+    echo "FATAL: Target image commit (${IMAGE_SOURCE_COMMIT}) does not match expected commit (${EXPECTED_COMMIT_SHA})!"
+    exit 1
 fi
 
 # Capture live Apache config hash before quiescence
@@ -678,7 +703,7 @@ echo "PASS: Postflight script SHA256 verified against expected hash."
 
 # Execute dedicated read-only Issue #140 postflight suite inside target container
 echo "Executing dedicated read-only Issue #140 postflight suite..."
-"${DOCKER_CMD}" exec "${APP_CONTAINER_NAME}" node "${POSTFLIGHT_FILE}"
+"${DOCKER_CMD}" exec -e POSTFLIGHT_ADMIN_ID="${POSTFLIGHT_ADMIN_ID}" -e POSTFLIGHT_MANAGER_ID="${POSTFLIGHT_MANAGER_ID}" "${APP_CONTAINER_NAME}" node "${POSTFLIGHT_FILE}"
 
 # Verify data counts strictly unchanged before live exposure
 PRE_EXP_SAMPLES=$("${SQLITE3_CMD}" "${DB_PATH}" "SELECT count(*) FROM Sample;")
@@ -711,15 +736,29 @@ fi
 echo "PASS: Final runtime container verified running target image ID: ${FINAL_RUNTIME_IMAGE_ID}"
 
 # Verify DISABLE_BACKGROUND_JOBS is absent in final production runtime settings
-FINAL_ENV_CHECK=$("${DOCKER_CMD}" inspect "${APP_CONTAINER_NAME}" --format '{{range .Config.Env}}{{println .}}{{end}}' | grep '^DISABLE_BACKGROUND_JOBS=' || true)
-if [ -n "${FINAL_ENV_CHECK}" ]; then
-    echo "FATAL: Final production container unexpectedly retains DISABLE_BACKGROUND_JOBS setting: ${FINAL_ENV_CHECK}"
+FINAL_ENV_CHECK=""
+FINAL_ENV_RC=0
+FINAL_ENV_CHECK=$("${DOCKER_CMD}" inspect "${APP_CONTAINER_NAME}" --format '{{range .Config.Env}}{{println .}}{{end}}' 2>&1) || FINAL_ENV_RC=$?
+
+if [ ${FINAL_ENV_RC} -ne 0 ] || [ -z "${FINAL_ENV_CHECK}" ]; then
+    echo "FATAL: Failed to inspect final runtime container environment: ${FINAL_ENV_CHECK}"
     exit 1
 fi
+
+if printf '%s\n' "${FINAL_ENV_CHECK}" | grep -q '^DISABLE_BACKGROUND_JOBS=true$'; then
+    echo "FATAL: Final production container unexpectedly retains DISABLE_BACKGROUND_JOBS setting!"
+    exit 1
+fi
+
+if printf '%s\n' "${FINAL_ENV_CHECK}" | grep -q '^ENABLE_BACKGROUND_JOBS=false$'; then
+    echo "FATAL: Final production container has ENABLE_BACKGROUND_JOBS=false (alternate suppression flag active)!"
+    exit 1
+fi
+
 echo "CONFIRMED: Background job suppression removed; production writers active."
 
 for i in $(seq 1 30); do
-    if "${CURL_CMD}" -s -f http://127.0.0.1:3000/api/health >/dev/null 2>&1; then
+    if "${CURL_CMD}" -s -f --max-time 2 http://127.0.0.1:3000/api/health >/dev/null 2>&1; then
         echo "Production container healthy at second $i."
         break
     fi
@@ -796,6 +835,8 @@ cat << LEDGER_JSON > "${LEDGER_FILE}"
   "imageSourceCommit": "${IMAGE_SOURCE_COMMIT:-unknown}",
   "expectedCommitSha": "${EXPECTED_COMMIT_SHA:-unknown}",
   "mainCiRunId": "${MAIN_CI_RUN_ID:-unknown}",
+  "postflightAdminId": "${POSTFLIGHT_ADMIN_ID:-unknown}",
+  "postflightManagerId": "${POSTFLIGHT_MANAGER_ID:-unknown}",
   "wrapperScriptSha256": "${WRAPPER_SCRIPT_HASH:-unknown}",
   "apacheConfigSha256": "${APACHE_LIVE_HASH:-unknown}",
   "expectedPostflightSha": "${EXPECTED_POSTFLIGHT_SHA}",

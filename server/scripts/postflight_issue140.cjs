@@ -177,21 +177,20 @@ async function runPostflight() {
             // Fail closed: Missing required JWT_SECRET must block release verification
             logResult('FAIL', 'JWT_SECRET configuration', 'JWT_SECRET environment variable is missing; cannot verify role boundaries');
         } else {
-            // Find existing active principals in DB (supports environment overrides or reviewed existing principals)
-            const superAdmin = (process.env.POSTFLIGHT_ADMIN_ID
-                ? db.prepare("SELECT id, username, role, tokenVersion FROM User WHERE id = ? AND role = 'SUPER_ADMIN' AND isActive = 1").get(process.env.POSTFLIGHT_ADMIN_ID)
-                : null)
-                || db.prepare("SELECT id, username, role, tokenVersion FROM User WHERE id = 'synthetic-admin' AND role = 'SUPER_ADMIN' AND isActive = 1").get()
-                || db.prepare("SELECT id, username, role, tokenVersion FROM User WHERE role = 'SUPER_ADMIN' AND isActive = 1 ORDER BY id ASC LIMIT 1").get();
+            // Require explicit reviewed existing principal IDs from environment (no synthetic or arbitrary fallbacks)
+            const adminId = process.env.POSTFLIGHT_ADMIN_ID;
+            const managerId = process.env.POSTFLIGHT_MANAGER_ID;
 
-            const labManager = (process.env.POSTFLIGHT_MANAGER_ID
-                ? db.prepare("SELECT id, username, role, labId, countries, projects, tokenVersion FROM User WHERE id = ? AND role = 'LAB_MANAGER' AND isActive = 1").get(process.env.POSTFLIGHT_MANAGER_ID)
-                : null)
-                || db.prepare("SELECT id, username, role, labId, countries, projects, tokenVersion FROM User WHERE id = 'synthetic-manager' AND role = 'LAB_MANAGER' AND isActive = 1").get()
-                || db.prepare("SELECT id, username, role, labId, countries, projects, tokenVersion FROM User WHERE role = 'LAB_MANAGER' AND isActive = 1 ORDER BY id ASC LIMIT 1").get();
+            const superAdmin = adminId
+                ? db.prepare("SELECT id, username, role, tokenVersion FROM User WHERE id = ? AND role = 'SUPER_ADMIN' AND isActive = 1").get(adminId)
+                : null;
+
+            const labManager = managerId
+                ? db.prepare("SELECT id, username, role, labId, countries, projects, tokenVersion FROM User WHERE id = ? AND role = 'LAB_MANAGER' AND isActive = 1").get(managerId)
+                : null;
 
             if (!superAdmin) {
-                logResult('FAIL', 'SUPER_ADMIN principal presence', 'Required active SUPER_ADMIN user not found in database');
+                logResult('FAIL', 'SUPER_ADMIN principal presence', `Required active SUPER_ADMIN user '${adminId || 'UNSPECIFIED'}' not found in database or inactive/wrong-role`);
             } else {
                 const adminToken = jwt.sign({
                     id: superAdmin.id,
@@ -231,23 +230,67 @@ async function runPostflight() {
             }
 
             if (!labManager) {
-                logResult('FAIL', 'LAB_MANAGER principal presence', 'Required active LAB_MANAGER user not found in database');
+                logResult('FAIL', 'LAB_MANAGER principal presence', `Required active LAB_MANAGER user '${managerId || 'UNSPECIFIED'}' not found in database or inactive/wrong-role`);
             } else {
-                let allowedCountries = [];
-                if (labManager.countries) {
-                    try {
-                        allowedCountries = typeof labManager.countries === 'string' ? JSON.parse(labManager.countries) : labManager.countries;
-                    } catch (_) {}
-                }
-                if (!Array.isArray(allowedCountries)) allowedCountries = [];
+                // Derive authorized laboratories according to actual application catalogue policy (labRoutes.js:30-68)
+                let expectedLabIds = [];
+                let allLabsAllowed = false;
+                let scopeResolutionError = null;
 
-                let allowedProjects = [];
-                if (labManager.projects) {
+                if (labManager.role === 'SUPER_ADMIN') {
+                    allLabsAllowed = true;
+                } else if (labManager.role === 'MASTER_USER' || labManager.role === 'COUNTRY_ADMIN') {
+                    let userCountries = [];
+                    if (labManager.countries) {
+                        try {
+                            userCountries = Array.isArray(labManager.countries)
+                                ? labManager.countries
+                                : (typeof labManager.countries === 'string' ? JSON.parse(labManager.countries) : []);
+                        } catch (e) {
+                            scopeResolutionError = `Failed to parse manager countries JSON: ${e.message}`;
+                        }
+                    }
+                    if (userCountries.includes('*')) {
+                        allLabsAllowed = true;
+                    } else if (userCountries.length > 0) {
+                        try {
+                            const placeholders = userCountries.map(() => '?').join(',');
+                            const rows = db.prepare(`SELECT id FROM Lab WHERE country IN (${placeholders})`).all(...userCountries);
+                            expectedLabIds = rows.map(r => r.id);
+                        } catch (e) {
+                            scopeResolutionError = `Failed to query country labs: ${e.message}`;
+                        }
+                    } else {
+                        expectedLabIds = [];
+                    }
+                } else if (labManager.labId) {
+                    // 1. Manager with assigned labId takes strict precedence
+                    expectedLabIds = [labManager.labId];
+                } else if (labManager.projects) {
+                    // 2. Manager without labId: project codes resolve to lab IDs
+                    let projs = [];
                     try {
-                        allowedProjects = typeof labManager.projects === 'string' ? JSON.parse(labManager.projects) : labManager.projects;
-                    } catch (_) {}
+                        projs = Array.isArray(labManager.projects)
+                            ? labManager.projects
+                            : (typeof labManager.projects === 'string' ? JSON.parse(labManager.projects) : []);
+                    } catch (e) {
+                        scopeResolutionError = `Failed to parse manager projects JSON: ${e.message}`;
+                    }
+                    if (Array.isArray(projs) && projs.length > 0) {
+                        try {
+                            const placeholders = projs.map(() => '?').join(',');
+                            const rows = db.prepare(`SELECT DISTINCT labId FROM Project WHERE code IN (${placeholders}) AND labId IS NOT NULL`).all(...projs);
+                            expectedLabIds = rows.map(r => r.labId).filter(Boolean);
+                        } catch (e) {
+                            scopeResolutionError = `Failed to query project labs: ${e.message}`;
+                        }
+                    } else {
+                        expectedLabIds = [];
+                    }
+                } else {
+                    // 3. Manager with no labId and no projects: allow-list is strictly empty
+                    expectedLabIds = [];
                 }
-                if (!Array.isArray(allowedProjects)) allowedProjects = [];
 
                 const mgrToken = jwt.sign({
                     id: labManager.id,
@@ -285,45 +328,20 @@ async function runPostflight() {
                 const labsRes = await request('GET', '/api/labs', mgrHeaders);
                 let catalogueScoped = labsRes.status === 200 && Array.isArray(labsRes.body);
 
-                if (catalogueScoped) {
-                    if (labManager.labId) {
-                        // 1. Manager with assigned labId: must only receive assigned facility
-                        for (const lab of labsRes.body) {
-                            if (lab.id !== labManager.labId) {
-                                catalogueScoped = false;
-                                break;
-                            }
-                        }
-                    } else if (allowedCountries.length === 0 && allowedProjects.length === 0) {
-                        // 2. Manager with no assigned lab, no countries, and no projects: catalogue must be empty
+                if (scopeResolutionError) {
+                    catalogueScoped = false;
+                } else if (catalogueScoped && !allLabsAllowed) {
+                    if (expectedLabIds.length === 0) {
+                        // Empty effective allow-list must allow no labs
                         if (labsRes.body.length > 0) {
                             catalogueScoped = false;
                         }
                     } else {
-                        // 3. Manager without labId: must adhere strictly to country and project scoping
-                        let projectLabIds = [];
-                        if (allowedProjects.length > 0) {
-                            try {
-                                const placeholders = allowedProjects.map(() => '?').join(',');
-                                const rows = db.prepare(`SELECT DISTINCT labId FROM Project WHERE code IN (${placeholders}) AND labId IS NOT NULL`).all(...allowedProjects);
-                                projectLabIds = rows.map(r => r.labId);
-                            } catch (_) {}
-                        }
-
+                        // Every returned lab must be in expectedLabIds
                         for (const lab of labsRes.body) {
-                            // Country scope validation
-                            if (allowedCountries.length > 0 && !allowedCountries.includes('*')) {
-                                if (!lab.country || !allowedCountries.includes(lab.country)) {
-                                    catalogueScoped = false;
-                                    break;
-                                }
-                            }
-                            // Project scope validation if manager is project-scoped
-                            if (allowedProjects.length > 0 && projectLabIds.length > 0) {
-                                if (!projectLabIds.includes(lab.id)) {
-                                    catalogueScoped = false;
-                                    break;
-                                }
+                            if (!expectedLabIds.includes(lab.id)) {
+                                catalogueScoped = false;
+                                break;
                             }
                         }
                     }

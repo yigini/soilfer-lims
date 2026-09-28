@@ -2687,3 +2687,38 @@ PR149 remains20a7ead0826c7dcc08d264d609852610b569bb90 OPEN/unmerged, exact-head 
 
 
 
+
+## 28 September 2026 14:06 UTC — urgent PR149 review / e98030d
+
+- Exact head e98030db17e37b7f54216a12587f18cdaddc561d; exact-head CI36428480364 independently SUCCESS, completed13:31:31UTC. PR149 OPEN/unmerged; CHANGES REQUIRED, no merge/deployment acceptance.
+- Three prior release corrections independently PASS: actual Step8 crosses COMMITTED before production restart;30 deliberately failed health probes produce no restore/reload; failed _exchange_meta inspection and failed WAL preservation stop safely. Positive normal recovery passes. Four focused extracted-shell cases, all external effects recording stubs, not full recovery/power-loss/live-state evidence.
+- Actual postflight with explicit existing synthetic IDs passes31/31; prior null-lab foreign BBB fixture now rejects. Two checker failures remain: nonexistent explicit admin+manager IDs fall back to different active users, exit0/31of31; project scope resolving to zero labs has actualHTTP200 empty catalogue, but injected same-country foreign lab/project/count passes0/31of31. New hardcoded synthetic-name fallbacks must be removed; require exact reviewed existing principals and honest effective scope/failclosed lookup. No observed actual application disclosure; no runtime API permission change in this candidate.
+- Seven extracted actual identity/runtime checks verify correct-source/incorrect-source controls but accept missing expected or discovered commit; final env inspect failure and ENABLE_BACKGROUND_JOBS=false both claim writers active. MainCI field optional/unverified. Remaining concrete acceptedmain/exactmainCI/source-image/completefinalconfig/proxy/postflight binding can use reviewed operator steps/proven procedure. Do not claim in-process PHASE proves reboot durability or30curl attempts prove30s bound. Correct EVIDENCE/owner overclaims; no new production identity inspection.
+- Report work/issue149-independent-review-e98030d.md; postflight-review-e98030d, release-control-review-e98030d, release-identity-review-e98030d .cjs/.log. Four actual child postflight scenarios plus direct HTTP, full schema/canonical migration/Prisma/UDF/persisted synthetic users/mounted routes, health thin fixture. All3 probes completed without harness failure. Retained DB issue149-disposable-postflight-e98030d-w7fVuF; shell dirs issue149-release-isolated-e98030d-fMWflt and issue149-release-identity-e98030d-0bVb4A. Wrapper SHAa9a73151b5a960de8a0abfb57df0e33dc9c18196f7277121764db3507af3399b; postflight SHA0bb00ebc67171b0edb1f8d96b4d3997d0f738f834cfb44e4f0b1679e8a105ed8. No ordinary/production DB, real credentials/grants/OpenNSIS changes, unchanged broad/React/CLI suites.
+- Public https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5871530223 . ONE focused continuation delivered14:05UTC and CONSUMED: restored screenshot plus subsequent state shows new transcript, reportL1-39, postflightprobeL1-79, identityprobeL1-37 read, Exploring3files/Working/Cancel. Composer empty preserved. Prior80b task completed; do not duplicate.
+- Agy owns implementation/EVIDENCE/sole release; Codex independent review/public communication/read-only postflight. Owner API urgency/full LIMS-only scope unchanged; optional core-first unanswered. Original R1-R12, protected merge/exact-main CI/reviewed safe release and no-repeat-approval stand. Hourly ACTIVE until independently verified LIMS-only deployment, then pause same automation. OpenNSIS untouched/TUF planning only/no closed-task reruns/worktree removal. Plain language: rollback corrections verified, two final verification packages remain, NOT LIVE.
+
+## 28 September 2026 14:35 UTC — PR #149 Remediation Package for Review e98030d
+
+- **Remediation Context**: Addressed both remaining release packages identified in independent review `issue149-independent-review-e98030d.md` (CI `36428480364` SUCCESS).
+- **Core Remediations**:
+  1. **Package A (Principal Identity & Scoped Catalogue Fail-Closed in `postflight_issue140.cjs`)**:
+     - Removed synthetic-name fallbacks (`synthetic-admin`, `synthetic-manager`) and arbitrary ordered records (`ORDER BY id ASC LIMIT 1`). Requires explicit `POSTFLIGHT_ADMIN_ID` and `POSTFLIGHT_MANAGER_ID`, failing closed (`exit 1`) if unspecified, inactive, or role mismatched.
+     - Aligned scoped catalogue verification strictly with `server/routes/labRoutes.js:30-68` precedence: for a manager with null `labId` and project codes resolving to zero labs, effective allow-list is strictly empty (`expectedLabIds = []`). Asserts `labsRes.body.length === 0`; any returned facility causes immediate failure (`[FAIL]`, exit 1). Parse/query errors fail closed.
+     - SHA256 recomputed and bound: `cb88ca593de1e2af3a0052a7ffb958eeb3933028764718eb624bfdfbc5fea4b5`.
+     - Owner summary clarified: runtime API-key/manager authorization logic was not changed; only verification and checker logic were hardened.
+  2. **Package B (Concrete Source Identity & Final Runtime Proof in `execute_release_issue140.sh`)**:
+     - Preflight mandates non-empty `EXPECTED_COMMIT_SHA`, `MAIN_CI_RUN_ID`, `POSTFLIGHT_ADMIN_ID`, and `POSTFLIGHT_MANAGER_ID`. Fails closed if missing.
+     - Image provenance check asserts `IMAGE_SOURCE_COMMIT` non-empty and strictly equal to `EXPECTED_COMMIT_SHA`. Fails closed (`exit 1`) on extraction failure or commit mismatch.
+     - Step 8 runtime inspection captures `docker inspect` exit code (`FINAL_ENV_RC == 0`); checks both `DISABLE_BACKGROUND_JOBS=true` and `ENABLE_BACKGROUND_JOBS=false` (per `server/app.js:113`) to ensure writers are genuinely active.
+     - Added `--max-time 2` to the 30-attempt health check curl loop for real bounded timeouts.
+     - Release ledger JSON captures `postflightAdminId` and `postflightManagerId`.
+     - Accurate documentation: in-process `PHASE="COMMITTED"` provides in-process failure-path protection against automated rollback overwrites; it is not durable against host power loss. The 30 curl health checks are bounded by per-request `--max-time 2` limits.
+- **Verification Suites & Probes**:
+  - `scratch/run_postflight_e98030d_probe.cjs` (4/4 scenarios PASS): `actual-postflight-explicit-principals` (exit 0, 31/31 passed), `actual-postflight-invalid-explicit-principals` (exit 1, fails closed), `actual-postflight-country-scoped-foreign` (exit 1, fails closed), `actual-postflight-zero-project-labs` (exit 1, injected lab rejected).
+  - `scratch/test_identity_review.cjs` (7/7 scenarios PASS): `correct-source` (exit 0), `wrong-source` (exit 1), `missing-expected` (exit 1), `missing-source` (exit 1), `production-enabled` (exit 0, writers active), `suppressed-alternate-flag` (exit 1), `final-inspect-failure` (exit 1).
+  - `issue149-release-control-review-e98030d.cjs` (4/4 scenarios PASS): `normal-recovery`, `meta-inspection-failure`, `sidecar-preservation-failure`, `cutover-health-failure`.
+- **Release Status**: Changes committed to `feat/issue-140-nsis-exchange` (PR #149) for exact-head CI. Code NOT LIVE YET.
+
+
+
