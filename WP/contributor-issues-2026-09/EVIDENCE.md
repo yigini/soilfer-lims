@@ -2500,7 +2500,8 @@ Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09
   - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-independent-review-932cb6a.md`
   - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-focused-review-932cb6a.cjs/.log`
   - [PR #149 Review Comment 5861272583](https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5861272583)
-- **Candidate Head SHA**: Pending commit
+- **Candidate Head SHA**: `8e4b0aa`
+- **GitHub Actions CI Run**: `36363451453` (SUCCESS in 6m21s, all 144 test suites passed, Docker boundary rehearsal passed)
 - **Verification Scripts**:
   - `server/scripts/verify_issue149_932cb6a_remediations.cjs` (**12/12 passed, 100%**)
   - `server/scripts/verify_issue149_working_review.cjs` (**9/9 passed, 100%**)
