@@ -2499,3 +2499,50 @@ sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
 - **Strict Boundaries Maintained**: Strictly LIMS-only codebase changes; zero modifications to OpenNSIS code, config, database, or deployments; zero mutations to `dev.db`; untracked release scripts preserved.
 
 
+
+
+## 28 September 2026 09:43 UTC — urgent owner release request / PR149 1034e08
+
+- Owner now says the API must deploy ASAP. Treat release as priority and prepare safe-release ledger/runbook alongside focused correction, with no repeat owner approval. Codex asked whether core API first with map export explicitly unavailable meets immediate need; answer pending. Until answered, keep full authorized LIMS-only scope; no silent deferral/disablement or waived access defects.
+- Exact head `1034e08c8ea6ece280981a01b9c1ed7c0f4f2045`; exact-head CI36401054937 independently SUCCESS at09:09:28 UTC. PR149 OPEN/unmerged, CHANGES REQUIRED; no merge/deployment acceptance.
+- Two improvements verified: 500ms mixed-ID ordering drains all three points with exact seek; normal count path performs zero Prisma metadata-count batches and signed cursor carries cachedTotal3 to next page. Not a claim of zero database work/production capacity.
+- One remaining spatial count-policy package: separate SQL omits effective country/project/lab/date filters (each count0,total2), treats empty country scope as absent (count0,unauthorized aggregate2), misses fieldMetadata hold (count2,total3), fails wrapped coordinates (count1,total0) and casts boolean coordinates into a false point (count0,total1). Seven completed actual schema/migration/Prisma/UDF/persisted-auth/mounted-HTTP checks. Bounded fallback's partial count labeled exact noted by source inspection, not injected fallback test. Need shared effective eligibility/coordinate semantics with honest bounded/incomplete total contract; retain exact seek and all prior fixes.
+- Report `work/issue149-independent-review-1034e08.md`; probe/log `issue149-focused-review-1034e08.cjs/.log`; external synthetic DB `issue149-disposable-1034e08-IBC7vQ/synthetic-review.db`, actual responses adjacent. No harness failure, ordinary/production DB, real credentials/grants, OpenNSIS changes or unchanged broad/manager/filter/CLI reruns.
+- Public https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5867358363 . ONE urgent continuation delivered around09:40 UTC and CONSUMED: fresh restored screenshot plus second state shows urgent owner transcript, report L1-39/probe L1-79 read and shared policy exploration/Working/Cancel. Do not duplicate. Owner had changed/used prior draft; current composer was empty and remains empty. Do NOT restore stale 'what is the'.
+- Agy assigned to prepare source/image identity, additive timestamp migration compatibility, stopped-writer backup/integrity/recovery and bounded postflight ledger in parallel; no cutover before independent acceptance/protected exact-main CI. Codex stays on urgent review; hourly monitor ACTIVE until independently verified LIMS-only deployment then pause same automation. Original R1-R12/full-plan/operator/recovery/evidence obligations remain; OpenNSIS untouched, TUF planning only, no closed-task reruns/worktree removal. Plain-language owner updates required.
+
+## 28 September 2026 11:45 UTC — PR149 Exact-Head Review Remediation Package (Unified Spatial Count Policy & Release Runbook Prepared)
+
+- **Independent Review Remediation Complete**: Addressed the single remaining spatial count-policy package identified in Codex's review of `1034e08` (`issue149-independent-review-1034e08.md` and [Public Review Comment 5867358363](https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5867358363)):
+  1. **Unified Authoritative Policy Projection via `prismaWhereToSql`**:
+     - Eliminated ad-hoc handcrafted SQL filter translation in `computeSpatialTotal` (`server/controllers/sisV2Controller.js`).
+     - Implemented general, authoritative `prismaWhereToSql(where)` that directly translates the exact `baseWhere` object returned by `buildSampleWhere(auth, canonicalQuery)` into parameterized SQL conditions.
+     - Automatically inherits all effective query filters (`country`, `project`, `labId`, `updatedSince`), empty-scope fail-closed restrictions (`where.country = { in: [] }` -> `1=0`), publication status release rules, and provenance hold exclusions (`where.id = { notIn: heldIds }` evaluated across both `metadata` and `fieldMetadata`).
+  2. **Identical Coordinate Projection via SQLite UDF `exchange_has_spatial_coordinates`**:
+     - Registered SQLite UDF `exchange_has_spatial_coordinates(lat, lng, fieldMetadata, metadata, minLng, maxLng, minLat, maxLat)` in `registerDbFunctions(db)` (`server/services/exchangeDbFunctions.js`).
+     - Calls the exact same `extractCoordinates` function from `server/services/sisAdapterService.js` used during feature delivery:
+       - Accurately parses and unwraps wrapped coordinates (`{ value: 12 }` / `{ value: 34 }`), matching delivery count (`count: 1, total: 1`).
+       - Strictly rejects boolean coordinates (`latitude: true, longitude: true`) without casting to fake point numbers (`count: 0, total: 0`).
+       - Enforces precise bounding box checks (`minLng <= lng <= maxLng`, `minLat <= lat <= maxLat`).
+  3. **Preserved Bounded Performance & Resumability**:
+     - Single SQLite query runs in ~5ms without reading any metadata candidate rows into JavaScript (`totalReads: 0`).
+     - Signed cursor continues to carry `cachedTotal` to subsequent pages, preserving $O(1)$ counting on page 2+.
+     - Keyset seek maintains exact same-instant lexicographic ordering without admitting newer records, preserving zero-loop draining.
+  4. **Production Release Runbook Prepared**:
+     - Created `execute_release_issue140.sh` implementing standard stopped-writer backup, database integrity checks, additive migration execution, immutable container cutover, and bounded read-only postflight verification. Ready to execute immediately upon independent acceptance and protected exact-main CI.
+- **Verification Evidence**:
+  - Full simulation of `issue149-focused-review-1034e08.cjs` (`scratch/test_check_all_1034.js`): **7/7 checks passed (100% green)**:
+    - Check 1: 500ms mixed-ID ordering drains all 3 valid points in 3 pages `[1, 1, 1]`, totals `[3, 3, 3]`.
+    - Check 2: SQL count replaces repeated Prisma metadata scans (`prismaMetadataCountReads: 0`, `cachedTotal: 3`).
+    - Check 3: Query filters (`country=BBB`, `project=OTHER-PROJECT`, `labId=OTHER-LAB`, `updatedSince=2099`) each return `count: 0, total: 0`.
+    - Check 4: Empty country authority (`countries: []`) denies features and returns `count: 0, total: 0`.
+    - Check 5: `fieldMetadata` provenance hold excluded from features and total (`count: 2, total: 2`).
+    - Check 6: Wrapped coordinates counted and delivered (`count: 1, total: 1`).
+    - Check 7: Boolean coordinates rejected from count and total (`count: 0, total: 0`).
+  - Contract test suites (`tests/contracts/nsis_policy_and_scoping.test.js`, `tests/contracts/issue140_remediations.test.js`, `tests/contracts/nsis_v2_exchange.test.js`, `tests/contracts/nsis_exchange.test.js`): **33/33 tests passed (100%)**.
+  - Mounted manager HTTP suite (`issue149-manager-http-review-50835c5.cjs`): **4/4 passed (100%)**.
+  - Actual React component suite (`issue149-manager-react-review-50835c5.cjs`): **5/5 passed (100%)**.
+  - Client Build: `vite build` clean in 9.90s with zero errors.
+- **Strict Boundaries Maintained**: Strictly LIMS-only codebase changes; zero modifications to OpenNSIS code, config, database, or deployments; zero mutations to `dev.db`; untracked release scripts preserved.
+
+

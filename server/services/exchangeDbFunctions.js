@@ -205,6 +205,49 @@ function registerDbFunctions(db) {
             const sourceSysId = connSourceSystemId || (typeof getCachedSourceSystemId === 'function' ? getCachedSourceSystemId() : null);
             return JSON.stringify(formatSampleV2(sampleObj, {}, { internal: true, db, sourceSystemId: sourceSysId }));
         });
+
+        const { extractCoordinates, safeParseJson } = require('./sisAdapterService');
+        db.function('exchange_has_spatial_coordinates', (lat, lng, fieldMetadata, metadata, minLng, maxLng, minLat, maxLat) => {
+            let fieldObj = null;
+            if (fieldMetadata) {
+                if (typeof fieldMetadata === 'object') fieldObj = fieldMetadata;
+                else if (typeof fieldMetadata === 'string') {
+                    try { fieldObj = JSON.parse(fieldMetadata); } catch (e) {}
+                }
+            }
+            let metaObj = null;
+            if (metadata) {
+                if (typeof metadata === 'object') metaObj = metadata;
+                else if (typeof metadata === 'string') {
+                    try { metaObj = JSON.parse(metadata); } catch (e) {}
+                }
+            }
+            const coords = extractCoordinates(
+                { latitude: lat, longitude: lng },
+                fieldObj || {},
+                metaObj || {}
+            );
+            if (!coords || coords.latitude === null || coords.longitude === null) {
+                return 0;
+            }
+            if (minLng !== null && minLng !== undefined) {
+                const numMinLng = Number(minLng);
+                const numMaxLng = Number(maxLng);
+                const numMinLat = Number(minLat);
+                const numMaxLat = Number(maxLat);
+                if (isFinite(numMinLng) && isFinite(numMaxLng) && isFinite(numMinLat) && isFinite(numMaxLat)) {
+                    if (
+                        coords.longitude < numMinLng ||
+                        coords.longitude > numMaxLng ||
+                        coords.latitude < numMinLat ||
+                        coords.latitude > numMaxLat
+                    ) {
+                        return 0;
+                    }
+                }
+            }
+            return 1;
+        });
     } catch (e) {}
 }
 

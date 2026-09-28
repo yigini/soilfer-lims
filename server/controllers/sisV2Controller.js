@@ -485,111 +485,138 @@ exports.getObservations = async (req, res) => {
     }
 };
 
-async function computeSpatialTotal(auth, canonicalQuery, bboxBounds) {
-    const db = exchangeStateService.getDb ? exchangeStateService.getDb() : null;
-    if (db && db.open) {
-        try {
-            const params = [];
-            const conditions = [];
+function prismaWhereToSql(where) {
+    const conditions = [];
+    const params = [];
 
-            if (auth?.connectionStatus && auth.connectionStatus !== 'ACTIVE') {
-                return 0;
-            }
-            if (auth.labs && auth.labs.length > 0) {
-                conditions.push(`assignedLab IN (${auth.labs.map(() => '?').join(',')})`);
-                params.push(...auth.labs);
-            }
-            if (auth.countries && auth.countries.length > 0) {
-                conditions.push(`UPPER(country) IN (${auth.countries.map(() => '?').join(',')})`);
-                params.push(...auth.countries.map(c => String(c).toUpperCase()));
-            }
-            if (auth.projects && auth.projects.length > 0) {
-                conditions.push(`projectCode IN (${auth.projects.map(() => '?').join(',')})`);
-                params.push(...auth.projects);
-            }
+    if (!where || typeof where !== 'object') {
+        return { sql: '1=1', params: [] };
+    }
 
-            const restricted = isRestrictedConsumer(auth);
-            if (restricted) {
-                const statusVal = canonicalQuery.status ? String(canonicalQuery.status).trim().toUpperCase() : null;
-                if (statusVal && (statusVal === 'ALL' || statusVal === '*')) {
-                    conditions.push(`(
-                        status IN ('APPROVED', 'RELEASED')
-                        OR (status IN ('ARCHIVED', 'DISPOSED') AND approvedAt IS NOT NULL)
-                    )`);
-                } else if (statusVal) {
-                    if (['APPROVED', 'RELEASED'].includes(statusVal)) {
-                        conditions.push(`status = ?`);
-                        params.push(statusVal);
-                    } else if (['ARCHIVED', 'DISPOSED'].includes(statusVal)) {
-                        conditions.push(`status = ? AND approvedAt IS NOT NULL`);
-                        params.push(statusVal);
-                    } else {
-                        return 0;
+    for (const [key, val] of Object.entries(where)) {
+        if (key === 'AND') {
+            if (Array.isArray(val)) {
+                for (const sub of val) {
+                    const res = prismaWhereToSql(sub);
+                    if (res.sql && res.sql !== '1=1') {
+                        conditions.push(`(${res.sql})`);
+                        params.push(...res.params);
                     }
-                } else {
-                    conditions.push(`(
-                        status IN ('APPROVED', 'RELEASED')
-                        OR (status IN ('ARCHIVED', 'DISPOSED') AND approvedAt IS NOT NULL)
-                    )`);
-                }
-            } else {
-                const statusVal = canonicalQuery.status ? String(canonicalQuery.status).trim().toUpperCase() : null;
-                if (statusVal && (statusVal === 'ALL' || statusVal === '*')) {
-                    // unrestricted all
-                } else if (statusVal) {
-                    conditions.push(`status = ?`);
-                    params.push(statusVal);
-                } else {
-                    conditions.push(`status != 'CANCELLED'`);
                 }
             }
-
-            try {
-                const hasHoldsTable = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_holds'").get();
-                if (hasHoldsTable) {
-                    conditions.push(`id NOT IN (SELECT sampleId FROM _exchange_holds WHERE status = 'ACTIVE')`);
+        } else if (key === 'OR') {
+            if (Array.isArray(val) && val.length > 0) {
+                const orClauses = [];
+                for (const sub of val) {
+                    const res = prismaWhereToSql(sub);
+                    if (res.sql && res.sql !== '1=1') {
+                        orClauses.push(`(${res.sql})`);
+                        params.push(...res.params);
+                    }
                 }
-            } catch (e) {}
-            conditions.push(`(metadata IS NULL OR json_extract(metadata, '$.provenanceHold.status') IS NULL)`);
-
-            const effLat = `COALESCE(
-                CASE WHEN latitude BETWEEN -90 AND 90 THEN latitude ELSE NULL END,
-                CAST(COALESCE(json_extract(fieldMetadata, '$.latitude'), json_extract(fieldMetadata, '$.lat'), json_extract(fieldMetadata, '$.gps_lat'), json_extract(fieldMetadata, '$.coordinates.lat'), json_extract(fieldMetadata, '$.coordinates.latitude'), json_extract(metadata, '$.latitude'), json_extract(metadata, '$.lat'), json_extract(metadata, '$.gpsY')) AS REAL)
-            )`;
-
-            const effLng = `COALESCE(
-                CASE WHEN longitude BETWEEN -180 AND 180 THEN longitude ELSE NULL END,
-                CAST(COALESCE(json_extract(fieldMetadata, '$.longitude'), json_extract(fieldMetadata, '$.lng'), json_extract(fieldMetadata, '$.gps_lng'), json_extract(fieldMetadata, '$.coordinates.lng'), json_extract(fieldMetadata, '$.coordinates.longitude'), json_extract(metadata, '$.longitude'), json_extract(metadata, '$.lng'), json_extract(metadata, '$.gpsX')) AS REAL)
-            )`;
-
-            conditions.push(`(${effLat}) IS NOT NULL`);
-            conditions.push(`(${effLng}) IS NOT NULL`);
-            conditions.push(`(${effLat}) BETWEEN -90 AND 90`);
-            conditions.push(`(${effLng}) BETWEEN -180 AND 180`);
-
-            if (bboxBounds) {
-                conditions.push(`(${effLat}) BETWEEN ? AND ?`);
-                params.push(bboxBounds.minLat, bboxBounds.maxLat);
-                conditions.push(`(${effLng}) BETWEEN ? AND ?`);
-                params.push(bboxBounds.minLng, bboxBounds.maxLng);
+                if (orClauses.length > 0) {
+                    conditions.push(`(${orClauses.join(' OR ')})`);
+                }
             }
-
-            if (canonicalQuery.profile && String(canonicalQuery.profile).trim().toLowerCase() === 'opennsis') {
-                conditions.push(`labId IS NOT NULL`);
+        } else if (key === 'NOT') {
+            const res = prismaWhereToSql(val);
+            if (res.sql && res.sql !== '1=1') {
+                conditions.push(`NOT (${res.sql})`);
+                params.push(...res.params);
             }
-
-            const sql = `SELECT COUNT(*) as total FROM Sample WHERE ${conditions.join(' AND ')}`;
-            const row = db.prepare(sql).get(...params);
-            if (row && typeof row.total === 'number') {
-                return row.total;
+        } else {
+            const col = key;
+            if (val === null) {
+                conditions.push(`${col} IS NULL`);
+            } else if (typeof val === 'string' || typeof val === 'number') {
+                conditions.push(`${col} = ?`);
+                params.push(val);
+            } else if (val instanceof Date) {
+                conditions.push(`${col} = ?`);
+                params.push(val.toISOString());
+            } else if (typeof val === 'object') {
+                if (val.in !== undefined) {
+                    if (Array.isArray(val.in)) {
+                        if (val.in.length === 0) {
+                            conditions.push('1=0');
+                        } else {
+                            const placeholders = val.in.map(() => '?').join(',');
+                            conditions.push(`${col} IN (${placeholders})`);
+                            params.push(...val.in);
+                        }
+                    }
+                }
+                if (val.notIn !== undefined) {
+                    if (Array.isArray(val.notIn)) {
+                        if (val.notIn.length > 0) {
+                            const placeholders = val.notIn.map(() => '?').join(',');
+                            conditions.push(`${col} NOT IN (${placeholders})`);
+                            params.push(...val.notIn);
+                        }
+                    }
+                }
+                if (val.not !== undefined) {
+                    if (val.not === null) {
+                        conditions.push(`${col} IS NOT NULL`);
+                    } else if (Array.isArray(val.not)) {
+                        if (val.not.length > 0) {
+                            const placeholders = val.not.map(() => '?').join(',');
+                            conditions.push(`${col} NOT IN (${placeholders})`);
+                            params.push(...val.not);
+                        }
+                    } else {
+                        conditions.push(`${col} != ?`);
+                        params.push(val.not);
+                    }
+                }
+                if (val.gte !== undefined) {
+                    conditions.push(`${col} >= ?`);
+                    params.push(val.gte instanceof Date ? val.gte.toISOString() : val.gte);
+                }
+                if (val.gt !== undefined) {
+                    conditions.push(`${col} > ?`);
+                    params.push(val.gt instanceof Date ? val.gt.toISOString() : val.gt);
+                }
+                if (val.lte !== undefined) {
+                    conditions.push(`${col} <= ?`);
+                    params.push(val.lte instanceof Date ? val.lte.toISOString() : val.lte);
+                }
+                if (val.lt !== undefined) {
+                    conditions.push(`${col} < ?`);
+                    params.push(val.lt instanceof Date ? val.lt.toISOString() : val.lt);
+                }
             }
-        } catch (e) {
-            // fallback to bounded prisma count
         }
     }
 
+    return {
+        sql: conditions.length > 0 ? conditions.join(' AND ') : '1=1',
+        params
+    };
+}
+
+async function computeSpatialTotal(auth, canonicalQuery, bboxBounds) {
     const baseWhere = buildSampleWhere(auth, canonicalQuery);
 
+    try {
+        const db = exchangeStateService.getDb ? exchangeStateService.getDb() : null;
+        if (db && db.open) {
+            const { sql, params } = prismaWhereToSql(baseWhere);
+            const bboxParams = [
+                bboxBounds ? bboxBounds.minLng : null,
+                bboxBounds ? bboxBounds.maxLng : null,
+                bboxBounds ? bboxBounds.minLat : null,
+                bboxBounds ? bboxBounds.maxLat : null
+            ];
+            const fullSql = `SELECT COUNT(*) as total FROM Sample WHERE (${sql}) AND exchange_has_spatial_coordinates(latitude, longitude, fieldMetadata, metadata, ?, ?, ?, ?) = 1`;
+            const row = db.prepare(fullSql).get(...params, ...bboxParams);
+            if (row && typeof row.total === 'number') {
+                return row.total;
+            }
+        }
+    } catch (e) {}
+
+    // Bounded Prisma fallback
     const directWhere = { ...baseWhere };
     directWhere.AND = [
         ...(directWhere.AND || []),
@@ -601,91 +628,7 @@ async function computeSpatialTotal(auth, canonicalQuery, bboxBounds) {
             longitude: { gte: -180, lte: 180 }
         }
     ];
-    const directCount = await prisma.sample.count({ where: directWhere });
-
-    let jsonCount = 0;
-    const notEmptyMeta = { not: null, notIn: ['', '{}', 'null'] };
-    const metadataCandidateWhere = {
-        ...baseWhere,
-        AND: [
-            ...(baseWhere.AND || []),
-            {
-                OR: [
-                    { metadata: notEmptyMeta },
-                    { fieldMetadata: notEmptyMeta }
-                ]
-            },
-            bboxBounds ? {
-                OR: [
-                    { latitude: null },
-                    { longitude: null },
-                    { latitude: { lt: bboxBounds.minLat } },
-                    { latitude: { gt: bboxBounds.maxLat } },
-                    { longitude: { lt: bboxBounds.minLng } },
-                    { longitude: { gt: bboxBounds.maxLng } }
-                ]
-            } : {
-                OR: [
-                    { latitude: null },
-                    { longitude: null },
-                    { latitude: { lt: -90 } },
-                    { latitude: { gt: 90 } },
-                    { longitude: { lt: -180 } },
-                    { longitude: { gt: 180 } }
-                ]
-            }
-        ]
-    };
-
-    const jsonCandidatesTotal = await prisma.sample.count({ where: metadataCandidateWhere });
-    if (jsonCandidatesTotal > 0) {
-        const BATCH_SIZE = 5000;
-        const MAX_COUNT_SCAN = 15000;
-        let lastId = null;
-        let examined = 0;
-        while (examined < jsonCandidatesTotal && examined < MAX_COUNT_SCAN) {
-            const batchWhere = {
-                ...metadataCandidateWhere,
-                AND: [
-                    ...(metadataCandidateWhere.AND || []),
-                    ...(lastId ? [{ id: { gt: lastId } }] : [])
-                ]
-            };
-            const batch = await prisma.sample.findMany({
-                where: batchWhere,
-                select: {
-                    id: true,
-                    latitude: true,
-                    longitude: true,
-                    fieldMetadata: true,
-                    metadata: true
-                },
-                orderBy: { id: 'asc' },
-                take: BATCH_SIZE
-            });
-            if (batch.length === 0) break;
-            for (const s of batch) {
-                const coords = extractCoordinates(s, safeParseJson(s.fieldMetadata), safeParseJson(s.metadata));
-                if (!coords || coords.latitude === null || coords.longitude === null) continue;
-                if (bboxBounds) {
-                    if (
-                        coords.longitude < bboxBounds.minLng ||
-                        coords.longitude > bboxBounds.maxLng ||
-                        coords.latitude < bboxBounds.minLat ||
-                        coords.latitude > bboxBounds.maxLat
-                    ) {
-                        continue;
-                    }
-                }
-                jsonCount++;
-            }
-            lastId = batch[batch.length - 1].id;
-            examined += batch.length;
-            if (batch.length < BATCH_SIZE) break;
-        }
-    }
-
-    return directCount + jsonCount;
+    return await prisma.sample.count({ where: directWhere });
 }
 
 // ─── 5. GET /api/v2/data-exchange/geojson (RFC 7946 GeoJSON) ───
