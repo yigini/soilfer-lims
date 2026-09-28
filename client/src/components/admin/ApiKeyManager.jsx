@@ -8,10 +8,13 @@ import {
 } from 'lucide-react';
 import { useDialog } from '../../context/DialogContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 
 const ApiKeyManager = () => {
     const { t } = useLanguage();
     const { showDialog } = useDialog();
+    const { user } = useAuth();
+    const isSuperAdmin = user?.role === 'SUPER_ADMIN';
     
     // Core state
     const [keys, setKeys] = useState([]);
@@ -165,9 +168,11 @@ const ApiKeyManager = () => {
     ];
 
     useEffect(() => {
-        fetchKeys();
-        fetchConnections();
-    }, []);
+        if (isSuperAdmin) {
+            fetchKeys();
+            fetchConnections();
+        }
+    }, [isSuperAdmin]);
 
     const fetchConnections = async () => {
         setConnectionsLoading(true);
@@ -186,7 +191,7 @@ const ApiKeyManager = () => {
         try {
             const [keysRes, labsRes] = await Promise.allSettled([
                 axios.get('/api/v1/data-exchange/keys'),
-                axios.get('/api/labs')
+                axios.get('/api/labs/directory')
             ]);
             if (keysRes.status === 'fulfilled') {
                 setKeys(keysRes.value.data.data || []);
@@ -492,6 +497,20 @@ const ApiKeyManager = () => {
                 return '';
         }
     };
+
+    if (!isSuperAdmin) {
+        return (
+            <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm max-w-lg mx-auto my-12">
+                <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-4 border border-amber-200 dark:border-amber-800/50">
+                    <Shield size={24} />
+                </div>
+                <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Access Restricted</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
+                    National SIS & Data Exchange API key management and connection administration are strictly reserved for Super Administrators.
+                </p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">

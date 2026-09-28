@@ -2714,6 +2714,28 @@ Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09
 | **Package 2: Canonical Effective Query Context & Alias Precedence (F2, R2, R4, R8, R11)** | `exchangeStateService.js`, `exchangePolicyService.js`, `sisV2Controller.js` | 1. Conflicting alias precedence: `normalizeFilter` prioritized `labId`, whereas `buildSampleWhere` prioritized `assignedLab`. Adding conflicting alias changed authorized laboratory.<br>2. Case-sensitivity mismatch in finite scoping: `country=aaa` continuation request against authorized `AAA` failed `auth.countries.includes(query.country)`, returning `total: 0`. | 1. Added alias conflict detection in `normalizeFilter` and `buildCanonicalQueryContext`, rejecting conflicting aliases (`labId !== assignedLab` or `instrument !== equipmentId`) with HTTP 400 `INVALID_QUERY`.<br>2. Unified laboratory precedence across `exchangePolicyService.js` to `query.labId \|\| query.assignedLab`.<br>3. Implemented case-insensitive country matching in `buildSampleWhere` (`authCountriesUpper.includes(reqCountryUpper)`).<br>4. Shared `buildCanonicalQueryContext(rawQuery, endpoint)` across `getSamples`, `getObservations`, `getStats`, and `getSpectra`, passing canonical filters to cursor validation, query builders, and cursor generation. | `test_pr149_remediations.cjs` Checks 7a & 7b (PASS): conflicting `labId` and `assignedLab` aliases rejected with 400 `INVALID_QUERY`; `country=aaa` continuation matches `country=AAA` scope with `total: 3, count: 1`. |
 | **Package 3: Explicit UTC Formatting Without Local Timezone Offset (F3, R7, R8, R12)** | `exchangeStateService.js` | `new Date(r.created_at).toISOString()` interpreted zone-free SQLite timestamps (`YYYY-MM-DD HH:MM:SS`) as local time. In `Europe/Rome` (UTC+2), stored `06:39:51` shifted to `04:39:51Z` (2 hours early) in amendment and withdrawal feeds. | 1. Implemented `formatStoredUtc(val)` helper: parses zone-free SQLite UTC strings (`replace(' ', 'T') + 'Z'`) without local runtime shifting.<br>2. Applied `formatStoredUtc` to change feed event timestamps, change feed cursor timestamps, durable receipt timestamps, and journal withdrawal comparisons, ensuring exact 0ms offset against stored SQLite UTC across all runtimes. | `test_pr149_remediations.cjs` Check 9 (PASS) executed under `$env:TZ='Europe/Rome'`: change feed event timestamps match stored SQLite UTC with exact 0ms offset across runtimes. |
 
+---
+
+### Manager UI Permission Alignment & Operational Catalogue Scope Enforcement (28 September 2026)
+
+- **Review References**:
+  - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-manager-ui-review-20260928.md`
+  - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-manager-ui-review-20260928.cjs/.log`
+  - [PR #149 Review Addendum Comment 5864940021](https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5864940021)
+- **Candidate Head Branch**: `feat/issue-140-nsis-exchange` (PR #149)
+- **Verification Suites & Probes**:
+  - Synthetic Scope & UI Verification (`verify_manager_ui_and_scope.cjs`): **7/7 passed (100%)**
+  - Contract test suites (`npm.cmd test -- contracts/`): all test suites passing
+  - Client Build: `vite build` clean in 12.48s with zero errors
+
+#### Remediated Findings Ledger
+
+| Item | Component(s) | Review Finding & Failure Mode | Comprehensive Remediation Implemented | Verification Evidence |
+|---|---|---|---|---|
+| **UI Permission Alignment & Direct URL Navigation** | `AdminPanel.jsx`, `ApiKeyManager.jsx` | 1. `AdminPanel.jsx` admitted `LAB_MANAGER` and `MASTER_USER` to `api-keys` tab (`canManageApiKeys = isSuperAdmin \|\| isMasterUser \|\| isLabManager`), while server controllers strictly permit only `SUPER_ADMIN`.<br>2. Direct URL navigation (`?tab=api-keys`) allowed managers into the key manager surface.<br>3. `ApiKeyManager` had no client-side role guard and called `axios.get('/api/labs')` on mount. | 1. Restrict `canManageApiKeys` strictly to `isSuperAdmin`.<br>2. `isTabAllowed('api-keys')` returns false for non-superadmins; direct URL navigation (`?tab=api-keys`) falls back to default tabs (`branding`/`lab-config`).<br>3. Added `isSuperAdmin` check in `ApiKeyManager.jsx`, rendering Access Restricted card and dispatching 0 network requests when non-admins attempt to mount.<br>4. Replaced `axios.get('/api/labs')` with `axios.get('/api/labs/directory')` for modal checkboxes. | `verify_manager_ui_and_scope.cjs` Checks 6 & 7 (PASS): manager navigation falls back to default tab, ApiKeyManager not rendered; component-level guard blocks network requests. |
+| **Server-Side Operational Catalogue Scoping** | `labRoutes.js` | `GET /api/labs` enriched list lacked scoping on `prisma.lab.findMany`, returning foreign country laboratories, foreign projects, and sample counts to scoped users. | 1. Enforced strict scoping hierarchy on `GET /api/labs`: `SUPER_ADMIN` gets all labs; `MASTER_USER`/`COUNTRY_ADMIN` scoped to authorized countries (`country: { in: userCountries }`); `LAB_MANAGER` and scoped users scoped strictly to their assigned laboratory (`id: req.user.labId`).<br>2. Scoped batch-fetched projects, user counts, and sample counts to authorized laboratory IDs, completely excluding foreign facilities, linked foreign projects, and foreign sample counts.<br>3. Preserved intentionally public lightweight directory (`GET /api/labs/directory`) separately without operational project details or sample counts. | `verify_manager_ui_and_scope.cjs` Checks 1, 2, 3, 4, 5 (PASS): manager key operations denied (403); admin key operations succeed (200); manager `GET /api/labs` returns only own lab (`SYNTHETIC-LAB`) with foreign facilities/projects/counts excluded; admin receives all labs; lightweight directory preserved separately. |
+
+
 
 
 

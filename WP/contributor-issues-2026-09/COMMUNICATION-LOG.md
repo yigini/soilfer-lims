@@ -2367,7 +2367,21 @@ sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
   - Remediations verification suite (`test_pr149_remediations.cjs`) under `$env:TZ='Europe/Rome'`: **9/9 checks passed (100%)**.
   - `server/scripts/verify_issue149_complete_remediations.cjs`: **19/19 passed (100%)**.
   - `server/scripts/data_exchange_reference_client.cjs --verify`: **16/16 passed (100%)**.
-  - Contract test suites (`npm.cmd test -- contracts/`): all test suites passed.
-  - Client production build (`npm.cmd run build --prefix client`): `vite build` clean in 8.77s with zero errors.
+## 28 September 2026 09:30 UTC — Manager UI Permission Alignment & Operational Catalogue Scope Enforcement
+- **Review & Report Addressed**: Codex independent review of owner-reported manager API-key screen (`work/issue149-manager-ui-review-20260928.md`, `issue149-manager-ui-review-20260928.cjs/.log`, public addendum `5864940021`).
+- **Owner-Reported Problem**: Owner logged in as `mgr_gha` and saw other labs, countries, and projects around the Generate API Key UI.
+- **Analysis & Findings**:
+  - `AdminPanel.jsx` admitted `LAB_MANAGER` and `MASTER_USER` to the `api-keys` tab (`canManageApiKeys = isSuperAdmin || isMasterUser || isLabManager`), while server controllers strictly permit only `SUPER_ADMIN` (returning 403 on key list and creation with 0 keys created).
+  - Mounting `ApiKeyManager` triggered `axios.get('/api/labs')`.
+  - `GET /api/labs` enriched list lacked scoping on `prisma.lab.findMany`, returning foreign country laboratories, foreign projects, and sample counts to scoped users.
+- **Remediations Implemented**:
+  1. **UI Permission Alignment & Direct URL Navigation**: In `AdminPanel.jsx`, restricted `canManageApiKeys` strictly to `isSuperAdmin`. For `LAB_MANAGER` and `MASTER_USER`, the `api-keys` tab is omitted, `isTabAllowed('api-keys')` returns false, and direct URL navigation (`?tab=api-keys`) safely falls back to default tabs (`branding`/`lab-config`).
+  2. **Component-Level Guard & Directory Isolation**: In `ApiKeyManager.jsx`, added authentication guard requiring `isSuperAdmin`, rendering an Access Restricted banner and preventing any background network requests when non-admins attempt to mount the component. Replaced `axios.get('/api/labs')` with `axios.get('/api/labs/directory')` for modal checkboxes, ensuring the API key surface never requests operational project or sample metadata.
+  3. **Server-Side Operational Catalogue Scoping**: In `server/routes/labRoutes.js`, enforced strict authorization and scoping on `GET /api/labs`. `SUPER_ADMIN` retains full global catalogue access; national leads (`MASTER_USER`/`COUNTRY_ADMIN`) are scoped to authorized countries (`country: { in: userCountries }`); facility managers (`LAB_MANAGER`) and scoped users are scoped strictly to their assigned laboratory (`id: req.user.labId`). Batch-fetched projects, user counts, and sample counts are scoped to authorized laboratory IDs, completely excluding foreign facilities, linked foreign projects, and foreign sample counts.
+  4. **Preserved Lightweight Public Directory**: Intentionally public/authenticated directory (`GET /api/labs/directory`) remains intact, returning only public facility routing fields (`id`, `code`, `name`, `country`, `location`, `city`, `isActive`, `operationalStatus`) without operational project details or sample counts.
+- **Verification Evidence**:
+  - `verify_manager_ui_and_scope.cjs`: **7/7 checks passed (100%)** in disposable external SQLite, verifying denied management HTTP for manager (403), intended admin management HTTP (200), scoped manager `/api/labs` (foreign facilities/projects/counts excluded), admin full catalogue, lightweight directory preservation, UI tab scoping/direct URL navigation fallback, and component guard.
+  - Client production build (`npm.cmd run build --prefix client`): `vite build` clean in 12.48s with zero errors.
 - **Strict Boundaries Maintained**: Strictly LIMS-only codebase changes; zero modifications to OpenNSIS code, config, database, or deployments; zero mutations to `dev.db`; untracked release scripts preserved.
+
 

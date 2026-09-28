@@ -42,7 +42,7 @@ const AdminPanel = () => {
     const canManageBranding = isSuperAdmin || isMasterUser || isLabManager || hasPermission('MANAGE_BRANDING');
     const canManageAnalyses = isSuperAdmin || isMasterUser || isLabManager || hasPermission('MANAGE_ANALYSES');
     const canViewAudit = isSuperAdmin || isMasterUser || isLabManager || hasPermission('VIEW_AUDIT');
-    const canManageApiKeys = isSuperAdmin || isMasterUser || isLabManager;
+    const canManageApiKeys = isSuperAdmin;
     const canManageUsers = isSuperAdmin || isMasterUser || isLabManager || hasPermission('MANAGE_USERS');
 
     const isTabAllowed = (tab) => {
@@ -348,7 +348,7 @@ const AdminPanel = () => {
                         <AuditLogs />
                     </div>
                 )}
-                {activeTab === 'api-keys' && <ApiKeyManager />}
+                {activeTab === 'api-keys' && canManageApiKeys && <ApiKeyManager />}
                 {activeTab === 'users' && (
                     <div className="-m-8 p-8">
                         <UsersComponent />
