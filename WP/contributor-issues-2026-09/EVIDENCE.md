@@ -2898,7 +2898,7 @@ Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09
   - Single-quote SQL literal fix in `server/controllers/sisController.js:1252` (`key_status = 'ACTIVE'`) and `sisController.js:882` (`key_status = 'REVOKED'`):
     - Authenticated `GET /api/v1/data-exchange/connections` returns HTTP 200 with active key links and connection list (eliminates SQLite column identifier parsing error `no such column: "ACTIVE"`).
   - Fail-Closed Postflight Verification (`server/scripts/postflight_issue140.cjs`):
-    - Check 1 (Normal run): 100% pass (29/30 checks including authenticated Super Admin connection/key listings, Lab Manager 403 denials, lightweight directory projection, and scoped catalogue). Exit code 0.
+    - Check 1 (Normal run): 100% pass (31/31 checks passed, including authenticated Super Admin connection/key listings, Lab Manager 403 denials, lightweight directory projection, and scoped catalogue). Exit code 0.
     - Check 2 (Missing `JWT_SECRET` configuration): Fails closed immediately (`[FAIL] JWT_SECRET configuration - JWT_SECRET environment variable is missing; cannot verify role boundaries`). Exit code 1.
     - Check 3 (Missing required principals `SUPER_ADMIN` or `LAB_MANAGER`): Fails closed immediately (`[FAIL] SUPER_ADMIN principal presence` / `[FAIL] LAB_MANAGER principal presence`). Exit code 1.
     - Check 4 (Scoped Catalogue Assertion): Compares returned facility IDs against manager's assigned `labId` / `countries`; foreign facilities (e.g. `FOREIGN-LAB`) fail closed (`[FAIL] LAB_MANAGER GET /api/labs (scoped catalogue)`). Exit code 1.
@@ -2924,6 +2924,68 @@ Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09
 | **SQLite Literal Parameterization in Connection Listing** | `server/controllers/sisController.js` (lines 882, 1252) | `WHERE key_status = "ACTIVE"` and `WHERE key_status = "REVOKED"` used double quotes instead of single quotes. BetterSQLite3 treated `"ACTIVE"` as a column identifier (`no such column: "ACTIVE"`), causing `GET /api/v1/data-exchange/connections` to return HTTP 500 for authenticated Super Admin. | Replaced double quotes with standard SQL string literals in single quotes (`WHERE key_status = 'ACTIVE'` and `'REVOKED'`). | `scratch/test_postflight_verification.cjs` Check 1 (PASS): `SUPER_ADMIN GET /api/v1/data-exchange/connections` returns HTTP 200 with connection list and active key links. |
 | **Fail-Closed HTTP API Postflight & Scoped Catalogue Verification** | `server/scripts/postflight_issue140.cjs` | 1. Postflight skipped authenticated role checks if `JWT_SECRET` was missing, exiting 0 (falsely passing release gate).<br>2. Absent required roles (`SUPER_ADMIN`, `LAB_MANAGER`) were skipped rather than failing.<br>3. Manager scoped catalogue checked HTTP 200 only, ignoring injected foreign facility data.<br>4. Script lacked directory projection validation and negative token fixture. | 1. Fails closed (`[FAIL]`) and exits 1 if `JWT_SECRET` is missing.<br>2. Fails closed and exits 1 if required active principals are absent in the database.<br>3. Scoped catalogue checks assert returned lab IDs against authorized `labId` and `countries`, failing closed if foreign facilities appear.<br>4. Added directory projection policy validation (rejects leaked operational fields) and negative forged token fixture (asserts HTTP 401).<br>5. Explicitly labeled as HTTP API non-mutating probe. SHA256 hashed and bound. | `scratch/test_postflight_verification.cjs` Checks 1, 2, 3 (PASS): normal run passes (exit 0); missing JWT fails closed (exit 1); foreign catalogue fails closed (exit 1). |
 | **Fail-Closed Release Recovery & Pre-Exposure Background Writer Hold** | `execute_release_issue140.sh` | 1. `assert_writers_stopped` treated any inspect failure as stopped, permitting restore under unknown docker state.<br>2. `cleanup_recovery` swallowed epoch update SQL errors and reopened ingress.<br>3. Missing backup file fell through to restart baseline over unverified DB and reopen ingress.<br>4. Background writers (Kobo scheduler) ran before `COMMITTED` under normal production settings while automatic rollback was still permitted.<br>5. Postflight script was not hash-verified inside container; no concrete release ledger. | 1. Distinguishes verified absent containers (`No such container`) from docker inspect errors; unknown state fails closed (`return 1`).<br>2. Verifies persisted restore epoch in `_exchange_meta`; epoch update failure halts recovery and keeps ingress quiesced (503).<br>3. Missing backup immediately fails closed and aborts restore.<br>4. Pre-exposure container started with `-e DISABLE_BACKGROUND_JOBS=true`; verifies zero scheduler logs before cutover; restarts in full production mode prior to `COMMITTED`.<br>5. Verifies container postflight SHA256 against `EXPECTED_POSTFLIGHT_SHA`. Generates structured JSON release ledger. | `scratch/test_extracted_recovery.cjs` (PASS): all 6 recovery scenarios pass with 100% fail-closed safety (`ingressReload: false` on all failures). |
+
+---
+
+### Phase 10: Head `80b5dd0` Independent Review & Safe Release Hardening (28 September 2026)
+
+- **Review Document**: `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-independent-review-80b5dd0.md` (13:08 UTC / 15:08 CEST)
+- **Review Probes**:
+  - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-postflight-review-80b5dd0.cjs/.log`
+  - `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-release-control-review-80b5dd0.cjs/.log`
+  - [Public Review Comment 5870490289](https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5870490289)
+- **Candidate Head Branch**: `feat/issue-140-nsis-exchange` (PR #149)
+- **Reviewed Head**: `80b5dd0e1e723fb244025fd85f53e8de8a047e27` (CI `36421141486` independently SUCCESS)
+- **Production Baseline Reconciliation**:
+  - Pinned Production Baseline Release: `v3.5.29-e5d5ebd` (Commit `e5d5ebdf9fa54a29fcbd4424d566eda8036920bd`).
+  - Serving Image: `soilfer-lims:v3.5.29-e5d5ebd` (`sha256:fe6b64efc4f046635a830f5568773fefa52e95e975444c1f61dff14800679c1b`).
+  - Reconciles production baseline provenance against last independently verified release rather than asserting a new unverified runtime identity. Release `v3.5.26-9b69920` preserved in historic logs as the prior PR #143 release.
+
+#### Comprehensive Verification Evidence
+
+1. **Durable Writer Boundary (`PHASE="COMMITTED"`)**:
+   - `PHASE="COMMITTED"` moved to the immediate start of Step 8, strictly BEFORE restarting the application container in production mode and before background writers (e.g. `koboScheduler`, which runs its initial tick after 10s) resume.
+   - Verified final runtime container image ID (`FINAL_RUNTIME_IMAGE_ID == TARGET_IMAGE_ID`) after second start.
+   - Verified `DISABLE_BACKGROUND_JOBS` is strictly absent from final production container environment.
+   - Any failure during cutover health checks or subsequent postflight triggers fail-closed operator recovery (`cleanup_recovery` case `COMMITTED`): automatic database restoration is strictly forbidden, preserving legitimate client data and leaving ingress quiesced (503) for manual operator triage.
+
+2. **Recovery Prerequisite Fail-Closed Hardening**:
+   - **WAL/SHM Sidecar Preservation**: `cleanup_recovery` checks the exit code of `cp "${DB_PATH}-wal"` and `cp "${DB_PATH}-shm"`. If sidecar preservation fails, recovery immediately aborts (`exit 1`) and leaves ingress quiesced (503) rather than deleting sidecars or restoring over unpreserved state.
+   - **`_exchange_meta` Inspection**: Captures the exit code (`has_meta_rc`) and stdout of `sqlite3 "${DB_PATH}" "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='_exchange_meta';"`. Query errors or unexpected output immediately halt recovery (`exit 1`) and keep ingress at 503. Epoch rotation is only skipped when cleanly confirmed as `"0"` on genuine legacy schemas.
+
+3. **Postflight Scoped Catalogue & Principal Selection Hardening (`postflight_issue140.cjs`)**:
+   - Replaced arbitrary `LIMIT 1` selection with explicit reviewed principal IDs (`POSTFLIGHT_ADMIN_ID`, `POSTFLIGHT_MANAGER_ID`), deterministic synthetic fallback (`synthetic-admin`, `synthetic-manager`), and ascending ordered active DB records.
+   - Enforces comprehensive scoped catalogue assertions covering all manager configurations:
+     a) Manager with assigned `labId`: verifies every returned lab ID matches `labManager.labId`.
+     b) Manager with null `labId` and country array: verifies every returned lab matches authorized countries (`labManager.countries`, e.g. `["AAA"]`), strictly rejecting foreign facilities (`["BBB"]`).
+     c) Manager with project scope: verifies returned facilities match project-authorized labs.
+     d) Manager with null `labId` and empty countries/projects: asserts catalogue is empty (`0 labs`).
+   - SHA-256 hash bound to `0bb00ebc67171b0edb1f8d96b4d3997d0f738f834cfb44e4f0b1679e8a105ed8`.
+
+4. **Release Identity Ledger Binding**:
+   - Structured JSON release ledger (`release_ledger_issue140_${TIMESTAMP}.json`) binds:
+     - `releaseId`: `"issue-140-pr149"`
+     - `targetImageInput` & `targetImageId`
+     - `finalRuntimeImageId` (verified after second start)
+     - `imageSourceCommit` (verified against `EXPECTED_COMMIT_SHA`)
+     - `mainCiRunId`
+     - `wrapperScriptSha256` & `apacheConfigSha256`
+     - `expectedPostflightSha` & `actualPostflightSha`
+     - `baselineTag` & `baselineImageId`
+     - `backupFile` & `backupSha256`
+     - `stoppedWriterCounts` (`samples`, `results`)
+     - `runtimeConfiguration` with `productionBackgroundJobs: "VERIFIED_ACTIVE"`
+     - `serviceHealth` endpoint HTTP codes
+
+#### Remediated Findings Ledger (Head `80b5dd0` Package)
+
+| Item | Component(s) | Review Finding & Failure Mode | Comprehensive Remediation Implemented | Verification Evidence |
+|---|---|---|---|---|
+| **Writer-Resumption Boundary** | `execute_release_issue140.sh` (Step 8) | Step 8 started production container with background writers before `COMMITTED`. If 30 health checks failed, recovery attempted to restore backup and reload ingress over active writers. | Moved `PHASE="COMMITTED"` before production container start. Verified final image ID and absence of `DISABLE_BACKGROUND_JOBS`. Cutover failure enters `COMMITTED` recovery: automatic restore forbidden, ingress remains 503, fails closed. | `scratch/test_release_controls.cjs` Scenario `cutover-health-failure`: `backupRestoreAttempt: false, ingressReload: false, productionStartBeforeRestore: false` (PASS). |
+| **Recovery Prerequisite Failures** | `execute_release_issue140.sh` (`cleanup_recovery`) | 1. Failed WAL/SHM copy was swallowed with `\|\| true`, followed by sidecar deletion and restore.<br>2. `_exchange_meta` query failure was masked as `"0"`, skipping epoch rotation and reloading ingress. | 1. Strict exit code check on `cp` for WAL and SHM; copy failure immediately aborts recovery and keeps ingress at 503.<br>2. Captures `sqlite3` exit code on `sqlite_master` query; query error aborts recovery and keeps ingress at 503. | `scratch/test_release_controls.cjs` Scenarios `sidecar-preservation-failure` and `meta-inspection-failure`: both fail closed with `ingressReload: false` (PASS). |
+| **Scoped Catalogue Unconditional-Pass Branch** | `server/scripts/postflight_issue140.cjs` | Manager selection used `LIMIT 1`. When `labId` was null, country-scoped manager (e.g. `countries: ["AAA"]`) accepted foreign `BBB` catalogue without rejection. | Added explicit principal selection (env overrides -> synthetic -> deterministic). Validates country array (`labManager.countries`) and project scoping even when `labId` is null. Foreign injected catalogue rejected (`exit 1`). | `scratch/run_postflight_test.cjs` Scenario `actual-postflight-country-scoped-foreign`: exit 1, `[FAIL] LAB_MANAGER GET /api/labs (scoped catalogue)` (PASS). Normal run: 31/31 passed (exit 0). |
+| **Release Identity Ledger & Provenance** | `execute_release_issue140.sh`, `EVIDENCE.md` | Ledger lacked image source commit validation, proxy config hash, and verified runtime background jobs. Baseline cited stale `v3.5.26-9b69920` instead of verified `v3.5.29-e5d5ebd`. | Bound image source commit to `EXPECTED_COMMIT_SHA`, captured live Apache config SHA256, verified background jobs active, and reconciled baseline to `v3.5.29-e5d5ebd`. | Release ledger emits complete verified schema; EVIDENCE reconciled to `v3.5.29-e5d5ebd`. |
+
 
 
 

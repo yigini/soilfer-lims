@@ -17,8 +17,16 @@ if [ $# -lt 1 ] || [ -z "$1" ]; then
 fi
 
 REVIEWED_IMAGE="$1"
-EXPECTED_COMMIT_SHA=${EXPECTED_COMMIT_SHA:-"828087cc8630478e4492f0cb7078ab31a0634968"}
-EXPECTED_POSTFLIGHT_SHA=${EXPECTED_POSTFLIGHT_SHA:-"8ef04ddb73e2030b3ebaaa5d687b924f8cfa741c9f7c74d0e81f1c2840f8a2c6"}
+EXPECTED_COMMIT_SHA=${EXPECTED_COMMIT_SHA:-""}
+MAIN_CI_RUN_ID=${MAIN_CI_RUN_ID:-""}
+EXPECTED_POSTFLIGHT_SHA=${EXPECTED_POSTFLIGHT_SHA:-"0bb00ebc67171b0edb1f8d96b4d3997d0f738f834cfb44e4f0b1679e8a105ed8"}
+IMAGE_SOURCE_COMMIT=""
+APACHE_LIVE_HASH=""
+WRAPPER_SCRIPT_HASH=""
+if [ -f "$0" ]; then
+    WRAPPER_SCRIPT_HASH=$(sha256sum "$0" 2>/dev/null | awk '{print $1}' || echo "unknown")
+fi
+FINAL_RUNTIME_IMAGE_ID=""
 
 APP_CONTAINER_NAME=${APP_CONTAINER_NAME:-"soilfer-lims"}
 MIGRATION_CONTAINER_NAME=${MIGRATION_CONTAINER_NAME:-"soilfer-lims-migration"}
@@ -265,10 +273,18 @@ cleanup_recovery() {
                         exit 1
                     fi
                     if [ -f "${DB_PATH}-wal" ]; then
-                        cp "${DB_PATH}-wal" "${BACKUP_DIR}/failed_db_${TIMESTAMP}.db-wal" 2>/dev/null || true
+                        echo "Preserving failed database WAL sidecar..."
+                        if ! cp "${DB_PATH}-wal" "${BACKUP_DIR}/failed_db_${TIMESTAMP}.db-wal"; then
+                            echo "FATAL RECOVERY ERROR: Failed to preserve failed database WAL sidecar! Aborting recovery to protect state."
+                            exit 1
+                        fi
                     fi
                     if [ -f "${DB_PATH}-shm" ]; then
-                        cp "${DB_PATH}-shm" "${BACKUP_DIR}/failed_db_${TIMESTAMP}.db-shm" 2>/dev/null || true
+                        echo "Preserving failed database SHM sidecar..."
+                        if ! cp "${DB_PATH}-shm" "${BACKUP_DIR}/failed_db_${TIMESTAMP}.db-shm"; then
+                            echo "FATAL RECOVERY ERROR: Failed to preserve failed database SHM sidecar! Aborting recovery to protect state."
+                            exit 1
+                        fi
                     fi
                 fi
 
@@ -298,9 +314,20 @@ cleanup_recovery() {
                 fi
 
                 # 8. Rotate exchange restore epoch in _exchange_meta if table exists
-                local has_meta
-                has_meta=$("${SQLITE3_CMD}" "${DB_PATH}" "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='_exchange_meta';" 2>/dev/null || echo "0")
-                if [ "${has_meta}" = "1" ]; then
+                local has_meta_out
+                local has_meta_rc=0
+                has_meta_out=$("${SQLITE3_CMD}" "${DB_PATH}" "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='_exchange_meta';" 2>&1) || has_meta_rc=$?
+
+                if [ ${has_meta_rc} -ne 0 ]; then
+                    echo "FATAL RECOVERY ERROR: Failed to inspect sqlite_master for _exchange_meta: ${has_meta_out}"
+                    exit 1
+                fi
+                if [ "${has_meta_out}" != "0" ] && [ "${has_meta_out}" != "1" ]; then
+                    echo "FATAL RECOVERY ERROR: Unexpected output inspecting _exchange_meta in sqlite_master: ${has_meta_out}"
+                    exit 1
+                fi
+
+                if [ "${has_meta_out}" = "1" ]; then
                     local restore_nonce
                     restore_nonce=$(head -c 6 /dev/urandom 2>/dev/null | xxd -p 2>/dev/null || date +%s%N)
                     local restore_epoch="epoch-$(date +%s)-${restore_nonce}"
@@ -324,6 +351,8 @@ cleanup_recovery() {
                         exit 1
                     fi
                     echo "Restored database exchange epoch rotated to: ${restore_epoch}"
+                else
+                    echo "Restored database does not contain _exchange_meta (genuine legacy schema). Skipping epoch rotation."
                 fi
 
                 # 9. Recreate container with pinned immutable baseline image ID only (no mutable tag fallback)
@@ -412,6 +441,25 @@ if [ -z "${TARGET_IMAGE_ID}" ]; then
     exit 1
 fi
 echo "Target reviewed image verified: ${REVIEWED_IMAGE} (Image ID: ${TARGET_IMAGE_ID})"
+
+# Validate image source commit if EXPECTED_COMMIT_SHA is specified
+IMAGE_SOURCE_COMMIT=$("${DOCKER_CMD}" inspect "${TARGET_IMAGE_ID}" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' 2>/dev/null || true)
+if [ -z "${IMAGE_SOURCE_COMMIT}" ]; then
+    IMAGE_SOURCE_COMMIT=$("${DOCKER_CMD}" inspect "${TARGET_IMAGE_ID}" --format '{{range .Config.Env}}{{println .}}{{end}}' | grep '^GIT_COMMIT=' | cut -d= -f2 || true)
+fi
+if [ -n "${IMAGE_SOURCE_COMMIT}" ]; then
+    echo "Target image source commit: ${IMAGE_SOURCE_COMMIT}"
+    if [ -n "${EXPECTED_COMMIT_SHA:-}" ] && [ "${IMAGE_SOURCE_COMMIT}" != "${EXPECTED_COMMIT_SHA}" ]; then
+        echo "FATAL: Target image commit (${IMAGE_SOURCE_COMMIT}) does not match expected commit (${EXPECTED_COMMIT_SHA})!"
+        exit 1
+    fi
+fi
+
+# Capture live Apache config hash before quiescence
+if [ -f "${APACHE_CONF_DIR}/httpd-lims.conf" ]; then
+    APACHE_LIVE_HASH=$(sha256sum "${APACHE_CONF_DIR}/httpd-lims.conf" 2>/dev/null | awk '{print $1}' || echo "unknown")
+    echo "Live Apache configuration SHA256: ${APACHE_LIVE_HASH}"
+fi
 
 # Check production environment file & volumes
 if [ ! -f "${LIMS_OPT_DIR}/.env" ]; then
@@ -644,10 +692,31 @@ echo "Pre-exposure checks passed. System ready for live exposure."
 # --- Step 8: Production Cutover & Live Ingress Restoration (COMMITTED Phase) ---
 echo "--- Step 8: Production Cutover & Live Ingress Restoration (COMMITTED) ---"
 
+# Durable no-automatic-restore boundary: Transition to COMMITTED phase BEFORE writers resume
+# Any failure after this point must fail closed with operator recovery to prevent overwriting new client data
+PHASE="COMMITTED"
+echo "Phase transitioned to COMMITTED. Automatic database restore is strictly disabled."
+
 # Restart container in full production mode (normal background schedulers enabled)
 echo "Restarting application container with full production background settings..."
 "${DOCKER_CMD}" stop -t 10 "${APP_CONTAINER_NAME}"
 start_app_container "${TARGET_IMAGE_ID}" "production"
+
+# Verify final runtime image ID after second container start
+FINAL_RUNTIME_IMAGE_ID=$("${DOCKER_CMD}" inspect "${APP_CONTAINER_NAME}" --format '{{.Image}}' 2>/dev/null || true)
+if [ "${FINAL_RUNTIME_IMAGE_ID}" != "${TARGET_IMAGE_ID}" ]; then
+    echo "FATAL: Final runtime container image (${FINAL_RUNTIME_IMAGE_ID}) does not match target image ID (${TARGET_IMAGE_ID})!"
+    exit 1
+fi
+echo "PASS: Final runtime container verified running target image ID: ${FINAL_RUNTIME_IMAGE_ID}"
+
+# Verify DISABLE_BACKGROUND_JOBS is absent in final production runtime settings
+FINAL_ENV_CHECK=$("${DOCKER_CMD}" inspect "${APP_CONTAINER_NAME}" --format '{{range .Config.Env}}{{println .}}{{end}}' | grep '^DISABLE_BACKGROUND_JOBS=' || true)
+if [ -n "${FINAL_ENV_CHECK}" ]; then
+    echo "FATAL: Final production container unexpectedly retains DISABLE_BACKGROUND_JOBS setting: ${FINAL_ENV_CHECK}"
+    exit 1
+fi
+echo "CONFIRMED: Background job suppression removed; production writers active."
 
 for i in $(seq 1 30); do
     if "${CURL_CMD}" -s -f http://127.0.0.1:3000/api/health >/dev/null 2>&1; then
@@ -661,8 +730,7 @@ for i in $(seq 1 30); do
     fi
 done
 
-# Transition to COMMITTED phase before opening ingress
-PHASE="COMMITTED"
+# Transition to live ingress routing (COMMITTED)
 cp "${APACHE_CONF_DIR}/httpd-lims.conf.live" "${APACHE_CONF_DIR}/httpd-lims.conf"
 "${APACHECTL_CMD}" configtest
 "${SYSTEMCTL_CMD}" reload httpd
@@ -724,7 +792,12 @@ cat << LEDGER_JSON > "${LEDGER_FILE}"
   "status": "SUCCESS",
   "targetImageInput": "${REVIEWED_IMAGE}",
   "targetImageId": "${TARGET_IMAGE_ID}",
-  "expectedCommitSha": "${EXPECTED_COMMIT_SHA}",
+  "finalRuntimeImageId": "${FINAL_RUNTIME_IMAGE_ID}",
+  "imageSourceCommit": "${IMAGE_SOURCE_COMMIT:-unknown}",
+  "expectedCommitSha": "${EXPECTED_COMMIT_SHA:-unknown}",
+  "mainCiRunId": "${MAIN_CI_RUN_ID:-unknown}",
+  "wrapperScriptSha256": "${WRAPPER_SCRIPT_HASH:-unknown}",
+  "apacheConfigSha256": "${APACHE_LIVE_HASH:-unknown}",
   "expectedPostflightSha": "${EXPECTED_POSTFLIGHT_SHA}",
   "actualPostflightSha": "${ACTUAL_POSTFLIGHT_SHA}",
   "baselineTag": "${BASELINE_TAG}",
@@ -741,7 +814,7 @@ cat << LEDGER_JSON > "${LEDGER_FILE}"
     "assetsVolume": "${ASSETS_VOLUME}",
     "envFile": "${LIMS_OPT_DIR}/.env",
     "preExposureWriterHold": "DISABLE_BACKGROUND_JOBS=true",
-    "productionBackgroundJobs": "ACTIVE",
+    "productionBackgroundJobs": "VERIFIED_ACTIVE",
     "ingressQuiescence": "APACHE_503_REWRITE",
     "ingressResumption": "HTTP_401_VERIFIED"
   },
