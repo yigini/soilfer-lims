@@ -151,7 +151,7 @@ const {
     installSqliteHooks
 } = require('./exchangeDbFunctions');
 
-const CURRENT_TRIGGER_VERSION = '10';
+const CURRENT_TRIGGER_VERSION = '11';
 
 function ensureTriggers(db, force = false) {
     registerDbFunctions(db);
@@ -320,6 +320,22 @@ function ensureTriggers(db, force = false) {
             DROP TRIGGER IF EXISTS trg_sample_au_withdraw;
             DROP TRIGGER IF EXISTS trg_sample_au_amend;
             DROP TRIGGER IF EXISTS trg_sample_ad_withdraw;
+            DROP TRIGGER IF EXISTS trg_sample_norm_updated_at;
+            DROP TRIGGER IF EXISTS trg_sample_norm_updated_at_update;
+
+            CREATE TRIGGER trg_sample_norm_updated_at AFTER INSERT ON Sample
+            FOR EACH ROW
+            WHEN NEW.updatedAt LIKE '%Z'
+            BEGIN
+                UPDATE Sample SET updatedAt = strftime('%Y-%m-%dT%H:%M:%f+00:00', NEW.updatedAt) WHERE id = NEW.id;
+            END;
+
+            CREATE TRIGGER trg_sample_norm_updated_at_update AFTER UPDATE OF updatedAt ON Sample
+            FOR EACH ROW
+            WHEN NEW.updatedAt LIKE '%Z'
+            BEGIN
+                UPDATE Sample SET updatedAt = strftime('%Y-%m-%dT%H:%M:%f+00:00', NEW.updatedAt) WHERE id = NEW.id;
+            END;
 
             CREATE TRIGGER trg_sample_ai_publish AFTER INSERT ON Sample
             FOR EACH ROW

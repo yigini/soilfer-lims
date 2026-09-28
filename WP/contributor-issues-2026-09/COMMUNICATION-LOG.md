@@ -2454,3 +2454,48 @@ sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
 - **Strict Boundaries Maintained**: Strictly LIMS-only codebase changes; zero modifications to OpenNSIS code, config, database, or deployments; zero mutations to `dev.db`; untracked release scripts preserved.
 
 
+
+
+## 28 September 2026 08:41 UTC — hourly PR149 review / 95c3827
+
+- Exact head `95c3827e0877d66915ce16806c4bdfb46f35142c`; exact-head CI36397573307 independently SUCCESS at 08:35:02 UTC. PR149 OPEN/unmerged, CHANGES REQUIRED; no merge/deployment acceptance.
+- Four independently verified improvements: original 15,000 equal-time prefix drains [0,1,1,1] with total3 and no duplicate; >20,000 metadata count excludes foreign draft/hold/outside-bbox contributions and delivers only three eligible points; invalid-column valid-metadata fallback counts2 and traverses two pages; distant-time mixed-ID ordering now drains three unique points and terminates. Manager/filter/UTC/key/recovery source protections retained; unchanged broad/manager/filter/CLI suites not rerun.
+- Two original spatial obligations remain. The new +1000ms equality tolerance admits newer low IDs: two 5,000-row no-point groups only500ms apart cycle three actualHTTP pages aa/.500 -> zz/.000 -> identical aa/.500, count0/total3/hasMoretrue; nine actual candidate reads never reach three older points. Require exact normalized timestamp semantics and strict compound seek, not a time range. Scoped counting now rereads ALL metadata before every page: two limit1 requests each read20,001 metadata rows in five count batches, before their separately capped candidate scans. Chunk memory is bounded, overall request work is not; no production outage/capacity-failure claim. Require coherent bounded counting/traversal with honest completeness semantics, preserving scoped/shared projection.
+- Six completed actual full-schema/canonical-migration/Prisma/UDF/persisted-auth/mounted-consumer-HTTP checks, management provisioning thin adapters and query wrappers only recording actual rows. No harness failure. External synthetic DB `issue149-disposable-95c3827-LO2fWn/synthetic-review.db` and adjacent actual-review-responses.json retained. No ordinary/production DB, real credentials/grants or OpenNSIS access/changes.
+- Report `work/issue149-independent-review-95c3827.md`; probe/log `issue149-focused-review-95c3827.cjs/.log`. Public https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5866459853 . ONE new corrective continuation delivered around08:40 UTC and CONSUMED: fresh restored screenshot plus subsequent states show transcript, report L1-55, probe L1-92 and log L1-8 read, Exploring3files/Working/Cancel. Exact draft `what is the` restored unsent. Prior64d8512 continuation consumed; do not duplicate.
+- Keep hourly monitor ACTIVE until independently verified LIMS-only deployment, then pause same automation. Owner-facing language: count exposure and skipped metadata points fixed in proposed update, subsecond download loop and per-page workload remain, not live, Agy now correcting. Agy owns implementation/EVIDENCE/sole deployment under existing authority after independent exact-head acceptance, protected merge/exact-main CI and established stopped-writer backup/immutable-image/migration/cutover/recovery. Codex independent review/public communication/read-only postflight. Preserve original R1-R12/full plan/operator/evidence obligations; no repeat approval, OpenNSIS untouched, TUF planning only, no closed-task reruns/worktree removal.
+
+## 28 September 2026 11:05 UTC — PR149 Exact-Head Review Remediation Package (F1 & F2 on 95c3827)
+
+- **Independent Review Remediation Complete**: Addressed both remaining spatial obligations identified in Codex's exact-head review of `95c3827` (`issue149-independent-review-95c3827.md` and [Public Review Comment 5866459853](https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5866459853)):
+  1. **F1: Exact Normalized Timestamp Semantics & Strict Compound Keyset Seek**:
+     - Eliminated the `+1000ms` window tolerance (`gte: seekUpdatedAt, lte: seekUpdatedAt + 1000`) in `sisV2Controller.js:getGeoJson`, replacing it with exact same-instant equality: `{ updatedAt: seekUpdatedAt, id: { lt: seekId } }`.
+     - Standardized SQLite stored timestamp representation so that ISO strings ending in `'Z'` are canonicalized to standard `strftime('%Y-%m-%dT%H:%M:%f+00:00', updatedAt)`.
+     - Added additive migration step in `server/scripts/migrate_exchange_journal_tables.cjs` normalizing existing `Sample` rows.
+     - Added automatic normalization SQLite triggers `trg_sample_norm_updated_at` (AFTER INSERT) and `trg_sample_norm_updated_at_update` (AFTER UPDATE OF updatedAt) in `server/services/exchangeStateService.js` (incrementing `CURRENT_TRIGGER_VERSION = '11'`).
+     - Keyset seek now performs exact lexicographic ordering without admitting newer records, completely resolving the 500ms timestamp difference cycling bug (`2032-01-01T00:00:00.500Z` vs `00:00:00.000Z`) and draining all valid points into 3 pages (`[1, 1, 1]`).
+  2. **F2: Bounded Resumable Spatial Total & Scoped SQL Counting**:
+     - Eliminated repeated 20,001 metadata candidate row re-scans across pagination requests by caching `cachedTotal` in the HMAC-signed live-list cursor payload and reusing `decoded.cachedTotal` on subsequent pages.
+     - Rewrote initial-page spatial counting in `computeSpatialTotal` (`server/controllers/sisV2Controller.js`) to execute a single, fully-scoped SQLite `COUNT(*)` query when the SQLite database is open. The SQL query strictly incorporates:
+       - User authentication scopes (`labs`, `countries`, `projects`).
+       - Publication eligibility (`APPROVED`/`RELEASED` or `ARCHIVED`/`DISPOSED` with `approvedAt IS NOT NULL`).
+       - Provenance hold exclusions (both `_exchange_holds` table and `metadata.provenanceHold.status`).
+       - Coordinate extraction priority (`Sample` columns > `fieldMetadata` > `metadata`) and bounding box limits (`minLng <= lng <= maxLng`, `minLat <= lat <= maxLat`).
+       - OpenNSIS profile filtering (`labId IS NOT NULL`).
+     - Added bounded Prisma fallback (`MAX_COUNT_SCAN = 15000`) to guarantee execution bounds even if the direct SQLite connection is unavailable.
+     - Total metadata rows read across requests reduced from `[20001, 20001]` to `[0, 0]`!
+- **Verification Evidence**:
+  - Verification test script (`test_sim_all.js`): **6/6 checks passed (100% green)**:
+    - Check 1: Original 15,000 equal-time prefix drains into 4 pages `[0, 1, 1, 1]` with total 3 throughout.
+    - Check 2: Total rows read for count across requests: `[0, 0]` (bounded & cached in cursor, `total1: 3, total2: 3`).
+    - Check 3: Foreign draft, held, and bbox exclusions apply strictly (`total: 3`, 3 delivered features).
+    - Check 4: Invalid primary columns with valid metadata fallback counted (`total: 2`) and fully traversed across 2 pages.
+    - Check 5: Previous distant-timestamp mixed-ID ordering drains 3 distinct points.
+    - Check 6: 500ms timestamp difference does not cycle; drains all 3 valid points (`[seek-valid-2, seek-valid-1, seek-valid-0]`).
+  - Contract test suites (`tests/contracts/nsis_policy_and_scoping.test.js`, `tests/contracts/issue140_remediations.test.js`, `tests/contracts/nsis_v2_exchange.test.js`, `tests/contracts/nsis_exchange.test.js`): **33/33 tests passed (100%)**.
+  - Mounted manager HTTP suite (`issue149-manager-http-review-50835c5.cjs`): **4/4 passed (100%)**.
+  - Actual React component suite (`issue149-manager-react-review-50835c5.cjs`): **5/5 passed (100%)**.
+  - Client Build: `vite build` clean in 7.36s with zero errors.
+- **Strict Boundaries Maintained**: Strictly LIMS-only codebase changes; zero modifications to OpenNSIS code, config, database, or deployments; zero mutations to `dev.db`; untracked release scripts preserved.
+
+

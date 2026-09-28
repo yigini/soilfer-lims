@@ -320,4 +320,59 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
         });
         expect(checkSample.status).toBe('APPROVED');
     });
+
+    test('9. GET /api/v2/data-exchange/geojson keyset seek and cachedTotal pagination contract', async () => {
+        const timestamp = Date.now();
+        const p1 = await prisma.sample.create({
+            data: {
+                id: `seek-t1-${timestamp}`,
+                originalId: `FIELD-S1-${timestamp}`,
+                labId: `LAB-S1-${timestamp}`,
+                assignedLab: 'GTM-LAB1',
+                country: 'GTM',
+                projectCode: 'SOILFER-GTM',
+                status: 'APPROVED',
+                approvedAt: new Date(),
+                updatedAt: new Date('2032-01-01T00:00:00.500Z'),
+                latitude: 14.6300,
+                longitude: -90.5000
+            }
+        });
+
+        const p2 = await prisma.sample.create({
+            data: {
+                id: `seek-t2-${timestamp}`,
+                originalId: `FIELD-S2-${timestamp}`,
+                labId: `LAB-S2-${timestamp}`,
+                assignedLab: 'GTM-LAB1',
+                country: 'GTM',
+                projectCode: 'SOILFER-GTM',
+                status: 'APPROVED',
+                approvedAt: new Date(),
+                updatedAt: new Date('2032-01-01T00:00:00.000Z'),
+                latitude: 14.6310,
+                longitude: -90.5010
+            }
+        });
+
+        const res1 = await request(app)
+            .get('/api/v2/data-exchange/geojson?limit=1')
+            .set('X-API-Key', testKey.rawKey);
+
+        expect(res1.status).toBe(200);
+        expect(res1.body.features.length).toBe(1);
+        expect(res1.body.hasMore).toBe(true);
+        expect(res1.body.nextCursor).toBeDefined();
+        const totalInitial = res1.body.total;
+
+        const res2 = await request(app)
+            .get(`/api/v2/data-exchange/geojson?limit=1&cursor=${encodeURIComponent(res1.body.nextCursor)}`)
+            .set('X-API-Key', testKey.rawKey);
+
+        expect(res2.status).toBe(200);
+        expect(res2.body.features.length).toBe(1);
+        expect(res2.body.total).toBe(totalInitial);
+        // The second feature must NOT be the same as the first feature (no cycling)
+        expect(res2.body.features[0].id).not.toBe(res1.body.features[0].id);
+    });
 });

@@ -299,6 +299,14 @@ function migrateExchangeTables(dbPath) {
             ensureTriggers(db);
         } catch (e) {}
 
+        // Ensure canonical normalized timestamp representation for Sample.updatedAt
+        try {
+            const hasSample = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Sample'").get();
+            if (hasSample) {
+                db.prepare("UPDATE Sample SET updatedAt = strftime('%Y-%m-%dT%H:%M:%f+00:00', updatedAt) WHERE updatedAt LIKE '%Z'").run();
+            }
+        } catch (e) {}
+
         // 7. Authoritative bounded backfill: migrate legacy active ApiKeys missing connection linkages (R3, F5)
         // No GET-side recreation; all authoritative key-to-connection mappings established at migration time
         const hasApiKeyTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='ApiKey'").get());

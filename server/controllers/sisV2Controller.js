@@ -486,6 +486,108 @@ exports.getObservations = async (req, res) => {
 };
 
 async function computeSpatialTotal(auth, canonicalQuery, bboxBounds) {
+    const db = exchangeStateService.getDb ? exchangeStateService.getDb() : null;
+    if (db && db.open) {
+        try {
+            const params = [];
+            const conditions = [];
+
+            if (auth?.connectionStatus && auth.connectionStatus !== 'ACTIVE') {
+                return 0;
+            }
+            if (auth.labs && auth.labs.length > 0) {
+                conditions.push(`assignedLab IN (${auth.labs.map(() => '?').join(',')})`);
+                params.push(...auth.labs);
+            }
+            if (auth.countries && auth.countries.length > 0) {
+                conditions.push(`UPPER(country) IN (${auth.countries.map(() => '?').join(',')})`);
+                params.push(...auth.countries.map(c => String(c).toUpperCase()));
+            }
+            if (auth.projects && auth.projects.length > 0) {
+                conditions.push(`projectCode IN (${auth.projects.map(() => '?').join(',')})`);
+                params.push(...auth.projects);
+            }
+
+            const restricted = isRestrictedConsumer(auth);
+            if (restricted) {
+                const statusVal = canonicalQuery.status ? String(canonicalQuery.status).trim().toUpperCase() : null;
+                if (statusVal && (statusVal === 'ALL' || statusVal === '*')) {
+                    conditions.push(`(
+                        status IN ('APPROVED', 'RELEASED')
+                        OR (status IN ('ARCHIVED', 'DISPOSED') AND approvedAt IS NOT NULL)
+                    )`);
+                } else if (statusVal) {
+                    if (['APPROVED', 'RELEASED'].includes(statusVal)) {
+                        conditions.push(`status = ?`);
+                        params.push(statusVal);
+                    } else if (['ARCHIVED', 'DISPOSED'].includes(statusVal)) {
+                        conditions.push(`status = ? AND approvedAt IS NOT NULL`);
+                        params.push(statusVal);
+                    } else {
+                        return 0;
+                    }
+                } else {
+                    conditions.push(`(
+                        status IN ('APPROVED', 'RELEASED')
+                        OR (status IN ('ARCHIVED', 'DISPOSED') AND approvedAt IS NOT NULL)
+                    )`);
+                }
+            } else {
+                const statusVal = canonicalQuery.status ? String(canonicalQuery.status).trim().toUpperCase() : null;
+                if (statusVal && (statusVal === 'ALL' || statusVal === '*')) {
+                    // unrestricted all
+                } else if (statusVal) {
+                    conditions.push(`status = ?`);
+                    params.push(statusVal);
+                } else {
+                    conditions.push(`status != 'CANCELLED'`);
+                }
+            }
+
+            try {
+                const hasHoldsTable = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_exchange_holds'").get();
+                if (hasHoldsTable) {
+                    conditions.push(`id NOT IN (SELECT sampleId FROM _exchange_holds WHERE status = 'ACTIVE')`);
+                }
+            } catch (e) {}
+            conditions.push(`(metadata IS NULL OR json_extract(metadata, '$.provenanceHold.status') IS NULL)`);
+
+            const effLat = `COALESCE(
+                CASE WHEN latitude BETWEEN -90 AND 90 THEN latitude ELSE NULL END,
+                CAST(COALESCE(json_extract(fieldMetadata, '$.latitude'), json_extract(fieldMetadata, '$.lat'), json_extract(fieldMetadata, '$.gps_lat'), json_extract(fieldMetadata, '$.coordinates.lat'), json_extract(fieldMetadata, '$.coordinates.latitude'), json_extract(metadata, '$.latitude'), json_extract(metadata, '$.lat'), json_extract(metadata, '$.gpsY')) AS REAL)
+            )`;
+
+            const effLng = `COALESCE(
+                CASE WHEN longitude BETWEEN -180 AND 180 THEN longitude ELSE NULL END,
+                CAST(COALESCE(json_extract(fieldMetadata, '$.longitude'), json_extract(fieldMetadata, '$.lng'), json_extract(fieldMetadata, '$.gps_lng'), json_extract(fieldMetadata, '$.coordinates.lng'), json_extract(fieldMetadata, '$.coordinates.longitude'), json_extract(metadata, '$.longitude'), json_extract(metadata, '$.lng'), json_extract(metadata, '$.gpsX')) AS REAL)
+            )`;
+
+            conditions.push(`(${effLat}) IS NOT NULL`);
+            conditions.push(`(${effLng}) IS NOT NULL`);
+            conditions.push(`(${effLat}) BETWEEN -90 AND 90`);
+            conditions.push(`(${effLng}) BETWEEN -180 AND 180`);
+
+            if (bboxBounds) {
+                conditions.push(`(${effLat}) BETWEEN ? AND ?`);
+                params.push(bboxBounds.minLat, bboxBounds.maxLat);
+                conditions.push(`(${effLng}) BETWEEN ? AND ?`);
+                params.push(bboxBounds.minLng, bboxBounds.maxLng);
+            }
+
+            if (canonicalQuery.profile && String(canonicalQuery.profile).trim().toLowerCase() === 'opennsis') {
+                conditions.push(`labId IS NOT NULL`);
+            }
+
+            const sql = `SELECT COUNT(*) as total FROM Sample WHERE ${conditions.join(' AND ')}`;
+            const row = db.prepare(sql).get(...params);
+            if (row && typeof row.total === 'number') {
+                return row.total;
+            }
+        } catch (e) {
+            // fallback to bounded prisma count
+        }
+    }
+
     const baseWhere = buildSampleWhere(auth, canonicalQuery);
 
     const directWhere = { ...baseWhere };
@@ -538,9 +640,10 @@ async function computeSpatialTotal(auth, canonicalQuery, bboxBounds) {
     const jsonCandidatesTotal = await prisma.sample.count({ where: metadataCandidateWhere });
     if (jsonCandidatesTotal > 0) {
         const BATCH_SIZE = 5000;
+        const MAX_COUNT_SCAN = 15000;
         let lastId = null;
         let examined = 0;
-        while (examined < jsonCandidatesTotal) {
+        while (examined < jsonCandidatesTotal && examined < MAX_COUNT_SCAN) {
             const batchWhere = {
                 ...metadataCandidateWhere,
                 AND: [
@@ -680,7 +783,10 @@ exports.getGeoJson = async (req, res) => {
             });
         }
 
-        const total = await computeSpatialTotal(req.sisAuth, canonicalQuery, bboxBounds);
+        // Reuse cached total from cursor if available (resumable counting state, eliminates repeated scans)
+        const total = (decoded && typeof decoded.cachedTotal === 'number')
+            ? decoded.cachedTotal
+            : await computeSpatialTotal(req.sisAuth, canonicalQuery, bboxBounds);
 
         // Bounded seek/scan traversal across candidate batches (F1, R1/R4/R7/R11)
         const BATCH_SIZE = 5000;
@@ -704,7 +810,7 @@ exports.getGeoJson = async (req, res) => {
                     OR: [
                         { updatedAt: { lt: seekUpdatedAt } },
                         {
-                            updatedAt: { gte: seekUpdatedAt, lte: new Date(seekUpdatedAt.getTime() + 1000) },
+                            updatedAt: seekUpdatedAt,
                             id: { lt: seekId }
                         }
                     ]
@@ -805,7 +911,8 @@ exports.getGeoJson = async (req, res) => {
                     profile: canonicalQuery.profile || 'default',
                     filter: ctx.filter,
                     lastUpdatedAt: (anchorCandidate.updatedAt instanceof Date ? anchorCandidate.updatedAt : new Date(anchorCandidate.updatedAt)).toISOString(),
-                    lastId: anchorCandidate.id
+                    lastId: anchorCandidate.id,
+                    cachedTotal: total
                 });
             }
         }
