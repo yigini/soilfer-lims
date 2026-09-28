@@ -344,7 +344,7 @@ function migrateExchangeTables(dbPath) {
             const holdConds = [];
             if (sampleCols.has('metadata')) {
                 holdConds.push(`(CASE
-                    WHEN s.metadata IS NULL OR TRIM(s.metadata) = '' THEN 0
+                    WHEN s.metadata IS NULL OR s.metadata = '' THEN 0
                     WHEN NOT json_valid(s.metadata) THEN 1
                     WHEN json_type(s.metadata) != 'object' THEN 1
                     WHEN COALESCE(json_extract(s.metadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD' THEN 1
@@ -353,7 +353,7 @@ function migrateExchangeTables(dbPath) {
             }
             if (sampleCols.has('fieldMetadata')) {
                 holdConds.push(`(CASE
-                    WHEN s.fieldMetadata IS NULL OR TRIM(s.fieldMetadata) = '' THEN 0
+                    WHEN s.fieldMetadata IS NULL OR s.fieldMetadata = '' THEN 0
                     WHEN NOT json_valid(s.fieldMetadata) THEN 1
                     WHEN json_type(s.fieldMetadata) != 'object' THEN 1
                     WHEN COALESCE(json_extract(s.fieldMetadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD' THEN 1

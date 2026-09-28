@@ -867,18 +867,26 @@ const ApiKeyManager = () => {
                                             <td className="p-4 space-y-1">
                                                 <div className="text-[11px]">
                                                     <span className="text-sf-muted">Receiver Ingested: </span>
-                                                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                                                        {c.telemetry?.receiverReportedImported ?? c.telemetry?.totalImported ?? 0}
-                                                    </span>
+                                                    {(c.telemetry?.receiverReportedImported != null || c.telemetry?.totalImported != null) ? (
+                                                        <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                                                            {c.telemetry.receiverReportedImported ?? c.telemetry.totalImported}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-sf-muted italic">Not reported</span>
+                                                    )}
                                                 </div>
                                                 <div className="text-[11px]">
                                                     <span className="text-sf-muted">Receiver Quarantined: </span>
-                                                    <span className="font-bold text-amber-600 dark:text-amber-400">
-                                                        {c.telemetry?.receiverReportedQuarantined ?? c.telemetry?.totalQuarantined ?? 0}
-                                                    </span>
+                                                    {(c.telemetry?.receiverReportedQuarantined != null || c.telemetry?.totalQuarantined != null) ? (
+                                                        <span className="font-bold text-amber-600 dark:text-amber-400">
+                                                            {c.telemetry.receiverReportedQuarantined ?? c.telemetry.totalQuarantined}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-sf-muted italic">Not reported</span>
+                                                    )}
                                                 </div>
                                                 <div className="text-[10px] font-mono text-sf-muted">
-                                                    Reported Checkpoint: <span className="text-sf-text">{c.telemetry?.lastReportedCheckpoint || c.telemetry?.lastCheckpoint || 'None'}</span>
+                                                    Reported Checkpoint: <span className="text-sf-text">{c.telemetry?.lastReportedCheckpoint || c.telemetry?.lastCheckpoint || 'Not reported'}</span>
                                                 </div>
                                                 <div className="text-[10px] text-sf-muted">
                                                     Last Receipt: <span className="text-sf-text">{c.telemetry?.lastReceiptAt ? new Date(c.telemetry.lastReceiptAt).toLocaleString() : 'Not reported'}</span>

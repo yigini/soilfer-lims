@@ -151,7 +151,7 @@ const {
     installSqliteHooks
 } = require('./exchangeDbFunctions');
 
-const CURRENT_TRIGGER_VERSION = '9';
+const CURRENT_TRIGGER_VERSION = '10';
 
 function ensureTriggers(db, force = false) {
     registerDbFunctions(db);
@@ -291,7 +291,7 @@ function ensureTriggers(db, force = false) {
         const holdConds = [];
         if (sampleCols.has('metadata')) {
             holdConds.push(`(CASE
-                WHEN ${prefix}.metadata IS NULL OR TRIM(${prefix}.metadata) = '' THEN 0
+                WHEN ${prefix}.metadata IS NULL OR ${prefix}.metadata = '' THEN 0
                 WHEN NOT json_valid(${prefix}.metadata) THEN 1
                 WHEN json_type(${prefix}.metadata) != 'object' THEN 1
                 WHEN COALESCE(json_extract(${prefix}.metadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD' THEN 1
@@ -300,7 +300,7 @@ function ensureTriggers(db, force = false) {
         }
         if (sampleCols.has('fieldMetadata')) {
             holdConds.push(`(CASE
-                WHEN ${prefix}.fieldMetadata IS NULL OR TRIM(${prefix}.fieldMetadata) = '' THEN 0
+                WHEN ${prefix}.fieldMetadata IS NULL OR ${prefix}.fieldMetadata = '' THEN 0
                 WHEN NOT json_valid(${prefix}.fieldMetadata) THEN 1
                 WHEN json_type(${prefix}.fieldMetadata) != 'object' THEN 1
                 WHEN COALESCE(json_extract(${prefix}.fieldMetadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD' THEN 1
@@ -778,10 +778,10 @@ function getConnectionId(auth) {
 
 
 function isProvenanceHeld(meta) {
-    if (!meta) return false;
+    if (meta === null || meta === undefined || meta === '') return false;
     try {
         const parsed = typeof meta === 'string' ? JSON.parse(meta) : meta;
-        if (!parsed || typeof parsed !== 'object') {
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
             return true;
         }
         if (parsed.provenanceHold && parsed.provenanceHold.status === 'AMBIGUOUS_PROVENANCE_HOLD') {

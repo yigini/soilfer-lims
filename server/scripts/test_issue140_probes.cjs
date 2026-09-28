@@ -19,6 +19,7 @@ function source(rel, mocks) {
         require(name) {
             if (Object.hasOwn(mocks, name)) return mocks[name];
             if (['path', 'crypto'].includes(name)) return require(name);
+            if (name === 'better-sqlite3') return Sqlite;
             throw Error('Unexpected dependency: ' + name);
         },
         process: { env: {} },

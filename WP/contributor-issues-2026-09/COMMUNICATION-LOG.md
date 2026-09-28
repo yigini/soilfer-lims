@@ -2204,3 +2204,44 @@ sis_v2_exchange.test.js, sis_adapter_service.test.js): **43/43 passed (100%)**
 - **Candidate Head & CI**: Candidate head `9133d63` (`9133d631dfb1b8aa4df7fb459faef72da6bfdb05`) on `feat/issue-140-nsis-exchange` (PR #149); GitHub Actions CI run `36367548685` passed 100% green (6m20s, all 146 test suites passed, 1,414/1,414 tests passed, Docker boundary rehearsal passed). Ready for Codex independent verification.
 
 
+
+## 28 September 2026 02:35 UTC — hourly PR149 independent review / 2bdab7a
+- Exact head 2bdab7a80ca86fab5cb73a5886bd29be1277e229 (implementation f437c1d, test portability9133d63); exact-head CI36368001752 independently SUCCESS02:04:39UTC. PR149 OPEN/unmerged, CHANGES REQUIRED, no deployment acceptance.
+- Four latest failures now independently FIXED: revoked replacement confirm409/still401; revoked original abort409/still401; JSON-null policy list/count/observations consistent; terminal download checkpoint restart verifies2items without duplication. Four selected prior protections preserved: escaped holds, sibling isolation, exact replacement/replay, middle-page verified process resume.
+- Remaining ORIGINAL full-plan packages: normal CLI consumes1of3pending amendments then exits0, ignores hasMore and advances count-only checkpoint dropping event/snapshot content; finish durable consumable export/event accounting and bounded full traversal/context/recovery. SQL/JS all-space metadata policy differs; original R11 observations param count0/total2, stats country filter ignored, GeoJSON silently truncates1of2/no continuation and malformed bbox200. OpenAPI eventId vs actualid, omitted batchId and snapshot highWaterSequence/nextCursor; stale runbook directdev.db/snapshotDELETE/self-verification/publication guidance and epochCLI unsupportedseq=0. Finish accurate contract/operator evidence and original R1-R12, not narrow probe completion.
+- Eleven main plus4original-R11 follow-through actual fullschema/migration/Prisma/UDF/auth/mountedconsumerHTTP/normalCLI checks. Management thin req/res; deliberate localHTTP400 and controlled child exit77 after checkpoint rename, not production/uncontrolled crash. External synthetic DBs issue149-disposable-2bdab7a-JaDST3 and issue149-followthrough-2bdab7a-NwjQBe retained. Five actual CLI logs retained. Initial tab-containing metadata was correctly excluded; final all-space fixture reproduces mismatch. No ordinary/production/realcredential/grant/OpenNSIS changes; no broad unchanged suites.
+- Report work/issue149-independent-review-2bdab7a.md; probes/logs issue149-focused-review-2bdab7a and issue149-followthrough-review-2bdab7a. Public https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5862247485 . ONE complete corrective continuation delivered02:34UTC and CONSUMED: fresh restored screenshot plus secondstate show report and both probes/logs read, Exploring5files/Working/Cancel. Exact draft "what is the" restored unsent. Do not duplicate.
+- Hourly monitor ACTIVE until independently verified LIMS-only deployment then pause same automation. Existing sole-Agy safe release authority after independent exact-head technical acceptance, exact-main CI and established release; no repeat approval. Agy owns implementation/EVIDENCE/deployment; Codex independent review/public communication/read-only postflight. OpenNSIS entirely untouched, TUF planning only, no closed-issue reruns/worktree removal.
+
+
+
+## 28 September 2026 03:00 UTC — PR149 Remediations for Review 2bdab7a (Packages 1, 2, 3)
+- **Review Addressed**: Codex independent review of PR #149 head `2bdab7a` (`work/issue149-independent-review-2bdab7a.md`, `issue149-focused-review-2bdab7a.cjs/.log`, `issue149-followthrough-review-2bdab7a.cjs/.log`, public comment `5862247485`).
+- **Preserved Protections**: Preserved all 4 latest fixed protections (confirm 409 on revoked replacement, abort 409 on revoked original, JSON-null policy agreement across list/count/observations, terminal download restart without duplicate items) and all 4 prior passing protections (escaped hold serialization exclusion, sibling auth/abort isolation, replacement retirement and live replay, middle-page verified resume).
+- **Package 1 (P1 - Complete Reference Harvester & Durable Event Accounting, R2/R8)**:
+  - Bounded backlog drain loop: Reference client Step 9 implements `do ... while (hasMore && changePageNum < MAX_CHANGE_PAGES)` honoring server `hasMore`, draining multi-page backlogs, and preventing premature exit-0 with pending events.
+  - Checkpoint retention: Checkpoint retains both `harvestedItems` and cumulative deduplicated `changes`. Fixed state carryover so `currentHarvestedItems` survives partial snapshot page restarts and is preserved into change feed checkpoints.
+  - Consumable export sink: Added `--export <file>` option writing verified snapshot records and ordered change events to a durable export JSON file.
+  - Actionable transport recovery: Handles HTTP 429 with `Retry-After` backoff and HTTP 410 with explicit re-baselining guidance.
+- **Package 2 (P2 - Coherent Unknown-Metadata Policy, Totals & GeoJSON Traversal, R4/R11)**:
+  - Coherent whitespace/unknown metadata policy: Harmonized SQL and JS predicates across triggers (`CURRENT_TRIGGER_VERSION = '10'`), migration backfill, dynamic SQL, and JS `isProvenanceHeld`: `WHEN col IS NULL OR col = '' THEN 0 WHEN NOT json_valid(col) THEN 1 ...`. Whitespace `'   '` fails `json_valid` and is held (1 / true) in both SQL and JS. Empty string `''` and `NULL` are unheld (0 / false) in both.
+  - Filter-aware observations count: `countWhere` in `getObservations` includes `param`, `censoring`, and `basis` filters.
+  - Filter-aware statistics: `getStats` passes `req.query` to `buildSampleWhere` and `buildSpectralWhere`. Removed unsubstantiated `standardsCompliant: 'GLOSOLAN / ISO 17025'` claim.
+  - Bounded deterministic spatial traversal: `getGeoJson` returns `total`, `count`, `hasMore`, `nextCursor`, and uses Prisma native cursor pagination (`cursor: { id: decoded.lastId }, skip: 1`) to eliminate SQLite text vs integer timestamp comparison mismatches.
+  - Strict bounding box validation: `getGeoJson` validates `bbox` format (4 decimals), bounds (-180..180, -90..90), and min <= max, returning HTTP 400 `INVALID_BBOX` on malformed input.
+- **Package 3 (P1/P2 - OpenAPI Contract Alignment, Stale Runbook & Honest Telemetry, R8/R10/R11/R12)**:
+  - OpenAPI schema alignment: Updated `docs/openapi-data-exchange-v2.yaml` with `id` (renamed from `eventId`), `batchId`, `highWaterSequence`, `nextCursor`, and GeoJSON pagination query parameters and response schema.
+  - Honest UI telemetry: `ApiKeyManager.jsx` displays explicit `"Not reported"` when `receiverReportedImported` or `receiverReportedQuarantined` is absent/null, eliminating deceptive green zeros.
+  - Accurate epoch guidance: `rotate_exchange_epoch.cjs` instructs operators to re-baseline via `POST /api/v2/data-exchange/snapshots` and removed unsupported `seq=0` instructions.
+  - Corrected operator runbook: `docs/nsis-operator-runbook.md` accurately describes `--verify` as isolated in-memory VM/probe harness, attributes key revocation to application middleware (`exchangeAuthMiddleware.js`), documents publication of approved archived/disposed specimens, and directs operators to non-destructive `prune_exchange_storage.cjs`.
+  - Test sandbox compatibility: `test_issue140_probes.cjs` sandbox mock includes `better-sqlite3`.
+- **Verification Evidence**:
+  - `server/scripts/verify_issue149_complete_remediations.cjs`: **15/15 passed (100%)**, covering all 15 checks from Codex's focused and follow-through probes in external disposable SQLite.
+  - `server/scripts/data_exchange_reference_client.cjs --verify`: **16/16 passed (100%)**.
+  - `server/scripts/test_issue140_probes.cjs`: **16/16 passed (100%)**.
+  - `server/tests/contracts/sis_adapter_service.test.js`: **20/20 passed (100%)**.
+  - `server/tests/contracts/nsis_v2_exchange.test.js` & `nsis_exchange.test.js`: **12/12 passed (100%)**.
+  - Client Build: `vite build` clean in 7.20s with zero errors.
+- **Strict Boundaries Maintained**: Strictly LIMS-only codebase changes; zero modifications to OpenNSIS code, config, database, or deployments; zero mutations to `dev.db`; untracked release scripts preserved.
+
+

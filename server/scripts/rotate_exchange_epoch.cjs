@@ -83,9 +83,9 @@ function main() {
 
         console.log('POST-RESTORE RECONCILIATION INSTRUCTIONS:');
         console.log('1. All consumer cursors signed with the old epoch are now expired (HTTP 410).');
-        console.log('2. External receivers (OpenNSIS / harvesters) encountering HTTP 410 must:');
-        console.log('   a) Request a fresh frozen snapshot via POST /api/v2/data-exchange/snapshots, or');
-        console.log('   b) Reset cursor to the current sequence boundary using seq=0 on /changes.');
+        console.log('2. External receivers (OpenNSIS / harvesters) encountering HTTP 410 must re-baseline:');
+        console.log('   a) Request a fresh frozen snapshot via POST /api/v2/data-exchange/snapshots.');
+        console.log('   b) Resume change feed continuous synchronization from the snapshot handoff cursor.');
         console.log('3. Verify that database integrity check returns "ok": PRAGMA integrity_check;');
         console.log('4. External exchange endpoints can now safely be re-enabled.\n');
 

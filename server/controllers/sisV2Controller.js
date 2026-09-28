@@ -296,8 +296,23 @@ exports.getObservations = async (req, res) => {
         
 
 
+        const countWhere = {
+            isCurrent: true,
+            OR: [{ isValid: true }, { isValid: null }],
+            sample: sampleWhere
+        };
+        if (req.query.param) {
+            countWhere.param = req.query.param.toUpperCase();
+        }
+        if (req.query.censoring) {
+            countWhere.censoring = req.query.censoring.toUpperCase();
+        }
+        if (req.query.basis) {
+            countWhere.basis = req.query.basis.toUpperCase();
+        }
+
         const [total, results, maps] = await Promise.all([
-            prisma.result.count({ where: { isCurrent: true, OR: [{ isValid: true }, { isValid: null }], sample: sampleWhere } }),
+            prisma.result.count({ where: countWhere }),
             prisma.result.findMany({
                 where: resultWhere,
                 include: { sample: true },
@@ -429,15 +444,47 @@ exports.getGeoJson = async (req, res) => {
 
         // Apply spatial bounding box query at database level before limit (F6)
         if (req.query.bbox) {
-            const bboxParts = req.query.bbox.split(',').map(Number);
+            const parts = String(req.query.bbox).split(',').map(s => s.trim());
+            const bboxParts = parts.map(Number);
+            if (parts.length !== 4 || bboxParts.some(n => isNaN(n))) {
+                return res.status(400).json({
+                    error: 'Bad Request',
+                    code: 'INVALID_BBOX',
+                    message: "Invalid 'bbox' parameter. Must be 'minLng,minLat,maxLng,maxLat' formatted as 4 valid decimal numbers."
+                });
+            }
+            const [minLng, minLat, maxLng, maxLat] = bboxParts;
+            if (minLng < -180 || maxLng > 180 || minLat < -90 || maxLat > 90 || minLng > maxLng || minLat > maxLat) {
+                return res.status(400).json({
+                    error: 'Bad Request',
+                    code: 'INVALID_BBOX',
+                    message: "Invalid 'bbox' coordinates. Must satisfy -180 <= minLng <= maxLng <= 180 and -90 <= minLat <= maxLat <= 90."
+                });
+            }
+            where.latitude = { gte: minLat, lte: maxLat };
+            where.longitude = { gte: minLng, lte: maxLng };
+        }
+
+        const cursor = req.query.cursor;
+        const decoded = exchangeStateService.decodeCursor(cursor);
+        let cursorClause = undefined;
+        let skipClause = undefined;
+        if (decoded && decoded.lastId) {
+            cursorClause = { id: decoded.lastId };
+            skipClause = 1;
+        }
+
+        const countWhere = buildSampleWhere(req.sisAuth, req.query);
+        if (req.query.bbox) {
+            const bboxParts = String(req.query.bbox).split(',').map(s => Number(s.trim()));
             if (bboxParts.length === 4 && bboxParts.every(n => !isNaN(n))) {
-                const [minLng, minLat, maxLng, maxLat] = bboxParts;
-                where.latitude = { gte: minLat, lte: maxLat };
-                where.longitude = { gte: minLng, lte: maxLng };
+                countWhere.latitude = { gte: bboxParts[1], lte: bboxParts[3] };
+                countWhere.longitude = { gte: bboxParts[0], lte: bboxParts[2] };
             }
         }
 
-        const [samples, maps] = await Promise.all([
+        const [total, samples, maps] = await Promise.all([
+            prisma.sample.count({ where: countWhere }),
             prisma.sample.findMany({
                 where,
                 include: { results: true },
@@ -445,14 +492,27 @@ exports.getGeoJson = async (req, res) => {
                     { updatedAt: 'desc' },
                     { id: 'desc' }
                 ],
-                take: limit
+                take: limit + 1,
+                ...(cursorClause ? { cursor: cursorClause, skip: skipClause } : {})
             }),
             getAnalysisMap()
         ]);
 
+        const hasMore = samples.length > limit;
+        const pageSamples = hasMore ? samples.slice(0, limit) : samples;
+
+        let nextCursor = null;
+        if (hasMore && pageSamples.length > 0) {
+            const last = pageSamples[pageSamples.length - 1];
+            nextCursor = exchangeStateService.encodeCursor({
+                lastUpdatedAt: last.updatedAt.toISOString(),
+                lastId: last.id
+            });
+        }
+
         const features = [];
 
-        samples.forEach(s => {
+        pageSamples.forEach(s => {
             const v2 = formatSampleV2(s, maps, { auth: req.sisAuth });
             const loc = v2.sampling.location;
 
@@ -501,7 +561,10 @@ exports.getGeoJson = async (req, res) => {
             type: 'FeatureCollection',
             schemaVersion: '2026-09-issue140-v2',
             sourceSystemId: getSourceSystemId(),
+            total,
             count: features.length,
+            hasMore,
+            nextCursor,
             features
         });
     } catch (err) {
@@ -514,8 +577,8 @@ exports.getGeoJson = async (req, res) => {
 exports.getStats = async (req, res) => {
     if (!checkConnectionActive(req, res)) return;
     try {
-        const sampleWhere = buildSampleWhere(req.sisAuth, {});
-        const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, {}));
+        const sampleWhere = buildSampleWhere(req.sisAuth, req.query);
+        const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, req.query));
 
         const keyLabs = req.sisAuth?.labs || [];
         const isApiKey = req.sisAuth?.type === 'API_KEY';
@@ -553,7 +616,6 @@ exports.getStats = async (req, res) => {
                 publishedObservations,
                 publishedSpectra,
                 registeredLabs: labsCount,
-                standardsCompliant: 'GLOSOLAN / ISO 17025',
                 timestamp: new Date().toISOString()
             }
         });

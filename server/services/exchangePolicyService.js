@@ -45,7 +45,7 @@ function getHeldSampleIds(db) {
         const cols = new Set((metaDb.prepare("PRAGMA table_info(Sample)").all() || []).map(c => c.name));
         const conds = [];
         const holdCondition = (col) => `(CASE
-            WHEN ${col} IS NULL OR TRIM(${col}) = '' THEN 0
+            WHEN ${col} IS NULL OR ${col} = '' THEN 0
             WHEN NOT json_valid(${col}) THEN 1
             WHEN json_type(${col}) != 'object' THEN 1
             WHEN COALESCE(json_extract(${col}, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD' THEN 1

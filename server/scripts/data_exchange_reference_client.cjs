@@ -39,6 +39,7 @@ function getArg(flag, fallback = null) {
 }
 const hasFlag = (flag) => args.includes(flag);
 const CHECKPOINT_FILE = getArg('--checkpoint', null);
+const EXPORT_FILE = getArg('--export', getArg('--out', null));
 
 function saveCheckpointAtomic(filePath, data) {
     if (!filePath) return;
@@ -58,11 +59,14 @@ Usage:
   node data_exchange_reference_client.cjs [options]
 
 Options:
-  --url <url>       Base URL of SoilFER-LIMS server (default: EXCHANGE_BASE_URL or http://localhost:5000)
-  --key <apiKey>    API key for authentication (default: EXCHANGE_API_KEY)
-  --profile <name>  Exchange profile: core-lossless-v2 or opennsis (default: core-lossless-v2)
-  --country <iso>   Optional country code filter (e.g. KEN, ZMB, GTM)
+  --url <url>         Base URL of SoilFER-LIMS server (default: EXCHANGE_BASE_URL or http://localhost:5000)
+  --key <apiKey>      API key for authentication (default: EXCHANGE_API_KEY)
+  --profile <name>    Exchange profile: core-lossless-v2 or opennsis (default: core-lossless-v2)
+  --country <iso>     Optional country code filter (e.g. KEN, ZMB, GTM)
   --limit <num>       Page limit for records (default: 5)
+  --checkpoint <path> Checkpoint file path for atomic state persistence and resumption
+  --export <path>     Export sink file path for verified records and ordered changes
+  --max-pages <num>   Maximum change feed pages to drain per execution (default: 50)
   --receipt           Submit authenticated delivery receipt with receiver-reported evidence
   --imported <num>    Receiver-reported successfully imported specimen count
   --quarantined <num> Receiver-reported quarantined specimen count (default: 0)
@@ -77,6 +81,7 @@ const API_KEY = getArg('--key', process.env.EXCHANGE_API_KEY || '');
 const PROFILE = getArg('--profile', 'core-lossless-v2');
 const COUNTRY = getArg('--country', null);
 const LIMIT = parseInt(getArg('--limit', '5'), 10) || 5;
+const MAX_CHANGE_PAGES = parseInt(getArg('--max-pages', '50'), 10) || 50;
 const SUBMIT_RECEIPT = hasFlag('--receipt');
 const IMPORTED_ARG = getArg('--imported', null);
 const QUARANTINED_ARG = getArg('--quarantined', null);
@@ -159,6 +164,13 @@ function request(method, path, body = null, customHeaders = {}, maxRetries = 3) 
             attempt++;
             try {
                 const res = await executeAttempt();
+                if (res.status === 429 && attempt <= maxRetries) {
+                    const retryAfterHeader = res.headers && res.headers['retry-after'];
+                    const retryAfterSec = retryAfterHeader ? parseInt(retryAfterHeader, 10) : 0;
+                    const delay = retryAfterSec > 0 ? retryAfterSec * 1000 : Math.min(2000, 200 * Math.pow(2, attempt - 1));
+                    await new Promise(r => setTimeout(r, delay));
+                    continue;
+                }
                 if ([502, 503, 504].includes(res.status) && attempt <= maxRetries) {
                     const delay = Math.min(2000, 200 * Math.pow(2, attempt - 1));
                     await new Promise(r => setTimeout(r, delay));
@@ -329,6 +341,8 @@ async function runClientWorkflow() {
     let snapshotContinuationCursor = existingCheckpoint?.changeFeedCursor || existingCheckpoint?.nextCursor || null;
     let skipSnapshotCreation = false;
     let skipSnapshotPagination = false;
+    let currentHarvestedItems = existingCheckpoint?.harvestedItems ? [...existingCheckpoint.harvestedItems] : [];
+    let isSnapshotDigestVerified = Boolean(existingCheckpoint?.digestVerified);
 
     if (existingCheckpoint) {
         // Validate context: profile and country
@@ -337,13 +351,17 @@ async function runClientWorkflow() {
         if (!profileMatch || !countryMatch) {
             console.warn(`[WARN] Checkpoint context mismatch (Checkpoint: profile=${existingCheckpoint.profile}, country=${existingCheckpoint.country} vs Current: profile=${PROFILE}, country=${COUNTRY}). Starting fresh export.`);
             existingCheckpoint = null;
-        } else if (existingCheckpoint.type === 'change_feed' && existingCheckpoint.completed) {
+        } else if (existingCheckpoint.type === 'change_feed') {
             skipSnapshotCreation = true;
             skipSnapshotPagination = true;
+            snapshotId = existingCheckpoint.snapshotId || null;
+            snapshotMeta = existingCheckpoint.snapshotMeta || null;
             snapshotContinuationCursor = existingCheckpoint.changeFeedCursor || existingCheckpoint.nextCursor;
         } else if (existingCheckpoint.snapshotId && existingCheckpoint.completed && existingCheckpoint.digestVerified) {
             skipSnapshotCreation = true;
             skipSnapshotPagination = true;
+            snapshotId = existingCheckpoint.snapshotId;
+            snapshotMeta = existingCheckpoint.snapshotMeta || null;
             snapshotContinuationCursor = existingCheckpoint.changeFeedCursor || existingCheckpoint.nextCursor;
         } else if (existingCheckpoint.snapshotId) {
             skipSnapshotCreation = true;
@@ -397,7 +415,9 @@ async function runClientWorkflow() {
     if (snapshotId) {
         await step(`Read Snapshot Pages (GET /api/v2/data-exchange/snapshots/${snapshotId}/pages)`, async () => {
             if (skipSnapshotPagination) {
-                return `Snapshot previously verified and completed in checkpoint (${existingCheckpoint?.totalHarvested || 0} items). Resuming change feed.`;
+                currentHarvestedItems = existingCheckpoint?.harvestedItems ? [...existingCheckpoint.harvestedItems] : [];
+                harvestedCount = existingCheckpoint?.totalHarvested ?? currentHarvestedItems.length;
+                return `Snapshot previously verified and completed in checkpoint (${harvestedCount} items). Resuming change feed.`;
             }
             let pageNum = existingCheckpoint?.pageNum || 0;
             let currentCursor = existingCheckpoint?.pageCursor || null;
@@ -448,6 +468,7 @@ async function runClientWorkflow() {
             }
 
             harvestedCount = totalHarvested;
+            currentHarvestedItems = harvestedItems;
 
             if (!isComplete) {
                 throw new Error(`Snapshot pagination incomplete: reached page safety limit ${MAX_PAGES}. Retrieved ${totalHarvested} items (partial).`);
@@ -474,6 +495,7 @@ async function runClientWorkflow() {
             }
 
             const digestStatus = `VERIFIED (${computedDigest.slice(0, 16)}...)`;
+            isSnapshotDigestVerified = true;
 
             if (CHECKPOINT_FILE) {
                 saveCheckpointAtomic(CHECKPOINT_FILE, {
@@ -494,46 +516,116 @@ async function runClientWorkflow() {
                 });
             }
 
+            if (EXPORT_FILE) {
+                saveCheckpointAtomic(EXPORT_FILE, {
+                    type: 'lims_exchange_export',
+                    snapshotId,
+                    snapshotMeta: meta,
+                    totalHarvested,
+                    harvestedItems,
+                    eventsReceived: 0,
+                    changes: [],
+                    completed: true,
+                    backlogRemaining: false,
+                    cursor: snapshotContinuationCursor || meta.nextCursor,
+                    updatedAt: new Date().toISOString()
+                });
+            }
+
             return `Retrieved ${totalHarvested} items across ${pageNum} page(s). Delivered digest: ${digestStatus} (retrieval only; receiver import status pending).`;
         }, { required: true });
     }
 
     // 9. Change Feed Continuous Polling
     await step('Monotonic Change Feed (GET /api/v2/data-exchange/changes)', async () => {
-        let changeUrl = `/api/v2/data-exchange/changes?limit=${LIMIT}&profile=${encodeURIComponent(PROFILE)}`;
-        if (COUNTRY) {
-            changeUrl += `&country=${encodeURIComponent(COUNTRY)}`;
-        }
         const cursorToUse = snapshotContinuationCursor || existingCheckpoint?.changeFeedCursor || existingCheckpoint?.nextCursor;
-        if (cursorToUse) {
-            changeUrl += `&cursor=${encodeURIComponent(cursorToUse)}`;
-        }
-        const res = await request('GET', changeUrl);
-        if (res.status !== 200) {
-            const err = new Error(`HTTP ${res.status}`);
-            err.response = res;
-            throw err;
-        }
-        const changes = res.data.changes || [];
-        const nextCursor = res.data.nextCursor;
-        if (CHECKPOINT_FILE && nextCursor) {
-            saveCheckpointAtomic(CHECKPOINT_FILE, {
-                type: 'change_feed',
-                snapshotId,
-                snapshotMeta: snapshotMeta || existingCheckpoint?.snapshotMeta || null,
-                completed: true,
-                pageCursor: null,
-                changeFeedCursor: nextCursor,
-                nextCursor,
-                totalHarvested: harvestedCount,
-                digestVerified: true,
-                eventsReceived: changes.length,
-                profile: PROFILE,
-                country: COUNTRY,
-                updatedAt: new Date().toISOString()
-            });
-        }
-        return `Received ${changes.length} events (resumed from snapshot continuation: ${Boolean(cursorToUse)}), cursor: ${nextCursor ? nextCursor.slice(0, 16) + '...' : 'none'}`;
+        const harvestedItems = currentHarvestedItems.length > 0 ? currentHarvestedItems : (existingCheckpoint?.harvestedItems || []);
+        const totalHarvested = harvestedCount || (existingCheckpoint?.totalHarvested ?? harvestedItems.length);
+        const allChanges = Array.isArray(existingCheckpoint?.changes) ? [...existingCheckpoint.changes] : [];
+        let currentCursor = cursorToUse;
+        let changePageNum = 0;
+        let hasMore = true;
+        let totalReceivedThisRun = 0;
+
+        do {
+            changePageNum++;
+            let changeUrl = `/api/v2/data-exchange/changes?limit=${LIMIT}&profile=${encodeURIComponent(PROFILE)}`;
+            if (COUNTRY) {
+                changeUrl += `&country=${encodeURIComponent(COUNTRY)}`;
+            }
+            if (currentCursor) {
+                changeUrl += `&cursor=${encodeURIComponent(currentCursor)}`;
+            }
+            const res = await request('GET', changeUrl);
+            if (res.status === 410) {
+                const msg = `Change feed cursor expired or invalid (HTTP 410 Gone). Recovery action: Re-baseline required. Create a new baseline snapshot via POST /api/v2/data-exchange/snapshots.`;
+                const err = new Error(msg);
+                err.response = res;
+                err.code = 'CURSOR_EXPIRED';
+                throw err;
+            }
+            if (res.status === 401) {
+                const msg = `Authentication rejected (HTTP 401 Unauthorized). Recovery action: API key may be revoked or expired. Obtain a new API key or connection grant.`;
+                const err = new Error(msg);
+                err.response = res;
+                err.code = 'AUTH_REJECTED';
+                throw err;
+            }
+            if (res.status !== 200) {
+                const err = new Error(`HTTP ${res.status}: ${typeof res.data === 'object' ? JSON.stringify(res.data) : res.data}`);
+                err.response = res;
+                throw err;
+            }
+            const pageChanges = res.data.changes || [];
+            totalReceivedThisRun += pageChanges.length;
+            for (const change of pageChanges) {
+                const exists = allChanges.some(c => (c.id && change.id && c.id === change.id) || (c.sequence !== undefined && change.sequence !== undefined && c.sequence === change.sequence));
+                if (!exists) {
+                    allChanges.push(change);
+                }
+            }
+            currentCursor = res.data.nextCursor || currentCursor;
+            hasMore = Boolean(res.data.hasMore);
+
+            if (CHECKPOINT_FILE) {
+                saveCheckpointAtomic(CHECKPOINT_FILE, {
+                    type: 'change_feed',
+                    snapshotId: snapshotId || existingCheckpoint?.snapshotId || null,
+                    snapshotMeta: snapshotMeta || existingCheckpoint?.snapshotMeta || null,
+                    completed: !hasMore,
+                    backlogRemaining: hasMore,
+                    pageCursor: null,
+                    changeFeedCursor: currentCursor,
+                    nextCursor: currentCursor,
+                    totalHarvested,
+                    harvestedItems,
+                    changes: allChanges,
+                    digestVerified: isSnapshotDigestVerified || (existingCheckpoint?.digestVerified ?? true),
+                    eventsReceived: allChanges.length,
+                    profile: PROFILE,
+                    country: COUNTRY,
+                    updatedAt: new Date().toISOString()
+                });
+            }
+
+            if (EXPORT_FILE) {
+                saveCheckpointAtomic(EXPORT_FILE, {
+                    type: 'lims_exchange_export',
+                    snapshotId: snapshotId || existingCheckpoint?.snapshotId || null,
+                    totalHarvested,
+                    harvestedItems,
+                    eventsReceived: allChanges.length,
+                    changes: allChanges,
+                    completed: !hasMore,
+                    backlogRemaining: hasMore,
+                    cursor: currentCursor,
+                    updatedAt: new Date().toISOString()
+                });
+            }
+        } while (hasMore && changePageNum < MAX_CHANGE_PAGES);
+
+        const backlogMsg = hasMore ? ` (backlog remaining: safety limit of ${MAX_CHANGE_PAGES} pages reached)` : '';
+        return `Received ${allChanges.length} events (resumed from snapshot continuation: ${Boolean(cursorToUse)}), cursor: ${currentCursor ? currentCursor.slice(0, 16) + '...' : 'none'}${backlogMsg}`;
     });
 
     // 10. Submit Delivery Receipt (requires explicit receiver-reported import evidence)

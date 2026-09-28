@@ -184,7 +184,29 @@ paths:
         Streams GeoJSON Point features for GIS integration.
         Coordinates are strictly WGS84 [lng, lat]. Root crs object is omitted per RFC 7946.
       parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            maximum: 500
+          description: Number of features per page
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Opaque pagination continuation cursor
+        - name: bbox
+          in: query
+          schema:
+            type: string
+          description: Bounding box filter formatted as 'minLng,minLat,maxLng,maxLat'
+          example: "34.0,-5.0,42.0,5.0"
         - name: country
+          in: query
+          schema:
+            type: string
+        - name: project
           in: query
           schema:
             type: string
@@ -1064,6 +1086,25 @@ components:
         type:
           type: string
           enum: [FeatureCollection]
+        schemaVersion:
+          type: string
+          example: 2026-09-issue140-v2
+        sourceSystemId:
+          type: string
+          example: soilfer-lims-core
+        total:
+          type: integer
+          description: Total eligible spatial features matching filter context
+        count:
+          type: integer
+          description: Number of spatial features delivered in this page
+        hasMore:
+          type: boolean
+          description: Indicates whether additional spatial features remain beyond current page
+        nextCursor:
+          type: string
+          nullable: true
+          description: Signed opaque pagination continuation cursor
         features:
           type: array
           items:
@@ -1123,9 +1164,17 @@ components:
           type: string
         connectionId:
           type: string
+        highWaterSequence:
+          type: integer
+          description: Highest journal sequence captured at snapshot baseline
+          example: 42
         highWaterTimestamp:
           type: string
           format: date-time
+        nextCursor:
+          type: string
+          description: Signed cursor for continuous sync resumption from snapshot boundary
+          example: eyJ2IjoyLC...
         totalSamples:
           type: integer
         digest:
@@ -1158,6 +1207,11 @@ components:
         sourceSystemId:
           type: string
           example: soilfer-lims-core
+        batchId:
+          type: string
+          nullable: true
+          description: Unique batch identifier recorded for delivery receipt resolution
+          example: batch_1727488000_a1b2c3d4
         boundaryTimestamp:
           type: string
           format: date-time
@@ -1175,8 +1229,9 @@ components:
             properties:
               sequence:
                 type: integer
-              eventId:
+              id:
                 type: string
+                description: Event journal identifier
               eventType:
                 type: string
                 enum: [PUBLICATION, AMENDMENT, WITHDRAWAL]

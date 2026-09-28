@@ -78,24 +78,18 @@ Verify that the response returns:
 - `supportedProfiles: ["opennsis", "glosis", "default"]`
 
 ### 3.2 Running the Standalone Reference Client Verification
-SoilFER-LIMS includes an automated reference client that tests all 10 exchange contracts:
+SoilFER-LIMS includes an automated reference client verification mode (`--verify`) that executes an isolated synthetic probe harness (`server/scripts/test_issue140_probes.cjs`) against an in-memory SQLite instance, testing exchange contracts and invariants without mutating or accessing application databases:
 ```bash
-cd server
-node scripts/data_exchange_reference_client.cjs --verify
+node server/scripts/data_exchange_reference_client.cjs --verify
 ```
 A clean run outputs:
 ```
-[PASS] Capabilities (unauthenticated): status=200, schema=2026-09-issue140-v2
-[PASS] Capabilities (authenticated): schema=2026-09-issue140-v2, contract=2.0.0
-[PASS] Stats: totalSamples=...
-[PASS] Samples: count=...
-[PASS] Observations: count=...
-[PASS] Spatial GeoJSON: features=..., RFC 7946 compliant
-[PASS] Snapshots created: id=snap_...
-[PASS] Snapshot Pages: items=...
-[PASS] Change Feed: events=...
-[PASS] Delivery Receipts: id=rec_..., status=ACKNOWLEDGED
-All 10 Reference Client verification checks passed successfully against in-process app.
+Running isolated reference verification harness (in-memory, non-destructive)...
+[PASS] Probe remediation 1: Snapshot remains frozen after result-only edit
+[PASS] Probe remediation 2: Snapshot row does not disappear after sample update
+...
+ALL 16 PROBE REMEDIATIONS VERIFIED SUCCESSFULLY.
+Isolated self-verification passed. No production/development database touched.
 ```
 
 ---
@@ -104,7 +98,7 @@ All 10 Reference Client verification checks passed successfully against in-proce
 
 ### Issue 1: External Consumer Receives Empty Array (`data: []`)
 - **Cause A: Scoping Mismatch (IR-14)**: Check if the key's authorized laboratory scope matches the assigned laboratories of the samples. If the key was created without selecting any laboratory, fail-closed policy returns zero records.
-- **Cause B: Publication Lifecycle Invariant**: External consumers strictly receive samples in `APPROVED` or `RELEASED` status. If samples are in `RECEIVED`, `PROCESSING`, or `REVIEW`, they are excluded by design until final laboratory approval.
+- **Cause B: Publication Lifecycle Policy**: External consumers strictly receive specimens that have completed formal laboratory approval (`approvedAt IS NOT NULL`), including approved specimens with subsequent archived or disposed retention lifecycle history (`status IN ('APPROVED', 'ARCHIVED', 'DISPOSED')`). Unapproved samples in `RECEIVED`, `PROCESSING`, `REVIEW`, or unapproved `ARCHIVED` status are excluded by design until laboratory approval.
 - **Resolution**: In **Active API Keys**, inspect the key's `labs` scope. If empty, revoke the key and re-issue with explicit laboratory scopes.
 
 ### Issue 2: Consumer Receives HTTP 410 `CURSOR_EXPIRED`
@@ -127,17 +121,18 @@ All 10 Reference Client verification checks passed successfully against in-proce
 If an external consumer credential is leaked or compromised:
 1. Open **Admin Panel** > **Active API Keys**.
 2. Locate the compromised key and click **Revoke**.
-3. All requests using that key are rejected immediately at the TLS gateway layer (HTTP 401).
+3. All requests using that key are rejected immediately by application middleware (`server/middleware/exchangeAuthMiddleware.js`) with HTTP 401 Unauthorized (`KEY_REVOKED`).
 
-### Database Storage Pruning
-Durable exchange tables (`_exchange_snapshots`, `_exchange_receipts`, `_exchange_journal`) are stored in `server/prisma/dev.db`.
-Snapshots automatically expire after 24 hours (TTL). To inspect snapshot storage:
+### Database Storage Pruning & Retention Management
+Durable exchange tables (`_exchange_snapshots`, `_exchange_snapshot_items`, `_exchange_receipts`, `_exchange_batches`, `_exchange_rotation_operations`) are stored in the database configured via `DATABASE_PATH` (default: `server/prisma/dev.db`).
+Snapshots automatically expire after their configured TTL (nominal 24 hours).
+To inspect or safely prune expired exchange storage without manual SQL deletion, use the non-destructive pruner utility:
 ```bash
-sqlite3 server/prisma/dev.db "SELECT id, connection_id, total_items, created_at, expires_at FROM _exchange_snapshots;"
-```
-Expired snapshots can be cleaned up without affecting laboratory sample records:
-```bash
-sqlite3 server/prisma/dev.db "DELETE FROM _exchange_snapshots WHERE expires_at < datetime('now');"
+# Preview expired exchange records without modifying database (dry run)
+node server/scripts/prune_exchange_storage.cjs "${DATABASE_PATH:-server/prisma/dev.db}" --dry-run
+
+# Safely prune expired snapshots, child items, obsolete batches/receipts, and expired rotation ops
+node server/scripts/prune_exchange_storage.cjs "${DATABASE_PATH:-server/prisma/dev.db}"
 ```
 
 ---
