@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const os = require('os');
 const Database = require('better-sqlite3');
 const supertest = require('supertest');
 const express = require('express');
@@ -45,7 +46,7 @@ describe('Issue #149 Head 9ac1202 Remediation Contracts (Codex Independent Revie
     }
 
     beforeAll(async () => {
-        dir = fs.mkdtempSync(path.join(__dirname, '..', '..', '..', 'scratch', 'jest-9ac1202-'));
+        dir = fs.mkdtempSync(path.join(os.tmpdir(), 'jest-9ac1202-'));
         databasePath = path.join(dir, 'test-remediations.db');
         process.env.DATABASE_PATH = databasePath;
         process.env.NODE_ENV = 'test';
@@ -90,9 +91,9 @@ describe('Issue #149 Head 9ac1202 Remediation Contracts (Codex Independent Revie
     });
 
     afterAll(async () => {
-        await prisma.$disconnect();
+        if (prisma) await prisma.$disconnect();
         if (db && db.open) db.close();
-        try { fs.rmSync(dir, { recursive: true, force: true }); } catch (e) {}
+        try { if (dir) fs.rmSync(dir, { recursive: true, force: true }); } catch (e) {}
     });
 
     test('Package 1: JSON null metadata consistently excluded across canonical predicate, sample list & count, and observations', async () => {
