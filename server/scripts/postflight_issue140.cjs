@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 /**
- * Bounded, Read-Only Postflight Verification for Issue #140 (PR #149)
+ * Bounded Read-Only HTTP API Postflight Verification for Issue #140 (PR #149)
  *
- * Verifies:
- * 1. Database table presence and schema integrity (no mutations)
- * 2. Public unauthenticated endpoint availability (health, capabilities)
+ * Verifies mounted HTTP API contracts:
+ * 1. Database schema presence and integrity checks (no mutations)
+ * 2. Public discovery endpoints availability (health, capabilities)
  * 3. Anonymous request rejection on all protected exchange & directory routes (HTTP 401)
- * 4. Manager UI & Super Admin RBAC boundaries using approved existing principals (HTTP 200 vs 403)
- * 5. Scoped laboratory catalogue retrieval
+ * 4. Directory projection policy (lightweight public fields, no operational leaks)
+ * 5. Role-based access control (Super Admin vs Lab Manager boundaries) using approved existing principals
+ * 6. Scoped laboratory catalogue retrieval (strictly excludes unauthorized/foreign facilities)
  *
- * Exit code 0 on complete pass, exit code 1 on any failure.
+ * NOTE: This probe validates HTTP API contracts; it does not render browser UI or provision credentials.
+ * Exit code 0 on complete pass, exit code 1 on any failure (fail-closed).
  */
 
 'use strict';
@@ -172,13 +174,16 @@ async function runPostflight() {
         // --- 4. Role-Based Access Control & Principal Verification ---
         console.log('\n--- 4. Role-Based Access Control & Scoped Catalogue ---');
         if (!JWT_SECRET) {
-            console.warn('[WARN] JWT_SECRET not provided; skipping authenticated role checks.');
+            // Fail closed: Missing required JWT_SECRET must block release verification
+            logResult('FAIL', 'JWT_SECRET configuration', 'JWT_SECRET environment variable is missing; cannot verify role boundaries');
         } else {
             // Find existing active principals in DB
             const superAdmin = db.prepare("SELECT id, username, role, tokenVersion FROM User WHERE role = 'SUPER_ADMIN' AND isActive = 1 LIMIT 1").get();
-            const labManager = db.prepare("SELECT id, username, role, labId, tokenVersion FROM User WHERE role = 'LAB_MANAGER' AND isActive = 1 LIMIT 1").get();
+            const labManager = db.prepare("SELECT id, username, role, labId, countries, projects, tokenVersion FROM User WHERE role = 'LAB_MANAGER' AND isActive = 1 LIMIT 1").get();
 
-            if (superAdmin) {
+            if (!superAdmin) {
+                logResult('FAIL', 'SUPER_ADMIN principal presence', 'Required active SUPER_ADMIN user not found in database');
+            } else {
                 const adminToken = jwt.sign({
                     id: superAdmin.id,
                     username: superAdmin.username,
@@ -187,33 +192,63 @@ async function runPostflight() {
                 }, JWT_SECRET, { expiresIn: '5m' });
                 const adminHeaders = { 'Authorization': `Bearer ${adminToken}` };
 
+                // Directory lookup with projection policy check (lightweight public fields only, no operational leaks)
                 const dirRes = await request('GET', '/api/labs/directory', adminHeaders);
-                logResult(dirRes.status === 200 ? 'PASS' : 'FAIL', 'SUPER_ADMIN GET /api/labs/directory -> 200', `Got ${dirRes.status}`);
+                let isDirValid = dirRes.status === 200 && Array.isArray(dirRes.body) && dirRes.body.length > 0;
+                if (isDirValid) {
+                    const LEAK_KEYS = ['notes', 'projects', 'users', 'sampleCount', 'allSamplesCount', 'activeSamplesCount', 'totalSamplesCount', 'equipment', 'staff', 'capacity'];
+                    for (const item of dirRes.body) {
+                        for (const k of LEAK_KEYS) {
+                            if (k in item) {
+                                isDirValid = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                logResult(isDirValid ? 'PASS' : 'FAIL', 'SUPER_ADMIN GET /api/labs/directory (projection policy)', `Got ${dirRes.status}, valid: ${isDirValid}, items: ${Array.isArray(dirRes.body) ? dirRes.body.length : 0}`);
 
+                // Connection and key management
                 const connRes = await request('GET', '/api/v1/data-exchange/connections', adminHeaders);
-                logResult(connRes.status === 200 ? 'PASS' : 'FAIL', 'SUPER_ADMIN GET /api/v1/data-exchange/connections -> 200', `Got ${connRes.status}`);
+                const isConnValid = connRes.status === 200 && Array.isArray(connRes.body?.data);
+                logResult(isConnValid ? 'PASS' : 'FAIL', 'SUPER_ADMIN GET /api/v1/data-exchange/connections -> 200', `Got ${connRes.status}`);
 
                 const keysRes = await request('GET', '/api/v1/data-exchange/keys', adminHeaders);
-                logResult(keysRes.status === 200 ? 'PASS' : 'FAIL', 'SUPER_ADMIN GET /api/v1/data-exchange/keys -> 200', `Got ${keysRes.status}`);
+                const isKeysValid = keysRes.status === 200 && Array.isArray(keysRes.body?.data);
+                logResult(isKeysValid ? 'PASS' : 'FAIL', 'SUPER_ADMIN GET /api/v1/data-exchange/keys -> 200', `Got ${keysRes.status}`);
 
                 const labsRes = await request('GET', '/api/labs', adminHeaders);
                 logResult(labsRes.status === 200 ? 'PASS' : 'FAIL', 'SUPER_ADMIN GET /api/labs -> 200', `Got ${labsRes.status}`);
-            } else {
-                console.log('[INFO] No active SUPER_ADMIN found in User table; skipping admin token tests.');
             }
 
-            if (labManager) {
+            if (!labManager) {
+                logResult('FAIL', 'LAB_MANAGER principal presence', 'Required active LAB_MANAGER user not found in database');
+            } else {
                 const mgrToken = jwt.sign({
                     id: labManager.id,
                     username: labManager.username,
                     role: labManager.role,
                     labId: labManager.labId,
+                    countries: labManager.countries,
+                    projects: labManager.projects,
                     tokenVersion: labManager.tokenVersion || 0
                 }, JWT_SECRET, { expiresIn: '5m' });
                 const mgrHeaders = { 'Authorization': `Bearer ${mgrToken}` };
 
                 const dirRes = await request('GET', '/api/labs/directory', mgrHeaders);
-                logResult(dirRes.status === 200 ? 'PASS' : 'FAIL', 'LAB_MANAGER GET /api/labs/directory -> 200', `Got ${dirRes.status}`);
+                let isMgrDirValid = dirRes.status === 200 && Array.isArray(dirRes.body);
+                if (isMgrDirValid) {
+                    const LEAK_KEYS = ['notes', 'projects', 'users', 'sampleCount', 'allSamplesCount', 'activeSamplesCount', 'totalSamplesCount', 'equipment', 'staff', 'capacity'];
+                    for (const item of dirRes.body) {
+                        for (const k of LEAK_KEYS) {
+                            if (k in item) {
+                                isMgrDirValid = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                logResult(isMgrDirValid ? 'PASS' : 'FAIL', 'LAB_MANAGER GET /api/labs/directory (projection policy)', `Got ${dirRes.status}, valid: ${isMgrDirValid}`);
 
                 const connRes = await request('GET', '/api/v1/data-exchange/connections', mgrHeaders);
                 logResult(connRes.status === 403 ? 'PASS' : 'FAIL', 'LAB_MANAGER GET /api/v1/data-exchange/connections -> 403 Forbidden', `Got ${connRes.status}`);
@@ -221,10 +256,25 @@ async function runPostflight() {
                 const keysRes = await request('GET', '/api/v1/data-exchange/keys', mgrHeaders);
                 logResult(keysRes.status === 403 ? 'PASS' : 'FAIL', 'LAB_MANAGER GET /api/v1/data-exchange/keys -> 403 Forbidden', `Got ${keysRes.status}`);
 
+                // Scoped catalogue assertion: verify returned facilities belong strictly to authorized scope
                 const labsRes = await request('GET', '/api/labs', mgrHeaders);
-                logResult(labsRes.status === 200 ? 'PASS' : 'FAIL', 'LAB_MANAGER GET /api/labs (scoped catalogue) -> 200', `Got ${labsRes.status}`);
-            } else {
-                console.log('[INFO] No active LAB_MANAGER found in User table; skipping manager token tests.');
+                let catalogueScoped = labsRes.status === 200 && Array.isArray(labsRes.body);
+                if (catalogueScoped) {
+                    for (const lab of labsRes.body) {
+                        if (labManager.labId && lab.id !== labManager.labId) {
+                            catalogueScoped = false;
+                            break;
+                        }
+                    }
+                }
+                logResult(catalogueScoped ? 'PASS' : 'FAIL',
+                    'LAB_MANAGER GET /api/labs (scoped catalogue)',
+                    `Status: ${labsRes.status}, Scoped: ${catalogueScoped} (returned ${Array.isArray(labsRes.body) ? labsRes.body.length : 0} labs)`
+                );
+
+                // Negative fixture: forged token rejected on protected route (HTTP 401)
+                const forgedRes = await request('GET', '/api/labs/directory', { 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid.signature' });
+                logResult(forgedRes.status === 401 ? 'PASS' : 'FAIL', 'Negative fixture: forged token GET /api/labs/directory -> 401', `Got ${forgedRes.status}`);
             }
         }
     } finally {

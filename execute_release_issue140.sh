@@ -6,7 +6,8 @@ set -euo pipefail
 #   Target: Safe LIMS-NSIS Data Exchange Gateway (PR #149)
 #   Standard: Phase-Aware Stopped-Writer Backup, Additive Migration,
 #             Preserved Container Config, Immutable Image Cutover,
-#             Fail-Closed Recovery, Dedicated Hashed Postflight
+#             Fail-Closed Recovery, Dedicated Hashed Postflight,
+#             Pre-Exposure Background Writer Hold
 # ============================================================
 
 if [ $# -lt 1 ] || [ -z "$1" ]; then
@@ -16,6 +17,9 @@ if [ $# -lt 1 ] || [ -z "$1" ]; then
 fi
 
 REVIEWED_IMAGE="$1"
+EXPECTED_COMMIT_SHA=${EXPECTED_COMMIT_SHA:-"828087cc8630478e4492f0cb7078ab31a0634968"}
+EXPECTED_POSTFLIGHT_SHA=${EXPECTED_POSTFLIGHT_SHA:-"8ef04ddb73e2030b3ebaaa5d687b924f8cfa741c9f7c74d0e81f1c2840f8a2c6"}
+
 APP_CONTAINER_NAME=${APP_CONTAINER_NAME:-"soilfer-lims"}
 MIGRATION_CONTAINER_NAME=${MIGRATION_CONTAINER_NAME:-"soilfer-lims-migration"}
 DATA_VOLUME=${DOCKER_VOLUME_NAME:-"lims_lims-data"}
@@ -41,9 +45,11 @@ mkdir -p "${BACKUP_DIR}" "${LOG_DIR}"
 exec > >(tee -a "${LOG_FILE}") 2>&1
 
 echo "=== SOILFER-LIMS PRODUCTION RELEASE EXECUTION: ISSUE #140 ==="
-echo "Execution Timestamp: ${TIMESTAMP}"
-echo "Target Image:        ${REVIEWED_IMAGE}"
-echo "Log File:            ${LOG_FILE}"
+echo "Execution Timestamp:    ${TIMESTAMP}"
+echo "Target Image Input:     ${REVIEWED_IMAGE}"
+echo "Expected Commit SHA:    ${EXPECTED_COMMIT_SHA}"
+echo "Expected Postflight SHA: ${EXPECTED_POSTFLIGHT_SHA}"
+echo "Log File:               ${LOG_FILE}"
 
 # --- Exclusive Host Locking (Fail-Closed) ---
 LOCK_FILE="${LIMS_OPT_DIR}/release_issue140.lock"
@@ -76,40 +82,75 @@ BACKUP_SHA=""
 STOPPED_SAMPLES=0
 STOPPED_RESULTS=0
 
-# Helper to assert no writers are running
+# Helper to assert no writers are running (distinguishes absent containers from unknown inspect errors)
 assert_writers_stopped() {
-    local running
     local containers_to_check=("${APP_CONTAINER_NAME}" "${MIGRATION_CONTAINER_NAME}")
 
     for c in "${containers_to_check[@]}"; do
         if [ -z "${c}" ]; then continue; fi
-        running=$("${DOCKER_CMD}" inspect "${c}" --format '{{.State.Running}}' 2>/dev/null || echo "false")
-        if [ "${running}" = "true" ]; then
+
+        local inspect_out
+        local inspect_rc=0
+        inspect_out=$("${DOCKER_CMD}" inspect "${c}" --format '{{.State.Running}}' 2>&1) || inspect_rc=$?
+
+        if [ ${inspect_rc} -ne 0 ]; then
+            # Check if container simply does not exist (valid absent state)
+            if echo "${inspect_out}" | grep -qiE "No such (container|object)"; then
+                continue
+            else
+                echo "ERROR: Docker inspect returned unknown error on '${c}': ${inspect_out}"
+                return 1
+            fi
+        fi
+
+        if [ "${inspect_out}" = "true" ]; then
             echo "Stopping active container '${c}'..."
             if ! "${DOCKER_CMD}" stop -t 10 "${c}"; then
                 echo "ERROR: Docker stop failed on '${c}'"
                 return 1
             fi
-        fi
-        running=$("${DOCKER_CMD}" inspect "${c}" --format '{{.State.Running}}' 2>/dev/null || echo "false")
-        if [ "${running}" = "true" ]; then
-            echo "ERROR: Container '${c}' is still running after stop!"
+
+            inspect_out=$("${DOCKER_CMD}" inspect "${c}" --format '{{.State.Running}}' 2>&1) || inspect_rc=$?
+            if [ ${inspect_rc} -ne 0 ]; then
+                if echo "${inspect_out}" | grep -qiE "No such (container|object)"; then
+                    continue
+                else
+                    echo "ERROR: Docker inspect failed after stop on '${c}': ${inspect_out}"
+                    return 1
+                fi
+            fi
+            if [ "${inspect_out}" = "true" ]; then
+                echo "ERROR: Container '${c}' is still running after stop!"
+                return 1
+            fi
+        elif [ "${inspect_out}" != "false" ]; then
+            echo "ERROR: Unknown running status on '${c}': ${inspect_out}"
             return 1
         fi
     done
     return 0
 }
 
-# Function to run container with preserved configuration
+# Function to run container with preserved configuration and optional background-job suppression
 start_app_container() {
     local image_to_run="$1"
-    echo "Starting container '${APP_CONTAINER_NAME}' with image '${image_to_run}'..."
+    local run_mode=${2:-"production"}
+    local env_extra=()
+
+    if [ "${run_mode}" = "pre_exposure" ]; then
+        echo "Starting container '${APP_CONTAINER_NAME}' in pre-exposure verification mode (DISABLE_BACKGROUND_JOBS=true)..."
+        env_extra+=("-e" "DISABLE_BACKGROUND_JOBS=true")
+    else
+        echo "Starting container '${APP_CONTAINER_NAME}' in full production mode..."
+    fi
+
     "${DOCKER_CMD}" rm -f "${APP_CONTAINER_NAME}" 2>/dev/null || true
     "${DOCKER_CMD}" run -d \
         --name "${APP_CONTAINER_NAME}" \
         --restart unless-stopped \
         -p 127.0.0.1:3000:3000 \
         --env-file "${LIMS_OPT_DIR}/.env" \
+        "${env_extra[@]}" \
         -v "${DATA_VOLUME}:/app/server/prisma" \
         -v "${ASSETS_VOLUME}:/app/server/uploads" \
         --health-cmd "wget -q --spider http://localhost:3000/api/health" \
@@ -139,10 +180,7 @@ cleanup_recovery() {
         echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 
         case "${PHASE}" in
-            INIT)
-                echo "Failed in INIT phase. No system changes made."
-                ;;
-            PREFLIGHT)
+            INIT|PREFLIGHT)
                 echo "Preflight check failed. Live application remains untouched."
                 ;;
             QUIESCE)
@@ -155,9 +193,7 @@ cleanup_recovery() {
             STOPPED_WRITER|BACKUP)
                 echo "Container stopped before database mutation. Restarting baseline container..."
                 local restart_ok=false
-                if [ -n "${BASELINE_IMAGE_ID}" ] && start_app_container "${BASELINE_IMAGE_ID}"; then
-                    restart_ok=true
-                elif start_app_container "${BASELINE_TAG}"; then
+                if [ -n "${BASELINE_IMAGE_ID:-}" ] && start_app_container "${BASELINE_IMAGE_ID}" "production"; then
                     restart_ok=true
                 fi
 
@@ -190,84 +226,130 @@ cleanup_recovery() {
                     exit 1
                 fi
 
-                # Preserve failed database and WAL/SHM before restore for forensic inspection
+                # 1. Require backup file to exist; missing backup MUST block restore and fail closed!
+                if [ ! -f "${BACKUP_FILE}" ]; then
+                    echo "FATAL RECOVERY ERROR: Pre-release backup file '${BACKUP_FILE}' not found! Cannot restore database."
+                    echo "Ingress remains QUIESCED (503). Preserving failed state for manual operator recovery."
+                    exit 1
+                fi
+
+                # 2. Verify backup hash before restore
+                if [ -n "${BACKUP_SHA:-}" ]; then
+                    local cur_backup_sha
+                    cur_backup_sha=$(sha256sum "${BACKUP_FILE}" 2>/dev/null | awk '{print $1}')
+                    if [ "${cur_backup_sha}" != "${BACKUP_SHA}" ]; then
+                        echo "FATAL RECOVERY ERROR: Backup SHA mismatch! Expected ${BACKUP_SHA}, got ${cur_backup_sha}. Aborting restore."
+                        exit 1
+                    fi
+                fi
+
+                # 3. Verify backup integrity and foreign keys before restore
+                local b_integ
+                b_integ=$("${SQLITE3_CMD}" "${BACKUP_FILE}" "PRAGMA integrity_check;" 2>/dev/null || echo "failed")
+                if [ "${b_integ}" != "ok" ]; then
+                    echo "FATAL RECOVERY ERROR: Backup integrity check failed: ${b_integ}. Aborting restore."
+                    exit 1
+                fi
+                local b_fk
+                b_fk=$("${SQLITE3_CMD}" "${BACKUP_FILE}" "PRAGMA foreign_key_check;" 2>/dev/null || echo "failed")
+                if [ -n "${b_fk}" ] && [ "${b_fk}" != "OK (0 errors)" ]; then
+                    echo "FATAL RECOVERY ERROR: Backup foreign key check failed: ${b_fk}. Aborting restore."
+                    exit 1
+                fi
+
+                # 4. Preserve failed database and WAL/SHM before restore for forensic inspection
                 if [ -f "${DB_PATH}" ]; then
                     echo "Preserving failed database state to ${BACKUP_DIR}/failed_db_${TIMESTAMP}.db..."
-                    cp "${DB_PATH}" "${BACKUP_DIR}/failed_db_${TIMESTAMP}.db" || true
+                    if ! cp "${DB_PATH}" "${BACKUP_DIR}/failed_db_${TIMESTAMP}.db"; then
+                        echo "FATAL RECOVERY ERROR: Failed to preserve failed database file before restore! Aborting."
+                        exit 1
+                    fi
                     if [ -f "${DB_PATH}-wal" ]; then
-                        cp "${DB_PATH}-wal" "${BACKUP_DIR}/failed_db_${TIMESTAMP}.db-wal" || true
+                        cp "${DB_PATH}-wal" "${BACKUP_DIR}/failed_db_${TIMESTAMP}.db-wal" 2>/dev/null || true
                     fi
                     if [ -f "${DB_PATH}-shm" ]; then
-                        cp "${DB_PATH}-shm" "${BACKUP_DIR}/failed_db_${TIMESTAMP}.db-shm" || true
+                        cp "${DB_PATH}-shm" "${BACKUP_DIR}/failed_db_${TIMESTAMP}.db-shm" 2>/dev/null || true
                     fi
                 fi
 
-                if [ -f "${BACKUP_FILE}" ]; then
-                    if [ -n "${BACKUP_SHA}" ]; then
-                        local cur_backup_sha
-                        cur_backup_sha=$(sha256sum "${BACKUP_FILE}" 2>/dev/null | awk '{print $1}')
-                        if [ "${cur_backup_sha}" != "${BACKUP_SHA}" ]; then
-                            echo "FATAL RECOVERY ERROR: Backup SHA mismatch! Expected ${BACKUP_SHA}, got ${cur_backup_sha}. Aborting restore."
-                            exit 1
-                        fi
-                    fi
+                # 5. Remove stale WAL and SHM files
+                echo "Removing stale WAL and SHM files..."
+                rm -f "${DB_PATH}-wal" "${DB_PATH}-shm"
 
-                    local b_integ
-                    b_integ=$("${SQLITE3_CMD}" "${BACKUP_FILE}" "PRAGMA integrity_check;" 2>/dev/null || echo "failed")
-                    if [ "${b_integ}" != "ok" ]; then
-                        echo "FATAL RECOVERY ERROR: Backup integrity check failed: ${b_integ}. Aborting restore."
+                # 6. Restore database from backup
+                echo "Restoring database from ${BACKUP_FILE}..."
+                if ! cp "${BACKUP_FILE}" "${DB_PATH}"; then
+                    echo "FATAL RECOVERY ERROR: Failed to copy backup to ${DB_PATH}!"
+                    exit 1
+                fi
+
+                # 7. Verify restored database integrity and foreign keys
+                local r_integ
+                r_integ=$("${SQLITE3_CMD}" "${DB_PATH}" "PRAGMA integrity_check;" 2>/dev/null || echo "failed")
+                if [ "${r_integ}" != "ok" ]; then
+                    echo "FATAL RECOVERY ERROR: Restored database integrity check failed: ${r_integ}!"
+                    exit 1
+                fi
+                local r_fk
+                r_fk=$("${SQLITE3_CMD}" "${DB_PATH}" "PRAGMA foreign_key_check;" 2>/dev/null || echo "failed")
+                if [ -n "${r_fk}" ] && [ "${r_fk}" != "OK (0 errors)" ]; then
+                    echo "FATAL RECOVERY ERROR: Restored database foreign key check failed: ${r_fk}!"
+                    exit 1
+                fi
+
+                # 8. Rotate exchange restore epoch in _exchange_meta if table exists
+                local has_meta
+                has_meta=$("${SQLITE3_CMD}" "${DB_PATH}" "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='_exchange_meta';" 2>/dev/null || echo "0")
+                if [ "${has_meta}" = "1" ]; then
+                    local restore_nonce
+                    restore_nonce=$(head -c 6 /dev/urandom 2>/dev/null | xxd -p 2>/dev/null || date +%s%N)
+                    local restore_epoch="epoch-$(date +%s)-${restore_nonce}"
+                    local restore_now
+                    restore_now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+                    # Attempt epoch rotation and verify persisted value
+                    if ! "${SQLITE3_CMD}" "${DB_PATH}" "INSERT INTO _exchange_meta (key, value, updated_at) VALUES ('epoch', '${restore_epoch}', '${restore_now}') ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at;"; then
+                        echo "FATAL RECOVERY ERROR: Failed to update restore epoch in _exchange_meta!"
+                        exit 1
+                    fi
+                    if ! "${SQLITE3_CMD}" "${DB_PATH}" "INSERT INTO _exchange_meta (key, value, updated_at) VALUES ('last_epoch_rotation_reason', 'STOPPED_WRITER_RESTORE', '${restore_now}') ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at;"; then
+                        echo "FATAL RECOVERY ERROR: Failed to record epoch rotation reason in _exchange_meta!"
                         exit 1
                     fi
 
-                    echo "Removing stale WAL and SHM files..."
-                    rm -f "${DB_PATH}-wal" "${DB_PATH}-shm"
-
-                    echo "Restoring database from ${BACKUP_FILE}..."
-                    cp "${BACKUP_FILE}" "${DB_PATH}"
-
-                    local r_integ
-                    r_integ=$("${SQLITE3_CMD}" "${DB_PATH}" "PRAGMA integrity_check;" 2>/dev/null || echo "failed")
-                    if [ "${r_integ}" != "ok" ]; then
-                        echo "FATAL RECOVERY ERROR: Restored database integrity check failed: ${r_integ}!"
+                    local check_epoch
+                    check_epoch=$("${SQLITE3_CMD}" "${DB_PATH}" "SELECT value FROM _exchange_meta WHERE key = 'epoch';" 2>/dev/null || echo "")
+                    if [ "${check_epoch}" != "${restore_epoch}" ]; then
+                        echo "FATAL RECOVERY ERROR: Persisted restore epoch mismatch! Expected ${restore_epoch}, got ${check_epoch}."
                         exit 1
                     fi
-
-                    # Rotate exchange epoch in restored database per runbook
-                    local has_meta
-                    has_meta=$("${SQLITE3_CMD}" "${DB_PATH}" "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='_exchange_meta';" 2>/dev/null || echo "0")
-                    if [ "${has_meta}" = "1" ]; then
-                        local restore_nonce
-                        restore_nonce=$(head -c 6 /dev/urandom 2>/dev/null | xxd -p 2>/dev/null || date +%s%N)
-                        local restore_epoch="epoch-$(date +%s)-${restore_nonce}"
-                        local restore_now
-                        restore_now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-                        "${SQLITE3_CMD}" "${DB_PATH}" "INSERT INTO _exchange_meta (key, value, updated_at) VALUES ('epoch', '${restore_epoch}', '${restore_now}') ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at;" 2>/dev/null || true
-                        "${SQLITE3_CMD}" "${DB_PATH}" "INSERT INTO _exchange_meta (key, value, updated_at) VALUES ('last_epoch_rotation_reason', 'STOPPED_WRITER_RESTORE', '${restore_now}') ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at;" 2>/dev/null || true
-                        echo "Restored database exchange epoch rotated to: ${restore_epoch}"
-                    fi
+                    echo "Restored database exchange epoch rotated to: ${restore_epoch}"
                 fi
 
-                echo "Recreating container with rollback baseline image: ${BASELINE_IMAGE_ID:-${BASELINE_TAG}}..."
-                local rollback_recreated=false
-                if [ -n "${BASELINE_IMAGE_ID}" ] && start_app_container "${BASELINE_IMAGE_ID}"; then
-                    rollback_recreated=true
-                elif start_app_container "${BASELINE_TAG}"; then
-                    rollback_recreated=true
+                # 9. Recreate container with pinned immutable baseline image ID only (no mutable tag fallback)
+                if [ -z "${BASELINE_IMAGE_ID:-}" ]; then
+                    echo "FATAL RECOVERY ERROR: Immutable BASELINE_IMAGE_ID is not set! Aborting container restart."
+                    exit 1
+                fi
+                echo "Recreating container with rollback baseline image ID: ${BASELINE_IMAGE_ID}..."
+                if ! start_app_container "${BASELINE_IMAGE_ID}" "production"; then
+                    echo "FATAL RECOVERY ERROR: Failed to recreate baseline container with ${BASELINE_IMAGE_ID}!"
+                    exit 1
                 fi
 
+                # 10. Await baseline container health
                 local rollback_healthy=false
-                if [ "${rollback_recreated}" = "true" ]; then
-                    echo "Awaiting baseline container health..."
-                    for i in $(seq 1 30); do
-                        if "${CURL_CMD}" -s -f http://127.0.0.1:3000/api/health >/dev/null 2>&1; then
-                            echo "Rollback container is healthy."
-                            rollback_healthy=true
-                            break
-                        fi
-                        sleep 1
-                    done
-                fi
+                echo "Awaiting baseline container health..."
+                for i in $(seq 1 30); do
+                    if "${CURL_CMD}" -s -f http://127.0.0.1:3000/api/health >/dev/null 2>&1; then
+                        echo "Rollback container is healthy."
+                        rollback_healthy=true
+                        break
+                    fi
+                    sleep 1
+                done
 
+                # 11. Only restore live Apache ingress routing if baseline is confirmed healthy!
                 if [ "${rollback_healthy}" = "true" ]; then
                     echo "Restoring live Apache ingress routing..."
                     if [ -f "${APACHE_CONF_DIR}/httpd-lims.conf.live" ]; then
@@ -484,10 +566,10 @@ if [ "${POST_MIG_SAMPLES}" -ne "${STOPPED_SAMPLES}" ] || [ "${POST_MIG_RESULTS}"
 fi
 echo "Additive database migration verified OK."
 
-# --- Step 6: Start Container with Reviewed Immutable Image ID ---
+# --- Step 6: Start Container with Background Writers Held (Pre-Exposure Mode) ---
 PHASE="CONTAINER_START"
-echo "--- Step 6: Start Container with Reviewed Immutable Image ID ---"
-start_app_container "${TARGET_IMAGE_ID}"
+echo "--- Step 6: Start Container with Background Writers Held (Pre-Exposure Mode) ---"
+start_app_container "${TARGET_IMAGE_ID}" "pre_exposure"
 
 echo "Waiting for container service readiness..."
 for i in $(seq 1 30); do
@@ -510,6 +592,19 @@ if [ "${RUNTIME_IMAGE_ID}" != "${TARGET_IMAGE_ID}" ]; then
 fi
 echo "Runtime container verified running target image ID: ${RUNTIME_IMAGE_ID}"
 
+# Verify background jobs are actively held during pre-exposure phase
+ENV_CHECK=$("${DOCKER_CMD}" inspect "${APP_CONTAINER_NAME}" --format '{{range .Config.Env}}{{println .}}{{end}}' | grep '^DISABLE_BACKGROUND_JOBS=' || true)
+if [ "${ENV_CHECK}" != "DISABLE_BACKGROUND_JOBS=true" ]; then
+    echo "FATAL: Pre-exposure container did not enforce DISABLE_BACKGROUND_JOBS=true!"
+    exit 1
+fi
+KOBO_CHECK=$("${DOCKER_CMD}" logs --tail 50 "${APP_CONTAINER_NAME}" 2>&1 | grep "KOBO_SCHEDULER" || true)
+if [ -n "${KOBO_CHECK}" ]; then
+    echo "FATAL: Kobo scheduler was active during pre-exposure phase: ${KOBO_CHECK}"
+    exit 1
+fi
+echo "CONFIRMED: Background sync writers suppressed during pre-exposure (zero scheduler activity)."
+
 # --- Step 7: Pre-Exposure Postflight & Verification (Under Quiescence) ---
 PHASE="PRE_EXPOSURE_VERIFICATION"
 echo "--- Step 7: Pre-Exposure Verification Under Quiescence ---"
@@ -522,9 +617,20 @@ if [ "${LOOP_CAPS}" != "200" ]; then
 fi
 echo "PASS: Loopback /api/v2/data-exchange/capabilities -> 200"
 
-# Dedicated, hashed read-only postflight verification inside target container
+# Verify dedicated postflight script SHA256 inside target container
+POSTFLIGHT_FILE="/app/server/scripts/postflight_issue140.cjs"
+ACTUAL_POSTFLIGHT_SHA=$("${DOCKER_CMD}" exec "${APP_CONTAINER_NAME}" sha256sum "${POSTFLIGHT_FILE}" | awk '{print $1}')
+echo "Postflight script SHA256 inside container: ${ACTUAL_POSTFLIGHT_SHA}"
+
+if [ -n "${EXPECTED_POSTFLIGHT_SHA}" ] && [ "${ACTUAL_POSTFLIGHT_SHA}" != "${EXPECTED_POSTFLIGHT_SHA}" ]; then
+    echo "FATAL: Postflight script SHA256 mismatch! Expected ${EXPECTED_POSTFLIGHT_SHA}, got ${ACTUAL_POSTFLIGHT_SHA}."
+    exit 1
+fi
+echo "PASS: Postflight script SHA256 verified against expected hash."
+
+# Execute dedicated read-only Issue #140 postflight suite inside target container
 echo "Executing dedicated read-only Issue #140 postflight suite..."
-"${DOCKER_CMD}" exec "${APP_CONTAINER_NAME}" node /app/server/scripts/postflight_issue140.cjs
+"${DOCKER_CMD}" exec "${APP_CONTAINER_NAME}" node "${POSTFLIGHT_FILE}"
 
 # Verify data counts strictly unchanged before live exposure
 PRE_EXP_SAMPLES=$("${SQLITE3_CMD}" "${DB_PATH}" "SELECT count(*) FROM Sample;")
@@ -535,9 +641,28 @@ if [ "${PRE_EXP_SAMPLES}" -ne "${STOPPED_SAMPLES}" ] || [ "${PRE_EXP_RESULTS}" -
 fi
 echo "Pre-exposure checks passed. System ready for live exposure."
 
-# --- Step 8: Restore Live Ingress Configuration (COMMITTED Phase) ---
+# --- Step 8: Production Cutover & Live Ingress Restoration (COMMITTED Phase) ---
+echo "--- Step 8: Production Cutover & Live Ingress Restoration (COMMITTED) ---"
+
+# Restart container in full production mode (normal background schedulers enabled)
+echo "Restarting application container with full production background settings..."
+"${DOCKER_CMD}" stop -t 10 "${APP_CONTAINER_NAME}"
+start_app_container "${TARGET_IMAGE_ID}" "production"
+
+for i in $(seq 1 30); do
+    if "${CURL_CMD}" -s -f http://127.0.0.1:3000/api/health >/dev/null 2>&1; then
+        echo "Production container healthy at second $i."
+        break
+    fi
+    sleep 1
+    if [ "$i" -eq 30 ]; then
+        echo "FATAL: Production container failed health check within 30 seconds!"
+        exit 1
+    fi
+done
+
+# Transition to COMMITTED phase before opening ingress
 PHASE="COMMITTED"
-echo "--- Step 8: Restore Live Ingress Configuration (COMMITTED) ---"
 cp "${APACHE_CONF_DIR}/httpd-lims.conf.live" "${APACHE_CONF_DIR}/httpd-lims.conf"
 "${APACHECTL_CMD}" configtest
 "${SYSTEMCTL_CMD}" reload httpd
@@ -591,13 +716,58 @@ fi
 echo "PASS: Anonymous /api/v2/data-exchange/geojson -> 401 Unauthorized (protected)"
 
 PHASE="COMPLETE"
+LEDGER_FILE="${LOG_DIR}/release_ledger_issue140_${TIMESTAMP}.json"
+cat << LEDGER_JSON > "${LEDGER_FILE}"
+{
+  "releaseId": "issue-140-pr149",
+  "executionTimestamp": "${TIMESTAMP}",
+  "status": "SUCCESS",
+  "targetImageInput": "${REVIEWED_IMAGE}",
+  "targetImageId": "${TARGET_IMAGE_ID}",
+  "expectedCommitSha": "${EXPECTED_COMMIT_SHA}",
+  "expectedPostflightSha": "${EXPECTED_POSTFLIGHT_SHA}",
+  "actualPostflightSha": "${ACTUAL_POSTFLIGHT_SHA}",
+  "baselineTag": "${BASELINE_TAG}",
+  "baselineImageId": "${BASELINE_IMAGE_ID}",
+  "backupFile": "${BACKUP_FILE}",
+  "backupSha256": "${BACKUP_SHA}",
+  "stoppedWriterCounts": {
+    "samples": ${STOPPED_SAMPLES},
+    "results": ${STOPPED_RESULTS}
+  },
+  "runtimeConfiguration": {
+    "appContainerName": "${APP_CONTAINER_NAME}",
+    "dataVolume": "${DATA_VOLUME}",
+    "assetsVolume": "${ASSETS_VOLUME}",
+    "envFile": "${LIMS_OPT_DIR}/.env",
+    "preExposureWriterHold": "DISABLE_BACKGROUND_JOBS=true",
+    "productionBackgroundJobs": "ACTIVE",
+    "ingressQuiescence": "APACHE_503_REWRITE",
+    "ingressResumption": "HTTP_401_VERIFIED"
+  },
+  "serviceHealth": {
+    "publicHealthEndpoint": ${HEALTH_STATUS},
+    "capabilitiesEndpoint": ${CAPS_STATUS},
+    "anonymousDirectoryPolicy": ${DIR_STATUS},
+    "anonymousStatsPolicy": ${EXCH_STATS_STATUS},
+    "anonymousGeojsonPolicy": ${GEOJSON_STATUS}
+  },
+  "transcriptFile": "${LOG_FILE}"
+}
+LEDGER_JSON
+
 echo "============================================================"
 echo "  RELEASE EXECUTION SUCCESSFUL: ISSUE #140                   "
-echo "  Target Image:         ${REVIEWED_IMAGE}                    "
+echo "  Target Image Input:   ${REVIEWED_IMAGE}                    "
 echo "  Target Image ID:      ${TARGET_IMAGE_ID}                   "
-echo "  Rollback Baseline:    ${BASELINE_TAG} (${BASELINE_IMAGE_ID})"
+echo "  Expected Commit SHA:  ${EXPECTED_COMMIT_SHA}               "
+echo "  Rollback Baseline ID: ${BASELINE_IMAGE_ID} (${BASELINE_TAG})"
 echo "  Consistent Backup:    ${BACKUP_FILE}                       "
 echo "  Backup SHA256:        ${BACKUP_SHA}                        "
 echo "  Stopped-Writer Count: Samples=${STOPPED_SAMPLES}, Results=${STOPPED_RESULTS}"
+echo "  Postflight SHA256:    ${ACTUAL_POSTFLIGHT_SHA}             "
+echo "  Background Writers:   Held during pre-exposure, Restored in production"
+echo "  Ingress Quiescence:   Enforced (503), Resumption verified (401)"
 echo "  Release Transcript:   ${LOG_FILE}                          "
+echo "  Release Ledger:       ${LEDGER_FILE}                       "
 echo "============================================================"

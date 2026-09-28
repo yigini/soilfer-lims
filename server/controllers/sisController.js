@@ -879,7 +879,7 @@ exports.revokeApiKey = async (req, res) => {
         try {
             const { getDb } = require('../services/exchangeStateService');
             const db = getDb();
-            db.prepare('UPDATE _exchange_connection_keys SET key_status = "REVOKED", rotated_at = ? WHERE api_key_id = ?').run(new Date().toISOString(), id);
+            db.prepare("UPDATE _exchange_connection_keys SET key_status = 'REVOKED', rotated_at = ? WHERE api_key_id = ?").run(new Date().toISOString(), id);
         } catch (e) {}
 
         await prisma.auditLog.create({
@@ -1249,7 +1249,7 @@ exports.listConnections = async (req, res) => {
         const { getDb } = require('../services/exchangeStateService');
         const db = getDb();
         const connections = db.prepare('SELECT * FROM _exchange_connections ORDER BY created_at DESC').all();
-        const keys = db.prepare('SELECT * FROM _exchange_connection_keys WHERE key_status = "ACTIVE"').all();
+        const keys = db.prepare("SELECT * FROM _exchange_connection_keys WHERE key_status = 'ACTIVE'").all();
         const keysByConn = {};
         keys.forEach(k => {
             if (!keysByConn[k.connection_id]) keysByConn[k.connection_id] = [];

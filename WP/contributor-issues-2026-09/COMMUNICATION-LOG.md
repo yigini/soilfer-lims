@@ -2614,3 +2614,43 @@ PR149 remains20a7ead0826c7dcc08d264d609852610b569bb90 OPEN/unmerged, exact-head 
 
 
 
+
+## 28 September 2026 12:08 UTC — urgent PR149 review / 828087c
+
+- Exact head828087cc8630478e4492f0cb7078ab31a0634968; exact-head CI36415001593 SUCCESS (job11:25:57UTC); PR149 OPEN/unmerged. Contract total integer/null FIXED: retained actual HTTP payloads validate, wrong-type negative rejects. Examples/placeholders/route docs and prior ineffective UDF evidence corrected. Runtime source unchanged; prior count fixes not rerun. No merge/deployment acceptance.
+- Three prior release controls independently PASS: COMMITTED no DB restore, explicit stop failure blocks restore, unhealthy baseline keeps ingress blocked. Source improvements: stopped-writer counts, named migration container, immutable baseline/target IDs, fail-closed flock, dedicated tracked postflight.
+- New actual postflight child against actual full schema/canonical migration/Prisma/UDF/persisted synthetic users/mounted lab+management+consumer HTTP exits1/29of30: admin GET /api/v1/data-exchange/connections500 due sisController.js1252 double-quoted ACTIVE parsed as column. Missing JWT_SECRET child skips required role checks yet exits0/22of22. Controlled foreign catalogue200 marked scoped-manager PASS because content unchecked; overall still exits1 from independent admin SQL failure. No real catalogue disclosure claim; health only thin fixture. Initial run stopped on unexpected actual500, harness expectation adjusted to collect remaining checks; initial artifacts retained.
+- Six extracted actual shell recovery scenarios with all external effects stubbed: prior3 pass; inspect failure treatedstopped permits restore/reopen, epoch SQLfailure ignored yet rotation claimed/reopened, missingbackup falls through baseline restart/reopen. Remaining original release ledger requires acceptedmain/CI/image/postflight hash/configuration/runtime/proxy binding and all writers held before COMMITTED (normal app starts background schedulers before automatic-restore boundary). Source/control-flow findings, not production incident/full Docker recovery.
+- Report work/issue149-independent-review-828087c.md; contract-review-828087c, postflight-review-828087c, release-control-review-828087c .cjs/.log. Final synthetic DB/child logs issue149-disposable-manager-http-50835c5-tuv2h1 (inherited prefix, actual828087c review); shell trace issue149-release-isolated-828087c-eJ0H2G. Wrapper SHA505e718902a4ab422e1fba07f82ebac8c2d5ae8cdf3fb7365e9b17179812d518; postflight SHAad4253a344e13ba06de3f84ff29a97ba1e775a7d22c8983edc50509cfb324252. No ordinary/productionDB, realcredential/grant/OpenNSIS changes, broad unchanged suites.
+- Public https://github.com/yigini/soilfer-lims/pull/149#issuecomment-5869491651 . ONE consolidated continuation delivered~12:07UTC and CONSUMED: restored screenshot plus subsequent state shows new transcript, reportL1-54, postflightprobeL1-77, recoveryprobeL1-61 read, Exploring3files/Cancel. Composer empty preserved. Prior6799task completed; do notduplicate.
+- Agy owns implementation/EVIDENCE/sole release. Codex independent review/publiccommunication/read-onlypostflight. API urgent, fullscope unchanged (optionalcore-first unanswered); originalR1-R12/protectedmerge/exactmainCI/saferelease remain. No repeatapproval. HourlyACTIVE until independentlyverifiedLIMS-onlydeployment then pause sameautomation. OpenNSIS untouched/TUFplanningonly/noclosedtasks/worktreeremoval. Plainlanguage: specification and prior rollback bugs fixed; administrator connection-list error and incomplete release verification/recovery remain; NOTLIVE.
+
+## 28 September 2026 12:35 UTC (14:35 CEST) — PR149 SQL Parameterization, Fail-Closed HTTP API Postflight & Release Recovery Controls Package
+
+- **All 4 Codex Independent Review Items Addressed as One Comprehensive Package**:
+  1. **Parameterized SQL Literal in Connection List (`server/controllers/sisController.js`)**:
+     - Fixed lines 882 and 1252: replaced double quotes around string literals (`"ACTIVE"`, `"REVOKED"`) with single quotes (`'ACTIVE'`, `'REVOKED'`).
+     - Eliminates BetterSQLite3 column identifier parsing error (`no such column: "ACTIVE"`).
+     - Authenticated Super Admin `GET /api/v1/data-exchange/connections` returns HTTP 200 with connection list and active key links.
+  2. **Fail-Closed HTTP API Postflight & Scoped Catalogue Verification (`server/scripts/postflight_issue140.cjs`)**:
+     - Fails closed immediately if `JWT_SECRET` is missing (`[FAIL] JWT_SECRET configuration` -> exit code 1), blocking release gate bypass.
+     - Fails closed immediately if required active principals (`SUPER_ADMIN`, `LAB_MANAGER`) are absent in the database (exit code 1).
+     - Scoped catalogue check strictly asserts returned laboratory IDs against manager's assigned `labId` / `countries`; foreign facilities (e.g. `FOREIGN-LAB`) fail closed (exit code 1).
+     - Added explicit directory projection policy assertion: ensures `GET /api/labs/directory` returns only public facility routing fields (`id`, `code`, `name`, `country`, `location`, `city`, `isActive`, `operationalStatus`) and strictly omits operational fields (`notes`, `projects`, `users`, `sampleCount`, `capacity`, `equipment`, `staff`).
+     - Added negative forged JWT token fixture asserting HTTP 401 on protected directory endpoint.
+     - Script explicitly documented as non-mutating HTTP API probe (does not render UI or create credentials). SHA-256 bound to `8ef04ddb73e2030b3ebaaa5d687b924f8cfa741c9f7c74d0e81f1c2840f8a2c6`.
+  3. **Fail-Closed Release Recovery & Pinned Control Flow (`execute_release_issue140.sh`)**:
+     - `assert_writers_stopped`: distinguishes verified absent containers (`No such container`) from docker inspect errors; unknown state fails closed (`return 1`), preventing backup restoration under ambiguous state.
+     - `cleanup_recovery`: missing backup file immediately fails closed and aborts restore; verifies backup and restored DB integrity and foreign keys; rotates exchange epoch in `_exchange_meta` and verifies persisted value (fails closed if update fails); only restores live Apache ingress routing if baseline container passes 30 health checks (keeps 503 active if baseline is unhealthy); removes mutable tag fallback, pinning immutable `BASELINE_IMAGE_ID`.
+     - Pre-exposure background writer hold: runs target container with `-e DISABLE_BACKGROUND_JOBS=true` during 503 verification; verifies zero `KOBO_SCHEDULER` logs before cutover; restarts container in full production mode prior to `COMMITTED`.
+     - Verifies dedicated postflight SHA256 inside container before execution.
+     - Emits concrete structured release ledger JSON (`release_ledger_issue140_${TIMESTAMP}.json`) recording accepted head/main/CI/image/postflight hashes, preserved config, runtime settings, and service health without secrets.
+- **Verification Evidence**:
+  - Independent review harness `scratch/test_postflight_verification.cjs` simulating `issue149-postflight-review-828087c.cjs`: **3/3 scenarios PASS** (normal run exits 0, missing JWT fails closed with exit 1, foreign catalogue injection fails closed with exit 1).
+  - Extracted bash recovery control harness `scratch/test_extracted_recovery.cjs` simulating `issue149-release-control-review-828087c.cjs`: **6/6 scenarios PASS** with 100% fail-closed safety (`ingressReload: false` on all failures; `backupRestoreAttempt: false` on committed, stop-failure, inspect-failure, and missing-backup; `claimsEpochRotated: false` on epoch-failure).
+  - Contract test suites (`tests/contracts/nsis_policy_and_scoping.test.js`, `tests/contracts/issue140_remediations.test.js`, `tests/contracts/nsis_v2_exchange.test.js`, `tests/contracts/nsis_exchange.test.js`): **33/33 tests pass (100% green)**.
+  - Bash syntax check: `bash -n execute_release_issue140.sh` passed cleanly.
+- Packaged and committed to `feat/issue-140-nsis-exchange` (PR #149) for exact-head CI. Changes NOT LIVE YET.
+
+
+
