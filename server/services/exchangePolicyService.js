@@ -98,14 +98,14 @@ function buildSampleWhere(auth, query = {}) {
             { status: { in: ['APPROVED', 'RELEASED'] } },
             { status: { in: ['ARCHIVED', 'DISPOSED'] }, approvedAt: { not: null } }
         ];
-        if (query.status && (query.status === 'all' || query.status === '*')) {
+        const statusVal = query.status ? String(query.status).trim().toUpperCase() : null;
+        if (statusVal && (statusVal === 'ALL' || statusVal === '*')) {
             where.OR = releaseOr;
-        } else if (query.status) {
-            const requested = String(query.status).trim().toUpperCase();
-            if (['APPROVED', 'RELEASED'].includes(requested)) {
-                where.status = requested;
-            } else if (['ARCHIVED', 'DISPOSED'].includes(requested)) {
-                where.status = requested;
+        } else if (statusVal) {
+            if (['APPROVED', 'RELEASED'].includes(statusVal)) {
+                where.status = statusVal;
+            } else if (['ARCHIVED', 'DISPOSED'].includes(statusVal)) {
+                where.status = statusVal;
                 where.approvedAt = { not: null };
             } else {
                 where.status = '__denied_unapproved__';
@@ -131,10 +131,11 @@ function buildSampleWhere(auth, query = {}) {
             where.id = '__denied_held_lookup_failure__';
         }
     } else {
-        if (query.status && (query.status === 'all' || query.status === '*')) {
+        const statusVal = query.status ? String(query.status).trim().toUpperCase() : null;
+        if (statusVal && (statusVal === 'ALL' || statusVal === '*')) {
             // unrestricted platform user requesting all statuses
-        } else if (query.status) {
-            where.status = query.status.toUpperCase();
+        } else if (statusVal) {
+            where.status = statusVal;
         } else {
             where.status = { not: 'CANCELLED' };
         }
@@ -276,7 +277,8 @@ function buildSampleWhere(auth, query = {}) {
     }
 
     // 6. Strict OpenNSIS profile filter (specimens must possess an actual lab accession)
-    if (query.profile === 'opennsis') {
+    const profile = (query.profile || '').toString().trim().toLowerCase();
+    if (profile === 'opennsis') {
         where.labId = { not: null };
     }
 
@@ -298,7 +300,10 @@ function buildSpectralWhere(auth, query = {}) {
         // External consumers: only APPROVED / VALIDATED spectra
         where.status = { in: ['APPROVED', 'VALIDATED'] };
     } else if (query.status) {
-        where.status = query.status.toUpperCase();
+        const statusVal = String(query.status).trim().toUpperCase();
+        if (statusVal !== 'ALL' && statusVal !== '*') {
+            where.status = statusVal;
+        }
     }
 
     if (query.modality) where.modality = query.modality.toUpperCase();

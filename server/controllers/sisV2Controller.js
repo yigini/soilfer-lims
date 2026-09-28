@@ -485,6 +485,89 @@ exports.getObservations = async (req, res) => {
     }
 };
 
+async function computeSpatialTotal(auth, canonicalQuery, bboxBounds) {
+    const baseWhere = buildSampleWhere(auth, canonicalQuery);
+
+    const directWhere = { ...baseWhere };
+    directWhere.AND = [
+        ...(directWhere.AND || []),
+        bboxBounds ? {
+            latitude: { gte: bboxBounds.minLat, lte: bboxBounds.maxLat },
+            longitude: { gte: bboxBounds.minLng, lte: bboxBounds.maxLng }
+        } : {
+            latitude: { not: null },
+            longitude: { not: null }
+        }
+    ];
+    const directCount = await prisma.sample.count({ where: directWhere });
+
+    let jsonCount = 0;
+    const notEmptyMeta = { not: null, notIn: ['', '{}', 'null'] };
+    const jsonCandidateWhere = { ...baseWhere, latitude: null };
+    jsonCandidateWhere.AND = [
+        ...(jsonCandidateWhere.AND || []),
+        {
+            OR: [
+                { metadata: notEmptyMeta },
+                { fieldMetadata: notEmptyMeta }
+            ]
+        }
+    ];
+
+    const jsonCandidatesTotal = await prisma.sample.count({ where: jsonCandidateWhere });
+    if (jsonCandidatesTotal > 0) {
+        if (jsonCandidatesTotal <= 5000) {
+            const candidates = await prisma.sample.findMany({
+                where: jsonCandidateWhere,
+                select: {
+                    latitude: true,
+                    longitude: true,
+                    fieldMetadata: true,
+                    metadata: true
+                }
+            });
+            for (const s of candidates) {
+                const coords = extractCoordinates(s, safeParseJson(s.fieldMetadata), safeParseJson(s.metadata));
+                if (!coords || coords.latitude === null || coords.longitude === null) continue;
+                if (bboxBounds) {
+                    if (
+                        coords.longitude < bboxBounds.minLng ||
+                        coords.longitude > bboxBounds.maxLng ||
+                        coords.latitude < bboxBounds.minLat ||
+                        coords.latitude > bboxBounds.maxLat
+                    ) {
+                        continue;
+                    }
+                }
+                jsonCount++;
+            }
+        } else {
+            const db = exchangeStateService.getDb();
+            if (db && db.open) {
+                try {
+                    const row = db.prepare(`
+                        SELECT count(*) as c FROM Sample
+                        WHERE latitude IS NULL
+                        AND (
+                            (metadata IS NOT NULL AND metadata NOT IN ('', '{}', 'null'))
+                            OR (fieldMetadata IS NOT NULL AND fieldMetadata NOT IN ('', '{}', 'null'))
+                        )
+                        AND (
+                            json_extract(metadata, '$.latitude') IS NOT NULL
+                            OR json_extract(metadata, '$.lat') IS NOT NULL
+                            OR json_extract(fieldMetadata, '$.latitude') IS NOT NULL
+                            OR json_extract(fieldMetadata, '$.lat') IS NOT NULL
+                        )
+                    `).get();
+                    if (row && row.c) jsonCount = row.c;
+                } catch (e) {}
+            }
+        }
+    }
+
+    return directCount + jsonCount;
+}
+
 // ─── 5. GET /api/v2/data-exchange/geojson (RFC 7946 GeoJSON) ───
 exports.getGeoJson = async (req, res) => {
     if (!checkConnectionActive(req, res)) return;
@@ -580,6 +663,8 @@ exports.getGeoJson = async (req, res) => {
             });
         }
 
+        const total = await computeSpatialTotal(req.sisAuth, canonicalQuery, bboxBounds);
+
         // Bounded seek/scan traversal across candidate batches (F1, R1/R4/R7/R11)
         const BATCH_SIZE = 5000;
         const MAX_SCAN_ROWS = 15000;
@@ -587,11 +672,29 @@ exports.getGeoJson = async (req, res) => {
         let scannedCount = 0;
         let exhausted = false;
         let lastScannedCandidate = null;
-        let lastBatchId = null;
+
+        let seekUpdatedAt = decoded?.lastUpdatedAt ? new Date(decoded.lastUpdatedAt) : null;
+        let seekId = decoded?.lastId || null;
 
         while (scannedCount < MAX_SCAN_ROWS) {
+            const whereClause = {
+                AND: [
+                    candidateBaseWhere
+                ]
+            };
+            if (seekUpdatedAt && seekId) {
+                whereClause.AND.push({
+                    OR: [
+                        { updatedAt: { lt: seekUpdatedAt } },
+                        { id: { lt: seekId } }
+                    ]
+                });
+            } else if (seekId) {
+                whereClause.AND.push({ id: { lt: seekId } });
+            }
+
             const queryArgs = {
-                where: candidateBaseWhere,
+                where: whereClause,
                 select: {
                     id: true,
                     updatedAt: true,
@@ -606,10 +709,6 @@ exports.getGeoJson = async (req, res) => {
                 ],
                 take: BATCH_SIZE
             };
-            if (lastBatchId) {
-                queryArgs.cursor = { id: lastBatchId };
-                queryArgs.skip = 1;
-            }
 
             const batch = await prisma.sample.findMany(queryArgs);
 
@@ -620,9 +719,20 @@ exports.getGeoJson = async (req, res) => {
 
             scannedCount += batch.length;
             lastScannedCandidate = batch[batch.length - 1];
-            lastBatchId = lastScannedCandidate.id;
+            seekUpdatedAt = lastScannedCandidate.updatedAt;
+            seekId = lastScannedCandidate.id;
 
             for (const s of batch) {
+                if (decoded && (decoded.lastUpdatedAt || decoded.lastId)) {
+                    const sTime = s.updatedAt instanceof Date ? s.updatedAt.getTime() : new Date(s.updatedAt).getTime();
+                    const targetTime = decoded.lastUpdatedAt ? new Date(decoded.lastUpdatedAt).getTime() : null;
+                    if (targetTime !== null) {
+                        if (sTime > targetTime) continue;
+                        if (sTime === targetTime && decoded.lastId && s.id >= decoded.lastId) continue;
+                    } else if (decoded.lastId && s.id >= decoded.lastId) {
+                        continue;
+                    }
+                }
                 const coords = extractCoordinates(s, safeParseJson(s.fieldMetadata), safeParseJson(s.metadata));
                 if (!coords || coords.latitude === null || coords.longitude === null) {
                     continue;
@@ -642,27 +752,12 @@ exports.getGeoJson = async (req, res) => {
                     updatedAt: s.updatedAt,
                     coords
                 });
-            }
-
-            // Check if we already have enough candidates past the cursor start point
-            if (decoded && (decoded.lastUpdatedAt || decoded.lastId)) {
-                const cursorTime = decoded.lastUpdatedAt ? new Date(decoded.lastUpdatedAt).getTime() : null;
-                const cursorId = decoded.lastId || null;
-                const foundIdx = validSpatialCandidates.findIndex(item => {
-                    const itemTime = item.updatedAt instanceof Date ? item.updatedAt.getTime() : new Date(item.updatedAt).getTime();
-                    if (cursorTime !== null) {
-                        if (itemTime < cursorTime) return true;
-                        if (itemTime === cursorTime && cursorId && item.id < cursorId) return true;
-                        return false;
-                    }
-                    if (cursorId && item.id < cursorId) return true;
-                    return false;
-                });
-                const curStart = (foundIdx !== -1) ? foundIdx : validSpatialCandidates.length;
-                if (validSpatialCandidates.length >= curStart + limit + 1) {
+                if (validSpatialCandidates.length >= limit + 1) {
                     break;
                 }
-            } else if (validSpatialCandidates.length >= limit + 1) {
+            }
+
+            if (validSpatialCandidates.length >= limit + 1) {
                 break;
             }
 
@@ -672,28 +767,8 @@ exports.getGeoJson = async (req, res) => {
             }
         }
 
-        const total = validSpatialCandidates.length;
-
-        // Deterministic pagination using immutable recorded ordering boundary (R4, R11)
-        let startIndex = 0;
-        if (decoded && (decoded.lastUpdatedAt || decoded.lastId)) {
-            const cursorTime = decoded.lastUpdatedAt ? new Date(decoded.lastUpdatedAt).getTime() : null;
-            const cursorId = decoded.lastId || null;
-            const foundIdx = validSpatialCandidates.findIndex(item => {
-                const itemTime = item.updatedAt instanceof Date ? item.updatedAt.getTime() : new Date(item.updatedAt).getTime();
-                if (cursorTime !== null) {
-                    if (itemTime < cursorTime) return true;
-                    if (itemTime === cursorTime && cursorId && item.id < cursorId) return true;
-                    return false;
-                }
-                if (cursorId && item.id < cursorId) return true;
-                return false;
-            });
-            startIndex = (foundIdx !== -1) ? foundIdx : validSpatialCandidates.length;
-        }
-
-        const pageCandidates = validSpatialCandidates.slice(startIndex, startIndex + limit);
-        const hasMore = (startIndex + limit) < validSpatialCandidates.length || (!exhausted && scannedCount >= MAX_SCAN_ROWS);
+        const pageCandidates = validSpatialCandidates.slice(0, limit);
+        const hasMore = (total > 0 && validSpatialCandidates.length > limit) || (total > 0 && !exhausted && scannedCount >= MAX_SCAN_ROWS);
         const pageIds = pageCandidates.map(c => c.id);
 
         let nextCursor = null;

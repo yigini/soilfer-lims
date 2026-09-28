@@ -1497,9 +1497,16 @@ function normalizeFilter(query = {}, endpoint = 'samples') {
 
     // Common filters across endpoints
     if (query.status !== undefined && query.status !== null && String(query.status).trim() !== '') {
-        norm.status = String(query.status).trim().toUpperCase();
+        const rawStatus = String(query.status).trim().toUpperCase();
+        norm.status = (rawStatus === 'ALL' || rawStatus === '*') ? '*' : rawStatus;
     } else {
         norm.status = null;
+    }
+
+    if (query.profile !== undefined && query.profile !== null && String(query.profile).trim() !== '') {
+        norm.profile = String(query.profile).trim().toLowerCase();
+    } else {
+        norm.profile = 'default';
     }
 
     if (query.country !== undefined && query.country !== null && String(query.country).trim() !== '') {
@@ -1561,7 +1568,8 @@ function buildCanonicalQueryContext(rawQuery = {}, endpoint = 'samples') {
         const norm = normalizeFilter(rawQuery, endpoint);
         const query = {
             ...rawQuery,
-            ...norm
+            ...norm,
+            profile: norm.profile
         };
         if (norm.labId !== undefined && norm.labId !== null) {
             query.labId = norm.labId;
@@ -1679,6 +1687,11 @@ function validateLiveListCursor(cursorStr, auth, endpoint, query = {}, db) {
     for (const k of allKeys) {
         const reqVal = reqFilter[k] !== undefined ? reqFilter[k] : null;
         const curVal = curFilter[k] !== undefined ? curFilter[k] : null;
+        if (k === 'status') {
+            if ((reqVal === 'ALL' || reqVal === '*') && (curVal === 'ALL' || curVal === '*')) {
+                continue;
+            }
+        }
         if (reqVal !== curVal) {
             return {
                 ok: false,
