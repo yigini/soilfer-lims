@@ -92,20 +92,44 @@ async function restoreBackup(backupPath, customTargetPath) {
         fs.unlinkSync(stagingPath);
 
         // 5. Final integrity verification on restored DB
-        const db = new Database(targetDbPath, { readonly: true, fileMustExist: true });
+        const db = new Database(targetDbPath, { fileMustExist: true });
         const integrity = db.pragma('integrity_check');
-        db.close();
-
         const isOk = Array.isArray(integrity) && integrity.length > 0 && integrity[0].integrity_check === 'ok';
         if (!isOk) {
+            db.close();
             throw new Error(`Post-restore integrity check failed on ${targetDbPath}`);
+        }
+
+        const fkCheck = db.pragma('foreign_key_check');
+        if (Array.isArray(fkCheck) && fkCheck.length > 0) {
+            db.close();
+            throw new Error(`Post-restore foreign key check failed on ${targetDbPath}: ${JSON.stringify(fkCheck)}`);
+        }
+
+        // 6. Invalidate data exchange epoch if exchange tables are present (Issue #140 / NSIS runbook R5/R10)
+        let epochRotated = false;
+        try {
+            const hasExchangeMeta = db.prepare("SELECT count(*) as count FROM sqlite_master WHERE type='table' AND name='_exchange_meta'").get();
+            if (hasExchangeMeta && hasExchangeMeta.count > 0) {
+                process.env.DATABASE_PATH = targetDbPath;
+                const { rotateEpoch, ensureTriggers } = require('../services/exchangeStateService');
+                const result = rotateEpoch(db, 'STOPPED_WRITER_RESTORE');
+                ensureTriggers(db);
+                epochRotated = true;
+                console.log(`[RESTORE] Successfully rotated data exchange epoch to invalidate prior cursors: ${result.currentEpoch}`);
+            }
+        } catch (epochErr) {
+            console.warn(`[RESTORE] Warning: Could not rotate exchange epoch: ${epochErr.message}`);
+        } finally {
+            db.close();
         }
 
         console.log(`[RESTORE] SUCCESS: Database successfully restored to ${targetDbPath}`);
         return {
             success: true,
             preRestoreBackup,
-            targetPath: targetDbPath
+            targetPath: targetDbPath,
+            epochRotated
         };
     } catch (err) {
         if (fs.existsSync(stagingPath)) {

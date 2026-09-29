@@ -24,6 +24,7 @@
 
 Complete, operator-focused documentation is available directly in the repository and viewable locally as an interactive book:
 
+* 📊 **[Deployment Readiness Status & Operator Guide](docs/DEPLOYMENT_READINESS.md)** — Tracked readiness status, single-lab and multi-lab guides, and technical audit ledger.
 * 📖 **[Administration Guide](docs/ADMIN_GUIDE.md)** — Laboratory configuration, user RBAC, GloSIS procedures, quality rules, and SIS API keys.
 * 🚀 **[Deployment & Production Guide](docs/DEPLOYMENT_GUIDE.md)** — Comprehensive VPS setup, Docker Compose, Nginx/Apache reverse proxy, SSL/Certbot, and zero-downtime updates.
 * 🛠️ **[Installation Quickstart](docs/INSTALL.md)** — Step-by-step local machine and server installation for beginners.

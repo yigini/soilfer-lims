@@ -1,5 +1,5 @@
 # ─── Stage 1: Build the React client ───
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -23,7 +23,7 @@ RUN cd client && npm run build
 
 
 # ─── Stage 2: Production image ───
-FROM node:20-alpine
+FROM node:24-alpine
 
 # Labels
 LABEL org.opencontainers.image.title="SoilFER-LIMS"

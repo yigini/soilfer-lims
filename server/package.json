@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node index.js",
+    "seed": "node seed.js",
     "test": "jest --runInBand",
     "test:watch": "jest --watch",
     "test:workflow": "jest --runInBand tests/security/ tests/contracts/ tests/scenarios/",
@@ -31,8 +32,8 @@
     "multer": "^2.3.0",
     "papaparse": "^5.5.3",
     "pdfkit": "^0.20.2",
-    "uuid": "^13.0.0",
-    "ws": "^8.19.0"
+    "uuid": "^13.0.1",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "jest": "^30.2.0",

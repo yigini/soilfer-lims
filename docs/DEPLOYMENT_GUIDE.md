@@ -17,6 +17,7 @@
 
 ## 📖 In-Repository & Local Documentation
 
+* 📊 **[Deployment Readiness Status & Operator Guide](DEPLOYMENT_READINESS.md)** — Tracked readiness status, single-lab and multi-lab guides, and technical audit ledger.
 * 📖 **[Administration Guide](ADMIN_GUIDE.md)** — Laboratory configuration, user RBAC, GloSIS procedures, and SIS API keys.
 * 🚀 **[Deployment & Production Guide](DEPLOYMENT_GUIDE.md)** — Comprehensive VPS setup, Nginx reverse proxy, SSL/Certbot, and zero-downtime updates.
 * 🛠️ **[Installation Quickstart](INSTALL.md)** — Step-by-step local and server installation.

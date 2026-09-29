@@ -17,6 +17,7 @@
 
 ## 📖 In-Repository & Local Documentation
 
+* 📊 **[Deployment Readiness Status & Operator Guide](DEPLOYMENT_READINESS.md)** — Tracked readiness status, single-lab and multi-lab guides, and technical audit ledger.
 * 📖 **[Administration Guide](ADMIN_GUIDE.md)** — Laboratory configuration, user RBAC, GloSIS procedures, and SIS API keys.
 * 🚀 **[Deployment & Production Guide](DEPLOYMENT_GUIDE.md)** — Comprehensive VPS setup, Nginx reverse proxy, SSL/Certbot, and zero-downtime updates.
 * 🛠️ **[Installation Quickstart](INSTALL.md)** — Step-by-step local and server installation.
@@ -193,13 +194,16 @@ Save and exit (Ctrl+O, Ctrl+X).
 ### A3. Start SoilFER-LIMS
 
 ```bash
-# For single-lab deployment:
-docker compose -f docker-compose.yml -f docker-compose.global.yml up -d
+# For single-lab deployment with NGINX (standard ports 80 & 443):
+docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d
+
+# For multi-lab deployment with NGINX:
+docker compose -f docker-compose.yml -f docker-compose.global.yml -f docker-compose.nginx.yml up -d
 
 # Wait about 30-60 seconds for first boot (it downloads, builds, and seeds the database)
 ```
 
-> **Why `docker-compose.global.yml`?** This adds NGINX (web server) which listens on port 80 — standard for websites. Without it, you'd access the site on port 3000, which is unusual and won't work with SSL.
+> **Why `docker-compose.nginx.yml`?** This adds the NGINX web server which listens on ports 80 and 443 — standard for public websites and SSL. Without it, you'd access the site directly on port 3000. Use `docker-compose.global.yml` only if you want multi-laboratory network mode.
 
 Verify it's running:
 
@@ -229,7 +233,7 @@ This makes your site secure (`https://`) and removes browser warnings.
 sudo apt install -y certbot
 
 # Stop NGINX temporarily so Certbot can verify your domain
-docker compose -f docker-compose.yml -f docker-compose.global.yml stop nginx
+docker compose -f docker-compose.yml -f docker-compose.nginx.yml stop nginx
 
 # Get your SSL certificate (replace with YOUR domain)
 sudo certbot certonly --standalone -d soillab.org -d www.soillab.org
@@ -279,24 +283,18 @@ server {
 }
 ```
 
-Update `docker-compose.global.yml` to mount the SSL certificates:
-
-```bash
-nano docker-compose.global.yml
-```
-
-Uncomment the SSL volume line:
+Verify `docker-compose.nginx.yml` mounts the SSL certificates (already enabled by default):
 
 ```yaml
     volumes:
       - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro     # ← ADD THIS LINE
+      - /etc/letsencrypt:/etc/letsencrypt:ro
 ```
 
 Restart everything:
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.global.yml up -d
+docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d
 ```
 
 Visit **https://soillab.org** — you should see the green lock icon! 🔒
@@ -308,7 +306,7 @@ Let's Encrypt certificates expire every 90 days. Set up automatic renewal:
 ```bash
 # Create a renewal script
 sudo tee /etc/cron.d/certbot-renew << 'EOF'
-0 3 * * 1 root certbot renew --pre-hook "docker compose -f /opt/soilfer-lims/docker-compose.yml -f /opt/soilfer-lims/docker-compose.global.yml stop nginx" --post-hook "docker compose -f /opt/soilfer-lims/docker-compose.yml -f /opt/soilfer-lims/docker-compose.global.yml start nginx"
+0 3 * * 1 root certbot renew --pre-hook "docker compose -f /opt/soilfer-lims/docker-compose.yml -f /opt/soilfer-lims/docker-compose.nginx.yml stop nginx" --post-hook "docker compose -f /opt/soilfer-lims/docker-compose.yml -f /opt/soilfer-lims/docker-compose.nginx.yml start nginx"
 EOF
 ```
 
