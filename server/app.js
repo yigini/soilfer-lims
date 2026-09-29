@@ -125,6 +125,7 @@ let backupScheduleInterval = null;
 
 function startBackgroundSchedulers() {
     if (process.env.NODE_ENV === 'test' || process.env.DISABLE_BACKGROUND_JOBS === 'true' || process.env.ENABLE_BACKGROUND_JOBS === 'false') {
+        console.log('[SCHEDULER] Background schedulers suppressed (writer hold active)');
         return;
     }
 

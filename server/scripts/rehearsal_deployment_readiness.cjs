@@ -539,10 +539,14 @@ async function runSuite() {
     await Promise.all(intakePromises);
     console.log('  ✓ Ingested 10 representative samples concurrently across Lab Alpha & Lab Beta');
 
-    const expectedAlphaSampleIds = createdAlphaSamples.map(s => s.originalId || s.id);
-    const expectedAlphaLabIds = createdAlphaSamples.map(s => s.labId);
-    const expectedBetaSampleIds = createdBetaSamples.map(s => s.originalId || s.id);
-    const expectedBetaLabIds = createdBetaSamples.map(s => s.labId);
+    const expectedAlphaMap = new Map();
+    for (const s of createdAlphaSamples) {
+        expectedAlphaMap.set(s.originalId || s.id, s.labId);
+    }
+    const expectedBetaMap = new Map();
+    for (const s of createdBetaSamples) {
+        expectedBetaMap.set(s.originalId || s.id, s.labId);
+    }
 
     // 4. Real Data Export Endpoint: POST /api/exports/data
     const exportARes = await fetch(`http://127.0.0.1:${globalPort}/api/exports/data`, {
@@ -553,19 +557,27 @@ async function runSuite() {
     if (exportARes.status !== 200) throw new Error(`Manager A export failed with status ${exportARes.status}`);
     const exportDataA = await exportARes.json();
     const rowsA = Array.isArray(exportDataA.data) ? exportDataA.data : (Array.isArray(exportDataA.rows) ? exportDataA.rows : []);
-    if (rowsA.length !== 5) throw new Error(`Expected exactly 5 rows in Manager A export, got ${rowsA.length}`);
-    const alphaSampleIds = rowsA.map(r => r['Sample ID'] || '').filter(Boolean);
-    const alphaLabIds = rowsA.map(r => r['Lab ID'] || '').filter(Boolean);
-    if (alphaSampleIds.length !== 5) throw new Error(`Expected 5 valid Sample IDs in Manager A export, got ${alphaSampleIds.length}`);
+    if (rowsA.length !== expectedAlphaMap.size) throw new Error(`Expected exactly ${expectedAlphaMap.size} rows in Manager A export, got ${rowsA.length}`);
     if (rowsA.some(r => (r['Sample ID'] && r['Sample ID'].includes('Beta')) || (r['Lab ID'] && r['Lab ID'].includes('Beta')))) {
         throw new Error('Manager A export contained Lab Beta records!');
     }
-    if (typeof expectedAlphaSampleIds !== 'undefined' && expectedAlphaSampleIds.length > 0) {
-        for (const sId of alphaSampleIds) {
-            if (!expectedAlphaSampleIds.includes(sId)) throw new Error(`Manager A export contained unexpected sample ID: ${sId}`);
-        }
+    const seenAlphaIds = new Set();
+    for (const r of rowsA) {
+        const sId = r['Sample ID'];
+        const lId = r['Lab ID'];
+        if (!sId || typeof sId !== 'string') throw new Error(`Manager A export missing or non-string Sample ID in row: ${JSON.stringify(r)}`);
+        if (!lId || typeof lId !== 'string') throw new Error(`Manager A export missing or non-string Lab ID in row: ${JSON.stringify(r)}`);
+        if (seenAlphaIds.has(sId)) throw new Error(`Manager A export contained duplicate Sample ID: ${sId}`);
+        seenAlphaIds.add(sId);
+        if (!expectedAlphaMap.has(sId)) throw new Error(`Manager A export contained unexpected sample ID: ${sId}`);
+        const expLabId = expectedAlphaMap.get(sId);
+        if (lId !== expLabId) throw new Error(`Manager A export Lab ID mismatch for sample ${sId}: expected ${expLabId}, got ${lId}`);
+        if (r['Status'] !== 'REGISTERED') throw new Error(`Manager A export Status mismatch for sample ${sId}: expected REGISTERED, got ${r['Status']}`);
     }
-    console.log(`  ✓ Manager A real data export returned exactly ${rowsA.length} scoped samples for Lab Alpha`);
+    if (seenAlphaIds.size !== expectedAlphaMap.size) {
+        throw new Error(`Manager A export missing expected sample IDs: expected ${expectedAlphaMap.size}, got ${seenAlphaIds.size}`);
+    }
+    console.log(`  ✓ Manager A real data export returned exactly ${rowsA.length} scoped samples with 1:1 multiplicity and verified accession Lab IDs`);
 
     const exportBRes = await fetch(`http://127.0.0.1:${globalPort}/api/exports/data`, {
         method: 'POST',
@@ -575,19 +587,27 @@ async function runSuite() {
     if (exportBRes.status !== 200) throw new Error(`Manager B export failed with status ${exportBRes.status}`);
     const exportDataB = await exportBRes.json();
     const rowsB = Array.isArray(exportDataB.data) ? exportDataB.data : (Array.isArray(exportDataB.rows) ? exportDataB.rows : []);
-    if (rowsB.length !== 5) throw new Error(`Expected exactly 5 rows in Manager B export, got ${rowsB.length}`);
-    const betaSampleIds = rowsB.map(r => r['Sample ID'] || '').filter(Boolean);
-    const betaLabIds = rowsB.map(r => r['Lab ID'] || '').filter(Boolean);
-    if (betaSampleIds.length !== 5) throw new Error(`Expected 5 valid Sample IDs in Manager B export, got ${betaSampleIds.length}`);
+    if (rowsB.length !== expectedBetaMap.size) throw new Error(`Expected exactly ${expectedBetaMap.size} rows in Manager B export, got ${rowsB.length}`);
     if (rowsB.some(r => (r['Sample ID'] && r['Sample ID'].includes('Alpha')) || (r['Lab ID'] && r['Lab ID'].includes('Alpha')))) {
         throw new Error('Manager B export contained Lab Alpha records!');
     }
-    if (typeof expectedBetaSampleIds !== 'undefined' && expectedBetaSampleIds.length > 0) {
-        for (const sId of betaSampleIds) {
-            if (!expectedBetaSampleIds.includes(sId)) throw new Error(`Manager B export contained unexpected sample ID: ${sId}`);
-        }
+    const seenBetaIds = new Set();
+    for (const r of rowsB) {
+        const sId = r['Sample ID'];
+        const lId = r['Lab ID'];
+        if (!sId || typeof sId !== 'string') throw new Error(`Manager B export missing or non-string Sample ID in row: ${JSON.stringify(r)}`);
+        if (!lId || typeof lId !== 'string') throw new Error(`Manager B export missing or non-string Lab ID in row: ${JSON.stringify(r)}`);
+        if (seenBetaIds.has(sId)) throw new Error(`Manager B export contained duplicate Sample ID: ${sId}`);
+        seenBetaIds.add(sId);
+        if (!expectedBetaMap.has(sId)) throw new Error(`Manager B export contained unexpected sample ID: ${sId}`);
+        const expLabId = expectedBetaMap.get(sId);
+        if (lId !== expLabId) throw new Error(`Manager B export Lab ID mismatch for sample ${sId}: expected ${expLabId}, got ${lId}`);
+        if (r['Status'] !== 'REGISTERED') throw new Error(`Manager B export Status mismatch for sample ${sId}: expected REGISTERED, got ${r['Status']}`);
     }
-    console.log(`  ✓ Manager B real data export returned exactly ${rowsB.length} scoped samples for Lab Beta`);
+    if (seenBetaIds.size !== expectedBetaMap.size) {
+        throw new Error(`Manager B export missing expected sample IDs: expected ${expectedBetaMap.size}, got ${seenBetaIds.size}`);
+    }
+    console.log(`  ✓ Manager B real data export returned exactly ${rowsB.length} scoped samples with 1:1 multiplicity and verified accession Lab IDs`);
 
     const exportSuperRes = await fetch(`http://127.0.0.1:${globalPort}/api/exports/data`, {
         method: 'POST',
@@ -597,20 +617,25 @@ async function runSuite() {
     if (exportSuperRes.status !== 200) throw new Error(`Super Admin export failed: ${exportSuperRes.status}`);
     const exportSuperData = await exportSuperRes.json();
     const rowsSuper = Array.isArray(exportSuperData.data) ? exportSuperData.data : (Array.isArray(exportSuperData.rows) ? exportSuperData.rows : []);
-    if (rowsSuper.length !== 10) throw new Error(`Expected exactly 10 rows in Super Admin export, got ${rowsSuper.length}`);
-    const superSampleIds = rowsSuper.map(r => r['Sample ID'] || '').filter(Boolean);
-    if (superSampleIds.length !== 10) throw new Error(`Expected 10 valid Sample IDs in Super Admin export, got ${superSampleIds.length}`);
-    if (typeof expectedAlphaSampleIds !== 'undefined' && expectedAlphaSampleIds.length > 0) {
-        for (const sId of expectedAlphaSampleIds) {
-            if (!superSampleIds.includes(sId)) throw new Error(`Super Admin export missing Alpha sample: ${sId}`);
-        }
+    const expectedSuperMap = new Map([...expectedAlphaMap, ...expectedBetaMap]);
+    if (rowsSuper.length !== expectedSuperMap.size) throw new Error(`Expected exactly ${expectedSuperMap.size} rows in Super Admin export, got ${rowsSuper.length}`);
+    const seenSuperIds = new Set();
+    for (const r of rowsSuper) {
+        const sId = r['Sample ID'];
+        const lId = r['Lab ID'];
+        if (!sId || typeof sId !== 'string') throw new Error(`Super Admin export missing or non-string Sample ID in row: ${JSON.stringify(r)}`);
+        if (!lId || typeof lId !== 'string') throw new Error(`Super Admin export missing or non-string Lab ID in row: ${JSON.stringify(r)}`);
+        if (seenSuperIds.has(sId)) throw new Error(`Super Admin export contained duplicate Sample ID: ${sId}`);
+        seenSuperIds.add(sId);
+        if (!expectedSuperMap.has(sId)) throw new Error(`Super Admin export contained unexpected sample ID: ${sId}`);
+        const expLabId = expectedSuperMap.get(sId);
+        if (lId !== expLabId) throw new Error(`Super Admin export Lab ID mismatch for sample ${sId}: expected ${expLabId}, got ${lId}`);
+        if (r['Status'] !== 'REGISTERED') throw new Error(`Super Admin export Status mismatch for sample ${sId}: expected REGISTERED, got ${r['Status']}`);
     }
-    if (typeof expectedBetaSampleIds !== 'undefined' && expectedBetaSampleIds.length > 0) {
-        for (const sId of expectedBetaSampleIds) {
-            if (!superSampleIds.includes(sId)) throw new Error(`Super Admin export missing Beta sample: ${sId}`);
-        }
+    if (seenSuperIds.size !== expectedSuperMap.size) {
+        throw new Error(`Super Admin export missing expected sample IDs: expected ${expectedSuperMap.size}, got ${seenSuperIds.size}`);
     }
-    console.log(`  ✓ Super Admin real data export returned all ${rowsSuper.length} cross-facility samples`);
+    console.log(`  ✓ Super Admin real data export returned all ${rowsSuper.length} cross-facility samples with complete IDs, multiplicity, and accession Lab IDs`);
 
     // 5. Background Scheduler Verification
     const globalLogs = cp.execFileSync('docker', ['logs', globalContainer], { encoding: 'utf8' });
@@ -1167,31 +1192,30 @@ async function runSuite() {
          console.log(JSON.stringify(samples));`
     ], { encoding: 'utf8' }).trim();
     const rollbackParsed = JSON.parse(postRollbackData);
-    const rollbackCodes = rollbackParsed.map(item => (typeof item === 'string' ? item : item.originalId));
-    if (rollbackCodes.length !== 10) {
-        throw new Error(`Post-rollback data count mismatch: expected 10, got ${rollbackCodes.length}`);
+    if (!Array.isArray(rollbackParsed) || rollbackParsed.length !== 10) {
+        throw new Error(`Post-rollback data count mismatch: expected 10, got ${rollbackParsed ? rollbackParsed.length : 0}`);
     }
     for (let i = 0; i < 10; i++) {
-        if (rollbackCodes[i] !== expectedSampleCodes[i]) {
-            throw new Error(`Post-rollback sample ID mismatch at index ${i}: expected ${expectedSampleCodes[i]}, got ${rollbackCodes[i]}`);
+        const item = rollbackParsed[i];
+        if (!item || typeof item !== 'object') {
+            throw new Error(`Post-rollback row at index ${i} is not a valid object: ${JSON.stringify(item)}`);
+        }
+        const expectedCode = expectedSampleCodes[i];
+        if (item.originalId !== expectedCode) {
+            throw new Error(`Post-rollback sample ID mismatch at index ${i}: expected ${expectedCode}, got ${item.originalId}`);
+        }
+        if (item.labId !== expectedCode) {
+            throw new Error(`Post-rollback labId mismatch for ${expectedCode}: expected ${expectedCode}, got ${item.labId}`);
+        }
+        const expectedLab = i < 5 ? 'lab-base-1' : 'lab-base-2';
+        if (item.assignedLab !== expectedLab) {
+            throw new Error(`Post-rollback assignedLab mismatch for ${expectedCode}: expected ${expectedLab}, got ${item.assignedLab}`);
+        }
+        if (item.status !== 'REGISTERED') {
+            throw new Error(`Post-rollback status mismatch for ${expectedCode}: expected REGISTERED, got ${item.status}`);
         }
     }
-    if (typeof rollbackParsed[0] === 'object' && rollbackParsed[0] !== null) {
-        for (let i = 0; i < 10; i++) {
-            const item = rollbackParsed[i];
-            if (item.labId && item.labId !== expectedSampleCodes[i]) {
-                throw new Error(`Post-rollback labId mismatch for ${expectedSampleCodes[i]}: expected ${expectedSampleCodes[i]}, got ${item.labId}`);
-            }
-            const expectedLab = i < 5 ? 'lab-base-1' : 'lab-base-2';
-            if (item.assignedLab && item.assignedLab !== expectedLab) {
-                throw new Error(`Post-rollback assignedLab mismatch for ${expectedSampleCodes[i]}: expected ${expectedLab}, got ${item.assignedLab}`);
-            }
-            if (item.status && item.status !== 'REGISTERED') {
-                throw new Error(`Post-rollback status mismatch for ${expectedSampleCodes[i]}: expected REGISTERED, got ${item.status}`);
-            }
-        }
-    }
-    console.log('  ✓ Post-rollback data verified: all 10 sample records, assigned labs, and statuses preserved in restored volume');
+    console.log('  ✓ Post-rollback data verified: all 10 sample records, assigned labs, and statuses preserved with exact values in restored volume');
 
     // Verify asset preservation in restored volume
     const postRollbackAsset = cp.execFileSync('docker', [

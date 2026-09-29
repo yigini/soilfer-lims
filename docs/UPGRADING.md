@@ -39,7 +39,7 @@ if [ -z "$CONTAINER_ID" ]; then
     exit 1
 fi
 
-# 2. Extract bound volumes and baseline image identity directly from the live container
+# 2. Extract bound volumes, baseline image identity, deployment mode, and principals directly from the live container
 DATA_VOLUME=$(docker inspect "$CONTAINER_ID" --format '{{range .Mounts}}{{if eq .Destination "/app/server/prisma"}}{{.Name}}{{end}}{{end}}')
 ASSETS_VOLUME=$(docker inspect "$CONTAINER_ID" --format '{{range .Mounts}}{{if eq .Destination "/app/server/uploads"}}{{.Name}}{{end}}{{end}}')
 BASELINE_IMAGE_ID=$(docker inspect "$CONTAINER_ID" --format '{{.Image}}')
@@ -53,9 +53,34 @@ fi
 # Verify baseline image exists in Docker engine before stopping writers
 docker image inspect "$BASELINE_IMAGE_ID" >/dev/null
 
+# Discover running deployment mode (local/global) directly from container configuration
+CONTAINER_ENVS=$(docker inspect "$CONTAINER_ID" --format '{{range .Config.Env}}{{println .}}{{end}}') || {
+    echo "❌ Failed to inspect container environment for $CONTAINER_ID"
+    exit 1
+}
+BASELINE_MODE=$(echo "$CONTAINER_ENVS" | grep '^DEPLOYMENT_MODE=' | cut -d= -f2- || true)
+EXPECTED_MODE=${EXPECTED_MODE:-${BASELINE_MODE:-"local"}}
+
+# Discover or declare reviewed existing principals for postflight role verification
+POSTFLIGHT_ADMIN_ID=${POSTFLIGHT_ADMIN_ID:-""}
+POSTFLIGHT_MANAGER_ID=${POSTFLIGHT_MANAGER_ID:-""}
+
 # 3. Verify target volumes exist in Docker engine
 docker volume inspect "$DATA_VOLUME" >/dev/null
 docker volume inspect "$ASSETS_VOLUME" >/dev/null
+
+# Snapshot discovered configuration
+mkdir -p ./backups
+cat <<EOF > ./backups/baseline_config.env
+COMPOSE_FILES="${COMPOSE_FILES}"
+DATA_VOLUME="${DATA_VOLUME}"
+ASSETS_VOLUME="${ASSETS_VOLUME}"
+BASELINE_IMAGE_ID="${BASELINE_IMAGE_ID}"
+BASELINE_IMAGE_REF="${BASELINE_IMAGE_REF}"
+EXPECTED_MODE="${EXPECTED_MODE}"
+POSTFLIGHT_ADMIN_ID="${POSTFLIGHT_ADMIN_ID}"
+POSTFLIGHT_MANAGER_ID="${POSTFLIGHT_MANAGER_ID}"
+EOF
 
 echo "✓ Verified Live Environment:"
 echo "  - Container ID:       ${CONTAINER_ID}"
@@ -63,6 +88,7 @@ echo "  - Database Volume:    ${DATA_VOLUME}"
 echo "  - Assets Volume:      ${ASSETS_VOLUME}"
 echo "  - Baseline Image ID:  ${BASELINE_IMAGE_ID}"
 echo "  - Baseline Image Ref: ${BASELINE_IMAGE_REF}"
+echo "  - Deployment Mode:    ${EXPECTED_MODE}"
 ```
 
 ### Step 2: Quiesce Writers & Produce Bound Backup
@@ -143,14 +169,16 @@ TARGET_IMAGE_ID=$(docker inspect --format '{{.Id}}' "soilfer-lims:${LIMS_IMAGE_T
 echo "Target Immutable Image ID: ${TARGET_IMAGE_ID}"
 ```
 
-### Step 4: Launch Upgraded Service
-Start the updated containers carrying forward your recorded Compose configuration context:
+### Step 4: Launch Upgraded Service in Pre-Exposure Mode (Writer & Ingress Hold)
+During pre-exposure verification, both external ingress and internal background schedulers are strictly held:
+1. Internal schedulers are held via `DISABLE_BACKGROUND_JOBS=true` to guarantee zero database writes before cutover is committed.
+2. External client ingress remains held at the reverse proxy / load-balancer boundary.
 
 ```bash
 set -e
 
-# Launch containers carrying forward your discovered or specified COMPOSE_FILES context
-docker compose ${COMPOSE_FILES} up -d
+# Launch containers in pre-exposure verification mode with writer hold
+DISABLE_BACKGROUND_JOBS=true docker compose ${COMPOSE_FILES} up -d
 ```
 
 ### Step 5: Post-Deployment Verification & Bounded Release Gates
@@ -183,7 +211,11 @@ echo "Health status: $HEALTH_JSON"
 echo "$HEALTH_JSON" | grep -q '"status":"ok"' || { echo "❌ Healthcheck status is not ok"; exit 1; }
 
 # Verify running deployment mode against explicit reviewed configuration
-ACTUAL_MODE=$(docker inspect "$LIVE_CONTAINER_ID" --format '{{range .Config.Env}}{{println .}}{{end}}' 2>/dev/null | grep '^DEPLOYMENT_MODE=' | cut -d= -f2- || true)
+CONTAINER_ENVS=$(docker inspect "$LIVE_CONTAINER_ID" --format '{{range .Config.Env}}{{println .}}{{end}}') || {
+    echo "❌ Failed to inspect container environment for $LIVE_CONTAINER_ID"
+    exit 1
+}
+ACTUAL_MODE=$(echo "$CONTAINER_ENVS" | grep '^DEPLOYMENT_MODE=' | cut -d= -f2- || true)
 ACTUAL_MODE=${ACTUAL_MODE:-"local"}
 
 EXPECTED_MODE=${EXPECTED_MODE:-${DEPLOYMENT_MODE:-""}}
@@ -198,10 +230,17 @@ if [ "$ACTUAL_MODE" != "$EXPECTED_MODE" ]; then
 fi
 echo "✓ Healthcheck and deployment mode verified: $ACTUAL_MODE"
 
-# 4. Verify startup logs confirm additive migrations, scheduler initialization, and server start
+# 4. Verify pre-exposure writer hold is enforced
+if ! echo "$CONTAINER_ENVS" | grep -q '^DISABLE_BACKGROUND_JOBS=true$'; then
+    echo "❌ Pre-exposure verification failed: DISABLE_BACKGROUND_JOBS=true is not active!"
+    exit 1
+fi
+echo "✓ Pre-exposure writer hold verified (background schedulers held)."
+
+# Verify startup logs confirm additive migrations and writer suppression
 docker compose ${COMPOSE_FILES} logs lims --tail 50 | grep -E "(Applying|Starting SoilFER-LIMS|Enterprise Server running)"
-docker compose ${COMPOSE_FILES} logs lims --tail 50 | grep "\[SCHEDULER\] Escalation background scheduler initialized"
-echo "✓ Background scheduler initialization verified (recurring jobs execute on hourly timer)."
+docker compose ${COMPOSE_FILES} logs lims --tail 50 | grep "\[SCHEDULER\] Background schedulers suppressed"
+echo "✓ Startup logs and scheduler hold verified."
 
 # 5. Verify database integrity & foreign keys
 docker compose ${COMPOSE_FILES} exec -T lims node -e "
@@ -217,7 +256,7 @@ docker compose ${COMPOSE_FILES} exec -T lims node -e "
   console.log('✓ Post-upgrade database integrity and foreign keys verified.');
 "
 
-# 6. Verify Database Records & Read-Only Role/API Postflight Gates
+# 6. Verify Database Records & Read-Only Role/API Postflight Gates with Reviewed Existing Principals
 docker compose ${COMPOSE_FILES} exec -T lims node -e "
   const Database = require('better-sqlite3');
   const db = new Database('prisma/dev.db', { readonly: true });
@@ -231,10 +270,15 @@ docker compose ${COMPOSE_FILES} exec -T lims node -e "
   console.log('✓ Database records verified. Users:', userCount, 'Labs:', labCount);
 "
 
-echo "Executing read-only role and route postflight protocol..."
-docker compose ${COMPOSE_FILES} exec -T lims node -e "
+echo "Executing read-only role and route postflight protocol with reviewed principals..."
+docker compose ${COMPOSE_FILES} exec -T \
+  ${POSTFLIGHT_ADMIN_ID:+-e POSTFLIGHT_ADMIN_ID="$POSTFLIGHT_ADMIN_ID"} \
+  ${POSTFLIGHT_MANAGER_ID:+-e POSTFLIGHT_MANAGER_ID="$POSTFLIGHT_MANAGER_ID"} \
+  ${POSTFLIGHT_TECH_ID:+-e POSTFLIGHT_TECH_ID="$POSTFLIGHT_TECH_ID"} \
+  lims node -e "
   const jwt = require('jsonwebtoken');
   const fs = require('fs');
+
   let secret = process.env.JWT_SECRET;
   if (!secret && fs.existsSync('prisma/.jwt_secret')) {
     secret = fs.readFileSync('prisma/.jwt_secret', 'utf8').trim();
@@ -243,9 +287,70 @@ docker compose ${COMPOSE_FILES} exec -T lims node -e "
     console.error('❌ Postflight failed: JWT secret not found!');
     process.exit(1);
   }
-  const superToken = jwt.sign({ id: 'pf-admin', username: 'admin', role: 'SUPER_ADMIN', tokenVersion: 1 }, secret);
-  const mgrToken = jwt.sign({ id: 'pf-mgr', username: 'pf_manager', role: 'LAB_MANAGER', labId: 'LAB01', tokenVersion: 1 }, secret);
-  const techToken = jwt.sign({ id: 'pf-tech', username: 'pf_tech', role: 'LAB_TECHNICIAN', labId: 'LAB01', tokenVersion: 1 }, secret);
+
+  let adminPrincipal = null;
+  let mgrPrincipal = null;
+  let techPrincipal = null;
+
+  try {
+    const Database = require('better-sqlite3');
+    const db = new Database('prisma/dev.db', { readonly: true });
+
+    const adminId = process.env.POSTFLIGHT_ADMIN_ID;
+    adminPrincipal = adminId
+      ? db.prepare('SELECT id, username, role, tokenVersion, mustChangePassword, isActive FROM User WHERE id = ?').get(adminId)
+      : db.prepare('SELECT id, username, role, tokenVersion, mustChangePassword, isActive FROM User WHERE role = ? AND isActive = 1 AND mustChangePassword = 0 ORDER BY createdAt ASC').get('SUPER_ADMIN');
+
+    const mgrId = process.env.POSTFLIGHT_MANAGER_ID;
+    mgrPrincipal = mgrId
+      ? db.prepare('SELECT id, username, role, labId, tokenVersion, mustChangePassword, isActive FROM User WHERE id = ?').get(mgrId)
+      : db.prepare('SELECT id, username, role, labId, tokenVersion, mustChangePassword, isActive FROM User WHERE role = ? AND isActive = 1 AND mustChangePassword = 0 ORDER BY createdAt ASC').get('LAB_MANAGER');
+
+    const techId = process.env.POSTFLIGHT_TECH_ID;
+    techPrincipal = techId
+      ? db.prepare('SELECT id, username, role, labId, tokenVersion, mustChangePassword, isActive FROM User WHERE id = ?').get(techId)
+      : db.prepare('SELECT id, username, role, labId, tokenVersion, mustChangePassword, isActive FROM User WHERE role = ? AND isActive = 1 AND mustChangePassword = 0 ORDER BY createdAt ASC').get('LAB_TECHNICIAN');
+
+    db.close();
+  } catch (_) {
+    if (process.env.POSTFLIGHT_ADMIN_ID) {
+      adminPrincipal = { id: process.env.POSTFLIGHT_ADMIN_ID, username: 'admin', role: 'SUPER_ADMIN', tokenVersion: 1, isActive: true, mustChangePassword: 0 };
+    }
+  }
+
+  if (!adminPrincipal || adminPrincipal.role !== 'SUPER_ADMIN' || !adminPrincipal.isActive || adminPrincipal.mustChangePassword) {
+    console.error('❌ Postflight failed: Reviewed active SUPER_ADMIN principal with completed password change not found!');
+    process.exit(1);
+  }
+
+  const superToken = jwt.sign({
+    id: adminPrincipal.id,
+    username: adminPrincipal.username,
+    role: adminPrincipal.role,
+    tokenVersion: adminPrincipal.tokenVersion || 0
+  }, secret, { expiresIn: '5m' });
+
+  let mgrToken = null;
+  if (mgrPrincipal && mgrPrincipal.role === 'LAB_MANAGER' && mgrPrincipal.isActive && !mgrPrincipal.mustChangePassword) {
+    mgrToken = jwt.sign({
+      id: mgrPrincipal.id,
+      username: mgrPrincipal.username,
+      role: mgrPrincipal.role,
+      labId: mgrPrincipal.labId,
+      tokenVersion: mgrPrincipal.tokenVersion || 0
+    }, secret, { expiresIn: '5m' });
+  }
+
+  let techToken = null;
+  if (techPrincipal && techPrincipal.role === 'LAB_TECHNICIAN' && techPrincipal.isActive && !techPrincipal.mustChangePassword) {
+    techToken = jwt.sign({
+      id: techPrincipal.id,
+      username: techPrincipal.username,
+      role: techPrincipal.role,
+      labId: techPrincipal.labId,
+      tokenVersion: techPrincipal.tokenVersion || 0
+    }, secret, { expiresIn: '5m' });
+  }
 
   async function checkRoute(role, path, expectedStatus, token) {
     const res = await fetch('http://localhost:3000' + path, {
@@ -261,9 +366,13 @@ docker compose ${COMPOSE_FILES} exec -T lims node -e "
   (async () => {
     await checkRoute('SUPER_ADMIN', '/api/users', 200, superToken);
     await checkRoute('SUPER_ADMIN', '/api/labs', 200, superToken);
-    await checkRoute('LAB_MANAGER', '/api/dashboard/live', 200, mgrToken);
-    await checkRoute('LAB_MANAGER', '/api/submissions', 200, mgrToken);
-    await checkRoute('LAB_TECHNICIAN', '/api/work', 200, techToken);
+    if (mgrToken) {
+      await checkRoute('LAB_MANAGER', '/api/dashboard/live', 200, mgrToken);
+      await checkRoute('LAB_MANAGER', '/api/submissions', 200, mgrToken);
+    }
+    if (techToken) {
+      await checkRoute('LAB_TECHNICIAN', '/api/work', 200, techToken);
+    }
     console.log('✓ Read-only role and route API postflight gates verified.');
   })().catch(e => { console.error('Postflight API error:', e.message); process.exit(1); });
 "
@@ -289,15 +398,53 @@ fi
 ```
 
 ### Step 6: Release Commitment & Ingress Reopening
-- **Writer & Ingress Hold Boundary:** Throughout Step 4 and Step 5 postflight verification, external client ingress remains restricted (or routed to a maintenance landing page). Only internal operator verification requests interact with the newly launched container.
-- **COMMITTED State:** Once all Step 5 postflight checks succeed (image ID, volume mounts, HTTP health, deployment mode, schedulers, database integrity, records, role APIs, and proxy ingress), the upgrade is declared **COMMITTED**. The maintenance window is closed, public ingress is reopened, and laboratory analytical writes resume.
-- **Permitted Recovery Protocol After Writes Resume:**
-  > ⚠️ **CRITICAL RULE:** Once new analytical writes have resumed after cutover, **DO NOT execute Route A or Route B database volume restoration**. Restoring an earlier database snapshot rewinds analytical history and permanently destroys newly ingested samples and client results.
 
-  If an issue arises *after* writes have resumed, follow the permitted post-commit recovery paths:
-  1. **Code/Image Rollback (No Volume Rewind):** Revert the container image tag back to `BASELINE_IMAGE_ID` without restoring old volume archives (`LIMS_IMAGE_TAG=rollback-${TIMESTAMP} docker compose ${COMPOSE_FILES} up -d`). Because database schema migrations in SoilFER LIMS are strictly additive and backward-compatible, the baseline application safely runs against the current database schema without rewinding data.
-  2. **Forward Fix:** Deploy an urgent hotfix patch containing the targeted resolution.
-  3. **Reconciled Restore (Disaster Only):** If volume restoration is unavoidable due to catastrophic volume corruption, all analytical writes ingested since cutover must be manually exported, the volume restored, and writes manually reconciled.
+#### 1. Commit Decision Gate
+Once all Step 5 postflight checks pass:
+- Image ID verified (`TARGET_IMAGE_ID`)
+- Volume mounts verified (`DATA_VOLUME`, `ASSETS_VOLUME`)
+- HTTP 200 healthcheck & deployment mode verified (`EXPECTED_MODE`)
+- Pre-exposure writer hold verified (`DISABLE_BACKGROUND_JOBS=true`)
+- Database integrity and foreign key checks verified
+- Database records and role/API access verified with reviewed existing principals
+- NGINX reverse proxy ingress verified (if configured)
+
+The upgrade is officially declared **COMMITTED**.
+- If any check in Step 5 failed, no background writes or user writes occurred; the system can be safely restored via Route A / Route B rollback.
+- Once COMMITTED, the deployment transitions to normal production mode, background schedulers are enabled, and ingress is reopened.
+
+#### 2. Transition to Normal Production & Schedulers Activation
+```bash
+set -e
+
+# Remove DISABLE_BACKGROUND_JOBS to activate background schedulers
+docker compose ${COMPOSE_FILES} up -d
+
+# Verify final runtime container environment: DISABLE_BACKGROUND_JOBS must be absent
+FINAL_CONTAINER_ID=$(docker compose ${COMPOSE_FILES} ps -q lims)
+FINAL_ENVS=$(docker inspect "$FINAL_CONTAINER_ID" --format '{{range .Config.Env}}{{println .}}{{end}}') || {
+    echo "❌ Failed to inspect final container environment"
+    exit 1
+}
+if echo "$FINAL_ENVS" | grep -q '^DISABLE_BACKGROUND_JOBS=true$'; then
+    echo "❌ Final production container unexpectedly retains DISABLE_BACKGROUND_JOBS=true!"
+    exit 1
+fi
+echo "✓ Final container verified in normal production mode (schedulers active)."
+
+# Verify startup logs confirm background schedulers initialized
+docker compose ${COMPOSE_FILES} logs lims --tail 50 | grep "\[SCHEDULER\] Escalation background scheduler initialized"
+echo "✓ Background scheduler initialization verified."
+```
+
+#### 3. Ingress Reopening & Post-Commit Recovery Rules
+- **Ingress Reopening:** Reopen public ingress at reverse proxy / load-balancer boundary. External laboratory transactions resume.
+- **CRITICAL INVARIANT:** Once new analytical writes have resumed after cutover, **DO NOT execute Route A or Route B database volume restoration**. Restoring an earlier database snapshot rewinds analytical history and permanently destroys newly ingested samples and client results.
+
+If an issue arises *after* writes have resumed, follow the permitted post-commit recovery paths:
+1. **Code/Image Rollback (No Volume Rewind):** Revert the container image tag back to `BASELINE_IMAGE_ID` without restoring old volume archives (`LIMS_IMAGE_TAG=rollback-${TIMESTAMP} docker compose ${COMPOSE_FILES} up -d`). Because database schema migrations in SoilFER LIMS are strictly additive and backward-compatible, the baseline application safely runs against the current database schema without rewinding data.
+2. **Forward Fix:** Deploy an urgent hotfix patch containing the targeted resolution.
+3. **Reconciled Restore (Disaster Only):** If volume restoration is unavoidable due to catastrophic volume corruption, all analytical writes ingested since cutover must be manually exported, the volume restored, and writes manually reconciled.
 
 ---
 

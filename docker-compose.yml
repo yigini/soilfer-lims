@@ -12,6 +12,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:-}
       - DEPLOYMENT_MODE=${DEPLOYMENT_MODE:-local}
       - ADMIN_INITIAL_PASSWORD=${ADMIN_INITIAL_PASSWORD:-}
+      - DISABLE_BACKGROUND_JOBS=${DISABLE_BACKGROUND_JOBS:-}
     deploy:
       resources:
         limits:
