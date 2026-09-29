@@ -67,6 +67,12 @@ function registerVolume(vol) {
     return vol;
 }
 
+function extractTokenAndUser(data) {
+    const token = data.token || data.data?.token;
+    const user = data.user || data.data?.user || {};
+    return { token, user };
+}
+
 function cleanup() {
     console.log('\n🧹 Cleaning up disposable test resources...');
     for (const c of disposableContainers) {
@@ -145,8 +151,9 @@ async function runSuite() {
         throw new Error(`Initial login failed with status ${loginRes.status}: ${txt}`);
     }
     const loginData = await loginRes.json();
-    if (!loginData.token || !loginData.mustChangePassword) {
-        throw new Error(`Expected token and mustChangePassword=true, got: ${JSON.stringify(loginData)}`);
+    const { token: localToken, user: localUser } = extractTokenAndUser(loginData);
+    if (!localToken || !localUser.mustChangePassword) {
+        throw new Error(`Expected token and user.mustChangePassword=true, got: ${JSON.stringify(loginData)}`);
     }
     console.log('  ✓ Initial admin login succeeded (mustChangePassword=true)');
 
@@ -155,7 +162,7 @@ async function runSuite() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${loginData.token}`
+            'Authorization': `Bearer ${localToken}`
         },
         body: JSON.stringify({
             currentPassword: 'InitialSecretLocal123!',
@@ -204,7 +211,8 @@ async function runSuite() {
         throw new Error(`Post-restart login failed with status ${restartLoginRes.status}`);
     }
     const restartData = await restartLoginRes.json();
-    if (restartData.mustChangePassword) {
+    const { user: restartUser } = extractTokenAndUser(restartData);
+    if (restartUser.mustChangePassword) {
         throw new Error('mustChangePassword should be false after previous password change');
     }
     console.log('  ✓ Login with updated password confirmed on restarted container');
@@ -300,8 +308,9 @@ async function runSuite() {
         throw new Error(`Global admin login failed with status ${globalLoginRes.status}`);
     }
     const globalLoginData = await globalLoginRes.json();
-    if (globalLoginData.user?.role !== 'SUPER_ADMIN') {
-        throw new Error(`Expected role SUPER_ADMIN in global mode, got ${globalLoginData.user?.role}`);
+    const { token: globalInitialToken, user: globalUser } = extractTokenAndUser(globalLoginData);
+    if (globalUser.role !== 'SUPER_ADMIN') {
+        throw new Error(`Expected role SUPER_ADMIN in global mode, got ${globalUser.role}`);
     }
     console.log('  ✓ Global SUPER_ADMIN login verified');
 
@@ -310,7 +319,7 @@ async function runSuite() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${globalLoginData.token}`
+            'Authorization': `Bearer ${globalInitialToken}`
         },
         body: JSON.stringify({
             currentPassword: 'GlobalSuperPass123!',
@@ -327,7 +336,7 @@ async function runSuite() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: 'admin', password: 'UpdatedGlobalPass456!' })
     });
-    const superToken = (await tokenRes.json()).token;
+    const { token: superToken } = extractTokenAndUser(await tokenRes.json());
 
     // Create Laboratory A and Laboratory B via Admin API
     const labARes = await fetch(`http://127.0.0.1:${globalPort}/api/laboratories`, {
@@ -386,7 +395,7 @@ async function runSuite() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: 'manager_alpha', password: 'AlphaManagerPass123!' })
     });
-    const tokenA = (await loginARes.json()).token;
+    const { token: tokenA } = extractTokenAndUser(await loginARes.json());
 
     // Manager A submits 5 walkin samples
     for (let i = 1; i <= 5; i++) {
