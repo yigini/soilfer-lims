@@ -1,10 +1,24 @@
+const path = require('path');
+const fs = require('fs');
+const dotenv = require('dotenv');
+
+// Load environment variables independent of working directory:
+// 1. process.env (externally supplied, e.g. Docker, CI, process exports) is preserved by dotenv default.
+// 2. Project-root .env (canonical location created by setup.sh / .env.example) supplies configuration.
+// 3. server/.env (if present) is loaded for backward compatibility without overriding existing variables.
+const rootEnv = path.resolve(__dirname, '..', '.env');
+const serverEnv = path.resolve(__dirname, '.env');
+if (fs.existsSync(rootEnv)) {
+    dotenv.config({ path: rootEnv });
+}
+if (fs.existsSync(serverEnv)) {
+    dotenv.config({ path: serverEnv });
+}
+
 const express = require('express');
-require('dotenv').config();
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const path = require('path');
-const fs = require('fs');
 const adminRoutes = require('./routes/adminRoutes');
 const publicRoutes = require('./routes/publicRoutes');
 const prisma = require('./prisma');
