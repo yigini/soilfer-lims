@@ -1164,7 +1164,6 @@ async function runSuite() {
     ], { encoding: 'utf8' }).trim();
     const rollbackParsed = JSON.parse(postRollbackData);
     const rollbackCodes = rollbackParsed.map(item => (typeof item === 'string' ? item : item.originalId));
-    const expectedSampleCodes = Array.from({ length: 10 }, (_, i) => 'BASE-SMP-' + String(i + 1).padStart(3, '0'));
     if (rollbackCodes.length !== 10) {
         throw new Error(`Post-rollback data count mismatch: expected 10, got ${rollbackCodes.length}`);
     }
