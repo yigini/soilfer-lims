@@ -350,22 +350,33 @@ async function runSuite() {
     const { token: superToken } = extractTokenAndUser(await tokenRes.json());
 
     // Create Laboratory A and Laboratory B via Admin API
-    const labARes = await fetch(`http://127.0.0.1:${globalPort}/api/laboratories`, {
+    const labARes = await fetch(`http://127.0.0.1:${globalPort}/api/labs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${superToken}` },
-        body: JSON.stringify({ name: 'Accredited Lab Alpha', code: 'LAB_ALPHA', country: 'GHA', isActive: true })
+        body: JSON.stringify({ id: `lab-alpha-${TS}`, name: 'Accredited Lab Alpha', code: `ALPHA_${TS}`, country: 'GHA' })
     });
-    const labBRes = await fetch(`http://127.0.0.1:${globalPort}/api/laboratories`, {
+    const labBRes = await fetch(`http://127.0.0.1:${globalPort}/api/labs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${superToken}` },
-        body: JSON.stringify({ name: 'Accredited Lab Beta', code: 'LAB_BETA', country: 'KEN', isActive: true })
+        body: JSON.stringify({ id: `lab-beta-${TS}`, name: 'Accredited Lab Beta', code: `BETA_${TS}`, country: 'KEN' })
     });
-    if (labARes.status !== 201 || labBRes.status !== 201) {
+    if (labARes.status !== 200 || labBRes.status !== 200) {
         throw new Error(`Failed to create laboratories: A=${labARes.status}, B=${labBRes.status}`);
     }
-    const labA = await labARes.json();
-    const labB = await labBRes.json();
+    const { lab: labA } = await labARes.json();
+    const { lab: labB } = await labBRes.json();
     console.log(`  ✓ Created Lab Alpha (${labA.code}) and Lab Beta (${labB.code})`);
+
+    // Activate both laboratories
+    await fetch(`http://127.0.0.1:${globalPort}/api/labs/${labA.id}/toggle-active`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${superToken}` }
+    });
+    await fetch(`http://127.0.0.1:${globalPort}/api/labs/${labB.id}/toggle-active`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${superToken}` }
+    });
+    console.log('  ✓ Activated both laboratories');
 
     // ─────────────────────────────────────────────────────────────
     // SCENARIO 5: Representative Workload, Export & Backup/Restore Round-Trip
@@ -396,7 +407,7 @@ async function runSuite() {
             isActive: true
         })
     });
-    if (userARes.status !== 201 || userBRes.status !== 201) {
+    if ((userARes.status !== 200 && userARes.status !== 201) || (userBRes.status !== 200 && userBRes.status !== 201)) {
         throw new Error(`Failed to create managers: A=${userARes.status}, B=${userBRes.status}`);
     }
 
@@ -406,7 +417,37 @@ async function runSuite() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: 'manager_alpha', password: 'AlphaManagerPass123!' })
     });
-    const { token: tokenA } = extractTokenAndUser(await loginARes.json());
+    if (loginARes.status !== 200) {
+        throw new Error(`Manager A login failed: ${loginARes.status}`);
+    }
+    const { token: initTokenA, user: initUserA } = extractTokenAndUser(await loginARes.json());
+    if (!initUserA.mustChangePassword) {
+        throw new Error('Expected Manager A mustChangePassword=true');
+    }
+
+    // Manager A changes temporary password
+    const changePassARes = await fetch(`http://127.0.0.1:${globalPort}/api/auth/change-password`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${initTokenA}`
+        },
+        body: JSON.stringify({
+            currentPassword: 'AlphaManagerPass123!',
+            newPassword: 'UpdatedAlphaPass789!'
+        })
+    });
+    if (changePassARes.status !== 200) {
+        throw new Error(`Manager A password change failed: ${changePassARes.status}`);
+    }
+
+    // Re-login with updated password to obtain operational token
+    const permLoginARes = await fetch(`http://127.0.0.1:${globalPort}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'manager_alpha', password: 'UpdatedAlphaPass789!' })
+    });
+    const { token: tokenA } = extractTokenAndUser(await permLoginARes.json());
 
     // Manager A submits 5 walkin samples
     for (let i = 1; i <= 5; i++) {
@@ -514,7 +555,29 @@ async function runSuite() {
     if (verifyRestoredLogin.status !== 200) {
         throw new Error(`Login on restored database failed with status ${verifyRestoredLogin.status}`);
     }
-    console.log('  ✓ Post-restore login and data preservation confirmed');
+    console.log('  ✓ Post-restore admin login confirmed');
+
+    // Verify Manager Alpha login and sample preservation on restored database
+    const verifyMgrLogin = await fetch(`http://127.0.0.1:${restoredPort}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'manager_alpha', password: 'UpdatedAlphaPass789!' })
+    });
+    if (verifyMgrLogin.status !== 200) {
+        throw new Error(`Manager login on restored database failed with status ${verifyMgrLogin.status}`);
+    }
+    const { token: restoredTokenA } = extractTokenAndUser(await verifyMgrLogin.json());
+
+    const restoredSamplesRes = await fetch(`http://127.0.0.1:${restoredPort}/api/samples`, {
+        headers: { 'Authorization': `Bearer ${restoredTokenA}` }
+    });
+    const restoredData = await restoredSamplesRes.json();
+    const restoredCount = Array.isArray(restoredData?.data) ? restoredData.data.length : 0;
+    if (restoredCount < 5) {
+        throw new Error(`Expected at least 5 preserved samples on restored DB, got ${restoredCount}`);
+    }
+    console.log(`  ✓ Post-restore sample count confirmed (${restoredCount} samples preserved)`);
+
     cp.execFileSync('docker', ['stop', restoredContainer]);
 
     console.log('\n================================================================');
