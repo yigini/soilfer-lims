@@ -45,16 +45,15 @@ fi
 NODE_MAJOR=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
 NODE_MINOR=$(node -v | cut -d'.' -f2)
 NODE_OK=0
-if [ "$NODE_MAJOR" -ge 24 ]; then
+if [ "$NODE_MAJOR" -eq 24 ]; then
     NODE_OK=1
 elif [ "$NODE_MAJOR" -eq 22 ] && [ "$NODE_MINOR" -ge 12 ]; then
-    NODE_OK=1
-elif [ "$NODE_MAJOR" -eq 20 ] && [ "$NODE_MINOR" -ge 19 ]; then
     NODE_OK=1
 fi
 
 if [ "$NODE_OK" -ne 1 ]; then
-    echo -e "${RED}✗ Supported Node.js required: v24 LTS (recommended), v22.12+, or v20.19+ (found $(node -v))${NC}"
+    echo -e "${RED}✗ Supported Node.js LTS required: Node.js 24 LTS (recommended) or Node.js 22 LTS (v22.12+) (found $(node -v))${NC}"
+    echo "  Node.js 20 and earlier have reached official End-of-Life (EOL)."
     echo "  Please install a supported Node.js LTS release from: https://nodejs.org"
     exit 1
 fi
@@ -129,7 +128,7 @@ echo -e "${GREEN}╔════════════════════
 echo -e "${GREEN}║       ✓ Setup Complete! (${MODE_UPPER} mode)          ║${NC}"
 echo -e "${GREEN}╚═══════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "  Start:   ${BLUE}cd server && NODE_ENV=production node index.js${NC}"
+echo -e "  Start:   ${BLUE}npm start${NC}  (or: ${BLUE}cd server && npm start${NC})"
 echo -e "  Open:    ${BLUE}http://localhost:3000${NC}"
 echo -e "  Login:   ${BLUE}admin${NC} (Role: $([ "$MODE" = "global" ] && echo "SUPER_ADMIN" || echo "LAB_MANAGER"))"
 echo -e "  Password: (See initial one-time password generated in step 7 above)"

@@ -19,6 +19,7 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const cp = require('child_process');
 const Database = require('better-sqlite3');
 const { restoreBackup } = require('../../scripts/restore_db');
 const { rotateEpoch, getCurrentEpoch, initTables, ensureTriggers } = require('../../services/exchangeStateService');
@@ -428,33 +429,174 @@ describe('Deployment Readiness Acceptance Contract', () => {
             expect(newEpoch).toBeDefined();
             expect(newEpoch).not.toBe(initialEpoch); // Epoch was successfully rotated!
         });
+
+        test('Fails closed, exits non-zero, and preserves safety artifacts when SQL epoch rotation triggers fail', async () => {
+            const failBackupPath = path.join(tmpDir, 'fail_backup.db');
+            const failTargetPath = path.join(tmpDir, 'fail_target.db');
+
+            // 1. Create a prior target database with a WAL sidecar to test preservation
+            const priorDb = new Database(failTargetPath);
+            priorDb.pragma('journal_mode = WAL');
+            priorDb.exec(`
+                CREATE TABLE User (id TEXT PRIMARY KEY, username TEXT);
+                INSERT INTO User VALUES ('prior-admin', 'prior');
+            `);
+            // Write a record without checkpointing to leave pages in WAL
+            priorDb.exec(`INSERT INTO User VALUES ('wal-page-test', 'in-wal');`);
+            priorDb.close();
+
+            // 2. Create source backup with a deliberate SQL trigger aborting epoch updates
+            const failDb = new Database(failBackupPath);
+            failDb.exec(`
+                CREATE TABLE User (id TEXT PRIMARY KEY, username TEXT);
+                INSERT INTO User VALUES ('u2', 'admin2');
+                CREATE TABLE Sample (id TEXT PRIMARY KEY, labId TEXT);
+                INSERT INTO Sample VALUES ('s2', 'LAB02');
+            `);
+            initTables(failDb);
+            ensureTriggers(failDb);
+            failDb.exec(`
+                CREATE TRIGGER fail_epoch_update
+                BEFORE UPDATE OF value ON _exchange_meta
+                WHEN NEW.key = 'epoch'
+                BEGIN
+                    SELECT RAISE(ABORT, 'controlled epoch persistence failure');
+                END;
+            `);
+            failDb.close();
+
+            // 3. Test programmatic restore: MUST throw and fail closed
+            await expect(restoreBackup(failBackupPath, failTargetPath)).rejects.toThrow(
+                /Data exchange epoch rotation failed/
+            );
+
+            // 4. Test CLI restore: MUST exit with code 1 and NOT claim success
+            const serverDir = path.resolve(__dirname, '..', '..');
+            const cliRes = cp.spawnSync(process.execPath, [
+                path.join(serverDir, 'scripts', 'restore_db.js'),
+                failBackupPath,
+                '--target',
+                failTargetPath
+            ], {
+                cwd: serverDir,
+                env: { ...process.env, DATABASE_PATH: failTargetPath },
+                encoding: 'utf8'
+            });
+
+            expect(cliRes.status).toBe(1);
+            expect(cliRes.stdout).not.toMatch(/\[RESTORE\] SUCCESS/);
+            expect(cliRes.stderr).toMatch(/controlled epoch persistence failure/);
+
+            // 5. Verify that pre-restore safety snapshots were preserved
+            const dirFiles = fs.readdirSync(tmpDir);
+            const bakFiles = dirFiles.filter(f => f.startsWith('fail_target.db.pre_restore_') && f.endsWith('.bak'));
+            expect(bakFiles.length).toBeGreaterThanOrEqual(1);
+        });
     });
 
-    describe('5. Bounded Concurrent Multi-Lab Load Processing', () => {
-        test('Handles concurrent read and status requests across laboratories without deadlocks', async () => {
-            const requests = [];
+    describe('5. Bounded Concurrent Multi-Lab Load Processing & Workload Isolation', () => {
+        test('Handles concurrent sample intake, queries, and project reads across laboratories without deadlocks', async () => {
+            const numConcurrentOperations = 12; // 6 operations for Lab A + 6 operations for Lab B
+            const promises = [];
 
-            for (let i = 0; i < 20; i++) {
-                // Interleave Manager A and Manager B requests concurrently
+            for (let i = 0; i < numConcurrentOperations; i++) {
                 if (i % 2 === 0) {
-                    requests.push(
+                    // Manager A operations (Lab A)
+                    promises.push(
                         request(app)
-                            .get('/api/labs')
+                            .post('/api/samples/walkin')
                             .set('Authorization', `Bearer ${managerAToken}`)
+                            .send({
+                                submitter: `Submitter A ${i}`,
+                                description: `Concurrent Batch A Sample ${i}`,
+                                sampleType: 'ROUTINE'
+                            })
+                            .then(res => ({
+                                lab: 'A',
+                                type: 'intake',
+                                status: res.status,
+                                body: res.body
+                            }))
                     );
                 } else {
-                    requests.push(
+                    // Manager B operations (Lab B)
+                    promises.push(
                         request(app)
-                            .get('/api/labs')
+                            .post('/api/samples/walkin')
                             .set('Authorization', `Bearer ${managerBToken}`)
+                            .send({
+                                submitter: `Submitter B ${i}`,
+                                description: `Concurrent Batch B Sample ${i}`,
+                                sampleType: 'ROUTINE'
+                            })
+                            .then(res => ({
+                                lab: 'B',
+                                type: 'intake',
+                                status: res.status,
+                                body: res.body
+                            }))
                     );
                 }
             }
 
-            const responses = await Promise.all(requests);
-            for (const r of responses) {
-                expect(r.status).toBe(200);
-                expect(Array.isArray(r.body)).toBe(true);
+            // Also interleave concurrent read operations simultaneously
+            for (let i = 0; i < 8; i++) {
+                const token = i % 2 === 0 ? managerAToken : managerBToken;
+                promises.push(
+                    request(app)
+                        .get('/api/samples')
+                        .set('Authorization', `Bearer ${token}`)
+                        .then(res => ({
+                            lab: i % 2 === 0 ? 'A' : 'B',
+                            type: 'query',
+                            status: res.status,
+                            count: Array.isArray(res.body?.data) ? res.body.data.length : 0
+                        }))
+                );
+            }
+
+            const results = await Promise.all(promises);
+
+            // All operations must complete cleanly without 500 error or SQLITE_BUSY / locked deadlocks
+            for (const r of results) {
+                if (r.type === 'intake') {
+                    expect([200, 201]).toContain(r.status);
+                    expect(r.body.sample?.id || r.body.data?.id).toBeDefined();
+                } else if (r.type === 'query') {
+                    expect(r.status).toBe(200);
+                }
+            }
+
+            // Verify strict multi-lab isolation after concurrent writes:
+            // Manager A should ONLY see Lab A samples; Manager B should ONLY see Lab B samples
+            const resA = await request(app)
+                .get('/api/samples')
+                .set('Authorization', `Bearer ${managerAToken}`);
+            const samplesA = resA.body.data || resA.body;
+            expect(Array.isArray(samplesA)).toBe(true);
+            for (const s of samplesA) {
+                if (s.submitter && s.submitter.startsWith('Submitter A')) {
+                    expect(s.assignedLab).toBe(globalLabAId);
+                }
+                if (s.submitter) {
+                    expect(s.submitter).not.toMatch(/^Submitter B/);
+                }
+                if (s.assignedLab) expect(s.assignedLab).toBe(globalLabAId);
+            }
+
+            const resB = await request(app)
+                .get('/api/samples')
+                .set('Authorization', `Bearer ${managerBToken}`);
+            const samplesB = resB.body.data || resB.body;
+            expect(Array.isArray(samplesB)).toBe(true);
+            for (const s of samplesB) {
+                if (s.submitter && s.submitter.startsWith('Submitter B')) {
+                    expect(s.assignedLab).toBe(globalLabBId);
+                }
+                if (s.submitter) {
+                    expect(s.submitter).not.toMatch(/^Submitter A/);
+                }
+                if (s.assignedLab) expect(s.assignedLab).toBe(globalLabBId);
             }
         });
     });

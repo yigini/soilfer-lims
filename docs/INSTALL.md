@@ -510,7 +510,8 @@ curl -f http://localhost/api/health
 cd /opt/soilfer-lims
 git pull origin main
 docker compose down
-docker compose up -d --build     # or add -f docker-compose.global.yml for Scenario A
+docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d --build     # for Scenario A (NGINX)
+# (Or: docker compose up -d --build for direct port 3000)
 ```
 
 > Your database is preserved across updates — it lives in the Docker volume `lims-data`.
@@ -584,7 +585,7 @@ sudo certbot renew --force-renewal
 
 ### Port 80 or 443 already in use
 
-If another web server is using these ports (Scenario B), don't use the global docker-compose. Use the base compose and your existing NGINX/Apache.
+If another web server is using these ports (Scenario B), don't use `docker-compose.nginx.yml`. Use the base compose (`docker compose up -d` on port 3000) and configure your existing NGINX or Apache reverse proxy.
 
 ```bash
 # Check what's using port 80
@@ -602,11 +603,15 @@ cd /app/server
 node -e "
 const {PrismaClient}=require('./prisma_client');
 const bcrypt=require('bcryptjs');
+const crypto=require('crypto');
 const p=new PrismaClient();
 (async()=>{
-  const hash=await bcrypt.hash('password',10);
+  const tempPass = crypto.randomBytes(6).toString('base64url');
+  const hash=await bcrypt.hash(tempPass,10);
   await p.user.updateMany({where:{username:'admin'},data:{password:hash,mustChangePassword:true}});
-  console.log('Password reset to: password');
+  console.log('Password reset successfully.');
+  console.log('Temporary password:', tempPass);
+  process.exit(0);
 })()
 "
 

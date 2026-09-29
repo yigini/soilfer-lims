@@ -7,6 +7,7 @@
     "start": "node index.js",
     "dev": "node index.js",
     "seed": "node seed.js",
+    "provision:admin": "node scripts/provision_super_admin.js",
     "test": "jest --runInBand",
     "test:watch": "jest --watch",
     "test:workflow": "jest --runInBand tests/security/ tests/contracts/ tests/scenarios/",

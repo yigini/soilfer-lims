@@ -11,6 +11,7 @@ services:
       - PORT=3000
       - JWT_SECRET=${JWT_SECRET:-}
       - DEPLOYMENT_MODE=${DEPLOYMENT_MODE:-local}
+      - ADMIN_INITIAL_PASSWORD=${ADMIN_INITIAL_PASSWORD:-}
     deploy:
       resources:
         limits:

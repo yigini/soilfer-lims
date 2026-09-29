@@ -58,7 +58,7 @@ describe('Deployment Readiness Bootstrap & Packaging Verification', () => {
         });
 
         expect(res.status).toBe(1);
-        expect(res.stdout + res.stderr).toMatch(/Supported Node\.js required/i);
+        expect(res.stdout + res.stderr).toMatch(/Supported Node\.js (LTS )?required/i);
     });
 
     test('setup.sh fails fast and aborts if schema push fails (no error swallowing)', () => {
@@ -152,10 +152,113 @@ esac
         expect(match).not.toBeNull();
     });
 
+    test('entrypoint persists auto-generated JWT_SECRET across container restarts', () => {
+        const testDir = path.join(scratchDir, 'jwt_entrypoint_persist_test');
+        fs.mkdirSync(path.join(testDir, 'prisma'), { recursive: true });
+
+        // Extract secret-handling block from docker-entrypoint.sh
+        const entryContent = fs.readFileSync(path.join(repoRoot, 'docker-entrypoint.sh'), 'utf8');
+        const secretBlock = entryContent.slice(
+            entryContent.indexOf('if [ -z "$JWT_SECRET"'),
+            entryContent.indexOf('# Ensure schema')
+        );
+
+        const testScript = path.join(testDir, 'test_secret.sh');
+        fs.writeFileSync(testScript, `#!/bin/sh\nset -e\ncd "${testDir.replace(/\\/g, '/')}"\n${secretBlock}\nnode -e "console.log(require('crypto').createHash('sha256').update(process.env.JWT_SECRET).digest('hex'))"\n`);
+        fs.chmodSync(testScript, '755');
+
+        function runSecret(secretEnv) {
+            const res = cp.spawnSync(bashPath, [testScript], {
+                cwd: testDir,
+                env: { ...process.env, JWT_SECRET: secretEnv },
+                encoding: 'utf8'
+            });
+            expect(res.status).toBe(0);
+            return res.stdout.trim().split(/\r?\n/).pop();
+        }
+
+        // Two blank invocations MUST yield the exact same persisted secret
+        const emptyHash1 = runSecret('');
+        const emptyHash2 = runSecret('');
+        expect(emptyHash1).toBe(emptyHash2);
+
+        // Pre-configured invocation preserves explicit secret
+        const configuredHash1 = runSecret('test-configured-secret-1234');
+        const configuredHash2 = runSecret('test-configured-secret-1234');
+        expect(configuredHash1).toBe(configuredHash2);
+        expect(emptyHash1).not.toBe(configuredHash1);
+    });
+
+    test('entrypoint recovers from interrupted initial setup on restart without reseeding populated installations', () => {
+        const testDir = path.join(scratchDir, 'resumable_boot_test');
+        fs.mkdirSync(path.join(testDir, 'prisma'), { recursive: true });
+        fs.writeFileSync(path.join(testDir, 'prisma', 'schema.prisma'), '// test fixture\n');
+
+        const entryContent = fs.readFileSync(path.join(repoRoot, 'docker-entrypoint.sh'), 'utf8');
+        // Adapt container path to testDir
+        const adaptedEntry = entryContent.replace('cd /app/server', `cd "${testDir.replace(/\\/g, '/')}"`);
+        const entryScript = path.join(testDir, 'entrypoint.sh');
+        fs.writeFileSync(entryScript, adaptedEntry);
+        fs.chmodSync(entryScript, '755');
+
+        const traceFile = path.join(testDir, 'boot-trace.log');
+        const driverScript = path.join(testDir, 'boot-driver.sh');
+        fs.writeFileSync(driverScript, `#!/bin/sh
+export JWT_SECRET=test-fixed-secret-for-driver
+export ALLOW_AUTO_SEED=false ALLOW_PRISMA_DB_PUSH=false
+npx() { echo "npx $*" >> "${traceFile.replace(/\\/g, '/')}"; printf 'nonempty-schema' > prisma/dev.db; }
+node() {
+    echo "node $*" >> "${traceFile.replace(/\\/g, '/')}";
+    if [ "$1" = "seed.js" ] && [ "$FAIL_SEED" = "1" ]; then return 77; fi
+    return 0;
+}
+export -f npx node
+bash "${entryScript.replace(/\\/g, '/')}"
+`);
+        fs.chmodSync(driverScript, '755');
+
+        function runDriver(failSeed) {
+            return cp.spawnSync(bashPath, [driverScript], {
+                cwd: testDir,
+                env: { ...process.env, FAIL_SEED: failSeed },
+                encoding: 'utf8'
+            });
+        }
+
+        // Run 1: First installation attempt where seed.js fails (exit 77)
+        const first = runDriver('1');
+        expect(first.status).toBe(77);
+        const firstTrace = fs.readFileSync(traceFile, 'utf8');
+        expect(firstTrace).toMatch(/npx prisma db push/);
+        expect(firstTrace).toMatch(/node seed\.js/);
+        fs.writeFileSync(traceFile, '');
+
+        // Run 2: Container restarts after crash (FAIL_SEED=0)
+        // MUST resume and retry seed.js because database was not yet seeded!
+        const second = runDriver('0');
+        const secondTrace = fs.readFileSync(traceFile, 'utf8');
+        expect(secondTrace).toMatch(/node seed\.js/); // Retried seed!
+        expect(secondTrace).not.toMatch(/npx prisma db push/); // Did not re-push schema!
+        fs.writeFileSync(traceFile, '');
+
+        // Run 3: Subsequent normal restart on already-seeded database
+        // MUST NOT re-run seed.js or schema push!
+        const third = runDriver('0');
+        const thirdTrace = fs.readFileSync(traceFile, 'utf8');
+        expect(thirdTrace).not.toMatch(/node seed\.js/); // Skipped seed!
+        expect(thirdTrace).not.toMatch(/npx prisma db push/);
+    });
+
     test('docker compose configuration validates cleanly across local, global, and nginx overlays', () => {
-        // Test with blank JWT_SECRET in env file
         const envFile = path.join(scratchDir, 'test.env');
-        fs.writeFileSync(envFile, 'PORT=3000\nJWT_SECRET=\nNODE_ENV=production\nDEPLOYMENT_MODE=local\n');
+        fs.writeFileSync(envFile, 'PORT=3000\nJWT_SECRET=\nNODE_ENV=production\nDEPLOYMENT_MODE=local\nADMIN_INITIAL_PASSWORD=testPass\n');
+
+        // Check if docker CLI exists
+        const checkDocker = cp.spawnSync('docker', ['--version'], { encoding: 'utf8' });
+        if (checkDocker.error && checkDocker.error.code === 'ENOENT') {
+            console.log('NOTICE: Docker executable not found in PATH; skipping compose CLI tests.');
+            return;
+        }
 
         // 1. Base compose config
         const baseRes = cp.spawnSync('docker', ['compose', '--env-file', envFile, '-f', path.join(repoRoot, 'docker-compose.yml'), 'config', '--format', 'json'], {
@@ -163,38 +266,35 @@ esac
             cwd: repoRoot
         });
 
-        if (baseRes.status === 0) {
-            const baseConfig = JSON.parse(baseRes.stdout);
-            expect(baseConfig.services.lims).toBeDefined();
-            expect(baseConfig.services.lims.image).toMatch(/soilfer-lims/);
-            expect(baseConfig.services.lims.environment.DEPLOYMENT_MODE).toBe('local');
+        expect(baseRes.status).toBe(0);
+        const baseConfig = JSON.parse(baseRes.stdout);
+        expect(baseConfig.services.lims).toBeDefined();
+        expect(baseConfig.services.lims.image).toMatch(/soilfer-lims/);
+        expect(baseConfig.services.lims.environment.DEPLOYMENT_MODE).toBe('local');
 
-            // 2. Global overlay
-            const globalRes = cp.spawnSync('docker', [
-                'compose', '--env-file', envFile,
-                '-f', path.join(repoRoot, 'docker-compose.yml'),
-                '-f', path.join(repoRoot, 'docker-compose.global.yml'),
-                'config', '--format', 'json'
-            ], { encoding: 'utf8', cwd: repoRoot });
+        // 2. Global overlay
+        const globalRes = cp.spawnSync('docker', [
+            'compose', '--env-file', envFile,
+            '-f', path.join(repoRoot, 'docker-compose.yml'),
+            '-f', path.join(repoRoot, 'docker-compose.global.yml'),
+            'config', '--format', 'json'
+        ], { encoding: 'utf8', cwd: repoRoot });
 
-            expect(globalRes.status).toBe(0);
-            const globalConfig = JSON.parse(globalRes.stdout);
-            expect(globalConfig.services.lims.environment.DEPLOYMENT_MODE).toBe('global');
+        expect(globalRes.status).toBe(0);
+        const globalConfig = JSON.parse(globalRes.stdout);
+        expect(globalConfig.services.lims.environment.DEPLOYMENT_MODE).toBe('global');
 
-            // 3. NGINX overlay
-            const nginxRes = cp.spawnSync('docker', [
-                'compose', '--env-file', envFile,
-                '-f', path.join(repoRoot, 'docker-compose.yml'),
-                '-f', path.join(repoRoot, 'docker-compose.nginx.yml'),
-                'config', '--format', 'json'
-            ], { encoding: 'utf8', cwd: repoRoot });
+        // 3. NGINX overlay
+        const nginxRes = cp.spawnSync('docker', [
+            'compose', '--env-file', envFile,
+            '-f', path.join(repoRoot, 'docker-compose.yml'),
+            '-f', path.join(repoRoot, 'docker-compose.nginx.yml'),
+            'config', '--format', 'json'
+        ], { encoding: 'utf8', cwd: repoRoot });
 
-            expect(nginxRes.status).toBe(0);
-            const nginxConfig = JSON.parse(nginxRes.stdout);
-            expect(nginxConfig.services.nginx).toBeDefined();
-            expect(nginxConfig.services.lims.environment.DEPLOYMENT_MODE).toBe('local'); // Mode remains local!
-        } else {
-            console.log('NOTICE: Docker CLI is unavailable or returned error in this environment; skipping compose validation.');
-        }
+        expect(nginxRes.status).toBe(0);
+        const nginxConfig = JSON.parse(nginxRes.stdout);
+        expect(nginxConfig.services.nginx).toBeDefined();
+        expect(nginxConfig.services.lims.environment.DEPLOYMENT_MODE).toBe('local'); // Mode remains local!
     });
 });

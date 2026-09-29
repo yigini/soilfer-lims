@@ -51,8 +51,9 @@ If you're already familiar with Docker and Linux:
 ```bash
 git clone https://github.com/yigini/soilfer-lims.git
 cd soilfer-lims
-cp .env.example .env
-docker compose -f docker-compose.yml -f docker-compose.global.yml up -d --build
+# For Single-Lab with NGINX:
+docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d --build
+# (Or for Multi-Lab Global mode, add -f docker-compose.global.yml)
 ```
 
 Open your browser to `http://localhost` and sign in with:
