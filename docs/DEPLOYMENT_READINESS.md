@@ -14,11 +14,11 @@ SoilFER-LIMS is designed to run reliably in two operating modes:
 2. **Multiple Laboratories (`global` mode):** For national agricultural institutes or laboratory networks coordinating several facilities. It provisions a central `SUPER_ADMIN` account who can create new laboratories, activate them, assign laboratory managers, and oversee cross-facility operations.
 
 ### Current System Health Summary
-- **What Works:** Basic onboarding, initial login, forced password change, single-lab technician/project management, and multi-lab data isolation operate cleanly (verified by 38 independent audit probe assertions and 30 automated contract tests).
+- **What Works:** Basic onboarding, initial login, forced password change, single-lab technician/project management, and multi-lab data isolation operate cleanly (verified by 38 independent audit probe assertions and 31 automated contract tests).
 - **What Was Done & Fixed:**
   - `setup.sh` no longer crashes on Prisma 7 flags or swallows database push errors.
   - Docker entrypoint persists auto-generated JWT secrets across container restarts (`prisma/.jwt_secret`).
-  - Container first-boot is fully resumable and fail-closed: if seed fails, it retries on restart; once seeded or populated with users, existing accounts are protected from reseeding. Inspection halts safely if SQLite is unreadable or corrupt.
+  - Container first-boot is fully resumable and fail-closed: if seed fails, it retries on restart; once seeded or populated with users, existing accounts are protected from reseeding. Inspection halts safely if SQLite is unreadable or corrupt, and allows WAL recovery on restart.
   - Real partial seed recovery: if an interrupted initial setup leaves `LAB01` present without users, `seed.js` detects and reuses `LAB01`, successfully creates the admin account, and avoids duplicate key crashes.
   - `provision_super_admin.js` prevents identity collisions: checks username and email targets strictly before mutation; rejects colliding combinations without touching unrelated inactive accounts; preserves inactive state; and revokes active sessions via `tokenVersion`.
   - Docker Compose cleanly separates NGINX (`docker-compose.nginx.yml`) from deployment mode (`docker-compose.global.yml`).
@@ -26,7 +26,7 @@ SoilFER-LIMS is designed to run reliably in two operating modes:
   - Upgrading guide (`docs/UPGRADING.md`) reconciles live container mount discovery, immutable image IDs, bound backup artifacts with SHA-256 hashes, non-destructive tarball staging, and bounded postflight gates.
   - Added real isolated Docker default-entrypoint deployment readiness rehearsal (`server/scripts/rehearsal_deployment_readiness.cjs`) executed in GitHub Actions CI across empty-volume boots, restarts, partial-inits, and backup/restore round trips.
   - Production dependency vulnerabilities were reduced to 4 in server (all high, strictly Prisma 7 tooling transitives) and 3 in client (2 moderate in react-router v6, 1 high in xlsx), with zero critical vulnerabilities.
-- **What Was Tested:** 30 contract tests across bootstrap, fail-closed SQLite inspection, secret stability, real partial-seed recovery, provision CLI collision rejection, role scoping, fail-closed restore with SQL triggers, and concurrent multi-lab sample intake and queries. Full backend test suites pass (148/148 suites, 1,440 tests). Frontend production build passed cleanly via Vite in 27.11s.
+- **What Was Tested:** 31 contract tests across bootstrap, fail-closed SQLite inspection, secret stability, real partial-seed recovery, provision CLI collision rejection, role scoping, fail-closed restore with SQL triggers, and concurrent multi-lab sample intake and queries. Full backend test suites pass (148/148 suites, 1,440 tests). Frontend production build passed cleanly via Vite in 27.11s.
 - **What Remains:** Independent Codex review of the updated commit candidate on PR #154, merge to `main`, and production safe-release verification.
 - **Availability & Live Status:** These fixes are currently implemented on branch `feat/deployment-readiness` (in PR #154). **THEY ARE NOT YET LIVE ON THE PRODUCTION SERVER.** The running production environment remains untouched.
 

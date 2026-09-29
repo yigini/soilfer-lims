@@ -309,6 +309,39 @@ bash "${entryScript.replace(/\\/g, '/')}"
         expect(res.stdout).not.toMatch(/LIMS_STARTED_SUCCESS/);
     });
 
+    test('docker-entrypoint.sh database inspection passes cleanly on valid populated database', () => {
+        const testDir = path.join(scratchDir, 'valid_db_inspect_test');
+        fs.mkdirSync(path.join(testDir, 'prisma'), { recursive: true });
+
+        const serverDir = path.resolve(__dirname, '..', '..');
+        fs.copyFileSync(path.join(serverDir, 'prisma', 'dev.db'), path.join(testDir, 'prisma', 'dev.db'));
+
+        const entryContent = fs.readFileSync(path.join(repoRoot, 'docker-entrypoint.sh'), 'utf8');
+        const adaptedEntry = entryContent
+            .replace('cd /app/server', `cd "${testDir.replace(/\\/g, '/')}"`)
+            .replace('cp /app/server/.schema-backup/schema.prisma', '# noop')
+            .replace('exec node index.js', 'echo "LIMS_STARTED_SUCCESS"')
+            .replace(/node scripts\/migrate_[^\n]+/g, '# noop migration');
+
+        const entryScript = path.join(testDir, 'entrypoint.sh');
+        fs.writeFileSync(entryScript, adaptedEntry);
+        fs.chmodSync(entryScript, '755');
+
+        const res = cp.spawnSync(bashPath, [entryScript], {
+            cwd: testDir,
+            env: {
+                ...process.env,
+                JWT_SECRET: 'test-secret',
+                NODE_PATH: path.join(repoRoot, 'server', 'node_modules')
+            },
+            encoding: 'utf8'
+        });
+
+        expect(res.status).toBe(0);
+        expect(res.stdout).toMatch(/LIMS_STARTED_SUCCESS/);
+        expect(res.stdout + res.stderr).not.toMatch(/Database inspection failed/i);
+    });
+
     test('seed.js recovers from real partial state ({ labs: 1, users: 0 }) and does not duplicate LAB01', () => {
         const Database = require('better-sqlite3');
         const testDbPath = path.join(scratchDir, 'partial_resumption.db');

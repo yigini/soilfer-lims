@@ -60,7 +60,7 @@ if [ -s "$DB_FILE" ]; then
         const Database = require("better-sqlite3");
         try {
             const db = new Database(process.argv[1]);
-            const tableCheck = db.prepare("SELECT name FROM sqlite_master WHERE type=\"table\" AND name=\"User\"").get();
+            const tableCheck = db.prepare("SELECT name FROM sqlite_master WHERE type = ? AND name = ?").get("table", "User");
             if (!tableCheck) {
                 console.log(JSON.stringify({ ok: true, schemaReady: false, userCount: 0 }));
             } else {
