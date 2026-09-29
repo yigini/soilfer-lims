@@ -209,8 +209,34 @@ export ALLOW_AUTO_SEED=false ALLOW_PRISMA_DB_PUSH=false
 npx() { echo "npx $*" >> "${traceFile.replace(/\\/g, '/')}"; printf 'nonempty-schema' > prisma/dev.db; }
 node() {
     echo "node $*" >> "${traceFile.replace(/\\/g, '/')}";
-    if [ "$1" = "seed.js" ] && [ "$FAIL_SEED" = "1" ]; then return 77; fi
-    return 0;
+    if [ "$1" = "seed.js" ]; then
+        if [ "$FAIL_SEED" = "1" ]; then return 77; fi
+        touch "${testDir.replace(/\\/g, '/')}/prisma/.seeded"
+        return 0
+    fi
+    if [ "$1" = "-e" ]; then
+        if echo "$2" | grep -q "better-sqlite3"; then
+            if [ -f "${testDir.replace(/\\/g, '/')}/prisma/.seeded" ]; then
+                echo '{"ok":true,"schemaReady":true,"userCount":1}'
+            else
+                echo '{"ok":true,"schemaReady":true,"userCount":0}'
+            fi
+            return 0
+        fi
+        if echo "$2" | grep -q "userCount"; then
+            if [ -f "${testDir.replace(/\\/g, '/')}/prisma/.seeded" ]; then
+                echo '1'
+            else
+                echo '0'
+            fi
+            return 0
+        fi
+        if echo "$2" | grep -q "schemaReady"; then
+            echo '1'
+            return 0
+        fi
+    fi
+    return 0
 }
 export -f npx node
 bash "${entryScript.replace(/\\/g, '/')}"
@@ -247,6 +273,81 @@ bash "${entryScript.replace(/\\/g, '/')}"
         const thirdTrace = fs.readFileSync(traceFile, 'utf8');
         expect(thirdTrace).not.toMatch(/node seed\.js/); // Skipped seed!
         expect(thirdTrace).not.toMatch(/npx prisma db push/);
+    });
+
+    test('docker-entrypoint.sh database inspection fails closed on corrupt or unreadable database', () => {
+        const testDir = path.join(scratchDir, 'corrupt_db_test');
+        fs.mkdirSync(path.join(testDir, 'prisma'), { recursive: true });
+
+        // Write corrupt garbage to dev.db
+        fs.writeFileSync(path.join(testDir, 'prisma', 'dev.db'), 'NOT_A_VALID_SQLITE_DATABASE_HEADER_CORRUPT');
+
+        const entryContent = fs.readFileSync(path.join(repoRoot, 'docker-entrypoint.sh'), 'utf8');
+        const adaptedEntry = entryContent
+            .replace('cd /app/server', `cd "${testDir.replace(/\\/g, '/')}"`)
+            .replace('cp /app/server/.schema-backup/schema.prisma', '# noop')
+            .replace('exec node index.js', 'echo "LIMS_STARTED_SUCCESS"')
+            .replace(/node scripts\/migrate_[^\n]+/g, '# noop migration');
+
+        const entryScript = path.join(testDir, 'entrypoint.sh');
+        fs.writeFileSync(entryScript, adaptedEntry);
+        fs.chmodSync(entryScript, '755');
+
+        const res = cp.spawnSync(bashPath, [entryScript], {
+            cwd: testDir,
+            env: {
+                ...process.env,
+                JWT_SECRET: 'test-secret',
+                NODE_PATH: path.join(repoRoot, 'server', 'node_modules')
+            },
+            encoding: 'utf8'
+        });
+
+        // MUST fail closed with non-zero exit code and fatal error message!
+        expect(res.status).not.toBe(0);
+        expect(res.stdout + res.stderr).toMatch(/Database inspection failed/i);
+        expect(res.stdout).not.toMatch(/LIMS_STARTED_SUCCESS/);
+    });
+
+    test('seed.js recovers from real partial state ({ labs: 1, users: 0 }) and does not duplicate LAB01', () => {
+        const Database = require('better-sqlite3');
+        const testDbPath = path.join(scratchDir, 'partial_resumption.db');
+        const serverDir = path.resolve(__dirname, '..', '..');
+
+        // Copy template database
+        fs.copyFileSync(path.join(serverDir, 'prisma', 'dev.db'), testDbPath);
+        const db = new Database(testDbPath);
+        db.exec('PRAGMA foreign_keys = OFF; DELETE FROM User; DELETE FROM Lab; DELETE FROM SystemSetting; PRAGMA foreign_keys = ON;');
+        db.prepare('INSERT INTO Lab (id, name, code, country, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)')
+            .run('lab-preexisting', 'My Laboratory', 'LAB01', 'INT', 1, new Date().toISOString(), new Date().toISOString());
+        db.close();
+
+        // Run seed.js against the partial database
+        const res = cp.spawnSync(process.execPath, [path.join(serverDir, 'seed.js')], {
+            cwd: serverDir,
+            env: {
+                ...process.env,
+                DATABASE_PATH: testDbPath,
+                DEPLOYMENT_MODE: 'local',
+                ADMIN_INITIAL_PASSWORD: 'resumed-password-123'
+            },
+            encoding: 'utf8'
+        });
+
+        expect(res.status).toBe(0);
+        expect(res.stdout).toMatch(/Using existing default laboratory/);
+        expect(res.stdout).toMatch(/Created user: admin/);
+
+        const verifyDb = new Database(testDbPath, { readonly: true });
+        const labCount = verifyDb.prepare('SELECT count(*) n FROM Lab').get().n;
+        const userCount = verifyDb.prepare('SELECT count(*) n FROM User').get().n;
+        const adminUser = verifyDb.prepare('SELECT * FROM User WHERE username=?').get('admin');
+        verifyDb.close();
+
+        expect(labCount).toBe(1);
+        expect(userCount).toBe(1);
+        expect(adminUser.role).toBe('LAB_MANAGER');
+        expect(adminUser.labId).toBe('lab-preexisting');
     });
 
     test('docker compose configuration validates cleanly across local, global, and nginx overlays', () => {

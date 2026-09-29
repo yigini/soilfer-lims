@@ -52,34 +52,50 @@ if [ ! -d "prisma" ]; then
     SEED_FLAG=".seed_complete"
 fi
 
-# Guard existing installations: detect if database already has users
+# Guard existing installations: detect database state safely (Fail-Closed)
 EXISTING_USERS=0
+SCHEMA_READY=0
 if [ -s "$DB_FILE" ]; then
-    EXISTING_USERS=$(node -e '
+    INSPECT_JSON=$(node -e '
+        const Database = require("better-sqlite3");
         try {
-            const Database = require("better-sqlite3");
-            const db = new Database("'"$DB_FILE"'", { readonly: true });
-            const row = db.prepare("SELECT count(*) as count FROM User").get();
+            const db = new Database(process.argv[1], { readonly: true });
+            const tableCheck = db.prepare("SELECT name FROM sqlite_master WHERE type=\"table\" AND name=\"User\"").get();
+            if (!tableCheck) {
+                console.log(JSON.stringify({ ok: true, schemaReady: false, userCount: 0 }));
+            } else {
+                const row = db.prepare("SELECT count(*) as count FROM User").get();
+                console.log(JSON.stringify({ ok: true, schemaReady: true, userCount: row ? row.count : 0 }));
+            }
             db.close();
-            console.log(row ? row.count : 0);
-        } catch (_) {
-            console.log(0);
+        } catch (err) {
+            console.error("FATAL: Database inspection failed:", err.message);
+            process.exit(2);
         }
-    ' 2>/dev/null || echo "0")
+    ' "$DB_FILE")
+    INSPECT_STATUS=$?
+
+    if [ $INSPECT_STATUS -ne 0 ] || [ -z "$INSPECT_JSON" ]; then
+        echo "❌ FATAL: Database inspection failed for $DB_FILE. Halting startup to prevent data corruption." >&2
+        exit 1
+    fi
+
+    EXISTING_USERS=$(node -e 'const r = JSON.parse(process.argv[1]); console.log(r.userCount || 0);' "$INSPECT_JSON")
+    SCHEMA_READY=$(node -e 'const r = JSON.parse(process.argv[1]); console.log(r.schemaReady ? 1 : 0);' "$INSPECT_JSON")
+
     if [ "$EXISTING_USERS" -gt 0 ] 2>/dev/null; then
         touch "$SEED_FLAG" 2>/dev/null || true
     fi
 fi
 
-# Step 1: Initialize database schema if file is missing or empty
-if [ ! -f "$DB_FILE" ] || [ ! -s "$DB_FILE" ]; then
-    echo "🌱 Fresh empty volume detected (no existing database at $DB_FILE)."
-    echo "📦 Initializing database schema with Prisma..."
+# Step 1: Initialize database schema if file is missing, empty, or schema is not ready
+if [ ! -f "$DB_FILE" ] || [ ! -s "$DB_FILE" ] || [ "$SCHEMA_READY" -eq 0 ]; then
+    echo "🌱 Initializing database schema with Prisma..."
     npx prisma db push
 fi
 
 # Step 2: Resumable initial seed (runs if not yet seeded and no users exist)
-if [ ! -f "$SEED_FLAG" ]; then
+if [ ! -f "$SEED_FLAG" ] && [ "$EXISTING_USERS" -eq 0 ]; then
     echo "🌱 Seeding initial administrator and laboratory (${DEPLOYMENT_MODE:-local} mode)..."
     node seed.js
     touch "$SEED_FLAG" 2>/dev/null || true

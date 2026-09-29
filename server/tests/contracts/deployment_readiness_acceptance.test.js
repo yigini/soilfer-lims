@@ -600,4 +600,178 @@ describe('Deployment Readiness Acceptance Contract', () => {
             }
         });
     });
+
+    describe('6. Provision Super Admin CLI Identity Collision & State Preservation Invariants', () => {
+        const provDir = fs.mkdtempSync(path.join(os.tmpdir(), `lims_prov_test_${TS}_`));
+        const serverDir = path.resolve(__dirname, '..', '..');
+
+        afterAll(() => {
+            try {
+                fs.rmSync(provDir, { recursive: true, force: true });
+            } catch (_) {}
+        });
+
+        test('provision_super_admin CLI rejects conflicting email and does not mutate unrelated inactive user', () => {
+            const testDbPath = path.join(provDir, 'conflict.db');
+            const db = new Database(testDbPath);
+            db.exec(`
+                CREATE TABLE User (
+                    id TEXT PRIMARY KEY,
+                    username TEXT UNIQUE,
+                    password TEXT,
+                    email TEXT UNIQUE,
+                    role TEXT,
+                    name TEXT,
+                    labId TEXT,
+                    countries TEXT,
+                    projects TEXT,
+                    isActive INTEGER DEFAULT 1,
+                    mustChangePassword INTEGER DEFAULT 0,
+                    tokenVersion INTEGER DEFAULT 0,
+                    language TEXT,
+                    themePreference TEXT DEFAULT 'light',
+                    createdAt TEXT,
+                    updatedAt TEXT
+                );
+            `);
+            const now = new Date().toISOString();
+            db.prepare(`
+                INSERT INTO User (id, username, password, email, role, updatedAt, isActive, tokenVersion)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `).run('existing-owner-id', 'existing-owner', 'hash-1234', 'sysadmin@soilfer-lims.local', 'LAB_MANAGER', now, 0, 0);
+            db.close();
+
+            const res = cp.spawnSync(process.execPath, [
+                path.join(serverDir, 'scripts', 'provision_super_admin.js'),
+                '--username', 'requested-owner',
+                '--email', 'sysadmin@soilfer-lims.local',
+                '--password', 'new-pass-5678'
+            ], {
+                cwd: serverDir,
+                env: { ...process.env, DATABASE_PATH: testDbPath },
+                encoding: 'utf8'
+            });
+
+            expect(res.status).toBe(1);
+            expect(res.stderr).toMatch(/Conflicting identity/i);
+
+            const verifyDb = new Database(testDbPath, { readonly: true });
+            const existing = verifyDb.prepare('SELECT * FROM User WHERE id=?').get('existing-owner-id');
+            const requested = verifyDb.prepare('SELECT * FROM User WHERE username=?').get('requested-owner');
+            verifyDb.close();
+
+            expect(requested).toBeUndefined();
+            expect(existing.role).toBe('LAB_MANAGER');
+            expect(existing.isActive).toBe(0);
+            expect(existing.password).toBe('hash-1234');
+            expect(existing.tokenVersion).toBe(0);
+        });
+
+        test('provision_super_admin CLI creates non-conflicting new admin cleanly without touching existing accounts', () => {
+            const testDbPath = path.join(provDir, 'clean_create.db');
+            const db = new Database(testDbPath);
+            db.exec(`
+                CREATE TABLE User (
+                    id TEXT PRIMARY KEY,
+                    username TEXT UNIQUE,
+                    password TEXT,
+                    email TEXT UNIQUE,
+                    role TEXT,
+                    name TEXT,
+                    labId TEXT,
+                    countries TEXT,
+                    projects TEXT,
+                    isActive INTEGER DEFAULT 1,
+                    mustChangePassword INTEGER DEFAULT 0,
+                    tokenVersion INTEGER DEFAULT 0,
+                    language TEXT,
+                    themePreference TEXT DEFAULT 'light',
+                    createdAt TEXT,
+                    updatedAt TEXT
+                );
+            `);
+            const now = new Date().toISOString();
+            db.prepare(`
+                INSERT INTO User (id, username, password, email, role, updatedAt, isActive, tokenVersion)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `).run('manager-id', 'existing-manager', 'hash-1111', 'manager@soilfer-lims.local', 'LAB_MANAGER', now, 1, 0);
+            db.close();
+
+            const res = cp.spawnSync(process.execPath, [
+                path.join(serverDir, 'scripts', 'provision_super_admin.js'),
+                '--username', 'new-admin',
+                '--password', 'valid-admin-pass'
+            ], {
+                cwd: serverDir,
+                env: { ...process.env, DATABASE_PATH: testDbPath },
+                encoding: 'utf8'
+            });
+
+            expect(res.status).toBe(0);
+            expect(res.stdout).toMatch(/Created new SUPER_ADMIN user: new-admin/);
+
+            const verifyDb = new Database(testDbPath, { readonly: true });
+            const created = verifyDb.prepare('SELECT * FROM User WHERE username=?').get('new-admin');
+            const original = verifyDb.prepare('SELECT * FROM User WHERE id=?').get('manager-id');
+            verifyDb.close();
+
+            expect(created).toBeDefined();
+            expect(created.role).toBe('SUPER_ADMIN');
+            expect(created.email).toBe('new-admin@soilfer-lims.local');
+            expect(original.role).toBe('LAB_MANAGER');
+            expect(original.password).toBe('hash-1111');
+        });
+
+        test('provision_super_admin CLI preserves inactive status unless --activate is explicitly specified', () => {
+            const testDbPath = path.join(provDir, 'elevate_inactive.db');
+            const db = new Database(testDbPath);
+            db.exec(`
+                CREATE TABLE User (
+                    id TEXT PRIMARY KEY,
+                    username TEXT UNIQUE,
+                    password TEXT,
+                    email TEXT UNIQUE,
+                    role TEXT,
+                    name TEXT,
+                    labId TEXT,
+                    countries TEXT,
+                    projects TEXT,
+                    isActive INTEGER DEFAULT 1,
+                    mustChangePassword INTEGER DEFAULT 0,
+                    tokenVersion INTEGER DEFAULT 0,
+                    language TEXT,
+                    themePreference TEXT DEFAULT 'light',
+                    createdAt TEXT,
+                    updatedAt TEXT
+                );
+            `);
+            const now = new Date().toISOString();
+            db.prepare(`
+                INSERT INTO User (id, username, password, email, role, updatedAt, isActive, tokenVersion)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `).run('target-id', 'target-user', 'hash-2222', 'target@soilfer-lims.local', 'LAB_MANAGER', now, 0, 2);
+            db.close();
+
+            const res = cp.spawnSync(process.execPath, [
+                path.join(serverDir, 'scripts', 'provision_super_admin.js'),
+                '--username', 'target-user',
+                '--elevate',
+                '--password', 'elevated-pass'
+            ], {
+                cwd: serverDir,
+                env: { ...process.env, DATABASE_PATH: testDbPath },
+                encoding: 'utf8'
+            });
+
+            expect(res.status).toBe(0);
+
+            const verifyDb = new Database(testDbPath, { readonly: true });
+            const elevated = verifyDb.prepare('SELECT * FROM User WHERE id=?').get('target-id');
+            verifyDb.close();
+
+            expect(elevated.role).toBe('SUPER_ADMIN');
+            expect(elevated.isActive).toBe(0);
+            expect(elevated.tokenVersion).toBe(3);
+        });
+    });
 });

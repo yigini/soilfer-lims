@@ -89,19 +89,28 @@ async function seed() {
 
         const labId = `lab-default-${Date.now()}`;
 
-        // Create default laboratory (uses Lab model from schema)
-        await prisma.lab.create({
-            data: {
-                id: labId,
-                name: 'My Laboratory',
-                code: 'LAB01',
-                country: 'INT',
-                isActive: true,
-                createdAt: now,
-                updatedAt: now
-            }
+        // Find or create default laboratory (uses Lab model from schema)
+        let defaultLab = await prisma.lab.findFirst({
+            where: { code: 'LAB01' }
         });
-        console.log('  ✓ Created laboratory: My Laboratory (LAB01)');
+        if (!defaultLab) {
+            defaultLab = await prisma.lab.create({
+                data: {
+                    id: labId,
+                    name: 'My Laboratory',
+                    code: 'LAB01',
+                    country: 'INT',
+                    isActive: true,
+                    createdAt: now,
+                    updatedAt: now
+                }
+            });
+            console.log('  ✓ Created laboratory: My Laboratory (LAB01)');
+        } else {
+            console.log(`  ✓ Using existing default laboratory: ${defaultLab.name} (${defaultLab.code})`);
+        }
+
+        const effectiveLabId = defaultLab.id;
 
         // Create admin user (LAB_MANAGER scoped to the default lab)
         await prisma.user.create({
@@ -112,7 +121,7 @@ async function seed() {
                 email: 'admin@soilfer-lims.local',
                 role: 'LAB_MANAGER',
                 name: 'Lab Administrator',
-                labId: labId,
+                labId: effectiveLabId,
                 countries: '[]',
                 projects: '[]',
                 isActive: true,
@@ -121,7 +130,6 @@ async function seed() {
                 updatedAt: now
             }
         });
-
         console.log('  ✓ Created user: admin (LAB_MANAGER)');
         console.log('  ┌────────────────────────────────────────────────────────┐');
         console.log('  │ 🔑 INITIAL ADMIN CREDENTIALS (Generated — Print Once): │');
