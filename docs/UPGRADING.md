@@ -64,6 +64,37 @@ EXPECTED_MODE=${EXPECTED_MODE:-${BASELINE_MODE:-"local"}}
 # Discover or declare reviewed existing principals for postflight role verification
 POSTFLIGHT_ADMIN_ID=${POSTFLIGHT_ADMIN_ID:-""}
 POSTFLIGHT_MANAGER_ID=${POSTFLIGHT_MANAGER_ID:-""}
+POSTFLIGHT_TECH_ID=${POSTFLIGHT_TECH_ID:-""}
+
+# If any principal ID is unset, query active reviewed principals from the running container:
+if [ -z "$POSTFLIGHT_ADMIN_ID" ] || [ -z "$POSTFLIGHT_MANAGER_ID" ] || [ -z "$POSTFLIGHT_TECH_ID" ]; then
+    DISCOVERED_PRINCIPALS=$(docker compose ${COMPOSE_FILES} exec -T lims node -e "
+      const Database = require('better-sqlite3');
+      const db = new Database('prisma/dev.db', { readonly: true });
+      const admin = db.prepare('SELECT id FROM User WHERE role = ? AND isActive = 1 AND mustChangePassword = 0 ORDER BY createdAt ASC').get('SUPER_ADMIN');
+      const mgr = db.prepare('SELECT id FROM User WHERE role = ? AND isActive = 1 AND mustChangePassword = 0 ORDER BY createdAt ASC').get('LAB_MANAGER');
+      const tech = db.prepare('SELECT id FROM User WHERE role = ? AND isActive = 1 AND mustChangePassword = 0 ORDER BY createdAt ASC').get('LAB_TECHNICIAN');
+      db.close();
+      if (!admin || !mgr || !tech) {
+        console.error('❌ Failed to discover required active baseline principals (SUPER_ADMIN, LAB_MANAGER, LAB_TECHNICIAN)');
+        process.exit(1);
+      }
+      console.log('ADMIN_ID=' + admin.id);
+      console.log('MGR_ID=' + mgr.id);
+      console.log('TECH_ID=' + tech.id);
+    ") || {
+      echo "❌ Failed to discover baseline principals from running container"
+      exit 1
+    }
+    POSTFLIGHT_ADMIN_ID=${POSTFLIGHT_ADMIN_ID:-$(echo "$DISCOVERED_PRINCIPALS" | grep '^ADMIN_ID=' | cut -d= -f2-)}
+    POSTFLIGHT_MANAGER_ID=${POSTFLIGHT_MANAGER_ID:-$(echo "$DISCOVERED_PRINCIPALS" | grep '^MGR_ID=' | cut -d= -f2-)}
+    POSTFLIGHT_TECH_ID=${POSTFLIGHT_TECH_ID:-$(echo "$DISCOVERED_PRINCIPALS" | grep '^TECH_ID=' | cut -d= -f2-)}
+fi
+
+if [ -z "$POSTFLIGHT_ADMIN_ID" ] || [ -z "$POSTFLIGHT_MANAGER_ID" ] || [ -z "$POSTFLIGHT_TECH_ID" ]; then
+    echo "❌ Missing required reviewed principal IDs (POSTFLIGHT_ADMIN_ID, POSTFLIGHT_MANAGER_ID, POSTFLIGHT_TECH_ID)!"
+    exit 1
+fi
 
 # 3. Verify target volumes exist in Docker engine
 docker volume inspect "$DATA_VOLUME" >/dev/null
@@ -80,6 +111,7 @@ BASELINE_IMAGE_REF="${BASELINE_IMAGE_REF}"
 EXPECTED_MODE="${EXPECTED_MODE}"
 POSTFLIGHT_ADMIN_ID="${POSTFLIGHT_ADMIN_ID}"
 POSTFLIGHT_MANAGER_ID="${POSTFLIGHT_MANAGER_ID}"
+POSTFLIGHT_TECH_ID="${POSTFLIGHT_TECH_ID}"
 EOF
 
 echo "✓ Verified Live Environment:"
@@ -89,6 +121,9 @@ echo "  - Assets Volume:      ${ASSETS_VOLUME}"
 echo "  - Baseline Image ID:  ${BASELINE_IMAGE_ID}"
 echo "  - Baseline Image Ref: ${BASELINE_IMAGE_REF}"
 echo "  - Deployment Mode:    ${EXPECTED_MODE}"
+echo "  - Super Admin ID:     ${POSTFLIGHT_ADMIN_ID}"
+echo "  - Lab Manager ID:     ${POSTFLIGHT_MANAGER_ID}"
+echo "  - Lab Technician ID:  ${POSTFLIGHT_TECH_ID}"
 ```
 
 ### Step 2: Quiesce Writers & Produce Bound Backup
@@ -177,8 +212,19 @@ During pre-exposure verification, both external ingress and internal background 
 ```bash
 set -e
 
+# Load discovered baseline configuration and reviewed principals
+if [ -f "./backups/baseline_config.env" ]; then
+    source ./backups/baseline_config.env
+fi
+
+# Ingress Hold: If NGINX proxy is configured, hold external client ingress during postflight
+if [ -f "docker-compose.nginx.yml" ] && echo "$COMPOSE_FILES" | grep -q "docker-compose.nginx.yml"; then
+    echo "Holding public ingress at NGINX reverse proxy boundary..."
+    docker compose ${COMPOSE_FILES} stop nginx || true
+fi
+
 # Launch containers in pre-exposure verification mode with writer hold
-DISABLE_BACKGROUND_JOBS=true docker compose ${COMPOSE_FILES} up -d
+DISABLE_BACKGROUND_JOBS=true docker compose ${COMPOSE_FILES} up -d lims
 ```
 
 ### Step 5: Post-Deployment Verification & Bounded Release Gates
@@ -288,38 +334,39 @@ docker compose ${COMPOSE_FILES} exec -T \
     process.exit(1);
   }
 
-  let adminPrincipal = null;
-  let mgrPrincipal = null;
-  let techPrincipal = null;
+  const adminId = process.env.POSTFLIGHT_ADMIN_ID;
+  const mgrId = process.env.POSTFLIGHT_MANAGER_ID;
+  const techId = process.env.POSTFLIGHT_TECH_ID;
 
+  if (!adminId || !mgrId || !techId) {
+    console.error('❌ Postflight failed: POSTFLIGHT_ADMIN_ID, POSTFLIGHT_MANAGER_ID, and POSTFLIGHT_TECH_ID must all be explicitly defined.');
+    process.exit(1);
+  }
+
+  const Database = require('better-sqlite3');
+  let db;
+  let adminPrincipal, mgrPrincipal, techPrincipal;
   try {
-    const Database = require('better-sqlite3');
-    const db = new Database('prisma/dev.db', { readonly: true });
-
-    const adminId = process.env.POSTFLIGHT_ADMIN_ID;
-    adminPrincipal = adminId
-      ? db.prepare('SELECT id, username, role, tokenVersion, mustChangePassword, isActive FROM User WHERE id = ?').get(adminId)
-      : db.prepare('SELECT id, username, role, tokenVersion, mustChangePassword, isActive FROM User WHERE role = ? AND isActive = 1 AND mustChangePassword = 0 ORDER BY createdAt ASC').get('SUPER_ADMIN');
-
-    const mgrId = process.env.POSTFLIGHT_MANAGER_ID;
-    mgrPrincipal = mgrId
-      ? db.prepare('SELECT id, username, role, labId, tokenVersion, mustChangePassword, isActive FROM User WHERE id = ?').get(mgrId)
-      : db.prepare('SELECT id, username, role, labId, tokenVersion, mustChangePassword, isActive FROM User WHERE role = ? AND isActive = 1 AND mustChangePassword = 0 ORDER BY createdAt ASC').get('LAB_MANAGER');
-
-    const techId = process.env.POSTFLIGHT_TECH_ID;
-    techPrincipal = techId
-      ? db.prepare('SELECT id, username, role, labId, tokenVersion, mustChangePassword, isActive FROM User WHERE id = ?').get(techId)
-      : db.prepare('SELECT id, username, role, labId, tokenVersion, mustChangePassword, isActive FROM User WHERE role = ? AND isActive = 1 AND mustChangePassword = 0 ORDER BY createdAt ASC').get('LAB_TECHNICIAN');
-
+    db = new Database('prisma/dev.db', { readonly: true });
+    adminPrincipal = db.prepare('SELECT id, username, role, tokenVersion, mustChangePassword, isActive FROM User WHERE id = ?').get(adminId);
+    mgrPrincipal = db.prepare('SELECT id, username, role, labId, tokenVersion, mustChangePassword, isActive FROM User WHERE id = ?').get(mgrId);
+    techPrincipal = db.prepare('SELECT id, username, role, labId, tokenVersion, mustChangePassword, isActive FROM User WHERE id = ?').get(techId);
     db.close();
-  } catch (_) {
-    if (process.env.POSTFLIGHT_ADMIN_ID) {
-      adminPrincipal = { id: process.env.POSTFLIGHT_ADMIN_ID, username: 'admin', role: 'SUPER_ADMIN', tokenVersion: 1, isActive: true, mustChangePassword: 0 };
-    }
+  } catch (err) {
+    console.error('❌ Postflight failed: Database error looking up reviewed principals:', err.message);
+    process.exit(1);
   }
 
   if (!adminPrincipal || adminPrincipal.role !== 'SUPER_ADMIN' || !adminPrincipal.isActive || adminPrincipal.mustChangePassword) {
-    console.error('❌ Postflight failed: Reviewed active SUPER_ADMIN principal with completed password change not found!');
+    console.error('❌ Postflight failed: Reviewed active SUPER_ADMIN principal (' + adminId + ') not found, inactive, wrong role, or password not changed!');
+    process.exit(1);
+  }
+  if (!mgrPrincipal || mgrPrincipal.role !== 'LAB_MANAGER' || !mgrPrincipal.isActive || mgrPrincipal.mustChangePassword) {
+    console.error('❌ Postflight failed: Reviewed active LAB_MANAGER principal (' + mgrId + ') not found, inactive, wrong role, or password not changed!');
+    process.exit(1);
+  }
+  if (!techPrincipal || techPrincipal.role !== 'LAB_TECHNICIAN' || !techPrincipal.isActive || techPrincipal.mustChangePassword) {
+    console.error('❌ Postflight failed: Reviewed active LAB_TECHNICIAN principal (' + techId + ') not found, inactive, wrong role, or password not changed!');
     process.exit(1);
   }
 
@@ -330,29 +377,23 @@ docker compose ${COMPOSE_FILES} exec -T \
     tokenVersion: adminPrincipal.tokenVersion || 0
   }, secret, { expiresIn: '5m' });
 
-  let mgrToken = null;
-  if (mgrPrincipal && mgrPrincipal.role === 'LAB_MANAGER' && mgrPrincipal.isActive && !mgrPrincipal.mustChangePassword) {
-    mgrToken = jwt.sign({
-      id: mgrPrincipal.id,
-      username: mgrPrincipal.username,
-      role: mgrPrincipal.role,
-      labId: mgrPrincipal.labId,
-      tokenVersion: mgrPrincipal.tokenVersion || 0
-    }, secret, { expiresIn: '5m' });
-  }
+  const mgrToken = jwt.sign({
+    id: mgrPrincipal.id,
+    username: mgrPrincipal.username,
+    role: mgrPrincipal.role,
+    labId: mgrPrincipal.labId,
+    tokenVersion: mgrPrincipal.tokenVersion || 0
+  }, secret, { expiresIn: '5m' });
 
-  let techToken = null;
-  if (techPrincipal && techPrincipal.role === 'LAB_TECHNICIAN' && techPrincipal.isActive && !techPrincipal.mustChangePassword) {
-    techToken = jwt.sign({
-      id: techPrincipal.id,
-      username: techPrincipal.username,
-      role: techPrincipal.role,
-      labId: techPrincipal.labId,
-      tokenVersion: techPrincipal.tokenVersion || 0
-    }, secret, { expiresIn: '5m' });
-  }
+  const techToken = jwt.sign({
+    id: techPrincipal.id,
+    username: techPrincipal.username,
+    role: techPrincipal.role,
+    labId: techPrincipal.labId,
+    tokenVersion: techPrincipal.tokenVersion || 0
+  }, secret, { expiresIn: '5m' });
 
-  async function checkRoute(role, path, expectedStatus, token) {
+  async function checkRoute(role, path, expectedStatus, token, principal) {
     const res = await fetch('http://localhost:3000' + path, {
       headers: { 'Authorization': 'Bearer ' + token }
     });
@@ -360,19 +401,24 @@ docker compose ${COMPOSE_FILES} exec -T \
       console.error(\`❌ Role gate failed for \${role} on \${path}: expected \${expectedStatus}, got \${res.status}\`);
       process.exit(1);
     }
+    const body = await res.json().catch(() => null);
+    if (Array.isArray(body)) {
+      for (const item of body) {
+        if (item && (item.id === 'foreign-lab' || item.country === 'FOREIGN' || (principal.labId && item.labId && item.labId !== principal.labId) || (principal.labId && item.assignedLab && item.assignedLab !== principal.labId))) {
+          console.error(\`❌ Scope violation: foreign record found for \${role} on \${path}: \${item.id || item.country}\`);
+          process.exit(1);
+        }
+      }
+    }
     console.log(\`  ✓ \${role} -> \${path} (\${res.status} OK)\`);
   }
 
   (async () => {
-    await checkRoute('SUPER_ADMIN', '/api/users', 200, superToken);
-    await checkRoute('SUPER_ADMIN', '/api/labs', 200, superToken);
-    if (mgrToken) {
-      await checkRoute('LAB_MANAGER', '/api/dashboard/live', 200, mgrToken);
-      await checkRoute('LAB_MANAGER', '/api/submissions', 200, mgrToken);
-    }
-    if (techToken) {
-      await checkRoute('LAB_TECHNICIAN', '/api/work', 200, techToken);
-    }
+    await checkRoute('SUPER_ADMIN', '/api/users', 200, superToken, adminPrincipal);
+    await checkRoute('SUPER_ADMIN', '/api/labs', 200, superToken, adminPrincipal);
+    await checkRoute('LAB_MANAGER', '/api/dashboard/live', 200, mgrToken, mgrPrincipal);
+    await checkRoute('LAB_MANAGER', '/api/submissions', 200, mgrToken, mgrPrincipal);
+    await checkRoute('LAB_TECHNICIAN', '/api/work', 200, techToken, techPrincipal);
     console.log('✓ Read-only role and route API postflight gates verified.');
   })().catch(e => { console.error('Postflight API error:', e.message); process.exit(1); });
 "
@@ -420,16 +466,30 @@ set -e
 # Remove DISABLE_BACKGROUND_JOBS to activate background schedulers
 docker compose ${COMPOSE_FILES} up -d
 
-# Verify final runtime container environment: DISABLE_BACKGROUND_JOBS must be absent
+# Verify final runtime container environment: must be NODE_ENV=production with all schedulers enabled
 FINAL_CONTAINER_ID=$(docker compose ${COMPOSE_FILES} ps -q lims)
 FINAL_ENVS=$(docker inspect "$FINAL_CONTAINER_ID" --format '{{range .Config.Env}}{{println .}}{{end}}') || {
     echo "❌ Failed to inspect final container environment"
     exit 1
 }
+
+# Require explicit NODE_ENV=production
+if ! echo "$FINAL_ENVS" | grep -q '^NODE_ENV=production$'; then
+    echo "❌ Final container is not running in production mode (NODE_ENV=production required)!"
+    exit 1
+fi
+
+# Reject scheduler suppression flags
 if echo "$FINAL_ENVS" | grep -q '^DISABLE_BACKGROUND_JOBS=true$'; then
     echo "❌ Final production container unexpectedly retains DISABLE_BACKGROUND_JOBS=true!"
     exit 1
 fi
+
+if echo "$FINAL_ENVS" | grep -q '^ENABLE_BACKGROUND_JOBS=false$'; then
+    echo "❌ Final production container unexpectedly retains ENABLE_BACKGROUND_JOBS=false!"
+    exit 1
+fi
+
 echo "✓ Final container verified in normal production mode (schedulers active)."
 
 # Verify startup logs confirm background schedulers initialized
@@ -438,7 +498,15 @@ echo "✓ Background scheduler initialization verified."
 ```
 
 #### 3. Ingress Reopening & Post-Commit Recovery Rules
-- **Ingress Reopening:** Reopen public ingress at reverse proxy / load-balancer boundary. External laboratory transactions resume.
+- **Ingress Reopening:** Reopen public ingress at reverse proxy / load-balancer boundary. External laboratory transactions resume:
+```bash
+if [ -f "docker-compose.nginx.yml" ] && echo "$COMPOSE_FILES" | grep -q "docker-compose.nginx.yml"; then
+    echo "Reopening public ingress at NGINX reverse proxy boundary..."
+    docker compose ${COMPOSE_FILES} up -d nginx
+    docker compose ${COMPOSE_FILES} ps nginx | grep -q "Up" || { echo "❌ NGINX ingress failed to reopen"; exit 1; }
+    echo "✓ Ingress reopened successfully at NGINX reverse proxy boundary."
+fi
+```
 - **CRITICAL INVARIANT:** Once new analytical writes have resumed after cutover, **DO NOT execute Route A or Route B database volume restoration**. Restoring an earlier database snapshot rewinds analytical history and permanently destroys newly ingested samples and client results.
 
 If an issue arises *after* writes have resumed, follow the permitted post-commit recovery paths:
