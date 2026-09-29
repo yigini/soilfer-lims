@@ -25,10 +25,12 @@ if [[ "$MODE" != "local" && "$MODE" != "global" ]]; then
     exit 1
 fi
 
+MODE_UPPER=$(printf '%s' "$MODE" | tr '[:lower:]' '[:upper:]')
+
 echo -e "${BLUE}"
 echo "╔═══════════════════════════════════════╗"
 echo "║       SoilFER-LIMS Setup Script       ║"
-echo "║       Mode: $(printf '%-26s' "${MODE^^}")║"
+echo "║       Mode: $(printf '%-26s' "${MODE_UPPER}")║"
 echo "╚═══════════════════════════════════════╝"
 echo -e "${NC}"
 
@@ -102,7 +104,7 @@ cd ..
 # ── Done! ──
 echo ""
 echo -e "${GREEN}╔═══════════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║       ✓ Setup Complete! (${MODE^^} mode)          ║${NC}"
+echo -e "${GREEN}║       ✓ Setup Complete! (${MODE_UPPER} mode)          ║${NC}"
 echo -e "${GREEN}╚═══════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "  Start:   ${BLUE}cd server && NODE_ENV=production node index.js${NC}"
