@@ -314,7 +314,18 @@ bash "${entryScript.replace(/\\/g, '/')}"
         fs.mkdirSync(path.join(testDir, 'prisma'), { recursive: true });
 
         const serverDir = path.resolve(__dirname, '..', '..');
-        fs.copyFileSync(path.join(serverDir, 'prisma', 'dev.db'), path.join(testDir, 'prisma', 'dev.db'));
+        const targetDb = path.join(testDir, 'prisma', 'dev.db');
+        fs.copyFileSync(path.join(serverDir, 'prisma', 'dev.db'), targetDb);
+
+        const Database = require('better-sqlite3');
+        const db = new Database(targetDb);
+        const existing = db.prepare('SELECT count(*) as count FROM User').get();
+        if (!existing || existing.count === 0) {
+            db.prepare('INSERT INTO User (id, username, password, email, role, isActive) VALUES (?, ?, ?, ?, ?, ?)')
+              .run('u-inspect-test', 'inspectadmin', 'hashedpass', 'inspect@soilfer.local', 'LAB_MANAGER', 1);
+        }
+        db.close();
+        fs.writeFileSync(path.join(testDir, 'prisma', '.seed_complete'), 'done');
 
         const entryContent = fs.readFileSync(path.join(repoRoot, 'docker-entrypoint.sh'), 'utf8');
         const adaptedEntry = entryContent
