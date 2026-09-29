@@ -250,7 +250,7 @@ async function runSuite() {
         '-v', `${partialVol}:/app/server/prisma`,
         IMAGE_TAG,
         'sh', '-c',
-        `npx prisma db push --skip-generate && node -e "
+        `npx prisma db push && node -e "
             const Database = require('better-sqlite3');
             const db = new Database('prisma/dev.db');
             db.prepare(\\"INSERT INTO Lab (id, name, code, country, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)\\")
