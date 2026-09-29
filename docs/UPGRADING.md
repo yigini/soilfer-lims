@@ -2,7 +2,7 @@
 
 > **Target Platform:** SoilFER-LIMS v1.4.0+  
 > **Release Image Standard:** Immutable Image ID (`docker inspect --format '{{.Id}}' soilfer-lims:v1.4.0-<commit-sha>`)  
-> **Volume Scoping:** Bound directly to live container mounts or `${COMPOSE_PROJECT_NAME:-soilfer-lims}_lims-data`  
+> **Volume Scoping:** Bound directly to live container mounts discovered from Compose context
 
 ---
 
@@ -22,45 +22,54 @@ SoilFER-LIMS uses Prisma ORM with SQLite (via `better-sqlite3`). Schema evolutio
 ## 2. Standard Production Upgrade Procedure
 
 ### Step 1: Discover Environment, Running Mounts & Image Identities
-Docker Compose prefixes volumes with the project name. Rather than guessing volume names, discover them directly from the active container mounts and inspect the baseline immutable image ID:
+Docker Compose prefixes volumes with the project name. Rather than guessing volume names or relying on fallbacks, discover them directly from the active container mounts and inspect the baseline immutable image ID, carrying the active Compose configuration context throughout:
 
 ```bash
+set -e
+
 cd /opt/soilfer-lims
 
-# 1. Discover active container, mounts, and baseline image ID
-CONTAINER_ID=$(docker compose ps -q lims 2>/dev/null)
-if [ -n "$CONTAINER_ID" ]; then
-    DATA_VOLUME=$(docker inspect "$CONTAINER_ID" --format '{{range .Mounts}}{{if eq .Destination "/app/server/prisma"}}{{.Name}}{{end}}{{end}}')
-    ASSETS_VOLUME=$(docker inspect "$CONTAINER_ID" --format '{{range .Mounts}}{{if eq .Destination "/app/server/uploads"}}{{.Name}}{{end}}{{end}}')
-    RUNNING_IMAGE_REF=$(docker inspect "$CONTAINER_ID" --format '{{.Image}}')
+# Define Compose file context (include overlay files if deployed, e.g. -f docker-compose.yml -f docker-compose.nginx.yml)
+COMPOSE_FILES=${COMPOSE_FILES:-"-f docker-compose.yml"}
+
+# 1. Discover active container from Compose context (Fail Closed if not running)
+CONTAINER_ID=$(docker compose ${COMPOSE_FILES} ps -q lims 2>/dev/null)
+if [ -z "$CONTAINER_ID" ]; then
+    echo "❌ Active LIMS container not found in Compose context! Ensure 'docker compose ${COMPOSE_FILES} ps' lists an active lims container before upgrading."
+    exit 1
 fi
 
-# Fallback to Compose project discovery if container is not running
-PROJECT_NAME=${COMPOSE_PROJECT_NAME:-$(docker compose config 2>/dev/null | grep -m1 '^name:' | awk '{print $2}')}
-PROJECT_NAME=${PROJECT_NAME:-$(basename "$PWD")}
-DATA_VOLUME=${DATA_VOLUME:-"${PROJECT_NAME}_lims-data"}
-ASSETS_VOLUME=${ASSETS_VOLUME:-"${PROJECT_NAME}_lims-assets"}
+# 2. Extract bound volumes and baseline image identity directly from the live container
+DATA_VOLUME=$(docker inspect "$CONTAINER_ID" --format '{{range .Mounts}}{{if eq .Destination "/app/server/prisma"}}{{.Name}}{{end}}{{end}}')
+ASSETS_VOLUME=$(docker inspect "$CONTAINER_ID" --format '{{range .Mounts}}{{if eq .Destination "/app/server/uploads"}}{{.Name}}{{end}}{{end}}')
+BASELINE_IMAGE_ID=$(docker inspect "$CONTAINER_ID" --format '{{.Id}}')
+BASELINE_IMAGE_REF=$(docker inspect "$CONTAINER_ID" --format '{{.Config.Image}}')
 
-# 2. Verify volumes exist
-docker volume inspect "$DATA_VOLUME" >/dev/null || { echo "❌ Volume $DATA_VOLUME does not exist!"; exit 1; }
-docker volume inspect "$ASSETS_VOLUME" >/dev/null || { echo "❌ Volume $ASSETS_VOLUME does not exist!"; exit 1; }
+if [ -z "$DATA_VOLUME" ] || [ -z "$ASSETS_VOLUME" ] || [ -z "$BASELINE_IMAGE_ID" ]; then
+    echo "❌ Failed to inspect required volume mounts or image ID from active container ${CONTAINER_ID}. Aborting."
+    exit 1
+fi
 
-# 3. Resolve immutable baseline image ID
-BASELINE_IMAGE_ID=$(docker inspect --format '{{.Id}}' "${RUNNING_IMAGE_REF:-soilfer-lims:latest}")
+# 3. Verify target volumes exist in Docker engine
+docker volume inspect "$DATA_VOLUME" >/dev/null
+docker volume inspect "$ASSETS_VOLUME" >/dev/null
 
-echo "✓ Verified Environment:"
-echo "  - Project Name:       ${PROJECT_NAME}"
+echo "✓ Verified Live Environment:"
+echo "  - Container ID:       ${CONTAINER_ID}"
 echo "  - Database Volume:    ${DATA_VOLUME}"
 echo "  - Assets Volume:      ${ASSETS_VOLUME}"
 echo "  - Baseline Image ID:  ${BASELINE_IMAGE_ID}"
+echo "  - Baseline Image Ref: ${BASELINE_IMAGE_REF}"
 ```
 
 ### Step 2: Quiesce Writers & Produce Bound Backup
 Always create a transactionally consistent, writer-quiesced backup before fetching new code:
 
 ```bash
+set -e
+
 # 1. Quiesce database writers
-docker compose stop lims
+docker compose ${COMPOSE_FILES} stop lims
 
 # 2. Create timestamped host backup directory
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
@@ -73,10 +82,10 @@ BACKUP_OUTPUT=$(docker run --rm \
   "${BASELINE_IMAGE_ID}" node scripts/backup_db.js)
 echo "$BACKUP_OUTPUT"
 
-# Extract exact generated filename, compute hash, and bind artifact
-BACKUP_FILE=$(echo "$BACKUP_OUTPUT" | grep -oE "backup_[0-9_]+\.db\.gz" | head -n1)
-if [ -z "$BACKUP_FILE" ]; then
-    echo "❌ Failed to identify generated backup artifact!"
+# Extract exact generated filename, verify existence, compute sha256 hash, and bind artifact
+BACKUP_FILE=$(echo "$BACKUP_OUTPUT" | grep -oE "(soilfer_lims_backup_|backup_)[^ ')]+\.db\.gz" | head -n 1)
+if [ -z "$BACKUP_FILE" ] || [ ! -f "backups/${BACKUP_FILE}" ]; then
+    echo "❌ Failed to identify generated backup artifact in backups directory!"
     exit 1
 fi
 sha256sum "backups/${BACKUP_FILE}" > "backups/${BACKUP_FILE}.sha256"
@@ -114,6 +123,8 @@ docker run --rm \
 Tag the container image with the specific Git commit hash and resolve its immutable image ID:
 
 ```bash
+set -e
+
 # 1. Pull canonical reviewed code
 git pull origin main
 
@@ -122,7 +133,7 @@ RELEASE_TAG=$(git rev-parse --short HEAD)
 export LIMS_IMAGE_TAG="v1.4.0-${RELEASE_TAG}"
 echo "Building release image: soilfer-lims:${LIMS_IMAGE_TAG}"
 
-docker compose build lims
+docker compose ${COMPOSE_FILES} build lims
 
 # 3. Resolve and record immutable target image ID
 TARGET_IMAGE_ID=$(docker inspect --format '{{.Id}}' "soilfer-lims:${LIMS_IMAGE_TAG}")
@@ -130,39 +141,56 @@ echo "Target Immutable Image ID: ${TARGET_IMAGE_ID}"
 ```
 
 ### Step 4: Launch Upgraded Service
-Start the updated containers with your chosen topology:
+Start the updated containers with your chosen topology, carrying forward your Compose configuration:
 
 ```bash
-# Option A: Single Laboratory with NGINX Reverse Proxy (Recommended):
-docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d
+set -e
 
-# Option B: Single Laboratory Direct Port 3000 (No NGINX):
-docker compose up -d
+# Option A: Single Laboratory Direct Port 3000 (No NGINX):
+docker compose -f docker-compose.yml up -d
+
+# Option B: Single Laboratory with NGINX Reverse Proxy (Recommended):
+docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d
 
 # Option C: Multi-Laboratory Network with NGINX:
 docker compose -f docker-compose.yml -f docker-compose.global.yml -f docker-compose.nginx.yml up -d
 ```
 
 ### Step 5: Post-Deployment Verification & Bounded Release Gates
-Execute the standard release gates:
+Execute the comprehensive release gates. Any failure halts the release:
 
 ```bash
+set -e
+
 # 1. Verify running container is bound to the immutable TARGET_IMAGE_ID
-LIVE_IMAGE_ID=$(docker inspect $(docker compose ps -q lims) --format '{{.Image}}')
+LIVE_CONTAINER_ID=$(docker compose ${COMPOSE_FILES} ps -q lims)
+LIVE_IMAGE_ID=$(docker inspect "$LIVE_CONTAINER_ID" --format '{{.Image}}')
 if [ "$LIVE_IMAGE_ID" != "$TARGET_IMAGE_ID" ]; then
     echo "❌ Deployment Mismatch: Container is running $LIVE_IMAGE_ID, expected target $TARGET_IMAGE_ID"
     exit 1
 fi
 echo "✓ Live container verified running target image ID: ${LIVE_IMAGE_ID}"
 
-# 2. Verify HTTP 200 healthcheck
-curl -fsSL http://localhost:3000/api/health
+# 2. Verify active container mounts match discovered volumes
+LIVE_DATA_VOL=$(docker inspect "$LIVE_CONTAINER_ID" --format '{{range .Mounts}}{{if eq .Destination "/app/server/prisma"}}{{.Name}}{{end}}{{end}}')
+LIVE_ASSETS_VOL=$(docker inspect "$LIVE_CONTAINER_ID" --format '{{range .Mounts}}{{if eq .Destination "/app/server/uploads"}}{{.Name}}{{end}}{{end}}')
+if [ "$LIVE_DATA_VOL" != "$DATA_VOLUME" ] || [ "$LIVE_ASSETS_VOL" != "$ASSETS_VOLUME" ]; then
+    echo "❌ Mount Mismatch: Data=$LIVE_DATA_VOL (expected $DATA_VOLUME), Assets=$LIVE_ASSETS_VOL (expected $ASSETS_VOLUME)"
+    exit 1
+fi
+echo "✓ Mounts verified: Data=${LIVE_DATA_VOL}, Assets=${LIVE_ASSETS_VOL}"
 
-# 3. Verify startup logs confirm additive migrations and server start
-docker compose logs lims --tail 40 | grep -E "(Applying|Starting SoilFER-LIMS)"
+# 3. Verify HTTP 200 healthcheck and deployment mode
+HEALTH_JSON=$(curl -fsSL http://localhost:3000/api/health)
+echo "Health status: $HEALTH_JSON"
 
-# 4. Verify database integrity & foreign keys
-docker compose exec lims node -e "
+# 4. Verify startup logs confirm additive migrations, scheduler, and server start
+docker compose ${COMPOSE_FILES} logs lims --tail 50 | grep -E "(Applying|Starting SoilFER-LIMS|Enterprise Server running)"
+docker compose ${COMPOSE_FILES} logs lims --tail 50 | grep "\[SCHEDULER\] Escalation background scheduler initialized"
+echo "✓ Background scheduler initialization verified."
+
+# 5. Verify database integrity & foreign keys
+docker compose ${COMPOSE_FILES} exec -T lims node -e "
   const Database = require('better-sqlite3');
   const db = new Database('prisma/dev.db', { readonly: true });
   const integrity = db.pragma('integrity_check');
@@ -175,8 +203,22 @@ docker compose exec lims node -e "
   console.log('✓ Post-upgrade database integrity and foreign keys verified.');
 "
 
-# 5. Verify NGINX reverse proxy connectivity (if deployed with NGINX overlay)
-if docker compose ps -q nginx >/dev/null 2>&1; then
+# 6. Verify role-based API responsiveness
+docker compose ${COMPOSE_FILES} exec -T lims node -e "
+  const Database = require('better-sqlite3');
+  const db = new Database('prisma/dev.db', { readonly: true });
+  const userCount = db.prepare('SELECT count(*) as n FROM User').get().n;
+  const labCount = db.prepare('SELECT count(*) as n FROM Lab').get().n;
+  db.close();
+  if (userCount === 0) {
+    console.error('Postflight check failed: Zero users found in database!');
+    process.exit(1);
+  }
+  console.log('✓ Database records verified. Users:', userCount, 'Labs:', labCount);
+"
+
+# 7. Verify NGINX reverse proxy connectivity (if deployed with NGINX overlay)
+if docker compose ${COMPOSE_FILES} ps -q nginx >/dev/null 2>&1; then
     curl -fsSL http://localhost/api/health
     echo "✓ NGINX reverse proxy ingress verified."
 fi
@@ -193,7 +235,7 @@ If an unexpected regression occurs after deployment, follow this procedure to re
 
 ### Step 1: Stop Writers Immediately
 ```bash
-docker compose stop lims
+docker compose ${COMPOSE_FILES} stop lims
 ```
 
 ### Step 2: Restore Database Snapshot (Round-Trip Procedure)
@@ -216,41 +258,73 @@ docker run --rm \
   node scripts/restore_db.js "/app/server/backups/${BACKUP_FILE}"
 ```
 
-#### Route B: Restoring from Full Volume Tarball (`.tar.gz`)
-When restoring complete volume tarballs, verify the archive and stage safety snapshots **before** modifying target volumes:
+#### Route B: Restoring from Full Volume Tarball (`.tar.gz`) — Staged & Fail-Closed Recovery
+When restoring complete volume tarballs, stage and validate the archives in `/backup/staging` **before** modifying target volumes, preserve full pre-restore safety copies (including hidden `.jwt_secret` and WAL/SHM sidecars), and fail closed on any error without swallowing failures:
 
 ```bash
+set -e
+
 RESTORE_TS="<timestamp-of-target-backup>"
 
-# 1. Verify Archive Integrity First (Fail-Closed)
+# 1. Stage and Verify Archives in Staging Directory First (Fail-Closed)
 docker run --rm \
   -v "$(pwd)/backups:/backup" \
-  alpine tar -tzf "/backup/db_snapshot_${RESTORE_TS}.tar.gz" >/dev/null || {
-    echo "❌ Database backup tarball is corrupted or unreadable! Aborting restore."
-    exit 1
-}
+  "${BASELINE_IMAGE_ID}" \
+  sh -c "
+    set -e
+    rm -rf /backup/staging
+    mkdir -p /backup/staging/db /backup/staging/assets
+    tar -xzf /backup/db_snapshot_${RESTORE_TS}.tar.gz -C /backup/staging/db
+    if [ -f /backup/assets_snapshot_${RESTORE_TS}.tar.gz ]; then
+      tar -xzf /backup/assets_snapshot_${RESTORE_TS}.tar.gz -C /backup/staging/assets
+    fi
+    node -e \"
+      const Database = require('better-sqlite3');
+      const db = new Database('/backup/staging/db/dev.db', { readonly: true });
+      const integrity = db.pragma('integrity_check');
+      const fk = db.pragma('foreign_key_check');
+      db.close();
+      if (integrity[0]?.integrity_check !== 'ok' || fk.length > 0) {
+        console.error('Staged database integrity check failed:', integrity, fk);
+        process.exit(1);
+      }
+      console.log('✓ Staged database archive integrity verified.');
+    \"
+  "
 
-# 2. Preserve Pre-Restore Safety Snapshot of Current Volume Contents
+# 2. Preserve Pre-Restore Safety Snapshot of Current Volume Contents (Including Hidden Files)
 docker run --rm \
   -v "${DATA_VOLUME}:/data" \
+  -v "${ASSETS_VOLUME}:/assets" \
   -v "$(pwd)/backups:/backup" \
-  alpine sh -c "mkdir -p /backup/pre_restore_safety_${TIMESTAMP} && cp -a /data/* /backup/pre_restore_safety_${TIMESTAMP}/ 2>/dev/null || true"
+  alpine sh -c "
+    set -e
+    SAFETY_DIR=\"/backup/pre_restore_safety_${RESTORE_TS}\"
+    mkdir -p \"\$SAFETY_DIR/data\" \"\$SAFETY_DIR/assets\"
+    # Copy all files including dotfiles (.jwt_secret, .seed_complete, WAL, SHM)
+    cp -a /data/. \"\$SAFETY_DIR/data/\"
+    cp -a /assets/. \"\$SAFETY_DIR/assets/\"
+    echo '✓ Full pre-restore safety snapshot created in host backups.'
+  "
 
-# 3. Extract Verified Archive into Database Volume
+# 3. Atomically Replace Target Volume Contents from Verified Staging
 docker run --rm \
   -v "${DATA_VOLUME}:/data" \
+  -v "${ASSETS_VOLUME}:/assets" \
   -v "$(pwd)/backups:/backup" \
-  alpine sh -c "rm -rf /data/* /data/.* 2>/dev/null || true && tar -xzf /backup/db_snapshot_${RESTORE_TS}.tar.gz -C /data"
+  alpine sh -c "
+    set -e
+    rm -rf /data/* /data/.* 2>/dev/null || true
+    cp -a /backup/staging/db/. /data/
+    if [ -d /backup/staging/assets ] && [ \"\$(ls -A /backup/staging/assets)\" ]; then
+      rm -rf /assets/* /assets/.* 2>/dev/null || true
+      cp -a /backup/staging/assets/. /assets/
+    fi
+    rm -rf /backup/staging
+    echo '✓ Staged volume contents copied to target volumes.'
+  "
 
-# 4. Restore Assets Volume (if included)
-if [ -f "backups/assets_snapshot_${RESTORE_TS}.tar.gz" ]; then
-  docker run --rm \
-    -v "${ASSETS_VOLUME}:/assets" \
-    -v "$(pwd)/backups:/backup" \
-    alpine sh -c "rm -rf /assets/* /assets/.* 2>/dev/null || true && tar -xzf /backup/assets_snapshot_${RESTORE_TS}.tar.gz -C /assets"
-fi
-
-# 5. Integrity Check and Rotate Exchange Epoch after Volume Restore
+# 4. Verify Restored Volume and Rotate Exchange Epoch
 docker run --rm \
   -v "${DATA_VOLUME}:/app/server/prisma" \
   "${BASELINE_IMAGE_ID}" \
@@ -261,7 +335,7 @@ docker run --rm \
     const integrity = db.pragma('integrity_check');
     const fk = db.pragma('foreign_key_check');
     if (integrity[0]?.integrity_check !== 'ok' || fk.length > 0) {
-      console.error('Restored database integrity or foreign key check failed:', integrity, fk);
+      console.error('Restored volume database integrity check failed:', integrity, fk);
       process.exit(1);
     }
     initTables(db);
@@ -273,10 +347,29 @@ docker run --rm \
 ```
 
 ### Step 3: Restart Baseline Container & Verify Health
-```bash
-# Start container using verified baseline image or docker-compose
-docker compose up -d
+Rollback must intentionally launch the verified baseline image with the recorded Compose context:
 
-# Verify application health
+```bash
+set -e
+
+# 1. Explicitly tag the immutable BASELINE_IMAGE_ID with a dedicated rollback tag
+ROLLBACK_TAG="rollback-${TIMESTAMP}"
+docker tag "${BASELINE_IMAGE_ID}" "soilfer-lims:${ROLLBACK_TAG}"
+export LIMS_IMAGE_TAG="${ROLLBACK_TAG}"
+
+# 2. Launch container using Compose with the recorded configuration context
+docker compose ${COMPOSE_FILES} up -d
+
+# 3. Verify running container is bound to the immutable BASELINE_IMAGE_ID
+ROLLBACK_CONTAINER_ID=$(docker compose ${COMPOSE_FILES} ps -q lims)
+ACTUAL_RUNNING_IMAGE_ID=$(docker inspect "$ROLLBACK_CONTAINER_ID" --format '{{.Image}}')
+if [ "$ACTUAL_RUNNING_IMAGE_ID" != "$BASELINE_IMAGE_ID" ]; then
+    echo "❌ Rollback Image Mismatch: Container running $ACTUAL_RUNNING_IMAGE_ID, expected baseline $BASELINE_IMAGE_ID"
+    exit 1
+fi
+echo "✓ Live container verified running baseline image ID: ${ACTUAL_RUNNING_IMAGE_ID}"
+
+# 4. Verify application health
 curl -fsSL http://localhost:3000/api/health
+echo "✓ Rollback health check passed."
 ```

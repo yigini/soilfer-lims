@@ -262,6 +262,7 @@ let schedulerInterval = null;
 
 function startEscalationScheduler(intervalMs = 60 * 60 * 1000) {
     if (schedulerInterval) return;
+    console.log('[SCHEDULER] Escalation background scheduler initialized');
     schedulerInterval = setInterval(async () => {
         try {
             await runEscalationChecks();

@@ -1,9 +1,11 @@
 # SoilFER-LIMS Deployment Readiness Status & Operator Guide
 
-> **Current Status:** In Progress (Branch: `feat/deployment-readiness`)  
-> **Last Updated:** 29 September 2026  
-> **Target Reviewed Baseline:** `61e8900f8f5078383cc8585195ca4ec98a734c5d`  
-> **Audit References:** `Codex Deployment Readiness Review (2026-09-29)`, `PR154 Independent Review (2026-09-29)`, and `PR154 Follow-up Review (2026-09-29)`
+> The setup and admin-account bugs are fixed and Docker startup tests pass. We are finishing the tested backup/upgrade procedure and the remaining multi-lab checks. This update is not yet released.
+
+**Target Branch:** `feat/deployment-readiness` (PR #154)  
+**Target Baseline:** `61e8900f8f5078383cc8585195ca4ec98a734c5d`  
+**Current Live Production Status:** Unchanged (v1.3.x / production commit `9b69920`). **THIS UPDATE IS NOT YET LIVE.**  
+**Independent Audit Reference:** Codex Deployment Readiness Reviews (PR154 heads `4a07b2c` and `96921ae`).
 
 ---
 
@@ -13,22 +15,29 @@ SoilFER-LIMS is designed to run reliably in two operating modes:
 1. **Single Laboratory (`local` mode):** For an individual soil laboratory. Upon installation, it provisions your laboratory record and an initial `LAB_MANAGER` administrator account. The manager can configure the lab, onboard technicians, register samples, and process analytical batches.
 2. **Multiple Laboratories (`global` mode):** For national agricultural institutes or laboratory networks coordinating several facilities. It provisions a central `SUPER_ADMIN` account who can create new laboratories, activate them, assign laboratory managers, and oversee cross-facility operations.
 
-### Current System Health Summary
-- **What Works:** Basic onboarding, initial login, forced password change, single-lab technician/project management, and multi-lab data isolation operate cleanly (verified by 38 independent audit probe assertions and 31 automated contract tests).
-- **What Was Done & Fixed:**
-  - `setup.sh` no longer crashes on Prisma 7 flags or swallows database push errors.
-  - Docker entrypoint persists auto-generated JWT secrets across container restarts (`prisma/.jwt_secret`).
-  - Container first-boot is fully resumable and fail-closed: if seed fails, it retries on restart; once seeded or populated with users, existing accounts are protected from reseeding. Inspection halts safely if SQLite is unreadable or corrupt, and allows WAL recovery on restart.
-  - Real partial seed recovery: if an interrupted initial setup leaves `LAB01` present without users, `seed.js` detects and reuses `LAB01`, successfully creates the admin account, and avoids duplicate key crashes.
-  - `provision_super_admin.js` prevents identity collisions: checks username and email targets strictly before mutation; rejects colliding combinations without touching unrelated inactive accounts; preserves inactive state; and revokes active sessions via `tokenVersion`.
-  - Docker Compose cleanly separates NGINX (`docker-compose.nginx.yml`) from deployment mode (`docker-compose.global.yml`).
-  - Database restore fails closed if SQL triggers or epoch rotations fail, preserving safety snapshots of database and WAL/SHM sidecars.
-  - Upgrading guide (`docs/UPGRADING.md`) reconciles live container mount discovery, immutable image IDs, bound backup artifacts with SHA-256 hashes, non-destructive tarball staging, and bounded postflight gates.
-  - Added real isolated Docker default-entrypoint deployment readiness rehearsal (`server/scripts/rehearsal_deployment_readiness.cjs`) executed in GitHub Actions CI across empty-volume boots, restarts, partial-inits, and backup/restore round trips.
-  - Production dependency vulnerabilities were reduced to 4 in server (all high, strictly Prisma 7 tooling transitives) and 3 in client (2 moderate in react-router v6, 1 high in xlsx), with zero critical vulnerabilities.
-- **What Was Tested:** 31 contract tests across bootstrap, fail-closed SQLite inspection, secret stability, real partial-seed recovery, provision CLI collision rejection, role scoping, fail-closed restore with SQL triggers, and concurrent multi-lab sample intake and queries. Full backend test suites pass (148/148 suites, 1,440 tests). Frontend production build passed cleanly via Vite in 27.11s.
-- **What Remains:** Independent Codex review of the updated commit candidate on PR #154, merge to `main`, and production safe-release verification.
-- **Availability & Live Status:** These fixes are currently implemented on branch `feat/deployment-readiness` (in PR #154). **THEY ARE NOT YET LIVE ON THE PRODUCTION SERVER.** The running production environment remains untouched.
+### Current System Health & Progress Summary
+- **What Works:**
+  - Setup and admin account provisioning bugs are fixed and independently verified.
+  - Real Docker default-entrypoint startup, restart, and partial-seed recovery pass.
+  - Multi-lab sample intake and scoped data exports (`POST /api/exports/data`).
+  - Pre-restart token persistence across container restarts on the same volume.
+  - Executable backup filename extraction via regex `(soilfer_lims_backup_|backup_)[^ ')]+\.db\.gz`.
+  - Staged Route B disaster recovery procedure (`/backup/staging/db`), staged SQLite validation, full unsuppressed pre-restore safety snapshots including dotfiles (`.jwt_secret`, `.seed_complete`, WAL/SHM), and rollback explicitly bound to immutable baseline image ID.
+  - Fail-closed behavior on corrupted archives.
+  - Automatic data exchange epoch rotation on restore and rejection of pre-restore client cursors with `EPOCH_MISMATCH`.
+  - Manifest file import pre-parser size check (5 MB bound) and extension/MIME validation.
+- **What Remains:**
+  - Independent review and verification of the corrected head by Codex.
+  - Independent green CI execution of the enhanced Docker deployment readiness acceptance suite.
+  - Formal merge to `main` and production cutover verification through established release gates.
+- **What Was Tested:**
+  - 31 automated backend contract tests across bootstrap and acceptance suites (all passed).
+  - 6 real Docker scenarios in `server/scripts/rehearsal_deployment_readiness.cjs`.
+  - Vite client production build: 2,659 modules transformed in 6.89s with 0 errors.
+  - Full backend test suites pass.
+- **Availability & Live Status:**
+  - These improvements are committed to the PR #154 branch (`feat/deployment-readiness`).
+  - **THEY ARE NOT YET LIVE ON THE PRODUCTION SERVER.** The running production environment remains untouched until independent review acceptance and release gates pass.
 
 ---
 
@@ -44,24 +53,25 @@ Status lifecycle stages:
 
 | # | Problem | Effect on Users | Change Made | Current Status | Tests | Remaining Work |
 |---|---|---|---|---|---|---|
-| **P1** | `setup.sh` used removed Prisma 7 flag `--skip-generate` | Fresh installation via `./setup.sh` crashed during database setup | Removed `--skip-generate` flag; Prisma 7 handles generation via `prisma.config.ts` | **Fixed in branch** | Tested CLI schema push in isolated disposable checkout | Review & merge |
-| **P2** | `setup.sh` suppressed DB push errors with `\|\| true` | Script printed "Database ready" even when the database failed to initialize | Removed error swallowing; script aborts immediately with guidance | **Fixed in branch** | Verified non-zero exit on deliberate failure | Review & merge |
-| **P3** | Interrupted initial Docker boot could skip seed; blank JWT changed on restart | Incomplete first-start left empty unseeded database; restart invalidated auth tokens | Auto-generated JWT secret is saved to `prisma/.jwt_secret`; entrypoint detects incomplete setups and safely retries seed without touching populated databases | **Fixed in branch** | Verified secret stability across restarts; verified recovery after simulated seed failure (exit 77) | Container CI validation |
-| **P4** | Blank `JWT_SECRET` in `.env.example` caused Compose error; missing `ADMIN_INITIAL_PASSWORD` forwarding | Users copying `.env.example` saw errors; `.env` initial password was not passed to container | Compose accepts empty secret for entrypoint auto-generation; forwards `ADMIN_INITIAL_PASSWORD` | **Fixed in branch** | Validated Compose configuration with blank and configured variables | Review & merge |
-| **P5** | `INSTALL.md` and guides suggested `docker-compose.global.yml` for single-lab NGINX | Single-lab users setting up NGINX were inadvertently forced into `global` multi-lab mode | Decoupled NGINX proxy into `docker-compose.nginx.yml`; updated all guide commands | **Fixed in branch** | Verified compose configurations for local, global, and local+nginx | Review & merge |
-| **P6** | `setup.sh` printed incorrect login password `admin / password` | Users could not log in because the seed generated a random one-time password | `setup.sh` and docs now clearly direct operators to the generated one-time credentials | **Fixed in branch** | Traced setup shell output | Review & merge |
-| **P7** | `server/package.json` had no `npm run seed` command | Users following README manual instructions failed with `missing script: seed` | Added `"seed": "node seed.js"` and `"provision:admin"` to `server/package.json` | **Fixed in branch** | Ran scripts in clean environment | CI test |
-| **P8** | `server/seed.js` did not load `.env` variables | Custom `ADMIN_INITIAL_PASSWORD` or `DEPLOYMENT_MODE` in `.env` were ignored during seeding | Added CWD-independent dotenv loading at top of `server/seed.js` | **Fixed in branch** | Verified custom seed password read from root `.env` | Multi-CWD test |
-| **P9** | Dockerfile and CI ran Node.js 20 (now EOL); setup allowed Node 18 | Unsupported runtime risks and native addon linking failures | Standardized Dockerfile and CI on Node.js 24 LTS; setup.sh requires Node 24 LTS or Node 22 LTS (22.12+) | **Fixed in branch** | Verified Node 18 and Node 20 rejection; verified Node 24 builds | CI workflow validation |
-| **P10** | Single-lab operators lacked supported path for API administration | Seeded `LAB_MANAGER` is denied SIS API credentials; operators lacked an official path to provision `SUPER_ADMIN` | Created `server/scripts/provision_super_admin.js` (`npm run provision:admin`) for host-console provisioning without widening UI permissions | **Fixed in branch** | Tested CLI provisioning and elevation | Review & merge |
-| **P11** | Production dependency security advisories | Potential vulnerability notices in automated package scanners | Resolved direct safe dependencies via semver updates; production vulnerabilities reduced to 4 in server (Prisma 7 tooling transitives) and 3 in client (react-router v6, xlsx) | **Fixed in branch** | Ran `npm audit --omit=dev`; verified client Vite production build in 27.11s | Upstream package tracking |
-| **P12** | Database restore swallowed SQL trigger/epoch rotation errors and risked sidecar loss | Controlled trigger failures still reported SUCCESS; WAL/SHM sidecars were unlinked without snapshots | `restore_db.js` preserves target and WAL/SHM sidecars as recovery artifacts (`.bak`); fails closed (exit 1) on SQL epoch rotation errors | **Fixed in branch** | Verified exit 1 and failure report when SQL trigger aborts epoch update | Review & merge |
-| **P13** | Documentation lacked volume identity discovery and archive round-trip parity | Mismatched `.tar.gz` vs `.db.gz` instructions; hardcoded volume names risk creating empty volumes | `UPGRADING.md` rewritten with live container mount discovery, verified `.tar.gz` and `.db.gz` round trips, immutable image IDs, and postflight gates | **Fixed in branch** | Reconciled README, INSTALL, DEPLOYMENT_GUIDE, and UPGRADING | Review & merge |
-| **P14** | Partial initial seed leaving `LAB01` crashed retry with unique-code conflict | Interrupted setup could not be resumed without manual database intervention | `seed.js` checks if `LAB01` exists; if present without users, reuses its ID and completes user seeding | **Fixed in branch** | Tested exact SQL trigger user-insert abort and subsequent retry | Review & merge |
-| **P15** | Docker entrypoint SQLite inspection converted query errors to 0 users (fail-open) | Unreadable or corrupt database could trigger unintentional schema push or seeding | Inspection in `docker-entrypoint.sh` fails closed with code 1 upon any SQLite error or unreadable state | **Fixed in branch** | Verified exit 1 and fatal error on corrupt database header | Review & merge |
-| **P16** | `provision_super_admin.js` matched `OR: [{ username }, { email }]`, risking account hijacking | Requesting a new username matching an existing user's default email altered the existing account | Strict target lookup, collision rejection before mutation, inactive status preservation, session revocation | **Fixed in branch** | Verified collision rejection, inactive preservation, and tokenVersion increment | Review & merge |
-| **P17** | Lack of default-entrypoint Docker acceptance testing in CI | CI boundary rehearsal overrode entrypoint with synthetic runner; default boot was unverified | Created `server/scripts/rehearsal_deployment_readiness.cjs` testing default entrypoint on empty volumes in CI | **Fixed in branch** | Automated CI suite with real HTTP fetch against local/global/restored containers | Remote CI run |
-| **P18** | Route B full-tarball restore deleted target data before checking archive validity | Corrupt archive could wipe out existing database without recovery | Staged and verified archive before extraction; created pre-restore safety snapshot of volume contents | **Fixed in branch** | Runbook validation and procedure verification | Review & merge |
+| **P1** | `setup.sh` used removed Prisma 7 flag `--skip-generate` | Fresh installation via `./setup.sh` crashed during database setup | Removed `--skip-generate` flag; Prisma 7 handles generation via `prisma.config.ts` | **Independently verified** | Tested CLI schema push in isolated disposable checkout | Review & merge |
+| **P2** | `setup.sh` suppressed DB push errors with `\|\| true` | Script printed "Database ready" even when the database failed to initialize | Removed error swallowing; script aborts immediately with guidance | **Independently verified** | Verified non-zero exit on deliberate failure | Review & merge |
+| **P3** | Interrupted initial Docker boot could skip seed; blank JWT changed on restart | Incomplete first-start left empty unseeded database; restart invalidated auth tokens | Auto-generated JWT secret is saved to `prisma/.jwt_secret`; entrypoint detects incomplete setups and safely retries seed without touching populated databases | **Independently verified** | Verified secret stability across restarts; verified recovery after simulated seed failure (exit 77) | Review & merge |
+| **P4** | Blank `JWT_SECRET` in `.env.example` caused Compose error; missing `ADMIN_INITIAL_PASSWORD` forwarding | Users copying `.env.example` saw errors; `.env` initial password was not passed to container | Compose accepts empty secret for entrypoint auto-generation; forwards `ADMIN_INITIAL_PASSWORD` | **Independently verified** | Validated Compose configuration with blank and configured variables | Review & merge |
+| **P5** | `INSTALL.md` and guides suggested `docker-compose.global.yml` for single-lab NGINX | Single-lab users setting up NGINX were inadvertently forced into `global` multi-lab mode | Decoupled NGINX proxy into `docker-compose.nginx.yml`; updated all guide commands | **Independently verified** | Verified compose configurations for local, global, and local+nginx | Review & merge |
+| **P6** | `setup.sh` printed incorrect login password `admin / password` | Users could not log in because the seed generated a random one-time password | `setup.sh` and docs now clearly direct operators to the generated one-time credentials | **Independently verified** | Traced setup shell output | Review & merge |
+| **P7** | `server/package.json` had no `npm run seed` command | Users following README manual instructions failed with `missing script: seed` | Added `"seed": "node seed.js"` and `"provision:admin"` to `server/package.json` | **Independently verified** | Ran scripts in clean environment | Review & merge |
+| **P8** | `server/seed.js` did not load `.env` variables | Custom `ADMIN_INITIAL_PASSWORD` or `DEPLOYMENT_MODE` in `.env` were ignored during seeding | Added CWD-independent dotenv loading at top of `server/seed.js` | **Independently verified** | Verified custom seed password read from root `.env` | Review & merge |
+| **P9** | Dockerfile and CI ran Node.js 20 (now EOL); setup allowed Node 18 | Unsupported runtime risks and native addon linking failures | Standardized Dockerfile and CI on Node.js 24 LTS; setup.sh requires Node 24 LTS or Node 22 LTS (22.12+) | **Independently verified** | Verified Node 18 and Node 20 rejection; verified Node 24 builds | Review & merge |
+| **P10** | Single-lab operators lacked supported path for API administration | Seeded `LAB_MANAGER` is denied SIS API credentials; operators lacked an official path to provision `SUPER_ADMIN` | Created `server/scripts/provision_super_admin.js` (`npm run provision:admin`) for host-console provisioning without widening UI permissions | **Independently verified** | Tested CLI provisioning and elevation | Review & merge |
+| **P11** | Production dependency security advisories | Potential vulnerability notices in automated package scanners | Resolved direct safe dependencies via semver updates; production vulnerabilities reduced to 4 in server (Prisma 7 tooling transitives) and 3 in client (react-router v6, xlsx) | **Independently verified** | Ran `npm audit --omit=dev`; verified client Vite production build | Upstream package tracking |
+| **P12** | Database restore swallowed SQL trigger/epoch rotation errors and risked sidecar loss | Controlled trigger failures still reported SUCCESS; WAL/SHM sidecars were unlinked without snapshots | `restore_db.js` preserves target and WAL/SHM sidecars as recovery artifacts (`.bak`); fails closed (exit 1) on SQL epoch rotation errors | **Independently verified** | Verified exit 1 and failure report when SQL trigger aborts epoch update | Review & merge |
+| **P13** | Documentation lacked volume identity discovery and archive round-trip parity | Mismatched `.tar.gz` vs `.db.gz` instructions; hardcoded volume names risk creating empty volumes | `UPGRADING.md` rewritten with live container mount discovery, verified `.tar.gz` and `.db.gz` round trips, immutable image IDs, and postflight gates | **Independently verified** | Reconciled README, INSTALL, DEPLOYMENT_GUIDE, and UPGRADING | Review & merge |
+| **P14** | Partial initial seed leaving `LAB01` crashed retry with unique-code conflict | Interrupted setup could not be resumed without manual database intervention | `seed.js` checks if `LAB01` exists; if present without users, reuses its ID and completes user seeding | **Independently verified** | Verified retry exits 0, reuses LAB01, creates exactly 1 manager | Review & merge |
+| **P15** | Docker entrypoint SQLite inspection converted query errors to 0 users (fail-open) | Unreadable or corrupt database could trigger unintentional schema push or seeding | Inspection in `docker-entrypoint.sh` fails closed with code 1 upon any SQLite error or unreadable state | **Independently verified** | Verified exit 1 and fatal error on corrupt database header | Review & merge |
+| **P16** | `provision_super_admin.js` matched `OR: [{ username }, { email }]`, risking account hijacking | Requesting a new username matching an existing user's default email altered the existing account | Strict target lookup, collision rejection before mutation, inactive status preservation, session revocation | **Independently verified** | Verified collision rejection, inactive preservation, and tokenVersion increment | Review & merge |
+| **P17** | Real Docker acceptance testing lacked pre-restart token validation, two-manager workload & baseline upgrade | Partial scenarios omitted cross-restart token check, Manager B, real export path, and populated upgrade | Enhanced `rehearsal_deployment_readiness.cjs` with pre-restart token check, 2-manager intake, real `POST /api/exports/data`, scheduler logs, baseline upgrade & Route B recovery | **Fixed in branch** | Rehearsal suite covering Scenarios 1-6 | Remote CI verification |
+| **P18** | Documented backup regex failed on ISO-dated filenames; Route B tar recovery was not staged | Operator runbook failed on real backup filename; tar restore deleted target before validation | Updated regex to `(soilfer_lims_backup_\|backup_)[^ ')]+\.db\.gz`; implemented staged Route B recovery in `/backup/staging`, unsuppressed safety snapshots, and baseline-bound rollback | **Fixed in branch** | Tested backup extraction snippet against actual CLI output; verified staged recovery failure behavior | Review & merge |
+| **P19** | `ManifestImportModal.jsx` lacked pre-parser file size and MIME/extension checks | Potential unconstrained file parsing in reception manifest uploads | Added 5 MB file size limit and explicit MIME/extension validation before passing file to `XLSX.read` | **Fixed in branch** | Verified client build with 0 errors | Review & merge |
 
 ---
 
@@ -82,14 +92,20 @@ An independent audit using `npm audit --omit=dev` confirms:
   - No MySQL connections or drivers are configured or accessible.
   - Direct downgrade of Prisma is rejected to avoid breaking Prisma 7 schema-engine contracts. Tracked for upcoming Prisma patch updates.
 
-### Client Advisories (2 Moderate, 1 High — 0 Critical)
+### Client Advisories (2 Moderate in react-router v6, 1 High in xlsx — 0 Critical)
 - **Affected Packages:** `react-router` / `react-router-dom` v6 (2 moderate), `xlsx` v0.18.5 (1 high).
-- **Actual LIMS Usage:**
-  - `react-router-dom` v6 provides client-side SPA routing inside the browser. Parameter parsing is guarded by strict TypeScript types and client-side page layout guards. No SSR or server-side hydration is performed.
-  - `xlsx` (SheetJS) is used strictly in laboratory bulk import views for reading `.xlsx` spreadsheets client-side.
-- **Mitigation & Risk Assessment:**
-  - Spreadsheet parsing is bounded by file size upload limits, explicit MIME-type checks, and try/catch boundaries that display validation errors directly to the technician.
-  - `jspdf` critical advisory was resolved cleanly via semver update without breaking analytical report generation.
+- **Actual LIMS Usage & Remaining Risk:**
+  - **`xlsx` (SheetJS v0.18.5):**
+    - *Usage:* Used client-side in laboratory bulk import views (`ImportPreviewModal.jsx` and `ManifestImportModal.jsx`) to parse `.xlsx`, `.xls`, and `.csv` files provided by authenticated lab operators.
+    - *Implemented Safeguards:* Both import modals enforce defensive application-level bounds before files reach `XLSX.read()`:
+      1. Hard pre-parser file size limit (`MAX_FILE_SIZE = 5 MB`). Uploads exceeding 5 MB are rejected immediately before byte arrays are loaded into memory.
+      2. File extension and MIME type validation (`.xlsx`, `.xls`, `.csv`).
+      3. Row batch limits (`MAX_BATCH_ROWS = 2,000`).
+      4. Structured try/catch boundaries with user-facing validation errors.
+    - *Remaining Risk & Maintenance Decision:* Known CVEs exist in SheetJS v0.18.5 (prototype pollution and potential ReDoS on crafted files). While application bounds restrict parser work to 5 MB files from authenticated laboratory users, SheetJS remains an unpatched npm package because newer versions are published under a separate proprietary CDN rather than the public npm registry. **Maintenance Decision:** SheetJS is retained for v1.4.0 under the 5 MB and MIME bounds. A tracked maintenance issue is scheduled to evaluate migrating client-side spreadsheet parsing to an actively maintained public library (such as `exceljs`) in the next release cycle.
+  - **`react-router-dom` v6:**
+    - *Usage:* Client-side Single Page Application (SPA) routing in the user's browser. SoilFER-LIMS does not use Server-Side Rendering (SSR) or hydration.
+    - *Remaining Risk & Maintenance Decision:* Advisories relate to route parameter matching edge cases. Route access is controlled by authenticated user tokens, role guards, and server-side authorization middleware on every API call. Note that TypeScript types provide compile-time guarantees and do not constitute runtime guards. **Maintenance Decision:** SoilFER-LIMS tracks the React Router v7 migration path once ecosystem stability is confirmed.
 
 ---
 
@@ -112,81 +128,54 @@ An independent audit using `npm audit --omit=dev` confirms:
 git clone https://github.com/yigini/soilfer-lims.git
 cd soilfer-lims
 
-# Copy sample configuration
+# Copy environment configuration template
 cp .env.example .env
 ```
 
-Open `.env` in a text editor:
+#### Step 2: Start the System
 ```bash
-PORT=3000
-NODE_ENV=production
-DEPLOYMENT_MODE=local
-
-# Security Secret: Leave blank to auto-generate and persist on first boot, or generate now:
-# node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
-JWT_SECRET=
-
-# Optional: pre-configure the initial admin password (otherwise randomly generated):
-# ADMIN_INITIAL_PASSWORD=
-```
-
-#### Step 2A: Direct Node.js Installation
-```bash
-chmod +x setup.sh
-./setup.sh local
-
-# Start the application server:
-npm start
-# (Or: cd server && NODE_ENV=production node index.js)
-```
-
-#### Step 2B: Docker Compose Installation
-```bash
-# Option 1: With NGINX Reverse Proxy (Ports 80/443 — Recommended):
-docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d
-
-# Option 2: Direct Port 3000 (No NGINX):
+# Using Docker (Recommended):
 docker compose up -d
 
-# View initial administrator credentials:
-docker compose logs lims | grep -A 4 "INITIAL ADMIN CREDENTIALS"
+# Or with NGINX Reverse Proxy:
+docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d
+
+# Or direct Node.js:
+./setup.sh local
+npm start
 ```
 
-#### Step 3: First Login & Mandatory Password Change
-1. Open your browser to: `http://<your-server-ip>:3000` (or `http://<your-server-ip>` if using NGINX).
-2. Log in with:
-   - **Username:** `admin`
-   - **Password:** `<The initial password printed during Step 2>`
-3. **Mandatory Security Step:** The system will prompt you to set a new password on first login.
-4. **Next Steps:** As `LAB_MANAGER`, configure your laboratory in **Settings**, set up analytical methods in **Methods**, and invite technicians in **Staff**.
-
-#### Single-Lab API & Integration Administration
-In single-lab mode, the seeded `LAB_MANAGER` account manages all lab operations (samples, methods, QC, inventory, reporting), but is restricted from managing system-wide external API keys (`/api/sis-keys`). If external integrations (such as GloSIS or OpenNSIS data exchange) are required:
-```bash
-# Provision a designated SUPER_ADMIN credential from the host console:
-cd /opt/soilfer-lims/server
-npm run provision:admin -- --username sysadmin --email sysadmin@soilfer-lims.local
-```
-Log in as `sysadmin` to configure API connections without broadening normal laboratory managers' permissions.
+#### Step 3: First Login as Laboratory Manager
+1. Navigate to: `http://<your-server-ip>:3000` (or port 80 if using NGINX).
+2. Log in with username `admin` (Role: `LAB_MANAGER`) and your initial password.
+3. Change your temporary password upon first login prompt.
+4. Go to **Lab Management** to configure your laboratory name, address, accreditation status, and testing instruments.
+5. Go to **Staff Management** to onboard lab technicians.
 
 ---
 
-### Path B: Multi-Laboratory Network Deployment (`global` mode)
+### Path B: Multi-Laboratory Network (`global` mode)
 
-*Use this path if you are a national agricultural ministry or institute coordinating several laboratories.*
+*Use this path if you are setting up SoilFER-LIMS to coordinate multiple laboratory facilities.*
 
-#### Step 1: Configure Environment for Global Mode
-In your `.env` file:
+#### Step 1: Clone the Repository & Configure Environment
 ```bash
-PORT=3000
-NODE_ENV=production
+git clone https://github.com/yigini/soilfer-lims.git
+cd soilfer-lims
+
+cp .env.example .env
+```
+Edit `.env` and set:
+```ini
 DEPLOYMENT_MODE=global
-JWT_SECRET=
 ```
 
-#### Step 2: Launch the System
+#### Step 2: Start the System
 ```bash
-# With NGINX (Ports 80/443):
+# Using Docker Compose (Recommended):
+docker compose -f docker-compose.yml -f docker-compose.global.yml up -d
+
+# Or with NGINX Reverse Proxy:
 docker compose -f docker-compose.yml -f docker-compose.global.yml -f docker-compose.nginx.yml up -d
 
 # Or direct Node.js:
@@ -210,15 +199,16 @@ npm start
 
 - **Automated Contract Tests:**
   - `server/tests/contracts/deployment_readiness_acceptance.test.js` (21 tests passed): Verifies initial password change, role boundaries, cross-lab isolation, fail-closed restore with SQL trigger aborts, concurrent multi-lab sample intake/queries, and `provision_super_admin` identity collision rejection, inactive preservation, and session revocation.
-  - `server/tests/contracts/deployment_readiness_bootstrap.test.js` (9 tests passed): Verifies mode validation, Node 18/20 rejection, fail-fast schema push, JWT auto-population, entrypoint secret persistence across restarts, fail-closed SQLite database inspection, real partial seed recovery without duplicate code conflict, and strict Compose config validation.
+  - `server/tests/contracts/deployment_readiness_bootstrap.test.js` (10 tests passed): Verifies mode validation, Node 18/20 rejection, fail-fast schema push, JWT auto-population, entrypoint secret persistence across restarts, fail-closed SQLite database inspection, real partial seed recovery without duplicate code conflict, and strict Compose config validation.
 - **Docker Deployment Readiness Rehearsal (`server/scripts/rehearsal_deployment_readiness.cjs`):**
   - Scenario 1: Default entrypoint empty-volume local mode installation, HTTP health, admin login, and password change.
-  - Scenario 2: Container restart on same volume — persistent JWT secret and skipping re-seed.
+  - Scenario 2: Container restart on same volume — persistent JWT secret, pre-restart token validation without re-login, and skipping re-seed.
   - Scenario 3: Interrupted-init (partial seed) recovery on startup with default entrypoint.
   - Scenario 4: Default entrypoint empty-volume global mode installation and SUPER_ADMIN coordination.
-  - Scenario 5: Multi-lab representative workload, sample intake, data export, and backup/restore round-trip with epoch rotation.
+  - Scenario 5: Multi-lab representative workload (Manager Alpha & Manager Beta), real export endpoint (`POST /api/exports/data`), background escalation scheduler logs, and backup overlap.
+  - Scenario 6: Populated supported-baseline-to-target upgrade, assets preservation, staged Route B recovery, failure behavior on corrupted archives, and epoch cursor invalidation (`EPOCH_MISMATCH`).
 - **Production Dependency Status (`npm audit --omit=dev`):**
   - Server: 4 high severity findings via Prisma 7 tooling transitives (`@prisma/config`, `deepmerge-ts`, `mysql2`, `prisma`). Zero critical vulnerabilities. Upstream Prisma 7 updates tracked.
   - Client: 3 findings (2 moderate in `react-router`/`react-router-dom` v6, 1 high in `xlsx` v0.18.5). Zero critical vulnerabilities. `jsPDF` critical advisory resolved cleanly.
-- **Client Production Build:** Vite v5.4.21 transformed 2,659 modules and built cleanly in 27.11s with zero errors.
+- **Client Production Build:** Vite v5.4.21 transformed 2,659 modules and built cleanly in 6.89s with zero errors.
 - **Full Backend Suite:** 148 server test suites (1,440 tests) passed.
