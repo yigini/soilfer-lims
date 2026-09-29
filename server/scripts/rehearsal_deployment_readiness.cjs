@@ -865,6 +865,7 @@ async function runSuite() {
         '-e', 'DEPLOYMENT_MODE=global',
         '-e', 'PORT=3000',
         '-e', 'NODE_ENV=production',
+        '-e', `JWT_SECRET=${baselineSecretHex}`,
         BASELINE_IMAGE_TAG
     ]);
     await waitForHealth(basePort, baseContainer);
@@ -1129,6 +1130,7 @@ async function runSuite() {
         '-e', 'DEPLOYMENT_MODE=global',
         '-e', 'PORT=3000',
         '-e', 'NODE_ENV=production',
+        '-e', `JWT_SECRET=${baselineSecretHex}`,
         rollbackTag
     ]);
 
