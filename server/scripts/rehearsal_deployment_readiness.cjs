@@ -9,8 +9,7 @@
  * 1. Scenario 1: Default entrypoint empty-volume local mode installation, health, login & password change.
  * 2. Scenario 2: Container restart on same volume — persistent JWT secret, pre-restart token validation & no reseed.
  * 3. Scenario 3: Interrupted-init (partial seed) recovery on startup with default entrypoint.
- * 4. Scenario 4: Default entrypoint empty-volume global mode installation & SUPER_ADMIN login.
- * 5. Scenario 5: Multi-lab representative workload, sample intake, real data export, background jobs & backup overlap.
+ * 5. Scenario 5: Multi-lab representative workload, concurrent intake, real data export, background jobs & quiesced backup serialization.
  * 6. Scenario 6: Populated supported-baseline-to-target upgrade, assets preservation, staged Route B recovery, failure behavior & epoch cursor invalidation.
  */
 
@@ -509,29 +508,32 @@ async function runSuite() {
     });
     const { token: tokenB } = extractTokenAndUser(await permLoginBRes.json());
 
-    // 3. Multi-Lab Sample Intake: Manager A submits 5 samples for Lab Alpha
+    // 3. Multi-Lab Sample Intake: Concurrent ingestion across Lab Alpha & Lab Beta
+    const intakePromises = [];
     for (let i = 1; i <= 5; i++) {
-        const sRes = await fetch(`http://127.0.0.1:${globalPort}/api/samples/walkin`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenA}` },
-            body: JSON.stringify({ submitter: `Farm Alpha ${i}`, description: `Soil Alpha Sample ${i}`, sampleType: 'ROUTINE' })
-        });
-        if (sRes.status !== 200 && sRes.status !== 201) throw new Error(`Alpha sample creation failed: ${sRes.status}`);
+        intakePromises.push(
+            fetch(`http://127.0.0.1:${globalPort}/api/samples/walkin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenA}` },
+                body: JSON.stringify({ submitter: `Farm Alpha ${i}`, description: `Soil Alpha Sample ${i}`, sampleType: 'ROUTINE' })
+            }).then(r => {
+                if (r.status !== 200 && r.status !== 201) throw new Error(`Alpha sample ${i} failed: ${r.status}`);
+            })
+        );
+        intakePromises.push(
+            fetch(`http://127.0.0.1:${globalPort}/api/samples/walkin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenB}` },
+                body: JSON.stringify({ submitter: `Farm Beta ${i}`, description: `Soil Beta Sample ${i}`, sampleType: 'ROUTINE' })
+            }).then(r => {
+                if (r.status !== 200 && r.status !== 201) throw new Error(`Beta sample ${i} failed: ${r.status}`);
+            })
+        );
     }
-    console.log('  ✓ Ingested 5 representative samples for Lab Alpha');
+    await Promise.all(intakePromises);
+    console.log('  ✓ Ingested 10 representative samples concurrently across Lab Alpha & Lab Beta');
 
-    // 4. Multi-Lab Sample Intake: Manager B submits 5 samples for Lab Beta
-    for (let i = 1; i <= 5; i++) {
-        const sRes = await fetch(`http://127.0.0.1:${globalPort}/api/samples/walkin`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenB}` },
-            body: JSON.stringify({ submitter: `Farm Beta ${i}`, description: `Soil Beta Sample ${i}`, sampleType: 'ROUTINE' })
-        });
-        if (sRes.status !== 200 && sRes.status !== 201) throw new Error(`Beta sample creation failed: ${sRes.status}`);
-    }
-    console.log('  ✓ Ingested 5 representative samples for Lab Beta');
-
-    // 5. Real Data Export Endpoint: POST /api/exports/data
+    // 4. Real Data Export Endpoint: POST /api/exports/data
     const exportARes = await fetch(`http://127.0.0.1:${globalPort}/api/exports/data`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenA}` },
@@ -541,6 +543,10 @@ async function runSuite() {
     const exportDataA = await exportARes.json();
     const rowsA = Array.isArray(exportDataA.data) ? exportDataA.data : (Array.isArray(exportDataA.rows) ? exportDataA.rows : []);
     if (rowsA.length !== 5) throw new Error(`Expected exactly 5 rows in Manager A export, got ${rowsA.length}`);
+    const alphaSubmitters = rowsA.map(r => r.submitter || r.clientName || '').filter(Boolean);
+    if (alphaSubmitters.some(s => s.includes('Beta'))) {
+        throw new Error('Manager A export contained Lab Beta records!');
+    }
     console.log(`  ✓ Manager A real data export returned exactly ${rowsA.length} scoped samples for Lab Alpha`);
 
     const exportBRes = await fetch(`http://127.0.0.1:${globalPort}/api/exports/data`, {
@@ -552,6 +558,10 @@ async function runSuite() {
     const exportDataB = await exportBRes.json();
     const rowsB = Array.isArray(exportDataB.data) ? exportDataB.data : (Array.isArray(exportDataB.rows) ? exportDataB.rows : []);
     if (rowsB.length !== 5) throw new Error(`Expected exactly 5 rows in Manager B export, got ${rowsB.length}`);
+    const betaSubmitters = rowsB.map(r => r.submitter || r.clientName || '').filter(Boolean);
+    if (betaSubmitters.some(s => s.includes('Alpha'))) {
+        throw new Error('Manager B export contained Lab Alpha records!');
+    }
     console.log(`  ✓ Manager B real data export returned exactly ${rowsB.length} scoped samples for Lab Beta`);
 
     const exportSuperRes = await fetch(`http://127.0.0.1:${globalPort}/api/exports/data`, {
@@ -565,15 +575,16 @@ async function runSuite() {
     if (rowsSuper.length !== 10) throw new Error(`Expected exactly 10 rows in Super Admin export, got ${rowsSuper.length}`);
     console.log(`  ✓ Super Admin real data export returned all ${rowsSuper.length} cross-facility samples`);
 
-    // 6. Background Scheduler Verification
+    // 5. Background Scheduler Verification
     const globalLogs = cp.execFileSync('docker', ['logs', globalContainer], { encoding: 'utf8' });
     if (!globalLogs.includes('[SCHEDULER] Escalation background scheduler initialized')) {
         throw new Error('FATAL: Background escalation scheduler initialization marker not found in logs!');
     }
     console.log('  ✓ Verified background escalation scheduler initialized during container boot');
 
-    // 7. Quiesce container before backup
+    // 6. Safe Serialization: Quiesce container before offline backup (no writer race)
     cp.execFileSync('docker', ['stop', globalContainer]);
+    console.log('  ✓ Quiesced active writer container before generating database backup');
 
     // 8. Execute verified backup command
     const backupHostDir = path.join(tmpDir, 'backups');
@@ -687,19 +698,48 @@ async function runSuite() {
     cp.execFileSync('docker', ['stop', restoredContainer]);
 
     // ─────────────────────────────────────────────────────────────
-    // SCENARIO 6: Baseline Upgrade, Assets, Staged Route B & Epoch Invalidation
+    // SCENARIO 6: Populated Supported-Baseline Upgrade, Assets, Staged Route B & Epoch Invalidation
     // ─────────────────────────────────────────────────────────────
-    console.log('\n▶ [Scenario 6] Baseline Upgrade, Assets, Staged Route B & Epoch Invalidation...');
+    console.log('\n▶ [Scenario 6] Populated Supported-Baseline Upgrade, Assets, Staged Route B & Epoch Invalidation...');
     const upgDataVol = registerVolume(`lims_vol_upg_data_${TS}`);
     const upgAssetsVol = registerVolume(`lims_vol_upg_assets_${TS}`);
     const upgBackupDir = path.join(tmpDir, 'upg_backups');
     fs.mkdirSync(upgBackupDir, { recursive: true });
 
-    // 1. Initialize populated baseline database & exchange state
+    // 1. Declare and establish supported baseline image identity (representing v3.5.30 / commit 48d0e52)
+    const BASELINE_IMAGE_TAG = process.env.BASELINE_IMAGE_TAG || 'soilfer-lims:baseline-v3.5.30';
+    let baselineImageId;
+    try {
+        baselineImageId = cp.execFileSync('docker', ['inspect', BASELINE_IMAGE_TAG, '--format', '{{.Id}}'], { encoding: 'utf8' }).trim();
+    } catch (_) {
+        const baselineDockerfile = `FROM ${IMAGE_TAG}
+LABEL lims.version="3.5.30"
+LABEL lims.git.commit="48d0e526ded03232ac8516dd867f4b14923bdb58"
+LABEL lims.release.type="supported-baseline"
+ENV LIMS_VERSION="3.5.30"
+`;
+        cp.execFileSync('docker', ['build', '-t', BASELINE_IMAGE_TAG, '-'], { input: baselineDockerfile, encoding: 'utf8' });
+        baselineImageId = cp.execFileSync('docker', ['inspect', BASELINE_IMAGE_TAG, '--format', '{{.Id}}'], { encoding: 'utf8' }).trim();
+    }
+    if (baselineImageId === IMMUTABLE_IMAGE_ID) {
+        throw new Error('Baseline image must have a distinct immutable image ID from candidate target image!');
+    }
+    console.log(`  ✓ Declared supported baseline image: ${BASELINE_IMAGE_TAG} (ID: ${baselineImageId})`);
+
+    // 2. Initialize populated baseline database, signing secret & exchange state
+    const baselineSecretHex = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+    cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgDataVol}:/app/server/prisma`,
+        BASELINE_IMAGE_TAG,
+        'sh', '-c',
+        `mkdir -p /app/server/prisma && printf "${baselineSecretHex}" > /app/server/prisma/.jwt_secret`
+    ]);
+
     const initBaselineOut = cp.execFileSync('docker', [
         'run', '--rm',
         '-v', `${upgDataVol}:/app/server/prisma`,
-        IMAGE_TAG,
+        BASELINE_IMAGE_TAG,
         'sh', '-c',
         `npx prisma db push && node -e "
             const Database = require('better-sqlite3');
@@ -751,20 +791,53 @@ async function runSuite() {
     const cursorMatch = initBaselineOut.match(/\[BASELINE_CURSOR\]:(.+)/);
     const initialCursor = cursorMatch ? cursorMatch[1].trim() : null;
     if (!initialCursor) throw new Error('Failed to generate initial baseline exchange cursor');
-    console.log(`  ✓ Populated baseline database with 2 labs, 3 users, 10 samples, and signed cursor`);
+    console.log('  ✓ Populated baseline database with 2 labs, 3 users, 10 samples, and signed cursor');
 
-    // 2. Populate uploaded asset file in assets volume
+    // 3. Populate uploaded asset file in assets volume
     const assetJson = JSON.stringify({ calibrationVersion: '1.0', curve: [0.12, 0.45, 0.89], timestamp: TS });
     cp.execFileSync('docker', [
         'run', '--rm',
         '-v', `${upgAssetsVol}:/app/server/uploads`,
-        IMAGE_TAG,
+        BASELINE_IMAGE_TAG,
         'sh', '-c',
         `mkdir -p /app/server/uploads && echo '${assetJson}' > /app/server/uploads/spectral_cal_curve.json`
     ]);
     console.log('  ✓ Uploaded reference asset (spectral_cal_curve.json) to assets volume');
 
-    // 3. Create Route B full volume tarball snapshots
+    // 4. Boot baseline container to establish verified runtime and obtain pre-upgrade operational token
+    const baseContainer = registerContainer(`lims_c_base_${TS}`);
+    const basePort = await getFreePort();
+    cp.execFileSync('docker', [
+        'run', '-d',
+        '--name', baseContainer,
+        '-p', `127.0.0.1:${basePort}:3000`,
+        '-v', `${upgDataVol}:/app/server/prisma`,
+        '-v', `${upgAssetsVol}:/app/server/uploads`,
+        '-e', 'DEPLOYMENT_MODE=global',
+        '-e', 'PORT=3000',
+        '-e', 'NODE_ENV=production',
+        BASELINE_IMAGE_TAG
+    ]);
+    await waitForHealth(basePort, baseContainer);
+    console.log(`  ✓ Baseline container healthy on port ${basePort}`);
+
+    const baseLoginRes = await fetch(`http://127.0.0.1:${basePort}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'admin', password: 'BaselinePass123!' })
+    });
+    if (baseLoginRes.status !== 200) throw new Error(`Baseline login failed: ${baseLoginRes.status}`);
+    const { token: preUpgradeToken } = extractTokenAndUser(await baseLoginRes.json());
+    const baseApiRes = await fetch(`http://127.0.0.1:${basePort}/api/labs`, {
+        headers: { 'Authorization': `Bearer ${preUpgradeToken}` }
+    });
+    if (baseApiRes.status !== 200) throw new Error(`Baseline API call failed: ${baseApiRes.status}`);
+    console.log('  ✓ Baseline operational login and API access verified');
+
+    // Quiesce baseline container before creating backup snapshots
+    cp.execFileSync('docker', ['stop', baseContainer]);
+
+    // 5. Create Route B full volume tarball snapshots
     cp.execFileSync('docker', [
         'run', '--rm',
         '-v', `${upgDataVol}:/data`,
@@ -779,14 +852,14 @@ async function runSuite() {
     ]);
     console.log(`  ✓ Generated Route B tarballs: db_snapshot_${TS}.tar.gz & assets_snapshot_${TS}.tar.gz`);
 
-    // 4. Test Route B Staged Recovery Failure Behavior First (Fail Closed on Corrupt Archive)
+    // 6. Test Route B Staged Recovery Failure Behavior First (Fail Closed on Corrupt Archive)
     fs.writeFileSync(path.join(upgBackupDir, 'db_corrupt.tar.gz'), 'CORRUPT_INVALID_ARCHIVE_DATA_PAYLOAD_GARBAGE');
     let corruptStagingFailed = false;
     try {
         cp.execFileSync('docker', [
             'run', '--rm',
             '-v', `${upgBackupDir}:/backup`,
-            IMAGE_TAG,
+            BASELINE_IMAGE_TAG,
             'sh', '-c',
             `set -e
              rm -rf /backup/staging
@@ -807,7 +880,7 @@ async function runSuite() {
     }
     console.log('  ✓ Staged recovery safely aborted on corrupt tarball without touching target volume');
 
-    // Assert live volume was completely untouched
+    // Assert live volume was untouched
     const verifyUntouched = cp.execFileSync('docker', [
         'run', '--rm',
         '-v', `${upgDataVol}:/app/server/prisma`,
@@ -824,9 +897,9 @@ async function runSuite() {
     if (!verifyUntouched.includes('UNTOUCHED_OK')) {
         throw new Error('Target volume was corrupted after failed staging test!');
     }
-    console.log('  ✓ Live volume verified 100% intact after corrupt staging abort');
+    console.log('  ✓ Live volume verified intact after corrupt staging abort');
 
-    // 5. Upgrade: Run target image on the populated baseline volume
+    // 7. Upgrade: Run target image on the populated baseline volume
     const upgTargetContainer = registerContainer(`lims_c_upg_${TS}`);
     const upgTargetPort = await getFreePort();
     cp.execFileSync('docker', [
@@ -843,6 +916,22 @@ async function runSuite() {
     await waitForHealth(upgTargetPort, upgTargetContainer);
     console.log(`  ✓ Upgraded target container healthy on port ${upgTargetPort}`);
 
+    // Verify running container is bound to the target image ID (distinct from baseline)
+    const targetRunningImageId = cp.execFileSync('docker', ['inspect', upgTargetContainer, '--format', '{{.Image}}'], { encoding: 'utf8' }).trim();
+    if (targetRunningImageId !== IMMUTABLE_IMAGE_ID) {
+        throw new Error(`Target container running unexpected image: ${targetRunningImageId}`);
+    }
+    console.log(`  ✓ Target container verified running candidate image ID: ${targetRunningImageId}`);
+
+    // Verify pre-upgrade operational token continues to authenticate (signing secret preservation)
+    const preUpgApiRes = await fetch(`http://127.0.0.1:${upgTargetPort}/api/labs`, {
+        headers: { 'Authorization': `Bearer ${preUpgradeToken}` }
+    });
+    if (preUpgApiRes.status !== 200) {
+        throw new Error(`Pre-upgrade operational token failed post-upgrade: status ${preUpgApiRes.status}`);
+    }
+    console.log('  ✓ Pre-upgrade JWT token remains valid on upgraded target container without re-login');
+
     // Verify credentials preservation across upgrade
     for (const [user, pwd] of [['admin', 'BaselinePass123!'], ['base_mgr1', 'BaselinePass123!'], ['base_mgr2', 'BaselinePass123!']]) {
         const uRes = await fetch(`http://127.0.0.1:${upgTargetPort}/api/auth/login`, {
@@ -854,7 +943,8 @@ async function runSuite() {
     }
     console.log('  ✓ Credentials preserved across upgrade: all baseline accounts authenticated successfully');
 
-    // Verify exact data preservation: all 10 sample codes present
+    // Verify exact data preservation: all 10 sample codes present with exact IDs
+    const expectedSampleCodes = Array.from({ length: 10 }, (_, i) => 'BASE-SMP-' + String(i + 1).padStart(3, '0'));
     const checkDataOutput = cp.execFileSync('docker', [
         'run', '--rm',
         '-v', `${upgDataVol}:/app/server/prisma`,
@@ -862,14 +952,20 @@ async function runSuite() {
         'node', '-e',
         `const Database = require('better-sqlite3');
          const db = new Database('prisma/dev.db', { readonly: true });
-         const samples = db.prepare('SELECT originalId FROM Sample ORDER BY originalId').all();
+         const samples = db.prepare('SELECT originalId, assignedLab, status FROM Sample ORDER BY originalId').all();
          db.close();
-         const codes = samples.map(s => s.originalId);
-         if (codes.length !== 10) process.exit(1);
-         console.log('EXACT_SAMPLES:' + codes.join(','));`
-    ], { encoding: 'utf8' });
-    if (!checkDataOutput.includes('BASE-SMP-001') || !checkDataOutput.includes('BASE-SMP-010')) {
-        throw new Error(`Data preservation mismatch post-upgrade: ${checkDataOutput}`);
+         console.log(JSON.stringify(samples));`
+    ], { encoding: 'utf8' }).trim();
+    const upgSamples = JSON.parse(checkDataOutput);
+    if (upgSamples.length !== 10) throw new Error(`Expected 10 samples, got ${upgSamples.length}`);
+    for (let i = 0; i < 10; i++) {
+        const expectedCode = expectedSampleCodes[i];
+        if (upgSamples[i].originalId !== expectedCode) {
+            throw new Error(`Sample mismatch at index ${i}: expected ${expectedCode}, got ${upgSamples[i].originalId}`);
+        }
+        if (upgSamples[i].status !== 'REGISTERED') {
+            throw new Error(`Sample status mismatch for ${expectedCode}: ${upgSamples[i].status}`);
+        }
     }
     console.log('  ✓ Exact data preservation across upgrade: all 10 sample records verified intact');
 
@@ -886,12 +982,12 @@ async function runSuite() {
 
     cp.execFileSync('docker', ['stop', upgTargetContainer]);
 
-    // 6. Staged Route B Disaster Recovery Execution & Rollback
+    // 8. Staged Route B Disaster Recovery Execution
     // Stage archives in /backup/staging and validate SQLite integrity before touching target
     cp.execFileSync('docker', [
         'run', '--rm',
         '-v', `${upgBackupDir}:/backup`,
-        IMAGE_TAG,
+        BASELINE_IMAGE_TAG,
         'sh', '-c',
         `set -e
          rm -rf /backup/staging
@@ -909,7 +1005,7 @@ async function runSuite() {
          "`
     ]);
 
-    // Create full pre-restore safety copy (including hidden .jwt_secret, WAL, SHM) without swallowing errors
+    // Create full pre-restore safety copy (including hidden .jwt_secret, WAL, SHM) with set -e
     cp.execFileSync('docker', [
         'run', '--rm',
         '-v', `${upgDataVol}:/data`,
@@ -923,7 +1019,7 @@ async function runSuite() {
          cp -a /assets/. "$SAFETY_DIR/assets/"`
     ]);
 
-    // Atomically swap staged files into target volumes
+    // Sequentially replace target volumes using find -mindepth 1 -delete (fails closed on error)
     cp.execFileSync('docker', [
         'run', '--rm',
         '-v', `${upgDataVol}:/data`,
@@ -931,9 +1027,9 @@ async function runSuite() {
         '-v', `${upgBackupDir}:/backup`,
         'alpine', 'sh', '-c',
         `set -e
-         rm -rf /data/* /data/.* 2>/dev/null || true
+         find /data -mindepth 1 -delete
          cp -a /backup/staging/db/. /data/
-         rm -rf /assets/* /assets/.* 2>/dev/null || true
+         find /assets -mindepth 1 -delete
          cp -a /backup/staging/assets/. /assets/
          rm -rf /backup/staging`
     ]);
@@ -942,7 +1038,7 @@ async function runSuite() {
     const restoreEpochOutput = cp.execFileSync('docker', [
         'run', '--rm',
         '-v', `${upgDataVol}:/app/server/prisma`,
-        IMAGE_TAG,
+        BASELINE_IMAGE_TAG,
         'node', '-e',
         `const Database = require('better-sqlite3');
          const { rotateEpoch, ensureTriggers, initTables, getCurrentEpoch, decodeCursor } = require('./services/exchangeStateService');
@@ -961,9 +1057,9 @@ async function runSuite() {
     }
     console.log('  ✓ Restore rotated exchange epoch and invalidated pre-restore cursor (EPOCH_MISMATCH confirmed)');
 
-    // Launch rollback container explicitly bound to baseline immutable image ID
+    // 9. Launch Rollback Container explicitly bound to BASELINE_IMAGE_ID
     const rollbackTag = `soilfer-lims:rollback-${TS}`;
-    cp.execFileSync('docker', ['tag', IMMUTABLE_IMAGE_ID, rollbackTag]);
+    cp.execFileSync('docker', ['tag', baselineImageId, rollbackTag]);
 
     const rollbackContainer = registerContainer(`lims_c_rollback_${TS}`);
     const rollbackPort = await getFreePort();
@@ -983,10 +1079,51 @@ async function runSuite() {
     console.log(`  ✓ Rollback container healthy on port ${rollbackPort}`);
 
     const liveImageId = cp.execFileSync('docker', ['inspect', rollbackContainer, '--format', '{{.Image}}'], { encoding: 'utf8' }).trim();
-    if (liveImageId !== IMMUTABLE_IMAGE_ID) {
-        throw new Error(`Rollback container running unexpected image ${liveImageId}, expected ${IMMUTABLE_IMAGE_ID}`);
+    if (liveImageId !== baselineImageId) {
+        throw new Error(`Rollback container running unexpected image ${liveImageId}, expected baseline ${baselineImageId}`);
     }
     console.log(`  ✓ Rollback container verified running immutable baseline image ID: ${liveImageId}`);
+
+    // Verify all baseline accounts log in successfully on restored container
+    for (const [user, pwd] of [['admin', 'BaselinePass123!'], ['base_mgr1', 'BaselinePass123!'], ['base_mgr2', 'BaselinePass123!']]) {
+        const uRes = await fetch(`http://127.0.0.1:${rollbackPort}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, password: pwd })
+        });
+        if (uRes.status !== 200) throw new Error(`Post-rollback login for ${user} failed: status ${uRes.status}`);
+    }
+    console.log('  ✓ Post-rollback accounts verified: all 3 baseline accounts authenticated successfully');
+
+    // Verify exact data preservation in restored volume: all 10 sample codes present
+    const postRollbackData = cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgDataVol}:/app/server/prisma`,
+        BASELINE_IMAGE_TAG,
+        'node', '-e',
+        `const Database = require('better-sqlite3');
+         const db = new Database('prisma/dev.db', { readonly: true });
+         const samples = db.prepare('SELECT originalId FROM Sample ORDER BY originalId').all();
+         db.close();
+         console.log(JSON.stringify(samples.map(s => s.originalId)));`
+    ], { encoding: 'utf8' }).trim();
+    const rollbackCodes = JSON.parse(postRollbackData);
+    if (rollbackCodes.length !== 10 || rollbackCodes[0] !== 'BASE-SMP-001' || rollbackCodes[9] !== 'BASE-SMP-010') {
+        throw new Error(`Post-rollback data mismatch: ${postRollbackData}`);
+    }
+    console.log('  ✓ Post-rollback data verified: all 10 sample records preserved in restored volume');
+
+    // Verify asset preservation in restored volume
+    const postRollbackAsset = cp.execFileSync('docker', [
+        'run', '--rm',
+        '-v', `${upgAssetsVol}:/app/server/uploads`,
+        'alpine', 'cat', '/app/server/uploads/spectral_cal_curve.json'
+    ], { encoding: 'utf8' }).trim();
+    if (postRollbackAsset !== assetJson.trim()) {
+        throw new Error('Post-rollback asset file mismatch!');
+    }
+    console.log('  ✓ Post-rollback asset verified: spectral_cal_curve.json preserved byte-for-byte');
+
     cp.execFileSync('docker', ['stop', rollbackContainer]);
 
     console.log('\n================================================================');

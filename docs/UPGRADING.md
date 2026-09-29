@@ -42,13 +42,16 @@ fi
 # 2. Extract bound volumes and baseline image identity directly from the live container
 DATA_VOLUME=$(docker inspect "$CONTAINER_ID" --format '{{range .Mounts}}{{if eq .Destination "/app/server/prisma"}}{{.Name}}{{end}}{{end}}')
 ASSETS_VOLUME=$(docker inspect "$CONTAINER_ID" --format '{{range .Mounts}}{{if eq .Destination "/app/server/uploads"}}{{.Name}}{{end}}{{end}}')
-BASELINE_IMAGE_ID=$(docker inspect "$CONTAINER_ID" --format '{{.Id}}')
+BASELINE_IMAGE_ID=$(docker inspect "$CONTAINER_ID" --format '{{.Image}}')
 BASELINE_IMAGE_REF=$(docker inspect "$CONTAINER_ID" --format '{{.Config.Image}}')
 
 if [ -z "$DATA_VOLUME" ] || [ -z "$ASSETS_VOLUME" ] || [ -z "$BASELINE_IMAGE_ID" ]; then
     echo "❌ Failed to inspect required volume mounts or image ID from active container ${CONTAINER_ID}. Aborting."
     exit 1
 fi
+
+# Verify baseline image exists in Docker engine before stopping writers
+docker image inspect "$BASELINE_IMAGE_ID" >/dev/null
 
 # 3. Verify target volumes exist in Docker engine
 docker volume inspect "$DATA_VOLUME" >/dev/null
@@ -141,19 +144,13 @@ echo "Target Immutable Image ID: ${TARGET_IMAGE_ID}"
 ```
 
 ### Step 4: Launch Upgraded Service
-Start the updated containers with your chosen topology, carrying forward your Compose configuration:
+Start the updated containers carrying forward your recorded Compose configuration context:
 
 ```bash
 set -e
 
-# Option A: Single Laboratory Direct Port 3000 (No NGINX):
-docker compose -f docker-compose.yml up -d
-
-# Option B: Single Laboratory with NGINX Reverse Proxy (Recommended):
-docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d
-
-# Option C: Multi-Laboratory Network with NGINX:
-docker compose -f docker-compose.yml -f docker-compose.global.yml -f docker-compose.nginx.yml up -d
+# Launch containers carrying forward your discovered or specified COMPOSE_FILES context
+docker compose ${COMPOSE_FILES} up -d
 ```
 
 ### Step 5: Post-Deployment Verification & Bounded Release Gates
@@ -183,11 +180,19 @@ echo "✓ Mounts verified: Data=${LIVE_DATA_VOL}, Assets=${LIVE_ASSETS_VOL}"
 # 3. Verify HTTP 200 healthcheck and deployment mode
 HEALTH_JSON=$(curl -fsSL http://localhost:3000/api/health)
 echo "Health status: $HEALTH_JSON"
+echo "$HEALTH_JSON" | grep -q '"status":"ok"' || { echo "❌ Healthcheck status is not ok"; exit 1; }
+ACTUAL_MODE=$(echo "$HEALTH_JSON" | grep -o '"mode":"[^"]*"' | cut -d'"' -f4)
+EXPECTED_MODE=${DEPLOYMENT_MODE:-""}
+if [ -n "$EXPECTED_MODE" ] && [ "$ACTUAL_MODE" != "$EXPECTED_MODE" ]; then
+    echo "❌ Deployment mode mismatch: running in $ACTUAL_MODE, expected $EXPECTED_MODE"
+    exit 1
+fi
+echo "✓ Healthcheck and deployment mode verified (${ACTUAL_MODE:-default})."
 
-# 4. Verify startup logs confirm additive migrations, scheduler, and server start
+# 4. Verify startup logs confirm additive migrations, scheduler initialization, and server start
 docker compose ${COMPOSE_FILES} logs lims --tail 50 | grep -E "(Applying|Starting SoilFER-LIMS|Enterprise Server running)"
 docker compose ${COMPOSE_FILES} logs lims --tail 50 | grep "\[SCHEDULER\] Escalation background scheduler initialized"
-echo "✓ Background scheduler initialization verified."
+echo "✓ Background scheduler initialization verified (recurring jobs execute on hourly timer)."
 
 # 5. Verify database integrity & foreign keys
 docker compose ${COMPOSE_FILES} exec -T lims node -e "
@@ -203,7 +208,7 @@ docker compose ${COMPOSE_FILES} exec -T lims node -e "
   console.log('✓ Post-upgrade database integrity and foreign keys verified.');
 "
 
-# 6. Verify role-based API responsiveness
+# 6. Verify Database User & Facility Record Persistence
 docker compose ${COMPOSE_FILES} exec -T lims node -e "
   const Database = require('better-sqlite3');
   const db = new Database('prisma/dev.db', { readonly: true });
@@ -218,8 +223,9 @@ docker compose ${COMPOSE_FILES} exec -T lims node -e "
 "
 
 # 7. Verify NGINX reverse proxy connectivity (if deployed with NGINX overlay)
-if docker compose ${COMPOSE_FILES} ps -q nginx >/dev/null 2>&1; then
-    curl -fsSL http://localhost/api/health
+NGINX_CONTAINER=$(docker compose ${COMPOSE_FILES} ps -q nginx 2>/dev/null || true)
+if [ -n "$NGINX_CONTAINER" ] && [ "$(docker inspect -f '{{.State.Running}}' "$NGINX_CONTAINER" 2>/dev/null)" = "true" ]; then
+    curl -fsSL http://localhost/api/health >/dev/null
     echo "✓ NGINX reverse proxy ingress verified."
 fi
 ```
@@ -259,25 +265,27 @@ docker run --rm \
 ```
 
 #### Route B: Restoring from Full Volume Tarball (`.tar.gz`) — Staged & Fail-Closed Recovery
-When restoring complete volume tarballs, stage and validate the archives in `/backup/staging` **before** modifying target volumes, preserve full pre-restore safety copies (including hidden `.jwt_secret` and WAL/SHM sidecars), and fail closed on any error without swallowing failures:
+When restoring complete volume tarballs, stage and validate both database and assets archives in `/backup/staging` **before** modifying target volumes, preserve full pre-restore safety copies (including hidden `.jwt_secret` and WAL/SHM sidecars), and fail closed on any error without swallowing failures:
 
 ```bash
 set -e
 
 RESTORE_TS="<timestamp-of-target-backup>"
 
-# 1. Stage and Verify Archives in Staging Directory First (Fail-Closed)
+# 1. Stage and Verify Paired Archives in Staging Directory First (Fail-Closed)
 docker run --rm \
   -v "$(pwd)/backups:/backup" \
   "${BASELINE_IMAGE_ID}" \
   sh -c "
     set -e
+    if [ ! -f \"/backup/db_snapshot_${RESTORE_TS}.tar.gz\" ] || [ ! -f \"/backup/assets_snapshot_${RESTORE_TS}.tar.gz\" ]; then
+      echo '❌ Missing required backup archive pair (db and assets). Aborting.'
+      exit 1
+    fi
     rm -rf /backup/staging
     mkdir -p /backup/staging/db /backup/staging/assets
-    tar -xzf /backup/db_snapshot_${RESTORE_TS}.tar.gz -C /backup/staging/db
-    if [ -f /backup/assets_snapshot_${RESTORE_TS}.tar.gz ]; then
-      tar -xzf /backup/assets_snapshot_${RESTORE_TS}.tar.gz -C /backup/staging/assets
-    fi
+    tar -xzf \"/backup/db_snapshot_${RESTORE_TS}.tar.gz\" -C /backup/staging/db
+    tar -xzf \"/backup/assets_snapshot_${RESTORE_TS}.tar.gz\" -C /backup/staging/assets
     node -e \"
       const Database = require('better-sqlite3');
       const db = new Database('/backup/staging/db/dev.db', { readonly: true });
@@ -307,21 +315,23 @@ docker run --rm \
     echo '✓ Full pre-restore safety snapshot created in host backups.'
   "
 
-# 3. Atomically Replace Target Volume Contents from Verified Staging
+# 3. Sequentially Replace Target Volume Contents from Verified Staging (Writers Quiesced)
 docker run --rm \
   -v "${DATA_VOLUME}:/data" \
   -v "${ASSETS_VOLUME}:/assets" \
   -v "$(pwd)/backups:/backup" \
   alpine sh -c "
     set -e
-    rm -rf /data/* /data/.* 2>/dev/null || true
+    # Fail-closed cleanup of target data volume (clears dotfiles safely without erroring on . or ..)
+    find /data -mindepth 1 -delete
     cp -a /backup/staging/db/. /data/
-    if [ -d /backup/staging/assets ] && [ \"\$(ls -A /backup/staging/assets)\" ]; then
-      rm -rf /assets/* /assets/.* 2>/dev/null || true
-      cp -a /backup/staging/assets/. /assets/
-    fi
+
+    # Fail-closed cleanup of target assets volume; copies staged assets (properly restores empty state if archive was empty)
+    find /assets -mindepth 1 -delete
+    cp -a /backup/staging/assets/. /assets/
+
     rm -rf /backup/staging
-    echo '✓ Staged volume contents copied to target volumes.'
+    echo '✓ Staged volume contents sequentially copied to target volumes.'
   "
 
 # 4. Verify Restored Volume and Rotate Exchange Epoch

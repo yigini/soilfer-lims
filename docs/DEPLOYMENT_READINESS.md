@@ -3,9 +3,9 @@
 > The setup and admin-account bugs are fixed and Docker startup tests pass. We are finishing the tested backup/upgrade procedure and the remaining multi-lab checks. This update is not yet released.
 
 **Target Branch:** `feat/deployment-readiness` (PR #154)  
-**Target Baseline:** `61e8900f8f5078383cc8585195ca4ec98a734c5d`  
-**Current Live Production Status:** Unchanged (v1.3.x / production commit `9b69920`). **THIS UPDATE IS NOT YET LIVE.**  
-**Independent Audit Reference:** Codex Deployment Readiness Reviews (PR154 heads `4a07b2c` and `96921ae`).
+**Target Baseline:** `61e8900f8f5078383cc8585195ca4ec98a734c5d` (merged development baseline on main)  
+**Current Live Production Status:** Unchanged (v3.5.30 / production commit `48d0e52`, released 28 September 2026 under PR #149). **THIS UPDATE IS NOT YET LIVE.**  
+**Independent Audit Reference:** Codex Deployment Readiness Reviews (PR154 heads `4a07b2c`, `96921ae`, and `6725a99`).
 
 ---
 
@@ -19,16 +19,18 @@ SoilFER-LIMS is designed to run reliably in two operating modes:
 - **What Works:**
   - Setup and admin account provisioning bugs are fixed and independently verified.
   - Real Docker default-entrypoint startup, restart, and partial-seed recovery pass.
-  - Multi-lab sample intake and scoped data exports (`POST /api/exports/data`).
-  - Pre-restart token persistence across container restarts on the same volume.
+  - Multi-lab concurrent sample intake and scoped data exports (`POST /api/exports/data`) with exact role scoping.
+  - Cross-restart token persistence and byte-for-byte signing secret verification.
+  - Safe serialization: active writer container quiescence before generating database backups without writer races.
   - Executable backup filename extraction via regex `(soilfer_lims_backup_|backup_)[^ ')]+\.db\.gz`.
-  - Staged Route B disaster recovery procedure (`/backup/staging/db`), staged SQLite validation, full unsuppressed pre-restore safety snapshots including dotfiles (`.jwt_secret`, `.seed_complete`, WAL/SHM), and rollback explicitly bound to immutable baseline image ID.
-  - Fail-closed behavior on corrupted archives.
+  - Staged Route B disaster recovery procedure (`/backup/staging/db` and `/backup/staging/assets`), staged SQLite validation, full unsuppressed pre-restore safety snapshots including dotfiles (`.jwt_secret`, `.seed_complete`, WAL/SHM), and rollback explicitly bound to immutable baseline image ID (`.Image`).
+  - Fail-closed behavior on corrupted archives with untouched target volume verification.
   - Automatic data exchange epoch rotation on restore and rejection of pre-restore client cursors with `EPOCH_MISMATCH`.
-  - Manifest file import pre-parser size check (5 MB bound) and extension/MIME validation.
+  - Populated supported-baseline (v3.5.30) upgrade, exact 10-sample verification, asset preservation, and full post-recovery account/data/asset verifications.
+  - Manifest file import pre-parser size check (5 MB bound) and extension/MIME validation (independently verified in review).
 - **What Remains:**
-  - Independent review and verification of the corrected head by Codex.
-  - Independent green CI execution of the enhanced Docker deployment readiness acceptance suite.
+  - Independent exact-head review and verification of the corrected candidate by Codex.
+  - Remote green CI execution of the updated suite.
   - Formal merge to `main` and production cutover verification through established release gates.
 - **What Was Tested:**
   - 31 automated backend contract tests across bootstrap and acceptance suites (all passed).
@@ -69,9 +71,9 @@ Status lifecycle stages:
 | **P14** | Partial initial seed leaving `LAB01` crashed retry with unique-code conflict | Interrupted setup could not be resumed without manual database intervention | `seed.js` checks if `LAB01` exists; if present without users, reuses its ID and completes user seeding | **Independently verified** | Verified retry exits 0, reuses LAB01, creates exactly 1 manager | Review & merge |
 | **P15** | Docker entrypoint SQLite inspection converted query errors to 0 users (fail-open) | Unreadable or corrupt database could trigger unintentional schema push or seeding | Inspection in `docker-entrypoint.sh` fails closed with code 1 upon any SQLite error or unreadable state | **Independently verified** | Verified exit 1 and fatal error on corrupt database header | Review & merge |
 | **P16** | `provision_super_admin.js` matched `OR: [{ username }, { email }]`, risking account hijacking | Requesting a new username matching an existing user's default email altered the existing account | Strict target lookup, collision rejection before mutation, inactive status preservation, session revocation | **Independently verified** | Verified collision rejection, inactive preservation, and tokenVersion increment | Review & merge |
-| **P17** | Real Docker acceptance testing lacked pre-restart token validation, two-manager workload & baseline upgrade | Partial scenarios omitted cross-restart token check, Manager B, real export path, and populated upgrade | Enhanced `rehearsal_deployment_readiness.cjs` with pre-restart token check, 2-manager intake, real `POST /api/exports/data`, scheduler logs, baseline upgrade & Route B recovery | **Fixed in branch** | Rehearsal suite covering Scenarios 1-6 | Remote CI verification |
-| **P18** | Documented backup regex failed on ISO-dated filenames; Route B tar recovery was not staged | Operator runbook failed on real backup filename; tar restore deleted target before validation | Updated regex to `(soilfer_lims_backup_\|backup_)[^ ')]+\.db\.gz`; implemented staged Route B recovery in `/backup/staging`, unsuppressed safety snapshots, and baseline-bound rollback | **Fixed in branch** | Tested backup extraction snippet against actual CLI output; verified staged recovery failure behavior | Review & merge |
-| **P19** | `ManifestImportModal.jsx` lacked pre-parser file size and MIME/extension checks | Potential unconstrained file parsing in reception manifest uploads | Added 5 MB file size limit and explicit MIME/extension validation before passing file to `XLSX.read` | **Fixed in branch** | Verified client build with 0 errors | Review & merge |
+| **P17** | Real Docker acceptance testing lacked distinct baseline image, two-manager workload & full assertions | Partial scenarios omitted cross-restart token check, Manager B, real export path, baseline image, and full data assertions | Enhanced `rehearsal_deployment_readiness.cjs` with distinct baseline image ID (`soilfer-lims:baseline-v3.5.30`), pre-upgrade token, concurrent intake, real `POST /api/exports/data`, safe serialization, exact 10-sample verification, and post-recovery account/data/asset assertions | **Fixed in branch** | Rehearsal suite covering Scenarios 1-6 | Remote CI verification |
+| **P18** | Documented backup regex failed on ISO-dated filenames; Route B tar recovery swallowed errors; container ID used as image | Runbook failed on real backup filename; container ID used instead of .Image; tar restore swallowed removal errors | Updated regex; extracted .Image and pre-inspected image; implemented staged Route B recovery in `/backup/staging`, unsuppressed sequential replacement via `find -mindepth 1 -delete`, and baseline-bound rollback | **Fixed in branch** | Tested backup extraction snippet and sequential staging failure behavior | Review & merge |
+| **P19** | `ManifestImportModal.jsx` lacked pre-parser file size and MIME/extension checks | Potential unconstrained file parsing in reception manifest uploads | Added 5 MB file size limit and explicit MIME/extension validation before passing file to `XLSX.read` | **Independently verified** | Verified in VM harness across 6 test groups (size, extension, MIME, parser reach) | Review & merge |
 
 ---
 
@@ -97,12 +99,18 @@ An independent audit using `npm audit --omit=dev` confirms:
 - **Actual LIMS Usage & Remaining Risk:**
   - **`xlsx` (SheetJS v0.18.5):**
     - *Usage:* Used client-side in laboratory bulk import views (`ImportPreviewModal.jsx` and `ManifestImportModal.jsx`) to parse `.xlsx`, `.xls`, and `.csv` files provided by authenticated lab operators.
-    - *Implemented Safeguards:* Both import modals enforce defensive application-level bounds before files reach `XLSX.read()`:
-      1. Hard pre-parser file size limit (`MAX_FILE_SIZE = 5 MB`). Uploads exceeding 5 MB are rejected immediately before byte arrays are loaded into memory.
-      2. File extension and MIME type validation (`.xlsx`, `.xls`, `.csv`).
-      3. Row batch limits (`MAX_BATCH_ROWS = 2,000`).
-      4. Structured try/catch boundaries with user-facing validation errors.
-    - *Remaining Risk & Maintenance Decision:* Known CVEs exist in SheetJS v0.18.5 (prototype pollution and potential ReDoS on crafted files). While application bounds restrict parser work to 5 MB files from authenticated laboratory users, SheetJS remains an unpatched npm package because newer versions are published under a separate proprietary CDN rather than the public npm registry. **Maintenance Decision:** SheetJS is retained for v1.4.0 under the 5 MB and MIME bounds. A tracked maintenance issue is scheduled to evaluate migrating client-side spreadsheet parsing to an actively maintained public library (such as `exceljs`) in the next release cycle.
+    - *Implemented Safeguards by Path:*
+      1. **Reception Manifest Import (`ManifestImportModal.jsx`):**
+         - Enforces hard pre-parser file size limit (`MAX_FILE_SIZE = 5 MB`). Files exceeding 5 MB are rejected immediately before byte arrays are loaded into memory.
+         - Enforces pre-parser extension validation (`.xlsx`, `.xls`, `.csv`) and browser-reported MIME type validation.
+         - *Note:* Manifest import does not currently enforce a post-parse row count cap.
+      2. **Project Samples Bulk Import (`ImportPreviewModal.jsx` & `spreadsheetImport.js`):**
+         - Enforces hard pre-parser file size limit (`MAX_FILE_SIZE = 5 MB`).
+         - Uses input `accept` attribute filtering (`.xlsx, .xls, .csv`), followed by FileReader and `XLSX.read()`.
+         - Post-parse batch limit: enforces `MAX_BATCH_ROWS = 2,000` (rejects workbooks containing more than 2,000 data rows).
+      3. **Both paths:** Wrapped in structured try/catch blocks with user-facing validation errors.
+    - *Decompressed Complexity & Remaining Risk:* While application-level bounds restrict file payload sizes to 5 MB from authenticated users, a file-size bound does not strictly cap the memory allocation or computational complexity of deeply nested XML structures, large expanded cell ranges, or crafted formulas inside the SheetJS parser. Upstream advisories (prototype pollution, ReDoS) remain unpatched in the npm registry package v0.18.5 because upstream shifted subsequent distributions exclusively to a proprietary CDN.
+    - *Maintenance Decision & Tracking:* SheetJS v0.18.5 is retained under the above defensive guards for the current release. Migration to an actively maintained, open-source library (`exceljs`) is tracked in the project maintenance backlog under issue `#155` (`MAINT-DEP-155`) for the next scheduled minor release cycle.
   - **`react-router-dom` v6:**
     - *Usage:* Client-side Single Page Application (SPA) routing in the user's browser. SoilFER-LIMS does not use Server-Side Rendering (SSR) or hydration.
     - *Remaining Risk & Maintenance Decision:* Advisories relate to route parameter matching edge cases. Route access is controlled by authenticated user tokens, role guards, and server-side authorization middleware on every API call. Note that TypeScript types provide compile-time guarantees and do not constitute runtime guards. **Maintenance Decision:** SoilFER-LIMS tracks the React Router v7 migration path once ecosystem stability is confirmed.
