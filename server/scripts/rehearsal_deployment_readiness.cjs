@@ -541,11 +541,11 @@ async function runSuite() {
 
     const expectedAlphaMap = new Map();
     for (const s of createdAlphaSamples) {
-        expectedAlphaMap.set(s.originalId || s.id, s.labId);
+        expectedAlphaMap.set(s.originalId || s.id, { labId: s.labId, status: s.status || 'RECEIVED' });
     }
     const expectedBetaMap = new Map();
     for (const s of createdBetaSamples) {
-        expectedBetaMap.set(s.originalId || s.id, s.labId);
+        expectedBetaMap.set(s.originalId || s.id, { labId: s.labId, status: s.status || 'RECEIVED' });
     }
 
     // 4. Real Data Export Endpoint: POST /api/exports/data
@@ -570,9 +570,9 @@ async function runSuite() {
         if (seenAlphaIds.has(sId)) throw new Error(`Manager A export contained duplicate Sample ID: ${sId}`);
         seenAlphaIds.add(sId);
         if (!expectedAlphaMap.has(sId)) throw new Error(`Manager A export contained unexpected sample ID: ${sId}`);
-        const expLabId = expectedAlphaMap.get(sId);
-        if (lId !== expLabId) throw new Error(`Manager A export Lab ID mismatch for sample ${sId}: expected ${expLabId}, got ${lId}`);
-        if (r['Status'] !== 'REGISTERED') throw new Error(`Manager A export Status mismatch for sample ${sId}: expected REGISTERED, got ${r['Status']}`);
+        const exp = expectedAlphaMap.get(sId);
+        if (lId !== exp.labId) throw new Error(`Manager A export Lab ID mismatch for sample ${sId}: expected ${exp.labId}, got ${lId}`);
+        if (r['Status'] !== exp.status) throw new Error(`Manager A export Status mismatch for sample ${sId}: expected ${exp.status}, got ${r['Status']}`);
     }
     if (seenAlphaIds.size !== expectedAlphaMap.size) {
         throw new Error(`Manager A export missing expected sample IDs: expected ${expectedAlphaMap.size}, got ${seenAlphaIds.size}`);
@@ -600,9 +600,9 @@ async function runSuite() {
         if (seenBetaIds.has(sId)) throw new Error(`Manager B export contained duplicate Sample ID: ${sId}`);
         seenBetaIds.add(sId);
         if (!expectedBetaMap.has(sId)) throw new Error(`Manager B export contained unexpected sample ID: ${sId}`);
-        const expLabId = expectedBetaMap.get(sId);
-        if (lId !== expLabId) throw new Error(`Manager B export Lab ID mismatch for sample ${sId}: expected ${expLabId}, got ${lId}`);
-        if (r['Status'] !== 'REGISTERED') throw new Error(`Manager B export Status mismatch for sample ${sId}: expected REGISTERED, got ${r['Status']}`);
+        const exp = expectedBetaMap.get(sId);
+        if (lId !== exp.labId) throw new Error(`Manager B export Lab ID mismatch for sample ${sId}: expected ${exp.labId}, got ${lId}`);
+        if (r['Status'] !== exp.status) throw new Error(`Manager B export Status mismatch for sample ${sId}: expected ${exp.status}, got ${r['Status']}`);
     }
     if (seenBetaIds.size !== expectedBetaMap.size) {
         throw new Error(`Manager B export missing expected sample IDs: expected ${expectedBetaMap.size}, got ${seenBetaIds.size}`);
@@ -628,9 +628,9 @@ async function runSuite() {
         if (seenSuperIds.has(sId)) throw new Error(`Super Admin export contained duplicate Sample ID: ${sId}`);
         seenSuperIds.add(sId);
         if (!expectedSuperMap.has(sId)) throw new Error(`Super Admin export contained unexpected sample ID: ${sId}`);
-        const expLabId = expectedSuperMap.get(sId);
-        if (lId !== expLabId) throw new Error(`Super Admin export Lab ID mismatch for sample ${sId}: expected ${expLabId}, got ${lId}`);
-        if (r['Status'] !== 'REGISTERED') throw new Error(`Super Admin export Status mismatch for sample ${sId}: expected REGISTERED, got ${r['Status']}`);
+        const exp = expectedSuperMap.get(sId);
+        if (lId !== exp.labId) throw new Error(`Super Admin export Lab ID mismatch for sample ${sId}: expected ${exp.labId}, got ${lId}`);
+        if (r['Status'] !== exp.status) throw new Error(`Super Admin export Status mismatch for sample ${sId}: expected ${exp.status}, got ${r['Status']}`);
     }
     if (seenSuperIds.size !== expectedSuperMap.size) {
         throw new Error(`Super Admin export missing expected sample IDs: expected ${expectedSuperMap.size}, got ${seenSuperIds.size}`);
