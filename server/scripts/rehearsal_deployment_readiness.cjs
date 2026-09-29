@@ -100,10 +100,21 @@ async function getFreePort() {
     });
 }
 
-async function waitForHealth(port, maxWaitMs = 60000) {
+async function waitForHealth(port, containerName = null, maxWaitMs = 60000) {
     const start = Date.now();
     const url = `http://127.0.0.1:${port}/api/health`;
     while (Date.now() - start < maxWaitMs) {
+        if (containerName) {
+            try {
+                const status = cp.execFileSync('docker', ['inspect', containerName, '--format', '{{.State.Status}}'], { encoding: 'utf8' }).trim();
+                if (status === 'exited' || status === 'dead') {
+                    const logs = cp.execFileSync('docker', ['logs', containerName], { encoding: 'utf8' });
+                    throw new Error(`Container '${containerName}' exited unexpectedly with status '${status}'. Logs:\n${logs}`);
+                }
+            } catch (err) {
+                if (err.message.includes('exited unexpectedly')) throw err;
+            }
+        }
         try {
             const res = await fetch(url);
             if (res.status === 200) {
@@ -137,7 +148,7 @@ async function runSuite() {
         IMAGE_TAG
     ]);
 
-    await waitForHealth(localPort);
+    await waitForHealth(localPort, localContainer);
     console.log(`  ✓ Container healthy on port ${localPort}`);
 
     // Initial Login
@@ -198,7 +209,7 @@ async function runSuite() {
         IMAGE_TAG
     ]);
 
-    await waitForHealth(restartPort);
+    await waitForHealth(restartPort, restartContainer);
     console.log(`  ✓ Restarted container healthy on port ${restartPort}`);
 
     // Verify login with updated password
@@ -261,7 +272,7 @@ async function runSuite() {
         IMAGE_TAG
     ]);
 
-    await waitForHealth(partialPort);
+    await waitForHealth(partialPort, partialContainer);
     console.log(`  ✓ Container booted on partial volume and became healthy on port ${partialPort}`);
 
     // Login must succeed with ResumedPass789!
@@ -296,7 +307,7 @@ async function runSuite() {
         IMAGE_TAG
     ]);
 
-    await waitForHealth(globalPort);
+    await waitForHealth(globalPort, globalContainer);
     console.log(`  ✓ Global mode container healthy on port ${globalPort}`);
 
     const globalLoginRes = await fetch(`http://127.0.0.1:${globalPort}/api/auth/login`, {
@@ -491,7 +502,7 @@ async function runSuite() {
         IMAGE_TAG
     ]);
 
-    await waitForHealth(restoredPort);
+    await waitForHealth(restoredPort, restoredContainer);
     console.log(`  ✓ Restored container healthy on port ${restoredPort}`);
 
     // Verify login on restored database
