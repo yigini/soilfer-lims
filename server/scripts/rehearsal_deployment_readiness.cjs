@@ -432,9 +432,9 @@ async function runSuite() {
     console.log('  ✓ Activated both laboratories');
 
     // ─────────────────────────────────────────────────────────────
-    // SCENARIO 5: Multi-Lab Workload, Real Export, Schedulers & Backup Overlap
+    // SCENARIO 5: Multi-Lab Workload, Real Export, Schedulers & Quiesced Backup Serialization
     // ─────────────────────────────────────────────────────────────
-    console.log('\n▶ [Scenario 5] Multi-Lab Workload, Real Export, Schedulers & Backup Overlap...');
+    console.log('\n▶ [Scenario 5] Multi-Lab Workload, Real Export, Schedulers & Quiesced Backup Serialization...');
     // Create Manager A and Manager B accounts
     const userARes = await fetch(`http://127.0.0.1:${globalPort}/api/users`, {
         method: 'POST',
@@ -509,6 +509,8 @@ async function runSuite() {
     const { token: tokenB } = extractTokenAndUser(await permLoginBRes.json());
 
     // 3. Multi-Lab Sample Intake: Concurrent ingestion across Lab Alpha & Lab Beta
+    const createdAlphaSamples = [];
+    const createdBetaSamples = [];
     const intakePromises = [];
     for (let i = 1; i <= 5; i++) {
         intakePromises.push(
@@ -516,8 +518,10 @@ async function runSuite() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenA}` },
                 body: JSON.stringify({ submitter: `Farm Alpha ${i}`, description: `Soil Alpha Sample ${i}`, sampleType: 'ROUTINE' })
-            }).then(r => {
+            }).then(async r => {
                 if (r.status !== 200 && r.status !== 201) throw new Error(`Alpha sample ${i} failed: ${r.status}`);
+                const resJson = await r.json();
+                createdAlphaSamples.push(resJson.sample);
             })
         );
         intakePromises.push(
@@ -525,13 +529,20 @@ async function runSuite() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenB}` },
                 body: JSON.stringify({ submitter: `Farm Beta ${i}`, description: `Soil Beta Sample ${i}`, sampleType: 'ROUTINE' })
-            }).then(r => {
+            }).then(async r => {
                 if (r.status !== 200 && r.status !== 201) throw new Error(`Beta sample ${i} failed: ${r.status}`);
+                const resJson = await r.json();
+                createdBetaSamples.push(resJson.sample);
             })
         );
     }
     await Promise.all(intakePromises);
     console.log('  ✓ Ingested 10 representative samples concurrently across Lab Alpha & Lab Beta');
+
+    const expectedAlphaSampleIds = createdAlphaSamples.map(s => s.originalId || s.id);
+    const expectedAlphaLabIds = createdAlphaSamples.map(s => s.labId);
+    const expectedBetaSampleIds = createdBetaSamples.map(s => s.originalId || s.id);
+    const expectedBetaLabIds = createdBetaSamples.map(s => s.labId);
 
     // 4. Real Data Export Endpoint: POST /api/exports/data
     const exportARes = await fetch(`http://127.0.0.1:${globalPort}/api/exports/data`, {
@@ -543,9 +554,16 @@ async function runSuite() {
     const exportDataA = await exportARes.json();
     const rowsA = Array.isArray(exportDataA.data) ? exportDataA.data : (Array.isArray(exportDataA.rows) ? exportDataA.rows : []);
     if (rowsA.length !== 5) throw new Error(`Expected exactly 5 rows in Manager A export, got ${rowsA.length}`);
-    const alphaSubmitters = rowsA.map(r => r.submitter || r.clientName || '').filter(Boolean);
-    if (alphaSubmitters.some(s => s.includes('Beta'))) {
+    const alphaSampleIds = rowsA.map(r => r['Sample ID'] || '').filter(Boolean);
+    const alphaLabIds = rowsA.map(r => r['Lab ID'] || '').filter(Boolean);
+    if (alphaSampleIds.length !== 5) throw new Error(`Expected 5 valid Sample IDs in Manager A export, got ${alphaSampleIds.length}`);
+    if (rowsA.some(r => (r['Sample ID'] && r['Sample ID'].includes('Beta')) || (r['Lab ID'] && r['Lab ID'].includes('Beta')))) {
         throw new Error('Manager A export contained Lab Beta records!');
+    }
+    if (typeof expectedAlphaSampleIds !== 'undefined' && expectedAlphaSampleIds.length > 0) {
+        for (const sId of alphaSampleIds) {
+            if (!expectedAlphaSampleIds.includes(sId)) throw new Error(`Manager A export contained unexpected sample ID: ${sId}`);
+        }
     }
     console.log(`  ✓ Manager A real data export returned exactly ${rowsA.length} scoped samples for Lab Alpha`);
 
@@ -558,9 +576,16 @@ async function runSuite() {
     const exportDataB = await exportBRes.json();
     const rowsB = Array.isArray(exportDataB.data) ? exportDataB.data : (Array.isArray(exportDataB.rows) ? exportDataB.rows : []);
     if (rowsB.length !== 5) throw new Error(`Expected exactly 5 rows in Manager B export, got ${rowsB.length}`);
-    const betaSubmitters = rowsB.map(r => r.submitter || r.clientName || '').filter(Boolean);
-    if (betaSubmitters.some(s => s.includes('Alpha'))) {
+    const betaSampleIds = rowsB.map(r => r['Sample ID'] || '').filter(Boolean);
+    const betaLabIds = rowsB.map(r => r['Lab ID'] || '').filter(Boolean);
+    if (betaSampleIds.length !== 5) throw new Error(`Expected 5 valid Sample IDs in Manager B export, got ${betaSampleIds.length}`);
+    if (rowsB.some(r => (r['Sample ID'] && r['Sample ID'].includes('Alpha')) || (r['Lab ID'] && r['Lab ID'].includes('Alpha')))) {
         throw new Error('Manager B export contained Lab Alpha records!');
+    }
+    if (typeof expectedBetaSampleIds !== 'undefined' && expectedBetaSampleIds.length > 0) {
+        for (const sId of betaSampleIds) {
+            if (!expectedBetaSampleIds.includes(sId)) throw new Error(`Manager B export contained unexpected sample ID: ${sId}`);
+        }
     }
     console.log(`  ✓ Manager B real data export returned exactly ${rowsB.length} scoped samples for Lab Beta`);
 
@@ -573,6 +598,18 @@ async function runSuite() {
     const exportSuperData = await exportSuperRes.json();
     const rowsSuper = Array.isArray(exportSuperData.data) ? exportSuperData.data : (Array.isArray(exportSuperData.rows) ? exportSuperData.rows : []);
     if (rowsSuper.length !== 10) throw new Error(`Expected exactly 10 rows in Super Admin export, got ${rowsSuper.length}`);
+    const superSampleIds = rowsSuper.map(r => r['Sample ID'] || '').filter(Boolean);
+    if (superSampleIds.length !== 10) throw new Error(`Expected 10 valid Sample IDs in Super Admin export, got ${superSampleIds.length}`);
+    if (typeof expectedAlphaSampleIds !== 'undefined' && expectedAlphaSampleIds.length > 0) {
+        for (const sId of expectedAlphaSampleIds) {
+            if (!superSampleIds.includes(sId)) throw new Error(`Super Admin export missing Alpha sample: ${sId}`);
+        }
+    }
+    if (typeof expectedBetaSampleIds !== 'undefined' && expectedBetaSampleIds.length > 0) {
+        for (const sId of expectedBetaSampleIds) {
+            if (!superSampleIds.includes(sId)) throw new Error(`Super Admin export missing Beta sample: ${sId}`);
+        }
+    }
     console.log(`  ✓ Super Admin real data export returned all ${rowsSuper.length} cross-facility samples`);
 
     // 5. Background Scheduler Verification
@@ -707,24 +744,35 @@ async function runSuite() {
     fs.mkdirSync(upgBackupDir, { recursive: true });
 
     // 1. Declare and establish supported baseline image identity (representing v3.5.30 / commit 48d0e52)
+    const BASELINE_COMMIT = '48d0e526ded03232ac8516dd867f4b14923bdb58';
     const BASELINE_IMAGE_TAG = process.env.BASELINE_IMAGE_TAG || 'soilfer-lims:baseline-v3.5.30';
     let baselineImageId;
     try {
         baselineImageId = cp.execFileSync('docker', ['inspect', BASELINE_IMAGE_TAG, '--format', '{{.Id}}'], { encoding: 'utf8' }).trim();
     } catch (_) {
-        const baselineDockerfile = `FROM ${IMAGE_TAG}
-LABEL lims.version="3.5.30"
-LABEL lims.git.commit="48d0e526ded03232ac8516dd867f4b14923bdb58"
-LABEL lims.release.type="supported-baseline"
-ENV LIMS_VERSION="3.5.30"
-`;
-        cp.execFileSync('docker', ['build', '-t', BASELINE_IMAGE_TAG, '-'], { input: baselineDockerfile, encoding: 'utf8' });
+        console.log(`  Building genuine supported baseline image from verified pinned tree ${BASELINE_COMMIT}...`);
+        const baselineTreeDir = path.join(tmpDir, 'baseline_tree');
+        fs.mkdirSync(baselineTreeDir, { recursive: true });
+        try {
+            cp.execFileSync('git', ['rev-parse', '--verify', `${BASELINE_COMMIT}^{commit}`], { encoding: 'utf8' });
+        } catch (e) {
+            throw new Error(`Real supported baseline commit ${BASELINE_COMMIT} is not available in git repository! Cannot synthesize baseline.`);
+        }
+        const tarPath = path.join(tmpDir, 'baseline.tar');
+        const tarBuf = cp.execFileSync('git', ['archive', '--format=tar', BASELINE_COMMIT]);
+        fs.writeFileSync(tarPath, tarBuf);
+        cp.execFileSync('tar', ['-xf', tarPath, '-C', baselineTreeDir]);
+        cp.execFileSync('docker', ['build', '-t', BASELINE_IMAGE_TAG, baselineTreeDir], { stdio: 'inherit' });
         baselineImageId = cp.execFileSync('docker', ['inspect', BASELINE_IMAGE_TAG, '--format', '{{.Id}}'], { encoding: 'utf8' }).trim();
+    }
+    if (!baselineImageId) {
+        throw new Error(`Failed to obtain Docker image ID for supported baseline image ${BASELINE_IMAGE_TAG}`);
     }
     if (baselineImageId === IMMUTABLE_IMAGE_ID) {
         throw new Error('Baseline image must have a distinct immutable image ID from candidate target image!');
     }
-    console.log(`  ✓ Declared supported baseline image: ${BASELINE_IMAGE_TAG} (ID: ${baselineImageId})`);
+    console.log(`  ✓ Bound supported baseline: ${BASELINE_IMAGE_TAG} (Tree: ${BASELINE_COMMIT}, ID: ${baselineImageId})`);
+    console.log(`  ✓ Bound candidate target:   ${IMAGE_TAG} (ID: ${IMMUTABLE_IMAGE_ID})`);
 
     // 2. Initialize populated baseline database, signing secret & exchange state
     const baselineSecretHex = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
@@ -952,7 +1000,7 @@ ENV LIMS_VERSION="3.5.30"
         'node', '-e',
         `const Database = require('better-sqlite3');
          const db = new Database('prisma/dev.db', { readonly: true });
-         const samples = db.prepare('SELECT originalId, assignedLab, status FROM Sample ORDER BY originalId').all();
+         const samples = db.prepare('SELECT originalId, labId, assignedLab, status FROM Sample ORDER BY originalId').all();
          db.close();
          console.log(JSON.stringify(samples));`
     ], { encoding: 'utf8' }).trim();
@@ -963,11 +1011,18 @@ ENV LIMS_VERSION="3.5.30"
         if (upgSamples[i].originalId !== expectedCode) {
             throw new Error(`Sample mismatch at index ${i}: expected ${expectedCode}, got ${upgSamples[i].originalId}`);
         }
+        if (upgSamples[i].labId !== expectedCode) {
+            throw new Error(`Sample labId mismatch for ${expectedCode}: expected ${expectedCode}, got ${upgSamples[i].labId}`);
+        }
+        const expectedLab = i < 5 ? 'lab-base-1' : 'lab-base-2';
+        if (upgSamples[i].assignedLab !== expectedLab) {
+            throw new Error(`Sample assignedLab mismatch for ${expectedCode}: expected ${expectedLab}, got ${upgSamples[i].assignedLab}`);
+        }
         if (upgSamples[i].status !== 'REGISTERED') {
             throw new Error(`Sample status mismatch for ${expectedCode}: ${upgSamples[i].status}`);
         }
     }
-    console.log('  ✓ Exact data preservation across upgrade: all 10 sample records verified intact');
+    console.log('  ✓ Exact data preservation across upgrade: all 10 sample records, assigned labs, and statuses verified intact');
 
     // Verify asset preservation across upgrade
     const assetCheck = cp.execFileSync('docker', [
@@ -1103,15 +1158,37 @@ ENV LIMS_VERSION="3.5.30"
         'node', '-e',
         `const Database = require('better-sqlite3');
          const db = new Database('prisma/dev.db', { readonly: true });
-         const samples = db.prepare('SELECT originalId FROM Sample ORDER BY originalId').all();
+         const samples = db.prepare('SELECT originalId, labId, assignedLab, status FROM Sample ORDER BY originalId').all();
          db.close();
-         console.log(JSON.stringify(samples.map(s => s.originalId)));`
+         console.log(JSON.stringify(samples));`
     ], { encoding: 'utf8' }).trim();
-    const rollbackCodes = JSON.parse(postRollbackData);
-    if (rollbackCodes.length !== 10 || rollbackCodes[0] !== 'BASE-SMP-001' || rollbackCodes[9] !== 'BASE-SMP-010') {
-        throw new Error(`Post-rollback data mismatch: ${postRollbackData}`);
+    const rollbackParsed = JSON.parse(postRollbackData);
+    const rollbackCodes = rollbackParsed.map(item => (typeof item === 'string' ? item : item.originalId));
+    const expectedSampleCodes = Array.from({ length: 10 }, (_, i) => 'BASE-SMP-' + String(i + 1).padStart(3, '0'));
+    if (rollbackCodes.length !== 10) {
+        throw new Error(`Post-rollback data count mismatch: expected 10, got ${rollbackCodes.length}`);
     }
-    console.log('  ✓ Post-rollback data verified: all 10 sample records preserved in restored volume');
+    for (let i = 0; i < 10; i++) {
+        if (rollbackCodes[i] !== expectedSampleCodes[i]) {
+            throw new Error(`Post-rollback sample ID mismatch at index ${i}: expected ${expectedSampleCodes[i]}, got ${rollbackCodes[i]}`);
+        }
+    }
+    if (typeof rollbackParsed[0] === 'object' && rollbackParsed[0] !== null) {
+        for (let i = 0; i < 10; i++) {
+            const item = rollbackParsed[i];
+            if (item.labId && item.labId !== expectedSampleCodes[i]) {
+                throw new Error(`Post-rollback labId mismatch for ${expectedSampleCodes[i]}: expected ${expectedSampleCodes[i]}, got ${item.labId}`);
+            }
+            const expectedLab = i < 5 ? 'lab-base-1' : 'lab-base-2';
+            if (item.assignedLab && item.assignedLab !== expectedLab) {
+                throw new Error(`Post-rollback assignedLab mismatch for ${expectedSampleCodes[i]}: expected ${expectedLab}, got ${item.assignedLab}`);
+            }
+            if (item.status && item.status !== 'REGISTERED') {
+                throw new Error(`Post-rollback status mismatch for ${expectedSampleCodes[i]}: expected REGISTERED, got ${item.status}`);
+            }
+        }
+    }
+    console.log('  ✓ Post-rollback data verified: all 10 sample records, assigned labs, and statuses preserved in restored volume');
 
     // Verify asset preservation in restored volume
     const postRollbackAsset = cp.execFileSync('docker', [

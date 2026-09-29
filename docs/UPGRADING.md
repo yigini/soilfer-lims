@@ -181,13 +181,22 @@ echo "✓ Mounts verified: Data=${LIVE_DATA_VOL}, Assets=${LIVE_ASSETS_VOL}"
 HEALTH_JSON=$(curl -fsSL http://localhost:3000/api/health)
 echo "Health status: $HEALTH_JSON"
 echo "$HEALTH_JSON" | grep -q '"status":"ok"' || { echo "❌ Healthcheck status is not ok"; exit 1; }
-ACTUAL_MODE=$(echo "$HEALTH_JSON" | grep -o '"mode":"[^"]*"' | cut -d'"' -f4)
-EXPECTED_MODE=${DEPLOYMENT_MODE:-""}
-if [ -n "$EXPECTED_MODE" ] && [ "$ACTUAL_MODE" != "$EXPECTED_MODE" ]; then
-    echo "❌ Deployment mode mismatch: running in $ACTUAL_MODE, expected $EXPECTED_MODE"
+
+# Verify running deployment mode against explicit reviewed configuration
+ACTUAL_MODE=$(docker inspect "$LIVE_CONTAINER_ID" --format '{{range .Config.Env}}{{println .}}{{end}}' 2>/dev/null | grep '^DEPLOYMENT_MODE=' | cut -d= -f2- || true)
+ACTUAL_MODE=${ACTUAL_MODE:-"local"}
+
+EXPECTED_MODE=${EXPECTED_MODE:-${DEPLOYMENT_MODE:-""}}
+if [ -z "$EXPECTED_MODE" ]; then
+    echo "❌ Deployment mode verification failed: EXPECTED_MODE is unset; explicit expected mode (local/global) must be defined."
     exit 1
 fi
-echo "✓ Healthcheck and deployment mode verified (${ACTUAL_MODE:-default})."
+
+if [ "$ACTUAL_MODE" != "$EXPECTED_MODE" ]; then
+    echo "❌ Deployment mode mismatch: container running in $ACTUAL_MODE, expected $EXPECTED_MODE"
+    exit 1
+fi
+echo "✓ Healthcheck and deployment mode verified: $ACTUAL_MODE"
 
 # 4. Verify startup logs confirm additive migrations, scheduler initialization, and server start
 docker compose ${COMPOSE_FILES} logs lims --tail 50 | grep -E "(Applying|Starting SoilFER-LIMS|Enterprise Server running)"
@@ -208,7 +217,7 @@ docker compose ${COMPOSE_FILES} exec -T lims node -e "
   console.log('✓ Post-upgrade database integrity and foreign keys verified.');
 "
 
-# 6. Verify Database User & Facility Record Persistence
+# 6. Verify Database Records & Read-Only Role/API Postflight Gates
 docker compose ${COMPOSE_FILES} exec -T lims node -e "
   const Database = require('better-sqlite3');
   const db = new Database('prisma/dev.db', { readonly: true });
@@ -222,13 +231,73 @@ docker compose ${COMPOSE_FILES} exec -T lims node -e "
   console.log('✓ Database records verified. Users:', userCount, 'Labs:', labCount);
 "
 
+echo "Executing read-only role and route postflight protocol..."
+docker compose ${COMPOSE_FILES} exec -T lims node -e "
+  const jwt = require('jsonwebtoken');
+  const fs = require('fs');
+  let secret = process.env.JWT_SECRET;
+  if (!secret && fs.existsSync('prisma/.jwt_secret')) {
+    secret = fs.readFileSync('prisma/.jwt_secret', 'utf8').trim();
+  }
+  if (!secret) {
+    console.error('❌ Postflight failed: JWT secret not found!');
+    process.exit(1);
+  }
+  const superToken = jwt.sign({ id: 'pf-admin', username: 'admin', role: 'SUPER_ADMIN', tokenVersion: 1 }, secret);
+  const mgrToken = jwt.sign({ id: 'pf-mgr', username: 'pf_manager', role: 'LAB_MANAGER', labId: 'LAB01', tokenVersion: 1 }, secret);
+  const techToken = jwt.sign({ id: 'pf-tech', username: 'pf_tech', role: 'LAB_TECHNICIAN', labId: 'LAB01', tokenVersion: 1 }, secret);
+
+  async function checkRoute(role, path, expectedStatus, token) {
+    const res = await fetch('http://localhost:3000' + path, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (res.status !== expectedStatus) {
+      console.error(\`❌ Role gate failed for \${role} on \${path}: expected \${expectedStatus}, got \${res.status}\`);
+      process.exit(1);
+    }
+    console.log(\`  ✓ \${role} -> \${path} (\${res.status} OK)\`);
+  }
+
+  (async () => {
+    await checkRoute('SUPER_ADMIN', '/api/users', 200, superToken);
+    await checkRoute('SUPER_ADMIN', '/api/labs', 200, superToken);
+    await checkRoute('LAB_MANAGER', '/api/dashboard/live', 200, mgrToken);
+    await checkRoute('LAB_MANAGER', '/api/submissions', 200, mgrToken);
+    await checkRoute('LAB_TECHNICIAN', '/api/work', 200, techToken);
+    console.log('✓ Read-only role and route API postflight gates verified.');
+  })().catch(e => { console.error('Postflight API error:', e.message); process.exit(1); });
+"
+
 # 7. Verify NGINX reverse proxy connectivity (if deployed with NGINX overlay)
-NGINX_CONTAINER=$(docker compose ${COMPOSE_FILES} ps -q nginx 2>/dev/null || true)
-if [ -n "$NGINX_CONTAINER" ] && [ "$(docker inspect -f '{{.State.Running}}' "$NGINX_CONTAINER" 2>/dev/null)" = "true" ]; then
-    curl -fsSL http://localhost/api/health >/dev/null
-    echo "✓ NGINX reverse proxy ingress verified."
+if echo "${COMPOSE_FILES}" | grep -q "docker-compose\.nginx\.yml"; then
+    echo "NGINX reverse proxy overlay is configured; verifying proxy container and ingress..."
+    NGINX_CONTAINER=$(docker compose ${COMPOSE_FILES} ps -q nginx 2>/dev/null || true)
+    if [ -z "$NGINX_CONTAINER" ]; then
+        echo "❌ NGINX reverse proxy container is missing despite NGINX overlay being configured!"
+        exit 1
+    fi
+    NGINX_RUNNING=$(docker inspect -f '{{.State.Running}}' "$NGINX_CONTAINER" 2>/dev/null || echo "false")
+    if [ "$NGINX_RUNNING" != "true" ]; then
+        echo "❌ NGINX reverse proxy container is not running (State.Running: $NGINX_RUNNING)!"
+        exit 1
+    fi
+    curl -fsSL http://localhost/api/health >/dev/null || { echo "❌ Ingress check via NGINX port 80 failed!"; exit 1; }
+    echo "✓ NGINX reverse proxy ingress verified on port 80."
+else
+    echo "ℹ Direct topology deployment (no NGINX overlay configured); skipping proxy ingress check."
 fi
 ```
+
+### Step 6: Release Commitment & Ingress Reopening
+- **Writer & Ingress Hold Boundary:** Throughout Step 4 and Step 5 postflight verification, external client ingress remains restricted (or routed to a maintenance landing page). Only internal operator verification requests interact with the newly launched container.
+- **COMMITTED State:** Once all Step 5 postflight checks succeed (image ID, volume mounts, HTTP health, deployment mode, schedulers, database integrity, records, role APIs, and proxy ingress), the upgrade is declared **COMMITTED**. The maintenance window is closed, public ingress is reopened, and laboratory analytical writes resume.
+- **Permitted Recovery Protocol After Writes Resume:**
+  > ⚠️ **CRITICAL RULE:** Once new analytical writes have resumed after cutover, **DO NOT execute Route A or Route B database volume restoration**. Restoring an earlier database snapshot rewinds analytical history and permanently destroys newly ingested samples and client results.
+
+  If an issue arises *after* writes have resumed, follow the permitted post-commit recovery paths:
+  1. **Code/Image Rollback (No Volume Rewind):** Revert the container image tag back to `BASELINE_IMAGE_ID` without restoring old volume archives (`LIMS_IMAGE_TAG=rollback-${TIMESTAMP} docker compose ${COMPOSE_FILES} up -d`). Because database schema migrations in SoilFER LIMS are strictly additive and backward-compatible, the baseline application safely runs against the current database schema without rewinding data.
+  2. **Forward Fix:** Deploy an urgent hotfix patch containing the targeted resolution.
+  3. **Reconciled Restore (Disaster Only):** If volume restoration is unavoidable due to catastrophic volume corruption, all analytical writes ingested since cutover must be manually exported, the volume restored, and writes manually reconciled.
 
 ---
 
