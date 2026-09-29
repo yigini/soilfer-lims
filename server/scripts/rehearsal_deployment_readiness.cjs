@@ -730,13 +730,13 @@ async function runSuite() {
             // 10 Baseline Samples
             for (let i = 1; i <= 5; i++) {
                 const code1 = 'BASE-SMP-' + String(i).padStart(3, '0');
-                db.prepare('INSERT INTO Sample (id, sampleCode, submitter, assignedLab, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)')
-                  .run('smp-base-1-' + i, code1, 'Farmer Alpha ' + i, 'lab-base-1', 'REGISTERED', now, now);
+                db.prepare('INSERT INTO Sample (id, originalId, labId, assignedLab, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)')
+                  .run('smp-base-1-' + i, code1, code1, 'lab-base-1', 'REGISTERED', now, now);
             }
             for (let i = 1; i <= 5; i++) {
                 const code2 = 'BASE-SMP-' + String(i + 5).padStart(3, '0');
-                db.prepare('INSERT INTO Sample (id, sampleCode, submitter, assignedLab, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)')
-                  .run('smp-base-2-' + i, code2, 'Farmer Beta ' + i, 'lab-base-2', 'REGISTERED', now, now);
+                db.prepare('INSERT INTO Sample (id, originalId, labId, assignedLab, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)')
+                  .run('smp-base-2-' + i, code2, code2, 'lab-base-2', 'REGISTERED', now, now);
             }
 
             // Set initial epoch and generate signed cursor
@@ -862,9 +862,9 @@ async function runSuite() {
         'node', '-e',
         `const Database = require('better-sqlite3');
          const db = new Database('prisma/dev.db', { readonly: true });
-         const samples = db.prepare('SELECT sampleCode FROM Sample ORDER BY sampleCode').all();
+         const samples = db.prepare('SELECT originalId FROM Sample ORDER BY originalId').all();
          db.close();
-         const codes = samples.map(s => s.sampleCode);
+         const codes = samples.map(s => s.originalId);
          if (codes.length !== 10) process.exit(1);
          console.log('EXACT_SAMPLES:' + codes.join(','));`
     ], { encoding: 'utf8' });
