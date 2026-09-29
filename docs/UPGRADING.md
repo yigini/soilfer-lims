@@ -409,15 +409,16 @@ docker run --rm \
   "${BASELINE_IMAGE_ID}" \
   node -e "
     const Database = require('better-sqlite3');
-    const { rotateEpoch, ensureTriggers, initTables } = require('./services/exchangeStateService');
-    const db = new Database('prisma/dev.db');
+    const exchange = require('./services/exchangeStateService');
+    const { rotateEpoch, ensureTriggers } = exchange;
+    const db = typeof exchange.getDb === 'function' ? exchange.getDb() : new Database('prisma/dev.db');
     const integrity = db.pragma('integrity_check');
     const fk = db.pragma('foreign_key_check');
     if (integrity[0]?.integrity_check !== 'ok' || fk.length > 0) {
       console.error('Restored volume database integrity check failed:', integrity, fk);
       process.exit(1);
     }
-    initTables(db);
+    if (typeof exchange.initTables === 'function') exchange.initTables(db);
     ensureTriggers(db);
     const res = rotateEpoch(db, 'VOLUME_RESTORE');
     db.close();

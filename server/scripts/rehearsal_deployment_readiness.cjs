@@ -792,10 +792,11 @@ async function runSuite() {
         `npx prisma db push && node -e "
             const Database = require('better-sqlite3');
             const bcrypt = require('bcryptjs');
-            const { initTables, ensureTriggers, encodeCursor, getCurrentEpoch } = require('./services/exchangeStateService');
+            const exchange = require('./services/exchangeStateService');
+            const { ensureTriggers, encodeCursor, getCurrentEpoch } = exchange;
 
-            const db = new Database('prisma/dev.db');
-            initTables(db);
+            const db = typeof exchange.getDb === 'function' ? exchange.getDb() : new Database('prisma/dev.db');
+            if (typeof exchange.initTables === 'function') exchange.initTables(db);
             ensureTriggers(db);
 
             const now = new Date().toISOString();
@@ -1096,9 +1097,10 @@ async function runSuite() {
         BASELINE_IMAGE_TAG,
         'node', '-e',
         `const Database = require('better-sqlite3');
-         const { rotateEpoch, ensureTriggers, initTables, getCurrentEpoch, decodeCursor } = require('./services/exchangeStateService');
-         const db = new Database('prisma/dev.db');
-         initTables(db);
+         const exchange = require('./services/exchangeStateService');
+         const { rotateEpoch, ensureTriggers, getCurrentEpoch, decodeCursor } = exchange;
+         const db = typeof exchange.getDb === 'function' ? exchange.getDb() : new Database('prisma/dev.db');
+         if (typeof exchange.initTables === 'function') exchange.initTables(db);
          ensureTriggers(db);
          const res = rotateEpoch(db, 'VOLUME_RESTORE');
          console.log('EPOCH_ROTATION:' + JSON.stringify(res));
