@@ -321,8 +321,9 @@ bash "${entryScript.replace(/\\/g, '/')}"
         const db = new Database(targetDb);
         const existing = db.prepare('SELECT count(*) as count FROM User').get();
         if (!existing || existing.count === 0) {
-            db.prepare('INSERT INTO User (id, username, password, email, role, isActive) VALUES (?, ?, ?, ?, ?, ?)')
-              .run('u-inspect-test', 'inspectadmin', 'hashedpass', 'inspect@soilfer.local', 'LAB_MANAGER', 1);
+            const now = new Date().toISOString();
+            db.prepare('INSERT INTO User (id, username, password, email, role, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+              .run('u-inspect-test', 'inspectadmin', 'hashedpass', 'inspect@soilfer.local', 'LAB_MANAGER', 1, now, now);
         }
         db.close();
         fs.writeFileSync(path.join(testDir, 'prisma', '.seed_complete'), 'done');
