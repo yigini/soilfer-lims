@@ -5,14 +5,14 @@
  *
  * Verifies with real Headless Google Chrome via Playwright:
  * 1. All 14 concrete theme variants (7 families × 2 modes) computed DOM tokens & contrast.
- * 2. Actual route & workflow matrix across 6 core views.
- * 3. Live preview & unsaved form input state preservation across preview cycles.
+ * 2. Actual route & workflow matrix across 6 core views with active view validation.
+ * 3. Live preview & unsaved form input state preservation on real React forms.
  * 4. Selector entrypoints (Header ThemeToggle popover, Profile, Lab Management).
  * 5. Confirmation modal auto-focus entry, focus trap (Tab / Shift+Tab), Escape dismissal, and trigger restoration.
  * 6. Color mode radiogroup WAI-ARIA roving tabindex and arrow key / Home / End navigation.
- * 7. Responsive layout reflow down to 320px viewport width (no horizontal overflow, >= 44px touch targets).
- * 8. Multi-language / locale switching across English, Spanish (es), French (fr), Portuguese (pt).
- * 9. Scientific chart tokens (--sf-chart-1..6) and paper/certificate @media print isolation.
+ * 7. Responsive layout reflow down to 320px viewport width (no horizontal overflow, >= 44x44px touch targets).
+ * 8. Multi-language / locale switching across English, Spanish (es, es-419), French (fr), Portuguese (pt).
+ * 9. Scientific chart tokens (--sf-chart-1..6) and paper/certificate @media print white-paper isolation.
  * 10. Honest boundary recording (Chrome browser execution verified; native physical iOS/Android gate pending).
  */
 
@@ -268,11 +268,15 @@ async function runBrowserEvidence() {
         viewport: { width: 1280, height: 800 }
     });
 
-    // Seed local storage with authenticated session and tokens
     await context.addInitScript(({ token, user }) => {
         window.localStorage.setItem('token', token);
         window.localStorage.setItem('user', JSON.stringify(user));
-        window.localStorage.setItem('soilfer_language', 'en');
+        if (!window.localStorage.getItem('locale')) {
+            window.localStorage.setItem('locale', 'en');
+        }
+        if (!window.sessionStorage.getItem('soilfer_locale_override')) {
+            window.sessionStorage.setItem('soilfer_locale_override', 'en');
+        }
     }, { token: authToken, user: testUser });
 
     const page = await context.newPage();
@@ -373,12 +377,12 @@ async function runBrowserEvidence() {
         // PACKAGE 2: Actual Route & Workflow Matrix
         // =====================================================================
         const routesToTest = [
-            { path: '/profile', name: 'User Profile' },
-            { path: '/', name: 'Dashboard' },
-            { path: '/samples', name: 'Sample Registry' },
-            { path: '/reception', name: 'Sample Reception' },
-            { path: '/admin/labs', name: 'Lab Management' },
-            { path: '/qa', name: 'QA Overview' }
+            { path: '/profile', name: 'User Profile', keyword: 'Profile' },
+            { path: '/', name: 'Dashboard', keyword: 'Dashboard' },
+            { path: '/samples', name: 'Sample Registry', keyword: 'Sample' },
+            { path: '/reception', name: 'Sample Reception', keyword: 'Reception' },
+            { path: '/admin/labs', name: 'Lab Management', keyword: 'Lab' },
+            { path: '/qa', name: 'QA Overview', keyword: 'QA' }
         ];
 
         let routeFailures = 0;
@@ -389,22 +393,43 @@ async function runBrowserEvidence() {
             await page.waitForSelector('header', { timeout: 3000 }).catch(() => null);
             await page.waitForTimeout(300);
 
-            const pageState = await page.evaluate(() => {
+            const pageState = await page.evaluate((curr) => {
                 const root = document.getElementById('root');
                 const themeAttr = document.documentElement.getAttribute('data-theme');
                 const modeAttr = document.documentElement.getAttribute('data-appearance');
                 const hasNavbar = !!document.querySelector('nav, header, [role="banner"], [role="navigation"]');
+                const bodySnippet = (document.body.innerText || '').slice(0, 200);
+                const isNotFound = bodySnippet.toLowerCase().includes('not found') ||
+                                   bodySnippet.toLowerCase().includes('404') ||
+                                   bodySnippet.toLowerCase().includes('component absent');
+                const hasViewContainer = !!document.querySelector('main, [role="main"], .card-base, section, [data-testid]');
+                const hasRouteContent = !isNotFound && (bodySnippet.toLowerCase().includes(curr.keyword.toLowerCase()) || hasViewContainer);
                 return {
                     pathname: window.location.pathname,
                     rendered: !!root && root.children.length > 0,
                     hasNavbar,
                     themeAttr,
                     modeAttr,
-                    bodySnippet: (document.body.innerText || '').slice(0, 100)
+                    bodySnippet,
+                    isNotFound,
+                    hasViewContainer,
+                    hasRouteContent
                 };
-            });
+            }, r);
 
-            const passed = pageState.rendered && pageState.hasNavbar && pageState.pathname === r.path;
+            const passed = Boolean(
+                pageState.rendered &&
+                pageState.hasNavbar &&
+                pageState.pathname === r.path &&
+                !pageState.isNotFound &&
+                !(pageState.bodySnippet && (
+                    pageState.bodySnippet.toLowerCase().includes('not found') ||
+                    pageState.bodySnippet.toLowerCase().includes('404') ||
+                    pageState.bodySnippet.toLowerCase().includes('absent')
+                )) &&
+                pageState.hasViewContainer !== false &&
+                pageState.hasRouteContent !== false
+            );
             if (!passed) routeFailures++;
             routeMetrics.push({ route: r.path, name: r.name, ...pageState, passed });
         }
@@ -422,17 +447,15 @@ async function runBrowserEvidence() {
         await page.goto(`${origin}/profile`, { waitUntil: 'domcontentloaded' });
         await page.waitForTimeout(300);
 
-        // Create an unsaved agronomic input in the DOM (e.g. notes drafted in a form)
-        await page.evaluate(() => {
-            let inp = document.getElementById('field-sample-notes-input');
-            if (!inp) {
-                inp = document.createElement('input');
-                inp.id = 'field-sample-notes-input';
-                inp.className = 'border p-2 rounded';
-                inp.value = 'Unsaved agronomic notes for field sample GT-42';
-                document.body.appendChild(inp);
-            }
-        });
+        // Use real React form input in the Security tab (Change Password section)
+        const securityTab = page.locator('button:has-text("Security")');
+        if (await securityTab.count() > 0) {
+            await securityTab.first().click();
+            await page.waitForTimeout(300);
+        }
+        const pwdInput = page.locator('input[type="password"]').first();
+        await pwdInput.fill('UnsavedSecretDraft42!');
+        const initialVal = await pwdInput.inputValue();
 
         // Click on Appearance tab to mount real ThemeGallery
         const appearanceTabBtn = page.locator('button:has-text("Appearance")');
@@ -448,7 +471,6 @@ async function runBrowserEvidence() {
         if (await terraCard.count() > 0) {
             await terraCard.click();
         } else {
-            // Fallback locator
             await page.locator('[role="radio"]:has-text("Terra")').first().click();
         }
         await page.waitForTimeout(200);
@@ -465,41 +487,53 @@ async function runBrowserEvidence() {
             const notice = document.querySelector('[role="region"][aria-label*="preview" i], aside');
             const noticeText = notice ? (notice.textContent || '') : '';
             const previewNoticePresent = !!notice && (noticeText.includes('Preview') || noticeText.includes('Terra'));
-            const inp = document.getElementById('field-sample-notes-input');
             const currentTheme = document.documentElement.getAttribute('data-theme');
             return {
                 previewNoticePresent,
-                currentTheme,
-                inputPreserved: inp && inp.value === 'Unsaved agronomic notes for field sample GT-42'
+                currentTheme
             };
         });
+
+        // Verify input state in Security tab is preserved during preview
+        if (await securityTab.count() > 0) {
+            await securityTab.first().click();
+            await page.waitForTimeout(200);
+        }
+        const previewVal = await pwdInput.inputValue();
+        previewActiveState.inputPreserved = previewVal === initialVal;
+
+        // Return to Appearance tab
+        if (await appearanceTabBtn.count() > 0) {
+            await appearanceTabBtn.first().click();
+            await page.waitForTimeout(200);
+        }
 
         // Click the real Exit Preview button in the preview notice banner
         const exitPreviewBtn = page.locator('button:has-text("Exit preview")');
         if (await exitPreviewBtn.count() > 0) {
             await exitPreviewBtn.first().click();
             await page.waitForTimeout(300);
-        } else {
-            // Programmatically exit preview via context if button not in DOM
-            await page.evaluate(() => {
-                document.documentElement.setAttribute('data-theme', 'forest');
-            });
         }
 
-        const previewExitState = await page.evaluate(() => {
-            const inp = document.getElementById('field-sample-notes-input');
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            return {
-                currentTheme,
-                inputPreserved: inp && inp.value === 'Unsaved agronomic notes for field sample GT-42'
-            };
-        });
+        // Evaluate exit preview state
+        const currentThemeAfterExit = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+        if (await securityTab.count() > 0) {
+            await securityTab.first().click();
+            await page.waitForTimeout(200);
+        }
+        const exitVal = await pwdInput.inputValue();
+
+        const previewExitState = {
+            currentTheme: currentThemeAfterExit,
+            inputPreserved: exitVal === initialVal
+        };
 
         const previewPreserved =
-            previewActiveState.inputPreserved &&
-            previewExitState.inputPreserved &&
-            (previewActiveState.currentTheme === 'terra' || previewActiveState.previewNoticePresent) &&
-            previewExitState.currentTheme === 'forest';
+            previewActiveState.previewNoticePresent === true &&
+            previewActiveState.currentTheme === 'terra' &&
+            previewActiveState.inputPreserved === true &&
+            previewExitState.currentTheme === 'forest' &&
+            previewExitState.inputPreserved === true;
 
         record(
             'Live preview cycle preserves unsaved form input state',
@@ -686,23 +720,44 @@ async function runBrowserEvidence() {
         // PACKAGE 7: Responsive Layout & 320px Viewport Reflow
         // =====================================================================
         await page.setViewportSize({ width: 320, height: 568 }); // iPhone SE dimension
-        await page.goto(`${origin}/profile`, { waitUntil: 'domcontentloaded' });
-        await page.waitForTimeout(300);
+        await page.goto(`${origin}/profile?tab=appearance`, { waitUntil: 'domcontentloaded' });
+        await page.waitForTimeout(400);
 
         const mobile320State = await page.evaluate(() => {
             const scrollWidth = document.documentElement.scrollWidth;
             const innerWidth = window.innerWidth;
             const noHorizontalOverflow = scrollWidth <= innerWidth;
 
-            // Check touch targets on interactive buttons
-            const buttons = Array.from(document.querySelectorAll('button, [role="button"]'));
-            const touchTargets = buttons.slice(0, 10).map(b => {
+            // Query visible required theme controls in the gallery and entrypoints
+            const candidates = Array.from(document.querySelectorAll(
+                'button, [role="button"], [role="radio"]'
+            )).filter(el => {
+                const text = (el.textContent || el.getAttribute('aria-label') || '').toLowerCase();
+                return (
+                    el.hasAttribute('aria-controls') ||
+                    Boolean(el.closest('[role="radiogroup"]')) ||
+                    el.classList.contains('touch-target') ||
+                    text.includes('preview') ||
+                    text.includes('save') ||
+                    text.includes('use as') ||
+                    text.includes('appearance') ||
+                    text.includes('theme')
+                );
+            });
+
+            const visibleControls = candidates.filter(el => {
+                const r = el.getBoundingClientRect();
+                const style = window.getComputedStyle(el);
+                return r.width > 0 && r.height > 0 && style.visibility !== 'hidden' && style.display !== 'none';
+            });
+
+            const touchTargets = visibleControls.slice(0, 10).map(b => {
                 const rect = b.getBoundingClientRect();
                 return {
-                    text: (b.textContent || '').trim().slice(0, 20),
-                    height: rect.height,
-                    width: rect.width,
-                    meets44px: rect.height >= 40 || rect.width >= 40 // allowing sub-pixel margin
+                    text: (b.textContent || b.getAttribute('aria-label') || '').trim().slice(0, 20),
+                    height: Math.round(rect.height),
+                    width: Math.round(rect.width),
+                    meets44px: rect.height >= 44 && rect.width >= 44
                 };
             });
 
@@ -726,7 +781,15 @@ async function runBrowserEvidence() {
             };
         });
 
-        const responsivePassed = mobile320State.noHorizontalOverflow && mobile390State.noHorizontalOverflow;
+        const responsivePassed = Boolean(
+            mobile320State &&
+            mobile390State &&
+            mobile320State.noHorizontalOverflow &&
+            mobile390State.noHorizontalOverflow &&
+            Array.isArray(mobile320State.touchTargets) &&
+            mobile320State.touchTargets.length > 0 &&
+            mobile320State.touchTargets.every(t => t.meets44px && t.height >= 44 && t.width >= 44)
+        );
 
         record(
             'Responsive layout reflow down to 320px viewport without horizontal window overflow',
@@ -741,33 +804,46 @@ async function runBrowserEvidence() {
         // =====================================================================
         // PACKAGE 8: Multi-Language / Locale Strings Rendering
         // =====================================================================
-        const localesToTest = ['en', 'es', 'fr', 'pt'];
+        const localesToTest = [
+            { code: 'en', keyword: 'Appearance' },
+            { code: 'es', keyword: 'Apariencia' },
+            { code: 'es-419', keyword: 'Apariencia' },
+            { code: 'fr', keyword: 'Apparence' },
+            { code: 'pt', keyword: 'Aparência' }
+        ];
         const localeResults = [];
 
         for (const loc of localesToTest) {
             await page.evaluate((l) => {
-                window.localStorage.setItem('soilfer_language', l);
-                document.documentElement.lang = l;
+                window.localStorage.setItem('locale', l.code);
+                window.sessionStorage.setItem('soilfer_locale_override', l.code);
+                document.documentElement.lang = l.code;
             }, loc);
 
-            await page.goto(`${origin}/profile`, { waitUntil: 'domcontentloaded' });
-            await page.waitForTimeout(200);
+            await page.goto(`${origin}/profile?tab=appearance`, { waitUntil: 'domcontentloaded' });
+            await page.waitForTimeout(300);
 
             const langState = await page.evaluate((l) => {
+                const bodyText = document.body.textContent || '';
+                const hasTranslatedKeyword = bodyText.includes(l.keyword);
                 return {
-                    lang: l,
+                    lang: l.code,
                     docLang: document.documentElement.lang,
-                    bodyTextLength: document.body.textContent.length
+                    keyword: l.keyword,
+                    hasTranslatedKeyword,
+                    bodyTextLength: bodyText.length
                 };
             }, loc);
 
             localeResults.push(langState);
         }
 
+        const localePassed = localeResults.length >= 5 && localeResults.every(r => r.docLang === r.lang && r.hasTranslatedKeyword && r.bodyTextLength > 0);
+
         record(
-            'Multi-language localization verified across en, es, fr, pt',
+            'Multi-language localization verified across en, es, es-419, fr, pt',
             'Internationalization',
-            localeResults.every(r => r.bodyTextLength > 0),
+            localePassed,
             { localeResults }
         );
 
@@ -798,18 +874,34 @@ async function runBrowserEvidence() {
 
             const style = window.getComputedStyle(cert);
             const bg = style.backgroundColor;
+            const color = style.color;
             cert.remove();
+
+            const isPureWhite = bg === 'rgb(255, 255, 255)' || bg === '#ffffff';
+            const isBlackBackground = bg === 'rgb(0, 0, 0)' || bg === '#000000';
             return {
                 paperSurfaceEvaluated: true,
-                computedBg: bg
+                computedBg: bg,
+                computedColor: color,
+                isPureWhite,
+                isBlackBackground
             };
         });
         await page.emulateMedia({ media: null });
 
+        const printIsolationPassed = Boolean(
+            chartTokensPresent &&
+            printStylesActive &&
+            printStylesActive.paperSurfaceEvaluated &&
+            printStylesActive.computedBg !== 'rgb(0, 0, 0)' &&
+            !printStylesActive.isBlackBackground &&
+            (printStylesActive.isPureWhite || printStylesActive.computedBg === 'rgb(255, 255, 255)' || printStylesActive.computedBg === '#ffffff')
+        );
+
         record(
             'Scientific chart tokens defined and paper print styles isolated',
             'Scientific & Print Isolation',
-            chartTokensPresent && printStylesActive.paperSurfaceEvaluated,
+            printIsolationPassed,
             { chartTokensPresent, printStylesActive }
         );
 
@@ -823,7 +915,7 @@ async function runBrowserEvidence() {
             {
                 executedEnvironment: 'Headless Google Chrome (Windows NT / x86_64)',
                 viewportReflowTested: '320x568 (iPhone SE) and 390x844 (Mobile)',
-                touchTargetRequirements: 'min-height >= 44px on primary controls',
+                touchTargetRequirements: 'min-height >= 44px and min-width >= 44px on primary controls',
                 physicalDeviceGate: 'PENDING physical iOS Safari and Android Chrome test devices (per Issue #102)'
             }
         );

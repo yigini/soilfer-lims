@@ -3403,9 +3403,9 @@ Laboratory operators can find step-by-step procedures in the following documenta
     4. Theme selector entrypoints accessibility and mounting (Header ThemeToggle, Profile, Lab Management).
     5. Confirmation modal auto-focus entry, focus trap boundary wrapping (`Shift+Tab` / `Tab`), Escape key dismissal, and trigger focus restoration.
     6. Mode radiogroup WAI-ARIA roving tabindex (`tabindex="0"` for active, `-1` for inactive) and keyboard navigation (`ArrowRight`, `ArrowLeft`, `Home`, `End`).
-    7. Responsive layout reflow down to 320px viewport (320×568 iPhone SE and 390×844) without horizontal window overflow.
-    8. Multi-language localization verified across English, Spanish (`es`), French (`fr`), and Portuguese (`pt`).
-    9. Scientific chart tokens (`--sf-chart-1`..`6`) defined in DOM and paper certificate `@media print` styles isolated.
+    7. Responsive layout reflow down to 320px viewport (320×568 iPhone SE and 390×844) without horizontal window overflow; verified primary theme controls meet min-height >= 44px and min-width >= 44px.
+    8. Multi-language localization verified across English, Spanish (`es`), Latin American Spanish (`es-419`), French (`fr`), and Portuguese (`pt`), asserting both `document.documentElement.lang` and translated appearance keywords (`Appearance`, `Apariencia`, `Apparence`, `Aparência`).
+    9. Scientific chart tokens (`--sf-chart-1`..`6`) defined in DOM and paper certificate `@media print` styles isolated with strict pure white paper background (`rgb(255, 255, 255)`) and dark text isolation, rejecting non-white/black paper fixtures.
     10. Verification boundaries: Real Chrome browser execution verified; native physical iOS/Android gate recorded as pending.
   - `server/tests/contracts/theme_appearance_contract.test.js`: **All 19/19 tests PASS**.
   - `server/tests/security/` (5 suites): **All 80/80 tests PASS** (including `rbac_enforcement.test.js`, `lab_isolation.test.js`, `wiring.test.js`, `auth_token_invalidation.test.js`, `help_lab_isolation.test.js`).
@@ -3424,11 +3424,12 @@ Laboratory operators can find step-by-step procedures in the following documenta
     11. All 14 theme variants pass contrast checks with 0 failures.
   - Theme Catalog & Tokens Drift Verification (`npm run check:theme-catalog`): **0 drift detected** across server catalogue, client catalogue, and exact CSS token values across all 14 variants. Negative mutation fixtures verify detection of altered primary colors (`#FFFFFF`) and missing chart tokens. Wired into CI workflow (`.github/workflows/ci.yml`).
   - Client production build & Reproducible Delta Budget (measured against baseline `1265e8a` via `node server/scripts/measure_theme_bundle_delta.js`):
-    - Baseline Assets (`1265e8a`): CSS 203,804 B raw / 33,223 B gzip; Main JS 1,213,087 B raw / 350,029 B gzip.
-    - Candidate Assets: CSS 212,651 B raw / 34,948 B gzip; Main JS 1,252,768 B raw / 361,060 B gzip.
-    - **1. Plan Budget (Additional CSS + Canonical Theme Catalogue)**: Additional CSS delta (1,725 B gzip / 1.68 KiB) + Canonical Theme Catalogue (`themeCatalog.js`, 3,511 B gzip / 3.43 KiB) = **5,236 B gzip = 5.11 KiB gzip** vs ≤ 15.0 KiB plan budget (+9.89 KiB headroom, **PASSED**).
-    - **2. Lazy-Loaded Selector Component**: `ThemeGallery.jsx` chunk = 25,935 B raw / 6,478 B gzip (6.33 KiB gzip).
-    - **3. Complete End-to-End Application Footprint**: Total delta across all production assets including context and header integrations is 19,234 B gzip (18.78 KiB gzip).
+    - Baseline Assets (`1265e8a`): CSS 203,804 B raw / 33,223 B gzip; Main JS 1,213,087 B raw / 350,029 B gzip; Tree: `260975e57d0b3a1389f622c2f84ef444f3f46cf4`; Client Tree: `bffc1d55ebf9dbbcad5c5c8530794bede9b1f77e`.
+    - Candidate Assets: CSS 212,624 B raw / 34,942 B gzip (`b474b563...`); Main JS 1,252,791 B raw / 361,087 B gzip (`a201df5a...`); Client Tree: `fc48363a1b7f51a4751014c4d75781f1a953c2e1`.
+    - **1. Plan Budget (Additional CSS + Canonical Theme Catalogue Proxy)**: Additional CSS delta (1,719 B gzip / 1.68 KiB) + Canonical Theme Catalogue (`themeCatalog.js`, 3,511 B gzip / 3.43 KiB) = **5,230 B gzip = 5.11 KiB gzip** vs ≤ 15.0 KiB plan budget (+9.89 KiB headroom, **PASSED**).
+    - **2. Lazy-Loaded Selector Component**: `ThemeGallery-BjmaG7OE.js` chunk = 25,935 B raw / 6,477 B gzip (6.33 KiB gzip).
+    - **3. Complete End-to-End Application Footprint**: Total delta across all production assets including context and header integrations is 19,254 B gzip (18.80 KiB gzip).
+    - **Source Provenance Hashes**: `themeCatalog.js` sha256:`d140fa015ef37c4824ec966fc8ababb204028f694034d1eb7c507bf4d1c388bf`; `appearance-tokens.css` sha256:`25be0e303739c18d70e0548d476572c0365df7963f14d2c086958466a4efb246`.
   - Documentation: Updated `docs/THEME_GUIDE.md` covering user guide, lab manager guide, platform administrator guide, reset procedure, troubleshooting, and scientific paper isolation with honest physical hardware boundaries.
   - Status: Candidate completed locally with full test evidence and build budgets; PR #155 remains OPEN and unmerged; no production deployment until independent Codex acceptance and authorized release pipeline execution.
 

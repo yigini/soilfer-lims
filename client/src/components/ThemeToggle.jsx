@@ -79,7 +79,7 @@ export const ThemeToggle = () => {
             <button
                 ref={triggerRef}
                 onClick={toggleOpen}
-                className={`p-2 rounded-full transition-colors flex items-center justify-center relative focus:outline-none focus:ring-2 focus:ring-sf-focus ${
+                className={`p-2.5 min-h-[44px] min-w-[44px] rounded-full transition-colors flex items-center justify-center relative focus:outline-none focus:ring-2 focus:ring-sf-focus touch-target ${
                     isOpen
                         ? 'bg-sf-hover text-sf-text'
                         : 'text-sf-muted hover:text-sf-text hover:bg-sf-hover'

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
+const crypto = require('crypto');
 const { execSync } = require('child_process');
 const os = require('os');
 
@@ -17,7 +18,8 @@ function getDistMetrics(distDir) {
         if (stat.isFile()) {
             const content = fs.readFileSync(full);
             const gzip = zlib.gzipSync(content).length;
-            metrics[file] = { raw: stat.size, gzip };
+            const sha256 = crypto.createHash('sha256').update(content).digest('hex');
+            metrics[file] = { raw: stat.size, gzip, sha256 };
         }
     }
     return metrics;
@@ -111,9 +113,35 @@ console.log(`Main JS Bundle Delta:     +${mainJsDeltaGzip} bytes gzip (${(mainJs
 console.log(`Total App Gzip Overhead:  +${totalOverheadGzip} bytes gzip = ${(totalOverheadGzip / 1024).toFixed(2)} kB gzip`);
 console.log('======================================================\n');
 
+const getTreeSha = (ref) => {
+    try {
+        const out = execSync(`git cat-file -p ${ref}`, { cwd: root }).toString();
+        const m = out.match(/^tree ([a-f0-9]{40})/m);
+        return m ? m[1] : null;
+    } catch (e) {
+        return null;
+    }
+};
+
+const baselineTree = getTreeSha('1265e8a');
+const baselineClientTree = execSync('git rev-parse 1265e8a:client', { cwd: root }).toString().trim();
+const candidateCommit = execSync('git rev-parse HEAD', { cwd: root }).toString().trim();
+const candidateTree = getTreeSha('HEAD');
+const candidateClientTree = execSync('git rev-parse HEAD:client', { cwd: root }).toString().trim();
+
 fs.writeFileSync(path.join(root, 'server/scripts/theme_bundle_budget_measurement.json'), JSON.stringify({
     baselineCommit: '1265e8a',
-    candidateCommit: execSync('git rev-parse HEAD', { cwd: root }).toString().trim(),
+    baselineTree,
+    baselineClientTree,
+    candidateCommit,
+    candidateTree,
+    candidateClientTree,
+    sourceProvenance: {
+        themeCatalogPath: 'client/src/lib/themeCatalog.js',
+        themeCatalogSha256: crypto.createHash('sha256').update(fs.readFileSync(catalogPath)).digest('hex'),
+        appearanceTokensCssPath: 'client/src/styles/appearance-tokens.css',
+        appearanceTokensCssSha256: crypto.createHash('sha256').update(fs.readFileSync(path.join(root, 'client/src/styles/appearance-tokens.css'))).digest('hex')
+    },
     measuredAt: new Date().toISOString(),
     baseline: {
         css: baseCss,

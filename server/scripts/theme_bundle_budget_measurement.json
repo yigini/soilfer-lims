@@ -1,34 +1,49 @@
 {
   "baselineCommit": "1265e8a",
-  "candidateCommit": "b627a767543a4bc21d370865b75b221bc6677bc1",
-  "measuredAt": "2026-09-30T23:08:41.291Z",
+  "baselineTree": "260975e57d0b3a1389f622c2f84ef444f3f46cf4",
+  "baselineClientTree": "bffc1d55ebf9dbbcad5c5c8530794bede9b1f77e",
+  "candidateCommit": "bde7e8183fbfa0b30800e6dee01df1b8e681ebdb",
+  "candidateTree": "d19d48f85c1fbe390086fea479d42fd8f1d0f206",
+  "candidateClientTree": "fc48363a1b7f51a4751014c4d75781f1a953c2e1",
+  "sourceProvenance": {
+    "themeCatalogPath": "client/src/lib/themeCatalog.js",
+    "themeCatalogSha256": "d140fa015ef37c4824ec966fc8ababb204028f694034d1eb7c507bf4d1c388bf",
+    "appearanceTokensCssPath": "client/src/styles/appearance-tokens.css",
+    "appearanceTokensCssSha256": "25be0e303739c18d70e0548d476572c0365df7963f14d2c086958466a4efb246"
+  },
+  "measuredAt": "2026-09-30T23:53:16.281Z",
   "baseline": {
     "css": {
       "file": "index-B4HqGI8K.css",
       "raw": 203804,
-      "gzip": 33223
+      "gzip": 33223,
+      "sha256": "675d3398258dfdb798e7c86b4b6480ea7e0995741eddd0f5b3a26d2ee1c2f4f6"
     },
     "mainJs": {
       "file": "index-BzvRfDqo.js",
       "raw": 1213087,
-      "gzip": 350029
+      "gzip": 350029,
+      "sha256": "76f3754c17a4790c827636e7d631137598e5997a5da49f5c56bb487e94801ea0"
     }
   },
   "candidate": {
     "css": {
-      "file": "index-C2VWvOfU.css",
-      "raw": 212651,
-      "gzip": 34948
+      "file": "index-B6ZLjnoc.css",
+      "raw": 212624,
+      "gzip": 34942,
+      "sha256": "b474b563a2a7da9570ccad9c8a92b037cd3f5202ba51e3445a7949bd0b9ae31c"
     },
     "galleryJs": {
-      "file": "ThemeGallery-B_6Gkfwm.js",
+      "file": "ThemeGallery-BjmaG7OE.js",
       "raw": 25935,
-      "gzip": 6478
+      "gzip": 6477,
+      "sha256": "0d9e599ef695cfd87b038a8917aa0735f859e75713fa9519302a5714c1297225"
     },
     "mainJs": {
-      "file": "index-CMLAxFLZ.js",
-      "raw": 1252768,
-      "gzip": 361060
+      "file": "index-CwqN8k5p.js",
+      "raw": 1252791,
+      "gzip": 361087,
+      "sha256": "a201df5a0394980a59eeebc62a3d63b4832652c71a6f3ac73bd6cf176d50d4a3"
     },
     "themeCatalog": {
       "raw": 16701,
@@ -37,26 +52,26 @@
   },
   "planBudget": {
     "description": "Additional CSS + Canonical Theme Catalogue",
-    "additionalCssGzip": 1725,
+    "additionalCssGzip": 1719,
     "themeCatalogGzip": 3511,
-    "totalGzip": 5236,
+    "totalGzip": 5230,
     "totalGzipKb": "5.11",
     "budgetLimitKb": 15,
     "underBudgetKb": "9.89",
     "passed": true
   },
   "lazyChunk": {
-    "file": "ThemeGallery-B_6Gkfwm.js",
+    "file": "ThemeGallery-BjmaG7OE.js",
     "raw": 25935,
-    "gzip": 6478,
+    "gzip": 6477,
     "gzipKb": "6.33"
   },
   "completeAppOverhead": {
     "description": "Total delta across all assets (CSS + ThemeGallery Chunk + Main JS Bundle)",
-    "cssDeltaGzip": 1725,
-    "galleryGzip": 6478,
-    "mainJsDeltaGzip": 11031,
-    "totalOverheadGzip": 19234,
-    "totalOverheadGzipKb": "18.78"
+    "cssDeltaGzip": 1719,
+    "galleryGzip": 6477,
+    "mainJsDeltaGzip": 11058,
+    "totalOverheadGzip": 19254,
+    "totalOverheadGzipKb": "18.80"
   }
 }

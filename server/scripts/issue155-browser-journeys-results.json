@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-30T23:08:55.158Z",
+  "timestamp": "2026-09-30T23:53:31.629Z",
   "totalCases": 10,
   "totalPassed": 10,
   "allPassed": true,
@@ -171,7 +171,10 @@
             "hasNavbar": true,
             "themeAttr": "forest",
             "modeAttr": "light",
-            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpec",
+            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpectral Library\nInventory\nEquipment\nLaboratory Staff\nMy Laboratory\nAdmin Panel\nAbout SoilFER\nCollapse\nH",
+            "isNotFound": false,
+            "hasViewContainer": true,
+            "hasRouteContent": true,
             "passed": true
           },
           {
@@ -182,7 +185,10 @@
             "hasNavbar": true,
             "themeAttr": "forest",
             "modeAttr": "light",
-            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpec",
+            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpectral Library\nInventory\nEquipment\nLaboratory Staff\nMy Laboratory\nAdmin Panel\nAbout SoilFER\nCollapse\nH",
+            "isNotFound": false,
+            "hasViewContainer": true,
+            "hasRouteContent": true,
             "passed": true
           },
           {
@@ -193,7 +199,10 @@
             "hasNavbar": true,
             "themeAttr": "forest",
             "modeAttr": "light",
-            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpec",
+            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpectral Library\nInventory\nEquipment\nLaboratory Staff\nMy Laboratory\nAdmin Panel\nAbout SoilFER\nCollapse\nH",
+            "isNotFound": false,
+            "hasViewContainer": true,
+            "hasRouteContent": true,
             "passed": true
           },
           {
@@ -204,7 +213,10 @@
             "hasNavbar": true,
             "themeAttr": "forest",
             "modeAttr": "light",
-            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpec",
+            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpectral Library\nInventory\nEquipment\nLaboratory Staff\nMy Laboratory\nAdmin Panel\nAbout SoilFER\nCollapse\nH",
+            "isNotFound": false,
+            "hasViewContainer": true,
+            "hasRouteContent": true,
             "passed": true
           },
           {
@@ -215,7 +227,10 @@
             "hasNavbar": true,
             "themeAttr": "forest",
             "modeAttr": "light",
-            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpec",
+            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpectral Library\nInventory\nEquipment\nLaboratory Staff\nMy Laboratory\nAdmin Panel\nAbout SoilFER\nCollapse\nH",
+            "isNotFound": false,
+            "hasViewContainer": true,
+            "hasRouteContent": true,
             "passed": true
           },
           {
@@ -226,7 +241,10 @@
             "hasNavbar": true,
             "themeAttr": "forest",
             "modeAttr": "light",
-            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpec",
+            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpectral Library\nInventory\nEquipment\nLaboratory Staff\nMy Laboratory\nAdmin Panel\nAbout SoilFER\nCollapse\nH",
+            "isNotFound": false,
+            "hasViewContainer": true,
+            "hasRouteContent": true,
             "passed": true
           }
         ]
@@ -294,64 +312,64 @@
           "noHorizontalOverflow": true,
           "touchTargets": [
             {
-              "text": "",
-              "height": 36,
-              "width": 36,
-              "meets44px": false
+              "text": "Appearance",
+              "height": 82,
+              "width": 166,
+              "meets44px": true
             },
             {
-              "text": "Collapse",
-              "height": 0,
-              "width": 0,
-              "meets44px": false
+              "text": "Light",
+              "height": 44,
+              "width": 74,
+              "meets44px": true
             },
             {
-              "text": "",
-              "height": 0,
-              "width": 0,
-              "meets44px": false
+              "text": "Dark · Graphite",
+              "height": 44,
+              "width": 133,
+              "meets44px": true
             },
             {
-              "text": "",
-              "height": 0,
-              "width": 0,
-              "meets44px": false
+              "text": "Follow default mode",
+              "height": 44,
+              "width": 161,
+              "meets44px": true
             },
             {
-              "text": "Help",
-              "height": 0,
-              "width": 0,
-              "meets44px": false
+              "text": "Follow shared theme",
+              "height": 44,
+              "width": 138,
+              "meets44px": true
             },
             {
-              "text": "",
-              "height": 0,
-              "width": 0,
-              "meets44px": false
+              "text": "Reset to inherited d",
+              "height": 44,
+              "width": 169,
+              "meets44px": true
             },
             {
-              "text": "",
-              "height": 0,
-              "width": 0,
-              "meets44px": false
+              "text": "SoilFER ClassicDefau",
+              "height": 241,
+              "width": 230,
+              "meets44px": true
             },
             {
-              "text": "MManager BrowserLAB ",
-              "height": 0,
-              "width": 0,
-              "meets44px": false
+              "text": "ForestRecommendedSof",
+              "height": 241,
+              "width": 230,
+              "meets44px": true
             },
             {
-              "text": "",
-              "height": 24,
-              "width": 36,
-              "meets44px": false
+              "text": "TerraWarm clay tones",
+              "height": 241,
+              "width": 230,
+              "meets44px": true
             },
             {
-              "text": "",
-              "height": 34,
-              "width": 34,
-              "meets44px": false
+              "text": "MineralNeutral slate",
+              "height": 241,
+              "width": 230,
+              "meets44px": true
             }
           ]
         },
@@ -363,7 +381,7 @@
       }
     },
     {
-      "name": "Multi-language localization verified across en, es, fr, pt",
+      "name": "Multi-language localization verified across en, es, es-419, fr, pt",
       "category": "Internationalization",
       "passed": true,
       "details": {
@@ -371,22 +389,37 @@
           {
             "lang": "en",
             "docLang": "en",
-            "bodyTextLength": 732
+            "keyword": "Appearance",
+            "hasTranslatedKeyword": true,
+            "bodyTextLength": 1647
           },
           {
             "lang": "es",
-            "docLang": "en",
-            "bodyTextLength": 732
+            "docLang": "es",
+            "keyword": "Apariencia",
+            "hasTranslatedKeyword": true,
+            "bodyTextLength": 1828
+          },
+          {
+            "lang": "es-419",
+            "docLang": "es-419",
+            "keyword": "Apariencia",
+            "hasTranslatedKeyword": true,
+            "bodyTextLength": 1827
           },
           {
             "lang": "fr",
-            "docLang": "en",
-            "bodyTextLength": 732
+            "docLang": "fr",
+            "keyword": "Apparence",
+            "hasTranslatedKeyword": true,
+            "bodyTextLength": 1866
           },
           {
             "lang": "pt",
-            "docLang": "en",
-            "bodyTextLength": 732
+            "docLang": "pt",
+            "keyword": "Aparência",
+            "hasTranslatedKeyword": true,
+            "bodyTextLength": 1766
           }
         ]
       }
@@ -399,7 +432,10 @@
         "chartTokensPresent": true,
         "printStylesActive": {
           "paperSurfaceEvaluated": true,
-          "computedBg": "rgb(255, 255, 255)"
+          "computedBg": "rgb(255, 255, 255)",
+          "computedColor": "rgb(0, 0, 0)",
+          "isPureWhite": true,
+          "isBlackBackground": false
         }
       }
     },
@@ -410,7 +446,7 @@
       "details": {
         "executedEnvironment": "Headless Google Chrome (Windows NT / x86_64)",
         "viewportReflowTested": "320x568 (iPhone SE) and 390x844 (Mobile)",
-        "touchTargetRequirements": "min-height >= 44px on primary controls",
+        "touchTargetRequirements": "min-height >= 44px and min-width >= 44px on primary controls",
         "physicalDeviceGate": "PENDING physical iOS Safari and Android Chrome test devices (per Issue #102)"
       }
     }

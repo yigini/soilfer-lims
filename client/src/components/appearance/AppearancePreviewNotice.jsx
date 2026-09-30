@@ -58,7 +58,7 @@ export const AppearancePreviewNotice = () => {
                 <button
                     type="button"
                     onClick={clearPreviewTheme}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-sf-control/40 hover:bg-sf-hover/20 font-medium transition-colors touch-target sm:min-h-0 sm:min-w-0"
+                    className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg border border-sf-control/40 hover:bg-sf-hover/20 font-medium transition-colors touch-target min-h-[44px]"
                     title={t('appearance.exitPreview', 'Exit preview')}
                 >
                     <Undo2 size={15} />
@@ -68,7 +68,7 @@ export const AppearancePreviewNotice = () => {
                 <button
                     type="button"
                     onClick={handleSaveCurrent}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-sf-primary text-sf-on-primary font-bold hover:bg-sf-primary-hover shadow-sm transition-colors touch-target sm:min-h-0 sm:min-w-0"
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-sf-primary text-sf-on-primary font-bold hover:bg-sf-primary-hover shadow-sm transition-colors touch-target min-h-[44px]"
                     title={t('appearance.saveForMe', 'Save for me')}
                 >
                     <Check size={15} />
