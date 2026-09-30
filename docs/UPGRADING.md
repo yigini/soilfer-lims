@@ -212,7 +212,11 @@ if [ -f "./backups/baseline_config.env" ]; then
     source ./backups/baseline_config.env
 fi
 
-# Ingress Hold: Hold external client traffic for all configured client paths during postflight
+# Ingress Hold: Enforce client hold on all configured client paths during postflight
+# 1. Direct application port hold: bind published port to host loopback interface (127.0.0.1) across all topologies
+export PORT="127.0.0.1:3000"
+
+# 2. Reverse proxy hold: if NGINX proxy overlay is configured, stop NGINX proxy container
 if [ -f "docker-compose.nginx.yml" ] && echo "$COMPOSE_FILES" | grep -q "docker-compose.nginx.yml"; then
     echo "Holding public ingress at NGINX reverse proxy boundary..."
     docker compose ${COMPOSE_FILES} stop nginx || {
@@ -221,9 +225,7 @@ if [ -f "docker-compose.nginx.yml" ] && echo "$COMPOSE_FILES" | grep -q "docker-
     }
     echo "✓ Ingress held at NGINX reverse proxy boundary."
 else
-    echo "Direct topology deployment (no NGINX overlay configured)."
-    echo "Enforcing direct application port client hold: binding to loopback (127.0.0.1) for bounded postflight verification..."
-    export PORT="127.0.0.1:3000"
+    echo "Direct topology deployment (no NGINX overlay configured); application port bounded to loopback."
 fi
 
 # Launch containers in pre-exposure verification mode with writer hold
@@ -477,21 +479,15 @@ docker compose ${COMPOSE_FILES} exec -T \
         process.exit(1);
       }
     } else if (path === '/api/dashboard/live') {
-      if (Array.isArray(body) || typeof body !== 'object') {
-        console.error(\`❌ Invalid schema for \${path}: expected dashboard object\`);
+      if (!body || typeof body !== 'object' || Array.isArray(body) ||
+          !Array.isArray(body.intakeQueue) || !Array.isArray(body.reviewQueue) || !Array.isArray(body.oversight)) {
+        console.error(\`❌ Invalid schema for \${path}: expected dashboard object with intakeQueue, reviewQueue, and oversight arrays\`);
         process.exit(1);
       }
-      const queues = ['intakeQueue', 'reviewQueue', 'oversight'];
-      for (const q of queues) {
-        if (q in body && !Array.isArray(body[q])) {
-          console.error(\`❌ Invalid schema for \${path}: queue '\${q}' must be an array\`);
-          process.exit(1);
-        }
-      }
       records = [
-        ...(Array.isArray(body.intakeQueue) ? body.intakeQueue : []),
-        ...(Array.isArray(body.reviewQueue) ? body.reviewQueue : []),
-        ...(Array.isArray(body.oversight) ? body.oversight : [])
+        ...body.intakeQueue,
+        ...body.reviewQueue,
+        ...body.oversight
       ];
     } else {
       if (Array.isArray(body)) {
@@ -504,11 +500,32 @@ docker compose ${COMPOSE_FILES} exec -T \
       }
     }
 
-    // Validate that every record in records is a valid, non-null record object
+    // Validate that every record in records is a valid, non-null record object with required content identity
     for (const item of records) {
       if (!item || typeof item !== 'object' || Array.isArray(item)) {
         console.error(\`❌ Role gate failed for \${role} on \${path}: Record is not a valid non-null object (\${JSON.stringify(item)})\`);
         process.exit(1);
+      }
+      if (path === '/api/work') {
+        if (!item.id || (!item.assignedLab && !item.labId) || (!item.status && !item.analysis)) {
+          console.error(\`❌ Record content validation failed for \${path}: Missing required work item fields (id, assignedLab/labId, status/analysis)\`);
+          process.exit(1);
+        }
+      } else if (path === '/api/submissions') {
+        if (!item.id || (!item.assignedLab && !item.labId && !item.sampleId)) {
+          console.error(\`❌ Record content validation failed for \${path}: Missing required submission fields (id, assignedLab/labId/sampleId)\`);
+          process.exit(1);
+        }
+      } else if (path === '/api/users') {
+        if (!item.id || !item.username) {
+          console.error(\`❌ Record content validation failed for \${path}: Missing required user fields (id, username)\`);
+          process.exit(1);
+        }
+      } else if (path === '/api/labs') {
+        if (!item.id) {
+          console.error(\`❌ Record content validation failed for \${path}: Missing required lab field (id)\`);
+          process.exit(1);
+        }
       }
     }
 
@@ -519,6 +536,14 @@ docker compose ${COMPOSE_FILES} exec -T \
       const userCountries = parseArray(principal.countries, 'countries');
 
       for (const item of records) {
+        // 0. Technician assignee validation on /api/work
+        if (principal.role === 'LAB_TECHNICIAN' && path === '/api/work') {
+          if (!item.assignedTo || item.assignedTo !== principal.username) {
+            console.error(\`❌ Scope violation: work item assignedTo '\${item.assignedTo}' does not match technician username '\${principal.username}' for \${role} on \${path}\`);
+            process.exit(1);
+          }
+        }
+
         // 1. Facility assignedLab scoping (distinguished from specimen accession labId)
         if (userLabId) {
           if (item.assignedLab && item.assignedLab !== userLabId) {
@@ -538,10 +563,13 @@ docker compose ${COMPOSE_FILES} exec -T \
         // 2. Project scoping (route-specific):
         // /api/submissions controller scopes LAB_MANAGER strictly by assignedLab (facility),
         // so an own-facility manager legitimately processes samples from any project at their lab.
+        // /api/work controller scopes LAB_TECHNICIAN strictly by assignedLab and assignedTo,
+        // so an own-facility technician legitimately processes assigned work from any project at their lab.
         // For other routes or when userLabId is not set, enforce project allow-list.
-        if (path !== '/api/submissions' || !userLabId) {
-          if (userProjects.length > 0 && item.projectCode && !userProjects.includes(item.projectCode)) {
-            console.error(\`❌ Scope violation: item projectCode '\${item.projectCode}' outside authorized projects for \${role} on \${path}\`);
+        if ((path !== '/api/submissions' && path !== '/api/work') || !userLabId) {
+          const itemProjectCode = item.projectCode || (item.sample && item.sample.projectCode);
+          if (userProjects.length > 0 && itemProjectCode && !userProjects.includes(itemProjectCode)) {
+            console.error(\`❌ Scope violation: item projectCode '\${itemProjectCode}' outside authorized projects for \${role} on \${path}\`);
             process.exit(1);
           }
         }
@@ -580,7 +608,7 @@ docker compose ${COMPOSE_FILES} exec -T \
   })().catch(e => { console.error('Postflight API error:', e.message); process.exit(1); });
 "
 
-# 7. Verify NGINX Ingress Hold (if deployed with NGINX overlay)
+# 7. Verify NGINX and Application Client Ingress Hold across all configured client paths (Pre-Exposure Boundary Gate)
 if echo "${COMPOSE_FILES}" | grep -q "docker-compose\.nginx\.yml"; then
     echo "NGINX reverse proxy overlay is configured; verifying ingress is held..."
     NGINX_CONTAINER=$(docker compose ${COMPOSE_FILES} ps -q nginx) || {
@@ -597,23 +625,30 @@ if echo "${COMPOSE_FILES}" | grep -q "docker-compose\.nginx\.yml"; then
             echo "❌ NGINX reverse proxy is unexpectedly running; ingress hold violated!"
             exit 1
         elif [ "$NGINX_RUNNING" != "false" ]; then
-            echo "❌ Unexpected NGINX container state '\${NGINX_RUNNING}'!"
+            echo "❌ Unexpected NGINX container state '${NGINX_RUNNING}'!"
             exit 1
         fi
     fi
-    echo "✓ Public ingress hold verified (NGINX proxy inactive during pre-exposure postflight)."
-else
-    echo "Verifying direct topology client ingress hold..."
-    if ! HOST_BIND_IP=$(docker inspect "$LIVE_CONTAINER_ID" --format '{{range $p, $conf := .NetworkSettings.Ports}}{{range $conf}}{{.HostIp}}{{end}}{{end}}'); then
-        echo "❌ Failed to inspect direct container port binding!"
-        exit 1
-    fi
-    if [ "$HOST_BIND_IP" = "0.0.0.0" ]; then
-        echo "❌ Direct application port is exposed on public interface (0.0.0.0); ingress hold violated!"
-        exit 1
-    fi
-    echo "✓ Direct client ingress hold verified (application port bounded to host loopback ${HOST_BIND_IP:-127.0.0.1} during pre-exposure postflight)."
+    echo "✓ Reverse proxy ingress hold verified (NGINX proxy inactive during pre-exposure postflight)."
 fi
+
+echo "Verifying application port client ingress hold..."
+BIND_IPS=$(docker inspect "$LIVE_CONTAINER_ID" --format '{{range $p, $conf := .NetworkSettings.Ports}}{{range $conf}}{{.HostIp}} {{end}}{{end}}') || {
+    echo "❌ Failed to inspect container port bindings!"
+    exit 1
+}
+BIND_IPS_TRIMMED=$(echo "$BIND_IPS" | tr -d '[:space:]')
+if [ -z "$BIND_IPS_TRIMMED" ]; then
+    echo "❌ Container port bindings are empty or uninspected; ingress hold violated!"
+    exit 1
+fi
+for ip in $BIND_IPS; do
+    if [ "$ip" != "127.0.0.1" ] && [ "$ip" != "::1" ]; then
+        echo "❌ Ingress hold violated: container port is bound to non-loopback address '${ip}'!"
+        exit 1
+    fi
+done
+echo "✓ Application client ingress hold verified (all published bindings restricted to loopback: ${BIND_IPS_TRIMMED})."
 ```
 
 ### Step 6: Release Commitment & Ingress Reopening
