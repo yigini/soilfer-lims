@@ -87,6 +87,12 @@ fi
 docker volume inspect "$DATA_VOLUME" >/dev/null
 docker volume inspect "$ASSETS_VOLUME" >/dev/null
 
+# Discover configured NGINX proxy container identity if deployed with NGINX overlay
+BASELINE_NGINX_CONTAINER=""
+if echo "${COMPOSE_FILES}" | grep -q "docker-compose\.nginx\.yml"; then
+    BASELINE_NGINX_CONTAINER=$(docker compose ${COMPOSE_FILES} ps -q nginx 2>/dev/null || true)
+fi
+
 # Snapshot discovered configuration
 mkdir -p ./backups
 cat <<EOF > ./backups/baseline_config.env
@@ -95,6 +101,7 @@ DATA_VOLUME="${DATA_VOLUME}"
 ASSETS_VOLUME="${ASSETS_VOLUME}"
 BASELINE_IMAGE_ID="${BASELINE_IMAGE_ID}"
 BASELINE_IMAGE_REF="${BASELINE_IMAGE_REF}"
+BASELINE_NGINX_CONTAINER="${BASELINE_NGINX_CONTAINER}"
 EXPECTED_MODE="${EXPECTED_MODE}"
 POSTFLIGHT_ADMIN_ID="${POSTFLIGHT_ADMIN_ID}"
 POSTFLIGHT_MANAGER_ID="${POSTFLIGHT_MANAGER_ID}"
@@ -107,6 +114,7 @@ echo "  - Database Volume:    ${DATA_VOLUME}"
 echo "  - Assets Volume:      ${ASSETS_VOLUME}"
 echo "  - Baseline Image ID:  ${BASELINE_IMAGE_ID}"
 echo "  - Baseline Image Ref: ${BASELINE_IMAGE_REF}"
+echo "  - NGINX Proxy ID:     ${BASELINE_NGINX_CONTAINER:-'none (direct)'}"
 echo "  - Deployment Mode:    ${EXPECTED_MODE}"
 echo "  - Super Admin ID:     ${POSTFLIGHT_ADMIN_ID}"
 echo "  - Lab Manager ID:     ${POSTFLIGHT_MANAGER_ID}"
@@ -204,7 +212,7 @@ if [ -f "./backups/baseline_config.env" ]; then
     source ./backups/baseline_config.env
 fi
 
-# Ingress Hold: If NGINX proxy is configured, hold external client ingress during postflight
+# Ingress Hold: Hold external client traffic for all configured client paths during postflight
 if [ -f "docker-compose.nginx.yml" ] && echo "$COMPOSE_FILES" | grep -q "docker-compose.nginx.yml"; then
     echo "Holding public ingress at NGINX reverse proxy boundary..."
     docker compose ${COMPOSE_FILES} stop nginx || {
@@ -212,6 +220,10 @@ if [ -f "docker-compose.nginx.yml" ] && echo "$COMPOSE_FILES" | grep -q "docker-
         exit 1
     }
     echo "✓ Ingress held at NGINX reverse proxy boundary."
+else
+    echo "Direct topology deployment (no NGINX overlay configured)."
+    echo "Enforcing direct application port client hold: binding to loopback (127.0.0.1) for bounded postflight verification..."
+    export PORT="127.0.0.1:3000"
 fi
 
 # Launch containers in pre-exposure verification mode with writer hold
@@ -292,6 +304,18 @@ docker compose ${COMPOSE_FILES} exec -T lims node -e "
   }
   console.log('✓ Post-upgrade database integrity and foreign keys verified.');
 "
+
+# 5b. Execute Pinned Issue #140 Scope & Catalogue Postflight Suite
+echo "Executing pinned Issue #140 scope and catalogue postflight verification..."
+docker compose ${COMPOSE_FILES} exec -T \
+  -e POSTFLIGHT_BASE_URL="http://127.0.0.1:3000" \
+  -e POSTFLIGHT_ADMIN_ID="${POSTFLIGHT_ADMIN_ID}" \
+  -e POSTFLIGHT_MANAGER_ID="${POSTFLIGHT_MANAGER_ID}" \
+  lims node scripts/postflight_issue140.cjs || {
+    echo "❌ Pinned Issue #140 postflight suite failed!"
+    exit 1
+}
+echo "✓ Pinned Issue #140 scope and catalogue verification passed."
 
 # 6. Verify Database Records & Read-Only Role/API Postflight Gates with Reviewed Existing Principals
 docker compose ${COMPOSE_FILES} exec -T lims node -e "
@@ -384,13 +408,24 @@ docker compose ${COMPOSE_FILES} exec -T \
     tokenVersion: techPrincipal.tokenVersion || 0
   }, secret, { expiresIn: '5m' });
 
-  function parseArray(val) {
+  function parseArray(val, fieldName) {
     if (!val) return [];
     if (Array.isArray(val)) return val;
     if (typeof val === 'string') {
-      try { return JSON.parse(val); } catch (_) { return []; }
+      try {
+        const parsed = JSON.parse(val);
+        if (!Array.isArray(parsed)) {
+          console.error(\`❌ Malformed \${fieldName} metadata for principal: expected JSON array, got \${typeof parsed}\`);
+          process.exit(1);
+        }
+        return parsed;
+      } catch (err) {
+        console.error(\`❌ Failed to parse \${fieldName} JSON metadata for principal: \${err.message}\`);
+        process.exit(1);
+      }
     }
-    return [];
+    console.error(\`❌ Invalid \${fieldName} metadata for principal: expected array or string, got \${typeof val}\`);
+    process.exit(1);
   }
 
   async function checkRoute(role, path, expectedStatus, token, principal) {
@@ -413,45 +448,102 @@ docker compose ${COMPOSE_FILES} exec -T \
       process.exit(1);
     }
 
+    // Route-specific envelope and schema validation
     let records = [];
-    if (Array.isArray(body)) {
-      records = body;
-    } else if (Array.isArray(body.data)) {
+    if (path === '/api/work') {
+      if (!body || typeof body !== 'object' || Array.isArray(body) || !Array.isArray(body.data)) {
+        console.error(\`❌ Invalid schema for \${path}: expected envelope object with array 'data'\`);
+        process.exit(1);
+      }
       records = body.data;
-    } else if (Array.isArray(body.users)) {
-      records = body.users;
+    } else if (path === '/api/users') {
+      if (Array.isArray(body)) {
+        records = body;
+      } else if (Array.isArray(body.data)) {
+        records = body.data;
+      } else if (Array.isArray(body.users)) {
+        records = body.users;
+      } else {
+        console.error(\`❌ Invalid schema for \${path}: expected array or envelope with 'data'/'users' array\`);
+        process.exit(1);
+      }
+    } else if (path === '/api/labs' || path === '/api/submissions') {
+      if (Array.isArray(body)) {
+        records = body;
+      } else if (Array.isArray(body.data)) {
+        records = body.data;
+      } else {
+        console.error(\`❌ Invalid schema for \${path}: expected array of records\`);
+        process.exit(1);
+      }
     } else if (path === '/api/dashboard/live') {
+      if (Array.isArray(body) || typeof body !== 'object') {
+        console.error(\`❌ Invalid schema for \${path}: expected dashboard object\`);
+        process.exit(1);
+      }
+      const queues = ['intakeQueue', 'reviewQueue', 'oversight'];
+      for (const q of queues) {
+        if (q in body && !Array.isArray(body[q])) {
+          console.error(\`❌ Invalid schema for \${path}: queue '\${q}' must be an array\`);
+          process.exit(1);
+        }
+      }
       records = [
         ...(Array.isArray(body.intakeQueue) ? body.intakeQueue : []),
         ...(Array.isArray(body.reviewQueue) ? body.reviewQueue : []),
         ...(Array.isArray(body.oversight) ? body.oversight : [])
       ];
+    } else {
+      if (Array.isArray(body)) {
+        records = body;
+      } else if (Array.isArray(body.data)) {
+        records = body.data;
+      } else {
+        console.error(\`❌ Invalid schema for \${path}: unknown envelope\`);
+        process.exit(1);
+      }
     }
 
+    // Validate that every record in records is a valid, non-null record object
+    for (const item of records) {
+      if (!item || typeof item !== 'object' || Array.isArray(item)) {
+        console.error(\`❌ Role gate failed for \${role} on \${path}: Record is not a valid non-null object (\${JSON.stringify(item)})\`);
+        process.exit(1);
+      }
+    }
+
+    // Route-specific and role-specific scope validation
     if (principal.role !== 'SUPER_ADMIN') {
       const userLabId = principal.labId || null;
-      const userProjects = parseArray(principal.projects);
-      const userCountries = parseArray(principal.countries);
+      const userProjects = parseArray(principal.projects, 'projects');
+      const userCountries = parseArray(principal.countries, 'countries');
 
       for (const item of records) {
-        if (!item || typeof item !== 'object') continue;
-
         // 1. Facility assignedLab scoping (distinguished from specimen accession labId)
-        if (userLabId && item.assignedLab && item.assignedLab !== userLabId) {
-          console.error(\`❌ Scope violation: item assignedLab '\${item.assignedLab}' does not match principal labId '\${userLabId}' for \${role} on \${path}\`);
-          process.exit(1);
-        }
-        if (!userLabId && item.assignedLab) {
-          if (!userProjects.length || (item.projectCode && !userProjects.includes(item.projectCode))) {
-            console.error(\`❌ Scope violation: unassigned-lab principal received facility record '\${item.assignedLab}' for \${role} on \${path}\`);
+        if (userLabId) {
+          if (item.assignedLab && item.assignedLab !== userLabId) {
+            console.error(\`❌ Scope violation: item assignedLab '\${item.assignedLab}' does not match principal labId '\${userLabId}' for \${role} on \${path}\`);
             process.exit(1);
+          }
+        } else {
+          // Principal has NO assigned lab: must not receive facility-assigned records unless authorized by project/country
+          if (item.assignedLab) {
+            if (!userProjects.length || (item.projectCode && !userProjects.includes(item.projectCode))) {
+              console.error(\`❌ Scope violation: unassigned-lab principal received facility record '\${item.assignedLab}' for \${role} on \${path}\`);
+              process.exit(1);
+            }
           }
         }
 
-        // 2. Project scoping
-        if (userProjects.length > 0 && item.projectCode && !userProjects.includes(item.projectCode)) {
-          console.error(\`❌ Scope violation: item projectCode '\${item.projectCode}' outside authorized projects for \${role} on \${path}\`);
-          process.exit(1);
+        // 2. Project scoping (route-specific):
+        // /api/submissions controller scopes LAB_MANAGER strictly by assignedLab (facility),
+        // so an own-facility manager legitimately processes samples from any project at their lab.
+        // For other routes or when userLabId is not set, enforce project allow-list.
+        if (path !== '/api/submissions' || !userLabId) {
+          if (userProjects.length > 0 && item.projectCode && !userProjects.includes(item.projectCode)) {
+            console.error(\`❌ Scope violation: item projectCode '\${item.projectCode}' outside authorized projects for \${role} on \${path}\`);
+            process.exit(1);
+          }
         }
 
         // 3. Country scoping
@@ -491,17 +583,36 @@ docker compose ${COMPOSE_FILES} exec -T \
 # 7. Verify NGINX Ingress Hold (if deployed with NGINX overlay)
 if echo "${COMPOSE_FILES}" | grep -q "docker-compose\.nginx\.yml"; then
     echo "NGINX reverse proxy overlay is configured; verifying ingress is held..."
-    NGINX_CONTAINER=$(docker compose ${COMPOSE_FILES} ps -q nginx 2>/dev/null || true)
-    if [ -n "$NGINX_CONTAINER" ]; then
-        NGINX_RUNNING=$(docker inspect -f '{{.State.Running}}' "$NGINX_CONTAINER" 2>/dev/null || echo "false")
+    NGINX_CONTAINER=$(docker compose ${COMPOSE_FILES} ps -q nginx) || {
+        echo "❌ Failed to query NGINX container status via docker compose ps!"
+        exit 1
+    }
+    TARGET_NGINX="${NGINX_CONTAINER:-${BASELINE_NGINX_CONTAINER}}"
+    if [ -n "$TARGET_NGINX" ]; then
+        NGINX_RUNNING=$(docker inspect -f '{{.State.Running}}' "$TARGET_NGINX") || {
+            echo "❌ Failed to inspect NGINX container state!"
+            exit 1
+        }
         if [ "$NGINX_RUNNING" = "true" ]; then
             echo "❌ NGINX reverse proxy is unexpectedly running; ingress hold violated!"
+            exit 1
+        elif [ "$NGINX_RUNNING" != "false" ]; then
+            echo "❌ Unexpected NGINX container state '\${NGINX_RUNNING}'!"
             exit 1
         fi
     fi
     echo "✓ Public ingress hold verified (NGINX proxy inactive during pre-exposure postflight)."
 else
-    echo "ℹ Direct topology deployment (no NGINX overlay configured); skipping proxy check."
+    echo "Verifying direct topology client ingress hold..."
+    if ! HOST_BIND_IP=$(docker inspect "$LIVE_CONTAINER_ID" --format '{{range $p, $conf := .NetworkSettings.Ports}}{{range $conf}}{{.HostIp}}{{end}}{{end}}'); then
+        echo "❌ Failed to inspect direct container port binding!"
+        exit 1
+    fi
+    if [ "$HOST_BIND_IP" = "0.0.0.0" ]; then
+        echo "❌ Direct application port is exposed on public interface (0.0.0.0); ingress hold violated!"
+        exit 1
+    fi
+    echo "✓ Direct client ingress hold verified (application port bounded to host loopback ${HOST_BIND_IP:-127.0.0.1} during pre-exposure postflight)."
 fi
 ```
 
@@ -565,18 +676,29 @@ echo "✓ Background scheduler initialization verified."
 if [ -f "docker-compose.nginx.yml" ] && echo "$COMPOSE_FILES" | grep -q "docker-compose.nginx.yml"; then
     echo "Reopening public ingress at NGINX reverse proxy boundary..."
     docker compose ${COMPOSE_FILES} up -d nginx
-    NGINX_CONTAINER=$(docker compose ${COMPOSE_FILES} ps -q nginx 2>/dev/null || true)
+    NGINX_CONTAINER=$(docker compose ${COMPOSE_FILES} ps -q nginx) || {
+        echo "❌ Failed to query NGINX container status via docker compose ps!"
+        exit 1
+    }
     if [ -z "$NGINX_CONTAINER" ]; then
         echo "❌ NGINX reverse proxy container is missing!"
         exit 1
     fi
-    NGINX_RUNNING=$(docker inspect -f '{{.State.Running}}' "$NGINX_CONTAINER" 2>/dev/null || echo "false")
+    NGINX_RUNNING=$(docker inspect -f '{{.State.Running}}' "$NGINX_CONTAINER") || {
+        echo "❌ Failed to inspect NGINX container state!"
+        exit 1
+    }
     if [ "$NGINX_RUNNING" != "true" ]; then
         echo "❌ NGINX reverse proxy container is not running (State.Running: $NGINX_RUNNING)!"
         exit 1
     fi
     curl -fsSL http://localhost/api/health >/dev/null || { echo "❌ Ingress check via NGINX port 80 failed!"; exit 1; }
     echo "✓ Ingress reopened and verified healthy at NGINX reverse proxy boundary."
+else
+    echo "Reopening public ingress for direct topology..."
+    PORT="${PRODUCTION_PORT:-3000}" docker compose ${COMPOSE_FILES} up -d lims
+    curl -fsSL "http://localhost:${PRODUCTION_PORT:-3000}/api/health" >/dev/null || { echo "❌ Ingress check via direct port failed!"; exit 1; }
+    echo "✓ Ingress reopened and verified healthy on direct application port."
 fi
 ```
 - **CRITICAL INVARIANT:** Once new analytical writes have resumed after cutover, **DO NOT execute Route A or Route B database volume restoration**. Restoring an earlier database snapshot rewinds analytical history and permanently destroys newly ingested samples and client results.
