@@ -262,6 +262,11 @@ let schedulerInterval = null;
 
 function startEscalationScheduler(intervalMs = 60 * 60 * 1000) {
     if (schedulerInterval) return;
+    if (process.env.NODE_ENV === 'test' || process.env.DISABLE_BACKGROUND_JOBS === 'true' || process.env.ENABLE_BACKGROUND_JOBS === 'false') {
+        console.log('[SCHEDULER] Escalation background scheduler suppressed (writer hold active)');
+        return;
+    }
+    console.log('[SCHEDULER] Escalation background scheduler initialized');
     schedulerInterval = setInterval(async () => {
         try {
             await runEscalationChecks();

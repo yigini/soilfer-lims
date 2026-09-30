@@ -10,6 +10,23 @@
  *   global → SUPER_ADMIN account (create labs via UI)
  */
 
+const path = require('path');
+const fs = require('fs');
+const dotenv = require('dotenv');
+
+// Load environment variables independent of working directory:
+// 1. process.env (externally supplied, e.g. Docker, CI, process exports) is preserved by dotenv default.
+// 2. Project-root .env (canonical location created by setup.sh / .env.example) supplies configuration.
+// 3. server/.env (if present) is loaded for backward compatibility without overriding existing variables.
+const rootEnv = path.resolve(__dirname, '..', '.env');
+const serverEnv = path.resolve(__dirname, '.env');
+if (fs.existsSync(rootEnv)) {
+    dotenv.config({ path: rootEnv });
+}
+if (fs.existsSync(serverEnv)) {
+    dotenv.config({ path: serverEnv });
+}
+
 const prisma = require('./prisma');
 const bcrypt = require('bcryptjs');
 
@@ -72,19 +89,28 @@ async function seed() {
 
         const labId = `lab-default-${Date.now()}`;
 
-        // Create default laboratory (uses Lab model from schema)
-        await prisma.lab.create({
-            data: {
-                id: labId,
-                name: 'My Laboratory',
-                code: 'LAB01',
-                country: 'INT',
-                isActive: true,
-                createdAt: now,
-                updatedAt: now
-            }
+        // Find or create default laboratory (uses Lab model from schema)
+        let defaultLab = await prisma.lab.findFirst({
+            where: { code: 'LAB01' }
         });
-        console.log('  ✓ Created laboratory: My Laboratory (LAB01)');
+        if (!defaultLab) {
+            defaultLab = await prisma.lab.create({
+                data: {
+                    id: labId,
+                    name: 'My Laboratory',
+                    code: 'LAB01',
+                    country: 'INT',
+                    isActive: true,
+                    createdAt: now,
+                    updatedAt: now
+                }
+            });
+            console.log('  ✓ Created laboratory: My Laboratory (LAB01)');
+        } else {
+            console.log(`  ✓ Using existing default laboratory: ${defaultLab.name} (${defaultLab.code})`);
+        }
+
+        const effectiveLabId = defaultLab.id;
 
         // Create admin user (LAB_MANAGER scoped to the default lab)
         await prisma.user.create({
@@ -95,7 +121,7 @@ async function seed() {
                 email: 'admin@soilfer-lims.local',
                 role: 'LAB_MANAGER',
                 name: 'Lab Administrator',
-                labId: labId,
+                labId: effectiveLabId,
                 countries: '[]',
                 projects: '[]',
                 isActive: true,
@@ -104,7 +130,6 @@ async function seed() {
                 updatedAt: now
             }
         });
-
         console.log('  ✓ Created user: admin (LAB_MANAGER)');
         console.log('  ┌────────────────────────────────────────────────────────┐');
         console.log('  │ 🔑 INITIAL ADMIN CREDENTIALS (Generated — Print Once): │');

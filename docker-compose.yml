@@ -1,6 +1,7 @@
 services:
   lims:
     build: .
+    image: soilfer-lims:${LIMS_IMAGE_TAG:-latest}
     container_name: soilfer-lims
     restart: unless-stopped
     ports:
@@ -8,8 +9,10 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set}
+      - JWT_SECRET=${JWT_SECRET:-}
       - DEPLOYMENT_MODE=${DEPLOYMENT_MODE:-local}
+      - ADMIN_INITIAL_PASSWORD=${ADMIN_INITIAL_PASSWORD:-}
+      - DISABLE_BACKGROUND_JOBS=${DISABLE_BACKGROUND_JOBS:-}
     deploy:
       resources:
         limits:

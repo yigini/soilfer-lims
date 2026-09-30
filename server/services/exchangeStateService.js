@@ -2519,6 +2519,7 @@ module.exports = {
     decodeCursor,
     registerDbFunctions,
     installSqliteHooks,
+    initTables,
     ensureTriggers,
     normalizeSampleDataForHash,
     getCurrentEpoch,

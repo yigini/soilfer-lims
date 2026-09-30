@@ -24,6 +24,7 @@
 
 Complete, operator-focused documentation is available directly in the repository and viewable locally as an interactive book:
 
+* 📊 **[Deployment Readiness Status & Operator Guide](docs/DEPLOYMENT_READINESS.md)** — Tracked readiness status, single-lab and multi-lab guides, and technical audit ledger.
 * 📖 **[Administration Guide](docs/ADMIN_GUIDE.md)** — Laboratory configuration, user RBAC, GloSIS procedures, quality rules, and SIS API keys.
 * 🚀 **[Deployment & Production Guide](docs/DEPLOYMENT_GUIDE.md)** — Comprehensive VPS setup, Docker Compose, Nginx/Apache reverse proxy, SSL/Certbot, and zero-downtime updates.
 * 🛠️ **[Installation Quickstart](docs/INSTALL.md)** — Step-by-step local machine and server installation for beginners.
@@ -134,16 +135,19 @@ cp .env.example .env
 
 ### 3. Launch with Docker Compose
 ```bash
-# For a Single Local Laboratory:
-docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
+# Option A: Single Laboratory with NGINX (Ports 80/443 — Recommended):
+docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d --build
 
-# For a Multi-Lab National Network:
-docker compose -f docker-compose.yml -f docker-compose.global.yml up -d --build
+# Option B: Single Laboratory Direct Port 3000 (No NGINX):
+docker compose up -d --build
+
+# Option C: Multi-Lab National Network (Global mode) with NGINX:
+docker compose -f docker-compose.yml -f docker-compose.global.yml -f docker-compose.nginx.yml up -d --build
 ```
 
 ### 4. Access the Application
 Open your web browser and navigate to:
-👉 **`http://localhost`** (or your server's public IP address)
+👉 **`http://localhost`** (or `http://localhost:3000` if not using NGINX)
 
 ---
 

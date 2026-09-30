@@ -17,6 +17,7 @@
 
 ## 📖 In-Repository & Local Documentation
 
+* 📊 **[Deployment Readiness Status & Operator Guide](DEPLOYMENT_READINESS.md)** — Tracked readiness status, single-lab and multi-lab guides, and technical audit ledger.
 * 📖 **[Administration Guide](ADMIN_GUIDE.md)** — Laboratory configuration, user RBAC, GloSIS procedures, and SIS API keys.
 * 🚀 **[Deployment & Production Guide](DEPLOYMENT_GUIDE.md)** — Comprehensive VPS setup, Nginx reverse proxy, SSL/Certbot, and zero-downtime updates.
 * 🛠️ **[Installation Quickstart](INSTALL.md)** — Step-by-step local and server installation.
@@ -353,13 +354,21 @@ Save (Ctrl+O, Enter) and exit (Ctrl+X).
 
 ```bash
 cd /opt/soilfer-lims
-docker compose -f docker-compose.yml -f docker-compose.global.yml up -d
+
+# Option A: Single-Lab with NGINX Reverse Proxy (Ports 80/443 — Recommended)
+docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d
+
+# Option B: Single-Lab Direct Port 3000 (No NGINX)
+docker compose up -d
+
+# Option C: Multi-Laboratory Network (Global mode) with NGINX
+docker compose -f docker-compose.yml -f docker-compose.global.yml -f docker-compose.nginx.yml up -d
 ```
 
-> **What does this command do?**
-> - `docker compose up` starts the application
-> - `-f docker-compose.yml -f docker-compose.global.yml` tells Docker to use both the base config and the web server (NGINX) config
-> - `-d` runs it in the background (so it keeps running after you close the terminal)
+> **What do these options do?**
+> - `docker compose up -d` starts the application container in background.
+> - `-f docker-compose.nginx.yml` adds the NGINX web server (listens on ports 80 and 443 for web traffic and SSL).
+> - `-f docker-compose.global.yml` configures multi-laboratory network mode (`SUPER_ADMIN`). Without it, LIMS runs in single-laboratory mode (`local`).
 
 The **first time** you run this, Docker will:
 1. Download the Node.js base image (~150 MB)
@@ -431,7 +440,7 @@ First, temporarily stop the NGINX container (Certbot needs port 80):
 
 ```bash
 cd /opt/soilfer-lims
-docker compose -f docker-compose.yml -f docker-compose.global.yml stop nginx
+docker compose -f docker-compose.yml -f docker-compose.nginx.yml stop nginx
 ```
 
 Now run Certbot (replace with your domain):
@@ -505,7 +514,7 @@ server {
 
 ```bash
 cd /opt/soilfer-lims
-docker compose -f docker-compose.yml -f docker-compose.global.yml up -d
+docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d
 ```
 
 Visit **https://soillab.org** — you should see the green lock icon 🔒 in your browser!
@@ -517,7 +526,7 @@ Let's Encrypt certificates expire every 90 days. Set up automatic renewal:
 ```bash
 sudo tee /etc/cron.d/lims-certbot << 'EOF'
 # Renew SSL certificate every Monday at 3 AM
-0 3 * * 1 root certbot renew --pre-hook "cd /opt/soilfer-lims && docker compose -f docker-compose.yml -f docker-compose.global.yml stop nginx" --post-hook "cd /opt/soilfer-lims && docker compose -f docker-compose.yml -f docker-compose.global.yml start nginx" >> /var/log/certbot-renew.log 2>&1
+0 3 * * 1 root certbot renew --pre-hook "cd /opt/soilfer-lims && docker compose -f docker-compose.yml -f docker-compose.nginx.yml stop nginx" --post-hook "cd /opt/soilfer-lims && docker compose -f docker-compose.yml -f docker-compose.nginx.yml start nginx" >> /var/log/certbot-renew.log 2>&1
 EOF
 ```
 
@@ -859,7 +868,9 @@ git pull origin main
 
 # Rebuild and restart (your data is preserved)
 docker compose down
-docker compose -f docker-compose.yml -f docker-compose.global.yml up -d --build
+# For single-lab with NGINX:
+docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d --build
+# (Or for multi-lab global mode, add -f docker-compose.global.yml)
 ```
 
 > ⚠️ **Your database is safe** — it lives in a Docker volume that persists across rebuilds. But it's always good practice to back up before updating.
@@ -887,20 +898,20 @@ cd /opt/soilfer-lims
 # Simple restart
 docker compose restart
 
-# Full restart (stop, then start)
+# Full restart (stop, then start with your configuration)
 docker compose down
-docker compose -f docker-compose.yml -f docker-compose.global.yml up -d
+docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d
 ```
 
 ## 9.5 Resetting the Admin Password
 
-If you forget the admin password:
+If you forget the admin password, generate a secure temporary password:
 
 ```bash
 # Open a shell inside the container
 docker exec -it soilfer-lims sh
 
-# Reset the password to 'password'
+# Reset the administrator credentials
 cd /app/server
 node -e "
 const {PrismaClient}=require('./prisma_client');
@@ -983,7 +994,7 @@ sudo certbot renew --force-renewal
 
 # Restart NGINX after renewal
 cd /opt/soilfer-lims
-docker compose -f docker-compose.yml -f docker-compose.global.yml restart nginx
+docker compose -f docker-compose.yml -f docker-compose.nginx.yml restart nginx
 ```
 
 ## "The database is locked"
@@ -1000,7 +1011,7 @@ docker compose restart
 ```bash
 cd /opt/soilfer-lims
 docker compose down
-docker compose -f docker-compose.yml -f docker-compose.global.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d --build
 ```
 
 ---
@@ -1030,15 +1041,15 @@ docker compose -f docker-compose.yml -f docker-compose.global.yml up -d --build
 
 | Action | Command |
 |--------|---------|
-| Start LIMS | `cd /opt/soilfer-lims && docker compose -f docker-compose.yml -f docker-compose.global.yml up -d` |
+| Start LIMS | `cd /opt/soilfer-lims && docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d` |
 | Stop LIMS | `cd /opt/soilfer-lims && docker compose down` |
 | Restart LIMS | `cd /opt/soilfer-lims && docker compose restart` |
 | View logs | `docker logs soilfer-lims -f --tail 50` |
 | Check status | `docker ps` |
 | Backup database | `docker exec soilfer-lims node scripts/backup_db.js` |
 | Verify backup | `docker exec soilfer-lims node scripts/verify_backup.js /app/server/backups/<file>.db.gz` |
-| Restore database | `docker run --rm -v lims-data:/app/server/prisma -v lims-backups:/app/server/backups soilfer-lims-app node scripts/restore_db.js /app/server/backups/<file>.db.gz` |
-| Update LIMS | `cd /opt/soilfer-lims && git pull && docker compose down && docker compose up -d --build` |
+| Restore database | `docker compose stop lims && docker run --rm -v ${COMPOSE_PROJECT_NAME:-soilfer-lims}_lims-data:/app/server/prisma -v ${COMPOSE_PROJECT_NAME:-soilfer-lims}_lims-backups:/app/server/backups soilfer-lims:latest node scripts/restore_db.js /app/server/backups/<file>.db.gz` |
+| Update LIMS | `cd /opt/soilfer-lims && git pull && docker compose down && docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d --build` |
 
 ## Initial Administration Credentials
 

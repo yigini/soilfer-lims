@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { X, Upload, FileSpreadsheet, Check, AlertCircle, ArrowRight, Save, FolderOpen, RefreshCw } from 'lucide-react';
 import { parseCoordinates } from '../../utils/coordParser';
+import { MAX_FILE_SIZE } from '../../utils/spreadsheetImport';
 
 const PROFILE_STORAGE_KEY = 'soilfer_manifest_mapping_profiles';
 
@@ -57,6 +58,30 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
     const handleFileUpload = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
+
+        // Pre-parser file size limit (5 MB bound)
+        if (file.size > MAX_FILE_SIZE) {
+            alert(`File size (${(file.size / (1024 * 1024)).toFixed(1)} MB) exceeds maximum allowed limit of 5 MB.`);
+            e.target.value = '';
+            return;
+        }
+
+        // Pre-parser extension and MIME type validation
+        const validExtensions = ['.xlsx', '.xls', '.csv'];
+        const lowerName = file.name.toLowerCase();
+        const hasValidExt = validExtensions.some(ext => lowerName.endsWith(ext));
+        const validMimes = [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-excel',
+            'text/csv',
+            'application/csv',
+            'text/plain'
+        ];
+        if (!hasValidExt || (file.type && !validMimes.includes(file.type))) {
+            alert('Invalid file format. Please upload a valid spreadsheet (.xlsx, .xls, .csv).');
+            e.target.value = '';
+            return;
+        }
 
         setFileName(file.name);
         const reader = new FileReader();

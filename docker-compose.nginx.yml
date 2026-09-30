@@ -1,0 +1,21 @@
+# Docker Compose override for NGINX reverse proxy (SSL / Port 80 & 443)
+# Works with both single-lab ('local') and multi-lab ('global') modes.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: soilfer-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # Mount SSL certificates from host (after running certbot)
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      lims:
+        condition: service_healthy

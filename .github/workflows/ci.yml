@@ -14,11 +14,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install server dependencies
         run: npm install
@@ -64,8 +66,20 @@ jobs:
           push: false
           tags: soilfer-lims:ci
 
+      - name: Build Supported Baseline Docker Image (v3.5.30 / 48d0e52)
+        run: |
+          mkdir -p /tmp/baseline_v3_5_30
+          git archive 48d0e526ded03232ac8516dd867f4b14923bdb58 | tar -x -C /tmp/baseline_v3_5_30
+          docker build -t soilfer-lims:baseline-v3.5.30 /tmp/baseline_v3_5_30
+
       - name: Run Real Disposable Docker Boundary Rehearsal
         run: node server/scripts/rehearsal_docker_boundary.cjs
+        env:
+          IMAGE_TAG: soilfer-lims:ci
+          CI: true
+
+      - name: Run Real Docker Deployment Readiness Acceptance
+        run: node server/scripts/rehearsal_deployment_readiness.cjs
         env:
           IMAGE_TAG: soilfer-lims:ci
           CI: true
