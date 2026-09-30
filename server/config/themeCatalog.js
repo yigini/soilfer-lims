@@ -1,8 +1,9 @@
 /**
  * SoilFER LIMS - Server Theme Catalogue & Validation
  *
- * Source: WP/sitewide-theme-library-v1/THEME-CONCEPTS.json
- * Synchronized with client/src/lib/themeCatalog.js
+ * GENERATED CODE - DO NOT EDIT MANUALLY
+ * Source: server/config/themeCatalogData.json (v1.0.0)
+ * Generator: server/scripts/generate_theme_catalog.js
  */
 
 const THEME_ALLOWLIST = [

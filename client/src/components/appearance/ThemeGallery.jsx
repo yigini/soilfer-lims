@@ -11,7 +11,7 @@
  * - Conflict detection and retry reconciliation
  */
 
-import React, { useState, useEffect, useCallback, useId, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useId, useMemo, useRef } from 'react';
 import {
     Sun,
     Moon,
@@ -35,6 +35,7 @@ export const ThemeGallery = ({
     targetScope = 'personal', // 'personal' | 'lab' | 'platform'
     targetLabId = null,
     targetLabName = null,
+    targetAppearance: propTargetAppearance = null,
     onSaved = null
 }) => {
     const {
@@ -54,11 +55,14 @@ export const ThemeGallery = ({
         adoptLabDefault,
         adoptPlatformDefault,
         resetPersonalToDefault,
-        fetchAppearanceContext
+        fetchAppearanceContext,
+        getLabAppearance
     } = useTheme();
 
     const { t } = useLanguage();
     const groupId = useId();
+    const modalRef = useRef(null);
+    const modalTriggerRef = useRef(null);
 
     const isSuperAdmin = authSubject?.role === 'SUPER_ADMIN';
     const isLabManager = authSubject?.role === 'LAB_MANAGER';
@@ -67,38 +71,93 @@ export const ThemeGallery = ({
     // Resolve effective lab target
     const effectiveLabId = targetLabId || authSubject?.labId || null;
 
+    // Target lab appearance state
+    const [targetLabAppearance, setTargetLabAppearance] = useState(propTargetAppearance);
+    const [loadingTarget, setLoadingTarget] = useState(false);
+    const [targetLoadError, setTargetLoadError] = useState(null);
+
+    useEffect(() => {
+        if (targetScope !== 'lab' || !effectiveLabId) {
+            setTargetLabAppearance(null);
+            return;
+        }
+
+        if (propTargetAppearance) {
+            setTargetLabAppearance(propTargetAppearance);
+            return;
+        }
+
+        if (serverContext?.labDefault && serverContext.labDefault.labId === effectiveLabId) {
+            setTargetLabAppearance(serverContext.labDefault);
+            return;
+        }
+
+        if (typeof getLabAppearance === 'function') {
+            let active = true;
+            setLoadingTarget(true);
+            setTargetLoadError(null);
+            getLabAppearance(effectiveLabId)
+                .then(data => {
+                    if (active && data) {
+                        setTargetLabAppearance(data);
+                    }
+                })
+                .catch(err => {
+                    if (active) {
+                        setTargetLoadError(err.message || 'Failed to load target laboratory settings');
+                    }
+                })
+                .finally(() => {
+                    if (active) setLoadingTarget(false);
+                });
+            return () => { active = false; };
+        }
+    }, [targetScope, effectiveLabId, serverContext?.labDefault, getLabAppearance]);
+
     // Initialize drafts based on targetScope
     const initialThemeId = useMemo(() => {
         if (targetScope === 'personal') {
             return authSubject?.savedThemeId || null;
         }
         if (targetScope === 'lab') {
-            return serverContext?.labDefault?.themeId || 'forest';
+            if (targetLabAppearance) {
+                return targetLabAppearance.themeId ?? null;
+            }
+            if (serverContext?.labDefault && serverContext.labDefault.labId === effectiveLabId) {
+                return serverContext.labDefault.themeId || null;
+            }
+            return null; // preserve null/inherit instead of Forest fallback
         }
         if (targetScope === 'platform') {
             return serverContext?.platformDefault?.themeId || 'soilfer-classic';
         }
         return activeThemeId;
-    }, [targetScope, authSubject?.savedThemeId, serverContext?.labDefault?.themeId, serverContext?.platformDefault?.themeId, activeThemeId]);
+    }, [targetScope, authSubject?.savedThemeId, targetLabAppearance, serverContext?.labDefault, effectiveLabId, activeThemeId]);
 
     const initialMode = useMemo(() => {
         if (targetScope === 'personal') {
-            return (authSubject?.savedModePreference === 'light' || authSubject?.savedModePreference === 'dark')
+            return (authSubject?.savedModePreference === 'light' || authSubject?.savedModePreference === 'dark' || authSubject?.savedModePreference === 'inherit')
                 ? authSubject.savedModePreference
                 : 'inherit';
         }
         if (targetScope === 'lab') {
-            return serverContext?.labDefault?.defaultMode || 'inherit';
+            if (targetLabAppearance) {
+                return targetLabAppearance.defaultMode || 'inherit';
+            }
+            if (serverContext?.labDefault && serverContext.labDefault.labId === effectiveLabId) {
+                return serverContext.labDefault.defaultMode || 'inherit';
+            }
+            return 'inherit';
         }
         if (targetScope === 'platform') {
             return serverContext?.platformDefault?.defaultMode || 'light';
         }
         return appearance;
-    }, [targetScope, authSubject?.savedModePreference, serverContext?.labDefault?.defaultMode, serverContext?.platformDefault?.defaultMode, appearance]);
+    }, [targetScope, authSubject?.savedModePreference, targetLabAppearance, serverContext?.labDefault, effectiveLabId, appearance]);
 
-    // Local draft state
+    // Local draft state - preserve initialMode (do not convert inherit to explicit Light)
     const [draftThemeId, setDraftThemeId] = useState(initialThemeId);
-    const [draftMode, setDraftMode] = useState(initialMode === 'inherit' ? appearance : initialMode);
+    const [draftMode, setDraftMode] = useState(initialMode);
     const [saving, setSaving] = useState(false);
     const [statusMessage, setStatusMessage] = useState({ type: null, text: '' });
     const [conflictError, setConflictError] = useState(null);
@@ -108,9 +167,41 @@ export const ThemeGallery = ({
     useEffect(() => {
         if (!isPreviewActive) {
             setDraftThemeId(initialThemeId);
-            setDraftMode(initialMode === 'inherit' ? appearance : initialMode);
+            setDraftMode(initialMode);
         }
-    }, [initialThemeId, initialMode, appearance, isPreviewActive]);
+    }, [initialThemeId, initialMode, isPreviewActive]);
+
+    // Keyboard and focus management for modal
+    useEffect(() => {
+        if (!pendingConfirm || typeof document === 'undefined') return;
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                setPendingConfirm(null);
+            } else if (e.key === 'Tab' && modalRef.current) {
+                const focusables = modalRef.current.querySelectorAll('button:not([disabled]), [tabindex="0"]');
+                if (focusables.length === 0) return;
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            if (modalTriggerRef.current && typeof modalTriggerRef.current.focus === 'function') {
+                modalTriggerRef.current.focus();
+            }
+        };
+    }, [pendingConfirm]);
 
     // Check if user is allowed to select this theme palette
     const isThemeSelectable = (themeId) => {
@@ -140,10 +231,19 @@ export const ThemeGallery = ({
         setStatusMessage({ type: null, text: '' });
     };
 
-    // Trigger full-screen live preview
+    // Trigger full-screen live preview resolving proposed inherited values
     const handleStartPreview = () => {
-        const themeToPreview = draftThemeId || activeThemeId;
-        const modeToPreview = (draftMode === 'dark' || draftMode === 'light') ? draftMode : appearance;
+        const resolvedInheritedThemeId = (targetScope === 'personal' && serverContext?.labDefault?.themeId)
+            ? serverContext.labDefault.themeId
+            : (serverContext?.platformDefault?.themeId || 'soilfer-classic');
+
+        const resolvedInheritedMode = (targetScope === 'personal' && serverContext?.labDefault?.defaultMode && serverContext.labDefault.defaultMode !== 'inherit')
+            ? serverContext.labDefault.defaultMode
+            : (serverContext?.platformDefault?.defaultMode || 'light');
+
+        const themeToPreview = draftThemeId !== null ? draftThemeId : resolvedInheritedThemeId;
+        const modeToPreview = (draftMode === 'dark' || draftMode === 'light') ? draftMode : resolvedInheritedMode;
+
         setPreviewTheme({
             themeId: themeToPreview,
             mode: modeToPreview
@@ -158,7 +258,7 @@ export const ThemeGallery = ({
     const handleExitPreview = () => {
         clearPreviewTheme();
         setDraftThemeId(initialThemeId);
-        setDraftMode(initialMode === 'inherit' ? appearance : initialMode);
+        setDraftMode(initialMode);
         setStatusMessage({ type: null, text: '' });
     };
 
@@ -171,10 +271,10 @@ export const ThemeGallery = ({
             // Ordinary staff who haven't explicitly chosen Clear Contrast must retain themeId: null
             let finalThemeId = draftThemeId;
             if (isOrdinaryStaff && draftThemeId !== 'clear-contrast') {
-                finalThemeId = authSubject?.savedThemeId || null;
+                finalThemeId = null;
             }
 
-            const effectiveModePref = (draftMode === 'light' || draftMode === 'dark') ? draftMode : 'inherit';
+            const effectiveModePref = (draftMode === 'light' || draftMode === 'dark' || draftMode === 'inherit') ? draftMode : 'inherit';
 
             await savePersonalPreferences({
                 themeId: finalThemeId,
@@ -207,10 +307,12 @@ export const ThemeGallery = ({
         setConflictError(null);
         setPendingConfirm(null);
         try {
+            const targetRev = targetLabAppearance?.revision ?? (serverContext?.labDefault?.labId === effectiveLabId ? serverContext.labDefault.revision : undefined);
             await adoptLabDefault({
                 labId: effectiveLabId,
-                themeId: draftThemeId || 'forest',
-                defaultMode: draftMode || 'inherit'
+                themeId: draftThemeId, // Preserves null/inherit
+                defaultMode: draftMode || 'inherit',
+                expectedRevision: targetRev
             });
             setStatusMessage({
                 type: 'success',
@@ -333,11 +435,11 @@ export const ThemeGallery = ({
                     </p>
                 </div>
 
-                {/* Light / Dark Mode Toggle */}
+                {/* Light / Dark / Inherit Mode Toggle */}
                 <div
                     role="radiogroup"
                     aria-label={t('appearance.modeSelectionAria', 'Color Mode')}
-                    className="inline-flex items-center p-1 rounded-xl bg-sf-hover border border-sf-divider gap-1"
+                    className="inline-flex items-center p-1 rounded-xl bg-sf-hover border border-sf-divider gap-1 flex-wrap"
                 >
                     <button
                         type="button"
@@ -378,6 +480,28 @@ export const ThemeGallery = ({
                         <Moon size={15} className="text-sf-link" />
                         <span>{t('appearance.dark', 'Dark · Graphite')}</span>
                     </button>
+
+                    {targetScope !== 'platform' && (
+                        <button
+                            type="button"
+                            role="radio"
+                            aria-checked={draftMode === 'inherit'}
+                            onClick={() => {
+                                setDraftMode('inherit');
+                                if (isPreviewActive) {
+                                    handleStartPreview();
+                                }
+                            }}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[44px] sm:min-h-0 touch-target ${
+                                draftMode === 'inherit'
+                                    ? 'bg-sf-surface text-sf-text shadow-sm'
+                                    : 'text-sf-muted hover:text-sf-text'
+                            }`}
+                        >
+                            <RotateCcw size={13} className="text-sf-link" />
+                            <span>{t('appearance.followDefaultMode', 'Follow default mode')}</span>
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -425,16 +549,44 @@ export const ThemeGallery = ({
                     </span>
                 </div>
 
-                {targetScope === 'personal' && authSubject?.savedThemeId && (
-                    <button
-                        type="button"
-                        onClick={handleResetPersonal}
-                        disabled={saving}
-                        className="flex items-center gap-1.5 text-xs text-sf-link hover:underline font-medium min-h-[44px] sm:min-h-0 touch-target"
-                    >
-                        <RotateCcw size={13} />
-                        <span>{t('appearance.resetToInherited', 'Reset to inherited defaults')}</span>
-                    </button>
+                {targetScope === 'personal' && (
+                    <div className="flex items-center gap-3 flex-wrap">
+                        {(authSubject?.savedThemeId !== null || draftThemeId !== null) && (
+                            <button
+                                type="button"
+                                onClick={handleSetInheritTheme}
+                                disabled={saving || draftThemeId === null}
+                                className="flex items-center gap-1.5 text-xs text-sf-link hover:underline font-medium min-h-[44px] sm:min-h-0 touch-target"
+                            >
+                                <RotateCcw size={13} />
+                                <span>{t('appearance.followSharedTheme', 'Follow shared theme')}</span>
+                            </button>
+                        )}
+                        {(authSubject?.savedThemeId !== null || authSubject?.savedModePreference !== 'inherit') && (
+                            <button
+                                type="button"
+                                onClick={handleResetPersonal}
+                                disabled={saving}
+                                className="flex items-center gap-1.5 text-xs text-sf-link hover:underline font-medium min-h-[44px] sm:min-h-0 touch-target"
+                            >
+                                <RotateCcw size={13} />
+                                <span>{t('appearance.resetToInherited', 'Reset to inherited defaults')}</span>
+                            </button>
+                        )}
+                    </div>
+                )}
+                {targetScope === 'lab' && draftThemeId !== null && (
+                    <div className="flex items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={handleSetInheritTheme}
+                            disabled={saving}
+                            className="flex items-center gap-1.5 text-xs text-sf-link hover:underline font-medium min-h-[44px] sm:min-h-0 touch-target"
+                        >
+                            <RotateCcw size={13} />
+                            <span>{t('appearance.followPlatformTheme', 'Follow platform theme')}</span>
+                        </button>
+                    </div>
                 )}
             </div>
 
@@ -461,22 +613,44 @@ export const ThemeGallery = ({
                 aria-label={t('appearance.themeFamiliesAria', 'Theme Families')}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
             >
-                {themes?.map((th) => {
+                {themes?.map((th, index) => {
                     const isSelected = draftThemeId === th.id || (draftThemeId === null && activeThemeId === th.id && targetScope === 'personal');
+                    const isRovingFocused = isSelected || (!draftThemeId && index === 0);
                     const tokens = draftMode === 'dark' ? th.dark : th.light;
                     const selectable = isThemeSelectable(th.id);
 
                     return (
                         <div
                             key={th.id}
+                            id={`theme-card-${th.id}`}
                             role="radio"
                             aria-checked={isSelected}
-                            tabIndex={selectable ? 0 : -1}
+                            tabIndex={selectable ? (isRovingFocused ? 0 : -1) : -1}
                             onClick={() => handleSelectCard(th.id)}
                             onKeyDown={(e) => {
                                 if (e.key === ' ' || e.key === 'Enter') {
                                     e.preventDefault();
                                     handleSelectCard(th.id);
+                                } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                                    e.preventDefault();
+                                    const nextIdx = (index + 1) % themes.length;
+                                    const nextTheme = themes[nextIdx];
+                                    if (isThemeSelectable(nextTheme.id)) {
+                                        handleSelectCard(nextTheme.id);
+                                        if (typeof document !== 'undefined') {
+                                            document.getElementById(`theme-card-${nextTheme.id}`)?.focus();
+                                        }
+                                    }
+                                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                                    e.preventDefault();
+                                    const prevIdx = (index - 1 + themes.length) % themes.length;
+                                    const prevTheme = themes[prevIdx];
+                                    if (isThemeSelectable(prevTheme.id)) {
+                                        handleSelectCard(prevTheme.id);
+                                        if (typeof document !== 'undefined') {
+                                            document.getElementById(`theme-card-${prevTheme.id}`)?.focus();
+                                        }
+                                    }
                                 }
                             }}
                             className={`group relative flex flex-col rounded-2xl border-2 transition-all p-3.5 space-y-3 focus:outline-none focus:ring-2 focus:ring-sf-focus min-h-[44px] ${
@@ -656,7 +830,10 @@ export const ThemeGallery = ({
                     {targetScope === 'lab' && (
                         <button
                             type="button"
-                            onClick={() => setPendingConfirm('lab')}
+                            onClick={() => {
+                                if (typeof document !== 'undefined') modalTriggerRef.current = document.activeElement;
+                                setPendingConfirm('lab');
+                            }}
                             disabled={saving || !effectiveLabId}
                             className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-sf-primary text-sf-primary bg-sf-surface hover:bg-sf-selected text-xs font-bold transition-all disabled:opacity-50 min-h-[44px] touch-target"
                             title={t('appearance.adoptLabTitle', 'Staff following this lab default will see this appearance')}
@@ -674,7 +851,10 @@ export const ThemeGallery = ({
                     {targetScope === 'platform' && (
                         <button
                             type="button"
-                            onClick={() => setPendingConfirm('platform')}
+                            onClick={() => {
+                                if (typeof document !== 'undefined') modalTriggerRef.current = document.activeElement;
+                                setPendingConfirm('platform');
+                            }}
                             disabled={saving}
                             className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-sf-divider bg-sf-raised text-sf-text hover:bg-sf-hover text-xs font-bold transition-all disabled:opacity-50 min-h-[44px] touch-target"
                             title={t('appearance.adoptPlatformTitle', 'All users without personal or lab overrides will see this theme')}
@@ -694,7 +874,7 @@ export const ThemeGallery = ({
                     aria-labelledby={`${groupId}-confirm-title`}
                     className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150"
                 >
-                    <div className="relative w-full max-w-md rounded-2xl bg-sf-surface border border-sf-divider p-6 space-y-4 shadow-xl">
+                    <div ref={modalRef} className="relative w-full max-w-md rounded-2xl bg-sf-surface border border-sf-divider p-6 space-y-4 shadow-xl">
                         <div className="flex items-center justify-between">
                             <h4 id={`${groupId}-confirm-title`} className="text-base font-bold text-sf-text">
                                 {pendingConfirm === 'lab'
@@ -703,8 +883,9 @@ export const ThemeGallery = ({
                             </h4>
                             <button
                                 type="button"
+                                aria-label={t('common.close', 'Close')}
                                 onClick={() => setPendingConfirm(null)}
-                                className="p-1 text-sf-muted hover:text-sf-text rounded-lg"
+                                className="p-2.5 text-sf-muted hover:text-sf-text rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center touch-target"
                             >
                                 <X size={18} />
                             </button>

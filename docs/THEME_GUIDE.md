@@ -77,7 +77,7 @@ To stop using a custom personal theme and return to inheriting your laboratory's
 - **Accidentally in preview mode?**
   Look for the banner pinned to the top of the window with the eye icon: click **Exit preview** to immediately return to your normal appearance.
 - **Need higher contrast?**
-  Select **Clear Contrast** from Profile → Appearance. It enforces a strict WCAG AAA >= 7:1 contrast ratio across all text and borders.
+  Select **Clear Contrast** from Profile → Appearance. It enforces a strict WCAG AAA >= 7:1 contrast ratio for core text and >= 4.5:1 for interactive borders and controls, while all seven standard theme families meet WCAG 2.2 Level AA (>= 4.5:1 text, >= 3:1 controls).
 - **Session expired?**
   Temporary session overrides are bound to your active authenticated session and are cleared automatically upon logout or session timeout.
 
@@ -97,9 +97,10 @@ SoilFER-LIMS strictly protects laboratory data integrity, status color semantics
 
 ## 7. Mobile & Touch Responsive Operation
 
-- The theme gallery and appearance selectors reflow cleanly down to 320px screen widths.
-- Touch targets meet or exceed 48×48 CSS pixels for laboratory tablet and phone use.
-- Native safe area insets (`env(safe-area-inset-bottom)`) are applied to navigation bars and floating preview notices to prevent obstruction by software keyboards or home indicators.
+- **Responsive Viewport Reflow**: The theme gallery and appearance selectors reflow cleanly down to 320px viewport width in automated and responsive browser checks.
+- **Touch Target Dimensions**: Primary interactive controls and buttons adhere to 44–48px touch dimensions (`min-h-[44px]` with 44×44px hit-target padding on icon controls including the confirmation modal close button), satisfying WCAG 2.2 Level AA Target Size (Minimum).
+- **Safe Area Insets**: Safe area insets (`env(safe-area-inset-bottom)`) are declared on navigation bars and floating preview notices to prevent obstruction by software keyboards or home indicators.
+- **Physical Device Gate Notice**: Automated browser journeys and responsive emulation verify 320px layout reflow and touch sizing. Physical testing on native iOS Safari and Android Chrome hardware remains pending under the existing Issue #102 hardware gate (physical devices are not available in current CI/CD runner environments).
 
 ---
 

@@ -227,23 +227,13 @@ function validatePreferencesAndAppearance(body) {
 
     const { themePreference, language, appearance } = body;
 
-    // Check mixed mode parity
-    if (themePreference !== undefined && appearance !== undefined && appearance.modePreference !== undefined) {
-        if (themePreference !== appearance.modePreference) {
-            const err = new Error('Conflicting theme parameters: legacy themePreference and appearance.modePreference cannot mismatch.');
-            err.statusCode = 400;
-            err.code = 'CONFLICTING_THEME_PARAMETERS';
-            err.errorCode = 'AUTH.CONFLICTING_THEME_PARAMETERS';
-            throw err;
-        }
-    }
-
     // Validate appearance if present
     if (appearance !== undefined) {
         if (!appearance || typeof appearance !== 'object' || Array.isArray(appearance)) {
             const err = new Error('appearance must be a valid non-null object');
             err.statusCode = 400;
             err.code = 'INVALID_APPEARANCE_PAYLOAD';
+            err.errorCode = 'AUTH.INVALID_APPEARANCE_PAYLOAD';
             throw err;
         }
 
@@ -258,6 +248,17 @@ function validatePreferencesAndAppearance(body) {
         }
 
         const { themeId, modePreference, expectedRevision } = appearance;
+
+        // Check mixed mode parity before checking individual fields
+        if (themePreference !== undefined && modePreference !== undefined) {
+            if (themePreference !== modePreference) {
+                const err = new Error('Conflicting theme parameters: legacy themePreference and appearance.modePreference cannot mismatch.');
+                err.statusCode = 400;
+                err.code = 'CONFLICTING_THEME_PARAMETERS';
+                err.errorCode = 'AUTH.CONFLICTING_THEME_PARAMETERS';
+                throw err;
+            }
+        }
 
         // expectedRevision is required for appearance writes
         if (expectedRevision === undefined || typeof expectedRevision !== 'number' || !Number.isInteger(expectedRevision) || expectedRevision < 0) {

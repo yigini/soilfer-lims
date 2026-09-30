@@ -96,6 +96,25 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const handleAppearanceSaved = (e) => {
+            const detail = e?.detail;
+            if (!detail) return;
+            setUser(prev => {
+                if (!prev || String(prev.id) !== String(detail.userId)) return prev;
+                return {
+                    ...prev,
+                    uiThemeId: detail.themeId,
+                    uiModePreference: detail.modePreference,
+                    uiAppearanceRevision: detail.revision
+                };
+            });
+        };
+        window.addEventListener('soilfer:appearance-saved', handleAppearanceSaved);
+        return () => window.removeEventListener('soilfer:appearance-saved', handleAppearanceSaved);
+    }, []);
+
+    useEffect(() => {
         if (user && user.language) {
             const sessionOverride = typeof window !== 'undefined' ? sessionStorage.getItem('soilfer_locale_override') : null;
             if (!sessionOverride) {
@@ -143,16 +162,57 @@ export const AuthProvider = ({ children }) => {
             if (!prev) return prev;
             let newTheme = prev.themePreference;
             let newLang = prev.language;
+            let newUiThemeId = prev.uiThemeId;
+            let newUiModePreference = prev.uiModePreference;
+            let newUiAppearanceRevision = prev.uiAppearanceRevision;
+
+            // Check if localStorage has updated appearance saved by ThemeContext
+            try {
+                const stored = localStorage.getItem('user');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (parsed && String(parsed.id) === String(prev.id)) {
+                        if (parsed.uiAppearanceRevision !== undefined && parsed.uiAppearanceRevision > (newUiAppearanceRevision || 0)) {
+                            newUiThemeId = parsed.uiThemeId;
+                            newUiModePreference = parsed.uiModePreference;
+                            newUiAppearanceRevision = parsed.uiAppearanceRevision;
+                        }
+                    }
+                }
+            } catch {
+                // Ignore storage error
+            }
 
             if (typeof preferencesOrTheme === 'object' && preferencesOrTheme !== null) {
                 if (preferencesOrTheme.themePreference !== undefined) newTheme = preferencesOrTheme.themePreference;
                 if (preferencesOrTheme.language !== undefined) newLang = preferencesOrTheme.language;
+                if (preferencesOrTheme.appearance !== undefined && preferencesOrTheme.appearance !== null) {
+                    if (preferencesOrTheme.appearance.themeId !== undefined) {
+                        newUiThemeId = preferencesOrTheme.appearance.themeId;
+                    }
+                    if (preferencesOrTheme.appearance.modePreference !== undefined) {
+                        newUiModePreference = preferencesOrTheme.appearance.modePreference;
+                    }
+                    if (preferencesOrTheme.appearance.revision !== undefined) {
+                        newUiAppearanceRevision = preferencesOrTheme.appearance.revision;
+                    }
+                }
+                if (preferencesOrTheme.uiThemeId !== undefined) newUiThemeId = preferencesOrTheme.uiThemeId;
+                if (preferencesOrTheme.uiModePreference !== undefined) newUiModePreference = preferencesOrTheme.uiModePreference;
+                if (preferencesOrTheme.uiAppearanceRevision !== undefined) newUiAppearanceRevision = preferencesOrTheme.uiAppearanceRevision;
             } else if (typeof preferencesOrTheme === 'string') {
                 newTheme = preferencesOrTheme;
                 if (maybeLang) newLang = maybeLang;
             }
 
-            const updated = { ...prev, themePreference: newTheme, language: newLang };
+            const updated = {
+                ...prev,
+                themePreference: newTheme,
+                language: newLang,
+                uiThemeId: newUiThemeId,
+                uiModePreference: newUiModePreference,
+                uiAppearanceRevision: newUiAppearanceRevision
+            };
             try {
                 localStorage.setItem('user', JSON.stringify(updated));
             } catch {

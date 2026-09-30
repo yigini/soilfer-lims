@@ -3388,15 +3388,20 @@ Laboratory operators can find step-by-step procedures in the following documenta
   - Scientific status colors: Emerald (Approved), Amber (In Analysis), and Rose (Rejected) preserved unchanged across all themes.
   - White paper reports: `ResultReports.jsx` and `PublicReport.jsx` retain `data-surface="paper"` and `@media print` white paper isolation.
 - **Accessibility & Mobile Touch Targets (Phase 5)**:
-  - WCAG 2.2 AA compliant across all 7 families in both Light and Dark modes.
-  - Clear Contrast provides WCAG AAA >= 7:1 contrast across text and interactive borders.
-  - Mobile safe areas: `env(safe-area-inset-bottom)` applied to navigation bars and floating preview notices.
-  - Controls designed for 48px touch targets; gallery reflows seamlessly down to 320px viewport width.
+  - WCAG 2.2 Level AA compliant across all 7 families in both Light and Dark modes (14 variants total; 0 contrast failures across 7 critical state pairs: text/canvas, muted/hover, muted/selected, onPrimary/primaryHover, control/hover, control/selected, sideMuted/sideActive).
+  - Clear Contrast provides WCAG AAA >= 7:1 contrast for core text and >= 4.5:1 for interactive controls/borders.
+  - Interactive touch targets designed for 44–48px (`min-h-[44px]` with 44×44px hit-target padding on icon buttons including confirmation modal close button), satisfying WCAG 2.2 Level AA Target Size (Minimum).
+  - WAI-ARIA roving tabindex (`tabIndex={isSelected ? 0 : -1}`) and arrow key navigation (`ArrowRight`, `ArrowDown`, `ArrowLeft`, `ArrowUp`) across Theme Cards in `ThemeGallery`.
+  - Modal focus trap, Escape key dismissal, and trigger focus restoration implemented.
+  - Independent follow-default controls: "Follow default mode" radio and "Follow shared theme" button preserve inheritance without clobbering to explicit values.
+  - Gallery reflows cleanly down to 320px viewport width in automated and responsive browser checks. Physical mobile testing on native iOS Safari and Android Chrome hardware remains pending under the Issue #102 hardware gate (emulation only in CI; physical devices are unavailable).
 - **Verification Evidence**:
   - `server/tests/contracts/theme_appearance_contract.test.js`: **All 19/19 tests PASS**.
   - `server/tests/security/` (5 suites): **All 80/80 tests PASS** (including `rbac_enforcement.test.js`, `lab_isolation.test.js`, `wiring.test.js`, `auth_token_invalidation.test.js`, `help_lab_isolation.test.js`).
-  - Client production build: **Vite build PASS in 15.13s**; `ThemeGallery` chunk is 13.01 kB (gzip: 3.55 kB), well within the ≤ 15 kB gzip budget.
-  - Documentation: Created `docs/THEME_GUIDE.md` covering user guide, lab manager guide, platform administrator guide, reset procedure, troubleshooting, and scientific paper isolation.
+  - Candidate Verification Suite (`verify_issue155_candidate.cjs`): **All 20/20 cases PASS (0 defects)**.
+  - Theme Catalog Drift Verification (`npm run check:theme-catalog`): **0 drift detected** between server, client, and single canonical authority `server/config/themeCatalogData.json`.
+  - Client production build: **Vite build PASS in 7.45s**; Total additional theme library budget (measured against pre-PR155 baseline): `appearance-tokens.css` (~1.4 kB gzip) + `themeCatalog.js` (~3.2 kB gzip) + `ThemeGallery.jsx` chunk (~5.9 kB gzip) + `appearance.js` (~1.8 kB gzip) = ~12.3 kB gzip total, safely within the ≤ 15 kB gzip budget.
+  - Documentation: Updated `docs/THEME_GUIDE.md` covering user guide, lab manager guide, platform administrator guide, reset procedure, troubleshooting, and scientific paper isolation with honest physical hardware boundaries.
 
 
 

@@ -31,6 +31,14 @@ router.get('/appearance', async (req, res) => {
 });
 
 router.patch('/appearance', checkPermission('MANAGE_GLOBAL_APPEARANCE'), async (req, res) => {
+    if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
+        return res.status(400).json({ error: 'Payload must be a non-null JSON object', code: 'INVALID_PAYLOAD' });
+    }
+    const allowed = ['themeId', 'defaultMode', 'expectedRevision'];
+    const invalid = Object.keys(req.body).filter(k => !allowed.includes(k));
+    if (invalid.length > 0) {
+        return res.status(400).json({ error: `Unexpected fields in appearance update: ${invalid.join(', ')}`, code: 'INVALID_APPEARANCE_FIELDS' });
+    }
     try {
         const appearanceService = require('../services/appearanceService');
         const updated = await appearanceService.updateGlobalAppearance(req.user, req.body);

@@ -102,6 +102,14 @@ async function updateGlobalAppearance(actor, { themeId, defaultMode, expectedRev
         throw err;
     }
 
+    // Require expectedRevision strictly
+    if (expectedRevision === undefined || expectedRevision === null || typeof expectedRevision !== 'number' || !Number.isInteger(expectedRevision) || expectedRevision < 0) {
+        const err = new Error('Expected revision number is required for global appearance updates');
+        err.statusCode = 400;
+        err.code = 'EXPECTED_REVISION_REQUIRED';
+        throw err;
+    }
+
     if (!themeId || !isValidThemeId(themeId)) {
         const err = new Error(`Invalid themeId: ${themeId}. Must be one of: ${THEME_ALLOWLIST.join(', ')}`);
         err.statusCode = 400;
@@ -123,7 +131,7 @@ async function updateGlobalAppearance(actor, { themeId, defaultMode, expectedRev
 
         const currentRevision = current ? current.revision : 0;
 
-        if (expectedRevision !== undefined && expectedRevision !== null && expectedRevision !== currentRevision) {
+        if (expectedRevision !== currentRevision) {
             const err = new Error(`Revision conflict: expected revision ${expectedRevision} but current revision is ${currentRevision}.`);
             err.statusCode = 409;
             err.code = 'REVISION_CONFLICT';
@@ -252,6 +260,14 @@ async function updateLabAppearance(actor, labId, { themeId, defaultMode, expecte
         throw err;
     }
 
+    // Require expectedRevision strictly
+    if (expectedRevision === undefined || expectedRevision === null || typeof expectedRevision !== 'number' || !Number.isInteger(expectedRevision) || expectedRevision < 0) {
+        const err = new Error('Expected revision number is required for laboratory appearance updates');
+        err.statusCode = 400;
+        err.code = 'EXPECTED_REVISION_REQUIRED';
+        throw err;
+    }
+
     const lab = await prisma.lab.findUnique({
         where: { id: labId },
         select: { id: true, name: true, code: true, isActive: true }
@@ -297,7 +313,7 @@ async function updateLabAppearance(actor, labId, { themeId, defaultMode, expecte
 
         const currentRevision = current ? current.revision : 0;
 
-        if (expectedRevision !== undefined && expectedRevision !== null && expectedRevision !== currentRevision) {
+        if (expectedRevision !== currentRevision) {
             const err = new Error(`Revision conflict: expected revision ${expectedRevision} but current revision is ${currentRevision}.`);
             err.statusCode = 409;
             err.code = 'REVISION_CONFLICT';
