@@ -178,27 +178,127 @@ function verifyCssTokens(data) {
     if (!fs.existsSync(CSS_TARGET)) {
         return [`Missing CSS appearance tokens file at: ${CSS_TARGET}`];
     }
-    const css = fs.readFileSync(CSS_TARGET, 'utf8');
+    const cssContent = fs.readFileSync(CSS_TARGET, 'utf8');
+
+    function tokenToCssVar(prop) {
+        if (prop === 'onPrimary') return '--sf-on-primary';
+        if (prop === 'primaryHover') return '--sf-primary-hover';
+        if (prop === 'sideText') return '--sf-side-text';
+        if (prop === 'sideMuted') return '--sf-side-muted';
+        if (prop === 'sideActive') return '--sf-side-active';
+        if (prop === 'disabledBg') return '--sf-disabled-bg';
+        if (prop === 'disabledText') return '--sf-disabled-text';
+        if (prop === 'chart1') return '--sf-chart-1';
+        if (prop === 'chart2') return '--sf-chart-2';
+        if (prop === 'chart3') return '--sf-chart-3';
+        if (prop === 'browserTheme') return '--sf-browser-theme';
+        return '--sf-' + prop;
+    }
+
+    // Parse CSS into selector rules and declaration maps
+    const rules = [];
+    const ruleRegex = /([^{]+)\{([^}]+)\}/gs;
+    let m;
+    while ((m = ruleRegex.exec(cssContent)) !== null) {
+        const selector = m[1].replace(/\/\*.*?\*\//gs, '').trim();
+        const body = m[2];
+        const decls = {};
+        body.split(';').forEach(line => {
+            const parts = line.split(':');
+            if (parts.length >= 2) {
+                decls[parts[0].trim()] = parts.slice(1).join(':').trim();
+            }
+        });
+        rules.push({ selector, decls });
+    }
+
     const errors = [];
 
-    // Verify all 7 theme families are defined in CSS for light and dark
-    for (const themeId of data.themeAllowlist) {
-        const hasLight = css.includes(`[data-theme="${themeId}"]`);
-        const hasDark = css.includes(`[data-theme="${themeId}"][data-appearance="dark"]`) || css.includes(`[data-theme="${themeId}"].dark`);
-        if (!hasLight) {
-            errors.push(`CSS tokens missing light definition for theme: ${themeId}`);
-        }
-        if (!hasDark) {
-            errors.push(`CSS tokens missing dark definition for theme: ${themeId}`);
+    // 1. Verify all 14 concrete variants across all 7 families
+    for (const theme of data.themes) {
+        for (const mode of ['light', 'dark']) {
+            const rule = rules.find(r => {
+                if (!r.selector.includes(`[data-theme="${theme.id}"]`)) return false;
+                if (mode === 'dark') {
+                    return r.selector.includes('.dark') || r.selector.includes('[data-appearance="dark"]');
+                } else {
+                    return !r.selector.includes('.dark') && !r.selector.includes('[data-appearance="dark"]');
+                }
+            });
+
+            if (!rule) {
+                errors.push(`Missing CSS rule for theme "${theme.id}" mode "${mode}"`);
+                continue;
+            }
+
+            const expected = theme[mode];
+            for (const [prop, val] of Object.entries(expected)) {
+                const varName = tokenToCssVar(prop);
+                if (!rule.decls[varName]) {
+                    errors.push(`Theme "${theme.id}" (${mode}) missing required token ${varName} (expected ${val})`);
+                } else if (rule.decls[varName].toUpperCase() !== val.toUpperCase()) {
+                    errors.push(`Theme "${theme.id}" (${mode}) token ${varName} mismatch: expected ${val}, found ${rule.decls[varName]}`);
+                }
+            }
         }
     }
 
-    // Verify required scientific chart and semantic status tokens
-    const requiredTokens = [
-        '--sf-success',
-        '--sf-warning',
-        '--sf-danger',
-        '--sf-info',
+    // 2. Verify baseline :root / [data-appearance="light"] and [data-appearance="dark"] semantic status tokens
+    const lightStatusRule = rules.find(r => r.selector.includes(':root') || r.selector.includes('[data-appearance="light"]'));
+    const darkStatusRule = rules.find(r => r.selector.includes('[data-appearance="dark"]'));
+
+    if (!lightStatusRule) {
+        errors.push('Missing baseline light status token rule (:root)');
+    } else if (data.semanticStatus && data.semanticStatus.light) {
+        const statusMap = {
+            success: '--sf-success',
+            successBg: '--sf-success-bg',
+            warning: '--sf-warning',
+            warningBg: '--sf-warning-bg',
+            danger: '--sf-danger',
+            dangerBg: '--sf-danger-bg',
+            info: '--sf-info',
+            infoBg: '--sf-info-bg'
+        };
+        for (const [k, varName] of Object.entries(statusMap)) {
+            const exp = data.semanticStatus.light[k];
+            if (exp) {
+                if (!lightStatusRule.decls[varName]) {
+                    errors.push(`Baseline light missing status token ${varName}`);
+                } else if (lightStatusRule.decls[varName].toUpperCase() !== exp.toUpperCase()) {
+                    errors.push(`Baseline light status token ${varName} mismatch: expected ${exp}, found ${lightStatusRule.decls[varName]}`);
+                }
+            }
+        }
+    }
+
+    if (!darkStatusRule) {
+        errors.push('Missing baseline dark status token rule');
+    } else if (data.semanticStatus && data.semanticStatus.dark) {
+        const statusMap = {
+            success: '--sf-success',
+            successBg: '--sf-success-bg',
+            warning: '--sf-warning',
+            warningBg: '--sf-warning-bg',
+            danger: '--sf-danger',
+            dangerBg: '--sf-danger-bg',
+            info: '--sf-info',
+            infoBg: '--sf-info-bg'
+        };
+        for (const [k, varName] of Object.entries(statusMap)) {
+            const exp = data.semanticStatus.dark[k];
+            if (exp) {
+                if (!darkStatusRule.decls[varName]) {
+                    errors.push(`Baseline dark missing status token ${varName}`);
+                } else if (darkStatusRule.decls[varName].toUpperCase() !== exp.toUpperCase()) {
+                    errors.push(`Baseline dark status token ${varName} mismatch: expected ${exp}, found ${darkStatusRule.decls[varName]}`);
+                }
+            }
+        }
+    }
+
+    // 3. Verify required scientific chart tokens on baseline
+    const requiredChartTokens = [
         '--sf-chart-1',
         '--sf-chart-2',
         '--sf-chart-3',
@@ -208,14 +308,15 @@ function verifyCssTokens(data) {
         '--sf-chart-grid',
         '--sf-chart-axis'
     ];
-    for (const token of requiredTokens) {
-        if (!css.includes(`${token}:`)) {
-            errors.push(`CSS tokens missing required semantic token: ${token}`);
+    for (const token of requiredChartTokens) {
+        if (!lightStatusRule || !lightStatusRule.decls[token]) {
+            errors.push(`Baseline CSS tokens missing required scientific chart token: ${token}`);
         }
     }
 
     return errors;
 }
+
 
 function verifyBindings() {
     const errors = [];

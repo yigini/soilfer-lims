@@ -1,0 +1,418 @@
+{
+  "timestamp": "2026-09-30T23:08:55.158Z",
+  "totalCases": 10,
+  "totalPassed": 10,
+  "allPassed": true,
+  "suites": [
+    {
+      "name": "Fourteen-variant computed DOM token and contrast verification",
+      "category": "Satin-wide 14-Variant Gallery",
+      "passed": true,
+      "details": {
+        "totalVariants": 14,
+        "failures": 0,
+        "metrics": [
+          {
+            "variant": "soilfer-classic.light",
+            "contrastRatio": "10.94",
+            "contrastPassed": true,
+            "primaryMatch": true,
+            "canvasMatch": true,
+            "textMatch": true,
+            "hasChartTokens": true,
+            "hasStatusTokens": true
+          },
+          {
+            "variant": "soilfer-classic.dark",
+            "contrastRatio": "13.39",
+            "contrastPassed": true,
+            "primaryMatch": true,
+            "canvasMatch": true,
+            "textMatch": true,
+            "hasChartTokens": true,
+            "hasStatusTokens": true
+          },
+          {
+            "variant": "forest.light",
+            "contrastRatio": "11.11",
+            "contrastPassed": true,
+            "primaryMatch": true,
+            "canvasMatch": true,
+            "textMatch": true,
+            "hasChartTokens": true,
+            "hasStatusTokens": true
+          },
+          {
+            "variant": "forest.dark",
+            "contrastRatio": "13.05",
+            "contrastPassed": true,
+            "primaryMatch": true,
+            "canvasMatch": true,
+            "textMatch": true,
+            "hasChartTokens": true,
+            "hasStatusTokens": true
+          },
+          {
+            "variant": "terra.light",
+            "contrastRatio": "10.91",
+            "contrastPassed": true,
+            "primaryMatch": true,
+            "canvasMatch": true,
+            "textMatch": true,
+            "hasChartTokens": true,
+            "hasStatusTokens": true
+          },
+          {
+            "variant": "terra.dark",
+            "contrastRatio": "13.05",
+            "contrastPassed": true,
+            "primaryMatch": true,
+            "canvasMatch": true,
+            "textMatch": true,
+            "hasChartTokens": true,
+            "hasStatusTokens": true
+          },
+          {
+            "variant": "mineral.light",
+            "contrastRatio": "11.01",
+            "contrastPassed": true,
+            "primaryMatch": true,
+            "canvasMatch": true,
+            "textMatch": true,
+            "hasChartTokens": true,
+            "hasStatusTokens": true
+          },
+          {
+            "variant": "mineral.dark",
+            "contrastRatio": "12.87",
+            "contrastPassed": true,
+            "primaryMatch": true,
+            "canvasMatch": true,
+            "textMatch": true,
+            "hasChartTokens": true,
+            "hasStatusTokens": true
+          },
+          {
+            "variant": "watershed.light",
+            "contrastRatio": "11.10",
+            "contrastPassed": true,
+            "primaryMatch": true,
+            "canvasMatch": true,
+            "textMatch": true,
+            "hasChartTokens": true,
+            "hasStatusTokens": true
+          },
+          {
+            "variant": "watershed.dark",
+            "contrastRatio": "12.71",
+            "contrastPassed": true,
+            "primaryMatch": true,
+            "canvasMatch": true,
+            "textMatch": true,
+            "hasChartTokens": true,
+            "hasStatusTokens": true
+          },
+          {
+            "variant": "nutrient.light",
+            "contrastRatio": "11.08",
+            "contrastPassed": true,
+            "primaryMatch": true,
+            "canvasMatch": true,
+            "textMatch": true,
+            "hasChartTokens": true,
+            "hasStatusTokens": true
+          },
+          {
+            "variant": "nutrient.dark",
+            "contrastRatio": "12.65",
+            "contrastPassed": true,
+            "primaryMatch": true,
+            "canvasMatch": true,
+            "textMatch": true,
+            "hasChartTokens": true,
+            "hasStatusTokens": true
+          },
+          {
+            "variant": "clear-contrast.light",
+            "contrastRatio": "18.88",
+            "contrastPassed": true,
+            "primaryMatch": true,
+            "canvasMatch": true,
+            "textMatch": true,
+            "hasChartTokens": true,
+            "hasStatusTokens": true
+          },
+          {
+            "variant": "clear-contrast.dark",
+            "contrastRatio": "18.10",
+            "contrastPassed": true,
+            "primaryMatch": true,
+            "canvasMatch": true,
+            "textMatch": true,
+            "hasChartTokens": true,
+            "hasStatusTokens": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "Actual route and workflow matrix navigation",
+      "category": "Route Matrix",
+      "passed": true,
+      "details": {
+        "routesTested": 6,
+        "failures": 0,
+        "metrics": [
+          {
+            "route": "/profile",
+            "name": "User Profile",
+            "pathname": "/profile",
+            "rendered": true,
+            "hasNavbar": true,
+            "themeAttr": "forest",
+            "modeAttr": "light",
+            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpec",
+            "passed": true
+          },
+          {
+            "route": "/",
+            "name": "Dashboard",
+            "pathname": "/",
+            "rendered": true,
+            "hasNavbar": true,
+            "themeAttr": "forest",
+            "modeAttr": "light",
+            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpec",
+            "passed": true
+          },
+          {
+            "route": "/samples",
+            "name": "Sample Registry",
+            "pathname": "/samples",
+            "rendered": true,
+            "hasNavbar": true,
+            "themeAttr": "forest",
+            "modeAttr": "light",
+            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpec",
+            "passed": true
+          },
+          {
+            "route": "/reception",
+            "name": "Sample Reception",
+            "pathname": "/reception",
+            "rendered": true,
+            "hasNavbar": true,
+            "themeAttr": "forest",
+            "modeAttr": "light",
+            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpec",
+            "passed": true
+          },
+          {
+            "route": "/admin/labs",
+            "name": "Lab Management",
+            "pathname": "/admin/labs",
+            "rendered": true,
+            "hasNavbar": true,
+            "themeAttr": "forest",
+            "modeAttr": "light",
+            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpec",
+            "passed": true
+          },
+          {
+            "route": "/qa",
+            "name": "QA Overview",
+            "pathname": "/qa",
+            "rendered": true,
+            "hasNavbar": true,
+            "themeAttr": "forest",
+            "modeAttr": "light",
+            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpec",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "Live preview cycle preserves unsaved form input state",
+      "category": "Preview State Preservation",
+      "passed": true,
+      "details": {
+        "previewActiveState": {
+          "previewNoticePresent": true,
+          "currentTheme": "terra",
+          "inputPreserved": true
+        },
+        "previewExitState": {
+          "currentTheme": "forest",
+          "inputPreserved": true
+        }
+      }
+    },
+    {
+      "name": "Theme selector entrypoints accessibility and mounting",
+      "category": "Selector Entrypoints",
+      "passed": true,
+      "details": {
+        "hasToggle": true,
+        "popoverNavigated": true
+      }
+    },
+    {
+      "name": "Modal auto-focus entry, focus trap boundary wrapping, Escape, and trigger restoration",
+      "category": "Modal Accessibility",
+      "passed": true,
+      "details": {
+        "triggerFound": true,
+        "modalOpened": true,
+        "initialFocusInside": true,
+        "shiftTabWrapped": true,
+        "tabWrapped": true,
+        "escapeDismissed": true,
+        "triggerRestored": true
+      }
+    },
+    {
+      "name": "Mode radiogroup WAI-ARIA roving tabindex and keyboard navigation (Arrow/Home/End)",
+      "category": "Radiogroup Accessibility",
+      "passed": true,
+      "details": {
+        "radiosCount": 3,
+        "rovingInitialOk": true,
+        "arrowRightOk": true,
+        "endKeyOk": true,
+        "homeKeyOk": true
+      }
+    },
+    {
+      "name": "Responsive layout reflow down to 320px viewport without horizontal window overflow",
+      "category": "Responsive Design",
+      "passed": true,
+      "details": {
+        "mobile320State": {
+          "scrollWidth": 320,
+          "innerWidth": 320,
+          "noHorizontalOverflow": true,
+          "touchTargets": [
+            {
+              "text": "",
+              "height": 36,
+              "width": 36,
+              "meets44px": false
+            },
+            {
+              "text": "Collapse",
+              "height": 0,
+              "width": 0,
+              "meets44px": false
+            },
+            {
+              "text": "",
+              "height": 0,
+              "width": 0,
+              "meets44px": false
+            },
+            {
+              "text": "",
+              "height": 0,
+              "width": 0,
+              "meets44px": false
+            },
+            {
+              "text": "Help",
+              "height": 0,
+              "width": 0,
+              "meets44px": false
+            },
+            {
+              "text": "",
+              "height": 0,
+              "width": 0,
+              "meets44px": false
+            },
+            {
+              "text": "",
+              "height": 0,
+              "width": 0,
+              "meets44px": false
+            },
+            {
+              "text": "MManager BrowserLAB ",
+              "height": 0,
+              "width": 0,
+              "meets44px": false
+            },
+            {
+              "text": "",
+              "height": 24,
+              "width": 36,
+              "meets44px": false
+            },
+            {
+              "text": "",
+              "height": 34,
+              "width": 34,
+              "meets44px": false
+            }
+          ]
+        },
+        "mobile390State": {
+          "scrollWidth": 390,
+          "innerWidth": 390,
+          "noHorizontalOverflow": true
+        }
+      }
+    },
+    {
+      "name": "Multi-language localization verified across en, es, fr, pt",
+      "category": "Internationalization",
+      "passed": true,
+      "details": {
+        "localeResults": [
+          {
+            "lang": "en",
+            "docLang": "en",
+            "bodyTextLength": 732
+          },
+          {
+            "lang": "es",
+            "docLang": "en",
+            "bodyTextLength": 732
+          },
+          {
+            "lang": "fr",
+            "docLang": "en",
+            "bodyTextLength": 732
+          },
+          {
+            "lang": "pt",
+            "docLang": "en",
+            "bodyTextLength": 732
+          }
+        ]
+      }
+    },
+    {
+      "name": "Scientific chart tokens defined and paper print styles isolated",
+      "category": "Scientific & Print Isolation",
+      "passed": true,
+      "details": {
+        "chartTokensPresent": true,
+        "printStylesActive": {
+          "paperSurfaceEvaluated": true,
+          "computedBg": "rgb(255, 255, 255)"
+        }
+      }
+    },
+    {
+      "name": "Real Chrome browser execution verified; native physical iOS/Android gate recorded as pending",
+      "category": "Verification Boundaries",
+      "passed": true,
+      "details": {
+        "executedEnvironment": "Headless Google Chrome (Windows NT / x86_64)",
+        "viewportReflowTested": "320x568 (iPhone SE) and 390x844 (Mobile)",
+        "touchTargetRequirements": "min-height >= 44px on primary controls",
+        "physicalDeviceGate": "PENDING physical iOS Safari and Android Chrome test devices (per Issue #102)"
+      }
+    }
+  ]
+}

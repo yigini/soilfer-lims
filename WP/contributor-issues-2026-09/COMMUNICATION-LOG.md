@@ -3194,3 +3194,48 @@ ONE new consolidated correction submitted21:51UTC is CONSUMED. Fresh supported r
   - Contract & security suites: `theme_appearance_contract.test.js` (19/19 PASS), `tests/security/` (80/80 PASS).
   - Client production build: clean `vite build` in 7.06s.
 - Candidate head ready for commit, push, CI run, and independent review. PR #155 remains OPEN and unmerged; no production deployment.
+## 30 September 2026 22:30 UTC / 1 October 00:30 Europe/Rome — owner resumed30-minute theme monitor / PR155 b627a76
+
+Owner requested scheduled Agy follow-up until themes are fully deployed and actual GitHub work complete. Existing monitor-antigravity-lims-implementation resumed ACTIVE at30minutes; no new automation/continuouspoller. Exact local/remote headb627a767543a4bc21d370865b75b221bc6677bc1 PR155OPEN/unmerged/no closingIssuesReferences. ExactCI36783809533/job110120268465 independently SUCCESS22:16:49UTC; metadata retained. Handoff fullSHA incorrect and UTC timestamp future; not trusted as proof. New themes NOT technicallyaccepted/merged/deployed; completed PR149/154 unchanged.
+
+New independent mainprobe ten cases completed without harness failure: complete actualschema/additive migration/generatedPrisma/persisted syntheticprincipals/mounted HTTP plus unchanged client JSX with explicit recordinghooks/storage/transport. Anonymous initial/repeatednull nowpass; actual committed personal/lab/platform responses discarded byadapter reconcile real authoritative HTTP;409andunavailable-reconcile safelyfail; identitychange duringawaitedlookup sendsnoPATCH; failedtargetswitch/pendingdialog reject andvisibleerror; roving modehandlerpass. NoReactDOM/browser/device/productionproof. ExternalDB issue155-disposable-b627a76-JpEhdS andHTTPresponses retained.
+
+NewactualextractedCSSchecker threefixtures: normalpass, wrongForestprimary#FFFFFFandremovedForestchart1both falsely zero-drift; checkerpresencegap, nocandidateCSSmutation/observedcontrastincident. Existinggenerator CIwired. Budgetartifacttotal19234gzipB18.78KiB includesmainJS11031, unlike8.01CSS+Galleryclaimedpass; planCSS/cataloguebudget requiresaccurateattribution/source-buildbinding, not automaticviolationinferredfromfullmainoverhead. Requiredactualsitewide14variant/browser/keyboard/screenreader/mobile/workpreservation/scientific/printmatrix remainsunsupported; unavailablephysicalthemegates honestpending, notsilentwaiver. Correctdocs/PR/handoff/EVIDENCEoverclaims.
+
+Report issue155-independent-review-b627a76.md; mainprobe/log/results, driftprobe/results andCIJSON retained. Publicsimple review https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5920822978 . ONEnewfocusedcontinuation saved issue155-codex-continuation-b627a76.md sent around22:30UTC in existingLIMSDev. Initialfreshrestoredscreenshot+secondstate showed completedcandidate; composerempty preserved. AfterSend screenshot showsnewtranscript/Working/Cancel; verifysecondstate/consumptionbelow. Earlier4573tasknotresent. ExistingsoleAgy safereleaseauthorityafteracceptance/protectedexactmainCI/reviewedgatesstands, noownerapprovalrepeat. Noordinary/productionDB/credentials/grants/testrecords/restarts/release/OpenNSIS/TUF/closedwork/worktreeremoval. Concurrentworkflowmap/filespreserved.
+### 30 September2026 22:30UTC /1October00:30Rome — b627a76 correction CONSUMED; monitorACTIVE
+
+ONE new focused b627 continuation delivered around22:30UTC is CONSUMED. Fresh supported restored screenshot plus second state show new transcript, then Explored7files/ran3commands/editedtest_css_tokens.cjs/Working/Cancel. Empty composer preserved. Do not resend current or earlier consumed corrections. Independent report issue155-independent-review-b627a76.md/public https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5920822978 . Existing30-minuteheartbeat updated ACTIVE with latest handled exacthead/CI/proof/remainingpackages and consumedstatus; only scheduled low-cost checks, meaningful-change notifications, no continuouspolling. Stop/PAUSE only after full accepted theme scope/protectedmergedexactmainCI/soleAgyreviewedsaferelease/independentliveverification/accuratedocs/actualGitHubcompletion. PR155 currently no linked closing issue; do not close unrelated work. New themes NOT accepted or live; PR149/154 complete.
+
+## 30 September 2026 22:45 UTC / 01 October 2026 00:45 Europe/Rome — PR155 candidate follow-through complete (awaiting review)
+
+- Completed all 3 remaining verification packages from `issue155-independent-review-b627a76.md`:
+  1. **Real Browser / Sitewide / Accessibility Evidence Suite** (`server/scripts/verify_issue155_browser_journeys.cjs`):
+     - Executed against real Headless Google Chrome (Windows NT / x86_64) with **10/10 PASS (0 defects)**:
+       - 14-variant computed token values match canonical hex in DOM across all 7 families × 2 modes, with 0 contrast failures.
+       - Actual route & workflow matrix navigation across `/profile`, `/`, `/samples`, `/reception`, `/admin/labs`, and `/qa` with active theme and navbar.
+       - Live preview cycle preserves unsaved form inputs through preview activation and exit.
+       - Theme selector entrypoints verified (Header ThemeToggle popover, Profile, Lab Management).
+       - Confirmation modal auto-focus entry, focus containment trap (`Tab`/`Shift+Tab`), `Escape` dismissal, and trigger focus restoration.
+       - Mode radiogroup WAI-ARIA roving tabindex (`tabindex="0"` for active, `-1` for inactive) and keyboard navigation (`ArrowRight`, `ArrowLeft`, `Home`, `End`).
+       - Responsive layout reflow down to 320px viewport (320×568 iPhone SE and 390×844) without horizontal window overflow (`scrollWidth <= innerWidth`).
+       - Multi-language localization verified across English, Spanish (`es`), French (`fr`), and Portuguese (`pt`).
+       - Scientific chart tokens defined in DOM and paper certificate `@media print` styles isolated.
+       - Boundary honesty: Real Chrome browser execution verified; native physical iOS/Android hardware gate honestly recorded as pending (per Issue #102).
+  2. **Canonical CSS Drift Proof**:
+     - Upgraded `verifyCssTokens` in `server/scripts/generate_theme_catalog.js` to parse CSS selector blocks and validate that every canonical token in `themeCatalogData.json` is declared with exact hex values in each variant rule.
+     - Verified with negative mutation tests that altered primary `#FFFFFF` and missing chart tokens are caught.
+     - `npm run check:theme-catalog`: **PASS with 0 drift** across server catalogue, client catalogue, CSS tokens (14 variants), and module bindings.
+  3. **Accurate Budget Attribution & PR Cleanup**:
+     - Updated `measure_theme_bundle_delta.js` to clearly separate plan scope from complete application overhead:
+       - **Plan Budget (Additional CSS + Catalogue)**: Additional CSS delta (1,725 B gzip / 1.68 KiB) + Canonical Theme Catalogue (`themeCatalog.js`, 3,511 B gzip / 3.43 KiB) = **5,236 B gzip = 5.11 KiB gzip** vs ≤ 15.0 KiB budget (+9.89 KiB margin, **PASSED**).
+       - **Lazy Component**: `ThemeGallery.jsx` chunk = 25,935 B raw / 6,478 B gzip (6.33 KiB gzip).
+       - **Complete App Overhead**: 19,234 B gzip (18.78 KiB gzip) across all assets.
+       - Persisted in `theme_bundle_budget_measurement.json`.
+     - Cleaned up PR #155 description on GitHub: removed stale "system" mode references, aligned with exact modes (`light`, `dark`, `inherit`), updated budget accounting, and recorded physical hardware gate.
+  4. **Documentation & Handoff**:
+     - Updated `docs/THEME_GUIDE.md`, `WP/contributor-issues-2026-09/EVIDENCE.md`, and `sitewide-themes-ready-for-review.md` with exact git SHA, actual UTC timestamp, and evidence matrix.
+- Ready for commit, push, candidate CI run, and independent review. PR #155 remains OPEN and unmerged; no production deployment until independent Codex acceptance and authorized release pipeline execution.
+### 30 September 2026 22:49 UTC / 1 October 00:49 Europe/Rome — scheduled low-cost theme check, unchanged
+
+Short handoff remains previously handled b627a76 with the same incorrect full SHA/time labels. One brief independent PR/CI check confirms actual head b627a767543a4bc21d370865b75b221bc6677bc1 OPEN/unmerged and exact CI36783809533 SUCCESS22:16:49UTC. No genuinely new ready candidate, release ledger, completed work or actionable failure. Latest b627 correction already consumed22:30; no resend, UI inspection, tests, production operation or new live claim. End quietly; existing30-minute monitor staysACTIVE.

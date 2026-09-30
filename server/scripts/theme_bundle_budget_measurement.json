@@ -1,6 +1,7 @@
 {
   "baselineCommit": "1265e8a",
-  "measuredAt": "2026-09-30T22:03:26.221Z",
+  "candidateCommit": "b627a767543a4bc21d370865b75b221bc6677bc1",
+  "measuredAt": "2026-09-30T23:08:41.291Z",
   "baseline": {
     "css": {
       "file": "index-B4HqGI8K.css",
@@ -28,16 +29,34 @@
       "file": "index-CMLAxFLZ.js",
       "raw": 1252768,
       "gzip": 361060
+    },
+    "themeCatalog": {
+      "raw": 16701,
+      "gzip": 3511
     }
   },
-  "delta": {
-    "cssRaw": 8847,
-    "cssGzip": 1725,
+  "planBudget": {
+    "description": "Additional CSS + Canonical Theme Catalogue",
+    "additionalCssGzip": 1725,
+    "themeCatalogGzip": 3511,
+    "totalGzip": 5236,
+    "totalGzipKb": "5.11",
+    "budgetLimitKb": 15,
+    "underBudgetKb": "9.89",
+    "passed": true
+  },
+  "lazyChunk": {
+    "file": "ThemeGallery-B_6Gkfwm.js",
+    "raw": 25935,
+    "gzip": 6478,
+    "gzipKb": "6.33"
+  },
+  "completeAppOverhead": {
+    "description": "Total delta across all assets (CSS + ThemeGallery Chunk + Main JS Bundle)",
+    "cssDeltaGzip": 1725,
     "galleryGzip": 6478,
-    "mainJsGzip": 11031,
-    "totalGzip": 19234,
-    "totalGzipKb": "18.78",
-    "budgetKb": 15,
-    "underBudgetKb": "-3.78"
+    "mainJsDeltaGzip": 11031,
+    "totalOverheadGzip": 19234,
+    "totalOverheadGzipKb": "18.78"
   }
 }

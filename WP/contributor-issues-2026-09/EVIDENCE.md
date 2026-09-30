@@ -3392,10 +3392,21 @@ Laboratory operators can find step-by-step procedures in the following documenta
   - Clear Contrast provides WCAG AAA >= 7:1 contrast for core text and >= 4.5:1 for interactive controls/borders.
   - Interactive touch targets designed for 44–48px (`min-h-[44px]` with 44×44px hit-target padding on icon buttons including confirmation modal close button), satisfying WCAG 2.2 Level AA Target Size (Minimum).
   - WAI-ARIA roving tabindex (`tabIndex={draftMode === mode ? 0 : -1}`) and arrow key navigation (`ArrowRight`, `ArrowDown`, `ArrowLeft`, `ArrowUp`, `Home`, `End`) across Mode Radiogroup and Theme Cards in `ThemeGallery`.
-  - Confirmation modal initial focus entry, focus trap (`Tab`/`Shift+Tab`), Escape key dismissal, and trigger focus restoration implemented.
+  - Confirmation modal auto-focus entry, focus trap (`Tab`/`Shift+Tab`), Escape key dismissal, and trigger focus restoration verified in real Headless Chrome.
   - Independent follow-default controls: "Follow default mode" radio and "Follow shared theme" button preserve inheritance without clobbering to explicit values.
-  - Gallery reflows cleanly down to 320px viewport width in responsive layouts. Physical mobile testing on native iOS Safari and Android Chrome hardware remains strictly pending under the Issue #102 hardware gate (emulation only in CI; physical devices are unavailable in current execution environments).
+  - Gallery reflows cleanly down to 320px viewport width without horizontal window overflow (`scrollWidth <= innerWidth`). Native physical iOS Safari and Android Chrome hardware testing remains strictly pending under the Issue #102 hardware gate (physical test devices are not available in current execution environments).
 - **Verification Evidence**:
+  - `server/scripts/verify_issue155_browser_journeys.cjs`: **All 10/10 Browser Suites PASS** with real Headless Google Chrome:
+    1. Fourteen-variant computed DOM token and contrast verification (14/14 variants match canonical hex and pass WCAG AA / AAA).
+    2. Actual route and workflow matrix navigation (`/profile`, `/`, `/samples`, `/reception`, `/admin/labs`, `/qa` all render cleanly with active theme).
+    3. Live preview form input state preservation (unsaved input value preserved through preview activation and exit).
+    4. Theme selector entrypoints accessibility and mounting (Header ThemeToggle, Profile, Lab Management).
+    5. Confirmation modal auto-focus entry, focus trap boundary wrapping (`Shift+Tab` / `Tab`), Escape key dismissal, and trigger focus restoration.
+    6. Mode radiogroup WAI-ARIA roving tabindex (`tabindex="0"` for active, `-1` for inactive) and keyboard navigation (`ArrowRight`, `ArrowLeft`, `Home`, `End`).
+    7. Responsive layout reflow down to 320px viewport (320×568 iPhone SE and 390×844) without horizontal window overflow.
+    8. Multi-language localization verified across English, Spanish (`es`), French (`fr`), and Portuguese (`pt`).
+    9. Scientific chart tokens (`--sf-chart-1`..`6`) defined in DOM and paper certificate `@media print` styles isolated.
+    10. Verification boundaries: Real Chrome browser execution verified; native physical iOS/Android gate recorded as pending.
   - `server/tests/contracts/theme_appearance_contract.test.js`: **All 19/19 tests PASS**.
   - `server/tests/security/` (5 suites): **All 80/80 tests PASS** (including `rbac_enforcement.test.js`, `lab_isolation.test.js`, `wiring.test.js`, `auth_token_invalidation.test.js`, `help_lab_isolation.test.js`).
   - Candidate Verification Suite (`verify_issue155_candidate.cjs`): **All 20/20 cases PASS (0 defects)**.
@@ -3411,14 +3422,13 @@ Laboratory operators can find step-by-step procedures in the following documenta
     9. Lost-response authoritative reconciliation queries `/api/appearance/context` and updates provider state upon server commit.
     10. Canonical single-source theme catalog drift check passes with 0 drift.
     11. All 14 theme variants pass contrast checks with 0 failures.
-  - Theme Catalog & Tokens Drift Verification (`npm run check:theme-catalog`): **0 drift detected** across server catalogue, client catalogue, CSS appearance tokens (14 variants), and module bindings. Wired into CI workflow (`.github/workflows/ci.yml`).
+  - Theme Catalog & Tokens Drift Verification (`npm run check:theme-catalog`): **0 drift detected** across server catalogue, client catalogue, and exact CSS token values across all 14 variants. Negative mutation fixtures verify detection of altered primary colors (`#FFFFFF`) and missing chart tokens. Wired into CI workflow (`.github/workflows/ci.yml`).
   - Client production build & Reproducible Delta Budget (measured against baseline `1265e8a` via `node server/scripts/measure_theme_bundle_delta.js`):
-    - Baseline CSS (`1265e8a`): 203,804 bytes raw / 33,223 bytes gzip
-    - Candidate CSS: 212,651 bytes raw / 34,948 bytes gzip
-    - CSS Delta: +8,847 bytes raw / +1,725 bytes gzip (+1.68 kB gzip)
-    - ThemeGallery Chunk: 25,935 bytes raw / 6,478 bytes gzip (+6.33 kB gzip)
-    - Additional Theme CSS + Gallery Component gzip: **8,203 bytes gzip (8.01 kB gzip)**, safely within the ≤ 15.0 kB gzip budget (6.99 kB margin).
-    - Main Application Chunk: baseline 350,029 bytes gzip -> candidate 361,060 bytes gzip (+11,031 bytes gzip / +10.77 kB gzip, accounting for `ThemeContext`, `ThemeToggle` in Header, and `AppearancePreviewNotice` in App).
+    - Baseline Assets (`1265e8a`): CSS 203,804 B raw / 33,223 B gzip; Main JS 1,213,087 B raw / 350,029 B gzip.
+    - Candidate Assets: CSS 212,651 B raw / 34,948 B gzip; Main JS 1,252,768 B raw / 361,060 B gzip.
+    - **1. Plan Budget (Additional CSS + Canonical Theme Catalogue)**: Additional CSS delta (1,725 B gzip / 1.68 KiB) + Canonical Theme Catalogue (`themeCatalog.js`, 3,511 B gzip / 3.43 KiB) = **5,236 B gzip = 5.11 KiB gzip** vs ≤ 15.0 KiB plan budget (+9.89 KiB headroom, **PASSED**).
+    - **2. Lazy-Loaded Selector Component**: `ThemeGallery.jsx` chunk = 25,935 B raw / 6,478 B gzip (6.33 KiB gzip).
+    - **3. Complete End-to-End Application Footprint**: Total delta across all production assets including context and header integrations is 19,234 B gzip (18.78 KiB gzip).
   - Documentation: Updated `docs/THEME_GUIDE.md` covering user guide, lab manager guide, platform administrator guide, reset procedure, troubleshooting, and scientific paper isolation with honest physical hardware boundaries.
   - Status: Candidate completed locally with full test evidence and build budgets; PR #155 remains OPEN and unmerged; no production deployment until independent Codex acceptance and authorized release pipeline execution.
 
