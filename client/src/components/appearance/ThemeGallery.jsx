@@ -7,9 +7,11 @@
  * - Scope-aware adoption controls: Personal save, Laboratory default, Platform default
  * - Reversible live preview without losing unsaved inputs
  * - WCAG 2.2 AA compliant contrast, keyboard navigation, and polite status announcements
+ * - Named confirmation modals for lab and platform adoption
+ * - Conflict detection and retry reconciliation
  */
 
-import React, { useState, useEffect, useCallback, useId } from 'react';
+import React, { useState, useEffect, useCallback, useId, useMemo } from 'react';
 import {
     Sun,
     Moon,
@@ -21,7 +23,10 @@ import {
     Globe,
     AlertCircle,
     CheckCircle2,
-    RotateCcw
+    RotateCcw,
+    Layers,
+    X,
+    RefreshCw
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -48,60 +53,112 @@ export const ThemeGallery = ({
         savePersonalPreferences,
         adoptLabDefault,
         adoptPlatformDefault,
-        resetPersonalToDefault
+        resetPersonalToDefault,
+        fetchAppearanceContext
     } = useTheme();
 
     const { t } = useLanguage();
     const groupId = useId();
 
-    // Local draft selection for the gallery
-    const [draftThemeId, setDraftThemeId] = useState(activeThemeId);
-    const [draftMode, setDraftMode] = useState(appearance);
-    const [saving, setSaving] = useState(false);
-    const [statusMessage, setStatusMessage] = useState({ type: null, text: '' });
-
-    // Sync draft selection with active theme if not currently previewing
-    useEffect(() => {
-        if (!isPreviewActive) {
-            setDraftThemeId(activeThemeId);
-            setDraftMode(appearance);
-        }
-    }, [activeThemeId, appearance, isPreviewActive]);
-
-    const isSuperAdmin = authSubject.role === 'SUPER_ADMIN';
-    const isLabManager = authSubject.role === 'LAB_MANAGER';
+    const isSuperAdmin = authSubject?.role === 'SUPER_ADMIN';
+    const isLabManager = authSubject?.role === 'LAB_MANAGER';
     const isOrdinaryStaff = !isSuperAdmin && !isLabManager;
 
-    // Check if user is allowed to select this theme palette personally
-    const isThemeSelectablePersonally = (themeId) => {
+    // Resolve effective lab target
+    const effectiveLabId = targetLabId || authSubject?.labId || null;
+
+    // Initialize drafts based on targetScope
+    const initialThemeId = useMemo(() => {
+        if (targetScope === 'personal') {
+            return authSubject?.savedThemeId || null;
+        }
+        if (targetScope === 'lab') {
+            return serverContext?.labDefault?.themeId || 'forest';
+        }
+        if (targetScope === 'platform') {
+            return serverContext?.platformDefault?.themeId || 'soilfer-classic';
+        }
+        return activeThemeId;
+    }, [targetScope, authSubject?.savedThemeId, serverContext?.labDefault?.themeId, serverContext?.platformDefault?.themeId, activeThemeId]);
+
+    const initialMode = useMemo(() => {
+        if (targetScope === 'personal') {
+            return (authSubject?.savedModePreference === 'light' || authSubject?.savedModePreference === 'dark')
+                ? authSubject.savedModePreference
+                : 'inherit';
+        }
+        if (targetScope === 'lab') {
+            return serverContext?.labDefault?.defaultMode || 'inherit';
+        }
+        if (targetScope === 'platform') {
+            return serverContext?.platformDefault?.defaultMode || 'light';
+        }
+        return appearance;
+    }, [targetScope, authSubject?.savedModePreference, serverContext?.labDefault?.defaultMode, serverContext?.platformDefault?.defaultMode, appearance]);
+
+    // Local draft state
+    const [draftThemeId, setDraftThemeId] = useState(initialThemeId);
+    const [draftMode, setDraftMode] = useState(initialMode === 'inherit' ? appearance : initialMode);
+    const [saving, setSaving] = useState(false);
+    const [statusMessage, setStatusMessage] = useState({ type: null, text: '' });
+    const [conflictError, setConflictError] = useState(null);
+    const [pendingConfirm, setPendingConfirm] = useState(null); // 'lab' | 'platform' | null
+
+    // Sync draft if targetScope or server data updates and preview is not active
+    useEffect(() => {
+        if (!isPreviewActive) {
+            setDraftThemeId(initialThemeId);
+            setDraftMode(initialMode === 'inherit' ? appearance : initialMode);
+        }
+    }, [initialThemeId, initialMode, appearance, isPreviewActive]);
+
+    // Check if user is allowed to select this theme palette
+    const isThemeSelectable = (themeId) => {
+        if (targetScope !== 'personal') return true;
         if (isSuperAdmin || isLabManager) return true;
-        // Non-manager staff can only select Clear Contrast (the accessibility option)
-        return themeId === 'clear-contrast' || themeId === activeThemeId;
+        // Non-manager staff can only explicitly select Clear Contrast (the accessibility option)
+        return themeId === 'clear-contrast';
     };
 
-    // Handle card click or radio selection
+    // Handle card click
     const handleSelectCard = (themeId) => {
+        if (!isThemeSelectable(themeId)) {
+            setStatusMessage({
+                type: 'info',
+                text: t('appearance.staffInheritNotice', 'Staff accounts inherit laboratory themes. Clear Contrast is available as an accessibility override.')
+            });
+            return;
+        }
         setDraftThemeId(themeId);
+        setStatusMessage({ type: null, text: '' });
+        setConflictError(null);
+    };
+
+    // Set theme to follow shared default
+    const handleSetInheritTheme = () => {
+        setDraftThemeId(null);
         setStatusMessage({ type: null, text: '' });
     };
 
     // Trigger full-screen live preview
     const handleStartPreview = () => {
+        const themeToPreview = draftThemeId || activeThemeId;
+        const modeToPreview = (draftMode === 'dark' || draftMode === 'light') ? draftMode : appearance;
         setPreviewTheme({
-            themeId: draftThemeId,
-            mode: draftMode
+            themeId: themeToPreview,
+            mode: modeToPreview
         });
         setStatusMessage({
             type: 'info',
-            text: t('appearance.previewNotice', 'Previewing theme. Click "Exit preview" or "Save" below.')
+            text: t('appearance.previewNotice', 'Previewing theme. Click "Exit preview" or save below.')
         });
     };
 
     // Exit live preview
     const handleExitPreview = () => {
         clearPreviewTheme();
-        setDraftThemeId(activeThemeId);
-        setDraftMode(appearance);
+        setDraftThemeId(initialThemeId);
+        setDraftMode(initialMode === 'inherit' ? appearance : initialMode);
         setStatusMessage({ type: null, text: '' });
     };
 
@@ -109,60 +166,80 @@ export const ThemeGallery = ({
     const handleSavePersonal = async () => {
         setSaving(true);
         setStatusMessage({ type: null, text: '' });
+        setConflictError(null);
         try {
+            // Ordinary staff who haven't explicitly chosen Clear Contrast must retain themeId: null
+            let finalThemeId = draftThemeId;
+            if (isOrdinaryStaff && draftThemeId !== 'clear-contrast') {
+                finalThemeId = authSubject?.savedThemeId || null;
+            }
+
+            const effectiveModePref = (draftMode === 'light' || draftMode === 'dark') ? draftMode : 'inherit';
+
             await savePersonalPreferences({
-                themeId: draftThemeId,
-                modePreference: draftMode
+                themeId: finalThemeId,
+                modePreference: effectiveModePref
             });
             setStatusMessage({
                 type: 'success',
                 text: t('appearance.savedPersonalSuccess', 'Personal appearance preferences saved successfully.')
             });
-            if (onSaved) onSaved({ themeId: draftThemeId, mode: draftMode });
+            if (onSaved) onSaved({ themeId: finalThemeId, mode: effectiveModePref });
         } catch (err) {
             console.error('[THEME] Save error:', err);
-            const msg = err.response?.data?.error || err.message || t('appearance.saveFailed', 'Failed to save preferences.');
-            setStatusMessage({ type: 'error', text: msg });
+            if (err.statusCode === 409 || err.response?.status === 409) {
+                setConflictError(t('appearance.revisionConflict', 'Settings were updated by another session. Please refresh to load latest settings.'));
+            } else {
+                const msg = err.response?.data?.error || err.message || t('appearance.saveFailed', 'Failed to save preferences.');
+                setStatusMessage({ type: 'error', text: msg });
+            }
         } finally {
             setSaving(false);
         }
     };
 
     // Adopt as laboratory default
-    const handleAdoptLab = async () => {
-        const labId = targetLabId || authSubject.labId;
-        if (!labId) return;
+    const executeAdoptLab = async () => {
+        if (!effectiveLabId) return;
 
         setSaving(true);
         setStatusMessage({ type: null, text: '' });
+        setConflictError(null);
+        setPendingConfirm(null);
         try {
             await adoptLabDefault({
-                labId,
-                themeId: draftThemeId,
-                defaultMode: draftMode
+                labId: effectiveLabId,
+                themeId: draftThemeId || 'forest',
+                defaultMode: draftMode || 'inherit'
             });
             setStatusMessage({
                 type: 'success',
-                text: t('appearance.adoptedLabSuccess', `Adopted as default for laboratory ${targetLabName || labId}.`)
+                text: t('appearance.adoptedLabSuccess', `Adopted as default for laboratory ${targetLabName || effectiveLabId}.`)
             });
-            if (onSaved) onSaved({ scope: 'lab', labId, themeId: draftThemeId, mode: draftMode });
+            if (onSaved) onSaved({ scope: 'lab', labId: effectiveLabId, themeId: draftThemeId, mode: draftMode });
         } catch (err) {
             console.error('[THEME] Lab adopt error:', err);
-            const msg = err.response?.data?.error || err.message || t('appearance.adoptFailed', 'Failed to update lab default.');
-            setStatusMessage({ type: 'error', text: msg });
+            if (err.statusCode === 409 || err.response?.status === 409) {
+                setConflictError(t('appearance.revisionConflict', 'Laboratory default was updated by another administrator. Please refresh.'));
+            } else {
+                const msg = err.response?.data?.error || err.message || t('appearance.adoptFailed', 'Failed to update lab default.');
+                setStatusMessage({ type: 'error', text: msg });
+            }
         } finally {
             setSaving(false);
         }
     };
 
     // Adopt as platform default
-    const handleAdoptPlatform = async () => {
+    const executeAdoptPlatform = async () => {
         setSaving(true);
         setStatusMessage({ type: null, text: '' });
+        setConflictError(null);
+        setPendingConfirm(null);
         try {
             await adoptPlatformDefault({
-                themeId: draftThemeId,
-                defaultMode: draftMode
+                themeId: draftThemeId || 'soilfer-classic',
+                defaultMode: draftMode === 'dark' ? 'dark' : 'light'
             });
             setStatusMessage({
                 type: 'success',
@@ -171,19 +248,43 @@ export const ThemeGallery = ({
             if (onSaved) onSaved({ scope: 'platform', themeId: draftThemeId, mode: draftMode });
         } catch (err) {
             console.error('[THEME] Platform adopt error:', err);
-            const msg = err.response?.data?.error || err.message || t('appearance.adoptFailed', 'Failed to update platform default.');
-            setStatusMessage({ type: 'error', text: msg });
+            if (err.statusCode === 409 || err.response?.status === 409) {
+                setConflictError(t('appearance.revisionConflict', 'Platform default was updated by another administrator. Please refresh.'));
+            } else {
+                const msg = err.response?.data?.error || err.message || t('appearance.adoptFailed', 'Failed to update platform default.');
+                setStatusMessage({ type: 'error', text: msg });
+            }
         } finally {
             setSaving(false);
         }
     };
 
-    // Reset to inherited defaults
+    // Refresh after conflict
+    const handleRefreshAfterConflict = async () => {
+        setSaving(true);
+        try {
+            await fetchAppearanceContext(effectiveLabId);
+            setConflictError(null);
+            setStatusMessage({
+                type: 'info',
+                text: t('appearance.refreshedLatest', 'Refreshed latest settings from server.')
+            });
+        } catch (e) {
+            // Ignore
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Reset personal to default
     const handleResetPersonal = async () => {
         setSaving(true);
         setStatusMessage({ type: null, text: '' });
+        setConflictError(null);
         try {
             await resetPersonalToDefault();
+            setDraftThemeId(null);
+            setDraftMode(appearance);
             setStatusMessage({
                 type: 'success',
                 text: t('appearance.resetSuccess', 'Reset to inherited defaults.')
@@ -208,6 +309,8 @@ export const ThemeGallery = ({
         }
     };
 
+    const selectedThemeName = themes?.find(t => t.id === (draftThemeId || activeThemeId))?.name || 'Classic';
+
     return (
         <section
             aria-labelledby={`${groupId}-title`}
@@ -217,10 +320,16 @@ export const ThemeGallery = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-sf-divider pb-4">
                 <div>
                     <h3 id={`${groupId}-title`} className="text-lg font-bold text-sf-text">
-                        {t('appearance.galleryTitle', 'Theme Library')}
+                        {targetScope === 'lab'
+                            ? (targetLabName ? `${targetLabName} — ${t('appearance.labAppearance', 'Laboratory Appearance')}` : t('appearance.labAppearance', 'Laboratory Appearance'))
+                            : (targetScope === 'platform' ? t('appearance.platformAppearance', 'Platform Default Appearance') : t('appearance.galleryTitle', 'Theme Library'))}
                     </h3>
                     <p className="text-sm text-sf-muted">
-                        {t('appearance.galleryDescription', 'Choose a calm, readable identity for scientific laboratory work.')}
+                        {targetScope === 'lab'
+                            ? t('appearance.labHeadingDesc', 'Configure default theme and mode for staff in this laboratory.')
+                            : (targetScope === 'platform'
+                                ? t('appearance.platformHeadingDesc', 'Configure global appearance for all users without laboratory or personal overrides.')
+                                : t('appearance.galleryDescription', 'Choose a calm, readable identity for scientific laboratory work.'))}
                     </p>
                 </div>
 
@@ -237,10 +346,10 @@ export const ThemeGallery = ({
                         onClick={() => {
                             setDraftMode('light');
                             if (isPreviewActive) {
-                                setPreviewTheme({ themeId: draftThemeId, mode: 'light' });
+                                setPreviewTheme({ themeId: draftThemeId || activeThemeId, mode: 'light' });
                             }
                         }}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all touch-target sm:min-h-0 sm:min-w-0 ${
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[44px] sm:min-h-0 touch-target ${
                             draftMode === 'light'
                                 ? 'bg-sf-surface text-sf-text shadow-sm'
                                 : 'text-sf-muted hover:text-sf-text'
@@ -257,10 +366,10 @@ export const ThemeGallery = ({
                         onClick={() => {
                             setDraftMode('dark');
                             if (isPreviewActive) {
-                                setPreviewTheme({ themeId: draftThemeId, mode: 'dark' });
+                                setPreviewTheme({ themeId: draftThemeId || activeThemeId, mode: 'dark' });
                             }
                         }}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all touch-target sm:min-h-0 sm:min-w-0 ${
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all min-h-[44px] sm:min-h-0 touch-target ${
                             draftMode === 'dark'
                                 ? 'bg-sf-surface text-sf-text shadow-sm'
                                 : 'text-sf-muted hover:text-sf-text'
@@ -272,6 +381,33 @@ export const ThemeGallery = ({
                 </div>
             </div>
 
+            {/* Scope Missing Warning for Lab Scope */}
+            {targetScope === 'lab' && !effectiveLabId && (
+                <div role="alert" className="p-4 rounded-xl bg-sf-warning-bg border border-sf-warning/40 text-sf-warning text-sm flex items-center gap-3">
+                    <AlertCircle size={18} className="shrink-0" />
+                    <span>{t('appearance.noLabSelected', 'No laboratory selected. Please select a laboratory to configure appearance defaults.')}</span>
+                </div>
+            )}
+
+            {/* Conflict Error Notice */}
+            {conflictError && (
+                <div role="alert" className="p-4 rounded-xl bg-sf-danger-bg border border-sf-danger/40 text-sf-danger text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                        <AlertCircle size={18} className="shrink-0" />
+                        <span>{conflictError}</span>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleRefreshAfterConflict}
+                        disabled={saving}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sf-surface text-sf-danger border border-sf-danger font-bold text-xs hover:bg-sf-hover"
+                    >
+                        <RefreshCw size={13} className={saving ? 'animate-spin' : ''} />
+                        <span>{t('appearance.refreshLatest', 'Refresh & Review Latest')}</span>
+                    </button>
+                </div>
+            )}
+
             {/* Current Active Status Indicator */}
             <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-xl bg-sf-surface border border-sf-divider text-xs md:text-sm">
                 <div className="flex items-center gap-2">
@@ -279,7 +415,7 @@ export const ThemeGallery = ({
                         {t('appearance.activeAppearance', 'Active Appearance')}:
                     </span>
                     <span className="font-bold text-sf-text">
-                        {themes.find(t => t.id === activeThemeId)?.name || 'Classic'}
+                        {themes?.find(t => t.id === activeThemeId)?.name || 'Classic'}
                     </span>
                     <span className="px-2 py-0.5 rounded-md bg-sf-hover text-sf-text font-medium text-xs">
                         {appearance === 'dark' ? t('appearance.dark', 'Dark') : t('appearance.light', 'Light')}
@@ -289,12 +425,12 @@ export const ThemeGallery = ({
                     </span>
                 </div>
 
-                {authSubject.savedThemeId && (
+                {targetScope === 'personal' && authSubject?.savedThemeId && (
                     <button
                         type="button"
                         onClick={handleResetPersonal}
                         disabled={saving}
-                        className="flex items-center gap-1.5 text-xs text-sf-link hover:underline font-medium"
+                        className="flex items-center gap-1.5 text-xs text-sf-link hover:underline font-medium min-h-[44px] sm:min-h-0 touch-target"
                     >
                         <RotateCcw size={13} />
                         <span>{t('appearance.resetToInherited', 'Reset to inherited defaults')}</span>
@@ -325,17 +461,17 @@ export const ThemeGallery = ({
                 aria-label={t('appearance.themeFamiliesAria', 'Theme Families')}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
             >
-                {themes.map((th) => {
-                    const isSelected = draftThemeId === th.id;
+                {themes?.map((th) => {
+                    const isSelected = draftThemeId === th.id || (draftThemeId === null && activeThemeId === th.id && targetScope === 'personal');
                     const tokens = draftMode === 'dark' ? th.dark : th.light;
-                    const selectable = isThemeSelectablePersonally(th.id);
+                    const selectable = isThemeSelectable(th.id);
 
                     return (
                         <div
                             key={th.id}
                             role="radio"
                             aria-checked={isSelected}
-                            tabIndex={0}
+                            tabIndex={selectable ? 0 : -1}
                             onClick={() => handleSelectCard(th.id)}
                             onKeyDown={(e) => {
                                 if (e.key === ' ' || e.key === 'Enter') {
@@ -343,7 +479,9 @@ export const ThemeGallery = ({
                                     handleSelectCard(th.id);
                                 }
                             }}
-                            className={`group relative flex flex-col rounded-2xl border-2 transition-all cursor-pointer overflow-hidden p-3.5 space-y-3 focus:outline-none focus:ring-2 focus:ring-sf-focus ${
+                            className={`group relative flex flex-col rounded-2xl border-2 transition-all p-3.5 space-y-3 focus:outline-none focus:ring-2 focus:ring-sf-focus min-h-[44px] ${
+                                selectable ? 'cursor-pointer' : 'cursor-default'
+                            } ${
                                 isSelected
                                     ? 'border-sf-primary bg-sf-selected/30 shadow-md ring-1 ring-sf-primary/40'
                                     : 'border-sf-divider bg-sf-surface hover:border-sf-control'
@@ -365,6 +503,11 @@ export const ThemeGallery = ({
                                                         : 'bg-sf-hover text-sf-muted')
                                             }`}>
                                                 {th.badge}
+                                            </span>
+                                        )}
+                                        {draftThemeId === null && activeThemeId === th.id && targetScope === 'personal' && (
+                                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-sf-hover text-sf-muted">
+                                                {t('appearance.inherited', 'Inherited')}
                                             </span>
                                         )}
                                     </div>
@@ -478,7 +621,7 @@ export const ThemeGallery = ({
                         <button
                             type="button"
                             onClick={handleStartPreview}
-                            className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-sf-divider bg-sf-surface hover:bg-sf-hover text-xs font-bold transition-all touch-target"
+                            className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-sf-divider bg-sf-surface hover:bg-sf-hover text-xs font-bold transition-all min-h-[44px] touch-target"
                         >
                             <Eye size={15} />
                             <span>{t('appearance.livePreview', 'Preview full screen')}</span>
@@ -487,7 +630,7 @@ export const ThemeGallery = ({
                         <button
                             type="button"
                             onClick={handleExitPreview}
-                            className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-sf-control bg-sf-surface hover:bg-sf-hover text-xs font-bold transition-all touch-target"
+                            className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-sf-control bg-sf-surface hover:bg-sf-hover text-xs font-bold transition-all min-h-[44px] touch-target"
                         >
                             <Undo2 size={15} />
                             <span>{t('appearance.exitPreview', 'Exit preview')}</span>
@@ -496,24 +639,26 @@ export const ThemeGallery = ({
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                    {/* 1. Save for Me (Personal Preference) */}
-                    <button
-                        type="button"
-                        onClick={handleSavePersonal}
-                        disabled={saving}
-                        className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-sf-primary text-sf-on-primary text-xs font-bold hover:bg-sf-primary-hover shadow-sm transition-all disabled:opacity-50 touch-target"
-                    >
-                        <Save size={15} />
-                        <span>{t('appearance.saveForMe', 'Save for me')}</span>
-                    </button>
-
-                    {/* 2. Adopt as Laboratory Default (LAB_MANAGER own lab or SUPER_ADMIN) */}
-                    {(serverContext.canAdoptLabDefault || isSuperAdmin) && (
+                    {/* Target Scope: Personal Save */}
+                    {targetScope === 'personal' && (
                         <button
                             type="button"
-                            onClick={handleAdoptLab}
+                            onClick={handleSavePersonal}
                             disabled={saving}
-                            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-sf-primary text-sf-primary bg-sf-surface hover:bg-sf-selected text-xs font-bold transition-all disabled:opacity-50 touch-target"
+                            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-sf-primary text-sf-on-primary text-xs font-bold hover:bg-sf-primary-hover shadow-sm transition-all disabled:opacity-50 min-h-[44px] touch-target"
+                        >
+                            <Save size={15} />
+                            <span>{t('appearance.saveForMe', 'Save for me')}</span>
+                        </button>
+                    )}
+
+                    {/* Target Scope: Laboratory Default */}
+                    {targetScope === 'lab' && (
+                        <button
+                            type="button"
+                            onClick={() => setPendingConfirm('lab')}
+                            disabled={saving || !effectiveLabId}
+                            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-sf-primary text-sf-primary bg-sf-surface hover:bg-sf-selected text-xs font-bold transition-all disabled:opacity-50 min-h-[44px] touch-target"
                             title={t('appearance.adoptLabTitle', 'Staff following this lab default will see this appearance')}
                         >
                             <Building2 size={15} />
@@ -525,13 +670,13 @@ export const ThemeGallery = ({
                         </button>
                     )}
 
-                    {/* 3. Adopt as Platform Default (SUPER_ADMIN only) */}
-                    {isSuperAdmin && (
+                    {/* Target Scope: Platform Default */}
+                    {targetScope === 'platform' && (
                         <button
                             type="button"
-                            onClick={handleAdoptPlatform}
+                            onClick={() => setPendingConfirm('platform')}
                             disabled={saving}
-                            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-sf-divider bg-sf-raised text-sf-text hover:bg-sf-hover text-xs font-bold transition-all disabled:opacity-50 touch-target"
+                            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-sf-divider bg-sf-raised text-sf-text hover:bg-sf-hover text-xs font-bold transition-all disabled:opacity-50 min-h-[44px] touch-target"
                             title={t('appearance.adoptPlatformTitle', 'All users without personal or lab overrides will see this theme')}
                         >
                             <Globe size={15} />
@@ -540,6 +685,63 @@ export const ThemeGallery = ({
                     )}
                 </div>
             </div>
+
+            {/* Named Confirmation Modal */}
+            {pendingConfirm && (
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby={`${groupId}-confirm-title`}
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150"
+                >
+                    <div className="relative w-full max-w-md rounded-2xl bg-sf-surface border border-sf-divider p-6 space-y-4 shadow-xl">
+                        <div className="flex items-center justify-between">
+                            <h4 id={`${groupId}-confirm-title`} className="text-base font-bold text-sf-text">
+                                {pendingConfirm === 'lab'
+                                    ? t('appearance.confirmLabTitle', 'Confirm Laboratory Appearance Default')
+                                    : t('appearance.confirmPlatformTitle', 'Confirm Platform Appearance Default')}
+                            </h4>
+                            <button
+                                type="button"
+                                onClick={() => setPendingConfirm(null)}
+                                className="p-1 text-sf-muted hover:text-sf-text rounded-lg"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <p className="text-sm text-sf-muted">
+                            {pendingConfirm === 'lab'
+                                ? t('appearance.confirmLabMsg', `Are you sure you want to set the appearance default for "${targetLabName || effectiveLabId}" to ${selectedThemeName} (${draftMode})?`)
+                                : t('appearance.confirmPlatformMsg', `Are you sure you want to set the platform-wide default to ${selectedThemeName} (${draftMode})?`)}
+                        </p>
+
+                        <div className="p-3 rounded-xl bg-sf-hover text-xs text-sf-muted">
+                            {pendingConfirm === 'lab'
+                                ? t('appearance.confirmLabSub', 'Staff members assigned to this laboratory who do not have personal overrides will immediately receive this appearance.')
+                                : t('appearance.confirmPlatformSub', 'All users across all laboratories without laboratory or personal overrides will receive this appearance.')}
+                        </div>
+
+                        <div className="flex items-center justify-end gap-3 pt-2">
+                            <button
+                                type="button"
+                                onClick={() => setPendingConfirm(null)}
+                                className="px-4 py-2 rounded-xl border border-sf-divider text-xs font-bold hover:bg-sf-hover min-h-[44px] touch-target"
+                            >
+                                {t('common.cancel', 'Cancel')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={pendingConfirm === 'lab' ? executeAdoptLab : executeAdoptPlatform}
+                                disabled={saving}
+                                className="px-4 py-2 rounded-xl bg-sf-primary text-sf-on-primary text-xs font-bold hover:bg-sf-primary-hover min-h-[44px] touch-target"
+                            >
+                                {saving ? t('common.saving', 'Saving...') : t('common.confirm', 'Confirm & Apply')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 };

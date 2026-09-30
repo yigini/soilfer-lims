@@ -92,6 +92,11 @@ describe('Theme Library & Appearance Contracts', () => {
             });
         }
 
+        await prisma.user.update({
+            where: { id: techUser.id },
+            data: { uiThemeId: null, uiModePreference: 'inherit', uiAppearanceRevision: 0 }
+        });
+
         superAdminToken = jwt.sign({ id: adminUser.id, username: adminUser.username, role: adminUser.role, tokenVersion: adminUser.tokenVersion }, JWT_SECRET, { expiresIn: '1h' });
         labManagerToken = jwt.sign({ id: mgrUser.id, username: mgrUser.username, role: mgrUser.role, labId: mgrUser.labId, tokenVersion: mgrUser.tokenVersion }, JWT_SECRET, { expiresIn: '1h' });
         foreignManagerToken = jwt.sign({ id: foreignMgrUser.id, username: foreignMgrUser.username, role: foreignMgrUser.role, labId: foreignMgrUser.labId, tokenVersion: foreignMgrUser.tokenVersion }, JWT_SECRET, { expiresIn: '1h' });
@@ -190,7 +195,8 @@ describe('Theme Library & Appearance Contracts', () => {
                 .send({
                     appearance: {
                         themeId: null,
-                        modePreference: 'dark'
+                        modePreference: 'dark',
+                        expectedRevision: 0
                     }
                 });
 
@@ -208,7 +214,8 @@ describe('Theme Library & Appearance Contracts', () => {
                 .send({
                     appearance: {
                         themeId: 'forest',
-                        modePreference: 'light'
+                        modePreference: 'light',
+                        expectedRevision: 1
                     }
                 });
 
@@ -223,7 +230,8 @@ describe('Theme Library & Appearance Contracts', () => {
                 .send({
                     appearance: {
                         themeId: 'clear-contrast',
-                        modePreference: 'light'
+                        modePreference: 'light',
+                        expectedRevision: 1
                     }
                 });
 
@@ -292,7 +300,8 @@ describe('Theme Library & Appearance Contracts', () => {
                     name: 'Updated Tech Name',
                     appearance: {
                         themeId: null,
-                        modePreference: 'inherit'
+                        modePreference: 'inherit',
+                        expectedRevision: 3
                     }
                 });
 

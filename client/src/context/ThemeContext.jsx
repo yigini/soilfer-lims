@@ -80,9 +80,13 @@ export const ThemeProvider = ({ children }) => {
 
     // Abort controller reference for cleaning up stale fetch requests
     const abortControllerRef = useRef(null);
+    const contextGenerationRef = useRef(0);
 
     // Synchronize authenticated user state from AuthProvider / bridge
     const syncAuthUser = useCallback((user) => {
+        // Increment generation so any in-flight requests for prior user/lab are ignored
+        contextGenerationRef.current += 1;
+
         if (user && user.id) {
             const subjectId = String(user.id);
             const userThemeId = isValidThemeId(user.uiThemeId) ? user.uiThemeId : null;
@@ -91,6 +95,9 @@ export const ThemeProvider = ({ children }) => {
                 : (user.themePreference === 'dark' ? 'dark' : (user.uiModePreference === 'inherit' ? 'inherit' : 'light'));
 
             const existingSession = getStoredSessionOverride(subjectId);
+
+            // Always clear preview override when switching account or lab scope
+            setPreviewOverride(null);
 
             setAuthSubject({
                 authenticated: true,
@@ -104,7 +111,22 @@ export const ThemeProvider = ({ children }) => {
             setSessionOverrideState(existingSession);
         } else {
             // Anonymous / signed out
-            const anonSession = getStoredSessionOverride('anonymous');
+            setPreviewOverride(null);
+            clearStoredSessionOverride();
+            setSessionOverrideState(null);
+
+            // Reset serverContext on logout to avoid retaining former laboratory default
+            setServerContext({
+                labDefault: null,
+                platformDefault: {
+                    themeId: DEFAULT_THEME_ID,
+                    defaultMode: DEFAULT_MODE,
+                    revision: 1
+                },
+                canAdoptLabDefault: false,
+                canAdoptPlatformDefault: false
+            });
+
             setAuthSubject({
                 authenticated: false,
                 userId: 'anonymous',
@@ -114,8 +136,6 @@ export const ThemeProvider = ({ children }) => {
                 savedModePreference: 'light',
                 revision: 0
             });
-            setSessionOverrideState(anonSession);
-            setPreviewOverride(null);
         }
     }, []);
 
@@ -126,14 +146,17 @@ export const ThemeProvider = ({ children }) => {
         }
         const controller = new AbortController();
         abortControllerRef.current = controller;
+        const currentGen = ++contextGenerationRef.current;
 
         const token = localStorage.getItem('token');
         if (!token) {
             try {
                 const res = await axios.get('/api/appearance/public', { signal: controller.signal });
+                if (currentGen !== contextGenerationRef.current) return;
                 const pub = res.data?.data || res.data;
                 setServerContext(prev => ({
                     ...prev,
+                    labDefault: null,
                     platformDefault: {
                         themeId: pub.themeId || DEFAULT_THEME_ID,
                         defaultMode: pub.appearance || DEFAULT_MODE,
@@ -145,7 +168,9 @@ export const ThemeProvider = ({ children }) => {
                     // Safe fallback
                 }
             } finally {
-                setLoading(false);
+                if (currentGen === contextGenerationRef.current) {
+                    setLoading(false);
+                }
             }
             return;
         }
@@ -153,6 +178,7 @@ export const ThemeProvider = ({ children }) => {
         try {
             const url = queryLabId ? `/api/appearance/context?labId=${encodeURIComponent(queryLabId)}` : '/api/appearance/context';
             const res = await axios.get(url, { signal: controller.signal });
+            if (currentGen !== contextGenerationRef.current) return;
             const data = res.data?.data || res.data;
 
             if (data) {
@@ -181,7 +207,9 @@ export const ThemeProvider = ({ children }) => {
                 console.warn('[THEME] Could not load appearance context:', e.message);
             }
         } finally {
-            setLoading(false);
+            if (currentGen === contextGenerationRef.current) {
+                setLoading(false);
+            }
         }
     }, []);
 
@@ -192,7 +220,7 @@ export const ThemeProvider = ({ children }) => {
                 abortControllerRef.current.abort();
             }
         };
-    }, [authSubject.userId, fetchAppearanceContext]);
+    }, [authSubject.userId, authSubject.labId, fetchAppearanceContext]);
 
     // Load laboratory branding settings (titles, logos, branding metadata)
     useEffect(() => {
@@ -321,10 +349,24 @@ export const ThemeProvider = ({ children }) => {
             throw new Error('No laboratory specified for default adoption.');
         }
 
+        let targetRevision = expectedRevision;
+        if (targetRevision === undefined) {
+            if (serverContext.labDefault && serverContext.labDefault.labId === targetLabId) {
+                targetRevision = serverContext.labDefault.revision;
+            } else {
+                try {
+                    const labRes = await axios.get(`/api/labs/${encodeURIComponent(targetLabId)}/appearance`);
+                    targetRevision = labRes.data?.data?.revision ?? 0;
+                } catch {
+                    targetRevision = 0;
+                }
+            }
+        }
+
         const payload = {
             themeId,
             defaultMode: defaultMode || 'inherit',
-            expectedRevision: expectedRevision !== undefined ? expectedRevision : serverContext.labDefault?.revision
+            expectedRevision: targetRevision
         };
 
         const res = await axios.patch(`/api/labs/${encodeURIComponent(targetLabId)}/appearance`, payload);
@@ -333,14 +375,15 @@ export const ThemeProvider = ({ children }) => {
         setPreviewOverride(null);
         await fetchAppearanceContext(targetLabId);
         return data;
-    }, [authSubject.labId, serverContext.labDefault?.revision, fetchAppearanceContext]);
+    }, [authSubject.labId, serverContext.labDefault, fetchAppearanceContext]);
 
     // Adopt platform-wide default (SUPER_ADMIN only)
     const adoptPlatformDefault = useCallback(async ({ themeId, defaultMode, expectedRevision }) => {
+        const targetRevision = expectedRevision !== undefined ? expectedRevision : (serverContext.platformDefault?.revision ?? 1);
         const payload = {
             themeId,
             defaultMode: defaultMode || 'light',
-            expectedRevision: expectedRevision !== undefined ? expectedRevision : serverContext.platformDefault?.revision
+            expectedRevision: targetRevision
         };
 
         const res = await axios.patch('/api/admin/appearance', payload);

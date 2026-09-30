@@ -30,7 +30,7 @@
     --sf-muted: #58665E;
     --sf-divider: #D9DFD7;
     --sf-border: #D9DFD7;
-    --sf-control: #829087;
+    --sf-control: #7E8C83;
 
     --sf-primary: #256348;
     --sf-on-primary: #FFFFFF;
@@ -69,6 +69,11 @@
     --sf-chart-1: #256348;
     --sf-chart-2: #206477;
     --sf-chart-3: #945539;
+    --sf-chart-4: #85601B;
+    --sf-chart-5: #638052;
+    --sf-chart-6: #4D91A0;
+    --sf-chart-grid: #D9DFD7;
+    --sf-chart-axis: #58665E;
 
     --sf-browser-theme: #F5F3ED;
 
@@ -139,6 +144,11 @@
     --sf-chart-1: #91D2AF;
     --sf-chart-2: #9CD4E1;
     --sf-chart-3: #E6B298;
+    --sf-chart-4: #F0D083;
+    --sf-chart-5: #A5DABA;
+    --sf-chart-6: #9CD4E1;
+    --sf-chart-grid: #505C58;
+    --sf-chart-axis: #BBC7C2;
 
     --sf-browser-theme: #25282B;
 
@@ -160,7 +170,7 @@
     --sf-muted: #58665E;
     --sf-divider: #D9DFD7;
     --sf-border: #D9DFD7;
-    --sf-control: #829087;
+    --sf-control: #7E8C83;
     --sf-primary: #256348;
     --sf-on-primary: #FFFFFF;
     --sf-primary-hover: #1E523B;
@@ -443,10 +453,10 @@
     --sf-hover: #415052;
     --sf-selected: #39575B;
     --sf-text: #F1F4F3;
-    --sf-muted: #BBC7C2;
+    --sf-muted: #BFCBC6;
     --sf-divider: #526366;
     --sf-border: #526366;
-    --sf-control: #909D97;
+    --sf-control: #9AA7A1;
     --sf-primary: #89CFD2;
     --sf-on-primary: #163739;
     --sf-primary-hover: #A7DFE1;
@@ -510,7 +520,7 @@
     --sf-muted: #BBC7C2;
     --sf-divider: #5C6551;
     --sf-border: #5C6551;
-    --sf-control: #909D97;
+    --sf-control: #96A39D;
     --sf-primary: #C4D48E;
     --sf-on-primary: #30381C;
     --sf-primary-hover: #D5E3A5;

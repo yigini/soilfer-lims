@@ -132,22 +132,37 @@ async function updateGlobalAppearance(actor, { themeId, defaultMode, expectedRev
         }
 
         const newRevision = currentRevision + 1;
-        const updated = await tx.globalAppearanceSetting.upsert({
-            where: { id: 'global' },
-            create: {
-                id: 'global',
-                themeId,
-                defaultMode,
-                revision: newRevision,
-                updatedBy: actor.username || actor.id
-            },
-            update: {
-                themeId,
-                defaultMode,
-                revision: newRevision,
-                updatedBy: actor.username || actor.id
+        if (current) {
+            const updateRes = await tx.globalAppearanceSetting.updateMany({
+                where: { id: 'global', revision: currentRevision },
+                data: {
+                    themeId,
+                    defaultMode,
+                    revision: newRevision,
+                    updatedBy: actor.username || actor.id,
+                    updatedAt: new Date()
+                }
+            });
+            if (updateRes.count === 0) {
+                const fresh = await tx.globalAppearanceSetting.findUnique({ where: { id: 'global' } });
+                const err = new Error(`Revision conflict: expected revision ${expectedRevision !== undefined ? expectedRevision : currentRevision} but current revision is ${fresh ? fresh.revision : 'unknown'}.`);
+                err.statusCode = 409;
+                err.code = 'REVISION_CONFLICT';
+                err.currentRevision = fresh ? fresh.revision : 0;
+                throw err;
             }
-        });
+        } else {
+            await tx.globalAppearanceSetting.create({
+                data: {
+                    id: 'global',
+                    themeId,
+                    defaultMode,
+                    revision: newRevision,
+                    updatedBy: actor.username || actor.id
+                }
+            });
+        }
+        const updated = await tx.globalAppearanceSetting.findUnique({ where: { id: 'global' } });
 
         // Record Audit Event
         await tx.auditLog.create({
@@ -293,22 +308,37 @@ async function updateLabAppearance(actor, labId, { themeId, defaultMode, expecte
         const newRevision = currentRevision + 1;
         const normalizedThemeId = themeId === undefined ? (current ? current.themeId : null) : themeId;
 
-        const updated = await tx.labAppearanceSetting.upsert({
-            where: { labId },
-            create: {
-                labId,
-                themeId: normalizedThemeId,
-                defaultMode: targetMode,
-                revision: newRevision,
-                updatedBy: actor.username || actor.id
-            },
-            update: {
-                themeId: normalizedThemeId,
-                defaultMode: targetMode,
-                revision: newRevision,
-                updatedBy: actor.username || actor.id
+        if (current) {
+            const updateRes = await tx.labAppearanceSetting.updateMany({
+                where: { labId, revision: currentRevision },
+                data: {
+                    themeId: normalizedThemeId,
+                    defaultMode: targetMode,
+                    revision: newRevision,
+                    updatedBy: actor.username || actor.id,
+                    updatedAt: new Date()
+                }
+            });
+            if (updateRes.count === 0) {
+                const fresh = await tx.labAppearanceSetting.findUnique({ where: { labId } });
+                const err = new Error(`Revision conflict: expected revision ${expectedRevision !== undefined ? expectedRevision : currentRevision} but current revision is ${fresh ? fresh.revision : 'unknown'}.`);
+                err.statusCode = 409;
+                err.code = 'REVISION_CONFLICT';
+                err.currentRevision = fresh ? fresh.revision : 0;
+                throw err;
             }
-        });
+        } else {
+            await tx.labAppearanceSetting.create({
+                data: {
+                    labId,
+                    themeId: normalizedThemeId,
+                    defaultMode: targetMode,
+                    revision: newRevision,
+                    updatedBy: actor.username || actor.id
+                }
+            });
+        }
+        const updated = await tx.labAppearanceSetting.findUnique({ where: { labId } });
 
         // Record Audit Event
         await tx.auditLog.create({
@@ -507,7 +537,7 @@ async function getUserAppearanceContext(actor, queryLabId = null) {
  * Updates user self-service preferences: appearance and language.
  * Enforces role restrictions: ordinary staff can only set null (inherit) or 'clear-contrast'.
  */
-async function updateSelfPreferences(actor, { appearance, themePreference, language } = {}) {
+async function updateSelfPreferences(actor, { appearance, themePreference, language } = {}, externalTx = null) {
     if (!actor || !actor.id) {
         const err = new Error('Authentication required');
         err.statusCode = 401;
@@ -515,153 +545,199 @@ async function updateSelfPreferences(actor, { appearance, themePreference, langu
         throw err;
     }
 
-    const user = await prisma.user.findUnique({
-        where: { id: String(actor.id) }
-    });
+    const runWithTx = async (tx) => {
+        const user = await tx.user.findUnique({
+            where: { id: String(actor.id) }
+        });
 
-    if (!user) {
-        const err = new Error('User not found');
-        err.statusCode = 404;
-        err.code = 'USER_NOT_FOUND';
-        throw err;
-    }
-
-    const updateData = {};
-    const isPrivileged = user.role === 'SUPER_ADMIN' || user.role === 'LAB_MANAGER';
-
-    // Handle appearance object (v2)
-    if (appearance !== undefined) {
-        if (typeof appearance !== 'object' || appearance === null) {
-            const err = new Error('appearance must be an object');
-            err.statusCode = 400;
-            err.code = 'INVALID_APPEARANCE_PAYLOAD';
+        if (!user) {
+            const err = new Error('User not found');
+            err.statusCode = 404;
+            err.code = 'USER_NOT_FOUND';
             throw err;
         }
 
-        const { themeId, modePreference, expectedRevision } = appearance;
+        const updateData = {};
+        const isPrivileged = user.role === 'SUPER_ADMIN' || user.role === 'LAB_MANAGER';
 
-        // Concurrency check
-        if (expectedRevision !== undefined && expectedRevision !== null && expectedRevision !== user.uiAppearanceRevision) {
-            const err = new Error(`Revision conflict: expected revision ${expectedRevision} but current revision is ${user.uiAppearanceRevision}.`);
-            err.statusCode = 409;
-            err.code = 'REVISION_CONFLICT';
-            err.currentRevision = user.uiAppearanceRevision;
-            throw err;
-        }
-
-        // Validate themeId
-        if (themeId !== undefined) {
-            if (themeId === null) {
-                updateData.uiThemeId = null;
-            } else if (!isValidThemeId(themeId)) {
-                const err = new Error(`Invalid themeId: ${themeId}`);
+        // Handle appearance object (v2)
+        if (appearance !== undefined) {
+            if (typeof appearance !== 'object' || appearance === null || Array.isArray(appearance)) {
+                const err = new Error('appearance must be an object');
                 err.statusCode = 400;
-                err.code = 'INVALID_THEME_ID';
+                err.code = 'INVALID_APPEARANCE_PAYLOAD';
                 throw err;
-            } else {
-                // Non-privileged users can ONLY select Clear Contrast (the accessibility theme)
-                if (!isPrivileged && themeId !== ACCESSIBILITY_THEME_ID) {
-                    const err = new Error('Staff accounts inherit laboratory or platform themes. Only Clear Contrast is available as a personal accessibility override.');
-                    err.statusCode = 403;
-                    err.code = 'FORBIDDEN_THEME_SELECTION';
+            }
+
+            const { themeId, modePreference, expectedRevision } = appearance;
+
+            // expectedRevision is strictly required for appearance writes
+            if (expectedRevision === undefined || typeof expectedRevision !== 'number' || !Number.isInteger(expectedRevision) || expectedRevision < 0) {
+                const err = new Error('Expected revision number is required for appearance updates');
+                err.statusCode = 400;
+                err.code = 'EXPECTED_REVISION_REQUIRED';
+                throw err;
+            }
+
+            // Concurrency check against in-memory user
+            if (expectedRevision !== user.uiAppearanceRevision) {
+                const err = new Error(`Revision conflict: expected revision ${expectedRevision} but current revision is ${user.uiAppearanceRevision}.`);
+                err.statusCode = 409;
+                err.code = 'REVISION_CONFLICT';
+                err.currentRevision = user.uiAppearanceRevision;
+                throw err;
+            }
+
+            // Validate themeId
+            if (themeId !== undefined) {
+                if (themeId === null) {
+                    updateData.uiThemeId = null;
+                } else if (!isValidThemeId(themeId)) {
+                    const err = new Error(`Invalid themeId: ${themeId}`);
+                    err.statusCode = 400;
+                    err.code = 'INVALID_THEME_ID';
+                    throw err;
+                } else {
+                    // Non-privileged users can ONLY select Clear Contrast (the accessibility theme)
+                    if (!isPrivileged && themeId !== ACCESSIBILITY_THEME_ID) {
+                        const err = new Error('Staff accounts inherit laboratory or platform themes. Only Clear Contrast is available as a personal accessibility override.');
+                        err.statusCode = 403;
+                        err.code = 'FORBIDDEN_THEME_SELECTION';
+                        throw err;
+                    }
+                    updateData.uiThemeId = themeId;
+                }
+            }
+
+            // Validate modePreference
+            if (modePreference !== undefined) {
+                if (!isValidModePreference(modePreference)) {
+                    const err = new Error(`Invalid modePreference: ${modePreference}. Must be "inherit", "light", or "dark".`);
+                    err.statusCode = 400;
+                    err.code = 'INVALID_MODE_PREFERENCE';
                     throw err;
                 }
-                updateData.uiThemeId = themeId;
-            }
-        }
+                updateData.uiModePreference = modePreference;
 
-        // Validate modePreference
-        if (modePreference !== undefined) {
-            if (!isValidModePreference(modePreference)) {
-                const err = new Error(`Invalid modePreference: ${modePreference}. Must be "inherit", "light", or "dark".`);
+                // Also synchronize legacy themePreference if explicit light or dark
+                if (modePreference === 'light' || modePreference === 'dark') {
+                    updateData.themePreference = modePreference;
+                }
+            }
+
+            // Check for conflicting legacy themePreference parameter in the same request
+            if (themePreference !== undefined && modePreference !== undefined && modePreference !== 'inherit' && themePreference !== modePreference) {
+                const err = new Error(`Conflicting mode values: appearance.modePreference="${modePreference}" but legacy themePreference="${themePreference}".`);
                 err.statusCode = 400;
-                err.code = 'INVALID_MODE_PREFERENCE';
+                err.code = 'CONFLICTING_THEME_PARAMETERS';
                 throw err;
             }
-            updateData.uiModePreference = modePreference;
 
-            // Also synchronize legacy themePreference if explicit light or dark
-            if (modePreference === 'light' || modePreference === 'dark') {
-                updateData.themePreference = modePreference;
+            updateData.uiAppearanceRevision = user.uiAppearanceRevision + 1;
+        } else if (themePreference !== undefined) {
+            // Pure legacy themePreference update
+            if (!['light', 'dark'].includes(themePreference)) {
+                const err = new Error('Theme preference must be strictly "light" or "dark"');
+                err.statusCode = 400;
+                err.code = 'INVALID_THEME_PREFERENCE';
+                throw err;
             }
+            updateData.themePreference = themePreference;
+            updateData.uiModePreference = themePreference;
+            updateData.uiAppearanceRevision = user.uiAppearanceRevision + 1;
         }
 
-        // Check for conflicting legacy themePreference parameter in the same request
-        if (themePreference !== undefined && modePreference !== undefined && modePreference !== 'inherit' && themePreference !== modePreference) {
-            const err = new Error(`Conflicting mode values: appearance.modePreference="${modePreference}" but legacy themePreference="${themePreference}".`);
+        // Handle language update
+        if (language !== undefined) {
+            const { matchSupportedLocale } = require('../utils/localeResolver');
+            if (!language || typeof language !== 'string') {
+                const err = new Error('Language must be a valid string');
+                err.statusCode = 400;
+                err.code = 'INVALID_LANGUAGE_PREFERENCE';
+                throw err;
+            }
+            const matched = matchSupportedLocale(language);
+            if (!matched) {
+                const err = new Error(`Unsupported language: ${language}`);
+                err.statusCode = 400;
+                err.code = 'INVALID_LANGUAGE_PREFERENCE';
+                throw err;
+            }
+            updateData.language = matched;
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            const err = new Error('At least one valid preference field must be provided.');
             err.statusCode = 400;
-            err.code = 'CONFLICTING_THEME_PARAMETERS';
+            err.code = 'EMPTY_PAYLOAD';
             throw err;
         }
 
-        updateData.uiAppearanceRevision = user.uiAppearanceRevision + 1;
-    } else if (themePreference !== undefined) {
-        // Pure legacy themePreference update
-        if (!['light', 'dark'].includes(themePreference)) {
-            const err = new Error('Theme preference must be strictly "light" or "dark"');
-            err.statusCode = 400;
-            err.code = 'INVALID_THEME_PREFERENCE';
+        // Atomic conditional write using updateMany
+        const condition = {
+            id: user.id,
+            uiAppearanceRevision: (appearance !== undefined && appearance.expectedRevision !== undefined)
+                ? appearance.expectedRevision
+                : user.uiAppearanceRevision
+        };
+
+        const updateResult = await tx.user.updateMany({
+            where: condition,
+            data: updateData
+        });
+
+        if (updateResult.count === 0) {
+            const fresh = await tx.user.findUnique({
+                where: { id: user.id },
+                select: { uiAppearanceRevision: true }
+            });
+            const currentRev = fresh ? fresh.uiAppearanceRevision : user.uiAppearanceRevision;
+            const err = new Error(`Revision conflict: expected revision ${condition.uiAppearanceRevision} but current revision is ${currentRev}.`);
+            err.statusCode = 409;
+            err.code = 'REVISION_CONFLICT';
+            err.currentRevision = currentRev;
             throw err;
         }
-        updateData.themePreference = themePreference;
-        updateData.uiModePreference = themePreference;
-        updateData.uiAppearanceRevision = user.uiAppearanceRevision + 1;
-    }
 
-    // Handle language update
-    if (language !== undefined) {
-        const { matchSupportedLocale } = require('../utils/localeResolver');
-        if (!language || typeof language !== 'string') {
-            const err = new Error('Language must be a valid string');
-            err.statusCode = 400;
-            err.code = 'INVALID_LANGUAGE_PREFERENCE';
-            throw err;
-        }
-        const matched = matchSupportedLocale(language);
-        if (!matched) {
-            const err = new Error(`Unsupported language: ${language}`);
-            err.statusCode = 400;
-            err.code = 'INVALID_LANGUAGE_PREFERENCE';
-            throw err;
-        }
-        updateData.language = matched;
-    }
+        const updated = await tx.user.findUnique({
+            where: { id: user.id },
+            select: {
+                id: true,
+                username: true,
+                language: true,
+                themePreference: true,
+                uiThemeId: true,
+                uiModePreference: true,
+                uiAppearanceRevision: true
+            }
+        });
 
-    if (Object.keys(updateData).length === 0) {
-        const err = new Error('At least one valid preference field must be provided.');
-        err.statusCode = 400;
-        err.code = 'EMPTY_PAYLOAD';
-        throw err;
-    }
-
-    const updated = await prisma.user.update({
-        where: { id: user.id },
-        data: updateData,
-        select: {
-            id: true,
-            username: true,
-            language: true,
-            themePreference: true,
-            uiThemeId: true,
-            uiModePreference: true,
-            uiAppearanceRevision: true
-        }
-    });
-
-    return {
-        id: updated.id,
-        username: updated.username,
-        language: updated.language,
-        themePreference: updated.themePreference,
-        appearance: {
-            themeId: updated.uiThemeId,
-            modePreference: updated.uiModePreference,
-            revision: updated.uiAppearanceRevision
-        }
+        return {
+            id: updated.id,
+            username: updated.username,
+            language: updated.language,
+            themePreference: updated.themePreference,
+            appearance: {
+                themeId: updated.uiThemeId,
+                modePreference: updated.uiModePreference,
+                revision: updated.uiAppearanceRevision
+            }
+        };
     };
+
+    if (externalTx) {
+        return await runWithTx(externalTx);
+    } else {
+        return await prisma.$transaction(runWithTx);
+    }
 }
 
 module.exports = {
+    THEME_ALLOWLIST,
+    ACCESSIBILITY_THEME_ID,
+    isValidThemeId,
+    isValidMode,
+    isValidModePreference,
     getCatalog,
     getPublicAppearance,
     getGlobalAppearance,

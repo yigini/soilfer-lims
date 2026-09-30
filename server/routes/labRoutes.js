@@ -645,8 +645,40 @@ router.post('/:id/lifecycle', checkPermission('MANAGE_BRANDING'), async (req, re
 // ─── GET /api/labs/:labId/appearance ─── Retrieve laboratory appearance default
 router.get('/:labId/appearance', async (req, res) => {
     try {
+        const actor = req.user;
+        const targetLabId = req.params.labId;
+
+        let authorized = false;
+        if (actor.role === 'SUPER_ADMIN') {
+            authorized = true;
+        } else if (actor.labId && actor.labId === targetLabId) {
+            authorized = true;
+        } else if (actor.role === 'MASTER_USER' || actor.role === 'COUNTRY_ADMIN') {
+            let userCountries = [];
+            if (actor.countries) {
+                userCountries = Array.isArray(actor.countries)
+                    ? actor.countries
+                    : (typeof actor.countries === 'string' ? JSON.parse(actor.countries) : []);
+            }
+            if (userCountries.includes('*')) {
+                authorized = true;
+            } else if (userCountries.length > 0) {
+                const lab = await prisma.lab.findUnique({ where: { id: targetLabId }, select: { country: true } });
+                if (lab && userCountries.includes(lab.country)) {
+                    authorized = true;
+                }
+            }
+        }
+
+        if (!authorized) {
+            return res.status(403).json({
+                error: 'Forbidden: You do not have permission to view appearance settings for this laboratory',
+                code: 'AUTH.FORBIDDEN'
+            });
+        }
+
         const appearanceService = require('../services/appearanceService');
-        const setting = await appearanceService.getLabAppearance(req.params.labId);
+        const setting = await appearanceService.getLabAppearance(targetLabId);
         res.json({ success: true, data: setting });
     } catch (err) {
         res.status(err.statusCode || 500).json({

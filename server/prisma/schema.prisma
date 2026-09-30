@@ -428,6 +428,7 @@ model Lab {
   // Relations
   projectLabs       ProjectLab[]  // Many-to-many: projects this lab is assigned to
   proficiencyRounds ProficiencyRound[]
+  appearanceSetting LabAppearanceSetting?
 }
 
 model ProficiencyRound {
@@ -1374,6 +1375,8 @@ model LabAppearanceSetting {
   revision    Int      @default(0)
   updatedAt   DateTime @default(now()) @updatedAt
   updatedBy   String?
+
+  lab         Lab      @relation(fields: [labId], references: [id], onDelete: Cascade)
 }
 
 model GlobalAppearanceSetting {

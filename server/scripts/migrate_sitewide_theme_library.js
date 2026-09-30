@@ -64,17 +64,47 @@ function migrateThemeLibrary(dbPath) {
                 `);
             }
 
-            // 3. Create LabAppearanceSetting table
-            db.exec(`
-                CREATE TABLE IF NOT EXISTS "LabAppearanceSetting" (
-                    "labId" TEXT NOT NULL PRIMARY KEY,
-                    "themeId" TEXT,
-                    "defaultMode" TEXT NOT NULL DEFAULT 'inherit',
-                    "revision" INTEGER NOT NULL DEFAULT 0,
-                    "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    "updatedBy" TEXT
-                );
-            `);
+            // 3. Create or update LabAppearanceSetting table with canonical Lab foreign key
+            const labSettingTable = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='LabAppearanceSetting'").get();
+            if (!labSettingTable) {
+                console.log('[MIGRATE-THEMES] Creating LabAppearanceSetting table with foreign key to Lab...');
+                db.exec(`
+                    CREATE TABLE "LabAppearanceSetting" (
+                        "labId" TEXT NOT NULL PRIMARY KEY,
+                        "themeId" TEXT,
+                        "defaultMode" TEXT NOT NULL DEFAULT 'inherit',
+                        "revision" INTEGER NOT NULL DEFAULT 0,
+                        "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        "updatedBy" TEXT,
+                        CONSTRAINT "LabAppearanceSetting_labId_fkey" FOREIGN KEY ("labId") REFERENCES "Lab" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+                    );
+                `);
+            } else {
+                const fkList = db.prepare("PRAGMA foreign_key_list('LabAppearanceSetting')").all();
+                const hasLabFk = fkList.some(fk => fk.table === 'Lab' && fk.to === 'id');
+                if (!hasLabFk) {
+                    console.log('[MIGRATE-THEMES] Upgrading LabAppearanceSetting table with canonical Lab foreign key...');
+                    const labTable = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Lab'").get();
+                    if (labTable) {
+                        db.exec('DELETE FROM "LabAppearanceSetting" WHERE "labId" NOT IN (SELECT "id" FROM "Lab")');
+                    }
+                    db.exec(`
+                        CREATE TABLE "LabAppearanceSetting_new" (
+                            "labId" TEXT NOT NULL PRIMARY KEY,
+                            "themeId" TEXT,
+                            "defaultMode" TEXT NOT NULL DEFAULT 'inherit',
+                            "revision" INTEGER NOT NULL DEFAULT 0,
+                            "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                            "updatedBy" TEXT,
+                            CONSTRAINT "LabAppearanceSetting_labId_fkey" FOREIGN KEY ("labId") REFERENCES "Lab" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+                        );
+                        INSERT INTO "LabAppearanceSetting_new" ("labId", "themeId", "defaultMode", "revision", "updatedAt", "updatedBy")
+                        SELECT "labId", "themeId", "defaultMode", "revision", "updatedAt", "updatedBy" FROM "LabAppearanceSetting";
+                        DROP TABLE "LabAppearanceSetting";
+                        ALTER TABLE "LabAppearanceSetting_new" RENAME TO "LabAppearanceSetting";
+                    `);
+                }
+            }
 
             // 4. Create GlobalAppearanceSetting table
             db.exec(`
@@ -96,6 +126,7 @@ function migrateThemeLibrary(dbPath) {
         })();
 
         // 6. Verification
+        db.pragma('foreign_keys = ON');
         const integrity = db.pragma('integrity_check');
         const fkCheck = db.pragma('foreign_key_check');
 
@@ -104,6 +135,9 @@ function migrateThemeLibrary(dbPath) {
 
         if (integrity[0]?.integrity_check !== 'ok') {
             throw new Error(`Database integrity failure: ${JSON.stringify(integrity)}`);
+        }
+        if (fkCheck.length > 0) {
+            throw new Error(`Database foreign key check failure (${fkCheck.length} violations): ${JSON.stringify(fkCheck)}`);
         }
 
         const globalSetting = db.prepare('SELECT * FROM GlobalAppearanceSetting WHERE id = ?').get('global');

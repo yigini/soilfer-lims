@@ -22,7 +22,8 @@ CREATE TABLE IF NOT EXISTS "LabAppearanceSetting" (
     "defaultMode" TEXT NOT NULL DEFAULT 'inherit',
     "revision" INTEGER NOT NULL DEFAULT 0,
     "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedBy" TEXT
+    "updatedBy" TEXT,
+    CONSTRAINT "LabAppearanceSetting_labId_fkey" FOREIGN KEY ("labId") REFERENCES "Lab" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateTable GlobalAppearanceSetting
