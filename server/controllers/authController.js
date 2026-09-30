@@ -240,10 +240,60 @@ exports.updatePreferences = async (req, res) => {
         return error(res, 400, 'AUTH.EMPTY_PREFERENCES', 'At least one preference field must be provided');
     }
 
+    const { themePreference, language, appearance } = req.body || {};
+
+    // Reject conflicting legacy themePreference and appearance.modePreference
+    if (themePreference !== undefined && appearance !== undefined && appearance.modePreference !== undefined) {
+        if (themePreference !== appearance.modePreference) {
+            return res.status(400).json({
+                error: 'Conflicting theme parameters: legacy themePreference and appearance.modePreference cannot mismatch.',
+                code: 'CONFLICTING_THEME_PARAMETERS',
+                errorCode: 'AUTH.CONFLICTING_THEME_PARAMETERS'
+            });
+        }
+    }
+
+    // Validate legacy themePreference
+    if (themePreference !== undefined) {
+        if (!themePreference || typeof themePreference !== 'string') {
+            return error(res, 400, 'AUTH.INVALID_THEME_PREFERENCE', 'Theme preference must be a valid string');
+        }
+        if (!['light', 'dark'].includes(themePreference)) {
+            return error(res, 400, 'AUTH.INVALID_THEME_PREFERENCE', 'Theme preference must be strictly "light" or "dark"');
+        }
+    }
+
+    // Validate language
+    if (language !== undefined) {
+        const { matchSupportedLocale } = require('../utils/localeResolver');
+        if (!language || typeof language !== 'string') {
+            return error(res, 400, 'AUTH.INVALID_LANGUAGE_PREFERENCE', 'Language must be a valid string');
+        }
+        const matched = matchSupportedLocale(language);
+        if (!matched) {
+            return error(res, 400, 'AUTH.INVALID_LANGUAGE_PREFERENCE', `Unsupported language: ${language}`);
+        }
+    }
+
     try {
         const appearanceService = require('../services/appearanceService');
         const updated = await appearanceService.updateSelfPreferences(req.user, req.body);
-        return success(res, 'AUTH.PREFERENCES_UPDATED', 'Preferences updated successfully', null, 200, updated);
+
+        const responseData = {};
+        if (themePreference !== undefined) {
+            responseData.themePreference = updated.themePreference;
+        }
+        if (language !== undefined) {
+            responseData.language = updated.language;
+        }
+        if (appearance !== undefined) {
+            responseData.appearance = updated.appearance;
+            if (themePreference === undefined) {
+                responseData.themePreference = updated.themePreference;
+            }
+        }
+
+        return success(res, 'AUTH.PREFERENCES_UPDATED', 'Preferences updated successfully', null, 200, responseData);
     } catch (err) {
         if (err.statusCode && err.statusCode < 500) {
             return res.status(err.statusCode).json({

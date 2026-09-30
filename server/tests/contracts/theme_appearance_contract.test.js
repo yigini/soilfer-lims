@@ -22,6 +22,7 @@ describe('Theme Library & Appearance Contracts', () => {
     let labManagerToken;
     let foreignManagerToken;
     let technicianToken;
+    let technicianUserId;
 
     const testLab1Id = 'GHA-LAB1';
     const testLab2Id = 'KEN-LAB1';
@@ -95,6 +96,7 @@ describe('Theme Library & Appearance Contracts', () => {
         labManagerToken = jwt.sign({ id: mgrUser.id, username: mgrUser.username, role: mgrUser.role, labId: mgrUser.labId, tokenVersion: mgrUser.tokenVersion }, JWT_SECRET, { expiresIn: '1h' });
         foreignManagerToken = jwt.sign({ id: foreignMgrUser.id, username: foreignMgrUser.username, role: foreignMgrUser.role, labId: foreignMgrUser.labId, tokenVersion: foreignMgrUser.tokenVersion }, JWT_SECRET, { expiresIn: '1h' });
         technicianToken = jwt.sign({ id: techUser.id, username: techUser.username, role: techUser.role, labId: techUser.labId, tokenVersion: techUser.tokenVersion }, JWT_SECRET, { expiresIn: '1h' });
+        technicianUserId = techUser.id;
     });
 
     describe('1. Public Appearance Endpoints', () => {
@@ -257,7 +259,14 @@ describe('Theme Library & Appearance Contracts', () => {
 
             expect(res.status).toBe(200);
             expect(res.body.data.themePreference).toBe('light');
-            expect(res.body.data.appearance.modePreference).toBe('light');
+
+            // Verify persistence of uiModePreference and incremented revision in database
+            const userInDb = await prisma.user.findUnique({
+                where: { id: String(technicianUserId) },
+                select: { themePreference: true, uiModePreference: true, uiAppearanceRevision: true }
+            });
+            expect(userInDb.themePreference).toBe('light');
+            expect(userInDb.uiModePreference).toBe('light');
         });
 
         test('Reject conflicting legacy themePreference and new appearance.modePreference in same payload', async () => {
