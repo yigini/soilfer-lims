@@ -62,37 +62,24 @@ BASELINE_MODE=$(echo "$CONTAINER_ENVS" | grep '^DEPLOYMENT_MODE=' | cut -d= -f2-
 EXPECTED_MODE=${EXPECTED_MODE:-${BASELINE_MODE:-"local"}}
 
 # Discover or declare reviewed existing principals for postflight role verification
+# Require explicit reviewed existing principals for postflight verification
 POSTFLIGHT_ADMIN_ID=${POSTFLIGHT_ADMIN_ID:-""}
 POSTFLIGHT_MANAGER_ID=${POSTFLIGHT_MANAGER_ID:-""}
 POSTFLIGHT_TECH_ID=${POSTFLIGHT_TECH_ID:-""}
 
-# If any principal ID is unset, query active reviewed principals from the running container:
+# If any principal ID is unset, query candidate active principals from running container for operator review:
 if [ -z "$POSTFLIGHT_ADMIN_ID" ] || [ -z "$POSTFLIGHT_MANAGER_ID" ] || [ -z "$POSTFLIGHT_TECH_ID" ]; then
-    DISCOVERED_PRINCIPALS=$(docker compose ${COMPOSE_FILES} exec -T lims node -e "
+    echo "⚠️ Required reviewed principal IDs are not explicitly declared."
+    echo "Querying candidate active principals from baseline container for operator review:"
+    docker compose ${COMPOSE_FILES} exec -T lims node -e "
       const Database = require('better-sqlite3');
       const db = new Database('prisma/dev.db', { readonly: true });
-      const admin = db.prepare('SELECT id FROM User WHERE role = ? AND isActive = 1 AND mustChangePassword = 0 ORDER BY createdAt ASC').get('SUPER_ADMIN');
-      const mgr = db.prepare('SELECT id FROM User WHERE role = ? AND isActive = 1 AND mustChangePassword = 0 ORDER BY createdAt ASC').get('LAB_MANAGER');
-      const tech = db.prepare('SELECT id FROM User WHERE role = ? AND isActive = 1 AND mustChangePassword = 0 ORDER BY createdAt ASC').get('LAB_TECHNICIAN');
+      const users = db.prepare('SELECT id, username, role, labId, isActive, mustChangePassword FROM User WHERE isActive = 1 AND mustChangePassword = 0').all();
       db.close();
-      if (!admin || !mgr || !tech) {
-        console.error('❌ Failed to discover required active baseline principals (SUPER_ADMIN, LAB_MANAGER, LAB_TECHNICIAN)');
-        process.exit(1);
-      }
-      console.log('ADMIN_ID=' + admin.id);
-      console.log('MGR_ID=' + mgr.id);
-      console.log('TECH_ID=' + tech.id);
-    ") || {
-      echo "❌ Failed to discover baseline principals from running container"
-      exit 1
-    }
-    POSTFLIGHT_ADMIN_ID=${POSTFLIGHT_ADMIN_ID:-$(echo "$DISCOVERED_PRINCIPALS" | grep '^ADMIN_ID=' | cut -d= -f2-)}
-    POSTFLIGHT_MANAGER_ID=${POSTFLIGHT_MANAGER_ID:-$(echo "$DISCOVERED_PRINCIPALS" | grep '^MGR_ID=' | cut -d= -f2-)}
-    POSTFLIGHT_TECH_ID=${POSTFLIGHT_TECH_ID:-$(echo "$DISCOVERED_PRINCIPALS" | grep '^TECH_ID=' | cut -d= -f2-)}
-fi
-
-if [ -z "$POSTFLIGHT_ADMIN_ID" ] || [ -z "$POSTFLIGHT_MANAGER_ID" ] || [ -z "$POSTFLIGHT_TECH_ID" ]; then
-    echo "❌ Missing required reviewed principal IDs (POSTFLIGHT_ADMIN_ID, POSTFLIGHT_MANAGER_ID, POSTFLIGHT_TECH_ID)!"
+      console.log('Candidate reviewed principals available:');
+      users.forEach(u => console.log('  [' + u.role + '] ID: ' + u.id + ' (' + u.username + ', lab: ' + (u.labId || 'ALL') + ')'));
+    " || true
+    echo "❌ Missing explicit reviewed principal IDs! Please review candidates above and set POSTFLIGHT_ADMIN_ID, POSTFLIGHT_MANAGER_ID, and POSTFLIGHT_TECH_ID before proceeding."
     exit 1
 fi
 
@@ -220,7 +207,11 @@ fi
 # Ingress Hold: If NGINX proxy is configured, hold external client ingress during postflight
 if [ -f "docker-compose.nginx.yml" ] && echo "$COMPOSE_FILES" | grep -q "docker-compose.nginx.yml"; then
     echo "Holding public ingress at NGINX reverse proxy boundary..."
-    docker compose ${COMPOSE_FILES} stop nginx || true
+    docker compose ${COMPOSE_FILES} stop nginx || {
+        echo "❌ Failed to hold NGINX proxy ingress; aborting deployment!"
+        exit 1
+    }
+    echo "✓ Ingress held at NGINX reverse proxy boundary."
 fi
 
 # Launch containers in pre-exposure verification mode with writer hold
@@ -348,9 +339,9 @@ docker compose ${COMPOSE_FILES} exec -T \
   let adminPrincipal, mgrPrincipal, techPrincipal;
   try {
     db = new Database('prisma/dev.db', { readonly: true });
-    adminPrincipal = db.prepare('SELECT id, username, role, tokenVersion, mustChangePassword, isActive FROM User WHERE id = ?').get(adminId);
-    mgrPrincipal = db.prepare('SELECT id, username, role, labId, tokenVersion, mustChangePassword, isActive FROM User WHERE id = ?').get(mgrId);
-    techPrincipal = db.prepare('SELECT id, username, role, labId, tokenVersion, mustChangePassword, isActive FROM User WHERE id = ?').get(techId);
+    adminPrincipal = db.prepare('SELECT id, username, role, labId, countries, projects, tokenVersion, mustChangePassword, isActive FROM User WHERE id = ?').get(adminId);
+    mgrPrincipal = db.prepare('SELECT id, username, role, labId, countries, projects, tokenVersion, mustChangePassword, isActive FROM User WHERE id = ?').get(mgrId);
+    techPrincipal = db.prepare('SELECT id, username, role, labId, countries, projects, tokenVersion, mustChangePassword, isActive FROM User WHERE id = ?').get(techId);
     db.close();
   } catch (err) {
     console.error('❌ Postflight failed: Database error looking up reviewed principals:', err.message);
@@ -393,6 +384,15 @@ docker compose ${COMPOSE_FILES} exec -T \
     tokenVersion: techPrincipal.tokenVersion || 0
   }, secret, { expiresIn: '5m' });
 
+  function parseArray(val) {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string') {
+      try { return JSON.parse(val); } catch (_) { return []; }
+    }
+    return [];
+  }
+
   async function checkRoute(role, path, expectedStatus, token, principal) {
     const res = await fetch('http://localhost:3000' + path, {
       headers: { 'Authorization': 'Bearer ' + token }
@@ -401,12 +401,77 @@ docker compose ${COMPOSE_FILES} exec -T \
       console.error(\`❌ Role gate failed for \${role} on \${path}: expected \${expectedStatus}, got \${res.status}\`);
       process.exit(1);
     }
-    const body = await res.json().catch(() => null);
+    let body;
+    try {
+      body = await res.json();
+    } catch (err) {
+      console.error(\`❌ Role gate failed for \${role} on \${path}: Response is not valid JSON (\${err.message})\`);
+      process.exit(1);
+    }
+    if (!body || typeof body !== 'object') {
+      console.error(\`❌ Role gate failed for \${role} on \${path}: Invalid response body structure\`);
+      process.exit(1);
+    }
+
+    let records = [];
     if (Array.isArray(body)) {
-      for (const item of body) {
-        if (item && (item.id === 'foreign-lab' || item.country === 'FOREIGN' || (principal.labId && item.labId && item.labId !== principal.labId) || (principal.labId && item.assignedLab && item.assignedLab !== principal.labId))) {
-          console.error(\`❌ Scope violation: foreign record found for \${role} on \${path}: \${item.id || item.country}\`);
+      records = body;
+    } else if (Array.isArray(body.data)) {
+      records = body.data;
+    } else if (Array.isArray(body.users)) {
+      records = body.users;
+    } else if (path === '/api/dashboard/live') {
+      records = [
+        ...(Array.isArray(body.intakeQueue) ? body.intakeQueue : []),
+        ...(Array.isArray(body.reviewQueue) ? body.reviewQueue : []),
+        ...(Array.isArray(body.oversight) ? body.oversight : [])
+      ];
+    }
+
+    if (principal.role !== 'SUPER_ADMIN') {
+      const userLabId = principal.labId || null;
+      const userProjects = parseArray(principal.projects);
+      const userCountries = parseArray(principal.countries);
+
+      for (const item of records) {
+        if (!item || typeof item !== 'object') continue;
+
+        // 1. Facility assignedLab scoping (distinguished from specimen accession labId)
+        if (userLabId && item.assignedLab && item.assignedLab !== userLabId) {
+          console.error(\`❌ Scope violation: item assignedLab '\${item.assignedLab}' does not match principal labId '\${userLabId}' for \${role} on \${path}\`);
           process.exit(1);
+        }
+        if (!userLabId && item.assignedLab) {
+          if (!userProjects.length || (item.projectCode && !userProjects.includes(item.projectCode))) {
+            console.error(\`❌ Scope violation: unassigned-lab principal received facility record '\${item.assignedLab}' for \${role} on \${path}\`);
+            process.exit(1);
+          }
+        }
+
+        // 2. Project scoping
+        if (userProjects.length > 0 && item.projectCode && !userProjects.includes(item.projectCode)) {
+          console.error(\`❌ Scope violation: item projectCode '\${item.projectCode}' outside authorized projects for \${role} on \${path}\`);
+          process.exit(1);
+        }
+
+        // 3. Country scoping
+        if (item.country && !userCountries.includes('*') && !userCountries.includes(item.country)) {
+          console.error(\`❌ Scope violation: item country '\${item.country}' outside authorized countries for \${role} on \${path}\`);
+          process.exit(1);
+        }
+
+        // 4. Lab catalogue scoping on /api/labs
+        if (path === '/api/labs' && userLabId && item.id && item.id !== userLabId) {
+          console.error(\`❌ Scope violation: lab ID '\${item.id}' does not match principal labId '\${userLabId}' for \${role} on \${path}\`);
+          process.exit(1);
+        }
+
+        // 5. Unscoped principal receiving scoped record
+        if (!userLabId && userProjects.length === 0 && userCountries.length === 0) {
+          if (item.assignedLab || item.projectCode || item.country) {
+            console.error(\`❌ Scope violation: unscoped principal received scoped record for \${role} on \${path}\`);
+            process.exit(1);
+          }
         }
       }
     }
@@ -423,23 +488,20 @@ docker compose ${COMPOSE_FILES} exec -T \
   })().catch(e => { console.error('Postflight API error:', e.message); process.exit(1); });
 "
 
-# 7. Verify NGINX reverse proxy connectivity (if deployed with NGINX overlay)
+# 7. Verify NGINX Ingress Hold (if deployed with NGINX overlay)
 if echo "${COMPOSE_FILES}" | grep -q "docker-compose\.nginx\.yml"; then
-    echo "NGINX reverse proxy overlay is configured; verifying proxy container and ingress..."
+    echo "NGINX reverse proxy overlay is configured; verifying ingress is held..."
     NGINX_CONTAINER=$(docker compose ${COMPOSE_FILES} ps -q nginx 2>/dev/null || true)
-    if [ -z "$NGINX_CONTAINER" ]; then
-        echo "❌ NGINX reverse proxy container is missing despite NGINX overlay being configured!"
-        exit 1
+    if [ -n "$NGINX_CONTAINER" ]; then
+        NGINX_RUNNING=$(docker inspect -f '{{.State.Running}}' "$NGINX_CONTAINER" 2>/dev/null || echo "false")
+        if [ "$NGINX_RUNNING" = "true" ]; then
+            echo "❌ NGINX reverse proxy is unexpectedly running; ingress hold violated!"
+            exit 1
+        fi
     fi
-    NGINX_RUNNING=$(docker inspect -f '{{.State.Running}}' "$NGINX_CONTAINER" 2>/dev/null || echo "false")
-    if [ "$NGINX_RUNNING" != "true" ]; then
-        echo "❌ NGINX reverse proxy container is not running (State.Running: $NGINX_RUNNING)!"
-        exit 1
-    fi
-    curl -fsSL http://localhost/api/health >/dev/null || { echo "❌ Ingress check via NGINX port 80 failed!"; exit 1; }
-    echo "✓ NGINX reverse proxy ingress verified on port 80."
+    echo "✓ Public ingress hold verified (NGINX proxy inactive during pre-exposure postflight)."
 else
-    echo "ℹ Direct topology deployment (no NGINX overlay configured); skipping proxy ingress check."
+    echo "ℹ Direct topology deployment (no NGINX overlay configured); skipping proxy check."
 fi
 ```
 
@@ -453,7 +515,7 @@ Once all Step 5 postflight checks pass:
 - Pre-exposure writer hold verified (`DISABLE_BACKGROUND_JOBS=true`)
 - Database integrity and foreign key checks verified
 - Database records and role/API access verified with reviewed existing principals
-- NGINX reverse proxy ingress verified (if configured)
+- NGINX ingress hold verified (if configured)
 
 The upgrade is officially declared **COMMITTED**.
 - If any check in Step 5 failed, no background writes or user writes occurred; the system can be safely restored via Route A / Route B rollback.
@@ -463,8 +525,8 @@ The upgrade is officially declared **COMMITTED**.
 ```bash
 set -e
 
-# Remove DISABLE_BACKGROUND_JOBS to activate background schedulers
-docker compose ${COMPOSE_FILES} up -d
+# Transition to normal production: remove DISABLE_BACKGROUND_JOBS and activate schedulers on LIMS
+docker compose ${COMPOSE_FILES} up -d lims
 
 # Verify final runtime container environment: must be NODE_ENV=production with all schedulers enabled
 FINAL_CONTAINER_ID=$(docker compose ${COMPOSE_FILES} ps -q lims)
@@ -503,8 +565,18 @@ echo "✓ Background scheduler initialization verified."
 if [ -f "docker-compose.nginx.yml" ] && echo "$COMPOSE_FILES" | grep -q "docker-compose.nginx.yml"; then
     echo "Reopening public ingress at NGINX reverse proxy boundary..."
     docker compose ${COMPOSE_FILES} up -d nginx
-    docker compose ${COMPOSE_FILES} ps nginx | grep -q "Up" || { echo "❌ NGINX ingress failed to reopen"; exit 1; }
-    echo "✓ Ingress reopened successfully at NGINX reverse proxy boundary."
+    NGINX_CONTAINER=$(docker compose ${COMPOSE_FILES} ps -q nginx 2>/dev/null || true)
+    if [ -z "$NGINX_CONTAINER" ]; then
+        echo "❌ NGINX reverse proxy container is missing!"
+        exit 1
+    fi
+    NGINX_RUNNING=$(docker inspect -f '{{.State.Running}}' "$NGINX_CONTAINER" 2>/dev/null || echo "false")
+    if [ "$NGINX_RUNNING" != "true" ]; then
+        echo "❌ NGINX reverse proxy container is not running (State.Running: $NGINX_RUNNING)!"
+        exit 1
+    fi
+    curl -fsSL http://localhost/api/health >/dev/null || { echo "❌ Ingress check via NGINX port 80 failed!"; exit 1; }
+    echo "✓ Ingress reopened and verified healthy at NGINX reverse proxy boundary."
 fi
 ```
 - **CRITICAL INVARIANT:** Once new analytical writes have resumed after cutover, **DO NOT execute Route A or Route B database volume restoration**. Restoring an earlier database snapshot rewinds analytical history and permanently destroys newly ingested samples and client results.
