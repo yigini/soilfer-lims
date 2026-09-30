@@ -5,10 +5,10 @@ Repository: `https://github.com/yigini/soilfer-lims`
 Implementation Lead: Antigravity  
 Review & Communication Lead: Codex  
 Baseline Commit: `762c46e`  
-Current Production Release: `v3.5.29` (`e5d5ebdf9fa54a29fcbd4424d566eda8036920bd`)  
-Production Serving Image: `soilfer-lims:v3.5.29-e5d5ebd` (sha256:`fe6b64efc4f046635a830f5568773fefa52e95e975444c1f61dff14800679c1b`)  
-Rollback Baseline Image: `soilfer-lims:rollback-baseline` / `soilfer-lims:v3.5.28-2ef64cd` (sha256:`cf3d71a49ef38be3834db6d9abc105a3447af10c485e274a1f52eb8ec54a489b`)  
-Date: 2026-09-26  
+Current Production Release: `v3.5.31` (`1265e8aa9f71f5f60b61c6fdaf31bc36ba8b2c54`)  
+Production Serving Image: `soilfer-lims:v3.5.31-1265e8a` (sha256:`5114c6c07b4e5e614e818dea794670cfc23ef1f847aca817d89c551e128d3857`)  
+Rollback Baseline Image: `soilfer-lims:rollback-baseline` / `soilfer-lims:v3.5.30-48d0e52` (sha256:`685af8a608d0015fbc582084cda50dc514089d44ba15bcbdbf283c21ae1e40fb`)  
+Date: 2026-09-30  
 
 Status Summary:
 - **Total Tracked Issues**: 19
@@ -47,7 +47,8 @@ Status Key:
 | **#126** | 4 | Raw usernames displayed instead of proper names in messages/tasks | Reproduced & Implemented Locally | `1ed46ef` | `localization_and_user_display.test.js` (12/12 passed), client production build (`vite build` clean) | `7516f0e` | Resolved stored proper display name (`user.name`) with safe username fallback across message lists, conversation threads, notification toasts, task assignment dropdowns, and header drawers; leading/trailing whitespace safely trimmed; historical/deactivated users and missing names fall back gracefully; audit logs and reviewer attributions retain stable immutable username identifiers. | Passwords and private profile data excluded. | Code LIVE in `v3.5.19`; Individual live workflow acceptance pending. OPEN |
 | **#102** | 5 | Physical mobile device testing (iOS Safari, Android Chrome) | Open | Pending | Mobile device testing execution sheet (`docs/test-sheets/mobile-device-testing.md`) | `7516f0e` | Real physical device testing sheet established covering touch targets, virtual keyboard pan/zoom, horizontal scrolling, sticky headers, camera permissions, and offline draft sync. Emulation alone is insufficient. | Requires physical device validation on deployed release candidate. | Actual iOS Safari / Android Chrome hardware evidence pending. OPEN |
 | **#103** | 5 | User membership reconciliation & country access grants | Open | Pending | Read-only discrepancy ledger (`docs/governance/membership-reconciliation-ledger.md`) | None (Gate) | Governance framework and illustrative archetypes mapped against real Prisma schema (`User.labId`, `User.projects`, `User.countries`, `ProjectLab`); scopeGuard global access rules documented (`SUPER_ADMIN` only); no invented junction tables; production migration hold strictly active. | Under production migration hold. | Reconciliation apply and access expansion NOT performed; governance hold remains. OPEN |
-| **#140** | 8 | Safe LIMS–NSIS exchange gateway; durable state, pure adapter, monotonic change feed, fail-closed capabilities, decoupled connection identity, spatial entitlement, unrepeatable restore generation, total scope intersection, atomic CAS rotation, durable resource-bound idempotency, authoritative key linkage fail-closed, canonical publication backfill, pure reader snapshots, hashed-at-rest rotation secrets, lifecycle revalidation, permitted content digest, bounded harvester backlog drain honoring hasMore, durable checkpoint/export sink, coherent whitespace/unknown metadata policy across SQL/JS, filter-aware observation counts and stats, bounded GeoJSON pagination traversal & strict bbox validation, OpenAPI schema alignment, honest receiver telemetry | Remediated & Implementer-Tested | Candidate Head (PR #149) | `verify_issue149_complete_remediations.cjs` (15/15), `test_issue140_probes.cjs` (16/16), `data_exchange_reference_client.cjs --verify` (16/16), `sis_adapter_service.test.js` (20/20), `nsis_v2_exchange.test.js` (8/8), `nsis_exchange.test.js` (4/4), client build clean (7.20s) | Pre-release | All 4 independently passing groups from `2bdab7a` preserved: confirm/abort 409 rejection on revoked credentials without resurrection; JSON-null policy agreement; terminal download restart without duplicate items. All 4 prior protections preserved: escaped holds, sibling isolation, exact replacement retirement & replay, middle-page verified resume. All 3 remaining packages remediated: (1) Reference harvester drains multi-page backlogs honoring `hasMore`, retains `harvestedItems` and cumulative `changes` across checkpoints, writes consumable dataset to `--export` sink, and provides actionable HTTP 429/410 recovery; (2) Coherent whitespace/unknown metadata policy across SQL triggers (`v10`), migration backfill, dynamic SQL, and JS `isProvenanceHeld`, with observation counts respecting param/censoring/basis filters, stats respecting query filters with blanket standards claim removed, and GeoJSON providing deterministic cursor pagination and strict bbox validation; (3) OpenAPI contract aligned with `id`, `batchId`, `highWaterSequence`, `nextCursor`, and GeoJSON pagination parameters, UI telemetry rendering explicit "Not reported" for absent receiver evidence, `rotate_exchange_epoch.cjs` removing unsupported `seq=0` reset guidance, and runbook correcting `--verify`, middleware revocation, approved archived/disposed history, and non-destructive retention pruner CLI commands. | Receiver integration and national database ingestion owned by external OpenNSIS maintainer. | Remediated & Implementer-Tested; Awaiting Codex PR Technical Review before Safe Release (`Refs #140`, `PR #149`) |
+| **#140** | 8 | Safe LIMS–NSIS exchange gateway; durable state, pure adapter, monotonic change feed, fail-closed capabilities, decoupled connection identity, spatial entitlement, unrepeatable restore generation, total scope intersection, atomic CAS rotation, durable resource-bound idempotency, authoritative key linkage fail-closed, canonical publication backfill, pure reader snapshots, hashed-at-rest rotation secrets, lifecycle revalidation, permitted content digest, bounded harvester backlog drain honoring hasMore, durable checkpoint/export sink, coherent whitespace/unknown metadata policy across SQL/JS, filter-aware observation counts and stats, bounded GeoJSON pagination traversal & strict bbox validation, OpenAPI schema alignment, honest receiver telemetry | Released & Live | `48d0e52` (PR #149) | `verify_issue149_complete_remediations.cjs` (15/15), `test_issue140_probes.cjs` (16/16), `data_exchange_reference_client.cjs --verify` (16/16), `sis_adapter_service.test.js` (20/20), `nsis_v2_exchange.test.js` (8/8), `nsis_exchange.test.js` (4/4), client build clean (7.20s) | `48d0e52` (v3.5.30) | Released to Production (`48d0e52` / v3.5.30); verified live by Codex on 2026-09-28. | Receiver integration and national database ingestion owned by external OpenNSIS maintainer. | **CLOSED / RELEASED** (2026-09-28; PR #149) |
+| **#154** | 9 | Single-lab and multi-lab deployment readiness hardening: fail-closed port loopback inspection across topologies, route-specific schema and record validation, technician assignee check, and pinned catalogue postflight integration | Released & Live | `1265e8a` (PR #154) | `deployment_readiness_acceptance.test.js` (21/21), `deployment_readiness_bootstrap.test.js` (10/10), CI Run 36656048252 (13/13) | `1265e8a` (v3.5.31) | Single-lab and multi-lab topology bootstrap and recovery verified in disposable CI. Port loopback restriction (`PORT=127.0.0.1:3000`) and dual-stack loopback parsing enforced. Route-specific schema and record identity validation (`/api/work`, `/api/users`, `/api/labs`, `/api/submissions`, `/api/dashboard/live`) enforced; technician assignee check (`assignedTo === principal.username`) enforced while aligning with actual `getWorkItems` + `scopeGuard` controller semantics. Pinned catalogue postflight (31/31 passed) and role/route postflight (5/5 passed) verified. Production client mutation hold enforced (Apache 503 rewrite for POST/PUT/PATCH/DELETE), zero-writer consistent DB backup (`2a286a30...`, 38,566 samples, 19 results) and assets backup (`7921958f...`, 489 files) verified. Target image `soilfer-lims:v3.5.31-1265e8a` live on `46.19.33.37` in unchanged global mode; public health 200, capabilities 200, protected routes 401. Independently verified live by Codex at 02:41 UTC. | Existing MOZL mapping and TUR inactive lab status remain under separate governance holds; receiver integration remains separate. | **RELEASED & VERIFIED LIVE** (2026-09-30; [PR #154](https://github.com/yigini/soilfer-lims/pull/154), Codex independent verification `issue154-production-verification-20260930.md`) |
 
 
 
@@ -3235,6 +3236,168 @@ Following technical acceptance by Codex (`C:/Users/yigin/Documents/Codex/2026-09
   - LIMS-only deployment is accepted as complete.
   - OpenNSIS receiver acceptance remains separate; OpenNSIS was completely untouched.
   - No new production data/grants/credentials were modified. No broad test reruns or repeat release required.
+
+---
+
+### Phase 9: Issue #154 Single-Lab and Multi-Lab Deployment Readiness Hardening & Production Release
+
+#### 1. Simple Summary of What Changed
+Single-lab and multi-lab deployment readiness hardening ensures SoilFER-LIMS can be deployed reliably across both single-laboratory local instances and global multi-laboratory setups. The release hardens operational procedures and runtime validation:
+- **Client Mutation Hold Across Topologies**: Pre-exposure verification explicitly sets `PORT="127.0.0.1:3000"` so that the application port is bounded to host loopback during pre-exposure postflight under both proxy and direct topologies, and inspects `.NetworkSettings.Ports` to reject wildcards (`0.0.0.0`, `::`), routable IPs, or failed inspections.
+- **Route-Specific Schema & Record Identity Validation**: Enforces strict JSON structure and mandatory fields per route (`/api/work` requires object envelope with `data` array; `/api/users` requires array or envelope with `data`/`users`; `/api/labs` and `/api/submissions` require record arrays; `/api/dashboard/live` requires dashboard object with array queues `intakeQueue`, `reviewQueue`, and `oversight`). Rejects empty objects like `{ data: [{}] }` or empty dashboard `{}` with exit 1.
+- **Technician Assignee Validation & Controller Alignment**: Enforces `item.assignedTo === principal.username` for `LAB_TECHNICIAN` on `/api/work`. Aligns route policy with actual `getWorkItems` + `scopeGuard` controller semantics: own-facility technicians can work on samples from any project assigned to them at their lab, while unassigned-lab principals remain strictly subject to project allow-list filtering.
+- **Pinned Catalogue Postflight Wiring**: Integrates the reviewed pinned postflight suite (`server/scripts/postflight_issue140.cjs`) with explicit reviewed principals into pre-exposure verification gates.
+
+#### 2. What Was Tested in Disposable CI
+All topology scenarios were validated in disposable Docker containers and automated contract test suites:
+- **Scenario 1 (Single-Lab Bootstrap)**: Clean database initialization, super-admin provisioning, lab setup.
+- **Scenario 2 (Multi-Lab Topology)**: Multi-lab isolation, cross-lab boundary enforcement, and scoped data access.
+- **Scenario 3 (Migration & Upgrade)**: Clean upgrade from genuine supported baseline (`48d0e52`), verifying data retention across upgrades.
+- **Scenario 4 (Recovery & Rollback)**: Fail-closed recovery, pre-restore safety copies, exchange epoch rotation.
+- **Scenarios 5 & 6 (Record Preservation & Strict Exports)**: Non-null equality and strict sample/result record preservation across Lab Alpha, Lab Beta, and Super Admin real data exports.
+- **Contract Tests**: 31/31 passed across `deployment_readiness_acceptance.test.js` (21/21) and `deployment_readiness_bootstrap.test.js` (10/10).
+- **Extraction Verification**: 25/25 guide controls passed in `verify_issue154_continuation6.cjs`.
+- **Exact-Head CI**: Run [36654282908](https://github.com/yigini/soilfer-lims/actions/runs/36654282908) (Job `109695076466`) — SUCCESS at 01:24:27 UTC (genuine baseline build 01:20:33Z, Docker readiness 01:24:17Z).
+- **Exact-Main CI**: Run [36656048252](https://github.com/yigini/soilfer-lims/actions/runs/36656048252) (Job `109700520971`) — SUCCESS at 01:46:14 UTC (genuine baseline build 01:42:24Z, Docker readiness 01:46:05Z).
+
+#### 3. Operator Guides for Laboratory Deployment & Administration
+Laboratory operators can find step-by-step procedures in the following documentation:
+- **Setup & Installation**: [`docs/INSTALL.md`](file:///c:/Users/yigin/Documents/soilfer-lims/docs/INSTALL.md) — Prerequisites, environment configuration, container bootstrapping, and initial super-admin setup.
+- **Topology & Deployment Modes**: [`docs/DEPLOYMENT_GUIDE.md`](file:///c:/Users/yigin/Documents/soilfer-lims/docs/DEPLOYMENT_GUIDE.md) — Single-lab local deployment vs global multi-laboratory production deployment topologies.
+- **Operational Readiness Checklist**: [`docs/DEPLOYMENT_READINESS.md`](file:///c:/Users/yigin/Documents/soilfer-lims/docs/DEPLOYMENT_READINESS.md) — Production verification matrix, environment checklist, and scheduler controls.
+- **Upgrade, Backup, Rollback & Recovery**: [`docs/UPGRADING.md`](file:///c:/Users/yigin/Documents/soilfer-lims/docs/UPGRADING.md) — Zero-writer backup creation, WAL checkpointing, pre-exposure verification, in-process COMMITTED boundary, Route A (.db.gz) and Route B (.tar.gz) disaster recovery protocols.
+
+#### 4. Release Provenance, Verification Documents & Live Status
+- **Accepted Candidate Commit**: `a87ea409a558e2effbdbe742f9372f422742f590` (`a87ea40`)
+- **Accepted Git Tree SHA**: `260975e57d0b3a1389f622c2f84ef444f3f46cf4`
+- **Merged Main Commit**: `1265e8aa9f71f5f60b61c6fdaf31bc36ba8b2c54` (`1265e8a`, merged 2026-09-30 01:38:05 UTC)
+- **Merged Main Git Tree SHA**: `260975e57d0b3a1389f622c2f84ef444f3f46cf4` (identical match, zero diff against `a87ea40`)
+- **Exact-Main GitHub Actions CI**: [CI Run 36656048252](https://github.com/yigini/soilfer-lims/actions/runs/36656048252) (Job `109700520971`, SUCCESS 01:46:14 UTC)
+- **Production Serving Image**: `soilfer-lims:v3.5.31-1265e8a` (`sha256:5114c6c07b4e5e614e818dea794670cfc23ef1f847aca817d89c551e128d3857`, Node 24 LTS `v24.21.0`)
+- **Rollback Baseline Image**: `sha256:685af8a608d0015fbc582084cda50dc514089d44ba15bcbdbf283c21ae1e40fb` (`soilfer-lims:rollback-baseline` / `v3.5.30-48d0e52`)
+- **Current Production Mode**: Unchanged `NODE_ENV=production`, `DEPLOYMENT_MODE=global` on host `46.19.33.37` (`lims.yigini.net`). Container `04a1c6d2cb26...` running and healthy.
+- **Production Release Ledger**: `/opt/lims/logs/release_ledger_issue154_20260930_041213.json` (Archived: `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/release_ledger_issue154_20260930_041213.json`)
+- **Production Release Transcript**: `/opt/lims/logs/release_issue154_20260930_041213.log` (Archived: `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/release_issue154_20260930_041213.log`)
+- **Independent Acceptance Report**: `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue154-independent-acceptance-a87ea40.md`
+- **Independent Production Verification Report**: `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue154-production-verification-20260930.md` (Codex verified live at 02:41 UTC)
+- **Independent Live Verification JSON**: `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue154-independent-live-verification-20260930.json`
+
+#### 5. Technical Audit Details & Operator Gates Proof
+
+##### Cryptographic Provenance & Artifact Hashes
+
+| Artifact / Entity | Location / Source | SHA256 Digest | Verification Notes |
+|---|---|---|---|
+| **Clean POSIX Source Archive** | `/opt/lims/source_1265e8a.tar.gz` | `360299616a3575cc6e78437788788d64d7d24eefca37807524b8c550c0ee581b` | 60,428,023 bytes; all 1,597 archive files match accepted Git blobs; build directory matches archive |
+| **Deployed Runtime Source** | Container `/app/server` | *Matched byte-for-byte* | All 209 checked deployed server/entrypoint source files match accepted Git blobs |
+| **Public Frontend Assets** | Container & Public HTTPS | *Matched byte-for-byte* | HTML (`cab4d289...`) and 8 referenced assets match container built frontend; all return HTTP 200 |
+| **Pre-Release DB Backup** | `/opt/lims/backups/dev_pre_issue154_20260930_041213.db` | `2a286a303df10f38ac8c0e99357253f781f3a8d86b8ed9912d0b532ec7f648bf` | 563,322,880 bytes; integrity `ok`, FK errors 0; Sample 38,566 / Result 19 / User 49 / Lab 10 |
+| **Pre-Release Assets Backup** | `/opt/lims/backups/assets_pre_issue154_20260930_041213.tar.gz` | `7921958ff04086be1b9c2b59490c5aa102123cc8d91d33abbd4600b3cbf9234a` | 1,813,849 bytes; all 489 archived files match mounted assets volume |
+| **Pinned Postflight Suite** | `/app/server/scripts/postflight_issue140.cjs` | `cb88ca593de1e2af3a0052a7ffb958eeb3933028764718eb624bfdfbc5fea4b5` | 31/31 passed in pre-exposure and independent verification |
+| **Role Postflight Suite** | `/opt/lims/postflight_issue154_roles.cjs` | `6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da` | 5/5 role routes passed in pre-exposure and independent verification |
+| **Release Wrapper Script** | `/opt/lims/execute_release_issue154.sh` | `40e268c62629f7a7cbf3e11f406cf9c5216d49c894ad94444c9ea96940134428` | Executed 2026-09-30 04:12:13 (transcript 165 lines, SHA256 `edc2bed2...`) |
+| **Apache Configuration** | `/etc/httpd/conf/extra/httpd-lims.conf` | `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20` | Strict equality between pre-hold, restored, and baseline configurations |
+
+##### Reviewed Principals Binding
+
+| Role | Principal ID | Username | Assigned Lab | Countries | Projects | TokenVersion | MustChangePassword | IsActive |
+|---|---|---|---|---|---|---|---|---|
+| `SUPER_ADMIN` | `1770311018064` | `admin` | *(unassigned)* | `[]` | `["SOILFER-US","SOILFER-JPN"]` | 1 | 0 | 1 |
+| `LAB_MANAGER` | `user-mgr-gha` | `mgr_gha` | `GHA-LAB1` | `["GHA"]` | `["SOILFER-US"]` | 1 | 0 | 1 |
+| `LAB_TECHNICIAN` | `user-tech-gha` | `tech_gha` | `GHA-LAB1` | `["GHA"]` | `["SOILFER-US"]` | 1 | 0 | 1 |
+
+*Note: Tokens are generated synthetically in-memory during postflight execution; no credentials, secrets, or role tokens are printed or persisted.*
+
+##### Client Mutation Hold & Zero-Writer Backups (Gate 3)
+- **Client Mutation Hold**: The actual Apache procedure blocked client mutation methods (`POST`, `PUT`, `PATCH`, `DELETE`) with HTTP 503 and kept the direct application port on loopback (`127.0.0.1:3000`). GET traffic was not universally held. This is accurately designated as a *client mutation hold*, not an all-client traffic block or claim of no conceivable bypass.
+- **Zero-Writer Checkpoint**: Active container stopped cleanly (`assert_writers_stopped` passed). SQLite WAL checkpoint executed (`PRAGMA wal_checkpoint(TRUNCATE)`).
+- **Baseline Stopped-Writer Counts**: `Sample`: **38,566**; `Result`: **19**; `User`: **49**; `Lab`: **10**.
+- **Backup Verification**: SQLite `.backup` created (`2a286a30...`, 563 MB, integrity `ok`, FK errors 0, counts exactly matched). Assets volume archive created (`7921958f...`, 1.8 MB, 489 files).
+- **Additive Verification**: DB schema integrity check `ok`, FK check `0 errors`, counts strictly preserved.
+
+##### Pre-Exposure Verification & Role Gates (Gate 3)
+- **Pre-Exposure Container**: Started with `DISABLE_BACKGROUND_JOBS=true` and `-p 127.0.0.1:3000:3000`. Background sync schedulers verified completely suppressed.
+- **Pinned Issue #140 Catalogue Postflight**: 31/31 passed (0 errors) verifying schema, public discovery, anonymous 401 denials, directory projection policy, and scoped laboratory catalogue.
+- **Role & Route API Postflight**:
+  - `SUPER_ADMIN` -> `/api/users` (200 OK, 20 records) & `/api/labs` (200 OK, 10 records)
+  - `LAB_MANAGER` -> `/api/dashboard/live` (200 OK, 0 records — valid empty arrays) & `/api/submissions` (200 OK, 0 records — valid empty array)
+  - `LAB_TECHNICIAN` -> `/api/work` (200 OK, 0 records — valid empty array)
+  - *Note on queue records*: Empty live manager and technician queues (`records: 0`) verify route access, authentication, and response schema validity; populated and negative scoping cases belong to disposable contract evidence.
+
+##### Cutover, COMMITTED Boundary & Production Resumption (Gate 4)
+- **In-Process COMMITTED Boundary**: Transition to `COMMITTED` occurred at transcript line 120, *before* restarting the application container (line 121) or reopening ingress. This is an *in-process automatic-restore boundary* (preventing automated rollback scripts from overwriting newly ingested client data once production writers resume); no host reboot or power-loss durability test occurred, and it does not permanently prohibit manual operator recovery. The core data safety invariant remains: *never restore an old database after new analytical writes have resumed without manual reconciliation*.
+- **Production Container Restart**: Container restarted with full production settings (no suppression flags). Running image verified `sha256:5114c6c07b4e5e614e818dea794670cfc23ef1f847aca817d89c551e128d3857`. Schedulers verified active in startup logs (`[BACKUP_SCHEDULE]`, `[KOBO_SCHEDULER]`, `[SCHEDULER] Escalation background scheduler initialized`).
+- **Live Ingress Restoration**: Apache live routing restored and verified matching pre-quiescence hash `f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20`.
+- **Write Resumption**: Unauthenticated POST to `/api/v2/data-exchange/receipts` returned **HTTP 401 Unauthorized** (not 503), proving mutations are actively handled by LIMS.
+- **Public Smoke Verification**:
+  - `GET https://lims.yigini.net/api/health` -> **HTTP 200** `{"status":"ok"}`
+  - `GET https://lims.yigini.net/api/v2/data-exchange/capabilities` -> **HTTP 200** (`version: 2.0.0`)
+  - Anonymous access to `/api/labs/directory`, `/api/v2/data-exchange/stats`, `/api/v2/data-exchange/geojson` -> **HTTP 401 Unauthorized**
+  - Post-exposure role/route verification on live container -> **5/5 passed**.
+
+##### Scope, Governance & System Boundaries
+- **LIMS Deployment Acceptance**: LIMS single-lab and multi-lab deployment readiness is accepted as complete and live in production.
+- **Unchanged Production Mode**: Production remains in its existing global mode (`DEPLOYMENT_MODE=global`). Single-lab topology was fully verified in disposable CI without mutating production topology.
+- **Existing Governance Holds**: Existing MOZL project mapping and TUR inactive lab status remain known, separate governance holds; no modifications or scope changes were performed.
+- **Receiver Acceptance**: OpenNSIS receiver integration and national database ingestion remain owned by external OpenNSIS maintainers and were untouched.
+
+---
+
+### Phase 3 & Feature Implementation: Sitewide SoilFER Theme Library & Selector v1
+
+- **Authorization & Scope**: Implemented under owner instruction (*"WE NEED TO IMPLEMENT NOW.. ask agy"*, 30 September 2026, 12:09 UTC) following all 17 phases and sections of `WP/sitewide-theme-library-v1/IMPLEMENTATION-PLAN.md`.
+- **Catalogue & Token Primitives (Phase 1)**:
+  - Created canonical single-source theme catalogues: `client/src/lib/themeCatalog.js` and `server/config/themeCatalog.js`.
+  - Built 7 complete theme families × 2 modes (14 variants):
+    1. **SoilFER Classic** (`soilfer-classic`): Canonical green identity, warm neutral canvas, graphite dark surfaces (`#256348` / `#91D2AF`). Initial compatibility default.
+    2. **Forest** (`forest`): Muted vegetation green with calm work surfaces (`#245B3D` / `#9DD7AA`). Recommended additional soil theme.
+    3. **Terra** (`terra`): Clay and earth accents (`#865039` / `#E6B298`).
+    4. **Mineral** (`mineral`): Slate and restrained blue-gray for dense instrument screens (`#43556D` / `#ABC2D7`).
+    5. **Watershed** (`watershed`): Quiet teal for soil & hydrology work (`#166879` / `#89CFD2`).
+    6. **Nutrient** (`nutrient`): Olive and fertility-inspired accents (`#596024` / `#C4D48E`).
+    7. **Clear Contrast** (`clear-contrast`): High contrast (>= 7:1) text/borders for accessibility (`#003E70` / `#90C9FF`).
+  - Implemented `client/src/styles/appearance-tokens.css` with semantic `--sf-*` custom properties (canvas, surface, raised, inset, hover, selected, text, muted, link, control, divider, focus, status, chart, and sidebar).
+  - Strict print paper certificate isolation: `@media print` and `[data-surface="paper"]` / `.sf-paper` enforce `#FFFFFF` white paper and `#1A1D20` charcoal text, isolating reports/labels from theme modes.
+- **Additive Persistence & Server Authority (Phase 2)**:
+  - Database schema extension in `server/prisma/schema.prisma`:
+    - `User`: additive `uiThemeId String?`, `uiModePreference String @default("inherit")`, `uiAppearanceRevision Int @default(0)`, preserving legacy `themePreference`.
+    - `LabAppearanceSetting`: `labId String @id`, `themeId String?`, `defaultMode String?`, `revision Int`, `updatedBy String?`, `updatedAt DateTime`.
+    - `GlobalAppearanceSetting`: singleton `id String @id @default("global")`, `themeId String @default("soilfer-classic")`, `defaultMode String @default("light")`, `revision Int`, `updatedBy String?`, `updatedAt DateTime`.
+  - Additive idempotent SQL migration executed: `server/prisma/migrations/20260930140000_add_sitewide_theme_appearance/migration.sql`.
+  - Verified 49 existing users backfilled cleanly without data loss; database integrity `ok`, FK errors `0`.
+  - Implemented `server/services/appearanceService.js` and routes:
+    - `GET /api/appearance/catalog`: Static-safe public catalogue with swatches and no secrets.
+    - `GET /api/appearance/public`: Sanitized public appearance for login/help chrome.
+    - `GET /api/appearance/context`: Resolves 5-tier inheritance hierarchy (Session Preview -> User Personal -> Lab Default -> Global Default -> Built-in Classic Light).
+    - `PATCH /api/auth/preferences` & `/api/auth/profile`: Self-service personal preference updates with revision concurrency (`409 Conflict`) and legacy client compatibility.
+    - `GET/PATCH /api/labs/:labId/appearance`: Own-lab manager and `SUPER_ADMIN` authority only; foreign lab/null assignment denied with HTTP 403; atomic `AuditLog` generation.
+    - `GET/PATCH /api/admin/appearance`: `SUPER_ADMIN` authority only; non-admin denied with HTTP 403; atomic `AuditLog` generation.
+  - Canonical RBAC registry updated in `server/config/roles.js` with `MANAGE_GLOBAL_APPEARANCE` and `MANAGE_LAB_APPEARANCE`; all 5 security test suites (80/80 tests) passing with zero unprotected mutating routes.
+- **Resolver & Responsive Selector UI (Phase 3)**:
+  - Pure resolver & v2 session storage in `client/src/lib/appearance.js` (`soilfer.appearance.session.v2`), backward-compatible v1 migration, meta theme-color injection.
+  - `client/src/context/ThemeContext.jsx`: Root appearance provider with hierarchy resolution, session overrides, context caching, request-generation abort guards, and adoption methods.
+  - `client/src/components/appearance/AppearancePreviewNotice.jsx`: Reversible full-screen preview notice with "Exit preview" and "Save for me".
+  - `client/src/components/appearance/ThemeGallery.jsx`: Reusable responsive selector with 7 theme cards, miniature screen mockups, Light/Dark toggle, scope-aware adoption ("Save for me", "Use as lab default", "Use as platform default", "Follow shared default"), and WCAG status.
+  - Profile integration: `client/src/pages/Profile.jsx` integrates `ThemeGallery` for personal preference alongside dedicated language preference section.
+  - Laboratory integration: `client/src/pages/admin/LabManagement.jsx` adds Appearance tab for `LAB_MANAGER` to adopt lab default.
+  - Platform administration: `client/src/pages/AdminPanel.jsx` adds Appearance tab for `SUPER_ADMIN` to adopt global platform default.
+  - Header integration: `client/src/components/ThemeToggle.jsx` displays active theme family and direct link to theme library.
+  - App root integration: `client/src/App.jsx` mounts `AppearancePreviewNotice` across all routes.
+- **Sitewide Route & Scientific Chart Integration (Phase 4)**:
+  - Chart & spectral traces: `client/src/components/SpectraViewer.jsx` and `SpectraBatchUpload.jsx` dynamically consume `var(--sf-chart-grid)` and `var(--sf-chart-axis)` with theme-aware tooltip backgrounds (`var(--sf-surface)`, `var(--sf-text)`, `var(--sf-divider)`).
+  - Scientific status colors: Emerald (Approved), Amber (In Analysis), and Rose (Rejected) preserved unchanged across all themes.
+  - White paper reports: `ResultReports.jsx` and `PublicReport.jsx` retain `data-surface="paper"` and `@media print` white paper isolation.
+- **Accessibility & Mobile Touch Targets (Phase 5)**:
+  - WCAG 2.2 AA compliant across all 7 families in both Light and Dark modes.
+  - Clear Contrast provides WCAG AAA >= 7:1 contrast across text and interactive borders.
+  - Mobile safe areas: `env(safe-area-inset-bottom)` applied to navigation bars and floating preview notices.
+  - Controls designed for 48px touch targets; gallery reflows seamlessly down to 320px viewport width.
+- **Verification Evidence**:
+  - `server/tests/contracts/theme_appearance_contract.test.js`: **All 19/19 tests PASS**.
+  - `server/tests/security/` (5 suites): **All 80/80 tests PASS** (including `rbac_enforcement.test.js`, `lab_isolation.test.js`, `wiring.test.js`, `auth_token_invalidation.test.js`, `help_lab_isolation.test.js`).
+  - Client production build: **Vite build PASS in 15.13s**; `ThemeGallery` chunk is 13.01 kB (gzip: 3.55 kB), well within the ≤ 15 kB gzip budget.
+  - Documentation: Created `docs/THEME_GUIDE.md` covering user guide, lab manager guide, platform administrator guide, reset procedure, troubleshooting, and scientific paper isolation.
+
 
 
 

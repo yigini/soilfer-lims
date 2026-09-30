@@ -7,6 +7,7 @@
 
 const success = (res, messageCode, message, messageParams = null, status = 200, data = null) => {
     return res.status(status).json({
+        success: true,
         messageCode,
         messageParams,
         message,

@@ -642,4 +642,33 @@ router.post('/:id/lifecycle', checkPermission('MANAGE_BRANDING'), async (req, re
     }
 });
 
+// ─── GET /api/labs/:labId/appearance ─── Retrieve laboratory appearance default
+router.get('/:labId/appearance', async (req, res) => {
+    try {
+        const appearanceService = require('../services/appearanceService');
+        const setting = await appearanceService.getLabAppearance(req.params.labId);
+        res.json({ success: true, data: setting });
+    } catch (err) {
+        res.status(err.statusCode || 500).json({
+            error: err.message,
+            code: err.code || 'LAB_APPEARANCE_ERROR'
+        });
+    }
+});
+
+// ─── PATCH /api/labs/:labId/appearance ─── Update laboratory appearance default
+router.patch('/:labId/appearance', checkPermission('MANAGE_LAB_APPEARANCE'), async (req, res) => {
+    try {
+        const appearanceService = require('../services/appearanceService');
+        const updated = await appearanceService.updateLabAppearance(req.user, req.params.labId, req.body);
+        res.json({ success: true, data: updated, message: 'Laboratory appearance updated successfully' });
+    } catch (err) {
+        res.status(err.statusCode || 500).json({
+            error: err.message,
+            code: err.code || 'LAB_APPEARANCE_ERROR',
+            currentRevision: err.currentRevision
+        });
+    }
+});
+
 module.exports = router;

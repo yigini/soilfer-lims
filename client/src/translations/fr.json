@@ -1580,7 +1580,26 @@
     "savedError": "Impossible d'enregistrer. Votre apparence enregistrée reste inchangée.",
     "activeSessionNotice": "Remplacement de session actif pour cet onglet",
     "languageHeading": "Langue préférée",
-    "languageDescription": "Choisissez la langue utilisée pour votre session et les communications par défaut."
+    "languageDescription": "Choisissez la langue utilisée pour votre session et les communications par défaut.",
+    "manageThemesLink": "Bibliothèque de thèmes et préférences →",
+    "saveLanguageButton": "Enregistrer la préférence de langue",
+    "languageSavedSuccess": "Préférence de langue enregistrée.",
+    "languageSavedError": "Impossible d'enregistrer la préférence de langue.",
+    "themesHeading": "Palette de thèmes soignée",
+    "themesDescription": "Sélectionnez une famille de thèmes optimisée pour les surfaces de travail et les données scientifiques.",
+    "modeHeading": "Mode d'affichage",
+    "saveForMe": "Enregistrer pour moi",
+    "useLabDefault": "Définir par défaut pour ce lab",
+    "usePlatformDefault": "Définir par défaut pour la plateforme",
+    "resetToDefault": "Suivre le thème partagé par défaut",
+    "previewNotice": "Aperçu en cours. Cliquez sur « Quitter l'aperçu » ou « Enregistrer ».",
+    "exitPreview": "Quitter l'aperçu",
+    "previewing": "Aperçu",
+    "previewUnsavedNotice": "Aperçu temporaire uniquement. Vos paramètres restent inchangés.",
+    "labHeading": "Apparence par défaut du laboratoire",
+    "labDescription": "Le personnel affecté à ce laboratoire suivant les valeurs par défaut verra ce thème et ce mode.",
+    "adminHeading": "Apparence par défaut de la plateforme",
+    "adminDescription": "Définissez le thème et le mode par défaut pour tous les laboratoires et les pages publiques."
   },
   "analytics": {
     "testMethods": "Méthodes d'essai"

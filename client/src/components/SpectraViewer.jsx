@@ -136,22 +136,27 @@ const SpectraViewer = ({ data, overlayData }) => {
                 </div>
                 <ResponsiveContainer width="100%" height="88%">
                     <LineChart data={overlayGrid || []}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--sf-chart-grid, var(--sf-divider))" />
                         <XAxis
                             dataKey="wavelength"
-                            label={{ value: xLabel, position: 'insideBottomRight', offset: -5 }}
+                            label={{ value: xLabel, position: 'insideBottomRight', offset: -5, fill: 'var(--sf-chart-axis, var(--sf-muted))' }}
                             type="number"
                             reversed={isWavenumber}
                             domain={['dataMin', 'dataMax']}
-                            tick={{ fontSize: 11 }}
+                            tick={{ fontSize: 11, fill: 'var(--sf-chart-axis, var(--sf-muted))' }}
+                            stroke="var(--sf-chart-axis, var(--sf-muted))"
                         />
                         <YAxis
-                            label={{ value: yLabel, angle: -90, position: 'insideLeft' }}
-                            tick={{ fontSize: 11 }}
+                            label={{ value: yLabel, angle: -90, position: 'insideLeft', fill: 'var(--sf-chart-axis, var(--sf-muted))' }}
+                            tick={{ fontSize: 11, fill: 'var(--sf-chart-axis, var(--sf-muted))' }}
+                            stroke="var(--sf-chart-axis, var(--sf-muted))"
                         />
                         <Tooltip
                             contentStyle={{
-                                borderRadius: '8px', border: 'none',
+                                backgroundColor: 'var(--sf-surface)',
+                                color: 'var(--sf-text)',
+                                borderColor: 'var(--sf-divider)',
+                                borderRadius: '8px',
                                 boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                                 fontSize: '12px'
                             }}
@@ -208,21 +213,29 @@ const SpectraViewer = ({ data, overlayData }) => {
             </div>
             <ResponsiveContainer width="100%" height="88%">
                 <LineChart data={data.chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--sf-divider, #e2e8f0)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--sf-chart-grid, var(--sf-divider))" />
                     <XAxis
                         dataKey="wavelength"
-                        label={{ value: xLabel, position: 'insideBottomRight', offset: -5 }}
+                        label={{ value: xLabel, position: 'insideBottomRight', offset: -5, fill: 'var(--sf-chart-axis, var(--sf-muted))' }}
                         type="number"
                         reversed={isWavenumber}
                         domain={['dataMin', 'dataMax']}
-                        tick={{ fontSize: 11 }}
+                        tick={{ fontSize: 11, fill: 'var(--sf-chart-axis, var(--sf-muted))' }}
+                        stroke="var(--sf-chart-axis, var(--sf-muted))"
                     />
                     <YAxis
-                        label={{ value: yLabel, angle: -90, position: 'insideLeft' }}
-                        tick={{ fontSize: 11 }}
+                        label={{ value: yLabel, angle: -90, position: 'insideLeft', fill: 'var(--sf-chart-axis, var(--sf-muted))' }}
+                        tick={{ fontSize: 11, fill: 'var(--sf-chart-axis, var(--sf-muted))' }}
+                        stroke="var(--sf-chart-axis, var(--sf-muted))"
                     />
                     <Tooltip
-                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                        contentStyle={{
+                            backgroundColor: 'var(--sf-surface)',
+                            color: 'var(--sf-text)',
+                            borderColor: 'var(--sf-divider)',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                        }}
                         labelFormatter={v => isWavenumber ? `${Number(v).toFixed(1)} cm⁻¹` : `λ ${Number(v).toFixed(1)} nm`}
                         formatter={val => [Number(val).toFixed(4), yLabel]}
                     />

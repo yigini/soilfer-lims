@@ -305,6 +305,7 @@ app.use('/api/notifications', verifyToken, require('./routes/notificationRoutes'
 app.use('/api/auth', require('./routes/authRoutes')); // auth handled internally (has login)
 app.use('/api/messages', verifyToken, require('./routes/messageRoutes'));
 app.use('/api/help', require('./routes/helpRoutes'));
+app.use('/api/appearance', require('./routes/appearanceRoutes'));
 app.use('/api/v1/data-exchange', require('./routes/sisRoutes')); // Neutral National Data Exchange API (v1)
 app.use('/api/v1/sis', require('./routes/sisRoutes')); // Legacy backward-compatible alias
 app.use('/api/v2/data-exchange', require('./routes/sisV2Routes')); // Neutral National Data Exchange API (v2)

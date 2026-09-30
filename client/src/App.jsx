@@ -87,6 +87,7 @@ import { MobileNavBar } from './components/mobile/MobileNavBar';
 import { MobileMoreSheet } from './components/mobile/MobileMoreSheet';
 import { SyncCentreModal } from './components/mobile/SyncCentreModal';
 import { ContextHelpDrawer } from './components/help/ContextHelpDrawer';
+import { AppearancePreviewNotice } from './components/appearance/AppearancePreviewNotice';
 
 // --- Layout Component ---
 const Layout = ({ children }) => {
@@ -279,7 +280,9 @@ const RequireAuth = ({ children, permission, requiredRole }) => {
 
 function App() {
     return (
-        <Routes>
+        <>
+            <AppearancePreviewNotice />
+            <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/activate" element={<React.Suspense fallback={<LazyFallback />}><ActivateAccount /></React.Suspense>} />
                 <Route path="/reset-password" element={<React.Suspense fallback={<LazyFallback />}><ResetPassword /></React.Suspense>} />
@@ -339,6 +342,7 @@ function App() {
                 {/* Catch-All 404 Route */}
                 <Route path="*" element={<React.Suspense fallback={<LazyFallback />}><NotFound /></React.Suspense>} />
             </Routes>
+        </>
     );
 }
 

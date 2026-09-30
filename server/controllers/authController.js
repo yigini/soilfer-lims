@@ -17,6 +17,14 @@ const sanitizeUser = (user) => {
         lab: user.lab || null,
         labLocation: user.labLocation || null,
         themePreference: user.themePreference || 'light',
+        uiThemeId: user.uiThemeId || null,
+        uiModePreference: user.uiModePreference || 'inherit',
+        uiAppearanceRevision: user.uiAppearanceRevision || 0,
+        appearance: {
+            themeId: user.uiThemeId || null,
+            modePreference: user.uiModePreference || 'inherit',
+            revision: user.uiAppearanceRevision || 0
+        },
         countries: typeof user.countries === 'string' ? JSON.parse(user.countries) : (user.countries || []),
         projects: typeof user.projects === 'string' ? JSON.parse(user.projects) : (user.projects || []),
         permissions: getPermissionsForRole(user.role)
@@ -219,7 +227,7 @@ exports.updatePreferences = async (req, res) => {
         return error(res, 403, 'AUTH.IMPERSONATION_PREFERENCE_BLOCKED', 'Preferences cannot be modified during an impersonation session.');
     }
 
-    const allowedKeys = ['themePreference', 'language'];
+    const allowedKeys = ['themePreference', 'language', 'appearance'];
     const bodyKeys = Object.keys(req.body || {});
 
     // Reject unknown fields or attempts to inject roles, permissions, passwords, or target IDs
@@ -228,58 +236,22 @@ exports.updatePreferences = async (req, res) => {
         return error(res, 400, 'AUTH.INVALID_PREFERENCE_FIELDS', `Unexpected fields in preference update: ${invalidKeys.join(', ')}`);
     }
 
-    const { themePreference, language } = req.body || {};
-
     if (bodyKeys.length === 0) {
         return error(res, 400, 'AUTH.EMPTY_PREFERENCES', 'At least one preference field must be provided');
     }
 
-    const updateData = {};
-    const responseData = {};
-
-    if (themePreference !== undefined) {
-        if (!themePreference || typeof themePreference !== 'string') {
-            return error(res, 400, 'AUTH.INVALID_THEME_PREFERENCE', 'Theme preference must be a valid string');
-        }
-        if (!['light', 'dark'].includes(themePreference)) {
-            return error(res, 400, 'AUTH.INVALID_THEME_PREFERENCE', 'Theme preference must be strictly "light" or "dark"');
-        }
-        updateData.themePreference = themePreference;
-    }
-
-    if (language !== undefined) {
-        const { matchSupportedLocale } = require('../utils/localeResolver');
-        if (!language || typeof language !== 'string') {
-            return error(res, 400, 'AUTH.INVALID_LANGUAGE_PREFERENCE', 'Language must be a valid string');
-        }
-        const matched = matchSupportedLocale(language);
-        if (!matched) {
-            return error(res, 400, 'AUTH.INVALID_LANGUAGE_PREFERENCE', `Unsupported language: ${language}`);
-        }
-        updateData.language = matched;
-    }
-
     try {
-        const updated = await prisma.user.update({
-            where: { id: String(req.user.id) },
-            data: updateData,
-            select: {
-                id: true,
-                username: true,
-                themePreference: true,
-                language: true
-            }
-        });
-
-        if (themePreference !== undefined) {
-            responseData.themePreference = updated.themePreference;
-        }
-        if (language !== undefined) {
-            responseData.language = updated.language;
-        }
-
-        return success(res, 'AUTH.PREFERENCES_UPDATED', 'Preferences updated successfully', null, 200, responseData);
+        const appearanceService = require('../services/appearanceService');
+        const updated = await appearanceService.updateSelfPreferences(req.user, req.body);
+        return success(res, 'AUTH.PREFERENCES_UPDATED', 'Preferences updated successfully', null, 200, updated);
     } catch (err) {
+        if (err.statusCode && err.statusCode < 500) {
+            return res.status(err.statusCode).json({
+                error: err.message,
+                code: err.code || 'PREFERENCE_UPDATE_ERROR',
+                currentRevision: err.currentRevision
+            });
+        }
         console.error('[AUTH] Update Preferences Error:', err);
         return error(res, 500, 'AUTH.INTERNAL', 'Failed to update preferences');
     }
@@ -291,7 +263,7 @@ exports.updateProfile = async (req, res) => {
     if (!actor) return res.status(401).json({ error: 'Unauthorized' });
 
     // Allowlist only safe self-service fields
-    const allowedKeys = ['name', 'language', 'themePreference'];
+    const allowedKeys = ['name', 'language', 'themePreference', 'appearance'];
     const forbiddenKeys = ['role', 'labId', 'countries', 'projects', 'isActive', 'email', 'username', 'tokenVersion', 'password'];
     
     const bodyKeys = Object.keys(req.body || {});
@@ -307,50 +279,84 @@ exports.updateProfile = async (req, res) => {
         return res.status(400).json({ error: 'At least one field must be provided for update', code: 'EMPTY_PAYLOAD' });
     }
 
-    const { name, language, themePreference } = req.body;
-    const updateData = {};
-
-    if (name !== undefined) {
-        if (!name || typeof name !== 'string' || !name.trim()) {
-            return res.status(400).json({ error: 'Name must be a non-empty string', code: 'INVALID_NAME' });
-        }
-        updateData.name = name.trim();
-    }
-
-    if (themePreference !== undefined) {
-        if (!['light', 'dark'].includes(themePreference)) {
-            return res.status(400).json({ error: 'Theme preference must be "light" or "dark"', code: 'INVALID_THEME' });
-        }
-        updateData.themePreference = themePreference;
-    }
-
-    if (language !== undefined) {
-        const { matchSupportedLocale } = require('../utils/localeResolver');
-        const matched = matchSupportedLocale(language);
-        if (!matched) {
-            return res.status(400).json({ error: `Unsupported language: ${language}`, code: 'INVALID_LANGUAGE' });
-        }
-        updateData.language = matched;
-    }
-
     try {
-        const updated = await prisma.user.update({
-            where: { id: String(actor.id) },
-            data: updateData,
-            select: {
-                id: true,
-                username: true,
-                name: true,
-                email: true,
-                role: true,
-                labId: true,
-                language: true,
-                themePreference: true
+        const appearanceService = require('../services/appearanceService');
+        const updateData = {};
+
+        if (req.body.name !== undefined) {
+            if (!req.body.name || typeof req.body.name !== 'string' || !req.body.name.trim()) {
+                return res.status(400).json({ error: 'Name must be a non-empty string', code: 'INVALID_NAME' });
+            }
+            updateData.name = req.body.name.trim();
+        }
+
+        // Delegate preferences (appearance, language, themePreference) to appearanceService
+        let prefResult = null;
+        if (req.body.appearance !== undefined || req.body.themePreference !== undefined || req.body.language !== undefined) {
+            prefResult = await appearanceService.updateSelfPreferences(actor, {
+                appearance: req.body.appearance,
+                themePreference: req.body.themePreference,
+                language: req.body.language
+            });
+        }
+
+        let updatedUser = null;
+        if (updateData.name) {
+            updatedUser = await prisma.user.update({
+                where: { id: String(actor.id) },
+                data: updateData,
+                select: {
+                    id: true,
+                    username: true,
+                    name: true,
+                    email: true,
+                    role: true,
+                    labId: true,
+                    language: true,
+                    themePreference: true,
+                    uiThemeId: true,
+                    uiModePreference: true,
+                    uiAppearanceRevision: true
+                }
+            });
+        } else {
+            updatedUser = await prisma.user.findUnique({
+                where: { id: String(actor.id) },
+                select: {
+                    id: true,
+                    username: true,
+                    name: true,
+                    email: true,
+                    role: true,
+                    labId: true,
+                    language: true,
+                    themePreference: true,
+                    uiThemeId: true,
+                    uiModePreference: true,
+                    uiAppearanceRevision: true
+                }
+            });
+        }
+
+        res.json({
+            message: 'Profile updated successfully',
+            user: {
+                ...updatedUser,
+                appearance: {
+                    themeId: updatedUser.uiThemeId,
+                    modePreference: updatedUser.uiModePreference,
+                    revision: updatedUser.uiAppearanceRevision
+                }
             }
         });
-
-        res.json({ message: 'Profile updated successfully', user: updated });
     } catch (err) {
+        if (err.statusCode && err.statusCode < 500) {
+            return res.status(err.statusCode).json({
+                error: err.message,
+                code: err.code || 'PROFILE_UPDATE_ERROR',
+                currentRevision: err.currentRevision
+            });
+        }
         console.error('[AUTH] updateProfile error:', err);
         res.status(500).json({ error: 'Internal server error' });
     }

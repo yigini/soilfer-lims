@@ -243,6 +243,10 @@ const BrandingManager = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            <div className="p-3 bg-sf-canvas border border-sf-divider rounded-xl text-xs text-sf-muted leading-relaxed">
+                                <span className="font-bold text-sf-text">Note:</span> Custom branding colors are preserved for organization identity and certificates. To configure sitewide color themes and Light/Dark modes for the platform, use the <strong>Appearance & Theme</strong> tab.
+                            </div>
                         </div>
                     </div>
 

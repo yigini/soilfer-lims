@@ -188,6 +188,14 @@ const PERMISSIONS = {
     ],
     'HELP_PUBLISH_LAB': [
         'SUPER_ADMIN', 'LAB_MANAGER'
+    ],
+
+    // Appearance & Themes
+    'MANAGE_GLOBAL_APPEARANCE': [
+        'SUPER_ADMIN'
+    ],
+    'MANAGE_LAB_APPEARANCE': [
+        'SUPER_ADMIN', 'LAB_MANAGER'
     ]
 };
 

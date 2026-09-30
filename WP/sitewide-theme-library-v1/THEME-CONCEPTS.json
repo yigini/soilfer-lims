@@ -1,0 +1,275 @@
+{
+  "status": "PLANNING ONLY",
+  "description": "Proposed core colours, not complete production token sets or accessibility certification.",
+  "themes": [
+    {
+      "id": "soilfer-classic",
+      "name": "SoilFER Classic",
+      "description": "Keep the familiar SoilFER identity.",
+      "light": {
+        "canvas": "#F5F3ED",
+        "surface": "#FFFFFF",
+        "raised": "#FFFFFF",
+        "text": "#253A32",
+        "muted": "#58665E",
+        "primary": "#256348",
+        "onPrimary": "#FFFFFF",
+        "sidebar": "#173F32",
+        "sideText": "#F3F6EF",
+        "control": "#829087",
+        "link": "#206477",
+        "focus": "#256348"
+      },
+      "dark": {
+        "canvas": "#25282B",
+        "surface": "#2E3236",
+        "raised": "#34393C",
+        "text": "#F1F4F3",
+        "muted": "#BBC7C2",
+        "primary": "#91D2AF",
+        "onPrimary": "#173127",
+        "sidebar": "#243932",
+        "sideText": "#F1F4F3",
+        "control": "#8C9B95",
+        "link": "#9CD4E1",
+        "focus": "#91D2AF"
+      }
+    },
+    {
+      "id": "forest",
+      "name": "Forest",
+      "description": "Soft green and quiet surfaces for everyday soil work.",
+      "light": {
+        "canvas": "#F2F6F1",
+        "surface": "#FFFFFF",
+        "raised": "#FFFFFF",
+        "text": "#253A32",
+        "muted": "#58665E",
+        "primary": "#245B3D",
+        "onPrimary": "#FFFFFF",
+        "sidebar": "#1B392B",
+        "sideText": "#F3F6EF",
+        "control": "#757F78",
+        "link": "#245B3D",
+        "focus": "#245B3D"
+      },
+      "dark": {
+        "canvas": "#252B27",
+        "surface": "#303A33",
+        "raised": "#303A33",
+        "text": "#F1F4F3",
+        "muted": "#BBC7C2",
+        "primary": "#9DD7AA",
+        "onPrimary": "#1B3324",
+        "sidebar": "#26382B",
+        "sideText": "#F1F4F3",
+        "control": "#909D97",
+        "link": "#9DD7AA",
+        "focus": "#9DD7AA"
+      }
+    },
+    {
+      "id": "terra",
+      "name": "Terra",
+      "description": "Warm clay tones with clear white work surfaces.",
+      "light": {
+        "canvas": "#F7F2ED",
+        "surface": "#FFFFFF",
+        "raised": "#FFFFFF",
+        "text": "#253A32",
+        "muted": "#58665E",
+        "primary": "#865039",
+        "onPrimary": "#FFFFFF",
+        "sidebar": "#493226",
+        "sideText": "#F3F6EF",
+        "control": "#757F78",
+        "link": "#865039",
+        "focus": "#865039"
+      },
+      "dark": {
+        "canvas": "#2C2927",
+        "surface": "#3A3330",
+        "raised": "#3A3330",
+        "text": "#F1F4F3",
+        "muted": "#BBC7C2",
+        "primary": "#E6B298",
+        "onPrimary": "#342821",
+        "sidebar": "#3B2E27",
+        "sideText": "#F1F4F3",
+        "control": "#909D97",
+        "link": "#E6B298",
+        "focus": "#E6B298"
+      }
+    },
+    {
+      "id": "mineral",
+      "name": "Mineral",
+      "description": "Neutral slate for tables, precision and instrument work.",
+      "light": {
+        "canvas": "#F2F4F6",
+        "surface": "#FFFFFF",
+        "raised": "#FFFFFF",
+        "text": "#253A32",
+        "muted": "#58665E",
+        "primary": "#43556D",
+        "onPrimary": "#FFFFFF",
+        "sidebar": "#283545",
+        "sideText": "#F3F6EF",
+        "control": "#757F78",
+        "link": "#43556D",
+        "focus": "#43556D"
+      },
+      "dark": {
+        "canvas": "#272B30",
+        "surface": "#333A42",
+        "raised": "#333A42",
+        "text": "#F1F4F3",
+        "muted": "#BBC7C2",
+        "primary": "#ABC2D7",
+        "onPrimary": "#232F39",
+        "sidebar": "#293440",
+        "sideText": "#F1F4F3",
+        "control": "#909D97",
+        "link": "#ABC2D7",
+        "focus": "#ABC2D7"
+      }
+    },
+    {
+      "id": "watershed",
+      "name": "Watershed",
+      "description": "Restrained teal, suitable for soil and future water analysis.",
+      "light": {
+        "canvas": "#F0F6F5",
+        "surface": "#FFFFFF",
+        "raised": "#FFFFFF",
+        "text": "#253A32",
+        "muted": "#58665E",
+        "primary": "#166879",
+        "onPrimary": "#FFFFFF",
+        "sidebar": "#173F44",
+        "sideText": "#F3F6EF",
+        "control": "#757F78",
+        "link": "#166879",
+        "focus": "#166879"
+      },
+      "dark": {
+        "canvas": "#252D2E",
+        "surface": "#303B3D",
+        "raised": "#303B3D",
+        "text": "#F1F4F3",
+        "muted": "#BBC7C2",
+        "primary": "#89CFD2",
+        "onPrimary": "#163739",
+        "sidebar": "#263C3F",
+        "sideText": "#F1F4F3",
+        "control": "#909D97",
+        "link": "#89CFD2",
+        "focus": "#89CFD2"
+      }
+    },
+    {
+      "id": "nutrient",
+      "name": "Nutrient",
+      "description": "Muted olive inspired by soil fertility and nutrient work.",
+      "light": {
+        "canvas": "#F5F5ED",
+        "surface": "#FFFFFF",
+        "raised": "#FFFFFF",
+        "text": "#253A32",
+        "muted": "#58665E",
+        "primary": "#596024",
+        "onPrimary": "#FFFFFF",
+        "sidebar": "#373B23",
+        "sideText": "#F3F6EF",
+        "control": "#757F78",
+        "link": "#596024",
+        "focus": "#596024"
+      },
+      "dark": {
+        "canvas": "#2A2D25",
+        "surface": "#353B2E",
+        "raised": "#353B2E",
+        "text": "#F1F4F3",
+        "muted": "#BBC7C2",
+        "primary": "#C4D48E",
+        "onPrimary": "#30381C",
+        "sidebar": "#303A25",
+        "sideText": "#F1F4F3",
+        "control": "#909D97",
+        "link": "#C4D48E",
+        "focus": "#C4D48E"
+      }
+    },
+    {
+      "id": "clear-contrast",
+      "name": "Clear Contrast",
+      "description": "Stronger edges and text with minimal decoration.",
+      "light": {
+        "canvas": "#FFFFFF",
+        "surface": "#FFFFFF",
+        "raised": "#FFFFFF",
+        "text": "#111111",
+        "muted": "#303030",
+        "primary": "#003E70",
+        "onPrimary": "#FFFFFF",
+        "sidebar": "#182B3B",
+        "sideText": "#FFFFFF",
+        "control": "#404040",
+        "link": "#003E70",
+        "focus": "#003E70"
+      },
+      "dark": {
+        "canvas": "#161616",
+        "surface": "#202020",
+        "raised": "#202020",
+        "text": "#FFFFFF",
+        "muted": "#DEDEDE",
+        "primary": "#90C9FF",
+        "onPrimary": "#102A40",
+        "sidebar": "#202020",
+        "sideText": "#FFFFFF",
+        "control": "#C0C0C0",
+        "link": "#90C9FF",
+        "focus": "#90C9FF"
+      }
+    }
+  ],
+  "semanticStatus": {
+    "light": {
+      "success": [
+        "#246044",
+        "#EAF4ED"
+      ],
+      "warning": [
+        "#7F5710",
+        "#FCF2DA"
+      ],
+      "danger": [
+        "#9B3842",
+        "#FAEDEF"
+      ],
+      "info": [
+        "#206477",
+        "#E4F1F3"
+      ]
+    },
+    "dark": {
+      "success": [
+        "#A5DABA",
+        "#31493B"
+      ],
+      "warning": [
+        "#F0D083",
+        "#494030"
+      ],
+      "danger": [
+        "#F3AFB5",
+        "#4A343B"
+      ],
+      "info": [
+        "#9CD4E1",
+        "#2E4149"
+      ]
+    }
+  }
+}

@@ -1580,7 +1580,26 @@
     "savedError": "Não foi possível salvar. Sua aparência salva permanece inalterada.",
     "activeSessionNotice": "Substituição de sessão ativa para este separador",
     "languageHeading": "Idioma preferencial",
-    "languageDescription": "Escolha o idioma utilizado em sua sessão e comunicações padrão."
+    "languageDescription": "Escolha o idioma utilizado em sua sessão e comunicações padrão.",
+    "manageThemesLink": "Biblioteca de temas e preferências →",
+    "saveLanguageButton": "Salvar preferência de idioma",
+    "languageSavedSuccess": "Preferência de idioma salva.",
+    "languageSavedError": "Não foi possível salvar a preferência de idioma.",
+    "themesHeading": "Paleta de temas selecionada",
+    "themesDescription": "Selecione uma família de temas otimizada para superfícies de análise de solo e dados científicos.",
+    "modeHeading": "Modo de exibição",
+    "saveForMe": "Salvar para mim",
+    "useLabDefault": "Usar como padrão deste laboratório",
+    "usePlatformDefault": "Usar como padrão da plataforma",
+    "resetToDefault": "Seguir padrão compartilhado",
+    "previewNotice": "Pré-visualização do tema ativa. Clique em \"Sair da pré-visualização\" ou \"Salvar\".",
+    "exitPreview": "Sair da pré-visualização",
+    "previewing": "Pré-visualizando",
+    "previewUnsavedNotice": "Pré-visualização temporária. Sua opção salva permanece inalterada.",
+    "labHeading": "Aparência padrão do laboratório",
+    "labDescription": "Os colaboradores atribuídos a este laboratório que seguem os padrões verão este tema e modo.",
+    "adminHeading": "Aparência padrão da plataforma",
+    "adminDescription": "Defina o tema e modo padrão para todos os laboratórios e páginas públicas."
   },
   "analytics": {
     "testMethods": "Métodos de ensaio"

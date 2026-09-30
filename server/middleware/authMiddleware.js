@@ -101,6 +101,14 @@ const verifyToken = async (req, res, next) => {
             lab: user.lab || null,
             labLocation: user.labLocation || null,
             themePreference: user.themePreference || 'light',
+            uiThemeId: user.uiThemeId || null,
+            uiModePreference: user.uiModePreference || 'inherit',
+            uiAppearanceRevision: user.uiAppearanceRevision || 0,
+            appearance: {
+                themeId: user.uiThemeId || null,
+                modePreference: user.uiModePreference || 'inherit',
+                revision: user.uiAppearanceRevision || 0
+            },
             isImpersonated: !!decoded.act,
             countries: safeJsonParse(user.countries),
             projects: safeJsonParse(user.projects),
@@ -143,7 +151,13 @@ const checkPermission = (permissionKey) => {
 
         if (!allowedRoles.includes(currentRole)) {
             console.warn(`[AUTH] RBAC Denied: User ${user.username} (${currentRole}) attempted ${currentKey}. Allowed roles: ${JSON.stringify(allowedRoles)}`);
-            return res.status(403).json({ error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` });
+            const payload = { error: `Access denied. Role '${currentRole}' lacks permission '${currentKey}'.` };
+            if (currentKey === 'MANAGE_LAB_APPEARANCE') {
+                payload.code = 'FORBIDDEN_LAB_APPEARANCE';
+            } else if (currentKey === 'MANAGE_GLOBAL_APPEARANCE') {
+                payload.code = 'FORBIDDEN_GLOBAL_APPEARANCE';
+            }
+            return res.status(403).json(payload);
         }
 
         next();

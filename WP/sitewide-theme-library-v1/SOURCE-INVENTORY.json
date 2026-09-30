@@ -1,0 +1,1344 @@
+{
+  "sourceCommit": "1265e8aa9f71f5f60b61c6fdaf31bc36ba8b2c54",
+  "inspectionDate": "2026-09-30",
+  "note": "Static source candidates; literals and utilities are not automatically defects. Inspect paper, domain colours and images separately.",
+  "files": [
+    {
+      "path": "client/src/App.jsx",
+      "literalColourCount": 1,
+      "paletteUtilityCount": 4,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/admin/AnalysisManager.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 132,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/admin/ApiKeyManager.jsx",
+      "literalColourCount": 1,
+      "paletteUtilityCount": 264,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/admin/BrandingManager.jsx",
+      "literalColourCount": 3,
+      "paletteUtilityCount": 78,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/admin/CategoryManager.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 32,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/admin/GroupManager.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 51,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/admin/MethodologyManager.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 19,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/AnalysisConfig.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 21,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/AuthenticatedAppearanceBridge.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/common/ExportModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 33,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/common/HelpTooltip.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/common/InfoTooltip.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/common/LabelPrintDialog.jsx",
+      "literalColourCount": 2,
+      "paletteUtilityCount": 65,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/common/QRScanner.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 12,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/dashboard/DashboardShell.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/dashboard/EmptyState.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 8,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/dashboard/ManagerDashboard.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 118,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/dashboard/ManagerProgressOverview.jsx",
+      "literalColourCount": 1,
+      "paletteUtilityCount": 77,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/dashboard/OversightDashboard.jsx",
+      "literalColourCount": 12,
+      "paletteUtilityCount": 50,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/dashboard/QueueSummary.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/dashboard/ReceptionDashboard.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 144,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/dashboard/ScopeSelector.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 10,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/dashboard/TechnicianDashboard.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 85,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/dashboard/UpdateStatus.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 13,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/dashboard/WorkQueue.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 2,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/equipment/EquipmentDetailDrawer.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 116,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/equipment/LogEventModal.jsx",
+      "literalColourCount": 1,
+      "paletteUtilityCount": 70,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/equipment/RegisterAssetModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 56,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/Footer.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 1,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/ForcePasswordChangeModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 7,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/Header.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 18,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/help/ContextHelpDrawer.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 64,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/help/HelpButton.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/lab/LabLifecycleModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 14,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/LanguageSwitcher.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/messaging/MessagingCenter.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 126,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/mobile/MobileHeader.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 8,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/mobile/MobileMoreSheet.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 3,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/mobile/MobileNavBar.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/mobile/SyncCentreModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 25,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/mobile/SyncStatusBadge.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 15,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/NotificationDrawer.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 26,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/projects/ActivityTab.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 6,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/projects/AnalysisPlanTab.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 23,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/projects/DataConnectionsTab.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 23,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/projects/ImportPreviewModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 55,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/projects/LabsAndPeopleTab.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 10,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/projects/LegacyBackfillModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 73,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/projects/NewProjectModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 14,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/projects/OverviewTab.jsx",
+      "literalColourCount": 6,
+      "paletteUtilityCount": 21,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/projects/PageGuideModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 1,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/projects/ProjectActionsModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 81,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/projects/SamplesTab.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 40,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/projects/WorkspaceHeader.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 15,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/qc/BatchInspectionModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 106,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/reception/BatchExceptionModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 33,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/reception/BatchIntake.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 80,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/reception/ComplianceChecklist.jsx",
+      "literalColourCount": 5,
+      "paletteUtilityCount": 129,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/reception/FieldProvenanceCard.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 29,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/reception/KeyboardShortcutsModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 1,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/reception/LocationPicker.jsx",
+      "literalColourCount": 6,
+      "paletteUtilityCount": 82,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/reception/ManifestImportModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 50,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/reception/SampleMap.jsx",
+      "literalColourCount": 3,
+      "paletteUtilityCount": 22,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/reception/WalkInForm.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 52,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/reception/WedgeModeBar.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 11,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/report/ReportContent.css",
+      "literalColourCount": 62,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/report/ReportContent.jsx",
+      "literalColourCount": 14,
+      "paletteUtilityCount": 4,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/sample/AnalysisUpdateModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 76,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/sample/CollapsibleDrawer.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 91,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/sample/ContextPanel.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 22,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/sample/EvidenceInspectionModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 32,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/sample/FieldMap.jsx",
+      "literalColourCount": 11,
+      "paletteUtilityCount": 99,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/sample/FieldMetadataCard.jsx",
+      "literalColourCount": 18,
+      "paletteUtilityCount": 120,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/sample/FieldSummary.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 13,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/sample/IntakeRequestCard.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 47,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/sample/MetadataEditorModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 23,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/sample/SampleSummary.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 133,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/sample/StorageMovementModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 9,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/sample/SubmissionPanel.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 37,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/sample/WorkflowProgressBar.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 24,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/sample/WorkItemsTable.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 120,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/SampleProgressBar.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 21,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/samples/SamplesFilterBar.jsx",
+      "literalColourCount": 1,
+      "paletteUtilityCount": 33,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/samples/SamplesFilterDrawer.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 1,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/samples/SamplesHeader.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 37,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/samples/SamplesTable.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 94,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/SampleStepper.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 17,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/SampleTimeline.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 36,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/SpectraBatchUpload.jsx",
+      "literalColourCount": 3,
+      "paletteUtilityCount": 166,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/SpectraUpload.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 20,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/SpectraViewer.jsx",
+      "literalColourCount": 15,
+      "paletteUtilityCount": 11,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/staff/AccessReviewModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 30,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/staff/InviteStaffModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 16,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/staff/RecoveryLinkModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 19,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/staff/SuspendUserModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 7,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/ThemeToggle.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 2,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/TranslationEditor.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 47,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/UserDialog.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 35,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/UserMenu.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workbench/ActivityReceiptsView.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 12,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workbench/BatchModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 44,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workbench/ConflictComparePanel.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 12,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workbench/NumericEditor.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workbench/OperationalTaskEditor.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 24,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workbench/PastePreviewModal.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 19,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workbench/ReviewCompletionView.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 33,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workbench/ReviewSubmissionView.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 19,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workbench/SingleSampleEditor.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 12,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workbench/SpectralIntakeModal.jsx",
+      "literalColourCount": 7,
+      "paletteUtilityCount": 144,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workbench/TextureEditor.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 6,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workbench/WorkbenchInspector.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 12,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workbench/WorkbenchQueue.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 52,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workbench/WorkbenchShell.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 12,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workbench/WorksheetArea.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 22,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workflow/LabFloorPlan.jsx",
+      "literalColourCount": 28,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowAnalysisList.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 5,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowDependencyGraph.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowDetailDrawer.jsx",
+      "literalColourCount": 1,
+      "paletteUtilityCount": 67,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowDetailPanel.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 23,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowEdge.jsx",
+      "literalColourCount": 2,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowExport.jsx",
+      "literalColourCount": 2,
+      "paletteUtilityCount": 16,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowFilters.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 20,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowHeader.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 9,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowInspector.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 7,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowKPICards.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 12,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowNode.jsx",
+      "literalColourCount": 42,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowOverviewGraph.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowStageCard.jsx",
+      "literalColourCount": 16,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowStageLane.jsx",
+      "literalColourCount": 2,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowStageNode.jsx",
+      "literalColourCount": 13,
+      "paletteUtilityCount": 47,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowTimeline.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 16,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/components/workflow/WorkflowTopStrip.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 49,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/context/AnalysisCatalogueContext.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/context/AuthContext.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/context/DialogContext.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 9,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/context/HelpContext.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/context/LanguageContext.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/context/NotificationContext.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/context/SyncContext.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/context/ThemeContext.jsx",
+      "literalColourCount": 3,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/hooks/useFocusTrap.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/hooks/useRealtimeData.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/hooks/useSampleWorkflow.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/index.css",
+      "literalColourCount": 2,
+      "paletteUtilityCount": 17,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/lib/appearance.js",
+      "literalColourCount": 2,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/lib/localeResolver.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/lib/terminologyRegistry.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/main.jsx",
+      "literalColourCount": 24,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/navigationConfig.js",
+      "literalColourCount": 6,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/pages/About.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 88,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/admin/LabManagement.jsx",
+      "literalColourCount": 3,
+      "paletteUtilityCount": 148,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/admin/LabMethods.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 49,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/admin/LegacyImport.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 60,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/pages/AdminPanel.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 69,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/AuditLogs.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 35,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/auth/ActivateAccount.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 7,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/auth/ResetPassword.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 7,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/CesiumGlobe.jsx",
+      "literalColourCount": 10,
+      "paletteUtilityCount": 67,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/pages/CountryData.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 18,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/Credits.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 28,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/Dashboard.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 10,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/DataResults.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 72,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/DataSheet.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 32,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/Equipment.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 70,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/help/AdminHelpEditor.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 59,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/help/ArticleReader.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 53,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/help/FAQPage.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 5,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/help/HelpCentre.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 29,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/help/TopicExplorer.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 4,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/Inventory.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 296,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/Login.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 37,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/ManagerQueue.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 53,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/MyWork.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 134,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/NotFound.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/Profile.jsx",
+      "literalColourCount": 24,
+      "paletteUtilityCount": 68,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/Projects.jsx",
+      "literalColourCount": 4,
+      "paletteUtilityCount": 24,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/ProjectWorkspace.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 3,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/PublicReport.jsx",
+      "literalColourCount": 20,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/pages/QADashboard.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 21,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/Reception.jsx",
+      "literalColourCount": 2,
+      "paletteUtilityCount": 212,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/Reports.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 50,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/pages/ResultReports.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 52,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/SampleDetail.jsx",
+      "literalColourCount": 1,
+      "paletteUtilityCount": 108,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/Samples.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 13,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/SampleWorkflowMap.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 15,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/ScanPage.jsx",
+      "literalColourCount": 1,
+      "paletteUtilityCount": 8,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/SpectralLibrary.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 242,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/TechStack.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 79,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/TechWorkbench.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/pages/TempPages.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/pages/Users.jsx",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 29,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/services/helpClientService.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/services/offline/offlineDb.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/services/offline/syncEngine.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/services/offline/workPackManager.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/services/pendingGovernanceStore.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/services/reportService.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/styles/appearance-tokens.css",
+      "literalColourCount": 98,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/styles/workflow-map-v2.css",
+      "literalColourCount": 90,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": true
+    },
+    {
+      "path": "client/src/utils/analysisNames.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/utils/audioCues.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/utils/coordinateResolver.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/utils/coordParser.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/utils/dashboardConfig.js",
+      "literalColourCount": 1,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/utils/dateUtils.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/utils/i18nHelper.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/utils/mapConfig.js",
+      "literalColourCount": 1,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/utils/messageFormatter.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/utils/reportUtils.js",
+      "literalColourCount": 1,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/utils/soilCalculations.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/utils/spreadsheetImport.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/utils/timezone.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/utils/workflowContract.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/utils/workflowMapper.js",
+      "literalColourCount": 30,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    },
+    {
+      "path": "client/src/utils/workItemEvidence.js",
+      "literalColourCount": 0,
+      "paletteUtilityCount": 0,
+      "usesSemanticTokens": false
+    }
+  ],
+  "routes": [
+    "/login",
+    "/activate",
+    "/reset-password",
+    "/",
+    "/samples",
+    "/samples/:id",
+    "/scan",
+    "/samples/:id/map",
+    "/workflow-map",
+    "/my-work",
+    "/workbench",
+    "/manager-queue",
+    "/reception",
+    "/inventory",
+    "/equipment",
+    "/users",
+    "/projects",
+    "/projects/:projectId",
+    "/admin",
+    "/admin/methods",
+    "/lab-methods",
+    "/admin/audit",
+    "/admin/labs",
+    "/admin/legacy-import",
+    "/datasheet",
+    "/maps",
+    "/qa",
+    "/spectral-library",
+    "/spectral",
+    "/data-results",
+    "/result-reports",
+    "/reports",
+    "/report/:token",
+    "/profile",
+    "/about",
+    "/techstack",
+    "/tech-stack",
+    "/credits",
+    "/help",
+    "/help/faq",
+    "/faq",
+    "/help/articles/:articleId",
+    "/help/topics/:topicId",
+    "/admin/help",
+    "*"
+  ]
+}

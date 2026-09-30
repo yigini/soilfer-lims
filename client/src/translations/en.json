@@ -1580,7 +1580,26 @@
     "savedError": "Could not save. Your saved appearance is unchanged.",
     "activeSessionNotice": "Session override active for this tab",
     "languageHeading": "Preferred Language",
-    "languageDescription": "Choose the language used across your session and default communications."
+    "languageDescription": "Choose the language used across your session and default communications.",
+    "manageThemesLink": "Theme library & preferences →",
+    "saveLanguageButton": "Save language preference",
+    "languageSavedSuccess": "Language preference saved.",
+    "languageSavedError": "Could not save language preference.",
+    "themesHeading": "Curated Theme Palette",
+    "themesDescription": "Select a theme family tuned for soil analysis work surfaces and scientific data.",
+    "modeHeading": "Display Mode",
+    "saveForMe": "Save for me",
+    "useLabDefault": "Use as this lab's default",
+    "usePlatformDefault": "Use as platform default",
+    "resetToDefault": "Follow shared default",
+    "previewNotice": "Previewing theme. Click \"Exit preview\" or \"Save\" below.",
+    "exitPreview": "Exit preview",
+    "previewing": "Previewing",
+    "previewUnsavedNotice": "Temporary preview only. Your saved default is unchanged.",
+    "labHeading": "Laboratory Default Appearance",
+    "labDescription": "Staff assigned to this laboratory who follow lab defaults will see this theme and mode. Personal choices remain intact.",
+    "adminHeading": "Platform Default Appearance",
+    "adminDescription": "Set the system-wide default theme and mode for all laboratories and public pages. Labs and users without custom overrides will inherit this setting."
   },
   "analytics": {
     "testMethods": "Test Methods"
