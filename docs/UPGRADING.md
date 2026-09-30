@@ -14,6 +14,7 @@ SoilFER-LIMS uses Prisma ORM with SQLite (via `better-sqlite3`). Schema evolutio
   - `scripts/migrate_lab_operations_v3.js --apply` (Analysis versioning, WorkItem rackPosition, Batch capacity)
   - `scripts/migrate_appearance_preference.js` (User theme preference)
   - `scripts/migrate_project_templates_and_policy.js` (Project template and channel policies)
+  - `scripts/migrate_sitewide_theme_library.js` (Sitewide theme library and scoped appearance defaults)
 - **Conservation Invariants:** All existing samples, results, reports, and audit logs are strictly preserved.
 - **Fail-Closed Restore:** Database restoration requires stopped writers, integrity and foreign key validation, and automatic NSIS data exchange epoch rotation (`rotateEpoch`) when synchronization tables exist.
 
