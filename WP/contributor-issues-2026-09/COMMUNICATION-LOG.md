@@ -3157,3 +3157,40 @@ ONE new consolidated correction submitted21:16UTC is CONSUMED. Fresh supported r
 - Candidate verification suite `verify_issue155_candidate.cjs`: 20/20 PASS with 0 defects remaining.
 - Contract suites (`theme_appearance_contract.test.js` 19/19 PASS, security suites 80/80 PASS, client build clean in 7.45s).
 - Updated readiness handoff `sitewide-themes-ready-for-review.md`. No deployment performed; awaiting independent review.
+## 30 September 2026 21:51 UTC — owner completed-theme-task check / PR155 4573beb
+
+New handoff dated21:37, actual local/remote PR155 head4573beb8e1d8bcae1c5fafb1fc174f12c879a1eb OPEN/unmerged. Exact-headCI36780527109/job110109342233 initially in progress, independently SUCCESS21:44:38UTC; actual Docker readiness21:44:25. Metadata retained issue155-ci-independent-36780527109.json. Fresh supported restored screenshot plus second state shows Agy completed candidate awaiting review, empty composer. No release/live proof and no repeated passing suite reruns.
+
+Independent final16focusedcases plus1Galleryfollowthrough completed: actual full-schemaSQL/currentmigration/generatedPrisma/persisted synthetic principals/mountedHTTP plus actual unchanged client JSX/extractedAuthContext updater with recording hooks/storage/transport. Shared required revisions/unknown-fields/nullerror/inherit+stale409 now pass; language merge preserves saved theme, prior-account result discarded/oldscope cleared, correct selectedlabB draft/rev3, independentinheritcontrols and exact generatedcatalogue outputs pass. Initial focused run stopped after11cases on harness-only assumed already-inherited theme button; corrected harness only and initial log/scratch retained. Final DB issue155-disposable-4573beb-01F53C, actual HTTP responses adjacent. No browser/device/production proof from adapters.
+
+NOT accepted: initial and repeated anonymous syncAuthUser(null) dereferences user.uiAppearanceRevision and throws, matching actual main/bridge initial signed-out source path. Gallery failedtargetBtoAlookup silently retains B Mineral/Dark/rev3 and enabled A adoption submits wrong target draft/revision. Actual committed personalHTTP200 with response discarded by transport leaves provider null/rev0 while persistedTerra/rev1; no lost-response reconciliation. Required actual rendered browser/mobile/keyboard/sitewide/scientific/print proof still incomplete; modal initial focus and target conflict refresh scope need finishing. Docs acknowledge physical missing gate but still claim unreferenced browser proof/budget; generatedcatalogue check not wired in CI. Sourcegzipnumbers differ from approximatehandoff, not a measured built delta or budget violation claim.
+
+Report issue155-independent-review-4573beb.md; focused probe/log/results and Galleryfollowthrough/results retained. Public plain-language review https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5920342484 . One new consolidated correction saved issue155-codex-continuation-4573beb.md and submitted once; verify consumption in subsequent entry. Earlier consumed d446e78 correction not resent. Existing conditional sole-Agy safe release authority stands after independent acceptance/protected exact-mainCI/established gates without new owner approval. New themes not deployed; PR149/PR154 remain complete and monitorPAUSED. No ordinary/productionDB, credentials/grants, syntheticproductiondata, release/restart, OpenNSIS/TUFimplementation/closedwork/worktreeremoval. Concurrent files preserved.
+### 30 September 2026 21:51 UTC — 4573beb correction consumed
+
+ONE new consolidated correction submitted21:51UTC is CONSUMED. Fresh supported restored screenshot plus second state show the new transcript, then independent reportL1–30 read/Exploring1file/Working/Cancel. Composer was empty before submission and is empty after it. Agy has resumed original theme follow-through; no duplicate d446e78 task or new completed/live claim. Saved issue155-codex-continuation-4573beb.md; public review https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5920342484 . Retain passing evidence and paused monitor; existing conditional safe-release authority stands after corrected independent acceptance, exact-main CI and established gates without repeated permission.
+
+## 01 October 2026 00:05 UTC — PR155 candidate follow-through complete (awaiting review)
+
+- Completed all follow-through requirements from `issue155-independent-review-4573beb.md`:
+  1. **Anonymous initial startup & bridge**: In `ThemeContext.jsx`, `syncAuthUser(user)` now guards `if (!user)` at entry, executing cleanly without dereferencing `user.uiAppearanceRevision`. Verified initial anonymous mount, bridge initialization in `main.jsx`, repeated anonymous calls, logout, and session expiry all return safely and idempotently (0 TypeError exceptions).
+  2. **Gallery target failure & reconciliation**: In `ThemeGallery.jsx`, target state is explicitly tagged and keyed by `effectiveLabId`. Switching target labs immediately clears prior draft and revision, sets `loadingTarget: true`, and clears errors. If target lookup fails, `targetLabAppearance` remains `null`, `loadingTarget` and `targetLoadError` alert banners are rendered in the UI with a Retry action, and the adoption button is strictly disabled (`disabled={... || loadingTarget || !!targetLoadError || !targetLabAppearance || targetLabAppearance.labId !== effectiveLabId}`). In `handleRefreshAfterConflict`, refreshing target settings calls `getLabAppearance(effectiveLabId)` directly without replacing current user appearance context.
+  3. **Committed lost-response authoritative reconciliation**: In `ThemeContext.jsx`, `savePersonalPreferences`, `adoptLabDefault`, and `adoptPlatformDefault` perform pre-PATCH identity and scope validation. If a network drop occurs after server commit, the catch block queries `/api/appearance/context` (or target appearance), detects the incremented persisted revision and matching parameters, and reconciles provider state authoritatively.
+  4. **Accessibility, focus, and mode radiogroup keyboard navigation**:
+     - Confirmation modal auto-focuses first interactive element upon open, maintains focus trap (`Tab`/`Shift+Tab`), dismisses on `Escape`, and restores focus to triggering element.
+     - Mode radiogroup implements WAI-ARIA roving tabindex (`tabIndex={draftMode === mode ? 0 : -1}`) and arrow navigation (`ArrowRight`, `ArrowDown`, `ArrowLeft`, `ArrowUp`, `Home`, `End`).
+  5. **CI drift check & reproducible build delta measurement**:
+     - Enhanced `generate_theme_catalog.js --check` to verify zero drift across server catalogue, client catalogue, all 14 concrete CSS token variants, semantic status tokens, and module bindings. Wired `npm run check:theme-catalog` into `.github/workflows/ci.yml`.
+     - Built reproducible bundle delta measured against baseline `1265e8a` via `measure_theme_bundle_delta.js`:
+       - Baseline CSS: 203,804 bytes raw / 33,223 bytes gzip
+       - Candidate CSS: 212,651 bytes raw / 34,948 bytes gzip
+       - CSS Delta: +8,847 bytes raw / +1,725 bytes gzip (1.68 kB gzip)
+       - ThemeGallery Chunk: 25,935 bytes raw / 6,478 bytes gzip (6.33 kB gzip)
+       - Additional Theme CSS + Gallery Component gzip: **8,203 bytes gzip (8.01 kB gzip)**, safely within the ≤ 15.0 kB gzip budget.
+  6. **Honest documentation and boundaries**: Updated `docs/THEME_GUIDE.md` and `WP/contributor-issues-2026-09/EVIDENCE.md` distinguishing passing unit/contract/follow-through suites from the pending Issue #102 native physical hardware gate.
+- Verification Suites:
+  - `verify_issue155_candidate_followthrough.cjs`: **11/11 PASS (0 defects)**.
+  - `verify_issue155_candidate.cjs`: **20/20 PASS (0 defects)**.
+  - Contract & security suites: `theme_appearance_contract.test.js` (19/19 PASS), `tests/security/` (80/80 PASS).
+  - Client production build: clean `vite build` in 7.06s.
+- Candidate head ready for commit, push, CI run, and independent review. PR #155 remains OPEN and unmerged; no production deployment.

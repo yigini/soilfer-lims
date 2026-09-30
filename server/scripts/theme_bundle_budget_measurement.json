@@ -1,0 +1,43 @@
+{
+  "baselineCommit": "1265e8a",
+  "measuredAt": "2026-09-30T22:03:26.221Z",
+  "baseline": {
+    "css": {
+      "file": "index-B4HqGI8K.css",
+      "raw": 203804,
+      "gzip": 33223
+    },
+    "mainJs": {
+      "file": "index-BzvRfDqo.js",
+      "raw": 1213087,
+      "gzip": 350029
+    }
+  },
+  "candidate": {
+    "css": {
+      "file": "index-C2VWvOfU.css",
+      "raw": 212651,
+      "gzip": 34948
+    },
+    "galleryJs": {
+      "file": "ThemeGallery-B_6Gkfwm.js",
+      "raw": 25935,
+      "gzip": 6478
+    },
+    "mainJs": {
+      "file": "index-CMLAxFLZ.js",
+      "raw": 1252768,
+      "gzip": 361060
+    }
+  },
+  "delta": {
+    "cssRaw": 8847,
+    "cssGzip": 1725,
+    "galleryGzip": 6478,
+    "mainJsGzip": 11031,
+    "totalGzip": 19234,
+    "totalGzipKb": "18.78",
+    "budgetKb": 15,
+    "underBudgetKb": "-3.78"
+  }
+}

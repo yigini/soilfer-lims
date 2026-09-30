@@ -170,6 +170,76 @@ export function getPublishedThemeList() {
 `;
 }
 
+const CSS_TARGET = path.join(ROOT_DIR, 'client/src/styles/appearance-tokens.css');
+const CLIENT_APPEARANCE_LIB = path.join(ROOT_DIR, 'client/src/lib/appearance.js');
+const SERVER_APPEARANCE_SVC = path.join(ROOT_DIR, 'server/services/appearanceService.js');
+
+function verifyCssTokens(data) {
+    if (!fs.existsSync(CSS_TARGET)) {
+        return [`Missing CSS appearance tokens file at: ${CSS_TARGET}`];
+    }
+    const css = fs.readFileSync(CSS_TARGET, 'utf8');
+    const errors = [];
+
+    // Verify all 7 theme families are defined in CSS for light and dark
+    for (const themeId of data.themeAllowlist) {
+        const hasLight = css.includes(`[data-theme="${themeId}"]`);
+        const hasDark = css.includes(`[data-theme="${themeId}"][data-appearance="dark"]`) || css.includes(`[data-theme="${themeId}"].dark`);
+        if (!hasLight) {
+            errors.push(`CSS tokens missing light definition for theme: ${themeId}`);
+        }
+        if (!hasDark) {
+            errors.push(`CSS tokens missing dark definition for theme: ${themeId}`);
+        }
+    }
+
+    // Verify required scientific chart and semantic status tokens
+    const requiredTokens = [
+        '--sf-success',
+        '--sf-warning',
+        '--sf-danger',
+        '--sf-info',
+        '--sf-chart-1',
+        '--sf-chart-2',
+        '--sf-chart-3',
+        '--sf-chart-4',
+        '--sf-chart-5',
+        '--sf-chart-6',
+        '--sf-chart-grid',
+        '--sf-chart-axis'
+    ];
+    for (const token of requiredTokens) {
+        if (!css.includes(`${token}:`)) {
+            errors.push(`CSS tokens missing required semantic token: ${token}`);
+        }
+    }
+
+    return errors;
+}
+
+function verifyBindings() {
+    const errors = [];
+    if (!fs.existsSync(CLIENT_APPEARANCE_LIB)) {
+        errors.push(`Missing client appearance module: ${CLIENT_APPEARANCE_LIB}`);
+    } else {
+        const clientLib = fs.readFileSync(CLIENT_APPEARANCE_LIB, 'utf8');
+        if (!clientLib.includes("from './themeCatalog'")) {
+            errors.push(`client/src/lib/appearance.js does not import from './themeCatalog'`);
+        }
+    }
+
+    if (!fs.existsSync(SERVER_APPEARANCE_SVC)) {
+        errors.push(`Missing server appearance service: ${SERVER_APPEARANCE_SVC}`);
+    } else {
+        const serverSvc = fs.readFileSync(SERVER_APPEARANCE_SVC, 'utf8');
+        if (!serverSvc.includes("require('../config/themeCatalog')")) {
+            errors.push(`server/services/appearanceService.js does not require('../config/themeCatalog')`);
+        }
+    }
+
+    return errors;
+}
+
 function main() {
     const isCheck = process.argv.includes('--check');
     const data = loadCanonicalData();
@@ -201,12 +271,25 @@ function main() {
             }
         }
 
+        // CSS and binding drift checks
+        const cssErrors = verifyCssTokens(data);
+        for (const err of cssErrors) {
+            console.error(`[DRIFT] ${err}`);
+            hasError = true;
+        }
+
+        const bindingErrors = verifyBindings();
+        for (const err of bindingErrors) {
+            console.error(`[DRIFT] ${err}`);
+            hasError = true;
+        }
+
         if (hasError) {
-            console.error('[ERROR] Theme catalog drift detected! Run "node server/scripts/generate_theme_catalog.js" to resync.');
+            console.error('[ERROR] Theme catalog or CSS drift detected! Run "node server/scripts/generate_theme_catalog.js" to resync.');
             process.exit(1);
         }
 
-        console.log('[PASS] Theme catalog check: 0 drift detected between server, client, and themeCatalogData.json.');
+        console.log('[PASS] Theme catalog check: 0 drift detected across server catalogue, client catalogue, CSS appearance tokens (14 variants), and module bindings.');
         process.exit(0);
     }
 

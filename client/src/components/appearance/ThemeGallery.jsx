@@ -63,6 +63,7 @@ export const ThemeGallery = ({
     const groupId = useId();
     const modalRef = useRef(null);
     const modalTriggerRef = useRef(null);
+    const radiogroupRef = useRef(null);
 
     const isSuperAdmin = authSubject?.role === 'SUPER_ADMIN';
     const isLabManager = authSubject?.role === 'LAB_MANAGER';
@@ -71,24 +72,47 @@ export const ThemeGallery = ({
     // Resolve effective lab target
     const effectiveLabId = targetLabId || authSubject?.labId || null;
 
-    // Target lab appearance state
-    const [targetLabAppearance, setTargetLabAppearance] = useState(propTargetAppearance);
+    // Target lab appearance state tagged by effectiveLabId
+    const [targetLabAppearance, setTargetLabAppearance] = useState(() => {
+        if (targetScope === 'lab' && propTargetAppearance && propTargetAppearance.labId === effectiveLabId) {
+            return propTargetAppearance;
+        }
+        return null;
+    });
     const [loadingTarget, setLoadingTarget] = useState(false);
     const [targetLoadError, setTargetLoadError] = useState(null);
+
+    // Track active lab target to trigger clean reset when switching target laboratories
+    const lastTargetLabIdRef = useRef(effectiveLabId);
 
     useEffect(() => {
         if (targetScope !== 'lab' || !effectiveLabId) {
             setTargetLabAppearance(null);
+            setLoadingTarget(false);
+            setTargetLoadError(null);
             return;
         }
 
-        if (propTargetAppearance) {
+        // Scope switch or target change: immediately clear stale target state
+        if (lastTargetLabIdRef.current !== effectiveLabId) {
+            lastTargetLabIdRef.current = effectiveLabId;
+            setTargetLabAppearance(null);
+            setDraftThemeId(null);
+            setDraftMode('inherit');
+            setTargetLoadError(null);
+        }
+
+        if (propTargetAppearance && propTargetAppearance.labId === effectiveLabId) {
             setTargetLabAppearance(propTargetAppearance);
+            setLoadingTarget(false);
+            setTargetLoadError(null);
             return;
         }
 
         if (serverContext?.labDefault && serverContext.labDefault.labId === effectiveLabId) {
             setTargetLabAppearance(serverContext.labDefault);
+            setLoadingTarget(false);
+            setTargetLoadError(null);
             return;
         }
 
@@ -96,14 +120,27 @@ export const ThemeGallery = ({
             let active = true;
             setLoadingTarget(true);
             setTargetLoadError(null);
+            setTargetLabAppearance(null);
+            setDraftThemeId(null);
+            setDraftMode('inherit');
+
             getLabAppearance(effectiveLabId)
                 .then(data => {
-                    if (active && data) {
-                        setTargetLabAppearance(data);
+                    if (active) {
+                        if (data && data.labId === effectiveLabId) {
+                            setTargetLabAppearance(data);
+                            setDraftThemeId(data.themeId ?? null);
+                            setDraftMode(data.defaultMode ?? 'inherit');
+                        } else {
+                            setTargetLoadError('Invalid laboratory data received.');
+                        }
                     }
                 })
                 .catch(err => {
                     if (active) {
+                        setTargetLabAppearance(null);
+                        setDraftThemeId(null);
+                        setDraftMode('inherit');
                         setTargetLoadError(err.message || 'Failed to load target laboratory settings');
                     }
                 })
@@ -111,8 +148,11 @@ export const ThemeGallery = ({
                     if (active) setLoadingTarget(false);
                 });
             return () => { active = false; };
+        } else {
+            setLoadingTarget(false);
+            setTargetLoadError('Laboratory appearance loader is unavailable.');
         }
-    }, [targetScope, effectiveLabId, serverContext?.labDefault, getLabAppearance]);
+    }, [targetScope, effectiveLabId, propTargetAppearance, serverContext?.labDefault, getLabAppearance]);
 
     // Initialize drafts based on targetScope
     const initialThemeId = useMemo(() => {
@@ -171,9 +211,63 @@ export const ThemeGallery = ({
         }
     }, [initialThemeId, initialMode, isPreviewActive]);
 
+    // Available modes for current scope
+    const availableModes = useMemo(() => {
+        return targetScope === 'platform' ? ['light', 'dark'] : ['light', 'dark', 'inherit'];
+    }, [targetScope]);
+
+    // Keyboard navigation across mode radiogroup
+    const handleModeKeyDown = (e) => {
+        const currentIndex = availableModes.indexOf(draftMode);
+        if (currentIndex === -1) return;
+        let nextIndex = -1;
+
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            nextIndex = (currentIndex + 1) % availableModes.length;
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            nextIndex = (currentIndex - 1 + availableModes.length) % availableModes.length;
+        } else if (e.key === 'Home') {
+            e.preventDefault();
+            nextIndex = 0;
+        } else if (e.key === 'End') {
+            e.preventDefault();
+            nextIndex = availableModes.length - 1;
+        }
+
+        if (nextIndex !== -1) {
+            const nextMode = availableModes[nextIndex];
+            setDraftMode(nextMode);
+            if (isPreviewActive) {
+                if (nextMode === 'inherit') {
+                    handleStartPreview();
+                } else {
+                    setPreviewTheme({ themeId: draftThemeId || activeThemeId, mode: nextMode });
+                }
+            }
+            if (radiogroupRef.current) {
+                const btn = radiogroupRef.current.querySelector(`[data-mode="${nextMode}"]`);
+                if (btn && typeof btn.focus === 'function') {
+                    btn.focus();
+                }
+            }
+        }
+    };
+
     // Keyboard and focus management for modal
     useEffect(() => {
         if (!pendingConfirm || typeof document === 'undefined') return;
+
+        // Auto-focus first focusable element inside modal upon open
+        const focusTimer = setTimeout(() => {
+            if (modalRef.current) {
+                const focusables = modalRef.current.querySelectorAll('button:not([disabled]), [tabindex="0"]');
+                if (focusables.length > 0) {
+                    focusables[0].focus();
+                }
+            }
+        }, 10);
 
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') {
@@ -196,6 +290,7 @@ export const ThemeGallery = ({
 
         document.addEventListener('keydown', handleKeyDown);
         return () => {
+            clearTimeout(focusTimer);
             document.removeEventListener('keydown', handleKeyDown);
             if (modalTriggerRef.current && typeof modalTriggerRef.current.focus === 'function') {
                 modalTriggerRef.current.focus();
@@ -302,12 +397,22 @@ export const ThemeGallery = ({
     const executeAdoptLab = async () => {
         if (!effectiveLabId) return;
 
+        // Reject missing, mismatched, or unverified target state
+        if (loadingTarget || targetLoadError || !targetLabAppearance || targetLabAppearance.labId !== effectiveLabId) {
+            setStatusMessage({
+                type: 'error',
+                text: t('appearance.targetNotVerified', 'Target laboratory settings could not be verified. Please retry loading.')
+            });
+            setPendingConfirm(null);
+            return;
+        }
+
         setSaving(true);
         setStatusMessage({ type: null, text: '' });
         setConflictError(null);
         setPendingConfirm(null);
         try {
-            const targetRev = targetLabAppearance?.revision ?? (serverContext?.labDefault?.labId === effectiveLabId ? serverContext.labDefault.revision : undefined);
+            const targetRev = targetLabAppearance.revision;
             await adoptLabDefault({
                 labId: effectiveLabId,
                 themeId: draftThemeId, // Preserves null/inherit
@@ -361,11 +466,22 @@ export const ThemeGallery = ({
         }
     };
 
-    // Refresh after conflict
+    // Refresh after conflict - separates selected target refresh from current user appearance scope
     const handleRefreshAfterConflict = async () => {
         setSaving(true);
         try {
-            await fetchAppearanceContext(effectiveLabId);
+            if (targetScope === 'lab' && effectiveLabId) {
+                if (typeof getLabAppearance === 'function') {
+                    const fresh = await getLabAppearance(effectiveLabId);
+                    if (fresh && fresh.labId === effectiveLabId) {
+                        setTargetLabAppearance(fresh);
+                        setDraftThemeId(fresh.themeId ?? null);
+                        setDraftMode(fresh.defaultMode ?? 'inherit');
+                    }
+                }
+            } else {
+                await fetchAppearanceContext();
+            }
             setConflictError(null);
             setStatusMessage({
                 type: 'info',
@@ -437,13 +553,17 @@ export const ThemeGallery = ({
 
                 {/* Light / Dark / Inherit Mode Toggle */}
                 <div
+                    ref={radiogroupRef}
                     role="radiogroup"
                     aria-label={t('appearance.modeSelectionAria', 'Color Mode')}
+                    onKeyDown={handleModeKeyDown}
                     className="inline-flex items-center p-1 rounded-xl bg-sf-hover border border-sf-divider gap-1 flex-wrap"
                 >
                     <button
                         type="button"
                         role="radio"
+                        data-mode="light"
+                        tabIndex={draftMode === 'light' ? 0 : -1}
                         aria-checked={draftMode === 'light'}
                         onClick={() => {
                             setDraftMode('light');
@@ -464,6 +584,8 @@ export const ThemeGallery = ({
                     <button
                         type="button"
                         role="radio"
+                        data-mode="dark"
+                        tabIndex={draftMode === 'dark' ? 0 : -1}
                         aria-checked={draftMode === 'dark'}
                         onClick={() => {
                             setDraftMode('dark');
@@ -485,6 +607,8 @@ export const ThemeGallery = ({
                         <button
                             type="button"
                             role="radio"
+                            data-mode="inherit"
+                            tabIndex={draftMode === 'inherit' ? 0 : -1}
                             aria-checked={draftMode === 'inherit'}
                             onClick={() => {
                                 setDraftMode('inherit');
@@ -513,6 +637,49 @@ export const ThemeGallery = ({
                 </div>
             )}
 
+            {/* Target Loading Indicator */}
+            {targetScope === 'lab' && loadingTarget && (
+                <div role="status" className="p-4 rounded-xl bg-sf-surface border border-sf-divider text-sf-text text-sm flex items-center gap-3 animate-pulse">
+                    <RefreshCw size={18} className="animate-spin text-sf-primary shrink-0" />
+                    <span>{t('appearance.loadingTarget', 'Loading laboratory appearance settings...')}</span>
+                </div>
+            )}
+
+            {/* Target Load Error Notice */}
+            {targetScope === 'lab' && targetLoadError && (
+                <div role="alert" className="p-4 rounded-xl bg-sf-danger-bg border border-sf-danger/40 text-sf-danger text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                        <AlertCircle size={18} className="shrink-0" />
+                        <span>{targetLoadError}</span>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (typeof getLabAppearance === 'function' && effectiveLabId) {
+                                setLoadingTarget(true);
+                                setTargetLoadError(null);
+                                getLabAppearance(effectiveLabId)
+                                    .then(data => {
+                                        if (data && data.labId === effectiveLabId) {
+                                            setTargetLabAppearance(data);
+                                            setDraftThemeId(data.themeId ?? null);
+                                            setDraftMode(data.defaultMode ?? 'inherit');
+                                        }
+                                    })
+                                    .catch(err => {
+                                        setTargetLoadError(err.message || 'Failed to load target laboratory settings');
+                                    })
+                                    .finally(() => setLoadingTarget(false));
+                            }
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sf-surface text-sf-danger border border-sf-danger font-bold text-xs hover:bg-sf-hover min-h-[44px] touch-target"
+                    >
+                        <RefreshCw size={13} />
+                        <span>{t('common.retry', 'Retry')}</span>
+                    </button>
+                </div>
+            )}
+
             {/* Conflict Error Notice */}
             {conflictError && (
                 <div role="alert" className="p-4 rounded-xl bg-sf-danger-bg border border-sf-danger/40 text-sf-danger text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -524,7 +691,7 @@ export const ThemeGallery = ({
                         type="button"
                         onClick={handleRefreshAfterConflict}
                         disabled={saving}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sf-surface text-sf-danger border border-sf-danger font-bold text-xs hover:bg-sf-hover"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sf-surface text-sf-danger border border-sf-danger font-bold text-xs hover:bg-sf-hover min-h-[44px] touch-target"
                     >
                         <RefreshCw size={13} className={saving ? 'animate-spin' : ''} />
                         <span>{t('appearance.refreshLatest', 'Refresh & Review Latest')}</span>
@@ -834,7 +1001,7 @@ export const ThemeGallery = ({
                                 if (typeof document !== 'undefined') modalTriggerRef.current = document.activeElement;
                                 setPendingConfirm('lab');
                             }}
-                            disabled={saving || !effectiveLabId}
+                            disabled={saving || !effectiveLabId || loadingTarget || !!targetLoadError || !targetLabAppearance || targetLabAppearance.labId !== effectiveLabId}
                             className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-sf-primary text-sf-primary bg-sf-surface hover:bg-sf-selected text-xs font-bold transition-all disabled:opacity-50 min-h-[44px] touch-target"
                             title={t('appearance.adoptLabTitle', 'Staff following this lab default will see this appearance')}
                         >

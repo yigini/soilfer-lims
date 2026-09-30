@@ -98,13 +98,67 @@ export const ThemeProvider = ({ children }) => {
     // Synchronize authenticated user state from AuthProvider / bridge
     const syncAuthUser = useCallback((user) => {
         const prevAuth = authSubjectRef.current;
-        const incomingId = (user && user.id) ? String(user.id) : null;
+
+        if (!user) {
+            // Unauthenticated / Anonymous state
+            if (!prevAuth.authenticated) {
+                // Already anonymous: idempotent no-op
+                return;
+            }
+
+            // Transition from authenticated to anonymous (logout / session expiry)
+            contextGenerationRef.current += 1;
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+                abortControllerRef.current = null;
+            }
+
+            // Clear preview & session overrides
+            setPreviewOverride(null);
+            clearStoredSessionOverride();
+            setSessionOverrideState(null);
+
+            // Reset serverContext immediately to avoid retaining former laboratory default/authority
+            setServerContext({
+                labDefault: null,
+                platformDefault: {
+                    themeId: DEFAULT_THEME_ID,
+                    defaultMode: DEFAULT_MODE,
+                    revision: 1
+                },
+                canAdoptLabDefault: false,
+                canAdoptPlatformDefault: false
+            });
+
+            // Reset branding immediately
+            setTheme(defaultBranding);
+
+            const nextAuth = {
+                authenticated: false,
+                userId: 'anonymous',
+                role: 'ANONYMOUS',
+                labId: null,
+                savedThemeId: null,
+                savedModePreference: 'light',
+                revision: 0
+            };
+            authSubjectRef.current = nextAuth;
+            setAuthSubject(nextAuth);
+            return;
+        }
+
+        // Authenticated user path
+        const incomingId = String(user.id);
         const prevId = prevAuth.authenticated ? prevAuth.userId : null;
-        const isScopeChange = (incomingId !== prevId) || ((user?.labId || null) !== prevAuth.labId);
+        const isScopeChange = !prevAuth.authenticated || (incomingId !== prevId) || ((user.labId || null) !== prevAuth.labId);
 
         if (isScopeChange) {
             // Scope change: increment generation so any in-flight requests for prior user/lab are ignored
             contextGenerationRef.current += 1;
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+                abortControllerRef.current = null;
+            }
 
             // Clear preview override immediately
             setPreviewOverride(null);
@@ -124,46 +178,30 @@ export const ThemeProvider = ({ children }) => {
             // Reset branding immediately
             setTheme(defaultBranding);
 
-            if (incomingId) {
-                const subjectId = incomingId;
-                const userThemeId = isValidThemeId(user.uiThemeId) ? user.uiThemeId : null;
-                // Retain valid mode inherit over legacy dark
-                const userModePref = (user.uiModePreference === 'inherit' || user.uiModePreference === 'light' || user.uiModePreference === 'dark')
-                    ? user.uiModePreference
-                    : (user.themePreference === 'dark' ? 'dark' : 'light');
+            const subjectId = incomingId;
+            const userThemeId = isValidThemeId(user.uiThemeId) ? user.uiThemeId : null;
+            // Retain valid mode inherit over legacy dark
+            const userModePref = (user.uiModePreference === 'inherit' || user.uiModePreference === 'light' || user.uiModePreference === 'dark')
+                ? user.uiModePreference
+                : (user.themePreference === 'dark' ? 'dark' : 'light');
 
-                const existingSession = getStoredSessionOverride(subjectId);
-                const nextAuth = {
-                    authenticated: true,
-                    userId: subjectId,
-                    role: user.role,
-                    labId: user.labId || null,
-                    savedThemeId: userThemeId,
-                    savedModePreference: userModePref,
-                    revision: user.uiAppearanceRevision || 0
-                };
-                authSubjectRef.current = nextAuth;
-                setAuthSubject(nextAuth);
-                setSessionOverrideState(existingSession);
-            } else {
-                // Anonymous / signed out
-                clearStoredSessionOverride();
-                setSessionOverrideState(null);
-                const nextAuth = {
-                    authenticated: false,
-                    userId: 'anonymous',
-                    role: 'ANONYMOUS',
-                    labId: null,
-                    savedThemeId: null,
-                    savedModePreference: 'light',
-                    revision: 0
-                };
-                authSubjectRef.current = nextAuth;
-                setAuthSubject(nextAuth);
-            }
+            const existingSession = getStoredSessionOverride(subjectId);
+            const nextAuth = {
+                authenticated: true,
+                userId: subjectId,
+                role: user.role,
+                labId: user.labId || null,
+                savedThemeId: userThemeId,
+                savedModePreference: userModePref,
+                revision: user.uiAppearanceRevision || 0
+            };
+            authSubjectRef.current = nextAuth;
+            setAuthSubject(nextAuth);
+            setSessionOverrideState(existingSession);
         } else {
-            // Same-user, same-lab metadata refresh:
+            // Same authenticated user, same lab metadata refresh:
             // Do NOT increment contextGenerationRef.current to avoid discarding required in-flight fetches!
+            // user is guaranteed to be non-null in this branch
             const incomingRev = user.uiAppearanceRevision ?? 0;
             let finalThemeId = prevAuth.savedThemeId;
             let finalModePref = prevAuth.savedModePreference;
@@ -391,6 +429,11 @@ export const ThemeProvider = ({ children }) => {
             }
         };
 
+        // PRE-PATCH IDENTITY CHECK
+        if (initiatingUserId !== authSubjectRef.current.userId || initiatingGen !== contextGenerationRef.current) {
+            return null;
+        }
+
         try {
             const res = await axios.patch('/api/auth/preferences', payload);
             const data = res.data?.data || res.data;
@@ -455,6 +498,66 @@ export const ThemeProvider = ({ children }) => {
             if (initiatingUserId !== authSubjectRef.current.userId || initiatingGen !== contextGenerationRef.current) {
                 return null;
             }
+
+            // Lost-Response Authoritative Reconciliation:
+            // If the transport failed or response was dropped after server commit,
+            // query server context to reconcile authoritative state before failing or retrying.
+            const isClientErrorWithResponse = !!err.response && err.response.status >= 400 && err.response.status < 500;
+            if (!isClientErrorWithResponse) {
+                try {
+                    const reconRes = await axios.get('/api/appearance/context');
+                    if (initiatingUserId === authSubjectRef.current.userId && initiatingGen === contextGenerationRef.current) {
+                        const reconData = reconRes.data?.data || reconRes.data;
+                        const p = reconData?.personal;
+                        if (p && p.revision > currentAuth.revision && p.themeId === payload.appearance.themeId && p.modePreference === payload.appearance.modePreference) {
+                            // Confirmed server committed the write! Reconcile client state authoritatively.
+                            setPreviewOverride(null);
+                            clearStoredSessionOverride();
+                            setSessionOverrideState(null);
+
+                            const nextAuth = {
+                                ...authSubjectRef.current,
+                                savedThemeId: p.themeId,
+                                savedModePreference: p.modePreference,
+                                revision: p.revision
+                            };
+                            authSubjectRef.current = nextAuth;
+                            setAuthSubject(nextAuth);
+
+                            try {
+                                const storedUser = localStorage.getItem('user');
+                                if (storedUser) {
+                                    const parsed = JSON.parse(storedUser);
+                                    if (String(parsed.id) === String(initiatingUserId)) {
+                                        parsed.uiThemeId = p.themeId;
+                                        parsed.uiModePreference = p.modePreference;
+                                        parsed.uiAppearanceRevision = p.revision;
+                                        localStorage.setItem('user', JSON.stringify(parsed));
+                                    }
+                                }
+                            } catch {}
+
+                            if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+                                try {
+                                    window.dispatchEvent(new CustomEvent('soilfer:appearance-saved', {
+                                        detail: {
+                                            userId: initiatingUserId,
+                                            themeId: p.themeId,
+                                            modePreference: p.modePreference,
+                                            revision: p.revision
+                                        }
+                                    }));
+                                } catch {}
+                            }
+
+                            return { appearance: p };
+                        }
+                    }
+                } catch {
+                    // Reconciliation query failed; fall through to rethrow original error
+                }
+            }
+
             throw err;
         }
     }, []);
@@ -484,6 +587,15 @@ export const ThemeProvider = ({ children }) => {
             }
         }
 
+        // PRE-PATCH IDENTITY & SCOPE CHECK:
+        // Must verify user identity, generation, and laboratory authority BEFORE issuing mutating PATCH!
+        if (initiatingUserId !== authSubjectRef.current.userId || initiatingGen !== contextGenerationRef.current) {
+            return null;
+        }
+        if (authSubjectRef.current.role !== 'SUPER_ADMIN' && authSubjectRef.current.labId !== targetLabId) {
+            throw new Error('Unauthorized to modify appearance for this laboratory.');
+        }
+
         const payload = {
             themeId,
             defaultMode: defaultMode || 'inherit',
@@ -508,6 +620,27 @@ export const ThemeProvider = ({ children }) => {
             if (initiatingUserId !== authSubjectRef.current.userId || initiatingGen !== contextGenerationRef.current) {
                 return null;
             }
+
+            // Lost-Response Authoritative Reconciliation for Lab Default:
+            const isClientErrorWithResponse = !!err.response && err.response.status >= 400 && err.response.status < 500;
+            if (!isClientErrorWithResponse) {
+                try {
+                    const reconRes = await axios.get(`/api/labs/${encodeURIComponent(targetLabId)}/appearance`);
+                    if (initiatingUserId === authSubjectRef.current.userId && initiatingGen === contextGenerationRef.current) {
+                        const reconData = reconRes.data?.data || reconRes.data;
+                        if (reconData && reconData.revision > targetRevision && reconData.themeId === payload.themeId && reconData.defaultMode === payload.defaultMode) {
+                            setPreviewOverride(null);
+                            if (targetLabId === authSubjectRef.current.labId) {
+                                await fetchAppearanceContext();
+                            }
+                            return { data: reconData };
+                        }
+                    }
+                } catch {
+                    // Fall through to rethrow original error
+                }
+            }
+
             throw err;
         }
     }, [serverContext.labDefault, fetchAppearanceContext]);
@@ -525,6 +658,14 @@ export const ThemeProvider = ({ children }) => {
             expectedRevision: targetRevision
         };
 
+        // PRE-PATCH IDENTITY & SCOPE CHECK:
+        if (initiatingUserId !== authSubjectRef.current.userId || initiatingGen !== contextGenerationRef.current) {
+            return null;
+        }
+        if (authSubjectRef.current.role !== 'SUPER_ADMIN') {
+            throw new Error('Unauthorized to modify platform-wide appearance defaults.');
+        }
+
         try {
             const res = await axios.patch('/api/admin/appearance', payload);
             const data = res.data?.data || res.data;
@@ -540,6 +681,25 @@ export const ThemeProvider = ({ children }) => {
             if (initiatingUserId !== authSubjectRef.current.userId || initiatingGen !== contextGenerationRef.current) {
                 return null;
             }
+
+            // Lost-Response Authoritative Reconciliation for Platform Default:
+            const isClientErrorWithResponse = !!err.response && err.response.status >= 400 && err.response.status < 500;
+            if (!isClientErrorWithResponse) {
+                try {
+                    const reconRes = await axios.get('/api/appearance/public');
+                    if (initiatingUserId === authSubjectRef.current.userId && initiatingGen === contextGenerationRef.current) {
+                        const reconData = reconRes.data?.data || reconRes.data;
+                        if (reconData && reconData.revision > targetRevision && reconData.themeId === payload.themeId && (reconData.appearance === payload.defaultMode || reconData.defaultMode === payload.defaultMode)) {
+                            setPreviewOverride(null);
+                            await fetchAppearanceContext();
+                            return { data: reconData };
+                        }
+                    }
+                } catch {
+                    // Fall through to rethrow original error
+                }
+            }
+
             throw err;
         }
     }, [serverContext.platformDefault?.revision, fetchAppearanceContext]);
