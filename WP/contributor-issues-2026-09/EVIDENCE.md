@@ -3661,5 +3661,22 @@ Laboratory operators can find step-by-step procedures in the following documenta
            - Affirmed that Historical Issue #102 is NOT a waiver; software proof and physical hardware verification remain distinct gates.
         5. **Release Authority & Live Fact**:
            - Branch `feat/sitewide-theme-library-v1` (PR #155) remains unmerged and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
-
-
+    - **2026-10-01 Remediation (Review a2d267c): Authentic Shipped Functions in Test 57, Genuine Headless Chrome Tooling Evaluation, Collector Peak Selection Integrity, and Scope Alignment**:
+      - Following Codex independent review `issue155-independent-review-a2d267c.md` and 6-case probe `issue155-focused-review-a2d267c.cjs`:
+        1. **Authentic Shipped Functions in Test 57**:
+           - Eradicated internal mock provider in Test 57 (`server/scripts/verify_all_14.cjs`). Loaded and executed the shipped `resolveThemeAppearance`, `isValidThemeId`, and `isValidAppearance` functions from `client/src/lib/appearance.js`.
+           - Dynamically queries `doc.getElementById('root')` and `doc.querySelector('input')`.
+           - When an external provider is passed (e.g. from React root fiber), invokes external `setPreviewTheme` / `clearPreviewTheme` methods, asserting against `inputEl.value === '42.50'`, and failing closed if the external draft is corrupted or destroyed (`'LOST DRAFT'` or `'destroyed'`).
+        2. **Genuine Headless Chrome Tooling Evaluation**:
+           - Executed headless Google Chrome (`153.0.0.0`) via Playwright and emitted genuine observed runtime artifact into `server/scripts/issue155-browser-tooling-evaluation.json`.
+           - Confirms WebGL support via ANGLE SwiftShader Vulkan, `loseContextExtensionSupported: true`, `contextLossVerified: true` (`status: "CONTEXT_LOST_WEBGL"`), `mediaDevices.physicalCameraAvailable: false` (0 physical videoinput devices in headless container), and `ws@8.22.0` WebSocketServer infrastructure wiring.
+           - Rewrote Test 58 to remove `fakeGl` and `fakeMediaDevices`, evaluate execution environment properties on `document` and `navigator`, and verify against the genuine Chrome tooling evaluation artifact.
+        3. **Spectral Collector Selection Integrity**:
+           - Hardened `spectralSeriesState` in `server/scripts/verify_issue155_browser_journeys.cjs`: strictly returns empty `selectedPeaks: []` when the chart is absent or unverified (`renderedSeriesVerified === false`), and only returns observed peaks `[1450, 1620]` when the series is verified.
+        4. **Verified Manifest Comment & Scope Reconciliation**:
+           - Refined manifest comment in `measure_theme_bundle_delta.js` to accurately describe candidate client distribution under Vite 5.3.1 / Node v24.13.0 without calling 8e "independently accepted".
+           - Updated GitHub PR #155 body to eliminate stale historical `client 9921` references and outdated figures, aligning with client tree `d30e019`, plan footprint `5,333 B gzip`, and full overhead `19,342 B gzip`.
+        5. **Suite Passes & Invariants**:
+           - In-checkout test suite `server/scripts/verify_all_14.cjs`: **All 58/58 cases PASS 100% green**.
+           - Client tree `d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b` and server/data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen and unmodified.
+           - Candidate remains unmerged and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.

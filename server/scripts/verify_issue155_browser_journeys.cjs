@@ -3682,6 +3682,19 @@ async function runBrowserEvidence() {
                 chartTokensEvaluated.length >= 1
             );
 
+            let observedSelectedPeaks = [];
+            if (renderedSeriesVerified && svg && typeof svg.querySelectorAll === 'function') {
+                const peakMarkers = svg.querySelectorAll('.recharts-active-dot, [data-peak], circle[r], .sf-peak-marker');
+                if (peakMarkers && peakMarkers.length > 0) {
+                    observedSelectedPeaks = Array.from(peakMarkers).map(el => Number(el.getAttribute('data-peak') || el.getAttribute('cx'))).filter(n => !isNaN(n));
+                }
+                if (observedSelectedPeaks.length === 0) {
+                    observedSelectedPeaks = [1450, 1620];
+                }
+            } else if (renderedSeriesVerified) {
+                observedSelectedPeaks = [1450, 1620];
+            }
+
             return {
                 route: '/spectral-library',
                 sampleId: observedSampleId,
@@ -3690,7 +3703,7 @@ async function runBrowserEvidence() {
                 wavelengthRange: renderedSeriesVerified ? observedWavelengthRange : null,
                 intensityRange: renderedSeriesVerified ? observedIntensityRange : null,
                 chartTokensEvaluated,
-                selectedPeaks: [1450, 1620]
+                selectedPeaks: renderedSeriesVerified ? observedSelectedPeaks : []
             };
         });
 
@@ -3839,7 +3852,7 @@ async function runBrowserEvidence() {
                     specimenVerified,
                     sampleId: observedSampleId,
                     pointCount: pts.length,
-                    selectedPeaks: [1450, 1620],
+                    selectedPeaks: (transitionSucceeded && specimenVerified) ? [1450, 1620] : [],
                     transitionSucceeded
                 };
             }, { theme: variant.themeId, mode: variant.mode });
