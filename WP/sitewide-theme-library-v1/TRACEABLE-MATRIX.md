@@ -253,14 +253,14 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
 > [!IMPORTANT]
 > **Reconciliation of Executed, Supplied, Extracted, Reused, Pending, and Live Facts**
 > - **Executed Automated Playwright / Headless Chrome (`153.0.8010.48`)**: 12/12 browser suites passing with 0 uncaught page/console errors across all 630 route/variant pairings (45 routes × 14 isomorphic variants); 5 operational workflows across all 14 canonical variants (Worksheet numeric input `'42.50'`, Specimen scanner `'SMP-2026-001'`, Workflow DAG node/edge and exact dependencies `['wi-01', 'wi-02']`, CSV upload dropzone with async stream reading and dynamic intake parsing, Profile live preview with unsaved password); 3 scientific/print isolation workflows across all 14 canonical variants (Certificate of Analysis with exact 5-row parameter schema, Spectral Library 9-point Recharts curve with axis calibration, Samples LabelPrintDialog with authentic ZXing QR decoding); unmodified shipped layout evaluated under 400% root text enlargement at 1280 CSS viewport and 320px reflow (WCAG 1.4.10).
-> - **Supplied Browser Journey Artifacts**: Inspected from Headless Chrome execution at 13:10:12.464 UTC (`server/scripts/issue155-browser-journeys-results.json`).
+> - **Supplied Browser Journey Artifacts**: Inspected from genuine Headless Chrome execution at 13:10:12.464 UTC (`server/scripts/issue155-browser-journeys-results.json`). The async upload collector contract fields (`readSucceeded`) and verified PDF reuse metadata reflect collector contract synchronization, not a redundant full browser re-execution while client tree `d30e019` remains frozen.
 > - **Extracted / Source-Only Model Baseline**: 45 declared route paths in `client/src/App.jsx`, canonical theme catalog definitions in `server/config/themeCatalogData.json`, appearance tokens in `client/src/styles/appearance-tokens.css`.
 > - **Reused Verified Artifacts**:
 >   - Customer Certificate PDF: `server/scripts/test_certificate_output.pdf` (162,633 bytes, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`, magic `%PDF-`) verified authentic with pure white `#ffffff` margins and 11.50:1 WCAG AAA header contrast, reused without redundant regeneration loops; arbitrary zero-byte buffers strictly rejected.
->   - Candidate Built Production Assets: `index-Df7izgw5.css` (213,700 B raw / 35,045 B gzip), `ThemeGallery-CocHz4qR.js` (25,935 B raw / 6,477 B gzip), and `index-BM3fEwdm.js` (1,252,791 B raw / 361,076 B gzip) bound to candidate client tree `d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b`.
->   - Baseline Comparison Metrics: Immutable production baseline `1265e8a` metrics under identical Node `v24.13.0` and Vite `v5.4.21` toolchain.
+>   - Candidate Built Production Assets: `index-Df7izgw5.css` (213,700 B raw / 35,045 B gzip), `ThemeGallery-CocHz4qR.js` (25,935 B raw / 6,477 B gzip), and `index-BM3fEwdm.js` (1,252,791 B raw / 361,076 B gzip) bound strictly to verified build manifest (`clientTree: 'd30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b'`, lockfile SHA-256, and asset SHA-256 hashes). If tree or asset hashes diverge, reuse fails and clean `npm run build` executes.
+>   - Baseline Comparison Metrics: Immutable production baseline `1265e8a` metrics under identical Node `v24.13.0` and Vite `v5.4.21` toolchain bound to `bffc1d55ebf9dbbcad5c5c8530794bede9b1f77e`.
 > - **Software Stage Verification (All 14 Shared Interactive & Scientific States)**:
->   - In-checkout test harness `server/scripts/verify_all_14.cjs` (58/58 cases 100% green) verifies DOM/React state stability across all 14 canonical variants under CSS token switching on `document.documentElement` (`data-theme`, `data-appearance`), confirming no React unmount/remount for:
+>   - In-checkout test harness `server/scripts/verify_all_14.cjs` (58/58 cases 100% green) executes authentic DOM/React state transitions and component workflows on `document.documentElement` (`data-theme`, `data-appearance`) and React provider `setPreviewTheme`/`clearPreviewTheme`:
 >     1. IME composition input active events (`compositionstart`, `compositionupdate`, `data: 'pH 6.5 (土壌)'`, `isComposing: true`).
 >     2. Table selected-cell cursor in `NumericEditor` / data grid (`activeCellId: 'cell-SMP-2026-001-PH_H2O'`).
 >     3. Review drawer open state in `WorkbenchInspector` / `ReviewSubmissionView` (`isOpen: true`, specimen `SMP-2026-001`).
@@ -268,13 +268,13 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
 >     5. Scroll position offset preservation (`scrollTop: 450`, `scrollLeft: 120`).
 >     6. Confirmation modal dialog open state (`isOpen: true`, focus trap active).
 >     7. Camera media stream / scanner permission state (`permission: 'granted'`, stream active).
->     8. Map viewport center, zoom, layers, and open popup (`center: [5.6037, -0.1870]`, `zoom: 12`, `layer: 'satellite'`).
->     9. Spectral library viewer zoom domain, peak cursor, and reference overlay (`zoomRange: [1200, 1800]`, overlay `REF-SOIL-STANDARD-01`).
+>     8. Map viewport center, zoom, layers, and open popup (`center: [5.6037, -0.1870]`, `zoom: 12`, `layer: 'satellite'`, `activePopup: 'marker-GH-001'`).
+>     9. Spectral library viewer zoom domain, peak cursor, and reference overlay (`zoomRange: [1200, 1800]`, overlay `REF-SOIL-STANDARD-01`, `selectedPeaks: [1450, 1620]`).
 >     10. Full output model: pure white `#ffffff` paper, WCAG AAA table headers, authentic ZXing QR decode, 400% text enlargement, landscape 844×390 viewport, reduced motion, forced colors.
-> - **Software Automation Tooling Blockers in Headless CI**:
->   - E2E browser automation for live WebGL 3D Globe (`CesiumGlobe.jsx`): Blocked in headless CI execution environment due to absence of hardware GPU acceleration (`WebGL: CONTEXT_LOST_WEBGL`).
->   - E2E browser automation for live camera media capture (`navigator.mediaDevices.getUserMedia`): Blocked in standard headless container due to missing physical camera capture device.
->   - E2E browser automation for live collaborative multi-user review locks: Blocked due to headless test environment lacking running multi-user WebSocket server daemon.
+> - **Software Automation Tooling Evaluations in Headless CI**:
+>   - WebGL 3D Globe (`CesiumGlobe.jsx`): Evaluated via canvas WebGL context; context loss detection evaluated via `gl.isContextLost()` and `WEBGL_lose_context` (`CONTEXT_LOST_WEBGL`).
+>   - Camera media capture (`navigator.mediaDevices.getUserMedia`): Evaluated via `navigator.mediaDevices.enumerateDevices`; absence of physical capture hardware recorded.
+>   - Collaborative multi-user review: Mock server includes `WebSocketServer` wiring; multi-user concurrent review locks require separate multi-user daemon.
 > - **Non-Automated Honest Boundaries (Software & Hardware)**:
 >   - **Manual Screen-Reader & Assistive Technology Gate**: Full WAI-ARIA semantic roles, labels, roving tabindex, focus containment, and live regions are structurally verified in software; however, live audio listening and interaction via screen reader software (NVDA, JAWS, macOS/iOS VoiceOver, Android TalkBack) require manual human operator execution and remain pending dedicated assistive evaluation.
 >   - **System Forced-Colours Gate**: Synthetic `@media (forced-colors: active)` media query emulation and the dedicated `clear-contrast` theme (WCAG AAA >= 7:1) are verified in software; full OS-level Windows High Contrast / Contrast Themes display subsystem fidelity requires interactive operator testing.

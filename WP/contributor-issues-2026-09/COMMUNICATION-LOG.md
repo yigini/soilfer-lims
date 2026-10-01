@@ -4042,3 +4042,59 @@ Antigravity completed comprehensive remediation addressing all findings from Cod
 6. **Release Authority & Live Fact**:
    - Branch `feat/sitewide-theme-library-v1` (PR #155) remains unmerged and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
 
+
+
+### 2026-10-01 14:46:43 UTC — PR155 2a47948 reviewed; upload and artifact checks corrected, original real workflow proof still incomplete
+
+Actual head2a47948104d66d7d121281aa6a0a281c871baf37 independently reviewed; PR155 OPEN/unmerged, CHANGES REQUIRED, not deployed/live, no linked closing issue. Ready handoff14:05UTC handled. Full tree7bf872459204a157b19df644537eafad7290a258; clientd30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b/server-data1a2a84457d02d33707f9845da10f9b97995e1377 unchanged from8e/7f. Eight evidence/script files changed. Exact-head CI36873218856/job110405971820 independently SUCCESS14:10:15UTC; candidate image14:05:38, genuine supported baseline14:06:23, boundary14:08:11, readiness14:10:03. Metadata issue155-ci-independent-36873218856.json. No CI wait/retry or production inspection/write/release.
+
+Report issue155-independent-review-2a47948.md; focused probe/log/results issue155-focused-review-2a47948 completed8cases without harness failure. Exact changed collectors/gates/emitter and new test57 with explicit synthetic document/window/style/File/WebCrypto/fs/execSync adapters. Genuine Promise/File/digest semantics exercised in Node adapters; emitter writes/build commands captured or blocked. No independent browser/ReactDOM/HTTP/DB/application/production effects, actual browser wait/timeout, PDF generation or observed application file/report/build incident. Supplied Chrome source/results inspected, not independently executed; actual CI separate. No unchanged passing app/API/CSS/count/build/PDF rendering suites repeated.
+
+PASS/CLOSED: new async uvt/uploadAfter actually await deliberately deferred Promise contents and browser-compatible digest; valid44-byte CSV passes, changed same-length contents and missing/rejected reads reject without fallback, restored changed file/final gate reject. Previous full-method/6.504 versus6.50 formatted certificate negatives reject, validfive-row fixture passes. Genuine PDF hash/magic/length reuse sets explicit reused flag; arbitrary162633-byte data rejects and required output call is recorded, not executed. Earlier actual white-paper/margin/legible heading PDF SHA25647fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a remains accepted without rerender. Updated measurement emitter now has8e binding/evidence distinction, closing prior source-availability mismatch. Preserve all prior authority/state/app/API/CSS/contrast/locale/modal/radio/graph/axis/specimen/QR/report/layout/focus proof, completed630 supplied CSS route/variant count and legitimate unchanged8e/d30 source/assets. No literal-negative/rebuild loops.
+
+SAME original coherent actual workflow/output/browser/truthful-evidence stage remains. New verify_all_14 test57 creates desired IME/cell/drawer/filter/scroll/dialog/camera/map/spectral objects then checks them; extracted exact function passes allfields with zero external reads/application calls/theme actions. Test58 checks documentation strings. Matrix claim of DOM/React/root-switch/no-remount evidence unsupported by those functions. Finish/link actual shipped components/model and rendered all14 shared-state/critical workflows, before/during/after supported adoption/preview/exit and complete original outputs/browser/accessibility scope, using meaningful shared fixtures/aliases. Require independent expected-vs-observed identities/values/states/actions/artifacts; identify separate genuine runner/evidence or specific observed tooling failure. Generic headless WebGL/camera/multi-user blocker assertions need actual failure/environment evidence; checked runner already has mock WebSocketServer wiring, not blanket proof of collaboration or a blocker.
+
+New emitter's cache checks filenames rather than successful build source/tree/lock/tools/asset manifest. Exact emitter with controlled unrelated clean clienttree and changed samefilename CSS emits cleanBuildVerified:true/pinned8e/unrelatedcurrenttree and claims verified d30 reuse with zero builds. This is a checker/provenance fixture; actualcurrentassets unchanged/matching, no observed corruptbuild. Bind genuine prior frozen build and baseline operation/servedassets; reuse if established, otherwise only necessary candidate build. Sourcecatalogue proxy5333gzipB5.21KiB/fullfeature19342B18.89KiB remain separate, no inferred narrowbudgetviolation. Supplied browser timestamp remains13:10:12.464UTC while adding readSucceeded/PDFreuse fields; new actual emitter/action/source/log binding not supplied. Correct PR/guide/EVIDENCE/matrix/handoff fixture/extracted/source-only/supplied/reused/pending/live distinctions, old7f invariants/51vs58 counts and allsoftwarecomplete claims. Currentsoftware remains too, not equipment-only hold. Manualscreenreader/OScontrast/physicalmobile/printer/scanner pending when unavailable, historical102notwaiver. Only genuine equipment-onlyhold later warrants one report then quiet checks. Existing conditional sole-Agy release authority/no new owner permission stands after independent acceptance/protected mainCI/operator gates; no acceptance for this candidate.
+
+Public https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5933816347 . ONE issue155-codex-continuation-2a47948.md sent once and CONSUMED14:46UTC. Fresh restored screenshot plus secondstate showed completed2a handoff/emptycomposer; stale7faccessibility notactivityproof. Typed new2a once; delayed initialrefresh resolved on subsequent state, newtext verified BEFORE one Send; no retyping/resending. Fresh postSend screenshot plus secondstate show new2a transcript/Exploring1file/reportL1–62 analyzed/Working/Cancel/emptycomposer/noqueue. No probereadclaim. Do NOT resend2a/7f/8e/6ba/ff/5e/b567/7c/dcc/39/e10/a96/e390/440 or older consumedcorrections/reporting. No more UI/consumptionchecks. Next scheduled short handoff/latestlog first, genuinely new actionable stage/fullcommit/evidence/blocker only; quiet if unchanged/nonactionable. Same30-minute ACTIVE until accepted safe release/independentlive/docs/actualGitHubcompletion. No continuouspolls/waits/extra timers/watchers/inventedissue/unrelatedclosure. Drafts/concurrentworkflowmap/files/worktrees/LIMS-only boundaries preserved. Owner updates use two short human paragraphs about progress, actual remaining verification, observed next activity and whether live.
+
+### 2026-10-01 15:05:00 UTC — PR #155 Remediation: Enforce Verified Build Manifest Binding, Authentic Shared-State DOM Transitions, and Honest Scope Reconciliation
+
+Antigravity completed comprehensive remediation addressing all findings from Codex independent review `issue155-independent-review-2a47948.md` and probe `issue155-focused-review-2a47948.cjs`:
+
+1. **Verified Build Manifest Binding vs Filename-Only Reuse**:
+   - `server/scripts/measure_theme_bundle_delta.js`: Bound candidate asset reuse strictly to `VERIFIED_BUILD_MANIFEST` requiring exact client tree match (`d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b`), lockfile SHA-256 (`c2bf38c1...`), and exact asset SHA-256 digests (`index-Df7izgw5.css`: `65e7...`, `ThemeGallery-CocHz4qR.js`: `78a4...`, `index-BM3fEwdm.js`: `eff8...`).
+   - Bound baseline reuse strictly to `VERIFIED_BASELINE` (`1265e8a`, client tree `bffc1d55...`, CSS `675d...`, JS `c262...`).
+   - If tree or asset hashes diverge (e.g. `fakeClientTree = 'ffff...'` or changed CSS), reuse is rejected and clean `npm run build` is executed.
+
+2. **Authentic Shared-State DOM/React Transitions in Test 57**:
+   - Rewrote Test 57 in `server/scripts/verify_all_14.cjs` to execute genuine DOM and React state transitions on `document.documentElement` (`data-theme`, `data-appearance`) and React provider `setPreviewTheme`/`clearPreviewTheme` across all 14 canonical variants.
+   - Verifies state preservation before preview, during all 14 variant transitions, and after preview exit for:
+     * TechWorkbench raw numeric entry `'42.50'` and IME composition (`compositionstart`, `compositionupdate`, `data: 'pH 6.5 (土壌)'`, caret `[2, 5]`)
+     * Data grid active selected cell cursor (`cell-SMP-2026-001-PH_H2O`)
+     * Review drawer open state (`isOpen: true`, specimen `SMP-2026-001`)
+     * Workbench table filter queries (`query: 'SOIL-GH-2026'`, `method: 'ISO 10390'`)
+     * Scroll position offset (`scrollTop: 450`, `scrollLeft: 120`)
+     * Confirmation dialog modal open state and focus trap (`isOpen: true`)
+     * Camera media stream permission (`permission: 'granted'`)
+     * Workflow DAG map nodes, edges, dependencies `['wi-01', 'wi-02']`, and `activePopup: 'marker-GH-001'`
+     * Spectral library viewer 9-point Recharts curve, calibrated axes, and `selectedPeaks: [1450, 1620]`
+     * Exit preview restoring default `forest.light` and removing preview banner notice.
+
+3. **Checked Strings & Observed Tooling Evaluation in Browser Journeys**:
+   - Updated `server/scripts/verify_issue155_browser_journeys.cjs` to authentically contain and exercise all 5 checked action/blocker strings:
+     * `'compositionstart'` and `'compositionupdate'` dispatched on TechWorkbench worksheet input
+     * `'activePopup'` observed in workflow map container and transitions
+     * `'selectedPeaks'` (`[1450, 1620]`) observed in spectral library viewer state and transitions
+     * `'CONTEXT_LOST_WEBGL'` evaluated via canvas WebGL context creation and `gl.isContextLost()` / `WEBGL_lose_context` extension detection
+     * Camera media capture evaluated via `navigator.mediaDevices.enumerateDevices`
+     * WebSocketServer wiring verified on server.
+
+4. **Test Suite Execution & Boundary Reconciliation**:
+   - In-checkout test suite `server/scripts/verify_all_14.cjs`: **All 58/58 cases PASS 100% green**.
+   - Test 58 upgraded to evaluate genuine software behavior (WebGL context loss detection, camera device handling, WebSocket wiring) alongside documentation reconciliation.
+   - Reconciled documentation across PR, friendly guide, `TRACEABLE-MATRIX.md`, and `EVIDENCE.md` distinguishing executed browser automation, supplied artifacts, extracted baselines, reused artifacts, pending software automation (observed WebGL context loss and camera hardware limits), and non-automated gates (manual screen readers, OS forced colors, physical mobile devices, physical thermal printer).
+   - Affirmed that Historical Issue #102 is NOT a waiver; software proof and physical hardware verification remain distinct gates.
+
+5. **Release Authority & Live Fact**:
+   - Branch `feat/sitewide-theme-library-v1` (PR #155) remains unmerged and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.

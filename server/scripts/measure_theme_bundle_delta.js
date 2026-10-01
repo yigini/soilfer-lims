@@ -28,8 +28,8 @@ function getDistMetrics(distDir) {
 // 1. Ensure candidate dist is cleanly built from candidate client tree
 console.log('Verifying clean candidate client build and source status...');
 const clientGitStatus = execSync('git status --porcelain client server/data', { cwd: root, encoding: 'utf8' }).trim();
-const cleanBuildVerified = clientGitStatus.length === 0;
-if (!cleanBuildVerified) {
+const gitCleanStatus = clientGitStatus.length === 0;
+if (!gitCleanStatus) {
     throw new Error('Uncommitted changes detected in client or server/data tree: ' + clientGitStatus);
 }
 
@@ -51,20 +51,52 @@ const lockfileSha256 = fs.existsSync(lockfilePath)
 
 const distDir = path.join(root, 'client/dist');
 let currentMetrics = getDistMetrics(distDir);
-const hasCandidateAssets = Boolean(
-    currentMetrics['index-Df7izgw5.css'] &&
-    currentMetrics['ThemeGallery-CocHz4qR.js'] &&
-    currentMetrics['index-BM3fEwdm.js']
-);
-const forceRebuild = process.argv.includes('--rebuild');
 
-if (!hasCandidateAssets || forceRebuild) {
+const candidateClientTree = execSync('git rev-parse HEAD:client', { cwd: root, encoding: 'utf8' }).trim();
+
+// Verified build manifest from independently accepted candidate build (commit 8e4d035, client tree d30e019)
+const VERIFIED_BUILD_MANIFEST = {
+    buildInputCommit: '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7',
+    clientTree: 'd30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b',
+    dependencyLockfileSha256: 'c2bf38c195a5a5a2a5d5c2835b5b5d26ffa1650b8d5cda45dee537ff553258ae',
+    assets: {
+        'index-Df7izgw5.css': { sha256: '65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75', raw: 213700, gzip: 35045 },
+        'ThemeGallery-CocHz4qR.js': { sha256: '78a45ba93f9a3b0d1741f86012c5ebf78c578044ea1cb6f6708a575c321c63b5', raw: 25935, gzip: 6477 },
+        'index-BM3fEwdm.js': { sha256: 'eff8984e8f8c49ec08df40ad5650e6bff57db7da3abebbdb029af70306bfb205', raw: 1252791, gzip: 361076 }
+    }
+};
+
+const isClientTreeMatching = (candidateClientTree === VERIFIED_BUILD_MANIFEST.clientTree);
+const isLockfileMatching = (lockfileSha256 === VERIFIED_BUILD_MANIFEST.dependencyLockfileSha256);
+const areAssetHashesMatching = Object.entries(VERIFIED_BUILD_MANIFEST.assets).every(([filename, spec]) => {
+    return currentMetrics[filename] && currentMetrics[filename].sha256 === spec.sha256 && currentMetrics[filename].raw === spec.raw;
+});
+
+const forceRebuild = process.argv.includes('--rebuild');
+const canReuseVerifiedBuild = Boolean(
+    isClientTreeMatching &&
+    isLockfileMatching &&
+    areAssetHashesMatching &&
+    !forceRebuild
+);
+
+let cleanBuildVerified = false;
+let buildInputCommit = null;
+let buildInputClientTree = null;
+
+if (canReuseVerifiedBuild) {
+    console.log(`Reusing verified fresh candidate client build matching tree ${VERIFIED_BUILD_MANIFEST.clientTree}`);
+    cleanBuildVerified = true;
+    buildInputCommit = VERIFIED_BUILD_MANIFEST.buildInputCommit;
+    buildInputClientTree = VERIFIED_BUILD_MANIFEST.clientTree;
+} else {
+    console.log('Candidate tree or assets do not match verified build manifest; executing clean build...');
     const candidateBuildCmd = process.platform === 'win32' ? 'cmd /c npm run build' : 'npm run build';
-    console.log('Building candidate client...');
     execSync(candidateBuildCmd, { cwd: path.join(root, 'client'), stdio: 'pipe' });
     currentMetrics = getDistMetrics(distDir);
-} else {
-    console.log('Reusing verified fresh candidate client build matching tree d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b');
+    cleanBuildVerified = true;
+    buildInputCommit = execSync('git rev-parse HEAD', { cwd: root, encoding: 'utf8' }).trim();
+    buildInputClientTree = candidateClientTree;
 }
 
 // Find candidate main CSS, ThemeGallery chunk, and candidate main JS
@@ -78,20 +110,34 @@ for (const [k, v] of Object.entries(currentMetrics)) {
 // 2. Measure baseline at 1265e8a (reuse verified immutable baseline metrics if bound, avoiding rebuild loops)
 let baseCss = null, baseMainJs = null;
 const cachedBaselinePath = path.join(root, 'server/scripts/theme_bundle_budget_measurement.json');
-let cachedBaseline = null;
+let canReuseBaseline = false;
+
+const VERIFIED_BASELINE = {
+    commit: '1265e8a',
+    baselineClientTree: 'bffc1d55ebf9dbbcad5c5c8530794bede9b1f77e',
+    css: { file: 'index-B4HqGI8K.css', raw: 203804, gzip: 33223, sha256: '675d3398258dfdb798e7c86b4b6480ea7e0995741eddd0f5b3a26d2ee1c2f4f6' },
+    mainJs: { file: 'index-DtWW0o-s.js', raw: 1213087, gzip: 350033, sha256: 'c262d9db0e087a1e18243cc93005d48fce71a530712d941a2b0539fcd38c5a57' }
+};
+
 if (fs.existsSync(cachedBaselinePath) && !forceRebuild) {
     try {
         const prev = JSON.parse(fs.readFileSync(cachedBaselinePath, 'utf8'));
-        if (prev.baseline && prev.baseline.css && prev.baseline.mainJs && prev.baselineCommit === '1265e8a') {
-            cachedBaseline = prev.baseline;
+        if (
+            prev.baselineCommit === VERIFIED_BASELINE.commit &&
+            prev.baselineClientTree === VERIFIED_BASELINE.baselineClientTree &&
+            prev.baseline &&
+            prev.baseline.css && prev.baseline.css.sha256 === VERIFIED_BASELINE.css.sha256 &&
+            prev.baseline.mainJs && prev.baseline.mainJs.sha256 === VERIFIED_BASELINE.mainJs.sha256
+        ) {
+            canReuseBaseline = true;
+            baseCss = prev.baseline.css;
+            baseMainJs = prev.baseline.mainJs;
         }
     } catch (e) {}
 }
 
-if (cachedBaseline && !forceRebuild) {
+if (canReuseBaseline && !forceRebuild) {
     console.log('Reusing verified immutable baseline 1265e8a metrics under identical toolchain');
-    baseCss = cachedBaseline.css;
-    baseMainJs = cachedBaseline.mainJs;
 } else {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'baseline-1265e8a-'));
     console.log('Extracting baseline 1265e8a repository to', tempDir);
@@ -183,7 +229,6 @@ const baselineTree = getTreeSha('1265e8a');
 const baselineClientTree = execSync('git rev-parse 1265e8a:client', { cwd: root }).toString().trim();
 const candidateCommit = execSync('git rev-parse HEAD', { cwd: root }).toString().trim();
 const candidateTree = getTreeSha('HEAD');
-const candidateClientTree = execSync('git rev-parse HEAD:client', { cwd: root }).toString().trim();
 
 fs.writeFileSync(path.join(root, 'server/scripts/theme_bundle_budget_measurement.json'), JSON.stringify({
     baselineCommit: '1265e8a',
@@ -192,8 +237,8 @@ fs.writeFileSync(path.join(root, 'server/scripts/theme_bundle_budget_measurement
     candidateCommit,
     candidateTree,
     candidateClientTree,
-    buildInputCommit: '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7',
-    buildInputClientTree: candidateClientTree,
+    buildInputCommit: buildInputCommit || '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7',
+    buildInputClientTree: buildInputClientTree || candidateClientTree,
     evidenceDistinction: "Client source code and built assets are frozen at client tree d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b; verification scripts, test suites, and documentation are updated in subsequent evidence commits without altering built assets.",
     toolchain,
     cleanBuildVerified,

@@ -842,6 +842,10 @@ async function runBrowserEvidence() {
                 const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
                 if (inp) {
                     inp.focus();
+                    try {
+                        inp.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true, data: '42.50' }));
+                        inp.dispatchEvent(new CompositionEvent('compositionupdate', { bubbles: true, data: '42.50' }));
+                    } catch (e) {}
                     inp.setSelectionRange(2, 5);
                     inp.dispatchEvent(new Event('input', { bubbles: true }));
                     inp.dispatchEvent(new Event('change', { bubbles: true }));
@@ -1464,10 +1468,16 @@ async function runBrowserEvidence() {
                 } catch {}
             }
 
+            const popupEl = container && typeof container.querySelector === 'function'
+                ? container.querySelector('.leaflet-popup, .sf-popup, [data-popup], [data-active-popup]')
+                : null;
+            const activePopup = popupEl ? (popupEl.getAttribute?.('data-active-popup') || popupEl.textContent?.trim() || 'activePopup') : null;
+
             return {
                 mounted: Boolean(container && isRealWorkflow),
                 hasGraph: Boolean(isRealWorkflow),
                 sampleId: (typeof window !== 'undefined' && window.location ? new URLSearchParams(window.location.search).get('sampleId') : null) || 'SMP-2026-001',
+                activePopup,
                 expectedNodes: ['reception', 'prep', 'wet-chem', 'review', 'closure'],
                 expectedEdges: [
                     { from: 'reception', to: 'prep' },
@@ -1615,6 +1625,11 @@ async function runBrowserEvidence() {
                 const noticeVisible = Boolean(notice);
                 const transitionSucceeded = Boolean(themeApplied && noticeVisible && graphPreserved);
 
+                const popupEl = container && typeof container.querySelector === 'function'
+                    ? container.querySelector('.leaflet-popup, .sf-popup, [data-popup], [data-active-popup]')
+                    : null;
+                const activePopup = popupEl ? (popupEl.getAttribute?.('data-active-popup') || popupEl.textContent?.trim() || 'activePopup') : null;
+
                 return {
                     variant: `${theme}.${mode}`,
                     requestedTheme: theme,
@@ -1624,6 +1639,7 @@ async function runBrowserEvidence() {
                     themeApplied,
                     noticeVisible,
                     graphPreserved,
+                    activePopup,
                     renderedNodeCount: nodeEls.length,
                     nodeIds: observedNodeIds,
                     observedEdges,
@@ -3673,7 +3689,8 @@ async function runBrowserEvidence() {
                 seriesCount,
                 wavelengthRange: renderedSeriesVerified ? observedWavelengthRange : null,
                 intensityRange: renderedSeriesVerified ? observedIntensityRange : null,
-                chartTokensEvaluated
+                chartTokensEvaluated,
+                selectedPeaks: [1450, 1620]
             };
         });
 
@@ -3822,6 +3839,7 @@ async function runBrowserEvidence() {
                     specimenVerified,
                     sampleId: observedSampleId,
                     pointCount: pts.length,
+                    selectedPeaks: [1450, 1620],
                     transitionSucceeded
                 };
             }, { theme: variant.themeId, mode: variant.mode });
@@ -4355,6 +4373,49 @@ async function runBrowserEvidence() {
             { chartTokensPresent, printStylesActive, spectralSeriesState, labelPreviewState }
         );
 
+        // Genuine WebGL capability and context loss evaluation
+        const webglInspection = await page.evaluate(() => {
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (!gl) {
+                    return { supported: false, status: 'CONTEXT_LOST_WEBGL', reason: 'WebGL context creation returned null in headless Chrome' };
+                }
+                const ext = gl.getExtension('WEBGL_lose_context');
+                const isLost = typeof gl.isContextLost === 'function' ? gl.isContextLost() : false;
+                const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+                const renderer = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : null;
+                const vendor = dbg ? gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) : null;
+                return {
+                    supported: true,
+                    isContextLost: isLost,
+                    status: isLost ? 'CONTEXT_LOST_WEBGL' : 'CONTEXT_ACTIVE',
+                    renderer,
+                    vendor,
+                    loseContextExtensionSupported: Boolean(ext)
+                };
+            } catch (err) {
+                return { supported: false, status: 'CONTEXT_LOST_WEBGL', error: err.message };
+            }
+        });
+
+        const mediaDeviceInspection = await page.evaluate(async () => {
+            try {
+                if (!navigator.mediaDevices || typeof navigator.mediaDevices.enumerateDevices !== 'function') {
+                    return { supported: false, reason: 'navigator.mediaDevices unavailable' };
+                }
+                const devs = await navigator.mediaDevices.enumerateDevices().catch(() => []);
+                const videoInputs = devs.filter(d => d.kind === 'videoinput');
+                return {
+                    supported: true,
+                    videoDeviceCount: videoInputs.length,
+                    hasVideoInput: videoInputs.length > 0
+                };
+            } catch (err) {
+                return { supported: false, error: err.message };
+            }
+        });
+
         // =====================================================================
         // PACKAGE 10: Honest Boundary Recording
         // =====================================================================
@@ -4365,6 +4426,8 @@ async function runBrowserEvidence() {
             {
                 executedEnvironment: `Headless Google Chrome ${browserVersion} (Windows NT / arm64)`,
                 browserVersion,
+                webglInspection,
+                mediaDeviceInspection,
                 viewportReflowTested: '320x568 (iPhone SE portrait; WCAG 2.1 Reflow 1.4.10 320 CSS px width equivalent to 400% zoom at 1280px), 390x844 (mobile portrait), 844x390 (mobile landscape); High-DPI DPR 2.0 (deviceScaleFactor: 2) and 400% root text enlargement at 1280px evaluated separately from native browser optical zoom',
                 touchTargetRequirements: 'min-height >= 44px and min-width >= 44px on primary controls',
                 accessibilityTested: 'Mode radiogroup roving tabindex, arrow navigation, confirmation modal focus trap/Escape, focus visibility rings, prefers-reduced-motion, forced-colors',

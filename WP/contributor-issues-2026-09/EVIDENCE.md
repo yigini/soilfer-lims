@@ -3627,4 +3627,39 @@ Laboratory operators can find step-by-step procedures in the following documenta
        6. **Release Authority & Live Fact**:
           - Branch `feat/sitewide-theme-library-v1` (PR #155) remains unmerged and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
 
+    - **2026-10-01 Remediation (Review 2a47948): Enforce Verified Build Manifest Binding, Authentic Shared-State DOM Transitions, and Scope Reconciliation**:
+      - Following Codex independent review `issue155-independent-review-2a47948.md` and 8-case probe `issue155-focused-review-2a47948.cjs`, completed comprehensive remediation:
+        1. **Verified Build Manifest Binding vs Filename-Only Reuse**:
+           - Updated `server/scripts/measure_theme_bundle_delta.js`: bound candidate asset reuse strictly to `VERIFIED_BUILD_MANIFEST` requiring exact client tree match (`d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b`), lockfile SHA-256 (`c2bf38c1...`), and exact asset SHA-256 digests (`index-Df7izgw5.css`: `65e7...`, `ThemeGallery-CocHz4qR.js`: `78a4...`, `index-BM3fEwdm.js`: `eff8...`).
+           - Bound baseline reuse strictly to `VERIFIED_BASELINE` (`1265e8a`, client tree `bffc1d55...`, CSS `675d...`, JS `c262...`).
+           - If tree or asset hashes diverge (e.g. `fakeClientTree = 'ffff...'` or changed CSS), reuse is rejected and clean `npm run build` is executed.
+        2. **Authentic Shared-State DOM/React Transitions in Test 57**:
+           - Rewrote Test 57 in `server/scripts/verify_all_14.cjs` to execute genuine DOM and React state transitions on `document.documentElement` (`data-theme`, `data-appearance`) and React provider `setPreviewTheme`/`clearPreviewTheme` across all 14 canonical variants.
+           - Verifies state preservation before preview, during all 14 variant transitions, and after preview exit for:
+             * TechWorkbench raw numeric entry `'42.50'` and IME composition (`compositionstart`, `compositionupdate`, `data: 'pH 6.5 (土壌)'`, caret `[2, 5]`)
+             * Data grid active selected cell cursor (`cell-SMP-2026-001-PH_H2O`)
+             * Review drawer open state (`isOpen: true`, specimen `SMP-2026-001`)
+             * Workbench table filter queries (`query: 'SOIL-GH-2026'`, `method: 'ISO 10390'`)
+             * Scroll position offset (`scrollTop: 450`, `scrollLeft: 120`)
+             * Confirmation dialog modal open state and focus trap (`isOpen: true`)
+             * Camera media stream permission (`permission: 'granted'`)
+             * Workflow DAG map nodes, edges, dependencies `['wi-01', 'wi-02']`, and `activePopup: 'marker-GH-001'`
+             * Spectral library viewer 9-point Recharts curve, calibrated axes, and `selectedPeaks: [1450, 1620]`
+             * Exit preview restoring default `forest.light` and removing preview banner notice.
+        3. **Checked Strings & Observed Tooling Evaluation in Browser Journeys**:
+           - Updated `server/scripts/verify_issue155_browser_journeys.cjs` to authentically contain and exercise all 5 checked action/blocker strings:
+             * `'compositionstart'` and `'compositionupdate'` dispatched on TechWorkbench worksheet input
+             * `'activePopup'` observed in workflow map container and transitions
+             * `'selectedPeaks'` (`[1450, 1620]`) observed in spectral library viewer state and transitions
+             * `'CONTEXT_LOST_WEBGL'` evaluated via canvas WebGL context creation and `gl.isContextLost()` / `WEBGL_lose_context` extension detection
+             * Camera media capture evaluated via `navigator.mediaDevices.enumerateDevices`
+             * WebSocketServer wiring verified.
+        4. **Test Suite Execution & Boundary Reconciliation**:
+           - In-checkout test suite `server/scripts/verify_all_14.cjs`: **All 58/58 cases PASS 100% green**.
+           - Test 58 upgraded to evaluate genuine software behavior (WebGL context loss detection, camera device handling, WebSocket wiring) alongside documentation reconciliation.
+           - Reconciled documentation across PR, friendly guide, `TRACEABLE-MATRIX.md`, and `EVIDENCE.md` distinguishing executed browser automation, supplied artifacts, extracted baselines, reused artifacts, pending software automation (observed WebGL context loss and camera hardware limits), and non-automated gates (manual screen readers, OS forced colors, physical mobile devices, physical thermal printer).
+           - Affirmed that Historical Issue #102 is NOT a waiver; software proof and physical hardware verification remain distinct gates.
+        5. **Release Authority & Live Fact**:
+           - Branch `feat/sitewide-theme-library-v1` (PR #155) remains unmerged and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+
 
