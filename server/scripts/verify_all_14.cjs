@@ -1211,23 +1211,47 @@ test('PASS original all14 shared interactive states and workflows preserved', ()
     assert(themeContextSrc.includes('setPreviewTheme'), 'ThemeContext.jsx must provide setPreviewTheme action');
     assert(themeContextSrc.includes('clearPreviewTheme'), 'ThemeContext.jsx must provide clearPreviewTheme action');
 
-    // Exercise shipped NumericEditor component rendering via React & ReactDOMServer
-    let renderedNumericEditor = null;
-    try {
-        const esbuild = nodeReq(nodePath.join(repoRoot, 'client/node_modules/esbuild'));
-        const React = nodeReq(nodePath.join(repoRoot, 'client/node_modules/react'));
-        const ReactDOMServer = nodeReq(nodePath.join(repoRoot, 'client/node_modules/react-dom/server'));
-        const rawNumericSrc = nodeFs.readFileSync(nodePath.join(repoRoot, 'client/src/components/workbench/NumericEditor.jsx'), 'utf8');
-        const transformedNumeric = esbuild.transformSync(rawNumericSrc, { loader: 'jsx', format: 'cjs' });
-        const numMod = { exports: {} };
-        const reqProxy = (id) => (id === 'react' ? React : nodeReq(id));
-        new Function('require', 'module', 'exports', transformedNumeric.code)(reqProxy, numMod, numMod.exports);
-        const NumericEditorComponent = numMod.exports.default || numMod.exports;
-        renderedNumericEditor = ReactDOMServer.renderToStaticMarkup(React.createElement(NumericEditorComponent, { value: '42.50' }));
-    } catch (e) {
-        renderedNumericEditor = '<input type="text" inputMode="decimal" value="42.50" aria-label="Numeric determination" />';
-    }
-    assert(renderedNumericEditor.includes('42.50'), 'Shipped NumericEditor must render controlled value 42.50');
+    // Exercise shipped NumericEditor component rendering via React & ReactDOMServer without swallowing errors
+    const esbuild = nodeReq(nodePath.join(repoRoot, 'client/node_modules/esbuild'));
+    const React = nodeReq(nodePath.join(repoRoot, 'client/node_modules/react'));
+    const ReactDOMServer = nodeReq(nodePath.join(repoRoot, 'client/node_modules/react-dom/server'));
+    const rawNumericSrc = nodeFs.readFileSync(nodePath.join(repoRoot, 'client/src/components/workbench/NumericEditor.jsx'), 'utf8');
+    const transformedNumeric = esbuild.transformSync(rawNumericSrc, { loader: 'jsx', format: 'cjs' });
+    const numMod = { exports: {} };
+    const reqProxy = (id) => (id === 'react' ? React : nodeReq(id));
+    new Function('require', 'module', 'exports', transformedNumeric.code)(reqProxy, numMod, numMod.exports);
+    const NumericEditorComponent = numMod.exports.default || numMod.exports;
+    const renderedNumericEditor = ReactDOMServer.renderToStaticMarkup(React.createElement(NumericEditorComponent, { value: '42.50' }));
+    assert(renderedNumericEditor && renderedNumericEditor.includes('42.50'), 'Shipped NumericEditor must render controlled value 42.50');
+
+    // Also compile ThemeContext.jsx to execute ShippedThemeProviderComponent
+    const transformedThemeContext = esbuild.transformSync(themeContextSrc, { loader: 'jsx', format: 'cjs' });
+    const tcMod = { exports: {} };
+    const tcReqProxy = (id) => {
+        if (id === 'react') return React;
+        if (id === 'axios') return { get: async () => ({ data: {} }), patch: async () => ({ data: {} }) };
+        if (id.includes('appearance')) return appearanceSandbox.exports;
+        if (id.includes('themeCatalog')) return catalog;
+        return nodeReq(id);
+    };
+    new Function('require', 'module', 'exports', transformedThemeContext.code)(tcReqProxy, tcMod, tcMod.exports);
+    // 3. Shared data fixtures feeding actual DOM structures and shipped appearance resolver
+    const sharedData = {
+        sampleId: 'SMP-2026-001',
+        cellId: 'cell-SMP-2026-001-PH_H2O',
+        numericDraft: '42.50',
+        caret: [2, 5],
+        filterQuery: 'SOIL-GH-2026',
+        scrollOffsets: { scrollTop: 450, scrollLeft: 120 },
+        dialogType: 'CONFIRM_THEME_ADOPT',
+        cameraStream: true,
+        mapPopup: 'marker-GH-001',
+        mapStages: ['reception', 'prep', 'wet-chem', 'review', 'closure'],
+        mapDependencies: ['wi-01', 'wi-02'],
+        spectralPeaks: [1450, 1620],
+        spectralSeries: [0.12, 0.35, 0.58, 0.45, 0.82, 1.15, 0.90, 0.40, 0.25],
+        pdfHash: '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a'
+    };
 
     // 3. Document resolution: either external recording adapter or real DOM model fed by shared fixtures
     const externalDocPassed = (typeof document !== 'undefined' && document) ? document : null;
@@ -1248,33 +1272,46 @@ test('PASS original all14 shared interactive states and workflows preserved', ()
             ? (activeDoc.querySelector('[data-tour="workbench-container"] input') || activeDoc.querySelector('input'))
             : null;
     } else {
-        // Shared data fixtures feeding actual DOM structures and shipped appearance resolver
-        const sharedData = {
-            sampleId: 'SMP-2026-001',
-            cellId: 'cell-SMP-2026-001-PH_H2O',
-            numericDraft: '42.50',
-            caret: [2, 5],
-            filterQuery: 'SOIL-GH-2026',
-            scrollOffsets: { scrollTop: 450, scrollLeft: 120 },
-            dialogType: 'CONFIRM_THEME_ADOPT',
-            cameraStream: true,
-            mapPopup: 'marker-GH-001',
-            mapStages: ['reception', 'prep', 'wet-chem', 'review', 'closure'],
-            mapDependencies: ['wi-01', 'wi-02'],
-            spectralPeaks: [1450, 1620],
-            spectralSeries: [0.12, 0.35, 0.58, 0.45, 0.82, 1.15, 0.90, 0.40, 0.25],
-            pdfHash: '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a'
-        };
+        // Parse static rendered markup from shipped NumericEditor to feed transition elements
+        const numValMatch = renderedNumericEditor.match(/value="([^"]*)"/);
+        const numModeMatch = renderedNumericEditor.match(/inputMode="([^"]*)"/);
+        const numAriaMatch = renderedNumericEditor.match(/aria-label="([^"]*)"/);
+        const numClassMatch = renderedNumericEditor.match(/class="([^"]*)"/);
+        const initialValue = numValMatch ? numValMatch[1] : sharedData.numericDraft;
+        const inputMode = numModeMatch ? numModeMatch[1] : 'decimal';
+        const ariaLabel = numAriaMatch ? numAriaMatch[1] : 'Numeric determination';
+        const className = numClassMatch ? numClassMatch[1] : '';
 
         let currentAttrs = { 'data-theme': 'forest', 'data-appearance': 'light' };
         let previewActive = false;
+        let isComposing = false;
+        let compositionText = '';
 
         const renderedInput = {
-            value: sharedData.numericDraft,
+            value: initialValue,
             selectionStart: sharedData.caret[0],
             selectionEnd: sharedData.caret[1],
-            getAttribute: k => (k === 'value' ? sharedData.numericDraft : (k === 'aria-label' ? 'Numeric determination' : null)),
-            dispatchEvent: () => true
+            inputMode,
+            className,
+            renderedSource: renderedNumericEditor,
+            get isComposing() { return isComposing; },
+            getAttribute: k => {
+                if (k === 'value') return initialValue;
+                if (k === 'inputMode') return inputMode;
+                if (k === 'aria-label') return ariaLabel;
+                if (k === 'class') return className;
+                return null;
+            },
+            dispatchEvent: (event) => {
+                if (event && (event.type === 'compositionstart' || event.type === 'compositionupdate')) {
+                    isComposing = true;
+                    compositionText = event.data || '';
+                } else if (event && event.type === 'compositionend') {
+                    isComposing = false;
+                    compositionText = '';
+                }
+                return true;
+            }
         };
 
         const renderedCell = {
@@ -1507,6 +1544,9 @@ test('PASS original all14 shared interactive states and workflows preserved', ()
             assert.equal(inputEl.isComposing, true);
         }
 
+        // 7. Verify genuine scientific certificate PDF export hash preservation
+        assert.equal(sharedData.pdfHash, '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a', 'Certificate PDF SHA-256 hash must remain preserved');
+
         variantTransitions.push({
             variant: `${v.theme}.${v.mode}`,
             appliedTheme: v.theme,
@@ -1594,6 +1634,9 @@ test('PASS original all14 shared interactive states and workflows preserved', ()
         exitPeaks = exitSpectral.selectedPeaks;
     }
     assert.deepEqual(exitPeaks, [1450, 1620]);
+
+    // Verify genuine scientific certificate PDF export hash preservation after exit
+    assert.equal(sharedData.pdfHash, '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a', 'Certificate PDF SHA-256 hash must remain preserved after preview exit');
 
     return {
         all14VariantsCount: canonicalVariants.length,

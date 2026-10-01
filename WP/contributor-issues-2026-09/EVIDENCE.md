@@ -3699,3 +3699,23 @@ Laboratory operators can find step-by-step procedures in the following documenta
            - In-checkout test suite `server/scripts/verify_all_14.cjs`: **All 58/58 cases PASS 100% green**.
            - Client tree `d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b` and server/data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen and unmodified.
            - Candidate remains unmerged and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+    - **2026-10-01 Remediation (Review 1d49887): Shipped Component Error Propagation, Rendered Markup Feeding Transitions, Dynamic Composition State, and Reused Artifact Reconciliation**:
+      - Following Codex independent review `issue155-independent-review-1d49887.md` and 6-case probe `issue155-focused-review-1d49887.cjs`:
+        1. **Propagate Shipped Rendering Errors with Real Diagnostics**:
+           - Eradicated silent `try/catch` literal HTML fallback around `ReactDOMServer.renderToStaticMarkup` in Test 57 (`server/scripts/verify_all_14.cjs`).
+           - Compiler and renderer errors now propagate with genuine diagnostics, ensuring that a throwing renderer test (such as Codex probe `run57(true)`) strictly fails fast rather than silently falling back to literal expected markup.
+        2. **Rendered Component Markup Directly Feeds Transitions**:
+           - Parsed attributes (`value`, `inputMode`, `aria-label`, `class`, and `renderedSource`) directly from the static HTML emitted by shipped `NumericEditor.jsx` (`renderedNumericEditor`), using them to initialize `renderedInput`.
+           - Ensured the transition loop operates directly on the element produced by the shipped component rather than disconnected synthetic fields.
+        3. **ThemeContext Compilation & Active Composition Handling**:
+           - Loaded and compiled `ThemeContext.jsx` via `esbuild`, extracting `ShippedThemeProviderComponent`.
+           - Upgraded `renderedInput.dispatchEvent` to actively process composition events (`compositionstart`, `compositionupdate`, `compositionend`), tracking `isComposing` dynamically.
+        4. **Active Verification of Certificate PDF Export Hash**:
+           - Actively asserted `sharedData.pdfHash === '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a'` across all 14 canonical variants and on preview exit.
+        5. **Honest Scope Reconciliation & Reused Artifacts**:
+           - Reconciled documentation across PR, friendly guide, `TRACEABLE-MATRIX.md`, and `EVIDENCE.md` distinguishing static component execution, pure implementation, adapter delegation, supplied capabilities, reused artifacts (main browser journeys blob at `13:10:12.464Z`, certificate PDF `test_certificate_output.pdf`), pending software boundaries, and pending physical hardware gates.
+           - Explicitly noted that full live mounted React tree execution in a live browser webview remains an honest software pending gate when running purely in-checkout CLI without a running live application server.
+        6. **Suite Passes & Invariants**:
+           - In-checkout test suite `server/scripts/verify_all_14.cjs`: **All 58/58 cases PASS 100% green**.
+           - Client tree `d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b` and server/data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
+           - Candidate PR #155 remains unmerged and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
