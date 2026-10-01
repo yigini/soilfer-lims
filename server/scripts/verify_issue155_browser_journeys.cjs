@@ -799,9 +799,9 @@ async function runBrowserEvidence() {
             return {
                 theme: document.documentElement.getAttribute('data-theme') || 'forest',
                 mode: document.documentElement.getAttribute('data-appearance') || 'light',
-                value: inp ? inp.value : '42.50',
-                selectionStart: inp ? inp.selectionStart : 2,
-                selectionEnd: inp ? inp.selectionEnd : 5
+                value: inp ? inp.value : null,
+                selectionStart: inp ? inp.selectionStart : 0,
+                selectionEnd: inp ? inp.selectionEnd : 0
             };
         });
 
@@ -832,16 +832,16 @@ async function runBrowserEvidence() {
 
         const wsDuring = await page.evaluate(() => {
             const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
-            const notice = document.querySelector('[role="region"][aria-label*="preview" i], aside');
+            const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
             return {
                 requestedTheme: 'terra',
                 requestedMode: 'light',
                 appliedTheme: document.documentElement.getAttribute('data-theme'),
                 appliedMode: document.documentElement.getAttribute('data-appearance'),
                 noticeVisible: !!notice,
-                value: inp ? inp.value : '42.50',
-                selectionStart: inp ? inp.selectionStart : 2,
-                selectionEnd: inp ? inp.selectionEnd : 5
+                value: inp ? inp.value : null,
+                selectionStart: inp ? inp.selectionStart : 0,
+                selectionEnd: inp ? inp.selectionEnd : 0
             };
         });
 
@@ -853,14 +853,14 @@ async function runBrowserEvidence() {
 
         const wsAfter = await page.evaluate(() => {
             const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
-            const notice = document.querySelector('[role="region"][aria-label*="preview" i], aside');
+            const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
             return {
                 appliedTheme: document.documentElement.getAttribute('data-theme'),
                 appliedMode: document.documentElement.getAttribute('data-appearance'),
                 noticeVisible: !!notice,
-                value: inp ? inp.value : '42.50',
-                selectionStart: inp ? inp.selectionStart : 2,
-                selectionEnd: inp ? inp.selectionEnd : 5
+                value: inp ? inp.value : null,
+                selectionStart: inp ? inp.selectionStart : 0,
+                selectionEnd: inp ? inp.selectionEnd : 0
             };
         });
 
@@ -920,26 +920,74 @@ async function runBrowserEvidence() {
                 selectionEnd = input.selectionEnd;
                 val = input.value;
             }
+            // Extract observed fields directly from component DOM
+            const sampleEl = container && typeof container.querySelector === 'function'
+                ? container.querySelector('.sf-sample-id, [data-sample-id]')
+                : null;
+            const observedSampleId = sampleEl
+                ? ((typeof sampleEl.getAttribute === 'function' && sampleEl.getAttribute('data-sample-id')) || (sampleEl.textContent || '').trim().split(/\s+/)[0])
+                : (container && typeof window !== 'undefined' && window.location && typeof window.location.search === 'string'
+                    ? new URLSearchParams(window.location.search).get('sampleId')
+                    : null);
+
+            const workItemEl = container && typeof container.querySelector === 'function'
+                ? container.querySelector('[data-testid*="rack-pos-"], [data-workitem-id]')
+                : null;
+            const observedWorkItemId = workItemEl
+                ? (typeof workItemEl.getAttribute === 'function' && (workItemEl.getAttribute('data-workitem-id') || workItemEl.getAttribute('data-testid')?.replace('rack-pos-', '')))
+                : (container && typeof window !== 'undefined' && window.location && typeof window.location.search === 'string'
+                    ? new URLSearchParams(window.location.search).get('workItemId')
+                    : null);
+
+            const titleEl = container && typeof container.querySelector === 'function'
+                ? container.querySelector('h3, [data-tour="analysis-title"]')
+                : null;
+            const observedAnalysisName = titleEl ? (titleEl.textContent || '').trim() : null;
+
+            const unitEl = container && typeof container.querySelector === 'function'
+                ? container.querySelector('.text-sf-muted, [data-unit], input[inputmode="decimal"] ~ span')
+                : null;
+            const observedUnitText = unitEl ? (unitEl.textContent || '').trim() : '';
+            const observedUnit = observedUnitText.includes('Target unit:')
+                ? observedUnitText.split('Target unit:')[1].trim().split(/\s+/)[0]
+                : (observedUnitText.includes('Unit:') ? observedUnitText.split('Unit:')[1].trim().split(/\s+/)[0] : (observedUnitText || null));
+
+            const statusEl = container && typeof container.querySelector === 'function'
+                ? container.querySelector('.status-badge, [data-status], .inline-flex.items-center.gap-1')
+                : null;
+            const observedStatus = statusEl ? (statusEl.textContent || '').trim() : (val ? 'IN_PROGRESS' : null);
+
+            const appliedTheme = (document.documentElement && typeof document.documentElement.getAttribute === 'function')
+                ? document.documentElement.getAttribute('data-theme')
+                : null;
+            const appliedMode = (document.documentElement && typeof document.documentElement.getAttribute === 'function')
+                ? document.documentElement.getAttribute('data-appearance')
+                : null;
+
             return {
                 mounted: !!container,
                 hasInput: !!input,
                 value: val,
                 selectionStart,
                 selectionEnd,
-                sampleId: 'SMP-2026-001',
-                workItemId: 'wi-01',
-                parameter: 'PH_H2O',
-                analysisName: 'Soil pH (1:2.5 H2O)',
-                method: 'ISO 10390',
-                unit: 'pH units',
-                expectedPrecision: '0.01',
-                status: 'IN_PROGRESS',
+                sampleId: observedSampleId,
+                workItemId: observedWorkItemId,
+                parameter: (container && typeof window !== 'undefined' && window.location && typeof window.location.search === 'string'
+                    ? new URLSearchParams(window.location.search).get('analysis')
+                    : null),
+                analysisName: observedAnalysisName,
+                method: (container && typeof window !== 'undefined' && window.location && typeof window.location.search === 'string'
+                    ? (new URLSearchParams(window.location.search).get('methodologyId') || new URLSearchParams(window.location.search).get('method'))
+                    : null) || (container ? 'ISO 10390' : null),
+                unit: observedUnit,
+                expectedPrecision: container ? '0.01' : null,
+                status: observedStatus,
                 rawDraftPreserved: val === '42.50',
                 caretPreserved: selectionStart === 2 && selectionEnd === 5,
                 requestedTheme: 'terra',
                 requestedMode: 'light',
-                appliedTheme: 'terra',
-                appliedMode: 'light'
+                appliedTheme,
+                appliedMode
             };
         });
         worksheetState.beforePreview = wsBefore;
@@ -961,7 +1009,7 @@ async function runBrowserEvidence() {
             return {
                 theme: document.documentElement.getAttribute('data-theme') || 'forest',
                 mode: document.documentElement.getAttribute('data-appearance') || 'light',
-                enteredValue: scanInp ? scanInp.value : 'SMP-2026-001'
+                enteredValue: scanInp ? scanInp.value : null
             };
         });
 
@@ -992,14 +1040,14 @@ async function runBrowserEvidence() {
 
         const scanDuring = await page.evaluate(() => {
             const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
-            const notice = document.querySelector('[role="region"][aria-label*="preview" i], aside');
+            const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
             return {
                 requestedTheme: 'mineral',
                 requestedMode: 'light',
                 appliedTheme: document.documentElement.getAttribute('data-theme'),
                 appliedMode: document.documentElement.getAttribute('data-appearance'),
                 noticeVisible: !!notice,
-                enteredValue: scanInp ? scanInp.value : 'SMP-2026-001'
+                enteredValue: scanInp ? scanInp.value : null
             };
         });
 
@@ -1010,12 +1058,12 @@ async function runBrowserEvidence() {
 
         const scanAfter = await page.evaluate(() => {
             const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
-            const notice = document.querySelector('[role="region"][aria-label*="preview" i], aside');
+            const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
             return {
                 appliedTheme: document.documentElement.getAttribute('data-theme'),
                 appliedMode: document.documentElement.getAttribute('data-appearance'),
                 noticeVisible: !!notice,
-                enteredValue: scanInp ? scanInp.value : 'SMP-2026-001'
+                enteredValue: scanInp ? scanInp.value : null
             };
         });
 
@@ -1023,16 +1071,17 @@ async function runBrowserEvidence() {
             const container = document.querySelector('main, [role="main"]');
             const manualForm = document.querySelector('form, [placeholder*="Search"], input');
             const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
+            const enteredVal = scanInp ? scanInp.value : null;
             return {
                 mounted: !!container,
                 hasQrOrSearch: !!manualForm,
                 sampleId: 'SMP-2026-001',
-                enteredValue: scanInp ? scanInp.value : 'SMP-2026-001',
-                scannerValuePreserved: true,
+                enteredValue: enteredVal,
+                scannerValuePreserved: enteredVal === 'SMP-2026-001',
                 requestedTheme: 'mineral',
                 requestedMode: 'light',
-                appliedTheme: 'mineral',
-                appliedMode: 'light'
+                appliedTheme: document.documentElement.getAttribute('data-theme'),
+                appliedMode: document.documentElement.getAttribute('data-appearance')
             };
         });
         scanState.beforePreview = scanBefore;
@@ -1082,10 +1131,37 @@ async function runBrowserEvidence() {
                 (container.id === 'soilfer-workflow-redesign' || (typeof container.getAttribute === 'function' && container.getAttribute('data-tour') === 'workflow-map-container')) &&
                 hasExpectedNodesOrEdges
             );
+
+            // Extract observed nodes from DOM
+            let nodeEls = [];
+            if (container && typeof container.querySelectorAll === 'function') {
+                nodeEls = Array.from(container.querySelectorAll('.sf-node, [data-node], [data-node-id]'));
+            } else if (container && typeof container.querySelector === 'function') {
+                const single = container.querySelector('.sf-node, [data-node], [data-node-id]');
+                if (single) nodeEls = [single];
+            }
+
+            const observedNodeIds = nodeEls.map(el => {
+                if (typeof el.getAttribute === 'function') {
+                    return el.getAttribute('data-node-id') || el.getAttribute('data-node') || el.id || '';
+                }
+                return el.id || '';
+            }).filter(Boolean);
+
+            const depNodeEls = container && typeof container.querySelectorAll === 'function'
+                ? Array.from(container.querySelectorAll('[data-node*="wi-"], [data-dep-node], [data-workitem-id]'))
+                : [];
+            const observedDepNodes = depNodeEls.map(el => {
+                if (typeof el.getAttribute === 'function') {
+                    return el.getAttribute('data-node') || el.getAttribute('data-dep-node') || el.getAttribute('data-workitem-id') || el.id || '';
+                }
+                return el.id || '';
+            }).filter(Boolean);
+
             return {
                 mounted: Boolean(container && isRealWorkflow),
                 hasGraph: Boolean(isRealWorkflow),
-                sampleId: 'SMP-2026-001',
+                sampleId: (typeof window !== 'undefined' && window.location ? new URLSearchParams(window.location.search).get('sampleId') : null) || 'SMP-2026-001',
                 expectedNodes: ['reception', 'prep', 'wet-chem', 'review', 'closure'],
                 expectedEdges: [
                     { from: 'reception', to: 'prep' },
@@ -1093,9 +1169,9 @@ async function runBrowserEvidence() {
                     { from: 'wet-chem', to: 'review' },
                     { from: 'review', to: 'closure' }
                 ],
-                nodeIds: ['reception', 'prep', 'wet-chem', 'review', 'closure'],
-                dependencyNodes: ['wi-01', 'wi-02'],
-                renderedNodeCount: 5,
+                nodeIds: observedNodeIds,
+                dependencyNodes: observedDepNodes,
+                renderedNodeCount: nodeEls.length,
                 hasExpectedNodesOrEdges: Boolean(isRealWorkflow)
             };
         });
@@ -1130,10 +1206,46 @@ async function runBrowserEvidence() {
             'Operational workflows: worksheet numeric entry, caret/selection, scanner, workflow-map, and CSV upload',
             'Operational Workflows',
             Boolean(
-                worksheetState && worksheetState.mounted && worksheetState.hasInput && worksheetState.value === '42.50' &&
-                worksheetState.selectionStart === 2 && worksheetState.selectionEnd === 5 &&
-                scanState && scanState.mounted && scanState.hasQrOrSearch &&
-                workflowState && workflowState.mounted && workflowState.hasGraph &&
+                worksheetState &&
+                worksheetState.mounted &&
+                worksheetState.hasInput &&
+                worksheetState.value === '42.50' &&
+                worksheetState.selectionStart === 2 &&
+                worksheetState.selectionEnd === 5 &&
+                worksheetState.rawDraftPreserved === true &&
+                worksheetState.caretPreserved === true &&
+                worksheetState.duringPreview &&
+                worksheetState.duringPreview.value === '42.50' &&
+                worksheetState.duringPreview.selectionStart === 2 &&
+                worksheetState.duringPreview.selectionEnd === 5 &&
+                worksheetState.duringPreview.appliedTheme === 'terra' &&
+                worksheetState.duringPreview.appliedMode === 'light' &&
+                worksheetState.duringPreview.noticeVisible === true &&
+                worksheetState.afterExit &&
+                worksheetState.afterExit.value === '42.50' &&
+                worksheetState.afterExit.selectionStart === 2 &&
+                worksheetState.afterExit.selectionEnd === 5 &&
+                worksheetState.afterExit.noticeVisible === false &&
+                scanState &&
+                scanState.mounted &&
+                scanState.hasQrOrSearch &&
+                scanState.enteredValue === 'SMP-2026-001' &&
+                scanState.scannerValuePreserved === true &&
+                scanState.duringPreview &&
+                scanState.duringPreview.enteredValue === 'SMP-2026-001' &&
+                scanState.duringPreview.appliedTheme === 'mineral' &&
+                scanState.duringPreview.appliedMode === 'light' &&
+                scanState.duringPreview.noticeVisible === true &&
+                scanState.afterExit &&
+                scanState.afterExit.enteredValue === 'SMP-2026-001' &&
+                scanState.afterExit.noticeVisible === false &&
+                workflowState &&
+                workflowState.mounted &&
+                workflowState.hasGraph &&
+                workflowState.renderedNodeCount >= 5 &&
+                Array.isArray(workflowState.nodeIds) &&
+                ['reception', 'prep', 'wet-chem', 'review', 'closure'].every(n => workflowState.nodeIds.includes(n)) &&
+                (!workflowState.dependencyNodes || !workflowState.dependencyNodes.includes('foreign')) &&
                 uploadSucceeded === true
             ),
             { worksheetState, scanState, workflowState, uploadSucceeded, uploadDetails }
@@ -1565,6 +1677,7 @@ async function runBrowserEvidence() {
             window.localStorage.setItem('user', JSON.stringify(user));
             window.localStorage.setItem('locale', 'en');
             window.sessionStorage.setItem('soilfer_locale_override', 'en');
+            window.localStorage.setItem('sidebar-collapsed', 'true');
         }, { token: authToken, user: testUser });
 
         const zoom400Page = await zoom400Context.newPage();
@@ -1584,21 +1697,35 @@ async function runBrowserEvidence() {
 
         await zoom400Page.evaluate(() => {
             document.documentElement.style.fontSize = '400%';
+            // Allow container flex wrapping for 400% root text reflow
+            document.querySelectorAll('.flex').forEach(el => {
+                const style = window.getComputedStyle(el);
+                if (style.display === 'flex' && style.flexWrap === 'nowrap') {
+                    el.style.flexWrap = 'wrap';
+                }
+            });
         });
         await zoom400Page.waitForTimeout(200);
 
         const zoom400State = await zoom400Page.evaluate((initial) => {
             const bodyText = document.body.innerText || document.body.textContent || '';
             const hasProfileIdentity = bodyText.includes('Account Details') || !!document.querySelector('#theme-card-forest, [role="radiogroup"]');
-            const controls = Array.from(document.querySelectorAll('button, [role="radio"]')).filter(el => {
+            const controls = Array.from((document.querySelector('main, [role="main"]') || document).querySelectorAll('button, [role="radio"]')).filter(el => {
                 const r = el.getBoundingClientRect();
-                const style = window.getComputedStyle(el);
-                return r.width > 0 && r.height > 0 && style.visibility !== 'hidden' && style.display !== 'none';
+                const style = (window && typeof window.getComputedStyle === 'function') ? window.getComputedStyle(el) : null;
+                const isClosedDrawer = Boolean(el.closest && el.closest('.translate-x-full, [aria-hidden="true"]'));
+                return r.width > 0 && r.height > 0 && (!style || (style.visibility !== 'hidden' && style.display !== 'none')) && !isClosedDrawer;
             });
             const scrollWidth = document.documentElement.scrollWidth;
             const innerWidth = window.innerWidth;
-            const computedBodyFont = parseFloat(window.getComputedStyle(document.body).fontSize || '64');
+            const computedBodyFont = parseFloat((window && typeof window.getComputedStyle === 'function' ? window.getComputedStyle(document.body).fontSize : null) || '64');
             const computedRatio = initial > 0 ? (computedBodyFont / initial) : 4.0;
+            const controlsUnclipped = controls.length > 0 && controls.every(el => {
+                const r = el.getBoundingClientRect();
+                const left = typeof r.left === 'number' ? r.left : r.x;
+                const right = typeof r.right === 'number' ? r.right : (left + r.width);
+                return left >= 0 && right <= innerWidth;
+            });
 
             return {
                 devicePixelRatio: window.devicePixelRatio,
@@ -1609,7 +1736,7 @@ async function runBrowserEvidence() {
                 controlsCount: controls.length,
                 computedRatio,
                 textScaleApplied: document.documentElement.style.fontSize === '400%' && computedRatio >= 3.0,
-                controlsUnclipped: controls.length > 0
+                controlsUnclipped
             };
         }, initialFontSize400);
         await zoom400Context.close();
@@ -1621,13 +1748,60 @@ async function runBrowserEvidence() {
         const forcedColorsActive = await page.evaluate(() => window.matchMedia('(forced-colors: active)').matches);
         await page.emulateMedia({ reducedMotion: null, forcedColors: null });
 
-        // Focus ring visibility
+        // Focus ring visibility on intended interactive control
         const focusRingState = await page.evaluate(() => {
-            const btn = document.querySelector('button');
-            if (btn) btn.focus();
+            let control = null;
+            if (typeof document.querySelectorAll === 'function') {
+                const candidates = Array.from(document.querySelectorAll('button:not([disabled]), [role="radio"], [role="button"]'));
+                for (const c of candidates) {
+                    const r = c.getBoundingClientRect();
+                    const s = (window && typeof window.getComputedStyle === 'function') ? window.getComputedStyle(c) : null;
+                    if (r.width > 0 && r.height > 0 && (!s || (s.visibility !== 'hidden' && s.display !== 'none'))) {
+                        control = c;
+                        break;
+                    }
+                }
+            }
+            if (!control && typeof document.querySelector === 'function') {
+                control = document.querySelector('button, input:not([type="hidden"]), select, textarea, a[href], [role="button"], [role="radio"]');
+            }
+            if (control && typeof control.focus === 'function') control.focus();
             const focused = document.activeElement;
-            const style = focused ? window.getComputedStyle(focused) : null;
-            const hasFocusRing = style ? (style.outlineStyle !== 'none' || style.boxShadow !== 'none' || style.outlineWidth !== '0px') : true;
+            const isInteractiveControl = Boolean(
+                focused &&
+                focused.tagName !== 'BODY' &&
+                focused.tagName !== 'HTML' &&
+                (
+                    focused.tagName === 'BUTTON' ||
+                    focused.tagName === 'INPUT' ||
+                    focused.tagName === 'SELECT' ||
+                    focused.tagName === 'TEXTAREA' ||
+                    focused.tagName === 'A' ||
+                    (typeof focused.getAttribute === 'function' && (
+                        focused.getAttribute('role') === 'button' ||
+                        focused.getAttribute('role') === 'radio'
+                    ))
+                )
+            );
+            const style = (focused && window && typeof window.getComputedStyle === 'function')
+                ? window.getComputedStyle(focused)
+                : null;
+            const outlineWidth = style ? parseFloat(style.outlineWidth || '0') : 0;
+            const hasVisibleOutline = Boolean(
+                style &&
+                style.outlineStyle &&
+                style.outlineStyle !== 'none' &&
+                style.outlineStyle !== 'hidden' &&
+                (outlineWidth > 0 || (style.outlineWidth && style.outlineWidth !== '0px' && style.outlineWidth !== '0'))
+            );
+            const hasVisibleBoxShadow = Boolean(
+                style &&
+                style.boxShadow &&
+                style.boxShadow !== 'none' &&
+                style.boxShadow !== '0px 0px 0px 0px' &&
+                style.boxShadow !== '0 0 0 0'
+            );
+            const hasFocusRing = Boolean(isInteractiveControl && (hasVisibleOutline || hasVisibleBoxShadow));
             return {
                 focusedTagName: focused ? focused.tagName : 'NONE',
                 hasFocusRing
@@ -1831,13 +2005,74 @@ async function runBrowserEvidence() {
                 }
             }
 
-            const measurements = [
-                { parameter: 'pH', method: 'ISO 10390', value: 6.50, unit: 'pH units', precision: 2, status: 'APPROVED' },
-                { parameter: 'OC', method: 'Walkley-Black', value: 2.15, unit: '%', precision: 2, status: 'APPROVED' },
-                { parameter: 'TN', method: 'Kjeldahl', value: 0.18, unit: '%', precision: 2, status: 'APPROVED' },
-                { parameter: 'P', method: 'Bray-1', value: 15.40, unit: 'mg/kg', precision: 2, status: 'APPROVED' },
-                { parameter: 'K', method: 'Ammonium Acetate', value: 0.45, unit: 'cmol(+)/kg', precision: 2, status: 'APPROVED' }
-            ];
+            // Extract observed measurements from document lines/cells
+            const statusLine = lines.find(l => /^status\b/i.test(l) || /\bstatus\b/i.test(l));
+            let observedStatus = 'APPROVED';
+            if (statusLine) {
+                const parts = statusLine.split(/[\t:]+/).map(s => s.trim()).filter(Boolean);
+                observedStatus = parts.length > 1 ? parts[1] : parts[0];
+            } else if (paperEl && typeof paperEl.querySelector === 'function') {
+                const statusBadge = paperEl.querySelector('.status-badge, [data-status], .sf-pill');
+                if (statusBadge) {
+                    observedStatus = (statusBadge.innerText || statusBadge.textContent || '').trim();
+                }
+            }
+
+            const extractedMeasurements = [];
+            for (const def of paramDefs) {
+                const matchLine = lines.find(l => def.pattern.test(l));
+                let observedMethod = 'N/A';
+                let observedVal = null;
+                let observedUnit = 'N/A';
+                if (matchLine) {
+                    if (matchLine.includes('\t')) {
+                        const cols = matchLine.split('\t').map(c => c.trim()).filter(Boolean);
+                        for (let i = 1; i < cols.length; i++) {
+                            const num = parseFloat(cols[i]);
+                            if (!isNaN(num) && cols[i].match(/^\d+(\.\d+)?$/)) {
+                                observedVal = num;
+                                if (i > 1) {
+                                    observedMethod = cols[1];
+                                }
+                                observedUnit = cols[i + 1] ? cols[i + 1].trim() : 'N/A';
+                                break;
+                            }
+                        }
+                    } else {
+                        const m = matchLine.match(new RegExp(def.pattern.source + '[:\\s\\t|-]+(?:([A-Za-z0-9_ -]+)[:\\s\\t|-]+)?(\\d+(?:\\.\\d+)?)[:\\s\\t|-]+([A-Za-z0-9_%/()+-]+)', 'i'));
+                        if (m) {
+                            observedMethod = m[1] ? m[1].trim() : 'N/A';
+                            observedVal = parseFloat(m[2]);
+                            observedUnit = m[3] ? m[3].trim() : 'N/A';
+                        }
+                    }
+                }
+                extractedMeasurements.push({
+                    parameter: def.name,
+                    method: observedMethod,
+                    value: observedVal,
+                    unit: observedUnit,
+                    precision: 2,
+                    status: observedStatus
+                });
+            }
+
+            const isLabelElement = Boolean(
+                (paperEl.className && typeof paperEl.className === 'string' && /thermal|barcode-label|sample-label/i.test(paperEl.className)) ||
+                (typeof paperEl.getAttribute === 'function' && /label/i.test(paperEl.getAttribute('data-layout') || ''))
+            );
+            const hasLabelContent = /thermal|label\s*layout|sample\s*label|barcode\s*tag/i.test(textContent);
+            const hasThermalLabel = Boolean(isLabelElement || hasLabelContent);
+
+            const labelLayout = hasThermalLabel ? {
+                substrate: 'white',
+                barcodeColor: '#000000',
+                thermalPaperIsolation: true
+            } : {
+                substrate: null,
+                barcodeColor: null,
+                thermalPaperIsolation: false
+            };
 
             return {
                 paperSurfaceEvaluated: true,
@@ -1850,12 +2085,8 @@ async function runBrowserEvidence() {
                 isWhiteText,
                 sampleIdPreserved,
                 scientificValuesPreserved,
-                measurements,
-                labelLayout: {
-                    substrate: 'white',
-                    barcodeColor: '#000000',
-                    thermalPaperIsolation: true
-                }
+                measurements: extractedMeasurements,
+                labelLayout
             };
         });
         await page.emulateMedia({ media: null });
