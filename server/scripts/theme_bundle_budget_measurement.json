@@ -2,8 +2,8 @@
   "baselineCommit": "1265e8a",
   "baselineTree": "260975e57d0b3a1389f622c2f84ef444f3f46cf4",
   "baselineClientTree": "bffc1d55ebf9dbbcad5c5c8530794bede9b1f77e",
-  "candidateCommit": "a2d267c1eca975f9d95fb618fca25e170752319d",
-  "candidateTree": "ac1d624f75fa571f8beaf22b00072a4cfe03c373",
+  "candidateCommit": "dced48aab5fa969e4337a82d047b4f668269402e",
+  "candidateTree": "6394deda1c539f0ad3aa81de7301d2b6575e884b",
   "candidateClientTree": "d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b",
   "buildInputCommit": "8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7",
   "buildInputClientTree": "d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b",
@@ -17,7 +17,7 @@
     "appearanceTokensCssPath": "client/src/styles/appearance-tokens.css",
     "appearanceTokensCssSha256": "fe67c691a44538a9816a64d6ba93b3dbd1c40769774dca5eb060a1d499e88263"
   },
-  "measuredAt": "2026-10-01T15:51:52.511Z",
+  "measuredAt": "2026-10-01T16:22:31.724Z",
   "baseline": {
     "css": {
       "file": "index-B4HqGI8K.css",

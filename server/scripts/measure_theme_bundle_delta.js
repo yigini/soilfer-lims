@@ -54,13 +54,13 @@ let currentMetrics = getDistMetrics(distDir);
 
 const candidateClientTree = execSync('git rev-parse HEAD:client', { cwd: root, encoding: 'utf8' }).trim();
 
-// Verified build manifest from candidate client distribution (commit 8e4d035, client tree d30e019 under Vite 5.3.1 / Node v24.13.0)
+// Verified build manifest from candidate client distribution (commit 8e4d035, client tree d30e019 under Vite 5.4.21 [declared ^5.3.1] / Node v24.13.0)
 const VERIFIED_BUILD_MANIFEST = {
     buildInputCommit: '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7',
     clientTree: 'd30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b',
     toolchain: {
         node: 'v24.13.0',
-        vite: '5.3.1',
+        vite: '5.4.21',
         buildCmd: 'npm run build'
     },
     dependencyLockfileSha256: 'c2bf38c195a5a5a2a5d5c2835b5b5d26ffa1650b8d5cda45dee537ff553258ae',

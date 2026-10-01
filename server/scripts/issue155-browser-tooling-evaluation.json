@@ -1,6 +1,6 @@
 {
-  "executedAt": "2026-10-01T15:45:09.274Z",
-  "browserVersion": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+  "executedAt": "2026-10-01T16:18:21.342Z",
+  "browserVersion": "HeadlessChrome/153.0.8010.48",
   "chromePath": "C:/Program Files/Google/Chrome/Application/chrome.exe",
   "webglInfo": {
     "supported": true,
@@ -15,7 +15,7 @@
     "count": 0,
     "videoInputCount": 0,
     "physicalCameraAvailable": false,
-    "status": "NO_PHYSICAL_CAMERA_IN_HEADLESS"
+    "status": "MEDIA_DEVICES_NOT_SUPPORTED"
   },
   "webSocketServerWiring": {
     "sourceFile": "server/index.js",

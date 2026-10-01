@@ -3688,11 +3688,6 @@ async function runBrowserEvidence() {
                 if (peakMarkers && peakMarkers.length > 0) {
                     observedSelectedPeaks = Array.from(peakMarkers).map(el => Number(el.getAttribute('data-peak') || el.getAttribute('cx'))).filter(n => !isNaN(n));
                 }
-                if (observedSelectedPeaks.length === 0) {
-                    observedSelectedPeaks = [1450, 1620];
-                }
-            } else if (renderedSeriesVerified) {
-                observedSelectedPeaks = [1450, 1620];
             }
 
             return {
@@ -3838,6 +3833,15 @@ async function runBrowserEvidence() {
                     }
                 }
 
+                let transitionPeaks = [];
+                const svgEl = document.querySelector ? document.querySelector('svg.recharts-surface, .recharts-wrapper svg, svg') : null;
+                if (svgEl && typeof svgEl.querySelectorAll === 'function') {
+                    const peakMarkers = svgEl.querySelectorAll('.recharts-active-dot, [data-peak], circle[r], .sf-peak-marker');
+                    if (peakMarkers && peakMarkers.length > 0) {
+                        transitionPeaks = Array.from(peakMarkers).map(el => Number(el.getAttribute('data-peak') || el.getAttribute('cx'))).filter(n => !isNaN(n));
+                    }
+                }
+
                 const transitionSucceeded = Boolean(themeApplied && noticeVisible && chartTokensPresent && curveModelValid && specimenVerified);
                 return {
                     variant: `${theme}.${mode}`,
@@ -3852,7 +3856,7 @@ async function runBrowserEvidence() {
                     specimenVerified,
                     sampleId: observedSampleId,
                     pointCount: pts.length,
-                    selectedPeaks: (transitionSucceeded && specimenVerified) ? [1450, 1620] : [],
+                    selectedPeaks: transitionPeaks,
                     transitionSucceeded
                 };
             }, { theme: variant.themeId, mode: variant.mode });
