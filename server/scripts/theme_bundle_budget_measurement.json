@@ -2,20 +2,21 @@
   "baselineCommit": "1265e8a",
   "baselineTree": "260975e57d0b3a1389f622c2f84ef444f3f46cf4",
   "baselineClientTree": "bffc1d55ebf9dbbcad5c5c8530794bede9b1f77e",
-  "candidateCommit": "4c0ed59f4f5700f1981409c180ce4317c558ce5e",
-  "candidateTree": "c0dafdfae59cec6b843231949f7a5d210f9eee52",
+  "candidateCommit": "686ebb4dcabe4dc67ef3fb7389362954826c9e4f",
+  "candidateTree": "0ea9dae3d0d8f50eddfbfdfdb1eab05fc8acb75b",
   "candidateClientTree": "9921a81a647113e53859c80fd06d9f0ca592beb5",
   "buildInputCommit": "4c0ed59f4f5700f1981409c180ce4317c558ce5e",
   "buildInputClientTree": "9921a81a647113e53859c80fd06d9f0ca592beb5",
-  "toolchain": "vite v5.4.21, node v20.18.0 (win32-x64)",
+  "toolchain": "vite v5.4.21, node v24.13.0 (win32-arm64)",
   "cleanBuildVerified": true,
+  "dependencyLockfileSha256": "c2bf38c195a5a5a2a5d5c2835b5b5d26ffa1650b8d5cda45dee537ff553258ae",
   "sourceProvenance": {
     "themeCatalogPath": "client/src/lib/themeCatalog.js",
     "themeCatalogSha256": "d140fa015ef37c4824ec966fc8ababb204028f694034d1eb7c507bf4d1c388bf",
     "appearanceTokensCssPath": "client/src/styles/appearance-tokens.css",
     "appearanceTokensCssSha256": "25be0e303739c18d70e0548d476572c0365df7963f14d2c086958466a4efb246"
   },
-  "measuredAt": "2026-10-01T00:38:03.026Z",
+  "measuredAt": "2026-10-01T01:08:00.775Z",
   "baseline": {
     "css": {
       "file": "index-B4HqGI8K.css",

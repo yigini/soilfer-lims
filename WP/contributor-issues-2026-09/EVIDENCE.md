@@ -3398,16 +3398,17 @@ Laboratory operators can find step-by-step procedures in the following documenta
 - **Verification Evidence**:
   - `server/scripts/verify_issue155_browser_journeys.cjs`: **All 11/11 Browser Suites PASS** with real Headless Google Chrome:
     1. Fourteen-variant computed DOM token and contrast verification (14/14 variants match canonical hex and pass WCAG AA / AAA).
-    2. Actual route and workflow matrix navigation (`/profile`, `/`, `/samples`, `/reception`, `/admin/labs`, `/qa` verified with view-container-scoped text extraction, populated synthetic records, diverse theme/mode bindings across 14 variants, and strict rejection of generic shells or omitted metrics).
+    2. Actual route and workflow matrix navigation (`/profile` [watershed.dark], `/` [soilfer-classic.light], `/samples` [terra.dark], `/reception` [forest.light], `/admin/labs` [mineral.dark], `/qa` [clear-contrast.light] verified with view-container-scoped text extraction, populated synthetic records, canonical theme IDs, and strict rejection of generic shells, omitted metrics, or wrong-variant assignments).
     3. Live preview form input state preservation (unsaved Security tab password input value preserved through preview activation and real Exit Preview button click without DOM injection or forced attribute fallback).
     4. Theme selector entrypoints accessibility and mounting (Header ThemeToggle, Profile, Lab Management).
     5. Confirmation modal auto-focus entry, focus trap boundary wrapping (`Shift+Tab` / `Tab`), Escape key dismissal, and trigger focus restoration.
     6. Mode radiogroup WAI-ARIA roving tabindex (`tabindex="0"` for active, `-1` for inactive) and keyboard navigation (`ArrowRight`, `ArrowLeft`, `Home`, `End`).
     7. Responsive layout reflow down to 320px viewport (320×568 iPhone SE and 390×844) without horizontal window overflow; verified 100% of visible theme controls (all cards, buttons, toggles without slice truncation) meet min-height >= 44px and min-width >= 44px.
     8. Multi-language localization verified across English, Spanish (`es`), Latin American Spanish (`es-419`), French (`fr`), and Portuguese (`pt`), asserting both `document.documentElement.lang` and translated appearance keywords (`Appearance`, `Apariencia`, `Apparence`, `Aparência`).
-    9. Scientific chart tokens (`--sf-chart-1`..`6`) defined in DOM and real public report (`/report/CERT-2026-SOIL-01`) `@media print` styles isolated with strict pure white paper background (`rgb(255, 255, 255)`), dark header text contrast (`rgb(30, 58, 95)`), specimen ID and results preservation, strictly rejecting black paper and white-on-white text fixtures.
-    10. Verification boundaries: Real Chrome browser execution verified; native physical iOS/Android gate recorded as pending under Issue #102.
-    11. Console & Page Integrity: Verified zero uncaught page errors across all browser navigation journeys.
+    9. Scientific chart tokens (`--sf-chart-1`..`6`) defined in DOM and real public report (`/report/CERT-2026-SOIL-01`) `@media print` styles isolated with strict pure white paper background (`rgb(255, 255, 255)`), dark header text contrast (`rgb(30, 58, 95)`), specimen ID and results preservation, strictly rejecting black paper, white-on-white text, and unreadable near-white (`#fefefe`) text fixtures.
+    10. Verification boundaries: Real Chrome browser execution verified; native physical iOS/Android gate recorded as pending under physical hardware constraints (historical issue 102 does not substitute for physical device testing).
+    11. Console & Page Integrity: Verified zero uncaught page errors and zero unexpected console errors across all browser navigation journeys.
+  - Traceable Whole-Site Matrix (`WP/sitewide-theme-library-v1/TRACEABLE-MATRIX.md`): Comprehensive inventory mapping all 45 routes declared in `App.jsx` and 215 source candidates from `SOURCE-INVENTORY.json`, 10 functional areas from Plan Section 7, 14 variants, operating work/input preservation, spectral/charts/maps, and report/certificate print isolation.
   - `server/tests/contracts/theme_appearance_contract.test.js`: **All 19/19 tests PASS**.
   - `server/tests/contracts/theme_preference_api.test.js`: **All 7/7 tests PASS**.
   - `server/tests/security/` (5 suites): **All 80/80 tests PASS** (including `rbac_enforcement.test.js`, `lab_isolation.test.js`, `wiring.test.js`, `auth_token_invalidation.test.js`, `help_lab_isolation.test.js`).
@@ -3428,6 +3429,8 @@ Laboratory operators can find step-by-step procedures in the following documenta
   - Client production build & Reproducible Delta Budget (measured against baseline `1265e8a` via `node server/scripts/measure_theme_bundle_delta.js` with clean build verification):
     - Baseline Assets (`1265e8a`): CSS 203,804 B raw / 33,223 B gzip; Main JS 1,213,087 B raw / 350,033 B gzip; Tree: `260975e57d0b3a1389f622c2f84ef444f3f46cf4`; Client Tree: `bffc1d55ebf9dbbcad5c5c8530794bede9b1f77e`.
     - Candidate Assets: CSS 212,624 B raw / 34,942 B gzip (`b474b563...`, `index-B6ZLjnoc.css`); Main JS 1,252,791 B raw / 361,089 B gzip (`38b06573...`, `index-CZQfW30I.js`); Lazy Gallery JS 25,935 B raw / 6,478 B gzip (`b35c8e8e...`, `ThemeGallery-CGFr0F1k.js`); Clean Client Tree: `9921a81a647113e53859c80fd06d9f0ca592beb5`.
+    - Build Input Commit: `4c0ed59f4f5700f1981409c180ce4317c558ce5e` (client tree `9921a81a647113e53859c80fd06d9f0ca592beb5`).
+    - Toolchain & Locks: Discovered dynamically (`node v24.13.0`, `vite v5.4.21`, lockfile `client/package-lock.json` sha256 `c2bf38c1...`).
     - **1. Plan Budget (Additional CSS + Canonical Theme Catalogue Source Proxy)**: Additional CSS delta (1,719 B gzip / 1.68 KiB) + Canonical Theme Catalogue (`themeCatalog.js`, 3,511 B gzip / 3.43 KiB) = **5,230 B gzip = 5.11 KiB gzip** vs ≤ 15.0 KiB plan budget (+9.89 KiB headroom, **PASSED**).
     - **2. Lazy-Loaded Selector Component**: `ThemeGallery-CGFr0F1k.js` chunk = 25,935 B raw / 6,478 B gzip (6.33 KiB gzip).
     - **3. Complete End-to-End Application Footprint**: Total delta across all production assets including context, toggle, and notice integrations is **19,253 B gzip = 18.80 KiB gzip**.

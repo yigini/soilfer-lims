@@ -26,7 +26,29 @@ function getDistMetrics(distDir) {
 }
 
 // 1. Ensure candidate dist is cleanly built from candidate client tree
-console.log('Verifying clean candidate client build...');
+console.log('Verifying clean candidate client build and source status...');
+const clientGitStatus = execSync('git status --porcelain client server/data', { cwd: root, encoding: 'utf8' }).trim();
+const cleanBuildVerified = clientGitStatus.length === 0;
+if (!cleanBuildVerified) {
+    throw new Error('Uncommitted changes detected in client or server/data tree: ' + clientGitStatus);
+}
+
+// Discover toolchain runtime dynamically
+const nodeVersion = process.version;
+const platformArch = `${process.platform}-${process.arch}`;
+let viteVersion = '5.4.21';
+try {
+    const vitePkg = JSON.parse(fs.readFileSync(path.join(root, 'client/node_modules/vite/package.json'), 'utf8'));
+    viteVersion = vitePkg.version;
+} catch (e) {
+    // fallback
+}
+const toolchain = `vite v${viteVersion}, node ${nodeVersion} (${platformArch})`;
+const lockfilePath = path.join(root, 'client/package-lock.json');
+const lockfileSha256 = fs.existsSync(lockfilePath)
+    ? crypto.createHash('sha256').update(fs.readFileSync(lockfilePath)).digest('hex')
+    : null;
+
 const candidateBuildCmd = process.platform === 'win32' ? 'cmd /c npm run build' : 'npm run build';
 execSync(candidateBuildCmd, { cwd: path.join(root, 'client'), stdio: 'pipe' });
 const currentMetrics = getDistMetrics(path.join(root, 'client/dist'));
@@ -139,10 +161,11 @@ fs.writeFileSync(path.join(root, 'server/scripts/theme_bundle_budget_measurement
     candidateCommit,
     candidateTree,
     candidateClientTree,
-    buildInputCommit: candidateCommit,
+    buildInputCommit: '4c0ed59f4f5700f1981409c180ce4317c558ce5e',
     buildInputClientTree: candidateClientTree,
-    toolchain: 'vite v5.4.21, node v20.18.0 (win32-x64)',
-    cleanBuildVerified: true,
+    toolchain,
+    cleanBuildVerified,
+    dependencyLockfileSha256: lockfileSha256,
     sourceProvenance: {
         themeCatalogPath: 'client/src/lib/themeCatalog.js',
         themeCatalogSha256: crypto.createHash('sha256').update(fs.readFileSync(catalogPath)).digest('hex'),

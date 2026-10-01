@@ -100,7 +100,7 @@ SoilFER-LIMS strictly protects laboratory data integrity, status color semantics
 - **Responsive Layout Design**: The theme gallery and appearance selectors are styled with fluid flex-wrap containers, touch target sizing, and responsive padding to accommodate small viewports down to 320px width.
 - **Touch Target Dimensions**: Primary interactive controls and buttons adhere to 44–48px touch dimensions (`min-h-[44px]` with 44×44px hit-target padding on icon controls including the confirmation modal close button), satisfying WCAG 2.2 Level AA Target Size (Minimum).
 - **Safe Area Insets**: Safe area insets (`env(safe-area-inset-bottom)`) are declared on navigation bars and floating preview notices to prevent obstruction by software keyboards or home indicators.
-- **Physical Device Gate Notice**: Layout reflow and touch sizing are designed and checked via responsive layout adapters and headless build checks. Physical testing on native iOS Safari and Android Chrome hardware remains strictly pending under the Issue #102 hardware gate (physical devices are not available in current execution environments). Production deployment must not claim verified physical mobile execution until verified on physical target hardware.
+- **Physical Device Gate Notice**: Layout reflow and touch sizing are designed and checked via responsive layout adapters and automated headless Chrome checks. Physical testing on native iOS Safari and Android Chrome hardware remains strictly pending under physical hardware constraints (historical Issue #102 is NOT a substitute waiver; physical test devices are not provisioned in current CI/test environments). Production deployment must not claim verified physical mobile execution until verified on physical target hardware.
 
 ---
 

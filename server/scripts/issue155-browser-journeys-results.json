@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-01T00:36:58.033Z",
+  "timestamp": "2026-10-01T01:08:21.329Z",
   "totalCases": 11,
   "totalPassed": 11,
   "allPassed": true,
@@ -153,7 +153,8 @@
             "hasStatusTokens": true
           }
         ],
-        "pageErrorsCount": 0
+        "pageErrorsCount": 0,
+        "unexpectedConsoleErrorsCount": 0
       }
     },
     {
@@ -170,7 +171,7 @@
             "pathname": "/profile",
             "rendered": true,
             "hasNavbar": true,
-            "themeAttr": "ocean",
+            "themeAttr": "watershed",
             "modeAttr": "dark",
             "bodySnippet": "M\nManager Browser\nLAB MANAGER\nLAB-BRW-01\nbrw-mgr-login\nOverview\nSecurity\nMessaging Center\nAppearance\nAccount Details\nUsername\nbrw-mgr-login\nFull Name\nManager Browser\nEmail Address\nMember Since\n01/10/2",
             "isNotFound": false,
@@ -184,7 +185,7 @@
             "pathname": "/",
             "rendered": true,
             "hasNavbar": true,
-            "themeAttr": "sand",
+            "themeAttr": "soilfer-classic",
             "modeAttr": "light",
             "bodySnippet": "LABORATORY MANAGEMENT\nLaboratory overview\n\nIntake approval, analytical assignment, submission review, and final result authorization.\n\nOpen manager task list\nAssigned Laboratory\nLive connection\nRefres",
             "isNotFound": false,
@@ -228,7 +229,7 @@
             "hasNavbar": true,
             "themeAttr": "mineral",
             "modeAttr": "dark",
-            "bodySnippet": "Laboratories\n/\nBrowser Test Laboratory Alpha\nHelp with this lab\nLAB-BRW-01 · GUATEMALA\nBrowser Test Laboratory Alpha\n● Operational\n06:36 PM CST (America/Guatemala)\nYour laboratory. Manage your team, l",
+            "bodySnippet": "Laboratories\n/\nBrowser Test Laboratory Alpha\nHelp with this lab\nLAB-BRW-01 · GUATEMALA\nBrowser Test Laboratory Alpha\n● Operational\n07:08 PM CST (America/Guatemala)\nYour laboratory. Manage your team, l",
             "isNotFound": false,
             "hasViewContainer": true,
             "hasRouteContent": true,
@@ -249,7 +250,8 @@
             "passed": true
           }
         ],
-        "pageErrorsCount": 0
+        "pageErrorsCount": 0,
+        "unexpectedConsoleErrorsCount": 0
       }
     },
     {
@@ -266,7 +268,8 @@
           "currentTheme": "forest",
           "inputPreserved": true
         },
-        "pageErrorsCount": 0
+        "pageErrorsCount": 0,
+        "unexpectedConsoleErrorsCount": 0
       }
     },
     {
@@ -276,7 +279,8 @@
       "details": {
         "hasToggle": true,
         "popoverNavigated": true,
-        "pageErrorsCount": 0
+        "pageErrorsCount": 0,
+        "unexpectedConsoleErrorsCount": 0
       }
     },
     {
@@ -291,7 +295,8 @@
         "tabWrapped": true,
         "escapeDismissed": true,
         "triggerRestored": true,
-        "pageErrorsCount": 0
+        "pageErrorsCount": 0,
+        "unexpectedConsoleErrorsCount": 0
       }
     },
     {
@@ -304,7 +309,8 @@
         "arrowRightOk": true,
         "endKeyOk": true,
         "homeKeyOk": true,
-        "pageErrorsCount": 0
+        "pageErrorsCount": 0,
+        "unexpectedConsoleErrorsCount": 0
       }
     },
     {
@@ -420,7 +426,8 @@
           "innerWidth": 390,
           "noHorizontalOverflow": true
         },
-        "pageErrorsCount": 0
+        "pageErrorsCount": 0,
+        "unexpectedConsoleErrorsCount": 0
       }
     },
     {
@@ -465,7 +472,8 @@
             "bodyTextLength": 1766
           }
         ],
-        "pageErrorsCount": 0
+        "pageErrorsCount": 0,
+        "unexpectedConsoleErrorsCount": 0
       }
     },
     {
@@ -484,7 +492,8 @@
           "sampleIdPreserved": true,
           "scientificValuesPreserved": true
         },
-        "pageErrorsCount": 0
+        "pageErrorsCount": 0,
+        "unexpectedConsoleErrorsCount": 0
       }
     },
     {
@@ -495,18 +504,20 @@
         "executedEnvironment": "Headless Google Chrome (Windows NT / x86_64)",
         "viewportReflowTested": "320x568 (iPhone SE) and 390x844 (Mobile)",
         "touchTargetRequirements": "min-height >= 44px and min-width >= 44px on primary controls",
-        "physicalDeviceGate": "PENDING physical iOS Safari and Android Chrome test devices (per Issue #102)",
-        "pageErrorsCount": 0
+        "physicalDeviceGate": "PENDING physical iOS Safari and Android Chrome test devices (explicit pending gate, historical issue 102 does not substitute)",
+        "pageErrorsCount": 0,
+        "unexpectedConsoleErrorsCount": 0
       }
     },
     {
-      "name": "Zero uncaught page errors across complete browser navigation journeys",
+      "name": "Zero uncaught page errors and zero unexpected console errors across complete browser navigation journeys",
       "category": "Console & Page Integrity",
       "passed": true,
       "details": {
         "uncaughtPageErrors": [],
-        "consoleErrorsCount": 0,
-        "pageErrorsCount": 0
+        "unexpectedConsoleErrors": [],
+        "pageErrorsCount": 0,
+        "unexpectedConsoleErrorsCount": 0
       }
     }
   ]

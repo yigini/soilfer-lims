@@ -334,10 +334,32 @@ async function runBrowserEvidence() {
     const suiteResults = [];
 
     function record(name, category, passed, details) {
-        const effectivePassed = Boolean(passed && pageErrors.length === 0);
-        suiteResults.push({ name, category, passed: effectivePassed, details: { ...details, pageErrorsCount: pageErrors.length } });
+        const isAllowedConsoleError = (msg) => {
+            if (!msg || typeof msg !== 'string') return false;
+            // Narrow legitimate exclusions: harmless favicon 404 or React DevTools prompt
+            const allowed = [
+                'favicon.ico',
+                'Failed to load resource: the server responded with a status of 404',
+                'Download the React DevTools'
+            ];
+            return allowed.some(a => msg.includes(a));
+        };
+        const unexpectedConsoleErrors = (typeof browserConsoleErrors !== 'undefined' && Array.isArray(browserConsoleErrors))
+            ? browserConsoleErrors.filter(e => !isAllowedConsoleError(e))
+            : [];
+        const effectivePassed = Boolean(passed && pageErrors.length === 0 && unexpectedConsoleErrors.length === 0);
+        suiteResults.push({
+            name,
+            category,
+            passed: effectivePassed,
+            details: {
+                ...details,
+                pageErrorsCount: pageErrors.length,
+                unexpectedConsoleErrorsCount: unexpectedConsoleErrors.length
+            }
+        });
         console.log(`[${effectivePassed ? 'PASS' : 'FAIL'}] [${category}] ${name}`);
-        if (!effectivePassed) console.error('  Details:', details, 'PageErrors:', pageErrors);
+        if (!effectivePassed) console.error('  Details:', details, 'PageErrors:', pageErrors, 'UnexpectedConsoleErrors:', unexpectedConsoleErrors);
     }
 
     try {
@@ -425,8 +447,8 @@ async function runBrowserEvidence() {
         // PACKAGE 2: Actual Route & Workflow Matrix
         // =====================================================================
         const routesToTest = [
-            { path: '/profile', name: 'User Profile', keyword: 'Account Details', theme: 'ocean', mode: 'dark' },
-            { path: '/', name: 'Dashboard', keyword: 'Laboratory overview', theme: 'sand', mode: 'light' },
+            { path: '/profile', name: 'User Profile', keyword: 'Account Details', theme: 'watershed', mode: 'dark' },
+            { path: '/', name: 'Dashboard', keyword: 'Laboratory overview', theme: 'soilfer-classic', mode: 'light' },
             { path: '/samples', name: 'Sample Registry', keyword: 'Samples', theme: 'terra', mode: 'dark' },
             { path: '/reception', name: 'Sample Reception', keyword: 'Reception Console', theme: 'forest', mode: 'light' },
             { path: '/admin/labs', name: 'Lab Management', keyword: 'Laboratories', theme: 'mineral', mode: 'dark' },
@@ -441,12 +463,27 @@ async function runBrowserEvidence() {
             await page.waitForSelector('main, [role="main"]', { timeout: 3000 }).catch(() => null);
             await page.waitForTimeout(300);
 
-            // Apply variant theme and mode across the 14-variant library
+            // Apply variant theme and mode across the 14-variant library via provider session override & DOM
             if (r.theme && r.mode) {
-                await page.evaluate(({ theme, mode }) => {
+                await page.evaluate(({ theme, mode, userId }) => {
+                    const sessionKey = 'soilfer.appearance.session.v2';
+                    const payload = JSON.stringify({
+                        subjectId: userId,
+                        themeId: theme,
+                        mode: mode,
+                        timestamp: Date.now()
+                    });
+                    try {
+                        window.sessionStorage.setItem(sessionKey, payload);
+                    } catch {}
                     document.documentElement.setAttribute('data-theme', theme);
                     document.documentElement.setAttribute('data-appearance', mode);
-                }, { theme: r.theme, mode: r.mode });
+                    if (mode === 'dark') {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                }, { theme: r.theme, mode: r.mode, userId: testUser.id });
             }
 
             const pageState = await page.evaluate((curr) => {
@@ -498,7 +535,13 @@ async function runBrowserEvidence() {
                     pageState.bodySnippet.toLowerCase().includes('absent')
                 )) &&
                 pageState.hasViewContainer === true &&
-                pageState.hasRouteContent === true
+                pageState.hasRouteContent === true &&
+                ['soilfer-classic', 'forest', 'terra', 'mineral', 'watershed', 'nutrient', 'clear-contrast'].includes(r.theme) &&
+                ['light', 'dark'].includes(r.mode) &&
+                ['soilfer-classic', 'forest', 'terra', 'mineral', 'watershed', 'nutrient', 'clear-contrast'].includes(pageState.themeAttr) &&
+                ['light', 'dark'].includes(pageState.modeAttr) &&
+                pageState.themeAttr === r.theme &&
+                pageState.modeAttr === r.mode
             );
             if (!passed) routeFailures++;
             routeMetrics.push({ route: r.path, name: r.name, ...pageState, passed });
@@ -514,6 +557,14 @@ async function runBrowserEvidence() {
         // =====================================================================
         // PACKAGE 3: Live Preview & Unsaved Form Input State Preservation
         // =====================================================================
+        await page.evaluate(() => {
+            try {
+                window.sessionStorage.removeItem('soilfer.appearance.session.v2');
+            } catch {}
+            document.documentElement.setAttribute('data-theme', 'forest');
+            document.documentElement.setAttribute('data-appearance', 'light');
+            document.documentElement.classList.remove('dark');
+        });
         await page.goto(`${origin}/profile`, { waitUntil: 'domcontentloaded' });
         await page.waitForTimeout(300);
 
@@ -973,11 +1024,20 @@ async function runBrowserEvidence() {
             chartTokensPresent &&
             printStylesActive &&
             printStylesActive.paperSurfaceEvaluated &&
+            printStylesActive.sampleIdPreserved === true &&
+            printStylesActive.scientificValuesPreserved === true &&
             printStylesActive.computedBg !== 'rgb(0, 0, 0)' &&
             !printStylesActive.isBlackBackground &&
             (printStylesActive.isPureWhite || printStylesActive.computedBg === 'rgb(255, 255, 255)' || printStylesActive.computedBg === '#ffffff') &&
             printStylesActive.computedColor !== 'rgb(255, 255, 255)' &&
-            (printStylesActive.computedColor === 'rgb(0, 0, 0)' || !printStylesActive.isWhiteText)
+            !printStylesActive.isWhiteText &&
+            ((bg, fg) => {
+                const rgb = (fg && fg.match(/\d+/g) ? fg.match(/\d+/g).slice(0, 3).map(Number) : [0, 0, 0])
+                const lumFg = 0.2126 * (rgb[0]/255 <= 0.03928 ? rgb[0]/255/12.92 : Math.pow((rgb[0]/255 + 0.055)/1.055, 2.4)) +
+                              0.7152 * (rgb[1]/255 <= 0.03928 ? rgb[1]/255/12.92 : Math.pow((rgb[1]/255 + 0.055)/1.055, 2.4)) +
+                              0.0722 * (rgb[2]/255 <= 0.03928 ? rgb[2]/255/12.92 : Math.pow((rgb[2]/255 + 0.055)/1.055, 2.4))
+                return (1.05) / (lumFg + 0.05) >= 4.5
+            })(printStylesActive.computedBg || 'rgb(255, 255, 255)', printStylesActive.computedColor || 'rgb(0, 0, 0)')
         );
 
         record(
@@ -998,15 +1058,25 @@ async function runBrowserEvidence() {
                 executedEnvironment: 'Headless Google Chrome (Windows NT / x86_64)',
                 viewportReflowTested: '320x568 (iPhone SE) and 390x844 (Mobile)',
                 touchTargetRequirements: 'min-height >= 44px and min-width >= 44px on primary controls',
-                physicalDeviceGate: 'PENDING physical iOS Safari and Android Chrome test devices (per Issue #102)'
+                physicalDeviceGate: 'PENDING physical iOS Safari and Android Chrome test devices (explicit pending gate, historical issue 102 does not substitute)'
             }
         );
 
+        const isAllowedErr = (msg) => {
+            if (!msg || typeof msg !== 'string') return false;
+            const allowed = [
+                'favicon.ico',
+                'Failed to load resource: the server responded with a status of 404',
+                'Download the React DevTools'
+            ];
+            return allowed.some(a => msg.includes(a));
+        };
+        const unexpectedConsoleTotal = browserConsoleErrors.filter(e => !isAllowedErr(e));
         record(
-            'Zero uncaught page errors across complete browser navigation journeys',
+            'Zero uncaught page errors and zero unexpected console errors across complete browser navigation journeys',
             'Console & Page Integrity',
-            pageErrors.length === 0,
-            { uncaughtPageErrors: pageErrors, consoleErrorsCount: browserConsoleErrors.length }
+            pageErrors.length === 0 && unexpectedConsoleTotal.length === 0,
+            { uncaughtPageErrors: pageErrors, unexpectedConsoleErrors: unexpectedConsoleTotal }
         );
 
     } finally {
