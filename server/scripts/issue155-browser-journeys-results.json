@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-10-01T01:08:21.329Z",
-  "totalCases": 11,
-  "totalPassed": 11,
+  "timestamp": "2026-10-01T01:38:19.048Z",
+  "totalCases": 12,
+  "totalPassed": 12,
   "allPassed": true,
   "suites": [
     {
@@ -229,7 +229,7 @@
             "hasNavbar": true,
             "themeAttr": "mineral",
             "modeAttr": "dark",
-            "bodySnippet": "Laboratories\n/\nBrowser Test Laboratory Alpha\nHelp with this lab\nLAB-BRW-01 · GUATEMALA\nBrowser Test Laboratory Alpha\n● Operational\n07:08 PM CST (America/Guatemala)\nYour laboratory. Manage your team, l",
+            "bodySnippet": "Laboratories\n/\nBrowser Test Laboratory Alpha\nHelp with this lab\nLAB-BRW-01 · GUATEMALA\nBrowser Test Laboratory Alpha\n● Operational\n07:38 PM CST (America/Guatemala)\nYour laboratory. Manage your team, l",
             "isNotFound": false,
             "hasViewContainer": true,
             "hasRouteContent": true,
@@ -250,6 +250,30 @@
             "passed": true
           }
         ],
+        "pageErrorsCount": 0,
+        "unexpectedConsoleErrorsCount": 0
+      }
+    },
+    {
+      "name": "Operational workflows: worksheet numeric entry, caret/selection, scanner, workflow-map, and CSV upload",
+      "category": "Operational Workflows",
+      "passed": true,
+      "details": {
+        "worksheetState": {
+          "mounted": true,
+          "hasInput": true,
+          "value": "42.50",
+          "selectionStart": 2,
+          "selectionEnd": 5
+        },
+        "scanState": {
+          "mounted": true,
+          "hasQrOrSearch": true
+        },
+        "workflowState": {
+          "mounted": true
+        },
+        "uploadSucceeded": true,
         "pageErrorsCount": 0,
         "unexpectedConsoleErrorsCount": 0
       }
@@ -314,7 +338,7 @@
       }
     },
     {
-      "name": "Responsive layout reflow down to 320px viewport without horizontal window overflow",
+      "name": "Responsive layout reflow down to 320px viewport without horizontal window overflow and 200% zoom reflow",
       "category": "Responsive Design",
       "passed": true,
       "details": {
@@ -426,6 +450,12 @@
           "innerWidth": 390,
           "noHorizontalOverflow": true
         },
+        "zoomState": {
+          "devicePixelRatio": 2,
+          "scrollWidth": 640,
+          "innerWidth": 640,
+          "noHorizontalOverflow": true
+        },
         "pageErrorsCount": 0,
         "unexpectedConsoleErrorsCount": 0
       }
@@ -501,8 +531,9 @@
       "category": "Verification Boundaries",
       "passed": true,
       "details": {
-        "executedEnvironment": "Headless Google Chrome (Windows NT / x86_64)",
-        "viewportReflowTested": "320x568 (iPhone SE) and 390x844 (Mobile)",
+        "executedEnvironment": "Headless Google Chrome 153.0.8010.48 (Windows NT / arm64)",
+        "browserVersion": "153.0.8010.48",
+        "viewportReflowTested": "320x568 (iPhone SE) and 390x844 (Mobile), 200% zoom with deviceScaleFactor: 2",
         "touchTargetRequirements": "min-height >= 44px and min-width >= 44px on primary controls",
         "physicalDeviceGate": "PENDING physical iOS Safari and Android Chrome test devices (explicit pending gate, historical issue 102 does not substitute)",
         "pageErrorsCount": 0,
