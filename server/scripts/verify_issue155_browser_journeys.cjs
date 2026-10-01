@@ -2603,15 +2603,25 @@ async function runBrowserEvidence() {
             const expectedMockValues = [0.12, 0.35, 0.58, 0.45, 0.82, 1.15, 0.90, 0.40, 0.25];
             const expectedWavelengths = [4000, 3500, 3000, 2500, 2000, 1500, 1000, 500, 400];
             let seriesModelVerified = false;
+            let endpoints = [];
+            let xs = [];
+            let ys = [];
+            let deltaX = null;
+            let uniformX = null;
+            let axisTicks = [];
+            let calibratedA = null;
+            let calibratedB = null;
+            let maxValDiff = null;
+            let dAttr = '';
 
             if (seriesCurves.length === 1 && observedSampleId === 'SMP-2026-001') {
                 const curveEl = seriesCurves[0];
-                const dAttr = typeof curveEl.getAttribute === 'function' ? (curveEl.getAttribute('d') || '') : '';
-                const endpoints = parseEndpoints(dAttr);
+                dAttr = typeof curveEl.getAttribute === 'function' ? (curveEl.getAttribute('d') || '') : '';
+                endpoints = parseEndpoints(dAttr);
 
                 if (endpoints.length === expectedWavelengthCount) {
-                    const xs = endpoints.map(p => p.x);
-                    const ys = endpoints.map(p => p.y);
+                    xs = endpoints.map(p => p.x);
+                    ys = endpoints.map(p => p.y);
                     const hasUnphysical99 = ys.some(y => Math.abs(y - 99) < 0.1);
 
                     if (!hasUnphysical99) {
@@ -2621,27 +2631,50 @@ async function runBrowserEvidence() {
                             const matchesIndices = xs.every((x, i) => Math.abs(x - i) < 0.05);
                             const matchesWavelengths = xs.every((x, i) => Math.abs(x - expectedWavelengths[i]) < 1.0);
                             if (matchesIndices || matchesWavelengths) {
-                                const maxDiffY = Math.max(...ys.map((y, i) => Math.abs(y - expectedMockValues[i])));
-                                seriesModelVerified = (maxDiffY < 0.02);
+                                maxValDiff = Math.max(...ys.map((y, i) => Math.abs(y - expectedMockValues[i])));
+                                seriesModelVerified = (maxValDiff < 0.02);
                             }
                         } else {
-                            // Pixel coordinates in browser Recharts layout
-                            const monotonicX = xs.every((x, i) => i === 0 || x > xs[i - 1]);
-                            if (monotonicX) {
-                                const n = 9;
-                                const meanVal = expectedMockValues.reduce((a, b) => a + b) / n;
-                                const meanY = ys.reduce((a, b) => a + b) / n;
-                                let cov = 0, varVal = 0;
-                                for (let i = 0; i < n; i++) {
-                                    cov += (expectedMockValues[i] - meanVal) * (ys[i] - meanY);
-                                    varVal += (expectedMockValues[i] - meanVal) ** 2;
+                            // Pixel coordinates in browser Recharts layout:
+                            // 1. Verify X spacing against expected index or wavenumber spacing
+                            const spanX = xs[8] - xs[0];
+                            const isIndexX = spanX > 0 && xs.every((x, i) => Math.abs(x - (xs[0] + (i / 8) * spanX)) < Math.max(1.0, 0.05 * spanX));
+                            const isWavelengthX = spanX > 0 && xs.every((x, i) => Math.abs(x - (xs[0] + ((expectedWavelengths[0] - expectedWavelengths[i]) / (expectedWavelengths[0] - expectedWavelengths[8])) * spanX)) < Math.max(1.0, 0.05 * spanX));
+                            const validX = isIndexX || isWavelengthX;
+
+                            // 2. Calibrate scale and offset from observed Y-axis tick locations
+                            const tickElements = document.querySelectorAll ? document.querySelectorAll('.recharts-yAxis text, g.yAxis text') : [];
+                            for (const t of tickElements) {
+                                const txt = (t.textContent || t.innerText || '').trim();
+                                const val = parseFloat(txt);
+                                if (isNaN(val)) continue;
+                                let py = null;
+                                if (typeof t.getAttribute === 'function' && t.getAttribute('y') !== null) {
+                                    const num = parseFloat(t.getAttribute('y'));
+                                    if (!isNaN(num)) py = num;
                                 }
-                                if (varVal > 1e-6) {
-                                    const A = cov / varVal;
-                                    const B = meanY - A * meanVal;
-                                    // In SVG pixel coordinates, y=0 is at top, so intensity scale A must be negative
-                                    if (A < 0) {
-                                        const maxValDiff = Math.max(...ys.map((y, i) => Math.abs((y - B) / A - expectedMockValues[i])));
+                                if (py === null && typeof t.getBoundingClientRect === 'function') {
+                                    const rect = t.getBoundingClientRect();
+                                    if (rect && typeof rect.y === 'number' && !isNaN(rect.y)) py = rect.y;
+                                    else if (rect && typeof rect.top === 'number' && !isNaN(rect.top)) py = rect.top;
+                                }
+                                if (py !== null) axisTicks.push({ val, py });
+                            }
+
+                            if (validX && axisTicks.length >= 2) {
+                                const nTicks = axisTicks.length;
+                                const meanV = axisTicks.reduce((a, b) => a + b.val, 0) / nTicks;
+                                const meanPy = axisTicks.reduce((a, b) => a + b.py, 0) / nTicks;
+                                let cov = 0, varV = 0;
+                                for (const t of axisTicks) {
+                                    cov += (t.val - meanV) * (t.py - meanPy);
+                                    varV += (t.val - meanV) ** 2;
+                                }
+                                if (varV > 1e-6) {
+                                    calibratedA = cov / varV;
+                                    calibratedB = meanPy - calibratedA * meanV;
+                                    if (calibratedA < 0) {
+                                        maxValDiff = Math.max(...ys.map((y, i) => Math.abs((y - calibratedB) / calibratedA - expectedMockValues[i])));
                                         seriesModelVerified = (maxValDiff < 0.05);
                                     }
                                 }
@@ -2719,6 +2752,15 @@ async function runBrowserEvidence() {
                 const tokens = ['--sf-chart-1', '--sf-chart-2', '--sf-chart-3', '--sf-chart-4', '--sf-chart-5', '--sf-chart-6'];
                 const styles = (typeof window !== 'undefined' && window.getComputedStyle && docEl) ? window.getComputedStyle(docEl) : null;
                 const chartTokensPresent = Boolean(styles && tokens.every(t => Boolean(styles.getPropertyValue(t))));
+                // Specimen verification in svt
+                const sampleEl = document.querySelector ? document.querySelector('h2, .modal-title, [data-sample-id], .font-mono') : null;
+                const sampleText = (sampleEl && (sampleEl.textContent || sampleEl.innerText || (typeof sampleEl.getAttribute === 'function' && sampleEl.getAttribute('data-sample-id')) || '')) || '';
+                const docText = (document.documentElement && (document.documentElement.textContent || document.documentElement.innerText)) || '';
+                const combinedText = (sampleText + ' ' + docText).trim();
+                const sampleMatch = sampleText.match(/SMP-[\w-]+/) || combinedText.match(/SMP-[\w-]+/);
+                const observedSampleId = sampleMatch ? sampleMatch[0] : null;
+                const specimenVerified = (observedSampleId === 'SMP-2026-001');
+
                 const curveEl = document.querySelector ? document.querySelector('path.recharts-line-curve, .recharts-line-curve, path.sf-spectral-trace, [data-trace="spectral"]') : null;
                 const d = curveEl && typeof curveEl.getAttribute === 'function' ? (curveEl.getAttribute('d') || '') : '';
 
@@ -2749,21 +2791,45 @@ async function runBrowserEvidence() {
                                 curveModelValid = (maxDiffY < 0.02);
                             }
                         } else {
-                            const monotonicX = xs.every((x, i) => i === 0 || x > xs[i - 1]);
-                            if (monotonicX) {
-                                const n = 9;
-                                const meanVal = expectedValues.reduce((a, b) => a + b) / n;
-                                const meanY = ys.reduce((a, b) => a + b) / n;
-                                let cov = 0, varVal = 0;
-                                for (let i = 0; i < n; i++) {
-                                    cov += (expectedValues[i] - meanVal) * (ys[i] - meanY);
-                                    varVal += (expectedValues[i] - meanVal) ** 2;
+                            // Pixel coordinates in browser Recharts layout:
+                            const spanX = xs[8] - xs[0];
+                            const isIndexX = spanX > 0 && xs.every((x, i) => Math.abs(x - (xs[0] + (i / 8) * spanX)) < Math.max(1.0, 0.05 * spanX));
+                            const isWavelengthX = spanX > 0 && xs.every((x, i) => Math.abs(x - (xs[0] + ((expectedWavelengths[0] - expectedWavelengths[i]) / (expectedWavelengths[0] - expectedWavelengths[8])) * spanX)) < Math.max(1.0, 0.05 * spanX));
+                            const validX = isIndexX || isWavelengthX;
+
+                            const tickElements = document.querySelectorAll ? document.querySelectorAll('.recharts-yAxis text, g.yAxis text') : [];
+                            const axisTicks = [];
+                            for (const t of tickElements) {
+                                const txt = (t.textContent || t.innerText || '').trim();
+                                const val = parseFloat(txt);
+                                if (isNaN(val)) continue;
+                                let py = null;
+                                if (typeof t.getAttribute === 'function' && t.getAttribute('y') !== null) {
+                                    const num = parseFloat(t.getAttribute('y'));
+                                    if (!isNaN(num)) py = num;
                                 }
-                                if (varVal > 1e-6) {
-                                    const A = cov / varVal;
-                                    const B = meanY - A * meanVal;
-                                    if (A < 0) {
-                                        const maxValDiff = Math.max(...ys.map((y, i) => Math.abs((y - B) / A - expectedValues[i])));
+                                if (py === null && typeof t.getBoundingClientRect === 'function') {
+                                    const rect = t.getBoundingClientRect();
+                                    if (rect && typeof rect.y === 'number' && !isNaN(rect.y)) py = rect.y;
+                                    else if (rect && typeof rect.top === 'number' && !isNaN(rect.top)) py = rect.top;
+                                }
+                                if (py !== null) axisTicks.push({ val, py });
+                            }
+
+                            if (validX && axisTicks.length >= 2) {
+                                const nTicks = axisTicks.length;
+                                const meanV = axisTicks.reduce((a, b) => a + b.val, 0) / nTicks;
+                                const meanPy = axisTicks.reduce((a, b) => a + b.py, 0) / nTicks;
+                                let cov = 0, varV = 0;
+                                for (const t of axisTicks) {
+                                    cov += (t.val - meanV) * (t.py - meanPy);
+                                    varV += (t.val - meanV) ** 2;
+                                }
+                                if (varV > 1e-6) {
+                                    const calibratedA = cov / varV;
+                                    const calibratedB = meanPy - calibratedA * meanV;
+                                    if (calibratedA < 0) {
+                                        const maxValDiff = Math.max(...ys.map((y, i) => Math.abs((y - calibratedB) / calibratedA - expectedValues[i])));
                                         curveModelValid = (maxValDiff < 0.05);
                                     }
                                 }
@@ -2772,7 +2838,7 @@ async function runBrowserEvidence() {
                     }
                 }
 
-                const transitionSucceeded = Boolean(themeApplied && noticeVisible && chartTokensPresent && curveModelValid);
+                const transitionSucceeded = Boolean(themeApplied && noticeVisible && chartTokensPresent && curveModelValid && specimenVerified);
                 return {
                     variant: `${theme}.${mode}`,
                     requestedTheme: theme,
@@ -2783,6 +2849,8 @@ async function runBrowserEvidence() {
                     noticeVisible,
                     chartTokensPresent,
                     curvePreserved: curveModelValid,
+                    specimenVerified,
+                    sampleId: observedSampleId,
                     pointCount: pts.length,
                     transitionSucceeded
                 };
@@ -2819,7 +2887,8 @@ async function runBrowserEvidence() {
             const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
             const docEl = document.documentElement;
             const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
-            return !notice && appliedTheme === 'forest';
+            const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+            return !notice && appliedTheme === 'forest' && appliedMode === 'light';
         }, null, { timeout: 3000 });
 
         spectralSeriesState.variantTransitions = spectralVariantTransitions;
@@ -3152,19 +3221,21 @@ async function runBrowserEvidence() {
                     }
                 }
 
-                const qrVerified = Boolean(
-                    qrImg &&
-                    observedSampleId === 'SMP-2026-001' &&
-                    (decodedPayload ? decodedPayload === observedSampleId : (qrSrc.startsWith('data:image/') || qrSrc.length > 50))
-                );
-
                 let measuredDimensions = null;
                 if (labelEl && typeof labelEl.getBoundingClientRect === 'function') {
                     const rect = labelEl.getBoundingClientRect();
                     measuredDimensions = { width: Math.round(rect.width), height: Math.round(rect.height) };
                 }
+                const dimensionsValid = Boolean(measuredDimensions && measuredDimensions.width >= 200 && measuredDimensions.height >= 100);
 
-                const transitionSucceeded = Boolean(themeApplied && noticeVisible && thermalIsolationPreserved && qrVerified);
+                const qrVerified = Boolean(
+                    qrImg &&
+                    observedSampleId === 'SMP-2026-001' &&
+                    decodedPayload !== null &&
+                    decodedPayload === observedSampleId
+                );
+
+                const transitionSucceeded = Boolean(themeApplied && noticeVisible && thermalIsolationPreserved && qrVerified && (measuredDimensions ? dimensionsValid : true));
                 return {
                     variant: `${theme}.${mode}`,
                     requestedTheme: theme,
@@ -3214,7 +3285,8 @@ async function runBrowserEvidence() {
             const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
             const docEl = document.documentElement;
             const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
-            return !notice && appliedTheme === 'forest';
+            const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+            return !notice && appliedTheme === 'forest' && appliedMode === 'light';
         }, null, { timeout: 3000 });
 
         labelPreviewState.variantTransitions = labelVariantTransitions;
@@ -3235,7 +3307,7 @@ async function runBrowserEvidence() {
                 spectralSeriesState.all14VariantsPreserved === true &&
                 Array.isArray(spectralSeriesState.variantTransitions) &&
                 spectralSeriesState.variantTransitions.length === 14 &&
-                spectralSeriesState.variantTransitions.every(v => v && v.transitionSucceeded === true)
+                spectralSeriesState.variantTransitions.every(v => v && v.transitionSucceeded === true && v.specimenVerified === true && v.curvePreserved === true)
             ) &&
             (typeof labelPreviewState !== 'undefined' && labelPreviewState &&
                 labelPreviewState.rendered === true &&
@@ -3244,9 +3316,10 @@ async function runBrowserEvidence() {
                 labelPreviewState.sampleId === 'SMP-2026-001' &&
                 labelPreviewState.substrate === 'white' &&
                 labelPreviewState.all14VariantsPreserved === true &&
+                labelPreviewState.dimensions && labelPreviewState.dimensions.width >= 200 && labelPreviewState.dimensions.height >= 100 &&
                 Array.isArray(labelPreviewState.variantTransitions) &&
                 labelPreviewState.variantTransitions.length === 14 &&
-                labelPreviewState.variantTransitions.every(v => v && v.transitionSucceeded === true)
+                labelPreviewState.variantTransitions.every(v => v && v.transitionSucceeded === true && v.qrVerified === true && v.thermalIsolationPreserved === true)
             ) &&
             printStylesActive.paperSurfaceEvaluated &&
             printStylesActive.reportId === 'CERT-2026-SOIL-01' &&

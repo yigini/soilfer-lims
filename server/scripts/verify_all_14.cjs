@@ -129,7 +129,11 @@ const validSpectral = {
     intensityRange: '0.05 - 1.25 AU',
     chartTokensEvaluated: ['--sf-chart-1'],
     all14VariantsPreserved: true,
-    variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true }))
+    variantTransitions: Array.from({ length: 14 }, () => ({
+        transitionSucceeded: true,
+        specimenVerified: true,
+        curvePreserved: true
+    }))
 };
 const validLabel = {
     rendered: true,
@@ -140,8 +144,13 @@ const validLabel = {
     barcodeColor: '#000000',
     thermalPaperIsolation: true,
     offlineQrVerified: true,
+    dimensions: { width: 382, height: 204 },
     all14VariantsPreserved: true,
-    variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true }))
+    variantTransitions: Array.from({ length: 14 }, () => ({
+        transitionSucceeded: true,
+        qrVerified: true,
+        thermalIsolationPreserved: true
+    }))
 };
 
 const emptyDoc = { querySelector: () => null, querySelectorAll: () => [], documentElement: {} };
@@ -584,8 +593,13 @@ test('PASS final print gate strictly requires all14 transitions and rejects arbi
         thermalPaperIsolation: true,
         sampleId: 'SMP-2026-001',
         substrate: 'white',
+        dimensions: { width: 382, height: 204 },
         all14VariantsPreserved: true,
-        variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true }))
+        variantTransitions: Array.from({ length: 14 }, () => ({
+            transitionSucceeded: true,
+            qrVerified: true,
+            thermalIsolationPreserved: true
+        }))
     };
     const p = paper(valid);
     assert.equal(printGate(p, ssEmpty, lsValid), false);
@@ -596,7 +610,11 @@ test('PASS final print gate strictly requires all14 transitions and rejects arbi
         sampleId: 'SMP-2026-001',
         wavelengthRange: null,
         all14VariantsPreserved: true,
-        variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true }))
+        variantTransitions: Array.from({ length: 14 }, () => ({
+            transitionSucceeded: true,
+            specimenVerified: true,
+            curvePreserved: true
+        }))
     };
     assert.equal(printGate(p, ssArb, lsValid), false);
 
@@ -606,6 +624,7 @@ test('PASS final print gate strictly requires all14 transitions and rejects arbi
         thermalPaperIsolation: true,
         sampleId: 'SMP-2026-001',
         substrate: 'white',
+        dimensions: { width: 382, height: 204 },
         all14VariantsPreserved: false,
         variantTransitions: []
     };
@@ -615,17 +634,202 @@ test('PASS final print gate strictly requires all14 transitions and rejects arbi
         sampleId: 'SMP-2026-001',
         wavelengthRange: '4000 - 400 cm⁻¹',
         all14VariantsPreserved: true,
-        variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true }))
+        variantTransitions: Array.from({ length: 14 }, () => ({
+            transitionSucceeded: true,
+            specimenVerified: true,
+            curvePreserved: true
+        }))
     };
     assert.equal(printGate(p, ssValid, lsEmpty), false);
     return { emptyTransitionsRejected: true, falseFlagsRejected: true, arbitraryPixelsRejectedByGate: true };
 });
 
-// 41. Observable exit settlement asserts notice removal and restored theme
-test('PASS observable exit settlement asserts notice removal and restored theme', () => {
+// 41. Observable exit settlement asserts notice removal and restored theme and appearance mode
+test('PASS observable exit settlement asserts notice removal and restored theme and appearance mode', () => {
     const span = src.slice(src.indexOf('// PACKAGE 9: Scientific Chart Tokens'), src.indexOf('const printIsolationPassed ='));
-    assert(span.includes('!notice && appliedTheme === \'forest\''));
-    return { observableNoticeRemovalAsserted: true, restoredThemeAsserted: true };
+    assert(span.includes("!notice && appliedTheme === 'forest' && appliedMode === 'light'"));
+    return { observableNoticeRemovalAsserted: true, restoredThemeAsserted: true, restoredModeAsserted: true };
+});
+
+// 42. Independent axis calibration and uniform X spacing reject wrongScalePath (Case 30)
+test('PASS independent axis calibration and uniform X spacing reject wrongScalePath', () => {
+    function spectralDoc(curve) {
+        const svg = { className: 'recharts-surface', getAttribute: k => k === 'class' ? 'recharts-surface' : null };
+        const line = { className: 'recharts-line-curve', getAttribute: k => k === 'class' ? 'recharts-line-curve' : k === 'd' ? curve : null };
+        const x = { className: 'recharts-xAxis', getAttribute: () => 'recharts-xAxis' };
+        const y = { className: 'recharts-yAxis', getAttribute: () => 'recharts-yAxis' };
+        const title = { textContent: 'SMP-2026-001' };
+        const rangeEl = { textContent: '4000 → 400 cm⁻¹' };
+        const ticks = [
+            { textContent: '0', getAttribute: k => k === 'y' ? '200' : null, getBoundingClientRect: () => ({ y: 200 }) },
+            { textContent: '1.2', getAttribute: k => k === 'y' ? '80' : null, getBoundingClientRect: () => ({ y: 80 }) }
+        ];
+        return {
+            querySelector: s => s.includes('h2,') ? title : s.includes('xAxis') ? x : s.includes('yAxis') ? y : svg,
+            querySelectorAll: s => s.includes('recharts-line') ? [line] : s.includes('yAxis text') ? ticks : [rangeEl],
+            documentElement: { textContent: 'SMP-2026-001 Absorbance 4000 → 400 cm⁻¹' }
+        };
+    }
+    const expected = [0.12, 0.35, 0.58, 0.45, 0.82, 1.15, 0.90, 0.40, 0.25];
+    const pathFor = (xs, A, B) => expected.map((v, i) => (i ? 'L' : 'M') + xs[i] + ',' + (A * v + B)).join('');
+    const expectedPixelPath = pathFor([0, 1, 2, 3, 4, 5, 6, 7, 8], -100, 200);
+    const wrongScalePath = pathFor([0, 1, 4, 9, 16, 25, 36, 49, 64], -50, 200);
+
+    const ssCalibrated = collector('spectralSeriesState')(spectralDoc(expectedPixelPath), { getComputedStyle: () => ({ getPropertyValue: () => '#222' }) });
+    const ssWrongScale = collector('spectralSeriesState')(spectralDoc(wrongScalePath), { getComputedStyle: () => ({ getPropertyValue: () => '#222' }) });
+
+    assert.equal(ssCalibrated.renderedSeriesVerified, true);
+    assert.equal(ssWrongScale.renderedSeriesVerified, false);
+    return { expectedPixelPathCalibrated: true, wrongScalePathRejected: true };
+});
+
+// 43. Spectral transition callback strictly rejects wrong specimen SMP-2026-999 (Case 33)
+test('PASS spectral transition callback strictly rejects wrong specimen SMP-2026-999', () => {
+    const span = src.slice(src.indexOf('// PACKAGE 9: Scientific Chart Tokens'), src.indexOf('const printIsolationPassed ='));
+    const m = span.match(/const svt = await page\.evaluate\(\(\{ theme, mode \}\) => \{([\s\S]*?)\n            \}, \{ theme: variant\.themeId, mode: variant\.mode \}\);/);
+    assert(m);
+    const svtFn = new Function('document', 'window', 'theme', 'mode', m[1]);
+
+    const expected = [0.12, 0.35, 0.58, 0.45, 0.82, 1.15, 0.90, 0.40, 0.25];
+    const pathFor = (xs, A, B) => expected.map((v, i) => (i ? 'L' : 'M') + xs[i] + ',' + (A * v + B)).join('');
+    const expectedPixelPath = pathFor([0, 1, 2, 3, 4, 5, 6, 7, 8], -100, 200);
+
+    function spectralDoc(sample) {
+        const svg = { className: 'recharts-surface', getAttribute: k => k === 'class' ? 'recharts-surface' : null };
+        const line = { tagName: 'path', className: 'recharts-line-curve', getAttribute: k => k === 'class' ? 'recharts-line-curve' : k === 'd' ? expectedPixelPath : null };
+        const title = { textContent: sample };
+        const ticks = [
+            { textContent: '0', getAttribute: k => k === 'y' ? '200' : null, getBoundingClientRect: () => ({ y: 200 }) },
+            { textContent: '1.2', getAttribute: k => k === 'y' ? '80' : null, getBoundingClientRect: () => ({ y: 80 }) }
+        ];
+        return {
+            querySelector: s => s.includes('h2,') ? title : s.includes('curve') ? line : s.includes('role=') ? {} : svg,
+            querySelectorAll: s => s.includes('recharts-line') ? [line] : s.includes('yAxis text') ? ticks : [],
+            documentElement: { textContent: sample + ' Absorbance', getAttribute: k => k === 'data-theme' ? 'terra' : 'dark' }
+        };
+    }
+    const mockWin = { getComputedStyle: () => ({ getPropertyValue: () => '#222' }) };
+
+    const svtCorrect = svtFn(spectralDoc('SMP-2026-001'), mockWin, 'terra', 'dark');
+    const svtWrong = svtFn(spectralDoc('SMP-2026-999'), mockWin, 'terra', 'dark');
+
+    assert.equal(svtCorrect.specimenVerified, true);
+    assert.equal(svtCorrect.transitionSucceeded, true);
+    assert.equal(svtWrong.specimenVerified, false);
+    assert.equal(svtWrong.transitionSucceeded, false);
+    return { correctSpecimenAccepted: true, wrongSpecimenRejected: true };
+});
+
+// 44. QR transition callback strictly rejects decoding failure without fallback (Case 31)
+test('PASS QR transition callback strictly rejects decoding failure without fallback', () => {
+    const span = src.slice(src.indexOf('// PACKAGE 9: Scientific Chart Tokens'), src.indexOf('const printIsolationPassed ='));
+    const m = span.match(/const lvt = await page\.evaluate\(\(\{ theme, mode \}\) => \{([\s\S]*?)\n            \}, \{ theme: variant\.themeId, mode: variant\.mode \}\);/);
+    assert(m);
+    const lvtFn = new Function('document', 'window', 'theme', 'mode', m[1]);
+
+    const onePixel = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a8l8AAAAASUVORK5CYII=';
+    const image = { src: onePixel, naturalWidth: 1, naturalHeight: 1, getAttribute: () => onePixel };
+    const label = { textContent: 'SMP-2026-001', querySelector: s => s.includes('font-mono') ? { textContent: 'SMP-2026-001' } : image, getBoundingClientRect: () => ({ width: 382, height: 204 }) };
+    const mockDoc = {
+        documentElement: { getAttribute: k => k === 'data-theme' ? 'terra' : 'dark' },
+        querySelector: s => s.includes('role=') ? {} : label,
+        createElement: () => ({ width: 0, height: 0, getContext: () => ({ drawImage: () => {} }) })
+    };
+    const throwingWin = {
+        getComputedStyle: () => ({ getPropertyValue: () => '#222', backgroundColor: 'rgb(255, 255, 255)', color: 'rgb(0, 0, 0)' }),
+        ZXing: {
+            HTMLCanvasElementLuminanceSource: class {},
+            BinaryBitmap: class {},
+            HybridBinarizer: class {},
+            QRCodeReader: class {
+                decode() { throw new Error('recording required QR decode failure'); }
+            }
+        }
+    };
+
+    const lvtFailed = lvtFn(mockDoc, throwingWin, 'terra', 'dark');
+    assert.equal(lvtFailed.qrVerified, false);
+    assert.equal(lvtFailed.transitionSucceeded, false);
+    return { decoderFailureStrictlyRejected: true, noDataUrlFallback: true };
+});
+
+// 45. Preview exit predicate strictly requires light mode restoration (Case 34)
+test('PASS preview exit predicate strictly requires light mode restoration', () => {
+    const span = src.slice(src.indexOf('// PACKAGE 9: Scientific Chart Tokens'), src.indexOf('const printIsolationPassed ='));
+    const m = span.match(/await page\.waitForFunction\(\(\) => \{([\s\S]*?)return !notice && appliedTheme === 'forest' && appliedMode === 'light';\s*\}, null, \{ timeout: 3000 \}\);/);
+    assert(m);
+    const body = m[1] + "return !notice && appliedTheme === 'forest' && appliedMode === 'light';";
+    const exitFn = new Function('document', body);
+
+    const docRestored = {
+        querySelector: () => null,
+        documentElement: { getAttribute: k => k === 'data-theme' ? 'forest' : k === 'data-appearance' ? 'light' : null }
+    };
+    const docForestDark = {
+        querySelector: () => null,
+        documentElement: { getAttribute: k => k === 'data-theme' ? 'forest' : k === 'data-appearance' ? 'dark' : null }
+    };
+    const docWithNotice = {
+        querySelector: () => ({}),
+        documentElement: { getAttribute: k => k === 'data-theme' ? 'forest' : k === 'data-appearance' ? 'light' : null }
+    };
+
+    assert.equal(exitFn(docRestored), true);
+    assert.equal(exitFn(docForestDark), false);
+    assert.equal(exitFn(docWithNotice), false);
+    return { lightModeExitVerified: true, forestDarkRejected: true, noticePresenceRejected: true };
+});
+
+// 46. Final print gate strictly rejects failed transition verifications (Case 32)
+test('PASS final print gate strictly rejects failed transition verifications', () => {
+    const p = paper(valid);
+    const ssBadTrans = {
+        renderedSeriesVerified: true,
+        seriesCount: 1,
+        sampleId: 'SMP-2026-001',
+        wavelengthRange: '4000 - 400 cm⁻¹',
+        all14VariantsPreserved: true,
+        variantTransitions: Array.from({ length: 14 }, (_, i) => ({
+            transitionSucceeded: i !== 5,
+            specimenVerified: i !== 5,
+            curvePreserved: true
+        }))
+    };
+    assert.equal(printGate(p, ssBadTrans, validLabel), false);
+
+    const lsBadTrans = {
+        rendered: true,
+        offlineQrVerified: true,
+        thermalPaperIsolation: true,
+        sampleId: 'SMP-2026-001',
+        substrate: 'white',
+        dimensions: { width: 382, height: 204 },
+        all14VariantsPreserved: true,
+        variantTransitions: Array.from({ length: 14 }, (_, i) => ({
+            transitionSucceeded: i !== 3,
+            qrVerified: i !== 3,
+            thermalIsolationPreserved: true
+        }))
+    };
+    assert.equal(printGate(p, validSpectral, lsBadTrans), false);
+
+    const lsNoDims = {
+        rendered: true,
+        offlineQrVerified: true,
+        thermalPaperIsolation: true,
+        sampleId: 'SMP-2026-001',
+        substrate: 'white',
+        dimensions: null,
+        all14VariantsPreserved: true,
+        variantTransitions: Array.from({ length: 14 }, () => ({
+            transitionSucceeded: true,
+            qrVerified: true,
+            thermalIsolationPreserved: true
+        }))
+    };
+    assert.equal(printGate(p, validSpectral, lsNoDims), false);
+
+    return { singleFailedSpectralTransitionRejected: true, singleFailedLabelTransitionRejected: true, missingDimensionsRejected: true };
 });
 
 console.log(JSON.stringify({ allCasesPassed: true, casesCompleted: cases.length }));
