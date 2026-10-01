@@ -3798,3 +3798,5 @@ Antigravity completed remediation addressing all findings from Codex's independe
    - Server data tree: `1a2a84457d02d33707f9845da10f9b97995e1377` (ZERO mutations).
    - Completed 630 CSS pairs preserved and closed.
    - Sole-Agy conditional safe-release authority maintained: PR #155 remains unmerged and undeployed awaiting independent acceptance and established gates.
+
+Public https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5929839383 . Remediated candidate 3f6a9e7 pushed, CI 36851666832 running, handoff updated for Codex independent review.
