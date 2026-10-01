@@ -127,7 +127,9 @@ const validSpectral = {
     seriesCount: 1,
     wavelengthRange: '4000 - 400 cm⁻¹',
     intensityRange: '0.05 - 1.25 AU',
-    chartTokensEvaluated: ['--sf-chart-1']
+    chartTokensEvaluated: ['--sf-chart-1'],
+    all14VariantsPreserved: true,
+    variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true }))
 };
 const validLabel = {
     rendered: true,
@@ -137,7 +139,9 @@ const validLabel = {
     substrate: 'white',
     barcodeColor: '#000000',
     thermalPaperIsolation: true,
-    offlineQrVerified: true
+    offlineQrVerified: true,
+    all14VariantsPreserved: true,
+    variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true }))
 };
 
 const emptyDoc = { querySelector: () => null, querySelectorAll: () => [], documentElement: {} };
@@ -498,6 +502,130 @@ test('PASS scientific and label output suite executes all-14 theme/preview itera
     assert(span.includes('spectralSeriesState.variantTransitions = spectralVariantTransitions'));
     assert(span.includes('labelPreviewState.variantTransitions = labelVariantTransitions'));
     return { all14ScientificTransitionsPresent: true, all14LabelTransitionsPresent: true };
+});
+
+// 37. Arbitrary nine-point pixel model without expected data comparison is strictly rejected
+test('PASS arbitrary nine-point pixel model without expected data comparison is strictly rejected', () => {
+    function spectralDoc(curve) {
+        const svg = { className: 'recharts-surface', getAttribute: k => k === 'class' ? 'recharts-surface' : null };
+        const line = { className: 'recharts-line-curve', getAttribute: k => k === 'class' ? 'recharts-line-curve' : k === 'd' ? curve : null };
+        const x = { className: 'recharts-xAxis', getAttribute: () => 'recharts-xAxis' };
+        const y = { className: 'recharts-yAxis', getAttribute: () => 'recharts-yAxis' };
+        const title = { textContent: 'SMP-2026-001' };
+        const rangeEl = { textContent: '4000 → 400 cm⁻¹' };
+        return {
+            querySelector: s => s.includes('h2,') ? title : s.includes('xAxis') ? x : s.includes('yAxis') ? y : svg,
+            querySelectorAll: s => s.includes('recharts-line') ? [line] : s.includes('yAxis text') ? [{ textContent: '0' }, { textContent: '1.2' }] : [rangeEl],
+            documentElement: { textContent: 'SMP-2026-001 Absorbance 4000 → 400 cm⁻¹' }
+        };
+    }
+    const ssArb = collector('spectralSeriesState')(spectralDoc('M0,50L1,51L2,52L3,53L4,54L5,55L6,56L7,57L8,58'), { getComputedStyle: () => ({ getPropertyValue: () => '#222' }) });
+    assert.equal(ssArb.renderedSeriesVerified, false);
+    assert.equal(ssArb.wavelengthRange, null);
+    assert.equal(ssArb.intensityRange, null);
+    return { arbitraryPixelsRejected: true };
+});
+
+// 38. Wrong or scrambled X coordinates are strictly rejected even with valid intensity values
+test('PASS wrong or scrambled X coordinates are strictly rejected even with valid intensity values', () => {
+    function spectralDoc(curve) {
+        const svg = { className: 'recharts-surface', getAttribute: k => k === 'class' ? 'recharts-surface' : null };
+        const line = { className: 'recharts-line-curve', getAttribute: k => k === 'class' ? 'recharts-line-curve' : k === 'd' ? curve : null };
+        const x = { className: 'recharts-xAxis', getAttribute: () => 'recharts-xAxis' };
+        const y = { className: 'recharts-yAxis', getAttribute: () => 'recharts-yAxis' };
+        const title = { textContent: 'SMP-2026-001' };
+        const rangeEl = { textContent: '4000 → 400 cm⁻¹' };
+        return {
+            querySelector: s => s.includes('h2,') ? title : s.includes('xAxis') ? x : s.includes('yAxis') ? y : svg,
+            querySelectorAll: s => s.includes('recharts-line') ? [line] : s.includes('yAxis text') ? [{ textContent: '0' }, { textContent: '1.2' }] : [rangeEl],
+            documentElement: { textContent: 'SMP-2026-001 Absorbance 4000 → 400 cm⁻¹' }
+        };
+    }
+    const ssWrongX = collector('spectralSeriesState')(spectralDoc('M800,0.12L-20,0.35L1,0.58L1,0.45L0,0.82L0,1.15L-99,0.90L200,0.40L700,0.25'), { getComputedStyle: () => ({ getPropertyValue: () => '#222' }) });
+    assert.equal(ssWrongX.renderedSeriesVerified, false);
+    return { wrongXCoordinatesRejected: true };
+});
+
+// 39. Preview transition callbacks reject changed 2-point curve and label without QR
+test('PASS preview transition callbacks reject changed 2-point curve and label without QR', () => {
+    const span = src.slice(src.indexOf('// PACKAGE 9: Scientific Chart Tokens'), src.indexOf('const printIsolationPassed ='));
+    function transition(name) {
+        const m = span.match(new RegExp('const ' + name + ' = await page\\.evaluate\\(\\(\\{ theme, mode \\}\\) => \\{([\\s\\S]*?)\\n            \\},'));
+        assert(m, name);
+        return new Function('document', 'window', 'theme', 'mode', m[1]);
+    }
+    const mockDoc = {
+        documentElement: { getAttribute: k => k === 'data-theme' ? 'terra' : 'dark' },
+        querySelector: s => s.includes('role=') ? {} : s.includes('curve') ? { getAttribute: () => 'M0,50L1,51' } : { className: 'sample-label-page' }
+    };
+    const mockWin = {
+        getComputedStyle: () => ({ getPropertyValue: () => '#222', backgroundColor: 'rgb(255, 255, 255)', color: 'rgb(0, 0, 0)' })
+    };
+    const svtRes = transition('svt')(mockDoc, mockWin, 'terra', 'dark');
+    const lvtRes = transition('lvt')(mockDoc, mockWin, 'terra', 'dark');
+    assert.equal(svtRes.transitionSucceeded, false);
+    assert.equal(lvtRes.transitionSucceeded, false);
+    return { changedTwoPointCurveRejected: true, noQrLabelRejected: true };
+});
+
+// 40. Final print gate strictly requires all14 transitions and rejects arbitrary pixels or empty transition arrays
+test('PASS final print gate strictly requires all14 transitions and rejects arbitrary pixels or empty transition arrays', () => {
+    const ssEmpty = {
+        renderedSeriesVerified: true,
+        seriesCount: 1,
+        sampleId: 'SMP-2026-001',
+        wavelengthRange: '4000 - 400 cm⁻¹',
+        all14VariantsPreserved: false,
+        variantTransitions: []
+    };
+    const lsValid = {
+        rendered: true,
+        offlineQrVerified: true,
+        thermalPaperIsolation: true,
+        sampleId: 'SMP-2026-001',
+        substrate: 'white',
+        all14VariantsPreserved: true,
+        variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true }))
+    };
+    const p = paper(valid);
+    assert.equal(printGate(p, ssEmpty, lsValid), false);
+
+    const ssArb = {
+        renderedSeriesVerified: false,
+        seriesCount: 1,
+        sampleId: 'SMP-2026-001',
+        wavelengthRange: null,
+        all14VariantsPreserved: true,
+        variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true }))
+    };
+    assert.equal(printGate(p, ssArb, lsValid), false);
+
+    const lsEmpty = {
+        rendered: true,
+        offlineQrVerified: true,
+        thermalPaperIsolation: true,
+        sampleId: 'SMP-2026-001',
+        substrate: 'white',
+        all14VariantsPreserved: false,
+        variantTransitions: []
+    };
+    const ssValid = {
+        renderedSeriesVerified: true,
+        seriesCount: 1,
+        sampleId: 'SMP-2026-001',
+        wavelengthRange: '4000 - 400 cm⁻¹',
+        all14VariantsPreserved: true,
+        variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true }))
+    };
+    assert.equal(printGate(p, ssValid, lsEmpty), false);
+    return { emptyTransitionsRejected: true, falseFlagsRejected: true, arbitraryPixelsRejectedByGate: true };
+});
+
+// 41. Observable exit settlement asserts notice removal and restored theme
+test('PASS observable exit settlement asserts notice removal and restored theme', () => {
+    const span = src.slice(src.indexOf('// PACKAGE 9: Scientific Chart Tokens'), src.indexOf('const printIsolationPassed ='));
+    assert(span.includes('!notice && appliedTheme === \'forest\''));
+    return { observableNoticeRemovalAsserted: true, restoredThemeAsserted: true };
 });
 
 console.log(JSON.stringify({ allCasesPassed: true, casesCompleted: cases.length }));

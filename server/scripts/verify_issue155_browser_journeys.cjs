@@ -2601,6 +2601,7 @@ async function runBrowserEvidence() {
             // Expected scientific model comparison against 9 mock wavelength/value pairs
             const expectedWavelengthCount = 9;
             const expectedMockValues = [0.12, 0.35, 0.58, 0.45, 0.82, 1.15, 0.90, 0.40, 0.25];
+            const expectedWavelengths = [4000, 3500, 3000, 2500, 2000, 1500, 1000, 500, 400];
             let seriesModelVerified = false;
 
             if (seriesCurves.length === 1 && observedSampleId === 'SMP-2026-001') {
@@ -2609,20 +2610,42 @@ async function runBrowserEvidence() {
                 const endpoints = parseEndpoints(dAttr);
 
                 if (endpoints.length === expectedWavelengthCount) {
-                    const yCoords = endpoints.map(p => p.y);
-                    const hasUnphysical99 = yCoords.some(y => Math.abs(y - 99) < 0.1);
-                    const maxY = Math.max(...yCoords);
+                    const xs = endpoints.map(p => p.x);
+                    const ys = endpoints.map(p => p.y);
+                    const hasUnphysical99 = ys.some(y => Math.abs(y - 99) < 0.1);
 
                     if (!hasUnphysical99) {
+                        const maxY = Math.max(...ys);
                         if (maxY <= 2.0) {
                             // Direct intensity coordinates (synthetic probe)
-                            const maxDiff = Math.max(...endpoints.map((p, i) => Math.abs(p.y - expectedMockValues[i])));
-                            seriesModelVerified = (maxDiff < 0.02);
+                            const matchesIndices = xs.every((x, i) => Math.abs(x - i) < 0.05);
+                            const matchesWavelengths = xs.every((x, i) => Math.abs(x - expectedWavelengths[i]) < 1.0);
+                            if (matchesIndices || matchesWavelengths) {
+                                const maxDiffY = Math.max(...ys.map((y, i) => Math.abs(y - expectedMockValues[i])));
+                                seriesModelVerified = (maxDiffY < 0.02);
+                            }
                         } else {
                             // Pixel coordinates in browser Recharts layout
-                            const monotonicX = endpoints.every((p, i) => i === 0 || p.x > endpoints[i - 1].x);
-                            const reasonableY = endpoints.every(p => p.y >= 5 && p.y <= 400);
-                            seriesModelVerified = (monotonicX && reasonableY);
+                            const monotonicX = xs.every((x, i) => i === 0 || x > xs[i - 1]);
+                            if (monotonicX) {
+                                const n = 9;
+                                const meanVal = expectedMockValues.reduce((a, b) => a + b) / n;
+                                const meanY = ys.reduce((a, b) => a + b) / n;
+                                let cov = 0, varVal = 0;
+                                for (let i = 0; i < n; i++) {
+                                    cov += (expectedMockValues[i] - meanVal) * (ys[i] - meanY);
+                                    varVal += (expectedMockValues[i] - meanVal) ** 2;
+                                }
+                                if (varVal > 1e-6) {
+                                    const A = cov / varVal;
+                                    const B = meanY - A * meanVal;
+                                    // In SVG pixel coordinates, y=0 is at top, so intensity scale A must be negative
+                                    if (A < 0) {
+                                        const maxValDiff = Math.max(...ys.map((y, i) => Math.abs((y - B) / A - expectedMockValues[i])));
+                                        seriesModelVerified = (maxValDiff < 0.05);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -2694,11 +2717,62 @@ async function runBrowserEvidence() {
                 const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
                 const noticeVisible = Boolean(notice);
                 const tokens = ['--sf-chart-1', '--sf-chart-2', '--sf-chart-3', '--sf-chart-4', '--sf-chart-5', '--sf-chart-6'];
-                const styles = window.getComputedStyle(docEl);
-                const chartTokensPresent = tokens.every(t => Boolean(styles.getPropertyValue(t)));
-                const curveEl = document.querySelector('path.recharts-line-curve, .recharts-line path, path.sf-spectral-trace');
-                const curvePreserved = Boolean(curveEl && curveEl.getAttribute('d'));
-                const transitionSucceeded = Boolean(themeApplied && noticeVisible && chartTokensPresent && curvePreserved);
+                const styles = (typeof window !== 'undefined' && window.getComputedStyle && docEl) ? window.getComputedStyle(docEl) : null;
+                const chartTokensPresent = Boolean(styles && tokens.every(t => Boolean(styles.getPropertyValue(t))));
+                const curveEl = document.querySelector ? document.querySelector('path.recharts-line-curve, .recharts-line-curve, path.sf-spectral-trace, [data-trace="spectral"]') : null;
+                const d = curveEl && typeof curveEl.getAttribute === 'function' ? (curveEl.getAttribute('d') || '') : '';
+
+                const cmds = d.match(/[MLCSQTAZ][^MLCSQTAZ]*/gi) || [];
+                const pts = [];
+                for (const cmd of cmds) {
+                    const type = cmd[0];
+                    if (type === 'Z' || type === 'z') continue;
+                    const nums = (cmd.slice(1).match(/[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?/g) || []).map(Number);
+                    if (nums.length >= 2) pts.push({ x: nums[nums.length - 2], y: nums[nums.length - 1] });
+                }
+
+                const expectedMockValues = [0.12, 0.35, 0.58, 0.45, 0.82, 1.15, 0.90, 0.40, 0.25];
+                const expectedValues = expectedMockValues;
+                const expectedWavelengths = [4000, 3500, 3000, 2500, 2000, 1500, 1000, 500, 400];
+                let curveModelValid = false;
+
+                if (pts.length === 9) {
+                    const xs = pts.map(p => p.x);
+                    const ys = pts.map(p => p.y);
+                    if (!ys.some(y => Math.abs(y - 99) < 0.1)) {
+                        const maxY = Math.max(...ys);
+                        if (maxY <= 2.0) {
+                            const matchesIndices = xs.every((x, i) => Math.abs(x - i) < 0.05);
+                            const matchesWavelengths = xs.every((x, i) => Math.abs(x - expectedWavelengths[i]) < 1.0);
+                            if (matchesIndices || matchesWavelengths) {
+                                const maxDiffY = Math.max(...ys.map((y, i) => Math.abs(y - expectedValues[i])));
+                                curveModelValid = (maxDiffY < 0.02);
+                            }
+                        } else {
+                            const monotonicX = xs.every((x, i) => i === 0 || x > xs[i - 1]);
+                            if (monotonicX) {
+                                const n = 9;
+                                const meanVal = expectedValues.reduce((a, b) => a + b) / n;
+                                const meanY = ys.reduce((a, b) => a + b) / n;
+                                let cov = 0, varVal = 0;
+                                for (let i = 0; i < n; i++) {
+                                    cov += (expectedValues[i] - meanVal) * (ys[i] - meanY);
+                                    varVal += (expectedValues[i] - meanVal) ** 2;
+                                }
+                                if (varVal > 1e-6) {
+                                    const A = cov / varVal;
+                                    const B = meanY - A * meanVal;
+                                    if (A < 0) {
+                                        const maxValDiff = Math.max(...ys.map((y, i) => Math.abs((y - B) / A - expectedValues[i])));
+                                        curveModelValid = (maxValDiff < 0.05);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                const transitionSucceeded = Boolean(themeApplied && noticeVisible && chartTokensPresent && curveModelValid);
                 return {
                     variant: `${theme}.${mode}`,
                     requestedTheme: theme,
@@ -2708,7 +2782,8 @@ async function runBrowserEvidence() {
                     themeApplied,
                     noticeVisible,
                     chartTokensPresent,
-                    curvePreserved,
+                    curvePreserved: curveModelValid,
+                    pointCount: pts.length,
                     transitionSucceeded
                 };
             }, { theme: variant.themeId, mode: variant.mode });
@@ -2730,7 +2805,7 @@ async function runBrowserEvidence() {
                                 curr.memoizedProps.value.clearPreviewTheme();
                                 break;
                             } else if (typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
-                                curr.memoizedProps.value.setPreviewTheme({ themeId: 'soilfer-classic', mode: 'light' });
+                                curr.memoizedProps.value.setPreviewTheme({ themeId: 'forest', mode: 'light' });
                                 break;
                             }
                         }
@@ -2740,7 +2815,12 @@ async function runBrowserEvidence() {
                 }
             }
         });
-        await page.waitForTimeout(100);
+        await page.waitForFunction(() => {
+            const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+            const docEl = document.documentElement;
+            const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+            return !notice && appliedTheme === 'forest';
+        }, null, { timeout: 3000 });
 
         spectralSeriesState.variantTransitions = spectralVariantTransitions;
         spectralSeriesState.all14VariantsPreserved = spectralVariantTransitions.length === 14 && spectralVariantTransitions.every(v => v.transitionSucceeded);
@@ -2970,11 +3050,18 @@ async function runBrowserEvidence() {
                 isPureWhiteBg
             );
 
+            let measuredDimensions = null;
+            if (labelEl && typeof labelEl.getBoundingClientRect === 'function') {
+                const rect = labelEl.getBoundingClientRect();
+                measuredDimensions = { width: Math.round(rect.width), height: Math.round(rect.height) };
+            }
+
             return {
                 rendered,
                 component: 'LabelPrintDialog.jsx',
                 sampleId: observedSampleId,
                 format: rendered ? 'Standard 101x54mm' : null,
+                dimensions: measuredDimensions,
                 substrate: observedSubstrate,
                 barcodeColor: observedBarcodeColor,
                 thermalPaperIsolation,
@@ -3035,7 +3122,49 @@ async function runBrowserEvidence() {
                 const isDarkText = Boolean(color === 'rgb(0, 0, 0)' || color === '#000000' || color.includes('15, 23, 42') || color.includes('30, 41, 59'));
                 const thermalIsolationPreserved = Boolean(isPureWhiteBg && !isBlackBg && isDarkText);
 
-                const transitionSucceeded = Boolean(themeApplied && noticeVisible && thermalIsolationPreserved);
+                // Sample record verification
+                const monoEl = labelEl && labelEl.querySelector ? labelEl.querySelector('.font-mono, [class*="font-mono"]') : null;
+                const labelText = (labelEl && (labelEl.textContent || labelEl.innerText || (typeof labelEl.getAttribute === 'function' && labelEl.getAttribute('data-sample-id')) || '')) || '';
+                const sampleMatch = (monoEl && (monoEl.textContent || monoEl.innerText || '').trim().match(/SMP-\d{4}-\d+/)) || labelText.match(/SMP-\d{4}-\d+/) || labelText.match(/SMP-[\w-]+/);
+                const observedSampleId = sampleMatch ? sampleMatch[0] : null;
+
+                // QR code image verification and decoding
+                const qrImg = labelEl && labelEl.querySelector ? labelEl.querySelector('img[alt*="QR" i], img[src*="data:image"], .qr-code, svg.barcode, [data-testid="label-qr"]') : null;
+                const qrSrc = (qrImg && (qrImg.src || (typeof qrImg.getAttribute === 'function' && qrImg.getAttribute('src')) || '')) || '';
+
+                let decodedPayload = null;
+                if (qrImg && typeof window !== 'undefined' && window.ZXing && typeof document !== 'undefined' && document.createElement) {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = qrImg.naturalWidth || qrImg.width || 240;
+                        canvas.height = qrImg.naturalHeight || qrImg.height || 240;
+                        const ctx = canvas.getContext('2d');
+                        if (ctx) {
+                            ctx.drawImage(qrImg, 0, 0, canvas.width, canvas.height);
+                            const lum = new window.ZXing.HTMLCanvasElementLuminanceSource(canvas);
+                            const bitmap = new window.ZXing.BinaryBitmap(new window.ZXing.HybridBinarizer(lum));
+                            const reader = new window.ZXing.QRCodeReader();
+                            const res = reader.decode(bitmap);
+                            if (res && res.getText) decodedPayload = res.getText();
+                        }
+                    } catch (e) {
+                        decodedPayload = null;
+                    }
+                }
+
+                const qrVerified = Boolean(
+                    qrImg &&
+                    observedSampleId === 'SMP-2026-001' &&
+                    (decodedPayload ? decodedPayload === observedSampleId : (qrSrc.startsWith('data:image/') || qrSrc.length > 50))
+                );
+
+                let measuredDimensions = null;
+                if (labelEl && typeof labelEl.getBoundingClientRect === 'function') {
+                    const rect = labelEl.getBoundingClientRect();
+                    measuredDimensions = { width: Math.round(rect.width), height: Math.round(rect.height) };
+                }
+
+                const transitionSucceeded = Boolean(themeApplied && noticeVisible && thermalIsolationPreserved && qrVerified);
                 return {
                     variant: `${theme}.${mode}`,
                     requestedTheme: theme,
@@ -3045,6 +3174,9 @@ async function runBrowserEvidence() {
                     themeApplied,
                     noticeVisible,
                     thermalIsolationPreserved,
+                    qrVerified,
+                    sampleId: observedSampleId,
+                    dimensions: measuredDimensions,
                     bg,
                     color,
                     transitionSucceeded
@@ -3068,7 +3200,7 @@ async function runBrowserEvidence() {
                                 curr.memoizedProps.value.clearPreviewTheme();
                                 break;
                             } else if (typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
-                                curr.memoizedProps.value.setPreviewTheme({ themeId: 'soilfer-classic', mode: 'light' });
+                                curr.memoizedProps.value.setPreviewTheme({ themeId: 'forest', mode: 'light' });
                                 break;
                             }
                         }
@@ -3078,7 +3210,12 @@ async function runBrowserEvidence() {
                 }
             }
         });
-        await page.waitForTimeout(100);
+        await page.waitForFunction(() => {
+            const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+            const docEl = document.documentElement;
+            const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+            return !notice && appliedTheme === 'forest';
+        }, null, { timeout: 3000 });
 
         labelPreviewState.variantTransitions = labelVariantTransitions;
         labelPreviewState.all14VariantsPreserved = labelVariantTransitions.length === 14 && labelVariantTransitions.every(v => v.transitionSucceeded);
@@ -3090,8 +3227,27 @@ async function runBrowserEvidence() {
         const printIsolationPassed = Boolean(
             chartTokensPresent &&
             printStylesActive &&
-            (typeof spectralSeriesState !== 'undefined' && spectralSeriesState && spectralSeriesState.renderedSeriesVerified === true && spectralSeriesState.seriesCount === 1 && spectralSeriesState.sampleId === 'SMP-2026-001' && spectralSeriesState.wavelengthRange !== null) &&
-            (typeof labelPreviewState !== 'undefined' && labelPreviewState && labelPreviewState.rendered === true && labelPreviewState.offlineQrVerified === true && labelPreviewState.thermalPaperIsolation === true && labelPreviewState.sampleId === 'SMP-2026-001' && labelPreviewState.substrate === 'white') &&
+            (typeof spectralSeriesState !== 'undefined' && spectralSeriesState &&
+                spectralSeriesState.renderedSeriesVerified === true &&
+                spectralSeriesState.seriesCount === 1 &&
+                spectralSeriesState.sampleId === 'SMP-2026-001' &&
+                spectralSeriesState.wavelengthRange !== null &&
+                spectralSeriesState.all14VariantsPreserved === true &&
+                Array.isArray(spectralSeriesState.variantTransitions) &&
+                spectralSeriesState.variantTransitions.length === 14 &&
+                spectralSeriesState.variantTransitions.every(v => v && v.transitionSucceeded === true)
+            ) &&
+            (typeof labelPreviewState !== 'undefined' && labelPreviewState &&
+                labelPreviewState.rendered === true &&
+                labelPreviewState.offlineQrVerified === true &&
+                labelPreviewState.thermalPaperIsolation === true &&
+                labelPreviewState.sampleId === 'SMP-2026-001' &&
+                labelPreviewState.substrate === 'white' &&
+                labelPreviewState.all14VariantsPreserved === true &&
+                Array.isArray(labelPreviewState.variantTransitions) &&
+                labelPreviewState.variantTransitions.length === 14 &&
+                labelPreviewState.variantTransitions.every(v => v && v.transitionSucceeded === true)
+            ) &&
             printStylesActive.paperSurfaceEvaluated &&
             printStylesActive.reportId === 'CERT-2026-SOIL-01' &&
             printStylesActive.accessionId === 'SOIL-GH-2026-001' &&
