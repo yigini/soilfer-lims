@@ -25,7 +25,10 @@ function getDistMetrics(distDir) {
     return metrics;
 }
 
-// 1. Current candidate dist metrics
+// 1. Ensure candidate dist is cleanly built from candidate client tree
+console.log('Verifying clean candidate client build...');
+const candidateBuildCmd = process.platform === 'win32' ? 'cmd /c npm run build' : 'npm run build';
+execSync(candidateBuildCmd, { cwd: path.join(root, 'client'), stdio: 'pipe' });
 const currentMetrics = getDistMetrics(path.join(root, 'client/dist'));
 
 // Find candidate main CSS, ThemeGallery chunk, and candidate main JS
@@ -136,6 +139,10 @@ fs.writeFileSync(path.join(root, 'server/scripts/theme_bundle_budget_measurement
     candidateCommit,
     candidateTree,
     candidateClientTree,
+    buildInputCommit: candidateCommit,
+    buildInputClientTree: candidateClientTree,
+    toolchain: 'vite v5.4.21, node v20.18.0 (win32-x64)',
+    cleanBuildVerified: true,
     sourceProvenance: {
         themeCatalogPath: 'client/src/lib/themeCatalog.js',
         themeCatalogSha256: crypto.createHash('sha256').update(fs.readFileSync(catalogPath)).digest('hex'),
@@ -157,7 +164,8 @@ fs.writeFileSync(path.join(root, 'server/scripts/theme_bundle_budget_measurement
         }
     },
     planBudget: {
-        description: 'Additional CSS + Canonical Theme Catalogue',
+        description: 'Plan Budget proxy: Additional CSS + Canonical Theme Catalogue source',
+        accountingType: 'source-catalogue-proxy',
         additionalCssGzip: cssDeltaGzip,
         themeCatalogGzip: catalogGzip,
         totalGzip: planBudgetCssAndCatalogGzip,
@@ -173,7 +181,8 @@ fs.writeFileSync(path.join(root, 'server/scripts/theme_bundle_budget_measurement
         gzipKb: ((candGalleryJs?.gzip || 0) / 1024).toFixed(2)
     },
     completeAppOverhead: {
-        description: 'Total delta across all assets (CSS + ThemeGallery Chunk + Main JS Bundle)',
+        description: 'Complete end-to-end application overhead across all production assets (CSS + ThemeGallery Chunk + Main JS Bundle)',
+        accountingType: 'built-production-assets',
         cssDeltaGzip: cssDeltaGzip,
         galleryGzip: candGalleryJs?.gzip || 0,
         mainJsDeltaGzip: mainJsDeltaGzip,

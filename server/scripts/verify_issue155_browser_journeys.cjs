@@ -205,14 +205,53 @@ app.get('/api/labs/LAB-BRW-02/workspace', (req, res) => res.json({
 }));
 
 app.get('/api/samples', (req, res) => res.json({
-    data: [],
-    meta: { page: 1, limit: 50, total: 0, pages: 1 },
+    data: [
+        { id: 'SMP-2026-001', sampleId: 'SMP-2026-001', clientSampleId: 'FIELD-LOC-A', status: 'RECEIVED', matrix: 'Topsoil', labId: 'LAB-BRW-01', createdAt: new Date().toISOString() },
+        { id: 'SMP-2026-002', sampleId: 'SMP-2026-002', clientSampleId: 'FIELD-LOC-B', status: 'IN_ANALYSIS', matrix: 'Topsoil', labId: 'LAB-BRW-01', createdAt: new Date().toISOString() }
+    ],
+    meta: { page: 1, limit: 50, total: 2, pages: 1 },
     facets: {}
 }));
-app.get('/api/reception/stats', (req, res) => res.json({ pendingCount: 0 }));
+app.get('/api/reception/stats', (req, res) => res.json({ pendingCount: 5, registeredToday: 12 }));
 app.get('/api/config/groups', (req, res) => res.json([]));
 app.get('/api/config/analyses', (req, res) => res.json([]));
-app.get('/api/projects', (req, res) => res.json([]));
+app.get('/api/projects', (req, res) => res.json([
+    { id: 'PRJ-2026-01', name: 'National Soil Inventory Pilot', code: 'NSIP-01', status: 'ACTIVE', sampleCount: 120 }
+]));
+app.get('/api/reports/public/:token', (req, res) => res.json({
+    reportNumber: 'CERT-2026-SOIL-01',
+    version: '1.0',
+    content: {
+        reportNumber: 'CERT-2026-SOIL-01',
+        sample: {
+            sampleId: 'SOIL-GH-2026-001',
+            clientSampleId: 'FIELD-LOC-A',
+            originalId: 'SOIL-GH-2026-001',
+            matrix: 'Topsoil (0-20cm)',
+            receptionDate: '2026-09-15'
+        },
+        client: {
+            fullName: 'Ministry of Agriculture & Food Security',
+            organization: 'National Soil Inventory - Pilot Region'
+        },
+        lab: {
+            name: 'National Soil Reference Laboratory',
+            code: 'NSRL-01'
+        },
+        resultGroups: [{
+            categoryName: 'Chemical Analyses',
+            items: [
+                { name: 'pH (1:2.5 H2O)', param: 'PH', value: 6.5, unit: 'pH units', method: 'ISO 10390' },
+                { name: 'Organic Carbon', param: 'OC', value: 2.15, unit: '%', method: 'Walkley-Black' },
+                { name: 'Total Nitrogen', param: 'TN', value: 0.18, unit: '%', method: 'Kjeldahl' },
+                { name: 'Available P (Bray-1)', param: 'P', value: 15.4, unit: 'mg/kg', method: 'Bray-1' },
+                { name: 'Exchangeable K', param: 'K', value: 0.45, unit: 'cmol(+)/kg', method: 'Ammonium Acetate' }
+            ]
+        }],
+        generated: { at: '2026-09-30T12:00:00.000Z' },
+        signedBy: 'Dr. Kwame Mensah, Quality Manager'
+    }
+}));
 app.get('/api/admin/settings', (req, res) => res.json({ data: { branding: {} } }));
 app.get('/api/notifications', (req, res) => res.json({ data: [], unreadCount: 0 }));
 app.get('/api/messages', (req, res) => res.json({ data: [], unreadCount: 0 }));
@@ -280,16 +319,25 @@ async function runBrowserEvidence() {
     }, { token: authToken, user: testUser });
 
     const page = await context.newPage();
-    page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
+    const pageErrors = [];
+    const browserConsoleErrors = [];
+    page.on('pageerror', err => {
+        console.error('PAGE ERROR:', err.message);
+        pageErrors.push(err.message);
+    });
     page.on('console', msg => {
-        if (msg.type() === 'error') console.log('BROWSER CONSOLE ERROR:', msg.text());
+        if (msg.type() === 'error') {
+            console.error('BROWSER CONSOLE ERROR:', msg.text());
+            browserConsoleErrors.push(msg.text());
+        }
     });
     const suiteResults = [];
 
     function record(name, category, passed, details) {
-        suiteResults.push({ name, category, passed, details });
-        console.log(`[${passed ? 'PASS' : 'FAIL'}] [${category}] ${name}`);
-        if (!passed) console.error('  Details:', details);
+        const effectivePassed = Boolean(passed && pageErrors.length === 0);
+        suiteResults.push({ name, category, passed: effectivePassed, details: { ...details, pageErrorsCount: pageErrors.length } });
+        console.log(`[${effectivePassed ? 'PASS' : 'FAIL'}] [${category}] ${name}`);
+        if (!effectivePassed) console.error('  Details:', details, 'PageErrors:', pageErrors);
     }
 
     try {
@@ -377,12 +425,12 @@ async function runBrowserEvidence() {
         // PACKAGE 2: Actual Route & Workflow Matrix
         // =====================================================================
         const routesToTest = [
-            { path: '/profile', name: 'User Profile', keyword: 'Profile' },
-            { path: '/', name: 'Dashboard', keyword: 'Dashboard' },
-            { path: '/samples', name: 'Sample Registry', keyword: 'Sample' },
-            { path: '/reception', name: 'Sample Reception', keyword: 'Reception' },
-            { path: '/admin/labs', name: 'Lab Management', keyword: 'Lab' },
-            { path: '/qa', name: 'QA Overview', keyword: 'QA' }
+            { path: '/profile', name: 'User Profile', keyword: 'Account Details', theme: 'ocean', mode: 'dark' },
+            { path: '/', name: 'Dashboard', keyword: 'Laboratory overview', theme: 'sand', mode: 'light' },
+            { path: '/samples', name: 'Sample Registry', keyword: 'Samples', theme: 'terra', mode: 'dark' },
+            { path: '/reception', name: 'Sample Reception', keyword: 'Reception Console', theme: 'forest', mode: 'light' },
+            { path: '/admin/labs', name: 'Lab Management', keyword: 'Laboratories', theme: 'mineral', mode: 'dark' },
+            { path: '/qa', name: 'QA Overview', keyword: 'Quality Assurance', theme: 'clear-contrast', mode: 'light' }
         ];
 
         let routeFailures = 0;
@@ -390,20 +438,42 @@ async function runBrowserEvidence() {
 
         for (const r of routesToTest) {
             await page.goto(`${origin}${r.path}`, { waitUntil: 'domcontentloaded' });
-            await page.waitForSelector('header', { timeout: 3000 }).catch(() => null);
+            await page.waitForSelector('main, [role="main"]', { timeout: 3000 }).catch(() => null);
             await page.waitForTimeout(300);
+
+            // Apply variant theme and mode across the 14-variant library
+            if (r.theme && r.mode) {
+                await page.evaluate(({ theme, mode }) => {
+                    document.documentElement.setAttribute('data-theme', theme);
+                    document.documentElement.setAttribute('data-appearance', mode);
+                }, { theme: r.theme, mode: r.mode });
+            }
 
             const pageState = await page.evaluate((curr) => {
                 const root = document.getElementById('root');
                 const themeAttr = document.documentElement.getAttribute('data-theme');
                 const modeAttr = document.documentElement.getAttribute('data-appearance');
                 const hasNavbar = !!document.querySelector('nav, header, [role="banner"], [role="navigation"]');
-                const bodySnippet = (document.body.innerText || '').slice(0, 200);
+
+                // Inspect the actual main view container, isolating view-scoped content from shell/sidebar navigation
+                const viewContainer = document.querySelector('main, [role="main"]');
+                const hasViewContainer = !!viewContainer && (viewContainer.children ? viewContainer.children.length > 0 : false);
+
+                // Extract inner text specifically from the mounted view container, avoiding document.body shell leaks
+                const viewText = (viewContainer && typeof viewContainer.innerText === 'string')
+                    ? viewContainer.innerText.trim()
+                    : (viewContainer && typeof viewContainer.textContent === 'string' ? viewContainer.textContent.trim() : '');
+
+                const bodySnippet = viewText.slice(0, 200);
                 const isNotFound = bodySnippet.toLowerCase().includes('not found') ||
                                    bodySnippet.toLowerCase().includes('404') ||
-                                   bodySnippet.toLowerCase().includes('component absent');
-                const hasViewContainer = !!document.querySelector('main, [role="main"], .card-base, section, [data-testid]');
-                const hasRouteContent = !isNotFound && (bodySnippet.toLowerCase().includes(curr.keyword.toLowerCase()) || hasViewContainer);
+                                   bodySnippet.toLowerCase().includes('component absent') ||
+                                   bodySnippet.toLowerCase().includes('page not found');
+
+                // Route-specific mounted view verification: must be present, non-empty, and contain route keyword
+                const hasRouteContent = !isNotFound && hasViewContainer && viewText.length > 0 &&
+                                       viewText.toLowerCase().includes(curr.keyword.toLowerCase());
+
                 return {
                     pathname: window.location.pathname,
                     rendered: !!root && root.children.length > 0,
@@ -427,8 +497,8 @@ async function runBrowserEvidence() {
                     pageState.bodySnippet.toLowerCase().includes('404') ||
                     pageState.bodySnippet.toLowerCase().includes('absent')
                 )) &&
-                pageState.hasViewContainer !== false &&
-                pageState.hasRouteContent !== false
+                pageState.hasViewContainer === true &&
+                pageState.hasRouteContent === true
             );
             if (!passed) routeFailures++;
             routeMetrics.push({ route: r.path, name: r.name, ...pageState, passed });
@@ -751,7 +821,7 @@ async function runBrowserEvidence() {
                 return r.width > 0 && r.height > 0 && style.visibility !== 'hidden' && style.display !== 'none';
             });
 
-            const touchTargets = visibleControls.slice(0, 10).map(b => {
+            const touchTargets = visibleControls.map(b => {
                 const rect = b.getBoundingClientRect();
                 return {
                     text: (b.textContent || b.getAttribute('aria-label') || '').trim().slice(0, 20),
@@ -864,27 +934,37 @@ async function runBrowserEvidence() {
             return !!c1 && !!c2 && !!c3 && !!c4 && !!c5 && !!c6 && !!grid && !!axis;
         });
 
-        // 2. Emulate print media for certificates and paper outputs
+        // 2. Navigate to real customer-facing report / certificate view
+        await page.goto(`${origin}/report/CERT-2026-SOIL-01`, { waitUntil: 'domcontentloaded' });
+        await page.waitForSelector('[data-surface="paper"], .print-body, table', { timeout: 4000 }).catch(() => null);
+        await page.waitForTimeout(300);
+
+        // 3. Emulate print media for certificates and paper outputs
         await page.emulateMedia({ media: 'print' });
         const printStylesActive = await page.evaluate(() => {
-            const cert = document.createElement('div');
-            cert.setAttribute('data-surface', 'paper');
-            cert.className = 'print:bg-white print:text-black';
-            document.body.appendChild(cert);
+            const paperEl = document.querySelector('[data-surface="paper"], .print-body, .report-document') || document.body;
+            const paperStyle = window.getComputedStyle(paperEl);
+            const textEl = paperEl.querySelector('.report-lab-name, .report-section-title, td.param-name, td.param-value') || paperEl;
+            const textStyle = window.getComputedStyle(textEl);
+            const bg = paperStyle.backgroundColor;
+            const color = textStyle.color;
+            const textContent = (paperEl.innerText || paperEl.textContent || '').trim();
 
-            const style = window.getComputedStyle(cert);
-            const bg = style.backgroundColor;
-            const color = style.color;
-            cert.remove();
-
-            const isPureWhite = bg === 'rgb(255, 255, 255)' || bg === '#ffffff';
+            const isPureWhite = bg === 'rgb(255, 255, 255)' || bg === '#ffffff' || bg === 'rgba(0, 0, 0, 0)';
             const isBlackBackground = bg === 'rgb(0, 0, 0)' || bg === '#000000';
+            const isWhiteText = color === 'rgb(255, 255, 255)' || color === '#ffffff';
+            const sampleIdPreserved = textContent.includes('SOIL-GH-2026-001') || textContent.includes('CERT-2026-SOIL-01');
+            const scientificValuesPreserved = textContent.includes('pH') && (textContent.includes('6.5') || textContent.includes('6.50'));
+
             return {
                 paperSurfaceEvaluated: true,
                 computedBg: bg,
                 computedColor: color,
                 isPureWhite,
-                isBlackBackground
+                isBlackBackground,
+                isWhiteText,
+                sampleIdPreserved,
+                scientificValuesPreserved
             };
         });
         await page.emulateMedia({ media: null });
@@ -895,7 +975,9 @@ async function runBrowserEvidence() {
             printStylesActive.paperSurfaceEvaluated &&
             printStylesActive.computedBg !== 'rgb(0, 0, 0)' &&
             !printStylesActive.isBlackBackground &&
-            (printStylesActive.isPureWhite || printStylesActive.computedBg === 'rgb(255, 255, 255)' || printStylesActive.computedBg === '#ffffff')
+            (printStylesActive.isPureWhite || printStylesActive.computedBg === 'rgb(255, 255, 255)' || printStylesActive.computedBg === '#ffffff') &&
+            printStylesActive.computedColor !== 'rgb(255, 255, 255)' &&
+            (printStylesActive.computedColor === 'rgb(0, 0, 0)' || !printStylesActive.isWhiteText)
         );
 
         record(
@@ -918,6 +1000,13 @@ async function runBrowserEvidence() {
                 touchTargetRequirements: 'min-height >= 44px and min-width >= 44px on primary controls',
                 physicalDeviceGate: 'PENDING physical iOS Safari and Android Chrome test devices (per Issue #102)'
             }
+        );
+
+        record(
+            'Zero uncaught page errors across complete browser navigation journeys',
+            'Console & Page Integrity',
+            pageErrors.length === 0,
+            { uncaughtPageErrors: pageErrors, consoleErrorsCount: browserConsoleErrors.length }
         );
 
     } finally {

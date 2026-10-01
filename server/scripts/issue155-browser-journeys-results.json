@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-09-30T23:53:31.629Z",
-  "totalCases": 10,
-  "totalPassed": 10,
+  "timestamp": "2026-10-01T00:36:58.033Z",
+  "totalCases": 11,
+  "totalPassed": 11,
   "allPassed": true,
   "suites": [
     {
@@ -152,7 +152,8 @@
             "hasChartTokens": true,
             "hasStatusTokens": true
           }
-        ]
+        ],
+        "pageErrorsCount": 0
       }
     },
     {
@@ -169,9 +170,9 @@
             "pathname": "/profile",
             "rendered": true,
             "hasNavbar": true,
-            "themeAttr": "forest",
-            "modeAttr": "light",
-            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpectral Library\nInventory\nEquipment\nLaboratory Staff\nMy Laboratory\nAdmin Panel\nAbout SoilFER\nCollapse\nH",
+            "themeAttr": "ocean",
+            "modeAttr": "dark",
+            "bodySnippet": "M\nManager Browser\nLAB MANAGER\nLAB-BRW-01\nbrw-mgr-login\nOverview\nSecurity\nMessaging Center\nAppearance\nAccount Details\nUsername\nbrw-mgr-login\nFull Name\nManager Browser\nEmail Address\nMember Since\n01/10/2",
             "isNotFound": false,
             "hasViewContainer": true,
             "hasRouteContent": true,
@@ -183,9 +184,9 @@
             "pathname": "/",
             "rendered": true,
             "hasNavbar": true,
-            "themeAttr": "forest",
+            "themeAttr": "sand",
             "modeAttr": "light",
-            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpectral Library\nInventory\nEquipment\nLaboratory Staff\nMy Laboratory\nAdmin Panel\nAbout SoilFER\nCollapse\nH",
+            "bodySnippet": "LABORATORY MANAGEMENT\nLaboratory overview\n\nIntake approval, analytical assignment, submission review, and final result authorization.\n\nOpen manager task list\nAssigned Laboratory\nLive connection\nRefres",
             "isNotFound": false,
             "hasViewContainer": true,
             "hasRouteContent": true,
@@ -197,9 +198,9 @@
             "pathname": "/samples",
             "rendered": true,
             "hasNavbar": true,
-            "themeAttr": "forest",
-            "modeAttr": "light",
-            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpectral Library\nInventory\nEquipment\nLaboratory Staff\nMy Laboratory\nAdmin Panel\nAbout SoilFER\nCollapse\nH",
+            "themeAttr": "terra",
+            "modeAttr": "dark",
+            "bodySnippet": "Samples\nEXPECTED\n0\nRECEIVED\n0\nACCEPTED\n0\nONGOING\n0\nCOMPLETE\n0\nARCHIVED\n0\nActive Lab Work\nExpected Arrivals\nField Registry\nEXPECTED\nINTAKE QUEUE\nACCEPTED\nIN PROGRESS\nCOMPLETED\nARCHIVED\nREJECTED\nFilters",
             "isNotFound": false,
             "hasViewContainer": true,
             "hasRouteContent": true,
@@ -213,7 +214,7 @@
             "hasNavbar": true,
             "themeAttr": "forest",
             "modeAttr": "light",
-            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpectral Library\nInventory\nEquipment\nLaboratory Staff\nMy Laboratory\nAdmin Panel\nAbout SoilFER\nCollapse\nH",
+            "bodySnippet": "Wedge Fast Mode\nAlt+W\nStandard Desk Typing Mode\nSuffix:\nEnter (\\n)\nTab (\\t)\nEnter or Tab\n?\nReception Console\n\nSelect intake mode or resume a draft\n\nProject Sample\n\nScheduled samples (SoilFER campaigns",
             "isNotFound": false,
             "hasViewContainer": true,
             "hasRouteContent": true,
@@ -225,9 +226,9 @@
             "pathname": "/admin/labs",
             "rendered": true,
             "hasNavbar": true,
-            "themeAttr": "forest",
-            "modeAttr": "light",
-            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpectral Library\nInventory\nEquipment\nLaboratory Staff\nMy Laboratory\nAdmin Panel\nAbout SoilFER\nCollapse\nH",
+            "themeAttr": "mineral",
+            "modeAttr": "dark",
+            "bodySnippet": "Laboratories\n/\nBrowser Test Laboratory Alpha\nHelp with this lab\nLAB-BRW-01 · GUATEMALA\nBrowser Test Laboratory Alpha\n● Operational\n06:36 PM CST (America/Guatemala)\nYour laboratory. Manage your team, l",
             "isNotFound": false,
             "hasViewContainer": true,
             "hasRouteContent": true,
@@ -239,15 +240,16 @@
             "pathname": "/qa",
             "rendered": true,
             "hasNavbar": true,
-            "themeAttr": "forest",
+            "themeAttr": "clear-contrast",
             "modeAttr": "light",
-            "bodySnippet": "Dashboard\nProjects\nSample Reception\nSamples\nManager Task List\nQA Dashboard\nData Results\nReports\nSpectral Library\nInventory\nEquipment\nLaboratory Staff\nMy Laboratory\nAdmin Panel\nAbout SoilFER\nCollapse\nH",
+            "bodySnippet": "QUALITY & REGULATORY COMPLIANCE\nQuality Assurance & Audit\n\nQC batch verification, control chart monitoring, traceable specimen amendments, and immutable audit trails.\n\nRefresh QA\nFull Audit Log\nQC Bat",
             "isNotFound": false,
             "hasViewContainer": true,
             "hasRouteContent": true,
             "passed": true
           }
-        ]
+        ],
+        "pageErrorsCount": 0
       }
     },
     {
@@ -263,7 +265,8 @@
         "previewExitState": {
           "currentTheme": "forest",
           "inputPreserved": true
-        }
+        },
+        "pageErrorsCount": 0
       }
     },
     {
@@ -272,7 +275,8 @@
       "passed": true,
       "details": {
         "hasToggle": true,
-        "popoverNavigated": true
+        "popoverNavigated": true,
+        "pageErrorsCount": 0
       }
     },
     {
@@ -286,7 +290,8 @@
         "shiftTabWrapped": true,
         "tabWrapped": true,
         "escapeDismissed": true,
-        "triggerRestored": true
+        "triggerRestored": true,
+        "pageErrorsCount": 0
       }
     },
     {
@@ -298,7 +303,8 @@
         "rovingInitialOk": true,
         "arrowRightOk": true,
         "endKeyOk": true,
-        "homeKeyOk": true
+        "homeKeyOk": true,
+        "pageErrorsCount": 0
       }
     },
     {
@@ -370,6 +376,42 @@
               "height": 241,
               "width": 230,
               "meets44px": true
+            },
+            {
+              "text": "WatershedRestrained ",
+              "height": 241,
+              "width": 230,
+              "meets44px": true
+            },
+            {
+              "text": "NutrientMuted olive ",
+              "height": 241,
+              "width": 230,
+              "meets44px": true
+            },
+            {
+              "text": "Clear ContrastAccess",
+              "height": 261,
+              "width": 230,
+              "meets44px": true
+            },
+            {
+              "text": "Preview full screen",
+              "height": 44,
+              "width": 167,
+              "meets44px": true
+            },
+            {
+              "text": "Save for me",
+              "height": 44,
+              "width": 230,
+              "meets44px": true
+            },
+            {
+              "text": "Save language prefer",
+              "height": 70,
+              "width": 230,
+              "meets44px": true
             }
           ]
         },
@@ -377,7 +419,8 @@
           "scrollWidth": 390,
           "innerWidth": 390,
           "noHorizontalOverflow": true
-        }
+        },
+        "pageErrorsCount": 0
       }
     },
     {
@@ -421,7 +464,8 @@
             "hasTranslatedKeyword": true,
             "bodyTextLength": 1766
           }
-        ]
+        ],
+        "pageErrorsCount": 0
       }
     },
     {
@@ -433,10 +477,14 @@
         "printStylesActive": {
           "paperSurfaceEvaluated": true,
           "computedBg": "rgb(255, 255, 255)",
-          "computedColor": "rgb(0, 0, 0)",
+          "computedColor": "rgb(30, 58, 95)",
           "isPureWhite": true,
-          "isBlackBackground": false
-        }
+          "isBlackBackground": false,
+          "isWhiteText": false,
+          "sampleIdPreserved": true,
+          "scientificValuesPreserved": true
+        },
+        "pageErrorsCount": 0
       }
     },
     {
@@ -447,7 +495,18 @@
         "executedEnvironment": "Headless Google Chrome (Windows NT / x86_64)",
         "viewportReflowTested": "320x568 (iPhone SE) and 390x844 (Mobile)",
         "touchTargetRequirements": "min-height >= 44px and min-width >= 44px on primary controls",
-        "physicalDeviceGate": "PENDING physical iOS Safari and Android Chrome test devices (per Issue #102)"
+        "physicalDeviceGate": "PENDING physical iOS Safari and Android Chrome test devices (per Issue #102)",
+        "pageErrorsCount": 0
+      }
+    },
+    {
+      "name": "Zero uncaught page errors across complete browser navigation journeys",
+      "category": "Console & Page Integrity",
+      "passed": true,
+      "details": {
+        "uncaughtPageErrors": [],
+        "consoleErrorsCount": 0,
+        "pageErrorsCount": 0
       }
     }
   ]

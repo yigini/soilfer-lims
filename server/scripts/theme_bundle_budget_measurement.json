@@ -2,16 +2,20 @@
   "baselineCommit": "1265e8a",
   "baselineTree": "260975e57d0b3a1389f622c2f84ef444f3f46cf4",
   "baselineClientTree": "bffc1d55ebf9dbbcad5c5c8530794bede9b1f77e",
-  "candidateCommit": "bde7e8183fbfa0b30800e6dee01df1b8e681ebdb",
-  "candidateTree": "d19d48f85c1fbe390086fea479d42fd8f1d0f206",
-  "candidateClientTree": "fc48363a1b7f51a4751014c4d75781f1a953c2e1",
+  "candidateCommit": "4c0ed59f4f5700f1981409c180ce4317c558ce5e",
+  "candidateTree": "c0dafdfae59cec6b843231949f7a5d210f9eee52",
+  "candidateClientTree": "9921a81a647113e53859c80fd06d9f0ca592beb5",
+  "buildInputCommit": "4c0ed59f4f5700f1981409c180ce4317c558ce5e",
+  "buildInputClientTree": "9921a81a647113e53859c80fd06d9f0ca592beb5",
+  "toolchain": "vite v5.4.21, node v20.18.0 (win32-x64)",
+  "cleanBuildVerified": true,
   "sourceProvenance": {
     "themeCatalogPath": "client/src/lib/themeCatalog.js",
     "themeCatalogSha256": "d140fa015ef37c4824ec966fc8ababb204028f694034d1eb7c507bf4d1c388bf",
     "appearanceTokensCssPath": "client/src/styles/appearance-tokens.css",
     "appearanceTokensCssSha256": "25be0e303739c18d70e0548d476572c0365df7963f14d2c086958466a4efb246"
   },
-  "measuredAt": "2026-09-30T23:53:16.281Z",
+  "measuredAt": "2026-10-01T00:38:03.026Z",
   "baseline": {
     "css": {
       "file": "index-B4HqGI8K.css",
@@ -20,10 +24,10 @@
       "sha256": "675d3398258dfdb798e7c86b4b6480ea7e0995741eddd0f5b3a26d2ee1c2f4f6"
     },
     "mainJs": {
-      "file": "index-BzvRfDqo.js",
+      "file": "index-DtWW0o-s.js",
       "raw": 1213087,
-      "gzip": 350029,
-      "sha256": "76f3754c17a4790c827636e7d631137598e5997a5da49f5c56bb487e94801ea0"
+      "gzip": 350033,
+      "sha256": "c262d9db0e087a1e18243cc93005d48fce71a530712d941a2b0539fcd38c5a57"
     }
   },
   "candidate": {
@@ -34,16 +38,16 @@
       "sha256": "b474b563a2a7da9570ccad9c8a92b037cd3f5202ba51e3445a7949bd0b9ae31c"
     },
     "galleryJs": {
-      "file": "ThemeGallery-BjmaG7OE.js",
+      "file": "ThemeGallery-CGFr0F1k.js",
       "raw": 25935,
-      "gzip": 6477,
-      "sha256": "0d9e599ef695cfd87b038a8917aa0735f859e75713fa9519302a5714c1297225"
+      "gzip": 6478,
+      "sha256": "b35c8e8e5ce3a9cf75108477c056379c4c781e5c3ae1cacb8c8b0bf95639b3f8"
     },
     "mainJs": {
-      "file": "index-CwqN8k5p.js",
+      "file": "index-CZQfW30I.js",
       "raw": 1252791,
-      "gzip": 361087,
-      "sha256": "a201df5a0394980a59eeebc62a3d63b4832652c71a6f3ac73bd6cf176d50d4a3"
+      "gzip": 361089,
+      "sha256": "38b06573a9e61b6bc7f4dc4994c271d9376fb4cb7efc00d66014b4b52d4ecc4e"
     },
     "themeCatalog": {
       "raw": 16701,
@@ -51,7 +55,8 @@
     }
   },
   "planBudget": {
-    "description": "Additional CSS + Canonical Theme Catalogue",
+    "description": "Plan Budget proxy: Additional CSS + Canonical Theme Catalogue source",
+    "accountingType": "source-catalogue-proxy",
     "additionalCssGzip": 1719,
     "themeCatalogGzip": 3511,
     "totalGzip": 5230,
@@ -61,17 +66,18 @@
     "passed": true
   },
   "lazyChunk": {
-    "file": "ThemeGallery-BjmaG7OE.js",
+    "file": "ThemeGallery-CGFr0F1k.js",
     "raw": 25935,
-    "gzip": 6477,
+    "gzip": 6478,
     "gzipKb": "6.33"
   },
   "completeAppOverhead": {
-    "description": "Total delta across all assets (CSS + ThemeGallery Chunk + Main JS Bundle)",
+    "description": "Complete end-to-end application overhead across all production assets (CSS + ThemeGallery Chunk + Main JS Bundle)",
+    "accountingType": "built-production-assets",
     "cssDeltaGzip": 1719,
-    "galleryGzip": 6477,
-    "mainJsDeltaGzip": 11058,
-    "totalOverheadGzip": 19254,
+    "galleryGzip": 6478,
+    "mainJsDeltaGzip": 11056,
+    "totalOverheadGzip": 19253,
     "totalOverheadGzipKb": "18.80"
   }
 }
