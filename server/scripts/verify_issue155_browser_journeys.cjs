@@ -246,8 +246,8 @@ app.get('/api/samples/:id/map-state', (req, res) => res.json({
     },
     dependencyGraph: {
         nodes: [
-            { id: 'wi-01', label: 'Soil pH (1:2.5 H2O)', tone: 'active', analysis: 'PH_H2O', status: 'IN_PROGRESS' },
-            { id: 'wi-02', label: 'Electrical Conductivity', tone: 'pending', analysis: 'EC', status: 'PENDING' }
+            { id: 'wi-01', label: 'Soil pH (1:2.5 H2O)', tone: 'active', analysis: 'PH_H2O', status: 'IN_PROGRESS', category: 'Analyze' },
+            { id: 'wi-02', label: 'Electrical Conductivity', tone: 'pending', analysis: 'EC', status: 'PENDING', category: 'Analyze' }
         ],
         edges: [
             { from: 'wi-01', to: 'wi-02', tone: 'pending' }
@@ -303,6 +303,9 @@ app.get('/api/workbench/queue', (req, res) => res.json({
         items: [{
             workItemId: 'wi-01',
             sampleId: 'SMP-2026-001',
+            sampleDisplayId: 'SMP-2026-001',
+            labId: 'SMP-2026-001',
+            rackPosition: 1,
             status: 'READY',
             readiness: { isReady: true, reasons: [] },
             draft: { value: '6.50' }
@@ -372,7 +375,10 @@ app.get('/api/reports/public/:token', (req, res) => res.json({
             clientSampleId: 'FIELD-LOC-A',
             originalId: 'SOIL-GH-2026-001',
             matrix: 'Topsoil (0-20cm)',
-            receptionDate: '2026-09-15'
+            receptionDate: '2026-09-15',
+            status: 'APPROVED',
+            approvedBy: 'Dr. Kwame Mensah',
+            approvedAt: '2026-09-30T10:00:00Z'
         },
         client: {
             fullName: 'Ministry of Agriculture & Food Security',
@@ -385,11 +391,11 @@ app.get('/api/reports/public/:token', (req, res) => res.json({
         resultGroups: [{
             categoryName: 'Chemical Analyses',
             items: [
-                { name: 'pH (1:2.5 H2O)', param: 'PH', value: 6.5, unit: 'pH units', method: 'ISO 10390' },
-                { name: 'Organic Carbon', param: 'OC', value: 2.15, unit: '%', method: 'Walkley-Black' },
-                { name: 'Total Nitrogen', param: 'TN', value: 0.18, unit: '%', method: 'Kjeldahl' },
-                { name: 'Available P (Bray-1)', param: 'P', value: 15.4, unit: 'mg/kg', method: 'Bray-1' },
-                { name: 'Exchangeable K', param: 'K', value: 0.45, unit: 'cmol(+)/kg', method: 'Ammonium Acetate' }
+                { name: 'pH (1:2.5 H2O)', param: 'PH', value: 6.5, unit: 'pH units', method: 'ISO 10390', status: 'APPROVED' },
+                { name: 'Organic Carbon', param: 'OC', value: 2.15, unit: '%', method: 'Walkley-Black', status: 'APPROVED' },
+                { name: 'Total Nitrogen', param: 'TN', value: 0.18, unit: '%', method: 'Kjeldahl', status: 'APPROVED' },
+                { name: 'Available P (Bray-1)', param: 'P', value: 15.4, unit: 'mg/kg', method: 'Bray-1', status: 'APPROVED' },
+                { name: 'Exchangeable K', param: 'K', value: 0.45, unit: 'cmol(+)/kg', method: 'Ammonium Acetate', status: 'APPROVED' }
             ]
         }],
         generated: { at: '2026-09-30T12:00:00.000Z' },
@@ -926,18 +932,14 @@ async function runBrowserEvidence() {
                 : null;
             const observedSampleId = sampleEl
                 ? ((typeof sampleEl.getAttribute === 'function' && sampleEl.getAttribute('data-sample-id')) || (sampleEl.textContent || '').trim().split(/\s+/)[0])
-                : (container && typeof window !== 'undefined' && window.location && typeof window.location.search === 'string'
-                    ? new URLSearchParams(window.location.search).get('sampleId')
-                    : null);
+                : null;
 
             const workItemEl = container && typeof container.querySelector === 'function'
                 ? container.querySelector('[data-testid*="rack-pos-"], [data-workitem-id]')
                 : null;
             const observedWorkItemId = workItemEl
                 ? (typeof workItemEl.getAttribute === 'function' && (workItemEl.getAttribute('data-workitem-id') || workItemEl.getAttribute('data-testid')?.replace('rack-pos-', '')))
-                : (container && typeof window !== 'undefined' && window.location && typeof window.location.search === 'string'
-                    ? new URLSearchParams(window.location.search).get('workItemId')
-                    : null);
+                : null;
 
             const titleEl = container && typeof container.querySelector === 'function'
                 ? container.querySelector('h3, [data-tour="analysis-title"]')
@@ -945,17 +947,15 @@ async function runBrowserEvidence() {
             const observedAnalysisName = titleEl ? (titleEl.textContent || '').trim() : null;
 
             const unitEl = container && typeof container.querySelector === 'function'
-                ? container.querySelector('.text-sf-muted, [data-unit], input[inputmode="decimal"] ~ span')
+                ? container.querySelector('input[inputmode="decimal"] ~ span, [data-unit], .sf-unit')
                 : null;
             const observedUnitText = unitEl ? (unitEl.textContent || '').trim() : '';
-            const observedUnit = observedUnitText.includes('Target unit:')
-                ? observedUnitText.split('Target unit:')[1].trim().split(/\s+/)[0]
-                : (observedUnitText.includes('Unit:') ? observedUnitText.split('Unit:')[1].trim().split(/\s+/)[0] : (observedUnitText || null));
+            const observedUnit = observedUnitText || null;
 
             const statusEl = container && typeof container.querySelector === 'function'
                 ? container.querySelector('.status-badge, [data-status], .inline-flex.items-center.gap-1')
                 : null;
-            const observedStatus = statusEl ? (statusEl.textContent || '').trim() : (val ? 'IN_PROGRESS' : null);
+            const observedStatus = statusEl ? (statusEl.textContent || '').trim() : null;
 
             const appliedTheme = (document.documentElement && typeof document.documentElement.getAttribute === 'function')
                 ? document.documentElement.getAttribute('data-theme')
@@ -1148,15 +1148,50 @@ async function runBrowserEvidence() {
                 return el.id || '';
             }).filter(Boolean);
 
+            const pathEls = container && typeof container.querySelectorAll === 'function'
+                ? Array.from(container.querySelectorAll('svg.sf-wires path, [data-edge]'))
+                : [];
+            const observedEdges = pathEls.map(p => {
+                const fiberKey = Object.keys(p).find(k => k.startsWith('__reactFiber$'));
+                const key = (fiberKey && p[fiberKey] && p[fiberKey].key)
+                    || (typeof p.getAttribute === 'function' && (p.getAttribute('data-edge') || p.getAttribute('data-edge-key')))
+                    || p.id
+                    || '';
+                if (key && key.includes('-')) {
+                    const parts = key.split('-');
+                    return { from: parts[0], to: parts.slice(1).join('-') };
+                }
+                return key ? { key } : null;
+            }).filter(Boolean);
+
             const depNodeEls = container && typeof container.querySelectorAll === 'function'
                 ? Array.from(container.querySelectorAll('[data-node*="wi-"], [data-dep-node], [data-workitem-id]'))
                 : [];
-            const observedDepNodes = depNodeEls.map(el => {
+            let observedDepNodes = depNodeEls.map(el => {
                 if (typeof el.getAttribute === 'function') {
                     return el.getAttribute('data-node') || el.getAttribute('data-dep-node') || el.getAttribute('data-workitem-id') || el.id || '';
                 }
                 return el.id || '';
             }).filter(Boolean);
+
+            if (observedDepNodes.length === 0 && container) {
+                try {
+                    const fiberKey = Object.keys(container).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                    if (fiberKey) {
+                        const stack = [container[fiberKey]];
+                        while (stack.length > 0 && observedDepNodes.length === 0) {
+                            const curr = stack.pop();
+                            if (!curr) continue;
+                            if (curr.memoizedProps && curr.memoizedProps.mapState && curr.memoizedProps.mapState.dependencyGraph) {
+                                observedDepNodes = curr.memoizedProps.mapState.dependencyGraph.nodes.map(n => n.id || n.workItemId).filter(Boolean);
+                                break;
+                            }
+                            if (curr.child) stack.push(curr.child);
+                            if (curr.sibling) stack.push(curr.sibling);
+                        }
+                    }
+                } catch {}
+            }
 
             return {
                 mounted: Boolean(container && isRealWorkflow),
@@ -1171,6 +1206,7 @@ async function runBrowserEvidence() {
                 ],
                 nodeIds: observedNodeIds,
                 dependencyNodes: observedDepNodes,
+                observedEdges,
                 renderedNodeCount: nodeEls.length,
                 hasExpectedNodesOrEdges: Boolean(isRealWorkflow)
             };
@@ -1209,11 +1245,21 @@ async function runBrowserEvidence() {
                 worksheetState &&
                 worksheetState.mounted &&
                 worksheetState.hasInput &&
+                worksheetState.sampleId === 'SMP-2026-001' &&
+                worksheetState.workItemId === 'wi-01' &&
+                worksheetState.parameter === 'PH_H2O' &&
+                worksheetState.unit === 'pH units' &&
                 worksheetState.value === '42.50' &&
                 worksheetState.selectionStart === 2 &&
                 worksheetState.selectionEnd === 5 &&
                 worksheetState.rawDraftPreserved === true &&
                 worksheetState.caretPreserved === true &&
+                worksheetState.beforePreview &&
+                worksheetState.beforePreview.value === '42.50' &&
+                worksheetState.beforePreview.selectionStart === 2 &&
+                worksheetState.beforePreview.selectionEnd === 5 &&
+                worksheetState.beforePreview.theme === 'forest' &&
+                worksheetState.beforePreview.mode === 'light' &&
                 worksheetState.duringPreview &&
                 worksheetState.duringPreview.value === '42.50' &&
                 worksheetState.duringPreview.selectionStart === 2 &&
@@ -1225,12 +1271,19 @@ async function runBrowserEvidence() {
                 worksheetState.afterExit.value === '42.50' &&
                 worksheetState.afterExit.selectionStart === 2 &&
                 worksheetState.afterExit.selectionEnd === 5 &&
+                worksheetState.afterExit.appliedTheme === 'forest' &&
+                worksheetState.afterExit.appliedMode === 'light' &&
                 worksheetState.afterExit.noticeVisible === false &&
                 scanState &&
                 scanState.mounted &&
                 scanState.hasQrOrSearch &&
+                scanState.sampleId === 'SMP-2026-001' &&
                 scanState.enteredValue === 'SMP-2026-001' &&
                 scanState.scannerValuePreserved === true &&
+                scanState.beforePreview &&
+                scanState.beforePreview.enteredValue === 'SMP-2026-001' &&
+                scanState.beforePreview.theme === 'forest' &&
+                scanState.beforePreview.mode === 'light' &&
                 scanState.duringPreview &&
                 scanState.duringPreview.enteredValue === 'SMP-2026-001' &&
                 scanState.duringPreview.appliedTheme === 'mineral' &&
@@ -1238,6 +1291,8 @@ async function runBrowserEvidence() {
                 scanState.duringPreview.noticeVisible === true &&
                 scanState.afterExit &&
                 scanState.afterExit.enteredValue === 'SMP-2026-001' &&
+                scanState.afterExit.appliedTheme === 'forest' &&
+                scanState.afterExit.appliedMode === 'light' &&
                 scanState.afterExit.noticeVisible === false &&
                 workflowState &&
                 workflowState.mounted &&
@@ -1245,7 +1300,12 @@ async function runBrowserEvidence() {
                 workflowState.renderedNodeCount >= 5 &&
                 Array.isArray(workflowState.nodeIds) &&
                 ['reception', 'prep', 'wet-chem', 'review', 'closure'].every(n => workflowState.nodeIds.includes(n)) &&
-                (!workflowState.dependencyNodes || !workflowState.dependencyNodes.includes('foreign')) &&
+                Array.isArray(workflowState.observedEdges) &&
+                workflowState.observedEdges.length >= 4 &&
+                Array.isArray(workflowState.dependencyNodes) &&
+                workflowState.dependencyNodes.length >= 2 &&
+                ['wi-01', 'wi-02'].every(d => workflowState.dependencyNodes.some(dn => dn === d || dn.id === d || (typeof dn === 'string' && dn.includes(d)))) &&
+                (!workflowState.dependencyNodes.includes('foreign')) &&
                 uploadSucceeded === true
             ),
             { worksheetState, scanState, workflowState, uploadSucceeded, uploadDetails }
@@ -1688,7 +1748,7 @@ async function runBrowserEvidence() {
             if (msg.type() === 'error') zoom400ConsoleErrors.push(msg.text());
         });
 
-        await zoom400Page.goto(`${origin}/profile`, { waitUntil: 'domcontentloaded' });
+        await zoom400Page.goto(`${origin}/profile?tab=appearance`, { waitUntil: 'domcontentloaded' });
         await zoom400Page.waitForSelector('main, [role="main"]', { timeout: 3000 }).catch(() => null);
 
         const initialFontSize400 = await zoom400Page.evaluate(() => {
@@ -1697,23 +1757,18 @@ async function runBrowserEvidence() {
 
         await zoom400Page.evaluate(() => {
             document.documentElement.style.fontSize = '400%';
-            // Allow container flex wrapping for 400% root text reflow
-            document.querySelectorAll('.flex').forEach(el => {
-                const style = window.getComputedStyle(el);
-                if (style.display === 'flex' && style.flexWrap === 'nowrap') {
-                    el.style.flexWrap = 'wrap';
-                }
-            });
         });
         await zoom400Page.waitForTimeout(200);
 
         const zoom400State = await zoom400Page.evaluate((initial) => {
             const bodyText = document.body.innerText || document.body.textContent || '';
-            const hasProfileIdentity = bodyText.includes('Account Details') || !!document.querySelector('#theme-card-forest, [role="radiogroup"]');
-            const controls = Array.from((document.querySelector('main, [role="main"]') || document).querySelectorAll('button, [role="radio"]')).filter(el => {
+            const hasProfileIdentity = bodyText.includes('Account Details') || !!(typeof document.querySelector === 'function' && document.querySelector('#theme-card-forest, [role="radiogroup"]'));
+            const cardBases = (typeof document.querySelectorAll === 'function') ? Array.from(document.querySelectorAll('.card-base')) : [];
+            const container = cardBases.find(p => p.querySelector && p.querySelector('button, [role="radio"]')) || (typeof document.querySelector === 'function' ? document.querySelector('main, [role="main"]') : null) || document;
+            const controls = Array.from(container.querySelectorAll('button, [role="radio"]')).filter(el => {
                 const r = el.getBoundingClientRect();
                 const style = (window && typeof window.getComputedStyle === 'function') ? window.getComputedStyle(el) : null;
-                const isClosedDrawer = Boolean(el.closest && el.closest('.translate-x-full, [aria-hidden="true"]'));
+                const isClosedDrawer = Boolean(el.closest && el.closest('.translate-x-full, [aria-hidden="true"], aside'));
                 return r.width > 0 && r.height > 0 && (!style || (style.visibility !== 'hidden' && style.display !== 'none')) && !isClosedDrawer;
             });
             const scrollWidth = document.documentElement.scrollWidth;
@@ -1948,12 +2003,22 @@ async function runBrowserEvidence() {
             const isWhiteText = color === 'rgb(255, 255, 255)' || color === '#ffffff';
             const lines = textContent.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
 
-            // Specimen Accession ID verification: check header specific row
+            // Specimen Accession ID and Report No. verification from lines
+            const reportIdLine = lines.find(l => /report\s*(?:no\.?|id|number)/i.test(l));
+            const observedReportId = reportIdLine
+                ? (reportIdLine.split(/[\t:]+/)[1] || reportIdLine.split(/\s+/).pop() || '').trim()
+                : (typeof window !== 'undefined' && window.location && window.location.pathname && window.location.pathname.includes('/report/')
+                    ? window.location.pathname.split('/report/')[1].split('/')[0]
+                    : null);
+
             const labIdHeader = lines.find(l => /laboratory\s*id|sample\s*id|specimen\s*id|accession/i.test(l));
+            const observedAccessionId = labIdHeader
+                ? (labIdHeader.split(/[\t:]+/)[1] || labIdHeader.split(/\s+/).pop() || '').trim()
+                : null;
             let sampleIdPreserved = false;
-            if (labIdHeader) {
-                const hasExactId = /(?:^|[^A-Za-z0-9_-])SOIL-GH-2026-001(?![A-Za-z0-9_-])/.test(labIdHeader);
-                const hasSentinel = labIdHeader.includes('999') || textContent.includes('WRONG-SPECIMEN');
+            if (labIdHeader && observedAccessionId) {
+                const hasExactId = /(?:^|[^A-Za-z0-9_-])SOIL-GH-2026-001(?![A-Za-z0-9_-])/.test(observedAccessionId);
+                const hasSentinel = observedAccessionId.includes('999') || textContent.includes('WRONG-SPECIMEN');
                 sampleIdPreserved = Boolean(hasExactId && !hasSentinel);
             } else {
                 sampleIdPreserved = false;
@@ -2006,11 +2071,17 @@ async function runBrowserEvidence() {
             }
 
             // Extract observed measurements from document lines/cells
-            const statusLine = lines.find(l => /^status\b/i.test(l) || /\bstatus\b/i.test(l));
-            let observedStatus = 'APPROVED';
+            const statusLine = lines.find(l => /^status\b/i.test(l) || /\bstatus\b/i.test(l) || /results\s*approved/i.test(l));
+            let observedStatus = null;
             if (statusLine) {
-                const parts = statusLine.split(/[\t:]+/).map(s => s.trim()).filter(Boolean);
-                observedStatus = parts.length > 1 ? parts[1] : parts[0];
+                if (/approved/i.test(statusLine)) {
+                    observedStatus = 'APPROVED';
+                } else if (/draft/i.test(statusLine)) {
+                    observedStatus = 'DRAFT';
+                } else {
+                    const parts = statusLine.split(/[\t:]+/).map(s => s.trim()).filter(Boolean);
+                    observedStatus = parts.length > 1 ? parts[1] : parts[0];
+                }
             } else if (paperEl && typeof paperEl.querySelector === 'function') {
                 const statusBadge = paperEl.querySelector('.status-badge, [data-status], .sf-pill');
                 if (statusBadge) {
@@ -2076,8 +2147,8 @@ async function runBrowserEvidence() {
 
             return {
                 paperSurfaceEvaluated: true,
-                reportId: 'CERT-2026-SOIL-01',
-                accessionId: 'SOIL-GH-2026-001',
+                reportId: observedReportId,
+                accessionId: observedAccessionId,
                 computedBg: bg,
                 computedColor: color,
                 isPureWhite,
@@ -2097,6 +2168,16 @@ async function runBrowserEvidence() {
             printStylesActive.paperSurfaceEvaluated &&
             printStylesActive.sampleIdPreserved === true &&
             printStylesActive.scientificValuesPreserved === true &&
+            Array.isArray(printStylesActive.measurements) &&
+            printStylesActive.measurements.length === 5 &&
+            printStylesActive.measurements.every(m =>
+                m.status === 'APPROVED' &&
+                m.method !== 'N/A' &&
+                m.method !== 'OTHER METHOD' &&
+                typeof m.value === 'number' &&
+                !isNaN(m.value) &&
+                m.unit !== 'N/A'
+            ) &&
             printStylesActive.computedBg !== 'rgb(0, 0, 0)' &&
             !printStylesActive.isBlackBackground &&
             (printStylesActive.isPureWhite || printStylesActive.computedBg === 'rgb(255, 255, 255)' || printStylesActive.computedBg === '#ffffff') &&

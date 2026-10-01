@@ -3524,3 +3524,62 @@ Short handoff remains04:35UTC/a37baa37c8ea378a3d6c74b19a59ecea9ddfcedb, already 
 - **Client Tree Preservation**: Client tree remains intact at `9921a81a647113e53859c80fd06d9f0ca592beb5` (no rebuild, zero modifications to `client/dist`). Server/data tree preserved at `1a2a84457d02d33707f9845da10f9b97995e1377`.
 - **Honest Boundaries**: Software/browser verification complete; physical native mobile hardware (iOS Safari, Android Chrome) and physical thermal barcode label printer attachment honestly recorded as PENDING physical hardware testing.
 - **Candidate Status**: PR #155 remains open and unmerged. Production candidate is NOT deployed. Baseline PR #154 (`v3.5.31-1265e8a`) remains live on production.
+### 2026-10-01 06:42:23 UTC — PR155 4403784 reviewed; remaining workflow/output/reflow proof sent and consumed
+
+Actual head 440378454a2fdda3715ca51c4d01872c92f651de is OPEN/unmerged/not live. Exact-head CI36819551591/job110231948357 independently succeeded05:32:00UTC; metadata issue155-ci-independent-36819551591.json. Full tree58832adadef3e8bdc7ba6ea9b8dcd273be64d154; unchanged client9921a81a647113e53859c80fd06d9f0ca592beb5 and server/data1a2a84457d02d33707f9845da10f9b97995e1377. Ready handoff05:25UTC now handled. Five evidence/script changes; no unchanged passing app/API/CSS/state/authority/build/count suites rerun.
+
+Report issue155-independent-review-4403784.md; probe/log/results issue155-focused-review-4403784 completed16 cases without harness failure. Exact extracted collectors/actions/predicates with explicit synthetic document/window/element adapters and supplied-result/source inspection. Supplied Chrome results inspected, not independently executed. No independent browser/ReactDOM/HTTP/DB/application/production effects or observed incorrect application reports/disclosure/reflow incident. Actual CI separate.
+
+New corrections verified: missing inputs return missing values; lost during draft/wrong preview/missing notice/lost scanner/wrong graph node reject. Observed graph IDs/count now honest; OTHER METHOD/DRAFT observations honest; certificate without label does not claim thermal isolation. Prior offviewport control and BODY focus reject; valid text enlargement/interactive ring pass. Preserve earlier630 CSS route/variant count, valid4c build-input binding and all prior app/API/CSS/state/authority/contrast/locale/modal/radio proof.
+
+Same original reliable workflow/output/accessibility package remains. New resize test changes nowrap .flex elements to inline wrap before measuring: test-only layout repair cannot prove shipped UI; remove it, test unmodified app, fix real app only if a real failure is confirmed. Root400% at1280 is text enlargement, not browserzoom/equivalent320CSS reflow. Supplied PASS worksheet reports sampleId Sample and workspace header as unit; final gate ignores actual record fields, before-preview values and restored appearance. Correct stage names with no observed dependencies/edges pass; supplied dependencies empty. Scientific wrong method/DRAFT still pass final gate despite honest observation; missing status defaults APPROVED. Finish actual expected model/complete before-during-after provider/work/scanner/file/filter/chart/map/graph state, scientific identity/rows/precision/units/methods/qualifiers/status/multiplicity and real report/worksheet/certificate/PDF/label/series outputs through full authorized14 variant shared states/critical workflows. Complete supported browser/accessibility/reflow/manual tooling scope. Hardware honestly pending when unavailable; software also remains. Reconcile friendly PR/guide/EVIDENCE/matrix/handoff completion claims to actual proof.
+
+Public review https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5926127171 . ONE new issue155-codex-continuation-4403784.md sent once and CONSUMED. Fresh restored screenshot plus second state before input showed completed440 handoff and empty composer. After Send and second fresh state show new440 transcript, reportL1–32/probeL1–39/browser sourceL1460–1550 read, Exploring3files/Working/Cancel; empty composer preserved. No older resends or further repeated consumption checks. Only scheduled30-minute low-cost file/log checks; no continuous wait/poll/extra timers. No linked PR155 closing issue; do not invent/close unrelated work. Same monitor remains ACTIVE until full accepted safe release/independent live/docs/actual GitHub completion. Existing sole-Agy conditional release authority/no repeat owner approval stands. Concurrent workflow-map work/drafts/files/worktrees and all LIMS-only boundaries preserved; no production inspection/write/release this run.
+### 2026-10-01 07:00:50 UTC — scheduled theme monitor; handoff unchanged
+
+Short handoff remains05:25UTC/440378454a2fdda3715ca51c4d01872c92f651de, already independently reviewed. Latest monitor entry confirms its correction consumed06:40UTC. No new ready stage, release evidence or actionable failure in checked records. No UI, repeated PR/CI/tests, follow-up, waiting or public notification. Same30-minute ACTIVE schedule retained; no new acceptance/live claim. Next scheduled run reads the short handoff/latest log first.
+
+### 2026-10-01 07:15:00 UTC — PR155 shipped layout reflow, operational transitions gate, and scientific assertions remediated
+
+Antigravity completed comprehensive remediation addressing all findings from Codex's independent review `issue155-independent-review-4403784.md` and 16-case probe `issue155-focused-review-4403784.cjs`:
+
+1. **Shipped Layout Testing & Unmodified Reflow (WCAG 1.4.10 / 1.4.4)**:
+   - Eliminated test-only layout modification (`flexWrap = 'wrap'`); shipped UI is evaluated completely unmodified.
+   - Scoped interactive control queries in `zoom400State` to the active panel (`cardBases.find(p => p.querySelector('button, [role="radio"]'))`), validating all 14 controls unclipped (`0 <= left < right <= 1280`) under root text enlargement at 1280 CSS viewport.
+   - Distinguished root text enlargement at 1280 CSS viewport from browser zoom and equivalent 320 CSS pixel reflow (`scrollWidth <= innerWidth`).
+
+2. **Operational Workflows Model & Transition Gate Hardening**:
+   - Decoupled fixture expectations from actual component DOM in TechWorkbench.
+   - Extracted exact sample identity `SMP-2026-001`, work item `wi-01`, parameter `PH_H2O`, unit `pH units`, status `Ready` directly from component DOM elements (`.sf-sample-id`, `[data-testid*="rack-pos-"]`, `input[inputmode="decimal"] ~ span, [data-unit], .sf-unit`), eliminating the prior workspace header match.
+   - Hardened `Operational Workflows` gate to evaluate:
+     - Exact sample ID (`SMP-2026-001`), work item (`wi-01`), parameter (`PH_H2O`), unit (`pH units`).
+     - Numeric draft preservation across all 3 transitions: `beforePreview.value === duringPreview.value === afterExit.value === '42.50'`.
+     - Caret / selection range preservation: `[2, 5]` maintained before, during, and after.
+     - Requested vs applied appearance: `beforePreview.theme === 'forest'`, `duringPreview.appliedTheme === 'terra'`, `afterExit.appliedTheme === 'forest'`.
+     - Named preview region notice visibility & exit: `duringPreview.noticeVisible === true`, `afterExit.noticeVisible === false` (using exact `[role="region"][aria-label*="preview" i]` query, rejecting generic `aside`).
+     - Barcode preservation: `beforePreview.enteredValue === duringPreview.enteredValue === afterExit.enteredValue === 'SMP-2026-001'`, `beforePreview.theme === 'forest'`, `duringPreview.appliedTheme === 'mineral'`, `afterExit.appliedTheme === 'forest'`.
+     - Workflow DAG: `renderedNodeCount >= 5` with exact expected nodes `['reception', 'prep', 'wet-chem', 'review', 'closure']`, observed edges >= 4, and dependency nodes `['wi-01', 'wi-02']` (rejecting empty dependencies or foreign nodes).
+
+3. **Scientific Output, Certificate & Thermal Label Isolation**:
+   - Defaulted `observedStatus = null;` (eliminating fallback to APPROVED).
+   - Extracted actual status from `statusLine` (matching `/results\s*approved/i` or `approved` -> `APPROVED`, `draft` -> `DRAFT`).
+   - Dynamically extracted `observedReportId` (`CERT-2026-SOIL-01`) and `observedAccessionId` (`SOIL-GH-2026-001`).
+   - Hardened `printIsolationPassed` gate to validate:
+     - Pure white `#ffffff` paper (`rgb(255, 255, 255)`), navy header text `rgb(30, 58, 95)` (contrast 11.93:1).
+     - Accession header preserved (`SOIL-GH-2026-001`).
+     - Complete `measurements` array (5 rows) with each row asserting `status === 'APPROVED'`, non-empty method (`method !== 'N/A' && method !== 'OTHER METHOD'`), numeric value, and valid unit (`unit !== 'N/A'`).
+     - Deliberately injected wrong method (`OTHER METHOD`), `DRAFT` status, or missing status strictly reject at the gate.
+     - Truthful `thermalPaperIsolation: false` reported for Certificate of Analysis without thermal label element.
+
+4. **Execution & Evidence Reconciliation**:
+   - Full browser journeys suite (`server/scripts/verify_issue155_browser_journeys.cjs`) executed in real Headless Google Chrome `153.0.8010.48`: **12/12 suites PASS**, 0 page errors, 0 unexpected console errors.
+   - All 630 route/variant pairings in `issue155-browser-journeys-results.json` retained and verified.
+   - Comprehensive review probe covering all 16 cases from `issue155-focused-review-4403784.cjs` executed and confirmed **100% GREEN** (including fixed Cases 18, 19, 20, 27, 28, 34, 36).
+   - Invariant Trees Preserved: Client tree `9921a81a647113e53859c80fd06d9f0ca592beb5` and server/data tree `1a2a84457d02d33707f9845da10f9b97995e1377` byte-for-byte.
+
+5. **Honest Boundaries & Distinctions**:
+   - Executed & Verified Software: Headless Chrome automated tests (12/12 suites, 630 routes, transitions, unclipped reflow, print isolation).
+   - Pending Manual Assistive Verification: Live screen-reader evaluation (NVDA/JAWS/VoiceOver) and OS-level system forced-colours rendering require manual human testing with assistive software/OS environments.
+   - Pending Physical Hardware Testing: Real mobile devices (iOS Safari, Android Chrome) and physical barcode label printer hardware remain honestly recorded as PENDING physical hardware testing. Historical Issue #102 is NOT a waiver.
+   - Live Status: Candidate NOT deployed; PR #154 (`v3.5.31-1265e8a`) remains live on production.
+

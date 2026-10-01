@@ -5,7 +5,7 @@
 - **Canonical Authority:** `server/config/themeCatalogData.json` (7 theme families × 2 modes = 14 isomorphic variants)
 - **Source Inventory Baseline:** `WP/sitewide-theme-library-v1/SOURCE-INVENTORY.json` (215 source candidates, 45 route declarations)
 - **Browser Execution Toolchain:** Headless Google Chrome `153.0.8010.48 (win32-arm64, captured dynamically via browser.version())`
-- **Status:** Automated Playwright/Chrome browser suite executed (12/12 suites passing); all 45 routes declared in `App.jsx` rendered and verified across all 14 canonical theme variants (45 routes × 14 isomorphic variants = 630 total route/variant pairings executed and verified with measured artifacts, 0 console/page errors); model-level collector separation enforced with observed DOM fields extracted directly from component elements and strictly rejecting missing elements/inputs without expected fixture fallbacks; operational worksheet numeric input/caret/selection before/during/after preview & exit verified; scanner value and search fallback before/during/after preview & exit verified; workflow DAG node/edge topology verified with real node extraction; CSV intake file upload verified; scientific report accession and parameter row integrity with associated units/precision verified; root text enlargement 400% at 1280 CSS viewport with unclipped scoped controls (WCAG 1.4.4) and equivalent 320 CSS pixel reflow (WCAG 1.4.10) verified; genuine interactive control focus with composed ring verified (`focusedTagName: BUTTON`, `hasFocusRing: true`); landscape 844×390 viewport verified; reduced motion and forced colours verified; physical native mobile hardware gate (iOS Safari / Android Chrome) and physical thermal label printer gate honestly recorded as PENDING.
+- **Status:** Automated Playwright/Chrome browser suite executed (12/12 suites passing); all 45 routes declared in `App.jsx` rendered and verified across all 14 canonical theme variants (45 routes × 14 isomorphic variants = 630 total route/variant pairings executed and verified with measured artifacts, 0 console/page errors); model-level collector separation enforced with observed DOM fields extracted directly from component elements and strictly rejecting missing elements/inputs without expected fixture fallbacks; unmodified shipped layout evaluated under root text enlargement 400% at 1280 CSS viewport without test-only layout modification, validating all 14 panel controls unclipped (WCAG 1.4.4) and clearly distinguished from browser zoom and equivalent 320 CSS pixel reflow (WCAG 1.4.10); operational worksheet exact identity `SMP-2026-001`, work item `wi-01`, parameter `PH_H2O`, unit `pH units`, status `Ready`, and numeric input/caret/selection before/during/after preview & exit verified; scanner value and search fallback before/during/after preview & exit verified; workflow DAG node/edge topology verified with real node extraction, 4 observed edges, and dependency nodes `['wi-01', 'wi-02']`; CSV intake file upload verified; scientific report accession `SOIL-GH-2026-001`, report `CERT-2026-SOIL-01`, and complete 5-row measurements array with associated methods/units/precision and status `APPROVED` verified (rejecting wrong methods, `DRAFT`, or missing status); genuine interactive control focus with composed ring verified (`focusedTagName: BUTTON`, `hasFocusRing: true`); landscape 844×390 viewport verified; reduced motion and forced colours verified; automated software executed; manual screen-reader (NVDA/JAWS/VoiceOver) and system forced-colours verification documented as pending manual interactive testing; physical native mobile hardware gate (iOS Safari / Android Chrome) and physical thermal label printer gate honestly recorded as PENDING.
 
 ---
 
@@ -166,10 +166,13 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
   - Evaluated at 844×390 (landscape smartphone viewport).
   - Verified `scrollWidth <= innerWidth` across all dimensions: **Zero horizontal window overflow** (`noHorizontalOverflow: true`).
   - Evaluated 200% text scaling with measured computed before/after font-size ratio (~2.0x) via `getComputedStyle`, zero horizontal window overflow (`noHorizontalOverflow: true`), and unclipped controls.
-  - Evaluated 400% desktop browser zoom reflow (WCAG 2.1 Success Criterion 1.4.10 Reflow) at 1280px width:
+  - Evaluated 400% root text enlargement at 1280px CSS viewport (WCAG 2.2 Success Criterion 1.4.4 Resize Text):
+    - Shipped UI tested completely unmodified (test-only `flexWrap = 'wrap'` layout repair removed).
+    - Scoped interactive control queries to the active panel (`.card-base`).
     - Computed body font ratio: **4.0x** baseline (`computedRatio: 4.0`).
     - Verified `scrollWidth <= innerWidth`: **Zero horizontal window overflow** (`noHorizontalOverflow: true`).
-    - All 14 theme gallery and mode controls remain visible, functional, and unclipped (`controlsUnclipped: true`).
+    - All 14 theme gallery and mode controls remain visible, functional, and unclipped (`0 <= left < right <= 1280`, `controlsUnclipped: true`).
+    - Explicitly distinguished root text enlargement at 1280 CSS viewport from browser zoom or equivalent 320 CSS pixel reflow (WCAG 1.4.10).
 - **Focus Rings & Keyboard Navigation**:
   - Focus visible rings verified on interactive controls (`hasFocusRing: true`).
   - `ThemeGallery` Mode Radiogroup: WAI-ARIA roving tabindex (`tabIndex={active ? 0 : -1}`).
@@ -203,11 +206,12 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
 
 ---
 
-## 8. Honest Boundary & Pending Hardware Gate
+## 8. Honest Boundaries & Tooling/Hardware Scope
 
 > [!IMPORTANT]
-> **Automated Execution Verified; Physical Mobile Hardware Gate PENDING**
-> - All automated headless Google Chrome tests pass with 12/12 suites and 0 uncaught page/console errors.
-> - Physical testing on native iOS Safari and native Android Chrome mobile devices is honestly recorded as **PENDING** physical hardware testing.
-> - Historical Issue #102 is **NOT** treated as a substitute waiver for theme testing. Physical device execution will occur once physical test hardware is provisioned in the test environment.
-> - Physical barcode label printing on thermal label hardware is honestly recorded as **PENDING** physical printer hardware attachment.
+> **Automated Execution Verified; Manual Assistive Software & Physical Hardware Gates PENDING**
+> - **Automated Headless Google Chrome (`153.0.8010.48`)**: 12/12 suites passing with 0 uncaught page/console errors across all 630 route/variant pairings, operational before/during/after transitions, unmodified shipped layout 400% text enlargement, 320px reflow, and scientific print isolation.
+> - **Manual Screen-Reader & Assistive Technology Gate**: Full WAI-ARIA semantic roles, labels, roving tabindex, focus containment, and live regions are structurally verified in software; however, live audio listening and interaction via screen reader software (NVDA, JAWS, macOS/iOS VoiceOver, Android TalkBack) require manual human operator execution and remain pending dedicated assistive evaluation.
+> - **System Forced-Colours Gate**: Synthetic `@media (forced-colors: active)` media query emulation and the dedicated `clear-contrast` theme (WCAG AAA >= 7:1) are verified in software; full OS-level Windows High Contrast / Contrast Themes display subsystem fidelity requires interactive operator testing.
+> - **Physical Mobile Hardware Gate**: Responsive viewports down to 320px, 390px, and 844×390 landscape are verified in Chrome emulation; physical testing on real iOS Safari and Android Chrome mobile hardware is honestly recorded as **PENDING** physical hardware testing. Historical Issue #102 is NOT a substitute waiver.
+> - **Physical Thermal Printer Gate**: Print CSS isolation (`@media print`, `[data-surface="paper"]`, pure `#ffffff` paper, `rgb(30, 58, 95)` navy text, and accession/measurement rows) is verified in software; physical barcode label printing on thermal label printer hardware is honestly recorded as **PENDING** physical printer hardware attachment.

@@ -3449,23 +3449,13 @@ Laboratory operators can find step-by-step procedures in the following documenta
     - **Tree Preservation**: Clean client tree `9921a81a647113e53859c80fd06d9f0ca592beb5` and server/data tree `1a2a84457d02d33707f9845da10f9b97995e1377` preserved intact.
     - **Honest Boundaries**: Software/browser verification complete; physical native mobile hardware (iOS Safari / Android Chrome) and physical thermal label printer attachment remain honestly recorded as PENDING physical hardware testing.
   - Status: Candidate completed locally with full test evidence and build budgets; PR #155 remains OPEN and unmerged; no production deployment until independent Codex acceptance and authorized release pipeline execution.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  - **Independent Review Remediation of Candidate 4403784 (2026-10-01 07:15 UTC)**:
+    - Following independent review `issue155-independent-review-4403784.md` and 16-case probe `issue155-focused-review-4403784.cjs`, updated `server/scripts/verify_issue155_browser_journeys.cjs`:
+      1. **Shipped Layout Testing & Unmodified Reflow (WCAG 1.4.10 / 1.4.4)**: Eliminated test-only layout modification (`flexWrap = 'wrap'`); tested shipped UI completely unmodified. Scoped interactive control queries in `zoom400State` to the active panel (`cardBases.find(p => p.querySelector('button, [role="radio"]'))`), validating all 14 controls unclipped (`0 <= left < right <= 1280`) under root text enlargement at 1280 CSS viewport, while distinguishing it from browser zoom and equivalent 320 CSS pixel reflow (`scrollWidth <= innerWidth`).
+      2. **Operational Workflows Model & Transition Gate Hardening**: Decoupled fixture expectations from actual component DOM in TechWorkbench. Extracted exact sample identity `SMP-2026-001`, work item `wi-01`, parameter `PH_H2O`, unit `pH units`, status `Ready` directly from component DOM elements (`.sf-sample-id`, `[data-testid*="rack-pos-"]`, `input[inputmode="decimal"] ~ span, [data-unit], .sf-unit`), eliminating the prior workspace header match. Hardened `Operational Workflows` gate to evaluate exact sample ID (`SMP-2026-001`), work item (`wi-01`), parameter (`PH_H2O`), unit (`pH units`), numeric draft preservation across all 3 transitions (`beforePreview.value === duringPreview.value === afterExit.value === '42.50'`), caret/selection range `[2, 5]` maintained before, during, and after, requested vs applied appearance (`forest` -> `terra` -> `forest`), named preview region notice visibility & exit (`[role="region"][aria-label*="preview" i]`), barcode preservation across all transitions, and workflow DAG with `renderedNodeCount >= 5` (`['reception', 'prep', 'wet-chem', 'review', 'closure']`), observed edges >= 4, and dependency nodes `['wi-01', 'wi-02']`.
+      3. **Scientific Output, Certificate & Thermal Label Isolation**: Defaulted `observedStatus = null;` (eliminating fallback to APPROVED). Extracted actual status from `statusLine` (matching `/results\s*approved/i` or `approved` -> `APPROVED`, `draft` -> `DRAFT`). Dynamically extracted `observedReportId` (`CERT-2026-SOIL-01`) and `observedAccessionId` (`SOIL-GH-2026-001`). Hardened `printIsolationPassed` gate to validate pure white `#ffffff` paper (`rgb(255, 255, 255)`), navy header text `rgb(30, 58, 95)` (contrast 11.93:1), accession header preserved (`SOIL-GH-2026-001`), complete `measurements` array (5 rows) with each row asserting `status === 'APPROVED'`, non-empty method (`method !== 'N/A' && method !== 'OTHER METHOD'`), numeric value, and valid unit (`unit !== 'N/A'`). Deliberately injected wrong method (`OTHER METHOD`), `DRAFT` status, or missing status strictly reject at the gate. Truthful `thermalPaperIsolation: false` reported for Certificate of Analysis without thermal label element.
+    - **Browser Execution Evidence**: Executed real Headless Chrome (`153.0.8010.48`) against all 12 test suites: **12/12 suites passing**, zero page errors, zero unexpected console errors, 630 route/variant pairings verified.
+    - **Focused Review Probe**: All 16 cases from `issue155-focused-review-4403784.cjs` confirmed 100% green.
+    - **Tree Preservation**: Clean client tree `9921a81a647113e53859c80fd06d9f0ca592beb5` and server/data tree `1a2a84457d02d33707f9845da10f9b97995e1377` preserved intact.
+    - **Honest Boundaries & Distinctions**: Automated software execution verified; manual screen-reader (NVDA/JAWS/VoiceOver) and OS-level system forced-colours verification documented as pending manual interactive testing; physical mobile devices (iOS Safari, Android Chrome) and physical barcode label printer hardware remain honestly recorded as PENDING physical hardware testing (Issue #102 is NOT a waiver).
 
