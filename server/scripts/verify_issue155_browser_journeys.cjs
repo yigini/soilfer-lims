@@ -1151,15 +1151,22 @@ async function runBrowserEvidence() {
             const pathEls = container && typeof container.querySelectorAll === 'function'
                 ? Array.from(container.querySelectorAll('svg.sf-wires path, [data-edge]'))
                 : [];
+            const sortedNodes = [...observedNodeIds].sort((a, b) => b.length - a.length);
             const observedEdges = pathEls.map(p => {
                 const fiberKey = Object.keys(p).find(k => k.startsWith('__reactFiber$'));
                 const key = (fiberKey && p[fiberKey] && p[fiberKey].key)
                     || (typeof p.getAttribute === 'function' && (p.getAttribute('data-edge') || p.getAttribute('data-edge-key')))
                     || p.id
                     || '';
-                if (key && key.includes('-')) {
-                    const parts = key.split('-');
-                    return { from: parts[0], to: parts.slice(1).join('-') };
+                if (key) {
+                    const fromNode = sortedNodes.find(n => key.startsWith(n + '-'));
+                    if (fromNode) {
+                        return { from: fromNode, to: key.slice(fromNode.length + 1) };
+                    }
+                    if (key.includes('-')) {
+                        const parts = key.split('-');
+                        return { from: parts[0], to: parts.slice(1).join('-') };
+                    }
                 }
                 return key ? { key } : null;
             }).filter(Boolean);
@@ -1248,6 +1255,9 @@ async function runBrowserEvidence() {
                 worksheetState.sampleId === 'SMP-2026-001' &&
                 worksheetState.workItemId === 'wi-01' &&
                 worksheetState.parameter === 'PH_H2O' &&
+                worksheetState.method === 'ISO 10390' &&
+                worksheetState.expectedPrecision === '0.01' &&
+                worksheetState.status && (worksheetState.status === 'Ready' || worksheetState.status === 'Ready to Record' || /ready/i.test(worksheetState.status)) &&
                 worksheetState.unit === 'pH units' &&
                 worksheetState.value === '42.50' &&
                 worksheetState.selectionStart === 2 &&
@@ -1299,12 +1309,22 @@ async function runBrowserEvidence() {
                 workflowState.hasGraph &&
                 workflowState.renderedNodeCount >= 5 &&
                 Array.isArray(workflowState.nodeIds) &&
+                workflowState.nodeIds.length === 5 &&
                 ['reception', 'prep', 'wet-chem', 'review', 'closure'].every(n => workflowState.nodeIds.includes(n)) &&
+                workflowState.nodeIds.every(n => ['reception', 'prep', 'wet-chem', 'review', 'closure'].includes(n)) &&
                 Array.isArray(workflowState.observedEdges) &&
-                workflowState.observedEdges.length >= 4 &&
+                workflowState.observedEdges.length === 4 &&
+                Array.isArray(workflowState.expectedEdges) &&
+                workflowState.expectedEdges.length === 4 &&
+                workflowState.expectedEdges.every(exp => workflowState.observedEdges.some(obs => obs && obs.from === exp.from && obs.to === exp.to)) &&
+                workflowState.observedEdges.every(obs => workflowState.expectedEdges.some(exp => exp && exp.from === obs.from && exp.to === obs.to)) &&
                 Array.isArray(workflowState.dependencyNodes) &&
-                workflowState.dependencyNodes.length >= 2 &&
-                ['wi-01', 'wi-02'].every(d => workflowState.dependencyNodes.some(dn => dn === d || dn.id === d || (typeof dn === 'string' && dn.includes(d)))) &&
+                workflowState.dependencyNodes.length === 2 &&
+                ['wi-01', 'wi-02'].every(d => workflowState.dependencyNodes.some(dn => (typeof dn === 'string' ? dn : (dn && dn.id)) === d)) &&
+                workflowState.dependencyNodes.every(dn => {
+                    const id = typeof dn === 'string' ? dn : (dn && dn.id);
+                    return id === 'wi-01' || id === 'wi-02';
+                }) &&
                 (!workflowState.dependencyNodes.includes('foreign')) &&
                 uploadSucceeded === true
             ),
@@ -2166,17 +2186,37 @@ async function runBrowserEvidence() {
             chartTokensPresent &&
             printStylesActive &&
             printStylesActive.paperSurfaceEvaluated &&
+            printStylesActive.reportId === 'CERT-2026-SOIL-01' &&
+            printStylesActive.accessionId === 'SOIL-GH-2026-001' &&
             printStylesActive.sampleIdPreserved === true &&
             printStylesActive.scientificValuesPreserved === true &&
             Array.isArray(printStylesActive.measurements) &&
             printStylesActive.measurements.length === 5 &&
+            [
+                { parameter: 'pH', method: 'ISO 10390', value: 6.5, unit: 'pH units', precision: 2, status: 'APPROVED' },
+                { parameter: 'OC', method: 'Walkley-Black', value: 2.15, unit: '%', precision: 2, status: 'APPROVED' },
+                { parameter: 'TN', method: 'Kjeldahl', value: 0.18, unit: '%', precision: 2, status: 'APPROVED' },
+                { parameter: 'P', method: 'Bray-1', value: 15.4, unit: 'mg/kg', precision: 2, status: 'APPROVED' },
+                { parameter: 'K', method: 'Ammonium Acetate', value: 0.45, unit: 'cmol(+)/kg', precision: 2, status: 'APPROVED' }
+            ].every(exp => ((obs) => Boolean(
+                obs &&
+                obs.method === exp.method &&
+                obs.method !== 'N/A' &&
+                obs.method !== 'OTHER METHOD' &&
+                obs.status === exp.status &&
+                typeof obs.value === 'number' &&
+                Math.abs(obs.value - exp.value) < 0.005 &&
+                (obs.unit === exp.unit || (exp.parameter === 'K' && (obs.unit === 'cmol(+)/kg' || obs.unit === 'cmol/kg'))) &&
+                obs.unit !== 'N/A'
+            ))(printStylesActive.measurements.find(m => m && (m.parameter === exp.parameter || (exp.parameter === 'K' && (m.parameter === 'K' || m.parameter === 'Exchangeable K')))))) &&
             printStylesActive.measurements.every(m =>
                 m.status === 'APPROVED' &&
                 m.method !== 'N/A' &&
                 m.method !== 'OTHER METHOD' &&
                 typeof m.value === 'number' &&
                 !isNaN(m.value) &&
-                m.unit !== 'N/A'
+                m.unit !== 'N/A' &&
+                (m.parameter === 'pH' ? m.method === 'ISO 10390' : true)
             ) &&
             printStylesActive.computedBg !== 'rgb(0, 0, 0)' &&
             !printStylesActive.isBlackBackground &&

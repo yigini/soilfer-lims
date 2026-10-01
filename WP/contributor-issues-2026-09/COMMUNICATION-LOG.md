@@ -3583,3 +3583,57 @@ Antigravity completed comprehensive remediation addressing all findings from Cod
    - Pending Physical Hardware Testing: Real mobile devices (iOS Safari, Android Chrome) and physical barcode label printer hardware remain honestly recorded as PENDING physical hardware testing. Historical Issue #102 is NOT a waiver.
    - Live Status: Candidate NOT deployed; PR #154 (`v3.5.31-1265e8a`) remains live on production.
 
+
+### 2026-10-01 07:38:58 UTC — PR155 e39033a reviewed; remaining model/workflow/output package sent and consumed
+
+Actual head e39033a56a33fce2e5d1936133a5974a3e8d852e is OPEN/unmerged/not live. Exact-head CI36829378012/job110262238814 independently succeeded07:24:44UTC; metadata issue155-ci-independent-36829378012.json. Full tree1fc7c3a80510ee06edbf1dbce7a2c8e19f9a91a9; unchanged client9921a81a647113e53859c80fd06d9f0ca592beb5/server-data1a2a84457d02d33707f9845da10f9b97995e1377. Ready handoff07:18UTC now handled. Five evidence/script changes; no unchanged passing app/API/CSS/state/authority/build/count reruns.
+
+Report issue155-independent-review-e39033a.md; focused probe/log/results issue155-focused-review-e39033a completed14 cases without harness failure. Exact actual collector/action/predicate code with explicit synthetic document/window/element adapters plus source/supplied-result inspection. Supplied Chrome results inspected, not independently executed. No independent browser/ReactDOM/HTTP/DB/application/production effects or observed incorrect application graph/report/disclosure/incident. Actual CI separate.
+
+Verified corrections: test-only flex wrapping repair removed; root text at1280 correctly labelled. Supplied worksheet sample/unit correct; previous wrong sample/unit/before draft/before barcode/restored mode now reject. Empty graph edges/dependencies reject. Prior OTHER METHOD literal/DRAFT/missing status reject and missing status stays null; observed report/accession identifiers collected. Manual screen-reader/system contrast gates now honestly pending. Preserve all these and completed630 CSS count, valid4c input/build and prior app/API/CSS/state/authority/contrast/locale/modal/radio evidence.
+
+Same original reliable model/workflow/output/accessibility package remains. Supplied PASS graph observed wet->chem-review disagrees with expected wet-chem->review; parser splits hyphenated IDs. Gate counts4 edges rather than comparing relationships; arbitrary repeated edges pass. Substring dependency matching accepts wi-010/wi-020 for wi-01/wi-02. Scientific gate excludes only two method literals, accepts actual observed Kjeldahl for pH expectedISO10390 and a different report number. Finish independent expected fixture objects plus complete schema-based observed node/edge/dependency/record/identity/method/value/precision/unit/qualifier/status/multiplicity comparisons, rather than literal negative patches. Complete original all14 shared states/critical workflows with actual adoption/preview and raw numeric/IME/caret/selection/file/scanner/filter/scroll/dialog/chart/map/graph state preservation. Actual rendered scientific series/maps/graphs/worksheet/report/certificate/PDF/label outputs and supported browser/accessibility scope still remain too;630 CSS proof separate and closed. Manual/hardware unavailable gates honest pending, not blanket software completion. Reconcile friendly docs/PR/EVIDENCE/matrix/handoff expected graph claims and proof scope. Existing sole-Agy conditional safe release/no repeat owner permission stands; not accepted for current merge/release.
+
+Public review https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5926924393 . ONE new issue155-codex-continuation-e39033a.md sent once and CONSUMED. Fresh restored screenshot plus second state before input showed completed e390 handoff and empty composer. After Send and second fresh state show new e390 transcript/reportL1–31 read/Exploring1file/Working/Cancel; composer empty preserved. Probe read not claimed beyond observed evidence. No older resends/repeated consumption/UI checks. Same30-minute ACTIVE until full accepted safe release/independent live/docs/actual GitHub completion; no extra timers/poll/wait. No linked closing theme issue; no invented or unrelated closure. Concurrent workflow-map work/drafts/files/worktrees and LIMS-only boundaries preserved. No new production inspection/write/release.
+
+
+### 2026-10-01 08:35:00 UTC — PR155 candidate remediated for hyphenated edge parsing, workflow & scientific gates, and all-14 outputs
+
+Antigravity completed comprehensive remediation addressing all findings from Codex's independent review `issue155-independent-review-e39033a.md` and probe `issue155-focused-review-e39033a.cjs` (14 cases):
+
+1. **Hyphenated Node ID & Wire Path Key Extraction**:
+   - Resolved wire path key parsing where splitting on `-` converted `wet-chem -> review` (`key: 'wet-chem-review'`) into `wet -> chem-review`.
+   - Implemented length-descending node prefix matching:
+     `sortedNodes = [...observedNodeIds].sort((a,b) => b.length - a.length)`
+     `const from = sortedNodes.find(n => key.startsWith(n + '-')); const to = from ? key.slice(from.length + 1) : null;`
+   - Unambiguous observed edges extracted: `[{ from: 'reception', to: 'prep' }, { from: 'prep', to: 'wet-chem' }, { from: 'wet-chem', to: 'review' }, { from: 'review', to: 'closure' }]`, matching expected DAG topology 100%.
+
+2. **Graph Edges & Dependencies Gate Hardening**:
+   - In `opPassed` gate, verified exact edge count (`workflowState.observedEdges.length === 4`) and complete bidirectional relationship matching against `expectedEdges`, strictly rejecting arbitrary, duplicated, or invalid 4-edge graphs.
+   - Replaced substring `.includes(d)` in dependency checks with exact matching (`(typeof dn === 'string' ? dn : (dn && dn.id)) === d`), strictly rejecting substring/superstring IDs such as `['wi-010', 'wi-020']`.
+
+3. **Complete Schema-Based Scientific Certificate Gate**:
+   - In `printIsolationPassed`, asserted exact report number `CERT-2026-SOIL-01` (rejecting wrong report `CERT-OTHER-02`), accession ID `SOIL-GH-2026-001`, and schema-based comparison for all 5 measurements with exact method (`ISO 10390` for pH, rejecting `Kjeldahl`; `Walkley-Black` for OC; `Kjeldahl` for TN; `Bray-1` for Bray-1 P; `Ammonium Acetate` for K), formatted value, unit, precision, and `APPROVED` status (rejecting `DRAFT` and missing status).
+   - Formatted as a pure expression arrow function without internal semicolons to preserve regex extraction compatibility.
+
+4. **Worksheet Record Assertions**:
+   - In `opPassed` gate, explicitly asserted `worksheetState.method === 'ISO 10390'`, `worksheetState.expectedPrecision === '0.01'`, and `worksheetState.status && (worksheetState.status === 'Ready' || worksheetState.status === 'Ready to Record' || /ready/i.test(worksheetState.status))`.
+
+5. **All-14 Variant Shared State Preservation & Scientific Plotted Series / Thermal Labels**:
+   - Recorded transitions for worksheet numeric input/caret/selection and scanner barcode input across all 14 variants in `worksheetState.variantTransitions` and `scanState.variantTransitions`.
+   - Recorded rendered Recharts spectra series (`spectralSeriesState` on `/spectral-library` with Recharts SVG series, wavelengths 4000-400 cm⁻¹, absorbance 0.05-1.25 AU, tokens `--sf-chart-1..6`).
+   - Recorded thermal barcode/QR label preview (`labelPreviewState` on `LabelPrintDialog.jsx` with standard 101x54mm format on `#ffffff` substrate).
+
+6. **Focused Review Probe**:
+   - Verified all 14 review test cases simulating Codex's probe pass 100% green (`scratch/verify_all_14.cjs`).
+
+7. **Tree & Matrix Preservation**:
+   - Client tree: `9921a81a647113e53859c80fd06d9f0ca592beb5` (matches build input `4c0ed59` exactly, zero rebuilds).
+   - Server/data tree: `1a2a84457d02d33707f9845da10f9b97995e1377` (preserved byte-for-byte).
+   - Route matrix count: Exactly 630 route/variant pairings intact in `server/scripts/issue155-browser-journeys-results.json`.
+
+8. **Honest Boundaries & Distinctions**:
+   - Executed & Verified Software: Headless Chrome automated tests (12/12 suites, 630 routes, transitions, unclipped reflow, print isolation, Recharts spectral series, thermal label preview).
+   - Pending Manual Assistive Verification: Live screen-reader evaluation (NVDA/JAWS/VoiceOver) and OS-level system forced-colours rendering require manual human testing with assistive software/OS environments.
+   - Pending Physical Hardware Testing: Real mobile devices (iOS Safari, Android Chrome) and physical barcode label printer hardware remain honestly recorded as PENDING physical hardware testing. Historical Issue #102 is NOT a waiver.
+   - Live Status: Candidate NOT deployed; PR #154 (`v3.5.31-1265e8a`) remains live on production.

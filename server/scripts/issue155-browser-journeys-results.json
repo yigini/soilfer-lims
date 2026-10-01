@@ -12189,7 +12189,122 @@
             "value": "42.50",
             "selectionStart": 2,
             "selectionEnd": 5
-          }
+          },
+          "variantTransitions": [
+            {
+              "theme": "soilfer-classic",
+              "mode": "light",
+              "appliedTheme": "soilfer-classic",
+              "appliedMode": "light",
+              "valuePreserved": true,
+              "caretPreserved": true
+            },
+            {
+              "theme": "soilfer-classic",
+              "mode": "dark",
+              "appliedTheme": "soilfer-classic",
+              "appliedMode": "dark",
+              "valuePreserved": true,
+              "caretPreserved": true
+            },
+            {
+              "theme": "forest",
+              "mode": "light",
+              "appliedTheme": "forest",
+              "appliedMode": "light",
+              "valuePreserved": true,
+              "caretPreserved": true
+            },
+            {
+              "theme": "forest",
+              "mode": "dark",
+              "appliedTheme": "forest",
+              "appliedMode": "dark",
+              "valuePreserved": true,
+              "caretPreserved": true
+            },
+            {
+              "theme": "terra",
+              "mode": "light",
+              "appliedTheme": "terra",
+              "appliedMode": "light",
+              "valuePreserved": true,
+              "caretPreserved": true
+            },
+            {
+              "theme": "terra",
+              "mode": "dark",
+              "appliedTheme": "terra",
+              "appliedMode": "dark",
+              "valuePreserved": true,
+              "caretPreserved": true
+            },
+            {
+              "theme": "mineral",
+              "mode": "light",
+              "appliedTheme": "mineral",
+              "appliedMode": "light",
+              "valuePreserved": true,
+              "caretPreserved": true
+            },
+            {
+              "theme": "mineral",
+              "mode": "dark",
+              "appliedTheme": "mineral",
+              "appliedMode": "dark",
+              "valuePreserved": true,
+              "caretPreserved": true
+            },
+            {
+              "theme": "watershed",
+              "mode": "light",
+              "appliedTheme": "watershed",
+              "appliedMode": "light",
+              "valuePreserved": true,
+              "caretPreserved": true
+            },
+            {
+              "theme": "watershed",
+              "mode": "dark",
+              "appliedTheme": "watershed",
+              "appliedMode": "dark",
+              "valuePreserved": true,
+              "caretPreserved": true
+            },
+            {
+              "theme": "nutrient",
+              "mode": "light",
+              "appliedTheme": "nutrient",
+              "appliedMode": "light",
+              "valuePreserved": true,
+              "caretPreserved": true
+            },
+            {
+              "theme": "nutrient",
+              "mode": "dark",
+              "appliedTheme": "nutrient",
+              "appliedMode": "dark",
+              "valuePreserved": true,
+              "caretPreserved": true
+            },
+            {
+              "theme": "clear-contrast",
+              "mode": "light",
+              "appliedTheme": "clear-contrast",
+              "appliedMode": "light",
+              "valuePreserved": true,
+              "caretPreserved": true
+            },
+            {
+              "theme": "clear-contrast",
+              "mode": "dark",
+              "appliedTheme": "clear-contrast",
+              "appliedMode": "dark",
+              "valuePreserved": true,
+              "caretPreserved": true
+            }
+          ],
+          "all14VariantsPreserved": true
         },
         "scanState": {
           "mounted": true,
@@ -12219,7 +12334,108 @@
             "appliedMode": "light",
             "noticeVisible": false,
             "enteredValue": "SMP-2026-001"
-          }
+          },
+          "variantTransitions": [
+            {
+              "theme": "soilfer-classic",
+              "mode": "light",
+              "appliedTheme": "soilfer-classic",
+              "appliedMode": "light",
+              "enteredValuePreserved": true
+            },
+            {
+              "theme": "soilfer-classic",
+              "mode": "dark",
+              "appliedTheme": "soilfer-classic",
+              "appliedMode": "dark",
+              "enteredValuePreserved": true
+            },
+            {
+              "theme": "forest",
+              "mode": "light",
+              "appliedTheme": "forest",
+              "appliedMode": "light",
+              "enteredValuePreserved": true
+            },
+            {
+              "theme": "forest",
+              "mode": "dark",
+              "appliedTheme": "forest",
+              "appliedMode": "dark",
+              "enteredValuePreserved": true
+            },
+            {
+              "theme": "terra",
+              "mode": "light",
+              "appliedTheme": "terra",
+              "appliedMode": "light",
+              "enteredValuePreserved": true
+            },
+            {
+              "theme": "terra",
+              "mode": "dark",
+              "appliedTheme": "terra",
+              "appliedMode": "dark",
+              "enteredValuePreserved": true
+            },
+            {
+              "theme": "mineral",
+              "mode": "light",
+              "appliedTheme": "mineral",
+              "appliedMode": "light",
+              "enteredValuePreserved": true
+            },
+            {
+              "theme": "mineral",
+              "mode": "dark",
+              "appliedTheme": "mineral",
+              "appliedMode": "dark",
+              "enteredValuePreserved": true
+            },
+            {
+              "theme": "watershed",
+              "mode": "light",
+              "appliedTheme": "watershed",
+              "appliedMode": "light",
+              "enteredValuePreserved": true
+            },
+            {
+              "theme": "watershed",
+              "mode": "dark",
+              "appliedTheme": "watershed",
+              "appliedMode": "dark",
+              "enteredValuePreserved": true
+            },
+            {
+              "theme": "nutrient",
+              "mode": "light",
+              "appliedTheme": "nutrient",
+              "appliedMode": "light",
+              "enteredValuePreserved": true
+            },
+            {
+              "theme": "nutrient",
+              "mode": "dark",
+              "appliedTheme": "nutrient",
+              "appliedMode": "dark",
+              "enteredValuePreserved": true
+            },
+            {
+              "theme": "clear-contrast",
+              "mode": "light",
+              "appliedTheme": "clear-contrast",
+              "appliedMode": "light",
+              "enteredValuePreserved": true
+            },
+            {
+              "theme": "clear-contrast",
+              "mode": "dark",
+              "appliedTheme": "clear-contrast",
+              "appliedMode": "dark",
+              "enteredValuePreserved": true
+            }
+          ],
+          "all14VariantsPreserved": true
         },
         "workflowState": {
           "mounted": true,
@@ -12271,8 +12487,8 @@
               "to": "wet-chem"
             },
             {
-              "from": "wet",
-              "to": "chem-review"
+              "from": "wet-chem",
+              "to": "review"
             },
             {
               "from": "review",
@@ -12617,7 +12833,49 @@
           }
         },
         "pageErrorsCount": 0,
-        "unexpectedConsoleErrorsCount": 0
+        "unexpectedConsoleErrorsCount": 0,
+        "spectralSeriesState": {
+          "route": "/spectral-library",
+          "component": "pages/SpectralLibrary.jsx",
+          "role": "Staff / All",
+          "seriesCount": 1,
+          "modality": "MIR",
+          "sampleId": "SMP-2026-001",
+          "wavelengthPoints": 5,
+          "intensityRange": [
+            0.12,
+            0.88
+          ],
+          "chartTokensApplied": {
+            "grid": "var(--sf-chart-grid)",
+            "axis": "var(--sf-chart-axis)",
+            "traceColors": [
+              "#2563eb",
+              "#10b981",
+              "#f59e0b",
+              "#ef4444",
+              "#8b5cf6",
+              "#06b6d4",
+              "#ec4899",
+              "#84cc16",
+              "#f97316",
+              "#6366f1"
+            ]
+          },
+          "renderedSeriesVerified": true
+        },
+        "labelPreviewState": {
+          "component": "components/common/LabelPrintDialog.jsx",
+          "format": "STANDARD",
+          "dimensions": "101x54mm",
+          "substrate": "#ffffff",
+          "barcodeColor": "#000000",
+          "sampleId": "SMP-2026-001",
+          "labId": "LAB-BRW-01",
+          "qrCodeMode": "offline-qrcode",
+          "thermalPaperIsolation": true,
+          "physicalPrinterHardwareGate": "PENDING physical thermal label printer attachment"
+        }
       }
     },
     {
