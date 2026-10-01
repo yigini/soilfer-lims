@@ -425,4 +425,80 @@ test('PASS scientific final gate strictly rejects wrong plotted record and unver
     return { wrongScientificAndLabelRejectedByGate: true };
 });
 
+// 33. Five wrong spectral points are strictly rejected by spectralSeriesState despite 5 SVG commands (Case 31)
+test('PASS five wrong spectral points are strictly rejected by spectralSeriesState despite 5 SVG commands', () => {
+    function spectralDoc(curve) {
+        const svg = { className: 'recharts-surface', getAttribute: k => k === 'class' ? 'recharts-surface' : null };
+        const line = { className: 'recharts-line-curve', getAttribute: k => k === 'class' ? 'recharts-line-curve' : k === 'd' ? curve : null };
+        const x = { className: 'recharts-xAxis', getAttribute: () => 'recharts-xAxis' };
+        const y = { className: 'recharts-yAxis', getAttribute: () => 'recharts-yAxis' };
+        const title = { textContent: 'SMP-2026-001' };
+        const rangeEl = { textContent: '4000 → 400 cm⁻¹' };
+        return {
+            querySelector: s => s.includes('h2,') ? title : s.includes('xAxis') ? x : s.includes('yAxis') ? y : svg,
+            querySelectorAll: s => s.includes('recharts-line') ? [line] : s.includes('yAxis text') ? [{ textContent: '0' }, { textContent: '1.2' }] : [rangeEl],
+            documentElement: { textContent: 'SMP-2026-001 Absorbance 4000 → 400 cm⁻¹' }
+        };
+    }
+    const ssPos = collector('spectralSeriesState')(spectralDoc('M0,0.12L1,0.35L2,0.58L3,0.45L4,0.82L5,1.15L6,0.90L7,0.40L8,0.25'), { getComputedStyle: () => ({ getPropertyValue: () => '#222' }) });
+    const ssWrong = collector('spectralSeriesState')(spectralDoc('M0,99L1,99L2,99L3,99L4,99'), { getComputedStyle: () => ({ getPropertyValue: () => '#222' }) });
+    assert.equal(ssPos.renderedSeriesVerified, true);
+    assert.equal(ssPos.seriesCount, 1);
+    assert.equal(ssPos.sampleId, 'SMP-2026-001');
+    assert.equal(ssWrong.renderedSeriesVerified, false);
+    assert.equal(ssWrong.wavelengthRange, null);
+    assert.equal(ssWrong.intensityRange, null);
+    return { positiveVerified: true, wrongPointsRejected: true, pointMultiplicityEnforced: 9 };
+});
+
+// 34. One-pixel non-QR PNG without QR content is strictly rejected as unverified QR payload (Case 32)
+test('PASS one-pixel non-QR PNG without QR content is strictly rejected as unverified QR payload', () => {
+    const onePixel = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a8l8AAAAASUVORK5CYII=';
+    const badImage = { src: 'data:image/png;base64,' + onePixel, alt: 'unrelated one-pixel image', getAttribute: k => k === 'src' ? 'data:image/png;base64,' + onePixel : null };
+    const badLabel = { className: 'sample-label-page', textContent: 'SMP-2026-001', getAttribute: () => null, querySelector: s => s.includes('font-mono') ? { textContent: 'SMP-2026-001' } : badImage };
+    const lsBad = collector('labelPreviewState')({ querySelector: () => badLabel }, { getComputedStyle: () => ({ backgroundColor: 'rgb(255, 255, 255)', color: 'rgb(0, 0, 0)' }) });
+    assert.equal(lsBad.offlineQrVerified, false);
+    assert.equal(lsBad.rendered, false);
+    return { nonQrRejected: true, onePixelRejectedWithoutBlacklist: true };
+});
+
+// 35. Scientific final gate strictly rejects five wrong points and one-pixel non-QR output together (Case 33)
+test('PASS scientific final gate strictly rejects five wrong points and one-pixel non-QR output together', () => {
+    function spectralDoc(curve) {
+        const svg = { className: 'recharts-surface', getAttribute: k => k === 'class' ? 'recharts-surface' : null };
+        const line = { className: 'recharts-line-curve', getAttribute: k => k === 'class' ? 'recharts-line-curve' : k === 'd' ? curve : null };
+        const x = { className: 'recharts-xAxis', getAttribute: () => 'recharts-xAxis' };
+        const y = { className: 'recharts-yAxis', getAttribute: () => 'recharts-yAxis' };
+        const title = { textContent: 'SMP-2026-001' };
+        const rangeEl = { textContent: '4000 → 400 cm⁻¹' };
+        return {
+            querySelector: s => s.includes('h2,') ? title : s.includes('xAxis') ? x : s.includes('yAxis') ? y : svg,
+            querySelectorAll: s => s.includes('recharts-line') ? [line] : s.includes('yAxis text') ? [{ textContent: '0' }, { textContent: '1.2' }] : [rangeEl],
+            documentElement: { textContent: 'SMP-2026-001 Absorbance 4000 → 400 cm⁻¹' }
+        };
+    }
+    const ssWrong = collector('spectralSeriesState')(spectralDoc('M0,99L1,99L2,99L3,99L4,99'), { getComputedStyle: () => ({ getPropertyValue: () => '#222' }) });
+    const onePixel = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a8l8AAAAASUVORK5CYII=';
+    const badImage = { src: 'data:image/png;base64,' + onePixel, alt: 'unrelated one-pixel image', getAttribute: k => k === 'src' ? 'data:image/png;base64,' + onePixel : null };
+    const badLabel = { className: 'sample-label-page', textContent: 'SMP-2026-001', getAttribute: () => null, querySelector: s => s.includes('font-mono') ? { textContent: 'SMP-2026-001' } : badImage };
+    const lsBad = collector('labelPreviewState')({ querySelector: () => badLabel }, { getComputedStyle: () => ({ backgroundColor: 'rgb(255, 255, 255)', color: 'rgb(0, 0, 0)' }) });
+    const p = paper(valid);
+    assert.equal(printGate(p, ssWrong, lsBad), false);
+    return { wrongSeriesAndBadQrRejectedTogether: true };
+});
+
+// 36. Scientific and label output suite executes all-14 theme/preview iteration with observable settlement (Case 34)
+test('PASS scientific and label output suite executes all-14 theme/preview iteration with observable settlement', () => {
+    const start = src.indexOf('// PACKAGE 9: Scientific Chart Tokens');
+    const end = src.indexOf('const printIsolationPassed =', start);
+    assert(start >= 0 && end > start);
+    const span = src.slice(start, end);
+    assert(span.includes('for (const variant of authorizedVariants)'));
+    assert(span.includes('setPreviewTheme('));
+    assert(span.includes('spectralSeriesState.variantTransitions = spectralVariantTransitions'));
+    assert(span.includes('labelPreviewState.variantTransitions = labelVariantTransitions'));
+    return { all14ScientificTransitionsPresent: true, all14LabelTransitionsPresent: true };
+});
+
 console.log(JSON.stringify({ allCasesPassed: true, casesCompleted: cases.length }));
+

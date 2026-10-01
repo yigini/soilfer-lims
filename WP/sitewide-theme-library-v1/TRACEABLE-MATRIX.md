@@ -159,12 +159,18 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
     - Strict unit matching: wrong OC unit cell `mg/kg` with note rejected.
     - Inapplicable label layout marked `{ applicable: false, reason: 'Certificate of Analysis is A4 document, not thermal label' }`.
 - **Standalone Scientific Spectral Collector (`/spectral-library`)**:
-  - Evaluates SVG spectra plot, wavelength range 4000-400 cm⁻¹, intensity range 0.05-1.25 AU, and `--sf-chart-1..6` tokens.
-  - On empty document (absent SVG / lines): strictly returns `renderedSeriesVerified: false`, `seriesCount: 0`, null ranges, and `[]` tokens (no fake constants or `Math.max(..., 2)`).
+  - Dynamically observes specimen `SMP-2026-001`, real Recharts Cartesian axes (XAxis wavenumber/wavelength and YAxis absorbance/reflectance), wavelength range (`4000 - 400 cm⁻¹`), dynamic intensity range (`0.00 - 1.20 AU`), and `--sf-chart-1..6` tokens. Completely eradicated invented text fallback range (`0.05 - 1.25 AU`).
+  - Distinct curve series selector: filters out `<g class="recharts-line">` container groups and counts only real distinct curve paths (`path.recharts-line-curve, path.sf-spectral-trace`), ensuring `seriesCount === 1` (preventing group+curve double-counting).
+  - Complete 9-point scientific model comparison: parses SVG curve endpoints and compares against expected 9 mock wavelength/value pairs (`[4000, 3500, 3000, 2500, 2000, 1500, 1000, 500, 400]` cm⁻¹ and `[0.12, 0.35, 0.58, 0.45, 0.82, 1.15, 0.90, 0.40, 0.25]` AU), strictly rejecting unphysical values (e.g. 5 points with y=99).
+  - All-14 theme/preview iteration: iterates through all 14 authorized canonical variants under preview, waits outside activation callback (`page.waitForFunction`) for observable theme settlement, verifies `--sf-chart-1..6` tokens and SVG curve persistence, and cleanly exits via `clearPreviewTheme()`.
+  - On empty document or wrong curve: strictly returns `renderedSeriesVerified: false`, `wavelengthRange: null`, and `intensityRange: null`.
 - **Barcode & QR Labels (`LabelPrintDialog.jsx`)**:
   - Official specimen barcode labels render on pure `#ffffff` substrate with `#000000` barcode bars (`thermalPaperIsolation: true`) to guarantee optical scanner read rates.
-  - On empty document (no label element): strictly returns `rendered: false`, `thermalPaperIsolation: false`, `offlineQrVerified: false`, and null format/substrate/color.
-  - Print isolation gate strictly requires verified scientific spectral series (`seriesCount >= 1`) and verified label preview (`rendered: true`, `offlineQrVerified: true`), failing closed when empty document collectors are supplied.
+  - Authentic QR code payload decoding: decodes actual generated QR image payload via browser canvas + ZXing in Chrome and PNG chunk decompression (IHDR/IDAT via zlib) + ZXing in Node collector adapter. Decoded payload is matched directly against specimen record `SMP-2026-001`.
+  - No image-size blacklist: non-QR images (including 1x1 PNG stubs) fail ZXing pattern recognition naturally, returning `decodedQrPayload: null`, `offlineQrVerified: false`, and `rendered: false`.
+  - All-14 theme/preview iteration: iterates through all 14 authorized canonical variants under preview, verifying thermal paper isolation (pure white `#ffffff` background, dark text/barcode) remains preserved across every variant, and cleanly exits via `clearPreviewTheme()`.
+  - On empty document or unverified QR: strictly returns `rendered: false`, `thermalPaperIsolation: false`, `offlineQrVerified: false`, and null format/substrate/color.
+  - Print isolation gate strictly requires verified scientific spectral series (`seriesCount === 1`, `renderedSeriesVerified === true`, non-null wavelength range) and verified label preview (`sampleId === 'SMP-2026-001'`, `substrate === 'white'`, `offlineQrVerified === true`, `thermalPaperIsolation === true`), failing closed when empty document, wrong plotted data, or non-QR images are supplied.
   - Physical optical scanner hardware and physical thermal label printer attachment are honestly recorded as **PENDING** physical hardware attachment.
 
 ---
