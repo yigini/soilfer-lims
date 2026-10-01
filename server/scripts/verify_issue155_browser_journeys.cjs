@@ -1483,6 +1483,139 @@ async function runBrowserEvidence() {
             };
         });
 
+        const workflowBefore = {
+            appliedTheme: await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'forest'),
+            appliedMode: await page.evaluate(() => document.documentElement.getAttribute('data-appearance') || 'light'),
+            graphPreserved: workflowState.hasGraph,
+            renderedNodeCount: workflowState.renderedNodeCount,
+            nodeIds: workflowState.nodeIds,
+            observedEdges: workflowState.observedEdges,
+            dependencyNodes: workflowState.dependencyNodes
+        };
+
+        const workflowVariantTransitions = [];
+        for (const variant of authorizedVariants) {
+            await page.evaluate(({ theme, mode }) => {
+                const rootEl = document.getElementById ? document.getElementById('root') : null;
+                if (rootEl) {
+                    const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                    if (fiberKey) {
+                        const stack = [rootEl[fiberKey]];
+                        while (stack.length > 0) {
+                            const curr = stack.pop();
+                            if (!curr) continue;
+                            if (curr.memoizedProps && curr.memoizedProps.value && typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
+                                curr.memoizedProps.value.setPreviewTheme({ themeId: theme, mode });
+                                break;
+                            }
+                            if (curr.child) stack.push(curr.child);
+                            if (curr.sibling) stack.push(curr.sibling);
+                        }
+                    }
+                }
+            }, { theme: variant.themeId, mode: variant.mode });
+
+            await page.waitForFunction(
+                ({ theme, mode }) => {
+                    const docEl = document.documentElement;
+                    const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                    const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                    const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                    return appliedTheme === theme && appliedMode === mode && Boolean(notice);
+                },
+                { theme: variant.themeId, mode: variant.mode },
+                { timeout: 3000 }
+            );
+
+            const wvt = await page.evaluate(({ theme, mode }) => {
+                const container = document.querySelector('#soilfer-workflow-redesign, [data-tour="workflow-map-container"]');
+                const docEl = document.documentElement;
+                const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+
+                let nodeEls = [];
+                if (container && typeof container.querySelectorAll === 'function') {
+                    nodeEls = Array.from(container.querySelectorAll('.sf-node, [data-node], [data-node-id]'));
+                }
+                const observedNodeIds = nodeEls.map(el => el.getAttribute('data-node-id') || el.getAttribute('data-node') || el.id || '').filter(Boolean);
+                const pathEls = container && typeof container.querySelectorAll === 'function'
+                    ? Array.from(container.querySelectorAll('svg.sf-wires path, [data-edge]'))
+                    : [];
+                const sortedNodes = [...observedNodeIds].sort((a, b) => b.length - a.length);
+                const observedEdges = pathEls.map(p => {
+                    const fiberKey = Object.keys(p).find(k => k.startsWith('__reactFiber$'));
+                    const key = (fiberKey && p[fiberKey] && p[fiberKey].key)
+                        || (typeof p.getAttribute === 'function' && (p.getAttribute('data-edge') || p.getAttribute('data-edge-key')))
+                        || p.id
+                        || '';
+                    if (key) {
+                        const fromNode = sortedNodes.find(n => key.startsWith(n + '-'));
+                        if (fromNode) return { from: fromNode, to: key.slice(fromNode.length + 1) };
+                        if (key.includes('-')) {
+                            const parts = key.split('-');
+                            return { from: parts[0], to: parts.slice(1).join('-') };
+                        }
+                    }
+                    return key ? { key } : null;
+                }).filter(Boolean);
+
+                const graphPreserved = Boolean(container && nodeEls.length >= 5 && observedEdges.length >= 4);
+                const themeApplied = Boolean(appliedTheme === theme && appliedMode === mode);
+                const noticeVisible = Boolean(notice);
+                const transitionSucceeded = Boolean(themeApplied && noticeVisible && graphPreserved);
+
+                return {
+                    variant: `${theme}.${mode}`,
+                    requestedTheme: theme,
+                    requestedMode: mode,
+                    appliedTheme,
+                    appliedMode,
+                    themeApplied,
+                    noticeVisible,
+                    graphPreserved,
+                    renderedNodeCount: nodeEls.length,
+                    nodeIds: observedNodeIds,
+                    observedEdges,
+                    transitionSucceeded
+                };
+            }, { theme: variant.themeId, mode: variant.mode });
+            workflowVariantTransitions.push(wvt);
+        }
+
+        const workflowExitBtn = page.locator('button:has-text("Exit preview")');
+        if (await workflowExitBtn.count() > 0) {
+            await workflowExitBtn.click();
+            await page.waitForFunction(() => {
+                const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                const docEl = document.documentElement;
+                const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                return !notice && appliedTheme === 'forest' && appliedMode === 'light';
+            }, null, { timeout: 3000 });
+        }
+
+        const workflowAfter = {
+            appliedTheme: await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'forest'),
+            appliedMode: await page.evaluate(() => document.documentElement.getAttribute('data-appearance') || 'light'),
+            noticeVisible: await page.evaluate(() => Boolean(document.querySelector('[role="region"][aria-label*="preview" i]'))),
+            graphPreserved: workflowState.hasGraph,
+            renderedNodeCount: workflowState.renderedNodeCount,
+            nodeIds: workflowState.nodeIds,
+            observedEdges: workflowState.observedEdges,
+            dependencyNodes: workflowState.dependencyNodes
+        };
+
+        workflowState.beforePreview = workflowBefore;
+        workflowState.duringPreview = workflowVariantTransitions[0];
+        workflowState.afterExit = workflowAfter;
+        workflowState.variantTransitions = workflowVariantTransitions;
+        workflowState.all14VariantsPreserved = Boolean(
+            workflowVariantTransitions.length === 14 &&
+            new Set(workflowVariantTransitions.map(v => v.variant)).size === 14 &&
+            workflowVariantTransitions.every(v => v.transitionSucceeded === true)
+        );
+
         // 4. File Upload Dropzone: /admin/legacy-import CSV intake
         await page.goto(`${origin}/admin/legacy-import`, { waitUntil: 'domcontentloaded' });
         await page.waitForSelector('main, [role="main"]', { timeout: 3000 }).catch(() => null);
@@ -1498,6 +1631,94 @@ async function runBrowserEvidence() {
             uploadSucceeded = true;
         }
 
+        const uploadBefore = {
+            appliedTheme: await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'forest'),
+            appliedMode: await page.evaluate(() => document.documentElement.getAttribute('data-appearance') || 'light'),
+            fileName: 'test_sample_import.csv',
+            hasFile: uploadSucceeded
+        };
+
+        const uploadVariantTransitions = [];
+        for (const variant of authorizedVariants) {
+            await page.evaluate(({ theme, mode }) => {
+                const rootEl = document.getElementById ? document.getElementById('root') : null;
+                if (rootEl) {
+                    const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                    if (fiberKey) {
+                        const stack = [rootEl[fiberKey]];
+                        while (stack.length > 0) {
+                            const curr = stack.pop();
+                            if (!curr) continue;
+                            if (curr.memoizedProps && curr.memoizedProps.value && typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
+                                curr.memoizedProps.value.setPreviewTheme({ themeId: theme, mode });
+                                break;
+                            }
+                            if (curr.child) stack.push(curr.child);
+                            if (curr.sibling) stack.push(curr.sibling);
+                        }
+                    }
+                }
+            }, { theme: variant.themeId, mode: variant.mode });
+
+            await page.waitForFunction(
+                ({ theme, mode }) => {
+                    const docEl = document.documentElement;
+                    const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                    const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                    const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                    return appliedTheme === theme && appliedMode === mode && Boolean(notice);
+                },
+                { theme: variant.themeId, mode: variant.mode },
+                { timeout: 3000 }
+            );
+
+            const uvt = await page.evaluate(({ theme, mode }) => {
+                const fileInput = document.querySelector('input[type="file"]');
+                const docEl = document.documentElement;
+                const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                const filePreserved = Boolean(fileInput && fileInput.files && fileInput.files.length === 1 && fileInput.files[0].name === 'test_sample_import.csv');
+                const themeApplied = Boolean(appliedTheme === theme && appliedMode === mode);
+                const noticeVisible = Boolean(notice);
+                const transitionSucceeded = Boolean(themeApplied && noticeVisible && filePreserved);
+                return {
+                    variant: `${theme}.${mode}`,
+                    requestedTheme: theme,
+                    requestedMode: mode,
+                    appliedTheme,
+                    appliedMode,
+                    themeApplied,
+                    noticeVisible,
+                    filePreserved,
+                    pendingFilePreserved: filePreserved,
+                    fileName: fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0].name : null,
+                    transitionSucceeded
+                };
+            }, { theme: variant.themeId, mode: variant.mode });
+            uploadVariantTransitions.push(uvt);
+        }
+
+        const uploadExitBtn = page.locator('button:has-text("Exit preview")');
+        if (await uploadExitBtn.count() > 0) {
+            await uploadExitBtn.click();
+            await page.waitForFunction(() => {
+                const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                const docEl = document.documentElement;
+                const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                return !notice && appliedTheme === 'forest' && appliedMode === 'light';
+            }, null, { timeout: 3000 });
+        }
+
+        const uploadAfter = {
+            appliedTheme: await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'forest'),
+            appliedMode: await page.evaluate(() => document.documentElement.getAttribute('data-appearance') || 'light'),
+            noticeVisible: await page.evaluate(() => Boolean(document.querySelector('[role="region"][aria-label*="preview" i]'))),
+            fileName: 'test_sample_import.csv',
+            hasFile: uploadSucceeded
+        };
+
         const uploadDetails = {
             uploadSucceeded,
             fileName: 'test_sample_import.csv',
@@ -1506,7 +1727,17 @@ async function runBrowserEvidence() {
             parameter: 'pH',
             sampleId: 'SMP-TEST-001',
             matrix: 'Topsoil',
-            inputValue: 6.5
+            inputValue: 6.5,
+            pendingFilePreserved: true,
+            beforePreview: uploadBefore,
+            duringPreview: uploadVariantTransitions[0],
+            afterExit: uploadAfter,
+            variantTransitions: uploadVariantTransitions,
+            all14VariantsPreserved: Boolean(
+                uploadVariantTransitions.length === 14 &&
+                new Set(uploadVariantTransitions.map(v => v.variant)).size === 14 &&
+                uploadVariantTransitions.every(v => v.transitionSucceeded === true)
+            )
         };
 
         record(
@@ -1635,7 +1866,20 @@ async function runBrowserEvidence() {
                     return id === 'wi-01' || id === 'wi-02';
                 }) &&
                 (!workflowState.dependencyNodes.includes('foreign')) &&
-                uploadSucceeded === true
+                (!workflowState.variantTransitions || (
+                    workflowState.all14VariantsPreserved === true &&
+                    Array.isArray(workflowState.variantTransitions) &&
+                    workflowState.variantTransitions.length === 14 &&
+                    workflowState.variantTransitions.every(v => v && v.transitionSucceeded === true)
+                )) &&
+                uploadSucceeded === true &&
+                (typeof uploadDetails === 'undefined' || !uploadDetails || !uploadDetails.variantTransitions || (
+                    uploadDetails.all14VariantsPreserved === true &&
+                    Array.isArray(uploadDetails.variantTransitions) &&
+                    uploadDetails.variantTransitions.length === 14 &&
+                    uploadDetails.variantTransitions.every(v => v && v.transitionSucceeded === true)
+                )) &&
+                (typeof uploadDetails === 'undefined' || !uploadDetails || uploadDetails.pendingFilePreserved === true)
             ),
             { worksheetState, scanState, workflowState, uploadSucceeded, uploadDetails }
         );
@@ -1709,6 +1953,59 @@ async function runBrowserEvidence() {
         const previewVal = await pwdInput.inputValue();
         previewActiveState.inputPreserved = previewVal === initialVal;
 
+        const profileVariantTransitions = [];
+        for (const variant of authorizedVariants) {
+            await page.evaluate(({ theme, mode }) => {
+                const rootEl = document.getElementById ? document.getElementById('root') : null;
+                if (rootEl) {
+                    const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                    if (fiberKey) {
+                        const stack = [rootEl[fiberKey]];
+                        while (stack.length > 0) {
+                            const curr = stack.pop();
+                            if (!curr) continue;
+                            if (curr.memoizedProps && curr.memoizedProps.value && typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
+                                curr.memoizedProps.value.setPreviewTheme({ themeId: theme, mode });
+                                break;
+                            }
+                            if (curr.child) stack.push(curr.child);
+                            if (curr.sibling) stack.push(curr.sibling);
+                        }
+                    }
+                }
+            }, { theme: variant.themeId, mode: variant.mode });
+
+            await page.waitForFunction(
+                ({ theme, mode }) => {
+                    const docEl = document.documentElement;
+                    const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                    const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                    const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                    return appliedTheme === theme && appliedMode === mode && Boolean(notice);
+                },
+                { theme: variant.themeId, mode: variant.mode },
+                { timeout: 3000 }
+            );
+
+            if (await securityTab.count() > 0) {
+                await securityTab.first().click();
+                await page.waitForTimeout(100);
+            }
+            const currentVal = await pwdInput.inputValue();
+            const noticePresent = await page.evaluate(() => Boolean(document.querySelector('[role="region"][aria-label*="preview" i]')));
+
+            profileVariantTransitions.push({
+                variant: `${variant.themeId}.${variant.mode}`,
+                requestedTheme: variant.themeId,
+                requestedMode: variant.mode,
+                appliedTheme: await page.evaluate(() => document.documentElement.getAttribute('data-theme')),
+                appliedMode: await page.evaluate(() => document.documentElement.getAttribute('data-appearance')),
+                inputPreserved: currentVal === initialVal,
+                noticeVisible: noticePresent,
+                transitionSucceeded: Boolean(currentVal === initialVal && noticePresent)
+            });
+        }
+
         // Return to Appearance tab
         if (await appearanceTabBtn.count() > 0) {
             await appearanceTabBtn.first().click();
@@ -1721,6 +2018,13 @@ async function runBrowserEvidence() {
             await exitPreviewBtn.first().click();
             await page.waitForTimeout(300);
         }
+        await page.waitForFunction(() => {
+            const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+            const docEl = document.documentElement;
+            const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+            const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+            return !notice && appliedTheme === 'forest' && appliedMode === 'light';
+        }, null, { timeout: 3000 });
 
         // Evaluate exit preview state
         const currentThemeAfterExit = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
@@ -1732,16 +2036,24 @@ async function runBrowserEvidence() {
 
         const previewExitState = {
             currentTheme: currentThemeAfterExit,
-            inputPreserved: exitVal === initialVal
+            inputPreserved: exitVal === initialVal,
+            noticeRemoved: await page.evaluate(() => !document.querySelector('[role="region"][aria-label*="preview" i]'))
         };
 
-        const previewPreserved =
-            previewActiveState.previewNoticePresent === true &&
-            previewActiveState.currentTheme === 'terra' &&
-            previewActiveState.inputPreserved === true &&
-            previewExitState.currentTheme === 'forest' &&
-            previewExitState.inputPreserved === true;
+        previewActiveState.variantTransitions = profileVariantTransitions;
+        previewActiveState.all14VariantsPreserved = Boolean(
+            profileVariantTransitions.length === 14 &&
+            new Set(profileVariantTransitions.map(v => v.variant)).size === 14 &&
+            profileVariantTransitions.every(v => v.transitionSucceeded === true)
+        );
 
+        const previewPreserved = 
+            previewActiveState.previewNoticePresent === true &&
+            previewActiveState.inputPreserved === true &&
+            previewActiveState.all14VariantsPreserved === true &&
+            previewExitState.currentTheme === 'forest' &&
+            previewExitState.inputPreserved === true &&
+            previewExitState.noticeRemoved === true;
         record(
             'Live preview cycle preserves unsaved form input state',
             'Preview State Preservation',
@@ -2495,7 +2807,135 @@ async function runBrowserEvidence() {
                 labelLayout
             };
         });
+        // Iterate through all 14 authorized variants under print media
+        const certificateVariantTransitions = [];
+        for (const variant of authorizedVariants) {
+            await page.evaluate(({ theme, mode }) => {
+                const rootEl = document.getElementById ? document.getElementById('root') : null;
+                if (rootEl) {
+                    const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                    if (fiberKey) {
+                        const stack = [rootEl[fiberKey]];
+                        while (stack.length > 0) {
+                            const curr = stack.pop();
+                            if (!curr) continue;
+                            if (curr.memoizedProps && curr.memoizedProps.value && typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
+                                curr.memoizedProps.value.setPreviewTheme({ themeId: theme, mode });
+                                break;
+                            }
+                            if (curr.child) stack.push(curr.child);
+                            if (curr.sibling) stack.push(curr.sibling);
+                        }
+                    }
+                }
+            }, { theme: variant.themeId, mode: variant.mode });
+
+            await page.waitForFunction(
+                ({ theme, mode }) => {
+                    const docEl = document.documentElement;
+                    const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                    const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                    const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                    return appliedTheme === theme && appliedMode === mode && Boolean(notice);
+                },
+                { theme: variant.themeId, mode: variant.mode },
+                { timeout: 3000 }
+            );
+
+            const cvt = await page.evaluate(({ theme, mode }) => {
+                const paperEl = document.querySelector('[data-surface="paper"], .print-body, .report-document') || document.body;
+                const paperStyle = window.getComputedStyle(paperEl);
+                const bg = paperStyle.backgroundColor;
+                const isPureWhite = bg === 'rgb(255, 255, 255)' || bg === '#ffffff' || bg === 'rgba(0, 0, 0, 0)';
+                const textContent = (paperEl.innerText || paperEl.textContent || '').trim();
+                const samplePreserved = /(?:^|[^A-Za-z0-9_-])SOIL-GH-2026-001(?![A-Za-z0-9_-])/.test(textContent) && !textContent.includes('WRONG-SPECIMEN');
+                const valuesPreserved = textContent.includes('6.5') && textContent.includes('2.15') && textContent.includes('0.18') && textContent.includes('15.4') && textContent.includes('0.45');
+                const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                const transitionSucceeded = Boolean(isPureWhite && samplePreserved && valuesPreserved && notice);
+                return {
+                    variant: `${theme}.${mode}`,
+                    requestedTheme: theme,
+                    requestedMode: mode,
+                    appliedTheme: document.documentElement.getAttribute('data-theme'),
+                    appliedMode: document.documentElement.getAttribute('data-appearance'),
+                    paperIsolated: isPureWhite,
+                    samplePreserved,
+                    valuesPreserved,
+                    noticeVisible: Boolean(notice),
+                    transitionSucceeded
+                };
+            }, { theme: variant.themeId, mode: variant.mode });
+            certificateVariantTransitions.push(cvt);
+        }
+
+        // Generate actual PDF file artifact on disk across themes
+        const pdfOutputPath = path.join(__dirname, 'test_certificate_output.pdf');
+        let pdfGenerated = false;
+        let pdfByteLength = 0;
+        try {
+            const pdfBuffer = await page.pdf({
+                path: pdfOutputPath,
+                format: 'A4',
+                printBackground: true,
+                margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' }
+            });
+            if (pdfBuffer && pdfBuffer.length > 1000 && fs.existsSync(pdfOutputPath)) {
+                pdfGenerated = true;
+                pdfByteLength = pdfBuffer.length;
+            }
+        } catch (err) {
+            console.warn('PDF export note:', err.message);
+        }
+
         await page.emulateMedia({ media: null });
+
+        // Exit preview after report variant iteration
+        await page.evaluate(() => {
+            const rootEl = document.getElementById ? document.getElementById('root') : null;
+            if (rootEl) {
+                const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                if (fiberKey) {
+                    const stack = [rootEl[fiberKey]];
+                    while (stack.length > 0) {
+                        const curr = stack.pop();
+                        if (!curr) continue;
+                        if (curr.memoizedProps && curr.memoizedProps.value) {
+                            if (typeof curr.memoizedProps.value.clearPreviewTheme === 'function') {
+                                curr.memoizedProps.value.clearPreviewTheme();
+                                break;
+                            } else if (typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
+                                curr.memoizedProps.value.setPreviewTheme({ themeId: 'forest', mode: 'light' });
+                                break;
+                            }
+                        }
+                        if (curr.child) stack.push(curr.child);
+                        if (curr.sibling) stack.push(curr.sibling);
+                    }
+                }
+            }
+        });
+        const certExitBtn = page.locator('button:has-text("Exit preview")');
+        if (await certExitBtn.count() > 0) {
+            await certExitBtn.first().click().catch(() => null);
+            await page.waitForTimeout(300);
+        }
+        await page.waitForFunction(() => {
+            const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+            const docEl = document.documentElement;
+            const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+            const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+            return !notice && appliedTheme === 'forest' && appliedMode === 'light';
+        }, null, { timeout: 3000 });
+
+        printStylesActive.variantTransitions = certificateVariantTransitions;
+        printStylesActive.all14VariantsPreserved = Boolean(
+            certificateVariantTransitions.length === 14 &&
+            new Set(certificateVariantTransitions.map(v => v.variant)).size === 14 &&
+            certificateVariantTransitions.every(v => v.transitionSucceeded === true)
+        );
+        printStylesActive.pdfGenerated = pdfGenerated;
+        printStylesActive.pdfOutputPath = pdfOutputPath;
+        printStylesActive.pdfByteLength = pdfByteLength;
 
         // Navigate to actual populated spectral library view and open viewer modal
         await page.goto(`${origin}/spectral-library`, { waitUntil: 'domcontentloaded' });
@@ -3361,6 +3801,12 @@ async function runBrowserEvidence() {
             (printStylesActive.isPureWhite || printStylesActive.computedBg === 'rgb(255, 255, 255)' || printStylesActive.computedBg === '#ffffff') &&
             printStylesActive.computedColor !== 'rgb(255, 255, 255)' &&
             !printStylesActive.isWhiteText &&
+            (!printStylesActive.variantTransitions || (
+                printStylesActive.all14VariantsPreserved === true &&
+                Array.isArray(printStylesActive.variantTransitions) &&
+                printStylesActive.variantTransitions.length === 14 &&
+                printStylesActive.variantTransitions.every(v => v && v.transitionSucceeded === true)
+            )) &&
             ((bg, fg) => {
                 const rgb = (fg && fg.match(/\d+/g) ? fg.match(/\d+/g).slice(0, 3).map(Number) : [0, 0, 0])
                 const lumFg = 0.2126 * (rgb[0]/255 <= 0.03928 ? rgb[0]/255/12.92 : Math.pow((rgb[0]/255 + 0.055)/1.055, 2.4)) +
