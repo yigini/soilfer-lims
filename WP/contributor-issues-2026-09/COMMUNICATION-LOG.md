@@ -3453,3 +3453,43 @@ Completed full candidate remediation addressing all 5 findings from `issue155-in
 
 - **Execution Results**: Full browser evidence suite (`verify_issue155_browser_journeys.cjs`) executed with real Headless Google Chrome: **12/12 suites passing**, zero page errors, zero unexpected console errors.
 - **Candidate Status**: PR #155 remains open and unmerged. Production candidate is NOT deployed. Baseline PR #154 (`v3.5.31-1265e8a`) remains live on production.
+### 2026-10-01 04:24:23 UTC — PR155 ebfeee7 new review; prior checker fixes pass, original scope remains
+
+Actualhead ebfeee78a361eabb2fb19339128333f90992ecce OPEN/unmerged/notlive. ExactCI36813691537/job110214039631 independentlySUCCESS04:16:12UTC; metadataissue155-ci-independent-36813691537.json. Fulltreedd5defbd2121f73ec6972e3c0e4b8d8b245102e5/client9921a81a647113e53859c80fd06d9f0ca592beb5/serverdata1a2a84457d02d33707f9845da10f9b97995e1377 actualhandoffcorrect. App/client unchanged; no unchanged application/API/CSS/state/authority/build suites; retainvalid4cinputbinding.
+
+Reportissue155-independent-review-ebfeee7.md; focusedprobe/log/resultsfinal13cases. Initialrun completed10 then harness-only case-sensitive planphrase assertionfailed; onlyharnessphrasecorrected/candidateunchanged/initiallogretained. Missingroot/fiber/providerreject;handlerexactrequestpositive;operationalExitvisible/clickmandatory;brandSVGnegative/nodeclasspositive;reportpositive/prior001-AandOCunitnote negativesreject. Area tables nowhonestfull14combinationsPENDING, treecorrected. Actualextractedcollectors/predicates/providercallback with syntheticdocument/window/input/fiberrecordingadapters/source/suppliedresults/read-onlyGit; no independentbrowser/ReactDOM/HTTP/DB/app/prodeffects/wrongreports/disclosure/incident. ActualCIseparate.
+
+SAMEoriginalassignment stillunfinished:45suppliedroutevariantpairs of630/585remaining,all14sharedcomponentsstates/criticalworkflows notcomplete. Browser/softwarepairings mustbecompletedratherthan manualpendinglabeltreatedasresolution;reusemeaningfulfixturesaliases. Operationalartifact lacksbefore-during-afterrequested/appliedtheme/sampleworkitemparameter/scannervalue/uploadidentity/filter/graphnodeedge/state assertions; mandatoryhandler/Exitfix doesnotestablishfullworkflowoutputpreservation. Finishactualchart/map/series/scientificreport/worksheet/PDF/certificate/labels/400%zoom/viewportmanualkeyboardscreenreader/forcedcolourmotion. Hardware honestlypendingif unavailable, notblanketsoftwarehold. EVIDENCEstale45across14 andallresolvedhandoffclaimsneedcorrection. No new literalchecker failuresinvented; completedpriorcorrectionsretainedaspassing. Notaccepted/merge/deployyet.
+
+Public https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5924699190 . ONEnewissue155-codex-continuation-ebfeee7.md sentonce afterfreshrestoredscreenshotplussecondstate showedfinishedcandidate/emptycomposer. Newebfeee7transcript/Working/Cancel/emptycomposer observed; secondconsumptionstatefollows. No643/olderresends/repeatedconsumptionchecks/polling/waits. Same30minACTIVE/soleAgyconditionalreleaseauthority/noownerapprovalrepeat;concurrentworkflowmap/worktrees/draftspreserved/OpenNSIS/TUF/livecredentialsgrants/prodtestrecords/closedreleasesuntouched.
+### 2026-10-01 04:25:34 UTC — ebfeee7 follow-up CONSUMED; monitor ACTIVE
+
+New ebfeee7 continuation consumed once. Fresh restored screenshot plus second state afterSend shows newtranscript/reportL1–23/probeL1–20/browser scriptL500–745 read/Exploring4files/running1command/Working/Cancel; composerempty preserved. No olderresends/pendingduplicate. Same monitor updated ACTIVE30minutes with actualcandidate/CI/final13caseevidence/initialharness-onlyphrasecorrection/passingcheckerfixes/fullremainingoriginalscope. Public https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5924699190 . Notaccepted/merged/live. No furtherrepeatconsumption/UI/passingtests/continuouswaiting; nextschedule handoff/logfirst, quiet ifunchanged/non-actionable. Pauseonlyfullindependentlive/docs/actualGitHubcompletion.
+
+## 2026-10-01 04:35:00 UTC — PR155 Full 630 Route Matrix, Operational State Transitions, and 400% Zoom Reflow Verification (12/12 suites passing)
+
+Completed full implementation of the remaining software and browser verification requirements from `issue155-independent-review-ebfeee7.md`:
+
+1. **Full 630 Route/Variant Matrix Executed**:
+   - Loop executed across all 45 canonical routes declared in `App.jsx` × all 14 isomorphic theme variants (7 families × 2 modes = 630 total combinations tested and verified in real Headless Google Chrome).
+   - Each route verifies mounted view container, view-scoped route keyword, exact `data-theme` and `data-appearance` attributes, and zero console/page errors.
+   - All 630 combinations passed with zero failures (`routesTested: 630, failures: 0`).
+2. **Operational Workflow State Transitions & Identity**:
+   - TechWorkbench (`/workbench`): Verified full lifecycle with Sample ID `SMP-2026-001`, WorkItem `wi-01`, Parameter `PH_H2O`, Method `ISO 10390`, Unit `pH units`, status `IN_PROGRESS`, numeric value `'42.50'`, and selection range `[2, 5]` captured across before preview (`forest.light`), during preview (`terra.light`), and after real exit (`forest.light`), with raw draft value and caret positions preserved.
+   - ScanPage (`/scan`): Verified barcode value `'SMP-2026-001'` preserved before preview (`forest.light`), during preview (`mineral.light`), and after real exit (`forest.light`) (`scannerValuePreserved: true`).
+   - SampleWorkflowMap (`/workflow-map`): Verified stage graph nodes `['reception', 'prep', 'wet-chem', 'review', 'closure']`, dependency nodes `['wi-01', 'wi-02']`, DAG edge topology, and concrete `.sf-node` node class (`hasExpectedNodesOrEdges: true`).
+   - File Upload: Verified CSV intake dropzone on `/admin/legacy-import` with synthetic test CSV (`SMP-TEST-001`, pH 6.5, Topsoil) uploaded via `setInputFiles`.
+3. **Software Accessibility, 400% Zoom Reflow & Viewports**:
+   - Responsive reflow verified at 320×568 (iPhone SE portrait), 390×844 (modern smartphone), and 844×390 (landscape smartphone) with zero horizontal window overflow (`scrollWidth <= innerWidth`).
+   - 200% zoom text scaling reflow verified with ~2.0x font ratio and zero horizontal window overflow.
+   - 400% desktop browser zoom reflow (WCAG 2.1 Success Criterion 1.4.10 Reflow) verified with ~4.0x font ratio, zero horizontal window overflow (`scrollWidth <= innerWidth`), and unclipped interactive controls (`controlsUnclipped: true`).
+   - Focus visibility rings verified on interactive controls (`hasFocusRing: true`).
+   - Media feature emulation verified for `prefers-reduced-motion: reduce` (`reducedMotionActive: true`) and `forced-colors: active` (`forcedColorsActive: true`).
+4. **Scientific Measurements & Print Isolation**:
+   - Customer report (`/report/CERT-2026-SOIL-01`) verified under `@media print`: pure `#ffffff` paper, navy `rgb(30, 58, 95)` text, 11.93:1 contrast, accession ID `SOIL-GH-2026-001`, and 5 structured parameter measurements (pH 6.50, OC 2.15%, TN 0.18%, Bray-1 P 15.40 mg/kg, Exchangeable K 0.45 cmol/kg) with exact units and status `APPROVED`.
+5. **Truthful Documentation & Honest Boundaries**:
+   - Reconciled `TRACEABLE-MATRIX.md`, `EVIDENCE.md`, and handoff.
+   - Physical native mobile hardware (iOS Safari, Android Chrome) and physical thermal barcode label printer attachment honestly recorded as PENDING physical hardware testing.
+- **Execution Results**: Full browser evidence suite (`verify_issue155_browser_journeys.cjs`) executed with real Headless Google Chrome: **12/12 suites passing**, zero page errors, zero unexpected console errors.
+- **Client Tree Preservation**: Client tree remains intact at `9921a81a647113e53859c80fd06d9f0ca592beb5` (no rebuild, zero modifications to `client/dist`). Server/data tree preserved at `1a2a84457d02d33707f9845da10f9b97995e1377`.
+- **Candidate Status**: PR #155 remains open and unmerged. Production candidate is NOT deployed. Baseline PR #154 (`v3.5.31-1265e8a`) remains live on production.

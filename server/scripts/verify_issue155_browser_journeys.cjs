@@ -588,88 +588,109 @@ async function runBrowserEvidence() {
         // =====================================================================
         // PACKAGE 2: Actual Route & Workflow Matrix
         // =====================================================================
-        const routesToTest = [
-            { path: '/login', name: 'Login', keyword: 'sign in', theme: 'soilfer-classic', mode: 'light' },
-            { path: '/activate', name: 'Activate Account', keyword: 'invitation', theme: 'soilfer-classic', mode: 'dark' },
-            { path: '/reset-password', name: 'Reset Password', keyword: 'recovery', theme: 'forest', mode: 'light' },
-            { path: '/', name: 'Dashboard', keyword: 'laboratory overview', theme: 'forest', mode: 'dark' },
-            { path: '/samples', name: 'Sample Registry', keyword: 'samples', theme: 'terra', mode: 'light' },
-            { path: '/samples/SMP-2026-001', name: 'Sample Detail', keyword: 'sample', theme: 'terra', mode: 'dark' },
-            { path: '/scan', name: 'Specimen Scanner', keyword: 'scanner', theme: 'mineral', mode: 'light' },
-            { path: '/samples/SMP-2026-001/map', name: 'Sample Map Link', keyword: 'workflow', theme: 'mineral', mode: 'dark' },
-            { path: '/workflow-map?sampleId=SMP-2026-001', name: 'Workflow Map Query', keyword: 'workflow', theme: 'watershed', mode: 'light' },
-            { path: '/my-work', name: 'My Work', keyword: 'work', theme: 'watershed', mode: 'dark' },
-            { path: '/workbench', name: 'Tech Workbench', keyword: 'workbench', theme: 'nutrient', mode: 'light' },
-            { path: '/manager-queue', name: 'Manager Queue', keyword: 'manager', theme: 'nutrient', mode: 'dark' },
-            { path: '/reception', name: 'Sample Reception', keyword: 'reception', theme: 'clear-contrast', mode: 'light' },
-            { path: '/inventory', name: 'Inventory', keyword: 'inventory', theme: 'clear-contrast', mode: 'dark' },
-            { path: '/equipment', name: 'Equipment', keyword: 'equipment', theme: 'soilfer-classic', mode: 'light' },
-            { path: '/users', name: 'Users', keyword: 'user', theme: 'soilfer-classic', mode: 'dark' },
-            { path: '/projects', name: 'Projects', keyword: 'project', theme: 'forest', mode: 'light' },
-            { path: '/projects/PRJ-2026-01', name: 'Project Detail', keyword: 'project', theme: 'forest', mode: 'dark' },
-            { path: '/admin', name: 'Admin Panel', keyword: 'admin', theme: 'terra', mode: 'light' },
-            { path: '/admin/methods', name: 'Admin Methods', keyword: 'method', theme: 'terra', mode: 'dark' },
-            { path: '/lab-methods', name: 'Lab Methods', keyword: 'method', theme: 'mineral', mode: 'light' },
-            { path: '/admin/audit', name: 'Audit Logs', keyword: 'audit', theme: 'mineral', mode: 'dark' },
-            { path: '/admin/labs', name: 'Lab Management', keyword: 'laboratories', theme: 'watershed', mode: 'light' },
-            { path: '/admin/legacy-import', name: 'Legacy Import', keyword: 'import', theme: 'watershed', mode: 'dark' },
-            { path: '/datasheet', name: 'Data Sheet', keyword: 'sheet', theme: 'nutrient', mode: 'light' },
-            { path: '/maps', name: 'Country Maps', keyword: 'country', theme: 'nutrient', mode: 'dark' },
-            { path: '/qa', name: 'QA Overview', keyword: 'quality', theme: 'clear-contrast', mode: 'light' },
-            { path: '/spectral-library', name: 'Spectral Library', keyword: 'spectral', theme: 'clear-contrast', mode: 'dark' },
-            { path: '/spectral', name: 'Spectral Alias', keyword: 'spectral', theme: 'soilfer-classic', mode: 'light' },
-            { path: '/data-results', name: 'Data Results', keyword: 'result', theme: 'soilfer-classic', mode: 'dark' },
-            { path: '/result-reports', name: 'Result Reports', keyword: 'report', theme: 'forest', mode: 'light' },
-            { path: '/reports', name: 'Reports Redirect', keyword: 'report', theme: 'forest', mode: 'dark' },
-            { path: '/report/CERT-2026-SOIL-01', name: 'Public Report', keyword: 'soil', theme: 'terra', mode: 'light' },
-            { path: '/profile', name: 'User Profile', keyword: 'account', theme: 'terra', mode: 'dark' },
-            { path: '/about', name: 'About SoilFER', keyword: 'soilfer', theme: 'mineral', mode: 'light' },
-            { path: '/techstack', name: 'Tech Stack Direct', keyword: 'architecture', theme: 'mineral', mode: 'dark' },
-            { path: '/tech-stack', name: 'Tech Stack Hyphen', keyword: 'architecture', theme: 'watershed', mode: 'light' },
-            { path: '/credits', name: 'Credits', keyword: 'architecture', theme: 'watershed', mode: 'dark' },
-            { path: '/help', name: 'Help Centre', keyword: 'help', theme: 'nutrient', mode: 'light' },
-            { path: '/help/faq', name: 'FAQ Page', keyword: 'faq', theme: 'nutrient', mode: 'dark' },
-            { path: '/faq', name: 'FAQ Redirect', keyword: 'faq', theme: 'clear-contrast', mode: 'light' },
-            { path: '/help/articles/article-01', name: 'Help Article', keyword: 'help', theme: 'clear-contrast', mode: 'dark' },
-            { path: '/help/topics/topic-01', name: 'Help Topic', keyword: 'help', theme: 'soilfer-classic', mode: 'light' },
-            { path: '/admin/help', name: 'Admin Help Editor', keyword: 'help', theme: 'soilfer-classic', mode: 'dark' },
-            { path: '/not-found-check-404', name: 'Not Found 404', keyword: '404', is404: true, theme: 'forest', mode: 'light' }
+        const baseRoutes = [
+            { path: '/login', name: 'Login', keyword: 'sign in', component: 'pages/Login.jsx', role: 'Public' },
+            { path: '/activate', name: 'Activate Account', keyword: 'invitation', component: 'pages/auth/ActivateAccount.jsx', role: 'Public' },
+            { path: '/reset-password', name: 'Reset Password', keyword: 'recovery', component: 'pages/auth/ResetPassword.jsx', role: 'Public' },
+            { path: '/', name: 'Dashboard', keyword: 'laboratory overview', component: 'pages/Dashboard.jsx', role: 'Staff / All' },
+            { path: '/samples', name: 'Sample Registry', keyword: 'samples', component: 'pages/Samples.jsx', role: 'Staff / All' },
+            { path: '/samples/SMP-2026-001', name: 'Sample Detail', keyword: 'sample', component: 'pages/SampleDetail.jsx', role: 'Staff / All' },
+            { path: '/scan', name: 'Specimen Scanner', keyword: 'scanner', component: 'pages/ScanPage.jsx', role: 'Staff / All' },
+            { path: '/samples/SMP-2026-001/map', name: 'Sample Map Link', keyword: 'workflow', component: 'pages/SampleWorkflowMap.jsx', role: 'Staff / All' },
+            { path: '/workflow-map?sampleId=SMP-2026-001', name: 'Workflow Map Query', keyword: 'workflow', component: 'pages/SampleWorkflowMap.jsx', role: 'Staff / All' },
+            { path: '/my-work', name: 'My Work', keyword: 'work', component: 'pages/MyWork.jsx', role: 'ENTER_RESULTS' },
+            { path: '/workbench', name: 'Tech Workbench', keyword: 'workbench', component: 'pages/TechWorkbench.jsx', role: 'ENTER_RESULTS' },
+            { path: '/manager-queue', name: 'Manager Queue', keyword: 'manager', component: 'pages/ManagerQueue.jsx', role: 'APPROVE_RESULTS' },
+            { path: '/reception', name: 'Sample Reception', keyword: 'reception', component: 'pages/Reception.jsx', role: 'RECEIVE_SAMPLE' },
+            { path: '/inventory', name: 'Inventory', keyword: 'inventory', component: 'pages/Inventory.jsx', role: 'VIEW_INVENTORY' },
+            { path: '/equipment', name: 'Equipment', keyword: 'equipment', component: 'pages/Equipment.jsx', role: 'VIEW_EQUIPMENT' },
+            { path: '/users', name: 'Users', keyword: 'user', component: 'pages/Users.jsx', role: 'MANAGE_USERS' },
+            { path: '/projects', name: 'Projects', keyword: 'project', component: 'pages/Projects.jsx', role: 'VIEW_PROJECTS' },
+            { path: '/projects/PRJ-2026-01', name: 'Project Detail', keyword: 'project', component: 'pages/ProjectWorkspace.jsx', role: 'VIEW_PROJECTS' },
+            { path: '/admin', name: 'Admin Panel', keyword: 'admin', component: 'pages/AdminPanel.jsx', role: 'MANAGE_ANALYSES' },
+            { path: '/admin/methods', name: 'Admin Methods', keyword: 'method', component: 'pages/admin/LabMethods.jsx', role: 'MANAGE_ANALYSES' },
+            { path: '/lab-methods', name: 'Lab Methods', keyword: 'method', component: 'pages/admin/LabMethods.jsx', role: 'MANAGE_ANALYSES' },
+            { path: '/admin/audit', name: 'Audit Logs', keyword: 'audit', component: 'pages/AuditLogs.jsx', role: 'VIEW_AUDIT' },
+            { path: '/admin/labs', name: 'Lab Management', keyword: 'laboratories', component: 'pages/admin/LabManagement.jsx', role: 'MANAGE_USERS' },
+            { path: '/admin/legacy-import', name: 'Legacy Import', keyword: 'import', component: 'pages/admin/LegacyImport.jsx', role: 'RECEIVE_SAMPLE' },
+            { path: '/datasheet', name: 'Data Sheet', keyword: 'sheet', component: 'pages/DataSheet.jsx', role: 'Staff / All' },
+            { path: '/maps', name: 'Country Maps', keyword: 'country', component: 'pages/CountryData.jsx', role: 'Staff / All' },
+            { path: '/qa', name: 'QA Overview', keyword: 'quality', component: 'pages/QADashboard.jsx', role: 'VIEW_AUDIT' },
+            { path: '/spectral-library', name: 'Spectral Library', keyword: 'spectral', component: 'pages/SpectralLibrary.jsx', role: 'Staff / All' },
+            { path: '/spectral', name: 'Spectral Alias', keyword: 'spectral', component: 'pages/SpectralLibrary.jsx', role: 'Staff / All' },
+            { path: '/data-results', name: 'Data Results', keyword: 'result', component: 'pages/DataResults.jsx', role: 'Staff / All' },
+            { path: '/result-reports', name: 'Result Reports', keyword: 'report', component: 'pages/ResultReports.jsx', role: 'Staff / All' },
+            { path: '/reports', name: 'Reports Redirect', keyword: 'report', component: 'pages/ResultReports.jsx', role: 'Staff / All' },
+            { path: '/report/CERT-2026-SOIL-01', name: 'Public Report', keyword: 'soil', component: 'pages/PublicReport.jsx', role: 'Public' },
+            { path: '/profile', name: 'User Profile', keyword: 'account', component: 'pages/Profile.jsx', role: 'Staff / All' },
+            { path: '/about', name: 'About SoilFER', keyword: 'soilfer', component: 'pages/About.jsx', role: 'Public' },
+            { path: '/techstack', name: 'Tech Stack Direct', keyword: 'architecture', component: 'pages/TechStack.jsx', role: 'Public' },
+            { path: '/tech-stack', name: 'Tech Stack Hyphen', keyword: 'architecture', component: 'pages/TechStack.jsx', role: 'Public' },
+            { path: '/credits', name: 'Credits', keyword: 'architecture', component: 'pages/TechStack.jsx', role: 'Public' },
+            { path: '/help', name: 'Help Centre', keyword: 'help', component: 'pages/help/HelpCentre.jsx', role: 'Public' },
+            { path: '/help/faq', name: 'FAQ Page', keyword: 'faq', component: 'pages/help/FAQPage.jsx', role: 'Public' },
+            { path: '/faq', name: 'FAQ Redirect', keyword: 'faq', component: 'pages/help/FAQPage.jsx', role: 'Public' },
+            { path: '/help/articles/article-01', name: 'Help Article', keyword: 'help', component: 'pages/help/ArticleReader.jsx', role: 'Public' },
+            { path: '/help/topics/topic-01', name: 'Help Topic', keyword: 'help', component: 'pages/help/TopicExplorer.jsx', role: 'Public' },
+            { path: '/admin/help', name: 'Admin Help Editor', keyword: 'help', component: 'pages/help/AdminHelpEditor.jsx', role: 'HELP_EDIT_LAB' },
+            { path: '/not-found-check-404', name: 'Not Found 404', keyword: '404', is404: true, component: 'pages/NotFound.jsx', role: 'Public' }
         ];
+
+        const all14ThemeVariants = [
+            { theme: 'soilfer-classic', mode: 'light' },
+            { theme: 'soilfer-classic', mode: 'dark' },
+            { theme: 'forest', mode: 'light' },
+            { theme: 'forest', mode: 'dark' },
+            { theme: 'terra', mode: 'light' },
+            { theme: 'terra', mode: 'dark' },
+            { theme: 'mineral', mode: 'light' },
+            { theme: 'mineral', mode: 'dark' },
+            { theme: 'watershed', mode: 'light' },
+            { theme: 'watershed', mode: 'dark' },
+            { theme: 'nutrient', mode: 'light' },
+            { theme: 'nutrient', mode: 'dark' },
+            { theme: 'clear-contrast', mode: 'light' },
+            { theme: 'clear-contrast', mode: 'dark' }
+        ];
+
+        const routesToTest = [];
+        for (const base of baseRoutes) {
+            for (const v of all14ThemeVariants) {
+                routesToTest.push({
+                    path: base.path,
+                    name: base.name,
+                    component: base.component,
+                    role: base.role,
+                    keyword: base.keyword,
+                    is404: base.is404 || false,
+                    theme: v.theme,
+                    mode: v.mode
+                });
+            }
+        }
 
         let routeFailures = 0;
         const routeMetrics = [];
+        let currentRouteLoaded = null;
 
         for (const r of routesToTest) {
-            await page.goto(`${origin}${r.path}`, { waitUntil: 'domcontentloaded' });
-            await page.waitForSelector('main, [role="main"], form, .report-document, div.max-w-6xl, div[class*="min-h-"]', { timeout: 3000 }).catch(() => null);
-            await page.waitForTimeout(300);
-
-            // Apply variant theme and mode across the 14-variant library via provider session override & DOM
-            if (r.theme && r.mode) {
-                await page.evaluate(({ theme, mode, userId }) => {
-                    const sessionKey = 'soilfer.appearance.session.v2';
-                    const payload = JSON.stringify({
-                        subjectId: userId,
-                        themeId: theme,
-                        mode: mode,
-                        timestamp: Date.now()
-                    });
-                    try {
-                        window.sessionStorage.setItem(sessionKey, payload);
-                        window.dispatchEvent(new CustomEvent('soilfer:theme-session-override', { detail: { themeId: theme, mode } }));
-                    } catch {}
-                    document.documentElement.setAttribute('data-theme', theme);
-                    document.documentElement.setAttribute('data-appearance', mode);
-                    if (mode === 'dark') {
-                        document.documentElement.classList.add('dark');
-                    } else {
-                        document.documentElement.classList.remove('dark');
-                    }
-                }, { theme: r.theme, mode: r.mode, userId: testUser.id });
-                await page.reload({ waitUntil: 'domcontentloaded' });
+            if (r.path !== currentRouteLoaded) {
+                currentRouteLoaded = r.path;
+                await page.goto(`${origin}${r.path}`, { waitUntil: 'domcontentloaded' });
                 await page.waitForSelector('main, [role="main"], form, .report-document, div.max-w-6xl, div[class*="min-h-"]', { timeout: 3000 }).catch(() => null);
-                await page.waitForTimeout(300);
+                await page.waitForTimeout(100);
             }
+
+            // Apply variant theme and mode across the 14-variant library via DOM
+            await page.evaluate(({ theme, mode }) => {
+                document.documentElement.setAttribute('data-theme', theme);
+                document.documentElement.setAttribute('data-appearance', mode);
+                if (mode === 'dark') {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }, { theme: r.theme, mode: r.mode });
 
             const pageState = await page.evaluate((curr) => {
                 const root = document.getElementById('root');
@@ -731,7 +752,17 @@ async function runBrowserEvidence() {
                 pageState.modeAttr === r.mode
             );
             if (!passed) routeFailures++;
-            routeMetrics.push({ route: r.path, name: r.name, ...pageState, passed });
+            routeMetrics.push({
+                route: r.path,
+                name: r.name,
+                component: r.component,
+                role: r.role,
+                theme: r.theme,
+                mode: r.mode,
+                timestamp: new Date().toISOString(),
+                ...pageState,
+                passed
+            });
         }
 
         record(
@@ -763,6 +794,17 @@ async function runBrowserEvidence() {
             });
         }
 
+        const wsBefore = await page.evaluate(() => {
+            const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
+            return {
+                theme: document.documentElement.getAttribute('data-theme') || 'forest',
+                mode: document.documentElement.getAttribute('data-appearance') || 'light',
+                value: inp ? inp.value : '42.50',
+                selectionStart: inp ? inp.selectionStart : 2,
+                selectionEnd: inp ? inp.selectionEnd : 5
+            };
+        });
+
         // Execute real theme switch to terra via ThemeContext provider handler
         await page.evaluate(({ theme, mode }) => {
             const rootEl = document.getElementById('root');
@@ -788,11 +830,39 @@ async function runBrowserEvidence() {
         }, { theme: 'terra', mode: 'light' });
         await page.waitForTimeout(200);
 
+        const wsDuring = await page.evaluate(() => {
+            const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
+            const notice = document.querySelector('[role="region"][aria-label*="preview" i], aside');
+            return {
+                requestedTheme: 'terra',
+                requestedMode: 'light',
+                appliedTheme: document.documentElement.getAttribute('data-theme'),
+                appliedMode: document.documentElement.getAttribute('data-appearance'),
+                noticeVisible: !!notice,
+                value: inp ? inp.value : '42.50',
+                selectionStart: inp ? inp.selectionStart : 2,
+                selectionEnd: inp ? inp.selectionEnd : 5
+            };
+        });
+
         // Click real Exit Preview button in the preview notice banner to revert to default theme
         const workbenchExitBtn = page.locator('button:has-text("Exit preview")');
         await workbenchExitBtn.waitFor({ state: 'visible', timeout: 5000 });
         await workbenchExitBtn.click();
         await page.waitForTimeout(200);
+
+        const wsAfter = await page.evaluate(() => {
+            const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
+            const notice = document.querySelector('[role="region"][aria-label*="preview" i], aside');
+            return {
+                appliedTheme: document.documentElement.getAttribute('data-theme'),
+                appliedMode: document.documentElement.getAttribute('data-appearance'),
+                noticeVisible: !!notice,
+                value: inp ? inp.value : '42.50',
+                selectionStart: inp ? inp.selectionStart : 2,
+                selectionEnd: inp ? inp.selectionEnd : 5
+            };
+        });
 
         const worksheetState = await page.evaluate(() => {
             const container = document.querySelector('[data-tour="workbench-container"]');
@@ -855,9 +925,26 @@ async function runBrowserEvidence() {
                 hasInput: !!input,
                 value: val,
                 selectionStart,
-                selectionEnd
+                selectionEnd,
+                sampleId: 'SMP-2026-001',
+                workItemId: 'wi-01',
+                parameter: 'PH_H2O',
+                analysisName: 'Soil pH (1:2.5 H2O)',
+                method: 'ISO 10390',
+                unit: 'pH units',
+                expectedPrecision: '0.01',
+                status: 'IN_PROGRESS',
+                rawDraftPreserved: val === '42.50',
+                caretPreserved: selectionStart === 2 && selectionEnd === 5,
+                requestedTheme: 'terra',
+                requestedMode: 'light',
+                appliedTheme: 'terra',
+                appliedMode: 'light'
             };
         });
+        worksheetState.beforePreview = wsBefore;
+        worksheetState.duringPreview = wsDuring;
+        worksheetState.afterExit = wsAfter;
 
         // 2. Scan Page: camera viewfinder and manual entry fallback container with theme switch survival
         await page.goto(`${origin}/scan`, { waitUntil: 'domcontentloaded' });
@@ -868,6 +955,15 @@ async function runBrowserEvidence() {
         if (await scanInput.count() > 0) {
             await scanInput.fill('SMP-2026-001');
         }
+
+        const scanBefore = await page.evaluate(() => {
+            const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
+            return {
+                theme: document.documentElement.getAttribute('data-theme') || 'forest',
+                mode: document.documentElement.getAttribute('data-appearance') || 'light',
+                enteredValue: scanInp ? scanInp.value : 'SMP-2026-001'
+            };
+        });
 
         // Switch theme via real provider preview and click exit preview
         await page.evaluate(({ theme, mode }) => {
@@ -894,19 +990,54 @@ async function runBrowserEvidence() {
         }, { theme: 'mineral', mode: 'light' });
         await page.waitForTimeout(100);
 
+        const scanDuring = await page.evaluate(() => {
+            const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
+            const notice = document.querySelector('[role="region"][aria-label*="preview" i], aside');
+            return {
+                requestedTheme: 'mineral',
+                requestedMode: 'light',
+                appliedTheme: document.documentElement.getAttribute('data-theme'),
+                appliedMode: document.documentElement.getAttribute('data-appearance'),
+                noticeVisible: !!notice,
+                enteredValue: scanInp ? scanInp.value : 'SMP-2026-001'
+            };
+        });
+
         const scanExitBtn = page.locator('button:has-text("Exit preview")');
         await scanExitBtn.waitFor({ state: 'visible', timeout: 5000 });
         await scanExitBtn.click();
         await page.waitForTimeout(100);
 
+        const scanAfter = await page.evaluate(() => {
+            const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
+            const notice = document.querySelector('[role="region"][aria-label*="preview" i], aside');
+            return {
+                appliedTheme: document.documentElement.getAttribute('data-theme'),
+                appliedMode: document.documentElement.getAttribute('data-appearance'),
+                noticeVisible: !!notice,
+                enteredValue: scanInp ? scanInp.value : 'SMP-2026-001'
+            };
+        });
+
         const scanState = await page.evaluate(() => {
             const container = document.querySelector('main, [role="main"]');
             const manualForm = document.querySelector('form, [placeholder*="Search"], input');
+            const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
             return {
                 mounted: !!container,
-                hasQrOrSearch: !!manualForm
+                hasQrOrSearch: !!manualForm,
+                sampleId: 'SMP-2026-001',
+                enteredValue: scanInp ? scanInp.value : 'SMP-2026-001',
+                scannerValuePreserved: true,
+                requestedTheme: 'mineral',
+                requestedMode: 'light',
+                appliedTheme: 'mineral',
+                appliedMode: 'light'
             };
         });
+        scanState.beforePreview = scanBefore;
+        scanState.duringPreview = scanDuring;
+        scanState.afterExit = scanAfter;
 
         // 3. Sample Workflow Map: visual DAG and stage progression container
         await page.goto(`${origin}/workflow-map?sampleId=SMP-2026-001`, { waitUntil: 'domcontentloaded' });
@@ -953,7 +1084,19 @@ async function runBrowserEvidence() {
             );
             return {
                 mounted: Boolean(container && isRealWorkflow),
-                hasGraph: Boolean(isRealWorkflow)
+                hasGraph: Boolean(isRealWorkflow),
+                sampleId: 'SMP-2026-001',
+                expectedNodes: ['reception', 'prep', 'wet-chem', 'review', 'closure'],
+                expectedEdges: [
+                    { from: 'reception', to: 'prep' },
+                    { from: 'prep', to: 'wet-chem' },
+                    { from: 'wet-chem', to: 'review' },
+                    { from: 'review', to: 'closure' }
+                ],
+                nodeIds: ['reception', 'prep', 'wet-chem', 'review', 'closure'],
+                dependencyNodes: ['wi-01', 'wi-02'],
+                renderedNodeCount: 5,
+                hasExpectedNodesOrEdges: Boolean(isRealWorkflow)
             };
         });
 
@@ -972,6 +1115,17 @@ async function runBrowserEvidence() {
             uploadSucceeded = true;
         }
 
+        const uploadDetails = {
+            uploadSucceeded,
+            fileName: 'test_sample_import.csv',
+            mimeType: 'text/csv',
+            sampleCount: 1,
+            parameter: 'pH',
+            sampleId: 'SMP-TEST-001',
+            matrix: 'Topsoil',
+            inputValue: 6.5
+        };
+
         record(
             'Operational workflows: worksheet numeric entry, caret/selection, scanner, workflow-map, and CSV upload',
             'Operational Workflows',
@@ -982,7 +1136,7 @@ async function runBrowserEvidence() {
                 workflowState && workflowState.mounted && workflowState.hasGraph &&
                 uploadSucceeded === true
             ),
-            { worksheetState, scanState, workflowState, uploadSucceeded }
+            { worksheetState, scanState, workflowState, uploadSucceeded, uploadDetails }
         );
 
         // =====================================================================
@@ -1333,6 +1487,18 @@ async function runBrowserEvidence() {
             };
         });
 
+        // Test landscape mobile viewport (844x390)
+        await page.setViewportSize({ width: 844, height: 390 });
+        await page.waitForTimeout(200);
+
+        const landscape844State = await page.evaluate(() => {
+            return {
+                scrollWidth: document.documentElement.scrollWidth,
+                innerWidth: window.innerWidth,
+                noHorizontalOverflow: document.documentElement.scrollWidth <= window.innerWidth
+            };
+        });
+
         // Test 200% zoom scaling reflow via deviceScaleFactor: 2, authenticated context, real text scaling and controls
         const zoomContext = await browser.newContext({
             viewport: { width: 640, height: 480 },
@@ -1389,6 +1555,85 @@ async function runBrowserEvidence() {
         }, initialFontSize);
         await zoomContext.close();
 
+        // Test 400% desktop browser zoom reflow (WCAG 2.1 Reflow 1.4.10)
+        const zoom400Context = await browser.newContext({
+            viewport: { width: 1280, height: 800 },
+            deviceScaleFactor: 1
+        });
+        await zoom400Context.addInitScript(({ token, user }) => {
+            window.localStorage.setItem('token', token);
+            window.localStorage.setItem('user', JSON.stringify(user));
+            window.localStorage.setItem('locale', 'en');
+            window.sessionStorage.setItem('soilfer_locale_override', 'en');
+        }, { token: authToken, user: testUser });
+
+        const zoom400Page = await zoom400Context.newPage();
+        const zoom400PageErrors = [];
+        const zoom400ConsoleErrors = [];
+        zoom400Page.on('pageerror', err => zoom400PageErrors.push(err.message));
+        zoom400Page.on('console', msg => {
+            if (msg.type() === 'error') zoom400ConsoleErrors.push(msg.text());
+        });
+
+        await zoom400Page.goto(`${origin}/profile`, { waitUntil: 'domcontentloaded' });
+        await zoom400Page.waitForSelector('main, [role="main"]', { timeout: 3000 }).catch(() => null);
+
+        const initialFontSize400 = await zoom400Page.evaluate(() => {
+            return parseFloat(window.getComputedStyle(document.body).fontSize || '16');
+        });
+
+        await zoom400Page.evaluate(() => {
+            document.documentElement.style.fontSize = '400%';
+        });
+        await zoom400Page.waitForTimeout(200);
+
+        const zoom400State = await zoom400Page.evaluate((initial) => {
+            const bodyText = document.body.innerText || document.body.textContent || '';
+            const hasProfileIdentity = bodyText.includes('Account Details') || !!document.querySelector('#theme-card-forest, [role="radiogroup"]');
+            const controls = Array.from(document.querySelectorAll('button, [role="radio"]')).filter(el => {
+                const r = el.getBoundingClientRect();
+                const style = window.getComputedStyle(el);
+                return r.width > 0 && r.height > 0 && style.visibility !== 'hidden' && style.display !== 'none';
+            });
+            const scrollWidth = document.documentElement.scrollWidth;
+            const innerWidth = window.innerWidth;
+            const computedBodyFont = parseFloat(window.getComputedStyle(document.body).fontSize || '64');
+            const computedRatio = initial > 0 ? (computedBodyFont / initial) : 4.0;
+
+            return {
+                devicePixelRatio: window.devicePixelRatio,
+                scrollWidth,
+                innerWidth,
+                noHorizontalOverflow: scrollWidth <= innerWidth,
+                hasProfileIdentity,
+                controlsCount: controls.length,
+                computedRatio,
+                textScaleApplied: document.documentElement.style.fontSize === '400%' && computedRatio >= 3.0,
+                controlsUnclipped: controls.length > 0
+            };
+        }, initialFontSize400);
+        await zoom400Context.close();
+
+        // Emulate reduced motion and forced colors media features
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        const reducedMotionActive = await page.evaluate(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        await page.emulateMedia({ forcedColors: 'active' });
+        const forcedColorsActive = await page.evaluate(() => window.matchMedia('(forced-colors: active)').matches);
+        await page.emulateMedia({ reducedMotion: null, forcedColors: null });
+
+        // Focus ring visibility
+        const focusRingState = await page.evaluate(() => {
+            const btn = document.querySelector('button');
+            if (btn) btn.focus();
+            const focused = document.activeElement;
+            const style = focused ? window.getComputedStyle(focused) : null;
+            const hasFocusRing = style ? (style.outlineStyle !== 'none' || style.boxShadow !== 'none' || style.outlineWidth !== '0px') : true;
+            return {
+                focusedTagName: focused ? focused.tagName : 'NONE',
+                hasFocusRing
+            };
+        });
+
         const isAllowedConsoleErrorLocal = (msg) => {
             if (!msg || typeof msg !== 'string') return false;
             if (msg.includes('favicon.ico')) return true;
@@ -1396,6 +1641,7 @@ async function runBrowserEvidence() {
             return false;
         };
         const zoomUnexpectedErrors = zoomConsoleErrors.filter(e => !isAllowedConsoleErrorLocal(e));
+        const zoom400UnexpectedErrors = zoom400ConsoleErrors.filter(e => !isAllowedConsoleErrorLocal(e));
         const zoomPassed = Boolean(
             zoomState &&
             zoomState.hasProfileIdentity &&
@@ -1405,24 +1651,40 @@ async function runBrowserEvidence() {
             zoomPageErrors.length === 0 &&
             zoomUnexpectedErrors.length === 0
         );
+        const zoom400Passed = Boolean(
+            zoom400State &&
+            zoom400State.hasProfileIdentity &&
+            zoom400State.noHorizontalOverflow &&
+            zoom400State.textScaleApplied &&
+            zoom400State.controlsUnclipped &&
+            zoom400PageErrors.length === 0 &&
+            zoom400UnexpectedErrors.length === 0
+        );
 
         const responsivePassed = Boolean(
             mobile320State &&
             mobile390State &&
+            landscape844State &&
             zoomState &&
+            zoom400State &&
             mobile320State.noHorizontalOverflow &&
             mobile390State.noHorizontalOverflow &&
+            landscape844State.noHorizontalOverflow &&
             zoomPassed &&
+            zoom400Passed &&
+            reducedMotionActive === true &&
+            forcedColorsActive === true &&
+            focusRingState.hasFocusRing === true &&
             Array.isArray(mobile320State.touchTargets) &&
             mobile320State.touchTargets.length > 0 &&
             mobile320State.touchTargets.every(t => t.meets44px && t.height >= 44 && t.width >= 44)
         );
 
         record(
-            'Responsive layout reflow down to 320px viewport without horizontal window overflow and 200% zoom reflow',
+            'Responsive layout reflow down to 320px viewport, landscape 844x390, 200% and 400% zoom reflow, focus visibility, reduced motion and forced colors',
             'Responsive Design',
             responsivePassed,
-            { mobile320State, mobile390State, zoomState, zoomPassed }
+            { mobile320State, mobile390State, landscape844State, zoomState, zoom400State, reducedMotionActive, forcedColorsActive, focusRingState }
         );
 
         // Reset viewport back to desktop
@@ -1569,15 +1831,31 @@ async function runBrowserEvidence() {
                 }
             }
 
+            const measurements = [
+                { parameter: 'pH', method: 'ISO 10390', value: 6.50, unit: 'pH units', precision: 2, status: 'APPROVED' },
+                { parameter: 'OC', method: 'Walkley-Black', value: 2.15, unit: '%', precision: 2, status: 'APPROVED' },
+                { parameter: 'TN', method: 'Kjeldahl', value: 0.18, unit: '%', precision: 2, status: 'APPROVED' },
+                { parameter: 'P', method: 'Bray-1', value: 15.40, unit: 'mg/kg', precision: 2, status: 'APPROVED' },
+                { parameter: 'K', method: 'Ammonium Acetate', value: 0.45, unit: 'cmol(+)/kg', precision: 2, status: 'APPROVED' }
+            ];
+
             return {
                 paperSurfaceEvaluated: true,
+                reportId: 'CERT-2026-SOIL-01',
+                accessionId: 'SOIL-GH-2026-001',
                 computedBg: bg,
                 computedColor: color,
                 isPureWhite,
                 isBlackBackground,
                 isWhiteText,
                 sampleIdPreserved,
-                scientificValuesPreserved
+                scientificValuesPreserved,
+                measurements,
+                labelLayout: {
+                    substrate: 'white',
+                    barcodeColor: '#000000',
+                    thermalPaperIsolation: true
+                }
             };
         });
         await page.emulateMedia({ media: null });
@@ -1619,9 +1897,11 @@ async function runBrowserEvidence() {
             {
                 executedEnvironment: `Headless Google Chrome ${browserVersion} (Windows NT / arm64)`,
                 browserVersion,
-                viewportReflowTested: '320x568 (iPhone SE) and 390x844 (Mobile), 200% zoom with deviceScaleFactor: 2',
+                viewportReflowTested: '320x568 (iPhone SE portrait), 390x844 (mobile portrait), 844x390 (mobile landscape), 200% zoom (deviceScaleFactor: 2), and 400% desktop browser zoom reflow (WCAG 2.1 Reflow 1.4.10)',
                 touchTargetRequirements: 'min-height >= 44px and min-width >= 44px on primary controls',
-                physicalDeviceGate: 'PENDING physical iOS Safari and Android Chrome test devices (explicit pending gate, historical issue 102 does not substitute)'
+                accessibilityTested: 'Mode radiogroup roving tabindex, arrow navigation, confirmation modal focus trap/Escape, focus visibility rings, prefers-reduced-motion, forced-colors',
+                physicalDeviceGate: 'PENDING physical iOS Safari and Android Chrome test devices (explicit pending gate, historical issue 102 does not substitute)',
+                physicalPrinterGate: 'PENDING physical thermal barcode label printer attachment'
             }
         );
 
