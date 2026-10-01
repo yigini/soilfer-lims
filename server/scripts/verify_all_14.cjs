@@ -114,26 +114,49 @@ const valid = [
 
 const pm = src.match(/const printIsolationPassed =([\s\S]*?);/);
 assert(pm);
-const printGate = a => new Function('chartTokensPresent', 'printStylesActive', 'return ' + pm[1])(true, a);
+const printGate = (p, ss, ls) => new Function('chartTokensPresent', 'printStylesActive', 'spectralSeriesState', 'labelPreviewState', 'return ' + pm[1])(true, p, ss, ls);
 function paper(text) {
     const el = { innerText: text, className: 'report-document', querySelector: () => null, getAttribute: () => null };
     return collector('printStylesActive')({ querySelector: () => el, body: el }, { getComputedStyle: () => ({ backgroundColor: 'rgb(255, 255, 255)', color: 'rgb(30, 58, 95)' }) });
 }
 
+const validSpectral = {
+    route: '/spectral-library',
+    renderedSeriesVerified: true,
+    seriesCount: 1,
+    wavelengthRange: '4000 - 400 cm⁻¹',
+    intensityRange: '0.05 - 1.25 AU',
+    chartTokensEvaluated: ['--sf-chart-1']
+};
+const validLabel = {
+    rendered: true,
+    component: 'LabelPrintDialog.jsx',
+    format: 'Standard 101x54mm',
+    substrate: 'white',
+    barcodeColor: '#000000',
+    thermalPaperIsolation: true,
+    offlineQrVerified: true
+};
+
+const emptyDoc = { querySelector: () => null, querySelectorAll: () => [], documentElement: {} };
+const emptySpectral = collector('spectralSeriesState')(emptyDoc, { getComputedStyle: () => ({ getPropertyValue: () => '' }) });
+const emptyLabel = collector('labelPreviewState')(emptyDoc, {});
+
 // 8. Scientific positive and observed report identity
 test('PASS complete scientific positive and observed report identity', () => {
     const a = paper(valid);
-    assert.equal(printGate(a), true);
+    assert.equal(printGate(a, validSpectral, validLabel), true);
     assert.equal(a.reportId, 'CERT-2026-SOIL-01');
     assert.equal(a.accessionId, 'SOIL-GH-2026-001');
     assert.equal(a.labelLayout.thermalPaperIsolation, false);
+    assert.equal(a.labelLayout.applicable, false);
     return { report: a.reportId, accession: a.accessionId, status: a.measurements[0].status, labelIsolation: a.labelLayout.thermalPaperIsolation };
 });
 
 // 9. Prior OTHER METHOD, DRAFT and missing status reject
 test('PASS prior OTHER METHOD, DRAFT and missing status now reject', () => {
     const texts = [valid.replace('ISO 10390', 'OTHER METHOD'), valid.replace('Status\tAPPROVED', 'Status\tDRAFT'), valid.replace('\nStatus\tAPPROVED', '')];
-    for (const text of texts) assert.equal(printGate(paper(text)), false);
+    for (const text of texts) assert.equal(printGate(paper(text), validSpectral, validLabel), false);
     assert.equal(paper(texts[2]).measurements[0].status, null);
     return { literalWrongMethodRejected: true, draftRejected: true, missingStatusRejected: true };
 });
@@ -142,7 +165,7 @@ test('PASS prior OTHER METHOD, DRAFT and missing status now reject', () => {
 test('PASS different real method (Kjeldahl) for pH row now rejects', () => {
     const a = paper(valid.replace('ISO 10390', 'Kjeldahl'));
     assert.equal(a.measurements[0].method, 'Kjeldahl');
-    assert.equal(printGate(a), false);
+    assert.equal(printGate(a, validSpectral, validLabel), false);
     return { parameter: a.measurements[0].parameter, expectedMethod: 'ISO 10390', observedMethod: a.measurements[0].method, wrongMethodRejected: true };
 });
 
@@ -150,7 +173,7 @@ test('PASS different real method (Kjeldahl) for pH row now rejects', () => {
 test('PASS wrong observed report number (CERT-OTHER-02) now rejects', () => {
     const a = paper(valid.replace('CERT-2026-SOIL-01', 'CERT-OTHER-02'));
     assert.equal(a.reportId, 'CERT-OTHER-02');
-    assert.equal(printGate(a), false);
+    assert.equal(printGate(a, validSpectral, validLabel), false);
     return { expectedReport: 'CERT-2026-SOIL-01', observedReport: a.reportId, wrongReportRejected: true };
 });
 
@@ -205,28 +228,88 @@ test('PASS all 14 variant transitions and preservation required by operational g
     return { worksheetTransitions: 14, scanTransitions: 14, operationalGateStrict: true };
 });
 
-// 16. Spectral series and label preview state collectors present and required by print gate
+// 16. Workflow loop IDs agree with canonical catalogue
+const vm = src.match(/const authorizedVariants = (\[[\s\S]*?\]);/);
+assert(vm);
+const variants = new Function('return ' + vm[1])();
+test('PASS workflow loop IDs agree with canonical catalogue', () => {
+    const allowed = JSON.parse(fs.readFileSync(path.join(root, 'server/config/themeCatalogData.json'), 'utf8')).themeAllowlist;
+    const used = [...new Set(variants.map(v => v.themeId))];
+    const unsupported = used.filter(x => !allowed.includes(x));
+    const missing = allowed.filter(x => !used.includes(x));
+    assert.deepEqual(unsupported, []);
+    assert.deepEqual(missing, []);
+    assert.equal(variants.length, 14);
+    return { unsupported, missing, count: variants.length };
+});
+
+// 17. Missing preview provider and mismatched actual theme now reject
+const tm = src.match(/const vt = await page\.evaluate\(\(\{ theme, mode \}\) => \{([\s\S]*?)\n            \}, \{ theme: variant\.themeId, mode: variant\.mode \}\);/);
+assert(tm);
+const transition = new Function('document', 'theme', 'mode', tm[1]);
+test('PASS missing preview provider and mismatched actual theme now reject', () => {
+    const input = { value: '42.50', selectionStart: 2, selectionEnd: 5 };
+    const doc = { getElementById: () => null, querySelector: s => s.includes('workbench-container') ? input : null, documentElement: { getAttribute: k => k === 'data-theme' ? 'forest' : 'light' } };
+    const a = variants.map(v => transition(doc, v.themeId, v.mode));
+    assert(a.every(v => v.draftPreserved && v.caretPreserved));
+    assert(a.some(v => v.requestedTheme !== v.appliedTheme || v.requestedMode !== v.appliedMode));
+    assert(a.every(v => v.noticeVisible === false));
+    assert(a.every(v => v.providerFound === false));
+    assert(a.every(v => v.transitionSucceeded === false));
+    const w = copy(op.worksheetState);
+    w.variantTransitions = a;
+    w.all14VariantsPreserved = a.length === 14 && a.every(v => v.transitionSucceeded === true);
+    assert.equal(gate(w), false);
+    return { providerMissing: true, noticeAbsent: true, rejected: true };
+});
+
+// 18. Absent actual spectrum reports falsy / empty
+test('PASS absent actual spectrum reports unverified and zero series', () => {
+    assert.equal(emptySpectral.renderedSeriesVerified, false);
+    assert.equal(emptySpectral.seriesCount, 0);
+    assert.equal(emptySpectral.chartTokensEvaluated.length, 0);
+    assert.equal(emptySpectral.wavelengthRange, null);
+    assert.equal(emptySpectral.intensityRange, null);
+    return { noSvgOrSeries: true, reported: emptySpectral };
+});
+
+// 19. Absent actual label reports unrendered and unverified
+test('PASS absent actual label reports unrendered and unverified', () => {
+    assert.equal(emptyLabel.rendered, false);
+    assert.equal(emptyLabel.thermalPaperIsolation, false);
+    assert.equal(emptyLabel.offlineQrVerified, false);
+    assert.equal(emptyLabel.format, null);
+    assert.equal(emptyLabel.substrate, null);
+    assert.equal(emptyLabel.barcodeColor, null);
+    return { labelNotRendered: true, reported: emptyLabel };
+});
+
+// 20. Scientific final gate rejects when actual spectrum or label is absent
+test('PASS scientific final gate rejects when actual spectrum or label is absent', () => {
+    const p = paper(valid);
+    assert.equal(printGate(p, emptySpectral, emptyLabel), false);
+    return { validCertificate: true, actualSpectrumAbsent: true, actualLabelAbsent: true, rejected: true };
+});
+
+// 21. Spectral series and label preview state collectors present and required by print gate
 test('PASS spectral series and label preview state collectors present and required by print gate', () => {
     assert(src.includes('const spectralSeriesState = await page.evaluate'));
     assert(src.includes('const labelPreviewState = await page.evaluate'));
     
-    const pWithoutSpectra = paper(valid);
-    delete pWithoutSpectra.spectralSeriesState;
-    assert.equal(printGate(pWithoutSpectra), false);
-
-    const pWithoutLabel = paper(valid);
-    delete pWithoutLabel.labelPreviewState;
-    assert.equal(printGate(pWithoutLabel), false);
+    const p = paper(valid);
+    assert.equal(printGate(p, null, validLabel), false);
+    assert.equal(printGate(p, validSpectral, null), false);
 
     return { spectralCollectorPresent: true, labelCollectorPresent: true, printGateStrict: true };
 });
 
-// 17. Fixture fallbacks completely eradicated from verifier source
+// 22. Fixture fallbacks completely eradicated from verifier source
 test('PASS fixture fallbacks completely eradicated from verifier source', () => {
-    assert(!src.includes("|| (container ? 'ISO 10390' : null)"));
-    assert(!src.includes("expectedPrecision: container ? '0.01' : null"));
-    assert(!src.includes('precision: 2,'));
-    return { worksheetMethodFallbackRemoved: true, expectedPrecisionFallbackRemoved: true, constantPrecisionRemoved: true };
+    assert(!src.includes("input.getAttribute('step') || '0.01'"));
+    assert(!src.includes("(typeof observedVal === 'number' ? 2 : null)"));
+    assert(!src.includes("Math.max(seriesLines ? seriesLines.length : 0, 2)"));
+    assert(!src.includes("seriesCount: 2"));
+    return { defaultWorksheetStepRemoved: true, defaultScientificDecimalsRemoved: true, constantTwoRemoved: true };
 });
 
 console.log(JSON.stringify({ allCasesPassed: true, casesCompleted: cases.length }));

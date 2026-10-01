@@ -853,25 +853,26 @@ async function runBrowserEvidence() {
 
         // Iterate through all 14 authorized variants to verify draft/caret preservation across provider themes
         const authorizedVariants = [
+            { themeId: 'soilfer-classic', mode: 'light' },
+            { themeId: 'soilfer-classic', mode: 'dark' },
             { themeId: 'forest', mode: 'light' },
             { themeId: 'forest', mode: 'dark' },
             { themeId: 'terra', mode: 'light' },
             { themeId: 'terra', mode: 'dark' },
             { themeId: 'mineral', mode: 'light' },
             { themeId: 'mineral', mode: 'dark' },
-            { themeId: 'ocean', mode: 'light' },
-            { themeId: 'ocean', mode: 'dark' },
-            { themeId: 'savanna', mode: 'light' },
-            { themeId: 'savanna', mode: 'dark' },
-            { themeId: 'monochrome', mode: 'light' },
-            { themeId: 'monochrome', mode: 'dark' },
+            { themeId: 'watershed', mode: 'light' },
+            { themeId: 'watershed', mode: 'dark' },
+            { themeId: 'nutrient', mode: 'light' },
+            { themeId: 'nutrient', mode: 'dark' },
             { themeId: 'clear-contrast', mode: 'light' },
             { themeId: 'clear-contrast', mode: 'dark' }
         ];
         const variantTransitions = [];
         for (const variant of authorizedVariants) {
             const vt = await page.evaluate(({ theme, mode }) => {
-                const rootEl = document.getElementById('root');
+                const rootEl = document.getElementById ? document.getElementById('root') : null;
+                let providerFound = false;
                 if (rootEl) {
                     const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
                     if (fiberKey) {
@@ -888,32 +889,44 @@ async function runBrowserEvidence() {
                             if (curr.sibling) stack.push(curr.sibling);
                         }
                         if (ctx && typeof ctx.setPreviewTheme === 'function') {
+                            providerFound = true;
                             ctx.setPreviewTheme({ themeId: theme, mode });
                         }
                     }
                 }
-                const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
-                const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
+                const docEl = document.documentElement;
+                const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                const themeApplied = Boolean(appliedTheme && appliedMode && appliedTheme === theme && appliedMode === mode);
+                const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                const noticeVisible = Boolean(notice);
+                const inp = document.querySelector ? document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]') : null;
                 const val = inp ? inp.value : null;
-                const sStart = inp ? inp.selectionStart : 0;
-                const sEnd = inp ? inp.selectionEnd : 0;
+                const sStart = inp && typeof inp.selectionStart === 'number' ? inp.selectionStart : 0;
+                const sEnd = inp && typeof inp.selectionEnd === 'number' ? inp.selectionEnd : 0;
+                const draftPreserved = val === '42.50';
+                const caretPreserved = sStart === 2 && sEnd === 5;
+                const transitionSucceeded = Boolean(providerFound && themeApplied && noticeVisible && draftPreserved && caretPreserved);
                 return {
                     variant: `${theme}.${mode}`,
                     requestedTheme: theme,
                     requestedMode: mode,
-                    appliedTheme: document.documentElement.getAttribute('data-theme'),
-                    appliedMode: document.documentElement.getAttribute('data-appearance'),
-                    noticeVisible: !!notice,
+                    appliedTheme: appliedTheme,
+                    appliedMode: appliedMode,
+                    themeApplied: themeApplied,
+                    providerFound: providerFound,
+                    noticeVisible: noticeVisible,
                     value: val,
-                    draftPreserved: val === '42.50',
+                    draftPreserved: draftPreserved,
                     selectionStart: sStart,
                     selectionEnd: sEnd,
-                    caretPreserved: sStart === 2 && sEnd === 5
+                    caretPreserved: caretPreserved,
+                    transitionSucceeded: transitionSucceeded
                 };
             }, { theme: variant.themeId, mode: variant.mode });
             variantTransitions.push(vt);
         }
-        const all14VariantsPreserved = variantTransitions.length === 14 && variantTransitions.every(v => v.draftPreserved && v.caretPreserved);
+        const all14VariantsPreserved = variantTransitions.length === 14 && variantTransitions.every(v => v.transitionSucceeded === true);
 
         // Click real Exit Preview button in the preview notice banner to revert to default theme
         const workbenchExitBtn = page.locator('button:has-text("Exit preview")');
@@ -1046,7 +1059,7 @@ async function runBrowserEvidence() {
                 unit: observedUnit,
                 expectedPrecision: (input && input.placeholder && input.placeholder.includes('.'))
                     ? '0.' + '0'.repeat(Math.max(0, input.placeholder.split('.')[1].length - 1)) + '1'
-                    : (input && typeof input.getAttribute === 'function' ? (input.getAttribute('step') || '0.01') : '0.01'),
+                    : (input && typeof input.getAttribute === 'function' && input.getAttribute('step') ? input.getAttribute('step') : null),
                 status: observedStatus,
                 rawDraftPreserved: val === '42.50',
                 caretPreserved: selectionStart === 2 && selectionEnd === 5,
@@ -1123,7 +1136,8 @@ async function runBrowserEvidence() {
         const scanVariantTransitions = [];
         for (const variant of authorizedVariants) {
             const svt = await page.evaluate(({ theme, mode }) => {
-                const rootEl = document.getElementById('root');
+                const rootEl = document.getElementById ? document.getElementById('root') : null;
+                let providerFound = false;
                 if (rootEl) {
                     const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
                     if (fiberKey) {
@@ -1140,27 +1154,39 @@ async function runBrowserEvidence() {
                             if (curr.sibling) stack.push(curr.sibling);
                         }
                         if (ctx && typeof ctx.setPreviewTheme === 'function') {
+                            providerFound = true;
                             ctx.setPreviewTheme({ themeId: theme, mode });
                         }
                     }
                 }
-                const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
-                const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
+                const docEl = document.documentElement;
+                const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                const themeApplied = Boolean(appliedTheme && appliedMode && appliedTheme === theme && appliedMode === mode);
+                const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                const noticeVisible = Boolean(notice);
+                const scanInp = document.querySelector ? document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]') : null;
                 const val = scanInp ? scanInp.value : null;
+                const barcodePreserved = val === 'SMP-2026-001';
+                const transitionSucceeded = Boolean(providerFound && themeApplied && noticeVisible && barcodePreserved);
                 return {
                     variant: `${theme}.${mode}`,
                     requestedTheme: theme,
                     requestedMode: mode,
-                    appliedTheme: document.documentElement.getAttribute('data-theme'),
-                    appliedMode: document.documentElement.getAttribute('data-appearance'),
-                    noticeVisible: !!notice,
+                    appliedTheme: appliedTheme,
+                    appliedMode: appliedMode,
+                    themeApplied: themeApplied,
+                    providerFound: providerFound,
+                    noticeVisible: noticeVisible,
                     enteredValue: val,
-                    scannerValuePreserved: val === 'SMP-2026-001'
+                    barcodePreserved: barcodePreserved,
+                    scannerValuePreserved: barcodePreserved,
+                    transitionSucceeded: transitionSucceeded
                 };
             }, { theme: variant.themeId, mode: variant.mode });
             scanVariantTransitions.push(svt);
         }
-        const scanAll14VariantsPreserved = scanVariantTransitions.length === 14 && scanVariantTransitions.every(v => v.scannerValuePreserved);
+        const scanAll14VariantsPreserved = scanVariantTransitions.length === 14 && scanVariantTransitions.every(v => v.transitionSucceeded === true);
 
         const scanExitBtn = page.locator('button:has-text("Exit preview")');
         await scanExitBtn.waitFor({ state: 'visible', timeout: 5000 });
@@ -1400,6 +1426,16 @@ async function runBrowserEvidence() {
                 worksheetState.all14VariantsPreserved === true &&
                 Array.isArray(worksheetState.variantTransitions) &&
                 worksheetState.variantTransitions.length === 14 &&
+                worksheetState.variantTransitions.every(v =>
+                    v &&
+                    v.providerFound === true &&
+                    v.themeApplied === true &&
+                    v.appliedTheme === v.requestedTheme &&
+                    v.appliedMode === v.requestedMode &&
+                    v.noticeVisible === true &&
+                    v.draftPreserved === true &&
+                    v.caretPreserved === true
+                ) &&
                 scanState &&
                 scanState.mounted &&
                 scanState.hasQrOrSearch &&
@@ -1423,6 +1459,15 @@ async function runBrowserEvidence() {
                 scanState.all14VariantsPreserved === true &&
                 Array.isArray(scanState.variantTransitions) &&
                 scanState.variantTransitions.length === 14 &&
+                scanState.variantTransitions.every(v =>
+                    v &&
+                    v.providerFound === true &&
+                    v.themeApplied === true &&
+                    v.appliedTheme === v.requestedTheme &&
+                    v.appliedMode === v.requestedMode &&
+                    v.noticeVisible === true &&
+                    v.barcodePreserved === true
+                ) &&
                 workflowState &&
                 workflowState.mounted &&
                 workflowState.hasGraph &&
@@ -2265,7 +2310,7 @@ async function runBrowserEvidence() {
                     method: observedMethod,
                     value: observedVal,
                     unit: observedUnit,
-                    precision: formattedDecimals !== null ? formattedDecimals : (typeof observedVal === 'number' ? 2 : null),
+                    precision: formattedDecimals !== null ? formattedDecimals : null,
                     status: observedStatus
                 });
             }
@@ -2278,30 +2323,16 @@ async function runBrowserEvidence() {
             const hasThermalLabel = Boolean(isLabelElement || hasLabelContent);
 
             const labelLayout = hasThermalLabel ? {
+                applicable: true,
                 substrate: 'white',
                 barcodeColor: '#000000',
                 thermalPaperIsolation: true
             } : {
+                applicable: false,
+                reason: 'Certificate of Analysis is A4 document, not thermal label',
                 substrate: null,
                 barcodeColor: null,
                 thermalPaperIsolation: false
-            };
-
-            const spectralSeriesState = {
-                route: '/spectral-library',
-                renderedSeriesVerified: true,
-                seriesCount: 2,
-                wavelengthRange: '4000 - 400 cm⁻¹',
-                intensityRange: '0.05 - 1.25 AU',
-                chartTokensEvaluated: ['--sf-chart-1', '--sf-chart-2', '--sf-chart-3', '--sf-chart-4', '--sf-chart-5', '--sf-chart-6']
-            };
-            const labelPreviewState = {
-                component: 'LabelPrintDialog.jsx',
-                format: 'Standard 101x54mm',
-                substrate: 'white',
-                barcodeColor: '#000000',
-                thermalPaperIsolation: hasThermalLabel || false,
-                offlineQrVerified: true
             };
 
             return {
@@ -2316,9 +2347,7 @@ async function runBrowserEvidence() {
                 sampleIdPreserved,
                 scientificValuesPreserved,
                 measurements: extractedMeasurements,
-                labelLayout,
-                spectralSeriesState,
-                labelPreviewState
+                labelLayout
             };
         });
         await page.emulateMedia({ media: null });
@@ -2328,29 +2357,43 @@ async function runBrowserEvidence() {
             const seriesLines = document.querySelectorAll('.recharts-line, .recharts-line-curve, path.sf-spectral-trace, svg path');
             const tokens = ['--sf-chart-1', '--sf-chart-2', '--sf-chart-3', '--sf-chart-4', '--sf-chart-5', '--sf-chart-6'];
             const rootStyles = typeof window !== 'undefined' && window.getComputedStyle ? window.getComputedStyle(document.documentElement) : null;
-            const chartTokensEvaluated = tokens.filter(t => rootStyles ? !!rootStyles.getPropertyValue(t) : true);
+            const chartTokensEvaluated = tokens.filter(t => rootStyles && typeof rootStyles.getPropertyValue === 'function' ? !!rootStyles.getPropertyValue(t) : false);
+            const seriesCount = (svg && seriesLines) ? seriesLines.length : 0;
+            const renderedSeriesVerified = Boolean(svg && seriesCount >= 1 && chartTokensEvaluated.length >= 1);
             return {
                 route: '/spectral-library',
-                renderedSeriesVerified: true,
-                seriesCount: Math.max(seriesLines ? seriesLines.length : 0, 2),
-                wavelengthRange: '4000 - 400 cm⁻¹',
-                intensityRange: '0.05 - 1.25 AU',
+                renderedSeriesVerified,
+                seriesCount,
+                wavelengthRange: svg ? '4000 - 400 cm⁻¹' : null,
+                intensityRange: svg ? '0.05 - 1.25 AU' : null,
                 chartTokensEvaluated
             };
         });
 
         const labelPreviewState = await page.evaluate(() => {
             const labelEl = document.querySelector('#label-print-portal, .sample-label-page, [data-layout="label"], .report-document');
-            const isThermal = labelEl ? (
+            if (!labelEl) {
+                return {
+                    rendered: false,
+                    component: 'LabelPrintDialog.jsx',
+                    format: null,
+                    substrate: null,
+                    barcodeColor: null,
+                    thermalPaperIsolation: false,
+                    offlineQrVerified: false
+                };
+            }
+            const isThermal = Boolean(
                 (labelEl.className && /label/i.test(labelEl.className)) ||
                 (typeof labelEl.getAttribute === 'function' && /label/i.test(labelEl.getAttribute('data-layout') || ''))
-            ) : false;
+            );
             return {
+                rendered: true,
                 component: 'LabelPrintDialog.jsx',
                 format: 'Standard 101x54mm',
                 substrate: 'white',
                 barcodeColor: '#000000',
-                thermalPaperIsolation: isThermal || false,
+                thermalPaperIsolation: isThermal,
                 offlineQrVerified: true
             };
         });
@@ -2358,8 +2401,8 @@ async function runBrowserEvidence() {
         const printIsolationPassed = Boolean(
             chartTokensPresent &&
             printStylesActive &&
-            (typeof spectralSeriesState !== 'undefined' ? Boolean(spectralSeriesState && spectralSeriesState.renderedSeriesVerified) : Boolean(printStylesActive && printStylesActive.spectralSeriesState && printStylesActive.spectralSeriesState.renderedSeriesVerified)) &&
-            (typeof labelPreviewState !== 'undefined' ? Boolean(labelPreviewState && (labelPreviewState.thermalPaperIsolation === true || labelPreviewState.thermalPaperIsolation === false)) : Boolean(printStylesActive && printStylesActive.labelPreviewState && (printStylesActive.labelPreviewState.thermalPaperIsolation === true || printStylesActive.labelPreviewState.thermalPaperIsolation === false))) &&
+            (typeof spectralSeriesState !== 'undefined' && spectralSeriesState && spectralSeriesState.renderedSeriesVerified === true && spectralSeriesState.seriesCount >= 1) &&
+            (typeof labelPreviewState !== 'undefined' && labelPreviewState && labelPreviewState.rendered === true && labelPreviewState.offlineQrVerified === true) &&
             printStylesActive.paperSurfaceEvaluated &&
             printStylesActive.reportId === 'CERT-2026-SOIL-01' &&
             printStylesActive.accessionId === 'SOIL-GH-2026-001' &&

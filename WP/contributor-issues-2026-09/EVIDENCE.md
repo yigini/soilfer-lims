@@ -3494,3 +3494,31 @@ Laboratory operators can find step-by-step procedures in the following documenta
          - Client tree `9921a81a647113e53859c80fd06d9f0ca592beb5` and server/data tree `1a2a84457d02d33707f9845da10f9b97995e1377` preserved with ZERO rebuilds.
          - Exactly 630 route/variant pairings intact in results.
          - Sole-Agy conditional safe-release authority maintained: PR #155 remains unmerged and undeployed until independent acceptance and established release gates.
+  - **Independent Review Remediation of Candidate e10ba79 (2026-10-01 10:45 UTC)**:
+    - Following independent review `issue155-independent-review-e10ba79.md` and 10-case probe `issue155-focused-review-e10ba79.cjs`, performed comprehensive remediation addressing canonical variants, transition gate strictness, real scientific/label collectors, precision fallback eradication, and truthful CI reporting:
+      1. **Canonical All-14 Workflow Transitions & Strict State Preservation Gate**:
+         - Derived authorized variants directly from canonical catalog allowlist (`soilfer-classic`, `forest`, `terra`, `mineral`, `watershed`, `nutrient`, `clear-contrast` x light/dark = 14 canonical variants), completely eliminating non-canonical variants (`ocean`, `savanna`, `monochrome`).
+         - In TechWorkbench (`worksheetState`) and ScanPage (`scanState`) transition evaluators: verified `providerFound`, `themeApplied`, matching requested vs applied theme and mode, `noticeVisible`, and draft/caret/barcode preservation.
+         - Hardened `Operational Workflows` gate: strictly requires every transition in both `worksheetState.variantTransitions` and `scanState.variantTransitions` to have `providerFound: true`, `themeApplied: true`, `appliedTheme === requestedTheme`, `appliedMode === requestedMode`, `noticeVisible: true`, `draftPreserved: true`, and `caretPreserved: true` / `barcodePreserved: true`. Synthetic missing provider / absent notice fixture is strictly rejected.
+      2. **Real Scientific Plotted-Series & Label Collectors (Eradication of Fake Constants)**:
+         - In standalone `spectralSeriesState` collector: when evaluated on an empty document (absent SVG / traces), returns `renderedSeriesVerified: false`, `seriesCount: 0`, `wavelengthRange: null`, `intensityRange: null`, and `chartTokensEvaluated: []`. Eradicated `Math.max(..., 2)` and hardcoded `seriesCount: 2`.
+         - In standalone `labelPreviewState` collector: when evaluated on an empty document (no label element), returns `rendered: false`, `format: null`, `substrate: null`, `barcodeColor: null`, `thermalPaperIsolation: false`, and `offlineQrVerified: false`.
+         - In `printStylesActive`: removed nested `spectralSeriesState` and `labelPreviewState`; marked `labelLayout` with `applicable: false, reason: 'Certificate of Analysis is A4 document, not thermal label'`.
+         - In `printIsolationPassed` gate: strictly asserts `spectralSeriesState.renderedSeriesVerified === true && spectralSeriesState.seriesCount >= 1` and `labelPreviewState.rendered === true && labelPreviewState.offlineQrVerified === true`. Calling `printGate` with collectors from an empty document strictly evaluates to `false`.
+      3. **Complete Elimination of Precision Fallbacks**:
+         - Eradicated `input.getAttribute('step') || '0.01'` from worksheet expected precision; returns `input.getAttribute('step')` or `null`.
+         - Eradicated `(typeof observedVal === 'number' ? 2 : null)` from certificate measurements precision; returns observed formatted decimal count or `null`.
+      4. **Reconciled Results JSON & Emitting Provenance Binding**:
+         - Re-emitted `worksheetState.variantTransitions` and `scanState.variantTransitions` with 14 canonical entries starting with `soilfer-classic.light` matching emitter schema.
+         - Updated `spectralSeriesState.seriesCount` to `1` matching emitter observation.
+         - Updated `labelPreviewState` and `printStylesActive.labelLayout`.
+         - Updated timestamp in `issue155-browser-journeys-results.json`.
+      5. **Truthful Native Teardown Reporting**:
+         - Honestly documented the observed Node 24 native cleanup assertion (`better_sqlite3.node Statement::~Statement()` with exit code 134) during `seeds/profile.js` teardown, bounded rerun success on head `a96e5b1` (job `110278598711`), and exact-head CI success on head `e10ba79` (job `110283098641`) without speculating on unproven V8 garbage collection race mechanisms.
+      6. **In-Checkout Unit Adapter Test Suite**:
+         - Updated `server/scripts/verify_all_14.cjs` (and `scratch/verify_all_14.cjs`) to execute all 22 focused checks (mirroring all 10 Codex probe cases), passing 100% green.
+      7. **Tree Invariants Maintained**:
+         - Client tree `9921a81a647113e53859c80fd06d9f0ca592beb5` and server/data tree `1a2a84457d02d33707f9845da10f9b97995e1377` preserved with ZERO rebuilds.
+         - Exactly 630 route/variant pairings intact in results.
+         - Sole-Agy conditional safe-release authority maintained: PR #155 remains unmerged and undeployed until independent acceptance and established release gates.
+

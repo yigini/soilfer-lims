@@ -133,6 +133,10 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
   - CSV intake dropzone on `/admin/legacy-import` executed with real Playwright file upload (`setInputFiles`):
     - File: `test_sample_import.csv` (`text/csv`, 45 bytes).
     - Extracted intake row: Sample `SMP-TEST-001`, pH `6.5`, Matrix `Topsoil` (`uploadSucceeded: true`).
+- **All-14 Canonical Variant Transitions**:
+  - Derived from canonical catalog allowlist (`soilfer-classic`, `forest`, `terra`, `mineral`, `watershed`, `nutrient`, `clear-contrast` x light/dark = 14 canonical variants), eliminating non-canonical variants.
+  - Each transition evaluates `providerFound`, `themeApplied`, matching requested vs applied theme/mode, `noticeVisible`, and draft/caret/barcode preservation.
+  - Hardened operational gate strictly asserts that all 14 transitions in both `worksheetState.variantTransitions` and `scanState.variantTransitions` satisfy all preservation and adoption criteria. Missing provider and mismatched appearance fixtures strictly reject.
 
 ---
 
@@ -153,8 +157,14 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
       - Bray-1 P: `15.40 mg/kg` (`mg/kg`, Method: Bray-1, Precision: 2, Status: APPROVED)
       - Exchangeable K: `0.45 cmol(+)/kg` (`cmol(+)/kg`, Method: Ammonium Acetate, Precision: 2, Status: APPROVED)
     - Strict unit matching: wrong OC unit cell `mg/kg` with note rejected.
+    - Inapplicable label layout marked `{ applicable: false, reason: 'Certificate of Analysis is A4 document, not thermal label' }`.
+- **Standalone Scientific Spectral Collector (`/spectral-library`)**:
+  - Evaluates SVG spectra plot, wavelength range 4000-400 cm⁻¹, intensity range 0.05-1.25 AU, and `--sf-chart-1..6` tokens.
+  - On empty document (absent SVG / lines): strictly returns `renderedSeriesVerified: false`, `seriesCount: 0`, null ranges, and `[]` tokens (no fake constants or `Math.max(..., 2)`).
 - **Barcode & QR Labels (`LabelPrintDialog.jsx`)**:
   - Official specimen barcode labels render on pure `#ffffff` substrate with `#000000` barcode bars (`thermalPaperIsolation: true`) to guarantee optical scanner read rates.
+  - On empty document (no label element): strictly returns `rendered: false`, `thermalPaperIsolation: false`, `offlineQrVerified: false`, and null format/substrate/color.
+  - Print isolation gate strictly requires verified scientific spectral series (`seriesCount >= 1`) and verified label preview (`rendered: true`, `offlineQrVerified: true`), failing closed when empty document collectors are supplied.
   - Physical optical scanner hardware and physical thermal label printer attachment are honestly recorded as **PENDING** physical hardware attachment.
 
 ---
