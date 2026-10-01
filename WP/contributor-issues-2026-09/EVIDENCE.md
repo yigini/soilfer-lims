@@ -3553,3 +3553,25 @@ Laboratory operators can find step-by-step procedures in the following documenta
          - Exactly 630 route/variant pairings intact in results.
          - Sole-Agy conditional safe-release authority maintained: PR #155 remains unmerged and undeployed until independent acceptance and established release gates.
 
+
+   - **2026-10-01 Remediation: Print Isolation, Exact-Model Validators, and Verified PDF Output**:
+     - Following independent review `issue155-independent-review-6ba9743.md` and 9-case probe `issue155-focused-review-6ba9743.cjs`, implemented comprehensive remediation addressing print margin leakage, heading contrast, exact-model validation, and fail-closed operational/print gates:
+       1. **Print Isolation CSS & Regenerated PDF Artifact**:
+          - Enforced pure white `#ffffff` background across root, body, containers, and `.report-document` in `@media print` in `appearance-tokens.css`, `ReportContent.css`, and `PublicReport.jsx`, eliminating dark border margin leakage (`(18, 18, 18)`).
+          - Fixed table heading contrast: removed `th` from `#1A1A1A` paper styling and set `.report-results-table th, .report-methods-table th, .report-title-badge { background-color: #1e3a5f !important; color: #FFFFFF !important; }`, achieving 11.50:1 WCAG AAA contrast (fixed from ~1.51:1).
+          - Regenerated `server/scripts/test_certificate_output.pdf`: 162,633 bytes, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`. Verified with PyMuPDF: top, left, and bottom margins are pure white `(255, 255, 255)`, table header text is pure white `(255, 255, 255)` on `#1e3a5f` `(30, 58, 95)`.
+       2. **Exact-Model Validators & Live DOM Recollection**:
+          - `wvt`: Reads exact 5 nodes, exact 4 edges, observes `dependencyNodes`, and strictly rejects bad or rewired edges.
+          - `workflowAfter`: Recollects live DOM state via `page.evaluate(...)` rather than copying previous objects.
+          - `uvt`: Observes actual file name, size (`44` bytes), and MIME type (`text/csv`); strictly rejects 999 bytes and `application/octet-stream`.
+          - `uploadAfter`: Recollects live DOM state via `page.evaluate(...)`.
+          - `cvt`: Enforces full row-associated identity (Accession `SOIL-GH-2026-001`, Report `CERT-2026-SOIL-01`, non-draft status `APPROVED`, exact parameter methods, values, units, precision, and effective text contrast).
+          - `opGate` & `printGate`: Mandatory 14-variant arrays (removed optional fallbacks); strictly require `variantTransitions.length === 14` with all transitions passing and authentic PDF disk artifact (>10,000 bytes).
+       3. **Fresh Client Build & Provenance**:
+          - Rebuilt client distribution: `index-Df7izgw5.css` (213,700 B / 35,045 B gzip, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), `index-BM3fEwdm.js` (1,252,791 B / 361,076 B gzip, SHA256 `eff8984e8f8c49ec08df40ad5650e6bff57db7da3abebbdb029af70306bfb205`), `ThemeGallery-CocHz4qR.js` (25,935 B / 6,477 B gzip, SHA256 `78a45ba93f9a3b0d1741f86012c5ebf78c578044ea1cb6f6708a575c321c63b5`).
+       4. **Test Suite Execution**:
+          - `server/scripts/verify_all_14.cjs`: 46/46 unit tests pass 100% green.
+          - `server/scripts/verify_issue155_browser_journeys.cjs`: 12/12 suites pass in Headless Google Chrome `153.0.8010.48`.
+          - All probe scenarios verified.
+       5. **Sole-Agy Authority**:
+          - Candidate remains unmerged and undeployed awaiting independent acceptance and established release gates.

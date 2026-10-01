@@ -616,13 +616,27 @@
 
 [data-surface="paper"] p,
 [data-surface="paper"] td,
-[data-surface="paper"] th,
 [data-surface="paper"] span,
 .sf-paper p,
 .sf-paper td,
-.sf-paper th,
 .sf-paper span {
     color: #1A1A1A;
+}
+
+[data-surface="paper"] th,
+.sf-paper th {
+    color: inherit;
+}
+
+/* Explicit high-contrast white text for dark/brand headers and badges on paper */
+[data-surface="paper"] .report-results-table th,
+[data-surface="paper"] .report-methods-table th,
+[data-surface="paper"] .report-title-badge,
+.sf-paper .report-results-table th,
+.sf-paper .report-methods-table th,
+.sf-paper .report-title-badge {
+    background-color: #1e3a5f !important;
+    color: #FFFFFF !important;
 }
 
 [data-surface="paper"] .text-muted,
@@ -632,13 +646,31 @@
 
 /* Print Isolation: Always force paper appearance when printing */
 @media print {
+    html,
     body,
+    #root,
     main,
+    .print-reset,
+    .print-container,
+    .report-document,
     [data-surface="paper"],
     .sf-paper {
         background-color: #FFFFFF !important;
+        background: #FFFFFF !important;
         color: #000000 !important;
         color-scheme: light !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .report-results-table th,
+    .report-methods-table th,
+    .report-title-badge {
+        background-color: #1e3a5f !important;
+        background: #1e3a5f !important;
+        color: #FFFFFF !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
 
     /* Hide UI navigation, selectors, headers during print */

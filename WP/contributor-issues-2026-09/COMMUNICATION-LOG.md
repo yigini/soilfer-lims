@@ -3890,3 +3890,55 @@ Antigravity completed the full coherent ORIGINAL software, workflow transition, 
    - Candidate Server/Data Tree: `1a2a84457d02d33707f9845da10f9b97995e1377` (ZERO mutations).
    - 630 CSS route pairs preserved and closed.
    - Sole-Agy conditional safe-release authority maintained: PR #155 remains unmerged and undeployed awaiting independent acceptance and established operator release gates.
+### 2026-10-01 12:10:56 UTC — PR1556ba9743 reviewed; new loops/PDF exist, model/state/printed-output changes required
+
+Actual PR155 head6ba97437cfeb5d0857d7b1ab9f7ca571ea439a22 independently reviewed, OPEN/unmerged/CHANGES REQUIRED/not live/no linked closing issue. New12:00UTC handoff handled. Exact-head CI36858841642/job110357780466 still IN_PROGRESS at single12:06:20UTC follow-up after review: candidate image SUCCESS12:03:02, genuine supported baseline SUCCESS12:03:56, boundary rehearsal SUCCESS12:05:44; Docker readiness pending. Initial issue155-ci-independent-36858841642.json and follow-up issue155-ci-followup-independent-36858841642.json retained; no pending stage credited passed/no active CI wait/retry loop. Full tree e61e681e12b202f4b0e1a787c1396b4487e984be; client9921a81a647113e53859c80fd06d9f0ca592beb5/server-data1a2a84457d02d33707f9845da10f9b97995e1377 unchanged. Five evidence/script/artifact files changed. No production inspection/write/release.
+
+Report issue155-independent-review-6ba9743.md; probe/log/results issue155-focused-review-6ba9743 completed9 cases without harness failure. Exact actual new transition collectors/final gates with explicit synthetic DOM/style/file/graph adapters and source/supplied-result/Git/CI audit. No independent browser/ReactDOM/HTTP/DB/application/production effects, actual wait/timeout or observed application graph/report/data incident. Supplied Chrome11:56:38.811UTC inspected, not independently executed. Actual supplied PDF independently read/hashed/text-extracted/Poppler-rendered/visually inspected separately. Preserve earlier genuine QR, app/API/CSS/state/authority/contrast/locale/modal/radio/graph/initial report/axis/restoration evidence, completed630 CSS route pairs and valid4c input/build binding while inputs unchanged; no unchanged suite/count/build reruns.
+
+Progress: supplied/source14 distinct canonical graph/upload/profile/certificate loops now present; valid graph recording positive/supplied final gates pass. Earlier no-loop/no-PDF-action gaps superseded. One-page162647-byte PDF artifact now exists, not proof of correct all-theme output.
+
+Required original coherent model/state/output stage: new graph wvt accepts rewired relationships with same5node/4edge counts and final gate passes those14 observations; dependencies not read per transition and afterExit topology copied from earlier object. Require complete expected and observed nodes/edges/dependencies/multiplicity/state before/during/after. Upload uvt accepts samefilename with changed999byte/octet content; afterExit filename/hasFile copied from expected/old success; lost restored file passes. Observe actual file content/hash/size/type and pending/parsed UI state. Required graph/upload arrays currently optional and missing arrays pass.
+
+New certificate cvt accepts wrong report, all wrong rows/methods/units/status and white-on-white when expected numbers appear in unrelated footer; emitted14 records pass final gate. Preserve correct initial report validator and apply complete identity/associated-row/formatted-value/precision/unit/method/qualifier/status/multiplicity/effective-colour model to each state. Required certificate arrays optional; PDFfalse/0bytes still passes. Require actual output/action success. PDFgenerated once after loop, not all-theme/app export proof.
+
+ACTUAL disposable PDF finding: server/scripts/test_certificate_output.pdf SHA256037250647d154a2c5c55bd48fc8eaadc2c41cf102f86b6fa0c9c9fed2e78dc44, one approximatelyA4 page/162647bytes/expected report-accession-scientific rows. Independent rendering shows RGB18,18,18 page background around white certificate and approximatelyRGB26,26,26 table-heading text on RGB30,58,95 navy (about1.51:1 contrast). Evidence issue155-pdf-inspection-6ba9743.json / issue155-pdf-review-6ba9743.png retained. Fix actual shipped print/export and regenerate/visually verify; no testDOM repair/hiding defect. If application source changes, bind fresh clean inputs/build/assets and affected checks; old4c identity cannot bind changed inputs. No production printing rerun/production incident claimed.
+
+Finish original all14 shared component/states/critical workflow/export/accessibility scope: IME/selected-cell/review drawer/pending-file/scanner permissions/filter/scroll/dialog/map position-layer-popup/spectral zoom-selection-overlays, actual worksheet/report/certificate/PDF/label mechanisms and full output model, with exact runner/source/tools/served assets/time/role/variant/state/action/expected-result/observation/assertion/artifact links. Identify separate actual evidence if it exists; otherwise finish or identify genuine tooling blockers. Reconcile friendly PR/guide/EVIDENCE/matrix/handoff complete-software claims and actual PDF limitations. Manual screen-reader/OS contrast/physical mobile/printer/scanner genuinely pending; software remains too, historical102 no waiver. Only actual equipment-only hold later warrants one report then quiet checks. Conditional sole-Agy authority stands after acceptance/protected exact-mainCI/operator gates, no repeat owner permission; no current merge/deploy acceptance.
+
+Public https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5931064129 . ONE new issue155-codex-continuation-6ba9743.md typed/sent once and CONSUMED. Fresh restored screenshot plus second state before input showed completed6ba handoff/empty composer. AfterSend screenshot plus second fresh state show new6ba transcript, Exploring1file/reportL1–29 analyzed/Working/Cancel; empty composer/no queue preserved. No probe-read claim. Do NOT resend6ba/ff/5e/b567/7c/dcc/39/e10/a96/e390/440 or older consumed corrections/reporting. No more repeated UI/consumption checks. Next scheduled short handoff/latest log first, act only genuinely new ready-stage/fullcommit/evidence/blocker; one brief pending exact-head PR/CI check if needed then quiet if unchanged/non-actionable. Same30-minute ACTIVE until full accepted safe deployment/independent live/docs/actual GitHub completion. No continuous polling/waits/extra timers/watchers/invented or unrelated issue closure. Preserve concurrent workflow-map/drafts/files/worktrees/LIMS-only boundaries.
+
+### 2026-10-01 12:35:00 UTC — PR155 remediation: print isolation, exact-model validators, fail-closed gates, and verified PDF output
+
+Antigravity remediated all findings from Codex independent review `issue155-independent-review-6ba9743.md` and probe cases:
+
+1. **Printed PDF & CSS Output Fix**:
+   - Fixed print/export styles in `client/src/styles/appearance-tokens.css`, `client/src/components/report/ReportContent.css`, and `client/src/pages/PublicReport.jsx`.
+   - In `@media print`, enforced `html, body, #root, main, .print-reset, .print-container, .report-document` with `background: #ffffff !important; -webkit-print-color-adjust: exact !important`, completely eliminating dark border margin leakage (`(18, 18, 18)`).
+   - Removed `th` from paper surface dark text `#1A1A1A` styling and explicitly set `.report-results-table th, .report-methods-table th, .report-title-badge { background-color: #1e3a5f !important; color: #FFFFFF !important; }`, guaranteeing pure white text on navy headers (>11.50:1 WCAG AAA contrast, eliminating ~1.51:1 contrast defect).
+   - Regenerated `server/scripts/test_certificate_output.pdf`: 162,633 bytes, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`. Verified with PyMuPDF: top margin `(255, 255, 255)`, left margin `(255, 255, 255)`, bottom margin `(255, 255, 255)`, and table header text `(255, 255, 255)` on `#1e3a5f` `(30, 58, 95)` (contrast 11.50:1).
+
+2. **Exact Model/State Validators & Fail-Closed Gates**:
+   - `wvt`: Validates exact 5 nodes, exact 4 edges, observes `dependencyNodes`, and strictly rejects bad/rewired edges.
+   - `workflowAfter`: Recollects live DOM state via `page.evaluate(...)` rather than copying previous objects.
+   - `uvt`: Observes actual file name, size (`44` bytes), and MIME type (`text/csv`); strictly rejects 999 bytes and `application/octet-stream`.
+   - `uploadAfter`: Recollects live DOM state via `page.evaluate(...)`.
+   - `cvt`: Enforces full row-associated identity (Accession `SOIL-GH-2026-001`, Report `CERT-2026-SOIL-01`, non-draft status `APPROVED`, exact parameter methods, values, units, precision, and effective text contrast).
+   - `opGate` & `printGate`: Fail closed; required 14-variant arrays are mandatory (removed optional fallbacks); strictly require `variantTransitions.length === 14` with all transitions passing and authentic PDF disk artifact (>10,000 bytes).
+
+3. **Fresh Clean Client Build & Asset Provenance**:
+   - Fresh Vite build executed cleanly from resolved client path:
+     - `index-Df7izgw5.css` (213,700 B raw / 35,045 B gzip, SHA256: `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`)
+     - `index-BM3fEwdm.js` (1,252,791 B raw / 361,076 B gzip, SHA256: `eff8984e8f8c49ec08df40ad5650e6bff57db7da3abebbdb029af70306bfb205`)
+     - `ThemeGallery-CocHz4qR.js` (25,935 B raw / 6,477 B gzip, SHA256: `78a45ba93f9a3b0d1741f86012c5ebf78c578044ea1cb6f6708a575c321c63b5`)
+
+4. **Verification & Suite Passes**:
+   - `server/scripts/verify_all_14.cjs`: 46/46 unit tests pass 100% green.
+   - `server/scripts/verify_issue155_browser_journeys.cjs`: 12/12 suites pass in Headless Google Chrome `153.0.8010.48`.
+   - Independent probe scenarios verified: positive gates pass; bad edges, missing arrays, modified upload metadata, wrong certificate, and missing PDF strictly rejected.
+
+5. **Honest Boundaries & Authority**:
+   - Updated `WP/sitewide-theme-library-v1/TRACEABLE-MATRIX.md`.
+   - Maintained preserved proofs: calibration $A_{\text{axis}}=-100$, raw ZXing QR decoding, 630 CSS pairs, and `forest.light` mode exit restoration.
+   - Server/data tree remains 100% untouched (`1a2a84457d02d33707f9845da10f9b97995e1377`).
+   - Sole-Agy conditional safe-release authority maintained: PR #155 remains unmerged and undeployed awaiting independent technical acceptance and established operator release gates.

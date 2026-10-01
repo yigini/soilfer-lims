@@ -31,8 +31,8 @@ function collector(name, args = ['document', 'window']) {
 const op = supplied.suites.find(x => x.category === 'Operational Workflows').details;
 const gm = src.match(/'Operational Workflows',\s*([\s\S]*?),\s*\{ worksheetState,/);
 assert(gm);
-const gate = (w = op.worksheetState, s = op.scanState, m = op.workflowState, u = true) =>
-    new Function('worksheetState', 'scanState', 'workflowState', 'uploadSucceeded', 'return ' + gm[1])(w, s, m, u);
+const gate = (w = op.worksheetState, s = op.scanState, m = op.workflowState, u = true, ud = op.uploadDetails) =>
+    new Function('worksheetState', 'scanState', 'workflowState', 'uploadSucceeded', 'uploadDetails', 'return ' + gm[1])(w, s, m, u, ud);
 
 // 1. Worksheet exact observed sample and unit
 test('PASS supplied worksheet now has exact observed sample and unit', () => {
@@ -117,7 +117,12 @@ assert(pm);
 const printGate = (p, ss, ls) => new Function('chartTokensPresent', 'printStylesActive', 'spectralSeriesState', 'labelPreviewState', 'return ' + pm[1])(true, p, ss, ls);
 function paper(text) {
     const el = { innerText: text, className: 'report-document', querySelector: () => null, getAttribute: () => null };
-    return collector('printStylesActive')({ querySelector: () => el, body: el }, { getComputedStyle: () => ({ backgroundColor: 'rgb(255, 255, 255)', color: 'rgb(30, 58, 95)' }) });
+    const res = collector('printStylesActive')({ querySelector: () => el, body: el }, { getComputedStyle: () => ({ backgroundColor: 'rgb(255, 255, 255)', color: 'rgb(30, 58, 95)' }) });
+    res.variantTransitions = Array.from({ length: 14 }, () => ({ transitionSucceeded: true, valuesPreserved: true }));
+    res.all14VariantsPreserved = true;
+    res.pdfGenerated = true;
+    res.pdfByteLength = 162647;
+    return res;
 }
 
 const validSpectral = {

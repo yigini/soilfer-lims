@@ -1560,7 +1560,58 @@ async function runBrowserEvidence() {
                     return key ? { key } : null;
                 }).filter(Boolean);
 
-                const graphPreserved = Boolean(container && nodeEls.length >= 5 && observedEdges.length >= 4);
+                let observedDepNodes = [];
+                if (container) {
+                    try {
+                        const depEls = container.querySelectorAll ? Array.from(container.querySelectorAll('[data-node-type="dependency"], .dependency-node, [data-dependency-id], [data-work-item-id]')) : [];
+                        if (depEls.length > 0) {
+                            observedDepNodes = depEls.map(el => {
+                                if (typeof el.getAttribute === 'function') {
+                                    const depId = el.getAttribute('data-dependency-id') || el.getAttribute('data-work-item-id');
+                                    if (depId) return depId;
+                                }
+                                if (el.className && typeof el.className === 'string' && el.className.includes('dependency') && el.id) {
+                                    return el.id;
+                                }
+                                return null;
+                            }).filter(Boolean);
+                        }
+                        if (observedDepNodes.length === 0) {
+                            const fiberKey = Object.keys(container).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                            if (fiberKey) {
+                                const stack = [container[fiberKey]];
+                                while (stack.length > 0 && observedDepNodes.length === 0) {
+                                    const curr = stack.pop();
+                                    if (!curr) continue;
+                                    if (curr.memoizedProps && curr.memoizedProps.mapState && curr.memoizedProps.mapState.dependencyGraph) {
+                                        observedDepNodes = curr.memoizedProps.mapState.dependencyGraph.nodes.map(n => n.id || n.workItemId).filter(Boolean);
+                                        break;
+                                    }
+                                    if (curr.child) stack.push(curr.child);
+                                    if (curr.sibling) stack.push(curr.sibling);
+                                }
+                            }
+                        }
+                    } catch {}
+                }
+
+                const expectedNodes = ['reception', 'prep', 'wet-chem', 'review', 'closure'];
+                const expectedEdges = [
+                    { from: 'reception', to: 'prep' },
+                    { from: 'prep', to: 'wet-chem' },
+                    { from: 'wet-chem', to: 'review' },
+                    { from: 'review', to: 'closure' }
+                ];
+                const nodesValid = expectedNodes.every(n => observedNodeIds.includes(n)) && observedNodeIds.every(n => expectedNodes.includes(n));
+                const edgesValid = observedEdges.length === expectedEdges.length &&
+                    expectedEdges.every(exp => observedEdges.some(obs => obs.from === exp.from && obs.to === exp.to)) &&
+                    observedEdges.every(obs => expectedEdges.some(exp => exp.from === obs.from && exp.to === obs.to));
+                const dependenciesValid = observedDepNodes.length === 0 || (
+                    observedDepNodes.length === 2 &&
+                    ['wi-01', 'wi-02'].every(d => observedDepNodes.includes(d))
+                );
+
+                const graphPreserved = Boolean(container && nodesValid && edgesValid && dependenciesValid);
                 const themeApplied = Boolean(appliedTheme === theme && appliedMode === mode);
                 const noticeVisible = Boolean(notice);
                 const transitionSucceeded = Boolean(themeApplied && noticeVisible && graphPreserved);
@@ -1577,6 +1628,7 @@ async function runBrowserEvidence() {
                     renderedNodeCount: nodeEls.length,
                     nodeIds: observedNodeIds,
                     observedEdges,
+                    dependencyNodes: observedDepNodes,
                     transitionSucceeded
                 };
             }, { theme: variant.themeId, mode: variant.mode });
@@ -1595,16 +1647,82 @@ async function runBrowserEvidence() {
             }, null, { timeout: 3000 });
         }
 
-        const workflowAfter = {
-            appliedTheme: await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'forest'),
-            appliedMode: await page.evaluate(() => document.documentElement.getAttribute('data-appearance') || 'light'),
-            noticeVisible: await page.evaluate(() => Boolean(document.querySelector('[role="region"][aria-label*="preview" i]'))),
-            graphPreserved: workflowState.hasGraph,
-            renderedNodeCount: workflowState.renderedNodeCount,
-            nodeIds: workflowState.nodeIds,
-            observedEdges: workflowState.observedEdges,
-            dependencyNodes: workflowState.dependencyNodes
-        };
+        const workflowAfter = await page.evaluate(() => {
+            const container = document.querySelector('#soilfer-workflow-redesign, [data-tour="workflow-map-container"]');
+            const docEl = document.documentElement;
+            const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+            const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+            const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+
+            let nodeEls = [];
+            if (container && typeof container.querySelectorAll === 'function') {
+                nodeEls = Array.from(container.querySelectorAll('.sf-node, [data-node], [data-node-id]'));
+            }
+            const observedNodeIds = nodeEls.map(el => el.getAttribute('data-node-id') || el.getAttribute('data-node') || el.id || '').filter(Boolean);
+            const pathEls = container && typeof container.querySelectorAll === 'function'
+                ? Array.from(container.querySelectorAll('svg.sf-wires path, [data-edge]'))
+                : [];
+            const sortedNodes = [...observedNodeIds].sort((a, b) => b.length - a.length);
+            const observedEdges = pathEls.map(p => {
+                const fiberKey = Object.keys(p).find(k => k.startsWith('__reactFiber$'));
+                const key = (fiberKey && p[fiberKey] && p[fiberKey].key)
+                    || (typeof p.getAttribute === 'function' && (p.getAttribute('data-edge') || p.getAttribute('data-edge-key')))
+                    || p.id
+                    || '';
+                if (key) {
+                    const fromNode = sortedNodes.find(n => key.startsWith(n + '-'));
+                    if (fromNode) return { from: fromNode, to: key.slice(fromNode.length + 1) };
+                    if (key.includes('-')) {
+                        const parts = key.split('-');
+                        return { from: parts[0], to: parts.slice(1).join('-') };
+                    }
+                }
+                return key ? { key } : null;
+            }).filter(Boolean);
+
+            let observedDepNodes = [];
+            if (container) {
+                try {
+                    const fiberKey = Object.keys(container).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                    if (fiberKey) {
+                        const stack = [container[fiberKey]];
+                        while (stack.length > 0 && observedDepNodes.length === 0) {
+                            const curr = stack.pop();
+                            if (!curr) continue;
+                            if (curr.memoizedProps && curr.memoizedProps.mapState && curr.memoizedProps.mapState.dependencyGraph) {
+                                observedDepNodes = curr.memoizedProps.mapState.dependencyGraph.nodes.map(n => n.id || n.workItemId).filter(Boolean);
+                                break;
+                            }
+                            if (curr.child) stack.push(curr.child);
+                            if (curr.sibling) stack.push(curr.sibling);
+                        }
+                    }
+                } catch {}
+            }
+
+            const expectedNodes = ['reception', 'prep', 'wet-chem', 'review', 'closure'];
+            const expectedEdges = [
+                { from: 'reception', to: 'prep' },
+                { from: 'prep', to: 'wet-chem' },
+                { from: 'wet-chem', to: 'review' },
+                { from: 'review', to: 'closure' }
+            ];
+            const nodesValid = expectedNodes.every(n => observedNodeIds.includes(n)) && observedNodeIds.every(n => expectedNodes.includes(n));
+            const edgesValid = observedEdges.length === expectedEdges.length &&
+                expectedEdges.every(exp => observedEdges.some(obs => obs.from === exp.from && obs.to === exp.to)) &&
+                observedEdges.every(obs => expectedEdges.some(exp => exp.from === obs.from && exp.to === obs.to));
+
+            return {
+                appliedTheme: appliedTheme || 'forest',
+                appliedMode: appliedMode || 'light',
+                noticeVisible: Boolean(notice),
+                graphPreserved: Boolean(container && nodesValid && edgesValid),
+                renderedNodeCount: nodeEls.length,
+                nodeIds: observedNodeIds,
+                observedEdges,
+                dependencyNodes: observedDepNodes
+            };
+        });
 
         workflowState.beforePreview = workflowBefore;
         workflowState.duringPreview = workflowVariantTransitions[0];
@@ -1678,7 +1796,15 @@ async function runBrowserEvidence() {
                 const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
                 const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
                 const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
-                const filePreserved = Boolean(fileInput && fileInput.files && fileInput.files.length === 1 && fileInput.files[0].name === 'test_sample_import.csv');
+                const f = fileInput && fileInput.files && fileInput.files[0];
+                const filePreserved = Boolean(
+                    f &&
+                    f.name === 'test_sample_import.csv' &&
+                    (typeof f.size !== 'number' || f.size === 44) &&
+                    f.size !== 999 &&
+                    (!f.type || f.type === 'text/csv') &&
+                    f.type !== 'application/octet-stream'
+                );
                 const themeApplied = Boolean(appliedTheme === theme && appliedMode === mode);
                 const noticeVisible = Boolean(notice);
                 const transitionSucceeded = Boolean(themeApplied && noticeVisible && filePreserved);
@@ -1692,7 +1818,9 @@ async function runBrowserEvidence() {
                     noticeVisible,
                     filePreserved,
                     pendingFilePreserved: filePreserved,
-                    fileName: fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0].name : null,
+                    fileName: f ? f.name : null,
+                    fileSize: f ? f.size : null,
+                    fileType: f ? f.type : null,
                     transitionSucceeded
                 };
             }, { theme: variant.themeId, mode: variant.mode });
@@ -1711,13 +1839,31 @@ async function runBrowserEvidence() {
             }, null, { timeout: 3000 });
         }
 
-        const uploadAfter = {
-            appliedTheme: await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'forest'),
-            appliedMode: await page.evaluate(() => document.documentElement.getAttribute('data-appearance') || 'light'),
-            noticeVisible: await page.evaluate(() => Boolean(document.querySelector('[role="region"][aria-label*="preview" i]'))),
-            fileName: 'test_sample_import.csv',
-            hasFile: uploadSucceeded
-        };
+        const uploadAfter = await page.evaluate(() => {
+            const fileInput = document.querySelector('input[type="file"]');
+            const docEl = document.documentElement;
+            const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+            const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+            const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+            const f = fileInput && fileInput.files && fileInput.files[0];
+            const hasFile = Boolean(
+                f &&
+                f.name === 'test_sample_import.csv' &&
+                (typeof f.size !== 'number' || f.size === 44) &&
+                f.size !== 999 &&
+                (!f.type || f.type === 'text/csv') &&
+                f.type !== 'application/octet-stream'
+            );
+            return {
+                appliedTheme: appliedTheme || 'forest',
+                appliedMode: appliedMode || 'light',
+                noticeVisible: Boolean(notice),
+                fileName: f ? f.name : null,
+                fileSize: f ? f.size : null,
+                fileType: f ? f.type : null,
+                hasFile
+            };
+        });
 
         const uploadDetails = {
             uploadSucceeded,
@@ -1866,20 +2012,39 @@ async function runBrowserEvidence() {
                     return id === 'wi-01' || id === 'wi-02';
                 }) &&
                 (!workflowState.dependencyNodes.includes('foreign')) &&
-                (!workflowState.variantTransitions || (
-                    workflowState.all14VariantsPreserved === true &&
-                    Array.isArray(workflowState.variantTransitions) &&
-                    workflowState.variantTransitions.length === 14 &&
-                    workflowState.variantTransitions.every(v => v && v.transitionSucceeded === true)
-                )) &&
+                workflowState.variantTransitions &&
+                workflowState.all14VariantsPreserved === true &&
+                Array.isArray(workflowState.variantTransitions) &&
+                workflowState.variantTransitions.length === 14 &&
+                workflowState.variantTransitions.every(v =>
+                    v &&
+                    v.transitionSucceeded === true &&
+                    v.graphPreserved === true &&
+                    Array.isArray(v.nodeIds) &&
+                    v.nodeIds.length === 5 &&
+                    ['reception', 'prep', 'wet-chem', 'review', 'closure'].every(n => v.nodeIds.includes(n)) &&
+                    Array.isArray(v.observedEdges) &&
+                    v.observedEdges.length === 4 &&
+                    [
+                        { from: 'reception', to: 'prep' },
+                        { from: 'prep', to: 'wet-chem' },
+                        { from: 'wet-chem', to: 'review' },
+                        { from: 'review', to: 'closure' }
+                    ].every(exp => v.observedEdges.some(obs => obs.from === exp.from && obs.to === exp.to))
+                ) &&
                 uploadSucceeded === true &&
-                (typeof uploadDetails === 'undefined' || !uploadDetails || !uploadDetails.variantTransitions || (
+                (typeof uploadDetails === 'undefined' || (
+                    uploadDetails &&
+                    uploadDetails.variantTransitions &&
                     uploadDetails.all14VariantsPreserved === true &&
                     Array.isArray(uploadDetails.variantTransitions) &&
                     uploadDetails.variantTransitions.length === 14 &&
-                    uploadDetails.variantTransitions.every(v => v && v.transitionSucceeded === true)
-                )) &&
-                (typeof uploadDetails === 'undefined' || !uploadDetails || uploadDetails.pendingFilePreserved === true)
+                    uploadDetails.variantTransitions.every(v => v && v.transitionSucceeded === true && v.filePreserved === true) &&
+                    uploadDetails.pendingFilePreserved === true &&
+                    uploadDetails.afterExit &&
+                    uploadDetails.afterExit.hasFile === true &&
+                    uploadDetails.afterExit.fileName === 'test_sample_import.csv'
+                ))
             ),
             { worksheetState, scanState, workflowState, uploadSucceeded, uploadDetails }
         );
@@ -2845,13 +3010,116 @@ async function runBrowserEvidence() {
             const cvt = await page.evaluate(({ theme, mode }) => {
                 const paperEl = document.querySelector('[data-surface="paper"], .print-body, .report-document') || document.body;
                 const paperStyle = window.getComputedStyle(paperEl);
+                const textEl = paperEl.querySelector ? (paperEl.querySelector('.report-lab-name, .report-section-title, td.param-name, td.param-value') || paperEl) : paperEl;
+                const textStyle = window.getComputedStyle(textEl);
                 const bg = paperStyle.backgroundColor;
-                const isPureWhite = bg === 'rgb(255, 255, 255)' || bg === '#ffffff' || bg === 'rgba(0, 0, 0, 0)';
+                const color = textStyle.color;
                 const textContent = (paperEl.innerText || paperEl.textContent || '').trim();
-                const samplePreserved = /(?:^|[^A-Za-z0-9_-])SOIL-GH-2026-001(?![A-Za-z0-9_-])/.test(textContent) && !textContent.includes('WRONG-SPECIMEN');
-                const valuesPreserved = textContent.includes('6.5') && textContent.includes('2.15') && textContent.includes('0.18') && textContent.includes('15.4') && textContent.includes('0.45');
+
+                const isPureWhite = bg === 'rgb(255, 255, 255)' || bg === '#ffffff' || bg === 'rgba(0, 0, 0, 0)';
+                const isBlackBg = bg === 'rgb(0, 0, 0)' || bg === '#000000';
+                const isWhiteText = color === 'rgb(255, 255, 255)' || color === '#ffffff';
+                const textContrastValid = !isWhiteText && color !== bg;
+
+                const lines = textContent.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+
+                // Report ID
+                const reportIdLine = lines.find(l => /report\s*(?:no\.?|id|number)/i.test(l));
+                const observedReportId = reportIdLine
+                    ? (reportIdLine.split(/[\t:]+/)[1] || reportIdLine.split(/\s+/).pop() || '').trim()
+                    : (typeof window !== 'undefined' && window.location && window.location.pathname && window.location.pathname.includes('CERT-2026-SOIL-01')
+                        ? 'CERT-2026-SOIL-01'
+                        : null);
+                const reportIdValid = observedReportId === 'CERT-2026-SOIL-01';
+
+                // Accession ID
+                const labIdHeader = lines.find(l => /laboratory\s*id|sample\s*id|specimen\s*id|accession/i.test(l));
+                const observedAccessionId = labIdHeader
+                    ? (labIdHeader.split(/[\t:]+/)[1] || labIdHeader.split(/\s+/).pop() || '').trim()
+                    : null;
+                const samplePreserved = /(?:^|[^A-Za-z0-9_-])SOIL-GH-2026-001(?![A-Za-z0-9_-])/.test(observedAccessionId || textContent) &&
+                    !textContent.includes('WRONG-SPECIMEN') &&
+                    !(observedAccessionId && observedAccessionId.includes('999'));
+
+                // Status
+                const isDraft = lines.some(l => /\bstatus\s*draft\b|\bdraft\b/i.test(l));
+                const hasApproved = /approved/i.test(textContent);
+                const statusValid = !isDraft && hasApproved;
+
+                // Parameter row validation (row-associated identity, methods, values, units)
+                const paramDefs = [
+                    { name: 'pH', pattern: /(?:Soil\s*pH|^pH\b)/i, unitPattern: /\bpH\s*units\b/i, methodPattern: /ISO\s*10390/i, expected: 6.5 },
+                    { name: 'OC', pattern: /(?:Organic\s*Carbon|\bOC\b)/i, unitPattern: /^%$/i, methodPattern: /Walkley/i, expected: 2.15 },
+                    { name: 'TN', pattern: /(?:Total\s*Nitrogen|\bTN\b)/i, unitPattern: /^%$/i, methodPattern: /Kjeldahl/i, expected: 0.18 },
+                    { name: 'P', pattern: /(?:Available\s*P|Bray-?1\s*P|BrayP)/i, unitPattern: /^mg\/kg$/i, methodPattern: /Bray/i, expected: 15.4 },
+                    { name: 'K', pattern: /(?:Exchangeable\s*K|\bK\b)/i, unitPattern: /^cmol(?:\(\+\))?\/kg$/i, methodPattern: /Ammonium/i, expected: 0.45 }
+                ];
+
+                let scientificValuesPreserved = true;
+                for (const def of paramDefs) {
+                    const matches = lines.filter(l => def.pattern.test(l));
+                    if (matches.length === 0) {
+                        scientificValuesPreserved = false;
+                        break;
+                    }
+                    const line = matches[0];
+                    let val = null;
+                    let unitPassed = false;
+                    const methodPassed = def.methodPattern.test(line);
+
+                    if (line.includes('\t')) {
+                        const cols = line.split('\t').map(c => c.trim()).filter(Boolean);
+                        for (let i = 1; i < cols.length; i++) {
+                            const num = parseFloat(cols[i]);
+                            if (!isNaN(num) && cols[i].match(/^\d+(\.\d+)?$/)) {
+                                val = num;
+                                const unitCell = cols[i + 1] ? cols[i + 1].trim() : '';
+                                unitPassed = def.unitPattern.test(unitCell);
+                                break;
+                            }
+                        }
+                    }
+                    if (val === null) {
+                        const m = line.match(new RegExp(def.pattern.source + '[:\\s\\t|-]+(?:([A-Za-z0-9_ -]+)[:\\s\\t|-]+)?(\\d+(?:\\.\\d+)?)[:\\s\\t|-]+([A-Za-z0-9_%/()+-]+)', 'i'));
+                        if (m) {
+                            val = parseFloat(m[2]);
+                            const unitWord = (m[3] || '').trim();
+                            unitPassed = def.unitPattern.test(unitWord);
+                        } else {
+                            const m2 = line.match(new RegExp(def.pattern.source + '[:\\s\\t|-]+(\\d+(?:\\.\\d+)?)', 'i'));
+                            if (m2) {
+                                val = parseFloat(m2[1]);
+                                const after = line.slice(line.indexOf(m2[1]) + m2[1].length).trim();
+                                const unitWord = after.split(/\s+/)[0] || '';
+                                unitPassed = def.unitPattern.test(unitWord) || def.unitPattern.test(after.slice(0, 15));
+                            }
+                        }
+                    }
+                    if (!methodPassed || !unitPassed || val === null || Math.abs(val - def.expected) >= 0.005) {
+                        scientificValuesPreserved = false;
+                        break;
+                    }
+                }
+
+                const docEl = document.documentElement;
+                const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
                 const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
-                const transitionSucceeded = Boolean(isPureWhite && samplePreserved && valuesPreserved && notice);
+                const themeApplied = Boolean(appliedTheme === theme && appliedMode === mode);
+                const noticeVisible = Boolean(notice);
+
+                const transitionSucceeded = Boolean(
+                    themeApplied &&
+                    noticeVisible &&
+                    isPureWhite &&
+                    !isBlackBg &&
+                    textContrastValid &&
+                    reportIdValid &&
+                    samplePreserved &&
+                    statusValid &&
+                    scientificValuesPreserved
+                );
+
                 return {
                     variant: `${theme}.${mode}`,
                     requestedTheme: theme,
@@ -2860,8 +3128,12 @@ async function runBrowserEvidence() {
                     appliedMode: document.documentElement.getAttribute('data-appearance'),
                     paperIsolated: isPureWhite,
                     samplePreserved,
-                    valuesPreserved,
+                    valuesPreserved: scientificValuesPreserved,
                     noticeVisible: Boolean(notice),
+                    reportIdValid,
+                    statusValid,
+                    scientificValuesPreserved,
+                    textContrastValid,
                     transitionSucceeded
                 };
             }, { theme: variant.themeId, mode: variant.mode });
@@ -3801,12 +4073,14 @@ async function runBrowserEvidence() {
             (printStylesActive.isPureWhite || printStylesActive.computedBg === 'rgb(255, 255, 255)' || printStylesActive.computedBg === '#ffffff') &&
             printStylesActive.computedColor !== 'rgb(255, 255, 255)' &&
             !printStylesActive.isWhiteText &&
-            (!printStylesActive.variantTransitions || (
-                printStylesActive.all14VariantsPreserved === true &&
-                Array.isArray(printStylesActive.variantTransitions) &&
-                printStylesActive.variantTransitions.length === 14 &&
-                printStylesActive.variantTransitions.every(v => v && v.transitionSucceeded === true)
-            )) &&
+            printStylesActive.variantTransitions &&
+            printStylesActive.all14VariantsPreserved === true &&
+            Array.isArray(printStylesActive.variantTransitions) &&
+            printStylesActive.variantTransitions.length === 14 &&
+            printStylesActive.variantTransitions.every(v => v && v.transitionSucceeded === true && v.valuesPreserved === true) &&
+            printStylesActive.pdfGenerated === true &&
+            typeof printStylesActive.pdfByteLength === 'number' &&
+            printStylesActive.pdfByteLength > 10000 &&
             ((bg, fg) => {
                 const rgb = (fg && fg.match(/\d+/g) ? fg.match(/\d+/g).slice(0, 3).map(Number) : [0, 0, 0])
                 const lumFg = 0.2126 * (rgb[0]/255 <= 0.03928 ? rgb[0]/255/12.92 : Math.pow((rgb[0]/255 + 0.055)/1.055, 2.4)) +
