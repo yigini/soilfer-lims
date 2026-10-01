@@ -226,11 +226,17 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
 
 ## 7. Toolchain & Built Asset Provenance
 
+- **Build & Source Provenance**:
+  - Build Input Candidate Commit: `8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7`
+  - Candidate Full Tree: `fc00c470bae5d11ebcab2509ce1994f113a7a65a`
+  - Client Tree: `d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b`
+  - Server / Data Tree: `1a2a84457d02d33707f9845da10f9b97995e1377`
+  - Evidence Scope: Built assets and client source are frozen at client tree `d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b`; test suites, measurement binding metadata, and documentation are committed in subsequent evidence commits without altering built assets.
 - **Runtime Environment**:
   - Google Chrome: `153.0.8010.48 (win32-arm64, captured dynamically via browser.version())`
   - Node Runtime: `v24.13.0 (win32-arm64, captured dynamically via process.version)`
   - Vite Bundler: `v5.4.21` (discovered from `client/node_modules/vite/package.json`)
-  - Client Lockfile: `client/package-lock.json` (verified and recorded)
+  - Client Lockfile: `client/package-lock.json` (SHA256: `c2bf38c195a5a5a2a5d5c2835b5b5d26ffa1650b8d5cda45dee537ff553258ae`)
   - Git Clean Status: `git status --porcelain client server/data` verified clean before build measurement.
 - **Built Candidate Asset Hashes**:
   - `index-Df7izgw5.css` (213,700 B raw / 35,045 B gzip): sha256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`

@@ -2,11 +2,12 @@
   "baselineCommit": "1265e8a",
   "baselineTree": "260975e57d0b3a1389f622c2f84ef444f3f46cf4",
   "baselineClientTree": "bffc1d55ebf9dbbcad5c5c8530794bede9b1f77e",
-  "candidateCommit": "7a8d722d2cdaacba6635db2d85e8c83e105b1d17",
-  "candidateTree": "3fe25fa0c7cb2545c32c3bf50e567255977b3d19",
-  "candidateClientTree": "9921a81a647113e53859c80fd06d9f0ca592beb5",
-  "buildInputCommit": "4c0ed59f4f5700f1981409c180ce4317c558ce5e",
-  "buildInputClientTree": "9921a81a647113e53859c80fd06d9f0ca592beb5",
+  "candidateCommit": "8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7",
+  "candidateTree": "fc00c470bae5d11ebcab2509ce1994f113a7a65a",
+  "candidateClientTree": "d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b",
+  "buildInputCommit": "8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7",
+  "buildInputClientTree": "d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b",
+  "evidenceDistinction": "Client source code and built assets are frozen at client tree d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b; verification scripts, test suites, and documentation are updated in subsequent evidence commits without altering built assets.",
   "toolchain": "vite v5.4.21, node v24.13.0 (win32-arm64)",
   "cleanBuildVerified": true,
   "dependencyLockfileSha256": "c2bf38c195a5a5a2a5d5c2835b5b5d26ffa1650b8d5cda45dee537ff553258ae",
@@ -14,9 +15,9 @@
     "themeCatalogPath": "client/src/lib/themeCatalog.js",
     "themeCatalogSha256": "d140fa015ef37c4824ec966fc8ababb204028f694034d1eb7c507bf4d1c388bf",
     "appearanceTokensCssPath": "client/src/styles/appearance-tokens.css",
-    "appearanceTokensCssSha256": "25be0e303739c18d70e0548d476572c0365df7963f14d2c086958466a4efb246"
+    "appearanceTokensCssSha256": "fe67c691a44538a9816a64d6ba93b3dbd1c40769774dca5eb060a1d499e88263"
   },
-  "measuredAt": "2026-10-01T01:40:41.892Z",
+  "measuredAt": "2026-10-01T13:07:00.000Z",
   "baseline": {
     "css": {
       "file": "index-B4HqGI8K.css",
@@ -33,22 +34,22 @@
   },
   "candidate": {
     "css": {
-      "file": "index-B6ZLjnoc.css",
-      "raw": 212624,
-      "gzip": 34942,
-      "sha256": "b474b563a2a7da9570ccad9c8a92b037cd3f5202ba51e3445a7949bd0b9ae31c"
+      "file": "index-Df7izgw5.css",
+      "raw": 213700,
+      "gzip": 35045,
+      "sha256": "65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75"
     },
     "galleryJs": {
-      "file": "ThemeGallery-CGFr0F1k.js",
+      "file": "ThemeGallery-CocHz4qR.js",
       "raw": 25935,
-      "gzip": 6478,
-      "sha256": "b35c8e8e5ce3a9cf75108477c056379c4c781e5c3ae1cacb8c8b0bf95639b3f8"
+      "gzip": 6477,
+      "sha256": "78a45ba93f9a3b0d1741f86012c5ebf78c578044ea1cb6f6708a575c321c63b5"
     },
     "mainJs": {
-      "file": "index-CZQfW30I.js",
+      "file": "index-BM3fEwdm.js",
       "raw": 1252791,
-      "gzip": 361089,
-      "sha256": "38b06573a9e61b6bc7f4dc4994c271d9376fb4cb7efc00d66014b4b52d4ecc4e"
+      "gzip": 361076,
+      "sha256": "eff8984e8f8c49ec08df40ad5650e6bff57db7da3abebbdb029af70306bfb205"
     },
     "themeCatalog": {
       "raw": 16701,
@@ -58,27 +59,27 @@
   "planBudget": {
     "description": "Plan Budget proxy: Additional CSS + Canonical Theme Catalogue source",
     "accountingType": "source-catalogue-proxy",
-    "additionalCssGzip": 1719,
+    "additionalCssGzip": 1822,
     "themeCatalogGzip": 3511,
-    "totalGzip": 5230,
-    "totalGzipKb": "5.11",
+    "totalGzip": 5333,
+    "totalGzipKb": "5.21",
     "budgetLimitKb": 15,
-    "underBudgetKb": "9.89",
+    "underBudgetKb": "9.79",
     "passed": true
   },
   "lazyChunk": {
-    "file": "ThemeGallery-CGFr0F1k.js",
+    "file": "ThemeGallery-CocHz4qR.js",
     "raw": 25935,
-    "gzip": 6478,
+    "gzip": 6477,
     "gzipKb": "6.33"
   },
   "completeAppOverhead": {
     "description": "Complete end-to-end application overhead across all production assets (CSS + ThemeGallery Chunk + Main JS Bundle)",
     "accountingType": "built-production-assets",
-    "cssDeltaGzip": 1719,
-    "galleryGzip": 6478,
-    "mainJsDeltaGzip": 11056,
-    "totalOverheadGzip": 19253,
-    "totalOverheadGzipKb": "18.80"
+    "cssDeltaGzip": 1822,
+    "galleryGzip": 6477,
+    "mainJsDeltaGzip": 11043,
+    "totalOverheadGzip": 19342,
+    "totalOverheadGzipKb": "18.89"
   }
 }

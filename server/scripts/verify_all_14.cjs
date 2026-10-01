@@ -837,5 +837,169 @@ test('PASS final print gate strictly rejects failed transition verifications', (
     return { singleFailedSpectralTransitionRejected: true, singleFailedLabelTransitionRejected: true, missingDimensionsRejected: true };
 });
 
+// 47. Workflow transition and operational gate strictly reject missing dependency nodes or lost afterExit topology
+test('PASS workflow transition and operational gate strictly reject missing dependency nodes or lost afterExit topology', () => {
+    function transition(name) {
+        const m = src.match(new RegExp('const ' + name + ' = await page\\.evaluate\\(\\(\\{ theme, mode \\}\\) => \\{([\\s\\S]*?)\\n            \\},'));
+        assert(m, name);
+        return new Function('document', 'window', 'theme', 'mode', m[1]);
+    }
+    const nodes = ['reception', 'prep', 'wet-chem', 'review', 'closure'];
+    const edges = [['reception', 'prep'], ['prep', 'wet-chem'], ['wet-chem', 'review'], ['review', 'closure']];
+    function baseDoc(q) {
+        return { documentElement: { getAttribute: k => k === 'data-theme' ? 'terra' : 'dark' }, querySelector: s => s.includes('role=') ? {} : q(s) };
+    }
+    function graphDoc(es = edges, depIds = ['wi-01', 'wi-02']) {
+        const ns = nodes.map(id => ({ id, getAttribute: k => k === 'data-node-id' ? id : null }));
+        const ps = es.map(([a, b]) => ({ id: a + '-' + b, getAttribute: () => null }));
+        const ds = depIds.map(id => ({ getAttribute: k => k === 'data-dependency-id' ? id : null }));
+        const container = { querySelectorAll: s => s.includes('dependency') ? ds : s.includes('path') ? ps : ns };
+        return baseDoc(() => container);
+    }
+
+    const good = transition('wvt')(graphDoc(), {}, 'terra', 'dark');
+    assert.equal(good.transitionSucceeded, true);
+    assert.deepEqual(good.dependencyNodes, ['wi-01', 'wi-02']);
+
+    const missingDeps = transition('wvt')(graphDoc(edges, []), {}, 'terra', 'dark');
+    assert.equal(missingDeps.transitionSucceeded, false);
+    assert.deepEqual(missingDeps.dependencyNodes, []);
+
+    const mBadDeps = copy(op.workflowState);
+    mBadDeps.variantTransitions = mBadDeps.variantTransitions.map(v => ({ ...v, dependencyNodes: [] }));
+    assert.equal(gate(undefined, undefined, mBadDeps), false);
+
+    const mLostTopology = copy(op.workflowState);
+    mLostTopology.afterExit = { appliedTheme: 'forest', appliedMode: 'light', noticeVisible: false, graphPreserved: false, nodeIds: [], observedEdges: [], dependencyNodes: [] };
+    assert.equal(gate(undefined, undefined, mLostTopology), false);
+
+    return { missingDependenciesRejected: true, lostAfterExitTopologyRejected: true, verified: true };
+});
+
+// 48. Upload transition and operational gate strictly read file content, parse intake fields, and reject changed CSV content or missing uploadDetails
+test('PASS upload transition and operational gate strictly read file content, parse intake fields, and reject changed CSV content or missing uploadDetails', () => {
+    function transition(name) {
+        const m = src.match(new RegExp('const ' + name + ' = await page\\.evaluate\\(\\(\\{ theme, mode \\}\\) => \\{([\\s\\S]*?)\\n            \\},'));
+        assert(m, name);
+        return new Function('document', 'window', 'theme', 'mode', m[1]);
+    }
+    function baseDoc(q) {
+        return { documentElement: { getAttribute: k => k === 'data-theme' ? 'terra' : 'dark' }, querySelector: s => s.includes('role=') ? {} : q(s) };
+    }
+
+    let reads = 0;
+    const changed = Buffer.from('sampleId,pH,matrix\nSMP-TEST-999,9.9,Topsoil\n');
+    const fChanged = { name: 'test_sample_import.csv', size: 44, type: 'text/csv', text: async () => { reads++; return changed.toString(); } };
+    const uvtBad = transition('uvt')(baseDoc(() => ({ files: [fChanged] })), {}, 'terra', 'dark');
+    assert.equal(reads, 1);
+    assert.equal(uvtBad.transitionSucceeded, false);
+    assert.equal(uvtBad.parsedSampleId, 'SMP-TEST-999');
+    assert.equal(uvtBad.parsedInputValue, 9.9);
+
+    let readsGood = 0;
+    const actual = Buffer.from('sampleId,pH,matrix\nSMP-TEST-001,6.5,Topsoil\n');
+    const fGood = { name: 'test_sample_import.csv', size: 44, type: 'text/csv', text: async () => { readsGood++; return actual.toString(); } };
+    const uvtGood = transition('uvt')(baseDoc(() => ({ files: [fGood] })), {}, 'terra', 'dark');
+    assert.equal(readsGood, 1);
+    assert.equal(uvtGood.transitionSucceeded, true);
+    assert.equal(uvtGood.parsedSampleId, 'SMP-TEST-001');
+
+    assert.equal(gate(undefined, undefined, undefined, true, null), false);
+    assert.equal(gate(undefined, undefined, undefined, true, {}), false);
+
+    const badU = copy(op.uploadDetails);
+    badU.afterExit.hasFile = false;
+    assert.equal(gate(undefined, undefined, undefined, true, badU), false);
+
+    return { fileContentReadEnforced: true, changedContentRejected: true, dynamicParsingVerified: true, strictUploadDetailsGate: true };
+});
+
+// 49. Certificate preview transition and print gate strictly reject missing report/accession headers and contradictory duplicate rows
+test('PASS certificate preview transition and print gate strictly reject missing report/accession headers and contradictory duplicate rows', () => {
+    function transition(name) {
+        const m = src.match(new RegExp('const ' + name + ' = await page\\.evaluate\\(\\(\\{ theme, mode \\}\\) => \\{([\\s\\S]*?)\\n            \\},'));
+        assert(m, name);
+        return new Function('document', 'window', 'theme', 'mode', m[1]);
+    }
+    function baseDoc(q) {
+        return { documentElement: { getAttribute: k => k === 'data-theme' ? 'terra' : 'dark' }, querySelector: s => s.includes('role=') ? {} : q(s) };
+    }
+    function certificate(text = valid, color = 'rgb(30, 58, 95)') {
+        const paper = { innerText: text, querySelector: () => null };
+        return transition('cvt')(baseDoc(() => paper), { location: { pathname: '/report/CERT-2026-SOIL-01' }, getComputedStyle: () => ({ backgroundColor: 'rgb(255, 255, 255)', color }) }, 'terra', 'dark');
+    }
+
+    const good = certificate();
+    assert.equal(good.transitionSucceeded, true);
+    assert.equal(good.reportIdValid, true);
+
+    const noHeaders = valid.split('\n').slice(2).join('\n') + '\nUnrelated footer reference SOIL-GH-2026-001';
+    const missing = certificate(noHeaders);
+    assert.equal(missing.transitionSucceeded, false);
+    assert.equal(missing.reportIdValid, false);
+    assert.equal(missing.samplePreserved, false);
+
+    const duplicate = certificate(valid + '\nTotal Nitrogen\tKjeldahl\t99\t%');
+    assert.equal(duplicate.transitionSucceeded, false);
+    assert.equal(duplicate.scientificValuesPreserved, false);
+
+    const p = paper(valid);
+    p.variantTransitions = p.variantTransitions.map(v => ({ ...duplicate, variant: v.variant, requestedTheme: v.requestedTheme, requestedMode: v.requestedMode, appliedTheme: v.requestedTheme, appliedMode: v.requestedMode }));
+    assert.equal(printGate(p, validSpectral, validLabel), false);
+
+    return { missingReportIdHeaderRejected: true, missingAccessionHeaderRejected: true, contradictoryDuplicateRowRejected: true, printGateEnforced: true };
+});
+
+// 50. Certificate preview transition strictly enforces WCAG 2.1 relative luminance contrast ratio (>= 4.5:1) and rejects near-white text
+test('PASS certificate preview transition strictly enforces WCAG 2.1 relative luminance contrast ratio (>= 4.5:1) and rejects near-white text', () => {
+    function transition(name) {
+        const m = src.match(new RegExp('const ' + name + ' = await page\\.evaluate\\(\\(\\{ theme, mode \\}\\) => \\{([\\s\\S]*?)\\n            \\},'));
+        assert(m, name);
+        return new Function('document', 'window', 'theme', 'mode', m[1]);
+    }
+    function baseDoc(q) {
+        return { documentElement: { getAttribute: k => k === 'data-theme' ? 'terra' : 'dark' }, querySelector: s => s.includes('role=') ? {} : q(s) };
+    }
+    function certificate(text = valid, color = 'rgb(30, 58, 95)') {
+        const paper = { innerText: text, querySelector: () => null };
+        return transition('cvt')(baseDoc(() => paper), { location: { pathname: '/report/CERT-2026-SOIL-01' }, getComputedStyle: () => ({ backgroundColor: 'rgb(255, 255, 255)', color }) }, 'terra', 'dark');
+    }
+
+    const nearWhite = certificate(valid, 'rgb(254, 254, 254)');
+    assert.equal(nearWhite.transitionSucceeded, false);
+    assert.equal(nearWhite.textContrastValid, false);
+    assert(nearWhite.contrastRatio < 4.5);
+
+    const navy = certificate(valid, 'rgb(30, 58, 95)');
+    assert.equal(navy.transitionSucceeded, true);
+    assert.equal(navy.textContrastValid, true);
+    assert(navy.contrastRatio >= 4.5);
+
+    return { nearWhiteRejected: true, contrastRatioNearWhite: nearWhite.contrastRatio, contrastRatioNavy: navy.contrastRatio, wcagEnforced: true };
+});
+
+// 51. Asset hashes, clean build binding, and honest boundary labels verified
+test('PASS asset hashes, clean build binding, and honest boundary labels verified', () => {
+    const budgetPath = path.join(root, 'server/scripts/theme_bundle_budget_measurement.json');
+    assert(fs.existsSync(budgetPath));
+    const budget = JSON.parse(fs.readFileSync(budgetPath, 'utf8'));
+
+    assert.equal(budget.buildInputClientTree, 'd30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b');
+    assert.equal(budget.candidateClientTree, 'd30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b');
+    assert.equal(budget.candidate.css.file, 'index-Df7izgw5.css');
+    assert.equal(budget.candidate.css.sha256, '65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75');
+    assert.equal(budget.candidate.galleryJs.file, 'ThemeGallery-CocHz4qR.js');
+    assert.equal(budget.candidate.galleryJs.sha256, '78a45ba93f9a3b0d1741f86012c5ebf78c578044ea1cb6f6708a575c321c63b5');
+    assert.equal(budget.candidate.mainJs.file, 'index-BM3fEwdm.js');
+    assert.equal(budget.candidate.mainJs.sha256, 'eff8984e8f8c49ec08df40ad5650e6bff57db7da3abebbdb029af70306bfb205');
+    assert.equal(budget.cleanBuildVerified, true);
+    assert.equal(budget.planBudget.passed, true);
+
+    assert(src.includes('WCAG 2.1 Reflow 1.4.10 320 CSS px width equivalent to 400% zoom at 1280px'));
+    assert(src.includes('High-DPI DPR 2.0 (deviceScaleFactor: 2) and 400% root text enlargement at 1280px evaluated separately from native browser optical zoom'));
+
+    return { clientTreeBound: budget.buildInputClientTree, freshAssetsBound: true, honestBoundariesVerified: true };
+});
+
 console.log(JSON.stringify({ allCasesPassed: true, casesCompleted: cases.length }));
 

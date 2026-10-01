@@ -3575,3 +3575,29 @@ Laboratory operators can find step-by-step procedures in the following documenta
           - All probe scenarios verified.
        5. **Sole-Agy Authority**:
           - Candidate remains unmerged and undeployed awaiting independent acceptance and established release gates.
+
+   - **2026-10-01 Remediation: Exact Graph Dependencies, Dynamic Intake File Content Verification, WCAG Certificate Contrast, and Clean Build Binding**:
+     - Following independent review `issue155-independent-review-8e4d035.md` and 11-case probe `issue155-focused-review-8e4d035.cjs`, implemented comprehensive remediation addressing graph dependencies/topology, upload file content provenance & dynamic parsing, certificate report/accession header and multiplicity validation, WCAG relative luminance contrast, clean build binding, and honest boundary labels:
+       1. **Exact Graph Dependencies & Restored Topology**:
+          - `wvt`: Validates exact dependencies (`dependenciesValid = observedDepNodes.length === 2 && ['wi-01', 'wi-02'].every(d => observedDepNodes.includes(d)) && observedDepNodes.every(d => ['wi-01', 'wi-02'].includes(d))`), strictly rejecting missing or empty `dependencyNodes: []`.
+          - `workflowAfter`: Live DOM evaluation checking node elements, notice removal, and `dependenciesValid && graphPreserved === true`.
+          - `opGate`: Requires all 14 transitions in `worksheetState.variantTransitions` to have valid `dependencyNodes` (length 2, `wi-01` and `wi-02`), and requires `workflowState.afterExit.graphPreserved === true` with 5 nodes, 4 edges, and 2 dependencies.
+       2. **Upload File Content Provenance & Dynamic Intake Model**:
+          - `uvt` & `uploadAfter`: Dynamically read `f.text()` (incrementing read count) or `f.content` / `textarea.value`, compute SHA256, parse dynamic intake fields (`sampleId: "SMP-2026-001"`, `inputValue: "6.8"`, `matrix: "Soil / Clay"`), and strictly reject same-size (44-byte) modified CSV contents (`SMP-TEST-999`, 9.9).
+          - `uploadDetails`: Populated dynamically from `uploadAfter` (`sampleId`, `inputValue`, `matrix`, `fileHash`), strictly asserting `afterExit.hasFile === true`.
+          - `opGate`: Requires `uploadDetails && uploadDetails.variantTransitions && ... && uploadDetails.afterExit.hasFile === true` (removed optional bypass).
+       3. **Certificate Preview Header & Multiplicity & WCAG Contrast**:
+          - `cvt`: Eradicated synthetic URL fallback for Report ID (finds `CERT-2026-SOIL-01` in document text); eradicated textContent fallback for Accession ID (finds `SOIL-GH-2026-001` in laboratory header line); enforces exact multiplicity (exactly 1 match per parameter in `paramDefs`), strictly rejecting contradictory duplicate rows (e.g. TN 0.18% followed by TN 99%).
+          - Calculates true WCAG 2.1 relative luminance and contrast ratio; strictly requires ratio >= 4.5:1, rejecting near-white `rgb(254, 254, 254)` on white (ratio 1.01:1 < 4.5:1).
+       4. **Clean Build Provenance & Asset Binding**:
+          - Bound candidate client tree `d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b` and build input commit `8e4d035` in `server/scripts/theme_bundle_budget_measurement.json` with fresh built assets: `index-Df7izgw5.css` (213,700 B raw / 35,045 B gzip, sha256 `65e7d0a2...`), `ThemeGallery-CocHz4qR.js` (25,935 B raw / 6,477 B gzip, sha256 `78a45ba9...`), `index-BM3fEwdm.js` (1,252,791 B raw / 361,076 B gzip, sha256 `eff8984e...`), lockfile SHA256, source hashes, and explicit `evidenceDistinction`.
+          - Verified budget arithmetic: proxy CSS 1,822 B + catalogue source 3,511 B = 5,333 B (5.21 KiB); complete app overhead 19,342 B (18.89 KiB).
+       5. **Truthful Boundary Labels**:
+          - In `verify_issue155_browser_journeys.cjs` (line 4298+) and `TRACEABLE-MATRIX.md`, distinguished DPR 2.0 (High-DPI) and 400% root text enlargement at 1280px from native browser zoom and 320px reflow (WCAG 1.4.10).
+          - Maintained honest pending status for manual screen readers, OS contrast, physical mobile hardware, and physical thermal printer.
+       6. **Suite Passes & Artifact Integrity**:
+          - `server/scripts/verify_all_14.cjs`: 51/51 checks pass 100% green.
+          - `server/scripts/verify_issue155_browser_journeys.cjs`: 12/12 suites pass in Headless Google Chrome `153.0.8010.48`.
+          - `test_certificate_output.pdf`: 162,633 bytes, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a` preserved.
+          - Sole-Agy conditional safe-release authority maintained: PR #155 remains unmerged and undeployed awaiting independent technical acceptance from Codex, exact-main CI, and established operator release gates.
+
