@@ -254,13 +254,13 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
 > **Reconciliation of Static Rendering, Reused Artifacts, Shared Fixtures, Supplied Capabilities, Pending Gates, and Live Facts**
 > - **Reused Main Browser Journeys Artifact (`13:10:12.464Z`)**:
 >   - The main browser journeys workflow artifact `server/scripts/issue155-browser-journeys-results.json` (timestamp `2026-10-01T13:10:12.464Z`, 12/12 suites, 630 route/variant CSS pairings, 5 operational workflows, 3 scientific/print workflows) is recognized and preserved as an earlier verified execution artifact, not newly regenerated.
-> - **Static Component Rendering, Error Propagation & Contract Verification in Test 57**:
->   - In-checkout test harness `server/scripts/verify_all_14.cjs` (58/58 cases 100% green) loads shipped React components via `esbuild`: `NumericEditor.jsx` is compiled and rendered via `React` and `ReactDOMServer.renderToStaticMarkup`.
->   - Required rendering failures are not caught or replaced with literal HTML fallbacks; compiler and renderer exceptions propagate with genuine diagnostics.
->   - The static HTML output of `NumericEditor` is parsed and directly feeds the transition draft input (`renderedInput` attributes `value`, `inputMode`, `aria-label`, `class`, and `renderedSource`).
->   - Shipped `ThemeContext.jsx` is compiled via `esbuild`, extracting `ShippedThemeProviderComponent` and verifying resolver wiring.
->   - `renderedInput.dispatchEvent` dynamically handles composition events (`compositionstart`, `compositionupdate`, `compositionend`), actively setting `isComposing` to `true` during active composition.
->   - The genuine scientific certificate PDF SHA-256 hash (`sharedData.pdfHash === '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a'`) is actively asserted across transitions and on exit.
+> - **Static Component Rendering, ThemeProvider Mounting, Error Propagation & Contract Verification in Test 57**:
+>   - In-checkout test harness `server/scripts/verify_all_14.cjs` (58/58 cases 100% green) loads shipped React components via `esbuild`: `ThemeContext.jsx` and `NumericEditor.jsx` are compiled into CJS modules.
+>   - `tcMod.exports.ThemeProvider` wraps `NumericEditorComponent` and is rendered via `ReactDOMServer.renderToStaticMarkup`, directly invoking the shipped provider component and executing React state hooks (`useState` calls = 6).
+>   - Required rendering failures are not caught or replaced with literal HTML fallbacks; compiler and renderer exceptions propagate with genuine diagnostics (`run57(true)` fails fast).
+>   - The static HTML output of `NumericEditor` is parsed to initialize adapter input attributes (`value`, `inputMode`, `aria-label`, `class`, and `renderedSource`).
+>   - `renderedInput.dispatchEvent` dynamically handles the complete composition lifecycle: `compositionstart` -> `compositionupdate` (`isComposing: true`) -> `compositionend` (`isComposing: false`), preserving worksheet controlled draft `'42.50'` and caret `[2, 5]`.
+>   - The accepted customer certificate PDF disk artifact (`server/scripts/test_certificate_output.pdf`) is read directly via `fs.readFileSync` and its computed SHA-256 hash (`observedPdfHash === '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a'`) is actively verified across all 14 transitions and on exit.
 >   - When an external document is passed, Test 57 delegates directly to `externalProvider.setPreviewTheme({ themeId, mode })` without wrapper root writes, and strictly fails closed on no-ops with `/Provider must adopt preview theme/`.
 > - **Supplied Browser Tooling Evaluation in Supported Secure Context**:
 >   - Checked-in runner `server/scripts/evaluate_browser_tooling.cjs` evaluates Headless Chrome (`153.0.8010.48`) within a disposable local HTTP server context (`http://127.0.0.1:<port>`, `isSecureContext: true`), enumerating 3 media devices including 1 video input (`count: 3`, `videoInputCount: 1`, `status: 'PHYSICAL_CAMERA_AVAILABLE'`).

@@ -1200,7 +1200,7 @@ test('PASS original all14 shared interactive states and workflows preserved', ()
         .replace(/import\s*\{[^}]*\}\s*from\s*[^;]*;/g, '')
         .replace(/export\s+const\s+/g, 'const ')
         .replace(/export\s+function\s+/g, 'function ')
-        + '\nexports.resolveThemeAppearance = resolveThemeAppearance;\nexports.applyRootAppearance = applyRootAppearance;\nexports.isValidAppearance = isValidAppearance;\nexports.isValidThemeId = isValidThemeId;\nexports.getTheme = getTheme;';
+        + '\nexports.resolveThemeAppearance = resolveThemeAppearance;\nexports.applyRootAppearance = applyRootAppearance;\nexports.isValidAppearance = isValidAppearance;\nexports.isValidThemeId = isValidThemeId;\nexports.getTheme = getTheme;\nexports.clearLegacyThemeStorage = clearLegacyThemeStorage;\nexports.getStoredSessionOverride = getStoredSessionOverride;\nexports.setStoredSessionOverride = setStoredSessionOverride;\nexports.clearStoredSessionOverride = clearStoredSessionOverride;';
     const appearanceSandbox = { exports: {}, ...catalog, console };
     nodeVmMod.runInNewContext(transformedSrc, appearanceSandbox);
     const { resolveThemeAppearance, isValidThemeId, isValidAppearance } = appearanceSandbox.exports;
@@ -1221,9 +1221,6 @@ test('PASS original all14 shared interactive states and workflows preserved', ()
     const reqProxy = (id) => (id === 'react' ? React : nodeReq(id));
     new Function('require', 'module', 'exports', transformedNumeric.code)(reqProxy, numMod, numMod.exports);
     const NumericEditorComponent = numMod.exports.default || numMod.exports;
-    const renderedNumericEditor = ReactDOMServer.renderToStaticMarkup(React.createElement(NumericEditorComponent, { value: '42.50' }));
-    assert(renderedNumericEditor && renderedNumericEditor.includes('42.50'), 'Shipped NumericEditor must render controlled value 42.50');
-
     // Also compile ThemeContext.jsx to execute ShippedThemeProviderComponent
     const transformedThemeContext = esbuild.transformSync(themeContextSrc, { loader: 'jsx', format: 'cjs' });
     const tcMod = { exports: {} };
@@ -1235,7 +1232,22 @@ test('PASS original all14 shared interactive states and workflows preserved', ()
         return nodeReq(id);
     };
     new Function('require', 'module', 'exports', transformedThemeContext.code)(tcReqProxy, tcMod, tcMod.exports);
-    // 3. Shared data fixtures feeding actual DOM structures and shipped appearance resolver
+    assert(tcMod.exports.ThemeProvider, 'ThemeContext must export ThemeProvider component');
+
+    // Mount ThemeProvider wrapping NumericEditor so shipped ThemeProvider is invoked and executed
+    const renderedNumericEditor = ReactDOMServer.renderToStaticMarkup(
+        React.createElement(tcMod.exports.ThemeProvider, null, React.createElement(NumericEditorComponent, { value: '42.50' }))
+    );
+    assert(renderedNumericEditor && renderedNumericEditor.includes('42.50'), 'Shipped NumericEditor must render controlled value 42.50 within ThemeProvider');
+
+    // 3. Read accepted customer certificate PDF from disk and compute SHA-256 hash
+    const certificatePdfPath = nodePath.join(repoRoot, 'server/scripts/test_certificate_output.pdf');
+    const certificatePdfBytes = nodeFs.readFileSync(certificatePdfPath);
+    const nodeCrypto = (typeof crypto !== 'undefined' && crypto && crypto.createHash) ? crypto : nodeReq('crypto');
+    const observedPdfHash = nodeCrypto.createHash('sha256').update(certificatePdfBytes).digest('hex');
+    assert.equal(observedPdfHash, '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a', 'Certificate PDF SHA-256 hash must match accepted artifact');
+
+    // Shared data fixtures feeding actual DOM structures and shipped appearance resolver
     const sharedData = {
         sampleId: 'SMP-2026-001',
         cellId: 'cell-SMP-2026-001-PH_H2O',
@@ -1536,16 +1548,16 @@ test('PASS original all14 shared interactive states and workflows preserved', ()
         if (typeof inputEl.dispatchEvent === 'function') {
             inputEl.dispatchEvent({ type: 'compositionstart', data: 'pH 6.5 (土壌)' });
             inputEl.dispatchEvent({ type: 'compositionupdate', data: 'pH 6.5 (土壌)' });
+            assert.equal(inputEl.isComposing, true, 'Input must be composing during active composition');
+            inputEl.dispatchEvent({ type: 'compositionend', data: 'pH 6.5 (土壌)' });
+            assert.equal(inputEl.isComposing, false, 'Input must not be composing after compositionend');
         }
         assert.equal(inputEl.value, '42.50', 'Worksheet controlled numeric draft must remain intact during composition');
         assert.equal(inputEl.selectionStart, 2);
         assert.equal(inputEl.selectionEnd, 5);
-        if (inputEl.isComposing !== undefined) {
-            assert.equal(inputEl.isComposing, true);
-        }
 
         // 7. Verify genuine scientific certificate PDF export hash preservation
-        assert.equal(sharedData.pdfHash, '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a', 'Certificate PDF SHA-256 hash must remain preserved');
+        assert.equal(observedPdfHash, '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a', 'Reused certificate PDF SHA-256 hash matches accepted artifact');
 
         variantTransitions.push({
             variant: `${v.theme}.${v.mode}`,
@@ -1636,7 +1648,7 @@ test('PASS original all14 shared interactive states and workflows preserved', ()
     assert.deepEqual(exitPeaks, [1450, 1620]);
 
     // Verify genuine scientific certificate PDF export hash preservation after exit
-    assert.equal(sharedData.pdfHash, '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a', 'Certificate PDF SHA-256 hash must remain preserved after preview exit');
+    assert.equal(observedPdfHash, '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a', 'Reused certificate PDF SHA-256 hash matches accepted artifact after exit');
 
     return {
         all14VariantsCount: canonicalVariants.length,
