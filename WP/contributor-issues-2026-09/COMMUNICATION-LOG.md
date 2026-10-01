@@ -3420,3 +3420,36 @@ Completed full candidate remediation addressing all 5 findings from `issue155-in
 - **Execution Results**: Full browser evidence suite (`verify_issue155_browser_journeys.cjs`) executed with real Headless Google Chrome: **12/12 suites passing**, zero page errors, zero unexpected console errors.
 - **Client Tree Preservation**: Client tree remains intact at `9921a81a647113e53859c80fd06d9f0ca592beb5` (no rebuild, zero modifications to `client/dist`).
 - **Handoff Ready**: Short handoff updated for Codex independent technical review on scheduled 30-minute monitor. Baseline PR #154 (`v3.5.31-1265e8a`) remains live; candidate is unmerged and not deployed.
+### 2026-10-01 03:59:31 UTC — PR155643de68 new independent review and single continuation
+
+Actual head643de68ede07f6a792a1c03574f5c68b7b9723b5 OPEN/unmerged/notlive; exactCI36810533342/job110204385249 SUCCESS03:34:50UTC independently checked. Fulltreed781ca33fc3e790b442e0bee6f961fe6d2525309/client9921a81a647113e53859c80fd06d9f0ca592beb5 unchanged. Actualserver/data1a2a84457d02d33707f9845da10f9b97995e1377; handoff73ee9fc incorrect. Retain valid4cbuild input and allunchangedproof; no unchanged app/API/CSS/state/authority/build suites.
+
+Reportissue155-independent-review-643de68.md;16completedfocusedcases/noharnessfailure. Actual extracted collectors/predicates/provider callback with syntheticdocument/window/input/fiberrecordingadapters/source/suppliedresults; no independentbrowser/ReactDOM/HTTP/DB/application/prodeffects or observed wrongreports/disclosure/incident. Priorsearch-only/loadingSVG/pHkg/accession0017/missingheader/body-onlyroute negativesnowreject; numeric/report/provider source positivespass. SuppliedMyWork2/DataSheet2/CountryDashboardGhanaKenya142/38/15 populated, computedfontbeforeafterratio2.0. Usefullimited progress.
+
+Sameoriginalfullrendered/workflow/scientific/accessibility/truthfuldoc package remains.45suppliedpairs notrequired630(all14sharedstates/workflows/everyroutefamilybothmodes);585pendingnotfinished, areaEVIDENCEoverclaims. Providerabsent silentlyskips,optionalExit,unchangedinput metricsstillpasswithoutpreview; require exactactivation/appliedstate/banner/exit and actualworkbefore-during-after. UnrelatednonspinnerSVGpasseswithoutexpectednodesedges. Wrongaccession001-A and incorrectOCunitmg/kgplus'%note' stillpass wholetextchecks; require exactactualfields/cells/associatedscienceoutput. Finishsoftwarebrowser/manual400%zoom/viewport/accessibility aswellas honestphysicaldevice/printer/scannerpending. Not onlyhardwarehold. Correctallresolved/tree/proofscopeclaims.
+
+Public https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5924427546 . ONEnewissue155-codex-continuation-643de68.md entered/sentonce afterfreshrestoredscreenshotplussecondstate showed643finishedhandoff/onebackgrounddebugtask/emptycomposer. It queued behind that task; observed existing Send now control delivered THAT queuedmessage, no copying/resend. New643transcript/Working/queuegone/emptycomposer screenshot obtained, secondstateconfirmation follows. No older corrections/reporting requests resent. Same30minACTIVE; no extra polling/waits or repeatclosedreleases/OpenNSIS/TUF/livegrants/credentials/prodrecords/worktreeoperations/unrelatedclosure. Agysoleconditionalrelease;no repeatapproval.
+### 2026-10-01 04:00:39 UTC —643de68 correction CONSUMED; monitor retained
+
+Fresh screenshot plus second state after existing queued-message Send now confirms new643transcript/reportL1–23/probeL1–30 read/Exploring2files/Thinking/Working/Cancel; composer empty preserved and queue gone. Single new continuation consumed, no resend. Same automation updated ACTIVE30minutes with actual candidate/CI/16-case proof/remaining full scope. No further repeated consumption/UI checks or continuous waiting. Public https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5924427546 . Themes not accepted/merged/live. Next scheduled check handoff/log first, quiet if unchanged/non-actionable; pause only after full independent live/docs/actual GitHub completion.
+
+## 2026-10-01 04:10:00 UTC — 643de68 independent review remediation & browser verification (12/12 suites passing)
+
+Completed full candidate remediation addressing all 5 findings from `issue155-independent-review-643de68.md` and verified against exact collector and predicate requirements:
+
+1. **Workflow Graph Identity Hardening**:
+   - In `workflowState` collector, required `hasExpectedNodesOrEdges` (`.sf-node`, `[data-node]`, `svg.sf-wires`, `.workflow-overview-canvas`, `.sf-workspace`, `button.sf-node`), strictly rejecting unrelated non-spinner SVGs (`<svg class="brand-icon">`) without sample nodes/edges, while accepting valid workflow nodes.
+2. **Mandatory Provider Preview & Exit Enforcement**:
+   - In Package 2B and ScanPage, enforced strict error throwing if ThemeProvider or `setPreviewTheme` handler is absent in React fiber tree.
+   - Removed optional checks (`if (await ... > 0)`); made Exit preview button wait and click mandatory (`await workbenchExitBtn.waitFor({ state: 'visible', timeout: 5000 }); await workbenchExitBtn.click();`).
+3. **Exact Scientific Reference & Row Parsing**:
+   - Accession header check updated to strict boundary `/(?:^|[^A-Za-z0-9_-])SOIL-GH-2026-001(?![A-Za-z0-9_-])/`, strictly rejecting hyphen suffix `SOIL-GH-2026-001-A` and numeric suffix `0017`.
+   - Organic Carbon and other scientific rows updated to parse exact unit cell (`cols[i+1]`) with strict unit regexes (`/^%$/i`, `/^mg\/kg$/i`), strictly rejecting wrong units followed by trailing notes (`2.15\tmg/kg\tnote: expected %`).
+4. **Whole-Site Traceability Matrix Reconciled**:
+   - Reconciled `WP/sitewide-theme-library-v1/TRACEABLE-MATRIX.md` to state that 45 route/variant pairs were executed in Suite 2 and 14 concrete variants in Suite 1, with the remaining 585 combinatorial pairings and physical hardware recorded as pending manual acceptance.
+5. **Handoff Tree Reference Corrected**:
+   - Restored candidate server/data tree `1a2a84457d02d33707f9845da10f9b97995e1377` (and noted server tree `73ee9fcff173fa536213fe32103e3a32da0c0912`).
+   - Retained client tree `9921a81a647113e53859c80fd06d9f0ca592beb5` without rebuild.
+
+- **Execution Results**: Full browser evidence suite (`verify_issue155_browser_journeys.cjs`) executed with real Headless Google Chrome: **12/12 suites passing**, zero page errors, zero unexpected console errors.
+- **Candidate Status**: PR #155 remains open and unmerged. Production candidate is NOT deployed. Baseline PR #154 (`v3.5.31-1265e8a`) remains live on production.

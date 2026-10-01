@@ -766,7 +766,9 @@ async function runBrowserEvidence() {
         // Execute real theme switch to terra via ThemeContext provider handler
         await page.evaluate(({ theme, mode }) => {
             const rootEl = document.getElementById('root');
+            if (!rootEl) throw new Error('Root element #root not found');
             const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+            if (!fiberKey) throw new Error('React fiber root not found on #root');
             const stack = [rootEl[fiberKey]];
             let ctx = null;
             while (stack.length > 0) {
@@ -779,16 +781,18 @@ async function runBrowserEvidence() {
                 if (curr.child) stack.push(curr.child);
                 if (curr.sibling) stack.push(curr.sibling);
             }
-            if (ctx) ctx.setPreviewTheme({ themeId: theme, mode });
+            if (!ctx || typeof ctx.setPreviewTheme !== 'function') {
+                throw new Error('ThemeProvider preview handler setPreviewTheme not found in React tree');
+            }
+            ctx.setPreviewTheme({ themeId: theme, mode });
         }, { theme: 'terra', mode: 'light' });
         await page.waitForTimeout(200);
 
         // Click real Exit Preview button in the preview notice banner to revert to default theme
         const workbenchExitBtn = page.locator('button:has-text("Exit preview")');
-        if (await workbenchExitBtn.count() > 0) {
-            await workbenchExitBtn.click();
-            await page.waitForTimeout(200);
-        }
+        await workbenchExitBtn.waitFor({ state: 'visible', timeout: 5000 });
+        await workbenchExitBtn.click();
+        await page.waitForTimeout(200);
 
         const worksheetState = await page.evaluate(() => {
             const container = document.querySelector('[data-tour="workbench-container"]');
@@ -868,7 +872,9 @@ async function runBrowserEvidence() {
         // Switch theme via real provider preview and click exit preview
         await page.evaluate(({ theme, mode }) => {
             const rootEl = document.getElementById('root');
+            if (!rootEl) throw new Error('Root element #root not found');
             const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+            if (!fiberKey) throw new Error('React fiber root not found on #root');
             const stack = [rootEl[fiberKey]];
             let ctx = null;
             while (stack.length > 0) {
@@ -881,15 +887,17 @@ async function runBrowserEvidence() {
                 if (curr.child) stack.push(curr.child);
                 if (curr.sibling) stack.push(curr.sibling);
             }
-            if (ctx) ctx.setPreviewTheme({ themeId: theme, mode });
+            if (!ctx || typeof ctx.setPreviewTheme !== 'function') {
+                throw new Error('ThemeProvider preview handler setPreviewTheme not found in React tree');
+            }
+            ctx.setPreviewTheme({ themeId: theme, mode });
         }, { theme: 'mineral', mode: 'light' });
         await page.waitForTimeout(100);
 
         const scanExitBtn = page.locator('button:has-text("Exit preview")');
-        if (await scanExitBtn.count() > 0) {
-            await scanExitBtn.click();
-            await page.waitForTimeout(100);
-        }
+        await scanExitBtn.waitFor({ state: 'visible', timeout: 5000 });
+        await scanExitBtn.click();
+        await page.waitForTimeout(100);
 
         const scanState = await page.evaluate(() => {
             const container = document.querySelector('main, [role="main"]');
@@ -903,24 +911,45 @@ async function runBrowserEvidence() {
         // 3. Sample Workflow Map: visual DAG and stage progression container
         await page.goto(`${origin}/workflow-map?sampleId=SMP-2026-001`, { waitUntil: 'domcontentloaded' });
         await page.waitForSelector('#soilfer-workflow-redesign, [data-tour="workflow-map-container"]', { timeout: 3000 }).catch(() => null);
+        await page.waitForSelector('.sf-node, [data-node], svg.sf-wires, .workflow-overview-canvas', { timeout: 4000 }).catch(() => null);
         await page.waitForTimeout(300);
         const workflowState = await page.evaluate(() => {
             const container = document.querySelector('#soilfer-workflow-redesign, [data-tour="workflow-map-container"]');
             const graphEl = container && typeof container.querySelector === 'function'
-                ? container.querySelector('.sf-workspace, .workflow-overview-canvas, svg.sf-wires, [data-node], .sf-node, svg, canvas')
+                ? container.querySelector('.sf-node, [data-node], svg.sf-wires, .workflow-overview-canvas, .sf-workspace')
                 : null;
             const isSpinner = Boolean(
                 graphEl && (
                     graphEl.identity === 'loading-icon' ||
                     (typeof graphEl.getAttribute === 'function' && graphEl.getAttribute('data-loading') === 'true') ||
-                    (graphEl.classList && graphEl.classList.contains && graphEl.classList.contains('animate-spin')) ||
+                    (graphEl.classList && typeof graphEl.classList.contains === 'function' && graphEl.classList.contains('animate-spin')) ||
                     (typeof graphEl.className === 'string' && graphEl.className.includes('spin'))
+                )
+            );
+            const hasExpectedNodesOrEdges = Boolean(
+                graphEl && !isSpinner && (
+                    (typeof graphEl.getAttribute === 'function' && (
+                        graphEl.getAttribute('data-node') != null ||
+                        graphEl.getAttribute('data-node-id') != null ||
+                        (graphEl.getAttribute('data-testid') && /node|edge|wire|dag/i.test(graphEl.getAttribute('data-testid')))
+                    )) ||
+                    (typeof graphEl.className === 'string' && (
+                        graphEl.className.includes('sf-node') ||
+                        graphEl.className.includes('sf-wires') ||
+                        graphEl.className.includes('workflow-overview-canvas')
+                    )) ||
+                    (graphEl.classList && typeof graphEl.classList.contains === 'function' && (
+                        graphEl.classList.contains('sf-node') ||
+                        graphEl.classList.contains('sf-wires') ||
+                        graphEl.classList.contains('workflow-overview-canvas')
+                    )) ||
+                    (typeof graphEl.querySelector === 'function' && graphEl.querySelector('.sf-node, [data-node], svg.sf-wires, .workflow-overview-canvas, button.sf-node'))
                 )
             );
             const isRealWorkflow = Boolean(
                 container &&
                 (container.id === 'soilfer-workflow-redesign' || (typeof container.getAttribute === 'function' && container.getAttribute('data-tour') === 'workflow-map-container')) &&
-                graphEl && !isSpinner
+                hasExpectedNodesOrEdges
             );
             return {
                 mounted: Boolean(container && isRealWorkflow),
@@ -1487,7 +1516,7 @@ async function runBrowserEvidence() {
             const labIdHeader = lines.find(l => /laboratory\s*id|sample\s*id|specimen\s*id|accession/i.test(l));
             let sampleIdPreserved = false;
             if (labIdHeader) {
-                const hasExactId = /\bSOIL-GH-2026-001\b/.test(labIdHeader);
+                const hasExactId = /(?:^|[^A-Za-z0-9_-])SOIL-GH-2026-001(?![A-Za-z0-9_-])/.test(labIdHeader);
                 const hasSentinel = labIdHeader.includes('999') || textContent.includes('WRONG-SPECIMEN');
                 sampleIdPreserved = Boolean(hasExactId && !hasSentinel);
             } else {
@@ -1497,10 +1526,10 @@ async function runBrowserEvidence() {
             // Complete row-associated scientific parameter & value validation
             const paramDefs = [
                 { name: 'pH', pattern: /^pH\b/i, unitPattern: /\bpH\s*units\b/i, expected: 6.5 },
-                { name: 'OC', pattern: /(?:Organic\s*Carbon|\bOC\b)/i, unitPattern: /%/i, expected: 2.15 },
-                { name: 'TN', pattern: /(?:Total\s*Nitrogen|\bTN\b)/i, unitPattern: /%/i, expected: 0.18 },
-                { name: 'P', pattern: /(?:Available\s*P|Bray-?1\s*P|BrayP)/i, unitPattern: /mg\/kg/i, expected: 15.4 },
-                { name: 'K', pattern: /(?:Exchangeable\s*K|\bK\b)/i, unitPattern: /cmol(?:\(\+\))?\/kg/i, expected: 0.45 }
+                { name: 'OC', pattern: /(?:Organic\s*Carbon|\bOC\b)/i, unitPattern: /^%$/i, expected: 2.15 },
+                { name: 'TN', pattern: /(?:Total\s*Nitrogen|\bTN\b)/i, unitPattern: /^%$/i, expected: 0.18 },
+                { name: 'P', pattern: /(?:Available\s*P|Bray-?1\s*P|BrayP)/i, unitPattern: /^mg\/kg$/i, expected: 15.4 },
+                { name: 'K', pattern: /(?:Exchangeable\s*K|\bK\b)/i, unitPattern: /^cmol(?:\(\+\))?\/kg$/i, expected: 0.45 }
             ];
 
             let scientificValuesPreserved = true;
@@ -1519,8 +1548,8 @@ async function runBrowserEvidence() {
                         const num = parseFloat(cols[i]);
                         if (!isNaN(num) && cols[i].match(/^\d+(\.\d+)?$/)) {
                             val = num;
-                            const remaining = cols.slice(i + 1).join(' ');
-                            unitPassed = def.unitPattern.test(remaining);
+                            const unitCell = cols[i + 1] ? cols[i + 1].trim() : '';
+                            unitPassed = def.unitPattern.test(unitCell);
                             break;
                         }
                     }
@@ -1529,8 +1558,9 @@ async function runBrowserEvidence() {
                     const m = line.match(new RegExp(def.pattern.source + '[:\\s\\t|-]+(\\d+(?:\\.\\d+)?)', 'i'));
                     if (m) {
                         val = parseFloat(m[1]);
-                        const after = line.slice(line.indexOf(m[1]) + m[1].length);
-                        unitPassed = def.unitPattern.test(after);
+                        const after = line.slice(line.indexOf(m[1]) + m[1].length).trim();
+                        const unitWord = after.split(/\s+/)[0] || '';
+                        unitPassed = def.unitPattern.test(unitWord) || def.unitPattern.test(after.slice(0, 15));
                     }
                 }
                 if (!unitPassed || val === null || Math.abs(val - def.expected) >= 0.005) {
