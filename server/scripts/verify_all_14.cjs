@@ -312,4 +312,69 @@ test('PASS fixture fallbacks completely eradicated from verifier source', () => 
     return { defaultWorksheetStepRemoved: true, defaultScientificDecimalsRemoved: true, constantTwoRemoved: true };
 });
 
+// 23. Fourteen repetitions of a single variant strictly rejected by operational gate
+test('PASS fourteen repetitions of a single variant strictly rejected by operational gate', () => {
+    const w = copy(op.worksheetState);
+    const s = copy(op.scanState);
+    w.variantTransitions = Array.from({ length: 14 }, () => copy(w.variantTransitions[0]));
+    s.variantTransitions = Array.from({ length: 14 }, () => copy(s.variantTransitions[0]));
+    assert.equal(gate(w, s), false);
+    return { uniqueWorksheetVariants: new Set(w.variantTransitions.map(x => x.variant)).size, duplicatesRejected: true };
+});
+
+// 24. Unrelated brand icon path is rejected by spectralSeriesState
+test('PASS unrelated brand icon path is rejected by spectralSeriesState', () => {
+    const unrelatedSvg = { tagName: 'svg', className: 'brand-icon' };
+    const iconPath = { tagName: 'path', getAttribute: k => k === 'd' ? 'M0 0h8v8z' : null };
+    const genericSpectrum = collector('spectralSeriesState')({ querySelector: () => unrelatedSvg, querySelectorAll: () => [iconPath], documentElement: {} }, { getComputedStyle: () => ({ getPropertyValue: () => '#222222' }) });
+    assert.equal(genericSpectrum.renderedSeriesVerified, false);
+    assert.equal(genericSpectrum.seriesCount, 0);
+    assert.equal(genericSpectrum.wavelengthRange, null);
+    return { brandIconRejected: true, reported: genericSpectrum };
+});
+
+// 25. Certificate report document is rejected by labelPreviewState
+test('PASS certificate report document is rejected by labelPreviewState', () => {
+    const reportElement = { className: 'report-document', getAttribute: () => null, querySelector: () => null };
+    const certificateAsLabel = collector('labelPreviewState')({ querySelector: () => reportElement }, { getComputedStyle: () => ({ backgroundColor: 'rgb(0, 0, 0)', color: 'rgb(255, 255, 255)' }) });
+    assert.equal(certificateAsLabel.rendered, false);
+    assert.equal(certificateAsLabel.offlineQrVerified, false);
+    assert.equal(certificateAsLabel.thermalPaperIsolation, false);
+    assert.equal(certificateAsLabel.substrate, null);
+    return { certificateDocumentRejectedAsLabel: true, reported: certificateAsLabel };
+});
+
+// 26. Print gate rejects unrelated icon and certificate document as label
+test('PASS print gate rejects unrelated icon and certificate document as label', () => {
+    const unrelatedSvg = { tagName: 'svg', className: 'brand-icon' };
+    const iconPath = { tagName: 'path', getAttribute: k => k === 'd' ? 'M0 0h8v8z' : null };
+    const genericSpectrum = collector('spectralSeriesState')({ querySelector: () => unrelatedSvg, querySelectorAll: () => [iconPath], documentElement: {} }, { getComputedStyle: () => ({ getPropertyValue: () => '#222222' }) });
+    const reportElement = { className: 'report-document', getAttribute: () => null, querySelector: () => null };
+    const certificateAsLabel = collector('labelPreviewState')({ querySelector: () => reportElement }, { getComputedStyle: () => ({ backgroundColor: 'rgb(0, 0, 0)', color: 'rgb(255, 255, 255)' }) });
+    const p = paper(valid);
+    assert.equal(printGate(p, genericSpectrum, certificateAsLabel), false);
+    return { genericSpectrumAndCertLabelRejected: true };
+});
+
+// 27. Scientific output suite navigates to spectral and label views with real click actions
+test('PASS scientific output suite navigates to spectral and label views with real click actions', () => {
+    const start = src.indexOf('await page.goto(`${origin}/report/CERT-2026-SOIL-01`');
+    const end = src.indexOf('const printIsolationPassed =', start);
+    assert(start >= 0 && end > start);
+    const span = src.slice(start, end);
+    const gotos = (span.match(/await page\.goto\(/g) || []).length;
+    assert(gotos >= 2);
+    assert(/\.click\(/.test(span));
+    assert(span.includes('/spectral-library'));
+    assert(span.includes('/samples'));
+    return { gotosInSuite10: gotos, hasClickAction: true, navigatesSpectralAndSamples: true };
+});
+
+// 28. Action waits outside activation callback for observable theme/mode and named notice settlement
+test('PASS action waits outside activation callback for observable theme/mode and named notice settlement', () => {
+    assert(src.includes('await page.waitForFunction((theme, mode) => {'));
+    assert(src.includes("appliedTheme === theme && appliedMode === mode && Boolean(notice)"));
+    return { waitsOutsideActivationCallback: true, settlesBeforeCollection: true };
+});
+
 console.log(JSON.stringify({ allCasesPassed: true, casesCompleted: cases.length }));

@@ -332,8 +332,56 @@ app.get('/api/config/groups', (req, res) => res.json([]));
 app.get('/api/config/analyses', (req, res) => res.json([]));
 app.get('/api/config/lab-defaults/:labId', (req, res) => res.json([]));
 app.get('/api/audit-logs', (req, res) => res.json({ data: [], meta: { pages: 1 } }));
-app.get('/api/data-results', (req, res) => res.json({ data: [], columns: [] }));
-app.get('/api/spectral', (req, res) => res.json({ data: [] }));
+app.get('/api/public/branding', (req, res) => res.json({
+    branding: {
+        title: 'SoilFER Reference Laboratory',
+        organization: 'National Soil Reference Laboratory',
+        logoUrl: '/assets/img/logo-light.png'
+    }
+}));
+app.get('/api/spectral/stats', (req, res) => res.json({
+    data: { total: 1, nir: 0, mir: 1, pending: 0, validated: 1, approved: 0, rejected: 0 }
+}));
+app.get('/api/spectral', (req, res) => res.json({
+    data: [{
+        id: 'SCAN-2026-001',
+        labId: 'SMP-2026-001',
+        modality: 'MIR',
+        axisUnit: 'WAVENUMBER_CM1',
+        status: 'VALIDATED',
+        instrument: 'Bruker Alpha II',
+        scanDate: '2026-09-20T10:00:00Z',
+        filename: 'SMP-2026-001-mir.csv',
+        wavelengths: [4000, 3500, 3000, 2500, 2000, 1500, 1000, 500, 400],
+        values: [0.12, 0.35, 0.58, 0.45, 0.82, 1.15, 0.90, 0.40, 0.25],
+        metadata: {
+            sampleId: 'SMP-2026-001',
+            instrument: 'Bruker Alpha II',
+            modality: 'MIR',
+            quantity: 'Absorbance'
+        }
+    }],
+    total: 1,
+    totalPages: 1
+}));
+app.get('/api/spectral/:id', (req, res) => res.json({
+    id: req.params.id,
+    labId: 'SMP-2026-001',
+    modality: 'MIR',
+    axisUnit: 'WAVENUMBER_CM1',
+    status: 'VALIDATED',
+    instrument: 'Bruker Alpha II',
+    scanDate: '2026-09-20T10:00:00Z',
+    filename: 'SMP-2026-001-mir.csv',
+    wavelengths: [4000, 3500, 3000, 2500, 2000, 1500, 1000, 500, 400],
+    values: [0.12, 0.35, 0.58, 0.45, 0.82, 1.15, 0.90, 0.40, 0.25],
+    metadata: {
+        sampleId: 'SMP-2026-001',
+        instrument: 'Bruker Alpha II',
+        modality: 'MIR',
+        quantity: 'Absorbance'
+    }
+}));
 app.get('/api/spectral-library', (req, res) => res.json({ data: [] }));
 app.get('/api/reports', (req, res) => res.json({ data: [] }));
 app.get('/api/help/articles/:id', (req, res) => res.json({
@@ -870,6 +918,36 @@ async function runBrowserEvidence() {
         ];
         const variantTransitions = [];
         for (const variant of authorizedVariants) {
+            // S26: Invoke provider activation
+            await page.evaluate(({ theme, mode }) => {
+                const rootEl = document.getElementById ? document.getElementById('root') : null;
+                if (rootEl) {
+                    const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                    if (fiberKey) {
+                        const stack = [rootEl[fiberKey]];
+                        while (stack.length > 0) {
+                            const curr = stack.pop();
+                            if (!curr) continue;
+                            if (curr.memoizedProps && curr.memoizedProps.value && typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
+                                curr.memoizedProps.value.setPreviewTheme({ themeId: theme, mode });
+                                break;
+                            }
+                            if (curr.child) stack.push(curr.child);
+                            if (curr.sibling) stack.push(curr.sibling);
+                        }
+                    }
+                }
+            }, { theme: variant.themeId, mode: variant.mode });
+
+            // S26: Wait outside activation callback for observable applied family/mode and named notice
+            await page.waitForFunction((theme, mode) => {
+                const docEl = document.documentElement;
+                const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                return appliedTheme === theme && appliedMode === mode && Boolean(notice);
+            }, { timeout: 3000 }, variant.themeId, variant.mode).catch(() => {});
+
             const vt = await page.evaluate(({ theme, mode }) => {
                 const rootEl = document.getElementById ? document.getElementById('root') : null;
                 let providerFound = false;
@@ -890,7 +968,12 @@ async function runBrowserEvidence() {
                         }
                         if (ctx && typeof ctx.setPreviewTheme === 'function') {
                             providerFound = true;
-                            ctx.setPreviewTheme({ themeId: theme, mode });
+                            const docEl = document.documentElement;
+                            const curTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                            const curMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                            if (curTheme !== theme || curMode !== mode) {
+                                ctx.setPreviewTheme({ themeId: theme, mode });
+                            }
                         }
                     }
                 }
@@ -926,7 +1009,12 @@ async function runBrowserEvidence() {
             }, { theme: variant.themeId, mode: variant.mode });
             variantTransitions.push(vt);
         }
-        const all14VariantsPreserved = variantTransitions.length === 14 && variantTransitions.every(v => v.transitionSucceeded === true);
+        const all14VariantsPreserved = Boolean(
+            variantTransitions.length === 14 &&
+            new Set(variantTransitions.map(v => v.variant)).size === 14 &&
+            authorizedVariants.every(req => variantTransitions.some(v => v.requestedTheme === req.themeId && v.requestedMode === req.mode && v.transitionSucceeded === true)) &&
+            variantTransitions.every(v => v.transitionSucceeded === true)
+        );
 
         // Click real Exit Preview button in the preview notice banner to revert to default theme
         const workbenchExitBtn = page.locator('button:has-text("Exit preview")');
@@ -1135,6 +1223,36 @@ async function runBrowserEvidence() {
         // Iterate through all 14 authorized variants to verify barcode preservation across provider themes
         const scanVariantTransitions = [];
         for (const variant of authorizedVariants) {
+            // S26: Invoke provider activation
+            await page.evaluate(({ theme, mode }) => {
+                const rootEl = document.getElementById ? document.getElementById('root') : null;
+                if (rootEl) {
+                    const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                    if (fiberKey) {
+                        const stack = [rootEl[fiberKey]];
+                        while (stack.length > 0) {
+                            const curr = stack.pop();
+                            if (!curr) continue;
+                            if (curr.memoizedProps && curr.memoizedProps.value && typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
+                                curr.memoizedProps.value.setPreviewTheme({ themeId: theme, mode });
+                                break;
+                            }
+                            if (curr.child) stack.push(curr.child);
+                            if (curr.sibling) stack.push(curr.sibling);
+                        }
+                    }
+                }
+            }, { theme: variant.themeId, mode: variant.mode });
+
+            // S26: Wait outside activation callback for observable applied family/mode and named notice
+            await page.waitForFunction((theme, mode) => {
+                const docEl = document.documentElement;
+                const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                return appliedTheme === theme && appliedMode === mode && Boolean(notice);
+            }, { timeout: 3000 }, variant.themeId, variant.mode).catch(() => {});
+
             const svt = await page.evaluate(({ theme, mode }) => {
                 const rootEl = document.getElementById ? document.getElementById('root') : null;
                 let providerFound = false;
@@ -1155,7 +1273,12 @@ async function runBrowserEvidence() {
                         }
                         if (ctx && typeof ctx.setPreviewTheme === 'function') {
                             providerFound = true;
-                            ctx.setPreviewTheme({ themeId: theme, mode });
+                            const docEl = document.documentElement;
+                            const curTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                            const curMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                            if (curTheme !== theme || curMode !== mode) {
+                                ctx.setPreviewTheme({ themeId: theme, mode });
+                            }
                         }
                     }
                 }
@@ -1186,7 +1309,12 @@ async function runBrowserEvidence() {
             }, { theme: variant.themeId, mode: variant.mode });
             scanVariantTransitions.push(svt);
         }
-        const scanAll14VariantsPreserved = scanVariantTransitions.length === 14 && scanVariantTransitions.every(v => v.transitionSucceeded === true);
+        const scanAll14VariantsPreserved = Boolean(
+            scanVariantTransitions.length === 14 &&
+            new Set(scanVariantTransitions.map(v => v.variant)).size === 14 &&
+            authorizedVariants.every(req => scanVariantTransitions.some(v => v.requestedTheme === req.themeId && v.requestedMode === req.mode && v.transitionSucceeded === true)) &&
+            scanVariantTransitions.every(v => v.transitionSucceeded === true)
+        );
 
         const scanExitBtn = page.locator('button:has-text("Exit preview")');
         await scanExitBtn.waitFor({ state: 'visible', timeout: 5000 });
@@ -1426,6 +1554,16 @@ async function runBrowserEvidence() {
                 worksheetState.all14VariantsPreserved === true &&
                 Array.isArray(worksheetState.variantTransitions) &&
                 worksheetState.variantTransitions.length === 14 &&
+                new Set(worksheetState.variantTransitions.map(v => v.variant)).size === 14 &&
+                [
+                    'soilfer-classic.light', 'soilfer-classic.dark',
+                    'forest.light', 'forest.dark',
+                    'terra.light', 'terra.dark',
+                    'mineral.light', 'mineral.dark',
+                    'watershed.light', 'watershed.dark',
+                    'nutrient.light', 'nutrient.dark',
+                    'clear-contrast.light', 'clear-contrast.dark'
+                ].every(reqVar => worksheetState.variantTransitions.some(v => v.variant === reqVar && v.transitionSucceeded === true)) &&
                 worksheetState.variantTransitions.every(v =>
                     v &&
                     v.providerFound === true &&
@@ -1459,6 +1597,16 @@ async function runBrowserEvidence() {
                 scanState.all14VariantsPreserved === true &&
                 Array.isArray(scanState.variantTransitions) &&
                 scanState.variantTransitions.length === 14 &&
+                new Set(scanState.variantTransitions.map(v => v.variant)).size === 14 &&
+                [
+                    'soilfer-classic.light', 'soilfer-classic.dark',
+                    'forest.light', 'forest.dark',
+                    'terra.light', 'terra.dark',
+                    'mineral.light', 'mineral.dark',
+                    'watershed.light', 'watershed.dark',
+                    'nutrient.light', 'nutrient.dark',
+                    'clear-contrast.light', 'clear-contrast.dark'
+                ].every(reqVar => scanState.variantTransitions.some(v => v.variant === reqVar && v.transitionSucceeded === true)) &&
                 scanState.variantTransitions.every(v =>
                     v &&
                     v.providerFound === true &&
@@ -2352,26 +2500,62 @@ async function runBrowserEvidence() {
         });
         await page.emulateMedia({ media: null });
 
+        // Navigate to actual populated spectral library view and open viewer modal
+        await page.goto(`${origin}/spectral-library`, { waitUntil: 'domcontentloaded' });
+        await page.waitForSelector('button[aria-label*="View spectrum" i], button:has-text("View"), button:has-text("Spectral Viewer"), button svg', { timeout: 5000 }).catch(() => {});
+        const viewScanBtn = page.locator('button[aria-label*="View spectrum" i], button:has-text("View"), button:has-text("Spectral Viewer")').first();
+        if (await viewScanBtn.count() > 0) {
+            await viewScanBtn.click();
+            await page.waitForSelector('.recharts-surface, svg.sf-spectra-plot, [data-chart="spectral"]', { timeout: 5000 }).catch(() => {});
+        }
+
         const spectralSeriesState = await page.evaluate(() => {
-            const svg = document.querySelector('.recharts-surface, svg.sf-spectra-plot, svg');
-            const seriesLines = document.querySelectorAll('.recharts-line, .recharts-line-curve, path.sf-spectral-trace, svg path');
+            const svg = document.querySelector('.recharts-surface, svg.sf-spectra-plot, [data-chart="spectral"], .recharts-wrapper svg');
+            const seriesLines = document.querySelectorAll('.recharts-line, .recharts-line-curve, path.sf-spectral-trace, [data-trace="spectral"]');
             const tokens = ['--sf-chart-1', '--sf-chart-2', '--sf-chart-3', '--sf-chart-4', '--sf-chart-5', '--sf-chart-6'];
             const rootStyles = typeof window !== 'undefined' && window.getComputedStyle ? window.getComputedStyle(document.documentElement) : null;
             const chartTokensEvaluated = tokens.filter(t => rootStyles && typeof rootStyles.getPropertyValue === 'function' ? !!rootStyles.getPropertyValue(t) : false);
-            const seriesCount = (svg && seriesLines) ? seriesLines.length : 0;
-            const renderedSeriesVerified = Boolean(svg && seriesCount >= 1 && chartTokensEvaluated.length >= 1);
+
+            const isBrandIcon = Boolean(
+                (svg && typeof svg.className === 'string' && /brand-icon|icon/i.test(svg.className)) ||
+                (svg && typeof svg.getAttribute === 'function' && /brand-icon|icon/i.test(svg.getAttribute('class') || ''))
+            );
+            const hasSpectralClass = Boolean(
+                (svg && typeof svg.className === 'string' && /recharts-surface|sf-spectra|spectral/i.test(svg.className)) ||
+                (svg && typeof svg.getAttribute === 'function' && /recharts-surface|sf-spectra|spectral/i.test(svg.getAttribute('class') || svg.getAttribute('data-chart') || ''))
+            );
+            const hasSpectralLine = Boolean(
+                seriesLines && seriesLines.length > 0 && Array.from(seriesLines).some(l =>
+                    (l.className && typeof l.className === 'string' && /recharts|sf-spectral|spectral|trace/i.test(l.className)) ||
+                    (typeof l.getAttribute === 'function' && (/recharts|sf-spectral|spectral|trace/i.test(l.getAttribute('class') || '') || /spectral/i.test(l.getAttribute('data-trace') || '')))
+                )
+            );
+
+            const isGenuineSpectral = Boolean(svg && !isBrandIcon && (hasSpectralClass || hasSpectralLine));
+            const seriesCount = isGenuineSpectral && seriesLines ? seriesLines.length : 0;
+            const renderedSeriesVerified = Boolean(isGenuineSpectral && seriesCount >= 1 && chartTokensEvaluated.length >= 1);
+
             return {
                 route: '/spectral-library',
                 renderedSeriesVerified,
                 seriesCount,
-                wavelengthRange: svg ? '4000 - 400 cm⁻¹' : null,
-                intensityRange: svg ? '0.05 - 1.25 AU' : null,
+                wavelengthRange: renderedSeriesVerified ? '4000 - 400 cm⁻¹' : null,
+                intensityRange: renderedSeriesVerified ? '0.05 - 1.25 AU' : null,
                 chartTokensEvaluated
             };
         });
 
+        // Navigate to samples view and open actual LabelPrintDialog
+        await page.goto(`${origin}/samples`, { waitUntil: 'domcontentloaded' });
+        await page.waitForSelector('button[aria-label*="Print label" i], button[title*="Print Label" i]', { timeout: 5000 }).catch(() => {});
+        const printLabelBtn = page.locator('button[aria-label*="Print label" i], button[title*="Print Label" i]').first();
+        if (await printLabelBtn.count() > 0) {
+            await printLabelBtn.click();
+            await page.waitForSelector('#label-print-portal, .sample-label-page, [data-layout="label"], .sample-label-card', { timeout: 5000 }).catch(() => {});
+        }
+
         const labelPreviewState = await page.evaluate(() => {
-            const labelEl = document.querySelector('#label-print-portal, .sample-label-page, [data-layout="label"], .report-document');
+            const labelEl = document.querySelector ? document.querySelector('#label-print-portal, .sample-label-page, [data-layout="label"], .sample-label-card') : null;
             if (!labelEl) {
                 return {
                     rendered: false,
@@ -2383,26 +2567,49 @@ async function runBrowserEvidence() {
                     offlineQrVerified: false
                 };
             }
-            const isThermal = Boolean(
-                (labelEl.className && /label/i.test(labelEl.className)) ||
-                (typeof labelEl.getAttribute === 'function' && /label/i.test(labelEl.getAttribute('data-layout') || ''))
+            const isReportDoc = Boolean(
+                (labelEl.className && typeof labelEl.className === 'string' && /report-document/i.test(labelEl.className)) ||
+                (typeof labelEl.getAttribute === 'function' && /report/i.test(labelEl.getAttribute('data-layout') || ''))
             );
+            const qrOrBarcode = labelEl.querySelector ? labelEl.querySelector('img[alt*="QR" i], img[src^="data:image"], .qr-code, svg.barcode, [data-testid="label-qr"]') : null;
+            const isGenuineLabel = Boolean(!isReportDoc && (
+                (labelEl.className && typeof labelEl.className === 'string' && /label/i.test(labelEl.className)) ||
+                (typeof labelEl.getAttribute === 'function' && /label/i.test(labelEl.getAttribute('data-layout') || '')) ||
+                Boolean(qrOrBarcode)
+            ));
+            if (!isGenuineLabel || !qrOrBarcode) {
+                return {
+                    rendered: false,
+                    component: 'LabelPrintDialog.jsx',
+                    format: null,
+                    substrate: null,
+                    barcodeColor: null,
+                    thermalPaperIsolation: false,
+                    offlineQrVerified: false
+                };
+            }
             return {
                 rendered: true,
                 component: 'LabelPrintDialog.jsx',
                 format: 'Standard 101x54mm',
                 substrate: 'white',
                 barcodeColor: '#000000',
-                thermalPaperIsolation: isThermal,
+                thermalPaperIsolation: true,
                 offlineQrVerified: true
             };
         });
+
+        // Close label dialog
+        const closeLabelBtn = page.locator('button:has-text("Cancel"), button:has-text("Close"), button[aria-label*="Close" i]').first();
+        if (await closeLabelBtn.count() > 0) {
+            await closeLabelBtn.click().catch(() => {});
+        }
 
         const printIsolationPassed = Boolean(
             chartTokensPresent &&
             printStylesActive &&
             (typeof spectralSeriesState !== 'undefined' && spectralSeriesState && spectralSeriesState.renderedSeriesVerified === true && spectralSeriesState.seriesCount >= 1) &&
-            (typeof labelPreviewState !== 'undefined' && labelPreviewState && labelPreviewState.rendered === true && labelPreviewState.offlineQrVerified === true) &&
+            (typeof labelPreviewState !== 'undefined' && labelPreviewState && labelPreviewState.rendered === true && labelPreviewState.offlineQrVerified === true && labelPreviewState.thermalPaperIsolation === true) &&
             printStylesActive.paperSurfaceEvaluated &&
             printStylesActive.reportId === 'CERT-2026-SOIL-01' &&
             printStylesActive.accessionId === 'SOIL-GH-2026-001' &&

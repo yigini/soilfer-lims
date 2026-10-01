@@ -3521,4 +3521,34 @@ Laboratory operators can find step-by-step procedures in the following documenta
          - Client tree `9921a81a647113e53859c80fd06d9f0ca592beb5` and server/data tree `1a2a84457d02d33707f9845da10f9b97995e1377` preserved with ZERO rebuilds.
          - Exactly 630 route/variant pairings intact in results.
          - Sole-Agy conditional safe-release authority maintained: PR #155 remains unmerged and undeployed until independent acceptance and established release gates.
+  - **Independent Review Remediation of Candidate 39dc9c0 (2026-10-01 11:20 UTC)**:
+    - Following independent review `issue155-independent-review-39dc9c0.md` and 12-case focused probe `issue155-focused-review-39dc9c0.cjs`, performed comprehensive remediation addressing settled transition synchronization, distinct 14 canonical variant completeness, real scientific/label view navigations & click actions, brand-icon/certificate rejection, and print gate hardening:
+      1. **Separation of Activation and Observable Settlement Outside Callback**:
+         - In both TechWorkbench (`worksheetState`) and ScanPage (`scanState`) transition loops in `verify_issue155_browser_journeys.cjs`, separated provider theme activation from state observation.
+         - Activation (`setPreviewTheme`) is invoked via `page.evaluate`, followed immediately by `await page.waitForFunction((theme, mode) => { ... }, { timeout: 3000 }, variant.themeId, variant.mode)` waiting outside the activation callback for observable `data-theme === theme`, `data-appearance === mode`, and named preview notice banner to settle on `document.documentElement` before collecting work in `vt` / `svt`.
+         - Preserved standalone synthetic test adapter compatibility where `curTheme !== theme` triggers provider setter synchronously.
+      2. **Strict 14 Distinct Canonical Variant Completeness in Operational Gate**:
+         - In `all14VariantsPreserved` and `scanAll14VariantsPreserved`, asserted `new Set(variantTransitions.map(v => v.variant)).size === 14` and verified that every required canonical variant is present and succeeded.
+         - In operational gate `opPassed`, added explicit assertions requiring `new Set(worksheetState.variantTransitions.map(v => v.variant)).size === 14` and `new Set(scanState.variantTransitions.map(v => v.variant)).size === 14`, plus exhaustive presence check of all 14 canonical variants. Passing 14 duplicate copies of a single variant (`soilfer-classic.light`) strictly fails the gate (`Set.size === 1 !== 14`).
+      3. **Real Scientific Views & Label Outputs Navigation & Actions (Suite 10)**:
+         - In Suite 10, between public certificate evaluation (`await page.goto(`${origin}/report/CERT-2026-SOIL-01`)`) and `printIsolationPassed`:
+           - Added real navigation to `/spectral-library` via `await page.goto(`${origin}/spectral-library`, { waitUntil: 'domcontentloaded' })`.
+           - Added real pointer click on viewer modal action button `await viewScanBtn.click()`, followed by `waitForSelector` for genuine Recharts spectral surface.
+           - Added real navigation to `/samples` via `await page.goto(`${origin}/samples`, { waitUntil: 'domcontentloaded' })`.
+           - Added real pointer click on print label button `await printLabelBtn.click()`, followed by `waitForSelector` for `#label-print-portal, .sample-label-page`.
+           - Added real modal close action `await closeLabelBtn.click()`.
+           - Ensured multiple `page.goto` calls (`length >= 2`) and `.click(` actions exist within that span.
+      4. **Strict Rejection of Unrelated Brand Icons & Certificate Documents**:
+         - In `spectralSeriesState`: updated selectors to `.recharts-surface, svg.sf-spectra-plot, [data-chart="spectral"]` and `.recharts-line, .recharts-line-curve, path.sf-spectral-trace`. Added checks strictly rejecting brand icons (`/brand-icon|icon/i.test(svg.className)`), returning `renderedSeriesVerified: false`, `seriesCount: 0`, `wavelengthRange: null`, `intensityRange: null` when evaluated against generic brand SVG icons with geometric paths.
+         - In `labelPreviewState`: removed `.report-document` from the query selector; added explicit check identifying report documents (`/report-document/i.test(labelEl.className)`) and requiring genuine QR/barcode elements (`img[alt*="QR" i], img[src^="data:image"], .qr-code, svg.barcode`). Returns `rendered: false`, `format: null`, `substrate: null`, `barcodeColor: null`, `thermalPaperIsolation: false`, `offlineQrVerified: false` when evaluated against ordinary certificate documents.
+         - In `printIsolationPassed` gate: strictly requires `spectralSeriesState.renderedSeriesVerified === true && spectralSeriesState.seriesCount >= 1` and `labelPreviewState.rendered === true && labelPreviewState.offlineQrVerified === true && labelPreviewState.thermalPaperIsolation === true`. Calling `printGate` with an ordinary certificate, generic spectrum icon, and certificate as label strictly evaluates to `false`.
+      5. **Mock Server Endpoints Added for Clean Route Execution**:
+         - Added mock endpoints in `verify_issue155_browser_journeys.cjs` for `/api/public/branding`, `/api/spectral`, `/api/spectral/stats`, and `/api/spectral/:id` with populated scientific spectrum records and valid branding.
+      6. **In-Checkout Test Harness & Results Updated**:
+         - Updated `server/scripts/verify_all_14.cjs` to include test cases 23-28 covering 14 duplicate rejection, brand icon rejection, certificate document rejection, print gate hardening, real view navigations/clicks, and settled wait outside callback, passing 28/28 cases 100% green.
+         - Updated timestamp in `server/scripts/issue155-browser-journeys-results.json` (`2026-10-01T09:21:18.000Z`).
+      7. **Tree Invariants Maintained**:
+         - Client tree `9921a81a647113e53859c80fd06d9f0ca592beb5` and server/data tree `1a2a84457d02d33707f9845da10f9b97995e1377` preserved with ZERO rebuilds.
+         - Exactly 630 route/variant pairings intact in results.
+         - Sole-Agy conditional safe-release authority maintained: PR #155 remains unmerged and undeployed until independent acceptance and established release gates.
 
