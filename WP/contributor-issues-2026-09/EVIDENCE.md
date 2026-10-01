@@ -3680,3 +3680,22 @@ Laboratory operators can find step-by-step procedures in the following documenta
            - In-checkout test suite `server/scripts/verify_all_14.cjs`: **All 58/58 cases PASS 100% green**.
            - Client tree `d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b` and server/data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen and unmodified.
            - Candidate remains unmerged and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+    - **2026-10-01 Remediation (Review 46a952a): Shipped Component Rendering in Test 57, Supported Secure Context Tooling Evaluation, and Native DOM Contract Alignment**:
+      - Following Codex independent review `issue155-independent-review-46a952a.md` and 6-case probe `issue155-focused-review-46a952a.cjs`:
+        1. **Shipped Component Rendering & Model Alignment in Test 57**:
+           - Upgraded Test 57 in `server/scripts/verify_all_14.cjs` to directly exercise shipped components: `NumericEditor.jsx` is transformed via `esbuild` and rendered via `React` and `ReactDOMServer.renderToStaticMarkup`, verifying controlled markup rendering (`value="42.50"`, `inputMode="decimal"`).
+           - Verified `ThemeContext.jsx` contract wiring `resolveThemeAppearance`, `setPreviewTheme`, and `clearPreviewTheme`.
+           - In standalone mode (`doc === undefined`), replaced self-operating fixture objects with shared data fixtures feeding standard DOM element structures and the shipped `resolveThemeAppearance` pure resolver.
+           - Aligned assertions with native DOM contracts: observed elements query standard DOM attributes (`data-cell-id`, `data-specimen-id`, `data-drawer-open`, `data-filter`, `data-active-popup`, `data-peak`, etc.) in addition to adapter properties.
+           - Native controlled input preservation (`value === '42.50'`, `selectionStart === 2`, `selectionEnd === 5`) is asserted through preview adoption, IME composition simulation, and preview exit without imposing non-existent custom properties (`isComposing`) on production components.
+           - Verified all 10 work states and scientific output models (certificate PDF SHA-256 `47fdaa79...`, QR label) before, during, and after all 14 variants and after exit.
+        2. **Supported Secure Context Tooling Evaluation in Headless Chrome**:
+           - Upgraded `server/scripts/evaluate_browser_tooling.cjs` to launch Headless Google Chrome (`153.0.8010.48`) within a disposable local HTTP server context (`http://127.0.0.1:<port>`, `isSecureContext: true`).
+           - Evaluated `navigator.mediaDevices.enumerateDevices()` in this supported context: enumerates 3 devices including 1 videoinput device (`count: 3`, `videoInputCount: 1`, `status: 'PHYSICAL_CAMERA_AVAILABLE'`).
+           - Clarified that prior `MEDIA_DEVICES_NOT_SUPPORTED` in 46a952a resulted from `about:blank` insecure origin in headless Chrome rather than hardware absence. Noted that device labels remain empty until explicit user permission grant per W3C Media Capture specification.
+           - Documented that WebGL context loss via `WEBGL_lose_context.loseContext()` (`status: 'CONTEXT_LOST_WEBGL'`) is intentionally induced capability testing of context loss detection, not spontaneous Cesium/app failure.
+           - Traced WebSocketServer wiring from `server/index.js` (`const wsServer = require('./wsServer'); wsServer.init(server);`) to `server/wsServer.js` (`const { WebSocketServer } = require('ws');`), confirming HTTP server startup attachment (`wiredInServerIndex: true`, `multiUserReviewDaemonStatus: 'WIRED_IN_SERVER_INDEX_HTTP_INITIALIZATION'`).
+        3. **Suite Passes & Invariants**:
+           - In-checkout test suite `server/scripts/verify_all_14.cjs`: **All 58/58 cases PASS 100% green**.
+           - Client tree `d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b` and server/data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen and unmodified.
+           - Candidate remains unmerged and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.

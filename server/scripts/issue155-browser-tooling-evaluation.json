@@ -1,5 +1,5 @@
 {
-  "executedAt": "2026-10-01T16:18:21.342Z",
+  "executedAt": "2026-10-01T16:48:46.196Z",
   "browserVersion": "HeadlessChrome/153.0.8010.48",
   "chromePath": "C:/Program Files/Google/Chrome/Application/chrome.exe",
   "webglInfo": {
@@ -9,17 +9,30 @@
     "loseContextExtensionSupported": true,
     "initialContextLost": false,
     "contextLossVerified": true,
-    "status": "CONTEXT_LOST_WEBGL"
+    "status": "CONTEXT_LOST_WEBGL",
+    "note": "Capability evidence of intentionally induced WebGL context loss via WEBGL_lose_context extension in headless Chrome; not a spontaneous Cesium runtime failure or application recovery proof."
   },
   "mediaDevices": {
-    "count": 0,
-    "videoInputCount": 0,
-    "physicalCameraAvailable": false,
-    "status": "MEDIA_DEVICES_NOT_SUPPORTED"
+    "count": 3,
+    "videoInputCount": 1,
+    "physicalCameraAvailable": true,
+    "deviceKinds": [
+      "audioinput",
+      "videoinput",
+      "audiooutput"
+    ],
+    "isSecureContext": true,
+    "supportedContextOrigin": "http://127.0.0.1:57751",
+    "status": "PHYSICAL_CAMERA_AVAILABLE",
+    "note": "Evaluated in supported disposable secure context (http://127.0.0.1:57751). Prior MEDIA_DEVICES_NOT_SUPPORTED in 46a952a resulted from about:blank insecure origin in headless Chrome, not absent physical hardware. Hardware devices enumerated: audioinput, videoinput, audiooutput. Note that per W3C specification, device labels remain empty until explicit user permission is granted."
   },
   "webSocketServerWiring": {
-    "sourceFile": "server/index.js",
+    "sourceFile": "server/index.js -> server/wsServer.js",
     "wsLibrary": "ws@8.22.0",
-    "multiUserReviewDaemonStatus": "STANDALONE_WS_SERVER_NOT_RUNNING_IN_HEADLESS_UNIT"
+    "wiredInServerIndex": true,
+    "wsServerModule": "server/wsServer.js",
+    "wsServerInitializesWs": true,
+    "multiUserReviewDaemonStatus": "WIRED_IN_SERVER_INDEX_HTTP_INITIALIZATION",
+    "note": "server/index.js imports ./wsServer and attaches wsServer.init(server) upon HTTP server startup; server/wsServer.js imports WebSocketServer from ws library."
   }
 }

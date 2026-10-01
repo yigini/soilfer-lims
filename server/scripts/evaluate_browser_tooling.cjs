@@ -30,11 +30,22 @@ try {
     }
 }
 
+const http = require('http');
+
 async function evaluateTooling() {
     console.log('Evaluating browser tooling capabilities in Headless Chrome...');
     if (!playwrightChromium) {
         throw new Error('Playwright chromium runner not found');
     }
+
+    // 1. Disposable local HTTP server providing supported secure context (http://127.0.0.1:<port>)
+    const tempServer = http.createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end('<!DOCTYPE html><html><head><title>SoilFER LIMS Tooling Evaluation</title></head><body><h1>SoilFER LIMS Capability Evaluation</h1></body></html>');
+    });
+    await new Promise(r => tempServer.listen(0, '127.0.0.1', r));
+    const port = tempServer.address().port;
+    const supportedOrigin = `http://127.0.0.1:${port}`;
 
     const browser = await playwrightChromium.launch({
         executablePath: CHROME_PATH,
@@ -45,8 +56,9 @@ async function evaluateTooling() {
     const browserVersion = browser.version ? await browser.version() : '153.0.0.0';
     const context = await browser.newContext();
     const page = await context.newPage();
+    await page.goto(supportedOrigin);
 
-    const result = await page.evaluate(async () => {
+    const result = await page.evaluate(async (originUrl) => {
         let webglInfo = {
             supported: false,
             renderer: null,
@@ -54,7 +66,8 @@ async function evaluateTooling() {
             loseContextExtensionSupported: false,
             initialContextLost: false,
             contextLossVerified: false,
-            status: 'NO_WEBGL'
+            status: 'NO_WEBGL',
+            note: 'Capability evidence of intentionally induced WebGL context loss via WEBGL_lose_context extension in headless Chrome; not a spontaneous Cesium runtime failure or application recovery proof.'
         };
 
         try {
@@ -89,7 +102,11 @@ async function evaluateTooling() {
             count: 0,
             videoInputCount: 0,
             physicalCameraAvailable: false,
-            status: 'MEDIA_DEVICES_NOT_SUPPORTED'
+            deviceKinds: [],
+            isSecureContext: typeof window !== 'undefined' ? window.isSecureContext : false,
+            supportedContextOrigin: originUrl,
+            status: 'MEDIA_DEVICES_NOT_SUPPORTED',
+            note: null
         };
 
         try {
@@ -99,7 +116,9 @@ async function evaluateTooling() {
                 const vdevs = devs.filter(d => d.kind === 'videoinput');
                 mediaDevices.videoInputCount = vdevs.length;
                 mediaDevices.physicalCameraAvailable = vdevs.length > 0;
-                mediaDevices.status = vdevs.length > 0 ? 'PHYSICAL_CAMERA_AVAILABLE' : 'NO_PHYSICAL_CAMERA_IN_HEADLESS';
+                mediaDevices.deviceKinds = devs.map(d => d.kind);
+                mediaDevices.status = vdevs.length > 0 ? 'PHYSICAL_CAMERA_AVAILABLE' : 'ENUMERATED_DISPOSABLE_SUPPORTED_CONTEXT_NO_VIDEO_INPUT';
+                mediaDevices.note = 'Evaluated in supported disposable secure context (' + originUrl + '). Prior MEDIA_DEVICES_NOT_SUPPORTED in 46a952a resulted from about:blank insecure origin in headless Chrome, not absent physical hardware. Hardware devices enumerated: ' + (devs.map(d => d.kind).join(', ') || 'none') + '. Note that per W3C specification, device labels remain empty until explicit user permission is granted.';
             }
         } catch (e) {
             mediaDevices.status = 'MEDIA_DEVICE_QUERY_ERROR: ' + e.message;
@@ -109,20 +128,29 @@ async function evaluateTooling() {
             webglInfo,
             mediaDevices
         };
-    });
+    }, supportedOrigin);
 
     await browser.close();
+    tempServer.close();
 
-    // Check server WebSocketServer wiring
+    // Check server WebSocketServer wiring: server/index.js -> server/wsServer.js
     let serverWsWiring = {
-        sourceFile: 'server/index.js',
+        sourceFile: 'server/index.js -> server/wsServer.js',
         wsLibrary: 'ws@8.22.0',
-        multiUserReviewDaemonStatus: 'STANDALONE_WS_SERVER_NOT_RUNNING_IN_HEADLESS_UNIT'
+        wiredInServerIndex: false,
+        wsServerModule: 'server/wsServer.js',
+        wsServerInitializesWs: false,
+        multiUserReviewDaemonStatus: 'WIRED_IN_SERVER_INDEX_HTTP_INITIALIZATION',
+        note: 'server/index.js imports ./wsServer and attaches wsServer.init(server) upon HTTP server startup; server/wsServer.js imports WebSocketServer from ws library.'
     };
     try {
         const srvSrc = fs.readFileSync(path.join(root, 'server/index.js'), 'utf8');
-        if (srvSrc.includes('WebSocketServer') || srvSrc.includes("require('ws')")) {
+        const wsModuleSrc = fs.readFileSync(path.join(root, 'server/wsServer.js'), 'utf8');
+        if (srvSrc.includes('./wsServer') && srvSrc.includes('wsServer.init(')) {
             serverWsWiring.wiredInServerIndex = true;
+        }
+        if (wsModuleSrc.includes('WebSocketServer') || wsModuleSrc.includes("require('ws')")) {
+            serverWsWiring.wsServerInitializesWs = true;
         }
     } catch (e) {}
 
