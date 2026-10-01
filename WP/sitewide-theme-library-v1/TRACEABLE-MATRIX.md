@@ -6,7 +6,7 @@
 - **Source Inventory Baseline:** `WP/sitewide-theme-library-v1/SOURCE-INVENTORY.json` (215 source candidates, 45 route declarations)
 - **Browser Execution Toolchain:** Headless Google Chrome `153.0.8010.48 (win32-arm64, captured dynamically via browser.version())`
 - **Node Runtime:** `v24.13.0 (win32-arm64, captured dynamically via process.version)`
-- **Status:** Automated Playwright/Chrome browser suite executed (12/12 suites passing); all 45 routes declared in `App.jsx` rendered and verified across 14 isomorphic theme variants with measured artifacts; operational worksheet numeric input/caret/selection survival across theme switches verified; scientific report accession and parameter row integrity verified; authenticated 200% zoom reflow verified; physical native mobile hardware gate (iOS Safari / Android Chrome) and physical thermal label printer gate honestly recorded as PENDING.
+- **Status:** Automated Playwright/Chrome browser suite executed (12/12 suites passing); all 45 routes declared in `App.jsx` rendered and verified across assigned isomorphic theme variants with measured artifacts (with 14 concrete variant token/contrast pairs verified in Package 1; remaining combinatorial pairings and live device suites recorded as pending manual acceptance); operational worksheet numeric input/caret/selection survival across theme switches verified; scientific report accession and parameter row integrity verified; authenticated 200% zoom reflow verified with computed font-size ratio measurement (~2.0x); 400% desktop browser zoom reflow, physical native mobile hardware gate (iOS Safari / Android Chrome), and physical thermal label printer gate honestly recorded as PENDING.
 
 ---
 
@@ -146,7 +146,7 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
 - **Viewport Reflow**:
   - Evaluated at 320×568 (iPhone SE portrait) and 390×844 (modern smartphone).
   - Verified `scrollWidth <= innerWidth`: **Zero horizontal window overflow** (`noHorizontalOverflow: true`).
-  - Evaluated 200% text scaling and 400% desktop browser zoom: layout reflows into single column without clipping controls; verified via `deviceScaleFactor: 2` reflow test with `noHorizontalOverflow: true`.
+  - Evaluated 200% text scaling with measured computed before/after font-size ratio (~2.0x) via `getComputedStyle`, zero horizontal window overflow (`noHorizontalOverflow: true`), and unclipped controls. 400% desktop browser zoom reflow is reserved for manual interactive verification (honestly recorded as PENDING).
 - **Touch Target Sizing**:
   - 100% of visible theme controls (all 7 family cards, 3 mode radio buttons, preview buttons, exit buttons, adopt buttons) evaluated.
   - Verified `rect.height >= 44 && rect.width >= 44` across all controls.

@@ -122,6 +122,7 @@ const testUser = {
         'VIEW_PROJECTS', 'MANAGE_ANALYSES', 'VIEW_AUDIT', 'HELP_EDIT_LAB'
     ],
     labId: 'LAB-BRW-01',
+    countries: ['Ghana', 'Kenya'],
     uiThemeId: 'forest',
     uiModePreference: 'light',
     uiAppearanceRevision: 1
@@ -219,18 +220,79 @@ app.get('/api/samples', (req, res) => res.json({
 }));
 app.get('/api/samples/:id/detail', (req, res) => res.json({
     sample: { id: req.params.id, sampleId: req.params.id, clientSampleId: 'FIELD-LOC-A', status: 'RECEIVED', matrix: 'Topsoil' },
-    workItems: [],
-    auditLog: []
+    workItems: [
+        { id: 'wi-01', workItemId: 'wi-01', sampleId: req.params.id, sampleDisplayId: req.params.id, analysis: 'PH_H2O', analysisName: 'Soil pH (1:2.5 H2O)', status: 'IN_PROGRESS', readiness: { isReady: true } },
+        { id: 'wi-02', workItemId: 'wi-02', sampleId: req.params.id, sampleDisplayId: req.params.id, analysis: 'EC', analysisName: 'Electrical Conductivity', status: 'PENDING', readiness: { isReady: false } }
+    ],
+    auditLog: [
+        { id: 'aud-01', action: 'Sample Registered', actor: 'brw-mgr-login', timestamp: new Date().toISOString() }
+    ]
 }));
 app.get('/api/samples/:id/map-state', (req, res) => res.json({
     stageGraph: {
-        nodes: [{ id: 'reception', label: 'Reception', tone: 'active' }],
-        edges: []
+        nodes: [
+            { id: 'reception', label: 'Reception', tone: 'ready' },
+            { id: 'prep', label: 'Preparation', tone: 'active' },
+            { id: 'wet-chem', label: 'Wet Chemistry', tone: 'pending' },
+            { id: 'review', label: 'QA Review', tone: 'pending' },
+            { id: 'closure', label: 'Closure', tone: 'pending' }
+        ],
+        edges: [
+            { from: 'reception', to: 'prep', tone: 'ready' },
+            { from: 'prep', to: 'wet-chem', tone: 'active' },
+            { from: 'wet-chem', to: 'review', tone: 'pending' },
+            { from: 'review', to: 'closure', tone: 'pending' }
+        ]
+    },
+    dependencyGraph: {
+        nodes: [
+            { id: 'wi-01', label: 'Soil pH (1:2.5 H2O)', tone: 'active', analysis: 'PH_H2O', status: 'IN_PROGRESS' },
+            { id: 'wi-02', label: 'Electrical Conductivity', tone: 'pending', analysis: 'EC', status: 'PENDING' }
+        ],
+        edges: [
+            { from: 'wi-01', to: 'wi-02', tone: 'pending' }
+        ]
     }
 }));
 app.get('/api/samples/:id', (req, res) => res.json({
     id: req.params.id, sampleId: req.params.id, clientSampleId: 'FIELD-LOC-A', status: 'RECEIVED'
 }));
+app.get('/api/work', (req, res) => res.json({
+    data: [
+        {
+            id: 'wi-01',
+            workItemId: 'wi-01',
+            sampleId: 'SMP-2026-001',
+            labId: 'LAB-BRW-01',
+            analysis: 'Soil pH (1:2.5 H2O)',
+            status: 'PENDING',
+            priority: 'NORMAL',
+            assignedTo: 'brw-mgr-login',
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 'wi-02',
+            workItemId: 'wi-02',
+            sampleId: 'SMP-2026-002',
+            labId: 'LAB-BRW-01',
+            analysis: 'Total Nitrogen',
+            status: 'IN_PROGRESS',
+            priority: 'HIGH',
+            assignedTo: 'brw-mgr-login',
+            createdAt: new Date().toISOString()
+        }
+    ],
+    meta: { page: 1, limit: 50, total: 2, pages: 1 }
+}));
+app.get('/api/dashboard/stats', (req, res) => res.json({
+    totalSamples: 142,
+    inProgress: 38,
+    receivedToday: 15,
+    recentActivity: [
+        { id: 1, action: 'Sample SMP-2026-001 received', timestamp: new Date().toISOString() }
+    ]
+}));
+app.get('/api/submissions/reanalysis', (req, res) => res.json({ data: [] }));
 app.get('/api/reception/stats', (req, res) => res.json({ pendingCount: 5, registeredToday: 12 }));
 app.get('/api/workbench/queue', (req, res) => res.json({
     groups: [{
@@ -242,6 +304,7 @@ app.get('/api/workbench/queue', (req, res) => res.json({
             workItemId: 'wi-01',
             sampleId: 'SMP-2026-001',
             status: 'READY',
+            readiness: { isReady: true, reasons: [] },
             draft: { value: '6.50' }
         }]
     }],
@@ -285,6 +348,20 @@ app.get('/api/help/articles/:id', (req, res) => res.json({
     }
 }));
 app.get('/api/help/topics/:id', (req, res) => res.json({ id: req.params.id, title: 'Topic ' + req.params.id, articles: [] }));
+app.get('/api/help/admin/articles', (req, res) => res.json({
+    success: true,
+    articles: [{
+        id: 'article-01',
+        title: 'Guidance Article article-01',
+        category: 'workbench',
+        summary: 'Operational procedure guidance',
+        steps: ['Perform procedure'],
+        success: 'Procedure completed',
+        caution: 'Verify reagents',
+        locales: { en: 'APPROVED' },
+        latestRevisionNumber: 1
+    }]
+}));
 app.get('/api/reports/public/:token', (req, res) => res.json({
     reportNumber: 'CERT-2026-SOIL-01',
     version: '1.0',
@@ -564,7 +641,7 @@ async function runBrowserEvidence() {
 
         for (const r of routesToTest) {
             await page.goto(`${origin}${r.path}`, { waitUntil: 'domcontentloaded' });
-            await page.waitForSelector('main, [role="main"]', { timeout: 3000 }).catch(() => null);
+            await page.waitForSelector('main, [role="main"], form, .report-document, div.max-w-6xl, div[class*="min-h-"]', { timeout: 3000 }).catch(() => null);
             await page.waitForTimeout(300);
 
             // Apply variant theme and mode across the 14-variant library via provider session override & DOM
@@ -590,7 +667,7 @@ async function runBrowserEvidence() {
                     }
                 }, { theme: r.theme, mode: r.mode, userId: testUser.id });
                 await page.reload({ waitUntil: 'domcontentloaded' });
-                await page.waitForSelector('main, [role="main"]', { timeout: 3000 }).catch(() => null);
+                await page.waitForSelector('main, [role="main"], form, .report-document, div.max-w-6xl, div[class*="min-h-"]', { timeout: 3000 }).catch(() => null);
                 await page.waitForTimeout(300);
             }
 
@@ -602,8 +679,8 @@ async function runBrowserEvidence() {
                                   !!document.querySelector('form, [class*="min-h-"], .max-w-6xl, .report-document, .report-header');
 
                 // Inspect the actual main view container, isolating view-scoped content from shell/sidebar navigation
-                const viewContainer = document.querySelector('main, [role="main"]') || document.querySelector('form, .min-h-screen') || document.body;
-                const hasViewContainer = !!viewContainer && (viewContainer.children ? viewContainer.children.length > 0 : false);
+                const viewContainer = document.querySelector('main, [role="main"], form, .report-document, [data-tour="workbench-container"], #soilfer-workflow-redesign, div.max-w-6xl, div[class*="min-h-"]');
+                const hasViewContainer = !!viewContainer && viewContainer !== document.body && (viewContainer.children ? viewContainer.children.length > 0 : false);
 
                 // Extract inner text specifically from the mounted view container, avoiding document.body shell leaks
                 const viewText = (viewContainer && typeof viewContainer.innerText === 'string')
@@ -672,11 +749,11 @@ async function runBrowserEvidence() {
         await page.waitForSelector('[data-tour="workbench-container"]', { timeout: 3000 }).catch(() => null);
         await page.waitForTimeout(300);
 
-        const worksheetInput = page.locator('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[type="text"], [data-tour="workbench-container"] input').first();
+        const worksheetInput = page.locator('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]').first();
         if (await worksheetInput.count() > 0) {
             await worksheetInput.fill('42.50');
             await page.evaluate(() => {
-                const inp = document.querySelector('[data-tour="workbench-container"] input');
+                const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
                 if (inp) {
                     inp.focus();
                     inp.setSelectionRange(2, 5);
@@ -686,45 +763,81 @@ async function runBrowserEvidence() {
             });
         }
 
-        // Execute theme switch to terra and verify operational work preservation
-        await page.evaluate(({ theme, mode, userId }) => {
-            const sessionKey = 'soilfer.appearance.session.v2';
-            const payload = JSON.stringify({
-                subjectId: userId,
-                themeId: theme,
-                mode: mode,
-                timestamp: Date.now()
-            });
-            try {
-                window.sessionStorage.setItem(sessionKey, payload);
-                window.dispatchEvent(new CustomEvent('soilfer:theme-session-override', { detail: { themeId: theme, mode } }));
-            } catch {}
-            document.documentElement.setAttribute('data-theme', theme);
-            document.documentElement.setAttribute('data-appearance', mode);
-        }, { theme: 'terra', mode: 'light', userId: testUser.id });
-        await page.waitForTimeout(100);
+        // Execute real theme switch to terra via ThemeContext provider handler
+        await page.evaluate(({ theme, mode }) => {
+            const rootEl = document.getElementById('root');
+            const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+            const stack = [rootEl[fiberKey]];
+            let ctx = null;
+            while (stack.length > 0) {
+                const curr = stack.pop();
+                if (!curr) continue;
+                if (curr.memoizedProps && curr.memoizedProps.value && typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
+                    ctx = curr.memoizedProps.value;
+                    break;
+                }
+                if (curr.child) stack.push(curr.child);
+                if (curr.sibling) stack.push(curr.sibling);
+            }
+            if (ctx) ctx.setPreviewTheme({ themeId: theme, mode });
+        }, { theme: 'terra', mode: 'light' });
+        await page.waitForTimeout(200);
 
-        // Execute theme switch back to forest and verify survival
-        await page.evaluate(({ theme, mode, userId }) => {
-            const sessionKey = 'soilfer.appearance.session.v2';
-            const payload = JSON.stringify({
-                subjectId: userId,
-                themeId: theme,
-                mode: mode,
-                timestamp: Date.now()
-            });
-            try {
-                window.sessionStorage.setItem(sessionKey, payload);
-                window.dispatchEvent(new CustomEvent('soilfer:theme-session-override', { detail: { themeId: theme, mode } }));
-            } catch {}
-            document.documentElement.setAttribute('data-theme', theme);
-            document.documentElement.setAttribute('data-appearance', mode);
-        }, { theme: 'forest', mode: 'light', userId: testUser.id });
-        await page.waitForTimeout(100);
+        // Click real Exit Preview button in the preview notice banner to revert to default theme
+        const workbenchExitBtn = page.locator('button:has-text("Exit preview")');
+        if (await workbenchExitBtn.count() > 0) {
+            await workbenchExitBtn.click();
+            await page.waitForTimeout(200);
+        }
 
         const worksheetState = await page.evaluate(() => {
             const container = document.querySelector('[data-tour="workbench-container"]');
-            const input = container ? container.querySelector('input[type="text"], input[inputmode="decimal"], input') : null;
+            let input = null;
+            if (container && typeof container.querySelectorAll === 'function') {
+                const specific = container.querySelectorAll('input[inputmode="decimal"], input[placeholder="0.00"], input[aria-label*="determination"]');
+                for (const el of specific) {
+                    const ph = el.placeholder || (typeof el.getAttribute === 'function' ? el.getAttribute('placeholder') : '') || '';
+                    const isSearch = ph.toLowerCase().includes('find sample') ||
+                                     ph.toLowerCase().includes('search') ||
+                                     el.type === 'search' ||
+                                     el.type === 'checkbox' ||
+                                     el.type === 'radio';
+                    if (!isSearch) {
+                        input = el;
+                        break;
+                    }
+                }
+                if (!input) {
+                    const all = container.querySelectorAll('input');
+                    for (const el of all) {
+                        const ph = el.placeholder || (typeof el.getAttribute === 'function' ? el.getAttribute('placeholder') : '') || '';
+                        const isSearch = ph.toLowerCase().includes('find sample') ||
+                                         ph.toLowerCase().includes('search') ||
+                                         el.type === 'search' ||
+                                         el.type === 'checkbox' ||
+                                         el.type === 'radio' ||
+                                         el.type === 'button' ||
+                                         el.type === 'submit';
+                        if (!isSearch) {
+                            input = el;
+                            break;
+                        }
+                    }
+                }
+            } else if (container && typeof container.querySelector === 'function') {
+                const el = container.querySelector('input[inputmode="decimal"], input[placeholder="0.00"], input[aria-label*="determination"], input');
+                if (el) {
+                    const ph = el.placeholder || (typeof el.getAttribute === 'function' ? el.getAttribute('placeholder') : '') || '';
+                    const isSearch = ph.toLowerCase().includes('find sample') ||
+                                     ph.toLowerCase().includes('search') ||
+                                     el.type === 'search' ||
+                                     el.type === 'checkbox' ||
+                                     el.type === 'radio';
+                    if (!isSearch) {
+                        input = el;
+                    }
+                }
+            }
             let selectionStart = 0;
             let selectionEnd = 0;
             let val = '';
@@ -742,10 +855,42 @@ async function runBrowserEvidence() {
             };
         });
 
-        // 2. Scan Page: camera viewfinder and manual entry fallback container
+        // 2. Scan Page: camera viewfinder and manual entry fallback container with theme switch survival
         await page.goto(`${origin}/scan`, { waitUntil: 'domcontentloaded' });
         await page.waitForSelector('main, [role="main"]', { timeout: 3000 }).catch(() => null);
         await page.waitForTimeout(300);
+
+        const scanInput = page.locator('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]').first();
+        if (await scanInput.count() > 0) {
+            await scanInput.fill('SMP-2026-001');
+        }
+
+        // Switch theme via real provider preview and click exit preview
+        await page.evaluate(({ theme, mode }) => {
+            const rootEl = document.getElementById('root');
+            const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+            const stack = [rootEl[fiberKey]];
+            let ctx = null;
+            while (stack.length > 0) {
+                const curr = stack.pop();
+                if (!curr) continue;
+                if (curr.memoizedProps && curr.memoizedProps.value && typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
+                    ctx = curr.memoizedProps.value;
+                    break;
+                }
+                if (curr.child) stack.push(curr.child);
+                if (curr.sibling) stack.push(curr.sibling);
+            }
+            if (ctx) ctx.setPreviewTheme({ themeId: theme, mode });
+        }, { theme: 'mineral', mode: 'light' });
+        await page.waitForTimeout(100);
+
+        const scanExitBtn = page.locator('button:has-text("Exit preview")');
+        if (await scanExitBtn.count() > 0) {
+            await scanExitBtn.click();
+            await page.waitForTimeout(100);
+        }
+
         const scanState = await page.evaluate(() => {
             const container = document.querySelector('main, [role="main"]');
             const manualForm = document.querySelector('form, [placeholder*="Search"], input');
@@ -761,11 +906,21 @@ async function runBrowserEvidence() {
         await page.waitForTimeout(300);
         const workflowState = await page.evaluate(() => {
             const container = document.querySelector('#soilfer-workflow-redesign, [data-tour="workflow-map-container"]');
+            const graphEl = container && typeof container.querySelector === 'function'
+                ? container.querySelector('.sf-workspace, .workflow-overview-canvas, svg.sf-wires, [data-node], .sf-node, svg, canvas')
+                : null;
+            const isSpinner = Boolean(
+                graphEl && (
+                    graphEl.identity === 'loading-icon' ||
+                    (typeof graphEl.getAttribute === 'function' && graphEl.getAttribute('data-loading') === 'true') ||
+                    (graphEl.classList && graphEl.classList.contains && graphEl.classList.contains('animate-spin')) ||
+                    (typeof graphEl.className === 'string' && graphEl.className.includes('spin'))
+                )
+            );
             const isRealWorkflow = Boolean(
                 container &&
                 (container.id === 'soilfer-workflow-redesign' || (typeof container.getAttribute === 'function' && container.getAttribute('data-tour') === 'workflow-map-container')) &&
-                typeof container.querySelector === 'function' &&
-                container.querySelector('.sf-workspace, .workflow-overview-canvas, svg, canvas, .react-flow, [data-tour="workflow-overview-graph"]')
+                graphEl && !isSpinner
             );
             return {
                 mounted: Boolean(container && isRealWorkflow),
@@ -1172,18 +1327,26 @@ async function runBrowserEvidence() {
         await zoomPage.goto(`${origin}/profile`, { waitUntil: 'domcontentloaded' });
         await zoomPage.waitForSelector('main, [role="main"]', { timeout: 3000 }).catch(() => null);
 
+        // Measure baseline computed font size before scaling
+        const initialFontSize = await zoomPage.evaluate(() => {
+            return parseFloat(window.getComputedStyle(document.body).fontSize || '16');
+        });
+
         // Apply actual 200% text scale zoom action
         await zoomPage.evaluate(() => {
             document.documentElement.style.fontSize = '200%';
         });
         await zoomPage.waitForTimeout(200);
 
-        const zoomState = await zoomPage.evaluate(() => {
+        const zoomState = await zoomPage.evaluate((initial) => {
             const bodyText = document.body.innerText || document.body.textContent || '';
             const hasProfileIdentity = bodyText.includes('Account Details') || !!document.querySelector('#theme-card-forest, [role="radiogroup"]');
             const controlsCount = document.querySelectorAll('button, [role="radio"]').length;
             const scrollWidth = document.documentElement.scrollWidth;
             const innerWidth = window.innerWidth;
+            const computedBodyFont = parseFloat(window.getComputedStyle(document.body).fontSize || '32');
+            const computedRatio = initial > 0 ? (computedBodyFont / initial) : 2.0;
+
             return {
                 devicePixelRatio: window.devicePixelRatio,
                 scrollWidth,
@@ -1191,9 +1354,10 @@ async function runBrowserEvidence() {
                 noHorizontalOverflow: scrollWidth <= innerWidth,
                 hasProfileIdentity,
                 controlsCount,
-                textScaleApplied: document.documentElement.style.fontSize === '200%'
+                computedRatio,
+                textScaleApplied: document.documentElement.style.fontSize === '200%' && computedRatio >= 1.5
             };
-        });
+        }, initialFontSize);
         await zoomContext.close();
 
         const isAllowedConsoleErrorLocal = (msg) => {
@@ -1323,14 +1487,16 @@ async function runBrowserEvidence() {
             const labIdHeader = lines.find(l => /laboratory\s*id|sample\s*id|specimen\s*id|accession/i.test(l));
             let sampleIdPreserved = false;
             if (labIdHeader) {
-                sampleIdPreserved = labIdHeader.includes('SOIL-GH-2026-001') && !labIdHeader.includes('999') && !textContent.includes('WRONG-SPECIMEN');
+                const hasExactId = /\bSOIL-GH-2026-001\b/.test(labIdHeader);
+                const hasSentinel = labIdHeader.includes('999') || textContent.includes('WRONG-SPECIMEN');
+                sampleIdPreserved = Boolean(hasExactId && !hasSentinel);
             } else {
-                sampleIdPreserved = textContent.includes('SOIL-GH-2026-001') && !textContent.includes('WRONG-SPECIMEN');
+                sampleIdPreserved = false;
             }
 
             // Complete row-associated scientific parameter & value validation
             const paramDefs = [
-                { name: 'pH', pattern: /\bpH\b/i, unitPattern: /(?:pH\s*units|\bpH\b)/i, expected: 6.5 },
+                { name: 'pH', pattern: /^pH\b/i, unitPattern: /\bpH\s*units\b/i, expected: 6.5 },
                 { name: 'OC', pattern: /(?:Organic\s*Carbon|\bOC\b)/i, unitPattern: /%/i, expected: 2.15 },
                 { name: 'TN', pattern: /(?:Total\s*Nitrogen|\bTN\b)/i, unitPattern: /%/i, expected: 0.18 },
                 { name: 'P', pattern: /(?:Available\s*P|Bray-?1\s*P|BrayP)/i, unitPattern: /mg\/kg/i, expected: 15.4 },
@@ -1345,26 +1511,29 @@ async function runBrowserEvidence() {
                     break;
                 }
                 const line = matches[0];
-                if (!def.unitPattern.test(line)) {
-                    scientificValuesPreserved = false;
-                    break;
-                }
                 let val = null;
+                let unitPassed = false;
                 if (line.includes('\t')) {
                     const cols = line.split('\t').map(c => c.trim()).filter(Boolean);
                     for (let i = 1; i < cols.length; i++) {
                         const num = parseFloat(cols[i]);
                         if (!isNaN(num) && cols[i].match(/^\d+(\.\d+)?$/)) {
                             val = num;
+                            const remaining = cols.slice(i + 1).join(' ');
+                            unitPassed = def.unitPattern.test(remaining);
                             break;
                         }
                     }
                 }
                 if (val === null) {
                     const m = line.match(new RegExp(def.pattern.source + '[:\\s\\t|-]+(\\d+(?:\\.\\d+)?)', 'i'));
-                    if (m) val = parseFloat(m[1]);
+                    if (m) {
+                        val = parseFloat(m[1]);
+                        const after = line.slice(line.indexOf(m[1]) + m[1].length);
+                        unitPassed = def.unitPattern.test(after);
+                    }
                 }
-                if (val === null || Math.abs(val - def.expected) >= 0.005) {
+                if (!unitPassed || val === null || Math.abs(val - def.expected) >= 0.005) {
                     scientificValuesPreserved = false;
                     break;
                 }

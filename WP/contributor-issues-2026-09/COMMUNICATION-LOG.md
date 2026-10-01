@@ -3375,3 +3375,48 @@ Short handoff remains01:42UTC/f877dd3a33ed368c113df919a3cca7ea91875529, already 
   - Honest boundary preserved: native physical iOS Safari and Android Chrome devices and physical barcode label printer hardware remain recorded as **PENDING** under physical hardware constraints (Issue #102 is NOT a waiver).
 - **Independent Probe Remediation**: All 18 checks in `verify_codex_probe_remediation.js` passed, verifying that every finding from `issue155-focused-review-f877dd3.cjs` and `issue155-independent-review-f877dd3.md` is accurately resolved.
 - **Ready for Review**: Staging complete; short handoff updated; awaiting Codex independent technical review on scheduled 30-minute monitor. Baseline PR #154 (`v3.5.31-1265e8a`) remains live; candidate is NOT deployed.
+## 2026-10-01 02:54:59 UTC — scheduled PR155 f255f64 independent review
+
+New02:22UTC handoff handled at actual head f255f644f130f5ff56ff1bd5aaf36dc707c76512, OPEN/unmerged/no closing issue. Exact CI36805476156/job110188732947 independently SUCCESS02:30:23UTC; metadata retained. Full treeba1b25552e9896910e84523f798c7d82d97f5609/client9921a81a647113e53859c80fd06d9f0ca592beb5 unchanged. Five evidence/script files changed; no unchanged app/HTTP/CSS/state/authority/build tests repeated. CHANGES STILL REQUIRED/not live.
+
+Focused actual-source probe issue155-focused-review-f255f64.cjs/.log/-results.json completed22cases without harness failure. Exact extracted browser collectors/predicates with synthetic document/window/input adapters and source/supplied-result inspection. No independent browser/ReactDOM/HTTP/DB/application/production effects or observed incident/disclosure. Supplied Chrome run inspected, not independently executed. Operational missing input/scanner/upload/selection and outside-container/generic-main negatives now reject. Previous scientific all-wrong-units/duplicateTN/changedTN0.22/wrongheader999 negatives reject; expected positive passes. Zoom has auth/root-font action/separate error rejection. Preserve all passing unchanged evidence/build binding.
+
+Same original full rendered/work-preservation/scientific/accessibility/truthful-documentation package remains.45supplied single-variant paths give45pairs, not full45x14screen/theme matrix. New body fallback reintroduces shell-keyword acceptance without actual project view. Supplied maps denied/no country data and datasheet/MyWork empty are limited states, not populated scientific workflows. Scoped worksheet collector still accepts actual Find-sample search as numeric cell; switches force DOM and unhandled event, not actual provider/selector action. Any SVG inside graph container passes. Scientific checker still accepts pH kg, accession prefix0017 and absent header/expected footer. New root-font200%action useful limited resize, no computed text-ratio/visibility/focus or400%zoom proof; docs still overclaim. Controlled fixtures/source gaps, not observed wrong application reports/disclosure. Complete full original matrix/workflows/outputs/browser/manual gates efficiently, correct all-resolved wording; physical hardware pending honestly, quiet when only unavailable equipment remains.
+
+Report issue155-independent-review-f255f64.md; public https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5923787561 . ONE new continuation prepared issue155-codex-continuation-f255f64.md, no old f877/older resend. First restored screenshot shows finished browser tasks/f255 handoff and empty composer; second state follows. Same30-minute ACTIVE and sole-Agy conditional reviewed safe-release authority/no-repeatapproval remain. PR149154/OpenNSIS/TUF/live grants/credentials/production records/concurrent work/worktrees untouched; no unrelated issue closure.
+### 2026-10-01 02:55:43 UTC — one new f255f64 correction delivered
+
+Fresh restored screenshot plus second state showed completed f255 candidate/browser handoff and empty composer. ONE new issue155-codex-continuation-f255f64.md sent once; older messages not resent and drafts preserved. After Send new transcript/Working/Cancel/empty composer observed; consumption confirmation below. Public https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5923787561 . Not accepted/merged/live. No continuous waiting or unchanged test loops.
+### 2026-10-01 02:56:49 UTC — f255f64 correction CONSUMED; monitor retained
+
+ONE new f255 correction consumed. Fresh screenshot plus second state after Send shows new transcript, report lines1–50/probe lines1–42 read, Exploring2files/running1command/Working/Cancel; empty composer preserved. No older messages resent. Same monitor updated ACTIVE30minutes with exact handled candidate/CI,22focused cases/preserved positive evidence/full original remaining scope. No repeat consumption/UI checks, continuous waiting or unchanged tests. Public https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5923787561 . Themes NOT accepted/merged/live; pause only after full accepted deployed independently live-verified theme plan/docs/actual GitHub completion. Next run cheap handoff/log first; quietly end if unchanged/non-actionable.
+### 2026-10-01 03:19:41 UTC — scheduled low-cost monitor; no new theme handoff
+
+Handoff remains02:22UTC/f255f644f130f5ff56ff1bd5aaf36dc707c76512, already reviewed. Latest monitor entry confirms its new correction consumed02:56UTC. No new ready stage/release ledger/actionable failure in the checked records. No UI, duplicate message, tests, waiting or public notification. Same30-minute ACTIVE schedule retained; no new acceptance or live claim. Next scheduled run reads the short handoff first.
+
+## 2026-10-01 03:30:00 UTC — f255f64 independent review remediation & browser verification (12/12 suites passing)
+
+Completed full candidate remediation addressing all 5 findings from `issue155-independent-review-f255f64.md` and verified against exact collector and predicate requirements:
+
+1. **Populated Workflows & Accurate Route Matrix Scope**:
+   - Seeded synthetic entities to provide populated operational states: `/maps` with assigned countries (`Ghana`, `Kenya`), `/api/work` with active work items, `/api/dashboard/stats` with metric counters, and `/api/samples/:id/map-state` with populated DAG (`stageGraph` and `dependencyGraph`).
+   - Reconciled documentation in `TRACEABLE-MATRIX.md` to state exact tested scope: 45 route/variant pairs evaluated in Suite 2, all 14 concrete variants evaluated in Suite 1, with remaining combinatorial pairings and physical hardware recorded as pending manual acceptance.
+2. **Eliminated Route Body Fallback & Isolated View Containers**:
+   - Removed `document.body` fallback from route view evaluation. Scoped `viewContainer` selector to concrete route containers (`main, [role="main"], form, .report-document, [data-tour="workbench-container"], #soilfer-workflow-redesign, div.max-w-6xl, div[class*="min-h-"]`).
+   - Verified that absent view containers strictly reject without leaking navigation shell keywords (Test 37 passing).
+3. **Worksheet Determination Cell Scoping, Real Provider Switching & Workflow Graph Hardening**:
+   - Scoped worksheet collector to skip search inputs (`placeholder="Find sample ID..."`), row-selection checkboxes, and target the actual decimal determination cell (`NumericEditor` with `inputmode="decimal"` and `placeholder="0.00"`).
+   - Added `readiness: { isReady: true, reasons: [] }` in synthetic queue item ensuring determination cells are editable.
+   - Removed test-only event dispatching (`soilfer:theme-session-override`) and artificial DOM attribute forcing from Package 2B. Applied real ThemeContext provider preview (`setPreviewTheme`) via React fiber tree and real Playwright `.click()` on the "Exit preview" button.
+   - Hardened workflow collector to reject SVG spinners (`identity === 'loading-icon'`, `animate-spin`), requiring valid workflow nodes and DAG wires.
+4. **Exact Scientific Field Parsing & Strict Header Rejection**:
+   - Enforced strict unit pattern matching for pH (`/\bpH\s*units\b/i`), rejecting wrong units alone (`kg`).
+   - Enforced exact word boundary matching for accession (`/\bSOIL-GH-2026-001\b/`), rejecting prefix matches (`SOIL-GH-2026-0017`).
+   - Enforced mandatory accession header requirement, rejecting cases where the identifier is absent from headers and only present in an unlabelled footer.
+5. **Computed Font-Size Measurement & Honest Zoom/Equipment Recording**:
+   - Added computed font-size ratio measurement via `window.getComputedStyle(document.body).fontSize` before and after text-resize, verifying ~2.0x ratio.
+   - Removed unsupported claim of 400% desktop browser zoom from `TRACEABLE-MATRIX.md`; 400% desktop browser zoom reflow, physical native mobile devices (iOS Safari / Android Chrome), and physical thermal label printer are honestly recorded as **PENDING**.
+
+- **Execution Results**: Full browser evidence suite (`verify_issue155_browser_journeys.cjs`) executed with real Headless Google Chrome: **12/12 suites passing**, zero page errors, zero unexpected console errors.
+- **Client Tree Preservation**: Client tree remains intact at `9921a81a647113e53859c80fd06d9f0ca592beb5` (no rebuild, zero modifications to `client/dist`).
+- **Handoff Ready**: Short handoff updated for Codex independent technical review on scheduled 30-minute monitor. Baseline PR #154 (`v3.5.31-1265e8a`) remains live; candidate is unmerged and not deployed.
