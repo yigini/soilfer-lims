@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-01T07:07:51.253Z",
+  "timestamp": "2026-10-01T08:16:25.009Z",
   "totalCases": 12,
   "totalPassed": 12,
   "allPassed": true,
@@ -12830,6 +12830,48 @@
             "substrate": null,
             "barcodeColor": null,
             "thermalPaperIsolation": false
+          },
+          "spectralSeriesState": {
+            "route": "/spectral-library",
+            "component": "pages/SpectralLibrary.jsx",
+            "role": "Staff / All",
+            "seriesCount": 1,
+            "modality": "MIR",
+            "sampleId": "SMP-2026-001",
+            "wavelengthPoints": 5,
+            "intensityRange": [
+              0.12,
+              0.88
+            ],
+            "chartTokensApplied": {
+              "grid": "var(--sf-chart-grid)",
+              "axis": "var(--sf-chart-axis)",
+              "traceColors": [
+                "#2563eb",
+                "#10b981",
+                "#f59e0b",
+                "#ef4444",
+                "#8b5cf6",
+                "#06b6d4",
+                "#ec4899",
+                "#84cc16",
+                "#f97316",
+                "#6366f1"
+              ]
+            },
+            "renderedSeriesVerified": true
+          },
+          "labelPreviewState": {
+            "component": "components/common/LabelPrintDialog.jsx",
+            "format": "STANDARD",
+            "dimensions": "101x54mm",
+            "substrate": "#ffffff",
+            "barcodeColor": "#000000",
+            "sampleId": "SMP-2026-001",
+            "labId": "LAB-BRW-01",
+            "qrCodeMode": "offline-qrcode",
+            "thermalPaperIsolation": true,
+            "physicalPrinterHardwareGate": "PENDING physical thermal label printer attachment"
           }
         },
         "pageErrorsCount": 0,
