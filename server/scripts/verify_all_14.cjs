@@ -122,6 +122,7 @@ function paper(text) {
 
 const validSpectral = {
     route: '/spectral-library',
+    sampleId: 'SMP-2026-001',
     renderedSeriesVerified: true,
     seriesCount: 1,
     wavelengthRange: '4000 - 400 cm⁻¹',
@@ -131,6 +132,7 @@ const validSpectral = {
 const validLabel = {
     rendered: true,
     component: 'LabelPrintDialog.jsx',
+    sampleId: 'SMP-2026-001',
     format: 'Standard 101x54mm',
     substrate: 'white',
     barcodeColor: '#000000',
@@ -372,9 +374,55 @@ test('PASS scientific output suite navigates to spectral and label views with re
 
 // 28. Action waits outside activation callback for observable theme/mode and named notice settlement
 test('PASS action waits outside activation callback for observable theme/mode and named notice settlement', () => {
-    assert(src.includes('await page.waitForFunction((theme, mode) => {'));
+    assert(src.includes('({ theme, mode }) => {'));
     assert(src.includes("appliedTheme === theme && appliedMode === mode && Boolean(notice)"));
+    assert(!src.includes('{ timeout: 3000 }, variant.themeId, variant.mode'));
     return { waitsOutsideActivationCallback: true, settlesBeforeCollection: true };
+});
+
+// 29. Playwright waitForFunction correctly passes single ({ theme, mode }) object and options
+test('PASS Playwright waitForFunction correctly passes single ({ theme, mode }) object and options', () => {
+    const wm = src.match(/await page\.waitForFunction\(\s*\(\{ theme, mode \}\) => \{([\s\S]*?)\r?\n\s*\},[\s\r\n]*\{ theme: variant\.themeId, mode: variant\.mode \},[\s\r\n]*\{ timeout: 3000 \}\s*\);/);
+    assert(wm);
+    assert(!wm[0].includes('.catch('));
+    return { singleObjectArg: true, optionsThird: true, catchSwallowedRemoved: true };
+});
+
+// 30. Wrong geometric curve in chart class without record/axes/points is strictly rejected
+test('PASS wrong geometric curve in chart class without record/axes/points is strictly rejected', () => {
+    const wrongChart = { className: 'recharts-surface', getAttribute: k => k === 'class' ? 'recharts-surface' : null };
+    const wrongTrace = { className: 'recharts-line-curve', getAttribute: k => k === 'class' ? 'recharts-line-curve' : k === 'd' ? 'M0,0L1,99' : null };
+    const ssWrong = collector('spectralSeriesState')({ querySelector: () => wrongChart, querySelectorAll: () => [wrongTrace], documentElement: {} }, { getComputedStyle: () => ({ getPropertyValue: () => '#222222' }) });
+    assert.equal(ssWrong.renderedSeriesVerified, false);
+    assert.equal(ssWrong.wavelengthRange, null);
+    assert.equal(ssWrong.intensityRange, null);
+    return { wrongGeometricCurveRejected: true, reported: ssWrong };
+});
+
+// 31. Arbitrary image in label class with dark background is strictly rejected
+test('PASS arbitrary image in label class with dark background is strictly rejected', () => {
+    const arbitraryImage = { src: 'data:image/png;base64,arbitrary-unrelated-logo', alt: 'logo', getAttribute: k => k === 'src' ? 'data:image/png;base64,arbitrary-unrelated-logo' : null };
+    const wrongLabel = { className: 'sample-label-page', getAttribute: () => null, querySelector: () => arbitraryImage };
+    const lsWrong = collector('labelPreviewState')({ querySelector: () => wrongLabel }, { getComputedStyle: () => ({ backgroundColor: 'rgb(0, 0, 0)', color: 'rgb(255, 255, 255)' }) });
+    assert.equal(lsWrong.rendered, false);
+    assert.equal(lsWrong.offlineQrVerified, false);
+    assert.equal(lsWrong.thermalPaperIsolation, false);
+    assert.equal(lsWrong.substrate, 'black');
+    assert.equal(lsWrong.barcodeColor, '#ffffff');
+    return { arbitraryImageDarkLabelRejected: true, reported: lsWrong };
+});
+
+// 32. Scientific final gate strictly rejects wrong plotted record and unverified QR output
+test('PASS scientific final gate strictly rejects wrong plotted record and unverified QR output', () => {
+    const wrongChart = { className: 'recharts-surface', getAttribute: k => k === 'class' ? 'recharts-surface' : null };
+    const wrongTrace = { className: 'recharts-line-curve', getAttribute: k => k === 'class' ? 'recharts-line-curve' : k === 'd' ? 'M0,0L1,99' : null };
+    const ssWrong = collector('spectralSeriesState')({ querySelector: () => wrongChart, querySelectorAll: () => [wrongTrace], documentElement: {} }, { getComputedStyle: () => ({ getPropertyValue: () => '#222222' }) });
+    const arbitraryImage = { src: 'data:image/png;base64,arbitrary-unrelated-logo', alt: 'logo', getAttribute: k => k === 'src' ? 'data:image/png;base64,arbitrary-unrelated-logo' : null };
+    const wrongLabel = { className: 'sample-label-page', getAttribute: () => null, querySelector: () => arbitraryImage };
+    const lsWrong = collector('labelPreviewState')({ querySelector: () => wrongLabel }, { getComputedStyle: () => ({ backgroundColor: 'rgb(0, 0, 0)', color: 'rgb(255, 255, 255)' }) });
+    const p = paper(valid);
+    assert.equal(printGate(p, ssWrong, lsWrong), false);
+    return { wrongScientificAndLabelRejectedByGate: true };
 });
 
 console.log(JSON.stringify({ allCasesPassed: true, casesCompleted: cases.length }));
