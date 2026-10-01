@@ -13493,7 +13493,8 @@
             "parsedSampleId": "SMP-TEST-001",
             "parsedInputValue": 6.5,
             "parsedMatrix": "Topsoil",
-            "hasFile": true
+            "hasFile": true,
+            "readSucceeded": true
           },
           "variantTransitions": [
             {
@@ -13513,7 +13514,8 @@
               "parsedSampleId": "SMP-TEST-001",
               "parsedInputValue": 6.5,
               "parsedMatrix": "Topsoil",
-              "transitionSucceeded": true
+              "transitionSucceeded": true,
+              "readSucceeded": true
             },
             {
               "variant": "soilfer-classic.dark",
@@ -13532,7 +13534,8 @@
               "parsedSampleId": "SMP-TEST-001",
               "parsedInputValue": 6.5,
               "parsedMatrix": "Topsoil",
-              "transitionSucceeded": true
+              "transitionSucceeded": true,
+              "readSucceeded": true
             },
             {
               "variant": "forest.light",
@@ -13551,7 +13554,8 @@
               "parsedSampleId": "SMP-TEST-001",
               "parsedInputValue": 6.5,
               "parsedMatrix": "Topsoil",
-              "transitionSucceeded": true
+              "transitionSucceeded": true,
+              "readSucceeded": true
             },
             {
               "variant": "forest.dark",
@@ -13570,7 +13574,8 @@
               "parsedSampleId": "SMP-TEST-001",
               "parsedInputValue": 6.5,
               "parsedMatrix": "Topsoil",
-              "transitionSucceeded": true
+              "transitionSucceeded": true,
+              "readSucceeded": true
             },
             {
               "variant": "terra.light",
@@ -13589,7 +13594,8 @@
               "parsedSampleId": "SMP-TEST-001",
               "parsedInputValue": 6.5,
               "parsedMatrix": "Topsoil",
-              "transitionSucceeded": true
+              "transitionSucceeded": true,
+              "readSucceeded": true
             },
             {
               "variant": "terra.dark",
@@ -13608,7 +13614,8 @@
               "parsedSampleId": "SMP-TEST-001",
               "parsedInputValue": 6.5,
               "parsedMatrix": "Topsoil",
-              "transitionSucceeded": true
+              "transitionSucceeded": true,
+              "readSucceeded": true
             },
             {
               "variant": "mineral.light",
@@ -13627,7 +13634,8 @@
               "parsedSampleId": "SMP-TEST-001",
               "parsedInputValue": 6.5,
               "parsedMatrix": "Topsoil",
-              "transitionSucceeded": true
+              "transitionSucceeded": true,
+              "readSucceeded": true
             },
             {
               "variant": "mineral.dark",
@@ -13646,7 +13654,8 @@
               "parsedSampleId": "SMP-TEST-001",
               "parsedInputValue": 6.5,
               "parsedMatrix": "Topsoil",
-              "transitionSucceeded": true
+              "transitionSucceeded": true,
+              "readSucceeded": true
             },
             {
               "variant": "watershed.light",
@@ -13665,7 +13674,8 @@
               "parsedSampleId": "SMP-TEST-001",
               "parsedInputValue": 6.5,
               "parsedMatrix": "Topsoil",
-              "transitionSucceeded": true
+              "transitionSucceeded": true,
+              "readSucceeded": true
             },
             {
               "variant": "watershed.dark",
@@ -13684,7 +13694,8 @@
               "parsedSampleId": "SMP-TEST-001",
               "parsedInputValue": 6.5,
               "parsedMatrix": "Topsoil",
-              "transitionSucceeded": true
+              "transitionSucceeded": true,
+              "readSucceeded": true
             },
             {
               "variant": "nutrient.light",
@@ -13703,7 +13714,8 @@
               "parsedSampleId": "SMP-TEST-001",
               "parsedInputValue": 6.5,
               "parsedMatrix": "Topsoil",
-              "transitionSucceeded": true
+              "transitionSucceeded": true,
+              "readSucceeded": true
             },
             {
               "variant": "nutrient.dark",
@@ -13722,7 +13734,8 @@
               "parsedSampleId": "SMP-TEST-001",
               "parsedInputValue": 6.5,
               "parsedMatrix": "Topsoil",
-              "transitionSucceeded": true
+              "transitionSucceeded": true,
+              "readSucceeded": true
             },
             {
               "variant": "clear-contrast.light",
@@ -13741,7 +13754,8 @@
               "parsedSampleId": "SMP-TEST-001",
               "parsedInputValue": 6.5,
               "parsedMatrix": "Topsoil",
-              "transitionSucceeded": true
+              "transitionSucceeded": true,
+              "readSucceeded": true
             },
             {
               "variant": "clear-contrast.dark",
@@ -13760,7 +13774,8 @@
               "parsedSampleId": "SMP-TEST-001",
               "parsedInputValue": 6.5,
               "parsedMatrix": "Topsoil",
-              "transitionSucceeded": true
+              "transitionSucceeded": true,
+              "readSucceeded": true
             }
           ],
           "all14VariantsPreserved": true

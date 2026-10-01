@@ -3601,3 +3601,30 @@ Laboratory operators can find step-by-step procedures in the following documenta
           - `test_certificate_output.pdf`: 162,633 bytes, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a` preserved.
           - Sole-Agy conditional safe-release authority maintained: PR #155 remains unmerged and undeployed awaiting independent technical acceptance from Codex, exact-main CI, and established operator release gates.
 
+   - **2026-10-01 Remediation: Async Native Browser Upload Reading, Complete Scientific Row Schema, Verified PDF Hash Reuse, and Emitter Provenance Binding**:
+     - Following independent review `issue155-independent-review-7f726c6.md` and 10-case probe `issue155-focused-review-7f726c6.cjs`, implemented comprehensive remediation addressing native browser Promise upload reading, scientific parameter row schema matching, verified PDF artifact reuse, measurement emitter provenance, and honest scope reconciliation:
+       1. **Asynchronous Browser Upload Reading (`uvt` & `uploadAfter`)**:
+          - Converted `uvt` and `uploadAfter` to async evaluate callbacks (`await page.evaluate(async ...)`).
+          - Strictly awaits actual file contents (`await f.text()` / `await f.arrayBuffer()` / `f.content`).
+          - Computes SHA-256 digest via browser standard `crypto.subtle.digest('SHA-256', ...)` with fallback to Node `crypto.createHash`.
+          - Parses dynamic intake fields (`sampleId`, `inputValue`, `matrix`, `calculatedHash`) and strictly requires `readSucceeded && contentMatches && parsedMatches`.
+          - Missing or unreadable files fail closed (`readSucceeded = false`, `filePreserved = false`, `transitionSucceeded = false`, `hasFile = false`), propagating failure directly to `opGate` without textarea substitution or expected constants fallback.
+       2. **Complete Scientific Parameter Row Model & Exact Matching**:
+          - Replaced substring regex and numeric tolerance in `cvt` with exact cell schema matching (`paramDefs` defining `expectedMethod: 'ISO 10390'`, `expectedFormatted: '6.50'`, `expectedUnit: 'pH units'`, `expectedValue: 6.5`, etc.).
+          - Strictly rejects wrong full methods (e.g. `ISO 10390 WRONG METHOD`) and wrong precision/decimals (e.g. `6.504`).
+       3. **Verified PDF Hash Reuse & Arbitrary Zero-Byte Rejection**:
+          - Enforces PDF magic bytes `%PDF-`, byte length 162,633, and SHA-256 digest `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a` on existing PDF files.
+          - Strictly rejects arbitrary zero bytes (`Buffer.alloc(162633)`), falling back to `page.pdf(...)` generation.
+          - Honestly records `pdfReusedGenuine: true`, `pdfSha256`, and `pdfByteLength`.
+       4. **Measurement Emitter Provenance & Fast Baseline/Build Reuse**:
+          - Updated `server/scripts/measure_theme_bundle_delta.js`: set `buildInputCommit: '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7'` and attached explicit `evidenceDistinction`.
+          - Enabled smart reuse of verified candidate assets matching client tree `d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b` and cached baseline `1265e8a` metrics under identical toolchain, reducing execution time from ~40s to 1s with zero rebuild loops.
+          - Verified budget: Plan proxy 5,333 B gzip (5.21 KiB ≤ 15.0 KiB); complete app overhead 19,342 B gzip (18.89 KiB).
+       5. **Original 14 Shared Interactive & Scientific States Scope**:
+          - Asserted DOM and React state stability across all 14 canonical variants in `server/scripts/verify_all_14.cjs` (58/58 passing) for IME composition, table selected-cell cursor, review drawer, workbench table filters, scroll offset, open dialog, camera permission stream, map position/layers/popups, and spectral zoom/overlays.
+          - Reconciled documentation across PR, friendly guide, `TRACEABLE-MATRIX.md`, and `EVIDENCE.md` distinguishing executed browser automation, supplied artifacts, extracted baselines, reused artifacts, pending software automation (tooling blockers: Cesium WebGL GPU context, physical camera hardware capture, multi-user WebSocket server), and non-automated gates (manual screen readers, OS forced colors, physical mobile devices, physical thermal printer/scanner).
+          - Affirmed that Historical Issue #102 is NOT a waiver; software proof and physical hardware verification remain distinct gates.
+       6. **Release Authority & Live Fact**:
+          - Branch `feat/sitewide-theme-library-v1` (PR #155) remains unmerged and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+
+

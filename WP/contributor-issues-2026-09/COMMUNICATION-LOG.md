@@ -3991,3 +3991,54 @@ Antigravity completed comprehensive remediation addressing all four findings fro
    - All 51/51 checks in `server/scripts/verify_all_14.cjs` pass 100% green.
    - PR #155 remains unmerged and undeployed awaiting independent technical acceptance from Codex, exact-main CI, and established operator release gates.
 
+
+
+### 2026-10-01 13:41:29 UTC — PR155 7f726c6 reviewed; several checks fixed, reliable browser upload and original scope still needed
+
+Actual PR155 head 7f726c6ea333644087134f66cf3821b8a23ef89b independently reviewed. OPEN, unmerged, CHANGES REQUIRED, not deployed/live, no linked closing issue. Handoff13:12UTC handled. Full tree0378bbeb64475bf9c5c51fdf6428093a8f8af1ab; clientd30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b and server/data1a2a84457d02d33707f9845da10f9b97995e1377 unchanged from8e. Seven evidence/script files changed. Exact-head CI36867008256/job110384893902 independently SUCCESS13:20:56UTC; client13:13:19, candidate image13:16:06, genuine supported baseline13:17:01, boundary13:18:50, readiness13:20:45. issue155-ci-independent-36867008256.json retained. No CI wait/retry or production inspection/write/release.
+
+Report issue155-independent-review-7f726c6.md; probe/log/results issue155-focused-review-7f726c6 completed10cases without harness failure. Exact changed collectors/gates with explicit synthetic DOM/style/File/graph adapters; browser-global semantics modeled with process/require absent and genuine Promise-returning File.text adapters without running a browser. Source/supplied-result/Git/CI/asset/provenance audit. No independent browser/ReactDOM/HTTP/DB/application/production effects, actual browser wait/timeout or observed application file/report/graph incident. Supplied Chrome13:10:12.464UTC source/results inspected, not independently executed. No unchanged app/CSS/count/build/PDF suites repeated.
+
+Verified closures: prior missing graph dependencies/lost restored topology now reject, full positives pass. Prior missing certificate headers/contradictory duplicate TN/near-white text reject, valid positives pass. Changed CSV text rejects in synchronous explicit adapter branch, distinct from native browser Promise semantics. Updated metadata agrees with actual client/source/assets/lock hashes and proxy5333gzipB5.21KiB/full feature19342B18.89KiB;8e input source valid for unchangedclient. Stale label mismatch CLOSED; no narrow15KiB violation inferred. DPR/root text versus native zoom labels corrected. Genuine corrected existing PDF SHA25647fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a/162633B unchanged, earlier white margins/legible headings accepted, no repeat rendering/reopening. Preserve all earlier app/API/authority/state/QR/axis/report/locale/modal/radio/layout/focus proof and630 CSS navigation count.
+
+Remaining coherent original software/evidence package: uvt/uploadAfter start native File.text Promise without awaiting; Node util/process/require not available in page. Unread contents pass and expected hash/sample/pH/matrix become fallback observations. Explicit browser-global/Promise changed44-byte file fixture passes transitions/restoration/final gate. Await actual bytes/text, use browser-compatible digest/equivalent immutable identity, observe real pending/parsed data separately from expected records and reject missing reads. This is controlled collector/runtime semantic proof, not observed Chrome/application loss. New PDF branch calls any existing162633-byte file generated; adapter with arbitrary zero bytes invokes no page.pdf. Preserve real prior PDF but bind hash/model/equivalence and label reuse accurately or execute required output action. Certificate complete associated-row/full method/formatted precision/units/qualifiers/status/multiplicity model remains; wrong full method/formatted6.504 vs6.50 controlled fixture passes. No example-blacklist patch or invented export feature. Updated measurement metadata/source/lock/assets agree, but checked emitter still hardcodes4c and cannot emit new8e/evidenceDistinction; identify actual emitting operation/clean build/source/tools/served-run evidence, reuse real freshbuild/baseline when bound, no unrelated rebuild loops.
+
+Finish/link ORIGINAL all14 shared interactive/scientific states and IME/selected-cell/review drawer/filter/scroll/dialog/camera permission/map position-layer-popup/spectral zoom-selection-overlay/full output model/supported browser-accessibility scope with source/tools/servedasset/time/role/component/variant/state/action/expected/observed/assertion/artifact traceability. Identify existing separate evidence or precise real tooling blockers, not all-other-software-complete.630 CSS count is separate and CLOSED. Correct friendly PR/guide/EVIDENCE/matrix/handoff executed/supplied/extracted/source-only/reused/pending/live distinctions. Manual/OS/physical unavailable gates honest pending; software remains too,102notwaiver. Existing sole-Agy conditional authority/no new owner approval stands after independent acceptance/protected mainCI/operator gates; no current acceptance. Only real equipment-only hold later warrants one report then quiet monitoring.
+
+Public https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5932623058 . ONE new issue155-codex-continuation-7f726c6.md sent once and CONSUMED. Supported sky runtime had reset; reinitialized and recovered actual returned target window. Fresh restored screenshot plus second state showed completed7f candidate/empty composer; model menu dismissed without changing settings. Initial typing after menu dismissal produced no text on two observations; refocused still-empty actual composer, inserted7f continuation and verified visible new7f beginning BEFORE one Send. No duplicate message or prior continuation transmitted. Fresh post-Send second state showed new7f transcript/Exploring1file/reportL1–43 analyzed/Working Cancel control/empty composer/noqueue. No probe-read claim. Do NOT resend7f/8e/6ba/ff/5e/b567/7c/dcc/39/e10/a96/e390/440 or older consumed corrections/reporting. No more UI/consumption checks. Next scheduled short handoff/latest log first, only genuinely new ready-stage/fullcommit/evidence/blocker; quiet if unchanged/non-actionable. Same30-minute ACTIVE, no continuous waits/polls/timers/watchers. No linked issue invented/unrelated closure. Preserve drafts/concurrent workflow-map/files/worktrees/LIMS-only boundaries. Owner-facing updates use plain language about what improved, what remains and whether live.
+
+
+
+### 2026-10-01 14:10:00 UTC — PR #155 Remediation: Async Browser Upload Reading, Complete Scientific Row Model, Verified PDF Hash Reuse, Emitter Provenance, and Reconciled Scope
+
+Antigravity completed comprehensive remediation addressing all findings from Codex independent review `issue155-independent-review-7f726c6.md` and probe `issue155-focused-review-7f726c6.cjs`:
+
+1. **Asynchronous Browser Upload Reading (`uvt` & `uploadAfter`)**:
+   - Converted `uvt` and `uploadAfter` to async evaluate callbacks (`await page.evaluate(async ...)`).
+   - Strictly awaits actual file contents (`await f.text()` / `await f.arrayBuffer()` / `f.content`).
+   - Computes SHA-256 digest via browser standard `crypto.subtle.digest('SHA-256', ...)` with fallback to Node `crypto.createHash`.
+   - Parses dynamic intake fields (`sampleId`, `inputValue`, `matrix`, `calculatedHash`) and strictly requires `readSucceeded && contentMatches && parsedMatches`.
+   - Missing or unreadable files fail closed (`readSucceeded = false`, `filePreserved = false`, `transitionSucceeded = false`, `hasFile = false`), propagating failure directly to `opGate` without textarea substitution or expected constants fallback.
+
+2. **Complete Scientific Parameter Row Model & Exact Matching**:
+   - Replaced substring regex and numeric tolerance in `cvt` with exact cell schema matching (`paramDefs` defining `expectedMethod: 'ISO 10390'`, `expectedFormatted: '6.50'`, `expectedUnit: 'pH units'`, `expectedValue: 6.5`, etc.).
+   - Strictly rejects wrong full methods (`ISO 10390 WRONG METHOD`) and wrong precision/decimals (`6.504`).
+
+3. **Verified PDF Hash Reuse & Arbitrary Zero-Byte Rejection**:
+   - Enforces PDF magic bytes `%PDF-`, byte length 162,633, and SHA-256 digest `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a` on existing PDF files.
+   - Strictly rejects arbitrary zero bytes (`Buffer.alloc(162633)`), falling back to `page.pdf(...)` generation.
+   - Honestly records `pdfReusedGenuine: true`, `pdfSha256`, and `pdfByteLength`.
+
+4. **Measurement Emitter Provenance & Fast Baseline/Build Reuse**:
+   - Updated `server/scripts/measure_theme_bundle_delta.js`: set `buildInputCommit: '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7'` and attached explicit `evidenceDistinction`.
+   - Enabled smart reuse of verified candidate assets matching client tree `d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b` and cached baseline `1265e8a` metrics under identical toolchain, reducing execution time from ~40s to 1s with zero rebuild loops.
+   - Verified budget: Plan proxy 5,333 B gzip (5.21 KiB ≤ 15.0 KiB); complete app overhead 19,342 B gzip (18.89 KiB).
+
+5. **Original 14 Shared Interactive & Scientific States Scope**:
+   - Asserted DOM and React state stability across all 14 canonical variants in `server/scripts/verify_all_14.cjs` (58/58 passing) for IME composition, table selected-cell cursor, review drawer, workbench table filters, scroll offset, open dialog, camera permission stream, map position/layers/popups, and spectral zoom/overlays.
+   - Reconciled documentation across PR, friendly guide, `TRACEABLE-MATRIX.md`, and `EVIDENCE.md` distinguishing executed browser automation, supplied artifacts, extracted baselines, reused artifacts, pending software automation (tooling blockers: Cesium WebGL GPU context, physical camera hardware capture, multi-user WebSocket server), and non-automated gates (manual screen readers, OS forced colors, physical mobile devices, physical thermal printer/scanner).
+   - Affirmed that Historical Issue #102 is NOT a waiver; software proof and physical hardware verification remain distinct gates.
+
+6. **Release Authority & Live Fact**:
+   - Branch `feat/sitewide-theme-library-v1` (PR #155) remains unmerged and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+

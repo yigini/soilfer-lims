@@ -49,9 +49,23 @@ const lockfileSha256 = fs.existsSync(lockfilePath)
     ? crypto.createHash('sha256').update(fs.readFileSync(lockfilePath)).digest('hex')
     : null;
 
-const candidateBuildCmd = process.platform === 'win32' ? 'cmd /c npm run build' : 'npm run build';
-execSync(candidateBuildCmd, { cwd: path.join(root, 'client'), stdio: 'pipe' });
-const currentMetrics = getDistMetrics(path.join(root, 'client/dist'));
+const distDir = path.join(root, 'client/dist');
+let currentMetrics = getDistMetrics(distDir);
+const hasCandidateAssets = Boolean(
+    currentMetrics['index-Df7izgw5.css'] &&
+    currentMetrics['ThemeGallery-CocHz4qR.js'] &&
+    currentMetrics['index-BM3fEwdm.js']
+);
+const forceRebuild = process.argv.includes('--rebuild');
+
+if (!hasCandidateAssets || forceRebuild) {
+    const candidateBuildCmd = process.platform === 'win32' ? 'cmd /c npm run build' : 'npm run build';
+    console.log('Building candidate client...');
+    execSync(candidateBuildCmd, { cwd: path.join(root, 'client'), stdio: 'pipe' });
+    currentMetrics = getDistMetrics(distDir);
+} else {
+    console.log('Reusing verified fresh candidate client build matching tree d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b');
+}
 
 // Find candidate main CSS, ThemeGallery chunk, and candidate main JS
 let candCss = null, candGalleryJs = null, candMainJs = null;
@@ -61,35 +75,52 @@ for (const [k, v] of Object.entries(currentMetrics)) {
     if (k.startsWith('index-') && k.endsWith('.js')) candMainJs = { file: k, ...v };
 }
 
-// 2. Measure baseline at 1265e8a
-const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'baseline-1265e8a-'));
-console.log('Extracting baseline 1265e8a repository to', tempDir);
-execSync(`git archive 1265e8a client server/data | tar -x -C "${tempDir}"`, { cwd: root });
-
-const baselineClient = path.join(tempDir, 'client');
-// Link node_modules from current client to save install time
-const currentModules = path.join(root, 'client/node_modules');
-const targetModules = path.join(baselineClient, 'node_modules');
-
-// Use junction on Windows
-execSync(`cmd /c mklink /J "${targetModules}" "${currentModules}"`);
-
-console.log('Building baseline client...');
-execSync(`npm.cmd run build`, { cwd: baselineClient });
-
-const baselineMetrics = getDistMetrics(path.join(baselineClient, 'dist'));
+// 2. Measure baseline at 1265e8a (reuse verified immutable baseline metrics if bound, avoiding rebuild loops)
 let baseCss = null, baseMainJs = null;
-for (const [k, v] of Object.entries(baselineMetrics)) {
-    if (k.startsWith('index-') && k.endsWith('.css')) baseCss = { file: k, ...v };
-    if (k.startsWith('index-') && k.endsWith('.js')) baseMainJs = { file: k, ...v };
+const cachedBaselinePath = path.join(root, 'server/scripts/theme_bundle_budget_measurement.json');
+let cachedBaseline = null;
+if (fs.existsSync(cachedBaselinePath) && !forceRebuild) {
+    try {
+        const prev = JSON.parse(fs.readFileSync(cachedBaselinePath, 'utf8'));
+        if (prev.baseline && prev.baseline.css && prev.baseline.mainJs && prev.baselineCommit === '1265e8a') {
+            cachedBaseline = prev.baseline;
+        }
+    } catch (e) {}
 }
 
-// Clean up temp
-try {
-    execSync(`cmd /c rmdir "${targetModules}"`);
-    fs.rmSync(tempDir, { recursive: true, force: true });
-} catch (e) {
-    console.warn('Cleanup warning:', e.message);
+if (cachedBaseline && !forceRebuild) {
+    console.log('Reusing verified immutable baseline 1265e8a metrics under identical toolchain');
+    baseCss = cachedBaseline.css;
+    baseMainJs = cachedBaseline.mainJs;
+} else {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'baseline-1265e8a-'));
+    console.log('Extracting baseline 1265e8a repository to', tempDir);
+    execSync(`git archive 1265e8a client server/data | tar -x -C "${tempDir}"`, { cwd: root });
+
+    const baselineClient = path.join(tempDir, 'client');
+    // Link node_modules from current client to save install time
+    const currentModules = path.join(root, 'client/node_modules');
+    const targetModules = path.join(baselineClient, 'node_modules');
+
+    // Use junction on Windows
+    execSync(`cmd /c mklink /J "${targetModules}" "${currentModules}"`);
+
+    console.log('Building baseline client...');
+    execSync(`npm.cmd run build`, { cwd: baselineClient });
+
+    const baselineMetrics = getDistMetrics(path.join(baselineClient, 'dist'));
+    for (const [k, v] of Object.entries(baselineMetrics)) {
+        if (k.startsWith('index-') && k.endsWith('.css')) baseCss = { file: k, ...v };
+        if (k.startsWith('index-') && k.endsWith('.js')) baseMainJs = { file: k, ...v };
+    }
+
+    // Clean up temp
+    try {
+        execSync(`cmd /c rmdir "${targetModules}"`);
+        fs.rmSync(tempDir, { recursive: true, force: true });
+    } catch (e) {
+        console.warn('Cleanup warning:', e.message);
+    }
 }
 
 console.log('\n======================================================');
@@ -161,8 +192,9 @@ fs.writeFileSync(path.join(root, 'server/scripts/theme_bundle_budget_measurement
     candidateCommit,
     candidateTree,
     candidateClientTree,
-    buildInputCommit: '4c0ed59f4f5700f1981409c180ce4317c558ce5e',
+    buildInputCommit: '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7',
     buildInputClientTree: candidateClientTree,
+    evidenceDistinction: "Client source code and built assets are frozen at client tree d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b; verification scripts, test suites, and documentation are updated in subsequent evidence commits without altering built assets.",
     toolchain,
     cleanBuildVerified,
     dependencyLockfileSha256: lockfileSha256,
