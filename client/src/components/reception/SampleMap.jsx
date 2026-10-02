@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import { MapPinOff, AlertTriangle, Maximize2, Minimize2, Layers } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
@@ -132,7 +132,7 @@ const SampleMap = ({ coordinates, title, uncertaintyM, labCoordinates, countryCo
 
     const lat = parseFloat(coordinates.lat);
     const lng = parseFloat(coordinates.lng);
-    const position = useMemo(() => [lat, lng], [lat, lng]);
+    const position = [lat, lng];
     const uncertainty = uncertaintyM || coordinates.positionalUncertaintyM || coordinates.accuracy;
 
     const currentTileConfig = layer === 'satellite' ? SATELLITE_TILE_CONFIG : OSM_TILE_CONFIG;
