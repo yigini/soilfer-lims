@@ -2663,10 +2663,11 @@ async function runBrowserEvidence() {
                 }
                 const contentMatches = Boolean(readSucceeded && fileText && fileText.trim() === expectedContent.trim() && calculatedHash === expectedHash);
                 const hasFile = Boolean(f && f.name === 'test_sample_import.csv' && (typeof f.size !== 'number' || f.size === 44) && contentMatches);
-                const hasTextareaContent = Boolean(textareaVal && textareaVal.includes('SMP-TEST-001') && textareaVal.includes('6.5') && textareaVal.includes('Topsoil'));
+                const draftMatches = Boolean(textareaVal && textareaVal.trim() === expectedContent.trim());
+                const hasTextareaContent = draftMatches;
                 const themeApplied = Boolean(appliedTheme === theme && appliedMode === mode);
                 const noticeVisible = Boolean(notice);
-                const transitionSucceeded = Boolean(themeApplied && noticeVisible && hasFile && hasTextareaContent);
+                const transitionSucceeded = Boolean(themeApplied && noticeVisible && hasFile && draftMatches);
 
                 return {
                     variant: `${theme}.${mode}`,
@@ -2680,6 +2681,8 @@ async function runBrowserEvidence() {
                     fileName: f ? f.name : null,
                     fileSize: f ? f.size : null,
                     contentMatches,
+                    draftText: textareaVal,
+                    draftMatches,
                     hasTextareaContent,
                     transitionSucceeded
                 };
@@ -2732,13 +2735,16 @@ async function runBrowserEvidence() {
                     }
                 }
                 const contentMatches = Boolean(readSucceeded && fileText && fileText.trim() === expectedContent.trim() && calculatedHash === expectedHash);
-                const hasTextareaContent = Boolean(textareaVal && textareaVal.includes('SMP-TEST-001'));
-                const preserved = Boolean(!notice && appliedTheme === 'forest' && appliedMode === 'light' && contentMatches && hasTextareaContent);
+                const draftMatches = Boolean(textareaVal && textareaVal.trim() === expectedContent.trim());
+                const hasTextareaContent = draftMatches;
+                const preserved = Boolean(!notice && appliedTheme === 'forest' && appliedMode === 'light' && contentMatches && draftMatches);
                 return {
                     appliedTheme,
                     appliedMode,
                     noticeVisible: Boolean(notice),
                     contentMatches,
+                    draftText: textareaVal,
+                    draftMatches,
                     hasTextareaContent,
                     preserved
                 };
@@ -3623,13 +3629,13 @@ async function runBrowserEvidence() {
                     v.parsedState.mappingSelections.sampleId !== 'pH' &&
                     v.parsedState.mappingSelections.sampleId !== 'matrix' &&
                     Array.isArray(v.parsedState.sampleRows) &&
-                    v.parsedState.sampleRows.length >= 1 &&
+                    v.parsedState.sampleRows.length === 1 &&
                     v.parsedState.sampleRows.every(r => r && r.sampleId === 'SMP-TEST-001' && r.pH === 6.5 && r.matrix === 'Topsoil') &&
                     Array.isArray(v.parsedState.mappingRows) &&
                     v.parsedState.mappingRows.length >= 2 &&
-                    v.parsedState.mappingRows.some(r => r.column === 'pH' && (r.targetParameter === 'PH_H2O' || r.analysisCode === 'PH_H2O') && r.status === 'Ready') &&
+                    v.parsedState.mappingRows.some(r => r.column === 'pH' && (r.targetParameter === 'PH_H2O' || r.analysisCode === 'PH_H2O') && r.methodologyId === 'ph-water-sop' && r.unitCode === 'PH_UNIT' && r.status === 'Ready') &&
                     v.parsedState.mappingRows.some(r => r.column === 'matrix' && r.status === 'Incomplete') &&
-                    !v.parsedState.mappingRows.some(r => r.column === 'unrelated' || r.targetParameter === 'wrong' || r.column === 'OTHER COLUMN' || r.column === 'WRONG COLUMN' || (r.column === 'pH' && (r.targetParameter === 'OC' || r.analysisCode === 'OC' || r.status === 'Incomplete')))
+                    !v.parsedState.mappingRows.some(r => r.column === 'unrelated' || r.targetParameter === 'wrong' || r.column === 'OTHER COLUMN' || r.column === 'WRONG COLUMN' || (r.column === 'pH' && (r.targetParameter === 'OC' || r.analysisCode === 'OC' || r.status === 'Incomplete' || r.methodologyId !== 'ph-water-sop' || r.unitCode !== 'PH_UNIT')))
                 ) &&
                 uploadDetails.pendingFilePreserved === true &&
                 uploadDetails.preparseAll14Preserved === true &&
@@ -3641,12 +3647,14 @@ async function runBrowserEvidence() {
                     v.transitionSucceeded === true &&
                     v.pendingFilePreserved === true &&
                     v.contentMatches === true &&
-                    v.hasTextareaContent === true
+                    v.hasTextareaContent === true &&
+                    (!('draftMatches' in v) || v.draftMatches === true)
                 ) &&
                 uploadDetails.preparseAfterExit &&
                 uploadDetails.preparseAfterExit.preserved === true &&
                 uploadDetails.preparseAfterExit.contentMatches === true &&
                 uploadDetails.preparseAfterExit.hasTextareaContent === true &&
+                (!('draftMatches' in uploadDetails.preparseAfterExit) || uploadDetails.preparseAfterExit.draftMatches === true) &&
                 uploadDetails.afterExit &&
                 uploadDetails.afterExit.hasFile === true &&
                 uploadDetails.afterExit.readSucceeded === true &&
@@ -3668,13 +3676,13 @@ async function runBrowserEvidence() {
                 uploadDetails.afterExit.parsedState.mappingSelections.sampleId !== 'pH' &&
                 uploadDetails.afterExit.parsedState.mappingSelections.sampleId !== 'matrix' &&
                 Array.isArray(uploadDetails.afterExit.parsedState.sampleRows) &&
-                uploadDetails.afterExit.parsedState.sampleRows.length >= 1 &&
+                uploadDetails.afterExit.parsedState.sampleRows.length === 1 &&
                 uploadDetails.afterExit.parsedState.sampleRows.every(r => r && r.sampleId === 'SMP-TEST-001' && r.pH === 6.5 && r.matrix === 'Topsoil') &&
                 Array.isArray(uploadDetails.afterExit.parsedState.mappingRows) &&
                 uploadDetails.afterExit.parsedState.mappingRows.length >= 2 &&
-                uploadDetails.afterExit.parsedState.mappingRows.some(r => r.column === 'pH' && (r.targetParameter === 'PH_H2O' || r.analysisCode === 'PH_H2O') && r.status === 'Ready') &&
+                uploadDetails.afterExit.parsedState.mappingRows.some(r => r.column === 'pH' && (r.targetParameter === 'PH_H2O' || r.analysisCode === 'PH_H2O') && r.methodologyId === 'ph-water-sop' && r.unitCode === 'PH_UNIT' && r.status === 'Ready') &&
                 uploadDetails.afterExit.parsedState.mappingRows.some(r => r.column === 'matrix' && r.status === 'Incomplete') &&
-                !uploadDetails.afterExit.parsedState.mappingRows.some(r => r.column === 'unrelated' || r.targetParameter === 'wrong' || r.column === 'OTHER COLUMN' || r.column === 'WRONG COLUMN' || (r.column === 'pH' && (r.targetParameter === 'OC' || r.analysisCode === 'OC' || r.status === 'Incomplete'))) &&
+                !uploadDetails.afterExit.parsedState.mappingRows.some(r => r.column === 'unrelated' || r.targetParameter === 'wrong' || r.column === 'OTHER COLUMN' || r.column === 'WRONG COLUMN' || (r.column === 'pH' && (r.targetParameter === 'OC' || r.analysisCode === 'OC' || r.status === 'Incomplete' || r.methodologyId !== 'ph-water-sop' || r.unitCode !== 'PH_UNIT'))) &&
                 (() => {
                     const mapState = (typeof geographicMapState !== 'undefined') ? geographicMapState : (uploadDetails && uploadDetails.geographicMapState);
                     return Boolean(
@@ -5701,11 +5709,10 @@ async function runBrowserEvidence() {
                 const expGrid1 = Array.from({ length: NUM_GRID_PTS }, (_, i) => interp(rawScan1, 400 + i * gridStep));
                 const expGrid2 = Array.from({ length: NUM_GRID_PTS }, (_, i) => interp(rawScan2, 400 + i * gridStep));
 
-                function matchSeries(ptsY, expected) {
-                    if (ptsY.length !== expected.length) return false;
+                function fitCalibration(ptsY, expected) {
+                    if (!ptsY || !expected || ptsY.length !== expected.length) return null;
                     const directDiff = Math.max(...ptsY.map((y, i) => Math.abs(y - expected[i])));
-                    if (directDiff < 0.05) return true;
-
+                    if (directDiff < 0.05) return { A: 1, B: 0 };
                     const n = ptsY.length;
                     const meanY = ptsY.reduce((a, b) => a + b, 0) / n;
                     const meanE = expected.reduce((a, b) => a + b, 0) / n;
@@ -5717,18 +5724,30 @@ async function runBrowserEvidence() {
                         varE += de * de;
                         varY += dy * dy;
                     }
-                    if (varE < 1e-6 || varY < 1e-6) return false;
+                    if (varE < 1e-6 || varY < 1e-6) return null;
                     const r2 = (cov * cov) / (varE * varY);
                     const A = cov / varE;
                     const B = meanY - A * meanE;
-                    if (A >= 0) return false;
-                    if (r2 < 0.90) return false;
+                    if (A >= 0 || r2 < 0.90) return null;
                     const maxCalDiff = Math.max(...ptsY.map((y, i) => Math.abs((y - B) / A - expected[i])));
-                    return maxCalDiff < 0.08;
+                    if (maxCalDiff >= 0.08) return null;
+                    return { A, B };
                 }
 
-                function matchesScanModel(ptsY, expModel) {
-                    return matchSeries(ptsY, expModel) || matchSeries(ptsY, [...expModel].reverse());
+                function checkSharedModel(yA, yB, refA, refB) {
+                    let cal = fitCalibration(yA, refA);
+                    if (cal) {
+                        const maxDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
+                        if (maxDiffB < 0.08) return true;
+                    }
+                    const revA = [...refA].reverse();
+                    const revB = [...refB].reverse();
+                    cal = fitCalibration(yA, revA);
+                    if (cal) {
+                        const maxDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - revB[i])));
+                        if (maxDiffB < 0.08) return true;
+                    }
+                    return false;
                 }
 
                 const curvePointSets = [];
@@ -5754,9 +5773,15 @@ async function runBrowserEvidence() {
                     const isStrictlyDecreasing = pts.every((p, i) => i === 0 || p.x < pts[i - 1].x);
                     if (!isStrictlyIncreasing && !isStrictlyDecreasing) return false;
 
+                    const x0 = pts[0].x;
+                    const xN = pts[pts.length - 1].x;
+                    const step = (xN - x0) / (pts.length - 1);
+                    const isUniformX = pts.every((p, i) => Math.abs(p.x - (x0 + i * step)) <= Math.max(1.5, 0.02 * spanX));
+                    if (!isUniformX) return false;
+
                     const ptsY = pts.map(p => p.y);
-                    const isScan1 = matchesScanModel(ptsY, expGrid1);
-                    const isScan2 = matchesScanModel(ptsY, expGrid2);
+                    const isScan1 = Boolean(fitCalibration(ptsY, expGrid1) || fitCalibration(ptsY, [...expGrid1].reverse()));
+                    const isScan2 = Boolean(fitCalibration(ptsY, expGrid2) || fitCalibration(ptsY, [...expGrid2].reverse()));
                     if (!isScan1 && !isScan2) return false;
 
                     curvePointSets.push(pts);
@@ -5770,22 +5795,31 @@ async function runBrowserEvidence() {
                     const maxDiffY = Math.max(...pts0.map((p, i) => Math.abs(p.y - pts1[i].y)));
                     const y0 = pts0.map(p => p.y);
                     const y1 = pts1.map(p => p.y);
-                    const match01 = matchesScanModel(y0, expGrid1) && matchesScanModel(y1, expGrid2);
-                    const match10 = matchesScanModel(y0, expGrid2) && matchesScanModel(y1, expGrid1);
-                    distinctSeriesVerified = Boolean(maxDiffY > 0.5 && (match01 || match10));
+                    const sharedModelValid = checkSharedModel(y0, y1, expGrid1, expGrid2) || checkSharedModel(y0, y1, expGrid2, expGrid1);
+                    distinctSeriesVerified = Boolean(maxDiffY > 0.5 && sharedModelValid);
                 }
 
                 const curveModelVerified = Boolean(validCurves.length >= 2 && distinctSeriesVerified);
 
                 const yAxisEl = document.querySelector ? document.querySelector('.recharts-yAxis, [class*="yAxis"]') : null;
                 const xAxisEl = document.querySelector ? document.querySelector('.recharts-xAxis, [class*="xAxis"]') : null;
-                const xTicks = document.querySelectorAll ? document.querySelectorAll('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick') : [];
-                const yTicks = document.querySelectorAll ? document.querySelectorAll('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick') : [];
+                function extractNumericTicks(selector, el) {
+                    const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
+                    const texts = Array.from(nodes).map(n => (n.textContent || '').trim()).filter(Boolean);
+                    if (texts.length === 0 && el && el.textContent) {
+                        texts.push(...(el.textContent.match(/-?\d+(?:\.\d+)?/g) || []));
+                    }
+                    return texts.map(t => parseFloat(t)).filter(n => !isNaN(n) && isFinite(n));
+                }
+                const xTickVals = extractNumericTicks('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', xAxisEl);
+                const yTickVals = extractNumericTicks('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', yAxisEl);
                 const axesVerified = Boolean(
                     xAxisEl &&
                     yAxisEl &&
-                    (xTicks.length > 0 || (xAxisEl.textContent && xAxisEl.textContent.trim().length > 0)) &&
-                    (yTicks.length > 0 || (yAxisEl.textContent && yAxisEl.textContent.trim().length > 0))
+                    xTickVals.length > 0 &&
+                    xTickVals.some(v => v >= 400 && v <= 4000) &&
+                    yTickVals.length > 0 &&
+                    yTickVals.some(v => v >= 0 && v <= 3.5)
                 );
 
                 const hasValidScans = selectedScanIds.length >= 2 &&
@@ -5900,10 +5934,10 @@ async function runBrowserEvidence() {
                     const expGrid1 = Array.from({ length: NUM_GRID_PTS }, (_, i) => interp(rawScan1, 400 + i * gridStep));
                     const expGrid2 = Array.from({ length: NUM_GRID_PTS }, (_, i) => interp(rawScan2, 400 + i * gridStep));
 
-                    function matchSeries(ptsY, expected) {
-                        if (!ptsY || !expected || ptsY.length !== expected.length) return false;
+                    function fitCalibration(ptsY, expected) {
+                        if (!ptsY || !expected || ptsY.length !== expected.length) return null;
                         const directDiff = Math.max(...ptsY.map((y, i) => Math.abs(y - expected[i])));
-                        if (directDiff < 0.05) return true;
+                        if (directDiff < 0.05) return { A: 1, B: 0 };
                         const n = ptsY.length;
                         const meanY = ptsY.reduce((a, b) => a + b, 0) / n;
                         const meanE = expected.reduce((a, b) => a + b, 0) / n;
@@ -5915,17 +5949,30 @@ async function runBrowserEvidence() {
                             varE += de * de;
                             varY += dy * dy;
                         }
-                        if (varE < 1e-6 || varY < 1e-6) return false;
+                        if (varE < 1e-6 || varY < 1e-6) return null;
                         const r2 = (cov * cov) / (varE * varY);
                         const A = cov / varE;
                         const B = meanY - A * meanE;
-                        if (A >= 0) return false;
-                        if (r2 < 0.90) return false;
+                        if (A >= 0 || r2 < 0.90) return null;
                         const maxCalDiff = Math.max(...ptsY.map((y, i) => Math.abs((y - B) / A - expected[i])));
-                        return maxCalDiff < 0.08;
+                        if (maxCalDiff >= 0.08) return null;
+                        return { A, B };
                     }
-                    function matchesScanModel(ptsY, expModel) {
-                        return matchSeries(ptsY, expModel) || matchSeries(ptsY, [...expModel].reverse());
+
+                    function checkSharedModel(yA, yB, refA, refB) {
+                        let cal = fitCalibration(yA, refA);
+                        if (cal) {
+                            const maxDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
+                            if (maxDiffB < 0.08) return true;
+                        }
+                        const revA = [...refA].reverse();
+                        const revB = [...refB].reverse();
+                        cal = fitCalibration(yA, revA);
+                        if (cal) {
+                            const maxDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - revB[i])));
+                            if (maxDiffB < 0.08) return true;
+                        }
+                        return false;
                     }
 
                     const curvePointSets = [];
@@ -5951,9 +5998,15 @@ async function runBrowserEvidence() {
                         const isStrictlyDecreasing = pts.every((p, i) => i === 0 || p.x < pts[i - 1].x);
                         if (!isStrictlyIncreasing && !isStrictlyDecreasing) return false;
 
+                        const x0 = pts[0].x;
+                        const xN = pts[pts.length - 1].x;
+                        const step = (xN - x0) / (pts.length - 1);
+                        const isUniformX = pts.every((p, i) => Math.abs(p.x - (x0 + i * step)) <= Math.max(1.5, 0.02 * spanX));
+                        if (!isUniformX) return false;
+
                         const ptsY = pts.map(p => p.y);
-                        const isScan1 = matchesScanModel(ptsY, expGrid1);
-                        const isScan2 = matchesScanModel(ptsY, expGrid2);
+                        const isScan1 = Boolean(fitCalibration(ptsY, expGrid1) || fitCalibration(ptsY, [...expGrid1].reverse()));
+                        const isScan2 = Boolean(fitCalibration(ptsY, expGrid2) || fitCalibration(ptsY, [...expGrid2].reverse()));
                         if (!isScan1 && !isScan2) return false;
 
                         curvePointSets.push(pts);
@@ -5967,12 +6020,34 @@ async function runBrowserEvidence() {
                         const maxDiffY = Math.max(...pts0.map((p, i) => Math.abs(p.y - pts1[i].y)));
                         const y0 = pts0.map(p => p.y);
                         const y1 = pts1.map(p => p.y);
-                        const match01 = matchesScanModel(y0, expGrid1) && matchesScanModel(y1, expGrid2);
-                        const match10 = matchesScanModel(y0, expGrid2) && matchesScanModel(y1, expGrid1);
-                        distinctSeriesVerified = Boolean(maxDiffY > 0.5 && (match01 || match10));
+                        const sharedModelValid = checkSharedModel(y0, y1, expGrid1, expGrid2) || checkSharedModel(y0, y1, expGrid2, expGrid1);
+                        distinctSeriesVerified = Boolean(maxDiffY > 0.5 && sharedModelValid);
                     }
 
-                    const modelVerified = Boolean(validCurves.length >= 2 && distinctSeriesVerified);
+                    const curveModelVerified = Boolean(validCurves.length >= 2 && distinctSeriesVerified);
+
+                    const yAxisEl = document.querySelector ? document.querySelector('.recharts-yAxis, [class*="yAxis"]') : null;
+                    const xAxisEl = document.querySelector ? document.querySelector('.recharts-xAxis, [class*="xAxis"]') : null;
+                    function extractNumericTicks(selector, el) {
+                        const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
+                        const texts = Array.from(nodes).map(n => (n.textContent || '').trim()).filter(Boolean);
+                        if (texts.length === 0 && el && el.textContent) {
+                            texts.push(...(el.textContent.match(/-?\d+(?:\.\d+)?/g) || []));
+                        }
+                        return texts.map(t => parseFloat(t)).filter(n => !isNaN(n) && isFinite(n));
+                    }
+                    const xTickVals = extractNumericTicks('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', xAxisEl);
+                    const yTickVals = extractNumericTicks('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', yAxisEl);
+                    const axesVerified = Boolean(
+                        xAxisEl &&
+                        yAxisEl &&
+                        xTickVals.length > 0 &&
+                        xTickVals.some(v => v >= 400 && v <= 4000) &&
+                        yTickVals.length > 0 &&
+                        yTickVals.some(v => v >= 0 && v <= 3.5)
+                    );
+
+                    const modelVerified = Boolean(curveModelVerified && axesVerified);
                     const transitionSucceeded = Boolean(appliedTheme === theme && appliedMode === mode && Boolean(notice) && curves.length >= 2 && modelVerified);
 
                     return {
@@ -6051,10 +6126,10 @@ async function runBrowserEvidence() {
                     const expGrid1 = Array.from({ length: NUM_GRID_PTS }, (_, i) => interp(rawScan1, 400 + i * gridStep));
                     const expGrid2 = Array.from({ length: NUM_GRID_PTS }, (_, i) => interp(rawScan2, 400 + i * gridStep));
 
-                    function matchSeries(ptsY, expected) {
-                        if (!ptsY || !expected || ptsY.length !== expected.length) return false;
+                    function fitCalibration(ptsY, expected) {
+                        if (!ptsY || !expected || ptsY.length !== expected.length) return null;
                         const directDiff = Math.max(...ptsY.map((y, i) => Math.abs(y - expected[i])));
-                        if (directDiff < 0.05) return true;
+                        if (directDiff < 0.05) return { A: 1, B: 0 };
                         const n = ptsY.length;
                         const meanY = ptsY.reduce((a, b) => a + b, 0) / n;
                         const meanE = expected.reduce((a, b) => a + b, 0) / n;
@@ -6066,17 +6141,30 @@ async function runBrowserEvidence() {
                             varE += de * de;
                             varY += dy * dy;
                         }
-                        if (varE < 1e-6 || varY < 1e-6) return false;
+                        if (varE < 1e-6 || varY < 1e-6) return null;
                         const r2 = (cov * cov) / (varE * varY);
                         const A = cov / varE;
                         const B = meanY - A * meanE;
-                        if (A >= 0) return false;
-                        if (r2 < 0.90) return false;
+                        if (A >= 0 || r2 < 0.90) return null;
                         const maxCalDiff = Math.max(...ptsY.map((y, i) => Math.abs((y - B) / A - expected[i])));
-                        return maxCalDiff < 0.08;
+                        if (maxCalDiff >= 0.08) return null;
+                        return { A, B };
                     }
-                    function matchesScanModel(ptsY, expModel) {
-                        return matchSeries(ptsY, expModel) || matchSeries(ptsY, [...expModel].reverse());
+
+                    function checkSharedModel(yA, yB, refA, refB) {
+                        let cal = fitCalibration(yA, refA);
+                        if (cal) {
+                            const maxDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
+                            if (maxDiffB < 0.08) return true;
+                        }
+                        const revA = [...refA].reverse();
+                        const revB = [...refB].reverse();
+                        cal = fitCalibration(yA, revA);
+                        if (cal) {
+                            const maxDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - revB[i])));
+                            if (maxDiffB < 0.08) return true;
+                        }
+                        return false;
                     }
 
                     const curvePointSets = [];
@@ -6102,9 +6190,15 @@ async function runBrowserEvidence() {
                         const isStrictlyDecreasing = pts.every((p, i) => i === 0 || p.x < pts[i - 1].x);
                         if (!isStrictlyIncreasing && !isStrictlyDecreasing) return false;
 
+                        const x0 = pts[0].x;
+                        const xN = pts[pts.length - 1].x;
+                        const step = (xN - x0) / (pts.length - 1);
+                        const isUniformX = pts.every((p, i) => Math.abs(p.x - (x0 + i * step)) <= Math.max(1.5, 0.02 * spanX));
+                        if (!isUniformX) return false;
+
                         const ptsY = pts.map(p => p.y);
-                        const isScan1 = matchesScanModel(ptsY, expGrid1);
-                        const isScan2 = matchesScanModel(ptsY, expGrid2);
+                        const isScan1 = Boolean(fitCalibration(ptsY, expGrid1) || fitCalibration(ptsY, [...expGrid1].reverse()));
+                        const isScan2 = Boolean(fitCalibration(ptsY, expGrid2) || fitCalibration(ptsY, [...expGrid2].reverse()));
                         if (!isScan1 && !isScan2) return false;
 
                         curvePointSets.push(pts);
@@ -6118,12 +6212,34 @@ async function runBrowserEvidence() {
                         const maxDiffY = Math.max(...pts0.map((p, i) => Math.abs(p.y - pts1[i].y)));
                         const y0 = pts0.map(p => p.y);
                         const y1 = pts1.map(p => p.y);
-                        const match01 = matchesScanModel(y0, expGrid1) && matchesScanModel(y1, expGrid2);
-                        const match10 = matchesScanModel(y0, expGrid2) && matchesScanModel(y1, expGrid1);
-                        distinctSeriesVerified = Boolean(maxDiffY > 0.5 && (match01 || match10));
+                        const sharedModelValid = checkSharedModel(y0, y1, expGrid1, expGrid2) || checkSharedModel(y0, y1, expGrid2, expGrid1);
+                        distinctSeriesVerified = Boolean(maxDiffY > 0.5 && sharedModelValid);
                     }
 
-                    const modelVerified = Boolean(validCurves.length >= 2 && distinctSeriesVerified);
+                    const curveModelVerified = Boolean(validCurves.length >= 2 && distinctSeriesVerified);
+
+                    const yAxisEl = document.querySelector ? document.querySelector('.recharts-yAxis, [class*="yAxis"]') : null;
+                    const xAxisEl = document.querySelector ? document.querySelector('.recharts-xAxis, [class*="xAxis"]') : null;
+                    function extractNumericTicks(selector, el) {
+                        const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
+                        const texts = Array.from(nodes).map(n => (n.textContent || '').trim()).filter(Boolean);
+                        if (texts.length === 0 && el && el.textContent) {
+                            texts.push(...(el.textContent.match(/-?\d+(?:\.\d+)?/g) || []));
+                        }
+                        return texts.map(t => parseFloat(t)).filter(n => !isNaN(n) && isFinite(n));
+                    }
+                    const xTickVals = extractNumericTicks('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', xAxisEl);
+                    const yTickVals = extractNumericTicks('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', yAxisEl);
+                    const axesVerified = Boolean(
+                        xAxisEl &&
+                        yAxisEl &&
+                        xTickVals.length > 0 &&
+                        xTickVals.some(v => v >= 400 && v <= 4000) &&
+                        yTickVals.length > 0 &&
+                        yTickVals.some(v => v >= 0 && v <= 3.5)
+                    );
+
+                    const modelVerified = Boolean(curveModelVerified && axesVerified);
 
                     return {
                         mounted: Boolean(curves.length >= 2 && modelVerified),
