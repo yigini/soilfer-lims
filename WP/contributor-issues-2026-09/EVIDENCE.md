@@ -3765,3 +3765,65 @@ Laboratory operators can find step-by-step procedures in the following documenta
            - Candidate Server/Data Tree: `1a2a84457d02d33707f9845da10f9b97995e1377` (strictly frozen byte-for-byte, zero mutation).
            - Manual screen reader, OS contrast, physical mobile hardware, and physical thermal printer remain pending physical/operator gates (Issue #102 is NOT a waiver).
            - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+    - **2026-10-02 Remediation (Review 7892196): 1-to-1 Overlay Model Separation, Strict Axis Domains, Mapping Row Multiplicity, and Mandatory Draft Observations**:
+      - Following Codex independent review `issue155-independent-review-7892196.md` and 6-case probe `issue155-focused-review-7892196.cjs`:
+        1. **1-to-1 Overlay Model Separation & Replicate Distinction**:
+           - Replaced shared tolerance of 0.08 with strict 1-to-1 model separation: `diffA < 0.008 && diffB < 0.008 && crossDiffA > 0.015 && crossDiffB > 0.015`. A 1-pixel offset duplicate of the baseline curve strictly fails model verification (`distinctSeriesVerified: false`, `curveModelVerified: false`, `modelVerified: false`).
+        2. **Strict Numeric Axis Tick Domains**:
+           - Enforced that all extracted axis tick numbers fall strictly within their valid physical domains across initial, all 14 transitions, and after exit: X-axis ticks require `xTickVals.length >= 2 && xTickVals.every(v => v >= 400 && v <= 4000)` and Y-axis ticks require `yTickVals.length >= 2 && yTickVals.every(v => v >= 0 && v <= 3.5)`. Plausible-tick sets with out-of-range boundaries (such as X ticks `[400, 99999]` or Y ticks `[0, 100]`) are strictly rejected (`axesVerified: false`, `modelVerified: false`).
+        3. **Mapping Row Multiplicity & Column Schema**:
+           - In `opGate`, strictly enforced complete mapping row multiplicity and schema: `mappingRows.length === 2 && mappingRows.length === rowCount`, `filter(r => r.column === 'pH').length === 1`, and `filter(r => r.column === 'matrix').length === 1`. Duplicated mapping rows are strictly rejected by the operational gate.
+        4. **Mandatory Positive Draft Observations**:
+           - In `opGate`, replaced optional draft guards with mandatory positive draft verification: `v.draftMatches === true && typeof v.draftText === 'string'` across all 14 preparse transitions and `uploadDetails.preparseAfterExit.draftMatches === true && typeof uploadDetails.preparseAfterExit.draftText === 'string'`. Deletion or absence of draft observations fails closed.
+    - **2026-10-03 Remediation (Review 3a323da): Scientific Axis Domain Coverage, Unassigned Matrix Association Preservation, Complete Draft Equality Gate, and Full 14-Item Operating Stage Reconciliation**:
+      - Following Codex independent review `issue155-independent-review-3a323da.md` and 5-case probe `issue155-focused-review-3a323da.cjs`:
+        1. **Strict Scientific Axis Domain Coverage & Truncated Axis Rejection (Finding 1)**:
+           - In `server/scripts/verify_issue155_browser_journeys.cjs`, `multiOverlayState`, `ovt`, and `multiOverlayState.afterExit` enforce that observed axis ticks span the actual scientific reference models:
+             * X-axis ticks must span the full $[400, 4000] \text{ cm}^{-1}$ domain: `minObsX <= 1500 && maxObsX >= 3500 && (maxObsX - minObsX) >= 2000`.
+             * Y-axis ticks must cover the $[0, 1.20] \text{ AU}$ absorbance range: `minObsY <= 0.50 && maxObsY <= 1.50 && (maxObsY - minObsY) >= 0.50`.
+           - Physically plausible but truncated ticks like $X \in [600, 700]$ (span 100) and $Y \in [2, 3]$ (absorbance 2 to 3, detached from baseline) are strictly rejected (`initialAxesVerified: false`, `transitionModelVerified: false`, `exitModelVerified: false`).
+        2. **Unfinished Matrix Mapping State Preservation (Finding 2)**:
+           - In `opGate`, strictly enforced that the genuine unassigned fixture state for `matrix` is preserved without mutation:
+             `r.column === 'matrix' && r.status === 'Incomplete' && (!r.targetParameter || r.targetParameter === '') && (!r.analysisCode || r.analysisCode === '') && (!r.methodologyId || r.methodologyId === '') && (!r.unitCode || r.unitCode === '')`
+           - Rejects changing the unassigned matrix selection to `TN / nitrogen-sop / Incomplete` (`opAccept` strictly returns false).
+        3. **Complete Draft Text Equality in Final Gate (Finding 3)**:
+           - In `opGate`, strictly enforces complete draft text equality:
+             `v.draftMatches === true && typeof v.draftText === 'string' && v.draftText.trim() === 'sampleId,pH,matrix\nSMP-TEST-001,6.5,Topsoil'`
+             across all 14 preparse transitions and `uploadDetails.preparseAfterExit.draftText.trim() === 'sampleId,pH,matrix\nSMP-TEST-001,6.5,Topsoil'`.
+           - Mutating draft text to `SMP-OTHER,99,Subsoil` while retaining stale `draftMatches: true` is strictly rejected (`opAccept` returns false).
+        4. **SampleMap Non-Default Pan/Zoom Exact Software Blocker (Finding 4)**:
+           - In `client/src/components/reception/SampleMap.jsx`:
+             * Line 135: `const position = [lat, lng];`
+             * Line 190: `<ChangeView center={position} />`
+             * Lines 29–35:
+               ```javascript
+               const ChangeView = ({ center }) => {
+                   const map = useMap();
+                   useEffect(() => {
+                       if (center && Number.isFinite(center[0]) && Number.isFinite(center[1])) {
+                           map.setView(center, 13);
+                       }
+                   }, [center, map]);
+                   return null;
+               };
+               ```
+             * Because `position` is re-allocated as a new array reference on every render pass of `SampleMap` (`[lat, lng] !== [lat, lng]`), `ChangeView`'s `useEffect` forcibly resets `map.setView(center, 13)`.
+             * Because the client tree `c7557a2b3b74f077244fd0cee9e55e05edf21671` is strictly frozen, modifying `SampleMap.jsx` (e.g. adding `useMemo` on `position` or view-state retention) is prohibited. This constitutes an exact, source-supported software blocker for preserving non-default pan/zoom through component re-render. The runner legitimately observes the default view with live Leaflet getters (`getCenter()`, `getZoom()`), marker, popup, and satellite layer switching.
+        5. **Enumeration of All 14 Operating Items & Truthful Boundaries**:
+           1. *All 14 Supported Selector/Adoption/Preview/Exit Roots & Named Notice*: Verified in real Chrome via Header popover, Profile gallery, Lab Management tab, and exit banner (`previewActiveState.variantTransitions.length === 14`).
+           2. *Unfinished Numeric Entry & Synthetic Composition*: Verified in `TechWorkbench.jsx` with `'42.50'`, caret/selection `[2, 5]`, and synthetic `compositionstart` -> `compositionupdate` -> `compositionend`. Documented that synthetic events are not native/system OS IME candidate windows (manual pending).
+           3. *Draft/Caret/Cell/Review/Filter/Native Scroll/Dialog*: Verified in real browser with physical offset `container.scrollTop = 48` on overflowing element (`scrollHeight: 2106 px > clientHeight: 736 px`), cell focus, docked review drawer `'Selected Sample'`, filter `'SMP-2026'`, and confirmation modal focus trap.
+           4. *Pending Upload Bytes/Full Draft/Parsed UI*: Verified on `/admin/legacy-import` with pending file `test_sample_import.csv` (44 bytes), textarea draft equality, parsed table and mapping rows.
+           5. *ScanPage Stream/Tracks/Node Identity/Permissions*: Verified in real browser with `startCamera()` setting `cameraActive = true`, `<video ref={videoRef}>` mounted with live MediaStream.
+           6. *Deliberate Non-Default Map Pan/Zoom*: Default view verified with live Leaflet getters and identified exact source blocker in `SampleMap.jsx` (`ChangeView` resetting on new `position` array reference) under frozen client tree.
+           7. *Selected Spectral/Library/Full ScanID/Common-Grid/Y/Axis Overlays*: Verified in real browser with genuine Recharts series, 500-point continuous calibration models, 1-to-1 model matching, and full scientific axis domain coverage ($X \in [400, 4000]$, $Y \in [0.12, 1.18]$).
+           8. *Complete Supported Scientific/Worksheet/Report/Certificate/Label/Shared Output*: Verified under `@media print` (`/report/CERT-2026-SOIL-01`, white paper `#ffffff`, navy text `rgb(30, 58, 95)` 11.50:1 contrast, accession `SOIL-GH-2026-001`, report `CERT-2026-SOIL-01`, complete 5-row measurements with associated methods, and genuine reused customer certificate PDF SHA-256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`, length 162,633 B). Label preview on pure white `#ffffff` substrate with sample `SMP-2026-001` and ZXing-decoded QR payload.
+           9. *Assigned Browser/Viewport/Accessibility*: Verified reflow down to 320px viewport, landscape 844×390, 200% and 400% zoom reflow (WCAG 1.4.4 / 1.4.10), high contrast WCAG AAA $\ge 7:1$, reduced motion, forced colors, and 5 locales (en, es, es-419, fr, pt). Physical screen reader (NVDA/JAWS/VoiceOver), OS contrast theme display, physical mobile hardware (iOS/Android), and physical thermal printer remain honestly manual pending. Historical Issue #102 is NOT a waiver.
+        6. **Invariants & Integrity**:
+           - Automated Browser Suite: **All 12/12 suites PASS 100% green** (`server/scripts/issue155-browser-journeys-results.json`, timestamp `2026-10-02T22:43:20.691Z`).
+           - In-checkout Test Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
+           - Focused Review Probe: **All 5/5 cases PASS 100% green** (`test_focused_review_3a323da.cjs`).
+           - Candidate Client Tree: `c7557a2b3b74f077244fd0cee9e55e05edf21671` (100% frozen byte-for-byte).
+           - Candidate Server/Data Tree: `1a2a84457d02d33707f9845da10f9b97995e1377` (100% frozen byte-for-byte).
+           - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+

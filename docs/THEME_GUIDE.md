@@ -100,7 +100,8 @@ SoilFER-LIMS strictly protects laboratory data integrity, status color semantics
 - **Responsive Layout Design**: The theme gallery and appearance selectors are styled with fluid flex-wrap containers, touch target sizing, and responsive padding to accommodate small viewports down to 320px width.
 - **Touch Target Dimensions**: Primary interactive controls and buttons adhere to 44–48px touch dimensions (`min-h-[44px]` with 44×44px hit-target padding on icon controls including the confirmation modal close button), satisfying WCAG 2.2 Level AA Target Size (Minimum).
 - **Safe Area Insets**: Safe area insets (`env(safe-area-inset-bottom)`) are declared on navigation bars and floating preview notices to prevent obstruction by software keyboards or home indicators.
-- **Physical Device Gate Notice**: Layout reflow and touch sizing are designed and checked via responsive layout adapters and automated headless Chrome checks. Physical testing on native iOS Safari and Android Chrome hardware remains strictly pending under physical hardware constraints (historical Issue #102 is NOT a substitute waiver; physical test devices are not provisioned in current CI/test environments). Production deployment must not claim verified physical mobile execution until verified on physical target hardware.
+- **Optical Zoom & Reflow**: Layout reflow down to 320px viewport, landscape 844×390, 200% zoom, and 400% text enlargement at 1280px CSS viewport width (WCAG 1.4.4 / 1.4.10) are verified without content clipping in real Headless Chrome.
+- **Physical Device Gate Notice**: Layout reflow, touch sizing, and zoom reflow are designed and checked via responsive layout adapters and automated headless Chrome checks. Physical testing on native iOS Safari and Android Chrome hardware, assistive screen readers (NVDA, JAWS, VoiceOver), and physical thermal label printers remains strictly pending under physical hardware constraints. Historical Issue #102 addressed physical hardware access constraints; it is NOT an omnibus waiver for software test coverage, collector integrity, or release criteria.
 
 ---
 
@@ -131,3 +132,8 @@ SoilFER-LIMS strictly protects laboratory data integrity, status color semantics
 - `PATCH /api/auth/preferences` — Self-service personal appearance updates (supports `themeId`, `modePreference`, `expectedRevision`).
 - `GET/PATCH /api/labs/:labId/appearance` — Laboratory default appearance (restricted to assigned `LAB_MANAGER` and `SUPER_ADMIN`).
 - `GET/PATCH /api/admin/appearance` — System-wide platform default appearance (restricted to `SUPER_ADMIN`).
+
+### Geographic Map & Scientific Print Execution Notes
+- **Geographic Map View (`SampleMap.jsx`)**: Renders Leaflet container with live getters (`getCenter()`, `getZoom()`), marker coordinates `[5.6037, -0.1870]`, uncertainty radius circle, popup information (`SMP-2026-001`), and satellite layer switching. Due to the `<ChangeView center={[lat, lng]} />` subcomponent in `SampleMap.jsx` re-evaluating its `useEffect` on new array reference allocations during component re-renders, the view resets to the default center (`[5.6037, -0.1870]`, zoom 13). Because the client tree is strictly frozen, this represents an identified software scope blocker in the current candidate tree.
+- **Scientific Print Isolation**: All 14 theme variants isolate customer certificates (`/report/CERT-2026-SOIL-01`) under `@media print` with pure white `#ffffff` paper, deep navy text (11.50:1 contrast), report ID `CERT-2026-SOIL-01`, accession `SOIL-GH-2026-001`, and complete 5-row measurements. Genuine PDF artifact (`test_certificate_output.pdf`, 162,633 B, SHA-256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`) is verified and conserved.
+

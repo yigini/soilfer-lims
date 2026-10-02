@@ -3637,8 +3637,8 @@ async function runBrowserEvidence() {
                     v.parsedState.mappingRows.filter(r => r.column === 'pH').length === 1 &&
                     v.parsedState.mappingRows.filter(r => r.column === 'matrix').length === 1 &&
                     v.parsedState.mappingRows.some(r => r.column === 'pH' && (r.targetParameter === 'PH_H2O' || r.analysisCode === 'PH_H2O') && r.methodologyId === 'ph-water-sop' && r.unitCode === 'PH_UNIT' && r.status === 'Ready') &&
-                    v.parsedState.mappingRows.some(r => r.column === 'matrix' && r.status === 'Incomplete') &&
-                    !v.parsedState.mappingRows.some(r => r.column === 'unrelated' || r.targetParameter === 'wrong' || r.column === 'OTHER COLUMN' || r.column === 'WRONG COLUMN' || (r.column === 'pH' && (r.targetParameter === 'OC' || r.analysisCode === 'OC' || r.status === 'Incomplete' || r.methodologyId !== 'ph-water-sop' || r.unitCode !== 'PH_UNIT')))
+                    v.parsedState.mappingRows.some(r => r.column === 'matrix' && r.status === 'Incomplete' && (!r.targetParameter || r.targetParameter === '') && (!r.analysisCode || r.analysisCode === '') && (!r.methodologyId || r.methodologyId === '') && (!r.unitCode || r.unitCode === '')) &&
+                    !v.parsedState.mappingRows.some(r => r.column === 'unrelated' || r.targetParameter === 'wrong' || r.column === 'OTHER COLUMN' || r.column === 'WRONG COLUMN' || (r.column === 'pH' && (r.targetParameter === 'OC' || r.analysisCode === 'OC' || r.status === 'Incomplete' || r.methodologyId !== 'ph-water-sop' || r.unitCode !== 'PH_UNIT')) || (r.column === 'matrix' && (r.targetParameter !== '' || r.analysisCode !== '' || r.methodologyId !== '' || r.status !== 'Incomplete')))
                 ) &&
                 uploadDetails.pendingFilePreserved === true &&
                 uploadDetails.preparseAll14Preserved === true &&
@@ -3652,7 +3652,8 @@ async function runBrowserEvidence() {
                     v.contentMatches === true &&
                     v.hasTextareaContent === true &&
                     v.draftMatches === true &&
-                    typeof v.draftText === 'string'
+                    typeof v.draftText === 'string' &&
+                    v.draftText.trim() === 'sampleId,pH,matrix\nSMP-TEST-001,6.5,Topsoil'
                 ) &&
                 uploadDetails.preparseAfterExit &&
                 uploadDetails.preparseAfterExit.preserved === true &&
@@ -3660,6 +3661,7 @@ async function runBrowserEvidence() {
                 uploadDetails.preparseAfterExit.hasTextareaContent === true &&
                 uploadDetails.preparseAfterExit.draftMatches === true &&
                 typeof uploadDetails.preparseAfterExit.draftText === 'string' &&
+                uploadDetails.preparseAfterExit.draftText.trim() === 'sampleId,pH,matrix\nSMP-TEST-001,6.5,Topsoil' &&
                 uploadDetails.afterExit &&
                 uploadDetails.afterExit.hasFile === true &&
                 uploadDetails.afterExit.readSucceeded === true &&
@@ -3689,8 +3691,8 @@ async function runBrowserEvidence() {
                 uploadDetails.afterExit.parsedState.mappingRows.filter(r => r.column === 'pH').length === 1 &&
                 uploadDetails.afterExit.parsedState.mappingRows.filter(r => r.column === 'matrix').length === 1 &&
                 uploadDetails.afterExit.parsedState.mappingRows.some(r => r.column === 'pH' && (r.targetParameter === 'PH_H2O' || r.analysisCode === 'PH_H2O') && r.methodologyId === 'ph-water-sop' && r.unitCode === 'PH_UNIT' && r.status === 'Ready') &&
-                uploadDetails.afterExit.parsedState.mappingRows.some(r => r.column === 'matrix' && r.status === 'Incomplete') &&
-                !uploadDetails.afterExit.parsedState.mappingRows.some(r => r.column === 'unrelated' || r.targetParameter === 'wrong' || r.column === 'OTHER COLUMN' || r.column === 'WRONG COLUMN' || (r.column === 'pH' && (r.targetParameter === 'OC' || r.analysisCode === 'OC' || r.status === 'Incomplete' || r.methodologyId !== 'ph-water-sop' || r.unitCode !== 'PH_UNIT'))) &&
+                uploadDetails.afterExit.parsedState.mappingRows.some(r => r.column === 'matrix' && r.status === 'Incomplete' && (!r.targetParameter || r.targetParameter === '') && (!r.analysisCode || r.analysisCode === '') && (!r.methodologyId || r.methodologyId === '') && (!r.unitCode || r.unitCode === '')) &&
+                !uploadDetails.afterExit.parsedState.mappingRows.some(r => r.column === 'unrelated' || r.targetParameter === 'wrong' || r.column === 'OTHER COLUMN' || r.column === 'WRONG COLUMN' || (r.column === 'pH' && (r.targetParameter === 'OC' || r.analysisCode === 'OC' || r.status === 'Incomplete' || r.methodologyId !== 'ph-water-sop' || r.unitCode !== 'PH_UNIT')) || (r.column === 'matrix' && (r.targetParameter !== '' || r.analysisCode !== '' || r.methodologyId !== '' || r.status !== 'Incomplete'))) &&
                 (() => {
                     const mapState = (typeof geographicMapState !== 'undefined') ? geographicMapState : (uploadDetails && uploadDetails.geographicMapState);
                     return Boolean(
@@ -5827,13 +5829,19 @@ async function runBrowserEvidence() {
                 }
                 const xTickVals = extractNumericTicks('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', xAxisEl);
                 const yTickVals = extractNumericTicks('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', yAxisEl);
+                const minObsX = Math.min(...xTickVals);
+                const maxObsX = Math.max(...xTickVals);
+                const minObsY = Math.min(...yTickVals);
+                const maxObsY = Math.max(...yTickVals);
                 const axesVerified = Boolean(
                     xAxisEl &&
                     yAxisEl &&
                     xTickVals.length >= 2 &&
                     xTickVals.every(v => v >= 400 && v <= 4000) &&
+                    minObsX <= 1500 && maxObsX >= 3500 && (maxObsX - minObsX) >= 2000 &&
                     yTickVals.length >= 2 &&
-                    yTickVals.every(v => v >= 0 && v <= 3.5)
+                    yTickVals.every(v => v >= 0 && v <= 3.5) &&
+                    minObsY <= 0.50 && maxObsY <= 1.50 && (maxObsY - minObsY) >= 0.50
                 );
 
                 const hasValidScans = selectedScanIds.length >= 2 &&
@@ -6058,13 +6066,19 @@ async function runBrowserEvidence() {
                     }
                     const xTickVals = extractNumericTicks('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', xAxisEl);
                     const yTickVals = extractNumericTicks('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', yAxisEl);
+                    const minObsX = Math.min(...xTickVals);
+                    const maxObsX = Math.max(...xTickVals);
+                    const minObsY = Math.min(...yTickVals);
+                    const maxObsY = Math.max(...yTickVals);
                     const axesVerified = Boolean(
                         xAxisEl &&
                         yAxisEl &&
                         xTickVals.length >= 2 &&
                         xTickVals.every(v => v >= 400 && v <= 4000) &&
+                        minObsX <= 1500 && maxObsX >= 3500 && (maxObsX - minObsX) >= 2000 &&
                         yTickVals.length >= 2 &&
-                        yTickVals.every(v => v >= 0 && v <= 3.5)
+                        yTickVals.every(v => v >= 0 && v <= 3.5) &&
+                        minObsY <= 0.50 && maxObsY <= 1.50 && (maxObsY - minObsY) >= 0.50
                     );
 
                     const modelVerified = Boolean(curveModelVerified && axesVerified);
@@ -6256,13 +6270,19 @@ async function runBrowserEvidence() {
                     }
                     const xTickVals = extractNumericTicks('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', xAxisEl);
                     const yTickVals = extractNumericTicks('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', yAxisEl);
+                    const minObsX = Math.min(...xTickVals);
+                    const maxObsX = Math.max(...xTickVals);
+                    const minObsY = Math.min(...yTickVals);
+                    const maxObsY = Math.max(...yTickVals);
                     const axesVerified = Boolean(
                         xAxisEl &&
                         yAxisEl &&
                         xTickVals.length >= 2 &&
                         xTickVals.every(v => v >= 400 && v <= 4000) &&
+                        minObsX <= 1500 && maxObsX >= 3500 && (maxObsX - minObsX) >= 2000 &&
                         yTickVals.length >= 2 &&
-                        yTickVals.every(v => v >= 0 && v <= 3.5)
+                        yTickVals.every(v => v >= 0 && v <= 3.5) &&
+                        minObsY <= 0.50 && maxObsY <= 1.50 && (maxObsY - minObsY) >= 0.50
                     );
 
                     const modelVerified = Boolean(curveModelVerified && axesVerified);
