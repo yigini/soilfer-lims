@@ -318,25 +318,33 @@ app.get('/api/dashboard/stats', (req, res) => res.json({
 }));
 app.get('/api/submissions/reanalysis', (req, res) => res.json({ data: [] }));
 app.get('/api/reception/stats', (req, res) => res.json({ pendingCount: 5, registeredToday: 12 }));
-app.get('/api/workbench/queue', (req, res) => res.json({
-    groups: [{
-        analysis: 'PH_H2O',
-        methodologyId: 'ph-water-sop',
-        name: 'Soil pH (1:2.5 H2O)',
-        unit: 'pH units',
-        items: [{
-            workItemId: 'wi-01',
-            sampleId: 'SMP-2026-001',
-            sampleDisplayId: 'SMP-2026-001',
-            labId: 'SMP-2026-001',
-            rackPosition: 1,
-            status: 'READY',
-            readiness: { isReady: true, reasons: [] },
-            draft: { value: '6.50' }
-        }]
-    }],
-    stats: {}
-}));
+app.get('/api/workbench/queue', (req, res) => {
+    const items = [];
+    for (let i = 1; i <= 25; i++) {
+        const num = String(i).padStart(3, '0');
+        const wiId = `wi-${String(i).padStart(2, '0')}`;
+        items.push({
+            workItemId: wiId,
+            sampleId: `SMP-2026-${num}`,
+            sampleDisplayId: `SMP-2026-${num}`,
+            labId: `SMP-2026-${num}`,
+            rackPosition: i,
+            status: i === 1 ? 'READY' : 'PENDING',
+            readiness: { isReady: i === 1, reasons: [] },
+            draft: { value: i === 1 ? '6.50' : '7.00' }
+        });
+    }
+    res.json({
+        groups: [{
+            analysis: 'PH_H2O',
+            methodologyId: 'ph-water-sop',
+            name: 'Soil pH (1:2.5 H2O)',
+            unit: 'pH units',
+            items
+        }],
+        stats: { totalItems: 25, myWorkCount: 25 }
+    });
+});
 app.get('/api/workbench/v2/receipts', (req, res) => res.json({ receipts: [] }));
 app.get('/api/inventory/items', (req, res) => res.json([]));
 app.get('/api/inventory/locations', (req, res) => res.json([]));
@@ -900,16 +908,7 @@ async function runBrowserEvidence() {
         await page.evaluate(() => {
             const container = document.querySelector('[data-tour="workbench-container"]');
             if (container) {
-                try {
-                    container.scrollTop = 48;
-                } catch (e) {}
-                if (container.scrollTop !== 48) {
-                    try {
-                        Object.defineProperty(container, 'scrollTop', { value: 48, writable: true, configurable: true });
-                    } catch (e) {
-                        container.scrollTop = 48;
-                    }
-                }
+                container.scrollTop = 48;
             }
         });
 
@@ -954,7 +953,8 @@ async function runBrowserEvidence() {
             const scrollPreserved = Boolean(
                 container &&
                 typeof container.scrollTop === 'number' &&
-                container.scrollTop === 48
+                container.scrollTop === 48 &&
+                (typeof container.scrollHeight !== 'number' || typeof container.clientHeight !== 'number' || container.scrollHeight > container.clientHeight)
             );
             const isComposingObserved = Boolean(
                 inp &&
@@ -975,6 +975,8 @@ async function runBrowserEvidence() {
                 filterPreserved,
                 isComposingObserved,
                 scrollTop: container ? container.scrollTop : 0,
+                scrollHeight: container ? container.scrollHeight : 0,
+                clientHeight: container ? container.clientHeight : 0,
                 scrollPreserved
             };
         });
@@ -1046,7 +1048,8 @@ async function runBrowserEvidence() {
             const scrollPreserved = Boolean(
                 container &&
                 typeof container.scrollTop === 'number' &&
-                container.scrollTop === 48
+                container.scrollTop === 48 &&
+                (typeof container.scrollHeight !== 'number' || typeof container.clientHeight !== 'number' || container.scrollHeight > container.clientHeight)
             );
             const isComposingObserved = Boolean(
                 inp &&
@@ -1070,6 +1073,8 @@ async function runBrowserEvidence() {
                 filterPreserved,
                 isComposingObserved,
                 scrollTop: container ? container.scrollTop : 0,
+                scrollHeight: container ? container.scrollHeight : 0,
+                clientHeight: container ? container.clientHeight : 0,
                 scrollPreserved
             };
         });
@@ -1201,7 +1206,8 @@ async function runBrowserEvidence() {
                 const scrollPreserved = Boolean(
                     container &&
                     typeof container.scrollTop === 'number' &&
-                    container.scrollTop === 48
+                    container.scrollTop === 48 &&
+                    (typeof container.scrollHeight !== 'number' || typeof container.clientHeight !== 'number' || container.scrollHeight > container.clientHeight)
                 );
                 const isComposingObserved = Boolean(
                     inp &&
@@ -1239,6 +1245,9 @@ async function runBrowserEvidence() {
                     reviewDrawerOpen: reviewDrawerPreserved,
                     reviewDrawerPreserved: reviewDrawerPreserved,
                     filterPreserved: filterPreserved,
+                    scrollTop: container ? container.scrollTop : 0,
+                    scrollHeight: container ? container.scrollHeight : 0,
+                    clientHeight: container ? container.clientHeight : 0,
                     scrollPreserved: scrollPreserved,
                     isComposingObserved: isComposingObserved,
                     transitionSucceeded: transitionSucceeded
@@ -1313,7 +1322,8 @@ async function runBrowserEvidence() {
             const scrollPreserved = Boolean(
                 container &&
                 typeof container.scrollTop === 'number' &&
-                container.scrollTop === 48
+                container.scrollTop === 48 &&
+                (typeof container.scrollHeight !== 'number' || typeof container.clientHeight !== 'number' || container.scrollHeight > container.clientHeight)
             );
             return {
                 appliedTheme: document.documentElement.getAttribute('data-theme'),
@@ -1329,6 +1339,8 @@ async function runBrowserEvidence() {
                 filterValue: filterVal,
                 filterPreserved,
                 scrollTop: container ? container.scrollTop : 0,
+                scrollHeight: container ? container.scrollHeight : 0,
+                clientHeight: container ? container.clientHeight : 0,
                 scrollPreserved,
                 compositionCompleted: Boolean(inp && !inp.isComposing)
             };
@@ -1465,6 +1477,7 @@ async function runBrowserEvidence() {
         // 2. Scan Page: camera viewfinder and manual entry fallback container with theme switch survival
         await page.goto(`${origin}/scan`, { waitUntil: 'domcontentloaded' });
         await page.waitForSelector('main, [role="main"]', { timeout: 3000 }).catch(() => null);
+        await page.waitForSelector('video', { timeout: 5000 }).catch(() => null);
         await page.waitForTimeout(300);
 
         const scanInput = page.locator('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]').first();
@@ -4324,6 +4337,13 @@ async function runBrowserEvidence() {
                             curvePreserved = (maxDiffY < 0.02);
                         }
                     } else {
+                        // Pixel coordinates in browser Recharts layout:
+                        const spanX = xs[8] - xs[0];
+                        const isIndexX = spanX > 0 && xs.every((x, i) => Math.abs(x - (xs[0] + (i / 8) * spanX)) < Math.max(1.0, 0.05 * spanX));
+                        const isWavelengthX = spanX > 0 && xs.every((x, i) => Math.abs(x - (xs[0] + ((expectedWavelengths[0] - expectedWavelengths[i]) / (expectedWavelengths[0] - expectedWavelengths[8])) * spanX)) < Math.max(1.0, 0.05 * spanX));
+                        const xsMonotonic = xs.every((x, i) => i === 0 || x > xs[i - 1]);
+                        const validX = xsMonotonic && (isIndexX || isWavelengthX);
+
                         const axisTicks = [];
                         const tickEls = document.querySelectorAll ? document.querySelectorAll('.recharts-yAxis text, text.sf-y-tick, [data-axis="y"] text, g.yAxis text') : [];
                         for (const tick of tickEls) {
@@ -4341,7 +4361,7 @@ async function runBrowserEvidence() {
                             }
                             if (py !== null) axisTicks.push({ val, py });
                         }
-                        if (axisTicks.length >= 2) {
+                        if (validX && axisTicks.length >= 2) {
                             const nTicks = axisTicks.length;
                             const meanV = axisTicks.reduce((a, b) => a + b.val, 0) / nTicks;
                             const meanPy = axisTicks.reduce((a, b) => a + b.py, 0) / nTicks;
