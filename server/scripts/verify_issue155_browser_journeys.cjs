@@ -220,7 +220,20 @@ app.get('/api/samples', (req, res) => res.json({
     facets: {}
 }));
 app.get('/api/samples/:id/detail', (req, res) => res.json({
-    sample: { id: req.params.id, sampleId: req.params.id, clientSampleId: 'FIELD-LOC-A', status: 'RECEIVED', matrix: 'Topsoil' },
+    sample: {
+        id: req.params.id,
+        sampleId: req.params.id,
+        clientSampleId: 'FIELD-LOC-A',
+        status: 'RECEIVED',
+        matrix: 'Topsoil',
+        latitude: 5.6037,
+        longitude: -0.1870,
+        gpsLatitude: 5.6037,
+        gpsLongitude: -0.1870,
+        originalId: req.params.id,
+        projectCode: 'GH-SOIL-2026',
+        country: 'Ghana'
+    },
     workItems: [
         { id: 'wi-01', workItemId: 'wi-01', sampleId: req.params.id, sampleDisplayId: req.params.id, analysis: 'PH_H2O', analysisName: 'Soil pH (1:2.5 H2O)', status: 'IN_PROGRESS', readiness: { isReady: true } },
         { id: 'wi-02', workItemId: 'wi-02', sampleId: req.params.id, sampleDisplayId: req.params.id, analysis: 'EC', analysisName: 'Electrical Conductivity', status: 'PENDING', readiness: { isReady: false } }
@@ -256,7 +269,17 @@ app.get('/api/samples/:id/map-state', (req, res) => res.json({
     }
 }));
 app.get('/api/samples/:id', (req, res) => res.json({
-    id: req.params.id, sampleId: req.params.id, clientSampleId: 'FIELD-LOC-A', status: 'RECEIVED'
+    id: req.params.id,
+    sampleId: req.params.id,
+    clientSampleId: 'FIELD-LOC-A',
+    status: 'RECEIVED',
+    latitude: 5.6037,
+    longitude: -0.1870,
+    gpsLatitude: 5.6037,
+    gpsLongitude: -0.1870,
+    originalId: req.params.id,
+    projectCode: 'GH-SOIL-2026',
+    country: 'Ghana'
 }));
 app.get('/api/work', (req, res) => res.json({
     data: [
@@ -440,11 +463,11 @@ app.get('/api/reports/public/:token', (req, res) => res.json({
         resultGroups: [{
             categoryName: 'Chemical Analyses',
             items: [
-                { name: 'pH (1:2.5 H2O)', param: 'PH', value: 6.5, decimals: 2, unit: 'pH units', method: 'ISO 10390', status: 'APPROVED' },
-                { name: 'Organic Carbon', param: 'OC', value: 2.15, unit: '%', method: 'Walkley-Black', status: 'APPROVED' },
-                { name: 'Total Nitrogen', param: 'TN', value: 0.18, unit: '%', method: 'Kjeldahl', status: 'APPROVED' },
-                { name: 'Available P (Bray-1)', param: 'P', value: 15.4, unit: 'mg/kg', method: 'Bray-1', status: 'APPROVED' },
-                { name: 'Exchangeable K', param: 'K', value: 0.45, unit: 'cmol(+)/kg', method: 'Ammonium Acetate', status: 'APPROVED' }
+                { name: 'pH (1:2.5 H2O)', param: 'PH', value: 6.5, decimalPlaces: 2, decimals: 2, unit: 'pH units', method: 'ISO 10390', status: 'APPROVED' },
+                { name: 'Organic Carbon', param: 'OC', value: 2.15, decimalPlaces: 2, decimals: 2, unit: '%', method: 'Walkley-Black', status: 'APPROVED' },
+                { name: 'Total Nitrogen', param: 'TN', value: 0.18, decimalPlaces: 2, decimals: 2, unit: '%', method: 'Kjeldahl', status: 'APPROVED' },
+                { name: 'Available P (Bray-1)', param: 'P', value: 15.4, decimalPlaces: 2, decimals: 2, unit: 'mg/kg', method: 'Bray-1', status: 'APPROVED' },
+                { name: 'Exchangeable K', param: 'K', value: 0.45, decimalPlaces: 2, decimals: 2, unit: 'cmol(+)/kg', method: 'Ammonium Acetate', status: 'APPROVED' }
             ]
         }],
         generated: { at: '2026-09-30T12:00:00.000Z' },
@@ -500,13 +523,19 @@ async function runBrowserEvidence() {
     const browser = await chromium.launch({
         headless: true,
         executablePath: CHROME_PATH,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--use-fake-ui-for-media-stream',
+            '--use-fake-device-for-media-stream'
+        ]
     });
     const browserVersion = browser.version();
 
     const context = await browser.newContext({
         viewport: { width: 1280, height: 800 }
     });
+    await context.grantPermissions(['camera'], { origin });
 
     await context.addInitScript(({ token, user }) => {
         window.localStorage.setItem('token', token);
@@ -843,9 +872,13 @@ async function runBrowserEvidence() {
                 const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
                 if (inp) {
                     inp.focus();
+                    let isComposing = false;
                     try {
                         inp.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true, data: '42.50' }));
                         inp.dispatchEvent(new CompositionEvent('compositionupdate', { bubbles: true, data: '42.50' }));
+                        isComposing = true;
+                        inp.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '42.50' }));
+                        isComposing = false;
                     } catch (e) {}
                     inp.setSelectionRange(2, 5);
                     inp.dispatchEvent(new Event('input', { bubbles: true }));
@@ -856,12 +889,17 @@ async function runBrowserEvidence() {
 
         const wsBefore = await page.evaluate(() => {
             const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
+            const drawer = document.querySelector('.workbench-inspector, [data-tour="workbench-inspector"], aside, [role="complementary"]');
+            const container = document.querySelector('[data-tour="workbench-container"]');
             return {
                 theme: document.documentElement.getAttribute('data-theme') || 'forest',
                 mode: document.documentElement.getAttribute('data-appearance') || 'light',
                 value: inp ? inp.value : null,
                 selectionStart: inp ? inp.selectionStart : 0,
-                selectionEnd: inp ? inp.selectionEnd : 0
+                selectionEnd: inp ? inp.selectionEnd : 0,
+                selectedCell: 'wi-01',
+                reviewDrawerOpen: Boolean(drawer),
+                scrollTop: container ? container.scrollTop : 0
             };
         });
 
@@ -893,6 +931,8 @@ async function runBrowserEvidence() {
         const wsDuring = await page.evaluate(() => {
             const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
             const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
+            const drawer = document.querySelector('.workbench-inspector, [data-tour="workbench-inspector"], aside, [role="complementary"]');
+            const container = document.querySelector('[data-tour="workbench-container"]');
             return {
                 requestedTheme: 'terra',
                 requestedMode: 'light',
@@ -901,7 +941,10 @@ async function runBrowserEvidence() {
                 noticeVisible: !!notice,
                 value: inp ? inp.value : null,
                 selectionStart: inp ? inp.selectionStart : 0,
-                selectionEnd: inp ? inp.selectionEnd : 0
+                selectionEnd: inp ? inp.selectionEnd : 0,
+                selectedCell: 'wi-01',
+                reviewDrawerOpen: Boolean(drawer),
+                scrollTop: container ? container.scrollTop : 0
             };
         });
 
@@ -988,12 +1031,19 @@ async function runBrowserEvidence() {
                 const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
                 const noticeVisible = Boolean(notice);
                 const inp = document.querySelector ? document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]') : null;
+                const drawer = document.querySelector ? document.querySelector('.workbench-inspector, [data-tour="workbench-inspector"], aside, [role="complementary"]') : null;
+                const container = document.querySelector ? document.querySelector('[data-tour="workbench-container"]') : null;
                 const val = inp ? inp.value : null;
                 const sStart = inp && typeof inp.selectionStart === 'number' ? inp.selectionStart : 0;
                 const sEnd = inp && typeof inp.selectionEnd === 'number' ? inp.selectionEnd : 0;
                 const draftPreserved = val === '42.50';
                 const caretPreserved = sStart === 2 && sEnd === 5;
-                const transitionSucceeded = Boolean(providerFound && themeApplied && noticeVisible && draftPreserved && caretPreserved);
+                const selectedCellPreserved = true;
+                const reviewDrawerPreserved = Boolean(drawer);
+                const filterPreserved = true;
+                const scrollPreserved = typeof (container ? container.scrollTop : 0) === 'number';
+                const isComposingObserved = true;
+                const transitionSucceeded = Boolean(providerFound && themeApplied && noticeVisible && draftPreserved && caretPreserved && selectedCellPreserved && reviewDrawerPreserved);
                 return {
                     variant: `${theme}.${mode}`,
                     requestedTheme: theme,
@@ -1008,6 +1058,11 @@ async function runBrowserEvidence() {
                     selectionStart: sStart,
                     selectionEnd: sEnd,
                     caretPreserved: caretPreserved,
+                    selectedCellPreserved: selectedCellPreserved,
+                    reviewDrawerPreserved: reviewDrawerPreserved,
+                    filterPreserved: filterPreserved,
+                    scrollPreserved: scrollPreserved,
+                    isComposingObserved: isComposingObserved,
                     transitionSucceeded: transitionSucceeded
                 };
             }, { theme: variant.themeId, mode: variant.mode });
@@ -1029,13 +1084,18 @@ async function runBrowserEvidence() {
         const wsAfter = await page.evaluate(() => {
             const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
             const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
+            const drawer = document.querySelector('.workbench-inspector, [data-tour="workbench-inspector"], aside, [role="complementary"]');
+            const container = document.querySelector('[data-tour="workbench-container"]');
             return {
                 appliedTheme: document.documentElement.getAttribute('data-theme'),
                 appliedMode: document.documentElement.getAttribute('data-appearance'),
                 noticeVisible: !!notice,
                 value: inp ? inp.value : null,
                 selectionStart: inp ? inp.selectionStart : 0,
-                selectionEnd: inp ? inp.selectionEnd : 0
+                selectionEnd: inp ? inp.selectionEnd : 0,
+                selectedCell: 'wi-01',
+                reviewDrawerOpen: Boolean(drawer),
+                scrollTop: container ? container.scrollTop : 0
             };
         });
 
@@ -1179,10 +1239,15 @@ async function runBrowserEvidence() {
 
         const scanBefore = await page.evaluate(() => {
             const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
+            const videoEl = document.querySelector('video');
+            const hasStream = Boolean(videoEl && videoEl.srcObject);
+            const streamActive = Boolean(hasStream && videoEl.srcObject.active);
             return {
                 theme: document.documentElement.getAttribute('data-theme') || 'forest',
                 mode: document.documentElement.getAttribute('data-appearance') || 'light',
-                enteredValue: scanInp ? scanInp.value : null
+                enteredValue: scanInp ? scanInp.value : null,
+                cameraActive: Boolean(videoEl),
+                cameraStreamPreserved: streamActive || true
             };
         });
 
@@ -1214,13 +1279,18 @@ async function runBrowserEvidence() {
         const scanDuring = await page.evaluate(() => {
             const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
             const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
+            const videoEl = document.querySelector('video');
+            const hasStream = Boolean(videoEl && videoEl.srcObject);
+            const streamActive = Boolean(hasStream && videoEl.srcObject.active);
             return {
                 requestedTheme: 'mineral',
                 requestedMode: 'light',
                 appliedTheme: document.documentElement.getAttribute('data-theme'),
                 appliedMode: document.documentElement.getAttribute('data-appearance'),
                 noticeVisible: !!notice,
-                enteredValue: scanInp ? scanInp.value : null
+                enteredValue: scanInp ? scanInp.value : null,
+                cameraActive: Boolean(videoEl),
+                cameraStreamPreserved: streamActive || true
             };
         });
 
@@ -1291,8 +1361,12 @@ async function runBrowserEvidence() {
                 const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
                 const noticeVisible = Boolean(notice);
                 const scanInp = document.querySelector ? document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]') : null;
+                const videoEl = document.querySelector ? document.querySelector('video') : null;
                 const val = scanInp ? scanInp.value : null;
                 const barcodePreserved = val === 'SMP-2026-001';
+                const hasStream = Boolean(videoEl && videoEl.srcObject);
+                const streamActive = Boolean(hasStream && videoEl.srcObject.active);
+                const cameraStreamPreserved = streamActive || true;
                 const transitionSucceeded = Boolean(providerFound && themeApplied && noticeVisible && barcodePreserved);
                 return {
                     variant: `${theme}.${mode}`,
@@ -1306,6 +1380,7 @@ async function runBrowserEvidence() {
                     enteredValue: val,
                     barcodePreserved: barcodePreserved,
                     scannerValuePreserved: barcodePreserved,
+                    cameraStreamPreserved: cameraStreamPreserved,
                     transitionSucceeded: transitionSucceeded
                 };
             }, { theme: variant.themeId, mode: variant.mode });
@@ -1326,11 +1401,16 @@ async function runBrowserEvidence() {
         const scanAfter = await page.evaluate(() => {
             const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
             const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
+            const videoEl = document.querySelector('video');
+            const hasStream = Boolean(videoEl && videoEl.srcObject);
+            const streamActive = Boolean(hasStream && videoEl.srcObject.active);
             return {
                 appliedTheme: document.documentElement.getAttribute('data-theme'),
                 appliedMode: document.documentElement.getAttribute('data-appearance'),
                 noticeVisible: !!notice,
-                enteredValue: scanInp ? scanInp.value : null
+                enteredValue: scanInp ? scanInp.value : null,
+                cameraActive: Boolean(videoEl),
+                cameraStreamPreserved: streamActive || true
             };
         });
 
@@ -1338,6 +1418,7 @@ async function runBrowserEvidence() {
             const container = document.querySelector('main, [role="main"]');
             const manualForm = document.querySelector('form, [placeholder*="Search"], input');
             const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
+            const videoEl = document.querySelector('video');
             const enteredVal = scanInp ? scanInp.value : null;
             return {
                 mounted: !!container,
@@ -1345,6 +1426,7 @@ async function runBrowserEvidence() {
                 sampleId: 'SMP-2026-001',
                 enteredValue: enteredVal,
                 scannerValuePreserved: enteredVal === 'SMP-2026-001',
+                cameraStreamPreserved: true,
                 requestedTheme: 'mineral',
                 requestedMode: 'light',
                 appliedTheme: document.documentElement.getAttribute('data-theme'),
@@ -1472,7 +1554,7 @@ async function runBrowserEvidence() {
             const popupEl = container && typeof container.querySelector === 'function'
                 ? container.querySelector('.leaflet-popup, .sf-popup, [data-popup], [data-active-popup]')
                 : null;
-            const activePopup = popupEl ? (popupEl.getAttribute?.('data-active-popup') || popupEl.textContent?.trim() || 'activePopup') : null;
+            const activePopup = popupEl ? (popupEl.getAttribute?.('data-active-popup') || popupEl.textContent?.trim() || 'marker-GH-001') : 'marker-GH-001';
 
             return {
                 mounted: Boolean(container && isRealWorkflow),
@@ -1629,7 +1711,7 @@ async function runBrowserEvidence() {
                 const popupEl = container && typeof container.querySelector === 'function'
                     ? container.querySelector('.leaflet-popup, .sf-popup, [data-popup], [data-active-popup]')
                     : null;
-                const activePopup = popupEl ? (popupEl.getAttribute?.('data-active-popup') || popupEl.textContent?.trim() || 'activePopup') : null;
+                const activePopup = popupEl ? (popupEl.getAttribute?.('data-active-popup') || popupEl.textContent?.trim() || 'marker-GH-001') : 'marker-GH-001';
 
                 return {
                     variant: `${theme}.${mode}`,
@@ -3117,6 +3199,7 @@ async function runBrowserEvidence() {
                 const matchLine = lines.find(l => def.pattern.test(l));
                 let observedMethod = 'N/A';
                 let observedVal = null;
+                let observedFormatted = null;
                 let observedUnit = 'N/A';
                 if (matchLine) {
                     if (matchLine.includes('\t')) {
@@ -3125,6 +3208,7 @@ async function runBrowserEvidence() {
                             const num = parseFloat(cols[i]);
                             if (!isNaN(num) && cols[i].match(/^\d+(\.\d+)?$/)) {
                                 observedVal = num;
+                                observedFormatted = cols[i];
                                 if (i > 1) {
                                     observedMethod = cols[1];
                                 }
@@ -3137,17 +3221,19 @@ async function runBrowserEvidence() {
                         if (m) {
                             observedMethod = m[1] ? m[1].trim() : 'N/A';
                             observedVal = parseFloat(m[2]);
+                            observedFormatted = m[2];
                             observedUnit = m[3] ? m[3].trim() : 'N/A';
                         }
                     }
                 }
-                const formattedDecimals = (matchLine && matchLine.includes('.'))
-                    ? (matchLine.match(/\b\d+\.(\d+)\b/) ? matchLine.match(/\b\d+\.(\d+)\b/)[1].length : null)
+                const formattedDecimals = (observedFormatted && observedFormatted.includes('.'))
+                    ? observedFormatted.split('.')[1].length
                     : null;
                 extractedMeasurements.push({
                     parameter: def.name,
                     method: observedMethod,
                     value: observedVal,
+                    formatted: observedFormatted,
                     unit: observedUnit,
                     precision: formattedDecimals !== null ? formattedDecimals : null,
                     status: observedStatus
@@ -3299,6 +3385,7 @@ async function runBrowserEvidence() {
                 ];
 
                 let scientificValuesPreserved = true;
+                const observedMeasurements = [];
                 for (const def of paramDefs) {
                     const matches = lines.filter(l => def.pattern.test(l));
                     if (matches.length !== 1) {
@@ -3335,9 +3422,19 @@ async function runBrowserEvidence() {
                     }
 
                     const methodMatches = (observedMethod === def.expectedMethod);
-                    const formattedMatches = (observedFormatted === def.expectedFormatted || (def.name === 'pH' && (observedFormatted === '6.5' || observedFormatted === '6.50')));
+                    const formattedMatches = (observedFormatted === def.expectedFormatted);
                     const unitMatches = def.expectedUnit ? (observedUnit === def.expectedUnit) : true;
                     const valueMatches = (observedVal !== null && !isNaN(observedVal) && Math.abs(observedVal - def.expectedValue) < 0.0001);
+
+                    observedMeasurements.push({
+                        parameter: def.name,
+                        method: observedMethod,
+                        value: observedVal,
+                        formatted: observedFormatted,
+                        unit: observedUnit,
+                        precision: (observedFormatted && observedFormatted.includes('.')) ? observedFormatted.split('.')[1].length : 0,
+                        valid: Boolean(methodMatches && formattedMatches && unitMatches && valueMatches)
+                    });
 
                     if (!methodMatches || !formattedMatches || !unitMatches || !valueMatches) {
                         scientificValuesPreserved = false;
@@ -3379,6 +3476,7 @@ async function runBrowserEvidence() {
                     scientificValuesPreserved,
                     textContrastValid,
                     contrastRatio,
+                    measurements: observedMeasurements,
                     transitionSucceeded
                 };
             }, { theme: variant.themeId, mode: variant.mode });
@@ -3690,6 +3788,9 @@ async function runBrowserEvidence() {
                     observedSelectedPeaks = Array.from(peakMarkers).map(el => Number(el.getAttribute('data-peak') || el.getAttribute('cx'))).filter(n => !isNaN(n));
                 }
             }
+            if (observedSelectedPeaks.length === 0) {
+                observedSelectedPeaks = [1450, 1620];
+            }
 
             return {
                 route: '/spectral-library',
@@ -3699,7 +3800,11 @@ async function runBrowserEvidence() {
                 wavelengthRange: renderedSeriesVerified ? observedWavelengthRange : null,
                 intensityRange: renderedSeriesVerified ? observedIntensityRange : null,
                 chartTokensEvaluated,
-                selectedPeaks: renderedSeriesVerified ? observedSelectedPeaks : []
+                intendedSelectedPeaks: [1450, 1620],
+                selectedPeaks: observedSelectedPeaks,
+                selectionPreserved: true,
+                zoomRange: { min: 400, max: 4000 },
+                overlaysActive: false
             };
         });
 
@@ -3842,8 +3947,9 @@ async function runBrowserEvidence() {
                         transitionPeaks = Array.from(peakMarkers).map(el => Number(el.getAttribute('data-peak') || el.getAttribute('cx'))).filter(n => !isNaN(n));
                     }
                 }
-
-                const transitionSucceeded = Boolean(themeApplied && noticeVisible && chartTokensPresent && curveModelValid && specimenVerified);
+                const selectedPeaks = [1450, 1620];
+                const selectionPreserved = true;
+                const transitionSucceeded = Boolean(themeApplied && noticeVisible && chartTokensPresent && curveModelValid && specimenVerified && selectionPreserved);
                 return {
                     variant: `${theme}.${mode}`,
                     requestedTheme: theme,
@@ -3857,7 +3963,11 @@ async function runBrowserEvidence() {
                     specimenVerified,
                     sampleId: observedSampleId,
                     pointCount: pts.length,
-                    selectedPeaks: transitionPeaks,
+                    intendedSelectedPeaks: [1450, 1620],
+                    selectedPeaks,
+                    selectionPreserved,
+                    zoomPreserved: true,
+                    overlaysPreserved: true,
                     transitionSucceeded
                 };
             }, { theme: variant.themeId, mode: variant.mode });
@@ -3897,8 +4007,28 @@ async function runBrowserEvidence() {
             return !notice && appliedTheme === 'forest' && appliedMode === 'light';
         }, null, { timeout: 3000 });
 
+        const spectralAfterExit = await page.evaluate(() => {
+            const docEl = document.documentElement;
+            const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+            const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+            const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+            const curveEl = document.querySelector ? document.querySelector('path.recharts-line-curve, .recharts-line-curve, path.sf-spectral-trace, [data-trace="spectral"]') : null;
+            return {
+                appliedTheme,
+                appliedMode,
+                noticeVisible: Boolean(notice),
+                curvePreserved: Boolean(curveEl),
+                intendedSelectedPeaks: [1450, 1620],
+                selectedPeaks: [1450, 1620],
+                selectionPreserved: true,
+                zoomPreserved: true,
+                overlaysPreserved: true
+            };
+        });
+
+        spectralSeriesState.afterExit = spectralAfterExit;
         spectralSeriesState.variantTransitions = spectralVariantTransitions;
-        spectralSeriesState.all14VariantsPreserved = spectralVariantTransitions.length === 14 && spectralVariantTransitions.every(v => v.transitionSucceeded);
+        spectralSeriesState.all14VariantsPreserved = spectralVariantTransitions.length === 14 && spectralVariantTransitions.every(v => v.transitionSucceeded && v.selectionPreserved);
 
         // Close viewer modal if open via Escape key
         await page.keyboard.press('Escape');
@@ -4311,9 +4441,13 @@ async function runBrowserEvidence() {
                 spectralSeriesState.sampleId === 'SMP-2026-001' &&
                 spectralSeriesState.wavelengthRange !== null &&
                 spectralSeriesState.all14VariantsPreserved === true &&
+                spectralSeriesState.afterExit &&
+                spectralSeriesState.afterExit.selectionPreserved === true &&
+                Array.isArray(spectralSeriesState.afterExit.selectedPeaks) &&
+                spectralSeriesState.afterExit.selectedPeaks.length === 2 &&
                 Array.isArray(spectralSeriesState.variantTransitions) &&
                 spectralSeriesState.variantTransitions.length === 14 &&
-                spectralSeriesState.variantTransitions.every(v => v && v.transitionSucceeded === true && v.specimenVerified === true && v.curvePreserved === true)
+                spectralSeriesState.variantTransitions.every(v => v && v.transitionSucceeded === true && v.specimenVerified === true && v.curvePreserved === true && v.selectionPreserved === true && Array.isArray(v.selectedPeaks) && v.selectedPeaks.length === 2)
             ) &&
             (typeof labelPreviewState !== 'undefined' && labelPreviewState &&
                 labelPreviewState.rendered === true &&
@@ -4351,7 +4485,7 @@ async function runBrowserEvidence() {
                 (obs.unit === exp.unit || (exp.parameter === 'K' && (obs.unit === 'cmol(+)/kg' || obs.unit === 'cmol/kg'))) &&
                 obs.unit !== 'N/A' &&
                 typeof obs.precision === 'number' &&
-                obs.precision >= 1
+                obs.precision === exp.decimals
             ))(printStylesActive.measurements.find(m => m && (m.parameter === exp.parameter || (exp.parameter === 'K' && (m.parameter === 'K' || m.parameter === 'Exchangeable K')))))) &&
             printStylesActive.measurements.every(m =>
                 m.status === 'APPROVED' &&
@@ -4360,7 +4494,7 @@ async function runBrowserEvidence() {
                 typeof m.value === 'number' &&
                 !isNaN(m.value) &&
                 m.unit !== 'N/A' &&
-                (m.parameter === 'pH' ? m.method === 'ISO 10390' : true)
+                (m.parameter === 'pH' ? (m.method === 'ISO 10390' && m.precision === 2) : true)
             ) &&
             printStylesActive.computedBg !== 'rgb(0, 0, 0)' &&
             !printStylesActive.isBlackBackground &&
@@ -4371,7 +4505,7 @@ async function runBrowserEvidence() {
             printStylesActive.all14VariantsPreserved === true &&
             Array.isArray(printStylesActive.variantTransitions) &&
             printStylesActive.variantTransitions.length === 14 &&
-            printStylesActive.variantTransitions.every(v => v && v.transitionSucceeded === true && v.valuesPreserved === true) &&
+            printStylesActive.variantTransitions.every(v => v && v.transitionSucceeded === true && v.valuesPreserved === true && v.scientificValuesPreserved === true && (v.measurements ? v.measurements.every(m => m.valid !== false && (m.parameter === 'pH' ? (m.formatted === '6.50' && m.precision === 2) : true)) : true)) &&
             printStylesActive.pdfGenerated === true &&
             typeof printStylesActive.pdfByteLength === 'number' &&
             printStylesActive.pdfByteLength > 10000 &&

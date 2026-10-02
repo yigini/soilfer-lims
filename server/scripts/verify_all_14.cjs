@@ -131,7 +131,14 @@ const printGate = (p, ss, ls) => new Function('chartTokensPresent', 'printStyles
 function paper(text) {
     const el = { innerText: text, className: 'report-document', querySelector: () => null, getAttribute: () => null };
     const res = collector('printStylesActive')({ querySelector: () => el, body: el }, { getComputedStyle: () => ({ backgroundColor: 'rgb(255, 255, 255)', color: 'rgb(30, 58, 95)' }) });
-    res.variantTransitions = Array.from({ length: 14 }, () => ({ transitionSucceeded: true, valuesPreserved: true }));
+    res.variantTransitions = Array.from({ length: 14 }, () => ({
+        transitionSucceeded: true,
+        valuesPreserved: true,
+        scientificValuesPreserved: true,
+        measurements: [
+            { parameter: 'pH', formatted: '6.50', precision: 2, valid: true }
+        ]
+    }));
     res.all14VariantsPreserved = true;
     res.pdfGenerated = true;
     res.pdfByteLength = 162647;
@@ -147,10 +154,16 @@ const validSpectral = {
     intensityRange: '0.05 - 1.25 AU',
     chartTokensEvaluated: ['--sf-chart-1'],
     all14VariantsPreserved: true,
+    afterExit: {
+        selectionPreserved: true,
+        selectedPeaks: [1450, 1620]
+    },
     variantTransitions: Array.from({ length: 14 }, () => ({
         transitionSucceeded: true,
         specimenVerified: true,
-        curvePreserved: true
+        curvePreserved: true,
+        selectionPreserved: true,
+        selectedPeaks: [1450, 1620]
     }))
 };
 const validLabel = {
