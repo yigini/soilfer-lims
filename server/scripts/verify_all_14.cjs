@@ -188,8 +188,8 @@ const validSpectral = {
         distinctSeriesVerified: true,
         axesVerified: true,
         all14VariantsPreserved: true,
-        afterExit: { mounted: true, traceCount: 2 },
-        variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true, overlayPreserved: true, curvesCount: 2, validCurvesCount: 2, legendCount: 2 }))
+        afterExit: { mounted: true, traceCount: 2, modelVerified: true },
+        variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true, overlayPreserved: true, modelVerified: true, curvesCount: 2, validCurvesCount: 2, legendCount: 2 }))
     },
     all14VariantsPreserved: true,
     afterExit: {
