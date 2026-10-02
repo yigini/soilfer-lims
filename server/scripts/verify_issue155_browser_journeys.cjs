@@ -3632,7 +3632,10 @@ async function runBrowserEvidence() {
                     v.parsedState.sampleRows.length === 1 &&
                     v.parsedState.sampleRows.every(r => r && r.sampleId === 'SMP-TEST-001' && r.pH === 6.5 && r.matrix === 'Topsoil') &&
                     Array.isArray(v.parsedState.mappingRows) &&
-                    v.parsedState.mappingRows.length >= 2 &&
+                    v.parsedState.mappingRows.length === 2 &&
+                    v.parsedState.mappingRows.length === v.parsedState.rowCount &&
+                    v.parsedState.mappingRows.filter(r => r.column === 'pH').length === 1 &&
+                    v.parsedState.mappingRows.filter(r => r.column === 'matrix').length === 1 &&
                     v.parsedState.mappingRows.some(r => r.column === 'pH' && (r.targetParameter === 'PH_H2O' || r.analysisCode === 'PH_H2O') && r.methodologyId === 'ph-water-sop' && r.unitCode === 'PH_UNIT' && r.status === 'Ready') &&
                     v.parsedState.mappingRows.some(r => r.column === 'matrix' && r.status === 'Incomplete') &&
                     !v.parsedState.mappingRows.some(r => r.column === 'unrelated' || r.targetParameter === 'wrong' || r.column === 'OTHER COLUMN' || r.column === 'WRONG COLUMN' || (r.column === 'pH' && (r.targetParameter === 'OC' || r.analysisCode === 'OC' || r.status === 'Incomplete' || r.methodologyId !== 'ph-water-sop' || r.unitCode !== 'PH_UNIT')))
@@ -3648,13 +3651,15 @@ async function runBrowserEvidence() {
                     v.pendingFilePreserved === true &&
                     v.contentMatches === true &&
                     v.hasTextareaContent === true &&
-                    (!('draftMatches' in v) || v.draftMatches === true)
+                    v.draftMatches === true &&
+                    typeof v.draftText === 'string'
                 ) &&
                 uploadDetails.preparseAfterExit &&
                 uploadDetails.preparseAfterExit.preserved === true &&
                 uploadDetails.preparseAfterExit.contentMatches === true &&
                 uploadDetails.preparseAfterExit.hasTextareaContent === true &&
-                (!('draftMatches' in uploadDetails.preparseAfterExit) || uploadDetails.preparseAfterExit.draftMatches === true) &&
+                uploadDetails.preparseAfterExit.draftMatches === true &&
+                typeof uploadDetails.preparseAfterExit.draftText === 'string' &&
                 uploadDetails.afterExit &&
                 uploadDetails.afterExit.hasFile === true &&
                 uploadDetails.afterExit.readSucceeded === true &&
@@ -3679,7 +3684,10 @@ async function runBrowserEvidence() {
                 uploadDetails.afterExit.parsedState.sampleRows.length === 1 &&
                 uploadDetails.afterExit.parsedState.sampleRows.every(r => r && r.sampleId === 'SMP-TEST-001' && r.pH === 6.5 && r.matrix === 'Topsoil') &&
                 Array.isArray(uploadDetails.afterExit.parsedState.mappingRows) &&
-                uploadDetails.afterExit.parsedState.mappingRows.length >= 2 &&
+                uploadDetails.afterExit.parsedState.mappingRows.length === 2 &&
+                uploadDetails.afterExit.parsedState.mappingRows.length === uploadDetails.afterExit.parsedState.rowCount &&
+                uploadDetails.afterExit.parsedState.mappingRows.filter(r => r.column === 'pH').length === 1 &&
+                uploadDetails.afterExit.parsedState.mappingRows.filter(r => r.column === 'matrix').length === 1 &&
                 uploadDetails.afterExit.parsedState.mappingRows.some(r => r.column === 'pH' && (r.targetParameter === 'PH_H2O' || r.analysisCode === 'PH_H2O') && r.methodologyId === 'ph-water-sop' && r.unitCode === 'PH_UNIT' && r.status === 'Ready') &&
                 uploadDetails.afterExit.parsedState.mappingRows.some(r => r.column === 'matrix' && r.status === 'Incomplete') &&
                 !uploadDetails.afterExit.parsedState.mappingRows.some(r => r.column === 'unrelated' || r.targetParameter === 'wrong' || r.column === 'OTHER COLUMN' || r.column === 'WRONG COLUMN' || (r.column === 'pH' && (r.targetParameter === 'OC' || r.analysisCode === 'OC' || r.status === 'Incomplete' || r.methodologyId !== 'ph-water-sop' || r.unitCode !== 'PH_UNIT'))) &&
@@ -5730,22 +5738,28 @@ async function runBrowserEvidence() {
                     const B = meanY - A * meanE;
                     if (A >= 0 || r2 < 0.90) return null;
                     const maxCalDiff = Math.max(...ptsY.map((y, i) => Math.abs((y - B) / A - expected[i])));
-                    if (maxCalDiff >= 0.08) return null;
+                    if (maxCalDiff >= 0.008) return null;
                     return { A, B };
                 }
 
                 function checkSharedModel(yA, yB, refA, refB) {
                     let cal = fitCalibration(yA, refA);
                     if (cal) {
-                        const maxDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                        if (maxDiffB < 0.08) return true;
+                        const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
+                        const diffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
+                        const crossDiffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
+                        const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
+                        if (diffA < 0.008 && diffB < 0.008 && crossDiffA > 0.015 && crossDiffB > 0.015) return true;
                     }
                     const revA = [...refA].reverse();
                     const revB = [...refB].reverse();
                     cal = fitCalibration(yA, revA);
                     if (cal) {
-                        const maxDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - revB[i])));
-                        if (maxDiffB < 0.08) return true;
+                        const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - revA[i])));
+                        const diffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
+                        const crossDiffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
+                        const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
+                        if (diffA < 0.008 && diffB < 0.008 && crossDiffA > 0.015 && crossDiffB > 0.015) return true;
                     }
                     return false;
                 }
@@ -5816,10 +5830,10 @@ async function runBrowserEvidence() {
                 const axesVerified = Boolean(
                     xAxisEl &&
                     yAxisEl &&
-                    xTickVals.length > 0 &&
-                    xTickVals.some(v => v >= 400 && v <= 4000) &&
-                    yTickVals.length > 0 &&
-                    yTickVals.some(v => v >= 0 && v <= 3.5)
+                    xTickVals.length >= 2 &&
+                    xTickVals.every(v => v >= 400 && v <= 4000) &&
+                    yTickVals.length >= 2 &&
+                    yTickVals.every(v => v >= 0 && v <= 3.5)
                 );
 
                 const hasValidScans = selectedScanIds.length >= 2 &&
@@ -5955,22 +5969,28 @@ async function runBrowserEvidence() {
                         const B = meanY - A * meanE;
                         if (A >= 0 || r2 < 0.90) return null;
                         const maxCalDiff = Math.max(...ptsY.map((y, i) => Math.abs((y - B) / A - expected[i])));
-                        if (maxCalDiff >= 0.08) return null;
+                        if (maxCalDiff >= 0.008) return null;
                         return { A, B };
                     }
 
                     function checkSharedModel(yA, yB, refA, refB) {
                         let cal = fitCalibration(yA, refA);
                         if (cal) {
-                            const maxDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                            if (maxDiffB < 0.08) return true;
+                            const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
+                            const diffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
+                            const crossDiffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
+                            const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
+                            if (diffA < 0.008 && diffB < 0.008 && crossDiffA > 0.015 && crossDiffB > 0.015) return true;
                         }
                         const revA = [...refA].reverse();
                         const revB = [...refB].reverse();
                         cal = fitCalibration(yA, revA);
                         if (cal) {
-                            const maxDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - revB[i])));
-                            if (maxDiffB < 0.08) return true;
+                            const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - revA[i])));
+                            const diffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
+                            const crossDiffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
+                            const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
+                            if (diffA < 0.008 && diffB < 0.008 && crossDiffA > 0.015 && crossDiffB > 0.015) return true;
                         }
                         return false;
                     }
@@ -6041,10 +6061,10 @@ async function runBrowserEvidence() {
                     const axesVerified = Boolean(
                         xAxisEl &&
                         yAxisEl &&
-                        xTickVals.length > 0 &&
-                        xTickVals.some(v => v >= 400 && v <= 4000) &&
-                        yTickVals.length > 0 &&
-                        yTickVals.some(v => v >= 0 && v <= 3.5)
+                        xTickVals.length >= 2 &&
+                        xTickVals.every(v => v >= 400 && v <= 4000) &&
+                        yTickVals.length >= 2 &&
+                        yTickVals.every(v => v >= 0 && v <= 3.5)
                     );
 
                     const modelVerified = Boolean(curveModelVerified && axesVerified);
@@ -6147,22 +6167,28 @@ async function runBrowserEvidence() {
                         const B = meanY - A * meanE;
                         if (A >= 0 || r2 < 0.90) return null;
                         const maxCalDiff = Math.max(...ptsY.map((y, i) => Math.abs((y - B) / A - expected[i])));
-                        if (maxCalDiff >= 0.08) return null;
+                        if (maxCalDiff >= 0.008) return null;
                         return { A, B };
                     }
 
                     function checkSharedModel(yA, yB, refA, refB) {
                         let cal = fitCalibration(yA, refA);
                         if (cal) {
-                            const maxDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                            if (maxDiffB < 0.08) return true;
+                            const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
+                            const diffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
+                            const crossDiffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
+                            const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
+                            if (diffA < 0.008 && diffB < 0.008 && crossDiffA > 0.015 && crossDiffB > 0.015) return true;
                         }
                         const revA = [...refA].reverse();
                         const revB = [...refB].reverse();
                         cal = fitCalibration(yA, revA);
                         if (cal) {
-                            const maxDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - revB[i])));
-                            if (maxDiffB < 0.08) return true;
+                            const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - revA[i])));
+                            const diffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
+                            const crossDiffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
+                            const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
+                            if (diffA < 0.008 && diffB < 0.008 && crossDiffA > 0.015 && crossDiffB > 0.015) return true;
                         }
                         return false;
                     }
@@ -6233,10 +6259,10 @@ async function runBrowserEvidence() {
                     const axesVerified = Boolean(
                         xAxisEl &&
                         yAxisEl &&
-                        xTickVals.length > 0 &&
-                        xTickVals.some(v => v >= 400 && v <= 4000) &&
-                        yTickVals.length > 0 &&
-                        yTickVals.some(v => v >= 0 && v <= 3.5)
+                        xTickVals.length >= 2 &&
+                        xTickVals.every(v => v >= 400 && v <= 4000) &&
+                        yTickVals.length >= 2 &&
+                        yTickVals.every(v => v >= 0 && v <= 3.5)
                     );
 
                     const modelVerified = Boolean(curveModelVerified && axesVerified);
