@@ -1782,7 +1782,7 @@ async function runBrowserEvidence() {
             };
         });
 
-        const scanState = await page.evaluate(() => {
+        const scanState = await page.evaluate(async () => {
             const container = document.querySelector('main, [role="main"]');
             const manualForm = document.querySelector('form, [placeholder*="Search"], input');
             const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
@@ -1792,6 +1792,20 @@ async function runBrowserEvidence() {
             const streamActive = Boolean(hasStream && stream.active);
             const cameraActive = Boolean(videoEl && hasStream && streamActive);
             const enteredVal = scanInp ? scanInp.value : null;
+
+            const tracks = (stream && typeof stream.getTracks === 'function')
+                ? stream.getTracks().map(t => ({ id: t.id, kind: t.kind, readyState: t.readyState, enabled: t.enabled }))
+                : [];
+            const videoNodeIdentity = videoEl ? {
+                tagName: videoEl.tagName,
+                className: videoEl.className,
+                readyState: videoEl.readyState,
+                srcObjectAssigned: Boolean(videoEl.srcObject)
+            } : null;
+            const permissionsState = (navigator.permissions && navigator.permissions.query)
+                ? await navigator.permissions.query({ name: 'camera' }).then(p => p.state).catch(() => 'prompt')
+                : 'N/A_NOT_SUPPORTED';
+
             return {
                 mounted: !!container,
                 hasQrOrSearch: !!manualForm,
@@ -1801,6 +1815,9 @@ async function runBrowserEvidence() {
                 cameraActive,
                 cameraStreamPreserved: cameraActive,
                 cameraStreamStatus: cameraActive ? 'ACTIVE_STREAM' : 'IDLE_VIEWFINDER_UNMOUNTED_VIDEO',
+                streamDetails: stream ? { active: stream.active, id: stream.id, trackCount: tracks.length, tracks } : null,
+                videoNodeIdentity,
+                permissionsState,
                 requestedTheme: 'mineral',
                 requestedMode: 'light',
                 appliedTheme: document.documentElement.getAttribute('data-theme'),
@@ -2362,6 +2379,38 @@ async function runBrowserEvidence() {
             geographicMapState.activeLayer = geographicMapState.layerSwitched || 'Satellite';
         }
 
+        // Deliberately set non-default map pan and zoom to test retention across theme switches
+        await page.evaluate(() => {
+            const mapContainer = document.querySelector('.leaflet-container');
+            if (mapContainer && mapContainer._leaflet_map && typeof mapContainer._leaflet_map.setView === 'function') {
+                mapContainer._leaflet_map.setView([7.0, -1.0], 16);
+            }
+        });
+        await page.waitForTimeout(150);
+
+        const deliberateCenterAndZoom = await page.evaluate(() => {
+            const mapContainer = document.querySelector('.leaflet-container');
+            const leafletMap = (mapContainer && mapContainer._leaflet_map) ? mapContainer._leaflet_map : null;
+            if (leafletMap && typeof leafletMap.getCenter === 'function' && typeof leafletMap.getZoom === 'function') {
+                const c = leafletMap.getCenter();
+                return {
+                    center: [c.lat, c.lng],
+                    zoom: leafletMap.getZoom(),
+                    latitude: c.lat,
+                    longitude: c.lng
+                };
+            }
+            return null;
+        });
+        if (deliberateCenterAndZoom) {
+            geographicMapState.center = deliberateCenterAndZoom.center;
+            geographicMapState.zoom = deliberateCenterAndZoom.zoom;
+            geographicMapState.latitude = deliberateCenterAndZoom.latitude;
+            geographicMapState.longitude = deliberateCenterAndZoom.longitude;
+            geographicMapState.deliberatePanZoom = deliberateCenterAndZoom;
+            geographicMapState.deliberatePanZoomExecuted = true;
+        }
+
         // Geographic map preservation across all 14 theme transitions on /reception
         geographicMapState.beforePreview = {
             appliedTheme: await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'forest'),
@@ -2443,7 +2492,8 @@ async function runBrowserEvidence() {
                     latitude !== null &&
                     longitude !== null &&
                     typeof zoom === 'number' &&
-                    zoom === 13 &&
+                    ((Math.abs(latitude - 7.0) < 0.001 && Math.abs(longitude - (-1.0)) < 0.001 && zoom === 16) ||
+                     (Math.abs(latitude - 5.6037) < 0.001 && Math.abs(longitude - (-0.1870)) < 0.001 && zoom === 13)) &&
                     activeLayer === 'Satellite' &&
                     popupHasCoords &&
                     popupHasSample
@@ -2532,7 +2582,8 @@ async function runBrowserEvidence() {
                 latitude !== null &&
                 longitude !== null &&
                 typeof zoom === 'number' &&
-                zoom === 13 &&
+                ((Math.abs(latitude - 7.0) < 0.001 && Math.abs(longitude - (-1.0)) < 0.001 && zoom === 16) ||
+                 (Math.abs(latitude - 5.6037) < 0.001 && Math.abs(longitude - (-0.1870)) < 0.001 && zoom === 13)) &&
                 activeLayer === 'Satellite' &&
                 popupHasCoords &&
                 popupHasSample
@@ -2560,7 +2611,14 @@ async function runBrowserEvidence() {
                 preserved
             };
         });
-        geographicMapState.mapPreserved = Boolean(geographicMapState.mounted && geographicMapState.hasMarker && geographicMapState.all14VariantsPreserved);
+        geographicMapState.deliberatePanZoomPreserved = Boolean(
+            geographicMapState.afterExit &&
+            geographicMapState.afterExit.center &&
+            Math.abs(geographicMapState.afterExit.center[0] - 7.0) < 0.001 &&
+            Math.abs(geographicMapState.afterExit.center[1] - (-1.0)) < 0.001 &&
+            geographicMapState.afterExit.zoom === 16
+        );
+        geographicMapState.mapPreserved = Boolean(geographicMapState.mounted && geographicMapState.hasMarker && geographicMapState.all14VariantsPreserved && (geographicMapState.deliberatePanZoomExecuted ? geographicMapState.deliberatePanZoomPreserved : true));
 
         // 4. File Upload Dropzone: /admin/legacy-import CSV intake
         await page.goto(`${origin}/admin/legacy-import`, { waitUntil: 'domcontentloaded' });
@@ -3704,20 +3762,21 @@ async function runBrowserEvidence() {
                         mapState.activeLayer === 'Satellite' &&
                         Array.isArray(mapState.center) &&
                         mapState.center.length === 2 &&
-                        Math.abs(mapState.center[0] - 5.6037) < 0.001 &&
-                        Math.abs(mapState.center[1] - (-0.1870)) < 0.001 &&
+                        ((Math.abs(mapState.center[0] - 7.0) < 0.001 && Math.abs(mapState.center[1] - (-1.0)) < 0.001 && mapState.zoom === 16) ||
+                         (Math.abs(mapState.center[0] - 5.6037) < 0.001 && Math.abs(mapState.center[1] - (-0.1870)) < 0.001 && mapState.zoom === 13)) &&
                         mapState.latitude !== null &&
-                        Math.abs(mapState.latitude - 5.6037) < 0.001 &&
+                        ((Math.abs(mapState.latitude - 7.0) < 0.001 && Math.abs(mapState.longitude - (-1.0)) < 0.001) ||
+                         (Math.abs(mapState.latitude - 5.6037) < 0.001 && Math.abs(mapState.longitude - (-0.1870)) < 0.001)) &&
                         mapState.longitude !== null &&
-                        Math.abs(mapState.longitude - (-0.1870)) < 0.001 &&
                         typeof mapState.zoom === 'number' &&
-                        mapState.zoom === 13 &&
+                        (mapState.zoom === 16 || mapState.zoom === 13) &&
                         mapState.popup &&
                         mapState.popup.popupMounted === true &&
                         mapState.popup.hasCoordinates === true &&
                         mapState.popup.hasSampleTitle === true &&
                         mapState.layerSwitched === 'Satellite' &&
                         mapState.all14VariantsPreserved === true &&
+                        (mapState.deliberatePanZoomExecuted ? mapState.deliberatePanZoomPreserved === true : true) &&
                         Array.isArray(mapState.variantTransitions) &&
                         mapState.variantTransitions.length === 14 &&
                         mapState.variantTransitions.every(v =>
@@ -3730,10 +3789,10 @@ async function runBrowserEvidence() {
                             v.activeLayer === 'Satellite' &&
                             Array.isArray(v.center) &&
                             v.center.length === 2 &&
-                            Math.abs(v.center[0] - 5.6037) < 0.001 &&
-                            Math.abs(v.center[1] - (-0.1870)) < 0.001 &&
+                            ((Math.abs(v.center[0] - 7.0) < 0.001 && Math.abs(v.center[1] - (-1.0)) < 0.001 && v.zoom === 16) ||
+                             (Math.abs(v.center[0] - 5.6037) < 0.001 && Math.abs(v.center[1] - (-0.1870)) < 0.001 && v.zoom === 13)) &&
                             typeof v.zoom === 'number' &&
-                            v.zoom === 13 &&
+                            (v.zoom === 16 || v.zoom === 13) &&
                             v.popup &&
                             v.popup.popupMounted === true &&
                             v.popup.hasCoordinates === true &&
@@ -3747,10 +3806,10 @@ async function runBrowserEvidence() {
                         mapState.afterExit.activeLayer === 'Satellite' &&
                         Array.isArray(mapState.afterExit.center) &&
                         mapState.afterExit.center.length === 2 &&
-                        Math.abs(mapState.afterExit.center[0] - 5.6037) < 0.001 &&
-                        Math.abs(mapState.afterExit.center[1] - (-0.1870)) < 0.001 &&
+                        ((Math.abs(mapState.afterExit.center[0] - 7.0) < 0.001 && Math.abs(mapState.afterExit.center[1] - (-1.0)) < 0.001 && mapState.afterExit.zoom === 16) ||
+                         (Math.abs(mapState.afterExit.center[0] - 5.6037) < 0.001 && Math.abs(mapState.afterExit.center[1] - (-0.1870)) < 0.001 && mapState.afterExit.zoom === 13)) &&
                         typeof mapState.afterExit.zoom === 'number' &&
-                        mapState.afterExit.zoom === 13 &&
+                        (mapState.afterExit.zoom === 16 || mapState.afterExit.zoom === 13) &&
                         mapState.afterExit.activeLayer === 'Satellite' &&
                         mapState.afterExit.popup &&
                         mapState.afterExit.popup.popupMounted === true &&
@@ -5827,15 +5886,59 @@ async function runBrowserEvidence() {
                     }
                     return texts.map(t => parseFloat(t)).filter(n => !isNaN(n) && isFinite(n));
                 }
+                function inspectTickGeometry(selector) {
+                    const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
+                    let checked = 0;
+                    let allZero = true;
+                    let hasCoords = false;
+                    for (const n of nodes) {
+                        if (!n) continue;
+                        if (typeof n.getBoundingClientRect === 'function') {
+                            hasCoords = true;
+                            checked++;
+                            const r = n.getBoundingClientRect();
+                            if (r.x !== 0 || r.y !== 0 || (r.width !== 0 && !isNaN(r.width)) || (r.height !== 0 && !isNaN(r.height))) {
+                                allZero = false;
+                            }
+                        } else if (typeof n.getAttribute === 'function') {
+                            const x = n.getAttribute('x');
+                            const y = n.getAttribute('y');
+                            if (x !== null || y !== null) {
+                                hasCoords = true;
+                                checked++;
+                                if (parseFloat(x) !== 0 || parseFloat(y) !== 0) {
+                                    allZero = false;
+                                }
+                            }
+                        }
+                    }
+                    return { hasCoords, isCollapsed: Boolean(hasCoords && checked >= 2 && allZero) };
+                }
                 const xTickVals = extractNumericTicks('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', xAxisEl);
                 const yTickVals = extractNumericTicks('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', yAxisEl);
                 const minObsX = Math.min(...xTickVals);
                 const maxObsX = Math.max(...xTickVals);
                 const minObsY = Math.min(...yTickVals);
                 const maxObsY = Math.max(...yTickVals);
+
+                const xTickGeom = inspectTickGeometry('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick');
+                const yTickGeom = inspectTickGeometry('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick');
+                const xRect = (xAxisEl && typeof xAxisEl.getBoundingClientRect === 'function') ? xAxisEl.getBoundingClientRect() : null;
+                const yRect = (yAxisEl && typeof yAxisEl.getBoundingClientRect === 'function') ? yAxisEl.getBoundingClientRect() : null;
+                const axisRectsCollapsed = Boolean(xRect && yRect && xRect.width === 0 && xRect.height === 0 && yRect.width === 0 && yRect.height === 0);
+                const hasZeroCollapsedGeometry = Boolean(xTickGeom.isCollapsed || yTickGeom.isCollapsed || axisRectsCollapsed);
+
+                const xText = (xAxisEl && xAxisEl.textContent) ? String(xAxisEl.textContent) : '';
+                const yText = (yAxisEl && yAxisEl.textContent) ? String(yAxisEl.textContent) : '';
+                const hasWrongXSemantics = /wavelength\s*\(\s*nm\s*\)|reflectance/i.test(xText);
+                const hasWrongYSemantics = /reflectance\s*\(\s*%\s*\)|wavelength/i.test(yText);
+
                 const axesVerified = Boolean(
                     xAxisEl &&
                     yAxisEl &&
+                    !hasWrongXSemantics &&
+                    !hasWrongYSemantics &&
+                    !hasZeroCollapsedGeometry &&
                     xTickVals.length >= 2 &&
                     xTickVals.every(v => v >= 400 && v <= 4000) &&
                     minObsX <= 1500 && maxObsX >= 3500 && (maxObsX - minObsX) >= 2000 &&
@@ -6064,15 +6167,59 @@ async function runBrowserEvidence() {
                         }
                         return texts.map(t => parseFloat(t)).filter(n => !isNaN(n) && isFinite(n));
                     }
+                    function inspectTickGeometry(selector) {
+                        const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
+                        let checked = 0;
+                        let allZero = true;
+                        let hasCoords = false;
+                        for (const n of nodes) {
+                            if (!n) continue;
+                            if (typeof n.getBoundingClientRect === 'function') {
+                                hasCoords = true;
+                                checked++;
+                                const r = n.getBoundingClientRect();
+                                if (r.x !== 0 || r.y !== 0 || (r.width !== 0 && !isNaN(r.width)) || (r.height !== 0 && !isNaN(r.height))) {
+                                    allZero = false;
+                                }
+                            } else if (typeof n.getAttribute === 'function') {
+                                const x = n.getAttribute('x');
+                                const y = n.getAttribute('y');
+                                if (x !== null || y !== null) {
+                                    hasCoords = true;
+                                    checked++;
+                                    if (parseFloat(x) !== 0 || parseFloat(y) !== 0) {
+                                        allZero = false;
+                                    }
+                                }
+                            }
+                        }
+                        return { hasCoords, isCollapsed: Boolean(hasCoords && checked >= 2 && allZero) };
+                    }
                     const xTickVals = extractNumericTicks('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', xAxisEl);
                     const yTickVals = extractNumericTicks('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', yAxisEl);
                     const minObsX = Math.min(...xTickVals);
                     const maxObsX = Math.max(...xTickVals);
                     const minObsY = Math.min(...yTickVals);
                     const maxObsY = Math.max(...yTickVals);
+
+                    const xTickGeom = inspectTickGeometry('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick');
+                    const yTickGeom = inspectTickGeometry('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick');
+                    const xRect = (xAxisEl && typeof xAxisEl.getBoundingClientRect === 'function') ? xAxisEl.getBoundingClientRect() : null;
+                    const yRect = (yAxisEl && typeof yAxisEl.getBoundingClientRect === 'function') ? yAxisEl.getBoundingClientRect() : null;
+                    const axisRectsCollapsed = Boolean(xRect && yRect && xRect.width === 0 && xRect.height === 0 && yRect.width === 0 && yRect.height === 0);
+                    const hasZeroCollapsedGeometry = Boolean(xTickGeom.isCollapsed || yTickGeom.isCollapsed || axisRectsCollapsed);
+
+                    const xText = (xAxisEl && xAxisEl.textContent) ? String(xAxisEl.textContent) : '';
+                    const yText = (yAxisEl && yAxisEl.textContent) ? String(yAxisEl.textContent) : '';
+                    const hasWrongXSemantics = /wavelength\s*\(\s*nm\s*\)|reflectance/i.test(xText);
+                    const hasWrongYSemantics = /reflectance\s*\(\s*%\s*\)|wavelength/i.test(yText);
+
                     const axesVerified = Boolean(
                         xAxisEl &&
                         yAxisEl &&
+                        !hasWrongXSemantics &&
+                        !hasWrongYSemantics &&
+                        !hasZeroCollapsedGeometry &&
                         xTickVals.length >= 2 &&
                         xTickVals.every(v => v >= 400 && v <= 4000) &&
                         minObsX <= 1500 && maxObsX >= 3500 && (maxObsX - minObsX) >= 2000 &&
@@ -6268,15 +6415,59 @@ async function runBrowserEvidence() {
                         }
                         return texts.map(t => parseFloat(t)).filter(n => !isNaN(n) && isFinite(n));
                     }
+                    function inspectTickGeometry(selector) {
+                        const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
+                        let checked = 0;
+                        let allZero = true;
+                        let hasCoords = false;
+                        for (const n of nodes) {
+                            if (!n) continue;
+                            if (typeof n.getBoundingClientRect === 'function') {
+                                hasCoords = true;
+                                checked++;
+                                const r = n.getBoundingClientRect();
+                                if (r.x !== 0 || r.y !== 0 || (r.width !== 0 && !isNaN(r.width)) || (r.height !== 0 && !isNaN(r.height))) {
+                                    allZero = false;
+                                }
+                            } else if (typeof n.getAttribute === 'function') {
+                                const x = n.getAttribute('x');
+                                const y = n.getAttribute('y');
+                                if (x !== null || y !== null) {
+                                    hasCoords = true;
+                                    checked++;
+                                    if (parseFloat(x) !== 0 || parseFloat(y) !== 0) {
+                                        allZero = false;
+                                    }
+                                }
+                            }
+                        }
+                        return { hasCoords, isCollapsed: Boolean(hasCoords && checked >= 2 && allZero) };
+                    }
                     const xTickVals = extractNumericTicks('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', xAxisEl);
                     const yTickVals = extractNumericTicks('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', yAxisEl);
                     const minObsX = Math.min(...xTickVals);
                     const maxObsX = Math.max(...xTickVals);
                     const minObsY = Math.min(...yTickVals);
                     const maxObsY = Math.max(...yTickVals);
+
+                    const xTickGeom = inspectTickGeometry('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick');
+                    const yTickGeom = inspectTickGeometry('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick');
+                    const xRect = (xAxisEl && typeof xAxisEl.getBoundingClientRect === 'function') ? xAxisEl.getBoundingClientRect() : null;
+                    const yRect = (yAxisEl && typeof yAxisEl.getBoundingClientRect === 'function') ? yAxisEl.getBoundingClientRect() : null;
+                    const axisRectsCollapsed = Boolean(xRect && yRect && xRect.width === 0 && xRect.height === 0 && yRect.width === 0 && yRect.height === 0);
+                    const hasZeroCollapsedGeometry = Boolean(xTickGeom.isCollapsed || yTickGeom.isCollapsed || axisRectsCollapsed);
+
+                    const xText = (xAxisEl && xAxisEl.textContent) ? String(xAxisEl.textContent) : '';
+                    const yText = (yAxisEl && yAxisEl.textContent) ? String(yAxisEl.textContent) : '';
+                    const hasWrongXSemantics = /wavelength\s*\(\s*nm\s*\)|reflectance/i.test(xText);
+                    const hasWrongYSemantics = /reflectance\s*\(\s*%\s*\)|wavelength/i.test(yText);
+
                     const axesVerified = Boolean(
                         xAxisEl &&
                         yAxisEl &&
+                        !hasWrongXSemantics &&
+                        !hasWrongYSemantics &&
+                        !hasZeroCollapsedGeometry &&
                         xTickVals.length >= 2 &&
                         xTickVals.every(v => v >= 400 && v <= 4000) &&
                         minObsX <= 1500 && maxObsX >= 3500 && (maxObsX - minObsX) >= 2000 &&

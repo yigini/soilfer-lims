@@ -54,10 +54,10 @@ let currentMetrics = getDistMetrics(distDir);
 
 const candidateClientTree = execSync('git rev-parse HEAD:client', { cwd: root, encoding: 'utf8' }).trim();
 
-// Verified build manifest from candidate client distribution (client tree c7557a2 under Vite 5.4.21 [declared ^5.3.1] / Node v24.13.0)
+// Verified build manifest from candidate client distribution (client tree 48f6ad6 under Vite 5.4.21 [declared ^5.3.1] / Node v24.13.0)
 const VERIFIED_BUILD_MANIFEST = {
-    buildInputCommit: '1015524384c254383d12c10cd6d67e1bf2755c59',
-    clientTree: 'c7557a2b3b74f077244fd0cee9e55e05edf21671',
+    buildInputCommit: '2fd3c82be31615d62ddd95122138e8dcfccc896a',
+    clientTree: '48f6ad6bb6a21c5ec1c4ab4bdae9901df51e0ff0',
     toolchain: {
         node: 'v24.13.0',
         vite: '5.4.21',
@@ -66,8 +66,8 @@ const VERIFIED_BUILD_MANIFEST = {
     dependencyLockfileSha256: 'c2bf38c195a5a5a2a5d5c2835b5b5d26ffa1650b8d5cda45dee537ff553258ae',
     assets: {
         'index-Df7izgw5.css': { sha256: '65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75', raw: 213700, gzip: 35045 },
-        'ThemeGallery-CmTtzdUN.js': { sha256: 'c6a6e3d080a35c6c74eadab5f5e8ebd987589c0c0eecc1cedce2a6b287673f52', raw: 25935, gzip: 6478 },
-        'index-D_NTOWPw.js': { sha256: '71bf151e8bb1381b7b766d7be552a823c7fb4769a0562a8a1e2dc893e910608f', raw: 1252791, gzip: 361077 }
+        'ThemeGallery-BDY0TaEP.js': { sha256: 'b7ac18a247fbc02750e6babeb0479230f3feee20215c84fc0b587de57e93847c', raw: 25935, gzip: 6477 },
+        'index-Cqwjam7b.js': { sha256: '5ba1e507d7c75df700ff65c4edf073e68980e295d2fa1fe41b7fe990d1e89822', raw: 1252791, gzip: 361081 }
     }
 };
 // Historical baseline 8e binding retained for provenance (buildInputCommit: '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7')
@@ -244,9 +244,9 @@ fs.writeFileSync(path.join(root, 'server/scripts/theme_bundle_budget_measurement
     candidateCommit,
     candidateTree,
     candidateClientTree,
-    buildInputCommit: buildInputCommit || '1015524384c254383d12c10cd6d67e1bf2755c59',
+    buildInputCommit: buildInputCommit || '2fd3c82be31615d62ddd95122138e8dcfccc896a',
     buildInputClientTree: buildInputClientTree || candidateClientTree,
-    evidenceDistinction: "Client source code and built assets are frozen at candidate client tree c7557a2b3b74f077244fd0cee9e55e05edf21671 (including ScanPage.jsx synchronization and TechWorkbench.jsx overflow styling); verification scripts, test suites, and documentation are updated in subsequent evidence commits without altering built assets.",
+    evidenceDistinction: "Client source code and built assets are updated at candidate client tree 48f6ad6bb6a21c5ec1c4ab4bdae9901df51e0ff0 (including SampleMap.jsx ChangeView dependency memoization, ScanPage.jsx synchronization, and TechWorkbench.jsx overflow styling); verification scripts, test suites, and documentation are updated in subsequent evidence commits without altering built assets.",
     toolchain,
     cleanBuildVerified,
     dependencyLockfileSha256: lockfileSha256,

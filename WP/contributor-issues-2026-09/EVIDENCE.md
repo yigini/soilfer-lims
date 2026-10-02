@@ -3826,4 +3826,29 @@ Laboratory operators can find step-by-step procedures in the following documenta
            - Candidate Client Tree: `c7557a2b3b74f077244fd0cee9e55e05edf21671` (100% frozen byte-for-byte).
            - Candidate Server/Data Tree: `1a2a84457d02d33707f9845da10f9b97995e1377` (100% frozen byte-for-byte).
            - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+      - Following Codex independent review `issue155-independent-review-1e30482.md` and 4-case probe `issue155-focused-review-1e30482.cjs`:
+         1. **Scientific Axis Bounds, Geometry & Semantic Units (Finding 1 / Case 3)**:
+            - Hardened `multiOverlayState`, `ovt`, and `multiOverlayState.afterExit` in `server/scripts/verify_issue155_browser_journeys.cjs`:
+              * Inspects axis text content for invalid semantics: strictly rejects `Wavelength (nm)` or `Reflectance (%)` for MIR modality where `Wavenumber (cm⁻¹)` and `Absorbance` are required.
+              * Inspects tick element coordinates and bounding rects: strictly rejects zero-collapsed tick geometries where tick coordinates/rectangles are all zero, while preserving source-supported N/A equivalence when tick coordinate attributes are absent on synthetic text adapters (`axisDoc`).
+              * Verified that `wrongAxisDoc` from Case 3 strictly rejects across `initial.axesVerified: false`, `transition.modelVerified: false`, `exit.modelVerified: false`, and `printAccept() === false`, while genuine reference adapter `axisDoc` passes 100%.
+         2. **Authorized SampleMap View Retention Fix (Finding 2 / Case 4)**:
+            - Owner authorization explicitly affirmed that fixing `client/src/components/reception/SampleMap.jsx` is authorized:
+              * In `client/src/components/reception/SampleMap.jsx`:
+                - Added `useMemo` on `position`: `const position = useMemo(() => [lat, lng], [lat, lng]);`.
+                - Updated `ChangeView` dependencies from `[center, map]` to primitive coordinate dependencies `[center && center[0], center && center[1], map]`, preventing `useEffect` from re-running when coordinates have not changed on re-render.
+              * Built client cleanly with `cmd /c npm run build` (built in 16.30s). Candidate client tree: `48f6ad6bb6a21c5ec1c4ab4bdae9901df51e0ff0`.
+              * Preserved frozen CSS: `dist/assets/index-Df7izgw5.css` (213,700 B raw / 35,045 B gzip, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`).
+              * In `server/scripts/verify_issue155_browser_journeys.cjs`: deliberately panned and zoomed map to `[7.0, -1.0]`, zoom 16; verified `deliberatePanZoomExecuted: true`, `center: [7.0, -1.0]`, `zoom: 16`, preserved across all 14 theme transitions and modal exit (`deliberatePanZoomPreserved: true`).
+         3. **Correct PR Body Theme Catalog (Finding 3)**:
+            - Public PR #155 body updated to match canonical JSON catalog: `soilfer-classic` (default), `forest`, `terra`, `mineral`, `watershed`, `nutrient`, `clear-contrast`. Eliminated historical earth/ocean/amber/slate/classic catalog references.
+         4. **Complete Operating Stage Reconciliation (Finding 4)**:
+            - ScanPage camera verification expanded beyond `cameraActive` flag to independently observe live stream details (`active`, `id`, `trackCount`, `tracks` with kind, enabled, readyState), `<video>` node identity (`tagName: 'VIDEO'`, `className`, `readyState: 4`, `srcObjectAssigned: true`), and `permissionsState: 'granted'`.
+            - Truthful optical zoom/DPR/text reflow distinctions maintained: High-DPI DPR 2.0 and 400% root font enlargement distinguished from viewport emulation and native browser optical zoom.
+            - Complete supported scientific/worksheet/report/certificate/label and genuine shared-output associations verified. Reused genuine certificate PDF (162,633 B, SHA256 `47fdaa79...`).
+         5. **Suite Results**:
+            - Running-app Browser Suite: **All 12/12 suites PASS 100% green** (`server/scripts/issue155-browser-journeys-results.json`).
+            - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
+            - Plan budget: 5,333 B gzip (<= 15.0 kB gzip limit, margin +9.79 kB under budget).
+            - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
 
