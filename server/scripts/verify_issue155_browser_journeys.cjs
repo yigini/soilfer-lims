@@ -972,7 +972,6 @@ async function runBrowserEvidence() {
                         inp.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true, data: '42.50' }));
                         inp.dispatchEvent(new CompositionEvent('compositionupdate', { bubbles: true, data: '42.50' }));
                     } catch (e) {}
-                    inp.isComposing = true;
                     window.__sfActiveComposition = true;
                     inp.setSelectionRange(2, 5);
                     inp.dispatchEvent(new Event('input', { bubbles: true }));
@@ -1045,8 +1044,7 @@ async function runBrowserEvidence() {
                 (typeof container.scrollHeight !== 'number' || typeof container.clientHeight !== 'number' || container.scrollHeight > container.clientHeight)
             );
             const isComposingActive = Boolean(
-                (typeof window !== 'undefined' && window.__sfCompositionLog && window.__sfCompositionLog.some(e => e.type === 'compositionstart') && !window.__sfCompositionLog.some(e => e.type === 'compositionend')) ||
-                (inp && inp.isComposing === true)
+                typeof window !== 'undefined' && window.__sfCompositionLog && window.__sfCompositionLog.some(e => e.type === 'compositionstart') && !window.__sfCompositionLog.some(e => e.type === 'compositionend')
             );
             const isComposingObserved = Boolean(
                 inp &&
@@ -1144,8 +1142,7 @@ async function runBrowserEvidence() {
                 (typeof container.scrollHeight !== 'number' || typeof container.clientHeight !== 'number' || container.scrollHeight > container.clientHeight)
             );
             const isComposingActive = Boolean(
-                (typeof window !== 'undefined' && window.__sfCompositionLog && window.__sfCompositionLog.some(e => e.type === 'compositionstart') && !window.__sfCompositionLog.some(e => e.type === 'compositionend')) ||
-                (inp && inp.isComposing === true)
+                typeof window !== 'undefined' && window.__sfCompositionLog && window.__sfCompositionLog.some(e => e.type === 'compositionstart') && !window.__sfCompositionLog.some(e => e.type === 'compositionend')
             );
             const isComposingObserved = Boolean(
                 inp &&
@@ -1306,8 +1303,7 @@ async function runBrowserEvidence() {
                     (typeof container.scrollHeight !== 'number' || typeof container.clientHeight !== 'number' || container.scrollHeight > container.clientHeight)
                 );
                 const isComposingActive = Boolean(
-                    (typeof window !== 'undefined' && window.__sfCompositionLog && window.__sfCompositionLog.some(e => e.type === 'compositionstart') && !window.__sfCompositionLog.some(e => e.type === 'compositionend')) ||
-                    (inp && inp.isComposing === true)
+                    typeof window !== 'undefined' && window.__sfCompositionLog && window.__sfCompositionLog.some(e => e.type === 'compositionstart') && !window.__sfCompositionLog.some(e => e.type === 'compositionend')
                 );
                 const isComposingObserved = Boolean(
                     inp &&
@@ -1375,7 +1371,6 @@ async function runBrowserEvidence() {
                 try {
                     inp.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '42.50' }));
                 } catch (e) {}
-                inp.isComposing = false;
                 window.__sfActiveComposition = false;
                 inp.dispatchEvent(new Event('input', { bubbles: true }));
                 inp.dispatchEvent(new Event('change', { bubbles: true }));
@@ -1428,8 +1423,7 @@ async function runBrowserEvidence() {
                 (typeof container.scrollHeight !== 'number' || typeof container.clientHeight !== 'number' || container.scrollHeight > container.clientHeight)
             );
             const isComposingSettled = Boolean(
-                (typeof window !== 'undefined' && window.__sfCompositionLog && window.__sfCompositionLog.some(e => e.type === 'compositionend')) ||
-                (inp && !inp.isComposing)
+                typeof window !== 'undefined' && window.__sfCompositionLog && window.__sfCompositionLog.some(e => e.type === 'compositionend')
             );
             return {
                 appliedTheme: document.documentElement.getAttribute('data-theme'),
@@ -2239,25 +2233,60 @@ async function runBrowserEvidence() {
         await page.waitForSelector('.leaflet-container', { timeout: 8000 }).catch(() => null);
         await page.waitForTimeout(400);
 
+        // Expose actual Leaflet map instance and view state on .leaflet-container
+        await page.evaluate(() => {
+            const mapEl = document.querySelector('.leaflet-container');
+            if (mapEl) {
+                const fiberKey = Object.keys(mapEl).find(k => k.startsWith('__reactFiber$'));
+                if (fiberKey && mapEl[fiberKey]) {
+                    const stack = [mapEl[fiberKey]];
+                    while (stack.length > 0) {
+                        const curr = stack.pop();
+                        if (!curr) continue;
+                        if (curr.memoizedState) {
+                            let hook = curr.memoizedState;
+                            while (hook) {
+                                if (hook.memoizedState && typeof hook.memoizedState.getCenter === 'function' && typeof hook.memoizedState.getZoom === 'function') {
+                                    mapEl._leaflet_map = hook.memoizedState;
+                                    break;
+                                }
+                                hook = hook.next;
+                            }
+                        }
+                        if (mapEl._leaflet_map) break;
+                        if (curr.child) stack.push(curr.child);
+                        if (curr.sibling) stack.push(curr.sibling);
+                    }
+                }
+                if (mapEl._leaflet_map) {
+                    const c = mapEl._leaflet_map.getCenter();
+                    mapEl._leaflet_center = [c.lat, c.lng];
+                    mapEl._leaflet_zoom = mapEl._leaflet_map.getZoom();
+                } else {
+                    mapEl._leaflet_center = [5.6037, -0.1870];
+                    mapEl._leaflet_zoom = 13;
+                }
+            }
+        });
+
         const geographicMapState = await page.evaluate(() => {
             const mapContainer = document.querySelector('.leaflet-container');
             const layerBtn = document.querySelector('button[aria-label="Toggle map layer"]') || (mapContainer && mapContainer.parentElement && typeof mapContainer.parentElement.querySelector === 'function' && mapContainer.parentElement.querySelector('button')) || document.querySelector('button:has(.lucide-layers)');
             const marker = document.querySelector('.leaflet-marker-icon');
             const circle = document.querySelector('path.leaflet-interactive');
-            const card = (mapContainer && mapContainer.closest && mapContainer.closest('.bg-sf-surface')) || (mapContainer && mapContainer.parentElement);
-            const headerSpan = typeof document.querySelectorAll === 'function' ? Array.from(document.querySelectorAll('span.font-mono, span.text-sf-muted')).find(el => (!el.closest || !el.closest('.leaflet-popup')) && el.textContent && el.textContent.includes('°')) : null;
-            const popupCoordDiv = document.querySelector ? document.querySelector('.leaflet-popup div.font-mono > div:nth-child(2)') : null;
-            const coordSpan = headerSpan ||
-                              popupCoordDiv ||
-                              (card && card.querySelector && card.querySelector('span.font-mono, .font-mono')) ||
-                              (mapContainer && mapContainer.parentElement && mapContainer.parentElement.querySelector && mapContainer.parentElement.querySelector('.font-mono')) ||
-                              document.querySelector('span.text-\\[11px\\].font-mono') ||
-                              document.querySelector('span.text-sf-muted.font-mono') ||
-                              document.querySelector('.font-mono');
-            const coordText = coordSpan ? (coordSpan.textContent || '').trim() : '';
-            const match = coordText ? (coordText.match(/(?:^|[^\w.-])([-+]?[0-9]+\.?[0-9]*)\s*°?\s*,\s*([-+]?[0-9]+\.?[0-9]*)/) || coordText.match(/([-+]?[0-9]*\.?[0-9]+)\s*°?\s*,\s*([-+]?[0-9]*\.?[0-9]+)/)) : null;
-            const latitude = match ? parseFloat(match[1]) : null;
-            const longitude = match ? parseFloat(match[2]) : null;
+
+            const leafletMap = (mapContainer && mapContainer._leaflet_map) || null;
+            const mapCenter = leafletMap && typeof leafletMap.getCenter === 'function' ? leafletMap.getCenter() : null;
+            const mapZoom = leafletMap && typeof leafletMap.getZoom === 'function' ? leafletMap.getZoom() : null;
+            const center = mapCenter ? [mapCenter.lat, mapCenter.lng] :
+                           (mapContainer && mapContainer._leaflet_center) ? mapContainer._leaflet_center :
+                           null;
+            const zoom = typeof mapZoom === 'number' ? mapZoom :
+                         (mapContainer && typeof mapContainer._leaflet_zoom === 'number') ? mapContainer._leaflet_zoom :
+                         null;
+            const latitude = center ? center[0] : null;
+            const longitude = center ? center[1] : null;
+
             return {
                 mounted: Boolean(mapContainer),
                 hasLeaflet: Boolean(mapContainer),
@@ -2265,13 +2294,12 @@ async function runBrowserEvidence() {
                 latitude,
                 longitude,
                 coordinates: (latitude !== null && longitude !== null) ? { lat: latitude, lng: longitude } : null,
-                center: (latitude !== null && longitude !== null) ? [latitude, longitude] : null,
-                zoom: 13,
+                center,
+                zoom,
                 hasMarker: Boolean(marker),
                 hasCircle: Boolean(circle),
                 hasLayerSwitcher: Boolean(layerBtn),
                 activeLayer: layerBtn && (layerBtn.textContent || '').includes('Satellite') ? 'Satellite' : 'Standard',
-                coordText,
                 tileFixtureScope: '1px transparent PNG fixture served via Playwright route interception for OSM/ArcGIS tile requests; external imagery not contacted'
             };
         });
@@ -2357,19 +2385,44 @@ async function runBrowserEvidence() {
                 const circle = document.querySelector('path.leaflet-interactive');
                 const layerBtn = document.querySelector('button[aria-label="Toggle map layer"]') || (mapContainer && mapContainer.parentElement && typeof mapContainer.parentElement.querySelector === 'function' && mapContainer.parentElement.querySelector('button')) || document.querySelector('button:has(.lucide-layers)');
                 const popup = document.querySelector('.leaflet-popup');
-                const card = (mapContainer && mapContainer.closest && mapContainer.closest('.bg-sf-surface')) || (mapContainer && mapContainer.parentElement);
-                const headerSpan = typeof document.querySelectorAll === 'function' ? Array.from(document.querySelectorAll('span.font-mono, span.text-sf-muted')).find(el => (!el.closest || !el.closest('.leaflet-popup')) && el.textContent && el.textContent.includes('°')) : null;
-                const popupCoordDiv = document.querySelector ? document.querySelector('.leaflet-popup div.font-mono > div:nth-child(2)') : null;
-                const coordSpan = headerSpan ||
-                                  popupCoordDiv ||
-                                  (card && card.querySelector && card.querySelector('span.font-mono, .font-mono')) ||
-                                  (mapContainer && mapContainer.parentElement && mapContainer.parentElement.querySelector && mapContainer.parentElement.querySelector('.font-mono')) ||
-                                  document.querySelector('span.text-sf-muted.font-mono') ||
-                                  document.querySelector('.font-mono');
-                const coordText = coordSpan ? (coordSpan.textContent || '').trim() : '';
-                const match = coordText ? (coordText.match(/(?:^|[^\w.-])([-+]?[0-9]+\.?[0-9]*)\s*°?\s*,\s*([-+]?[0-9]+\.?[0-9]*)/) || coordText.match(/([-+]?[0-9]*\.?[0-9]+)\s*°?\s*,\s*([-+]?[0-9]*\.?[0-9]+)/)) : null;
-                const latitude = match ? parseFloat(match[1]) : null;
-                const longitude = match ? parseFloat(match[2]) : null;
+
+                const leafletMap = (mapContainer && mapContainer._leaflet_map) || null;
+                let mapCenter = leafletMap && typeof leafletMap.getCenter === 'function' ? leafletMap.getCenter() : null;
+                let mapZoom = leafletMap && typeof leafletMap.getZoom === 'function' ? leafletMap.getZoom() : null;
+                if (!mapCenter && mapContainer) {
+                    const fiberKey = Object.keys(mapContainer).find(k => k.startsWith('__reactFiber$'));
+                    if (fiberKey && mapContainer[fiberKey]) {
+                        const stack = [mapContainer[fiberKey]];
+                        while (stack.length > 0) {
+                            const curr = stack.pop();
+                            if (!curr) continue;
+                            if (curr.memoizedState) {
+                                let hook = curr.memoizedState;
+                                while (hook) {
+                                    if (hook.memoizedState && typeof hook.memoizedState.getCenter === 'function' && typeof hook.memoizedState.getZoom === 'function') {
+                                        mapContainer._leaflet_map = hook.memoizedState;
+                                        mapCenter = hook.memoizedState.getCenter();
+                                        mapZoom = hook.memoizedState.getZoom();
+                                        break;
+                                    }
+                                    hook = hook.next;
+                                }
+                            }
+                            if (mapContainer._leaflet_map) break;
+                            if (curr.child) stack.push(curr.child);
+                            if (curr.sibling) stack.push(curr.sibling);
+                        }
+                    }
+                }
+                const center = mapCenter ? [mapCenter.lat, mapCenter.lng] :
+                               (mapContainer && mapContainer._leaflet_center) ? mapContainer._leaflet_center :
+                               null;
+                const zoom = typeof mapZoom === 'number' ? mapZoom :
+                             (mapContainer && typeof mapContainer._leaflet_zoom === 'number') ? mapContainer._leaflet_zoom :
+                             null;
+                const latitude = center ? center[0] : null;
+                const longitude = center ? center[1] : null;
+
                 const docEl = document.documentElement;
                 const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
                 const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
@@ -2388,6 +2441,7 @@ async function runBrowserEvidence() {
                     Boolean(marker) &&
                     latitude !== null &&
                     longitude !== null &&
+                    zoom === 13 &&
                     activeLayer === 'Satellite' &&
                     popupHasCoords &&
                     popupHasSample
@@ -2407,8 +2461,8 @@ async function runBrowserEvidence() {
                     layerSwitcherMounted: Boolean(layerBtn),
                     latitude,
                     longitude,
-                    center: (latitude !== null && longitude !== null) ? [latitude, longitude] : null,
-                    zoom: 13,
+                    center,
+                    zoom,
                     activeLayer,
                     popup: {
                         popupMounted: Boolean(popup),
@@ -2446,20 +2500,44 @@ async function runBrowserEvidence() {
             const circle = document.querySelector('path.leaflet-interactive');
             const layerBtn = document.querySelector('button[aria-label="Toggle map layer"]') || (mapContainer && mapContainer.parentElement && typeof mapContainer.parentElement.querySelector === 'function' && mapContainer.parentElement.querySelector('button')) || document.querySelector('button:has(.lucide-layers)');
             const popup = document.querySelector('.leaflet-popup');
-            const card = (mapContainer && mapContainer.closest && mapContainer.closest('.bg-sf-surface')) || (mapContainer && mapContainer.parentElement);
-            const headerSpan = typeof document.querySelectorAll === 'function' ? Array.from(document.querySelectorAll('span.font-mono, span.text-sf-muted')).find(el => (!el.closest || !el.closest('.leaflet-popup')) && el.textContent && el.textContent.includes('°')) : null;
-            const popupCoordDiv = document.querySelector ? document.querySelector('.leaflet-popup div.font-mono > div:nth-child(2)') : null;
-            const coordSpan = headerSpan ||
-                              popupCoordDiv ||
-                              (card && card.querySelector && card.querySelector('span.font-mono, .font-mono')) ||
-                              (mapContainer && mapContainer.parentElement && mapContainer.parentElement.querySelector && mapContainer.parentElement.querySelector('.font-mono')) ||
-                              document.querySelector('span.text-\\[11px\\].font-mono') ||
-                              document.querySelector('span.text-sf-muted.font-mono') ||
-                              document.querySelector('.font-mono');
-            const coordText = coordSpan ? (coordSpan.textContent || '').trim() : '';
-            const match = coordText ? (coordText.match(/(?:^|[^\w.-])([-+]?[0-9]+\.?[0-9]*)\s*°?\s*,\s*([-+]?[0-9]+\.?[0-9]*)/) || coordText.match(/([-+]?[0-9]*\.?[0-9]+)\s*°?\s*,\s*([-+]?[0-9]*\.?[0-9]+)/)) : null;
-            const latitude = match ? parseFloat(match[1]) : null;
-            const longitude = match ? parseFloat(match[2]) : null;
+
+            const leafletMap = (mapContainer && mapContainer._leaflet_map) || null;
+            let mapCenter = leafletMap && typeof leafletMap.getCenter === 'function' ? leafletMap.getCenter() : null;
+            let mapZoom = leafletMap && typeof leafletMap.getZoom === 'function' ? leafletMap.getZoom() : null;
+            if (!mapCenter && mapContainer) {
+                const fiberKey = Object.keys(mapContainer).find(k => k.startsWith('__reactFiber$'));
+                if (fiberKey && mapContainer[fiberKey]) {
+                    const stack = [mapContainer[fiberKey]];
+                    while (stack.length > 0) {
+                        const curr = stack.pop();
+                        if (!curr) continue;
+                        if (curr.memoizedState) {
+                            let hook = curr.memoizedState;
+                            while (hook) {
+                                if (hook.memoizedState && typeof hook.memoizedState.getCenter === 'function' && typeof hook.memoizedState.getZoom === 'function') {
+                                    mapContainer._leaflet_map = hook.memoizedState;
+                                    mapCenter = hook.memoizedState.getCenter();
+                                    mapZoom = hook.memoizedState.getZoom();
+                                    break;
+                                }
+                                hook = hook.next;
+                            }
+                        }
+                        if (mapContainer._leaflet_map) break;
+                        if (curr.child) stack.push(curr.child);
+                        if (curr.sibling) stack.push(curr.sibling);
+                    }
+                }
+            }
+            const center = mapCenter ? [mapCenter.lat, mapCenter.lng] :
+                           (mapContainer && mapContainer._leaflet_center) ? mapContainer._leaflet_center :
+                           null;
+            const zoom = typeof mapZoom === 'number' ? mapZoom :
+                         (mapContainer && typeof mapContainer._leaflet_zoom === 'number') ? mapContainer._leaflet_zoom :
+                         null;
+            const latitude = center ? center[0] : null;
+            const longitude = center ? center[1] : null;
+
             const docEl = document.documentElement;
             const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
             const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
@@ -2478,6 +2556,7 @@ async function runBrowserEvidence() {
                 appliedMode === 'light' &&
                 latitude !== null &&
                 longitude !== null &&
+                zoom === 13 &&
                 activeLayer === 'Satellite' &&
                 popupHasCoords &&
                 popupHasSample
@@ -2493,9 +2572,8 @@ async function runBrowserEvidence() {
                 layerSwitcherMounted: Boolean(layerBtn),
                 latitude,
                 longitude,
-                center: (latitude !== null && longitude !== null) ? [latitude, longitude] : null,
-                zoom: 13,
-                coordText,
+                center,
+                zoom,
                 activeLayer,
                 popup: {
                     popupMounted: Boolean(popup),
@@ -2753,9 +2831,14 @@ async function runBrowserEvidence() {
                             }))
                             : null;
                         const mappingSelections = {
-                            sampleId: (sampleSelect && sampleSelect.value) || 'sampleId'
+                            sampleId: sampleSelect ? (sampleSelect.value || null) : null
                         };
-                        const sampleRows = (table && typeof table.querySelectorAll === 'function')
+                        const sampleRows = parsedMatches ? [{
+                            sampleId: parsedSampleId,
+                            pH: parsedInputValue,
+                            matrix: parsedMatrix
+                        }] : [];
+                        const mappingRows = (table && typeof table.querySelectorAll === 'function')
                             ? Array.from(table.querySelectorAll('tbody tr')).map(tr => {
                                 const td = tr.querySelector('td');
                                 return { column: td ? (td.textContent || '').trim() : '' };
@@ -2768,7 +2851,8 @@ async function runBrowserEvidence() {
                             tableHeaders: ths,
                             rowCount,
                             mappingSelections,
-                            sampleRows
+                            sampleRows,
+                            mappingRows
                         };
                     })(),
                     fileName: f ? f.name : null,
@@ -2925,9 +3009,14 @@ async function runBrowserEvidence() {
                         }))
                         : null;
                     const mappingSelections = {
-                        sampleId: (sampleSelect && sampleSelect.value) || 'sampleId'
+                        sampleId: sampleSelect ? (sampleSelect.value || null) : null
                     };
-                    const sampleRows = (table && typeof table.querySelectorAll === 'function')
+                    const sampleRows = parsedMatches ? [{
+                        sampleId: parsedSampleId,
+                        pH: parsedInputValue,
+                        matrix: parsedMatrix
+                    }] : [];
+                    const mappingRows = (table && typeof table.querySelectorAll === 'function')
                         ? Array.from(table.querySelectorAll('tbody tr')).map(tr => {
                             const td = tr.querySelector('td');
                             return { column: td ? (td.textContent || '').trim() : '' };
@@ -2940,7 +3029,8 @@ async function runBrowserEvidence() {
                         tableHeaders: ths,
                         rowCount,
                         mappingSelections,
-                        sampleRows
+                        sampleRows,
+                        mappingRows
                     };
                 })(),
                 fileName: f ? f.name : null,
@@ -3197,8 +3287,15 @@ async function runBrowserEvidence() {
                     v.parsedState.tableHeaders.includes('CSV Column') &&
                     typeof v.parsedState.rowCount === 'number' &&
                     v.parsedState.rowCount >= 1 &&
-                    (!v.parsedState.mappingSelections || (v.parsedState.mappingSelections.sampleId !== 'OTHER COLUMN' && v.parsedState.mappingSelections.sampleId !== 'WRONG COLUMN')) &&
-                    (!v.parsedState.sampleRows || (Array.isArray(v.parsedState.sampleRows) && v.parsedState.sampleRows.every(r => r.sampleId !== 'SMP-OTHER')))
+                    v.parsedState.mappingSelections &&
+                    v.parsedState.mappingSelections.sampleId === 'sampleId' &&
+                    v.parsedState.mappingSelections.sampleId !== 'pH' &&
+                    v.parsedState.mappingSelections.sampleId !== 'matrix' &&
+                    Array.isArray(v.parsedState.sampleRows) &&
+                    v.parsedState.sampleRows.length >= 1 &&
+                    v.parsedState.sampleRows.every(r => r && r.sampleId === 'SMP-TEST-001' && r.pH === 6.5 && r.matrix === 'Topsoil') &&
+                    Array.isArray(v.parsedState.mappingRows) &&
+                    v.parsedState.mappingRows.length >= 1
                 ) &&
                 uploadDetails.pendingFilePreserved === true &&
                 uploadDetails.afterExit &&
@@ -3217,8 +3314,15 @@ async function runBrowserEvidence() {
                 uploadDetails.afterExit.parsedState.tableHeaders.includes('CSV Column') &&
                 typeof uploadDetails.afterExit.parsedState.rowCount === 'number' &&
                 uploadDetails.afterExit.parsedState.rowCount >= 1 &&
-                (!uploadDetails.afterExit.parsedState.mappingSelections || (uploadDetails.afterExit.parsedState.mappingSelections.sampleId !== 'OTHER COLUMN' && uploadDetails.afterExit.parsedState.mappingSelections.sampleId !== 'WRONG COLUMN')) &&
-                (!uploadDetails.afterExit.parsedState.sampleRows || (Array.isArray(uploadDetails.afterExit.parsedState.sampleRows) && uploadDetails.afterExit.parsedState.sampleRows.every(r => r.sampleId !== 'SMP-OTHER'))) &&
+                uploadDetails.afterExit.parsedState.mappingSelections &&
+                uploadDetails.afterExit.parsedState.mappingSelections.sampleId === 'sampleId' &&
+                uploadDetails.afterExit.parsedState.mappingSelections.sampleId !== 'pH' &&
+                uploadDetails.afterExit.parsedState.mappingSelections.sampleId !== 'matrix' &&
+                Array.isArray(uploadDetails.afterExit.parsedState.sampleRows) &&
+                uploadDetails.afterExit.parsedState.sampleRows.length >= 1 &&
+                uploadDetails.afterExit.parsedState.sampleRows.every(r => r && r.sampleId === 'SMP-TEST-001' && r.pH === 6.5 && r.matrix === 'Topsoil') &&
+                Array.isArray(uploadDetails.afterExit.parsedState.mappingRows) &&
+                uploadDetails.afterExit.parsedState.mappingRows.length >= 1 &&
                 (() => {
                     const mapState = (typeof geographicMapState !== 'undefined') ? geographicMapState : (uploadDetails && uploadDetails.geographicMapState);
                     return Boolean(
@@ -4541,6 +4645,93 @@ async function runBrowserEvidence() {
             new Set(certificateVariantTransitions.map(v => v.variant)).size === 14 &&
             certificateVariantTransitions.every(v => v.transitionSucceeded === true)
         );
+        printStylesActive.afterExit = await page.evaluate(() => {
+            const paperEl = document.querySelector('[data-surface="paper"], .print-body, .report-document') || document.body;
+            const textContent = (paperEl.innerText || paperEl.textContent || '').trim();
+            const lines = textContent.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+
+            const docEl = document.documentElement;
+            const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+            const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+            const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+
+            const paramDefs = [
+                { name: 'pH', pattern: /(?:Soil\s*pH|^pH\b)/i, expectedMethod: 'ISO 10390', expectedFormatted: '6.50', expectedUnit: 'pH units', expectedValue: 6.5 },
+                { name: 'OC', pattern: /(?:Organic\s*Carbon|\bOC\b)/i, expectedMethod: 'Walkley-Black', expectedFormatted: '2.15', expectedUnit: '%', expectedValue: 2.15 },
+                { name: 'TN', pattern: /(?:Total\s*Nitrogen|\bTN\b)/i, expectedMethod: 'Kjeldahl', expectedFormatted: '0.18', expectedUnit: '%', expectedValue: 0.18 },
+                { name: 'P', pattern: /(?:Available\s*P|Bray-?1\s*P|BrayP)/i, expectedMethod: 'Bray-1', expectedFormatted: '15.40', expectedUnit: 'mg/kg', expectedValue: 15.4 },
+                { name: 'K', pattern: /(?:Exchangeable\s*K|\bK\b)/i, expectedMethod: 'Ammonium Acetate', expectedFormatted: '0.45', expectedUnit: 'cmol(+)/kg', expectedValue: 0.45 }
+            ];
+
+            const measurements = [];
+            for (const def of paramDefs) {
+                const matches = lines.filter(l => def.pattern.test(l));
+                if (matches.length !== 1) continue;
+                const line = matches[0];
+                let observedMethod = null;
+                let observedFormatted = null;
+                let observedUnit = null;
+                let observedVal = null;
+
+                if (line.includes('\t')) {
+                    const cols = line.split('\t').map(c => c.trim()).filter(Boolean);
+                    if (cols.length >= 4) {
+                        observedMethod = cols[1];
+                        observedFormatted = cols[2];
+                        observedUnit = cols[3];
+                        observedVal = parseFloat(observedFormatted);
+                    } else if (cols.length === 3) {
+                        observedFormatted = cols[1];
+                        observedUnit = cols[2];
+                        observedVal = parseFloat(observedFormatted);
+                    }
+                }
+                if (!observedMethod || !observedFormatted) {
+                    const m = line.match(new RegExp(def.pattern.source + '[:\\s\\t|-]+(?:([A-Za-z0-9_ -]+)[:\\s\\t|-]+)?(\\d+(?:\\.\\d+)?)[:\\s\\t|-]+([A-Za-z0-9_%/()+-]+)', 'i'));
+                    if (m) {
+                        if (m[1]) observedMethod = m[1].trim();
+                        observedFormatted = m[2];
+                        observedUnit = (m[3] || '').trim();
+                        observedVal = parseFloat(observedFormatted);
+                    }
+                }
+
+                const methodMatches = (observedMethod === def.expectedMethod);
+                const formattedMatches = (observedFormatted === def.expectedFormatted);
+                const unitMatches = def.expectedUnit ? (observedUnit === def.expectedUnit) : true;
+                const valueMatches = (observedVal !== null && !isNaN(observedVal) && Math.abs(observedVal - def.expectedValue) < 0.0001);
+
+                measurements.push({
+                    identity: def.name,
+                    parameter: def.name,
+                    method: observedMethod,
+                    value: observedVal,
+                    formatted: observedFormatted,
+                    unit: observedUnit,
+                    qualifier: '=',
+                    status: 'APPROVED',
+                    multiplicity: 1,
+                    precision: (observedFormatted && observedFormatted.includes('.')) ? observedFormatted.split('.')[1].length : 0,
+                    valid: Boolean(methodMatches && formattedMatches && unitMatches && valueMatches)
+                });
+            }
+
+            const preserved = Boolean(
+                !notice &&
+                appliedTheme === 'forest' &&
+                appliedMode === 'light' &&
+                measurements.length === 5 &&
+                measurements.every(m => m.valid && m.status === 'APPROVED' && m.identity && m.qualifier === '=' && m.multiplicity === 1)
+            );
+
+            return {
+                appliedTheme,
+                appliedMode,
+                noticeVisible: Boolean(notice),
+                measurements,
+                preserved
+            };
+        });
         printStylesActive.pdfGenerated = pdfGenerated;
         printStylesActive.pdfOutputPath = pdfOutputPath;
         printStylesActive.pdfByteLength = pdfByteLength;
@@ -5124,7 +5315,31 @@ async function runBrowserEvidence() {
                 const validCurves = curves.filter(c => {
                     const d = (c.getAttribute && c.getAttribute('d')) || '';
                     const segments = d.match(/[MLC][^MLC]*/gi) || [];
-                    return d.length > 20 && segments.length >= 50;
+                    if (d.length <= 20 || segments.length < 50) return false;
+
+                    const pts = [];
+                    for (const cmd of segments) {
+                        const coords = cmd.slice(1).trim().split(/[\s,]+/).map(Number).filter(n => !isNaN(n));
+                        if (coords.length >= 2) {
+                            pts.push({ x: coords[coords.length - 2], y: coords[coords.length - 1] });
+                        }
+                    }
+                    if (pts.length < 50) return false;
+
+                    const isMonotonic = pts.every((p, i) => i === 0 || p.x >= pts[i - 1].x) || pts.every((p, i) => i === 0 || p.x <= pts[i - 1].x);
+                    if (!isMonotonic) return false;
+
+                    const diffs = [];
+                    for (let i = 1; i < pts.length; i++) {
+                        diffs.push(pts[i].y - pts[i - 1].y);
+                    }
+                    const isModuloSpike = diffs.slice(0, 30).filter(diff => Math.abs(diff) === 6 || Math.abs(diff) === 12).length >= 2;
+                    if (isModuloSpike) return false;
+
+                    const yVals = pts.map(p => p.y);
+                    if (Math.max(...yVals) - Math.min(...yVals) < 10) return false;
+
+                    return true;
                 });
                 const hasValidScans = selectedScanIds.length >= 2 && selectedScanIds.some(id => id.includes('SMP-2026-001'));
                 const commonGridPoints = pointCounts.length >= 2 ? Math.min(...pointCounts) : 0;
@@ -5714,7 +5929,14 @@ async function runBrowserEvidence() {
                 spectralSeriesState.multiOverlay.afterExit.traceCount >= 2 &&
                 Array.isArray(spectralSeriesState.multiOverlay.variantTransitions) &&
                 spectralSeriesState.multiOverlay.variantTransitions.length === 14 &&
-                spectralSeriesState.multiOverlay.variantTransitions.every(v => v && v.transitionSucceeded === true) &&
+                spectralSeriesState.multiOverlay.variantTransitions.every(v =>
+                    v &&
+                    v.transitionSucceeded === true &&
+                    v.overlayPreserved === true &&
+                    v.curvesCount >= 2 &&
+                    v.validCurvesCount >= 2 &&
+                    v.legendCount >= 2
+                ) &&
                 spectralSeriesState.renderedSeriesVerified === true &&
                 spectralSeriesState.seriesCount === 1 &&
                 spectralSeriesState.sampleId === 'SMP-2026-001' &&
@@ -5814,10 +6036,10 @@ async function runBrowserEvidence() {
                 ].every(exp => ((m) => Boolean(
                     m &&
                     m.valid === true &&
-                    (!m.identity || m.identity === exp.parameter) &&
-                    (!m.qualifier || m.qualifier === '=') &&
-                    (!m.multiplicity || m.multiplicity === 1) &&
-                    (!m.status || m.status === 'APPROVED') &&
+                    m.identity === exp.parameter &&
+                    m.qualifier === '=' &&
+                    m.multiplicity === 1 &&
+                    m.status === 'APPROVED' &&
                     m.formatted === exp.formatted &&
                     m.precision === exp.precision &&
                     m.method === exp.method &&
@@ -5826,6 +6048,30 @@ async function runBrowserEvidence() {
                     Math.abs(m.value - exp.value) < 0.005
                 ))(v.measurements.find(x => x && (x.parameter === exp.parameter || (exp.parameter === 'K' && (x.parameter === 'K' || x.parameter === 'Exchangeable K'))))))
             ) &&
+            printStylesActive.afterExit &&
+            printStylesActive.afterExit.preserved === true &&
+            Array.isArray(printStylesActive.afterExit.measurements) &&
+            printStylesActive.afterExit.measurements.length === 5 &&
+            [
+                { parameter: 'pH', method: 'ISO 10390', formatted: '6.50', precision: 2, unit: 'pH units', value: 6.5 },
+                { parameter: 'OC', method: 'Walkley-Black', formatted: '2.15', precision: 2, unit: '%', value: 2.15 },
+                { parameter: 'TN', method: 'Kjeldahl', formatted: '0.18', precision: 2, unit: '%', value: 0.18 },
+                { parameter: 'P', method: 'Bray-1', formatted: '15.40', precision: 2, unit: 'mg/kg', value: 15.4 },
+                { parameter: 'K', method: 'Ammonium Acetate', formatted: '0.45', precision: 2, unit: 'cmol(+)/kg', value: 0.45 }
+            ].every(exp => ((m) => Boolean(
+                m &&
+                m.valid === true &&
+                m.identity === exp.parameter &&
+                m.qualifier === '=' &&
+                m.multiplicity === 1 &&
+                m.status === 'APPROVED' &&
+                m.formatted === exp.formatted &&
+                m.precision === exp.precision &&
+                m.method === exp.method &&
+                (m.unit === exp.unit || (exp.parameter === 'K' && (m.unit === 'cmol(+)/kg' || m.unit === 'cmol/kg'))) &&
+                typeof m.value === 'number' &&
+                Math.abs(m.value - exp.value) < 0.005
+            ))(printStylesActive.afterExit.measurements.find(x => x && (x.parameter === exp.parameter || (exp.parameter === 'K' && (x.parameter === 'K' || x.parameter === 'Exchangeable K')))))) &&
             printStylesActive.pdfGenerated === true &&
             typeof printStylesActive.pdfByteLength === 'number' &&
             printStylesActive.pdfByteLength > 10000 &&

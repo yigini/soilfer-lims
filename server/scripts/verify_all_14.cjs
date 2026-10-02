@@ -136,13 +136,23 @@ function paper(text) {
         valuesPreserved: true,
         scientificValuesPreserved: true,
         measurements: [
-            { parameter: 'pH', method: 'ISO 10390', formatted: '6.50', precision: 2, unit: 'pH units', value: 6.5, valid: true },
-            { parameter: 'OC', method: 'Walkley-Black', formatted: '2.15', precision: 2, unit: '%', value: 2.15, valid: true },
-            { parameter: 'TN', method: 'Kjeldahl', formatted: '0.18', precision: 2, unit: '%', value: 0.18, valid: true },
-            { parameter: 'P', method: 'Bray-1', formatted: '15.40', precision: 2, unit: 'mg/kg', value: 15.4, valid: true },
-            { parameter: 'K', method: 'Ammonium Acetate', formatted: '0.45', precision: 2, unit: 'cmol(+)/kg', value: 0.45, valid: true }
+            { parameter: 'pH', identity: 'pH', qualifier: '=', multiplicity: 1, status: 'APPROVED', method: 'ISO 10390', formatted: '6.50', precision: 2, unit: 'pH units', value: 6.5, valid: true },
+            { parameter: 'OC', identity: 'OC', qualifier: '=', multiplicity: 1, status: 'APPROVED', method: 'Walkley-Black', formatted: '2.15', precision: 2, unit: '%', value: 2.15, valid: true },
+            { parameter: 'TN', identity: 'TN', qualifier: '=', multiplicity: 1, status: 'APPROVED', method: 'Kjeldahl', formatted: '0.18', precision: 2, unit: '%', value: 0.18, valid: true },
+            { parameter: 'P', identity: 'P', qualifier: '=', multiplicity: 1, status: 'APPROVED', method: 'Bray-1', formatted: '15.40', precision: 2, unit: 'mg/kg', value: 15.4, valid: true },
+            { parameter: 'K', identity: 'K', qualifier: '=', multiplicity: 1, status: 'APPROVED', method: 'Ammonium Acetate', formatted: '0.45', precision: 2, unit: 'cmol(+)/kg', value: 0.45, valid: true }
         ]
     }));
+    res.afterExit = {
+        preserved: true,
+        measurements: [
+            { parameter: 'pH', identity: 'pH', qualifier: '=', multiplicity: 1, status: 'APPROVED', method: 'ISO 10390', formatted: '6.50', precision: 2, unit: 'pH units', value: 6.5, valid: true },
+            { parameter: 'OC', identity: 'OC', qualifier: '=', multiplicity: 1, status: 'APPROVED', method: 'Walkley-Black', formatted: '2.15', precision: 2, unit: '%', value: 2.15, valid: true },
+            { parameter: 'TN', identity: 'TN', qualifier: '=', multiplicity: 1, status: 'APPROVED', method: 'Kjeldahl', formatted: '0.18', precision: 2, unit: '%', value: 0.18, valid: true },
+            { parameter: 'P', identity: 'P', qualifier: '=', multiplicity: 1, status: 'APPROVED', method: 'Bray-1', formatted: '15.40', precision: 2, unit: 'mg/kg', value: 15.4, valid: true },
+            { parameter: 'K', identity: 'K', qualifier: '=', multiplicity: 1, status: 'APPROVED', method: 'Ammonium Acetate', formatted: '0.45', precision: 2, unit: 'cmol(+)/kg', value: 0.45, valid: true }
+        ]
+    };
     res.all14VariantsPreserved = true;
     res.pdfGenerated = true;
     res.pdfByteLength = 162647;
@@ -176,7 +186,7 @@ const validSpectral = {
         commonGridPoints: 500,
         all14VariantsPreserved: true,
         afterExit: { mounted: true, traceCount: 2 },
-        variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true }))
+        variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true, overlayPreserved: true, curvesCount: 2, validCurvesCount: 2, legendCount: 2 }))
     },
     all14VariantsPreserved: true,
     afterExit: {
