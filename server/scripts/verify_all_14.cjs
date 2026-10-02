@@ -146,6 +146,11 @@ function paper(text) {
     res.all14VariantsPreserved = true;
     res.pdfGenerated = true;
     res.pdfByteLength = 162647;
+    res.sharedOutputEquivalence = {
+        measurementsEquivalent: true,
+        pdfSha256: '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a',
+        pdfByteLength: 162633
+    };
     return res;
 }
 
@@ -157,6 +162,14 @@ const validSpectral = {
     wavelengthRange: '4000 - 400 cm⁻¹',
     intensityRange: '0.05 - 1.25 AU',
     chartTokensEvaluated: ['--sf-chart-1'],
+    multiOverlay: {
+        mounted: true,
+        tracesVerified: true,
+        traceCount: 2,
+        scanCount: 2,
+        legendItems: ['v1 — SMP-2026-001-mir-baseline.csv', 'v2 — SMP-2026-001-mir-replicate.csv'],
+        commonGridPoints: 500
+    },
     all14VariantsPreserved: true,
     afterExit: {
         curvePreserved: true,

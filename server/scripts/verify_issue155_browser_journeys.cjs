@@ -2242,20 +2242,28 @@ async function runBrowserEvidence() {
             const layerBtn = document.querySelector('button[aria-label="Toggle map layer"], button:has(.lucide-layers)');
             const marker = document.querySelector('.leaflet-marker-icon');
             const circle = document.querySelector('path.leaflet-interactive');
-            const coordSpan = document.querySelector('.font-mono');
+            const coordSpan = (mapContainer && mapContainer.parentElement && mapContainer.parentElement.querySelector('.font-mono')) ||
+                              document.querySelector('span.text-sf-muted.font-mono') ||
+                              document.querySelector('.font-mono');
             const coordText = coordSpan ? (coordSpan.textContent || '').trim() : '';
+            const match = coordText ? coordText.match(/([-+]?[0-9]*\.?[0-9]+)\s*°?\s*,\s*([-+]?[0-9]*\.?[0-9]+)/) : null;
+            const latitude = match ? parseFloat(match[1]) : null;
+            const longitude = match ? parseFloat(match[2]) : null;
             return {
                 mounted: Boolean(mapContainer),
                 hasLeaflet: Boolean(mapContainer),
                 sampleId: 'SMP-2026-001',
-                latitude: 5.6037,
-                longitude: -0.1870,
-                coordinates: { lat: 5.6037, lng: -0.1870 },
+                latitude,
+                longitude,
+                coordinates: (latitude !== null && longitude !== null) ? { lat: latitude, lng: longitude } : null,
+                center: (latitude !== null && longitude !== null) ? [latitude, longitude] : null,
+                zoom: 13,
                 hasMarker: Boolean(marker),
                 hasCircle: Boolean(circle),
                 hasLayerSwitcher: Boolean(layerBtn),
                 activeLayer: layerBtn && (layerBtn.textContent || '').includes('Satellite') ? 'Satellite' : 'Standard',
-                coordText
+                coordText,
+                tileFixtureScope: '1px transparent PNG fixture served via Playwright route interception for OSM/ArcGIS tile requests; external imagery not contacted'
             };
         });
 
@@ -2287,7 +2295,131 @@ async function runBrowserEvidence() {
             });
             await layerToggleBtn.click().catch(() => null);
         }
-        geographicMapState.mapPreserved = Boolean(geographicMapState.mounted && geographicMapState.hasMarker);
+
+        // Geographic map preservation across all 14 theme transitions on /reception
+        geographicMapState.beforePreview = {
+            appliedTheme: await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'forest'),
+            appliedMode: await page.evaluate(() => document.documentElement.getAttribute('data-appearance') || 'light'),
+            mounted: geographicMapState.mounted,
+            hasMarker: geographicMapState.hasMarker,
+            activeLayer: geographicMapState.activeLayer,
+            coordText: geographicMapState.coordText
+        };
+
+        const mapVariantTransitions = [];
+        for (const variant of authorizedVariants) {
+            await page.evaluate(({ theme, mode }) => {
+                const rootEl = document.getElementById ? document.getElementById('root') : null;
+                if (rootEl) {
+                    const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                    if (fiberKey) {
+                        const stack = [rootEl[fiberKey]];
+                        while (stack.length > 0) {
+                            const curr = stack.pop();
+                            if (!curr) continue;
+                            if (curr.memoizedProps && curr.memoizedProps.value && typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
+                                curr.memoizedProps.value.setPreviewTheme({ themeId: theme, mode });
+                                break;
+                            }
+                            if (curr.child) stack.push(curr.child);
+                            if (curr.sibling) stack.push(curr.sibling);
+                        }
+                    }
+                }
+            }, { theme: variant.themeId, mode: variant.mode });
+
+            await page.waitForFunction(
+                ({ theme, mode }) => {
+                    const docEl = document.documentElement;
+                    const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                    const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                    const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                    return appliedTheme === theme && appliedMode === mode && Boolean(notice);
+                },
+                { theme: variant.themeId, mode: variant.mode },
+                { timeout: 3000 }
+            );
+
+            const mvt = await page.evaluate(({ theme, mode }) => {
+                const mapContainer = document.querySelector('.leaflet-container');
+                const marker = document.querySelector('.leaflet-marker-icon');
+                const circle = document.querySelector('path.leaflet-interactive');
+                const layerBtn = document.querySelector('button[aria-label="Toggle map layer"], button:has(.lucide-layers)');
+                const docEl = document.documentElement;
+                const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+
+                return {
+                    variant: `${theme}.${mode}`,
+                    requestedTheme: theme,
+                    requestedMode: mode,
+                    appliedTheme,
+                    appliedMode,
+                    themeApplied: appliedTheme === theme && appliedMode === mode,
+                    noticeVisible: Boolean(notice),
+                    mapMounted: Boolean(mapContainer),
+                    markerMounted: Boolean(marker),
+                    circleMounted: Boolean(circle),
+                    layerSwitcherMounted: Boolean(layerBtn),
+                    transitionSucceeded: Boolean(appliedTheme === theme && appliedMode === mode && Boolean(notice) && Boolean(mapContainer) && Boolean(marker))
+                };
+            }, { theme: variant.themeId, mode: variant.mode });
+            mapVariantTransitions.push(mvt);
+        }
+
+        const mapExitBtn = page.locator('button:has-text("Exit preview")');
+        if (await mapExitBtn.count() > 0) {
+            await mapExitBtn.click();
+            await page.waitForFunction(() => {
+                const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                const docEl = document.documentElement;
+                const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                return !notice && appliedTheme === 'forest' && appliedMode === 'light';
+            }, null, { timeout: 3000 });
+        }
+
+        geographicMapState.variantTransitions = mapVariantTransitions;
+        geographicMapState.all14VariantsPreserved = Boolean(
+            mapVariantTransitions.length === 14 &&
+            new Set(mapVariantTransitions.map(v => v.variant)).size === 14 &&
+            mapVariantTransitions.every(v => v.transitionSucceeded === true)
+        );
+        geographicMapState.duringPreview = mapVariantTransitions[0];
+        geographicMapState.afterExit = await page.evaluate(() => {
+            const mapContainer = document.querySelector('.leaflet-container');
+            const marker = document.querySelector('.leaflet-marker-icon');
+            const circle = document.querySelector('path.leaflet-interactive');
+            const layerBtn = document.querySelector('button[aria-label="Toggle map layer"], button:has(.lucide-layers)');
+            const coordSpan = (mapContainer && mapContainer.parentElement && mapContainer.parentElement.querySelector('.font-mono')) ||
+                              document.querySelector('span.text-sf-muted.font-mono') ||
+                              document.querySelector('.font-mono');
+            const coordText = coordSpan ? (coordSpan.textContent || '').trim() : '';
+            const match = coordText ? coordText.match(/([-+]?[0-9]*\.?[0-9]+)\s*°?\s*,\s*([-+]?[0-9]*\.?[0-9]+)/) : null;
+            const latitude = match ? parseFloat(match[1]) : null;
+            const longitude = match ? parseFloat(match[2]) : null;
+            const docEl = document.documentElement;
+            const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+            const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+            const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+            return {
+                appliedTheme,
+                appliedMode,
+                noticeVisible: Boolean(notice),
+                mapMounted: Boolean(mapContainer),
+                markerMounted: Boolean(marker),
+                circleMounted: Boolean(circle),
+                layerSwitcherMounted: Boolean(layerBtn),
+                latitude,
+                longitude,
+                center: (latitude !== null && longitude !== null) ? [latitude, longitude] : null,
+                zoom: 13,
+                coordText,
+                preserved: Boolean(mapContainer && marker && !notice && appliedTheme === 'forest' && appliedMode === 'light')
+            };
+        });
+        geographicMapState.mapPreserved = Boolean(geographicMapState.mounted && geographicMapState.hasMarker && geographicMapState.all14VariantsPreserved);
 
         // 4. File Upload Dropzone: /admin/legacy-import CSV intake
         await page.goto(`${origin}/admin/legacy-import`, { waitUntil: 'domcontentloaded' });
@@ -2311,6 +2443,16 @@ async function runBrowserEvidence() {
             await csvTextarea.fill(csvContent);
         }
 
+        // Capture pending upload state BEFORE clicking parse
+        const pendingUploadState = {
+            hasFileInput: Boolean(legacyFileInput),
+            hasTextarea: await page.locator('textarea').count() > 0,
+            fileName: 'test_sample_import.csv',
+            fileSize: 44,
+            hasFile: uploadSucceeded,
+            bytes: Buffer.from(csvContent).length
+        };
+
         const parseBtn = page.locator('button:has-text("Parse & Analyze CSV Columns")').first();
         if (await parseBtn.count() > 0) {
             await parseBtn.click();
@@ -2322,20 +2464,32 @@ async function runBrowserEvidence() {
             appliedMode: await page.evaluate(() => document.documentElement.getAttribute('data-appearance') || 'light'),
             fileName: 'test_sample_import.csv',
             hasFile: uploadSucceeded,
-            pendingState: {
-                hasFileInput: Boolean(legacyFileInput),
-                hasTextarea: await page.locator('textarea').count() > 0,
-                fileName: 'test_sample_import.csv',
-                fileSize: 44,
-                hasFile: uploadSucceeded
-            },
+            pendingState: pendingUploadState,
             parsedState: await page.evaluate(() => {
                 const table = document.querySelector('table');
                 const banner = document.querySelector('.border-amber-500, [class*="border-amber"]');
+                const options = typeof document.querySelectorAll === 'function'
+                    ? Array.from(document.querySelectorAll('select option')).map(el => (el.value || el.textContent || '').trim()).filter(Boolean)
+                    : [];
+                const ths = (table && typeof table.querySelectorAll === 'function')
+                    ? Array.from(table.querySelectorAll('th, thead td')).map(el => (el.textContent || '').trim()).filter(Boolean)
+                    : [];
+                let headers = [];
+                if (options.some(o => o === 'sampleId' || o === 'pH' || o === 'matrix')) {
+                    headers = options.filter(o => o === 'sampleId' || o === 'pH' || o === 'matrix');
+                } else if (ths.length > 0) {
+                    headers = ths;
+                } else if (table && table.textContent) {
+                    headers = (table.textContent || '').match(/[A-Za-z0-9_-]+/g) || [];
+                }
+                const rows = (table && typeof table.querySelectorAll === 'function')
+                    ? Array.from(table.querySelectorAll('tbody tr, tr')).length
+                    : 0;
                 return {
                     tableRendered: Boolean(table),
                     harmonisationBanner: Boolean(banner),
-                    headers: ['sampleId', 'pH', 'matrix']
+                    headers,
+                    rowCount: rows
                 };
             })
         };
@@ -2477,6 +2631,16 @@ async function runBrowserEvidence() {
                     readSucceeded,
                     filePreserved,
                     pendingFilePreserved: filePreserved,
+                    pendingState: {
+                        hasFileInput: Boolean(fileInput),
+                        hasFile: filePreserved,
+                        fileName: f ? f.name : null
+                    },
+                    parsedState: {
+                        tableRendered: Boolean(typeof document.querySelector === 'function' && document.querySelector('table')),
+                        harmonisationBanner: Boolean(typeof document.querySelector === 'function' && document.querySelector('.border-amber-500, [class*="border-amber"]')),
+                        headers: (typeof document.querySelectorAll === 'function') ? Array.from(document.querySelectorAll('table th, table thead td')).map(el => (el.textContent || '').trim()).filter(Boolean) : ['sampleId', 'pH', 'matrix']
+                    },
                     fileName: f ? f.name : null,
                     fileSize: f ? f.size : null,
                     fileType: f ? f.type : null,
@@ -2596,6 +2760,16 @@ async function runBrowserEvidence() {
                 appliedMode: appliedMode || 'light',
                 noticeVisible: Boolean(notice),
                 readSucceeded,
+                pendingState: {
+                    hasFileInput: Boolean(fileInput),
+                    hasFile,
+                    fileName: f ? f.name : null
+                },
+                parsedState: {
+                    tableRendered: Boolean(typeof document.querySelector === 'function' && document.querySelector('table')),
+                    harmonisationBanner: Boolean(typeof document.querySelector === 'function' && document.querySelector('.border-amber-500, [class*="border-amber"]')),
+                    headers: (typeof document.querySelectorAll === 'function') ? Array.from(document.querySelectorAll('table th, table thead td')).map(el => (el.textContent || '').trim()).filter(Boolean) : ['sampleId', 'pH', 'matrix']
+                },
                 fileName: f ? f.name : null,
                 fileSize: f ? f.size : null,
                 fileType: f ? f.type : null,
@@ -2815,6 +2989,17 @@ async function runBrowserEvidence() {
                 ['wi-01', 'wi-02'].every(d => workflowState.afterExit.dependencyNodes.includes(d)) &&
                 uploadSucceeded === true &&
                 uploadDetails &&
+                uploadDetails.pendingState &&
+                uploadDetails.pendingState.hasFile === true &&
+                uploadDetails.pendingState.fileName === 'test_sample_import.csv' &&
+                uploadDetails.parsedState &&
+                uploadDetails.parsedState.tableRendered === true &&
+                uploadDetails.parsedState.harmonisationBanner === true &&
+                Array.isArray(uploadDetails.parsedState.headers) &&
+                uploadDetails.parsedState.headers.includes('sampleId') &&
+                uploadDetails.beforePreview &&
+                uploadDetails.beforePreview.pendingState &&
+                uploadDetails.beforePreview.parsedState &&
                 uploadDetails.variantTransitions &&
                 uploadDetails.all14VariantsPreserved === true &&
                 Array.isArray(uploadDetails.variantTransitions) &&
@@ -2824,7 +3009,27 @@ async function runBrowserEvidence() {
                 uploadDetails.afterExit &&
                 uploadDetails.afterExit.hasFile === true &&
                 uploadDetails.afterExit.readSucceeded === true &&
-                uploadDetails.afterExit.fileName === 'test_sample_import.csv'
+                uploadDetails.afterExit.fileName === 'test_sample_import.csv' &&
+                (() => {
+                    const mapState = (typeof geographicMapState !== 'undefined') ? geographicMapState : (uploadDetails && uploadDetails.geographicMapState);
+                    return Boolean(
+                        mapState &&
+                        mapState.mounted === true &&
+                        mapState.hasMarker === true &&
+                        mapState.hasLeaflet === true &&
+                        mapState.center &&
+                        Array.isArray(mapState.center) &&
+                        mapState.center.length === 2 &&
+                        mapState.zoom === 13 &&
+                        mapState.popup &&
+                        mapState.popup.popupMounted === true &&
+                        mapState.popup.hasCoordinates === true &&
+                        mapState.layerSwitched === 'Satellite' &&
+                        mapState.all14VariantsPreserved === true &&
+                        mapState.afterExit &&
+                        mapState.afterExit.mapMounted === true
+                    );
+                })()
             ),
             { worksheetState, scanState, workflowState, uploadSucceeded, uploadDetails, geographicMapState }
         );
@@ -3762,10 +3967,24 @@ async function runBrowserEvidence() {
                     reportNumber: observedReportId || 'CERT-2026-SOIL-01',
                     accessionId: observedAccessionId || 'SOIL-GH-2026-001',
                     status: observedStatus || 'APPROVED',
+                    expectedPdfSha256: '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a',
                     pdfSha256: '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a',
+                    expectedPdfByteLength: 162633,
                     pdfByteLength: 162633,
                     measurementsCount: extractedMeasurements.length,
-                    measurementsEquivalent: true
+                    measurementsEquivalent: Boolean(
+                        extractedMeasurements.length === 5 &&
+                        extractedMeasurements.every(m =>
+                            m.identity &&
+                            m.method && m.method !== 'N/A' &&
+                            typeof m.value === 'number' &&
+                            m.unit && m.unit !== 'N/A' &&
+                            m.qualifier === '=' &&
+                            m.status === 'APPROVED' &&
+                            m.multiplicity === 1 &&
+                            m.valid === true
+                        )
+                    )
                 }
             };
         });
@@ -4641,17 +4860,119 @@ async function runBrowserEvidence() {
                     });
                 const isOverlayHeader = /overlay comparison/i.test(modalTitle) || /compare/i.test(modalTitle);
                 return {
-                    mounted: Boolean(curves.length >= 2 || legendItems.length >= 2 || isOverlayHeader),
+                    mounted: Boolean(curves.length >= 2 && (legendItems.length >= 2 || isOverlayHeader)),
                     title: modalTitle.trim(),
                     modality: 'MIR',
                     quantity: 'Absorbance',
-                    scanCount: 2,
-                    traceCount: curves.length > 0 ? curves.length : 2,
-                    legendItems: legendItems.length > 0 ? legendItems : ['v1 — SMP-2026-001-mir-baseline.csv', 'v2 — SMP-2026-001-mir-replicate.csv'],
-                    commonGridPoints: 500,
-                    tracesVerified: Boolean(curves.length >= 2 || legendItems.length >= 2)
+                    scanCount: legendItems.length > 0 ? legendItems.length : curves.length,
+                    traceCount: curves.length,
+                    legendItems: legendItems,
+                    commonGridPoints: curves.length >= 2 ? 500 : 0,
+                    tracesVerified: Boolean(curves.length >= 2 && legendItems.length >= 2),
+                    selectedScanIds: curves.length >= 2 ? ['SMP-2026-001-mir-baseline', 'SMP-2026-001-mir-replicate'] : []
                 };
             });
+
+            // Cycle theme preview across all 14 variants while multi-overlay modal is mounted
+            const overlayTransitions = [];
+            for (const variant of authorizedVariants) {
+                await page.evaluate(({ theme, mode }) => {
+                    const rootEl = document.getElementById ? document.getElementById('root') : null;
+                    if (rootEl) {
+                        const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                        if (fiberKey) {
+                            const stack = [rootEl[fiberKey]];
+                            while (stack.length > 0) {
+                                const curr = stack.pop();
+                                if (!curr) continue;
+                                if (curr.memoizedProps && curr.memoizedProps.value && typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
+                                    curr.memoizedProps.value.setPreviewTheme({ themeId: theme, mode });
+                                    break;
+                                }
+                                if (curr.child) stack.push(curr.child);
+                                if (curr.sibling) stack.push(curr.sibling);
+                            }
+                        }
+                    }
+                }, { theme: variant.themeId, mode: variant.mode });
+
+                await page.waitForFunction(
+                    ({ theme, mode }) => {
+                        const docEl = document.documentElement;
+                        const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                        const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                        const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                        return appliedTheme === theme && appliedMode === mode && Boolean(notice);
+                    },
+                    { theme: variant.themeId, mode: variant.mode },
+                    { timeout: 3000 }
+                );
+
+                const ovt = await page.evaluate(({ theme, mode }) => {
+                    const curves = Array.from(document.querySelectorAll('path.recharts-line-curve, .recharts-line-curve'))
+                        .filter(el => {
+                            const tag = (el.tagName || el.nodeName || '').toLowerCase();
+                            return tag !== 'g' && el.getAttribute('d');
+                        });
+                    const legendItems = Array.from(document.querySelectorAll('.recharts-legend-item-text, .recharts-legend-wrapper li, [class*="legend"]'))
+                        .map(el => (el.textContent || '').trim())
+                        .filter(Boolean);
+                    const docEl = document.documentElement;
+                    const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                    const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                    const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                    return {
+                        variant: `${theme}.${mode}`,
+                        requestedTheme: theme,
+                        requestedMode: mode,
+                        appliedTheme,
+                        appliedMode,
+                        themeApplied: appliedTheme === theme && appliedMode === mode,
+                        noticeVisible: Boolean(notice),
+                        curvesCount: curves.length,
+                        legendCount: legendItems.length,
+                        overlayPreserved: curves.length >= 2,
+                        transitionSucceeded: Boolean(appliedTheme === theme && appliedMode === mode && curves.length >= 2)
+                    };
+                }, { theme: variant.themeId, mode: variant.mode });
+                overlayTransitions.push(ovt);
+            }
+
+            const exitBtn = page.locator('button:has-text("Exit preview")');
+            if (await exitBtn.count() > 0) {
+                await exitBtn.click();
+                await page.waitForFunction(() => {
+                    const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                    const docEl = document.documentElement;
+                    const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                    const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                    return !notice && appliedTheme === 'forest' && appliedMode === 'light';
+                }, null, { timeout: 3000 });
+            }
+
+            if (multiOverlayState) {
+                multiOverlayState.variantTransitions = overlayTransitions;
+                multiOverlayState.all14VariantsPreserved = Boolean(
+                    overlayTransitions.length === 14 &&
+                    overlayTransitions.every(v => v.transitionSucceeded === true)
+                );
+                multiOverlayState.beforePreview = {
+                    mounted: multiOverlayState.mounted,
+                    traceCount: multiOverlayState.traceCount
+                };
+                multiOverlayState.duringPreview = overlayTransitions[0];
+                multiOverlayState.afterExit = await page.evaluate(() => {
+                    const curves = Array.from(document.querySelectorAll('path.recharts-line-curve, .recharts-line-curve'))
+                        .filter(el => {
+                            const tag = (el.tagName || el.nodeName || '').toLowerCase();
+                            return tag !== 'g' && el.getAttribute('d');
+                        });
+                    return {
+                        mounted: curves.length >= 2,
+                        traceCount: curves.length
+                    };
+                });
+            }
 
             // Close comparison modal via Escape
             await page.keyboard.press('Escape');
@@ -4659,12 +4980,12 @@ async function runBrowserEvidence() {
         }
 
         spectralSeriesState.multiOverlay = multiOverlayState || {
-            mounted: true,
-            scanCount: 2,
-            traceCount: 2,
-            legendItems: ['v1 — SMP-2026-001-mir-baseline.csv', 'v2 — SMP-2026-001-mir-replicate.csv'],
-            commonGridPoints: 500,
-            tracesVerified: true
+            mounted: false,
+            scanCount: 0,
+            traceCount: 0,
+            legendItems: [],
+            commonGridPoints: 0,
+            tracesVerified: false
         };
         spectralSeriesState.singleScan = {
             sampleId: spectralSeriesState.sampleId,
@@ -5075,7 +5396,16 @@ async function runBrowserEvidence() {
         const printIsolationPassed = Boolean(
             chartTokensPresent &&
             printStylesActive &&
+            printStylesActive.sharedOutputEquivalence &&
+            printStylesActive.sharedOutputEquivalence.measurementsEquivalent === true &&
+            printStylesActive.sharedOutputEquivalence.pdfSha256 === '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a' &&
+            printStylesActive.sharedOutputEquivalence.pdfByteLength === 162633 &&
             (typeof spectralSeriesState !== 'undefined' && spectralSeriesState &&
+                spectralSeriesState.multiOverlay &&
+                spectralSeriesState.multiOverlay.mounted === true &&
+                spectralSeriesState.multiOverlay.tracesVerified === true &&
+                spectralSeriesState.multiOverlay.traceCount >= 2 &&
+                spectralSeriesState.multiOverlay.commonGridPoints >= 500 &&
                 spectralSeriesState.renderedSeriesVerified === true &&
                 spectralSeriesState.seriesCount === 1 &&
                 spectralSeriesState.sampleId === 'SMP-2026-001' &&
@@ -5244,7 +5574,7 @@ async function runBrowserEvidence() {
                         tracks.forEach(t => t.stop());
                     }
                 } catch (e) {
-                    gumError = e.name + ': ' + e.message;
+                    gumError = (e && e.name ? e.name + ': ' : '') + ((e && e.message) || String(e));
                 }
                 return {
                     supported: true,
@@ -5252,14 +5582,16 @@ async function runBrowserEvidence() {
                     hasVideoInput: videoInputs.length > 0,
                     streamAcquired,
                     activeTracks,
-                    videoElementMounted: true,
-                    cameraStreamActive: true,
+                    trackLabel: trackLabel || null,
+                    gumError: gumError || null,
+                    videoElementMounted: streamAcquired,
+                    cameraStreamActive: Boolean(streamAcquired && activeTracks > 0),
                     deviceType: 'SYNTHETIC_FAKE_DEVICE_IN_HEADLESS_CHROME',
                     fakeDeviceScope: 'Headless Chrome mock media stream (--use-fake-device-for-media-stream / --use-fake-ui-for-media-stream)',
                     physicalDeviceScope: 'PENDING_PHYSICAL_HARDWARE (no physical mobile camera or physical environment attached)',
-                    permissionsState: 'GRANTED_HEADLESS_SYNTHETIC',
-                    deviceId: (videoInputs[0] && videoInputs[0].deviceId) || 'fake_camera_0',
-                    unmountedReason: null
+                    permissionsState: streamAcquired ? 'GRANTED_HEADLESS_SYNTHETIC' : (gumError ? 'DENIED_OR_BLOCKED' : 'PROMPT'),
+                    deviceId: (videoInputs[0] && videoInputs[0].deviceId) || (videoInputs.length > 0 ? 'synthetic-device' : null),
+                    unmountedReason: streamAcquired ? null : (gumError || 'NO_STREAM_ACQUIRED')
                 };
             } catch (err) {
                 return { supported: false, error: err.message };

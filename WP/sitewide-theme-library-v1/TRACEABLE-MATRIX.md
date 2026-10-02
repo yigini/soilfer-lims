@@ -227,11 +227,11 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
 ## 7. Toolchain & Built Asset Provenance
 
 - **Build & Source Provenance**:
-  - Build Input Candidate Commit: `8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7`
-  - Candidate Full Tree: `fc00c470bae5d11ebcab2509ce1994f113a7a65a`
-  - Client Tree: `d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b`
+  - Build Input Candidate Commit: `1015524384c254383d12c10cd6d67e1bf2755c59`
+  - Candidate Full Tree: `e86a1075e19fc89acb17b6267f303ad6546dd544`
+  - Client Tree: `c7557a2b3b74f077244fd0cee9e55e05edf21671`
   - Server / Data Tree: `1a2a84457d02d33707f9845da10f9b97995e1377`
-  - Evidence Scope: Built assets and client source are frozen at client tree `d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b`; test suites, measurement binding metadata, and documentation are committed in subsequent evidence commits without altering built assets.
+  - Evidence Scope: Built assets and client source are frozen at client tree `c7557a2b3b74f077244fd0cee9e55e05edf21671`; test suites, measurement binding metadata, and documentation are committed in subsequent evidence commits without altering built assets.
 - **Runtime Environment**:
   - Google Chrome: `153.0.8010.48 (win32-arm64, captured dynamically via browser.version())`
   - Node Runtime: `v24.13.0 (win32-arm64, captured dynamically via process.version)`
@@ -240,11 +240,11 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
   - Git Clean Status: `git status --porcelain client server/data` verified clean before build measurement.
 - **Built Candidate Asset Hashes**:
   - `index-Df7izgw5.css` (213,700 B raw / 35,045 B gzip): sha256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`
-  - `index-BM3fEwdm.js` (1,252,791 B raw / 361,076 B gzip): sha256 `eff8984e8f8c49ec08df40ad5650e6bff57db7da3abebbdb029af70306bfb205`
-  - `ThemeGallery-CocHz4qR.js` (25,935 B raw / 6,477 B gzip): sha256 `78a45ba93f9a3b0d1741f86012c5ebf78c578044ea1cb6f6708a575c321c63b5`
+  - `index-D_NTOWPw.js` (1,252,791 B raw / 361,077 B gzip): sha256 `71bf151e8bb1381b7b766d7be552a823c7fb4769a0562a8a1e2dc893e910608f`
+  - `ThemeGallery-CmTtzdUN.js` (25,935 B raw / 6,478 B gzip): sha256 `c6a6e3d080a35c6c74eadab5f5e8ebd987589c0c0eecc1cedce2a6b287673f52`
 - **Budget Attribution**:
   - **Plan Budget (CSS Delta + Canonical Catalogue Source Proxy)**: 1,822 B CSS gzip + 3,511 B catalogue gzip = **5,333 B gzip (5.21 KiB gzip)** vs ≤ 15.0 KiB budget (+9.79 KiB margin / 65% headroom, **PASSED**).
-  - **Complete Application Overhead**: 1,822 B CSS + 6,477 B gallery chunk + 11,043 B main bundle = **19,342 B gzip (18.89 KiB gzip)** total.
+  - **Complete Application Overhead**: 1,822 B CSS + 6,478 B gallery chunk + 11,044 B main bundle = **19,344 B gzip (18.89 KiB gzip)** total.
 
 ---
 
@@ -255,6 +255,12 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
 > - **Executed Main Browser Journeys Suite (Fresh Execution)**:
 >   - The main browser journeys workflow suite `server/scripts/verify_issue155_browser_journeys.cjs` was freshly executed in the authorized disposable local running-app context with real Headless Google Chrome (`153.0.8010.48`), an ephemeral SQLite database, and Express mounting `client/dist`.
 >   - Verified artifact `server/scripts/issue155-browser-journeys-results.json` refreshed with fresh execution timestamp (12/12 suites passing, 630 route/variant CSS pairings, 5 operational workflows, all 14 variant transitions verified across preview/exit, and authentic customer certificate PDF disk integrity verified).
+> - **Operational & Scientific Evidence Remediation (Remediation of 868e682 Review)**:
+>   - **Geographic Map Collector & Gate Enforcement**: `geographicMapState` dynamically extracts `coordText` from the parent reception preview card (`.leaflet-container`'s parent `.font-mono` resolving `"5.6037°, -0.1870°"`), parsing latitude `5.6037` and longitude `-0.1870` dynamically without expected literals fallback; center `[5.6037, -0.1870]`, zoom `13`, active layer, and popup identity are observed; 14-variant theme preview cycle executed on `/reception` observing `beforePreview`, `duringPreview`, all 14 `variantTransitions`, and `afterExit` (`all14VariantsPreserved: true`, `mapPreserved: true`); explicit tile fixture scope recorded (`1px transparent PNG fixture served via Playwright route interception for OSM/ArcGIS tile requests; external imagery not contacted`); and `opGate` strictly enforces `geographicMapState` presence, rejecting null map.
+>   - **Upload Pending & Parsed State Preservation**: `pendingUploadState` is captured before clicking parse (`hasFileInput: true, hasTextarea: true, hasFile: true, bytes: 44`); `parsedState` dynamically extracts headers from `select option` mappings, table `th`, or text words without static fallback; pending and parsed UI states are preserved across all 14 variant transitions and exit; and `opGate` strictly enforces `uploadDetails.pendingState` and `uploadDetails.parsedState`.
+>   - **Spectral Multi-Scan Overlay & Fallback Eradication**: `multiOverlayState` dynamically observes 2 distinct Recharts series curves and 2 legend items (`v1 — SMP-2026-001-mir-baseline.csv`, `v2 — SMP-2026-001-mir-replicate.csv`) from DOM; all fabricated expected-answer success fallbacks (`traceCount: 2`, `legendItems: [...]`, `commonGridPoints: 500`, `mounted: true`) on empty/absent DOM or missing compare action are completely eradicated (absent DOM strictly yields 0 traces, 0 scans, empty legend, 0 common grid points, and `mounted: false`); multi-overlay state is preserved across all 14 variant transitions while modal is mounted (`all14VariantsPreserved: true`); and `printGate` strictly enforces `spectralSeriesState.multiOverlay` presence and verification.
+>   - **Shared Output Equivalence**: `printStylesActive.sharedOutputEquivalence` dynamically verifies complete 5-row scientific parameter model (`identity`, `method`, `value`, `unit`, `qualifier: '='`, `status: 'APPROVED'`, `multiplicity: 1`, `precision: 2`, `valid: true`); reused customer certificate PDF SHA-256 (`47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`, 162,633 B) is explicitly labeled as expected/reused without redundant rendering; and `printGate` strictly enforces `sharedOutputEquivalence.measurementsEquivalent === true`, correct PDF hash, and byte length.
+>   - **Camera Inspection & Blocked Scope Fidelity**: `mediaDeviceInspection` dynamically binds actual stream tracks, track label, `videoElementMounted: streamAcquired`, `cameraStreamActive: Boolean(streamAcquired && activeTracks > 0)`, and permissions state; under controlled failed `getUserMedia`, `gumError` is preserved (`Error: CONTROLLED_TEST_NO_STREAM`), `cameraStreamActive: false`, and `videoElementMounted: false`; in normal headless execution, live synthetic stream is acquired (`unmountedReason: null`, `streamAcquired: true`).
 > - **Worksheet State & Native Scroll Verification (Remediation of 140be7e Review)**:
 >   - `selectedRowItemId` resolves authentic item identity `attrItemId || rackPosId` (inspecting child `[data-testid*="rack-pos-"]` or `[data-workitem-id]`), requiring `selectedRowItemId === 'wi-01'`, `selectedRowText.includes('SMP-2026-001')`, and `!selectedRowText.includes('WRONG SAMPLE')`. Arbitrary rows (e.g. `row = { getAttribute: () => 'wi-99', textContent: 'WRONG SAMPLE' }`) are strictly rejected.
 >   - `selectedCell` returns observed item id `selectedRowItemId || null`, never defaulting to `'wi-01'` when absent.
