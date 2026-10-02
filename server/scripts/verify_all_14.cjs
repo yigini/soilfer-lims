@@ -147,6 +147,10 @@ function paper(text) {
     res.pdfGenerated = true;
     res.pdfByteLength = 162647;
     res.sharedOutputEquivalence = {
+        reportNumber: 'CERT-2026-SOIL-01',
+        accessionId: 'SOIL-GH-2026-001',
+        status: 'APPROVED',
+        measurementsCount: 5,
         measurementsEquivalent: true,
         pdfSha256: '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a',
         pdfByteLength: 162633
@@ -168,7 +172,11 @@ const validSpectral = {
         traceCount: 2,
         scanCount: 2,
         legendItems: ['v1 — SMP-2026-001-mir-baseline.csv', 'v2 — SMP-2026-001-mir-replicate.csv'],
-        commonGridPoints: 500
+        selectedScanIds: ['SMP-2026-001-mir-baseline', 'SMP-2026-001-mir-replicate'],
+        commonGridPoints: 500,
+        all14VariantsPreserved: true,
+        afterExit: { mounted: true, traceCount: 2 },
+        variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true }))
     },
     all14VariantsPreserved: true,
     afterExit: {

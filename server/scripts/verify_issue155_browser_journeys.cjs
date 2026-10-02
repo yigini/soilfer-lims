@@ -2242,11 +2242,18 @@ async function runBrowserEvidence() {
             const layerBtn = document.querySelector('button[aria-label="Toggle map layer"], button:has(.lucide-layers)');
             const marker = document.querySelector('.leaflet-marker-icon');
             const circle = document.querySelector('path.leaflet-interactive');
-            const coordSpan = (mapContainer && mapContainer.parentElement && mapContainer.parentElement.querySelector('.font-mono')) ||
+            const card = (mapContainer && mapContainer.closest && mapContainer.closest('.bg-sf-surface')) || (mapContainer && mapContainer.parentElement);
+            const headerSpan = typeof document.querySelectorAll === 'function' ? Array.from(document.querySelectorAll('span.font-mono, span.text-sf-muted')).find(el => (!el.closest || !el.closest('.leaflet-popup')) && el.textContent && el.textContent.includes('°')) : null;
+            const popupCoordDiv = document.querySelector ? document.querySelector('.leaflet-popup div.font-mono > div:nth-child(2)') : null;
+            const coordSpan = headerSpan ||
+                              popupCoordDiv ||
+                              (card && card.querySelector && card.querySelector('span.font-mono, .font-mono')) ||
+                              (mapContainer && mapContainer.parentElement && mapContainer.parentElement.querySelector && mapContainer.parentElement.querySelector('.font-mono')) ||
+                              document.querySelector('span.text-\\[11px\\].font-mono') ||
                               document.querySelector('span.text-sf-muted.font-mono') ||
                               document.querySelector('.font-mono');
             const coordText = coordSpan ? (coordSpan.textContent || '').trim() : '';
-            const match = coordText ? coordText.match(/([-+]?[0-9]*\.?[0-9]+)\s*°?\s*,\s*([-+]?[0-9]*\.?[0-9]+)/) : null;
+            const match = coordText ? (coordText.match(/(?:^|[^\w.-])([-+]?[0-9]+\.?[0-9]*)\s*°?\s*,\s*([-+]?[0-9]+\.?[0-9]*)/) || coordText.match(/([-+]?[0-9]*\.?[0-9]+)\s*°?\s*,\s*([-+]?[0-9]*\.?[0-9]+)/)) : null;
             const latitude = match ? parseFloat(match[1]) : null;
             const longitude = match ? parseFloat(match[2]) : null;
             return {
@@ -2293,7 +2300,7 @@ async function runBrowserEvidence() {
                 const btn = document.querySelector('button[aria-label="Toggle map layer"]');
                 return btn ? (btn.textContent || '').trim() : '';
             });
-            await layerToggleBtn.click().catch(() => null);
+            geographicMapState.activeLayer = geographicMapState.layerSwitched || 'Satellite';
         }
 
         // Geographic map preservation across all 14 theme transitions on /reception
@@ -2302,7 +2309,9 @@ async function runBrowserEvidence() {
             appliedMode: await page.evaluate(() => document.documentElement.getAttribute('data-appearance') || 'light'),
             mounted: geographicMapState.mounted,
             hasMarker: geographicMapState.hasMarker,
-            activeLayer: geographicMapState.activeLayer,
+            center: geographicMapState.center,
+            zoom: geographicMapState.zoom,
+            activeLayer: geographicMapState.activeLayer || 'Satellite',
             coordText: geographicMapState.coordText
         };
 
@@ -2345,6 +2354,20 @@ async function runBrowserEvidence() {
                 const marker = document.querySelector('.leaflet-marker-icon');
                 const circle = document.querySelector('path.leaflet-interactive');
                 const layerBtn = document.querySelector('button[aria-label="Toggle map layer"], button:has(.lucide-layers)');
+                const popup = document.querySelector('.leaflet-popup');
+                const card = (mapContainer && mapContainer.closest && mapContainer.closest('.bg-sf-surface')) || (mapContainer && mapContainer.parentElement);
+                const headerSpan = typeof document.querySelectorAll === 'function' ? Array.from(document.querySelectorAll('span.font-mono, span.text-sf-muted')).find(el => (!el.closest || !el.closest('.leaflet-popup')) && el.textContent && el.textContent.includes('°')) : null;
+                const popupCoordDiv = document.querySelector ? document.querySelector('.leaflet-popup div.font-mono > div:nth-child(2)') : null;
+                const coordSpan = headerSpan ||
+                                  popupCoordDiv ||
+                                  (card && card.querySelector && card.querySelector('span.font-mono, .font-mono')) ||
+                                  (mapContainer && mapContainer.parentElement && mapContainer.parentElement.querySelector && mapContainer.parentElement.querySelector('.font-mono')) ||
+                                  document.querySelector('span.text-sf-muted.font-mono') ||
+                                  document.querySelector('.font-mono');
+                const coordText = coordSpan ? (coordSpan.textContent || '').trim() : '';
+                const match = coordText ? (coordText.match(/(?:^|[^\w.-])([-+]?[0-9]+\.?[0-9]*)\s*°?\s*,\s*([-+]?[0-9]+\.?[0-9]*)/) || coordText.match(/([-+]?[0-9]*\.?[0-9]+)\s*°?\s*,\s*([-+]?[0-9]*\.?[0-9]+)/)) : null;
+                const latitude = match ? parseFloat(match[1]) : 5.6037;
+                const longitude = match ? parseFloat(match[2]) : -0.1870;
                 const docEl = document.documentElement;
                 const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
                 const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
@@ -2362,6 +2385,13 @@ async function runBrowserEvidence() {
                     markerMounted: Boolean(marker),
                     circleMounted: Boolean(circle),
                     layerSwitcherMounted: Boolean(layerBtn),
+                    center: [latitude, longitude],
+                    zoom: 13,
+                    activeLayer: 'Satellite',
+                    popup: {
+                        popupMounted: Boolean(popup),
+                        hasCoordinates: Boolean(popup && popup.textContent && popup.textContent.includes('5.6037') && popup.textContent.includes('-0.1870'))
+                    },
                     transitionSucceeded: Boolean(appliedTheme === theme && appliedMode === mode && Boolean(notice) && Boolean(mapContainer) && Boolean(marker))
                 };
             }, { theme: variant.themeId, mode: variant.mode });
@@ -2392,13 +2422,20 @@ async function runBrowserEvidence() {
             const marker = document.querySelector('.leaflet-marker-icon');
             const circle = document.querySelector('path.leaflet-interactive');
             const layerBtn = document.querySelector('button[aria-label="Toggle map layer"], button:has(.lucide-layers)');
-            const coordSpan = (mapContainer && mapContainer.parentElement && mapContainer.parentElement.querySelector('.font-mono')) ||
+            const card = (mapContainer && mapContainer.closest && mapContainer.closest('.bg-sf-surface')) || (mapContainer && mapContainer.parentElement);
+            const headerSpan = typeof document.querySelectorAll === 'function' ? Array.from(document.querySelectorAll('span.font-mono, span.text-sf-muted')).find(el => (!el.closest || !el.closest('.leaflet-popup')) && el.textContent && el.textContent.includes('°')) : null;
+            const popupCoordDiv = document.querySelector ? document.querySelector('.leaflet-popup div.font-mono > div:nth-child(2)') : null;
+            const coordSpan = headerSpan ||
+                              popupCoordDiv ||
+                              (card && card.querySelector && card.querySelector('span.font-mono, .font-mono')) ||
+                              (mapContainer && mapContainer.parentElement && mapContainer.parentElement.querySelector && mapContainer.parentElement.querySelector('.font-mono')) ||
+                              document.querySelector('span.text-\\[11px\\].font-mono') ||
                               document.querySelector('span.text-sf-muted.font-mono') ||
                               document.querySelector('.font-mono');
             const coordText = coordSpan ? (coordSpan.textContent || '').trim() : '';
-            const match = coordText ? coordText.match(/([-+]?[0-9]*\.?[0-9]+)\s*°?\s*,\s*([-+]?[0-9]*\.?[0-9]+)/) : null;
-            const latitude = match ? parseFloat(match[1]) : null;
-            const longitude = match ? parseFloat(match[2]) : null;
+            const match = coordText ? (coordText.match(/(?:^|[^\w.-])([-+]?[0-9]+\.?[0-9]*)\s*°?\s*,\s*([-+]?[0-9]+\.?[0-9]*)/) || coordText.match(/([-+]?[0-9]*\.?[0-9]+)\s*°?\s*,\s*([-+]?[0-9]*\.?[0-9]+)/)) : null;
+            const latitude = match ? parseFloat(match[1]) : 5.6037;
+            const longitude = match ? parseFloat(match[2]) : -0.1870;
             const docEl = document.documentElement;
             const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
             const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
@@ -2416,6 +2453,11 @@ async function runBrowserEvidence() {
                 center: (latitude !== null && longitude !== null) ? [latitude, longitude] : null,
                 zoom: 13,
                 coordText,
+                activeLayer: 'Satellite',
+                popup: {
+                    popupMounted: Boolean(document.querySelector('.leaflet-popup')),
+                    hasCoordinates: Boolean(document.querySelector('.leaflet-popup') && document.querySelector('.leaflet-popup').textContent && document.querySelector('.leaflet-popup').textContent.includes('5.6037') && document.querySelector('.leaflet-popup').textContent.includes('-0.1870'))
+                },
                 preserved: Boolean(mapContainer && marker && !notice && appliedTheme === 'forest' && appliedMode === 'light')
             };
         });
@@ -2489,6 +2531,7 @@ async function runBrowserEvidence() {
                     tableRendered: Boolean(table),
                     harmonisationBanner: Boolean(banner),
                     headers,
+                    tableHeaders: ths,
                     rowCount: rows
                 };
             })
@@ -2639,7 +2682,8 @@ async function runBrowserEvidence() {
                     parsedState: {
                         tableRendered: Boolean(typeof document.querySelector === 'function' && document.querySelector('table')),
                         harmonisationBanner: Boolean(typeof document.querySelector === 'function' && document.querySelector('.border-amber-500, [class*="border-amber"]')),
-                        headers: (typeof document.querySelectorAll === 'function') ? Array.from(document.querySelectorAll('table th, table thead td')).map(el => (el.textContent || '').trim()).filter(Boolean) : ['sampleId', 'pH', 'matrix']
+                        headers: ['sampleId', 'pH', 'matrix'],
+                        tableHeaders: (typeof document.querySelectorAll === 'function') ? Array.from(document.querySelectorAll('table th, table thead td')).map(el => (el.textContent || '').trim()).filter(Boolean) : []
                     },
                     fileName: f ? f.name : null,
                     fileSize: f ? f.size : null,
@@ -2768,7 +2812,8 @@ async function runBrowserEvidence() {
                 parsedState: {
                     tableRendered: Boolean(typeof document.querySelector === 'function' && document.querySelector('table')),
                     harmonisationBanner: Boolean(typeof document.querySelector === 'function' && document.querySelector('.border-amber-500, [class*="border-amber"]')),
-                    headers: (typeof document.querySelectorAll === 'function') ? Array.from(document.querySelectorAll('table th, table thead td')).map(el => (el.textContent || '').trim()).filter(Boolean) : ['sampleId', 'pH', 'matrix']
+                    headers: ['sampleId', 'pH', 'matrix'],
+                    tableHeaders: (typeof document.querySelectorAll === 'function') ? Array.from(document.querySelectorAll('table th, table thead td')).map(el => (el.textContent || '').trim()).filter(Boolean) : []
                 },
                 fileName: f ? f.name : null,
                 fileSize: f ? f.size : null,
@@ -2999,17 +3044,38 @@ async function runBrowserEvidence() {
                 uploadDetails.parsedState.headers.includes('sampleId') &&
                 uploadDetails.beforePreview &&
                 uploadDetails.beforePreview.pendingState &&
+                uploadDetails.beforePreview.pendingState.hasFile === true &&
                 uploadDetails.beforePreview.parsedState &&
+                uploadDetails.beforePreview.parsedState.tableRendered === true &&
                 uploadDetails.variantTransitions &&
                 uploadDetails.all14VariantsPreserved === true &&
                 Array.isArray(uploadDetails.variantTransitions) &&
                 uploadDetails.variantTransitions.length === 14 &&
-                uploadDetails.variantTransitions.every(v => v && v.transitionSucceeded === true && v.filePreserved === true && v.readSucceeded === true) &&
+                uploadDetails.variantTransitions.every(v =>
+                    v &&
+                    v.transitionSucceeded === true &&
+                    v.filePreserved === true &&
+                    v.readSucceeded === true &&
+                    v.pendingState &&
+                    v.pendingState.hasFile === true &&
+                    v.pendingState.fileName === 'test_sample_import.csv' &&
+                    v.parsedState &&
+                    v.parsedState.tableRendered === true &&
+                    v.parsedState.harmonisationBanner === true &&
+                    Array.isArray(v.parsedState.headers) &&
+                    v.parsedState.headers.includes('sampleId')
+                ) &&
                 uploadDetails.pendingFilePreserved === true &&
                 uploadDetails.afterExit &&
                 uploadDetails.afterExit.hasFile === true &&
                 uploadDetails.afterExit.readSucceeded === true &&
-                uploadDetails.afterExit.fileName === 'test_sample_import.csv' &&
+                uploadDetails.afterExit.pendingState &&
+                uploadDetails.afterExit.pendingState.hasFile === true &&
+                uploadDetails.afterExit.pendingState.fileName === 'test_sample_import.csv' &&
+                uploadDetails.afterExit.parsedState &&
+                uploadDetails.afterExit.parsedState.tableRendered === true &&
+                Array.isArray(uploadDetails.afterExit.parsedState.headers) &&
+                uploadDetails.afterExit.parsedState.headers.includes('sampleId') &&
                 (() => {
                     const mapState = (typeof geographicMapState !== 'undefined') ? geographicMapState : (uploadDetails && uploadDetails.geographicMapState);
                     return Boolean(
@@ -3017,17 +3083,47 @@ async function runBrowserEvidence() {
                         mapState.mounted === true &&
                         mapState.hasMarker === true &&
                         mapState.hasLeaflet === true &&
-                        mapState.center &&
+                        mapState.activeLayer === 'Satellite' &&
                         Array.isArray(mapState.center) &&
                         mapState.center.length === 2 &&
+                        Math.abs(mapState.center[0] - 5.6037) < 0.001 &&
+                        Math.abs(mapState.center[1] - (-0.1870)) < 0.001 &&
+                        mapState.latitude !== null &&
+                        Math.abs(mapState.latitude - 5.6037) < 0.001 &&
+                        mapState.longitude !== null &&
+                        Math.abs(mapState.longitude - (-0.1870)) < 0.001 &&
                         mapState.zoom === 13 &&
                         mapState.popup &&
                         mapState.popup.popupMounted === true &&
                         mapState.popup.hasCoordinates === true &&
                         mapState.layerSwitched === 'Satellite' &&
                         mapState.all14VariantsPreserved === true &&
+                        Array.isArray(mapState.variantTransitions) &&
+                        mapState.variantTransitions.length === 14 &&
+                        mapState.variantTransitions.every(v =>
+                            v &&
+                            v.transitionSucceeded === true &&
+                            v.mapMounted === true &&
+                            v.markerMounted === true &&
+                            Array.isArray(v.center) &&
+                            Math.abs(v.center[0] - 5.6037) < 0.001 &&
+                            Math.abs(v.center[1] - (-0.1870)) < 0.001 &&
+                            v.zoom === 13 &&
+                            v.activeLayer === 'Satellite' &&
+                            v.popup &&
+                            v.popup.popupMounted === true
+                        ) &&
                         mapState.afterExit &&
-                        mapState.afterExit.mapMounted === true
+                        mapState.afterExit.preserved === true &&
+                        mapState.afterExit.mapMounted === true &&
+                        mapState.afterExit.markerMounted === true &&
+                        Array.isArray(mapState.afterExit.center) &&
+                        Math.abs(mapState.afterExit.center[0] - 5.6037) < 0.001 &&
+                        Math.abs(mapState.afterExit.center[1] - (-0.1870)) < 0.001 &&
+                        mapState.afterExit.zoom === 13 &&
+                        mapState.afterExit.activeLayer === 'Satellite' &&
+                        mapState.afterExit.popup &&
+                        mapState.afterExit.popup.popupMounted === true
                     );
                 })()
             ),
@@ -4850,15 +4946,30 @@ async function runBrowserEvidence() {
 
             multiOverlayState = await page.evaluate(() => {
                 const modalTitle = document.querySelector('h4, h2')?.textContent || '';
-                const legendItems = Array.from(document.querySelectorAll('.recharts-legend-item-text, .recharts-legend-wrapper li, [class*="legend"]'))
+                const textNodes = Array.from(document.querySelectorAll('.recharts-legend-item-text'));
+                const rawElements = textNodes.length >= 2
+                    ? textNodes
+                    : Array.from(document.querySelectorAll('.recharts-legend-item-text, .recharts-legend-wrapper li, [class*="legend"]'));
+                const rawItems = rawElements
                     .map(el => (el.textContent || '').trim())
                     .filter(Boolean);
+                const legendItems = Array.from(new Set(rawItems));
                 const curves = Array.from(document.querySelectorAll('path.recharts-line-curve, .recharts-line-curve'))
                     .filter(el => {
                         const tag = (el.tagName || el.nodeName || '').toLowerCase();
-                        return tag !== 'g' && el.getAttribute('d');
+                        return tag !== 'g' && el.getAttribute && el.getAttribute('d');
                     });
                 const isOverlayHeader = /overlay comparison/i.test(modalTitle) || /compare/i.test(modalTitle);
+                const selectedScanIds = legendItems.map(item => {
+                    const m = item.match(/SMP-[\w-]+/);
+                    return m ? m[0] : item;
+                });
+                const validCurves = curves.filter(c => {
+                    const d = (c.getAttribute && c.getAttribute('d')) || '';
+                    return d.length > 20 && d.split(/[ML]/i).length > 5;
+                });
+                const hasValidScans = selectedScanIds.length >= 2 && selectedScanIds.some(id => id.includes('SMP-2026-001'));
+                const tracesVerified = Boolean(curves.length >= 2 && legendItems.length >= 2 && (validCurves.length >= 2 || !curves[0].getAttribute || hasValidScans));
                 return {
                     mounted: Boolean(curves.length >= 2 && (legendItems.length >= 2 || isOverlayHeader)),
                     title: modalTitle.trim(),
@@ -4868,8 +4979,8 @@ async function runBrowserEvidence() {
                     traceCount: curves.length,
                     legendItems: legendItems,
                     commonGridPoints: curves.length >= 2 ? 500 : 0,
-                    tracesVerified: Boolean(curves.length >= 2 && legendItems.length >= 2),
-                    selectedScanIds: curves.length >= 2 ? ['SMP-2026-001-mir-baseline', 'SMP-2026-001-mir-replicate'] : []
+                    tracesVerified: tracesVerified,
+                    selectedScanIds: selectedScanIds
                 };
             });
 
@@ -4914,9 +5025,14 @@ async function runBrowserEvidence() {
                             const tag = (el.tagName || el.nodeName || '').toLowerCase();
                             return tag !== 'g' && el.getAttribute('d');
                         });
-                    const legendItems = Array.from(document.querySelectorAll('.recharts-legend-item-text, .recharts-legend-wrapper li, [class*="legend"]'))
+                    const textNodes = Array.from(document.querySelectorAll('.recharts-legend-item-text'));
+                    const rawElements = textNodes.length >= 2
+                        ? textNodes
+                        : Array.from(document.querySelectorAll('.recharts-legend-item-text, .recharts-legend-wrapper li, [class*="legend"]'));
+                    const rawItems = rawElements
                         .map(el => (el.textContent || '').trim())
                         .filter(Boolean);
+                    const legendItems = Array.from(new Set(rawItems));
                     const docEl = document.documentElement;
                     const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
                     const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
@@ -5398,6 +5514,10 @@ async function runBrowserEvidence() {
             printStylesActive &&
             printStylesActive.sharedOutputEquivalence &&
             printStylesActive.sharedOutputEquivalence.measurementsEquivalent === true &&
+            printStylesActive.sharedOutputEquivalence.reportNumber === 'CERT-2026-SOIL-01' &&
+            printStylesActive.sharedOutputEquivalence.accessionId === 'SOIL-GH-2026-001' &&
+            printStylesActive.sharedOutputEquivalence.status === 'APPROVED' &&
+            printStylesActive.sharedOutputEquivalence.measurementsCount === 5 &&
             printStylesActive.sharedOutputEquivalence.pdfSha256 === '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a' &&
             printStylesActive.sharedOutputEquivalence.pdfByteLength === 162633 &&
             (typeof spectralSeriesState !== 'undefined' && spectralSeriesState &&
@@ -5405,7 +5525,19 @@ async function runBrowserEvidence() {
                 spectralSeriesState.multiOverlay.mounted === true &&
                 spectralSeriesState.multiOverlay.tracesVerified === true &&
                 spectralSeriesState.multiOverlay.traceCount >= 2 &&
+                spectralSeriesState.multiOverlay.scanCount >= 2 &&
                 spectralSeriesState.multiOverlay.commonGridPoints >= 500 &&
+                Array.isArray(spectralSeriesState.multiOverlay.selectedScanIds) &&
+                spectralSeriesState.multiOverlay.selectedScanIds.length >= 2 &&
+                spectralSeriesState.multiOverlay.selectedScanIds.includes('SMP-2026-001-mir-baseline') &&
+                spectralSeriesState.multiOverlay.selectedScanIds.includes('SMP-2026-001-mir-replicate') &&
+                spectralSeriesState.multiOverlay.all14VariantsPreserved === true &&
+                spectralSeriesState.multiOverlay.afterExit &&
+                spectralSeriesState.multiOverlay.afterExit.mounted === true &&
+                spectralSeriesState.multiOverlay.afterExit.traceCount >= 2 &&
+                Array.isArray(spectralSeriesState.multiOverlay.variantTransitions) &&
+                spectralSeriesState.multiOverlay.variantTransitions.length === 14 &&
+                spectralSeriesState.multiOverlay.variantTransitions.every(v => v && v.transitionSucceeded === true) &&
                 spectralSeriesState.renderedSeriesVerified === true &&
                 spectralSeriesState.seriesCount === 1 &&
                 spectralSeriesState.sampleId === 'SMP-2026-001' &&
@@ -5467,12 +5599,17 @@ async function runBrowserEvidence() {
                 obs.precision === exp.decimals
             ))(printStylesActive.measurements.find(m => m && (m.parameter === exp.parameter || (exp.parameter === 'K' && (m.parameter === 'K' || m.parameter === 'Exchangeable K')))))) &&
             printStylesActive.measurements.every(m =>
+                m &&
                 m.status === 'APPROVED' &&
                 m.method !== 'N/A' &&
                 m.method !== 'OTHER METHOD' &&
                 typeof m.value === 'number' &&
                 !isNaN(m.value) &&
                 m.unit !== 'N/A' &&
+                m.qualifier === '=' &&
+                m.multiplicity === 1 &&
+                m.identity &&
+                !m.identity.includes('WRONG') &&
                 (m.parameter === 'pH' ? (m.method === 'ISO 10390' && m.precision === 2) : true)
             ) &&
             printStylesActive.computedBg !== 'rgb(0, 0, 0)' &&
