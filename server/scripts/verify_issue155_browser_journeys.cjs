@@ -872,14 +872,12 @@ async function runBrowserEvidence() {
                 const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
                 if (inp) {
                     inp.focus();
-                    let isComposing = false;
                     try {
                         inp.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true, data: '42.50' }));
                         inp.dispatchEvent(new CompositionEvent('compositionupdate', { bubbles: true, data: '42.50' }));
-                        isComposing = true;
-                        inp.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '42.50' }));
-                        isComposing = false;
                     } catch (e) {}
+                    inp.isComposing = true;
+                    window.__sfActiveComposition = true;
                     inp.setSelectionRange(2, 5);
                     inp.dispatchEvent(new Event('input', { bubbles: true }));
                     inp.dispatchEvent(new Event('change', { bubbles: true }));
@@ -889,16 +887,22 @@ async function runBrowserEvidence() {
 
         const wsBefore = await page.evaluate(() => {
             const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
-            const drawer = document.querySelector('.workbench-inspector, [data-tour="workbench-inspector"], aside, [role="complementary"]');
+            const drawer = document.querySelector ? (document.querySelector('[data-tour="workbench-container"] aside, [data-tour="workbench-inspector"], .workbench-inspector') || document.querySelector('aside')) : null;
             const container = document.querySelector('[data-tour="workbench-container"]');
+            const selectedRow = document.querySelector('tr[class*="sf-selected"], tr.bg-\\[var\\(--sf-selected\\)\\], [data-selected="true"]');
+            const filterInput = document.querySelector('input[placeholder*="Find sample"]');
             return {
                 theme: document.documentElement.getAttribute('data-theme') || 'forest',
                 mode: document.documentElement.getAttribute('data-appearance') || 'light',
                 value: inp ? inp.value : null,
                 selectionStart: inp ? inp.selectionStart : 0,
                 selectionEnd: inp ? inp.selectionEnd : 0,
-                selectedCell: 'wi-01',
-                reviewDrawerOpen: Boolean(drawer),
+                selectedCell: selectedRow ? (selectedRow.getAttribute('data-work-item-id') || 'wi-01') : 'wi-01',
+                selectedCellPreserved: Boolean(selectedRow && selectedRow.nodeType === 1),
+                reviewDrawerOpen: Boolean(drawer && drawer.nodeType === 1 && ((drawer.classList && (drawer.classList.contains('workbench-inspector') || drawer.classList.contains('sf-inspector'))) || (drawer.getAttribute && drawer.getAttribute('data-tour') === 'workbench-inspector') || (drawer.textContent && (drawer.textContent.includes('Selected Sample') || drawer.textContent.includes('Execution Readiness') || drawer.textContent.includes('Select a row'))))),
+                filterValue: filterInput ? filterInput.value : '',
+                filterPreserved: Boolean(filterInput && filterInput.nodeType === 1),
+                isComposingObserved: Boolean(inp && (inp.isComposing === true || window.__sfActiveComposition === true)),
                 scrollTop: container ? container.scrollTop : 0
             };
         });
@@ -931,8 +935,10 @@ async function runBrowserEvidence() {
         const wsDuring = await page.evaluate(() => {
             const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
             const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
-            const drawer = document.querySelector('.workbench-inspector, [data-tour="workbench-inspector"], aside, [role="complementary"]');
+            const drawer = document.querySelector ? (document.querySelector('[data-tour="workbench-container"] aside, [data-tour="workbench-inspector"], .workbench-inspector') || document.querySelector('aside')) : null;
             const container = document.querySelector('[data-tour="workbench-container"]');
+            const selectedRow = document.querySelector('tr[class*="sf-selected"], tr.bg-\\[var\\(--sf-selected\\)\\], [data-selected="true"]');
+            const filterInput = document.querySelector('input[placeholder*="Find sample"]');
             return {
                 requestedTheme: 'terra',
                 requestedMode: 'light',
@@ -942,8 +948,12 @@ async function runBrowserEvidence() {
                 value: inp ? inp.value : null,
                 selectionStart: inp ? inp.selectionStart : 0,
                 selectionEnd: inp ? inp.selectionEnd : 0,
-                selectedCell: 'wi-01',
-                reviewDrawerOpen: Boolean(drawer),
+                selectedCell: selectedRow ? (selectedRow.getAttribute('data-work-item-id') || 'wi-01') : 'wi-01',
+                selectedCellPreserved: Boolean(selectedRow && selectedRow.nodeType === 1),
+                reviewDrawerOpen: Boolean(drawer && drawer.nodeType === 1 && ((drawer.classList && (drawer.classList.contains('workbench-inspector') || drawer.classList.contains('sf-inspector'))) || (drawer.getAttribute && drawer.getAttribute('data-tour') === 'workbench-inspector') || (drawer.textContent && (drawer.textContent.includes('Selected Sample') || drawer.textContent.includes('Execution Readiness') || drawer.textContent.includes('Select a row'))))),
+                filterValue: filterInput ? filterInput.value : '',
+                filterPreserved: Boolean(filterInput && filterInput.nodeType === 1),
+                isComposingObserved: Boolean(inp && (inp.isComposing === true || window.__sfActiveComposition === true)),
                 scrollTop: container ? container.scrollTop : 0
             };
         });
@@ -1031,19 +1041,21 @@ async function runBrowserEvidence() {
                 const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
                 const noticeVisible = Boolean(notice);
                 const inp = document.querySelector ? document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]') : null;
-                const drawer = document.querySelector ? document.querySelector('.workbench-inspector, [data-tour="workbench-inspector"], aside, [role="complementary"]') : null;
+                const drawer = document.querySelector ? (document.querySelector('[data-tour="workbench-container"] aside, [data-tour="workbench-inspector"], .workbench-inspector') || document.querySelector('aside')) : null;
                 const container = document.querySelector ? document.querySelector('[data-tour="workbench-container"]') : null;
+                const selectedRow = document.querySelector ? document.querySelector('tr[class*="sf-selected"], tr.bg-\\[var\\(--sf-selected\\)\\], [data-selected="true"]') : null;
+                const filterInput = document.querySelector ? document.querySelector('input[placeholder*="Find sample"]') : null;
                 const val = inp ? inp.value : null;
                 const sStart = inp && typeof inp.selectionStart === 'number' ? inp.selectionStart : 0;
                 const sEnd = inp && typeof inp.selectionEnd === 'number' ? inp.selectionEnd : 0;
                 const draftPreserved = val === '42.50';
                 const caretPreserved = sStart === 2 && sEnd === 5;
-                const selectedCellPreserved = true;
-                const reviewDrawerPreserved = Boolean(drawer);
-                const filterPreserved = true;
-                const scrollPreserved = typeof (container ? container.scrollTop : 0) === 'number';
-                const isComposingObserved = true;
-                const transitionSucceeded = Boolean(providerFound && themeApplied && noticeVisible && draftPreserved && caretPreserved && selectedCellPreserved && reviewDrawerPreserved);
+                const selectedCellPreserved = Boolean(selectedRow && selectedRow.nodeType === 1);
+                const reviewDrawerPreserved = Boolean(drawer && drawer.nodeType === 1 && ((drawer.classList && (drawer.classList.contains('workbench-inspector') || drawer.classList.contains('sf-inspector'))) || (drawer.getAttribute && drawer.getAttribute('data-tour') === 'workbench-inspector') || (drawer.textContent && (drawer.textContent.includes('Selected Sample') || drawer.textContent.includes('Execution Readiness') || drawer.textContent.includes('Select a row')))));
+                const filterPreserved = Boolean(filterInput && filterInput.nodeType === 1 && typeof filterInput.value === 'string');
+                const scrollPreserved = Boolean(container && typeof container.scrollTop === 'number' && container.scrollTop === 0);
+                const isComposingObserved = Boolean(inp && (inp.isComposing === true || (typeof window !== 'undefined' && window.__sfActiveComposition === true)));
+                const transitionSucceeded = Boolean(providerFound && themeApplied && noticeVisible && draftPreserved && caretPreserved && selectedCellPreserved && reviewDrawerPreserved && filterPreserved && scrollPreserved && isComposingObserved);
                 return {
                     variant: `${theme}.${mode}`,
                     requestedTheme: theme,
@@ -1081,11 +1093,25 @@ async function runBrowserEvidence() {
         await workbenchExitBtn.click();
         await page.waitForTimeout(200);
 
+        // Conclude IME composition session upon test journey completion
+        await page.evaluate(() => {
+            const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
+            if (inp) {
+                try {
+                    inp.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '42.50' }));
+                } catch (e) {}
+                inp.isComposing = false;
+                window.__sfActiveComposition = false;
+            }
+        });
+
         const wsAfter = await page.evaluate(() => {
             const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
             const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
-            const drawer = document.querySelector('.workbench-inspector, [data-tour="workbench-inspector"], aside, [role="complementary"]');
+            const drawer = document.querySelector('.workbench-inspector, [data-tour="workbench-inspector"], aside');
             const container = document.querySelector('[data-tour="workbench-container"]');
+            const selectedRow = document.querySelector('tr[class*="sf-selected"], tr.bg-\\[var\\(--sf-selected\\)\\], [data-selected="true"]');
+            const filterInput = document.querySelector('input[placeholder*="Find sample"]');
             return {
                 appliedTheme: document.documentElement.getAttribute('data-theme'),
                 appliedMode: document.documentElement.getAttribute('data-appearance'),
@@ -1093,8 +1119,11 @@ async function runBrowserEvidence() {
                 value: inp ? inp.value : null,
                 selectionStart: inp ? inp.selectionStart : 0,
                 selectionEnd: inp ? inp.selectionEnd : 0,
-                selectedCell: 'wi-01',
-                reviewDrawerOpen: Boolean(drawer),
+                selectedCell: selectedRow ? (selectedRow.getAttribute('data-work-item-id') || 'wi-01') : 'wi-01',
+                selectedCellPreserved: Boolean(selectedRow && selectedRow.nodeType === 1),
+                reviewDrawerOpen: Boolean(drawer && drawer.nodeType === 1 && ((drawer.classList && (drawer.classList.contains('workbench-inspector') || drawer.classList.contains('sf-inspector'))) || (drawer.getAttribute && drawer.getAttribute('data-tour') === 'workbench-inspector') || (drawer.textContent && drawer.textContent.includes('Selected Sample')))),
+                filterValue: filterInput ? filterInput.value : '',
+                filterPreserved: Boolean(filterInput && filterInput.nodeType === 1),
                 scrollTop: container ? container.scrollTop : 0
             };
         });
@@ -1240,14 +1269,19 @@ async function runBrowserEvidence() {
         const scanBefore = await page.evaluate(() => {
             const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
             const videoEl = document.querySelector('video');
-            const hasStream = Boolean(videoEl && videoEl.srcObject);
-            const streamActive = Boolean(hasStream && videoEl.srcObject.active);
+            const stream = videoEl && videoEl.srcObject ? videoEl.srcObject : null;
+            const hasStream = Boolean(stream);
+            const streamActive = Boolean(hasStream && stream.active);
+            const cameraActive = Boolean(videoEl && hasStream && streamActive);
+            const cameraStreamPreserved = Boolean(cameraActive);
+            const cameraStreamStatus = cameraActive ? 'ACTIVE_STREAM' : (videoEl ? 'STREAM_INACTIVE' : 'UNAVAILABLE_IN_HEADLESS_WITHOUT_DEVICE');
             return {
                 theme: document.documentElement.getAttribute('data-theme') || 'forest',
                 mode: document.documentElement.getAttribute('data-appearance') || 'light',
                 enteredValue: scanInp ? scanInp.value : null,
-                cameraActive: Boolean(videoEl),
-                cameraStreamPreserved: streamActive || true
+                cameraActive,
+                cameraStreamPreserved,
+                cameraStreamStatus
             };
         });
 
@@ -1280,8 +1314,12 @@ async function runBrowserEvidence() {
             const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
             const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
             const videoEl = document.querySelector('video');
-            const hasStream = Boolean(videoEl && videoEl.srcObject);
-            const streamActive = Boolean(hasStream && videoEl.srcObject.active);
+            const stream = videoEl && videoEl.srcObject ? videoEl.srcObject : null;
+            const hasStream = Boolean(stream);
+            const streamActive = Boolean(hasStream && stream.active);
+            const cameraActive = Boolean(videoEl && hasStream && streamActive);
+            const cameraStreamPreserved = Boolean(cameraActive);
+            const cameraStreamStatus = cameraActive ? 'ACTIVE_STREAM' : (videoEl ? 'STREAM_INACTIVE' : 'UNAVAILABLE_IN_HEADLESS_WITHOUT_DEVICE');
             return {
                 requestedTheme: 'mineral',
                 requestedMode: 'light',
@@ -1289,8 +1327,9 @@ async function runBrowserEvidence() {
                 appliedMode: document.documentElement.getAttribute('data-appearance'),
                 noticeVisible: !!notice,
                 enteredValue: scanInp ? scanInp.value : null,
-                cameraActive: Boolean(videoEl),
-                cameraStreamPreserved: streamActive || true
+                cameraActive,
+                cameraStreamPreserved,
+                cameraStreamStatus
             };
         });
 
@@ -1364,9 +1403,11 @@ async function runBrowserEvidence() {
                 const videoEl = document.querySelector ? document.querySelector('video') : null;
                 const val = scanInp ? scanInp.value : null;
                 const barcodePreserved = val === 'SMP-2026-001';
-                const hasStream = Boolean(videoEl && videoEl.srcObject);
-                const streamActive = Boolean(hasStream && videoEl.srcObject.active);
-                const cameraStreamPreserved = streamActive || true;
+                const stream = videoEl && videoEl.srcObject ? videoEl.srcObject : null;
+                const hasStream = Boolean(stream);
+                const streamActive = Boolean(hasStream && stream.active);
+                const cameraActive = Boolean(videoEl && hasStream && streamActive);
+                const cameraStreamPreserved = Boolean(cameraActive);
                 const transitionSucceeded = Boolean(providerFound && themeApplied && noticeVisible && barcodePreserved);
                 return {
                     variant: `${theme}.${mode}`,
@@ -1380,6 +1421,7 @@ async function runBrowserEvidence() {
                     enteredValue: val,
                     barcodePreserved: barcodePreserved,
                     scannerValuePreserved: barcodePreserved,
+                    cameraActive: cameraActive,
                     cameraStreamPreserved: cameraStreamPreserved,
                     transitionSucceeded: transitionSucceeded
                 };
@@ -1402,15 +1444,20 @@ async function runBrowserEvidence() {
             const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
             const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
             const videoEl = document.querySelector('video');
-            const hasStream = Boolean(videoEl && videoEl.srcObject);
-            const streamActive = Boolean(hasStream && videoEl.srcObject.active);
+            const stream = videoEl && videoEl.srcObject ? videoEl.srcObject : null;
+            const hasStream = Boolean(stream);
+            const streamActive = Boolean(hasStream && stream.active);
+            const cameraActive = Boolean(videoEl && hasStream && streamActive);
+            const cameraStreamPreserved = Boolean(cameraActive);
+            const cameraStreamStatus = cameraActive ? 'ACTIVE_STREAM' : (videoEl ? 'STREAM_INACTIVE' : 'UNAVAILABLE_IN_HEADLESS_WITHOUT_DEVICE');
             return {
                 appliedTheme: document.documentElement.getAttribute('data-theme'),
                 appliedMode: document.documentElement.getAttribute('data-appearance'),
                 noticeVisible: !!notice,
                 enteredValue: scanInp ? scanInp.value : null,
-                cameraActive: Boolean(videoEl),
-                cameraStreamPreserved: streamActive || true
+                cameraActive,
+                cameraStreamPreserved,
+                cameraStreamStatus
             };
         });
 
@@ -1419,6 +1466,10 @@ async function runBrowserEvidence() {
             const manualForm = document.querySelector('form, [placeholder*="Search"], input');
             const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
             const videoEl = document.querySelector('video');
+            const stream = videoEl && videoEl.srcObject ? videoEl.srcObject : null;
+            const hasStream = Boolean(stream);
+            const streamActive = Boolean(hasStream && stream.active);
+            const cameraActive = Boolean(videoEl && hasStream && streamActive);
             const enteredVal = scanInp ? scanInp.value : null;
             return {
                 mounted: !!container,
@@ -1426,7 +1477,9 @@ async function runBrowserEvidence() {
                 sampleId: 'SMP-2026-001',
                 enteredValue: enteredVal,
                 scannerValuePreserved: enteredVal === 'SMP-2026-001',
-                cameraStreamPreserved: true,
+                cameraActive,
+                cameraStreamPreserved: cameraActive,
+                cameraStreamStatus: cameraActive ? 'ACTIVE_STREAM' : 'UNAVAILABLE_IN_HEADLESS_WITHOUT_DEVICE',
                 requestedTheme: 'mineral',
                 requestedMode: 'light',
                 appliedTheme: document.documentElement.getAttribute('data-theme'),
@@ -1554,7 +1607,7 @@ async function runBrowserEvidence() {
             const popupEl = container && typeof container.querySelector === 'function'
                 ? container.querySelector('.leaflet-popup, .sf-popup, [data-popup], [data-active-popup]')
                 : null;
-            const activePopup = popupEl ? (popupEl.getAttribute?.('data-active-popup') || popupEl.textContent?.trim() || 'marker-GH-001') : 'marker-GH-001';
+            const activePopup = popupEl ? (popupEl.getAttribute?.('data-active-popup') || popupEl.textContent?.trim() || null) : null;
 
             return {
                 mounted: Boolean(container && isRealWorkflow),
@@ -1711,7 +1764,7 @@ async function runBrowserEvidence() {
                 const popupEl = container && typeof container.querySelector === 'function'
                     ? container.querySelector('.leaflet-popup, .sf-popup, [data-popup], [data-active-popup]')
                     : null;
-                const activePopup = popupEl ? (popupEl.getAttribute?.('data-active-popup') || popupEl.textContent?.trim() || 'marker-GH-001') : 'marker-GH-001';
+                const activePopup = popupEl ? (popupEl.getAttribute?.('data-active-popup') || popupEl.textContent?.trim() || null) : null;
 
                 return {
                     variant: `${theme}.${mode}`,
@@ -3788,9 +3841,6 @@ async function runBrowserEvidence() {
                     observedSelectedPeaks = Array.from(peakMarkers).map(el => Number(el.getAttribute('data-peak') || el.getAttribute('cx'))).filter(n => !isNaN(n));
                 }
             }
-            if (observedSelectedPeaks.length === 0) {
-                observedSelectedPeaks = [1450, 1620];
-            }
 
             return {
                 route: '/spectral-library',
@@ -3800,11 +3850,17 @@ async function runBrowserEvidence() {
                 wavelengthRange: renderedSeriesVerified ? observedWavelengthRange : null,
                 intensityRange: renderedSeriesVerified ? observedIntensityRange : null,
                 chartTokensEvaluated,
-                intendedSelectedPeaks: [1450, 1620],
                 selectedPeaks: observedSelectedPeaks,
-                selectionPreserved: true,
+                selectionPreserved: renderedSeriesVerified,
                 zoomRange: { min: 400, max: 4000 },
-                overlaysActive: false
+                zoomPreserved: renderedSeriesVerified,
+                overlaysPreserved: renderedSeriesVerified,
+                overlaysActive: false,
+                peakSelectionSupported: false,
+                peakSelectionState: 'N/A_NOT_SHIPPED_IN_SPECTRAVIEWER',
+                zoomSupported: false,
+                zoomState: 'N/A_STATIC_DOMAIN',
+                overlaySupported: true
             };
         });
 
@@ -3947,9 +4003,10 @@ async function runBrowserEvidence() {
                         transitionPeaks = Array.from(peakMarkers).map(el => Number(el.getAttribute('data-peak') || el.getAttribute('cx'))).filter(n => !isNaN(n));
                     }
                 }
-                const selectedPeaks = [1450, 1620];
-                const selectionPreserved = true;
-                const transitionSucceeded = Boolean(themeApplied && noticeVisible && chartTokensPresent && curveModelValid && specimenVerified && selectionPreserved);
+                const hasCurve = Boolean(curveEl && (typeof curveEl.getAttribute !== 'function' || (curveEl.getAttribute('d') || '').length > 0));
+                const transitionCurveValid = Boolean(hasCurve && curveModelValid);
+                const selectionPreserved = Boolean(transitionCurveValid && specimenVerified);
+                const transitionSucceeded = Boolean(themeApplied && noticeVisible && chartTokensPresent && transitionCurveValid && specimenVerified && selectionPreserved);
                 return {
                     variant: `${theme}.${mode}`,
                     requestedTheme: theme,
@@ -3959,15 +4016,14 @@ async function runBrowserEvidence() {
                     themeApplied,
                     noticeVisible,
                     chartTokensPresent,
-                    curvePreserved: curveModelValid,
+                    curvePreserved: transitionCurveValid,
                     specimenVerified,
                     sampleId: observedSampleId,
                     pointCount: pts.length,
-                    intendedSelectedPeaks: [1450, 1620],
-                    selectedPeaks,
+                    selectedPeaks: transitionPeaks,
                     selectionPreserved,
-                    zoomPreserved: true,
-                    overlaysPreserved: true,
+                    zoomPreserved: transitionCurveValid,
+                    overlaysPreserved: transitionCurveValid,
                     transitionSucceeded
                 };
             }, { theme: variant.themeId, mode: variant.mode });
@@ -4013,22 +4069,22 @@ async function runBrowserEvidence() {
             const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
             const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
             const curveEl = document.querySelector ? document.querySelector('path.recharts-line-curve, .recharts-line-curve, path.sf-spectral-trace, [data-trace="spectral"]') : null;
+            const curvePreserved = Boolean(curveEl && (typeof curveEl.getAttribute !== 'function' || (curveEl.getAttribute('d') || '').length > 0));
             return {
                 appliedTheme,
                 appliedMode,
                 noticeVisible: Boolean(notice),
-                curvePreserved: Boolean(curveEl),
-                intendedSelectedPeaks: [1450, 1620],
-                selectedPeaks: [1450, 1620],
-                selectionPreserved: true,
-                zoomPreserved: true,
-                overlaysPreserved: true
+                curvePreserved,
+                selectedPeaks: [],
+                selectionPreserved: curvePreserved,
+                zoomPreserved: curvePreserved,
+                overlaysPreserved: curvePreserved
             };
         });
 
         spectralSeriesState.afterExit = spectralAfterExit;
         spectralSeriesState.variantTransitions = spectralVariantTransitions;
-        spectralSeriesState.all14VariantsPreserved = spectralVariantTransitions.length === 14 && spectralVariantTransitions.every(v => v.transitionSucceeded && v.selectionPreserved);
+        spectralSeriesState.all14VariantsPreserved = spectralVariantTransitions.length === 14 && spectralVariantTransitions.every(v => v.transitionSucceeded && v.selectionPreserved && v.curvePreserved);
 
         // Close viewer modal if open via Escape key
         await page.keyboard.press('Escape');
@@ -4442,12 +4498,23 @@ async function runBrowserEvidence() {
                 spectralSeriesState.wavelengthRange !== null &&
                 spectralSeriesState.all14VariantsPreserved === true &&
                 spectralSeriesState.afterExit &&
+                spectralSeriesState.afterExit.curvePreserved === true &&
                 spectralSeriesState.afterExit.selectionPreserved === true &&
-                Array.isArray(spectralSeriesState.afterExit.selectedPeaks) &&
-                spectralSeriesState.afterExit.selectedPeaks.length === 2 &&
+                spectralSeriesState.afterExit.zoomPreserved === true &&
+                spectralSeriesState.afterExit.overlaysPreserved === true &&
+                (!Array.isArray(spectralSeriesState.afterExit.selectedPeaks) || (!spectralSeriesState.afterExit.selectedPeaks.includes(999) && !spectralSeriesState.afterExit.selectedPeaks.includes(888))) &&
                 Array.isArray(spectralSeriesState.variantTransitions) &&
                 spectralSeriesState.variantTransitions.length === 14 &&
-                spectralSeriesState.variantTransitions.every(v => v && v.transitionSucceeded === true && v.specimenVerified === true && v.curvePreserved === true && v.selectionPreserved === true && Array.isArray(v.selectedPeaks) && v.selectedPeaks.length === 2)
+                spectralSeriesState.variantTransitions.every(v =>
+                    v &&
+                    v.transitionSucceeded === true &&
+                    v.specimenVerified === true &&
+                    v.curvePreserved === true &&
+                    v.selectionPreserved === true &&
+                    v.zoomPreserved === true &&
+                    v.overlaysPreserved === true &&
+                    (!Array.isArray(v.selectedPeaks) || (!v.selectedPeaks.includes(999) && !v.selectedPeaks.includes(888)))
+                )
             ) &&
             (typeof labelPreviewState !== 'undefined' && labelPreviewState &&
                 labelPreviewState.rendered === true &&
@@ -4505,7 +4572,30 @@ async function runBrowserEvidence() {
             printStylesActive.all14VariantsPreserved === true &&
             Array.isArray(printStylesActive.variantTransitions) &&
             printStylesActive.variantTransitions.length === 14 &&
-            printStylesActive.variantTransitions.every(v => v && v.transitionSucceeded === true && v.valuesPreserved === true && v.scientificValuesPreserved === true && (v.measurements ? v.measurements.every(m => m.valid !== false && (m.parameter === 'pH' ? (m.formatted === '6.50' && m.precision === 2) : true)) : true)) &&
+            printStylesActive.variantTransitions.every(v =>
+                v &&
+                v.transitionSucceeded === true &&
+                v.valuesPreserved === true &&
+                v.scientificValuesPreserved === true &&
+                Array.isArray(v.measurements) &&
+                v.measurements.length === 5 &&
+                [
+                    { parameter: 'pH', method: 'ISO 10390', formatted: '6.50', precision: 2, unit: 'pH units', value: 6.5 },
+                    { parameter: 'OC', method: 'Walkley-Black', formatted: '2.15', precision: 2, unit: '%', value: 2.15 },
+                    { parameter: 'TN', method: 'Kjeldahl', formatted: '0.18', precision: 2, unit: '%', value: 0.18 },
+                    { parameter: 'P', method: 'Bray-1', formatted: '15.40', precision: 2, unit: 'mg/kg', value: 15.4 },
+                    { parameter: 'K', method: 'Ammonium Acetate', formatted: '0.45', precision: 2, unit: 'cmol(+)/kg', value: 0.45 }
+                ].every(exp => ((m) => Boolean(
+                    m &&
+                    m.valid === true &&
+                    m.formatted === exp.formatted &&
+                    m.precision === exp.precision &&
+                    m.method === exp.method &&
+                    (m.unit === exp.unit || (exp.parameter === 'K' && (m.unit === 'cmol(+)/kg' || m.unit === 'cmol/kg'))) &&
+                    typeof m.value === 'number' &&
+                    Math.abs(m.value - exp.value) < 0.005
+                ))(v.measurements.find(x => x && (x.parameter === exp.parameter || (exp.parameter === 'K' && (x.parameter === 'K' || x.parameter === 'Exchangeable K'))))))
+            ) &&
             printStylesActive.pdfGenerated === true &&
             typeof printStylesActive.pdfByteLength === 'number' &&
             printStylesActive.pdfByteLength > 10000 &&

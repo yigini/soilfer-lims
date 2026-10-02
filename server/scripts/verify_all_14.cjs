@@ -136,7 +136,11 @@ function paper(text) {
         valuesPreserved: true,
         scientificValuesPreserved: true,
         measurements: [
-            { parameter: 'pH', formatted: '6.50', precision: 2, valid: true }
+            { parameter: 'pH', method: 'ISO 10390', formatted: '6.50', precision: 2, unit: 'pH units', value: 6.5, valid: true },
+            { parameter: 'OC', method: 'Walkley-Black', formatted: '2.15', precision: 2, unit: '%', value: 2.15, valid: true },
+            { parameter: 'TN', method: 'Kjeldahl', formatted: '0.18', precision: 2, unit: '%', value: 0.18, valid: true },
+            { parameter: 'P', method: 'Bray-1', formatted: '15.40', precision: 2, unit: 'mg/kg', value: 15.4, valid: true },
+            { parameter: 'K', method: 'Ammonium Acetate', formatted: '0.45', precision: 2, unit: 'cmol(+)/kg', value: 0.45, valid: true }
         ]
     }));
     res.all14VariantsPreserved = true;
@@ -155,15 +159,20 @@ const validSpectral = {
     chartTokensEvaluated: ['--sf-chart-1'],
     all14VariantsPreserved: true,
     afterExit: {
+        curvePreserved: true,
         selectionPreserved: true,
-        selectedPeaks: [1450, 1620]
+        zoomPreserved: true,
+        overlaysPreserved: true,
+        selectedPeaks: []
     },
     variantTransitions: Array.from({ length: 14 }, () => ({
         transitionSucceeded: true,
         specimenVerified: true,
         curvePreserved: true,
         selectionPreserved: true,
-        selectedPeaks: [1450, 1620]
+        zoomPreserved: true,
+        overlaysPreserved: true,
+        selectedPeaks: []
     }))
 };
 const validLabel = {
@@ -665,10 +674,21 @@ test('PASS final print gate strictly requires all14 transitions and rejects arbi
         sampleId: 'SMP-2026-001',
         wavelengthRange: '4000 - 400 cm⁻¹',
         all14VariantsPreserved: true,
+        afterExit: {
+            curvePreserved: true,
+            selectionPreserved: true,
+            zoomPreserved: true,
+            overlaysPreserved: true,
+            selectedPeaks: []
+        },
         variantTransitions: Array.from({ length: 14 }, () => ({
             transitionSucceeded: true,
             specimenVerified: true,
-            curvePreserved: true
+            curvePreserved: true,
+            selectionPreserved: true,
+            zoomPreserved: true,
+            overlaysPreserved: true,
+            selectedPeaks: []
         }))
     };
     assert.equal(printGate(p, ssValid, lsEmpty), false);
