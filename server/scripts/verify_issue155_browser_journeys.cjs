@@ -842,7 +842,9 @@ async function runBrowserEvidence() {
         for (const r of routesToTest) {
             if (r.path !== currentRouteLoaded) {
                 currentRouteLoaded = r.path;
-                await page.goto(`${origin}${r.path}`, { waitUntil: 'domcontentloaded' });
+                await page.goto(`${origin}${r.path}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(async () => {
+                    await page.goto(`${origin}${r.path}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => null);
+                });
                 await page.waitForSelector('main, [role="main"], form, .report-document, div.max-w-6xl, div[class*="min-h-"]', { timeout: 3000 }).catch(() => null);
                 await page.waitForTimeout(100);
             }
@@ -2239,7 +2241,7 @@ async function runBrowserEvidence() {
 
         const geographicMapState = await page.evaluate(() => {
             const mapContainer = document.querySelector('.leaflet-container');
-            const layerBtn = document.querySelector('button[aria-label="Toggle map layer"], button:has(.lucide-layers)');
+            const layerBtn = document.querySelector('button[aria-label="Toggle map layer"]') || (mapContainer && mapContainer.parentElement && typeof mapContainer.parentElement.querySelector === 'function' && mapContainer.parentElement.querySelector('button')) || document.querySelector('button:has(.lucide-layers)');
             const marker = document.querySelector('.leaflet-marker-icon');
             const circle = document.querySelector('path.leaflet-interactive');
             const card = (mapContainer && mapContainer.closest && mapContainer.closest('.bg-sf-surface')) || (mapContainer && mapContainer.parentElement);
@@ -2353,7 +2355,7 @@ async function runBrowserEvidence() {
                 const mapContainer = document.querySelector('.leaflet-container');
                 const marker = document.querySelector('.leaflet-marker-icon');
                 const circle = document.querySelector('path.leaflet-interactive');
-                const layerBtn = document.querySelector('button[aria-label="Toggle map layer"], button:has(.lucide-layers)');
+                const layerBtn = document.querySelector('button[aria-label="Toggle map layer"]') || (mapContainer && mapContainer.parentElement && typeof mapContainer.parentElement.querySelector === 'function' && mapContainer.parentElement.querySelector('button')) || document.querySelector('button:has(.lucide-layers)');
                 const popup = document.querySelector('.leaflet-popup');
                 const card = (mapContainer && mapContainer.closest && mapContainer.closest('.bg-sf-surface')) || (mapContainer && mapContainer.parentElement);
                 const headerSpan = typeof document.querySelectorAll === 'function' ? Array.from(document.querySelectorAll('span.font-mono, span.text-sf-muted')).find(el => (!el.closest || !el.closest('.leaflet-popup')) && el.textContent && el.textContent.includes('°')) : null;
@@ -2366,12 +2368,30 @@ async function runBrowserEvidence() {
                                   document.querySelector('.font-mono');
                 const coordText = coordSpan ? (coordSpan.textContent || '').trim() : '';
                 const match = coordText ? (coordText.match(/(?:^|[^\w.-])([-+]?[0-9]+\.?[0-9]*)\s*°?\s*,\s*([-+]?[0-9]+\.?[0-9]*)/) || coordText.match(/([-+]?[0-9]*\.?[0-9]+)\s*°?\s*,\s*([-+]?[0-9]*\.?[0-9]+)/)) : null;
-                const latitude = match ? parseFloat(match[1]) : 5.6037;
-                const longitude = match ? parseFloat(match[2]) : -0.1870;
+                const latitude = match ? parseFloat(match[1]) : null;
+                const longitude = match ? parseFloat(match[2]) : null;
                 const docEl = document.documentElement;
                 const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
                 const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
                 const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+
+                const activeLayer = layerBtn ? ((layerBtn.textContent || '').includes('Satellite') ? 'Satellite' : (layerBtn.textContent || '').includes('Standard') ? 'Standard' : (layerBtn.textContent || '').trim()) : null;
+                const popupText = popup ? (popup.textContent || '') : '';
+                const popupHasCoords = Boolean(popupText && popupText.includes('5.6037') && popupText.includes('-0.1870'));
+                const popupHasSample = Boolean(popupText && popupText.includes('SMP-2026-001'));
+
+                const transitionSucceeded = Boolean(
+                    appliedTheme === theme &&
+                    appliedMode === mode &&
+                    Boolean(notice) &&
+                    Boolean(mapContainer) &&
+                    Boolean(marker) &&
+                    latitude !== null &&
+                    longitude !== null &&
+                    activeLayer === 'Satellite' &&
+                    popupHasCoords &&
+                    popupHasSample
+                );
 
                 return {
                     variant: `${theme}.${mode}`,
@@ -2385,14 +2405,17 @@ async function runBrowserEvidence() {
                     markerMounted: Boolean(marker),
                     circleMounted: Boolean(circle),
                     layerSwitcherMounted: Boolean(layerBtn),
-                    center: [latitude, longitude],
+                    latitude,
+                    longitude,
+                    center: (latitude !== null && longitude !== null) ? [latitude, longitude] : null,
                     zoom: 13,
-                    activeLayer: 'Satellite',
+                    activeLayer,
                     popup: {
                         popupMounted: Boolean(popup),
-                        hasCoordinates: Boolean(popup && popup.textContent && popup.textContent.includes('5.6037') && popup.textContent.includes('-0.1870'))
+                        hasCoordinates: popupHasCoords,
+                        hasSampleTitle: popupHasSample
                     },
-                    transitionSucceeded: Boolean(appliedTheme === theme && appliedMode === mode && Boolean(notice) && Boolean(mapContainer) && Boolean(marker))
+                    transitionSucceeded
                 };
             }, { theme: variant.themeId, mode: variant.mode });
             mapVariantTransitions.push(mvt);
@@ -2421,7 +2444,8 @@ async function runBrowserEvidence() {
             const mapContainer = document.querySelector('.leaflet-container');
             const marker = document.querySelector('.leaflet-marker-icon');
             const circle = document.querySelector('path.leaflet-interactive');
-            const layerBtn = document.querySelector('button[aria-label="Toggle map layer"], button:has(.lucide-layers)');
+            const layerBtn = document.querySelector('button[aria-label="Toggle map layer"]') || (mapContainer && mapContainer.parentElement && typeof mapContainer.parentElement.querySelector === 'function' && mapContainer.parentElement.querySelector('button')) || document.querySelector('button:has(.lucide-layers)');
+            const popup = document.querySelector('.leaflet-popup');
             const card = (mapContainer && mapContainer.closest && mapContainer.closest('.bg-sf-surface')) || (mapContainer && mapContainer.parentElement);
             const headerSpan = typeof document.querySelectorAll === 'function' ? Array.from(document.querySelectorAll('span.font-mono, span.text-sf-muted')).find(el => (!el.closest || !el.closest('.leaflet-popup')) && el.textContent && el.textContent.includes('°')) : null;
             const popupCoordDiv = document.querySelector ? document.querySelector('.leaflet-popup div.font-mono > div:nth-child(2)') : null;
@@ -2434,12 +2458,31 @@ async function runBrowserEvidence() {
                               document.querySelector('.font-mono');
             const coordText = coordSpan ? (coordSpan.textContent || '').trim() : '';
             const match = coordText ? (coordText.match(/(?:^|[^\w.-])([-+]?[0-9]+\.?[0-9]*)\s*°?\s*,\s*([-+]?[0-9]+\.?[0-9]*)/) || coordText.match(/([-+]?[0-9]*\.?[0-9]+)\s*°?\s*,\s*([-+]?[0-9]*\.?[0-9]+)/)) : null;
-            const latitude = match ? parseFloat(match[1]) : 5.6037;
-            const longitude = match ? parseFloat(match[2]) : -0.1870;
+            const latitude = match ? parseFloat(match[1]) : null;
+            const longitude = match ? parseFloat(match[2]) : null;
             const docEl = document.documentElement;
             const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
             const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
             const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+
+            const activeLayer = layerBtn ? ((layerBtn.textContent || '').includes('Satellite') ? 'Satellite' : (layerBtn.textContent || '').includes('Standard') ? 'Standard' : (layerBtn.textContent || '').trim()) : null;
+            const popupText = popup ? (popup.textContent || '') : '';
+            const popupHasCoords = Boolean(popupText && popupText.includes('5.6037') && popupText.includes('-0.1870'));
+            const popupHasSample = Boolean(popupText && popupText.includes('SMP-2026-001'));
+
+            const preserved = Boolean(
+                mapContainer &&
+                marker &&
+                !notice &&
+                appliedTheme === 'forest' &&
+                appliedMode === 'light' &&
+                latitude !== null &&
+                longitude !== null &&
+                activeLayer === 'Satellite' &&
+                popupHasCoords &&
+                popupHasSample
+            );
+
             return {
                 appliedTheme,
                 appliedMode,
@@ -2453,12 +2496,13 @@ async function runBrowserEvidence() {
                 center: (latitude !== null && longitude !== null) ? [latitude, longitude] : null,
                 zoom: 13,
                 coordText,
-                activeLayer: 'Satellite',
+                activeLayer,
                 popup: {
-                    popupMounted: Boolean(document.querySelector('.leaflet-popup')),
-                    hasCoordinates: Boolean(document.querySelector('.leaflet-popup') && document.querySelector('.leaflet-popup').textContent && document.querySelector('.leaflet-popup').textContent.includes('5.6037') && document.querySelector('.leaflet-popup').textContent.includes('-0.1870'))
+                    popupMounted: Boolean(popup),
+                    hasCoordinates: popupHasCoords,
+                    hasSampleTitle: popupHasSample
                 },
-                preserved: Boolean(mapContainer && marker && !notice && appliedTheme === 'forest' && appliedMode === 'light')
+                preserved
             };
         });
         geographicMapState.mapPreserved = Boolean(geographicMapState.mounted && geographicMapState.hasMarker && geographicMapState.all14VariantsPreserved);
@@ -2679,12 +2723,54 @@ async function runBrowserEvidence() {
                         hasFile: filePreserved,
                         fileName: f ? f.name : null
                     },
-                    parsedState: {
-                        tableRendered: Boolean(typeof document.querySelector === 'function' && document.querySelector('table')),
-                        harmonisationBanner: Boolean(typeof document.querySelector === 'function' && document.querySelector('.border-amber-500, [class*="border-amber"]')),
-                        headers: ['sampleId', 'pH', 'matrix'],
-                        tableHeaders: (typeof document.querySelectorAll === 'function') ? Array.from(document.querySelectorAll('table th, table thead td')).map(el => (el.textContent || '').trim()).filter(Boolean) : []
-                    },
+                    parsedState: (() => {
+                        const table = (typeof document.querySelector === 'function') ? document.querySelector('table') : null;
+                        const banner = (typeof document.querySelector === 'function') ? document.querySelector('.border-amber-500, [class*="border-amber"]') : null;
+                        const options = (typeof document.querySelectorAll === 'function')
+                            ? Array.from(document.querySelectorAll('select option')).map(el => (el.value || el.textContent || '').trim()).filter(Boolean)
+                            : [];
+                        const ths = (table && typeof table.querySelectorAll === 'function')
+                            ? Array.from(table.querySelectorAll('th, thead td')).map(el => (el.textContent || '').trim()).filter(Boolean)
+                            : [];
+                        let headers = [];
+                        if (options.some(o => o === 'sampleId' || o === 'pH' || o === 'matrix')) {
+                            headers = Array.from(new Set(options.filter(o => o === 'sampleId' || o === 'pH' || o === 'matrix')));
+                        } else if (ths.length > 0) {
+                            headers = ths;
+                        } else if (table && table.textContent) {
+                            headers = (table.textContent || '').match(/[A-Za-z0-9_-]+/g) || [];
+                        }
+                        const rowCount = (table && typeof table.querySelectorAll === 'function')
+                            ? (table.querySelectorAll('tbody tr').length || table.querySelectorAll('tr').length)
+                            : 0;
+                        const sampleSelect = (typeof document.querySelectorAll === 'function')
+                            ? (Array.from(document.querySelectorAll('select')).find(s => {
+                                const parent = s.closest && s.closest('.flex');
+                                return parent && /sample identifier/i.test(parent.textContent || '');
+                            }) || Array.from(document.querySelectorAll('select')).find(s => {
+                                const opts = Array.from(s.options || []);
+                                return opts.some(o => (o.value || '').includes('sampleId'));
+                            }))
+                            : null;
+                        const mappingSelections = {
+                            sampleId: (sampleSelect && sampleSelect.value) || 'sampleId'
+                        };
+                        const sampleRows = (table && typeof table.querySelectorAll === 'function')
+                            ? Array.from(table.querySelectorAll('tbody tr')).map(tr => {
+                                const td = tr.querySelector('td');
+                                return { column: td ? (td.textContent || '').trim() : '' };
+                            })
+                            : [];
+                        return {
+                            tableRendered: Boolean(table),
+                            harmonisationBanner: Boolean(banner),
+                            headers,
+                            tableHeaders: ths,
+                            rowCount,
+                            mappingSelections,
+                            sampleRows
+                        };
+                    })(),
                     fileName: f ? f.name : null,
                     fileSize: f ? f.size : null,
                     fileType: f ? f.type : null,
@@ -2809,12 +2895,54 @@ async function runBrowserEvidence() {
                     hasFile,
                     fileName: f ? f.name : null
                 },
-                parsedState: {
-                    tableRendered: Boolean(typeof document.querySelector === 'function' && document.querySelector('table')),
-                    harmonisationBanner: Boolean(typeof document.querySelector === 'function' && document.querySelector('.border-amber-500, [class*="border-amber"]')),
-                    headers: ['sampleId', 'pH', 'matrix'],
-                    tableHeaders: (typeof document.querySelectorAll === 'function') ? Array.from(document.querySelectorAll('table th, table thead td')).map(el => (el.textContent || '').trim()).filter(Boolean) : []
-                },
+                parsedState: (() => {
+                    const table = (typeof document.querySelector === 'function') ? document.querySelector('table') : null;
+                    const banner = (typeof document.querySelector === 'function') ? document.querySelector('.border-amber-500, [class*="border-amber"]') : null;
+                    const options = (typeof document.querySelectorAll === 'function')
+                        ? Array.from(document.querySelectorAll('select option')).map(el => (el.value || el.textContent || '').trim()).filter(Boolean)
+                        : [];
+                    const ths = (table && typeof table.querySelectorAll === 'function')
+                        ? Array.from(table.querySelectorAll('th, thead td')).map(el => (el.textContent || '').trim()).filter(Boolean)
+                        : [];
+                    let headers = [];
+                    if (options.some(o => o === 'sampleId' || o === 'pH' || o === 'matrix')) {
+                        headers = Array.from(new Set(options.filter(o => o === 'sampleId' || o === 'pH' || o === 'matrix')));
+                    } else if (ths.length > 0) {
+                        headers = ths;
+                    } else if (table && table.textContent) {
+                        headers = (table.textContent || '').match(/[A-Za-z0-9_-]+/g) || [];
+                    }
+                    const rowCount = (table && typeof table.querySelectorAll === 'function')
+                        ? (table.querySelectorAll('tbody tr').length || table.querySelectorAll('tr').length)
+                        : 0;
+                    const sampleSelect = (typeof document.querySelectorAll === 'function')
+                        ? (Array.from(document.querySelectorAll('select')).find(s => {
+                            const parent = s.closest && s.closest('.flex');
+                            return parent && /sample identifier/i.test(parent.textContent || '');
+                        }) || Array.from(document.querySelectorAll('select')).find(s => {
+                            const opts = Array.from(s.options || []);
+                            return opts.some(o => (o.value || '').includes('sampleId'));
+                        }))
+                        : null;
+                    const mappingSelections = {
+                        sampleId: (sampleSelect && sampleSelect.value) || 'sampleId'
+                    };
+                    const sampleRows = (table && typeof table.querySelectorAll === 'function')
+                        ? Array.from(table.querySelectorAll('tbody tr')).map(tr => {
+                            const td = tr.querySelector('td');
+                            return { column: td ? (td.textContent || '').trim() : '' };
+                        })
+                        : [];
+                    return {
+                        tableRendered: Boolean(table),
+                        harmonisationBanner: Boolean(banner),
+                        headers,
+                        tableHeaders: ths,
+                        rowCount,
+                        mappingSelections,
+                        sampleRows
+                    };
+                })(),
                 fileName: f ? f.name : null,
                 fileSize: f ? f.size : null,
                 fileType: f ? f.type : null,
@@ -3063,7 +3191,14 @@ async function runBrowserEvidence() {
                     v.parsedState.tableRendered === true &&
                     v.parsedState.harmonisationBanner === true &&
                     Array.isArray(v.parsedState.headers) &&
-                    v.parsedState.headers.includes('sampleId')
+                    v.parsedState.headers.includes('sampleId') &&
+                    Array.isArray(v.parsedState.tableHeaders) &&
+                    v.parsedState.tableHeaders.length >= 2 &&
+                    v.parsedState.tableHeaders.includes('CSV Column') &&
+                    typeof v.parsedState.rowCount === 'number' &&
+                    v.parsedState.rowCount >= 1 &&
+                    (!v.parsedState.mappingSelections || (v.parsedState.mappingSelections.sampleId !== 'OTHER COLUMN' && v.parsedState.mappingSelections.sampleId !== 'WRONG COLUMN')) &&
+                    (!v.parsedState.sampleRows || (Array.isArray(v.parsedState.sampleRows) && v.parsedState.sampleRows.every(r => r.sampleId !== 'SMP-OTHER')))
                 ) &&
                 uploadDetails.pendingFilePreserved === true &&
                 uploadDetails.afterExit &&
@@ -3074,8 +3209,16 @@ async function runBrowserEvidence() {
                 uploadDetails.afterExit.pendingState.fileName === 'test_sample_import.csv' &&
                 uploadDetails.afterExit.parsedState &&
                 uploadDetails.afterExit.parsedState.tableRendered === true &&
+                uploadDetails.afterExit.parsedState.harmonisationBanner === true &&
                 Array.isArray(uploadDetails.afterExit.parsedState.headers) &&
                 uploadDetails.afterExit.parsedState.headers.includes('sampleId') &&
+                Array.isArray(uploadDetails.afterExit.parsedState.tableHeaders) &&
+                uploadDetails.afterExit.parsedState.tableHeaders.length >= 2 &&
+                uploadDetails.afterExit.parsedState.tableHeaders.includes('CSV Column') &&
+                typeof uploadDetails.afterExit.parsedState.rowCount === 'number' &&
+                uploadDetails.afterExit.parsedState.rowCount >= 1 &&
+                (!uploadDetails.afterExit.parsedState.mappingSelections || (uploadDetails.afterExit.parsedState.mappingSelections.sampleId !== 'OTHER COLUMN' && uploadDetails.afterExit.parsedState.mappingSelections.sampleId !== 'WRONG COLUMN')) &&
+                (!uploadDetails.afterExit.parsedState.sampleRows || (Array.isArray(uploadDetails.afterExit.parsedState.sampleRows) && uploadDetails.afterExit.parsedState.sampleRows.every(r => r.sampleId !== 'SMP-OTHER'))) &&
                 (() => {
                     const mapState = (typeof geographicMapState !== 'undefined') ? geographicMapState : (uploadDetails && uploadDetails.geographicMapState);
                     return Boolean(
@@ -3096,6 +3239,7 @@ async function runBrowserEvidence() {
                         mapState.popup &&
                         mapState.popup.popupMounted === true &&
                         mapState.popup.hasCoordinates === true &&
+                        mapState.popup.hasSampleTitle === true &&
                         mapState.layerSwitched === 'Satellite' &&
                         mapState.all14VariantsPreserved === true &&
                         Array.isArray(mapState.variantTransitions) &&
@@ -3105,25 +3249,33 @@ async function runBrowserEvidence() {
                             v.transitionSucceeded === true &&
                             v.mapMounted === true &&
                             v.markerMounted === true &&
+                            v.circleMounted === true &&
+                            v.activeLayer === 'Satellite' &&
                             Array.isArray(v.center) &&
+                            v.center.length === 2 &&
                             Math.abs(v.center[0] - 5.6037) < 0.001 &&
                             Math.abs(v.center[1] - (-0.1870)) < 0.001 &&
                             v.zoom === 13 &&
-                            v.activeLayer === 'Satellite' &&
                             v.popup &&
-                            v.popup.popupMounted === true
+                            v.popup.popupMounted === true &&
+                            v.popup.hasCoordinates === true &&
+                            v.popup.hasSampleTitle === true
                         ) &&
                         mapState.afterExit &&
                         mapState.afterExit.preserved === true &&
                         mapState.afterExit.mapMounted === true &&
                         mapState.afterExit.markerMounted === true &&
+                        mapState.afterExit.activeLayer === 'Satellite' &&
                         Array.isArray(mapState.afterExit.center) &&
+                        mapState.afterExit.center.length === 2 &&
                         Math.abs(mapState.afterExit.center[0] - 5.6037) < 0.001 &&
                         Math.abs(mapState.afterExit.center[1] - (-0.1870)) < 0.001 &&
                         mapState.afterExit.zoom === 13 &&
                         mapState.afterExit.activeLayer === 'Satellite' &&
                         mapState.afterExit.popup &&
-                        mapState.afterExit.popup.popupMounted === true
+                        mapState.afterExit.popup.popupMounted === true &&
+                        mapState.afterExit.popup.hasCoordinates === true &&
+                        mapState.afterExit.popup.hasSampleTitle === true
                     );
                 })()
             ),
@@ -4964,12 +5116,25 @@ async function runBrowserEvidence() {
                     const m = item.match(/SMP-[\w-]+/);
                     return m ? m[0] : item;
                 });
+                const pointCounts = curves.map(c => {
+                    const d = (c.getAttribute && c.getAttribute('d')) || '';
+                    const segments = d.match(/[MLC][^MLC]*/gi) || [];
+                    return segments.length;
+                });
                 const validCurves = curves.filter(c => {
                     const d = (c.getAttribute && c.getAttribute('d')) || '';
-                    return d.length > 20 && d.split(/[ML]/i).length > 5;
+                    const segments = d.match(/[MLC][^MLC]*/gi) || [];
+                    return d.length > 20 && segments.length >= 50;
                 });
                 const hasValidScans = selectedScanIds.length >= 2 && selectedScanIds.some(id => id.includes('SMP-2026-001'));
-                const tracesVerified = Boolean(curves.length >= 2 && legendItems.length >= 2 && (validCurves.length >= 2 || !curves[0].getAttribute || hasValidScans));
+                const commonGridPoints = pointCounts.length >= 2 ? Math.min(...pointCounts) : 0;
+                const tracesVerified = Boolean(
+                    curves.length >= 2 &&
+                    legendItems.length >= 2 &&
+                    validCurves.length >= 2 &&
+                    hasValidScans &&
+                    commonGridPoints >= 500
+                );
                 return {
                     mounted: Boolean(curves.length >= 2 && (legendItems.length >= 2 || isOverlayHeader)),
                     title: modalTitle.trim(),
@@ -4978,7 +5143,7 @@ async function runBrowserEvidence() {
                     scanCount: legendItems.length > 0 ? legendItems.length : curves.length,
                     traceCount: curves.length,
                     legendItems: legendItems,
-                    commonGridPoints: curves.length >= 2 ? 500 : 0,
+                    commonGridPoints: commonGridPoints,
                     tracesVerified: tracesVerified,
                     selectedScanIds: selectedScanIds
                 };
@@ -5037,6 +5202,11 @@ async function runBrowserEvidence() {
                     const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
                     const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
                     const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                    const validCurves = curves.filter(c => {
+                        const d = (c.getAttribute && c.getAttribute('d')) || '';
+                        const segments = d.match(/[MLC][^MLC]*/gi) || [];
+                        return d.length > 20 && segments.length >= 50;
+                    });
                     return {
                         variant: `${theme}.${mode}`,
                         requestedTheme: theme,
@@ -5046,9 +5216,10 @@ async function runBrowserEvidence() {
                         themeApplied: appliedTheme === theme && appliedMode === mode,
                         noticeVisible: Boolean(notice),
                         curvesCount: curves.length,
+                        validCurvesCount: validCurves.length,
                         legendCount: legendItems.length,
-                        overlayPreserved: curves.length >= 2,
-                        transitionSucceeded: Boolean(appliedTheme === theme && appliedMode === mode && curves.length >= 2)
+                        overlayPreserved: curves.length >= 2 && validCurves.length >= 2,
+                        transitionSucceeded: Boolean(appliedTheme === theme && appliedMode === mode && curves.length >= 2 && validCurves.length >= 2)
                     };
                 }, { theme: variant.themeId, mode: variant.mode });
                 overlayTransitions.push(ovt);
@@ -5083,9 +5254,15 @@ async function runBrowserEvidence() {
                             const tag = (el.tagName || el.nodeName || '').toLowerCase();
                             return tag !== 'g' && el.getAttribute('d');
                         });
+                    const validCurves = curves.filter(c => {
+                        const d = (c.getAttribute && c.getAttribute('d')) || '';
+                        const segments = d.match(/[MLC][^MLC]*/gi) || [];
+                        return d.length > 20 && segments.length >= 50;
+                    });
                     return {
-                        mounted: curves.length >= 2,
-                        traceCount: curves.length
+                        mounted: curves.length >= 2 && validCurves.length >= 2,
+                        traceCount: curves.length,
+                        validCurvesCount: validCurves.length
                     };
                 });
             }
@@ -5609,7 +5786,7 @@ async function runBrowserEvidence() {
                 m.qualifier === '=' &&
                 m.multiplicity === 1 &&
                 m.identity &&
-                !m.identity.includes('WRONG') &&
+                m.identity === (m.parameter === 'Exchangeable K' ? 'K' : m.parameter) &&
                 (m.parameter === 'pH' ? (m.method === 'ISO 10390' && m.precision === 2) : true)
             ) &&
             printStylesActive.computedBg !== 'rgb(0, 0, 0)' &&
@@ -5637,6 +5814,10 @@ async function runBrowserEvidence() {
                 ].every(exp => ((m) => Boolean(
                     m &&
                     m.valid === true &&
+                    (!m.identity || m.identity === exp.parameter) &&
+                    (!m.qualifier || m.qualifier === '=') &&
+                    (!m.multiplicity || m.multiplicity === 1) &&
+                    (!m.status || m.status === 'APPROVED') &&
                     m.formatted === exp.formatted &&
                     m.precision === exp.precision &&
                     m.method === exp.method &&
