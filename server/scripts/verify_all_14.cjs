@@ -184,6 +184,9 @@ const validSpectral = {
         legendItems: ['v1 — SMP-2026-001-mir-baseline.csv', 'v2 — SMP-2026-001-mir-replicate.csv'],
         selectedScanIds: ['SMP-2026-001-mir-baseline', 'SMP-2026-001-mir-replicate'],
         commonGridPoints: 500,
+        curveModelVerified: true,
+        distinctSeriesVerified: true,
+        axesVerified: true,
         all14VariantsPreserved: true,
         afterExit: { mounted: true, traceCount: 2 },
         variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true, overlayPreserved: true, curvesCount: 2, validCurvesCount: 2, legendCount: 2 }))

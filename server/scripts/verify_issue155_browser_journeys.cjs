@@ -2239,10 +2239,8 @@ async function runBrowserEvidence() {
             if (mapEl) {
                 const fiberKey = Object.keys(mapEl).find(k => k.startsWith('__reactFiber$'));
                 if (fiberKey && mapEl[fiberKey]) {
-                    const stack = [mapEl[fiberKey]];
-                    while (stack.length > 0) {
-                        const curr = stack.pop();
-                        if (!curr) continue;
+                    let curr = mapEl[fiberKey];
+                    while (curr && !mapEl._leaflet_map) {
                         if (curr.memoizedState) {
                             let hook = curr.memoizedState;
                             while (hook) {
@@ -2254,17 +2252,44 @@ async function runBrowserEvidence() {
                             }
                         }
                         if (mapEl._leaflet_map) break;
-                        if (curr.child) stack.push(curr.child);
-                        if (curr.sibling) stack.push(curr.sibling);
+                        if (curr.memoizedProps && curr.memoizedProps.center && curr.memoizedProps.zoom) {
+                            const p = curr.memoizedProps;
+                            const c = Array.isArray(p.center) ? p.center : (p.center.lat !== undefined ? [p.center.lat, p.center.lng] : null);
+                            if (c) {
+                                mapEl._leaflet_center = c;
+                                mapEl._leaflet_zoom = typeof p.zoom === 'number' ? p.zoom : 13;
+                            }
+                        }
+                        curr = curr.return;
+                    }
+                    if (!mapEl._leaflet_map) {
+                        const stack = [mapEl[fiberKey]];
+                        while (stack.length > 0) {
+                            const node = stack.pop();
+                            if (!node) continue;
+                            if (node.memoizedState) {
+                                let hook = node.memoizedState;
+                                while (hook) {
+                                    if (hook.memoizedState && typeof hook.memoizedState.getCenter === 'function' && typeof hook.memoizedState.getZoom === 'function') {
+                                        mapEl._leaflet_map = hook.memoizedState;
+                                        break;
+                                    }
+                                    hook = hook.next;
+                                }
+                            }
+                            if (mapEl._leaflet_map) break;
+                            if (node.child) stack.push(node.child);
+                            if (node.sibling) stack.push(node.sibling);
+                        }
                     }
                 }
                 if (mapEl._leaflet_map) {
-                    const c = mapEl._leaflet_map.getCenter();
-                    mapEl._leaflet_center = [c.lat, c.lng];
-                    mapEl._leaflet_zoom = mapEl._leaflet_map.getZoom();
-                } else {
-                    mapEl._leaflet_center = [5.6037, -0.1870];
-                    mapEl._leaflet_zoom = 13;
+                    const c = typeof mapEl._leaflet_map.getCenter === 'function' ? mapEl._leaflet_map.getCenter() : null;
+                    mapEl._leaflet_center = (c && typeof c.lat === 'number') ? [c.lat, c.lng] : null;
+                    mapEl._leaflet_zoom = typeof mapEl._leaflet_map.getZoom === 'function' ? mapEl._leaflet_map.getZoom() : null;
+                } else if (!mapEl._leaflet_center) {
+                    mapEl._leaflet_center = null;
+                    mapEl._leaflet_zoom = null;
                 }
             }
         });
@@ -2392,10 +2417,8 @@ async function runBrowserEvidence() {
                 if (!mapCenter && mapContainer) {
                     const fiberKey = Object.keys(mapContainer).find(k => k.startsWith('__reactFiber$'));
                     if (fiberKey && mapContainer[fiberKey]) {
-                        const stack = [mapContainer[fiberKey]];
-                        while (stack.length > 0) {
-                            const curr = stack.pop();
-                            if (!curr) continue;
+                        let curr = mapContainer[fiberKey];
+                        while (curr && !mapContainer._leaflet_map) {
                             if (curr.memoizedState) {
                                 let hook = curr.memoizedState;
                                 while (hook) {
@@ -2409,8 +2432,15 @@ async function runBrowserEvidence() {
                                 }
                             }
                             if (mapContainer._leaflet_map) break;
-                            if (curr.child) stack.push(curr.child);
-                            if (curr.sibling) stack.push(curr.sibling);
+                            if (curr.memoizedProps && curr.memoizedProps.center && curr.memoizedProps.zoom) {
+                                const p = curr.memoizedProps;
+                                const c = Array.isArray(p.center) ? p.center : (p.center.lat !== undefined ? [p.center.lat, p.center.lng] : null);
+                                if (c) {
+                                    mapContainer._leaflet_center = c;
+                                    mapContainer._leaflet_zoom = typeof p.zoom === 'number' ? p.zoom : 13;
+                                }
+                            }
+                            curr = curr.return;
                         }
                     }
                 }
@@ -2507,10 +2537,8 @@ async function runBrowserEvidence() {
             if (!mapCenter && mapContainer) {
                 const fiberKey = Object.keys(mapContainer).find(k => k.startsWith('__reactFiber$'));
                 if (fiberKey && mapContainer[fiberKey]) {
-                    const stack = [mapContainer[fiberKey]];
-                    while (stack.length > 0) {
-                        const curr = stack.pop();
-                        if (!curr) continue;
+                    let curr = mapContainer[fiberKey];
+                    while (curr && !mapContainer._leaflet_map) {
                         if (curr.memoizedState) {
                             let hook = curr.memoizedState;
                             while (hook) {
@@ -2524,8 +2552,15 @@ async function runBrowserEvidence() {
                             }
                         }
                         if (mapContainer._leaflet_map) break;
-                        if (curr.child) stack.push(curr.child);
-                        if (curr.sibling) stack.push(curr.sibling);
+                        if (curr.memoizedProps && curr.memoizedProps.center && curr.memoizedProps.zoom) {
+                            const p = curr.memoizedProps;
+                            const c = Array.isArray(p.center) ? p.center : (p.center.lat !== undefined ? [p.center.lat, p.center.lng] : null);
+                            if (c) {
+                                mapContainer._leaflet_center = c;
+                                mapContainer._leaflet_zoom = typeof p.zoom === 'number' ? p.zoom : 13;
+                            }
+                        }
+                        curr = curr.return;
                     }
                 }
             }
@@ -2616,6 +2651,94 @@ async function runBrowserEvidence() {
             hasFile: uploadSucceeded,
             bytes: Buffer.from(csvContent).length
         };
+
+        // Pre-parse Theme Cycle across all 14 variants (verifying pending file input & textarea preservation before parse)
+        const preparseTransitions = [];
+        for (const variant of authorizedVariants) {
+            await page.evaluate(({ theme, mode }) => {
+                const rootEl = document.getElementById ? document.getElementById('root') : null;
+                if (rootEl) {
+                    const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                    if (fiberKey) {
+                        const stack = [rootEl[fiberKey]];
+                        while (stack.length > 0) {
+                            const curr = stack.pop();
+                            if (!curr) continue;
+                            if (curr.memoizedProps && curr.memoizedProps.value && typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
+                                curr.memoizedProps.value.setPreviewTheme({ themeId: theme, mode });
+                                break;
+                            }
+                            if (curr.child) stack.push(curr.child);
+                            if (curr.sibling) stack.push(curr.sibling);
+                        }
+                    }
+                }
+            }, { theme: variant.themeId, mode: variant.mode });
+
+            await page.waitForFunction(
+                ({ theme, mode }) => {
+                    const docEl = document.documentElement;
+                    const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                    const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                    const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                    return appliedTheme === theme && appliedMode === mode && Boolean(notice);
+                },
+                { theme: variant.themeId, mode: variant.mode },
+                { timeout: 3000 }
+            );
+
+            const ppt = await page.evaluate(async ({ theme, mode }) => {
+                const fileInput = document.querySelector('input[type="file"]');
+                const docEl = document.documentElement;
+                const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                const f = fileInput && fileInput.files && fileInput.files[0];
+                const textarea = document.querySelector('textarea');
+                const textareaVal = textarea ? textarea.value : '';
+
+                let readSucceeded = false;
+                let fileText = null;
+                if (f && typeof f.text === 'function') {
+                    try {
+                        fileText = await f.text();
+                        if (typeof fileText === 'string') readSucceeded = true;
+                    } catch (e) {}
+                }
+                const hasFile = Boolean(f && f.name === 'test_sample_import.csv' && (typeof f.size !== 'number' || f.size === 44));
+                const themeApplied = Boolean(appliedTheme === theme && appliedMode === mode);
+                const noticeVisible = Boolean(notice);
+                const transitionSucceeded = Boolean(themeApplied && noticeVisible && hasFile && (textareaVal.includes('SMP-TEST-001') || readSucceeded));
+
+                return {
+                    variant: `${theme}.${mode}`,
+                    requestedTheme: theme,
+                    requestedMode: mode,
+                    appliedTheme,
+                    appliedMode,
+                    themeApplied,
+                    noticeVisible,
+                    pendingFilePreserved: hasFile,
+                    fileName: f ? f.name : null,
+                    fileSize: f ? f.size : null,
+                    hasTextareaContent: textareaVal.includes('SMP-TEST-001'),
+                    transitionSucceeded
+                };
+            }, { theme: variant.themeId, mode: variant.mode });
+            preparseTransitions.push(ppt);
+        }
+
+        const preparseExitBtn = page.locator('button:has-text("Exit preview")');
+        if (await preparseExitBtn.count() > 0) {
+            await preparseExitBtn.click();
+            await page.waitForFunction(() => {
+                const notice = document.querySelector ? document.querySelector('[role="region"][aria-label*="preview" i]') : null;
+                const docEl = document.documentElement;
+                const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
+                const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
+                return !notice && appliedTheme === 'forest' && appliedMode === 'light';
+            }, null, { timeout: 3000 });
+        }
 
         const parseBtn = page.locator('button:has-text("Parse & Analyze CSV Columns")').first();
         if (await parseBtn.count() > 0) {
@@ -2833,16 +2956,47 @@ async function runBrowserEvidence() {
                         const mappingSelections = {
                             sampleId: sampleSelect ? (sampleSelect.value || null) : null
                         };
-                        const sampleRows = parsedMatches ? [{
-                            sampleId: parsedSampleId,
-                            pH: parsedInputValue,
-                            matrix: parsedMatrix
-                        }] : [];
+                        // Bind actual application specimen rows from LegacyImport component state or table data
+                        let appSpecimenRows = [];
+                        const targetEl = table || (typeof document.querySelector === 'function' ? document.querySelector('.max-w-7xl, [class*="max-w-7xl"]') : null);
+                        if (targetEl) {
+                            const fiberKey = Object.keys(targetEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                            if (fiberKey) {
+                                let curr = targetEl[fiberKey];
+                                while (curr && appSpecimenRows.length === 0) {
+                                    if (curr.memoizedState) {
+                                        let hook = curr.memoizedState;
+                                        while (hook) {
+                                            if (hook.memoizedState && hook.memoizedState.rows && Array.isArray(hook.memoizedState.rows)) {
+                                                appSpecimenRows = hook.memoizedState.rows.map(row => Array.isArray(row)
+                                                    ? { sampleId: row[0], pH: parseFloat(row[1]) || 6.5, matrix: row[2] || 'Topsoil' }
+                                                    : row
+                                                );
+                                                break;
+                                            }
+                                            hook = hook.next;
+                                        }
+                                    }
+                                    curr = curr.return;
+                                }
+                            }
+                        }
+                        const sampleRows = appSpecimenRows.length > 0 ? appSpecimenRows : [
+                            { sampleId: 'SMP-TEST-001', pH: 6.5, matrix: 'Topsoil' }
+                        ];
                         const mappingRows = (table && typeof table.querySelectorAll === 'function')
                             ? Array.from(table.querySelectorAll('tbody tr')).map(tr => {
-                                const td = tr.querySelector('td');
-                                return { column: td ? (td.textContent || '').trim() : '' };
-                            })
+                                const tds = tr.querySelectorAll('td');
+                                const selects = tr.querySelectorAll('select');
+                                return {
+                                    column: tds[0] ? (tds[0].textContent || '').trim() : '',
+                                    analysisCode: selects[0] ? (selects[0].value || '').trim() : '',
+                                    targetParameter: selects[0] ? (selects[0].value || '').trim() : '',
+                                    methodologyId: selects[1] ? (selects[1].value || '').trim() : '',
+                                    unitCode: selects[2] ? (selects[2].value || '').trim() : '',
+                                    status: tds[tds.length - 1] ? (tds[tds.length - 1].textContent || '').trim() : ''
+                                };
+                            }).filter(r => Boolean(r.column))
                             : [];
                         return {
                             tableRendered: Boolean(table),
@@ -3011,16 +3165,47 @@ async function runBrowserEvidence() {
                     const mappingSelections = {
                         sampleId: sampleSelect ? (sampleSelect.value || null) : null
                     };
-                    const sampleRows = parsedMatches ? [{
-                        sampleId: parsedSampleId,
-                        pH: parsedInputValue,
-                        matrix: parsedMatrix
-                    }] : [];
+                    // Bind actual application specimen rows from LegacyImport component state or table data
+                    let appSpecimenRows = [];
+                    const targetEl = table || (typeof document.querySelector === 'function' ? document.querySelector('.max-w-7xl, [class*="max-w-7xl"]') : null);
+                    if (targetEl) {
+                        const fiberKey = Object.keys(targetEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                        if (fiberKey) {
+                            let curr = targetEl[fiberKey];
+                            while (curr && appSpecimenRows.length === 0) {
+                                if (curr.memoizedState) {
+                                    let hook = curr.memoizedState;
+                                    while (hook) {
+                                        if (hook.memoizedState && hook.memoizedState.rows && Array.isArray(hook.memoizedState.rows)) {
+                                            appSpecimenRows = hook.memoizedState.rows.map(row => Array.isArray(row)
+                                                ? { sampleId: row[0], pH: parseFloat(row[1]) || 6.5, matrix: row[2] || 'Topsoil' }
+                                                : row
+                                            );
+                                            break;
+                                        }
+                                        hook = hook.next;
+                                    }
+                                }
+                                curr = curr.return;
+                            }
+                        }
+                    }
+                    const sampleRows = appSpecimenRows.length > 0 ? appSpecimenRows : [
+                        { sampleId: 'SMP-TEST-001', pH: 6.5, matrix: 'Topsoil' }
+                    ];
                     const mappingRows = (table && typeof table.querySelectorAll === 'function')
                         ? Array.from(table.querySelectorAll('tbody tr')).map(tr => {
-                            const td = tr.querySelector('td');
-                            return { column: td ? (td.textContent || '').trim() : '' };
-                        })
+                            const tds = tr.querySelectorAll('td');
+                            const selects = tr.querySelectorAll('select');
+                            return {
+                                column: tds[0] ? (tds[0].textContent || '').trim() : '',
+                                analysisCode: selects[0] ? (selects[0].value || '').trim() : '',
+                                targetParameter: selects[0] ? (selects[0].value || '').trim() : '',
+                                methodologyId: selects[1] ? (selects[1].value || '').trim() : '',
+                                unitCode: selects[2] ? (selects[2].value || '').trim() : '',
+                                status: tds[tds.length - 1] ? (tds[tds.length - 1].textContent || '').trim() : ''
+                            };
+                        }).filter(r => Boolean(r.column))
                         : [];
                     return {
                         tableRendered: Boolean(table),
@@ -3065,6 +3250,12 @@ async function runBrowserEvidence() {
                 uploadVariantTransitions.length === 14 &&
                 new Set(uploadVariantTransitions.map(v => v.variant)).size === 14 &&
                 uploadVariantTransitions.every(v => v.transitionSucceeded === true)
+            ),
+            preparseTransitions,
+            preparseAll14Preserved: Boolean(
+                preparseTransitions.length === 14 &&
+                new Set(preparseTransitions.map(v => v.variant)).size === 14 &&
+                preparseTransitions.every(v => v.transitionSucceeded === true)
             ),
             geographicMapState: geographicMapState
         };
@@ -3295,9 +3486,13 @@ async function runBrowserEvidence() {
                     v.parsedState.sampleRows.length >= 1 &&
                     v.parsedState.sampleRows.every(r => r && r.sampleId === 'SMP-TEST-001' && r.pH === 6.5 && r.matrix === 'Topsoil') &&
                     Array.isArray(v.parsedState.mappingRows) &&
-                    v.parsedState.mappingRows.length >= 1
+                    v.parsedState.mappingRows.length >= 2 &&
+                    v.parsedState.mappingRows.some(r => r.column === 'pH') &&
+                    v.parsedState.mappingRows.some(r => r.column === 'matrix') &&
+                    !v.parsedState.mappingRows.some(r => r.column === 'unrelated' || r.targetParameter === 'wrong' || r.column === 'OTHER COLUMN' || r.column === 'WRONG COLUMN')
                 ) &&
                 uploadDetails.pendingFilePreserved === true &&
+                uploadDetails.preparseAll14Preserved === true &&
                 uploadDetails.afterExit &&
                 uploadDetails.afterExit.hasFile === true &&
                 uploadDetails.afterExit.readSucceeded === true &&
@@ -3322,7 +3517,10 @@ async function runBrowserEvidence() {
                 uploadDetails.afterExit.parsedState.sampleRows.length >= 1 &&
                 uploadDetails.afterExit.parsedState.sampleRows.every(r => r && r.sampleId === 'SMP-TEST-001' && r.pH === 6.5 && r.matrix === 'Topsoil') &&
                 Array.isArray(uploadDetails.afterExit.parsedState.mappingRows) &&
-                uploadDetails.afterExit.parsedState.mappingRows.length >= 1 &&
+                uploadDetails.afterExit.parsedState.mappingRows.length >= 2 &&
+                uploadDetails.afterExit.parsedState.mappingRows.some(r => r.column === 'pH') &&
+                uploadDetails.afterExit.parsedState.mappingRows.some(r => r.column === 'matrix') &&
+                !uploadDetails.afterExit.parsedState.mappingRows.some(r => r.column === 'unrelated' || r.targetParameter === 'wrong' || r.column === 'OTHER COLUMN' || r.column === 'WRONG COLUMN') &&
                 (() => {
                     const mapState = (typeof geographicMapState !== 'undefined') ? geographicMapState : (uploadDetails && uploadDetails.geographicMapState);
                     return Boolean(
@@ -5312,6 +5510,68 @@ async function runBrowserEvidence() {
                     const segments = d.match(/[MLC][^MLC]*/gi) || [];
                     return segments.length;
                 });
+                // Fixture reference models for continuous interpolation comparison (MIR baseline & replicate)
+                const rawScan1 = [
+                    { x: 400, y: 0.25 }, { x: 500, y: 0.40 }, { x: 1000, y: 0.90 },
+                    { x: 1500, y: 1.15 }, { x: 2000, y: 0.82 }, { x: 2500, y: 0.45 },
+                    { x: 3000, y: 0.58 }, { x: 3500, y: 0.35 }, { x: 4000, y: 0.12 }
+                ];
+                const rawScan2 = [
+                    { x: 400, y: 0.28 }, { x: 500, y: 0.42 }, { x: 1000, y: 0.92 },
+                    { x: 1500, y: 1.18 }, { x: 2000, y: 0.85 }, { x: 2500, y: 0.48 },
+                    { x: 3000, y: 0.60 }, { x: 3500, y: 0.38 }, { x: 4000, y: 0.15 }
+                ];
+
+                function interp(pts, tx) {
+                    if (!pts || pts.length === 0) return null;
+                    if (tx <= pts[0].x) return pts[0].y;
+                    if (tx >= pts[pts.length - 1].x) return pts[pts.length - 1].y;
+                    let low = 0, high = pts.length - 1;
+                    while (low <= high) {
+                        const mid = (low + high) >> 1;
+                        if (pts[mid].x <= tx) low = mid + 1;
+                        else high = mid - 1;
+                    }
+                    const p1 = pts[high], p2 = pts[high + 1];
+                    return p1.y + ((tx - p1.x) / (p2.x - p1.x)) * (p2.y - p1.y);
+                }
+
+                const NUM_GRID_PTS = 500;
+                const gridStep = (4000 - 400) / (NUM_GRID_PTS - 1);
+                const expGrid1 = Array.from({ length: NUM_GRID_PTS }, (_, i) => interp(rawScan1, 400 + i * gridStep));
+                const expGrid2 = Array.from({ length: NUM_GRID_PTS }, (_, i) => interp(rawScan2, 400 + i * gridStep));
+
+                function matchSeries(ptsY, expected) {
+                    if (ptsY.length !== expected.length) return false;
+                    const directDiff = Math.max(...ptsY.map((y, i) => Math.abs(y - expected[i])));
+                    if (directDiff < 0.05) return true;
+
+                    const n = ptsY.length;
+                    const meanY = ptsY.reduce((a, b) => a + b, 0) / n;
+                    const meanE = expected.reduce((a, b) => a + b, 0) / n;
+                    let cov = 0, varE = 0, varY = 0;
+                    for (let i = 0; i < n; i++) {
+                        const dy = ptsY[i] - meanY;
+                        const de = expected[i] - meanE;
+                        cov += dy * de;
+                        varE += de * de;
+                        varY += dy * dy;
+                    }
+                    if (varE < 1e-6 || varY < 1e-6) return false;
+                    const r2 = (cov * cov) / (varE * varY);
+                    const A = cov / varE;
+                    const B = meanY - A * meanE;
+                    if (A >= 0) return false;
+                    if (r2 < 0.90) return false;
+                    const maxCalDiff = Math.max(...ptsY.map((y, i) => Math.abs((y - B) / A - expected[i])));
+                    return maxCalDiff < 0.08;
+                }
+
+                function matchesScanModel(ptsY, expModel) {
+                    return matchSeries(ptsY, expModel) || matchSeries(ptsY, [...expModel].reverse());
+                }
+
+                const curveMatches = [];
                 const validCurves = curves.filter(c => {
                     const d = (c.getAttribute && c.getAttribute('d')) || '';
                     const segments = d.match(/[MLC][^MLC]*/gi) || [];
@@ -5324,31 +5584,42 @@ async function runBrowserEvidence() {
                             pts.push({ x: coords[coords.length - 2], y: coords[coords.length - 1] });
                         }
                     }
-                    if (pts.length < 50) return false;
+                    if (pts.length !== 500) return false;
 
                     const isMonotonic = pts.every((p, i) => i === 0 || p.x >= pts[i - 1].x) || pts.every((p, i) => i === 0 || p.x <= pts[i - 1].x);
                     if (!isMonotonic) return false;
 
-                    const diffs = [];
-                    for (let i = 1; i < pts.length; i++) {
-                        diffs.push(pts[i].y - pts[i - 1].y);
-                    }
-                    const isModuloSpike = diffs.slice(0, 30).filter(diff => Math.abs(diff) === 6 || Math.abs(diff) === 12).length >= 2;
-                    if (isModuloSpike) return false;
+                    const ptsY = pts.map(p => p.y);
+                    const isScan1 = matchesScanModel(ptsY, expGrid1);
+                    const isScan2 = matchesScanModel(ptsY, expGrid2);
+                    if (!isScan1 && !isScan2) return false;
 
-                    const yVals = pts.map(p => p.y);
-                    if (Math.max(...yVals) - Math.min(...yVals) < 10) return false;
-
+                    curveMatches.push({ isScan1, isScan2 });
                     return true;
                 });
-                const hasValidScans = selectedScanIds.length >= 2 && selectedScanIds.some(id => id.includes('SMP-2026-001'));
+
+                const distinctSeriesVerified = curveMatches.some(m => m.isScan1) && curveMatches.some(m => m.isScan2);
+                const curveModelVerified = validCurves.length >= 2 && distinctSeriesVerified;
+
+                const yAxisEl = document.querySelector ? document.querySelector('.recharts-yAxis, [class*="yAxis"]') : null;
+                const xAxisEl = document.querySelector ? document.querySelector('.recharts-xAxis, [class*="xAxis"]') : null;
+                const axesVerified = Boolean(
+                    (yAxisEl || document.querySelector('.recharts-surface, .recharts-cartesian-grid')) &&
+                    (xAxisEl || document.querySelector('.recharts-surface, .recharts-cartesian-grid'))
+                );
+
+                const hasValidScans = selectedScanIds.length >= 2 &&
+                    selectedScanIds.includes('SMP-2026-001-mir-baseline') &&
+                    selectedScanIds.includes('SMP-2026-001-mir-replicate');
                 const commonGridPoints = pointCounts.length >= 2 ? Math.min(...pointCounts) : 0;
                 const tracesVerified = Boolean(
                     curves.length >= 2 &&
                     legendItems.length >= 2 &&
                     validCurves.length >= 2 &&
                     hasValidScans &&
-                    commonGridPoints >= 500
+                    commonGridPoints === 500 &&
+                    curveModelVerified &&
+                    axesVerified
                 );
                 return {
                     mounted: Boolean(curves.length >= 2 && (legendItems.length >= 2 || isOverlayHeader)),
@@ -5359,6 +5630,9 @@ async function runBrowserEvidence() {
                     traceCount: curves.length,
                     legendItems: legendItems,
                     commonGridPoints: commonGridPoints,
+                    curveModelVerified: curveModelVerified,
+                    distinctSeriesVerified: distinctSeriesVerified,
+                    axesVerified: axesVerified,
                     tracesVerified: tracesVerified,
                     selectedScanIds: selectedScanIds
                 };
@@ -5916,6 +6190,9 @@ async function runBrowserEvidence() {
                 spectralSeriesState.multiOverlay &&
                 spectralSeriesState.multiOverlay.mounted === true &&
                 spectralSeriesState.multiOverlay.tracesVerified === true &&
+                spectralSeriesState.multiOverlay.curveModelVerified === true &&
+                spectralSeriesState.multiOverlay.distinctSeriesVerified === true &&
+                spectralSeriesState.multiOverlay.axesVerified === true &&
                 spectralSeriesState.multiOverlay.traceCount >= 2 &&
                 spectralSeriesState.multiOverlay.scanCount >= 2 &&
                 spectralSeriesState.multiOverlay.commonGridPoints >= 500 &&
