@@ -252,8 +252,9 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
 
 > [!IMPORTANT]
 > **Reconciliation of Static Rendering, Reused Artifacts, Shared Fixtures, Supplied Capabilities, Pending Gates, and Live Facts**
-> - **Reused Main Browser Journeys Artifact (`13:10:12.464Z`)**:
->   - The main browser journeys workflow artifact `server/scripts/issue155-browser-journeys-results.json` (timestamp `2026-10-01T13:10:12.464Z`, 12/12 suites, 630 route/variant CSS pairings, 5 operational workflows, 3 scientific/print workflows) is recognized and preserved as an earlier verified execution artifact, not newly regenerated.
+> - **Executed Main Browser Journeys Suite (`2026-10-02T05:12:23.201Z`)**:
+>   - The main browser journeys workflow suite `server/scripts/verify_issue155_browser_journeys.cjs` was freshly executed in the authorized disposable local running-app context with real Headless Google Chrome (`153.0.8010.48`), an ephemeral SQLite database, and Express mounting `client/dist`.
+>   - Verified artifact `server/scripts/issue155-browser-journeys-results.json` refreshed with execution timestamp `2026-10-02T05:12:23.201Z` (12/12 suites passing, 630 route/variant CSS pairings, 5 operational workflows, all 14 variant transitions verified across preview/exit, and authentic customer certificate PDF disk integrity verified).
 > - **Static Component Rendering, ThemeProvider Mounting, Error Propagation & Contract Verification in Test 57**:
 >   - In-checkout test harness `server/scripts/verify_all_14.cjs` (58/58 cases 100% green) loads shipped React components via `esbuild`: `ThemeContext.jsx` and `NumericEditor.jsx` are compiled into CJS modules.
 >   - `tcMod.exports.ThemeProvider` wraps `NumericEditorComponent` and is rendered via `ReactDOMServer.renderToStaticMarkup`, directly invoking the shipped provider component and executing React state hooks (`useState` calls = 6).

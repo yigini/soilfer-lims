@@ -3739,3 +3739,29 @@ Laboratory operators can find step-by-step procedures in the following documenta
            - Current software remains pending live full-tree integration in an interactive browser webview when running purely in-checkout CLI without an application server.
            - Manual screen reader, OS contrast, physical mobile hardware, and physical thermal printer remain pending physical/operator gates (Issue #102 is NOT a waiver).
            - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+    - **2026-10-02 Remediation (Review cb858b4): Fresh Browser Journeys Execution, Operational & Scientific Print Isolation, All-14 Variant Preservation, and Scope Harmonization**:
+      - Following Codex independent review `issue155-independent-review-cb858b4.md` and 5-case probe `issue155-focused-review-cb858b4.cjs`:
+        1. **Fresh Running-App Browser Journeys Verification**:
+           - Executed the full automated browser verification suite `server/scripts/verify_issue155_browser_journeys.cjs` in the authorized disposable local running-app context with real Headless Google Chrome (`153.0.8010.48`), an ephemeral SQLite database, and Express mounting `client/dist`.
+           - **All 12/12 test packages passed 100% green**:
+             1. 14-variant computed DOM tokens & contrast (WCAG AAA >= 7:1)
+             2. Actual route & workflow matrix navigation across all 45 declared routes × 14 variants = 630 total pairings
+             3. Operational workflows: TechWorkbench numeric cell entry `'42.50'`, caret/selection `[2, 5]`, scanner `'SMP-2026-001'`, workflow-map DAG topology `['reception', 'prep', 'wet-chem', 'review', 'closure']` with dependencies `['wi-01', 'wi-02']`, and CSV file upload intake
+             4. Live preview cycle preserving unsaved form inputs through preview adoption and exit
+             5. Theme selector entrypoints accessibility and mounting
+             6. Confirmation modal auto-focus entry, focus trap boundary wrapping, Escape dismissal, and trigger restoration
+             7. Mode radiogroup WAI-ARIA roving tabindex and arrow key / Home / End navigation
+             8. Responsive layout reflow down to 320px viewport, landscape 844x390, 200% and 400% zoom reflow, focus visibility, reduced motion and forced colors
+             9. Multi-language localization verified across en, es, es-419, fr, pt
+             10. Scientific chart tokens defined and paper print styles isolated: genuine Recharts spectral series (1 distinct series, 9-point curve, $A_{\text{axis}}=-100$), label preview on pure white substrate with authentic ZXing-decoded QR payload, and customer certificate (`/report/CERT-2026-SOIL-01`) under `@media print` with pure white paper, navy text (11.50:1 contrast), accession `SOIL-GH-2026-001`, and complete 5-row measurements preserved across all 14 canonical transitions and exit (`all14VariantsPreserved: true`, `pdfReusedGenuine: true`, SHA-256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`, length 162,633 B)
+             11. Verification boundaries honestly recorded (real Chrome execution verified; physical hardware gates pending)
+             12. Console and page integrity: 0 uncaught page errors, 0 unexpected console errors
+           - Refreshed artifact `server/scripts/issue155-browser-journeys-results.json` with execution timestamp `2026-10-02T05:12:23.201Z`.
+        2. **Preserved Closed Items & In-Checkout Verification**:
+           - In-checkout test suite `server/scripts/verify_all_14.cjs`: **All 58/58 cases PASS 100% green**.
+           - Test 57 preserves static ThemeProvider invocation wrapping NumericEditor, React hook execution (6 `useState` calls), throwing renderer error propagation fast-fail, direct customer certificate PDF disk read and SHA-256 hash integrity (`47fdaa79...`), and full simulated IME composition lifecycle (`compositionstart` -> `compositionupdate` -> `compositionend`).
+        3. **Invariants & Honest Release Authority**:
+           - Candidate Client Tree: `d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b` (strictly frozen byte-for-byte, zero mutation).
+           - Candidate Server/Data Tree: `1a2a84457d02d33707f9845da10f9b97995e1377` (strictly frozen byte-for-byte, zero mutation).
+           - Manual screen reader, OS contrast, physical mobile hardware, and physical thermal printer remain pending physical/operator gates (Issue #102 is NOT a waiver).
+           - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.

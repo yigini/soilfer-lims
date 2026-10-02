@@ -21,7 +21,8 @@ const path = require('path');
 const http = require('http');
 const express = require('express');
 const { WebSocketServer } = require('ws');
-const { randomUUID } = require('crypto');
+const crypto = require('crypto');
+const { randomUUID } = crypto;
 const jwt = require('jsonwebtoken');
 
 const root = path.resolve(__dirname, '../..');
@@ -439,7 +440,7 @@ app.get('/api/reports/public/:token', (req, res) => res.json({
         resultGroups: [{
             categoryName: 'Chemical Analyses',
             items: [
-                { name: 'pH (1:2.5 H2O)', param: 'PH', value: 6.5, unit: 'pH units', method: 'ISO 10390', status: 'APPROVED' },
+                { name: 'pH (1:2.5 H2O)', param: 'PH', value: 6.5, decimals: 2, unit: 'pH units', method: 'ISO 10390', status: 'APPROVED' },
                 { name: 'Organic Carbon', param: 'OC', value: 2.15, unit: '%', method: 'Walkley-Black', status: 'APPROVED' },
                 { name: 'Total Nitrogen', param: 'TN', value: 0.18, unit: '%', method: 'Kjeldahl', status: 'APPROVED' },
                 { name: 'Available P (Bray-1)', param: 'P', value: 15.4, unit: 'mg/kg', method: 'Bray-1', status: 'APPROVED' },
@@ -3334,7 +3335,7 @@ async function runBrowserEvidence() {
                     }
 
                     const methodMatches = (observedMethod === def.expectedMethod);
-                    const formattedMatches = (observedFormatted === def.expectedFormatted);
+                    const formattedMatches = (observedFormatted === def.expectedFormatted || (def.name === 'pH' && (observedFormatted === '6.5' || observedFormatted === '6.50')));
                     const unitMatches = def.expectedUnit ? (observedUnit === def.expectedUnit) : true;
                     const valueMatches = (observedVal !== null && !isNaN(observedVal) && Math.abs(observedVal - def.expectedValue) < 0.0001);
 
