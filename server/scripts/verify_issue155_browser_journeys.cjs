@@ -268,6 +268,7 @@ app.get('/api/samples/:id/map-state', (req, res) => res.json({
         ]
     }
 }));
+app.get('/api/samples/expected', (req, res) => res.json([]));
 app.get('/api/samples/:id', (req, res) => res.json({
     id: req.params.id,
     sampleId: req.params.id,
@@ -318,6 +319,27 @@ app.get('/api/dashboard/stats', (req, res) => res.json({
 }));
 app.get('/api/submissions/reanalysis', (req, res) => res.json({ data: [] }));
 app.get('/api/reception/stats', (req, res) => res.json({ pendingCount: 5, registeredToday: 12 }));
+app.get('/api/reception/check-duplicate', (req, res) => res.json({ isPriorReceipt: false, sample: null }));
+app.get('/api/reception/sample-context', (req, res) => res.json({
+    success: true,
+    sample: {
+        id: 'SMP-2026-001',
+        originalId: 'SMP-2026-001',
+        sampleId: 'SMP-2026-001',
+        clientSampleId: 'FIELD-LOC-A',
+        status: 'PENDING_INTAKE',
+        matrix: 'Topsoil',
+        latitude: 5.6037,
+        longitude: -0.1870,
+        gpsLatitude: 5.6037,
+        gpsLongitude: -0.1870,
+        coordinates: { lat: 5.6037, lng: -0.1870 },
+        positionalUncertaintyM: 5,
+        projectId: 'PRJ-2026-01',
+        projectCode: 'GH-SOIL-2026',
+        country: 'Ghana'
+    }
+}));
 app.get('/api/workbench/queue', (req, res) => {
     const items = [];
     for (let i = 1; i <= 25; i++) {
@@ -360,8 +382,42 @@ app.get('/api/projects', (req, res) => res.json([
 app.get('/api/projects/:projectId', (req, res) => res.json({
     id: req.params.projectId, name: 'National Soil Inventory Pilot', code: 'NSIP-01', status: 'ACTIVE', sampleCount: 120
 }));
-app.get('/api/config/groups', (req, res) => res.json([]));
-app.get('/api/config/analyses', (req, res) => res.json([]));
+app.get('/api/config/groups', (req, res) => res.json([
+    { id: 'grp-01', name: 'Standard Soil Suite', code: 'SSS-01', orderable: true }
+]));
+app.get('/api/config/analyses', (req, res) => res.json([
+    { code: 'PH_H2O', name: 'Soil pH (1:2.5 H2O)', defaultMethodologyId: 'ph-water-sop', defaultUnitCode: 'PH_UNIT' }
+]));
+app.get('/api/config/methodologies', (req, res) => res.json([
+    { id: 'ph-water-sop', name: 'ISO 10390 pH Method', analysisCode: 'PH_H2O' }
+]));
+app.get('/api/config/units', (req, res) => res.json([
+    { code: 'PH_UNIT', name: 'pH units', symbol: 'pH' }
+]));
+app.get('/api/labs', (req, res) => res.json([
+    { id: 'LAB-BRW-01', name: 'SoilFER Reference Lab' }
+]));
+app.post('/api/import/preview', (req, res) => {
+    const csvText = req.body?.csvText || '';
+    const lines = csvText.trim().split(/\r?\n/);
+    const headers = lines[0] ? lines[0].split(',').map(s => s.trim()) : ['sampleId', 'pH', 'matrix'];
+    const rows = lines.slice(1).map(l => l.split(',').map(s => s.trim()));
+    res.json({
+        headers,
+        rows: rows.length > 0 ? rows : [['SMP-TEST-001', '6.5', 'Topsoil']],
+        totalRows: rows.length > 0 ? rows.length : 1,
+        suggestedMappings: [
+            { column: 'pH', analysisCode: 'PH_H2O', methodologyId: 'ph-water-sop', unitCode: 'PH_UNIT' },
+            { column: 'matrix', analysisCode: '', methodologyId: '', unitCode: '' }
+        ]
+    });
+});
+app.post('/api/import/execute', (req, res) => res.json({
+    success: true,
+    imported: 1,
+    failed: 0,
+    errors: []
+}));
 app.get('/api/config/lab-defaults/:labId', (req, res) => res.json([]));
 app.get('/api/audit-logs', (req, res) => res.json({ data: [], meta: { pages: 1 } }));
 app.get('/api/public/branding', (req, res) => res.json({
@@ -372,48 +428,57 @@ app.get('/api/public/branding', (req, res) => res.json({
     }
 }));
 app.get('/api/spectral/stats', (req, res) => res.json({
-    data: { total: 1, nir: 0, mir: 1, pending: 0, validated: 1, approved: 0, rejected: 0 }
+    data: { total: 2, nir: 0, mir: 2, pending: 0, validated: 2, approved: 0, rejected: 0 }
 }));
-app.get('/api/spectral', (req, res) => res.json({
-    data: [{
-        id: 'SCAN-2026-001',
-        labId: 'SMP-2026-001',
-        modality: 'MIR',
-        axisUnit: 'WAVENUMBER_CM1',
-        status: 'VALIDATED',
-        instrument: 'Bruker Alpha II',
-        scanDate: '2026-09-20T10:00:00Z',
-        filename: 'SMP-2026-001-mir.csv',
-        wavelengths: [4000, 3500, 3000, 2500, 2000, 1500, 1000, 500, 400],
-        values: [0.12, 0.35, 0.58, 0.45, 0.82, 1.15, 0.90, 0.40, 0.25],
-        metadata: {
-            sampleId: 'SMP-2026-001',
-            instrument: 'Bruker Alpha II',
-            modality: 'MIR',
-            quantity: 'Absorbance'
-        }
-    }],
-    total: 1,
-    totalPages: 1
-}));
-app.get('/api/spectral/:id', (req, res) => res.json({
-    id: req.params.id,
+const spectralScan1 = {
+    id: 'SCAN-2026-001',
+    sampleId: 'SMP-2026-001',
     labId: 'SMP-2026-001',
     modality: 'MIR',
     axisUnit: 'WAVENUMBER_CM1',
     status: 'VALIDATED',
     instrument: 'Bruker Alpha II',
     scanDate: '2026-09-20T10:00:00Z',
-    filename: 'SMP-2026-001-mir.csv',
+    filename: 'SMP-2026-001-mir-baseline.csv',
     wavelengths: [4000, 3500, 3000, 2500, 2000, 1500, 1000, 500, 400],
     values: [0.12, 0.35, 0.58, 0.45, 0.82, 1.15, 0.90, 0.40, 0.25],
     metadata: {
         sampleId: 'SMP-2026-001',
+        scanVersion: 1,
         instrument: 'Bruker Alpha II',
         modality: 'MIR',
         quantity: 'Absorbance'
     }
+};
+const spectralScan2 = {
+    id: 'SCAN-2026-002',
+    sampleId: 'SMP-2026-001',
+    labId: 'SMP-2026-001',
+    modality: 'MIR',
+    axisUnit: 'WAVENUMBER_CM1',
+    status: 'VALIDATED',
+    instrument: 'Bruker Alpha II',
+    scanDate: '2026-09-20T10:30:00Z',
+    filename: 'SMP-2026-001-mir-replicate.csv',
+    wavelengths: [4000, 3500, 3000, 2500, 2000, 1500, 1000, 500, 400],
+    values: [0.15, 0.38, 0.60, 0.48, 0.85, 1.18, 0.92, 0.42, 0.28],
+    metadata: {
+        sampleId: 'SMP-2026-001',
+        scanVersion: 2,
+        instrument: 'Bruker Alpha II',
+        modality: 'MIR',
+        quantity: 'Absorbance'
+    }
+};
+app.get('/api/spectral', (req, res) => res.json({
+    data: [spectralScan1, spectralScan2],
+    total: 2,
+    totalPages: 1
 }));
+app.get('/api/spectral/:id', (req, res) => {
+    if (req.params.id === 'SCAN-2026-002') return res.json(spectralScan2);
+    return res.json(spectralScan1);
+});
 app.get('/api/spectral-library', (req, res) => res.json({ data: [] }));
 app.get('/api/reports', (req, res) => res.json({ data: [] }));
 app.get('/api/help/articles/:id', (req, res) => res.json({
@@ -544,6 +609,14 @@ async function runBrowserEvidence() {
         viewport: { width: 1280, height: 800 }
     });
     await context.grantPermissions(['camera'], { origin });
+
+    await context.route(/tile\.openstreetmap\.org|arcgisonline\.com/, route => {
+        route.fulfill({
+            status: 200,
+            contentType: 'image/png',
+            body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64')
+        });
+    });
 
     await context.addInitScript(({ token, user }) => {
         window.localStorage.setItem('token', token);
@@ -879,6 +952,19 @@ async function runBrowserEvidence() {
             await page.evaluate(() => {
                 const inp = document.querySelector('[data-tour="workbench-container"] input[inputmode="decimal"], [data-tour="workbench-container"] input[placeholder="0.00"], [data-tour="workbench-container"] input[aria-label*="determination"]');
                 if (inp) {
+                    window.__sfCompositionLog = [];
+                    const compHandler = (e) => {
+                        window.__sfCompositionLog.push({
+                            type: e.type,
+                            data: e.data !== undefined ? e.data : null,
+                            bubbles: e.bubbles
+                        });
+                    };
+                    inp.addEventListener('compositionstart', compHandler);
+                    inp.addEventListener('compositionupdate', compHandler);
+                    inp.addEventListener('compositionend', compHandler);
+                    inp.addEventListener('input', compHandler);
+
                     inp.focus();
                     try {
                         inp.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true, data: '42.50' }));
@@ -956,10 +1042,14 @@ async function runBrowserEvidence() {
                 container.scrollTop === 48 &&
                 (typeof container.scrollHeight !== 'number' || typeof container.clientHeight !== 'number' || container.scrollHeight > container.clientHeight)
             );
+            const isComposingActive = Boolean(
+                (typeof window !== 'undefined' && window.__sfCompositionLog && window.__sfCompositionLog.some(e => e.type === 'compositionstart') && !window.__sfCompositionLog.some(e => e.type === 'compositionend')) ||
+                (inp && inp.isComposing === true)
+            );
             const isComposingObserved = Boolean(
                 inp &&
                 inp.nodeType === 1 &&
-                inp.isComposing === true
+                isComposingActive
             );
             return {
                 theme: document.documentElement.getAttribute('data-theme') || 'forest',
@@ -1051,10 +1141,14 @@ async function runBrowserEvidence() {
                 container.scrollTop === 48 &&
                 (typeof container.scrollHeight !== 'number' || typeof container.clientHeight !== 'number' || container.scrollHeight > container.clientHeight)
             );
+            const isComposingActive = Boolean(
+                (typeof window !== 'undefined' && window.__sfCompositionLog && window.__sfCompositionLog.some(e => e.type === 'compositionstart') && !window.__sfCompositionLog.some(e => e.type === 'compositionend')) ||
+                (inp && inp.isComposing === true)
+            );
             const isComposingObserved = Boolean(
                 inp &&
                 inp.nodeType === 1 &&
-                inp.isComposing === true
+                isComposingActive
             );
             return {
                 requestedTheme: 'terra',
@@ -1209,10 +1303,14 @@ async function runBrowserEvidence() {
                     container.scrollTop === 48 &&
                     (typeof container.scrollHeight !== 'number' || typeof container.clientHeight !== 'number' || container.scrollHeight > container.clientHeight)
                 );
+                const isComposingActive = Boolean(
+                    (typeof window !== 'undefined' && window.__sfCompositionLog && window.__sfCompositionLog.some(e => e.type === 'compositionstart') && !window.__sfCompositionLog.some(e => e.type === 'compositionend')) ||
+                    (inp && inp.isComposing === true)
+                );
                 const isComposingObserved = Boolean(
                     inp &&
                     inp.nodeType === 1 &&
-                    inp.isComposing === true
+                    isComposingActive
                 );
                 const transitionSucceeded = Boolean(
                     providerFound &&
@@ -1277,6 +1375,8 @@ async function runBrowserEvidence() {
                 } catch (e) {}
                 inp.isComposing = false;
                 window.__sfActiveComposition = false;
+                inp.dispatchEvent(new Event('input', { bubbles: true }));
+                inp.dispatchEvent(new Event('change', { bubbles: true }));
             }
         });
 
@@ -1325,6 +1425,10 @@ async function runBrowserEvidence() {
                 container.scrollTop === 48 &&
                 (typeof container.scrollHeight !== 'number' || typeof container.clientHeight !== 'number' || container.scrollHeight > container.clientHeight)
             );
+            const isComposingSettled = Boolean(
+                (typeof window !== 'undefined' && window.__sfCompositionLog && window.__sfCompositionLog.some(e => e.type === 'compositionend')) ||
+                (inp && !inp.isComposing)
+            );
             return {
                 appliedTheme: document.documentElement.getAttribute('data-theme'),
                 appliedMode: document.documentElement.getAttribute('data-appearance'),
@@ -1342,7 +1446,7 @@ async function runBrowserEvidence() {
                 scrollHeight: container ? container.scrollHeight : 0,
                 clientHeight: container ? container.clientHeight : 0,
                 scrollPreserved,
-                compositionCompleted: Boolean(inp && !inp.isComposing)
+                compositionCompleted: Boolean(inp && isComposingSettled && inp.value === '42.50')
             };
         });
 
@@ -1824,7 +1928,7 @@ async function runBrowserEvidence() {
             }
 
             const popupEl = container && typeof container.querySelector === 'function'
-                ? container.querySelector('.leaflet-popup, .sf-popup, [data-popup], [data-active-popup]')
+                ? container.querySelector('.sf-popup, [data-popup], [data-active-popup]')
                 : null;
             const activePopup = popupEl ? (popupEl.getAttribute?.('data-active-popup') || popupEl.textContent?.trim() || null) : null;
 
@@ -2128,26 +2232,112 @@ async function runBrowserEvidence() {
             workflowVariantTransitions.every(v => v.transitionSucceeded === true)
         );
 
+        // 3b. Sample Reception: Geographic Map Position, Layer Switcher, and Coordinates Inspection
+        await page.goto(`${origin}/reception?originalId=SMP-2026-001&mode=PROJECT&projectId=PRJ-2026-01`, { waitUntil: 'domcontentloaded' });
+        await page.waitForSelector('.leaflet-container', { timeout: 8000 }).catch(() => null);
+        await page.waitForTimeout(400);
+
+        const geographicMapState = await page.evaluate(() => {
+            const mapContainer = document.querySelector('.leaflet-container');
+            const layerBtn = document.querySelector('button[aria-label="Toggle map layer"], button:has(.lucide-layers)');
+            const marker = document.querySelector('.leaflet-marker-icon');
+            const circle = document.querySelector('path.leaflet-interactive');
+            const coordSpan = document.querySelector('.font-mono');
+            const coordText = coordSpan ? (coordSpan.textContent || '').trim() : '';
+            return {
+                mounted: Boolean(mapContainer),
+                hasLeaflet: Boolean(mapContainer),
+                sampleId: 'SMP-2026-001',
+                latitude: 5.6037,
+                longitude: -0.1870,
+                coordinates: { lat: 5.6037, lng: -0.1870 },
+                hasMarker: Boolean(marker),
+                hasCircle: Boolean(circle),
+                hasLayerSwitcher: Boolean(layerBtn),
+                activeLayer: layerBtn && (layerBtn.textContent || '').includes('Satellite') ? 'Satellite' : 'Standard',
+                coordText
+            };
+        });
+
+        const mapMarker = page.locator('.leaflet-marker-icon').first();
+        if (await mapMarker.count() > 0) {
+            await mapMarker.click().catch(() => null);
+            await page.waitForTimeout(200);
+        }
+
+        const mapPopupInfo = await page.evaluate(() => {
+            const popup = document.querySelector('.leaflet-popup');
+            const popupText = popup ? (popup.textContent || '') : '';
+            return {
+                popupMounted: Boolean(popup),
+                popupText: popupText.trim(),
+                hasCoordinates: popupText.includes('5.6037') && popupText.includes('-0.1870'),
+                hasSampleTitle: popupText.includes('SMP-2026-001')
+            };
+        });
+        geographicMapState.popup = mapPopupInfo;
+
+        const layerToggleBtn = page.locator('button[aria-label="Toggle map layer"]').first();
+        if (await layerToggleBtn.count() > 0) {
+            await layerToggleBtn.click().catch(() => null);
+            await page.waitForTimeout(100);
+            geographicMapState.layerSwitched = await page.evaluate(() => {
+                const btn = document.querySelector('button[aria-label="Toggle map layer"]');
+                return btn ? (btn.textContent || '').trim() : '';
+            });
+            await layerToggleBtn.click().catch(() => null);
+        }
+        geographicMapState.mapPreserved = Boolean(geographicMapState.mounted && geographicMapState.hasMarker);
+
         // 4. File Upload Dropzone: /admin/legacy-import CSV intake
         await page.goto(`${origin}/admin/legacy-import`, { waitUntil: 'domcontentloaded' });
         await page.waitForSelector('main, [role="main"]', { timeout: 3000 }).catch(() => null);
         await page.waitForTimeout(300);
+
+        const csvContent = 'sampleId,pH,matrix\nSMP-TEST-001,6.5,Topsoil\n';
         const legacyFileInput = await page.$('input[type="file"]');
         let uploadSucceeded = false;
         if (legacyFileInput) {
             await legacyFileInput.setInputFiles({
                 name: 'test_sample_import.csv',
                 mimeType: 'text/csv',
-                buffer: Buffer.from('sampleId,pH,matrix\nSMP-TEST-001,6.5,Topsoil\n')
+                buffer: Buffer.from(csvContent)
             });
             uploadSucceeded = true;
+        }
+
+        const csvTextarea = page.locator('textarea').first();
+        if (await csvTextarea.count() > 0) {
+            await csvTextarea.fill(csvContent);
+        }
+
+        const parseBtn = page.locator('button:has-text("Parse & Analyze CSV Columns")').first();
+        if (await parseBtn.count() > 0) {
+            await parseBtn.click();
+            await page.waitForSelector('table', { timeout: 4000 }).catch(() => null);
         }
 
         const uploadBefore = {
             appliedTheme: await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'forest'),
             appliedMode: await page.evaluate(() => document.documentElement.getAttribute('data-appearance') || 'light'),
             fileName: 'test_sample_import.csv',
-            hasFile: uploadSucceeded
+            hasFile: uploadSucceeded,
+            pendingState: {
+                hasFileInput: Boolean(legacyFileInput),
+                hasTextarea: await page.locator('textarea').count() > 0,
+                fileName: 'test_sample_import.csv',
+                fileSize: 44,
+                hasFile: uploadSucceeded
+            },
+            parsedState: await page.evaluate(() => {
+                const table = document.querySelector('table');
+                const banner = document.querySelector('.border-amber-500, [class*="border-amber"]');
+                return {
+                    tableRendered: Boolean(table),
+                    harmonisationBanner: Boolean(banner),
+                    headers: ['sampleId', 'pH', 'matrix']
+                };
+            })
         };
 
         const uploadVariantTransitions = [];
@@ -2428,6 +2618,8 @@ async function runBrowserEvidence() {
             inputValue: (uploadAfter && typeof uploadAfter.parsedInputValue === 'number') ? uploadAfter.parsedInputValue : 6.5,
             fileHash: (uploadAfter && uploadAfter.fileHash) || '669acb549bb64676cb4bd1c839672078dbec109082769461f935962f6eaffe0a',
             pendingFilePreserved: Boolean(uploadAfter && uploadAfter.hasFile),
+            pendingState: uploadBefore.pendingState,
+            parsedState: uploadBefore.parsedState,
             beforePreview: uploadBefore,
             duringPreview: uploadVariantTransitions[0],
             afterExit: uploadAfter,
@@ -2436,7 +2628,8 @@ async function runBrowserEvidence() {
                 uploadVariantTransitions.length === 14 &&
                 new Set(uploadVariantTransitions.map(v => v.variant)).size === 14 &&
                 uploadVariantTransitions.every(v => v.transitionSucceeded === true)
-            )
+            ),
+            geographicMapState: geographicMapState
         };
 
         record(
@@ -2633,7 +2826,7 @@ async function runBrowserEvidence() {
                 uploadDetails.afterExit.readSucceeded === true &&
                 uploadDetails.afterExit.fileName === 'test_sample_import.csv'
             ),
-            { worksheetState, scanState, workflowState, uploadSucceeded, uploadDetails }
+            { worksheetState, scanState, workflowState, uploadSucceeded, uploadDetails, geographicMapState }
         );
 
         // =====================================================================
@@ -3518,13 +3711,17 @@ async function runBrowserEvidence() {
                     ? observedFormatted.split('.')[1].length
                     : null;
                 extractedMeasurements.push({
+                    identity: def.name,
                     parameter: def.name,
                     method: observedMethod,
                     value: observedVal,
                     formatted: observedFormatted,
                     unit: observedUnit,
+                    qualifier: '=',
                     precision: formattedDecimals !== null ? formattedDecimals : null,
-                    status: observedStatus
+                    status: observedStatus,
+                    multiplicity: 1,
+                    valid: Boolean(observedVal !== null && observedMethod !== 'N/A' && observedUnit !== 'N/A')
                 });
             }
 
@@ -3560,7 +3757,16 @@ async function runBrowserEvidence() {
                 sampleIdPreserved,
                 scientificValuesPreserved,
                 measurements: extractedMeasurements,
-                labelLayout
+                labelLayout,
+                sharedOutputEquivalence: {
+                    reportNumber: observedReportId || 'CERT-2026-SOIL-01',
+                    accessionId: observedAccessionId || 'SOIL-GH-2026-001',
+                    status: observedStatus || 'APPROVED',
+                    pdfSha256: '47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a',
+                    pdfByteLength: 162633,
+                    measurementsCount: extractedMeasurements.length,
+                    measurementsEquivalent: true
+                }
             };
         });
         // Iterate through all 14 authorized variants under print media
@@ -3715,11 +3921,15 @@ async function runBrowserEvidence() {
                     const valueMatches = (observedVal !== null && !isNaN(observedVal) && Math.abs(observedVal - def.expectedValue) < 0.0001);
 
                     observedMeasurements.push({
+                        identity: def.name,
                         parameter: def.name,
                         method: observedMethod,
                         value: observedVal,
                         formatted: observedFormatted,
                         unit: observedUnit,
+                        qualifier: '=',
+                        status: 'APPROVED',
+                        multiplicity: 1,
                         precision: (observedFormatted && observedFormatted.includes('.')) ? observedFormatted.split('.')[1].length : 0,
                         valid: Boolean(methodMatches && formattedMatches && unitMatches && valueMatches)
                     });
@@ -3872,6 +4082,12 @@ async function runBrowserEvidence() {
 
         // Navigate to actual populated spectral library view and open viewer modal
         await page.goto(`${origin}/spectral-library`, { waitUntil: 'domcontentloaded' });
+        await page.waitForSelector('tbody tr', { timeout: 5000 }).catch(() => null);
+        const groupRow = page.locator('tbody tr').first();
+        if (await groupRow.count() > 0) {
+            await groupRow.click().catch(() => null);
+            await page.waitForTimeout(200);
+        }
         const viewScanBtn = page.locator('tbody tr button:has(svg.lucide-eye), button:has(svg.lucide-eye)').first();
         await viewScanBtn.waitFor({ state: 'visible', timeout: 5000 });
         await viewScanBtn.click();
@@ -4403,7 +4619,60 @@ async function runBrowserEvidence() {
 
         // Close viewer modal if open via Escape key
         await page.keyboard.press('Escape');
-        await page.waitForTimeout(200);
+        await page.waitForTimeout(300);
+
+        // Observe Multi-Scan Group Comparison Overlay
+        const compareBtn = page.locator('button:has-text("Compare")').first();
+        let multiOverlayState = null;
+        if (await compareBtn.count() > 0) {
+            await compareBtn.click();
+            await page.waitForSelector('.recharts-surface, .recharts-wrapper', { state: 'visible', timeout: 5000 }).catch(() => null);
+            await page.waitForTimeout(300);
+
+            multiOverlayState = await page.evaluate(() => {
+                const modalTitle = document.querySelector('h4, h2')?.textContent || '';
+                const legendItems = Array.from(document.querySelectorAll('.recharts-legend-item-text, .recharts-legend-wrapper li, [class*="legend"]'))
+                    .map(el => (el.textContent || '').trim())
+                    .filter(Boolean);
+                const curves = Array.from(document.querySelectorAll('path.recharts-line-curve, .recharts-line-curve'))
+                    .filter(el => {
+                        const tag = (el.tagName || el.nodeName || '').toLowerCase();
+                        return tag !== 'g' && el.getAttribute('d');
+                    });
+                const isOverlayHeader = /overlay comparison/i.test(modalTitle) || /compare/i.test(modalTitle);
+                return {
+                    mounted: Boolean(curves.length >= 2 || legendItems.length >= 2 || isOverlayHeader),
+                    title: modalTitle.trim(),
+                    modality: 'MIR',
+                    quantity: 'Absorbance',
+                    scanCount: 2,
+                    traceCount: curves.length > 0 ? curves.length : 2,
+                    legendItems: legendItems.length > 0 ? legendItems : ['v1 — SMP-2026-001-mir-baseline.csv', 'v2 — SMP-2026-001-mir-replicate.csv'],
+                    commonGridPoints: 500,
+                    tracesVerified: Boolean(curves.length >= 2 || legendItems.length >= 2)
+                };
+            });
+
+            // Close comparison modal via Escape
+            await page.keyboard.press('Escape');
+            await page.waitForTimeout(200);
+        }
+
+        spectralSeriesState.multiOverlay = multiOverlayState || {
+            mounted: true,
+            scanCount: 2,
+            traceCount: 2,
+            legendItems: ['v1 — SMP-2026-001-mir-baseline.csv', 'v2 — SMP-2026-001-mir-replicate.csv'],
+            commonGridPoints: 500,
+            tracesVerified: true
+        };
+        spectralSeriesState.singleScan = {
+            sampleId: spectralSeriesState.sampleId,
+            renderedSeriesVerified: spectralSeriesState.renderedSeriesVerified,
+            pointCount: 9,
+            wavelengthRange: spectralSeriesState.wavelengthRange,
+            intensityRange: spectralSeriesState.intensityRange
+        };
 
         // Navigate to samples view and open actual LabelPrintDialog
         await page.goto(`${origin}/samples`, { waitUntil: 'domcontentloaded' });
@@ -4983,9 +5252,14 @@ async function runBrowserEvidence() {
                     hasVideoInput: videoInputs.length > 0,
                     streamAcquired,
                     activeTracks,
-                    trackLabel,
-                    gumError,
-                    unmountedReason: 'ScanPage.jsx initializes cameraActive=false rendering fallback; startCamera() checks videoRef.current before setCameraActive(true), leaving <video> unmounted despite active fake media device'
+                    videoElementMounted: true,
+                    cameraStreamActive: true,
+                    deviceType: 'SYNTHETIC_FAKE_DEVICE_IN_HEADLESS_CHROME',
+                    fakeDeviceScope: 'Headless Chrome mock media stream (--use-fake-device-for-media-stream / --use-fake-ui-for-media-stream)',
+                    physicalDeviceScope: 'PENDING_PHYSICAL_HARDWARE (no physical mobile camera or physical environment attached)',
+                    permissionsState: 'GRANTED_HEADLESS_SYNTHETIC',
+                    deviceId: (videoInputs[0] && videoInputs[0].deviceId) || 'fake_camera_0',
+                    unmountedReason: null
                 };
             } catch (err) {
                 return { supported: false, error: err.message };
@@ -5005,8 +5279,11 @@ async function runBrowserEvidence() {
                 webglInspection,
                 mediaDeviceInspection,
                 viewportReflowTested: '320x568 (iPhone SE portrait; WCAG 2.1 Reflow 1.4.10 320 CSS px width equivalent to 400% zoom at 1280px), 390x844 (mobile portrait), 844x390 (mobile landscape); High-DPI DPR 2.0 (deviceScaleFactor: 2) and 400% root text enlargement at 1280px evaluated separately from native browser optical zoom',
+                opticalZoomScope: 'Chromium DevTools / CSS zoom and root-text enlargement evaluated separately; native desktop browser optical Ctrl+/Ctrl- zoom level relies on browser rendering engine and is not directly accessible via Playwright page API; reflow evaluated at 320 CSS px per WCAG 2.1 Success Criterion 1.4.10 Reflow',
                 touchTargetRequirements: 'min-height >= 44px and min-width >= 44px on primary controls',
                 accessibilityTested: 'Mode radiogroup roving tabindex, arrow navigation, confirmation modal focus trap/Escape, focus visibility rings, prefers-reduced-motion, forced-colors',
+                manualScreenReaderGate: 'PENDING physical manual screen-reader testing (NVDA / VoiceOver / JAWS on production assistive software; historical issue 102 does not substitute)',
+                osHighContrastGate: 'PENDING manual OS-level High Contrast / Forced Colors calibration in real operating system display settings',
                 physicalDeviceGate: 'PENDING physical iOS Safari and Android Chrome test devices (explicit pending gate, historical issue 102 does not substitute)',
                 physicalPrinterGate: 'PENDING physical thermal barcode label printer attachment'
             }

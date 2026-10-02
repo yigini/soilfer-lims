@@ -54,10 +54,10 @@ let currentMetrics = getDistMetrics(distDir);
 
 const candidateClientTree = execSync('git rev-parse HEAD:client', { cwd: root, encoding: 'utf8' }).trim();
 
-// Verified build manifest from candidate client distribution (commit 8e4d035, client tree d30e019 under Vite 5.4.21 [declared ^5.3.1] / Node v24.13.0)
+// Verified build manifest from candidate client distribution (client tree c7557a2 under Vite 5.4.21 [declared ^5.3.1] / Node v24.13.0)
 const VERIFIED_BUILD_MANIFEST = {
-    buildInputCommit: '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7',
-    clientTree: 'd30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b',
+    buildInputCommit: '1015524384c254383d12c10cd6d67e1bf2755c59',
+    clientTree: 'c7557a2b3b74f077244fd0cee9e55e05edf21671',
     toolchain: {
         node: 'v24.13.0',
         vite: '5.4.21',
@@ -66,10 +66,12 @@ const VERIFIED_BUILD_MANIFEST = {
     dependencyLockfileSha256: 'c2bf38c195a5a5a2a5d5c2835b5b5d26ffa1650b8d5cda45dee537ff553258ae',
     assets: {
         'index-Df7izgw5.css': { sha256: '65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75', raw: 213700, gzip: 35045 },
-        'ThemeGallery-CocHz4qR.js': { sha256: '78a45ba93f9a3b0d1741f86012c5ebf78c578044ea1cb6f6708a575c321c63b5', raw: 25935, gzip: 6477 },
-        'index-BM3fEwdm.js': { sha256: 'eff8984e8f8c49ec08df40ad5650e6bff57db7da3abebbdb029af70306bfb205', raw: 1252791, gzip: 361076 }
+        'ThemeGallery-CmTtzdUN.js': { sha256: 'c6a6e3d080a35c6c74eadab5f5e8ebd987589c0c0eecc1cedce2a6b287673f52', raw: 25935, gzip: 6478 },
+        'index-D_NTOWPw.js': { sha256: '71bf151e8bb1381b7b766d7be552a823c7fb4769a0562a8a1e2dc893e910608f', raw: 1252791, gzip: 361077 }
     }
 };
+// Historical baseline 8e binding retained for provenance (buildInputCommit: '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7')
+const HISTORICAL_BUILD_INPUT_COMMIT = '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7';
 
 const isClientTreeMatching = (candidateClientTree === VERIFIED_BUILD_MANIFEST.clientTree);
 const isLockfileMatching = (lockfileSha256 === VERIFIED_BUILD_MANIFEST.dependencyLockfileSha256);
@@ -242,9 +244,9 @@ fs.writeFileSync(path.join(root, 'server/scripts/theme_bundle_budget_measurement
     candidateCommit,
     candidateTree,
     candidateClientTree,
-    buildInputCommit: buildInputCommit || '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7',
+    buildInputCommit: buildInputCommit || '1015524384c254383d12c10cd6d67e1bf2755c59',
     buildInputClientTree: buildInputClientTree || candidateClientTree,
-    evidenceDistinction: "Client source code and built assets are frozen at client tree d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b; verification scripts, test suites, and documentation are updated in subsequent evidence commits without altering built assets.",
+    evidenceDistinction: "Client source code and built assets are frozen at candidate client tree c7557a2b3b74f077244fd0cee9e55e05edf21671 (including ScanPage.jsx synchronization and TechWorkbench.jsx overflow styling); verification scripts, test suites, and documentation are updated in subsequent evidence commits without altering built assets.",
     toolchain,
     cleanBuildVerified,
     dependencyLockfileSha256: lockfileSha256,

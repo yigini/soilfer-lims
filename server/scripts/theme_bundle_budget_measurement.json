@@ -2,12 +2,12 @@
   "baselineCommit": "1265e8a",
   "baselineTree": "260975e57d0b3a1389f622c2f84ef444f3f46cf4",
   "baselineClientTree": "bffc1d55ebf9dbbcad5c5c8530794bede9b1f77e",
-  "candidateCommit": "dced48aab5fa969e4337a82d047b4f668269402e",
-  "candidateTree": "6394deda1c539f0ad3aa81de7301d2b6575e884b",
-  "candidateClientTree": "d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b",
-  "buildInputCommit": "8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7",
-  "buildInputClientTree": "d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b",
-  "evidenceDistinction": "Client source code and built assets are frozen at client tree d30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b; verification scripts, test suites, and documentation are updated in subsequent evidence commits without altering built assets.",
+  "candidateCommit": "1015524384c254383d12c10cd6d67e1bf2755c59",
+  "candidateTree": "e86a1075e19fc89acb17b6267f303ad6546dd544",
+  "candidateClientTree": "c7557a2b3b74f077244fd0cee9e55e05edf21671",
+  "buildInputCommit": "1015524384c254383d12c10cd6d67e1bf2755c59",
+  "buildInputClientTree": "c7557a2b3b74f077244fd0cee9e55e05edf21671",
+  "evidenceDistinction": "Client source code and built assets are frozen at candidate client tree c7557a2b3b74f077244fd0cee9e55e05edf21671 (including ScanPage.jsx synchronization and TechWorkbench.jsx overflow styling); verification scripts, test suites, and documentation are updated in subsequent evidence commits without altering built assets.",
   "toolchain": "vite v5.4.21, node v24.13.0 (win32-arm64)",
   "cleanBuildVerified": true,
   "dependencyLockfileSha256": "c2bf38c195a5a5a2a5d5c2835b5b5d26ffa1650b8d5cda45dee537ff553258ae",
@@ -17,7 +17,7 @@
     "appearanceTokensCssPath": "client/src/styles/appearance-tokens.css",
     "appearanceTokensCssSha256": "fe67c691a44538a9816a64d6ba93b3dbd1c40769774dca5eb060a1d499e88263"
   },
-  "measuredAt": "2026-10-01T16:22:31.724Z",
+  "measuredAt": "2026-10-02T09:33:12.799Z",
   "baseline": {
     "css": {
       "file": "index-B4HqGI8K.css",
@@ -40,16 +40,16 @@
       "sha256": "65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75"
     },
     "galleryJs": {
-      "file": "ThemeGallery-CocHz4qR.js",
+      "file": "ThemeGallery-CmTtzdUN.js",
       "raw": 25935,
-      "gzip": 6477,
-      "sha256": "78a45ba93f9a3b0d1741f86012c5ebf78c578044ea1cb6f6708a575c321c63b5"
+      "gzip": 6478,
+      "sha256": "c6a6e3d080a35c6c74eadab5f5e8ebd987589c0c0eecc1cedce2a6b287673f52"
     },
     "mainJs": {
-      "file": "index-BM3fEwdm.js",
+      "file": "index-D_NTOWPw.js",
       "raw": 1252791,
-      "gzip": 361076,
-      "sha256": "eff8984e8f8c49ec08df40ad5650e6bff57db7da3abebbdb029af70306bfb205"
+      "gzip": 361077,
+      "sha256": "71bf151e8bb1381b7b766d7be552a823c7fb4769a0562a8a1e2dc893e910608f"
     },
     "themeCatalog": {
       "raw": 16701,
@@ -68,18 +68,18 @@
     "passed": true
   },
   "lazyChunk": {
-    "file": "ThemeGallery-CocHz4qR.js",
+    "file": "ThemeGallery-CmTtzdUN.js",
     "raw": 25935,
-    "gzip": 6477,
+    "gzip": 6478,
     "gzipKb": "6.33"
   },
   "completeAppOverhead": {
     "description": "Complete end-to-end application overhead across all production assets (CSS + ThemeGallery Chunk + Main JS Bundle)",
     "accountingType": "built-production-assets",
     "cssDeltaGzip": 1822,
-    "galleryGzip": 6477,
-    "mainJsDeltaGzip": 11043,
-    "totalOverheadGzip": 19342,
+    "galleryGzip": 6478,
+    "mainJsDeltaGzip": 11044,
+    "totalOverheadGzip": 19344,
     "totalOverheadGzipKb": "18.89"
   }
 }
