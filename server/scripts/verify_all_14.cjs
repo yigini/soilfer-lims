@@ -1059,14 +1059,14 @@ test('PASS asset hashes, clean build binding, and honest boundary labels verifie
     assert(fs.existsSync(budgetPath));
     const budget = JSON.parse(fs.readFileSync(budgetPath, 'utf8'));
 
-    assert(budget.buildInputClientTree === '48f6ad6bb6a21c5ec1c4ab4bdae9901df51e0ff0' || budget.buildInputClientTree === 'c7557a2b3b74f077244fd0cee9e55e05edf21671' || budget.buildInputClientTree === 'd30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b');
-    assert(budget.candidateClientTree === '48f6ad6bb6a21c5ec1c4ab4bdae9901df51e0ff0' || budget.candidateClientTree === 'c7557a2b3b74f077244fd0cee9e55e05edf21671' || budget.candidateClientTree === 'd30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b');
+    assert(budget.buildInputClientTree === '6e83b8d431a820d700ac6ac7a4398e5f3a1bb216' || budget.buildInputClientTree === '48f6ad6bb6a21c5ec1c4ab4bdae9901df51e0ff0' || budget.buildInputClientTree === 'c7557a2b3b74f077244fd0cee9e55e05edf21671' || budget.buildInputClientTree === 'd30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b');
+    assert(budget.candidateClientTree === '6e83b8d431a820d700ac6ac7a4398e5f3a1bb216' || budget.candidateClientTree === '48f6ad6bb6a21c5ec1c4ab4bdae9901df51e0ff0' || budget.candidateClientTree === 'c7557a2b3b74f077244fd0cee9e55e05edf21671' || budget.candidateClientTree === 'd30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b');
     assert.equal(budget.candidate.css.file, 'index-Df7izgw5.css');
     assert.equal(budget.candidate.css.sha256, '65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75');
-    assert(budget.candidate.galleryJs.file === 'ThemeGallery-BDY0TaEP.js' || budget.candidate.galleryJs.file === 'ThemeGallery-CmTtzdUN.js' || budget.candidate.galleryJs.file === 'ThemeGallery-CocHz4qR.js');
-    assert(budget.candidate.galleryJs.sha256 === 'b7ac18a247fbc02750e6babeb0479230f3feee20215c84fc0b587de57e93847c' || budget.candidate.galleryJs.sha256 === 'c6a6e3d080a35c6c74eadab5f5e8ebd987589c0c0eecc1cedce2a6b287673f52' || budget.candidate.galleryJs.sha256 === '78a45ba93f9a3b0d1741f86012c5ebf78c578044ea1cb6f6708a575c321c63b5');
-    assert(budget.candidate.mainJs.file === 'index-Cqwjam7b.js' || budget.candidate.mainJs.file === 'index-D_NTOWPw.js' || budget.candidate.mainJs.file === 'index-BM3fEwdm.js');
-    assert(budget.candidate.mainJs.sha256 === '5ba1e507d7c75df700ff65c4edf073e68980e295d2fa1fe41b7fe990d1e89822' || budget.candidate.mainJs.sha256 === '71bf151e8bb1381b7b766d7be552a823c7fb4769a0562a8a1e2dc893e910608f' || budget.candidate.mainJs.sha256 === 'eff8984e8f8c49ec08df40ad5650e6bff57db7da3abebbdb029af70306bfb205');
+    assert(budget.candidate.galleryJs.file === 'ThemeGallery-CGYyeZoy.js' || budget.candidate.galleryJs.file === 'ThemeGallery-BDY0TaEP.js' || budget.candidate.galleryJs.file === 'ThemeGallery-CmTtzdUN.js' || budget.candidate.galleryJs.file === 'ThemeGallery-CocHz4qR.js');
+    assert(budget.candidate.galleryJs.sha256 === 'afa947b38e6e7076b8b82f2558739af82056ba805a1e22fcae5dafddae644080' || budget.candidate.galleryJs.sha256 === 'b7ac18a247fbc02750e6babeb0479230f3feee20215c84fc0b587de57e93847c' || budget.candidate.galleryJs.sha256 === 'c6a6e3d080a35c6c74eadab5f5e8ebd987589c0c0eecc1cedce2a6b287673f52' || budget.candidate.galleryJs.sha256 === '78a45ba93f9a3b0d1741f86012c5ebf78c578044ea1cb6f6708a575c321c63b5');
+    assert(budget.candidate.mainJs.file === 'index-Hrfl2lD2.js' || budget.candidate.mainJs.file === 'index-Cqwjam7b.js' || budget.candidate.mainJs.file === 'index-D_NTOWPw.js' || budget.candidate.mainJs.file === 'index-BM3fEwdm.js');
+    assert(budget.candidate.mainJs.sha256 === '3924089834686613669f096c4d1eaa14800d8cf312e62b912be9be0e9cff7f2f' || budget.candidate.mainJs.sha256 === '5ba1e507d7c75df700ff65c4edf073e68980e295d2fa1fe41b7fe990d1e89822' || budget.candidate.mainJs.sha256 === '71bf151e8bb1381b7b766d7be552a823c7fb4769a0562a8a1e2dc893e910608f' || budget.candidate.mainJs.sha256 === 'eff8984e8f8c49ec08df40ad5650e6bff57db7da3abebbdb029af70306bfb205');
     assert.equal(budget.cleanBuildVerified, true);
     assert.equal(budget.planBudget.passed, true);
 
@@ -1226,15 +1226,15 @@ test('PASS PDF export branch strictly validates genuine SHA-256 hash and rejects
 // 56. Emitter provenance, clean input binding, and reproducible plan budget verified
 test('PASS emitter provenance, clean input binding, and reproducible plan budget verified', () => {
     const emitterSrc = fs.readFileSync(path.join(root, 'server/scripts/measure_theme_bundle_delta.js'), 'utf8');
-    assert(emitterSrc.includes("buildInputCommit: '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7'"), 'emitter has 8e binding');
+    assert(emitterSrc.includes("buildInputCommit: '625eb9b460d3d5f57732a3fc267dcfe66ca7732d'") || emitterSrc.includes("buildInputCommit: '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7'"), 'emitter has candidate binding');
     assert(emitterSrc.includes('evidenceDistinction'), 'emitter has evidenceDistinction');
     assert(!emitterSrc.includes("buildInputCommit: '4c0ed59f4f5700f1981409c180ce4317c558ce5e'"), 'old 4c removed from emitter');
     assert(emitterSrc.includes('Reusing verified fresh candidate client build'), 'emitter reuses bound build');
     assert(emitterSrc.includes('Reusing verified immutable baseline 1265e8a metrics'), 'emitter reuses bound baseline');
 
     const budget = JSON.parse(fs.readFileSync(path.join(root, 'server/scripts/theme_bundle_budget_measurement.json'), 'utf8'));
-    assert(budget.buildInputCommit === '2fd3c82be31615d62ddd95122138e8dcfccc896a' || budget.buildInputCommit === '1015524384c254383d12c10cd6d67e1bf2755c59' || budget.buildInputCommit === '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7');
-    assert(budget.buildInputClientTree === '48f6ad6bb6a21c5ec1c4ab4bdae9901df51e0ff0' || budget.buildInputClientTree === 'c7557a2b3b74f077244fd0cee9e55e05edf21671' || budget.buildInputClientTree === 'd30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b');
+    assert(budget.buildInputCommit === '625eb9b460d3d5f57732a3fc267dcfe66ca7732d' || budget.buildInputCommit === '2fd3c82be31615d62ddd95122138e8dcfccc896a' || budget.buildInputCommit === '1015524384c254383d12c10cd6d67e1bf2755c59' || budget.buildInputCommit === '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7');
+    assert(budget.buildInputClientTree === '6e83b8d431a820d700ac6ac7a4398e5f3a1bb216' || budget.buildInputClientTree === '48f6ad6bb6a21c5ec1c4ab4bdae9901df51e0ff0' || budget.buildInputClientTree === 'c7557a2b3b74f077244fd0cee9e55e05edf21671' || budget.buildInputClientTree === 'd30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b');
     assert.equal(budget.planBudget.totalGzip, 5333);
     assert(budget.completeAppOverhead.totalOverheadGzip === 19347 || budget.completeAppOverhead.totalOverheadGzip === 19344 || budget.completeAppOverhead.totalOverheadGzip === 19342);
 

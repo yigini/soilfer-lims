@@ -3851,4 +3851,30 @@ Laboratory operators can find step-by-step procedures in the following documenta
             - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
             - Plan budget: 5,333 B gzip (<= 15.0 kB gzip limit, margin +9.79 kB under budget).
             - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+       - Following Codex independent review `issue155-independent-review-a540393.md` and 6-case probe `issue155-focused-review-a540393.cjs`:
+          1. **SampleMap Conditional Hook Defect Resolved (Finding 6 / Case 6)**:
+             - Identified defect: `useMemo` in `client/src/components/reception/SampleMap.jsx` was invoked after an early return (`if (!hasCoords) return ...`). Because `SampleMap` is rendered in `Reception.jsx:1856-1872` without a key based on `resolvedCoordinates`, coordinate presence changes (absent -> present -> absent) altered hook invocation order, violating React's `rules-of-hooks`.
+             - Remediated by removing redundant `useMemo`: replaced with plain array `const position = [lat, lng];`. Since `ChangeView`'s `useEffect` dependencies already track primitive values (`[center && center[0], center && center[1], map]`), array reference churn does not trigger re-renders or view resets.
+             - Verified with installed ESLint `react-hooks/rules-of-hooks` -> 0 errors.
+             - Rebuilt client cleanly via `cmd /c npm run build` (built in 11.96s), yielding client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`. Preserved frozen CSS `index-Df7izgw5.css` (213,700 B raw / 35,045 B gzip, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`). New JS chunks: `ThemeGallery-CGYyeZoy.js` (6,476 B gzip, SHA256 `afa947b3...`) and `index-Hrfl2lD2.js` (361,077 B gzip, SHA256 `39240898...`).
+          2. **Map Pan/Zoom Operational Gate & Model Bound (Finding 1 / Case 4)**:
+             - Hardened `opGate` in `server/scripts/verify_issue155_browser_journeys.cjs` to bind the observed deliberate pan/zoom model (`[7.0, -1.0]`, zoom 16) across initial `geographicMapState`, all 14 variant transitions, and `afterExit`.
+             - Strictly enforces `deliberatePanZoomExecuted === true` and `deliberatePanZoomPreserved === true`. Transient resets to default coordinates (`[5.6037, -0.1870]`, zoom 13) or missing deliberate action flags strictly fail closed.
+          3. **Axis Calibration & Stacked Tick Geometry Rejection (Finding 2 / Case 3)**:
+             - Hardened `inspectTickGeometry` in `multiOverlayState`, `ovt`, and `multiOverlayState.afterExit` in `server/scripts/verify_issue155_browser_journeys.cjs`:
+               * Detects stacked ticks along the respective axis dimension (`isStacked: coords.length >= 2 && Math.max(...coords) === Math.min(...coords)`), failing closed on identical coordinates like `{x: 7, y: 7}` where spatial span is zero.
+               * Preserves source-supported N/A equivalence (`hasCoords: false`) for text-only mock DOM adapters (`axisDoc`) lacking spatial layout attributes.
+               * Verified that non-zero stacked ticks strictly reject across `axesVerified: false`, `modelVerified: false`, and `printAccept() === false`.
+          4. **Camera Continuity Across All Transitions and Exit (Finding 3 / Case 5)**:
+             - Expanded camera verification in `server/scripts/verify_issue155_browser_journeys.cjs`: collected `streamDetails` (active, id, tracks), `videoNodeIdentity` (nodeName, className, readyState, srcObjectAssigned), and `permissionsState` across initial `scanState`, `scanBefore`, `scanDuring`, all 14 `scanVariantTransitions`, and `scanAfter`.
+             - Bound required camera continuity fields in `opGate` so omitting or dropping them during transitions strictly fails closed.
+          5. **Timestamp & Catalog Alignment (Finding 5)**:
+             - Corrected handoff timestamps to true UTC (`2026-10-02T23:55:00Z`).
+             - Reconciled whole-stage claims across PR body, docs, evidence, and matrix with verified execution scope.
+          6. **Suite Verification Results**:
+             - Running-app Browser Suite: **All 12/12 suites PASS 100% green** (`server/scripts/issue155-browser-journeys-results.json`).
+             - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
+             - Plan budget footprint: 5,333 B gzip (<= 15.0 kB gzip limit, margin +9.79 kB under budget). Complete app overhead: 19,342 B gzip (18.89 kB gzip).
+             - Reused verified artifacts: Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79...`). Server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen.
+             - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
 
