@@ -3632,7 +3632,7 @@ async function runBrowserEvidence() {
                 typeof scanState.videoNodeIdentity.readyState === 'number' &&
                 scanState.videoNodeIdentity.readyState >= 2 &&
                 scanState.videoNodeIdentity.srcObjectAssigned === true &&
-                (typeof scanState.videoNodeIdentity.isSameNode === 'boolean' ? scanState.videoNodeIdentity.isSameNode === true : true) &&
+                scanState.videoNodeIdentity.isSameNode === true &&
                 scanState.permissionsState === 'granted' &&
                 scanState.beforePreview &&
                 scanState.beforePreview.enteredValue === 'SMP-2026-001' &&
@@ -3647,7 +3647,7 @@ async function runBrowserEvidence() {
                 typeof scanState.beforePreview.videoNodeIdentity.readyState === 'number' &&
                 scanState.beforePreview.videoNodeIdentity.readyState >= 2 &&
                 scanState.beforePreview.videoNodeIdentity.srcObjectAssigned === true &&
-                (typeof scanState.beforePreview.videoNodeIdentity.isSameNode === 'boolean' ? scanState.beforePreview.videoNodeIdentity.isSameNode === true : true) &&
+                scanState.beforePreview.videoNodeIdentity.isSameNode === true &&
                 scanState.beforePreview.permissionsState === 'granted' &&
                 scanState.beforePreview.theme === 'forest' &&
                 scanState.beforePreview.mode === 'light' &&
@@ -3664,7 +3664,7 @@ async function runBrowserEvidence() {
                 typeof scanState.duringPreview.videoNodeIdentity.readyState === 'number' &&
                 scanState.duringPreview.videoNodeIdentity.readyState >= 2 &&
                 scanState.duringPreview.videoNodeIdentity.srcObjectAssigned === true &&
-                (typeof scanState.duringPreview.videoNodeIdentity.isSameNode === 'boolean' ? scanState.duringPreview.videoNodeIdentity.isSameNode === true : true) &&
+                scanState.duringPreview.videoNodeIdentity.isSameNode === true &&
                 scanState.duringPreview.permissionsState === 'granted' &&
                 scanState.duringPreview.appliedTheme === 'mineral' &&
                 scanState.duringPreview.appliedMode === 'light' &&
@@ -3682,7 +3682,7 @@ async function runBrowserEvidence() {
                 typeof scanState.afterExit.videoNodeIdentity.readyState === 'number' &&
                 scanState.afterExit.videoNodeIdentity.readyState >= 2 &&
                 scanState.afterExit.videoNodeIdentity.srcObjectAssigned === true &&
-                (typeof scanState.afterExit.videoNodeIdentity.isSameNode === 'boolean' ? scanState.afterExit.videoNodeIdentity.isSameNode === true : true) &&
+                scanState.afterExit.videoNodeIdentity.isSameNode === true &&
                 scanState.afterExit.permissionsState === 'granted' &&
                 scanState.afterExit.appliedTheme === 'forest' &&
                 scanState.afterExit.appliedMode === 'light' &&
@@ -3720,7 +3720,7 @@ async function runBrowserEvidence() {
                     typeof v.videoNodeIdentity.readyState === 'number' &&
                     v.videoNodeIdentity.readyState >= 2 &&
                     v.videoNodeIdentity.srcObjectAssigned === true &&
-                    (typeof v.videoNodeIdentity.isSameNode === 'boolean' ? v.videoNodeIdentity.isSameNode === true : true) &&
+                    v.videoNodeIdentity.isSameNode === true &&
                     v.permissionsState === 'granted'
                 ) &&
                 workflowState &&
@@ -6119,29 +6119,46 @@ async function runBrowserEvidence() {
                     return { A, B };
                 }
 
-                function checkAxisCalibrated(ptsY, expected) {
-                    if (!yTickGeom.hasCoords || !yTickGeom.isCollinear || yTickGeom.scaleSlope === null || yTickGeom.scaleSlope >= 0) {
+                function checkAxisCalibrated(pts, expected) {
+                    if (!xTickGeom.hasCoords || !xTickGeom.isCollinear || xTickGeom.scaleSlope === null || xTickGeom.scaleSlope >= 0 ||
+                        !yTickGeom.hasCoords || !yTickGeom.isCollinear || yTickGeom.scaleSlope === null || yTickGeom.scaleSlope >= 0) {
                         return false;
                     }
+                    const Mx = xTickGeom.scaleSlope;
+                    const Kx = xTickGeom.scaleIntercept;
                     const My = yTickGeom.scaleSlope;
                     const Ky = yTickGeom.scaleIntercept;
-                    const diffFwd = Math.max(...ptsY.map((y, i) => Math.abs(y - (My * expected[i] + Ky))));
+                    const n = pts.length;
+                    if (n !== expected.length) return false;
+                    const diffFwd = Math.max(...pts.map((p, k) => {
+                        const W = 400 + k * gridStep;
+                        const expX = Mx * W + Kx;
+                        const expY = My * expected[k] + Ky;
+                        return Math.max(Math.abs(p.x - expX), Math.abs(p.y - expY));
+                    }));
                     if (diffFwd <= 2.5) return true;
-                    const n = expected.length;
-                    const diffRev = Math.max(...ptsY.map((y, i) => Math.abs(y - (My * expected[n - 1 - i] + Ky))));
+                    const diffRev = Math.max(...pts.map((p, k) => {
+                        const idx = n - 1 - k;
+                        const W = 400 + idx * gridStep;
+                        const expX = Mx * W + Kx;
+                        const expY = My * expected[idx] + Ky;
+                        return Math.max(Math.abs(p.x - expX), Math.abs(p.y - expY));
+                    }));
                     if (diffRev <= 2.5) return true;
                     return false;
                 }
 
-                function checkSharedModel(yA, yB, refA, refB) {
-                    if (yTickGeom.hasCoords) {
-                        const calA = checkAxisCalibrated(yA, refA);
-                        const calB = checkAxisCalibrated(yB, refB);
-                        const crossA = checkAxisCalibrated(yA, refB);
-                        const crossB = checkAxisCalibrated(yB, refA);
+                function checkSharedModel(ptsA, ptsB, refA, refB) {
+                    if (xTickGeom.hasCoords && yTickGeom.hasCoords) {
+                        const calA = checkAxisCalibrated(ptsA, refA);
+                        const calB = checkAxisCalibrated(ptsB, refB);
+                        const crossA = checkAxisCalibrated(ptsA, refB);
+                        const crossB = checkAxisCalibrated(ptsB, refA);
                         if (calA && calB && !crossA && !crossB) return true;
                         return false;
                     }
+                    const yA = ptsA.map(p => typeof p === 'object' && p !== null ? p.y : p);
+                    const yB = ptsB.map(p => typeof p === 'object' && p !== null ? p.y : p);
                     let cal = fitCalibration(yA, refA);
                     if (cal) {
                         const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
@@ -6193,11 +6210,11 @@ async function runBrowserEvidence() {
                     if (!isUniformX) return false;
 
                     const ptsY = pts.map(p => p.y);
-                    const isScan1 = yTickGeom.hasCoords
-                        ? checkAxisCalibrated(ptsY, expGrid1)
+                    const isScan1 = (xTickGeom.hasCoords && yTickGeom.hasCoords)
+                        ? checkAxisCalibrated(pts, expGrid1)
                         : Boolean(fitCalibration(ptsY, expGrid1) || fitCalibration(ptsY, [...expGrid1].reverse()));
-                    const isScan2 = yTickGeom.hasCoords
-                        ? checkAxisCalibrated(ptsY, expGrid2)
+                    const isScan2 = (xTickGeom.hasCoords && yTickGeom.hasCoords)
+                        ? checkAxisCalibrated(pts, expGrid2)
                         : Boolean(fitCalibration(ptsY, expGrid2) || fitCalibration(ptsY, [...expGrid2].reverse()));
                     if (!isScan1 && !isScan2) return false;
 
@@ -6210,9 +6227,7 @@ async function runBrowserEvidence() {
                     const pts0 = curvePointSets[0];
                     const pts1 = curvePointSets[1];
                     const maxDiffY = Math.max(...pts0.map((p, i) => Math.abs(p.y - pts1[i].y)));
-                    const y0 = pts0.map(p => p.y);
-                    const y1 = pts1.map(p => p.y);
-                    const sharedModelValid = checkSharedModel(y0, y1, expGrid1, expGrid2) || checkSharedModel(y0, y1, expGrid2, expGrid1);
+                    const sharedModelValid = checkSharedModel(pts0, pts1, expGrid1, expGrid2) || checkSharedModel(pts0, pts1, expGrid2, expGrid1);
                     distinctSeriesVerified = Boolean(maxDiffY > 0.5 && sharedModelValid);
                 }
 
@@ -6532,29 +6547,46 @@ async function runBrowserEvidence() {
                         return { A, B };
                     }
 
-                    function checkAxisCalibrated(ptsY, expected) {
-                        if (!yTickGeom.hasCoords || !yTickGeom.isCollinear || yTickGeom.scaleSlope === null || yTickGeom.scaleSlope >= 0) {
+                    function checkAxisCalibrated(pts, expected) {
+                        if (!xTickGeom.hasCoords || !xTickGeom.isCollinear || xTickGeom.scaleSlope === null || xTickGeom.scaleSlope >= 0 ||
+                            !yTickGeom.hasCoords || !yTickGeom.isCollinear || yTickGeom.scaleSlope === null || yTickGeom.scaleSlope >= 0) {
                             return false;
                         }
+                        const Mx = xTickGeom.scaleSlope;
+                        const Kx = xTickGeom.scaleIntercept;
                         const My = yTickGeom.scaleSlope;
                         const Ky = yTickGeom.scaleIntercept;
-                        const diffFwd = Math.max(...ptsY.map((y, i) => Math.abs(y - (My * expected[i] + Ky))));
+                        const n = pts.length;
+                        if (n !== expected.length) return false;
+                        const diffFwd = Math.max(...pts.map((p, k) => {
+                            const W = 400 + k * gridStep;
+                            const expX = Mx * W + Kx;
+                            const expY = My * expected[k] + Ky;
+                            return Math.max(Math.abs(p.x - expX), Math.abs(p.y - expY));
+                        }));
                         if (diffFwd <= 2.5) return true;
-                        const n = expected.length;
-                        const diffRev = Math.max(...ptsY.map((y, i) => Math.abs(y - (My * expected[n - 1 - i] + Ky))));
+                        const diffRev = Math.max(...pts.map((p, k) => {
+                            const idx = n - 1 - k;
+                            const W = 400 + idx * gridStep;
+                            const expX = Mx * W + Kx;
+                            const expY = My * expected[idx] + Ky;
+                            return Math.max(Math.abs(p.x - expX), Math.abs(p.y - expY));
+                        }));
                         if (diffRev <= 2.5) return true;
                         return false;
                     }
 
-                    function checkSharedModel(yA, yB, refA, refB) {
-                        if (yTickGeom.hasCoords) {
-                            const calA = checkAxisCalibrated(yA, refA);
-                            const calB = checkAxisCalibrated(yB, refB);
-                            const crossA = checkAxisCalibrated(yA, refB);
-                            const crossB = checkAxisCalibrated(yB, refA);
+                    function checkSharedModel(ptsA, ptsB, refA, refB) {
+                        if (xTickGeom.hasCoords && yTickGeom.hasCoords) {
+                            const calA = checkAxisCalibrated(ptsA, refA);
+                            const calB = checkAxisCalibrated(ptsB, refB);
+                            const crossA = checkAxisCalibrated(ptsA, refB);
+                            const crossB = checkAxisCalibrated(ptsB, refA);
                             if (calA && calB && !crossA && !crossB) return true;
                             return false;
                         }
+                        const yA = ptsA.map(p => typeof p === 'object' && p !== null ? p.y : p);
+                        const yB = ptsB.map(p => typeof p === 'object' && p !== null ? p.y : p);
                         let cal = fitCalibration(yA, refA);
                         if (cal) {
                             const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
@@ -6606,11 +6638,11 @@ async function runBrowserEvidence() {
                         if (!isUniformX) return false;
 
                         const ptsY = pts.map(p => p.y);
-                        const isScan1 = yTickGeom.hasCoords
-                            ? checkAxisCalibrated(ptsY, expGrid1)
+                        const isScan1 = (xTickGeom.hasCoords && yTickGeom.hasCoords)
+                            ? checkAxisCalibrated(pts, expGrid1)
                             : Boolean(fitCalibration(ptsY, expGrid1) || fitCalibration(ptsY, [...expGrid1].reverse()));
-                        const isScan2 = yTickGeom.hasCoords
-                            ? checkAxisCalibrated(ptsY, expGrid2)
+                        const isScan2 = (xTickGeom.hasCoords && yTickGeom.hasCoords)
+                            ? checkAxisCalibrated(pts, expGrid2)
                             : Boolean(fitCalibration(ptsY, expGrid2) || fitCalibration(ptsY, [...expGrid2].reverse()));
                         if (!isScan1 && !isScan2) return false;
 
@@ -6623,9 +6655,7 @@ async function runBrowserEvidence() {
                         const pts0 = curvePointSets[0];
                         const pts1 = curvePointSets[1];
                         const maxDiffY = Math.max(...pts0.map((p, i) => Math.abs(p.y - pts1[i].y)));
-                        const y0 = pts0.map(p => p.y);
-                        const y1 = pts1.map(p => p.y);
-                        const sharedModelValid = checkSharedModel(y0, y1, expGrid1, expGrid2) || checkSharedModel(y0, y1, expGrid2, expGrid1);
+                        const sharedModelValid = checkSharedModel(pts0, pts1, expGrid1, expGrid2) || checkSharedModel(pts0, pts1, expGrid2, expGrid1);
                         distinctSeriesVerified = Boolean(maxDiffY > 0.5 && sharedModelValid);
                     }
 
@@ -6912,45 +6942,62 @@ async function runBrowserEvidence() {
                         return { A, B };
                     }
 
-                    function checkAxisCalibrated(ptsY, expected) {
-                        if (!yTickGeom.hasCoords || !yTickGeom.isCollinear || yTickGeom.scaleSlope === null || yTickGeom.scaleSlope >= 0) {
+                    function checkAxisCalibrated(pts, expected) {
+                        if (!xTickGeom.hasCoords || !xTickGeom.isCollinear || xTickGeom.scaleSlope === null || xTickGeom.scaleSlope >= 0 ||
+                            !yTickGeom.hasCoords || !yTickGeom.isCollinear || yTickGeom.scaleSlope === null || yTickGeom.scaleSlope >= 0) {
                             return false;
                         }
+                        const Mx = xTickGeom.scaleSlope;
+                        const Kx = xTickGeom.scaleIntercept;
                         const My = yTickGeom.scaleSlope;
                         const Ky = yTickGeom.scaleIntercept;
-                        const diffFwd = Math.max(...ptsY.map((y, i) => Math.abs(y - (My * expected[i] + Ky))));
+                        const n = pts.length;
+                        if (n !== expected.length) return false;
+                        const diffFwd = Math.max(...pts.map((p, k) => {
+                            const W = 400 + k * gridStep;
+                            const expX = Mx * W + Kx;
+                            const expY = My * expected[k] + Ky;
+                            return Math.max(Math.abs(p.x - expX), Math.abs(p.y - expY));
+                        }));
                         if (diffFwd <= 2.5) return true;
-                        const n = expected.length;
-                        const diffRev = Math.max(...ptsY.map((y, i) => Math.abs(y - (My * expected[n - 1 - i] + Ky))));
+                        const diffRev = Math.max(...pts.map((p, k) => {
+                            const idx = n - 1 - k;
+                            const W = 400 + idx * gridStep;
+                            const expX = Mx * W + Kx;
+                            const expY = My * expected[idx] + Ky;
+                            return Math.max(Math.abs(p.x - expX), Math.abs(p.y - expY));
+                        }));
                         if (diffRev <= 2.5) return true;
                         return false;
                     }
 
-                    function checkSharedModel(yA, yB, refA, refB) {
-                        if (yTickGeom.hasCoords) {
-                            const calA = checkAxisCalibrated(yA, refA);
-                            const calB = checkAxisCalibrated(yB, refB);
-                            const crossA = checkAxisCalibrated(yA, refB);
-                            const crossB = checkAxisCalibrated(yB, refA);
+                    function checkSharedModel(ptsA, ptsB, refA, refB) {
+                        if (xTickGeom.hasCoords && yTickGeom.hasCoords) {
+                            const calA = checkAxisCalibrated(ptsA, refA);
+                            const calB = checkAxisCalibrated(ptsB, refB);
+                            const crossA = checkAxisCalibrated(ptsA, refB);
+                            const crossB = checkAxisCalibrated(ptsB, refA);
                             if (calA && calB && !crossA && !crossB) return true;
                             return false;
                         }
+                        const yA = ptsA.map(p => typeof p === 'object' && p !== null ? p.y : p);
+                        const yB = ptsB.map(p => typeof p === 'object' && p !== null ? p.y : p);
                         let cal = fitCalibration(yA, refA);
                         if (cal) {
                             const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
                             const diffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
                             const crossDiffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                            const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
+                            const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
                             if (diffA < 0.008 && diffB < 0.008 && crossDiffA > 0.015 && crossDiffB > 0.015) return true;
                         }
                         const revA = [...refA].reverse();
                         const revB = [...refB].reverse();
                         cal = fitCalibration(yA, revA);
                         if (cal) {
-                            const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
+                            const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - revA[i])));
                             const diffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
                             const crossDiffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                            const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
+                            const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
                             if (diffA < 0.008 && diffB < 0.008 && crossDiffA > 0.015 && crossDiffB > 0.015) return true;
                         }
                         return false;
@@ -6986,11 +7033,11 @@ async function runBrowserEvidence() {
                         if (!isUniformX) return false;
 
                         const ptsY = pts.map(p => p.y);
-                        const isScan1 = yTickGeom.hasCoords
-                            ? checkAxisCalibrated(ptsY, expGrid1)
+                        const isScan1 = (xTickGeom.hasCoords && yTickGeom.hasCoords)
+                            ? checkAxisCalibrated(pts, expGrid1)
                             : Boolean(fitCalibration(ptsY, expGrid1) || fitCalibration(ptsY, [...expGrid1].reverse()));
-                        const isScan2 = yTickGeom.hasCoords
-                            ? checkAxisCalibrated(ptsY, expGrid2)
+                        const isScan2 = (xTickGeom.hasCoords && yTickGeom.hasCoords)
+                            ? checkAxisCalibrated(pts, expGrid2)
                             : Boolean(fitCalibration(ptsY, expGrid2) || fitCalibration(ptsY, [...expGrid2].reverse()));
                         if (!isScan1 && !isScan2) return false;
 
@@ -7003,9 +7050,7 @@ async function runBrowserEvidence() {
                         const pts0 = curvePointSets[0];
                         const pts1 = curvePointSets[1];
                         const maxDiffY = Math.max(...pts0.map((p, i) => Math.abs(p.y - pts1[i].y)));
-                        const y0 = pts0.map(p => p.y);
-                        const y1 = pts1.map(p => p.y);
-                        const sharedModelValid = checkSharedModel(y0, y1, expGrid1, expGrid2) || checkSharedModel(y0, y1, expGrid2, expGrid1);
+                        const sharedModelValid = checkSharedModel(pts0, pts1, expGrid1, expGrid2) || checkSharedModel(pts0, pts1, expGrid2, expGrid1);
                         distinctSeriesVerified = Boolean(maxDiffY > 0.5 && sharedModelValid);
                     }
 

@@ -3830,7 +3830,7 @@ Laboratory operators can find step-by-step procedures in the following documenta
          1. **Scientific Axis Bounds, Geometry & Semantic Units (Finding 1 / Case 3)**:
             - Hardened `multiOverlayState`, `ovt`, and `multiOverlayState.afterExit` in `server/scripts/verify_issue155_browser_journeys.cjs`:
               * Inspects axis text content for invalid semantics: strictly rejects `Wavelength (nm)` or `Reflectance (%)` for MIR modality where `Wavenumber (cm⁻¹)` and `Absorbance` are required.
-              * Inspects tick element coordinates and bounding rects: strictly rejects zero-collapsed tick geometries where tick coordinates/rectangles are all zero, while preserving source-supported N/A equivalence when tick coordinate attributes are absent on synthetic text adapters (`axisDoc`).
+              * Inspects tick element coordinates and bounding rects: strictly rejects zero-collapsed tick geometries where tick coordinates/rectangles are all zero, while preserving adapter fallback behavior when tick coordinate attributes are absent on synthetic text adapters (`axisDoc`).
               * Verified that `wrongAxisDoc` from Case 3 strictly rejects across `initial.axesVerified: false`, `transition.modelVerified: false`, `exit.modelVerified: false`, and `printAccept() === false`, while genuine reference adapter `axisDoc` passes 100%.
          2. **Authorized SampleMap View Retention Fix (Finding 2 / Case 4)**:
             - Owner authorization explicitly affirmed that fixing `client/src/components/reception/SampleMap.jsx` is authorized:
@@ -3863,7 +3863,7 @@ Laboratory operators can find step-by-step procedures in the following documenta
           3. **Axis Calibration & Stacked Tick Geometry Rejection (Finding 2 / Case 3)**:
              - Hardened `inspectTickGeometry` in `multiOverlayState`, `ovt`, and `multiOverlayState.afterExit` in `server/scripts/verify_issue155_browser_journeys.cjs`:
                * Detects stacked ticks along the respective axis dimension (`isStacked: coords.length >= 2 && Math.max(...coords) === Math.min(...coords)`), failing closed on identical coordinates like `{x: 7, y: 7}` where spatial span is zero.
-               * Preserves source-supported N/A equivalence (`hasCoords: false`) for text-only mock DOM adapters (`axisDoc`) lacking spatial layout attributes.
+               * Preserves adapter fallback behavior (`hasCoords: false`) for text-only mock DOM adapters (`axisDoc`) lacking spatial layout attributes.
                * Verified that non-zero stacked ticks strictly reject across `axesVerified: false`, `modelVerified: false`, and `printAccept() === false`.
           4. **Camera Continuity Across All Transitions and Exit (Finding 3 / Case 5)**:
              - Expanded camera verification in `server/scripts/verify_issue155_browser_journeys.cjs`: collected `streamDetails` (active, id, tracks), `videoNodeIdentity` (nodeName, className, readyState, srcObjectAssigned), and `permissionsState` across initial `scanState`, `scanBefore`, `scanDuring`, all 14 `scanVariantTransitions`, and `scanAfter`.
@@ -3884,7 +3884,7 @@ Laboratory operators can find step-by-step procedures in the following documenta
                * Formed unique `{ val, coord }` pairs from tick labels and spatial coordinates along the respective axis dimension.
                * Sorted pairs by numerical value and asserted strict monotonicity (`isStrictlyInc || isStrictlyDec`).
                * Flags scrambled/misassociated tick positions (`isScrambled = true`) when coordinates reverse direction or jump out of order (e.g. $X \in [40, 400, 140, 300]$ for values $[400, 1000, 2000, 4000]$, $Y \in [250, 50, 200, 120]$ for values $[0, 0.4, 0.8, 1.2]$), strictly failing closed across `initial.axesVerified: false`, `transition.modelVerified: false`, `exit.modelVerified: false`, and `printIsolationPassed: false`.
-               * Preserved source-supported N/A equivalence (`hasCoords: false`) for mock DOM adapters (`axisDoc`) lacking spatial coordinates.
+               * Preserved adapter fallback behavior (`hasCoords: false`) for mock DOM adapters (`axisDoc`) lacking spatial coordinates.
           2. **Observed Camera Continuity Across All 14 Transitions and Exit (Finding 2 / Case 4)**:
              - Hardened `opGate` in `server/scripts/verify_issue155_browser_journeys.cjs` to enforce camera continuity:
                * Requires `v.streamDetails.id === scanState.streamDetails.id` (strictly rejects replacement/swapped stream IDs).
@@ -3913,7 +3913,7 @@ Laboratory operators can find step-by-step procedures in the following documenta
               - Enforced SVG tick collinearity (|residual| <= 2.0 px via linear regression) across `multiOverlayState`, `ovt`, and `multiOverlayState.afterExit` in `server/scripts/verify_issue155_browser_journeys.cjs`. Monotonic but non-linear ticks (like Case 3's X in [499, 450, 200, 0], Y in [320, 250, 200, 100]) strictly fail closed (`isCollinear: false`).
               - When `hasCoords === true`, derived (My, Ky) scale parameters directly from actual SVG tick anchors (`n.getAttribute(axisDim)`) in the shared SVG coordinate system, prioritizing SVG attribute anchors over text glyph bounding boxes during deduplication (`isAnchor: true`).
               - Projected expected scientific reference curves (Y_proj = My * Y + Ky) and verified curve points match the axis projection within <= 2.5 px, strictly enforcing axis-to-curve binding.
-              - When `hasCoords === false` (mock DOM layout-less text adapter `axisDoc`), preserved source-supported N/A equivalence via affine regression fallback.
+              - When `hasCoords === false` (mock DOM layout-less text adapter `axisDoc`), preserved adapter fallback behavior via affine regression fallback (adapter fallback, not runtime-axis N/A).
            2. **Observed Camera Track Kinds, Track IDs & Video Node Identity (Finding 2 / Case 4)**:
               - Hardened `opGate` in `server/scripts/verify_issue155_browser_journeys.cjs`:
                 * Strictly requires `typeof t.id === 'string' && t.id.length > 0` and non-empty stream ID across initial and all transitions.
@@ -3929,4 +3929,25 @@ Laboratory operators can find step-by-step procedures in the following documenta
               - Running-app Browser Suite: **All 12/12 suites PASS 100% green** (`server/scripts/issue155-browser-journeys-results.json`).
               - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
               - Focused Review Harness: **All 4/4 cases PASS 100% green** (`scratch/test_harness_cases.cjs`).
+              - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+
+        - Following Codex independent review `issue155-independent-review-64e448b.md` and 5-case probe `issue155-focused-review-64e448b.cjs`:
+           1. **Horizontal & Vertical Joint 2D Axis-to-Curve Calibration (Finding 1 / Case 3)**:
+              - Derived both (Mx, Kx) and (My, Ky) scale parameters in the shared SVG coordinate system directly from actual SVG tick anchors (`xTickGeom`, `yTickGeom`) across `multiOverlayState`, `ovt`, and `multiOverlayState.afterExit` in `server/scripts/verify_issue155_browser_journeys.cjs`.
+              - Projected expected scientific reference curves across the source 500-point uniform wavelength grid (W_k = 400 + k * 3600 / 499):
+                expX_k = Mx * W_k + Kx, expY_k = My * expected[k] + Ky
+              - Verified curve points simultaneously against (expX, expY) in both forward index order (k) and reverse index order (499 - k), strictly requiring both coordinates to bind to the exact same physical wavenumber within <= 2.5 px.
+              - Strictly rejects shifted/compressed paths (like Case 3's X = 399 - 0.5 * i) and reversed direction paths with unreversed intensity (X = i with Y(i)) across `initial.tracesVerified: false`, `transition.modelVerified: false`, `exit.modelVerified: false`, and `printIsolationPassed: false`.
+              - Clarified that layout-less mock axis fallback (`!xTickGeom.hasCoords || !yTickGeom.hasCoords`) is adapter fallback behavior for headless/mock DOM environments without layout geometry, distinct from runtime-axis N/A.
+           2. **Strict Camera DOM Node Identity Gate (Finding 2 / Case 4)**:
+              - Eliminated loose optional ternaries `(typeof ... === 'boolean' ? ... === true : true)` in `opGate` across `scanState`, `beforePreview`, `duringPreview`, `afterExit`, and all 14 `variantTransitions`.
+              - Strictly requires `v.videoNodeIdentity.isSameNode === true` so missing node identity, non-boolean values, or string `'false'` fail closed.
+              - Preserved full track ID verification, track kind continuity (`'video'`), live ready states, and stream continuity.
+           3. **Whole-Stage Scope & Honest Truthful Boundaries (Finding 3)**:
+              - Maintained distinct boundaries: constructed node-listened composition events remain synthetic, distinct from OS/system IME candidate windows.
+              - High-DPI DPR 2.0, 200% and 400% zoom reflow remain distinct from native desktop optical zoom and physical hardware.
+              - Preserved accepted closures: customer certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), 5-row measurements, frozen CSS `index-Df7izgw5.css` (213,700 B raw / 35,045 B gzip, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
+           4. **Suite Verification Results**:
+              - Running-app Browser Suite: **All 12/12 suites PASS 100% green** (`server/scripts/issue155-browser-journeys-results.json`).
+              - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
               - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
