@@ -10,6 +10,8 @@ import { useDialog } from '../context/DialogContext';
 import { useNotifications } from '../context/NotificationContext';
 import WorkItemsTable from '../components/sample/WorkItemsTable';
 import FieldMetadataCard from '../components/sample/FieldMetadataCard';
+import {ProfileReferenceSummary} from '../components/reception/ProfileReferenceFields';
+import ProfileCorrectionDialog from '../components/sample/ProfileCorrectionDialog';
 import FieldMap from '../components/sample/FieldMap';
 import IntakeRequestCard from '../components/sample/IntakeRequestCard';
 import AnalysisUpdateModal from '../components/sample/AnalysisUpdateModal';
@@ -172,6 +174,12 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
     const [infoModal, setInfoModal] = useState({ isOpen: false, title: '', message: '', type: 'info' });
     const [undoApprovalModal, setUndoApprovalModal] = useState({ isOpen: false, reason: '' });
     const [amendmentModal, setAmendmentModal] = useState({ isOpen: false, type: 'CLERICAL', reason: '', impact: '' });
+    const [profileCorrectionOpen, setProfileCorrectionOpen] = useState(false);
+    const profileCorrectionTrigger = useRef(null);
+    const closeProfileCorrection = () => {
+        setProfileCorrectionOpen(false);
+        requestAnimationFrame(() => profileCorrectionTrigger.current?.focus());
+    };
 
     // Sync Tab to URL
     useEffect(() => {
@@ -1310,6 +1318,11 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
 
                         {/* Intake Condition Card */}
                         <IntakeRequestCard sample={sample || identity} />
+                        <section className="bg-sf-surface rounded-2xl p-6 border border-sf-divider space-y-4">
+                            <ProfileReferenceSummary profile={identity?.profileReference}/>
+                            {(capabilities.canAmend?.allowed || capabilities.canEditProfileReference?.allowed) && <button ref={profileCorrectionTrigger} className="btn-secondary text-xs" onClick={()=>setProfileCorrectionOpen(true)}>{t('profileReference.correct')}</button>}
+                            <p className="text-xs text-sf-muted">{t('profileReference.help')}</p>
+                        </section>
 
                         {/* Expandable Field Metadata & Map */}
                         <div className="bg-sf-surface rounded-2xl p-6 border border-sf-divider shadow-sm space-y-4">
@@ -1622,6 +1635,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
             )}
 
             {/* Amendment Modal */}
+            {profileCorrectionOpen && <ProfileCorrectionDialog sampleId={id} profile={identity?.profileReference} released={!capabilities.canEditProfileReference?.allowed} onClose={closeProfileCorrection} onSaved={()=>{setProfileCorrectionOpen(false); fetchWorkspaceData();}}/>}
             {amendmentModal.isOpen && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md p-6 border border-sf-divider">

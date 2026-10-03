@@ -9,6 +9,7 @@ const sampleWorkspaceService = require('../services/sampleWorkspaceService');
 const commandReceiptService = require('../services/commandReceiptService');
 const sampleOriginService = require('../services/sampleOriginService');
 const sampleStateService = require('../services/sampleStateService');
+const profileIdentity = require('../services/profileIdentityService');
 
 
 /**
@@ -913,7 +914,10 @@ exports.createWalkInSample = async (req, res) => {
 
     try {
         // Determine lab from user
-        const assignedLab = user.labId || `LAB-${countryCode}`;
+        const assignedLab = user.labId || (user.role === 'SUPER_ADMIN' ? req.body.assignedLab : null);
+        const receivingLab = assignedLab ? await prisma.lab.findUnique({where: {id: assignedLab}}) : null;
+        if (!receivingLab || !receivingLab.isActive) return res.status(400).json({error: 'ACTIVE_LAB_REQUIRED', message: 'Select an active receiving laboratory.'});
+        if (req.body.assignedLab && req.body.assignedLab !== assignedLab) return res.status(403).json({error: 'TARGET_OUTSIDE_SCOPE'});
         const selected = await cataloguePolicy.validateSelection(analyses ?? [], { labId: assignedLab });
         if (!selected.valid) return res.status(400).json({ error: selected.error, issues: selected.issues });
 
@@ -936,8 +940,9 @@ exports.createWalkInSample = async (req, res) => {
                 id: sampleId,
                 originalId: originalId,
                 status: 'RECEIVED', // Walk-ins start as RECEIVED
-                projectCode: countryCode,
-                countryName: countryCode, // Using projectCode as country proxy
+                projectCode: null,
+                country: receivingLab.country,
+                countryName: receivingLab.country,
                 assignedLab: assignedLab,
                 receptionDate: now,
                 receivedBy: user.username,
@@ -945,6 +950,7 @@ exports.createWalkInSample = async (req, res) => {
                 labId: autoId, // Walk-ins use their short ID as Lab ID (Finding #5)
                 metadata: JSON.stringify(sampleMeta),
                 fieldMetadata: JSON.stringify({
+                    profileReference: require('../services/intakeProfileService').capture({country: receivingLab.country}, {}, req.body, {actor: user.id || user.username, source: 'WALK_IN_INTAKE', isNew: true}).profileReference,
                     submitterName: { value: submitter, source: 'WALK_IN_INTAKE', lastUpdatedAt: now, lastUpdatedBy: user.username },
                     submitterContact: { value: submitterContact, source: 'WALK_IN_INTAKE', lastUpdatedAt: now, lastUpdatedBy: user.username },
                     description: { value: description, source: 'WALK_IN_INTAKE', lastUpdatedAt: now, lastUpdatedBy: user.username },
@@ -984,6 +990,7 @@ exports.createWalkInSample = async (req, res) => {
         });
     } catch (error) {
         console.error('Create Walk-in Error:', error);
+        if (error instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({code: error.code, message: error.message});
         res.status(500).json({ error: 'Failed to create walk-in sample' });
     }
 };
@@ -1878,10 +1885,36 @@ exports.updateSampleMetadata = async (req, res) => {
             return res.status(403).json({ error: 'Sample is outside your scope' });
         }
 
+        if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata) || Object.keys(metadata).some(key => ['__proto__','constructor','prototype','profileCompatibility'].includes(key))) {
+            return res.status(400).json({ error: 'Metadata must contain supported fields. Compatibility references are server-managed.' });
+        }
+        const identityKeys = Object.keys(metadata).filter(key => profileIdentity.IDENTITY_KEYS.has(key));
+        const released = !!sample.approvedAt || ['APPROVED','RELEASED','ARCHIVED','DISPOSED'].includes(sample.status);
+        if (released && identityKeys.length) {
+            return res.status(409).json({ code: 'PROFILE_AMENDMENT_REQUIRED', error: 'Use a reasoned clerical amendment to correct a released soil profile reference.' });
+        }
         const currentMeta = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : (sample.fieldMetadata || {});
+        if (!currentMeta || typeof currentMeta !== 'object' || Array.isArray(currentMeta)) throw new profileIdentity.ProfileReferenceConflictError('INVALID_STORED_PROVENANCE');
+        const oldMeta = JSON.stringify(currentMeta);
         const now = new Date();
 
+        if (identityKeys.length) {
+            const existing = Object.hasOwn(currentMeta,'profileReference') ? profileIdentity.validateReference(currentMeta.profileReference) : null;
+            if (req.body.expectedProfileRevision !== undefined && (!Number.isSafeInteger(req.body.expectedProfileRevision) || req.body.expectedProfileRevision !== (existing?.revision || 0))) {
+                return res.status(409).json({code:'PROFILE_REVISION_CONFLICT', error:'The soil profile reference has changed. Review the current value; your correction has not been discarded.'});
+            }
+            if (existing && !Object.hasOwn(metadata,'profileReference') && identityKeys.some(key => profileIdentity.PIT_KEYS.includes(key) || ['profileConfirmed','isComposite','composite'].includes(key))) {
+                return res.status(409).json({ code: 'PROFILE_REFERENCE_REQUIRED', error: 'Supply the complete soil profile correction so its meaning can be reviewed.' });
+            }
+            if (Object.hasOwn(metadata,'profileReference') || !existing) {
+                const input = Object.hasOwn(metadata,'profileReference') ? metadata : {...currentMeta,...metadata};
+                const captured = await require('../services/intakeProfileService').captureConfigured(sample, Object.hasOwn(metadata, 'profileReference') ? currentMeta : input, Object.hasOwn(metadata, 'profileReference') ? {profileReference: metadata.profileReference} : {}, {actor: user.username, source: 'MANUAL_EDIT', recordedAt: now.toISOString(), isNew: !existing && !Object.hasOwn(metadata, 'profileReference')}, prisma);
+                currentMeta.profileReference = captured.profileReference;
+            }
+        }
+
         Object.keys(metadata).forEach(key => {
+            if (key === 'profileReference') return;
             currentMeta[key] = {
                 value: metadata[key],
                 source: 'MANUAL_EDIT',
@@ -1890,26 +1923,27 @@ exports.updateSampleMetadata = async (req, res) => {
             };
         });
 
-        const updated = await prisma.sample.update({
-            where: { id: String(id) },
-            data: { fieldMetadata: JSON.stringify(currentMeta) }
-        });
-
-        await prisma.auditLog.create({
+        const updated = await prisma.$transaction(async tx => {
+            const changed = await tx.sample.updateMany({where:{id:String(id),updatedAt:sample.updatedAt},data:{fieldMetadata:JSON.stringify(currentMeta)}});
+            if (changed.count !== 1) throw new profileIdentity.ProfileReferenceConflictError('CONCURRENT_SAMPLE_EDIT');
+            await tx.auditLog.create({
             data: {
                 id: `audit-meta-${Date.now()}`,
                 entity: 'SAMPLE',
                 entityId: id,
                 action: 'METADATA_UPDATE',
-                details: `Updated metadata fields: ${Object.keys(metadata).join(', ')}`,
+                details: identityKeys.length ? JSON.stringify({fields:Object.keys(metadata),old:Object.fromEntries(Object.entries(JSON.parse(oldMeta)).filter(([key])=>profileIdentity.IDENTITY_KEYS.has(key))),new:Object.fromEntries(Object.entries(currentMeta).filter(([key])=>profileIdentity.IDENTITY_KEYS.has(key)))}) : `Updated metadata fields: ${Object.keys(metadata).join(', ')}`,
                 performedBy: user.username,
                 timestamp: now,
                 sampleId: String(id)
             }
+            });
+            return tx.sample.findUnique({where:{id:String(id)}});
         });
 
         res.json(updated);
     } catch (error) {
+        if (error instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({code:error.code,error:error.message,reason:error.reason});
         console.error('[updateSampleMetadata] Error:', error);
         res.status(500).json({ error: 'Failed to update metadata' });
     }
@@ -1938,19 +1972,16 @@ exports.updateSampleProject = async (req, res) => {
             return res.status(403).json({ error: 'Sample is outside your scope' });
         }
 
-        // Validate target project admission policy
+        // Validate target project admission policy and resolve one consistent identity.
+        let targetProject = null;
         if (projectId || projectCode) {
-            const targetProject = await prisma.project.findFirst({
-                where: {
-                    OR: [
-                        { id: projectId || '' },
-                        { code: projectCode || '' }
-                    ]
-                }
-            });
+            targetProject = await prisma.project.findUnique({where:projectId ? {id:projectId} : {code:projectCode}});
             if (!targetProject) {
                 return res.status(404).json({ error: 'TARGET_PROJECT_NOT_FOUND', message: 'Target project not found' });
             }
+            if (projectId && projectCode && targetProject.code !== projectCode) return res.status(409).json({code:'PROJECT_REFERENCE_CONFLICT',error:'The project ID and code do not identify the same project.'});
+            const membership = await require('../services/projectMembershipService').resolveProjectLabs(targetProject);
+            if (!require('../services/projectPolicyService').canReadProject(user,targetProject,{memberLabIds:membership.allMemberLabIds})) return res.status(403).json({error:'Target project is outside your scope'});
             if (['PAUSED', 'COMPLETED', 'ARCHIVED', 'CLOSED', 'DELETED'].includes(targetProject.status)) {
                 return res.status(422).json({
                     error: 'PROJECT_ADMISSIONS_PAUSED',
@@ -1958,6 +1989,7 @@ exports.updateSampleProject = async (req, res) => {
                 });
             }
         }
+        if (!targetProject) return res.status(400).json({error:'A target project is required'});
 
         const now = new Date();
         const history = typeof sample.history === 'string' ? JSON.parse(sample.history) : (sample.history || []);
@@ -1968,30 +2000,30 @@ exports.updateSampleProject = async (req, res) => {
             note: `Project changed from ${sample.projectId || sample.projectCode} to ${projectId || projectCode}`
         });
 
-        const updated = await prisma.sample.update({
-            where: { id: String(id) },
-            data: {
-                projectId: projectId || sample.projectId,
-                projectCode: projectCode || sample.projectCode,
-                history: JSON.stringify(history)
-            }
-        });
-
-        await prisma.auditLog.create({
+        const field = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : sample.fieldMetadata || {};
+        const meta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : sample.metadata || {};
+        const preserved = profileIdentity.preserveLegacyBeforeContextChange(sample,field,meta,require('../services/sisAdapterService').extractLegacyProfileReference,{actor:user.username,recordedAt:now.toISOString()});
+        const updated = await prisma.$transaction(async tx => {
+            const changed = await tx.sample.updateMany({where:{id:String(id),updatedAt:sample.updatedAt},data:{projectId:targetProject.id,projectCode:targetProject.code,history:JSON.stringify(history),fieldMetadata:JSON.stringify(preserved)}});
+            if (changed.count !== 1) throw new profileIdentity.ProfileReferenceConflictError('CONCURRENT_SAMPLE_EDIT');
+            await tx.auditLog.create({
             data: {
                 id: `audit-proj-move-${Date.now()}`,
                 entity: 'SAMPLE',
                 entityId: id,
                 action: 'PROJECT_CHANGE',
-                details: `Moved sample to project ${projectId || projectCode}`,
+                details: JSON.stringify({from:sample.projectCode,to:targetProject.code,profilePreservation:preserved.profileCompatibility || null}),
                 performedBy: user.username,
                 timestamp: now,
                 sampleId: String(id)
             }
+            });
+            return tx.sample.findUnique({where:{id:String(id)}});
         });
 
         res.json(updated);
     } catch (error) {
+        if (error instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({code:error.code,error:error.message,reason:error.reason});
         console.error('[updateSampleProject] Error:', error);
         res.status(500).json({ error: 'Failed to update sample project' });
     }
@@ -2899,17 +2931,10 @@ exports.applyOrderRevision = async (req, res) => {
  */
 exports.createAmendment = async (req, res) => {
     const { id } = req.params;
-    const { type, reason, affectedOrderLines, affectedResults, affectedReports, impactAssessment, idempotencyKey } = req.body;
+    const { type, reason, affectedOrderLines, affectedResults, affectedReports, impactAssessment, idempotencyKey, profileCorrection, expectedProfileRevision } = req.body;
     const user = req.user;
 
     const key = idempotencyKey || req.headers['x-idempotency-key'];
-    if (key) {
-        const check = await commandReceiptService.checkReceipt(key, 'CREATE_AMENDMENT', user.username, `Sample:${id}`);
-        if (check.isExisting) {
-            return res.json(check.receipt.parsedOutcome);
-        }
-    }
-
     try {
         if (!hasPermission(user, 'APPROVE_RESULTS')) {
             return res.status(403).json({ error: 'Insufficient permissions to create amendment.' });
@@ -2924,6 +2949,30 @@ exports.createAmendment = async (req, res) => {
 
         if (!reason || typeof reason !== 'string' || reason.trim() === '') {
             return res.status(400).json({ error: 'Amendment reason is required and cannot be blank.' });
+        }
+
+        const payloadHash = commandReceiptService.computePayloadHash(req.body);
+        if (key) {
+            const check = await commandReceiptService.checkReceipt(key,'CREATE_AMENDMENT',user.username,`Sample:${id}`,payloadHash);
+            if (check.conflict || (check.isExisting && profileCorrection !== undefined && !check.receipt.parsedOutcome?.payloadHash)) return res.status(409).json({code:'IDEMPOTENCY_CONFLICT',error:'This operation key belongs to a different amendment. Your input is preserved.'});
+            if (check.isExisting) return res.json(check.receipt.parsedOutcome);
+        }
+
+        let correctedField = null, oldProfile = null, newProfile = null;
+        if (profileCorrection !== undefined) {
+            if (type && type !== 'CLERICAL') return res.status(400).json({error:'Soil profile corrections require a clerical amendment.'});
+            const field = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : sample.fieldMetadata || {};
+            const oldRevision = Number.isSafeInteger(field.profileReference?.revision) ? field.profileReference.revision : 0;
+            if (!Number.isSafeInteger(expectedProfileRevision) || expectedProfileRevision !== oldRevision) return res.status(409).json({code:'PROFILE_REVISION_CONFLICT',error:'The soil profile reference has changed. Review the current value; your correction has not been discarded.'});
+            let namespace = profileIdentity.namespaceFor(sample);
+            if (field.profileReference) {
+                try { namespace = profileIdentity.validateReference(field.profileReference).namespace || namespace; } catch { /* A reasoned, authorized amendment can repair invalid stored provenance. */ }
+            } else if (field.profileCompatibility) {
+                namespace = require('../services/sisAdapterService').extractProfileReference(sample,field,{}).profileNamespace || namespace;
+            }
+            oldProfile = Object.fromEntries(Object.entries(field).filter(([name])=>profileIdentity.IDENTITY_KEYS.has(name)));
+            newProfile = profileIdentity.captureReference({profileReference:profileCorrection},{sample,actor:user.username,source:'CLERICAL_AMENDMENT',recordedAt:new Date().toISOString(),revision:oldRevision+1,authorizedNamespace:namespace});
+            correctedField = {...field,profileReference:newProfile};
         }
 
         // If sample is disposed, only clerical / metadata amendments allowed
@@ -2951,6 +3000,11 @@ exports.createAmendment = async (req, res) => {
                 }
             });
 
+            if (correctedField) {
+                const changed = await tx.sample.updateMany({where:{id:sample.id,updatedAt:sample.updatedAt},data:{fieldMetadata:JSON.stringify(correctedField)}});
+                if (changed.count !== 1) throw new profileIdentity.ProfileReferenceConflictError('CONCURRENT_SAMPLE_EDIT');
+            }
+
             const crypto = require('crypto');
             await tx.auditLog.create({
                 data: {
@@ -2958,7 +3012,7 @@ exports.createAmendment = async (req, res) => {
                     entity: 'SAMPLE',
                     entityId: sample.id,
                     action: 'SAMPLE_AMENDMENT_CREATED',
-                    details: `Created amendment ${amendment.id} (${type}): ${reason}`,
+                    details: correctedField ? JSON.stringify({amendmentId:amendment.id,type:'CLERICAL',reason,old:oldProfile,new:newProfile}) : `Created amendment ${amendment.id} (${type}): ${reason}`,
                     performedBy: user.username,
                     sampleId: sample.id
                 }
@@ -2966,7 +3020,8 @@ exports.createAmendment = async (req, res) => {
 
             const resultPayload = {
                 success: true,
-                amendment
+                amendment,
+                ...(newProfile ? {profileReference:newProfile} : {})
             };
 
             if (key) {
@@ -2976,7 +3031,8 @@ exports.createAmendment = async (req, res) => {
                     targetResource: `Sample:${id}`,
                     actor: user.username,
                     status: 'SUCCESS',
-                    outcome: resultPayload
+                    outcome: resultPayload,
+                    payloadHash
                 });
             }
 
@@ -2985,6 +3041,7 @@ exports.createAmendment = async (req, res) => {
 
         res.json(outcome);
     } catch (err) {
+        if (err instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({code:err.code,error:err.message,reason:err.reason});
         console.error('[createAmendment] Error:', err);
         res.status(500).json({ error: 'Failed to create amendment' });
     }

@@ -186,6 +186,8 @@ class KoboService {
      * Handles nested Kobo field paths automatically
      */
     transformSubmission(submission, fieldMapping, labId) {
+        const profileSource = require('./koboProfileService');
+        profileSource.validateMapping(fieldMapping);
         // Find values using flexible path matching
         const findField = (fieldNames) => {
             for (const name of fieldNames) {
@@ -196,7 +198,8 @@ class KoboService {
         };
 
         // Extract key fields handling nested paths
-        const siteId = findField(['site_id', 'codigo_sitio']) || '';
+        const sitePath = fieldMapping?.profileReference?.sitePath;
+        const siteId = sitePath ? require('./profileIdentityService').scalar(profileSource.exactValue(submission, sitePath), 255, true) : require('./profileIdentityService').scalar(findField(['site_id', 'codigo_sitio']), 255, true) ?? '';
         const barcodeD1 = String(findField(['barcode_d1', 'codigo_barras_p1', 'barcode_d1_scan']) || '').trim();
         const barcodeD2 = String(findField(['barcode_d2', 'codigo_barras_p2', 'barcode_d2_scan']) || '').trim();
         const samplingSucceeded = String(findField(['sampling_succeeded', 'muestreo_exitoso']) || '').toLowerCase() === 'yes';
@@ -204,21 +207,24 @@ class KoboService {
         const d2Text = String(findField(['d2_text', 'd2_texto']) || '').trim();
 
         // Get coordinates from _geolocation or geopoint field
-        let lat = 0, lng = 0;
+        let lat = null, lng = null;
         if (submission._geolocation && Array.isArray(submission._geolocation)) {
-            lat = submission._geolocation[0] || 0;
-            lng = submission._geolocation[1] || 0;
+            lat = profileSource.optionalNumber(submission._geolocation[0], -90, 90);
+            lng = profileSource.optionalNumber(submission._geolocation[1], -180, 180);
         } else {
             const geopoint = findField(['geopoint', 'gps']);
             if (geopoint && typeof geopoint === 'string') {
                 const parts = geopoint.split(' ');
-                lat = parseFloat(parts[0]) || 0;
-                lng = parseFloat(parts[1]) || 0;
+                lat = profileSource.optionalNumber(parts[0], -90, 90);
+                lng = profileSource.optionalNumber(parts[1], -180, 180);
             }
         }
 
         // Collection date
-        const collectedAt = submission.today || submission.start || submission._submission_time || new Date().toISOString();
+        const profileEvidence = profileSource.extractEvidence(submission, fieldMapping, siteId);
+        const collectedAt = profileEvidence.collectedAt;
+        // Comparison-only legacy facts: do not turn interview/submission dates or missing GPS into source observations.
+        const legacyFingerprintFacts = {lat: lat ?? 0, lng: lng ?? 0, collected_at: submission.today || submission.start || submission._submission_time || null};
 
         // Validate sample ID
         const isValidSampleId = (id) => {
@@ -257,14 +263,16 @@ class KoboService {
             submission_time: submission._submission_time,
             labId: labId,
             attachments: submission._attachments || [],
-            raw_data: submission  // Store ALL Kobo data
+            raw_data: submission,  // Store ALL Kobo data
+            legacyFingerprintFacts
         };
 
         if (sampleIdD1) {
             samples.push({
                 ...baseData,
                 original_id: sampleIdD1,
-                depth: 'D1'
+                depth: 'D1',
+                profileEvidence: profileSource.extractEvidence(submission, fieldMapping, siteId, 'D1')
             });
         }
 
@@ -272,7 +280,8 @@ class KoboService {
             samples.push({
                 ...baseData,
                 original_id: sampleIdD2,
-                depth: 'D2'
+                depth: 'D2',
+                profileEvidence: profileSource.extractEvidence(submission, fieldMapping, siteId, 'D2')
             });
         }
 

@@ -786,7 +786,8 @@ components:
               type: [string, "null"]
               example: "PLOT-ALPHA"
             namespace:
-              type: string
+              type: [string, "null"]
+              description: Saved source namespace. Null for an explicitly unknown reference; never a receiver-owned national profile identifier.
               example: "GTM:SOILFER-GTM"
             key:
               type: [string, "null"]

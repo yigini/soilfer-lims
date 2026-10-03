@@ -2308,4 +2308,49 @@
       "applyFilters": "Aplicar filtros"
     }
   }
+,
+  "profileReference": {
+    "label": "Perfil de suelo / punto de muestreo",
+    "code": "Código registrado en campo",
+    "unknown": "No registrado",
+    "namespace": "Referencia del estudio",
+    "meaning": "Significado registrado",
+    "help": "Use el código del registro de campo. Es independiente de la etiqueta de la bolsa y del identificador del laboratorio. Déjelo sin registrar si la fuente no identifica un perfil o punto de muestreo.",
+    "confirmedHelp": "Seleccione un perfil de suelo confirmado solo si el registro original verifica explícitamente la calicata o el perfil.",
+    "namespaceHelp": "La referencia del estudio se controla mediante la configuración del proyecto o de la fuente.",
+    "setUnknown": "Registrar como desconocido",
+    "conflict": "La referencia del perfil necesita revisión. Se conserva el trabajo del laboratorio.",
+    "correct": "Corregir la referencia de campo",
+    "correctionHelp": "Solo cambia la procedencia. Los resultados analíticos y las versiones anteriores de los informes publicados se conservan.",
+    "reason": "Motivo y verificación de la fuente (obligatorio)",
+    "saveFailed": "No se pudo guardar. Se conservan los datos introducidos.",
+    "mappingTitle": "Correspondencia de campos del perfil de suelo",
+    "mappingHelp": "Introduzca rutas exactas de Kobo, como soil/pit_id. Use una referencia del estudio fija o su ruta de origen, y un significado fijo o su ruta. D1/D2 identifican bolsas; vincule las profundidades medidas por separado. Los cambios afectan a nuevos registros; las identidades existentes se conservan.",
+    "mappingSaved": "Correspondencia guardada. Se conservaron las identidades existentes.",
+    "fromSource": "Punto de muestreo, salvo correspondencia explícita",
+    "relations": {
+      "SITE_POINT": "Punto de muestreo / sitio",
+      "COMPOSITE": "Área de muestreo compuesto",
+      "CONFIRMED_PROFILE": "Perfil de suelo / calicata confirmado",
+      "UNSPECIFIED": "No registrado"
+    },
+    "mapping": {
+      "codePath": "Ruta del código de perfil / calicata",
+      "sitePath": "Ruta independiente del código del sitio",
+      "namespace": "Referencia fija del estudio",
+      "namespacePath": "Ruta de la referencia del estudio",
+      "relationPath": "Ruta del significado registrado",
+      "collectionDatePath": "Ruta de la fecha de toma en campo",
+      "depthTopD1Path": "Ruta de profundidad superior D1 (cm)",
+      "depthBottomD1Path": "Ruta de profundidad inferior D1 (cm)",
+      "depthTopD2Path": "Ruta de profundidad superior D2 (cm)",
+      "depthBottomD2Path": "Ruta de profundidad inferior D2 (cm)"
+    },
+    "manifest": {
+      "profileCode": "Código del perfil / punto de muestreo",
+      "profileNamespace": "Referencia configurada del estudio",
+      "profileRelation": "Significado registrado (SITE_POINT, COMPOSITE, CONFIRMED_PROFILE)",
+      "collectionDate": "Fecha de toma en campo"
+    }
+  }
 }

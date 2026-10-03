@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import {useLanguage} from '../../context/LanguageContext';
 import * as XLSX from 'xlsx';
 import { X, Upload, FileSpreadsheet, Check, AlertCircle, ArrowRight, Save, FolderOpen, RefreshCw } from 'lucide-react';
 import { parseCoordinates } from '../../utils/coordParser';
@@ -7,7 +8,11 @@ import { MAX_FILE_SIZE } from '../../utils/spreadsheetImport';
 const PROFILE_STORAGE_KEY = 'soilfer_manifest_mapping_profiles';
 
 const LIMS_FIELDS = [
-    { key: 'sampleId', label: 'Sample Identifier (Required)', required: true, pattern: /id|sample|code|barcode/i },
+    { key: 'sampleId', label: 'Sample Identifier (Required)', required: true, pattern: /^(sample.?id|sample.?identifier|barcode|bag.?id|field.?sample.?id|id)$/i },
+    { key: 'profileCode', label: 'Soil profile / sampling point code', required: false, pattern: /^(pit.?id|profile.?id|profile.?code)$/i },
+    { key: 'profileNamespace', label: 'Configured survey reference', required: false, pattern: /^(profile.?namespace|survey.?reference)$/i },
+    { key: 'profileRelation', label: 'Recorded profile meaning', required: false, pattern: /^(profile.?relation|profile.?meaning)$/i },
+    { key: 'collectionDate', label: 'Field collection date', required: false, pattern: /^(collection.?date|collected.?at)$/i },
     { key: 'latitude', label: 'Latitude (DD)', required: false, pattern: /^lat|latitude/i },
     { key: 'longitude', label: 'Longitude (DD)', required: false, pattern: /^lon|lng|longitude/i },
     { key: 'coordinates', label: 'Combined Coords (DD / DMS / UTM)', required: false, pattern: /coord|gps|location/i },
@@ -22,7 +27,7 @@ const LIMS_FIELDS = [
 ];
 
 const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
-    if (!isOpen) return null;
+    const {t} = useLanguage();
 
     const [step, setStep] = useState(1); // 1: Upload, 2: Map, 3: Preview
     const [fileName, setFileName] = useState('');
@@ -151,7 +156,7 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
         const samples = [];
         rawRows.forEach((row, idx) => {
             const rawId = row[mapping.sampleId];
-            if (!rawId || String(rawId).trim() === '') return;
+            if (rawId == null || String(rawId).trim() === '') return;
 
             const originalId = String(rawId).trim();
             let lat = null, lng = null, uncertaintyM = null;
@@ -178,6 +183,13 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
             }
 
             samples.push({
+                ...(mapping.profileCode ? {
+                    profileReference: {code: row[mapping.profileCode] == null || String(row[mapping.profileCode]).trim() === '' ? null : String(row[mapping.profileCode]).trim(),
+                        relation: row[mapping.profileCode] == null || String(row[mapping.profileCode]).trim() === '' ? 'UNSPECIFIED' : (mapping.profileRelation ? String(row[mapping.profileRelation] || 'SITE_POINT').trim() : 'SITE_POINT'),
+                        ...(mapping.profileNamespace && row[mapping.profileNamespace] != null && String(row[mapping.profileNamespace]).trim() ? {namespace:String(row[mapping.profileNamespace]).trim()} : {})},
+                    profileSourceEvidence: {column: mapping.profileCode, record:`${fileName}:row:${idx + 1}`}
+                } : {}),
+                collectionDate: mapping.collectionDate && row[mapping.collectionDate] ? String(row[mapping.collectionDate]) : null,
                 originalId,
                 status: 'ACCEPTED',
                 latitude: lat,
@@ -206,6 +218,8 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
         onImport(parsedSamples);
         onClose();
     };
+
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
@@ -309,7 +323,7 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
                                     <div key={field.key} className="p-3 bg-sf-surface border border-sf-divider rounded-xl flex flex-col justify-between">
                                         <div className="flex justify-between items-center mb-1.5">
                                             <label className="text-xs font-bold text-sf-text">
-                                                {field.label} {field.required && <span className="text-red-500">*</span>}
+                                                {['profileCode','profileNamespace','profileRelation','collectionDate'].includes(field.key) ? t(`profileReference.manifest.${field.key}`) : field.label} {field.required && <span className="text-red-500">*</span>}
                                             </label>
                                             {mapping[field.key] && (
                                                 <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-0.5">
@@ -354,6 +368,7 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
                                         <tr>
                                             <th className="p-2.5">#</th>
                                             <th className="p-2.5">Sample ID</th>
+                                            <th className="p-2.5">{t('profileReference.label')}</th>
                                             <th className="p-2.5">Coordinates</th>
                                             <th className="p-2.5">Depths (cm)</th>
                                             <th className="p-2.5">Mass (g)</th>
@@ -365,6 +380,7 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
                                             <tr key={idx} className="hover:bg-sf-canvas">
                                                 <td className="p-2 text-sf-muted">{idx + 1}</td>
                                                 <td className="p-2 font-bold text-sf-text">{s.originalId}</td>
+                                                <td className="p-2 text-sf-text"><div>{s.profileReference?.code ?? t('profileReference.unknown')}</div><div className="text-xs text-sf-muted">{s.profileReference?.namespace || '—'}</div>{s.profileReference?.code != null && <div className="text-xs text-sf-muted">{t(`profileReference.relations.${s.profileReference.relation}`)}</div>}</td>
                                                 <td className="p-2">
                                                     {s.latitude && s.longitude
                                                         ? `${s.latitude.toFixed(4)}, ${s.longitude.toFixed(4)}`

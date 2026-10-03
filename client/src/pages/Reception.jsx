@@ -11,6 +11,7 @@ import WalkInForm from '../components/reception/WalkInForm';
 import ComplianceChecklist from '../components/reception/ComplianceChecklist';
 import SampleMap from '../components/reception/SampleMap';
 import FieldProvenanceCard from '../components/reception/FieldProvenanceCard';
+import ProfileReferenceFields from '../components/reception/ProfileReferenceFields';
 import BatchIntake from '../components/reception/BatchIntake';
 import WedgeModeBar from '../components/reception/WedgeModeBar';
 import KeyboardShortcutsModal from '../components/reception/KeyboardShortcutsModal';
@@ -146,9 +147,13 @@ const Reception = () => {
     }, [result?.labId]);
 
     // Walk-in Specific Data
+    const [profileInput, setProfileInput] = useState(undefined);
+    const currentProfile = useMemo(()=>{
+        try {const field = typeof sampleData?.fieldMetadata === 'string' ? JSON.parse(sampleData.fieldMetadata) : sampleData?.fieldMetadata; return field?.profileReference || field?.profileCompatibility || null;} catch {return null;}
+    },[sampleData]);
     const [submitter, setSubmitter] = useState({ name: '', surname: '', phone: '', email: '', organization: '', contactMethod: 'Phone' });
     const [sampling, setSampling] = useState({
-        date: new Date().toISOString().split('T')[0],
+        date: '',
         depth: '',
         depthType: '',
         depthMin: null,
@@ -423,6 +428,7 @@ const Reception = () => {
     }, [location.search, token]);
 
     const resetForm = () => {
+        setProfileInput(undefined);
         setScanCode('');
         setSampleData(null);
         setMobileStep('identify');
@@ -454,7 +460,7 @@ const Reception = () => {
         if (mode === 'WALK_IN') {
             setSubmitter({ name: '', surname: '', phone: '', email: '', organization: '', contactMethod: 'Phone' });
             setSampling({
-                date: new Date().toISOString().split('T')[0],
+                date: '',
                 depth: '',
                 depthType: '',
                 depthMin: null,
@@ -522,6 +528,7 @@ const Reception = () => {
                     onConfirm: () => {
                         setSubmitter(data.submitter || submitter);
                         setSampling(data.sampling || sampling);
+                        setProfileInput(data.profileInput);
                         setSelectedGroup(data.selectedGroup || '');
                         setAdditions(data.additions || []);
                         setRemovals(data.removals || []);
@@ -553,6 +560,7 @@ const Reception = () => {
             const data = {
                 submitter,
                 sampling,
+                profileInput,
                 selectedGroup,
                 additions,
                 removals,
@@ -570,10 +578,11 @@ const Reception = () => {
         }, 10000);
 
         return () => clearInterval(timer);
-    }, [mode, submitter, sampling, selectedGroup, additions, removals, checklistData, intakeNotes, receivedMass, massWarningAcknowledged, moistureOnArrival, foreignMaterial, intakePhotos, isResubmission, result]);
+    }, [mode, submitter, sampling, profileInput, selectedGroup, additions, removals, checklistData, intakeNotes, receivedMass, massWarningAcknowledged, moistureOnArrival, foreignMaterial, intakePhotos, isResubmission, result]);
 
     const populateDeskFacts = (targetSample) => {
         if (!targetSample) return;
+        setProfileInput(undefined);
         const recData = targetSample.receptionData ? (typeof targetSample.receptionData === 'string' ? JSON.parse(targetSample.receptionData) : targetSample.receptionData) : null;
         const meta = targetSample.metadata ? (typeof targetSample.metadata === 'string' ? JSON.parse(targetSample.metadata) : targetSample.metadata) : null;
 
@@ -669,7 +678,7 @@ const Reception = () => {
         setCustodyHandoverAt(new Date().toISOString().slice(0, 16));
         setCustodyCounterSigned(true);
         setSampling({
-            date: new Date().toISOString().split('T')[0],
+            date: '',
             depth: '',
             depthType: '',
             depthMin: null,
@@ -796,7 +805,11 @@ const Reception = () => {
                                 }));
                             }
 
-                            const savedChecklist = recData?.checklist || meta?.nonConformance?.checklist;
+        const field = targetSample.fieldMetadata ? (typeof targetSample.fieldMetadata === 'string' ? JSON.parse(targetSample.fieldMetadata) : targetSample.fieldMetadata) : {};
+        const sourceValue = value => value && typeof value === 'object' && Object.hasOwn(value, 'value') ? value.value : value;
+        const savedDate = sourceValue(field.collectionDate ?? field.collection_date ?? field.samplingDate ?? recData?.samplingDetails?.date);
+        setSampling(prev => ({...prev, date: savedDate ? String(savedDate).slice(0, 10) : '', depthTopCm: targetSample.depthTopCm ?? null, depthBottomCm: targetSample.depthBottomCm ?? null}));
+        const savedChecklist = recData?.checklist || meta?.nonConformance?.checklist;
                             if (savedChecklist) setChecklistData(savedChecklist);
                             if (recData?.notes || found.notes) setIntakeNotes(recData?.notes || found.notes || '');
 
@@ -1269,6 +1282,7 @@ const Reception = () => {
         setLoading(true);
 
         const payload = {
+            ...(profileInput !== undefined ? {profileReference: profileInput} : {}),
             originalId: scanCode,
             decision: isDraft ? 'DRAFT' : (decision === 'REJECTED' ? 'REJECTED' : 'ACCEPTED'),
             checklist: checklistData,
@@ -1846,7 +1860,7 @@ const Reception = () => {
                         })}
                     </div>
 
-                    <div className="grid lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4">
 
                         {/* LEFT COLUMN: SAMPLE DATA */}
                         <div className="space-y-6">
@@ -1885,6 +1899,7 @@ const Reception = () => {
                                 )}
 
                                 {/* Show Manual Form for Walk-ins OR Field Provenance Card for Project Samples (RC-09) */}
+                                <ProfileReferenceFields value={profileInput} onChange={setProfileInput} current={currentProfile} disabled={loading}/>
                                 {(mode === 'WALK_IN' || sampleData?.isNew) ? (
                                     <WalkInForm
                                         submitter={submitter} setSubmitter={setSubmitter}

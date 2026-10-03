@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Upload, Smartphone, Database, CheckCircle2, AlertTriangle, ArrowRight, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import KoboProfileMappingEditor from './KoboProfileMappingEditor';
 
 export default function DataConnectionsTab({
     project,
@@ -167,6 +168,7 @@ export default function DataConnectionsTab({
                     </p>
 
                     {/* Action buttons when user has connection management capability */}
+                    {canManageConnections && koboConfig?.configId && koboConfig?.updatedAt && <KoboProfileMappingEditor key={koboConfig.configId} projectId={project.id} config={koboConfig}/>}
                     {canManageConnections && (koboConfig?.configId || (Array.isArray(koboConfig?.configs) && koboConfig.configs.length > 0)) && (
                         <div className="pt-2 border-t border-sf-divider space-y-2">
                             {actionMsg && (

@@ -8,6 +8,8 @@ const crypto = require('crypto');
 const sampleOriginService = require('../services/sampleOriginService');
 const sampleStateService = require('../services/sampleStateService');
 const projectPolicyService = require('../services/projectPolicyService');
+const profileIdentity = require('../services/profileIdentityService');
+const intakeProfile = require('../services/intakeProfileService');
 
 // In-memory cache for reverse geocoding (24hr TTL)
 const geocodeCache = new Map();
@@ -472,6 +474,8 @@ exports.processIntake = async (req, res) => {
             const exceptionRecord = req.body.exceptionRecord || (req.body.exceptionReason ? { reason: req.body.exceptionReason, authorizer: user.username, authorizedAt: new Date().toISOString() } : null);
 
             const isWalkInDeskSample = !resolvedTargetProject && isWalkIn;
+            const receivingLab = user.labId && await prisma.lab.findUnique({where: {id: user.labId}});
+            if (!receivingLab?.isActive) return res.status(403).json({code: 'MISSING_LAB_SCOPE', message: 'Select an active receiving laboratory before creating an intake.'});
             const initialMetadata = isWalkInDeskSample
                 ? { origin: sampleOriginService.ORIGIN_TYPES.DESK_WALKIN }
                 : (hasException ? { exceptionRecord, origin: 'DESK_EXCEPTION' } : {});
@@ -485,6 +489,9 @@ exports.processIntake = async (req, res) => {
                     projectId: resolvedTargetProject ? resolvedTargetProject.id : null,
                     assignedLab: user.labId,
                     metadata: JSON.stringify(initialMetadata),
+                    country: receivingLab.country,
+                    countryName: receivingLab.country,
+                    fieldMetadata: JSON.stringify(await intakeProfile.captureConfigured({projectCode: resolvedTargetProject?.code || null, assignedLab: user.labId, country: receivingLab.country}, {}, req.body, {actor: user.id || receivedBy, isNew: true}, prisma)),
                     history: JSON.stringify([])
                 }
             });
@@ -513,6 +520,8 @@ exports.processIntake = async (req, res) => {
         }
 
         const now = new Date();
+        const intakeFieldMetadata = await intakeProfile.captureConfigured(sample, sample.fieldMetadata, req.body, {actor: user.id || receivedBy, recordedAt: now.toISOString()}, prisma);
+        const preservedCompactMetadata = intakeProfile.parseFieldMetadata(sample.metadata);
         const history = typeof sample.history === 'string' ? JSON.parse(sample.history) : (sample.history || []);
 
         if (decision === 'REJECTED' || decision === 'REJECT') {
@@ -540,8 +549,9 @@ exports.processIntake = async (req, res) => {
             const receivingOfficerSignature = req.body.receivingOfficerSignature || coc.officerSignature || `CONFIRMED:${receivedBy}:${now.toISOString()}`;
 
             const { transitionSample } = require('../services/sampleStateService');
-            const updated = await transitionSample(sample.id, workflow.SAMPLE_STATES.RECEIVED_REJECTED, user, `Sample rejected during intake: ${ncReason}`, {
+            const rejectionData = {
                 rejectionReason: ncReason,
+                fieldMetadata: JSON.stringify(intakeFieldMetadata),
                 intakePhotos: photosList.length > 0 ? JSON.stringify(photosList) : null,
                 receptionDate: now,
                 receivedBy: receivedBy,
@@ -565,6 +575,7 @@ exports.processIntake = async (req, res) => {
                     isWalkIn: isWalkIn || false
                 }),
                 metadata: JSON.stringify({
+                    ...preservedCompactMetadata,
                     nonConformance: {
                         reason: ncReason,
                         checklist,
@@ -575,6 +586,12 @@ exports.processIntake = async (req, res) => {
                     }
                 }),
                 history: JSON.stringify(history)
+            };
+            const updated = await prisma.$transaction(async tx => {
+                const current = await tx.sample.findUnique({where: {id: sample.id}});
+                if (!current || current.updatedAt.getTime() !== sample.updatedAt.getTime()) throw new profileIdentity.ProfileReferenceConflictError('SOURCE_CHANGED');
+                require('../utils/scopeGuard').ensureScope(user, current, {altLabField: 'assignedLab'});
+                return transitionSample(sample.id, workflow.SAMPLE_STATES.RECEIVED_REJECTED, user, `Sample rejected during intake: ${ncReason}`, rejectionData, tx);
             });
 
             await prisma.auditLog.create({
@@ -617,7 +634,7 @@ exports.processIntake = async (req, res) => {
                 note: sample.status === 'RECEIVED' ? 'Intake draft updated (status retained as RECEIVED)' : 'Saved as Draft'
             });
 
-            const currentFieldMeta = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : (sample.fieldMetadata || {});
+            const currentFieldMeta = {...intakeFieldMetadata};
             const mergeField = (key, value) => {
                 if (value !== undefined && value !== null && value !== '') {
                     currentFieldMeta[key] = { value: value, source: 'DRAFT', lastUpdatedAt: now, lastUpdatedBy: receivedBy };
@@ -699,9 +716,11 @@ exports.processIntake = async (req, res) => {
             }
 
             // Atomic conditional update: guarantee state was not concurrently locked by another actor
+            updateData.fieldMetadata = JSON.stringify(intakeProfile.preserveForContextChange(sample, currentFieldMeta, updateData, user.id || receivedBy));
             const updateRes = await prisma.sample.updateMany({
                 where: {
                     id: sample.id,
+                    updatedAt: sample.updatedAt,
                     status: { notIn: LOCKED_INTAKE_STATUSES }
                 },
                 data: updateData
@@ -828,7 +847,7 @@ exports.processIntake = async (req, res) => {
             }
         }
 
-        const currentFieldMeta = typeof sample.fieldMetadata === 'string' ? JSON.parse(sample.fieldMetadata) : (sample.fieldMetadata || {});
+        const currentFieldMeta = {...intakeFieldMetadata};
         const mergeField = (key, value) => {
             if (value !== undefined && value !== null && value !== '') {
                 currentFieldMeta[key] = { value, source: 'WALK_IN_INTAKE', lastUpdatedAt: now, lastUpdatedBy: receivedBy };
@@ -914,9 +933,9 @@ exports.processIntake = async (req, res) => {
                 admin1: samplingDetails.district || null,
                 admin2: samplingDetails.areaVillage || null,
                 landmark: samplingDetails.landmark || null,
-                latitude: samplingDetails.coordinates?.lat || null,
-                longitude: samplingDetails.coordinates?.lng || null,
-                gpsAccuracy: samplingDetails.coordinates?.accuracy || null,
+                latitude: samplingDetails.coordinates?.lat ?? null,
+                longitude: samplingDetails.coordinates?.lng ?? null,
+                gpsAccuracy: samplingDetails.coordinates?.accuracy ?? null,
                 locationCaptureMethod: captureMethod || null,
                 locationConfidence: finalConfidence,
                 locationUncertaintyReason: samplingDetails.locationUncertaintyReason || null
@@ -925,6 +944,7 @@ exports.processIntake = async (req, res) => {
 
             // Legacy key mapping (preserves backward compat)
             Object.entries(samplingDetails).forEach(([k, v]) => {
+                if (profileIdentity.IDENTITY_KEYS.has(k)) return;
                 if (k === 'coordinates' && v) {
                     mergeField('latitude', v.lat);
                     mergeField('longitude', v.lng);
@@ -1069,10 +1089,17 @@ exports.processIntake = async (req, res) => {
         }
 
         console.log(`[INTAKE] Updating sample ${sample.id} with status RECEIVED`);
+        updateData.fieldMetadata = JSON.stringify(intakeProfile.preserveForContextChange(sample, currentFieldMeta, updateData, user.id || receivedBy));
         const { transitionSample } = require('../services/sampleStateService');
         const nextStatus = updateData.status || (updateData.labId ? 'ACCEPTED' : 'RECEIVED');
         delete updateData.status;
-        const updated = await transitionSample(sample.id, nextStatus, user, 'Intake completed at reception', updateData);
+        const updated = await prisma.$transaction(async tx => {
+            const current = await tx.sample.findUnique({where: {id: sample.id}});
+            if (!current || current.updatedAt.getTime() !== sample.updatedAt.getTime()) throw new profileIdentity.ProfileReferenceConflictError('SOURCE_CHANGED');
+            require('../utils/scopeGuard').ensureScope(user, current, {altLabField: 'assignedLab'});
+            if (current.approvedAt || ['APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED'].includes(current.status)) throw new profileIdentity.ProfileReferenceConflictError('RELEASED_REFERENCE');
+            return transitionSample(sample.id, nextStatus, user, 'Intake completed at reception', updateData, tx);
+        });
 
         // Automatically generate work items for specified analyses
         try {
@@ -1136,8 +1163,8 @@ exports.processIntake = async (req, res) => {
         });
 
     } catch (error) {
+        if (error instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({success: false, code: error.code, error: error.code, message: error.message});
         console.error('[processIntake] CRITICAL FAILURE:', error);
-        console.error('Request Body:', JSON.stringify(req.body, null, 2));
         if (error.code) console.error('Prisma Error Code:', error.code);
         if (error.meta) console.error('Prisma Meta:', error.meta);
         res.status(500).json({ success: false, message: 'Internal server error: ' + error.message });
@@ -1941,7 +1968,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                 const locSource = s.locationSource || (lat && lng ? 'DESK_PASTE' : 'TEXT_ONLY');
 
                 // Generate short sequential Lab ID (RC-13)
-                const labId = await idGenerator.generateLabId(userLab, 'S');
+                const labId = await idGenerator.generateLabId(userLab, 'S', tx);
 
                 // Check if sample already exists (e.g. EXPECTED sample in Project)
                 const existing = await tx.sample.findFirst({
@@ -1952,6 +1979,13 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                         ]
                     }
                 });
+                if (existing && resolvedConsignmentProject && ((existing.projectCode && existing.projectCode !== resolvedConsignmentProject.code) || (existing.projectId && existing.projectId !== resolvedConsignmentProject.id))) throw new profileIdentity.ProfileReferenceConflictError('CROSS_PROJECT_CONFLICT');
+                if (existing) {
+                    require('../utils/scopeGuard').ensureScope(user, existing, {altLabField: 'assignedLab'});
+                    if (LOCKED_INTAKE_STATUSES.includes(existing.status) || existing.approvedAt) throw new profileIdentity.ProfileReferenceConflictError('SAMPLE_LOCKED');
+                    const currentMeta = intakeProfile.parseFieldMetadata(existing.metadata);
+                    if (currentMeta.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD') throw new profileIdentity.ProfileReferenceConflictError('PROVENANCE_HOLD');
+                }
 
                 const historyNote = isRejected
                     ? `Rejected during batch reception under Consignment ${consignment.code}. Reason: ${rejectionReason}`
@@ -1965,6 +1999,11 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                     assignedLab: userLab,
                     projectCode: resolvedConsignmentProject ? resolvedConsignmentProject.code : (consignment.projectCode || (existing?.projectCode || null)),
                     projectId: resolvedConsignmentProject ? resolvedConsignmentProject.id : (existing?.projectId || null),
+                    fieldMetadata: JSON.stringify(await intakeProfile.captureConfigured(
+                        {...existing, assignedLab: userLab, projectCode: resolvedConsignmentProject?.code || existing?.projectCode || null},
+                        existing?.fieldMetadata || s.fieldMetadata || (s.collectionDate ? {collectionDate: s.collectionDate} : {}),
+                        s, {actor: user.id || receivedBy, source: 'MANIFEST_INTAKE', isNew: !existing, recordedAt: now.toISOString()}, tx
+                    )),
                     receptionDate: now,
                     receivedBy,
                     acceptedBy: isRejected ? null : receivedBy,
@@ -2014,6 +2053,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                 };
 
                 if (existing) {
+                    sampleDataCommon.fieldMetadata = JSON.stringify(intakeProfile.preserveForContextChange(existing, sampleDataCommon.fieldMetadata, sampleDataCommon, user.id || receivedBy));
                     const existingHist = typeof existing.history === 'string' ? JSON.parse(existing.history) : (existing.history || []);
                     existingHist.push({ status: isRejected ? 'RECEIVED_REJECTED' : 'ACCEPTED', changedBy: receivedBy, timestamp: now, note: historyNote });
 
@@ -2031,9 +2071,6 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                             id: crypto.randomUUID(),
                             originalId,
                             ...sampleDataCommon,
-                            fieldMetadata: s.fieldMetadata
-                                ? (typeof s.fieldMetadata === 'string' ? s.fieldMetadata : JSON.stringify(s.fieldMetadata))
-                                : (s.collectionDate ? JSON.stringify({ collectionDate: s.collectionDate }) : null),
                             history: JSON.stringify(newHist)
                         }
                     });
@@ -2137,6 +2174,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
         });
     } catch (err) {
         console.error('[processBatchConsignmentIntake] ERROR:', err);
+        if (err instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({error: err.code, code: err.code, message: err.message});
         return res.status(500).json({ error: 'Batch consignment intake failed: ' + err.message });
     }
 };
@@ -2302,6 +2340,13 @@ exports.parseManifestEndpoint = async (req, res) => {
             }
 
             parsedRows.push({
+                ...(mapping?.profileCode ? {
+                    profileReference: {code: profileIdentity.scalar(raw[mapping.profileCode], 255, true),
+                        relation: profileIdentity.scalar(raw[mapping.profileCode], 255, true) === null ? 'UNSPECIFIED' : mapping.profileRelation ? profileIdentity.scalar(raw[mapping.profileRelation], 40) : 'SITE_POINT',
+                        ...(mapping.profileNamespace && raw[mapping.profileNamespace] != null && String(raw[mapping.profileNamespace]).trim() ? {namespace: profileIdentity.scalar(raw[mapping.profileNamespace], 512)} : {})},
+                    profileSourceEvidence: {column: mapping.profileCode, record:`row:${i + 1}`}
+                } : {}),
+                collectionDate: mapping?.collectionDate ? raw[mapping.collectionDate] ?? null : null,
                 rowIndex: i + 1,
                 originalId: sampleId,
                 status: 'ACCEPTED',
@@ -2329,6 +2374,7 @@ exports.parseManifestEndpoint = async (req, res) => {
         });
     } catch (err) {
         console.error('[parseManifestEndpoint] ERROR:', err);
+        if (err instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({error: err.code, code: err.code, message: err.message});
         return res.status(500).json({ error: 'Failed to parse manifest: ' + err.message });
     }
 };

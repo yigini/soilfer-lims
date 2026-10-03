@@ -8,20 +8,20 @@ The **PR** column assigns finite evidence to A0 → A → B1 → B2. All four in
 
 | ID | PR | Required check | Status |
 |---|---|---|---|
-| P13 | A (first) | Read-only copy plus retained journals/snapshots inventory current and historically emitted keys, verified/missing/conflicting/held candidates and affected rows. Zero-current is not assumed zero-historical. Compatibility preservation and scientific correction are distinguished; mutations are reviewed, scoped, auditable and idempotent. | Pending |
-| P01 | A | Explicit pit and site coexist; new canonical identity uses verified pit and preserves site. Absent canonical retains compatible legacy identity; valid explicit unknown stays null; invalid present canonical reports a conflict without silent legacy substitution. | Pending |
-| P02 | A | Conflicting explicit profile aliases surface a review conflict; no arbitrary winner. | Pending |
-| P03 | A | Wrapped values, zero, blank/null, invalid objects/arrays/booleans and false flags parse correctly. Explicit unknown does not resurrect an alias. Previously emitted malformed keys require reviewed correction, not silent replacement. | Pending |
-| P04 | A | Both canonical and already exported legacy identities remain stable through project rename, country-label change and lab transfer. Exact legacy preservation is materialized before mutation or mutation is guarded; same code in another namespace stays separate. | Pending |
-| P05 | A | Site point/composite/unknown are not relabeled confirmed profiles from depths or GPS. | Pending |
-| P06 | A | Kobo exact configured mappings work in normal sync, force sync and replay. Legacy fingerprints remain compatible; true corrections follow revision rules. | Pending |
-| P07 | A | Verified manual values, duplicate/provenance holds and PR154 replay protections survive source refresh. | Pending |
-| P08 | A | Manifest and batch mapping preserve row-specific code/depth and shared namespace only when explicitly selected. | Pending |
-| P09 | A | Single intake/draft save/reopen preserves reference, evidence and typed values; no fabricated missing source facts. | Pending |
-| P10 | A | Generic metadata edit cannot bypass released-reference protection through canonical keys or aliases. | Pending |
-| P11 | A | Authorized post-release correction records reason, old/new value, actor and change event; analytical values remain intact. | Pending |
-| P12 | A | v1/v2/GeoJSON/current snapshot/change payloads agree; old frozen snapshot remains unchanged after correction. | Pending |
-| P14 | A | Unknown profile remains null and does not block ordinary laboratory operations or silently change existing OpenNSIS eligibility. | Pending |
+| P13 | A (first) | Read-only copy plus retained journals/snapshots inventory current and historically emitted keys, verified/missing/conflicting/held candidates and affected rows. Zero-current is not assumed zero-historical. Compatibility preservation and scientific correction are distinguished; mutations are reviewed, scoped, auditable and idempotent. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
+| P01 | A | Explicit pit and site coexist; new canonical identity uses verified pit and preserves site. Absent canonical retains compatible legacy identity; valid explicit unknown stays null; invalid present canonical reports a conflict without silent legacy substitution. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
+| P02 | A | Conflicting explicit profile aliases surface a review conflict; no arbitrary winner. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
+| P03 | A | Wrapped values, zero, blank/null, invalid objects/arrays/booleans and false flags parse correctly. Explicit unknown does not resurrect an alias. Previously emitted malformed keys require reviewed correction, not silent replacement. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
+| P04 | A | Both canonical and already exported legacy identities remain stable through project rename, country-label change and lab transfer. Exact legacy preservation is materialized before mutation or mutation is guarded; same code in another namespace stays separate. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
+| P05 | A | Site point/composite/unknown are not relabeled confirmed profiles from depths or GPS. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
+| P06 | A | Kobo exact configured mappings work in normal sync, force sync and replay. Legacy fingerprints remain compatible; true corrections follow revision rules. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
+| P07 | A | Verified manual values, duplicate/provenance holds and PR154 replay protections survive source refresh. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
+| P08 | A | Manifest and batch mapping preserve row-specific code/depth and shared namespace only when explicitly selected. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
+| P09 | A | Single intake/draft save/reopen preserves reference, evidence and typed values; no fabricated missing source facts. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
+| P10 | A | Generic metadata edit cannot bypass released-reference protection through canonical keys or aliases. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
+| P11 | A | Authorized post-release correction records reason, old/new value, actor and change event; analytical values remain intact. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
+| P12 | A | v1/v2/GeoJSON/current snapshot/change payloads agree; old frozen snapshot remains unchanged after correction. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
+| P14 | A | Unknown profile remains null and does not block ordinary laboratory operations or silently change existing OpenNSIS eligibility. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
 
 ## Exchange reliability and performance
 
@@ -32,18 +32,18 @@ The **PR** column assigns finite evidence to A0 → A → B1 → B2. All four in
 | E03 | A0 | One eligibility resolution supplies both count/list; cursor seeks affect only list and preserve documented total semantics. | Verified (PASS in `tests/contracts/exchange_error_semantics.test.js`: `buildSampleWhere` invoked exactly 1x per `getSamples` request) |
 | E05 | A0 | Malformed metadata, holds, unreleased data, disjoint labs/projects and unavailable policy remain protected on touched v1/v2 paths. | Verified (PASS in `tests/contracts/exchange_error_semantics.test.js` and `tests/contracts/nsis_policy_and_scoping.test.js`) |
 | E11 | A0 | OpenAPI/operator docs describe retryable 503 and link the owner's delivered issue-140 notice before deployment: honour delay, retain checkpoint/previous data, never interpret failure as withdrawal/empty data. No contributor acknowledgement gate or claimed receiver completion. | Verified (`docs/openapi-data-exchange-v2.yaml` 503 schema/headers, `docs/nsis-operator-runbook.md` Section 7 with link to issue #140 comment 5972150911) |
-| E04 | A | Unchanged first-page query/scope returns the same eligible specimen IDs across bounded repeated reads. | Pending |
-| E06 | A | Pagination/signed cursor/changed scope/expiry/amendment/withdrawal behavior survives changes; snapshots remain frozen. | Pending |
+| E04 | A | Unchanged first-page query/scope returns the same eligible specimen IDs across bounded repeated reads. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
+| E06 | A | Pagination/signed cursor/changed scope/expiry/amendment/withdrawal behavior survives changes; snapshots remain frozen. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
 | E07 | A0 / A | A0: bounded correlation and minimum phase timings verified on actual routes without secrets/scientific payloads. A: deployed-instance correlation and measured comparison distinguish slow data, genuine empty and failed eligibility. | A0: Verified (`server/middleware/exchangeCorrelationMiddleware.js` pre-auth generation, phase timing instrumentation; PASS in contract suite). A: Pending |
-| E08 | A | Production-sized read-only copy/query plans justify any added index or scoped hold query; no global hold semantics weakened. | Pending |
+| E08 | A | Production-sized read-only copy/query plans justify any added index or scoped hold query; no global hold semantics weakened. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
 | E09 | A | Proposed warm p95 below one second for the three-specimen cohort is measured under named normal load; cold/network timings and one larger page recorded. If lock contention dominates and the target needs a larger change, measured options are presented to the owner instead. | Pending |
-| E10 | A | If telemetry, initialization or the hold-lookup connection is changed, show the measured reason and relevant startup/revocation behavior; no cached authorization. | Pending |
+| E10 | A | If telemetry, initialization or the hold-lookup connection is changed, show the measured reason and relevant startup/revocation behavior; no cached authorization. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
 
 ## Receiver fixture and external acceptance
 
 | ID | PR | Required check | Status |
 |---|---|---|---|
-| J01 | A | Guarded fixture loader refuses production, is idempotent and records only its own synthetic IDs for cleanup. | Pending |
+| J01 | A | Guarded fixture loader refuses production, is idempotent and records only its own synthetic IDs for cleanup. | Local PASS; evidence in ACCEPTANCE-EVIDENCE-A.md. Exact candidate CI/release pending. |
 | J02 | External | Eloi ingests the fixture through the actual OpenNSIS path: one profile, two layers, two distinct specimens with bag/lab identity. | Pending external |
 | J03 | External | Different namespaces and decimal depths are retained; observation/method/unit semantics remain correct. | Pending external |
 | J04 | External | Real replay is idempotent; amendment/withdrawal and expired-checkpoint rebaseline are reconciled. | Pending external |

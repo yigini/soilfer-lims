@@ -2308,4 +2308,49 @@
       "applyFilters": "Apply Filters"
     }
   }
+,
+  "profileReference": {
+    "label": "Soil profile / sampling point",
+    "code": "Recorded field code",
+    "unknown": "Not recorded",
+    "namespace": "Survey reference",
+    "meaning": "Recorded meaning",
+    "help": "Use the code on the field record. This is separate from the bag label and laboratory accession. Leave it unknown if the source does not identify a profile or sampling point.",
+    "confirmedHelp": "Choose a confirmed soil profile only when the original field record explicitly verifies the pit or profile.",
+    "namespaceHelp": "The survey reference is controlled by the project or source configuration.",
+    "setUnknown": "Record as unknown",
+    "conflict": "The stored profile reference needs review. Laboratory work is preserved.",
+    "correct": "Correct the field reference",
+    "correctionHelp": "This changes provenance only. Analytical results and previously released report snapshots remain intact.",
+    "reason": "Reason and source verification (required)",
+    "saveFailed": "Could not save. Your entries have been retained.",
+    "mappingTitle": "Soil profile field mapping",
+    "mappingHelp": "Enter exact Kobo paths, such as soil/pit_id. Use either a fixed survey reference or its mapped source path, and either a fixed meaning or its mapped path. D1/D2 are bag identifiers; map measured depths separately. Changes affect new captures; existing identities are preserved.",
+    "mappingSaved": "Field mapping saved. Existing specimen identities were preserved.",
+    "fromSource": "Sampling point unless explicitly mapped",
+    "relations": {
+      "SITE_POINT": "Sampling point / site",
+      "COMPOSITE": "Composite sampling area",
+      "CONFIRMED_PROFILE": "Confirmed soil profile / pit",
+      "UNSPECIFIED": "Not recorded"
+    },
+    "mapping": {
+      "codePath": "Profile / pit code path",
+      "sitePath": "Independent site code path",
+      "namespace": "Fixed survey reference",
+      "namespacePath": "Survey reference path",
+      "relationPath": "Recorded meaning path",
+      "collectionDatePath": "Field collection date path",
+      "depthTopD1Path": "D1 top depth path (cm)",
+      "depthBottomD1Path": "D1 bottom depth path (cm)",
+      "depthTopD2Path": "D2 top depth path (cm)",
+      "depthBottomD2Path": "D2 bottom depth path (cm)"
+    },
+    "manifest": {
+      "profileCode": "Soil profile / sampling point code",
+      "profileNamespace": "Configured survey reference",
+      "profileRelation": "Recorded meaning (SITE_POINT, COMPOSITE, CONFIRMED_PROFILE)",
+      "collectionDate": "Field collection date"
+    }
+  }
 }

@@ -7,6 +7,8 @@ const koboService = require('../services/koboService');
 const projectPolicyService = require('../services/projectPolicyService');
 const workflow = require('../workflowContract');
 const crypto = require('crypto');
+const profileIdentity = require('../services/profileIdentityService');
+const koboProfile = require('../services/koboProfileService');
 
 async function assertLabAccess(actor, targetLabId) {
     if (!actor) return false;
@@ -109,6 +111,7 @@ exports.upsertConfig = async (req, res) => {
             return res.status(403).json({ error: 'TARGET_OUTSIDE_SCOPE', message: 'Target laboratory outside authorized scope' });
         }
         const { koboServerUrl, formId, apiToken, labName, fieldMapping, syncIntervalMins, isActive, projectCode } = req.body;
+        koboProfile.validateMapping(fieldMapping);
 
         if (!formId || !apiToken) {
             return res.status(400).json({ error: 'Form ID and API Token are required' });
@@ -123,7 +126,7 @@ exports.upsertConfig = async (req, res) => {
 
         const targetProjectCode = String(projectCode).trim();
         const linkedProject = await prisma.project.findFirst({
-            where: { OR: [{ code: targetProjectCode }, { id: targetProjectCode }] }
+            where: { OR: [{ code: targetProjectCode }, { id: targetProjectCode }] },
         });
         if (!linkedProject) {
             return res.status(404).json({
@@ -131,44 +134,20 @@ exports.upsertConfig = async (req, res) => {
                 message: `Project '${targetProjectCode}' not found.`
             });
         }
+        const membership = await require('../services/projectMembershipService').resolveProjectLabs(linkedProject);
+        if (!membership.isMember(labId)) {
+            return res.status(403).json({error: 'PROJECT_LAB_NOT_AUTHORIZED', message: 'This laboratory is not a servicing laboratory for the selected project.'});
+        }
 
         const existing = await prisma.koboConfig.findFirst({
             where: {
                 labId,
-                projectCode: targetProjectCode
+            projectCode: linkedProject.code
             }
         });
 
-        let config;
-        if (existing) {
-            config = await prisma.koboConfig.update({
-                where: { id: existing.id },
-                data: {
-                    koboServerUrl: koboServerUrl || 'https://kf.kobotoolbox.org',
-                    formId,
-                    apiToken,
-                    labName,
-                    projectCode: targetProjectCode || existing.projectCode,
-                    fieldMapping: fieldMapping ? JSON.stringify(fieldMapping) : null,
-                    syncIntervalMins: syncIntervalMins || 15,
-                    isActive: isActive !== false
-                }
-            });
-        } else {
-            config = await prisma.koboConfig.create({
-                data: {
-                    labId,
-                    koboServerUrl: koboServerUrl || 'https://kf.kobotoolbox.org',
-                    formId,
-                    apiToken,
-                    labName,
-                    projectCode: targetProjectCode,
-                    fieldMapping: fieldMapping ? JSON.stringify(fieldMapping) : null,
-                    syncIntervalMins: syncIntervalMins || 15,
-                    isActive: isActive !== false
-                }
-            });
-        }
+        const data = {formId, apiToken, labName, ...(koboServerUrl !== undefined ? {koboServerUrl} : {}), ...(syncIntervalMins !== undefined ? {syncIntervalMins} : {}), ...(isActive !== undefined ? {isActive: isActive !== false} : {}), ...(fieldMapping !== undefined ? {fieldMapping: fieldMapping == null ? null : JSON.stringify(fieldMapping)} : {})};
+        const config = await require('../services/koboConfigurationService').save({actor: req.user, projectId: linkedProject.id, configId: existing?.id, labId, data, expectedRevision: req.body.expectedRevision});
 
         res.json({
             success: true,
@@ -177,7 +156,8 @@ exports.upsertConfig = async (req, res) => {
         });
     } catch (error) {
         console.error('[KOBO] Error saving config:', error);
-        res.status(500).json({ error: 'Failed to save configuration' });
+        const status = error instanceof profileIdentity.ProfileReferenceConflictError || error.code === 'P2025' ? 409 : (error.status || 500);
+        res.status(status).json({ error: error.code === 'P2025' ? 'STALE_REVISION' : error.code || 'KOBO_CONFIG_FAILED', message: status < 500 ? error.message : 'Failed to save configuration' });
     }
 };
 
@@ -291,6 +271,7 @@ exports.syncLab = async (req, res) => {
         res.json(result);
     } catch (error) {
         console.error('[KOBO] Sync error:', error);
+        if (error instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({code: error.code, message: error.message, reason: error.reason});
         if (error.message?.includes('LAB_INACTIVE') || error.message?.includes('CONFIG_INACTIVE') || error.message?.includes('CONFIG_REVOKED')) {
             return res.status(400).json({ error: 'PRECONDITION_FAILED', message: error.message });
         }
@@ -350,7 +331,11 @@ function isSameSource(meta, currentConfig) {
 /**
  * Compute deterministic evidence fingerprint over coordinates, depth, site, collection date, and attachments
  */
-function computeEvidenceFingerprint(sampleData, processedAttachments, submission) {
+function computeEvidenceFingerprint(sampleData, processedAttachments, submission, existingMeta = null) {
+    if (sampleData?.legacyFingerprintFacts) {
+        sampleData = {...sampleData, ...sampleData.legacyFingerprintFacts,
+            collected_at: sampleData.legacyFingerprintFacts.collected_at ?? existingMeta?.legacyEvidenceFacts?.collected_at ?? existingMeta?.collected_at ?? null};
+    }
     const rawAttachments = Array.isArray(processedAttachments) ? processedAttachments : (
         Array.isArray(submission?._attachments) ? submission._attachments : []
     );
@@ -374,10 +359,11 @@ function computeEvidenceFingerprint(sampleData, processedAttachments, submission
  */
 function hasEvidenceChanged(existingMeta, existingEntry, incomingSampleData, incomingAttachments, submission) {
     if (!existingMeta) return false;
+    if (existingMeta.profileFingerprint && existingMeta.profileFingerprint !== koboProfile.fingerprint(incomingSampleData)) return true;
 
     // 1. If existing record has a stored evidence fingerprint, strictly compare fingerprints
     if (existingMeta.evidenceFingerprint) {
-        const incomingFp = computeEvidenceFingerprint(incomingSampleData, incomingAttachments, submission);
+        const incomingFp = computeEvidenceFingerprint(incomingSampleData, incomingAttachments, submission, existingMeta);
         return existingMeta.evidenceFingerprint !== incomingFp;
     }
 
@@ -451,7 +437,7 @@ function isOccurrenceEvidenceRecorded(meta, currentConfig, submission, sampleDat
                 (!rev.sourceServerUrl || rev.sourceServerUrl === currentConfig?.koboServerUrl) &&
                 (!rev.sourceFormId || rev.sourceFormId === currentConfig?.formId)
             );
-            if (matchesKey && rev.evidenceFingerprint && rev.evidenceFingerprint === incomingFp) {
+            if (matchesKey && rev.evidenceFingerprint && rev.evidenceFingerprint === incomingFp && (rev.profileFingerprint ? rev.profileFingerprint === koboProfile.fingerprint(sampleData) : !meta.profileFingerprint)) {
                 return true;
             }
         }
@@ -466,7 +452,7 @@ function isOccurrenceEvidenceRecorded(meta, currentConfig, submission, sampleDat
                 (!conf.sourceServerUrl || conf.sourceServerUrl === currentConfig?.koboServerUrl) &&
                 (!conf.sourceFormId || conf.sourceFormId === currentConfig?.formId)
             );
-            if (matchesKey && conf.evidenceFingerprint && conf.evidenceFingerprint === incomingFp) {
+            if (matchesKey && conf.evidenceFingerprint && conf.evidenceFingerprint === incomingFp && (conf.profileFingerprint ? conf.profileFingerprint === koboProfile.fingerprint(sampleData) : !meta.profileFingerprint)) {
                 return true;
             }
         }
@@ -624,7 +610,9 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
             commitConfig.projectCode !== projectCode ||
             commitConfig.labId !== currentConfig.labId ||
             commitConfig.formId !== currentConfig.formId ||
-            commitConfig.koboServerUrl !== currentConfig.koboServerUrl
+            commitConfig.koboServerUrl !== currentConfig.koboServerUrl ||
+            commitConfig.fieldMapping !== currentConfig.fieldMapping ||
+            commitConfig.apiToken !== currentConfig.apiToken
         ) {
             throw new Error(`CONFIG_REVOKED: Kobo configuration '${currentConfig.id}' is inactive, remapped, or modified`);
         }
@@ -740,12 +728,8 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                 }
 
                 // Parse existing metadata to check for primary occurrence replay (Finding 1)
-                let meta = {};
-                try {
-                    meta = typeof existingEntry.metadata === 'string' ? JSON.parse(existingEntry.metadata) : (existingEntry.metadata || {});
-                } catch (e) {
-                    meta = {};
-                }
+                const meta = require('../services/intakeProfileService').parseFieldMetadata(existingEntry.metadata);
+                require('../services/intakeProfileService').parseFieldMetadata(existingEntry.fieldMetadata);
 
                 // Check if this incoming occurrence is from the SAME source server and form (Finding 1)
                 const isSameServerAndForm = isSameSource(meta, currentConfig);
@@ -888,6 +872,8 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                         }
                         const occurrenceKey = `${currentConfig.koboServerUrl || ''}:${currentConfig.formId || ''}:${submission._id}:${sampleData.depth || 'D1'}`;
                         const revisionRecord = {
+                            profileEvidence: sampleData.profileEvidence,
+                            profileFingerprint: koboProfile.fingerprint(sampleData),
                             occurrenceKey,
                             evidenceFingerprint: incomingFp,
                             sourceServerUrl: currentConfig.koboServerUrl,
@@ -982,6 +968,8 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                     }
                     existingConflict.revisions.push({
                         evidenceFingerprint: existingConflict.evidenceFingerprint,
+                        profileFingerprint: existingConflict.profileFingerprint,
+                        profileEvidence: existingConflict.profileEvidence,
                         lat: existingConflict.lat,
                         lng: existingConflict.lng,
                         collected_at: existingConflict.collected_at,
@@ -989,6 +977,8 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                         recordedAt: existingConflict.recordedAt || existingConflict.recorded_at
                     });
                     existingConflict.evidenceFingerprint = computeEvidenceFingerprint(sampleData, processedAttachments, submission);
+                    existingConflict.profileFingerprint = koboProfile.fingerprint(sampleData);
+                    existingConflict.profileEvidence = sampleData.profileEvidence;
                     existingConflict.lat = sampleData.lat;
                     existingConflict.lng = sampleData.lng;
                     existingConflict.collected_at = sampleData.collected_at;
@@ -996,6 +986,8 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                     existingConflict.recordedAt = new Date().toISOString();
                 } else {
                     conflicting.push({
+                        profileEvidence: sampleData.profileEvidence,
+                        profileFingerprint: koboProfile.fingerprint(sampleData),
                         occurrenceKey,
                         evidenceFingerprint: computeEvidenceFingerprint(sampleData, processedAttachments, submission),
                         sourceServerUrl,
@@ -1114,6 +1106,7 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                     const fm = (value) => ({ value, source: 'KOBO', lastUpdatedAt: now, lastUpdatedBy: 'SYNC' });
 
                     const fieldMetadata = {
+                        profileReference: koboProfile.capture(sampleData.profileEvidence, {sample: {country: labInfo.iso, projectCode}, actor: performedBy, site: sampleData.site_id, recordedAt: now}),
                         site_id: fm(sampleData.site_id),
                         depth: fm(sampleData.depth),
                         latitude: fm(sampleData.lat),
@@ -1125,6 +1118,9 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                         land_cover: fm(koboService.findValue(submission, ['land_cover_types', 'landcover', 'cobertura_terreno'])),
                         attachments: fm(processedAttachments)
                     };
+                    const capturedDepth = sampleData.profileEvidence;
+                    if (capturedDepth?.depthTopCm !== null && capturedDepth?.depthTopCm !== undefined) fieldMetadata.depthTopCm = fm(capturedDepth.depthTopCm);
+                    if (capturedDepth?.depthBottomCm !== null && capturedDepth?.depthBottomCm !== undefined) fieldMetadata.depthBottomCm = fm(capturedDepth.depthBottomCm);
 
                     const compactMeta = {
                         kobo_id: submission._id,
@@ -1144,6 +1140,9 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                         submission_time: submission._submission_time,
                         attachments: processedAttachments,
                         evidenceFingerprint: computeEvidenceFingerprint(sampleData, processedAttachments, submission),
+                        profileFingerprint: koboProfile.fingerprint(sampleData),
+                        profileEvidence: sampleData.profileEvidence,
+                        legacyEvidenceFacts: sampleData.legacyFingerprintFacts,
                         intraSubDuplicates: sampleData.intraSubDuplicates || undefined
                     };
 
@@ -1176,6 +1175,8 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                             fieldMetadata: JSON.stringify(fieldMetadata),
                             latitude: sampleData.lat != null ? Number(sampleData.lat) : null,
                             longitude: sampleData.lng != null ? Number(sampleData.lng) : null,
+                            depthTopCm: capturedDepth?.depthTopCm ?? null,
+                            depthBottomCm: capturedDepth?.depthBottomCm ?? null,
                             receptionDate: null,
                             rejectionReason: rejectionReason
                         }
@@ -1350,7 +1351,7 @@ exports.syncSample = async (req, res) => {
         }
 
         // Protected / released record check (F09)
-        if (['RELEASED', 'APPROVED', 'ARCHIVED'].includes(sample.status)) {
+        if (sample.approvedAt || ['RELEASED', 'APPROVED', 'ARCHIVED', 'DISPOSED'].includes(sample.status)) {
             return res.status(409).json({
                 error: 'SAMPLE_RELEASED',
                 message: `Sample ${sample.id} is in status '${sample.status}'. Field metadata cannot be overwritten without an authorized amendment.`
@@ -1451,20 +1452,21 @@ exports.syncSample = async (req, res) => {
             const targetUnderscore = targetOriginal?.replace(/-/g, '_');
             for (const submission of submissions) {
                 const rawSiteId = koboService.findValue(submission, ['site_id', 'codigo_sitio'])?.trim().toUpperCase();
-                if (rawSiteId === targetOriginal || rawSiteId === targetUnderscore || normalize(rawSiteId) === targetNormalized) {
+                if (rawSiteId === targetOriginal || rawSiteId === targetUnderscore || normalizeId(rawSiteId) === targetNormalized) {
                     matchedSubmission = submission;
                     // Create minimal sampleData from raw submission
-                    let lat = 0, lng = 0;
+                    let lat = null, lng = null;
                     if (submission._geolocation && Array.isArray(submission._geolocation)) {
-                        lat = submission._geolocation[0] || 0;
-                        lng = submission._geolocation[1] || 0;
+                        lat = koboProfile.optionalNumber(submission._geolocation[0], -90, 90);
+                        lng = koboProfile.optionalNumber(submission._geolocation[1], -180, 180);
                     }
                     matchedSampleData = {
                         site_id: rawSiteId,
                         original_id: sample.originalId,
                         depth: null,
                         lat, lng,
-                        collected_at: submission.today || submission.start || submission._submission_time,
+                        collected_at: koboProfile.extractEvidence(submission, fieldMapping, rawSiteId).collectedAt,
+                        profileEvidence: koboProfile.extractEvidence(submission, fieldMapping, rawSiteId),
                         kobo_submission_id: submission._id
                     };
                     break;
@@ -1493,6 +1495,8 @@ exports.syncSample = async (req, res) => {
         }));
 
         const compactMeta = {
+            profileEvidence: matchedSampleData.profileEvidence,
+            profileFingerprint: koboProfile.fingerprint(matchedSampleData),
             kobo_id: matchedSubmission._id,
             kobo_uuid: matchedSubmission._uuid,
             surveyor: koboService.findValue(matchedSubmission, ['surveyor_name', 'username']),
@@ -1526,27 +1530,39 @@ exports.syncSample = async (req, res) => {
             try { return JSON.parse(val); } catch { return fallback; }
         };
 
-        const existingFieldMeta = parseJson(sample.fieldMetadata, {});
-        const existingCompactMeta = parseJson(sample.metadata, {});
-
-        // Merge field metadata while strictly preserving manual overrides (Finding 2)
-        const mergedFieldMeta = { ...existingFieldMeta };
-        for (const [key, freshEntry] of Object.entries(freshFieldMetadata)) {
-            const existingEntry = existingFieldMeta[key];
-            if (existingEntry && (existingEntry.source === 'MANUAL' || existingEntry.isManualOverride || existingEntry.manuallyOverridden)) {
-                // Preserve manual override
-                continue;
-            }
-            mergedFieldMeta[key] = freshEntry;
-        }
-
-        const mergedMeta = { ...existingCompactMeta, ...compactMeta };
-
         // Atomic transaction: commit sample update and audit log together (Finding 2)
         await prisma.$transaction(async (tx) => {
+            const currentConfig = await tx.koboConfig.findUnique({where: {id: config.id}});
+            if (!currentConfig?.isActive || ['labId', 'projectCode', 'formId', 'koboServerUrl', 'fieldMapping', 'apiToken'].some(key => currentConfig[key] !== config[key])) throw new profileIdentity.ProfileReferenceConflictError('SOURCE_CONFIGURATION_CHANGED');
             const currentSample = await tx.sample.findUnique({ where: { id: sampleId } });
             if (!currentSample) {
                 throw new Error(`SAMPLE_NOT_FOUND: Sample '${sampleId}' was removed.`);
+            }
+            // Recheck authority and release protection at the mutation boundary, after the network fetch.
+            scopeGuard.ensureScope(req.user, currentSample, {altLabField: 'assignedLab'});
+            if (currentSample.updatedAt.getTime() !== sample.updatedAt.getTime() || currentSample.approvedAt || ['RELEASED', 'APPROVED', 'ARCHIVED', 'DISPOSED'].includes(currentSample.status)) {
+                throw new profileIdentity.ProfileReferenceConflictError('SOURCE_CHANGED');
+            }
+            const existingFieldMeta = parseJson(currentSample.fieldMetadata, {});
+            const existingCompactMeta = parseJson(currentSample.metadata, {});
+            if (!existingFieldMeta || typeof existingFieldMeta !== 'object' || Array.isArray(existingFieldMeta) || (currentSample.fieldMetadata && typeof currentSample.fieldMetadata === 'string' && !isValidJson(currentSample.fieldMetadata))) throw new profileIdentity.ProfileReferenceConflictError('INVALID_STORED_METADATA');
+            if (!existingCompactMeta || typeof existingCompactMeta !== 'object' || Array.isArray(existingCompactMeta) || (currentSample.metadata && typeof currentSample.metadata === 'string' && !isValidJson(currentSample.metadata))) throw new profileIdentity.ProfileReferenceConflictError('INVALID_STORED_METADATA');
+            const mergedFieldMeta = profileIdentity.preserveLegacyBeforeContextChange(currentSample, existingFieldMeta, existingCompactMeta, require('../services/sisAdapterService').extractLegacyProfileReference, {actor: req.user.id || req.user.username, recordedAt: now});
+            for (const [key, freshEntry] of Object.entries(freshFieldMetadata)) {
+                const previous = existingFieldMeta[key];
+                if (previous && (['MANUAL', 'MANUAL_EDIT', 'CLERICAL_AMENDMENT', 'INTAKE', 'DRAFT'].includes(previous.source) || previous.isManualOverride || previous.manuallyOverridden)) continue;
+                mergedFieldMeta[key] = freshEntry;
+            }
+            const oldRef = Object.hasOwn(existingFieldMeta, 'profileReference') ? profileIdentity.validateReference(existingFieldMeta.profileReference) : null;
+            const freshRef = koboProfile.capture(matchedSampleData.profileEvidence, {sample: currentSample, actor: req.user.id || req.user.username, site: matchedSampleData.site_id, recordedAt: now, revision: (oldRef?.revision || 0) + 1});
+            if (oldRef?.source === 'KOBO' && (oldRef.code !== freshRef.code || oldRef.namespace !== freshRef.namespace || oldRef.relation !== freshRef.relation)) {
+                throw new profileIdentity.ProfileReferenceConflictError('SOURCE_EVIDENCE_CHANGED');
+            }
+            // Verified manual identities, compatibility references and existing holds survive refresh.
+            const mergedMeta = {...existingCompactMeta, ...compactMeta};
+            if (!oldRef || oldRef.source !== 'KOBO') {
+                mergedMeta.profileFingerprint = existingCompactMeta.profileFingerprint;
+                mergedMeta.profileEvidence = existingCompactMeta.profileEvidence;
             }
 
             if (currentSample.projectId || currentSample.projectCode) {
@@ -1583,7 +1599,7 @@ exports.syncSample = async (req, res) => {
         res.json({ success: true, message: `Successfully synced ${sample.originalId} from Kobo` });
     } catch (error) {
         console.error('[KOBO] Force sync sample error:', error);
-        res.status(500).json({ error: error.message });
+        res.status(error instanceof profileIdentity.ProfileReferenceConflictError ? 409 : 500).json({ error: error.code || 'KOBO_SYNC_FAILED', message: error instanceof profileIdentity.ProfileReferenceConflictError ? error.message : 'Could not refresh the field record.' });
     }
 };
 
@@ -1642,6 +1658,8 @@ exports.proxyMedia = async (req, res) => {
 
 // Expose internal functions for cross-controller use (auto-sync on project creation)
 exports._syncLabSubmissions = syncLabSubmissions;
+function isValidJson(value) { try { const parsed = JSON.parse(value); return !!parsed && typeof parsed === 'object' && !Array.isArray(parsed); } catch { return false; } }
+exports._profileEvidence = {computeEvidenceFingerprint, hasEvidenceChanged, isOccurrenceEvidenceRecorded};
 
 module.exports = exports;
 
