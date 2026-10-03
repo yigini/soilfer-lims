@@ -4025,3 +4025,33 @@ Laboratory operators can find step-by-step procedures in the following documenta
               - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
               - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
 
+        - Following Codex independent review `issue155-independent-review-4ee5e94.md` and 6-case probe `issue155-focused-review-4ee5e94.cjs`:
+           1. **Complete 2D Cartesian Physical Model Binding in Final Gate (Finding 1)**:
+              - Replaced broad scalar range checks and near-identity constraints ($|a-1| < 0.1, |d-1| < 0.1$) in `printIsolationPassed` in `server/scripts/verify_issue155_browser_journeys.cjs` with rigorous 2D Cartesian physical model validation:
+                * Orthogonality ($b = 0, c = 0$ with $|b| \le 10^{-4}, |c| \le 10^{-4}$): Cartesian plots have orthogonal axes with no shear or rotation; strictly rejects skewed/sheared displacements like $b=3, c=4$.
+                * Transformation consistency across all curves in the overlay ($t_i \approx t_0$ within $10^{-4}$).
+                * Base unscaled coordinate mapping: $M_x^{(0)} = M_x / a$, $K_x^{(0)} = (K_x - e) / a$, $M_y^{(0)} = M_y / d$, $K_y^{(0)} = (K_y - f) / d$.
+                * Uniform 500-point continuous calibration grid step $\Delta x^{(0)} = -3600 \cdot M_x^{(0)} / 499$: strictly validates step $\approx 1.0$ px/pt (synthetic 499px layout) or $\approx 2.0$ px/pt (real Chrome 998px layout) with $|\Delta x^{(0)} - 1.0| < 0.05$ or $|\Delta x^{(0)} - 2.0| < 0.05$.
+                * Unscaled origin at $W=4000 \text{ cm}^{-1}$: $X_0^{(0)} = M_x^{(0)} \cdot 4000 + K_x^{(0)} \in [-1.0, 100]$.
+                * Unscaled absorbance scale height $|M_y^{(0)}| \in [90, 250]$ and baseline intercept $K_y^{(0)} \in [200, 350]$.
+                * Cross-state consistency: all 14 variant transitions and `afterExit` strictly preserve identical scale slopes and intercepts as initial `multiOverlay` ($|\Delta M| < 10^{-4}, |\Delta K| < 10^{-4}$).
+                * Faithful common scale by 2 on both ticks and curves (Case 5) passes cleanly (`printGate === true`).
+                * Contradictory scales ($M_x = -0.5, K_x = 999$) and wrong skewed displacement ($b=3, c=4, e=120, f=700$) (Case 4) strictly fail closed (`printGate === false`).
+                * Missing observations, zero slopes, or mutated transitions strictly fail closed.
+                * Semicolon-free syntax inside `printIsolationPassed = Boolean(...)` ensures syntax compatibility with regex extraction in `verify_all_14.cjs`.
+           2. **Whole Stage Scope Reconciliation (Finding 2)**:
+              - Unambiguously distinguished current observed/supplied/static/adapter/reused/software-pending/manual-pending/not-live scope in `TRACEABLE-MATRIX.md`, `EVIDENCE.md`, and PR handoffs:
+                * Observed in live running app context: 12 browser journeys executed in native Headless Chrome 154 with local Express and SQLite, covering all 14 variants selector/adoption/preview/exit roots and named notification banner settlement/removal, deliberate non-default map pan/zoom (`[7.0, -1.0]`, zoom 16), 1-to-1 continuous spectral models, upload intake, camera stream & video element, worksheet scroll offset (scrollTop 48 on 2106px scrollHeight), and report print preview.
+                * Static component & adapter proof: In-checkout `verify_all_14.cjs` (58/58) validating static SSR compilation/rendering via `ReactDOMServer` and synthetic IME events.
+                * Reused accepted artifacts: Frozen client tree `6e83b8d4...`, data tree `1a2a8445...`, customer certificate PDF (162,633 B, SHA256 `47fdaa79...`), built CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a2...`).
+                * Software-pending scope: Synthetic IME composition events vs native OS/system IME candidate windows; desktop browser native optical zoom UI engine controls (Ctrl+/Ctrl-) vs W3C SC 1.4.10 320 CSS px reflow layout equivalence, High-DPI DPR 2.0 at 640 CSS px with root font 200%, and DPR 1.0 at 1280 CSS px with root font 400%.
+                * Manual-pending scope: Physical screen reader listening (NVDA/JAWS/VoiceOver/TalkBack), OS contrast theme display, physical mobile hardware (iOS/Android), physical thermal label printer.
+                * Live fact: PR #155 is OPEN, unmerged, undeployed; production remains `v3.5.31-1265e8a`; themes are NOT LIVE.
+           3. **Suite Verification Results**:
+              - Running-app Browser Suite: **All 12/12 suites PASS 100% green** in real native Chrome (`server/scripts/issue155-browser-journeys-results.json`, timestamp `2026-10-03T06:51:17.714Z`).
+                * Runner trim SHA-256: `7423f46663434a0c9709053701ed679497dfb9b7b5ef3ef2109db7868f6e85ec`
+                * Result trim SHA-256: `10fd4da661dec1c142ca5809207e0a756eb4686ef40e915770d4d385a55a487d`
+              - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
+              - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
+              - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+

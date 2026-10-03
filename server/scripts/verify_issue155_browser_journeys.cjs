@@ -7930,58 +7930,50 @@ async function runBrowserEvidence() {
                 spectralSeriesState.multiOverlay.selectedScanIds.includes('SMP-2026-001-mir-baseline') &&
                 spectralSeriesState.multiOverlay.selectedScanIds.includes('SMP-2026-001-mir-replicate') &&
                 spectralSeriesState.multiOverlay.all14VariantsPreserved === true &&
-                spectralSeriesState.multiOverlay.scales &&
-                typeof spectralSeriesState.multiOverlay.scales.x === 'object' &&
-                typeof spectralSeriesState.multiOverlay.scales.x.slope === 'number' &&
-                spectralSeriesState.multiOverlay.scales.x.slope < -0.01 &&
-                spectralSeriesState.multiOverlay.scales.x.slope > -2.0 &&
-                typeof spectralSeriesState.multiOverlay.scales.x.intercept === 'number' &&
-                spectralSeriesState.multiOverlay.scales.x.intercept > 50 &&
-                spectralSeriesState.multiOverlay.scales.x.intercept < 5000 &&
-                typeof spectralSeriesState.multiOverlay.scales.y === 'object' &&
-                typeof spectralSeriesState.multiOverlay.scales.y.slope === 'number' &&
-                spectralSeriesState.multiOverlay.scales.y.slope < -1.0 &&
-                spectralSeriesState.multiOverlay.scales.y.slope > -1000 &&
-                typeof spectralSeriesState.multiOverlay.scales.y.intercept === 'number' &&
-                spectralSeriesState.multiOverlay.scales.y.intercept > 50 &&
-                spectralSeriesState.multiOverlay.scales.y.intercept < 2000 &&
-                Array.isArray(spectralSeriesState.multiOverlay.transforms) &&
-                spectralSeriesState.multiOverlay.transforms.length >= 2 &&
-                spectralSeriesState.multiOverlay.transforms.every(t =>
-                    t && typeof t.a === 'number' && typeof t.d === 'number' &&
-                    Math.abs(t.a - 1) < 0.1 && Math.abs(t.d - 1) < 0.1
+                [
+                    spectralSeriesState.multiOverlay,
+                    spectralSeriesState.multiOverlay.afterExit,
+                    ...(Array.isArray(spectralSeriesState.multiOverlay.variantTransitions) ? spectralSeriesState.multiOverlay.variantTransitions : [])
+                ].every(st =>
+                    Boolean(
+                        st && st.scales && typeof st.scales.x === 'object' && typeof st.scales.y === 'object' &&
+                        typeof st.scales.x.slope === 'number' && typeof st.scales.x.intercept === 'number' &&
+                        typeof st.scales.y.slope === 'number' && typeof st.scales.y.intercept === 'number' &&
+                        isFinite(st.scales.x.slope) && isFinite(st.scales.x.intercept) &&
+                        isFinite(st.scales.y.slope) && isFinite(st.scales.y.intercept) &&
+                        st.scales.x.slope < 0 && st.scales.y.slope < 0 &&
+                        Array.isArray(st.transforms) && st.transforms.length >= 2 &&
+                        st.transforms[0] && typeof st.transforms[0].a === 'number' && typeof st.transforms[0].d === 'number' &&
+                        typeof st.transforms[0].b === 'number' && typeof st.transforms[0].c === 'number' &&
+                        typeof st.transforms[0].e === 'number' && typeof st.transforms[0].f === 'number' &&
+                        isFinite(st.transforms[0].a) && isFinite(st.transforms[0].d) &&
+                        isFinite(st.transforms[0].b) && isFinite(st.transforms[0].c) &&
+                        isFinite(st.transforms[0].e) && isFinite(st.transforms[0].f) &&
+                        st.transforms[0].a > 0 && st.transforms[0].d > 0 &&
+                        Math.abs(st.transforms[0].b) <= 1e-4 && Math.abs(st.transforms[0].c) <= 1e-4 &&
+                        st.transforms.every(ti =>
+                            ti &&
+                            Math.abs(ti.a - st.transforms[0].a) <= 1e-4 &&
+                            Math.abs(ti.d - st.transforms[0].d) <= 1e-4 &&
+                            Math.abs(ti.b) <= 1e-4 &&
+                            Math.abs(ti.c) <= 1e-4 &&
+                            Math.abs(ti.e - st.transforms[0].e) <= 1e-4 &&
+                            Math.abs(ti.f - st.transforms[0].f) <= 1e-4
+                        ) &&
+                        ((baseSlopeX, baseInterceptX, baseSlopeY, baseInterceptY) =>
+                            baseSlopeX < 0 && baseSlopeY < 0 &&
+                            (Math.abs((-3600 * baseSlopeX) / 499 - 1.0) < 0.05 || Math.abs((-3600 * baseSlopeX) / 499 - 2.0) < 0.05) &&
+                            (baseSlopeX * 4000 + baseInterceptX >= -1.0 && baseSlopeX * 4000 + baseInterceptX <= 100) &&
+                            (Math.abs(baseSlopeY) >= 90 && Math.abs(baseSlopeY) <= 250) &&
+                            (baseInterceptY >= 200 && baseInterceptY <= 350)
+                        )(
+                            st.scales.x.slope / st.transforms[0].a,
+                            (st.scales.x.intercept - st.transforms[0].e) / st.transforms[0].a,
+                            st.scales.y.slope / st.transforms[0].d,
+                            (st.scales.y.intercept - st.transforms[0].f) / st.transforms[0].d
+                        )
+                    )
                 ) &&
-                spectralSeriesState.multiOverlay.afterExit &&
-                spectralSeriesState.multiOverlay.afterExit.mounted === true &&
-                spectralSeriesState.multiOverlay.afterExit.modelVerified === true &&
-                spectralSeriesState.multiOverlay.afterExit.calibrationBranch === '2D_AXIS_CALIBRATED' &&
-                Array.isArray(spectralSeriesState.multiOverlay.afterExit.selectedScanIds) &&
-                spectralSeriesState.multiOverlay.afterExit.selectedScanIds.includes('SMP-2026-001-mir-baseline') &&
-                spectralSeriesState.multiOverlay.afterExit.selectedScanIds.includes('SMP-2026-001-mir-replicate') &&
-                spectralSeriesState.multiOverlay.afterExit.scales &&
-                typeof spectralSeriesState.multiOverlay.afterExit.scales.x === 'object' &&
-                typeof spectralSeriesState.multiOverlay.afterExit.scales.x.slope === 'number' &&
-                spectralSeriesState.multiOverlay.afterExit.scales.x.slope < -0.01 &&
-                spectralSeriesState.multiOverlay.afterExit.scales.x.slope > -2.0 &&
-                typeof spectralSeriesState.multiOverlay.afterExit.scales.x.intercept === 'number' &&
-                spectralSeriesState.multiOverlay.afterExit.scales.x.intercept > 50 &&
-                spectralSeriesState.multiOverlay.afterExit.scales.x.intercept < 5000 &&
-                typeof spectralSeriesState.multiOverlay.afterExit.scales.y === 'object' &&
-                typeof spectralSeriesState.multiOverlay.afterExit.scales.y.slope === 'number' &&
-                spectralSeriesState.multiOverlay.afterExit.scales.y.slope < -1.0 &&
-                spectralSeriesState.multiOverlay.afterExit.scales.y.slope > -1000 &&
-                typeof spectralSeriesState.multiOverlay.afterExit.scales.y.intercept === 'number' &&
-                spectralSeriesState.multiOverlay.afterExit.scales.y.intercept > 50 &&
-                spectralSeriesState.multiOverlay.afterExit.scales.y.intercept < 2000 &&
-                Array.isArray(spectralSeriesState.multiOverlay.afterExit.transforms) &&
-                spectralSeriesState.multiOverlay.afterExit.transforms.length >= 2 &&
-                spectralSeriesState.multiOverlay.afterExit.transforms.every(t =>
-                    t && typeof t.a === 'number' && typeof t.d === 'number' &&
-                    Math.abs(t.a - 1) < 0.1 && Math.abs(t.d - 1) < 0.1
-                ) &&
-                spectralSeriesState.multiOverlay.afterExit.traceCount >= 2 &&
-                spectralSeriesState.multiOverlay.afterExit.curvesCount === spectralSeriesState.multiOverlay.afterExit.legendCount &&
-                spectralSeriesState.multiOverlay.afterExit.validCurvesCount === spectralSeriesState.multiOverlay.afterExit.curvesCount &&
                 Array.isArray(spectralSeriesState.multiOverlay.variantTransitions) &&
                 spectralSeriesState.multiOverlay.variantTransitions.length === 14 &&
                 spectralSeriesState.multiOverlay.variantTransitions.every(v =>
@@ -7993,33 +7985,30 @@ async function runBrowserEvidence() {
                     Array.isArray(v.selectedScanIds) &&
                     v.selectedScanIds.includes('SMP-2026-001-mir-baseline') &&
                     v.selectedScanIds.includes('SMP-2026-001-mir-replicate') &&
-                    v.scales &&
-                    typeof v.scales.x === 'object' &&
-                    typeof v.scales.x.slope === 'number' &&
-                    v.scales.x.slope < -0.01 &&
-                    v.scales.x.slope > -2.0 &&
-                    typeof v.scales.x.intercept === 'number' &&
-                    v.scales.x.intercept > 50 &&
-                    v.scales.x.intercept < 5000 &&
-                    typeof v.scales.y === 'object' &&
-                    typeof v.scales.y.slope === 'number' &&
-                    v.scales.y.slope < -1.0 &&
-                    v.scales.y.slope > -1000 &&
-                    typeof v.scales.y.intercept === 'number' &&
-                    v.scales.y.intercept > 50 &&
-                    v.scales.y.intercept < 2000 &&
-                    Array.isArray(v.transforms) &&
-                    v.transforms.length >= 2 &&
-                    v.transforms.every(t =>
-                        t && typeof t.a === 'number' && typeof t.d === 'number' &&
-                        Math.abs(t.a - 1) < 0.1 && Math.abs(t.d - 1) < 0.1
-                    ) &&
+                    Math.abs(v.scales.x.slope - spectralSeriesState.multiOverlay.scales.x.slope) < 1e-4 &&
+                    Math.abs(v.scales.x.intercept - spectralSeriesState.multiOverlay.scales.x.intercept) < 1e-4 &&
+                    Math.abs(v.scales.y.slope - spectralSeriesState.multiOverlay.scales.y.slope) < 1e-4 &&
+                    Math.abs(v.scales.y.intercept - spectralSeriesState.multiOverlay.scales.y.intercept) < 1e-4 &&
                     v.curvesCount >= 2 &&
                     v.validCurvesCount >= 2 &&
                     v.legendCount >= 2 &&
                     v.curvesCount === v.legendCount &&
                     v.validCurvesCount === v.curvesCount
                 ) &&
+                spectralSeriesState.multiOverlay.afterExit &&
+                spectralSeriesState.multiOverlay.afterExit.mounted === true &&
+                spectralSeriesState.multiOverlay.afterExit.modelVerified === true &&
+                spectralSeriesState.multiOverlay.afterExit.calibrationBranch === '2D_AXIS_CALIBRATED' &&
+                Array.isArray(spectralSeriesState.multiOverlay.afterExit.selectedScanIds) &&
+                spectralSeriesState.multiOverlay.afterExit.selectedScanIds.includes('SMP-2026-001-mir-baseline') &&
+                spectralSeriesState.multiOverlay.afterExit.selectedScanIds.includes('SMP-2026-001-mir-replicate') &&
+                Math.abs(spectralSeriesState.multiOverlay.afterExit.scales.x.slope - spectralSeriesState.multiOverlay.scales.x.slope) < 1e-4 &&
+                Math.abs(spectralSeriesState.multiOverlay.afterExit.scales.x.intercept - spectralSeriesState.multiOverlay.scales.x.intercept) < 1e-4 &&
+                Math.abs(spectralSeriesState.multiOverlay.afterExit.scales.y.slope - spectralSeriesState.multiOverlay.scales.y.slope) < 1e-4 &&
+                Math.abs(spectralSeriesState.multiOverlay.afterExit.scales.y.intercept - spectralSeriesState.multiOverlay.scales.y.intercept) < 1e-4 &&
+                spectralSeriesState.multiOverlay.afterExit.traceCount >= 2 &&
+                spectralSeriesState.multiOverlay.afterExit.curvesCount === spectralSeriesState.multiOverlay.afterExit.legendCount &&
+                spectralSeriesState.multiOverlay.afterExit.validCurvesCount === spectralSeriesState.multiOverlay.afterExit.curvesCount &&
                 spectralSeriesState.renderedSeriesVerified === true &&
                 spectralSeriesState.seriesCount === 1 &&
                 spectralSeriesState.sampleId === 'SMP-2026-001' &&

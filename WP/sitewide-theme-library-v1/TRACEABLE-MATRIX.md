@@ -254,6 +254,19 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
 > **Reconciliation of Static Rendering, Reused Artifacts, Shared Fixtures, Supplied Capabilities, Pending Gates, and Live Facts**
 > - **Executed Main Browser Journeys Suite (Fresh Execution)**:
 >   - The main browser journeys workflow suite `server/scripts/verify_issue155_browser_journeys.cjs` was freshly executed in the authorized disposable local running-app context with real Headless Google Chrome (`154.0.8037.93`; historical `153.0.8010.48`), an ephemeral SQLite database, and Express mounting `client/dist`.
+> - **Operational & Scientific Evidence Remediation (Remediation of 4ee5e94 Review)**:
+>   - **Sound 2D Cartesian Physical Model Binding in Final Gate**: Replaced broad scalar range checks and near-identity constraints ($|a-1| < 0.1, |d-1| < 0.1$) in `printIsolationPassed` with rigorous 2D Cartesian physical coordinate geometry validation:
+>     * Orthogonality ($b = 0, c = 0$ with $|b| \le 10^{-4}, |c| \le 10^{-4}$): Cartesian plots have orthogonal axes with no shear or rotation; strictly rejects skewed/sheared displacements like $b=3, c=4$.
+>     * Transformation consistency across all curves in the overlay ($t_i \approx t_0$ within $10^{-4}$).
+>     * Base unscaled coordinate mapping: $M_x^{(0)} = M_x / a$, $K_x^{(0)} = (K_x - e) / a$, $M_y^{(0)} = M_y / d$, $K_y^{(0)} = (K_y - f) / d$.
+>     * Uniform 500-point continuous calibration grid step $\Delta x^{(0)} = -3600 \cdot M_x^{(0)} / 499$: strictly validates step $\approx 1.0$ px/pt (synthetic 499px layout) or $\approx 2.0$ px/pt (real Chrome 998px layout) with $|\Delta x^{(0)} - 1.0| < 0.05$ or $|\Delta x^{(0)} - 2.0| < 0.05$.
+>     * Unscaled origin at $W=4000 \text{ cm}^{-1}$: $X_0^{(0)} = M_x^{(0)} \cdot 4000 + K_x^{(0)} \in [-1.0, 100]$.
+>     * Unscaled absorbance scale height $|M_y^{(0)}| \in [90, 250]$ and baseline intercept $K_y^{(0)} \in [200, 350]$.
+>     * Cross-state consistency: all 14 variant transitions and `afterExit` strictly preserve identical scale slopes and intercepts as initial `multiOverlay` ($|\Delta M| < 10^{-4}, |\Delta K| < 10^{-4}$).
+>     * Faithful common scale by 2 on both ticks and curves (Case 5) passes cleanly (`printGate === true`).
+>     * Contradictory scales ($M_x = -0.5, K_x = 999$) and wrong skewed displacement ($b=3, c=4, e=120, f=700$) (Case 4) strictly fail closed (`printGate === false`).
+>     * Missing observations, zero slopes, or mutated transitions strictly fail closed.
+>     * Semicolon-free syntax inside `printIsolationPassed = Boolean(...)` ensures syntax compatibility with regex extraction in `verify_all_14.cjs`.
 > - **Operational & Scientific Evidence Remediation (Remediation of 73ea6cf & 986a04b Reviews)**:
 >   - **Common Frame Matrix Composition for Ticks AND Curves**: Transformed raw tick anchor coordinates using full SVG matrices (`getCTM()` / `getScreenCTM()` / ancestor transform tree composition: $X_{\text{eff}} = a \cdot X_{\text{raw}} + c \cdot Y_{\text{raw}} + e$, $Y_{\text{eff}} = b \cdot X_{\text{raw}} + d \cdot Y_{\text{raw}} + f$), mapping both Recharts axis ticks and spectral line curves into the exact same SVG viewport coordinate system. Displaced tick matrices ($e=120$) with unshifted curves are strictly rejected ($|X_{\text{obs}} - X_{\text{exp}}| = 120 > 2.5$), while faithful common translation of both ticks and curves by 120 px strictly passes ($|X_{\text{obs}} - X_{\text{exp}}| = 0 \le 2.5$).
 >   - **Mandatory Final-Gate Binding of Serialized Scales and Transforms**: Enforced strict physical range validation on `scales.x.slope` ($\in [-2.0, -0.01]$), `scales.x.intercept` ($\in [50, 5000]$), `scales.y.slope` ($\in [-1000, -1.0]$), `scales.y.intercept` ($\in [50, 2000]$), and unscaled transform factors ($|a - 1| < 0.1, |d - 1| < 0.1$) across initial `multiOverlay`, `afterExit`, and all 14 `variantTransitions`. Deleting `scales`/`transforms` or substituting degenerate scales (slope 0, intercept 9999) or scaled matrices ($a=2, d=2$) strictly fails closed in `printGate`.
@@ -341,7 +354,24 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
 > - **Reused Verified Artifacts**:
 >   - Customer Certificate PDF: `server/scripts/test_certificate_output.pdf` (162,633 bytes, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`, magic `%PDF-`) verified authentic with pure white `#ffffff` margins and 11.50:1 WCAG AAA header contrast, reused without redundant regeneration loops; arbitrary zero-byte buffers strictly rejected.
 > - **Honest Boundaries & Pending Gates (Software & Hardware)**:
->   - **Software Pending Gate**: Deliberately non-default map pan/zoom view preservation, full 1-to-1 continuous model verification on real live datasets, and static component execution (`NumericEditor` via `ReactDOMServer` / Test 57) provide limited proof; full live mounted React component tree integration across all 14 variants in a live browser webview remains an honest software scope boundary when running purely in-checkout CLI without a running live application server. Deliberately changed map pan/zoom is software scope (software-pending), not solely physical-mobile pending.
+>   - **Observed in Live Running Application Context**:
+>     * Live mounted React component tree in Headless Google Chrome (`154.0.8037.93`) across all 12 browser journeys (`server/scripts/verify_issue155_browser_journeys.cjs`) served by local Express and SQLite.
+>     * All 14 variants selector/adoption/preview/exit roots and named notification banner settlement/removal.
+>     * Deliberately panned and zoomed map (`[7.0, -1.0]`, zoom 16), satellite layer, marker, and popup preserved across all 14 transitions and exit.
+>     * Spectral multi-scan overlay with 500-point uniform continuous calibration models, joint 2D Cartesian axis-to-curve calibration in common SVG coordinate frame, and ordered scan association (`SMP-2026-001-mir-baseline` and `SMP-2026-001-mir-replicate`).
+>     * Upload workflow pending bytes (44 B), full draft equality, parsed table and mapping rows.
+>     * ScanPage camera media stream acquisition, active tracks, `<video>` element mount and stable node identity.
+>     * Worksheet item selection (`wi-01`, `SMP-2026-001`), filter `'SMP-2026'`, and native container scroll (`scrollTop: 48` on `scrollHeight: 2106 px > clientHeight: 736 px`).
+>     * Report print preview (`/report/CERT-2026-SOIL-01`) under `@media print` with 5-row measurements, exact parameter identity, and contrast ratio.
+>   - **Static Component & Adapter Scope**:
+>     * In-checkout test harness `server/scripts/verify_all_14.cjs` (58/58 passed) validates static SSR compilation/rendering via `ReactDOMServer.renderToStaticMarkup` (`NumericEditor.jsx` / `ThemeContext.jsx`), synthetic IME composition lifecycle (`compositionstart` -> `compositionupdate` -> `compositionend`), and gate regex extraction.
+>   - **Reused Accepted Artifacts**:
+>     * Customer certificate PDF `server/scripts/test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`) verified authentic, reused without redundant regeneration loops.
+>     * Candidate client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216` and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
+>     * Built CSS `dist/assets/index-Df7izgw5.css` (213,700 B raw / 35,045 B gzip, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`) strictly frozen byte-for-byte.
+>   - **Software-Pending Scope**:
+>     * Constructed node-listened composition events are synthetic DOM events, distinct from native OS/system IME candidate windows.
+>     * Desktop browser native optical zoom UI engine controls (Ctrl+/Ctrl-) remain unexecuted/software-pending; reflow is evaluated under W3C SC 1.4.10 320 CSS px viewport width layout equivalence alongside High-DPI DPR 2.0 at 640 CSS px with root font 200% and DPR 1.0 at 1280 CSS px with root font 400%.
 >   - **Manual Screen-Reader & Assistive Technology Gate**: Full WAI-ARIA semantic roles, labels, roving tabindex, focus containment, and live regions are structurally verified in software; however, live audio listening and interaction via screen reader software (NVDA, JAWS, macOS/iOS VoiceOver, Android TalkBack) require manual human operator execution and remain pending dedicated assistive evaluation.
 >   - **System Forced-Colours Gate**: Synthetic `@media (forced-colors: active)` media query emulation and the dedicated `clear-contrast` theme (WCAG AAA >= 7:1) are verified in software; full OS-level Windows High Contrast / Contrast Themes display subsystem fidelity requires interactive operator testing.
 >   - **Physical Mobile Hardware Gate**: Responsive viewports down to 320px, 390px, and 844×390 landscape are verified in Chrome emulation; physical testing on real iOS Safari and Android Chrome mobile hardware is honestly recorded as **PENDING** physical hardware testing. Historical Issue #102 is NOT a substitute waiver.
