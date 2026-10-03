@@ -4171,3 +4171,34 @@ Laboratory operators can find step-by-step procedures in the following documenta
               - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
               - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
 
+        - Following Codex independent review `issue155-independent-review-96a1478.md` and source inspection `issue155-source-inspection-96a1478.json`:
+           1. **Desktop Optical Zoom Interactive Preview/Exit & State Association Execution (Finding 1)**:
+              - Executed interactive theme preview and exit cycle under 400% optical zoom in persistent Chromium profile (`HostZoomMap default_zoom_level: 7.603568`):
+                * Pre-zoom draft input: Navigated to `/profile?tab=security` and filled unfinished password input `pwdInput.fill('ZoomedDraftSecret2026!')`.
+                * Zoomed baseline: Navigated to `/profile?tab=appearance` under 400% zoom; measured `DPR: 4, innerWidth: 320, scrollWidth: 320, noHorizontalOverflow: true, controlsCount: 15, controlsUnclipped: true, appliedTheme: 'forest', appliedMode: 'light'`.
+                * Theme preview: Triggered `setPreviewTheme({ themeId: 'forest', mode: 'dark' })` on ThemeProvider; root settled: `data-theme="forest"`, `data-appearance="dark"`, preview notice banner visible (`[role="region"][aria-label*="preview" i]`).
+                * Preview reflow: Verified `scrollWidth <= innerWidth` (`320 <= 320`) and `controlsUnclipped: true`.
+                * State preservation during preview: Navigated to Security tab; verified `pwdInput.inputValue() === 'ZoomedDraftSecret2026!'`.
+                * Preview exit: Returned to Appearance tab, clicked real `Exit preview` button in preview notice banner; root settled: notice removed, `data-theme="forest"`, `data-appearance="light"`.
+                * Exit reflow: Verified `scrollWidth <= innerWidth` (`320 <= 320`) and `controlsUnclipped: true`.
+                * State preservation after exit: Navigated to Security tab; verified `pwdInput.inputValue() === 'ZoomedDraftSecret2026!'`.
+                * Gate enforcement: Actively enforced in Package 7 gate (`desktopOpticalZoomPassed === true`, requiring `themeOperationPreserved === true`) and recorded in results JSON.
+           2. **Documented Headed Shortcut Witness and Exact Limitation (Finding 2)**:
+              - Linked exact native execution attempt trace: `issue155-native-shortcut-attempt-witness-96a1478.json` (witnessed by Codex at `2026-10-03T08:49:50.418Z`).
+              - Executed command: `node scratch/test_headed_zoom.js` calling `scratch/send_zoom.ps1` against Example Domain in headed Chrome (`154.0.8037.93`).
+              - Observed error: `MethodInvocationException: Exception calling 'SendWait' with '1' argument(s): 'Access is denied' (Win32Exception) at line 14`.
+              - Observed metrics: Unchanged at `DPR: 1, innerWidth: 1280, innerHeight: 720`.
+              - Limitation: Playwright `page.keyboard` routes to Blink renderer DOM pipeline without activating outer desktop browser accelerators; Windows `SendWait` threw `Win32Exception: Access is denied` in this session.
+              - Scope distinction: Example Domain external shortcut limitation is distinct from the verified LIMS native profile-zoom layout and theme operation evidence.
+              - Clarification: Pinned `desktopChromeMenuAttempt` is a static documented summary witness, not an inline caught runtime collector. Claims of SendInput execution or universal UIPI causation removed.
+           3. **Zero Extra Timers / Standing Monitor Coordination (Finding 3)**:
+              - Canceled extra timer tasks; verified zero background tasks running (`manage_task list` confirmed empty).
+              - Internal `schedule` tool calls prohibited; exclusively relying on Codex's external 5-minute ACTIVE automation cadence.
+           4. **Suite Verification Results**:
+              - Running-app Browser Suite: **All 12/12 suites PASS 100% green** in real native Chrome (`server/scripts/issue155-browser-journeys-results.json`, timestamp `2026-10-03T09:07:47.203Z`).
+                * Runner trim SHA-256: `0f74eebd8d85aab0aa68eb921dc1e9151be044efc6cdad5b8d0a5a9ad4aac712`
+                * Result trim SHA-256: `e6019090cf40fb7ac041f809d90e158743bc0ee0b88ecbe2eb7e4cf47598c1bf`
+              - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
+              - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
+              - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+

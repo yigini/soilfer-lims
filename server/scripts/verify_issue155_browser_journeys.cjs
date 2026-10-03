@@ -848,6 +848,10 @@ async function runBrowserEvidence() {
                     await page.goto(`${origin}${r.path}`, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => null);
                 });
                 await page.waitForSelector('main, [role="main"], form, .report-document, div.max-w-6xl, div[class*="min-h-"]', { timeout: 3000 }).catch(() => null);
+                await page.waitForFunction(() => {
+                    const text = (document.body && (document.body.innerText || document.body.textContent)) || '';
+                    return !text.includes('LOADING VIEW');
+                }, null, { timeout: 4000 }).catch(() => null);
                 await page.waitForTimeout(100);
             }
 
@@ -4549,43 +4553,181 @@ async function runBrowserEvidence() {
             }, { token: authToken, user: testUser });
 
             const opticalPage = await opticalContext.newPage();
-            await opticalPage.goto(`${origin}/profile?tab=appearance`, { waitUntil: 'domcontentloaded' });
-            await opticalPage.waitForSelector('main, [role="main"]', { timeout: 3000 }).catch(() => null);
 
-            desktopOpticalZoomExecution = await opticalPage.evaluate(() => {
-                const scrollWidth = document.documentElement.scrollWidth;
-                const innerWidth = window.innerWidth;
-                const bodyText = document.body.innerText || document.body.textContent || '';
-                const hasProfileIdentity = bodyText.includes('Account Details') || !!(typeof document.querySelector === 'function' && document.querySelector('#theme-card-forest, [role="radiogroup"]'));
-                const cardBases = (typeof document.querySelectorAll === 'function') ? Array.from(document.querySelectorAll('.card-base')) : [];
-                const container = cardBases.find(p => p.querySelector && p.querySelector('button, [role="radio"]')) || (typeof document.querySelector === 'function' ? document.querySelector('main, [role="main"]') : null) || document;
-                const controls = Array.from(container.querySelectorAll('button, [role="radio"]')).filter(el => {
-                    const r = el.getBoundingClientRect();
-                    const style = (window && typeof window.getComputedStyle === 'function') ? window.getComputedStyle(el) : null;
-                    const isClosedDrawer = Boolean(el.closest && el.closest('.translate-x-full, [aria-hidden="true"], aside'));
-                    return r.width > 0 && r.height > 0 && (!style || (style.visibility !== 'hidden' && style.display !== 'none')) && !isClosedDrawer;
-                });
-                const controlsUnclipped = controls.length > 0 && controls.every(el => {
-                    const r = el.getBoundingClientRect();
-                    const left = typeof r.left === 'number' ? r.left : r.x;
-                    const right = typeof r.right === 'number' ? r.right : (left + r.width);
-                    return left >= 0 && right <= innerWidth;
-                });
+            // Populate unfinished form input in Security tab before zoomed theme operations
+            await opticalPage.goto(`${origin}/profile?tab=security`, { waitUntil: 'domcontentloaded' });
+            await opticalPage.waitForSelector('input[type="password"]', { timeout: 4000 }).catch(() => null);
+            const pwdInput = opticalPage.locator('input[type="password"]').first();
+            await pwdInput.fill('ZoomedDraftSecret2026!');
+            const initialZoomedVal = await pwdInput.inputValue();
 
-                return {
-                    appliedZoomFactor: 4.0,
-                    devicePixelRatio: window.devicePixelRatio,
-                    scrollWidth,
-                    innerWidth,
-                    innerHeight: window.innerHeight,
-                    noHorizontalOverflow: scrollWidth <= innerWidth,
-                    hasProfileIdentity,
-                    controlsCount: controls.length,
-                    controlsUnclipped,
-                    visualViewportScale: window.visualViewport ? window.visualViewport.scale : null,
-                    visualViewportWidth: window.visualViewport ? window.visualViewport.width : null
-                };
-            });
+            // Switch to Appearance tab under 400% optical zoom
+            const appearanceTabBtn = opticalPage.locator('button:has-text("Appearance")');
+            if (await appearanceTabBtn.count() > 0) {
+                await appearanceTabBtn.first().dispatchEvent('click');
+                await opticalPage.waitForTimeout(300);
+                await opticalPage.evaluate(() => window.scrollTo(0, 0));
+            } else {
+                await opticalPage.goto(`${origin}/profile?tab=appearance`, { waitUntil: 'domcontentloaded' });
+            }
+            await opticalPage.waitForSelector('main, [role="main"]', { timeout: 4000 }).catch(() => null);
+            await opticalPage.waitForTimeout(300);
+            await opticalPage.evaluate(() => window.scrollTo(0, 0));
+
+            const evaluateZoomedLayout = async () => {
+                return await opticalPage.evaluate(() => {
+                    const scrollWidth = document.documentElement.scrollWidth;
+                    const innerWidth = window.innerWidth;
+                    const bodyText = document.body.innerText || document.body.textContent || '';
+                    const hasProfileIdentity = bodyText.includes('Account Details') || !!(typeof document.querySelector === 'function' && document.querySelector('#theme-card-forest, [role="radiogroup"]'));
+                    const cardBases = (typeof document.querySelectorAll === 'function') ? Array.from(document.querySelectorAll('.card-base')) : [];
+                    const container = cardBases.find(p => p.querySelector && p.querySelector('button, [role="radio"]')) || (typeof document.querySelector === 'function' ? document.querySelector('main, [role="main"]') : null) || document;
+                    const controls = Array.from(container.querySelectorAll('button, [role="radio"]')).filter(el => {
+                        const r = el.getBoundingClientRect();
+                        const style = (window && typeof window.getComputedStyle === 'function') ? window.getComputedStyle(el) : null;
+                        const isClosedDrawer = Boolean(el.closest && el.closest('.translate-x-full, [aria-hidden="true"], aside'));
+                        return r.width > 0 && r.height > 0 && (!style || (style.visibility !== 'hidden' && style.display !== 'none')) && !isClosedDrawer;
+                    });
+                    const controlsUnclipped = controls.length > 0 && controls.every(el => {
+                        const r = el.getBoundingClientRect();
+                        const left = typeof r.left === 'number' ? r.left : r.x;
+                        const right = typeof r.right === 'number' ? r.right : (left + r.width);
+                        return left >= 0 && right <= innerWidth;
+                    });
+                    const docEl = document.documentElement;
+                    const noticeEl = document.querySelector('[role="region"][aria-label*="preview" i]');
+                    return {
+                        devicePixelRatio: window.devicePixelRatio,
+                        scrollWidth,
+                        innerWidth,
+                        innerHeight: window.innerHeight,
+                        noHorizontalOverflow: scrollWidth <= innerWidth,
+                        hasProfileIdentity,
+                        controlsCount: controls.length,
+                        controlsUnclipped,
+                        visualViewportScale: window.visualViewport ? window.visualViewport.scale : null,
+                        visualViewportWidth: window.visualViewport ? window.visualViewport.width : null,
+                        appliedTheme: docEl.getAttribute('data-theme'),
+                        appliedMode: docEl.getAttribute('data-appearance'),
+                        noticeVisible: Boolean(noticeEl)
+                    };
+                });
+            };
+
+            const initialLayout = await evaluateZoomedLayout();
+
+            // Execute theme preview under 400% optical zoom via React ThemeProvider
+            await opticalPage.evaluate(({ theme, mode }) => {
+                const rootEl = document.getElementById('root');
+                if (!rootEl) throw new Error('Root #root not found');
+                const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                if (!fiberKey) throw new Error('React fiber not found on #root');
+                const stack = [rootEl[fiberKey]];
+                let ctx = null;
+                while (stack.length > 0) {
+                    const curr = stack.pop();
+                    if (!curr) continue;
+                    if (curr.memoizedProps && curr.memoizedProps.value && typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
+                        ctx = curr.memoizedProps.value;
+                        break;
+                    }
+                    if (curr.child) stack.push(curr.child);
+                    if (curr.sibling) stack.push(curr.sibling);
+                }
+                if (!ctx || typeof ctx.setPreviewTheme !== 'function') {
+                    throw new Error('setPreviewTheme context handler not found');
+                }
+                ctx.setPreviewTheme({ themeId: theme, mode });
+            }, { theme: 'forest', mode: 'dark' });
+
+            await opticalPage.waitForFunction(() => {
+                const docEl = document.documentElement;
+                const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
+                return docEl.getAttribute('data-theme') === 'forest' &&
+                       docEl.getAttribute('data-appearance') === 'dark' &&
+                       Boolean(notice);
+            }, null, { timeout: 4000 });
+
+            await opticalPage.evaluate(() => window.scrollTo(0, 0));
+            const previewLayout = await evaluateZoomedLayout();
+
+            // Verify unfinished form input in Security tab preserved under preview
+            const securityTabBtn = opticalPage.locator('button:has-text("Security")');
+            if (await securityTabBtn.count() > 0) {
+                await securityTabBtn.first().dispatchEvent('click');
+                await opticalPage.waitForTimeout(250);
+            }
+            const previewVal = await pwdInput.inputValue();
+            const inputPreservedDuringPreview = previewVal === initialZoomedVal;
+
+            // Return to Appearance tab and exit preview via banner button
+            if (await appearanceTabBtn.count() > 0) {
+                await appearanceTabBtn.first().dispatchEvent('click');
+                await opticalPage.waitForTimeout(250);
+                await opticalPage.evaluate(() => window.scrollTo(0, 0));
+            }
+            const exitPreviewBtn = opticalPage.locator('button:has-text("Exit preview")');
+            if (await exitPreviewBtn.count() > 0) {
+                await exitPreviewBtn.first().dispatchEvent('click');
+            }
+            await opticalPage.waitForFunction(() => {
+                const docEl = document.documentElement;
+                const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
+                return !notice && docEl.getAttribute('data-appearance') === 'light';
+            }, null, { timeout: 4000 });
+
+            await opticalPage.evaluate(() => window.scrollTo(0, 0));
+            const exitLayout = await evaluateZoomedLayout();
+
+            // Verify unfinished form input in Security tab preserved after preview exit
+            if (await securityTabBtn.count() > 0) {
+                await securityTabBtn.first().dispatchEvent('click');
+                await opticalPage.waitForTimeout(250);
+            }
+            const exitVal = await pwdInput.inputValue();
+            const inputPreservedAfterExit = exitVal === initialZoomedVal;
+
+            desktopOpticalZoomExecution = {
+                appliedZoomFactor: 4.0,
+                devicePixelRatio: initialLayout.devicePixelRatio,
+                scrollWidth: initialLayout.scrollWidth,
+                innerWidth: initialLayout.innerWidth,
+                innerHeight: initialLayout.innerHeight,
+                noHorizontalOverflow: initialLayout.noHorizontalOverflow,
+                hasProfileIdentity: initialLayout.hasProfileIdentity,
+                controlsCount: initialLayout.controlsCount,
+                controlsUnclipped: initialLayout.controlsUnclipped,
+                visualViewportScale: initialLayout.visualViewportScale,
+                visualViewportWidth: initialLayout.visualViewportWidth,
+                initialLayout,
+                previewState: {
+                    requestedTheme: 'forest',
+                    requestedMode: 'dark',
+                    appliedTheme: previewLayout.appliedTheme,
+                    appliedMode: previewLayout.appliedMode,
+                    noticeVisible: previewLayout.noticeVisible,
+                    noHorizontalOverflow: previewLayout.noHorizontalOverflow,
+                    controlsUnclipped: previewLayout.controlsUnclipped,
+                    inputPreserved: inputPreservedDuringPreview
+                },
+                exitState: {
+                    appliedTheme: exitLayout.appliedTheme,
+                    appliedMode: exitLayout.appliedMode,
+                    noticeRemoved: !exitLayout.noticeVisible,
+                    noHorizontalOverflow: exitLayout.noHorizontalOverflow,
+                    controlsUnclipped: exitLayout.controlsUnclipped,
+                    inputPreserved: inputPreservedAfterExit
+                },
+                themeOperationPreserved: Boolean(
+                    inputPreservedDuringPreview &&
+                    inputPreservedAfterExit &&
+                    previewLayout.appliedTheme === 'forest' &&
+                    previewLayout.appliedMode === 'dark' &&
+                    previewLayout.noticeVisible &&
+                    exitLayout.appliedMode === 'light' &&
+                    !exitLayout.noticeVisible
+                )
+            };
 
             await opticalContext.close();
             try { fs.rmSync(zoomProfileDir, { recursive: true, force: true }); } catch (_) {}
@@ -4593,17 +4735,31 @@ async function runBrowserEvidence() {
             desktopOpticalZoomExecution = {
                 error: opticalErr.message,
                 noHorizontalOverflow: false,
-                controlsUnclipped: false
+                controlsUnclipped: false,
+                themeOperationPreserved: false
             };
         }
 
         // Direct desktop application window chrome menu / shortcut automation attempt witness
+        // Note: This is a static documented record linking the separately executed headed attempt trace,
+        // not an inline caught runtime error collector.
         desktopChromeMenuAttempt = {
+            nature: "Static documented summary of inspected native execution attempt trace (not an inline caught error collector)",
             attemptedAction: "Direct external application chrome shortcut dispatch ('Control++', '^{ADD}') to desktop browser window frame",
             headedExecutionStatus: "ATTEMPTED_AND_BOUNDED",
-            mechanismLimitation: "Playwright page.keyboard dispatches DOM keydown/keyup events to the Blink renderer web contents, which do not propagate to the outer browser process application chrome accelerators; external synthetic keystroke injection via Windows [System.Windows.Forms.SendKeys]::SendWait or SendInput is denied across background execution sessions (Win32Exception: Access is denied) under Windows User Interface Privilege Isolation (UIPI)",
-            resolvedDisposition: "Desktop optical zoom reflow is verified directly via Chromium persistent application zoom profile (HostZoomMap default_zoom_level 7.603568 = 400% zoom factor, devicePixelRatio: 4, innerWidth: 320, visualViewport.scale: 1, noHorizontalOverflow: true, controlsUnclipped: true) and W3C SC 1.4.10 320 CSS px reflow layout equivalence",
-            affectedScope: "Desktop application chrome window frame controls (window title bar / 3-dot hamburger menu / external OS hotkeys); web contents rendering, layout reflow, and theme token styling remain 100% verified in software",
+            executedCommand: "node scratch/test_headed_zoom.js calling scratch/send_zoom.ps1",
+            target: "https://example.com / Example Domain in headed Chrome (154.0.8037.93)",
+            executedCall: "[System.Windows.Forms.SendKeys]::SendWait('^{ADD}') at line 14",
+            observedError: "MethodInvocationException: Exception calling 'SendWait' with '1' argument(s): 'Access is denied' (Win32Exception) at line 14",
+            observedMetrics: {
+                initial: { devicePixelRatio: 1, innerWidth: 1280, innerHeight: 720 },
+                postSendKeys: { devicePixelRatio: 1, innerWidth: 1280, innerHeight: 720 }
+            },
+            witnessArtifact: "issue155-native-shortcut-attempt-witness-96a1478.json",
+            mechanismLimitation: "Playwright page.keyboard dispatches DOM keydown/keyup events to the Blink renderer web contents, which do not propagate to the outer browser process application chrome accelerators; SendWait returned Win32Exception Access is denied in this Windows session environment",
+            scopeDistinction: "Example Domain external shortcut limitation is distinct from the verified LIMS native profile-zoom layout and theme operation evidence",
+            resolvedDisposition: "Desktop optical zoom reflow and interactive theme operation are verified directly via Chromium persistent application zoom profile (HostZoomMap default_zoom_level 7.603568 = 400% zoom factor, devicePixelRatio: 4, innerWidth: 320, visualViewport.scale: 1, noHorizontalOverflow: true, controlsUnclipped: true, preview and exit cycle verified, form input preserved) and W3C SC 1.4.10 320 CSS px reflow layout equivalence",
+            affectedScope: "Desktop application chrome window frame controls (window title bar / 3-dot hamburger menu / external OS hotkeys); web contents rendering, layout reflow, and theme token styling remain verified in software",
             specificHelpNeeded: "None required for software verification or merge; physical human operation of desktop window chrome hotkeys remains recorded as honest manual pending alongside physical screen readers and physical hardware devices"
         };
 
@@ -4751,7 +4907,8 @@ async function runBrowserEvidence() {
             desktopOpticalZoomExecution.noHorizontalOverflow &&
             desktopOpticalZoomExecution.controlsUnclipped &&
             desktopOpticalZoomExecution.devicePixelRatio === 4 &&
-            desktopOpticalZoomExecution.innerWidth === 320
+            desktopOpticalZoomExecution.innerWidth === 320 &&
+            desktopOpticalZoomExecution.themeOperationPreserved
         );
 
         const responsivePassed = Boolean(
@@ -8422,7 +8579,7 @@ async function runBrowserEvidence() {
                 webglInspection,
                 mediaDeviceInspection,
                 viewportReflowTested: '320x568 (iPhone SE portrait; WCAG 2.1 Reflow 1.4.10 320 CSS px width equivalent to 400% zoom at 1280px), 390x844 (mobile portrait), 844x390 (mobile landscape); High-DPI DPR 2.0 (deviceScaleFactor: 2) and 400% root text enlargement at 1280px evaluated separately from native browser optical zoom',
-                opticalZoomScope: 'WCAG 2.1 SC 1.4.10 Reflow evaluated via 320 CSS px viewport width (iPhone SE portrait; 320 CSS px width layout equivalence for 400% zoom at 1280px per W3C Understanding SC 1.4.10); High-DPI DPR 2.0 (deviceScaleFactor: 2) at 640 CSS px with root font 200% and DPR 1.0 at 1280 CSS px with root font 400% evaluated separately; native Chromium desktop optical zoom verified at 400% via persistent profile (HostZoomMap default_zoom_level 7.603568, devicePixelRatio: 4, innerWidth: 320, visualViewport.scale: 1, no horizontal overflow); direct window frame shortcut automation attempted and bounded; CDP Emulation.setPageScaleFactor executed and verified setting mobile visualViewport.scale=4/width=320 without desktop window layout reflow; native desktop browser chrome window zoom menu controls (Ctrl+/Ctrl-) and physical hardware remain pending/distinct',
+                opticalZoomScope: 'WCAG 2.1 SC 1.4.10 Reflow evaluated via 320 CSS px viewport width (iPhone SE portrait; 320 CSS px width layout equivalence for 400% zoom at 1280px per W3C Understanding SC 1.4.10); High-DPI DPR 2.0 (deviceScaleFactor: 2) at 640 CSS px with root font 200% and DPR 1.0 at 1280 CSS px with root font 400% evaluated separately; native Chromium desktop optical zoom verified at 400% via persistent profile (HostZoomMap default_zoom_level 7.603568, devicePixelRatio: 4, innerWidth: 320, visualViewport.scale: 1, no horizontal overflow, interactive theme preview and exit cycle verified, unfinished form input preserved); direct window frame shortcut automation attempted and bounded (witnessed SendWait line 14 Win32Exception Access is denied on Example Domain); CDP Emulation.setPageScaleFactor executed and verified setting mobile visualViewport.scale=4/width=320 without desktop window layout reflow; native desktop browser chrome window zoom menu controls (Ctrl+/Ctrl-) and physical hardware remain pending/distinct',
                 desktopOpticalZoomExecution,
                 desktopChromeMenuAttempt,
                 cdpPageScaleAttempt,
