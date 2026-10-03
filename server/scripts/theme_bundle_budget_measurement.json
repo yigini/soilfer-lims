@@ -2,12 +2,12 @@
   "baselineCommit": "1265e8a",
   "baselineTree": "260975e57d0b3a1389f622c2f84ef444f3f46cf4",
   "baselineClientTree": "bffc1d55ebf9dbbcad5c5c8530794bede9b1f77e",
-  "candidateCommit": "625eb9babcb2ba7748cffa74623966be5b27449d",
-  "candidateTree": "45531bb7ed2c8db2ac27298022aa7902d6695164",
+  "candidateCommit": "1ee3b2560eaaf51433204dc0adbcb246fb08e069",
+  "candidateTree": "227580c1d5055961898f84a6352b363597d85e97",
   "candidateClientTree": "6e83b8d431a820d700ac6ac7a4398e5f3a1bb216",
-  "buildInputCommit": "625eb9b460d3d5f57732a3fc267dcfe66ca7732d",
+  "buildInputCommit": "625eb9babcb2ba7748cffa74623966be5b27449d",
   "buildInputClientTree": "6e83b8d431a820d700ac6ac7a4398e5f3a1bb216",
-  "evidenceDistinction": "Client source code and built assets are updated at candidate client tree 48f6ad6bb6a21c5ec1c4ab4bdae9901df51e0ff0 (including SampleMap.jsx ChangeView dependency memoization, ScanPage.jsx synchronization, and TechWorkbench.jsx overflow styling); verification scripts, test suites, and documentation are updated in subsequent evidence commits without altering built assets.",
+  "evidenceDistinction": "Client source code and built assets are updated at candidate client tree 6e83b8d431a820d700ac6ac7a4398e5f3a1bb216 (including SampleMap.jsx conditional hook fix, ScanPage.jsx synchronization, and TechWorkbench.jsx overflow styling); verification scripts, test suites, and documentation are updated in subsequent evidence commits without altering built assets.",
   "toolchain": "vite v5.4.21, node v24.13.0 (win32-arm64)",
   "cleanBuildVerified": true,
   "dependencyLockfileSha256": "c2bf38c195a5a5a2a5d5c2835b5b5d26ffa1650b8d5cda45dee537ff553258ae",
@@ -17,7 +17,7 @@
     "appearanceTokensCssPath": "client/src/styles/appearance-tokens.css",
     "appearanceTokensCssSha256": "fe67c691a44538a9816a64d6ba93b3dbd1c40769774dca5eb060a1d499e88263"
   },
-  "measuredAt": "2026-10-02T23:47:01.817Z",
+  "measuredAt": "2026-10-03T00:20:13.171Z",
   "baseline": {
     "css": {
       "file": "index-B4HqGI8K.css",

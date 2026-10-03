@@ -3878,3 +3878,32 @@ Laboratory operators can find step-by-step procedures in the following documenta
              - Reused verified artifacts: Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79...`). Server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen.
              - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
 
+       - Following Codex independent review `issue155-independent-review-1ee3b25.md` and 4-case probe `issue155-focused-review-1ee3b25.cjs`:
+          1. **Scientific Axis Value-Position Monotonicity Calibration (Finding 1 / Case 3)**:
+             - Hardened `inspectTickGeometry` in `multiOverlayState`, `ovt`, and `multiOverlayState.afterExit` in `server/scripts/verify_issue155_browser_journeys.cjs`:
+               * Formed unique `{ val, coord }` pairs from tick labels and spatial coordinates along the respective axis dimension.
+               * Sorted pairs by numerical value and asserted strict monotonicity (`isStrictlyInc || isStrictlyDec`).
+               * Flags scrambled/misassociated tick positions (`isScrambled = true`) when coordinates reverse direction or jump out of order (e.g. $X \in [40, 400, 140, 300]$ for values $[400, 1000, 2000, 4000]$, $Y \in [250, 50, 200, 120]$ for values $[0, 0.4, 0.8, 1.2]$), strictly failing closed across `initial.axesVerified: false`, `transition.modelVerified: false`, `exit.modelVerified: false`, and `printIsolationPassed: false`.
+               * Preserved source-supported N/A equivalence (`hasCoords: false`) for mock DOM adapters (`axisDoc`) lacking spatial coordinates.
+          2. **Observed Camera Continuity Across All 14 Transitions and Exit (Finding 2 / Case 4)**:
+             - Hardened `opGate` in `server/scripts/verify_issue155_browser_journeys.cjs` to enforce camera continuity:
+               * Requires `v.streamDetails.id === scanState.streamDetails.id` (strictly rejects replacement/swapped stream IDs).
+               * Requires `v.streamDetails.tracks[0].id === scanState.streamDetails.tracks[0].id` (strictly rejects swapped track IDs).
+               * Requires `v.streamDetails.tracks.every(t => t.readyState === 'live' && t.enabled === true)` (strictly rejects ended or disabled tracks).
+               * Requires `v.videoNodeIdentity.readyState >= 2` (strictly rejects unready `<video>` elements).
+               * Requires valid non-empty string stream ID and non-empty tracks array (strictly rejects deleted IDs or track arrays).
+          3. **Build & Public Identity Clean Binding (Finding 3)**:
+             - In `server/scripts/measure_theme_bundle_delta.js`: corrected `buildInputCommit` from typo `625eb9b460d3d5f57732a3fc267dcfe66ca7732d` to valid actual source commit `625eb9babcb2ba7748cffa74623966be5b27449d` (tree `45531bb7ed2c8db2ac27298022aa7902d6695164`), resolving cleanly in git object store.
+             - Updated `evidenceDistinction` to reference candidate client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216` and regenerated `theme_bundle_budget_measurement.json` (Plan footprint: 5,333 B gzip, complete app overhead: 19,342 B gzip).
+             - In `server/scripts/verify_all_14.cjs`: updated test 56 to assert `buildInputCommit: '625eb9babcb2ba7748cffa74623966be5b27449d'` and budget overhead `19342`.
+             - In `pr155_body_updated.md`: reconciled candidate client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216` and full feature budget overhead `19,342 B gzip`.
+          4. **Whole-Stage Scope & Honest Truthful Boundaries (Finding 4)**:
+             - Maintained distinct boundaries: constructed node-listened composition events remain synthetic, distinct from OS/system IME candidate windows.
+             - High-DPI DPR 2.0, 200% and 400% zoom reflow remain distinct from native desktop optical zoom and physical hardware.
+             - Preserved accepted closures: customer certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79...`), 5-row measurements, frozen CSS `index-Df7izgw5.css` (213,700 B raw / 35,045 B gzip, SHA256 `65e7d0a2...`), server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
+          5. **Suite Verification Results**:
+             - Running-app Browser Suite: **All 12/12 suites PASS 100% green** (`server/scripts/issue155-browser-journeys-results.json`).
+             - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
+             - Plan budget footprint: 5,333 B gzip (<= 15.0 kB gzip limit, margin +9.79 kB under budget). Complete app overhead: 19,342 B gzip (18.89 kB gzip).
+             - Reused verified artifacts: Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79...`). Server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen.
+             - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.

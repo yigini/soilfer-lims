@@ -56,7 +56,7 @@ const candidateClientTree = execSync('git rev-parse HEAD:client', { cwd: root, e
 
 // Verified build manifest from candidate client distribution (client tree 6e83b8d under Vite 5.4.21 [declared ^5.3.1] / Node v24.13.0)
 const VERIFIED_BUILD_MANIFEST = {
-    buildInputCommit: '625eb9b460d3d5f57732a3fc267dcfe66ca7732d',
+    buildInputCommit: '625eb9babcb2ba7748cffa74623966be5b27449d',
     clientTree: '6e83b8d431a820d700ac6ac7a4398e5f3a1bb216',
     toolchain: {
         node: 'v24.13.0',
@@ -244,9 +244,9 @@ fs.writeFileSync(path.join(root, 'server/scripts/theme_bundle_budget_measurement
     candidateCommit,
     candidateTree,
     candidateClientTree,
-    buildInputCommit: buildInputCommit || '2fd3c82be31615d62ddd95122138e8dcfccc896a',
+    buildInputCommit: buildInputCommit || '625eb9babcb2ba7748cffa74623966be5b27449d',
     buildInputClientTree: buildInputClientTree || candidateClientTree,
-    evidenceDistinction: "Client source code and built assets are updated at candidate client tree 48f6ad6bb6a21c5ec1c4ab4bdae9901df51e0ff0 (including SampleMap.jsx ChangeView dependency memoization, ScanPage.jsx synchronization, and TechWorkbench.jsx overflow styling); verification scripts, test suites, and documentation are updated in subsequent evidence commits without altering built assets.",
+    evidenceDistinction: "Client source code and built assets are updated at candidate client tree 6e83b8d431a820d700ac6ac7a4398e5f3a1bb216 (including SampleMap.jsx conditional hook fix, ScanPage.jsx synchronization, and TechWorkbench.jsx overflow styling); verification scripts, test suites, and documentation are updated in subsequent evidence commits without altering built assets.",
     toolchain,
     cleanBuildVerified,
     dependencyLockfileSha256: lockfileSha256,

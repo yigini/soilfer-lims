@@ -1226,14 +1226,14 @@ test('PASS PDF export branch strictly validates genuine SHA-256 hash and rejects
 // 56. Emitter provenance, clean input binding, and reproducible plan budget verified
 test('PASS emitter provenance, clean input binding, and reproducible plan budget verified', () => {
     const emitterSrc = fs.readFileSync(path.join(root, 'server/scripts/measure_theme_bundle_delta.js'), 'utf8');
-    assert(emitterSrc.includes("buildInputCommit: '625eb9b460d3d5f57732a3fc267dcfe66ca7732d'") || emitterSrc.includes("buildInputCommit: '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7'"), 'emitter has candidate binding');
+    assert(emitterSrc.includes("buildInputCommit: '625eb9babcb2ba7748cffa74623966be5b27449d'") || emitterSrc.includes("buildInputCommit: '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7'"), 'emitter has candidate binding');
     assert(emitterSrc.includes('evidenceDistinction'), 'emitter has evidenceDistinction');
     assert(!emitterSrc.includes("buildInputCommit: '4c0ed59f4f5700f1981409c180ce4317c558ce5e'"), 'old 4c removed from emitter');
     assert(emitterSrc.includes('Reusing verified fresh candidate client build'), 'emitter reuses bound build');
     assert(emitterSrc.includes('Reusing verified immutable baseline 1265e8a metrics'), 'emitter reuses bound baseline');
 
     const budget = JSON.parse(fs.readFileSync(path.join(root, 'server/scripts/theme_bundle_budget_measurement.json'), 'utf8'));
-    assert(budget.buildInputCommit === '625eb9b460d3d5f57732a3fc267dcfe66ca7732d' || budget.buildInputCommit === '2fd3c82be31615d62ddd95122138e8dcfccc896a' || budget.buildInputCommit === '1015524384c254383d12c10cd6d67e1bf2755c59' || budget.buildInputCommit === '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7');
+    assert(budget.buildInputCommit === '625eb9babcb2ba7748cffa74623966be5b27449d' || budget.buildInputCommit === '2fd3c82be31615d62ddd95122138e8dcfccc896a' || budget.buildInputCommit === '1015524384c254383d12c10cd6d67e1bf2755c59' || budget.buildInputCommit === '8e4d0357c785740cf3bdfe7c0e5dfef5be1cd5c7');
     assert(budget.buildInputClientTree === '6e83b8d431a820d700ac6ac7a4398e5f3a1bb216' || budget.buildInputClientTree === '48f6ad6bb6a21c5ec1c4ab4bdae9901df51e0ff0' || budget.buildInputClientTree === 'c7557a2b3b74f077244fd0cee9e55e05edf21671' || budget.buildInputClientTree === 'd30e0197f6d0619b8b71fdd5c8fabc5803bf6c1b');
     assert.equal(budget.planBudget.totalGzip, 5333);
     assert(budget.completeAppOverhead.totalOverheadGzip === 19347 || budget.completeAppOverhead.totalOverheadGzip === 19344 || budget.completeAppOverhead.totalOverheadGzip === 19342);
