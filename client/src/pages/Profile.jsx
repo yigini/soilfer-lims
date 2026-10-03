@@ -7,6 +7,7 @@ import { useDialog } from '../context/DialogContext';
 import { User, Lock, Bell, Mail, Shield, MapPin, Building2, Calendar, Sun } from 'lucide-react';
 import axios from 'axios';
 import MessagingCenter from '../components/messaging/MessagingCenter';
+import { ThemeGallery } from '../components/appearance/ThemeGallery';
 
 const Profile = () => {
     const { user, logout, updateUserPreferences } = useAuth();
@@ -24,6 +25,8 @@ const Profile = () => {
     const [selectedLang, setSelectedLang] = useState(user?.language || locale || 'en');
     const [savingPref, setSavingPref] = useState(false);
     const [appearanceStatus, setAppearanceStatus] = useState({ type: null, text: '' });
+    const [savingLang, setSavingLang] = useState(false);
+    const [languageStatus, setLanguageStatus] = useState({ type: null, text: '' });
 
     useEffect(() => {
         if (user?.language) {
@@ -70,6 +73,35 @@ const Profile = () => {
             });
         } finally {
             setSavingPref(false);
+        }
+    };
+
+    const handleSaveLanguage = async () => {
+        try {
+            setSavingLang(true);
+            setLanguageStatus({ type: null, text: '' });
+            const res = await axios.patch('/api/auth/preferences', {
+                language: selectedLang
+            });
+            const newLang = res.data?.data?.language || selectedLang;
+            if (updateUserPreferences) {
+                updateUserPreferences({ language: newLang });
+            }
+            if (changeLanguage) {
+                changeLanguage(newLang);
+            }
+            setLanguageStatus({
+                type: 'success',
+                text: t('appearance.languageSavedSuccess', 'Language preference saved.')
+            });
+        } catch (err) {
+            console.error('Failed to save language preference:', err);
+            setLanguageStatus({
+                type: 'error',
+                text: t('appearance.languageSavedError', 'Could not save language preference.')
+            });
+        } finally {
+            setSavingLang(false);
         }
     };
 
@@ -305,131 +337,21 @@ const Profile = () => {
 
                     {/* APPEARANCE TAB */}
                     {activeTab === 'appearance' && (
-                        <div className="space-y-6 max-w-2xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="space-y-8 max-w-4xl animate-in fade-in slide-in-from-bottom-2 duration-300">
                             <div>
-                                <h3 className="text-lg font-bold text-sf-text mb-1">
+                                <h3 className="text-xl font-bold text-sf-text mb-1">
                                     {t('appearance.profileHeading', 'Account appearance preference')}
                                 </h3>
                                 <p className="text-sm text-sf-muted">
-                                    {t('appearance.profileDescription', 'Use this appearance whenever you sign in, on any device. You can still switch for one session from the header.')}
+                                    {t('appearance.profileDescription', 'Choose your personal theme and mode preference across all devices. Your saved choice overrides laboratory defaults.')}
                                 </p>
                             </div>
 
-                            {appearanceStatus.text && (
-                                <div
-                                    role="status"
-                                    className={`p-3.5 rounded-xl text-sm font-medium border ${
-                                        appearanceStatus.type === 'success'
-                                            ? 'bg-sf-success-bg text-sf-success border-sf-success/30'
-                                            : 'bg-sf-danger-bg text-sf-danger border-sf-danger/30'
-                                    }`}
-                                >
-                                    {appearanceStatus.text}
-                                </div>
-                            )}
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {/* Light Option Card */}
-                                <label
-                                    className={`relative flex flex-col gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                                        selectedPref === 'light'
-                                            ? 'border-sf-primary bg-sf-selected/40 shadow-sm'
-                                            : 'border-sf-divider bg-sf-surface hover:border-sf-control'
-                                    }`}
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <input
-                                                type="radio"
-                                                name="appearance-preference"
-                                                value="light"
-                                                checked={selectedPref === 'light'}
-                                                onChange={() => {
-                                                    setSelectedPref('light');
-                                                    setAppearanceStatus({ type: null, text: '' });
-                                                }}
-                                                className="accent-sf-primary w-4 h-4"
-                                            />
-                                            <span className="font-semibold text-sf-text text-sm">
-                                                {t('appearance.light', 'Light')}
-                                            </span>
-                                        </div>
-                                        {savedAppearance === 'light' && (
-                                            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-sf-hover text-sf-muted">
-                                                {t('appearance.defaultLabel', 'Default')}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    {/* Miniature Preview Light */}
-                                    <div className="h-28 rounded-lg border border-[#D6DFDA] overflow-hidden grid grid-cols-4 bg-[#F4F6F5] select-none pointer-events-none">
-                                        <div className="bg-[#FFFFFF] border-r border-[#D6DFDA] p-2 space-y-1.5">
-                                            <div className="h-2 w-full bg-[#D6DFDA] rounded-sm" />
-                                            <div className="h-2 w-3/4 bg-[#EAF0EC] rounded-sm" />
-                                            <div className="h-2 w-2/3 bg-[#EAF0EC] rounded-sm" />
-                                        </div>
-                                        <div className="col-span-3 p-2.5 space-y-2">
-                                            <div className="h-2.5 w-1/2 bg-[#276B51] rounded-sm" />
-                                            <div className="h-12 bg-[#FFFFFF] border border-[#D6DFDA] rounded p-1.5 space-y-1">
-                                                <div className="h-1.5 w-full bg-[#EAF0EC] rounded-sm" />
-                                                <div className="h-1.5 w-4/5 bg-[#EAF0EC] rounded-sm" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </label>
-
-                                {/* Dark Option Card */}
-                                <label
-                                    className={`relative flex flex-col gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                                        selectedPref === 'dark'
-                                            ? 'border-sf-primary bg-sf-selected/40 shadow-sm'
-                                            : 'border-sf-divider bg-sf-surface hover:border-sf-control'
-                                    }`}
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <input
-                                                type="radio"
-                                                name="appearance-preference"
-                                                value="dark"
-                                                checked={selectedPref === 'dark'}
-                                                onChange={() => {
-                                                    setSelectedPref('dark');
-                                                    setAppearanceStatus({ type: null, text: '' });
-                                                }}
-                                                className="accent-sf-primary w-4 h-4"
-                                            />
-                                            <span className="font-semibold text-sf-text text-sm">
-                                                {t('appearance.dark', 'Dark · Graphite')}
-                                            </span>
-                                        </div>
-                                        {savedAppearance === 'dark' && (
-                                            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-sf-hover text-sf-muted">
-                                                {t('appearance.defaultLabel', 'Default')}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    {/* Miniature Preview Dark */}
-                                    <div className="h-28 rounded-lg border border-[#515B61] overflow-hidden grid grid-cols-4 bg-[#25282B] select-none pointer-events-none">
-                                        <div className="bg-[#2E3236] border-r border-[#515B61] p-2 space-y-1.5">
-                                            <div className="h-2 w-full bg-[#515B61] rounded-sm" />
-                                            <div className="h-2 w-3/4 bg-[#3C4247] rounded-sm" />
-                                            <div className="h-2 w-2/3 bg-[#3C4247] rounded-sm" />
-                                        </div>
-                                        <div className="col-span-3 p-2.5 space-y-2">
-                                            <div className="h-2.5 w-1/2 bg-[#8ED3B8] rounded-sm" />
-                                            <div className="h-12 bg-[#393E43] border border-[#515B61] rounded p-1.5 space-y-1">
-                                                <div className="h-1.5 w-full bg-[#515B61] rounded-sm" />
-                                                <div className="h-1.5 w-4/5 bg-[#515B61] rounded-sm" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
+                            {/* Sitewide Theme Gallery for Personal Preference */}
+                            <ThemeGallery targetScope="personal" />
 
                             {/* Preferred Language Section */}
-                            <div className="pt-4 border-t border-sf-divider space-y-3">
+                            <div className="pt-6 border-t border-sf-divider space-y-4">
                                 <div>
                                     <h4 className="text-base font-bold text-sf-text mb-1">
                                         {t('appearance.languageHeading', 'Preferred Language')}
@@ -438,6 +360,20 @@ const Profile = () => {
                                         {t('appearance.languageDescription', 'Choose the language used across your session and default communications.')}
                                     </p>
                                 </div>
+
+                                {languageStatus.text && (
+                                    <div
+                                        role="status"
+                                        className={`p-3.5 rounded-xl text-sm font-medium border ${
+                                            languageStatus.type === 'success'
+                                                ? 'bg-sf-success-bg text-sf-success border-sf-success/30'
+                                                : 'bg-sf-danger-bg text-sf-danger border-sf-danger/30'
+                                        }`}
+                                    >
+                                        {languageStatus.text}
+                                    </div>
+                                )}
+
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                     {(availableLanguages || [
                                         { code: 'en', name: 'English' },
@@ -462,7 +398,7 @@ const Profile = () => {
                                                     checked={selectedLang === l.code}
                                                     onChange={() => {
                                                         setSelectedLang(l.code);
-                                                        setAppearanceStatus({ type: null, text: '' });
+                                                        setLanguageStatus({ type: null, text: '' });
                                                     }}
                                                     className="accent-sf-primary w-4 h-4"
                                                 />
@@ -474,26 +410,26 @@ const Profile = () => {
                                         </label>
                                     ))}
                                 </div>
-                            </div>
 
-                            <div className="pt-4 flex items-center gap-4">
-                                <button
-                                    type="button"
-                                    onClick={handleSaveAppearance}
-                                    disabled={savingPref}
-                                    className="btn-primary flex items-center gap-2"
-                                >
-                                    {savingPref ? (
-                                        t('appearance.saving', 'Saving preferences...')
-                                    ) : (
-                                        t('appearance.saveButton', 'Save preferences')
+                                <div className="pt-2 flex items-center gap-4">
+                                    <button
+                                        type="button"
+                                        onClick={handleSaveLanguage}
+                                        disabled={savingLang}
+                                        className="btn-primary flex items-center gap-2"
+                                    >
+                                        {savingLang ? (
+                                            t('appearance.saving', 'Saving language...')
+                                        ) : (
+                                            t('appearance.saveLanguageButton', 'Save language preference')
+                                        )}
+                                    </button>
+                                    {selectedLang !== (user?.language || locale) && (
+                                        <span className="text-xs text-sf-muted">
+                                            Unsaved language change
+                                        </span>
                                     )}
-                                </button>
-                                {(selectedPref !== savedAppearance || selectedLang !== (user?.language || locale)) && (
-                                    <span className="text-xs text-sf-muted">
-                                        Unsaved changes
-                                    </span>
-                                )}
+                                </div>
                             </div>
                         </div>
                     )}

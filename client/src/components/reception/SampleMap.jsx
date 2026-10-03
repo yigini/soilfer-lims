@@ -27,10 +27,10 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const ChangeView = ({ center }) => {
     const map = useMap();
     useEffect(() => {
-        if (center && Number.isFinite(center[0]) && Number.isFinite(center[1])) {
+        if (center && Number.isFinite(center[0]) && Number.isFinite(center[1]) && map) {
             map.setView(center, 13);
         }
-    }, [center, map]);
+    }, [center && center[0], center && center[1], map]);
     return null;
 };
 

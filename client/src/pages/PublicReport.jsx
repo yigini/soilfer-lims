@@ -86,6 +86,23 @@ const PublicReport = () => {
             <style>{`
                 @keyframes spin { to { transform: rotate(360deg); } }
                 @media print {
+                    html, body, #root, .print-reset, .print-container, .report-document {
+                        background: #ffffff !important;
+                        background-color: #ffffff !important;
+                        color: #000000 !important;
+                        color-scheme: light !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    .report-results-table th,
+                    .report-methods-table th,
+                    .report-title-badge {
+                        background: #1e3a5f !important;
+                        background-color: #1e3a5f !important;
+                        color: #ffffff !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
                     .print-reset { background: white !important; padding: 0 !important; }
                     .print-container { box-shadow: none !important; border: none !important; border-radius: 0 !important; max-width: none !important; }
                     .print-body { padding: 0 !important; }

@@ -19,7 +19,11 @@ export default function TechWorkbench() {
     const initialQueue = searchParams.get('queue') || null;
 
     return (
-        <div className="min-h-[calc(100vh-4rem)] bg-sf-canvas text-sf-text" data-tour="workbench-container">
+        <div
+            className="min-h-[calc(100vh-4rem)] bg-sf-canvas text-sf-text"
+            style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 4rem)' }}
+            data-tour="workbench-container"
+        >
             <WorkbenchShell
                 initialAnalysis={initialAnalysis}
                 initialMethodologyId={initialMethodologyId}

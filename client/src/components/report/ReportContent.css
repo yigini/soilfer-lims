@@ -486,8 +486,27 @@
         margin: 15mm 12mm 20mm 12mm;
     }
 
-    body {
-        background: white !important;
+    html,
+    body,
+    #root,
+    main,
+    .print-reset,
+    .print-container,
+    .report-document {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        color-scheme: light !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .report-results-table th,
+    .report-methods-table th,
+    .report-title-badge {
+        background: #1e3a5f !important;
+        background-color: #1e3a5f !important;
+        color: #ffffff !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }

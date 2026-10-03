@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
-import { Globe, Palette, Users, FlaskConical, ShieldCheck, Key } from 'lucide-react';
+import { Globe, Palette, Users, FlaskConical, ShieldCheck, Key, Sparkles } from 'lucide-react';
 import AnalysisConfig from '../components/AnalysisConfig';
 import AuditLogs from './AuditLogs';
 import UsersComponent from './Users';
 import BrandingManager from '../components/admin/BrandingManager';
 import ApiKeyManager from '../components/admin/ApiKeyManager';
 import TranslationEditor from '../components/TranslationEditor';
+import { ThemeGallery } from '../components/appearance/ThemeGallery';
 import { useLanguage } from '../context/LanguageContext';
 import { useDialog } from '../context/DialogContext';
 import { useAuth } from '../context/AuthContext';
@@ -16,6 +17,9 @@ const TAB_ALIASES = {
     'translations': 'languages',
     'languages': 'languages',
     'branding': 'branding',
+    'appearance': 'appearance',
+    'theme': 'appearance',
+    'themes': 'appearance',
     'analysis': 'lab-config',
     'analyses': 'lab-config',
     'lab-config': 'lab-config',
@@ -44,11 +48,13 @@ const AdminPanel = () => {
     const canViewAudit = isSuperAdmin || isMasterUser || isLabManager || hasPermission('VIEW_AUDIT');
     const canManageApiKeys = isSuperAdmin;
     const canManageUsers = isSuperAdmin || isMasterUser || isLabManager || hasPermission('MANAGE_USERS');
+    const canManageAppearance = isSuperAdmin;
 
     const isTabAllowed = (tab) => {
         switch (tab) {
             case 'branding': return canManageBranding;
             case 'languages': return canManageBranding;
+            case 'appearance': return canManageAppearance;
             case 'lab-config': return canManageAnalyses;
             case 'audit': return canViewAudit;
             case 'api-keys': return canManageApiKeys;
@@ -204,6 +210,14 @@ const AdminPanel = () => {
                         </button>
                     </>
                 )}
+                {canManageAppearance && (
+                    <button
+                        onClick={() => handleTabChange('appearance')}
+                        className={`flex items-center gap-2 px-4 py-3 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'appearance' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'}`}
+                    >
+                        <Sparkles size={17} /> {t('appearance.title', 'Appearance & Theme')}
+                    </button>
+                )}
                 {canManageAnalyses && (
                     <button
                         onClick={() => handleTabChange('lab-config')}
@@ -241,6 +255,20 @@ const AdminPanel = () => {
             <div className={`flex-1 overflow-y-auto ${activeTab === 'branding' || activeTab === 'lab-config' || activeTab === 'api-keys' ? 'p-0' : 'card-base rounded-2xl shadow-sm border border-sf-divider p-6'}`}>
 
                 {activeTab === 'branding' && <BrandingManager />}
+
+                {activeTab === 'appearance' && (
+                    <div className="space-y-6">
+                        <div>
+                            <h3 className="text-xl font-bold text-sf-text mb-1">
+                                {t('appearance.adminHeading', 'Platform Default Appearance')}
+                            </h3>
+                            <p className="text-sm text-sf-muted">
+                                {t('appearance.adminDescription', 'Set the system-wide default theme and mode for all laboratories and public pages. Labs and users without custom overrides will inherit this setting.')}
+                            </p>
+                        </div>
+                        <ThemeGallery targetScope="platform" />
+                    </div>
+                )}
 
                 {activeTab === 'languages' && (
                     <div className="space-y-6">

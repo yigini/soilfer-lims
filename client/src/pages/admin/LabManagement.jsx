@@ -17,6 +17,7 @@ import AccessReviewModal from '../../components/staff/AccessReviewModal';
 import RecoveryLinkModal from '../../components/staff/RecoveryLinkModal';
 import SuspendUserModal from '../../components/staff/SuspendUserModal';
 import LabLifecycleModal from '../../components/lab/LabLifecycleModal';
+import { ThemeGallery } from '../../components/appearance/ThemeGallery';
 
 // IANA Timezone helper
 const getIanaTimezones = () => {
@@ -970,6 +971,7 @@ export default function LabManagement() {
                     { id: 'projects', label: t('labManagement.tabs.projects', 'Projects'), count: workspace?.projectsPagination?.total ?? workspace?.projects?.length },
                     { id: 'resources', label: t('labManagement.tabs.resources', 'Methods & Resources') },
                     { id: 'settings', label: t('labManagement.tabs.settings', 'Settings') },
+                    { id: 'appearance', label: t('appearance.title', 'Appearance') },
                     { id: 'history', label: t('labManagement.tabs.history', 'History') }
                 ].map(tab => (
                     <button
@@ -1801,6 +1803,28 @@ export default function LabManagement() {
                             )}
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/* ────────────────────────────────────────────────────────── */}
+            {/* TAB: APPEARANCE (Lab Appearance Default)                   */}
+            {/* ────────────────────────────────────────────────────────── */}
+            {activeTab === 'appearance' && (
+                <div className="space-y-6 animate-in fade-in duration-150">
+                    <div>
+                        <h2 className="text-lg font-black text-sf-text">
+                            {t('appearance.labHeading', 'Laboratory Appearance Default')}
+                        </h2>
+                        <p className="text-xs text-sf-muted mt-0.5">
+                            {t('appearance.labDescription', 'Choose the default theme and mode for staff assigned to this laboratory. Personal choices and accessibility overrides remain intact.')}
+                        </p>
+                    </div>
+
+                    <ThemeGallery
+                        targetScope="lab"
+                        targetLabId={selectedLabId}
+                        targetLabName={workspace?.name || selectedLabId}
+                    />
                 </div>
             )}
 

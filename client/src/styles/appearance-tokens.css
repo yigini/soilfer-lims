@@ -1,9 +1,22 @@
 /**
  * SoilFER LIMS - Authoritative Semantic Appearance Tokens
  *
- * Source: WP/sitewide-appearance-v1/tokens.json
- * Light default + Graphite Dark paired system.
+ * Source: WP/sitewide-theme-library-v1/THEME-CONCEPTS.json
+ * Seven theme families × Light and Dark modes (14 concrete variants)
+ *
+ * Families:
+ * 1. SoilFER Classic (soilfer-classic) - Baseline default
+ * 2. Forest (forest) - Recommended soil theme
+ * 3. Terra (terra) - Warm clay and earth accents
+ * 4. Mineral (mineral) - Slate and neutral blue-gray
+ * 5. Watershed (watershed) - Restrained teal
+ * 6. Nutrient (nutrient) - Muted fertility olive
+ * 7. Clear Contrast (clear-contrast) - High-contrast accessibility theme (>= 7:1)
  */
+
+/* =========================================================================
+   1. BASELINE FALLBACK (SoilFER Classic)
+   ========================================================================= */
 
 :root,
 [data-appearance="light"] {
@@ -12,11 +25,12 @@
     --sf-raised: #FFFFFF;
     --sf-inset: #F8F7F2;
     --sf-hover: #EDF4EF;
+    --sf-selected: #EDF4EF;
     --sf-text: #253A32;
     --sf-muted: #58665E;
     --sf-divider: #D9DFD7;
     --sf-border: #D9DFD7;
-    --sf-control: #829087;
+    --sf-control: #7E8C83;
 
     --sf-primary: #256348;
     --sf-on-primary: #FFFFFF;
@@ -49,14 +63,19 @@
     --sf-info-bg: #E4F1F3;
     --sf-info: #206477;
 
-    --sf-selected: #EDF4EF;
-
     --sf-disabled-bg: #EBEFEC;
     --sf-disabled-text: #617067;
 
     --sf-chart-1: #256348;
     --sf-chart-2: #206477;
     --sf-chart-3: #945539;
+    --sf-chart-4: #85601B;
+    --sf-chart-5: #638052;
+    --sf-chart-6: #4D91A0;
+    --sf-chart-grid: #D9DFD7;
+    --sf-chart-axis: #58665E;
+
+    --sf-browser-theme: #F5F3ED;
 
     --sf-brand-rule: linear-gradient(90deg, #436B45 0% 36%, #AA6844 36% 64%, #C79D49 64% 83%, #4D91A0 83%);
     --sf-soil-bands: linear-gradient(180deg, #638052 0% 20%, #7F6849 20% 45%, #AC7954 45% 73%, #C7AE7D 73%);
@@ -81,6 +100,7 @@
     --sf-raised: #34393C;
     --sf-inset: #34393C;
     --sf-hover: #3C4247;
+    --sf-selected: #344B41;
     --sf-text: #F1F4F3;
     --sf-muted: #BBC7C2;
     --sf-divider: #505C58;
@@ -118,22 +138,475 @@
     --sf-info-bg: #2E4149;
     --sf-info: #9CD4E1;
 
-    --sf-selected: #344B41;
-
     --sf-disabled-bg: #3B4145;
     --sf-disabled-text: #C0C8CB;
 
     --sf-chart-1: #91D2AF;
     --sf-chart-2: #9CD4E1;
     --sf-chart-3: #E6B298;
+    --sf-chart-4: #F0D083;
+    --sf-chart-5: #A5DABA;
+    --sf-chart-6: #9CD4E1;
+    --sf-chart-grid: #505C58;
+    --sf-chart-axis: #BBC7C2;
 
-    --sf-brand-rule: linear-gradient(90deg, #436B45 0% 36%, #AA6844 36% 64%, #C79D49 64% 83%, #4D91A0 83%);
-    --sf-soil-bands: linear-gradient(180deg, #638052 0% 20%, #7F6849 20% 45%, #AC7954 45% 73%, #C7AE7D 73%);
+    --sf-browser-theme: #25282B;
 
     color-scheme: dark;
 }
 
-/* Scoped White Paper Exception (for reports, certificate viewports, barcode labels) */
+/* =========================================================================
+   2. THEME: SOILFER CLASSIC (Explicit)
+   ========================================================================= */
+
+[data-theme="soilfer-classic"][data-appearance="light"] {
+    --sf-canvas: #F5F3ED;
+    --sf-surface: #FFFFFF;
+    --sf-raised: #FFFFFF;
+    --sf-inset: #F8F7F2;
+    --sf-hover: #EDF4EF;
+    --sf-selected: #EDF4EF;
+    --sf-text: #253A32;
+    --sf-muted: #58665E;
+    --sf-divider: #D9DFD7;
+    --sf-border: #D9DFD7;
+    --sf-control: #7E8C83;
+    --sf-primary: #256348;
+    --sf-on-primary: #FFFFFF;
+    --sf-primary-hover: #1E523B;
+    --sf-sidebar: #173F32;
+    --sf-side-text: #F3F6EF;
+    --sf-side-muted: #C4D3CA;
+    --sf-side-active: #305C49;
+    --sf-link: #206477;
+    --sf-focus: #256348;
+    --sf-disabled-bg: #EBEFEC;
+    --sf-disabled-text: #617067;
+    --sf-chart-1: #256348;
+    --sf-chart-2: #206477;
+    --sf-chart-3: #945539;
+    --sf-browser-theme: #F5F3ED;
+}
+
+[data-theme="soilfer-classic"][data-appearance="dark"],
+[data-theme="soilfer-classic"].dark {
+    --sf-canvas: #25282B;
+    --sf-surface: #2E3236;
+    --sf-raised: #34393C;
+    --sf-inset: #34393C;
+    --sf-hover: #3C4247;
+    --sf-selected: #344B41;
+    --sf-text: #F1F4F3;
+    --sf-muted: #BBC7C2;
+    --sf-divider: #505C58;
+    --sf-border: #505C58;
+    --sf-control: #8C9B95;
+    --sf-primary: #91D2AF;
+    --sf-on-primary: #173127;
+    --sf-primary-hover: #A5E0C0;
+    --sf-sidebar: #243932;
+    --sf-side-text: #F1F4F3;
+    --sf-side-muted: #C4D3CA;
+    --sf-side-active: #3A5749;
+    --sf-link: #9CD4E1;
+    --sf-focus: #91D2AF;
+    --sf-disabled-bg: #3B4145;
+    --sf-disabled-text: #C0C8CB;
+    --sf-chart-1: #91D2AF;
+    --sf-chart-2: #9CD4E1;
+    --sf-chart-3: #E6B298;
+    --sf-browser-theme: #25282B;
+}
+
+/* =========================================================================
+   3. THEME: FOREST (Recommended Soil Theme)
+   ========================================================================= */
+
+[data-theme="forest"],
+[data-theme="forest"][data-appearance="light"] {
+    --sf-canvas: #F2F6F1;
+    --sf-surface: #FFFFFF;
+    --sf-raised: #FFFFFF;
+    --sf-inset: #F6FAF5;
+    --sf-hover: #EAF3EC;
+    --sf-selected: #EAF3EC;
+    --sf-text: #253A32;
+    --sf-muted: #58665E;
+    --sf-divider: #D8DFD8;
+    --sf-border: #D8DFD8;
+    --sf-control: #757F78;
+    --sf-primary: #245B3D;
+    --sf-on-primary: #FFFFFF;
+    --sf-primary-hover: #1D4C32;
+    --sf-sidebar: #1B392B;
+    --sf-side-text: #F3F6EF;
+    --sf-side-muted: #C3D2C8;
+    --sf-side-active: #2D5841;
+    --sf-link: #245B3D;
+    --sf-focus: #245B3D;
+    --sf-disabled-bg: #E9ECE9;
+    --sf-disabled-text: #617067;
+    --sf-chart-1: #245B3D;
+    --sf-chart-2: #3E7E5A;
+    --sf-chart-3: #8C6A48;
+    --sf-browser-theme: #F2F6F1;
+}
+
+[data-theme="forest"][data-appearance="dark"],
+[data-theme="forest"].dark {
+    --sf-canvas: #252B27;
+    --sf-surface: #303A33;
+    --sf-raised: #303A33;
+    --sf-inset: #37423B;
+    --sf-hover: #3C4940;
+    --sf-selected: #39523F;
+    --sf-text: #F1F4F3;
+    --sf-muted: #BBC7C2;
+    --sf-divider: #526056;
+    --sf-border: #526056;
+    --sf-control: #909D97;
+    --sf-primary: #9DD7AA;
+    --sf-on-primary: #1B3324;
+    --sf-primary-hover: #B2E4BC;
+    --sf-sidebar: #26382B;
+    --sf-side-text: #F1F4F3;
+    --sf-side-muted: #C3D2C8;
+    --sf-side-active: #39523F;
+    --sf-link: #9DD7AA;
+    --sf-focus: #9DD7AA;
+    --sf-disabled-bg: #3C453E;
+    --sf-disabled-text: #B8C4BD;
+    --sf-chart-1: #9DD7AA;
+    --sf-chart-2: #6CAE84;
+    --sf-chart-3: #D9A984;
+    --sf-browser-theme: #252B27;
+}
+
+/* =========================================================================
+   4. THEME: TERRA (Warm Clay & Earth)
+   ========================================================================= */
+
+[data-theme="terra"],
+[data-theme="terra"][data-appearance="light"] {
+    --sf-canvas: #F7F2ED;
+    --sf-surface: #FFFFFF;
+    --sf-raised: #FFFFFF;
+    --sf-inset: #FBF7F2;
+    --sf-hover: #F6EDE6;
+    --sf-selected: #F6EDE6;
+    --sf-text: #253A32;
+    --sf-muted: #58665E;
+    --sf-divider: #E2DBD4;
+    --sf-border: #E2DBD4;
+    --sf-control: #757F78;
+    --sf-primary: #865039;
+    --sf-on-primary: #FFFFFF;
+    --sf-primary-hover: #70402C;
+    --sf-sidebar: #493226;
+    --sf-side-text: #F3F6EF;
+    --sf-side-muted: #D6CBC4;
+    --sf-side-active: #6B4938;
+    --sf-link: #865039;
+    --sf-focus: #865039;
+    --sf-disabled-bg: #ECE7E2;
+    --sf-disabled-text: #617067;
+    --sf-chart-1: #865039;
+    --sf-chart-2: #B87659;
+    --sf-chart-3: #567365;
+    --sf-browser-theme: #F7F2ED;
+}
+
+[data-theme="terra"][data-appearance="dark"],
+[data-theme="terra"].dark {
+    --sf-canvas: #2C2927;
+    --sf-surface: #3A3330;
+    --sf-raised: #3A3330;
+    --sf-inset: #433B38;
+    --sf-hover: #4C433F;
+    --sf-selected: #54433A;
+    --sf-text: #F1F4F3;
+    --sf-muted: #BBC7C2;
+    --sf-divider: #625853;
+    --sf-border: #625853;
+    --sf-control: #909D97;
+    --sf-primary: #E6B298;
+    --sf-on-primary: #342821;
+    --sf-primary-hover: #F2C7B3;
+    --sf-sidebar: #3B2E27;
+    --sf-side-text: #F1F4F3;
+    --sf-side-muted: #D6CBC4;
+    --sf-side-active: #54433A;
+    --sf-link: #E6B298;
+    --sf-focus: #E6B298;
+    --sf-disabled-bg: #433D3A;
+    --sf-disabled-text: #B8C4BD;
+    --sf-chart-1: #E6B298;
+    --sf-chart-2: #D18D6C;
+    --sf-chart-3: #8CA698;
+    --sf-browser-theme: #2C2927;
+}
+
+/* =========================================================================
+   5. THEME: MINERAL (Slate & Analytical Gray)
+   ========================================================================= */
+
+[data-theme="mineral"],
+[data-theme="mineral"][data-appearance="light"] {
+    --sf-canvas: #F2F4F6;
+    --sf-surface: #FFFFFF;
+    --sf-raised: #FFFFFF;
+    --sf-inset: #F7F9FA;
+    --sf-hover: #EBF0F4;
+    --sf-selected: #EBF0F4;
+    --sf-text: #253A32;
+    --sf-muted: #58665E;
+    --sf-divider: #D6DCE2;
+    --sf-border: #D6DCE2;
+    --sf-control: #757F78;
+    --sf-primary: #43556D;
+    --sf-on-primary: #FFFFFF;
+    --sf-primary-hover: #354457;
+    --sf-sidebar: #283545;
+    --sf-side-text: #F3F6EF;
+    --sf-side-muted: #C5CFD8;
+    --sf-side-active: #3D4E64;
+    --sf-link: #43556D;
+    --sf-focus: #43556D;
+    --sf-disabled-bg: #E6EAEF;
+    --sf-disabled-text: #617067;
+    --sf-chart-1: #43556D;
+    --sf-chart-2: #6A82A0;
+    --sf-chart-3: #7D6B58;
+    --sf-browser-theme: #F2F4F6;
+}
+
+[data-theme="mineral"][data-appearance="dark"],
+[data-theme="mineral"].dark {
+    --sf-canvas: #272B30;
+    --sf-surface: #333A42;
+    --sf-raised: #333A42;
+    --sf-inset: #3A434C;
+    --sf-hover: #434D57;
+    --sf-selected: #3D4E60;
+    --sf-text: #F1F4F3;
+    --sf-muted: #BBC7C2;
+    --sf-divider: #56626F;
+    --sf-border: #56626F;
+    --sf-control: #909D97;
+    --sf-primary: #ABC2D7;
+    --sf-on-primary: #232F39;
+    --sf-primary-hover: #C6D8E8;
+    --sf-sidebar: #293440;
+    --sf-side-text: #F1F4F3;
+    --sf-side-muted: #C5CFD8;
+    --sf-side-active: #3D4E60;
+    --sf-link: #ABC2D7;
+    --sf-focus: #ABC2D7;
+    --sf-disabled-bg: #3D444D;
+    --sf-disabled-text: #B8C4BD;
+    --sf-chart-1: #ABC2D7;
+    --sf-chart-2: #7FA0BE;
+    --sf-chart-3: #C4B29E;
+    --sf-browser-theme: #272B30;
+}
+
+/* =========================================================================
+   6. THEME: WATERSHED (Restrained Teal)
+   ========================================================================= */
+
+[data-theme="watershed"],
+[data-theme="watershed"][data-appearance="light"] {
+    --sf-canvas: #F0F6F5;
+    --sf-surface: #FFFFFF;
+    --sf-raised: #FFFFFF;
+    --sf-inset: #F5FAFA;
+    --sf-hover: #E6F2F1;
+    --sf-selected: #E6F2F1;
+    --sf-text: #253A32;
+    --sf-muted: #58665E;
+    --sf-divider: #D3DFDE;
+    --sf-border: #D3DFDE;
+    --sf-control: #757F78;
+    --sf-primary: #166879;
+    --sf-on-primary: #FFFFFF;
+    --sf-primary-hover: #105260;
+    --sf-sidebar: #173F44;
+    --sf-side-text: #F3F6EF;
+    --sf-side-muted: #C1D4D7;
+    --sf-side-active: #275B62;
+    --sf-link: #166879;
+    --sf-focus: #166879;
+    --sf-disabled-bg: #E7EDEC;
+    --sf-disabled-text: #617067;
+    --sf-chart-1: #166879;
+    --sf-chart-2: #348E9F;
+    --sf-chart-3: #826E4A;
+    --sf-browser-theme: #F0F6F5;
+}
+
+[data-theme="watershed"][data-appearance="dark"],
+[data-theme="watershed"].dark {
+    --sf-canvas: #252D2E;
+    --sf-surface: #303B3D;
+    --sf-raised: #303B3D;
+    --sf-inset: #384547;
+    --sf-hover: #415052;
+    --sf-selected: #39575B;
+    --sf-text: #F1F4F3;
+    --sf-muted: #BFCBC6;
+    --sf-divider: #526366;
+    --sf-border: #526366;
+    --sf-control: #9AA7A1;
+    --sf-primary: #89CFD2;
+    --sf-on-primary: #163739;
+    --sf-primary-hover: #A7DFE1;
+    --sf-sidebar: #263C3F;
+    --sf-side-text: #F1F4F3;
+    --sf-side-muted: #C1D4D7;
+    --sf-side-active: #39575B;
+    --sf-link: #89CFD2;
+    --sf-focus: #89CFD2;
+    --sf-disabled-bg: #3A4547;
+    --sf-disabled-text: #B8C4BD;
+    --sf-chart-1: #89CFD2;
+    --sf-chart-2: #5CAFB3;
+    --sf-chart-3: #D5B98A;
+    --sf-browser-theme: #252D2E;
+}
+
+/* =========================================================================
+   7. THEME: NUTRIENT (Muted Fertility Olive)
+   ========================================================================= */
+
+[data-theme="nutrient"],
+[data-theme="nutrient"][data-appearance="light"] {
+    --sf-canvas: #F5F5ED;
+    --sf-surface: #FFFFFF;
+    --sf-raised: #FFFFFF;
+    --sf-inset: #FAF9F3;
+    --sf-hover: #EFEFD9;
+    --sf-selected: #EFEFD9;
+    --sf-text: #253A32;
+    --sf-muted: #58665E;
+    --sf-divider: #DCE0CE;
+    --sf-border: #DCE0CE;
+    --sf-control: #757F78;
+    --sf-primary: #596024;
+    --sf-on-primary: #FFFFFF;
+    --sf-primary-hover: #464C1B;
+    --sf-sidebar: #373B23;
+    --sf-side-text: #F3F6EF;
+    --sf-side-muted: #CCD1BA;
+    --sf-side-active: #525936;
+    --sf-link: #596024;
+    --sf-focus: #596024;
+    --sf-disabled-bg: #ECEEE3;
+    --sf-disabled-text: #617067;
+    --sf-chart-1: #596024;
+    --sf-chart-2: #7D8837;
+    --sf-chart-3: #6C5543;
+    --sf-browser-theme: #F5F5ED;
+}
+
+[data-theme="nutrient"][data-appearance="dark"],
+[data-theme="nutrient"].dark {
+    --sf-canvas: #2A2D25;
+    --sf-surface: #353B2E;
+    --sf-raised: #353B2E;
+    --sf-inset: #3E4536;
+    --sf-hover: #47503E;
+    --sf-selected: #465536;
+    --sf-text: #F1F4F3;
+    --sf-muted: #BBC7C2;
+    --sf-divider: #5C6551;
+    --sf-border: #5C6551;
+    --sf-control: #96A39D;
+    --sf-primary: #C4D48E;
+    --sf-on-primary: #30381C;
+    --sf-primary-hover: #D5E3A5;
+    --sf-sidebar: #303A25;
+    --sf-side-text: #F1F4F3;
+    --sf-side-muted: #CCD1BA;
+    --sf-side-active: #465536;
+    --sf-link: #C4D48E;
+    --sf-focus: #C4D48E;
+    --sf-disabled-bg: #404639;
+    --sf-disabled-text: #B8C4BD;
+    --sf-chart-1: #C4D48E;
+    --sf-chart-2: #9FBA5A;
+    --sf-chart-3: #BFA48A;
+    --sf-browser-theme: #2A2D25;
+}
+
+/* =========================================================================
+   8. THEME: CLEAR CONTRAST (High-Contrast Accessibility)
+   ========================================================================= */
+
+[data-theme="clear-contrast"],
+[data-theme="clear-contrast"][data-appearance="light"] {
+    --sf-canvas: #FFFFFF;
+    --sf-surface: #FFFFFF;
+    --sf-raised: #FFFFFF;
+    --sf-inset: #F7F7F7;
+    --sf-hover: #ECECEC;
+    --sf-selected: #E5EFF7;
+    --sf-text: #111111;
+    --sf-muted: #303030;
+    --sf-divider: #404040;
+    --sf-border: #404040;
+    --sf-control: #404040;
+    --sf-primary: #003E70;
+    --sf-on-primary: #FFFFFF;
+    --sf-primary-hover: #002D52;
+    --sf-sidebar: #182B3B;
+    --sf-side-text: #FFFFFF;
+    --sf-side-muted: #E0E0E0;
+    --sf-side-active: #003E70;
+    --sf-link: #003E70;
+    --sf-focus: #003E70;
+    --sf-disabled-bg: #E0E0E0;
+    --sf-disabled-text: #454545;
+    --sf-chart-1: #003E70;
+    --sf-chart-2: #5E2750;
+    --sf-chart-3: #8C4400;
+    --sf-browser-theme: #FFFFFF;
+}
+
+[data-theme="clear-contrast"][data-appearance="dark"],
+[data-theme="clear-contrast"].dark {
+    --sf-canvas: #161616;
+    --sf-surface: #202020;
+    --sf-raised: #202020;
+    --sf-inset: #282828;
+    --sf-hover: #323232;
+    --sf-selected: #243545;
+    --sf-text: #FFFFFF;
+    --sf-muted: #DEDEDE;
+    --sf-divider: #C0C0C0;
+    --sf-border: #C0C0C0;
+    --sf-control: #C0C0C0;
+    --sf-primary: #90C9FF;
+    --sf-on-primary: #102A40;
+    --sf-primary-hover: #B8DCFF;
+    --sf-sidebar: #202020;
+    --sf-side-text: #FFFFFF;
+    --sf-side-muted: #DEDEDE;
+    --sf-side-active: #2C4054;
+    --sf-link: #90C9FF;
+    --sf-focus: #90C9FF;
+    --sf-disabled-bg: #383838;
+    --sf-disabled-text: #C0C0C0;
+    --sf-chart-1: #90C9FF;
+    --sf-chart-2: #F0A6E0;
+    --sf-chart-3: #FFB366;
+    --sf-browser-theme: #161616;
+}
+
+/* =========================================================================
+   9. SCOPED WHITE PAPER & CERTIFICATE ISOLATION
+   ========================================================================= */
+
+/* Scoped White Paper Exception (reports, certificate viewports, barcode labels) */
 [data-surface="paper"],
 .sf-paper {
     background-color: #FFFFFF !important;
@@ -143,13 +616,27 @@
 
 [data-surface="paper"] p,
 [data-surface="paper"] td,
-[data-surface="paper"] th,
 [data-surface="paper"] span,
 .sf-paper p,
 .sf-paper td,
-.sf-paper th,
 .sf-paper span {
     color: #1A1A1A;
+}
+
+[data-surface="paper"] th,
+.sf-paper th {
+    color: inherit;
+}
+
+/* Explicit high-contrast white text for dark/brand headers and badges on paper */
+[data-surface="paper"] .report-results-table th,
+[data-surface="paper"] .report-methods-table th,
+[data-surface="paper"] .report-title-badge,
+.sf-paper .report-results-table th,
+.sf-paper .report-methods-table th,
+.sf-paper .report-title-badge {
+    background-color: #1e3a5f !important;
+    color: #FFFFFF !important;
 }
 
 [data-surface="paper"] .text-muted,
@@ -157,7 +644,49 @@
     color: #555555 !important;
 }
 
-/* Mobile Safe Area & Touch Target Helpers */
+/* Print Isolation: Always force paper appearance when printing */
+@media print {
+    html,
+    body,
+    #root,
+    main,
+    .print-reset,
+    .print-container,
+    .report-document,
+    [data-surface="paper"],
+    .sf-paper {
+        background-color: #FFFFFF !important;
+        background: #FFFFFF !important;
+        color: #000000 !important;
+        color-scheme: light !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .report-results-table th,
+    .report-methods-table th,
+    .report-title-badge {
+        background-color: #1e3a5f !important;
+        background: #1e3a5f !important;
+        color: #FFFFFF !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Hide UI navigation, selectors, headers during print */
+    nav,
+    aside,
+    header,
+    .no-print,
+    #appearance-popover {
+        display: none !important;
+    }
+}
+
+/* =========================================================================
+   10. MOBILE SAFE AREA & TOUCH TARGET HELPERS
+   ========================================================================= */
+
 .pb-safe {
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
 }
@@ -168,4 +697,3 @@
     min-height: 48px;
     min-width: 48px;
 }
-

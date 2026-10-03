@@ -11,6 +11,8 @@
     "test": "jest --runInBand",
     "test:watch": "jest --watch",
     "test:workflow": "jest --runInBand tests/security/ tests/contracts/ tests/scenarios/",
+    "check:theme-catalog": "node scripts/generate_theme_catalog.js --check",
+    "generate:theme-catalog": "node scripts/generate_theme_catalog.js",
     "postinstall": "prisma generate"
   },
   "keywords": [],

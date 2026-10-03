@@ -1,0 +1,29 @@
+# Implement the SoilFER theme library now
+
+Owner authorization: 30 September 2026, 12:09 UTC, “WE NEED TO IMPLEMENT NOW.. ask agy”. This is new feature implementation in the existing LIMSI / LIMS Dev task. The completed PR149/PR154 releases stay complete.
+
+## Assignment
+
+Start implementing the full plan at `C:/Users/yigin/Documents/soilfer-lims/WP/sitewide-theme-library-v1/IMPLEMENTATION-PLAN.md` now. Read that plan, README, THEME-CONCEPTS.json, SOURCE-INVENTORY.json and DESIGN-REVIEW.md; use THEME-PREVIEW.html and its screenshots as visual directions. All seventeen sections and implementation phases are in scope, not just the dashboard or selector. The owner has approved the recommended decisions; routine implementation choices need no repeat approval.
+
+Implement seven complete families with Light/Dark: SoilFER Classic, Forest, Terra, Mineral, Watershed, Nutrient and Clear Contrast. Keep Classic as the initial compatibility default; offer Forest as the recommended soil theme. Water/fertilizer options are visual choices only. Finish every token and interactive state; the 294 passing core calculations are preliminary design evidence, not proof of a finished application.
+
+Provide the reusable responsive selector, reversible preview, Save for me, own-lab adoption for LAB_MANAGER and authorised lab/platform adoption for SUPER_ADMIN. Respect personal overrides and independent mode inheritance. Preserve other staff's existing Light/Dark controls plus Clear Contrast. Enforce current persisted principal and canonical lab authority on the server, including direct/tampered requests; do not infer SUPER_ADMIN from MASTER_USER or branding permission. Never broaden operational grants to make theme selection work.
+
+Integrate all routes, shared components, dialogs/portals, workbench, charts/spectra, maps/graphs, login/public pages, profile, administration and third-party surfaces. Protect scientific status/series meaning, branding metadata, white paper certificates/labels, numeric values and unsaved work. Complete identity/lab-bound resolution, stale-request/cache/storage safeguards, additive persistence/migration, old-client API compatibility, optimistic concurrency, clear errors and audit records. Preserve existing saved Light/Dark choices and language/branding values.
+
+Test actual disposable HTTP/database role/scope/migration behaviour, theme/preview/save failures, lost-response conflicts and work preservation. Verify all fourteen combinations and the route/state matrix, composed contrast, keyboard/screen reader/forced colours/reduced motion, translations, mobile safe areas/keyboard/reflow, supported browsers, charts/print/export and performance. Use real iOS/Android evidence where required and available; if a required device is unavailable, report the exact missing gate without inventing coverage. No production test users, specimens or grants. Fix theme-blocking defects before presenting the candidate as ready.
+
+Keep documentation very simple: what changed, how to choose a personal theme or lab/platform default, what other users inherit, how to preview/reset, what was tested, what remains and whether it is live. Update the feature plan/coverage matrix and EVIDENCE accurately. Maintain `C:/Users/yigin/Documents/Codex/2026-09-21/se/work/sitewide-themes-ready-for-review.md` at each completed candidate stage or genuine blocker with actual time, exact commit/PR/CI, concise changes/tests, remaining gates and live status. This is a handoff file, not a new watcher or event bridge.
+
+Preserve concurrent files/worktrees and create an isolated feature branch from current canonical main. Deliver a review-ready PR with successful exact-head CI and the focused evidence package for Codex's independent review. After independent technical acceptance, follow protected merge, successful exact-main CI and the existing sole-Agy safe release: clean accepted source/build and immutable image, actual configuration, verified client-mutation/all-writer hold, stopped-writer DB/WAL/assets backup and integrity/FK, additive migration and held checks, COMMITTED before writers resume, deliberate ingress restoration and a complete bounded final ledger. No old database restore after new writes without reconciliation. Existing release authorization stands; no repeat owner permission. Codex independently verifies the running release read-only before claiming completion.
+
+Start now and continue the full feature through those gates. Keep OpenNSIS code/configuration/data/deployment untouched and TUF planning only. Do not replay closed Ghana/Kobo/printing work, repeat prior releases, change live credentials/grants, remove worktrees or overwrite unrelated drafts. The previous monitor remains paused; no new continuous polling is requested.
+
+## Delivery record
+
+30 September 2026, 12:18 UTC: the full assignment in AGY-MESSAGE.txt was delivered to existing LIMSI / LIMS Dev. The initial run began inspecting this folder and then displayed “User cancelled agent execution” during delivery verification. A short continuation resumed the same assignment; the full plan was not sent again.
+
+Fresh supported window screenshots showed the continuation in the transcript, IMPLEMENTATION-HANDOFF.md L1–26 read, source/work-folder inspection, “Exploring 1 file, running 3 commands” and the active Cancel control. The initially empty composer was preserved and was empty again after submission. This establishes receipt and task startup, not completed implementation or live themes. The cancellation's cause is not established by the UI record.
+
+The owner-authorised feature work is active in Agy. Codex updated this package and append-only communication/status logs only; no application implementation, production action or monitor restart was performed by Codex. No repeated assignment is needed.

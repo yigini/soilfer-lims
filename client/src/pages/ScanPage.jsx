@@ -46,10 +46,14 @@ export default function ScanPage() {
                     return;
                 }
                 streamRef.current = stream;
+                setCameraActive(true);
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;
-                    await videoRef.current.play();
-                    setCameraActive(true);
+                    try {
+                        await videoRef.current.play();
+                    } catch (e) {
+                        console.warn('[CAMERA_PLAY_ERROR]', e);
+                    }
                 }
             } catch (err) {
                 console.warn('[CAMERA_INIT_ERROR]', err.message);
@@ -71,6 +75,14 @@ export default function ScanPage() {
             }
         };
     }, []);
+
+    // Synchronize mounted video element with active camera stream
+    useEffect(() => {
+        if (cameraActive && videoRef.current && streamRef.current && videoRef.current.srcObject !== streamRef.current) {
+            videoRef.current.srcObject = streamRef.current;
+            videoRef.current.play().catch(e => console.warn('[CAMERA_PLAY_ERROR]', e));
+        }
+    }, [cameraActive]);
 
     // Frame scanning loop if BarcodeDetector is available
     useEffect(() => {

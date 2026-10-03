@@ -713,18 +713,26 @@ const SpectraBatchUpload = ({
                                     }))}
                                     margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
                                 >
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--sf-chart-grid, var(--sf-divider))" />
                                     <XAxis
                                         dataKey="wavelength"
-                                        tick={{ fontSize: 10 }}
-                                        label={{ value: 'Wavelength (nm)', position: 'insideBottom', offset: -5, fontSize: 10 }}
+                                        tick={{ fontSize: 10, fill: 'var(--sf-chart-axis, var(--sf-muted))' }}
+                                        label={{ value: 'Wavelength (nm)', position: 'insideBottom', offset: -5, fontSize: 10, fill: 'var(--sf-chart-axis, var(--sf-muted))' }}
+                                        stroke="var(--sf-chart-axis, var(--sf-muted))"
                                     />
                                     <YAxis
-                                        tick={{ fontSize: 10 }}
-                                        label={{ value: modality === 'NIR' ? 'Reflectance' : 'Absorbance', angle: -90, position: 'insideLeft', fontSize: 10 }}
+                                        tick={{ fontSize: 10, fill: 'var(--sf-chart-axis, var(--sf-muted))' }}
+                                        label={{ value: modality === 'NIR' ? 'Reflectance' : 'Absorbance', angle: -90, position: 'insideLeft', fontSize: 10, fill: 'var(--sf-chart-axis, var(--sf-muted))' }}
+                                        stroke="var(--sf-chart-axis, var(--sf-muted))"
                                     />
                                     <Tooltip
-                                        contentStyle={{ fontSize: 11 }}
+                                        contentStyle={{
+                                            backgroundColor: 'var(--sf-surface)',
+                                            color: 'var(--sf-text)',
+                                            borderColor: 'var(--sf-divider)',
+                                            borderRadius: '8px',
+                                            fontSize: 11
+                                        }}
                                         formatter={(v) => [v?.toFixed(4), modality === 'NIR' ? 'Reflectance' : 'Absorbance']}
                                     />
                                     <Line

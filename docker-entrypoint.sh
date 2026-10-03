@@ -125,6 +125,10 @@ node scripts/migrate_appearance_preference.js
 echo "📦 Applying project templates and policy migration..."
 node scripts/migrate_project_templates_and_policy.js
 
+# Sitewide Theme Library Additive Migration (Fail-Closed, Idempotent)
+echo "📦 Applying sitewide theme library migration..."
+node scripts/migrate_sitewide_theme_library.js
+
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."
 exec node index.js

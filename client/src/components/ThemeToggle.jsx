@@ -9,6 +9,7 @@ export const ThemeToggle = () => {
     const {
         appearance,
         appearanceSource,
+        activeTheme,
         setSessionAppearance,
         clearSessionAppearance
     } = useTheme();
@@ -78,7 +79,7 @@ export const ThemeToggle = () => {
             <button
                 ref={triggerRef}
                 onClick={toggleOpen}
-                className={`p-2 rounded-full transition-colors flex items-center justify-center relative focus:outline-none focus:ring-2 focus:ring-sf-focus ${
+                className={`p-2.5 min-h-[44px] min-w-[44px] rounded-full transition-colors flex items-center justify-center relative focus:outline-none focus:ring-2 focus:ring-sf-focus touch-target ${
                     isOpen
                         ? 'bg-sf-hover text-sf-text'
                         : 'text-sf-muted hover:text-sf-text hover:bg-sf-hover'
@@ -111,12 +112,16 @@ export const ThemeToggle = () => {
                     className="absolute right-0 mt-2 w-64 rounded-xl border border-sf-divider bg-sf-raised p-3 text-sf-text shadow-xl z-50 animate-in fade-in zoom-in-95 duration-100 focus:outline-none"
                 >
                     <div className="flex items-center justify-between pb-1.5">
-                        <div className="text-sm font-bold text-sf-text">
-                            {t('appearance.title', 'Appearance')}
+                        <div className="text-sm font-bold text-sf-text truncate pr-2">
+                            {activeTheme?.name || t('appearance.title', 'Appearance')}
                         </div>
-                        {appearanceSource === 'session' && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sf-warning-bg text-sf-warning">
+                        {appearanceSource === 'session' ? (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sf-warning-bg text-sf-warning shrink-0">
                                 Session
+                            </span>
+                        ) : (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sf-hover text-sf-muted shrink-0">
+                                {appearance === 'dark' ? t('appearance.dark', 'Dark') : t('appearance.light', 'Light')}
                             </span>
                         )}
                     </div>
@@ -177,9 +182,9 @@ export const ThemeToggle = () => {
                             <button
                                 type="button"
                                 onClick={handleGoToProfile}
-                                className="w-full text-left text-xs font-medium text-sf-link hover:underline flex items-center justify-between py-1"
+                                className="w-full text-left text-xs font-semibold text-sf-link hover:underline flex items-center justify-between py-1"
                             >
-                                <span>{t('appearance.saveDefaultInProfile', 'Save a default in Profile →')}</span>
+                                <span>{t('appearance.manageThemesLink', 'Theme library & preferences →')}</span>
                             </button>
                         ) : (
                             <p className="text-[11px] text-sf-muted italic py-0.5">

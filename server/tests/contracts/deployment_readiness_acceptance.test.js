@@ -630,6 +630,9 @@ describe('Deployment Readiness Acceptance Contract', () => {
                     tokenVersion INTEGER DEFAULT 0,
                     language TEXT,
                     themePreference TEXT DEFAULT 'light',
+                    uiThemeId TEXT,
+                    uiModePreference TEXT DEFAULT 'system',
+                    uiAppearanceRevision INTEGER DEFAULT 1,
                     createdAt TEXT,
                     updatedAt TEXT
                 );
@@ -686,6 +689,9 @@ describe('Deployment Readiness Acceptance Contract', () => {
                     tokenVersion INTEGER DEFAULT 0,
                     language TEXT,
                     themePreference TEXT DEFAULT 'light',
+                    uiThemeId TEXT,
+                    uiModePreference TEXT DEFAULT 'system',
+                    uiAppearanceRevision INTEGER DEFAULT 1,
                     createdAt TEXT,
                     updatedAt TEXT
                 );
@@ -741,6 +747,9 @@ describe('Deployment Readiness Acceptance Contract', () => {
                     tokenVersion INTEGER DEFAULT 0,
                     language TEXT,
                     themePreference TEXT DEFAULT 'light',
+                    uiThemeId TEXT,
+                    uiModePreference TEXT DEFAULT 'system',
+                    uiAppearanceRevision INTEGER DEFAULT 1,
                     createdAt TEXT,
                     updatedAt TEXT
                 );
