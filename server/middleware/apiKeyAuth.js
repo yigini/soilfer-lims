@@ -51,6 +51,11 @@ function intersectScopeArrays(keyScope, connScope, isLab = false) {
  * 2. User JWT tokens for authenticated platform users (SUPER_ADMIN, LAB_MANAGER, etc.)
  */
 const apiKeyAuth = async (req, res, next) => {
+    if (typeof req.startPhase === 'function') req.startPhase('auth');
+    const endAuth = () => {
+        if (typeof req.endPhase === 'function') req.endPhase('auth');
+    };
+
     try {
         const apiKeyHeader = req.headers['x-api-key'];
         const authHeader = req.headers['authorization'];
@@ -60,10 +65,14 @@ const apiKeyAuth = async (req, res, next) => {
             token = authHeader.split(' ')[1];
         }
 
+        const requestId = req.exchangeRequestId || (req.headers && req.headers['x-request-id']) || undefined;
+
         if (!token) {
+            endAuth();
             return res.status(401).json({
                 error: 'Unauthorized',
-                message: 'Missing API authentication. Provide an X-API-KEY header or Bearer token.'
+                message: 'Missing API authentication. Provide an X-API-KEY header or Bearer token.',
+                requestId
             });
         }
 
@@ -76,25 +85,31 @@ const apiKeyAuth = async (req, res, next) => {
             });
 
             if (!apiKey) {
+                endAuth();
                 return res.status(401).json({
                     error: 'Unauthorized',
                     code: 'UNAUTHORIZED',
-                    message: 'Invalid or revoked API Key.'
+                    message: 'Invalid or revoked API Key.',
+                    requestId
                 });
             }
 
             if (!apiKey.isActive) {
+                endAuth();
                 return res.status(401).json({
                     error: 'Unauthorized',
                     code: 'KEY_RETIRED',
-                    message: 'Invalid or revoked API Key.'
+                    message: 'Invalid or revoked API Key.',
+                    requestId
                 });
             }
 
             if (apiKey.expiresAt && new Date(apiKey.expiresAt) < new Date()) {
+                endAuth();
                 return res.status(401).json({
                     error: 'Unauthorized',
-                    message: 'API Key has expired.'
+                    message: 'API Key has expired.',
+                    requestId
                 });
             }
 
@@ -300,6 +315,7 @@ const apiKeyAuth = async (req, res, next) => {
                 labs: effectiveLabs
             };
 
+            endAuth();
             return next();
         }
 
@@ -309,6 +325,7 @@ const apiKeyAuth = async (req, res, next) => {
             const { validateUserPrincipal } = require('../services/sessionValidationService');
             const decision = await validateUserPrincipal(decoded, { currentPath: req.originalUrl || req.url });
             if (!decision.valid) {
+                endAuth();
                 return res.status(decision.statusCode || 401).json({
                     error: decision.error,
                     code: decision.code || decision.error,
@@ -331,14 +348,17 @@ const apiKeyAuth = async (req, res, next) => {
                 labs: user.role === 'SUPER_ADMIN' ? ['*'] : (user.labId ? [user.labId] : [])
             };
 
+            endAuth();
             return next();
         } catch (jwtErr) {
+            endAuth();
             return res.status(401).json({
                 error: 'Unauthorized',
                 message: 'Invalid authentication credentials.'
             });
         }
     } catch (err) {
+        endAuth();
         console.error('[SIS_AUTH_ERROR]', err);
         return res.status(500).json({ error: 'Internal Server Error during authentication.' });
     }

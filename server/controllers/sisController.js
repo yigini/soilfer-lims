@@ -2,7 +2,14 @@ const crypto = require('crypto');
 const prisma = require('../prisma');
 const { normalizeUnit } = require('../services/interpretationService');
 const { formatSampleV1, extractCoordinates } = require('../services/sisAdapterService');
-const { buildSampleWhere, buildSpectralWhere, toPrismaSpectralWhere, AUTHORIZED_RELEASE_STATUSES } = require('../services/exchangePolicyService');
+const {
+    buildSampleWhere,
+    buildSpectralWhere,
+    toPrismaSpectralWhere,
+    AUTHORIZED_RELEASE_STATUSES,
+    ExchangeEligibilityUnavailableError,
+    handleExchangeError
+} = require('../services/exchangePolicyService');
 
 // Helper to build scoped database query based on SIS Auth permissions
 function buildSisWhere(sisAuth, query = {}) {
@@ -54,16 +61,22 @@ function formatSampleForSis(sample, { analysisMap = {}, methodMap = {} } = {}, o
 }
 
 // ─── 1. GET /api/v1/sis/samples (Paginated Registry) ───
-exports.getSamples = async (req, res) => {
+exports.getSamples = async (req, res, next) => {
     try {
         const page = Math.max(1, parseInt(req.query.page) || 1);
         const limit = Math.min(500, Math.max(1, parseInt(req.query.limit) || 50));
         const skip = (page - 1) * limit;
 
+        if (typeof req.startPhase === 'function') req.startPhase('eligibility');
         const where = buildSisWhere(req.sisAuth, req.query);
+        if (typeof req.endPhase === 'function') req.endPhase('eligibility');
 
-        const [total, samples, maps] = await Promise.all([
-            prisma.sample.count({ where }),
+        if (typeof req.startPhase === 'function') req.startPhase('count');
+        const total = await prisma.sample.count({ where });
+        if (typeof req.endPhase === 'function') req.endPhase('count');
+
+        if (typeof req.startPhase === 'function') req.startPhase('list');
+        const [samples, maps] = await Promise.all([
             prisma.sample.findMany({
                 where,
                 include: { results: true },
@@ -73,8 +86,11 @@ exports.getSamples = async (req, res) => {
             }),
             getAnalysisMap()
         ]);
+        if (typeof req.endPhase === 'function') req.endPhase('list');
 
+        if (typeof req.startPhase === 'function') req.startPhase('mapping');
         const formatted = samples.map(s => formatSampleForSis(s, maps, { auth: req.sisAuth }));
+        if (typeof req.endPhase === 'function') req.endPhase('mapping');
 
         res.json({
             status: 'success',
@@ -88,16 +104,19 @@ exports.getSamples = async (req, res) => {
             data: formatted
         });
     } catch (err) {
-        console.error('[SIS_GET_SAMPLES_ERR]', err);
-        res.status(500).json({ error: 'Failed to query SIS samples dataset.' });
+        return handleExchangeError(err, req, res, next, 'Failed to query SIS samples dataset.');
     }
 };
 
 // ─── 2. GET /api/v1/sis/samples/:id (Single Sample Detail) ───
-exports.getSampleById = async (req, res) => {
+exports.getSampleById = async (req, res, next) => {
     try {
         const { id } = req.params;
+        if (typeof req.startPhase === 'function') req.startPhase('eligibility');
         const baseWhere = buildSisWhere(req.sisAuth, {});
+        if (typeof req.endPhase === 'function') req.endPhase('eligibility');
+
+        if (typeof req.startPhase === 'function') req.startPhase('list');
         const [sample, maps] = await Promise.all([
             prisma.sample.findFirst({
                 where: {
@@ -113,11 +132,13 @@ exports.getSampleById = async (req, res) => {
             }),
             getAnalysisMap()
         ]);
+        if (typeof req.endPhase === 'function') req.endPhase('list');
 
         if (!sample) {
             return res.status(404).json({ error: 'Sample not found in SoilFER registry.' });
         }
 
+        if (typeof req.startPhase === 'function') req.startPhase('mapping');
         // Check spectral data with parent authorization & release constraints (Finding 4)
         const { isRestrictedConsumer } = require('../services/exchangePolicyService');
         const spectralWhere = {
@@ -142,23 +163,26 @@ exports.getSampleById = async (req, res) => {
 
         const formatted = formatSampleForSis(sample, maps, { auth: req.sisAuth });
         formatted.spectralRecords = spectra;
+        if (typeof req.endPhase === 'function') req.endPhase('mapping');
 
         res.json({
             status: 'success',
             data: formatted
         });
     } catch (err) {
-        console.error('[SIS_GET_SAMPLE_DETAIL_ERR]', err);
-        res.status(500).json({ error: 'Failed to retrieve sample detail.' });
+        return handleExchangeError(err, req, res, next, 'Failed to retrieve sample detail.');
     }
 };
 
 // ─── 3. GET /api/v1/sis/geojson (OGC-compliant GeoJSON) ───
-exports.getGeoJson = async (req, res) => {
+exports.getGeoJson = async (req, res, next) => {
     try {
         const limit = Math.min(5000, parseInt(req.query.limit) || 2000);
+        if (typeof req.startPhase === 'function') req.startPhase('eligibility');
         const where = buildSisWhere(req.sisAuth, req.query);
+        if (typeof req.endPhase === 'function') req.endPhase('eligibility');
 
+        if (typeof req.startPhase === 'function') req.startPhase('list');
         const [samples, maps] = await Promise.all([
             prisma.sample.findMany({
                 where,
@@ -168,7 +192,9 @@ exports.getGeoJson = async (req, res) => {
             }),
             getAnalysisMap()
         ]);
+        if (typeof req.endPhase === 'function') req.endPhase('list');
 
+        if (typeof req.startPhase === 'function') req.startPhase('mapping');
         const features = [];
 
         samples.forEach(s => {
@@ -217,6 +243,7 @@ exports.getGeoJson = async (req, res) => {
                 });
             }
         });
+        if (typeof req.endPhase === 'function') req.endPhase('mapping');
 
         res.json({
             type: 'FeatureCollection',
@@ -227,24 +254,28 @@ exports.getGeoJson = async (req, res) => {
             features
         });
     } catch (err) {
-        console.error('[SIS_GEOJSON_ERR]', err);
-        res.status(500).json({ error: 'Failed to generate GeoJSON FeatureCollection.' });
+        return handleExchangeError(err, req, res, next, 'Failed to generate GeoJSON FeatureCollection.');
     }
 };
 
 // ─── 4. GET /api/v1/sis/results (Flat Matrix for Statistics/CSV) ───
-exports.getResultsMatrix = async (req, res) => {
+exports.getResultsMatrix = async (req, res, next) => {
     try {
         const limit = Math.min(2000, parseInt(req.query.limit) || 500);
+        if (typeof req.startPhase === 'function') req.startPhase('eligibility');
         const where = buildSisWhere(req.sisAuth, req.query);
+        if (typeof req.endPhase === 'function') req.endPhase('eligibility');
 
+        if (typeof req.startPhase === 'function') req.startPhase('list');
         const samples = await prisma.sample.findMany({
             where,
             include: { results: true },
             take: limit,
             orderBy: { updatedAt: 'desc' }
         });
+        if (typeof req.endPhase === 'function') req.endPhase('list');
 
+        if (typeof req.startPhase === 'function') req.startPhase('mapping');
         const rows = samples.map(s => {
             const formatted = formatSampleForSis(s, {}, { auth: req.sisAuth });
             const row = {
@@ -267,6 +298,7 @@ exports.getResultsMatrix = async (req, res) => {
 
             return row;
         });
+        if (typeof req.endPhase === 'function') req.endPhase('mapping');
 
         res.json({
             status: 'success',
@@ -274,13 +306,12 @@ exports.getResultsMatrix = async (req, res) => {
             data: rows
         });
     } catch (err) {
-        console.error('[SIS_RESULTS_MATRIX_ERR]', err);
-        res.status(500).json({ error: 'Failed to extract results matrix.' });
+        return handleExchangeError(err, req, res, next, 'Failed to extract results matrix.');
     }
 };
 
 // ─── 5. GET /api/v1/sis/spectra (Spectroscopy Dataset) ───
-exports.getSpectra = async (req, res) => {
+exports.getSpectra = async (req, res, next) => {
     try {
         const { modality, limit = 50, cursor, instrument, equipmentId, qcStatus, withReference } = req.query;
         const take = Math.min(200, parseInt(limit) || 50);
@@ -312,7 +343,9 @@ exports.getSpectra = async (req, res) => {
 
         // Bounded Parent Specimen Traversal & Policy Enforcement (Finding 4)
         const { buildSampleWhere, isRestrictedConsumer } = require('../services/exchangePolicyService');
+        if (typeof req.startPhase === 'function') req.startPhase('eligibility');
         const parentSampleWhere = buildSampleWhere(req.sisAuth, req.query);
+        if (typeof req.endPhase === 'function') req.endPhase('eligibility');
 
         // SL-24: Cursor Pagination on (timestamp, id)
         if (cursor) {
@@ -345,6 +378,7 @@ exports.getSpectra = async (req, res) => {
         let scanned = 0;
         let authorizedParentMap = {};
 
+        if (typeof req.startPhase === 'function') req.startPhase('list');
         // Bounded authorized traversal over candidates avoiding hidden-page starvation (Finding 4)
         while (pageRecords.length < take && scanned < maxScanLimit) {
             const batchTake = Math.min(take * 2, maxScanLimit - scanned);
@@ -464,6 +498,9 @@ exports.getSpectra = async (req, res) => {
             }
         }
 
+        if (typeof req.endPhase === 'function') req.endPhase('list');
+
+        if (typeof req.startPhase === 'function') req.startPhase('mapping');
         // SL-23: Rich Payload Format
         const formatted = pageRecords.map(r => {
             const smp = authorizedParentMap[r.sampleId] || null;
@@ -513,6 +550,7 @@ exports.getSpectra = async (req, res) => {
                 values
             };
         });
+        if (typeof req.endPhase === 'function') req.endPhase('mapping');
 
         // SL-24: ETag & 304 Validation
         const payloadJson = JSON.stringify(formatted);
@@ -534,13 +572,12 @@ exports.getSpectra = async (req, res) => {
             data: formatted
         });
     } catch (err) {
-        console.error('[SIS_SPECTRA_ERR]', err);
-        res.status(500).json({ error: 'Failed to retrieve spectral dataset: ' + err.message });
+        return handleExchangeError(err, req, res, next, 'Failed to retrieve spectral dataset.');
     }
 };
 
 // ─── 6. GET /api/v1/sis/sync (Delta Sync ETL) ───
-exports.syncDelta = async (req, res) => {
+exports.syncDelta = async (req, res, next) => {
     try {
         const { updatedSince, limit } = req.query;
         if (!updatedSince) {
@@ -556,12 +593,15 @@ exports.syncDelta = async (req, res) => {
         }
 
         const maxTake = Math.min(1000, Math.max(1, parseInt(limit) || 1000));
+        if (typeof req.startPhase === 'function') req.startPhase('eligibility');
         const where = buildSampleWhere(req.sisAuth, { updatedSince });
         const spectralWhere = {
-            ...toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, {})),
+            ...toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, {}, where)),
             timestamp: { gte: sinceDate }
         };
+        if (typeof req.endPhase === 'function') req.endPhase('eligibility');
 
+        if (typeof req.startPhase === 'function') req.startPhase('list');
         const [samples, candidateSpectra, maps] = await Promise.all([
             prisma.sample.findMany({
                 where,
@@ -576,7 +616,9 @@ exports.syncDelta = async (req, res) => {
             }),
             getAnalysisMap()
         ]);
+        if (typeof req.endPhase === 'function') req.endPhase('list');
 
+        if (typeof req.startPhase === 'function') req.startPhase('mapping');
         const candidateSampleIds = candidateSpectra.map(s => s.sampleId).filter(Boolean);
         let authorizedSpectra = [];
         if (candidateSampleIds.length > 0) {
@@ -591,7 +633,7 @@ exports.syncDelta = async (req, res) => {
         const hasMoreSamples = samples.length >= maxTake;
         const hasMoreSpectra = candidateSpectra.length >= maxTake;
 
-        res.json({
+        const responsePayload = {
             status: 'success',
             syncTimestamp: new Date().toISOString(),
             samplesCount: samples.length,
@@ -605,24 +647,29 @@ exports.syncDelta = async (req, res) => {
                 qcStatus: s.qcStatus,
                 timestamp: s.timestamp
             }))
-        });
+        };
+        if (typeof req.endPhase === 'function') req.endPhase('mapping');
+
+        res.json(responsePayload);
     } catch (err) {
-        console.error('[SIS_SYNC_ERR]', err);
-        res.status(500).json({ error: 'Failed to perform delta sync.' });
+        return handleExchangeError(err, req, res, next, 'Failed to perform delta sync.');
     }
 };
 
 // ─── 7. GET /api/v1/sis/stats (Global / Regional Metrics) ───
-exports.getStats = async (req, res) => {
+exports.getStats = async (req, res, next) => {
     try {
+        if (typeof req.startPhase === 'function') req.startPhase('eligibility');
         const sampleWhere = buildSampleWhere(req.sisAuth, {});
-        const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, {}));
+        const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, {}, sampleWhere));
+        if (typeof req.endPhase === 'function') req.endPhase('eligibility');
 
         const keyLabs = req.sisAuth?.labs || [];
         const isApiKey = req.sisAuth?.type === 'API_KEY';
         const hasGlobalLab = keyLabs.includes('*') || (!isApiKey && req.sisAuth?.role === 'SUPER_ADMIN');
         const labWhere = hasGlobalLab ? {} : { id: { in: keyLabs } };
 
+        if (typeof req.startPhase === 'function') req.startPhase('count');
         const [totalSamples, releasedSamples, totalResults, labsCount] = await Promise.all([
             prisma.sample.count({ where: sampleWhere }),
             prisma.sample.count({ where: { ...sampleWhere, status: { in: AUTHORIZED_RELEASE_STATUSES } } }),
@@ -643,6 +690,7 @@ exports.getStats = async (req, res) => {
                 });
             }
         }
+        if (typeof req.endPhase === 'function') req.endPhase('count');
 
         res.json({
             status: 'success',
@@ -658,8 +706,7 @@ exports.getStats = async (req, res) => {
             }
         });
     } catch (err) {
-        console.error('[SIS_STATS_ERR]', err);
-        res.status(500).json({ error: 'Failed to compile SIS statistics.' });
+        return handleExchangeError(err, req, res, next, 'Failed to compile SIS statistics.');
     }
 };
 

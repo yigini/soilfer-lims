@@ -27,12 +27,14 @@ const {
     safeParseJson
 } = require('../services/sisAdapterService');
 const exchangePolicyService = require('../services/exchangePolicyService');
+const buildSampleWhere = (...args) => exchangePolicyService.buildSampleWhere(...args);
+const buildSpectralWhere = (...args) => exchangePolicyService.buildSpectralWhere(...args);
+const toPrismaSpectralWhere = (...args) => exchangePolicyService.toPrismaSpectralWhere(...args);
+const isRestrictedConsumer = (...args) => exchangePolicyService.isRestrictedConsumer(...args);
+const handleExchangeError = (...args) => exchangePolicyService.handleExchangeError(...args);
 const {
-    buildSampleWhere,
-    buildSpectralWhere,
-    toPrismaSpectralWhere,
-    isRestrictedConsumer,
-    AUTHORIZED_RELEASE_STATUSES
+    AUTHORIZED_RELEASE_STATUSES,
+    ExchangeEligibilityUnavailableError
 } = exchangePolicyService;
 const exchangeStateService = require('../services/exchangeStateService');
 const getSourceSystemId = () => (exchangeStateService.getSourceSystemId ? exchangeStateService.getSourceSystemId() : SOURCE_SYSTEM_ID);
@@ -126,7 +128,7 @@ function checkConnectionActive(req, res) {
 }
 
 // ─── 2. GET /api/v2/data-exchange/samples (Paginated Registry) ───
-exports.getSamples = async (req, res) => {
+exports.getSamples = async (req, res, next) => {
     if (!checkConnectionActive(req, res)) return;
     try {
         const ctx = exchangeStateService.buildCanonicalQueryContext(req.query, 'samples');
@@ -140,9 +142,17 @@ exports.getSamples = async (req, res) => {
         const canonicalQuery = ctx.query;
         const limit = Math.min(500, Math.max(1, parseInt(canonicalQuery.limit) || 50));
         const cursor = canonicalQuery.cursor;
-        const where = buildSampleWhere(req.sisAuth, canonicalQuery);
 
-        // Validate and decode cursor (R2, R8, R11)
+        // Single policy resolution per request (Issue #140 Work Package A0, E03)
+        if (typeof req.startPhase === 'function') req.startPhase('eligibility');
+        const baseWhere = buildSampleWhere(req.sisAuth, canonicalQuery);
+        if (typeof req.endPhase === 'function') req.endPhase('eligibility');
+
+        const listWhere = { ...baseWhere };
+        if (baseWhere.AND) listWhere.AND = [...baseWhere.AND];
+        if (baseWhere.OR) listWhere.OR = [...baseWhere.OR];
+
+        // Validate and decode cursor (R2, R8, R11) - affects list query only, preserving total count semantics
         if (cursor) {
             const cursorVal = exchangeStateService.validateLiveListCursor(cursor, req.sisAuth, 'samples', canonicalQuery);
             if (!cursorVal.ok) {
@@ -154,8 +164,8 @@ exports.getSamples = async (req, res) => {
             }
             const decoded = cursorVal.decoded;
             if (decoded && decoded.lastUpdatedAt && decoded.lastId) {
-                where.AND = [
-                    ...(where.AND || []),
+                listWhere.AND = [
+                    ...(listWhere.AND || []),
                     {
                         OR: [
                             { updatedAt: { lt: new Date(decoded.lastUpdatedAt) } },
@@ -169,10 +179,14 @@ exports.getSamples = async (req, res) => {
             }
         }
 
-        const [total, samples, maps] = await Promise.all([
-            prisma.sample.count({ where: buildSampleWhere(req.sisAuth, canonicalQuery) }),
+        if (typeof req.startPhase === 'function') req.startPhase('count');
+        const total = await prisma.sample.count({ where: baseWhere });
+        if (typeof req.endPhase === 'function') req.endPhase('count');
+
+        if (typeof req.startPhase === 'function') req.startPhase('list');
+        const [samples, maps] = await Promise.all([
             prisma.sample.findMany({
-                where,
+                where: listWhere,
                 include: { results: true },
                 orderBy: [
                     { updatedAt: 'desc' },
@@ -182,6 +196,7 @@ exports.getSamples = async (req, res) => {
             }),
             getAnalysisMap()
         ]);
+        if (typeof req.endPhase === 'function') req.endPhase('list');
 
         const hasMore = samples.length > limit;
         const pageItems = hasMore ? samples.slice(0, limit) : samples;
@@ -201,8 +216,10 @@ exports.getSamples = async (req, res) => {
             });
         }
 
+        if (typeof req.startPhase === 'function') req.startPhase('mapping');
         const eligibleSamples = isRestrictedConsumer(req.sisAuth) ? pageItems.filter(s => exchangeStateService.isSpecimenEligible(s)) : pageItems;
         const data = eligibleSamples.map(s => formatSampleV2(s, maps, { auth: req.sisAuth }));
+        if (typeof req.endPhase === 'function') req.endPhase('mapping');
 
         res.json({
             status: 'success',
@@ -216,18 +233,20 @@ exports.getSamples = async (req, res) => {
             data
         });
     } catch (err) {
-        console.error('[SIS_V2_GET_SAMPLES_ERR]', err);
-        res.status(500).json({ error: 'Failed to retrieve v2 exchange samples.' });
+        return handleExchangeError(err, req, res, next, 'Failed to retrieve v2 exchange samples.');
     }
 };
 
 // ─── 3. GET /api/v2/data-exchange/samples/:specimenId (Single Detail) ───
-exports.getSampleById = async (req, res) => {
+exports.getSampleById = async (req, res, next) => {
     if (!checkConnectionActive(req, res)) return;
     try {
         const { specimenId } = req.params;
+        if (typeof req.startPhase === 'function') req.startPhase('eligibility');
         const baseWhere = buildSampleWhere(req.sisAuth, {});
+        if (typeof req.endPhase === 'function') req.endPhase('eligibility');
 
+        if (typeof req.startPhase === 'function') req.startPhase('list');
         const [sample, maps] = await Promise.all([
             prisma.sample.findFirst({
                 where: {
@@ -240,6 +259,7 @@ exports.getSampleById = async (req, res) => {
             }),
             getAnalysisMap()
         ]);
+        if (typeof req.endPhase === 'function') req.endPhase('list');
 
         if (!sample || (isRestrictedConsumer(req.sisAuth) && !exchangeStateService.isSpecimenEligible(sample))) {
             return res.status(404).json({
@@ -248,11 +268,12 @@ exports.getSampleById = async (req, res) => {
             });
         }
 
+        if (typeof req.startPhase === 'function') req.startPhase('mapping');
         const formatted = formatSampleV2(sample, maps, { auth: req.sisAuth });
 
         // Check spectral records with shared spectral authorization (R4, F4)
         const spectralWhere = toPrismaSpectralWhere({
-            ...buildSpectralWhere(req.sisAuth, {}),
+            ...buildSpectralWhere(req.sisAuth, {}, baseWhere),
             sampleId: sample.id
         });
         const spectra = await prisma.spectralData.findMany({
@@ -267,6 +288,7 @@ exports.getSampleById = async (req, res) => {
         });
 
         formatted.spectralRecords = spectra;
+        if (typeof req.endPhase === 'function') req.endPhase('mapping');
 
         res.json({
             status: 'success',
@@ -275,13 +297,12 @@ exports.getSampleById = async (req, res) => {
             data: formatted
         });
     } catch (err) {
-        console.error('[SIS_V2_GET_SAMPLE_DETAIL_ERR]', err);
-        res.status(500).json({ error: 'Failed to retrieve specimen detail.' });
+        return handleExchangeError(err, req, res, next, 'Failed to retrieve specimen detail.');
     }
 };
 
 // ─── 4. GET /api/v2/data-exchange/observations (Lossless Results Array) ───
-exports.getObservations = async (req, res) => {
+exports.getObservations = async (req, res, next) => {
     if (!checkConnectionActive(req, res)) return;
     try {
         const ctx = exchangeStateService.buildCanonicalQueryContext(req.query, 'observations');
@@ -295,7 +316,10 @@ exports.getObservations = async (req, res) => {
         const canonicalQuery = ctx.query;
         const limit = Math.min(1000, Math.max(1, parseInt(canonicalQuery.limit) || 100));
         const cursor = canonicalQuery.cursor;
+
+        if (typeof req.startPhase === 'function') req.startPhase('eligibility');
         const sampleWhere = buildSampleWhere(req.sisAuth, canonicalQuery);
+        if (typeof req.endPhase === 'function') req.endPhase('eligibility');
 
         const resultWhere = {
             isCurrent: true,
@@ -355,8 +379,12 @@ exports.getObservations = async (req, res) => {
             countWhere.basis = canonicalQuery.basis;
         }
 
-        const [total, results, maps] = await Promise.all([
-            prisma.result.count({ where: countWhere }),
+        if (typeof req.startPhase === 'function') req.startPhase('count');
+        const total = await prisma.result.count({ where: countWhere });
+        if (typeof req.endPhase === 'function') req.endPhase('count');
+
+        if (typeof req.startPhase === 'function') req.startPhase('list');
+        const [results, maps] = await Promise.all([
             prisma.result.findMany({
                 where: resultWhere,
                 include: { sample: true },
@@ -368,6 +396,7 @@ exports.getObservations = async (req, res) => {
             }),
             getAnalysisMap()
         ]);
+        if (typeof req.endPhase === 'function') req.endPhase('list');
 
         const hasMore = results.length > limit;
         const pageItems = hasMore ? results.slice(0, limit) : results;
@@ -387,6 +416,7 @@ exports.getObservations = async (req, res) => {
             });
         }
 
+        if (typeof req.startPhase === 'function') req.startPhase('mapping');
         const observations = pageItems.map(r => {
             const s = r.sample;
             const aMeta = maps.analysisMap[r.param] || {};
@@ -467,6 +497,7 @@ exports.getObservations = async (req, res) => {
                 updatedAt: r.updatedAt.toISOString()
             };
         });
+        if (typeof req.endPhase === 'function') req.endPhase('mapping');
 
         res.json({
             status: 'success',
@@ -480,8 +511,7 @@ exports.getObservations = async (req, res) => {
             data: observations
         });
     } catch (err) {
-        console.error('[SIS_V2_GET_OBSERVATIONS_ERR]', err);
-        res.status(500).json({ error: 'Failed to retrieve analytical chemistry observations.' });
+        return handleExchangeError(err, req, res, next, 'Failed to retrieve analytical chemistry observations.');
     }
 };
 
@@ -612,8 +642,8 @@ function prismaWhereToSql(where) {
     };
 }
 
-async function computeSpatialTotal(auth, canonicalQuery, bboxBounds) {
-    const baseWhere = buildSampleWhere(auth, canonicalQuery);
+async function computeSpatialTotal(auth, canonicalQuery, bboxBounds, existingBaseWhere = null) {
+    const baseWhere = existingBaseWhere || buildSampleWhere(auth, canonicalQuery);
 
     try {
         const db = exchangeStateService.getDb ? exchangeStateService.getDb() : null;
@@ -641,7 +671,7 @@ async function computeSpatialTotal(auth, canonicalQuery, bboxBounds) {
 }
 
 // ─── 5. GET /api/v2/data-exchange/geojson (RFC 7946 GeoJSON) ───
-exports.getGeoJson = async (req, res) => {
+exports.getGeoJson = async (req, res, next) => {
     if (!checkConnectionActive(req, res)) return;
     try {
         const ctx = exchangeStateService.buildCanonicalQueryContext(req.query, 'geojson');
@@ -707,9 +737,13 @@ exports.getGeoJson = async (req, res) => {
             });
         }
 
-        // Candidate query matching authorization and filter criteria
-        const candidateBaseWhere = buildSampleWhere(req.sisAuth, canonicalQuery);
-        candidateBaseWhere.AND = candidateBaseWhere.AND || [];
+        // Single policy resolution (Issue #140 Work Package A0, E03)
+        if (typeof req.startPhase === 'function') req.startPhase('eligibility');
+        const baseWhere = buildSampleWhere(req.sisAuth, canonicalQuery);
+        if (typeof req.endPhase === 'function') req.endPhase('eligibility');
+
+        const candidateBaseWhere = { ...baseWhere };
+        candidateBaseWhere.AND = candidateBaseWhere.AND ? [...candidateBaseWhere.AND] : [];
 
         const notEmptyMeta = { not: null, notIn: ['', '{}', 'null'] };
         if (bboxBounds) {
@@ -736,9 +770,13 @@ exports.getGeoJson = async (req, res) => {
         }
 
         // Reuse cached total from cursor if available (resumable counting state, eliminates repeated scans)
+        if (typeof req.startPhase === 'function') req.startPhase('count');
         const total = (decoded && typeof decoded.cachedTotal === 'number')
             ? decoded.cachedTotal
-            : await computeSpatialTotal(req.sisAuth, canonicalQuery, bboxBounds);
+            : await computeSpatialTotal(req.sisAuth, canonicalQuery, bboxBounds, baseWhere);
+        if (typeof req.endPhase === 'function') req.endPhase('count');
+
+        if (typeof req.startPhase === 'function') req.startPhase('list');
 
         // Bounded seek/scan traversal across candidate batches (F1, R1/R4/R7/R11)
         const BATCH_SIZE = 5000;
@@ -869,9 +907,9 @@ exports.getGeoJson = async (req, res) => {
             }
         }
 
-        const detailWhere = buildSampleWhere(req.sisAuth, canonicalQuery);
+        const detailWhere = { ...baseWhere };
         detailWhere.AND = [
-            ...(detailWhere.AND || []),
+            ...(baseWhere.AND || []),
             { id: { in: pageIds } }
         ];
 
@@ -882,10 +920,12 @@ exports.getGeoJson = async (req, res) => {
             }) : Promise.resolve([]),
             getAnalysisMap()
         ]);
+        if (typeof req.endPhase === 'function') req.endPhase('list');
 
         const sampleMap = new Map(pageSamples.map(s => [s.id, s]));
         const orderedSamples = pageCandidates.map(c => sampleMap.get(c.id)).filter(Boolean);
 
+        if (typeof req.startPhase === 'function') req.startPhase('mapping');
         const features = [];
         for (const s of orderedSamples) {
             if (!s || !exchangeStateService.isSpecimenEligible(s)) continue;
@@ -943,6 +983,7 @@ exports.getGeoJson = async (req, res) => {
                 });
             }
         }
+        if (typeof req.endPhase === 'function') req.endPhase('mapping');
 
         // RFC 7946 strictly omits the obsolete crs object
         res.json({
@@ -956,13 +997,12 @@ exports.getGeoJson = async (req, res) => {
             features
         });
     } catch (err) {
-        console.error('[SIS_V2_GEOJSON_ERR]', err);
-        res.status(500).json({ error: 'Failed to generate RFC 7946 GeoJSON FeatureCollection.' });
+        return handleExchangeError(err, req, res, next, 'Failed to generate RFC 7946 GeoJSON FeatureCollection.');
     }
 };
 
 // ─── 6. GET /api/v2/data-exchange/stats (Scoped Metrics) ───
-exports.getStats = async (req, res) => {
+exports.getStats = async (req, res, next) => {
     if (!checkConnectionActive(req, res)) return;
     try {
         const ctx = exchangeStateService.buildCanonicalQueryContext(req.query, 'stats');
@@ -974,14 +1014,19 @@ exports.getStats = async (req, res) => {
             });
         }
         const canonicalQuery = ctx.query;
+
+        // Single policy resolution (Issue #140 Work Package A0, E03)
+        if (typeof req.startPhase === 'function') req.startPhase('eligibility');
         const sampleWhere = buildSampleWhere(req.sisAuth, canonicalQuery);
-        const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, canonicalQuery));
+        const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, canonicalQuery, sampleWhere));
+        if (typeof req.endPhase === 'function') req.endPhase('eligibility');
 
         const keyLabs = req.sisAuth?.labs || [];
         const isApiKey = req.sisAuth?.type === 'API_KEY';
         const hasGlobalLab = keyLabs.includes('*') || (!isApiKey && req.sisAuth?.role === 'SUPER_ADMIN');
         const labWhere = hasGlobalLab ? {} : { id: { in: keyLabs } };
 
+        if (typeof req.startPhase === 'function') req.startPhase('count');
         const [totalEligibleSamples, publishedSamples, publishedObservations, labsCount] = await Promise.all([
             prisma.sample.count({ where: sampleWhere }),
             prisma.sample.count({ where: { ...sampleWhere, status: { in: AUTHORIZED_RELEASE_STATUSES } } }),
@@ -1002,6 +1047,7 @@ exports.getStats = async (req, res) => {
                 });
             }
         }
+        if (typeof req.endPhase === 'function') req.endPhase('count');
 
         res.json({
             status: 'success',
@@ -1017,13 +1063,12 @@ exports.getStats = async (req, res) => {
             }
         });
     } catch (err) {
-        console.error('[SIS_V2_STATS_ERR]', err);
-        res.status(500).json({ error: 'Failed to compile v2 exchange statistics.' });
+        return handleExchangeError(err, req, res, next, 'Failed to compile v2 exchange statistics.');
     }
 };
 
 // ─── 7. GET /api/v2/data-exchange/spectra (Spectroscopy Records) ───
-exports.getSpectra = async (req, res) => {
+exports.getSpectra = async (req, res, next) => {
     if (!checkConnectionActive(req, res)) return;
     try {
         const ctx = exchangeStateService.buildCanonicalQueryContext(req.query, 'spectra');
@@ -1037,7 +1082,13 @@ exports.getSpectra = async (req, res) => {
         const canonicalQuery = ctx.query;
         const limit = Math.min(200, Math.max(1, parseInt(canonicalQuery.limit) || 50));
         const cursor = canonicalQuery.cursor;
-        const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, canonicalQuery));
+
+        // Single policy resolution (Issue #140 Work Package A0, E03)
+        if (typeof req.startPhase === 'function') req.startPhase('eligibility');
+        const parentSampleWhere = buildSampleWhere(req.sisAuth, canonicalQuery);
+        const spectralWhere = toPrismaSpectralWhere(buildSpectralWhere(req.sisAuth, canonicalQuery, parentSampleWhere));
+        if (typeof req.endPhase === 'function') req.endPhase('eligibility');
+
         const where = { ...spectralWhere };
 
         // Validate and decode cursor (R2, R8, R11)
@@ -1067,8 +1118,7 @@ exports.getSpectra = async (req, res) => {
             }
         }
 
-        const parentSampleWhere = buildSampleWhere(req.sisAuth, canonicalQuery);
-
+        if (typeof req.startPhase === 'function') req.startPhase('count');
         let total = 0;
         if (parentSampleWhere.assignedLab !== '__denied__' && parentSampleWhere.status !== '__denied_unapproved__') {
             const isRestricted = exchangePolicyService.isRestrictedConsumer(req.sisAuth);
@@ -1090,7 +1140,9 @@ exports.getSpectra = async (req, res) => {
                 total = await prisma.spectralData.count({ where: toPrismaSpectralWhere(spectralWhere) });
             }
         }
+        if (typeof req.endPhase === 'function') req.endPhase('count');
 
+        if (typeof req.startPhase === 'function') req.startPhase('list');
         const spectra = await prisma.spectralData.findMany({
             where,
             orderBy: [
@@ -1123,6 +1175,7 @@ exports.getSpectra = async (req, res) => {
         const pageItems = isRestricted
             ? candidateItems.filter(s => s.sampleId && sampleMap[s.sampleId])
             : candidateItems;
+        if (typeof req.endPhase === 'function') req.endPhase('list');
 
         let nextCursor = null;
         if (hasMore && candidateItems.length > 0) {
@@ -1139,6 +1192,7 @@ exports.getSpectra = async (req, res) => {
             });
         }
 
+        if (typeof req.startPhase === 'function') req.startPhase('mapping');
         const data = pageItems.map(s => {
             const smp = sampleMap[s.sampleId] || null;
             return {
@@ -1155,6 +1209,7 @@ exports.getSpectra = async (req, res) => {
                 timestamp: s.timestamp ? s.timestamp.toISOString() : null
             };
         });
+        if (typeof req.endPhase === 'function') req.endPhase('mapping');
 
         res.json({
             status: 'success',
@@ -1167,13 +1222,12 @@ exports.getSpectra = async (req, res) => {
             data
         });
     } catch (err) {
-        console.error('[SIS_V2_SPECTRA_ERR]', err);
-        res.status(500).json({ error: 'Failed to retrieve spectral records.' });
+        return handleExchangeError(err, req, res, next, 'Failed to retrieve spectral records.');
     }
 };
 
 // ─── 8. POST /api/v2/data-exchange/snapshots (Create Snapshot) ───
-exports.createSnapshot = async (req, res) => {
+exports.createSnapshot = async (req, res, next) => {
     if (!checkConnectionActive(req, res)) return;
     try {
         const ttlHours = req.body?.ttlHours ? Number(req.body.ttlHours) : 24;
@@ -1214,13 +1268,12 @@ exports.createSnapshot = async (req, res) => {
             ...snapshot
         });
     } catch (err) {
-        console.error('[SIS_V2_CREATE_SNAPSHOT_ERR]', err.message, err.stack);
-        res.status(500).json({ error: 'Failed to create export snapshot.', details: err.message });
+        return handleExchangeError(err, req, res, next, 'Failed to create export snapshot.');
     }
 };
 
 // ─── 9. GET /api/v2/data-exchange/snapshots/:snapshotId/pages (Read Snapshot Pages) ───
-exports.getSnapshotPages = async (req, res) => {
+exports.getSnapshotPages = async (req, res, next) => {
     if (!checkConnectionActive(req, res)) return;
     try {
         const { snapshotId } = req.params;
@@ -1242,13 +1295,12 @@ exports.getSnapshotPages = async (req, res) => {
             ...result
         });
     } catch (err) {
-        console.error('[SIS_V2_SNAPSHOT_PAGES_ERR]', err);
-        res.status(500).json({ error: 'Failed to read snapshot pages.' });
+        return handleExchangeError(err, req, res, next, 'Failed to read snapshot pages.');
     }
 };
 
 // ─── 10. GET /api/v2/data-exchange/changes (Change Feed / Continuous Sync) ───
-exports.getChanges = async (req, res) => {
+exports.getChanges = async (req, res, next) => {
     if (!checkConnectionActive(req, res)) return;
     try {
         const { cursor, limit, profile, country, project, labId, assignedLab } = req.query;
@@ -1276,13 +1328,12 @@ exports.getChanges = async (req, res) => {
             ...result
         });
     } catch (err) {
-        console.error('[SIS_V2_CHANGES_ERR]', err.message, err.stack);
-        res.status(500).json({ error: 'Failed to read change feed.', details: err.message });
+        return handleExchangeError(err, req, res, next, 'Failed to read change feed.');
     }
 };
 
 // ─── 11. POST /api/v2/data-exchange/receipts (Delivery Receipts) ───
-exports.submitReceipt = async (req, res) => {
+exports.submitReceipt = async (req, res, next) => {
     if (!checkConnectionActive(req, res)) return;
     try {
         const receipt = exchangeStateService.recordReceipt(req.sisAuth, req.body || {});
@@ -1300,7 +1351,6 @@ exports.submitReceipt = async (req, res) => {
             receipt
         });
     } catch (err) {
-        console.error('[SIS_V2_RECEIPT_ERR]', err);
-        res.status(500).json({ error: 'Failed to record delivery receipt.' });
+        return handleExchangeError(err, req, res, next, 'Failed to record delivery receipt.');
     }
 };
