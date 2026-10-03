@@ -3907,3 +3907,26 @@ Laboratory operators can find step-by-step procedures in the following documenta
              - Plan budget footprint: 5,333 B gzip (<= 15.0 kB gzip limit, margin +9.79 kB under budget). Complete app overhead: 19,342 B gzip (18.89 kB gzip).
              - Reused verified artifacts: Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79...`). Server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen.
              - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+
+        - Following Codex independent review `issue155-independent-review-65e16a8.md` and 4-case probe `issue155-focused-review-65e16a8.cjs`:
+           1. **Scientific Axis-to-Curve Calibration & Collinearity (Finding 1 / Case 3)**:
+              - Enforced SVG tick collinearity (|residual| <= 2.0 px via linear regression) across `multiOverlayState`, `ovt`, and `multiOverlayState.afterExit` in `server/scripts/verify_issue155_browser_journeys.cjs`. Monotonic but non-linear ticks (like Case 3's X in [499, 450, 200, 0], Y in [320, 250, 200, 100]) strictly fail closed (`isCollinear: false`).
+              - When `hasCoords === true`, derived (My, Ky) scale parameters directly from actual SVG tick anchors (`n.getAttribute(axisDim)`) in the shared SVG coordinate system, prioritizing SVG attribute anchors over text glyph bounding boxes during deduplication (`isAnchor: true`).
+              - Projected expected scientific reference curves (Y_proj = My * Y + Ky) and verified curve points match the axis projection within <= 2.5 px, strictly enforcing axis-to-curve binding.
+              - When `hasCoords === false` (mock DOM layout-less text adapter `axisDoc`), preserved source-supported N/A equivalence via affine regression fallback.
+           2. **Observed Camera Track Kinds, Track IDs & Video Node Identity (Finding 2 / Case 4)**:
+              - Hardened `opGate` in `server/scripts/verify_issue155_browser_journeys.cjs`:
+                * Strictly requires `typeof t.id === 'string' && t.id.length > 0` and non-empty stream ID across initial and all transitions.
+                * Enforces track kind continuity: `t.kind === 'video'` (strictly rejects video-to-audio mutations).
+                * Requires track count and track IDs to strictly match initial state across all 14 transitions and exit.
+                * Enforces numeric `typeof v.videoNodeIdentity.readyState === 'number' && v.videoNodeIdentity.readyState >= 2`.
+                * Retains initial `<video>` DOM node reference in collector (`window.__initialVideoNode`) and verifies stable node identity (`isSameNode === true`).
+           3. **Whole-Stage Scope & Honest Truthful Boundaries (Finding 3)**:
+              - Maintained distinct boundaries: constructed node-listened composition events remain synthetic, distinct from OS/system IME candidate windows.
+              - High-DPI DPR 2.0, 200% and 400% zoom reflow remain distinct from native desktop optical zoom and physical hardware.
+              - Preserved accepted closures: customer certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), 5-row measurements, frozen CSS `index-Df7izgw5.css` (213,700 B raw / 35,045 B gzip, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
+           4. **Suite Verification Results**:
+              - Running-app Browser Suite: **All 12/12 suites PASS 100% green** (`server/scripts/issue155-browser-journeys-results.json`).
+              - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
+              - Focused Review Harness: **All 4/4 cases PASS 100% green** (`scratch/test_harness_cases.cjs`).
+              - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.

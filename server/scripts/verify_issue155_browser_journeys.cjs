@@ -1590,6 +1590,10 @@ async function runBrowserEvidence() {
         const scanBefore = await page.evaluate(async () => {
             const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
             const videoEl = document.querySelector('video');
+            if (videoEl && typeof window !== 'undefined') {
+                window.__initialVideoNode = videoEl;
+            }
+            const isSameNode = Boolean(videoEl && typeof window !== 'undefined' && window.__initialVideoNode && (videoEl === window.__initialVideoNode || (typeof videoEl.isSameNode === 'function' && videoEl.isSameNode(window.__initialVideoNode))));
             const stream = videoEl && videoEl.srcObject ? videoEl.srcObject : null;
             const hasStream = Boolean(stream);
             const streamActive = Boolean(hasStream && stream.active);
@@ -1603,7 +1607,8 @@ async function runBrowserEvidence() {
                 tagName: videoEl.tagName,
                 className: videoEl.className,
                 readyState: videoEl.readyState,
-                srcObjectAssigned: Boolean(videoEl.srcObject)
+                srcObjectAssigned: Boolean(videoEl.srcObject),
+                isSameNode: isSameNode
             } : null;
             const permissionsState = (navigator.permissions && navigator.permissions.query)
                 ? await navigator.permissions.query({ name: 'camera' }).then(p => p.state).catch(() => 'prompt')
@@ -1650,6 +1655,7 @@ async function runBrowserEvidence() {
             const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
             const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
             const videoEl = document.querySelector('video');
+            const isSameNode = Boolean(videoEl && typeof window !== 'undefined' && window.__initialVideoNode && (videoEl === window.__initialVideoNode || (typeof videoEl.isSameNode === 'function' && videoEl.isSameNode(window.__initialVideoNode))));
             const stream = videoEl && videoEl.srcObject ? videoEl.srcObject : null;
             const hasStream = Boolean(stream);
             const streamActive = Boolean(hasStream && stream.active);
@@ -1663,7 +1669,8 @@ async function runBrowserEvidence() {
                 tagName: videoEl.tagName,
                 className: videoEl.className,
                 readyState: videoEl.readyState,
-                srcObjectAssigned: Boolean(videoEl.srcObject)
+                srcObjectAssigned: Boolean(videoEl.srcObject),
+                isSameNode: isSameNode
             } : null;
             const permissionsState = (navigator.permissions && navigator.permissions.query)
                 ? await navigator.permissions.query({ name: 'camera' }).then(p => p.state).catch(() => 'prompt')
@@ -1752,6 +1759,7 @@ async function runBrowserEvidence() {
                 const noticeVisible = Boolean(notice);
                 const scanInp = document.querySelector ? document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]') : null;
                 const videoEl = document.querySelector ? document.querySelector('video') : null;
+                const isSameNode = Boolean(videoEl && typeof window !== 'undefined' && window.__initialVideoNode && (videoEl === window.__initialVideoNode || (typeof videoEl.isSameNode === 'function' && videoEl.isSameNode(window.__initialVideoNode))));
                 const val = scanInp ? scanInp.value : null;
                 const barcodePreserved = val === 'SMP-2026-001';
                 const stream = videoEl && videoEl.srcObject ? videoEl.srcObject : null;
@@ -1766,7 +1774,8 @@ async function runBrowserEvidence() {
                     tagName: videoEl.tagName,
                     className: videoEl.className,
                     readyState: videoEl.readyState,
-                    srcObjectAssigned: Boolean(videoEl.srcObject)
+                    srcObjectAssigned: Boolean(videoEl.srcObject),
+                    isSameNode: isSameNode
                 } : null;
                 const permissionsState = (navigator.permissions && navigator.permissions.query)
                     ? await navigator.permissions.query({ name: 'camera' }).then(p => p.state).catch(() => 'prompt')
@@ -1810,6 +1819,7 @@ async function runBrowserEvidence() {
             const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
             const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
             const videoEl = document.querySelector('video');
+            const isSameNode = Boolean(videoEl && typeof window !== 'undefined' && window.__initialVideoNode && (videoEl === window.__initialVideoNode || (typeof videoEl.isSameNode === 'function' && videoEl.isSameNode(window.__initialVideoNode))));
             const stream = videoEl && videoEl.srcObject ? videoEl.srcObject : null;
             const hasStream = Boolean(stream);
             const streamActive = Boolean(hasStream && stream.active);
@@ -1823,7 +1833,8 @@ async function runBrowserEvidence() {
                 tagName: videoEl.tagName,
                 className: videoEl.className,
                 readyState: videoEl.readyState,
-                srcObjectAssigned: Boolean(videoEl.srcObject)
+                srcObjectAssigned: Boolean(videoEl.srcObject),
+                isSameNode: isSameNode
             } : null;
             const permissionsState = (navigator.permissions && navigator.permissions.query)
                 ? await navigator.permissions.query({ name: 'camera' }).then(p => p.state).catch(() => 'prompt')
@@ -1847,6 +1858,7 @@ async function runBrowserEvidence() {
             const manualForm = document.querySelector('form, [placeholder*="Search"], input');
             const scanInp = document.querySelector('main input[type="text"], main input[placeholder*="Search"], input[placeholder*="Scan"]');
             const videoEl = document.querySelector('video');
+            const isSameNode = Boolean(videoEl && typeof window !== 'undefined' && window.__initialVideoNode && (videoEl === window.__initialVideoNode || (typeof videoEl.isSameNode === 'function' && videoEl.isSameNode(window.__initialVideoNode))));
             const stream = videoEl && videoEl.srcObject ? videoEl.srcObject : null;
             const hasStream = Boolean(stream);
             const streamActive = Boolean(hasStream && stream.active);
@@ -1860,7 +1872,8 @@ async function runBrowserEvidence() {
                 tagName: videoEl.tagName,
                 className: videoEl.className,
                 readyState: videoEl.readyState,
-                srcObjectAssigned: Boolean(videoEl.srcObject)
+                srcObjectAssigned: Boolean(videoEl.srcObject),
+                isSameNode: isSameNode
             } : null;
             const permissionsState = (navigator.permissions && navigator.permissions.query)
                 ? await navigator.permissions.query({ name: 'camera' }).then(p => p.state).catch(() => 'prompt')
@@ -3613,11 +3626,13 @@ async function runBrowserEvidence() {
                 scanState.streamDetails.id.length > 0 &&
                 Array.isArray(scanState.streamDetails.tracks) &&
                 scanState.streamDetails.tracks.length >= 1 &&
-                scanState.streamDetails.tracks.every(t => t && t.readyState === 'live' && t.enabled === true) &&
+                scanState.streamDetails.tracks.every(t => t && typeof t.id === 'string' && t.id.length > 0 && t.kind === 'video' && t.readyState === 'live' && t.enabled === true) &&
                 scanState.videoNodeIdentity &&
                 scanState.videoNodeIdentity.tagName === 'VIDEO' &&
-                (typeof scanState.videoNodeIdentity.readyState !== 'number' || scanState.videoNodeIdentity.readyState >= 2) &&
+                typeof scanState.videoNodeIdentity.readyState === 'number' &&
+                scanState.videoNodeIdentity.readyState >= 2 &&
                 scanState.videoNodeIdentity.srcObjectAssigned === true &&
+                (typeof scanState.videoNodeIdentity.isSameNode === 'boolean' ? scanState.videoNodeIdentity.isSameNode === true : true) &&
                 scanState.permissionsState === 'granted' &&
                 scanState.beforePreview &&
                 scanState.beforePreview.enteredValue === 'SMP-2026-001' &&
@@ -3625,13 +3640,14 @@ async function runBrowserEvidence() {
                 scanState.beforePreview.streamDetails.active === true &&
                 scanState.beforePreview.streamDetails.id === scanState.streamDetails.id &&
                 Array.isArray(scanState.beforePreview.streamDetails.tracks) &&
-                scanState.beforePreview.streamDetails.tracks.length >= 1 &&
-                scanState.beforePreview.streamDetails.tracks[0].id === scanState.streamDetails.tracks[0].id &&
-                scanState.beforePreview.streamDetails.tracks.every(t => t && t.readyState === 'live' && t.enabled === true) &&
+                scanState.beforePreview.streamDetails.tracks.length === scanState.streamDetails.tracks.length &&
+                scanState.beforePreview.streamDetails.tracks.every((t, i) => t && typeof t.id === 'string' && t.id.length > 0 && t.kind === 'video' && t.readyState === 'live' && t.enabled === true && t.id === scanState.streamDetails.tracks[i].id) &&
                 scanState.beforePreview.videoNodeIdentity &&
                 scanState.beforePreview.videoNodeIdentity.tagName === 'VIDEO' &&
-                (typeof scanState.beforePreview.videoNodeIdentity.readyState !== 'number' || scanState.beforePreview.videoNodeIdentity.readyState >= 2) &&
+                typeof scanState.beforePreview.videoNodeIdentity.readyState === 'number' &&
+                scanState.beforePreview.videoNodeIdentity.readyState >= 2 &&
                 scanState.beforePreview.videoNodeIdentity.srcObjectAssigned === true &&
+                (typeof scanState.beforePreview.videoNodeIdentity.isSameNode === 'boolean' ? scanState.beforePreview.videoNodeIdentity.isSameNode === true : true) &&
                 scanState.beforePreview.permissionsState === 'granted' &&
                 scanState.beforePreview.theme === 'forest' &&
                 scanState.beforePreview.mode === 'light' &&
@@ -3641,13 +3657,14 @@ async function runBrowserEvidence() {
                 scanState.duringPreview.streamDetails.active === true &&
                 scanState.duringPreview.streamDetails.id === scanState.streamDetails.id &&
                 Array.isArray(scanState.duringPreview.streamDetails.tracks) &&
-                scanState.duringPreview.streamDetails.tracks.length >= 1 &&
-                scanState.duringPreview.streamDetails.tracks[0].id === scanState.streamDetails.tracks[0].id &&
-                scanState.duringPreview.streamDetails.tracks.every(t => t && t.readyState === 'live' && t.enabled === true) &&
+                scanState.duringPreview.streamDetails.tracks.length === scanState.streamDetails.tracks.length &&
+                scanState.duringPreview.streamDetails.tracks.every((t, i) => t && typeof t.id === 'string' && t.id.length > 0 && t.kind === 'video' && t.readyState === 'live' && t.enabled === true && t.id === scanState.streamDetails.tracks[i].id) &&
                 scanState.duringPreview.videoNodeIdentity &&
                 scanState.duringPreview.videoNodeIdentity.tagName === 'VIDEO' &&
-                (typeof scanState.duringPreview.videoNodeIdentity.readyState !== 'number' || scanState.duringPreview.videoNodeIdentity.readyState >= 2) &&
+                typeof scanState.duringPreview.videoNodeIdentity.readyState === 'number' &&
+                scanState.duringPreview.videoNodeIdentity.readyState >= 2 &&
                 scanState.duringPreview.videoNodeIdentity.srcObjectAssigned === true &&
+                (typeof scanState.duringPreview.videoNodeIdentity.isSameNode === 'boolean' ? scanState.duringPreview.videoNodeIdentity.isSameNode === true : true) &&
                 scanState.duringPreview.permissionsState === 'granted' &&
                 scanState.duringPreview.appliedTheme === 'mineral' &&
                 scanState.duringPreview.appliedMode === 'light' &&
@@ -3658,13 +3675,14 @@ async function runBrowserEvidence() {
                 scanState.afterExit.streamDetails.active === true &&
                 scanState.afterExit.streamDetails.id === scanState.streamDetails.id &&
                 Array.isArray(scanState.afterExit.streamDetails.tracks) &&
-                scanState.afterExit.streamDetails.tracks.length >= 1 &&
-                scanState.afterExit.streamDetails.tracks[0].id === scanState.streamDetails.tracks[0].id &&
-                scanState.afterExit.streamDetails.tracks.every(t => t && t.readyState === 'live' && t.enabled === true) &&
+                scanState.afterExit.streamDetails.tracks.length === scanState.streamDetails.tracks.length &&
+                scanState.afterExit.streamDetails.tracks.every((t, i) => t && typeof t.id === 'string' && t.id.length > 0 && t.kind === 'video' && t.readyState === 'live' && t.enabled === true && t.id === scanState.streamDetails.tracks[i].id) &&
                 scanState.afterExit.videoNodeIdentity &&
                 scanState.afterExit.videoNodeIdentity.tagName === 'VIDEO' &&
-                (typeof scanState.afterExit.videoNodeIdentity.readyState !== 'number' || scanState.afterExit.videoNodeIdentity.readyState >= 2) &&
+                typeof scanState.afterExit.videoNodeIdentity.readyState === 'number' &&
+                scanState.afterExit.videoNodeIdentity.readyState >= 2 &&
                 scanState.afterExit.videoNodeIdentity.srcObjectAssigned === true &&
+                (typeof scanState.afterExit.videoNodeIdentity.isSameNode === 'boolean' ? scanState.afterExit.videoNodeIdentity.isSameNode === true : true) &&
                 scanState.afterExit.permissionsState === 'granted' &&
                 scanState.afterExit.appliedTheme === 'forest' &&
                 scanState.afterExit.appliedMode === 'light' &&
@@ -3695,13 +3713,14 @@ async function runBrowserEvidence() {
                     v.streamDetails.active === true &&
                     v.streamDetails.id === scanState.streamDetails.id &&
                     Array.isArray(v.streamDetails.tracks) &&
-                    v.streamDetails.tracks.length >= 1 &&
-                    v.streamDetails.tracks[0].id === scanState.streamDetails.tracks[0].id &&
-                    v.streamDetails.tracks.every(t => t && t.readyState === 'live' && t.enabled === true) &&
+                    v.streamDetails.tracks.length === scanState.streamDetails.tracks.length &&
+                    v.streamDetails.tracks.every((t, i) => t && typeof t.id === 'string' && t.id.length > 0 && t.kind === 'video' && t.readyState === 'live' && t.enabled === true && t.id === scanState.streamDetails.tracks[i].id) &&
                     v.videoNodeIdentity &&
                     v.videoNodeIdentity.tagName === 'VIDEO' &&
-                    (typeof v.videoNodeIdentity.readyState !== 'number' || v.videoNodeIdentity.readyState >= 2) &&
+                    typeof v.videoNodeIdentity.readyState === 'number' &&
+                    v.videoNodeIdentity.readyState >= 2 &&
                     v.videoNodeIdentity.srcObjectAssigned === true &&
+                    (typeof v.videoNodeIdentity.isSameNode === 'boolean' ? v.videoNodeIdentity.isSameNode === true : true) &&
                     v.permissionsState === 'granted'
                 ) &&
                 workflowState &&
@@ -5895,6 +5914,186 @@ async function runBrowserEvidence() {
                 const expGrid1 = Array.from({ length: NUM_GRID_PTS }, (_, i) => interp(rawScan1, 400 + i * gridStep));
                 const expGrid2 = Array.from({ length: NUM_GRID_PTS }, (_, i) => interp(rawScan2, 400 + i * gridStep));
 
+                const yAxisEl = document.querySelector ? document.querySelector('.recharts-yAxis, [class*="yAxis"]') : null;
+                const xAxisEl = document.querySelector ? document.querySelector('.recharts-xAxis, [class*="xAxis"]') : null;
+
+                function extractNumericTicks(selector, el) {
+                    const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
+                    const texts = Array.from(nodes).map(n => (n.textContent || '').trim()).filter(Boolean);
+                    if (texts.length === 0 && el && el.textContent) {
+                        texts.push(...(el.textContent.match(/-?\d+(?:\.\d+)?/g) || []));
+                    }
+                    return texts.map(t => parseFloat(t)).filter(n => !isNaN(n) && isFinite(n));
+                }
+
+                function inspectTickGeometry(selector, axisDim) {
+                    const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
+                    let checked = 0;
+                    let allZero = true;
+                    let hasCoords = false;
+                    const coords = [];
+                    const tickPairs = [];
+                    for (const n of nodes) {
+                        if (!n) continue;
+                        let coord = null;
+                        let isAnchor = false;
+                        if (typeof n.getAttribute === 'function') {
+                            const attr = n.getAttribute(axisDim);
+                            if (attr !== null) {
+                                const num = parseFloat(attr);
+                                if (!isNaN(num) && isFinite(num)) {
+                                    hasCoords = true;
+                                    checked++;
+                                    if (num !== 0) allZero = false;
+                                    coord = num;
+                                    isAnchor = true;
+                                }
+                            }
+                            if (coord === null) {
+                                const tr = n.getAttribute('transform');
+                                if (tr) {
+                                    const m = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\)/);
+                                    if (m) {
+                                        const trVal = parseFloat(axisDim === 'x' ? m[1] : (m[2] || m[1]));
+                                        if (!isNaN(trVal) && isFinite(trVal)) {
+                                            hasCoords = true;
+                                            checked++;
+                                            if (trVal !== 0) allZero = false;
+                                            coord = trVal;
+                                            isAnchor = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (typeof n.getBoundingClientRect === 'function') {
+                            const r = n.getBoundingClientRect();
+                            if (r) {
+                                hasCoords = true;
+                                checked++;
+                                if (r.x !== 0 || r.y !== 0 || (r.width !== 0 && !isNaN(r.width)) || (r.height !== 0 && !isNaN(r.height))) {
+                                    allZero = false;
+                                }
+                                if (coord === null) {
+                                    const svgEl = (n.ownerSVGElement || (n.closest && n.closest('svg')) || (document.querySelector && document.querySelector('.recharts-surface')));
+                                    const svgRect = (svgEl && typeof svgEl.getBoundingClientRect === 'function') ? svgEl.getBoundingClientRect() : null;
+                                    const offset = svgRect ? (axisDim === 'x' ? (svgRect.x || 0) : (svgRect.y || 0)) : 0;
+                                    const val = (axisDim === 'x') ? (r.x - offset) : (r.y - offset);
+                                    if (val !== null && typeof val === 'number' && !isNaN(val)) coord = val;
+                                }
+                            }
+                        }
+                        if (coord !== null && typeof coord === 'number' && !isNaN(coord)) {
+                            coords.push(coord);
+                            const text = (n.textContent || '').trim();
+                            const m = text.match(/-?\d+(?:\.\d+)?/);
+                            if (m) {
+                                const num = parseFloat(m[0]);
+                                if (!isNaN(num) && isFinite(num)) {
+                                    tickPairs.push({ val: num, coord, isAnchor });
+                                }
+                            }
+                        }
+                    }
+                    const isStacked = Boolean(hasCoords && checked >= 2 && coords.length >= 2 && Math.max(...coords) === Math.min(...coords));
+                    let isScrambled = false;
+                    let isCollinear = true;
+                    let scaleSlope = null;
+                    let scaleIntercept = null;
+                    let unique = [];
+                    let maxResidual = 0;
+                    if (hasCoords && tickPairs.length >= 2) {
+                        const sorted = [...tickPairs].sort((a, b) => a.val - b.val);
+                        const byVal = new Map();
+                        for (const p of sorted) {
+                            if (!byVal.has(p.val) || (!byVal.get(p.val).isAnchor && p.isAnchor)) {
+                                byVal.set(p.val, p);
+                            }
+                        }
+                        unique = Array.from(byVal.values()).sort((a, b) => a.val - b.val);
+                        if (unique.length >= 2) {
+                            const isStrictlyInc = unique.every((p, i) => i === 0 || p.coord > unique[i - 1].coord);
+                            const isStrictlyDec = unique.every((p, i) => i === 0 || p.coord < unique[i - 1].coord);
+                            if (!isStrictlyInc && !isStrictlyDec) {
+                                isScrambled = true;
+                            }
+                            const n = unique.length;
+                            const meanV = unique.reduce((s, p) => s + p.val, 0) / n;
+                            const meanC = unique.reduce((s, p) => s + p.coord, 0) / n;
+                            let cov = 0, varV = 0, varC = 0;
+                            for (let i = 0; i < n; i++) {
+                                const dv = unique[i].val - meanV;
+                                const dc = unique[i].coord - meanC;
+                                cov += dv * dc;
+                                varV += dv * dv;
+                                varC += dc * dc;
+                            }
+                            if (varV > 1e-9 && varC > 1e-9) {
+                                scaleSlope = cov / varV;
+                                scaleIntercept = meanC - scaleSlope * meanV;
+                                maxResidual = Math.max(...unique.map(p => Math.abs(p.coord - (scaleSlope * p.val + scaleIntercept))));
+                                if (maxResidual > 2.0) {
+                                    isCollinear = false;
+                                }
+                            } else {
+                                isCollinear = false;
+                            }
+                        }
+                    }
+                    return {
+                        hasCoords,
+                        isCollapsed: Boolean(hasCoords && checked >= 2 && allZero),
+                        isStacked,
+                        isScrambled,
+                        isCollinear,
+                        scaleSlope,
+                        scaleIntercept,
+                        maxResidual,
+                        tickPairs,
+                        unique
+                    };
+                }
+
+                const xTickVals = extractNumericTicks('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', xAxisEl);
+                const yTickVals = extractNumericTicks('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', yAxisEl);
+                const minObsX = Math.min(...xTickVals);
+                const maxObsX = Math.max(...xTickVals);
+                const minObsY = Math.min(...yTickVals);
+                const maxObsY = Math.max(...yTickVals);
+
+                const xTickGeom = inspectTickGeometry('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', 'x');
+                const yTickGeom = inspectTickGeometry('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', 'y');
+                const xRect = (xAxisEl && typeof xAxisEl.getBoundingClientRect === 'function') ? xAxisEl.getBoundingClientRect() : null;
+                const yRect = (yAxisEl && typeof yAxisEl.getBoundingClientRect === 'function') ? yAxisEl.getBoundingClientRect() : null;
+                const axisRectsCollapsed = Boolean(xRect && yRect && xRect.width === 0 && xRect.height === 0 && yRect.width === 0 && yRect.height === 0);
+                const hasInvalidTickGeometry = Boolean(
+                    xTickGeom.isCollapsed || yTickGeom.isCollapsed ||
+                    xTickGeom.isStacked || yTickGeom.isStacked ||
+                    xTickGeom.isScrambled || yTickGeom.isScrambled ||
+                    (xTickGeom.hasCoords && !xTickGeom.isCollinear) ||
+                    (yTickGeom.hasCoords && !yTickGeom.isCollinear) ||
+                    axisRectsCollapsed
+                );
+
+                const xText = (xAxisEl && xAxisEl.textContent) ? String(xAxisEl.textContent) : '';
+                const yText = (yAxisEl && yAxisEl.textContent) ? String(yAxisEl.textContent) : '';
+                const hasWrongXSemantics = /wavelength\s*\(\s*nm\s*\)|reflectance/i.test(xText);
+                const hasWrongYSemantics = /reflectance\s*\(\s*%\s*\)|wavelength/i.test(yText);
+
+                const axesVerified = Boolean(
+                    xAxisEl &&
+                    yAxisEl &&
+                    !hasWrongXSemantics &&
+                    !hasWrongYSemantics &&
+                    !hasInvalidTickGeometry &&
+                    xTickVals.length >= 2 &&
+                    xTickVals.every(v => v >= 400 && v <= 4000) &&
+                    minObsX <= 1500 && maxObsX >= 3500 && (maxObsX - minObsX) >= 2000 &&
+                    yTickVals.length >= 2 &&
+                    yTickVals.every(v => v >= 0 && v <= 3.5) &&
+                    minObsY <= 0.50 && maxObsY <= 1.50 && (maxObsY - minObsY) >= 0.50
+                );
+
                 function fitCalibration(ptsY, expected) {
                     if (!ptsY || !expected || ptsY.length !== expected.length) return null;
                     const directDiff = Math.max(...ptsY.map((y, i) => Math.abs(y - expected[i])));
@@ -5920,7 +6119,29 @@ async function runBrowserEvidence() {
                     return { A, B };
                 }
 
+                function checkAxisCalibrated(ptsY, expected) {
+                    if (!yTickGeom.hasCoords || !yTickGeom.isCollinear || yTickGeom.scaleSlope === null || yTickGeom.scaleSlope >= 0) {
+                        return false;
+                    }
+                    const My = yTickGeom.scaleSlope;
+                    const Ky = yTickGeom.scaleIntercept;
+                    const diffFwd = Math.max(...ptsY.map((y, i) => Math.abs(y - (My * expected[i] + Ky))));
+                    if (diffFwd <= 2.5) return true;
+                    const n = expected.length;
+                    const diffRev = Math.max(...ptsY.map((y, i) => Math.abs(y - (My * expected[n - 1 - i] + Ky))));
+                    if (diffRev <= 2.5) return true;
+                    return false;
+                }
+
                 function checkSharedModel(yA, yB, refA, refB) {
+                    if (yTickGeom.hasCoords) {
+                        const calA = checkAxisCalibrated(yA, refA);
+                        const calB = checkAxisCalibrated(yB, refB);
+                        const crossA = checkAxisCalibrated(yA, refB);
+                        const crossB = checkAxisCalibrated(yB, refA);
+                        if (calA && calB && !crossA && !crossB) return true;
+                        return false;
+                    }
                     let cal = fitCalibration(yA, refA);
                     if (cal) {
                         const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
@@ -5972,8 +6193,12 @@ async function runBrowserEvidence() {
                     if (!isUniformX) return false;
 
                     const ptsY = pts.map(p => p.y);
-                    const isScan1 = Boolean(fitCalibration(ptsY, expGrid1) || fitCalibration(ptsY, [...expGrid1].reverse()));
-                    const isScan2 = Boolean(fitCalibration(ptsY, expGrid2) || fitCalibration(ptsY, [...expGrid2].reverse()));
+                    const isScan1 = yTickGeom.hasCoords
+                        ? checkAxisCalibrated(ptsY, expGrid1)
+                        : Boolean(fitCalibration(ptsY, expGrid1) || fitCalibration(ptsY, [...expGrid1].reverse()));
+                    const isScan2 = yTickGeom.hasCoords
+                        ? checkAxisCalibrated(ptsY, expGrid2)
+                        : Boolean(fitCalibration(ptsY, expGrid2) || fitCalibration(ptsY, [...expGrid2].reverse()));
                     if (!isScan1 && !isScan2) return false;
 
                     curvePointSets.push(pts);
@@ -5992,115 +6217,6 @@ async function runBrowserEvidence() {
                 }
 
                 const curveModelVerified = Boolean(validCurves.length >= 2 && distinctSeriesVerified);
-
-                const yAxisEl = document.querySelector ? document.querySelector('.recharts-yAxis, [class*="yAxis"]') : null;
-                const xAxisEl = document.querySelector ? document.querySelector('.recharts-xAxis, [class*="xAxis"]') : null;
-                function extractNumericTicks(selector, el) {
-                    const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
-                    const texts = Array.from(nodes).map(n => (n.textContent || '').trim()).filter(Boolean);
-                    if (texts.length === 0 && el && el.textContent) {
-                        texts.push(...(el.textContent.match(/-?\d+(?:\.\d+)?/g) || []));
-                    }
-                    return texts.map(t => parseFloat(t)).filter(n => !isNaN(n) && isFinite(n));
-                }
-                function inspectTickGeometry(selector, axisDim) {
-                    const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
-                    let checked = 0;
-                    let allZero = true;
-                    let hasCoords = false;
-                    const coords = [];
-                    const tickPairs = [];
-                    for (const n of nodes) {
-                        if (!n) continue;
-                        let coord = null;
-                        if (typeof n.getBoundingClientRect === 'function') {
-                            hasCoords = true;
-                            checked++;
-                            const r = n.getBoundingClientRect();
-                            if (r.x !== 0 || r.y !== 0 || (r.width !== 0 && !isNaN(r.width)) || (r.height !== 0 && !isNaN(r.height))) {
-                                allZero = false;
-                            }
-                            const val = (axisDim === 'x') ? r.x : (axisDim === 'y' ? r.y : null);
-                            if (val !== null && typeof val === 'number') coord = val;
-                        } else if (typeof n.getAttribute === 'function') {
-                            const x = n.getAttribute('x');
-                            const y = n.getAttribute('y');
-                            if (x !== null || y !== null) {
-                                hasCoords = true;
-                                checked++;
-                                if (parseFloat(x) !== 0 || parseFloat(y) !== 0) {
-                                    allZero = false;
-                                }
-                                const val = (axisDim === 'x') ? parseFloat(x) : (axisDim === 'y' ? parseFloat(y) : null);
-                                if (val !== null && !isNaN(val)) coord = val;
-                            }
-                        }
-                        if (coord !== null && typeof coord === 'number' && !isNaN(coord)) {
-                            coords.push(coord);
-                            const text = (n.textContent || '').trim();
-                            const m = text.match(/-?\d+(?:\.\d+)?/);
-                            if (m) {
-                                const num = parseFloat(m[0]);
-                                if (!isNaN(num) && isFinite(num)) {
-                                    tickPairs.push({ val: num, coord });
-                                }
-                            }
-                        }
-                    }
-                    const isStacked = Boolean(hasCoords && checked >= 2 && coords.length >= 2 && Math.max(...coords) === Math.min(...coords));
-                    let isScrambled = false;
-                    if (hasCoords && tickPairs.length >= 2) {
-                        const sorted = [...tickPairs].sort((a, b) => a.val - b.val);
-                        const unique = [];
-                        const seen = new Set();
-                        for (const p of sorted) {
-                            if (!seen.has(p.val)) {
-                                seen.add(p.val);
-                                unique.push(p);
-                            }
-                        }
-                        if (unique.length >= 2) {
-                            const isStrictlyInc = unique.every((p, i) => i === 0 || p.coord > unique[i - 1].coord);
-                            const isStrictlyDec = unique.every((p, i) => i === 0 || p.coord < unique[i - 1].coord);
-                            if (!isStrictlyInc && !isStrictlyDec) {
-                                isScrambled = true;
-                            }
-                        }
-                    }
-                    return { hasCoords, isCollapsed: Boolean(hasCoords && checked >= 2 && allZero), isStacked, isScrambled };
-                }
-                const xTickVals = extractNumericTicks('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', xAxisEl);
-                const yTickVals = extractNumericTicks('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', yAxisEl);
-                const minObsX = Math.min(...xTickVals);
-                const maxObsX = Math.max(...xTickVals);
-                const minObsY = Math.min(...yTickVals);
-                const maxObsY = Math.max(...yTickVals);
-
-                const xTickGeom = inspectTickGeometry('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', 'x');
-                const yTickGeom = inspectTickGeometry('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', 'y');
-                const xRect = (xAxisEl && typeof xAxisEl.getBoundingClientRect === 'function') ? xAxisEl.getBoundingClientRect() : null;
-                const yRect = (yAxisEl && typeof yAxisEl.getBoundingClientRect === 'function') ? yAxisEl.getBoundingClientRect() : null;
-                const axisRectsCollapsed = Boolean(xRect && yRect && xRect.width === 0 && xRect.height === 0 && yRect.width === 0 && yRect.height === 0);
-                const hasInvalidTickGeometry = Boolean(xTickGeom.isCollapsed || yTickGeom.isCollapsed || xTickGeom.isStacked || yTickGeom.isStacked || xTickGeom.isScrambled || yTickGeom.isScrambled || axisRectsCollapsed);
-
-                const xText = (xAxisEl && xAxisEl.textContent) ? String(xAxisEl.textContent) : '';
-                const yText = (yAxisEl && yAxisEl.textContent) ? String(yAxisEl.textContent) : '';
-                const hasWrongXSemantics = /wavelength\s*\(\s*nm\s*\)|reflectance/i.test(xText);
-                const hasWrongYSemantics = /reflectance\s*\(\s*%\s*\)|wavelength/i.test(yText);
-
-                const axesVerified = Boolean(
-                    xAxisEl &&
-                    yAxisEl &&
-                    !hasWrongXSemantics &&
-                    !hasWrongYSemantics &&
-                    !hasInvalidTickGeometry &&
-                    xTickVals.length >= 2 &&
-                    xTickVals.every(v => v >= 400 && v <= 4000) &&
-                    minObsX <= 1500 && maxObsX >= 3500 && (maxObsX - minObsX) >= 2000 &&
-                    yTickVals.length >= 2 &&
-                    yTickVals.every(v => v >= 0 && v <= 3.5) &&
-                    minObsY <= 0.50 && maxObsY <= 1.50 && (maxObsY - minObsY) >= 0.50
-                );
 
                 const hasValidScans = selectedScanIds.length >= 2 &&
                     selectedScanIds.includes('SMP-2026-001-mir-baseline') &&
@@ -6214,6 +6330,183 @@ async function runBrowserEvidence() {
                     const expGrid1 = Array.from({ length: NUM_GRID_PTS }, (_, i) => interp(rawScan1, 400 + i * gridStep));
                     const expGrid2 = Array.from({ length: NUM_GRID_PTS }, (_, i) => interp(rawScan2, 400 + i * gridStep));
 
+                    const yAxisEl = document.querySelector ? document.querySelector('.recharts-yAxis, [class*="yAxis"]') : null;
+                    const xAxisEl = document.querySelector ? document.querySelector('.recharts-xAxis, [class*="xAxis"]') : null;
+
+                    function extractNumericTicks(selector, el) {
+                        const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
+                        const texts = Array.from(nodes).map(n => (n.textContent || '').trim()).filter(Boolean);
+                        if (texts.length === 0 && el && el.textContent) {
+                            texts.push(...(el.textContent.match(/-?\d+(?:\.\d+)?/g) || []));
+                        }
+                        return texts.map(t => parseFloat(t)).filter(n => !isNaN(n) && isFinite(n));
+                    }
+
+                    function inspectTickGeometry(selector, axisDim) {
+                        const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
+                        let checked = 0;
+                        let allZero = true;
+                        let hasCoords = false;
+                        const coords = [];
+                        const tickPairs = [];
+                        for (const n of nodes) {
+                            if (!n) continue;
+                            let coord = null;
+                            let isAnchor = false;
+                            if (typeof n.getAttribute === 'function') {
+                                const attr = n.getAttribute(axisDim);
+                                if (attr !== null) {
+                                    const num = parseFloat(attr);
+                                    if (!isNaN(num) && isFinite(num)) {
+                                        hasCoords = true;
+                                        checked++;
+                                        if (num !== 0) allZero = false;
+                                        coord = num;
+                                        isAnchor = true;
+                                    }
+                                }
+                                if (coord === null) {
+                                    const tr = n.getAttribute('transform');
+                                    if (tr) {
+                                        const m = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\)/);
+                                        if (m) {
+                                            const trVal = parseFloat(axisDim === 'x' ? m[1] : (m[2] || m[1]));
+                                            if (!isNaN(trVal) && isFinite(trVal)) {
+                                                hasCoords = true;
+                                                checked++;
+                                                if (trVal !== 0) allZero = false;
+                                                coord = trVal;
+                                                isAnchor = true;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (typeof n.getBoundingClientRect === 'function') {
+                                const r = n.getBoundingClientRect();
+                                if (r) {
+                                    hasCoords = true;
+                                    checked++;
+                                    if (r.x !== 0 || r.y !== 0 || (r.width !== 0 && !isNaN(r.width)) || (r.height !== 0 && !isNaN(r.height))) {
+                                        allZero = false;
+                                    }
+                                    if (coord === null) {
+                                        const svgEl = (n.ownerSVGElement || (n.closest && n.closest('svg')) || (document.querySelector && document.querySelector('.recharts-surface')));
+                                        const svgRect = (svgEl && typeof svgEl.getBoundingClientRect === 'function') ? svgEl.getBoundingClientRect() : null;
+                                        const offset = svgRect ? (axisDim === 'x' ? (svgRect.x || 0) : (svgRect.y || 0)) : 0;
+                                        const val = (axisDim === 'x') ? (r.x - offset) : (r.y - offset);
+                                        if (val !== null && typeof val === 'number' && !isNaN(val)) coord = val;
+                                    }
+                                }
+                            }
+                            if (coord !== null && typeof coord === 'number' && !isNaN(coord)) {
+                                coords.push(coord);
+                                const text = (n.textContent || '').trim();
+                                const m = text.match(/-?\d+(?:\.\d+)?/);
+                                if (m) {
+                                    const num = parseFloat(m[0]);
+                                    if (!isNaN(num) && isFinite(num)) {
+                                        tickPairs.push({ val: num, coord, isAnchor });
+                                    }
+                                }
+                            }
+                        }
+                        const isStacked = Boolean(hasCoords && checked >= 2 && coords.length >= 2 && Math.max(...coords) === Math.min(...coords));
+                        let isScrambled = false;
+                        let isCollinear = true;
+                        let scaleSlope = null;
+                        let scaleIntercept = null;
+                        let maxResidual = 0;
+                        if (hasCoords && tickPairs.length >= 2) {
+                            const sorted = [...tickPairs].sort((a, b) => a.val - b.val);
+                            const byVal = new Map();
+                            for (const p of sorted) {
+                                if (!byVal.has(p.val) || (!byVal.get(p.val).isAnchor && p.isAnchor)) {
+                                    byVal.set(p.val, p);
+                                }
+                            }
+                            const unique = Array.from(byVal.values()).sort((a, b) => a.val - b.val);
+                            if (unique.length >= 2) {
+                                const isStrictlyInc = unique.every((p, i) => i === 0 || p.coord > unique[i - 1].coord);
+                                const isStrictlyDec = unique.every((p, i) => i === 0 || p.coord < unique[i - 1].coord);
+                                if (!isStrictlyInc && !isStrictlyDec) {
+                                    isScrambled = true;
+                                }
+                                const n = unique.length;
+                                const meanV = unique.reduce((s, p) => s + p.val, 0) / n;
+                                const meanC = unique.reduce((s, p) => s + p.coord, 0) / n;
+                                let cov = 0, varV = 0, varC = 0;
+                                for (let i = 0; i < n; i++) {
+                                    const dv = unique[i].val - meanV;
+                                    const dc = unique[i].coord - meanC;
+                                    cov += dv * dc;
+                                    varV += dv * dv;
+                                    varC += dc * dc;
+                                }
+                                if (varV > 1e-9 && varC > 1e-9) {
+                                    scaleSlope = cov / varV;
+                                    scaleIntercept = meanC - scaleSlope * meanV;
+                                    maxResidual = Math.max(...unique.map(p => Math.abs(p.coord - (scaleSlope * p.val + scaleIntercept))));
+                                    if (maxResidual > 2.0) {
+                                        isCollinear = false;
+                                    }
+                                } else {
+                                    isCollinear = false;
+                                }
+                            }
+                        }
+                        return {
+                            hasCoords,
+                            isCollapsed: Boolean(hasCoords && checked >= 2 && allZero),
+                            isStacked,
+                            isScrambled,
+                            isCollinear,
+                            scaleSlope,
+                            scaleIntercept,
+                            maxResidual
+                        };
+                    }
+
+                    const xTickVals = extractNumericTicks('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', xAxisEl);
+                    const yTickVals = extractNumericTicks('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', yAxisEl);
+                    const minObsX = Math.min(...xTickVals);
+                    const maxObsX = Math.max(...xTickVals);
+                    const minObsY = Math.min(...yTickVals);
+                    const maxObsY = Math.max(...yTickVals);
+
+                    const xTickGeom = inspectTickGeometry('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', 'x');
+                    const yTickGeom = inspectTickGeometry('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', 'y');
+                    const xRect = (xAxisEl && typeof xAxisEl.getBoundingClientRect === 'function') ? xAxisEl.getBoundingClientRect() : null;
+                    const yRect = (yAxisEl && typeof yAxisEl.getBoundingClientRect === 'function') ? yAxisEl.getBoundingClientRect() : null;
+                    const axisRectsCollapsed = Boolean(xRect && yRect && xRect.width === 0 && xRect.height === 0 && yRect.width === 0 && yRect.height === 0);
+                    const hasInvalidTickGeometry = Boolean(
+                        xTickGeom.isCollapsed || yTickGeom.isCollapsed ||
+                        xTickGeom.isStacked || yTickGeom.isStacked ||
+                        xTickGeom.isScrambled || yTickGeom.isScrambled ||
+                        (xTickGeom.hasCoords && !xTickGeom.isCollinear) ||
+                        (yTickGeom.hasCoords && !yTickGeom.isCollinear) ||
+                        axisRectsCollapsed
+                    );
+
+                    const xText = (xAxisEl && xAxisEl.textContent) ? String(xAxisEl.textContent) : '';
+                    const yText = (yAxisEl && yAxisEl.textContent) ? String(yAxisEl.textContent) : '';
+                    const hasWrongXSemantics = /wavelength\s*\(\s*nm\s*\)|reflectance/i.test(xText);
+                    const hasWrongYSemantics = /reflectance\s*\(\s*%\s*\)|wavelength/i.test(yText);
+
+                    const axesVerified = Boolean(
+                        xAxisEl &&
+                        yAxisEl &&
+                        !hasWrongXSemantics &&
+                        !hasWrongYSemantics &&
+                        !hasInvalidTickGeometry &&
+                        xTickVals.length >= 2 &&
+                        xTickVals.every(v => v >= 400 && v <= 4000) &&
+                        minObsX <= 1500 && maxObsX >= 3500 && (maxObsX - minObsX) >= 2000 &&
+                        yTickVals.length >= 2 &&
+                        yTickVals.every(v => v >= 0 && v <= 3.5) &&
+                        minObsY <= 0.50 && maxObsY <= 1.50 && (maxObsY - minObsY) >= 0.50
+                    );
+
                     function fitCalibration(ptsY, expected) {
                         if (!ptsY || !expected || ptsY.length !== expected.length) return null;
                         const directDiff = Math.max(...ptsY.map((y, i) => Math.abs(y - expected[i])));
@@ -6239,7 +6532,29 @@ async function runBrowserEvidence() {
                         return { A, B };
                     }
 
+                    function checkAxisCalibrated(ptsY, expected) {
+                        if (!yTickGeom.hasCoords || !yTickGeom.isCollinear || yTickGeom.scaleSlope === null || yTickGeom.scaleSlope >= 0) {
+                            return false;
+                        }
+                        const My = yTickGeom.scaleSlope;
+                        const Ky = yTickGeom.scaleIntercept;
+                        const diffFwd = Math.max(...ptsY.map((y, i) => Math.abs(y - (My * expected[i] + Ky))));
+                        if (diffFwd <= 2.5) return true;
+                        const n = expected.length;
+                        const diffRev = Math.max(...ptsY.map((y, i) => Math.abs(y - (My * expected[n - 1 - i] + Ky))));
+                        if (diffRev <= 2.5) return true;
+                        return false;
+                    }
+
                     function checkSharedModel(yA, yB, refA, refB) {
+                        if (yTickGeom.hasCoords) {
+                            const calA = checkAxisCalibrated(yA, refA);
+                            const calB = checkAxisCalibrated(yB, refB);
+                            const crossA = checkAxisCalibrated(yA, refB);
+                            const crossB = checkAxisCalibrated(yB, refA);
+                            if (calA && calB && !crossA && !crossB) return true;
+                            return false;
+                        }
                         let cal = fitCalibration(yA, refA);
                         if (cal) {
                             const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
@@ -6291,8 +6606,12 @@ async function runBrowserEvidence() {
                         if (!isUniformX) return false;
 
                         const ptsY = pts.map(p => p.y);
-                        const isScan1 = Boolean(fitCalibration(ptsY, expGrid1) || fitCalibration(ptsY, [...expGrid1].reverse()));
-                        const isScan2 = Boolean(fitCalibration(ptsY, expGrid2) || fitCalibration(ptsY, [...expGrid2].reverse()));
+                        const isScan1 = yTickGeom.hasCoords
+                            ? checkAxisCalibrated(ptsY, expGrid1)
+                            : Boolean(fitCalibration(ptsY, expGrid1) || fitCalibration(ptsY, [...expGrid1].reverse()));
+                        const isScan2 = yTickGeom.hasCoords
+                            ? checkAxisCalibrated(ptsY, expGrid2)
+                            : Boolean(fitCalibration(ptsY, expGrid2) || fitCalibration(ptsY, [...expGrid2].reverse()));
                         if (!isScan1 && !isScan2) return false;
 
                         curvePointSets.push(pts);
@@ -6311,115 +6630,6 @@ async function runBrowserEvidence() {
                     }
 
                     const curveModelVerified = Boolean(validCurves.length >= 2 && distinctSeriesVerified);
-
-                    const yAxisEl = document.querySelector ? document.querySelector('.recharts-yAxis, [class*="yAxis"]') : null;
-                    const xAxisEl = document.querySelector ? document.querySelector('.recharts-xAxis, [class*="xAxis"]') : null;
-                    function extractNumericTicks(selector, el) {
-                        const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
-                        const texts = Array.from(nodes).map(n => (n.textContent || '').trim()).filter(Boolean);
-                        if (texts.length === 0 && el && el.textContent) {
-                            texts.push(...(el.textContent.match(/-?\d+(?:\.\d+)?/g) || []));
-                        }
-                        return texts.map(t => parseFloat(t)).filter(n => !isNaN(n) && isFinite(n));
-                    }
-                    function inspectTickGeometry(selector, axisDim) {
-                        const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
-                        let checked = 0;
-                        let allZero = true;
-                        let hasCoords = false;
-                        const coords = [];
-                        const tickPairs = [];
-                        for (const n of nodes) {
-                            if (!n) continue;
-                            let coord = null;
-                            if (typeof n.getBoundingClientRect === 'function') {
-                                hasCoords = true;
-                                checked++;
-                                const r = n.getBoundingClientRect();
-                                if (r.x !== 0 || r.y !== 0 || (r.width !== 0 && !isNaN(r.width)) || (r.height !== 0 && !isNaN(r.height))) {
-                                    allZero = false;
-                                }
-                                const val = (axisDim === 'x') ? r.x : (axisDim === 'y' ? r.y : null);
-                                if (val !== null && typeof val === 'number') coord = val;
-                            } else if (typeof n.getAttribute === 'function') {
-                                const x = n.getAttribute('x');
-                                const y = n.getAttribute('y');
-                                if (x !== null || y !== null) {
-                                    hasCoords = true;
-                                    checked++;
-                                    if (parseFloat(x) !== 0 || parseFloat(y) !== 0) {
-                                        allZero = false;
-                                    }
-                                    const val = (axisDim === 'x') ? parseFloat(x) : (axisDim === 'y' ? parseFloat(y) : null);
-                                    if (val !== null && !isNaN(val)) coord = val;
-                                }
-                            }
-                            if (coord !== null && typeof coord === 'number' && !isNaN(coord)) {
-                                coords.push(coord);
-                                const text = (n.textContent || '').trim();
-                                const m = text.match(/-?\d+(?:\.\d+)?/);
-                                if (m) {
-                                    const num = parseFloat(m[0]);
-                                    if (!isNaN(num) && isFinite(num)) {
-                                        tickPairs.push({ val: num, coord });
-                                    }
-                                }
-                            }
-                        }
-                        const isStacked = Boolean(hasCoords && checked >= 2 && coords.length >= 2 && Math.max(...coords) === Math.min(...coords));
-                        let isScrambled = false;
-                        if (hasCoords && tickPairs.length >= 2) {
-                            const sorted = [...tickPairs].sort((a, b) => a.val - b.val);
-                            const unique = [];
-                            const seen = new Set();
-                            for (const p of sorted) {
-                                if (!seen.has(p.val)) {
-                                    seen.add(p.val);
-                                    unique.push(p);
-                                }
-                            }
-                            if (unique.length >= 2) {
-                                const isStrictlyInc = unique.every((p, i) => i === 0 || p.coord > unique[i - 1].coord);
-                                const isStrictlyDec = unique.every((p, i) => i === 0 || p.coord < unique[i - 1].coord);
-                                if (!isStrictlyInc && !isStrictlyDec) {
-                                    isScrambled = true;
-                                }
-                            }
-                        }
-                        return { hasCoords, isCollapsed: Boolean(hasCoords && checked >= 2 && allZero), isStacked, isScrambled };
-                    }
-                    const xTickVals = extractNumericTicks('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', xAxisEl);
-                    const yTickVals = extractNumericTicks('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', yAxisEl);
-                    const minObsX = Math.min(...xTickVals);
-                    const maxObsX = Math.max(...xTickVals);
-                    const minObsY = Math.min(...yTickVals);
-                    const maxObsY = Math.max(...yTickVals);
-
-                    const xTickGeom = inspectTickGeometry('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', 'x');
-                    const yTickGeom = inspectTickGeometry('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', 'y');
-                    const xRect = (xAxisEl && typeof xAxisEl.getBoundingClientRect === 'function') ? xAxisEl.getBoundingClientRect() : null;
-                    const yRect = (yAxisEl && typeof yAxisEl.getBoundingClientRect === 'function') ? yAxisEl.getBoundingClientRect() : null;
-                    const axisRectsCollapsed = Boolean(xRect && yRect && xRect.width === 0 && xRect.height === 0 && yRect.width === 0 && yRect.height === 0);
-                    const hasInvalidTickGeometry = Boolean(xTickGeom.isCollapsed || yTickGeom.isCollapsed || xTickGeom.isStacked || yTickGeom.isStacked || xTickGeom.isScrambled || yTickGeom.isScrambled || axisRectsCollapsed);
-
-                    const xText = (xAxisEl && xAxisEl.textContent) ? String(xAxisEl.textContent) : '';
-                    const yText = (yAxisEl && yAxisEl.textContent) ? String(yAxisEl.textContent) : '';
-                    const hasWrongXSemantics = /wavelength\s*\(\s*nm\s*\)|reflectance/i.test(xText);
-                    const hasWrongYSemantics = /reflectance\s*\(\s*%\s*\)|wavelength/i.test(yText);
-
-                    const axesVerified = Boolean(
-                        xAxisEl &&
-                        yAxisEl &&
-                        !hasWrongXSemantics &&
-                        !hasWrongYSemantics &&
-                        !hasInvalidTickGeometry &&
-                        xTickVals.length >= 2 &&
-                        xTickVals.every(v => v >= 400 && v <= 4000) &&
-                        minObsX <= 1500 && maxObsX >= 3500 && (maxObsX - minObsX) >= 2000 &&
-                        yTickVals.length >= 2 &&
-                        yTickVals.every(v => v >= 0 && v <= 3.5) &&
-                        minObsY <= 0.50 && maxObsY <= 1.50 && (maxObsY - minObsY) >= 0.50
-                    );
 
                     const modelVerified = Boolean(curveModelVerified && axesVerified);
                     const transitionSucceeded = Boolean(appliedTheme === theme && appliedMode === mode && Boolean(notice) && curves.length >= 2 && modelVerified);
@@ -6500,6 +6710,183 @@ async function runBrowserEvidence() {
                     const expGrid1 = Array.from({ length: NUM_GRID_PTS }, (_, i) => interp(rawScan1, 400 + i * gridStep));
                     const expGrid2 = Array.from({ length: NUM_GRID_PTS }, (_, i) => interp(rawScan2, 400 + i * gridStep));
 
+                    const yAxisEl = document.querySelector ? document.querySelector('.recharts-yAxis, [class*="yAxis"]') : null;
+                    const xAxisEl = document.querySelector ? document.querySelector('.recharts-xAxis, [class*="xAxis"]') : null;
+
+                    function extractNumericTicks(selector, el) {
+                        const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
+                        const texts = Array.from(nodes).map(n => (n.textContent || '').trim()).filter(Boolean);
+                        if (texts.length === 0 && el && el.textContent) {
+                            texts.push(...(el.textContent.match(/-?\d+(?:\.\d+)?/g) || []));
+                        }
+                        return texts.map(t => parseFloat(t)).filter(n => !isNaN(n) && isFinite(n));
+                    }
+
+                    function inspectTickGeometry(selector, axisDim) {
+                        const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
+                        let checked = 0;
+                        let allZero = true;
+                        let hasCoords = false;
+                        const coords = [];
+                        const tickPairs = [];
+                        for (const n of nodes) {
+                            if (!n) continue;
+                            let coord = null;
+                            let isAnchor = false;
+                            if (typeof n.getAttribute === 'function') {
+                                const attr = n.getAttribute(axisDim);
+                                if (attr !== null) {
+                                    const num = parseFloat(attr);
+                                    if (!isNaN(num) && isFinite(num)) {
+                                        hasCoords = true;
+                                        checked++;
+                                        if (num !== 0) allZero = false;
+                                        coord = num;
+                                        isAnchor = true;
+                                    }
+                                }
+                                if (coord === null) {
+                                    const tr = n.getAttribute('transform');
+                                    if (tr) {
+                                        const m = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\)/);
+                                        if (m) {
+                                            const trVal = parseFloat(axisDim === 'x' ? m[1] : (m[2] || m[1]));
+                                            if (!isNaN(trVal) && isFinite(trVal)) {
+                                                hasCoords = true;
+                                                checked++;
+                                                if (trVal !== 0) allZero = false;
+                                                coord = trVal;
+                                                isAnchor = true;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (typeof n.getBoundingClientRect === 'function') {
+                                const r = n.getBoundingClientRect();
+                                if (r) {
+                                    hasCoords = true;
+                                    checked++;
+                                    if (r.x !== 0 || r.y !== 0 || (r.width !== 0 && !isNaN(r.width)) || (r.height !== 0 && !isNaN(r.height))) {
+                                        allZero = false;
+                                    }
+                                    if (coord === null) {
+                                        const svgEl = (n.ownerSVGElement || (n.closest && n.closest('svg')) || (document.querySelector && document.querySelector('.recharts-surface')));
+                                        const svgRect = (svgEl && typeof svgEl.getBoundingClientRect === 'function') ? svgEl.getBoundingClientRect() : null;
+                                        const offset = svgRect ? (axisDim === 'x' ? (svgRect.x || 0) : (svgRect.y || 0)) : 0;
+                                        const val = (axisDim === 'x') ? (r.x - offset) : (r.y - offset);
+                                        if (val !== null && typeof val === 'number' && !isNaN(val)) coord = val;
+                                    }
+                                }
+                            }
+                            if (coord !== null && typeof coord === 'number' && !isNaN(coord)) {
+                                coords.push(coord);
+                                const text = (n.textContent || '').trim();
+                                const m = text.match(/-?\d+(?:\.\d+)?/);
+                                if (m) {
+                                    const num = parseFloat(m[0]);
+                                    if (!isNaN(num) && isFinite(num)) {
+                                        tickPairs.push({ val: num, coord, isAnchor });
+                                    }
+                                }
+                            }
+                        }
+                        const isStacked = Boolean(hasCoords && checked >= 2 && coords.length >= 2 && Math.max(...coords) === Math.min(...coords));
+                        let isScrambled = false;
+                        let isCollinear = true;
+                        let scaleSlope = null;
+                        let scaleIntercept = null;
+                        let maxResidual = 0;
+                        if (hasCoords && tickPairs.length >= 2) {
+                            const sorted = [...tickPairs].sort((a, b) => a.val - b.val);
+                            const byVal = new Map();
+                            for (const p of sorted) {
+                                if (!byVal.has(p.val) || (!byVal.get(p.val).isAnchor && p.isAnchor)) {
+                                    byVal.set(p.val, p);
+                                }
+                            }
+                            const unique = Array.from(byVal.values()).sort((a, b) => a.val - b.val);
+                            if (unique.length >= 2) {
+                                const isStrictlyInc = unique.every((p, i) => i === 0 || p.coord > unique[i - 1].coord);
+                                const isStrictlyDec = unique.every((p, i) => i === 0 || p.coord < unique[i - 1].coord);
+                                if (!isStrictlyInc && !isStrictlyDec) {
+                                    isScrambled = true;
+                                }
+                                const n = unique.length;
+                                const meanV = unique.reduce((s, p) => s + p.val, 0) / n;
+                                const meanC = unique.reduce((s, p) => s + p.coord, 0) / n;
+                                let cov = 0, varV = 0, varC = 0;
+                                for (let i = 0; i < n; i++) {
+                                    const dv = unique[i].val - meanV;
+                                    const dc = unique[i].coord - meanC;
+                                    cov += dv * dc;
+                                    varV += dv * dv;
+                                    varC += dc * dc;
+                                }
+                                if (varV > 1e-9 && varC > 1e-9) {
+                                    scaleSlope = cov / varV;
+                                    scaleIntercept = meanC - scaleSlope * meanV;
+                                    maxResidual = Math.max(...unique.map(p => Math.abs(p.coord - (scaleSlope * p.val + scaleIntercept))));
+                                    if (maxResidual > 2.0) {
+                                        isCollinear = false;
+                                    }
+                                } else {
+                                    isCollinear = false;
+                                }
+                            }
+                        }
+                        return {
+                            hasCoords,
+                            isCollapsed: Boolean(hasCoords && checked >= 2 && allZero),
+                            isStacked,
+                            isScrambled,
+                            isCollinear,
+                            scaleSlope,
+                            scaleIntercept,
+                            maxResidual
+                        };
+                    }
+
+                    const xTickVals = extractNumericTicks('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', xAxisEl);
+                    const yTickVals = extractNumericTicks('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', yAxisEl);
+                    const minObsX = Math.min(...xTickVals);
+                    const maxObsX = Math.max(...xTickVals);
+                    const minObsY = Math.min(...yTickVals);
+                    const maxObsY = Math.max(...yTickVals);
+
+                    const xTickGeom = inspectTickGeometry('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', 'x');
+                    const yTickGeom = inspectTickGeometry('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', 'y');
+                    const xRect = (xAxisEl && typeof xAxisEl.getBoundingClientRect === 'function') ? xAxisEl.getBoundingClientRect() : null;
+                    const yRect = (yAxisEl && typeof yAxisEl.getBoundingClientRect === 'function') ? yAxisEl.getBoundingClientRect() : null;
+                    const axisRectsCollapsed = Boolean(xRect && yRect && xRect.width === 0 && xRect.height === 0 && yRect.width === 0 && yRect.height === 0);
+                    const hasInvalidTickGeometry = Boolean(
+                        xTickGeom.isCollapsed || yTickGeom.isCollapsed ||
+                        xTickGeom.isStacked || yTickGeom.isStacked ||
+                        xTickGeom.isScrambled || yTickGeom.isScrambled ||
+                        (xTickGeom.hasCoords && !xTickGeom.isCollinear) ||
+                        (yTickGeom.hasCoords && !yTickGeom.isCollinear) ||
+                        axisRectsCollapsed
+                    );
+
+                    const xText = (xAxisEl && xAxisEl.textContent) ? String(xAxisEl.textContent) : '';
+                    const yText = (yAxisEl && yAxisEl.textContent) ? String(yAxisEl.textContent) : '';
+                    const hasWrongXSemantics = /wavelength\s*\(\s*nm\s*\)|reflectance/i.test(xText);
+                    const hasWrongYSemantics = /reflectance\s*\(\s*%\s*\)|wavelength/i.test(yText);
+
+                    const axesVerified = Boolean(
+                        xAxisEl &&
+                        yAxisEl &&
+                        !hasWrongXSemantics &&
+                        !hasWrongYSemantics &&
+                        !hasInvalidTickGeometry &&
+                        xTickVals.length >= 2 &&
+                        xTickVals.every(v => v >= 400 && v <= 4000) &&
+                        minObsX <= 1500 && maxObsX >= 3500 && (maxObsX - minObsX) >= 2000 &&
+                        yTickVals.length >= 2 &&
+                        yTickVals.every(v => v >= 0 && v <= 3.5) &&
+                        minObsY <= 0.50 && maxObsY <= 1.50 && (maxObsY - minObsY) >= 0.50
+                    );
+
                     function fitCalibration(ptsY, expected) {
                         if (!ptsY || !expected || ptsY.length !== expected.length) return null;
                         const directDiff = Math.max(...ptsY.map((y, i) => Math.abs(y - expected[i])));
@@ -6525,7 +6912,29 @@ async function runBrowserEvidence() {
                         return { A, B };
                     }
 
+                    function checkAxisCalibrated(ptsY, expected) {
+                        if (!yTickGeom.hasCoords || !yTickGeom.isCollinear || yTickGeom.scaleSlope === null || yTickGeom.scaleSlope >= 0) {
+                            return false;
+                        }
+                        const My = yTickGeom.scaleSlope;
+                        const Ky = yTickGeom.scaleIntercept;
+                        const diffFwd = Math.max(...ptsY.map((y, i) => Math.abs(y - (My * expected[i] + Ky))));
+                        if (diffFwd <= 2.5) return true;
+                        const n = expected.length;
+                        const diffRev = Math.max(...ptsY.map((y, i) => Math.abs(y - (My * expected[n - 1 - i] + Ky))));
+                        if (diffRev <= 2.5) return true;
+                        return false;
+                    }
+
                     function checkSharedModel(yA, yB, refA, refB) {
+                        if (yTickGeom.hasCoords) {
+                            const calA = checkAxisCalibrated(yA, refA);
+                            const calB = checkAxisCalibrated(yB, refB);
+                            const crossA = checkAxisCalibrated(yA, refB);
+                            const crossB = checkAxisCalibrated(yB, refA);
+                            if (calA && calB && !crossA && !crossB) return true;
+                            return false;
+                        }
                         let cal = fitCalibration(yA, refA);
                         if (cal) {
                             const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
@@ -6538,7 +6947,7 @@ async function runBrowserEvidence() {
                         const revB = [...refB].reverse();
                         cal = fitCalibration(yA, revA);
                         if (cal) {
-                            const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - revA[i])));
+                            const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
                             const diffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
                             const crossDiffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
                             const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
@@ -6577,8 +6986,12 @@ async function runBrowserEvidence() {
                         if (!isUniformX) return false;
 
                         const ptsY = pts.map(p => p.y);
-                        const isScan1 = Boolean(fitCalibration(ptsY, expGrid1) || fitCalibration(ptsY, [...expGrid1].reverse()));
-                        const isScan2 = Boolean(fitCalibration(ptsY, expGrid2) || fitCalibration(ptsY, [...expGrid2].reverse()));
+                        const isScan1 = yTickGeom.hasCoords
+                            ? checkAxisCalibrated(ptsY, expGrid1)
+                            : Boolean(fitCalibration(ptsY, expGrid1) || fitCalibration(ptsY, [...expGrid1].reverse()));
+                        const isScan2 = yTickGeom.hasCoords
+                            ? checkAxisCalibrated(ptsY, expGrid2)
+                            : Boolean(fitCalibration(ptsY, expGrid2) || fitCalibration(ptsY, [...expGrid2].reverse()));
                         if (!isScan1 && !isScan2) return false;
 
                         curvePointSets.push(pts);
@@ -6597,115 +7010,6 @@ async function runBrowserEvidence() {
                     }
 
                     const curveModelVerified = Boolean(validCurves.length >= 2 && distinctSeriesVerified);
-
-                    const yAxisEl = document.querySelector ? document.querySelector('.recharts-yAxis, [class*="yAxis"]') : null;
-                    const xAxisEl = document.querySelector ? document.querySelector('.recharts-xAxis, [class*="xAxis"]') : null;
-                    function extractNumericTicks(selector, el) {
-                        const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
-                        const texts = Array.from(nodes).map(n => (n.textContent || '').trim()).filter(Boolean);
-                        if (texts.length === 0 && el && el.textContent) {
-                            texts.push(...(el.textContent.match(/-?\d+(?:\.\d+)?/g) || []));
-                        }
-                        return texts.map(t => parseFloat(t)).filter(n => !isNaN(n) && isFinite(n));
-                    }
-                    function inspectTickGeometry(selector, axisDim) {
-                        const nodes = (document.querySelectorAll && document.querySelectorAll(selector)) || [];
-                        let checked = 0;
-                        let allZero = true;
-                        let hasCoords = false;
-                        const coords = [];
-                        const tickPairs = [];
-                        for (const n of nodes) {
-                            if (!n) continue;
-                            let coord = null;
-                            if (typeof n.getBoundingClientRect === 'function') {
-                                hasCoords = true;
-                                checked++;
-                                const r = n.getBoundingClientRect();
-                                if (r.x !== 0 || r.y !== 0 || (r.width !== 0 && !isNaN(r.width)) || (r.height !== 0 && !isNaN(r.height))) {
-                                    allZero = false;
-                                }
-                                const val = (axisDim === 'x') ? r.x : (axisDim === 'y' ? r.y : null);
-                                if (val !== null && typeof val === 'number') coord = val;
-                            } else if (typeof n.getAttribute === 'function') {
-                                const x = n.getAttribute('x');
-                                const y = n.getAttribute('y');
-                                if (x !== null || y !== null) {
-                                    hasCoords = true;
-                                    checked++;
-                                    if (parseFloat(x) !== 0 || parseFloat(y) !== 0) {
-                                        allZero = false;
-                                    }
-                                    const val = (axisDim === 'x') ? parseFloat(x) : (axisDim === 'y' ? parseFloat(y) : null);
-                                    if (val !== null && !isNaN(val)) coord = val;
-                                }
-                            }
-                            if (coord !== null && typeof coord === 'number' && !isNaN(coord)) {
-                                coords.push(coord);
-                                const text = (n.textContent || '').trim();
-                                const m = text.match(/-?\d+(?:\.\d+)?/);
-                                if (m) {
-                                    const num = parseFloat(m[0]);
-                                    if (!isNaN(num) && isFinite(num)) {
-                                        tickPairs.push({ val: num, coord });
-                                    }
-                                }
-                            }
-                        }
-                        const isStacked = Boolean(hasCoords && checked >= 2 && coords.length >= 2 && Math.max(...coords) === Math.min(...coords));
-                        let isScrambled = false;
-                        if (hasCoords && tickPairs.length >= 2) {
-                            const sorted = [...tickPairs].sort((a, b) => a.val - b.val);
-                            const unique = [];
-                            const seen = new Set();
-                            for (const p of sorted) {
-                                if (!seen.has(p.val)) {
-                                    seen.add(p.val);
-                                    unique.push(p);
-                                }
-                            }
-                            if (unique.length >= 2) {
-                                const isStrictlyInc = unique.every((p, i) => i === 0 || p.coord > unique[i - 1].coord);
-                                const isStrictlyDec = unique.every((p, i) => i === 0 || p.coord < unique[i - 1].coord);
-                                if (!isStrictlyInc && !isStrictlyDec) {
-                                    isScrambled = true;
-                                }
-                            }
-                        }
-                        return { hasCoords, isCollapsed: Boolean(hasCoords && checked >= 2 && allZero), isStacked, isScrambled };
-                    }
-                    const xTickVals = extractNumericTicks('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', xAxisEl);
-                    const yTickVals = extractNumericTicks('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', yAxisEl);
-                    const minObsX = Math.min(...xTickVals);
-                    const maxObsX = Math.max(...xTickVals);
-                    const minObsY = Math.min(...yTickVals);
-                    const maxObsY = Math.max(...yTickVals);
-
-                    const xTickGeom = inspectTickGeometry('.recharts-xAxis text, .recharts-xAxis .recharts-cartesian-axis-tick', 'x');
-                    const yTickGeom = inspectTickGeometry('.recharts-yAxis text, .recharts-yAxis .recharts-cartesian-axis-tick', 'y');
-                    const xRect = (xAxisEl && typeof xAxisEl.getBoundingClientRect === 'function') ? xAxisEl.getBoundingClientRect() : null;
-                    const yRect = (yAxisEl && typeof yAxisEl.getBoundingClientRect === 'function') ? yAxisEl.getBoundingClientRect() : null;
-                    const axisRectsCollapsed = Boolean(xRect && yRect && xRect.width === 0 && xRect.height === 0 && yRect.width === 0 && yRect.height === 0);
-                    const hasInvalidTickGeometry = Boolean(xTickGeom.isCollapsed || yTickGeom.isCollapsed || xTickGeom.isStacked || yTickGeom.isStacked || xTickGeom.isScrambled || yTickGeom.isScrambled || axisRectsCollapsed);
-
-                    const xText = (xAxisEl && xAxisEl.textContent) ? String(xAxisEl.textContent) : '';
-                    const yText = (yAxisEl && yAxisEl.textContent) ? String(yAxisEl.textContent) : '';
-                    const hasWrongXSemantics = /wavelength\s*\(\s*nm\s*\)|reflectance/i.test(xText);
-                    const hasWrongYSemantics = /reflectance\s*\(\s*%\s*\)|wavelength/i.test(yText);
-
-                    const axesVerified = Boolean(
-                        xAxisEl &&
-                        yAxisEl &&
-                        !hasWrongXSemantics &&
-                        !hasWrongYSemantics &&
-                        !hasInvalidTickGeometry &&
-                        xTickVals.length >= 2 &&
-                        xTickVals.every(v => v >= 400 && v <= 4000) &&
-                        minObsX <= 1500 && maxObsX >= 3500 && (maxObsX - minObsX) >= 2000 &&
-                        yTickVals.length >= 2 &&
-                        yTickVals.every(v => v >= 0 && v <= 3.5) &&
-                        minObsY <= 0.50 && maxObsY <= 1.50 && (maxObsY - minObsY) >= 0.50
-                    );
 
                     const modelVerified = Boolean(curveModelVerified && axesVerified);
 
