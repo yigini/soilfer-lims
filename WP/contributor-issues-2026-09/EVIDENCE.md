@@ -4114,3 +4114,26 @@ Laboratory operators can find step-by-step procedures in the following documenta
               - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
               - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
 
+        - Following Codex independent review `issue155-independent-review-314ff2d.md` and 9-case probe `issue155-focused-review-314ff2d.cjs`:
+           1. **Executed CDP Session Probe Witness & Truthful Desktop Optical Zoom Classification (Finding 1)**:
+              - Executed live CDP session probe in `server/scripts/verify_issue155_browser_journeys.cjs`:
+                * Command: `CDPSession.send('Emulation.setPageScaleFactor', { pageScaleFactor: 4.0 })`.
+                * Environment: Playwright Headless Google Chrome `154.0.8037.93 (Windows NT / arm64)`.
+                * Command Receipt: `{}` (success, `commandError: null`).
+                * Initial Metrics: `{ devicePixelRatio: 1, innerWidth: 1280, innerHeight: 800, visualViewportScale: 1, visualViewportWidth: 1280 }`.
+                * Post-Scale Metrics: `{ devicePixelRatio: 1, innerWidth: 1280, innerHeight: 800, visualViewportScale: 4, visualViewportWidth: 320 }`.
+                * Empirical Observation: CDP `Emulation.setPageScaleFactor` directly sets mobile pinch-to-zoom visual viewport scale, reducing `visualViewport.width` to 320 while leaving desktop window layout un-reflowed (`innerWidth: 1280`, `devicePixelRatio: 1`).
+                * Scoped Equivalence: Desktop browser optical zoom is evaluated under W3C Understanding SC 1.4.10 Reflow (layout reflow equivalence of 400% zoom at 1280px to a 320 CSS px viewport width without 2D scrolling) via 320 CSS px viewport width (`viewport: { width: 320, height: 568 }`, iPhone SE portrait layout equivalence) with 0 horizontal overflow, unclipped active panel controls, and touch target compliance, alongside High-DPI DPR 2.0 at 640 CSS px with root font 200% (`fontSize = '200%'`) and DPR 1.0 at 1280 CSS px with root font 400% (`fontSize = '400%'`).
+                * Status: Direct desktop application window chrome zoom menu automation (Ctrl+/Ctrl-) is classified truthfully as Software Pending with this executed CDP probe witness, while W3C SC 1.4.10 320 CSS px reflow layout equivalence is actively verified in software.
+           2. **Truthful Readiness and Whole-Stage Scope Reconciliation (Finding 2)**:
+              - Corrected PR #155 description, matrix, and evidence: eliminated blanket 'complete, production-grade' claims.
+              - Updated saved short handoff `sitewide-themes-ready-for-review.md` with candidate commit, exact trees, runner/result trim hashes, timestamp, and truthful status.
+              - PR #155 is OPEN, unmerged, and undeployed; themes are **NOT LIVE**.
+           3. **Suite Verification Results**:
+              - Running-app Browser Suite: **All 12/12 suites PASS 100% green** in real native Chrome (`server/scripts/issue155-browser-journeys-results.json`, timestamp `2026-10-03T08:11:31.125Z`).
+                * Runner trim SHA-256: `893e7fb91849a41be3653659621d8e62546bfd7a3f4304fdf92606847c105c5d`
+                * Result trim SHA-256: `fa545e9938547d6f30d2f17f2e2b4ff047bf50db08c302441ecc18bf6e8c8dca`
+              - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
+              - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
+              - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+

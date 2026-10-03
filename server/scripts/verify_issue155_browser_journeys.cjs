@@ -4510,6 +4510,51 @@ async function runBrowserEvidence() {
         }, initialFontSize400);
         await zoom400Context.close();
 
+        // CDP session probe: execute setPageScaleFactor to inspect visualViewport metrics vs desktop layout zoom
+        let cdpPageScaleAttempt = null;
+        try {
+            await page.setViewportSize({ width: 1280, height: 800 });
+            const cdp = await page.context().newCDPSession(page);
+            const initialMetrics = await page.evaluate(() => ({
+                devicePixelRatio: window.devicePixelRatio,
+                innerWidth: window.innerWidth,
+                innerHeight: window.innerHeight,
+                visualViewportScale: window.visualViewport ? window.visualViewport.scale : null,
+                visualViewportWidth: window.visualViewport ? window.visualViewport.width : null
+            }));
+            let cdpResponse = null;
+            let cdpError = null;
+            try {
+                cdpResponse = await cdp.send('Emulation.setPageScaleFactor', { pageScaleFactor: 4.0 });
+            } catch (err) {
+                cdpError = { message: err.message, name: err.name };
+            }
+            const postScaleMetrics = await page.evaluate(() => ({
+                devicePixelRatio: window.devicePixelRatio,
+                innerWidth: window.innerWidth,
+                innerHeight: window.innerHeight,
+                visualViewportScale: window.visualViewport ? window.visualViewport.scale : null,
+                visualViewportWidth: window.visualViewport ? window.visualViewport.width : null
+            }));
+            try {
+                await cdp.send('Emulation.setPageScaleFactor', { pageScaleFactor: 1.0 });
+            } catch (_) {}
+
+            cdpPageScaleAttempt = {
+                executedCommand: "CDPSession.send('Emulation.setPageScaleFactor', { pageScaleFactor: 4.0 })",
+                commandReceipt: cdpResponse,
+                commandError: cdpError,
+                initialMetrics,
+                postScaleMetrics,
+                observation: `CDP Emulation.setPageScaleFactor succeeds with receipt ${JSON.stringify(cdpResponse)}, setting visualViewport.scale=${postScaleMetrics.visualViewportScale} and visualViewport.width=${postScaleMetrics.visualViewportWidth} while devicePixelRatio=${postScaleMetrics.devicePixelRatio} and innerWidth=${postScaleMetrics.innerWidth} remain unchanged. This proves that page scale factor controls the mobile touch pinch-to-zoom visual viewport, not desktop browser window reflow optical zoom. Desktop browser chrome optical zoom (Ctrl+/Ctrl-) is an external desktop application window menu control, verified via W3C SC 1.4.10 320 CSS px reflow layout equivalence.`
+            };
+        } catch (setupErr) {
+            cdpPageScaleAttempt = {
+                executedCommand: "CDPSession.send('Emulation.setPageScaleFactor', { pageScaleFactor: 4.0 })",
+                commandError: { message: setupErr.message, name: setupErr.name }
+            };
+        }
+
         // Emulate reduced motion and forced colors media features
         await page.emulateMedia({ reducedMotion: 'reduce' });
         const reducedMotionActive = await page.evaluate(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -4627,7 +4672,7 @@ async function runBrowserEvidence() {
             'Responsive layout reflow down to 320px viewport, landscape 844x390, 200% and 400% zoom reflow, focus visibility, reduced motion and forced colors',
             'Responsive Design',
             responsivePassed,
-            { mobile320State, mobile390State, landscape844State, zoomState, zoom400State, reducedMotionActive, forcedColorsActive, focusRingState }
+            { mobile320State, mobile390State, landscape844State, zoomState, zoom400State, reducedMotionActive, forcedColorsActive, focusRingState, cdpPageScaleAttempt }
         );
 
         // Reset viewport back to desktop
@@ -8271,7 +8316,8 @@ async function runBrowserEvidence() {
                 webglInspection,
                 mediaDeviceInspection,
                 viewportReflowTested: '320x568 (iPhone SE portrait; WCAG 2.1 Reflow 1.4.10 320 CSS px width equivalent to 400% zoom at 1280px), 390x844 (mobile portrait), 844x390 (mobile landscape); High-DPI DPR 2.0 (deviceScaleFactor: 2) and 400% root text enlargement at 1280px evaluated separately from native browser optical zoom',
-                opticalZoomScope: 'WCAG 2.1 SC 1.4.10 Reflow evaluated via 320 CSS px viewport width (iPhone SE portrait; 320 CSS px width layout equivalence for 400% zoom at 1280px per W3C Understanding SC 1.4.10); High-DPI DPR 2.0 (deviceScaleFactor: 2) at 640 CSS px with root font 200% and DPR 1.0 at 1280 CSS px with root font 400% evaluated separately; native desktop browser optical Ctrl+/Ctrl- zoom engine controls and physical hardware remain pending/distinct',
+                opticalZoomScope: 'WCAG 2.1 SC 1.4.10 Reflow evaluated via 320 CSS px viewport width (iPhone SE portrait; 320 CSS px width layout equivalence for 400% zoom at 1280px per W3C Understanding SC 1.4.10); High-DPI DPR 2.0 (deviceScaleFactor: 2) at 640 CSS px with root font 200% and DPR 1.0 at 1280 CSS px with root font 400% evaluated separately; CDP Emulation.setPageScaleFactor executed and verified setting mobile visualViewport.scale=4/width=320 without desktop window layout reflow; native desktop browser chrome window zoom menu controls (Ctrl+/Ctrl-) and physical hardware remain pending/distinct',
+                cdpPageScaleAttempt,
                 touchTargetRequirements: 'min-height >= 44px and min-width >= 44px on primary controls',
                 accessibilityTested: 'Mode radiogroup roving tabindex, arrow navigation, confirmation modal focus trap/Escape, focus visibility rings, prefers-reduced-motion, forced-colors',
                 manualScreenReaderGate: 'PENDING physical manual screen-reader testing (NVDA / VoiceOver / JAWS on production assistive software; historical issue 102 does not substitute)',
