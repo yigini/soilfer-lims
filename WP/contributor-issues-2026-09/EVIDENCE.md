@@ -4084,3 +4084,33 @@ Laboratory operators can find step-by-step procedures in the following documenta
               - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
               - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
 
+        - Following Codex independent review `issue155-independent-review-dcc3aa2.md` and 9-case probe `issue155-focused-review-dcc3aa2.cjs`:
+           1. **Removal of Arbitrary Grid-Step Threshold & Unconstrained Responsive Geometry (Finding 1 / Case 8)**:
+              - In `dcc3aa2`, `printIsolationPassed` evaluated `((-3600 * baseSlopeX) / 499 > 0.2)`, which rejected valid narrow responsive plots (such as width factor 0.15 yielding raw plot width 74.85 px and normalized step 0.15 in Codex Case 8).
+              - Removed the arbitrary `> 0.2` floor completely. Enforced negative finite linear slopes ($M_x^{(0)} < 0, M_y^{(0)} < 0$) and finite intercepts ($K_x^{(0)}, K_y^{(0)}$), relying directly on observed numeric tick anchor goodness-of-fit (`st.anchors.x.every(...)`, `st.anchors.y.every(...)` fitting linear scales within $\le 2.5$ px, residuals $\le 1.3$ px) and domain span coverage ($X \in [400, 4000]\ \text{cm}^{-1}$ spanning $\ge 2000\ \text{cm}^{-1}$, $Y \in [0, 3.5]\ \text{AU}$ spanning $\ge 0.50\ \text{AU}$).
+              - Both Case 6 (width 748.5 px, step 1.5) and Case 8 (width 74.85 px, step 0.15) pass cleanly (`printGate === true`), while unobserved calibration mutations (Case 5) and missing/displaced anchors (Case 7) strictly fail closed.
+           2. **Truthful Scope & Native Optical Zoom Blocker Witness (Finding 2)**:
+              - Documented exact attempted action, environment, API, error/log, and affected scope for desktop browser native optical zoom UI engine controls:
+                * Attempted action: Programmatic automation of desktop browser window native optical zoom (Ctrl+/Ctrl- browser chrome UI zoom level setting via Chrome DevTools Protocol).
+                * Environment: Playwright Headless Chromium (`154.0.8037.93`) on Windows NT arm64.
+                * Attempted API: `CDPSession.send('Emulation.setPageScaleFactor', { pageScaleFactor: 4.0 })`.
+                * Limitation / Log: Throws `'setPageScaleFactor not supported on desktop'` / no-op on desktop Chrome where page scale factor is a mobile touch device metric.
+                * Affected scope: Desktop browser native optical magnification UI engine controls (Ctrl+/Ctrl- browser chrome zoom menu).
+                * Scoped equivalence: Evaluated under W3C Understanding SC 1.4.10 Reflow (which establishes layout reflow equivalence of 400% zoom at 1280px to a 320 CSS px viewport width without 2D scrolling) via 320 CSS px viewport width (`viewport: { width: 320, height: 568 }`, iPhone SE portrait layout equivalence) alongside High-DPI DPR 2.0 at 640 CSS px with root font 200% (`fontSize = '200%'`) and DPR 1.0 at 1280 CSS px with root font 400% (`fontSize = '400%'`).
+                * Status: Truthfully classified as software-pending for direct native browser UI engine optical zoom controls, with W3C SC 1.4.10 320 CSS px layout equivalence actively verified in software.
+           3. **Whole Stage Scope Reconciliation (Finding 2)**:
+              - Unambiguously distinguished current observed/supplied/static/adapter/reused/software-pending/manual-pending/not-live scope in `TRACEABLE-MATRIX.md`, `EVIDENCE.md`, and PR handoffs:
+                * Observed in live running app context: 12 browser journeys executed in native Headless Chrome 154 with local Express and SQLite, covering all 14 variants selector/adoption/preview/exit roots and named notification banner settlement/removal, deliberate non-default map pan/zoom (`[7.0, -1.0]`, zoom 16), 1-to-1 continuous spectral models with observed numeric tick anchors and linear fits $\le 2.5$ px, upload intake with pending 44 B and full draft equality, ScanPage live camera stream & video element node identity, worksheet scroll offset (scrollTop 48 on 2106px scrollHeight), and report print preview.
+                * Static component & adapter proof: In-checkout `verify_all_14.cjs` (58/58) validating static SSR compilation/rendering via `ReactDOMServer` and synthetic IME events.
+                * Reused accepted artifacts: Frozen client tree `6e83b8d4...`, data tree `1a2a8445...`, customer certificate PDF (162,633 B, SHA256 `47fdaa79...`), built CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a2...`).
+                * Software-pending scope: Synthetic IME composition events vs native OS/system IME candidate windows; desktop browser native optical zoom UI engine controls (Ctrl+/Ctrl-) vs W3C SC 1.4.10 320 CSS px reflow layout equivalence, High-DPI DPR 2.0 at 640 CSS px with root font 200%, and DPR 1.0 at 1280 CSS px with root font 400%.
+                * Manual-pending scope: Physical screen reader listening (NVDA/JAWS/VoiceOver/TalkBack), OS contrast theme display, physical mobile hardware (iOS/Android), physical thermal label printer.
+                * Live fact: PR #155 is OPEN, unmerged, undeployed; production remains `v3.5.31-1265e8a`; themes are NOT LIVE.
+           4. **Suite Verification Results**:
+              - Running-app Browser Suite: **All 12/12 suites PASS 100% green** in real native Chrome (`server/scripts/issue155-browser-journeys-results.json`, timestamp `2026-10-03T07:46:55.488Z`).
+                * Runner trim SHA-256: `43027254f2968241b0f6e5dce16b597ba34150483e9fecdf2f9abd7f5b1d0a1e`
+                * Result trim SHA-256: `6f7eb03dc1c0105ac0f014105915f63554373d17cb79598c5c5e10f5708527d8`
+              - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
+              - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
+              - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+

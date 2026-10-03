@@ -7988,7 +7988,8 @@ async function runBrowserEvidence() {
                         st.anchors.y.every(a => Math.abs(a.coord - (st.scales.y.slope * a.val + st.scales.y.intercept)) <= 2.5) &&
                         ((baseSlopeX, baseInterceptX, baseSlopeY, baseInterceptY) =>
                             baseSlopeX < 0 && baseSlopeY < 0 &&
-                            ((-3600 * baseSlopeX) / 499 > 0.2)
+                            isFinite(baseSlopeX) && isFinite(baseSlopeY) &&
+                            isFinite(baseInterceptX) && isFinite(baseInterceptY)
                         )(
                             st.scales.x.slope / st.transforms[0].a,
                             (st.scales.x.intercept - st.transforms[0].e) / st.transforms[0].a,
