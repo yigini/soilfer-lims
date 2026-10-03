@@ -1,3 +1,4 @@
+const { ensureTestLab } = require('../setup');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -9,6 +10,7 @@ describe('8.1 Section B: Gate Enforcement (Clean Flow)', () => {
     let workItems = {};
 
     beforeAll(async () => {
+        await ensureTestLab('LAB-GTM', 'GTM');
         managerToken = await getAuthToken('LAB_MANAGER');
         techToken = await getAuthToken('LAB_TECHNICIAN');
     });

@@ -1,3 +1,4 @@
+const { ensureTestLab } = require('../setup');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -12,6 +13,7 @@ describe('Stage B: Location, Provenance & Depth Contract (RC-05 - RC-11)', () =>
     const outlierSample = `TEST-B-OUTLIER-${Date.now()}`;
 
     beforeAll(async () => {
+        await ensureTestLab('LAB-GTM', 'GTM');
         const token = await getAuthToken('SAMPLE_RECEPTION', testLab, ['GTM'], [testProjectId]);
         authHeader = `Bearer ${token}`;
 

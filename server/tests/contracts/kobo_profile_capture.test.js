@@ -91,6 +91,27 @@ describe('Actual mounted Kobo capture, hold and force-refresh paths',()=>{
         await request(app).post(`/api/kobo/sync/${lab}?configId=${config}`).set('Authorization',`Bearer ${token}`);
         expect((await prisma.sample.findMany({where:{projectCode:project}})).every(s=>!JSON.parse(s.metadata).provenanceHold)).toBe(true);
     });
+    test('force refresh keeps a changed interval pending for normal source review',async()=>{
+        const sample=await prisma.sample.findFirst({where:{projectCode:project,originalId:'BAG-9001-D1'}});
+        const before=JSON.parse(sample.metadata);
+        fetch.mockResolvedValue([{...submission,'soil/bottom1':21}]);
+        const response=await request(app).post(`/api/kobo/sync-sample/${sample.id}`).set('Authorization',`Bearer ${token}`);
+        expect(response.status).toBe(409);
+        const unchanged=await prisma.sample.findUnique({where:{id:sample.id}});
+        expect(unchanged.depthBottomCm).toBe(20.5);
+        expect(unchanged.metadata).toBe(sample.metadata);
+        expect(unchanged.fieldMetadata).toBe(sample.fieldMetadata);
+        await prisma.koboConfig.update({where:{id:config},data:{lastSubmissionId:null}});
+        expect((await request(app).post(`/api/kobo/sync/${lab}?configId=${config}`).set('Authorization',`Bearer ${token}`)).status).toBe(200);
+        const reviewed=JSON.parse((await prisma.sample.findUnique({where:{id:sample.id}})).metadata);
+        expect(reviewed.profileFingerprint).toBe(before.profileFingerprint);
+        expect(reviewed.provenanceHold.status).toBe('AMBIGUOUS_PROVENANCE_HOLD');
+        expect(reviewed.revisions[0].profileEvidence.depthBottomCm).toBe(21);
+        // Leave the fixture in its original state for the following independent scenario.
+        await prisma.sample.update({where:{id:sample.id},data:{metadata:sample.metadata,fieldMetadata:sample.fieldMetadata}});
+        fetch.mockResolvedValue([submission]);
+        expect((await request(app).post(`/api/kobo/sync-sample/${sample.id}`).set('Authorization',`Bearer ${token}`)).status).toBe(200);
+    });
     test('changed profile creates one durable conflict; replay does not duplicate it or overwrite the primary',async()=>{
         fetch.mockResolvedValue([{...submission,'soil/pit':'CORRECTED'}]);
         for (let i=0;i<2;i++) {

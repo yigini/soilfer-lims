@@ -1,3 +1,4 @@
+const { ensureTestLab } = require('../setup');
 const request = require('supertest');
 const app = require('../../app');
 const { generateToken } = require('../setup');
@@ -9,6 +10,8 @@ describe('8.1 Section C: Assignment Rules', () => {
     let sampleIdA, workItemIdA;
 
     beforeAll(async () => {
+        await ensureTestLab('LAB-GTM', 'GTM');
+        await ensureTestLab('LAB-HND', 'HND');
         const suffix = Date.now();
         const mgrA = usersDb.create({ username: `mgr_a_${suffix}`, role: 'LAB_MANAGER', labId: 'LAB-GTM', countries: ['GTM'] });
         const mgrB = usersDb.create({ username: `mgr_b_${suffix}`, role: 'LAB_MANAGER', labId: 'LAB-HND', countries: ['HND'] });

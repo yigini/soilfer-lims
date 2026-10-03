@@ -44,3 +44,7 @@ Codex owns complete A0/A/B1/B2 delivery. Agy remains idle. A0 is accepted and li
 
 Inventory on the read-only563,322,880-byte production copy (SHA256 `61551adf698668f696f93aa0742610316e1943e3309734fa237b1ad94032275e`) plus independently captured live journal:38,566 samples,0 canonical references,37,898 legacy keys,668 missing source references,7 held records,0 malformed metadata,0 conflicting explicit pit aliases. Retained copy journal3 rows plus live journal3 rows (overlap possible),0 frozen snapshot items,0 historical non-null profile keys in these artifacts. Zero published keys in these retained artifacts is not proof that all past live reads were unknown; preserve exact legacy identities before relevant context mutations. No broad backfill or production identity mutation occurred. Private row-level report stays outside Git.
 
+
+###3 October2026,22:34UTC — A candidate correction
+
+PR160 first head58fc72e was held after a concrete independent Kobo depth-refresh blocker and CI37157744427 failure. The depth conflict is now protected and regression-tested; thirteen failed legacy contract suites pass78/78 with explicit active-lab test fixtures and truthful metadata/owned migration assertions.188 focused plus78 additional existing checks are recorded in ACCEPTANCE-EVIDENCE-A.md. Corrected exact-head review and CI are required before merge/release. B1 and B2 remain required and pending; Agy remains idle.

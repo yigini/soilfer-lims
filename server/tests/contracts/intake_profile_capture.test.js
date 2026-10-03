@@ -88,4 +88,16 @@ describe('Mounted intake draft and manifest paths preserve source identity',()=>
         expect(rows.map(row=>row.depthBottomCm)).toEqual([20.5,50]);
         expect(new Set(rows.map(row=>row.labId)).size).toBe(2);
     });
+    test('new walk-in receipt requires a registered active laboratory and cannot claim a different lab',async()=>{
+        const before=await prisma.sample.count();
+        const walkin=body=>request(app).post('/api/samples/walkin').set('Authorization',`Bearer ${token}`).send({submitter:'Synthetic operator',...body});
+        expect((await walkin({assignedLab:'UNAUTHORIZED-LAB'})).status).toBe(403);
+        await prisma.lab.update({where:{id:lab},data:{isActive:false}});
+        try {
+            const denied=await walkin({});
+            expect(denied.status).toBe(400);
+            expect(denied.body.error).toBe('ACTIVE_LAB_REQUIRED');
+            expect(await prisma.sample.count()).toBe(before);
+        } finally {await prisma.lab.update({where:{id:lab},data:{isActive:true}});}
+    });
 });

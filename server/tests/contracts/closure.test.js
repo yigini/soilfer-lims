@@ -1,3 +1,4 @@
+const { ensureTestLab } = require('../setup');
 const request = require('supertest');
 const app = require('../../app');
 const { generateToken } = require('../setup');
@@ -8,6 +9,7 @@ describe('8.1 Section E: Approval & Closure Rules', () => {
     let sampleId, workItemId;
 
     beforeAll(async () => {
+        await ensureTestLab('LAB-CLO', 'CLO');
         const suffix = Date.now();
         const mgr = usersDb.create({ username: `mgr_clo_${suffix}`, role: 'LAB_MANAGER', labId: 'LAB-CLO', countries: ['CLO'] });
         mgrToken = generateToken(mgr);

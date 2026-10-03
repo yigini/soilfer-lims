@@ -1,3 +1,4 @@
+const { ensureTestLab } = require('../setup');
 const request = require('supertest');
 const app = require('../../app');
 const { generateToken } = require('../setup');
@@ -73,6 +74,7 @@ describe('Reception Package ID Resolution & Boundary Contracts (Mandatory Correc
         let testSampleId;
 
         beforeAll(async () => {
+        await ensureTestLab('LAB_PKG_TEST', 'PKG');
             const suffix = Date.now();
             const mgr = usersDb.create({ username: `pkg_mgr_${suffix}`, role: 'LAB_MANAGER', labId: 'LAB_PKG_TEST', countries: ['PKG'] });
             mgrToken = generateToken(mgr);

@@ -1558,6 +1558,13 @@ exports.syncSample = async (req, res) => {
             if (oldRef?.source === 'KOBO' && (oldRef.code !== freshRef.code || oldRef.namespace !== freshRef.namespace || oldRef.relation !== freshRef.relation)) {
                 throw new profileIdentity.ProfileReferenceConflictError('SOURCE_EVIDENCE_CHANGED');
             }
+            // A metadata refresh must not acknowledge an interval that it does not apply.
+            // Keep the original fingerprint so normal sync can retain the revision for review.
+            if (oldRef?.source === 'KOBO' && ['depthTopCm', 'depthBottomCm'].some(key =>
+                (existingCompactMeta.profileEvidence?.[key] ?? currentSample[key] ?? null) !==
+                (matchedSampleData.profileEvidence?.[key] ?? null))) {
+                throw new profileIdentity.ProfileReferenceConflictError('SOURCE_DEPTH_CHANGED');
+            }
             // Verified manual identities, compatibility references and existing holds survive refresh.
             const mergedMeta = {...existingCompactMeta, ...compactMeta};
             if (!oldRef || oldRef.source !== 'KOBO') {

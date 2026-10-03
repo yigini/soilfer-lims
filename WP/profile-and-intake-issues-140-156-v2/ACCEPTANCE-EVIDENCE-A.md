@@ -22,8 +22,8 @@ Disposable small test database, Windows local environment, no real lab results. 
 |---|---:|---|
 | profile_identity + existing sis_adapter_service | 43 | Four states, scalar/flag/alias semantics, namespace compatibility and current serializers |
 | profile_identity_routes | 7 | Mounted scope, released alias block, project preservation, revision conflict, idempotent amendment, current rights before receipt, frozen snapshot/results retained |
-| kobo_profile_capture | 16 | Exact mapping, legacy hash comparison, true revisions, source precision and impossible collection-date rejection |
-| intake_profile_capture | 8 | Trusted capture, draft reopen, source evidence, explicit unknown/zero and actual two-row batch with distinct accessions |
+| kobo_profile_capture | 17 | Exact mapping, legacy hash comparison, true revisions, source precision and impossible collection-date rejection |
+| intake_profile_capture | 9 | Trusted capture, draft reopen, source evidence, explicit unknown/zero and actual two-row batch with distinct accessions |
 | profile_capture_safety | 9 | Rejection retention, concurrent final/batch checks, legacy mapping preservation/CAS, removed member, malformed refresh and mapping changes during fetch |
 | profile_fixture_workflow | 2 | Loader guards/idempotency and all five specimens through mounted reception → bench → submission → review → approval → scoped export |
 | exchange_publication_hold_candidates | 7 | Conservative JSON/hold predicates and missing-schema fallback; infrastructure failure stays an error |
@@ -32,7 +32,7 @@ Disposable small test database, Windows local environment, no real lab results. 
 | existing kobo_duplicate_provenance + kobo_explicit_mapping | 43 | Provenance ambiguity, replay, force refresh, membership and fetch revocation retained |
 | existing issue140_remediations + issue149_codex_932cb6a_remediations | 24 | Frozen snapshots, credential/connection isolation, monotonic journal, amendment/withdrawal, scope and retention/replay contracts |
 
-**186 distinct related checks passed.** The routes/fixture were rerun after the final revision guard and exported decimal/namespace assertions: 9/9 passed. The two remediation suites passed 24/24. Final Kobo date verification passed16/16. The final client production build passed after the focus/layout adjustments, in7.08 seconds. Existing Browserslist/chunk-size warnings are recorded, not turned into unrelated upgrades.
+**188 distinct related checks passed, plus78 existing checks in the13 CI-failed suites after fixture correction (266 distinct checks overall).** The routes/fixture were rerun after the final revision guard and exported decimal/namespace assertions: 9/9 passed. The two remediation suites passed 24/24. Final Kobo date verification passed16/16. The final client production build passed after the focus/layout adjustments, in7.08 seconds. Existing Browserslist/chunk-size warnings are recorded, not turned into unrelated upgrades.
 
 ## Measured exchange improvement (E04/E08/E09/E10)
 
@@ -66,3 +66,9 @@ Eloi's real receiver grouping/replay/amendment/withdrawal/expired-checkpoint acc
 ## Release gates still open
 
 Exact candidate review/CI, guarded merge, merged-main CI, pinned backup/cutover and independent live postflight are pending. A has no schema migration; backup preservation and no-old-database-restore-after-writes apply. Release follows [UPGRADING.md](../../docs/UPGRADING.md). B1/B2 and six separate actual theme qualifications are not claimed completed by this record.
+
+## First candidate CI and focused correction
+
+Candidate58fc72e CI37157744427 failed13 of158 suites (43 failing assertions), mostly cascades from physical-intake tests whose users named laboratories which were not registered. The production active-lab guard remains enforced. Eleven affected suites now explicitly create registered test-only lab fixtures; token helpers remain pure, and existing inactive labs are never reactivated by the opt-in helper. A mounted negative test confirms inactive/foreign lab receipt is refused without sample creation. The other failures were an intentional new canonical-unknown metadata envelope and a migration assertion selecting another suite's generated S002 accession; both assertions now use the intended contract/owned fixture. The13 affected suites passed78/78 together on a disposable local database.
+
+Independent review found a force-refresh depth inconsistency: a changed mapped numeric interval was acknowledged in the fingerprint without being applied to specimen columns. Force refresh now returns recoverable409 before any write, retaining the original interval/evidence/fingerprint; normal synchronization subsequently records the incoming revision and hold. Mounted Kobo suite17/17 and intake suite9/9 passed. No frontend or production change was made during this correction. The corrected candidate requires fresh CI and delta review; the failed head is not approved.

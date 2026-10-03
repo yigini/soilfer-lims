@@ -1,3 +1,4 @@
+const { ensureTestLab } = require('../setup');
 const fs = require('fs');
 const path = require('path');
 const request = require('supertest');
@@ -18,6 +19,10 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
     let specEquipId;
 
     beforeAll(async () => {
+        await ensureTestLab('LAB-GOLD', 'GLD');
+        await ensureTestLab('LAB-SILVER', 'SLV');
+        await ensureTestLab('LAB-RED', 'RED');
+        await ensureTestLab('LAB-BLUE', 'BLU');
         const suffix = Date.now();
         mgrUsername = `mgr_gold_${suffix}`;
         techUsername = `tech_gold_${suffix}`;
