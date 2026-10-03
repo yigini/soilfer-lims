@@ -4625,15 +4625,30 @@ async function runBrowserEvidence() {
             const darkRadio = opticalPage.locator('[role="radiogroup"] button[data-mode="dark"]');
             const previewBtn = opticalPage.locator('button:has-text("Preview full screen")');
 
-            if (await forestCard.count() > 0 && await darkRadio.count() > 0 && await previewBtn.count() > 0) {
+            const controlsAvailable = {
+                cardSelector: (await forestCard.count()) > 0,
+                modeToggle: (await darkRadio.count()) > 0,
+                previewAction: (await previewBtn.count()) > 0,
+                exitAction: false
+            };
+
+            const missingControls = [];
+            if (!controlsAvailable.cardSelector) missingControls.push('#theme-card-forest');
+            if (!controlsAvailable.modeToggle) missingControls.push('[role="radiogroup"] button[data-mode="dark"]');
+            if (!controlsAvailable.previewAction) missingControls.push('button:has-text("Preview full screen")');
+
+            let previewActionExecuted = false;
+
+            if (controlsAvailable.cardSelector && controlsAvailable.modeToggle && controlsAvailable.previewAction) {
                 await forestCard.scrollIntoViewIfNeeded();
                 await forestCard.click();
                 await darkRadio.scrollIntoViewIfNeeded();
                 await darkRadio.click();
                 await previewBtn.scrollIntoViewIfNeeded();
                 await previewBtn.click();
+                previewActionExecuted = true;
             } else {
-                // Documented provider fallback if UI controls are absent (preserves provider-state observation scope)
+                // Documented provider fallback if UI controls are absent (preserves provider-state observation scope, but does NOT satisfy supported-user-operation completion)
                 operationTriggerMethod = 'REACT_PROVIDER_DIRECT_FALLBACK';
                 await opticalPage.evaluate(({ theme, mode }) => {
                     const rootEl = document.getElementById('root');
@@ -4688,12 +4703,23 @@ async function runBrowserEvidence() {
                 await opticalPage.evaluate(() => window.scrollTo(0, 0));
             }
             const exitPreviewBtn = opticalPage.locator('[role="region"][aria-label*="preview" i] button:has-text("Exit preview")');
+            let exitActionExecuted = false;
+            let executedExitSelector = null;
+
             if (await exitPreviewBtn.count() > 0) {
+                controlsAvailable.exitAction = true;
                 await exitPreviewBtn.first().click();
+                exitActionExecuted = true;
+                executedExitSelector = '[role="region"][aria-label*="preview" i] button:has-text("Exit preview")';
             } else {
                 const fallbackExitBtn = opticalPage.locator('button:has-text("Exit preview")');
                 if (await fallbackExitBtn.count() > 0) {
+                    controlsAvailable.exitAction = true;
                     await fallbackExitBtn.first().click();
+                    exitActionExecuted = true;
+                    executedExitSelector = 'button:has-text("Exit preview")';
+                } else {
+                    missingControls.push('[role="region"][aria-label*="preview" i] button:has-text("Exit preview")');
                 }
             }
             await opticalPage.waitForFunction(() => {
@@ -4715,6 +4741,20 @@ async function runBrowserEvidence() {
             const exitVal = await pwdInput.inputValue();
             const inputPreservedAfterExit = exitVal === initialZoomedVal;
 
+            const supportedOperationExecuted = Boolean(
+                operationTriggerMethod === 'SHIPPED_GALLERY_CONTROLS' &&
+                previewActionExecuted &&
+                exitActionExecuted &&
+                executedExitSelector === '[role="region"][aria-label*="preview" i] button:has-text("Exit preview")'
+            );
+
+            const shippedControlsUsed = supportedOperationExecuted ? {
+                cardSelector: '#theme-card-forest',
+                modeToggle: '[role="radiogroup"] button[data-mode="dark"]',
+                previewAction: 'button:has-text("Preview full screen")',
+                exitAction: executedExitSelector
+            } : null;
+
             desktopOpticalZoomExecution = {
                 appliedZoomFactor: 4.0,
                 devicePixelRatio: initialLayout.devicePixelRatio,
@@ -4728,12 +4768,10 @@ async function runBrowserEvidence() {
                 visualViewportScale: initialLayout.visualViewportScale,
                 visualViewportWidth: initialLayout.visualViewportWidth,
                 operationTrigger: operationTriggerMethod,
-                shippedControlsUsed: {
-                    cardSelector: '#theme-card-forest',
-                    modeToggle: '[role="radiogroup"] button[data-mode="dark"]',
-                    previewAction: 'button:has-text("Preview full screen")',
-                    exitAction: '[role="region"][aria-label*="preview" i] button:has-text("Exit preview")'
-                },
+                supportedOperationExecuted,
+                controlsAvailable,
+                missingControls: missingControls.length > 0 ? missingControls : null,
+                shippedControlsUsed,
                 initialLayout,
                 previewState: {
                     requestedTheme: 'forest',
@@ -4774,6 +4812,11 @@ async function runBrowserEvidence() {
         } catch (opticalErr) {
             desktopOpticalZoomExecution = {
                 error: opticalErr.message,
+                operationTrigger: 'ERROR',
+                supportedOperationExecuted: false,
+                controlsAvailable: null,
+                missingControls: null,
+                shippedControlsUsed: null,
                 noHorizontalOverflow: false,
                 controlsUnclipped: false,
                 themeOperationPreserved: false
@@ -4944,6 +4987,13 @@ async function runBrowserEvidence() {
 
         const desktopOpticalZoomPassed = Boolean(
             desktopOpticalZoomExecution &&
+            desktopOpticalZoomExecution.operationTrigger === 'SHIPPED_GALLERY_CONTROLS' &&
+            desktopOpticalZoomExecution.supportedOperationExecuted === true &&
+            desktopOpticalZoomExecution.shippedControlsUsed &&
+            desktopOpticalZoomExecution.shippedControlsUsed.cardSelector === '#theme-card-forest' &&
+            desktopOpticalZoomExecution.shippedControlsUsed.modeToggle === '[role="radiogroup"] button[data-mode="dark"]' &&
+            desktopOpticalZoomExecution.shippedControlsUsed.previewAction === 'button:has-text("Preview full screen")' &&
+            desktopOpticalZoomExecution.shippedControlsUsed.exitAction === '[role="region"][aria-label*="preview" i] button:has-text("Exit preview")' &&
             desktopOpticalZoomExecution.noHorizontalOverflow &&
             desktopOpticalZoomExecution.controlsUnclipped &&
             desktopOpticalZoomExecution.devicePixelRatio === 4 &&

@@ -4226,3 +4226,29 @@ Laboratory operators can find step-by-step procedures in the following documenta
               - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
               - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
               - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+
+        - Following Codex independent review `issue155-independent-review-21577f4.md` and focused pure-expression probes `issue155-focused-review-21577f4-results.json`:
+           1. **Supported Gallery Control Provenance & Execution Receipt Enforcement**:
+              - Runner dynamically tracks presence of shipped controls via `controlsAvailable: { cardSelector, modeToggle, previewAction, exitAction }`.
+              - When shipped controls are clicked, runner records `operationTrigger = 'SHIPPED_GALLERY_CONTROLS'`, sets `supportedOperationExecuted = true`, and binds `shippedControlsUsed` to the executed selectors receipt map (`#theme-card-forest`, `[role="radiogroup"] button[data-mode="dark"]`, `button:has-text("Preview full screen")`, and `[role="region"][aria-label*="preview" i] button:has-text("Exit preview")`).
+              - If initiating controls are absent, runner records `operationTrigger = 'REACT_PROVIDER_DIRECT_FALLBACK'`, sets `supportedOperationExecuted = false`, sets `shippedControlsUsed = null`, and details missing controls in `missingControls`. The private React setter fallback is preserved as honest provider-state evidence but cannot claim or satisfy supported-user-operation completion.
+           2. **Final Optical Gate Provenance Enforcement (`desktopOpticalZoomPassed`)**:
+              - `desktopOpticalZoomPassed` now explicitly enforces `desktopOpticalZoomExecution.operationTrigger === 'SHIPPED_GALLERY_CONTROLS'`, `desktopOpticalZoomExecution.supportedOperationExecuted === true`, and strict attribute matches on `desktopOpticalZoomExecution.shippedControlsUsed`.
+              - Reconciles and fails closed on all 7 pure-expression probes from Codex:
+                * Case 1: Supplied baseline optical gate passes (`true`).
+                * Case 2: Faithful supplied operation expression passes (`true`).
+                * Case 3: Wrong exit family rejects (`false`).
+                * Case 4: Preview and exit overflow or clipping reject (`false`).
+                * Case 5: Contradictory serialized operation with retained flag rejects (`false`).
+                * Case 6: Provider-direct fallback strictly rejects (`false`).
+                * Case 7: Missing supported-control provenance strictly rejects (`false`).
+           3. **Zero Extra Timers / Standing Monitor Coordination**:
+              - Verified zero background tasks running (`manage_task list` confirmed empty).
+              - Internal `schedule` tool calls strictly avoided; exclusively relying on Codex's external 5-minute ACTIVE automation cadence.
+           4. **Suite Verification Results**:
+              - Running-app Browser Suite: **All 12/12 suites PASS 100% green** in real native Chrome (`server/scripts/issue155-browser-journeys-results.json`).
+                * Runner trim SHA-256: `db976baf8ce4aac45f18b628b5ab8fdd081b681dc331b1208e96b52589be8f8f`
+                * Result trim SHA-256: `a052f17f42ab07e14fa3fa2d265da42b346fc770bc3f3cdefeb923697a97ff92`
+              - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
+              - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
+              - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
