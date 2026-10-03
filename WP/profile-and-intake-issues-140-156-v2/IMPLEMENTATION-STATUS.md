@@ -17,7 +17,7 @@ Package validation: nine nonempty files including the example; eight relative Ma
 
 | Increment | Implementation | PR / exact head | CI / acceptance | Deployment / live verification |
 |---|---|---|---|---|
-| A0: exchange errors and timing | Completed | `3910254` (`feat/issue-140-a0-exchange-eligibility-503`) | Verified (E01, E02, E03, E05, E07-min, E11; 31/31 contract tests pass) | Pending merge / deployment gate |
+| A0: exchange errors and timing | Completed | [PR #158](https://github.com/yigini/soilfer-lims/pull/158) head `fe344f6` (`feat/issue-140-a0-exchange-eligibility-503`) | Verified (E01, E02, E03, E05, E07-min, E11; 31/31 contract tests pass) | CI in progress; pending merge / deployment gate |
 | A: profile identities, fixture and measured speed | Pending | Pending | Pending | Pending |
 | B1: consistent online/offline intake and basic settings | Pending | Pending | Pending | Pending |
 | B2: custom criteria/context and bounded editor | Pending | Pending | Pending | Pending |
