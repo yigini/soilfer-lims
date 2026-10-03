@@ -3977,3 +3977,29 @@ Laboratory operators can find step-by-step procedures in the following documenta
               - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
               - Theme Catalog Check: **0 drift detected**.
               - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+
+        - Following Codex independent review `issue155-independent-review-73ea6cf.md` and 6-case probe `issue155-focused-review-73ea6cf.cjs`:
+           1. **Full Matrix Composition in Common Coordinate System (Finding 1 / Case 3)**:
+              - In `multiOverlayState`, `ovt`, and `afterExit` in `server/scripts/verify_issue155_browser_journeys.cjs`:
+                * Directly inspected `c.getCTM()` and `c.getScreenCTM()`, extracting all 6 matrix components `{ a, b, c, d, e, f }` without conditioning on `mat.e === 0` or `mat.f === 0`.
+                * Reconciled runner and EVIDENCE truthfulness: supports both `getCTM` and `getScreenCTM`, plus parent attribute hierarchy traversal if DOM matrix methods are absent.
+                * Composed complete transformation matrices for ticks AND curves into one common coordinate system, including nontranslation scaling terms and parent displacements.
+                * Pure scale matrix (`{ a: 2, b: 0, c: 0, d: 2, e: 0, f: 0 }`) and parent-composed matrix (`{ a: 1, b: 0, c: 0, d: 1, e: 130, f: 0 }` with local `translate(10, 0)`) now strictly fail closed across initial, transitions, exit, and final gate.
+                * Attached `pts.transform = mat;` to valid curve points.
+           2. **Actual Named Scan Identity (Finding 2 / Case 4)**:
+              - Eradicated all manufactured/invented scan IDs (`selectedScanIds.push(...)` when recognized list was empty) across `ovt` and `afterExit`.
+              - Extracted observed scan IDs directly from rendered legend labels: `item.match(/SMP-[\w-]+/)`.
+              - Strictly enforces `hasSupportedScanIds`: must contain at least 2 IDs, including `'baseline'` and `'replicate'`.
+              - Foreign IDs (`SMP-2026-001-mir-foreign-a`, `foreign-b`) strictly fail closed across initial, all 14 transitions, exit, and final print gate.
+           3. **Save Required Model Observations & Enforce in Final Gate (Finding 3 / Case 5)**:
+              - In `multiOverlayState`, `ovt`, and `afterExit`: serialized `calibrationBranch: '2D_AXIS_CALIBRATED'`, `selectedScanIds`, `scales`, and `transforms`.
+              - In `printIsolationPassed`: strictly verified `multiOverlay.calibrationBranch === '2D_AXIS_CALIBRATED'`, `afterExit.calibrationBranch === '2D_AXIS_CALIBRATED'`, `v.calibrationBranch === '2D_AXIS_CALIBRATED'`, and valid `selectedScanIds` on `afterExit` and all transitions. Deleting `calibrationBranch` or `selectedScanIds` strictly fails closed (`printAccept() === false`).
+              - Reconciled browser provenance to `Headless Google Chrome 154.0.8037.93 (Windows NT / arm64)`.
+              - Updated `opticalZoomScope` to record CDP `Emulation.setPageScaleFactor` (2.0x/4.0x visual viewport zoom) and WCAG 2.1 SC 1.4.10 320 CSS px reflow layout equivalence, distinguishing software evaluations from native optical UI zoom controls.
+           4. **Suite Verification Results**:
+              - Running-app Browser Suite: **All 12/12 suites PASS 100% green** in real native Chrome (`server/scripts/issue155-browser-journeys-results.json`).
+              - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
+              - Focused Review Harness: **All 6/6 cases PASS 100% green** (`scratch/test_focused_probe.cjs`).
+              - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
+              - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+

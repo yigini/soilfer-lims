@@ -188,8 +188,42 @@ const validSpectral = {
         distinctSeriesVerified: true,
         axesVerified: true,
         all14VariantsPreserved: true,
-        afterExit: { mounted: true, traceCount: 2, modelVerified: true },
-        variantTransitions: Array.from({ length: 14 }, () => ({ transitionSucceeded: true, overlayPreserved: true, modelVerified: true, curvesCount: 2, validCurvesCount: 2, legendCount: 2 }))
+        calibrationBranch: '2D_AXIS_CALIBRATED',
+        scales: {
+            x: { slope: 1, intercept: 0 },
+            y: { slope: 1, intercept: 0 }
+        },
+        transforms: [{ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }, { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }],
+        afterExit: {
+            mounted: true,
+            traceCount: 2,
+            curvesCount: 2,
+            validCurvesCount: 2,
+            legendCount: 2,
+            modelVerified: true,
+            calibrationBranch: '2D_AXIS_CALIBRATED',
+            selectedScanIds: ['SMP-2026-001-mir-baseline', 'SMP-2026-001-mir-replicate'],
+            scales: {
+                x: { slope: 1, intercept: 0 },
+                y: { slope: 1, intercept: 0 }
+            },
+            transforms: [{ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }, { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }]
+        },
+        variantTransitions: Array.from({ length: 14 }, () => ({
+            transitionSucceeded: true,
+            overlayPreserved: true,
+            modelVerified: true,
+            curvesCount: 2,
+            validCurvesCount: 2,
+            legendCount: 2,
+            calibrationBranch: '2D_AXIS_CALIBRATED',
+            selectedScanIds: ['SMP-2026-001-mir-baseline', 'SMP-2026-001-mir-replicate'],
+            scales: {
+                x: { slope: 1, intercept: 0 },
+                y: { slope: 1, intercept: 0 }
+            },
+            transforms: [{ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }, { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }]
+        }))
     },
     all14VariantsPreserved: true,
     afterExit: {

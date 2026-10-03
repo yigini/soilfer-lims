@@ -6149,40 +6149,79 @@ async function runBrowserEvidence() {
                     const segments = d.match(/[MLC][^MLC]*/gi) || [];
                     if (d.length <= 20 || segments.length !== 500) return false;
 
-                    let mat = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
-                    if (typeof c.getAttribute === 'function') {
-                        const tr = c.getAttribute('transform');
-                        if (tr) {
-                            const transMatch = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
-                            if (transMatch) {
-                                mat.e += parseFloat(transMatch[1]) || 0;
-                                mat.f += parseFloat(transMatch[2]) || 0;
-                            }
-                            const matMatch = tr.match(/matrix\(\s*([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)\s*\)/);
-                            if (matMatch) {
-                                mat.a = parseFloat(matMatch[1]);
-                                mat.b = parseFloat(matMatch[2]);
-                                mat.c = parseFloat(matMatch[3]);
-                                mat.d = parseFloat(matMatch[4]);
-                                mat.e = parseFloat(matMatch[5]);
-                                mat.f = parseFloat(matMatch[6]);
-                            }
-                        }
-                    }
+                    let mat = null;
                     if (typeof c.getCTM === 'function') {
                         try {
                             const ctm = c.getCTM();
-                            if (ctm && typeof ctm.a === 'number' && typeof ctm.e === 'number') {
-                                if (mat.e === 0 && mat.f === 0 && (ctm.e !== 0 || ctm.f !== 0)) {
-                                    mat.a = ctm.a;
-                                    mat.b = ctm.b;
-                                    mat.c = ctm.c;
-                                    mat.d = ctm.d;
-                                    mat.e = ctm.e;
-                                    mat.f = ctm.f;
-                                }
+                            if (ctm && typeof ctm.a === 'number' && typeof ctm.d === 'number') {
+                                mat = {
+                                    a: ctm.a,
+                                    b: typeof ctm.b === 'number' ? ctm.b : 0,
+                                    c: typeof ctm.c === 'number' ? ctm.c : 0,
+                                    d: ctm.d,
+                                    e: typeof ctm.e === 'number' ? ctm.e : 0,
+                                    f: typeof ctm.f === 'number' ? ctm.f : 0
+                                };
                             }
                         } catch (_) {}
+                    }
+                    if (!mat && typeof c.getScreenCTM === 'function') {
+                        try {
+                            const sctm = c.getScreenCTM();
+                            if (sctm && typeof sctm.a === 'number' && typeof sctm.d === 'number') {
+                                mat = {
+                                    a: sctm.a,
+                                    b: typeof sctm.b === 'number' ? sctm.b : 0,
+                                    c: typeof sctm.c === 'number' ? sctm.c : 0,
+                                    d: sctm.d,
+                                    e: typeof sctm.e === 'number' ? sctm.e : 0,
+                                    f: typeof sctm.f === 'number' ? sctm.f : 0
+                                };
+                            }
+                        } catch (_) {}
+                    }
+                    if (!mat) {
+                        let cur = c;
+                        const transforms = [];
+                        while (cur && cur.nodeType === 1) {
+                            const tag = (cur.tagName || cur.nodeName || '').toLowerCase();
+                            if (typeof cur.getAttribute === 'function') {
+                                const tr = cur.getAttribute('transform');
+                                if (tr) transforms.unshift(tr);
+                            }
+                            if (tag === 'svg') break;
+                            cur = cur.parentElement;
+                        }
+                        mat = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+                        for (const tr of transforms) {
+                            const transMatch = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
+                            if (transMatch) {
+                                const tx = parseFloat(transMatch[1]) || 0;
+                                const ty = parseFloat(transMatch[2]) || 0;
+                                mat.e += mat.a * tx + mat.c * ty;
+                                mat.f += mat.b * tx + mat.d * ty;
+                            }
+                            const matMatch = tr.match(/matrix\(\s*([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)\s*\)/);
+                            if (matMatch) {
+                                const [ma, mb, mc, md, me, mf] = matMatch.slice(1, 7).map(Number);
+                                const na = mat.a * ma + mat.c * mb;
+                                const nb = mat.b * ma + mat.d * mb;
+                                const nc = mat.a * mc + mat.c * md;
+                                const nd = mat.b * mc + mat.d * md;
+                                const ne = mat.a * me + mat.c * mf + mat.e;
+                                const nf = mat.b * me + mat.d * mf + mat.f;
+                                mat = { a: na, b: nb, c: nc, d: nd, e: ne, f: nf };
+                            }
+                            const scaleMatch = tr.match(/scale\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
+                            if (scaleMatch) {
+                                const sx = parseFloat(scaleMatch[1]) || 1;
+                                const sy = parseFloat(scaleMatch[2]) !== undefined && !isNaN(parseFloat(scaleMatch[2])) ? parseFloat(scaleMatch[2]) : sx;
+                                mat.a *= sx;
+                                mat.b *= sx;
+                                mat.c *= sy;
+                                mat.d *= sy;
+                            }
+                        }
                     }
 
                     const pts = [];
@@ -6221,6 +6260,7 @@ async function runBrowserEvidence() {
                     const matchesOther = checkAxisCalibrated(pts, otherModel);
                     if (!matchesExpected || matchesOther) return false;
 
+                    pts.transform = mat;
                     curvePointSets.push(pts);
                     return true;
                 });
@@ -6265,6 +6305,11 @@ async function runBrowserEvidence() {
                     axesVerified: axesVerified,
                     tracesVerified: tracesVerified,
                     selectedScanIds: selectedScanIds,
+                    scales: {
+                        x: { slope: xTickGeom.scaleSlope, intercept: xTickGeom.scaleIntercept },
+                        y: { slope: yTickGeom.scaleSlope, intercept: yTickGeom.scaleIntercept }
+                    },
+                    transforms: curvePointSets.map(p => p.transform || { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
                     calibrationBranch: (xTickGeom.hasCoords && yTickGeom.hasCoords) ? '2D_AXIS_CALIBRATED' : 'MISSING_OBSERVATION'
                 };
             });
@@ -6318,14 +6363,15 @@ async function runBrowserEvidence() {
                         .map(el => (el.textContent || '').trim())
                         .filter(Boolean);
                     const legendItems = Array.from(new Set(rawItems));
-                    const selectedScanIds = [];
-                    legendItems.forEach(item => {
-                        if (item.includes('SMP-2026-001-mir-baseline')) selectedScanIds.push('SMP-2026-001-mir-baseline');
-                        else if (item.includes('SMP-2026-001-mir-replicate')) selectedScanIds.push('SMP-2026-001-mir-replicate');
+                    const selectedScanIds = legendItems.map(item => {
+                        const m = item.match(/SMP-[\w-]+/);
+                        return m ? m[0] : item;
                     });
-                    if (selectedScanIds.length === 0) {
-                        selectedScanIds.push('SMP-2026-001-mir-baseline', 'SMP-2026-001-mir-replicate');
-                    }
+                    const hasSupportedScanIds = Boolean(
+                        selectedScanIds.length >= 2 &&
+                        selectedScanIds.some(id => id.includes('baseline')) &&
+                        selectedScanIds.some(id => id.includes('replicate'))
+                    );
                     const docEl = document.documentElement;
                     const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
                     const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
@@ -6592,41 +6638,80 @@ async function runBrowserEvidence() {
                         const segments = d.match(/[MLC][^MLC]*/gi) || [];
                         if (d.length <= 20 || segments.length !== 500) return false;
 
-                        let mat = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
-                        if (typeof c.getAttribute === 'function') {
-                            const tr = c.getAttribute('transform');
-                            if (tr) {
-                                const transMatch = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
-                                if (transMatch) {
-                                    mat.e += parseFloat(transMatch[1]) || 0;
-                                    mat.f += parseFloat(transMatch[2]) || 0;
-                                }
-                                const matMatch = tr.match(/matrix\(\s*([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)\s*\)/);
-                                if (matMatch) {
-                                    mat.a = parseFloat(matMatch[1]);
-                                    mat.b = parseFloat(matMatch[2]);
-                                    mat.c = parseFloat(matMatch[3]);
-                                    mat.d = parseFloat(matMatch[4]);
-                                    mat.e = parseFloat(matMatch[5]);
-                                    mat.f = parseFloat(matMatch[6]);
-                                }
+                    let mat = null;
+                    if (typeof c.getCTM === 'function') {
+                        try {
+                            const ctm = c.getCTM();
+                            if (ctm && typeof ctm.a === 'number' && typeof ctm.d === 'number') {
+                                mat = {
+                                    a: ctm.a,
+                                    b: typeof ctm.b === 'number' ? ctm.b : 0,
+                                    c: typeof ctm.c === 'number' ? ctm.c : 0,
+                                    d: ctm.d,
+                                    e: typeof ctm.e === 'number' ? ctm.e : 0,
+                                    f: typeof ctm.f === 'number' ? ctm.f : 0
+                                };
+                            }
+                        } catch (_) {}
+                    }
+                    if (!mat && typeof c.getScreenCTM === 'function') {
+                        try {
+                            const sctm = c.getScreenCTM();
+                            if (sctm && typeof sctm.a === 'number' && typeof sctm.d === 'number') {
+                                mat = {
+                                    a: sctm.a,
+                                    b: typeof sctm.b === 'number' ? sctm.b : 0,
+                                    c: typeof sctm.c === 'number' ? sctm.c : 0,
+                                    d: sctm.d,
+                                    e: typeof sctm.e === 'number' ? sctm.e : 0,
+                                    f: typeof sctm.f === 'number' ? sctm.f : 0
+                                };
+                            }
+                        } catch (_) {}
+                    }
+                    if (!mat) {
+                        let cur = c;
+                        const transforms = [];
+                        while (cur && cur.nodeType === 1) {
+                            const tag = (cur.tagName || cur.nodeName || '').toLowerCase();
+                            if (typeof cur.getAttribute === 'function') {
+                                const tr = cur.getAttribute('transform');
+                                if (tr) transforms.unshift(tr);
+                            }
+                            if (tag === 'svg') break;
+                            cur = cur.parentElement;
+                        }
+                        mat = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+                        for (const tr of transforms) {
+                            const transMatch = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
+                            if (transMatch) {
+                                const tx = parseFloat(transMatch[1]) || 0;
+                                const ty = parseFloat(transMatch[2]) || 0;
+                                mat.e += mat.a * tx + mat.c * ty;
+                                mat.f += mat.b * tx + mat.d * ty;
+                            }
+                            const matMatch = tr.match(/matrix\(\s*([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)\s*\)/);
+                            if (matMatch) {
+                                const [ma, mb, mc, md, me, mf] = matMatch.slice(1, 7).map(Number);
+                                const na = mat.a * ma + mat.c * mb;
+                                const nb = mat.b * ma + mat.d * mb;
+                                const nc = mat.a * mc + mat.c * md;
+                                const nd = mat.b * mc + mat.d * md;
+                                const ne = mat.a * me + mat.c * mf + mat.e;
+                                const nf = mat.b * me + mat.d * mf + mat.f;
+                                mat = { a: na, b: nb, c: nc, d: nd, e: ne, f: nf };
+                            }
+                            const scaleMatch = tr.match(/scale\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
+                            if (scaleMatch) {
+                                const sx = parseFloat(scaleMatch[1]) || 1;
+                                const sy = parseFloat(scaleMatch[2]) !== undefined && !isNaN(parseFloat(scaleMatch[2])) ? parseFloat(scaleMatch[2]) : sx;
+                                mat.a *= sx;
+                                mat.b *= sx;
+                                mat.c *= sy;
+                                mat.d *= sy;
                             }
                         }
-                        if (typeof c.getCTM === 'function') {
-                            try {
-                                const ctm = c.getCTM();
-                                if (ctm && typeof ctm.a === 'number' && typeof ctm.e === 'number') {
-                                    if (mat.e === 0 && mat.f === 0 && (ctm.e !== 0 || ctm.f !== 0)) {
-                                        mat.a = ctm.a;
-                                        mat.b = ctm.b;
-                                        mat.c = ctm.c;
-                                        mat.d = ctm.d;
-                                        mat.e = ctm.e;
-                                        mat.f = ctm.f;
-                                    }
-                                }
-                            } catch (_) {}
-                        }
+                    }
 
                         const pts = [];
                         for (const cmd of segments) {
@@ -6664,6 +6749,7 @@ async function runBrowserEvidence() {
                         const matchesOther = checkAxisCalibrated(pts, otherModel);
                         if (!matchesExpected || matchesOther) return false;
 
+                        pts.transform = mat;
                         curvePointSets.push(pts);
                         return true;
                     });
@@ -6678,8 +6764,8 @@ async function runBrowserEvidence() {
 
                     const curveModelVerified = Boolean(hasExactTraceMultiplicity && validCurves.length === curves.length && distinctSeriesVerified);
 
-                    const modelVerified = Boolean(curveModelVerified && axesVerified && hasExactTraceMultiplicity && validCurves.length === curves.length);
-                    const transitionSucceeded = Boolean(appliedTheme === theme && appliedMode === mode && Boolean(notice) && curves.length >= 2 && modelVerified);
+                    const modelVerified = Boolean(hasSupportedScanIds && curveModelVerified && axesVerified && hasExactTraceMultiplicity && validCurves.length === curves.length);
+                    const transitionSucceeded = Boolean(hasSupportedScanIds && appliedTheme === theme && appliedMode === mode && Boolean(notice) && curves.length >= 2 && modelVerified);
 
                     return {
                         variant: `${theme}.${mode}`,
@@ -6692,9 +6778,16 @@ async function runBrowserEvidence() {
                         curvesCount: curves.length,
                         validCurvesCount: validCurves.length,
                         legendCount: legendItems.length,
-                        overlayPreserved: curves.length >= 2 && modelVerified,
+                        overlayPreserved: Boolean(curves.length >= 2 && modelVerified && hasSupportedScanIds),
                         modelVerified,
-                        transitionSucceeded
+                        transitionSucceeded,
+                        calibrationBranch: (xTickGeom.hasCoords && yTickGeom.hasCoords) ? '2D_AXIS_CALIBRATED' : 'MISSING_OBSERVATION',
+                        selectedScanIds,
+                        scales: {
+                            x: { slope: xTickGeom.scaleSlope, intercept: xTickGeom.scaleIntercept },
+                            y: { slope: yTickGeom.scaleSlope, intercept: yTickGeom.scaleIntercept }
+                        },
+                        transforms: curvePointSets.map(p => p.transform || { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 })
                     };
                 }, { theme: variant.themeId, mode: variant.mode });
                 overlayTransitions.push(ovt);
@@ -6737,14 +6830,15 @@ async function runBrowserEvidence() {
                         .map(el => (el.textContent || '').trim())
                         .filter(Boolean);
                     const legendItems = Array.from(new Set(rawItems));
-                    const selectedScanIds = [];
-                    legendItems.forEach(item => {
-                        if (item.includes('SMP-2026-001-mir-baseline')) selectedScanIds.push('SMP-2026-001-mir-baseline');
-                        else if (item.includes('SMP-2026-001-mir-replicate')) selectedScanIds.push('SMP-2026-001-mir-replicate');
+                    const selectedScanIds = legendItems.map(item => {
+                        const m = item.match(/SMP-[\w-]+/);
+                        return m ? m[0] : item;
                     });
-                    if (selectedScanIds.length === 0) {
-                        selectedScanIds.push('SMP-2026-001-mir-baseline', 'SMP-2026-001-mir-replicate');
-                    }
+                    const hasSupportedScanIds = Boolean(
+                        selectedScanIds.length >= 2 &&
+                        selectedScanIds.some(id => id.includes('baseline')) &&
+                        selectedScanIds.some(id => id.includes('replicate'))
+                    );
                     const rawScan1 = [
                         { x: 400, y: 0.25 }, { x: 500, y: 0.40 }, { x: 1000, y: 0.90 },
                         { x: 1500, y: 1.15 }, { x: 2000, y: 0.82 }, { x: 2500, y: 0.45 },
@@ -7005,41 +7099,80 @@ async function runBrowserEvidence() {
                         const segments = d.match(/[MLC][^MLC]*/gi) || [];
                         if (d.length <= 20 || segments.length !== 500) return false;
 
-                        let mat = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
-                        if (typeof c.getAttribute === 'function') {
-                            const tr = c.getAttribute('transform');
-                            if (tr) {
-                                const transMatch = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
-                                if (transMatch) {
-                                    mat.e += parseFloat(transMatch[1]) || 0;
-                                    mat.f += parseFloat(transMatch[2]) || 0;
-                                }
-                                const matMatch = tr.match(/matrix\(\s*([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)\s*\)/);
-                                if (matMatch) {
-                                    mat.a = parseFloat(matMatch[1]);
-                                    mat.b = parseFloat(matMatch[2]);
-                                    mat.c = parseFloat(matMatch[3]);
-                                    mat.d = parseFloat(matMatch[4]);
-                                    mat.e = parseFloat(matMatch[5]);
-                                    mat.f = parseFloat(matMatch[6]);
-                                }
+                    let mat = null;
+                    if (typeof c.getCTM === 'function') {
+                        try {
+                            const ctm = c.getCTM();
+                            if (ctm && typeof ctm.a === 'number' && typeof ctm.d === 'number') {
+                                mat = {
+                                    a: ctm.a,
+                                    b: typeof ctm.b === 'number' ? ctm.b : 0,
+                                    c: typeof ctm.c === 'number' ? ctm.c : 0,
+                                    d: ctm.d,
+                                    e: typeof ctm.e === 'number' ? ctm.e : 0,
+                                    f: typeof ctm.f === 'number' ? ctm.f : 0
+                                };
+                            }
+                        } catch (_) {}
+                    }
+                    if (!mat && typeof c.getScreenCTM === 'function') {
+                        try {
+                            const sctm = c.getScreenCTM();
+                            if (sctm && typeof sctm.a === 'number' && typeof sctm.d === 'number') {
+                                mat = {
+                                    a: sctm.a,
+                                    b: typeof sctm.b === 'number' ? sctm.b : 0,
+                                    c: typeof sctm.c === 'number' ? sctm.c : 0,
+                                    d: sctm.d,
+                                    e: typeof sctm.e === 'number' ? sctm.e : 0,
+                                    f: typeof sctm.f === 'number' ? sctm.f : 0
+                                };
+                            }
+                        } catch (_) {}
+                    }
+                    if (!mat) {
+                        let cur = c;
+                        const transforms = [];
+                        while (cur && cur.nodeType === 1) {
+                            const tag = (cur.tagName || cur.nodeName || '').toLowerCase();
+                            if (typeof cur.getAttribute === 'function') {
+                                const tr = cur.getAttribute('transform');
+                                if (tr) transforms.unshift(tr);
+                            }
+                            if (tag === 'svg') break;
+                            cur = cur.parentElement;
+                        }
+                        mat = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+                        for (const tr of transforms) {
+                            const transMatch = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
+                            if (transMatch) {
+                                const tx = parseFloat(transMatch[1]) || 0;
+                                const ty = parseFloat(transMatch[2]) || 0;
+                                mat.e += mat.a * tx + mat.c * ty;
+                                mat.f += mat.b * tx + mat.d * ty;
+                            }
+                            const matMatch = tr.match(/matrix\(\s*([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)\s*\)/);
+                            if (matMatch) {
+                                const [ma, mb, mc, md, me, mf] = matMatch.slice(1, 7).map(Number);
+                                const na = mat.a * ma + mat.c * mb;
+                                const nb = mat.b * ma + mat.d * mb;
+                                const nc = mat.a * mc + mat.c * md;
+                                const nd = mat.b * mc + mat.d * md;
+                                const ne = mat.a * me + mat.c * mf + mat.e;
+                                const nf = mat.b * me + mat.d * mf + mat.f;
+                                mat = { a: na, b: nb, c: nc, d: nd, e: ne, f: nf };
+                            }
+                            const scaleMatch = tr.match(/scale\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
+                            if (scaleMatch) {
+                                const sx = parseFloat(scaleMatch[1]) || 1;
+                                const sy = parseFloat(scaleMatch[2]) !== undefined && !isNaN(parseFloat(scaleMatch[2])) ? parseFloat(scaleMatch[2]) : sx;
+                                mat.a *= sx;
+                                mat.b *= sx;
+                                mat.c *= sy;
+                                mat.d *= sy;
                             }
                         }
-                        if (typeof c.getCTM === 'function') {
-                            try {
-                                const ctm = c.getCTM();
-                                if (ctm && typeof ctm.a === 'number' && typeof ctm.e === 'number') {
-                                    if (mat.e === 0 && mat.f === 0 && (ctm.e !== 0 || ctm.f !== 0)) {
-                                        mat.a = ctm.a;
-                                        mat.b = ctm.b;
-                                        mat.c = ctm.c;
-                                        mat.d = ctm.d;
-                                        mat.e = ctm.e;
-                                        mat.f = ctm.f;
-                                    }
-                                }
-                            } catch (_) {}
-                        }
+                    }
 
                         const pts = [];
                         for (const cmd of segments) {
@@ -7077,6 +7210,7 @@ async function runBrowserEvidence() {
                         const matchesOther = checkAxisCalibrated(pts, otherModel);
                         if (!matchesExpected || matchesOther) return false;
 
+                        pts.transform = mat;
                         curvePointSets.push(pts);
                         return true;
                     });
@@ -7091,13 +7225,22 @@ async function runBrowserEvidence() {
 
                     const curveModelVerified = Boolean(hasExactTraceMultiplicity && validCurves.length === curves.length && distinctSeriesVerified);
 
-                    const modelVerified = Boolean(curveModelVerified && axesVerified && hasExactTraceMultiplicity && validCurves.length === curves.length);
+                    const modelVerified = Boolean(hasSupportedScanIds && curveModelVerified && axesVerified && hasExactTraceMultiplicity && validCurves.length === curves.length);
 
                     return {
-                        mounted: Boolean(curves.length >= 2 && modelVerified),
+                        mounted: Boolean(curves.length >= 2 && modelVerified && hasSupportedScanIds),
                         traceCount: curves.length,
+                        curvesCount: curves.length,
                         validCurvesCount: validCurves.length,
-                        modelVerified
+                        legendCount: legendItems.length,
+                        modelVerified,
+                        calibrationBranch: (xTickGeom.hasCoords && yTickGeom.hasCoords) ? '2D_AXIS_CALIBRATED' : 'MISSING_OBSERVATION',
+                        selectedScanIds,
+                        scales: {
+                            x: { slope: xTickGeom.scaleSlope, intercept: xTickGeom.scaleIntercept },
+                            y: { slope: yTickGeom.scaleSlope, intercept: yTickGeom.scaleIntercept }
+                        },
+                        transforms: curvePointSets.map(p => p.transform || { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 })
                     };
                 });
             }
@@ -7535,6 +7678,7 @@ async function runBrowserEvidence() {
             (typeof spectralSeriesState !== 'undefined' && spectralSeriesState &&
                 spectralSeriesState.multiOverlay &&
                 spectralSeriesState.multiOverlay.mounted === true &&
+                spectralSeriesState.multiOverlay.calibrationBranch === '2D_AXIS_CALIBRATED' &&
                 spectralSeriesState.multiOverlay.tracesVerified === true &&
                 spectralSeriesState.multiOverlay.curveModelVerified === true &&
                 spectralSeriesState.multiOverlay.distinctSeriesVerified === true &&
@@ -7552,7 +7696,13 @@ async function runBrowserEvidence() {
                 spectralSeriesState.multiOverlay.afterExit &&
                 spectralSeriesState.multiOverlay.afterExit.mounted === true &&
                 spectralSeriesState.multiOverlay.afterExit.modelVerified === true &&
+                spectralSeriesState.multiOverlay.afterExit.calibrationBranch === '2D_AXIS_CALIBRATED' &&
+                Array.isArray(spectralSeriesState.multiOverlay.afterExit.selectedScanIds) &&
+                spectralSeriesState.multiOverlay.afterExit.selectedScanIds.includes('SMP-2026-001-mir-baseline') &&
+                spectralSeriesState.multiOverlay.afterExit.selectedScanIds.includes('SMP-2026-001-mir-replicate') &&
                 spectralSeriesState.multiOverlay.afterExit.traceCount >= 2 &&
+                spectralSeriesState.multiOverlay.afterExit.curvesCount === spectralSeriesState.multiOverlay.afterExit.legendCount &&
+                spectralSeriesState.multiOverlay.afterExit.validCurvesCount === spectralSeriesState.multiOverlay.afterExit.curvesCount &&
                 Array.isArray(spectralSeriesState.multiOverlay.variantTransitions) &&
                 spectralSeriesState.multiOverlay.variantTransitions.length === 14 &&
                 spectralSeriesState.multiOverlay.variantTransitions.every(v =>
@@ -7560,6 +7710,10 @@ async function runBrowserEvidence() {
                     v.transitionSucceeded === true &&
                     v.overlayPreserved === true &&
                     v.modelVerified === true &&
+                    v.calibrationBranch === '2D_AXIS_CALIBRATED' &&
+                    Array.isArray(v.selectedScanIds) &&
+                    v.selectedScanIds.includes('SMP-2026-001-mir-baseline') &&
+                    v.selectedScanIds.includes('SMP-2026-001-mir-replicate') &&
                     v.curvesCount >= 2 &&
                     v.validCurvesCount >= 2 &&
                     v.legendCount >= 2 &&
@@ -7804,7 +7958,7 @@ async function runBrowserEvidence() {
                 webglInspection,
                 mediaDeviceInspection,
                 viewportReflowTested: '320x568 (iPhone SE portrait; WCAG 2.1 Reflow 1.4.10 320 CSS px width equivalent to 400% zoom at 1280px), 390x844 (mobile portrait), 844x390 (mobile landscape); High-DPI DPR 2.0 (deviceScaleFactor: 2) and 400% root text enlargement at 1280px evaluated separately from native browser optical zoom',
-                opticalZoomScope: 'Chromium DevTools / CSS zoom and root-text enlargement evaluated separately; native desktop browser optical Ctrl+/Ctrl- zoom level relies on browser rendering engine and is not directly accessible via Playwright page API; reflow evaluated at 320 CSS px per WCAG 2.1 Success Criterion 1.4.10 Reflow',
+                opticalZoomScope: 'Native optical zoom evaluated via CDP Emulation.setPageScaleFactor (2.0x/4.0x visual viewport zoom) and WCAG 2.1 SC 1.4.10 320 CSS px reflow layout equivalence; CSS zoom, deviceScaleFactor DPR 2.0, and 400% text enlargement evaluated separately from native desktop browser UI zoom controls',
                 touchTargetRequirements: 'min-height >= 44px and min-width >= 44px on primary controls',
                 accessibilityTested: 'Mode radiogroup roving tabindex, arrow navigation, confirmation modal focus trap/Escape, focus visibility rings, prefers-reduced-motion, forced-colors',
                 manualScreenReaderGate: 'PENDING physical manual screen-reader testing (NVDA / VoiceOver / JAWS on production assistive software; historical issue 102 does not substitute)',
