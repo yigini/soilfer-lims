@@ -374,7 +374,7 @@ function extractDates(sample = {}, field = {}, reception = {}) {
  * Extracts and namespaces source profile/plot reference.
  * Disambiguates with country:project namespace and avoids false confirmed profile inference.
  */
-function extractProfileReference(sample = {}, field = {}, meta = {}) {
+function extractLegacyProfileReference(sample = {}, field = {}, meta = {}) {
     const rawCode = unwrapValue(field.site_id) ||
         unwrapValue(field.siteId) ||
         unwrapValue(field.plot_id) ||
@@ -431,10 +431,12 @@ function extractProfileReference(sample = {}, field = {}, meta = {}) {
     };
 }
 
-/**
- * Lossless Observation Extractor.
- * Retains every current result record without parameter-name clobbering.
- */
+// Canonical provenance is authoritative; absent canonical data uses the exact legacy formatter.
+function extractProfileReference(sample = {}, field = {}, meta = {}) {
+    return require('./profileIdentityService').resolveProfileReference(sample,field,meta,extractLegacyProfileReference);
+}
+
+/** Retains every current result record without parameter-name clobbering. */
 function extractObservations(sample, { analysisMap = {}, methodMap = {} } = {}) {
     const observations = [];
     if (!sample.results || !Array.isArray(sample.results)) {
@@ -796,6 +798,7 @@ module.exports = {
     extractDepths,
     extractDates,
     extractProfileReference,
+    extractLegacyProfileReference,
     extractObservations,
     buildLegacyAnalyticalResultsMap,
     evaluateQualityIssues,

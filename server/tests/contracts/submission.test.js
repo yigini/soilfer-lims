@@ -1,3 +1,4 @@
+const { ensureTestLab } = require('../setup');
 const request = require('supertest');
 const app = require('../../app');
 const { generateToken } = require('../setup');
@@ -10,6 +11,7 @@ describe('8.1 Section D: Submission Rules', () => {
     let phItemId, condItemId;
 
     beforeAll(async () => {
+        await ensureTestLab('LAB-SUB', 'SUB');
         const suffix = Date.now();
         techUsername = `tech_sub_${suffix}`;
         const mgr = usersDb.create({ username: `mgr_sub_${suffix}`, role: 'LAB_MANAGER', labId: 'LAB-SUB', countries: ['SUB'] });

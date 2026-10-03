@@ -6,10 +6,10 @@ class IdGenerator {
      * OLD Format: {LabCode}-{Year}-{Number} (GTM-LAB1-2026-001)
      * NEW Format: {Letter}{Number} (S001)
      */
-    async generateLabId(labCode, prefix = 'S') {
+    async generateLabId(labCode, prefix = 'S', db = prisma) {
         // We now prioritize the short format requested by the user
         // One letter + three numbers (e.g., S001)
-        const result = await this._getSequencedId(prefix, 3, false);
+        const result = await this._getSequencedId(prefix, 3, false, db);
         console.log(`[ID_GEN] Generated Lab ID: ${result} for labCode: ${labCode}`);
         return result;
     }
@@ -37,14 +37,14 @@ class IdGenerator {
      * pad: Padding length for the number (3 for "001")
      * useHyphen: Whether to put a hyphen between prefix and sequence
      */
-    async _getSequencedId(prefix, pad, useHyphen = true) {
+    async _getSequencedId(prefix, pad, useHyphen = true, db = prisma) {
         const separator = useHyphen ? '-' : '';
         const matchPrefix = `${prefix}${separator}`;
 
         // Retry loop to handle concurrent ID generation (Finding #9)
         for (let attempt = 0; attempt < 5; attempt++) {
             // Check both labId and originalId to ensure absolute uniqueness across the system
-            const samples = await prisma.sample.findMany({
+            const samples = await db.sample.findMany({
                 where: {
                     OR: [
                         { labId: { startsWith: matchPrefix } },
@@ -79,7 +79,7 @@ class IdGenerator {
             const candidateId = `${prefix}${separator}${nextSeq}`;
 
             // Verify the candidate doesn't already exist (collision check)
-            const exists = await prisma.sample.findFirst({
+            const exists = await db.sample.findFirst({
                 where: {
                     OR: [
                         { id: candidateId },

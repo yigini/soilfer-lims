@@ -585,6 +585,10 @@ class SampleWorkspaceService {
                 allowed: isManagerOrAdmin && ['APPROVED', 'ARCHIVED', 'DISPOSED'].includes(sample.status),
                 reason: isManagerOrAdmin ? null : 'Requires lab manager authority'
             },
+            canEditProfileReference: {
+                allowed: (hasPermission(user, 'RECEIVE_SAMPLE') || hasPermission(user, 'APPROVE_RESULTS')) && !sample.approvedAt && !['APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED'].includes(sample.status),
+                reason: null
+            },
             canPrintLabel: {
                 allowed: sample.status !== 'RECEIVED_REJECTED' && sample.status !== 'REJECTED',
                 reason: null
@@ -617,8 +621,19 @@ class SampleWorkspaceService {
             nextAction = { action: 'VIEW_REPORT', label: `View Report v${currentReleasedReport.version}`, role: 'ALL' };
         }
 
+        let profileReference;
+        try {
+            const resolved = require('./sisAdapterService').extractProfileReference(sample, parsedFieldMetadata, parsedMetadata);
+            const ref = parsedFieldMetadata.profileReference;
+            profileReference = {code: resolved.profileCode, namespace: resolved.profileNamespace, key: resolved.profileKey, relation: resolved.profileRelation, state: resolved.state, revision: ref?.revision || 0, source: ref?.source || 'LEGACY', sourcePath: ref?.sourcePath || null};
+        } catch (error) {
+            if (!(error instanceof require('./profileIdentityService').ProfileReferenceConflictError)) throw error;
+            profileReference = {state: 'CONFLICT', code: null, namespace: null, relation: 'UNSPECIFIED', revision: Number.isSafeInteger(parsedFieldMetadata.profileReference?.revision) ? parsedFieldMetadata.profileReference.revision : 0};
+        }
+
         return {
             identity: {
+                profileReference,
                 id: sample.id,
                 labSampleCode: sample.labId || 'Not assigned',
                 originalId: sample.originalId,

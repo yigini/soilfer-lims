@@ -2308,4 +2308,49 @@
       "applyFilters": "Appliquer les filtres"
     }
   }
+,
+  "profileReference": {
+    "label": "Profil pédologique / point de prélèvement",
+    "code": "Code consigné sur le terrain",
+    "unknown": "Non renseigné",
+    "namespace": "Référence de l’étude",
+    "meaning": "Signification consignée",
+    "help": "Utilisez le code du relevé de terrain. Il est distinct de l’étiquette du sac et de l’identifiant du laboratoire. Laissez-le inconnu si la source n’identifie ni profil ni point de prélèvement.",
+    "confirmedHelp": "Choisissez un profil pédologique confirmé uniquement si le relevé original vérifie explicitement la fosse ou le profil.",
+    "namespaceHelp": "La référence de l’étude dépend de la configuration du projet ou de la source.",
+    "setUnknown": "Enregistrer comme inconnu",
+    "conflict": "La référence du profil doit être vérifiée. Le travail du laboratoire est conservé.",
+    "correct": "Corriger la référence de terrain",
+    "correctionHelp": "Seule la provenance change. Les résultats analytiques et les versions des rapports déjà publiés sont conservés.",
+    "reason": "Motif et vérification de la source (obligatoires)",
+    "saveFailed": "Enregistrement impossible. Vos données saisies sont conservées.",
+    "mappingTitle": "Correspondance des champs du profil pédologique",
+    "mappingHelp": "Saisissez les chemins Kobo exacts, par exemple soil/pit_id. Utilisez une référence fixe ou son chemin source, et une signification fixe ou son chemin. D1/D2 identifient les sacs : associez séparément les profondeurs mesurées. Les changements concernent les nouveaux relevés ; les identités existantes sont conservées.",
+    "mappingSaved": "Correspondance enregistrée. Les identités existantes ont été conservées.",
+    "fromSource": "Point de prélèvement sauf correspondance explicite",
+    "relations": {
+      "SITE_POINT": "Point de prélèvement / site",
+      "COMPOSITE": "Zone de prélèvement composite",
+      "CONFIRMED_PROFILE": "Profil pédologique / fosse confirmé",
+      "UNSPECIFIED": "Non renseigné"
+    },
+    "mapping": {
+      "codePath": "Chemin du code de profil / fosse",
+      "sitePath": "Chemin indépendant du code du site",
+      "namespace": "Référence fixe de l’étude",
+      "namespacePath": "Chemin de la référence de l’étude",
+      "relationPath": "Chemin de la signification consignée",
+      "collectionDatePath": "Chemin de la date de prélèvement",
+      "depthTopD1Path": "Chemin de profondeur supérieure D1 (cm)",
+      "depthBottomD1Path": "Chemin de profondeur inférieure D1 (cm)",
+      "depthTopD2Path": "Chemin de profondeur supérieure D2 (cm)",
+      "depthBottomD2Path": "Chemin de profondeur inférieure D2 (cm)"
+    },
+    "manifest": {
+      "profileCode": "Code du profil / point de prélèvement",
+      "profileNamespace": "Référence configurée de l’étude",
+      "profileRelation": "Signification consignée (SITE_POINT, COMPOSITE, CONFIRMED_PROFILE)",
+      "collectionDate": "Date de prélèvement sur le terrain"
+    }
+  }
 }

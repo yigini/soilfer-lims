@@ -1,3 +1,4 @@
+const { ensureTestLab } = require('../setup');
 const request = require('supertest');
 const app = require('../../app');
 const { usersDb } = require('../../db');
@@ -6,6 +7,7 @@ describe('Scenario F: PT/ILC Support', () => {
     let rxToken, mgrToken;
 
     beforeAll(async () => {
+        await ensureTestLab('LAB-PT', 'PT');
         const suffix = Date.now();
         usersDb.create({ username: `rx_pt_${suffix}`, password: 'p', role: 'SAMPLE_RECEPTION', labId: 'LAB-PT', countries: ['PT'] });
         usersDb.create({ username: `mgr_pt_${suffix}`, password: 'p', role: 'LAB_MANAGER', labId: 'LAB-PT', countries: ['PT'] });

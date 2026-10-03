@@ -85,7 +85,7 @@ function handleExchangeError(err, req, res, next, defaultMessage = 'Internal Ser
  * Resolves IDs of samples currently on provenance hold using semantic JSON parsing.
  * Evaluates both metadata and fieldMetadata columns conservatively (fail-closed on malformed JSON or non-object).
  */
-function getHeldSampleIds(db) {
+function getHeldSampleIds(db, {publicationOnly = false} = {}) {
     let metaDb = db;
     let createdInstance = false;
     try {
@@ -125,7 +125,12 @@ function getHeldSampleIds(db) {
             if (createdInstance && metaDb.open) metaDb.close();
             return [];
         }
-        const rows = metaDb.prepare(`SELECT id FROM Sample WHERE ${conds.join(' OR ')}`).all();
+        // Only the restricted publication path may narrow candidate rows. All other callers
+        // retain broad hold discovery; incomplete schemas conservatively use that same broad query.
+        const eligible = publicationOnly && cols.has('status') && cols.has('approvedAt')
+            ? "(status IN ('APPROVED','RELEASED') OR (status IN ('ARCHIVED','DISPOSED') AND approvedAt IS NOT NULL)) AND "
+            : '';
+        const rows = metaDb.prepare(`SELECT id FROM Sample WHERE ${eligible}(${conds.join(' OR ')})`).all();
         if (createdInstance && metaDb.open) metaDb.close();
         return rows.map(r => r.id);
     } catch (e) {
@@ -178,7 +183,7 @@ function buildSampleWhere(auth, query = {}) {
         }
         try {
             const getHeldFn = (module.exports && typeof module.exports.getHeldSampleIds === 'function') ? module.exports.getHeldSampleIds : getHeldSampleIds;
-            const heldIds = getHeldFn();
+            const heldIds = getHeldFn(undefined, {publicationOnly: true});
             if (heldIds.length > 0) {
                 if (typeof where.id === 'string') {
                     if (heldIds.includes(where.id)) where.id = '__denied_held__';

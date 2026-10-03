@@ -2308,4 +2308,49 @@
       "applyFilters": "Aplicar filtros"
     }
   }
+,
+  "profileReference": {
+    "label": "Perfil do solo / ponto de amostragem",
+    "code": "Código registrado no campo",
+    "unknown": "Não registrado",
+    "namespace": "Referência do levantamento",
+    "meaning": "Significado registrado",
+    "help": "Use o código da ficha de campo. Ele é diferente da etiqueta do saco e do identificador do laboratório. Deixe-o desconhecido se a fonte não identificar um perfil ou ponto de amostragem.",
+    "confirmedHelp": "Selecione um perfil do solo confirmado apenas quando a ficha original verificar explicitamente a trincheira ou o perfil.",
+    "namespaceHelp": "A referência do levantamento é controlada pela configuração do projeto ou da fonte.",
+    "setUnknown": "Registrar como desconhecido",
+    "conflict": "A referência do perfil precisa de revisão. O trabalho do laboratório foi preservado.",
+    "correct": "Corrigir a referência de campo",
+    "correctionHelp": "Somente a proveniência muda. Os resultados analíticos e as versões anteriores dos relatórios publicados são preservados.",
+    "reason": "Motivo e verificação da fonte (obrigatórios)",
+    "saveFailed": "Não foi possível salvar. Os dados digitados foram preservados.",
+    "mappingTitle": "Mapeamento dos campos do perfil do solo",
+    "mappingHelp": "Insira os caminhos exatos do Kobo, como soil/pit_id. Use uma referência fixa ou seu caminho de origem, e um significado fixo ou seu caminho. D1/D2 identificam sacos; mapeie as profundidades medidas separadamente. As mudanças afetam novos registros; as identidades existentes são preservadas.",
+    "mappingSaved": "Mapeamento salvo. As identidades existentes foram preservadas.",
+    "fromSource": "Ponto de amostragem, salvo mapeamento explícito",
+    "relations": {
+      "SITE_POINT": "Ponto de amostragem / local",
+      "COMPOSITE": "Área de amostragem composta",
+      "CONFIRMED_PROFILE": "Perfil do solo / trincheira confirmado",
+      "UNSPECIFIED": "Não registrado"
+    },
+    "mapping": {
+      "codePath": "Caminho do código do perfil / trincheira",
+      "sitePath": "Caminho independente do código do local",
+      "namespace": "Referência fixa do levantamento",
+      "namespacePath": "Caminho da referência do levantamento",
+      "relationPath": "Caminho do significado registrado",
+      "collectionDatePath": "Caminho da data de coleta no campo",
+      "depthTopD1Path": "Caminho da profundidade superior D1 (cm)",
+      "depthBottomD1Path": "Caminho da profundidade inferior D1 (cm)",
+      "depthTopD2Path": "Caminho da profundidade superior D2 (cm)",
+      "depthBottomD2Path": "Caminho da profundidade inferior D2 (cm)"
+    },
+    "manifest": {
+      "profileCode": "Código do perfil / ponto de amostragem",
+      "profileNamespace": "Referência configurada do levantamento",
+      "profileRelation": "Significado registrado (SITE_POINT, COMPOSITE, CONFIRMED_PROFILE)",
+      "collectionDate": "Data de coleta no campo"
+    }
+  }
 }

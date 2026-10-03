@@ -1,3 +1,4 @@
+const { ensureTestLab } = require('../setup');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -10,6 +11,7 @@ describe('Stage A: Sample Reception Desk-Only Facts Contract (RC-01 - RC-04)', (
     const testAnalysisCode = 'TEST_AN_HEAVY';
 
     beforeAll(async () => {
+        await ensureTestLab('LAB-GTM', 'GTM');
         const token = await getAuthToken('SAMPLE_RECEPTION', testLab, ['GTM'], ['SOILFER-US']);
         authHeader = `Bearer ${token}`;
 

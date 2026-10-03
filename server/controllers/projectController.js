@@ -1849,6 +1849,8 @@ exports.getProjectKoboConfig = async (req, res) => {
             labId: config.labId,
             labName: config.labName,
             configId: config.id,
+            fieldMapping: config.fieldMapping ? JSON.parse(config.fieldMapping) : null,
+            updatedAt: config.updatedAt,
             isActive: config.isActive,
             status: config.isActive ? 'ACTIVE' : 'DISABLED',
             lastSyncAt: config.lastSyncAt,
@@ -2104,7 +2106,7 @@ exports.createProjectKoboConnection = async (req, res) => {
 
 exports.updateProjectKoboConnection = async (req, res) => {
     const { id, configId } = req.params;
-    const { formId, apiToken, koboServerUrl, isActive } = req.body;
+    const { formId, apiToken, koboServerUrl, isActive, fieldMapping, expectedRevision } = req.body;
 
     try {
         const project = await prisma.project.findFirst({
@@ -2132,23 +2134,13 @@ exports.updateProjectKoboConnection = async (req, res) => {
         if (apiToken) data.apiToken = apiToken;
         if (koboServerUrl) data.koboServerUrl = koboServerUrl;
         if (isActive !== undefined) data.isActive = Boolean(isActive);
+        if (fieldMapping !== undefined) {
+            require('../services/koboProfileService').validateMapping(fieldMapping);
+            if (!expectedRevision || new Date(expectedRevision).getTime() !== config.updatedAt.getTime()) return res.status(409).json({code: 'STALE_REVISION', message: 'The connection changed. Reload it before saving the field mapping.'});
+            data.fieldMapping = fieldMapping == null ? null : JSON.stringify(fieldMapping);
+        }
 
-        const updated = await prisma.koboConfig.update({
-            where: { id: configId },
-            data
-        });
-
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-kobo-update-${Date.now()}`,
-                entity: 'KOBO_CONFIG',
-                entityId: config.id,
-                action: 'KOBO_CONNECTION_UPDATED',
-                details: `Updated Kobo connection ${configId} for project ${project.code}`,
-                performedBy: req.user.username,
-                timestamp: new Date()
-            }
-        });
+        const updated = await require('../services/koboConfigurationService').save({actor: req.user, projectId: project.id, configId, data, expectedRevision});
 
         return res.json({
             id: updated.id,
@@ -2157,10 +2149,15 @@ exports.updateProjectKoboConnection = async (req, res) => {
             projectCode: updated.projectCode,
             formId: updated.formId,
             koboServerUrl: updated.koboServerUrl,
-            isActive: updated.isActive
+            isActive: updated.isActive,
+            fieldMapping: updated.fieldMapping ? JSON.parse(updated.fieldMapping) : null,
+            updatedAt: updated.updatedAt
         });
     } catch (err) {
         console.error('[updateProjectKoboConnection] Error:', err);
+        if (err instanceof require('../services/profileIdentityService').ProfileReferenceConflictError) return res.status(409).json({code: err.code, message: err.message});
+        if (err.code === 'P2025') return res.status(409).json({code: 'STALE_REVISION', message: 'The connection changed. Reload it before saving.'});
+        if ([403, 409].includes(err.status)) return res.status(err.status).json({code: err.code, message: err.message});
         return res.status(500).json({ error: 'Failed to update Kobo connection: ' + err.message });
     }
 };

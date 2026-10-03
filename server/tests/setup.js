@@ -21,6 +21,15 @@ require('../services/exchangeDbFunctions');
 const jwt = require('jsonwebtoken');
 const { usersDb } = require('../db');
 
+// Tests which physically receive specimens need a registered laboratory, just as production does.
+// This helper is opt-in and never reactivates an existing laboratory.
+async function ensureTestLab(id, country) {
+    if (process.env.NODE_ENV !== 'test') throw new Error('Test laboratory fixtures are test-only.');
+    return require('../prisma').lab.upsert({
+        where: {id}, update: {}, create: {id, code: id, name: `${id} test laboratory`, country}
+    });
+}
+
 /**
  * Generates a signed JWT for a given user object.
  */
@@ -62,5 +71,6 @@ async function getAuthToken(role = 'SUPER_ADMIN', labId = 'LAB-GTM', countries =
 
 module.exports = {
     generateToken,
-    getAuthToken
+    getAuthToken,
+    ensureTestLab
 };

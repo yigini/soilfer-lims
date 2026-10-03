@@ -432,7 +432,10 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         expect(s3.status).toBe('ACCEPTED');
         expect(s3.collectionDate).toBe('2026-09-22');
         const dbSample3 = await prisma.sample.findUnique({ where: { id: s3.id } });
-        expect(JSON.parse(dbSample3.fieldMetadata)).toEqual({ collectionDate: '2026-09-22' });
+        expect(JSON.parse(dbSample3.fieldMetadata)).toMatchObject({
+            collectionDate: '2026-09-22',
+            profileReference: {code: null, namespace: null, relation: 'UNSPECIFIED', source: 'MANIFEST_INTAKE'}
+        });
 
         // Verify sample 4: Rejected sample
         const s4 = res.body.samples.find(s => s.originalId === `FIELD-CSG-REJ-${runId}`);

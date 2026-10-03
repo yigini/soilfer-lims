@@ -1,23 +1,23 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Save, MapPin } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import LocationPicker from '../reception/LocationPicker';
 
 const MetadataEditorModal = ({ isOpen, onClose, sample, onSave }) => {
     const { user } = useAuth();
-    if (!isOpen || !sample) return null;
 
     const labCoordinates = user?.labCoordinates || (user?.labId === 'LAB-ZWE-01' || user?.labId === 'HARARE' ? [-17.8292, 31.0522] : null);
 
     const [formData, setFormData] = useState({});
+    const originalData = useRef({});
 
     // Helper to get initial value from fieldMetadata
-    const getVal = (key) => sample.fieldMetadata?.[key]?.value || '';
+    const getVal = (key) => sample.fieldMetadata?.[key]?.value ?? sample.fieldMetadata?.[key] ?? '';
 
     useEffect(() => {
         if (sample) {
-            setFormData({
+            const initial = {
                 // Identification
                 projectCode: sample.projectCode || getVal('projectCode'),
                 submitterName: getVal('submitterName'),
@@ -51,7 +51,9 @@ const MetadataEditorModal = ({ isOpen, onClose, sample, onSave }) => {
                 previousCrop: getVal('previousCrop'),
                 managementPractices: getVal('managementPractices'),
                 fertilizer: getVal('fertilizer')
-            });
+            };
+            originalData.current = initial;
+            setFormData(initial);
         }
     }, [sample]);
 
@@ -71,7 +73,7 @@ const MetadataEditorModal = ({ isOpen, onClose, sample, onSave }) => {
     };
 
     const handleSubmit = () => {
-        onSave(formData);
+        onSave(Object.fromEntries(Object.entries(formData).filter(([key, value])=>JSON.stringify(value) !== JSON.stringify(originalData.current[key]))));
     };
 
     const Section = ({ title, children }) => (
@@ -112,6 +114,7 @@ const MetadataEditorModal = ({ isOpen, onClose, sample, onSave }) => {
         </div>
     );
 
+    if (!isOpen || !sample) return null;
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-4 backdrop-blur-sm">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">

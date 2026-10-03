@@ -230,6 +230,8 @@ Following an epoch rotation:
 
 ## 7. Exchange Publication Eligibility & Retry Semantics (HTTP 503)
 
+For capture, reasoned corrections, namespace stability and the isolated two-layer receiver demonstration, see [the soil profile reference guide](profile-reference-guide.md). Receiver ingestion remains a separate acceptance step.
+
 ### 7.1 Fail-Closed Eligibility Semantics
 
 When evaluating sample eligibility for publication across both V1 and V2 exchange gateways (`/api/v1/sis`, `/api/v1/data-exchange`, `/api/v2/sis`, `/api/v2/data-exchange`), the server performs dynamic policy evaluation against durable provenance and intake hold tables.

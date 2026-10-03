@@ -9,7 +9,7 @@
  *    - All 7 country projects created with SOILFER_V1 template and primary lab links.
  *    - 100% sample conservation (0 samples lost, 0 duplicates).
  *    - Analytical results, QC batches, and report checksums 100% preserved.
- *    - Edge case S002 correctly assigned to SOILFER-GTM / GTM-LAB1 with SOILFER-US provenance.
+ *    - A specimen with unknown country is retained for review without changing its laboratory/project.
  *    - Edge case GHA0816-1-1C-S retained in unresolved records queue.
  *    - All 7 national KoboConfig records updated with explicit country projectCode.
  *    - Participating lab users' projects arrays updated with country projectCode.
@@ -71,6 +71,11 @@ describe('SoilFER Country Project Migration & Kobo Association (v2)', () => {
         testDb.prepare(`
             INSERT OR REPLACE INTO "Sample" (id, originalId, projectCode, projectId, country, status, createdAt, updatedAt)
             VALUES ('GHA0816-1-1C-S', 'GHA0816-1-1C-S', 'SOILFER-US', 'SoilFER-USA', 'GHA', 'EXPECTED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        `).run();
+        // Use an owned fixture; an accession such as S002 may belong to an unrelated earlier suite.
+        testDb.prepare(`
+            INSERT OR REPLACE INTO "Sample" (id, originalId, assignedLab, projectCode, projectId, country, status, createdAt, updatedAt)
+            VALUES ('MIGRATION-UNKNOWN-COUNTRY', 'MIGRATION-UNKNOWN-COUNTRY', 'LAB-GOLD', 'SOILFER-US', 'SoilFER-USA', NULL, 'EXPECTED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         `).run();
 
         // Populated test samples for results/batches/reports
@@ -244,12 +249,13 @@ describe('SoilFER Country Project Migration & Kobo Association (v2)', () => {
             expect(project.labId).toBe(cp.labId);
         }
 
-        // Verification of sample with missing country (S002) in unresolved records queue
-        const s002 = postDb.prepare('SELECT * FROM "Sample" WHERE id = ? OR labId = ? OR originalId = ?').get('TEST-1788651185926', 'S002', 'S002');
-        if (s002 && !s002.country) {
-            expect(result.audit.unresolvedRecords.some(r => r.sampleId === s002.id)).toBe(true);
-            expect(s002.assignedLab).toBe('LAB-GOLD'); // Preserved, not overwritten to GTM-LAB1
-        }
+        // Verification of the owned missing-country fixture in the unresolved records queue
+        const s002 = postDb.prepare('SELECT * FROM "Sample" WHERE id = ?').get('MIGRATION-UNKNOWN-COUNTRY');
+        expect(s002).toBeDefined();
+        expect(s002.country).toBeNull();
+        expect(result.audit.unresolvedRecords.some(r => r.sampleId === s002.id)).toBe(true);
+        expect(s002.assignedLab).toBe('LAB-GOLD'); // Preserved, not overwritten to GTM-LAB1
+        expect(s002.projectCode).toBe('SOILFER-US');
 
         // Verification of edge case GHA0816-1-1C-S in unresolved records queue
         expect(result.audit.unresolvedRecords.some(r => r.sampleId === 'GHA0816-1-1C-S')).toBe(true);

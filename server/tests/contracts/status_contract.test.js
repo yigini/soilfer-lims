@@ -1,3 +1,4 @@
+const { ensureTestLab } = require('../setup');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -7,6 +8,7 @@ describe('8.1 Section A: Status Contract Enforcement', () => {
     let sampleId;
 
     beforeAll(async () => {
+        await ensureTestLab('LAB-GTM', 'GTM');
         managerToken = await getAuthToken('LAB_MANAGER');
     });
 
