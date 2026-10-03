@@ -211,7 +211,7 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
 
         beforeEach(() => {
             holdSpy = jest.spyOn(exchangePolicyService, 'getHeldSampleIds').mockImplementation(() => {
-                throw new Error('Simulated SQLite contention / lock timeout during hold lookup');
+                throw new Error('SQLITE_BUSY: /srv/private/lab.db; SELECT secret FROM Sample; token=private-fixture');
             });
         });
 
@@ -238,10 +238,11 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
                 expect(res.body).toEqual({
                     error: 'Service Unavailable',
                     code: 'EXCHANGE_ELIGIBILITY_UNAVAILABLE',
-                    message: expect.stringContaining('Exchange publication eligibility evaluation is temporarily unavailable'),
+                    message: 'Exchange publication eligibility evaluation is temporarily unavailable.',
                     retryAfter: 5,
                     requestId: res.headers['x-request-id']
                 });
+                expect(JSON.stringify(res.body)).not.toMatch(/private|SQLITE|SELECT|token=/);
             }
         });
 

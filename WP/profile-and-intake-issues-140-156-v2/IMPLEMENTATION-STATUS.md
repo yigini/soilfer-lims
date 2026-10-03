@@ -17,9 +17,24 @@ Package validation: nine nonempty files including the example; eight relative Ma
 
 | Increment | Implementation | PR / exact head | CI / acceptance | Deployment / live verification |
 |---|---|---|---|---|
-| A0: exchange errors and timing | Completed | [PR #158](https://github.com/yigini/soilfer-lims/pull/158) head `fe344f6` (`feat/issue-140-a0-exchange-eligibility-503`) | Verified (E01, E02, E03, E05, E07-min, E11; 31/31 contract tests pass) | CI in progress; pending merge / deployment gate |
-| A: profile identities, fixture and measured speed | Pending | Pending | Pending | Pending |
+| A0: exchange errors and timing | Completed & Merged | [PR #158](https://github.com/yigini/soilfer-lims/pull/158) merged to `main` at `32f04e2195047e824eb76bc89ea0a0a779ad9097` (head `178e0c8083e579c69a97c66af51304fbb6ebf633`) | Verified (E01, E02, E03, E05, E07-min, E11; 31/31 contract tests pass). PR CI 37147180087 passed. Merged-main CI 37147737802 in progress. | Production cutover held per owner instruction (database path redaction to be applied by Codex). Nothing deployed. |
+| A: profile identities, fixture and measured speed | Partial (Handoff to Codex) | Branch `feat/issue-140-a-profile-identities-fixture` | In-progress (P01-P03, P10 partial; unit tests pass; contract tests pending Codex completion) | Not deployed |
 | B1: consistent online/offline intake and basic settings | Pending | Pending | Pending | Pending |
 | B2: custom criteria/context and bounded editor | Pending | Pending | Pending | Pending |
 
-Use ACCEPTANCE-CHECKLIST.md for the finite item-level evidence. Agy should update this short record with concrete commit/PR/action/evidence links as work progresses; do not replace pending with success until observed. Record actual receiver acceptance separately on #140. Keep #156 open through B2 completion.
+Use ACCEPTANCE-CHECKLIST.md for the finite item-level evidence. On 3 October 2026, owner authorized Codex takeover for implementation, testing, and release verification. Antigravity writing has stopped; all timers cancelled; worktree preserved intact for Codex.
+
+## Codex implementation checkpoint
+
+Codex is the sole product writer following the owner's explicit takeover request. Agy acknowledged the handoff in the existing LIMS Dev conversation and reported that nothing was deployed. Its partial A files remain intact in `C:/Users/yigin/Documents/soilfer-lims-profile-intake`. Active Codex checkout: `C:/Users/yigin/.codex/worktrees/profile-intake-delivery/soilfer-lims`, branch `codex/profile-intake-delivery`, starting from the exact PR158 merge above.
+
+Independent review of PR158 found that the new eligibility503 response reflected underlying database exception messages. Production cutover remains held while the small follow-up is reviewed: one constant public message, private underlying cause, truthful classification of eligibility failures, server-only correlation, and route-template diagnostics without bag IDs/query data.
+
+Focused verification on 3 October 2026 in the isolated Codex checkout used a disposable test copy (no production mutation):
+
+```text
+node node_modules/jest/bin/jest.js --runInBand --runTestsByPath tests/contracts/exchange_diagnostics_privacy.test.js tests/contracts/exchange_error_semantics.test.js --testMatch '**/*.test.js'
+```
+
+Result: **2 suites, 21 tests passed**. The route tests inject sensitive-looking database errors through all four deployed aliases; the new tests cover public redaction, unrelated errors and minimized phase diagnostics. The explicit testMatch override accommodates Jest path matching under the Windows `.codex` worktree; the initial default-match attempts found no tests and are not counted as verification. GitHub/review/deployment evidence for this follow-up is pending. No claim of full A0 release completion is made.
+

@@ -71,7 +71,8 @@ function exchangeCorrelationMiddleware(req, res, next) {
             const phaseParts = Object.entries(req.exchangeTiming.phases)
                 .map(([p, ms]) => `${p}=${ms}ms`)
                 .join(' ');
-            console.log(`[EXCHANGE_OP] id=${requestId} method=${req.method} url=${req.baseUrl || ''}${req.path} status=${res.statusCode} total=${totalMs}ms ${phaseParts}`.trim());
+            const route = typeof req.route?.path === 'string' ? req.route.path : '[unmatched]';
+            console.log(`[EXCHANGE_OP] id=${requestId} method=${req.method} route=${route} status=${res.statusCode} total=${totalMs}ms ${phaseParts}`.trim());
         }
     });
 
