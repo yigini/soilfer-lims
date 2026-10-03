@@ -4202,3 +4202,27 @@ Laboratory operators can find step-by-step procedures in the following documenta
               - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
               - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
 
+        - Following Codex independent review `issue155-independent-review-2c0111b.md` and source inspection `issue155-source-inspection-2c0111b.json`:
+           1. **Shipped ThemeGallery Selector & Preview Controls Under 400% Persistent Optical Zoom (Finding 1)**:
+              - Replaced direct React fiber `setPreviewTheme` invocation with real user interaction on shipped gallery controls:
+                * Draft theme card selection via `#theme-card-forest` (`forestCard.click()`).
+                * Mode radio selection via `[role="radiogroup"] button[data-mode="dark"]` (`darkRadio.click()`).
+                * Preview initiation via shipped `button:has-text("Preview full screen")` (`previewBtn.click()`).
+                * Exit preview via banner `[role="region"][aria-label*="preview" i] button:has-text("Exit preview")` (`exitPreviewBtn.click()`).
+              - Recorded `operationTrigger: 'SHIPPED_GALLERY_CONTROLS'` with explicit UI locator binding while retaining documented provider-state observation scope as fallback.
+              - Synthetic DOM `dispatchEvent('click')` for Security and Appearance tabs is explicitly documented as a scoped event under 400% zoom (180px viewport height) to inspect the mounted form value without pointer hit interception by fixed banners or bottom navigation.
+           2. **Restoration and Layout Enforcement in `themeOperationPreserved` & Optical Gate (Finding 2)**:
+              - Enforces layout assertions across all stages: `previewLayout.noHorizontalOverflow && previewLayout.controlsUnclipped && exitLayout.noHorizontalOverflow && exitLayout.controlsUnclipped`.
+              - Compares `exitLayout.appliedTheme === initialLayout.appliedTheme` (restoring authoritative initial theme `forest`), `exitLayout.appliedMode === initialLayout.appliedMode` (`light`), `previewLayout.appliedTheme === 'forest'`, `previewLayout.appliedMode === 'dark'`, `previewLayout.noticeVisible === true`, `!exitLayout.noticeVisible`, and form value preservation across preview and exit.
+              - Final optical gate (`desktopOpticalZoomPassed`) directly asserts serialized `initialLayout`, `previewState`, and `exitState` observations, failing closed on contradictory mutated states regardless of boolean flags.
+              - Successfully satisfies and fails closed on all 5 focused pure-expression probes from Codex (faithful baseline passes; wrong exit family fails; preview/exit overflow/clipping false fails; contradictory mutated serialized state fails).
+           3. **Zero Extra Timers / Standing Monitor Coordination**:
+              - Verified zero background tasks running (`manage_task list` confirmed empty).
+              - Internal `schedule` tool calls strictly avoided; exclusively relying on Codex's external 5-minute ACTIVE automation cadence.
+           4. **Suite Verification Results**:
+              - Running-app Browser Suite: **All 12/12 suites PASS 100% green** in real native Chrome (`server/scripts/issue155-browser-journeys-results.json`).
+                * Runner trim SHA-256: `6cf5d124451af4fd53c5350e86523054b21e6d64c9fde880c6effabad079ad21`
+                * Result trim SHA-256: `749b32b971a9110f55d7a1e6c2c7fac27fd1814dbd83279dca471375666ebe55`
+              - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
+              - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
+              - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.

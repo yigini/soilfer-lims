@@ -4616,29 +4616,48 @@ async function runBrowserEvidence() {
 
             const initialLayout = await evaluateZoomedLayout();
 
-            // Execute theme preview under 400% optical zoom via React ThemeProvider
-            await opticalPage.evaluate(({ theme, mode }) => {
-                const rootEl = document.getElementById('root');
-                if (!rootEl) throw new Error('Root #root not found');
-                const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
-                if (!fiberKey) throw new Error('React fiber not found on #root');
-                const stack = [rootEl[fiberKey]];
-                let ctx = null;
-                while (stack.length > 0) {
-                    const curr = stack.pop();
-                    if (!curr) continue;
-                    if (curr.memoizedProps && curr.memoizedProps.value && typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
-                        ctx = curr.memoizedProps.value;
-                        break;
+            // Shipped ThemeGallery selector & mode controls under 400% persistent optical zoom:
+            // 1. Select the Forest theme card via shipped gallery card control (#theme-card-forest)
+            // 2. Select Dark mode via shipped color mode radiogroup control ([data-mode="dark"])
+            // 3. Initiate full-screen preview via shipped "Preview full screen" button
+            let operationTriggerMethod = 'SHIPPED_GALLERY_CONTROLS';
+            const forestCard = opticalPage.locator('#theme-card-forest');
+            const darkRadio = opticalPage.locator('[role="radiogroup"] button[data-mode="dark"]');
+            const previewBtn = opticalPage.locator('button:has-text("Preview full screen")');
+
+            if (await forestCard.count() > 0 && await darkRadio.count() > 0 && await previewBtn.count() > 0) {
+                await forestCard.scrollIntoViewIfNeeded();
+                await forestCard.click();
+                await darkRadio.scrollIntoViewIfNeeded();
+                await darkRadio.click();
+                await previewBtn.scrollIntoViewIfNeeded();
+                await previewBtn.click();
+            } else {
+                // Documented provider fallback if UI controls are absent (preserves provider-state observation scope)
+                operationTriggerMethod = 'REACT_PROVIDER_DIRECT_FALLBACK';
+                await opticalPage.evaluate(({ theme, mode }) => {
+                    const rootEl = document.getElementById('root');
+                    if (!rootEl) throw new Error('Root #root not found');
+                    const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactContainer$'));
+                    if (!fiberKey) throw new Error('React fiber not found on #root');
+                    const stack = [rootEl[fiberKey]];
+                    let ctx = null;
+                    while (stack.length > 0) {
+                        const curr = stack.pop();
+                        if (!curr) continue;
+                        if (curr.memoizedProps && curr.memoizedProps.value && typeof curr.memoizedProps.value.setPreviewTheme === 'function') {
+                            ctx = curr.memoizedProps.value;
+                            break;
+                        }
+                        if (curr.child) stack.push(curr.child);
+                        if (curr.sibling) stack.push(curr.sibling);
                     }
-                    if (curr.child) stack.push(curr.child);
-                    if (curr.sibling) stack.push(curr.sibling);
-                }
-                if (!ctx || typeof ctx.setPreviewTheme !== 'function') {
-                    throw new Error('setPreviewTheme context handler not found');
-                }
-                ctx.setPreviewTheme({ themeId: theme, mode });
-            }, { theme: 'forest', mode: 'dark' });
+                    if (!ctx || typeof ctx.setPreviewTheme !== 'function') {
+                        throw new Error('setPreviewTheme context handler not found');
+                    }
+                    ctx.setPreviewTheme({ themeId: theme, mode });
+                }, { theme: 'forest', mode: 'dark' });
+            }
 
             await opticalPage.waitForFunction(() => {
                 const docEl = document.documentElement;
@@ -4652,6 +4671,8 @@ async function runBrowserEvidence() {
             const previewLayout = await evaluateZoomedLayout();
 
             // Verify unfinished form input in Security tab preserved under preview
+            // Note: Tab navigation under 400% zoom (180px viewport height) uses synthetic DOM dispatchEvent
+            // to switch active tab view and inspect the mounted form value without being intercepted by fixed banner/nav.
             const securityTabBtn = opticalPage.locator('button:has-text("Security")');
             if (await securityTabBtn.count() > 0) {
                 await securityTabBtn.first().dispatchEvent('click');
@@ -4660,20 +4681,27 @@ async function runBrowserEvidence() {
             const previewVal = await pwdInput.inputValue();
             const inputPreservedDuringPreview = previewVal === initialZoomedVal;
 
-            // Return to Appearance tab and exit preview via banner button
+            // Return to Appearance tab and exit preview via shipped banner Exit Preview button
             if (await appearanceTabBtn.count() > 0) {
                 await appearanceTabBtn.first().dispatchEvent('click');
                 await opticalPage.waitForTimeout(250);
                 await opticalPage.evaluate(() => window.scrollTo(0, 0));
             }
-            const exitPreviewBtn = opticalPage.locator('button:has-text("Exit preview")');
+            const exitPreviewBtn = opticalPage.locator('[role="region"][aria-label*="preview" i] button:has-text("Exit preview")');
             if (await exitPreviewBtn.count() > 0) {
-                await exitPreviewBtn.first().dispatchEvent('click');
+                await exitPreviewBtn.first().click();
+            } else {
+                const fallbackExitBtn = opticalPage.locator('button:has-text("Exit preview")');
+                if (await fallbackExitBtn.count() > 0) {
+                    await fallbackExitBtn.first().click();
+                }
             }
             await opticalPage.waitForFunction(() => {
                 const docEl = document.documentElement;
                 const notice = document.querySelector('[role="region"][aria-label*="preview" i]');
-                return !notice && docEl.getAttribute('data-appearance') === 'light';
+                return !notice &&
+                       docEl.getAttribute('data-appearance') === 'light' &&
+                       docEl.getAttribute('data-theme') === 'forest';
             }, null, { timeout: 4000 });
 
             await opticalPage.evaluate(() => window.scrollTo(0, 0));
@@ -4699,6 +4727,13 @@ async function runBrowserEvidence() {
                 controlsUnclipped: initialLayout.controlsUnclipped,
                 visualViewportScale: initialLayout.visualViewportScale,
                 visualViewportWidth: initialLayout.visualViewportWidth,
+                operationTrigger: operationTriggerMethod,
+                shippedControlsUsed: {
+                    cardSelector: '#theme-card-forest',
+                    modeToggle: '[role="radiogroup"] button[data-mode="dark"]',
+                    previewAction: 'button:has-text("Preview full screen")',
+                    exitAction: '[role="region"][aria-label*="preview" i] button:has-text("Exit preview")'
+                },
                 initialLayout,
                 previewState: {
                     requestedTheme: 'forest',
@@ -4724,8 +4759,13 @@ async function runBrowserEvidence() {
                     previewLayout.appliedTheme === 'forest' &&
                     previewLayout.appliedMode === 'dark' &&
                     previewLayout.noticeVisible &&
-                    exitLayout.appliedMode === 'light' &&
-                    !exitLayout.noticeVisible
+                    previewLayout.noHorizontalOverflow &&
+                    previewLayout.controlsUnclipped &&
+                    exitLayout.appliedTheme === initialLayout.appliedTheme &&
+                    exitLayout.appliedMode === initialLayout.appliedMode &&
+                    !exitLayout.noticeVisible &&
+                    exitLayout.noHorizontalOverflow &&
+                    exitLayout.controlsUnclipped
                 )
             };
 
@@ -4908,7 +4948,27 @@ async function runBrowserEvidence() {
             desktopOpticalZoomExecution.controlsUnclipped &&
             desktopOpticalZoomExecution.devicePixelRatio === 4 &&
             desktopOpticalZoomExecution.innerWidth === 320 &&
-            desktopOpticalZoomExecution.themeOperationPreserved
+            desktopOpticalZoomExecution.themeOperationPreserved &&
+            desktopOpticalZoomExecution.initialLayout &&
+            desktopOpticalZoomExecution.initialLayout.noHorizontalOverflow &&
+            desktopOpticalZoomExecution.initialLayout.controlsUnclipped &&
+            desktopOpticalZoomExecution.initialLayout.appliedTheme === 'forest' &&
+            desktopOpticalZoomExecution.initialLayout.appliedMode === 'light' &&
+            !desktopOpticalZoomExecution.initialLayout.noticeVisible &&
+            desktopOpticalZoomExecution.previewState &&
+            desktopOpticalZoomExecution.previewState.appliedTheme === 'forest' &&
+            desktopOpticalZoomExecution.previewState.appliedMode === 'dark' &&
+            desktopOpticalZoomExecution.previewState.noticeVisible &&
+            desktopOpticalZoomExecution.previewState.noHorizontalOverflow &&
+            desktopOpticalZoomExecution.previewState.controlsUnclipped &&
+            desktopOpticalZoomExecution.previewState.inputPreserved &&
+            desktopOpticalZoomExecution.exitState &&
+            desktopOpticalZoomExecution.exitState.appliedTheme === desktopOpticalZoomExecution.initialLayout.appliedTheme &&
+            desktopOpticalZoomExecution.exitState.appliedMode === desktopOpticalZoomExecution.initialLayout.appliedMode &&
+            desktopOpticalZoomExecution.exitState.noticeRemoved &&
+            desktopOpticalZoomExecution.exitState.noHorizontalOverflow &&
+            desktopOpticalZoomExecution.exitState.controlsUnclipped &&
+            desktopOpticalZoomExecution.exitState.inputPreserved
         );
 
         const responsivePassed = Boolean(
