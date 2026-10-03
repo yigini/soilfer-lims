@@ -5937,35 +5937,114 @@ async function runBrowserEvidence() {
                         if (!n) continue;
                         let coord = null;
                         let isAnchor = false;
-                        if (typeof n.getAttribute === 'function') {
-                            const attr = n.getAttribute(axisDim);
-                            if (attr !== null) {
-                                const num = parseFloat(attr);
-                                if (!isNaN(num) && isFinite(num)) {
-                                    hasCoords = true;
-                                    checked++;
-                                    if (num !== 0) allZero = false;
-                                    coord = num;
-                                    isAnchor = true;
+
+                        let tickMat = null;
+                        if (typeof n.getCTM === 'function') {
+                            try {
+                                const ctm = n.getCTM();
+                                if (ctm && typeof ctm.a === 'number' && typeof ctm.d === 'number') {
+                                    tickMat = {
+                                        a: ctm.a,
+                                        b: typeof ctm.b === 'number' ? ctm.b : 0,
+                                        c: typeof ctm.c === 'number' ? ctm.c : 0,
+                                        d: ctm.d,
+                                        e: typeof ctm.e === 'number' ? ctm.e : 0,
+                                        f: typeof ctm.f === 'number' ? ctm.f : 0
+                                    };
                                 }
+                            } catch (_) {}
+                        }
+                        if (!tickMat && typeof n.getScreenCTM === 'function') {
+                            try {
+                                const sctm = n.getScreenCTM();
+                                if (sctm && typeof sctm.a === 'number' && typeof sctm.d === 'number') {
+                                    tickMat = {
+                                        a: sctm.a,
+                                        b: typeof sctm.b === 'number' ? sctm.b : 0,
+                                        c: typeof sctm.c === 'number' ? sctm.c : 0,
+                                        d: sctm.d,
+                                        e: typeof sctm.e === 'number' ? sctm.e : 0,
+                                        f: typeof sctm.f === 'number' ? sctm.f : 0
+                                    };
+                                }
+                            } catch (_) {}
+                        }
+                        if (!tickMat) {
+                            let cur = n;
+                            const transforms = [];
+                            while (cur && cur.nodeType === 1) {
+                                const tag = (cur.tagName || cur.nodeName || '').toLowerCase();
+                                if (typeof cur.getAttribute === 'function') {
+                                    const tr = cur.getAttribute('transform');
+                                    if (tr) transforms.unshift(tr);
+                                }
+                                if (tag === 'svg') break;
+                                cur = cur.parentElement;
                             }
-                            if (coord === null) {
-                                const tr = n.getAttribute('transform');
-                                if (tr) {
-                                    const m = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\)/);
-                                    if (m) {
-                                        const trVal = parseFloat(axisDim === 'x' ? m[1] : (m[2] || m[1]));
-                                        if (!isNaN(trVal) && isFinite(trVal)) {
-                                            hasCoords = true;
-                                            checked++;
-                                            if (trVal !== 0) allZero = false;
-                                            coord = trVal;
-                                            isAnchor = true;
-                                        }
-                                    }
+                            tickMat = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+                            for (const tr of transforms) {
+                                const transMatch = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
+                                if (transMatch) {
+                                    const tx = parseFloat(transMatch[1]) || 0;
+                                    const ty = parseFloat(transMatch[2]) || 0;
+                                    tickMat.e += tickMat.a * tx + tickMat.c * ty;
+                                    tickMat.f += tickMat.b * tx + tickMat.d * ty;
+                                }
+                                const matMatch = tr.match(/matrix\(\s*([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)\s*\)/);
+                                if (matMatch) {
+                                    const [ma, mb, mc, md, me, mf] = matMatch.slice(1, 7).map(Number);
+                                    const na = tickMat.a * ma + tickMat.c * mb;
+                                    const nb = tickMat.b * ma + tickMat.d * mb;
+                                    const nc = tickMat.a * mc + tickMat.c * md;
+                                    const nd = tickMat.b * mc + tickMat.d * md;
+                                    const ne = tickMat.a * me + tickMat.c * mf + tickMat.e;
+                                    const nf = tickMat.b * me + tickMat.d * mf + tickMat.f;
+                                    tickMat = { a: na, b: nb, c: nc, d: nd, e: ne, f: nf };
+                                }
+                                const scaleMatch = tr.match(/scale\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
+                                if (scaleMatch) {
+                                    const sx = parseFloat(scaleMatch[1]) || 1;
+                                    const sy = parseFloat(scaleMatch[2]) !== undefined && !isNaN(parseFloat(scaleMatch[2])) ? parseFloat(scaleMatch[2]) : sx;
+                                    tickMat.a *= sx;
+                                    tickMat.b *= sx;
+                                    tickMat.c *= sy;
+                                    tickMat.d *= sy;
                                 }
                             }
                         }
+
+                        let rawX = 0;
+                        let rawY = 0;
+                        let hasAttr = false;
+                        if (typeof n.getAttribute === 'function') {
+                            const ax = n.getAttribute('x');
+                            if (ax !== null) {
+                                const nx = parseFloat(ax);
+                                if (!isNaN(nx) && isFinite(nx)) {
+                                    rawX = nx;
+                                    hasAttr = true;
+                                }
+                            }
+                            const ay = n.getAttribute('y');
+                            if (ay !== null) {
+                                const ny = parseFloat(ay);
+                                if (!isNaN(ny) && isFinite(ny)) {
+                                    rawY = ny;
+                                    hasAttr = true;
+                                }
+                            }
+                        }
+
+                        if (hasAttr || tickMat.e !== 0 || tickMat.f !== 0) {
+                            coord = axisDim === 'x'
+                                ? (tickMat.a * rawX + tickMat.c * rawY + tickMat.e)
+                                : (tickMat.b * rawX + tickMat.d * rawY + tickMat.f);
+                            hasCoords = true;
+                            checked++;
+                            if (coord !== 0) allZero = false;
+                            isAnchor = true;
+                        }
+
                         if (typeof n.getBoundingClientRect === 'function') {
                             const r = n.getBoundingClientRect();
                             if (r) {
@@ -6428,35 +6507,114 @@ async function runBrowserEvidence() {
                             if (!n) continue;
                             let coord = null;
                             let isAnchor = false;
-                            if (typeof n.getAttribute === 'function') {
-                                const attr = n.getAttribute(axisDim);
-                                if (attr !== null) {
-                                    const num = parseFloat(attr);
-                                    if (!isNaN(num) && isFinite(num)) {
-                                        hasCoords = true;
-                                        checked++;
-                                        if (num !== 0) allZero = false;
-                                        coord = num;
-                                        isAnchor = true;
+
+                            let tickMat = null;
+                            if (typeof n.getCTM === 'function') {
+                                try {
+                                    const ctm = n.getCTM();
+                                    if (ctm && typeof ctm.a === 'number' && typeof ctm.d === 'number') {
+                                        tickMat = {
+                                            a: ctm.a,
+                                            b: typeof ctm.b === 'number' ? ctm.b : 0,
+                                            c: typeof ctm.c === 'number' ? ctm.c : 0,
+                                            d: ctm.d,
+                                            e: typeof ctm.e === 'number' ? ctm.e : 0,
+                                            f: typeof ctm.f === 'number' ? ctm.f : 0
+                                        };
                                     }
+                                } catch (_) {}
+                            }
+                            if (!tickMat && typeof n.getScreenCTM === 'function') {
+                                try {
+                                    const sctm = n.getScreenCTM();
+                                    if (sctm && typeof sctm.a === 'number' && typeof sctm.d === 'number') {
+                                        tickMat = {
+                                            a: sctm.a,
+                                            b: typeof sctm.b === 'number' ? sctm.b : 0,
+                                            c: typeof sctm.c === 'number' ? sctm.c : 0,
+                                            d: sctm.d,
+                                            e: typeof sctm.e === 'number' ? sctm.e : 0,
+                                            f: typeof sctm.f === 'number' ? sctm.f : 0
+                                        };
+                                    }
+                                } catch (_) {}
+                            }
+                            if (!tickMat) {
+                                let cur = n;
+                                const transforms = [];
+                                while (cur && cur.nodeType === 1) {
+                                    const tag = (cur.tagName || cur.nodeName || '').toLowerCase();
+                                    if (typeof cur.getAttribute === 'function') {
+                                        const tr = cur.getAttribute('transform');
+                                        if (tr) transforms.unshift(tr);
+                                    }
+                                    if (tag === 'svg') break;
+                                    cur = cur.parentElement;
                                 }
-                                if (coord === null) {
-                                    const tr = n.getAttribute('transform');
-                                    if (tr) {
-                                        const m = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\)/);
-                                        if (m) {
-                                            const trVal = parseFloat(axisDim === 'x' ? m[1] : (m[2] || m[1]));
-                                            if (!isNaN(trVal) && isFinite(trVal)) {
-                                                hasCoords = true;
-                                                checked++;
-                                                if (trVal !== 0) allZero = false;
-                                                coord = trVal;
-                                                isAnchor = true;
-                                            }
-                                        }
+                                tickMat = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+                                for (const tr of transforms) {
+                                    const transMatch = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
+                                    if (transMatch) {
+                                        const tx = parseFloat(transMatch[1]) || 0;
+                                        const ty = parseFloat(transMatch[2]) || 0;
+                                        tickMat.e += tickMat.a * tx + tickMat.c * ty;
+                                        tickMat.f += tickMat.b * tx + tickMat.d * ty;
+                                    }
+                                    const matMatch = tr.match(/matrix\(\s*([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)\s*\)/);
+                                    if (matMatch) {
+                                        const [ma, mb, mc, md, me, mf] = matMatch.slice(1, 7).map(Number);
+                                        const na = tickMat.a * ma + tickMat.c * mb;
+                                        const nb = tickMat.b * ma + tickMat.d * mb;
+                                        const nc = tickMat.a * mc + tickMat.c * md;
+                                        const nd = tickMat.b * mc + tickMat.d * md;
+                                        const ne = tickMat.a * me + tickMat.c * mf + tickMat.e;
+                                        const nf = tickMat.b * me + tickMat.d * mf + tickMat.f;
+                                        tickMat = { a: na, b: nb, c: nc, d: nd, e: ne, f: nf };
+                                    }
+                                    const scaleMatch = tr.match(/scale\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
+                                    if (scaleMatch) {
+                                        const sx = parseFloat(scaleMatch[1]) || 1;
+                                        const sy = parseFloat(scaleMatch[2]) !== undefined && !isNaN(parseFloat(scaleMatch[2])) ? parseFloat(scaleMatch[2]) : sx;
+                                        tickMat.a *= sx;
+                                        tickMat.b *= sx;
+                                        tickMat.c *= sy;
+                                        tickMat.d *= sy;
                                     }
                                 }
                             }
+
+                            let rawX = 0;
+                            let rawY = 0;
+                            let hasAttr = false;
+                            if (typeof n.getAttribute === 'function') {
+                                const ax = n.getAttribute('x');
+                                if (ax !== null) {
+                                    const nx = parseFloat(ax);
+                                    if (!isNaN(nx) && isFinite(nx)) {
+                                        rawX = nx;
+                                        hasAttr = true;
+                                    }
+                                }
+                                const ay = n.getAttribute('y');
+                                if (ay !== null) {
+                                    const ny = parseFloat(ay);
+                                    if (!isNaN(ny) && isFinite(ny)) {
+                                        rawY = ny;
+                                        hasAttr = true;
+                                    }
+                                }
+                            }
+
+                            if (hasAttr || tickMat.e !== 0 || tickMat.f !== 0) {
+                                coord = axisDim === 'x'
+                                    ? (tickMat.a * rawX + tickMat.c * rawY + tickMat.e)
+                                    : (tickMat.b * rawX + tickMat.d * rawY + tickMat.f);
+                                hasCoords = true;
+                                checked++;
+                                if (coord !== 0) allZero = false;
+                                isAnchor = true;
+                            }
+
                             if (typeof n.getBoundingClientRect === 'function') {
                                 const r = n.getBoundingClientRect();
                                 if (r) {
@@ -6890,35 +7048,114 @@ async function runBrowserEvidence() {
                             if (!n) continue;
                             let coord = null;
                             let isAnchor = false;
-                            if (typeof n.getAttribute === 'function') {
-                                const attr = n.getAttribute(axisDim);
-                                if (attr !== null) {
-                                    const num = parseFloat(attr);
-                                    if (!isNaN(num) && isFinite(num)) {
-                                        hasCoords = true;
-                                        checked++;
-                                        if (num !== 0) allZero = false;
-                                        coord = num;
-                                        isAnchor = true;
+
+                            let tickMat = null;
+                            if (typeof n.getCTM === 'function') {
+                                try {
+                                    const ctm = n.getCTM();
+                                    if (ctm && typeof ctm.a === 'number' && typeof ctm.d === 'number') {
+                                        tickMat = {
+                                            a: ctm.a,
+                                            b: typeof ctm.b === 'number' ? ctm.b : 0,
+                                            c: typeof ctm.c === 'number' ? ctm.c : 0,
+                                            d: ctm.d,
+                                            e: typeof ctm.e === 'number' ? ctm.e : 0,
+                                            f: typeof ctm.f === 'number' ? ctm.f : 0
+                                        };
                                     }
+                                } catch (_) {}
+                            }
+                            if (!tickMat && typeof n.getScreenCTM === 'function') {
+                                try {
+                                    const sctm = n.getScreenCTM();
+                                    if (sctm && typeof sctm.a === 'number' && typeof sctm.d === 'number') {
+                                        tickMat = {
+                                            a: sctm.a,
+                                            b: typeof sctm.b === 'number' ? sctm.b : 0,
+                                            c: typeof sctm.c === 'number' ? sctm.c : 0,
+                                            d: sctm.d,
+                                            e: typeof sctm.e === 'number' ? sctm.e : 0,
+                                            f: typeof sctm.f === 'number' ? sctm.f : 0
+                                        };
+                                    }
+                                } catch (_) {}
+                            }
+                            if (!tickMat) {
+                                let cur = n;
+                                const transforms = [];
+                                while (cur && cur.nodeType === 1) {
+                                    const tag = (cur.tagName || cur.nodeName || '').toLowerCase();
+                                    if (typeof cur.getAttribute === 'function') {
+                                        const tr = cur.getAttribute('transform');
+                                        if (tr) transforms.unshift(tr);
+                                    }
+                                    if (tag === 'svg') break;
+                                    cur = cur.parentElement;
                                 }
-                                if (coord === null) {
-                                    const tr = n.getAttribute('transform');
-                                    if (tr) {
-                                        const m = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\)/);
-                                        if (m) {
-                                            const trVal = parseFloat(axisDim === 'x' ? m[1] : (m[2] || m[1]));
-                                            if (!isNaN(trVal) && isFinite(trVal)) {
-                                                hasCoords = true;
-                                                checked++;
-                                                if (trVal !== 0) allZero = false;
-                                                coord = trVal;
-                                                isAnchor = true;
-                                            }
-                                        }
+                                tickMat = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+                                for (const tr of transforms) {
+                                    const transMatch = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
+                                    if (transMatch) {
+                                        const tx = parseFloat(transMatch[1]) || 0;
+                                        const ty = parseFloat(transMatch[2]) || 0;
+                                        tickMat.e += tickMat.a * tx + tickMat.c * ty;
+                                        tickMat.f += tickMat.b * tx + tickMat.d * ty;
+                                    }
+                                    const matMatch = tr.match(/matrix\(\s*([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)\s*\)/);
+                                    if (matMatch) {
+                                        const [ma, mb, mc, md, me, mf] = matMatch.slice(1, 7).map(Number);
+                                        const na = tickMat.a * ma + tickMat.c * mb;
+                                        const nb = tickMat.b * ma + tickMat.d * mb;
+                                        const nc = tickMat.a * mc + tickMat.c * md;
+                                        const nd = tickMat.b * mc + tickMat.d * md;
+                                        const ne = tickMat.a * me + tickMat.c * mf + tickMat.e;
+                                        const nf = tickMat.b * me + tickMat.d * mf + tickMat.f;
+                                        tickMat = { a: na, b: nb, c: nc, d: nd, e: ne, f: nf };
+                                    }
+                                    const scaleMatch = tr.match(/scale\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
+                                    if (scaleMatch) {
+                                        const sx = parseFloat(scaleMatch[1]) || 1;
+                                        const sy = parseFloat(scaleMatch[2]) !== undefined && !isNaN(parseFloat(scaleMatch[2])) ? parseFloat(scaleMatch[2]) : sx;
+                                        tickMat.a *= sx;
+                                        tickMat.b *= sx;
+                                        tickMat.c *= sy;
+                                        tickMat.d *= sy;
                                     }
                                 }
                             }
+
+                            let rawX = 0;
+                            let rawY = 0;
+                            let hasAttr = false;
+                            if (typeof n.getAttribute === 'function') {
+                                const ax = n.getAttribute('x');
+                                if (ax !== null) {
+                                    const nx = parseFloat(ax);
+                                    if (!isNaN(nx) && isFinite(nx)) {
+                                        rawX = nx;
+                                        hasAttr = true;
+                                    }
+                                }
+                                const ay = n.getAttribute('y');
+                                if (ay !== null) {
+                                    const ny = parseFloat(ay);
+                                    if (!isNaN(ny) && isFinite(ny)) {
+                                        rawY = ny;
+                                        hasAttr = true;
+                                    }
+                                }
+                            }
+
+                            if (hasAttr || tickMat.e !== 0 || tickMat.f !== 0) {
+                                coord = axisDim === 'x'
+                                    ? (tickMat.a * rawX + tickMat.c * rawY + tickMat.e)
+                                    : (tickMat.b * rawX + tickMat.d * rawY + tickMat.f);
+                                hasCoords = true;
+                                checked++;
+                                if (coord !== 0) allZero = false;
+                                isAnchor = true;
+                            }
+
                             if (typeof n.getBoundingClientRect === 'function') {
                                 const r = n.getBoundingClientRect();
                                 if (r) {
@@ -7693,6 +7930,27 @@ async function runBrowserEvidence() {
                 spectralSeriesState.multiOverlay.selectedScanIds.includes('SMP-2026-001-mir-baseline') &&
                 spectralSeriesState.multiOverlay.selectedScanIds.includes('SMP-2026-001-mir-replicate') &&
                 spectralSeriesState.multiOverlay.all14VariantsPreserved === true &&
+                spectralSeriesState.multiOverlay.scales &&
+                typeof spectralSeriesState.multiOverlay.scales.x === 'object' &&
+                typeof spectralSeriesState.multiOverlay.scales.x.slope === 'number' &&
+                spectralSeriesState.multiOverlay.scales.x.slope < -0.01 &&
+                spectralSeriesState.multiOverlay.scales.x.slope > -2.0 &&
+                typeof spectralSeriesState.multiOverlay.scales.x.intercept === 'number' &&
+                spectralSeriesState.multiOverlay.scales.x.intercept > 50 &&
+                spectralSeriesState.multiOverlay.scales.x.intercept < 5000 &&
+                typeof spectralSeriesState.multiOverlay.scales.y === 'object' &&
+                typeof spectralSeriesState.multiOverlay.scales.y.slope === 'number' &&
+                spectralSeriesState.multiOverlay.scales.y.slope < -1.0 &&
+                spectralSeriesState.multiOverlay.scales.y.slope > -1000 &&
+                typeof spectralSeriesState.multiOverlay.scales.y.intercept === 'number' &&
+                spectralSeriesState.multiOverlay.scales.y.intercept > 50 &&
+                spectralSeriesState.multiOverlay.scales.y.intercept < 2000 &&
+                Array.isArray(spectralSeriesState.multiOverlay.transforms) &&
+                spectralSeriesState.multiOverlay.transforms.length >= 2 &&
+                spectralSeriesState.multiOverlay.transforms.every(t =>
+                    t && typeof t.a === 'number' && typeof t.d === 'number' &&
+                    Math.abs(t.a - 1) < 0.1 && Math.abs(t.d - 1) < 0.1
+                ) &&
                 spectralSeriesState.multiOverlay.afterExit &&
                 spectralSeriesState.multiOverlay.afterExit.mounted === true &&
                 spectralSeriesState.multiOverlay.afterExit.modelVerified === true &&
@@ -7700,6 +7958,27 @@ async function runBrowserEvidence() {
                 Array.isArray(spectralSeriesState.multiOverlay.afterExit.selectedScanIds) &&
                 spectralSeriesState.multiOverlay.afterExit.selectedScanIds.includes('SMP-2026-001-mir-baseline') &&
                 spectralSeriesState.multiOverlay.afterExit.selectedScanIds.includes('SMP-2026-001-mir-replicate') &&
+                spectralSeriesState.multiOverlay.afterExit.scales &&
+                typeof spectralSeriesState.multiOverlay.afterExit.scales.x === 'object' &&
+                typeof spectralSeriesState.multiOverlay.afterExit.scales.x.slope === 'number' &&
+                spectralSeriesState.multiOverlay.afterExit.scales.x.slope < -0.01 &&
+                spectralSeriesState.multiOverlay.afterExit.scales.x.slope > -2.0 &&
+                typeof spectralSeriesState.multiOverlay.afterExit.scales.x.intercept === 'number' &&
+                spectralSeriesState.multiOverlay.afterExit.scales.x.intercept > 50 &&
+                spectralSeriesState.multiOverlay.afterExit.scales.x.intercept < 5000 &&
+                typeof spectralSeriesState.multiOverlay.afterExit.scales.y === 'object' &&
+                typeof spectralSeriesState.multiOverlay.afterExit.scales.y.slope === 'number' &&
+                spectralSeriesState.multiOverlay.afterExit.scales.y.slope < -1.0 &&
+                spectralSeriesState.multiOverlay.afterExit.scales.y.slope > -1000 &&
+                typeof spectralSeriesState.multiOverlay.afterExit.scales.y.intercept === 'number' &&
+                spectralSeriesState.multiOverlay.afterExit.scales.y.intercept > 50 &&
+                spectralSeriesState.multiOverlay.afterExit.scales.y.intercept < 2000 &&
+                Array.isArray(spectralSeriesState.multiOverlay.afterExit.transforms) &&
+                spectralSeriesState.multiOverlay.afterExit.transforms.length >= 2 &&
+                spectralSeriesState.multiOverlay.afterExit.transforms.every(t =>
+                    t && typeof t.a === 'number' && typeof t.d === 'number' &&
+                    Math.abs(t.a - 1) < 0.1 && Math.abs(t.d - 1) < 0.1
+                ) &&
                 spectralSeriesState.multiOverlay.afterExit.traceCount >= 2 &&
                 spectralSeriesState.multiOverlay.afterExit.curvesCount === spectralSeriesState.multiOverlay.afterExit.legendCount &&
                 spectralSeriesState.multiOverlay.afterExit.validCurvesCount === spectralSeriesState.multiOverlay.afterExit.curvesCount &&
@@ -7714,6 +7993,27 @@ async function runBrowserEvidence() {
                     Array.isArray(v.selectedScanIds) &&
                     v.selectedScanIds.includes('SMP-2026-001-mir-baseline') &&
                     v.selectedScanIds.includes('SMP-2026-001-mir-replicate') &&
+                    v.scales &&
+                    typeof v.scales.x === 'object' &&
+                    typeof v.scales.x.slope === 'number' &&
+                    v.scales.x.slope < -0.01 &&
+                    v.scales.x.slope > -2.0 &&
+                    typeof v.scales.x.intercept === 'number' &&
+                    v.scales.x.intercept > 50 &&
+                    v.scales.x.intercept < 5000 &&
+                    typeof v.scales.y === 'object' &&
+                    typeof v.scales.y.slope === 'number' &&
+                    v.scales.y.slope < -1.0 &&
+                    v.scales.y.slope > -1000 &&
+                    typeof v.scales.y.intercept === 'number' &&
+                    v.scales.y.intercept > 50 &&
+                    v.scales.y.intercept < 2000 &&
+                    Array.isArray(v.transforms) &&
+                    v.transforms.length >= 2 &&
+                    v.transforms.every(t =>
+                        t && typeof t.a === 'number' && typeof t.d === 'number' &&
+                        Math.abs(t.a - 1) < 0.1 && Math.abs(t.d - 1) < 0.1
+                    ) &&
                     v.curvesCount >= 2 &&
                     v.validCurvesCount >= 2 &&
                     v.legendCount >= 2 &&
@@ -7958,7 +8258,7 @@ async function runBrowserEvidence() {
                 webglInspection,
                 mediaDeviceInspection,
                 viewportReflowTested: '320x568 (iPhone SE portrait; WCAG 2.1 Reflow 1.4.10 320 CSS px width equivalent to 400% zoom at 1280px), 390x844 (mobile portrait), 844x390 (mobile landscape); High-DPI DPR 2.0 (deviceScaleFactor: 2) and 400% root text enlargement at 1280px evaluated separately from native browser optical zoom',
-                opticalZoomScope: 'Native optical zoom evaluated via CDP Emulation.setPageScaleFactor (2.0x/4.0x visual viewport zoom) and WCAG 2.1 SC 1.4.10 320 CSS px reflow layout equivalence; CSS zoom, deviceScaleFactor DPR 2.0, and 400% text enlargement evaluated separately from native desktop browser UI zoom controls',
+                opticalZoomScope: 'WCAG 2.1 SC 1.4.10 Reflow evaluated via 320 CSS px viewport width (iPhone SE portrait; 320 CSS px width layout equivalence for 400% zoom at 1280px per W3C Understanding SC 1.4.10); High-DPI DPR 2.0 (deviceScaleFactor: 2) at 640 CSS px with root font 200% and DPR 1.0 at 1280 CSS px with root font 400% evaluated separately; native desktop browser optical Ctrl+/Ctrl- zoom engine controls and physical hardware remain pending/distinct',
                 touchTargetRequirements: 'min-height >= 44px and min-width >= 44px on primary controls',
                 accessibilityTested: 'Mode radiogroup roving tabindex, arrow navigation, confirmation modal focus trap/Escape, focus visibility rings, prefers-reduced-motion, forced-colors',
                 manualScreenReaderGate: 'PENDING physical manual screen-reader testing (NVDA / VoiceOver / JAWS on production assistive software; historical issue 102 does not substitute)',

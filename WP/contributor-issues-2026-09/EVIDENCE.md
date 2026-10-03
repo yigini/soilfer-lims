@@ -4003,3 +4003,25 @@ Laboratory operators can find step-by-step procedures in the following documenta
               - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
               - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
 
+        - Following Codex independent review `issue155-independent-review-986a04b.md` and 6-case probe `issue155-focused-review-986a04b.cjs`:
+           1. **Single Common Frame Composition for Ticks AND Curves (Finding 1 / Cases 3 & 4)**:
+              - In `inspectTickGeometry` across `multiOverlayState`, `ovt`, and `afterExit` in `server/scripts/verify_issue155_browser_journeys.cjs`:
+                * Directly inspected `n.getCTM()` and `n.getScreenCTM()`, and parent transform hierarchy fallback to extract full tick matrix `{ a, b, c, d, e, f }`.
+                * Transformed raw tick anchor coordinates via full matrix math:
+                  $$X_{\text{eff}} = a \cdot X_{\text{raw}} + c \cdot Y_{\text{raw}} + e$$
+                  $$Y_{\text{eff}} = b \cdot X_{\text{raw}} + d \cdot Y_{\text{raw}} + f$$
+                * Displaced tick matrix with identity curve (Case 3: `matrixDocM(v, n, identity, mat)` with $e=120$) strictly fails closed across initial, all 14 transitions, exit, and final gate.
+                * Faithful common translation of BOTH ticks and curves (Case 4: `matrixDocM(v, n, mat, mat)` with $e=120$) strictly passes with identical shared coordinates.
+           2. **Final-Gate Binding of Serialized Numeric Scales & Transforms (Finding 2 / Case 5)**:
+              - In `printIsolationPassed`: strictly validated physical ranges for `scales.x.slope` ($\in [-2.0, -0.01]$), `scales.x.intercept` ($\in [50, 5000]$), `scales.y.slope` ($\in [-1000, -1.0]$), `scales.y.intercept` ($\in [50, 2000]$), and unscaled transform factors ($|a - 1| < 0.1, |d - 1| < 0.1$) across initial `multiOverlay`, `afterExit`, and all 14 `variantTransitions`.
+              - Deleting `scales`/`transforms` or setting degenerate slopes/intercepts or scaled matrices strictly fails closed (`printAccept() === false`).
+              - Synchronized `validSpectral` in `verify_all_14.cjs` so that all 58/58 test cases pass.
+           3. **Truthful Boundary Claims & Scope Reconciliation (Finding 3)**:
+              - Corrected `opticalZoomScope` in `Verification Boundaries` to truthfully cite WCAG 2.1 SC 1.4.10 Reflow evaluated via 320 CSS px viewport width (iPhone SE portrait; 320 CSS px width layout equivalence for 400% zoom at 1280px per W3C Understanding SC 1.4.10) alongside High-DPI DPR 2.0 at 640 CSS px with root font 200% and DPR 1.0 at 1280 CSS px with root font 400%, without claiming unexecuted CDP `Emulation.setPageScaleFactor` commands.
+              - Updated `TRACEABLE-MATRIX.md` to reflect runtime Chrome `154.0.8037.93` and documented joint 2D axis calibration in the single common coordinate system.
+           4. **Suite Verification Results**:
+              - Running-app Browser Suite: **All 12/12 suites PASS 100% green** in real native Chrome (`server/scripts/issue155-browser-journeys-results.json`, timestamp `2026-10-03T06:27:39.942Z`).
+              - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
+              - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
+              - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+

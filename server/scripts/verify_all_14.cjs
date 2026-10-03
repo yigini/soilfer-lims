@@ -190,8 +190,8 @@ const validSpectral = {
         all14VariantsPreserved: true,
         calibrationBranch: '2D_AXIS_CALIBRATED',
         scales: {
-            x: { slope: 1, intercept: 0 },
-            y: { slope: 1, intercept: 0 }
+            x: { slope: -0.1386, intercept: 554.4 },
+            y: { slope: -100, intercept: 320 }
         },
         transforms: [{ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }, { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }],
         afterExit: {
@@ -204,8 +204,8 @@ const validSpectral = {
             calibrationBranch: '2D_AXIS_CALIBRATED',
             selectedScanIds: ['SMP-2026-001-mir-baseline', 'SMP-2026-001-mir-replicate'],
             scales: {
-                x: { slope: 1, intercept: 0 },
-                y: { slope: 1, intercept: 0 }
+                x: { slope: -0.1386, intercept: 554.4 },
+                y: { slope: -100, intercept: 320 }
             },
             transforms: [{ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }, { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }]
         },
@@ -219,8 +219,8 @@ const validSpectral = {
             calibrationBranch: '2D_AXIS_CALIBRATED',
             selectedScanIds: ['SMP-2026-001-mir-baseline', 'SMP-2026-001-mir-replicate'],
             scales: {
-                x: { slope: 1, intercept: 0 },
-                y: { slope: 1, intercept: 0 }
+                x: { slope: -0.1386, intercept: 554.4 },
+                y: { slope: -100, intercept: 320 }
             },
             transforms: [{ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }, { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }]
         }))
