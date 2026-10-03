@@ -36,4 +36,7 @@ router.get('/changes', apiKeyAuth, sisV2Controller.getChanges);
 // 9. Receiver Delivery Receipts
 router.post('/receipts', apiKeyAuth, apiKeyAuth.requireRole(EXCHANGE_WRITE_ROLES), apiKeyAuth.requireCapability('RECEIPT'), sisV2Controller.submitReceipt);
 
+const { handleExchangeError } = require('../services/exchangePolicyService');
+router.use((err, req, res, next) => handleExchangeError(err, req, res, next));
+
 module.exports = router;

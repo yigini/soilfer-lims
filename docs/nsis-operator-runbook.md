@@ -226,3 +226,45 @@ Following an epoch rotation:
   3. Resume continuous sync from the snapshot's handoff cursor (`nextCursor`, with `highWaterSequence` retained as a monotonic boundary value).
   4. Submit an authenticated delivery receipt via `POST /api/v2/data-exchange/receipts`.
 
+---
+
+## 7. Exchange Publication Eligibility & Retry Semantics (HTTP 503)
+
+### 7.1 Fail-Closed Eligibility Semantics
+
+When evaluating sample eligibility for publication across both V1 and V2 exchange gateways (`/api/v1/sis`, `/api/v1/data-exchange`, `/api/v2/sis`, `/api/v2/data-exchange`), the server performs dynamic policy evaluation against durable provenance and intake hold tables.
+
+Under normal operation:
+- Samples on active hold (`AMBIGUOUS_PROVENANCE_HOLD`, intake hold, or unapproved status) are omitted from published datasets.
+- If a query produces no eligible records for the caller's permitted scope, the endpoint returns HTTP 200 with an empty collection (`data: []`). **A genuine empty result is never an error.**
+
+Under degraded or transient database contention:
+- If hold or policy evaluation queries encounter unexpected infrastructure failures or temporary lock contention, the exchange gateway strictly **fails closed**.
+- Instead of returning misleading empty datasets (`200 OK`) or arbitrary `500 Internal Server Error`, the gateway returns a typed, retryable **HTTP 503 Service Unavailable** with machine-readable code `EXCHANGE_ELIGIBILITY_UNAVAILABLE`.
+- See the authoritative notice posted on [GitHub Issue #140 Comment 5972150911](https://github.com/yigini/soilfer-lims/issues/140#issuecomment-5972150911).
+
+### 7.2 Response Envelope & Correlation Headers
+
+When HTTP 503 is returned, the response includes:
+- **`Retry-After: 5`**: An HTTP standard header instructing receivers to wait at least 5 seconds before retrying the request.
+- **`X-Request-Id: xchg_<16-hex>`**: An unforgeable correlation identifier assigned by the gateway before authentication, allowing operators to cross-reference server-side microsecond phase logs (`auth`, `eligibility`, `list`, `mapping`).
+- **Standardized Error Envelope**:
+  ```json
+  {
+    "error": "Service Unavailable",
+    "code": "EXCHANGE_ELIGIBILITY_UNAVAILABLE",
+    "message": "Exchange publication eligibility evaluation is temporarily unavailable.",
+    "retryAfter": 5,
+    "requestId": "xchg_654215ff5abda7d6"
+  }
+  ```
+
+### 7.3 Receiver Harvester Guidance: Checkpoint Preservation
+
+External harvesters (including OpenNSIS and automated consumers) must implement the following retry guidelines:
+1. **Respect `Retry-After`:** Wait at least the duration specified in the `Retry-After` header (nominal 5 seconds) before retrying. Do not trigger tight retry loops.
+2. **Preserve Checkpoints:** Do **NOT** rewind, advance, or discard ingestion cursors or change feed bookmarks when encountering HTTP 503. The consumer's local high-water mark remains valid.
+3. **Do Not Treat 503 as Data Deletion:** An HTTP 503 indicates temporary eligibility evaluation unavailability on the exchange gateway; it must never be interpreted as sample withdrawal, revocation, or deletion.
+4. **Log Correlation ID:** When reporting exchange synchronization issues to LIMS operators, always provide the `X-Request-Id` value from the response headers or error body for rapid log diagnosis.
+
+

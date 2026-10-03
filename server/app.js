@@ -306,6 +306,13 @@ app.use('/api/auth', require('./routes/authRoutes')); // auth handled internally
 app.use('/api/messages', verifyToken, require('./routes/messageRoutes'));
 app.use('/api/help', require('./routes/helpRoutes'));
 app.use('/api/appearance', require('./routes/appearanceRoutes'));
+// National Data Exchange correlation & phase timings (Issue #140 Work Package A0)
+const exchangeCorrelation = require('./middleware/exchangeCorrelationMiddleware');
+const exchangeAliases = ['/api/v1/data-exchange', '/api/v1/sis', '/api/v2/data-exchange', '/api/v2/sis'];
+exchangeAliases.forEach(alias => {
+    app.use(alias, exchangeCorrelation);
+});
+
 app.use('/api/v1/data-exchange', require('./routes/sisRoutes')); // Neutral National Data Exchange API (v1)
 app.use('/api/v1/sis', require('./routes/sisRoutes')); // Legacy backward-compatible alias
 app.use('/api/v2/data-exchange', require('./routes/sisV2Routes')); // Neutral National Data Exchange API (v2)

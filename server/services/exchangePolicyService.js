@@ -18,6 +18,62 @@ const projectPolicyService = require('./projectPolicyService');
 
 const AUTHORIZED_RELEASE_STATUSES = ['APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED'];
 
+class ExchangeEligibilityUnavailableError extends Error {
+    constructor(message = 'Exchange publication eligibility evaluation is temporarily unavailable.', details = null) {
+        super(message);
+        this.name = 'ExchangeEligibilityUnavailableError';
+        this.status = 503;
+        this.statusCode = 503;
+        this.code = 'EXCHANGE_ELIGIBILITY_UNAVAILABLE';
+        this.retryAfter = 5;
+        this.details = details;
+    }
+}
+
+/**
+ * Shared Exchange Error Response Handler
+ * Enforces typed retryable 503 for eligibility failures across all exchange aliases,
+ * preserving Retry-After, X-Request-Id, and machine codes without leaking protected data.
+ */
+function handleExchangeError(err, req, res, next, defaultMessage = 'Internal Server Error during exchange operation.') {
+    if (!res || res.headersSent) {
+        if (next) return next(err);
+        return;
+    }
+
+    const requestId = req?.exchangeRequestId || (req?.headers && req.headers['x-request-id']) || null;
+    if (requestId && !res.getHeader('X-Request-Id')) {
+        res.setHeader('X-Request-Id', requestId);
+    }
+
+    if (err && (err.status === 503 || err.statusCode === 503 || err.code === 'EXCHANGE_ELIGIBILITY_UNAVAILABLE' || err instanceof ExchangeEligibilityUnavailableError)) {
+        res.setHeader('Retry-After', '5');
+        return res.status(503).json({
+            error: 'Service Unavailable',
+            code: 'EXCHANGE_ELIGIBILITY_UNAVAILABLE',
+            message: err.message || 'Exchange publication eligibility evaluation is temporarily unavailable.',
+            retryAfter: 5,
+            requestId
+        });
+    }
+
+    const status = err?.status || err?.statusCode;
+    if (status && status >= 400 && status < 500) {
+        return res.status(status).json({
+            error: err.error || err.message || (status === 400 ? 'Bad Request' : status === 401 ? 'Unauthorized' : status === 403 ? 'Forbidden' : status === 404 ? 'Not Found' : 'Client Error'),
+            code: err.code || undefined,
+            message: err.message || undefined,
+            requestId
+        });
+    }
+
+    console.error(`[EXCHANGE_ERROR] [${req?.method || 'UNKNOWN'}] ${req?.originalUrl || req?.url || ''}:`, err);
+    return res.status(500).json({
+        error: defaultMessage || 'Internal Server Error during exchange operation.',
+        requestId
+    });
+}
+
 /**
  * Resolves IDs of samples currently on provenance hold using semantic JSON parsing.
  * Evaluates both metadata and fieldMetadata columns conservatively (fail-closed on malformed JSON or non-object).
@@ -114,7 +170,8 @@ function buildSampleWhere(auth, query = {}) {
             where.OR = releaseOr;
         }
         try {
-            const heldIds = getHeldSampleIds();
+            const getHeldFn = (module.exports && typeof module.exports.getHeldSampleIds === 'function') ? module.exports.getHeldSampleIds : getHeldSampleIds;
+            const heldIds = getHeldFn();
             if (heldIds.length > 0) {
                 if (typeof where.id === 'string') {
                     if (heldIds.includes(where.id)) where.id = '__denied_held__';
@@ -128,7 +185,11 @@ function buildSampleWhere(auth, query = {}) {
                 }
             }
         } catch (err) {
-            where.id = '__denied_held_lookup_failure__';
+            if (err instanceof ExchangeEligibilityUnavailableError) throw err;
+            throw new ExchangeEligibilityUnavailableError(
+                `Exchange publication eligibility evaluation is temporarily unavailable: hold lookup failed (${err.message}).`,
+                err.message
+            );
         }
     } else {
         const statusVal = query.status ? String(query.status).trim().toUpperCase() : null;
@@ -289,8 +350,8 @@ function buildSampleWhere(auth, query = {}) {
  * Build Prisma `where` clause for Spectral queries enforcing release policy & lab/country scoping.
  * Enforces parent specimen relationship and release constraints (R4, Probe 15).
  */
-function buildSpectralWhere(auth, query = {}) {
-    const parentSampleWhere = buildSampleWhere(auth, query);
+function buildSpectralWhere(auth, query = {}, existingParentSampleWhere = null) {
+    const parentSampleWhere = existingParentSampleWhere || buildSampleWhere(auth, query);
     const where = {
         isCurrent: true
     };
@@ -355,6 +416,8 @@ function toPrismaSpectralWhere(spectralWhere) {
 
 module.exports = {
     AUTHORIZED_RELEASE_STATUSES,
+    ExchangeEligibilityUnavailableError,
+    handleExchangeError,
     isRestrictedConsumer,
     buildSampleWhere,
     buildSpectralWhere,

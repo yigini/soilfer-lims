@@ -53,6 +53,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '403':
           $ref: '#/components/responses/ForbiddenError'
+        '503':
+          $ref: '#/components/responses/EligibilityUnavailableError'
 
   /samples:
     get:
@@ -110,6 +112,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '403':
           $ref: '#/components/responses/ForbiddenError'
+        '503':
+          $ref: '#/components/responses/EligibilityUnavailableError'
 
   /samples/{specimenId}:
     get:
@@ -133,6 +137,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '404':
           $ref: '#/components/responses/NotFoundError'
+        '503':
+          $ref: '#/components/responses/EligibilityUnavailableError'
 
   /observations:
     get:
@@ -176,6 +182,8 @@ paths:
                 $ref: '#/components/schemas/ObservationListResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '503':
+          $ref: '#/components/responses/EligibilityUnavailableError'
 
   /geojson:
     get:
@@ -224,6 +232,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GeoJsonFeatureCollection'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '503':
+          $ref: '#/components/responses/EligibilityUnavailableError'
 
   /spectra:
     get:
@@ -256,6 +268,10 @@ paths:
                     type: array
                     items:
                       type: object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '503':
+          $ref: '#/components/responses/EligibilityUnavailableError'
 
   /snapshots:
     post:
@@ -277,6 +293,8 @@ paths:
                 $ref: '#/components/schemas/SnapshotCreateResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '503':
+          $ref: '#/components/responses/EligibilityUnavailableError'
 
   /snapshots/{snapshotId}/pages:
     get:
@@ -313,6 +331,10 @@ paths:
                       $ref: '#/components/schemas/Specimen'
                   nextCursor:
                     type: [string, "null"]
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '503':
+          $ref: '#/components/responses/EligibilityUnavailableError'
 
   /changes:
     get:
@@ -337,12 +359,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChangeFeedResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
         '410':
           description: Cursor expired. Consumer must reinitialize snapshot.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          $ref: '#/components/responses/EligibilityUnavailableError'
 
   /receipts:
     post:
@@ -362,6 +388,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReceiptSubmissionResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '503':
+          $ref: '#/components/responses/EligibilityUnavailableError'
 
   /connections:
     servers:
@@ -1453,6 +1483,30 @@ components:
               type: [string, "null"]
               format: date-time
 
+    ExchangeEligibilityUnavailableResponse:
+      type: object
+      required:
+        - error
+        - code
+        - message
+        - retryAfter
+      properties:
+        error:
+          type: string
+          example: Service Unavailable
+        code:
+          type: string
+          example: EXCHANGE_ELIGIBILITY_UNAVAILABLE
+        message:
+          type: string
+          example: Exchange publication eligibility evaluation is temporarily unavailable.
+        retryAfter:
+          type: integer
+          example: 5
+        requestId:
+          type: string
+          example: xchg_9a1b2c3d4e5f6071
+
     ErrorResponse:
       type: object
       properties:
@@ -1461,6 +1515,8 @@ components:
         code:
           type: string
         message:
+          type: string
+        requestId:
           type: string
 
   responses:
@@ -1482,3 +1538,20 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+    EligibilityUnavailableError:
+      description: Exchange publication eligibility evaluation temporarily unavailable (retryable)
+      headers:
+        Retry-After:
+          description: Minimum seconds receiver should wait before retrying request
+          schema:
+            type: integer
+            example: 5
+        X-Request-Id:
+          description: Correlation identifier assigned by exchange server
+          schema:
+            type: string
+            example: xchg_9a1b2c3d4e5f6071
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ExchangeEligibilityUnavailableResponse'

@@ -40,4 +40,7 @@ router.get('/connections', verifyToken, checkPermission('MANAGE_BRANDING'), sisC
 router.post('/connections', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.createConnection);
 router.put('/connections/:id', verifyToken, checkPermission('MANAGE_BRANDING'), sisController.updateConnection);
 
+const { handleExchangeError } = require('../services/exchangePolicyService');
+router.use((err, req, res, next) => handleExchangeError(err, req, res, next));
+
 module.exports = router;
