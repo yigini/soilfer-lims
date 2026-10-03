@@ -17,9 +17,10 @@ const Database = require('better-sqlite3');
 const projectPolicyService = require('./projectPolicyService');
 
 const AUTHORIZED_RELEASE_STATUSES = ['APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED'];
+const ELIGIBILITY_UNAVAILABLE_MESSAGE = 'Exchange publication eligibility evaluation is temporarily unavailable.';
 
 class ExchangeEligibilityUnavailableError extends Error {
-    constructor(message = 'Exchange publication eligibility evaluation is temporarily unavailable.', details = null) {
+    constructor(message = ELIGIBILITY_UNAVAILABLE_MESSAGE, details = null) {
         super(message);
         this.name = 'ExchangeEligibilityUnavailableError';
         this.status = 503;
@@ -41,17 +42,18 @@ function handleExchangeError(err, req, res, next, defaultMessage = 'Internal Ser
         return;
     }
 
-    const requestId = req?.exchangeRequestId || (req?.headers && req.headers['x-request-id']) || null;
+    const requestId = req?.exchangeRequestId || null;
     if (requestId && !res.getHeader('X-Request-Id')) {
         res.setHeader('X-Request-Id', requestId);
     }
 
-    if (err && (err.status === 503 || err.statusCode === 503 || err.code === 'EXCHANGE_ELIGIBILITY_UNAVAILABLE' || err instanceof ExchangeEligibilityUnavailableError)) {
+    if (err && (err.code === 'EXCHANGE_ELIGIBILITY_UNAVAILABLE' || err instanceof ExchangeEligibilityUnavailableError)) {
         res.setHeader('Retry-After', '5');
         return res.status(503).json({
             error: 'Service Unavailable',
             code: 'EXCHANGE_ELIGIBILITY_UNAVAILABLE',
-            message: err.message || 'Exchange publication eligibility evaluation is temporarily unavailable.',
+            // Internal causes can contain SQL, paths or source data. They are never public diagnostics.
+            message: ELIGIBILITY_UNAVAILABLE_MESSAGE,
             retryAfter: 5,
             requestId
         });
@@ -67,7 +69,12 @@ function handleExchangeError(err, req, res, next, defaultMessage = 'Internal Ser
         });
     }
 
-    console.error(`[EXCHANGE_ERROR] [${req?.method || 'UNKNOWN'}] ${req?.originalUrl || req?.url || ''}:`, err);
+    console.error('[EXCHANGE_ERROR]', {
+        requestId,
+        method: req?.method || 'UNKNOWN',
+        route: typeof req?.route?.path === 'string' ? req.route.path : '[unmatched]',
+        status: 500
+    });
     return res.status(500).json({
         error: defaultMessage || 'Internal Server Error during exchange operation.',
         requestId
@@ -187,8 +194,8 @@ function buildSampleWhere(auth, query = {}) {
         } catch (err) {
             if (err instanceof ExchangeEligibilityUnavailableError) throw err;
             throw new ExchangeEligibilityUnavailableError(
-                `Exchange publication eligibility evaluation is temporarily unavailable: hold lookup failed (${err.message}).`,
-                err.message
+                ELIGIBILITY_UNAVAILABLE_MESSAGE,
+                err
             );
         }
     } else {
