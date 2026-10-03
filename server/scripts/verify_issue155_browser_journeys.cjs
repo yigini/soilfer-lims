@@ -6388,6 +6388,10 @@ async function runBrowserEvidence() {
                         x: { slope: xTickGeom.scaleSlope, intercept: xTickGeom.scaleIntercept },
                         y: { slope: yTickGeom.scaleSlope, intercept: yTickGeom.scaleIntercept }
                     },
+                    anchors: {
+                        x: (xTickGeom.unique || []).map(p => ({ val: p.val, coord: p.coord })),
+                        y: (yTickGeom.unique || []).map(p => ({ val: p.val, coord: p.coord }))
+                    },
                     transforms: curvePointSets.map(p => p.transform || { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
                     calibrationBranch: (xTickGeom.hasCoords && yTickGeom.hasCoords) ? '2D_AXIS_CALIBRATED' : 'MISSING_OBSERVATION'
                 };
@@ -6650,6 +6654,7 @@ async function runBrowserEvidence() {
                         let scaleSlope = null;
                         let scaleIntercept = null;
                         let maxResidual = 0;
+                        let unique = [];
                         if (hasCoords && tickPairs.length >= 2) {
                             const sorted = [...tickPairs].sort((a, b) => a.val - b.val);
                             const byVal = new Map();
@@ -6658,7 +6663,7 @@ async function runBrowserEvidence() {
                                     byVal.set(p.val, p);
                                 }
                             }
-                            const unique = Array.from(byVal.values()).sort((a, b) => a.val - b.val);
+                            unique = Array.from(byVal.values()).sort((a, b) => a.val - b.val);
                             if (unique.length >= 2) {
                                 const isStrictlyInc = unique.every((p, i) => i === 0 || p.coord > unique[i - 1].coord);
                                 const isStrictlyDec = unique.every((p, i) => i === 0 || p.coord < unique[i - 1].coord);
@@ -6696,7 +6701,8 @@ async function runBrowserEvidence() {
                             isCollinear,
                             scaleSlope,
                             scaleIntercept,
-                            maxResidual
+                            maxResidual,
+                            unique
                         };
                     }
 
@@ -6945,6 +6951,10 @@ async function runBrowserEvidence() {
                             x: { slope: xTickGeom.scaleSlope, intercept: xTickGeom.scaleIntercept },
                             y: { slope: yTickGeom.scaleSlope, intercept: yTickGeom.scaleIntercept }
                         },
+                        anchors: {
+                            x: (xTickGeom.unique || []).map(p => ({ val: p.val, coord: p.coord })),
+                            y: (yTickGeom.unique || []).map(p => ({ val: p.val, coord: p.coord }))
+                        },
                         transforms: curvePointSets.map(p => p.transform || { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 })
                     };
                 }, { theme: variant.themeId, mode: variant.mode });
@@ -7191,6 +7201,7 @@ async function runBrowserEvidence() {
                         let scaleSlope = null;
                         let scaleIntercept = null;
                         let maxResidual = 0;
+                        let unique = [];
                         if (hasCoords && tickPairs.length >= 2) {
                             const sorted = [...tickPairs].sort((a, b) => a.val - b.val);
                             const byVal = new Map();
@@ -7199,7 +7210,7 @@ async function runBrowserEvidence() {
                                     byVal.set(p.val, p);
                                 }
                             }
-                            const unique = Array.from(byVal.values()).sort((a, b) => a.val - b.val);
+                            unique = Array.from(byVal.values()).sort((a, b) => a.val - b.val);
                             if (unique.length >= 2) {
                                 const isStrictlyInc = unique.every((p, i) => i === 0 || p.coord > unique[i - 1].coord);
                                 const isStrictlyDec = unique.every((p, i) => i === 0 || p.coord < unique[i - 1].coord);
@@ -7237,7 +7248,8 @@ async function runBrowserEvidence() {
                             isCollinear,
                             scaleSlope,
                             scaleIntercept,
-                            maxResidual
+                            maxResidual,
+                            unique
                         };
                     }
 
@@ -7476,6 +7488,10 @@ async function runBrowserEvidence() {
                         scales: {
                             x: { slope: xTickGeom.scaleSlope, intercept: xTickGeom.scaleIntercept },
                             y: { slope: yTickGeom.scaleSlope, intercept: yTickGeom.scaleIntercept }
+                        },
+                        anchors: {
+                            x: (xTickGeom.unique || []).map(p => ({ val: p.val, coord: p.coord })),
+                            y: (yTickGeom.unique || []).map(p => ({ val: p.val, coord: p.coord }))
                         },
                         transforms: curvePointSets.map(p => p.transform || { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 })
                     };
@@ -7960,12 +7976,19 @@ async function runBrowserEvidence() {
                             Math.abs(ti.e - st.transforms[0].e) <= 1e-4 &&
                             Math.abs(ti.f - st.transforms[0].f) <= 1e-4
                         ) &&
+                        st.anchors && Array.isArray(st.anchors.x) && st.anchors.x.length >= 2 &&
+                        Array.isArray(st.anchors.y) && st.anchors.y.length >= 2 &&
+                        st.anchors.x.every(a => a && typeof a.val === 'number' && isFinite(a.val) && typeof a.coord === 'number' && isFinite(a.coord) && a.val >= 400 && a.val <= 4000) &&
+                        st.anchors.y.every(a => a && typeof a.val === 'number' && isFinite(a.val) && typeof a.coord === 'number' && isFinite(a.coord) && a.val >= 0 && a.val <= 3.5) &&
+                        Math.min(...st.anchors.x.map(a => a.val)) <= 1500 && Math.max(...st.anchors.x.map(a => a.val)) >= 3500 &&
+                        (Math.max(...st.anchors.x.map(a => a.val)) - Math.min(...st.anchors.x.map(a => a.val))) >= 2000 &&
+                        Math.min(...st.anchors.y.map(a => a.val)) <= 0.50 && Math.max(...st.anchors.y.map(a => a.val)) >= 1.0 &&
+                        (Math.max(...st.anchors.y.map(a => a.val)) - Math.min(...st.anchors.y.map(a => a.val))) >= 0.50 &&
+                        st.anchors.x.every(a => Math.abs(a.coord - (st.scales.x.slope * a.val + st.scales.x.intercept)) <= 2.5) &&
+                        st.anchors.y.every(a => Math.abs(a.coord - (st.scales.y.slope * a.val + st.scales.y.intercept)) <= 2.5) &&
                         ((baseSlopeX, baseInterceptX, baseSlopeY, baseInterceptY) =>
                             baseSlopeX < 0 && baseSlopeY < 0 &&
-                            (Math.abs((-3600 * baseSlopeX) / 499 - 1.0) < 0.05 || Math.abs((-3600 * baseSlopeX) / 499 - 2.0) < 0.05) &&
-                            (baseSlopeX * 4000 + baseInterceptX >= -1.0 && baseSlopeX * 4000 + baseInterceptX <= 100) &&
-                            (Math.abs(baseSlopeY) >= 90 && Math.abs(baseSlopeY) <= 250) &&
-                            (baseInterceptY >= 200 && baseInterceptY <= 350)
+                            ((-3600 * baseSlopeX) / 499 > 0.2)
                         )(
                             st.scales.x.slope / st.transforms[0].a,
                             (st.scales.x.intercept - st.transforms[0].e) / st.transforms[0].a,

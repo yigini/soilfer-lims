@@ -190,8 +190,12 @@ const validSpectral = {
         all14VariantsPreserved: true,
         calibrationBranch: '2D_AXIS_CALIBRATED',
         scales: {
-            x: { slope: -0.1386, intercept: 554.4 },
+            x: { slope: -0.1386111111111111, intercept: 554.4444444444443 },
             y: { slope: -100, intercept: 320 }
+        },
+        anchors: {
+            x: [{ val: 400, coord: 499 }, { val: 1000, coord: 415.8333333333333 }, { val: 2000, coord: 277.22222222222223 }, { val: 4000, coord: 0 }],
+            y: [{ val: 0, coord: 320 }, { val: 0.4, coord: 280 }, { val: 0.8, coord: 240 }, { val: 1.2, coord: 200 }]
         },
         transforms: [{ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }, { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }],
         afterExit: {
@@ -204,8 +208,12 @@ const validSpectral = {
             calibrationBranch: '2D_AXIS_CALIBRATED',
             selectedScanIds: ['SMP-2026-001-mir-baseline', 'SMP-2026-001-mir-replicate'],
             scales: {
-                x: { slope: -0.1386, intercept: 554.4 },
+                x: { slope: -0.1386111111111111, intercept: 554.4444444444443 },
                 y: { slope: -100, intercept: 320 }
+            },
+            anchors: {
+                x: [{ val: 400, coord: 499 }, { val: 1000, coord: 415.8333333333333 }, { val: 2000, coord: 277.22222222222223 }, { val: 4000, coord: 0 }],
+                y: [{ val: 0, coord: 320 }, { val: 0.4, coord: 280 }, { val: 0.8, coord: 240 }, { val: 1.2, coord: 200 }]
             },
             transforms: [{ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }, { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }]
         },
@@ -219,8 +227,12 @@ const validSpectral = {
             calibrationBranch: '2D_AXIS_CALIBRATED',
             selectedScanIds: ['SMP-2026-001-mir-baseline', 'SMP-2026-001-mir-replicate'],
             scales: {
-                x: { slope: -0.1386, intercept: 554.4 },
+                x: { slope: -0.1386111111111111, intercept: 554.4444444444443 },
                 y: { slope: -100, intercept: 320 }
+            },
+            anchors: {
+                x: [{ val: 400, coord: 499 }, { val: 1000, coord: 415.8333333333333 }, { val: 2000, coord: 277.22222222222223 }, { val: 4000, coord: 0 }],
+                y: [{ val: 0, coord: 320 }, { val: 0.4, coord: 280 }, { val: 0.8, coord: 240 }, { val: 1.2, coord: 200 }]
             },
             transforms: [{ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }, { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }]
         }))
