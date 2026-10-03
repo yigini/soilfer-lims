@@ -6083,6 +6083,10 @@ async function runBrowserEvidence() {
                 const axesVerified = Boolean(
                     xAxisEl &&
                     yAxisEl &&
+                    xTickGeom.hasCoords === true &&
+                    yTickGeom.hasCoords === true &&
+                    xTickGeom.isCollinear === true &&
+                    yTickGeom.isCollinear === true &&
                     !hasWrongXSemantics &&
                     !hasWrongYSemantics &&
                     !hasInvalidTickGeometry &&
@@ -6093,31 +6097,6 @@ async function runBrowserEvidence() {
                     yTickVals.every(v => v >= 0 && v <= 3.5) &&
                     minObsY <= 0.50 && maxObsY <= 1.50 && (maxObsY - minObsY) >= 0.50
                 );
-
-                function fitCalibration(ptsY, expected) {
-                    if (!ptsY || !expected || ptsY.length !== expected.length) return null;
-                    const directDiff = Math.max(...ptsY.map((y, i) => Math.abs(y - expected[i])));
-                    if (directDiff < 0.05) return { A: 1, B: 0 };
-                    const n = ptsY.length;
-                    const meanY = ptsY.reduce((a, b) => a + b, 0) / n;
-                    const meanE = expected.reduce((a, b) => a + b, 0) / n;
-                    let cov = 0, varE = 0, varY = 0;
-                    for (let i = 0; i < n; i++) {
-                        const dy = ptsY[i] - meanY;
-                        const de = expected[i] - meanE;
-                        cov += dy * de;
-                        varE += de * de;
-                        varY += dy * dy;
-                    }
-                    if (varE < 1e-6 || varY < 1e-6) return null;
-                    const r2 = (cov * cov) / (varE * varY);
-                    const A = cov / varE;
-                    const B = meanY - A * meanE;
-                    if (A >= 0 || r2 < 0.90) return null;
-                    const maxCalDiff = Math.max(...ptsY.map((y, i) => Math.abs((y - B) / A - expected[i])));
-                    if (maxCalDiff >= 0.008) return null;
-                    return { A, B };
-                }
 
                 function checkAxisCalibrated(pts, expected) {
                     if (!xTickGeom.hasCoords || !xTickGeom.isCollinear || xTickGeom.scaleSlope === null || xTickGeom.scaleSlope >= 0 ||
@@ -6149,48 +6128,72 @@ async function runBrowserEvidence() {
                 }
 
                 function checkSharedModel(ptsA, ptsB, refA, refB) {
-                    if (xTickGeom.hasCoords && yTickGeom.hasCoords) {
-                        const calA = checkAxisCalibrated(ptsA, refA);
-                        const calB = checkAxisCalibrated(ptsB, refB);
-                        const crossA = checkAxisCalibrated(ptsA, refB);
-                        const crossB = checkAxisCalibrated(ptsB, refA);
-                        if (calA && calB && !crossA && !crossB) return true;
-                        return false;
-                    }
-                    const yA = ptsA.map(p => typeof p === 'object' && p !== null ? p.y : p);
-                    const yB = ptsB.map(p => typeof p === 'object' && p !== null ? p.y : p);
-                    let cal = fitCalibration(yA, refA);
-                    if (cal) {
-                        const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
-                        const diffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                        const crossDiffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                        const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
-                        if (diffA < 0.008 && diffB < 0.008 && crossDiffA > 0.015 && crossDiffB > 0.015) return true;
-                    }
-                    const revA = [...refA].reverse();
-                    const revB = [...refB].reverse();
-                    cal = fitCalibration(yA, revA);
-                    if (cal) {
-                        const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - revA[i])));
-                        const diffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                        const crossDiffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                        const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
-                        if (diffA < 0.008 && diffB < 0.008 && crossDiffA > 0.015 && crossDiffB > 0.015) return true;
-                    }
+                    if (!xTickGeom.hasCoords || !yTickGeom.hasCoords) return false;
+                    const calA = checkAxisCalibrated(ptsA, refA);
+                    const calB = checkAxisCalibrated(ptsB, refB);
+                    const crossA = checkAxisCalibrated(ptsA, refB);
+                    const crossB = checkAxisCalibrated(ptsB, refA);
+                    if (calA && calB && !crossA && !crossB) return true;
                     return false;
                 }
 
+                const hasExactTraceMultiplicity = Boolean(
+                    curves.length >= 2 &&
+                    selectedScanIds.length >= 2 &&
+                    curves.length === selectedScanIds.length
+                );
+
                 const curvePointSets = [];
-                const validCurves = curves.filter(c => {
+                const validCurves = curves.filter((c, curveIdx) => {
                     const d = (c.getAttribute && c.getAttribute('d')) || '';
                     const segments = d.match(/[MLC][^MLC]*/gi) || [];
                     if (d.length <= 20 || segments.length !== 500) return false;
+
+                    let mat = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+                    if (typeof c.getAttribute === 'function') {
+                        const tr = c.getAttribute('transform');
+                        if (tr) {
+                            const transMatch = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
+                            if (transMatch) {
+                                mat.e += parseFloat(transMatch[1]) || 0;
+                                mat.f += parseFloat(transMatch[2]) || 0;
+                            }
+                            const matMatch = tr.match(/matrix\(\s*([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)\s*\)/);
+                            if (matMatch) {
+                                mat.a = parseFloat(matMatch[1]);
+                                mat.b = parseFloat(matMatch[2]);
+                                mat.c = parseFloat(matMatch[3]);
+                                mat.d = parseFloat(matMatch[4]);
+                                mat.e = parseFloat(matMatch[5]);
+                                mat.f = parseFloat(matMatch[6]);
+                            }
+                        }
+                    }
+                    if (typeof c.getCTM === 'function') {
+                        try {
+                            const ctm = c.getCTM();
+                            if (ctm && typeof ctm.a === 'number' && typeof ctm.e === 'number') {
+                                if (mat.e === 0 && mat.f === 0 && (ctm.e !== 0 || ctm.f !== 0)) {
+                                    mat.a = ctm.a;
+                                    mat.b = ctm.b;
+                                    mat.c = ctm.c;
+                                    mat.d = ctm.d;
+                                    mat.e = ctm.e;
+                                    mat.f = ctm.f;
+                                }
+                            }
+                        } catch (_) {}
+                    }
 
                     const pts = [];
                     for (const cmd of segments) {
                         const coords = cmd.slice(1).trim().split(/[\s,]+/).map(Number).filter(n => !isNaN(n));
                         if (coords.length >= 2) {
-                            pts.push({ x: coords[coords.length - 2], y: coords[coords.length - 1] });
+                            const rawX = coords[coords.length - 2];
+                            const rawY = coords[coords.length - 1];
+                            const effX = mat.a * rawX + mat.c * rawY + mat.e;
+                            const effY = mat.b * rawX + mat.d * rawY + mat.f;
+                            pts.push({ x: effX, y: effY });
                         }
                     }
                     if (pts.length !== 500) return false;
@@ -6209,38 +6212,37 @@ async function runBrowserEvidence() {
                     const isUniformX = pts.every((p, i) => Math.abs(p.x - (x0 + i * step)) <= Math.max(1.5, 0.02 * spanX));
                     if (!isUniformX) return false;
 
-                    const ptsY = pts.map(p => p.y);
-                    const isScan1 = (xTickGeom.hasCoords && yTickGeom.hasCoords)
-                        ? checkAxisCalibrated(pts, expGrid1)
-                        : Boolean(fitCalibration(ptsY, expGrid1) || fitCalibration(ptsY, [...expGrid1].reverse()));
-                    const isScan2 = (xTickGeom.hasCoords && yTickGeom.hasCoords)
-                        ? checkAxisCalibrated(pts, expGrid2)
-                        : Boolean(fitCalibration(ptsY, expGrid2) || fitCalibration(ptsY, [...expGrid2].reverse()));
-                    if (!isScan1 && !isScan2) return false;
+                    if (!xTickGeom.hasCoords || !yTickGeom.hasCoords) return false;
+
+                    // 1-to-1 ordered association: curveIdx must match selectedScanIds[curveIdx]
+                    const expectedModel = (selectedScanIds[curveIdx] && selectedScanIds[curveIdx].includes('replicate')) ? expGrid2 : expGrid1;
+                    const otherModel = (expectedModel === expGrid1) ? expGrid2 : expGrid1;
+                    const matchesExpected = checkAxisCalibrated(pts, expectedModel);
+                    const matchesOther = checkAxisCalibrated(pts, otherModel);
+                    if (!matchesExpected || matchesOther) return false;
 
                     curvePointSets.push(pts);
                     return true;
                 });
 
                 let distinctSeriesVerified = false;
-                if (curvePointSets.length >= 2) {
+                if (curvePointSets.length === selectedScanIds.length && curvePointSets.length >= 2 && hasExactTraceMultiplicity && validCurves.length === curves.length) {
                     const pts0 = curvePointSets[0];
                     const pts1 = curvePointSets[1];
                     const maxDiffY = Math.max(...pts0.map((p, i) => Math.abs(p.y - pts1[i].y)));
-                    const sharedModelValid = checkSharedModel(pts0, pts1, expGrid1, expGrid2) || checkSharedModel(pts0, pts1, expGrid2, expGrid1);
-                    distinctSeriesVerified = Boolean(maxDiffY > 0.5 && sharedModelValid);
+                    distinctSeriesVerified = Boolean(maxDiffY > 0.5 && checkSharedModel(pts0, pts1, expGrid1, expGrid2));
                 }
 
-                const curveModelVerified = Boolean(validCurves.length >= 2 && distinctSeriesVerified);
+                const curveModelVerified = Boolean(hasExactTraceMultiplicity && validCurves.length === curves.length && distinctSeriesVerified);
 
                 const hasValidScans = selectedScanIds.length >= 2 &&
                     selectedScanIds.includes('SMP-2026-001-mir-baseline') &&
                     selectedScanIds.includes('SMP-2026-001-mir-replicate');
-                const commonGridPoints = pointCounts.length >= 2 ? Math.min(...pointCounts) : 0;
+                const commonGridPoints = (validCurves.length === curves.length && curves.length >= 2) ? 500 : 0;
                 const tracesVerified = Boolean(
-                    curves.length >= 2 &&
-                    legendItems.length >= 2 &&
-                    validCurves.length >= 2 &&
+                    hasExactTraceMultiplicity &&
+                    validCurves.length === curves.length &&
+                    legendItems.length === selectedScanIds.length &&
                     hasValidScans &&
                     commonGridPoints === 500 &&
                     curveModelVerified &&
@@ -6253,13 +6255,17 @@ async function runBrowserEvidence() {
                     quantity: 'Absorbance',
                     scanCount: legendItems.length > 0 ? legendItems.length : curves.length,
                     traceCount: curves.length,
+                    curvesCount: curves.length,
+                    validCurvesCount: validCurves.length,
+                    legendCount: legendItems.length,
                     legendItems: legendItems,
                     commonGridPoints: commonGridPoints,
                     curveModelVerified: curveModelVerified,
                     distinctSeriesVerified: distinctSeriesVerified,
                     axesVerified: axesVerified,
                     tracesVerified: tracesVerified,
-                    selectedScanIds: selectedScanIds
+                    selectedScanIds: selectedScanIds,
+                    calibrationBranch: (xTickGeom.hasCoords && yTickGeom.hasCoords) ? '2D_AXIS_CALIBRATED' : 'MISSING_OBSERVATION'
                 };
             });
 
@@ -6312,6 +6318,14 @@ async function runBrowserEvidence() {
                         .map(el => (el.textContent || '').trim())
                         .filter(Boolean);
                     const legendItems = Array.from(new Set(rawItems));
+                    const selectedScanIds = [];
+                    legendItems.forEach(item => {
+                        if (item.includes('SMP-2026-001-mir-baseline')) selectedScanIds.push('SMP-2026-001-mir-baseline');
+                        else if (item.includes('SMP-2026-001-mir-replicate')) selectedScanIds.push('SMP-2026-001-mir-replicate');
+                    });
+                    if (selectedScanIds.length === 0) {
+                        selectedScanIds.push('SMP-2026-001-mir-baseline', 'SMP-2026-001-mir-replicate');
+                    }
                     const docEl = document.documentElement;
                     const appliedTheme = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-theme') : null;
                     const appliedMode = docEl && typeof docEl.getAttribute === 'function' ? docEl.getAttribute('data-appearance') : null;
@@ -6511,6 +6525,10 @@ async function runBrowserEvidence() {
                     const axesVerified = Boolean(
                         xAxisEl &&
                         yAxisEl &&
+                        xTickGeom.hasCoords === true &&
+                        yTickGeom.hasCoords === true &&
+                        xTickGeom.isCollinear === true &&
+                        yTickGeom.isCollinear === true &&
                         !hasWrongXSemantics &&
                         !hasWrongYSemantics &&
                         !hasInvalidTickGeometry &&
@@ -6522,30 +6540,6 @@ async function runBrowserEvidence() {
                         minObsY <= 0.50 && maxObsY <= 1.50 && (maxObsY - minObsY) >= 0.50
                     );
 
-                    function fitCalibration(ptsY, expected) {
-                        if (!ptsY || !expected || ptsY.length !== expected.length) return null;
-                        const directDiff = Math.max(...ptsY.map((y, i) => Math.abs(y - expected[i])));
-                        if (directDiff < 0.05) return { A: 1, B: 0 };
-                        const n = ptsY.length;
-                        const meanY = ptsY.reduce((a, b) => a + b, 0) / n;
-                        const meanE = expected.reduce((a, b) => a + b, 0) / n;
-                        let cov = 0, varE = 0, varY = 0;
-                        for (let i = 0; i < n; i++) {
-                            const dy = ptsY[i] - meanY;
-                            const de = expected[i] - meanE;
-                            cov += dy * de;
-                            varE += de * de;
-                            varY += dy * dy;
-                        }
-                        if (varE < 1e-6 || varY < 1e-6) return null;
-                        const r2 = (cov * cov) / (varE * varY);
-                        const A = cov / varE;
-                        const B = meanY - A * meanE;
-                        if (A >= 0 || r2 < 0.90) return null;
-                        const maxCalDiff = Math.max(...ptsY.map((y, i) => Math.abs((y - B) / A - expected[i])));
-                        if (maxCalDiff >= 0.008) return null;
-                        return { A, B };
-                    }
 
                     function checkAxisCalibrated(pts, expected) {
                         if (!xTickGeom.hasCoords || !xTickGeom.isCollinear || xTickGeom.scaleSlope === null || xTickGeom.scaleSlope >= 0 ||
@@ -6577,48 +6571,72 @@ async function runBrowserEvidence() {
                     }
 
                     function checkSharedModel(ptsA, ptsB, refA, refB) {
-                        if (xTickGeom.hasCoords && yTickGeom.hasCoords) {
-                            const calA = checkAxisCalibrated(ptsA, refA);
-                            const calB = checkAxisCalibrated(ptsB, refB);
-                            const crossA = checkAxisCalibrated(ptsA, refB);
-                            const crossB = checkAxisCalibrated(ptsB, refA);
-                            if (calA && calB && !crossA && !crossB) return true;
-                            return false;
-                        }
-                        const yA = ptsA.map(p => typeof p === 'object' && p !== null ? p.y : p);
-                        const yB = ptsB.map(p => typeof p === 'object' && p !== null ? p.y : p);
-                        let cal = fitCalibration(yA, refA);
-                        if (cal) {
-                            const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
-                            const diffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                            const crossDiffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                            const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
-                            if (diffA < 0.008 && diffB < 0.008 && crossDiffA > 0.015 && crossDiffB > 0.015) return true;
-                        }
-                        const revA = [...refA].reverse();
-                        const revB = [...refB].reverse();
-                        cal = fitCalibration(yA, revA);
-                        if (cal) {
-                            const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - revA[i])));
-                            const diffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                            const crossDiffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                            const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
-                            if (diffA < 0.008 && diffB < 0.008 && crossDiffA > 0.015 && crossDiffB > 0.015) return true;
-                        }
+                        if (!xTickGeom.hasCoords || !yTickGeom.hasCoords) return false;
+                        const calA = checkAxisCalibrated(ptsA, refA);
+                        const calB = checkAxisCalibrated(ptsB, refB);
+                        const crossA = checkAxisCalibrated(ptsA, refB);
+                        const crossB = checkAxisCalibrated(ptsB, refA);
+                        if (calA && calB && !crossA && !crossB) return true;
                         return false;
                     }
 
+                    const hasExactTraceMultiplicity = Boolean(
+                        curves.length >= 2 &&
+                        selectedScanIds.length >= 2 &&
+                        curves.length === selectedScanIds.length
+                    );
+
                     const curvePointSets = [];
-                    const validCurves = curves.filter(c => {
+                    const validCurves = curves.filter((c, curveIdx) => {
                         const d = (c.getAttribute && c.getAttribute('d')) || '';
                         const segments = d.match(/[MLC][^MLC]*/gi) || [];
                         if (d.length <= 20 || segments.length !== 500) return false;
+
+                        let mat = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+                        if (typeof c.getAttribute === 'function') {
+                            const tr = c.getAttribute('transform');
+                            if (tr) {
+                                const transMatch = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
+                                if (transMatch) {
+                                    mat.e += parseFloat(transMatch[1]) || 0;
+                                    mat.f += parseFloat(transMatch[2]) || 0;
+                                }
+                                const matMatch = tr.match(/matrix\(\s*([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)\s*\)/);
+                                if (matMatch) {
+                                    mat.a = parseFloat(matMatch[1]);
+                                    mat.b = parseFloat(matMatch[2]);
+                                    mat.c = parseFloat(matMatch[3]);
+                                    mat.d = parseFloat(matMatch[4]);
+                                    mat.e = parseFloat(matMatch[5]);
+                                    mat.f = parseFloat(matMatch[6]);
+                                }
+                            }
+                        }
+                        if (typeof c.getCTM === 'function') {
+                            try {
+                                const ctm = c.getCTM();
+                                if (ctm && typeof ctm.a === 'number' && typeof ctm.e === 'number') {
+                                    if (mat.e === 0 && mat.f === 0 && (ctm.e !== 0 || ctm.f !== 0)) {
+                                        mat.a = ctm.a;
+                                        mat.b = ctm.b;
+                                        mat.c = ctm.c;
+                                        mat.d = ctm.d;
+                                        mat.e = ctm.e;
+                                        mat.f = ctm.f;
+                                    }
+                                }
+                            } catch (_) {}
+                        }
 
                         const pts = [];
                         for (const cmd of segments) {
                             const coords = cmd.slice(1).trim().split(/[\s,]+/).map(Number).filter(n => !isNaN(n));
                             if (coords.length >= 2) {
-                                pts.push({ x: coords[coords.length - 2], y: coords[coords.length - 1] });
+                                const rawX = coords[coords.length - 2];
+                                const rawY = coords[coords.length - 1];
+                                const effX = mat.a * rawX + mat.c * rawY + mat.e;
+                                const effY = mat.b * rawX + mat.d * rawY + mat.f;
+                                pts.push({ x: effX, y: effY });
                             }
                         }
                         if (pts.length !== 500) return false;
@@ -6637,31 +6655,30 @@ async function runBrowserEvidence() {
                         const isUniformX = pts.every((p, i) => Math.abs(p.x - (x0 + i * step)) <= Math.max(1.5, 0.02 * spanX));
                         if (!isUniformX) return false;
 
-                        const ptsY = pts.map(p => p.y);
-                        const isScan1 = (xTickGeom.hasCoords && yTickGeom.hasCoords)
-                            ? checkAxisCalibrated(pts, expGrid1)
-                            : Boolean(fitCalibration(ptsY, expGrid1) || fitCalibration(ptsY, [...expGrid1].reverse()));
-                        const isScan2 = (xTickGeom.hasCoords && yTickGeom.hasCoords)
-                            ? checkAxisCalibrated(pts, expGrid2)
-                            : Boolean(fitCalibration(ptsY, expGrid2) || fitCalibration(ptsY, [...expGrid2].reverse()));
-                        if (!isScan1 && !isScan2) return false;
+                        if (!xTickGeom.hasCoords || !yTickGeom.hasCoords) return false;
+
+                        // 1-to-1 ordered association: curveIdx must match selectedScanIds[curveIdx]
+                        const expectedModel = (selectedScanIds[curveIdx] && selectedScanIds[curveIdx].includes('replicate')) ? expGrid2 : expGrid1;
+                        const otherModel = (expectedModel === expGrid1) ? expGrid2 : expGrid1;
+                        const matchesExpected = checkAxisCalibrated(pts, expectedModel);
+                        const matchesOther = checkAxisCalibrated(pts, otherModel);
+                        if (!matchesExpected || matchesOther) return false;
 
                         curvePointSets.push(pts);
                         return true;
                     });
 
                     let distinctSeriesVerified = false;
-                    if (curvePointSets.length >= 2) {
+                    if (curvePointSets.length === selectedScanIds.length && curvePointSets.length >= 2 && hasExactTraceMultiplicity && validCurves.length === curves.length) {
                         const pts0 = curvePointSets[0];
                         const pts1 = curvePointSets[1];
                         const maxDiffY = Math.max(...pts0.map((p, i) => Math.abs(p.y - pts1[i].y)));
-                        const sharedModelValid = checkSharedModel(pts0, pts1, expGrid1, expGrid2) || checkSharedModel(pts0, pts1, expGrid2, expGrid1);
-                        distinctSeriesVerified = Boolean(maxDiffY > 0.5 && sharedModelValid);
+                        distinctSeriesVerified = Boolean(maxDiffY > 0.5 && checkSharedModel(pts0, pts1, expGrid1, expGrid2));
                     }
 
-                    const curveModelVerified = Boolean(validCurves.length >= 2 && distinctSeriesVerified);
+                    const curveModelVerified = Boolean(hasExactTraceMultiplicity && validCurves.length === curves.length && distinctSeriesVerified);
 
-                    const modelVerified = Boolean(curveModelVerified && axesVerified);
+                    const modelVerified = Boolean(curveModelVerified && axesVerified && hasExactTraceMultiplicity && validCurves.length === curves.length);
                     const transitionSucceeded = Boolean(appliedTheme === theme && appliedMode === mode && Boolean(notice) && curves.length >= 2 && modelVerified);
 
                     return {
@@ -6712,6 +6729,22 @@ async function runBrowserEvidence() {
                             const tag = (el.tagName || el.nodeName || '').toLowerCase();
                             return tag !== 'g' && el.getAttribute('d');
                         });
+                    const textNodes = Array.from(document.querySelectorAll('.recharts-legend-item-text'));
+                    const rawElements = textNodes.length >= 2
+                        ? textNodes
+                        : Array.from(document.querySelectorAll('.recharts-legend-item-text, .recharts-legend-wrapper li, [class*="legend"]'));
+                    const rawItems = rawElements
+                        .map(el => (el.textContent || '').trim())
+                        .filter(Boolean);
+                    const legendItems = Array.from(new Set(rawItems));
+                    const selectedScanIds = [];
+                    legendItems.forEach(item => {
+                        if (item.includes('SMP-2026-001-mir-baseline')) selectedScanIds.push('SMP-2026-001-mir-baseline');
+                        else if (item.includes('SMP-2026-001-mir-replicate')) selectedScanIds.push('SMP-2026-001-mir-replicate');
+                    });
+                    if (selectedScanIds.length === 0) {
+                        selectedScanIds.push('SMP-2026-001-mir-baseline', 'SMP-2026-001-mir-replicate');
+                    }
                     const rawScan1 = [
                         { x: 400, y: 0.25 }, { x: 500, y: 0.40 }, { x: 1000, y: 0.90 },
                         { x: 1500, y: 1.15 }, { x: 2000, y: 0.82 }, { x: 2500, y: 0.45 },
@@ -6906,6 +6939,10 @@ async function runBrowserEvidence() {
                     const axesVerified = Boolean(
                         xAxisEl &&
                         yAxisEl &&
+                        xTickGeom.hasCoords === true &&
+                        yTickGeom.hasCoords === true &&
+                        xTickGeom.isCollinear === true &&
+                        yTickGeom.isCollinear === true &&
                         !hasWrongXSemantics &&
                         !hasWrongYSemantics &&
                         !hasInvalidTickGeometry &&
@@ -6916,31 +6953,6 @@ async function runBrowserEvidence() {
                         yTickVals.every(v => v >= 0 && v <= 3.5) &&
                         minObsY <= 0.50 && maxObsY <= 1.50 && (maxObsY - minObsY) >= 0.50
                     );
-
-                    function fitCalibration(ptsY, expected) {
-                        if (!ptsY || !expected || ptsY.length !== expected.length) return null;
-                        const directDiff = Math.max(...ptsY.map((y, i) => Math.abs(y - expected[i])));
-                        if (directDiff < 0.05) return { A: 1, B: 0 };
-                        const n = ptsY.length;
-                        const meanY = ptsY.reduce((a, b) => a + b, 0) / n;
-                        const meanE = expected.reduce((a, b) => a + b, 0) / n;
-                        let cov = 0, varE = 0, varY = 0;
-                        for (let i = 0; i < n; i++) {
-                            const dy = ptsY[i] - meanY;
-                            const de = expected[i] - meanE;
-                            cov += dy * de;
-                            varE += de * de;
-                            varY += dy * dy;
-                        }
-                        if (varE < 1e-6 || varY < 1e-6) return null;
-                        const r2 = (cov * cov) / (varE * varY);
-                        const A = cov / varE;
-                        const B = meanY - A * meanE;
-                        if (A >= 0 || r2 < 0.90) return null;
-                        const maxCalDiff = Math.max(...ptsY.map((y, i) => Math.abs((y - B) / A - expected[i])));
-                        if (maxCalDiff >= 0.008) return null;
-                        return { A, B };
-                    }
 
                     function checkAxisCalibrated(pts, expected) {
                         if (!xTickGeom.hasCoords || !xTickGeom.isCollinear || xTickGeom.scaleSlope === null || xTickGeom.scaleSlope >= 0 ||
@@ -6972,48 +6984,72 @@ async function runBrowserEvidence() {
                     }
 
                     function checkSharedModel(ptsA, ptsB, refA, refB) {
-                        if (xTickGeom.hasCoords && yTickGeom.hasCoords) {
-                            const calA = checkAxisCalibrated(ptsA, refA);
-                            const calB = checkAxisCalibrated(ptsB, refB);
-                            const crossA = checkAxisCalibrated(ptsA, refB);
-                            const crossB = checkAxisCalibrated(ptsB, refA);
-                            if (calA && calB && !crossA && !crossB) return true;
-                            return false;
-                        }
-                        const yA = ptsA.map(p => typeof p === 'object' && p !== null ? p.y : p);
-                        const yB = ptsB.map(p => typeof p === 'object' && p !== null ? p.y : p);
-                        let cal = fitCalibration(yA, refA);
-                        if (cal) {
-                            const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refA[i])));
-                            const diffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                            const crossDiffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                            const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                            if (diffA < 0.008 && diffB < 0.008 && crossDiffA > 0.015 && crossDiffB > 0.015) return true;
-                        }
-                        const revA = [...refA].reverse();
-                        const revB = [...refB].reverse();
-                        cal = fitCalibration(yA, revA);
-                        if (cal) {
-                            const diffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - revA[i])));
-                            const diffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                            const crossDiffA = Math.max(...yA.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                            const crossDiffB = Math.max(...yB.map((y, i) => Math.abs((y - cal.B) / cal.A - refB[i])));
-                            if (diffA < 0.008 && diffB < 0.008 && crossDiffA > 0.015 && crossDiffB > 0.015) return true;
-                        }
+                        if (!xTickGeom.hasCoords || !yTickGeom.hasCoords) return false;
+                        const calA = checkAxisCalibrated(ptsA, refA);
+                        const calB = checkAxisCalibrated(ptsB, refB);
+                        const crossA = checkAxisCalibrated(ptsA, refB);
+                        const crossB = checkAxisCalibrated(ptsB, refA);
+                        if (calA && calB && !crossA && !crossB) return true;
                         return false;
                     }
 
+                    const hasExactTraceMultiplicity = Boolean(
+                        curves.length >= 2 &&
+                        selectedScanIds.length >= 2 &&
+                        curves.length === selectedScanIds.length
+                    );
+
                     const curvePointSets = [];
-                    const validCurves = curves.filter(c => {
+                    const validCurves = curves.filter((c, curveIdx) => {
                         const d = (c.getAttribute && c.getAttribute('d')) || '';
                         const segments = d.match(/[MLC][^MLC]*/gi) || [];
                         if (d.length <= 20 || segments.length !== 500) return false;
+
+                        let mat = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+                        if (typeof c.getAttribute === 'function') {
+                            const tr = c.getAttribute('transform');
+                            if (tr) {
+                                const transMatch = tr.match(/translate\(\s*([-\d.]+)(?:[\s,]+([-\d.]+))?\s*\)/);
+                                if (transMatch) {
+                                    mat.e += parseFloat(transMatch[1]) || 0;
+                                    mat.f += parseFloat(transMatch[2]) || 0;
+                                }
+                                const matMatch = tr.match(/matrix\(\s*([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)[,\s]+([-\d.]+)\s*\)/);
+                                if (matMatch) {
+                                    mat.a = parseFloat(matMatch[1]);
+                                    mat.b = parseFloat(matMatch[2]);
+                                    mat.c = parseFloat(matMatch[3]);
+                                    mat.d = parseFloat(matMatch[4]);
+                                    mat.e = parseFloat(matMatch[5]);
+                                    mat.f = parseFloat(matMatch[6]);
+                                }
+                            }
+                        }
+                        if (typeof c.getCTM === 'function') {
+                            try {
+                                const ctm = c.getCTM();
+                                if (ctm && typeof ctm.a === 'number' && typeof ctm.e === 'number') {
+                                    if (mat.e === 0 && mat.f === 0 && (ctm.e !== 0 || ctm.f !== 0)) {
+                                        mat.a = ctm.a;
+                                        mat.b = ctm.b;
+                                        mat.c = ctm.c;
+                                        mat.d = ctm.d;
+                                        mat.e = ctm.e;
+                                        mat.f = ctm.f;
+                                    }
+                                }
+                            } catch (_) {}
+                        }
 
                         const pts = [];
                         for (const cmd of segments) {
                             const coords = cmd.slice(1).trim().split(/[\s,]+/).map(Number).filter(n => !isNaN(n));
                             if (coords.length >= 2) {
-                                pts.push({ x: coords[coords.length - 2], y: coords[coords.length - 1] });
+                                const rawX = coords[coords.length - 2];
+                                const rawY = coords[coords.length - 1];
+                                const effX = mat.a * rawX + mat.c * rawY + mat.e;
+                                const effY = mat.b * rawX + mat.d * rawY + mat.f;
+                                pts.push({ x: effX, y: effY });
                             }
                         }
                         if (pts.length !== 500) return false;
@@ -7032,31 +7068,30 @@ async function runBrowserEvidence() {
                         const isUniformX = pts.every((p, i) => Math.abs(p.x - (x0 + i * step)) <= Math.max(1.5, 0.02 * spanX));
                         if (!isUniformX) return false;
 
-                        const ptsY = pts.map(p => p.y);
-                        const isScan1 = (xTickGeom.hasCoords && yTickGeom.hasCoords)
-                            ? checkAxisCalibrated(pts, expGrid1)
-                            : Boolean(fitCalibration(ptsY, expGrid1) || fitCalibration(ptsY, [...expGrid1].reverse()));
-                        const isScan2 = (xTickGeom.hasCoords && yTickGeom.hasCoords)
-                            ? checkAxisCalibrated(pts, expGrid2)
-                            : Boolean(fitCalibration(ptsY, expGrid2) || fitCalibration(ptsY, [...expGrid2].reverse()));
-                        if (!isScan1 && !isScan2) return false;
+                        if (!xTickGeom.hasCoords || !yTickGeom.hasCoords) return false;
+
+                        // 1-to-1 ordered association: curveIdx must match selectedScanIds[curveIdx]
+                        const expectedModel = (selectedScanIds[curveIdx] && selectedScanIds[curveIdx].includes('replicate')) ? expGrid2 : expGrid1;
+                        const otherModel = (expectedModel === expGrid1) ? expGrid2 : expGrid1;
+                        const matchesExpected = checkAxisCalibrated(pts, expectedModel);
+                        const matchesOther = checkAxisCalibrated(pts, otherModel);
+                        if (!matchesExpected || matchesOther) return false;
 
                         curvePointSets.push(pts);
                         return true;
                     });
 
                     let distinctSeriesVerified = false;
-                    if (curvePointSets.length >= 2) {
+                    if (curvePointSets.length === selectedScanIds.length && curvePointSets.length >= 2 && hasExactTraceMultiplicity && validCurves.length === curves.length) {
                         const pts0 = curvePointSets[0];
                         const pts1 = curvePointSets[1];
                         const maxDiffY = Math.max(...pts0.map((p, i) => Math.abs(p.y - pts1[i].y)));
-                        const sharedModelValid = checkSharedModel(pts0, pts1, expGrid1, expGrid2) || checkSharedModel(pts0, pts1, expGrid2, expGrid1);
-                        distinctSeriesVerified = Boolean(maxDiffY > 0.5 && sharedModelValid);
+                        distinctSeriesVerified = Boolean(maxDiffY > 0.5 && checkSharedModel(pts0, pts1, expGrid1, expGrid2));
                     }
 
-                    const curveModelVerified = Boolean(validCurves.length >= 2 && distinctSeriesVerified);
+                    const curveModelVerified = Boolean(hasExactTraceMultiplicity && validCurves.length === curves.length && distinctSeriesVerified);
 
-                    const modelVerified = Boolean(curveModelVerified && axesVerified);
+                    const modelVerified = Boolean(curveModelVerified && axesVerified && hasExactTraceMultiplicity && validCurves.length === curves.length);
 
                     return {
                         mounted: Boolean(curves.length >= 2 && modelVerified),
@@ -7506,6 +7541,8 @@ async function runBrowserEvidence() {
                 spectralSeriesState.multiOverlay.axesVerified === true &&
                 spectralSeriesState.multiOverlay.traceCount >= 2 &&
                 spectralSeriesState.multiOverlay.scanCount >= 2 &&
+                spectralSeriesState.multiOverlay.traceCount === spectralSeriesState.multiOverlay.selectedScanIds.length &&
+                spectralSeriesState.multiOverlay.traceCount === spectralSeriesState.multiOverlay.scanCount &&
                 spectralSeriesState.multiOverlay.commonGridPoints >= 500 &&
                 Array.isArray(spectralSeriesState.multiOverlay.selectedScanIds) &&
                 spectralSeriesState.multiOverlay.selectedScanIds.length >= 2 &&
@@ -7525,7 +7562,9 @@ async function runBrowserEvidence() {
                     v.modelVerified === true &&
                     v.curvesCount >= 2 &&
                     v.validCurvesCount >= 2 &&
-                    v.legendCount >= 2
+                    v.legendCount >= 2 &&
+                    v.curvesCount === v.legendCount &&
+                    v.validCurvesCount === v.curvesCount
                 ) &&
                 spectralSeriesState.renderedSeriesVerified === true &&
                 spectralSeriesState.seriesCount === 1 &&

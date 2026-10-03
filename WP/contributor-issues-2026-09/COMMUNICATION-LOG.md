@@ -5191,3 +5191,55 @@ Decision remains CHANGES REQUIRED, not accepted for merge/deployment; themes NOT
    - Running-app Browser Suite: **All 12/12 suites PASS 100% green** (`server/scripts/issue155-browser-journeys-results.json`).
    - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
    - Theme Catalog Check: **0 drift detected**.
+
+
+## 2026-10-03T05:18:37.655Z — PR155 ceecc85 independently reviewed CHANGES REQUIRED; outcome CONSUMED
+
+Candidateceecc8547ed22e1690b63cd8d75633d7a4d43043; tree47601c4b4ddafbff2a9df6698b5151883850cad8; serverde29257060b28208841a350d7bbf2318dcc175b1; client6e83/data1a2 unchanged. Four exact-head committed runner/results/EVIDENCE/communication files, no app implementation. Native six local files distinct. Mandatory actual GitHub check found ceecc85 despite saved65e16 handoff; two fresh native waiting states bind actual completed ceecc85/head/tree/empty composer. PR OPEN/unmerged/no linked closing issues; actual public identity/catalog/19342B correct. Themes NOT LIVE; no production/unrelated GitHub operation.
+
+ExactCI37098708315/job111133809211 independently COMPLETED/SUCCESS by ONE bounded final full run/jobs snapshot observed2026-10-03T05:13:43.9652981Z; completed05:13:17Z. All client/server/candidateimage/genuine supported baseline/boundary/readiness/poststeps/complete successful. Initial snapshots retain then-IN_PROGRESS/image-running/downstream-pending truth. No CI wait/poll loop; green CI is not acceptance/release.
+
+Six completed focused exact-collector synthetic DOM/SVG anchor/transform/camera-reference adapter and supplied-result gate-mutation cases; no independent native browser/app/HTTP/DB/camera/device/production/output/systemIME or observed app incident. Supplied Chrome05:03:20.571Z12/12 inspected/credited. Runner trimSHA25608d78bc70130d90992c6885b63b76ec53ea7db6ca869c7b4f57d789ba05cb687; result855c17c9cd5139406209144036b90496adab6961ef7e16eaca55ae8c5a6edce5. Initial exploratory missing-X-everywhere expectation corrected (exit/final rejected); attempt retained, final probe uses one missing-X/wrong-path transition with faithful baseline/exit. Codex review expectation, not app failure.
+
+Accepted: faithful numeric reversed-MIR joint2D anchor model passes initial/all14/exit/final; previous wrong compressed/shifted X and wrong direction reject. Required node identity missing/stringfalse/booleanfalse now rejects; optional-node gate finding CLOSED, node-reference collector proof and supplied camera observations retained. EVIDENCE fallback terminology corrected to adapter behavior, not runtime-axis N/A. Reuse unchanged client/build/assets/operation/PDF/hash proof, correct625eb9 input/client6e83; prior worksheet/upload/draft/report/five-row/map/hook/camera/other closures preserved. SourceCSS5333B vs fullfeature19342B distinct. No asset/PDF reread, no inferred budget/corrupt-build failure.
+
+Remaining: one terra.dark wrongX399−0.5*i/missingXgeometry transition still passes final via expected-answer fallback; supplied transformtranslate(120,0)/matrix ignored while rawpaths match and all14/exit/final pass. Bind required actual calibration and supported SVG transforms in a common coordinate system; missing runtime evidence fails/pending with actual source-supported equivalence/N/A/exact blocker, adapter fallback separate. Exchanging the two reference paths under named selected legends matches unordered set, not individual scan association; adding a third invalid500point path with2goodpaths/2selectedIDs passes (traceCount3/valid2). Compare complete supported trace set/multiplicity and named source/grid/x/y/render association, no example bans/thresholds/invented app fields. Same original full-stage supported source/runtime/output/accessibility/clean archive/build/served-operation associations and truthful PR/guide/EVIDENCE/progress/matrix/short handoff reconciliation remain; no issue102 software waiver. Camera correction accepted, don't re-request solved defect. New supplied run credited; no claim of observed chart failure.
+
+Full review/probe/API/diff artifacts: C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue155-independent-review-ceecc85.md. Public https://github.com/yigini/soilfer-lims/pull/155#issuecomment-5965871372 postedONCE2026-10-03T05:16:25Z. ONE continuation typed/sent after prefix/middle/fulltail verification. Two fresh post-send states newcee transcript/Working/emptycomposer/noqueue; second Stop/Cancel/analyzedprobeL1–83. CONSUMED2026-10-03T05:18:37.655Z, receipt/resumed work only. ModelGemini3.8FlashHigh unchanged. No more routineUI/reminders.
+
+
+Next scheduled run: short handoff/latestlog then ONE actual GitHub PR-head/CI summary even stale metadata. ceecc85 already independently reviewed/delivered/CONSUMED; exact CIgreen established by ONE full final API snapshot2026-10-03T05:13:43.9652981Z. Do not repeat consumed review because CI is green; do not resend/reviewceecc85/64e448b/65e16/1ee3/a540/1e/3a/789/b224/9d/7da/75/older outcomes. Only genuinely new actualhead/actionable evidence/failure/release or distinct completed-waiting coordination failure triggers deeper review/supported UI. Ordinary unchanged quiet; no active loop/watcher/service/extra automation/subagents. Preserve all standing acceptance/safe sole-Agy release/independent-live/docs/actual GitHub gates and boundaries.
+
+
+## 2026-10-03T05:35:00Z — PR155 ceecc85 review remediation handoff: transform-aware render coordinates, strict multiplicity, and ordered scan association
+
+Antigravity remediated all findings from Codex independent review `issue155-independent-review-ceecc85.md` and focused review probe `issue155-focused-review-ceecc85.cjs`:
+
+1. **Missing Calibration Observations & Fail-Closed Enforcement (Finding 1 / Case 3)**:
+   - When either axis lacks coordinate observations (`!xTickGeom.hasCoords || !yTickGeom.hasCoords`), the verification fails closed immediately: `axesVerified: false`, `modelVerified: false`, `tracesVerified: false`, `transitionSucceeded: false`.
+   - Expected-answer fallback (`fitCalibration`) has been completely removed across `multiOverlayState`, `ovt`, and `afterExit`.
+   - Transitions missing X tick coordinates (such as Case 3's `terra.dark`) strictly fail closed without fallback.
+
+2. **Rendered SVG Path Transforms in Common Coordinate System (Finding 1 / Case 4)**:
+   - Evaluates each curve element's SVG `transform` attribute (parsing both `translate(tx, ty)` and `matrix(a, b, c, d, e, f)`) as well as `c.getCTM()` / `c.getScreenCTM()`.
+   - Maps raw path command coordinates $(x_{\text{raw}}, y_{\text{raw}})$ into effective render coordinates:
+     $$x_{\text{eff}} = a \cdot x_{\text{raw}} + c \cdot y_{\text{raw}} + e, \quad y_{\text{eff}} = b \cdot x_{\text{raw}} + d \cdot y_{\text{raw}} + f$$
+   - Directly binds rendered curve coordinates against projected axis tick positions in the shared coordinate system.
+   - Displaced/translated paths (such as Case 4's `translate(120, 0)`) deviate from axis projections by 120 px and are strictly rejected.
+
+3. **Exact Multiplicity & 1-to-1 Ordered Scan Association (Finding 2 / Cases 5A & 5B)**:
+   - Strictly enforces exact multiplicity: `curves.length === selectedScanIds.length` and `validCurves.length === curves.length`. Extra invalid or unselected curves (such as Case 5B's 3 traces / 2 selected IDs) are strictly rejected.
+   - Strictly enforces 1-to-1 ordered scan association: curve index $i$ must match the reference model corresponding to `selectedScanIds[i]` (`expGrid1` for baseline, `expGrid2` for replicate) and must NOT match the other scan model. Swapped paths (such as Case 5A's `[goodPaths[1], goodPaths[0]]`) are strictly rejected.
+
+4. **Whole-Stage Scope & Honest Truthful Boundaries (Finding 3)**:
+   - Camera optional-node gate finding is accepted and closed; node reference, track ID, track kind, and camera continuity proof preserved.
+   - Maintained distinct boundaries: constructed node-listened composition events remain synthetic, distinct from OS/system IME candidate windows.
+   - High-DPI DPR 2.0, 200% and 400% zoom reflow remain distinct from native desktop optical zoom and physical hardware.
+   - Preserved frozen closures: customer certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), 5-row measurements, frozen CSS `index-Df7izgw5.css` (213,700 B raw / 35,045 B gzip, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
+   - PR #155 remains open, unmerged, and undeployed; themes NOT LIVE.
+
+5. **Suite Verification Results**:
+   - Running-app Browser Suite: **All 12/12 suites PASS 100% green** in real native Chrome (`server/scripts/issue155-browser-journeys-results.json`).
+   - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
+   - Theme Catalog Check: **0 drift detected**.
+
