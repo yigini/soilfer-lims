@@ -4252,3 +4252,35 @@ Laboratory operators can find step-by-step procedures in the following documenta
               - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
               - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
               - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+
+---
+
+### PR155 Production Merge, Release Execution & Independent Live Verification (3 October 2026)
+
+- **Technical Acceptance & Merge**:
+  - Implementation accepted at head `dbbf8797cb8a7029fb2eb296f4c8b7d34fbe158b` (`issue155-independent-review-dbbf879.md`); documentation correction accepted at head `6a205db83a7841632a10988006b373f01c596c67` (`docs/THEME_GUIDE.md` SampleMap coordinate dependencies; `issue155-independent-review-6a205db.md`).
+  - Guarded merge (`gh pr merge 155 --merge --match-head-commit 6a205db...`) merged to `main` at `25535b6f62b0d29c6b143a45a9c1db02ed2f229a` (tree `52335aba0b6741b41f85fe274aa89236fba10601`). The repository has no server-enforced branch protection rulesets (recorded honestly; API 404).
+  - Merged-main CI run `37117816283` / job `111187917280` completed SUCCESS at 10:59:20Z.
+  - Linked closing issues: None (PR #155 has no linked closing issue).
+- **Clean Immutable Build**:
+  - Source archive created with exact LF line endings (`git -c core.autocrlf=false -c core.eol=lf archive`): `source_25535b6.tar.gz` (SHA-256 `e8ed7fa7f3596c2af6266498a9d499b1b40aeab98871305d7f6b6226331dc280`).
+  - Built immutable container image: `soilfer-lims:v3.5.32-25535b6` (`sha256:72b6b81a7a335bede9d47b8230f8da05418068d86c195b3fccfbf224813b5b05`).
+  - Verified in-image asset hashes: CSS `index-Df7izgw5.css` (`65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), entrypoint (`11828fad1bfb222d7483a55b4e8cd3fd75f69a4cfb753c68ef2dd397d50d2c1e`), migration script (`c460eb55419a081fa549cd4d1f3c63596b96a8a17efa54597e30a1a68c8afe19`), and postflight suite (`cb88ca593de1e2af3a0052a7ffb958eeb3933028764718eb624bfdfbc5fea4b5`).
+- **Controlled Release Execution**:
+  - Executed once under authorized release procedure: run `20261003_132428` via `/opt/lims/execute_release_issue155.sh` (SHA-256 `f68d6864d64c16e4cfcdf3572bce7177c969fd8c648f2fc562b07e72b21dca1a`).
+  - Release ledger: `/opt/lims/logs/release_ledger_issue155_20261003_132428.json` (SHA-256 `09ad62bdf2606b22533332af39ef55c4ca5e8c91b158a9d1e97c2116b8234287`, status: `SUCCESS`).
+  - Release transcript: `/opt/lims/logs/release_issue155_20261003_132428.log` (SHA-256 `ba4f75c593d9c9eafec60ac4e24435e515b2f3bff86971d640bdaba51f07e7d8`).
+  - Rollback baseline preserved: `soilfer-lims:rollback-baseline` (`sha256:5114c6c07b4e5e614e818dea794670cfc23ef1f847aca817d89c551e128d3857`).
+  - Stopped-writer backups: DB `/opt/lims/backups/dev_pre_issue155_20261003_132428.db` (563,322,880 B, SHA-256 `61551adf698668f696f93aa0742610316e1943e3309734fa237b1ad94032275e`), assets `/opt/lims/backups/assets_pre_issue155_20261003_132428.tar.gz` (1,813,849 B, SHA-256 `7921958ff04086be1b9c2b59490c5aa102123cc8d91d33abbd4600b3cbf9234a`).
+  - Stopped-writer baseline counts: 38,566 samples, 19 results, 49 users, 10 labs; SQLite integrity `ok`, 0 foreign key violations.
+  - Additive migration under held schedulers (`DISABLE_BACKGROUND_JOBS=true`): 3 UI columns added to User, 2 appearance setting tables created, global default set to `soilfer-classic|light`, backfill mismatch 0.
+  - Ingress and cutover: Quiescence via Apache 503 rewrite; COMMITTED before normal writers; Apache restored configuration matches pre-quiescence hash (`f46aeaae33c48a7634b06bffab09ecfe19ed8f2a8e8df21e2503d2c479f78c20`); write resumption verified with HTTP 401 on unauthorized POST.
+  - Postflight verification: In-image postflight 31/31 passed (`cb88ca593de1e2af3a0052a7ffb958eeb3933028764718eb624bfdfbc5fea4b5`); roles postflight passed pre- and post-exposure (`6724d91d89343387adb18db03f396a1eac14d8c9cc0700ac722b36e82ed924da`).
+- **Codex Independent Live Verification**:
+  - Independent review report: `issue155-independent-live-review.md` / `issue155-independent-live.json` (observed 2026-10-03T11:35:39Z–11:36Z). Decision: **LIVE RELEASE VERIFIED**.
+  - Live container `soilfer-lims` running healthy on image `sha256:72b6b81a7a335bede9d47b8230f8da05418068d86c195b3fccfbf224813b5b05`.
+  - Public endpoints: `/api/health` 200, `/api/appearance/public` 200 (`soilfer-classic|light`, rev 1), `/api/appearance/catalog` 200 (all 7 families: SoilFER Classic, Forest, Terra, Mineral, Watershed, Nutrient, Clear Contrast across light & dark swatches), `/api/v2/data-exchange/capabilities` 200; `/api/labs/directory`, `/api/v2/data-exchange/stats`, and `/api/v2/data-exchange/geojson` return 401 as expected.
+  - Role authority gates: GET-only role checks independently executed via public HTTPS (admin users/labs 200, manager dashboard/submissions 200, technician work 200; admin appearance 200 for admin, 403 for manager/technician).
+  - Public login UI: Independently rendered in supported browser with `data-theme="soilfer-classic"`, `data-appearance="light"`, background `rgb(245, 243, 237)`, and stylesheet `index-Df7izgw5.css` (`issue155-independent-live-public-ui.json` / `.png`).
+- **Truthful Physical & Manual Testing Boundaries**:
+  - Physical devices (iOS/Android), physical barcode/label printers, manual screen-reader listening, and OS contrast theme displays remain recorded as manual pending.
