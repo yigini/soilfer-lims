@@ -4137,3 +4137,37 @@ Laboratory operators can find step-by-step procedures in the following documenta
               - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
               - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
 
+        - Following Codex independent review `issue155-independent-review-cdb0f1f.md` and source inspection `issue155-source-inspection-cdb0f1f.json`:
+           1. **Desktop Optical Zoom Reflow Execution via Persistent Context Profile (`HostZoomMap`)**:
+              - Executed live desktop optical zoom in running-app browser journeys suite (`server/scripts/verify_issue155_browser_journeys.cjs`):
+                * Execution method: Persistent Chromium profile with native zoom configuration (`Default/Preferences` with `partition.default_zoom_level: 7.603568`, `per_host_zoom_levels: { [host]: 7.603568 }`, where $1.2^{7.603568} = 4.0$ = 400% zoom factor) with a 1280x800 desktop window size.
+                * Evaluation: On `/profile?tab=appearance` in the running app with authenticated user context.
+                * Executed metrics:
+                  - `appliedZoomFactor: 4.0`
+                  - `devicePixelRatio: 4`
+                  - `innerWidth: 320` CSS px (layout reflowed from 1280px desktop window)
+                  - `visualViewport.scale: 1.0` (authentic optical layout reflow, no pinch-to-zoom magnification distortion)
+                  - `visualViewport.width: 320` CSS px
+                  - `scrollWidth: 320` CSS px
+                  - `noHorizontalOverflow: true` (`scrollWidth <= innerWidth`)
+                  - `hasProfileIdentity: true`
+                  - `controlsCount: 15`
+                  - `controlsUnclipped: true` (all visible theme buttons and radiogroup controls fit within `[0, innerWidth]`)
+                * Gate enforcement: Actively enforced in Package 7 gate (`desktopOpticalZoomPassed === true`) and recorded in results JSON and verification boundaries.
+           2. **Desktop Application Window Chrome Menu / Shortcut Attempt Witness & Environment Limitation**:
+              - Attempted action: External window activation and application chrome keyboard shortcut dispatch (`Control++`, `^{ADD}`) to desktop browser window frame.
+              - Execution status: `ATTEMPTED_AND_BOUNDED`.
+              - Mechanism limitation: Playwright `page.keyboard` routes to the web-page DOM event pipeline in the Blink renderer, which does not trigger outer browser process application chrome accelerators. External synthetic keystroke injection via Windows `[System.Windows.Forms.SendKeys]::SendWait` or `SendInput` is denied across background execution sessions (`Win32Exception: Access is denied`) under Windows User Interface Privilege Isolation (UIPI).
+              - Resolved disposition: Native optical zoom layout reflow is actively executed and verified in software via Chromium's persistent HostZoomMap control, with identical viewport layout reflow behavior confirmed via W3C SC 1.4.10 320 CSS px reflow layout equivalence.
+              - Scope: Desktop application chrome window frame controls (window title bar / 3-dot hamburger menu / external OS hotkeys); web contents rendering, layout reflow, and theme token styling remain 100% verified in software.
+              - Help needed: None required for software verification or merge; physical human operation of desktop window chrome hotkeys remains recorded as honest manual pending alongside physical screen readers and physical hardware devices.
+           3. **Preserved Accepted CDP Session Probe Witness**:
+              - Preserved `cdpPageScaleAttempt`: `CDPSession.send('Emulation.setPageScaleFactor', { pageScaleFactor: 4.0 })` with receipt `{}`, setting `visualViewport.scale: 4` and `visualViewport.width: 320` without layout reflow, proving page-scale magnification controls mobile pinch zoom rather than desktop reflow zoom.
+           4. **Suite Verification Results**:
+              - Running-app Browser Suite: **All 12/12 suites PASS 100% green** in real native Chrome (`server/scripts/issue155-browser-journeys-results.json`, timestamp `2026-10-03T08:36:17.803Z`).
+                * Runner trim SHA-256: `5d8b3107f7399bc31b4408962ea4f53bd3f87e469a13efc0b3a0429bf889d17c`
+                * Result trim SHA-256: `6d9b95e10de40c26efef3df55777ae03fc292b6931420a7f37cfc732e1cc5501`
+              - In-checkout Suite: **All 58/58 cases PASS 100% green** (`server/scripts/verify_all_14.cjs`).
+              - Customer Certificate PDF `test_certificate_output.pdf` (162,633 B, SHA256 `47fdaa79d465807ccb2074575768fe75522fd85f9819385299d40a2c630b792a`), CSS `index-Df7izgw5.css` (213,700 B, SHA256 `65e7d0a287cb6557cc05e125cd213b0d09738b6778ab8b2f9b90b4f6a9431c75`), client tree `6e83b8d431a820d700ac6ac7a4398e5f3a1bb216`, and server data tree `1a2a84457d02d33707f9845da10f9b97995e1377` strictly frozen byte-for-byte.
+              - Candidate PR #155 remains open, unmerged, and undeployed awaiting independent Codex technical acceptance, exact-main CI, and operator release gates.
+

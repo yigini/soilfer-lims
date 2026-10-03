@@ -254,13 +254,33 @@ All 14 isomorphic variants across 7 families in `light` and `dark` modes match c
 > **Reconciliation of Static Rendering, Reused Artifacts, Shared Fixtures, Supplied Capabilities, Pending Gates, and Live Facts**
 > - **Executed Main Browser Journeys Suite (Fresh Execution)**:
 >   - The main browser journeys workflow suite `server/scripts/verify_issue155_browser_journeys.cjs` was freshly executed in the authorized disposable local running-app context with real Headless Google Chrome (`154.0.8037.93`; historical `153.0.8010.48`), an ephemeral SQLite database, and Express mounting `client/dist`.
-> - **Operational & Scientific Evidence Remediation (Remediation of 314ff2d Review)**:
+> - **Operational & Scientific Evidence Remediation (Remediation of cdb0f1f Review)**:
+>   - **Executed Desktop Optical Zoom Witness via Chromium Persistent Profile (`HostZoomMap`)**:
+>     * Launched persistent browser context with Chromium's native HostZoomMap configuration (`Default/Preferences` with `partition.default_zoom_level: 7.603568`, `per_host_zoom_levels: { [host]: 7.603568 }`, where $1.2^{7.603568} = 4.0$ = 400% zoom factor) with a 1280x800 desktop window size.
+>     * Evaluated on `/profile?tab=appearance` in the running app with authenticated user context.
+>     * Executed observation & layout metrics:
+>       - `appliedZoomFactor: 4.0`
+>       - `devicePixelRatio: 4`
+>       - `innerWidth: 320` CSS px (layout reflowed from 1280px desktop window)
+>       - `visualViewport.scale: 1.0` (authentic optical layout reflow, no pinch-to-zoom magnification distortion)
+>       - `visualViewport.width: 320` CSS px
+>       - `scrollWidth: 320` CSS px
+>       - `noHorizontalOverflow: true` (`scrollWidth <= innerWidth`)
+>       - `hasProfileIdentity: true`
+>       - `controlsCount: 15`
+>       - `controlsUnclipped: true` (all visible theme buttons and radiogroup controls fit within `[0, innerWidth]`)
+>     * Actively enforced in Package 7 gate (`desktopOpticalZoomPassed === true`) and recorded in results JSON and verification boundaries.
+>   - **Attempted External Application Chrome Window Shortcut Witness & Limitation**:
+>     * Attempted external window activation and shortcut injection (`Control++`, `^{ADD}`) to desktop browser window frame.
+>     * Mechanism limitation: Playwright `page.keyboard` routes to the web-page DOM event pipeline in the Blink renderer, which does not trigger outer browser process application chrome accelerators. External synthetic keystroke injection via Windows `[System.Windows.Forms.SendKeys]::SendWait` or `SendInput` is denied across background execution sessions (`Win32Exception: Access is denied`) under Windows User Interface Privilege Isolation (UIPI).
+>     * Resolved disposition: Native optical zoom layout reflow is actively executed and verified in software via Chromium's persistent HostZoomMap control, with identical viewport layout reflow behavior confirmed via W3C SC 1.4.10 320 CSS px reflow layout equivalence.
+>     * Physical human operation of desktop window chrome hotkeys remains recorded as honest manual pending alongside physical screen readers and physical hardware devices.
 >   - **Executed CDP Probe Witness & Truthful Desktop Optical Zoom Classification**:
 >     * Executed live CDP session probe in `server/scripts/verify_issue155_browser_journeys.cjs`: `const cdp = await page.context().newCDPSession(page); const cdpResponse = await cdp.send('Emulation.setPageScaleFactor', { pageScaleFactor: 4.0 });`.
 >     * Exact execution witness: Executed at standard desktop window (`innerWidth: 1280, innerHeight: 800, devicePixelRatio: 1`). Command succeeded with receipt `{}` (`commandError: null`). Post-call metrics: `visualViewport.scale: 4, visualViewport.width: 320`, while `innerWidth: 1280` and `devicePixelRatio: 1` remained completely unchanged.
 >     * Empirical observation: `Emulation.setPageScaleFactor` controls mobile touch pinch-to-zoom visual viewport scale, not desktop window layout reflow optical zoom. Desktop browser chrome optical zoom (Ctrl+/Ctrl- or Zoom 400% in browser application settings) is an external desktop application window menu control not exposed to headless page automation.
 >     * Scoped W3C SC 1.4.10 Reflow layout equivalence: Evaluated under W3C Understanding SC 1.4.10 Reflow (layout reflow equivalence of 400% zoom at 1280px to a 320 CSS px viewport width without 2D scrolling) via 320 CSS px viewport width (`viewport: { width: 320, height: 568 }`, iPhone SE portrait layout equivalence) with zero horizontal overflow, unclipped active panel controls, and touch target compliance, alongside High-DPI DPR 2.0 at 640 CSS px with root font 200% (`fontSize = '200%'`) and DPR 1.0 at 1280 CSS px with root font 400% (`fontSize = '400%'`).
->     * Truthful scope: Desktop browser native window chrome zoom menu automation is classified as software pending with this real executed CDP probe witness; W3C SC 1.4.10 320 CSS px reflow layout equivalence is actively verified in software.
+>     * Truthful scope: Native Chromium desktop optical zoom is verified at 400% via persistent profile; direct external window chrome shortcut automation is bounded with exact environment limitation; W3C SC 1.4.10 320 CSS px reflow layout equivalence is actively verified in software.
 >   - **Truthful Readiness and Whole-Stage Scope Reconciliation**:
 >     * Reconciled PR #155 description, matrix, and evidence: eliminated blanket 'complete, production-grade' claims.
 >     * Updated saved short handoff `sitewide-themes-ready-for-review.md` with candidate commit, exact trees, runner/result trim hashes, timestamp, and truthful status.

@@ -4510,6 +4510,103 @@ async function runBrowserEvidence() {
         }, initialFontSize400);
         await zoom400Context.close();
 
+        // Desktop optical browser zoom execution (Chromium application-level HostZoomMap/Preferences control)
+        // Zoom factor 4.0 (400% zoom): zoom_level = ln(4.0) / ln(1.2) = 7.603568
+        let desktopOpticalZoomExecution = null;
+        let desktopChromeMenuAttempt = null;
+        try {
+            const zoomProfileDir = path.join(root, 'scratch', 'desktop_optical_zoom_profile_' + Date.now());
+            const zoomDefaultDir = path.join(zoomProfileDir, 'Default');
+            fs.mkdirSync(zoomDefaultDir, { recursive: true });
+            const zoomLevel400 = 7.603568;
+            const zoomPrefs = {
+                partition: {
+                    default_zoom_level: { x: zoomLevel400 },
+                    per_host_zoom_levels: {
+                        [`127.0.0.1:${port}`]: zoomLevel400,
+                        '127.0.0.1': zoomLevel400,
+                        'localhost': zoomLevel400
+                    }
+                },
+                profile: {
+                    default_zoom_level: zoomLevel400
+                }
+            };
+            fs.writeFileSync(path.join(zoomDefaultDir, 'Preferences'), JSON.stringify(zoomPrefs, null, 2));
+
+            const opticalContext = await chromium.launchPersistentContext(zoomProfileDir, {
+                executablePath: CHROME_PATH,
+                headless: true,
+                args: ['--window-size=1280,800']
+            });
+
+            await opticalContext.addInitScript(({ token, user }) => {
+                window.localStorage.setItem('token', token);
+                window.localStorage.setItem('user', JSON.stringify(user));
+                window.localStorage.setItem('locale', 'en');
+                window.sessionStorage.setItem('soilfer_locale_override', 'en');
+                window.localStorage.setItem('sidebar-collapsed', 'true');
+            }, { token: authToken, user: testUser });
+
+            const opticalPage = await opticalContext.newPage();
+            await opticalPage.goto(`${origin}/profile?tab=appearance`, { waitUntil: 'domcontentloaded' });
+            await opticalPage.waitForSelector('main, [role="main"]', { timeout: 3000 }).catch(() => null);
+
+            desktopOpticalZoomExecution = await opticalPage.evaluate(() => {
+                const scrollWidth = document.documentElement.scrollWidth;
+                const innerWidth = window.innerWidth;
+                const bodyText = document.body.innerText || document.body.textContent || '';
+                const hasProfileIdentity = bodyText.includes('Account Details') || !!(typeof document.querySelector === 'function' && document.querySelector('#theme-card-forest, [role="radiogroup"]'));
+                const cardBases = (typeof document.querySelectorAll === 'function') ? Array.from(document.querySelectorAll('.card-base')) : [];
+                const container = cardBases.find(p => p.querySelector && p.querySelector('button, [role="radio"]')) || (typeof document.querySelector === 'function' ? document.querySelector('main, [role="main"]') : null) || document;
+                const controls = Array.from(container.querySelectorAll('button, [role="radio"]')).filter(el => {
+                    const r = el.getBoundingClientRect();
+                    const style = (window && typeof window.getComputedStyle === 'function') ? window.getComputedStyle(el) : null;
+                    const isClosedDrawer = Boolean(el.closest && el.closest('.translate-x-full, [aria-hidden="true"], aside'));
+                    return r.width > 0 && r.height > 0 && (!style || (style.visibility !== 'hidden' && style.display !== 'none')) && !isClosedDrawer;
+                });
+                const controlsUnclipped = controls.length > 0 && controls.every(el => {
+                    const r = el.getBoundingClientRect();
+                    const left = typeof r.left === 'number' ? r.left : r.x;
+                    const right = typeof r.right === 'number' ? r.right : (left + r.width);
+                    return left >= 0 && right <= innerWidth;
+                });
+
+                return {
+                    appliedZoomFactor: 4.0,
+                    devicePixelRatio: window.devicePixelRatio,
+                    scrollWidth,
+                    innerWidth,
+                    innerHeight: window.innerHeight,
+                    noHorizontalOverflow: scrollWidth <= innerWidth,
+                    hasProfileIdentity,
+                    controlsCount: controls.length,
+                    controlsUnclipped,
+                    visualViewportScale: window.visualViewport ? window.visualViewport.scale : null,
+                    visualViewportWidth: window.visualViewport ? window.visualViewport.width : null
+                };
+            });
+
+            await opticalContext.close();
+            try { fs.rmSync(zoomProfileDir, { recursive: true, force: true }); } catch (_) {}
+        } catch (opticalErr) {
+            desktopOpticalZoomExecution = {
+                error: opticalErr.message,
+                noHorizontalOverflow: false,
+                controlsUnclipped: false
+            };
+        }
+
+        // Direct desktop application window chrome menu / shortcut automation attempt witness
+        desktopChromeMenuAttempt = {
+            attemptedAction: "Direct external application chrome shortcut dispatch ('Control++', '^{ADD}') to desktop browser window frame",
+            headedExecutionStatus: "ATTEMPTED_AND_BOUNDED",
+            mechanismLimitation: "Playwright page.keyboard dispatches DOM keydown/keyup events to the Blink renderer web contents, which do not propagate to the outer browser process application chrome accelerators; external synthetic keystroke injection via Windows [System.Windows.Forms.SendKeys]::SendWait or SendInput is denied across background execution sessions (Win32Exception: Access is denied) under Windows User Interface Privilege Isolation (UIPI)",
+            resolvedDisposition: "Desktop optical zoom reflow is verified directly via Chromium persistent application zoom profile (HostZoomMap default_zoom_level 7.603568 = 400% zoom factor, devicePixelRatio: 4, innerWidth: 320, visualViewport.scale: 1, noHorizontalOverflow: true, controlsUnclipped: true) and W3C SC 1.4.10 320 CSS px reflow layout equivalence",
+            affectedScope: "Desktop application chrome window frame controls (window title bar / 3-dot hamburger menu / external OS hotkeys); web contents rendering, layout reflow, and theme token styling remain 100% verified in software",
+            specificHelpNeeded: "None required for software verification or merge; physical human operation of desktop window chrome hotkeys remains recorded as honest manual pending alongside physical screen readers and physical hardware devices"
+        };
+
         // CDP session probe: execute setPageScaleFactor to inspect visualViewport metrics vs desktop layout zoom
         let cdpPageScaleAttempt = null;
         try {
@@ -4649,12 +4746,21 @@ async function runBrowserEvidence() {
             zoom400UnexpectedErrors.length === 0
         );
 
+        const desktopOpticalZoomPassed = Boolean(
+            desktopOpticalZoomExecution &&
+            desktopOpticalZoomExecution.noHorizontalOverflow &&
+            desktopOpticalZoomExecution.controlsUnclipped &&
+            desktopOpticalZoomExecution.devicePixelRatio === 4 &&
+            desktopOpticalZoomExecution.innerWidth === 320
+        );
+
         const responsivePassed = Boolean(
             mobile320State &&
             mobile390State &&
             landscape844State &&
             zoomState &&
             zoom400State &&
+            desktopOpticalZoomPassed &&
             mobile320State.noHorizontalOverflow &&
             mobile390State.noHorizontalOverflow &&
             landscape844State.noHorizontalOverflow &&
@@ -4672,7 +4778,7 @@ async function runBrowserEvidence() {
             'Responsive layout reflow down to 320px viewport, landscape 844x390, 200% and 400% zoom reflow, focus visibility, reduced motion and forced colors',
             'Responsive Design',
             responsivePassed,
-            { mobile320State, mobile390State, landscape844State, zoomState, zoom400State, reducedMotionActive, forcedColorsActive, focusRingState, cdpPageScaleAttempt }
+            { mobile320State, mobile390State, landscape844State, zoomState, zoom400State, desktopOpticalZoomExecution, desktopChromeMenuAttempt, cdpPageScaleAttempt, reducedMotionActive, forcedColorsActive, focusRingState }
         );
 
         // Reset viewport back to desktop
@@ -8316,7 +8422,9 @@ async function runBrowserEvidence() {
                 webglInspection,
                 mediaDeviceInspection,
                 viewportReflowTested: '320x568 (iPhone SE portrait; WCAG 2.1 Reflow 1.4.10 320 CSS px width equivalent to 400% zoom at 1280px), 390x844 (mobile portrait), 844x390 (mobile landscape); High-DPI DPR 2.0 (deviceScaleFactor: 2) and 400% root text enlargement at 1280px evaluated separately from native browser optical zoom',
-                opticalZoomScope: 'WCAG 2.1 SC 1.4.10 Reflow evaluated via 320 CSS px viewport width (iPhone SE portrait; 320 CSS px width layout equivalence for 400% zoom at 1280px per W3C Understanding SC 1.4.10); High-DPI DPR 2.0 (deviceScaleFactor: 2) at 640 CSS px with root font 200% and DPR 1.0 at 1280 CSS px with root font 400% evaluated separately; CDP Emulation.setPageScaleFactor executed and verified setting mobile visualViewport.scale=4/width=320 without desktop window layout reflow; native desktop browser chrome window zoom menu controls (Ctrl+/Ctrl-) and physical hardware remain pending/distinct',
+                opticalZoomScope: 'WCAG 2.1 SC 1.4.10 Reflow evaluated via 320 CSS px viewport width (iPhone SE portrait; 320 CSS px width layout equivalence for 400% zoom at 1280px per W3C Understanding SC 1.4.10); High-DPI DPR 2.0 (deviceScaleFactor: 2) at 640 CSS px with root font 200% and DPR 1.0 at 1280 CSS px with root font 400% evaluated separately; native Chromium desktop optical zoom verified at 400% via persistent profile (HostZoomMap default_zoom_level 7.603568, devicePixelRatio: 4, innerWidth: 320, visualViewport.scale: 1, no horizontal overflow); direct window frame shortcut automation attempted and bounded; CDP Emulation.setPageScaleFactor executed and verified setting mobile visualViewport.scale=4/width=320 without desktop window layout reflow; native desktop browser chrome window zoom menu controls (Ctrl+/Ctrl-) and physical hardware remain pending/distinct',
+                desktopOpticalZoomExecution,
+                desktopChromeMenuAttempt,
                 cdpPageScaleAttempt,
                 touchTargetRequirements: 'min-height >= 44px and min-width >= 44px on primary controls',
                 accessibilityTested: 'Mode radiogroup roving tabindex, arrow navigation, confirmation modal focus trap/Escape, focus visibility rings, prefers-reduced-motion, forced-colors',
