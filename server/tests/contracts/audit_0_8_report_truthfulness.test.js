@@ -191,4 +191,11 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
         expect(freezeReportEvidence([], [{ ...item, result: JSON.stringify({ ...receipt, steps: [] }) }], []).preparation).toEqual([]);
         expect(describeReportEvidence(freezeReportEvidence([], [], [])).preparationStatement).toMatch(/not recorded/i);
     });
+    test('short certificates keep footer on one page and all issue-date fields use publishedAt', async () => {
+        const pages = jest.spyOn(PDFDocument.prototype, 'addPage');
+        const text = jest.spyOn(PDFDocument.prototype, 'text');
+        await generateReportPdfBuffer(snapshot, { status: 'PUBLISHED', publishedAt: '2021-02-03T12:00:00Z' });
+        expect(pages).toHaveBeenCalledTimes(1);
+        expect(text.mock.calls.filter(([value]) => String(value).includes('2021-02-03'))).toHaveLength(2);
+    });
 });
