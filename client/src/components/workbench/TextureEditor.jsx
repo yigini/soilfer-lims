@@ -1,6 +1,6 @@
 import React, { useMemo, useRef } from 'react';
 import { calculateUsdaTexture } from '../../utils/soilCalculations';
-import numberParse from '../../../../shared/numberParse.js';
+import numberParse from '@lims/number-parse';
 import NumberPreview from './NumberPreview';
 
 /**

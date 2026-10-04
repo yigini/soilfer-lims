@@ -15,7 +15,7 @@ function load(name) {
     const code = esbuild.transformSync(fs.readFileSync(file, 'utf8'), { loader: 'jsx', format: 'cjs' }).code;
     vm.runInNewContext(code, { module, exports: module.exports, require: dependency => {
         if (dependency === 'react') return { ...React, useRef: value => ({ current: value }), useMemo: fn => fn() };
-        if (dependency.includes('shared/numberParse')) return numberParse;
+        if (dependency === '@lims/number-parse') return numberParse;
         if (dependency.includes('LanguageContext')) return { useLanguage: () => ({ t: (_, fallback) => fallback }) };
         if (dependency === './NumberPreview') return load('NumberPreview');
         if (dependency.includes('soilCalculations')) {

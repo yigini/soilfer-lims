@@ -1,5 +1,5 @@
 import React from 'react';
-import numberParse from '../../../../shared/numberParse.js';
+import numberParse from '@lims/number-parse';
 import { useLanguage } from '../../context/LanguageContext';
 
 export default function NumberPreview({ value, numberFormat }) {

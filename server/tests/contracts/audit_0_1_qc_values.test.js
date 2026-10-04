@@ -120,7 +120,7 @@ function modalHost() {
         if (name === 'lucide-react') return new Proxy({}, { get: () => () => null });
         if (name.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => code => code };
         if (name.includes('messageFormatter')) return parser;
-        if (name.includes('shared/numberParse')) return require('../../../shared/numberParse');
+        if (name === '@lims/number-parse') return require('../../../shared/numberParse');
         if (name === './NumberPreview') return () => null;
         throw new Error(`Unexpected component dependency: ${name}`);
     }).default;

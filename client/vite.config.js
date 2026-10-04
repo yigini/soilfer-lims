@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { readFileSync } from 'fs'
+import { fileURLToPath } from 'node:url'
 
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'))
 const buildDate = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
@@ -28,7 +29,8 @@ export default defineConfig({
         },
         chunkSizeWarningLimit: 1000
     },
-    optimizeDeps: { include: ['../shared/numberParse.js'] },
+    resolve: { alias: { '@lims/number-parse': fileURLToPath(new URL('../shared/numberParse.js', import.meta.url)) } },
+    optimizeDeps: { include: ['@lims/number-parse'] },
     server: {
         proxy: {
             '/api': {

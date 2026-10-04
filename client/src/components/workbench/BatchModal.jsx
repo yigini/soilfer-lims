@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { X, Layers, ShieldCheck, AlertTriangle, CheckCircle2, FlaskConical, PlusCircle } from 'lucide-react';
 import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
-import numberParse from '../../../../shared/numberParse.js';
+import numberParse from '@lims/number-parse';
 import NumberPreview from './NumberPreview';
 
 const EMPTY_QC_FORM = { blankVal: '', ctrlExpected: '', ctrlMeasured: '', dupVal1: '', dupVal2: '' };
