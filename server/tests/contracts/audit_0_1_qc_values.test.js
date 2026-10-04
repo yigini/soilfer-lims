@@ -101,8 +101,8 @@ function modalHost() {
     };
     const axios = {
         get: jest.fn().mockResolvedValue({ data: { data: [
-            { id: 'fixture-batch', status: 'OPEN', profile: 'RACK_40' },
-            { id: 'second-batch', status: 'OPEN', profile: 'RACK_40' }
+            { id: 'fixture-batch', status: 'OPEN', profile: 'RACK_40', numberFormat: { decimal: '.', thousands: null } },
+            { id: 'second-batch', status: 'OPEN', profile: 'RACK_40', numberFormat: { decimal: '.', thousands: null } }
         ] } }),
         post: jest.fn().mockResolvedValue({ data: { status: 'QC_PASS' } }),
         put: jest.fn()
@@ -120,6 +120,8 @@ function modalHost() {
         if (name === 'lucide-react') return new Proxy({}, { get: () => () => null });
         if (name.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => code => code };
         if (name.includes('messageFormatter')) return parser;
+        if (name.includes('shared/numberParse')) return require('../../../shared/numberParse');
+        if (name === './NumberPreview') return () => null;
         throw new Error(`Unexpected component dependency: ${name}`);
     }).default;
     let tree;
@@ -179,8 +181,8 @@ describe('Audit 0.1: BatchModal explicit input component behavior', () => {
         expect(host.find('evaluate-qc-btn').props.disabled).toBe(false);
         await host.find('evaluate-qc-btn').props.onClick();
         expect(host.axios.post).toHaveBeenCalledWith('/api/qc/batches/fixture-batch/evaluate', {
-            blanks: [{ value: 0 }], controls: [{ expected: 7, measured: 7.03 }],
-            duplicates: [{ value1: 6.85, value2: 6.87 }]
+            blanks: [{ value: 0, rawInput: { value: '0' } }], controls: [{ expected: 7, measured: 7.03, rawInput: { expected: '7,00', measured: '7,03' } }],
+            duplicates: [{ value1: 6.85, value2: 6.87, rawInput: { value1: '6,85', value2: '6,87' } }]
         });
         await host.render(false);
         await host.render(true);

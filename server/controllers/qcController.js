@@ -3,6 +3,8 @@ const prisma = require('../prisma');
 const { evaluateBatchQc, checkBatchDisposition, flagBatchResults, getMissingQcValueTypes } = require('../services/qcService');
 const scopeGuard = require('../utils/scopeGuard');
 const { hasPermission } = require('../config/roles');
+const { getNumberFormat } = require('../services/numberFormatService');
+const { normalizeQcNumbers, retainQcRawInput } = require('../services/qcNumberInputService');
 
 const BATCH_STATES = {
     OPEN: 'OPEN',
@@ -34,7 +36,7 @@ async function syncTypedQcItems(tx, batchId, evaluated) {
             recoveryPct: null,
             rpd: null,
             status: b.status || 'PASS',
-            details: b.details || null
+            details: b.rawInput ? JSON.stringify({ evaluation: b.details || null, rawInput: b.rawInput }) : b.details || null
         });
     });
 
@@ -51,7 +53,7 @@ async function syncTypedQcItems(tx, batchId, evaluated) {
             recoveryPct: null,
             rpd: d.rpd !== null && d.rpd !== undefined ? Number(d.rpd) : null,
             status: d.status || 'PASS',
-            details: d.details || null
+            details: d.rawInput ? JSON.stringify({ evaluation: d.details || null, rawInput: d.rawInput }) : d.details || null
         });
     });
 
@@ -68,7 +70,7 @@ async function syncTypedQcItems(tx, batchId, evaluated) {
             recoveryPct: c.recoveryPct !== null && c.recoveryPct !== undefined ? Number(c.recoveryPct) : null,
             rpd: null,
             status: c.status || 'PASS',
-            details: c.details || null
+            details: c.rawInput ? JSON.stringify({ evaluation: c.details || null, rawInput: c.rawInput }) : c.details || null
         });
     });
 
@@ -269,14 +271,16 @@ exports.getBatches = async (req, res) => {
             orderBy: { createdAt: 'desc' }
         });
 
-        const dataWithProfiles = batches.map(b => ({
+        const dataWithProfiles = await Promise.all(batches.map(async b => ({
             ...b,
+            numberFormat: await getNumberFormat(b.labId),
             runProfile: resolveRunProfile(b.analysis, b.instrument, b.maxCapacity, b.profile)
-        }));
+        })));
 
         res.json({ data: dataWithProfiles });
     } catch (error) {
         console.error('[getBatches] Error:', error);
+        if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
         res.status(500).json({ error: 'Failed to get batches' });
     }
 };
@@ -382,12 +386,13 @@ exports.updateBatch = async (req, res) => {
                 throw batchError(409, { code: 'QC_REOPEN_SEPARATE_EVALUATION', error: 'Reopen the batch before submitting new QC measurements.' });
             }
             if (hasQcPayload) {
-                const qcPayload = updates.qcResults || {
+                const sourcePayload = updates.qcResults || {
                     blanks: updates.blanks,
                     duplicates: updates.duplicates,
                     controls: updates.controls
                 };
-                evaluated = evaluateBatchQc(qcPayload, { runProfile });
+                const qcPayload = normalizeQcNumbers(sourcePayload, await getNumberFormat(batch.labId, { db: tx }));
+                evaluated = retainQcRawInput(evaluateBatchQc(qcPayload, { runProfile }), qcPayload);
                 data.qcResults = JSON.stringify(evaluated);
                 if (batch.status === BATCH_STATES.QC_PASS && evaluated.overallStatus === BATCH_STATES.OPEN) reopened = true;
                 if (evaluated.overallStatus === 'OPEN') {
@@ -479,7 +484,7 @@ exports.updateBatch = async (req, res) => {
         });
         res.json(response);
     } catch (error) {
-        if (error.statusCode) return res.status(error.statusCode).json(error.body);
+        if (error.statusCode) return res.status(error.statusCode).json(error.body || { code: error.code, error: error.message });
         console.error('[updateBatch] Error:', error);
         res.status(500).json({ error: 'Failed to update batch' });
     }
@@ -504,11 +509,12 @@ exports.evaluateBatch = async (req, res) => {
                 throw batchError(409, { code: 'QC_BATCH_LOCKED', error: 'Failed or dispositioned QC evidence cannot be re-evaluated.' });
             }
             const runProfile = resolveRunProfile(batch.analysis, batch.instrument, batch.maxCapacity, batch.profile);
-            const missingTypes = getMissingQcValueTypes({ blanks, duplicates, controls }, runProfile);
+            const qcPayload = normalizeQcNumbers({ blanks, duplicates, controls }, await getNumberFormat(batch.labId, { db: tx }));
+            const missingTypes = getMissingQcValueTypes(qcPayload, runProfile);
             if (missingTypes.length) {
                 throw batchError(400, { code: 'QC_VALUES_MISSING', error: 'Required QC values are missing or non-numeric.', missingTypes });
             }
-            const evaluated = evaluateBatchQc({ blanks, duplicates, controls }, { runProfile });
+            const evaluated = retainQcRawInput(evaluateBatchQc(qcPayload, { runProfile }), qcPayload);
             const reopened = batch.status === BATCH_STATES.QC_PASS && evaluated.overallStatus === BATCH_STATES.OPEN;
             if (reopened) requireReopenAuthority(user, req.body.reason);
             const data = {
@@ -521,7 +527,7 @@ exports.evaluateBatch = async (req, res) => {
         });
         res.json(response);
     } catch (error) {
-        if (error.statusCode) return res.status(error.statusCode).json(error.body);
+        if (error.statusCode) return res.status(error.statusCode).json(error.body || { code: error.code, error: error.message });
         console.error('[evaluateBatch] Error:', error);
         res.status(500).json({ error: 'Failed to evaluate batch' });
     }

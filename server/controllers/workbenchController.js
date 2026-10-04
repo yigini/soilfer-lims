@@ -522,7 +522,7 @@ exports.getQueue = async (req, res) => {
         const numberFormats = new Map();
         for (const item of items) {
             const code = item.analysis;
-            const labId = item.sample?.assignedLab || item.labId;
+            const labId = item.sample?.assignedLab || item.assignedLab || item.labId;
             if (!numberFormats.has(labId)) numberFormats.set(labId, await getNumberFormat(labId));
             const equipKey = `${labId}::${code}`;
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import NumberPreview from './NumberPreview';
 
 /**
  * NumericEditor
@@ -16,7 +17,8 @@ export default function NumericEditor({
     isInvalid = false,
     onEnterNext = null,
     ariaLabel = 'Numeric determination',
-    inputRef = null
+    inputRef = null,
+    numberFormat
 }) {
     const handleChange = (e) => {
         onChange(e.target.value);
@@ -58,6 +60,7 @@ export default function NumericEditor({
                     {unit}
                 </span>
             )}
+            <NumberPreview value={value} numberFormat={numberFormat} />
         </div>
     );
 }

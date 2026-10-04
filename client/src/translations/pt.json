@@ -1,4 +1,5 @@
 {
+  "numbers": { "ambiguous": "Esclareça o separador decimal ou de milhares.", "invalid": "Formato de número inválido.", "policyInvalid": "O formato numérico do laboratório está indisponível ou é inválido.", "decimal": "Separador decimal", "thousands": "Separador de milhares", "noGrouping": "Não configurado", "space": "Espaço" },
   "dataSheet": {
     "title": "Folha de dados",
     "readOnlyDescription": "Os resultados registrados são somente leitura aqui. Abra a bancada para inserir ou atualizar resultados.",

@@ -131,13 +131,13 @@ function validateTextureFractions(sandOrObj, siltOrTol, clay, tolerance = 2.0, n
         };
     }
 
-    if (!pSand.isValid || !pSilt.isValid || !pClay.isValid) {
+    if (!pSand.isValid || !pSilt.isValid || !pClay.isValid || [pSand, pSilt, pClay].some(value => value.isCensored)) {
         return {
             isValid: false,
             closureError: null,
             sum: null,
             className: null,
-            code: null,
+            code: [pSand, pSilt, pClay].find(value => !value.isValid)?.code || 'INVALID_NUMBER',
             flags: ['INVALID_FORMAT'],
             error: 'Fractions must be valid positive numbers'
         };

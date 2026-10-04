@@ -85,7 +85,7 @@ export default function LabManagement() {
 
     // Lab Settings form state
     const [settingsForm, setSettingsForm] = useState({
-        name: '', city: '', address: '', phone: '', email: '', website: '', capacity: '', timezone: '', notes: ''
+        name: '', city: '', address: '', phone: '', email: '', website: '', capacity: '', timezone: '', notes: '', decimalSeparator: '', thousandsSeparator: ''
     });
     const [initialSettings, setInitialSettings] = useState(null);
     const [savingSettings, setSavingSettings] = useState(false);
@@ -147,7 +147,9 @@ export default function LabManagement() {
                     website: res.data.lab.website || '',
                     capacity: labCap,
                     timezone: res.data.lab.timezone || '',
-                    notes: res.data.lab.notes || ''
+                    notes: res.data.lab.notes || '',
+                    decimalSeparator: res.data.lab.numberFormat?.decimal || '',
+                    thousandsSeparator: res.data.lab.numberFormat?.thousands ?? ''
                 };
                 setSettingsForm(formInit);
                 setInitialSettings(formInit);
@@ -281,7 +283,7 @@ export default function LabManagement() {
         setSettingsMsg(null);
         try {
             const patch = {};
-            const keys = ['name', 'city', 'address', 'phone', 'email', 'website', 'capacity', 'timezone', 'notes'];
+            const keys = ['name', 'city', 'address', 'phone', 'email', 'website', 'capacity', 'timezone', 'notes', 'decimalSeparator', 'thousandsSeparator'];
             for (const key of keys) {
                 if (!initialSettings || settingsForm[key] !== initialSettings[key]) {
                     if (key === 'capacity') {
@@ -290,6 +292,8 @@ export default function LabManagement() {
                     } else if (key === 'timezone') {
                         const trimmed = typeof settingsForm.timezone === 'string' ? settingsForm.timezone.trim() : settingsForm.timezone;
                         patch.timezone = trimmed === '' ? null : trimmed;
+                    } else if (key === 'thousandsSeparator') {
+                        patch.thousandsSeparator = settingsForm.thousandsSeparator === '' ? null : settingsForm.thousandsSeparator;
                     } else {
                         patch[key] = settingsForm[key];
                     }
@@ -299,6 +303,11 @@ export default function LabManagement() {
             if (Object.keys(patch).length === 0) {
                 setSettingsMsg({ type: 'success', text: t('labManagement.settings.noChanges', 'No changes to save.') });
                 setSavingSettings(false);
+                return;
+            }
+
+            if (!settingsForm.decimalSeparator || settingsForm.decimalSeparator === settingsForm.thousandsSeparator) {
+                setSettingsMsg({ type: 'error', text: t('numbers.policyInvalid', 'Laboratory number format is unavailable or invalid.') });
                 return;
             }
 
@@ -1639,6 +1648,21 @@ export default function LabManagement() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Profile Details Form */}
                         <form onSubmit={handleSaveSettings} className="p-6 rounded-2xl bg-sf-surface border border-sf-divider space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <label className="text-sm text-sf-text">{t('numbers.decimal', 'Decimal separator')}
+                                    <select aria-label={t('numbers.decimal', 'Decimal separator')} value={settingsForm.decimalSeparator}
+                                        onChange={e => setSettingsForm({ ...settingsForm, decimalSeparator: e.target.value })} className="block w-full border rounded p-2 bg-sf-canvas">
+                                        <option value="" disabled>—</option><option value=".">.</option><option value=",">,</option>
+                                    </select>
+                                </label>
+                                <label className="text-sm text-sf-text">{t('numbers.thousands', 'Thousands separator')}
+                                    <select aria-label={t('numbers.thousands', 'Thousands separator')} value={settingsForm.thousandsSeparator}
+                                        onChange={e => setSettingsForm({ ...settingsForm, thousandsSeparator: e.target.value })} className="block w-full border rounded p-2 bg-sf-canvas">
+                                        <option value="">{t('numbers.noGrouping', 'Not configured')}</option>
+                                        {[',', '.', ' ', "'"].map(value => <option key={value} value={value} disabled={value === settingsForm.decimalSeparator}>{value === ' ' ? t('numbers.space', 'Space') : value}</option>)}
+                                    </select>
+                                </label>
+                            </div>
                             <h3 className="font-black text-sm text-sf-text uppercase tracking-wider">
                                 Facility Profile & Local Time
                             </h3>

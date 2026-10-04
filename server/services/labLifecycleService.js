@@ -368,6 +368,7 @@ async function getLabWorkspace(actor, labId, options = {}, tx = prisma) {
             capacity: lab.capacity !== undefined ? lab.capacity : null,
             timezone: lab.timezone || null,
             effectiveTimezone: lab.timezone || 'UTC',
+            numberFormat: await require('./numberFormatService').getNumberFormat(lab.id, { db: tx }),
             notes: (capabilities.canManageProfile ? lab.notes : undefined),
             isActive: lab.isActive
         },
@@ -507,6 +508,21 @@ async function updateLabProfile(actor, labId, updates = {}, tx = prisma) {
     if (email !== undefined) data.email = email;
     if (website !== undefined) data.website = website;
     if (notes !== undefined && isSuperAdmin) data.notes = notes;
+
+    if (updates.decimalSeparator !== undefined || updates.thousandsSeparator !== undefined) {
+        const existingLab = await tx.lab.findUnique({ where: { id: labId }, select: { settings: true } });
+        let settings;
+        try { settings = existingLab?.settings ? JSON.parse(existingLab.settings) : {}; }
+        catch (_) { throw Object.assign(new Error('Invalid stored laboratory settings.'), { statusCode: 409, code: 'NUMBER_FORMAT_POLICY_INVALID' }); }
+        if (!settings || typeof settings !== 'object' || Array.isArray(settings)) throw Object.assign(new Error('Invalid stored laboratory settings.'), { statusCode: 409, code: 'NUMBER_FORMAT_POLICY_INVALID' });
+        const defaults = require('./policyService').getStrictNumberFormat();
+        const decimal = updates.decimalSeparator !== undefined ? updates.decimalSeparator : settings.decimalSeparator ?? defaults.decimal;
+        const thousands = updates.thousandsSeparator !== undefined ? updates.thousandsSeparator : settings.thousandsSeparator ?? defaults.thousands;
+        if (!require('../../shared/numberParse').validateNumberFormat({ decimal, thousands })) {
+            throw Object.assign(new Error('Decimal and thousands separators must be valid and different.'), { statusCode: 400, code: 'NUMBER_FORMAT_POLICY_INVALID' });
+        }
+        data.settings = JSON.stringify({ ...settings, decimalSeparator: decimal, thousandsSeparator: thousands });
+    }
 
     const updated = await tx.lab.update({
         where: { id: labId },
