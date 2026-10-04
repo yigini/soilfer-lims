@@ -1,5 +1,6 @@
 {
   "common": {
+    "copySecretFailed": "No se pudo copiar. Seleccione la clave y cópiela manualmente antes de cerrar esta ventana.",
     "save": "Guardar",
     "cancel": "Cancelar",
     "delete": "Eliminar",

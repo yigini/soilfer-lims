@@ -1,5 +1,6 @@
 {
   "common": {
+    "copySecretFailed": "La copie a échoué. Sélectionnez la clé et copiez-la manuellement avant de fermer cette fenêtre.",
     "save": "Enregistrer",
     "cancel": "Annuler",
     "delete": "Supprimer",

@@ -1,13 +1,62 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import axios from 'axios';
 import { 
     Key, Plus, Trash2, Copy, CheckCircle2, Shield, Globe, 
     Database, Code2, RefreshCw, Layers, Terminal, Check, Play, 
-    BookOpen, Sparkles, Sliders, Lock, CheckCheck, RotateCcw
+    BookOpen, Sparkles, Sliders, Lock, CheckCheck, RotateCcw, X
 } from 'lucide-react';
 import { useDialog } from '../../context/DialogContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
+
+// Native modality keeps the window above transformed page content and confines
+// keyboard focus without competing with the application's global dialog trap.
+const ApiKeyDialog = ({ labelledBy, describedBy, onDismiss, children }) => {
+    const dialogRef = useRef(null);
+    const openerRef = useRef(typeof document === 'undefined' ? null : document.activeElement);
+    useLayoutEffect(() => {
+        const dialog = dialogRef.current;
+        const opener = openerRef.current;
+        dialog.showModal();
+        dialog.querySelector('[data-dialog-initial-focus]')?.focus({ preventScroll: true });
+        return () => {
+            dialog.close();
+            if (opener?.isConnected) opener.focus({ preventScroll: true });
+        };
+    }, []);
+
+    return (
+        <dialog
+            ref={dialogRef}
+            aria-labelledby={labelledBy}
+            aria-describedby={describedBy}
+            onCancel={(event) => {
+                event.preventDefault();
+                onDismiss?.();
+            }}
+            onKeyDown={(event) => {
+                if (event.key !== 'Tab') return;
+                const dialog = event.currentTarget;
+                const controls = Array.from(dialog.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex="0"]'))
+                    .filter(control => control.getClientRects().length > 0);
+                const first = controls[0];
+                const last = controls[controls.length - 1];
+                if (!first) {
+                    event.preventDefault();
+                } else if (event.shiftKey && document.activeElement === first) {
+                    event.preventDefault();
+                    last.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                    event.preventDefault();
+                    first.focus();
+                }
+            }}
+            className="fixed inset-0 !m-auto w-[calc(100%-2rem)] max-w-lg max-h-[calc(100dvh-2rem)] rounded-2xl sm:rounded-3xl p-0 overflow-hidden bg-sf-surface text-sf-text border border-sf-divider shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+        >
+            {children}
+        </dialog>
+    );
+};
 
 const ApiKeyManager = () => {
     const { t } = useLanguage();
@@ -35,12 +84,23 @@ const ApiKeyManager = () => {
     const [selectedLabs, setSelectedLabs] = useState([]);
     const [expiresDays, setExpiresDays] = useState(365);
     const [creating, setCreating] = useState(false);
+    const [createError, setCreateError] = useState(null);
+    const createErrorRef = useRef(null);
     const [rotatingKeyId, setRotatingKeyId] = useState(null);
     const rotationOperationsRef = useRef({});
 
     // Newly generated key modal
     const [generatedKey, setGeneratedKey] = useState(null);
     const [copied, setCopied] = useState(false);
+    const [secretCopyError, setSecretCopyError] = useState(null);
+
+    const closeCreateModal = () => {
+        if (!creating) setIsCreateModalOpen(false);
+    };
+
+    useEffect(() => {
+        if (createError) createErrorRef.current?.focus();
+    }, [createError]);
 
     // API Explorer & Sandbox state
     const [selectedEndpoint, setSelectedEndpoint] = useState('/api/v2/data-exchange/capabilities');
@@ -262,13 +322,11 @@ const ApiKeyManager = () => {
 
     const handleCreateKey = async (e) => {
         e.preventDefault();
+        if (creating) return;
+        setCreateError(null);
         if (!name.trim()) return;
         if (!selectedLabs.length) {
-            showDialog({
-                title: 'Laboratory Scope Required',
-                message: 'You must select at least one authorized laboratory for this integration key to enforce strict scoping.',
-                type: 'error'
-            });
+            setCreateError('You must select at least one authorized laboratory for this integration key to enforce strict scoping.');
             return;
         }
         setCreating(true);
@@ -283,6 +341,8 @@ const ApiKeyManager = () => {
                 expiresDays: parseInt(expiresDays) || 365
             });
 
+            setCopied(false);
+            setSecretCopyError(null);
             setGeneratedKey(res.data.apiKey);
             setIsCreateModalOpen(false);
             setName('');
@@ -291,11 +351,7 @@ const ApiKeyManager = () => {
             setCustomConnectionId('');
             fetchKeys();
         } catch (err) {
-            showDialog({
-                title: 'Creation Failed',
-                message: err.response?.data?.message || err.response?.data?.error || err.message,
-                type: 'error'
-            });
+            setCreateError(err.response?.data?.message || err.response?.data?.error || err.message);
         } finally {
             setCreating(false);
         }
@@ -322,6 +378,8 @@ const ApiKeyManager = () => {
                     });
                     delete rotationOperationsRef.current[keyId];
                     if (res.data?.apiKey) {
+                        setCopied(false);
+                        setSecretCopyError(null);
                         setGeneratedKey(res.data.apiKey);
                     } else if (res.data?.alreadyRotated) {
                         showDialog({
@@ -417,6 +475,18 @@ const ApiKeyManager = () => {
         navigator.clipboard.writeText(text);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const copyGeneratedKey = async () => {
+        setSecretCopyError(null);
+        setCopied(false);
+        try {
+            await navigator.clipboard.writeText(generatedKey);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch {
+            setSecretCopyError(t('common.copySecretFailed', 'Copy failed. Select the key and copy it manually before closing this window.'));
+        }
     };
 
     // Build URL for current sandbox config
@@ -1511,22 +1581,32 @@ const ApiKeyManager = () => {
 
             {/* Create API Key Modal */}
             {isCreateModalOpen && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in">
-                    <div className="bg-sf-surface rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border border-sf-divider">
-                        <div className="flex items-center gap-2 font-bold text-lg text-sf-text">
-                            <Key size={20} className="text-emerald-700 dark:text-emerald-400" /> Issue Integration Secret Key
-                        </div>
-                        <p className="text-xs text-sf-muted">
-                            Create a cryptographically hashed access token for an external NSIS server, GIS system, or automated harvester.
-                        </p>
-
-                        <form onSubmit={handleCreateKey} className="space-y-4 pt-2">
+                <ApiKeyDialog labelledBy="create-api-key-title" describedBy="create-api-key-description" onDismiss={closeCreateModal}>
+                    <form onSubmit={handleCreateKey} aria-busy={creating} className="flex flex-col min-h-0 max-h-[calc(100dvh-2rem)]">
+                        <header className="shrink-0 p-4 sm:p-6 border-b border-sf-divider">
+                            <div className="flex items-start justify-between gap-3">
+                                <h2 id="create-api-key-title" className="flex items-start gap-2 font-bold text-base sm:text-lg text-sf-text">
+                                    <Key size={20} className="shrink-0 mt-0.5 text-emerald-700 dark:text-emerald-400" /> Issue Integration Secret Key
+                                </h2>
+                                <button type="button" onClick={closeCreateModal} disabled={creating} aria-label={t('common.close', 'Close')} className="shrink-0 p-2 -m-1 rounded-xl hover:bg-sf-hover text-sf-muted disabled:opacity-50">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <p id="create-api-key-description" className="mt-2 text-xs text-sf-muted">
+                                Create a cryptographically hashed access token for an external NSIS server, GIS system, or automated harvester.
+                            </p>
+                        </header>
+                        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6">
+                            {createError && <p ref={createErrorRef} tabIndex={-1} role="alert" className="mb-4 p-3 rounded-xl text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800">{createError}</p>}
+                            <fieldset disabled={creating} className="min-w-0 space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-sf-muted mb-1 uppercase tracking-wider">
+                                <label htmlFor="api-key-name" className="block text-xs font-bold text-sf-muted mb-1 uppercase tracking-wider">
                                     Integration Name / Consumer Label *
                                 </label>
                                 <input
+                                    id="api-key-name"
                                     type="text"
+                                    data-dialog-initial-focus
                                     required
                                     placeholder="e.g. Kenya National Soil Database"
                                     value={name}
@@ -1691,11 +1771,14 @@ const ApiKeyManager = () => {
                                 </select>
                             </div>
 
-                            <div className="flex justify-end gap-2 pt-4">
+                            </fieldset>
+                        </div>
+                            <footer className="shrink-0 flex flex-wrap justify-end gap-2 p-4 sm:px-6 border-t border-sf-divider bg-sf-surface">
                                 <button
                                     type="button"
-                                    onClick={() => setIsCreateModalOpen(false)}
-                                    className="px-4 py-2 text-sf-muted hover:text-sf-text text-xs font-bold"
+                                    onClick={closeCreateModal}
+                                    disabled={creating}
+                                    className="px-4 py-2 text-sf-muted hover:text-sf-text text-xs font-bold disabled:opacity-50"
                                 >
                                     Cancel
                                 </button>
@@ -1706,46 +1789,52 @@ const ApiKeyManager = () => {
                                 >
                                     {creating ? 'Generating...' : 'Generate Secret Key'}
                                 </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                            </footer>
+                    </form>
+                </ApiKeyDialog>
             )}
 
             {/* Secret Key Display Modal (Shown only once) */}
             {generatedKey && (
-                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in zoom-in-95">
-                    <div className="bg-sf-surface rounded-3xl p-8 max-w-lg w-full shadow-2xl space-y-6 text-center border border-sf-divider">
+                <ApiKeyDialog labelledBy="generated-api-key-title" describedBy="generated-api-key-warning">
+                    <div className="flex flex-col min-h-0 max-h-[calc(100dvh-2rem)] text-center">
+                        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-8 space-y-6">
                         <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto">
                             <CheckCircle2 size={32} />
                         </div>
 
                         <div className="space-y-2">
-                            <h3 className="text-xl font-black text-sf-text">API Key Successfully Generated</h3>
-                            <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold bg-amber-50 dark:bg-amber-950/50 p-2.5 rounded-xl border border-amber-200 dark:border-amber-800">
+                            <h2 id="generated-api-key-title" className="text-xl font-black text-sf-text">API Key Successfully Generated</h2>
+                            <p id="generated-api-key-warning" className="text-xs text-amber-600 dark:text-amber-400 font-semibold bg-amber-50 dark:bg-amber-950/50 p-2.5 rounded-xl border border-amber-200 dark:border-amber-800">
                                 ⚠️ Make sure to copy your API key now. You will not be able to view it again!
                             </p>
                         </div>
 
                         <div className="p-4 bg-gray-900 text-emerald-400 font-mono text-xs rounded-2xl flex items-center justify-between gap-3 border border-gray-800 break-all select-all">
-                            <span>{generatedKey}</span>
+                            <span className="min-w-0">{generatedKey}</span>
                             <button
-                                onClick={() => copyToClipboard(generatedKey)}
+                                type="button"
+                                onClick={copyGeneratedKey}
+                                data-dialog-initial-focus
                                 className="p-2 bg-gray-800 hover:bg-gray-700 text-white rounded-xl flex-shrink-0 transition flex items-center gap-1 text-xs"
                             >
                                 {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
                                 <span>{copied ? 'Copied' : 'Copy'}</span>
                             </button>
                         </div>
-
+                        {secretCopyError && <p role="alert" className="text-sm text-red-700 dark:text-red-300">{secretCopyError}</p>}
+                        </div>
+                        <footer className="shrink-0 p-4 sm:px-8 border-t border-sf-divider bg-sf-surface">
                         <button
+                            type="button"
                             onClick={() => setGeneratedKey(null)}
                             className="w-full py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs transition shadow-sm"
                         >
                             I Have Saved This Key Securely
                         </button>
+                        </footer>
                     </div>
-                </div>
+                </ApiKeyDialog>
             )}
         </div>
     );
