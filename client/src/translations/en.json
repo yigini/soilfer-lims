@@ -2381,5 +2381,16 @@
     "recordedCount": "Recorded",
     "retryFailed": "Retry failed",
     "recordingUnconfirmed": "Recording was not confirmed for this row."
+  },
+  "batchIntake": {
+    "massToApply": "Mass to apply (g)",
+    "moistureToApply": "Moisture to apply",
+    "notRecorded": "Not recorded",
+    "massNotRecorded": "Mass not recorded",
+    "applyToAll": "Apply entered mass and moisture to all rows",
+    "massDeficit": "Mass deficit",
+    "acknowledgeMass": "Acknowledge this sample’s mass warning",
+    "massCheckFailed": "Mass requirements could not be loaded. The server will check each row when you submit.",
+    "positionalUncertainty": "Recorded positional uncertainty (m)"
   }
 }

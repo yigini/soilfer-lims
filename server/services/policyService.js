@@ -2,7 +2,9 @@
 // this with persisted per-lab and per-method policy resolution.
 const STRICT_PRESET_DEFAULTS = Object.freeze({
     'qc.mode': 'REQUIRED_BLOCKING',
-    'report.numberFormat': 'RPT-{LAB}-{YYYY}-{SEQ:5}'
+    'report.numberFormat': 'RPT-{LAB}-{YYYY}-{SEQ:5}',
+    'intake.defaultAnalysisMassG': 10,
+    'intake.retentionMassG': 100
 });
 
 function get(labId, key, context = {}) {

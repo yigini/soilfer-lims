@@ -19,6 +19,7 @@ const LIMS_FIELDS = [
     { key: 'depthTop', label: 'Depth Top / From (cm)', required: false, pattern: /depth_?top|depth_?min|from/i },
     { key: 'depthBottom', label: 'Depth Bottom / To (cm)', required: false, pattern: /depth_?bot|depth_?max|to/i },
     { key: 'receivedMass', label: 'Received Mass (g)', required: false, pattern: /mass|weight/i },
+    { key: 'positionalUncertaintyM', label: 'Positional uncertainty (m)', required: false, pattern: /uncertainty|accuracy/i },
     { key: 'siteName', label: 'Site / Plot Identifier', required: false, pattern: /site|plot|farm/i },
     { key: 'village', label: 'Village / Community', required: false, pattern: /village|communit/i },
     { key: 'admin1', label: 'Department / Province', required: false, pattern: /dept|departamento|district|admin/i },
@@ -168,7 +169,6 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
                 if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
                     lat = parsedLat;
                     lng = parsedLng;
-                    uncertaintyM = 10;
                 }
             }
 
@@ -178,8 +178,11 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
                 if (parsed) {
                     lat = parsed.lat;
                     lng = parsed.lng;
-                    uncertaintyM = parsed.uncertaintyM;
                 }
+            }
+
+            if (mapping.positionalUncertaintyM && row[mapping.positionalUncertaintyM] != null && String(row[mapping.positionalUncertaintyM]).trim() !== '') {
+                uncertaintyM = Number(row[mapping.positionalUncertaintyM]);
             }
 
             samples.push({
@@ -323,7 +326,7 @@ const ManifestImportModal = ({ isOpen, onClose, onImport }) => {
                                     <div key={field.key} className="p-3 bg-sf-surface border border-sf-divider rounded-xl flex flex-col justify-between">
                                         <div className="flex justify-between items-center mb-1.5">
                                             <label className="text-xs font-bold text-sf-text">
-                                                {['profileCode','profileNamespace','profileRelation','collectionDate'].includes(field.key) ? t(`profileReference.manifest.${field.key}`) : field.label} {field.required && <span className="text-red-500">*</span>}
+                                                {field.key === 'positionalUncertaintyM' ? t('batchIntake.positionalUncertainty') : ['profileCode','profileNamespace','profileRelation','collectionDate'].includes(field.key) ? t(`profileReference.manifest.${field.key}`) : field.label} {field.required && <span className="text-red-500">*</span>}
                                             </label>
                                             {mapping[field.key] && (
                                                 <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-0.5">
