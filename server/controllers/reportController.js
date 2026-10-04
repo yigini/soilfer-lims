@@ -6,6 +6,16 @@ const crypto = require('crypto');
 const prisma = require('../prisma');
 const { assembleReport } = require('../services/reportAssembly');
 const { generateReportPdfBuffer } = require('../services/pdfGenerator');
+const { allocateReportIdentity, storedNumber, displayNumber } = require('../services/reportNumberService');
+
+async function pdfPublication(report) {
+    if (!report) return { status: 'DRAFT', publishedAt: null };
+    const replacement = report.status === 'SUPERSEDED' ? await prisma.report.findFirst({ where: {
+        sampleId: report.sampleId, version: { gt: report.version }, status: { in: ['PUBLISHED', 'SUPERSEDED'] }
+    }, orderBy: { version: 'asc' } }) : null;
+    const number = row => row?.reportNumberBase ? displayNumber(row.reportNumberBase, row.revision) : row ? storedNumber(row) : null;
+    return { status: report.status, publishedAt: report.publishedAt, reportNumber: number(report), replacementNumber: number(replacement) };
+}
 const policyService = require('../services/policyService');
 const { linkedBatchIds } = require('../services/reportResultGovernance');
 
@@ -113,8 +123,14 @@ async function generateReport(req, res) {
             }
             const maxReport = await tx.report.findFirst({ where: { sampleId }, orderBy: { version: 'desc' } });
             const version = (maxReport?.version || 0) + 1;
+            const publishedAt = new Date();
+            const lab = await tx.lab.findFirst({ where: { OR: [{ id: currentSample.assignedLab || currentSample.labId },
+                { code: currentSample.assignedLab || currentSample.labId }] } });
+            const identity = await allocateReportIdentity(tx, { sampleId, lab, publishedAt,
+                resolveFormat: () => policyService.get(lab.id, 'report.numberFormat') });
             const { content, searchKeys } = await assembleReport(sampleId, req.user, { db: tx, qcBatches, qcModes });
-            if (content.reportNumber) content.reportNumber = `${content.reportNumber}-v${version}`;
+            content.reportNumber = displayNumber(identity.reportNumberBase, identity.revision);
+            content.publication = { ...identity, publishedAt: publishedAt.toISOString(), status: 'PUBLISHED' };
             await tx.report.updateMany({
                 where: { sampleId, status: 'PUBLISHED' },
                 data: { status: 'SUPERSEDED' }
@@ -124,10 +140,12 @@ async function generateReport(req, res) {
                     sampleId,
                     labId: currentSample.assignedLab || currentSample.labId || null,
                     version,
+                    reportNumberBase: identity.reportNumberBase,
+                    revision: identity.revision,
                     status: 'PUBLISHED',
                     content: JSON.stringify(content),
                     generatedBy: req.user?.username || 'system',
-                    publishedAt: new Date(),
+                    publishedAt,
                     ...searchKeys
                 }
             });
@@ -763,7 +781,7 @@ async function getPublicReportPdf(req, res) {
         }
 
         const sampleId = content.sample?.labId || content.sample?.originalId || report.sampleId || 'Report';
-        const pdfBuffer = await generateReportPdfBuffer(content);
+        const pdfBuffer = await generateReportPdfBuffer(content, await pdfPublication(report));
 
         res.set({
             'Content-Type': 'application/pdf',
@@ -805,7 +823,7 @@ async function getReportPdf(req, res) {
         }
 
         const sampleId = content.sample?.labId || content.sample?.originalId || report.sampleId || 'Report';
-        const pdfBuffer = await generateReportPdfBuffer(content);
+        const pdfBuffer = await generateReportPdfBuffer(content, await pdfPublication(report));
 
         res.set({
             'Content-Type': 'application/pdf',
@@ -844,7 +862,7 @@ async function getSampleReportPdf(req, res) {
         }
 
         const sId = content.sample?.labId || content.sample?.originalId || sampleId;
-        const pdfBuffer = await generateReportPdfBuffer(content);
+        const pdfBuffer = await generateReportPdfBuffer(content, await pdfPublication(report));
 
         res.set({
             'Content-Type': 'application/pdf',

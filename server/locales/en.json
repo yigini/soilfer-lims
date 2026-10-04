@@ -1,5 +1,18 @@
 {
-  "resultReports": { "qcWarningStatement": "QC warning: One or more reported values have failed or incomplete batch QC. See the recorded batch warnings." },
+  "resultReports": {
+    "qcWarningStatement": "QC warning: One or more reported values have failed or incomplete batch QC. See the recorded batch warnings.",
+    "qcWithinLimits": "QC within limits for all reported values.",
+    "qcDeviations": "QC deviations:",
+    "qcNotRecorded": "QC status not recorded.",
+    "noBatch": "No batch recorded",
+    "drying": "Drying",
+    "preparation": "Preparation",
+    "notRecorded": "not recorded",
+    "superseded": "SUPERSEDED",
+    "see": "see",
+    "replaces": "Replaces",
+    "preparationRecords": "Preparation records"
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",

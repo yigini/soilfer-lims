@@ -1,5 +1,9 @@
 {
-  "dataSheet": {"title":"Data Sheet","readOnlyDescription":"Recorded results are read-only here. Open the workbench to enter or update results.","openWorkbench":"Open workbench"},
+  "dataSheet": {
+    "title": "Data Sheet",
+    "readOnlyDescription": "Recorded results are read-only here. Open the workbench to enter or update results.",
+    "openWorkbench": "Open workbench"
+  },
   "common": {
     "copySecretFailed": "Copy failed. Select the key and copy it manually before closing this window.",
     "save": "Save",
@@ -2142,7 +2146,18 @@
     "revoke": "Revoke",
     "createdBy": "Created {date} by {user}",
     "expiresOn": "Expires: {date}",
-    "viewsCount": "{count} views"
+    "viewsCount": "{count} views",
+    "qcWithinLimits": "QC within limits for all reported values.",
+    "qcDeviations": "QC deviations:",
+    "qcNotRecorded": "QC status not recorded.",
+    "noBatch": "No batch recorded",
+    "drying": "Drying",
+    "preparation": "Preparation",
+    "notRecorded": "not recorded",
+    "superseded": "SUPERSEDED",
+    "see": "see",
+    "replaces": "Replaces",
+    "preparationRecords": "Preparation records"
   },
   "qaSection": {
     "kicker": "Quality & Regulatory Compliance",
@@ -2310,8 +2325,7 @@
       "reset": "Reset",
       "applyFilters": "Apply Filters"
     }
-  }
-,
+  },
   "profileReference": {
     "label": "Soil profile / sampling point",
     "code": "Recorded field code",

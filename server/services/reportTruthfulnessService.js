@@ -29,4 +29,21 @@ function freezeReportEvidence(results, workItems, batches) {
     return { qc: { withinLimits: results.length > 0 && deviations.length === 0, deviations }, preparation };
 }
 
-module.exports = { freezeReportEvidence };
+function describeReportEvidence(evidence, locale = 'en') {
+    const canonical = ['en', 'es', 'es-419', 'fr', 'pt'].includes(locale) ? locale : 'en';
+    const labels = require(`../locales/${canonical}.json`).resultReports;
+    const qc = evidence?.qc;
+    const qcStatement = qc?.withinLimits ? labels.qcWithinLimits
+        : qc?.deviations?.length ? `${labels.qcDeviations}\n${qc.deviations.map(row =>
+            `${row.analysisCode} · ${row.batchId || labels.noBatch}: ${row.qcStatus}${row.dispositionReason ? ` · ${row.dispositionReason}` : ''}`).join('\n')}`
+            : labels.qcNotRecorded;
+    const preparationStatement = ['DRYING', 'PREPARATION'].map(analysis => {
+        const records = (evidence?.preparation || []).filter(record => record.analysis === analysis);
+        const label = analysis === 'DRYING' ? labels.drying : labels.preparation;
+        return records.length ? records.map(record => `${label}: ${record.status} · ${record.steps.join('; ')}`).join('\n')
+            : `${label}: ${labels.notRecorded}`;
+    }).join('\n');
+    return { qcStatement, preparationStatement };
+}
+
+module.exports = { freezeReportEvidence, describeReportEvidence };

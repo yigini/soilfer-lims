@@ -7,7 +7,7 @@ const { normalizeUnit, interpretParameter, evaluateSoilProfile } = require('./in
 const { isReviewedReportResult, isCurrentValidAnalyticalResult, matchingItems, governingItems,
     getReportingMode, reportingQc, linkedBatchIds } = require('./reportResultGovernance');
 const policyService = require('./policyService');
-const { freezeReportEvidence } = require('./reportTruthfulnessService');
+const { freezeReportEvidence, describeReportEvidence } = require('./reportTruthfulnessService');
 
 /**
  * Assemble a full report object for a given sample.
@@ -253,6 +253,8 @@ async function assembleReport(sampleId, user, options = {}) {
     const warningLocale = ['en', 'es', 'es-419', 'fr', 'pt'].includes(reportLocale) ? reportLocale : 'en';
     const qcWarningStatement = qcWarnings.length
         ? require(`../locales/${warningLocale}.json`).resultReports.qcWarningStatement : null;
+    const evidence = freezeReportEvidence(reportableResults, sample.workItems, qcBatches);
+    const evidenceText = describeReportEvidence(evidence, warningLocale);
     const reportContent = {
         meta: {
             reportId: null, // assigned when saved
@@ -306,7 +308,8 @@ async function assembleReport(sampleId, user, options = {}) {
         resultGroups: Object.values(groupedResults),
         qcWarnings,
         qcWarningStatement,
-        evidence: freezeReportEvidence(reportableResults, sample.workItems, qcBatches),
+        evidence,
+        ...evidenceText,
         // Holistic Multi-Parameter Soil Metrology & Diagnostics
         diagnostics: soilDiagnostics,
         // Methodologies footnotes

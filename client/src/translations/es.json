@@ -1,5 +1,9 @@
 {
-  "dataSheet": {"title":"Hoja de datos","readOnlyDescription":"Los resultados registrados son de solo lectura aquí. Abra el banco de trabajo para ingresar o actualizar resultados.","openWorkbench":"Abrir banco de trabajo"},
+  "dataSheet": {
+    "title": "Hoja de datos",
+    "readOnlyDescription": "Los resultados registrados son de solo lectura aquí. Abra el banco de trabajo para ingresar o actualizar resultados.",
+    "openWorkbench": "Abrir banco de trabajo"
+  },
   "common": {
     "copySecretFailed": "No se pudo copiar. Seleccione la clave y cópiela manualmente antes de cerrar esta ventana.",
     "save": "Guardar",
@@ -2142,7 +2146,18 @@
     "revoke": "Revocar",
     "createdBy": "Creado el {date} por {user}",
     "expiresOn": "Vence: {date}",
-    "viewsCount": "{count} visitas"
+    "viewsCount": "{count} visitas",
+    "qcWithinLimits": "QC dentro de los límites para todos los valores informados.",
+    "qcDeviations": "Desviaciones de QC:",
+    "qcNotRecorded": "Estado de QC no registrado.",
+    "noBatch": "Lote no registrado",
+    "drying": "Secado",
+    "preparation": "Preparación",
+    "notRecorded": "no registrado",
+    "superseded": "SUSTITUIDO",
+    "see": "ver",
+    "replaces": "Sustituye",
+    "preparationRecords": "Registros de preparación"
   },
   "qaSection": {
     "kicker": "Garantía de calidad y cumplimiento normativo",
@@ -2310,8 +2325,7 @@
       "reset": "Restablecer",
       "applyFilters": "Aplicar filtros"
     }
-  }
-,
+  },
   "profileReference": {
     "label": "Perfil de suelo / punto de muestreo",
     "code": "Código registrado en campo",

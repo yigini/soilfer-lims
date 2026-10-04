@@ -1,5 +1,18 @@
 {
-  "resultReports": { "qcWarningStatement": "Advertencia de QC: Uno o más valores informados tienen QC de lote fallido o incompleto. Consulte las advertencias de lote registradas." },
+  "resultReports": {
+    "qcWarningStatement": "Advertencia de QC: Uno o más valores informados tienen QC de lote fallido o incompleto. Consulte las advertencias de lote registradas.",
+    "qcWithinLimits": "QC dentro de los límites para todos los valores informados.",
+    "qcDeviations": "Desviaciones de QC:",
+    "qcNotRecorded": "Estado de QC no registrado.",
+    "noBatch": "Lote no registrado",
+    "drying": "Secado",
+    "preparation": "Preparación",
+    "notRecorded": "no registrado",
+    "superseded": "SUSTITUIDO",
+    "see": "ver",
+    "replaces": "Sustituye",
+    "preparationRecords": "Registros de preparación"
+  },
   "common": {
     "save": "Guardar",
     "cancel": "Cancelar",
