@@ -1,4 +1,4 @@
-const { parseNumber } = require('../../shared/numberParse');
+const { parseNumber, parseDuplicateObservation } = require('../../shared/numberParse');
 
 function normalizeQcNumbers(payload, format) {
     const collections = { blanks: { value: ['value', 'val', 'measured'] },
@@ -13,12 +13,13 @@ function normalizeQcNumbers(payload, format) {
             for (const [field, aliases] of Object.entries(fields)) {
                 const source = item.rawInput && typeof item.rawInput === 'object' && Object.prototype.hasOwnProperty.call(item.rawInput, field)
                     ? item.rawInput[field] : item[aliases.find(alias => item[alias] !== undefined)];
-                const parsed = parseNumber(source, format);
-                if (parsed.code === 'AMBIGUOUS_NUMBER' || (!parsed.valid && parsed.code === 'INVALID_NUMBER' && /^[<>≤≥=\s+-]*[\d.,]/.test(String(source))) || parsed.qualifier) {
+                const parsed = collection === 'duplicates' ? parseDuplicateObservation(source, format) : parseNumber(source, format);
+                if (parsed.code === 'AMBIGUOUS_NUMBER' || (collection !== 'duplicates' && (parsed.qualifier || (!parsed.valid && parsed.code === 'INVALID_NUMBER' && /^[<>≤≥=\s+-]*[\d.,]/.test(String(source)))))) {
                     throw Object.assign(new Error(parsed.code === 'AMBIGUOUS_NUMBER' ? 'Clarify the decimal or thousands separator.' : 'Invalid QC number format.'),
                         { statusCode: 400, code: parsed.code || 'INVALID_NUMBER', field, collection });
                 }
-                copy[field] = parsed.valid ? parsed.value : null;
+                copy[field] = parsed.valid && (!parsed.qualifier || collection === 'duplicates')
+                    ? (parsed.censored ? parsed.canonical : parsed.value) : null;
                 copy.rawInput[field] = source === undefined || source === null ? null : String(source);
             }
             return copy;

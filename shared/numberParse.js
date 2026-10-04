@@ -54,4 +54,15 @@ function parseNumber(input, format) {
     return { valid: true, code: null, rawInput, value, canonical: qualifier + normalized, qualifier, blank: false };
 }
 
-module.exports = { parseNumber, validateNumberFormat };
+// A censoring limit is an observation, never a numeric measured value. Only
+// duplicate QC uses this classifier; all numeric syntax still uses parseNumber.
+function parseDuplicateObservation(input, format) {
+    if (validateNumberFormat(format || {}) && typeof input === 'string' && /^<LOQ$/i.test(input.trim())) {
+        return { valid: true, code: null, rawInput: input, value: null, canonical: '<LOQ', qualifier: '<', censored: 'BELOW', literalLoq: true };
+    }
+    const parsed = parseNumber(input, format);
+    return { ...parsed, censored: parsed.valid && parsed.qualifier
+        ? (parsed.qualifier.startsWith('<') ? 'BELOW' : 'ABOVE') : null, literalLoq: false };
+}
+
+module.exports = { parseNumber, parseDuplicateObservation, validateNumberFormat };

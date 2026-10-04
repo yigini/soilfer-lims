@@ -27,7 +27,7 @@ function parseNumericMeasurement(val) {
 }
 
 // Validate explicit measurements by required QC type, without introducing position rules.
-function getMissingQcValueTypes(qcData = {}, runProfile = {}) {
+function getMissingQcValueTypes(qcData = {}, runProfile = {}, numberFormat = require('./policyService').getStrictNumberFormat()) {
     const fieldsByType = {
         BLANK: ['blanks', item => [item.value !== undefined ? item.value : item.val]],
         DUPLICATE: ['duplicates', item => [
@@ -44,7 +44,10 @@ function getMissingQcValueTypes(qcData = {}, runProfile = {}) {
         const [collection, fields] = fieldsByType[type] || [];
         const items = qcData[collection];
         return !fields || !Array.isArray(items) || items.length === 0 || items.some(item =>
-            !item || typeof item !== 'object' || !fields(item).every(value => Number.isFinite(parseNumericMeasurement(value)))
+            !item || typeof item !== 'object' || !fields(item).every((value, index) => type === 'DUPLICATE'
+                ? require('../../shared/numberParse').parseDuplicateObservation(
+                    item.rawInput && Object.prototype.hasOwnProperty.call(item.rawInput, `value${index + 1}`) ? item.rawInput[`value${index + 1}`] : value, numberFormat).valid
+                : Number.isFinite(parseNumericMeasurement(value)))
         );
     });
 }
@@ -99,9 +102,31 @@ function evaluateBlank(blank = {}, policy = {}) {
 function evaluateDuplicate(dup = {}, policy = {}) {
     const id = dup.id || `DUP-${Date.now()}`;
     const label = dup.label || 'Analytical Duplicate';
-    const v1 = parseNumericMeasurement(dup.value1 !== undefined ? dup.value1 : dup.val1);
-    const v2 = parseNumericMeasurement(dup.value2 !== undefined ? dup.value2 : dup.val2);
-    const maxRpd = (policy && typeof policy.maxRpd === 'number') ? policy.maxRpd : 10.0;
+    const defaults = require('./policyService');
+    const format = policy.numberFormat || defaults.getStrictNumberFormat();
+    const observations = [1, 2].map(index => require('../../shared/numberParse').parseDuplicateObservation(
+        dup.rawInput && Object.prototype.hasOwnProperty.call(dup.rawInput, `value${index}`) ? dup.rawInput[`value${index}`]
+            : (dup[`value${index}`] !== undefined ? dup[`value${index}`] : dup[`val${index}`]), format));
+    const [v1, v2] = observations.map(observation => observation.valid && !observation.censored ? observation.value : NaN);
+    const maxRpd = typeof policy.maxRpd === 'number' ? policy.maxRpd : defaults.get(null, 'qc.duplicateMaxRpd');
+    const nearLoqMultiplier = policy.nearLoqMultiplier ?? defaults.get(null, 'qc.duplicateNearLoqMultiplier');
+    const loq = typeof policy.loq === 'number' && Number.isFinite(policy.loq) && policy.loq >= 0 ? policy.loq : null;
+    const notes = loq === null ? ['NO_LOQ', ...(policy.noLoqReason ? [policy.noLoqReason] : [])] : [];
+    const evidence = { loq, loqSource: loq === null ? null : policy.loqSource || null, methodologyId: policy.methodologyId || null, notes };
+
+    if (observations.every(observation => observation.valid) && observations.some(observation => observation.censored)) {
+        const censoringLimits = observations.map(observation => observation.censored
+            ? { qualifier: observation.qualifier, limit: observation.literalLoq ? loq : observation.value, literalLoq: observation.literalLoq } : null);
+        let status = 'INVALID', criterion;
+        if (observations.some(observation => observation.censored === 'ABOVE')) criterion = 'CENSORED_ABOVE_RANGE';
+        else if (observations.every(observation => observation.censored === 'BELOW')) {
+            status = 'PASS'; criterion = 'CENSORED_PAIR';
+            if (censoringLimits[0].limit !== censoringLimits[1].limit) notes.push('CENSORING_LIMITS_DIFFER');
+        } else criterion = 'CENSORED_MISMATCH';
+        notes.push(criterion);
+        return { id, label, type: 'DUPLICATE', value1: Number.isNaN(v1) ? null : v1, value2: Number.isNaN(v2) ? null : v2,
+            rpd: null, maxRpd, ...evidence, censoringLimits, status, criterion, details: notes.join(' ') };
+    }
 
     if (isNaN(v1) || isNaN(v2)) {
         return {
@@ -113,17 +138,26 @@ function evaluateDuplicate(dup = {}, policy = {}) {
             rpd: null,
             maxRpd,
             status: 'FAIL',
+            ...evidence,
             error: 'Missing, non-numeric, or non-finite duplicate values',
             details: 'Invalid duplicate measurement'
         };
     }
 
-    const avg = (v1 + v2) / 2;
-    let rpd = 0;
-    if (avg !== 0) {
-        rpd = (Math.abs(v1 - v2) / Math.abs(avg)) * 100;
+    const avg = v1 / 2 + v2 / 2;
+    if (v1 <= 0 || v2 <= 0 || avg === 0) {
+        return { id, label, type: 'DUPLICATE', value1: v1, value2: v2, rpd: null, maxRpd,
+            ...evidence, status: 'INVALID', criterion: 'INVALID_NONPOSITIVE',
+            details: ['Duplicate readings must both be greater than zero.', ...notes].join(' ') };
     }
-
+    const difference = Math.abs(v1 - v2);
+    if (loq !== null && (v1 < nearLoqMultiplier * loq || v2 < nearLoqMultiplier * loq)) {
+        const passed = difference <= loq;
+        return { id, label, type: 'DUPLICATE', value1: v1, value2: v2, rpd: null, maxRpd,
+            ...evidence, status: passed ? 'PASS' : 'FAIL', criterion: 'ABSOLUTE_DIFFERENCE', absoluteDifference: difference,
+            details: `Absolute difference ${difference} ${passed ? '≤' : '>'} LOQ ${loq}` };
+    }
+    const rpd = (difference / avg) * 100;
     const passed = rpd <= maxRpd;
     return {
         id,
@@ -133,8 +167,10 @@ function evaluateDuplicate(dup = {}, policy = {}) {
         value2: Number(v2.toFixed(4)),
         rpd: Number(rpd.toFixed(2)),
         maxRpd,
+        ...evidence,
+        criterion: 'RPD',
         status: passed ? 'PASS' : 'FAIL',
-        details: passed ? `RPD ${rpd.toFixed(1)}% ≤ ${maxRpd}% (Acceptable)` : `RPD ${rpd.toFixed(1)}% > ${maxRpd}% (Precision failure)`
+        details: (passed ? `RPD ${rpd.toFixed(1)}% ≤ ${maxRpd}% (Acceptable)` : `RPD ${rpd.toFixed(1)}% > ${maxRpd}% (Precision failure)`) + (notes.length ? ` ${notes.join(' ')}` : '')
     };
 }
 

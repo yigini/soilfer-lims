@@ -6,6 +6,8 @@ const STRICT_PRESET_DEFAULTS = Object.freeze({
     'results.reportedValueRule': 'MEAN_IF_WITHIN_R',
     'intake.defaultAnalysisMassG': 10,
     'intake.retentionMassG': 100,
+    'qc.duplicateNearLoqMultiplier': 5,
+    'qc.duplicateMaxRpd': 10,
     'numbers.decimalSeparator': '.',
     'numbers.thousandsSeparator': null
 });

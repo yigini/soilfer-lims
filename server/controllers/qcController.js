@@ -5,6 +5,7 @@ const scopeGuard = require('../utils/scopeGuard');
 const { hasPermission } = require('../config/roles');
 const { getNumberFormat } = require('../services/numberFormatService');
 const { normalizeQcNumbers, retainQcRawInput } = require('../services/qcNumberInputService');
+const { resolveDuplicatePolicy } = require('../services/duplicateQcPolicyService');
 
 const BATCH_STATES = {
     OPEN: 'OPEN',
@@ -53,7 +54,9 @@ async function syncTypedQcItems(tx, batchId, evaluated) {
             recoveryPct: null,
             rpd: d.rpd !== null && d.rpd !== undefined ? Number(d.rpd) : null,
             status: d.status || 'PASS',
-            details: d.rawInput ? JSON.stringify({ evaluation: d.details || null, rawInput: d.rawInput }) : d.details || null
+            details: JSON.stringify({ evaluation: d.details || null, rawInput: d.rawInput || {},
+                loq: d.loq, loqSource: d.loqSource, methodologyId: d.methodologyId, notes: d.notes,
+                criterion: d.criterion, censoringLimits: d.censoringLimits || null, absoluteDifference: d.absoluteDifference ?? null })
         });
     });
 
@@ -391,8 +394,10 @@ exports.updateBatch = async (req, res) => {
                     duplicates: updates.duplicates,
                     controls: updates.controls
                 };
-                const qcPayload = normalizeQcNumbers(sourcePayload, await getNumberFormat(batch.labId, { db: tx }));
-                evaluated = retainQcRawInput(evaluateBatchQc(qcPayload, { runProfile }), qcPayload);
+                const numberFormat = await getNumberFormat(batch.labId, { db: tx });
+                const qcPayload = normalizeQcNumbers(sourcePayload, numberFormat);
+                const duplicate = { ...await resolveDuplicatePolicy(batch, tx), numberFormat };
+                evaluated = retainQcRawInput(evaluateBatchQc(qcPayload, { runProfile, policy: { duplicate } }), qcPayload);
                 data.qcResults = JSON.stringify(evaluated);
                 if (batch.status === BATCH_STATES.QC_PASS && evaluated.overallStatus === BATCH_STATES.OPEN) reopened = true;
                 if (evaluated.overallStatus === 'OPEN') {
@@ -509,12 +514,14 @@ exports.evaluateBatch = async (req, res) => {
                 throw batchError(409, { code: 'QC_BATCH_LOCKED', error: 'Failed or dispositioned QC evidence cannot be re-evaluated.' });
             }
             const runProfile = resolveRunProfile(batch.analysis, batch.instrument, batch.maxCapacity, batch.profile);
-            const qcPayload = normalizeQcNumbers({ blanks, duplicates, controls }, await getNumberFormat(batch.labId, { db: tx }));
-            const missingTypes = getMissingQcValueTypes(qcPayload, runProfile);
+            const numberFormat = await getNumberFormat(batch.labId, { db: tx });
+            const qcPayload = normalizeQcNumbers({ blanks, duplicates, controls }, numberFormat);
+            const missingTypes = getMissingQcValueTypes(qcPayload, runProfile, numberFormat);
             if (missingTypes.length) {
                 throw batchError(400, { code: 'QC_VALUES_MISSING', error: 'Required QC values are missing or non-numeric.', missingTypes });
             }
-            const evaluated = retainQcRawInput(evaluateBatchQc(qcPayload, { runProfile }), qcPayload);
+            const duplicate = { ...await resolveDuplicatePolicy(batch, tx), numberFormat };
+            const evaluated = retainQcRawInput(evaluateBatchQc(qcPayload, { runProfile, policy: { duplicate } }), qcPayload);
             const reopened = batch.status === BATCH_STATES.QC_PASS && evaluated.overallStatus === BATCH_STATES.OPEN;
             if (reopened) requireReopenAuthority(user, req.body.reason);
             const data = {
