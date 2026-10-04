@@ -51,6 +51,9 @@ function plan(db) {
     return report;
 }
 function backfill(db, apply = false) {
+    // Existing exchange triggers require the same UDFs as normal app writes.
+    // Registration is connection-local and never changes the database schema.
+    if (apply) require('../services/exchangeDbFunctions').registerDbFunctions(db);
     const run = () => {
         const report = plan(db);
         if (report.duplicates.length) { report.refused = true; return report; }
