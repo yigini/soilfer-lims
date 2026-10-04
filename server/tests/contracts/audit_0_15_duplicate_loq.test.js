@@ -11,7 +11,7 @@ const { getAuthToken } = require('../setup');
 const format = { decimal: '.', thousands: null };
 
 describe('Audit 0.15: censored observations use the shared number parser', () => {
-    test.each(['<0,05', '< 0.05', '<=0.05', '≤0.05', '<LOQ', ' <loq> '].slice(0, 5))('%s is an explicit below-limit observation', raw => {
+    test.each(['<0,05', '< 0.05', '<=0.05', '≤0.05', '<LOQ', ' <loq '])('%s is an explicit below-limit observation', raw => {
         expect(parseDuplicateObservation(raw, format)).toMatchObject({ valid: true, censored: 'BELOW', rawInput: raw });
     });
     test.each(['>100', '>=100', '≥100'])('%s is an above-range observation, never a finite measurement', raw => {
@@ -107,6 +107,18 @@ describe('Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring 
         const { details } = await duplicate(batch);
         expect(details.censoringLimits.map(observation => observation.limit)).toEqual([1.234, 1.234]);
         expect(details.rawInput).toEqual(data.duplicates[0].rawInput);
+    });
+    test('an invalid nonpositive pair flags analytical results without deleting or changing their measured values', async () => {
+        const { batch } = await fixture();
+        const member = await prisma.workItem.findFirst({ where: { batchId: batch.id } });
+        const row = await prisma.result.create({ data: { id: id('HTTP-R015'), sampleId: member.sampleId, batchId: batch.id,
+            param: batch.analysis, methodologyId: member.methodologyId, value: '42', numericValue: 42, rawInput: '42', isValid: true, isCurrent: true } });
+        expect((await evaluate(batch, payload(-1, 1))).status).toBe(200);
+        const after = await prisma.result.findUnique({ where: { id: row.id } });
+        expect(after).toMatchObject({ value: '42', numericValue: 42, rawInput: '42', isCurrent: true, isValid: false });
+        expect(JSON.parse(after.flags)).toContain('QC_BATCH_FAILED');
+        expect(await prisma.result.count({ where: { batchId: batch.id } })).toBe(1);
+        expect(await prisma.auditLog.count({ where: { entityId: batch.id } })).toBeGreaterThan(0);
     });
     test.each(['<0.1', '<LOQ'])('censored blank %s remains missing and leaves stored evidence untouched', async value => {
         const { batch } = await fixture(); const before = await prisma.batch.findUnique({ where: { id: batch.id } });
