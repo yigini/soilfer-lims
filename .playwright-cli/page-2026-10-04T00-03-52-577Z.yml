@@ -1,0 +1,57 @@
+- generic [ref=f2e4]:
+  - generic [ref=f2e5]:
+    - generic [ref=f2e8]:
+      - generic [ref=f2e9]:
+        - img "SoilFER" [ref=f2e10]
+        - heading "LIMS" [level=1] [ref=f2e11]
+      - paragraph [ref=f2e12]: Advanced Laboratory Information Management System for Soil Analysis and Fertility Tracking. Dedicated to global sustainable agriculture.
+    - generic [ref=f2e16]:
+      - paragraph [ref=f2e17]: With the financial support of
+      - generic [ref=f2e18]:
+        - link "United States Department of State United States Department of State" [ref=f2e19] [cursor=pointer]:
+          - /url: https://www.state.gov/
+          - img "United States Department of State" [ref=f2e21]
+          - generic [ref=f2e22]:
+            - generic [ref=f2e23]: United States
+            - generic [ref=f2e24]: Department of State
+        - link "From the People of Japan From the People of Japan Ministry of Foreign Affairs" [ref=f2e29] [cursor=pointer]:
+          - /url: https://www.mofa.go.jp/
+          - img "From the People of Japan" [ref=f2e31]
+          - generic [ref=f2e32]:
+            - generic [ref=f2e33]: From the People of Japan
+            - generic [ref=f2e34]: Ministry of Foreign Affairs
+  - generic [ref=f2e39]:
+    - generic [ref=f2e41]:
+      - button "en" [ref=f2e42] [cursor=pointer]
+      - button "es" [ref=f2e43] [cursor=pointer]
+      - button "es-419" [ref=f2e44] [cursor=pointer]
+      - button "fr" [ref=f2e45] [cursor=pointer]
+      - button "pt" [ref=f2e46] [cursor=pointer]
+    - generic [ref=f2e47]:
+      - generic [ref=f2e48]:
+        - heading "Sign in to SoilFER LIMS" [level=2] [ref=f2e49]
+        - paragraph [ref=f2e50]: Laboratory Information Management System
+      - generic [ref=f2e76]: Invalid credentials
+      - generic [ref=f2e51]:
+        - generic [ref=f2e52]:
+          - text: Username
+          - textbox "Username" [ref=f2e54]:
+            - /placeholder: Enter your username
+            - text: audit-tech
+        - generic [ref=f2e55]:
+          - generic [ref=f2e56]:
+            - generic [ref=f2e57]: Password
+            - button "Forgot password?" [ref=f2e58] [cursor=pointer]
+          - generic [ref=f2e59]:
+            - textbox "Password" [ref=f2e60]:
+              - /placeholder: ••••••••
+              - text: SyntheticAudit2026!
+            - button [ref=f2e61] [cursor=pointer]
+        - button "Sign In" [ref=f2e66] [cursor=pointer]
+      - generic [ref=f2e69]:
+        - paragraph [ref=f2e70]:
+          - img "SoilFER" [ref=f2e71]
+          - generic [ref=f2e72]: LIMS
+          - text: · vaudit-source · build 2026-10-04
+        - 'link "Support: GLOSOLAN@fao.org" [ref=f2e74] [cursor=pointer]':
+          - /url: mailto:GLOSOLAN@fao.org

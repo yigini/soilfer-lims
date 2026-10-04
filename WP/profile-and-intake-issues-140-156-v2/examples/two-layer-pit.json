@@ -1,0 +1,62 @@
+{
+  "assetType": "proposed-staging-scenario-not-an-import-payload",
+  "synthetic": true,
+  "environment": "isolated-staging-only",
+  "productionAllowed": false,
+  "note": "Agy must create valid model/workflow records and compare actual emitted contract. These objects illustrate selected current v2 fields; they are not complete responses or executed evidence.",
+  "sharedReference": {
+    "namespace": "DEMO-SURVEY-2026",
+    "code": "PIT-DEMO-01",
+    "key": "DEMO-SURVEY-2026:PIT-DEMO-01",
+    "relation": "CONFIRMED_PROFILE"
+  },
+  "specimens": [
+    {
+      "specimenId": "31c96064-041a-42a6-8c2a-d3a7223dadc5",
+      "fieldSampleId": "DEMO-BAG-A",
+      "labSampleId": "DEMO-LAB-A",
+      "laboratoryId": "DEMO-LAB",
+      "projectCode": "DEMO-SOIL-PROFILE",
+      "matrix": "SOIL",
+      "profile": {
+        "namespace": "DEMO-SURVEY-2026",
+        "code": "PIT-DEMO-01",
+        "key": "DEMO-SURVEY-2026:PIT-DEMO-01",
+        "relation": "CONFIRMED_PROFILE"
+      },
+      "sampling": {
+        "collectionDate": "2026-10-01",
+        "depths": { "topCm": 0, "bottomCm": 20, "unit": "cm" },
+        "location": null
+      }
+    },
+    {
+      "specimenId": "53e42202-0ea0-4205-b9ca-b34bbaae3a2b",
+      "fieldSampleId": "DEMO-BAG-B",
+      "labSampleId": "DEMO-LAB-B",
+      "laboratoryId": "DEMO-LAB",
+      "projectCode": "DEMO-SOIL-PROFILE",
+      "matrix": "SOIL",
+      "profile": {
+        "namespace": "DEMO-SURVEY-2026",
+        "code": "PIT-DEMO-01",
+        "key": "DEMO-SURVEY-2026:PIT-DEMO-01",
+        "relation": "CONFIRMED_PROFILE"
+      },
+      "sampling": {
+        "collectionDate": "2026-10-01",
+        "depths": { "topCm": 20, "bottomCm": 50, "unit": "cm" },
+        "location": null
+      }
+    }
+  ],
+  "requiredAdditionalCases": [
+    "same local code in DEMO-SURVEY-OTHER stays a distinct profile",
+    "separate recorded 0-20.5 cm interval preserves decimal precision",
+    "unknown profile stays null and does not stop normal lab work",
+    "site point and composite remain truthfully classified",
+    "actual authorized source coordinates for receiver import; null here deliberately avoids inventing GPS",
+    "approved synthetic observation created through designated test workflow",
+    "actual replay amendment withdrawal receipt and expiry acceptance"
+  ]
+}

@@ -1,0 +1,206 @@
+- generic [ref=f4e75]:
+  - complementary [ref=f4e76]:
+    - img "SoilFER LIMS" [ref=f4e78]
+    - navigation [ref=f4e79]:
+      - link "Dashboard" [ref=f4e80] [cursor=pointer]:
+        - /url: /
+      - link "Samples" [ref=f4e87] [cursor=pointer]:
+        - /url: /samples
+      - link "My Work" [ref=f4e92] [cursor=pointer]:
+        - /url: /my-work
+      - link "Workbench" [ref=f4e97] [cursor=pointer]:
+        - /url: /workbench
+      - link "Reports" [ref=f4e101] [cursor=pointer]:
+        - /url: /result-reports
+      - link "Spectral Library" [ref=f4e106] [cursor=pointer]:
+        - /url: /spectral-library
+      - link "Inventory" [ref=f4e110] [cursor=pointer]:
+        - /url: /inventory
+      - link "Equipment" [ref=f4e116] [cursor=pointer]:
+        - /url: /equipment
+      - link "Projects" [ref=f4e120] [cursor=pointer]:
+        - /url: /projects
+      - link "About SoilFER" [ref=f4e125] [cursor=pointer]:
+        - /url: /about
+    - button "Collapse" [ref=f4e130] [cursor=pointer]
+  - generic [ref=f4e136]:
+    - banner [ref=f4e137]:
+      - generic [ref=f4e139]:
+        - button "1 unread notification" [ref=f4e140] [cursor=pointer]:
+          - generic [ref=f4e144]: "1"
+        - button "Help with this page" [ref=f4e147] [cursor=pointer]:
+          - generic [ref=f4e151]: Help
+        - button "Change Language" [ref=f4e154] [cursor=pointer]
+        - button "Appearance" [ref=f4e159] [cursor=pointer]
+        - button "U User LAB TECHNICIAN" [ref=f4e163] [cursor=pointer]:
+          - generic [ref=f4e164]: U
+          - generic [ref=f4e165]:
+            - generic [ref=f4e166]: User
+            - generic [ref=f4e167]: LAB TECHNICIAN
+    - main [ref=f4e170]:
+      - generic [ref=f4e171]:
+        - generic [ref=f4e172]:
+          - generic [ref=f4e173]:
+            - generic [ref=f4e174]:
+              - generic [ref=f4e175]: Analytical bench
+              - heading "Analytical workbench" [level=1] [ref=f4e176]
+              - paragraph [ref=f4e177]: Method queues, batch runs, calibration verification, and instrument measurement entry.
+            - link "Open analytical workbench" [ref=f4e179] [cursor=pointer]:
+              - /url: /workbench
+          - generic [ref=f4e184]:
+            - generic [ref=f4e185]:
+              - generic [ref=f4e186]: Synthetic lab AUDIT-A · ITA
+              - generic [ref=f4e192]: UTC (UTC fallback)
+            - generic [ref=f4e197]:
+              - generic [ref=f4e198]: 2026-10-04 · UTC
+              - generic [ref=f4e199]:
+                - generic [ref=f4e200]: Live connection
+                - button "Refresh dashboard data" [ref=f4e203] [cursor=pointer]:
+                  - generic [ref=f4e209]: Refresh
+          - region "Work summaries" [ref=f4e210]:
+            - button "0 determinations Returned" [ref=f4e211] [cursor=pointer]:
+              - generic [ref=f4e212]:
+                - generic [ref=f4e213]: "0"
+                - generic [ref=f4e214]: determinations
+              - generic [ref=f4e215]: Returned
+            - button "0 runs Continue" [ref=f4e217] [cursor=pointer]:
+              - generic [ref=f4e218]:
+                - generic [ref=f4e219]: "0"
+                - generic [ref=f4e220]: runs
+              - generic [ref=f4e221]: Continue
+            - button "102 tasks Ready work" [pressed] [ref=f4e223] [cursor=pointer]:
+              - generic [ref=f4e224]:
+                - generic [ref=f4e225]: "102"
+                - generic [ref=f4e226]: tasks
+              - generic [ref=f4e227]: Ready work
+            - button "1 determination To submit" [ref=f4e229] [cursor=pointer]:
+              - generic [ref=f4e230]:
+                - generic [ref=f4e231]: "1"
+                - generic [ref=f4e232]: determination
+              - generic [ref=f4e233]: To submit
+            - button "0 tasks Waiting" [ref=f4e235] [cursor=pointer]:
+              - generic [ref=f4e236]:
+                - generic [ref=f4e237]: "0"
+                - generic [ref=f4e238]: tasks
+              - generic [ref=f4e239]: Waiting
+          - generic [ref=f4e241]:
+            - region "Work queue panel" [ref=f4e243]:
+              - generic [ref=f4e244]:
+                - generic [ref=f4e245]:
+                  - heading "Ready work" [level=2] [ref=f4e246]
+                  - paragraph [ref=f4e247]: Tracking 102 tasks in current authorized scope
+                - generic [ref=f4e248]:
+                  - button "Full Width" [ref=f4e249] [cursor=pointer]
+                  - searchbox "Filter this queue…" [ref=f4e255]
+              - generic [ref=f4e256]:
+                - button "Returned 0" [ref=f4e257] [cursor=pointer]:
+                  - generic [ref=f4e258]: Returned
+                  - generic [ref=f4e259]: "0"
+                - button "Continue 0" [ref=f4e260] [cursor=pointer]:
+                  - generic [ref=f4e261]: Continue
+                  - generic [ref=f4e262]: "0"
+                - button "Ready work 102" [ref=f4e263] [cursor=pointer]:
+                  - generic [ref=f4e264]: Ready work
+                  - generic [ref=f4e265]: "102"
+                - button "To submit 1" [ref=f4e266] [cursor=pointer]:
+                  - generic [ref=f4e267]: To submit
+                  - generic [ref=f4e268]: "1"
+                - button "Waiting 0" [ref=f4e269] [cursor=pointer]:
+                  - generic [ref=f4e270]: Waiting
+                  - generic [ref=f4e271]: "0"
+              - generic [ref=f4e272]:
+                - table [ref=f4e274]:
+                  - rowgroup [ref=f4e275]:
+                    - row [ref=f4e276]:
+                      - columnheader "Work / Item" [ref=f4e277]
+                      - columnheader "State" [ref=f4e278]
+                      - columnheader "Count" [ref=f4e279]
+                      - columnheader "Action" [ref=f4e280]
+                  - rowgroup [ref=f4e281]:
+                    - row [ref=f4e282]:
+                      - cell "Soil pH in water PH_H2O:audit-ph:1 SOP revision 1 102 assigned, received and prepared samples ready for entry." [ref=f4e283]:
+                        - generic [ref=f4e284]: Soil pH in water
+                        - generic [ref=f4e285]:
+                          - generic [ref=f4e286]: PH_H2O:audit-ph:1
+                          - generic [ref=f4e287]: SOP revision 1
+                        - generic [ref=f4e288]: 102 assigned, received and prepared samples ready for entry.
+                      - cell "Ready to record" [ref=f4e289]
+                      - cell "102determinations" [ref=f4e291]
+                      - cell [ref=f4e292]:
+                        - link "Open worksheet" [ref=f4e293] [cursor=pointer]:
+                          - /url: /workbench?analysis=PH_H2O&queue=bench.ready
+                - generic [ref=f4e298]:
+                  - generic [ref=f4e299]: Showing 1 of 1 items
+                  - generic [ref=f4e300]:
+                    - button "Previous page" [disabled] [ref=f4e301]:
+                      - generic [ref=f4e304]: Previous
+                    - generic [ref=f4e305]: Page 1
+                    - button "Next page" [disabled] [ref=f4e306]:
+                      - generic [ref=f4e307]: Next
+            - complementary [ref=f4e310]:
+              - generic [ref=f4e311]:
+                - generic [ref=f4e312]: Shift Notes
+                - heading "Bench Work Instructions" [level=2] [ref=f4e317]
+                - list [ref=f4e319]:
+                  - listitem [ref=f4e320]: Check instrument qualification and calibration status before initiating analytical runs.
+                  - listitem [ref=f4e321]: Determinations are batched up to 40 samples per run with required QC controls.
+                  - listitem [ref=f4e322]: Complete drying and preparation checklists before recording wet chemistry results.
+              - generic [ref=f4e323]:
+                - generic [ref=f4e324]: Continue elsewhere
+                - generic [ref=f4e325]:
+                  - link "Bench measurement workbench Record determinations and review QC" [ref=f4e326] [cursor=pointer]:
+                    - /url: /workbench
+                    - generic [ref=f4e327]:
+                      - generic [ref=f4e328]: Bench measurement workbench
+                      - generic [ref=f4e329]: Record determinations and review QC
+                  - link "Assigned tasks (My Work) View individual assigned analyses" [ref=f4e333] [cursor=pointer]:
+                    - /url: /my-work
+                    - generic [ref=f4e334]:
+                      - generic [ref=f4e335]: Assigned tasks (My Work)
+                      - generic [ref=f4e336]: View individual assigned analyses
+                  - link "Laboratory equipment Inspect instrument status and calibration dates" [ref=f4e340] [cursor=pointer]:
+                    - /url: /equipment
+                    - generic [ref=f4e341]:
+                      - generic [ref=f4e342]: Laboratory equipment
+                      - generic [ref=f4e343]: Inspect instrument status and calibration dates
+                  - link "Chemicals & Reagents Check standards and solution lots" [ref=f4e347] [cursor=pointer]:
+                    - /url: /inventory
+                    - generic [ref=f4e348]:
+                      - generic [ref=f4e349]: Chemicals & Reagents
+                      - generic [ref=f4e350]: Check standards and solution lots
+          - generic [ref=f4e354]: The source record is checked again when you open or act on work.
+        - generic [ref=f4e355]:
+          - generic [ref=f4e356]:
+            - heading "Messages & Alerts" [level=2] [ref=f4e358]
+            - button "Close drawer" [ref=f4e359] [cursor=pointer]
+          - generic [ref=f4e363]:
+            - button "Notifications 1" [ref=f4e364] [cursor=pointer]:
+              - generic [ref=f4e368]: Notifications
+              - generic [ref=f4e369]: "1"
+            - button "Chats" [ref=f4e370] [cursor=pointer]
+          - generic [ref=f4e374]:
+            - generic [ref=f4e375]:
+              - button "Mark all read" [ref=f4e376] [cursor=pointer]
+              - button "Clear All" [ref=f4e377] [cursor=pointer]
+            - generic [ref=f4e384] [cursor=pointer]:
+              - heading "✓ Work Approved" [level=4] [ref=f4e386]
+              - paragraph [ref=f4e388]: PH_H2O for sample LAB-pending
+              - generic [ref=f4e389]:
+                - generic [ref=f4e390]: 1m
+                - generic [ref=f4e391]: View
+          - button "Open Full Messaging Center" [ref=f4e397] [cursor=pointer]
+      - generic [ref=f4e404]:
+        - generic [ref=f4e405]:
+          - generic [ref=f4e406]: LIMS
+          - generic [ref=f4e407]: •
+          - generic [ref=f4e408]: Laboratory Information Management System
+        - generic [ref=f4e409]:
+          - link "About SoilFER" [ref=f4e410] [cursor=pointer]:
+            - /url: /about
+          - generic [ref=f4e413]: •
+          - link "Tech Stack & Releases" [ref=f4e414] [cursor=pointer]:
+            - /url: /techstack
+        - generic [ref=f4e418]:
+          - generic [ref=f4e419]: © 2026
+          - generic [ref=f4e420]: •
+          - generic [ref=f4e421]: Built with care

@@ -1,0 +1,1906 @@
+- generic [ref=f4e75]:
+  - complementary [ref=f4e76]:
+    - img "SoilFER LIMS" [ref=f4e78]
+    - navigation [ref=f4e79]:
+      - link "Dashboard" [ref=f4e80] [cursor=pointer]:
+        - /url: /
+      - link "Samples" [ref=f4e87] [cursor=pointer]:
+        - /url: /samples
+      - link "My Work" [ref=f4e92] [cursor=pointer]:
+        - /url: /my-work
+      - link "Workbench" [ref=f4e97] [cursor=pointer]:
+        - /url: /workbench
+      - link "Reports" [ref=f4e101] [cursor=pointer]:
+        - /url: /result-reports
+      - link "Spectral Library" [ref=f4e106] [cursor=pointer]:
+        - /url: /spectral-library
+      - link "Inventory" [ref=f4e110] [cursor=pointer]:
+        - /url: /inventory
+      - link "Equipment" [ref=f4e116] [cursor=pointer]:
+        - /url: /equipment
+      - link "Projects" [ref=f4e120] [cursor=pointer]:
+        - /url: /projects
+      - link "About SoilFER" [ref=f4e125] [cursor=pointer]:
+        - /url: /about
+    - button "Collapse" [ref=f4e130] [cursor=pointer]
+  - generic [ref=f4e136]:
+    - banner [ref=f4e137]:
+      - generic [ref=f4e139]:
+        - button "1 unread notification" [ref=f4e140] [cursor=pointer]:
+          - generic [ref=f4e144]: "1"
+        - button "Help with this page" [ref=f4e147] [cursor=pointer]:
+          - generic [ref=f4e151]: Help
+        - button "Change Language" [ref=f4e154] [cursor=pointer]
+        - button "Appearance" [ref=f4e159] [cursor=pointer]
+        - button "U User LAB TECHNICIAN" [ref=f4e163] [cursor=pointer]:
+          - generic [ref=f4e164]: U
+          - generic [ref=f4e165]:
+            - generic [ref=f4e166]: User
+            - generic [ref=f4e167]: LAB TECHNICIAN
+    - main [ref=f4e170]:
+      - generic [ref=f4e171]:
+        - generic [ref=f4e425]:
+          - generic [ref=f4e426]:
+            - generic [ref=f4e427]: SoilFER LIMS / Technician Workspace
+            - generic [ref=f4e428]: "Role: LAB_TECHNICIAN · Lab: AUDIT-A"
+          - generic [ref=f4e429]:
+            - generic [ref=f4e430]:
+              - heading "Technician Workbench" [level=1] [ref=f4e431]
+              - paragraph [ref=f4e432]: Unified determination queue, method-aware worksheets, and two-step reviewer handoff
+            - generic [ref=f4e433]:
+              - generic [ref=f4e434]: ✓ Drafts saved
+              - button "Refresh queue" [ref=f4e438] [cursor=pointer]
+          - navigation "Workbench navigation" [ref=f4e444]:
+            - button "My Work (102)" [ref=f4e445] [cursor=pointer]
+            - button "Worksheet (102)" [ref=f4e446] [cursor=pointer]
+            - button "Ready to Submit (1)" [ref=f4e447] [cursor=pointer]
+            - button "Sent & Completed (3)" [ref=f4e448] [cursor=pointer]
+            - button "Activity Receipts (1)" [ref=f4e449] [cursor=pointer]
+          - generic [ref=f4e3433]:
+            - generic [ref=f4e3434]:
+              - generic [ref=f4e3435]:
+                - generic [ref=f4e3436]:
+                  - generic [ref=f4e3437]: "Work type:"
+                  - combobox "Work type:" [ref=f4e3438]:
+                    - option "Soil pH in water (102)" [selected]
+                - button "Paste Values" [ref=f4e3439] [cursor=pointer]
+                - button "Batch & QC Runs" [ref=f4e3444] [cursor=pointer]
+              - generic [ref=f4e3450]:
+                - button "Card View" [ref=f4e3451] [cursor=pointer]
+                - textbox "Find sample ID..." [ref=f4e3460]
+            - generic [ref=f4e3461]:
+              - generic [ref=f4e3462]:
+                - heading "Soil pH in water" [level=3] [ref=f4e3463]
+                - paragraph [ref=f4e3465]: "Soil chemistry · Target unit: pH_units"
+              - generic [ref=f4e3466]:
+                - generic [ref=f4e3467]: "Unit: pH_units"
+                - generic [ref=f4e3468]: 102 assigned samples
+            - generic [ref=f4e3469]:
+              - generic [ref=f4e3470]:
+                - table [ref=f4e3472]:
+                  - rowgroup [ref=f4e3473]:
+                    - row [ref=f4e3474]:
+                      - columnheader [ref=f4e3475]:
+                        - checkbox "Select all rows" [ref=f4e3476]
+                      - columnheader "Sample" [ref=f4e3477]
+                      - columnheader "Determination (pH_units)" [ref=f4e3478]
+                      - columnheader "Readiness & State" [ref=f4e3479]
+                      - columnheader "Details" [ref=f4e3480]
+                  - rowgroup [ref=f4e3481]:
+                    - row [ref=f4e3482] [cursor=pointer]:
+                      - cell [ref=f4e3483]:
+                        - checkbox "Select LAB-move" [ref=f4e3484]
+                      - 'cell "#3 LAB-move Field: ORIG-move" [ref=f4e3485]':
+                        - generic [ref=f4e3486]:
+                          - 'generic "Rack Position 3 (Batch: new-batch)" [ref=f4e3487]': "#3"
+                          - generic [ref=f4e3488]: LAB-move
+                        - generic [ref=f4e3489]: "Field: ORIG-move"
+                      - cell "pH_units" [ref=f4e3490]:
+                        - generic [ref=f4e3491]:
+                          - textbox "LAB-move determination" [ref=f4e3492]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3493]: pH_units
+                      - cell "Ready Pending" [ref=f4e3494]:
+                        - generic [ref=f4e3496]:
+                          - generic [ref=f4e3497]: Ready
+                          - generic [ref=f4e3501]: Pending
+                      - cell [ref=f4e3502]:
+                        - button "Inspect →" [ref=f4e3503]
+                    - row [ref=f4e3504] [cursor=pointer]:
+                      - cell [ref=f4e3505]:
+                        - checkbox "Select LAB-queue" [ref=f4e3506]
+                      - 'cell "LAB-queue Field: ORIG-queue" [ref=f4e3507]':
+                        - generic [ref=f4e3508]: LAB-queue
+                        - generic [ref=f4e3510]: "Field: ORIG-queue"
+                      - cell "6.8 pH_units" [ref=f4e3511]:
+                        - generic [ref=f4e3512]:
+                          - textbox "LAB-queue determination" [ref=f4e3513]:
+                            - /placeholder: "0.00"
+                            - text: "6.8"
+                          - generic [ref=f4e3514]: pH_units
+                      - cell "Ready Pending" [ref=f4e3515]:
+                        - generic [ref=f4e3517]:
+                          - generic [ref=f4e3518]: Ready
+                          - generic [ref=f4e3522]: Pending
+                      - cell [ref=f4e3523]:
+                        - button "Inspect →" [ref=f4e3524]
+                    - row [ref=f4e5741] [cursor=pointer]:
+                      - cell [ref=f4e3526]:
+                        - checkbox "Select LAB-BENCH-001" [ref=f4e3527]
+                      - 'cell "LAB-BENCH-001 Field: ORIG-BENCH-001" [ref=f4e3528]':
+                        - generic [ref=f4e3529]: LAB-BENCH-001
+                        - generic [ref=f4e3531]: "Field: ORIG-BENCH-001"
+                      - cell "6,45 pH_units" [ref=f4e5742]:
+                        - generic [ref=f4e3533]:
+                          - textbox "LAB-BENCH-001 determination" [active] [ref=f4e3534]:
+                            - /placeholder: "0.00"
+                            - text: 6,45
+                          - generic [ref=f4e3535]: pH_units
+                      - cell "Ready Draft saved" [ref=f4e5743]:
+                        - generic [ref=f4e3538]:
+                          - generic [ref=f4e3539]: Ready
+                          - generic [ref=f4e3543]: Draft saved
+                      - cell [ref=f4e3544]:
+                        - button "Inspect →" [ref=f4e3545]
+                    - row [ref=f4e3546] [cursor=pointer]:
+                      - cell [ref=f4e3547]:
+                        - checkbox "Select LAB-BENCH-002" [ref=f4e3548]
+                      - 'cell "LAB-BENCH-002 Field: ORIG-BENCH-002" [ref=f4e3549]':
+                        - generic [ref=f4e3550]: LAB-BENCH-002
+                        - generic [ref=f4e3552]: "Field: ORIG-BENCH-002"
+                      - cell "pH_units" [ref=f4e3553]:
+                        - generic [ref=f4e3554]:
+                          - textbox "LAB-BENCH-002 determination" [ref=f4e3555]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3556]: pH_units
+                      - cell "Ready Pending" [ref=f4e3557]:
+                        - generic [ref=f4e3559]:
+                          - generic [ref=f4e3560]: Ready
+                          - generic [ref=f4e3564]: Pending
+                      - cell [ref=f4e3565]:
+                        - button "Inspect →" [ref=f4e3566]
+                    - row [ref=f4e3567] [cursor=pointer]:
+                      - cell [ref=f4e3568]:
+                        - checkbox "Select LAB-BENCH-003" [ref=f4e3569]
+                      - 'cell "LAB-BENCH-003 Field: ORIG-BENCH-003" [ref=f4e3570]':
+                        - generic [ref=f4e3571]: LAB-BENCH-003
+                        - generic [ref=f4e3573]: "Field: ORIG-BENCH-003"
+                      - cell "pH_units" [ref=f4e3574]:
+                        - generic [ref=f4e3575]:
+                          - textbox "LAB-BENCH-003 determination" [ref=f4e3576]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3577]: pH_units
+                      - cell "Ready Pending" [ref=f4e3578]:
+                        - generic [ref=f4e3580]:
+                          - generic [ref=f4e3581]: Ready
+                          - generic [ref=f4e3585]: Pending
+                      - cell [ref=f4e3586]:
+                        - button "Inspect →" [ref=f4e3587]
+                    - row [ref=f4e3588] [cursor=pointer]:
+                      - cell [ref=f4e3589]:
+                        - checkbox "Select LAB-BENCH-004" [ref=f4e3590]
+                      - 'cell "LAB-BENCH-004 Field: ORIG-BENCH-004" [ref=f4e3591]':
+                        - generic [ref=f4e3592]: LAB-BENCH-004
+                        - generic [ref=f4e3594]: "Field: ORIG-BENCH-004"
+                      - cell "pH_units" [ref=f4e3595]:
+                        - generic [ref=f4e3596]:
+                          - textbox "LAB-BENCH-004 determination" [ref=f4e3597]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3598]: pH_units
+                      - cell "Ready Pending" [ref=f4e3599]:
+                        - generic [ref=f4e3601]:
+                          - generic [ref=f4e3602]: Ready
+                          - generic [ref=f4e3606]: Pending
+                      - cell [ref=f4e3607]:
+                        - button "Inspect →" [ref=f4e3608]
+                    - row [ref=f4e3609] [cursor=pointer]:
+                      - cell [ref=f4e3610]:
+                        - checkbox "Select LAB-BENCH-005" [ref=f4e3611]
+                      - 'cell "LAB-BENCH-005 Field: ORIG-BENCH-005" [ref=f4e3612]':
+                        - generic [ref=f4e3613]: LAB-BENCH-005
+                        - generic [ref=f4e3615]: "Field: ORIG-BENCH-005"
+                      - cell "pH_units" [ref=f4e3616]:
+                        - generic [ref=f4e3617]:
+                          - textbox "LAB-BENCH-005 determination" [ref=f4e3618]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3619]: pH_units
+                      - cell "Ready Pending" [ref=f4e3620]:
+                        - generic [ref=f4e3622]:
+                          - generic [ref=f4e3623]: Ready
+                          - generic [ref=f4e3627]: Pending
+                      - cell [ref=f4e3628]:
+                        - button "Inspect →" [ref=f4e3629]
+                    - row [ref=f4e3630] [cursor=pointer]:
+                      - cell [ref=f4e3631]:
+                        - checkbox "Select LAB-BENCH-006" [ref=f4e3632]
+                      - 'cell "LAB-BENCH-006 Field: ORIG-BENCH-006" [ref=f4e3633]':
+                        - generic [ref=f4e3634]: LAB-BENCH-006
+                        - generic [ref=f4e3636]: "Field: ORIG-BENCH-006"
+                      - cell "pH_units" [ref=f4e3637]:
+                        - generic [ref=f4e3638]:
+                          - textbox "LAB-BENCH-006 determination" [ref=f4e3639]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3640]: pH_units
+                      - cell "Ready Pending" [ref=f4e3641]:
+                        - generic [ref=f4e3643]:
+                          - generic [ref=f4e3644]: Ready
+                          - generic [ref=f4e3648]: Pending
+                      - cell [ref=f4e3649]:
+                        - button "Inspect →" [ref=f4e3650]
+                    - row [ref=f4e3651] [cursor=pointer]:
+                      - cell [ref=f4e3652]:
+                        - checkbox "Select LAB-BENCH-007" [ref=f4e3653]
+                      - 'cell "LAB-BENCH-007 Field: ORIG-BENCH-007" [ref=f4e3654]':
+                        - generic [ref=f4e3655]: LAB-BENCH-007
+                        - generic [ref=f4e3657]: "Field: ORIG-BENCH-007"
+                      - cell "pH_units" [ref=f4e3658]:
+                        - generic [ref=f4e3659]:
+                          - textbox "LAB-BENCH-007 determination" [ref=f4e3660]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3661]: pH_units
+                      - cell "Ready Pending" [ref=f4e3662]:
+                        - generic [ref=f4e3664]:
+                          - generic [ref=f4e3665]: Ready
+                          - generic [ref=f4e3669]: Pending
+                      - cell [ref=f4e3670]:
+                        - button "Inspect →" [ref=f4e3671]
+                    - row [ref=f4e3672] [cursor=pointer]:
+                      - cell [ref=f4e3673]:
+                        - checkbox "Select LAB-BENCH-008" [ref=f4e3674]
+                      - 'cell "LAB-BENCH-008 Field: ORIG-BENCH-008" [ref=f4e3675]':
+                        - generic [ref=f4e3676]: LAB-BENCH-008
+                        - generic [ref=f4e3678]: "Field: ORIG-BENCH-008"
+                      - cell "pH_units" [ref=f4e3679]:
+                        - generic [ref=f4e3680]:
+                          - textbox "LAB-BENCH-008 determination" [ref=f4e3681]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3682]: pH_units
+                      - cell "Ready Pending" [ref=f4e3683]:
+                        - generic [ref=f4e3685]:
+                          - generic [ref=f4e3686]: Ready
+                          - generic [ref=f4e3690]: Pending
+                      - cell [ref=f4e3691]:
+                        - button "Inspect →" [ref=f4e3692]
+                    - row [ref=f4e3693] [cursor=pointer]:
+                      - cell [ref=f4e3694]:
+                        - checkbox "Select LAB-BENCH-009" [ref=f4e3695]
+                      - 'cell "LAB-BENCH-009 Field: ORIG-BENCH-009" [ref=f4e3696]':
+                        - generic [ref=f4e3697]: LAB-BENCH-009
+                        - generic [ref=f4e3699]: "Field: ORIG-BENCH-009"
+                      - cell "pH_units" [ref=f4e3700]:
+                        - generic [ref=f4e3701]:
+                          - textbox "LAB-BENCH-009 determination" [ref=f4e3702]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3703]: pH_units
+                      - cell "Ready Pending" [ref=f4e3704]:
+                        - generic [ref=f4e3706]:
+                          - generic [ref=f4e3707]: Ready
+                          - generic [ref=f4e3711]: Pending
+                      - cell [ref=f4e3712]:
+                        - button "Inspect →" [ref=f4e3713]
+                    - row [ref=f4e3714] [cursor=pointer]:
+                      - cell [ref=f4e3715]:
+                        - checkbox "Select LAB-BENCH-010" [ref=f4e3716]
+                      - 'cell "LAB-BENCH-010 Field: ORIG-BENCH-010" [ref=f4e3717]':
+                        - generic [ref=f4e3718]: LAB-BENCH-010
+                        - generic [ref=f4e3720]: "Field: ORIG-BENCH-010"
+                      - cell "pH_units" [ref=f4e3721]:
+                        - generic [ref=f4e3722]:
+                          - textbox "LAB-BENCH-010 determination" [ref=f4e3723]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3724]: pH_units
+                      - cell "Ready Pending" [ref=f4e3725]:
+                        - generic [ref=f4e3727]:
+                          - generic [ref=f4e3728]: Ready
+                          - generic [ref=f4e3732]: Pending
+                      - cell [ref=f4e3733]:
+                        - button "Inspect →" [ref=f4e3734]
+                    - row [ref=f4e3735] [cursor=pointer]:
+                      - cell [ref=f4e3736]:
+                        - checkbox "Select LAB-BENCH-011" [ref=f4e3737]
+                      - 'cell "LAB-BENCH-011 Field: ORIG-BENCH-011" [ref=f4e3738]':
+                        - generic [ref=f4e3739]: LAB-BENCH-011
+                        - generic [ref=f4e3741]: "Field: ORIG-BENCH-011"
+                      - cell "pH_units" [ref=f4e3742]:
+                        - generic [ref=f4e3743]:
+                          - textbox "LAB-BENCH-011 determination" [ref=f4e3744]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3745]: pH_units
+                      - cell "Ready Pending" [ref=f4e3746]:
+                        - generic [ref=f4e3748]:
+                          - generic [ref=f4e3749]: Ready
+                          - generic [ref=f4e3753]: Pending
+                      - cell [ref=f4e3754]:
+                        - button "Inspect →" [ref=f4e3755]
+                    - row [ref=f4e3756] [cursor=pointer]:
+                      - cell [ref=f4e3757]:
+                        - checkbox "Select LAB-BENCH-012" [ref=f4e3758]
+                      - 'cell "LAB-BENCH-012 Field: ORIG-BENCH-012" [ref=f4e3759]':
+                        - generic [ref=f4e3760]: LAB-BENCH-012
+                        - generic [ref=f4e3762]: "Field: ORIG-BENCH-012"
+                      - cell "pH_units" [ref=f4e3763]:
+                        - generic [ref=f4e3764]:
+                          - textbox "LAB-BENCH-012 determination" [ref=f4e3765]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3766]: pH_units
+                      - cell "Ready Pending" [ref=f4e3767]:
+                        - generic [ref=f4e3769]:
+                          - generic [ref=f4e3770]: Ready
+                          - generic [ref=f4e3774]: Pending
+                      - cell [ref=f4e3775]:
+                        - button "Inspect →" [ref=f4e3776]
+                    - row [ref=f4e3777] [cursor=pointer]:
+                      - cell [ref=f4e3778]:
+                        - checkbox "Select LAB-BENCH-013" [ref=f4e3779]
+                      - 'cell "LAB-BENCH-013 Field: ORIG-BENCH-013" [ref=f4e3780]':
+                        - generic [ref=f4e3781]: LAB-BENCH-013
+                        - generic [ref=f4e3783]: "Field: ORIG-BENCH-013"
+                      - cell "pH_units" [ref=f4e3784]:
+                        - generic [ref=f4e3785]:
+                          - textbox "LAB-BENCH-013 determination" [ref=f4e3786]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3787]: pH_units
+                      - cell "Ready Pending" [ref=f4e3788]:
+                        - generic [ref=f4e3790]:
+                          - generic [ref=f4e3791]: Ready
+                          - generic [ref=f4e3795]: Pending
+                      - cell [ref=f4e3796]:
+                        - button "Inspect →" [ref=f4e3797]
+                    - row [ref=f4e3798] [cursor=pointer]:
+                      - cell [ref=f4e3799]:
+                        - checkbox "Select LAB-BENCH-014" [ref=f4e3800]
+                      - 'cell "LAB-BENCH-014 Field: ORIG-BENCH-014" [ref=f4e3801]':
+                        - generic [ref=f4e3802]: LAB-BENCH-014
+                        - generic [ref=f4e3804]: "Field: ORIG-BENCH-014"
+                      - cell "pH_units" [ref=f4e3805]:
+                        - generic [ref=f4e3806]:
+                          - textbox "LAB-BENCH-014 determination" [ref=f4e3807]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3808]: pH_units
+                      - cell "Ready Pending" [ref=f4e3809]:
+                        - generic [ref=f4e3811]:
+                          - generic [ref=f4e3812]: Ready
+                          - generic [ref=f4e3816]: Pending
+                      - cell [ref=f4e3817]:
+                        - button "Inspect →" [ref=f4e3818]
+                    - row [ref=f4e3819] [cursor=pointer]:
+                      - cell [ref=f4e3820]:
+                        - checkbox "Select LAB-BENCH-015" [ref=f4e3821]
+                      - 'cell "LAB-BENCH-015 Field: ORIG-BENCH-015" [ref=f4e3822]':
+                        - generic [ref=f4e3823]: LAB-BENCH-015
+                        - generic [ref=f4e3825]: "Field: ORIG-BENCH-015"
+                      - cell "pH_units" [ref=f4e3826]:
+                        - generic [ref=f4e3827]:
+                          - textbox "LAB-BENCH-015 determination" [ref=f4e3828]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3829]: pH_units
+                      - cell "Ready Pending" [ref=f4e3830]:
+                        - generic [ref=f4e3832]:
+                          - generic [ref=f4e3833]: Ready
+                          - generic [ref=f4e3837]: Pending
+                      - cell [ref=f4e3838]:
+                        - button "Inspect →" [ref=f4e3839]
+                    - row [ref=f4e3840] [cursor=pointer]:
+                      - cell [ref=f4e3841]:
+                        - checkbox "Select LAB-BENCH-016" [ref=f4e3842]
+                      - 'cell "LAB-BENCH-016 Field: ORIG-BENCH-016" [ref=f4e3843]':
+                        - generic [ref=f4e3844]: LAB-BENCH-016
+                        - generic [ref=f4e3846]: "Field: ORIG-BENCH-016"
+                      - cell "pH_units" [ref=f4e3847]:
+                        - generic [ref=f4e3848]:
+                          - textbox "LAB-BENCH-016 determination" [ref=f4e3849]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3850]: pH_units
+                      - cell "Ready Pending" [ref=f4e3851]:
+                        - generic [ref=f4e3853]:
+                          - generic [ref=f4e3854]: Ready
+                          - generic [ref=f4e3858]: Pending
+                      - cell [ref=f4e3859]:
+                        - button "Inspect →" [ref=f4e3860]
+                    - row [ref=f4e3861] [cursor=pointer]:
+                      - cell [ref=f4e3862]:
+                        - checkbox "Select LAB-BENCH-017" [ref=f4e3863]
+                      - 'cell "LAB-BENCH-017 Field: ORIG-BENCH-017" [ref=f4e3864]':
+                        - generic [ref=f4e3865]: LAB-BENCH-017
+                        - generic [ref=f4e3867]: "Field: ORIG-BENCH-017"
+                      - cell "pH_units" [ref=f4e3868]:
+                        - generic [ref=f4e3869]:
+                          - textbox "LAB-BENCH-017 determination" [ref=f4e3870]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3871]: pH_units
+                      - cell "Ready Pending" [ref=f4e3872]:
+                        - generic [ref=f4e3874]:
+                          - generic [ref=f4e3875]: Ready
+                          - generic [ref=f4e3879]: Pending
+                      - cell [ref=f4e3880]:
+                        - button "Inspect →" [ref=f4e3881]
+                    - row [ref=f4e3882] [cursor=pointer]:
+                      - cell [ref=f4e3883]:
+                        - checkbox "Select LAB-BENCH-018" [ref=f4e3884]
+                      - 'cell "LAB-BENCH-018 Field: ORIG-BENCH-018" [ref=f4e3885]':
+                        - generic [ref=f4e3886]: LAB-BENCH-018
+                        - generic [ref=f4e3888]: "Field: ORIG-BENCH-018"
+                      - cell "pH_units" [ref=f4e3889]:
+                        - generic [ref=f4e3890]:
+                          - textbox "LAB-BENCH-018 determination" [ref=f4e3891]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3892]: pH_units
+                      - cell "Ready Pending" [ref=f4e3893]:
+                        - generic [ref=f4e3895]:
+                          - generic [ref=f4e3896]: Ready
+                          - generic [ref=f4e3900]: Pending
+                      - cell [ref=f4e3901]:
+                        - button "Inspect →" [ref=f4e3902]
+                    - row [ref=f4e3903] [cursor=pointer]:
+                      - cell [ref=f4e3904]:
+                        - checkbox "Select LAB-BENCH-019" [ref=f4e3905]
+                      - 'cell "LAB-BENCH-019 Field: ORIG-BENCH-019" [ref=f4e3906]':
+                        - generic [ref=f4e3907]: LAB-BENCH-019
+                        - generic [ref=f4e3909]: "Field: ORIG-BENCH-019"
+                      - cell "pH_units" [ref=f4e3910]:
+                        - generic [ref=f4e3911]:
+                          - textbox "LAB-BENCH-019 determination" [ref=f4e3912]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3913]: pH_units
+                      - cell "Ready Pending" [ref=f4e3914]:
+                        - generic [ref=f4e3916]:
+                          - generic [ref=f4e3917]: Ready
+                          - generic [ref=f4e3921]: Pending
+                      - cell [ref=f4e3922]:
+                        - button "Inspect →" [ref=f4e3923]
+                    - row [ref=f4e3924] [cursor=pointer]:
+                      - cell [ref=f4e3925]:
+                        - checkbox "Select LAB-BENCH-020" [ref=f4e3926]
+                      - 'cell "LAB-BENCH-020 Field: ORIG-BENCH-020" [ref=f4e3927]':
+                        - generic [ref=f4e3928]: LAB-BENCH-020
+                        - generic [ref=f4e3930]: "Field: ORIG-BENCH-020"
+                      - cell "pH_units" [ref=f4e3931]:
+                        - generic [ref=f4e3932]:
+                          - textbox "LAB-BENCH-020 determination" [ref=f4e3933]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3934]: pH_units
+                      - cell "Ready Pending" [ref=f4e3935]:
+                        - generic [ref=f4e3937]:
+                          - generic [ref=f4e3938]: Ready
+                          - generic [ref=f4e3942]: Pending
+                      - cell [ref=f4e3943]:
+                        - button "Inspect →" [ref=f4e3944]
+                    - row [ref=f4e3945] [cursor=pointer]:
+                      - cell [ref=f4e3946]:
+                        - checkbox "Select LAB-BENCH-021" [ref=f4e3947]
+                      - 'cell "LAB-BENCH-021 Field: ORIG-BENCH-021" [ref=f4e3948]':
+                        - generic [ref=f4e3949]: LAB-BENCH-021
+                        - generic [ref=f4e3951]: "Field: ORIG-BENCH-021"
+                      - cell "pH_units" [ref=f4e3952]:
+                        - generic [ref=f4e3953]:
+                          - textbox "LAB-BENCH-021 determination" [ref=f4e3954]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3955]: pH_units
+                      - cell "Ready Pending" [ref=f4e3956]:
+                        - generic [ref=f4e3958]:
+                          - generic [ref=f4e3959]: Ready
+                          - generic [ref=f4e3963]: Pending
+                      - cell [ref=f4e3964]:
+                        - button "Inspect →" [ref=f4e3965]
+                    - row [ref=f4e3966] [cursor=pointer]:
+                      - cell [ref=f4e3967]:
+                        - checkbox "Select LAB-BENCH-022" [ref=f4e3968]
+                      - 'cell "LAB-BENCH-022 Field: ORIG-BENCH-022" [ref=f4e3969]':
+                        - generic [ref=f4e3970]: LAB-BENCH-022
+                        - generic [ref=f4e3972]: "Field: ORIG-BENCH-022"
+                      - cell "pH_units" [ref=f4e3973]:
+                        - generic [ref=f4e3974]:
+                          - textbox "LAB-BENCH-022 determination" [ref=f4e3975]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3976]: pH_units
+                      - cell "Ready Pending" [ref=f4e3977]:
+                        - generic [ref=f4e3979]:
+                          - generic [ref=f4e3980]: Ready
+                          - generic [ref=f4e3984]: Pending
+                      - cell [ref=f4e3985]:
+                        - button "Inspect →" [ref=f4e3986]
+                    - row [ref=f4e3987] [cursor=pointer]:
+                      - cell [ref=f4e3988]:
+                        - checkbox "Select LAB-BENCH-023" [ref=f4e3989]
+                      - 'cell "LAB-BENCH-023 Field: ORIG-BENCH-023" [ref=f4e3990]':
+                        - generic [ref=f4e3991]: LAB-BENCH-023
+                        - generic [ref=f4e3993]: "Field: ORIG-BENCH-023"
+                      - cell "pH_units" [ref=f4e3994]:
+                        - generic [ref=f4e3995]:
+                          - textbox "LAB-BENCH-023 determination" [ref=f4e3996]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e3997]: pH_units
+                      - cell "Ready Pending" [ref=f4e3998]:
+                        - generic [ref=f4e4000]:
+                          - generic [ref=f4e4001]: Ready
+                          - generic [ref=f4e4005]: Pending
+                      - cell [ref=f4e4006]:
+                        - button "Inspect →" [ref=f4e4007]
+                    - row [ref=f4e4008] [cursor=pointer]:
+                      - cell [ref=f4e4009]:
+                        - checkbox "Select LAB-BENCH-024" [ref=f4e4010]
+                      - 'cell "LAB-BENCH-024 Field: ORIG-BENCH-024" [ref=f4e4011]':
+                        - generic [ref=f4e4012]: LAB-BENCH-024
+                        - generic [ref=f4e4014]: "Field: ORIG-BENCH-024"
+                      - cell "pH_units" [ref=f4e4015]:
+                        - generic [ref=f4e4016]:
+                          - textbox "LAB-BENCH-024 determination" [ref=f4e4017]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4018]: pH_units
+                      - cell "Ready Pending" [ref=f4e4019]:
+                        - generic [ref=f4e4021]:
+                          - generic [ref=f4e4022]: Ready
+                          - generic [ref=f4e4026]: Pending
+                      - cell [ref=f4e4027]:
+                        - button "Inspect →" [ref=f4e4028]
+                    - row [ref=f4e4029] [cursor=pointer]:
+                      - cell [ref=f4e4030]:
+                        - checkbox "Select LAB-BENCH-025" [ref=f4e4031]
+                      - 'cell "LAB-BENCH-025 Field: ORIG-BENCH-025" [ref=f4e4032]':
+                        - generic [ref=f4e4033]: LAB-BENCH-025
+                        - generic [ref=f4e4035]: "Field: ORIG-BENCH-025"
+                      - cell "pH_units" [ref=f4e4036]:
+                        - generic [ref=f4e4037]:
+                          - textbox "LAB-BENCH-025 determination" [ref=f4e4038]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4039]: pH_units
+                      - cell "Ready Pending" [ref=f4e4040]:
+                        - generic [ref=f4e4042]:
+                          - generic [ref=f4e4043]: Ready
+                          - generic [ref=f4e4047]: Pending
+                      - cell [ref=f4e4048]:
+                        - button "Inspect →" [ref=f4e4049]
+                    - row [ref=f4e4050] [cursor=pointer]:
+                      - cell [ref=f4e4051]:
+                        - checkbox "Select LAB-BENCH-026" [ref=f4e4052]
+                      - 'cell "LAB-BENCH-026 Field: ORIG-BENCH-026" [ref=f4e4053]':
+                        - generic [ref=f4e4054]: LAB-BENCH-026
+                        - generic [ref=f4e4056]: "Field: ORIG-BENCH-026"
+                      - cell "pH_units" [ref=f4e4057]:
+                        - generic [ref=f4e4058]:
+                          - textbox "LAB-BENCH-026 determination" [ref=f4e4059]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4060]: pH_units
+                      - cell "Ready Pending" [ref=f4e4061]:
+                        - generic [ref=f4e4063]:
+                          - generic [ref=f4e4064]: Ready
+                          - generic [ref=f4e4068]: Pending
+                      - cell [ref=f4e4069]:
+                        - button "Inspect →" [ref=f4e4070]
+                    - row [ref=f4e4071] [cursor=pointer]:
+                      - cell [ref=f4e4072]:
+                        - checkbox "Select LAB-BENCH-027" [ref=f4e4073]
+                      - 'cell "LAB-BENCH-027 Field: ORIG-BENCH-027" [ref=f4e4074]':
+                        - generic [ref=f4e4075]: LAB-BENCH-027
+                        - generic [ref=f4e4077]: "Field: ORIG-BENCH-027"
+                      - cell "pH_units" [ref=f4e4078]:
+                        - generic [ref=f4e4079]:
+                          - textbox "LAB-BENCH-027 determination" [ref=f4e4080]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4081]: pH_units
+                      - cell "Ready Pending" [ref=f4e4082]:
+                        - generic [ref=f4e4084]:
+                          - generic [ref=f4e4085]: Ready
+                          - generic [ref=f4e4089]: Pending
+                      - cell [ref=f4e4090]:
+                        - button "Inspect →" [ref=f4e4091]
+                    - row [ref=f4e4092] [cursor=pointer]:
+                      - cell [ref=f4e4093]:
+                        - checkbox "Select LAB-BENCH-028" [ref=f4e4094]
+                      - 'cell "LAB-BENCH-028 Field: ORIG-BENCH-028" [ref=f4e4095]':
+                        - generic [ref=f4e4096]: LAB-BENCH-028
+                        - generic [ref=f4e4098]: "Field: ORIG-BENCH-028"
+                      - cell "pH_units" [ref=f4e4099]:
+                        - generic [ref=f4e4100]:
+                          - textbox "LAB-BENCH-028 determination" [ref=f4e4101]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4102]: pH_units
+                      - cell "Ready Pending" [ref=f4e4103]:
+                        - generic [ref=f4e4105]:
+                          - generic [ref=f4e4106]: Ready
+                          - generic [ref=f4e4110]: Pending
+                      - cell [ref=f4e4111]:
+                        - button "Inspect →" [ref=f4e4112]
+                    - row [ref=f4e4113] [cursor=pointer]:
+                      - cell [ref=f4e4114]:
+                        - checkbox "Select LAB-BENCH-029" [ref=f4e4115]
+                      - 'cell "LAB-BENCH-029 Field: ORIG-BENCH-029" [ref=f4e4116]':
+                        - generic [ref=f4e4117]: LAB-BENCH-029
+                        - generic [ref=f4e4119]: "Field: ORIG-BENCH-029"
+                      - cell "pH_units" [ref=f4e4120]:
+                        - generic [ref=f4e4121]:
+                          - textbox "LAB-BENCH-029 determination" [ref=f4e4122]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4123]: pH_units
+                      - cell "Ready Pending" [ref=f4e4124]:
+                        - generic [ref=f4e4126]:
+                          - generic [ref=f4e4127]: Ready
+                          - generic [ref=f4e4131]: Pending
+                      - cell [ref=f4e4132]:
+                        - button "Inspect →" [ref=f4e4133]
+                    - row [ref=f4e4134] [cursor=pointer]:
+                      - cell [ref=f4e4135]:
+                        - checkbox "Select LAB-BENCH-030" [ref=f4e4136]
+                      - 'cell "LAB-BENCH-030 Field: ORIG-BENCH-030" [ref=f4e4137]':
+                        - generic [ref=f4e4138]: LAB-BENCH-030
+                        - generic [ref=f4e4140]: "Field: ORIG-BENCH-030"
+                      - cell "pH_units" [ref=f4e4141]:
+                        - generic [ref=f4e4142]:
+                          - textbox "LAB-BENCH-030 determination" [ref=f4e4143]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4144]: pH_units
+                      - cell "Ready Pending" [ref=f4e4145]:
+                        - generic [ref=f4e4147]:
+                          - generic [ref=f4e4148]: Ready
+                          - generic [ref=f4e4152]: Pending
+                      - cell [ref=f4e4153]:
+                        - button "Inspect →" [ref=f4e4154]
+                    - row [ref=f4e4155] [cursor=pointer]:
+                      - cell [ref=f4e4156]:
+                        - checkbox "Select LAB-BENCH-031" [ref=f4e4157]
+                      - 'cell "LAB-BENCH-031 Field: ORIG-BENCH-031" [ref=f4e4158]':
+                        - generic [ref=f4e4159]: LAB-BENCH-031
+                        - generic [ref=f4e4161]: "Field: ORIG-BENCH-031"
+                      - cell "pH_units" [ref=f4e4162]:
+                        - generic [ref=f4e4163]:
+                          - textbox "LAB-BENCH-031 determination" [ref=f4e4164]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4165]: pH_units
+                      - cell "Ready Pending" [ref=f4e4166]:
+                        - generic [ref=f4e4168]:
+                          - generic [ref=f4e4169]: Ready
+                          - generic [ref=f4e4173]: Pending
+                      - cell [ref=f4e4174]:
+                        - button "Inspect →" [ref=f4e4175]
+                    - row [ref=f4e4176] [cursor=pointer]:
+                      - cell [ref=f4e4177]:
+                        - checkbox "Select LAB-BENCH-032" [ref=f4e4178]
+                      - 'cell "LAB-BENCH-032 Field: ORIG-BENCH-032" [ref=f4e4179]':
+                        - generic [ref=f4e4180]: LAB-BENCH-032
+                        - generic [ref=f4e4182]: "Field: ORIG-BENCH-032"
+                      - cell "pH_units" [ref=f4e4183]:
+                        - generic [ref=f4e4184]:
+                          - textbox "LAB-BENCH-032 determination" [ref=f4e4185]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4186]: pH_units
+                      - cell "Ready Pending" [ref=f4e4187]:
+                        - generic [ref=f4e4189]:
+                          - generic [ref=f4e4190]: Ready
+                          - generic [ref=f4e4194]: Pending
+                      - cell [ref=f4e4195]:
+                        - button "Inspect →" [ref=f4e4196]
+                    - row [ref=f4e4197] [cursor=pointer]:
+                      - cell [ref=f4e4198]:
+                        - checkbox "Select LAB-BENCH-033" [ref=f4e4199]
+                      - 'cell "LAB-BENCH-033 Field: ORIG-BENCH-033" [ref=f4e4200]':
+                        - generic [ref=f4e4201]: LAB-BENCH-033
+                        - generic [ref=f4e4203]: "Field: ORIG-BENCH-033"
+                      - cell "pH_units" [ref=f4e4204]:
+                        - generic [ref=f4e4205]:
+                          - textbox "LAB-BENCH-033 determination" [ref=f4e4206]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4207]: pH_units
+                      - cell "Ready Pending" [ref=f4e4208]:
+                        - generic [ref=f4e4210]:
+                          - generic [ref=f4e4211]: Ready
+                          - generic [ref=f4e4215]: Pending
+                      - cell [ref=f4e4216]:
+                        - button "Inspect →" [ref=f4e4217]
+                    - row [ref=f4e4218] [cursor=pointer]:
+                      - cell [ref=f4e4219]:
+                        - checkbox "Select LAB-BENCH-034" [ref=f4e4220]
+                      - 'cell "LAB-BENCH-034 Field: ORIG-BENCH-034" [ref=f4e4221]':
+                        - generic [ref=f4e4222]: LAB-BENCH-034
+                        - generic [ref=f4e4224]: "Field: ORIG-BENCH-034"
+                      - cell "pH_units" [ref=f4e4225]:
+                        - generic [ref=f4e4226]:
+                          - textbox "LAB-BENCH-034 determination" [ref=f4e4227]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4228]: pH_units
+                      - cell "Ready Pending" [ref=f4e4229]:
+                        - generic [ref=f4e4231]:
+                          - generic [ref=f4e4232]: Ready
+                          - generic [ref=f4e4236]: Pending
+                      - cell [ref=f4e4237]:
+                        - button "Inspect →" [ref=f4e4238]
+                    - row [ref=f4e4239] [cursor=pointer]:
+                      - cell [ref=f4e4240]:
+                        - checkbox "Select LAB-BENCH-035" [ref=f4e4241]
+                      - 'cell "LAB-BENCH-035 Field: ORIG-BENCH-035" [ref=f4e4242]':
+                        - generic [ref=f4e4243]: LAB-BENCH-035
+                        - generic [ref=f4e4245]: "Field: ORIG-BENCH-035"
+                      - cell "pH_units" [ref=f4e4246]:
+                        - generic [ref=f4e4247]:
+                          - textbox "LAB-BENCH-035 determination" [ref=f4e4248]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4249]: pH_units
+                      - cell "Ready Pending" [ref=f4e4250]:
+                        - generic [ref=f4e4252]:
+                          - generic [ref=f4e4253]: Ready
+                          - generic [ref=f4e4257]: Pending
+                      - cell [ref=f4e4258]:
+                        - button "Inspect →" [ref=f4e4259]
+                    - row [ref=f4e4260] [cursor=pointer]:
+                      - cell [ref=f4e4261]:
+                        - checkbox "Select LAB-BENCH-036" [ref=f4e4262]
+                      - 'cell "LAB-BENCH-036 Field: ORIG-BENCH-036" [ref=f4e4263]':
+                        - generic [ref=f4e4264]: LAB-BENCH-036
+                        - generic [ref=f4e4266]: "Field: ORIG-BENCH-036"
+                      - cell "pH_units" [ref=f4e4267]:
+                        - generic [ref=f4e4268]:
+                          - textbox "LAB-BENCH-036 determination" [ref=f4e4269]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4270]: pH_units
+                      - cell "Ready Pending" [ref=f4e4271]:
+                        - generic [ref=f4e4273]:
+                          - generic [ref=f4e4274]: Ready
+                          - generic [ref=f4e4278]: Pending
+                      - cell [ref=f4e4279]:
+                        - button "Inspect →" [ref=f4e4280]
+                    - row [ref=f4e4281] [cursor=pointer]:
+                      - cell [ref=f4e4282]:
+                        - checkbox "Select LAB-BENCH-037" [ref=f4e4283]
+                      - 'cell "LAB-BENCH-037 Field: ORIG-BENCH-037" [ref=f4e4284]':
+                        - generic [ref=f4e4285]: LAB-BENCH-037
+                        - generic [ref=f4e4287]: "Field: ORIG-BENCH-037"
+                      - cell "pH_units" [ref=f4e4288]:
+                        - generic [ref=f4e4289]:
+                          - textbox "LAB-BENCH-037 determination" [ref=f4e4290]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4291]: pH_units
+                      - cell "Ready Pending" [ref=f4e4292]:
+                        - generic [ref=f4e4294]:
+                          - generic [ref=f4e4295]: Ready
+                          - generic [ref=f4e4299]: Pending
+                      - cell [ref=f4e4300]:
+                        - button "Inspect →" [ref=f4e4301]
+                    - row [ref=f4e4302] [cursor=pointer]:
+                      - cell [ref=f4e4303]:
+                        - checkbox "Select LAB-BENCH-038" [ref=f4e4304]
+                      - 'cell "LAB-BENCH-038 Field: ORIG-BENCH-038" [ref=f4e4305]':
+                        - generic [ref=f4e4306]: LAB-BENCH-038
+                        - generic [ref=f4e4308]: "Field: ORIG-BENCH-038"
+                      - cell "pH_units" [ref=f4e4309]:
+                        - generic [ref=f4e4310]:
+                          - textbox "LAB-BENCH-038 determination" [ref=f4e4311]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4312]: pH_units
+                      - cell "Ready Pending" [ref=f4e4313]:
+                        - generic [ref=f4e4315]:
+                          - generic [ref=f4e4316]: Ready
+                          - generic [ref=f4e4320]: Pending
+                      - cell [ref=f4e4321]:
+                        - button "Inspect →" [ref=f4e4322]
+                    - row [ref=f4e4323] [cursor=pointer]:
+                      - cell [ref=f4e4324]:
+                        - checkbox "Select LAB-BENCH-039" [ref=f4e4325]
+                      - 'cell "LAB-BENCH-039 Field: ORIG-BENCH-039" [ref=f4e4326]':
+                        - generic [ref=f4e4327]: LAB-BENCH-039
+                        - generic [ref=f4e4329]: "Field: ORIG-BENCH-039"
+                      - cell "pH_units" [ref=f4e4330]:
+                        - generic [ref=f4e4331]:
+                          - textbox "LAB-BENCH-039 determination" [ref=f4e4332]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4333]: pH_units
+                      - cell "Ready Pending" [ref=f4e4334]:
+                        - generic [ref=f4e4336]:
+                          - generic [ref=f4e4337]: Ready
+                          - generic [ref=f4e4341]: Pending
+                      - cell [ref=f4e4342]:
+                        - button "Inspect →" [ref=f4e4343]
+                    - row [ref=f4e4344] [cursor=pointer]:
+                      - cell [ref=f4e4345]:
+                        - checkbox "Select LAB-BENCH-040" [ref=f4e4346]
+                      - 'cell "LAB-BENCH-040 Field: ORIG-BENCH-040" [ref=f4e4347]':
+                        - generic [ref=f4e4348]: LAB-BENCH-040
+                        - generic [ref=f4e4350]: "Field: ORIG-BENCH-040"
+                      - cell "pH_units" [ref=f4e4351]:
+                        - generic [ref=f4e4352]:
+                          - textbox "LAB-BENCH-040 determination" [ref=f4e4353]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4354]: pH_units
+                      - cell "Ready Pending" [ref=f4e4355]:
+                        - generic [ref=f4e4357]:
+                          - generic [ref=f4e4358]: Ready
+                          - generic [ref=f4e4362]: Pending
+                      - cell [ref=f4e4363]:
+                        - button "Inspect →" [ref=f4e4364]
+                    - row [ref=f4e4365] [cursor=pointer]:
+                      - cell [ref=f4e4366]:
+                        - checkbox "Select LAB-BENCH-041" [ref=f4e4367]
+                      - 'cell "LAB-BENCH-041 Field: ORIG-BENCH-041" [ref=f4e4368]':
+                        - generic [ref=f4e4369]: LAB-BENCH-041
+                        - generic [ref=f4e4371]: "Field: ORIG-BENCH-041"
+                      - cell "pH_units" [ref=f4e4372]:
+                        - generic [ref=f4e4373]:
+                          - textbox "LAB-BENCH-041 determination" [ref=f4e4374]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4375]: pH_units
+                      - cell "Ready Pending" [ref=f4e4376]:
+                        - generic [ref=f4e4378]:
+                          - generic [ref=f4e4379]: Ready
+                          - generic [ref=f4e4383]: Pending
+                      - cell [ref=f4e4384]:
+                        - button "Inspect →" [ref=f4e4385]
+                    - row [ref=f4e4386] [cursor=pointer]:
+                      - cell [ref=f4e4387]:
+                        - checkbox "Select LAB-BENCH-042" [ref=f4e4388]
+                      - 'cell "LAB-BENCH-042 Field: ORIG-BENCH-042" [ref=f4e4389]':
+                        - generic [ref=f4e4390]: LAB-BENCH-042
+                        - generic [ref=f4e4392]: "Field: ORIG-BENCH-042"
+                      - cell "pH_units" [ref=f4e4393]:
+                        - generic [ref=f4e4394]:
+                          - textbox "LAB-BENCH-042 determination" [ref=f4e4395]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4396]: pH_units
+                      - cell "Ready Pending" [ref=f4e4397]:
+                        - generic [ref=f4e4399]:
+                          - generic [ref=f4e4400]: Ready
+                          - generic [ref=f4e4404]: Pending
+                      - cell [ref=f4e4405]:
+                        - button "Inspect →" [ref=f4e4406]
+                    - row [ref=f4e4407] [cursor=pointer]:
+                      - cell [ref=f4e4408]:
+                        - checkbox "Select LAB-BENCH-043" [ref=f4e4409]
+                      - 'cell "LAB-BENCH-043 Field: ORIG-BENCH-043" [ref=f4e4410]':
+                        - generic [ref=f4e4411]: LAB-BENCH-043
+                        - generic [ref=f4e4413]: "Field: ORIG-BENCH-043"
+                      - cell "pH_units" [ref=f4e4414]:
+                        - generic [ref=f4e4415]:
+                          - textbox "LAB-BENCH-043 determination" [ref=f4e4416]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4417]: pH_units
+                      - cell "Ready Pending" [ref=f4e4418]:
+                        - generic [ref=f4e4420]:
+                          - generic [ref=f4e4421]: Ready
+                          - generic [ref=f4e4425]: Pending
+                      - cell [ref=f4e4426]:
+                        - button "Inspect →" [ref=f4e4427]
+                    - row [ref=f4e4428] [cursor=pointer]:
+                      - cell [ref=f4e4429]:
+                        - checkbox "Select LAB-BENCH-044" [ref=f4e4430]
+                      - 'cell "LAB-BENCH-044 Field: ORIG-BENCH-044" [ref=f4e4431]':
+                        - generic [ref=f4e4432]: LAB-BENCH-044
+                        - generic [ref=f4e4434]: "Field: ORIG-BENCH-044"
+                      - cell "pH_units" [ref=f4e4435]:
+                        - generic [ref=f4e4436]:
+                          - textbox "LAB-BENCH-044 determination" [ref=f4e4437]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4438]: pH_units
+                      - cell "Ready Pending" [ref=f4e4439]:
+                        - generic [ref=f4e4441]:
+                          - generic [ref=f4e4442]: Ready
+                          - generic [ref=f4e4446]: Pending
+                      - cell [ref=f4e4447]:
+                        - button "Inspect →" [ref=f4e4448]
+                    - row [ref=f4e4449] [cursor=pointer]:
+                      - cell [ref=f4e4450]:
+                        - checkbox "Select LAB-BENCH-045" [ref=f4e4451]
+                      - 'cell "LAB-BENCH-045 Field: ORIG-BENCH-045" [ref=f4e4452]':
+                        - generic [ref=f4e4453]: LAB-BENCH-045
+                        - generic [ref=f4e4455]: "Field: ORIG-BENCH-045"
+                      - cell "pH_units" [ref=f4e4456]:
+                        - generic [ref=f4e4457]:
+                          - textbox "LAB-BENCH-045 determination" [ref=f4e4458]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4459]: pH_units
+                      - cell "Ready Pending" [ref=f4e4460]:
+                        - generic [ref=f4e4462]:
+                          - generic [ref=f4e4463]: Ready
+                          - generic [ref=f4e4467]: Pending
+                      - cell [ref=f4e4468]:
+                        - button "Inspect →" [ref=f4e4469]
+                    - row [ref=f4e4470] [cursor=pointer]:
+                      - cell [ref=f4e4471]:
+                        - checkbox "Select LAB-BENCH-046" [ref=f4e4472]
+                      - 'cell "LAB-BENCH-046 Field: ORIG-BENCH-046" [ref=f4e4473]':
+                        - generic [ref=f4e4474]: LAB-BENCH-046
+                        - generic [ref=f4e4476]: "Field: ORIG-BENCH-046"
+                      - cell "pH_units" [ref=f4e4477]:
+                        - generic [ref=f4e4478]:
+                          - textbox "LAB-BENCH-046 determination" [ref=f4e4479]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4480]: pH_units
+                      - cell "Ready Pending" [ref=f4e4481]:
+                        - generic [ref=f4e4483]:
+                          - generic [ref=f4e4484]: Ready
+                          - generic [ref=f4e4488]: Pending
+                      - cell [ref=f4e4489]:
+                        - button "Inspect →" [ref=f4e4490]
+                    - row [ref=f4e4491] [cursor=pointer]:
+                      - cell [ref=f4e4492]:
+                        - checkbox "Select LAB-BENCH-047" [ref=f4e4493]
+                      - 'cell "LAB-BENCH-047 Field: ORIG-BENCH-047" [ref=f4e4494]':
+                        - generic [ref=f4e4495]: LAB-BENCH-047
+                        - generic [ref=f4e4497]: "Field: ORIG-BENCH-047"
+                      - cell "pH_units" [ref=f4e4498]:
+                        - generic [ref=f4e4499]:
+                          - textbox "LAB-BENCH-047 determination" [ref=f4e4500]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4501]: pH_units
+                      - cell "Ready Pending" [ref=f4e4502]:
+                        - generic [ref=f4e4504]:
+                          - generic [ref=f4e4505]: Ready
+                          - generic [ref=f4e4509]: Pending
+                      - cell [ref=f4e4510]:
+                        - button "Inspect →" [ref=f4e4511]
+                    - row [ref=f4e4512] [cursor=pointer]:
+                      - cell [ref=f4e4513]:
+                        - checkbox "Select LAB-BENCH-048" [ref=f4e4514]
+                      - 'cell "LAB-BENCH-048 Field: ORIG-BENCH-048" [ref=f4e4515]':
+                        - generic [ref=f4e4516]: LAB-BENCH-048
+                        - generic [ref=f4e4518]: "Field: ORIG-BENCH-048"
+                      - cell "pH_units" [ref=f4e4519]:
+                        - generic [ref=f4e4520]:
+                          - textbox "LAB-BENCH-048 determination" [ref=f4e4521]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4522]: pH_units
+                      - cell "Ready Pending" [ref=f4e4523]:
+                        - generic [ref=f4e4525]:
+                          - generic [ref=f4e4526]: Ready
+                          - generic [ref=f4e4530]: Pending
+                      - cell [ref=f4e4531]:
+                        - button "Inspect →" [ref=f4e4532]
+                    - row [ref=f4e4533] [cursor=pointer]:
+                      - cell [ref=f4e4534]:
+                        - checkbox "Select LAB-BENCH-049" [ref=f4e4535]
+                      - 'cell "LAB-BENCH-049 Field: ORIG-BENCH-049" [ref=f4e4536]':
+                        - generic [ref=f4e4537]: LAB-BENCH-049
+                        - generic [ref=f4e4539]: "Field: ORIG-BENCH-049"
+                      - cell "pH_units" [ref=f4e4540]:
+                        - generic [ref=f4e4541]:
+                          - textbox "LAB-BENCH-049 determination" [ref=f4e4542]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4543]: pH_units
+                      - cell "Ready Pending" [ref=f4e4544]:
+                        - generic [ref=f4e4546]:
+                          - generic [ref=f4e4547]: Ready
+                          - generic [ref=f4e4551]: Pending
+                      - cell [ref=f4e4552]:
+                        - button "Inspect →" [ref=f4e4553]
+                    - row [ref=f4e4554] [cursor=pointer]:
+                      - cell [ref=f4e4555]:
+                        - checkbox "Select LAB-BENCH-050" [ref=f4e4556]
+                      - 'cell "LAB-BENCH-050 Field: ORIG-BENCH-050" [ref=f4e4557]':
+                        - generic [ref=f4e4558]: LAB-BENCH-050
+                        - generic [ref=f4e4560]: "Field: ORIG-BENCH-050"
+                      - cell "pH_units" [ref=f4e4561]:
+                        - generic [ref=f4e4562]:
+                          - textbox "LAB-BENCH-050 determination" [ref=f4e4563]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4564]: pH_units
+                      - cell "Ready Pending" [ref=f4e4565]:
+                        - generic [ref=f4e4567]:
+                          - generic [ref=f4e4568]: Ready
+                          - generic [ref=f4e4572]: Pending
+                      - cell [ref=f4e4573]:
+                        - button "Inspect →" [ref=f4e4574]
+                    - row [ref=f4e4575] [cursor=pointer]:
+                      - cell [ref=f4e4576]:
+                        - checkbox "Select LAB-BENCH-051" [ref=f4e4577]
+                      - 'cell "LAB-BENCH-051 Field: ORIG-BENCH-051" [ref=f4e4578]':
+                        - generic [ref=f4e4579]: LAB-BENCH-051
+                        - generic [ref=f4e4581]: "Field: ORIG-BENCH-051"
+                      - cell "pH_units" [ref=f4e4582]:
+                        - generic [ref=f4e4583]:
+                          - textbox "LAB-BENCH-051 determination" [ref=f4e4584]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4585]: pH_units
+                      - cell "Ready Pending" [ref=f4e4586]:
+                        - generic [ref=f4e4588]:
+                          - generic [ref=f4e4589]: Ready
+                          - generic [ref=f4e4593]: Pending
+                      - cell [ref=f4e4594]:
+                        - button "Inspect →" [ref=f4e4595]
+                    - row [ref=f4e4596] [cursor=pointer]:
+                      - cell [ref=f4e4597]:
+                        - checkbox "Select LAB-BENCH-052" [ref=f4e4598]
+                      - 'cell "LAB-BENCH-052 Field: ORIG-BENCH-052" [ref=f4e4599]':
+                        - generic [ref=f4e4600]: LAB-BENCH-052
+                        - generic [ref=f4e4602]: "Field: ORIG-BENCH-052"
+                      - cell "pH_units" [ref=f4e4603]:
+                        - generic [ref=f4e4604]:
+                          - textbox "LAB-BENCH-052 determination" [ref=f4e4605]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4606]: pH_units
+                      - cell "Ready Pending" [ref=f4e4607]:
+                        - generic [ref=f4e4609]:
+                          - generic [ref=f4e4610]: Ready
+                          - generic [ref=f4e4614]: Pending
+                      - cell [ref=f4e4615]:
+                        - button "Inspect →" [ref=f4e4616]
+                    - row [ref=f4e4617] [cursor=pointer]:
+                      - cell [ref=f4e4618]:
+                        - checkbox "Select LAB-BENCH-053" [ref=f4e4619]
+                      - 'cell "LAB-BENCH-053 Field: ORIG-BENCH-053" [ref=f4e4620]':
+                        - generic [ref=f4e4621]: LAB-BENCH-053
+                        - generic [ref=f4e4623]: "Field: ORIG-BENCH-053"
+                      - cell "pH_units" [ref=f4e4624]:
+                        - generic [ref=f4e4625]:
+                          - textbox "LAB-BENCH-053 determination" [ref=f4e4626]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4627]: pH_units
+                      - cell "Ready Pending" [ref=f4e4628]:
+                        - generic [ref=f4e4630]:
+                          - generic [ref=f4e4631]: Ready
+                          - generic [ref=f4e4635]: Pending
+                      - cell [ref=f4e4636]:
+                        - button "Inspect →" [ref=f4e4637]
+                    - row [ref=f4e4638] [cursor=pointer]:
+                      - cell [ref=f4e4639]:
+                        - checkbox "Select LAB-BENCH-054" [ref=f4e4640]
+                      - 'cell "LAB-BENCH-054 Field: ORIG-BENCH-054" [ref=f4e4641]':
+                        - generic [ref=f4e4642]: LAB-BENCH-054
+                        - generic [ref=f4e4644]: "Field: ORIG-BENCH-054"
+                      - cell "pH_units" [ref=f4e4645]:
+                        - generic [ref=f4e4646]:
+                          - textbox "LAB-BENCH-054 determination" [ref=f4e4647]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4648]: pH_units
+                      - cell "Ready Pending" [ref=f4e4649]:
+                        - generic [ref=f4e4651]:
+                          - generic [ref=f4e4652]: Ready
+                          - generic [ref=f4e4656]: Pending
+                      - cell [ref=f4e4657]:
+                        - button "Inspect →" [ref=f4e4658]
+                    - row [ref=f4e4659] [cursor=pointer]:
+                      - cell [ref=f4e4660]:
+                        - checkbox "Select LAB-BENCH-055" [ref=f4e4661]
+                      - 'cell "LAB-BENCH-055 Field: ORIG-BENCH-055" [ref=f4e4662]':
+                        - generic [ref=f4e4663]: LAB-BENCH-055
+                        - generic [ref=f4e4665]: "Field: ORIG-BENCH-055"
+                      - cell "pH_units" [ref=f4e4666]:
+                        - generic [ref=f4e4667]:
+                          - textbox "LAB-BENCH-055 determination" [ref=f4e4668]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4669]: pH_units
+                      - cell "Ready Pending" [ref=f4e4670]:
+                        - generic [ref=f4e4672]:
+                          - generic [ref=f4e4673]: Ready
+                          - generic [ref=f4e4677]: Pending
+                      - cell [ref=f4e4678]:
+                        - button "Inspect →" [ref=f4e4679]
+                    - row [ref=f4e4680] [cursor=pointer]:
+                      - cell [ref=f4e4681]:
+                        - checkbox "Select LAB-BENCH-056" [ref=f4e4682]
+                      - 'cell "LAB-BENCH-056 Field: ORIG-BENCH-056" [ref=f4e4683]':
+                        - generic [ref=f4e4684]: LAB-BENCH-056
+                        - generic [ref=f4e4686]: "Field: ORIG-BENCH-056"
+                      - cell "pH_units" [ref=f4e4687]:
+                        - generic [ref=f4e4688]:
+                          - textbox "LAB-BENCH-056 determination" [ref=f4e4689]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4690]: pH_units
+                      - cell "Ready Pending" [ref=f4e4691]:
+                        - generic [ref=f4e4693]:
+                          - generic [ref=f4e4694]: Ready
+                          - generic [ref=f4e4698]: Pending
+                      - cell [ref=f4e4699]:
+                        - button "Inspect →" [ref=f4e4700]
+                    - row [ref=f4e4701] [cursor=pointer]:
+                      - cell [ref=f4e4702]:
+                        - checkbox "Select LAB-BENCH-057" [ref=f4e4703]
+                      - 'cell "LAB-BENCH-057 Field: ORIG-BENCH-057" [ref=f4e4704]':
+                        - generic [ref=f4e4705]: LAB-BENCH-057
+                        - generic [ref=f4e4707]: "Field: ORIG-BENCH-057"
+                      - cell "pH_units" [ref=f4e4708]:
+                        - generic [ref=f4e4709]:
+                          - textbox "LAB-BENCH-057 determination" [ref=f4e4710]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4711]: pH_units
+                      - cell "Ready Pending" [ref=f4e4712]:
+                        - generic [ref=f4e4714]:
+                          - generic [ref=f4e4715]: Ready
+                          - generic [ref=f4e4719]: Pending
+                      - cell [ref=f4e4720]:
+                        - button "Inspect →" [ref=f4e4721]
+                    - row [ref=f4e4722] [cursor=pointer]:
+                      - cell [ref=f4e4723]:
+                        - checkbox "Select LAB-BENCH-058" [ref=f4e4724]
+                      - 'cell "LAB-BENCH-058 Field: ORIG-BENCH-058" [ref=f4e4725]':
+                        - generic [ref=f4e4726]: LAB-BENCH-058
+                        - generic [ref=f4e4728]: "Field: ORIG-BENCH-058"
+                      - cell "pH_units" [ref=f4e4729]:
+                        - generic [ref=f4e4730]:
+                          - textbox "LAB-BENCH-058 determination" [ref=f4e4731]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4732]: pH_units
+                      - cell "Ready Pending" [ref=f4e4733]:
+                        - generic [ref=f4e4735]:
+                          - generic [ref=f4e4736]: Ready
+                          - generic [ref=f4e4740]: Pending
+                      - cell [ref=f4e4741]:
+                        - button "Inspect →" [ref=f4e4742]
+                    - row [ref=f4e4743] [cursor=pointer]:
+                      - cell [ref=f4e4744]:
+                        - checkbox "Select LAB-BENCH-059" [ref=f4e4745]
+                      - 'cell "LAB-BENCH-059 Field: ORIG-BENCH-059" [ref=f4e4746]':
+                        - generic [ref=f4e4747]: LAB-BENCH-059
+                        - generic [ref=f4e4749]: "Field: ORIG-BENCH-059"
+                      - cell "pH_units" [ref=f4e4750]:
+                        - generic [ref=f4e4751]:
+                          - textbox "LAB-BENCH-059 determination" [ref=f4e4752]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4753]: pH_units
+                      - cell "Ready Pending" [ref=f4e4754]:
+                        - generic [ref=f4e4756]:
+                          - generic [ref=f4e4757]: Ready
+                          - generic [ref=f4e4761]: Pending
+                      - cell [ref=f4e4762]:
+                        - button "Inspect →" [ref=f4e4763]
+                    - row [ref=f4e4764] [cursor=pointer]:
+                      - cell [ref=f4e4765]:
+                        - checkbox "Select LAB-BENCH-060" [ref=f4e4766]
+                      - 'cell "LAB-BENCH-060 Field: ORIG-BENCH-060" [ref=f4e4767]':
+                        - generic [ref=f4e4768]: LAB-BENCH-060
+                        - generic [ref=f4e4770]: "Field: ORIG-BENCH-060"
+                      - cell "pH_units" [ref=f4e4771]:
+                        - generic [ref=f4e4772]:
+                          - textbox "LAB-BENCH-060 determination" [ref=f4e4773]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4774]: pH_units
+                      - cell "Ready Pending" [ref=f4e4775]:
+                        - generic [ref=f4e4777]:
+                          - generic [ref=f4e4778]: Ready
+                          - generic [ref=f4e4782]: Pending
+                      - cell [ref=f4e4783]:
+                        - button "Inspect →" [ref=f4e4784]
+                    - row [ref=f4e4785] [cursor=pointer]:
+                      - cell [ref=f4e4786]:
+                        - checkbox "Select LAB-BENCH-061" [ref=f4e4787]
+                      - 'cell "LAB-BENCH-061 Field: ORIG-BENCH-061" [ref=f4e4788]':
+                        - generic [ref=f4e4789]: LAB-BENCH-061
+                        - generic [ref=f4e4791]: "Field: ORIG-BENCH-061"
+                      - cell "pH_units" [ref=f4e4792]:
+                        - generic [ref=f4e4793]:
+                          - textbox "LAB-BENCH-061 determination" [ref=f4e4794]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4795]: pH_units
+                      - cell "Ready Pending" [ref=f4e4796]:
+                        - generic [ref=f4e4798]:
+                          - generic [ref=f4e4799]: Ready
+                          - generic [ref=f4e4803]: Pending
+                      - cell [ref=f4e4804]:
+                        - button "Inspect →" [ref=f4e4805]
+                    - row [ref=f4e4806] [cursor=pointer]:
+                      - cell [ref=f4e4807]:
+                        - checkbox "Select LAB-BENCH-062" [ref=f4e4808]
+                      - 'cell "LAB-BENCH-062 Field: ORIG-BENCH-062" [ref=f4e4809]':
+                        - generic [ref=f4e4810]: LAB-BENCH-062
+                        - generic [ref=f4e4812]: "Field: ORIG-BENCH-062"
+                      - cell "pH_units" [ref=f4e4813]:
+                        - generic [ref=f4e4814]:
+                          - textbox "LAB-BENCH-062 determination" [ref=f4e4815]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4816]: pH_units
+                      - cell "Ready Pending" [ref=f4e4817]:
+                        - generic [ref=f4e4819]:
+                          - generic [ref=f4e4820]: Ready
+                          - generic [ref=f4e4824]: Pending
+                      - cell [ref=f4e4825]:
+                        - button "Inspect →" [ref=f4e4826]
+                    - row [ref=f4e4827] [cursor=pointer]:
+                      - cell [ref=f4e4828]:
+                        - checkbox "Select LAB-BENCH-063" [ref=f4e4829]
+                      - 'cell "LAB-BENCH-063 Field: ORIG-BENCH-063" [ref=f4e4830]':
+                        - generic [ref=f4e4831]: LAB-BENCH-063
+                        - generic [ref=f4e4833]: "Field: ORIG-BENCH-063"
+                      - cell "pH_units" [ref=f4e4834]:
+                        - generic [ref=f4e4835]:
+                          - textbox "LAB-BENCH-063 determination" [ref=f4e4836]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4837]: pH_units
+                      - cell "Ready Pending" [ref=f4e4838]:
+                        - generic [ref=f4e4840]:
+                          - generic [ref=f4e4841]: Ready
+                          - generic [ref=f4e4845]: Pending
+                      - cell [ref=f4e4846]:
+                        - button "Inspect →" [ref=f4e4847]
+                    - row [ref=f4e4848] [cursor=pointer]:
+                      - cell [ref=f4e4849]:
+                        - checkbox "Select LAB-BENCH-064" [ref=f4e4850]
+                      - 'cell "LAB-BENCH-064 Field: ORIG-BENCH-064" [ref=f4e4851]':
+                        - generic [ref=f4e4852]: LAB-BENCH-064
+                        - generic [ref=f4e4854]: "Field: ORIG-BENCH-064"
+                      - cell "pH_units" [ref=f4e4855]:
+                        - generic [ref=f4e4856]:
+                          - textbox "LAB-BENCH-064 determination" [ref=f4e4857]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4858]: pH_units
+                      - cell "Ready Pending" [ref=f4e4859]:
+                        - generic [ref=f4e4861]:
+                          - generic [ref=f4e4862]: Ready
+                          - generic [ref=f4e4866]: Pending
+                      - cell [ref=f4e4867]:
+                        - button "Inspect →" [ref=f4e4868]
+                    - row [ref=f4e4869] [cursor=pointer]:
+                      - cell [ref=f4e4870]:
+                        - checkbox "Select LAB-BENCH-065" [ref=f4e4871]
+                      - 'cell "LAB-BENCH-065 Field: ORIG-BENCH-065" [ref=f4e4872]':
+                        - generic [ref=f4e4873]: LAB-BENCH-065
+                        - generic [ref=f4e4875]: "Field: ORIG-BENCH-065"
+                      - cell "pH_units" [ref=f4e4876]:
+                        - generic [ref=f4e4877]:
+                          - textbox "LAB-BENCH-065 determination" [ref=f4e4878]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4879]: pH_units
+                      - cell "Ready Pending" [ref=f4e4880]:
+                        - generic [ref=f4e4882]:
+                          - generic [ref=f4e4883]: Ready
+                          - generic [ref=f4e4887]: Pending
+                      - cell [ref=f4e4888]:
+                        - button "Inspect →" [ref=f4e4889]
+                    - row [ref=f4e4890] [cursor=pointer]:
+                      - cell [ref=f4e4891]:
+                        - checkbox "Select LAB-BENCH-066" [ref=f4e4892]
+                      - 'cell "LAB-BENCH-066 Field: ORIG-BENCH-066" [ref=f4e4893]':
+                        - generic [ref=f4e4894]: LAB-BENCH-066
+                        - generic [ref=f4e4896]: "Field: ORIG-BENCH-066"
+                      - cell "pH_units" [ref=f4e4897]:
+                        - generic [ref=f4e4898]:
+                          - textbox "LAB-BENCH-066 determination" [ref=f4e4899]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4900]: pH_units
+                      - cell "Ready Pending" [ref=f4e4901]:
+                        - generic [ref=f4e4903]:
+                          - generic [ref=f4e4904]: Ready
+                          - generic [ref=f4e4908]: Pending
+                      - cell [ref=f4e4909]:
+                        - button "Inspect →" [ref=f4e4910]
+                    - row [ref=f4e4911] [cursor=pointer]:
+                      - cell [ref=f4e4912]:
+                        - checkbox "Select LAB-BENCH-067" [ref=f4e4913]
+                      - 'cell "LAB-BENCH-067 Field: ORIG-BENCH-067" [ref=f4e4914]':
+                        - generic [ref=f4e4915]: LAB-BENCH-067
+                        - generic [ref=f4e4917]: "Field: ORIG-BENCH-067"
+                      - cell "pH_units" [ref=f4e4918]:
+                        - generic [ref=f4e4919]:
+                          - textbox "LAB-BENCH-067 determination" [ref=f4e4920]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4921]: pH_units
+                      - cell "Ready Pending" [ref=f4e4922]:
+                        - generic [ref=f4e4924]:
+                          - generic [ref=f4e4925]: Ready
+                          - generic [ref=f4e4929]: Pending
+                      - cell [ref=f4e4930]:
+                        - button "Inspect →" [ref=f4e4931]
+                    - row [ref=f4e4932] [cursor=pointer]:
+                      - cell [ref=f4e4933]:
+                        - checkbox "Select LAB-BENCH-068" [ref=f4e4934]
+                      - 'cell "LAB-BENCH-068 Field: ORIG-BENCH-068" [ref=f4e4935]':
+                        - generic [ref=f4e4936]: LAB-BENCH-068
+                        - generic [ref=f4e4938]: "Field: ORIG-BENCH-068"
+                      - cell "pH_units" [ref=f4e4939]:
+                        - generic [ref=f4e4940]:
+                          - textbox "LAB-BENCH-068 determination" [ref=f4e4941]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4942]: pH_units
+                      - cell "Ready Pending" [ref=f4e4943]:
+                        - generic [ref=f4e4945]:
+                          - generic [ref=f4e4946]: Ready
+                          - generic [ref=f4e4950]: Pending
+                      - cell [ref=f4e4951]:
+                        - button "Inspect →" [ref=f4e4952]
+                    - row [ref=f4e4953] [cursor=pointer]:
+                      - cell [ref=f4e4954]:
+                        - checkbox "Select LAB-BENCH-069" [ref=f4e4955]
+                      - 'cell "LAB-BENCH-069 Field: ORIG-BENCH-069" [ref=f4e4956]':
+                        - generic [ref=f4e4957]: LAB-BENCH-069
+                        - generic [ref=f4e4959]: "Field: ORIG-BENCH-069"
+                      - cell "pH_units" [ref=f4e4960]:
+                        - generic [ref=f4e4961]:
+                          - textbox "LAB-BENCH-069 determination" [ref=f4e4962]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4963]: pH_units
+                      - cell "Ready Pending" [ref=f4e4964]:
+                        - generic [ref=f4e4966]:
+                          - generic [ref=f4e4967]: Ready
+                          - generic [ref=f4e4971]: Pending
+                      - cell [ref=f4e4972]:
+                        - button "Inspect →" [ref=f4e4973]
+                    - row [ref=f4e4974] [cursor=pointer]:
+                      - cell [ref=f4e4975]:
+                        - checkbox "Select LAB-BENCH-070" [ref=f4e4976]
+                      - 'cell "LAB-BENCH-070 Field: ORIG-BENCH-070" [ref=f4e4977]':
+                        - generic [ref=f4e4978]: LAB-BENCH-070
+                        - generic [ref=f4e4980]: "Field: ORIG-BENCH-070"
+                      - cell "pH_units" [ref=f4e4981]:
+                        - generic [ref=f4e4982]:
+                          - textbox "LAB-BENCH-070 determination" [ref=f4e4983]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e4984]: pH_units
+                      - cell "Ready Pending" [ref=f4e4985]:
+                        - generic [ref=f4e4987]:
+                          - generic [ref=f4e4988]: Ready
+                          - generic [ref=f4e4992]: Pending
+                      - cell [ref=f4e4993]:
+                        - button "Inspect →" [ref=f4e4994]
+                    - row [ref=f4e4995] [cursor=pointer]:
+                      - cell [ref=f4e4996]:
+                        - checkbox "Select LAB-BENCH-071" [ref=f4e4997]
+                      - 'cell "LAB-BENCH-071 Field: ORIG-BENCH-071" [ref=f4e4998]':
+                        - generic [ref=f4e4999]: LAB-BENCH-071
+                        - generic [ref=f4e5001]: "Field: ORIG-BENCH-071"
+                      - cell "pH_units" [ref=f4e5002]:
+                        - generic [ref=f4e5003]:
+                          - textbox "LAB-BENCH-071 determination" [ref=f4e5004]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5005]: pH_units
+                      - cell "Ready Pending" [ref=f4e5006]:
+                        - generic [ref=f4e5008]:
+                          - generic [ref=f4e5009]: Ready
+                          - generic [ref=f4e5013]: Pending
+                      - cell [ref=f4e5014]:
+                        - button "Inspect →" [ref=f4e5015]
+                    - row [ref=f4e5016] [cursor=pointer]:
+                      - cell [ref=f4e5017]:
+                        - checkbox "Select LAB-BENCH-072" [ref=f4e5018]
+                      - 'cell "LAB-BENCH-072 Field: ORIG-BENCH-072" [ref=f4e5019]':
+                        - generic [ref=f4e5020]: LAB-BENCH-072
+                        - generic [ref=f4e5022]: "Field: ORIG-BENCH-072"
+                      - cell "pH_units" [ref=f4e5023]:
+                        - generic [ref=f4e5024]:
+                          - textbox "LAB-BENCH-072 determination" [ref=f4e5025]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5026]: pH_units
+                      - cell "Ready Pending" [ref=f4e5027]:
+                        - generic [ref=f4e5029]:
+                          - generic [ref=f4e5030]: Ready
+                          - generic [ref=f4e5034]: Pending
+                      - cell [ref=f4e5035]:
+                        - button "Inspect →" [ref=f4e5036]
+                    - row [ref=f4e5037] [cursor=pointer]:
+                      - cell [ref=f4e5038]:
+                        - checkbox "Select LAB-BENCH-073" [ref=f4e5039]
+                      - 'cell "LAB-BENCH-073 Field: ORIG-BENCH-073" [ref=f4e5040]':
+                        - generic [ref=f4e5041]: LAB-BENCH-073
+                        - generic [ref=f4e5043]: "Field: ORIG-BENCH-073"
+                      - cell "pH_units" [ref=f4e5044]:
+                        - generic [ref=f4e5045]:
+                          - textbox "LAB-BENCH-073 determination" [ref=f4e5046]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5047]: pH_units
+                      - cell "Ready Pending" [ref=f4e5048]:
+                        - generic [ref=f4e5050]:
+                          - generic [ref=f4e5051]: Ready
+                          - generic [ref=f4e5055]: Pending
+                      - cell [ref=f4e5056]:
+                        - button "Inspect →" [ref=f4e5057]
+                    - row [ref=f4e5058] [cursor=pointer]:
+                      - cell [ref=f4e5059]:
+                        - checkbox "Select LAB-BENCH-074" [ref=f4e5060]
+                      - 'cell "LAB-BENCH-074 Field: ORIG-BENCH-074" [ref=f4e5061]':
+                        - generic [ref=f4e5062]: LAB-BENCH-074
+                        - generic [ref=f4e5064]: "Field: ORIG-BENCH-074"
+                      - cell "pH_units" [ref=f4e5065]:
+                        - generic [ref=f4e5066]:
+                          - textbox "LAB-BENCH-074 determination" [ref=f4e5067]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5068]: pH_units
+                      - cell "Ready Pending" [ref=f4e5069]:
+                        - generic [ref=f4e5071]:
+                          - generic [ref=f4e5072]: Ready
+                          - generic [ref=f4e5076]: Pending
+                      - cell [ref=f4e5077]:
+                        - button "Inspect →" [ref=f4e5078]
+                    - row [ref=f4e5079] [cursor=pointer]:
+                      - cell [ref=f4e5080]:
+                        - checkbox "Select LAB-BENCH-075" [ref=f4e5081]
+                      - 'cell "LAB-BENCH-075 Field: ORIG-BENCH-075" [ref=f4e5082]':
+                        - generic [ref=f4e5083]: LAB-BENCH-075
+                        - generic [ref=f4e5085]: "Field: ORIG-BENCH-075"
+                      - cell "pH_units" [ref=f4e5086]:
+                        - generic [ref=f4e5087]:
+                          - textbox "LAB-BENCH-075 determination" [ref=f4e5088]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5089]: pH_units
+                      - cell "Ready Pending" [ref=f4e5090]:
+                        - generic [ref=f4e5092]:
+                          - generic [ref=f4e5093]: Ready
+                          - generic [ref=f4e5097]: Pending
+                      - cell [ref=f4e5098]:
+                        - button "Inspect →" [ref=f4e5099]
+                    - row [ref=f4e5100] [cursor=pointer]:
+                      - cell [ref=f4e5101]:
+                        - checkbox "Select LAB-BENCH-076" [ref=f4e5102]
+                      - 'cell "LAB-BENCH-076 Field: ORIG-BENCH-076" [ref=f4e5103]':
+                        - generic [ref=f4e5104]: LAB-BENCH-076
+                        - generic [ref=f4e5106]: "Field: ORIG-BENCH-076"
+                      - cell "pH_units" [ref=f4e5107]:
+                        - generic [ref=f4e5108]:
+                          - textbox "LAB-BENCH-076 determination" [ref=f4e5109]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5110]: pH_units
+                      - cell "Ready Pending" [ref=f4e5111]:
+                        - generic [ref=f4e5113]:
+                          - generic [ref=f4e5114]: Ready
+                          - generic [ref=f4e5118]: Pending
+                      - cell [ref=f4e5119]:
+                        - button "Inspect →" [ref=f4e5120]
+                    - row [ref=f4e5121] [cursor=pointer]:
+                      - cell [ref=f4e5122]:
+                        - checkbox "Select LAB-BENCH-077" [ref=f4e5123]
+                      - 'cell "LAB-BENCH-077 Field: ORIG-BENCH-077" [ref=f4e5124]':
+                        - generic [ref=f4e5125]: LAB-BENCH-077
+                        - generic [ref=f4e5127]: "Field: ORIG-BENCH-077"
+                      - cell "pH_units" [ref=f4e5128]:
+                        - generic [ref=f4e5129]:
+                          - textbox "LAB-BENCH-077 determination" [ref=f4e5130]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5131]: pH_units
+                      - cell "Ready Pending" [ref=f4e5132]:
+                        - generic [ref=f4e5134]:
+                          - generic [ref=f4e5135]: Ready
+                          - generic [ref=f4e5139]: Pending
+                      - cell [ref=f4e5140]:
+                        - button "Inspect →" [ref=f4e5141]
+                    - row [ref=f4e5142] [cursor=pointer]:
+                      - cell [ref=f4e5143]:
+                        - checkbox "Select LAB-BENCH-078" [ref=f4e5144]
+                      - 'cell "LAB-BENCH-078 Field: ORIG-BENCH-078" [ref=f4e5145]':
+                        - generic [ref=f4e5146]: LAB-BENCH-078
+                        - generic [ref=f4e5148]: "Field: ORIG-BENCH-078"
+                      - cell "pH_units" [ref=f4e5149]:
+                        - generic [ref=f4e5150]:
+                          - textbox "LAB-BENCH-078 determination" [ref=f4e5151]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5152]: pH_units
+                      - cell "Ready Pending" [ref=f4e5153]:
+                        - generic [ref=f4e5155]:
+                          - generic [ref=f4e5156]: Ready
+                          - generic [ref=f4e5160]: Pending
+                      - cell [ref=f4e5161]:
+                        - button "Inspect →" [ref=f4e5162]
+                    - row [ref=f4e5163] [cursor=pointer]:
+                      - cell [ref=f4e5164]:
+                        - checkbox "Select LAB-BENCH-079" [ref=f4e5165]
+                      - 'cell "LAB-BENCH-079 Field: ORIG-BENCH-079" [ref=f4e5166]':
+                        - generic [ref=f4e5167]: LAB-BENCH-079
+                        - generic [ref=f4e5169]: "Field: ORIG-BENCH-079"
+                      - cell "pH_units" [ref=f4e5170]:
+                        - generic [ref=f4e5171]:
+                          - textbox "LAB-BENCH-079 determination" [ref=f4e5172]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5173]: pH_units
+                      - cell "Ready Pending" [ref=f4e5174]:
+                        - generic [ref=f4e5176]:
+                          - generic [ref=f4e5177]: Ready
+                          - generic [ref=f4e5181]: Pending
+                      - cell [ref=f4e5182]:
+                        - button "Inspect →" [ref=f4e5183]
+                    - row [ref=f4e5184] [cursor=pointer]:
+                      - cell [ref=f4e5185]:
+                        - checkbox "Select LAB-BENCH-080" [ref=f4e5186]
+                      - 'cell "LAB-BENCH-080 Field: ORIG-BENCH-080" [ref=f4e5187]':
+                        - generic [ref=f4e5188]: LAB-BENCH-080
+                        - generic [ref=f4e5190]: "Field: ORIG-BENCH-080"
+                      - cell "pH_units" [ref=f4e5191]:
+                        - generic [ref=f4e5192]:
+                          - textbox "LAB-BENCH-080 determination" [ref=f4e5193]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5194]: pH_units
+                      - cell "Ready Pending" [ref=f4e5195]:
+                        - generic [ref=f4e5197]:
+                          - generic [ref=f4e5198]: Ready
+                          - generic [ref=f4e5202]: Pending
+                      - cell [ref=f4e5203]:
+                        - button "Inspect →" [ref=f4e5204]
+                    - row [ref=f4e5205] [cursor=pointer]:
+                      - cell [ref=f4e5206]:
+                        - checkbox "Select LAB-BENCH-081" [ref=f4e5207]
+                      - 'cell "LAB-BENCH-081 Field: ORIG-BENCH-081" [ref=f4e5208]':
+                        - generic [ref=f4e5209]: LAB-BENCH-081
+                        - generic [ref=f4e5211]: "Field: ORIG-BENCH-081"
+                      - cell "pH_units" [ref=f4e5212]:
+                        - generic [ref=f4e5213]:
+                          - textbox "LAB-BENCH-081 determination" [ref=f4e5214]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5215]: pH_units
+                      - cell "Ready Pending" [ref=f4e5216]:
+                        - generic [ref=f4e5218]:
+                          - generic [ref=f4e5219]: Ready
+                          - generic [ref=f4e5223]: Pending
+                      - cell [ref=f4e5224]:
+                        - button "Inspect →" [ref=f4e5225]
+                    - row [ref=f4e5226] [cursor=pointer]:
+                      - cell [ref=f4e5227]:
+                        - checkbox "Select LAB-BENCH-082" [ref=f4e5228]
+                      - 'cell "LAB-BENCH-082 Field: ORIG-BENCH-082" [ref=f4e5229]':
+                        - generic [ref=f4e5230]: LAB-BENCH-082
+                        - generic [ref=f4e5232]: "Field: ORIG-BENCH-082"
+                      - cell "pH_units" [ref=f4e5233]:
+                        - generic [ref=f4e5234]:
+                          - textbox "LAB-BENCH-082 determination" [ref=f4e5235]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5236]: pH_units
+                      - cell "Ready Pending" [ref=f4e5237]:
+                        - generic [ref=f4e5239]:
+                          - generic [ref=f4e5240]: Ready
+                          - generic [ref=f4e5244]: Pending
+                      - cell [ref=f4e5245]:
+                        - button "Inspect →" [ref=f4e5246]
+                    - row [ref=f4e5247] [cursor=pointer]:
+                      - cell [ref=f4e5248]:
+                        - checkbox "Select LAB-BENCH-083" [ref=f4e5249]
+                      - 'cell "LAB-BENCH-083 Field: ORIG-BENCH-083" [ref=f4e5250]':
+                        - generic [ref=f4e5251]: LAB-BENCH-083
+                        - generic [ref=f4e5253]: "Field: ORIG-BENCH-083"
+                      - cell "pH_units" [ref=f4e5254]:
+                        - generic [ref=f4e5255]:
+                          - textbox "LAB-BENCH-083 determination" [ref=f4e5256]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5257]: pH_units
+                      - cell "Ready Pending" [ref=f4e5258]:
+                        - generic [ref=f4e5260]:
+                          - generic [ref=f4e5261]: Ready
+                          - generic [ref=f4e5265]: Pending
+                      - cell [ref=f4e5266]:
+                        - button "Inspect →" [ref=f4e5267]
+                    - row [ref=f4e5268] [cursor=pointer]:
+                      - cell [ref=f4e5269]:
+                        - checkbox "Select LAB-BENCH-084" [ref=f4e5270]
+                      - 'cell "LAB-BENCH-084 Field: ORIG-BENCH-084" [ref=f4e5271]':
+                        - generic [ref=f4e5272]: LAB-BENCH-084
+                        - generic [ref=f4e5274]: "Field: ORIG-BENCH-084"
+                      - cell "pH_units" [ref=f4e5275]:
+                        - generic [ref=f4e5276]:
+                          - textbox "LAB-BENCH-084 determination" [ref=f4e5277]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5278]: pH_units
+                      - cell "Ready Pending" [ref=f4e5279]:
+                        - generic [ref=f4e5281]:
+                          - generic [ref=f4e5282]: Ready
+                          - generic [ref=f4e5286]: Pending
+                      - cell [ref=f4e5287]:
+                        - button "Inspect →" [ref=f4e5288]
+                    - row [ref=f4e5289] [cursor=pointer]:
+                      - cell [ref=f4e5290]:
+                        - checkbox "Select LAB-BENCH-085" [ref=f4e5291]
+                      - 'cell "LAB-BENCH-085 Field: ORIG-BENCH-085" [ref=f4e5292]':
+                        - generic [ref=f4e5293]: LAB-BENCH-085
+                        - generic [ref=f4e5295]: "Field: ORIG-BENCH-085"
+                      - cell "pH_units" [ref=f4e5296]:
+                        - generic [ref=f4e5297]:
+                          - textbox "LAB-BENCH-085 determination" [ref=f4e5298]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5299]: pH_units
+                      - cell "Ready Pending" [ref=f4e5300]:
+                        - generic [ref=f4e5302]:
+                          - generic [ref=f4e5303]: Ready
+                          - generic [ref=f4e5307]: Pending
+                      - cell [ref=f4e5308]:
+                        - button "Inspect →" [ref=f4e5309]
+                    - row [ref=f4e5310] [cursor=pointer]:
+                      - cell [ref=f4e5311]:
+                        - checkbox "Select LAB-BENCH-086" [ref=f4e5312]
+                      - 'cell "LAB-BENCH-086 Field: ORIG-BENCH-086" [ref=f4e5313]':
+                        - generic [ref=f4e5314]: LAB-BENCH-086
+                        - generic [ref=f4e5316]: "Field: ORIG-BENCH-086"
+                      - cell "pH_units" [ref=f4e5317]:
+                        - generic [ref=f4e5318]:
+                          - textbox "LAB-BENCH-086 determination" [ref=f4e5319]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5320]: pH_units
+                      - cell "Ready Pending" [ref=f4e5321]:
+                        - generic [ref=f4e5323]:
+                          - generic [ref=f4e5324]: Ready
+                          - generic [ref=f4e5328]: Pending
+                      - cell [ref=f4e5329]:
+                        - button "Inspect →" [ref=f4e5330]
+                    - row [ref=f4e5331] [cursor=pointer]:
+                      - cell [ref=f4e5332]:
+                        - checkbox "Select LAB-BENCH-087" [ref=f4e5333]
+                      - 'cell "LAB-BENCH-087 Field: ORIG-BENCH-087" [ref=f4e5334]':
+                        - generic [ref=f4e5335]: LAB-BENCH-087
+                        - generic [ref=f4e5337]: "Field: ORIG-BENCH-087"
+                      - cell "pH_units" [ref=f4e5338]:
+                        - generic [ref=f4e5339]:
+                          - textbox "LAB-BENCH-087 determination" [ref=f4e5340]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5341]: pH_units
+                      - cell "Ready Pending" [ref=f4e5342]:
+                        - generic [ref=f4e5344]:
+                          - generic [ref=f4e5345]: Ready
+                          - generic [ref=f4e5349]: Pending
+                      - cell [ref=f4e5350]:
+                        - button "Inspect →" [ref=f4e5351]
+                    - row [ref=f4e5352] [cursor=pointer]:
+                      - cell [ref=f4e5353]:
+                        - checkbox "Select LAB-BENCH-088" [ref=f4e5354]
+                      - 'cell "LAB-BENCH-088 Field: ORIG-BENCH-088" [ref=f4e5355]':
+                        - generic [ref=f4e5356]: LAB-BENCH-088
+                        - generic [ref=f4e5358]: "Field: ORIG-BENCH-088"
+                      - cell "pH_units" [ref=f4e5359]:
+                        - generic [ref=f4e5360]:
+                          - textbox "LAB-BENCH-088 determination" [ref=f4e5361]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5362]: pH_units
+                      - cell "Ready Pending" [ref=f4e5363]:
+                        - generic [ref=f4e5365]:
+                          - generic [ref=f4e5366]: Ready
+                          - generic [ref=f4e5370]: Pending
+                      - cell [ref=f4e5371]:
+                        - button "Inspect →" [ref=f4e5372]
+                    - row [ref=f4e5373] [cursor=pointer]:
+                      - cell [ref=f4e5374]:
+                        - checkbox "Select LAB-BENCH-089" [ref=f4e5375]
+                      - 'cell "LAB-BENCH-089 Field: ORIG-BENCH-089" [ref=f4e5376]':
+                        - generic [ref=f4e5377]: LAB-BENCH-089
+                        - generic [ref=f4e5379]: "Field: ORIG-BENCH-089"
+                      - cell "pH_units" [ref=f4e5380]:
+                        - generic [ref=f4e5381]:
+                          - textbox "LAB-BENCH-089 determination" [ref=f4e5382]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5383]: pH_units
+                      - cell "Ready Pending" [ref=f4e5384]:
+                        - generic [ref=f4e5386]:
+                          - generic [ref=f4e5387]: Ready
+                          - generic [ref=f4e5391]: Pending
+                      - cell [ref=f4e5392]:
+                        - button "Inspect →" [ref=f4e5393]
+                    - row [ref=f4e5394] [cursor=pointer]:
+                      - cell [ref=f4e5395]:
+                        - checkbox "Select LAB-BENCH-090" [ref=f4e5396]
+                      - 'cell "LAB-BENCH-090 Field: ORIG-BENCH-090" [ref=f4e5397]':
+                        - generic [ref=f4e5398]: LAB-BENCH-090
+                        - generic [ref=f4e5400]: "Field: ORIG-BENCH-090"
+                      - cell "pH_units" [ref=f4e5401]:
+                        - generic [ref=f4e5402]:
+                          - textbox "LAB-BENCH-090 determination" [ref=f4e5403]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5404]: pH_units
+                      - cell "Ready Pending" [ref=f4e5405]:
+                        - generic [ref=f4e5407]:
+                          - generic [ref=f4e5408]: Ready
+                          - generic [ref=f4e5412]: Pending
+                      - cell [ref=f4e5413]:
+                        - button "Inspect →" [ref=f4e5414]
+                    - row [ref=f4e5415] [cursor=pointer]:
+                      - cell [ref=f4e5416]:
+                        - checkbox "Select LAB-BENCH-091" [ref=f4e5417]
+                      - 'cell "LAB-BENCH-091 Field: ORIG-BENCH-091" [ref=f4e5418]':
+                        - generic [ref=f4e5419]: LAB-BENCH-091
+                        - generic [ref=f4e5421]: "Field: ORIG-BENCH-091"
+                      - cell "pH_units" [ref=f4e5422]:
+                        - generic [ref=f4e5423]:
+                          - textbox "LAB-BENCH-091 determination" [ref=f4e5424]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5425]: pH_units
+                      - cell "Ready Pending" [ref=f4e5426]:
+                        - generic [ref=f4e5428]:
+                          - generic [ref=f4e5429]: Ready
+                          - generic [ref=f4e5433]: Pending
+                      - cell [ref=f4e5434]:
+                        - button "Inspect →" [ref=f4e5435]
+                    - row [ref=f4e5436] [cursor=pointer]:
+                      - cell [ref=f4e5437]:
+                        - checkbox "Select LAB-BENCH-092" [ref=f4e5438]
+                      - 'cell "LAB-BENCH-092 Field: ORIG-BENCH-092" [ref=f4e5439]':
+                        - generic [ref=f4e5440]: LAB-BENCH-092
+                        - generic [ref=f4e5442]: "Field: ORIG-BENCH-092"
+                      - cell "pH_units" [ref=f4e5443]:
+                        - generic [ref=f4e5444]:
+                          - textbox "LAB-BENCH-092 determination" [ref=f4e5445]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5446]: pH_units
+                      - cell "Ready Pending" [ref=f4e5447]:
+                        - generic [ref=f4e5449]:
+                          - generic [ref=f4e5450]: Ready
+                          - generic [ref=f4e5454]: Pending
+                      - cell [ref=f4e5455]:
+                        - button "Inspect →" [ref=f4e5456]
+                    - row [ref=f4e5457] [cursor=pointer]:
+                      - cell [ref=f4e5458]:
+                        - checkbox "Select LAB-BENCH-093" [ref=f4e5459]
+                      - 'cell "LAB-BENCH-093 Field: ORIG-BENCH-093" [ref=f4e5460]':
+                        - generic [ref=f4e5461]: LAB-BENCH-093
+                        - generic [ref=f4e5463]: "Field: ORIG-BENCH-093"
+                      - cell "pH_units" [ref=f4e5464]:
+                        - generic [ref=f4e5465]:
+                          - textbox "LAB-BENCH-093 determination" [ref=f4e5466]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5467]: pH_units
+                      - cell "Ready Pending" [ref=f4e5468]:
+                        - generic [ref=f4e5470]:
+                          - generic [ref=f4e5471]: Ready
+                          - generic [ref=f4e5475]: Pending
+                      - cell [ref=f4e5476]:
+                        - button "Inspect →" [ref=f4e5477]
+                    - row [ref=f4e5478] [cursor=pointer]:
+                      - cell [ref=f4e5479]:
+                        - checkbox "Select LAB-BENCH-094" [ref=f4e5480]
+                      - 'cell "LAB-BENCH-094 Field: ORIG-BENCH-094" [ref=f4e5481]':
+                        - generic [ref=f4e5482]: LAB-BENCH-094
+                        - generic [ref=f4e5484]: "Field: ORIG-BENCH-094"
+                      - cell "pH_units" [ref=f4e5485]:
+                        - generic [ref=f4e5486]:
+                          - textbox "LAB-BENCH-094 determination" [ref=f4e5487]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5488]: pH_units
+                      - cell "Ready Pending" [ref=f4e5489]:
+                        - generic [ref=f4e5491]:
+                          - generic [ref=f4e5492]: Ready
+                          - generic [ref=f4e5496]: Pending
+                      - cell [ref=f4e5497]:
+                        - button "Inspect →" [ref=f4e5498]
+                    - row [ref=f4e5499] [cursor=pointer]:
+                      - cell [ref=f4e5500]:
+                        - checkbox "Select LAB-BENCH-095" [ref=f4e5501]
+                      - 'cell "LAB-BENCH-095 Field: ORIG-BENCH-095" [ref=f4e5502]':
+                        - generic [ref=f4e5503]: LAB-BENCH-095
+                        - generic [ref=f4e5505]: "Field: ORIG-BENCH-095"
+                      - cell "pH_units" [ref=f4e5506]:
+                        - generic [ref=f4e5507]:
+                          - textbox "LAB-BENCH-095 determination" [ref=f4e5508]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5509]: pH_units
+                      - cell "Ready Pending" [ref=f4e5510]:
+                        - generic [ref=f4e5512]:
+                          - generic [ref=f4e5513]: Ready
+                          - generic [ref=f4e5517]: Pending
+                      - cell [ref=f4e5518]:
+                        - button "Inspect →" [ref=f4e5519]
+                    - row [ref=f4e5520] [cursor=pointer]:
+                      - cell [ref=f4e5521]:
+                        - checkbox "Select LAB-BENCH-096" [ref=f4e5522]
+                      - 'cell "LAB-BENCH-096 Field: ORIG-BENCH-096" [ref=f4e5523]':
+                        - generic [ref=f4e5524]: LAB-BENCH-096
+                        - generic [ref=f4e5526]: "Field: ORIG-BENCH-096"
+                      - cell "pH_units" [ref=f4e5527]:
+                        - generic [ref=f4e5528]:
+                          - textbox "LAB-BENCH-096 determination" [ref=f4e5529]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5530]: pH_units
+                      - cell "Ready Pending" [ref=f4e5531]:
+                        - generic [ref=f4e5533]:
+                          - generic [ref=f4e5534]: Ready
+                          - generic [ref=f4e5538]: Pending
+                      - cell [ref=f4e5539]:
+                        - button "Inspect →" [ref=f4e5540]
+                    - row [ref=f4e5541] [cursor=pointer]:
+                      - cell [ref=f4e5542]:
+                        - checkbox "Select LAB-BENCH-097" [ref=f4e5543]
+                      - 'cell "LAB-BENCH-097 Field: ORIG-BENCH-097" [ref=f4e5544]':
+                        - generic [ref=f4e5545]: LAB-BENCH-097
+                        - generic [ref=f4e5547]: "Field: ORIG-BENCH-097"
+                      - cell "pH_units" [ref=f4e5548]:
+                        - generic [ref=f4e5549]:
+                          - textbox "LAB-BENCH-097 determination" [ref=f4e5550]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5551]: pH_units
+                      - cell "Ready Pending" [ref=f4e5552]:
+                        - generic [ref=f4e5554]:
+                          - generic [ref=f4e5555]: Ready
+                          - generic [ref=f4e5559]: Pending
+                      - cell [ref=f4e5560]:
+                        - button "Inspect →" [ref=f4e5561]
+                    - row [ref=f4e5562] [cursor=pointer]:
+                      - cell [ref=f4e5563]:
+                        - checkbox "Select LAB-BENCH-098" [ref=f4e5564]
+                      - 'cell "LAB-BENCH-098 Field: ORIG-BENCH-098" [ref=f4e5565]':
+                        - generic [ref=f4e5566]: LAB-BENCH-098
+                        - generic [ref=f4e5568]: "Field: ORIG-BENCH-098"
+                      - cell "pH_units" [ref=f4e5569]:
+                        - generic [ref=f4e5570]:
+                          - textbox "LAB-BENCH-098 determination" [ref=f4e5571]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5572]: pH_units
+                      - cell "Ready Pending" [ref=f4e5573]:
+                        - generic [ref=f4e5575]:
+                          - generic [ref=f4e5576]: Ready
+                          - generic [ref=f4e5580]: Pending
+                      - cell [ref=f4e5581]:
+                        - button "Inspect →" [ref=f4e5582]
+                    - row [ref=f4e5583] [cursor=pointer]:
+                      - cell [ref=f4e5584]:
+                        - checkbox "Select LAB-BENCH-099" [ref=f4e5585]
+                      - 'cell "LAB-BENCH-099 Field: ORIG-BENCH-099" [ref=f4e5586]':
+                        - generic [ref=f4e5587]: LAB-BENCH-099
+                        - generic [ref=f4e5589]: "Field: ORIG-BENCH-099"
+                      - cell "pH_units" [ref=f4e5590]:
+                        - generic [ref=f4e5591]:
+                          - textbox "LAB-BENCH-099 determination" [ref=f4e5592]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5593]: pH_units
+                      - cell "Ready Pending" [ref=f4e5594]:
+                        - generic [ref=f4e5596]:
+                          - generic [ref=f4e5597]: Ready
+                          - generic [ref=f4e5601]: Pending
+                      - cell [ref=f4e5602]:
+                        - button "Inspect →" [ref=f4e5603]
+                    - row [ref=f4e5604] [cursor=pointer]:
+                      - cell [ref=f4e5605]:
+                        - checkbox "Select LAB-BENCH-100" [ref=f4e5606]
+                      - 'cell "LAB-BENCH-100 Field: ORIG-BENCH-100" [ref=f4e5607]':
+                        - generic [ref=f4e5608]: LAB-BENCH-100
+                        - generic [ref=f4e5610]: "Field: ORIG-BENCH-100"
+                      - cell "pH_units" [ref=f4e5611]:
+                        - generic [ref=f4e5612]:
+                          - textbox "LAB-BENCH-100 determination" [ref=f4e5613]:
+                            - /placeholder: "0.00"
+                          - generic [ref=f4e5614]: pH_units
+                      - cell "Ready Pending" [ref=f4e5615]:
+                        - generic [ref=f4e5617]:
+                          - generic [ref=f4e5618]: Ready
+                          - generic [ref=f4e5622]: Pending
+                      - cell [ref=f4e5623]:
+                        - button "Inspect →" [ref=f4e5624]
+                - generic [ref=f4e5625]:
+                  - generic [ref=f4e5626]:
+                    - strong [ref=f4e5627]: "0"
+                    - text: selected · Press Enter to advance to next row
+                  - button "Review Completion (0)" [disabled] [ref=f4e5628]
+              - complementary [ref=f4e5632]:
+                - generic [ref=f4e5633]:
+                  - generic [ref=f4e5634]: Selected Sample
+                  - generic [ref=f4e5635]: LAB-BENCH-002
+                  - paragraph [ref=f4e5637]: "Field ID: ORIG-BENCH-002"
+                  - paragraph [ref=f4e5638]: Soil pH in water
+                - generic [ref=f4e5639]:
+                  - generic [ref=f4e5640]: Execution Readiness
+                  - generic [ref=f4e5641]: Ready to Record
+                - generic [ref=f4e5646]:
+                  - generic [ref=f4e5647]: Prerequisite Trail
+                  - generic [ref=f4e5648]:
+                    - generic [ref=f4e5649]:
+                      - generic [ref=f4e5650]: "Reception Intake:"
+                      - generic [ref=f4e5651]: ✓ Accepted
+                    - generic [ref=f4e5652]:
+                      - generic [ref=f4e5653]: "Drying Gate:"
+                      - generic [ref=f4e5654]: ✓ Completed
+                    - generic [ref=f4e5655]:
+                      - generic [ref=f4e5656]: "Preparation Gate:"
+                      - generic [ref=f4e5657]: ✓ Completed
+                - generic [ref=f4e5658]:
+                  - generic [ref=f4e5659]: Determination Identity
+                  - generic [ref=f4e5660]:
+                    - generic [ref=f4e5661]: Result Basis
+                    - combobox [ref=f4e5662]:
+                      - option "Air-dry (standard)" [selected]
+                      - option "Oven-dry (105°C moisture-corrected)"
+                      - option "Field-moist"
+                  - generic [ref=f4e5663]:
+                    - generic [ref=f4e5664]: Replicate Determination
+                    - combobox [ref=f4e5665]:
+                      - option "Replicate 1 (Primary)" [selected]
+                      - option "Replicate 2 (Quality duplicate)"
+                      - option "Replicate 3 (Triplicate)"
+                  - generic [ref=f4e5666]:
+                    - generic [ref=f4e5667]: Instrument Qualification
+                    - combobox [disabled] [ref=f4e5668]:
+                      - option "-- Select Instrument --" [selected]
+        - generic [ref=f4e355]:
+          - generic [ref=f4e356]:
+            - heading "Messages & Alerts" [level=2] [ref=f4e358]
+            - button "Close drawer" [ref=f4e359] [cursor=pointer]
+          - generic [ref=f4e363]:
+            - button "Notifications 1" [ref=f4e364] [cursor=pointer]:
+              - generic [ref=f4e368]: Notifications
+              - generic [ref=f4e369]: "1"
+            - button "Chats" [ref=f4e370] [cursor=pointer]
+          - generic [ref=f4e374]:
+            - generic [ref=f4e375]:
+              - button "Mark all read" [ref=f4e376] [cursor=pointer]
+              - button "Clear All" [ref=f4e377] [cursor=pointer]
+            - generic [ref=f4e384] [cursor=pointer]:
+              - heading "✓ Work Approved" [level=4] [ref=f4e386]
+              - paragraph [ref=f4e388]: PH_H2O for sample LAB-pending
+              - generic [ref=f4e389]:
+                - generic [ref=f4e390]: 9m
+                - generic [ref=f4e391]: View
+          - button "Open Full Messaging Center" [ref=f4e397] [cursor=pointer]
+      - generic [ref=f4e404]:
+        - generic [ref=f4e405]:
+          - generic [ref=f4e406]: LIMS
+          - generic [ref=f4e407]: •
+          - generic [ref=f4e408]: Laboratory Information Management System
+        - generic [ref=f4e409]:
+          - link "About SoilFER" [ref=f4e410] [cursor=pointer]:
+            - /url: /about
+          - generic [ref=f4e413]: •
+          - link "Tech Stack & Releases" [ref=f4e414] [cursor=pointer]:
+            - /url: /techstack
+        - generic [ref=f4e418]:
+          - generic [ref=f4e419]: © 2026
+          - generic [ref=f4e420]: •
+          - generic [ref=f4e421]: Built with care

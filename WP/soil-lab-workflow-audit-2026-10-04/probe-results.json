@@ -1,0 +1,249 @@
+{
+  "date": "2026-10-04",
+  "commit": "878e894472708076228f590e58bd35ba2a8ecbfa",
+  "scope": "Synthetic local fixtures only. DDL read from local dev DB; no source data copied. Not production or full lab UAT.",
+  "checks": [
+    {
+      "id": "P01",
+      "description": "RACK_40 requires two duplicate positions; submit only one duplicate",
+      "observed": {
+        "blanks": [
+          {
+            "id": "BLK-1791072295789",
+            "label": "Method Blank",
+            "type": "BLANK",
+            "value": 0.02,
+            "maxAllowed": 0.05,
+            "status": "PASS",
+            "details": "Blank within acceptable threshold (≤ 0.05)"
+          }
+        ],
+        "duplicates": [
+          {
+            "id": "DUP-1791072295789",
+            "label": "Analytical Duplicate",
+            "type": "DUPLICATE",
+            "value1": 6.85,
+            "value2": 6.87,
+            "rpd": 0.29,
+            "maxRpd": 10,
+            "status": "PASS",
+            "details": "RPD 0.3% ≤ 10% (Acceptable)"
+          }
+        ],
+        "controls": [
+          {
+            "id": "CRM-1791072295789",
+            "label": "Certified Reference Material",
+            "type": "CONTROL",
+            "expected": 7,
+            "measured": 7.03,
+            "recoveryPct": 100.43,
+            "minRecovery": 90,
+            "maxRecovery": 110,
+            "status": "PASS",
+            "details": "Recovery 100.4% within [90%, 110%]"
+          }
+        ],
+        "summary": {
+          "totalQcSamples": 3,
+          "passed": 3,
+          "failed": 0,
+          "missingRequired": [],
+          "incompleteReason": null,
+          "evaluatedAt": "2026-10-04T00:04:55.789Z"
+        },
+        "overallStatus": "QC_PASS"
+      },
+      "assessment": "Expect incomplete; current evaluator passes"
+    },
+    {
+      "id": "P02",
+      "description": "Duplicate values +1 and -1 have zero mean",
+      "observed": {
+        "id": "DUP-1791072295789",
+        "label": "Analytical Duplicate",
+        "type": "DUPLICATE",
+        "value1": 1,
+        "value2": -1,
+        "rpd": 0,
+        "maxRpd": 10,
+        "status": "PASS",
+        "details": "RPD 0.0% ≤ 10% (Acceptable)"
+      },
+      "assessment": "Expect invalid/not evaluable; current evaluator passes with RPD zero"
+    },
+    {
+      "id": "P03",
+      "description": "QC screen uses parseFloat while bench supports decimal comma",
+      "observed": {
+        "qc": 6,
+        "bench": 6.85
+      },
+      "assessment": "Different scientific values for the same input"
+    },
+    {
+      "id": "P04",
+      "description": "QC UI default values submitted unchanged",
+      "observed": {
+        "http": 200,
+        "status": "QC_PASS",
+        "qcRows": 3
+      },
+      "assessment": "Expect no prefilled real measurements; synthetic defaults currently pass"
+    },
+    {
+      "id": "P05",
+      "description": "Manager A calls legacy review route for lab B assigned item",
+      "observed": {
+        "http": 201,
+        "body": {
+          "success": true,
+          "decision": "ACCEPT",
+          "status": "ACCEPTED"
+        },
+        "persisted": "ACCEPTED"
+      },
+      "assessment": "Expect scope and submitted-evidence rejection"
+    },
+    {
+      "id": "P06",
+      "description": "Canonical review accepts submitted item in unevaluated OPEN batch",
+      "observed": {
+        "http": 200,
+        "body": {
+          "success": true,
+          "item": {
+            "id": "pending-wi",
+            "sampleId": "pending",
+            "labId": "AUDIT-A",
+            "assignedLab": "AUDIT-A",
+            "analysis": "PH_H2O",
+            "category": "Soil chemistry",
+            "status": "ACCEPTED",
+            "assignedTo": "audit-tech",
+            "assignedBy": null,
+            "assignedAt": null,
+            "priority": "NORMAL",
+            "dueDate": null,
+            "result": "6.5",
+            "methodologyId": "audit-ph",
+            "equipmentId": null,
+            "completedAt": null,
+            "version": 0,
+            "submissionId": null,
+            "submittedAt": null,
+            "batchId": "pending-batch",
+            "rackPosition": null,
+            "reanalysisReason": null,
+            "reanalysisRequestedBy": null,
+            "reviewedBy": null,
+            "reviewedAt": null,
+            "reviewDecision": null,
+            "waiveReason": null,
+            "history": [
+              {
+                "status": "ACCEPTED",
+                "note": "Manager Review",
+                "changedBy": "audit-manager",
+                "timestamp": "2026-10-04T00:04:55.905Z"
+              }
+            ],
+            "createdAt": "2026-10-04T00:04:55.892Z",
+            "updatedAt": "2026-10-04T00:04:55.906Z"
+          }
+        },
+        "persisted": "ACCEPTED"
+      },
+      "assessment": "Expect pending QC to block acceptance"
+    },
+    {
+      "id": "P07",
+      "description": "Publish submitted but unapproved sample with OPEN QC",
+      "observed": {
+        "http": 200,
+        "bodyStatus": "PUBLISHED",
+        "published": 1
+      },
+      "assessment": "Expect report publication blocked"
+    },
+    {
+      "id": "P08",
+      "description": "Queue result selection with current 6.2 and superseded replicate 9.9",
+      "observed": {
+        "http": 200,
+        "currentResult": "6.2"
+      },
+      "assessment": "Expect explicit current attempt/replicate, never stale 9.9"
+    },
+    {
+      "id": "P08b",
+      "description": "Two current replicates 6.2 and 6.8 collapse into a scalar queue value",
+      "observed": {
+        "http": 200,
+        "currentResult": "6.8"
+      },
+      "assessment": "Expect explicit replicate identity and reportable selection; one scalar hides the pair"
+    },
+    {
+      "id": "P09",
+      "description": "Record ordinary numeric determination",
+      "observed": {
+        "http": 200,
+        "saved": 1,
+        "attempts": 0,
+        "results": 1
+      },
+      "assessment": "Expect attempt lineage for every recorded determination"
+    },
+    {
+      "id": "P10",
+      "description": "Allocate same work item to another batch without explicit transfer",
+      "observed": {
+        "firstHttp": 200,
+        "secondHttp": 200,
+        "itemBatch": "new-batch",
+        "oldMembership": "[\"move-wi\"]"
+      },
+      "assessment": "Expect rejection or atomic audited transfer; memberships diverge"
+    },
+    {
+      "id": "P11",
+      "description": "Same request supplies failing QC and closes previously passed batch",
+      "observed": {
+        "http": 200,
+        "status": "CLOSED",
+        "evaluation": "QC_FAIL",
+        "disposition": null
+      },
+      "assessment": "Expect closure denied against newly evaluated failure"
+    },
+    {
+      "id": "C01",
+      "description": "Null blank regression control",
+      "observed": {
+        "http": 200,
+        "status": "QC_FAIL"
+      },
+      "assessment": "Current safeguard: no QC_PASS"
+    },
+    {
+      "id": "C02",
+      "description": "Closed batch direct evaluation regression control",
+      "observed": {
+        "http": 400,
+        "error": "Batch is CLOSED and cannot be evaluated or modified."
+      },
+      "assessment": "Current safeguard: rejected"
+    },
+    {
+      "id": "C03",
+      "description": "Direct PASS without evidence regression control",
+      "observed": {
+        "http": 400,
+        "error": "Cannot set status to 'QC_PASS' without evaluated QC evidence or authorized disposition."
+      },
+      "assessment": "Current safeguard: rejected"
+    }
+  ]
+}
