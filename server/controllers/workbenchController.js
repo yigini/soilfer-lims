@@ -435,7 +435,7 @@ exports.getQueue = async (req, res) => {
                 param: { in: analysisCodes },
                 isCurrent: true
             },
-            orderBy: { timestamp: 'asc' }
+            orderBy: { createdAt: 'asc' }
         });
         const resultMap = {};
         existingResults.forEach(r => {
