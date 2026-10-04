@@ -56,9 +56,9 @@ describe('Audit 0.10: downloaded header and replicate navigation', () => {
             browser: { URL: { createObjectURL: blob => { downloaded = blob; return 'blob:test'; } },
                 document: { createElement: () => link, body: { appendChild() {}, removeChild() {} } } } });
         const props = { isOpen: true, currentFilters: {} };
-        const generate = elements(h.render(props), node => node.type === 'button' && elements(node, el => el.props?.children === 'Generate Export').length)[0];
+        const generate = elements(h.render(props), node => node.type === 'button' && [].concat(node.props.children).some(child => typeof child === 'string' && child.trim() === 'Generate Export'))[0];
         await generate.props.onClick();
-        const download = elements(h.render(props), node => node.type === 'button' && elements(node, el => el.props?.children === 'Download CSV').length)[0];
+        const download = elements(h.render(props), node => node.type === 'button' && [].concat(node.props.children).some(child => typeof child === 'string' && child.trim() === 'Download CSV'))[0];
         download.props.onClick();
         expect(await downloaded.text()).toBe(`# ${note}\nSample ID,SOC,soc_n,soc_flag\nsample-a,15,2,MEAN_UNCHECKED`);
         expect(link.click).toHaveBeenCalledTimes(1);
