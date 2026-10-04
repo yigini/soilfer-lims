@@ -64,7 +64,7 @@ export function parseCoordinates(coords) {
     if (!coords) return null;
     let lat, lng;
     if (typeof coords === 'string') {
-        const parts = coords.replace(/[\[\]\(\)]/g, '').split(',').map(s => parseFloat(s.trim()));
+        const parts = coords.replace(/[[\]()]/g, '').split(',').map(s => parseFloat(s.trim()));
         if (parts.length >= 2) {
             lat = parts[0];
             lng = parts[1];
