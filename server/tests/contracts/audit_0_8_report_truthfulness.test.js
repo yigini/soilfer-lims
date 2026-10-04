@@ -42,7 +42,7 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
         return jest.spyOn(policy, 'get').mockImplementation((lab, requested, context) => requested === key ? value : original(lab, requested, context));
     }
     async function legacy(f, version, number, status = 'PUBLISHED') {
-        return prisma.report.create({ data: { sampleId: f.sampleId, labId, version, status, publishedAt: new Date('2020-03-04T12:00:00Z'),
+        return prisma.report.create({ data: { sampleId: f.sampleId, labId, version, status, generatedBy: 'historical-fixture', publishedAt: new Date('2020-03-04T12:00:00Z'),
             content: JSON.stringify({ ...snapshot, reportNumber: number }) } });
     }
     test('two simultaneous real publications have different bases and committed counter values', async () => {
@@ -70,7 +70,7 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
         const f = await fixture(), prefix = id('LEGACY');
         const v1 = await legacy(f, 1, `${prefix}-v1`, 'SUPERSEDED');
         const v2 = await legacy(f, 2, `${prefix}-v2`);
-        await prisma.report.create({ data: { sampleId: f.sampleId, labId, version: 3, status: 'DRAFT', content: JSON.stringify({ reportNumber: 'DO-NOT-ANCHOR' }) } });
+        await prisma.report.create({ data: { sampleId: f.sampleId, labId, version: 3, status: 'DRAFT', generatedBy: 'draft-fixture', content: JSON.stringify({ reportNumber: 'DO-NOT-ANCHOR' }) } });
         const next = await generate(f);
         expect(next.reportNumberBase).toBe(`${prefix}-v2`);
         expect(next.revision).toBe(1);
@@ -133,7 +133,7 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
         } finally { db.close(); }
     });
     test('QC_FAIL with PROCEED prints analyte, batch and reason; all reported linked batches must pass for a pass claim', async () => {
-        const f = await fixture('QC_FAIL', { decision: 'PROCEED', reason: 'Matrix effect reviewed' });
+        const f = await fixture('QC_FAIL', { decision: 'PROCEED_WITH_WARNING', reason: 'Matrix effect reviewed' });
         const report = await generate(f), content = JSON.parse(report.content);
         expect(content.evidence.qc.withinLimits).toBe(false);
         expect(content.qcStatement).toContain('PH_H2O'); expect(content.qcStatement).toContain(f.batch.id);
@@ -169,9 +169,10 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
         expect(values.join('\n')).not.toMatch(/40°C|ISO 11464|All batch Quality Control checks/);
     });
     test('public and internal PDFs both mark superseded reports and the issued replacement', async () => {
-        const f = await fixture(), first = await generate(f), second = await generate(f);
+        const f = await fixture(), first = await generate(f);
         const share = await request(app).post(`/api/reports/${first.id}/share`).set('Authorization', `Bearer ${token}`).send({ expiresInDays: 7 });
         expect(share.status).toBe(200);
+        const second = await generate(f);
         for (const url of [`/api/reports/${first.id}/pdf`, `/api/reports/public/${share.body.token}/pdf`]) {
             const text = jest.spyOn(PDFDocument.prototype, 'text');
             const response = await request(app).get(url).set('Authorization', `Bearer ${token}`);
