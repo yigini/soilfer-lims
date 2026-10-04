@@ -7,6 +7,8 @@
  */
 'use strict';
 
+const { checkBatchDisposition } = require('./qcService');
+
 const GATE_ANALYSES = ['DRYING', 'PREPARATION'];
 const NON_ANALYTICAL = ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP'];
 const TEXTURE_ALIASES = new Set([
@@ -337,28 +339,15 @@ function canPublish(sample, report, user, options = {}) {
         return { allowed: false, code: 'NOT_FOUND', reason: 'Sample record not found' };
     }
 
-    // QC Release Gate: unresolved failed QC strictly blocks report publication
+    // Review and publication use the same batch disposition gate.
     const qcBatches = options.qcBatches || [];
-    const failedQc = qcBatches.find(b => {
-        const isFailedStatus = b.status === 'QC_FAIL' || b.status === 'FAILED';
-        if (!isFailedStatus) return false;
-        let hasValidDisposition = false;
-        if (b.disposition) {
-            try {
-                const disp = typeof b.disposition === 'string' ? JSON.parse(b.disposition) : b.disposition;
-                if (disp && disp.decision === 'PROCEED_WITH_WARNING') {
-                    hasValidDisposition = true;
-                }
-            } catch (e) {}
-        }
-        return !hasValidDisposition;
-    });
-
-    if (failedQc) {
+    const blockedQc = qcBatches.find(batch => !checkBatchDisposition(batch).allowed);
+    if (blockedQc) {
+        const gate = checkBatchDisposition(blockedQc);
         return {
             allowed: false,
-            code: 'QC_BATCH_FAILED',
-            reason: `Cannot publish report: Linked QC batch ${failedQc.id} failed quality control without an authorized manager disposition override.`
+            code: blockedQc.status === 'QC_FAIL' ? 'QC_BATCH_FAILED' : 'QC_BATCH_PENDING',
+            reason: `Cannot publish report: ${gate.error}`
         };
     }
 

@@ -96,7 +96,7 @@ async function generateReport(req, res) {
         const { canPublish } = require('../services/workEligibility');
         const publishCheck = canPublish(sample, null, req.user, { qcBatches });
         if (!publishCheck.allowed) {
-            const statusCode = publishCheck.code === 'QC_BATCH_FAILED' ? 409 : 403;
+            const statusCode = publishCheck.code?.startsWith('QC_BATCH_') ? 409 : 403;
             return res.status(statusCode).json({ error: publishCheck.reason, code: publishCheck.code || 'PUBLISH_DENIED' });
         }
 

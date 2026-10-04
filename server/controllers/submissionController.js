@@ -371,7 +371,7 @@ exports.reviewSubmission = async (req, res) => {
         const batchFailures = [];
         for (const wiId of workItemIds) {
             const batchInfo = await qcController.checkItemBatchStatus(wiId);
-            if (batchInfo.status === 'QC_FAIL') {
+            if (batchInfo.allowed === false) {
                 batchFailures.push({ workItemId: wiId, batchId: batchInfo.batchId });
             }
         }
@@ -381,6 +381,7 @@ exports.reviewSubmission = async (req, res) => {
             if (decision && decision.decision === 'ACCEPT') {
                 return res.status(409).json({
                     error: `Cannot ACCEPT work item ${failure.workItemId} because it belongs to a FAILED QC Batch (${failure.batchId}). You must WAIVE or REJECT it.`,
+                    code: 'QC_FAIL_BLOCKER',
                     batchId: failure.batchId
                 });
             }
