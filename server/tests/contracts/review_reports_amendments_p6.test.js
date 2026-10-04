@@ -42,6 +42,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
                 labId: 'S-P6-01',
                 assignedLab: 'LAB-P6',
                 country: 'P6C',
+                receptionDate: new Date(),
                 status: 'SUBMITTED_FULL',
                 dryingStatus: 'DONE',
                 preparationStatus: 'DONE',

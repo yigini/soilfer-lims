@@ -52,6 +52,8 @@ function reportingQc(sample, options = {}) {
     const warnings = [];
     let blocker = null;
     for (const result of results.filter(row => row.isCurrent && !EXCLUDED_GATE_CODES.has(row.param))) {
+        const governing = governingItems(result, items);
+        if (!governing.length || !governing.every(item => item.status === 'ACCEPTED')) continue;
         const mode = getReportingMode(sample, result, options);
         for (const batchId of linkedBatchIds(result, items)) {
             const batch = batches.find(row => row.id === batchId) || { id: batchId, status: 'ERROR' };

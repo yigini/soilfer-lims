@@ -62,6 +62,11 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         expect(res.status).toBe(409); expect(res.body.code).toBe('ITEMS_NOT_ACCEPTED'); expect(res.body.workItemIds).toEqual([f.item.id]);
         expect(await prisma.report.count({ where: { sampleId: f.sampleId } })).toBe(0);
     });
+    test.each(modes)('%s never bypasses manager review', async mode => {
+        jest.spyOn(policyService, 'get').mockReturnValue(mode);
+        const res = await generate(await fixture({ itemStatus: 'REANALYSIS_REQUIRED' }));
+        expect(res.status).toBe(409); expect(res.body.code).toBe('ITEMS_NOT_ACCEPTED');
+    });
     test('RUNNING QC blocks with a stable 409', async () => {
         const f = await fixture({ batchStatus: 'RUNNING' });
         const res = await generate(f);
@@ -94,7 +99,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         expect(res.status).toBe(409); expect(res.body.code).toBe('ACCEPTED_ITEM_WITHOUT_VALID_RESULT'); expect(res.body.workItemIds).toEqual([f.item.id]);
     });
     test.each(['WAIVED', 'CANCELLED'])('%s work neither blocks nor prints a value', async itemStatus => {
-        const f = await fixture({ itemStatus, valid: false });
+        const f = await fixture({ itemStatus, valid: false, batchStatus: 'QC_FAIL' });
         expect((await generate(f)).status).toBe(200);
         expect((await reportValues(f)).values).toHaveLength(0);
     });
