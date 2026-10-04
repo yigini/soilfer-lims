@@ -87,6 +87,14 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         expect(res.status).toBe(409); expect(res.body.code).toBe('QC_POLICY_UNRESOLVED');
     });
     test('legacy accepted no-batch work can publish', async () => expect((await generate(await fixture())).status).toBe(200));
+    test('unfinished drying and preparation gates do not count as analytical publication work', async () => {
+        const f = await fixture();
+        await prisma.workItem.createMany({ data: ['DRYING', 'PREPARATION'].map(analysis => ({
+            id: id('GATE-03'), sampleId: f.sampleId, analysis, status: 'ASSIGNED'
+        })) });
+        expect((await generate(f)).status).toBe(200);
+        expect((await reportValues(f)).values).toHaveLength(1);
+    });
     test('ungoverned current result blocks and lists params', async () => {
         const f = await fixture();
         await prisma.workItem.update({ where: { id: f.item.id }, data: { analysis: 'EC' } });
