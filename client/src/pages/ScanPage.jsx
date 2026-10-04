@@ -226,7 +226,7 @@ export default function ScanPage() {
                 <div className="p-4 rounded-2xl border border-sf-divider bg-sf-surface shadow-md space-y-3 animate-fadeIn">
                     <div className="flex items-center justify-between">
                         <span className="text-xs font-bold uppercase tracking-wider text-sf-muted">
-                            {scannedResult.sampleData ? 'Specimen Recognized' : t('sampleLookup.failed', 'Sample could not be found or loaded. Check the identifier and connection.')}
+                            {scannedResult.sampleData ? 'Specimen Recognized' : t('sampleLookup.title', 'Sample lookup')}
                         </span>
                         <button
                             onClick={resetScan}
@@ -243,7 +243,7 @@ export default function ScanPage() {
                                 {scannedResult.sampleId}
                             </div>
                         </div>
-                        <CheckCircle2 size={20} className="text-emerald-500" />
+                        {scannedResult.sampleData ? <CheckCircle2 size={20} className="text-emerald-500" /> : <AlertCircle size={20} className="text-red-600" />}
                     </div>
 
                     {/* Quick action buttons */}
