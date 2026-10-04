@@ -109,6 +109,26 @@ describe('Audit 1.0: persistent lab policies', () => {
         expect((await patch({ decimalSeparator: '.', thousandsSeparator: null, reason: 'Stale editor', expectedVersion: 0 })).body.code).toBe('POLICY_VERSION_CONFLICT');
         expect(await getNumberFormat(labId)).toEqual({ decimal: ',', thousands: '.' });
     });
+    test('legacy migration is dry-run by default, additive, inherited and idempotent', async () => {
+        const { migrateLegacyNumberPolicies } = require('../../scripts/migrate_legacy_number_policies');
+        const untouched = id('UNTOUCHED'); await prisma.lab.create({ data: { id: untouched, code: untouched, name: untouched, country: 'GTM' } });
+        const settings = '{"language":"fr","decimalSeparator":",","thousandsSeparator":"."}';
+        await prisma.lab.update({ where: { id: labId }, data: { settings } });
+        const db = { ...prisma, lab: { ...prisma.lab, findMany: options => prisma.lab.findMany({ ...options, where: { id: { in: [labId, untouched] } } }) } };
+        const dry = await migrateLegacyNumberPolicies({ db });
+        expect(dry).toMatchObject({ mode: 'DRY_RUN', counts: { labsScanned: 2, labsToChange: 1, inheritedRowsToCreate: 1, explicitRowsToCreate: 0, overridesToCreate: 2, invalidLabs: 0 } });
+        expect(await prisma.labPolicy.count({ where: { labId } })).toBe(0);
+        const applied = await migrateLegacyNumberPolicies({ db, apply: true });
+        expect(applied.auditRowsCreated).toBe(1);
+        expect(await prisma.labPolicy.findUnique({ where: { labId } })).toMatchObject({ presetCode: null, version: 1 });
+        expect(await prisma.labPolicy.count({ where: { labId: untouched } })).toBe(0);
+        expect((await prisma.lab.findUnique({ where: { id: labId } })).settings).toBe(settings);
+        expect(await getNumberFormat(labId)).toEqual({ decimal: ',', thousands: '.' });
+        expect((await migrateLegacyNumberPolicies({ db })).counts).toMatchObject({ labsToChange: 0, overridesToCreate: 0, existingKeysSkipped: 2 });
+        expect((await migrateLegacyNumberPolicies({ db, apply: true })).auditRowsCreated).toBe(0);
+        const row = await prisma.labPolicyOverride.findFirst({ where: { labId } });
+        expect(row.reason).toBe('migrated from Lab.settings');
+    });
 });
 
 describe('Audit 1.0: registry and pure evaluator defaults', () => {

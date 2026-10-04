@@ -103,7 +103,7 @@ async function assertScope(actor, lab, edit = false, db = require('../prisma')) 
     if (!hasPermission(actor, edit ? 'MANAGE_LAB_POLICIES' : 'VIEW_LAB_POLICIES')) throw error(403, 'POLICY_PERMISSION_DENIED', 'Policy permission required.');
     const actorLab = actor.labId ? await resolveLab(actor.labId, db) : null;
     const scopedActor = { ...actor, labId: actorLab?.id || actor.labId };
-    if (edit ? !scopeGuard.canManageLab(scopedActor, lab.id) : !scopeGuard.canAccessEntity(scopedActor, lab, { labField: 'id', altLabField: null })) {
+    if (!scopeGuard.canAccessEntity(scopedActor, lab, { labField: 'id', altLabField: null }) || (edit && !scopeGuard.canManageLab(scopedActor, lab.id))) {
         throw error(403, 'TARGET_OUTSIDE_SCOPE', 'Laboratory is outside your scope.');
     }
 }
