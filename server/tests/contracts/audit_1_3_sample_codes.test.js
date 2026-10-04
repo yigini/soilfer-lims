@@ -63,7 +63,9 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
         const sample = await prisma.sample.create({ data: { id: id(), originalId: id(), assignedLab: lab.id, status: 'RECEIVED' } });
         const response = await request(app).put(`/api/samples/${sample.id}/status`).set('Authorization', `Bearer ${await getAuthToken('LAB_MANAGER', lab.id)}`).send({ status: 'ACCEPTED' });
         expect(response.status).toBe(200); expect(codes.verifyCheckCharacter(response.body.labSampleCode)).toBe(true);
-        expect((await prisma.workItem.findMany({ where: { sampleId: sample.id } })).every(item => item.labId === lab.id)).toBe(true);
+        const work = await prisma.workItem.findMany({ where: { sampleId: sample.id } });
+        expect(work).toHaveLength(2);
+        expect(work.every(item => item.labId === lab.id)).toBe(true);
         const walkIn = await request(app).post('/api/samples/walkin').set('Authorization', `Bearer ${token}`).send({ submitter: 'Synthetic submitter', analyses: [] });
         expect(walkIn.status).toBe(201); expect(walkIn.body.sample.originalId).toMatch(/^W\d+$/);
         expect(codes.verifyCheckCharacter(walkIn.body.sample.labSampleCode)).toBe(true);
