@@ -2307,8 +2307,7 @@
       "reset": "Restablecer",
       "applyFilters": "Aplicar filtros"
     }
-  }
-,
+  },
   "profileReference": {
     "label": "Perfil de suelo / punto de muestreo",
     "code": "Código registrado en campo",
@@ -2352,5 +2351,89 @@
       "profileRelation": "Significado registrado (SITE_POINT, COMPOSITE, CONFIRMED_PROFILE)",
       "collectionDate": "Fecha de toma en campo"
     }
+  },
+  "intakeRules": {
+    "effectiveForm": "Formulario de recepción",
+    "version": "Versión",
+    "inputKept": "Se han conservado los datos introducidos.",
+    "cached": "Formulario guardado; se comprobará la autorización al sincronizar.",
+    "resolving": "Cargando las reglas de recepción aplicables…",
+    "context": "Contexto de la muestra",
+    "required": "Obligatorio",
+    "labelFallback": "Etiqueta en inglés; falta la traducción.",
+    "unrecorded": "No registrado",
+    "reason": "Motivo / observación",
+    "optionalFacts": "Registre los datos disponibles. Deje en blanco lo desconocido. El formulario seleccionado indica los campos obligatorios.",
+    "restore": "Restaurar mi borrador",
+    "restoreHint": "Hay un formulario sin terminar de su cuenta y laboratorio en este dispositivo. ¿Restaurarlo? Se conservará hasta que el servidor confirme el guardado.",
+    "keepStored": "Empezar otro; conservar copia",
+    "legacyRetained": "Este dispositivo conserva un borrador antiguo sin propietario identificado. Solicite al responsable del laboratorio que compruebe su titularidad antes de recuperarlo. No se ha eliminado.",
+    "resolveBeforeAccept": "Conéctese y revise el formulario aplicable antes de continuar. Se conserva su borrador.",
+    "chooseAnalyses": "Seleccione los análisis solicitados.",
+    "invalidNumber": "Introduzca un valor numérico válido.",
+    "massAcknowledgement": "Confirme la insuficiencia de masa para los análisis solicitados.",
+    "deviceSaved": "Guardado en este dispositivo",
+    "awaitingSync": "Pendiente de sincronización con el servidor",
+    "noAccessionYet": "Aún no es una recepción ni aceptación confirmada por el servidor. No se ha asignado un identificador de laboratorio.",
+    "backToDraft": "Volver al formulario",
+    "settings": "Reglas y formulario de recepción",
+    "settingsHint": "Seleccione reglas publicadas para nuevas recepciones. Los cambios crean una versión inmutable. Los borradores y registros aceptados conservan su versión original.",
+    "loadFailed": "No se pudieron cargar las reglas de recepción.",
+    "saveFailed": "No se pudieron guardar los ajustes.",
+    "saved": "Guardado y confirmado por el servidor.",
+    "material": "Material",
+    "origin": "Origen de la muestra",
+    "template": "Formulario publicado",
+    "choose": "Seleccione…",
+    "criteria": "Comprobaciones de aceptación",
+    "contextFields": "Campos de contexto",
+    "enabled": "Activado",
+    "saveVersion": "Guardar nueva versión y aplicar",
+    "usePublished": "Aplicar esta versión publicada",
+    "bulkConfirm": "Confirmar comprobaciones observadas para las filas seleccionadas",
+    "bulkHint": "Seleccione solo muestras comprobadas físicamente. Se conservan las excepciones y los datos de origen registrados.",
+    "planned": "Prevista para aceptación",
+    "rowReview": "Revisar fila y comprobaciones",
+    "batchLocal": "Borrador del envío guardado en este dispositivo. Conéctese para confirmar el envío completo; aún no se ha recibido ninguna muestra.",
+    "legacyRecover": "Revisar y recuperar borrador antiguo",
+    "legacyOwnership": "Recupere este formulario solo si confirma que pertenece a su laboratorio y tiene autorización para acceder. Se conservará el original.",
+    "source": {
+      "SAVED_REVISION": "Versión guardada original",
+      "PROJECT_BINDING": "Seleccionado por este proyecto",
+      "LAB_DEFAULT": "Predeterminado del laboratorio",
+      "COMPATIBLE_SEED": "Formulario estándar compatible"
+    },
+    "originNames": {
+      "*": "Todos los orígenes",
+      "PROJECT_SAMPLE": "Muestra de proyecto",
+      "DESK_WALKIN": "Externa / sin cita"
+    },
+    "intent": {
+      "SAVE_DRAFT": "Borrador",
+      "RECEIVE": "Recepción física",
+      "ACCEPT": "Aceptación",
+      "REJECT": "Rechazo"
+    },
+    "moisture": {
+      "DRY": "Seca",
+      "MOIST": "Húmeda",
+      "WET": "Mojada",
+      "SATURATED": "Saturada"
+    },
+    "contact": {
+      "name": "Nombre / contacto",
+      "surname": "Apellidos",
+      "phone": "Teléfono",
+      "email": "Correo electrónico",
+      "organization": "Organización"
+    },
+    "seedNames": {
+      "INTAKE-SEED-SOILFER": "Recepción de suelo SoilFER",
+      "INTAKE-SEED-RESEARCH": "Recepción de suelo para investigación",
+      "INTAKE-SEED-COMMERCIAL": "Recepción comercial de suelo",
+      "INTAKE-SEED-COMPATIBLE": "Recepción de otros materiales"
+    },
+    "labCopy": "Copia del laboratorio",
+    "seedCopy": "Formulario del sistema"
   }
 }

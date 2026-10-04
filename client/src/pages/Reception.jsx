@@ -20,8 +20,12 @@ import QRScanner from '../components/common/QRScanner';
 import InfoTooltip from '../components/common/InfoTooltip';
 import { playSuccessChime, playErrorBuzz, playNoticeChime, isAudioEnabled, setAudioEnabled } from '../utils/audioCues';
 import { resolveCoordinates } from '../utils/coordinateResolver';
-import { recordSyncOperation } from '../services/offline/syncEngine';
+import { recordSyncOperation,subscribeSyncState } from '../services/offline/syncEngine';
 
+import useIntakeForm from '../components/reception/useIntakeForm';
+import {IntakeRuleSummary,IntakeContextFields} from '../components/reception/IntakeFormContext';
+import {formCriteria,formFields,formLabel,allowsNA,pinFor,draftScope,ownedDrafts} from '../components/reception/intakeForm';
+import {parseLaboratoryNumber} from '../utils/messageFormatter';
 import { parseCoordinates } from '../utils/mapConfig';
 
 
@@ -29,7 +33,7 @@ const Reception = () => {
     const getAnalysisDisplayName = useAnalysisNames();
     const { user, token } = useAuth();
     const { showDialog } = useDialog();
-    const { t } = useLanguage();
+    const { t,locale } = useLanguage();
     const location = useLocation();
 
     // Sourced laboratory configuration (#114)
@@ -93,10 +97,20 @@ const Reception = () => {
     const [scanCode, setScanCode] = useState('');
     const [sampleData, setSampleData] = useState(null);
 
+    const [contextAnswers,setContextAnswers] = useState({});
+    const [restoredForm,setRestoredForm] = useState(null);
+    const [temporaryId,setTemporaryId] = useState(() => crypto.randomUUID());
+    const commandRef = useRef(null);
+    const draftKeyRef = useRef(null);
+    const restoreSeen = useRef(new Set());
+    const formState = useIntakeForm({user,mode,projectId:sampleData?.projectId || sessionProject,sampleId:sampleData?.id,matrix:sampleData?.matrix || 'SOIL'});
+    const intakeForm = restoredForm || formState.form;
+    useEffect(() => {commandRef.current=null;},[mode,sessionProject,sampleData?.id]);
+
     // Stage A: Desk-Only Facts
     const [receivedMass, setReceivedMass] = useState('');
     const [massWarningAcknowledged, setMassWarningAcknowledged] = useState(false);
-    const [moistureOnArrival, setMoistureOnArrival] = useState('MOIST');
+    const [moistureOnArrival, setMoistureOnArrival] = useState('');
     const [foreignMaterial, setForeignMaterial] = useState([]);
     const [intakePhotos, setIntakePhotos] = useState([]);
     const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -109,18 +123,6 @@ const Reception = () => {
     // Compliance & Notes
     const [checklistData, setChecklistData] = useState({ items: {}, nonConformance: false, reason: '' });
 
-    // Enforce N/A policy cleanup when switching intake mode (#113)
-    useEffect(() => {
-        if (mode !== 'WALK_IN' && checklistData?.items?.coc?.status === 'NA') {
-            setChecklistData(prev => ({
-                ...prev,
-                items: {
-                    ...prev?.items,
-                    coc: { ...prev?.items?.coc, status: undefined }
-                }
-            }));
-        }
-    }, [mode, checklistData?.items?.coc?.status]);
     const [intakeNotes, setIntakeNotes] = useState('');
     const [branding, setBranding] = useState(null);
 
@@ -134,6 +136,12 @@ const Reception = () => {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
     const [resultQrUrl, setResultQrUrl] = useState('');
+
+    useEffect(()=>subscribeSyncState(event=>{
+        if(event.type!=='INTAKE_CONFIRMED' || event.userId!==String(user?.id) || event.labId!==user?.labId || event.operationId!==commandRef.current?.operationId) return;
+        if(event.outcome?.status==='DRAFT') {setSampleData(prev=>({...prev,id:event.outcome.id,originalId:event.outcome.originalId,updatedAt:event.outcome.updatedAt}));setResult(null);showDialog({type:'success',title:t('intakeRules.saved'),message:t('intakeRules.source.SAVED_REVISION')});}
+        else setResult(event.outcome);
+    }),[user?.id,user?.labId,t]);
 
     // Offline QR Code generation when Lab ID is minted
     useEffect(() => {
@@ -448,7 +456,7 @@ const Reception = () => {
         // Stage A
         setReceivedMass('');
         setMassWarningAcknowledged(false);
-        setMoistureOnArrival('MOIST');
+        setMoistureOnArrival('');
         setForeignMaterial([]);
         setIntakePhotos([]);
         setIsResubmission(false);
@@ -490,95 +498,48 @@ const Reception = () => {
             });
         }
         setResult(null);
-        localStorage.removeItem(AUTOSAVE_KEY); // Clear local autosave when resetting/discarding
+        if (draftKeyRef.current && !result?.queued) localStorage.removeItem(draftKeyRef.current);
+        setTemporaryId(crypto.randomUUID()); setContextAnswers({}); setRestoredForm(null); commandRef.current=null; draftKeyRef.current=null;
     };
 
-    // --- AUTOSAVE & DRAFTS ---
-    const AUTOSAVE_KEY = 'limsi_intake_autosave';
-
-    const isSubstantialDraft = (data) => {
-        if (!data) return false;
-        const hasSubmitter = data.submitter && (data.submitter.name || data.submitter.phone || data.submitter.organization || data.submitter.email);
-        const hasSampling = data.sampling && (data.sampling.location || data.sampling.coordinates || data.sampling.crop || data.sampling.purpose);
-        const hasAnalyses = data.selectedGroup || (data.additions && data.additions.length > 0);
-        const hasNotes = !!data.intakeNotes;
-        const hasDeskFacts = !!data.receivedMass || (data.intakePhotos && data.intakePhotos.length > 0);
-        return hasSubmitter || hasSampling || hasAnalyses || hasNotes || hasDeskFacts;
+    // Owner/lab/context-scoped local drafts. Original legacy records are never silently deleted.
+    const draftContext = intakeForm?.context || {projectId:sampleData?.projectId || sessionProject || null,origin:mode === 'WALK_IN' ? 'DESK_WALKIN' : 'PROJECT_SAMPLE',matrix:sampleData?.matrix || 'SOIL'};
+    const identity = sampleData?.id || 'new';
+    const localDraft = {submitter,sampling,profileInput,selectedGroup,additions,removals,checklistData,intakeNotes,receivedMass,massWarningAcknowledged,moistureOnArrival,foreignMaterial,intakePhotos,isResubmission,contextAnswers,intakeForm,custodyHandoverAt,custodyCarrierName,custodyTrackingNumber,custodySenderSignature,custodyCounterSigned,temporaryId,scanCode,sampleData};
+    const draftValueRef = useRef(localDraft); draftValueRef.current=localDraft;
+    const restoreDraft = data => {
+        setSubmitter(data.submitter || {}); setSampling(data.sampling || {}); setProfileInput(data.profileInput);
+        setSelectedGroup(data.selectedGroup || ''); setAdditions(data.additions || []); setRemovals(data.removals || []);
+        setChecklistData(data.checklistData || {items:{}});setIntakeNotes(data.intakeNotes ?? '');setReceivedMass(data.receivedMass ?? '');
+        setMassWarningAcknowledged(data.massWarningAcknowledged ?? false);setMoistureOnArrival(data.moistureOnArrival ?? '');
+        setForeignMaterial(data.foreignMaterial || []);setIntakePhotos(data.intakePhotos || []);setIsResubmission(data.isResubmission ?? false);
+        setContextAnswers(data.contextAnswers || {});setRestoredForm(data.intakeForm || null);setTemporaryId(data.temporaryId || crypto.randomUUID());
+        setCustodyHandoverAt(data.custodyHandoverAt ?? '');setCustodyCarrierName(data.custodyCarrierName ?? '');
+        setCustodyTrackingNumber(data.custodyTrackingNumber ?? '');setCustodySenderSignature(data.custodySenderSignature ?? '');setCustodyCounterSigned(data.custodyCounterSigned ?? false);
+        if (!sampleData?.id && data.sampleData?.id) setSampleData(data.sampleData);
+        if (data.scanCode) setScanCode(data.scanCode);
     };
-
-    // Load from Autosave on Mount
+    const persistLocalDraft = queued => {
+        if (!mode || !user?.id || !intakeForm) return;
+        const data=draftValueRef.current;
+        const substantial=sampleData?.id || data.submitter?.name || data.receivedMass !== '' || data.intakeNotes || data.intakePhotos?.length || Object.keys(data.checklistData?.items || {}).length || Object.keys(data.contextAnswers || {}).length;
+        if (!substantial) return;
+        const key='limsi_intake_v2:'+draftScope(user,draftContext,sampleData?.id || data.temporaryId,intakeForm.revisionId);
+        localStorage.setItem(key,JSON.stringify({ownerId:String(user.id),labId:user.labId,context:draftContext,identity,data,savedAt:Date.now(),queued:!!queued,queuedOperationId:queued ? commandRef.current?.operationId : null}));
+        draftKeyRef.current=key;
+    };
     useEffect(() => {
-        const saved = localStorage.getItem(AUTOSAVE_KEY);
-        if (saved && mode === 'WALK_IN' && !sampleData?.id) {
-            try {
-                const data = JSON.parse(saved);
-
-                // Only prompt if there is actual input to restore
-                if (!isSubstantialDraft(data)) {
-                    localStorage.removeItem(AUTOSAVE_KEY);
-                    return;
-                }
-
-                showDialog({
-                    type: 'confirm',
-                    title: 'Restore Draft?',
-                    message: 'Found an unfinished intake form. Would you like to restore it?',
-                    confirmText: 'Restore',
-                    cancelText: 'Discard Draft', // Explicitly offer to discard
-                    onConfirm: () => {
-                        setSubmitter(data.submitter || submitter);
-                        setSampling(data.sampling || sampling);
-                        setProfileInput(data.profileInput);
-                        setSelectedGroup(data.selectedGroup || '');
-                        setAdditions(data.additions || []);
-                        setRemovals(data.removals || []);
-                        setChecklistData(data.checklistData || checklistData);
-                        setIntakeNotes(data.intakeNotes || '');
-                        if (data.receivedMass) setReceivedMass(data.receivedMass);
-                        if (data.massWarningAcknowledged) setMassWarningAcknowledged(data.massWarningAcknowledged);
-                        if (data.moistureOnArrival) setMoistureOnArrival(data.moistureOnArrival);
-                        if (data.foreignMaterial) setForeignMaterial(data.foreignMaterial);
-                        if (data.intakePhotos) setIntakePhotos(data.intakePhotos);
-                        if (data.isResubmission) setIsResubmission(data.isResubmission);
-                    },
-                    onCancel: () => {
-                        // If they cancel restoration, we assume they want to start fresh
-                        localStorage.removeItem(AUTOSAVE_KEY);
-                    }
-                });
-            } catch (e) {
-                console.error("Autosave restore failed", e);
-            }
-        }
-    }, [mode]);
-
-    // Save to LocalStorage every 10s
+        if (!mode || !user?.id || !intakeForm) return;
+        const marker=draftScope(user,draftContext,identity,null);
+        if (restoreSeen.current.has(marker)) return;restoreSeen.current.add(marker);
+        const records=ownedDrafts(localStorage,user,draftContext,identity);
+        if (records.length) showDialog({type:'confirm',title:t('intakeRules.restore'),message:t('intakeRules.restoreHint'),confirmText:t('intakeRules.restore'),cancelText:t('intakeRules.keepStored'),onConfirm:()=>{draftKeyRef.current=records[0].key;restoreDraft(records[0].data);}});
+    },[mode,user?.id,intakeForm?.revisionId,identity,sessionProject]);
     useEffect(() => {
-        if (mode !== 'WALK_IN' || result) return; // Don't autosave project mode yet or if finished
-
-        const timer = setInterval(() => {
-            const data = {
-                submitter,
-                sampling,
-                profileInput,
-                selectedGroup,
-                additions,
-                removals,
-                checklistData,
-                intakeNotes,
-                receivedMass,
-                massWarningAcknowledged,
-                moistureOnArrival,
-                foreignMaterial,
-                intakePhotos,
-                isResubmission,
-                timestamp: Date.now()
-            };
-            localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data));
-        }, 10000);
-
-        return () => clearInterval(timer);
-    }, [mode, submitter, sampling, profileInput, selectedGroup, additions, removals, checklistData, intakeNotes, receivedMass, massWarningAcknowledged, moistureOnArrival, foreignMaterial, intakePhotos, isResubmission, result]);
+        if (!mode || result) return;
+        const timer=setInterval(()=>{try {persistLocalDraft(false);} catch { /* Outbox/database remains available; never announce a failed local save as success. */ }},5000);
+        return ()=>clearInterval(timer);
+    },[mode,result,intakeForm?.revisionId,identity,user?.id,sessionProject]);
 
     const populateDeskFacts = (targetSample) => {
         if (!targetSample) return;
@@ -586,7 +547,12 @@ const Reception = () => {
         const recData = targetSample.receptionData ? (typeof targetSample.receptionData === 'string' ? JSON.parse(targetSample.receptionData) : targetSample.receptionData) : null;
         const meta = targetSample.metadata ? (typeof targetSample.metadata === 'string' ? JSON.parse(targetSample.metadata) : targetSample.metadata) : null;
 
-        const savedChecklist = recData?.checklist || meta?.nonConformance?.checklist;
+        setContextAnswers(recData?.intakeTemplate?.contextAnswers || {});
+        const facts=recData?.commandFacts || recData || {};
+        setCustodyHandoverAt(facts.custodyHandoverAt ? String(facts.custodyHandoverAt).slice(0,16) : targetSample.custodyHandoverAt ? String(targetSample.custodyHandoverAt).slice(0,16) : '');
+        setCustodyCarrierName(facts.custodyCarrierName ?? targetSample.custodyCarrierName ?? '');setCustodyTrackingNumber(facts.custodyTrackingNumber ?? targetSample.custodyTrackingNumber ?? '');
+        setCustodySenderSignature(facts.custodySenderSignature ?? targetSample.custodySenderSignature ?? '');setCustodyCounterSigned(facts.coc?.counterSigned ?? !!targetSample.receivingOfficerSignature);
+        const savedChecklist = recData?.intakeTemplate?.checklist || recData?.checklist || meta?.nonConformance?.checklist;
         if (savedChecklist) {
             setChecklistData(savedChecklist);
         }
@@ -635,6 +601,7 @@ const Reception = () => {
         if (typeof codeOverride === 'string') setScanCode(trimmedCode);
 
         setLoading(true);
+        setRestoredForm(null);
         setResult(null);
 
         // Check for duplicate / prior receipts (RC-04)
@@ -662,7 +629,7 @@ const Reception = () => {
         setGeometryOutlierWarning(null);
         setReceivedMass('');
         setMassWarningAcknowledged(false);
-        setMoistureOnArrival('MOIST');
+        setMoistureOnArrival('');
         setForeignMaterial([]);
         setIntakePhotos([]);
         setIsResubmission(false);
@@ -718,7 +685,7 @@ const Reception = () => {
                     found = contextRes.data.sample;
                 }
             } catch (ctxErr) {
-                if (ctxErr.response?.status === 403) {
+                if (ctxErr.response && ctxErr.response.status !== 404) {
                     playErrorBuzz();
                     showDialog({
                         type: 'error',
@@ -1092,7 +1059,7 @@ const Reception = () => {
     const totalAnalyticalMass = massRequirementBreakdown.reduce((sum, item) => sum + item.massRequired, 0);
     const retentionBuffer = 100.0;
     const totalRequiredMass = effectiveList.length > 0 ? (totalAnalyticalMass + retentionBuffer) : 0;
-    const parsedReceivedMass = parseFloat(receivedMass) || 0;
+    const parsedReceivedMass = parseLaboratoryNumber(receivedMass).value ?? 0;
     const massDeficit = (parsedReceivedMass > 0 && totalRequiredMass > parsedReceivedMass)
         ? Math.round((totalRequiredMass - parsedReceivedMass) * 10) / 10
         : 0;
@@ -1197,57 +1164,32 @@ const Reception = () => {
         });
     };
 
-    const CHECKLIST_KEYS = ['container', 'label', 'quantity', 'condition', 'coc'];
-
     const validateForm = () => {
-        const errors = [];
-        const isWalkInOrNew = mode === 'WALK_IN' || sampleData?.isNew;
-
-        // Walk-in / new sample fields
-        if (isWalkInOrNew) {
-            if (!submitter.name?.trim()) errors.push({ key: 'submitter.name', label: 'Submitter first name' });
-            if (!submitter.phone?.trim()) errors.push({ key: 'submitter.phone', label: 'Submitter phone number' });
-            // Location validation: GPS present → OK; else need two text anchors (areaVillage + landmark)
-            const hasGPS = sampling.coordinates?.lat && sampling.coordinates?.lng;
-            if (!hasGPS) {
-                if (!sampling.areaVillage?.trim()) errors.push({ key: 'areaVillage', label: 'Area/Village (required when no GPS)' });
-                if (!sampling.landmark?.trim()) errors.push({ key: 'landmark', label: 'Nearest landmark (required when no GPS)' });
-                if (!sampling.areaVillage?.trim() && !sampling.landmark?.trim() && !sampling.location?.trim()) {
-                    errors.push({ key: 'location', label: 'Sample location (GPS, or area + landmark)' });
-                }
-            }
-            // Low confidence requires reason
-            if (sampling.locationConfidence === 'LOW' && !sampling.locationUncertaintyReason?.trim()) {
-                errors.push({ key: 'uncertaintyReason', label: 'Reason for low location confidence' });
-            }
-            if (!sampling.depthType) errors.push({ key: 'depth', label: 'Sampling depth' });
-            if (!sampling.purpose) errors.push({ key: 'purpose', label: 'Purpose of testing' });
+        const errors=[];
+        if (!intakeForm || formState.error) errors.push({key:'compliance',label:t('intakeRules.resolveBeforeAccept')});
+        if (!effectiveList.length) errors.push({key:'analyses',label:t('intakeRules.chooseAnalyses')});
+        for (const rule of formCriteria(intakeForm)) {
+            const answer=checklistData.items?.[rule.id], status=answer?.status;
+            if (rule.required && !status) errors.push({key:'compliance',label:formLabel(rule,locale)});
+            if (status === 'NA' && !allowsNA(rule,intakeForm.context)) errors.push({key:'compliance',label:formLabel(rule,locale)});
+            if ((status === 'FAIL' && rule.noteOnFail || status === 'NA' && rule.noteOnNA) && !answer?.note?.trim()) errors.push({key:'compliance',label:formLabel(rule,locale)+': '+t('intakeRules.reason')});
         }
-
-        // Universal fields (both modes)
-        if (effectiveList.length === 0) errors.push({ key: 'analyses', label: 'At least one analysis must be selected' });
-
-        // RC-01: Received Mass validation
-        const massNum = parseFloat(receivedMass);
-        if (!receivedMass || isNaN(massNum) || massNum <= 0) {
-            errors.push({ key: 'receivedMass', label: 'Received sample mass (grams) is required' });
-        } else if (isMassDeficient && !massWarningAcknowledged) {
-            errors.push({ key: 'massDeficit', label: `Mass deficit (${massDeficit}g) must be acknowledged` });
+        for (const field of formFields(intakeForm)) {
+            const canonical=field.mapping === 'collectionDate' ? sampling.date : field.mapping === 'receivedMass' ? receivedMass : field.mapping === 'moistureOnArrival' ? moistureOnArrival : sampling[field.mapping];
+            const value=contextAnswers[field.id] ?? canonical;
+            if (field.required && (value == null || value === '')) errors.push({key:field.id,label:formLabel(field,locale)});
         }
-
-        const unanswered = CHECKLIST_KEYS.filter(k => !checklistData.items?.[k]?.status);
-        if (unanswered.length > 0) errors.push({ key: 'compliance', label: `Compliance checklist (${unanswered.length} unanswered)` });
-
-        if (removals.length > 0 && !justification?.trim()) errors.push({ key: 'justification', label: 'Justification for removed analyses' });
-        if (checklistData.nonConformance && !checklistData.reason?.trim()) errors.push({ key: 'ncReason', label: 'Non-conformance reason' });
-
+        if (receivedMass !== '' && !parseLaboratoryNumber(receivedMass).valid) errors.push({key:'receivedMass',label:t('intakeRules.invalidNumber')});
+        if (receivedMass !== '' && isMassDeficient && !massWarningAcknowledged) errors.push({key:'massDeficit',label:t('intakeRules.massAcknowledgement')});
+        if (removals.length && !justification?.trim()) errors.push({key:'justification',label:t('intakeRules.reason')});
+        if (checklistData.nonConformance && !checklistData.reason?.trim()) errors.push({key:'ncReason',label:t('intakeRules.reason')});
         return errors;
     };
 
     const handleSubmit = async (decision, isDraft = false) => {
         // Skip validation for drafts
-        if (!isDraft) {
-            const hasFailedChecks = Object.values(checklistData?.items || {}).some(it => it?.status === 'FAIL') || Boolean(checklistData?.nonConformance);
+        if (!isDraft && decision === 'ACCEPTED') {
+            const hasFailedChecks = formCriteria(intakeForm).some(rule => rule.severity !== 'WARNING' && checklistData?.items?.[rule.id]?.status === 'FAIL') || Boolean(checklistData?.nonConformance);
             const isManager = ['SUPER_ADMIN', 'ADMIN', 'LAB_MANAGER'].includes(user?.role);
 
             if (decision === 'ACCEPTED' && hasFailedChecks && !isManager) {
@@ -1281,9 +1223,15 @@ const Reception = () => {
         setValidationErrors([]);
         setLoading(true);
 
+        if (!intakeForm || formState.error) {setLoading(false);showDialog({type:'error',title:t('intakeRules.effectiveForm'),message:t('intakeRules.resolveBeforeAccept')});return;}
+        const capturedAtLocal=commandRef.current?.capturedAtLocal || new Date().toISOString();
         const payload = {
+            intent:isDraft ? 'SAVE_DRAFT' : decision === 'REJECTED' ? 'REJECT' : 'ACCEPT',
+            sampleId:sampleData?.id || undefined,
+            intakeTemplate:pinFor(intakeForm),contextAnswers,
+            expectedUpdatedAt:sampleData?.updatedAt,
             ...(profileInput !== undefined ? {profileReference: profileInput} : {}),
-            originalId: scanCode,
+            originalId: scanCode || ("EXT-"+temporaryId),
             decision: isDraft ? 'DRAFT' : (decision === 'REJECTED' ? 'REJECTED' : 'ACCEPTED'),
             checklist: checklistData,
             notes: intakeNotes,
@@ -1291,18 +1239,18 @@ const Reception = () => {
             exceptionReason: checklistData.nonConformance ? checklistData.reason : null,
 
             receivedBy: user.username,
-            labId: user.labId,
+            receivingLabId: user.labId,
 
             // Stage E: Chain of Custody (RC-19)
-            custodyHandoverAt: custodyHandoverAt ? new Date(custodyHandoverAt).toISOString() : new Date().toISOString(),
+            custodyHandoverAt: custodyHandoverAt ? new Date(custodyHandoverAt).toISOString() : capturedAtLocal,
             custodyCarrierName: custodyCarrierName.trim() || null,
             custodyTrackingNumber: custodyTrackingNumber.trim() || null,
             custodySenderSignature: custodySenderSignature.trim() || null,
-            receivingOfficerSignature: custodyCounterSigned ? `CONFIRMED:${user.username}:${new Date().toISOString()}` : null,
+            receivingOfficerSignature: custodyCounterSigned ? `CONFIRMED:${user.username}:${capturedAtLocal}` : null,
             coc: {
                 deliveredBy: custodyCarrierName.trim() || null,
                 receivedBy: user.username,
-                date: custodyHandoverAt ? new Date(custodyHandoverAt).toISOString() : new Date().toISOString(),
+                date: custodyHandoverAt ? new Date(custodyHandoverAt).toISOString() : capturedAtLocal,
                 trackingNumber: custodyTrackingNumber.trim() || null,
                 senderSignature: custodySenderSignature.trim() || null,
                 counterSigned: custodyCounterSigned
@@ -1314,13 +1262,13 @@ const Reception = () => {
             justification: removals.length > 0 ? justification : null,
 
             isWalkIn: mode === 'WALK_IN',
-            projectId: mode === 'WALK_IN' ? null : (sessionProject || null),
+            projectId: sampleData?.projectId || (mode === 'WALK_IN' ? null : sessionProject || null),
             submitterDetails: (mode === 'WALK_IN' || sampleData?.isNew) ? submitter : null,
-            samplingDetails: (mode === 'WALK_IN' || sampleData?.isNew) ? sampling : null,
+            samplingDetails: sampling,
             isDraft,
 
             // Stage A: Desk-Only Facts
-            receivedMass: receivedMass ? parseFloat(receivedMass) : null,
+            receivedMass: receivedMass === '' ? null : receivedMass,
             massWarningAcknowledged: !!massWarningAcknowledged,
             moistureOnArrival: moistureOnArrival || null,
             foreignMaterial: foreignMaterial.length > 0 ? foreignMaterial : null,
@@ -1329,11 +1277,14 @@ const Reception = () => {
 
             // Stage B: Location & Provenance
             coordinates: sampling.coordinates || null,
-            positionalUncertaintyM: sampling.positionalUncertaintyM ? parseFloat(sampling.positionalUncertaintyM) : null,
+            positionalUncertaintyM: sampling.positionalUncertaintyM ?? null,
             locationSource: sampling.locationSource || sampling.captureMethod || null,
-            compositeRadiusM: sampling.compositeRadiusM ? parseFloat(sampling.compositeRadiusM) : null
+            compositeRadiusM: sampling.compositeRadiusM ?? null
         };
 
+        const semantic=JSON.stringify(payload);
+        if (!commandRef.current || commandRef.current.semantic !== semantic) commandRef.current={semantic,operationId:crypto.randomUUID(),capturedAtLocal};
+        payload.operationId=commandRef.current.operationId;payload.capturedAtLocal=commandRef.current.capturedAtLocal;
         try {
             const res = await axios.post('/api/reception/intake', payload);
             if (isDraft) {
@@ -1351,34 +1302,19 @@ const Reception = () => {
                 if (!res.data.rejected) {
                     setIsLabelPrintOpen(true);
                 }
-                localStorage.removeItem(AUTOSAVE_KEY);
+                if (draftKeyRef.current) localStorage.removeItem(draftKeyRef.current);
             }
         } catch (err) {
             // Offline outbox fallback if disconnected or server unreachable
             if (!navigator.onLine || !err.response) {
                 try {
+                    persistLocalDraft(true);
                     await recordSyncOperation({
-                        type: 'RECORD_INTAKE',
-                        target: { originalId: scanCode },
-                        payload
+                        type:'RECORD_INTAKE',target:{originalId:payload.originalId},payload,
+                        operationId:payload.operationId,capturedAtLocal:payload.capturedAtLocal,userId:user.id,labId:user.labId
                     });
                     playNoticeChime();
-                    setResult({
-                        success: true,
-                        labId: 'OFFLINE-' + scanCode,
-                        originalId: scanCode,
-                        status: 'RECEIVED_OFFLINE',
-                        custodyHandoverAt: payload.custodyHandoverAt,
-                        custodyCarrierName: payload.custodyCarrierName,
-                        custodyTrackingNumber: payload.custodyTrackingNumber,
-                        receivingOfficerName: user.name || user.username
-                    });
-                    showDialog({
-                        type: 'info',
-                        title: 'Offline Intake Queued',
-                        message: `Intake for sample ${scanCode} queued locally in offline storage. It will synchronize automatically when online.`
-                    });
-                    localStorage.removeItem(AUTOSAVE_KEY);
+                    setResult({success:true,queued:true,persistence:'DEVICE_ONLY',intent:payload.intent,originalId:payload.originalId});
                     setLoading(false);
                     return;
                 } catch (queueErr) {
@@ -1902,6 +1838,7 @@ const Reception = () => {
                                 <ProfileReferenceFields value={profileInput} onChange={setProfileInput} current={currentProfile} disabled={loading}/>
                                 {(mode === 'WALK_IN' || sampleData?.isNew) ? (
                                     <WalkInForm
+                                        compact={intakeForm?.context?.origin === 'DESK_WALKIN'}
                                         submitter={submitter} setSubmitter={setSubmitter}
                                         sampling={sampling} setSampling={setSampling}
                                         groups={groups}
@@ -2047,11 +1984,11 @@ const Reception = () => {
                                 )}
                             </div>
 
-                            {/* RC-01: Received Sample Mass & Live Sufficiency Meter */}
-                            <div>
+                            {/* Recorded mass remains visible even when a new form disables the field. */}
+                            {(formFields(intakeForm).some(f => f.mapping === 'receivedMass') || receivedMass !== '') && <div>
                                 <div className="flex justify-between items-center mb-1.5">
                                     <label className="text-sm font-semibold text-sf-text flex items-center gap-1.5">
-                                        Received Sample Mass (g) *
+                                        {formLabel(formFields(intakeForm).find(f => f.mapping === 'receivedMass') || {id:'receivedMass'},locale)} (g) {formFields(intakeForm).some(f => f.mapping === 'receivedMass' && f.required) && '*'}
                                         <InfoTooltip text="Weigh physical bag on desk scale. System verifies sufficient material for ordered tests + 100g standard archive retention." />
                                     </label>
                                     <span className="text-xs font-mono text-sf-muted">
@@ -2061,7 +1998,8 @@ const Reception = () => {
                                 <div className="relative">
                                     <input
                                         data-field-key="receivedMass"
-                                        type="number"
+                                        type="text"
+                                        inputMode="decimal"
                                         min="0"
                                         step="0.1"
                                         value={receivedMass}
@@ -2136,10 +2074,10 @@ const Reception = () => {
                                         )}
                                     </div>
                                 )}
-                            </div>
+                            </div>}
 
                             {/* RC-02: Moisture State on Arrival */}
-                            <div>
+                            {(formFields(intakeForm).some(f => f.mapping === 'moistureOnArrival') || moistureOnArrival !== '') && <div>
                                 <label className="text-sm font-semibold text-sf-text mb-1.5 flex items-center gap-1.5">
                                     <Droplets size={16} className="text-blue-500" /> Moisture on Arrival
                                     <InfoTooltip text="Desk assessment of raw sample moisture prior to lab drying protocol." />
@@ -2163,13 +2101,13 @@ const Reception = () => {
                                                         : 'bg-sf-surface border-sf-divider text-sf-text hover:border-blue-400'
                                                 }`}
                                             >
-                                                <div className="text-xs font-semibold">{m.label}</div>
+                                                <div className="text-xs font-semibold">{t('intakeRules.moisture.'+m.id)}</div>
                                                 <div className={`text-[10px] truncate ${isSelected ? 'text-blue-100' : 'text-sf-muted'}`}>{m.hint}</div>
                                             </button>
                                         );
                                     })}
                                 </div>
-                            </div>
+                            </div>}
 
                             {/* RC-02: Foreign Material Inclusions */}
                             <div>
@@ -2255,7 +2193,11 @@ const Reception = () => {
                         </div>
 
                         <div className="bg-sf-surface p-6 rounded-xl border border-sf-divider shadow-sm">
+                            <IntakeRuleSummary form={intakeForm} error={formState.error} cached={formState.cached}/>
+                            {localStorage.getItem('limsi_intake_autosave') && <div className="rounded-lg bg-sf-canvas p-3 text-sm text-sf-muted"><p>{t('intakeRules.legacyRetained')}</p>{['SUPER_ADMIN','LAB_MANAGER'].includes(user?.role) && <button type="button" className="mt-2 underline" onClick={()=>showDialog({type:'confirm',title:t('intakeRules.legacyRecover'),message:t('intakeRules.legacyOwnership'),confirmText:t('intakeRules.legacyRecover'),onConfirm:()=>{try {const data=JSON.parse(localStorage.getItem('limsi_intake_autosave'));if(data.userId && String(data.userId)!==String(user.id) || data.labId && data.labId!==user.labId) return;restoreDraft(data);}catch{}}})}>{t('intakeRules.legacyRecover')}</button>}</div>}
+                            <IntakeContextFields form={intakeForm} values={{...Object.fromEntries(formFields(intakeForm).filter(f=>f.mapping).map(f=>[f.id,f.mapping === 'collectionDate' ? sampling.date : sampling[f.mapping]])),...contextAnswers}} excludeMappings={['receivedMass','moistureOnArrival']} onChange={values=>{setContextAnswers(values);setSampling(prev=>({...prev,...Object.fromEntries(formFields(intakeForm).filter(f=>f.mapping && !['receivedMass','moistureOnArrival'].includes(f.mapping)).map(f=>[f.mapping === 'collectionDate' ? 'date' : f.mapping,values[f.id]]))}));}}/>
                             <ComplianceChecklist
+                                template={intakeForm}
                                 value={checklistData}
                                 onChange={setChecklistData}
                                 onNonConformance={(checked) => setChecklistData(prev => ({ ...prev, nonConformance: checked }))}
@@ -2472,7 +2414,13 @@ const Reception = () => {
             {result && (
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300 no-print">
                     <div className="bg-sf-surface p-8 rounded-2xl shadow-2xl max-w-md w-full text-center border border-sf-divider">
-                        {result.success && (result.rejected || result.status === 'RECEIVED_REJECTED') ? (
+                        {result.queued ? <>
+                            <Clock size={42} className="mx-auto text-amber-600 mb-4"/>
+                            <h2 className="font-bold text-xl text-sf-text">{t('intakeRules.deviceSaved')}</h2>
+                            <p className="text-sf-muted my-4">{t('intakeRules.awaitingSync')} · {t('intakeRules.intent.'+result.intent)}</p>
+                            <p className="text-sm text-sf-muted mb-4">{t('intakeRules.noAccessionYet')}</p>
+                            <button type="button" onClick={()=>setResult(null)} className="w-full rounded-lg bg-sf-raised border border-sf-divider p-3 text-sf-text">{t('intakeRules.backToDraft')}</button>
+                        </> : result.success && (result.rejected || result.status === 'RECEIVED_REJECTED') ? (
                             <>
                                 <div className="mx-auto w-24 h-24 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center mb-6 animate-in zoom-in duration-500">
                                     <div className="w-16 h-16 bg-rose-600 rounded-full flex items-center justify-center shadow-lg shadow-rose-600/30">

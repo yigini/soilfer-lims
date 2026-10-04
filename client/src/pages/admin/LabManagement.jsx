@@ -12,6 +12,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useDialog } from '../../context/DialogContext';
 
+import IntakeTemplateSettings from '../../components/reception/IntakeTemplateSettings';
 import InviteStaffModal from '../../components/staff/InviteStaffModal';
 import AccessReviewModal from '../../components/staff/AccessReviewModal';
 import RecoveryLinkModal from '../../components/staff/RecoveryLinkModal';
@@ -1618,6 +1619,7 @@ export default function LabManagement() {
             {/* ────────────────────────────────────────────────────────── */}
             {activeTab === 'settings' && (
                 <div className="space-y-6 animate-in fade-in duration-150">
+                    {workspace?.capabilities?.canManageProfile && <IntakeTemplateSettings labId={selectedLabId}/>}
                     <div>
                         <h2 className="text-lg font-black text-sf-text">Laboratory Configuration</h2>
                         <p className="text-xs text-sf-muted mt-0.5">

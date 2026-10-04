@@ -2307,8 +2307,7 @@
       "reset": "Repor",
       "applyFilters": "Aplicar filtros"
     }
-  }
-,
+  },
   "profileReference": {
     "label": "Perfil do solo / ponto de amostragem",
     "code": "Código registrado no campo",
@@ -2352,5 +2351,89 @@
       "profileRelation": "Significado registrado (SITE_POINT, COMPOSITE, CONFIRMED_PROFILE)",
       "collectionDate": "Data de coleta no campo"
     }
+  },
+  "intakeRules": {
+    "effectiveForm": "Formulário de receção",
+    "version": "Versão",
+    "inputKept": "Os dados introduzidos foram conservados.",
+    "cached": "Formulário guardado; a autorização atual será verificada na sincronização.",
+    "resolving": "A carregar as regras de receção aplicáveis…",
+    "context": "Contexto da amostra",
+    "required": "Obrigatório",
+    "labelFallback": "Designação em inglês; tradução não fornecida.",
+    "unrecorded": "Não registado",
+    "reason": "Motivo / observação",
+    "optionalFacts": "Registe os dados disponíveis. Deixe em branco as observações desconhecidas. O formulário indica os campos obrigatórios.",
+    "restore": "Restaurar o meu rascunho",
+    "restoreHint": "Existe um formulário inacabado da sua conta e laboratório neste dispositivo. Restaurar? A cópia será conservada até à confirmação do servidor.",
+    "keepStored": "Iniciar outro; conservar a cópia",
+    "legacyRetained": "Este dispositivo conserva um rascunho antigo sem proprietário identificado. Peça ao responsável do laboratório que verifique a titularidade antes da recuperação. Não foi eliminado.",
+    "resolveBeforeAccept": "Ligue-se e reveja o formulário aplicável antes de continuar. O rascunho é conservado.",
+    "chooseAnalyses": "Selecione as análises solicitadas.",
+    "invalidNumber": "Introduza um valor numérico válido.",
+    "massAcknowledgement": "Confirme a insuficiência de massa para as análises solicitadas.",
+    "deviceSaved": "Guardado neste dispositivo",
+    "awaitingSync": "A aguardar sincronização com o servidor",
+    "noAccessionYet": "Ainda não é uma receção ou aceitação confirmada pelo servidor. Não foi atribuído um número de laboratório.",
+    "backToDraft": "Voltar ao formulário",
+    "settings": "Regras e formulário de receção",
+    "settingsHint": "Escolha regras publicadas para novas receções. As alterações criam uma versão imutável. Os rascunhos e registos aceites conservam a versão original.",
+    "loadFailed": "Não foi possível carregar as regras de receção.",
+    "saveFailed": "Não foi possível guardar as definições.",
+    "saved": "Guardado e confirmado pelo servidor.",
+    "material": "Material",
+    "origin": "Origem da amostra",
+    "template": "Formulário publicado",
+    "choose": "Escolha…",
+    "criteria": "Verificações de aceitação",
+    "contextFields": "Campos de contexto",
+    "enabled": "Ativado",
+    "saveVersion": "Guardar e aplicar uma nova versão",
+    "usePublished": "Aplicar esta versão publicada",
+    "bulkConfirm": "Confirmar verificações observadas nas linhas selecionadas",
+    "bulkHint": "Selecione apenas amostras verificadas fisicamente. As exceções e os dados de origem são conservados.",
+    "planned": "Aceitação prevista",
+    "rowReview": "Rever linha e verificações",
+    "batchLocal": "Rascunho da remessa guardado neste dispositivo. Ligue-se para confirmar a remessa completa; nenhuma amostra foi ainda recebida.",
+    "legacyRecover": "Rever e recuperar rascunho antigo",
+    "legacyOwnership": "Recupere este formulário apenas se confirmar que pertence ao seu laboratório e tem autorização de acesso. O original será conservado.",
+    "source": {
+      "SAVED_REVISION": "Versão original guardada",
+      "PROJECT_BINDING": "Selecionado por este projeto",
+      "LAB_DEFAULT": "Predefinição do laboratório",
+      "COMPATIBLE_SEED": "Formulário padrão compatível"
+    },
+    "originNames": {
+      "*": "Todas as origens",
+      "PROJECT_SAMPLE": "Amostra de projeto",
+      "DESK_WALKIN": "Externa / sem marcação"
+    },
+    "intent": {
+      "SAVE_DRAFT": "Rascunho",
+      "RECEIVE": "Receção física",
+      "ACCEPT": "Aceitação",
+      "REJECT": "Rejeição"
+    },
+    "moisture": {
+      "DRY": "Seca",
+      "MOIST": "Húmida",
+      "WET": "Molhada",
+      "SATURATED": "Saturado"
+    },
+    "contact": {
+      "name": "Nome / contacto",
+      "surname": "Apelido",
+      "phone": "Telefone",
+      "email": "Email",
+      "organization": "Organização"
+    },
+    "seedNames": {
+      "INTAKE-SEED-SOILFER": "Receção de solo SoilFER",
+      "INTAKE-SEED-RESEARCH": "Receção de solo para investigação",
+      "INTAKE-SEED-COMMERCIAL": "Receção comercial de solo",
+      "INTAKE-SEED-COMPATIBLE": "Receção de outros materiais"
+    },
+    "labCopy": "Cópia do laboratório",
+    "seedCopy": "Formulário do sistema"
   }
 }

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { X, AlertTriangle, CheckCircle, Camera, Upload, Trash2 } from 'lucide-react';
+import {useLanguage} from '../../context/LanguageContext';
+import ComplianceChecklist from './ComplianceChecklist';
+import {IntakeContextFields,IntakeRuleSummary} from './IntakeFormContext';
 import axios from 'axios';
 
 const PRESET_REASONS = [
@@ -12,10 +15,13 @@ const PRESET_REASONS = [
 ];
 
 const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
+    const {t}=useLanguage();
+    const [checklist,setChecklist]=useState(sample?.checklist || {items:{}});
+    const [contextAnswers,setContextAnswers]=useState(sample?.contextAnswers || {});
     const [status, setStatus] = useState(sample?.status || 'ACCEPTED');
     const [rejectionReason, setRejectionReason] = useState(sample?.rejectionReason || '');
     const [receivedMass, setReceivedMass] = useState(sample?.receivedMass !== undefined && sample?.receivedMass !== null ? sample.receivedMass : '');
-    const [moistureOnArrival, setMoistureOnArrival] = useState(sample?.moistureOnArrival || 'MOIST');
+    const [moistureOnArrival, setMoistureOnArrival] = useState(sample?.moistureOnArrival || '');
     const [notes, setNotes] = useState(sample?.notes || '');
     const [photos, setPhotos] = useState(sample?.intakePhotos || []);
     const [uploading, setUploading] = useState(false);
@@ -72,7 +78,7 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
             ...sample,
             status,
             rejectionReason: status === 'REJECTED' ? rejectionReason.trim() : null,
-            receivedMass: receivedMass !== '' ? parseFloat(receivedMass) : null,
+            receivedMass: receivedMass !== '' ? receivedMass : null,checklist,contextAnswers,
             moistureOnArrival,
             notes: notes.trim(),
             intakePhotos: photos
@@ -96,6 +102,9 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
 
                 {/* Body */}
                 <div className="p-6 overflow-y-auto space-y-6 flex-1 text-sm text-sf-text">
+                    <IntakeRuleSummary form={sample._form}/>
+                    <IntakeContextFields form={sample._form} values={contextAnswers} excludeMappings={['receivedMass','moistureOnArrival']} onChange={setContextAnswers}/>
+                    <ComplianceChecklist template={sample._form} value={checklist} onChange={setChecklist}/>
                     {/* Status Toggle */}
                     <div>
                         <label className="block font-bold mb-2">Sample Reception Decision</label>
@@ -185,7 +194,7 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
                                 onChange={(e) => setMoistureOnArrival(e.target.value)}
                                 className="w-full p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text text-xs focus:ring-1 focus:ring-emerald-500"
                             >
-                                <option value="DRY">Dry (&lt;10%)</option>
+                                <option value="">{t('intakeRules.unrecorded')}</option><option value="DRY">Dry (&lt;10%)</option>
                                 <option value="MOIST">Moist (10-25%)</option>
                                 <option value="WET">Wet (25-40%)</option>
                                 <option value="SATURATED">Saturated (&gt;40%)</option>

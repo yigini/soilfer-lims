@@ -64,10 +64,10 @@ describe('Mounted intake draft and manifest paths preserve source identity',()=>
         expect(JSON.parse(stored.fieldMetadata).profileReference).toMatchObject({code:'0',namespace:project,recordedBy:jwt.decode(token).id});
         const reopen=await request(app).get(`/api/reception/sample-context/${sampleId}`).set('Authorization',`Bearer ${token}`);
         expect(reopen.status).toBe(200);
-        const omit={...payload};delete omit.profileReference;
+        const omit={...payload,expectedUpdatedAt:stored.updatedAt.toISOString()};delete omit.profileReference;
         expect((await request(app).post('/api/reception/intake').set('Authorization',`Bearer ${token}`).send(omit)).status).toBe(200);
         expect(JSON.parse((await prisma.sample.findUnique({where:{id:sampleId}})).fieldMetadata).profileReference.code).toBe('0');
-        expect((await request(app).post('/api/reception/intake').set('Authorization',`Bearer ${token}`).send({...payload,profileReference:{code:null}})).status).toBe(200);
+        expect((await request(app).post('/api/reception/intake').set('Authorization',`Bearer ${token}`).send({...payload,expectedUpdatedAt:(await prisma.sample.findUnique({where:{id:sampleId}})).updatedAt.toISOString(),profileReference:{code:null}})).status).toBe(200);
         const unknown=JSON.parse((await prisma.sample.findUnique({where:{id:sampleId}})).fieldMetadata);
         expect(unknown.profileReference).toMatchObject({code:null,namespace:null,relation:'UNSPECIFIED'});
         expect(unknown.site_id).toBe('SOURCE-SITE');
@@ -81,7 +81,7 @@ describe('Mounted intake draft and manifest paths preserve source identity',()=>
     });
     test('actual batch capture keeps separate source codes, decimal depths and distinct accessions',async()=>{
         const checklist={items:Object.fromEntries(['container','label','quantity','condition','coc'].map(key=>[key,{status:'PASS'}]))};
-        const response=await request(app).post('/api/reception/consignments').set('Authorization',`Bearer ${token}`).send({consignment:{projectId:project},defaults:{receivedMass:350,checklist},samples:[{originalId:'PROFILE-BATCH-A',profileReference:{code:0},depthTopCm:0,depthBottomCm:20.5},{originalId:'PROFILE-BATCH-B',profileReference:{code:'PIT-B'},depthTopCm:20.5,depthBottomCm:50}]});
+        const response=await request(app).post('/api/reception/consignments').set('Authorization',`Bearer ${token}`).send({bulkAttestation:{confirmed:true},consignment:{projectId:project},defaults:{receivedMass:350,checklist},samples:[{originalId:'PROFILE-BATCH-A',profileReference:{code:0},depthTopCm:0,depthBottomCm:20.5},{originalId:'PROFILE-BATCH-B',profileReference:{code:'PIT-B'},depthTopCm:20.5,depthBottomCm:50}]});
         expect({status:response.status,body:response.body}).toMatchObject({status:201});
         const rows=await prisma.sample.findMany({where:{originalId:{in:['PROFILE-BATCH-A','PROFILE-BATCH-B']}},orderBy:{originalId:'asc'}});
         expect(rows.map(row=>JSON.parse(row.fieldMetadata).profileReference.code)).toEqual(['0','PIT-B']);

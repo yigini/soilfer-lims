@@ -14,6 +14,7 @@ import {ProfileReferenceSummary} from '../components/reception/ProfileReferenceF
 import ProfileCorrectionDialog from '../components/sample/ProfileCorrectionDialog';
 import FieldMap from '../components/sample/FieldMap';
 import IntakeRequestCard from '../components/sample/IntakeRequestCard';
+import IntakeHistory from '../components/sample/IntakeHistory';
 import AnalysisUpdateModal from '../components/sample/AnalysisUpdateModal';
 import LabelPrintDialog from '../components/common/LabelPrintDialog';
 import ReportContent from '../components/report/ReportContent';
@@ -1317,6 +1318,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                         </div>
 
                         {/* Intake Condition Card */}
+                        <IntakeHistory sample={sample || identity}/>
                         <IntakeRequestCard sample={sample || identity} />
                         <section className="bg-sf-surface rounded-2xl p-6 border border-sf-divider space-y-4">
                             <ProfileReferenceSummary profile={identity?.profileReference}/>

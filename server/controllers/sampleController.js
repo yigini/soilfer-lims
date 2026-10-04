@@ -478,6 +478,13 @@ exports.updateStatus = async (req, res) => {
             });
         }
 
+        // Intake lifecycle states always pass through the canonical reception operation.
+        if (['RECEIVED','ACCEPTED','LAB_ID_ASSIGNED'].includes(status)) {
+            const command=require('../services/intakeCommandService');
+            try {const outcome=await command.executeIntake({actor:user,payload:{...req.body,sampleId:String(id)},intent:status==='RECEIVED'?'RECEIVE':'ACCEPT',operationId:req.body.operationId||req.get('Idempotency-Key')}); return res.json({...await prisma.sample.findUnique({where:{id:outcome.id}}),receiptId:outcome.receiptId});}
+            catch(err) {return command.sendError(res,err);}
+        }
+
         // 1. Validate Transition
         if (!workflow.isValidSampleTransition(sample.status, status)) {
             return res.status(400).json({
@@ -496,55 +503,10 @@ exports.updateStatus = async (req, res) => {
             updates.receptionDate = new Date();
         }
 
-        // Critical: Generate Lab ID on transition to LAB_ID_ASSIGNED or ACCEPTED
-        if ((status === 'LAB_ID_ASSIGNED' || status === 'ACCEPTED') && !sample.labId) {
-            updates.labId = await idGenerator.generateLabId(sample.projectCode || 'GEN');
-
-            // --- AUTOMATION: Enforce SoilFER Bundle ---
-            const projectPolicyService = require('../services/projectPolicyService');
-            const isSoilFer = projectPolicyService.isSoilFerTemplate(sample.projectCode || sample.projectId);
-
-            if (isSoilFer) {
-                // Load analysis groups from database
-                const analysisGroupsRaw = await prisma.analysisGroup.findMany({ where: { id: 'std-soil' } });
-                const stdGroup = analysisGroupsRaw[0];
-                if (stdGroup) {
-                    const groupAnalyses = stdGroup.analyses ? JSON.parse(stdGroup.analyses) : [];
-                    // Finding #7: Start from existing analyses to avoid overwriting on partial payloads
-                    const existingAnalyses = sample.requiredAnalyses
-                        ? (typeof sample.requiredAnalyses === 'string' ? JSON.parse(sample.requiredAnalyses) : sample.requiredAnalyses)
-                        : [];
-                    let requiredAnalyses = new Set(existingAnalyses);
-                    groupAnalyses.forEach(code => requiredAnalyses.add(code));
-                    updates.requiredAnalyses = JSON.stringify(Array.from(requiredAnalyses));
-                }
-            }
-        }
-
-        if (updates.requiredAnalyses) {
-            const selected = await cataloguePolicy.validateSelection(JSON.parse(updates.requiredAnalyses), { labId: sample.assignedLab || user.labId, existing: cataloguePolicy.parseJson(sample.requiredAnalyses, []) });
-            if (!selected.valid) return res.status(400).json({ error: selected.error, issues: selected.issues });
-        }
-
-        if (status === 'ACCEPTED') {
-            updates.dryingStatus = 'PENDING';
-            updates.preparationStatus = 'PENDING';
-        }
-
         const { transitionSample } = require('../services/sampleStateService');
         const nextStatus = status;
         delete updates.status;
         const updated = await transitionSample(id, nextStatus, user, updates.notes || updates.reason || 'Status updated via API', updates);
-
-        // Post-Update Hook for Work Items
-        if (nextStatus === 'ACCEPTED') {
-            try {
-                const workItemController = require('./workItemController');
-                await workItemController.generateWorkItemsForSample(updated);
-            } catch (e) {
-                console.error('Failed to generate work items', e);
-            }
-        }
 
         await prisma.auditLog.create({
             data: {
@@ -788,103 +750,13 @@ const userHasScopeForSample = async (user, sample) => {
  * RECEIVE SAMPLE - Transition to RECEIVED state
  * POST /api/samples/:id/receive
  */
-exports.receiveSample = async (req, res) => {
-    const { id } = req.params;
-    const user = req.user;
-
-    try {
-        // Permission check
-        if (!hasPermission(user, 'RECEIVE_SAMPLE')) {
-            return res.status(403).json({ error: 'Only Intake Officers and Managers can receive samples' });
-        }
-
-        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
-        if (!sample) return res.status(404).json({ error: 'Sample not found' });
-
-        // RBAC Scope check
-        if (!(await userHasScopeForSample(user, sample))) {
-            return res.status(403).json({ error: 'Sample is outside your lab scope' });
-        }
-
-        // Validate transition
-        const currentStatus = sample.status;
-        if (currentStatus !== workflow.SAMPLE_STATES.EXPECTED && currentStatus !== 'COLLECTED') {
-            return res.status(400).json({
-                error: `Cannot receive. Sample must be EXPECTED. Current: ${currentStatus}`
-            });
-        }
-
-        // Check for active provenance hold (Finding 4: Ambiguous specimen identity must remain visibly unresolved)
-        let sampleMeta = {};
+exports.receiveSample = async (req,res) => {
         try {
-            sampleMeta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
-        } catch (e) {}
-        if (sampleMeta.provenanceHold && sampleMeta.provenanceHold.status === 'AMBIGUOUS_PROVENANCE_HOLD') {
-            return res.status(409).json({
-                error: 'PROVENANCE_HOLD',
-                code: 'AMBIGUOUS_PROVENANCE_HOLD',
-                message: `Cannot receive sample '${sample.originalId}': Ambiguous field specimen identity. Reconciliation required before physical receipt. Reason: ${sampleMeta.provenanceHold.reason}`
-            });
-        }
-
-        // Validate project admission policy via centralized service (Finding 1)
-        if (sample.projectId || sample.projectCode) {
-            const project = await prisma.project.findFirst({
-                where: {
-                    OR: [
-                        { id: sample.projectId || '' },
-                        { code: sample.projectCode || '' }
-                    ]
-                }
-            });
-            if (project) {
-                const projectPolicyService = require('../services/projectPolicyService');
-                const admission = projectPolicyService.canAdmitSample({
-                    project,
-                    channel: 'PHYSICAL_RECEIPT',
-                    actor: user,
-                    labId: user.labId
-                });
-                if (!admission.allowed) {
-                    return res.status(422).json({
-                        error: admission.code || 'PROJECT_ADMISSIONS_BLOCKED',
-                        message: admission.reason || `Cannot receive sample: Admissions for project ${project.code} are blocked.`
-                    });
-                }
-            }
-        }
-
-        const beforeState = sample.status;
-        const now = new Date();
-
-        const { transitionSample } = require('../services/sampleStateService');
-        const updated = await transitionSample(id, workflow.SAMPLE_STATES.RECEIVED, user, 'Sample received at lab', {
-            receptionDate: now,
-            receivedBy: user.username
-        });
-
-        // Audit: SAMPLE_RECEIVED
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-rec-${Date.now()}`,
-                entity: 'SAMPLE',
-                entityId: id,
-                action: 'SAMPLE_RECEIVED',
-                details: `Sample received at lab by ${user.name || user.username}`,
-                performedBy: user.username,
-                performedByName: user.name || user.username,
-                timestamp: now,
-                before: JSON.stringify({ status: beforeState }),
-                after: JSON.stringify({ status: workflow.SAMPLE_STATES.RECEIVED }),
-                sampleId: String(id)
-            }
-        });
-
-        res.json(updated);
-    } catch (error) {
-        console.error('[receiveSample] Error:', error);
-        res.status(500).json({ error: 'Failed to receive sample' });
-    }
+            const command=require('../services/intakeCommandService');
+            const result=await command.executeIntake({actor:req.user,payload:{...req.body,sampleId:String(req.params.id)},intent:'RECEIVE',operationId:req.body.operationId||req.get('Idempotency-Key')});
+            const updated=await prisma.sample.findUnique({where:{id:result.id}});
+            return res.json({...updated,receiptId:result.receiptId,workItems:await prisma.workItem.findMany({where:{sampleId:result.id}})});
+        } catch(err) {return require('../services/intakeCommandService').sendError(res,err);}
 };
 
 /**
@@ -892,107 +764,17 @@ exports.receiveSample = async (req, res) => {
  * POST /api/samples/walkin
  * Body: { submitter, submitterContact, description, analyses: [...], countryCode? }
  */
-exports.createWalkInSample = async (req, res) => {
-    const { submitter, submitterContact, description, analyses, countryCode = 'GEN', sampleType, ptRound, expectedValues } = req.body;
-    const user = req.user;
-
-    // Permission check
-    if (!hasPermission(user, 'CREATE_SAMPLE')) {
-        return res.status(403).json({ error: 'Only Intake Officers and Managers can create walk-in samples' });
-    }
-
-    // Validation
-    if (!submitter) {
-        return res.status(400).json({ error: 'submitter is required' });
-    }
-
-    // STRICT: PT Validation
-    if (sampleType === 'PT') {
-        if (!ptRound) return res.status(400).json({ error: 'ptRound is required for PT samples' });
-        // expectedValues are optional at creation (might be blind)
-    }
-
+exports.createWalkInSample = async (req,res) => {
     try {
-        // Determine lab from user
-        const assignedLab = user.labId || (user.role === 'SUPER_ADMIN' ? req.body.assignedLab : null);
-        const receivingLab = assignedLab ? await prisma.lab.findUnique({where: {id: assignedLab}}) : null;
-        if (!receivingLab || !receivingLab.isActive) return res.status(400).json({error: 'ACTIVE_LAB_REQUIRED', message: 'Select an active receiving laboratory.'});
-        if (req.body.assignedLab && req.body.assignedLab !== assignedLab) return res.status(403).json({error: 'TARGET_OUTSIDE_SCOPE'});
-        const selected = await cataloguePolicy.validateSelection(analyses ?? [], { labId: assignedLab });
-        if (!selected.valid) return res.status(400).json({ error: selected.error, issues: selected.issues });
-
-        // Automated Short Sample ID for Walk-ins / PT
-        const prefix = sampleType === 'PT' ? 'P' : 'W';
-        const autoId = await idGenerator.generateWalkInId(countryCode, prefix);
-        const originalId = sampleType === 'PT' && ptRound ? `PT-${ptRound}-${autoId}` : autoId;
-        const sampleId = autoId;
-        const now = new Date();
-
-        const sampleMeta = {
-            sampleType: sampleType || 'WALKIN',
-            ptRound: ptRound || null,
-            expectedValues: expectedValues || null
-        };
-
-        // Create sample
-        const newSample = await prisma.sample.create({
-            data: {
-                id: sampleId,
-                originalId: originalId,
-                status: 'RECEIVED', // Walk-ins start as RECEIVED
-                projectCode: null,
-                country: receivingLab.country,
-                countryName: receivingLab.country,
-                assignedLab: assignedLab,
-                receptionDate: now,
-                receivedBy: user.username,
-                requiredAnalyses: analyses ? JSON.stringify(analyses) : '[]',
-                labId: autoId, // Walk-ins use their short ID as Lab ID (Finding #5)
-                metadata: JSON.stringify(sampleMeta),
-                fieldMetadata: JSON.stringify({
-                    profileReference: require('../services/intakeProfileService').capture({country: receivingLab.country}, {}, req.body, {actor: user.id || user.username, source: 'WALK_IN_INTAKE', isNew: true}).profileReference,
-                    submitterName: { value: submitter, source: 'WALK_IN_INTAKE', lastUpdatedAt: now, lastUpdatedBy: user.username },
-                    submitterContact: { value: submitterContact, source: 'WALK_IN_INTAKE', lastUpdatedAt: now, lastUpdatedBy: user.username },
-                    description: { value: description, source: 'WALK_IN_INTAKE', lastUpdatedAt: now, lastUpdatedBy: user.username },
-                    sampleType: { value: sampleType || 'WALKIN', source: 'WALK_IN_INTAKE', lastUpdatedAt: now, lastUpdatedBy: user.username }
-                }),
-                history: JSON.stringify([{
-                    status: 'RECEIVED',
-                    timestamp: now,
-                    changedBy: user.username,
-                    note: 'Walk-in/PT Sample Created'
-                }])
-            }
-        });
-
-        // Audit: SAMPLE_RECEIVED
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-walkin-${Date.now()}`,
-                entity: 'SAMPLE',
-                entityId: sampleId,
-                action: 'SAMPLE_RECEIVED',
-                details: `Walk-in sample created and received by ${user.name || user.username}`,
-                performedBy: user.username,
-                performedByName: user.name || user.username,
-                timestamp: now,
-                sampleId: sampleId
-            }
-        });
-
-        res.status(201).json({
-            sample: {
-                ...newSample,
-                sampleType: sampleMeta.sampleType,
-                ptRound: sampleMeta.ptRound,
-                expectedValues: sampleMeta.expectedValues
-            }
-        });
-    } catch (error) {
-        console.error('Create Walk-in Error:', error);
-        if (error instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({code: error.code, message: error.message});
-        res.status(500).json({ error: 'Failed to create walk-in sample' });
-    }
+        if(!hasPermission(req.user,'CREATE_SAMPLE')) return res.status(403).json({error:'PERMISSION_DENIED'});
+        if(!req.body.submitter) return res.status(400).json({error:'submitter is required'});
+        if(req.body.sampleType==='PT'&&!req.body.ptRound) return res.status(400).json({error:'ptRound is required for PT samples'});
+        const command=require('../services/intakeCommandService');
+        const operationId=req.body.operationId||req.get('Idempotency-Key')||require('crypto').randomUUID();
+        const outcome=await command.executeIntake({actor:req.user,payload:{...req.body,originalId:req.body.originalId||('EXT-'+operationId),isWalkIn:true,submitterDetails:{name:req.body.submitter,phone:req.body.submitterContact},requiredAnalyses:req.body.analyses||[],samplingDetails:{...req.body.samplingDetails,sampleType:req.body.sampleType}},intent:'RECEIVE',operationId,capturedAtLocal:req.body.capturedAtLocal});
+        const record=await prisma.sample.findUnique({where:{id:outcome.id}});
+        return res.status(201).json({sample:{...record,sampleType:req.body.sampleType||'WALKIN',ptRound:req.body.ptRound||null,expectedValues:req.body.expectedValues||null},receiptId:outcome.receiptId});
+    } catch(err) {if(err.code==='MISSING_LAB_SCOPE') return res.status(400).json({error:'ACTIVE_LAB_REQUIRED',code:'ACTIVE_LAB_REQUIRED'});return require('../services/intakeCommandService').sendError(res,err);}
 };
 
 /**
@@ -1374,107 +1156,13 @@ exports.getMapState = async (req, res) => {
  * - Inits Gates
  * - Generates WorkItems
  */
-exports.acceptSample = async (req, res) => {
-    const { id } = req.params;
-    const { user } = req;
-
-    try {
-        if (!hasPermission(user, 'APPROVE_RESULTS')) {
-            return res.status(403).json({ error: 'Only Managers can accept intakes.' });
-        }
-
-        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
-        if (!sample) return res.status(404).json({ error: 'Sample not found' });
-
-        // Lab scope guard — prevent cross-lab mutations (Finding #1)
-        if (!scopeGuard.hasGlobalAccess(user) && sample.assignedLab && sample.assignedLab !== user.labId) {
-            return res.status(403).json({ error: 'Access denied: this sample belongs to another lab.' });
-        }
-
-        if (sample.status !== 'RECEIVED' && sample.status !== 'COLLECTED') {
-            return res.status(400).json({
-                error: `Sample must be in RECEIVED state to accept. Current: ${sample.status}`
-            });
-        }
-
-        // Check for active provenance hold (Finding 4: Ambiguous specimen identity must remain visibly unresolved)
-        let sampleMeta = {};
+exports.acceptSample = async (req,res) => {
         try {
-            sampleMeta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
-        } catch (e) {}
-        if (sampleMeta.provenanceHold && sampleMeta.provenanceHold.status === 'AMBIGUOUS_PROVENANCE_HOLD') {
-            return res.status(409).json({
-                error: 'PROVENANCE_HOLD',
-                code: 'AMBIGUOUS_PROVENANCE_HOLD',
-                message: `Cannot accept intake for sample '${sample.originalId}': Ambiguous field specimen identity. Reconciliation required before acceptance. Reason: ${sampleMeta.provenanceHold.reason}`
-            });
-        }
-
-        // IDENTITY VERIFICATION
-        // Lab ID is now assigned at reception to facilitate immediate labeling.
-        const labId = sample.labId;
-        if (!labId) {
-            return res.status(500).json({ error: 'Sample is missing a Lab ID. Please contact support or re-intake.' });
-        }
-        console.log(`[ACCEPT] Verifying Lab ID ${labId} for sample ${sample.id}`);
-
-        const now = new Date();
-
-        const history = typeof sample.history === 'string' ? JSON.parse(sample.history) : (sample.history || []);
-        history.push({
-            status: 'ACCEPTED',
-            timestamp: now,
-            user: user.username,
-            note: `Intake Accepted. Assigned Lab ID: ${labId}`
-        });
-
-        const { transitionSample } = require('../services/sampleStateService');
-        const updated = await transitionSample(id, 'ACCEPTED', user, `Intake Accepted. Assigned Lab ID: ${labId}`, {
-            labId: labId,
-            dryingStatus: 'PENDING',
-            preparationStatus: 'PENDING',
-            acceptedBy: user.username,
-            acceptedAt: now,
-            history: JSON.stringify(history)
-        });
-
-        let workItemWarning = null;
-        try {
-            const workItemController = require('./workItemController');
-            await workItemController.generateWorkItemsForSample(updated);
-        } catch (e) {
-            // Finding #4: Don't silently suppress — track the failure
-            console.error('[ACCEPT] Failed to generate work items during acceptance:', e);
-            workItemWarning = `Sample accepted but work item generation failed: ${e.message}. Please contact support.`;
-        }
-
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-accept-${Date.now()}`,
-                entity: 'SAMPLE',
-                entityId: id,
-                action: 'SAMPLE_ACCEPTED',
-                details: `Assigned Lab ID ${labId}`,
-                performedBy: user.username,
-                timestamp: now,
-                sampleId: String(id)
-            }
-        });
-
-        let workItems = [];
-        try {
-            workItems = await prisma.workItem.findMany({
-                where: { sampleId: String(id) }
-            });
-        } catch (e) {
-            console.error('[ACCEPT] Failed to fetch generated work items:', e);
-        }
-
-        res.json({ ...updated, workItems, warning: workItemWarning || undefined });
-    } catch (error) {
-        console.error('[acceptSample] Error:', error);
-        res.status(500).json({ error: 'Failed to accept sample' });
-    }
+            const command=require('../services/intakeCommandService');
+            const result=await command.executeIntake({actor:req.user,payload:{...req.body,sampleId:String(req.params.id)},intent:'ACCEPT',requireRecordedIntake:true,operationId:req.body.operationId||req.get('Idempotency-Key')});
+            const updated=await prisma.sample.findUnique({where:{id:result.id}});
+            return res.json({...updated,receiptId:result.receiptId,workItems:await prisma.workItem.findMany({where:{sampleId:result.id}})});
+        } catch(err) {return require('../services/intakeCommandService').sendError(res,err);}
 };
 exports.deleteSample = async (req, res) => {
     const { id } = req.params;
