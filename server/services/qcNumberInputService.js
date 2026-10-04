@@ -14,7 +14,7 @@ function normalizeQcNumbers(payload, format) {
                 const source = item.rawInput && typeof item.rawInput === 'object' && Object.prototype.hasOwnProperty.call(item.rawInput, field)
                     ? item.rawInput[field] : item[aliases.find(alias => item[alias] !== undefined)];
                 const parsed = collection === 'duplicates' ? parseDuplicateObservation(source, format) : parseNumber(source, format);
-                if (parsed.code === 'AMBIGUOUS_NUMBER' || (collection !== 'duplicates' && !parsed.valid && parsed.code === 'INVALID_NUMBER' && /^[<>≤≥=\s+-]*[\d.,]/.test(String(source)))) {
+                if (parsed.code === 'AMBIGUOUS_NUMBER' || (collection !== 'duplicates' && (parsed.qualifier || (!parsed.valid && parsed.code === 'INVALID_NUMBER' && /^[<>≤≥=\s+-]*[\d.,]/.test(String(source)))))) {
                     throw Object.assign(new Error(parsed.code === 'AMBIGUOUS_NUMBER' ? 'Clarify the decimal or thousands separator.' : 'Invalid QC number format.'),
                         { statusCode: 400, code: parsed.code || 'INVALID_NUMBER', field, collection });
                 }

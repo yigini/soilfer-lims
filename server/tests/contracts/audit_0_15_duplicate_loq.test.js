@@ -124,10 +124,31 @@ describe('Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring 
         const { batch } = await fixture(); const before = await prisma.batch.findUnique({ where: { id: batch.id } });
         const data = payload(7, 7); data.blanks[0].value = value;
         const response = await evaluate(batch, data);
-        expect(response.status).toBe(400); expect(response.body).toMatchObject({ code: 'QC_VALUES_MISSING', missingTypes: ['BLANK'] });
+        expect(response.status).toBe(400);
+        if (value === '<LOQ') expect(response.body).toMatchObject({ code: 'QC_VALUES_MISSING', missingTypes: ['BLANK'] });
+        else expect(response.body.code).toBe('INVALID_NUMBER');
         expect(await prisma.batch.findUnique({ where: { id: batch.id } })).toEqual(before);
         expect(await prisma.batchQcResult.count({ where: { batchId: batch.id } })).toBe(0);
         expect(await prisma.auditLog.count({ where: { entityId: batch.id } })).toBe(0);
+    });
+    test.each([
+        ['post', 'blanks', 'value', '<0.01'], ['put', 'blanks', 'value', '<0.01'],
+        ['post', 'controls', 'measured', '<5'], ['put', 'controls', 'measured', '<5'],
+        ['post', 'controls', 'expected', '≤7'], ['put', 'controls', 'expected', '≤7']
+    ])('%s qualified %s.%s %s is rejected before QC, status, history or audit writes', async (route, collection, field, value) => {
+        const { batch } = await fixture();
+        await prisma.batch.update({ where: { id: batch.id }, data: { qcResults: '{"prior":"retained"}', history: '[{"prior":"retained"}]' } });
+        await prisma.batchQcResult.create({ data: { id: id('PRIOR-QC015'), batchId: batch.id, type: 'BLANK', label: 'Prior QC', measured: .01, status: 'PASS', details: '{"prior":"retained"}' } });
+        await prisma.auditLog.create({ data: { id: id('PRIOR-AUDIT015'), entity: 'BATCH', entityId: batch.id, action: 'PRIOR_QC', details: '{"prior":"retained"}', performedBy: 'fixture', labId } });
+        const before = await prisma.batch.findUnique({ where: { id: batch.id } });
+        const beforeRows = await prisma.batchQcResult.findMany({ where: { batchId: batch.id }, orderBy: { id: 'asc' } });
+        const beforeAudit = await prisma.auditLog.findMany({ where: { entityId: batch.id }, orderBy: { id: 'asc' } });
+        const data = payload(7, 7); data[collection][0][field] = value;
+        const response = await evaluate(batch, data, route);
+        expect(response.status).toBe(400); expect(response.body.code).toBe('INVALID_NUMBER');
+        expect(await prisma.batch.findUnique({ where: { id: batch.id } })).toEqual(before);
+        expect(await prisma.batchQcResult.findMany({ where: { batchId: batch.id }, orderBy: { id: 'asc' } })).toEqual(beforeRows);
+        expect(await prisma.auditLog.findMany({ where: { entityId: batch.id }, orderBy: { id: 'asc' } })).toEqual(beforeAudit);
     });
     test.each([null, '', '<LOQjunk', '?0.1', '6 ,42'])('missing, malformed or unknown duplicate %s is refused as missing with no writes', async value => {
         const { batch } = await fixture(); const before = await prisma.batch.findUnique({ where: { id: batch.id } });
