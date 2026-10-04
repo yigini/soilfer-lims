@@ -2369,5 +2369,17 @@
       "profileRelation": "Recorded meaning (SITE_POINT, COMPOSITE, CONFIRMED_PROFILE)",
       "collectionDate": "Field collection date"
     }
+  },
+  "workbench": {
+    "previousValue": "Previous",
+    "previousRejected": "rejected",
+    "previousRecorded": "recorded",
+    "selectInstrument": "Select instrument",
+    "recordThisSample": "Record this sample",
+    "nextSample": "Next sample",
+    "recordingIncomplete": "Recording incomplete",
+    "recordedCount": "Recorded",
+    "retryFailed": "Retry failed",
+    "recordingUnconfirmed": "Recording was not confirmed for this row."
   }
 }

@@ -12,6 +12,8 @@ import PastePreviewModal from './PastePreviewModal';
 import BatchModal from './BatchModal';
 import SingleSampleEditor from './SingleSampleEditor';
 import { useHelp } from '../../context/HelpContext';
+import { isEntryReady } from './entryReadiness';
+import PreviousResultHint from './PreviousResultHint';
 
 /**
  * WorksheetArea
@@ -54,6 +56,8 @@ export default function WorksheetArea({
     const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
     const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
     const [viewMode, setViewMode] = useState(() => (typeof window !== 'undefined' && window.innerWidth < 768) ? 'single' : 'table');
+    const inputRefs = useRef(new Map());
+    const reviewButtonRef = useRef(null);
 
     useEffect(() => {
         if (initialWorkItemId && items.length > 0) {
@@ -155,12 +159,15 @@ export default function WorksheetArea({
     };
 
     const handleEnterNext = (currentIndex) => {
-        const nextItem = filteredItems[currentIndex + 1];
+        const nextItem = filteredItems.slice(currentIndex + 1).find(item =>
+            isEntryReady(item, activeGroup?.eligibleEquipment || []) &&
+            inputRefs.current.get(item.workItemId) && !inputRefs.current.get(item.workItemId).disabled);
         if (nextItem) {
             setSelectedItemId(nextItem.workItemId);
             // Focus next input element
-            const el = document.querySelector(`[aria-label="${nextItem.sampleId} determination"]`);
-            if (el) el.focus();
+            inputRefs.current.get(nextItem.workItemId)?.focus();
+        } else {
+            reviewButtonRef.current?.focus();
         }
     };
 
@@ -264,6 +271,8 @@ export default function WorksheetArea({
                         if (filteredItems[idx]) setSelectedItemId(filteredItems[idx].workItemId);
                     }}
                     onDraftChange={onDraftChange}
+                    onUpdateItemMeta={onUpdateItemMeta}
+                    onReviewRecord={onReviewRecord}
                     onConfirmOperation={onConfirmOperation}
                     onOpenSpectralIntake={onOpenSpectralIntake}
                 />
@@ -332,6 +341,7 @@ export default function WorksheetArea({
                                             <td className="py-3 px-3" onClick={e => e.stopPropagation()}>
                                                 <input
                                                     type="checkbox"
+                                                    tabIndex={-1}
                                                     checked={isChecked}
                                                     onChange={() => toggleRowSelect(item.workItemId)}
                                                     aria-label={`Select ${item.sampleDisplayId || item.sampleId}`}
@@ -369,12 +379,13 @@ export default function WorksheetArea({
                                             <td className="py-3 px-3" onClick={e => e.stopPropagation()}>
                                                 {isTexture ? (
                                                     <TextureEditor
-                                                        disabled={!item.readiness?.isReady || isRecorded}
+                                                        disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
                                                         values={draft?.values || []}
                                                         tolerance={activeGroup?.validation?.tolerance ?? null}
                                                         onChange={(vals) => onDraftChange(item.workItemId, null, { values: vals })}
                                                         sampleId={item.sampleId}
                                                         onEnterNext={() => handleEnterNext(idx)}
+                                                        inputRef={node => node ? inputRefs.current.set(item.workItemId, node) : inputRefs.current.delete(item.workItemId)}
                                                     />
                                                 ) : isOperationalGate ? (
                                                     <OperationalTaskEditor
@@ -429,15 +440,17 @@ export default function WorksheetArea({
                                                     </div>
                                                 ) : (
                                                     <NumericEditor
-                                                        disabled={!item.readiness?.isReady || isRecorded}
-                                                        value={draft?.value ?? item.currentResult ?? ''}
+                                                        disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
+                                                        value={draft?.value ?? ''}
                                                         onChange={(val) => onDraftChange(item.workItemId, val)}
                                                         unit={activeGroup?.unit || ''}
                                                         placeholder="0.00"
                                                         ariaLabel={`${item.sampleDisplayId || item.sampleId} determination`}
                                                         onEnterNext={() => handleEnterNext(idx)}
+                                                        inputRef={node => node ? inputRefs.current.set(item.workItemId, node) : inputRefs.current.delete(item.workItemId)}
                                                     />
                                                 )}
+                                                {!isOperationalGate && <PreviousResultHint result={item.previousResult} />}
                                             </td>
 
                                             <td className="py-3 px-3">
@@ -484,6 +497,7 @@ export default function WorksheetArea({
                                                 <button
                                                     type="button"
                                                     onClick={() => setSelectedItemId(item.workItemId)}
+                                                    tabIndex={-1}
                                                     className="px-2 py-1 rounded text-xs text-sf-primary hover:underline font-medium transition-colors"
                                                 >
                                                     Inspect →
@@ -531,8 +545,9 @@ export default function WorksheetArea({
                         ) : (
                             <button
                                 type="button"
-                                onClick={() => onReviewRecord(Array.from(selectedRows))}
-                                disabled={selectedRows.size === 0}
+                                ref={reviewButtonRef}
+                                onClick={() => selectedRows.size > 0 && onReviewRecord(Array.from(selectedRows))}
+                                aria-disabled={selectedRows.size === 0}
                                 className="px-4 py-2 rounded-lg text-xs font-semibold bg-sf-primary text-sf-on-primary hover:bg-sf-primary-hover disabled:opacity-50 transition-colors flex items-center gap-1.5"
                             >
                                 <span>Review Completion ({selectedRows.size})</span>
