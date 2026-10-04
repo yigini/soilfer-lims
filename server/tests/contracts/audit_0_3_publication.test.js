@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
-const { getAuthToken } = require('../setup');
+const { getAuthToken, ensureTestLab } = require('../setup');
 const { canPublish } = require('../../services/workEligibility');
 const { assembleReport } = require('../../services/reportAssembly');
 const { governsResult, isReviewedReportResult } = require('../../services/reportResultGovernance');
@@ -15,10 +15,13 @@ const id = prefix => `${prefix}-${crypto.randomUUID()}`;
 const modes = ['REQUIRED_BLOCKING', 'REQUIRED_WARN', 'ADVISORY', 'OFF'];
 const manager = { role: 'LAB_MANAGER', username: 'reviewer' };
 const wire = value => JSON.parse(JSON.stringify(value));
+const originalPolicy = policyService.get;
+const mockQcMode = mode => jest.spyOn(policyService, 'get').mockImplementation((lab, key, context) =>
+    key === 'qc.mode' ? mode : originalPolicy(lab, key, context));
 
 describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     let token;
-    beforeAll(async () => { token = await getAuthToken('LAB_MANAGER', labId); });
+    beforeAll(async () => { await ensureTestLab(labId, 'GTM'); token = await getAuthToken('LAB_MANAGER', labId); });
     afterEach(() => jest.restoreAllMocks());
     const call = (path, body) => request(app).post(path).set('Authorization', `Bearer ${token}`).send(body);
     async function fixture({ status = 'APPROVED', itemStatus = 'ACCEPTED', param = 'PH_H2O', batchStatus, flags = [], valid = true } = {}) {
@@ -118,7 +121,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         expect(await prisma.report.count({ where: { sampleId: f.sampleId } })).toBe(0);
     });
     test.each(modes)('%s never bypasses manager review', async mode => {
-        jest.spyOn(policyService, 'get').mockReturnValue(mode);
+        mockQcMode(mode);
         const res = await generate(await fixture({ itemStatus: 'REANALYSIS_REQUIRED' }));
         expect(res.status).toBe(409); expect(res.body.code).toBe('ITEMS_NOT_ACCEPTED');
     });
@@ -137,7 +140,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         expect(canPublish({ status: 'APPROVED', workItems: [{ id: 'w', sampleId: 's', analysis: 'PH_H2O', status: 'ACCEPTED' }], results: [result] }, null, manager).code).toBe('QC_BATCH_PENDING');
     });
     test('unresolved policy mode fails closed', async () => {
-        jest.spyOn(policyService, 'get').mockReturnValue('UNKNOWN');
+        mockQcMode('UNKNOWN');
         const res = await generate(await fixture());
         expect(res.status).toBe(409); expect(res.body.code).toBe('QC_POLICY_UNRESOLVED');
     });
@@ -200,7 +203,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     });
     test.each(modes)('QC_FAIL in %s retains storage and applies the policy at read time', async mode => {
         const f = await fixture({ batchStatus: 'QC_FAIL', valid: false, flags: ['QC_BATCH_FAILED'] });
-        const policy = jest.spyOn(policyService, 'get').mockReturnValue(mode);
+        const policy = mockQcMode(mode);
         const before = await reviewedState(f);
         const res = await generate(f);
         expect(policy).toHaveBeenCalledWith(labId, 'qc.mode', { analysisCode: 'PH_H2O', methodologyId: null });
@@ -218,7 +221,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         expect((await reviewedState(f)).result).toEqual(before.result);
     });
     test.each(modes.flatMap(mode => ['ORIGINALLY_INVALID', 'REVIEW_RETURNED', 'QC_BATCH_REJECTED', 'QC_BATCH_REANALYZE_REQUESTED', 'METHOD_INVALID'].map(flag => [mode, flag])))('%s never prints an independently invalid %s result', async (mode, flag) => {
-        jest.spyOn(policyService, 'get').mockReturnValue(mode);
+        mockQcMode(mode);
         const f = await fixture({ batchStatus: 'QC_FAIL', valid: false, flags: ['QC_BATCH_FAILED', flag] });
         const before = await reviewedState(f);
         expect((await reportValues(f)).values).toHaveLength(0);
@@ -229,7 +232,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         expect(isInvalidOnlyByQcFailure({ isValid: false, flags })).toBe(false);
     });
     test.each(['en', 'es', 'es-419', 'fr', 'pt'])('QC caveat is frozen in %s', async language => {
-        jest.spyOn(policyService, 'get').mockReturnValue('REQUIRED_WARN');
+        mockQcMode('REQUIRED_WARN');
         const f = await fixture({ batchStatus: 'QC_FAIL', valid: false, flags: ['QC_BATCH_FAILED'] });
         expect((await reportValues(f, language)).content.qcWarningStatement).toBe(require(`../../locales/${language}.json`).resultReports.qcWarningStatement);
     });

@@ -8,6 +8,7 @@
 const PDFDocument = require('pdfkit');
 const { calculateUsdaTexture, evaluateCnRatio, evaluateCecAndBases } = require('../utils/soilCalculations');
 const { interpretParameter, normalizeUnit } = require('./interpretationService');
+const { describeReportEvidence } = require('./reportTruthfulnessService');
 
 /**
  * Format an interpretation label for display
@@ -22,7 +23,7 @@ function getInterpretation(paramCode, value, unit = '') {
  * @param {Object} reportContent - Full assembled report content object
  * @returns {Promise<Buffer>}
  */
-function generateReportPdfBuffer(reportContent) {
+function generateReportPdfBuffer(reportContent, publication = {}) {
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument({
@@ -37,6 +38,16 @@ function generateReportPdfBuffer(reportContent) {
                     Keywords: 'SoilFER, Soil Analysis, LIMS, Certificate of Analysis'
                 }
             });
+            const locale = ['en', 'es', 'es-419', 'fr', 'pt'].includes(reportContent.meta?.locale) ? reportContent.meta.locale : 'en';
+            const labels = require(`../locales/${locale}.json`).resultReports;
+            const evidenceText = describeReportEvidence(reportContent.evidence, locale);
+            const qcStatement = reportContent.qcStatement || (reportContent.evidence ? evidenceText.qcStatement
+                : reportContent.qcWarnings?.length ? reportContent.qcWarningStatement : evidenceText.qcStatement);
+            const preparationStatement = reportContent.preparationStatement || evidenceText.preparationStatement;
+            const number = publication.reportNumber || reportContent.reportNumber || labels.notRecorded;
+            const issuedAt = publication.publishedAt || reportContent.publication?.publishedAt;
+            const issuedDate = issuedAt ? new Date(issuedAt).toISOString().split('T')[0] : labels.notRecorded;
+            const status = publication.status || reportContent.publication?.status || 'DRAFT';
 
             const buffers = [];
             doc.on('data', buffers.push.bind(buffers));
@@ -68,27 +79,37 @@ function generateReportPdfBuffer(reportContent) {
             // Title inside banner
             doc.fillColor('#FFFFFF')
                 .font('Helvetica-Bold')
-                .fontSize(13)
+                .fontSize(10)
                 .text('FOOD AND AGRICULTURE ORGANIZATION OF THE UNITED NATIONS', startX + 14, currentY + 10, { width: 340 });
 
             doc.font('Helvetica')
                 .fontSize(8.5)
                 .fillColor('#93C5FD')
-                .text('Global Soil Doctors Programme · SoilFER Laboratory Network', startX + 14, currentY + 28);
+                .text('Global Soil Doctors Programme · SoilFER Laboratory Network', startX + 14, currentY + 38, { width: 340 });
 
             // Report Meta Badge (Right side of banner)
             doc.fillColor('#FFFFFF')
                 .font('Helvetica-Bold')
                 .fontSize(9.5)
-                .text(reportContent.reportNumber || `RPT-${reportContent.sample?.labId || '001'}`, startX + 360, currentY + 11, { width: 150, align: 'right' });
+                .text(number, startX + 360, currentY + 11, { width: 150, align: 'right' });
 
             doc.font('Helvetica')
                 .fontSize(8)
                 .fillColor('#E0E7FF')
-                .text(`Issue Date: ${new Date().toISOString().split('T')[0]}`, startX + 360, currentY + 25, { width: 150, align: 'right' })
-                .text(`Status: OFFICIAL / PUBLISHED`, startX + 360, currentY + 36, { width: 150, align: 'right' });
+                .text(`Issue Date: ${issuedDate}`, startX + 360, currentY + 25, { width: 150, align: 'right' })
+                .text(`Status: ${status}`, startX + 360, currentY + 36, { width: 150, align: 'right' });
 
             currentY += 60;
+            if (status === 'SUPERSEDED') {
+                doc.fillColor('#B91C1C').font('Helvetica-Bold').fontSize(10)
+                    .text(`${labels.superseded} – ${labels.see} ${publication.replacementNumber || labels.notRecorded}`, startX, currentY, { width: pageWidth });
+                currentY = doc.y + 10;
+            }
+            if (reportContent.publication?.replacesReportNumber) {
+                doc.fillColor(cGray).font('Helvetica').fontSize(8)
+                    .text(`${labels.replaces} ${reportContent.publication.replacesReportNumber}`, startX, currentY, { width: pageWidth });
+                currentY = doc.y + 10;
+            }
 
             // =========================================================================
             // 2. DOCUMENT TITLE & ACCREDITATION STATEMENT
@@ -162,22 +183,23 @@ function generateReportPdfBuffer(reportContent) {
                 .text(`${client.name || sample.clientName || 'General Intake'}`, rightX + 110, currentY + 60, { width: colWidth - 118, ellipsis: true })
                 .text(`${sampleDepth} ${sample.horizon ? `[${sample.horizon}]` : ''}`, rightX + 110, currentY + 72)
                 .text(`${sample.receptionDate ? String(sample.receptionDate).split('T')[0] : 'Recorded'}`, rightX + 110, currentY + 84)
-                .text(`${sample.approvedAt ? String(sample.approvedAt).split('T')[0] : new Date().toISOString().split('T')[0]}`, rightX + 110, currentY + 96);
+                .text(issuedDate, rightX + 110, currentY + 96);
 
             currentY += boxHeight + 12;
 
             // =========================================================================
             // 4. OPERATIONAL GATES & PREPARATION VERIFICATION BAR
             // =========================================================================
-            doc.rect(startX, currentY, pageWidth, 24).fillAndStroke(cSuccessBg, '#A7F3D0');
+            doc.font('Helvetica').fontSize(8);
+            const preparationHeight = doc.heightOfString(preparationStatement, { width: pageWidth - 20 }) + 26;
+            doc.rect(startX, currentY, pageWidth, preparationHeight).fillAndStroke(cLightBg, cBorder);
             doc.fillColor(cSuccessText).font('Helvetica-Bold').fontSize(8)
-                .text('PRE-ANALYTICAL GATES VERIFIED:', startX + 10, currentY + 7);
+                .text(labels.preparationRecords, startX + 10, currentY + 7);
 
             doc.font('Helvetica').fontSize(8).fillColor(cSuccessText)
-                .text(`Drying Phase: DONE (40°C Low-Temp)`, startX + 160, currentY + 7)
-                .text(`Milling/Preparation: DONE (2.0mm Fine Earth Sieve ISO 11464)`, startX + 320, currentY + 7);
+                .text(preparationStatement, startX + 10, currentY + 20, { width: pageWidth - 20 });
 
-            currentY += 32;
+            currentY += preparationHeight + 8;
 
             // =========================================================================
             // 5. TEST RESULTS TABLE (Categorized)
@@ -315,7 +337,10 @@ function generateReportPdfBuffer(reportContent) {
                 currentY = 40;
             }
 
-            const endorseHeight = 84;
+            doc.font('Helvetica').fontSize(7.5);
+            const qcHeight = doc.heightOfString(qcStatement, { width: 320 });
+            const endorseHeight = Math.max(84, qcHeight + 66);
+            if (currentY + endorseHeight > 770) { doc.addPage(); currentY = 40; }
             doc.rect(startX, currentY, pageWidth, endorseHeight).fillAndStroke(cLightBg, cBorder);
 
             // Left side: QA Statement
@@ -323,9 +348,9 @@ function generateReportPdfBuffer(reportContent) {
                 .text('QUALITY ASSURANCE & DATA INTEGRITY', startX + 10, currentY + 8);
 
             doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
-                .text(reportContent.qcWarnings?.length ? reportContent.qcWarningStatement : '• All batch Quality Control checks (Method Blanks, Duplicate RPD, and Certified Reference Materials recovery) met laboratory-approved acceptance limits.', startX + 10, currentY + 22, { width: 320 })
-                .text('• Metrological traceability: Calibrated instruments and analytical grade reagents referenced against recognized calibration standards.', startX + 10, currentY + 44, { width: 320 })
-                .text('• Disclaimer: This certificate relates solely to the sample as received and tested.', startX + 10, currentY + 66, { width: 320 });
+                .text(qcStatement, startX + 10, currentY + 22, { width: 320 })
+                .text('• Metrological traceability: Calibrated instruments and analytical grade reagents referenced against recognized calibration standards.', startX + 10, currentY + qcHeight + 30, { width: 320 })
+                .text('• Disclaimer: This certificate relates solely to the sample as received and tested.', startX + 10, currentY + qcHeight + 52, { width: 320 });
 
             // Right side: Authorization / Signature
             const sigX = startX + 340;
@@ -349,14 +374,23 @@ function generateReportPdfBuffer(reportContent) {
             const totalPages = doc.bufferedPageRange().count;
             for (let i = 0; i < totalPages; i++) {
                 doc.switchToPage(i);
+                // The footer sits below the body's bottom margin. Keep PDFKit
+                // from flowing its text into a new page while numbering pages.
+                const bottomMargin = doc.page.margins.bottom;
+                doc.page.margins.bottom = 0;
+                if (status === 'SUPERSEDED') {
+                    doc.fillColor('#B91C1C').font('Helvetica-Bold').fontSize(8)
+                        .text(`${labels.superseded} - ${labels.see} ${publication.replacementNumber || labels.notRecorded}`, startX, 787, { width: pageWidth, lineBreak: false });
+                }
                 doc.rect(36, 805, pageWidth, 0.5).fill(cBorder);
 
                 doc.fillColor(cGray)
                     .font('Helvetica')
                     .fontSize(7)
-                    .text('FAO SoilFER Programme · Soil Laboratory Quality Information System', 36, 810)
-                    .text(`Certificate No: ${reportContent.reportNumber || 'RPT-OFFICIAL'}`, 240, 810, { align: 'center' })
-                    .text(`Page ${i + 1} of ${totalPages}`, startX, 810, { width: pageWidth, align: 'right' });
+                    .text('FAO SoilFER Programme · Soil Laboratory Quality Information System', 36, 810, { lineBreak: false })
+                    .text(`Certificate No: ${number}`, 240, 810, { width: 235, align: 'center', lineBreak: false })
+                    .text(`Page ${i + 1} of ${totalPages}`, startX, 810, { width: pageWidth, align: 'right', lineBreak: false });
+                doc.page.margins.bottom = bottomMargin;
             }
 
             doc.end();

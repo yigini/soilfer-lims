@@ -350,7 +350,7 @@ const ReportContent = ({ data }) => {
             ═══════════════════════════════════════════════════ */}
             <footer className="report-footer-section">
                 <div className="report-methodology-note">
-                    <strong>General Note:</strong> {data.qcWarnings?.length ? data.qcWarningStatement : 'All analyses were performed according to standard laboratory protocols.'}
+                    <strong>General Note:</strong> {data.qcStatement || (data.qcWarnings?.length ? data.qcWarningStatement : 'All analyses were performed according to standard laboratory protocols.')}
                     Results are reported on an air-dry fine-earth (&lt;2 mm) basis unless otherwise indicated.
                 </div>
 
