@@ -129,13 +129,23 @@ describe('8.1 Section D: Submission Rules', () => {
     });
 
     test('Scenario 4: Rejection (COND)', async () => {
-        // Re-complete the rejected item
+        // Request a repeat before re-entry; completed measurements are sealed
+        // by the canonical workbench rather than overwritten through status.
+        const returned = await request(app).post(`/api/work/${condItemId}/review`)
+            .set('Authorization', `Bearer ${mgrToken}`)
+            .send({ status: 'REANALYSIS_REQUIRED', reason: 'Repeat conductivity before final submission' });
+        expect(returned.status).toBe(200);
+        const prior = await prisma.result.findFirst({ where: { sampleId, param: 'EC', isCurrent: true } });
+        expect(prior.value).toBe('5.0');
         const completeRes = await request(app)
             .post('/api/workbench/batch-save')
             .set('Authorization', `Bearer ${techToken}`)
             .send({ draft: false, entries: [{ workItemId: condItemId, value: '5.1' }] });
         expect(completeRes.status).toBe(200);
         expect((await prisma.result.findFirst({ where: { sampleId, param: 'EC', isCurrent: true } })).value).toBe('5.1');
+        const superseded = await prisma.result.findUnique({ where: { id: prior.id } });
+        expect(superseded.value).toBe('5.0');
+        expect(superseded.isCurrent).toBe(false);
 
         const subRes = await request(app)
             .post('/api/submissions')

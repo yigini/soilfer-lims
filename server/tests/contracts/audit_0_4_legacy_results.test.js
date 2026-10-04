@@ -19,7 +19,8 @@ describe('Audit 0.4: legacy status result writes are disabled', () => {
         await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
             status: 'PROCESSING', receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' } });
         return prisma.workItem.create({ data: { id: id('WI-04'), sampleId, analysis, status: 'ASSIGNED', assignedTo: username,
-            assignedLab: labId, category: ['ARCHIVING','DISPOSAL','ARCH','DISP'].includes(analysis) ? 'Post-Analytical' : 'Operational Gates' } });
+            assignedLab: labId, category: ['ARCHIVING','DISPOSAL','ARCH','DISP','Archive','Dispose'].includes(analysis) ? 'Post-Analytical'
+                : ['DRYING', 'PREPARATION'].includes(analysis) ? 'Operational Gates' : 'Chemical' } });
     }
     const put = (item, data) => request(app).put(`/api/work/${item.id}/status`).set('Authorization', `Bearer ${token}`).send(data);
     test.each(['7.2', '<0.5', 0, '', null, { value: 7 }])('analytical result %j returns 410 and preserves data', async result => {
@@ -46,7 +47,7 @@ describe('Audit 0.4: legacy status result writes are disabled', () => {
         expect(after.status).toBe('COMPLETED'); expect(JSON.parse(after.result).kind).toBe('operational-checklist-v1');
         expect(await prisma.result.count({ where: { sampleId: item.sampleId } })).toBe(0);
     });
-    test.each(['ARCHIVING', 'DISPOSAL', 'ARCH', 'DISP'])('%s status endpoint remains available with operational evidence', async analysis => {
+    test.each(['ARCHIVING', 'DISPOSAL', 'ARCH', 'DISP', 'Archive', 'Dispose'])('%s status endpoint remains available with operational evidence', async analysis => {
         const item = await fixture(analysis);
         const res = await put(item, { status: 'COMPLETED', result: 'Procedure recorded' });
         expect(res.status).toBe(200);
