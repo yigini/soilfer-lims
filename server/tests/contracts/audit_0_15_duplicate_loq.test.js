@@ -1,6 +1,9 @@
 const { evaluateDuplicate, evaluateBatchQc } = require('../../services/qcService');
 const { resolveDuplicatePolicy } = require('../../services/duplicateQcPolicyService');
 const policyService = require('../../services/policyService');
+const prisma = require('../../prisma');
+const { randomUUID } = require('crypto');
+const id = prefix => `${prefix}-${randomUUID()}`;
 
 describe('Audit 0.15: independent duplicate numeric criteria', () => {
     test.each([[-1, 1], [0, 0], [-1, -1], [0, 1], [1, 0]])('%s / %s cannot pass', (value1, value2) => {
@@ -24,6 +27,49 @@ describe('Audit 0.15: independent duplicate numeric criteria', () => {
     });
     test('an invalid duplicate contributes a QC_FAIL verdict, never a batch pass', () => {
         expect(evaluateBatchQc({ duplicates: [{ value1: -1, value2: 1 }] })).toMatchObject({ overallStatus: 'QC_FAIL', summary: { failed: 1, passed: 0 } });
+    });
+});
+
+describe('Audit 0.15: real batch method and analysis evidence', () => {
+    async function fixture({ analysisLoq = .2, validation = '{"loq":0.3}', methods = [] } = {}) {
+        const analysis = id('ANALYSIS015'), batchId = id('B015');
+        await prisma.analysis.create({ data: { code: analysis, name: 'Duplicate LOQ fixture', loq: analysisLoq, validation } });
+        const batch = await prisma.batch.create({ data: { id: batchId, analysis, labId: 'LAB-AUDIT-015', status: 'OPEN', createdBy: 'fixture' } });
+        const recorded = [];
+        for (const loq of methods) {
+            const methodId = id('METHOD015'), sampleId = id('S015');
+            await prisma.methodology.create({ data: { id: methodId, analysisCode: analysis, name: 'Recorded fixture method', loq } });
+            await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, assignedLab: batch.labId, status: 'PROCESSING' } });
+            await prisma.workItem.create({ data: { id: id('WI015'), sampleId, analysis, assignedLab: batch.labId, batchId, methodologyId: methodId, status: 'COMPLETED' } });
+            recorded.push({ methodId, sampleId });
+        }
+        return { batch, recorded };
+    }
+    test('current Result selects its recorded methodology rather than the cached work item', async () => {
+        const { batch, recorded: [cached] } = await fixture({ methods: [.9] });
+        const actualId = id('ACTUAL015');
+        await prisma.methodology.create({ data: { id: actualId, analysisCode: batch.analysis, name: 'Actually recorded', loq: .1 } });
+        await prisma.result.create({ data: { id: id('R015'), sampleId: cached.sampleId, batchId: batch.id, param: batch.analysis, methodologyId: actualId, value: '.02', numericValue: .02, isCurrent: true } });
+        const policy = await resolveDuplicatePolicy(batch, prisma);
+        expect(policy).toMatchObject({ loq: .1, loqSource: 'METHODOLOGY', methodologyId: actualId });
+        expect(evaluateDuplicate({ value1: .02, value2: .05 }, policy).status).toBe('PASS');
+    });
+    test('analysis fallback is used with no method recorded even if an isDefault method exists', async () => {
+        const { batch } = await fixture({ analysisLoq: .1 });
+        await prisma.methodology.create({ data: { id: id('DEFAULT015'), analysisCode: batch.analysis, name: 'Unused catalogue default', isDefault: true, loq: 999 } });
+        const policy = await resolveDuplicatePolicy(batch, prisma);
+        expect(policy).toMatchObject({ loq: .1, loqSource: 'ANALYSIS', methodologyId: null });
+        expect(evaluateDuplicate({ value1: .02, value2: .05 }, policy).criterion).toBe('ABSOLUTE_DIFFERENCE');
+    });
+    test('analysis validation is the final known limit source', async () => {
+        const { batch } = await fixture({ analysisLoq: null, validation: '{"loq":0.1}' });
+        expect(await resolveDuplicatePolicy(batch, prisma)).toMatchObject({ loq: .1, loqSource: 'ANALYSIS_VALIDATION' });
+    });
+    test('real mixed-method membership is recorded as NO_LOQ / METHOD_AMBIGUOUS', async () => {
+        const { batch } = await fixture({ methods: [.1, .2] });
+        const policy = await resolveDuplicatePolicy(batch, prisma);
+        expect(policy).toMatchObject({ loq: null, loqSource: null, noLoqReason: 'METHOD_AMBIGUOUS' });
+        expect(evaluateDuplicate({ value1: .02, value2: .05 }, policy)).toMatchObject({ status: 'FAIL', criterion: 'RPD', notes: ['NO_LOQ', 'METHOD_AMBIGUOUS'] });
     });
 });
 
