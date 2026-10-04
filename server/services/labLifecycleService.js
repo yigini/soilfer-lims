@@ -523,11 +523,6 @@ async function updateLabProfile(actor, labId, updates = {}, tx = prisma) {
     if (notes !== undefined && isSuperAdmin) data.notes = notes;
 
     if (updates.decimalSeparator !== undefined || updates.thousandsSeparator !== undefined) {
-        const existingLab = await tx.lab.findUnique({ where: { id: labId }, select: { settings: true } });
-        let settings;
-        try { settings = existingLab?.settings ? JSON.parse(existingLab.settings) : {}; }
-        catch (_) { throw Object.assign(new Error('Invalid stored laboratory settings.'), { statusCode: 409, code: 'NUMBER_FORMAT_POLICY_INVALID' }); }
-        if (!settings || typeof settings !== 'object' || Array.isArray(settings)) throw Object.assign(new Error('Invalid stored laboratory settings.'), { statusCode: 409, code: 'NUMBER_FORMAT_POLICY_INVALID' });
         const policyService = require('./policyService');
         const effective = await policyService.snapshot(labId, { db: tx });
         const decimal = updates.decimalSeparator !== undefined ? updates.decimalSeparator : effective.values['numbers.decimalSeparator'];
@@ -537,9 +532,7 @@ async function updateLabProfile(actor, labId, updates = {}, tx = prisma) {
         }
         await policyService.mutateInTransaction(actor, labId, { reason: updates.reason, expectedVersion: updates.expectedVersion,
             changes: [{ key: 'numbers.decimalSeparator', value: decimal }, { key: 'numbers.thousandsSeparator', value: thousands }] }, tx,
-        { auditAction: 'UPDATE_PROFILE', compatibilityFields: [...Object.keys(data), 'settings'] });
-        // Write-only rollback compatibility; parsing never reads these copies.
-        data.settings = JSON.stringify({ ...settings, decimalSeparator: decimal, thousandsSeparator: thousands });
+        { auditAction: 'UPDATE_PROFILE', compatibilityFields: Object.keys(data) });
     }
 
     const updated = await tx.lab.update({

@@ -982,7 +982,8 @@
       "POLICY_SCOPE_DENIED": "Este laboratório está fora do seu âmbito de acesso.",
       "POLICY_PROFILE_INVALID": "A configuração de políticas da implantação é inválida.",
       "POLICY_STORED_VALUE_INVALID": "Um valor de política armazenado é inválido.",
-      "POLICY_SCOPE_CONFLICT": "Há várias substituições atuais para esta configuração e âmbito."
+      "POLICY_SCOPE_CONFLICT": "Há várias substituições atuais para esta configuração e âmbito.",
+      "LAB_SETTINGS_INVALID": "As configurações armazenadas do laboratório são inválidas. A alteração não foi salva."
     }
   }
 }

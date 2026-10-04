@@ -142,6 +142,52 @@ describe('Audit 1.0: persistent lab policies', () => {
         expect(await prisma.labPolicyOverride.count({ where: { labId } })).toBe(1);
         expect(await prisma.auditLog.count({ where: { labId } })).toBe(1);
     });
+    test('Policies number override and clear share the write-only rollback copy and one audit', async () => {
+        await prisma.lab.update({ where: { id: labId }, data: { settings: '{ "language": "fr", "unrelated": 42 }' } });
+        await edit([{ key: 'numbers.decimalSeparator', value: ',' }]);
+        let lab = await prisma.lab.findUnique({ where: { id: labId } });
+        expect(JSON.parse(lab.settings)).toEqual({ language: 'fr', unrelated: 42, decimalSeparator: ',', thousandsSeparator: null });
+        const log = await prisma.auditLog.findFirst({ where: { labId } });
+        expect(JSON.parse(log.details).compatibilityCopy).toMatchObject({ written: true, after: { decimalSeparator: ',', thousandsSeparator: null } });
+        await edit([{ key: 'numbers.decimalSeparator', clear: true }]);
+        lab = await prisma.lab.findUnique({ where: { id: labId } });
+        expect(JSON.parse(lab.settings)).toEqual({ language: 'fr', unrelated: 42, decimalSeparator: '.', thousandsSeparator: null });
+        expect(await prisma.auditLog.count({ where: { labId } })).toBe(2); expect((await policy.snapshot(labId)).version).toBe(2);
+    });
+    test('preset change copies an altered inherited format and leaves unchanged settings byte-identical', async () => {
+        const settings = '{ "language": "fr", "decimalSeparator": ",", "thousandsSeparator": null }';
+        await prisma.lab.update({ where: { id: labId }, data: { settings } });
+        const options = { profile: { overrides: { 'numbers.decimalSeparator': ',' } } };
+        await policy.change(actor, labId, { presetCode: 'BASIC', reason: 'Preset replaces profile' }, options);
+        const copied = (await prisma.lab.findUnique({ where: { id: labId } })).settings;
+        expect(JSON.parse(copied)).toEqual({ language: 'fr', decimalSeparator: '.', thousandsSeparator: null });
+        await policy.change(actor, labId, { presetCode: 'ADVISORY', reason: 'Same number format' }, options);
+        expect((await prisma.lab.findUnique({ where: { id: labId } })).settings).toBe(copied);
+        await policy.change(actor, labId, { presetCode: null, reason: 'Restore profile format' }, options);
+        expect(JSON.parse((await prisma.lab.findUnique({ where: { id: labId } })).settings).decimalSeparator).toBe(',');
+    });
+    test.each(['not-json', '[]', 'null'])('malformed settings %s fail with no policy, audit or legacy writes', async settings => {
+        await prisma.lab.update({ where: { id: labId }, data: { settings } });
+        await expect(edit([{ key: 'numbers.decimalSeparator', value: ',' }])).rejects.toMatchObject({ statusCode: 409, code: 'LAB_SETTINGS_INVALID' });
+        expect((await prisma.lab.findUnique({ where: { id: labId } })).settings).toBe(settings);
+        expect(await prisma.labPolicy.count({ where: { labId } })).toBe(0); expect(await prisma.labPolicyOverride.count({ where: { labId } })).toBe(0);
+        expect(await prisma.auditLog.count({ where: { labId } })).toBe(0);
+    });
+    test('reported-value export stores the exact resolved version and selection rule without changing old selections', async () => {
+        const sampleId = id('POL-EXPORT'), project = id('POL-PROJECT');
+        await edit([{ key: 'results.reportedValueRule', value: 'LATEST_VALID' }]);
+        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, assignedLab: labId, projectCode: project, status: 'APPROVED', requiredAnalyses: '["SOC"]' } });
+        await prisma.workItem.create({ data: { id: id('POL-EXPORT-WI'), sampleId, assignedLab: labId, analysis: 'SOC', status: 'ACCEPTED', result: '9999' } });
+        for (const value of [10, 20]) await prisma.result.create({ data: { id: id('POL-EXPORT-RES'), sampleId, param: 'SOC', value: String(value), unit: 'g/kg', isValid: true, isCurrent: true,
+            createdAt: new Date(`2026-10-0${value / 10}T12:00:00Z`) } });
+        const response = await request(app).post('/api/exports/data').set('Authorization', `Bearer ${manager}`).send({ type: 'WET_CHEM', project });
+        expect(response.status).toBe(200); expect(response.body.data[0].SOC).toBe(20);
+        expect(response.body.meta.selectionPolicies).toEqual([expect.objectContaining({ labId, version: 1, rule: 'LATEST_VALID', source: 'LAB_OVERRIDE' })]);
+        const log = await prisma.auditLog.findUnique({ where: { id: response.body.meta.exportId } });
+        expect(JSON.parse(log.details).selectionPolicies[0]).toMatchObject({ labId, version: 1, rule: 'LATEST_VALID' });
+        await edit([{ key: 'results.reportedValueRule', value: 'MEAN_IF_WITHIN_R' }]);
+        expect(await prisma.auditLog.findUnique({ where: { id: log.id } })).toEqual(log);
+    });
     test('QC evaluates persisted lab and method limits and leaves old evaluations unchanged on a policy edit', async () => {
         const batch = await prisma.batch.create({ data: { id: id('POL-BATCH'), labId, analysis: analysisCode, profile: 'RACK_40', status: 'OPEN', createdBy: 'fixture' } });
         const sampleId = id('POL-SAMPLE');

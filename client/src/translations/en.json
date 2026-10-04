@@ -2531,7 +2531,8 @@
       "POLICY_SCOPE_DENIED": "This laboratory is outside your access scope.",
       "POLICY_PROFILE_INVALID": "The deployment policy configuration is invalid.",
       "POLICY_STORED_VALUE_INVALID": "A stored policy value is invalid.",
-      "POLICY_SCOPE_CONFLICT": "Several current overrides exist for this setting and scope."
+      "POLICY_SCOPE_CONFLICT": "Several current overrides exist for this setting and scope.",
+      "LAB_SETTINGS_INVALID": "Stored laboratory settings are invalid. The change was not saved."
     }
   }
 }

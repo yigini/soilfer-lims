@@ -2531,7 +2531,8 @@
       "POLICY_SCOPE_DENIED": "Ce laboratoire est hors de votre portée d’accès.",
       "POLICY_PROFILE_INVALID": "La configuration de politique du déploiement est invalide.",
       "POLICY_STORED_VALUE_INVALID": "Une valeur de politique enregistrée est invalide.",
-      "POLICY_SCOPE_CONFLICT": "Plusieurs dérogations actuelles existent pour ce paramètre et cette portée."
+      "POLICY_SCOPE_CONFLICT": "Plusieurs dérogations actuelles existent pour ce paramètre et cette portée.",
+      "LAB_SETTINGS_INVALID": "Les paramètres enregistrés du laboratoire sont invalides. Le changement n’a pas été sauvegardé."
     }
   }
 }

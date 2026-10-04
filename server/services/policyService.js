@@ -148,6 +148,21 @@ async function mutateInTransaction(actor, reference, request, tx, options = {}) 
     const affectedContexts = [{}, ...changes.map(c => ({ analysisCode: c.analysisCode, methodologyId: c.methodologyId })),
         ...current.overrides.map(c => ({ analysisCode: c.analysisCode, methodologyId: c.methodologyId }))];
     for (const context of affectedContexts) validatePairs(snapshotFromState(prospective, context).values);
+    const after = snapshotFromState(prospective);
+    let compatibilityCopy = { written: false };
+    let compatibilitySettings;
+    if (!options.preserveLegacySettings && ['numbers.decimalSeparator', 'numbers.thousandsSeparator'].some(key => before.values[key] !== after.values[key])) {
+        let settings;
+        try { settings = current.lab.settings ? JSON.parse(current.lab.settings) : {}; }
+        catch (_) { throw error(409, 'LAB_SETTINGS_INVALID', 'Stored laboratory settings must be valid JSON.'); }
+        if (!settings || typeof settings !== 'object' || Array.isArray(settings)) throw error(409, 'LAB_SETTINGS_INVALID', 'Stored laboratory settings must be an object.');
+        const values = { decimalSeparator: after.values['numbers.decimalSeparator'], thousandsSeparator: after.values['numbers.thousandsSeparator'] };
+        compatibilityCopy = { written: true, before: {
+            decimalSeparator: settings.decimalSeparator ?? null, thousandsSeparator: settings.thousandsSeparator ?? null,
+            presentKeys: ['decimalSeparator', 'thousandsSeparator'].filter(key => Object.hasOwn(settings, key))
+        }, after: values };
+        compatibilitySettings = JSON.stringify({ ...settings, ...values });
+    }
     const reason = request.reason.trim(), now = new Date();
     if (current.policy) {
         const written = await tx.labPolicy.updateMany({ where: { labId: current.lab.id, version }, data: {
@@ -162,13 +177,14 @@ async function mutateInTransaction(actor, reference, request, tx, options = {}) 
         if (!c.clear) await tx.labPolicyOverride.create({ data: { id: crypto.randomUUID(), labId: current.lab.id,
             key: c.key, analysisCode: c.analysisCode, methodologyId: c.methodologyId, value: JSON.stringify(c.value), reason, setBy: actor.username, setAt: now } });
     }
-    const after = snapshotFromState(prospective);
+    if (compatibilityCopy.written) await tx.lab.update({ where: { id: current.lab.id }, data: { settings: compatibilitySettings } });
     await tx.auditLog.create({ data: { id: crypto.randomUUID(), entity: 'LAB', entityId: current.lab.id, labId: current.lab.id,
         action: options.auditAction || 'UPDATE_POLICY', performedBy: actor.username, timestamp: now,
         before: JSON.stringify({ ...before, overrides: current.overrides }), after: JSON.stringify({ ...after,
             changes: changes.map(c => ({ ...c, value: c.clear ? null : c.value })) }),
         details: JSON.stringify({ kind: 'LAB_POLICY_CHANGE', reason, policyVersion: version + 1,
-            compatibilityFields: options.compatibilityFields || [], changedKeys: changes.map(c => c.key), presetChanged: hasPreset }) } });
+            compatibilityCopy, compatibilityFields: [...new Set([...(options.compatibilityFields || []), ...(compatibilityCopy.written ? ['settings'] : [])])],
+            changedKeys: changes.map(c => c.key), presetChanged: hasPreset }) } });
     return snapshot(current.lab.id, { ...options, db: tx });
 }
 async function change(actor, reference, request, options = {}) {

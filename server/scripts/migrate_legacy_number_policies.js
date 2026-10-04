@@ -45,7 +45,7 @@ async function migrateLegacyNumberPolicies({ db = require('../prisma'), apply = 
     await db.$transaction(async tx => {
         for (const row of plan.plans) await policyService.mutateInTransaction(actor, row.labId, {
             changes: row.changes, expectedVersion: row.expectedVersion, reason: 'migrated from Lab.settings'
-        }, tx);
+        }, tx, { preserveLegacySettings: true });
     });
     return { mode: 'APPLIED', counts: plan.counts, auditRowsCreated: plan.plans.length };
 }

@@ -982,7 +982,8 @@
       "POLICY_SCOPE_DENIED": "Este laboratorio está fuera de su ámbito de acceso.",
       "POLICY_PROFILE_INVALID": "La configuración de políticas del despliegue es inválida.",
       "POLICY_STORED_VALUE_INVALID": "Un valor de política almacenado es inválido.",
-      "POLICY_SCOPE_CONFLICT": "Hay varios ajustes vigentes para este ajuste y ámbito."
+      "POLICY_SCOPE_CONFLICT": "Hay varios ajustes vigentes para este ajuste y ámbito.",
+      "LAB_SETTINGS_INVALID": "Los ajustes almacenados del laboratorio son inválidos. El cambio no se guardó."
     }
   }
 }
