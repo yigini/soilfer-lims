@@ -135,14 +135,14 @@ describe('Audit 1.3: additive migration and idempotent back-fill', () => {
     beforeEach(() => {
         db = new Database(':memory:');
         db.exec('CREATE TABLE Lab(id TEXT PRIMARY KEY, code TEXT); CREATE TABLE Sample(id TEXT PRIMARY KEY, labId TEXT, assignedLab TEXT, metadata TEXT); CREATE TABLE WorkItem(id TEXT PRIMARY KEY, sampleId TEXT, labId TEXT, assignedLab TEXT); CREATE TABLE AuditLog(id TEXT PRIMARY KEY, details TEXT); CREATE TABLE Result(id TEXT PRIMARY KEY, value TEXT);');
-        db.exec("INSERT INTO Lab VALUES ('lab-a','AAA'),('lab-b','BBB'); INSERT INTO Sample VALUES ('s1','S123','lab-a','raw'),('s2','old-format','lab-a','raw'),('blank',' ','lab-a','raw'),('lab-valued','AAA','lab-a','raw'),('ambiguous',' aaa ','lab-a','raw'); INSERT INTO WorkItem VALUES ('w1','s1','S123','lab-a'),('referred','s1','old-code','BBB'),('fallback','s2','old-code',NULL),('unresolved','s2','lost','unknown'); INSERT INTO AuditLog VALUES ('a','original audit'); INSERT INTO Result VALUES ('r','12.5');");
+        db.exec("INSERT INTO Lab VALUES ('lab-a','AAA'),('lab-b','BBB'); INSERT INTO Sample VALUES ('s1','S123','lab-a','raw'),('s2','old-format','lab-a','raw'),('blank',' ','lab-a','raw'),('lab-valued','AAA','lab-a','raw'),('ambiguous',' aaa ','lab-a','raw'),('unowned',NULL,'unknown','raw'); INSERT INTO WorkItem VALUES ('w1','s1','S123','lab-a'),('referred','s1','old-code','BBB'),('fallback','s2','old-code',NULL),('unresolved','unowned','lost','unknown'); INSERT INTO AuditLog VALUES ('a','original audit'); INSERT INTO Result VALUES ('r','12.5');");
         db.exec(migration);
     });
     afterEach(() => db.close());
     test('dry-run has no writes; apply copies issued codes, retains aliases/old work-item ids, reports unresolved and referral ownership', () => {
         const before = db.serialize(), dry = backfill(db);
         expect(db.serialize()).toEqual(before);
-        expect(dry.sampleCounts).toEqual({ copiedSNumber: 1, copiedOtherFormat: 1, ambiguous: 1, blank: 1, labValued: 1, alreadyCopied: 0 });
+        expect(dry.sampleCounts).toEqual({ copiedSNumber: 1, copiedOtherFormat: 1, ambiguous: 1, blank: 2, labValued: 1, alreadyCopied: 0 });
         expect(dry.otherFormatSampleIds).toEqual(['s2']); expect(dry.ambiguous[0].code).toBe('AMBIGUOUS_LAB_OR_CODE');
         expect(dry.workItemCounts).toEqual({ updated: 3, unchanged: 0, unresolved: 1, sampleLabDiffer: 1 });
         const applied = backfill(db, true); expect(applied.mode).toBe('apply');
