@@ -598,7 +598,7 @@ exports.processIntake = async (req, res) => {
 
             await prisma.auditLog.create({
                 data: {
-                    id: `audit-reject-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                    id: crypto.randomUUID(),
                     entity: 'SAMPLE',
                     entityId: String(sample.id),
                     action: 'SAMPLE_REJECTED',
@@ -1098,7 +1098,7 @@ exports.processIntake = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-intake-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                id: crypto.randomUUID(),
                 entity: 'SAMPLE',
                 entityId: String(sample.id),
                 action: 'SAMPLE_RECEIVED',
@@ -1273,7 +1273,7 @@ exports.discardDraft = async (req, res) => {
 
                 await tx.auditLog.create({
                     data: {
-                        id: `audit-discard-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                        id: crypto.randomUUID(),
                         entity: 'SAMPLE',
                         entityId: String(sample.id),
                         action: 'DRAFT_DISCARDED',
@@ -1313,7 +1313,7 @@ exports.discardDraft = async (req, res) => {
 
                 await tx.auditLog.create({
                     data: {
-                        id: `audit-discard-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                        id: crypto.randomUUID(),
                         entity: 'SAMPLE',
                         entityId: String(sample.id),
                         action: 'SAMPLE_DELETED',
@@ -2141,7 +2141,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
             // C. Audit log (RC-12, RC-13)
             await tx.auditLog.create({
                 data: {
-                    id: `audit-csg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                    id: crypto.randomUUID(),
                     entity: 'CONSIGNMENT',
                     entityId: consignment.id,
                     action: 'CONSIGNMENT_BATCH_RECEIVED',

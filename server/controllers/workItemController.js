@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const { assertReviewable, commitReview, reconcileSubmission } = require('../services/reviewCommitService');
 const { hasPermission } = require('../config/roles');
 const { invalidateReturnedResults } = require('../services/reportResultGovernance');
@@ -87,7 +88,7 @@ exports.generateWorkItemsForSample = async (sample) => {
         });
         if (existing) continue;
 
-        const wiId = `WI-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        const wiId = crypto.randomUUID();
         const history = [{
             status: workflow.WORK_ITEM_STATES.NOT_ASSIGNED,
             timestamp: new Date().toISOString(),
@@ -112,7 +113,7 @@ exports.generateWorkItemsForSample = async (sample) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-wi-gen-${Date.now()}-${Math.random()}`,
+                id: crypto.randomUUID(),
                 entity: 'SAMPLE',
                 entityId: String(id),
                 action: 'WORKITEM_GENERATED',
@@ -148,7 +149,7 @@ exports.generateWorkItemsForSample = async (sample) => {
 
             const name = await getAnalysisName(analysisCode);
             const category = await getAnalysisCategory(analysisCode);
-            const wiId = `WI-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+            const wiId = crypto.randomUUID();
             const history = [{
                 status: workflow.WORK_ITEM_STATES.NOT_ASSIGNED,
                 timestamp: new Date().toISOString(),
@@ -177,7 +178,7 @@ exports.generateWorkItemsForSample = async (sample) => {
 
             await prisma.auditLog.create({
                 data: {
-                    id: `audit-wi-gen-${Date.now()}-${Math.random()}`,
+                    id: crypto.randomUUID(),
                     entity: 'SAMPLE',
                     entityId: String(id),
                     action: 'WORKITEM_GENERATED',
@@ -313,7 +314,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
             await prisma.workItem.delete({ where: { id: item.id } });
             await prisma.auditLog.create({
                 data: {
-                    id: `audit-wi-del-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                    id: crypto.randomUUID(),
                     entity: 'WORKITEM',
                     entityId: item.id,
                     action: 'WORKITEM_DELETED',
@@ -346,7 +347,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
 
             await prisma.auditLog.create({
                 data: {
-                    id: `audit-wi-waive-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                    id: crypto.randomUUID(),
                     entity: 'WORKITEM',
                     entityId: item.id,
                     action: 'WORKITEM_WAIVED',
@@ -377,7 +378,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
         for (const analysisCode of codesToAdd) {
             const name = await getAnalysisName(analysisCode);
             const category = await getAnalysisCategory(analysisCode);
-            const wiId = `WI-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+            const wiId = crypto.randomUUID();
             const history = [{
                 status: workflow.WORK_ITEM_STATES.NOT_ASSIGNED,
                 timestamp: new Date().toISOString(),
@@ -404,7 +405,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
 
             await prisma.auditLog.create({
                 data: {
-                    id: `audit-wi-gen-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                    id: crypto.randomUUID(),
                     entity: 'SAMPLE',
                     entityId: String(id),
                     action: 'WORKITEM_GENERATED',
@@ -662,7 +663,7 @@ exports.assignWork = async (req, res) => {
             const analysis = await getAnalysisName(item.analysis);
             await prisma.auditLog.create({
                 data: {
-                    id: `audit-assign-${item.id}-${Date.now()}`,
+                    id: crypto.randomUUID(),
                     entity: 'WORKITEM',
                     entityId: item.id,
                     action: 'WORKITEM_ASSIGNED',
@@ -841,7 +842,7 @@ exports.reassignWork = async (req, res) => {
         const analysis = await getAnalysisName(item.analysis);
         await prisma.auditLog.create({
             data: {
-                id: `audit-reassign-${id}-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'WORKITEM',
                 entityId: id,
                 action: 'WORKITEM_REASSIGNED',
@@ -1126,7 +1127,7 @@ exports.updateWorkItemStatus = async (req, res) => {
         if (item.status !== status) {
             operations.push(prisma.auditLog.create({
                 data: {
-                    id: `audit-wi-stat-${id}-${Date.now()}`,
+                    id: crypto.randomUUID(),
                     entity: 'WORKITEM',
                     entityId: id,
                     action: 'STATUS_CHANGE',
@@ -1407,7 +1408,7 @@ exports.reviewWorkItem = async (req, res) => {
 
         operations.push(tx => tx.auditLog.create({
             data: {
-                id: `audit-wi-rev-${id}-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'WORKITEM',
                 entityId: id,
                 action: 'REVIEW',
@@ -1692,7 +1693,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
 
             operations.push(tx => tx.auditLog.create({
                 data: {
-                    id: `audit-wi-bulk-rev-${item.id}-${Date.now()}`,
+                    id: crypto.randomUUID(),
                     entity: 'WORKITEM',
                     entityId: item.id,
                     action: 'REVIEW',

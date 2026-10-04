@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const { assertReviewable, commitReview, reconcileSubmission } = require('../services/reviewCommitService');
 const { hasPermission } = require('../config/roles');
 const scopeGuard = require('../utils/scopeGuard');
@@ -137,7 +138,7 @@ exports.createSubmission = async (req, res) => {
 
         const now = new Date();
         const submissionId = `SUB-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        const auditLogId = `audit-sub-${Date.now()}`;
+        const auditLogId = crypto.randomUUID();
 
         // Prepare operations for transaction
         const operations = [
@@ -159,7 +160,7 @@ exports.createSubmission = async (req, res) => {
             }),
             prisma.auditLog.create({
                 data: {
-                    id: `audit-sub-main-${Date.now()}`,
+                    id: auditLogId,
                     entity: 'SUBMISSION',
                     entityId: submissionId,
                     action: 'SUBMISSION_CREATED',
@@ -193,7 +194,7 @@ exports.createSubmission = async (req, res) => {
 
             operations.push(prisma.auditLog.create({
                 data: {
-                    id: `audit-wi-sub-${item.id}-${Date.now()}`,
+                    id: crypto.randomUUID(),
                     entity: 'WORKITEM',
                     entityId: item.id,
                     action: 'WORKITEM_SUBMITTED',
@@ -386,7 +387,7 @@ exports.reviewSubmission = async (req, res) => {
                     const now = new Date();
                     await tx.submission.update({ where: { id }, data: { status: 'REVIEWED', reviewedBy: user.username, reviewedAt: now } });
                     const movedCount = currentItems.filter(item => item.submissionId && item.submissionId !== id).length;
-                    await tx.auditLog.create({ data: { id: 'audit-sub-moved-' + id + '-' + Date.now(), entity: 'SUBMISSION', entityId: id,
+                    await tx.auditLog.create({ data: { id: crypto.randomUUID(), entity: 'SUBMISSION', entityId: id,
                         action: 'SUBMISSION_REVIEWED', performedBy: user.username, timestamp: now, sampleId: String(submission.sampleId),
                         details: '0 items reviewed; ' + movedCount + ' moved to later submissions' } });
                 }
@@ -477,7 +478,7 @@ exports.reviewSubmission = async (req, res) => {
             const analysisName = await getAnalysisName(item.analysis);
             operations.push(tx => tx.auditLog.create({
                 data: {
-                    id: `audit-wi-rev-${workItemId}-${Date.now()}`,
+                    id: crypto.randomUUID(),
                     entity: 'WORKITEM',
                     entityId: workItemId,
                     action: verdict === 'REJECT_REANALYSIS' ? 'REANALYSIS_REQUESTED' : 'REVIEW_DECISION_MADE',

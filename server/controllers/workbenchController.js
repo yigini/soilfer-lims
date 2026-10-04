@@ -1,3 +1,5 @@
+const { deriveTextureResult } = require('../services/textureResultService');
+const crypto = require('crypto');
 const operationalChecklists = require('../data/operationalChecklists.json');
 const prisma = require('../prisma');
 const analysisService = require('../services/analysisService');
@@ -1108,13 +1110,13 @@ exports.batchSave = async (req, res) => {
             const expectedVersion = entry.version !== undefined ? entry.version : item.version;
             const ops = [];
 
-            ops.push(prisma.workItem.update({
+            ops.push(tx => tx.workItem.update({
                 where: { id: item.id, version: expectedVersion },
                 data: updateData
             }));
 
             if (isOperationalTask) {
-                ops.push(prisma.sample.update({
+                ops.push(tx => tx.sample.update({
                     where: { id: sample.id, status: sample.status, dryingStatus: sample.dryingStatus, preparationStatus: sample.preparationStatus },
                     data: item.analysis === 'DRYING' ? { dryingStatus: 'DONE' } : { preparationStatus: 'DONE' }
                 }));
@@ -1130,13 +1132,13 @@ exports.batchSave = async (req, res) => {
                     const siltNum = textureClassification.fractions.silt;
                     const clayNum = textureClassification.fractions.clay;
 
-                    const sandResId = `res-${Date.now()}-sand-${Math.random().toString(36).substr(2, 5)}`;
-                    const siltResId = `res-${Date.now()}-silt-${Math.random().toString(36).substr(2, 5)}`;
-                    const clayResId = `res-${Date.now()}-clay-${Math.random().toString(36).substr(2, 5)}`;
-                    const textResId = `res-${Date.now()}-text-${Math.random().toString(36).substr(2, 5)}`;
+                    const sandResId = crypto.randomUUID();
+                    const siltResId = crypto.randomUUID();
+                    const clayResId = crypto.randomUUID();
+                    const textResId = crypto.randomUUID();
 
                     // Supersede prior active result for SAND, SILT, CLAY, and TEXTURE
-                    ops.push(prisma.result.updateMany({
+                    ops.push(tx => tx.result.updateMany({
                         where: {
                             sampleId: item.sampleId,
                             param: { in: ['SAND', 'SILT', 'CLAY', 'TEXTURE', item.analysis] },
@@ -1153,7 +1155,7 @@ exports.batchSave = async (req, res) => {
                     if (validation.overrideReason) flagsData.push('MANAGER_OVERRIDE');
 
                     // Sand
-                    ops.push(prisma.result.create({
+                    ops.push(tx => tx.result.create({
                         data: {
                             id: sandResId,
                             sampleId: item.sampleId,
@@ -1180,7 +1182,7 @@ exports.batchSave = async (req, res) => {
                     }));
 
                     // Silt
-                    ops.push(prisma.result.create({
+                    ops.push(tx => tx.result.create({
                         data: {
                             id: siltResId,
                             sampleId: item.sampleId,
@@ -1207,7 +1209,7 @@ exports.batchSave = async (req, res) => {
                     }));
 
                     // Clay
-                    ops.push(prisma.result.create({
+                    ops.push(tx => tx.result.create({
                         data: {
                             id: clayResId,
                             sampleId: item.sampleId,
@@ -1242,7 +1244,7 @@ exports.batchSave = async (req, res) => {
                         `CLOSURE_ERROR_${textureClassification.closureError ?? 0}`,
                         ...flagsData
                     ];
-                    ops.push(prisma.result.create({
+                    ops.push(tx => tx.result.create({
                         data: {
                             id: textResId,
                             sampleId: item.sampleId,
@@ -1269,7 +1271,7 @@ exports.batchSave = async (req, res) => {
                     }));
 
                     // WorkAttempt for defensible metrology
-                    ops.push(prisma.workAttempt.create({
+                    ops.push(tx => tx.workAttempt.create({
                         data: {
                             id: `att-${item.id}-${Date.now()}`,
                             workItemId: item.id,
@@ -1309,10 +1311,10 @@ exports.batchSave = async (req, res) => {
                         numericVal = validation.normalizedValue !== undefined ? validation.normalizedValue : (isNaN(Number(strVal.replace(',', '.'))) ? null : Number(strVal.replace(',', '.')));
                     }
 
-                    const newResultId = `res-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+                    const newResultId = crypto.randomUUID();
 
                     // Supersede prior active result for this sample & parameter ONLY for the same replicateNo
-                    ops.push(prisma.result.updateMany({
+                    ops.push(tx => tx.result.updateMany({
                         where: {
                             sampleId: item.sampleId,
                             param: item.analysis,
@@ -1326,7 +1328,7 @@ exports.batchSave = async (req, res) => {
                     }));
 
                     // Append new defensible Result row
-                    ops.push(prisma.result.create({
+                    ops.push(tx => tx.result.create({
                         data: {
                             id: newResultId,
                             sampleId: item.sampleId,
@@ -1355,13 +1357,13 @@ exports.batchSave = async (req, res) => {
             }
 
             // Both analytical results and operational evidence replace their working draft.
-            ops.push(prisma.workItemDraft.deleteMany({ where: { workItemId: item.id } }));
+            ops.push(tx => tx.workItemDraft.deleteMany({ where: { workItemId: item.id } }));
 
             // Handle operational gate side-effects (non-draft only)
             if (!draft && targetStatus === 'COMPLETED') {
                 // Equipment usage log
                 if (entry.equipmentId) {
-                    ops.push(prisma.workItemEquipmentUse.create({
+                    ops.push(tx => tx.workItemEquipmentUse.create({
                         data: {
                             id: `use-${item.id}-${Date.now()}`,
                             labId: item.labId || item.assignedLab,
@@ -1376,9 +1378,9 @@ exports.batchSave = async (req, res) => {
             }
 
             // Audit log
-            ops.push(prisma.auditLog.create({
+            ops.push(tx => tx.auditLog.create({
                 data: {
-                    id: `audit-wb-${item.id}-${Date.now()}-${Math.random().toString(36).substr(2, 3)}`,
+                    id: crypto.randomUUID(),
                     entity: 'WORKITEM',
                     entityId: item.id,
                     action: draft ? 'WORKBENCH_DRAFT' : 'WORKBENCH_COMPLETE',
@@ -1391,7 +1393,10 @@ exports.batchSave = async (req, res) => {
                 }
             }));
 
-            operationBundles.push({ workItemId: entry.workItemId, ops, validation, draft });
+            operationBundles.push({ workItemId: entry.workItemId, ops, validation, draft,
+                texture: !draft && ['SAND', 'SILT', 'CLAY'].includes(item.analysis)
+                    ? { sampleId: item.sampleId, replicateNo: Number(entry.replicateNo ?? 1), actor: 'SYSTEM_CALC', now, retainRawInput: true }
+                    : null });
 
             results.push({
                 workItemId: entry.workItemId,
@@ -1403,9 +1408,19 @@ exports.batchSave = async (req, res) => {
 
         // Execute all operations in a transaction, handling version conflicts
         if (operationBundles.length > 0) {
-            const allOps = operationBundles.flatMap(b => b.ops);
+            const commitBundles = bundles => prisma.$transaction(async tx => {
+                for (const bundle of bundles) for (const operation of bundle.ops) await operation(tx);
+                const derived = new Set();
+                for (const bundle of bundles) {
+                    if (!bundle.texture) continue;
+                    const key = JSON.stringify([bundle.texture.sampleId, bundle.texture.replicateNo]);
+                    if (derived.has(key)) continue;
+                    derived.add(key);
+                    await deriveTextureResult(tx, bundle.texture);
+                }
+            });
             try {
-                await prisma.$transaction(allOps);
+                await commitBundles(operationBundles);
             } catch (txError) {
                 // ─── Fix 3: Handle version conflict (P2025 = record not found) ───
                 if (txError.code === 'P2025') {
@@ -1416,7 +1431,7 @@ exports.batchSave = async (req, res) => {
 
                     for (const bundle of operationBundles) {
                         try {
-                            await prisma.$transaction(bundle.ops);
+                            await commitBundles([bundle]);
                             verifiedResults.push({
                                 workItemId: bundle.workItemId,
                                 status: bundle.draft ? 'drafted' : 'completed',
@@ -1458,53 +1473,6 @@ exports.batchSave = async (req, res) => {
                     return item?.sampleId;
                 }).filter(Boolean)
             )];
-
-            // Auto-derive USDA Texture Class if all 3 fractions (SAND, SILT, CLAY) are present
-            if (!draft && affectedSampleIds.length > 0) {
-                for (const sampleId of affectedSampleIds) {
-                    try {
-                        const curResults = await prisma.result.findMany({
-                            where: { sampleId, isCurrent: true, param: { in: ['SAND', 'SILT', 'CLAY'] } }
-                        });
-                        const sandR = curResults.find(r => r.param === 'SAND');
-                        const siltR = curResults.find(r => r.param === 'SILT');
-                        const clayR = curResults.find(r => r.param === 'CLAY');
-                        if (sandR && siltR && clayR) {
-                            const tex = calculateUsdaTexture(sandR.numericValue ?? sandR.value, siltR.numericValue ?? siltR.value, clayR.numericValue ?? clayR.value);
-                            if (tex.isValid) {
-                                const texResultId = `res-tex-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
-                                await prisma.result.updateMany({
-                                    where: { sampleId, param: 'TEXTURE', isCurrent: true },
-                                    data: { isCurrent: false, supersededBy: texResultId }
-                                });
-                                await prisma.result.create({
-                                    data: {
-                                        id: texResultId,
-                                        sampleId,
-                                        param: 'TEXTURE',
-                                        value: tex.className,
-                                        rawInput: JSON.stringify({ sand: sandR.rawInput, silt: siltR.rawInput, clay: clayR.rawInput }),
-                                        numericValue: null,
-                                        unit: '',
-                                        isValid: true,
-                                        censoring: 'NONE',
-                                        basis: 'AIR_DRY',
-                                        replicateNo: 1,
-                                        isCurrent: true,
-                                        provenance: 'DERIVED',
-                                        enteredBy: 'SYSTEM_CALC',
-                                        analysedAt: now,
-                                        createdAt: now,
-                                        updatedAt: now
-                                    }
-                                });
-                            }
-                        }
-                    } catch (texErr) {
-                        console.error('[TEXTURE_CALC_ERR]', texErr.message);
-                    }
-                }
-            }
 
             if (affectedSampleIds.length > 0) {
                 try {
@@ -1656,7 +1624,7 @@ exports.clearDrafts = async (req, res) => {
         // Log audit event
         await prisma.auditLog.create({
             data: {
-                id: `audit-clear-drafts-${user.username}-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'WorkItemDraft',
                 action: 'DRAFT_DISCARDED',
                 performedBy: user.username,
@@ -2177,7 +2145,7 @@ exports.commitSubmissions = async (req, res) => {
                 }),
                 prisma.auditLog.create({
                     data: {
-                        id: `audit-sub-${subId}-${Date.now()}`,
+                        id: crypto.randomUUID(),
                         entity: 'Submission',
                         entityId: subId,
                         sampleId,

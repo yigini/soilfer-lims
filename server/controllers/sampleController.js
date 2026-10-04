@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const cataloguePolicy = require('../services/cataloguePolicy');
 const prisma = require('../prisma');
 const { success, error } = require('../i18n/response');
@@ -572,7 +573,7 @@ exports.updateStatus = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-status-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'SAMPLE',
                 entityId: id,
                 action: 'STATUS_CHANGE',
@@ -692,7 +693,7 @@ exports.updatePhaseStatus = async (req, res) => {
                 updates.status = 'ON_HOLD';
                 await prisma.auditLog.create({
                     data: {
-                        id: `audit-nc-${Date.now()}`,
+                        id: crypto.randomUUID(),
                         entity: 'SAMPLE',
                         entityId: id,
                         action: 'NON_CONFORMANCE',
@@ -748,7 +749,7 @@ exports.updatePhaseStatus = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-phase-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'SAMPLE',
                 entityId: id,
                 action: auditEvent,
@@ -890,7 +891,7 @@ exports.receiveSample = async (req, res) => {
         // Audit: SAMPLE_RECEIVED
         await prisma.auditLog.create({
             data: {
-                id: `audit-rec-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'SAMPLE',
                 entityId: id,
                 action: 'SAMPLE_RECEIVED',
@@ -992,7 +993,7 @@ exports.createWalkInSample = async (req, res) => {
         // Audit: SAMPLE_RECEIVED
         await prisma.auditLog.create({
             data: {
-                id: `audit-walkin-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'SAMPLE',
                 entityId: sampleId,
                 action: 'SAMPLE_RECEIVED',
@@ -1069,7 +1070,7 @@ exports.undoIntake = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-undo-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'SAMPLE',
                 entityId: id,
                 action: 'UNDO_INTAKE',
@@ -1474,7 +1475,7 @@ exports.acceptSample = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-accept-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'SAMPLE',
                 entityId: id,
                 action: 'SAMPLE_ACCEPTED',
@@ -1617,7 +1618,7 @@ exports.deleteSample = async (req, res) => {
 
                 await tx.auditLog.create({
                     data: {
-                        id: `audit-revert-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                        id: crypto.randomUUID(),
                         entity: 'SAMPLE',
                         entityId: id,
                         action: 'REVERT_TO_EXPECTED',
@@ -1657,7 +1658,7 @@ exports.deleteSample = async (req, res) => {
 
             await tx.auditLog.create({
                 data: {
-                    id: `audit-del-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                    id: crypto.randomUUID(),
                     entity: 'SAMPLE',
                     entityId: id,
                     action: 'DELETE',
@@ -1856,7 +1857,7 @@ exports.batchDeleteSamples = async (req, res) => {
 
             await tx.auditLog.create({
                 data: {
-                    id: `audit-batch-del-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                    id: crypto.randomUUID(),
                     entity: 'SAMPLE',
                     entityId: 'BATCH',
                     action: toRevert.length > 0 ? 'BATCH_DISCARD' : 'BATCH_DELETE',
@@ -1952,7 +1953,7 @@ exports.updateSampleMetadata = async (req, res) => {
             if (changed.count !== 1) throw new profileIdentity.ProfileReferenceConflictError('CONCURRENT_SAMPLE_EDIT');
             await tx.auditLog.create({
             data: {
-                id: `audit-meta-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'SAMPLE',
                 entityId: id,
                 action: 'METADATA_UPDATE',
@@ -2032,7 +2033,7 @@ exports.updateSampleProject = async (req, res) => {
             if (changed.count !== 1) throw new profileIdentity.ProfileReferenceConflictError('CONCURRENT_SAMPLE_EDIT');
             await tx.auditLog.create({
             data: {
-                id: `audit-proj-move-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'SAMPLE',
                 entityId: id,
                 action: 'PROJECT_CHANGE',
@@ -2175,7 +2176,7 @@ exports.updateSampleAnalyses = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-analyses-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'SAMPLE',
                 entityId: id,
                 action: 'ANALYSES_UPDATE',
@@ -2283,7 +2284,7 @@ exports.approveSample = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-appr-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'SAMPLE',
                 entityId: id,
                 action: 'SAMPLE_APPROVED',
@@ -2364,7 +2365,7 @@ exports.undoApproval = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-unappr-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'SAMPLE',
                 entityId: id,
                 action: 'UNDO_APPROVAL',
@@ -2450,7 +2451,7 @@ exports.archiveSample = async (req, res) => {
         if (!archiveItem) {
             archiveItem = await prisma.workItem.create({
                 data: {
-                    id: `WI-ARCH-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+                    id: crypto.randomUUID(),
                     sampleId: String(id),
                     analysis: 'ARCHIVING',
                     status: 'PENDING',
@@ -2473,7 +2474,7 @@ exports.archiveSample = async (req, res) => {
         const now = new Date();
         await prisma.auditLog.create({
             data: {
-                id: `audit-arch-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'SAMPLE',
                 entityId: id,
                 action: 'ARCHIVE_TASK_CREATED',
@@ -2566,7 +2567,7 @@ exports.disposeSample = async (req, res) => {
         if (!disposalItem) {
             disposalItem = await prisma.workItem.create({
                 data: {
-                    id: `WI-DISP-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+                    id: crypto.randomUUID(),
                     sampleId: String(id),
                     analysis: 'DISPOSAL',
                     status: 'PENDING',
@@ -2589,7 +2590,7 @@ exports.disposeSample = async (req, res) => {
         const now = new Date();
         await prisma.auditLog.create({
             data: {
-                id: `audit-disp-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'SAMPLE',
                 entityId: id,
                 action: 'DISPOSAL_TASK_CREATED',

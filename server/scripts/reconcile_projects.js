@@ -1,5 +1,7 @@
 'use strict';
 
+const crypto = require('crypto');
+
 /**
  * Project Membership & Data Reconciliation Tool
  *
@@ -207,7 +209,7 @@ async function reconcileProjects({ isApply = false, targetProjectCode = null, cl
 
                     await tx.auditLog.create({
                         data: {
-                            id: `audit-reconcile-${project.id}-${Date.now()}`,
+                            id: crypto.randomUUID(),
                             entity: 'PROJECT',
                             entityId: project.id,
                             action: 'MEMBERSHIP_RECONCILED',

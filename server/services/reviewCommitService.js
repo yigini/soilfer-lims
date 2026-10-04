@@ -59,7 +59,7 @@ async function reconcileSubmission(prisma, submissionId, user, results, errors =
             reviewNote: committed.map(row => `${row.workItemId}: ${row.decision}`).join(' | ')
         } });
         await tx.auditLog.create({ data: {
-            id: `audit-sub-rev-${randomUUID()}`, entity: 'SUBMISSION', entityId: submissionId,
+            id: randomUUID(), entity: 'SUBMISSION', entityId: submissionId,
             action: 'SUBMISSION_REVIEWED', performedBy: user.username, timestamp: now, sampleId: String(submission.sampleId),
             details: JSON.stringify({ committedCount: committed.length, refusedCount: refused.length,
                 results: committed, errors: refused })

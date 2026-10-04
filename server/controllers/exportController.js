@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const prisma = require('../prisma');
 const { normalizeUnit } = require('../services/interpretationService');
 const { CURRENT_VALID_RESULTS, selectReportedValue } = require('../services/reportedValueService');
@@ -289,7 +290,7 @@ exports.getExportData = async (req, res) => {
         // Audit Log
         await prisma.auditLog.create({
             data: {
-                id: exportId,
+                id: crypto.randomUUID(),
                 entity: 'EXPORT',
                 entityId: exportId,
                 action: type,

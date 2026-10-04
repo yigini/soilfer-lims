@@ -132,7 +132,7 @@ function resolveConflicts(db, resolutions = {}, actor = 'SYSTEM_ADMIN') {
                     db.prepare('UPDATE "StaffInvitation" SET isRevoked = 1 WHERE id = ?').run(inv.id);
                 }
 
-                const auditId = 'audit-conf-res-' + Date.now() + '-' + crypto.randomBytes(4).toString('hex');
+                const auditId = crypto.randomUUID();
                 db.prepare(`
                     INSERT INTO "AuditLog" (id, entity, entityId, action, details, performedBy, timestamp)
                     VALUES (?, 'USER', ?, 'INVITATION_CONFLICT_RESOLVED', ?, ?, CURRENT_TIMESTAMP)
@@ -154,7 +154,7 @@ function resolveConflicts(db, resolutions = {}, actor = 'SYSTEM_ADMIN') {
                     db.prepare('UPDATE "StaffInvitation" SET isRevoked = 1 WHERE id = ?').run(inv.id);
                 }
 
-                const auditId = 'audit-conf-revall-' + Date.now() + '-' + crypto.randomBytes(4).toString('hex');
+                const auditId = crypto.randomUUID();
                 db.prepare(`
                     INSERT INTO "AuditLog" (id, entity, entityId, action, details, performedBy, timestamp)
                     VALUES (?, 'USER', ?, 'INVITATION_CONFLICT_RESOLVED', ?, ?, CURRENT_TIMESTAMP)

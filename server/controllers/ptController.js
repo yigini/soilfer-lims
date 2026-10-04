@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const prisma = require('../prisma');
 const scopeGuard = require('../utils/scopeGuard');
 const { hasPermission } = require('../config/roles');
@@ -82,7 +83,7 @@ exports.recordRound = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-pt-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'PROFICIENCY_ROUND',
                 entityId: roundId,
                 action: 'RECORD_PT',

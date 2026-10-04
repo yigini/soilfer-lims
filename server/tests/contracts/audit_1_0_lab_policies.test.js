@@ -192,7 +192,9 @@ describe('Audit 1.0: persistent lab policies', () => {
         const response = await request(app).post('/api/exports/data').set('Authorization', `Bearer ${manager}`).send({ type: 'WET_CHEM', project });
         expect(response.status).toBe(200); expect(response.body.data[0].SOC).toBe(20);
         expect(response.body.meta.selectionPolicies).toEqual([expect.objectContaining({ labId, version: 1, rule: 'LATEST_VALID', source: 'LAB_OVERRIDE' })]);
-        const log = await prisma.auditLog.findUnique({ where: { id: response.body.meta.exportId } });
+        const log = await prisma.auditLog.findFirst({ where: { entity: 'EXPORT', entityId: response.body.meta.exportId } });
+        expect(log.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+        expect(log.entityId).toBe(response.body.meta.exportId);
         expect(JSON.parse(log.details).selectionPolicies[0]).toMatchObject({ labId, version: 1, rule: 'LATEST_VALID' });
         await edit([{ key: 'results.reportedValueRule', value: 'MEAN_IF_WITHIN_R' }]);
         expect(await prisma.auditLog.findUnique({ where: { id: log.id } })).toEqual(log);

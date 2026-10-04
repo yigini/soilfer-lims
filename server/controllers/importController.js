@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const prisma = require('../prisma');
 
 /**
@@ -192,75 +193,83 @@ exports.executeImport = async (req, res) => {
         let importedResultsCount = 0;
         const now = new Date();
 
-        for (const row of rows) {
-            const rawSampleId = row[sampleIdColumn];
-            if (!rawSampleId) continue;
+        await prisma.$transaction(async tx => {
+            for (const row of rows) {
+                const rawSampleId = row[sampleIdColumn];
+                if (!rawSampleId) continue;
 
-            const sampleCode = String(rawSampleId).trim();
-            let sample = await prisma.sample.findFirst({
-                where: { OR: [{ id: sampleCode }, { originalId: sampleCode }] }
+                const sampleCode = String(rawSampleId).trim();
+                let sample = await tx.sample.findFirst({
+                    where: { OR: [{ id: sampleCode }, { originalId: sampleCode }] }
+                });
+
+                if (!sample) {
+                    sample = await tx.sample.create({
+                        data: {
+                            id: sampleCode,
+                            originalId: sampleCode,
+                            status: 'APPROVED',
+                            labId: targetLabId,
+                            assignedLab: targetLabId,
+                            receptionData: JSON.stringify({
+                                isLegacy: true,
+                                importedAt: now,
+                                importedBy: user?.username || 'SYSTEM'
+                            })
+                        }
+                    });
+                    importedSamplesCount++;
+                }
+
+                // Create imported results for each mapped column
+                for (const map of columnMappings) {
+                    const cellVal = row[map.column];
+                    if (cellVal === undefined || cellVal === null || String(cellVal).trim() === '') continue;
+
+                    const strVal = String(cellVal).trim();
+                    const numVal = isNaN(Number(strVal)) ? null : Number(strVal);
+                    const resultId = crypto.randomUUID();
+
+                    await tx.result.updateMany({
+                        where: { sampleId: sample.id, param: map.analysisCode, replicateNo: 1, isCurrent: true },
+                        data: { isCurrent: false, supersededBy: resultId }
+                    });
+                    await tx.result.create({
+                        data: {
+                            id: resultId,
+                            sampleId: sample.id,
+                            param: map.analysisCode,
+                            value: strVal,
+                            numericValue: numVal,
+                            unit: map.unitCode,
+                            methodologyId: map.methodologyId,
+                            provenance: 'IMPORTED',
+                            replicateNo: 1,
+                            isValid: true,
+                            isCurrent: true,
+                            enteredBy: user?.username || 'LEGACY_IMPORT',
+                            analysedAt: now,
+                            createdAt: now,
+                            updatedAt: now
+                        }
+                    });
+                    importedResultsCount++;
+                }
+            }
+
+            // Audit Log
+            await tx.auditLog.create({
+                data: {
+                    id: crypto.randomUUID(),
+                    entity: 'LEGACY_IMPORT',
+                    entityId: `IMPORT-${Date.now()}`,
+                    action: 'IMPORT_LEGACY_DATA',
+                    details: `Imported ${importedSamplesCount} historical samples and ${importedResultsCount} results with provenance IMPORTED`,
+                    performedBy: user?.username || 'system',
+                    timestamp: now
+                }
             });
 
-            if (!sample) {
-                sample = await prisma.sample.create({
-                    data: {
-                        id: sampleCode,
-                        originalId: sampleCode,
-                        status: 'APPROVED',
-                        labId: targetLabId,
-                        assignedLab: targetLabId,
-                        receptionData: JSON.stringify({
-                            isLegacy: true,
-                            importedAt: now,
-                            importedBy: user?.username || 'SYSTEM'
-                        })
-                    }
-                });
-                importedSamplesCount++;
-            }
-
-            // Create imported results for each mapped column
-            for (const map of columnMappings) {
-                const cellVal = row[map.column];
-                if (cellVal === undefined || cellVal === null || String(cellVal).trim() === '') continue;
-
-                const strVal = String(cellVal).trim();
-                const numVal = isNaN(Number(strVal)) ? null : Number(strVal);
-                const resultId = `RES-IMP-${sample.id}-${map.analysisCode}-${Date.now()}-${Math.floor(Math.random()*1000)}`;
-
-                await prisma.result.create({
-                    data: {
-                        id: resultId,
-                        sampleId: sample.id,
-                        param: map.analysisCode,
-                        value: strVal,
-                        numericValue: numVal,
-                        unit: map.unitCode,
-                        methodologyId: map.methodologyId,
-                        provenance: 'IMPORTED',
-                        isValid: true,
-                        isCurrent: true,
-                        enteredBy: user?.username || 'LEGACY_IMPORT',
-                        analysedAt: now,
-                        createdAt: now,
-                        updatedAt: now
-                    }
-                });
-                importedResultsCount++;
-            }
-        }
-
-        // Audit Log
-        await prisma.auditLog.create({
-            data: {
-                id: `audit-import-${Date.now()}`,
-                entity: 'LEGACY_IMPORT',
-                entityId: `IMPORT-${Date.now()}`,
-                action: 'IMPORT_LEGACY_DATA',
-                details: `Imported ${importedSamplesCount} historical samples and ${importedResultsCount} results with provenance IMPORTED`,
-                performedBy: user?.username || 'system',
-                timestamp: now
-            }
         });
 
         res.json({

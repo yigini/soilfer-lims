@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const labLifecycleService = require('../services/labLifecycleService');
 const express = require('express');
 const router = express.Router();
@@ -303,7 +304,7 @@ router.patch('/:id/toggle-active', checkPermission('MANAGE_BRANDING'), async (re
 
             await tx.auditLog.create({
                 data: {
-                    id: `audit-lab-toggle-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                    id: crypto.randomUUID(),
                     entity: 'LAB',
                     entityId: req.params.id,
                     action: 'STATUS_CHANGE',
@@ -368,7 +369,7 @@ router.patch('/:id/staff/:userId/toggle', checkPermission('MANAGE_USERS'), async
 
             await tx.auditLog.create({
                 data: {
-                    id: `audit-staff-toggle-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                    id: crypto.randomUUID(),
                     entity: 'USER',
                     entityId: req.params.userId,
                     action: 'STATUS_CHANGE',
@@ -430,7 +431,7 @@ router.patch('/:id/staff/:userId/reset-password', checkPermission('MANAGE_USERS'
 
             await tx.auditLog.create({
                 data: {
-                    id: `audit-staff-reset-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                    id: crypto.randomUUID(),
                     entity: 'USER',
                     entityId: req.params.userId,
                     action: 'PASSWORD_RESET',
@@ -498,7 +499,7 @@ router.post('/', checkPermission('MANAGE_BRANDING'), async (req, res) => {
 
             await tx.auditLog.create({
                 data: {
-                    id: `audit-lab-create-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                    id: crypto.randomUUID(),
                     entity: 'LAB',
                     entityId: id,
                     action: 'CREATE',
@@ -577,7 +578,7 @@ router.put('/:id', checkPermission('MANAGE_BRANDING'), async (req, res) => {
 
             await tx.auditLog.create({
                 data: {
-                    id: `audit-lab-update-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                    id: crypto.randomUUID(),
                     entity: 'LAB',
                     entityId: req.params.id,
                     action: 'UPDATE',

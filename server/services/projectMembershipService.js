@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 'use strict';
 
 const prisma = require('../prisma');
@@ -424,7 +425,7 @@ async function _executeUpdateProjectLabAccess(actor, projectId, { servicingLabId
     });
 
     const auditData = {
-        id: 'audit-proj-labs-' + Date.now(),
+        id: crypto.randomUUID(),
         entity: 'PROJECT',
         entityId: projectId,
         action: 'LAB_ACCESS_UPDATED',

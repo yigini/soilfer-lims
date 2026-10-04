@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 /**
  * FAO SoilFER & ISO/IEC 17025 Typed Quality Control Service
  * 
@@ -59,7 +61,7 @@ function getMissingQcValueTypes(qcData = {}, runProfile = {}, numberFormat = req
  * @returns {Object} Evaluated blank result
  */
 function evaluateBlank(blank = {}, policy = {}) {
-    const id = blank.id || `BLK-${Date.now()}`;
+    const id = blank.id || crypto.randomUUID();
     const label = blank.label || 'Method Blank';
     const rawVal = blank.value !== undefined ? blank.value : blank.measured;
     const value = parseNumericMeasurement(rawVal);
@@ -100,7 +102,7 @@ function evaluateBlank(blank = {}, policy = {}) {
  * @returns {Object} Evaluated duplicate result
  */
 function evaluateDuplicate(dup = {}, policy = {}) {
-    const id = dup.id || `DUP-${Date.now()}`;
+    const id = dup.id || crypto.randomUUID();
     const label = dup.label || 'Analytical Duplicate';
     const defaults = require('./policyService');
     const format = policy.numberFormat || defaults.getStrictNumberFormat();
@@ -182,7 +184,7 @@ function evaluateDuplicate(dup = {}, policy = {}) {
  * @returns {Object} Evaluated control result
  */
 function evaluateControl(crm = {}, policy = {}) {
-    const id = crm.id || `CRM-${Date.now()}`;
+    const id = crm.id || crypto.randomUUID();
     const label = crm.label || 'Certified Reference Material';
     const expected = parseNumericMeasurement(crm.expected !== undefined ? crm.expected : crm.expectedValue);
     const measured = parseNumericMeasurement(crm.measured !== undefined ? crm.measured : (crm.value !== undefined ? crm.value : crm.val));
