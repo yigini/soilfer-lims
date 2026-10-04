@@ -11,6 +11,30 @@ const sampleOriginService = require('../services/sampleOriginService');
 const sampleStateService = require('../services/sampleStateService');
 const profileIdentity = require('../services/profileIdentityService');
 
+// Printed labels and imported field barcodes encode a lab/original identifier.
+// Apply scope before matching so neither missing nor ambiguous responses leak
+// samples from another lab. Never prefer one identifier type over another.
+exports.lookupSample = async (req, res) => {
+    const code = typeof req.query.code === 'string' ? req.query.code.trim() : '';
+    if (!code) return res.status(400).json({ code: 'LOOKUP_CODE_REQUIRED', error: 'A sample identifier is required.' });
+    try {
+        const scopedRows = await prisma.sample.findMany({
+            where: scopeGuard.buildScopedWhere(req.user, { OR: [{ id: code }, { labId: code }, { originalId: code }] },
+                { entityType: 'Sample', labField: 'labId', altLabField: 'assignedLab' }),
+            orderBy: { id: 'asc' }
+        });
+        const matches = scopedRows.filter(sample => scopeGuard.canAccessEntity(req.user, sample,
+            { entityType: 'Sample', labField: 'labId', altLabField: 'assignedLab' }));
+        if (!matches.length) return res.status(404).json({ code: 'SAMPLE_NOT_FOUND', error: 'Sample not found.' });
+        if (matches.length > 1) return res.status(409).json({ code: 'SAMPLE_LOOKUP_AMBIGUOUS', error: 'This identifier matches several samples.',
+            candidates: matches.map(sample => ({ id: sample.id, displayId: sample.originalId || sample.labId || sample.id, labId: sample.labId, originalId: sample.originalId })) });
+        return res.json(matches[0]);
+    } catch (err) {
+        console.error('[Sample lookup]', err);
+        return res.status(500).json({ code: 'SAMPLE_LOOKUP_ERROR', error: 'Sample lookup failed.' });
+    }
+};
+
 
 /**
  * SEARCH EXPECTED SAMPLES - For Reception Autocomplete

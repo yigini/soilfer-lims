@@ -15,9 +15,12 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 import { getOfflineSample } from '../services/offline/offlineDb';
 import clsx from 'clsx';
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 export default function ScanPage() {
     const { t } = useLanguage();
+    const { token } = useAuth();
     const navigate = useNavigate();
 
     const videoRef = useRef(null);
@@ -27,6 +30,7 @@ export default function ScanPage() {
     const [manualCode, setManualCode] = useState('');
     const [scannedResult, setScannedResult] = useState(null);
     const [searching, setSearching] = useState(false);
+    const [lookupError, setLookupError] = useState(null);
 
     // Initialize camera stream
     useEffect(() => {
@@ -127,6 +131,7 @@ export default function ScanPage() {
         }
 
         setSearching(true);
+        setLookupError(null);
         let extractedId = clean;
 
         // If URL was scanned (e.g. https://lims.yigini.net/samples/SMP-001)
@@ -141,18 +146,21 @@ export default function ScanPage() {
         try {
             sampleData = await getOfflineSample(extractedId);
             if (!sampleData) {
-                const res = await fetch(`/api/samples/${extractedId}`);
-                if (res.ok) {
-                    sampleData = await res.json();
-                }
+                const res = await axios.get('/api/samples/lookup', { params: { code: extractedId },
+                    headers: { Authorization: `Bearer ${token}` } });
+                sampleData = res.data;
             }
         } catch (e) {
             console.warn('[SCAN_LOOKUP_FAIL]', e);
+            const candidates = e.response?.data?.candidates || [];
+            setLookupError(e.response?.status === 409
+                ? `${t('sampleLookup.ambiguous', 'This identifier matches several samples:')} ${candidates.map(candidate => candidate.displayId).join(', ')}`
+                : t('sampleLookup.failed', 'Sample could not be found or loaded. Check the identifier and connection.'));
         }
 
         setScannedResult({
             rawCode: clean,
-            sampleId: extractedId,
+            sampleId: sampleData?.id || extractedId,
             sampleData
         });
         setSearching(false);
@@ -166,6 +174,7 @@ export default function ScanPage() {
     const resetScan = () => {
         setScannedResult(null);
         setManualCode('');
+        setLookupError(null);
     };
 
     return (
@@ -217,7 +226,7 @@ export default function ScanPage() {
                 <div className="p-4 rounded-2xl border border-sf-divider bg-sf-surface shadow-md space-y-3 animate-fadeIn">
                     <div className="flex items-center justify-between">
                         <span className="text-xs font-bold uppercase tracking-wider text-sf-muted">
-                            Specimen Recognized
+                            {scannedResult.sampleData ? 'Specimen Recognized' : t('sampleLookup.failed', 'Sample could not be found or loaded. Check the identifier and connection.')}
                         </span>
                         <button
                             onClick={resetScan}
@@ -240,14 +249,16 @@ export default function ScanPage() {
                     {/* Quick action buttons */}
                     <div className="grid grid-cols-2 gap-2 pt-1">
                         <button
-                            onClick={() => navigate(`/samples/${scannedResult.sampleId}`)}
+                            disabled={!scannedResult.sampleData}
+                            onClick={() => navigate(`/samples/${encodeURIComponent(scannedResult.sampleId)}`)}
                             className="flex items-center justify-center gap-2 p-3 rounded-xl border border-sf-divider bg-sf-surface hover:bg-sf-hover text-xs font-bold text-sf-text transition-colors"
                         >
                             <TestTube2 size={16} className="text-sf-primary" />
                             <span>Sample Details</span>
                         </button>
                         <button
-                            onClick={() => navigate(`/workbench?sampleId=${scannedResult.sampleId}`)}
+                            disabled={!scannedResult.sampleData}
+                            onClick={() => navigate(`/workbench?sampleId=${encodeURIComponent(scannedResult.sampleId)}`)}
                             className="btn-primary flex items-center justify-center gap-2 p-3 text-xs font-bold"
                         >
                             <Beaker size={16} />
@@ -257,6 +268,7 @@ export default function ScanPage() {
                 </div>
             )}
 
+            {lookupError && <p role="alert" className="text-sm text-red-600">{lookupError}</p>}
             {/* Manual Entry Fallback */}
             <form onSubmit={handleManualSubmit} className="p-4 rounded-2xl border border-sf-divider bg-sf-surface space-y-3">
                 <label className="block text-xs font-bold uppercase tracking-wider text-sf-muted">
