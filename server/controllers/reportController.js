@@ -156,7 +156,7 @@ async function generateReport(req, res) {
     } catch (err) {
         if (err.statusCode) {
             const { code, workItemIds, params } = err.publishCheck || {};
-            return res.status(err.statusCode).json({ error: err.message, code, workItemIds, params });
+            return res.status(err.statusCode).json({ error: err.message, code: code || err.code, workItemIds, params });
         }
         console.error('[Report] Generate error:', err);
         res.status(500).json({ error: err.message || 'Failed to generate report' });

@@ -51,6 +51,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
                         {
                             id: 'p6-wi-ph-01',
                             analysis: 'PH_H2O',
+                            result: '7.12',
                             category: 'Chemical',
                             status: 'SUBMITTED',
                             assignedTo: techUser.username,
@@ -59,6 +60,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
                         {
                             id: 'p6-wi-ec-01',
                             analysis: 'EC',
+                            result: '1.45',
                             category: 'Chemical',
                             status: 'SUBMITTED',
                             assignedTo: techUser.username,

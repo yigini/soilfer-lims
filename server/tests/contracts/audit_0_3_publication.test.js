@@ -76,6 +76,11 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         const result = { id: 'r', sampleId: 's', param: 'PH_H2O', isCurrent: true, isValid: true, batchId: 'missing' };
         expect(canPublish({ status: 'APPROVED', workItems: [{ id: 'w', sampleId: 's', analysis: 'PH_H2O', status: 'ACCEPTED' }], results: [result] }, null, manager).code).toBe('QC_BATCH_PENDING');
     });
+    test('unresolved policy mode fails closed', async () => {
+        jest.spyOn(policyService, 'get').mockReturnValue('UNKNOWN');
+        const res = await generate(await fixture());
+        expect(res.status).toBe(409); expect(res.body.code).toBe('QC_POLICY_UNRESOLVED');
+    });
     test('legacy accepted no-batch work can publish', async () => expect((await generate(await fixture())).status).toBe(200));
     test('ungoverned current result blocks and lists params', async () => {
         const f = await fixture();
@@ -159,6 +164,25 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         expect(JSON.parse(log.details)).toEqual({ workItemId: f.item.id, reason: 'Recheck drift' });
         const { content, values } = await reportValues(f);
         expect(values).toHaveLength(0); expect(content.workItems[0].result).toBeNull();
+    });
+    test('RETURN of composite texture invalidates all four current parameters', async () => {
+        const f = await fixture({ status: 'PROCESSING', itemStatus: 'SUBMITTED', param: 'TEXTURE' });
+        for (const param of ['SAND', 'SILT', 'CLAY']) await prisma.result.create({ data: {
+            id: id('TEXT-RETURN-03'), sampleId: f.sampleId, param, value: '25', isCurrent: true, isValid: true, flags: '["METHOD_NOTE"]'
+        } });
+        expect((await returnItem('individual', f)).status).toBe(200);
+        const results = await prisma.result.findMany({ where: { sampleId: f.sampleId } });
+        expect(results).toHaveLength(4);
+        expect(results.every(row => row.isValid === false && JSON.parse(row.flags).includes('REVIEW_RETURNED'))).toBe(true);
+        expect(await prisma.auditLog.count({ where: { sampleId: f.sampleId, entity: 'RESULT', action: 'REVIEW_RETURNED' } })).toBe(4);
+    });
+    test('RETURN with malformed flags fails closed and preserves all records', async () => {
+        const f = await returnFixture('individual');
+        await prisma.result.update({ where: { id: f.result.id }, data: { flags: '{malformed' } });
+        const before = await reviewedState(f);
+        const res = await returnItem('individual', f);
+        expect(res.status).toBe(409); expect(res.body.code).toBe('RESULT_FLAGS_INVALID');
+        expect(await reviewedState(f)).toEqual(before);
     });
     test('RETURN invalidates a shared current result even if another governing item is accepted', async () => {
         const f = await returnFixture('individual');

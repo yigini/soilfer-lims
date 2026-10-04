@@ -20,9 +20,13 @@ function governingItems(result, items) {
 }
 
 function getReportingMode(sample, result, options = {}) {
-    return options.qcModes?.[result.id] ?? policyService.get(sample.assignedLab || sample.labId, 'qc.mode', {
+    const mode = options.qcModes?.[result.id] ?? policyService.get(sample.assignedLab || sample.labId, 'qc.mode', {
         analysisCode: result.param, methodologyId: result.methodologyId || null
     });
+    if (!['REQUIRED_BLOCKING', 'REQUIRED_WARN', 'ADVISORY', 'OFF'].includes(mode)) {
+        throw Object.assign(new Error('QC policy mode could not be resolved.'), { statusCode: 409, code: 'QC_POLICY_UNRESOLVED' });
+    }
+    return mode;
 }
 
 function isCurrentValidAnalyticalResult(result, mode) {
