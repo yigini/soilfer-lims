@@ -3,93 +3,30 @@
  * Manager QA/QC decisions per work item
  */
 const prisma = require('../prisma');
+const { reviewWorkItem } = require('./workItemController');
+const { WORK_ITEM_STATES } = require('../workflowContract');
 
 /**
  * Create review decision for a work item
  * POST /api/reviews/:workItemId
  */
 exports.createReview = async (req, res) => {
-    const user = req.user;
     const { workItemId } = req.params;
     const { decision, reason } = req.body;
-
-    if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
-        return res.status(403).json({ error: 'Managers only' });
+    const statuses = { ACCEPT: WORK_ITEM_STATES.ACCEPTED, REJECT: WORK_ITEM_STATES.REANALYSIS_REQUIRED, WAIVE: WORK_ITEM_STATES.WAIVED };
+    if (!Object.hasOwn(statuses, decision)) {
+        return res.status(400).json({ error: 'decision must be ACCEPT, REJECT, or WAIVE', code: 'INVALID_REVIEW_DECISION' });
     }
-
-    if (!['ACCEPT', 'REJECT', 'WAIVE'].includes(decision)) {
-        return res.status(400).json({ error: 'decision must be ACCEPT, REJECT, or WAIVE' });
+    if (['reason', 'note'].some(key => req.body[key] != null && typeof req.body[key] !== 'string')) {
+        return res.status(400).json({ error: 'Review reason must be text', code: 'INVALID_REVIEW_REASON' });
     }
-
-    // REJECT and WAIVE require reason
-    if (['REJECT', 'WAIVE'].includes(decision) && !reason) {
-        return res.status(400).json({ error: 'reason required for REJECT/WAIVE' });
+    if (['REJECT', 'WAIVE'].includes(decision) && !reason?.trim()) {
+        return res.status(400).json({ error: 'reason required for REJECT/WAIVE', code: 'REVIEW_REASON_REQUIRED' });
     }
-
-    try {
-        const item = await prisma.workItem.findUnique({ where: { id: workItemId } });
-        if (!item) {
-            return res.status(404).json({ error: 'Work item not found' });
-        }
-
-        // Determine new status
-        let newStatus;
-        switch (decision) {
-            case 'ACCEPT':
-                newStatus = 'ACCEPTED';
-                break;
-            case 'REJECT':
-                newStatus = 'REANALYSIS_REQUIRED';
-                break;
-            case 'WAIVE':
-                newStatus = 'WAIVED';
-                break;
-        }
-
-        const now = new Date();
-        const historyEntry = {
-            status: newStatus,
-            decision,
-            reason,
-            changedBy: user.username,
-            timestamp: now.toISOString()
-        };
-
-        // Parse existing history
-        let currentHistory = [];
-        try {
-            currentHistory = item.history ? JSON.parse(item.history) : [];
-        } catch (e) { }
-
-        const updatedHistory = [...currentHistory, historyEntry];
-
-        await prisma.$transaction([
-            prisma.workItem.update({
-                where: { id: workItemId },
-                data: {
-                    status: newStatus,
-                    history: JSON.stringify(updatedHistory),
-                    updatedAt: now
-                }
-            }),
-            prisma.auditLog.create({
-                data: {
-                    id: `audit-decision-${Date.now()}`,
-                    entity: 'WORK_ITEM',
-                    entityId: workItemId,
-                    action: `REVIEW_${decision}`,
-                    details: reason || `Work item ${decision.toLowerCase()}`,
-                    performedBy: user.username,
-                    timestamp: now
-                }
-            })
-        ]);
-
-        res.status(201).json({ success: true, decision, status: newStatus });
-    } catch (error) {
-        console.error('Review creation error:', error);
-        res.status(500).json({ error: 'Failed to create review' });
-    }
+    // Keep the compatibility URL and payload, with a single review authority.
+    req.params = { ...req.params, id: workItemId };
+    req.body = { ...req.body, status: statuses[decision] };
+    return reviewWorkItem(req, res);
 };
 
 /**
