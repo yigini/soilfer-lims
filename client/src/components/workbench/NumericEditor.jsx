@@ -15,7 +15,8 @@ export default function NumericEditor({
     validation = null,
     isInvalid = false,
     onEnterNext = null,
-    ariaLabel = 'Numeric determination'
+    ariaLabel = 'Numeric determination',
+    inputRef = null
 }) {
     const handleChange = (e) => {
         onChange(e.target.value);
@@ -33,6 +34,7 @@ export default function NumericEditor({
     return (
         <div className="flex items-center gap-1.5">
             <input
+                ref={inputRef}
                 type="text"
                 inputMode="decimal"
                 value={value ?? ''}

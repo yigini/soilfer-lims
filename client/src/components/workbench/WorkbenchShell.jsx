@@ -14,6 +14,7 @@ import WorksheetArea from './WorksheetArea';
 import ReviewCompletionView from './ReviewCompletionView';
 import ReviewSubmissionView from './ReviewSubmissionView';
 import ActivityReceiptsView from './ActivityReceiptsView';
+import CompletionReceipt from './CompletionReceipt';
 import SpectralIntakeModal from './SpectralIntakeModal';
 import { saveLocalDraft, getLocalDraft, deleteLocalDraft, removePendingDraftOperations } from '../../services/offline/offlineDb';
 import { recordSyncOperation } from '../../services/offline/syncEngine';
@@ -78,6 +79,7 @@ export default function WorkbenchShell({
 
     // Preflight review state
     const [completionPreview, setCompletionPreview] = useState(null);
+    const [completionReceipt, setCompletionReceipt] = useState(null);
     const [submissionPreview, setSubmissionPreview] = useState(null);
     const [receipts, setReceipts] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -527,7 +529,7 @@ export default function WorkbenchShell({
 
             const entries = selectedItems.map(i => ({
                 workItemId: i.workItemId,
-                value: i.draft?.value ?? i.currentResult,
+                value: i.draft?.value,
                 values: i.draft?.values,
                 checks: i.draft?.checks,
                 basis: i.draft?.basis || 'AIR_DRY',
@@ -538,6 +540,7 @@ export default function WorkbenchShell({
 
             const res = await axios.post('/api/workbench/v2/completion/preview', { entries });
             setCompletionPreview(res.data);
+            setCompletionReceipt(null);
             setReviewSubView('completion');
             setActiveTab('review');
         } catch (err) {
@@ -553,6 +556,22 @@ export default function WorkbenchShell({
     // ─────────────────────────────────────────────────────────────────────────
     const handleCommitCompletion = async (includedItems) => {
         setIsSubmitting(true);
+        const showIncomplete = data => {
+            const errors = (data.errors || []).map(error => {
+                const item = groups.flatMap(group => group.items || []).find(row => row.workItemId === error.workItemId);
+                return { ...error, sampleDisplayId: item?.sampleDisplayId, analysis: item?.analysis };
+            });
+            // A partial response without row errors must still stop the handoff.
+            if (errors.length === 0) {
+                const savedIds = new Set((data.results || []).map(row => row.workItemId));
+                includedItems.filter(item => !savedIds.has(item.workItemId)).forEach(item => errors.push({
+                    workItemId: item.workItemId, error: t('workbench.recordingUnconfirmed', 'Recording was not confirmed for this row.')
+                }));
+            }
+            setCompletionReceipt({ saved: data.saved || 0, errors });
+            setCompletionPreview({ included: [], excluded: errors.map(error => ({ ...error, reasons: [error.error || error.code] })) });
+            addToast(t('workbench.recordingIncomplete', 'Recording incomplete'), 'warning');
+        };
         try {
             const entries = includedItems.map(i => ({
                 workItemId: i.workItemId,
@@ -566,6 +585,13 @@ export default function WorkbenchShell({
             }));
 
             const res = await axios.post('/api/workbench/v2/completion/commit', { entries });
+            if (res.data.partial || res.data.errors?.length || res.data.success === false) {
+                showIncomplete(res.data);
+                await fetchQueue();
+                await fetchReceipts();
+                return;
+            }
+            setCompletionReceipt(null);
             addToast(`Successfully recorded ${res.data.saved} determination(s)`, 'success');
             await fetchQueue();
             await fetchReceipts();
@@ -574,7 +600,13 @@ export default function WorkbenchShell({
             await handleOpenSubmissionReview();
         } catch (err) {
             console.error('[workbench] Failed to commit determinations:', err);
-            addToast(err.response?.data?.error || 'Failed to record determinations', 'error');
+            if (err.response?.data?.errors?.length) {
+                showIncomplete(err.response.data);
+                await fetchQueue();
+                await fetchReceipts();
+            } else {
+                addToast(err.response?.data?.error || 'Failed to record determinations', 'error');
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -749,12 +781,16 @@ export default function WorkbenchShell({
                 )}
 
                 {activeTab === 'review' && reviewSubView === 'completion' && (
+                    <>
+                    <CompletionReceipt receipt={completionReceipt} disabled={isSubmitting || isLoading}
+                        onRetry={() => handleReviewRecord(completionReceipt.errors.map(error => error.workItemId))} />
                     <ReviewCompletionView
                         previewData={completionPreview}
                         onBack={() => setActiveTab('worksheet')}
                         onCommit={handleCommitCompletion}
                         isSubmitting={isSubmitting}
                     />
+                    </>
                 )}
 
                 {activeTab === 'review' && reviewSubView === 'submission' && (

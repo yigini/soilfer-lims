@@ -2310,8 +2310,7 @@
       "reset": "Restablecer",
       "applyFilters": "Aplicar filtros"
     }
-  }
-,
+  },
   "profileReference": {
     "label": "Perfil de suelo / punto de muestreo",
     "code": "Código registrado en campo",
@@ -2355,5 +2354,17 @@
       "profileRelation": "Significado registrado (SITE_POINT, COMPOSITE, CONFIRMED_PROFILE)",
       "collectionDate": "Fecha de toma en campo"
     }
+  },
+  "workbench": {
+    "previousValue": "Anterior",
+    "previousRejected": "rechazado",
+    "previousRecorded": "registrado",
+    "selectInstrument": "Seleccionar instrumento",
+    "recordThisSample": "Registrar esta muestra",
+    "nextSample": "Siguiente muestra",
+    "recordingIncomplete": "Registro incompleto",
+    "recordedCount": "Registrados",
+    "retryFailed": "Reintentar fallidos",
+    "recordingUnconfirmed": "No se confirmó el registro de esta fila."
   }
 }
