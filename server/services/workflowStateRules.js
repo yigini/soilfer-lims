@@ -132,7 +132,8 @@ function assertFixtureContext(env = process.env) {
 
 async function inTransaction(tx, execute) {
     try {
-        return tx ? await execute(tx) : await require('../prisma').$transaction(execute);
+        const client = tx || require('../prisma');
+        return typeof client.$transaction === 'function' ? await client.$transaction(execute) : await execute(client);
     } catch (error) { throw mapStateError(error); }
 }
 

@@ -22,6 +22,7 @@ beforeAll(async () => {
     databasePath = path.resolve(__dirname, '../.tmp', `audit_1_2_${id()}.db`);
     const source = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
     const definitions = source.prepare("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%'").all();
+    const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent'").all();
     source.close();
     const db = new Database(databasePath);
     try {
@@ -31,6 +32,7 @@ beforeAll(async () => {
                 ? table.sql.replace(/^\s*"(?:holdPriorStatus|legacyStatus)"\s+TEXT,?\s*$/gm, '') : table.sql;
             db.exec(sql);
         }
+        for (const index of indexes) db.exec(index.sql);
         const now = Date.now();
         for (const [sampleId, status, history] of [
             ['legacy-collected', 'COLLECTED', null], ['legacy-released', 'RELEASED', null],
@@ -201,7 +203,7 @@ test('migration fingerprint and row CAS refuse a modified plan or changed row', 
     expect(() => migration.reviewPlan({ ...plan, rows: [{ ...plan.rows[0], to: 'PROCESSING' }] }, migration.planFingerprint(plan)))
         .toThrow('fingerprint does not match');
     const reviewed = migration.reviewPlan(plan, migration.planFingerprint(plan));
-    await client.sample.update({ where: { id: row.id }, data: { clientName: 'Concurrent edit' } });
+    await client.sample.update({ where: { id: row.id }, data: { clientName: 'Concurrent edit', updatedAt: new Date(row.updatedAt.getTime() + 1000) } });
     const before = await snapshot(row.id);
     await expect(samples.transitionSample(row.id, 'APPROVED', 'system:status-migration', 'Stale review', {}, client, { migrationPlan: reviewed }))
         .rejects.toMatchObject({ code: 'STATUS_MIGRATION_PLAN_STALE' });
@@ -234,7 +236,7 @@ test('preparation reverts preserve scientific values and block review until a va
 test('superseding a reverted result clears only the current-result block, retaining all old evidence', async () => {
     const { sample } = await fixture();
     const old = await client.result.create({ data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.2' } });
-    await evidence.recordPreparationRevert(client, sample, 'DRYING', 'Drying repeated', manager);
+    await client.$transaction(tx => evidence.recordPreparationRevert(tx, sample, 'DRYING', 'Drying repeated', manager));
     const replacementId = id();
     await client.$transaction(async tx => {
         await tx.result.update({ where: { id: old.id }, data: { isCurrent: false, supersededBy: replacementId } });

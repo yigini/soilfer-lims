@@ -51,6 +51,9 @@ async function appendEvent(tx, result, gate, eventType, reason, actor) {
 
 /** Called inside the gate-revert transaction before the DONE flag changes. */
 async function recordPreparationRevert(tx, sample, gate, reason, actor) {
+    if (!tx || typeof tx.$transaction === 'function') {
+        throw new TransitionError('Preparation evidence requires the gate-revert transaction.', 409, 'EVIDENCE_TRANSACTION_REQUIRED');
+    }
     assertGate(gate);
     assertAmendable(sample);
     rules.assertScope(actor, sample);
