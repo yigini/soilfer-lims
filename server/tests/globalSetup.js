@@ -15,6 +15,15 @@ module.exports = async function globalSetup() {
 
     if (fs.existsSync(sourceDbPath)) {
         fs.copyFileSync(sourceDbPath, testDbPath);
+        // Prisma db push cannot express this partial index. Install the actual
+        // release DDL on the disposable test copy so CI checks the same guard.
+        const Database = require('better-sqlite3');
+        const db = new Database(testDbPath, { fileMustExist: true });
+        try {
+            if (!db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'WorkItem_one_active_per_analysis'").get()) {
+                db.exec(fs.readFileSync(path.resolve(__dirname, '../prisma/migrations/20261004190100_unique_active_workitem/migration.sql'), 'utf8'));
+            }
+        } finally { db.close(); }
     }
 
     process.env.DATABASE_PATH = testDbPath;

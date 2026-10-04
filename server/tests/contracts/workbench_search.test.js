@@ -266,6 +266,7 @@ describe('Issue #123: Workbench Search & Multi-Field Query Contract', () => {
         const workItemWithMethod = await prisma.workItem.create({
             data: {
                 id: `WI-METH-${ts}`,
+                duplicateOf: workItemA2.id,
                 sampleId: sampleA2.id,
                 analysis: 'PH',
                 status: 'ASSIGNED',
@@ -303,6 +304,7 @@ describe('Issue #123: Workbench Search & Multi-Field Query Contract', () => {
         const workItemWithStd = await prisma.workItem.create({
             data: {
                 id: `WI-STD-${ts}`,
+                duplicateOf: workItemA1.id,
                 sampleId: sampleA1.id,
                 analysis: 'SOC',
                 status: 'ASSIGNED',

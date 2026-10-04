@@ -514,7 +514,7 @@ class SampleWorkspaceService {
             integrityIssues.push({
                 code: 'AMBIGUOUS_PROVENANCE_HOLD',
                 severity: 'CRITICAL',
-                message: `Ambiguous field specimen identity: ${parsedMetadata.provenanceHold.reason}. Physical receipt blocked pending manual reconciliation.`,
+                message: `Ambiguous field specimen identity: ${parsedMetadata.provenanceHold.reason}. Acceptance blocked pending manual reconciliation.`,
                 count: 1
             });
         }
@@ -537,10 +537,8 @@ class SampleWorkspaceService {
 
         const capabilities = {
             canReceive: {
-                allowed: isReception && sample.status === 'EXPECTED' && !(parsedMetadata?.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD'),
-                reason: (parsedMetadata?.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD')
-                    ? `Ambiguous specimen identity: ${parsedMetadata.provenanceHold.reason}`
-                    : (sample.status !== 'EXPECTED' ? 'Sample already received' : (isReception ? null : 'Requires reception authority'))
+                allowed: isReception && sample.status === 'EXPECTED',
+                reason: sample.status !== 'EXPECTED' ? 'Sample already received' : (isReception ? null : 'Requires reception authority')
             },
             canAcceptIntake: {
                 allowed: isReception && ['EXPECTED', 'RECEIVED'].includes(sample.status) && !(parsedMetadata?.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD'),
@@ -598,13 +596,11 @@ class SampleWorkspaceService {
         // Determine Primary Next Action
         let nextAction = { action: 'VIEW', label: 'View sample workspace', role: 'ALL' };
         if (sample.status === 'EXPECTED') {
-            if (parsedMetadata?.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD') {
-                nextAction = { action: 'RECONCILE_HOLD', label: 'Reconciliation required (Ambiguous Provenance Hold)', role: 'LAB_MANAGER', disabled: true, reason: parsedMetadata.provenanceHold.reason };
-            } else {
-                nextAction = { action: 'RECEIVE', label: 'Receive physical sample', role: 'SAMPLE_RECEPTION' };
-            }
+            nextAction = { action: 'RECEIVE', label: 'Receive physical sample', role: 'SAMPLE_RECEPTION' };
         } else if (sample.status === 'RECEIVED') {
-            nextAction = { action: 'ACCEPT_INTAKE', label: 'Accept intake & generate work', role: 'SAMPLE_RECEPTION' };
+            nextAction = parsedMetadata?.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD'
+                ? { action: 'RECONCILE_HOLD', label: 'Reconciliation required (Ambiguous Provenance Hold)', role: 'LAB_MANAGER', disabled: true, reason: parsedMetadata.provenanceHold.reason }
+                : { action: 'ACCEPT_INTAKE', label: 'Accept intake & generate work', role: 'SAMPLE_RECEPTION' };
         } else if (unassignedCount > 0 && isManagerOrAdmin) {
             nextAction = { action: 'ASSIGN', label: `Assign ${unassignedCount} unassigned task(s) to technician`, role: 'LAB_MANAGER' };
         } else if (!gates.allGatesPassed && analyticalItems.length > 0) {

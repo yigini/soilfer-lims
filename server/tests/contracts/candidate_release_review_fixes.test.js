@@ -602,6 +602,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             wiAccepted = await prisma.workItem.create({
                 data: {
                     id: `WI-R3-ACC-${ts}`,
+                    duplicateOf: wiCompleted.id,
                     sampleId: normalSample.id,
                     analysis: 'R3_PH',
                     status: 'ACCEPTED',

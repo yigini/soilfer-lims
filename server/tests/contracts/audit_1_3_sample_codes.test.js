@@ -21,8 +21,9 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
         token = await getAuthToken('SAMPLE_RECEPTION', lab.id); manager = jwt.decode(await getAuthToken('LAB_MANAGER', lab.id));
     });
     const edit = changes => policy.change(manager, lab.id, { changes, reason: 'Sample numbering approved' });
+    const checklist = { items: Object.fromEntries(['container', 'label', 'quantity', 'condition', 'coc'].map(key => [key, { status: 'PASS' }])) };
     const receive = (body, auth = token) => request(app).post('/api/reception/consignments').set('Authorization', `Bearer ${auth}`)
-        .send({ samples: [{ originalId: id(), status: 'ACCEPTED' }], ...body });
+        .send({ defaults: { checklist }, samples: [{ originalId: id(), status: 'ACCEPTED' }], ...body });
     async function issue(issuedAt = new Date(), projectCode) {
         return prisma.$transaction(async tx => {
             const labSampleCode = await codes.allocateSampleCode(tx, { labReference: lab.id, projectCode, issuedAt });
@@ -61,23 +62,28 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
     });
     test('normal single and walk-in paths issue policy codes, with laboratory work-item ownership', async () => {
         const sample = await prisma.sample.create({ data: { id: id(), originalId: id(), assignedLab: lab.id, status: 'RECEIVED' } });
-        const response = await request(app).put(`/api/samples/${sample.id}/status`).set('Authorization', `Bearer ${await getAuthToken('LAB_MANAGER', lab.id)}`).send({ status: 'ACCEPTED' });
+        const response = await request(app).post(`/api/samples/${sample.id}/accept`).set('Authorization', `Bearer ${await getAuthToken('LAB_MANAGER', lab.id)}`).send({ checklist });
         expect(response.status).toBe(200); expect(codes.verifyCheckCharacter(response.body.labSampleCode)).toBe(true);
         const work = await prisma.workItem.findMany({ where: { sampleId: sample.id } });
         expect(work).toHaveLength(2);
         expect(work.every(item => item.labId === lab.id)).toBe(true);
         const walkIn = await request(app).post('/api/samples/walkin').set('Authorization', `Bearer ${token}`).send({ submitter: 'Synthetic submitter', analyses: [] });
         expect(walkIn.status).toBe(201); expect(walkIn.body.sample.originalId).toMatch(/^W\d+$/);
-        expect(codes.verifyCheckCharacter(walkIn.body.sample.labSampleCode)).toBe(true);
-        expect(walkIn.body.sample.labId).toBe(walkIn.body.sample.labSampleCode);
-        expect(walkIn.body.sample.labId).not.toBe(walkIn.body.sample.originalId);
+        expect(walkIn.body.sample.labSampleCode).toBeNull();
+        expect(await prisma.workItem.count({ where: { sampleId: walkIn.body.sample.id } })).toBe(0);
+        const accepted = await request(app).post(`/api/samples/${walkIn.body.sample.id}/accept`).set('Authorization', `Bearer ${await getAuthToken('LAB_MANAGER', lab.id)}`).send({ checklist });
+        expect(accepted.status).toBe(200);
+        expect(codes.verifyCheckCharacter(accepted.body.labSampleCode)).toBe(true);
+        expect(accepted.body.labId).toBe(accepted.body.labSampleCode);
+        expect(accepted.body.labId).not.toBe(walkIn.body.sample.originalId);
     });
     test('historical duplicate intake returns a stable conflict and preserves both records', async () => {
         const oldCode = `S${Date.now()}`;
         await prisma.sample.create({ data: { id: id(), originalId: id(), assignedLab: lab.id, labId: oldCode, labSampleCode: oldCode, status: 'RECEIVED' } });
         const sample = await prisma.sample.create({ data: { id: id(), originalId: id(), assignedLab: lab.id, labId: oldCode, status: 'EXPECTED' } });
         const response = await receive({ samples: [{ originalId: sample.originalId, status: 'ACCEPTED' }] });
-        expect(response.status).toBe(409); expect(response.body.code).toBe('SAMPLE_CODE_CONFLICT');
+        expect(response.status).toBe(422); expect(response.body.code).toBe('SAMPLE_CODE_CONFLICT');
+        expect(response.body.errors).toHaveLength(1);
         expect(await prisma.sample.findUnique({ where: { id: sample.id } })).toMatchObject({ labId: oldCode, labSampleCode: null, status: 'EXPECTED' });
     });
     test('year rollover uses lab timezone; NEVER retains its counter while date tokens change', async () => {
@@ -105,23 +111,28 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
         for (const row of [a, b, c]) expect(codes.verifyCheckCharacter(row.labSampleCode)).toBe(true);
         expect(new Set([a, b, c].map(row => row.labSampleCode)).size).toBe(3);
     });
-    test('missing PROJECT gives 409 and writes nothing on single, batch and walk-in intake', async () => {
+    test('missing PROJECT refuses acceptance without writes; walk-in arrival has no code allocation', async () => {
         await edit([{ key: 'sample.codeFormat', value: '{LAB}-{PROJECT}-{SEQ:6}{CHK}' }]);
         const counts = () => Promise.all([prisma.sample.count(), prisma.workItem.count(), prisma.consignment.count(), prisma.auditLog.count(), prisma.labSequence.count()]);
         const before = await counts();
         const batch = await receive({});
-        expect(batch.status).toBe(409); expect(batch.body.code).toBe('SAMPLE_CODE_PROJECT_REQUIRED');
-        const single = await request(app).post('/api/reception/intake').set('Authorization', `Bearer ${token}`).send({ originalId: id(), isWalkIn: true, decision: 'ACCEPTED' });
+        expect(batch.status).toBe(422); expect(batch.body.code).toBe('SAMPLE_CODE_PROJECT_REQUIRED');
+        const single = await request(app).post('/api/reception/intake').set('Authorization', `Bearer ${token}`).send({ originalId: id(), isWalkIn: true, decision: 'ACCEPTED', checklist });
         expect(single.status).toBe(409); expect(single.body.code).toBe('SAMPLE_CODE_PROJECT_REQUIRED');
-        const walkIn = await request(app).post('/api/samples/walkin').set('Authorization', `Bearer ${token}`).send({ submitter: 'Synthetic submitter', analyses: [] });
-        expect(walkIn.status).toBe(409); expect(walkIn.body.code).toBe('SAMPLE_CODE_PROJECT_REQUIRED');
         expect(await counts()).toEqual(before);
+        const walkIn = await request(app).post('/api/samples/walkin').set('Authorization', `Bearer ${token}`).send({ submitter: 'Synthetic submitter', analyses: [] });
+        expect(walkIn.status).toBe(201); expect(walkIn.body.sample.labSampleCode).toBeNull();
+        const beforeAcceptance = await counts();
+        const accepted = await request(app).post(`/api/samples/${walkIn.body.sample.id}/accept`).set('Authorization', `Bearer ${await getAuthToken('LAB_MANAGER', lab.id)}`).send({ checklist });
+        expect(accepted.status).toBe(409); expect(accepted.body.code).toBe('SAMPLE_CODE_PROJECT_REQUIRED');
+        expect(await counts()).toEqual(beforeAcceptance);
+        expect(await prisma.labSequence.count({ where: { labId: lab.id } })).toBe(0);
     });
     test('issued legacy S codes stay unchanged, resolvable and separate from S-prefixed originalIds', async () => {
         const old = await prisma.sample.create({ data: { id: id(), originalId: id(), labId: `S${Date.now()}`, assignedLab: lab.id, status: 'EXPECTED' } });
         const response = await receive({ samples: [{ originalId: old.originalId, status: 'ACCEPTED' }] });
         expect(response.status).toBe(201); expect(response.body.samples[0].labSampleCode).toBe(old.labId);
-        expect(await prisma.labSequence.count({ where: { labId: lab.id } })).toBe(0);
+        expect(await prisma.labSequence.count({ where: { labId: lab.id, scope: 'SAMPLE' } })).toBe(0);
         expect((await request(app).get('/api/samples/lookup').set('Authorization', `Bearer ${token}`).query({ code: old.labId })).body.id).toBe(old.id);
         await prisma.sample.create({ data: { id: id(), originalId: `S999999${id()}`, assignedLab: lab.id, status: 'EXPECTED' } });
         expect((await issue()).labSampleCode).toContain('-000001');

@@ -1,7 +1,7 @@
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
-const { getAuthToken } = require('../setup');
+const { getAuthToken, ensureTestLab } = require('../setup');
 
 describe('Stage C: Consignment & High-Throughput Batch Intake Contract (RC-12 - RC-15)', () => {
     let authHeader;
@@ -16,6 +16,7 @@ describe('Stage C: Consignment & High-Throughput Batch Intake Contract (RC-12 - 
     let createdConsignmentId = null;
 
     beforeAll(async () => {
+        await ensureTestLab(testLab, 'GTM');
         const token = await getAuthToken('SAMPLE_RECEPTION', testLab, ['GTM'], [testProjectId]);
         authHeader = `Bearer ${token}`;
 
@@ -161,7 +162,7 @@ describe('Stage C: Consignment & High-Throughput Batch Intake Contract (RC-12 - 
         const csg = res.body.consignment;
         createdConsignmentId = csg.id;
 
-        expect(csg.code).toMatch(/^CSG-\d{8}-\d{3}$/);
+        expect(csg.code).toMatch(/^CSG-LAB-GTM-\d{4}-\d{5}$/);
         expect(csg.deliveryNoteRef).toBe('WAYBILL-778899');
         expect(csg.deliveredBy).toBe('DHL Express - Driver Carlos');
         expect(csg.submitterName).toBe('Dr. Roberto Arbenz');

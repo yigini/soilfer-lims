@@ -1,13 +1,13 @@
 const policyService = require('./policyService');
 
-async function massRequirement(labId, analyses, retentionMass) {
+async function massRequirement(labId, analyses, retentionMass, db) {
     const breakdown = await Promise.all(analyses.map(async analysis => ({
         code: analysis.code,
         name: analysis.name,
-        massRequired: analysis.sampleMassRequired || await policyService.get(labId, 'intake.defaultAnalysisMassG', { analysisCode: analysis.code })
+        massRequired: analysis.sampleMassRequired || await policyService.get(labId, 'intake.defaultAnalysisMassG', { analysisCode: analysis.code, ...(db ? { db } : {}) })
     })));
     const totalAnalyticalMass = breakdown.reduce((sum, item) => sum + item.massRequired, 0);
-    const retention = typeof retentionMass === 'number' ? retentionMass : await policyService.get(labId, 'intake.retentionMassG');
+    const retention = typeof retentionMass === 'number' ? retentionMass : await policyService.get(labId, 'intake.retentionMassG', db ? { db } : {});
     return { totalAnalyticalMass, totalRequiredMass: totalAnalyticalMass + retention, retentionMass: retention, breakdown };
 }
 

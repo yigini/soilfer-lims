@@ -18,6 +18,12 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
     let batchId;
     let createdSampleIds = [];
     let createdWorkItemIds = [];
+    async function specimen(prefix) {
+        const sampleId = `${prefix}-${Date.now()}-${createdSampleIds.length}`;
+        createdSampleIds.push(sampleId);
+        await prisma.sample.create({ data: { id: sampleId, originalId: `ORIG-${sampleId}`, labId: `LAB-${sampleId}`, assignedLab: labId, status: 'PROCESSING' } });
+        return sampleId;
+    }
 
     afterEach(async () => {
         try {
@@ -65,7 +71,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
             createdWorkItemIds.push(wid);
             itemData.push({
                 id: wid,
-                sampleId,
+                sampleId: i === 1 ? sampleId : await specimen('SMP-QC-CAP'),
                 analysis: 'PH_H2O',
                 status: 'ASSIGNED',
                 labId,
@@ -219,12 +225,13 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
         const wid1 = `WI-RACK-1-${Date.now()}`;
         const wid2 = `WI-RACK-2-${Date.now()}`;
+        const sampleId2 = await specimen('SMP-QC-RACK');
         createdWorkItemIds.push(wid1, wid2);
 
         await prisma.workItem.createMany({
             data: [
                 { id: wid1, sampleId, analysis: 'SOC', status: 'ASSIGNED', labId, assignedLab: labId },
-                { id: wid2, sampleId, analysis: 'SOC', status: 'ASSIGNED', labId, assignedLab: labId }
+                { id: wid2, sampleId: sampleId2, analysis: 'SOC', status: 'ASSIGNED', labId, assignedLab: labId }
             ]
         });
 
@@ -382,11 +389,12 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
             const wid1 = `WI-DUP-1-${Date.now()}`;
             const wid2 = `WI-DUP-2-${Date.now()}`;
+            const sampleId2 = await specimen('SMP-QC-DUP');
             createdWorkItemIds.push(wid1, wid2);
             await prisma.workItem.createMany({
                 data: [
                     { id: wid1, sampleId, analysis: 'PH_H2O', status: 'ASSIGNED', labId, assignedLab: labId },
-                    { id: wid2, sampleId, analysis: 'PH_H2O', status: 'ASSIGNED', labId, assignedLab: labId }
+                    { id: wid2, sampleId: sampleId2, analysis: 'PH_H2O', status: 'ASSIGNED', labId, assignedLab: labId }
                 ]
             });
 

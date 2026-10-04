@@ -18,7 +18,9 @@ describe('Audit 0.12: observed batch intake values', () => {
     afterEach(() => jest.restoreAllMocks());
     const post = (path, body) => request(app).post(path).set('Authorization', `Bearer ${token}`).send(body);
     const row = data => ({ originalId: id('SMP-012'), status: 'ACCEPTED', ...data });
-    const receive = (samples, rest = {}) => post('/api/reception/consignments', { defaults: { requiredAnalyses: [analysis] }, samples, ...rest });
+    const receive = (samples, rest = {}) => post('/api/reception/consignments', { samples, ...rest, defaults: {
+        requiredAnalyses: [analysis], checklist: { items: Object.fromEntries(['container', 'label', 'quantity', 'condition', 'coc'].map(key => [key, { status: 'PASS' }])) }, ...rest.defaults
+    } });
     const stored = originalId => prisma.sample.findFirst({ where: { originalId } });
     async function counts() {
         return Promise.all([prisma.sample.count(), prisma.consignment.count(), prisma.workItem.count(), prisma.auditLog.count()]);
@@ -52,7 +54,7 @@ describe('Audit 0.12: observed batch intake values', () => {
         expect(requirement.status).toBe(200); expect(requirement.body.totalRequiredMass).toBe(150);
         const good = row({ receivedMass: 550 }), low = row({ receivedMass: 60 }), before = await counts();
         const response = await receive([good, low]);
-        expect(response.status).toBe(400); expect(response.body.code).toBe('MASS_DEFICIT');
+        expect(response.status).toBe(422); expect(response.body.code).toBe('MASS_DEFICIT');
         expect(response.body.warnings).toEqual([{ row: 2, originalId: low.originalId, code: 'MASS_DEFICIT', massDeficitInfo: {
             receivedMass: 60, totalRequiredMass: 150, totalAnalyticalMass: 50, retentionBuffer: 100, deficit: 90,
             analysesAtRisk: [{ code: analysis, name: 'Audit mass method', massRequired: 50 }]
@@ -61,8 +63,8 @@ describe('Audit 0.12: observed batch intake values', () => {
     });
     test('only an explicit per-row acknowledgement allows a mass deficit and records its audit evidence', async () => {
         const s = row({ receivedMass: 60 });
-        expect((await receive([s], { defaults: { requiredAnalyses: [analysis], massWarningAcknowledged: true } })).status).toBe(400);
-        expect((await receive([{ ...s, massWarningAcknowledged: 'true' }])).status).toBe(400);
+        expect((await receive([s], { defaults: { requiredAnalyses: [analysis], massWarningAcknowledged: true } })).status).toBe(422);
+        expect((await receive([{ ...s, massWarningAcknowledged: 'true' }])).status).toBe(422);
         const response = await receive([{ ...s, massWarningAcknowledged: true }]);
         expect(response.status).toBe(201);
         const sample = await stored(s.originalId);
@@ -81,9 +83,10 @@ describe('Audit 0.12: observed batch intake values', () => {
         expect((await receive([s])).status).toBe(201);
         expect(await stored(s.originalId)).toMatchObject({ status: 'RECEIVED_REJECTED', receivedMass: 5, massWarningAcknowledged: false });
     });
-    test.each([{ receivedMass: -1 }, { receivedMass: '500g' }, { receivedMass: false }, { moistureOnArrival: 'unknown' }, { positionalUncertaintyM: -2 }])('invalid observation is a stable 400 before writes: %s', async observation => {
+    test.each([{ receivedMass: -1 }, { receivedMass: '500g' }, { receivedMass: false }, { moistureOnArrival: 'unknown' }, { positionalUncertaintyM: -2 }])('invalid observation is a stable 422 before writes: %s', async observation => {
         const before = await counts(), response = await receive([row(observation)]);
-        expect(response.status).toBe(400); expect(response.body.code).toBe('INVALID_INTAKE_OBSERVATION');
+        expect(response.status).toBe(422); expect(response.body.code).toBe('INVALID_INTAKE_OBSERVATION');
+        expect(response.body.errors).toHaveLength(1);
         expect(await counts()).toEqual(before);
     });
     test('bulk actions cannot name unrelated rows or implicit warning acknowledgement fields', async () => {
@@ -99,7 +102,7 @@ describe('Audit 0.12: observed batch intake values', () => {
         const lookup = jest.spyOn(policy, 'get').mockImplementation((lab, key, context) => key === 'intake.retentionMassG' ? 25 : original(lab, key, context));
         const s = row({ receivedMass: 80 });
         expect((await receive([s])).status).toBe(201);
-        expect(lookup).toHaveBeenCalledWith(labId, 'intake.retentionMassG');
+        expect(lookup).toHaveBeenCalledWith(labId, 'intake.retentionMassG', expect.objectContaining({ db: expect.objectContaining({ sample: expect.any(Object) }) }));
         expect((await post('/api/reception/mass-check', { analysisCodes: [analysis] })).body.totalRequiredMass).toBe(75);
     });
     test.each([false, true])('manifest coordinates never imply uncertainty, and a supplied accuracy is retained (combined=%s)', async combined => {

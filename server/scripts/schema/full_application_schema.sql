@@ -1460,3 +1460,8 @@ CREATE TABLE "LabSequence" (
     "next" INTEGER NOT NULL DEFAULT 1 CHECK ("next" >= 1),
     PRIMARY KEY ("labId", "scope", "year")
 );
+
+-- Audit 1.1: additive intake constraints for disposable full-schema fixtures.
+ALTER TABLE "WorkItem" ADD COLUMN "duplicateOf" TEXT REFERENCES "WorkItem"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+CREATE UNIQUE INDEX "WorkItem_one_active_per_analysis" ON "WorkItem"("sampleId", "analysis") WHERE "duplicateOf" IS NULL;
+ALTER TABLE "Consignment" ADD COLUMN "declaredExpectedCount" INTEGER CHECK ("declaredExpectedCount" IS NULL OR "declaredExpectedCount" >= 1);

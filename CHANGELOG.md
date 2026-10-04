@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.0] - 2026-10-04
+
+### Added
+- Shared atomic intake validation and work/order generation for single, batch and final acceptance (Audit 1.1, #178).
+- Per-laboratory consignment formats and sequence reset policies, with undeclared delivery counts represented as unknown.
+- Read-only duplicate diagnostics and explicit manager resolution that flags retained WorkItems and audits every change.
+
+### Fixed
+- Physical arrival records custody without issuing a sample code or creating work; final acceptance requires the complete checklist and current mass, catalogue, admission and provenance checks.
+- Failed intake rolls back samples, codes, work, orders and audit rows. Partial batches list failed rows and never retain an empty consignment.
+- The partial WorkItem uniqueness constraint excludes marked duplicates from canonical lookup/generation while safety gates continue to include every retained row.
+
 ## [1.7.0] - 2026-10-04
 
 ### Added

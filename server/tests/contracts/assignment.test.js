@@ -39,7 +39,7 @@ describe('8.1 Section C: Assignment Rules', () => {
         const acceptRes = await request(app)
             .post(`/api/samples/${sampleIdA}/accept`)
             .set('Authorization', `Bearer ${mgrTokenA}`)
-            .send({ analyses: ['PH_H2O'] });
+            .send({ analyses: ['PH_H2O'], checklist: { items: Object.fromEntries(['container', 'label', 'quantity', 'condition', 'coc'].map(key => [key, { status: 'PASS' }])) } });
 
         expect(acceptRes.status).toBe(200);
         const item = acceptRes.body.workItems.find(i => i.analysis === 'PH_H2O');

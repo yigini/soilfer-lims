@@ -512,6 +512,15 @@ async function runSuite() {
     const createdAlphaSamples = [];
     const createdBetaSamples = [];
     const intakePromises = [];
+    async function acceptArrived(sample, token) {
+        if (sample.status !== 'RECEIVED' || sample.labId != null || sample.labSampleCode != null) throw new Error('Arrival must record custody without allocating a lab code');
+        const accepted = await fetch(`http://127.0.0.1:${globalPort}/api/samples/${encodeURIComponent(sample.id)}/accept`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ checklist: { container: 'PASS', label: 'PASS', quantity: 'PASS', condition: 'PASS', coc: 'PASS' }, receivedMass: 250, massWarningAcknowledged: true })
+        });
+        if (accepted.status !== 200) throw new Error(`Final acceptance failed: ${accepted.status} ${JSON.stringify(await accepted.json())}`);
+        return await accepted.json();
+    }
     for (let i = 1; i <= 5; i++) {
         intakePromises.push(
             fetch(`http://127.0.0.1:${globalPort}/api/samples/walkin`, {
@@ -521,7 +530,7 @@ async function runSuite() {
             }).then(async r => {
                 if (r.status !== 200 && r.status !== 201) throw new Error(`Alpha sample ${i} failed: ${r.status}`);
                 const resJson = await r.json();
-                createdAlphaSamples.push(resJson.sample);
+                createdAlphaSamples.push(await acceptArrived(resJson.sample, tokenA));
             })
         );
         intakePromises.push(
@@ -532,7 +541,7 @@ async function runSuite() {
             }).then(async r => {
                 if (r.status !== 200 && r.status !== 201) throw new Error(`Beta sample ${i} failed: ${r.status}`);
                 const resJson = await r.json();
-                createdBetaSamples.push(resJson.sample);
+                createdBetaSamples.push(await acceptArrived(resJson.sample, tokenB));
             })
         );
     }

@@ -3,7 +3,7 @@
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
-const { getAuthToken } = require('../setup');
+const { getAuthToken, ensureTestLab } = require('../setup');
 const sampleWorkspaceService = require('../../services/sampleWorkspaceService');
 
 describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (Issue #121)', () => {
@@ -16,6 +16,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
     const expectedSampleId = `SMP-LBL-EXP-${Date.now()}`;
 
     beforeAll(async () => {
+        await ensureTestLab('LAB-GTM', 'GTM');
         techGtmToken = await getAuthToken('LAB_TECHNICIAN', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
         mgrGtmToken = await getAuthToken('LAB_MANAGER', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
 
@@ -379,6 +380,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
                     projectCode: testProjectId
                 },
                 defaults: {
+                    checklist: { items: Object.fromEntries(['container', 'label', 'quantity', 'condition', 'coc'].map(key => [key, { status: 'PASS' }])) },
                     receivedMass: 500,
                     moistureOnArrival: 'MOIST',
                     requiredAnalyses: ['PH_H2O']

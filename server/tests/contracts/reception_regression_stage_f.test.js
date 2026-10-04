@@ -392,6 +392,8 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
                         checklist: {
                             container: { status: 'PASS' },
                             label: { status: 'PASS' },
+                            quantity: { status: 'PASS' },
+                            coc: { status: 'PASS' },
                             condition: { status: 'PASS' }
                         }
                     });

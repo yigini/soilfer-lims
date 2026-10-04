@@ -2,43 +2,7 @@ const crypto = require('crypto');
 const { assertReviewable, commitReview, reconcileSubmission } = require('../services/reviewCommitService');
 const { hasPermission } = require('../config/roles');
 const { invalidateReturnedResults } = require('../services/reportResultGovernance');
-const COMPOUND_ANALYSIS_EXPANSION = {
-    'exchangeableBases': ['EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA']
-};
-
-const TEXTURE_ALIASES = new Set([
-    'TEXTURE',
-    'SOIL_PSD_TEXTURE',
-    'SOIL_TEXTURE',
-    'PSA',
-    'pSA',
-    'Particle Size Analysis'
-]);
-
-function normalizeAnalysisCodes(codes) {
-    if (!Array.isArray(codes)) return [];
-    const normalized = [];
-    let hasTexture = false;
-    for (const raw of codes) {
-        if (!raw || typeof raw !== 'string') continue;
-        const trimmed = raw.trim();
-        if (TEXTURE_ALIASES.has(trimmed)) {
-            if (!hasTexture) {
-                normalized.push('TEXTURE');
-                hasTexture = true;
-            }
-        } else if (COMPOUND_ANALYSIS_EXPANSION[trimmed]) {
-            normalized.push(...COMPOUND_ANALYSIS_EXPANSION[trimmed]);
-        } else {
-            normalized.push(trimmed);
-        }
-    }
-    const unique = [...new Set(normalized)];
-    if (hasTexture) {
-        return unique.filter(c => !['SAND', 'SILT', 'CLAY'].includes(c) || c === 'TEXTURE');
-    }
-    return unique;
-}
+const { normalizeAnalysisCodes } = require('../services/analysisCodesService');
 
 const prisma = require('../prisma');
 const analysisService = require('../services/analysisService');
@@ -54,9 +18,9 @@ const getEffectiveAnalyses = (sample) => {
 };
 
 
-async function preflightDefaults(codes, sample, existingCodes = []) {
+async function preflightDefaults(codes, sample, existingCodes = [], db = prisma) {
     const resolved = new Map();
-    const selections = await require('../services/methodResolution').resolveDefaultSelections(codes.filter(c => !existingCodes.includes(c)), sample.assignedLab || sample.labId);
+    const selections = await require('../services/methodResolution').resolveDefaultSelections(codes.filter(c => !existingCodes.includes(c)), sample.assignedLab || sample.labId, db);
     for (const [analysisCode, selection] of selections) {
         if (selection.error) throw new Error(selection.error);
         resolved.set(analysisCode, selection.method?.id || null);
@@ -68,164 +32,9 @@ async function preflightDefaults(codes, sample, existingCodes = []) {
  * Generate Work Items for a Sample (Internal Hook)
  * Called when Sample -> LAB_ID_ASSIGNED or ACCEPTED
  */
-exports.generateWorkItemsForSample = async (sample) => {
-    const { id } = sample;
-    const labId = sample.assignedLab || null;
-    const requiredAnalyses = getEffectiveAnalyses(sample);
-    const workItems = [];
-    const expandedCodes = normalizeAnalysisCodes(requiredAnalyses);
-    const alreadyCreated = await prisma.workItem.findMany({ where: { sampleId: String(id) }, select: { analysis: true } });
-    const defaultMethods = await preflightDefaults(expandedCodes, sample, alreadyCreated.map(i => i.analysis));
-
-    // 1. Create OPERATIONAL GATE Work Items (Drying, Prep)
-    const opsGates = [
-        { code: 'DRYING', name: 'Drying' },
-        { code: 'PREPARATION', name: 'Preparation (Milling/Grinding)' }
-    ];
-
-    for (const gate of opsGates) {
-        const existing = await prisma.workItem.findFirst({
-            where: { sampleId: String(id), analysis: gate.code }
-        });
-        if (existing) continue;
-
-        const wiId = crypto.randomUUID();
-        const history = [{
-            status: workflow.WORK_ITEM_STATES.NOT_ASSIGNED,
-            timestamp: new Date().toISOString(),
-            note: 'Work Item Generated'
-        }];
-
-        const wi = await prisma.workItem.create({
-            data: {
-                id: wiId,
-                sampleId: String(id),
-                labId: labId,
-                assignedLab: sample.assignedLab,
-                analysis: gate.code,
-                category: 'Operational Gates',
-                status: workflow.WORK_ITEM_STATES.NOT_ASSIGNED,
-                assignedTo: null,
-                priority: 'NORMAL',
-                history: JSON.stringify(history)
-            }
-        });
-        workItems.push(wi);
-
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'SAMPLE',
-                entityId: String(id),
-                action: 'WORKITEM_GENERATED',
-                details: `System generated gate: ${gate.name}`,
-                performedBy: 'SYSTEM',
-                performedByName: 'System',
-                timestamp: new Date(),
-                analysisCode: gate.code
-            }
-        });
-    }
-
-    // 2. Create ANALYTICAL Work Items (with compound parameter expansion)
-
-
-    if (requiredAnalyses && Array.isArray(requiredAnalyses)) {
-        const uniqueAnalyses = normalizeAnalysisCodes(requiredAnalyses);
-
-        // WP-25: Drive workflow work item ordering from catalogue executionOrder
-        const catalogueRecords = await prisma.analysis.findMany({
-            where: { code: { in: uniqueAnalyses } },
-            select: { code: true, executionOrder: true }
-        });
-        const orderMap = {};
-        catalogueRecords.forEach(a => { orderMap[a.code] = a.executionOrder ?? 100; });
-        uniqueAnalyses.sort((a, b) => (orderMap[a] ?? 100) - (orderMap[b] ?? 100));
-
-        for (const analysisCode of uniqueAnalyses) {
-            const existing = await prisma.workItem.findFirst({
-                where: { sampleId: String(id), analysis: analysisCode }
-            });
-            if (existing) continue;
-
-            const name = await getAnalysisName(analysisCode);
-            const category = await getAnalysisCategory(analysisCode);
-            const wiId = crypto.randomUUID();
-            const history = [{
-                status: workflow.WORK_ITEM_STATES.NOT_ASSIGNED,
-                timestamp: new Date().toISOString(),
-                note: 'Work Item Generated'
-            }];
-
-            // WP-20: Resolve methodology for this lab and analysis
-            const defaultMethodId = defaultMethods.get(analysisCode) || null;
-
-            const wi = await prisma.workItem.create({
-                data: {
-                    id: wiId,
-                    sampleId: String(id),
-                    labId: labId,
-                    assignedLab: sample.assignedLab,
-                    analysis: analysisCode,
-                    category: category,
-                    status: workflow.WORK_ITEM_STATES.NOT_ASSIGNED,
-                    assignedTo: null,
-                    priority: 'NORMAL',
-                    methodologyId: defaultMethodId,
-                    history: JSON.stringify(history)
-                }
-            });
-            workItems.push(wi);
-
-            await prisma.auditLog.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    entity: 'SAMPLE',
-                    entityId: String(id),
-                    action: 'WORKITEM_GENERATED',
-                    details: `System generated analysis: ${name}`,
-                    performedBy: 'SYSTEM',
-                    performedByName: 'System',
-                    timestamp: new Date(),
-                    analysisCode: analysisCode
-                }
-            });
-        }
-    }
-
-    // Ensure initial SampleOrderRevision exists
-    try {
-        const existingRev = await prisma.sampleOrderRevision.findFirst({
-            where: { sampleId: String(id) }
-        });
-        if (!existingRev && requiredAnalyses && requiredAnalyses.length > 0) {
-            const rev = await prisma.sampleOrderRevision.create({
-                data: {
-                    sampleId: String(id),
-                    version: 1,
-                    status: 'ACTIVE',
-                    reason: 'Initial order generated at intake',
-                    requestedBy: sample.receivedBy || 'RECEPTION',
-                    authorizedBy: 'SYSTEM',
-                    authorizedAt: new Date()
-                }
-            });
-            for (const code of requiredAnalyses) {
-                await prisma.orderLine.create({
-                    data: {
-                        revisionId: rev.id,
-                        analysis: code,
-                        isRequired: true,
-                        status: 'ACTIVE'
-                    }
-                });
-            }
-        }
-    } catch (e) {
-        console.warn('[generateWorkItemsForSample] Notice: Order revision creation skipped:', e.message);
-    }
-
-    return workItems;
+exports.generateWorkItemsForSample = async (sample, tx) => {
+    const service = require('../services/intakeWorkItemService');
+    return tx ? service.generate(tx, sample) : prisma.$transaction(client => service.generate(client, sample));
 };
 
 /**
@@ -235,18 +44,16 @@ exports.generateWorkItemsForSample = async (sample) => {
  * 2. Assigned or in progress, no result -> Require reason; set WAIVED with reason and actor; audit
  * 3. Any result recorded (current or superseded) -> Refuse with 409 naming analysis and result
  */
-exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reason) => {
+async function reconcileWorkItems(tx, sample, targetAnalyses, user, reason) {
     const { id } = sample;
     const labId = sample.assignedLab || null;
     const targetList = Array.isArray(targetAnalyses) ? targetAnalyses : [];
-
-
 
     const uniqueTarget = normalizeAnalysisCodes(targetList);
     const targetSet = new Set(uniqueTarget);
 
     const operationalGates = ['DRYING', 'PREPARATION', 'ARCHIVING', 'DISPOSAL'];
-    const existingItems = await prisma.workItem.findMany({
+    const existingItems = await tx.workItem.findMany({
         where: {
             sampleId: String(id),
             analysis: { notIn: operationalGates }
@@ -255,6 +62,24 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
 
     const itemsToRemove = existingItems.filter(item => !targetSet.has(item.analysis) && item.status !== 'WAIVED');
 
+    // Refuse before any mutation: a canonical item may still be referenced by
+    // a marked duplicate, including a waived duplicate outside the removal set.
+    const canonicalRemovalIds = itemsToRemove.filter(item => item.duplicateOf == null).map(item => item.id);
+    const duplicateReferences = canonicalRemovalIds.length ? await tx.workItem.findMany({
+        where: { duplicateOf: { in: canonicalRemovalIds } },
+        select: { id: true, analysis: true }
+    }) : [];
+    if (duplicateReferences.length) {
+        return {
+            conflict: true,
+            status: 409,
+            code: 'WORKITEM_DUPLICATES_PRESENT',
+            error: 'Cannot remove an analysis while marked duplicate work items refer to its canonical item.',
+            refused: duplicateReferences
+        };
+    }
+
+
     // 1. Check for recorded results on any items to be removed
     const conflicts = [];
     for (const item of itemsToRemove) {
@@ -262,7 +87,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
         if (item.result && String(item.result).trim() !== '') {
             recordedResult = item.result;
         } else {
-            const dbResult = await prisma.result.findFirst({
+            const dbResult = await tx.result.findFirst({
                 where: {
                     sampleId: String(id),
                     param: item.analysis
@@ -304,7 +129,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
 
     const existingCodeSet = new Set(existingItems.map(i => i.analysis));
     const codesToAdd = uniqueTarget.filter(code => !existingCodeSet.has(code));
-    const defaultMethods = await preflightDefaults(codesToAdd, sample);
+    const defaultMethods = await preflightDefaults(codesToAdd, sample, [], tx);
 
     const deletedItems = [];
     const waivedItems = [];
@@ -313,8 +138,8 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
     // 3. Process Removals and Waivers
     for (const item of itemsToRemove) {
         if (item.status === workflow.WORK_ITEM_STATES.NOT_ASSIGNED) {
-            await prisma.workItem.delete({ where: { id: item.id } });
-            await prisma.auditLog.create({
+            await tx.workItem.delete({ where: { id: item.id } });
+            await tx.auditLog.create({
                 data: {
                     id: crypto.randomUUID(),
                     entity: 'WORKITEM',
@@ -338,7 +163,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
                 timestamp: new Date().toISOString()
             });
 
-            await prisma.workItem.update({
+            await tx.workItem.update({
                 where: { id: item.id },
                 data: {
                     status: workflow.WORK_ITEM_STATES.WAIVED,
@@ -347,7 +172,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
                 }
             });
 
-            await prisma.auditLog.create({
+            await tx.auditLog.create({
                 data: {
                     id: crypto.randomUUID(),
                     entity: 'WORKITEM',
@@ -369,7 +194,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
     // 4. Process Additions
 
     if (codesToAdd.length > 0) {
-        const catalogueRecords = await prisma.analysis.findMany({
+        const catalogueRecords = await tx.analysis.findMany({
             where: { code: { in: codesToAdd } },
             select: { code: true, executionOrder: true }
         });
@@ -378,8 +203,8 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
         codesToAdd.sort((a, b) => (orderMap[a] ?? 100) - (orderMap[b] ?? 100));
 
         for (const analysisCode of codesToAdd) {
-            const name = await getAnalysisName(analysisCode);
-            const category = await getAnalysisCategory(analysisCode);
+            const name = await getAnalysisName(analysisCode, tx);
+            const category = await getAnalysisCategory(analysisCode, tx);
             const wiId = crypto.randomUUID();
             const history = [{
                 status: workflow.WORK_ITEM_STATES.NOT_ASSIGNED,
@@ -389,7 +214,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
 
             const defaultMethodId = defaultMethods.get(analysisCode) || null;
 
-            const wi = await prisma.workItem.create({
+            const wi = await tx.workItem.create({
                 data: {
                     id: wiId,
                     sampleId: String(id),
@@ -405,7 +230,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
                 }
             });
 
-            await prisma.auditLog.create({
+            await tx.auditLog.create({
                 data: {
                     id: crypto.randomUUID(),
                     entity: 'SAMPLE',
@@ -430,6 +255,19 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
         removed: deletedItems,
         summary: `${addedItems.length} added, ${waivedItems.length} waived, ${deletedItems.length} removed`
     };
+}
+
+exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reason) => {
+    try {
+        return await prisma.$transaction(tx => reconcileWorkItems(tx, sample, targetAnalyses, user, reason));
+    } catch (error) {
+        // The rejected transaction has already rolled back every earlier write.
+        if (error.code === 'P2003' || error.code === 'SQLITE_CONSTRAINT_FOREIGNKEY') {
+            return { conflict: true, status: 409, code: 'WORKITEM_REFERENCE_CONFLICT',
+                error: 'A referenced work item cannot be removed; no reconciliation changes were saved.' };
+        }
+        throw error;
+    }
 };
 
 // --- API ENDPOINTS ---
@@ -477,7 +315,7 @@ exports.getWorkItems = async (req, res) => {
 
         const [items, total] = await Promise.all([
             prisma.workItem.findMany({
-                where,
+                where: where,
                 skip,
                 take: limitNum,
                 include: {
@@ -492,7 +330,7 @@ exports.getWorkItems = async (req, res) => {
                 },
                 orderBy: { createdAt: 'desc' }
             }),
-            prisma.workItem.count({ where })
+            prisma.workItem.count({ where: where })
         ]);
 
         // Parse history JSON and enrich with sample metadata

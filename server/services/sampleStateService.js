@@ -22,7 +22,7 @@ class TransitionError extends Error {
  * @param {object} extraData - Additional sample fields to update atomically
  * @returns {Promise<object>} - Updated sample
  */
-async function transitionSample(sampleId, nextStatus, actor, reason = null, extraData = {}, tx = null) {
+async function transitionSample(sampleId, nextStatus, actor, reason = null, extraData = {}, tx = null, audit = {}) {
     // 1. Validation of target status
     if (workflow.isLegacySampleState(nextStatus)) {
         throw new TransitionError(
@@ -93,8 +93,10 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
                 id: crypto.randomUUID(),
                 entity: 'SAMPLE',
                 entityId: String(sampleId),
-                action: 'SAMPLE_STATUS_TRANSITION',
-                details: `Status transition from ${currentStatus} to ${nextStatus}${reason ? `: ${reason}` : ''}`,
+                action: audit.action || 'SAMPLE_STATUS_TRANSITION',
+                details: audit.details || `Status transition from ${currentStatus} to ${nextStatus}${reason ? `: ${reason}` : ''}`,
+                before: audit.before || null,
+                after: audit.after || null,
                 performedBy: actorUsername,
                 sampleId: String(sampleId),
                 labId: updatedSample.assignedLab || null,
