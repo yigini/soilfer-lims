@@ -1,0 +1,162 @@
+const crypto = require('crypto');
+const request = require('supertest');
+const app = require('../../app');
+const prisma = require('../../prisma');
+const workflow = require('../../workflowContract');
+const qcController = require('../../controllers/qcController');
+const { getAuthToken } = require('../setup');
+const labId = 'LAB-AUDIT-06';
+const id = prefix => `${prefix}-${crypto.randomUUID()}`;
+
+describe('Audit 0.6: review state and atomic status/version compare-and-set', () => {
+    let manager, technician;
+    beforeAll(async () => { manager = await getAuthToken('LAB_MANAGER', labId); technician = await getAuthToken('LAB_TECHNICIAN', labId); });
+    afterEach(() => jest.restoreAllMocks());
+    const post = (path, body) => request(app).post(path).set('Authorization', `Bearer ${manager}`).send(body);
+    async function fixture({ status = 'SUBMITTED', analysis = 'PH_H2O', sampleStatus = 'PROCESSING', batchStatus } = {}) {
+        const sampleId = id('S-06');
+        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
+            status: sampleStatus, dryingStatus: 'DONE', preparationStatus: 'DONE' } });
+        const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-06'), analysis, labId, status: batchStatus, createdBy: 'test' } }) : null;
+        const item = await prisma.workItem.create({ data: { id: id('WI-06'), sampleId, analysis, assignedLab: labId,
+            status, result: '6.2', history: '[]', batchId: batch?.id } });
+        const result = await prisma.result.create({ data: { id: id('R-06'), sampleId, param: analysis, value: '6.2',
+            numericValue: 6.2, isCurrent: true, isValid: true, flags: '[]', batchId: batch?.id } });
+        return { sampleId, item, result, batch };
+    }
+    async function snapshot(f) {
+        return { item: await prisma.workItem.findUnique({ where: { id: f.item.id } }),
+            sample: await prisma.sample.findUnique({ where: { id: f.sampleId } }),
+            result: await prisma.result.findUnique({ where: { id: f.result.id } }),
+            reviews: await prisma.reviewDecision.findMany({ where: { workItemId: f.item.id } }),
+            audits: await prisma.auditLog.findMany({ where: { OR: [{ entityId: f.item.id }, { entityId: f.sampleId }] } }) };
+    }
+    async function packageFixture(states) {
+        const f = await fixture({ status: states[0] });
+        const items = [f.item];
+        for (const status of states.slice(1)) items.push(await prisma.workItem.create({ data: {
+            id: id('WI-06-PACKAGE'), sampleId: f.sampleId, assignedLab: labId, analysis: 'EC', status, result: '5.4', history: '[]'
+        } }));
+        const submission = await prisma.submission.create({ data: { id: id('SUB-06'), sampleId: f.sampleId, assignedLab: labId,
+            status: 'PENDING_REVIEW', type: 'PARTIAL', submittedBy: 'test', workItemCount: items.length,
+            workItemIds: JSON.stringify(items.map(item => item.id)) } });
+        await prisma.workItem.updateMany({ where: { id: { in: items.map(item => item.id) } }, data: { submissionId: submission.id } });
+        return { ...f, items, submission };
+    }
+    test.each(['ACCEPTED', 'WAIVED', 'COMPLETED', 'IN_PROGRESS'])('RETURN and WAIVE cannot alter analytical %s work or its approved sample', async status => {
+        const f = await fixture({ status, sampleStatus: 'APPROVED' }), before = await snapshot(f);
+        for (const verdict of ['REANALYSIS_REQUIRED', 'WAIVED']) {
+            const res = await post(`/api/work/${f.item.id}/review`, { status: verdict, reason: 'Review reason' });
+            expect(res.status).toBe(409); expect(res.body.code).toBe('ITEM_NOT_SUBMITTED');
+            expect(await snapshot(f)).toEqual(before);
+        }
+    });
+    test('two concurrent ACCEPTs create exactly one decision, one audit and one version increment', async () => {
+        const f = await fixture();
+        const responses = await Promise.all([1, 2].map(() => post(`/api/work/${f.item.id}/review`, { status: 'ACCEPTED' })));
+        expect(responses.map(res => res.status).sort()).toEqual([200, 409]);
+        expect(responses.find(res => res.status === 409).body.code).toBe('ITEM_NOT_SUBMITTED');
+        expect(await prisma.reviewDecision.count({ where: { workItemId: f.item.id } })).toBe(1);
+        expect(await prisma.auditLog.count({ where: { entityId: f.item.id, action: 'REVIEW' } })).toBe(1);
+        const after = await prisma.workItem.findUnique({ where: { id: f.item.id } });
+        expect(after).toMatchObject({ status: 'ACCEPTED', version: f.item.version + 1, reviewedBy: expect.any(String), reviewedAt: expect.any(Date) });
+    });
+    test('a changed version with the same submitted status loses the CAS with no review writes', async () => {
+        const f = await fixture();
+        jest.spyOn(qcController, 'checkItemBatchStatus').mockImplementationOnce(async () => {
+            await prisma.workItem.update({ where: { id: f.item.id }, data: { version: { increment: 1 } } });
+            return { allowed: true };
+        });
+        const res = await post(`/api/work/${f.item.id}/review`, { status: 'ACCEPTED' });
+        expect(res.status).toBe(409); expect(res.body.code).toBe('ITEM_NOT_SUBMITTED');
+        expect(await prisma.reviewDecision.count({ where: { workItemId: f.item.id } })).toBe(0);
+        expect(await prisma.auditLog.count({ where: { entityId: f.item.id } })).toBe(0);
+        expect((await prisma.workItem.findUnique({ where: { id: f.item.id } })).status).toBe('SUBMITTED');
+    });
+    test.each(['ACCEPTED', 'REANALYSIS_REQUIRED', 'WAIVED'])('bulk %s commits eligible rows and refuses already accepted rows', async status => {
+        const valid = await fixture(), refused = await fixture({ status: 'ACCEPTED' }), before = await snapshot(refused);
+        const response = await post('/api/work/review/bulk', { workItemIds: [valid.item.id, refused.item.id], status, reason: 'Bulk reason' });
+        expect(response.status).toBe(200); expect(response.body.count).toBe(1);
+        expect(response.body.results).toEqual([expect.objectContaining({ workItemId: valid.item.id, status })]);
+        expect(response.body.errors).toEqual([{ workItemId: refused.item.id, code: 'ITEM_NOT_SUBMITTED' }]);
+        expect(await snapshot(refused)).toEqual(before);
+        expect(await prisma.reviewDecision.count({ where: { workItemId: valid.item.id } })).toBe(1);
+        const after = await prisma.workItem.findUnique({ where: { id: valid.item.id } });
+        expect(after.reviewedBy).toBeTruthy(); expect(after.reviewedAt).toBeInstanceOf(Date);
+    });
+    test('bulk with no eligible rows returns 409 and leaves every record unchanged', async () => {
+        const f = await fixture({ status: 'ACCEPTED' }), before = await snapshot(f);
+        const res = await post('/api/work/review/bulk', { workItemIds: [f.item.id], status: 'WAIVED', reason: 'Waive' });
+        expect(res.status).toBe(409); expect(res.body.code).toBe('ITEM_NOT_SUBMITTED');
+        expect(res.body.errors).toEqual([{ workItemId: f.item.id, code: 'ITEM_NOT_SUBMITTED' }]);
+        expect(await snapshot(f)).toEqual(before);
+    });
+    test.each(['array', 'shorthand'])('%s submission review refuses accepted rows and derives status and note from committed rows', async form => {
+        const f = await packageFixture(['SUBMITTED', 'ACCEPTED']);
+        const acceptedBefore = await prisma.workItem.findUnique({ where: { id: f.items[1].id } });
+        const body = form === 'shorthand' ? { status: 'ACCEPTED' } : {
+            decisions: f.items.map(item => ({ workItemId: item.id, decision: 'ACCEPT' }))
+        };
+        const res = await post(`/api/submissions/${f.submission.id}/review`, body);
+        expect(res.status).toBe(200); expect(res.body.results).toHaveLength(1);
+        expect(res.body.errors).toEqual([{ workItemId: f.items[1].id, code: 'ITEM_NOT_SUBMITTED' }]);
+        expect(await prisma.workItem.findUnique({ where: { id: f.items[1].id } })).toEqual(acceptedBefore);
+        expect(await prisma.reviewDecision.count({ where: { submissionItemId: f.submission.id } })).toBe(1);
+        const submission = await prisma.submission.findUnique({ where: { id: f.submission.id } });
+        expect(submission.status).toBe('REVIEWED'); expect(submission.reviewNote).toContain(f.items[0].id);
+        expect(submission.reviewNote).not.toContain(f.items[1].id);
+        const summary = await prisma.auditLog.findFirst({ where: { entityId: f.submission.id, action: 'SUBMISSION_REVIEWED' } });
+        expect(JSON.parse(summary.details)).toMatchObject({ committedCount: 1, refusedCount: 1 });
+    });
+    test('no successful submission rows leave the package and every item unchanged', async () => {
+        const f = await packageFixture(['ACCEPTED']), before = await snapshot(f);
+        const packageBefore = await prisma.submission.findUnique({ where: { id: f.submission.id } });
+        const res = await post(`/api/submissions/${f.submission.id}/review`, { decision: 'WAIVE', reason: 'Waive' });
+        expect(res.status).toBe(409); expect(res.body.code).toBe('ITEM_NOT_SUBMITTED');
+        expect(await snapshot(f)).toEqual(before);
+        expect(await prisma.submission.findUnique({ where: { id: f.submission.id } })).toEqual(packageBefore);
+    });
+    test.each([
+        [{ decision: 'INVALID' }, 'INVALID_REVIEW_DECISION'],
+        [{ decision: 'WAIVE' }, 'REVIEW_REASON_REQUIRED'],
+        [{ decision: 'REJECT_REANALYSIS', reason: ' ' }, 'REVIEW_REASON_REQUIRED'],
+        [{ decision: 'WAIVE', reason: 123 }, 'INVALID_REVIEW_REASON']
+    ])('invalid second decision refuses the whole request before writes (%s)', async (bad, code) => {
+        const f = await packageFixture(['SUBMITTED', 'SUBMITTED']), before = await snapshot(f);
+        const res = await post(`/api/submissions/${f.submission.id}/review`, { decisions: [
+            { workItemId: f.items[0].id, decision: 'ACCEPT' }, { workItemId: f.items[1].id, ...bad }
+        ] });
+        expect(res.status).toBe(400); expect(res.body.code).toBe(code); expect(await snapshot(f)).toEqual(before);
+        expect(await prisma.reviewDecision.count({ where: { submissionItemId: f.submission.id } })).toBe(0);
+    });
+    test('QC refusal remains request-wide and prevents an otherwise eligible bulk row', async () => {
+        const good = await fixture(), failed = await fixture({ batchStatus: 'QC_FAIL' });
+        const goodBefore = await snapshot(good), failedBefore = await snapshot(failed);
+        const res = await post('/api/work/review/bulk', { workItemIds: [good.item.id, failed.item.id], status: 'ACCEPTED' });
+        expect(res.status).toBe(409); expect(res.body.code).toBe('QC_FAIL_BLOCKER');
+        expect(await snapshot(good)).toEqual(goodBefore); expect(await snapshot(failed)).toEqual(failedBefore);
+    });
+    test.each(workflow.CLOSURE_TASK_ANALYSES)('%s can be accepted once from COMPLETED and a second decision cannot change custody or audit', async analysis => {
+        const f = await fixture({ analysis, status: 'COMPLETED', sampleStatus: 'APPROVED' });
+        expect((await post(`/api/work/${f.item.id}/review`, { status: 'ACCEPTED' })).status).toBe(200);
+        expect((await prisma.sample.findUnique({ where: { id: f.sampleId } })).status).toBe(workflow.CLOSURE_TASK_SAMPLE_STATES[analysis]);
+        const before = await snapshot(f);
+        const res = await post(`/api/work/${f.item.id}/review`, { status: 'ACCEPTED' });
+        expect(res.status).toBe(409); expect(res.body.code).toBe('ITEM_NOT_SUBMITTED'); expect(await snapshot(f)).toEqual(before);
+    });
+    test('the shared SUBMITTED -> WAIVED contract keeps the technician status endpoint sealed', async () => {
+        const f = await fixture(), before = await snapshot(f);
+        expect(workflow.isValidWorkItemTransition('SUBMITTED', 'WAIVED')).toBe(true);
+        const res = await request(app).put(`/api/work/${f.item.id}/status`).set('Authorization', `Bearer ${technician}`).send({ status: 'WAIVED' });
+        expect(res.status).toBe(403); expect(await snapshot(f)).toEqual(before);
+    });
+    test('a failed decision insert rolls back the item CAS and audit together', async () => {
+        const f = await fixture(), before = await snapshot(f), original = prisma.$transaction.bind(prisma);
+        jest.spyOn(prisma, '$transaction').mockImplementation(callback => original(async tx => {
+            jest.spyOn(tx.reviewDecision, 'create').mockRejectedValueOnce(new Error('Injected decision storage failure'));
+            return callback(tx);
+        }));
+        const res = await post(`/api/work/${f.item.id}/review`, { status: 'ACCEPTED' });
+        expect(res.status).toBe(500); expect(await snapshot(f)).toEqual(before);
+    });
+});
