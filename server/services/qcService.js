@@ -393,6 +393,9 @@ async function flagBatchResults(prismaClient, batchId, status, disposition = nul
         const wasInitiallyValid = Boolean(res.isValid);
         const initialFlags = Array.isArray(flags) ? [...flags] : [];
         const hadQcBatchFailed = initialFlags.includes('QC_BATCH_FAILED');
+        const hadPriorProvenanceInvalid = initialFlags.some(f => PROVENANCE_INVALID_FLAGS.includes(f));
+        const hadPriorRejection = initialFlags.includes('QC_BATCH_REJECTED') || initialFlags.includes('QC_BATCH_REANALYZE_REQUESTED');
+        const nonQcFlags = initialFlags.filter(f => !QC_OWNED_FLAGS.includes(f) && !PROVENANCE_INVALID_FLAGS.includes(f));
 
         if (status === 'QC_FAIL') {
             if (isProceedWarning) {
@@ -454,7 +457,7 @@ async function flagBatchResults(prismaClient, batchId, status, disposition = nul
             let isValid = false;
             if (wasInitiallyValid) {
                 isValid = true;
-            } else if (isInvalidOnlyByQcFailure(res)) {
+            } else if (hadQcBatchFailed && !hadPriorProvenanceInvalid && !isMalformedFlags && nonQcFlags.length === 0 && !hadPriorRejection) {
                 isValid = true;
             }
 
