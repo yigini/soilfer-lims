@@ -3,9 +3,22 @@ const fs = require('fs');
 const path = require('path');
 const request = require('supertest');
 const app = require('../../app');
+const prisma = require('../../prisma');
 const { generateToken } = require('../setup');
 const { usersDb, workItemsDb, samplesDb, submissionsDb } = require('../../db');
-const prisma = require('../../prisma');
+
+async function completeAnalyticalWork(workItemId, token, value) {
+    const res = await request(app).post('/api/workbench/batch-save')
+        .set('Authorization', `Bearer ${token}`).send({ draft: false, entries: [{ workItemId, value }] });
+    expect(res.status).toBe(200);
+    expect(res.body.saved).toBe(1);
+    const workItem = await prisma.workItem.findUnique({ where: { id: workItemId } });
+    const result = await prisma.result.findFirst({ where: {
+        sampleId: workItem.sampleId, param: workItem.analysis, isCurrent: true
+    } });
+    expect(result.value).toBe(value);
+    return res;
+}
 
 describe('8.2 Integration: Golden Path Scenarios', () => {
     let mgrToken, techToken;
@@ -125,7 +138,7 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
             .send({ workItemIds: [phItem.id, condItem.id], assignee: techUsername });
 
         // 4. Tech Completes partial
-        await request(app).put(`/api/work/${phItem.id}/status`).set('Authorization', `Bearer ${techToken}`).send({ status: 'COMPLETED', result: '7.2' });
+        await completeAnalyticalWork(phItem.id, techToken, '7.2');
 
         // 5. Partial Submission
         const partialSubRes = await request(app)
@@ -145,13 +158,13 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         expect(phItemReload.status).toBe('REANALYSIS_REQUIRED'); // Sent back to technician
 
         // 7. Tech Fixes and Completes All
-        await request(app).put(`/api/work/${phItem.id}/status`).set('Authorization', `Bearer ${techToken}`).send({ status: 'COMPLETED', result: '7.1' });
-        await request(app).put(`/api/work/${condItem.id}/status`).set('Authorization', `Bearer ${techToken}`).send({ status: 'COMPLETED', result: '1.5' });
+        await completeAnalyticalWork(phItem.id, techToken, '7.1');
+        await completeAnalyticalWork(condItem.id, techToken, '1.5');
 
         // 8. Full Submission
         const socItem = itemsRes.body.data.find(i => i.analysis === 'SOC');
         await request(app).post('/api/work/assign').set('Authorization', `Bearer ${mgrToken}`).send({ workItemIds: [socItem.id], assignee: techUsername });
-        await request(app).put(`/api/work/${socItem.id}/status`).set('Authorization', `Bearer ${techToken}`).send({ status: 'COMPLETED', result: '15.0' });
+        await completeAnalyticalWork(socItem.id, techToken, '15.0');
 
         const fullSubRes = await request(app)
             .post('/api/submissions')
@@ -201,7 +214,7 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         const phId = phItem.id;
 
         await request(app).post('/api/work/assign').set('Authorization', `Bearer ${mgrSilverToken}`).send({ workItemIds: [phId], assignee: techSilverUsername });
-        await request(app).put(`/api/work/${phId}/status`).set('Authorization', `Bearer ${techSilverToken}`).send({ status: 'COMPLETED', result: '7.0' });
+        await completeAnalyticalWork(phId, techSilverToken, '7.0');
 
         const subRes = await request(app).post('/api/submissions').set('Authorization', `Bearer ${techSilverToken}`).send({ sampleId, type: 'FULL', workItemIds: [phId] });
         if (subRes.status !== 201) console.log('DEBUG Scenario B Submission Failure:', subRes.body);
@@ -261,10 +274,12 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         await request(app).post('/api/work/assign').set('Authorization', `Bearer ${mgrRedToken}`).send({ workItemIds: [phId], assignee: techRedUsername });
 
         const completeRes = await request(app)
-            .put(`/api/work/${phId}/status`)
+            .post('/api/workbench/batch-save')
             .set('Authorization', `Bearer ${techRedToken}`)
-            .send({ status: 'COMPLETED', result: '7.0' });
-        expect(completeRes.status).toBe(400);
+            .send({ draft: false, entries: [{ workItemId: phId, value: '7.0' }] });
+        expect(completeRes.status).toBe(422);
+        expect(completeRes.body.errors[0].code).toBe('EXECUTION_BLOCKED');
+        expect(await prisma.result.count({ where: { sampleId, param: 'PH_H2O' } })).toBe(0);
     });
 
     /**
@@ -292,7 +307,7 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         const phId = phItem.id;
 
         await request(app).post('/api/work/assign').set('Authorization', `Bearer ${mgrBlueToken}`).send({ workItemIds: [phId], assignee: techBlueUsername });
-        await request(app).put(`/api/work/${phId}/status`).set('Authorization', `Bearer ${techBlueToken}`).send({ status: 'COMPLETED', result: '7.0' });
+        await completeAnalyticalWork(phId, techBlueToken, '7.0');
 
         const subRes = await request(app).post('/api/submissions').set('Authorization', `Bearer ${techBlueToken}`).send({ sampleId, type: 'FULL', workItemIds: [phId] });
         if (subRes.status !== 201) console.log('DEBUG Scenario D Submission Failure:', subRes.body);

@@ -1,4 +1,5 @@
 {
+  "dataSheet": {"title":"Data Sheet","readOnlyDescription":"Recorded results are read-only here. Open the workbench to enter or update results.","openWorkbench":"Open workbench"},
   "common": {
     "copySecretFailed": "Copy failed. Select the key and copy it manually before closing this window.",
     "save": "Save",
