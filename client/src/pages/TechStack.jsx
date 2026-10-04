@@ -83,6 +83,17 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.7.0',
+        date: 'October 4, 2026',
+        tag: 'Atomic Sample Numbering',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Each laboratory controls sample-code format and yearly or continuous numbering.',
+            'Concurrent intake allocates unique codes atomically with the sample write.',
+            'Historical codes and previous work-item lab values are retained by an audited dry-run back-fill.',
+        ],
+    },
+    {
         version: 'v1.6.1',
         date: 'October 4, 2026',
         tag: 'UUID and Transaction Integrity',

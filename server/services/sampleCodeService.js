@@ -65,6 +65,9 @@ async function issuedCode(sample, db) {
     if (references.some(reference => reference.trim().toUpperCase() === sample.labId.trim().toUpperCase())) {
         throw conflict('AMBIGUOUS_LAB_OR_CODE', 'The historical laboratory/sample code needs review.');
     }
+    if (await db.sample.findFirst({ where: { labSampleCode: sample.labId, id: { not: sample.id } }, select: { id: true } })) {
+        throw conflict('SAMPLE_CODE_CONFLICT', 'The historical sample code belongs to another sample and needs review.');
+    }
     return sample.labId;
 }
 module.exports = { checkCharacter, verifyCheckCharacter, formatCode, codePolicy, allocateSampleCode, issuedCode };

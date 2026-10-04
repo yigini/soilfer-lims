@@ -59,6 +59,25 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
         expect(await prisma.sample.count({ where: { originalId: 'FAILED-A13' } })).toBe(0);
         expect((await issue()).labSampleCode).toBe(reserved);
     });
+    test('normal single and walk-in paths issue policy codes, with laboratory work-item ownership', async () => {
+        const sample = await prisma.sample.create({ data: { id: id(), originalId: id(), assignedLab: lab.id, status: 'RECEIVED' } });
+        const response = await request(app).put(`/api/samples/${sample.id}/status`).set('Authorization', `Bearer ${await getAuthToken('LAB_MANAGER', lab.id)}`).send({ status: 'ACCEPTED' });
+        expect(response.status).toBe(200); expect(codes.verifyCheckCharacter(response.body.labSampleCode)).toBe(true);
+        expect((await prisma.workItem.findMany({ where: { sampleId: sample.id } })).every(item => item.labId === lab.id)).toBe(true);
+        const walkIn = await request(app).post('/api/samples/walkin').set('Authorization', `Bearer ${token}`).send({ submitter: 'Synthetic submitter', analyses: [] });
+        expect(walkIn.status).toBe(201); expect(walkIn.body.sample.originalId).toMatch(/^W\d+$/);
+        expect(codes.verifyCheckCharacter(walkIn.body.sample.labSampleCode)).toBe(true);
+        expect(walkIn.body.sample.labId).toBe(walkIn.body.sample.labSampleCode);
+        expect(walkIn.body.sample.labId).not.toBe(walkIn.body.sample.originalId);
+    });
+    test('historical duplicate intake returns a stable conflict and preserves both records', async () => {
+        const oldCode = `S${Date.now()}`;
+        await prisma.sample.create({ data: { id: id(), originalId: id(), assignedLab: lab.id, labId: oldCode, labSampleCode: oldCode, status: 'RECEIVED' } });
+        const sample = await prisma.sample.create({ data: { id: id(), originalId: id(), assignedLab: lab.id, labId: oldCode, status: 'EXPECTED' } });
+        const response = await receive({ samples: [{ originalId: sample.originalId, status: 'ACCEPTED' }] });
+        expect(response.status).toBe(409); expect(response.body.code).toBe('SAMPLE_CODE_CONFLICT');
+        expect(await prisma.sample.findUnique({ where: { id: sample.id } })).toMatchObject({ labId: oldCode, labSampleCode: null, status: 'EXPECTED' });
+    });
     test('year rollover uses lab timezone; NEVER retains its counter while date tokens change', async () => {
         const a = await issue('2026-12-31T22:30:00Z'), b = await issue('2026-12-31T23:30:00Z');
         expect(a.labSampleCode).toContain('-26-000001'); expect(b.labSampleCode).toContain('-27-000001');
@@ -169,5 +188,10 @@ describe('Audit 1.3: additive migration and idempotent back-fill', () => {
         expect(() => db.prepare('UPDATE Sample SET labSampleCode = ? WHERE id = ?').run('code', 's2')).toThrow(/UNIQUE/);
         expect(() => db.prepare('INSERT INTO LabSequence VALUES (?,?,?,?)').run('lab-a', 'UNKNOWN', 2026, 1)).toThrow(/CHECK/);
         expect(() => db.prepare('INSERT INTO LabSequence VALUES (?,?,?,?)').run('lab-a', 'SAMPLE', 2026, 0)).toThrow(/CHECK/);
+    });
+    test('apply registers the actual exchange UDFs required by existing sample triggers', () => {
+        db.exec("CREATE TRIGGER existing_exchange_trigger AFTER UPDATE ON Sample BEGIN SELECT exchange_compute_hash('{}', '[]'); END;");
+        expect(() => backfill(db, true)).not.toThrow();
+        expect(db.prepare("SELECT labSampleCode FROM Sample WHERE id='s1'").get().labSampleCode).toBe('S123');
     });
 });
