@@ -29,6 +29,27 @@ function generateToken() {
     return crypto.randomBytes(32).toString('hex');
 }
 
+async function logPublicAccess(link, req) {
+    try {
+        await prisma.reportAccessLog.create({ data: {
+            linkId: link.id,
+            ipAddress: req.ip || req.connection?.remoteAddress,
+            userAgent: req.get('User-Agent') || null
+        } });
+    } catch (e) { /* best-effort, including refused visits to known links */ }
+}
+
+function publicLinkConflict(link) {
+    if (link.report.status === 'SUPERSEDED') {
+        return { error: 'This report has been superseded. Request a link to the current report.', code: 'REPORT_SUPERSEDED' };
+    }
+    if (link.isRevoked) return { error: 'This link has been revoked', code: 'LINK_REVOKED' };
+    if (link.expiresAt && new Date() > new Date(link.expiresAt)) {
+        return { error: 'This link has expired', code: 'LINK_EXPIRED' };
+    }
+    return null;
+}
+
 /**
  * Shared Report Authorization Validator
  * Enforces shared precedence across list, detail, and counts:
@@ -131,6 +152,10 @@ async function generateReport(req, res) {
             const { content, searchKeys } = await assembleReport(sampleId, req.user, { db: tx, qcBatches, qcModes });
             content.reportNumber = displayNumber(identity.reportNumberBase, identity.revision);
             content.publication = { ...identity, publishedAt: publishedAt.toISOString(), status: 'PUBLISHED' };
+            await tx.reportShareLink.updateMany({
+                where: { isRevoked: false, report: { sampleId, status: 'PUBLISHED' } },
+                data: { isRevoked: true, revokedAt: publishedAt, revokedBy: req.user.username }
+            });
             await tx.report.updateMany({
                 where: { sampleId, status: 'PUBLISHED' },
                 data: { status: 'SUPERSEDED' }
@@ -706,24 +731,9 @@ async function getPublicReport(req, res) {
             return res.status(404).json({ error: 'Report not found or link invalid' });
         }
 
-        if (link.isRevoked) {
-            return res.status(410).json({ error: 'This link has been revoked' });
-        }
-
-        if (link.expiresAt && new Date() > new Date(link.expiresAt)) {
-            return res.status(410).json({ error: 'This link has expired' });
-        }
-
-        // Log access
-        try {
-            await prisma.reportAccessLog.create({
-                data: {
-                    linkId: link.id,
-                    ipAddress: req.ip || req.connection?.remoteAddress,
-                    userAgent: req.get('User-Agent') || null
-                }
-            });
-        } catch (e) { /* best-effort */ }
+        await logPublicAccess(link, req);
+        const conflict = publicLinkConflict(link);
+        if (conflict) return res.status(410).json(conflict);
 
         const report = link.report;
         res.json({
@@ -758,23 +768,9 @@ async function getPublicReportPdf(req, res) {
         if (!link) {
             return res.status(404).json({ error: 'Report not found or link invalid' });
         }
-        if (link.isRevoked) {
-            return res.status(410).json({ error: 'This link has been revoked' });
-        }
-        if (link.expiresAt && new Date() > new Date(link.expiresAt)) {
-            return res.status(410).json({ error: 'This link has expired' });
-        }
-
-        // Log access
-        try {
-            await prisma.reportAccessLog.create({
-                data: {
-                    linkId: link.id,
-                    ipAddress: req.ip,
-                    userAgent: req.get('User-Agent')
-                }
-            });
-        } catch (e) { /* best-effort */ }
+        await logPublicAccess(link, req);
+        const conflict = publicLinkConflict(link);
+        if (conflict) return res.status(410).json(conflict);
 
         const report = link.report;
         const content = report.content ? (typeof report.content === 'string' ? JSON.parse(report.content) : report.content) : null;

@@ -6,6 +6,7 @@ const { checkPermission } = require('../middleware/authMiddleware');
 // Read routes
 router.get('/expected', sampleController.searchExpectedSamples);
 router.get('/locations', sampleController.getSampleLocations);
+router.get('/lookup', checkPermission('VIEW_SAMPLES'), sampleController.lookupSample);
 router.get('/', checkPermission('VIEW_SAMPLES'), sampleController.getSamples);
 
 // State-change routes with RBAC

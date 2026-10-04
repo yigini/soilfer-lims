@@ -10,6 +10,8 @@ const sampleStateService = require('../services/sampleStateService');
 const projectPolicyService = require('../services/projectPolicyService');
 const profileIdentity = require('../services/profileIdentityService');
 const intakeProfile = require('../services/intakeProfileService');
+const { massRequirement, massDeficit } = require('../services/intakeMassService');
+const batchObservations = require('../services/batchIntakeObservationsService');
 
 // In-memory cache for reverse geocoding (24hr TTL)
 const geocodeCache = new Map();
@@ -817,24 +819,9 @@ exports.processIntake = async (req, res) => {
                 select: { code: true, name: true, sampleMassRequired: true }
             });
 
-            const totalAnalyticalMass = analysesFromDb.reduce((sum, a) => sum + (a.sampleMassRequired || 10.0), 0);
-            const retentionBuffer = 100.0; // 100g standard retention
-            const totalRequiredMass = totalAnalyticalMass + retentionBuffer;
-
-            if (parsedMass < totalRequiredMass) {
-                const deficit = Math.round((totalRequiredMass - parsedMass) * 10) / 10;
-                massDeficitInfo = {
-                    receivedMass: parsedMass,
-                    totalRequiredMass,
-                    totalAnalyticalMass,
-                    retentionBuffer,
-                    deficit,
-                    analysesAtRisk: analysesFromDb.map(a => ({
-                        code: a.code,
-                        name: a.name,
-                        massRequired: a.sampleMassRequired || 10.0
-                    }))
-                };
+            massDeficitInfo = massDeficit(parsedMass, await massRequirement(sample.assignedLab || user.labId, analysesFromDb));
+            if (massDeficitInfo) {
+                const { totalAnalyticalMass, retentionBuffer, deficit } = massDeficitInfo;
 
                 if (!massWarningAcknowledged && !req.body.isDraft) {
                     return res.status(400).json({
@@ -1413,7 +1400,7 @@ exports.checkDuplicate = async (req, res) => {
  * RC-01: Analytical Mass Sufficiency Calculation
  */
 exports.calculateMassRequirement = async (req, res) => {
-    const { analysisCodes = [], analysisGroupIds = [], retentionMass = 100 } = req.body;
+    const { analysisCodes = [], analysisGroupIds = [], retentionMass } = req.body;
 
     try {
         const codes = new Set(Array.isArray(analysisCodes) ? analysisCodes : []);
@@ -1433,22 +1420,9 @@ exports.calculateMassRequirement = async (req, res) => {
             select: { code: true, name: true, sampleMassRequired: true }
         });
 
-        const breakdown = analysisList.map(a => ({
-            code: a.code,
-            name: a.name,
-            massRequired: a.sampleMassRequired || 10.0
-        }));
-
-        const totalAnalyticalMass = breakdown.reduce((sum, item) => sum + item.massRequired, 0);
-        const retention = typeof retentionMass === 'number' ? retentionMass : 100.0;
-        const totalRequiredMass = totalAnalyticalMass + retention;
-
         return res.json({
             success: true,
-            totalRequiredMass,
-            totalAnalyticalMass,
-            retentionMass: retention,
-            breakdown
+            ...await massRequirement(req.user?.labId, analysisList, retentionMass)
         });
     } catch (err) {
         console.error('[calculateMassRequirement] ERROR:', err);
@@ -1713,7 +1687,7 @@ exports.batchGeometryCheck = async (req, res) => {
 exports.processBatchConsignmentIntake = async (req, res) => {
     try {
         const user = req.user;
-        const { consignment: csgInput = {}, defaults = {}, samples = [] } = req.body;
+        const { consignment: csgInput = {}, defaults = {}, samples = [], bulkApplications = [] } = req.body;
 
         if (!Array.isArray(samples) || samples.length === 0) {
             return res.status(400).json({ error: 'At least one sample is required for batch intake' });
@@ -1835,12 +1809,26 @@ exports.processBatchConsignmentIntake = async (req, res) => {
             select: { code: true, name: true, sampleMassRequired: true, category: true }
         });
         const analysisMap = new Map(allAnalysesDb.map(a => [a.code, a]));
+        const appliedObservations = batchObservations.normalizeApplications(bulkApplications, samples);
+        const observedRows = [];
+        const massWarnings = [];
 
         // Validate every sample before creating the consignment or any sample records.
         for (const [index, sample] of samples.entries()) {
+            const observed = batchObservations.observations(sample, appliedObservations);
+            observedRows.push(observed);
             if (sample.status === 'REJECTED') continue;
             const selected = await cataloguePolicy.validateSelection(sample.requiredAnalyses ?? defaults.requiredAnalyses ?? [], { labId: userLab });
             if (!selected.valid) return res.status(400).json({ error: selected.error, message: selected.error, row: index + 1, issues: selected.issues });
+            const analyses = allAnalysesDb.filter(analysis => (sample.requiredAnalyses ?? defaults.requiredAnalyses ?? []).includes(analysis.code));
+            observed.massDeficitInfo = massDeficit(observed.receivedMass, await massRequirement(userLab, analyses));
+            if (observed.massDeficitInfo && sample.massWarningAcknowledged !== true) massWarnings.push({ row: index + 1,
+                originalId: sample.originalId || sample.id, code: 'MASS_DEFICIT', massDeficitInfo: observed.massDeficitInfo });
+        }
+        if (massWarnings.length) {
+            return res.status(400).json({ success: false, error: 'MASS_DEFICIT', code: 'MASS_DEFICIT',
+                message: 'Received mass is insufficient for the ordered tests and archive retention. Review and acknowledge each affected row.',
+                massDeficitInfo: massWarnings[0].massDeficitInfo, warnings: massWarnings });
         }
 
         // Canonical project resolution (F11)
@@ -1929,10 +1917,9 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                 const status = isRejected ? 'RECEIVED_REJECTED' : workflow.SAMPLE_STATES.ACCEPTED;
                 const rejectionReason = isRejected ? (s.rejectionReason || 'Sample non-conformance recorded during batch reception') : null;
 
-                // Merge values with defaults
-                const rawMass = s.receivedMass !== undefined && s.receivedMass !== null && s.receivedMass !== '' ? s.receivedMass : defaults.receivedMass;
-                const parsedMass = rawMass !== undefined && rawMass !== null && rawMass !== '' ? parseFloat(rawMass) : null;
-                const moisture = s.moistureOnArrival || defaults.moistureOnArrival || 'MOIST';
+                const observed = observedRows[i];
+                const parsedMass = observed.receivedMass;
+                const moisture = observed.moistureOnArrival;
                 const foreignMat = s.foreignMaterial || defaults.foreignMaterial || [];
                 const photos = s.intakePhotos || [];
                 const reqAnalyses = s.requiredAnalyses ?? defaults.requiredAnalyses ?? [];
@@ -1949,9 +1936,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                     elev = parseFloat(s.coordinates.elevation);
                 }
 
-                const uncertaintyM = s.positionalUncertaintyM !== undefined && s.positionalUncertaintyM !== null && s.positionalUncertaintyM !== ''
-                    ? parseFloat(s.positionalUncertaintyM)
-                    : (lat && lng ? 10.0 : null);
+                const uncertaintyM = observed.positionalUncertaintyM;
 
                 const compRadius = s.compositeRadiusM !== undefined && s.compositeRadiusM !== null && s.compositeRadiusM !== ''
                     ? parseFloat(s.compositeRadiusM)
@@ -2011,7 +1996,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                     dryingStatus: isRejected ? null : 'PENDING',
                     preparationStatus: isRejected ? null : 'PENDING',
                     receivedMass: parsedMass,
-                    massWarningAcknowledged: true,
+                    massWarningAcknowledged: Boolean(observed.massDeficitInfo && s.massWarningAcknowledged === true),
                     moistureOnArrival: moisture,
                     foreignMaterial: typeof foreignMat === 'string' ? foreignMat : JSON.stringify(foreignMat),
                     intakePhotos: JSON.stringify(photos),
@@ -2047,6 +2032,9 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                         deliveryNoteRef: consignment.deliveryNoteRef,
                         deliveredBy: consignment.deliveredBy,
                         batchIndex: i + 1,
+                        massNotRecorded: parsedMass === null,
+                        massStatus: parsedMass === null ? 'MASS_NOT_RECORDED' : observed.massDeficitInfo ? 'MASS_DEFICIT' : 'RECORDED',
+                        massDeficitInfo: observed.massDeficitInfo || null,
                         notes: s.notes || null,
                         checklist: s.checklist || defaults.checklist || {}
                     })
@@ -2157,7 +2145,8 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                     entity: 'CONSIGNMENT',
                     entityId: consignment.id,
                     action: 'CONSIGNMENT_BATCH_RECEIVED',
-                    details: `Consignment ${consignment.code} received with ${samples.length} samples (${acceptedCount} accepted, ${rejectedCount} rejected). Delivery Note: ${consignment.deliveryNoteRef || 'None'}.`,
+                    details: JSON.stringify({ summary: `Consignment ${consignment.code} received with ${samples.length} samples (${acceptedCount} accepted, ${rejectedCount} rejected). Delivery Note: ${consignment.deliveryNoteRef || 'None'}.`,
+                        bulkApplications: appliedObservations, massDeficitAcknowledgements: samples.filter((sample, index) => observedRows[index].massDeficitInfo && sample.massWarningAcknowledged === true).map(sample => sample.originalId || sample.id) }),
                     performedBy: receivedBy,
                     timestamp: now
                 }
@@ -2174,6 +2163,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
         });
     } catch (err) {
         console.error('[processBatchConsignmentIntake] ERROR:', err);
+        if (err.statusCode) return res.status(err.statusCode).json({ error: err.message, code: err.code });
         if (err instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({error: err.code, code: err.code, message: err.message});
         return res.status(500).json({ error: 'Batch consignment intake failed: ' + err.message });
     }
@@ -2298,6 +2288,7 @@ exports.parseManifestEndpoint = async (req, res) => {
         const depthTopCol = mapping?.depthTop || 'depth_top';
         const depthBottomCol = mapping?.depthBottom || 'depth_bottom';
         const massCol = mapping?.receivedMass || 'mass';
+        const uncertaintyCol = mapping?.positionalUncertaintyM || 'positional_uncertainty_m';
         const siteCol = mapping?.siteName || 'site';
         const villageCol = mapping?.village || 'village';
         const admin1Col = mapping?.admin1 || 'admin1';
@@ -2322,7 +2313,6 @@ exports.parseManifestEndpoint = async (req, res) => {
                 if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
                     lat = parsedLat;
                     lng = parsedLng;
-                    uncertaintyM = 10;
                     format = 'DD';
                 }
             }
@@ -2334,10 +2324,11 @@ exports.parseManifestEndpoint = async (req, res) => {
                 if (parsed) {
                     lat = parsed.lat;
                     lng = parsed.lng;
-                    uncertaintyM = parsed.uncertaintyM;
                     format = parsed.format;
                 }
             }
+
+            uncertaintyM = batchObservations.nullableNumber(raw[uncertaintyCol], 'positionalUncertaintyM');
 
             parsedRows.push({
                 ...(mapping?.profileCode ? {
@@ -2374,6 +2365,7 @@ exports.parseManifestEndpoint = async (req, res) => {
         });
     } catch (err) {
         console.error('[parseManifestEndpoint] ERROR:', err);
+        if (err.statusCode) return res.status(err.statusCode).json({ error: err.message, code: err.code });
         if (err instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({error: err.code, code: err.code, message: err.message});
         return res.status(500).json({ error: 'Failed to parse manifest: ' + err.message });
     }

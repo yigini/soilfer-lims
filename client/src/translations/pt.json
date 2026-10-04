@@ -1,4 +1,5 @@
 {
+  "sampleLookup": { "title": "Busca de amostra", "ambiguous": "Este identificador corresponde a várias amostras:", "failed": "Não foi possível encontrar ou carregar a amostra. Verifique o identificador e a conexão." },
   "dataSheet": {
     "title": "Folha de dados",
     "readOnlyDescription": "Os resultados registrados são somente leitura aqui. Abra a bancada para inserir ou atualizar resultados.",
@@ -2381,5 +2382,16 @@
     "recordedCount": "Registrados",
     "retryFailed": "Tentar novamente os que falharam",
     "recordingUnconfirmed": "O registro desta linha não foi confirmado."
+  },
+  "batchIntake": {
+    "massToApply": "Massa a aplicar (g)",
+    "moistureToApply": "Umidade a aplicar",
+    "notRecorded": "Não registrado",
+    "massNotRecorded": "Massa não registrada",
+    "applyToAll": "Aplicar a massa e umidade informadas a todas as linhas",
+    "massDeficit": "Massa insuficiente",
+    "acknowledgeMass": "Confirmar o aviso de massa desta amostra",
+    "massCheckFailed": "Não foi possível carregar os requisitos de massa. O servidor verificará cada linha ao enviar.",
+    "positionalUncertainty": "Incerteza de posição registrada (m)"
   }
 }

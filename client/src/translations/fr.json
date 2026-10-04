@@ -1,4 +1,5 @@
 {
+  "sampleLookup": { "title": "Recherche d'échantillon", "ambiguous": "Cet identifiant correspond à plusieurs échantillons :", "failed": "L'échantillon est introuvable ou ne peut pas être chargé. Vérifiez l'identifiant et la connexion." },
   "dataSheet": {
     "title": "Feuille de données",
     "readOnlyDescription": "Les résultats enregistrés sont en lecture seule ici. Ouvrez le plan de travail pour saisir ou modifier des résultats.",
@@ -2381,5 +2382,16 @@
     "recordedCount": "Enregistrés",
     "retryFailed": "Réessayer les échecs",
     "recordingUnconfirmed": "L’enregistrement de cette ligne n’a pas été confirmé."
+  },
+  "batchIntake": {
+    "massToApply": "Masse à appliquer (g)",
+    "moistureToApply": "Humidité à appliquer",
+    "notRecorded": "Non renseigné",
+    "massNotRecorded": "Masse non renseignée",
+    "applyToAll": "Appliquer la masse et l’humidité saisies à toutes les lignes",
+    "massDeficit": "Masse insuffisante",
+    "acknowledgeMass": "Confirmer l’avertissement de masse de cet échantillon",
+    "massCheckFailed": "Les besoins en masse n’ont pas pu être chargés. Le serveur vérifiera chaque ligne lors de l’envoi.",
+    "positionalUncertainty": "Incertitude de position enregistrée (m)"
   }
 }

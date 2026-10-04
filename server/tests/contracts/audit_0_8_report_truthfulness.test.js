@@ -168,18 +168,20 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
         expect(values).toContain(text.qcStatement); expect(values).toContain(text.preparationStatement);
         expect(values.join('\n')).not.toMatch(/40°C|ISO 11464|All batch Quality Control checks/);
     });
-    test('public and internal PDFs both mark superseded reports and the issued replacement', async () => {
+    test('internal PDF marks the issued replacement; public PDF refuses the superseded version', async () => {
         const f = await fixture(), first = await generate(f);
         const share = await request(app).post(`/api/reports/${first.id}/share`).set('Authorization', `Bearer ${token}`).send({ expiresInDays: 7 });
         expect(share.status).toBe(200);
         const second = await generate(f);
-        for (const url of [`/api/reports/${first.id}/pdf`, `/api/reports/public/${share.body.token}/pdf`]) {
-            const text = jest.spyOn(PDFDocument.prototype, 'text');
-            const response = await request(app).get(url).set('Authorization', `Bearer ${token}`);
-            expect(response.status).toBe(200);
-            expect(text.mock.calls.some(([value]) => String(value).includes(`SUPERSEDED`) && String(value).includes(`${second.reportNumberBase} rev 1`))).toBe(true);
-            text.mockRestore();
-        }
+        const text = jest.spyOn(PDFDocument.prototype, 'text');
+        const response = await request(app).get(`/api/reports/${first.id}/pdf`).set('Authorization', `Bearer ${token}`);
+        expect(response.status).toBe(200);
+        expect(text.mock.calls.some(([value]) => String(value).includes(`SUPERSEDED`) && String(value).includes(`${second.reportNumberBase} rev 1`))).toBe(true);
+        text.mockClear();
+        const publicPdf = await request(app).get(`/api/reports/public/${share.body.token}/pdf`);
+        expect(publicPdf.status).toBe(410);
+        expect(publicPdf.body.code).toBe('REPORT_SUPERSEDED');
+        expect(text).not.toHaveBeenCalled();
     });
     test('preparation claims come from complete recorded confirmations rather than sample DONE flags', () => {
         const receipt = { checks: [true, true], steps: ['Actual oven temperature recorded: 35 C', 'Actual sieve: 2 mm'], recordedAt: '2026-01-02', recordedBy: 'analyst' };

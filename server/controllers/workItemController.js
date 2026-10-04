@@ -1,3 +1,5 @@
+const { assertReviewable, commitReview, reconcileSubmission } = require('../services/reviewCommitService');
+const { hasPermission } = require('../config/roles');
 const { invalidateReturnedResults } = require('../services/reportResultGovernance');
 const COMPOUND_ANALYSIS_EXPANSION = {
     'exchangeableBases': ['EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA']
@@ -920,7 +922,7 @@ exports.updateWorkItemStatus = async (req, res) => {
 
         const { NON_ANALYTICAL } = require('../services/workEligibility');
         const isOperationalStatusItem = NON_ANALYTICAL.includes((item.analysis || '').toUpperCase()) ||
-            ['Archive', 'Dispose'].includes(item.analysis);
+            workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis);
         if (Object.prototype.hasOwnProperty.call(req.body, 'result') &&
             !isOperationalStatusItem) {
             return res.status(410).json({
@@ -1201,16 +1203,19 @@ exports.reviewWorkItem = async (req, res) => {
     const user = req.user;
 
     try {
-        if (!['LAB_MANAGER', 'SUPER_ADMIN', 'MASTER_USER'].includes(user.role)) {
+        if (!hasPermission(user, 'APPROVE_RESULTS')) {
             return res.status(403).json({ error: 'Insufficient permissions (Manager Only).' });
         }
 
+        if ((note != null && typeof note !== 'string') || (reason != null && typeof reason !== 'string')) {
+            return res.status(400).json({ error: 'Review note and reason must be text.', code: 'INVALID_REVIEW_REASON' });
+        }
         const effectiveReason = (note || reason || '').trim();
 
         // SD-10: Require mandatory reason on rejection
-        if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
+        if ([workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED, workflow.WORK_ITEM_STATES.WAIVED].includes(status)) {
             if (!effectiveReason) {
-                return res.status(400).json({ error: 'A reason is required when rejecting work for reanalysis' });
+                return res.status(400).json({ error: status === workflow.WORK_ITEM_STATES.WAIVED ? 'A reason is required when waiving work' : 'A reason is required when rejecting work for reanalysis', code: 'REVIEW_REASON_REQUIRED' });
             }
         }
 
@@ -1227,7 +1232,7 @@ exports.reviewWorkItem = async (req, res) => {
 
         // Lab scope check (S01/S02)
         const scopeGuard = require('../utils/scopeGuard');
-        if (user.role !== 'SUPER_ADMIN' && user.role !== 'MASTER_USER' && !scopeGuard.canAccessEntity(user, item.sample || item, { labField: 'labId', altLabField: 'assignedLab' })) {
+        if (!scopeGuard.canAccessEntity(user, item.sample || item, { labField: 'labId', altLabField: 'assignedLab' })) {
             return res.status(403).json({
                 error: 'Access denied: Work item outside your lab scope.',
                 code: 'ACCESS_DENIED_LAB'
@@ -1243,17 +1248,10 @@ exports.reviewWorkItem = async (req, res) => {
             return res.status(400).json({ error: `Invalid review status. Use: ${allowedReviewStatuses.join(', ')}` });
         }
 
-        const isClosureTask = ['ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'].includes(item.analysis);
+        const isClosureTask = workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis);
+        assertReviewable(item, status);
         if (status === workflow.WORK_ITEM_STATES.ACCEPTED) {
             if (!isClosureTask) {
-                // Canonical guard: must be in SUBMITTED state (COMPLETED is not SUBMITTED)
-                if (item.status !== workflow.WORK_ITEM_STATES.SUBMITTED) {
-                    return res.status(400).json({
-                        error: `Cannot approve work item in '${item.status}' state. Analyses must be completed and submitted by a technician before manager approval. Only submitted work items can be reviewed.`,
-                        code: 'INVALID_TRANSITION'
-                    });
-                }
-
                 // Evidence check: require valid result, linked scan, or Result row
                 const hasWorkItemResult = item.result !== null && item.result !== undefined && String(item.result).trim() !== '';
                 let hasEvidence = hasWorkItemResult;
@@ -1314,21 +1312,20 @@ exports.reviewWorkItem = async (req, res) => {
         }
 
         const operations = [];
+        const notifications = [];
 
         // Check if analysis is spectral-related
         const analysisUpper = (item.analysis || '').toUpperCase();
         const isSpectralAnalysis = ['NIR', 'MIR', 'SPECTRAL', 'VIS-NIR', 'VISNIR', 'SCAN'].some(k => analysisUpper.includes(k));
 
         if (status === workflow.WORK_ITEM_STATES.ACCEPTED) {
-            if (item.analysis === 'ARCHIVING' || item.analysis === 'ARCH' || item.analysis === 'Archive') {
-                const { transitionSample } = require('../services/sampleStateService');
-                await transitionSample(item.sampleId, 'ARCHIVED', user, 'Sample archived via work item review').catch(err => {
-                    console.warn('[reviewItem] Warning: sample transition to ARCHIVED failed:', err.message);
-                });
-            } else if (item.analysis === 'DISPOSAL' || item.analysis === 'DISP' || item.analysis === 'Dispose') {
-                const { transitionSample } = require('../services/sampleStateService');
-                await transitionSample(item.sampleId, 'DISPOSED', user, 'Sample disposed via work item review').catch(err => {
-                    console.warn('[reviewItem] Warning: sample transition to DISPOSED failed:', err.message);
+            if (workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis)) {
+                operations.push(async tx => {
+                    const { transitionSample } = require('../services/sampleStateService');
+                    await transitionSample(item.sampleId, workflow.CLOSURE_TASK_SAMPLE_STATES[item.analysis], user,
+                        'Sample closed via work item review', {}, tx).catch(err => {
+                        console.warn('[reviewItem] Warning: sample closure transition failed:', err.message);
+                    });
                 });
             }
 
@@ -1404,24 +1401,6 @@ exports.reviewWorkItem = async (req, res) => {
             }
         }));
 
-        if (item.submissionId) {
-            const allSubItems = await prisma.workItem.findMany({
-                where: { submissionId: item.submissionId },
-                select: { id: true, status: true }
-            });
-            const unreviewed = allSubItems.filter(si => si.id !== id && !['ACCEPTED', 'REANALYSIS_REQUIRED', 'WAIVED'].includes(si.status));
-            const subStatus = unreviewed.length === 0 ? 'REVIEWED' : 'PARTIALLY_REVIEWED';
-            operations.push(tx => tx.submission.update({
-                where: { id: item.submissionId },
-                data: {
-                    status: subStatus,
-                    reviewedBy: user.username,
-                    reviewedAt: now,
-                    reviewNote: `${user.username} reviewed item ${id} (${decisionVerdict})`
-                }
-            }));
-        }
-
         operations.push(tx => tx.auditLog.create({
             data: {
                 id: `audit-wi-rev-${id}-${Date.now()}`,
@@ -1488,24 +1467,25 @@ exports.reviewWorkItem = async (req, res) => {
                 // Also create bell notification
                 const notifType = isApproved ? 'SUCCESS' : (isRejected ? 'WARNING' : 'INFO');
                 const notifTitle = isApproved ? `✓ Work Approved` : (isRejected ? `✗ Reanalysis Required` : `⊘ Work Waived`);
-                await createNotification(
+                notifications.push(() => createNotification(
                     recipient.id,
                     notifType,
                     notifTitle,
                     `${item.analysis} for sample ${labId}`,
                     `/samples/${item.sampleId}`
-                );
+                ));
             }
         }
 
-        const updated = await prisma.$transaction(async tx => {
-            const updatedItem = await tx.workItem.update({ where: { id }, data: updateData });
+        const updated = await commitReview(prisma, item, status, user, updateData, async tx => {
             for (const operation of operations) await operation(tx);
             if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
                 await invalidateReturnedResults(tx, item, user, effectiveReason);
             }
-            return updatedItem;
         });
+        const result = { workItemId: id, status, decision: decisionVerdict };
+        if (item.submissionId) await reconcileSubmission(prisma, item.submissionId, user, [result]);
+        for (const notify of notifications) await notify();
 
         // Real-time push: broadcast WORKITEM_UPDATE to all connected users
         try {
@@ -1538,14 +1518,17 @@ exports.reviewWorkItemsBulk = async (req, res) => {
     const user = req.user;
 
     try {
-        if (!['LAB_MANAGER', 'SUPER_ADMIN', 'MASTER_USER'].includes(user.role)) {
+        if (!hasPermission(user, 'APPROVE_RESULTS')) {
             return res.status(403).json({ error: 'Insufficient permissions (Manager Only).' });
         }
 
+        if ((note != null && typeof note !== 'string') || (reason != null && typeof reason !== 'string')) {
+            return res.status(400).json({ error: 'Review note and reason must be text.', code: 'INVALID_REVIEW_REASON' });
+        }
         const effectiveReason = (note || reason || '').trim();
-        if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
+        if ([workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED, workflow.WORK_ITEM_STATES.WAIVED].includes(status)) {
             if (!effectiveReason) {
-                return res.status(400).json({ error: 'A reason is required when rejecting work for reanalysis' });
+                return res.status(400).json({ error: status === workflow.WORK_ITEM_STATES.WAIVED ? 'A reason is required when waiving work' : 'A reason is required when rejecting work for reanalysis', code: 'REVIEW_REASON_REQUIRED' });
             }
         }
 
@@ -1579,7 +1562,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
 
         // Lab scope check (S01/S02)
         const scopeGuard = require('../utils/scopeGuard');
-        if (user.role !== 'SUPER_ADMIN' && user.role !== 'MASTER_USER') {
+        {
             const outOfScopeItems = items.filter(item => !scopeGuard.canAccessEntity(user, item.sample || item, { labField: 'labId', altLabField: 'assignedLab' }));
             if (outOfScopeItems.length > 0) {
                 return res.status(403).json({
@@ -1592,7 +1575,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
 
         if (status === workflow.WORK_ITEM_STATES.ACCEPTED) {
             // Reject closure tasks from bulk analytical review
-            const closureItems = items.filter(item => ['ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'].includes(item.analysis));
+            const closureItems = items.filter(item => workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis));
             if (closureItems.length > 0) {
                 return res.status(400).json({
                     error: `Bulk approval cannot include custody closure tasks (${closureItems.map(i => i.id).join(', ')}). Execute closure via custody operations.`,
@@ -1601,19 +1584,10 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                 });
             }
 
-            // Reject unsubmitted items (strictly requires SUBMITTED)
-            const unsubmitted = items.filter(item => item.status !== workflow.WORK_ITEM_STATES.SUBMITTED);
-            if (unsubmitted.length > 0) {
-                return res.status(400).json({
-                    error: `Cannot approve ${unsubmitted.length} item(s) because they are not in SUBMITTED state. Analyses must be completed and submitted by a technician before manager approval.`,
-                    code: 'INVALID_TRANSITION',
-                    invalidItemIds: unsubmitted.map(i => i.id)
-                });
-            }
-
             // Check evidence for each item
             const missingEvidence = [];
             for (const item of items) {
+                if (item.status !== workflow.WORK_ITEM_STATES.SUBMITTED) continue;
                 const hasWorkItemResult = item.result !== null && item.result !== undefined && String(item.result).trim() !== '';
                 let hasEvidence = hasWorkItemResult;
                 if (!hasEvidence) {
@@ -1665,9 +1639,12 @@ exports.reviewWorkItemsBulk = async (req, res) => {
 
         const now = new Date();
         const results = [];
-        const operations = [];
-
+        const errors = [];
         for (const item of items) {
+            try { assertReviewable(item, status); }
+            catch (error) { errors.push({ workItemId: item.id, code: error.code }); continue; }
+            const operations = [];
+            const notifications = [];
             const history = typeof item.history === 'string' ? JSON.parse(item.history) : (item.history || []);
             history.push({
                 status,
@@ -1686,24 +1663,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                 updateData.submissionId = null;
             }
 
-            operations.push(tx => tx.workItem.update({
-                where: { id: item.id },
-                data: updateData
-            }));
-
             if (status === workflow.WORK_ITEM_STATES.ACCEPTED) {
-                if (item.analysis === 'ARCHIVING' || item.analysis === 'ARCH' || item.analysis === 'Archive') {
-                    const { transitionSample } = require('../services/sampleStateService');
-                    await transitionSample(item.sampleId, 'ARCHIVED', user, 'Sample archived via batch work item review').catch(err => {
-                        console.warn('[reviewBatch] Warning: sample transition to ARCHIVED failed:', err.message);
-                    });
-                } else if (item.analysis === 'DISPOSAL' || item.analysis === 'DISP' || item.analysis === 'Dispose') {
-                    const { transitionSample } = require('../services/sampleStateService');
-                    await transitionSample(item.sampleId, 'DISPOSED', user, 'Sample disposed via batch work item review').catch(err => {
-                        console.warn('[reviewBatch] Warning: sample transition to DISPOSED failed:', err.message);
-                    });
-                }
-
                 // Sync spectralData status when spectral work item is approved
                 // S05: Only sync exact linked scan or exact attempt
                 const bulkAnalysisUpper = (item.analysis || '').toUpperCase();
@@ -1805,65 +1765,53 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                     // Also create bell notification
                     const notifType = isApproved ? 'SUCCESS' : (isRejected ? 'WARNING' : 'INFO');
                     const notifTitle = isApproved ? `✓ Work Approved` : (isRejected ? `✗ Reanalysis Required` : `⊘ Work Waived`);
-                    await createNotification(
+                    notifications.push(() => createNotification(
                         recipient.id,
                         notifType,
                         notifTitle,
                         `${item.analysis} for sample ${item.labId || item.sampleId}`,
                         `/samples/${item.sampleId}`
-                    );
+                    ));
                 }
             }
+            try {
+                await commitReview(prisma, item, status, user, updateData, async tx => {
+                    for (const operation of operations) await operation(tx);
+                    if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
+                        await invalidateReturnedResults(tx, item, user, effectiveReason);
+                    }
+                });
+                results.push({ workItemId: item.id, status, decision: decisionVerdict });
+                for (const notify of notifications) await notify();
+            } catch (error) {
+                if (error.code !== 'ITEM_NOT_SUBMITTED') throw error;
+                errors.push({ workItemId: item.id, code: error.code });
+            }
         }
-
-        // Reconcile parent Submissions for all affected items
-        const affectedSubIds = [...new Set(items.map(i => i.submissionId).filter(Boolean))];
-        for (const subId of affectedSubIds) {
-            const allSubItems = await prisma.workItem.findMany({
-                where: { submissionId: subId },
-                select: { id: true, status: true }
-            });
-            const itemIdsBeingReviewed = new Set(items.map(i => i.id));
-            const unreviewed = allSubItems.filter(si => !itemIdsBeingReviewed.has(si.id) && !['ACCEPTED', 'REANALYSIS_REQUIRED', 'WAIVED'].includes(si.status));
-            const subStatus = unreviewed.length === 0 ? 'REVIEWED' : 'PARTIALLY_REVIEWED';
-            operations.push(tx => tx.submission.update({
-                where: { id: subId },
-                data: {
-                    status: subStatus,
-                    reviewedBy: user.username,
-                    reviewedAt: now,
-                    reviewNote: `${user.username} bulk reviewed items`
-                }
-            }));
-        }
-
-        if (operations.length > 0) {
-            // Using transaction to ensure atomic updates
-            await prisma.$transaction(async tx => {
-                for (const operation of operations) await operation(tx);
-                if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
-                    for (const item of items) await invalidateReturnedResults(tx, item, user, effectiveReason);
-                }
-            });
+        if (!results.length) return res.status(409).json({ error: 'No work items were eligible for review.', code: 'ITEM_NOT_SUBMITTED', results, errors });
+        const committedIds = new Set(results.map(row => row.workItemId));
+        const committedItems = items.filter(item => committedIds.has(item.id));
+        for (const subId of [...new Set(committedItems.map(item => item.submissionId).filter(Boolean))]) {
+            await reconcileSubmission(prisma, subId, user, results, errors);
         }
 
         // Real-time push: broadcast WORKITEM_UPDATE to all connected users
-        if (items.length > 0) {
-            const affectedSampleIds = [...new Set(items.map(i => i.sampleId).filter(Boolean))];
+        if (results.length > 0) {
+            const affectedSampleIds = [...new Set(committedItems.map(i => i.sampleId).filter(Boolean))];
             try {
                 wsServer.broadcastToLab(user.labId, 'WORKITEM_UPDATE', {
                     sampleIds: affectedSampleIds,
                     updatedBy: user.username,
                     action: 'BULK_REVIEWED',
                     reviewStatus: status,
-                    count: items.length
+                    count: results.length
                 });
             } catch (wsErr) {
                 console.error('[WS] Failed to broadcast WORKITEM_UPDATE (bulk review):', wsErr);
             }
         }
 
-        res.json({ success: true, count: items.length });
+        res.json({ success: true, count: results.length, results, errors });
     } catch (error) {
         console.error('[reviewWorkItemsBulk] Error:', error);
         res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work items', ...(error.code && { code: error.code }) });

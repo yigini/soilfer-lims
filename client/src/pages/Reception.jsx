@@ -411,7 +411,7 @@ const Reception = () => {
         const code = params.get('code') || params.get('originalId');
 
         if (sampleId) {
-            axios.get(`/api/samples/${sampleId}`, { headers: { Authorization: `Bearer ${token}` } })
+            axios.get('/api/samples/lookup', { params: { code: sampleId }, headers: { Authorization: `Bearer ${token}` } })
                 .then(res => {
                     if (res.data) {
                         const s = res.data;
@@ -421,7 +421,15 @@ const Reception = () => {
                         populateDeskFacts(s);
                     }
                 })
-                .catch(err => console.error('[Reception] Failed to load sample from URL param:', err));
+                .catch(err => {
+                    console.error('[Reception] Failed to load sample from URL param:', err);
+                    const candidates = err.response?.data?.candidates || [];
+                    setSampleData(null);
+                    showDialog({ type: 'error', title: t('sampleLookup.title', 'Sample lookup'),
+                        message: err.response?.status === 409
+                            ? `${t('sampleLookup.ambiguous', 'This identifier matches several samples:')} ${candidates.map(candidate => candidate.displayId).join(', ')}`
+                            : t('sampleLookup.failed', 'Sample could not be found or loaded. Check the identifier and connection.') });
+                });
         } else if (code) {
             handleLookup(code);
         }
