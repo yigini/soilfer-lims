@@ -15,91 +15,18 @@ const { calculateUsdaTexture } = require('../utils/soilCalculations');
  * @param {string|number|null|undefined} rawInput
  * @returns {object}
  */
-function parseDeterminationValue(rawInput) {
-    if (rawInput === null || rawInput === undefined) {
-        return {
-            isBlank: true,
-            isValid: false,
-            normalizedValue: null,
-            raw: '',
-            censoring: 'NONE',
-            isCensored: false,
-            flags: []
-        };
-    }
-
-    const str = String(rawInput).trim();
-    if (str === '') {
-        return {
-            isBlank: true,
-            isValid: false,
-            normalizedValue: null,
-            raw: '',
-            censoring: 'NONE',
-            isCensored: false,
-            flags: []
-        };
-    }
-
-    // Check for censoring prefix (<, <=, >, >=)
-    const censorMatch = str.match(/^([<>]=?)\s*(.+)$/);
-    if (censorMatch) {
-        const symbol = censorMatch[1];
-        const numPart = censorMatch[2].replace(',', '.').trim();
-        const numVal = Number(numPart);
-
-        if (!Number.isFinite(numVal) || !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(String(numPart ?? '').trim())) {
-            return {
-                isBlank: false,
-                isValid: false,
-                normalizedValue: null,
-                raw: str,
-                censoring: 'NONE',
-                isCensored: false,
-                flags: ['INVALID_FORMAT']
-            };
-        }
-
-        const isBelow = symbol.startsWith('<');
-        return {
-            isBlank: false,
-            isValid: true,
-            isCensored: true,
-            censoring: isBelow ? 'BELOW_LOQ' : 'ABOVE_RANGE',
-            limitValue: numVal,
-            normalizedValue: numVal,
-            raw: `${symbol}${numVal}`,
-            flags: isBelow ? ['BELOW_LOQ'] : ['ABOVE_RANGE']
-        };
-    }
-
-    // Standard numeric value with decimal comma conversion
-    const normalizedStr = str.replace(',', '.');
-    const numVal = Number(normalizedStr);
-
-    if (!Number.isFinite(numVal) || !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(normalizedStr)) {
-        return {
-            isBlank: false,
-            isValid: false,
-            normalizedValue: null,
-            raw: str,
-            censoring: 'NONE',
-            isCensored: false,
-            flags: ['INVALID_FORMAT']
-        };
-    }
-
+function parseDeterminationValue(rawInput, numberFormat = require('./policyService').getStrictNumberFormat()) {
+    const parsed = require('../../shared/numberParse').parseNumber(rawInput, numberFormat);
+    const below = parsed.qualifier.startsWith('<');
     return {
-        isBlank: false,
-        isValid: true,
-        isCensored: false,
-        censoring: 'NONE',
-        normalizedValue: numVal,
-        raw: normalizedStr,
-        flags: []
+        isBlank: parsed.blank, isValid: parsed.valid, normalizedValue: parsed.value,
+        raw: parsed.valid ? parsed.canonical : parsed.rawInput.trim(), rawInput: parsed.rawInput,
+        code: parsed.code, isCensored: !!parsed.qualifier,
+        censoring: parsed.qualifier ? (below ? 'BELOW_LOQ' : 'ABOVE_RANGE') : 'NONE',
+        ...(parsed.qualifier ? { limitValue: parsed.value } : {}),
+        flags: parsed.valid ? (parsed.qualifier ? [below ? 'BELOW_LOQ' : 'ABOVE_RANGE'] : []) : [parsed.blank ? 'VALUE_REQUIRED' : 'INVALID_FORMAT', parsed.code]
     };
 }
-
 /**
  * Validate numeric value against analysis method specification rules (min, max, loq, lod).
  *
@@ -107,8 +34,8 @@ function parseDeterminationValue(rawInput) {
  * @param {object|null} rules
  * @returns {object}
  */
-function validateNumericMethod(value, rules = null) {
-    const parsed = parseDeterminationValue(value);
+function validateNumericMethod(value, rules = null, numberFormat = require('./policyService').getStrictNumberFormat()) {
+    const parsed = parseDeterminationValue(value, numberFormat);
     if (parsed.isBlank) {
         return {
             ...parsed,
@@ -160,7 +87,7 @@ function validateNumericMethod(value, rules = null) {
  * @param {number|object} [tolerance=2.0]
  * @returns {object}
  */
-function validateTextureFractions(sandOrObj, siltOrTol, clay, tolerance = 2.0) {
+function validateTextureFractions(sandOrObj, siltOrTol, clay, tolerance = 2.0, numberFormat = require('./policyService').getStrictNumberFormat()) {
     let sand = sandOrObj;
     let silt = siltOrTol;
     let cVal = clay;
@@ -179,6 +106,7 @@ function validateTextureFractions(sandOrObj, siltOrTol, clay, tolerance = 2.0) {
     }
 
     if (sandOrObj && typeof sandOrObj === 'object') {
+        if (clay && typeof clay === 'object') numberFormat = clay;
         sand = sandOrObj.sand ?? sandOrObj.SAND ?? sandOrObj.Sand;
         silt = sandOrObj.silt ?? sandOrObj.SILT ?? sandOrObj.Silt;
         cVal = sandOrObj.clay ?? sandOrObj.CLAY ?? sandOrObj.Clay;
@@ -187,9 +115,9 @@ function validateTextureFractions(sandOrObj, siltOrTol, clay, tolerance = 2.0) {
         }
     }
 
-    const pSand = parseDeterminationValue(sand);
-    const pSilt = parseDeterminationValue(silt);
-    const pClay = parseDeterminationValue(cVal);
+    const pSand = parseDeterminationValue(sand, numberFormat);
+    const pSilt = parseDeterminationValue(silt, numberFormat);
+    const pClay = parseDeterminationValue(cVal, numberFormat);
 
     if (pSand.isBlank || pSilt.isBlank || pClay.isBlank) {
         return {

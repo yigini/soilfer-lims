@@ -13,6 +13,7 @@ export default defineConfig({
         __BUILD_DATE__: JSON.stringify(buildDate),
     },
     build: {
+        commonjsOptions: { include: [/node_modules/, /shared[\\/]numberParse\.js$/] },
         rollupOptions: {
             output: {
                 manualChunks: {
@@ -27,6 +28,7 @@ export default defineConfig({
         },
         chunkSizeWarningLimit: 1000
     },
+    optimizeDeps: { include: ['../shared/numberParse.js'] },
     server: {
         proxy: {
             '/api': {

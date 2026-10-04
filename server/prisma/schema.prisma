@@ -840,6 +840,7 @@ model Result {
   param         String
   value         String
   numericValue  Float?
+  rawInput      String?   // Exact original entry; historical rows remain null.
   unit          String?
   flags         String?   // JSON string: validation flags
   isValid       Boolean?
