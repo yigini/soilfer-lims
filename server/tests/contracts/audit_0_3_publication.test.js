@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -41,7 +42,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         const f = await fixture({ status: 'PROCESSING', itemStatus: 'SUBMITTED', flags: ['METHOD_NOTE'] });
         if (path === 'submission') {
             f.submission = await prisma.submission.create({ data: { id: id('SUB-03'), sampleId: f.sampleId, assignedLab: labId,
-                submittedBy: 'review-test', status: 'PENDING_REVIEW', type: 'PARTIAL', workItemCount: 1, workItemIds: JSON.stringify([f.item.id]) } });
+                submittedBy: jwt.decode(token).username, status: 'PENDING_REVIEW', type: 'PARTIAL', workItemCount: 1, workItemIds: JSON.stringify([f.item.id]) } });
             await prisma.workItem.update({ where: { id: f.item.id }, data: { submissionId: f.submission.id } });
         }
         return f;
