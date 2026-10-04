@@ -46,13 +46,15 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
         expect(history.at(-1).reason || history.at(-1).note).toBe(reason);
         expect((await prisma.submission.findUnique({ where: { id: f.submission.id } })).workItemIds).toBe(f.submission.workItemIds);
         expect((await prisma.result.findUnique({ where: { id: f.result.id } })).numericValue).toBe(6.2);
+        const beforeQueue = await request(app).get('/api/workbench/queue').query({ view: 'ready_to_submit' }).set('Authorization', `Bearer ${technician}`);
+        expect(beforeQueue.status).toBe(200);
         const saved = await post('/api/workbench/batch-save', { draft: false, entries: [{ workItemId: f.item.id, value: '6.4' }] }, technician);
         expect(saved.status).toBe(200); expect(saved.body.saved).toBe(1);
         const preview = await post('/api/workbench/v2/submissions/preview', { workItemIds: [f.item.id] }, technician);
         expect(preview.status).toBe(200); expect(preview.body.totalCompletedItems).toBe(1);
         expect(preview.body.eligibleSamples[0].items.map(item => item.workItemId)).toContain(f.item.id);
         const queue = await request(app).get('/api/workbench/queue').query({ view: 'ready_to_submit', workItemId: f.item.id }).set('Authorization', `Bearer ${technician}`);
-        expect(queue.status).toBe(200); expect(queue.body.stats.readyToSubmitCount).toBeGreaterThanOrEqual(1);
+        expect(queue.status).toBe(200); expect(queue.body.stats.readyToSubmitCount).toBe(beforeQueue.body.stats.readyToSubmitCount + 1);
         expect(queue.body.groups.flatMap(group => group.items).map(item => item.workItemId)).toContain(f.item.id);
         const old = await prisma.result.findUnique({ where: { id: f.result.id } });
         expect(old.value).toBe('6.2'); expect(old.numericValue).toBe(6.2); expect(old.isCurrent).toBe(false);
