@@ -7,12 +7,19 @@ const DERIVED_TEXTURE_FRACTIONS = ['SAND', 'SILT', 'CLAY'];
 const NON_ANALYTICAL = ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP'];
 const EXCLUDED_GATE_CODES = new Set([...NON_ANALYTICAL, 'PREP', 'SAMPLE_PREP', 'SIEVING', 'MILLING', 'HOMOGENIZATION']);
 
-function governsResult(item, result) {
+function matchesResult(item, result) {
     if (!item || !result || String(item.sampleId) !== String(result.sampleId)) return false;
-    if (['CANCELLED', 'WAIVED'].includes(item.status)) return false;
     const analysisMatches = item.analysis === result.param || (TEXTURE_ALIASES.has(item.analysis) &&
         [...DERIVED_TEXTURE_FRACTIONS, 'TEXTURE', item.analysis].includes(result.param));
     return analysisMatches && !(item.methodologyId && result.methodologyId && item.methodologyId !== result.methodologyId);
+}
+
+function matchingItems(result, items) {
+    return (items || []).filter(item => matchesResult(item, result));
+}
+
+function governsResult(item, result) {
+    return !['CANCELLED', 'WAIVED'].includes(item?.status) && matchesResult(item, result);
 }
 
 function governingItems(result, items) {
@@ -101,5 +108,5 @@ async function invalidateReturnedResults(tx, item, actor, reason) {
 }
 
 module.exports = { TEXTURE_ALIASES, DERIVED_TEXTURE_FRACTIONS, NON_ANALYTICAL, EXCLUDED_GATE_CODES,
-    governsResult, governingItems, isCurrentValidAnalyticalResult, isReviewedReportResult, invalidateReturnedResults,
+    matchesResult, matchingItems, governsResult, governingItems, isCurrentValidAnalyticalResult, isReviewedReportResult, invalidateReturnedResults,
     getReportingMode, linkedBatchIds, reportingQc };

@@ -99,9 +99,22 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         expect(res.status).toBe(409); expect(res.body.code).toBe('ACCEPTED_ITEM_WITHOUT_VALID_RESULT'); expect(res.body.workItemIds).toEqual([f.item.id]);
     });
     test.each(['WAIVED', 'CANCELLED'])('%s work neither blocks nor prints a value', async itemStatus => {
-        const f = await fixture({ itemStatus, valid: false, batchStatus: 'QC_FAIL' });
+        const f = await fixture({ itemStatus, valid: true, batchStatus: 'QC_FAIL', flags: ['METHOD_NOTE'] });
+        const before = await reviewedState(f);
+        const res = await generate(f); expect(res.status).toBe(200);
+        const { content, values } = await reportValues(f);
+        expect(values).toHaveLength(0);
+        expect(content.meta.assembly.omittedByDisposition).toEqual([{ param: 'PH_H2O', itemIds: [f.item.id] }]);
+        expect((await reviewedState(f)).result).toEqual(before.result);
+    });
+    test('a mix of waived and accepted matches prints once and preserves the stored row', async () => {
+        const f = await fixture();
+        await prisma.workItem.create({ data: { id: id('WI-OMIT-03'), sampleId: f.sampleId, analysis: f.item.analysis, status: 'WAIVED' } });
+        const before = await reviewedState(f);
         expect((await generate(f)).status).toBe(200);
-        expect((await reportValues(f)).values).toHaveLength(0);
+        const { content, values } = await reportValues(f);
+        expect(values).toHaveLength(1); expect(content.meta.assembly.omittedByDisposition).toEqual([]);
+        expect((await reviewedState(f)).result).toEqual(before.result);
     });
     test('composite texture governs sand, silt, clay and texture without duplicating values', async () => {
         const f = await fixture({ param: 'TEXTURE' });

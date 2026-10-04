@@ -7,7 +7,7 @@
  */
 'use strict';
 
-const { TEXTURE_ALIASES, DERIVED_TEXTURE_FRACTIONS, NON_ANALYTICAL, governingItems,
+const { TEXTURE_ALIASES, DERIVED_TEXTURE_FRACTIONS, NON_ANALYTICAL, matchingItems,
     governsResult, isCurrentValidAnalyticalResult, getReportingMode, reportingQc } = require('./reportResultGovernance');
 
 const GATE_ANALYSES = ['DRYING', 'PREPARATION'];
@@ -351,7 +351,7 @@ function canPublish(sample, report, user, options = {}) {
 
     const validResults = (options.results || sample.results || []).filter(result =>
         isCurrentValidAnalyticalResult(result, getReportingMode(sample, result, options)));
-    const ungoverned = validResults.filter(result => governingItems(result, workItems).length === 0);
+    const ungoverned = validResults.filter(result => matchingItems(result, workItems).length === 0);
     if (ungoverned.length) {
         return { allowed: false, code: 'RESULT_UNGOVERNED', reason: 'Current results lack a governing work item.',
             params: [...new Set(ungoverned.map(result => result.param))] };

@@ -4,7 +4,8 @@
  */
 const prisma = require('../prisma');
 const { normalizeUnit, interpretParameter, evaluateSoilProfile } = require('./interpretationService');
-const { isReviewedReportResult, getReportingMode, reportingQc, linkedBatchIds } = require('./reportResultGovernance');
+const { isReviewedReportResult, isCurrentValidAnalyticalResult, matchingItems, governingItems,
+    getReportingMode, reportingQc, linkedBatchIds } = require('./reportResultGovernance');
 const policyService = require('./policyService');
 
 /**
@@ -40,6 +41,10 @@ async function assembleReport(sampleId, user, options = {}) {
     const reportOptions = { qcModes, qcBatches };
     const reportableResults = sample.results.filter(result =>
         isReviewedReportResult(result, sample.workItems, getReportingMode(sample, result, reportOptions)));
+    const omittedByDisposition = sample.results.filter(result =>
+        isCurrentValidAnalyticalResult(result, getReportingMode(sample, result, reportOptions)) &&
+        matchingItems(result, sample.workItems).length > 0 && governingItems(result, sample.workItems).length === 0)
+        .map(result => ({ param: result.param, itemIds: matchingItems(result, sample.workItems).map(item => item.id) }));
 
     // 2. Fetch lab info
     let lab = null;
@@ -260,7 +265,8 @@ async function assembleReport(sampleId, user, options = {}) {
             template: 'STANDARD_AGRONOMIC',
             locale: reportLocale,
             terminologyVersion: '1.0',
-            frozenAt: new Date().toISOString()
+            frozenAt: new Date().toISOString(),
+            assembly: { omittedByDisposition }
         },
         // Sample Details
         sample: {
