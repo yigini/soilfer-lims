@@ -203,8 +203,8 @@ async function reconcileWorkItems(tx, sample, targetAnalyses, user, reason) {
         codesToAdd.sort((a, b) => (orderMap[a] ?? 100) - (orderMap[b] ?? 100));
 
         for (const analysisCode of codesToAdd) {
-            const name = await getAnalysisName(analysisCode);
-            const category = await getAnalysisCategory(analysisCode);
+            const name = await getAnalysisName(analysisCode, tx);
+            const category = await getAnalysisCategory(analysisCode, tx);
             const wiId = crypto.randomUUID();
             const history = [{
                 status: workflow.WORK_ITEM_STATES.NOT_ASSIGNED,

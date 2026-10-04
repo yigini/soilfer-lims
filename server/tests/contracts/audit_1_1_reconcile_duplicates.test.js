@@ -86,4 +86,14 @@ describe('Audit 1.1: duplicate references and atomic analysis reconciliation', (
             .rejects.toThrow('Injected reconciliation audit failure');
         expect(await snapshot(sample.id)).toEqual(before);
     });
+    test('cold catalogue lookups during additions stay inside the reconciliation transaction', async () => {
+        const sample = await fixture();
+        await prisma.workItem.delete({ where: { id: `${sample.id}-CEC` } });
+        require('../../services/analysisService').invalidateCache();
+        jest.spyOn(prisma.analysis, 'findMany').mockImplementation(() => { throw new Error('Catalogue read escaped the transaction'); });
+        const outcome = await controller.reconcileWorkItemsForSample(sample, ['PH_H2O', 'SOC', 'CEC'], { username: 'manager' }, 'Add requested analysis');
+        expect(outcome).toMatchObject({ conflict: false, added: ['CEC'] });
+        expect(await prisma.workItem.findUnique({ where: { id: `${sample.id}-CEC` } })).toBeNull();
+        expect(await prisma.workItem.count({ where: { sampleId: sample.id, analysis: 'CEC' } })).toBe(1);
+    });
 });

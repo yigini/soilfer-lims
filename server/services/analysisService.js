@@ -17,15 +17,15 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
  * Load all analyses from DB with caching.
  * Returns array of { code, name, unit, categoryId, validation }
  */
-const loadAnalyses = async () => {
+const loadAnalyses = async (db = prisma) => {
     const now = Date.now();
-    if (cache && cacheTime && (now - cacheTime) < CACHE_TTL) {
+    if (db === prisma && cache && cacheTime && (now - cacheTime) < CACHE_TTL) {
         return cache;
     }
-    const analyses = await prisma.analysis.findMany({
+    const analyses = await db.analysis.findMany({
         include: { category: { select: { name: true } } }
     });
-    cache = analyses.map(a => ({
+    const mapped = analyses.map(a => ({
         code: a.code,
         name: a.name,
         unit: a.units,
@@ -35,8 +35,9 @@ const loadAnalyses = async () => {
         executionOrder: a.executionOrder,
         validation: parseJson(a.validation)
     }));
-    cacheTime = now;
-    return cache;
+    // Transaction reads use their own snapshot and never seed the global cache.
+    if (db === prisma) { cache = mapped; cacheTime = now; }
+    return mapped;
 };
 
 const FALLBACK_ANALYSIS_NAMES = require('../data/analysisDisplayNames.json');
@@ -45,9 +46,9 @@ const FALLBACK_ANALYSIS_NAMES = require('../data/analysisDisplayNames.json');
  * Resolve analysis code to display name.
  * Returns a current catalogue name, a curated legacy label or an explicit missing-definition label.
  */
-const getAnalysisName = async (code) => {
+const getAnalysisName = async (code, db = prisma) => {
     if (!code) return '—';
-    const analyses = await loadAnalyses();
+    const analyses = await loadAnalyses(db);
     const match = analyses.find(a => a.code === code);
     if (match?.name && match.name !== code && match.name !== `${code} Determination` && !/^https?:/i.test(match.name)) return match.name;
     return FALLBACK_ANALYSIS_NAMES[code] || 'Unconfigured parameter';
@@ -57,8 +58,8 @@ const getAnalysisName = async (code) => {
  * Get the category name for a given analysis code.
  * Used by workItemController to dynamically assign work item categories.
  */
-const getAnalysisCategory = async (code) => {
-    const analyses = await loadAnalyses();
+const getAnalysisCategory = async (code, db = prisma) => {
+    const analyses = await loadAnalyses(db);
     const match = analyses.find(a => a.code === code);
     return match?.categoryName || 'Analysis';
 };
