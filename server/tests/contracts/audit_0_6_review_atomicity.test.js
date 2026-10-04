@@ -117,6 +117,39 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         expect(await snapshot(f)).toEqual(before);
         expect(await prisma.submission.findUnique({ where: { id: f.submission.id } })).toEqual(packageBefore);
     });
+    test.each(['bulk', 'submission'])('concurrent %s review has one successful row and exactly one decision', async route => {
+        const f = await packageFixture(['SUBMITTED']);
+        const body = route === 'bulk' ? { workItemIds: [f.item.id], status: 'ACCEPTED' }
+            : { decisions: [{ workItemId: f.item.id, decision: 'ACCEPT' }] };
+        const path = route === 'bulk' ? '/api/work/review/bulk' : `/api/submissions/${f.submission.id}/review`;
+        const responses = await Promise.all([1, 2].map(() => post(path, body)));
+        expect(responses.map(res => res.status).sort()).toEqual([200, 409]);
+        expect(responses.find(res => res.status === 409).body.errors).toEqual([{ workItemId: f.item.id, code: 'ITEM_NOT_SUBMITTED' }]);
+        expect(await prisma.reviewDecision.count({ where: { workItemId: f.item.id } })).toBe(1);
+        expect(await prisma.auditLog.count({ where: { entityId: f.item.id } })).toBe(1);
+        expect(await prisma.auditLog.count({ where: { entityId: f.submission.id, action: 'SUBMISSION_REVIEWED' } })).toBe(1);
+    });
+    test('partial submission summary uses committed state and RETURN keeps the scientific value', async () => {
+        const f = await packageFixture(['SUBMITTED', 'SUBMITTED', 'ACCEPTED']);
+        const accepted = await prisma.workItem.findUnique({ where: { id: f.items[2].id } });
+        const response = await post(`/api/submissions/${f.submission.id}/review`, { decisions: [
+            { workItemId: f.item.id, decision: 'REJECT_REANALYSIS', reason: 'Repeat required' },
+            { workItemId: f.items[2].id, decision: 'WAIVE', reason: 'Already decided' }
+        ] });
+        expect(response.status).toBe(200); expect(response.body.results).toHaveLength(1); expect(response.body.errors).toHaveLength(1);
+        expect((await prisma.submission.findUnique({ where: { id: f.submission.id } })).status).toBe('PARTIALLY_REVIEWED');
+        expect(await prisma.workItem.findUnique({ where: { id: f.items[2].id } })).toEqual(accepted);
+        const result = await prisma.result.findUnique({ where: { id: f.result.id } });
+        expect(result.numericValue).toBe(6.2); expect(result.value).toBe('6.2');
+        expect(JSON.parse(result.flags)).toEqual(expect.arrayContaining([expect.objectContaining({ type: 'REVIEW_RETURNED' })]));
+    });
+    test('a submitted closure WAIVE follows the shared contract and leaves sample custody unchanged', async () => {
+        const f = await fixture({ analysis: 'ARCH', sampleStatus: 'APPROVED' });
+        const sample = await prisma.sample.findUnique({ where: { id: f.sampleId } });
+        const response = await post(`/api/work/${f.item.id}/review`, { status: 'WAIVED', reason: 'Custody closure cancelled' });
+        expect(response.status).toBe(200); expect(response.body.item.status).toBe('WAIVED');
+        expect(await prisma.sample.findUnique({ where: { id: f.sampleId } })).toEqual(sample);
+    });
     test.each([
         [{ decision: 'INVALID' }, 'INVALID_REVIEW_DECISION'],
         [{ decision: 'WAIVE' }, 'REVIEW_REASON_REQUIRED'],
