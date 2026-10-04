@@ -329,6 +329,7 @@ exports.reviewSubmission = async (req, res) => {
             return res.status(400).json({ error: `Cannot review submission in '${submission.status}' status` });
         }
 
+        const isShorthand = (!Array.isArray(decisions) || decisions.length === 0) && Boolean(req.body.status || req.body.decision);
         let normalizedDecisions = decisions;
         if (!Array.isArray(normalizedDecisions) || normalizedDecisions.length === 0) {
             if (req.body.status || req.body.decision) {
@@ -369,8 +370,21 @@ exports.reviewSubmission = async (req, res) => {
             return res.status(403).json({ error: 'Security Violation: Attempted to review items not belonging to this submission.' });
         }
 
+        const dbItems = await prisma.workItem.findMany({
+            where: { id: { in: normalizedDecisions.map(d => d.workItemId) } }
+        });
+        const currentMemberIds = new Set(dbItems.filter(item => item.submissionId === submission.id).map(item => item.id));
+        const movedDecisions = normalizedDecisions.filter(decision => !currentMemberIds.has(decision.workItemId));
+        if (!isShorthand && movedDecisions.length) {
+            return res.status(409).json({
+                error: 'Work item is no longer a member of this submission.', code: 'ITEM_NOT_IN_SUBMISSION',
+                workItemIds: movedDecisions.map(decision => decision.workItemId)
+            });
+        }
+        if (isShorthand) normalizedDecisions = normalizedDecisions.filter(decision => currentMemberIds.has(decision.workItemId));
+
         const batchFailures = [];
-        for (const wiId of workItemIds) {
+        for (const wiId of normalizedDecisions.map(decision => decision.workItemId)) {
             const batchInfo = await qcController.checkItemBatchStatus(wiId);
             if (batchInfo.allowed === false) {
                 batchFailures.push({ workItemId: wiId, batchId: batchInfo.batchId });
@@ -391,10 +405,6 @@ exports.reviewSubmission = async (req, res) => {
         const now = new Date();
         const results = [];
         const operations = [];
-
-        const dbItems = await prisma.workItem.findMany({
-            where: { id: { in: normalizedDecisions.map(d => d.workItemId) } }
-        });
 
         for (const decision of normalizedDecisions) {
             const { workItemId, decision: verdict, reason } = decision;
@@ -445,10 +455,14 @@ exports.reviewSubmission = async (req, res) => {
                 updates.waiveReason = reason;
             }
 
-            operations.push(tx => tx.workItem.update({
-                where: { id: workItemId },
-                data: updates
-            }));
+            operations.push(async tx => {
+                const changed = await tx.workItem.updateMany({
+                    where: { id: workItemId, submissionId: submission.id }, data: updates
+                });
+                if (changed.count !== 1) throw Object.assign(new Error('Work item moved to another submission.'), {
+                    statusCode: 409, code: 'ITEM_NOT_IN_SUBMISSION'
+                });
+            });
 
             const analysisName = await getAnalysisName(item.analysis);
             operations.push(tx => tx.auditLog.create({
@@ -487,11 +501,12 @@ exports.reviewSubmission = async (req, res) => {
         const allSubmissionItemIds = workItemIds;
         const allDbSubmissionItems = await prisma.workItem.findMany({
             where: { id: { in: allSubmissionItemIds } },
-            select: { id: true, status: true }
+            select: { id: true, status: true, submissionId: true }
         });
         const decidedMap = new Map();
         results.forEach(r => decidedMap.set(r.workItemId, r.status));
         const hasUndecided = allDbSubmissionItems.some(item => {
+            if (item.submissionId !== submission.id) return false;
             const currentStatus = decidedMap.has(item.id) ? decidedMap.get(item.id) : item.status;
             return currentStatus === 'SUBMITTED' || currentStatus === 'PENDING';
         });
@@ -503,7 +518,7 @@ exports.reviewSubmission = async (req, res) => {
                 status: finalSubmissionStatus,
                 reviewedBy: user.username,
                 reviewedAt: now,
-                reviewNote: decisions.map(d => `${d.workItemId}: ${d.decision}`).join(' | ')
+                reviewNote: normalizedDecisions.map(d => `${d.workItemId}: ${d.decision}`).join(' | ')
             }
         }));
 

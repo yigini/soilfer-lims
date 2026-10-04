@@ -82,4 +82,52 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
         expect((await post('/api/workbench/batch-save', { draft: false, entries: [{ workItemId: f.item.id, value: '6.5' }] }, technician)).body.saved).toBe(1);
         expect((await post('/api/workbench/v2/submissions/preview', { workItemIds: [f.item.id] }, technician)).body.totalCompletedItems).toBe(1);
     });
+    test.each(['individual', 'bulk'])('%s RETURN and real S2 resubmission cannot be reviewed through S1', async route => {
+        const f = await fixture();
+        const remaining = await prisma.workItem.create({ data: { id: id('WI-07-REMAINING'), sampleId: f.sampleId,
+            analysis: `${f.analysis}-OTHER`, status: 'SUBMITTED', result: '5.4', assignedLab: labId,
+            assignedTo: username, submissionId: f.submission.id } });
+        await prisma.submission.update({ where: { id: f.submission.id }, data: {
+            workItemIds: JSON.stringify([f.item.id, remaining.id]), workItemCount: 2
+        } });
+        expect((await returned(route, f)).status).toBe(200);
+        expect((await post('/api/workbench/batch-save', { draft: false, entries: [{ workItemId: f.item.id, value: '6.4' }] }, technician)).body.saved).toBe(1);
+        const submitted = await post('/api/workbench/v2/submissions/commit', { sampleIds: [f.sampleId], workItemIds: [f.item.id] }, technician);
+        expect(submitted.status).toBe(200);
+        const newSubmissionId = submitted.body.receipt.submissions[0].submissionId;
+        const before = await prisma.workItem.findUnique({ where: { id: f.item.id } });
+        expect(before).toMatchObject({ status: 'SUBMITTED', submissionId: newSubmissionId });
+        const decisionsBefore = await prisma.reviewDecision.count(), auditsBefore = await prisma.auditLog.count();
+        const itemDecisionsBefore = await prisma.reviewDecision.findMany({ where: { workItemId: f.item.id } });
+        const itemAuditsBefore = await prisma.auditLog.findMany({ where: { entityId: f.item.id } });
+        const oldPackage = await prisma.submission.findUnique({ where: { id: f.submission.id } });
+        for (const decision of ['ACCEPT', 'REJECT_REANALYSIS', 'WAIVE']) {
+            const refused = await post(`/api/submissions/${f.submission.id}/review`, {
+                decisions: [{ workItemId: f.item.id, decision, reason }]
+            });
+            expect(refused.status).toBe(409); expect(refused.body.code).toBe('ITEM_NOT_IN_SUBMISSION');
+            expect(await prisma.workItem.findUnique({ where: { id: f.item.id } })).toEqual(before);
+            expect(await prisma.reviewDecision.count()).toBe(decisionsBefore);
+            expect(await prisma.auditLog.count()).toBe(auditsBefore);
+            expect(await prisma.submission.findUnique({ where: { id: f.submission.id } })).toEqual(oldPackage);
+        }
+        const foreign = await post(`/api/submissions/${f.submission.id}/review`, {
+            decisions: [{ workItemId: id('NEVER-IN-S1'), decision: 'ACCEPT' }]
+        });
+        expect(foreign.status).toBe(403); expect(await prisma.auditLog.count()).toBe(auditsBefore);
+        const shorthand = await post(`/api/submissions/${f.submission.id}/review`, { status: 'ACCEPTED' });
+        expect(shorthand.status).toBe(200);
+        expect(shorthand.body.results).toEqual([{ workItemId: remaining.id, status: 'ACCEPTED', decision: 'ACCEPT' }]);
+        expect(await prisma.workItem.findUnique({ where: { id: f.item.id } })).toEqual(before);
+        expect(await prisma.reviewDecision.findMany({ where: { workItemId: f.item.id } })).toEqual(itemDecisionsBefore);
+        expect(await prisma.auditLog.findMany({ where: { entityId: f.item.id } })).toEqual(itemAuditsBefore);
+        expect((await prisma.submission.findUnique({ where: { id: f.submission.id } })).status).toBe('REVIEWED');
+        const currentReview = await post(`/api/submissions/${newSubmissionId}/review`, {
+            decisions: [{ workItemId: f.item.id, decision: 'ACCEPT' }]
+        });
+        expect(currentReview.status).toBe(200);
+        expect((await prisma.workItem.findUnique({ where: { id: f.item.id } })).status).toBe('ACCEPTED');
+        expect(await prisma.reviewDecision.findFirst({ where: { workItemId: f.item.id, decision: 'ACCEPT' } })).toMatchObject({ submissionItemId: newSubmissionId });
+        expect((await prisma.result.findUnique({ where: { id: f.result.id } })).value).toBe('6.2');
+    });
 });
