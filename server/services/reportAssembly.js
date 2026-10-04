@@ -34,7 +34,7 @@ async function assembleReport(sampleId, user, options = {}) {
     const qcModes = options.qcModes || {};
     for (const result of sample.results) {
         if (!(result.id in qcModes)) qcModes[result.id] = await policyService.get(sample.assignedLab || sample.labId, 'qc.mode', {
-            analysisCode: result.param, methodologyId: result.methodologyId || null
+            analysisCode: result.param, methodologyId: result.methodologyId || null, db
         });
     }
     const batchIds = [...new Set(sample.results.flatMap(result => linkedBatchIds(result, sample.workItems)))];

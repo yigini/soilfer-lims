@@ -84,7 +84,10 @@ function snapshotFromState(current, context = {}) {
         values: Object.fromEntries(Object.entries(resolved).map(([key, row]) => [key, row.value])), resolved };
 }
 async function resolve(reference, key, context = {}) { return resolvedFromState(await state(reference, context), key, context); }
-async function get(reference, key, context = {}) { return (await resolve(reference, key, context)).value; }
+async function get(reference, key, context = {}) {
+    definition(key);
+    return context.snapshot ? clone(context.snapshot.values[key]) : (await resolve(reference, key, context)).value;
+}
 async function snapshot(reference, context = {}) { return snapshotFromState(await state(reference, context), context); }
 
 function validatePairs(values, status = 400, code = 'POLICY_VALUE_INVALID') {

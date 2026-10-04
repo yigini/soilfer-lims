@@ -711,4 +711,8 @@ router.patch('/:labId/appearance', checkPermission('MANAGE_LAB_APPEARANCE'), asy
     }
 });
 
+const labPolicyController = require('../controllers/labPolicyController');
+router.get('/:id/policies', checkPermission('VIEW_LAB_POLICIES'), labPolicyController.getPolicies);
+router.patch('/:id/policies', checkPermission('MANAGE_LAB_POLICIES'), labPolicyController.updatePolicies);
+
 module.exports = router;
