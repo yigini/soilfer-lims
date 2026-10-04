@@ -3,7 +3,7 @@ const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
 const policy = require('../../services/policyService');
-const { getAuthToken } = require('../setup');
+const { getAuthToken, ensureTestLab } = require('../setup');
 const { selectReportedValue } = require('../../services/reportedValueService');
 // Keep random, unique identifiers while excluding the numeric sentinel values
 // used below to detect leaked analytical data in the entire response payload.
@@ -13,7 +13,7 @@ const scalar = cell => cell && typeof cell === 'object' ? cell.value : cell;
 
 describe('Audit 0.10: current results in exports and working grid', () => {
     let token;
-    beforeAll(async () => { token = await getAuthToken('LAB_MANAGER', labId); });
+    beforeAll(async () => { await ensureTestLab(labId, 'GTM'); token = await getAuthToken('LAB_MANAGER', labId); });
     afterEach(() => jest.restoreAllMocks());
     test('fixture metadata cannot contain excluded analytical-value sentinels', () => {
         jest.spyOn(crypto, 'randomUUID').mockReturnValue('77778888-9999-4777-8888-999977778888');

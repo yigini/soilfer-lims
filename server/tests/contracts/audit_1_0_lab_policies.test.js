@@ -129,6 +129,58 @@ describe('Audit 1.0: persistent lab policies', () => {
         const row = await prisma.labPolicyOverride.findFirst({ where: { labId } });
         expect(row.reason).toBe('migrated from Lab.settings');
     });
+    test('audit write failure rolls back version, revocation and replacement together', async () => {
+        await edit([{ key: 'qc.duplicateMaxRpd', value: 12 }]);
+        const previous = await prisma.labPolicyOverride.findFirst({ where: { labId } });
+        const originalTransaction = prisma.$transaction.bind(prisma);
+        const fail = jest.spyOn(prisma, '$transaction').mockImplementationOnce(fn => originalTransaction(tx => fn({ ...tx,
+            auditLog: { ...tx.auditLog, create: async () => { throw new Error('Simulated audit storage failure'); } } })));
+        try { await expect(edit([{ key: 'qc.duplicateMaxRpd', value: 13 }])).rejects.toThrow('Simulated audit storage failure'); }
+        finally { fail.mockRestore(); }
+        expect((await policy.snapshot(labId)).version).toBe(1);
+        expect(await prisma.labPolicyOverride.findUnique({ where: { id: previous.id } })).toEqual(previous);
+        expect(await prisma.labPolicyOverride.count({ where: { labId } })).toBe(1);
+        expect(await prisma.auditLog.count({ where: { labId } })).toBe(1);
+    });
+    test('QC evaluates persisted lab and method limits and leaves old evaluations unchanged on a policy edit', async () => {
+        const batch = await prisma.batch.create({ data: { id: id('POL-BATCH'), labId, analysis: analysisCode, profile: 'RACK_40', status: 'OPEN', createdBy: 'fixture' } });
+        const sampleId = id('POL-SAMPLE');
+        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, assignedLab: labId, status: 'PROCESSING' } });
+        await prisma.workItem.create({ data: { id: id('POL-WORK'), sampleId, assignedLab: labId, analysis: analysisCode, methodologyId, batchId: batch.id, status: 'COMPLETED' } });
+        await edit([{ key: 'qc.blankMaxAllowed', value: .2 }, { key: 'qc.controlMinRecovery', value: 80 },
+            { key: 'qc.controlMaxRecovery', value: 120 }, { key: 'qc.duplicateMaxRpd', value: 30, analysisCode, methodologyId }]);
+        const response = await request(app).post(`/api/qc/batches/${batch.id}/evaluate`).set('Authorization', `Bearer ${technician}`)
+            .send({ blanks: [{ value: '0.1' }], controls: [{ expected: '100', measured: '85' }], duplicates: [{ value1: '100', value2: '120' }] });
+        expect({ status: response.status, body: response.body }).toMatchObject({ status: 200 });
+        const evaluated = await prisma.batch.findUnique({ where: { id: batch.id } });
+        expect(JSON.parse(evaluated.qcResults)).toMatchObject({ overallStatus: 'QC_PASS', policyVersion: 1,
+            policyValues: { 'qc.blankMaxAllowed': .2, 'qc.controlMinRecovery': 80, 'qc.controlMaxRecovery': 120, 'qc.duplicateMaxRpd': 30 } });
+        const typed = await prisma.batchQcResult.findMany({ where: { batchId: batch.id }, orderBy: { id: 'asc' } });
+        await edit([{ key: 'qc.blankMaxAllowed', value: .01 }]);
+        expect(await prisma.batch.findUnique({ where: { id: batch.id } })).toEqual(evaluated);
+        expect(await prisma.batchQcResult.findMany({ where: { batchId: batch.id }, orderBy: { id: 'asc' } })).toEqual(typed);
+    });
+    test('batch creation uses the lab tray layout and keeps analytical batch size separate', async () => {
+        const profiles = { CUSTOM: { name: 'Small tray', capacity: 7, qcSlots: [{ position: 2, type: 'BLANK', label: 'Blank' }] } };
+        await edit([{ key: 'qc.runProfiles', value: profiles }, { key: 'qc.maxBatchSize', value: 1 }]);
+        const response = await request(app).post('/api/qc/batches').set('Authorization', `Bearer ${technician}`)
+            .send({ analysis: analysisCode, profile: 'CUSTOM' });
+        expect(response.status).toBe(201);
+        expect(response.body).toMatchObject({ profile: 'CUSTOM', maxCapacity: 7 });
+    });
+    test('report generation freezes the lab policy version and content across later changes', async () => {
+        const sampleId = id('POL-REPORT');
+        await edit([], { presetCode: 'ADVISORY' });
+        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status: 'APPROVED' } });
+        await prisma.workItem.create({ data: { id: id('POL-REPORT-WI'), sampleId, assignedLab: labId, analysis: 'PH_H2O', status: 'ACCEPTED', result: '7.2' } });
+        await prisma.result.create({ data: { id: id('POL-REPORT-RES'), sampleId, param: 'PH_H2O', value: '7.2', numericValue: 7.2, isValid: true, isCurrent: true } });
+        const response = await request(app).post(`/api/reports/generate/${sampleId}`).set('Authorization', `Bearer ${manager}`).send({});
+        expect({ status: response.status, body: response.body }).toMatchObject({ status: 200 });
+        const report = await prisma.report.findFirst({ where: { sampleId } });
+        expect(report.policyVersion).toBe(1); expect(JSON.parse(report.content).policy).toMatchObject({ version: 1, presetCode: 'ADVISORY' });
+        await edit([], { presetCode: 'BASIC' });
+        expect(await prisma.report.findUnique({ where: { id: report.id } })).toEqual(report);
+    });
 });
 
 describe('Audit 1.0: registry and pure evaluator defaults', () => {
