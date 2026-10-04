@@ -74,7 +74,8 @@ const ExportModal = ({ isOpen, onClose, currentFilters, searchQuery }) => {
 
         const header = columns.map(escape).join(',');
         const rows = data.map(row => columns.map(col => escape(row[col])).join(','));
-        const csvContent = [header, ...rows].join('\n');
+        const notes = (meta.headerNotes || []).map(note => `# ${escape(note)}`);
+        const csvContent = [...notes, header, ...rows].join('\n');
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);

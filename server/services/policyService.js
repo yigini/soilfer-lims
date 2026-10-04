@@ -2,7 +2,8 @@
 // this with persisted per-lab and per-method policy resolution.
 const STRICT_PRESET_DEFAULTS = Object.freeze({
     'qc.mode': 'REQUIRED_BLOCKING',
-    'report.numberFormat': 'RPT-{LAB}-{YYYY}-{SEQ:5}'
+    'report.numberFormat': 'RPT-{LAB}-{YYYY}-{SEQ:5}',
+    'results.reportedValueRule': 'MEAN_IF_WITHIN_R'
 });
 
 function get(labId, key, context = {}) {
