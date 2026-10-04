@@ -1,3 +1,6 @@
+const { assertReviewable, commitReview, reconcileSubmission } = require('../services/reviewCommitService');
+const { hasPermission } = require('../config/roles');
+const scopeGuard = require('../utils/scopeGuard');
 const { invalidateReturnedResults } = require('../services/reportResultGovernance');
 const prisma = require('../prisma');
 const workflow = require('../workflowContract');
@@ -313,14 +316,14 @@ exports.reviewSubmission = async (req, res) => {
     const user = req.user;
 
     try {
-        if (!['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+        if (!hasPermission(user, 'APPROVE_RESULTS')) {
             return res.status(403).json({ error: 'Only managers can review' });
         }
 
         const submission = await prisma.submission.findUnique({ where: { id } });
         if (!submission) return res.status(404).json({ error: 'Submission not found' });
 
-        if (user.role === 'LAB_MANAGER' && submission.assignedLab !== user.labId) {
+        if (!scopeGuard.canAccessEntity(user, submission, { labField: 'assignedLab', altLabField: 'labId' })) {
             return res.status(403).json({ error: 'Submission outside your lab' });
         }
 
@@ -329,36 +332,35 @@ exports.reviewSubmission = async (req, res) => {
             return res.status(400).json({ error: `Cannot review submission in '${submission.status}' status` });
         }
 
-        let normalizedDecisions = decisions;
-        if (!Array.isArray(normalizedDecisions) || normalizedDecisions.length === 0) {
-            if (req.body.status || req.body.decision) {
-                const rawVerdict = req.body.decision || req.body.status;
-                const verdict = ['ACCEPTED', 'ACCEPT'].includes(rawVerdict) ? 'ACCEPT' :
-                    (['REJECT_REANALYSIS', 'REJECT', 'REANALYSIS_REQUIRED'].includes(rawVerdict) ? 'REJECT_REANALYSIS' : 'WAIVE');
-                const reason = req.body.note || req.body.reason || (verdict === 'ACCEPT' ? 'Submission approved' : 'Review rejection');
-                const subItemIds = typeof submission.workItemIds === 'string' ? JSON.parse(submission.workItemIds) : (submission.workItemIds || []);
-                normalizedDecisions = subItemIds.map(wiId => ({ workItemId: wiId, decision: verdict, reason }));
+        const workItemIds = typeof submission.workItemIds === 'string' ? JSON.parse(submission.workItemIds) : (submission.workItemIds || []);
+        const isShorthand = (!Array.isArray(decisions) || !decisions.length) && Boolean(req.body.status || req.body.decision);
+        let normalizedDecisions = isShorthand
+            ? workItemIds.map(workItemId => ({ workItemId, decision: req.body.decision || req.body.status, reason: req.body.reason || req.body.note }))
+            : decisions;
+        if (!Array.isArray(normalizedDecisions) || !normalizedDecisions.length) {
+            return res.status(400).json({ error: 'decisions array required', code: 'INVALID_REVIEW_DECISION' });
+        }
+        const aliases = { ACCEPTED: 'ACCEPT', REJECT: 'REJECT_REANALYSIS', RETURN: 'REJECT_REANALYSIS', REANALYSIS_REQUIRED: 'REJECT_REANALYSIS', WAIVED: 'WAIVE' };
+        const validated = [];
+        for (const decision of normalizedDecisions) {
+            if (!decision || typeof decision !== 'object' || Array.isArray(decision) || typeof decision.workItemId !== 'string') {
+                return res.status(400).json({ error: 'Invalid review decision.', code: 'INVALID_REVIEW_DECISION' });
             }
+            const raw = decision.decision || decision.verdict || decision.status;
+            const verdict = aliases[raw] || raw;
+            if (!['ACCEPT', 'REJECT_REANALYSIS', 'WAIVE'].includes(verdict)) {
+                return res.status(400).json({ error: 'Invalid review decision.', code: 'INVALID_REVIEW_DECISION' });
+            }
+            if ((decision.reason != null && typeof decision.reason !== 'string') || (decision.note != null && typeof decision.note !== 'string')) {
+                return res.status(400).json({ error: 'Review reason must be text.', code: 'INVALID_REVIEW_REASON' });
+            }
+            const reason = (decision.reason || decision.note || '').trim();
+            if (verdict !== 'ACCEPT' && !reason) return res.status(400).json({ error: 'RETURN and WAIVE require a reason.', code: 'REVIEW_REASON_REQUIRED' });
+            validated.push({ workItemId: decision.workItemId, decision: verdict, reason: reason || 'Item accepted' });
         }
-
-        if (!normalizedDecisions || !Array.isArray(normalizedDecisions) || normalizedDecisions.length === 0) {
-            return res.status(400).json({ error: 'decisions array required' });
-        }
-
-        // Normalize each item's decision attribute if 'status' or 'verdict' was provided
-        normalizedDecisions = normalizedDecisions.map(d => {
-            let verdict = d.decision || d.verdict || d.status;
-            if (verdict === 'ACCEPTED') verdict = 'ACCEPT';
-            if (verdict === 'REJECT') verdict = 'REJECT_REANALYSIS';
-            return {
-                ...d,
-                decision: verdict,
-                reason: d.reason || d.note || (verdict === 'ACCEPT' ? 'Item accepted' : 'Reviewer note')
-            };
-        });
+        normalizedDecisions = validated;
 
         const qcController = require('./qcController');
-        const workItemIds = typeof submission.workItemIds === 'string' ? JSON.parse(submission.workItemIds) : (submission.workItemIds || []);
 
         // SECURITY: Trojan Horse Prevention
         // Verify that all decided items actually belong to this submission
@@ -369,8 +371,31 @@ exports.reviewSubmission = async (req, res) => {
             return res.status(403).json({ error: 'Security Violation: Attempted to review items not belonging to this submission.' });
         }
 
+        const dbItems = await prisma.workItem.findMany({ where: { id: { in: workItemIds } }, include: { sample: true } });
+        if (dbItems.some(item => !scopeGuard.canAccessEntity(user, item.sample || item, { labField: 'labId', altLabField: 'assignedLab' }))) {
+            return res.status(403).json({ error: 'Work item outside your lab scope.', code: 'ACCESS_DENIED_LAB' });
+        }
+        const currentMemberIds = new Set(dbItems.filter(item => item.submissionId === id).map(item => item.id));
+        if (isShorthand) normalizedDecisions = normalizedDecisions.filter(decision => currentMemberIds.has(decision.workItemId));
+        if (isShorthand && !normalizedDecisions.length) {
+            await prisma.$transaction(async tx => {
+                const currentItems = await tx.workItem.findMany({ where: { id: { in: workItemIds } } });
+                if (currentItems.some(item => item.submissionId === id)) throw Object.assign(new Error('Submission membership changed. Please refresh.'), { statusCode: 409, code: 'ITEM_NOT_IN_SUBMISSION' });
+                const currentSubmission = await tx.submission.findUnique({ where: { id } });
+                if (currentSubmission.status !== 'REVIEWED') {
+                    const now = new Date();
+                    await tx.submission.update({ where: { id }, data: { status: 'REVIEWED', reviewedBy: user.username, reviewedAt: now } });
+                    const movedCount = currentItems.filter(item => item.submissionId && item.submissionId !== id).length;
+                    await tx.auditLog.create({ data: { id: 'audit-sub-moved-' + id + '-' + Date.now(), entity: 'SUBMISSION', entityId: id,
+                        action: 'SUBMISSION_REVIEWED', performedBy: user.username, timestamp: now, sampleId: String(submission.sampleId),
+                        details: '0 items reviewed; ' + movedCount + ' moved to later submissions' } });
+                }
+            });
+            return res.json({ success: true, results: [], errors: [] });
+        }
+
         const batchFailures = [];
-        for (const wiId of workItemIds) {
+        for (const wiId of normalizedDecisions.filter(decision => decision.decision === 'ACCEPT' && currentMemberIds.has(decision.workItemId)).map(decision => decision.workItemId)) {
             const batchInfo = await qcController.checkItemBatchStatus(wiId);
             if (batchInfo.allowed === false) {
                 batchFailures.push({ workItemId: wiId, batchId: batchInfo.batchId });
@@ -390,11 +415,7 @@ exports.reviewSubmission = async (req, res) => {
 
         const now = new Date();
         const results = [];
-        const operations = [];
-
-        const dbItems = await prisma.workItem.findMany({
-            where: { id: { in: normalizedDecisions.map(d => d.workItemId) } }
-        });
+        const errors = [];
 
         for (const decision of normalizedDecisions) {
             const { workItemId, decision: verdict, reason } = decision;
@@ -408,7 +429,11 @@ exports.reviewSubmission = async (req, res) => {
             }
 
             const item = dbItems.find(i => i.id === workItemId);
-            if (!item) continue;
+            if (!item || item.submissionId !== id) {
+                errors.push({ workItemId, code: 'ITEM_NOT_IN_SUBMISSION' });
+                continue;
+            }
+            const operations = [];
 
             let newStatus;
             switch (verdict) {
@@ -416,6 +441,9 @@ exports.reviewSubmission = async (req, res) => {
                 case 'REJECT_REANALYSIS': newStatus = workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED; break;
                 case 'WAIVE': newStatus = workflow.WORK_ITEM_STATES.WAIVED; break;
             }
+
+            try { assertReviewable(item, newStatus); }
+            catch (error) { errors.push({ workItemId, code: error.code }); continue; }
 
             const history = typeof item.history === 'string' ? JSON.parse(item.history) : (item.history || []);
             history.push({
@@ -443,10 +471,6 @@ exports.reviewSubmission = async (req, res) => {
                 updates.waiveReason = reason;
             }
 
-            operations.push(tx => tx.workItem.update({
-                where: { id: workItemId },
-                data: updates
-            }));
 
             const analysisName = await getAnalysisName(item.analysis);
             operations.push(tx => tx.auditLog.create({
@@ -478,55 +502,21 @@ exports.reviewSubmission = async (req, res) => {
                 }
             }));
 
-            results.push({ workItemId, status: newStatus, decision: verdict });
+            try {
+                await commitReview(prisma, item, newStatus, user, updates, async tx => {
+                    for (const operation of operations) await operation(tx);
+                    if (verdict === 'REJECT_REANALYSIS') await invalidateReturnedResults(tx, item, user, reason);
+                }, id);
+                results.push({ workItemId, status: newStatus, decision: verdict });
+            } catch (error) {
+                if (!['ITEM_NOT_SUBMITTED', 'ITEM_NOT_IN_SUBMISSION'].includes(error.code)) throw error;
+                errors.push({ workItemId, code: error.code });
+            }
         }
 
-        // S20: Derive package status from item decisions. Retain partial review if undecided items remain.
-        const allSubmissionItemIds = workItemIds;
-        const allDbSubmissionItems = await prisma.workItem.findMany({
-            where: { id: { in: allSubmissionItemIds } },
-            select: { id: true, status: true }
-        });
-        const decidedMap = new Map();
-        results.forEach(r => decidedMap.set(r.workItemId, r.status));
-        const hasUndecided = allDbSubmissionItems.some(item => {
-            const currentStatus = decidedMap.has(item.id) ? decidedMap.get(item.id) : item.status;
-            return currentStatus === 'SUBMITTED' || currentStatus === 'PENDING';
-        });
-        const finalSubmissionStatus = hasUndecided ? 'PARTIALLY_REVIEWED' : 'REVIEWED';
-
-        operations.push(tx => tx.submission.update({
-            where: { id },
-            data: {
-                status: finalSubmissionStatus,
-                reviewedBy: user.username,
-                reviewedAt: now,
-                reviewNote: decisions.map(d => `${d.workItemId}: ${d.decision}`).join(' | ')
-            }
-        }));
-
-        operations.push(tx => tx.auditLog.create({
-            data: {
-                id: `audit-sub-rev-${id}-${Date.now()}`,
-                entity: 'SUBMISSION',
-                entityId: id,
-                action: 'SUBMISSION_REVIEWED',
-                details: `${user.username} reviewed ${results.length} items`,
-                performedBy: user.username,
-                timestamp: now,
-                sampleId: String(submission.sampleId)
-            }
-        }));
-
-        await prisma.$transaction(async tx => {
-            for (const operation of operations) await operation(tx);
-            for (const decision of normalizedDecisions) {
-                if (decision.decision !== 'REJECT_REANALYSIS') continue;
-                const item = dbItems.find(row => row.id === decision.workItemId);
-                if (item) await invalidateReturnedResults(tx, item, user, decision.reason);
-            }
-        });
-        res.json({ success: true, results });
+        if (!results.length) return res.status(409).json({ error: 'No work items were eligible for review.', code: 'ITEM_NOT_SUBMITTED', results, errors });
+        await reconcileSubmission(prisma, id, user, results, errors);
+        res.json({ success: true, results, errors });
 
     } catch (error) {
         console.error('[reviewSubmission] Error:', error);
