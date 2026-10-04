@@ -50,7 +50,7 @@ function parseNumber(input, format) {
     // Keep explicit decimal precision while normalizing separators. Scientific
     // notation is expanded after parsing so its exponent cannot be mistaken for
     // a grouping separator by downstream consumers.
-    const normalized = exponent ? String(value) : sign + canonical;
+    const normalized = exponent ? String(value) : (sign === '-' ? '-' : '') + canonical;
     return { valid: true, code: null, rawInput, value, canonical: qualifier + normalized, qualifier, blank: false };
 }
 

@@ -34,6 +34,10 @@ describe('Audit 0.14: one number parser', () => {
         expect(parseNumber('6,85', { decimal: ';', thousands: null }).code).toBe('NUMBER_FORMAT_POLICY_INVALID');
         expect(parseNumber(1.234, format)).toMatchObject({ valid: true, value: 1.234 });
     });
+    test('normalization retains explicitly entered decimal precision', () => {
+        expect(parseNumber('7,00', format)).toMatchObject({ valid: true, value: 7, canonical: '7.00', rawInput: '7,00' });
+        expect(parseNumber('7.0', format)).toMatchObject({ valid: true, value: 7, canonical: '7.0' });
+    });
     test('texture uses the same parser, rejects internal spaces and preserves valid closure', () => {
         expect(validation.validateTextureFractions({ sand: '6,85', silt: '43,15', clay: '50' }, null, format)).toMatchObject({ isValid: true, fractions: { sand: 6.85, silt: 43.15, clay: 50 } });
         expect(validation.validateTextureFractions({ sand: '6 ,85', silt: '43,15', clay: '50' }, null, format)).toMatchObject({ isValid: false, code: 'INVALID_NUMBER' });
