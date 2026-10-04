@@ -23,6 +23,9 @@ describe('WP-31: Result Provenance Tracking', () => {
                 requiredAnalyses: JSON.stringify(['EC', 'CLAY_PRED', 'SOC', 'TOTAL_N'])
             }
         });
+        await prisma.workItem.createMany({ data: ['PH', 'EC', 'CLAY_PRED', 'TEXTURE', 'SOC', 'TOTAL_N'].map(analysis => ({
+            id: `reviewed-${testSampleId}-${analysis}`, sampleId: testSampleId, analysis, status: 'ACCEPTED'
+        })) });
     });
 
     afterAll(async () => {
@@ -30,6 +33,7 @@ describe('WP-31: Result Provenance Tracking', () => {
             await prisma.result.deleteMany({ where: { id: { in: createdResultIds } } });
         }
         await prisma.result.deleteMany({ where: { sampleId: testSampleId } });
+        await prisma.workItem.deleteMany({ where: { sampleId: testSampleId } });
         await prisma.sample.deleteMany({ where: { id: testSampleId } });
     });
 

@@ -26,6 +26,9 @@ describe('BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine', 
             requiredAnalyses: ['PH_H2O', 'SOC', 'TN', 'P_OLSEN', 'EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA', 'CEC', 'SAND', 'SILT', 'CLAY']
         });
         sampleId = s.id;
+        await prisma.workItem.createMany({ data: ["PH_H2O","SOC","TN","P_OLSEN","EXCH_CA","EXCH_MG","EXCH_K","CEC","SAND","SILT","CLAY"].map(analysis => ({
+            id: `reviewed-${s.id}-${analysis}`, sampleId: s.id, analysis, status: 'ACCEPTED'
+        })) });
 
         const now = new Date();
         await prisma.result.createMany({

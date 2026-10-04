@@ -21,7 +21,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     const call = (path, body) => request(app).post(path).set('Authorization', `Bearer ${token}`).send(body);
     async function fixture({ status = 'APPROVED', itemStatus = 'ACCEPTED', param = 'PH_H2O', batchStatus, flags = [], valid = true } = {}) {
         const sampleId = id('SMP-03'), workItemId = id('WI-03'), resultId = id('RES-03');
-        const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-03'), analysis: param, status: batchStatus, labId } }) : null;
+        const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-03'), analysis: param, status: batchStatus, labId, createdBy: 'review-test' } }) : null;
         await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status } });
         const item = await prisma.workItem.create({ data: { id: workItemId, sampleId, analysis: param, status: itemStatus, result: '7.2', assignedLab: labId, batchId: batch?.id } });
         const result = await prisma.result.create({ data: { id: resultId, sampleId, param, value: '7.2', numericValue: 7.2, isCurrent: true,

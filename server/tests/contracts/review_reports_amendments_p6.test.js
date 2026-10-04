@@ -179,6 +179,13 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
     });
 
     test('3. Generates report v1 with immutable snapshot and monotonic versioning', async () => {
+        const pending = await request(app).post(`/api/reports/generate/${sampleForReview.id}`)
+            .set('Authorization', `Bearer ${mgrToken}`).send({});
+        expect(pending.status).toBe(409);
+        expect(pending.body.code).toBe('SAMPLE_NOT_APPROVED');
+        const approval = await request(app).post(`/api/samples/${sampleForReview.id}/approve`)
+            .set('Authorization', `Bearer ${mgrToken}`);
+        expect(approval.status).toBe(200);
         const res = await request(app)
             .post(`/api/reports/generate/${sampleForReview.id}`)
             .set('Authorization', `Bearer ${mgrToken}`)
