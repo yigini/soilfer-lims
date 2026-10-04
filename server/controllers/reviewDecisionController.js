@@ -4,6 +4,7 @@
  */
 const prisma = require('../prisma');
 const { reviewWorkItem } = require('./workItemController');
+const { WORK_ITEM_STATES } = require('../workflowContract');
 
 /**
  * Create review decision for a work item
@@ -12,7 +13,7 @@ const { reviewWorkItem } = require('./workItemController');
 exports.createReview = async (req, res) => {
     const { workItemId } = req.params;
     const { decision, reason } = req.body;
-    const statuses = { ACCEPT: 'ACCEPTED', REJECT: 'REANALYSIS_REQUIRED', WAIVE: 'WAIVED' };
+    const statuses = { ACCEPT: WORK_ITEM_STATES.ACCEPTED, REJECT: WORK_ITEM_STATES.REANALYSIS_REQUIRED, WAIVE: WORK_ITEM_STATES.WAIVED };
     if (!Object.hasOwn(statuses, decision)) {
         return res.status(400).json({ error: 'decision must be ACCEPT, REJECT, or WAIVE', code: 'INVALID_REVIEW_DECISION' });
     }
