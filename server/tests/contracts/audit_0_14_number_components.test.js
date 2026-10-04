@@ -18,7 +18,13 @@ function load(name) {
         if (dependency.includes('shared/numberParse')) return numberParse;
         if (dependency.includes('LanguageContext')) return { useLanguage: () => ({ t: (_, fallback) => fallback }) };
         if (dependency === './NumberPreview') return load('NumberPreview');
-        if (dependency.includes('soilCalculations')) return require('../../../client/src/utils/soilCalculations');
+        if (dependency.includes('soilCalculations')) {
+            const calculation = { exports: {} };
+            const utility = fs.readFileSync(path.resolve(root, '../../utils/soilCalculations.js'), 'utf8');
+            vm.runInNewContext(esbuild.transformSync(utility, { loader: 'js', format: 'cjs' }).code,
+                { module: calculation, exports: calculation.exports });
+            return calculation.exports;
+        }
         throw new Error(`Unexpected dependency ${dependency}`);
     } });
     cache[name] = module.exports;
