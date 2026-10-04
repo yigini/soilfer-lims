@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0] - 2026-10-04
+
+### Added
+- Per-laboratory policy settings with Strict, Basic and Advisory presets, reasoned laboratory/analysis/method overrides and a versioned change history (Audit 1.0, #219).
+- Policies page with effective values and sources, structured editors for managers and read access for all laboratory roles.
+- Additive policy storage and a dry-run legacy separator migration that preserves original laboratory settings and historical analytical records.
+
+### Changed
+- QC limits and tray profiles resolve from laboratory policy. QC evaluations, exported selections and generated reports retain the policy version they used.
+- Number formats resolve from a single policy snapshot, with an atomic compatibility copy for image rollback and mandatory reasons for changes.
+
 ## [1.5.0] - 2026-10-04
 
 ### Added
