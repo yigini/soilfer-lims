@@ -2,6 +2,7 @@ const cataloguePolicy = require('../services/cataloguePolicy');
 const prisma = require('../prisma');
 const workflow = require('../workflowContract');
 const idGenerator = require('../services/idGenerator');
+const sampleCodes = require('../services/sampleCodeService');
 const { parseCoordinates } = require('../utils/coordParser');
 const adminBoundaries = require('../data/adminBoundaries.json');
 const crypto = require('crypto');
@@ -389,6 +390,13 @@ exports.processIntake = async (req, res) => {
         const isReject = decision === 'REJECTED' || decision === 'REJECT';
         const isDraft = Boolean(req.body.isDraft);
         const isFinalAcceptance = !isReject && !isDraft;
+
+        if (isFinalAcceptance) {
+            const projects = typeof user.projects === 'string' ? JSON.parse(user.projects) : user.projects;
+            const candidate = sample?.projectCode || sample?.projectId || projectId || (isWalkIn ? null : projects?.[0]);
+            const project = candidate ? await projectPolicyService.resolveProject(candidate, prisma) : null;
+            if (!sample || !await sampleCodes.issuedCode(sample, prisma)) await sampleCodes.codePolicy(user.labId, sample?.projectCode || project?.code, prisma);
+        }
 
         let compliance = null;
         let complianceExceptionRecord = null;
@@ -950,25 +958,6 @@ exports.processIntake = async (req, res) => {
             mergeField('admin2', samplingDetails.areaVillage);
         }
 
-        // NEW: Assign Lab ID immediately during intake
-        let assignedLabId;
-        const finalLabRef = user.labId || 'GEN';
-
-        if (isWalkIn && !projectId) {
-            // Generic Walk-ins keep their generated short ID as Lab ID
-            assignedLabId = sample.originalId;
-        } else {
-            // Project samples (Scheduled or Manual Type B) get a short sequential Lab ID
-            assignedLabId = await idGenerator.generateLabId(finalLabRef, 'S');
-        }
-
-        history.push({
-            status: 'RECEIVED',
-            changedBy: receivedBy,
-            timestamp: now,
-            note: `Intake process completed. Assigned Lab ID: ${assignedLabId}`
-        });
-
         if (massDeficitInfo && massWarningAcknowledged) {
             history.push({
                 status: 'MASS_DEFICIT_OVERRIDE',
@@ -989,14 +978,13 @@ exports.processIntake = async (req, res) => {
         };
 
         const updateData = {
-            status: assignedLabId ? workflow.SAMPLE_STATES.ACCEPTED : workflow.SAMPLE_STATES.RECEIVED,
-            labId: assignedLabId,
+            status: workflow.SAMPLE_STATES.ACCEPTED,
             receptionDate: now,       // Finding #3: canonical column
             receivedBy: receivedBy,   // Finding #3: canonical column
-            acceptedBy: assignedLabId ? receivedBy : null,
-            acceptedAt: assignedLabId ? now : null,
-            dryingStatus: assignedLabId ? 'PENDING' : null,
-            preparationStatus: assignedLabId ? 'PENDING' : null,
+            acceptedBy: receivedBy,
+            acceptedAt: now,
+            dryingStatus: 'PENDING',
+            preparationStatus: 'PENDING',
             metadata: JSON.stringify(updatedMetadata),
             requiredAnalyses: JSON.stringify(Array.from(requiredAnalyses)),
             analysisGroupIds: JSON.stringify([...new Set(canonicalGroupIds)]),
@@ -1085,6 +1073,11 @@ exports.processIntake = async (req, res) => {
             if (!current || current.updatedAt.getTime() !== sample.updatedAt.getTime()) throw new profileIdentity.ProfileReferenceConflictError('SOURCE_CHANGED');
             require('../utils/scopeGuard').ensureScope(user, current, {altLabField: 'assignedLab'});
             if (current.approvedAt || ['APPROVED', 'RELEASED', 'ARCHIVED', 'DISPOSED'].includes(current.status)) throw new profileIdentity.ProfileReferenceConflictError('RELEASED_REFERENCE');
+            const code = await sampleCodes.issuedCode(current, tx) || await idGenerator.generateLabId(user.labId, 'S', tx, { projectCode: updateData.projectCode || current.projectCode, issuedAt: now });
+            updateData.labSampleCode = code;
+            updateData.labId = code;
+            history.push({ status: 'RECEIVED', changedBy: receivedBy, timestamp: now, note: `Intake process completed. Assigned Lab ID: ${code}` });
+            updateData.history = JSON.stringify(history);
             return transitionSample(sample.id, nextStatus, user, 'Intake completed at reception', updateData, tx);
         });
 
@@ -1137,6 +1130,7 @@ exports.processIntake = async (req, res) => {
             id: updated.id,
             originalId: updated.originalId,
             labId: updated.labId,
+            labSampleCode: updated.labSampleCode,
             status: updated.status,
             receptionDate: updated.receptionDate ? (updated.receptionDate instanceof Date ? updated.receptionDate.toISOString() : updated.receptionDate) : null,
             custodyHandoverAt: updated.custodyHandoverAt ? (updated.custodyHandoverAt instanceof Date ? updated.custodyHandoverAt.toISOString() : updated.custodyHandoverAt) : null,
@@ -1150,6 +1144,7 @@ exports.processIntake = async (req, res) => {
         });
 
     } catch (error) {
+        if (error.statusCode) return res.status(error.statusCode).json({ success: false, code: error.code, message: error.message });
         if (error instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({success: false, code: error.code, error: error.code, message: error.message});
         console.error('[processIntake] CRITICAL FAILURE:', error);
         if (error.code) console.error('Prisma Error Code:', error.code);
@@ -1952,9 +1947,6 @@ exports.processBatchConsignmentIntake = async (req, res) => {
 
                 const locSource = s.locationSource || (lat && lng ? 'DESK_PASTE' : 'TEXT_ONLY');
 
-                // Generate short sequential Lab ID (RC-13)
-                const labId = await idGenerator.generateLabId(userLab, 'S', tx);
-
                 // Check if sample already exists (e.g. EXPECTED sample in Project)
                 const existing = await tx.sample.findFirst({
                     where: {
@@ -1972,6 +1964,9 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                     if (currentMeta.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD') throw new profileIdentity.ProfileReferenceConflictError('PROVENANCE_HOLD');
                 }
 
+                const labId = existing && await sampleCodes.issuedCode(existing, tx) || await idGenerator.generateLabId(userLab, 'S', tx,
+                    { projectCode: resolvedConsignmentProject?.code || consignment.projectCode || existing?.projectCode, issuedAt: now });
+
                 const historyNote = isRejected
                     ? `Rejected during batch reception under Consignment ${consignment.code}. Reason: ${rejectionReason}`
                     : `Batch accepted under Consignment ${consignment.code} (${consignment.deliveryNoteRef || 'no ref'}). Lab ID assigned: ${labId}`;
@@ -1980,6 +1975,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
 
                 const sampleDataCommon = {
                     labId,
+                    labSampleCode: labId,
                     status,
                     assignedLab: userLab,
                     projectCode: resolvedConsignmentProject ? resolvedConsignmentProject.code : (consignment.projectCode || (existing?.projectCode || null)),
@@ -2070,7 +2066,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                     workItemsToCreate.push({
                         id: crypto.randomUUID(),
                         sampleId: sampleRecord.id,
-                        labId: sampleRecord.labId,
+                        labId: userLab,
                         assignedLab: userLab,
                         analysis: 'DRYING',
                         category: 'Operational Gates',
@@ -2079,7 +2075,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                     workItemsToCreate.push({
                         id: crypto.randomUUID(),
                         sampleId: sampleRecord.id,
-                        labId: sampleRecord.labId,
+                        labId: userLab,
                         assignedLab: userLab,
                         analysis: 'PREPARATION',
                         category: 'Operational Gates',
@@ -2094,7 +2090,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                         workItemsToCreate.push({
                             id: crypto.randomUUID(),
                             sampleId: sampleRecord.id,
-                            labId: sampleRecord.labId,
+                            labId: userLab,
                             assignedLab: userLab,
                             analysis: code,
                             category: String(cat),
@@ -2124,6 +2120,7 @@ exports.processBatchConsignmentIntake = async (req, res) => {
                     id: sampleRecord.id,
                     originalId: sampleRecord.originalId,
                     labId: sampleRecord.labId,
+                    labSampleCode: sampleRecord.labSampleCode,
                     status: sampleRecord.status,
                     rejectionReason: sampleRecord.rejectionReason,
                     receivedMass: sampleRecord.receivedMass,

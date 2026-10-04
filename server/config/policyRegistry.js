@@ -44,6 +44,7 @@ key('review.secondPersonRequired', 'boolean', true, true, false);
 key('report.amendmentRequiresSecondPerson', 'boolean', true, true, false);
 key('report.numberFormat', 'reportFormat', 'RPT-{LAB}-{YYYY}-{SEQ:5}', undefined, undefined, { scope: 'LAB' });
 key('sample.codeFormat', 'sampleFormat', '{LAB}-{YY}-{SEQ:6}{CHK}', undefined, undefined, { scope: 'LAB' });
+key('sample.sequenceReset', 'enum', 'YEARLY', 'YEARLY', 'YEARLY', { scope: 'LAB', allowedValues: ['YEARLY', 'NEVER'] });
 key('sample.retentionDaysAfterReport', 'integer', 90, 60, 30, { ...integer, scope: 'LAB', unit: 'days' });
 key('bench.idleLockMinutes', 'integer', 5, 15, 0, { ...integer, scope: 'LAB', unit: 'minutes' });
 key('bench.pinAtRecord', 'boolean', true, false, false, { scope: 'LAB' });
@@ -79,7 +80,7 @@ function valid(name, value) {
                 s && typeof s === 'object' && !Array.isArray(s) && Number.isSafeInteger(s.position) && s.position >= 1 && s.position <= p.capacity && ['BLANK', 'DUPLICATE', 'CONTROL'].includes(s.type) && typeof s.label === 'string'));
     case 'reportFormat': case 'sampleFormat': {
         if (typeof value !== 'string' || !value.trim() || value.length > 200 || !/\{SEQ(?::\d+)?\}/.test(value)) return false;
-        const tokens = d.type === 'reportFormat' ? ['LAB', 'YYYY'] : ['LAB', 'YY', 'YYYY', 'CHK'];
+        const tokens = d.type === 'reportFormat' ? ['LAB', 'YYYY'] : ['LAB', 'YY', 'YYYY', 'CHK', 'PROJECT'];
         const rest = value.replace(/\{SEQ(?::(\d+))?\}/g, (token, width) => !width || Number(width) <= 32 ? '' : token)
             .replace(/\{([^{}]+)\}/g, (token, name) => tokens.includes(name) ? '' : token);
         return !/[{}]/.test(rest);

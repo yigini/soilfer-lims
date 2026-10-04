@@ -97,7 +97,7 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
                 details: `Status transition from ${currentStatus} to ${nextStatus}${reason ? `: ${reason}` : ''}`,
                 performedBy: actorUsername,
                 sampleId: String(sampleId),
-                labId: sample.labId || sample.assignedLab || null,
+                labId: updatedSample.assignedLab || null,
                 timestamp: new Date()
             }
         });

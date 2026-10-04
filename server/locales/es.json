@@ -848,6 +848,7 @@
   }
 ,
   "policies": {
+    "sampleCodeNoCheck": "Sin un carácter de control, los errores de lectura son más difíciles de detectar.",
     "keys": {
       "qc_mode": "Modo de bloqueo del control",
       "qc_maxBatchSize": "Tamaño máximo del lote analítico",
@@ -874,6 +875,7 @@
       "report_amendmentRequiresSecondPerson": "Exigir otra persona para modificaciones",
       "report_numberFormat": "Patrón del número de informe",
       "sample_codeFormat": "Patrón del código de muestra",
+      "sample_sequenceReset": "Reinicio de la secuencia de muestras",
       "sample_retentionDaysAfterReport": "Conservación de muestras después del informe",
       "bench_idleLockMinutes": "Bloqueo por inactividad (0: desactivado)",
       "bench_pinAtRecord": "Exigir PIN al registrar",
@@ -949,6 +951,8 @@
       "REGISTRY_DEFAULT": "Valor estricto predeterminado"
     },
     "options": {
+      "YEARLY": "Cada año",
+      "NEVER": "No reiniciar",
       "REQUIRED_BLOCKING": "Obligatorio, bloqueante",
       "REQUIRED_WARN": "Obligatorio, advertencias",
       "ADVISORY": "Informativo",

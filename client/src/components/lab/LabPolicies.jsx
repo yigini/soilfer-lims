@@ -36,7 +36,8 @@ export function PolicyValueEditor({ definition, value, onChange, t }) {
         {definition.nullable && <label><input type="checkbox" checked={value === null} onChange={e => onChange(e.target.checked ? null : '')} /> {t('policies.noLimit')}</label>}
         {value !== null && <input required type="number" min={definition.min} step={definition.type === 'integer' ? '1' : 'any'} value={value}
             onChange={e => onChange(e.target.value === '' ? '' : Number(e.target.value))} />}</div>;
-    return <input required value={value} onChange={e => onChange(e.target.value)} />;
+    return <div><input required value={value} onChange={e => onChange(e.target.value)} />
+        {definition.type === 'sampleFormat' && !value.includes('{CHK}') && <p role="alert">{t('policies.sampleCodeNoCheck')}</p>}</div>;
 }
 
 export default function LabPolicies({ labId }) {
@@ -96,7 +97,8 @@ export default function LabPolicies({ labId }) {
                 const row = data.resolved[key], presetValue = definition.presets[data.presetCode || data.inheritedPreset];
                 const canChangeScope = definition.scope === 'LAB+METHOD' || !analysisCode;
                 return <tr key={key} className="border-t"><td className="p-2">{t(definition.description)}{definition.unit && <span> ({t(`policies.units.${definition.unit}`, definition.unit)})</span>}</td>
-                    <td className="p-2">{display(definition, row.value)}</td><td className="p-2">{t(`policies.sources.${row.source}`)}
+                    <td className="p-2">{display(definition, row.value)}
+                        {definition.type === 'sampleFormat' && !row.value.includes('{CHK}') && <p role="alert">{t('policies.sampleCodeNoCheck')}</p>}</td><td className="p-2">{t(`policies.sources.${row.source}`)}
                         {row.scope?.analysisCode && ` · ${row.scope.analysisCode}`}{row.scope?.methodologyId && ` · ${data.methodologies.find(m => m.id === row.scope.methodologyId)?.name || row.scope.methodologyId}`}
                         {row.profile && ` · ${row.profile}`} · {t('policies.version')} {row.version}</td>
                     <td className="p-2">{JSON.stringify(row.value) !== JSON.stringify(presetValue) ? t('policies.differs') : '—'}</td>
