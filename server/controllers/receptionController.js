@@ -606,7 +606,7 @@ exports.getConsignments = async (req, res) => {
 
         return res.json({
             success: true,
-            data: consignments,
+            data: consignments.map(require('../services/consignmentResponseService').consignmentResponse),
             total,
             page: pageNum,
             limit: limitNum
@@ -659,7 +659,7 @@ exports.getConsignmentDetail = async (req, res) => {
             return res.status(404).json({ error: 'Consignment not found' });
         }
 
-        return res.json({ success: true, consignment });
+        return res.json({ success: true, consignment: require('../services/consignmentResponseService').consignmentResponse(consignment) });
     } catch (err) {
         console.error('[getConsignmentDetail] ERROR:', err);
         return res.status(500).json({ error: 'Failed to fetch consignment detail: ' + err.message });

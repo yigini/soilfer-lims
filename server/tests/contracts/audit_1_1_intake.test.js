@@ -44,7 +44,8 @@ describe('Audit 1.1: one atomic intake service', () => {
         expect(left.revisions).toEqual([{ version: 1, status: 'ACTIVE' }]);
         expect(left.lines).toEqual([{ analysis: analysis.code, methodologyId: method.id, status: 'ACTIVE' }]);
         expect(many.body.consignment.declaredExpectedCount).toBeNull();
-        expect(many.body.consignment.expectedCount).toBe(1); // rollback compatibility, never a declaration
+        expect(many.body.consignment.expectedCount).toBeNull(); // public alias is the declaration
+        expect((await prisma.consignment.findUnique({ where: { id: many.body.consignment.id } })).expectedCount).toBe(1); // stored rollback compatibility
         expect(many.body.consignment.discrepancy).toEqual({ status: 'NOT_DECLARED', difference: null });
     });
     test.each(['work', 'order', 'audit'])('a downstream %s failure rolls back sample, code, work, orders and audits', async stage => {
@@ -114,6 +115,31 @@ describe('Audit 1.1: one atomic intake service', () => {
     });
     test.each([0, -1, 1.5, '2', null])('invalid supplied expectedCount %p is refused before any writes', async value => {
         const before = await counts(), response = await batch([input()], { consignment: { expectedCount: value } });
+        expect(response.status).toBe(422); expect(response.body.code).toBe('CONSIGNMENT_EXPECTED_COUNT_INVALID'); expect(await counts()).toEqual(before);
+    });
+    test.each([
+        [{ expectedCount: 3 }, 3], [{ declaredExpectedCount: 3 }, 3],
+        [{ expectedCount: 3, declaredExpectedCount: 3 }, 3], [{}, null],
+        [{ expectedCount: null, declaredExpectedCount: null }, null]
+    ])('normalizes request aliases %p and all response aliases use the declaration', async (header, declared) => {
+        const response = await batch([input()], { consignment: header });
+        expect(response.status).toBe(201);
+        expect(response.body.consignment).toMatchObject({ declaredExpectedCount: declared, expectedCount: declared });
+        const stored = await prisma.consignment.findUnique({ where: { id: response.body.consignment.id } });
+        expect(stored.expectedCount).toBe(declared ?? 1);
+        const list = await request(app).get('/api/reception/consignments').set('Authorization', `Bearer ${token}`);
+        expect(list.status).toBe(200);
+        expect(list.body.data.find(row => row.id === stored.id)).toMatchObject({ declaredExpectedCount: declared, expectedCount: declared });
+        const detail = await request(app).get(`/api/reception/consignments/${stored.id}`).set('Authorization', `Bearer ${token}`);
+        expect(detail.status).toBe(200);
+        expect(detail.body.consignment).toMatchObject({ declaredExpectedCount: declared, expectedCount: declared });
+    });
+    test('conflicting request aliases return a stable 422 with no writes', async () => {
+        const before = await counts(), response = await batch([input()], { consignment: { declaredExpectedCount: 2, expectedCount: 3 } });
+        expect(response.status).toBe(422); expect(response.body.code).toBe('CONSIGNMENT_EXPECTED_COUNT_CONFLICT'); expect(await counts()).toEqual(before);
+    });
+    test.each([0, -1, 1.5, '2', null])('invalid new declaration %p is refused before writes', async value => {
+        const before = await counts(), response = await batch([input()], { consignment: { declaredExpectedCount: value } });
         expect(response.status).toBe(422); expect(response.body.code).toBe('CONSIGNMENT_EXPECTED_COUNT_INVALID'); expect(await counts()).toEqual(before);
     });
     test('rejected receipt resubmission must be explicit and reuses the same acceptance service', async () => {

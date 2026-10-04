@@ -4,12 +4,9 @@ const { IntakeError } = require('./intakeErrors');
 const { allocateConsignmentNumber } = require('./consignmentNumberService');
 const projects = require('./projectPolicyService');
 const observations = require('./batchIntakeObservationsService');
+const { declaredCountFromRequest } = require('./consignmentExpectedCountInput');
+const { consignmentResponse } = require('./consignmentResponseService');
 
-function expectedCount(value) {
-    if (value === undefined) return null;
-    if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 1) throw new IntakeError(422, { code: 'CONSIGNMENT_EXPECTED_COUNT_INVALID', message: 'The declared count must be a positive integer.' });
-    return value;
-}
 function discrepancy(declared, received) {
     return declared == null ? { status: 'NOT_DECLARED', difference: null } : { status: declared === received ? 'MATCH' : declared > received ? 'MISSING' : 'EXCESS', difference: received - declared };
 }
@@ -27,9 +24,9 @@ function failRows(errors, allFailed = false) {
 async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
     intake.requireTransaction(tx);
     const { consignment: header = {}, defaults = {}, samples = [], bulkApplications = [], allowPartial = false } = body;
+    const declared = declaredCountFromRequest(header);
     if (!Array.isArray(samples) || !samples.length) throw new IntakeError(400, { error: 'At least one sample is required for batch intake' });
     if (typeof allowPartial !== 'boolean') throw new IntakeError(422, { code: 'CONSIGNMENT_ALLOW_PARTIAL_INVALID', message: 'allowPartial must be a boolean.' });
-    const declared = expectedCount(header.declaredExpectedCount ?? header.expectedCount);
     const now = new Date();
     const lab = user.labId && await tx.lab.findUnique({ where: { id: user.labId } });
     if (!lab?.isActive) throw new IntakeError(403, { code: 'MISSING_LAB_SCOPE', message: 'Select an active receiving laboratory.' });
@@ -78,7 +75,7 @@ async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
         submitterPhone: header.submitterPhone || header.submitter?.phone || null, submitterEmail: header.submitterEmail || header.submitter?.email || null,
         deliveredBy: header.deliveredBy || null, deliveredAt: header.deliveredAt ? new Date(header.deliveredAt) : null,
         receivedBy: user.username, receivedAt: now, deliveryNoteRef: header.deliveryNoteRef || null,
-        declaredExpectedCount: declared, expectedCount: declared ?? plans.length,
+        declaredExpectedCount: declared,
         custodyHandoverAt: header.custodyHandoverAt ? new Date(header.custodyHandoverAt) : header.deliveredAt ? new Date(header.deliveredAt) : now,
         custodyCarrierName: header.custodyCarrierName || header.deliveredBy || null, custodyTrackingNumber: header.custodyTrackingNumber || header.deliveryNoteRef || null,
         custodySenderSignature: header.custodySenderSignature || null, receivingOfficerId: user.id ? String(user.id) : null,
@@ -114,8 +111,8 @@ async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
             failedRowCount: errors.length, bulkApplications: applications, discrepancy: discrepancy(declared, processed.length),
             massDeficitAcknowledgements: processed.filter(result => result.sample.massWarningAcknowledged).map(result => result.sample.originalId) }),
         performedBy: user.username, timestamp: now, labId: lab.id } });
-    return { success: true, consignment: { ...final, discrepancy: discrepancy(declared, processed.length) },
+    return { success: true, consignment: { ...consignmentResponse(final), discrepancy: discrepancy(declared, processed.length) },
         samples: processed.map(({ response, sample }) => ({ ...response, rejectionReason: sample.rejectionReason, receivedMass: sample.receivedMass })),
         errors: errors.sort((a, b) => a.row - b.row), failedRows: errors.length, message: `Batch received ${processed.length} samples under Consignment ${code}.` };
 }
-module.exports = { receiveConsignment, expectedCount, discrepancy };
+module.exports = { receiveConsignment, discrepancy };
