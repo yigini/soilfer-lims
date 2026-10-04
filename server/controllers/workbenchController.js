@@ -432,12 +432,14 @@ exports.getQueue = async (req, res) => {
         const existingResults = await prisma.result.findMany({
             where: {
                 sampleId: { in: sampleIds },
-                param: { in: analysisCodes }
-            }
+                param: { in: analysisCodes },
+                isCurrent: true
+            },
+            orderBy: { timestamp: 'asc' }
         });
         const resultMap = {};
         existingResults.forEach(r => {
-            resultMap[`${r.sampleId}::${r.param}`] = { value: r.value, unit: r.unit };
+            resultMap[`${r.sampleId}::${r.param}`] = { value: r.value, unit: r.unit, isValid: r.isValid };
         });
 
         // Prefetch active spectral scans for spectral analyses
@@ -506,6 +508,7 @@ exports.getQueue = async (req, res) => {
                     id: a.id,
                     name: a.name,
                     assetType: a.assetType,
+                    status: a.status,
                     calibrationStatus: a.qualification?.calibrationStatus || 'NOT_CONFIGURED',
                     nextCalibrationDue: a.qualification?.nextCalibrationDueDate || null
                 };
@@ -576,8 +579,9 @@ exports.getQueue = async (req, res) => {
                     : (['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(code) ? 'TEXTURE' : (groupsMap[code].category === 'Operational Gates' ? 'OPERATIONAL' : 'NUMERIC')),
                 status: item.status,
                 priority: item.priority,
-                currentResult: resultMap[resultKey]?.value || item.result || null,
+                currentResult: resultMap[resultKey]?.value ?? (operationalChecklists[code] ? item.result : null),
                 currentUnit: resultMap[resultKey]?.unit || null,
+                previousResult: operationalChecklists[code] ? null : resultMap[resultKey] || null,
                 equipmentId: item.equipmentId || null,
                 equipmentRequired: equipReqMap[equipKey]?.isRequired || false,
                 dryingStatus: item.sample?.dryingStatus || 'PENDING',

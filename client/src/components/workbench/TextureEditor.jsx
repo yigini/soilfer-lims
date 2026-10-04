@@ -13,7 +13,8 @@ export default function TextureEditor({
     disabled = false,
     onEnterNext = null,
     sampleId = '',
-    tolerance = null
+    tolerance = null,
+    inputRef = null
 }) {
     let sandVal = '';
     let siltVal = '';
@@ -73,7 +74,7 @@ export default function TextureEditor({
                 <div className="flex items-center gap-1">
                     <span className="text-[11px] text-sf-muted font-medium">Sand:</span>
                     <input
-                        ref={sandRef}
+                        ref={node => { sandRef.current = node; if (inputRef) inputRef(node); }}
                         type="text"
                         inputMode="decimal"
                         value={sandVal}

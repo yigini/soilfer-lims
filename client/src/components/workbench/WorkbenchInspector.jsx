@@ -5,6 +5,7 @@ import {
     FlaskConical, Trash2, Wrench
 } from 'lucide-react';
 import ConflictComparePanel from './ConflictComparePanel';
+import { canSelectInstrument } from './entryReadiness';
 
 /**
  * WorkbenchInspector
@@ -190,7 +191,7 @@ export default function WorkbenchInspector({
                             Instrument Qualification
                         </label>
                         <select
-                            disabled={isLocked || eligibleEquipment.length === 0}
+                            disabled={!canSelectInstrument(selectedItem) || eligibleEquipment.length === 0}
                             value={selectedEquipId}
                             onChange={(e) => onUpdateMeta(workItemId, 'instrumentId', e.target.value)}
                             className="w-full px-2 py-1 text-xs rounded border border-sf-divider bg-sf-canvas text-sf-text focus:outline-none focus:ring-1 focus:ring-sf-primary focus:border-sf-primary"

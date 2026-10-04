@@ -16,6 +16,9 @@ import NumericEditor from './NumericEditor';
 import TextureEditor from './TextureEditor';
 import OperationalTaskEditor from './OperationalTaskEditor';
 import clsx from 'clsx';
+import { useLanguage } from '../../context/LanguageContext';
+import { canSelectInstrument, isEntryReady } from './entryReadiness';
+import PreviousResultHint from './PreviousResultHint';
 
 /**
  * SingleSampleEditor
@@ -29,10 +32,13 @@ export default function SingleSampleEditor({
     currentIndex = 0,
     onIndexChange,
     onDraftChange,
+    onUpdateItemMeta,
+    onReviewRecord,
     onConfirmOperation,
     onOpenSpectralIntake
 }) {
     const getAnalysisDisplayName = useAnalysisNames();
+    const { t } = useLanguage();
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
     if (!items || items.length === 0) {
@@ -45,6 +51,15 @@ export default function SingleSampleEditor({
 
     const currentItem = items[currentIndex] || items[0];
     const totalCount = items.length;
+    const draft = currentItem.draft;
+    const equipment = activeGroup?.eligibleEquipment || [];
+    const disabled = !isEntryReady(currentItem, equipment);
+    let savedReceipt = null;
+    try {
+        const receipt = typeof currentItem.currentResult === 'string'
+            ? JSON.parse(currentItem.currentResult) : currentItem.currentResult;
+        if (Array.isArray(receipt?.checklist)) savedReceipt = receipt;
+    } catch { /* A historical scalar is not operational evidence. */ }
 
     const isTexture = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(activeGroup?.analysis) || currentItem?.editorKind === 'TEXTURE';
     const isOperationalGate = activeGroup?.category === 'Operational Gates';
@@ -185,13 +200,22 @@ export default function SingleSampleEditor({
                 {/* Editor Components */}
                 {isTexture ? (
                     <TextureEditor
-                        item={currentItem}
-                        onDraftChange={(val) => onDraftChange(currentItem.workItemId, val)}
+                        values={draft?.values || []}
+                        onChange={values => onDraftChange(currentItem.workItemId, null, { values })}
+                        disabled={disabled}
+                        sampleId={currentItem.sampleDisplayId || currentItem.sampleId}
+                        tolerance={activeGroup?.validation?.tolerance ?? null}
                     />
                 ) : isOperationalGate ? (
                     <OperationalTaskEditor
-                        item={currentItem}
-                        onConfirmOperation={onConfirmOperation}
+                        analysis={currentItem.analysis}
+                        checks={draft?.checks || savedReceipt?.checklist || [false, false, false]}
+                        onChange={checks => onDraftChange(currentItem.workItemId, null, { checks })}
+                        onConfirm={() => onConfirmOperation?.(currentItem.workItemId, draft?.checks || [])}
+                        disabled={disabled}
+                        savedReceipt={savedReceipt}
+                        isEvidenceGap={currentItem.status === 'COMPLETED' && !savedReceipt}
+                        sampleId={currentItem.sampleDisplayId || currentItem.sampleId}
                     />
                 ) : isSpectral ? (
                     <div className="p-4 text-center space-y-3 bg-sf-inset rounded-xl border border-sf-divider">
@@ -208,11 +232,36 @@ export default function SingleSampleEditor({
                 ) : (
                     <div className="space-y-3">
                         <NumericEditor
-                            item={currentItem}
+                            value={draft?.value ?? ''}
                             unit={activeGroup?.unit}
-                            onDraftChange={(val) => onDraftChange(currentItem.workItemId, val)}
+                            onChange={value => onDraftChange(currentItem.workItemId, value)}
+                            disabled={disabled}
+                            ariaLabel={`${currentItem.sampleDisplayId || currentItem.sampleId} determination`}
                         />
                     </div>
+                )}
+                {!isOperationalGate && <PreviousResultHint result={currentItem.previousResult} />}
+                {!isOperationalGate && equipment.length > 0 && (
+                    <label className="block text-xs text-sf-muted">
+                        {t('workbench.selectInstrument', 'Select instrument')}
+                        <select
+                            aria-label={t('workbench.selectInstrument', 'Select instrument')}
+                            disabled={!canSelectInstrument(currentItem)}
+                            value={draft?.instrumentId || currentItem.equipmentId || ''}
+                            onChange={event => onUpdateItemMeta?.(currentItem.workItemId, 'instrumentId', event.target.value)}
+                            className="input-base w-full mt-1"
+                        >
+                            <option value="">{t('workbench.selectInstrument', 'Select instrument')}</option>
+                            {equipment.map(asset => <option key={asset.id} value={asset.id}>{asset.name}</option>)}
+                        </select>
+                    </label>
+                )}
+                {!isOperationalGate && !isSpectral && (
+                    <button type="button" disabled={disabled}
+                        className="btn-primary w-full py-2"
+                        onClick={() => onReviewRecord?.([currentItem.workItemId])}>
+                        {t('workbench.recordThisSample', 'Record this sample')}
+                    </button>
                 )}
             </div>
 
@@ -230,7 +279,7 @@ export default function SingleSampleEditor({
                     disabled={currentIndex === totalCount - 1}
                     className="flex-1 btn-primary py-3 px-4 text-xs font-bold active:scale-95 transition-all"
                 >
-                    Save & Next
+                    {t('workbench.nextSample', 'Next sample')}
                 </button>
             </div>
         </div>
