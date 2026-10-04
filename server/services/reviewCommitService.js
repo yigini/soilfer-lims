@@ -18,16 +18,22 @@ function assertReviewable(item, status) {
 }
 
 // The first transaction write is the CAS. A refused row creates no side effects.
-async function commitReview(prisma, item, status, user, data, operations) {
+async function commitReview(prisma, item, status, user, data, operations, submissionId) {
     assertReviewable(item, status);
     try {
         return await prisma.$transaction(async tx => {
             const changed = await tx.workItem.updateMany({
-                where: { id: item.id, status: item.status, version: item.version },
+                where: { id: item.id, status: item.status, version: item.version, ...(submissionId && { submissionId }) },
                 data: { ...data, reviewedBy: user.username, reviewedAt: data.reviewedAt || new Date(),
                     version: item.version === null ? 1 : { increment: 1 } }
             });
-            if (changed.count !== 1) throw itemStateError(item);
+            if (changed.count !== 1) {
+                if (submissionId) {
+                    const current = await tx.workItem.findUnique({ where: { id: item.id }, select: { submissionId: true } });
+                    if (current?.submissionId !== submissionId) throw Object.assign(itemStateError(item), { code: 'ITEM_NOT_IN_SUBMISSION' });
+                }
+                throw itemStateError(item);
+            }
             await operations(tx);
             return tx.workItem.findUnique({ where: { id: item.id } });
         });
@@ -45,8 +51,8 @@ async function reconcileSubmission(prisma, submissionId, user, results, errors =
         const committed = results.filter(row => ids.includes(row.workItemId));
         if (!committed.length) return;
         const refused = errors.filter(row => ids.includes(row.workItemId));
-        const items = await tx.workItem.findMany({ where: { id: { in: ids } }, select: { status: true } });
-        const reviewed = items.length === ids.length && items.every(item => ['ACCEPTED', 'REANALYSIS_REQUIRED', 'WAIVED'].includes(item.status));
+        const items = await tx.workItem.findMany({ where: { id: { in: ids }, submissionId }, select: { status: true } });
+        const reviewed = items.every(item => ['ACCEPTED', 'REANALYSIS_REQUIRED', 'WAIVED'].includes(item.status));
         const now = new Date();
         await tx.submission.update({ where: { id: submissionId }, data: {
             status: reviewed ? 'REVIEWED' : 'PARTIALLY_REVIEWED', reviewedBy: user.username, reviewedAt: now,
