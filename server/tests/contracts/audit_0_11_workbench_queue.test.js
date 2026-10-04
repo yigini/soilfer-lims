@@ -13,7 +13,7 @@ describe('Audit 0.11: queue evidence and instrument readiness', () => {
     async function fixture() {
         const analysis = id('AUDIT11'), sampleId = id('SMP11'), workItemId = id('WI11'), equipmentId = id('EQ11');
         await prisma.analysis.create({ data: { code: analysis, name: 'Audit fixture numeric method', units: 'mg/kg', status: 'active' } });
-        await prisma.sample.create({ data: { id: sampleId, labId: sampleId, assignedLab: labId, status: 'PROCESSING',
+        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status: 'PROCESSING',
             receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' } });
         await prisma.workItem.create({ data: { id: workItemId, sampleId, analysis, assignedLab: labId, assignedTo: jwt.decode(token).username,
             status: 'ASSIGNED', version: 0, result: '88' } });
