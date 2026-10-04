@@ -1,4 +1,5 @@
 {
+  "resultReports": { "qcWarningStatement": "Advertencia de QC: Uno o más valores informados tienen QC de lote fallido o incompleto. Consulte las advertencias de lote registradas." },
   "common": {
     "save": "Guardar",
     "cancel": "Cancelar",

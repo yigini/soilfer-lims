@@ -4,14 +4,17 @@
  */
 const prisma = require('../prisma');
 const { normalizeUnit, interpretParameter, evaluateSoilProfile } = require('./interpretationService');
+const { isReviewedReportResult, getReportingMode, reportingQc, linkedBatchIds } = require('./reportResultGovernance');
+const policyService = require('./policyService');
 
 /**
  * Assemble a full report object for a given sample.
  * Returns a structured JSON payload ready for storage and rendering.
  */
-async function assembleReport(sampleId, user) {
+async function assembleReport(sampleId, user, options = {}) {
+    const db = options.db || prisma;
     // 1. Fetch sample with all related data
-    const sample = await prisma.sample.findUnique({
+    const sample = await db.sample.findUnique({
         where: { id: sampleId },
         include: {
             results: {
@@ -26,11 +29,23 @@ async function assembleReport(sampleId, user) {
 
     if (!sample) throw new Error(`Sample ${sampleId} not found`);
 
+    const qcModes = options.qcModes || {};
+    for (const result of sample.results) {
+        if (!(result.id in qcModes)) qcModes[result.id] = await policyService.get(sample.assignedLab || sample.labId, 'qc.mode', {
+            analysisCode: result.param, methodologyId: result.methodologyId || null
+        });
+    }
+    const batchIds = [...new Set(sample.results.flatMap(result => linkedBatchIds(result, sample.workItems)))];
+    const qcBatches = options.qcBatches || (batchIds.length ? await db.batch.findMany({ where: { id: { in: batchIds } } }) : []);
+    const reportOptions = { qcModes, qcBatches };
+    const reportableResults = sample.results.filter(result =>
+        isReviewedReportResult(result, sample.workItems, getReportingMode(sample, result, reportOptions)));
+
     // 2. Fetch lab info
     let lab = null;
     const labId = sample.assignedLab || sample.labId;
     if (labId) {
-        lab = await prisma.lab.findFirst({
+        lab = await db.lab.findFirst({
             where: { OR: [{ id: labId }, { code: labId }] }
         });
     }
@@ -38,7 +53,7 @@ async function assembleReport(sampleId, user) {
     // 3. Fetch lab manager for auto-signature
     let labManager = null;
     if (lab) {
-        labManager = await prisma.user.findFirst({
+        labManager = await db.user.findFirst({
             where: {
                 labId: lab.id,
                 role: 'LAB_MANAGER',
@@ -48,7 +63,7 @@ async function assembleReport(sampleId, user) {
         });
         // Fallback: try matching by lab code
         if (!labManager) {
-            labManager = await prisma.user.findFirst({
+            labManager = await db.user.findFirst({
                 where: {
                     labId: lab.code,
                     role: 'LAB_MANAGER',
@@ -68,23 +83,23 @@ async function assembleReport(sampleId, user) {
     const clientInfo = extractClientInfo(metadata, fieldMeta, receptionData, sample);
 
     // 6. Fetch all analyses and their default methodologies
-    const analyses = await prisma.analysis.findMany();
+    const analyses = await db.analysis.findMany();
     const analysisMap = new Map(analyses.map(a => [a.code, a]));
 
     // Fetch default methodologies for all analysis codes in results, and exact methodologies where assigned
-    const resultParams = sample.results.map(r => r.param);
-    const resultMethodIds = [...new Set(sample.results.map(r => r.methodologyId).filter(Boolean))];
+    const resultParams = reportableResults.map(r => r.param);
+    const resultMethodIds = [...new Set(reportableResults.map(r => r.methodologyId).filter(Boolean))];
     let methodologies = [];
     let specificMethodologies = [];
     try {
         [methodologies, specificMethodologies] = await Promise.all([
-            prisma.methodology.findMany({
+            db.methodology.findMany({
                 where: {
                     analysisCode: { in: resultParams },
                     isDefault: true
                 }
             }),
-            resultMethodIds.length > 0 ? prisma.methodology.findMany({
+            resultMethodIds.length > 0 ? db.methodology.findMany({
                 where: { id: { in: resultMethodIds } }
             }) : []
         ]);
@@ -92,16 +107,8 @@ async function assembleReport(sampleId, user) {
     const methodMap = new Map(methodologies.map(m => [m.analysisCode, m]));
     const specificMethodMap = new Map(specificMethodologies.map(m => [m.id, m]));
 
-    const EXCLUDED_GATE_CODES = ['DRYING', 'PREPARATION', 'PREP', 'SAMPLE_PREP', 'SIEVING', 'MILLING', 'HOMOGENIZATION', 'ARCHIVING', 'DISPOSAL'];
-
     // 7. Group results by category and apply controlled units & agronomic interpretation
     const groupedResults = {};
-    const reportableResults = (sample.results || []).filter(r =>
-        r.isCurrent === true &&
-        r.isValid !== false &&
-        !EXCLUDED_GATE_CODES.includes(r.param)
-    );
-
     for (const result of reportableResults) {
         const analysis = analysisMap.get(result.param);
         const category = analysis?.categoryId || 'Other';
@@ -140,7 +147,7 @@ async function assembleReport(sampleId, user) {
 
     // 8. Fetch category names
     const categoryIds = [...new Set(Object.keys(groupedResults))];
-    const categories = await prisma.analysisCategory.findMany({
+    const categories = await db.analysisCategory.findMany({
         where: { id: { in: categoryIds } }
     });
     const categoryMap = new Map(categories.map(c => [c.id, c.name]));
@@ -149,7 +156,7 @@ async function assembleReport(sampleId, user) {
     }
 
     // 8b. Compute comprehensive multi-parameter soil diagnostics
-    const soilDiagnostics = evaluateSoilProfile(sample.results.map(r => ({
+    const soilDiagnostics = evaluateSoilProfile(reportableResults.map(r => ({
         param: r.param,
         value: r.value,
         unit: r.unit || analysisMap.get(r.param)?.units
@@ -159,7 +166,8 @@ async function assembleReport(sampleId, user) {
     const workItemSummary = sample.workItems.map(wi => ({
         analysis: wi.analysis,
         status: wi.status,
-        result: wi.result,
+        result: wi.status === 'ACCEPTED' && reportableResults.some(result =>
+            isReviewedReportResult(result, [wi], getReportingMode(sample, result, reportOptions))) ? wi.result : null,
         completedAt: wi.completedAt,
         assignedTo: wi.assignedTo
     }));
@@ -205,7 +213,7 @@ async function assembleReport(sampleId, user) {
     };
 
     // SD-17: Compute analytical episodes for reopened samples
-    const auditLogs = await prisma.auditLog.findMany({
+    const auditLogs = await db.auditLog.findMany({
         where: { OR: [{ sampleId: sample.id }, { entityId: sample.id }] },
         orderBy: { timestamp: 'asc' }
     });
@@ -241,6 +249,10 @@ async function assembleReport(sampleId, user) {
 
     // 15. Assemble the final structured report payload
     const reportLocale = (user && user.language) ? user.language : 'en';
+    const qcWarnings = reportingQc(sample, reportOptions).warnings;
+    const warningLocale = ['en', 'es', 'es-419', 'fr', 'pt'].includes(reportLocale) ? reportLocale : 'en';
+    const qcWarningStatement = qcWarnings.length
+        ? require(`../locales/${warningLocale}.json`).resultReports.qcWarningStatement : null;
     const reportContent = {
         meta: {
             reportId: null, // assigned when saved
@@ -291,6 +303,8 @@ async function assembleReport(sampleId, user) {
         labBranding,
         // Results (grouped by category)
         resultGroups: Object.values(groupedResults),
+        qcWarnings,
+        qcWarningStatement,
         // Holistic Multi-Parameter Soil Metrology & Diagnostics
         diagnostics: soilDiagnostics,
         // Methodologies footnotes

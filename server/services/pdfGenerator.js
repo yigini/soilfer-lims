@@ -323,7 +323,7 @@ function generateReportPdfBuffer(reportContent) {
                 .text('QUALITY ASSURANCE & DATA INTEGRITY', startX + 10, currentY + 8);
 
             doc.font('Helvetica').fontSize(7.5).fillColor(cGray)
-                .text('• All batch Quality Control checks (Method Blanks, Duplicate RPD, and Certified Reference Materials recovery) met laboratory-approved acceptance limits.', startX + 10, currentY + 22, { width: 320 })
+                .text(reportContent.qcWarnings?.length ? reportContent.qcWarningStatement : '• All batch Quality Control checks (Method Blanks, Duplicate RPD, and Certified Reference Materials recovery) met laboratory-approved acceptance limits.', startX + 10, currentY + 22, { width: 320 })
                 .text('• Metrological traceability: Calibrated instruments and analytical grade reagents referenced against recognized calibration standards.', startX + 10, currentY + 44, { width: 320 })
                 .text('• Disclaimer: This certificate relates solely to the sample as received and tested.', startX + 10, currentY + 66, { width: 320 });
 

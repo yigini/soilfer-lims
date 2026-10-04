@@ -1,3 +1,4 @@
+const { invalidateReturnedResults } = require('../services/reportResultGovernance');
 const COMPOUND_ANALYSIS_EXPANSION = {
     'exchangeableBases': ['EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA']
 };
@@ -1299,11 +1300,6 @@ exports.reviewWorkItem = async (req, res) => {
             updateData.reanalysisReason = effectiveReason;
         }
 
-        const updated = await prisma.workItem.update({
-            where: { id },
-            data: updateData
-        });
-
         const operations = [];
 
         // Check if analysis is spectral-related
@@ -1326,7 +1322,7 @@ exports.reviewWorkItem = async (req, res) => {
             // Sync spectralData status to APPROVED when spectral work item is accepted
             // S05: Only sync exact linked scan or exact attempt, never entire lab or sample
             if (isSpectralAnalysis) {
-                operations.push(prisma.spectralData.updateMany({
+                operations.push(tx => tx.spectralData.updateMany({
                     where: {
                         OR: [
                             { workItemId: item.id },
@@ -1343,12 +1339,12 @@ exports.reviewWorkItem = async (req, res) => {
             }
         } else if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
             if (item.analysis === 'DRYING') {
-                operations.push(prisma.sample.update({
+                operations.push(tx => tx.sample.update({
                     where: { id: String(item.sampleId) },
                     data: { dryingStatus: 'PENDING' }
                 }));
             } else if (item.analysis === 'PREPARATION') {
-                operations.push(prisma.sample.update({
+                operations.push(tx => tx.sample.update({
                     where: { id: String(item.sampleId) },
                     data: { preparationStatus: 'PENDING' }
                 }));
@@ -1357,7 +1353,7 @@ exports.reviewWorkItem = async (req, res) => {
             // Sync spectralData status to REJECTED when spectral work is rejected
             // S05: Only sync exact linked scan or exact attempt
             if (isSpectralAnalysis) {
-                operations.push(prisma.spectralData.updateMany({
+                operations.push(tx => tx.spectralData.updateMany({
                     where: {
                         OR: [
                             { workItemId: item.id },
@@ -1379,7 +1375,7 @@ exports.reviewWorkItem = async (req, res) => {
             ? 'ACCEPT'
             : (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED ? 'RETURN' : 'WAIVE');
 
-        operations.push(prisma.reviewDecision.create({
+        operations.push(tx => tx.reviewDecision.create({
             data: {
                 id: `rd-${id}-${Date.now()}`,
                 sampleId: String(item.sampleId),
@@ -1402,7 +1398,7 @@ exports.reviewWorkItem = async (req, res) => {
             });
             const unreviewed = allSubItems.filter(si => si.id !== id && !['ACCEPTED', 'REANALYSIS_REQUIRED', 'WAIVED'].includes(si.status));
             const subStatus = unreviewed.length === 0 ? 'REVIEWED' : 'PARTIALLY_REVIEWED';
-            operations.push(prisma.submission.update({
+            operations.push(tx => tx.submission.update({
                 where: { id: item.submissionId },
                 data: {
                     status: subStatus,
@@ -1413,7 +1409,7 @@ exports.reviewWorkItem = async (req, res) => {
             }));
         }
 
-        operations.push(prisma.auditLog.create({
+        operations.push(tx => tx.auditLog.create({
             data: {
                 id: `audit-wi-rev-${id}-${Date.now()}`,
                 entity: 'WORKITEM',
@@ -1460,7 +1456,7 @@ exports.reviewWorkItem = async (req, res) => {
             // Only create message if we have a valid recipient ID and sender ID
             const senderId = user.id || (await prisma.user.findFirst({ where: { username: user.username }, select: { id: true } }))?.id;
             if (subject && body && recipient?.id && senderId) {
-                operations.push(prisma.message.create({
+                operations.push(tx => tx.message.create({
                     data: {
                         id: `msg-review-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
                         senderId: senderId,
@@ -1489,9 +1485,14 @@ exports.reviewWorkItem = async (req, res) => {
             }
         }
 
-        if (operations.length > 0) {
-            await prisma.$transaction(operations);
-        }
+        const updated = await prisma.$transaction(async tx => {
+            const updatedItem = await tx.workItem.update({ where: { id }, data: updateData });
+            for (const operation of operations) await operation(tx);
+            if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
+                await invalidateReturnedResults(tx, item, user, effectiveReason);
+            }
+            return updatedItem;
+        });
 
         // Real-time push: broadcast WORKITEM_UPDATE to all connected users
         try {
@@ -1515,7 +1516,7 @@ exports.reviewWorkItem = async (req, res) => {
         });
     } catch (error) {
         console.error('[reviewWorkItem] Error:', error);
-        res.status(500).json({ error: 'Failed to review work item' });
+        res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }) });
     }
 };
 
@@ -1670,7 +1671,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                 updateData.reanalysisReason = effectiveReason;
             }
 
-            operations.push(prisma.workItem.update({
+            operations.push(tx => tx.workItem.update({
                 where: { id: item.id },
                 data: updateData
             }));
@@ -1693,7 +1694,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                 const bulkAnalysisUpper = (item.analysis || '').toUpperCase();
                 const bulkIsSpectral = ['NIR', 'MIR', 'SPECTRAL', 'VIS-NIR', 'VISNIR', 'SCAN'].some(k => bulkAnalysisUpper.includes(k));
                 if (bulkIsSpectral) {
-                    operations.push(prisma.spectralData.updateMany({
+                    operations.push(tx => tx.spectralData.updateMany({
                         where: {
                             OR: [
                                 { workItemId: item.id },
@@ -1710,7 +1711,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                 }
             }
 
-            operations.push(prisma.auditLog.create({
+            operations.push(tx => tx.auditLog.create({
                 data: {
                     id: `audit-wi-bulk-rev-${item.id}-${Date.now()}`,
                     entity: 'WORKITEM',
@@ -1727,7 +1728,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                 ? 'ACCEPT'
                 : (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED ? 'RETURN' : 'WAIVE');
 
-            operations.push(prisma.reviewDecision.create({
+            operations.push(tx => tx.reviewDecision.create({
                 data: {
                     id: `rd-bulk-${item.id}-${Date.now()}`,
                     sampleId: String(item.sampleId),
@@ -1770,7 +1771,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                 // Only create message if we have a valid recipient ID and sender ID
                 const senderId = user.id || (await prisma.user.findFirst({ where: { username: user.username }, select: { id: true } }))?.id;
                 if (subject && body && recipient?.id && senderId) {
-                    operations.push(prisma.message.create({
+                    operations.push(tx => tx.message.create({
                         data: {
                             id: `msg-bulk-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
                             senderId: senderId,
@@ -1810,7 +1811,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
             const itemIdsBeingReviewed = new Set(items.map(i => i.id));
             const unreviewed = allSubItems.filter(si => !itemIdsBeingReviewed.has(si.id) && !['ACCEPTED', 'REANALYSIS_REQUIRED', 'WAIVED'].includes(si.status));
             const subStatus = unreviewed.length === 0 ? 'REVIEWED' : 'PARTIALLY_REVIEWED';
-            operations.push(prisma.submission.update({
+            operations.push(tx => tx.submission.update({
                 where: { id: subId },
                 data: {
                     status: subStatus,
@@ -1823,7 +1824,12 @@ exports.reviewWorkItemsBulk = async (req, res) => {
 
         if (operations.length > 0) {
             // Using transaction to ensure atomic updates
-            await prisma.$transaction(operations);
+            await prisma.$transaction(async tx => {
+                for (const operation of operations) await operation(tx);
+                if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
+                    for (const item of items) await invalidateReturnedResults(tx, item, user, effectiveReason);
+                }
+            });
         }
 
         // Real-time push: broadcast WORKITEM_UPDATE to all connected users
@@ -1845,7 +1851,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
         res.json({ success: true, count: items.length });
     } catch (error) {
         console.error('[reviewWorkItemsBulk] Error:', error);
-        res.status(500).json({ error: 'Failed to review work items' });
+        res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work items', ...(error.code && { code: error.code }) });
     }
 };
 

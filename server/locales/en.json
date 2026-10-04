@@ -1,4 +1,5 @@
 {
+  "resultReports": { "qcWarningStatement": "QC warning: One or more reported values have failed or incomplete batch QC. See the recorded batch warnings." },
   "common": {
     "save": "Save",
     "cancel": "Cancel",

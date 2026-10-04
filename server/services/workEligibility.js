@@ -7,19 +7,10 @@
  */
 'use strict';
 
-const { checkBatchDisposition } = require('./qcService');
+const { TEXTURE_ALIASES, DERIVED_TEXTURE_FRACTIONS, NON_ANALYTICAL, governingItems,
+    governsResult, isCurrentValidAnalyticalResult, getReportingMode, reportingQc } = require('./reportResultGovernance');
 
 const GATE_ANALYSES = ['DRYING', 'PREPARATION'];
-const NON_ANALYTICAL = ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP'];
-const TEXTURE_ALIASES = new Set([
-    'TEXTURE',
-    'SOIL_PSD_TEXTURE',
-    'SOIL_TEXTURE',
-    'PSA',
-    'pSA',
-    'Particle Size Analysis'
-]);
-const DERIVED_TEXTURE_FRACTIONS = ['SAND', 'SILT', 'CLAY'];
 
 /**
  * Evaluates whether a work item is ready for result/checklist entry by the technician.
@@ -339,27 +330,40 @@ function canPublish(sample, report, user, options = {}) {
         return { allowed: false, code: 'NOT_FOUND', reason: 'Sample record not found' };
     }
 
-    // Review and publication use the same batch disposition gate.
-    const qcBatches = options.qcBatches || [];
-    const blockedQc = qcBatches.find(batch => !checkBatchDisposition(batch).allowed);
-    if (blockedQc) {
-        const gate = checkBatchDisposition(blockedQc);
-        return {
-            allowed: false,
-            code: blockedQc.status === 'QC_FAIL' ? 'QC_BATCH_FAILED' : 'QC_BATCH_PENDING',
-            reason: `Cannot publish report: ${gate.error}`
-        };
+    if (!['APPROVED', 'PUBLISHED', 'ARCHIVED'].includes(sample.status)) {
+        return { allowed: false, code: 'SAMPLE_NOT_APPROVED', reason: `Sample must be approved before publishing (current: ${sample.status})` };
     }
 
-    if (!['APPROVED', 'PUBLISHED', 'COMPLETED', 'SUBMITTED_FULL'].includes(sample.status)) {
-        return { allowed: false, code: 'SAMPLE_NOT_APPROVED', reason: `Sample must be in approved or completed status before publishing (current: ${sample.status})` };
+    const workItems = options.workItems || sample.workItems || [];
+    const analyticalItems = workItems.filter(item => !NON_ANALYTICAL.includes(item.analysis));
+    const pending = analyticalItems.filter(item => !['ACCEPTED', 'WAIVED', 'CANCELLED'].includes(item.status));
+    if (pending.length) {
+        return { allowed: false, code: 'ITEMS_NOT_ACCEPTED', reason: 'Every analytical work item must be reviewed before publication.',
+            workItemIds: pending.map(item => item.id) };
     }
 
-    if (['DISPOSED', 'ARCHIVED', 'RECEIVED_REJECTED'].includes(sample.status)) {
-        return { allowed: false, code: 'SAMPLE_CLOSED', reason: 'Sample is closed, archived or rejected' };
+    const qc = reportingQc(sample, options);
+    if (qc.blocker) {
+        const { batch, gate } = qc.blocker;
+        return { allowed: false, code: batch.status === 'QC_FAIL' ? 'QC_BATCH_FAILED' : 'QC_BATCH_PENDING',
+            reason: `Cannot publish report: ${gate.error}` };
     }
 
-    return { allowed: true, reason: null };
+    const validResults = (options.results || sample.results || []).filter(result =>
+        isCurrentValidAnalyticalResult(result, getReportingMode(sample, result, options)));
+    const ungoverned = validResults.filter(result => governingItems(result, workItems).length === 0);
+    if (ungoverned.length) {
+        return { allowed: false, code: 'RESULT_UNGOVERNED', reason: 'Current results lack a governing work item.',
+            params: [...new Set(ungoverned.map(result => result.param))] };
+    }
+    const missing = analyticalItems.filter(item => item.status === 'ACCEPTED' &&
+        !validResults.some(result => governsResult(item, result)));
+    if (missing.length) {
+        return { allowed: false, code: 'ACCEPTED_ITEM_WITHOUT_VALID_RESULT', reason: 'Accepted analytical work lacks a current valid result.',
+            workItemIds: missing.map(item => item.id) };
+    }
+
+    return { allowed: true, reason: null, qcWarnings: qc.warnings };
 }
 
 const UNFINISHED_WORK_STATUSES = [

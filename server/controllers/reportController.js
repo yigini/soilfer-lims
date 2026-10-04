@@ -6,6 +6,8 @@ const crypto = require('crypto');
 const prisma = require('../prisma');
 const { assembleReport } = require('../services/reportAssembly');
 const { generateReportPdfBuffer } = require('../services/pdfGenerator');
+const policyService = require('../services/policyService');
+const { linkedBatchIds } = require('../services/reportResultGovernance');
 
 // ─── HELPERS ─────────────────────────────────────────────
 
@@ -83,48 +85,39 @@ async function generateReport(req, res) {
             return res.status(403).json({ error: 'Access denied: Sample not in your Lab scope' });
         }
 
-        // S06: Query linked QC batches for QC release gate
-        const qcBatches = await prisma.batch.findMany({
-            where: {
-                workItems: {
-                    some: { sampleId: String(sampleId) }
-                }
+        // Freeze eligibility, reviewed values, QC caveats and the report together.
+        const report = await prisma.$transaction(async tx => {
+            const currentSample = await tx.sample.findUnique({ where: { id: sampleId },
+                include: { workItems: true, results: { where: { isCurrent: true } } } });
+            if (!scopeGuard.canAccessEntity(req.user, currentSample, { labField: 'labId', altLabField: 'assignedLab' })) {
+                throw Object.assign(new Error('Access denied: Sample not in your Lab scope'), { statusCode: 403 });
             }
-        });
-
-        // R1: Enforce publication authority, sample approval state, and QC release gate
-        const { canPublish } = require('../services/workEligibility');
-        const publishCheck = canPublish(sample, null, req.user, { qcBatches });
-        if (!publishCheck.allowed) {
-            const statusCode = publishCheck.code?.startsWith('QC_BATCH_') ? 409 : 403;
-            return res.status(statusCode).json({ error: publishCheck.reason, code: publishCheck.code || 'PUBLISH_DENIED' });
-        }
-
-        // S13: Find max historical version across ALL reports for this sample to ensure strictly monotonic versioning
-        const maxReport = await prisma.report.findFirst({
-            where: { sampleId },
-            orderBy: { version: 'desc' }
-        });
-        const version = (maxReport?.version || 0) + 1;
-
-        // Assemble the report
-        const { content, searchKeys } = await assembleReport(sampleId, req.user);
-
-        // Append version to report number
-        if (content.reportNumber) {
-            content.reportNumber = `${content.reportNumber}-v${version}`;
-        }
-
-        // S13: Supersede existing published reports and create new report atomically under transaction
-        const [_, report] = await prisma.$transaction([
-            prisma.report.updateMany({
+            const batchIds = [...new Set(currentSample.results.flatMap(result => linkedBatchIds(result, currentSample.workItems)))];
+            const qcBatches = batchIds.length ? await tx.batch.findMany({ where: { id: { in: batchIds } } }) : [];
+            const qcModes = {};
+            for (const result of currentSample.results) {
+                qcModes[result.id] = await policyService.get(currentSample.assignedLab || currentSample.labId, 'qc.mode', {
+                    analysisCode: result.param, methodologyId: result.methodologyId || null
+                });
+            }
+            const { canPublish } = require('../services/workEligibility');
+            const publishCheck = canPublish(currentSample, null, req.user, { qcBatches, qcModes });
+            if (!publishCheck.allowed) {
+                const statusCode = publishCheck.code === 'PERMISSION_DENIED' ? 403 : 409;
+                throw Object.assign(new Error(publishCheck.reason), { statusCode, publishCheck });
+            }
+            const maxReport = await tx.report.findFirst({ where: { sampleId }, orderBy: { version: 'desc' } });
+            const version = (maxReport?.version || 0) + 1;
+            const { content, searchKeys } = await assembleReport(sampleId, req.user, { db: tx, qcBatches, qcModes });
+            if (content.reportNumber) content.reportNumber = `${content.reportNumber}-v${version}`;
+            await tx.report.updateMany({
                 where: { sampleId, status: 'PUBLISHED' },
                 data: { status: 'SUPERSEDED' }
-            }),
-            prisma.report.create({
+            });
+            return tx.report.create({
                 data: {
                     sampleId,
-                    labId: sample.assignedLab || sample.labId || null,
+                    labId: currentSample.assignedLab || currentSample.labId || null,
                     version,
                     status: 'PUBLISHED',
                     content: JSON.stringify(content),
@@ -132,8 +125,8 @@ async function generateReport(req, res) {
                     publishedAt: new Date(),
                     ...searchKeys
                 }
-            })
-        ]);
+            });
+        });
 
         // Audit log
         try {
@@ -161,6 +154,10 @@ async function generateReport(req, res) {
             generatedBy: report.generatedBy
         });
     } catch (err) {
+        if (err.statusCode) {
+            const { code, workItemIds, params } = err.publishCheck || {};
+            return res.status(err.statusCode).json({ error: err.message, code, workItemIds, params });
+        }
         console.error('[Report] Generate error:', err);
         res.status(500).json({ error: err.message || 'Failed to generate report' });
     }
