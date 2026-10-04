@@ -1,5 +1,6 @@
 {
   "common": {
+    "copySecretFailed": "Copy failed. Select the key and copy it manually before closing this window.",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
