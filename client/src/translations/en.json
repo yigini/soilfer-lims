@@ -1,4 +1,5 @@
 {
+  "sampleLookup": { "title": "Sample lookup", "ambiguous": "This identifier matches several samples:", "failed": "Sample could not be found or loaded. Check the identifier and connection." },
   "dataSheet": {
     "title": "Data Sheet",
     "readOnlyDescription": "Recorded results are read-only here. Open the workbench to enter or update results.",

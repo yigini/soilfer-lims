@@ -1,4 +1,5 @@
 {
+  "sampleLookup": { "title": "Recherche d'échantillon", "ambiguous": "Cet identifiant correspond à plusieurs échantillons :", "failed": "L'échantillon est introuvable ou ne peut pas être chargé. Vérifiez l'identifiant et la connexion." },
   "dataSheet": {
     "title": "Feuille de données",
     "readOnlyDescription": "Les résultats enregistrés sont en lecture seule ici. Ouvrez le plan de travail pour saisir ou modifier des résultats.",
