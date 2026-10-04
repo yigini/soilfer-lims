@@ -13,7 +13,7 @@ describe('Audit 0.10: current results in exports and working grid', () => {
     let token;
     beforeAll(async () => { token = await getAuthToken('LAB_MANAGER', labId); });
     afterEach(() => jest.restoreAllMocks());
-    async function fixture({ status = 'APPROVED', receptionDate, projectCode = id('PROJ-010'), assignedLab = labId } = {}) {
+    async function fixture({ status = 'APPROVED', receptionDate, projectCode = id('PROJ-010').toUpperCase(), assignedLab = labId } = {}) {
         const sampleId = id('SMP-010');
         const sample = await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId,
             assignedLab, status, projectCode, receptionDate: receptionDate ? new Date(receptionDate) : new Date(), requiredAnalyses: '["SOC"]' } });
@@ -97,7 +97,7 @@ describe('Audit 0.10: current results in exports and working grid', () => {
         [{ startDate: '2026-01-02T00:00:00Z' }, [2, 3]],
         [{ endDate: '2026-01-02T23:59:59Z' }, [1, 2]]
     ])('date bounds are merged and each bound works alone (%s)', async (bounds, expected) => {
-        const projectCode = id('PROJ-010-DATES');
+        const projectCode = id('PROJ-010-DATES').toUpperCase();
         for (const day of [1, 2, 3]) { const f = await fixture({ projectCode, receptionDate: `2026-01-0${day}T12:00:00Z` }); await result(f, day); }
         const response = await grid({ project: projectCode, ...bounds });
         expect(response.status).toBe(200); expect(response.body.data.map(row => scalar(row.SOC)).sort()).toEqual(expected);
