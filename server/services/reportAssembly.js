@@ -7,6 +7,7 @@ const { normalizeUnit, interpretParameter, evaluateSoilProfile } = require('./in
 const { isReviewedReportResult, isCurrentValidAnalyticalResult, matchingItems, governingItems,
     getReportingMode, reportingQc, linkedBatchIds } = require('./reportResultGovernance');
 const policyService = require('./policyService');
+const { freezeReportEvidence } = require('./reportTruthfulnessService');
 
 /**
  * Assemble a full report object for a given sample.
@@ -203,12 +204,6 @@ async function assembleReport(sampleId, user, options = {}) {
     // 12. Extract location data (merge receptionData + fieldMetadata)
     const locationData = extractLocationData(fieldMeta, receptionData, sample);
 
-    // 13. Build report number
-    const labCode = lab?.code || 'LAB';
-    const year = new Date().getFullYear();
-    // Version will be set by the controller, use placeholder
-    const reportNumber = `RPT-${labCode}-${year}`;
-
     // 14. Build signedBy block
     const signedByName = labManager?.name || labManager?.username || user?.name || user?.username || 'Laboratory Manager';
     const signedBy = {
@@ -311,6 +306,7 @@ async function assembleReport(sampleId, user, options = {}) {
         resultGroups: Object.values(groupedResults),
         qcWarnings,
         qcWarningStatement,
+        evidence: freezeReportEvidence(reportableResults, sample.workItems, qcBatches),
         // Holistic Multi-Parameter Soil Metrology & Diagnostics
         diagnostics: soilDiagnostics,
         // Methodologies footnotes
