@@ -83,6 +83,21 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.5.0',
+        date: 'October 2026',
+        tag: 'Data Exchange (OpenNSIS / GloSIS), Audit Phase 0 Hardening & Canonical Policy',
+        badgeColor: 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800',
+        changes: [
+            'National SIS & GloSIS Exchange Connector (Issue #140, PR #158): Machine-to-machine data exchange compatibility with OpenNSIS (ISO 28258), exposing profileCode, depth horizons, and 503 exchange eligibility guards.',
+            'Technician Workbench Ergonomics (Audit Phase 0, Issue #173): Fixed mobile card view prop forwarding in SingleSampleEditor, resolved instrument-required deadlock in inspector, enabled keyboard column navigation, and purged fabricated QC form defaults.',
+            'Batch QC Hardening & LOQ Guard (Audit Phase 0, Issue #177): Stricter duplicate RPD precision checks guarding against zero/negative means and near-LOQ mathematical distortion with absolute difference thresholds.',
+            'Report Truthfulness & Monotonic Versioning (Audit Phase 0, Issues #170, #171): Enforced strict monotonic report numbering (RPT-*-vN), automatic atomic supersession of older report versions, and audit disclaimers on manager overrides.',
+            'Intake Integrity (Audit Phase 0, Issue #174): Batch intake stops inventing default sample mass and moisture, preserving authentic field arrival conditions.',
+            'Shared Number & Decimal Parsing (Audit Phase 0, Issue #176): Unified locale-aware decimal parsing supporting both dot and comma notations across all results entry paths.',
+            'Canonical Semantic Versioning Policy: Established VERSIONING.md, unified client and server versions at v1.5.0, with dynamic build-time injection (__APP_VERSION__) and server /api/version endpoints.'
+        ]
+    },
+    {
         version: 'v1.4.0',
         date: 'September 2026',
         tag: 'Sample Reception Rework & Chain of Custody (RC-01 - RC-20)',
@@ -200,10 +215,15 @@ const TechStack = () => {
                             <Cpu size={26} />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-extrabold text-white tracking-tight">
-                                Technical Architecture & Release Log
-                            </h1>
-                            <p className="text-emerald-200/80 text-sm font-medium">
+                            <div className="flex items-center gap-3 flex-wrap">
+                                <h1 className="text-3xl font-extrabold text-white tracking-tight">
+                                    Technical Architecture & Release Log
+                                </h1>
+                                <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-white/10 text-emerald-300 border border-emerald-400/30 shadow-sm">
+                                    v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.5.0'}
+                                </span>
+                            </div>
+                            <p className="text-emerald-200/80 text-sm font-medium mt-1">
                                 SoilFER LIMS · Enterprise Laboratory Information Management System
                             </p>
                         </div>

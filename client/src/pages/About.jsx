@@ -25,6 +25,9 @@ const About = () => {
                         <Sparkles size={12} />
                         Global Flagship Initiative
                     </span>
+                    <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-mono font-semibold bg-sf-surface text-sf-text border border-sf-divider">
+                        v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.5.0'}
+                    </span>
                 </div>
             </div>
 
@@ -34,11 +37,21 @@ const About = () => {
                 <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
                 <div className="relative z-10 max-w-3xl space-y-6">
-                    <div className="flex items-center gap-3">
-                        <img src="/assets/img/soilfer-logo.png" alt="SoilFER" className="h-12 w-auto object-contain brightness-110 drop-shadow-md" />
-                        <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-amber-200 tracking-tight">
-                            LIMS
-                        </span>
+                    <div className="flex items-center justify-between flex-wrap gap-3">
+                        <div className="flex items-center gap-3">
+                            <img src="/assets/img/soilfer-logo.png" alt="SoilFER" className="h-12 w-auto object-contain brightness-110 drop-shadow-md" />
+                            <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-amber-200 tracking-tight">
+                                LIMS
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-white/10 text-emerald-300 border border-emerald-400/30 backdrop-blur-sm shadow-sm">
+                                v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.5.0'}
+                            </span>
+                            <span className="px-2.5 py-1 rounded-full text-[11px] font-mono text-gray-300 bg-black/20 border border-white/10">
+                                {typeof __BUILD_DATE__ !== 'undefined' ? __BUILD_DATE__ : '2026-10-04'}
+                            </span>
+                        </div>
                     </div>
 
                     <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">

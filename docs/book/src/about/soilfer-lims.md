@@ -48,6 +48,11 @@ SoilFER-LIMS is not a generic laboratory system. It was designed specifically fo
 - The source code is publicly available on [GitHub](https://github.com/yigini/soilfer-lims)
 - You can host it on your own server — your data stays under your control
 
+### 🏷️ Semantic Versioning & Traceability
+- Strictly adheres to [Semantic Versioning 2.0.0](https://semver.org/) across client and server runtimes.
+- Built-in live release audit and changelog tracking available in-app at `/techstack`.
+- Transparent Git tagging and release notes for verifiable laboratory deployments.
+
 ---
 
 ## Two Deployment Modes
