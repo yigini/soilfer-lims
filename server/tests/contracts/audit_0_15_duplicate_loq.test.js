@@ -4,6 +4,120 @@ const policyService = require('../../services/policyService');
 const prisma = require('../../prisma');
 const { randomUUID } = require('crypto');
 const id = prefix => `${prefix}-${randomUUID()}`;
+const { parseDuplicateObservation } = require('../../../shared/numberParse');
+const request = require('supertest');
+const app = require('../../app');
+const { getAuthToken } = require('../setup');
+const format = { decimal: '.', thousands: null };
+
+describe('Audit 0.15: censored observations use the shared number parser', () => {
+    test.each(['<0,05', '< 0.05', '<=0.05', '≤0.05', '<LOQ', ' <loq> '].slice(0, 5))('%s is an explicit below-limit observation', raw => {
+        expect(parseDuplicateObservation(raw, format)).toMatchObject({ valid: true, censored: 'BELOW', rawInput: raw });
+    });
+    test.each(['>100', '>=100', '≥100'])('%s is an above-range observation, never a finite measurement', raw => {
+        expect(parseDuplicateObservation(raw, format)).toMatchObject({ valid: true, censored: 'ABOVE' });
+    });
+    test.each(['', '?0.1', '<bad', '<1,234'])('invalid or ambiguous %s is not an observation', raw => {
+        expect(parseDuplicateObservation(raw, format).valid).toBe(false);
+    });
+    test.each([
+        ['<LOQ', '<0.05', 'PASS', 'CENSORED_PAIR'],
+        ['<0.1', '0.05', 'INVALID', 'CENSORED_MISMATCH'],
+        ['>100', '100', 'INVALID', 'CENSORED_ABOVE_RANGE'],
+        ['<0.1', '>100', 'INVALID', 'CENSORED_ABOVE_RANGE']
+    ])('%s and %s produce %s', (value1, value2, status, criterion) => {
+        expect(evaluateDuplicate({ value1, value2 }, { loq: .1 })).toMatchObject({ status, criterion, rpd: null });
+    });
+    test('different below-limit censoring values both remain null measured values with their limits recorded', () => {
+        expect(evaluateDuplicate({ value1: '<0.1', value2: '≤0.2' })).toMatchObject({ status: 'PASS', value1: null, value2: null,
+            notes: expect.arrayContaining(['NO_LOQ', 'CENSORED_PAIR', 'CENSORING_LIMITS_DIFFER']),
+            censoringLimits: [{ qualifier: '<', limit: .1, literalLoq: false }, { qualifier: '<=', limit: .2, literalLoq: false }] });
+    });
+});
+
+describe('Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring evidence', () => {
+    const labId = 'LAB-AUDIT-015';
+    let token;
+    beforeAll(async () => {
+        token = await getAuthToken('LAB_TECHNICIAN', labId);
+        await prisma.lab.upsert({ where: { id: labId }, update: { settings: '{}' }, create: { id: labId, code: labId, name: labId, country: 'GTM', settings: '{}' } });
+    });
+    afterEach(async () => { await prisma.lab.update({ where: { id: labId }, data: { settings: '{}' } }); });
+    async function fixture({ methodLoqs = [.1], analysisLoq = .2 } = {}) {
+        const analysis = id('HTTP-A015'), batchId = id('HTTP-B015');
+        await prisma.analysis.create({ data: { code: analysis, name: analysis, loq: analysisLoq } });
+        const batch = await prisma.batch.create({ data: { id: batchId, analysis, labId, profile: 'RACK_40', status: 'OPEN', createdBy: 'fixture' } });
+        const methods = [];
+        for (const loq of methodLoqs) {
+            const methodId = id('HTTP-M015'), sampleId = id('HTTP-S015');
+            await prisma.methodology.create({ data: { id: methodId, analysisCode: analysis, name: methodId, loq } });
+            await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, assignedLab: labId, status: 'PROCESSING' } });
+            await prisma.workItem.create({ data: { id: id('HTTP-W015'), sampleId, analysis, assignedLab: labId, batchId, methodologyId: methodId, status: 'COMPLETED' } });
+            methods.push(methodId);
+        }
+        return { batch, methods };
+    }
+    const payload = (value1, value2) => ({ blanks: [{ value: '0' }], controls: [{ expected: '7', measured: '7' }], duplicates: [{ value1, value2 }] });
+    const evaluate = (batch, data, route = 'post') => request(app)[route](`/api/qc/batches/${batch.id}${route === 'post' ? '/evaluate' : ''}`)
+        .set('Authorization', `Bearer ${token}`).send(data);
+    const duplicate = async batch => {
+        const typed = await prisma.batchQcResult.findFirst({ where: { batchId: batch.id, type: 'DUPLICATE' } });
+        return { typed, details: JSON.parse(typed.details) };
+    };
+    test.each(['post', 'put'])('%s resolves the recorded methodology LOQ and persists all decision evidence', async route => {
+        const { batch, methods: [methodologyId] } = await fixture();
+        const response = await evaluate(batch, payload('0,02', '0,05'), route);
+        expect({ status: response.status, body: response.body }).toMatchObject({ status: 200 });
+        const { typed, details } = await duplicate(batch);
+        expect(typed).toMatchObject({ status: 'PASS', value1: .02, value2: .05, rpd: null });
+        expect(details).toMatchObject({ loq: .1, loqSource: 'METHODOLOGY', methodologyId, criterion: 'ABSOLUTE_DIFFERENCE', rawInput: { value1: '0,02', value2: '0,05' } });
+        expect((await prisma.batch.findUnique({ where: { id: batch.id } })).status).toBe('QC_PASS');
+    });
+    test.each([
+        ['<LOQ', '<0.05', 'PASS', 'CENSORED_PAIR'],
+        [' <loq', '≤0,05 ', 'PASS', 'CENSORED_PAIR'],
+        ['<0.1', '<0.2', 'PASS', 'CENSORED_PAIR'],
+        ['<0.1', '0.05', 'INVALID', 'CENSORED_MISMATCH'],
+        ['>100', '100', 'INVALID', 'CENSORED_ABOVE_RANGE'],
+        [-1, 1, 'INVALID', 'INVALID_NONPOSITIVE']
+    ])('%s / %s records %s without replacing censored limits with measured values', async (value1, value2, status, criterion) => {
+        const { batch } = await fixture();
+        expect((await evaluate(batch, payload(value1, value2))).status).toBe(200);
+        const { typed, details } = await duplicate(batch);
+        expect(typed.status).toBe(status); expect(details.criterion).toBe(criterion);
+        expect(details.rawInput).toEqual({ value1: String(value1), value2: String(value2) });
+        if (String(value1).trim().startsWith('<') || String(value1).startsWith('>')) expect(typed.value1).toBeNull();
+        if (String(value2).trim().startsWith('<') || String(value2).trim().startsWith('≤')) expect(typed.value2).toBeNull();
+        expect((await prisma.batch.findUnique({ where: { id: batch.id } })).status).toBe(status === 'PASS' ? 'QC_PASS' : 'QC_FAIL');
+    });
+    test('one analysis fallback is authoritative and mixed methods are audited as NO_LOQ without rejection', async () => {
+        const fallback = await fixture({ methodLoqs: [], analysisLoq: .1 });
+        expect((await evaluate(fallback.batch, payload(.02, .05))).status).toBe(200);
+        expect((await duplicate(fallback.batch)).details).toMatchObject({ loq: .1, loqSource: 'ANALYSIS', methodologyId: null });
+        const mixed = await fixture({ methodLoqs: [.1, .2] });
+        expect((await evaluate(mixed.batch, payload(7, 7))).status).toBe(200);
+        expect((await duplicate(mixed.batch)).details).toMatchObject({ loq: null, notes: ['NO_LOQ', 'METHOD_AMBIGUOUS'], criterion: 'RPD' });
+    });
+    test('raw localized censoring syntax is reparsed once with its lab format, never with a canonical grouping separator', async () => {
+        await prisma.lab.update({ where: { id: labId }, data: { settings: '{"decimalSeparator":",","thousandsSeparator":"."}' } });
+        const { batch } = await fixture();
+        const data = payload('<1.234', '<1.234');
+        data.duplicates[0].rawInput = { value1: ' <1,234 ', value2: '<1,234' };
+        expect((await evaluate(batch, data)).status).toBe(200);
+        const { details } = await duplicate(batch);
+        expect(details.censoringLimits.map(observation => observation.limit)).toEqual([1.234, 1.234]);
+        expect(details.rawInput).toEqual(data.duplicates[0].rawInput);
+    });
+    test.each(['<0.1', '<LOQ'])('censored blank %s remains missing and leaves stored evidence untouched', async value => {
+        const { batch } = await fixture(); const before = await prisma.batch.findUnique({ where: { id: batch.id } });
+        const data = payload(7, 7); data.blanks[0].value = value;
+        const response = await evaluate(batch, data);
+        expect(response.status).toBe(400); expect(response.body).toMatchObject({ code: 'QC_VALUES_MISSING', missingTypes: ['BLANK'] });
+        expect(await prisma.batch.findUnique({ where: { id: batch.id } })).toEqual(before);
+        expect(await prisma.batchQcResult.count({ where: { batchId: batch.id } })).toBe(0);
+        expect(await prisma.auditLog.count({ where: { entityId: batch.id } })).toBe(0);
+    });
+});
 
 describe('Audit 0.15: independent duplicate numeric criteria', () => {
     test.each([[-1, 1], [0, 0], [-1, -1], [0, 1], [1, 0]])('%s / %s cannot pass', (value1, value2) => {
