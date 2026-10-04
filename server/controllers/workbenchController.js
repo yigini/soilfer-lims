@@ -9,6 +9,7 @@ const readinessService = require('../services/workbenchReadinessService');
 const { calculateUsdaTexture } = require('../utils/soilCalculations');
 const { broadcastToLab } = require('../wsServer');
 const scopeGuard = require('../utils/scopeGuard');
+const { SPECTRAL_ACQUISITION_CODES } = require('../config/spectralAcquisition');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/workbench/queue
@@ -550,7 +551,7 @@ exports.getQueue = async (req, res) => {
                 selectedEquipmentId: selectedEquipId
             });
 
-            const isSpectral = ['SPEC_MIR', 'SPEC_VIS_NIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(code);
+            const isSpectral = SPECTRAL_ACQUISITION_CODES.includes(code);
             const modality = (code === 'SPEC_MIR' || code === 'SPEC_FTIR') ? 'MIR' : 'NIR';
             const scans = isSpectral ? (spectralMap[`${item.sampleId}::${modality}`] || []) : [];
             const latestScan = scans.length > 0 ? scans[0] : null;
@@ -790,7 +791,7 @@ exports.batchSave = async (req, res) => {
             }
 
             // HARD BLOCK: Spectral acquisition tasks require spectrometer scans, never scalar values
-            const isSpectralAnalysis = ['SPEC_MIR', 'SPEC_VIS_NIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(item.analysis);
+            const isSpectralAnalysis = SPECTRAL_ACQUISITION_CODES.includes(item.analysis);
             if (isSpectralAnalysis) {
                 if (!draft) {
                     errors.push({
@@ -1794,7 +1795,7 @@ exports.previewCompletion = async (req, res) => {
 
             // 2. Validation check
             let validation = { isValid: true, flags: [] };
-            const isSpectralAnalysis = ['SPEC_MIR', 'SPEC_VIS_NIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(item.analysis);
+            const isSpectralAnalysis = SPECTRAL_ACQUISITION_CODES.includes(item.analysis);
             const isTextureAnalysis = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'].includes(item.analysis) || (entry.values != null);
             if (isSpectralAnalysis) {
                 validation = { isValid: false, flags: ['SPECTRAL_SCAN_REQUIRED'] };

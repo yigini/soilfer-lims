@@ -1,11 +1,17 @@
 const crypto = require('crypto');
 const policyService = require('./policyService');
 const { isInvalidOnlyByQcFailure, checkBatchDisposition } = require('./qcService');
+const { SPECTRAL_ACQUISITION_CODES } = require('../config/spectralAcquisition');
 
 const TEXTURE_ALIASES = new Set(['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis']);
 const DERIVED_TEXTURE_FRACTIONS = ['SAND', 'SILT', 'CLAY'];
 const NON_ANALYTICAL = ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP'];
 const EXCLUDED_GATE_CODES = new Set([...NON_ANALYTICAL, 'PREP', 'SAMPLE_PREP', 'SIEVING', 'MILLING', 'HOMOGENIZATION']);
+
+function hasApprovedSpectralEvidence(item, scans) {
+    return (scans || []).some(scan => scan.workItemId === item.id &&
+        scan.sampleId === item.sampleId && scan.isCurrent === true && scan.status === 'APPROVED');
+}
 
 function matchesResult(item, result) {
     if (!item || !result || String(item.sampleId) !== String(result.sampleId)) return false;
@@ -108,5 +114,6 @@ async function invalidateReturnedResults(tx, item, actor, reason) {
 }
 
 module.exports = { TEXTURE_ALIASES, DERIVED_TEXTURE_FRACTIONS, NON_ANALYTICAL, EXCLUDED_GATE_CODES,
+    SPECTRAL_ACQUISITION_CODES, hasApprovedSpectralEvidence,
     matchesResult, matchingItems, governsResult, governingItems, isCurrentValidAnalyticalResult, isReviewedReportResult, invalidateReturnedResults,
     getReportingMode, linkedBatchIds, reportingQc };

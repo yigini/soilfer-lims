@@ -101,7 +101,12 @@ async function generateReport(req, res) {
                 });
             }
             const { canPublish } = require('../services/workEligibility');
-            const publishCheck = canPublish(currentSample, null, req.user, { qcBatches, qcModes });
+            const { SPECTRAL_ACQUISITION_CODES } = require('../config/spectralAcquisition');
+            const spectralItemIds = currentSample.workItems.filter(item => SPECTRAL_ACQUISITION_CODES.includes(item.analysis)).map(item => item.id);
+            const spectralScans = spectralItemIds.length ? await tx.spectralData.findMany({ where: {
+                sampleId, workItemId: { in: spectralItemIds }, isCurrent: true, status: 'APPROVED'
+            } }) : [];
+            const publishCheck = canPublish(currentSample, null, req.user, { qcBatches, qcModes, spectralScans });
             if (!publishCheck.allowed) {
                 const statusCode = publishCheck.code === 'PERMISSION_DENIED' ? 403 : 409;
                 throw Object.assign(new Error(publishCheck.reason), { statusCode, publishCheck });

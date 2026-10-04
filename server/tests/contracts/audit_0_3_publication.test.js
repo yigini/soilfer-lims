@@ -9,6 +9,7 @@ const { assembleReport } = require('../../services/reportAssembly');
 const { governsResult, isReviewedReportResult } = require('../../services/reportResultGovernance');
 const { isInvalidOnlyByQcFailure } = require('../../services/qcService');
 const policyService = require('../../services/policyService');
+const { SPECTRAL_ACQUISITION_CODES } = require('../../config/spectralAcquisition');
 const labId = 'LAB-AUDIT-03';
 const id = prefix => `${prefix}-${crypto.randomUUID()}`;
 const modes = ['REQUIRED_BLOCKING', 'REQUIRED_WARN', 'ADVISORY', 'OFF'];
@@ -30,6 +31,60 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         return { sampleId, item, result, batch };
     }
     const generate = f => call(`/api/reports/generate/${f.sampleId}`, {});
+    async function spectralFixture(analysis = 'SPEC_MIR', scanOverrides = {}) {
+        const f = await fixture();
+        f.spectralItem = await prisma.workItem.create({ data: {
+            id: id('WI-SCAN'), sampleId: f.sampleId, assignedLab: labId, analysis, status: 'ACCEPTED'
+        } });
+        f.scan = await prisma.spectralData.create({ data: {
+            id: id('SCAN'), filename: 'audit-test-spectrum.csv', sampleId: f.sampleId, labId,
+            workItemId: f.spectralItem.id, modality: ['SPEC_MIR', 'SPEC_FTIR'].includes(analysis) ? 'MIR' : 'NIR',
+            isCurrent: true, status: 'APPROVED', ...scanOverrides
+        } });
+        return f;
+    }
+
+    test.each(SPECTRAL_ACQUISITION_CODES)('accepted %s publishes with exact approved scan and accepted pH result', async analysis => {
+        const f = await spectralFixture(analysis);
+        expect((await generate(f)).status).toBe(200);
+        expect(await prisma.result.count({ where: { sampleId: f.sampleId, param: analysis } })).toBe(0);
+    });
+    test.each([
+        ['unlinked', { workItemId: null }], ['superseded', { isCurrent: false }],
+        ['pending', { status: 'PENDING' }], ['rejected', { status: 'REJECTED' }],
+        ['wrong sample', { sampleId: 'unrelated-sample' }]
+    ])('%s spectral scan cannot evidence an accepted acquisition', async (_, overrides) => {
+        const f = await spectralFixture('SPEC_MIR', overrides);
+        const before = await prisma.spectralData.findUnique({ where: { id: f.scan.id } });
+        const res = await generate(f);
+        expect(res.status).toBe(409);
+        expect(res.body.code).toBe('ACCEPTED_ITEM_WITHOUT_EVIDENCE');
+        expect(res.body.workItemIds).toEqual([f.spectralItem.id]);
+        expect(await prisma.spectralData.findUnique({ where: { id: f.scan.id } })).toEqual(before);
+        expect(await prisma.report.count({ where: { sampleId: f.sampleId } })).toBe(0);
+    });
+    test('no scan or a scan linked to another item fails closed', async () => {
+        const f = await spectralFixture();
+        await prisma.spectralData.update({ where: { id: f.scan.id }, data: { workItemId: f.item.id } });
+        expect((await generate(f)).body.code).toBe('ACCEPTED_ITEM_WITHOUT_EVIDENCE');
+        await prisma.spectralData.delete({ where: { id: f.scan.id } }); // Synthetic test fixture only.
+        expect((await generate(f)).status).toBe(409);
+    });
+    test.each(['SPEC_GRS', 'SPEC_XRF'])('%s continues to require and record scalar Results', async analysis => {
+        const f = await fixture({ param: analysis });
+        expect((await generate(f)).status).toBe(200);
+        const techToken = await getAuthToken('LAB_TECHNICIAN', labId);
+        await prisma.sample.update({ where: { id: f.sampleId }, data: {
+            status: 'PROCESSING', receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE'
+        } });
+        await prisma.workItem.update({ where: { id: f.item.id }, data: { status: 'IN_PROGRESS', assignedTo: jwt.decode(techToken).username } });
+        const saved = await request(app).post('/api/workbench/batch-save').set('Authorization', `Bearer ${techToken}`)
+            .send({ draft: false, entries: [{ workItemId: f.item.id, value: '12' }] });
+        expect(saved.status).toBe(200);
+        expect(saved.body.saved).toBe(1);
+        expect((await prisma.result.findFirst({ where: { sampleId: f.sampleId, param: analysis, isCurrent: true } })).numericValue).toBe(12);
+        expect((await prisma.result.findUnique({ where: { id: f.result.id } })).isCurrent).toBe(false);
+    });
     async function reportValues(f, language = 'en') {
         const { content } = await assembleReport(f.sampleId, { ...manager, language });
         return { content, values: content.resultGroups.flatMap(group => group.items) };

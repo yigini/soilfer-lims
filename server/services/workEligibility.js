@@ -8,7 +8,8 @@
 'use strict';
 
 const { TEXTURE_ALIASES, DERIVED_TEXTURE_FRACTIONS, NON_ANALYTICAL, matchingItems,
-    governsResult, isCurrentValidAnalyticalResult, getReportingMode, reportingQc } = require('./reportResultGovernance');
+    governsResult, isCurrentValidAnalyticalResult, getReportingMode, reportingQc,
+    SPECTRAL_ACQUISITION_CODES, hasApprovedSpectralEvidence } = require('./reportResultGovernance');
 
 const GATE_ANALYSES = ['DRYING', 'PREPARATION'];
 
@@ -356,7 +357,15 @@ function canPublish(sample, report, user, options = {}) {
         return { allowed: false, code: 'RESULT_UNGOVERNED', reason: 'Current results lack a governing work item.',
             params: [...new Set(ungoverned.map(result => result.param))] };
     }
+    const missingSpectral = analyticalItems.filter(item => item.status === 'ACCEPTED' &&
+        SPECTRAL_ACQUISITION_CODES.includes(item.analysis) &&
+        !hasApprovedSpectralEvidence(item, options.spectralScans));
+    if (missingSpectral.length) {
+        return { allowed: false, code: 'ACCEPTED_ITEM_WITHOUT_EVIDENCE', reason: 'Accepted spectral acquisition lacks an approved linked scan.',
+            workItemIds: missingSpectral.map(item => item.id) };
+    }
     const missing = analyticalItems.filter(item => item.status === 'ACCEPTED' &&
+        !SPECTRAL_ACQUISITION_CODES.includes(item.analysis) &&
         !validResults.some(result => governsResult(item, result)));
     if (missing.length) {
         return { allowed: false, code: 'ACCEPTED_ITEM_WITHOUT_VALID_RESULT', reason: 'Accepted analytical work lacks a current valid result.',
