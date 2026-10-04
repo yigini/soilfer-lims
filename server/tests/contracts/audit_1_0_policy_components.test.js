@@ -67,6 +67,15 @@ describe('Audit 1.0: real policy page controls', () => {
         elements(tree).find(node => node.type === 'input').props.onChange({ target: { checked: true } });
         expect(change).toHaveBeenCalledWith({ reject: ['1-2s'], warn: [] });
     });
+    test('sample-code editor warns when the check character is omitted, and allows the lab to keep that format', async () => {
+        const h = await fixture(), change = jest.fn();
+        const tree = h.editor({ definition: registry['sample.codeFormat'], value: '{LAB}-{SEQ:6}', t, onChange: change });
+        expect(elements(tree).find(node => node.props?.role === 'alert').props.children).toBe(locale.policies.sampleCodeNoCheck);
+        elements(tree).find(node => node.type === 'input').props.onChange({ target: { value: '{LAB}-{YY}-{SEQ:6}{CHK}' } });
+        expect(change).toHaveBeenCalledWith('{LAB}-{YY}-{SEQ:6}{CHK}');
+        const safe = h.editor({ definition: registry['sample.codeFormat'], value: '{LAB}-{SEQ:6}{CHK}', t, onChange: change });
+        expect(elements(safe).find(node => node.props?.role === 'alert')).toBeUndefined();
+    });
     test('all registry descriptions, UI labels and error keys exist in all five locales', () => {
         const flatten = object => Object.entries(object).flatMap(([key, value]) => value && typeof value === 'object' ? flatten(value).map(child => `${key}.${child}`) : [key]);
         for (const base of ['client/src/translations', 'server/locales']) for (const lang of ['en','es','es-419','fr','pt']) {

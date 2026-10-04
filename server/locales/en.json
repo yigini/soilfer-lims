@@ -848,6 +848,7 @@
   }
 ,
   "policies": {
+    "sampleCodeNoCheck": "Without a check character, scanning errors are harder to detect.",
     "keys": {
       "qc_mode": "QC blocking mode",
       "qc_maxBatchSize": "Maximum analytical batch size",
@@ -874,6 +875,7 @@
       "report_amendmentRequiresSecondPerson": "Require a second person for amendments",
       "report_numberFormat": "Report number pattern",
       "sample_codeFormat": "Sample code pattern",
+      "sample_sequenceReset": "Sample sequence reset",
       "sample_retentionDaysAfterReport": "Sample retention after report",
       "bench_idleLockMinutes": "Idle bench lock (0: off)",
       "bench_pinAtRecord": "Require PIN when recording",
@@ -949,6 +951,8 @@
       "REGISTRY_DEFAULT": "Strict default"
     },
     "options": {
+      "YEARLY": "Each year",
+      "NEVER": "Never reset",
       "REQUIRED_BLOCKING": "Required, blocking",
       "REQUIRED_WARN": "Required, warnings",
       "ADVISORY": "Advisory",

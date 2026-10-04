@@ -3,6 +3,7 @@ const cataloguePolicy = require('../services/cataloguePolicy');
 const prisma = require('../prisma');
 const { success, error } = require('../i18n/response');
 const idGenerator = require('../services/idGenerator');
+const sampleCodes = require('../services/sampleCodeService');
 const workflow = require('../workflowContract');
 const { hasPermission } = require('../config/roles');
 const scopeGuard = require('../utils/scopeGuard');
@@ -20,7 +21,7 @@ exports.lookupSample = async (req, res) => {
     if (!code) return res.status(400).json({ code: 'LOOKUP_CODE_REQUIRED', error: 'A sample identifier is required.' });
     try {
         const scopedRows = await prisma.sample.findMany({
-            where: scopeGuard.buildScopedWhere(req.user, { OR: [{ id: code }, { labId: code }, { originalId: code }] },
+            where: scopeGuard.buildScopedWhere(req.user, { OR: [{ id: code }, { labSampleCode: code }, { labId: code }, { originalId: code }] },
                 { entityType: 'Sample', labField: 'labId', altLabField: 'assignedLab' }),
             orderBy: { id: 'asc' }
         });
@@ -522,8 +523,7 @@ exports.updateStatus = async (req, res) => {
         }
 
         // Critical: Generate Lab ID on transition to LAB_ID_ASSIGNED or ACCEPTED
-        if ((status === 'LAB_ID_ASSIGNED' || status === 'ACCEPTED') && !sample.labId) {
-            updates.labId = await idGenerator.generateLabId(sample.projectCode || 'GEN');
+        if ((status === 'LAB_ID_ASSIGNED' || status === 'ACCEPTED') && !sample.labSampleCode) {
 
             // --- AUTOMATION: Enforce SoilFER Bundle ---
             const projectPolicyService = require('../services/projectPolicyService');
@@ -559,7 +559,14 @@ exports.updateStatus = async (req, res) => {
         const { transitionSample } = require('../services/sampleStateService');
         const nextStatus = status;
         delete updates.status;
-        const updated = await transitionSample(id, nextStatus, user, updates.notes || updates.reason || 'Status updated via API', updates);
+        const updated = await prisma.$transaction(async tx => {
+            if (nextStatus === 'LAB_ID_ASSIGNED' || nextStatus === 'ACCEPTED') {
+                const current = await tx.sample.findUnique({ where: { id: String(id) } });
+                const code = await sampleCodes.issuedCode(current, tx) || await idGenerator.generateLabId(current.assignedLab || user.labId, 'S', tx, { projectCode: current.projectCode });
+                updates.labSampleCode = code; updates.labId = code;
+            }
+            return transitionSample(id, nextStatus, user, updates.notes || updates.reason || 'Status updated via API', updates, tx);
+        });
 
         // Post-Update Hook for Work Items
         if (nextStatus === 'ACCEPTED') {
@@ -590,6 +597,7 @@ exports.updateStatus = async (req, res) => {
         res.json(updated);
     } catch (err) {
         console.error('[updateStatus] Error:', err);
+        if (err.statusCode) return res.status(err.statusCode).json({ code: err.code, error: err.message });
         return error(res, 500, 'SAMPLE_UPDATE_ERROR', null, 'Failed to update status');
     }
 };
@@ -960,7 +968,9 @@ exports.createWalkInSample = async (req, res) => {
         };
 
         // Create sample
-        const newSample = await prisma.sample.create({
+        const newSample = await prisma.$transaction(async tx => {
+            const code = await idGenerator.generateLabId(assignedLab, 'S', tx, { issuedAt: now });
+            return tx.sample.create({
             data: {
                 id: sampleId,
                 originalId: originalId,
@@ -972,7 +982,8 @@ exports.createWalkInSample = async (req, res) => {
                 receptionDate: now,
                 receivedBy: user.username,
                 requiredAnalyses: analyses ? JSON.stringify(analyses) : '[]',
-                labId: autoId, // Walk-ins use their short ID as Lab ID (Finding #5)
+                labId: code,
+                labSampleCode: code,
                 metadata: JSON.stringify(sampleMeta),
                 fieldMetadata: JSON.stringify({
                     profileReference: require('../services/intakeProfileService').capture({country: receivingLab.country}, {}, req.body, {actor: user.id || user.username, source: 'WALK_IN_INTAKE', isNew: true}).profileReference,
@@ -988,6 +999,7 @@ exports.createWalkInSample = async (req, res) => {
                     note: 'Walk-in/PT Sample Created'
                 }])
             }
+            });
         });
 
         // Audit: SAMPLE_RECEIVED
@@ -1015,6 +1027,7 @@ exports.createWalkInSample = async (req, res) => {
         });
     } catch (error) {
         console.error('Create Walk-in Error:', error);
+        if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, message: error.message });
         if (error instanceof profileIdentity.ProfileReferenceConflictError) return res.status(409).json({code: error.code, message: error.message});
         res.status(500).json({ error: 'Failed to create walk-in sample' });
     }
@@ -1111,6 +1124,7 @@ exports.getSampleDetail = async (req, res) => {
                 where: {
                     OR: [
                         { labId: String(id) },
+                        { labSampleCode: String(id) },
                         { originalId: String(id) }
                     ]
                 },

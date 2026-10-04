@@ -2,16 +2,11 @@ const prisma = require('../prisma');
 
 class IdGenerator {
     /**
-     * Generates a new Lab ID.
-     * OLD Format: {LabCode}-{Year}-{Number} (GTM-LAB1-2026-001)
-     * NEW Format: {Letter}{Number} (S001)
+     * Compatibility entry point for sample-code allocation. The caller must
+     * supply the intake transaction; format and reset come from lab policy.
      */
-    async generateLabId(labCode, prefix = 'S', db = prisma) {
-        // We now prioritize the short format requested by the user
-        // One letter + three numbers (e.g., S001)
-        const result = await this._getSequencedId(prefix, 3, false, db);
-        console.log(`[ID_GEN] Generated Lab ID: ${result} for labCode: ${labCode}`);
-        return result;
+    async generateLabId(labReference, prefix = 'S', tx, context = {}) {
+        return require('./sampleCodeService').allocateSampleCode(tx, { labReference, ...context });
     }
 
     /**

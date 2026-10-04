@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.7.0] - 2026-10-04
+
+### Added
+- Atomic per-laboratory sample sequences and unique issued sample codes, with a check character and configurable numbering/reset policies (Audit 1.3, #180).
+- Additive storage and a dry-run back-fill preserving issued codes and original WorkItem lab values; unresolved ownership remains unchanged for review.
+
+### Fixed
+- Concurrent intake allocates the code inside the sample transaction. WorkItem laboratory ownership is separate from the sample code, and historical identifiers remain resolvable.
+
 ## [1.6.1] - 2026-10-04
 
 ### Fixed

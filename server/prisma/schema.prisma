@@ -101,7 +101,8 @@ model Sample {
   countryName       String?
   country           String?
   assignedLab       String?
-  labId             String?    // Generated Lab ID: LAB-2026-KE-001
+  labId             String?    // Legacy sample-code alias, retained for one release
+  labSampleCode     String?    @unique // Issued laboratory sample code; never renumbered
   status            String     // EXPECTED, RECEIVED, ACCEPTED, PROCESSING, etc.
   
   // Workflow Gates
@@ -238,6 +239,7 @@ model WorkItem {
   sampleId       String
   sample         Sample    @relation(fields: [sampleId], references: [id])
   labId          String?
+  legacyLabId    String?   // Original ambiguous labId retained by the audited back-fill
   assignedLab    String?
   analysis       String    // DRYING, PREPARATION, PH_H2O, etc.
   category       String?   // Operational Gates, Spectroscopy, etc.
@@ -1064,6 +1066,15 @@ model ReportSequence {
   lastValue Int @default(0)
 
   @@unique([labId, year])
+}
+
+model LabSequence {
+  labId String
+  scope String // SAMPLE, REPORT, CONSIGNMENT, BATCH (SQL CHECK)
+  year  Int
+  next  Int @default(1)
+
+  @@id([labId, scope, year])
 }
 
 model ReportShareLink {

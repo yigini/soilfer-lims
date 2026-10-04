@@ -5,7 +5,6 @@ const app = require('../../app');
 const prisma = require('../../prisma');
 const {getAuthToken} = require('../setup');
 const kobo = require('../../services/koboService');
-const idGenerator = require('../../services/idGenerator');
 
 describe('Source capture cannot discard provenance or bypass current authority', () => {
     const lab = 'PROFILE-SAFETY-LAB', owner = 'PROFILE-SAFETY-OWNER', project = 'PROFILE-SAFETY-PROJECT', config = 'PROFILE-SAFETY-CONFIG';
@@ -45,10 +44,12 @@ describe('Source capture cannot discard provenance or bypass current authority',
     test('a concurrent source edit is not overwritten by final intake', async () => {
         const id = 'PROFILE-SAFETY-CONCURRENT';
         await prisma.sample.create({data: {id, originalId: id, assignedLab: lab, projectId: project, projectCode: project, status: 'EXPECTED', fieldMetadata: '{}'}});
-        const generate = idGenerator.generateLabId.bind(idGenerator);
-        const spy = jest.spyOn(idGenerator, 'generateLabId').mockImplementationOnce(async (...args) => {
+        // Allocation now occurs inside the intake transaction. Inject the
+        // independent committed edit just before that transaction begins.
+        const transact = prisma.$transaction.bind(prisma);
+        const spy = jest.spyOn(prisma, '$transaction').mockImplementationOnce(async (...args) => {
             await prisma.sample.update({where: {id}, data: {fieldMetadata: JSON.stringify({sourceEvidence: 'newer-revision'}), updatedAt: new Date(Date.now() + 1000)}});
-            return generate(...args);
+            return transact(...args);
         });
         try {
             const checklist = {items: Object.fromEntries(['container', 'label', 'quantity', 'condition', 'coc'].map(key => [key, {status: 'PASS'}]))};

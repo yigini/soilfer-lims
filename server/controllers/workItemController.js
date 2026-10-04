@@ -69,7 +69,8 @@ async function preflightDefaults(codes, sample, existingCodes = []) {
  * Called when Sample -> LAB_ID_ASSIGNED or ACCEPTED
  */
 exports.generateWorkItemsForSample = async (sample) => {
-    const { id, labId } = sample;
+    const { id } = sample;
+    const labId = sample.assignedLab || null;
     const requiredAnalyses = getEffectiveAnalyses(sample);
     const workItems = [];
     const expandedCodes = normalizeAnalysisCodes(requiredAnalyses);
@@ -235,7 +236,8 @@ exports.generateWorkItemsForSample = async (sample) => {
  * 3. Any result recorded (current or superseded) -> Refuse with 409 naming analysis and result
  */
 exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reason) => {
-    const { id, labId } = sample;
+    const { id } = sample;
+    const labId = sample.assignedLab || null;
     const targetList = Array.isArray(targetAnalyses) ? targetAnalyses : [];
 
 

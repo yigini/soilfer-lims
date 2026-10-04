@@ -1,17 +1,18 @@
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
-const { getAuthToken } = require('../setup');
+const { getAuthToken, ensureTestLab } = require('../setup');
 const QRCode = require('../../../client/node_modules/qrcode');
 
 describe('Stage D: Desk Ergonomics & Hardware Contract Tests (RC-16 - RC-18)', () => {
     let authHeader;
-    const testLab = 'LAB-GTM';
+    const testLab = `LAB-D-${Date.now()}`;
     const testProjectId = `PROJ-D-${Date.now()}`;
     const testSampleId = `TEST-D-LBL-${Date.now()}`;
     let createdSampleDbId = null;
 
     beforeAll(async () => {
+        await ensureTestLab(testLab, 'GTM');
         const token = await getAuthToken('SAMPLE_RECEPTION', testLab, ['GTM'], [testProjectId]);
         authHeader = `Bearer ${token}`;
 
