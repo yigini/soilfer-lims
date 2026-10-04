@@ -89,10 +89,10 @@ exports.discardDraft = async (req, res) => {
                     throw new sampleStateService.TransitionError('Cannot discard sample with existing analytical results.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
                 }
                 const activeWork = await tx.workItem.findMany({
-                    where: {
+                    where: { ...({
                         sampleId: String(sample.id),
                         status: { in: ['COMPLETED', 'SUBMITTED', 'ACCEPTED'] }
-                    }
+                    }), duplicateOf: null }
                 });
                 if (activeWork.length > 0) {
                     throw new sampleStateService.TransitionError('Cannot discard sample with analytical work completed or submitted.', 409, 'ACTIVE_WORK_IN_PROGRESS');

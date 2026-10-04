@@ -55,6 +55,9 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
             where: { OR: [{ id: String(body.sampleId || body.id || originalId || '') }, { originalId: String(originalId || '') }] }
         });
 
+        if (!user.labId && require('../utils/scopeGuard').hasGlobalAccess(user)) user = { ...user, labId: sample?.assignedLab || body.assignedLab || null };
+        if (!user.labId) throw new IntakeError(403, { code: 'MISSING_LAB_SCOPE', message: 'Select a receiving laboratory.' });
+
         let isNewlyCreatedDeskSample = false;
 
         if (sample) {
@@ -524,10 +527,9 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
         const selected = await cataloguePolicy.validateSelection(Array.from(requiredAnalyses), { labId: sample.assignedLab || user.labId, existing: workItems.normalizeAnalysisCodes(existingAnalyses), db: prisma });
         if (!selected.valid) throw new IntakeError(400, { success: false, message: selected.error, error: selected.error, issues: selected.issues });
 
-        // RC-01: Analytical Mass Sufficiency Check
-        const parsedMass = (receivedMass !== undefined && receivedMass !== null && receivedMass !== '')
-            ? parseFloat(receivedMass)
-            : null;
+        // RC-01: Recheck the current observation, rather than trusting an earlier arrival validation.
+        const currentMass = receivedMass === undefined ? sample.receivedMass : receivedMass;
+        const parsedMass = currentMass !== undefined && currentMass !== null && currentMass !== '' ? Number(currentMass) : null;
 
         let massDeficitInfo = null;
         if (parsedMass !== null && !isNaN(parsedMass)) {
@@ -746,6 +748,7 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
                 moistureOnArrival,
                 foreignMaterial,
                 massDeficitInfo,
+                massStatus: parsedMass === null ? 'NOT_OBSERVED' : massDeficitInfo ? 'MASS_DEFICIT' : 'SUFFICIENT',
                 complianceException: complianceExceptionRecord || null,
                 positionalUncertaintyM: uncertaintyM,
                 locationSource: samplingDetails?.locationSource || samplingDetails?.captureMethod,
@@ -784,6 +787,7 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
 function validateObservations(body) {
     if (!body.isWalkIn && !String(body.originalId || body.sampleId || body.id || '').trim()) throw new IntakeError(422, { code: 'INTAKE_IDENTIFIER_REQUIRED', message: 'A specimen identifier is required.' });
     if (!body.isDraft) {
+        require('./intakeReceiptService').validateMass(body);
         const observed = batchObservations.observations(body, []);
         if (Object.hasOwn(body, 'receivedMass')) body.receivedMass = observed.receivedMass;
         if (Object.hasOwn(body, 'moistureOnArrival')) body.moistureOnArrival = observed.moistureOnArrival;

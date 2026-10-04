@@ -21,7 +21,7 @@ async function validateResultEntries(db, sample, measurements, user) {
         const labId = sample.assignedLab || sample.labId;
         if (!analysis || (analysis.labId && analysis.labId !== labId)) return 'A selected parameter is not available to this laboratory.';
         if (configurationIssues(analysis).length) return `${analysis.name}: the parameter configuration requires correction before recording results.`;
-        const items = await db.workItem.findMany({ where: { sampleId: sample.id, analysis: param, status: { not: 'WAIVED' } } });
+        const items = await db.workItem.findMany({ where: { ...({ sampleId: sample.id, analysis: param, status: { not: 'WAIVED' } }), duplicateOf: null } });
         if (!items.length && !(Array.isArray(ordered) && ordered.includes(param))) return `${analysis.name} is not ordered for this sample.`;
         if (items.some(item => ['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'APPROVED', 'VALIDATED'].includes(item.status))) return `${analysis.name} is already recorded or sealed. Use the correction workflow.`;
         if (user?.role === 'LAB_TECHNICIAN' && !items.some(item => item.assignedTo === user.username)) return `${analysis.name} is not assigned to you.`;

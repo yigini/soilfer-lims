@@ -225,7 +225,7 @@ exports.getBatches = async (req, res) => {
             where,
             include: {
                 qcItems: true,
-                workItems: {
+                workItems: { where: { duplicateOf: null },
                     select: {
                         id: true,
                         sampleId: true,
@@ -262,7 +262,7 @@ exports.getBatchById = async (req, res) => {
             where: { id },
             include: {
                 qcItems: true,
-                workItems: {
+                workItems: { where: { duplicateOf: null },
                     select: {
                         id: true,
                         sampleId: true,
@@ -556,7 +556,7 @@ exports.addItemsToBatch = async (req, res) => {
 
         // Validate work items exist and match batch scope & analysis
         const items = await prisma.workItem.findMany({
-            where: { id: { in: workItemIds } },
+            where: { ...({ id: { in: workItemIds } }), duplicateOf: null },
             include: { sample: true }
         });
 
@@ -584,7 +584,7 @@ exports.addItemsToBatch = async (req, res) => {
 
         // Query existing batch item positions
         const existingBatchItems = await prisma.workItem.findMany({
-            where: { batchId: id },
+            where: { ...({ batchId: id }), duplicateOf: null },
             select: { id: true, rackPosition: true }
         });
         const occupiedPositions = new Map();
@@ -733,7 +733,7 @@ exports.removeItemsFromBatch = async (req, res) => {
 exports.checkItemBatchStatus = async (workItemId) => {
     try {
         const item = await prisma.workItem.findUnique({
-            where: { id: workItemId },
+            where: { ...({ id: workItemId }), duplicateOf: null },
             include: { batch: true }
         });
 
@@ -855,7 +855,7 @@ exports.dispositionBatch = async (req, res) => {
 
             // 2. Link reanalysis/rejection task workflow to associated active WorkItems (protecting historical accepted work and released sample histories)
             const allBatchWorkItems = await tx.workItem.findMany({
-                where: { batchId: id },
+                where: { ...({ batchId: id }), duplicateOf: null },
                 include: { sample: { select: { id: true, status: true } } }
             });
 

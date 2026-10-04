@@ -165,24 +165,24 @@ async function getDashboardHome(user, options = {}) {
 
         // 1. Returned determinations
         const returnedCount = await prisma.workItem.count({
-            where: scopedWhere(workWhere, { status: 'REANALYSIS_REQUIRED' })
+            where: { ...(scopedWhere(workWhere, { status: 'REANALYSIS_REQUIRED' })), duplicateOf: null }
         });
 
         // 2. Open runs / in-progress work
         const continueCount = await prisma.workItem.count({
-            where: scopedWhere(workWhere, {
+            where: { ...(scopedWhere(workWhere, {
                 status: 'IN_PROGRESS',
                 sample: {
                     receptionDate: { not: null },
                     status: { in: ['RECEIVED', 'ACCEPTED', 'PROCESSING'] }
                 }
-            })
+            })), duplicateOf: null }
         });
 
         // 3. Ready analytical work & checklists
         // Physical receipt verified, gates satisfied, status in ASSIGNED or PENDING
         const readyAnalyticalCount = await prisma.workItem.count({
-            where: scopedWhere(workWhere, {
+            where: { ...(scopedWhere(workWhere, {
                 status: { in: ['ASSIGNED', 'PENDING'] },
                 analysis: { notIn: GATE_ANALYSES },
                 sample: {
@@ -191,30 +191,30 @@ async function getDashboardHome(user, options = {}) {
                     preparationStatus: 'DONE',
                     ...(isDryingApplicable ? { dryingStatus: 'DONE' } : {})
                 }
-            })
+            })), duplicateOf: null }
         });
 
         const readyOperationalCount = await prisma.workItem.count({
-            where: scopedWhere(workWhere, {
+            where: { ...(scopedWhere(workWhere, {
                 status: { in: ['ASSIGNED', 'PENDING'] },
                 analysis: { in: GATE_ANALYSES },
                 sample: {
                     receptionDate: { not: null },
                     status: { in: ['RECEIVED', 'ACCEPTED', 'PROCESSING', 'PREPARATION'] }
                 }
-            })
+            })), duplicateOf: null }
         });
 
         const readyTotal = readyAnalyticalCount + readyOperationalCount;
 
         // 4. Completed / recorded work to submit
         const toSubmitCount = await prisma.workItem.count({
-            where: scopedWhere(workWhere, { status: { in: ['RECORDED', 'COMPLETED'] } })
+            where: { ...(scopedWhere(workWhere, { status: { in: ['RECORDED', 'COMPLETED'] } })), duplicateOf: null }
         });
 
         // 5. Work waiting for prerequisites (drying/prep)
         const waitingCount = await prisma.workItem.count({
-            where: scopedWhere(workWhere, {
+            where: { ...(scopedWhere(workWhere, {
                 status: { in: ['ASSIGNED', 'PENDING'] },
                 analysis: { notIn: GATE_ANALYSES },
                 sample: {
@@ -225,7 +225,7 @@ async function getDashboardHome(user, options = {}) {
                         ...(isDryingApplicable ? [{ dryingStatus: { not: 'DONE' } }] : [])
                     ]
                 }
-            })
+            })), duplicateOf: null }
         });
 
         metrics = [
@@ -257,7 +257,7 @@ async function getDashboardHome(user, options = {}) {
                 ...(actorScope.activeLabId ? {
                     OR: [
                         { labId: actorScope.activeLabId },
-                        { workItems: { some: { labId: actorScope.activeLabId } } }
+                        { workItems: { some: { duplicateOf: null, labId: actorScope.activeLabId } } }
                     ]
                 } : {})
             }
@@ -288,7 +288,7 @@ async function getDashboardHome(user, options = {}) {
                 receptionDate: { not: null }
             }),
             include: {
-                workItems: true,
+                workItems: { where: { duplicateOf: null } },
                 orderRevisions: {
                     include: { lines: true },
                     orderBy: { version: 'desc' },
@@ -324,10 +324,10 @@ async function getDashboardHome(user, options = {}) {
 
         // 4. Unassigned tasks
         const unassignedTasksCount = await prisma.workItem.count({
-            where: scopedWhere(workWhere, {
+            where: { ...(scopedWhere(workWhere, {
                 assignedTo: null,
                 status: { in: ['NOT_ASSIGNED', 'PENDING'] }
-            })
+            })), duplicateOf: null }
         });
 
         // 5. Intake acceptance
@@ -430,7 +430,7 @@ async function getDashboardHome(user, options = {}) {
         });
 
         const allScopedWork = await prisma.workItem.findMany({
-            where: scopedWhere(workWhere, {}),
+            where: { ...(scopedWhere(workWhere, {})), duplicateOf: null },
             select: { id: true, status: true, assignedTo: true }
         });
 
@@ -896,9 +896,9 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
     if (queueKey === 'bench.returned') {
         const where = scopedWhere(workWhere, { status: 'REANALYSIS_REQUIRED' });
         const [total, items] = await Promise.all([
-            prisma.workItem.count({ where }),
+            prisma.workItem.count({ where: { ...(where), duplicateOf: null } }),
             prisma.workItem.findMany({
-                where,
+                where: { ...(where), duplicateOf: null },
                 include: { sample: { select: { id: true, labId: true, originalId: true } } },
                 orderBy: { updatedAt: 'desc' },
                 skip,
@@ -940,7 +940,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
             }
         });
         const items = await prisma.workItem.findMany({
-            where,
+            where: { ...(where), duplicateOf: null },
             include: { sample: { select: { id: true, labId: true, originalId: true } } },
             orderBy: { updatedAt: 'desc' }
         });
@@ -1000,7 +1000,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
         });
 
         const allItems = await prisma.workItem.findMany({
-            where,
+            where: { ...(where), duplicateOf: null },
             include: { sample: { select: { id: true, labId: true, originalId: true, dryingStatus: true, preparationStatus: true } } },
             orderBy: { createdAt: 'asc' }
         });
@@ -1066,9 +1066,9 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
     if (queueKey === 'bench.toSubmit') {
         const where = scopedWhere(workWhere, { status: { in: ['RECORDED', 'COMPLETED'] } });
         const [total, items] = await Promise.all([
-            prisma.workItem.count({ where }),
+            prisma.workItem.count({ where: { ...(where), duplicateOf: null } }),
             prisma.workItem.findMany({
-                where,
+                where: { ...(where), duplicateOf: null },
                 include: { sample: { select: { id: true, labId: true, originalId: true } } },
                 orderBy: { updatedAt: 'desc' },
                 skip,
@@ -1114,9 +1114,9 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
             }
         });
         const [total, items] = await Promise.all([
-            prisma.workItem.count({ where }),
+            prisma.workItem.count({ where: { ...(where), duplicateOf: null } }),
             prisma.workItem.findMany({
-                where,
+                where: { ...(where), duplicateOf: null },
                 include: { sample: { select: { id: true, labId: true, originalId: true, dryingStatus: true, preparationStatus: true } } },
                 orderBy: { createdAt: 'asc' },
                 skip,
@@ -1166,13 +1166,13 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
             ...(actorScope.activeLabId ? {
                 OR: [
                     { labId: actorScope.activeLabId },
-                    { workItems: { some: { labId: actorScope.activeLabId } } }
+                    { workItems: { some: { duplicateOf: null, labId: actorScope.activeLabId } } }
                 ]
             } : {})
         };
         const batches = await prisma.batch.findMany({
             where: batchWhere,
-            include: { workItems: { select: { id: true, sampleId: true, analysis: true } } },
+            include: { workItems: { where: { duplicateOf: null }, select: { id: true, sampleId: true, analysis: true } } },
             skip,
             take: pageSize
         });
@@ -1308,7 +1308,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
                 receptionDate: { not: null }
             }),
             include: {
-                workItems: true,
+                workItems: { where: { duplicateOf: null } },
                 orderRevisions: {
                     include: { lines: true },
                     orderBy: { version: 'desc' },
@@ -1371,7 +1371,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
         });
 
         const items = await prisma.workItem.findMany({
-            where,
+            where: { ...(where), duplicateOf: null },
             orderBy: { createdAt: 'asc' }
         });
 
@@ -1686,7 +1686,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
                 take: pageSize,
                 include: {
                     _count: {
-                        select: { workItems: true, qcItems: true }
+                        select: { workItems: { where: { duplicateOf: null } }, qcItems: true }
                     }
                 }
             })

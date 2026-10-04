@@ -21,9 +21,9 @@ class IdGenerator {
     /**
      * Helper for Walk-in creation
      */
-    async generateWalkInId(countryCode, prefixType = 'W') {
+    async generateWalkInId(countryCode, prefixType = 'W', db = prisma) {
         // User wants "one letter and three numbers"
-        return await this._getSequencedId(prefixType, 3, false);
+        return await this._getSequencedId(prefixType, 3, false, db);
     }
 
     /**

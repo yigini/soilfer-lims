@@ -29,7 +29,7 @@ async function saveDraft(user, {
 
     // 1. Verify work item existence and ownership/scope
     const workItem = await prisma.workItem.findUnique({
-        where: { id: workItemId },
+        where: { ...({ id: workItemId }), duplicateOf: null },
         include: { sample: true }
     });
 

@@ -417,14 +417,14 @@ exports.previewBatch = async (req, res) => {
         if (contextSampleId) {
             contextSample = await prisma.sample.findUnique({
                 where: { id: contextSampleId },
-                include: { workItems: true }
+                include: { workItems: { where: { duplicateOf: null } } }
             });
         }
 
         let contextWorkItem = null;
         if (targetWorkItemId) {
             contextWorkItem = await prisma.workItem.findUnique({
-                where: { id: targetWorkItemId },
+                where: { ...({ id: targetWorkItemId }), duplicateOf: null },
                 include: { sample: true }
             });
             if (contextWorkItem && !contextSample) {
@@ -512,7 +512,7 @@ exports.previewBatch = async (req, res) => {
                             userLabScope
                         ]
                     },
-                    include: { workItems: true }
+                    include: { workItems: { where: { duplicateOf: null } } }
                 });
             }
 
@@ -738,7 +738,7 @@ exports.commitBatch = async (req, res) => {
 
             const sample = await prisma.sample.findUnique({
                 where: { id: targetSampleId },
-                include: { workItems: true }
+                include: { workItems: { where: { duplicateOf: null } } }
             });
             if (!sample) {
                 results.failed++;
@@ -773,7 +773,7 @@ exports.commitBatch = async (req, res) => {
             let targetWorkItem = null;
             if (targetWorkItemId) {
                 targetWorkItem = sample.workItems.find(w => w.id === targetWorkItemId) ||
-                    await prisma.workItem.findUnique({ where: { id: targetWorkItemId } });
+                    await prisma.workItem.findUnique({ where: { ...({ id: targetWorkItemId }), duplicateOf: null } });
             }
 
             if (targetWorkItem && user.role === 'LAB_TECHNICIAN' && targetWorkItem.assignedTo && targetWorkItem.assignedTo !== user.username) {
@@ -1019,7 +1019,7 @@ exports.linkTask = async (req, res) => {
         }
 
         const workItem = await prisma.workItem.findUnique({
-            where: { id: workItemId },
+            where: { ...({ id: workItemId }), duplicateOf: null },
             include: { sample: true }
         });
         if (!workItem) {
@@ -1053,7 +1053,7 @@ exports.linkTask = async (req, res) => {
         const sample = workItem.sample;
         if (sample) {
             const gates = await prisma.workItem.findMany({
-                where: { sampleId: sample.id, analysis: { in: ['DRYING', 'PREPARATION'] } }
+                where: { ...({ sampleId: sample.id, analysis: { in: ['DRYING', 'PREPARATION'] } }), duplicateOf: null }
             });
             const dryingGate = gates.find(g => g.analysis === 'DRYING');
             const prepGate = gates.find(g => g.analysis === 'PREPARATION');
@@ -1516,14 +1516,14 @@ exports.uploadBatch = async (req, res) => {
             let targetWorkItem = null;
             const explicitWId = scanItem.targetWorkItemId || scanItem.workItemId || req.body?.targetWorkItemId;
             if (explicitWId) {
-                targetWorkItem = await prisma.workItem.findUnique({ where: { id: explicitWId } });
+                targetWorkItem = await prisma.workItem.findUnique({ where: { ...({ id: explicitWId }), duplicateOf: null } });
             } else if (sample && validation.qcStatus !== 'FAIL') {
                 const sModality = (scanItem.modality || 'NIR').toUpperCase();
                 const openWorkItems = await prisma.workItem.findMany({
-                    where: {
+                    where: { ...({
                         sampleId: sample.id,
                         status: { notIn: ['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'] }
-                    }
+                    }), duplicateOf: null }
                 });
 
                 targetWorkItem = openWorkItems.find(w => {
@@ -1543,7 +1543,7 @@ exports.uploadBatch = async (req, res) => {
             // Check operational gates if linking to work item (Amendment 4)
             if (sample && targetWorkItem) {
                 const gates = await prisma.workItem.findMany({
-                    where: { sampleId: sample.id, analysis: { in: ['DRYING', 'PREPARATION'] } }
+                    where: { ...({ sampleId: sample.id, analysis: { in: ['DRYING', 'PREPARATION'] } }), duplicateOf: null }
                 });
                 const dryingGate = gates.find(g => g.analysis === 'DRYING');
                 const prepGate = gates.find(g => g.analysis === 'PREPARATION');
@@ -1795,7 +1795,7 @@ exports.batchReview = async (req, res) => {
                 if (newStatus === 'APPROVED' && scan.sampleId) {
                     const sModality = (scan.modality || 'NIR').toUpperCase();
                     const workItems = await prisma.workItem.findMany({
-                        where: { sampleId: scan.sampleId, status: { notIn: ['COMPLETED', 'ACCEPTED', 'SUBMITTED'] } }
+                        where: { ...({ sampleId: scan.sampleId, status: { notIn: ['COMPLETED', 'ACCEPTED', 'SUBMITTED'] } }), duplicateOf: null }
                     });
                     const relatedItem = workItems.find(w => {
                         const wA = (w.analysis || '').toUpperCase();
@@ -1872,7 +1872,7 @@ exports.batchDelete = async (req, res) => {
                 if (scan.sampleId) {
                     const sModality = (scan.modality || 'NIR').toUpperCase();
                     const workItems = await prisma.workItem.findMany({
-                        where: { sampleId: scan.sampleId, status: 'COMPLETED' }
+                        where: { ...({ sampleId: scan.sampleId, status: 'COMPLETED' }), duplicateOf: null }
                     });
                     const relatedItem = workItems.find(w => {
                         const wA = (w.analysis || '').toUpperCase();
@@ -1933,7 +1933,7 @@ exports.deleteScan = async (req, res) => {
 
         // C10: Do not allow trashing spectra linked to ACCEPTED or SUBMITTED work items
         if (scan.workItemId) {
-            const linkedWi = await prisma.workItem.findUnique({ where: { id: scan.workItemId } });
+            const linkedWi = await prisma.workItem.findUnique({ where: { ...({ id: scan.workItemId }), duplicateOf: null } });
             if (linkedWi && ['ACCEPTED', 'SUBMITTED'].includes(linkedWi.status)) {
                 return res.status(400).json({
                     error: `Cannot delete spectrum linked to a ${linkedWi.status} work item. An authorized amendment or return is required.`,
@@ -1961,7 +1961,7 @@ exports.deleteScan = async (req, res) => {
         if (scan.sampleId) {
             const sModality = (scan.modality || 'NIR').toUpperCase();
             const workItems = await prisma.workItem.findMany({
-                where: { sampleId: scan.sampleId, status: 'COMPLETED' }
+                where: { ...({ sampleId: scan.sampleId, status: 'COMPLETED' }), duplicateOf: null }
             });
             const relatedItem = workItems.find(w => {
                 const wAnalysis = (w.analysis || '').toUpperCase();
@@ -2135,10 +2135,10 @@ exports.reviewSpectrum = async (req, res) => {
         if (newStatus === 'APPROVED') {
             const sModality = (scan.modality || 'NIR').toUpperCase();
             const workItems = await prisma.workItem.findMany({
-                where: {
+                where: { ...({
                     sampleId: scan.sampleId,
                     status: { notIn: ['COMPLETED', 'ACCEPTED', 'SUBMITTED'] }
-                }
+                }), duplicateOf: null }
             });
 
             const relatedItem = workItems.find(w => {

@@ -74,4 +74,8 @@ async function intake(tx, input) {
     if (input.body.isDraft) return commitPrepared(tx, await prepareIntake(tx, input));
     return ['REJECT', 'REJECTED'].includes(input.body.decision) ? rejectSample(tx, input) : acceptSample(tx, input);
 }
-module.exports = { intake, acceptSample, rejectSample, prepareIntake, commitPrepared, responseFor, requireTransaction, consumeStoredApproval };
+async function receiveSample(tx, input) {
+    requireTransaction(tx);
+    return require('./intakeReceiptService').receiveSample(tx, input);
+}
+module.exports = { intake, receiveSample, acceptSample, rejectSample, prepareIntake, commitPrepared, responseFor, requireTransaction, consumeStoredApproval };

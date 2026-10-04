@@ -49,14 +49,14 @@ async function validateProjectClosure(project, tx = prisma) {
 
     if (tx.workItem) {
         const activeWorkItems = await tx.workItem.count({
-            where: {
+            where: { ...({
                 sample: {
                     OR: [{ projectId: project.id }, { projectCode: project.code }]
                 },
                 status: {
                     notIn: ['COMPLETED', 'RELEASED', 'APPROVED', 'ACCEPTED', 'CANCELLED', 'REJECTED']
                 }
-            }
+            }), duplicateOf: null }
         });
         if (activeWorkItems > 0) {
             const err = new Error(`Cannot archive or complete project with ${activeWorkItems} active analytical work item(s). Complete or release all work before archiving.`);

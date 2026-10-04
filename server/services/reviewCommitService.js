@@ -29,13 +29,13 @@ async function commitReview(prisma, item, status, user, data, operations, submis
             });
             if (changed.count !== 1) {
                 if (submissionId) {
-                    const current = await tx.workItem.findUnique({ where: { id: item.id }, select: { submissionId: true } });
+                    const current = await tx.workItem.findUnique({ where: { ...({ id: item.id }), duplicateOf: null }, select: { submissionId: true } });
                     if (current?.submissionId !== submissionId) throw Object.assign(itemStateError(item), { code: 'ITEM_NOT_IN_SUBMISSION' });
                 }
                 throw itemStateError(item);
             }
             await operations(tx);
-            return tx.workItem.findUnique({ where: { id: item.id } });
+            return tx.workItem.findUnique({ where: { ...({ id: item.id }), duplicateOf: null } });
         });
     } catch (error) {
         if (['P2025', 'P2034'].includes(error.code)) throw itemStateError(item);
@@ -51,7 +51,7 @@ async function reconcileSubmission(prisma, submissionId, user, results, errors =
         const committed = results.filter(row => ids.includes(row.workItemId));
         if (!committed.length) return;
         const refused = errors.filter(row => ids.includes(row.workItemId));
-        const items = await tx.workItem.findMany({ where: { id: { in: ids }, submissionId }, select: { status: true } });
+        const items = await tx.workItem.findMany({ where: { ...({ id: { in: ids }, submissionId }), duplicateOf: null }, select: { status: true } });
         const reviewed = items.every(item => ['ACCEPTED', 'REANALYSIS_REQUIRED', 'WAIVED'].includes(item.status));
         const now = new Date();
         await tx.submission.update({ where: { id: submissionId }, data: {
