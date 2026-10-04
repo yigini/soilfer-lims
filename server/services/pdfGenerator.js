@@ -374,6 +374,10 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             const totalPages = doc.bufferedPageRange().count;
             for (let i = 0; i < totalPages; i++) {
                 doc.switchToPage(i);
+                // The footer sits below the body's bottom margin. Keep PDFKit
+                // from flowing its text into a new page while numbering pages.
+                const bottomMargin = doc.page.margins.bottom;
+                doc.page.margins.bottom = 0;
                 doc.rect(36, 805, pageWidth, 0.5).fill(cBorder);
 
                 doc.fillColor(cGray)
@@ -382,6 +386,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                     .text('FAO SoilFER Programme · Soil Laboratory Quality Information System', 36, 810, { lineBreak: false })
                     .text(`Certificate No: ${number}`, 240, 810, { width: 235, align: 'center', lineBreak: false })
                     .text(`Page ${i + 1} of ${totalPages}`, startX, 810, { width: pageWidth, align: 'right', lineBreak: false });
+                doc.page.margins.bottom = bottomMargin;
             }
 
             doc.end();
