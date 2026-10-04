@@ -56,10 +56,10 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
 
     const operationalGates = ['DRYING', 'PREPARATION', 'ARCHIVING', 'DISPOSAL'];
     const existingItems = await prisma.workItem.findMany({
-        where: { ...({
+        where: {
             sampleId: String(id),
             analysis: { notIn: operationalGates }
-        }), duplicateOf: null }
+        }
     });
 
     const itemsToRemove = existingItems.filter(item => !targetSet.has(item.analysis) && item.status !== 'WAIVED');
@@ -286,7 +286,7 @@ exports.getWorkItems = async (req, res) => {
 
         const [items, total] = await Promise.all([
             prisma.workItem.findMany({
-                where: { ...(where), duplicateOf: null },
+                where: where,
                 skip,
                 take: limitNum,
                 include: {
@@ -301,7 +301,7 @@ exports.getWorkItems = async (req, res) => {
                 },
                 orderBy: { createdAt: 'desc' }
             }),
-            prisma.workItem.count({ where: { ...(where), duplicateOf: null } })
+            prisma.workItem.count({ where: where })
         ]);
 
         // Parse history JSON and enrich with sample metadata
@@ -350,7 +350,7 @@ exports.assignWork = async (req, res) => {
         const assignmentEligibilityService = require('../services/assignmentEligibilityService');
 
         const dbItems = await prisma.workItem.findMany({
-            where: { ...({ id: { in: workItemIds } }), duplicateOf: null }
+            where: { id: { in: workItemIds } }
         });
 
         if (dbItems.length === 0) {
@@ -437,7 +437,7 @@ exports.assignWork = async (req, res) => {
             if (['ARCHIVING', 'DISPOSAL'].includes(item.analysis)) {
                 if (!sampleWorkItemsCache[item.sampleId]) {
                     sampleWorkItemsCache[item.sampleId] = await prisma.workItem.findMany({
-                        where: { ...({ sampleId: item.sampleId }), duplicateOf: null }
+                        where: { sampleId: item.sampleId }
                     });
                 }
                 const otherAnalysis = item.analysis === 'ARCHIVING' ? 'DISPOSAL' : 'ARCHIVING';
@@ -597,7 +597,7 @@ exports.reassignWork = async (req, res) => {
         if (!technicianUserId) return res.status(400).json({ error: 'technicianUserId is required' });
         if (!reason) return res.status(400).json({ error: 'reason is required for reassignment' });
 
-        const item = await prisma.workItem.findUnique({ where: { ...({ id }), duplicateOf: null } });
+        const item = await prisma.workItem.findUnique({ where: { id } });
         if (!item) return res.status(404).json({ error: 'Work item not found' });
 
         const sample = item.sampleId ? await prisma.sample.findUnique({ where: { id: item.sampleId } }) : null;
@@ -717,7 +717,7 @@ exports.updateWorkItemStatus = async (req, res) => {
     const user = req.user;
 
     try {
-        const item = await prisma.workItem.findUnique({ where: { ...({ id }), duplicateOf: null } });
+        const item = await prisma.workItem.findUnique({ where: { id } });
         if (!item) {
             return res.status(404).json({
                 error: `Work item not found (ID: ${id}). This analysis task may have been deleted or the sample intake has not been accepted yet. Please refresh the page or contact your lab manager.`,
@@ -1036,7 +1036,7 @@ exports.reviewWorkItem = async (req, res) => {
         }
 
         const item = await prisma.workItem.findUnique({
-            where: { ...({ id }), duplicateOf: null },
+            where: { id },
             include: { sample: true }
         });
         if (!item) {
@@ -1362,7 +1362,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
         }
 
         const items = await prisma.workItem.findMany({
-            where: { ...({ id: { in: workItemIds } }), duplicateOf: null },
+            where: { id: { in: workItemIds } },
             include: { sample: true }
         });
 

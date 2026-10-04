@@ -617,7 +617,7 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
         expect(metaAfter.conflictingSubmissions[0].kobo_id).toBe(caseSubId);
     });
 
-    test('9. Ambiguous depth identity (D1/D2 duplicate barcode) receives durable hold, blocking downstream physical receipt with 409 AMBIGUOUS_PROVENANCE_HOLD', async () => {
+    test('9. Ambiguous depth identity retains a durable hold through physical arrival and blocks acceptance', async () => {
         const ambigBarcode = 'GHA-AMBIG-' + SUFFIX;
         const ambigSubId = 40730;
 
@@ -674,12 +674,13 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
         // Workspace projection check
         const adminUser = { id: 'usr-adm', username: 'admin', role: 'SUPER_ADMIN', labId: labGHA.id };
         const ws = await sampleWorkspaceService.getSampleWorkspace(ambigSample.id, adminUser);
-        expect(ws.capabilities.canReceive.allowed).toBe(false);
-        expect(ws.capabilities.canReceive.reason).toContain('Ambiguous specimen identity');
-        expect(ws.nextAction.action).toBe('RECONCILE_HOLD');
+        expect(ws.capabilities.canReceive.allowed).toBe(true);
+        expect(ws.capabilities.canAcceptIntake.allowed).toBe(false);
+        expect(ws.capabilities.canAcceptIntake.reason).toContain('Ambiguous specimen identity');
+        expect(ws.nextAction.action).toBe('RECEIVE');
         expect(ws.integrity.issues.some(i => i.code === 'AMBIGUOUS_PROVENANCE_HOLD')).toBe(true);
 
-        // Attempt physical receipt via sampleController.receiveSample: must return 409 AMBIGUOUS_PROVENANCE_HOLD
+        // Physical arrival records custody; the hold must survive and block acceptance.
         const req = {
             params: { id: ambigSample.id },
             user: adminUser,
@@ -699,9 +700,13 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
         };
 
         await sampleController.receiveSample(req, res);
+        expect(statusCode).toBeNull();
+        expect(jsonResponse.status).toBe('RECEIVED');
+        expect(JSON.parse(jsonResponse.metadata).provenanceHold).toEqual(meta.provenanceHold);
+        expect(await prisma.workItem.count({ where: { sampleId: ambigSample.id } })).toBe(0);
+        await sampleController.acceptSample(req, res);
         expect(statusCode).toBe(409);
         expect(jsonResponse.code).toBe('AMBIGUOUS_PROVENANCE_HOLD');
-        expect(jsonResponse.message).toContain('Ambiguous field specimen identity');
 
         // In contrast, a normal unambiguous sample receives cleanly
         const normalBarcode = 'GHA-NORMAL-' + SUFFIX;
@@ -1024,7 +1029,8 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
                 }
             });
 
-        expect(consignmentRes.status).toBe(409);
+        expect(consignmentRes.status).toBe(422);
+        expect(consignmentRes.body.errors).toHaveLength(1);
         expect(consignmentRes.body.error).toBe('PROVENANCE_HOLD');
         expect(consignmentRes.body.code).toBe('AMBIGUOUS_PROVENANCE_HOLD');
 

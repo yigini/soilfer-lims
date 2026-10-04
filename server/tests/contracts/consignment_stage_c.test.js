@@ -161,7 +161,7 @@ describe('Stage C: Consignment & High-Throughput Batch Intake Contract (RC-12 - 
         const csg = res.body.consignment;
         createdConsignmentId = csg.id;
 
-        expect(csg.code).toMatch(/^CSG-\d{8}-\d{3}$/);
+        expect(csg.code).toMatch(/^CSG-LAB-GTM-\d{4}-\d{5}$/);
         expect(csg.deliveryNoteRef).toBe('WAYBILL-778899');
         expect(csg.deliveredBy).toBe('DHL Express - Driver Carlos');
         expect(csg.submitterName).toBe('Dr. Roberto Arbenz');

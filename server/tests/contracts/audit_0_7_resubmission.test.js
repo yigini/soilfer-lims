@@ -63,7 +63,7 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
     test('QC REANALYZE detaches only mutable work and keeps the old package/reason in history', async () => {
         const f = await fixture({ batchStatus: 'QC_FAIL' });
         const accepted = await prisma.workItem.create({ data: { id: id('WI-07-ACCEPTED'), sampleId: f.sampleId, analysis: f.analysis,
-            status: 'ACCEPTED', batchId: f.batch.id, submissionId: f.submission.id, result: '9.1', history: '[{"action":"ACCEPTED"}]' } });
+            status: 'ACCEPTED', batchId: f.batch.id, submissionId: f.submission.id, result: '9.1', history: '[{"action":"ACCEPTED"}]', duplicateOf: f.item.id } });
         const response = await post(`/api/qc/batches/${f.batch.id}/disposition`, { decision: 'REANALYZE_BATCH', reason });
         expect(response.status).toBe(200);
         const item = await prisma.workItem.findUnique({ where: { id: f.item.id } });

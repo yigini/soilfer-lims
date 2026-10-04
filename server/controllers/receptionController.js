@@ -22,7 +22,9 @@ Object.assign(exports, { LOCKED_INTAKE_STATUSES, deriveLocationConfidence, resol
 
 exports.processIntake = async (req, res) => {
     try {
-        const result = await prisma.$transaction(tx => require('../services/intakeService').intake(tx, { body: req.body, user: req.user }), { timeout: 30000 });
+        const intake = require('../services/intakeService');
+        const expectedSnapshot = await intake.snapshot(prisma, req.body);
+        const result = await prisma.$transaction(tx => intake.intake(tx, { body: req.body, user: req.user, expectedSnapshot }), { timeout: 30000 });
         return res.json(result.response);
     } catch (error) {
         return require('../services/intakeErrors').respond(res, error);
@@ -89,10 +91,10 @@ exports.discardDraft = async (req, res) => {
                     throw new sampleStateService.TransitionError('Cannot discard sample with existing analytical results.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
                 }
                 const activeWork = await tx.workItem.findMany({
-                    where: { ...({
+                    where: {
                         sampleId: String(sample.id),
                         status: { in: ['COMPLETED', 'SUBMITTED', 'ACCEPTED'] }
-                    }), duplicateOf: null }
+                    }
                 });
                 if (activeWork.length > 0) {
                     throw new sampleStateService.TransitionError('Cannot discard sample with analytical work completed or submitted.', 409, 'ACTIVE_WORK_IN_PROGRESS');
@@ -557,7 +559,8 @@ exports.batchGeometryCheck = async (req, res) => {
  */
 exports.processBatchConsignmentIntake = async (req, res) => {
     try {
-        const result = await prisma.$transaction(tx => require('../services/consignmentIntakeService').receiveConsignment(tx, { body: req.body, user: req.user }), { timeout: 60000 });
+        const expectedSnapshots = Array.isArray(req.body.samples) ? await Promise.all(req.body.samples.map(body => require('../services/intakeService').snapshot(prisma, body))) : [];
+        const result = await prisma.$transaction(tx => require('../services/consignmentIntakeService').receiveConsignment(tx, { body: req.body, user: req.user, expectedSnapshots }), { timeout: 60000 });
         return res.status(201).json(result);
     } catch (error) { return require('../services/intakeErrors').respond(res, error); }
 };

@@ -110,15 +110,16 @@ describe('Source capture cannot discard provenance or bypass current authority',
     test('batch capture rechecks a durable hold added after preflight', async () => {
         const id = 'PROFILE-SAFETY-BATCH-HOLD';
         await prisma.sample.create({data: {id, originalId: id, assignedLab: lab, projectId: project, projectCode: project, status: 'EXPECTED', fieldMetadata: '{}', metadata: '{}'}});
-        const count = prisma.consignment.count.bind(prisma.consignment);
-        const spy = jest.spyOn(prisma.consignment, 'count').mockImplementationOnce(async (...args) => {
+        const transact = prisma.$transaction.bind(prisma);
+        const spy = jest.spyOn(prisma, '$transaction').mockImplementationOnce(async (...args) => {
             await prisma.sample.update({where: {id}, data: {metadata: JSON.stringify({provenanceHold: {status: 'AMBIGUOUS_PROVENANCE_HOLD', reason: 'New field evidence'}})}});
-            return count(...args);
+            return transact(...args);
         });
         try {
             const checklist = {items: Object.fromEntries(['container', 'label', 'quantity', 'condition', 'coc'].map(key => [key, {status: 'PASS'}]))};
             const response = await request(app).post('/api/reception/consignments').set('Authorization', `Bearer ${receiver}`).send({consignment: {projectId: project}, defaults: {receivedMass: 350, checklist}, samples: [{originalId: id}]});
-            expect(response.status).toBe(409);
+            expect(response.status).toBe(422);
+            expect(response.body.errors).toHaveLength(1);
             const row = await prisma.sample.findUnique({where: {id}});
             expect(row.status).toBe('EXPECTED');
             expect(JSON.parse(row.metadata).provenanceHold.status).toBe('AMBIGUOUS_PROVENANCE_HOLD');

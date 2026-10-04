@@ -14,17 +14,17 @@ function discrepancy(declared, received) {
     return declared == null ? { status: 'NOT_DECLARED', difference: null } : { status: declared === received ? 'MATCH' : declared > received ? 'MISSING' : 'EXCESS', difference: received - declared };
 }
 function rowError(error, row, sample) {
-    return { row: row + 1, originalId: sample.originalId || sample.id || null, code: error.code || 'INTAKE_ROW_FAILED',
+    return { row: row + 1, originalId: sample?.originalId || sample?.id || null, code: error.code || 'INTAKE_ROW_FAILED',
         message: error.message, ...(error.payload || {}), ...(error.reason ? { reason: error.reason } : {}) };
 }
 function failRows(errors, allFailed = false) {
     const commonCode = errors.length && errors.every(error => error.code === errors[0].code) ? errors[0].code : 'CONSIGNMENT_ROWS_FAILED';
     const warnings = errors.filter(error => error.code === 'MASS_DEFICIT').map(error => ({ row: error.row, originalId: error.originalId, code: error.code, massDeficitInfo: error.massDeficitInfo }));
     throw new IntakeError(422, { success: false, code: allFailed ? 'CONSIGNMENT_ALL_ROWS_FAILED' : commonCode,
-        error: allFailed ? 'Every consignment row failed validation.' : 'Consignment rows failed validation; no intake was committed.', errors,
+        error: allFailed ? 'Every consignment row failed validation.' : errors.length && errors.every(error => error.error === errors[0].error) && errors[0].error || 'Consignment rows failed validation; no intake was committed.', errors,
         ...(warnings.length ? { warnings, massDeficitInfo: warnings[0].massDeficitInfo } : {}) });
 }
-async function receiveConsignment(tx, { body, user }) {
+async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
     intake.requireTransaction(tx);
     const { consignment: header = {}, defaults = {}, samples = [], bulkApplications = [], allowPartial = false } = body;
     if (!Array.isArray(samples) || !samples.length) throw new IntakeError(400, { error: 'At least one sample is required for batch intake' });
@@ -39,6 +39,7 @@ async function receiveConsignment(tx, { body, user }) {
     const plans = [], errors = [], seen = new Set();
     for (const [index, sample] of samples.entries()) {
         try {
+            if (!sample || typeof sample !== 'object' || Array.isArray(sample)) throw new IntakeError(422, { code: 'INTAKE_ROW_INVALID', message: 'Each consignment row must be a specimen object.' });
             const originalId = String(sample.originalId || sample.id || '').trim();
             if (!originalId) throw new IntakeError(422, { code: 'INTAKE_IDENTIFIER_REQUIRED', message: 'A specimen identifier is required.' });
             if (seen.has(originalId)) throw new IntakeError(422, { code: 'DUPLICATE_INTAKE_ROW', message: 'This identifier appears more than once in the consignment.' });
@@ -50,6 +51,7 @@ async function receiveConsignment(tx, { body, user }) {
                 if (!resolved || resolved.id !== project.id) throw new IntakeError(400, { code: 'CROSS_PROJECT_CONFLICT', message: 'The row belongs to a different project.' });
             }
             const input = { ...defaults, ...sample, ...observed, originalId,
+                massWarningAcknowledged: sample.massWarningAcknowledged === true,
                 projectId: project?.id || rowProject || null, isWalkIn: !project && !rowProject,
                 decision: ['REJECT', 'REJECTED', 'RECEIVED_REJECTED'].includes(sample.status) ? 'REJECTED' : 'ACCEPTED', isDraft: false,
                 ncReason: sample.rejectionReason || sample.ncReason || defaults.ncReason || 'Sample non-conformance recorded during batch reception',
@@ -62,7 +64,7 @@ async function receiveConsignment(tx, { body, user }) {
                 receivingOfficerSignature: sample.receivingOfficerSignature || header.receivingOfficerSignature,
                 samplingDetails: { ...defaults.samplingDetails, ...sample.samplingDetails, ...(sample.coordinates ? { coordinates: sample.coordinates } : {}) }
             };
-            const plan = await intake.prepareIntake(tx, { body: input, user, newSampleId: crypto.randomUUID(), initialFieldMetadata: sample.fieldMetadata || (sample.collectionDate ? { collectionDate: sample.collectionDate } : {}) });
+            const plan = await intake.prepareIntake(tx, { body: input, user, expectedSnapshot: expectedSnapshots?.[index], newSampleId: crypto.randomUUID(), initialFieldMetadata: sample.fieldMetadata || (sample.collectionDate ? { collectionDate: sample.collectionDate } : {}) });
             plans.push({ index, plan });
         } catch (error) { errors.push(rowError(error, index, sample)); }
     }
@@ -88,7 +90,8 @@ async function receiveConsignment(tx, { body, user }) {
         try {
             plan.updateData.consignmentId = consignment.id;
             plan.updateData.receptionData = JSON.stringify({ ...JSON.parse(plan.updateData.receptionData || '{}'), consignmentCode: code, deliveryNoteRef: consignment.deliveryNoteRef });
-            const result = await intake.commitPrepared(tx, plan, { consumeApproval: false });
+            const commit = plan.responseKind === 'rejected' ? intake.rejectSample : intake.acceptSample;
+            const result = await commit(tx, { body: plan.body, user: plan.user }, plan, { consumeApproval: false });
             processed.push(result);
             if (plan.approval?.mode === 'STORED_APPROVAL') approvals.set(plan.approval.approvalId, plan.approval);
             if (allowPartial) await tx.$executeRawUnsafe(`RELEASE SAVEPOINT "${savepoint}"`);

@@ -17,6 +17,8 @@ async function commitPrepared(tx, plan, { consumeApproval = true } = {}) {
     let sample = plan.sample;
     if (plan.createData) sample = await tx.sample.create({ data: plan.createData });
     const current = await tx.sample.findUnique({ where: { id: sample.id } });
+    const hold = current && require('./intakeProfileService').parseFieldMetadata(current.metadata).provenanceHold;
+    if (hold?.status === 'AMBIGUOUS_PROVENANCE_HOLD') throw new IntakeError(409, { code: 'AMBIGUOUS_PROVENANCE_HOLD', error: 'PROVENANCE_HOLD', message: 'Resolve the current provenance hold before final intake.' });
     if (!current || current.updatedAt.getTime() !== sample.updatedAt.getTime()) throw new profileIdentity.ProfileReferenceConflictError('SOURCE_CHANGED');
     scopeGuard.ensureScope(user, current, { altLabField: 'assignedLab' });
     if (current.approvedAt || LOCKED_INTAKE_STATUSES.includes(current.status) && !(current.status === 'RECEIVED_REJECTED' && body.isResubmission === true && plan.responseKind !== 'draft')) throw new profileIdentity.ProfileReferenceConflictError('SAMPLE_LOCKED');
@@ -61,13 +63,17 @@ function responseFor(sample, plan) {
         assignedLab: sample.assignedLab || plan.user.labId || null, projectCode: sample.projectCode || null, projectId: sample.projectId || null,
         fieldMetadata: sample.fieldMetadata || null, receptionData: sample.receptionData || null, message: 'Intake recorded.' };
 }
-async function acceptSample(tx, input) {
+async function acceptSample(tx, input, preparedPlan, options) {
     requireTransaction(tx);
-    return commitPrepared(tx, await prepareIntake(tx, { ...input, body: { ...input.body, decision: 'ACCEPTED', isDraft: false } }));
+    const plan = preparedPlan || await prepareIntake(tx, { ...input, body: { ...input.body, decision: 'ACCEPTED', isDraft: false } });
+    if (plan.responseKind !== 'accepted') throw new IntakeError(409, { code: 'INTAKE_DECISION_INVALID', message: 'Acceptance requires an accepted intake plan.' });
+    return commitPrepared(tx, plan, options);
 }
-async function rejectSample(tx, input) {
+async function rejectSample(tx, input, preparedPlan, options) {
     requireTransaction(tx);
-    return commitPrepared(tx, await prepareIntake(tx, { ...input, body: { ...input.body, decision: 'REJECTED', isDraft: false } }));
+    const plan = preparedPlan || await prepareIntake(tx, { ...input, body: { ...input.body, decision: 'REJECTED', isDraft: false } });
+    if (plan.responseKind !== 'rejected') throw new IntakeError(409, { code: 'INTAKE_DECISION_INVALID', message: 'Rejection requires a rejected intake plan.' });
+    return commitPrepared(tx, plan, options);
 }
 async function intake(tx, input) {
     requireTransaction(tx);
@@ -78,4 +84,10 @@ async function receiveSample(tx, input) {
     requireTransaction(tx);
     return require('./intakeReceiptService').receiveSample(tx, input);
 }
-module.exports = { intake, receiveSample, acceptSample, rejectSample, prepareIntake, commitPrepared, responseFor, requireTransaction, consumeStoredApproval };
+// Capture only the version before waiting for the write transaction. All
+// validation still runs inside it; an intervening committed edit is refused.
+async function snapshot(db, body = {}) {
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return null;
+    return db.sample.findFirst({ where: { OR: [{ id: String(body.sampleId || body.id || body.originalId || '') }, { originalId: String(body.originalId || '') }] }, select: { id: true, updatedAt: true } });
+}
+module.exports = { intake, receiveSample, acceptSample, rejectSample, prepareIntake, commitPrepared, responseFor, requireTransaction, consumeStoredApproval, snapshot };

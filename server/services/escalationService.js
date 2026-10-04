@@ -34,10 +34,10 @@ async function escalateUnassignedWork(now = new Date(), thresholds = DEFAULT_THR
     const unassignedCutoff = new Date(now.getTime() - thresholds.UNASSIGNED_HOURS * 60 * 60 * 1000);
 
     const unassignedItems = await prisma.workItem.findMany({
-        where: { ...({
+        where: {
             status: 'NOT_ASSIGNED',
             createdAt: { lte: unassignedCutoff }
-        }), duplicateOf: null },
+        },
         include: {
             sample: {
                 select: { id: true, labId: true, assignedLab: true, status: true }
@@ -106,10 +106,10 @@ async function escalateStalledWork(now = new Date(), thresholds = DEFAULT_THRESH
     const stalledCutoff = new Date(now.getTime() - thresholds.IN_PROGRESS_HOURS * 60 * 60 * 1000);
 
     const inProgressItems = await prisma.workItem.findMany({
-        where: { ...({
+        where: {
             status: 'IN_PROGRESS',
             updatedAt: { lte: stalledCutoff }
-        }), duplicateOf: null },
+        },
         include: {
             sample: {
                 select: { id: true, labId: true, assignedLab: true }
@@ -178,10 +178,10 @@ async function escalateOnHoldWork(now = new Date(), thresholds = DEFAULT_THRESHO
     const holdCutoff = new Date(now.getTime() - thresholds.ON_HOLD_HOURS * 60 * 60 * 1000);
 
     const onHoldItems = await prisma.workItem.findMany({
-        where: { ...({
+        where: {
             status: 'ON_HOLD',
             updatedAt: { lte: holdCutoff }
-        }), duplicateOf: null },
+        },
         include: {
             sample: {
                 select: { id: true, labId: true, assignedLab: true }

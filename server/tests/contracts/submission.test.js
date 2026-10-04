@@ -34,7 +34,7 @@ describe('8.1 Section D: Submission Rules', () => {
         await request(app)
             .post(`/api/samples/${sampleId}/accept`)
             .set('Authorization', `Bearer ${mgrToken}`)
-            .send({ analyses: ['PH_H2O', 'EC'] });
+            .send({ analyses: ['PH_H2O', 'EC'], checklist: { items: Object.fromEntries(['container', 'label', 'quantity', 'condition', 'coc'].map(key => [key, { status: 'PASS' }])) } });
 
         const itemsRes = await request(app)
             .get('/api/work')

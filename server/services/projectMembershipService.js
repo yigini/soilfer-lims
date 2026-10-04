@@ -367,7 +367,7 @@ async function _executeUpdateProjectLabAccess(actor, projectId, { servicingLabId
         let activeWorkItems = 0;
         if (tx.workItem) {
             activeWorkItems = await tx.workItem.count({
-                where: { ...({
+                where: {
                     sample: {
                         OR: [{ projectId: project.id }, { projectCode: project.code }]
                     },
@@ -378,7 +378,7 @@ async function _executeUpdateProjectLabAccess(actor, projectId, { servicingLabId
                         { sample: { labId: { in: removedLabs } } }
                     ],
                     status: { notIn: ['COMPLETED', 'RELEASED', 'APPROVED', 'ACCEPTED', 'CANCELLED', 'REJECTED'] }
-                }), duplicateOf: null }
+                }
             });
         }
 

@@ -50,7 +50,7 @@ exports.getReviews = async (req, res) => {
         // We'd need to join or assume context. For now, if sampleId provided, we first find workItems.
         if (sampleId) {
             const items = await prisma.workItem.findMany({
-                where: { ...({ sampleId }), duplicateOf: null },
+                where: { sampleId },
                 select: { id: true }
             });
             const itemIds = items.map(i => i.id);

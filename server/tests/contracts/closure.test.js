@@ -29,7 +29,7 @@ describe('8.1 Section E: Approval & Closure Rules', () => {
         const acceptRes = await request(app)
             .post(`/api/samples/${sampleId}/accept`)
             .set('Authorization', `Bearer ${mgrToken}`)
-            .send({ analyses: ['PH_H2O'] });
+            .send({ analyses: ['PH_H2O'], checklist: { items: Object.fromEntries(['container', 'label', 'quantity', 'condition', 'coc'].map(key => [key, { status: 'PASS' }])) } });
 
         workItemId = acceptRes.body.workItems[0].id;
 

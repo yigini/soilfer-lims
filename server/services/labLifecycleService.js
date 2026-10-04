@@ -149,9 +149,9 @@ async function getLabWorkspace(actor, labId, options = {}, tx = prisma) {
         transaction.sample.count({ where: { assignedLab: labId, status: { in: ['IN_ANALYSIS', 'PROCESSING', 'ANALYZING', 'PREPARATION', 'PARTIALLY_COMPLETE'] } } }),
         transaction.sample.count({ where: { assignedLab: labId, status: { in: ['REVIEW', 'PENDING_APPROVAL', 'SUBMITTED_PARTIAL', 'SUBMITTED_FULL'] } } }),
         transaction.sample.count({ where: { assignedLab: labId, status: { in: ['RELEASED', 'APPROVED', 'COMPLETED'] } } }),
-        transaction.workItem.count({ where: { ...({ labId }), duplicateOf: null } }),
-        transaction.workItem.count({ where: { ...(getUnfinishedWorkWhere(null, labId)), duplicateOf: null } }),
-        transaction.workItem.count({ where: { ...({ labId, status: { in: ['COMPLETED', 'ACCEPTED', 'APPROVED'] } }), duplicateOf: null } }),
+        transaction.workItem.count({ where: { labId } }),
+        transaction.workItem.count({ where: getUnfinishedWorkWhere(null, labId) }),
+        transaction.workItem.count({ where: { labId, status: { in: ['COMPLETED', 'ACCEPTED', 'APPROVED'] } } }),
         transaction.user.count({ where: { labId } }),
         transaction.user.count({ where: { labId, isActive: true } }),
         transaction.user.findFirst({
@@ -225,10 +225,10 @@ async function getLabWorkspace(actor, labId, options = {}, tx = prisma) {
 
     const openWorkCounts = await transaction.workItem.groupBy({
         by: ['assignedTo'],
-        where: { ...({
+        where: {
             ...getUnfinishedWorkWhere(null, labId),
             assignedTo: { in: staffUsers.map(u => u.username).filter(Boolean) }
-        }), duplicateOf: null },
+        },
         _count: { _all: true }
     });
     const countMap = {};
@@ -587,7 +587,7 @@ async function getLifecyclePreview(actor, labId, targetState, tx = prisma) {
     const currentState = await getLabOperationalState(labId, tx);
 
     const [openAssignmentsCount, pendingSamplesCount, activeStaffCount] = await Promise.all([
-        tx.workItem.count({ where: { ...(getUnfinishedWorkWhere(null, labId)), duplicateOf: null } }),
+        tx.workItem.count({ where: getUnfinishedWorkWhere(null, labId) }),
         tx.sample.count({ where: { assignedLab: labId, status: { notIn: INACTIVE_SAMPLE_STATUSES } } }),
         tx.user.count({ where: { labId, isActive: true } })
     ]);
@@ -737,7 +737,7 @@ async function _executeTransitionLifecycle(actor, labId, { targetState, reason, 
 
     // Invariant: Retirement safety gate
     if (targetState === 'RETIRED') {
-        const openCount = await tx.workItem.count({ where: { ...(getUnfinishedWorkWhere(null, labId)), duplicateOf: null } });
+        const openCount = await tx.workItem.count({ where: getUnfinishedWorkWhere(null, labId) });
         if (openCount > 0) {
             const err = new Error(`Cannot retire laboratory with ${openCount} unfinished work assignments`);
             err.statusCode = 422;

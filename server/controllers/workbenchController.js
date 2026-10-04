@@ -30,7 +30,7 @@ exports.getQueue = async (req, res) => {
 
         if (workItemId) {
             const target = await prisma.workItem.findUnique({
-                where: { ...({ id: String(workItemId) }), duplicateOf: null },
+                where: { id: String(workItemId) },
                 include: {
                     sample: {
                         select: {
@@ -284,7 +284,7 @@ exports.getQueue = async (req, res) => {
         }
 
         let items = await prisma.workItem.findMany({
-            where: { ...(whereClause), duplicateOf: null },
+            where: whereClause,
             include: {
                 methodology: {
                     select: {
@@ -345,11 +345,11 @@ exports.getQueue = async (req, res) => {
         } else if (canonicalSampleTarget && !workItemId) {
             // Use resolved canonical sample ID and enforce same scope
             const sampleWorkItems = await prisma.workItem.findMany({
-                where: { ...({
+                where: {
                     sampleId: canonicalSampleTarget.id,
                     ...(user.role === 'LAB_TECHNICIAN' ? { assignedTo: user.username } : {}),
                     ...(labScopeCondition ? labScopeCondition : {})
-                }), duplicateOf: null },
+                },
                 include: {
                     methodology: {
                         select: {
@@ -632,10 +632,10 @@ exports.getQueue = async (req, res) => {
         }
 
         const [myWorkCount, readyToSubmitCount, submittedCount, completedCount] = await Promise.all([
-            prisma.workItem.count({ where: { ...({ ...baseCountWhere, status: { in: ['ASSIGNED', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'] } }), duplicateOf: null } }),
-            prisma.workItem.count({ where: { ...({ ...baseCountWhere, status: 'COMPLETED', submissionId: null, analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] } }), duplicateOf: null } }),
-            prisma.workItem.count({ where: { ...({ ...baseCountWhere, status: 'SUBMITTED' }), duplicateOf: null } }),
-            prisma.workItem.count({ where: { ...({ ...baseCountWhere, status: { in: ['ACCEPTED', 'COMPLETED', 'WAIVED'] } }), duplicateOf: null } })
+            prisma.workItem.count({ where: { ...baseCountWhere, status: { in: ['ASSIGNED', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'] } } }),
+            prisma.workItem.count({ where: { ...baseCountWhere, status: 'COMPLETED', submissionId: null, analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] } } }),
+            prisma.workItem.count({ where: { ...baseCountWhere, status: 'SUBMITTED' } }),
+            prisma.workItem.count({ where: { ...baseCountWhere, status: { in: ['ACCEPTED', 'COMPLETED', 'WAIVED'] } } })
         ]);
 
         // Stats
@@ -684,7 +684,7 @@ exports.batchSave = async (req, res) => {
 
         // Fetch all work items
         const workItems = await prisma.workItem.findMany({
-            where: { ...({ id: { in: workItemIds } }), duplicateOf: null },
+            where: { id: { in: workItemIds } },
             include: {
                 sample: {
                     select: {
@@ -1690,7 +1690,7 @@ exports.previewCompletion = async (req, res) => {
     try {
         const workItemIds = entries.map(e => e.workItemId);
         const workItems = await prisma.workItem.findMany({
-            where: { ...({ id: { in: workItemIds } }), duplicateOf: null },
+            where: { id: { in: workItemIds } },
             include: { sample: true }
         });
         const itemMap = {};
@@ -1934,7 +1934,7 @@ exports.previewSubmissions = async (req, res) => {
         }
 
         const completedItems = await prisma.workItem.findMany({
-            where: { ...(whereClause), duplicateOf: null },
+            where: whereClause,
             include: {
                 sample: {
                     select: {
@@ -2005,10 +2005,10 @@ exports.previewSubmissions = async (req, res) => {
         let allItemsBySample = {};
         if (targetSampleIds.length > 0) {
             const allSampleItems = await prisma.workItem.findMany({
-                where: { ...({
+                where: {
                     sampleId: { in: targetSampleIds },
                     analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] }
-                }), duplicateOf: null },
+                },
                 select: { id: true, sampleId: true, status: true, analysis: true }
             });
             allSampleItems.forEach(wi => {
@@ -2088,7 +2088,7 @@ exports.commitSubmissions = async (req, res) => {
             }
 
             const rawItems = await prisma.workItem.findMany({
-                where: { ...(itemWhere), duplicateOf: null },
+                where: itemWhere,
                 include: { sample: true }
             });
 
@@ -2102,10 +2102,10 @@ exports.commitSubmissions = async (req, res) => {
 
             const sample = items[0].sample;
             const allSampleItems = await prisma.workItem.findMany({
-                where: { ...({
+                where: {
                     sampleId,
                     analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] }
-                }), duplicateOf: null }
+                }
             });
             const itemIds = items.map(i => i.id);
             const isFull = allSampleItems.length > 0 && allSampleItems.every(i => itemIds.includes(i.id) || i.status === 'COMPLETED' || i.status === 'SUBMITTED');

@@ -875,6 +875,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const wiAccepted = await prisma.workItem.create({
             data: {
                 id: `wi-acc-${Date.now()}`,
+                duplicateOf: wiActive.id,
                 sampleId: sample1.id,
                 analysis: 'pH',
                 status: 'ACCEPTED',
@@ -887,6 +888,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const wiCompleted = await prisma.workItem.create({
             data: {
                 id: `wi-comp-${Date.now()}`,
+                duplicateOf: wiActive.id,
                 sampleId: sample1.id,
                 analysis: 'pH',
                 status: 'COMPLETED',

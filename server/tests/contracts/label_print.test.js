@@ -379,6 +379,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
                     projectCode: testProjectId
                 },
                 defaults: {
+                    checklist: { items: Object.fromEntries(['container', 'label', 'quantity', 'condition', 'coc'].map(key => [key, { status: 'PASS' }])) },
                     receivedMass: 500,
                     moistureOnArrival: 'MOIST',
                     requiredAnalyses: ['PH_H2O']

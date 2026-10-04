@@ -2,7 +2,7 @@ const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
 const workflow = require('../../workflowContract');
-const { getAuthToken } = require('../setup');
+const { getAuthToken, ensureTestLab } = require('../setup');
 
 describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody (RC-19)', () => {
     let authHeader;
@@ -13,6 +13,7 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
     let createdConsignmentId = null;
 
     beforeAll(async () => {
+        await ensureTestLab(testLab, 'GTM');
         const token = await getAuthToken('SAMPLE_RECEPTION', testLab, ['GTM'], [testProjectId]);
         authHeader = `Bearer ${token}`;
 
@@ -224,6 +225,7 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
                 submitter: { name: 'Regional Agricultural Office' }
             },
             defaults: {
+                checklist: { items: Object.fromEntries(['container', 'label', 'quantity', 'condition', 'coc'].map(key => [key, { status: 'PASS' }])) },
                 receivedMass: 400.0,
                 moistureOnArrival: 'MOIST'
             },

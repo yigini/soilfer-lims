@@ -119,7 +119,7 @@ async function generateReport(req, res) {
         // Freeze eligibility, reviewed values, QC caveats and the report together.
         const report = await prisma.$transaction(async tx => {
             const currentSample = await tx.sample.findUnique({ where: { id: sampleId },
-                include: { workItems: { where: { duplicateOf: null } }, results: { where: { isCurrent: true } } } });
+                include: { workItems: true, results: { where: { isCurrent: true } } } });
             if (!scopeGuard.canAccessEntity(req.user, currentSample, { labField: 'labId', altLabField: 'assignedLab' })) {
                 throw Object.assign(new Error('Access denied: Sample not in your Lab scope'), { statusCode: 403 });
             }

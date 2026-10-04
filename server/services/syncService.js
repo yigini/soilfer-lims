@@ -187,7 +187,7 @@ class SyncService {
                     if (!workItemId) throw new Error('Target workItemId is required');
 
                     const item = await prisma.workItem.findUnique({
-                        where: { ...({ id: workItemId }), duplicateOf: null },
+                        where: { id: workItemId },
                         include: { sample: true }
                     });
                     if (!item) throw new Error(`Work item '${workItemId}' not found`);
@@ -517,7 +517,7 @@ class SyncService {
                     }
 
                     const item = await prisma.workItem.findUnique({
-                        where: { ...({ id: workItemId }), duplicateOf: null },
+                        where: { id: workItemId },
                         include: { sample: true }
                     });
                     if (!item) throw new Error(`Work item '${workItemId}' not found`);

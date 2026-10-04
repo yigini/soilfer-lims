@@ -175,7 +175,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     });
     test('a mix of waived and accepted matches prints once and preserves the stored row', async () => {
         const f = await fixture();
-        await prisma.workItem.create({ data: { id: id('WI-OMIT-03'), sampleId: f.sampleId, analysis: f.item.analysis, status: 'WAIVED' } });
+        await prisma.workItem.create({ data: { id: id('WI-OMIT-03'), sampleId: f.sampleId, analysis: f.item.analysis, status: 'WAIVED', duplicateOf: f.item.id } });
         const before = await reviewedState(f);
         expect((await generate(f)).status).toBe(200);
         const { content, values } = await reportValues(f);
@@ -196,7 +196,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     });
     test('two governing items print one current result only when both are accepted', async () => {
         const f = await fixture();
-        const other = await prisma.workItem.create({ data: { id: id('WI-03'), sampleId: f.sampleId, analysis: f.item.analysis, status: 'ACCEPTED', assignedLab: labId } });
+        const other = await prisma.workItem.create({ data: { id: id('WI-03'), sampleId: f.sampleId, analysis: f.item.analysis, status: 'ACCEPTED', assignedLab: labId, duplicateOf: f.item.id } });
         expect((await reportValues(f)).values).toHaveLength(1);
         await prisma.workItem.update({ where: { id: other.id }, data: { status: 'REANALYSIS_REQUIRED' } });
         expect((await reportValues(f)).values).toHaveLength(0);
@@ -271,7 +271,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     });
     test('RETURN invalidates a shared current result even if another governing item is accepted', async () => {
         const f = await returnFixture('individual');
-        await prisma.workItem.create({ data: { id: id('WI-03'), sampleId: f.sampleId, analysis: f.item.analysis, status: 'ACCEPTED' } });
+        await prisma.workItem.create({ data: { id: id('WI-03'), sampleId: f.sampleId, analysis: f.item.analysis, status: 'ACCEPTED', duplicateOf: f.item.id } });
         expect((await returnItem('individual', f)).status).toBe(200);
         expect((await prisma.result.findUnique({ where: { id: f.result.id } })).isValid).toBe(false);
     });

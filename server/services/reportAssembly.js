@@ -22,7 +22,7 @@ async function assembleReport(sampleId, user, options = {}) {
             results: {
                 where: { isCurrent: true }
             },
-            workItems: { where: { duplicateOf: null },
+            workItems: {
                 orderBy: { createdAt: 'asc' }
             },
             project: true

@@ -126,7 +126,7 @@ function buildScopedWhere(user, existingWhere = {}, options = {}) {
             if (labScope) {
                 orClauses.push({
                     AND: [
-                        { workItems: { some: { duplicateOf: null, assignedTo: user.username } } },
+                        { workItems: { some: { assignedTo: user.username } } },
                         {
                             OR: [
                                 { [labField]: labScope },
@@ -136,7 +136,7 @@ function buildScopedWhere(user, existingWhere = {}, options = {}) {
                     ]
                 });
             } else {
-                orClauses.push({ workItems: { some: { duplicateOf: null, assignedTo: user.username } } });
+                orClauses.push({ workItems: { some: { assignedTo: user.username } } });
             }
         }
         const isNationalRole = user.role === 'MASTER_USER' || user.role === 'COUNTRY_ADMIN';

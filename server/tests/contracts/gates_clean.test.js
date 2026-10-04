@@ -31,7 +31,7 @@ describe('8.1 Section B: Gate Enforcement (Clean Flow)', () => {
         const acceptRes = await request(app)
             .post(`/api/samples/${sampleId}/accept`)
             .set('Authorization', `Bearer ${managerToken}`)
-            .send({ analyses: ['PH_H2O'] });
+            .send({ analyses: ['PH_H2O'], checklist: { items: Object.fromEntries(['container', 'label', 'quantity', 'condition', 'coc'].map(key => [key, { status: 'PASS' }])) } });
 
         expect(acceptRes.status).toBe(200);
 

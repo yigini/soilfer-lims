@@ -222,7 +222,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
             data: {
                 id: `WI-A-TECHC-${ts}`,
                 sampleId: sampleA.id,
-                analysis: 'SOC',
+                analysis: 'EC',
                 status: 'ASSIGNED',
                 assignedTo: techCUsername,
                 labId: labAId,
@@ -309,7 +309,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
             data: {
                 id: `WI-CONFLICT-${ts}`,
                 sampleId: sampleB.id, // sampleB is in Lab B
-                analysis: 'SOC',
+                analysis: 'EC',
                 status: 'ASSIGNED',
                 assignedTo: 'test_lab_technician_labdeepa',
                 labId: labAId, // workItem is in Lab A

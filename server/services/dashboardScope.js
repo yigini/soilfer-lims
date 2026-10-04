@@ -285,7 +285,7 @@ function buildSampleScopeWhere(scope, options = {}) {
                 },
                 {
                     workItems: {
-                        some: { duplicateOf: null, assignedTo: scope.username }
+                        some: { assignedTo: scope.username }
                     }
                 }
             ]

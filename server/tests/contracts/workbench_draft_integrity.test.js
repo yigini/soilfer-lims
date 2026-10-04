@@ -69,6 +69,7 @@ describe('Workbench Draft Integrity Contract (P0)', () => {
         await prisma.workItem.create({
             data: {
                 id: testWorkItemId2,
+                duplicateOf: testWorkItemId1,
                 sampleId: testSampleId,
                 labId: 'LAB-DEFAULT',
                 analysis: 'PH',

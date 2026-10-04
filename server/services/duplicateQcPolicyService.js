@@ -4,7 +4,7 @@ const policyService = require('./policyService');
 async function resolveDuplicatePolicy(batch, db = require('../prisma')) {
     const [analysis, members] = await Promise.all([
         db.analysis.findUnique({ where: { code: batch.analysis }, select: { loq: true, validation: true } }),
-        db.workItem.findMany({ where: { ...({ batchId: batch.id, analysis: batch.analysis }), duplicateOf: null }, select: { sampleId: true, methodologyId: true } })
+        db.workItem.findMany({ where: { batchId: batch.id, analysis: batch.analysis }, select: { sampleId: true, methodologyId: true } })
     ]);
     const results = members.length ? await db.result.findMany({ where: {
         batchId: batch.id, param: batch.analysis, isCurrent: true, sampleId: { in: members.map(item => item.sampleId) }

@@ -551,7 +551,7 @@ async function getAccessPreview(actor, targetUserId, changes = {}, tx = prisma) 
 
     // Count open work assignments
     const openAssignmentsCount = await tx.workItem.count({
-        where: { ...(getUnfinishedWorkWhere(targetUser.username)), duplicateOf: null }
+        where: getUnfinishedWorkWhere(targetUser.username)
     });
 
     const proposedRole = changes.role || targetUser.role;
@@ -657,7 +657,7 @@ async function applyAccessChanges(actor, targetUserId, options = {}, outerTx = n
         }
 
         const openCount = await tx.workItem.count({
-            where: { ...(getUnfinishedWorkWhere(targetUser.username)), duplicateOf: null }
+            where: getUnfinishedWorkWhere(targetUser.username)
         });
 
         // Review token verification (IR-03)
@@ -793,7 +793,7 @@ async function suspendUser(actor, targetUserId, options = {}, outerTx = null) {
         });
 
         const openCount = await tx.workItem.count({
-            where: { ...(getUnfinishedWorkWhere(targetUser.username)), duplicateOf: null }
+            where: getUnfinishedWorkWhere(targetUser.username)
         });
 
         await tx.auditLog.create({

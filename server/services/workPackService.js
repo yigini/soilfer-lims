@@ -67,7 +67,7 @@ class WorkPackService {
         }
 
         const workItems = await prisma.workItem.findMany({
-            where: { ...(itemWhere), duplicateOf: null },
+            where: itemWhere,
             include: {
                 sample: {
                     select: {

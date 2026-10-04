@@ -27,7 +27,7 @@ exports.getAnalyticalResults = async (req, res) => {
         }
         const samples = await prisma.sample.findMany({
             where: scopeGuard.buildScopedWhere(req.user, filters, { labField: 'labId', altLabField: 'assignedLab' }),
-            include: { workItems: { where: { duplicateOf: null } }, results: { where: CURRENT_VALID_RESULTS, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] } },
+            include: { workItems: true, results: { where: CURRENT_VALID_RESULTS, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] } },
             orderBy: { receptionDate: 'desc' }, take: 500
         });
         const spectralIndex = await prisma.spectralData.findMany({

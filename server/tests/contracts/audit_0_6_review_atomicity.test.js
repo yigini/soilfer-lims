@@ -36,7 +36,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         const f = await fixture({ status: states[0] });
         const items = [f.item];
         for (const status of states.slice(1)) items.push(await prisma.workItem.create({ data: {
-            id: id('WI-06-PACKAGE'), sampleId: f.sampleId, assignedLab: labId, analysis: 'EC', status, result: '5.4', history: '[]'
+            id: id('WI-06-PACKAGE'), sampleId: f.sampleId, assignedLab: labId, analysis: 'EC', status, result: '5.4', history: '[]', duplicateOf: items.find(item => item.analysis === 'EC')?.id || null
         } }));
         const submission = await prisma.submission.create({ data: { id: id('SUB-06'), sampleId: f.sampleId, assignedLab: labId,
             status: 'PENDING_REVIEW', type: 'PARTIAL', submittedBy: jwt.decode(technician).username, workItemCount: items.length,

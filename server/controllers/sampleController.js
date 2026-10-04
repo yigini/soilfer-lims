@@ -255,7 +255,7 @@ exports.getSamples = async (req, res) => {
             // --- Phase 1: Lightweight ranking query (ALL matching rows, minimal fields) ---
             prisma.sample.findMany({
                 where,
-                select: { id: true, status: true, updatedAt: true, workItems: { where: { duplicateOf: null }, select: { status: true } } },
+                select: { id: true, status: true, updatedAt: true, workItems: {  select: { status: true } } },
                 orderBy: { updatedAt: 'desc' }
             }),
             prisma.sample.groupBy({
@@ -363,7 +363,7 @@ exports.getSamples = async (req, res) => {
                     receptionDate: true, createdAt: true, updatedAt: true,
                     fieldMetadata: true, metadata: true, rejectionReason: true,
                     custodyHandoverAt: true, custodyCarrierName: true, custodyTrackingNumber: true, receivingOfficerName: true,
-                    workItems: { where: { duplicateOf: null }, select: { analysis: true, status: true, category: true } }
+                    workItems: {  select: { analysis: true, status: true, category: true } }
                 }
             }) : [];
 
@@ -381,7 +381,7 @@ exports.getSamples = async (req, res) => {
                     receptionDate: true, createdAt: true, updatedAt: true,
                     fieldMetadata: true, metadata: true, rejectionReason: true,
                     custodyHandoverAt: true, custodyCarrierName: true, custodyTrackingNumber: true, receivingOfficerName: true,
-                    workItems: { where: { duplicateOf: null }, select: { analysis: true, status: true, category: true } }
+                    workItems: {  select: { analysis: true, status: true, category: true } }
                 },
                 orderBy: { [safeSort]: safeOrder },
                 skip,
@@ -515,6 +515,15 @@ exports.updateStatus = async (req, res) => {
         const reqPerm = STATUS_REQUIRED_PERMISSIONS[status];
         if (reqPerm && !hasPermission(user, reqPerm)) {
             return res.status(403).json({ error: 'Insufficient permissions' });
+        }
+
+        if (status === 'RECEIVED') {
+            const updated = await prisma.$transaction(tx => require('../services/intakeService').receiveSample(tx, { sampleId: String(id), body: req.body, user }));
+            return res.json(updated);
+        }
+        if (status === 'RECEIVED_REJECTED' && sample.status === 'RECEIVED') {
+            const result = await prisma.$transaction(tx => require('../services/intakeService').rejectSample(tx, { body: { ...req.body, sampleId: sample.id, originalId: sample.originalId, ncReason: req.body.ncReason || req.body.reason }, user }));
+            return res.json(result.sample);
         }
 
         const updates = { status };
@@ -666,7 +675,7 @@ exports.updatePhaseStatus = async (req, res) => {
 
             const OperationalConfirmationService = require('../services/operationalConfirmationService');
             const gateItem = await prisma.workItem.findFirst({
-                where: { ...({ sampleId: String(id), analysis: normPhase }), duplicateOf: null }
+                where: { sampleId: String(id), analysis: normPhase, duplicateOf: null }
             });
             if (!gateItem) {
                 return res.status(404).json({ error: `Gate work item for ${normPhase} not found` });
@@ -717,10 +726,10 @@ exports.updatePhaseStatus = async (req, res) => {
         }
 
         const gateItem = await prisma.workItem.findFirst({
-            where: { ...({
+            where: {
                 sampleId: String(id),
                 analysis: phase
-            }), duplicateOf: null }
+            }
         });
         if (gateItem) {
             let wiStatus = 'NOT_ASSIGNED';
@@ -794,11 +803,11 @@ const userHasScopeForSample = async (user, sample) => {
 
         if (user.role === 'LAB_TECHNICIAN') {
             const hasAssignment = await prisma.workItem.findFirst({
-                where: { ...({
+                where: {
                     sampleId: String(sample.id),
                     assignedTo: user.username,
                     labId: user.labId // Must be in their CURRENT lab
-                }), duplicateOf: null }
+                }
             });
             if (hasAssignment) return true;
         }
@@ -889,7 +898,7 @@ exports.undoIntake = async (req, res) => {
         }
 
         // Safety Check: Are there completed work items?
-        const items = await prisma.workItem.findMany({ where: { ...({ sampleId: String(id) }), duplicateOf: null } });
+        const items = await prisma.workItem.findMany({ where: { sampleId: String(id) } });
         const hasProgress = items.some(w => w.status !== 'PENDING');
 
         if (hasProgress) {
@@ -941,7 +950,7 @@ exports.getSampleDetail = async (req, res) => {
         let sample = await prisma.sample.findUnique({
             where: { id: String(id) },
             include: {
-                workItems: { where: { duplicateOf: null } }
+                workItems: true
             }
         });
 
@@ -955,7 +964,7 @@ exports.getSampleDetail = async (req, res) => {
                     ]
                 },
                 include: {
-                    workItems: { where: { duplicateOf: null } }
+                    workItems: true
                 }
             });
         }
@@ -1169,7 +1178,7 @@ exports.getMapState = async (req, res) => {
     try {
         const sample = await prisma.sample.findUnique({
             where: { id: String(id) },
-            include: { workItems: { where: { duplicateOf: null } } }
+            include: { workItems: true }
         });
 
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
@@ -1318,10 +1327,10 @@ exports.deleteSample = async (req, res) => {
                     throw new sampleStateService.TransitionError('Cannot discard sample with existing analytical results.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
                 }
                 const activeWork = await tx.workItem.findMany({
-                    where: { ...({
+                    where: {
                         sampleId: String(id),
                         status: { in: ['COMPLETED', 'SUBMITTED', 'ACCEPTED'] }
-                    }), duplicateOf: null }
+                    }
                 });
                 if (activeWork.length > 0) {
                     throw new sampleStateService.TransitionError('Cannot discard sample with analytical work completed or submitted.', 409, 'ACTIVE_WORK_IN_PROGRESS');
@@ -1546,10 +1555,10 @@ exports.batchDeleteSamples = async (req, res) => {
 
             // Verify no completed or submitted work items exist
             const activeWork = await tx.workItem.findMany({
-                where: { ...({
+                where: {
                     sampleId: { in: allIds },
                     status: { in: ['COMPLETED', 'SUBMITTED', 'ACCEPTED'] }
-                }), duplicateOf: null }
+                }
             });
             if (activeWork.length > 0) {
                 throw new sampleStateService.TransitionError('Cannot delete or discard samples with analytical work completed or submitted.', 409, 'ACTIVE_WORK_IN_PROGRESS');
@@ -1983,7 +1992,7 @@ exports.approveSample = async (req, res) => {
         // S04: Check analytical work items, active order lines, and QC batches
         const [workItems, orderRevision, qcBatches] = await Promise.all([
             prisma.workItem.findMany({
-                where: { ...({ sampleId: String(id) }), duplicateOf: null },
+                where: { sampleId: String(id) },
                 include: { batch: true }
             }),
             prisma.sampleOrderRevision.findFirst({
@@ -1994,7 +2003,7 @@ exports.approveSample = async (req, res) => {
             prisma.batch.findMany({
                 where: {
                     workItems: {
-                        some: { duplicateOf: null, sampleId: String(id) }
+                        some: {  sampleId: String(id) }
                     }
                 }
             })
@@ -2157,19 +2166,19 @@ exports.archiveSample = async (req, res) => {
 
         // WP-09: Block terminal transitions while work is live
         const activeWork = await prisma.workItem.findMany({
-            where: { ...({
+            where: {
                 sampleId: String(id),
                 analysis: { notIn: ['ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP', 'DRYING', 'PREPARATION'] },
                 status: { notIn: ['ACCEPTED', 'WAIVED'] }
-            }), duplicateOf: null },
+            },
             select: { id: true, analysis: true, status: true }
         });
         const uncompletedGates = await prisma.workItem.findMany({
-            where: { ...({
+            where: {
                 sampleId: String(id),
                 analysis: { in: ['DRYING', 'PREPARATION'] },
                 status: { notIn: ['COMPLETED', 'ACCEPTED', 'WAIVED'] }
-            }), duplicateOf: null },
+            },
             select: { id: true, analysis: true, status: true }
         });
         if (activeWork.length > 0 || uncompletedGates.length > 0) {
@@ -2183,11 +2192,11 @@ exports.archiveSample = async (req, res) => {
 
         // WP-08: Check mutual exclusion with DISPOSAL
         const existingDisposal = await prisma.workItem.findFirst({
-            where: { ...({
+            where: {
                 sampleId: String(id),
                 analysis: { in: ['DISPOSAL', 'DISP'] },
                 status: { notIn: ['WAIVED', 'CANCELLED'] }
-            }), duplicateOf: null }
+            }
         });
         if (existingDisposal && ['ASSIGNED', 'IN_PROGRESS', 'SUBMITTED', 'ACCEPTED'].includes(existingDisposal.status)) {
             return res.status(409).json({
@@ -2197,10 +2206,10 @@ exports.archiveSample = async (req, res) => {
 
         // WP-08: Create or retrieve ARCHIVING work item
         let archiveItem = await prisma.workItem.findFirst({
-            where: { ...({
+            where: {
                 sampleId: String(id),
-                analysis: { in: ['ARCHIVING', 'ARCH'] }
-            }), duplicateOf: null }
+                analysis: { in: ['ARCHIVING', 'ARCH'] }, duplicateOf: null
+            }
         });
 
         if (!archiveItem) {
@@ -2273,19 +2282,19 @@ exports.disposeSample = async (req, res) => {
 
         // WP-09: Block terminal transitions while work is live
         const activeWork = await prisma.workItem.findMany({
-            where: { ...({
+            where: {
                 sampleId: String(id),
                 analysis: { notIn: ['ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP', 'DRYING', 'PREPARATION'] },
                 status: { notIn: ['ACCEPTED', 'WAIVED'] }
-            }), duplicateOf: null },
+            },
             select: { id: true, analysis: true, status: true }
         });
         const uncompletedGates = await prisma.workItem.findMany({
-            where: { ...({
+            where: {
                 sampleId: String(id),
                 analysis: { in: ['DRYING', 'PREPARATION'] },
                 status: { notIn: ['COMPLETED', 'ACCEPTED', 'WAIVED'] }
-            }), duplicateOf: null },
+            },
             select: { id: true, analysis: true, status: true }
         });
         if (activeWork.length > 0 || uncompletedGates.length > 0) {
@@ -2299,11 +2308,11 @@ exports.disposeSample = async (req, res) => {
 
         // WP-08: Check mutual exclusion with ARCHIVING
         const existingArchiving = await prisma.workItem.findFirst({
-            where: { ...({
+            where: {
                 sampleId: String(id),
                 analysis: { in: ['ARCHIVING', 'ARCH'] },
                 status: { notIn: ['WAIVED', 'CANCELLED'] }
-            }), duplicateOf: null }
+            }
         });
         if (existingArchiving && ['ASSIGNED', 'IN_PROGRESS', 'SUBMITTED', 'ACCEPTED'].includes(existingArchiving.status)) {
             return res.status(409).json({
@@ -2313,10 +2322,10 @@ exports.disposeSample = async (req, res) => {
 
         // WP-08: Create or retrieve DISPOSAL work item
         let disposalItem = await prisma.workItem.findFirst({
-            where: { ...({
+            where: {
                 sampleId: String(id),
-                analysis: { in: ['DISPOSAL', 'DISP'] }
-            }), duplicateOf: null }
+                analysis: { in: ['DISPOSAL', 'DISP'] }, duplicateOf: null
+            }
         });
 
         if (!disposalItem) {
@@ -2461,7 +2470,7 @@ exports.previewOrderRevision = async (req, res) => {
         const sample = await prisma.sample.findUnique({
             where: { id: String(id) },
             include: {
-                workItems: { where: { duplicateOf: null } }
+                workItems: true
             }
         });
         if (!sample) return res.status(404).json({ error: 'Sample not found' });

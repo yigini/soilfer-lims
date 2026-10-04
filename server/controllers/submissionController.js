@@ -24,7 +24,7 @@ const userHasLabScope = (user, labId) => {
 // =============================================================================
 const getWorkItemsForSample = async (sampleId) => {
     return await prisma.workItem.findMany({
-        where: { ...({ sampleId: String(sampleId) }), duplicateOf: null }
+        where: { sampleId: String(sampleId) }
     });
 };
 
@@ -98,7 +98,7 @@ exports.createSubmission = async (req, res) => {
         const errors = [];
 
         const dbItems = await prisma.workItem.findMany({
-            where: { ...({ id: { in: workItemIds } }), duplicateOf: null }
+            where: { id: { in: workItemIds } }
         });
 
         workItemIds.forEach(wiId => {
@@ -300,7 +300,7 @@ exports.getSubmission = async (req, res) => {
 
         const workItemIds = typeof submission.workItemIds === 'string' ? JSON.parse(submission.workItemIds) : (submission.workItemIds || []);
         const workItems = await prisma.workItem.findMany({
-            where: { ...({ id: { in: workItemIds } }), duplicateOf: null }
+            where: { id: { in: workItemIds } }
         });
         const sample = await prisma.sample.findUnique({ where: { id: String(submission.sampleId) } });
 
@@ -372,7 +372,7 @@ exports.reviewSubmission = async (req, res) => {
             return res.status(403).json({ error: 'Security Violation: Attempted to review items not belonging to this submission.' });
         }
 
-        const dbItems = await prisma.workItem.findMany({ where: { ...({ id: { in: workItemIds } }), duplicateOf: null }, include: { sample: true } });
+        const dbItems = await prisma.workItem.findMany({ where: { id: { in: workItemIds } }, include: { sample: true } });
         if (dbItems.some(item => !scopeGuard.canAccessEntity(user, item.sample || item, { labField: 'labId', altLabField: 'assignedLab' }))) {
             return res.status(403).json({ error: 'Work item outside your lab scope.', code: 'ACCESS_DENIED_LAB' });
         }
@@ -380,7 +380,7 @@ exports.reviewSubmission = async (req, res) => {
         if (isShorthand) normalizedDecisions = normalizedDecisions.filter(decision => currentMemberIds.has(decision.workItemId));
         if (isShorthand && !normalizedDecisions.length) {
             await prisma.$transaction(async tx => {
-                const currentItems = await tx.workItem.findMany({ where: { ...({ id: { in: workItemIds } }), duplicateOf: null } });
+                const currentItems = await tx.workItem.findMany({ where: { id: { in: workItemIds } } });
                 if (currentItems.some(item => item.submissionId === id)) throw Object.assign(new Error('Submission membership changed. Please refresh.'), { statusCode: 409, code: 'ITEM_NOT_IN_SUBMISSION' });
                 const currentSubmission = await tx.submission.findUnique({ where: { id } });
                 if (currentSubmission.status !== 'REVIEWED') {
@@ -553,7 +553,7 @@ exports.getReanalysisRequests = async (req, res) => {
         }
 
         const items = await prisma.workItem.findMany({
-            where: { ...(where), duplicateOf: null }
+            where
         });
 
         const enriched = items.map(i => {

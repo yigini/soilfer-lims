@@ -48,7 +48,7 @@ class OperationalConfirmationService {
 
         // 2. Fetch WorkItem and Sample
         const item = await prisma.workItem.findUnique({
-            where: { ...({ id: workItemId }), duplicateOf: null },
+            where: { id: workItemId },
             include: { sample: true }
         });
 
@@ -289,7 +289,7 @@ class OperationalConfirmationService {
         }
 
         const item = await prisma.workItem.findUnique({
-            where: { ...({ id: workItemId }), duplicateOf: null },
+            where: { id: workItemId },
             include: { sample: true }
         });
 

@@ -17,8 +17,12 @@ const { LOCKED_INTAKE_STATUSES, deriveLocationConfidence, resolveAnalysisGroup, 
 const workItems = require('./intakeWorkItemService');
 const { IntakeError } = require('./intakeErrors');
 
-async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initialFieldMetadata = {} }) {
+async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initialFieldMetadata = {}, expectedSnapshot }) {
     const body = { ...rawBody };
+    if (!user?.username) throw new IntakeError(422, { code: 'INTAKE_CUSTODY_REQUIRED', message: 'A trusted receiving officer is required.' });
+    for (const field of ['requiredAnalyses', 'analysisAdditions', 'analysisRemovals']) {
+        if (body[field] !== undefined && (!Array.isArray(body[field]) || body[field].some(code => typeof code !== 'string' || !code.trim()))) throw new IntakeError(422, { code: 'INTAKE_CATALOGUE_INVALID', message: `${field} must be an array of catalogue codes.` });
+    }
     let createData = null;
     let admissionExceptionRecord = null;
     validateObservations(body);
@@ -54,6 +58,10 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
     let sample = await prisma.sample.findFirst({
             where: { OR: [{ id: String(body.sampleId || body.id || originalId || '') }, { originalId: String(originalId || '') }] }
         });
+
+        if (expectedSnapshot !== undefined && (sample?.id !== expectedSnapshot?.id || sample && sample.updatedAt.getTime() !== expectedSnapshot.updatedAt.getTime())) {
+            throw new profileIdentity.ProfileReferenceConflictError('SOURCE_CHANGED');
+        }
 
         if (!user.labId && require('../utils/scopeGuard').hasGlobalAccess(user)) user = { ...user, labId: sample?.assignedLab || body.assignedLab || null };
         if (!user.labId) throw new IntakeError(403, { code: 'MISSING_LAB_SCOPE', message: 'Select a receiving laboratory.' });

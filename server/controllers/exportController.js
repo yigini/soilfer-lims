@@ -133,7 +133,7 @@ exports.getExportData = async (req, res) => {
             const samples = await prisma.sample.findMany({
                 where,
                 include: {
-                    workItems: { where: { duplicateOf: null } } // Needed for progress calculation if we want it in export?
+                    workItems: true // Needed for progress calculation if we want it in export?
                 },
                 orderBy: { createdAt: 'desc' }
             });
