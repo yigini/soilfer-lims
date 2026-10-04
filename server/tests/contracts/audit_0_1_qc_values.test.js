@@ -149,6 +149,17 @@ function modalHost() {
 }
 
 describe('Audit 0.1: BatchModal explicit input component behavior', () => {
+    test.each(['1,234', '1.234', '6 ,42'])('ambiguous or malformed QC input %s cannot be sent', async raw => {
+        const host = modalHost();
+        await host.render(); host.qcTab().props.onClick(); await host.render();
+        for (const id of ['qc-blank-input', 'qc-ctrl-exp-input', 'qc-ctrl-meas-input', 'qc-dup1-input', 'qc-dup2-input']) {
+            host.find(id).props.onChange({ target: { value: id === 'qc-dup1-input' ? raw : '7' } });
+            await host.render();
+        }
+        expect(host.find('evaluate-qc-btn').props.disabled).toBe(true);
+        await host.find('evaluate-qc-btn').props.onClick();
+        expect(host.axios.post).not.toHaveBeenCalled();
+    });
     test('opening QC with no input disables evaluation and clicking its handler sends no request', async () => {
         const host = modalHost();
         await host.render();
