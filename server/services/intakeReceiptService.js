@@ -7,17 +7,17 @@ const { transitionSample } = require('./sampleStateService');
 const profile = require('./intakeProfileService');
 const { evaluateChecklistCompliance } = require('./intakeValidationService');
 
-function validateMass(body, { arrival = false } = {}) {
+function validateMass(body) {
     for (const unit of [body.receivedMassUnit, body.massUnit]) if (unit !== undefined && unit !== null && unit !== '' && unit !== 'g') throw new IntakeError(422, { code: 'SAMPLE_MASS_UNIT_UNSUPPORTED', message: 'receivedMass is expressed in grams (g).' });
     const value = body.receivedMass;
     if (value === undefined || value === null || value === '') return undefined;
-    if (!['number', 'string'].includes(typeof value) || !String(value).trim() || !Number.isFinite(Number(value)) || Number(value) < 0 || arrival && Number(value) === 0) throw new IntakeError(422, { code: 'SAMPLE_MASS_INVALID', message: arrival ? 'An arrival mass must be a finite positive number in grams.' : 'An observed mass must be a finite non-negative number in grams.' });
+    if (!['number', 'string'].includes(typeof value) || !String(value).trim() || !Number.isFinite(Number(value)) || Number(value) < 0) throw new IntakeError(422, { code: 'SAMPLE_MASS_INVALID', message: 'An observed mass must be a finite non-negative number in grams.' });
     return Number(value);
 }
 async function receiveSample(tx, { sampleId, body = {}, user, createDataFactory }) {
     const now = new Date();
     if (!user?.username || !Number.isFinite(now.getTime())) throw new IntakeError(422, { code: 'INTAKE_CUSTODY_REQUIRED', message: 'The receiving officer and received-at timestamp are required.' });
-    const mass = validateMass(body, { arrival: true });
+    const mass = validateMass(body);
     let sample = sampleId ? await tx.sample.findUnique({ where: { id: String(sampleId) } }) : null;
     if (sampleId && !sample) throw new IntakeError(404, { error: 'Sample not found' });
     if (sample) {

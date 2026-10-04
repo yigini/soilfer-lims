@@ -58,6 +58,10 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
         if (!user.labId && require('../utils/scopeGuard').hasGlobalAccess(user)) user = { ...user, labId: sample?.assignedLab || body.assignedLab || null };
         if (!user.labId) throw new IntakeError(403, { code: 'MISSING_LAB_SCOPE', message: 'Select a receiving laboratory.' });
 
+        // Recheck saved custody facts and keep arrival evidence when acceptance omits those fields.
+        for (const field of ['custodyHandoverAt', 'custodyCarrierName', 'custodyTrackingNumber', 'custodySenderSignature', 'receivingOfficerSignature']) {
+            if (body[field] === undefined && sample?.[field] != null) body[field] = sample[field];
+        }
         let isNewlyCreatedDeskSample = false;
 
         if (sample) {
@@ -323,7 +327,15 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
             const receivingOfficerSignature = body.receivingOfficerSignature || coc.officerSignature || `CONFIRMED:${receivedBy}:${now.toISOString()}`;
 
             const { transitionSample } = require('../services/sampleStateService');
+            const rejectedOrder = await orderedAnalyses(prisma, sample, body, user);
             const rejectionData = {
+                requiredAnalyses: JSON.stringify(Array.from(rejectedOrder.requiredAnalyses)),
+                analysisGroupIds: JSON.stringify(rejectedOrder.canonicalGroupIds),
+                receivedMass: receivedMass === undefined ? undefined : receivedMass === null || receivedMass === '' ? null : Number(receivedMass),
+                moistureOnArrival: moistureOnArrival === undefined ? undefined : moistureOnArrival || null,
+                positionalUncertaintyM: body.positionalUncertaintyM === undefined ? undefined : batchObservations.nullableNumber(body.positionalUncertaintyM, 'positionalUncertaintyM'),
+                foreignMaterial: foreignMaterial === undefined ? undefined : typeof foreignMaterial === 'string' ? foreignMaterial : JSON.stringify(foreignMaterial),
+                massWarningAcknowledged: false,
                 rejectionReason: ncReason,
                 fieldMetadata: JSON.stringify(intakeFieldMetadata),
                 intakePhotos: photosList.length > 0 ? JSON.stringify(photosList) : null,
@@ -474,58 +486,7 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
             throw new IntakeError(400, { success: false, message: 'Justification is mandatory when removing analyses.' });
         }
 
-        // Finding #7: Start from existing analyses to avoid overwriting on partial payloads
-        const existingAnalyses = sample.requiredAnalyses
-            ? (typeof sample.requiredAnalyses === 'string' ? JSON.parse(sample.requiredAnalyses) : sample.requiredAnalyses)
-            : [];
-        let requiredAnalyses = new Set(existingAnalyses);
-
-        // Load analysis groups from database
-        const analysisGroupsRaw = await prisma.analysisGroup.findMany({ where: { OR: [{ labId: sample.assignedLab || user.labId }, { labId: null }] } });
-        const analysisGroups = analysisGroupsRaw.map(g => ({
-            id: g.id,
-            name: g.name,
-            analyses: g.analyses ? JSON.parse(g.analyses) : []
-        }));
-
-        const canonicalGroupIds = [];
-        if (analysisGroupIds !== undefined && analysisGroupIds !== null) {
-            if (!Array.isArray(analysisGroupIds)) {
-                throw new IntakeError(400, {
-                    success: false,
-                    code: 'INVALID_PACKAGE_ID',
-                    message: 'analysisGroupIds must be an array of package ID strings.'
-                });
-            }
-            for (const gid of analysisGroupIds) {
-                const resolved = resolveAnalysisGroup(gid, analysisGroups);
-                if (resolved.error) {
-                    throw new IntakeError(400, {
-                        success: false,
-                        code: resolved.code,
-                        message: resolved.message
-                    });
-                }
-                canonicalGroupIds.push(resolved.canonicalId);
-                resolved.group.analyses.forEach(code => requiredAnalyses.add(code));
-            }
-        }
-
-        if (Array.isArray(body.requiredAnalyses)) {
-            body.requiredAnalyses.forEach(code => requiredAnalyses.add(code));
-        }
-
-        if (Array.isArray(analysisAdditions)) {
-            analysisAdditions.forEach(code => requiredAnalyses.add(code));
-        }
-
-        if (Array.isArray(analysisRemovals)) {
-            analysisRemovals.forEach(code => requiredAnalyses.delete(code));
-        }
-
-        requiredAnalyses = new Set(workItems.normalizeAnalysisCodes(Array.from(requiredAnalyses)));
-        const selected = await cataloguePolicy.validateSelection(Array.from(requiredAnalyses), { labId: sample.assignedLab || user.labId, existing: workItems.normalizeAnalysisCodes(existingAnalyses), db: prisma });
-        if (!selected.valid) throw new IntakeError(400, { success: false, message: selected.error, error: selected.error, issues: selected.issues });
+        const { requiredAnalyses, canonicalGroupIds } = await orderedAnalyses(prisma, sample, body, user);
 
         // RC-01: Recheck the current observation, rather than trusting an earlier arrival validation.
         const currentMass = receivedMass === undefined ? sample.receivedMass : receivedMass;
@@ -748,7 +709,8 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
                 moistureOnArrival,
                 foreignMaterial,
                 massDeficitInfo,
-                massStatus: parsedMass === null ? 'NOT_OBSERVED' : massDeficitInfo ? 'MASS_DEFICIT' : 'SUFFICIENT',
+                massNotRecorded: parsedMass === null,
+                massStatus: parsedMass === null ? 'MASS_NOT_RECORDED' : massDeficitInfo ? 'MASS_DEFICIT' : 'SUFFICIENT',
                 complianceException: complianceExceptionRecord || null,
                 positionalUncertaintyM: uncertaintyM,
                 locationSource: samplingDetails?.locationSource || samplingDetails?.captureMethod,
@@ -795,6 +757,64 @@ function validateObservations(body) {
     for (const value of [body.custodyHandoverAt, body.coc?.handoverAt, body.coc?.date]) {
         if (value != null && value !== '' && !Number.isFinite(new Date(value).getTime())) throw new IntakeError(422, { code: 'INTAKE_CUSTODY_INVALID', message: 'The custody handover date must be valid.' });
     }
+}
+
+async function orderedAnalyses(prisma, sample, body, user) {
+    const { analysisGroupIds, analysisAdditions, analysisRemovals } = body;
+        // Finding #7: Start from existing analyses to avoid overwriting on partial payloads
+        const existingAnalyses = sample.requiredAnalyses
+            ? (typeof sample.requiredAnalyses === 'string' ? JSON.parse(sample.requiredAnalyses) : sample.requiredAnalyses)
+            : [];
+        let requiredAnalyses = new Set(existingAnalyses);
+
+        // Load analysis groups from database
+        const analysisGroupsRaw = await prisma.analysisGroup.findMany({ where: { OR: [{ labId: sample.assignedLab || user.labId }, { labId: null }] } });
+        const analysisGroups = analysisGroupsRaw.map(g => ({
+            id: g.id,
+            name: g.name,
+            analyses: g.analyses ? JSON.parse(g.analyses) : []
+        }));
+
+        const canonicalGroupIds = [];
+        if (analysisGroupIds !== undefined && analysisGroupIds !== null) {
+            if (!Array.isArray(analysisGroupIds)) {
+                throw new IntakeError(400, {
+                    success: false,
+                    code: 'INVALID_PACKAGE_ID',
+                    message: 'analysisGroupIds must be an array of package ID strings.'
+                });
+            }
+            for (const gid of analysisGroupIds) {
+                const resolved = resolveAnalysisGroup(gid, analysisGroups);
+                if (resolved.error) {
+                    throw new IntakeError(400, {
+                        success: false,
+                        code: resolved.code,
+                        message: resolved.message
+                    });
+                }
+                canonicalGroupIds.push(resolved.canonicalId);
+                resolved.group.analyses.forEach(code => requiredAnalyses.add(code));
+            }
+        }
+
+        if (Array.isArray(body.requiredAnalyses)) {
+            body.requiredAnalyses.forEach(code => requiredAnalyses.add(code));
+        }
+
+        if (Array.isArray(analysisAdditions)) {
+            analysisAdditions.forEach(code => requiredAnalyses.add(code));
+        }
+
+        if (Array.isArray(analysisRemovals)) {
+            analysisRemovals.forEach(code => requiredAnalyses.delete(code));
+        }
+
+        requiredAnalyses = new Set(workItems.normalizeAnalysisCodes(Array.from(requiredAnalyses)));
+        const selected = await cataloguePolicy.validateSelection(Array.from(requiredAnalyses), { labId: sample.assignedLab || user.labId, existing: workItems.normalizeAnalysisCodes(existingAnalyses), db: prisma });
+        if (!selected.valid) throw new IntakeError(400, { success: false, code: 'INTAKE_CATALOGUE_INVALID', message: selected.error, error: selected.error, issues: selected.issues });
+
+    return { requiredAnalyses, canonicalGroupIds };
 }
 
 module.exports = { prepareIntake };

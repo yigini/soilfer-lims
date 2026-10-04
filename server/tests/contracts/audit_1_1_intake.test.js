@@ -157,4 +157,15 @@ describe('Audit 1.1: one atomic intake service', () => {
         expect(batches.discrepancy(null, 0)).toEqual({ status: 'NOT_DECLARED', difference: null });
         expect(batches.discrepancy(2, 2)).toEqual({ status: 'MATCH', difference: 0 });
     });
+    test('arrival stores an observed zero mass as zero without applying sufficiency or generating work', async () => {
+        const response = await post('/api/samples/walkin', { submitter: 'Zero mass observation', receivedMass: 0, receivedMassUnit: 'g', analyses: [analysis.code] });
+        expect(response.status).toBe(201); expect(response.body.sample).toMatchObject({ status: 'RECEIVED', receivedMass: 0, labSampleCode: null });
+        const sample = await prisma.sample.findUnique({ where: { id: response.body.sample.id } });
+        expect(sample.receivedMass).toBe(0);
+        expect((await evidence(sample.id)).items).toEqual([]);
+        const before = await counts(), denied = await post(`/api/samples/${sample.id}/accept`, { checklist });
+        expect(denied.status).toBe(400); expect(denied.body.error).toBe('MASS_DEFICIT'); expect(await counts()).toEqual(before);
+        const accepted = await post(`/api/samples/${sample.id}/accept`, { checklist, massWarningAcknowledged: true });
+        expect(accepted.status).toBe(200); expect(accepted.body.receivedMass).toBe(0);
+    });
 });

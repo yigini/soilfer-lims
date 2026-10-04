@@ -18,8 +18,11 @@ function rowError(error, row, sample) {
         message: error.message, ...(error.payload || {}), ...(error.reason ? { reason: error.reason } : {}) };
 }
 function failRows(errors, allFailed = false) {
-    throw new IntakeError(422, { success: false, code: allFailed ? 'CONSIGNMENT_ALL_ROWS_FAILED' : 'CONSIGNMENT_ROWS_FAILED',
-        error: allFailed ? 'Every consignment row failed validation.' : 'Consignment rows failed validation; no intake was committed.', errors });
+    const commonCode = errors.length && errors.every(error => error.code === errors[0].code) ? errors[0].code : 'CONSIGNMENT_ROWS_FAILED';
+    const warnings = errors.filter(error => error.code === 'MASS_DEFICIT').map(error => ({ row: error.row, originalId: error.originalId, code: error.code, massDeficitInfo: error.massDeficitInfo }));
+    throw new IntakeError(422, { success: false, code: allFailed ? 'CONSIGNMENT_ALL_ROWS_FAILED' : commonCode,
+        error: allFailed ? 'Every consignment row failed validation.' : 'Consignment rows failed validation; no intake was committed.', errors,
+        ...(warnings.length ? { warnings, massDeficitInfo: warnings[0].massDeficitInfo } : {}) });
 }
 async function receiveConsignment(tx, { body, user }) {
     intake.requireTransaction(tx);
