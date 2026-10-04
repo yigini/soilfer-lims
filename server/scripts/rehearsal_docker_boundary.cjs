@@ -11,7 +11,7 @@
  *   [Smoke Test]
  *     - Packaged runner loading (/app/server/scripts/execute_ghana_apply_146.cjs) inside
  *       candidate Alpine container, confirming musl native module (better-sqlite3) linkage.
- *     - Packaged controller intake guards (AMBIGUOUS_PROVENANCE_HOLD) verification.
+ *     - Packaged shared intake guards (AMBIGUOUS_PROVENANCE_HOLD) and controller wiring verification.
  * 
  *   [Real Bash Wrapper Boundary Rehearsals with Disposable Real Docker]
  *     Scenario 1: Real wrapper success path through disposable volume & live container.
@@ -361,7 +361,7 @@ async function runRealDockerBoundarySuite() {
             throw new Error(`Smoke test failed: expected exit 1 with argument error, got status ${smokeStatus}: ${smokeOutput}`);
         }
 
-        // 2. Verify packaged controllers contain AMBIGUOUS_PROVENANCE_HOLD guards
+        // 2. Verify controllers use the shared intake guard, including a held-sample refusal.
         const guardsCheck = cp.execFileSync('docker', [
             'run', '--rm',
             '--entrypoint', 'node',
@@ -369,20 +369,33 @@ async function runRealDockerBoundarySuite() {
             REVIEWED_IMAGE_ID,
             '-e', `
 const fs = require('fs');
+const assert = require('node:assert/strict');
 const rc = fs.readFileSync('/app/server/controllers/receptionController.js', 'utf8');
 const sc = fs.readFileSync('/app/server/controllers/sampleController.js', 'utf8');
-if (!rc.includes('AMBIGUOUS_PROVENANCE_HOLD') || !sc.includes('AMBIGUOUS_PROVENANCE_HOLD')) {
+const intake = fs.readFileSync('/app/server/services/intakeService.js', 'utf8');
+const preparation = fs.readFileSync('/app/server/services/intakePreparationService.js', 'utf8');
+if (!rc.includes("require('../services/intakeService')") || !rc.includes('intake.intake(tx,') ||
+    !sc.includes("require('../services/intakeService').acceptSample(tx,") ||
+    !intake.includes('AMBIGUOUS_PROVENANCE_HOLD') || !preparation.includes('AMBIGUOUS_PROVENANCE_HOLD')) {
     console.error('ERROR: AMBIGUOUS_PROVENANCE_HOLD intake guards missing!');
     process.exit(1);
 }
-console.log('GUARDS_VERIFIED');
+(async () => {
+    const service = require('/app/server/services/intakeService');
+    const held = { id: 'disposable-held-sample', updatedAt: new Date(), metadata: JSON.stringify({ provenanceHold: { status: 'AMBIGUOUS_PROVENANCE_HOLD' } }) };
+    let writes = 0;
+    const tx = { sample: { findUnique: async () => held, update: async () => { writes++; throw new Error('Unexpected held-sample write'); } } };
+    await assert.rejects(service.commitPrepared(tx, { sample: held, responseKind: 'accepted', body: {}, user: {}, updateData: {}, now: new Date() }), error => error.code === 'AMBIGUOUS_PROVENANCE_HOLD');
+    assert.equal(writes, 0);
+    console.log('GUARDS_VERIFIED');
+})().catch(error => { console.error(error); process.exitCode = 1; });
 `
         ], { encoding: 'utf8' });
 
         if (!guardsCheck.includes('GUARDS_VERIFIED')) {
             throw new Error('Intake guards verification failed in packaged image: ' + guardsCheck);
         }
-        console.log('  ✓ Smoke Test PASSED: Packaged runner (/app/server/scripts/execute_ghana_apply_146.cjs) loaded cleanly with Alpine musl native modules; intake guards confirmed in controllers.\n');
+        console.log('  ✓ Smoke Test PASSED: Packaged runner (/app/server/scripts/execute_ghana_apply_146.cjs) loaded cleanly with Alpine musl native modules; shared intake guards and controller wiring verified, held acceptance refused without writes.\n');
 
         // ====================================================================
         // SCENARIO 1: Real Wrapper Success Path Through Disposable Docker
