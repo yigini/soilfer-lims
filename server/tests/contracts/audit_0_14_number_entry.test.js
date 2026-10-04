@@ -45,6 +45,7 @@ describe('Audit 0.14: normalized entries and lab number policy', () => {
         expect(rows.find(row => row.param === 'SAND')).toMatchObject({ value: '6.85', numericValue: 6.85, rawInput: '6,85' });
         expect(rows.find(row => row.param === 'SILT')).toMatchObject({ value: '43.15', numericValue: 43.15, rawInput: '43,15' });
         expect(rows.find(row => row.param === 'TEXTURE').rawInput).toBe('{"sand":"6,85","silt":"43,15","clay":"50"}');
+        expect(rows.find(row => row.param === 'TEXTURE' && row.isCurrent).rawInput).toBe('{"sand":"6,85","silt":"43,15","clay":"50"}');
     });
     test('lab policy is shared across analysts, explicit thousands grouping is honored and malformed policy fails before writes', async () => {
         await prisma.lab.update({ where: { id: lab }, data: { settings: '{"decimalSeparator":".","thousandsSeparator":","}' } });

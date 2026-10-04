@@ -1483,6 +1483,7 @@ exports.batchSave = async (req, res) => {
                                         sampleId,
                                         param: 'TEXTURE',
                                         value: tex.className,
+                                        rawInput: JSON.stringify({ sand: sandR.rawInput, silt: siltR.rawInput, clay: clayR.rawInput }),
                                         numericValue: null,
                                         unit: '',
                                         isValid: true,
