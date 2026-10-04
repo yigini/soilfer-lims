@@ -38,6 +38,10 @@ const mapConfigPath = path.resolve(__dirname, '../../../client/src/utils/mapConf
 const { SATELLITE_TILE_CONFIG, OSM_TILE_CONFIG, resolveMapCenter, parseCoordinates, COUNTRY_CENTERS } = loadClientModule(mapConfigPath);
 
 describe('Map Centering, Provider & Resilience Contract (#114)', () => {
+    test.each(['[1.5, 2.5]', '(1.5, 2.5)', '1.5, 2.5'])('parses bracketed and plain coordinates: %s', coordinates => {
+        expect(parseCoordinates(coordinates)).toEqual([1.5, 2.5]);
+    });
+
     describe('1. Centering Precedence Hierarchy', () => {
         test('Prioritizes valid sample coordinates over laboratory and fallback', () => {
             const sampleCoords = { lat: 14.6349, lng: -90.5069 }; // Guatemala City sample
