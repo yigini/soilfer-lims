@@ -197,6 +197,34 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
             expect(await snapshot(f)).toEqual(before);
         }
     });
+    test('submission closure commits custody after the CAS and refuses a second package review', async () => {
+        const f = await fixture({ analysis: 'DISPOSAL', status: 'PENDING', sampleStatus: 'APPROVED' });
+        const submission = await prisma.submission.create({ data: { id: id('SUB-06-CLOSURE'), sampleId: f.sampleId,
+            assignedLab: labId, status: 'PENDING_REVIEW', type: 'PARTIAL', submittedBy: jwt.decode(technician).username,
+            workItemCount: 1, workItemIds: JSON.stringify([f.item.id]) } });
+        await prisma.workItem.update({ where: { id: f.item.id }, data: { submissionId: submission.id } });
+        expect((await post(`/api/submissions/${submission.id}/review`, { decision: 'ACCEPT' })).status).toBe(200);
+        expect((await prisma.sample.findUnique({ where: { id: f.sampleId } })).status).toBe('DISPOSED');
+        const before = await snapshot(f);
+        const response = await post(`/api/submissions/${submission.id}/review`, { decision: 'ACCEPT' });
+        expect(response.status).toBe(409); expect(response.body.code).toBe('SUBMISSION_NOT_REVIEWABLE');
+        expect(await snapshot(f)).toEqual(before);
+    });
+    test('a moved item is a per-row refusal while current members commit and determine the old package status', async () => {
+        const f = await packageFixture(['SUBMITTED', 'SUBMITTED']);
+        const newer = await prisma.submission.create({ data: { id: id('SUB-06-NEWER'), sampleId: f.sampleId,
+            assignedLab: labId, status: 'PENDING_REVIEW', type: 'PARTIAL', submittedBy: jwt.decode(technician).username,
+            workItemCount: 1, workItemIds: JSON.stringify([f.item.id]) } });
+        await prisma.workItem.update({ where: { id: f.item.id }, data: { submissionId: newer.id } });
+        const before = await snapshot(f);
+        const response = await post(`/api/submissions/${f.submission.id}/review`, { decisions: f.items.map(item => ({ workItemId: item.id, decision: 'ACCEPT' })) });
+        expect(response.status).toBe(200);
+        expect(response.body.errors).toEqual([{ workItemId: f.item.id, code: 'ITEM_NOT_IN_SUBMISSION' }]);
+        expect(response.body.results).toEqual([{ workItemId: f.items[1].id, status: 'ACCEPTED', decision: 'ACCEPT' }]);
+        expect(await snapshot(f)).toEqual(before);
+        expect((await prisma.submission.findUnique({ where: { id: f.submission.id } })).status).toBe('REVIEWED');
+        expect(await prisma.submission.findUnique({ where: { id: newer.id } })).toEqual(newer);
+    });
     test('a failed decision insert rolls back the item CAS and audit together', async () => {
         const f = await fixture(), before = await snapshot(f), original = prisma.$transaction.bind(prisma);
         jest.spyOn(prisma, '$transaction').mockImplementation(callback => original(async tx => {
