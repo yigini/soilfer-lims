@@ -4,7 +4,9 @@
   "version": "1.8.0",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/generate-workflow-contract.cjs",
     "dev": "vite --host",
+    "prebuild": "node scripts/generate-workflow-contract.cjs",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
