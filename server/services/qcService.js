@@ -26,6 +26,29 @@ function parseNumericMeasurement(val) {
     return NaN;
 }
 
+// Validate explicit measurements by required QC type, without introducing position rules.
+function getMissingQcValueTypes(qcData = {}, runProfile = {}) {
+    const fieldsByType = {
+        BLANK: ['blanks', item => [item.value !== undefined ? item.value : item.val]],
+        DUPLICATE: ['duplicates', item => [
+            item.value1 !== undefined ? item.value1 : item.val1,
+            item.value2 !== undefined ? item.value2 : item.val2
+        ]],
+        CONTROL: ['controls', item => [
+            item.expected !== undefined ? item.expected : item.expectedValue,
+            item.measured !== undefined ? item.measured : (item.value !== undefined ? item.value : item.val)
+        ]]
+    };
+    const requiredTypes = new Set((runProfile.qcSlots || []).map(slot => slot.type));
+    return [...requiredTypes].filter(type => {
+        const [collection, fields] = fieldsByType[type] || [];
+        const items = qcData[collection];
+        return !fields || !Array.isArray(items) || items.length === 0 || items.some(item =>
+            !item || typeof item !== 'object' || !fields(item).every(value => Number.isFinite(parseNumericMeasurement(value)))
+        );
+    });
+}
+
 /**
  * Evaluate a single Method / Reagent Blank
  * @param {Object} blank - { id, value, maxAllowed, label }
@@ -440,6 +463,7 @@ async function flagBatchResults(prismaClient, batchId, status, disposition = nul
 }
 
 module.exports = {
+    getMissingQcValueTypes,
     evaluateBlank,
     evaluateDuplicate,
     evaluateControl,

@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { X, Layers, ShieldCheck, AlertTriangle, CheckCircle2, FlaskConical, PlusCircle } from 'lucide-react';
 import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
+import { parseLaboratoryNumber } from '../../utils/messageFormatter';
+
+const EMPTY_QC_FORM = { blankVal: '', ctrlExpected: '', ctrlMeasured: '', dupVal1: '', dupVal2: '' };
 
 export default function BatchModal({
     isOpen,
@@ -27,13 +30,11 @@ export default function BatchModal({
     });
 
     // Form state for QC Evaluation
-    const [qcForm, setQcForm] = useState({
-        blankVal: '0.02',
-        ctrlExpected: '7.00',
-        ctrlMeasured: '7.03',
-        dupVal1: '6.85',
-        dupVal2: '6.87'
-    });
+    const [qcForm, setQcForm] = useState({ ...EMPTY_QC_FORM });
+
+    useEffect(() => {
+        setQcForm({ ...EMPTY_QC_FORM });
+    }, [isOpen, selectedBatchId]);
 
     const fetchBatches = useCallback(async () => {
         try {
@@ -64,6 +65,11 @@ export default function BatchModal({
     if (!isOpen) return null;
 
     const currentBatch = batches.find(b => b.id === selectedBatchId) || batches[0] || null;
+    const qcMeasurements = Object.fromEntries(Object.entries(qcForm).map(([field, raw]) => {
+        const parsed = parseLaboratoryNumber(raw);
+        return [field, parsed.valid && parsed.value !== null ? Number(parsed.canonical) : NaN];
+    }));
+    const qcFormComplete = Object.values(qcMeasurements).every(Number.isFinite);
 
     // Handle Create Batch
     const handleCreateBatch = async (e) => {
@@ -130,22 +136,16 @@ export default function BatchModal({
 
     // Handle QC Evaluation
     const handleEvaluateQc = async () => {
-        if (!selectedBatchId) return;
+        if (!selectedBatchId || loading || !qcFormComplete) return;
         setError(null);
         setSuccessMsg(null);
         try {
             setLoading(true);
-            const blanks = qcForm.blankVal ? [{ value: parseFloat(qcForm.blankVal) }] : [];
-            const controls = qcForm.ctrlExpected && qcForm.ctrlMeasured ? [{
-                expected: parseFloat(qcForm.ctrlExpected),
-                measured: parseFloat(qcForm.ctrlMeasured)
-            }] : [];
-            const duplicates = qcForm.dupVal1 && qcForm.dupVal2 ? [{
-                value1: parseFloat(qcForm.dupVal1),
-                value2: parseFloat(qcForm.dupVal2)
-            }] : [];
+            const blanks = [{ value: qcMeasurements.blankVal }];
+            const controls = [{ expected: qcMeasurements.ctrlExpected, measured: qcMeasurements.ctrlMeasured }];
+            const duplicates = [{ value1: qcMeasurements.dupVal1, value2: qcMeasurements.dupVal2 }];
 
-            const res = await axios.put(`/api/qc/batches/${selectedBatchId}`, {
+            const res = await axios.post(`/api/qc/batches/${selectedBatchId}/evaluate`, {
                 blanks,
                 controls,
                 duplicates
@@ -520,7 +520,7 @@ export default function BatchModal({
                                 <button
                                     type="button"
                                     onClick={handleEvaluateQc}
-                                    disabled={loading}
+                                    disabled={loading || !selectedBatchId || !qcFormComplete}
                                     data-testid="evaluate-qc-btn"
                                     className="px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white flex items-center gap-1.5 shadow transition-all"
                                 >
