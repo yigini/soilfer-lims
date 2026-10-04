@@ -379,6 +379,7 @@ export default function WorksheetArea({
                                             <td className="py-3 px-3" onClick={e => e.stopPropagation()}>
                                                 {isTexture ? (
                                                     <TextureEditor
+                                                        numberFormat={item.numberFormat}
                                                         disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
                                                         values={draft?.values || []}
                                                         tolerance={activeGroup?.validation?.tolerance ?? null}
@@ -440,6 +441,7 @@ export default function WorksheetArea({
                                                     </div>
                                                 ) : (
                                                     <NumericEditor
+                                                        numberFormat={item.numberFormat}
                                                         disabled={!isEntryReady(item, activeGroup?.eligibleEquipment || [])}
                                                         value={draft?.value ?? ''}
                                                         onChange={(val) => onDraftChange(item.workItemId, val)}

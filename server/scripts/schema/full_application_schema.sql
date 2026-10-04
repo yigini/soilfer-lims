@@ -669,6 +669,7 @@ CREATE TABLE "Result" (
     "param" TEXT NOT NULL,
     "value" TEXT NOT NULL,
     "numericValue" REAL,
+    "rawInput" TEXT,
     "unit" TEXT,
     "flags" TEXT,
     "isValid" BOOLEAN,

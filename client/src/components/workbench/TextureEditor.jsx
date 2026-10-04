@@ -1,5 +1,7 @@
 import React, { useMemo, useRef } from 'react';
 import { calculateUsdaTexture } from '../../utils/soilCalculations';
+import numberParse from '@lims/number-parse';
+import NumberPreview from './NumberPreview';
 
 /**
  * TextureEditor
@@ -14,7 +16,8 @@ export default function TextureEditor({
     onEnterNext = null,
     sampleId = '',
     tolerance = null,
-    inputRef = null
+    inputRef = null,
+    numberFormat
 }) {
     let sandVal = '';
     let siltVal = '';
@@ -50,12 +53,11 @@ export default function TextureEditor({
         onChange(nextObj);
     };
 
-    const s = Number(String(sandVal).replace(',', '.')) || 0;
-    const si = Number(String(siltVal).replace(',', '.')) || 0;
-    const c = Number(String(clayVal).replace(',', '.')) || 0;
+    const parsed = [sandVal, siltVal, clayVal].map(value => numberParse.parseNumber(value, numberFormat));
+    const [s, si, c] = parsed.map(value => value.valid && !value.qualifier ? value.value : 0);
 
     const hasAny = sandVal !== '' || siltVal !== '' || clayVal !== '';
-    const hasAll = sandVal !== '' && siltVal !== '' && clayVal !== '';
+    const hasAll = parsed.every(value => value.valid && !value.qualifier);
 
     const tolVal = typeof tolerance === 'number' ? tolerance : (tolerance?.tolerance ?? null);
 
@@ -70,6 +72,7 @@ export default function TextureEditor({
 
     return (
         <div className="flex flex-col gap-1.5">
+            {[sandVal, siltVal, clayVal].map((value, index) => <NumberPreview key={index} value={value} numberFormat={numberFormat} />)}
             <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center gap-1">
                     <span className="text-[11px] text-sf-muted font-medium">Sand:</span>

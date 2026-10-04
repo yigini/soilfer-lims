@@ -1,4 +1,5 @@
 {
+  "numbers": {"ambiguous":"Esclareça o separador decimal ou de milhares.","invalid":"Formato de número inválido.","policyInvalid":"O formato numérico do laboratório está indisponível ou é inválido.","decimal":"Separador decimal","thousands":"Separador de milhares","noGrouping":"Não configurado","space":"Espaço"},
   "sampleLookup": { "title": "Busca de amostra", "ambiguous": "Este identificador corresponde a várias amostras:", "failed": "Não foi possível encontrar ou carregar a amostra. Verifique o identificador e a conexão." },
   "dataSheet": {
     "title": "Folha de dados",

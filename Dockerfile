@@ -14,6 +14,7 @@ RUN cd server && npm ci --ignore-scripts
 # Copy source
 COPY client/ ./client/
 COPY server/ ./server/
+COPY shared/ ./shared/
 
 # Generate Prisma client (Prisma 7 uses prisma.config.ts)
 RUN cd server && npx prisma generate
@@ -48,6 +49,7 @@ RUN apk del python3 make g++
 COPY server/ ./server/
 
 # Copy Prisma client generated in builder
+COPY shared/ ./shared/
 COPY --from=builder /app/server/prisma_client ./server/prisma_client/
 
 # Copy built client

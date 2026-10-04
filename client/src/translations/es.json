@@ -1,4 +1,5 @@
 {
+  "numbers": {"ambiguous":"Aclare el separador decimal o de miles.","invalid":"Formato de número no válido.","policyInvalid":"El formato numérico del laboratorio no está disponible o no es válido.","decimal":"Separador decimal","thousands":"Separador de miles","noGrouping":"Sin configurar","space":"Espacio"},
   "sampleLookup": { "title": "Búsqueda de muestra", "ambiguous": "Este identificador coincide con varias muestras:", "failed": "No se pudo encontrar o cargar la muestra. Compruebe el identificador y la conexión." },
   "dataSheet": {
     "title": "Hoja de datos",
