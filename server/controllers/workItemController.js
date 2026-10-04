@@ -1272,7 +1272,7 @@ exports.reviewWorkItem = async (req, res) => {
                 // Batch QC check
                 const qcController = require('./qcController');
                 const batchInfo = await qcController.checkItemBatchStatus(item.id);
-                if (batchInfo && batchInfo.status === 'QC_FAIL') {
+                if (batchInfo && batchInfo.allowed === false) {
                     return res.status(409).json({
                         error: `Cannot ACCEPT work item ${item.id} because it belongs to a FAILED QC Batch (${batchInfo.batchId}). You must WAIVE or REJECT it.`,
                         code: 'QC_FAIL_BLOCKER',
@@ -1636,7 +1636,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
             const qcFailures = [];
             for (const item of items) {
                 const batchInfo = await qcController.checkItemBatchStatus(item.id);
-                if (batchInfo && batchInfo.status === 'QC_FAIL') {
+                if (batchInfo && batchInfo.allowed === false) {
                     qcFailures.push({ workItemId: item.id, batchId: batchInfo.batchId });
                 }
             }

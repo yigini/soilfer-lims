@@ -150,13 +150,26 @@ describe('BLK-2: Minimum Viable Typed QC Controls Contract', () => {
     });
 
     test('6. Batch evaluation endpoint transitions status to QC_PASS when all controls pass', async () => {
-        const evalRes = await request(app)
+        // A dispositioned failure stays locked. Passing evidence belongs to a fresh run.
+        const lockedRes = await request(app)
             .post(`/api/qc/batches/${batchId}/evaluate`)
             .set('Authorization', `Bearer ${techToken}`)
+            .send({ blanks: [{ value: 0.01 }] });
+        expect(lockedRes.status).toBe(409);
+        expect(lockedRes.body.code).toBe('QC_BATCH_LOCKED');
+
+        const createRes = await request(app)
+            .post('/api/qc/batches')
+            .set('Authorization', `Bearer ${techToken}`)
+            .send({ analysis: 'PH_H2O', instrument: 'Mettler Toledo pH' });
+        expect(createRes.status).toBe(201);
+        const evalRes = await request(app)
+            .post(`/api/qc/batches/${createRes.body.id}/evaluate`)
+            .set('Authorization', `Bearer ${techToken}`)
             .send({
-                blanks: [{ id: 'B1', value: 0.01, maxAllowed: 0.05 }],
-                duplicates: [{ id: 'D1', value1: 6.8, value2: 6.9, maxRpd: 10.0 }], // RPD 1.46% -> PASS
-                controls: [{ id: 'C1', expected: 7.0, measured: 6.95, minRecovery: 90, maxRecovery: 110 }] // Recovery 99.3% -> PASS
+                blanks: [{ id: 'B2', value: 0.01, maxAllowed: 0.05 }],
+                duplicates: [{ id: 'D2', value1: 6.8, value2: 6.9, maxRpd: 10.0 }], // RPD 1.46% -> PASS
+                controls: [{ id: 'C2', expected: 7.0, measured: 6.95, minRecovery: 90, maxRecovery: 110 }] // Recovery 99.3% -> PASS
             });
 
         expect(evalRes.status).toBe(200);

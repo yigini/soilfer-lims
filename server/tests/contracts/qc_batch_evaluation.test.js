@@ -676,14 +676,24 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
                     qcResults: { blanks: [], duplicates: [], controls: [] }
                 });
 
-            expect(clearRes.statusCode).toBe(200);
-            expect(clearRes.body.status).toBe('OPEN');
+            expect(clearRes.statusCode).toBe(403);
+            expect(clearRes.body.code).toBe('QC_REOPEN_PERMISSION_REQUIRED');
+            expect((await prisma.batch.findUnique({ where: { id: batchId } })).qcResults).toBe(passedBatch.qcResults);
+
+            const reopenRes = await request(app)
+                .put(`/api/qc/batches/${batchId}`)
+                .set('Authorization', `Bearer ${mgrToken}`)
+                .send({ status: 'OPEN', reason: 'Repeat run after instrument maintenance' });
+            expect(reopenRes.statusCode).toBe(200);
+            expect(reopenRes.body.status).toBe('OPEN');
 
             const batch = await prisma.batch.findUnique({ where: { id: batchId } });
             expect(batch.status).toBe('OPEN');
-            const parsed = JSON.parse(batch.qcResults);
-            expect(parsed.overallStatus).toBe('OPEN');
-            expect(parsed.summary.totalQcSamples).toBe(0);
+            expect(batch.qcResults).toBeNull();
+            expect(batch.disposition).toBeNull();
+            expect(await prisma.batchQcResult.count({ where: { batchId } })).toBe(0);
+            const snapshots = JSON.parse(batch.history).filter(event => event.action === 'QC_EVIDENCE_SNAPSHOT');
+            expect(snapshots.at(-1).snapshot.qcResults).toEqual(JSON.parse(passedBatch.qcResults));
         });
     });
 });
