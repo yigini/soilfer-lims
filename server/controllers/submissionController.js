@@ -1,3 +1,4 @@
+const { invalidateReturnedResults } = require('../services/reportResultGovernance');
 const prisma = require('../prisma');
 const workflow = require('../workflowContract');
 const { getAnalysisName } = require('../services/analysisService');
@@ -442,25 +443,26 @@ exports.reviewSubmission = async (req, res) => {
                 updates.waiveReason = reason;
             }
 
-            operations.push(prisma.workItem.update({
+            operations.push(tx => tx.workItem.update({
                 where: { id: workItemId },
                 data: updates
             }));
 
-            operations.push(prisma.auditLog.create({
+            const analysisName = await getAnalysisName(item.analysis);
+            operations.push(tx => tx.auditLog.create({
                 data: {
                     id: `audit-wi-rev-${workItemId}-${Date.now()}`,
                     entity: 'WORKITEM',
                     entityId: workItemId,
                     action: verdict === 'REJECT_REANALYSIS' ? 'REANALYSIS_REQUESTED' : 'REVIEW_DECISION_MADE',
-                    details: `${user.username} ${verdict.toLowerCase()}ed ${await getAnalysisName(item.analysis)}`,
+                    details: `${user.username} ${verdict.toLowerCase()}ed ${analysisName}`,
                     performedBy: user.username,
                     timestamp: now,
                     sampleId: String(submission.sampleId)
                 }
             }));
 
-            operations.push(prisma.reviewDecision.create({
+            operations.push(tx => tx.reviewDecision.create({
                 data: {
                     id: `rd-sub-${workItemId}-${Date.now()}`,
                     sampleId: String(submission.sampleId),
@@ -493,7 +495,7 @@ exports.reviewSubmission = async (req, res) => {
         });
         const finalSubmissionStatus = hasUndecided ? 'PARTIALLY_REVIEWED' : 'REVIEWED';
 
-        operations.push(prisma.submission.update({
+        operations.push(tx => tx.submission.update({
             where: { id },
             data: {
                 status: finalSubmissionStatus,
@@ -503,7 +505,7 @@ exports.reviewSubmission = async (req, res) => {
             }
         }));
 
-        operations.push(prisma.auditLog.create({
+        operations.push(tx => tx.auditLog.create({
             data: {
                 id: `audit-sub-rev-${id}-${Date.now()}`,
                 entity: 'SUBMISSION',
@@ -516,12 +518,19 @@ exports.reviewSubmission = async (req, res) => {
             }
         }));
 
-        await prisma.$transaction(operations);
+        await prisma.$transaction(async tx => {
+            for (const operation of operations) await operation(tx);
+            for (const decision of normalizedDecisions) {
+                if (decision.decision !== 'REJECT_REANALYSIS') continue;
+                const item = dbItems.find(row => row.id === decision.workItemId);
+                if (item) await invalidateReturnedResults(tx, item, user, decision.reason);
+            }
+        });
         res.json({ success: true, results });
 
     } catch (error) {
         console.error('[reviewSubmission] Error:', error);
-        res.status(500).json({ error: 'Failed to review submission' });
+        res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review submission', ...(error.code && { code: error.code }) });
     }
 };
 

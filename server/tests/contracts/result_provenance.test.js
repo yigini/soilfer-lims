@@ -30,6 +30,7 @@ describe('WP-31: Result Provenance Tracking', () => {
             await prisma.result.deleteMany({ where: { id: { in: createdResultIds } } });
         }
         await prisma.result.deleteMany({ where: { sampleId: testSampleId } });
+        await prisma.workItem.deleteMany({ where: { sampleId: testSampleId } });
         await prisma.sample.deleteMany({ where: { id: testSampleId } });
     });
 
@@ -93,6 +94,10 @@ describe('WP-31: Result Provenance Tracking', () => {
             }
         });
         createdResultIds.push(derivedRes.id);
+
+        await prisma.workItem.createMany({ data: ['PH', 'EC', 'CLAY_PRED', 'TEXTURE'].map(analysis => ({
+            id: `reviewed-${testSampleId}-${analysis}`, sampleId: testSampleId, analysis, status: 'ACCEPTED'
+        })) });
 
         const { content } = await assembleReport(testSampleId, { username: 'admin' });
         expect(content).toBeDefined();
@@ -171,6 +176,9 @@ describe('WP-31: Result Provenance Tracking', () => {
     });
 
     test('6. WP-40: assembleReport embeds basis, replicateNo, and censoring on result items', async () => {
+        await prisma.workItem.createMany({ data: ['SOC', 'TOTAL_N'].map(analysis => ({
+            id: `reviewed-${testSampleId}-${analysis}`, sampleId: testSampleId, analysis, status: 'ACCEPTED'
+        })) });
         const { content } = await assembleReport(testSampleId, { username: 'admin' });
         const allItems = content.resultGroups.flatMap(g => g.items || []);
         

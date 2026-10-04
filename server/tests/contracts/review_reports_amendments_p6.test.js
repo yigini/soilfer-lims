@@ -42,6 +42,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
                 labId: 'S-P6-01',
                 assignedLab: 'LAB-P6',
                 country: 'P6C',
+                receptionDate: new Date(),
                 status: 'SUBMITTED_FULL',
                 dryingStatus: 'DONE',
                 preparationStatus: 'DONE',
@@ -51,6 +52,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
                         {
                             id: 'p6-wi-ph-01',
                             analysis: 'PH_H2O',
+                            result: '7.12',
                             category: 'Chemical',
                             status: 'SUBMITTED',
                             assignedTo: techUser.username,
@@ -59,6 +61,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
                         {
                             id: 'p6-wi-ec-01',
                             analysis: 'EC',
+                            result: '1.45',
                             category: 'Chemical',
                             status: 'SUBMITTED',
                             assignedTo: techUser.username,
@@ -179,6 +182,13 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
     });
 
     test('3. Generates report v1 with immutable snapshot and monotonic versioning', async () => {
+        const pending = await request(app).post(`/api/reports/generate/${sampleForReview.id}`)
+            .set('Authorization', `Bearer ${mgrToken}`).send({});
+        expect(pending.status).toBe(409);
+        expect(pending.body.code).toBe('SAMPLE_NOT_APPROVED');
+        const approval = await request(app).post(`/api/samples/${sampleForReview.id}/approve`)
+            .set('Authorization', `Bearer ${mgrToken}`);
+        expect(approval.status).toBe(200);
         const res = await request(app)
             .post(`/api/reports/generate/${sampleForReview.id}`)
             .set('Authorization', `Bearer ${mgrToken}`)

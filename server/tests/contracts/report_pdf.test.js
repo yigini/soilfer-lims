@@ -22,6 +22,9 @@ describe('BLK-3: Report & Certificate PDF Generation Contract', () => {
             requiredAnalyses: ['PH_H2O', 'SOC', 'SAND', 'SILT', 'CLAY']
         });
         sampleId = s.id;
+        await prisma.workItem.createMany({ data: ["PH_H2O","SOC","SAND","SILT","CLAY"].map(analysis => ({
+            id: `reviewed-${s.id}-${analysis}`, sampleId: s.id, analysis, status: 'ACCEPTED'
+        })) });
 
         // Add verified results to the sample in DB
         const now = new Date();
