@@ -56,6 +56,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
                             result: '7.12',
                             category: 'Chemical',
                             status: 'SUBMITTED',
+                            submissionId: 'p6-sub-001',
                             assignedTo: techUser.username,
                             labId: 'LAB-P6'
                         },
@@ -65,6 +66,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
                             result: '1.45',
                             category: 'Chemical',
                             status: 'SUBMITTED',
+                            submissionId: 'p6-sub-001',
                             assignedTo: techUser.username,
                             labId: 'LAB-P6'
                         }
