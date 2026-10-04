@@ -931,7 +931,7 @@ exports.revokeApiKey = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-sis-revoke-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
+                id: crypto.randomUUID(),
                 entity: 'SIS_API_KEY',
                 entityId: id,
                 action: 'SIS_KEY_REVOKED',

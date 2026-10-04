@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const prisma = require('../prisma');
 
 /**
@@ -302,7 +303,7 @@ async function discardDraft(user, workItemId) {
     // 3. Log audit event
     await prisma.auditLog.create({
         data: {
-            id: `audit-draft-discard-${workItemId}-${Date.now()}`,
+            id: crypto.randomUUID(),
             entity: 'WorkItemDraft',
             entityId: workItemId,
             sampleId: draft.sampleId,
@@ -363,7 +364,7 @@ async function resolveConflict(user, workItemId, { resolution, reason }) {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-draft-resolve-${workItemId}-${Date.now()}-server`,
+                id: crypto.randomUUID(),
                 entity: 'WorkItemDraft',
                 entityId: workItemId,
                 sampleId: draft.sampleId,
@@ -393,7 +394,7 @@ async function resolveConflict(user, workItemId, { resolution, reason }) {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-draft-resolve-${workItemId}-${Date.now()}-local`,
+                id: crypto.randomUUID(),
                 entity: 'WorkItemDraft',
                 entityId: workItemId,
                 sampleId: draft.sampleId,

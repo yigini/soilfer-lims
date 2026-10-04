@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 'use strict';
 
 const prisma = require('../prisma');
@@ -195,7 +196,7 @@ class OperationalConfirmationService {
             }),
             prisma.auditLog.create({
                 data: {
-                    id: `audit-ops-${workItemId}-${Date.now()}`,
+                    id: crypto.randomUUID(),
                     entity: 'WORKITEM',
                     entityId: workItemId,
                     action: 'OPERATION_CONFIRMED',
@@ -353,7 +354,7 @@ class OperationalConfirmationService {
             }),
             prisma.auditLog.create({
                 data: {
-                    id: `audit-op-ver-${workItemId}-${Date.now()}`,
+                    id: crypto.randomUUID(),
                     entity: 'WORKITEM',
                     entityId: workItemId,
                     action: decision === 'ACCEPT' ? 'OPERATION_VERIFIED' : 'OPERATION_REJECTED',

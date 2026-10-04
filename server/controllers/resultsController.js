@@ -1,4 +1,6 @@
+const crypto = require('crypto');
 const prisma = require('../prisma');
+const { deriveTextureResult } = require('../services/textureResultService');
 const validationController = require('./validationController');
 const { validateResultEntries } = require('../services/resultEntryPolicy');
 
@@ -135,7 +137,7 @@ exports.saveResults = async (req, res) => {
             const censoringType = isCensored ? (strVal.startsWith('<') ? 'BELOW_LOQ' : 'ABOVE_RANGE') : 'NONE';
             const numericVal = m.validation?.normalizedValue !== undefined ? m.validation.normalizedValue : (isNaN(Number(strVal.replace(',', '.'))) ? null : Number(strVal.replace(',', '.')));
 
-            const newResultId = `res-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+            const newResultId = crypto.randomUUID();
 
             const repNo = (m.replicateNo !== undefined && m.replicateNo !== null) ? Number(m.replicateNo) : 1;
             const validBasis = ['AIR_DRY', 'OVEN_DRY', 'FIELD_MOIST'].includes(m.basis) ? m.basis : 'AIR_DRY';
@@ -183,7 +185,7 @@ exports.saveResults = async (req, res) => {
 
         operations.push(db => db.auditLog.create({
             data: {
-                id: `audit-res-up-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'RESULTS',
                 entityId: sampleId,
                 action: 'UPDATE_RESULTS',
@@ -201,54 +203,13 @@ exports.saveResults = async (req, res) => {
             const conflict = await validateResultEntries(tx, current, measurements, user);
             if (conflict) throw Object.assign(new Error(conflict), { statusCode: 409 });
             for (const operation of operations) await operation(tx);
+            const replicates = new Set(validatedMeasurements.filter(m => ['SAND', 'SILT', 'CLAY'].includes(m.param)).map(m => Number(m.replicateNo ?? 1)));
+            for (const replicateNo of replicates) await deriveTextureResult(tx, { sampleId, replicateNo, actor: user?.username, now });
         });
 
         if (sample.status === 'PROCESSING' || sample.status === 'ANALYSIS') {
             const { transitionSample } = require('../services/sampleStateService');
             await transitionSample(sampleId, 'SUBMITTED_PARTIAL', user, 'Partial results saved').catch(() => {});
-        }
-
-        // Auto-derive USDA Texture Class if all 3 fractions (SAND, SILT, CLAY) are present
-        try {
-            const curResults = await prisma.result.findMany({
-                where: { sampleId, isCurrent: true, param: { in: ['SAND', 'SILT', 'CLAY'] } }
-            });
-            const sandR = curResults.find(r => r.param === 'SAND');
-            const siltR = curResults.find(r => r.param === 'SILT');
-            const clayR = curResults.find(r => r.param === 'CLAY');
-            if (sandR && siltR && clayR) {
-                const { calculateUsdaTexture } = require('../utils/soilCalculations');
-                const tex = calculateUsdaTexture(sandR.numericValue ?? sandR.value, siltR.numericValue ?? siltR.value, clayR.numericValue ?? clayR.value);
-                if (tex.isValid) {
-                    const texResultId = `res-tex-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
-                    await prisma.result.updateMany({
-                        where: { sampleId, param: 'TEXTURE', isCurrent: true },
-                        data: { isCurrent: false, supersededBy: texResultId }
-                    });
-                    await prisma.result.create({
-                        data: {
-                            id: texResultId,
-                            sampleId,
-                            param: 'TEXTURE',
-                            value: tex.className,
-                            numericValue: null,
-                            unit: '',
-                            isValid: true,
-                            censoring: 'NONE',
-                            basis: 'AIR_DRY',
-                            replicateNo: 1,
-                            isCurrent: true,
-                            provenance: 'DERIVED',
-                            enteredBy: user ? user.username : 'SYSTEM_CALC',
-                            analysedAt: now,
-                            createdAt: now,
-                            updatedAt: now
-                        }
-                    });
-                }
-            }
-        } catch (texErr) {
-            console.error('[saveResults] Auto-derivation of texture failed:', texErr);
         }
 
         // Compute cross-parameter sample matrix diagnostics

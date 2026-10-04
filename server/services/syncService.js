@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 'use strict';
 
 const prisma = require('../prisma');
@@ -670,7 +671,7 @@ class SyncService {
                     }
 
                     let savedReceipt = null;
-                    const newResultId = `res-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+                    const newResultId = crypto.randomUUID();
                     const repNo = (op.payload?.replicateNo !== undefined && op.payload?.replicateNo !== null) ? Number(op.payload.replicateNo) : 1;
                     const validBasis = ['AIR_DRY', 'OVEN_DRY', 'FIELD_MOIST'].includes(op.payload?.basis) ? op.payload.basis : 'AIR_DRY';
                     const now = new Date();
@@ -683,10 +684,10 @@ class SyncService {
                             const clayNum = Number(String(textureFractions.clay).replace(',', '.'));
                             const textClassName = textVal.className || 'Loam';
 
-                            const textResId = `res-${Date.now()}-text-${Math.random().toString(36).substr(2, 5)}`;
-                            const sandResId = `res-${Date.now()}-sand-${Math.random().toString(36).substr(2, 5)}`;
-                            const siltResId = `res-${Date.now()}-silt-${Math.random().toString(36).substr(2, 5)}`;
-                            const clayResId = `res-${Date.now()}-clay-${Math.random().toString(36).substr(2, 5)}`;
+                            const textResId = crypto.randomUUID();
+                            const sandResId = crypto.randomUUID();
+                            const siltResId = crypto.randomUUID();
+                            const clayResId = crypto.randomUUID();
 
                             await tx.result.updateMany({
                                 where: {

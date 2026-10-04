@@ -1591,7 +1591,7 @@ exports.syncSample = async (req, res) => {
 
             await tx.auditLog.create({
                 data: {
-                    id: `audit-kobo-resync-${Date.now()}`,
+                    id: crypto.randomUUID(),
                     entity: 'SAMPLE',
                     entityId: sample.id,
                     action: 'KOBO_SAMPLE_RESYNC',

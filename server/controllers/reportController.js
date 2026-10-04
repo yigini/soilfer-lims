@@ -180,7 +180,7 @@ async function generateReport(req, res) {
         try {
             await prisma.auditLog.create({
                 data: {
-                    id: `audit-rpt-${Date.now()}`,
+                    id: crypto.randomUUID(),
                     entity: 'REPORT',
                     entityId: report.id,
                     sampleId,
@@ -593,6 +593,7 @@ async function createShareLink(req, res) {
         try {
             await prisma.auditLog.create({
                 data: {
+                    id: crypto.randomUUID(),
                     action: 'REPORT_SHARED',
                     userId: req.user?.id || 'system',
                     details: JSON.stringify({
@@ -697,6 +698,7 @@ async function revokeShareLink(req, res) {
         try {
             await prisma.auditLog.create({
                 data: {
+                    id: crypto.randomUUID(),
                     action: 'REPORT_LINK_REVOKED',
                     userId: req.user?.id || 'system',
                     details: JSON.stringify({ linkId, reportId: link.reportId })

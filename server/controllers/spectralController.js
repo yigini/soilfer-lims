@@ -922,7 +922,7 @@ exports.commitBatch = async (req, res) => {
                     // AuditLog entry
                     await tx.auditLog.create({
                         data: {
-                            id: `audit-spec-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                            id: crypto.randomUUID(),
                             entity: 'SPECTRA',
                             entityId: created.id,
                             action: canAutoApprove ? 'SPECTRA_AUTO_APPROVED' : 'SPECTRA_COMMIT',
@@ -1108,7 +1108,7 @@ exports.linkTask = async (req, res) => {
 
             await tx.auditLog.create({
                 data: {
-                    id: `audit-link-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                    id: crypto.randomUUID(),
                     entity: 'WORK_ITEM',
                     entityId: workItem.id,
                     action: 'LINK_SPECTRUM',
@@ -1652,7 +1652,7 @@ exports.uploadBatch = async (req, res) => {
                     // Create Audit Log
                     await tx.auditLog.create({
                         data: {
-                            id: `audit-spec-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                            id: crypto.randomUUID(),
                             entity: 'SPECTRA',
                             entityId: createdScan.id,
                             action: canAutoApprove ? 'SPECTRA_AUTO_APPROVED' : 'SPECTRA_UPLOAD',
@@ -1821,7 +1821,7 @@ exports.batchReview = async (req, res) => {
         // Single audit log for the batch
         await prisma.auditLog.create({
             data: {
-                id: `audit-spec-batch-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                id: crypto.randomUUID(),
                 entity: 'SPECTRA', entityId: ids.join(',').substring(0, 200), action: `SPECTRA_BATCH_${action}`,
                 performedBy: user.username, timestamp: new Date(),
                 details: `Batch ${action.toLowerCase()}: ${results.succeeded} succeeded, ${results.failed} failed out of ${ids.length} spectra.`
@@ -1897,7 +1897,7 @@ exports.batchDelete = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-spec-batchdel-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                id: crypto.randomUUID(),
                 entity: 'SPECTRA', entityId: ids.join(',').substring(0, 200), action: 'SPECTRA_BATCH_TRASH',
                 performedBy: user.username, timestamp: new Date(),
                 details: `Batch trash: ${results.succeeded} moved to trash, ${results.failed} failed out of ${ids.length} spectra.`
@@ -1979,7 +1979,7 @@ exports.deleteScan = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-spec-del-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                id: crypto.randomUUID(),
                 entity: 'SPECTRA', entityId: id, action: 'SPECTRA_TRASH',
                 performedBy: user.username, timestamp: new Date(), labId: scan.labId,
                 details: `Moved ${scan.modality} spectrum to trash (was ${previousStatus}). Sample: ${scan.sampleId || 'unlinked'}`
@@ -2021,7 +2021,7 @@ exports.restoreScan = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-spec-restore-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                id: crypto.randomUUID(),
                 entity: 'SPECTRA', entityId: id, action: 'SPECTRA_RESTORED',
                 performedBy: user.username, timestamp: new Date(), labId: scan.labId,
                 details: `Restored ${scan.modality} spectrum from trash to ${restoreTo}.`
@@ -2054,7 +2054,7 @@ exports.permanentlyDeleteScan = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-spec-permdel-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                id: crypto.randomUUID(),
                 entity: 'SPECTRA', entityId: id, action: 'SPECTRA_PERMANENT_DELETE',
                 performedBy: user.username, timestamp: new Date(), labId: scan.labId,
                 details: `Permanently deleted ${scan.modality} spectrum. Sample: ${scan.sampleId || 'unlinked'}`
@@ -2096,7 +2096,7 @@ exports.reviewSpectrum = async (req, res) => {
             });
             await prisma.auditLog.create({
                 data: {
-                    id: `audit-spec-undo-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                    id: crypto.randomUUID(),
                     entity: 'SPECTRA', entityId: id, action: 'SPECTRA_UNDO_REJECT',
                     performedBy: user.username, timestamp: new Date(), sampleId: scan.sampleId,
                     details: `Undid rejection of ${scan.modality} spectrum. Returned to VALIDATED.`
@@ -2180,7 +2180,7 @@ exports.reviewSpectrum = async (req, res) => {
         // 5. Audit log
         await prisma.auditLog.create({
             data: {
-                id: `audit-spec-review-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                id: crypto.randomUUID(),
                 entity: 'SPECTRA',
                 entityId: id,
                 action: newStatus === 'APPROVED' ? 'SPECTRA_APPROVED' : 'SPECTRA_REJECTED',

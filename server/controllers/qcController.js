@@ -24,9 +24,9 @@ async function syncTypedQcItems(tx, batchId, evaluated) {
     if (!evaluated) return;
 
     const items = [];
-    (evaluated.blanks || []).forEach((b, idx) => {
+    (evaluated.blanks || []).forEach(b => {
         items.push({
-            id: b.id || `BLK-${batchId}-${idx}-${Date.now()}`,
+            id: crypto.randomUUID(),
             batchId,
             type: 'BLANK',
             label: b.label || 'Method Blank',
@@ -41,9 +41,9 @@ async function syncTypedQcItems(tx, batchId, evaluated) {
         });
     });
 
-    (evaluated.duplicates || []).forEach((d, idx) => {
+    (evaluated.duplicates || []).forEach(d => {
         items.push({
-            id: d.id || `DUP-${batchId}-${idx}-${Date.now()}`,
+            id: crypto.randomUUID(),
             batchId,
             type: 'DUPLICATE',
             label: d.label || 'Analytical Duplicate',
@@ -60,9 +60,9 @@ async function syncTypedQcItems(tx, batchId, evaluated) {
         });
     });
 
-    (evaluated.controls || []).forEach((c, idx) => {
+    (evaluated.controls || []).forEach(c => {
         items.push({
-            id: c.id || `CRM-${batchId}-${idx}-${Date.now()}`,
+            id: crypto.randomUUID(),
             batchId,
             type: 'CONTROL',
             label: c.label || 'Certified Reference Material',
@@ -230,7 +230,7 @@ exports.createBatch = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-batch-cr-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'QC_BATCH',
                 entityId: batchId,
                 action: 'CREATE',
@@ -951,7 +951,7 @@ exports.dispositionBatch = async (req, res) => {
             }
 
             // 3. Audit log with unique UUID
-            const auditId = `audit-batch-disp-${crypto.randomUUID ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).substring(2, 9))}`;
+            const auditId = crypto.randomUUID();
             await tx.auditLog.create({
                 data: {
                     id: auditId,

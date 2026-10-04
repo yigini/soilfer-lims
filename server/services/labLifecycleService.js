@@ -531,7 +531,7 @@ async function updateLabProfile(actor, labId, updates = {}, tx = prisma) {
 
     await tx.auditLog.create({
         data: {
-            id: 'audit-lab-prof-' + Date.now(),
+            id: crypto.randomUUID(),
             entity: 'LAB',
             entityId: labId,
             action: 'UPDATE_PROFILE',
@@ -763,7 +763,7 @@ async function _executeTransitionLifecycle(actor, labId, { targetState, reason, 
 
     // 3. Audit log (collision-safe unique ID)
     const commandId = 'cmd-lab-lc-' + Date.now() + '-' + crypto.randomBytes(4).toString('hex');
-    const auditId = 'audit-lc-' + Date.now() + '-' + crypto.randomBytes(4).toString('hex');
+    const auditId = crypto.randomUUID();
     await tx.auditLog.create({
         data: {
             id: auditId,

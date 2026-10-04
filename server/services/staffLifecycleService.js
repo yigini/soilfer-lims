@@ -303,7 +303,7 @@ async function createInvitation(actor, { name, email, role, labId, projects, rei
                 );
                 await tx.auditLog.create({
                     data: {
-                        id: `audit-inv-reis-sc-${Date.now()}-${crypto.randomUUID()}`,
+                        id: crypto.randomUUID(),
                         entity: 'USER',
                         entityId: priorInvite.id,
                         action: 'INVITE_REISSUED',
@@ -431,7 +431,7 @@ async function createInvitation(actor, { name, email, role, labId, projects, rei
         // Audit log with collision-safe UUID in the same transaction
         await tx.auditLog.create({
             data: {
-                id: `audit-inv-${Date.now()}-${crypto.randomUUID()}`,
+                id: crypto.randomUUID(),
                 entity: 'USER',
                 entityId: inviteId,
                 action: 'INVITE_CREATED',
@@ -694,7 +694,7 @@ async function applyAccessChanges(actor, targetUserId, options = {}, outerTx = n
 
         await tx.auditLog.create({
             data: {
-                id: `audit-access-${Date.now()}-${crypto.randomUUID()}`,
+                id: crypto.randomUUID(),
                 entity: 'USER',
                 entityId: targetUserId,
                 action: 'ACCESS_CHANGED',
@@ -798,7 +798,7 @@ async function suspendUser(actor, targetUserId, options = {}, outerTx = null) {
 
         await tx.auditLog.create({
             data: {
-                id: `audit-susp-${Date.now()}-${crypto.randomUUID()}`,
+                id: crypto.randomUUID(),
                 entity: 'USER',
                 entityId: targetUserId,
                 action: 'USER_SUSPENDED',
@@ -888,7 +888,7 @@ async function reactivateUser(actor, targetUserId, outerTx = null) {
 
         await tx.auditLog.create({
             data: {
-                id: `audit-react-${Date.now()}-${crypto.randomUUID()}`,
+                id: crypto.randomUUID(),
                 entity: 'USER',
                 entityId: targetUserId,
                 action: 'USER_REACTIVATED',
@@ -965,7 +965,7 @@ async function createRecoveryGrant(actor, targetUserId, options = {}, outerTx = 
 
         await tx.auditLog.create({
             data: {
-                id: `audit-rec-${Date.now()}-${crypto.randomUUID()}`,
+                id: crypto.randomUUID(),
                 entity: 'USER',
                 entityId: targetUserId,
                 action: 'RECOVERY_ISSUED',
@@ -1193,7 +1193,7 @@ async function consumeInvitation(rawToken, { username, password }, outerTx = nul
 
         await tx.auditLog.create({
             data: {
-                id: `audit-inv-cons-${Date.now()}-${crypto.randomUUID()}`,
+                id: crypto.randomUUID(),
                 entity: 'USER',
                 entityId: userId,
                 action: 'INVITATION_CONSUMED',
@@ -1307,7 +1307,7 @@ async function consumeRecoveryGrant(rawToken, { newPassword }, outerTx = null) {
 
         await tx.auditLog.create({
             data: {
-                id: `audit-rec-cons-${Date.now()}-${crypto.randomUUID()}`,
+                id: crypto.randomUUID(),
                 entity: 'USER',
                 entityId: user.id,
                 action: 'PASSWORD_RECOVERED',
@@ -1494,7 +1494,7 @@ async function revokeInvitation(actor, invitationId, options = {}, outerTx = nul
 
         await tx.auditLog.create({
             data: {
-                id: `audit-inv-rev-${Date.now()}-${crypto.randomUUID()}`,
+                id: crypto.randomUUID(),
                 entity: 'USER',
                 entityId: invitationId,
                 action: 'INVITE_REVOKED',
@@ -1642,7 +1642,7 @@ async function reissueInvitation(actor, invitationId, options = {}, outerTx = nu
 
         await tx.auditLog.create({
             data: {
-                id: `audit-inv-reis-${Date.now()}-${crypto.randomUUID()}`,
+                id: crypto.randomUUID(),
                 entity: 'USER',
                 entityId: newInviteId,
                 action: 'INVITE_REISSUED',

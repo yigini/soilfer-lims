@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const prisma = require('../prisma');
 const { success, error } = require('../i18n/response');
 const projectPolicyService = require('../services/projectPolicyService');
@@ -452,7 +453,7 @@ exports.createProject = async (req, res) => {
 
             await tx.auditLog.create({
                 data: {
-                    id: `audit-proj-create-${Date.now()}`,
+                    id: crypto.randomUUID(),
                     entity: 'PROJECT',
                     entityId: uppercaseCode,
                     action: 'PROJECT_CREATED',
@@ -658,7 +659,7 @@ exports.updateProject = async (req, res) => {
             });
 
             const auditData = {
-                id: `audit-proj-update-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'PROJECT',
                 entityId: project.id,
                 action: 'PROJECT_UPDATED',
@@ -988,7 +989,7 @@ exports.uploadManifest = async (req, res) => {
             }
 
             const auditData = {
-                id: `audit-man-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'PROJECT',
                 entityId: project.id,
                 action: 'MANIFEST_UPLOAD',
@@ -1247,7 +1248,7 @@ exports.archiveProject = async (req, res) => {
 
             await tx.auditLog.create({
                 data: {
-                    id: `audit-proj-arch-${project.id}-${Date.now()}`,
+                    id: crypto.randomUUID(),
                     entity: 'PROJECT',
                     entityId: project.id,
                     action: 'ARCHIVE',
@@ -1329,7 +1330,7 @@ exports.deleteProject = async (req, res) => {
 
             await tx.auditLog.create({
                 data: {
-                    id: `audit-proj-soft-del-${Date.now()}`,
+                    id: crypto.randomUUID(),
                     entity: 'PROJECT',
                     entityId: project.id,
                     action: 'DELETE_SOFT',
@@ -1367,7 +1368,7 @@ exports.restoreProject = async (req, res) => {
 
             await tx.auditLog.create({
                 data: {
-                    id: `audit-proj-restore-${project.id}-${Date.now()}`,
+                    id: crypto.randomUUID(),
                     entity: 'PROJECT',
                     entityId: project.id,
                     action: 'RESTORE',
@@ -2078,7 +2079,7 @@ exports.createProjectKoboConnection = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-kobo-create-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'KOBO_CONFIG',
                 entityId: config.id,
                 action: 'KOBO_CONNECTION_CREATED',
@@ -2193,7 +2194,7 @@ exports.toggleProjectKoboConnection = async (req, res) => {
 
         await prisma.auditLog.create({
             data: {
-                id: `audit-kobo-toggle-${Date.now()}`,
+                id: crypto.randomUUID(),
                 entity: 'KOBO_CONFIG',
                 entityId: config.id,
                 action: 'KOBO_CONNECTION_TOGGLED',
