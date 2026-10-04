@@ -79,13 +79,13 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
             // Title inside banner
             doc.fillColor('#FFFFFF')
                 .font('Helvetica-Bold')
-                .fontSize(13)
+                .fontSize(10)
                 .text('FOOD AND AGRICULTURE ORGANIZATION OF THE UNITED NATIONS', startX + 14, currentY + 10, { width: 340 });
 
             doc.font('Helvetica')
                 .fontSize(8.5)
                 .fillColor('#93C5FD')
-                .text('Global Soil Doctors Programme · SoilFER Laboratory Network', startX + 14, currentY + 28);
+                .text('Global Soil Doctors Programme · SoilFER Laboratory Network', startX + 14, currentY + 38, { width: 340 });
 
             // Report Meta Badge (Right side of banner)
             doc.fillColor('#FFFFFF')
@@ -183,7 +183,7 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                 .text(`${client.name || sample.clientName || 'General Intake'}`, rightX + 110, currentY + 60, { width: colWidth - 118, ellipsis: true })
                 .text(`${sampleDepth} ${sample.horizon ? `[${sample.horizon}]` : ''}`, rightX + 110, currentY + 72)
                 .text(`${sample.receptionDate ? String(sample.receptionDate).split('T')[0] : 'Recorded'}`, rightX + 110, currentY + 84)
-                .text(`${sample.approvedAt ? String(sample.approvedAt).split('T')[0] : new Date().toISOString().split('T')[0]}`, rightX + 110, currentY + 96);
+                .text(issuedDate, rightX + 110, currentY + 96);
 
             currentY += boxHeight + 12;
 
@@ -379,9 +379,9 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                 doc.fillColor(cGray)
                     .font('Helvetica')
                     .fontSize(7)
-                    .text('FAO SoilFER Programme · Soil Laboratory Quality Information System', 36, 810)
-                    .text(`Certificate No: ${number}`, 240, 810, { align: 'center' })
-                    .text(`Page ${i + 1} of ${totalPages}`, startX, 810, { width: pageWidth, align: 'right' });
+                    .text('FAO SoilFER Programme · Soil Laboratory Quality Information System', 36, 810, { lineBreak: false })
+                    .text(`Certificate No: ${number}`, 240, 810, { width: 235, align: 'center', lineBreak: false })
+                    .text(`Page ${i + 1} of ${totalPages}`, startX, 810, { width: pageWidth, align: 'right', lineBreak: false });
             }
 
             doc.end();
