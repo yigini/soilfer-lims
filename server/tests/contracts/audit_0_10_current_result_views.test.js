@@ -87,7 +87,10 @@ describe('Audit 0.10: current results in exports and working grid', () => {
         const lookup = jest.spyOn(policy, 'get').mockImplementation((lab, key, context) => key === 'results.reportedValueRule' ? 'LATEST_VALID' : original(lab, key, context));
         const response = await exportData(f.projectCode);
         expect(response.status).toBe(200); expect(response.body.data[0]).toMatchObject({ SOC: 20, soc_n: 1, soc_flag: '', soc_as_measured: 20 });
-        expect(lookup).toHaveBeenCalledWith(labId, 'results.reportedValueRule', { analysisCode: 'SOC', methodologyId: 'same-method' });
+        expect(lookup).toHaveBeenCalledWith(labId, 'results.reportedValueRule', {
+            analysisCode: 'SOC', methodologyId: 'same-method',
+            snapshot: expect.objectContaining({ labId, version: 0, values: expect.objectContaining({ 'results.reportedValueRule': 'MEAN_IF_WITHIN_R' }) })
+        });
     });
     test('an unknown reported-value policy fails closed without writing an export audit', async () => {
         const f = await fixture(); await result(f, 10);

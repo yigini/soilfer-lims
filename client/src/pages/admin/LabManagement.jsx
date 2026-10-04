@@ -17,6 +17,7 @@ import AccessReviewModal from '../../components/staff/AccessReviewModal';
 import RecoveryLinkModal from '../../components/staff/RecoveryLinkModal';
 import SuspendUserModal from '../../components/staff/SuspendUserModal';
 import LabLifecycleModal from '../../components/lab/LabLifecycleModal';
+import LabPolicies from '../../components/lab/LabPolicies';
 import { ThemeGallery } from '../../components/appearance/ThemeGallery';
 
 // IANA Timezone helper
@@ -88,6 +89,8 @@ export default function LabManagement() {
         name: '', city: '', address: '', phone: '', email: '', website: '', capacity: '', timezone: '', notes: '', decimalSeparator: '', thousandsSeparator: ''
     });
     const [initialSettings, setInitialSettings] = useState(null);
+    const [policyReason, setPolicyReason] = useState('');
+    const numberFormatChanged = !!initialSettings && ['decimalSeparator', 'thousandsSeparator'].some(key => settingsForm[key] !== initialSettings[key]);
     const [savingSettings, setSavingSettings] = useState(false);
     const [settingsMsg, setSettingsMsg] = useState(null);
 
@@ -153,6 +156,7 @@ export default function LabManagement() {
                 };
                 setSettingsForm(formInit);
                 setInitialSettings(formInit);
+                setPolicyReason('');
             }
             return true;
         } catch (err) {
@@ -311,6 +315,11 @@ export default function LabManagement() {
                 return;
             }
 
+            if (Object.hasOwn(patch, 'decimalSeparator') || Object.hasOwn(patch, 'thousandsSeparator')) {
+                if (!policyReason.trim()) { setSettingsMsg({ type: 'error', text: t('policies.errors.POLICY_REASON_REQUIRED') }); return; }
+                patch.reason = policyReason;
+                patch.expectedVersion = workspace.lab.policyVersion;
+            }
             await axios.patch(`/api/labs/${selectedLabId}/profile`, patch);
 
             try {
@@ -980,6 +989,7 @@ export default function LabManagement() {
                     { id: 'projects', label: t('labManagement.tabs.projects', 'Projects'), count: workspace?.projectsPagination?.total ?? workspace?.projects?.length },
                     { id: 'resources', label: t('labManagement.tabs.resources', 'Methods & Resources') },
                     { id: 'settings', label: t('labManagement.tabs.settings', 'Settings') },
+                    { id: 'policies', label: t('policies.title', 'Policies') },
                     { id: 'appearance', label: t('appearance.title', 'Appearance') },
                     { id: 'history', label: t('labManagement.tabs.history', 'History') }
                 ].map(tab => (
@@ -1005,6 +1015,7 @@ export default function LabManagement() {
             {/* ────────────────────────────────────────────────────────── */}
             {/* TAB 1: OVERVIEW                                            */}
             {/* ────────────────────────────────────────────────────────── */}
+            {activeTab === 'policies' && <LabPolicies key={selectedLabId} labId={selectedLabId} />}
             {activeTab === 'overview' && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-150">
                     <div className="lg:col-span-2 space-y-6">
@@ -1648,6 +1659,8 @@ export default function LabManagement() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Profile Details Form */}
                         <form onSubmit={handleSaveSettings} className="p-6 rounded-2xl bg-sf-surface border border-sf-divider space-y-4">
+                            <p className="text-sm">{t('policies.source')}: {t(`policies.sources.${workspace.lab.numberFormatSources?.decimal?.source}`)} / {t(`policies.sources.${workspace.lab.numberFormatSources?.thousands?.source}`)} · {t('policies.version')} {workspace.lab.policyVersion}</p>
+                            <button type="button" className="text-sf-primary underline" onClick={() => setTab('policies')}>{t('policies.manage')}</button>
                             <div className="grid grid-cols-2 gap-4">
                                 <label className="text-sm text-sf-text">{t('numbers.decimal', 'Decimal separator')}
                                     <select aria-label={t('numbers.decimal', 'Decimal separator')} value={settingsForm.decimalSeparator}
@@ -1663,6 +1676,8 @@ export default function LabManagement() {
                                     </select>
                                 </label>
                             </div>
+                            {numberFormatChanged && <label className="block text-sm">{t('policies.reason')}
+                                <input required value={policyReason} onChange={e => setPolicyReason(e.target.value)} className="block w-full border rounded p-2 bg-sf-canvas" /></label>}
                             <h3 className="font-black text-sm text-sf-text uppercase tracking-wider">
                                 Facility Profile & Local Time
                             </h3>

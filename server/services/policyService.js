@@ -18,7 +18,7 @@ function loadProfile(context = {}) {
     if (data === undefined) {
         if (!/^[A-Za-z0-9_-]+$/.test(name)) throw error(409, 'POLICY_PROFILE_INVALID', 'Invalid deployment profile name.');
         const filename = path.resolve(__dirname, '../../profiles', name, 'policy.json');
-        if (!fs.existsSync(filename)) return { name, preset: null, overrides: {} };
+        if (!fs.existsSync(filename)) return { name, configured: false, preset: null, overrides: {} };
         try { data = JSON.parse(fs.readFileSync(filename, 'utf8')); }
         catch (_) { throw error(409, 'POLICY_PROFILE_INVALID', 'Deployment policy must be valid JSON.'); }
     }
@@ -33,7 +33,7 @@ function loadProfile(context = {}) {
     const effective = Object.fromEntries(Object.keys(registry).map(key => [key, data.overrides && Object.hasOwn(data.overrides, key)
         ? data.overrides[key] : registry[key].presets[data.preset || 'ISO17025_STRICT']]));
     validatePairs(effective, 409, 'POLICY_PROFILE_INVALID');
-    return { name, preset: data.preset || null, overrides: data.overrides || {} };
+    return { name, configured: true, preset: data.preset || null, overrides: data.overrides || {} };
 }
 async function state(reference, context = {}) {
     const db = context.db || require('../prisma');
@@ -79,7 +79,7 @@ function resolvedFromState(current, key, context = {}) {
 function snapshotFromState(current, context = {}) {
     const resolved = Object.fromEntries(Object.keys(registry).map(key => [key, resolvedFromState(current, key, context)]));
     return { labId: current.lab?.id || null, version: current.policy?.version || 0,
-        presetCode: current.policy?.presetCode || null, profileName: current.profile.name,
+        presetCode: current.policy?.presetCode || null, profileName: current.profile.name, profileConfigured: current.profile.configured,
         inheritedPreset: current.profile.preset || 'ISO17025_STRICT',
         values: Object.fromEntries(Object.entries(resolved).map(([key, row]) => [key, row.value])), resolved };
 }
