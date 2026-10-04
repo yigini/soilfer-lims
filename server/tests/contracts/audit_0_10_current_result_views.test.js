@@ -66,7 +66,9 @@ describe('Audit 0.10: current results in exports and working grid', () => {
         expect(response.body.data.find(row => row['Sample ID'] === bad.sample.id)).toMatchObject({ SOC: '', soc_as_measured: '', soc_normalized: '', soc_n: 0, soc_flag: 'REPLICATES_AMBIGUOUS' });
         expect(response.body.data.find(row => row['Sample ID'] === good.sample.id)).toMatchObject({ SOC: 42, soc_n: 1, soc_flag: '' });
         expect(response.body.meta.ambiguousCellCount).toBe(1);
-        const audit = await prisma.auditLog.findUnique({ where: { id: response.body.meta.exportId } });
+        const audit = await prisma.auditLog.findFirst({ where: { entity: 'EXPORT', entityId: response.body.meta.exportId } });
+        expect(audit.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+        expect(audit.entityId).toBe(response.body.meta.exportId);
         expect(JSON.parse(audit.details).ambiguousCellCount).toBe(1);
     });
     test('single qualified and legacy null-validity results keep their exact value', async () => {
