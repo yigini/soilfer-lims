@@ -24,7 +24,7 @@ const BatchIntake = ({
         deliveryNoteRef: '',
         deliveredBy: '',
         deliveredAt: new Date().toISOString().slice(0, 16),
-        expectedCount: '',
+        declaredExpectedCount: '',
         notes: '',
         submitterName: '',
         submitterOrg: '',
@@ -201,7 +201,7 @@ const BatchIntake = ({
             return;
         }
 
-        if (consignment.expectedCount.trim() && (!Number.isSafeInteger(Number(consignment.expectedCount)) || Number(consignment.expectedCount) < 1)) {
+        if (consignment.declaredExpectedCount.trim() && (!Number.isSafeInteger(Number(consignment.declaredExpectedCount)) || Number(consignment.declaredExpectedCount) < 1)) {
             alert(t('reception.expectedCountInvalid'));
             return;
         }
@@ -212,7 +212,7 @@ const BatchIntake = ({
                     deliveryNoteRef: consignment.deliveryNoteRef.trim() || null,
                     deliveredBy: consignment.deliveredBy.trim() || null,
                     deliveredAt: consignment.deliveredAt || null,
-                    ...(consignment.expectedCount.trim() ? { expectedCount: Number(consignment.expectedCount) } : {}),
+                    ...(consignment.declaredExpectedCount.trim() ? { declaredExpectedCount: Number(consignment.declaredExpectedCount) } : {}),
                     notes: consignment.notes.trim() || null,
                     submitterName: consignment.submitterName.trim() || null,
                     submitterOrg: consignment.submitterOrg.trim() || null,
@@ -249,7 +249,7 @@ const BatchIntake = ({
         }
     };
 
-    const expectedNum = consignment.expectedCount.trim() ? Number(consignment.expectedCount) : null;
+    const expectedNum = consignment.declaredExpectedCount.trim() ? Number(consignment.declaredExpectedCount) : null;
     const acceptedCount = samples.filter(s => s.status === 'ACCEPTED').length;
     const rejectedCount = samples.filter(s => s.status === 'REJECTED').length;
 
@@ -279,7 +279,7 @@ const BatchIntake = ({
                         </div>
                     </div>
 
-                    <p className="text-sm text-sf-muted mb-4">{t('reception.declaredCount')}: {csg.expectedCount ?? t('reception.notDeclared')}</p>
+                    <p className="text-sm text-sf-muted mb-4">{t('reception.declaredCount')}: {csg.declaredExpectedCount ?? t('reception.notDeclared')}</p>
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto mb-8">
@@ -405,8 +405,8 @@ const BatchIntake = ({
                             placeholder={t('reception.notDeclared')}
                             min="1"
                             step="1"
-                            value={consignment.expectedCount}
-                            onChange={(e) => setConsignment(prev => ({ ...prev, expectedCount: e.target.value }))}
+                            value={consignment.declaredExpectedCount}
+                            onChange={(e) => setConsignment(prev => ({ ...prev, declaredExpectedCount: e.target.value }))}
                             className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text"
                         />
                     </div>

@@ -43,7 +43,8 @@ describe('Audit 1.1: one atomic intake service', () => {
         expect(left.items.find(item => item.analysis === analysis.code).methodologyId).toBe(method.id);
         expect(left.revisions).toEqual([{ version: 1, status: 'ACTIVE' }]);
         expect(left.lines).toEqual([{ analysis: analysis.code, methodologyId: method.id, status: 'ACTIVE' }]);
-        expect(many.body.consignment.expectedCount).toBeNull();
+        expect(many.body.consignment.declaredExpectedCount).toBeNull();
+        expect(many.body.consignment.expectedCount).toBe(1); // rollback compatibility, never a declaration
         expect(many.body.consignment.discrepancy).toEqual({ status: 'NOT_DECLARED', difference: null });
     });
     test.each(['work', 'order', 'audit'])('a downstream %s failure rolls back sample, code, work, orders and audits', async stage => {

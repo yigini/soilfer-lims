@@ -29,7 +29,7 @@ async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
     const { consignment: header = {}, defaults = {}, samples = [], bulkApplications = [], allowPartial = false } = body;
     if (!Array.isArray(samples) || !samples.length) throw new IntakeError(400, { error: 'At least one sample is required for batch intake' });
     if (typeof allowPartial !== 'boolean') throw new IntakeError(422, { code: 'CONSIGNMENT_ALLOW_PARTIAL_INVALID', message: 'allowPartial must be a boolean.' });
-    const declared = expectedCount(header.expectedCount);
+    const declared = expectedCount(header.declaredExpectedCount ?? header.expectedCount);
     const now = new Date();
     const lab = user.labId && await tx.lab.findUnique({ where: { id: user.labId } });
     if (!lab?.isActive) throw new IntakeError(403, { code: 'MISSING_LAB_SCOPE', message: 'Select an active receiving laboratory.' });
@@ -77,7 +77,8 @@ async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
         submitterName: header.submitterName || header.submitter?.name || null, submitterOrg: header.submitterOrg || header.submitter?.organization || null,
         submitterPhone: header.submitterPhone || header.submitter?.phone || null, submitterEmail: header.submitterEmail || header.submitter?.email || null,
         deliveredBy: header.deliveredBy || null, deliveredAt: header.deliveredAt ? new Date(header.deliveredAt) : null,
-        receivedBy: user.username, receivedAt: now, deliveryNoteRef: header.deliveryNoteRef || null, expectedCount: declared,
+        receivedBy: user.username, receivedAt: now, deliveryNoteRef: header.deliveryNoteRef || null,
+        declaredExpectedCount: declared, expectedCount: declared ?? plans.length,
         custodyHandoverAt: header.custodyHandoverAt ? new Date(header.custodyHandoverAt) : header.deliveredAt ? new Date(header.deliveredAt) : now,
         custodyCarrierName: header.custodyCarrierName || header.deliveredBy || null, custodyTrackingNumber: header.custodyTrackingNumber || header.deliveryNoteRef || null,
         custodySenderSignature: header.custodySenderSignature || null, receivingOfficerId: user.id ? String(user.id) : null,
@@ -106,6 +107,7 @@ async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
     for (const approval of approvals.values()) await intake.consumeStoredApproval(tx, approval);
     const acceptedCount = processed.filter(result => result.sample.status === 'ACCEPTED').length, rejectedCount = processed.length - acceptedCount;
     const final = await tx.consignment.update({ where: { id: consignment.id }, data: { sampleCount: processed.length, acceptedCount, rejectedCount,
+        expectedCount: declared ?? processed.length,
         status: rejectedCount === processed.length ? 'REJECTED' : rejectedCount ? 'PARTIAL' : 'RECEIVED' } });
     await tx.auditLog.create({ data: { id: crypto.randomUUID(), entity: 'CONSIGNMENT', entityId: final.id, action: 'CONSIGNMENT_BATCH_RECEIVED',
         details: JSON.stringify({ summary: `Consignment ${code} received with ${processed.length} samples (${acceptedCount} accepted, ${rejectedCount} rejected).`,
