@@ -1,5 +1,8 @@
 const prisma = require('../prisma');
 const { normalizeUnit } = require('../services/interpretationService');
+const { CURRENT_VALID_RESULTS, selectReportedValue } = require('../services/reportedValueService');
+const policyService = require('../services/policyService');
+const { hasPermission } = require('../config/roles');
 
 // Helper: Scoping
 // Note: Prisma 'where' clause usually handles scoping better than array filtering
@@ -42,7 +45,7 @@ exports.getExportData = async (req, res) => {
         const user = req.user;
 
         // 0. Permission Check
-        if (includeUnapproved && !['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+        if (includeUnapproved && !hasPermission(user, 'EXPORT_UNAPPROVED_RESULTS')) {
             return res.status(403).json({ error: 'Permission denied: Cannot export unapproved data.' });
         }
 
@@ -120,6 +123,8 @@ exports.getExportData = async (req, res) => {
         let data = [];
         let columns = [];
         let analysisMetadata = {};
+        let ambiguousCellCount = 0;
+        const headerNotes = new Set();
 
         if (type === 'LIST') {
             const samples = await prisma.sample.findMany({
@@ -156,11 +161,11 @@ exports.getExportData = async (req, res) => {
 
         } else if (type === 'WET_CHEM' || type === 'SPECTRAL') {
             // ... existing Wet Chem logic (preserved for future or if user switches back)
-            if (!includeUnapproved) where.status = 'APPROVED';
+            if (!includeUnapproved) where.status = type === 'WET_CHEM' ? { in: ['APPROVED', 'ARCHIVED'] } : 'APPROVED';
 
             const samples = await prisma.sample.findMany({
                 where,
-                include: { results: true }
+                include: { results: type === 'WET_CHEM' ? { where: CURRENT_VALID_RESULTS } : true }
             });
 
             // Metadata map...
@@ -168,7 +173,7 @@ exports.getExportData = async (req, res) => {
             const analysesMap = {};
             allAnalyses.forEach(a => { analysesMap[a.code] = a; });
 
-            data = samples.map(sample => {
+            data = await Promise.all(samples.map(async sample => {
                 const row = {
                     'Sample ID': sample.originalId || sample.id,
                     'Lab ID': sample.labId || 'N/A',
@@ -191,26 +196,48 @@ exports.getExportData = async (req, res) => {
                 }
 
                 if (sample.results) {
-                    sample.results.forEach(r => {
+                    const groups = type === 'WET_CHEM' ? [...sample.results.reduce((map, result) => {
+                        if (!map.has(result.param)) map.set(result.param, []);
+                        map.get(result.param).push(result);
+                        return map;
+                    }, new Map()).values()] : sample.results.map(result => [result]);
+                    for (const replicates of groups) {
+                        const r = replicates[0];
                         const colKey = r.param;
                         const pLower = colKey.toLowerCase();
                         const rawUnit = r.unit || (analysesMap[colKey] ? analysesMap[colKey].units : '');
                         const norm = normalizeUnit(colKey, r.value, rawUnit);
-
-                        const asMeasured = isNaN(Number(r.value)) ? r.value : Number(r.value);
-                        const normalized = norm.normalizedValue !== null ? norm.normalizedValue : asMeasured;
-                        const controlledUnit = norm.standardUnit || rawUnit;
+                        let asMeasured = isNaN(Number(r.value)) ? r.value : Number(r.value);
+                        let normalized = norm.normalizedValue !== null ? norm.normalizedValue : asMeasured;
+                        let controlledUnit = norm.standardUnit || rawUnit;
+                        let measuredUnit = rawUnit;
+                        if (type === 'WET_CHEM') {
+                            const rule = await policyService.get(sample.assignedLab || sample.labId, 'results.reportedValueRule', {
+                                analysisCode: colKey, methodologyId: r.methodologyId || null
+                            });
+                            const selected = selectReportedValue(replicates, rule, { fallbackUnit: analysesMap[colKey]?.units || '' });
+                            asMeasured = selected.asMeasured;
+                            normalized = selected.normalizedValue;
+                            controlledUnit = selected.controlledUnit;
+                            measuredUnit = selected.unit;
+                            row[`${pLower}_n`] = selected.replicateCount;
+                            row[`${pLower}_flag`] = selected.flag;
+                            if (selected.flag === 'REPLICATES_AMBIGUOUS') ambiguousCellCount++;
+                            if (rule === 'MEAN_IF_WITHIN_R') headerNotes.add('Replicates: arithmetic mean of current valid replicates; repeatability (r) check not yet applied.');
+                            else headerNotes.add('Replicates: newest current valid result where the lab policy selects LATEST_VALID.');
+                        }
 
                         // Legacy column points to normalized value
                         row[colKey] = normalized;
 
                         // WP-22: Dual export representation
                         row[`${pLower}_as_measured`] = asMeasured;
-                        row[`${pLower}_unit`] = rawUnit;
+                        row[`${pLower}_unit`] = measuredUnit;
                         row[`${pLower}_normalized`] = normalized;
                         row[`${pLower}_controlled_unit`] = controlledUnit;
 
                         const newCols = [colKey, `${pLower}_as_measured`, `${pLower}_unit`, `${pLower}_normalized`, `${pLower}_controlled_unit`];
+                        if (type === 'WET_CHEM') newCols.push(`${pLower}_n`, `${pLower}_flag`);
                         newCols.forEach(c => {
                             if (!columns.includes(c)) columns.push(c);
                         });
@@ -223,10 +250,10 @@ exports.getExportData = async (req, res) => {
                                 method: 'Internal'
                             };
                         }
-                    });
+                    }
                 }
                 return row;
-            });
+            }));
 
             const staticCols = ['Sample ID', 'Lab ID', 'Project', 'Country', 'Lab', 'GPS X', 'GPS Y', 'Depth', 'Sampling Date', 'Land Use', 'Status'];
             columns = [...staticCols, ...columns.sort()];
@@ -264,6 +291,7 @@ exports.getExportData = async (req, res) => {
                 details: JSON.stringify({
                     filters: { project, lab, startDate, endDate, viewFilters },
                     count: data.length,
+                    ...(type === 'WET_CHEM' ? { ambiguousCellCount, headerNotes: [...headerNotes] } : {}),
                     signOff: { name: signOffName, reason: signOffReason }
                 })
             }
@@ -276,7 +304,8 @@ exports.getExportData = async (req, res) => {
                 generatedAt: timestamp,
                 generatedBy: signOffName || user.name,
                 recordCount: data.length,
-                analysisMetadata
+                analysisMetadata,
+                ...(type === 'WET_CHEM' ? { ambiguousCellCount, headerNotes: [...headerNotes] } : {})
             },
             columns,
             data
@@ -284,6 +313,7 @@ exports.getExportData = async (req, res) => {
 
     } catch (e) {
         console.error(e);
+        if (e.statusCode) return res.status(e.statusCode).json({ error: e.message, code: e.code });
         res.status(500).json({ error: 'Export generation failed', details: e.message });
     }
 };

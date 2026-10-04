@@ -108,7 +108,8 @@ const DataResults = () => {
         labId: true,
         originalId: true,
         project: true,
-        status: true
+        status: true,
+        replicateNo: true
         // Dynamic results default to true (handled in render)
     });
     const [showColumnMenu, setShowColumnMenu] = useState(false);
@@ -283,7 +284,7 @@ const DataResults = () => {
         const isSpectral = col && (col.key === 'SPEC_VIS_NIR' || col.key === 'SPEC_MIR');
         if (isSpectral && (value === 'Done' || value === 'Spectrum Uploaded' || String(value).includes('Uploaded') || String(value).includes('Done'))) {
             return (
-                <div className="flex justify-end items-center" onClick={() => handleViewSpectra(row.id, col.key)}>
+                <div className="flex justify-end items-center" onClick={() => handleViewSpectra(row.sampleId || row.id, col.key)}>
                     <CheckCircle size={16} className="text-green-500 hover:text-green-600 transition-colors cursor-pointer" />
                     <InfoTooltip text="View Spectrum" position="bottom" />
                 </div>
@@ -401,7 +402,7 @@ const DataResults = () => {
                                                 <td key={`${row.id}-${col.key}`} className={`px-4 py-2 text-sf-muted whitespace-nowrap ${col.frozen ? 'sticky left-0 z-10 bg-sf-surface font-medium border-r border-sf-divider' : ''} ${col.isResult ? 'text-right' : ''}`} style={col.frozen ? { left: 0 } : {}}>
                                                     {col.isResult ? renderCellContent(row[col.key], col, row) : (
                                                         (col.key === 'labId' || col.key === 'originalId') ? (
-                                                            <Link to={`/samples/${row.id}`} className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:underline font-medium">
+                                                            <Link to={`/samples/${row.sampleId || row.id}`} className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:underline font-medium">
                                                                 {row[col.key]}
                                                             </Link>
                                                         ) : (row[col.key] || '-')
