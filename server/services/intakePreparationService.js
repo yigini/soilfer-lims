@@ -17,7 +17,7 @@ const { LOCKED_INTAKE_STATUSES, deriveLocationConfidence, resolveAnalysisGroup, 
 const workItems = require('./intakeWorkItemService');
 const { IntakeError } = require('./intakeErrors');
 
-async function prepareIntake(prisma, { body: rawBody, user }) {
+async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initialFieldMetadata = {} }) {
     const body = { ...rawBody };
     let createData = null;
     let admissionExceptionRecord = null;
@@ -239,7 +239,7 @@ async function prepareIntake(prisma, { body: rawBody, user }) {
                 finalOriginalId = await idGenerator.generateWalkInOriginalId(resolvedTargetProject ? idPrefix : prefix, prisma);
             }
 
-            const sampleId = finalOriginalId;
+            const sampleId = newSampleId || finalOriginalId;
             console.log(`[INTAKE] Creating new sample: ${sampleId} linked to Project: ${resolvedTargetProject?.code || 'WALK-IN'}`);
 
             const hasException = Boolean(body.hasException || body.exceptionRecord || body.exceptionReason);
@@ -262,7 +262,7 @@ async function prepareIntake(prisma, { body: rawBody, user }) {
                     metadata: JSON.stringify(initialMetadata),
                     country: receivingLab.country,
                     countryName: receivingLab.country,
-                    fieldMetadata: JSON.stringify(await intakeProfile.captureConfigured({projectCode: resolvedTargetProject?.code || null, assignedLab: user.labId, country: receivingLab.country}, {}, body, {actor: user.id || receivedBy, isNew: true}, prisma)),
+                    fieldMetadata: JSON.stringify(await intakeProfile.captureConfigured({projectCode: resolvedTargetProject?.code || null, assignedLab: user.labId, country: receivingLab.country}, initialFieldMetadata, body, {actor: user.id || receivedBy, isNew: true}, prisma)),
                     history: JSON.stringify([])
             };
             sample = { ...createData, updatedAt: new Date() };

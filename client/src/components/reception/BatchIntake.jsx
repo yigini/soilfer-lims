@@ -201,6 +201,10 @@ const BatchIntake = ({
             return;
         }
 
+        if (consignment.expectedCount.trim() && (!Number.isSafeInteger(Number(consignment.expectedCount)) || Number(consignment.expectedCount) < 1)) {
+            alert(t('reception.expectedCountInvalid'));
+            return;
+        }
         setSubmitting(true);
         try {
             const payload = {
@@ -208,7 +212,7 @@ const BatchIntake = ({
                     deliveryNoteRef: consignment.deliveryNoteRef.trim() || null,
                     deliveredBy: consignment.deliveredBy.trim() || null,
                     deliveredAt: consignment.deliveredAt || null,
-                    expectedCount: parseInt(consignment.expectedCount) || samples.length,
+                    ...(consignment.expectedCount.trim() ? { expectedCount: Number(consignment.expectedCount) } : {}),
                     notes: consignment.notes.trim() || null,
                     submitterName: consignment.submitterName.trim() || null,
                     submitterOrg: consignment.submitterOrg.trim() || null,
@@ -245,7 +249,7 @@ const BatchIntake = ({
         }
     };
 
-    const expectedNum = parseInt(consignment.expectedCount) || 0;
+    const expectedNum = consignment.expectedCount.trim() ? Number(consignment.expectedCount) : null;
     const acceptedCount = samples.filter(s => s.status === 'ACCEPTED').length;
     const rejectedCount = samples.filter(s => s.status === 'REJECTED').length;
 
@@ -274,6 +278,8 @@ const BatchIntake = ({
                             Waybill: {csg.deliveryNoteRef || 'N/A'} • Courier: {csg.deliveredBy || 'N/A'}
                         </div>
                     </div>
+
+                    <p className="text-sm text-sf-muted mb-4">{t('reception.declaredCount')}: {csg.expectedCount ?? t('reception.notDeclared')}</p>
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto mb-8">
@@ -396,7 +402,9 @@ const BatchIntake = ({
                         </label>
                         <input
                             type="number"
-                            placeholder="e.g. 40"
+                            placeholder={t('reception.notDeclared')}
+                            min="1"
+                            step="1"
                             value={consignment.expectedCount}
                             onChange={(e) => setConsignment(prev => ({ ...prev, expectedCount: e.target.value }))}
                             className="w-full p-2 rounded-lg border border-sf-divider bg-sf-surface text-sf-text"
@@ -584,7 +592,7 @@ const BatchIntake = ({
                     <div>
                         <div className="text-xs text-sf-muted font-bold uppercase tracking-wider">Consignment Progress</div>
                         <div className="text-xl font-bold text-sf-text mt-0.5">
-                            {samples.length} <span className="text-sm font-normal text-sf-muted">/ {expectedNum > 0 ? expectedNum : '—'} expected</span>
+                            {samples.length} <span className="text-sm font-normal text-sf-muted">/ {expectedNum !== null ? expectedNum : t('reception.notDeclared')} expected</span>
                         </div>
                         <div className="flex gap-2 text-[11px] mt-1 font-medium">
                             <span className="text-emerald-600 dark:text-emerald-400">{acceptedCount} Accepted</span>
@@ -594,7 +602,7 @@ const BatchIntake = ({
                         </div>
                     </div>
 
-                    {expectedNum > 0 && (
+                    {expectedNum !== null && Number.isInteger(expectedNum) && expectedNum > 0 && (
                         <div className={`px-3 py-1.5 rounded-full text-xs font-bold ${
                             samples.length === expectedNum
                                 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'

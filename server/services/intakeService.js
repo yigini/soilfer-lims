@@ -11,7 +11,7 @@ const scopeGuard = require('../utils/scopeGuard');
 function requireTransaction(tx) {
     if (!tx || typeof tx.$transaction === 'function') throw new IntakeError(409, { code: 'INTAKE_TRANSACTION_REQUIRED', message: 'Intake requires the caller transaction.' });
 }
-async function commitPrepared(tx, plan) {
+async function commitPrepared(tx, plan, { consumeApproval = true } = {}) {
     requireTransaction(tx);
     const { user, body, now, updateData, nextStatus } = plan;
     let sample = plan.sample;
@@ -29,6 +29,7 @@ async function commitPrepared(tx, plan) {
             updateData.labSampleCode = code;
             updateData.labId = code;
             const history = JSON.parse(updateData.history || '[]');
+            history.push({ status: 'RECEIVED', changedBy: user.username, timestamp: now, note: `Intake process completed. Assigned Lab ID: ${code}` });
             history.push({ status: 'ACCEPTED', changedBy: user.username, timestamp: now, note: `Intake completed. Assigned Lab ID: ${code}` });
             updateData.history = JSON.stringify(history);
         }
@@ -38,13 +39,15 @@ async function commitPrepared(tx, plan) {
             action: plan.responseKind === 'rejected' ? 'SAMPLE_REJECTED' : 'SAMPLE_RECEIVED',
             details: plan.responseKind === 'rejected' ? `Sample intake rejected and non-conformance recorded: ${updated.rejectionReason || ''}` : 'Intake completed at reception',
             performedBy: user.username, timestamp: now, sampleId: updated.id, labId: updated.assignedLab } });
-        if (plan.approval?.isStoredApprovalVerified) {
-            const approvalId = plan.approval.approvalId || plan.approval.amendmentId;
-            const consumed = await tx.sampleAmendment.updateMany({ where: { id: String(approvalId), status: 'APPROVED', OR: [{ resolution: null }, { resolution: { not: 'CONSUMED' } }] }, data: { resolution: 'CONSUMED' } });
-            if (consumed.count !== 1) throw new IntakeError(409, { code: 'APPROVAL_ALREADY_CONSUMED', message: 'The manager approval was consumed concurrently.' });
-        }
+        if (consumeApproval) await consumeStoredApproval(tx, plan.approval);
     }
     return { sample: updated, response: responseFor(updated, plan) };
+}
+async function consumeStoredApproval(tx, approval) {
+    if (!approval?.isStoredApprovalVerified || approval.mode !== 'STORED_APPROVAL') return;
+    const approvalId = approval.approvalId || approval.amendmentId;
+    const consumed = await tx.sampleAmendment.updateMany({ where: { id: String(approvalId), status: 'APPROVED', OR: [{ resolution: null }, { resolution: { not: 'CONSUMED' } }] }, data: { resolution: 'CONSUMED' } });
+    if (consumed.count !== 1) throw new IntakeError(409, { code: 'APPROVAL_ALREADY_CONSUMED', message: 'The manager approval was consumed concurrently.' });
 }
 function responseFor(sample, plan) {
     if (plan.responseKind === 'draft') return { success: true, id: sample.id, originalId: sample.originalId, status: sample.status, message: 'Draft saved.' };
@@ -71,4 +74,4 @@ async function intake(tx, input) {
     if (input.body.isDraft) return commitPrepared(tx, await prepareIntake(tx, input));
     return ['REJECT', 'REJECTED'].includes(input.body.decision) ? rejectSample(tx, input) : acceptSample(tx, input);
 }
-module.exports = { intake, acceptSample, rejectSample, prepareIntake, commitPrepared, responseFor, requireTransaction };
+module.exports = { intake, acceptSample, rejectSample, prepareIntake, commitPrepared, responseFor, requireTransaction, consumeStoredApproval };

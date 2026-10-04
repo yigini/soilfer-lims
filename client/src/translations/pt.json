@@ -627,6 +627,9 @@
     }
   },
   "reception": {
+    "notDeclared": "Não declarado",
+    "expectedCountInvalid": "A quantidade declarada deve ser um número inteiro positivo.",
+    "declaredCount": "Quantidade declarada",
     "title": "Recepção de Amostras",
     "projectSample": "Amostra de projeto",
     "walkIn": "Sem agendamento / Externo",

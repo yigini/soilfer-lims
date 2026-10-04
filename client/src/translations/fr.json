@@ -627,6 +627,9 @@
     }
   },
   "reception": {
+    "notDeclared": "Non déclaré",
+    "expectedCountInvalid": "Le nombre déclaré doit être un entier positif.",
+    "declaredCount": "Nombre déclaré",
     "title": "Réception des Échantillons",
     "projectSample": "Échantillon de projet",
     "walkIn": "Sans rendez-vous / Externe",
