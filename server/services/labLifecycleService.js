@@ -353,6 +353,7 @@ async function getLabWorkspace(actor, labId, options = {}, tx = prisma) {
         }
     };
 
+    const policySnapshot = await require('./policyService').snapshot(lab.id, { db: tx });
     return {
         lab: {
             id: lab.id,
@@ -369,6 +370,11 @@ async function getLabWorkspace(actor, labId, options = {}, tx = prisma) {
             timezone: lab.timezone || null,
             effectiveTimezone: lab.timezone || 'UTC',
             numberFormat: await require('./numberFormatService').getNumberFormat(lab.id, { db: tx }),
+            policyVersion: policySnapshot.version,
+            numberFormatSources: {
+                decimal: policySnapshot.resolved['numbers.decimalSeparator'],
+                thousands: policySnapshot.resolved['numbers.thousandsSeparator']
+            },
             notes: (capabilities.canManageProfile ? lab.notes : undefined),
             isActive: lab.isActive
         },
@@ -408,6 +414,13 @@ async function getLabWorkspace(actor, labId, options = {}, tx = prisma) {
  * Updates laboratory profile details with strict allowlist.
  */
 async function updateLabProfile(actor, labId, updates = {}, tx = prisma) {
+    const hasNumberPolicy = updates.decimalSeparator !== undefined || updates.thousandsSeparator !== undefined;
+    if (hasNumberPolicy && (typeof updates.reason !== 'string' || !updates.reason.trim())) {
+        throw Object.assign(new Error('A reason is required for policy changes.'), { statusCode: 400, code: 'POLICY_REASON_REQUIRED' });
+    }
+    if (hasNumberPolicy && tx === prisma) {
+        return prisma.$transaction(db => updateLabProfile(actor, labId, updates, db));
+    }
     const isSuperAdmin = actor.role === 'SUPER_ADMIN';
     const isOwnManager = actor.role === 'LAB_MANAGER' && actor.labId === labId;
 
@@ -510,18 +523,16 @@ async function updateLabProfile(actor, labId, updates = {}, tx = prisma) {
     if (notes !== undefined && isSuperAdmin) data.notes = notes;
 
     if (updates.decimalSeparator !== undefined || updates.thousandsSeparator !== undefined) {
-        const existingLab = await tx.lab.findUnique({ where: { id: labId }, select: { settings: true } });
-        let settings;
-        try { settings = existingLab?.settings ? JSON.parse(existingLab.settings) : {}; }
-        catch (_) { throw Object.assign(new Error('Invalid stored laboratory settings.'), { statusCode: 409, code: 'NUMBER_FORMAT_POLICY_INVALID' }); }
-        if (!settings || typeof settings !== 'object' || Array.isArray(settings)) throw Object.assign(new Error('Invalid stored laboratory settings.'), { statusCode: 409, code: 'NUMBER_FORMAT_POLICY_INVALID' });
-        const defaults = require('./policyService').getStrictNumberFormat();
-        const decimal = updates.decimalSeparator !== undefined ? updates.decimalSeparator : settings.decimalSeparator ?? defaults.decimal;
-        const thousands = updates.thousandsSeparator !== undefined ? updates.thousandsSeparator : settings.thousandsSeparator ?? defaults.thousands;
+        const policyService = require('./policyService');
+        const effective = await policyService.snapshot(labId, { db: tx });
+        const decimal = updates.decimalSeparator !== undefined ? updates.decimalSeparator : effective.values['numbers.decimalSeparator'];
+        const thousands = updates.thousandsSeparator !== undefined ? updates.thousandsSeparator : effective.values['numbers.thousandsSeparator'];
         if (!require('../../shared/numberParse').validateNumberFormat({ decimal, thousands })) {
-            throw Object.assign(new Error('Decimal and thousands separators must be valid and different.'), { statusCode: 400, code: 'NUMBER_FORMAT_POLICY_INVALID' });
+            throw Object.assign(new Error('Decimal and thousands separators must be valid and different.'), { statusCode: 409, code: 'NUMBER_FORMAT_POLICY_INVALID' });
         }
-        data.settings = JSON.stringify({ ...settings, decimalSeparator: decimal, thousandsSeparator: thousands });
+        await policyService.mutateInTransaction(actor, labId, { reason: updates.reason, expectedVersion: updates.expectedVersion,
+            changes: [{ key: 'numbers.decimalSeparator', value: decimal }, { key: 'numbers.thousandsSeparator', value: thousands }] }, tx,
+        { auditAction: 'UPDATE_PROFILE', compatibilityFields: Object.keys(data) });
     }
 
     const updated = await tx.lab.update({
@@ -529,7 +540,7 @@ async function updateLabProfile(actor, labId, updates = {}, tx = prisma) {
         data
     });
 
-    await tx.auditLog.create({
+    if (!hasNumberPolicy) await tx.auditLog.create({
         data: {
             id: crypto.randomUUID(),
             entity: 'LAB',

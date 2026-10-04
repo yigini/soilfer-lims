@@ -126,6 +126,8 @@ exports.getExportData = async (req, res) => {
         let analysisMetadata = {};
         let ambiguousCellCount = 0;
         const headerNotes = new Set();
+        const policySnapshots = new Map();
+        const selectionPolicies = new Map();
 
         if (type === 'LIST') {
             const samples = await prisma.sample.findMany({
@@ -213,9 +215,14 @@ exports.getExportData = async (req, res) => {
                         let controlledUnit = norm.standardUnit || rawUnit;
                         let measuredUnit = rawUnit;
                         if (type === 'WET_CHEM') {
-                            const rule = await policyService.get(sample.assignedLab || sample.labId, 'results.reportedValueRule', {
-                                analysisCode: colKey, methodologyId: r.methodologyId || null
-                            });
+                            const labReference = sample.assignedLab || sample.labId;
+                            const context = { analysisCode: colKey, methodologyId: r.methodologyId || null };
+                            const policyScope = JSON.stringify([labReference, colKey, context.methodologyId]);
+                            if (!policySnapshots.has(policyScope)) policySnapshots.set(policyScope, await policyService.snapshot(labReference, context));
+                            const used = policySnapshots.get(policyScope);
+                            const rule = await policyService.get(labReference, 'results.reportedValueRule', { ...context, snapshot: used });
+                            selectionPolicies.set(policyScope, { labId: used.labId, ...context, version: used.version,
+                                rule, source: used.resolved['results.reportedValueRule'].source });
                             const selected = selectReportedValue(replicates, rule, { fallbackUnit: analysesMap[colKey]?.units || '' });
                             asMeasured = selected.asMeasured;
                             normalized = selected.normalizedValue;
@@ -292,7 +299,7 @@ exports.getExportData = async (req, res) => {
                 details: JSON.stringify({
                     filters: { project, lab, startDate, endDate, viewFilters },
                     count: data.length,
-                    ...(type === 'WET_CHEM' ? { ambiguousCellCount, headerNotes: [...headerNotes] } : {}),
+                    ...(type === 'WET_CHEM' ? { ambiguousCellCount, headerNotes: [...headerNotes], selectionPolicies: [...selectionPolicies.values()] } : {}),
                     signOff: { name: signOffName, reason: signOffReason }
                 })
             }
@@ -306,7 +313,7 @@ exports.getExportData = async (req, res) => {
                 generatedBy: signOffName || user.name,
                 recordCount: data.length,
                 analysisMetadata,
-                ...(type === 'WET_CHEM' ? { ambiguousCellCount, headerNotes: [...headerNotes] } : {})
+                ...(type === 'WET_CHEM' ? { ambiguousCellCount, headerNotes: [...headerNotes], selectionPolicies: [...selectionPolicies.values()] } : {})
             },
             columns,
             data

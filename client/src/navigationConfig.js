@@ -107,6 +107,7 @@ export function buildNavItems(user, t = (k, d) => d, icons = {}) {
     }
 
     // General Information
+    if (user) navItems.push({ icon: Settings, label: t('policies.title', 'Policies'), path: '/lab-policies' });
     navItems.push({ icon: Info, label: t('nav.about', 'About SoilFER'), path: '/about' });
 
     return navItems;

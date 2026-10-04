@@ -1,4 +1,5 @@
 import React from 'react';
+const LabPoliciesPage = React.lazy(() => import('./pages/LabPolicies'));
 import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import {
     LayoutDashboard,
@@ -310,6 +311,7 @@ function App() {
                 <Route path="/lab-methods" element={<RequireAuth permission="MANAGE_ANALYSES"><LabMethods /></RequireAuth>} />
                 <Route path="/admin/audit" element={<RequireAuth permission="VIEW_AUDIT"><AuditLogs /></RequireAuth>} />
                 <Route path="/admin/labs" element={<RequireAuth permission="MANAGE_USERS"><LabManagement /></RequireAuth>} />
+                <Route path="/lab-policies" element={<RequireAuth permission="VIEW_LAB_POLICIES"><LabPoliciesPage /></RequireAuth>} />
                 <Route path="/admin/legacy-import" element={<RequireAuth permission="RECEIVE_SAMPLE"><LegacyImport /></RequireAuth>} />
 
                 {/* General Access */}

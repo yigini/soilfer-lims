@@ -5,6 +5,7 @@ const app = require('../../app');
 const prisma = require('../../prisma');
 const { getAuthToken } = require('../setup');
 const { getNumberFormat } = require('../../services/numberFormatService');
+const policyService = require('../../services/policyService');
 const id = prefix => `${prefix}-${crypto.randomUUID()}`;
 const lab = 'LAB-AUDIT-014';
 
@@ -15,7 +16,12 @@ describe('Audit 0.14: normalized entries and lab number policy', () => {
         manager = await getAuthToken('LAB_MANAGER', lab);
         await prisma.lab.upsert({ where: { id: lab }, update: {}, create: { id: lab, code: lab, name: lab, country: 'GTM' } });
     });
-    beforeEach(async () => { await prisma.lab.update({ where: { id: lab }, data: { settings: '{"language":"fr","dateFormat":"YYYY-MM-DD"}' } }); });
+    const setNumberPolicy = (decimal, thousands) => policyService.change(jwt.decode(manager), lab, { reason: 'Number-format contract fixture',
+        changes: [{ key: 'numbers.decimalSeparator', value: decimal }, { key: 'numbers.thousandsSeparator', value: thousands }] });
+    beforeEach(async () => {
+        await prisma.lab.update({ where: { id: lab }, data: { settings: '{"language":"fr","dateFormat":"YYYY-MM-DD"}' } });
+        await setNumberPolicy('.', null);
+    });
     async function fixture(analysis = 'SPEC_GRS') {
         const sampleId = id('SMP014'), workItemId = id('WI014');
         await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, assignedLab: lab, labId: sampleId, status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify([analysis]) } });
@@ -49,10 +55,17 @@ describe('Audit 0.14: normalized entries and lab number policy', () => {
     });
     test('lab policy is shared across analysts, explicit thousands grouping is honored and malformed policy fails before writes', async () => {
         await prisma.lab.update({ where: { id: lab }, data: { settings: '{"decimalSeparator":".","thousandsSeparator":","}' } });
+        await setNumberPolicy('.', ',');
         expect(await getNumberFormat(lab)).toEqual({ decimal: '.', thousands: ',' });
         const f = await fixture(); const response = await record(f, '1,234');
         expect({ status: response.status, body: response.body }).toMatchObject({ status: 200, body: { saved: 1 } }); expect((await prisma.result.findFirst({ where: { sampleId: f.sampleId } })).value).toBe('1234');
         await prisma.lab.update({ where: { id: lab }, data: { settings: '{"decimalSeparator":",","thousandsSeparator":","}' } });
+        // Seed a corrupt stored pair to retain the malformed-policy no-write test.
+        // The normal editor rejects this pair before it can be stored.
+        await prisma.labPolicyOverride.updateMany({ where: { labId: lab, key: 'numbers.decimalSeparator', revokedAt: null },
+            data: { revokedAt: new Date(), revokedBy: 'FIXTURE' } });
+        await prisma.labPolicyOverride.create({ data: { id: id('POL014'), labId: lab, key: 'numbers.decimalSeparator', value: JSON.stringify(','),
+            reason: 'Corrupt stored policy fixture', setBy: 'FIXTURE' } });
         const invalid = await fixture(), before = await prisma.workItem.findUnique({ where: { id: invalid.workItemId } });
         const refused = await record(invalid, '6,85');
         expect(refused.status).toBe(409); expect(refused.body.code).toBe('NUMBER_FORMAT_POLICY_INVALID');
@@ -60,7 +73,7 @@ describe('Audit 0.14: normalized entries and lab number policy', () => {
         expect(await prisma.workItem.findUnique({ where: { id: invalid.workItemId } })).toEqual(before);
     });
     test('existing profile update persists only valid flat separators, retains unrelated settings and audits the change', async () => {
-        const patch = data => request(app).patch(`/api/labs/${lab}/profile`).set('Authorization', `Bearer ${manager}`).send(data);
+        const patch = data => request(app).patch(`/api/labs/${lab}/profile`).set('Authorization', `Bearer ${manager}`).send({ reason: 'Number-format profile fixture', ...data });
         expect((await patch({ decimalSeparator: ',', thousandsSeparator: '.' })).status).toBe(200);
         const stored = await prisma.lab.findUnique({ where: { id: lab } });
         expect(JSON.parse(stored.settings)).toEqual({ language: 'fr', dateFormat: 'YYYY-MM-DD', decimalSeparator: ',', thousandsSeparator: '.' });

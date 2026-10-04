@@ -105,7 +105,7 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
         const before = await prisma.reportSequence.findUnique({ where: { labId_year: { labId, year } } });
         let reserved;
         await expect(prisma.$transaction(async tx => {
-            reserved = await allocateReportIdentity(tx, { sampleId: f.sampleId, lab, publishedAt: now, resolveFormat: () => policy.get(labId, 'report.numberFormat') });
+            reserved = await allocateReportIdentity(tx, { sampleId: f.sampleId, lab, publishedAt: now, resolveFormat: () => policy.get(labId, 'report.numberFormat', { db: tx }) });
             throw new Error('synthetic downstream failure');
         })).rejects.toThrow('synthetic downstream failure');
         expect(await prisma.reportSequence.findUnique({ where: { labId_year: { labId, year } } })).toEqual(before);
