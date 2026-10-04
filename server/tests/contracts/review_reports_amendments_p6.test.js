@@ -2,7 +2,7 @@ const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
 const { usersDb } = require('../../db');
-const { generateToken } = require('../setup');
+const { generateToken, ensureTestLab } = require('../setup');
 
 describe('Package P6: Review, Reports & Amendments Verification', () => {
     let mgrUser, techUser, crossLabUser;
@@ -10,6 +10,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
     let sampleForReview, sampleDisposed;
 
     beforeAll(async () => {
+        await ensureTestLab('LAB-P6', 'P6C');
         mgrUser = usersDb.create({
             username: 'mgr_p6_test',
             role: 'LAB_MANAGER',

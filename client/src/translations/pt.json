@@ -1,5 +1,9 @@
 {
-  "dataSheet": {"title":"Folha de dados","readOnlyDescription":"Os resultados registrados são somente leitura aqui. Abra a bancada para inserir ou atualizar resultados.","openWorkbench":"Abrir bancada"},
+  "dataSheet": {
+    "title": "Folha de dados",
+    "readOnlyDescription": "Os resultados registrados são somente leitura aqui. Abra a bancada para inserir ou atualizar resultados.",
+    "openWorkbench": "Abrir bancada"
+  },
   "common": {
     "copySecretFailed": "Não foi possível copiar. Selecione a chave e copie-a manualmente antes de fechar esta janela.",
     "save": "Salvar",
@@ -2142,7 +2146,18 @@
     "revoke": "Revogar",
     "createdBy": "Criada em {date} por {user}",
     "expiresOn": "Expira em: {date}",
-    "viewsCount": "{count} visualizações"
+    "viewsCount": "{count} visualizações",
+    "qcWithinLimits": "QC dentro dos limites para todos os valores relatados.",
+    "qcDeviations": "Desvios de QC:",
+    "qcNotRecorded": "Estado de QC não registrado.",
+    "noBatch": "Lote não registrado",
+    "drying": "Secagem",
+    "preparation": "Preparação",
+    "notRecorded": "não registrado",
+    "superseded": "SUBSTITUÍDO",
+    "see": "ver",
+    "replaces": "Substitui",
+    "preparationRecords": "Registros de preparação"
   },
   "qaSection": {
     "kicker": "Garantia de qualidade e conformidade regulamentar",

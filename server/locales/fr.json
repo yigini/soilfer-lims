@@ -1,5 +1,18 @@
 {
-  "resultReports": { "qcWarningStatement": "Avertissement QC : Une ou plusieurs valeurs rapportées ont un QC de lot échoué ou incomplet. Consultez les avertissements de lot enregistrés." },
+  "resultReports": {
+    "qcWarningStatement": "Avertissement QC : Une ou plusieurs valeurs rapportées ont un QC de lot échoué ou incomplet. Consultez les avertissements de lot enregistrés.",
+    "qcWithinLimits": "QC dans les limites pour toutes les valeurs rapportées.",
+    "qcDeviations": "Écarts de QC :",
+    "qcNotRecorded": "État du QC non enregistré.",
+    "noBatch": "Lot non enregistré",
+    "drying": "Séchage",
+    "preparation": "Préparation",
+    "notRecorded": "non enregistré",
+    "superseded": "REMPLACÉ",
+    "see": "voir",
+    "replaces": "Remplace",
+    "preparationRecords": "Enregistrements de préparation"
+  },
   "common": {
     "save": "Enregistrer",
     "cancel": "Annuler",

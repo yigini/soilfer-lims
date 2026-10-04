@@ -997,6 +997,8 @@ model Report {
   labId         String?
   version       Int       @default(1)
   status        String    @default("DRAFT")  // DRAFT, PUBLISHED, SUPERSEDED
+  reportNumberBase String?
+  revision      Int?
 
   // Denormalized search keys (populated at generation time)
   firstName     String?
@@ -1023,6 +1025,14 @@ model Report {
   @@index([status])
   @@index([projectCode])
   @@index([sampleLabId])
+}
+
+model ReportSequence {
+  labId     String
+  year      Int
+  lastValue Int @default(0)
+
+  @@unique([labId, year])
 }
 
 model ReportShareLink {

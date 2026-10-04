@@ -1,5 +1,9 @@
 {
-  "dataSheet": {"title":"Feuille de données","readOnlyDescription":"Les résultats enregistrés sont en lecture seule ici. Ouvrez le plan de travail pour saisir ou modifier des résultats.","openWorkbench":"Ouvrir le plan de travail"},
+  "dataSheet": {
+    "title": "Feuille de données",
+    "readOnlyDescription": "Les résultats enregistrés sont en lecture seule ici. Ouvrez le plan de travail pour saisir ou modifier des résultats.",
+    "openWorkbench": "Ouvrir le plan de travail"
+  },
   "common": {
     "copySecretFailed": "La copie a échoué. Sélectionnez la clé et copiez-la manuellement avant de fermer cette fenêtre.",
     "save": "Enregistrer",
@@ -2142,7 +2146,18 @@
     "revoke": "Révoquer",
     "createdBy": "Créé le {date} par {user}",
     "expiresOn": "Expire le : {date}",
-    "viewsCount": "{count} vues"
+    "viewsCount": "{count} vues",
+    "qcWithinLimits": "QC dans les limites pour toutes les valeurs rapportées.",
+    "qcDeviations": "Écarts de QC :",
+    "qcNotRecorded": "État du QC non enregistré.",
+    "noBatch": "Lot non enregistré",
+    "drying": "Séchage",
+    "preparation": "Préparation",
+    "notRecorded": "non enregistré",
+    "superseded": "REMPLACÉ",
+    "see": "voir",
+    "replaces": "Remplace",
+    "preparationRecords": "Enregistrements de préparation"
   },
   "qaSection": {
     "kicker": "Assurance qualité et conformité réglementaire",
