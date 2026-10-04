@@ -47,7 +47,11 @@ function parseNumber(input, format) {
     }
     const value = Number(sign + canonical + exponentText);
     if (!Number.isFinite(value)) return fail('INVALID_NUMBER');
-    return { valid: true, code: null, rawInput, value, canonical: `${qualifier}${value}`, qualifier, blank: false };
+    // Keep explicit decimal precision while normalizing separators. Scientific
+    // notation is expanded after parsing so its exponent cannot be mistaken for
+    // a grouping separator by downstream consumers.
+    const normalized = exponent ? String(value) : sign + canonical;
+    return { valid: true, code: null, rawInput, value, canonical: qualifier + normalized, qualifier, blank: false };
 }
 
 module.exports = { parseNumber, validateNumberFormat };

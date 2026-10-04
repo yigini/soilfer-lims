@@ -16,7 +16,7 @@ describe('Audit 0.14: normalized entries and lab number policy', () => {
         await prisma.lab.upsert({ where: { id: lab }, update: {}, create: { id: lab, code: lab, name: lab, country: 'GTM' } });
     });
     beforeEach(async () => { await prisma.lab.update({ where: { id: lab }, data: { settings: '{"language":"fr","dateFormat":"YYYY-MM-DD"}' } }); });
-    async function fixture(analysis = 'SOC') {
+    async function fixture(analysis = 'SPEC_GRS') {
         const sampleId = id('SMP014'), workItemId = id('WI014');
         await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, assignedLab: lab, labId: sampleId, status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify([analysis]) } });
         await prisma.workItem.create({ data: { id: workItemId, sampleId, labId: lab, assignedLab: lab, analysis, assignedTo: actor.username, status: 'IN_PROGRESS', version: 0 } });
@@ -25,7 +25,7 @@ describe('Audit 0.14: normalized entries and lab number policy', () => {
     const record = (f, value, extra = {}) => request(app).post('/api/workbench/batch-save').set('Authorization', `Bearer ${token}`).send({ draft: false, entries: [{ workItemId: f.workItemId, value, version: 0, ...extra }] });
     test.each([['6,85', '6.85', 6.85], ['<0,5', '<0.5', 0.5], ['< 0.5', '<0.5', 0.5], ['>100', '>100', 100], ['1e-3', '0.001', 0.001]])('recording %s stores canonical value and exact raw input', async (raw, canonical, numericValue) => {
         const f = await fixture(); const response = await record(f, raw);
-        expect(response.status).toBe(200); expect(response.body.saved).toBe(1);
+        expect({ status: response.status, body: response.body }).toMatchObject({ status: 200, body: { saved: 1 } });
         const result = await prisma.result.findFirst({ where: { sampleId: f.sampleId } });
         expect(result).toMatchObject({ value: canonical, rawInput: raw, numericValue, isCurrent: true });
     });
@@ -41,7 +41,7 @@ describe('Audit 0.14: normalized entries and lab number policy', () => {
         const response = await record(f, null, { values: { sand: '6,85', silt: '43,15', clay: '50' } });
         expect(response.status).toBe(200); expect(response.body.saved).toBe(1);
         const rows = await prisma.result.findMany({ where: { sampleId: f.sampleId } });
-        expect(rows).toHaveLength(4);
+        expect(rows.filter(row => row.isCurrent)).toHaveLength(4);
         expect(rows.find(row => row.param === 'SAND')).toMatchObject({ value: '6.85', numericValue: 6.85, rawInput: '6,85' });
         expect(rows.find(row => row.param === 'SILT')).toMatchObject({ value: '43.15', numericValue: 43.15, rawInput: '43,15' });
         expect(rows.find(row => row.param === 'TEXTURE').rawInput).toBe('{"sand":"6,85","silt":"43,15","clay":"50"}');
@@ -50,7 +50,7 @@ describe('Audit 0.14: normalized entries and lab number policy', () => {
         await prisma.lab.update({ where: { id: lab }, data: { settings: '{"decimalSeparator":".","thousandsSeparator":","}' } });
         expect(await getNumberFormat(lab)).toEqual({ decimal: '.', thousands: ',' });
         const f = await fixture(); const response = await record(f, '1,234');
-        expect(response.status).toBe(200); expect((await prisma.result.findFirst({ where: { sampleId: f.sampleId } })).value).toBe('1234');
+        expect({ status: response.status, body: response.body }).toMatchObject({ status: 200, body: { saved: 1 } }); expect((await prisma.result.findFirst({ where: { sampleId: f.sampleId } })).value).toBe('1234');
         await prisma.lab.update({ where: { id: lab }, data: { settings: '{"decimalSeparator":",","thousandsSeparator":","}' } });
         const invalid = await fixture(), before = await prisma.workItem.findUnique({ where: { id: invalid.workItemId } });
         const refused = await record(invalid, '6,85');
