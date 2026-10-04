@@ -92,6 +92,25 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
         } finally { db.close(); }
     });
 
+    test('typed QC creates UUID rows even when supplied QC identifiers repeat', async () => {
+        const batchId = id();
+        await prisma.batch.create({ data: { id: batchId, labId, analysis: 'PH_H2O', profile: 'RACK_40',
+            status: 'OPEN', createdBy: username, history: '[]', qcResults: '{}' } });
+        const response = await request(app).post(`/api/qc/batches/${batchId}/evaluate`)
+            .set('Authorization', `Bearer ${token}`).send({
+                blanks: [{ id: 'same-legacy-id', value: 0 }, { id: 'same-legacy-id', value: 0 }],
+                controls: [{ id: 'same-legacy-id', expected: 7, measured: 7 }],
+                duplicates: [{ id: 'same-legacy-id', value1: 7, value2: 7 }]
+            });
+        expect(response.status).toBe(200);
+        const rows = await prisma.batchQcResult.findMany({ where: { batchId } });
+        expect(rows).toHaveLength(4);
+        expect(new Set(rows.map(row => row.id)).size).toBe(4);
+        for (const row of rows) expect(row.id).toMatch(uuid);
+        const snapshot = await prisma.auditLog.findFirst({ where: { entityId: batchId, action: 'QC_EVIDENCE_SNAPSHOT' } });
+        expect(snapshot.id).toMatch(uuid);
+    });
+
     test('sample result save derives texture within the matching replicate and retains all old values', async () => {
         const f = await textureFixture();
         const response = await sampleSave(f, measurements(2));

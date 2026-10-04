@@ -83,6 +83,17 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.6.1',
+        date: 'October 4, 2026',
+        tag: 'UUID and Transaction Integrity',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'New work, result, QC and audit identifiers use UUIDs, including bulk writes.',
+            'Texture results commit atomically with their source fractions and supersede only the same replicate.',
+            'Legacy imports preserve prior results through atomic supersession; a read-only diagnostic reports duplicate-current groups.',
+        ]
+    },
+    {
         version: 'v1.6.0',
         date: 'October 2026',
         tag: 'Laboratory Policy Settings (Audit 1.0)',

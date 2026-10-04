@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.1] - 2026-10-04
+
+### Fixed
+- New internal work, result, QC and audit identifiers use UUIDs to prevent collisions during bulk writes (Audit 1.4, #181).
+- Texture derivation commits with its source results and supersedes only the matching replicate. A storage failure rolls back the complete save.
+- Legacy imports atomically retain and supersede previous results for the same replicate. A read-only diagnostic reports existing duplicate-current groups.
+
 ## [1.6.0] - 2026-10-04
 
 ### Added
