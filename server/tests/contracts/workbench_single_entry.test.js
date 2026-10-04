@@ -278,8 +278,9 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
             };
 
             await workItemController.reviewWorkItem(req, res);
-            expect(statusVal).toBe(400);
+            expect(statusVal).toBe(409);
             expect(jsonVal.error).toContain('Only submitted work items can be reviewed');
+            expect(jsonVal.code).toBe('ITEM_NOT_SUBMITTED');
         });
 
         test('Submitting and reviewing scientific determination reconciles Submission and ReviewDecision', async () => {

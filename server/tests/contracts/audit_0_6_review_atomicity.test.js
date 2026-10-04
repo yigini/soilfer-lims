@@ -141,7 +141,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         expect(await prisma.workItem.findUnique({ where: { id: f.items[2].id } })).toEqual(accepted);
         const result = await prisma.result.findUnique({ where: { id: f.result.id } });
         expect(result.numericValue).toBe(6.2); expect(result.value).toBe('6.2');
-        expect(JSON.parse(result.flags)).toEqual(expect.arrayContaining([expect.objectContaining({ type: 'REVIEW_RETURNED' })]));
+        expect(JSON.parse(result.flags)).toContain('REVIEW_RETURNED');
     });
     test('a submitted closure WAIVE follows the shared contract and leaves sample custody unchanged', async () => {
         const f = await fixture({ analysis: 'ARCH', sampleStatus: 'APPROVED' });

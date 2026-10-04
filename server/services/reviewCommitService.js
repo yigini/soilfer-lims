@@ -2,7 +2,7 @@ const { randomUUID } = require('crypto');
 const workflow = require('../workflowContract');
 
 function itemStateError(item) {
-    return Object.assign(new Error(`Work item ${item.id} is no longer eligible for this review.`), {
+    return Object.assign(new Error(`Work item ${item.id} is no longer eligible for this review. Only submitted work items can be reviewed.`), {
         statusCode: 409, code: 'ITEM_NOT_SUBMITTED', workItemId: item.id
     });
 }

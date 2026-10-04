@@ -1215,7 +1215,7 @@ exports.reviewWorkItem = async (req, res) => {
         // SD-10: Require mandatory reason on rejection
         if ([workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED, workflow.WORK_ITEM_STATES.WAIVED].includes(status)) {
             if (!effectiveReason) {
-                return res.status(400).json({ error: 'A reason is required when returning or waiving work', code: 'REVIEW_REASON_REQUIRED' });
+                return res.status(400).json({ error: status === workflow.WORK_ITEM_STATES.WAIVED ? 'A reason is required when waiving work' : 'A reason is required when rejecting work for reanalysis', code: 'REVIEW_REASON_REQUIRED' });
             }
         }
 
@@ -1526,7 +1526,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
         const effectiveReason = (note || reason || '').trim();
         if ([workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED, workflow.WORK_ITEM_STATES.WAIVED].includes(status)) {
             if (!effectiveReason) {
-                return res.status(400).json({ error: 'A reason is required when returning or waiving work', code: 'REVIEW_REASON_REQUIRED' });
+                return res.status(400).json({ error: status === workflow.WORK_ITEM_STATES.WAIVED ? 'A reason is required when waiving work' : 'A reason is required when rejecting work for reanalysis', code: 'REVIEW_REASON_REQUIRED' });
             }
         }
 
