@@ -424,7 +424,8 @@ exports.reviewSubmission = async (req, res) => {
                 reason: reason || null,
                 reviewedBy: user.username,
                 timestamp: now,
-                action: 'REVIEWED'
+                action: 'REVIEWED',
+                ...(verdict === 'REJECT_REANALYSIS' ? { submissionId: item.submissionId } : {})
             });
 
             const updates = {
@@ -438,6 +439,7 @@ exports.reviewSubmission = async (req, res) => {
             if (verdict === 'REJECT_REANALYSIS') {
                 updates.reanalysisReason = reason;
                 updates.reanalysisRequestedBy = user.username;
+                updates.submissionId = null;
             }
             if (verdict === 'WAIVE') {
                 updates.waiveReason = reason;

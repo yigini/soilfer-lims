@@ -1299,6 +1299,7 @@ exports.reviewWorkItem = async (req, res) => {
         history.push({
             status,
             note: effectiveReason || note || 'Manager Review',
+            ...(status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED ? { submissionId: item.submissionId, reason: effectiveReason } : {}),
             changedBy: user.username,
             timestamp: now
         });
@@ -1309,6 +1310,7 @@ exports.reviewWorkItem = async (req, res) => {
         };
         if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
             updateData.reanalysisReason = effectiveReason;
+            updateData.submissionId = null;
         }
 
         const operations = [];
@@ -1670,6 +1672,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
             history.push({
                 status,
                 note: effectiveReason || note || 'Bulk Manager Review',
+                ...(status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED ? { submissionId: item.submissionId, reason: effectiveReason } : {}),
                 changedBy: user.username,
                 timestamp: now
             });
@@ -1680,6 +1683,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
             };
             if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
                 updateData.reanalysisReason = effectiveReason;
+                updateData.submissionId = null;
             }
 
             operations.push(tx => tx.workItem.update({
