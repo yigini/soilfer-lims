@@ -36,6 +36,7 @@ router.post('/:id/custody/move', checkPermission('ARCHIVE_SAMPLE'), sampleContro
 // Final Approval + Closure
 router.post('/:id/approve', checkPermission('APPROVE_RESULTS'), sampleController.approveSample);
 router.post('/:id/undo-approve', checkPermission('APPROVE_RESULTS'), sampleController.undoApproval);
+router.post('/:id/preparation-evidence/:resultId/clear', checkPermission('APPROVE_RESULTS'), sampleController.clearPreparationEvidence);
 router.post('/:id/archive', checkPermission('ARCHIVE_SAMPLE'), sampleController.archiveSample);
 router.post('/:id/dispose', checkPermission('DISPOSE_SAMPLE'), sampleController.disposeSample);
 router.delete('/:id', checkPermission('DELETE_SAMPLE'), sampleController.deleteSample);

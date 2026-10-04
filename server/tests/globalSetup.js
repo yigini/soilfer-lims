@@ -23,6 +23,19 @@ module.exports = async function globalSetup() {
             if (!db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'WorkItem_one_active_per_analysis'").get()) {
                 db.exec(fs.readFileSync(path.resolve(__dirname, '../prisma/migrations/20261004190100_unique_active_workitem/migration.sql'), 'utf8'));
             }
+            const stateColumns = ['Sample', 'WorkItem'].map(table => {
+                const columns = db.prepare(`PRAGMA table_info("${table}")`).all().map(row => row.name);
+                return ['holdPriorStatus', 'legacyStatus'].map(column => columns.includes(column));
+            }).flat();
+            const evidenceTable = !!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='ResultEvidenceEvent'").get();
+            if (stateColumns.every(value => !value) && !evidenceTable) {
+                db.exec(fs.readFileSync(path.resolve(__dirname, '../prisma/migrations/20261005000000_workflow_state_evidence/migration.sql'), 'utf8'));
+            } else if (!stateColumns.every(Boolean) || !evidenceTable) {
+                throw new Error('Disposable test template has a partial workflow-state schema.');
+            }
+            if (!db.prepare("SELECT 1 FROM sqlite_master WHERE type='trigger' AND name='Sample_status_insert_guard'").get()) {
+                db.exec(fs.readFileSync(path.resolve(__dirname, '../prisma/migrations/20261005000100_workflow_state_guards/migration.sql'), 'utf8'));
+            }
         } finally { db.close(); }
     }
 

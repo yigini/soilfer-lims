@@ -24,7 +24,7 @@ function mapStateError(error, conflictCode = 'STATE_CHANGED') {
     const text = `${error.message || ''} ${JSON.stringify(error.meta || {})}`;
     const code = TRIGGER_CODES.find(value => text.includes(value));
     if (code) return new TransitionError('The database refused an invalid workflow write.', 409, code);
-    if (['P2025', 'P2034'].includes(error.code)) {
+    if (['P2025', 'P2034', 'P1008'].includes(error.code)) {
         return new TransitionError('The workflow row changed. Reload before retrying.', 409, conflictCode);
     }
     return error;
@@ -99,6 +99,12 @@ function holdData(row, nextStatus, actor, reason, entity) {
     return { holdPriorStatus: null };
 }
 
+function heldPriorState(row, entity) {
+    const normalize = entity === 'Sample' ? workflow.normalizeSampleState : workflow.normalizeWorkItemState;
+    const allowed = entity === 'Sample' ? workflow.SAMPLE_TRANSITIONS.ON_HOLD : workflow.WORK_ITEM_TRANSITIONS.ON_HOLD;
+    return row.holdPriorStatus ? normalize(row.holdPriorStatus) : historyPriorStatus(row, normalize, allowed);
+}
+
 function updateData(extraData, nextStatus, normalize = value => value) {
     const data = { ...extraData };
     if ('status' in data && normalize(data.status) !== nextStatus) {
@@ -138,4 +144,4 @@ async function inTransaction(tx, execute) {
 }
 
 module.exports = { TransitionError, TRIGGER_CODES, mapStateError, actorName, assertScope, requireReason,
-    parseHistory, holdData, updateData, assertFixtureContext, inTransaction };
+    parseHistory, holdData, heldPriorState, updateData, assertFixtureContext, inTransaction };

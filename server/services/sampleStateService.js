@@ -19,6 +19,8 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
         const sample = await client.sample.findUnique({ where: { id: String(sampleId) } });
         if (!sample) throw new TransitionError(`Sample ${sampleId} not found.`, 404, 'SAMPLE_NOT_FOUND');
         rules.assertScope(actor, sample);
+        if ('id' in data && data.id !== sample.id) throw new TransitionError('Sample identity cannot change during a transition.', 400, 'WORKFLOW_ID_IMMUTABLE');
+        rules.assertScope(actor, { ...sample, ...data });
         const currentStatus = workflow.normalizeSampleState(sample.status);
         let provenance = {};
         if (migrating) {
@@ -38,7 +40,10 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
         }
         if (sample.status === nextStatus && !Object.keys(data).length && !migrating) return sample;
         const changed = await client.sample.updateMany({
-            where: { id: sample.id, status: sample.status, updatedAt: sample.updatedAt,
+            // The row was read inside this SQLite transaction. Keep the CAS on
+            // its raw state; DateTime equality would reject historical epoch
+            // timestamps that Prisma reads as dates but binds back as ISO text.
+            where: { id: sample.id, status: sample.status,
                 ...(migrating && { legacyStatus: sample.legacyStatus }) },
             data: { ...data, ...provenance, status: nextStatus, updatedAt: new Date() }
         });

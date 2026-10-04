@@ -612,175 +612,41 @@ exports.updateStatus = async (req, res) => {
 };
 
 exports.updatePhaseStatus = async (req, res) => {
-    const { id } = req.params;
-    const { phase, status, reason } = req.body;
-    const normPhase = (phase || '').toUpperCase();
-    const normStatus = (status || '').toUpperCase();
-    const user = req.user;
-
+    const gate = typeof req.body.phase === 'string' ? req.body.phase.toUpperCase() : '';
+    const status = typeof req.body.status === 'string' ? req.body.status.toUpperCase() : '';
     try {
-        if (!hasPermission(user, 'ENTER_RESULTS')) {
-            return error(res, 403, 'INSUFFICIENT_PERMISSIONS', null, 'Only Lab Technicians and Managers can update drying/preparation gates');
+        if (!hasPermission(req.user, 'ENTER_RESULTS')) {
+            return res.status(403).json({ code: 'OPERATIONAL_PERMISSION_DENIED', error: 'Operational gate permission required.' });
         }
-
-        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
-        if (!sample) return error(res, 404, 'SAMPLE_NOT_FOUND', { id }, 'Sample not found');
-
-        // SECURITY: Enforce Lab Scope
-        const scopeGuard = require('../utils/scopeGuard');
-        try {
-            scopeGuard.ensureScope(user, sample, { altLabField: 'assignedLab' });
-        } catch (e) {
-            return res.status(403).json({ error: 'Access Denied: You cannot update phases for samples from another lab.' });
+        if (!['DRYING', 'PREPARATION'].includes(gate) ||
+            !(gate === 'DRYING' ? workflow.isValidDryingStatus(status) : workflow.isValidPreparationStatus(status))) {
+            return res.status(400).json({ code: 'INVALID_PREPARATION_GATE', error: 'Invalid operational gate or status.' });
         }
-
-        const beforeDrying = sample.dryingStatus;
-        const beforePrep = sample.preparationStatus;
-
-        if (!['DRYING', 'PREPARATION'].includes(normPhase)) {
-            return res.status(400).json({ error: 'Invalid phase. Must be DRYING or PREPARATION' });
-        }
-
-        if (normPhase === 'DRYING') {
-            if (!workflow.isValidDryingStatus(normStatus)) {
-                return res.status(400).json({ error: `Invalid drying status '${status}'.` });
-            }
-            if (normStatus === 'FAILED' && !reason) {
-                return res.status(400).json({ error: 'Reason required for FAILED drying status' });
-            }
-        } else if (normPhase === 'PREPARATION') {
-            if (normStatus === 'FAILED') {
-                return res.status(400).json({ error: "preparationStatus=FAILED is not allowed." });
-            }
-            if (!workflow.isValidPreparationStatus(normStatus)) {
-                return res.status(400).json({ error: `Invalid preparation status '${status}'.` });
-            }
-        }
-
-        if (normStatus === 'DONE') {
-            const checklist = req.body.checklist;
-            if (!checklist || !Array.isArray(checklist) || checklist.length !== 3 || !checklist.every(Boolean)) {
-                return res.status(422).json({
-                    error: `Operational gate '${normPhase}' requires checklist confirmation with all procedural steps verified. Use Workbench to complete drying or preparation.`,
-                    code: 'CHECKLIST_REQUIRED',
-                    destination: '/workbench'
-                });
-            }
-
-            if (normPhase === 'PREPARATION' && sample.dryingStatus !== 'DONE') {
-                return res.status(400).json({
-                    error: `Cannot complete PREPARATION. Drying must be DONE first.`
-                });
-            }
-
-            const OperationalConfirmationService = require('../services/operationalConfirmationService');
-            const gateItem = await prisma.workItem.findFirst({
-                where: { sampleId: String(id), analysis: normPhase, duplicateOf: null }
+        if (status === 'DONE') {
+            const sample = await prisma.sample.findUnique({ where: { id: String(req.params.id) } });
+            if (!sample) return res.status(404).json({ code: 'SAMPLE_NOT_FOUND', error: 'Sample not found.' });
+            scopeGuard.ensureScope(req.user, sample, { altLabField: 'assignedLab' });
+            if (!Array.isArray(req.body.checklist)) return res.status(422).json({
+                code: 'CHECKLIST_REQUIRED', error: 'Operational completion requires its verified procedural checklist.', destination: '/workbench'
             });
-            if (!gateItem) {
-                return res.status(404).json({ error: `Gate work item for ${normPhase} not found` });
-            }
-
-            try {
-                const outcome = await OperationalConfirmationService.confirmOperation({
-                    actor: user,
-                    workItemId: gateItem.id,
-                    checklist,
-                    observations: req.body.observations,
-                    idempotencyKey: req.body.idempotencyKey
-                });
-                return res.json({
-                    message: `${normPhase} status updated to DONE via verified operational checklist`,
-                    sample: outcome.sample,
-                    workItem: outcome.workItem,
-                    receipt: outcome.receipt
-                });
-            } catch (opErr) {
-                return res.status(opErr.status || 400).json({ error: opErr.message, code: opErr.code });
-            }
+            const item = await prisma.workItem.findFirst({ where: { sampleId: sample.id, analysis: gate, duplicateOf: null } });
+            if (!item) return res.status(404).json({ code: 'WORK_ITEM_NOT_FOUND', error: 'Operational gate work item not found.' });
+            const outcome = await require('../services/operationalConfirmationService').confirmOperation({
+                actor: req.user, workItemId: item.id, checklist: req.body.checklist, observations: req.body.observations,
+                idempotencyKey: req.body.idempotencyKey, verificationRequired: req.body.verificationRequired
+            });
+            return res.json({
+                message: outcome.receipt.gatePassed ? `${gate} completed with its procedural checklist` : `${gate} awaits manager verification`,
+                sample: outcome.sample, workItem: outcome.workItem, receipt: outcome.receipt
+            });
         }
-
-        const updates = {};
-        if (normPhase === 'DRYING') {
-            updates.dryingStatus = normStatus;
-            if (normStatus === 'FAILED') {
-                const meta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
-                meta.dryingFailedReason = reason;
-                updates.metadata = JSON.stringify(meta);
-                updates.status = 'ON_HOLD';
-                await prisma.auditLog.create({
-                    data: {
-                        id: crypto.randomUUID(),
-                        entity: 'SAMPLE',
-                        entityId: id,
-                        action: 'NON_CONFORMANCE',
-                        details: `Drying FAILED: ${reason}`,
-                        performedBy: user.username,
-                        timestamp: new Date(),
-                        sampleId: String(id)
-                    }
-                });
-            }
-        } else if (normPhase === 'PREPARATION') {
-            updates.preparationStatus = normStatus;
-        }
-
-        const gateItem = await prisma.workItem.findFirst({
-            where: {
-                sampleId: String(id),
-                analysis: phase, duplicateOf: null
-            }
+        const outcome = await require('../services/operationalGateStateService').changeGate({
+            sampleId: req.params.id, gate, status, reason: req.body.reason, actor: req.user,
+            resumeSampleStatus: req.body.resumeSampleStatus, resumeWorkItemStatus: req.body.resumeWorkItemStatus
         });
-        if (gateItem) {
-            let wiStatus = 'NOT_ASSIGNED';
-            let wiResult = null;
-            if (status === 'FAILED') {
-                wiStatus = 'ON_HOLD';
-                wiResult = `Gate Failed: ${reason || 'Failed'}`;
-            }
-            await prisma.workItem.update({
-                where: { id: gateItem.id },
-                data: {
-                    status: wiStatus,
-                    result: wiResult
-                }
-            });
-        }
-
-        const newDrying = updates.dryingStatus || sample.dryingStatus;
-        const newPrep = updates.preparationStatus || sample.preparationStatus;
-        let updated;
-        if (newDrying === 'DONE' && newPrep === 'DONE' && sample.status === 'ACCEPTED') {
-            const { transitionSample } = require('../services/sampleStateService');
-            delete updates.status;
-            updated = await transitionSample(id, 'PROCESSING', user, 'Drying and preparation completed (gates passed)', updates);
-        } else {
-            updated = await prisma.sample.update({
-                where: { id: String(id) },
-                data: updates
-            });
-        }
-
-        const auditEvent = phase === 'DRYING' ? 'DRYING_STATUS_CHANGED' : 'PREP_STATUS_CHANGED';
-        const beforeValue = phase === 'DRYING' ? beforeDrying : beforePrep;
-
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'SAMPLE',
-                entityId: id,
-                action: auditEvent,
-                details: `${phase} status changed from ${beforeValue || 'PENDING'} to ${status}`,
-                performedBy: user.username,
-                timestamp: new Date(),
-                sampleId: String(id),
-                before: JSON.stringify({ [phase.toLowerCase() + 'Status']: beforeValue || 'PENDING' }),
-                after: JSON.stringify({ [phase.toLowerCase() + 'Status']: status })
-            }
-        });
-
-        res.json(updated);
+        return res.json(outcome.sample);
     } catch (err) {
+        if (err.statusCode || err.status) return res.status(err.statusCode || err.status).json({ code: err.code, error: err.message, details: err.details });
         console.error('[updatePhaseStatus] Error:', err);
         return error(res, 500, 'PHASE_UPDATE_ERROR', null, 'Failed to update phase status');
     }
@@ -2071,80 +1937,22 @@ exports.approveSample = async (req, res) => {
 };
 
 exports.undoApproval = async (req, res) => {
-    const { id } = req.params;
-    const { reason } = req.body || {};
-    const user = req.user;
+    return res.status(409).json({
+        code: 'AMENDMENT_WORKFLOW_REQUIRED',
+        error: 'Reopening an approved sample requires the manager amendment workflow.'
+    });
+};
 
+exports.clearPreparationEvidence = async (req, res) => {
     try {
-        if (!hasPermission(user, 'APPROVE_RESULTS')) {
-            return res.status(403).json({ error: 'Only Managers can undo approval.' });
-        }
-
-        const effectiveReason = (reason || '').trim();
-        if (!effectiveReason) {
-            return res.status(400).json({ error: 'A reason is required when reopening a finished sample' });
-        }
-
-        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
-        if (!sample) {
-            return res.status(404).json({ error: 'Sample not found' });
-        }
-
-        // S09: Disposed material cannot be reopened
-        if (sample.status === 'DISPOSED') {
-            return res.status(400).json({
-                error: 'Cannot reopen disposed sample material. Disposed samples are physically immutable.',
-                code: 'DISPOSED_MATERIAL_IMMUTABLE'
-            });
-        }
-
-        if (!['APPROVED', 'ARCHIVED'].includes(sample.status)) {
-            return res.status(400).json({ error: 'Sample not in a reversible state (must be Approved or Archived).' });
-        }
-
-        const previousStatus = sample.status;
-        const now = new Date();
-        const { transitionSample } = require('../services/sampleStateService');
-        await transitionSample(id, 'PROCESSING', user, effectiveReason, {
-            approvedBy: null,
-            approvedAt: null
-        });
-
-        // Reset all ACCEPTED work items to SUBMITTED
-        const { count } = await prisma.workItem.updateMany({
-            where: {
-                sampleId: String(id),
-                status: 'ACCEPTED'
-            },
-            data: { status: 'SUBMITTED' }
-        });
-
-        // Cleanup: Remove any Post-Analytical work items (Archiving/Disposal)
-        // because the sample is no longer approved.
-        await prisma.workItem.deleteMany({
-            where: {
-                sampleId: String(id),
-                category: 'Post-Analytical'
-            }
-        });
-
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'SAMPLE',
-                entityId: id,
-                action: 'UNDO_APPROVAL',
-                details: `Reverted from ${previousStatus} to PROCESSING. Reason: ${effectiveReason}. Reset ${count} work items to SUBMITTED and removed post-analytical tasks.`,
-                performedBy: req.user.username,
-                timestamp: now,
-                sampleId: String(id)
-            }
-        });
-
-        res.json({ success: true, resetItems: count });
-    } catch (error) {
-        console.error('[undoApproval] Error:', error);
-        res.status(500).json({ error: 'Failed to undo approval' });
+        const outcome = await require('../services/resultEvidenceService').clearPreparationRevert(
+            req.params.id, req.params.resultId, req.body.gate, req.body.reason, req.user
+        );
+        return res.json(outcome);
+    } catch (err) {
+        if (err.statusCode) return res.status(err.statusCode).json({ code: err.code, error: err.message, details: err.details });
+        console.error('[clearPreparationEvidence] Error:', err);
+        return res.status(500).json({ code: 'PREPARATION_CLEARANCE_FAILED', error: 'Failed to clear preparation evidence.' });
     }
 };
 

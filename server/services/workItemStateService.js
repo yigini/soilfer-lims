@@ -74,6 +74,9 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
     return rules.inTransaction(tx, async client => {
         const item = await client.workItem.findUnique({ where: { id: String(workItemId) } });
         if (!item) throw new TransitionError('Work item not found.', 404, 'WORK_ITEM_NOT_FOUND');
+        if (('id' in data && data.id !== item.id) || ('sampleId' in data && data.sampleId !== item.sampleId)) {
+            throw new TransitionError('Work item identity and parent sample cannot change during a transition.', 400, 'WORKFLOW_ID_IMMUTABLE');
+        }
         const sample = await client.sample.findUnique({ where: { id: item.sampleId } });
         if (!sample) throw new TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
         rules.assertScope(actor, sample);
@@ -101,7 +104,7 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
         const changed = await client.workItem.updateMany({
             where: { id: item.id, status: expected.status ?? item.status, version: expected.version === null ? null : (expected.version ?? item.version),
                 ...(options.submissionId && { submissionId: options.submissionId }),
-                ...(migrating && { legacyStatus: item.legacyStatus, updatedAt: item.updatedAt }) },
+                ...(migrating && { legacyStatus: item.legacyStatus }) },
             data: { ...data, ...provenance, ...reviewData, status: writeStatus, updatedAt: new Date(),
                 version: data.version ?? (item.version === null ? 1 : { increment: 1 }) }
         });

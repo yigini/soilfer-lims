@@ -2424,6 +2424,7 @@
       "repeats_maxAttemptsBeforeNcr": "Intentos antes de revisión de no conformidad (0: sin límite)",
       "repeats_technicianSelfRepeatBeforeSubmit": "Permitir repetición del técnico antes del envío",
       "review_secondPersonRequired": "Exigir un segundo revisor",
+      "gate_verificationRequired": "Exigir verificación de las etapas de preparación por un responsable",
       "report_amendmentRequiresSecondPerson": "Exigir otra persona para modificaciones",
       "report_numberFormat": "Patrón del número de informe",
       "sample_codeFormat": "Patrón del código de muestra",

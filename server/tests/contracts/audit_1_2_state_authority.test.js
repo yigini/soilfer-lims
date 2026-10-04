@@ -9,11 +9,16 @@ const work = require('../../services/workItemStateService');
 const evidence = require('../../services/resultEvidenceService');
 const rules = require('../../services/workflowStateRules');
 const migration = require('../../services/statusMigrationPlan');
+const operations = require('../../services/operationalConfirmationService');
+const gates = require('../../services/operationalGateStateService');
+const policyService = require('../../services/policyService');
+const { registry } = require('../../config/policyRegistry');
 const manager = { username: 'audit-state-manager', role: 'LAB_MANAGER', labId: 'AUDIT-STATE' };
 const technician = { username: 'audit-state-tech', role: 'LAB_TECHNICIAN', labId: manager.labId };
 const id = () => randomUUID();
 let client, databasePath;
-const ddl = fs.readFileSync(path.resolve(__dirname, '../../prisma/migrations/20261005000000_workflow_state_evidence/migration.sql'), 'utf8');
+const ddl = ['20261005000000_workflow_state_evidence', '20261005000100_workflow_state_guards']
+    .map(name => fs.readFileSync(path.resolve(__dirname, '../../prisma/migrations', name, 'migration.sql'), 'utf8')).join('\n');
 
 // Build a schema-only, disposable pre-migration database. No template data is
 // copied and no production constraints are dropped or disabled. This exercises
@@ -29,7 +34,7 @@ beforeAll(async () => {
         db.pragma('foreign_keys = ON');
         for (const table of definitions.filter(row => row.name !== 'ResultEvidenceEvent')) {
             const sql = ['Sample', 'WorkItem'].includes(table.name)
-                ? table.sql.replace(/^\s*"(?:holdPriorStatus|legacyStatus)"\s+TEXT,?\s*$/gm, '') : table.sql;
+                ? table.sql.replace(/,\s*"(?:holdPriorStatus|legacyStatus)"\s+TEXT(?=\s*[,)])/g, '') : table.sql;
             db.exec(sql);
         }
         for (const index of indexes) db.exec(index.sql);
@@ -45,6 +50,10 @@ beforeAll(async () => {
         db.exec(ddl);
     } finally { db.close(); }
     client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${databasePath}` }) });
+    await client.lab.create({ data: { id: manager.labId, code: manager.labId, name: 'Isolated workflow laboratory', country: 'TEST' } });
+    for (const user of [manager, technician]) await client.user.create({ data: { id: user.username, username: user.username,
+        email: `${user.username}@example.test`, password: 'isolated-fixture', role: user.role, labId: user.labId } });
+    for (const code of ['DRYING', 'PREPARATION', 'PH_H2O']) await client.analysis.create({ data: { code, name: code } });
 });
 
 afterAll(async () => {
@@ -193,7 +202,8 @@ test('the reviewed legacy plan preserves original values and reverts once; unmap
         expect(await client.auditLog.count({ where: { entityId, performedBy: 'system:status-migration' } })).toBe(2);
     }
     expect((await client.sample.findUnique({ where: { id: 'legacy-unmapped' } })).status).toBe('VALIDATED');
-    await expect(client.sample.update({ where: { id: 'legacy-unmapped' }, data: { status: 'COLLECTED' } })).rejects.toThrow('INVALID_SAMPLE_STATUS');
+    await expect(rules.inTransaction(client, tx => tx.sample.update({ where: { id: 'legacy-unmapped' }, data: { status: 'COLLECTED' } })))
+        .rejects.toMatchObject({ statusCode: 409, code: 'INVALID_SAMPLE_STATUS' });
     expect((await client.sample.update({ where: { id: 'legacy-unmapped' }, data: { clientName: 'Metadata update' } })).status).toBe('VALIDATED');
 });
 
@@ -229,8 +239,10 @@ test('preparation reverts preserve scientific values and block review until a va
     await evidence.assertNoPreparationRevert(client, sample.id);
     expect(await client.result.findUnique({ where: { id: result.id } })).toEqual(result);
     const event = await client.resultEvidenceEvent.findFirst({ where: { resultId: result.id } });
-    await expect(client.resultEvidenceEvent.update({ where: { id: event.id }, data: { reason: 'Overwritten' } })).rejects.toThrow('RESULT_EVIDENCE_IMMUTABLE');
-    await expect(client.resultEvidenceEvent.delete({ where: { id: event.id } })).rejects.toThrow('RESULT_EVIDENCE_IMMUTABLE');
+    await expect(rules.inTransaction(client, tx => tx.resultEvidenceEvent.update({ where: { id: event.id }, data: { reason: 'Overwritten' } })))
+        .rejects.toMatchObject({ statusCode: 409, code: 'RESULT_EVIDENCE_IMMUTABLE' });
+    await expect(rules.inTransaction(client, tx => tx.resultEvidenceEvent.delete({ where: { id: event.id } })))
+        .rejects.toMatchObject({ statusCode: 409, code: 'RESULT_EVIDENCE_IMMUTABLE' });
 });
 
 test('superseding a reverted result clears only the current-result block, retaining all old evidence', async () => {
@@ -254,5 +266,170 @@ test('state and audit roll back together when a subsequent transaction operation
         await samples.transitionSample(sample.id, 'ON_HOLD', manager, 'Hold pending review', {}, tx);
         throw new Error('Injected later-operation failure');
     })).rejects.toThrow('Injected later-operation failure');
+    expect(await snapshot(sample.id)).toEqual(before);
+});
+
+test('default policy completes both gates atomically and advances ACCEPTED to PROCESSING', async () => {
+    expect(Object.values(registry['gate.verificationRequired'].presets)).toEqual([false, false, false]);
+    const { sample, item } = await fixture('ACCEPTED', 'DRYING', 'NOT_ASSIGNED');
+    await client.sample.update({ where: { id: sample.id }, data: { dryingStatus: 'PENDING', preparationStatus: 'PENDING' } });
+    const prep = await work.createWorkItem({ id: id(), sampleId: sample.id, analysis: 'PREPARATION', assignedLab: manager.labId }, manager, { tx: client });
+    const dryOutcome = await operations.confirmOperation({ actor: technician, workItemId: item.id, checklist: [true, true, true], db: client });
+    expect(dryOutcome.sample).toMatchObject({ status: 'ACCEPTED', dryingStatus: 'DONE', preparationStatus: 'PENDING' });
+    const prepOutcome = await operations.confirmOperation({ actor: technician, workItemId: prep.id, checklist: [true, true, true], db: client });
+    expect(prepOutcome.sample).toMatchObject({ status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE' });
+    expect(await client.submission.count({ where: { sampleId: sample.id } })).toBe(0);
+    expect(await client.auditLog.count({ where: { entityId: prep.id, action: 'OPERATION_CONFIRMED' } })).toBe(1);
+});
+
+test('analysis policy cannot be bypassed by false input; rejected verification stays pending without revert evidence', async () => {
+    await client.$transaction(tx => policyService.mutateInTransaction(manager, manager.labId, {
+        changes: [{ key: 'gate.verificationRequired', analysisCode: 'PREPARATION', value: true }], reason: 'Preparation SOP requires verification'
+    }, tx));
+    const { sample, item } = await fixture('ACCEPTED', 'PREPARATION', 'NOT_ASSIGNED');
+    await client.sample.update({ where: { id: sample.id }, data: { preparationStatus: 'PENDING' } });
+    const outcome = await operations.confirmOperation({ actor: technician, workItemId: item.id, checklist: [true, true, true], verificationRequired: false, db: client });
+    expect(outcome.workItem.status).toBe('AWAITING_VERIFICATION');
+    expect(outcome.sample.preparationStatus).toBe('PENDING');
+    expect(JSON.parse(outcome.workItem.history).at(-1)).toMatchObject({ policyVersion: 1, verificationPolicy: true, verificationRequired: true });
+    expect(JSON.parse((await client.auditLog.findFirst({ where: { entityId: item.id, action: 'OPERATION_CONFIRMED' } })).details).verificationPolicy).toBe(true);
+    expect((await operations.verifyOperation({ actor: manager, workItemId: item.id, decision: 'REJECT', note: 'Repeat preparation', db: client })).status).toBe('REPEAT_REQUIRED');
+    expect((await client.sample.findUnique({ where: { id: sample.id } })).preparationStatus).toBe('PENDING');
+    expect(await client.resultEvidenceEvent.count({ where: { sampleId: sample.id } })).toBe(0);
+    await operations.confirmOperation({ actor: technician, workItemId: item.id, checklist: [true, true, true], db: client });
+    const accepted = await operations.verifyOperation({ actor: manager, workItemId: item.id, decision: 'ACCEPT', note: 'Preparation verified', db: client });
+    expect(accepted.sample).toMatchObject({ status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE' });
+    expect((await client.reviewDecision.findMany({ where: { workItemId: item.id } })).map(row => row.decision).sort()).toEqual(['ACCEPT', 'RETURN']);
+    const before = await snapshot(sample.id);
+    await expect(operations.verifyOperation({ actor: manager, workItemId: item.id, decision: 'ACCEPT', db: client })).rejects.toMatchObject({ code: 'WORKITEM_NOT_AWAITING_VERIFICATION' });
+    expect(await snapshot(sample.id)).toEqual(before);
+});
+
+test('a request may demand stricter drying verification; acceptance of the last gate advances the sample', async () => {
+    const { sample, item } = await fixture('ACCEPTED', 'DRYING', 'NOT_ASSIGNED');
+    await client.sample.update({ where: { id: sample.id }, data: { dryingStatus: 'PENDING' } });
+    const outcome = await operations.confirmOperation({ actor: technician, workItemId: item.id, checklist: [true, true, true], verificationRequired: true, db: client });
+    expect(outcome.workItem.status).toBe('AWAITING_VERIFICATION');
+    expect(JSON.parse(outcome.workItem.history).at(-1)).toMatchObject({ verificationPolicy: false, verificationRequested: true });
+    const accepted = await operations.verifyOperation({ actor: manager, workItemId: item.id, decision: 'ACCEPT', db: client });
+    expect(accepted.sample.status).toBe('PROCESSING');
+});
+
+test('gate verification policy refuses unrelated analyses and method-specific overrides with no policy writes', async () => {
+    const before = await client.labPolicy.findUnique({ where: { labId: manager.labId } });
+    for (const change of [{ analysisCode: 'PH_H2O' }, { analysisCode: 'DRYING', methodologyId: 'unrelated-method' }]) {
+        await expect(client.$transaction(tx => policyService.mutateInTransaction(manager, manager.labId, {
+            changes: [{ key: 'gate.verificationRequired', value: true, ...change }], reason: 'Invalid gate scope'
+        }, tx))).rejects.toMatchObject({ statusCode: 422, code: 'POLICY_SCOPE_INVALID' });
+    }
+    expect(await client.labPolicy.findUnique({ where: { labId: manager.labId } })).toEqual(before);
+});
+
+test.each(['APPROVED', 'ARCHIVED', 'DISPOSED', 'PROCESSING'])('undo approval is an amendment-only zero-write refusal for %s', async status => {
+    const { sample } = await fixture(status);
+    const before = await snapshot(sample.id);
+    const response = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    await require('../../controllers/sampleController').undoApproval({ params: { id: sample.id }, user: manager, body: { reason: 'Requested reopening' } }, response);
+    expect(response.status).toHaveBeenCalledWith(409);
+    expect(response.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'AMENDMENT_WORKFLOW_REQUIRED' }));
+    expect(await snapshot(sample.id)).toEqual(before);
+});
+
+test('concurrent operational verification commits one decision and refuses the stale decision without side effects', async () => {
+    const { sample, item } = await fixture('ACCEPTED', 'DRYING', 'NOT_ASSIGNED');
+    await client.sample.update({ where: { id: sample.id }, data: { dryingStatus: 'PENDING' } });
+    await operations.confirmOperation({ actor: technician, workItemId: item.id, checklist: [true, true, true], verificationRequired: true, db: client });
+    const outcomes = await Promise.allSettled([1, 2].map(() => operations.verifyOperation({ actor: manager, workItemId: item.id, decision: 'ACCEPT', db: client })));
+    expect(outcomes.filter(row => row.status === 'fulfilled')).toHaveLength(1);
+    expect(outcomes.find(row => row.status === 'rejected').reason).toMatchObject({ code: 'WORKITEM_NOT_AWAITING_VERIFICATION' });
+    expect(await client.reviewDecision.count({ where: { workItemId: item.id } })).toBe(1);
+    expect(await client.auditLog.count({ where: { entityId: item.id, action: 'OPERATION_VERIFIED' } })).toBe(1);
+});
+
+test('failed decision insertion rolls back operational state, gate flags and both audits', async () => {
+    const { sample, item } = await fixture('ACCEPTED', 'DRYING', 'NOT_ASSIGNED');
+    await client.sample.update({ where: { id: sample.id }, data: { dryingStatus: 'PENDING' } });
+    await operations.confirmOperation({ actor: technician, workItemId: item.id, checklist: [true, true, true], verificationRequired: true, db: client });
+    const before = await snapshot(sample.id), transaction = client.$transaction.bind(client);
+    const injected = jest.spyOn(client, '$transaction').mockImplementation(callback => transaction(tx => callback(new Proxy(tx, {
+        get(target, key) {
+            if (key === 'reviewDecision') return new Proxy(target.reviewDecision, { get(delegate, method) {
+                if (method === 'create') return () => { throw new Error('Injected decision insertion failure'); };
+                return delegate[method];
+            } });
+            return target[key];
+        }
+    }))));
+    try {
+        await expect(operations.verifyOperation({ actor: manager, workItemId: item.id, decision: 'ACCEPT', db: client })).rejects.toThrow('Injected decision insertion failure');
+    } finally { injected.mockRestore(); }
+    expect(await snapshot(sample.id)).toEqual(before);
+    expect(await client.reviewDecision.count({ where: { workItemId: item.id } })).toBe(0);
+});
+
+test('Batch and ReviewDecision backstops reject off-contract and mutable decisions with stable conflicts', async () => {
+    const { sample, item } = await fixture();
+    const batch = await client.batch.create({ data: { id: id(), analysis: 'PH_H2O', labId: manager.labId, status: 'OPEN', createdBy: manager.username } });
+    await expect(rules.inTransaction(client, tx => tx.batch.update({ where: { id: batch.id }, data: { status: 'QC_PASS_WITH_WARNING' } })))
+        .rejects.toMatchObject({ statusCode: 409, code: 'INVALID_BATCH_STATUS' });
+    expect((await client.batch.findUnique({ where: { id: batch.id } })).status).toBe('OPEN');
+    const decision = await client.reviewDecision.create({ data: { id: id(), sampleId: sample.id, workItemId: item.id, decision: 'ACCEPT',
+        reason: 'Reviewed', reviewerId: manager.username, reviewerName: manager.username, authorization: manager.role, policyVersion: 'audit-fixture' } });
+    await expect(rules.inTransaction(client, tx => tx.reviewDecision.update({ where: { id: decision.id }, data: { decision: 'ACCEPT' } })))
+        .rejects.toMatchObject({ statusCode: 409, code: 'REVIEW_DECISION_IMMUTABLE' });
+    expect(await client.reviewDecision.findUnique({ where: { id: decision.id } })).toEqual(decision);
+});
+
+test('reasoned gate revert records each current result once and preserves all analytical values', async () => {
+    const { sample, item } = await fixture('PROCESSING', 'PREPARATION', 'COMPLETED');
+    const results = [];
+    for (const [param, isCurrent] of [['PH_H2O', true], ['EC', true], ['PH_H2O', false]]) {
+        results.push(await client.result.create({ data: { id: id(), sampleId: sample.id, param, value: '6.2', numericValue: 6.2, isCurrent, flags: '["QC_WARN"]' } }));
+    }
+    const before = await snapshot(sample.id);
+    await expect(gates.changeGate({ sampleId: sample.id, gate: 'PREPARATION', status: 'PENDING', reason: ' ', actor: manager, db: client }))
+        .rejects.toMatchObject({ code: 'TRANSITION_REASON_REQUIRED' });
+    expect(await snapshot(sample.id)).toEqual(before);
+    const outcome = await gates.changeGate({ sampleId: sample.id, gate: 'PREPARATION', status: 'PENDING', reason: 'Repeat preparation with retained material', actor: manager, db: client });
+    expect(outcome.resultEvidenceCount).toBe(2);
+    expect(outcome.sample.preparationStatus).toBe('PENDING');
+    expect(outcome.workItem.status).toBe('NOT_ASSIGNED');
+    expect(await client.result.findMany({ where: { sampleId: sample.id }, orderBy: { id: 'asc' } })).toEqual(before.results);
+    expect(await client.resultEvidenceEvent.count({ where: { resultId: results[2].id } })).toBe(0);
+    expect(await client.auditLog.count({ where: { entityId: item.id, action: 'GATE_REVERTED' } })).toBe(1);
+    await expect(evidence.assertNoPreparationRevert(client, sample.id)).rejects.toMatchObject({ code: 'PREP_REVERTED_RESULTS' });
+});
+
+test('gate failure holds both entities and release restores their individual prior states', async () => {
+    const { sample, item } = await fixture('ACCEPTED', 'DRYING', 'ASSIGNED');
+    await client.sample.update({ where: { id: sample.id }, data: { dryingStatus: 'PENDING', preparationStatus: 'PENDING' } });
+    const held = await gates.changeGate({ sampleId: sample.id, gate: 'DRYING', status: 'FAILED', reason: 'Drying endpoint failed', actor: manager, db: client });
+    expect(held.sample).toMatchObject({ status: 'ON_HOLD', holdPriorStatus: 'ACCEPTED', dryingStatus: 'FAILED' });
+    expect(held.workItem).toMatchObject({ status: 'ON_HOLD', holdPriorStatus: 'ASSIGNED' });
+    const before = await snapshot(sample.id);
+    await expect(gates.changeGate({ sampleId: sample.id, gate: 'DRYING', status: 'PENDING', actor: manager, db: client }))
+        .rejects.toMatchObject({ code: 'TRANSITION_REASON_REQUIRED' });
+    expect(await snapshot(sample.id)).toEqual(before);
+    const released = await gates.changeGate({ sampleId: sample.id, gate: 'DRYING', status: 'PENDING', reason: 'Failure reviewed; resume assigned task', actor: manager, db: client });
+    expect(released.sample).toMatchObject({ status: 'ACCEPTED', holdPriorStatus: null });
+    expect(released.workItem).toMatchObject({ status: 'ASSIGNED', holdPriorStatus: null });
+    expect((await client.workItem.findUnique({ where: { id: item.id } })).result).toContain('Gate Failed');
+});
+
+test.each(['APPROVED', 'ARCHIVED', 'DISPOSED'])('gate reversion of %s sample refuses all writes', async status => {
+    const { sample } = await fixture(status, 'DRYING', 'COMPLETED');
+    const before = await snapshot(sample.id);
+    await expect(gates.changeGate({ sampleId: sample.id, gate: 'DRYING', status: 'PENDING', reason: 'Requested revert', actor: manager, db: client }))
+        .rejects.toMatchObject({ code: 'AMENDMENT_WORKFLOW_REQUIRED' });
+    expect(await snapshot(sample.id)).toEqual(before);
+});
+
+test('an accepted marked gate duplicate prevents revert of the canonical gate with no writes', async () => {
+    const { sample, item } = await fixture('PROCESSING', 'DRYING', 'COMPLETED');
+    await work.createWorkItem({ id: id(), sampleId: sample.id, analysis: 'DRYING', status: 'ACCEPTED', duplicateOf: item.id },
+        'system:fixture', { context: 'fixture', tx: client });
+    const before = await snapshot(sample.id);
+    await expect(gates.changeGate({ sampleId: sample.id, gate: 'DRYING', status: 'PENDING', reason: 'Revert request', actor: manager, db: client }))
+        .rejects.toMatchObject({ code: 'AMENDMENT_WORKFLOW_REQUIRED' });
     expect(await snapshot(sample.id)).toEqual(before);
 });

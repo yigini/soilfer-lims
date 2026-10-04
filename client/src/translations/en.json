@@ -2424,6 +2424,7 @@
       "repeats_maxAttemptsBeforeNcr": "Attempts before nonconformance review (0: unlimited)",
       "repeats_technicianSelfRepeatBeforeSubmit": "Allow technician repeat before submission",
       "review_secondPersonRequired": "Require a second reviewer",
+      "gate_verificationRequired": "Require manager verification of preparation gates",
       "report_amendmentRequiresSecondPerson": "Require a second person for amendments",
       "report_numberFormat": "Report number pattern",
       "sample_codeFormat": "Sample code pattern",
