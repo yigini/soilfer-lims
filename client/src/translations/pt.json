@@ -1,4 +1,5 @@
 {
+  "dataSheet": {"title":"Folha de dados","readOnlyDescription":"Os resultados registrados são somente leitura aqui. Abra a bancada para inserir ou atualizar resultados.","openWorkbench":"Abrir bancada"},
   "common": {
     "copySecretFailed": "Não foi possível copiar. Selecione a chave e copie-a manualmente antes de fechar esta janela.",
     "save": "Salvar",

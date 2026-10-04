@@ -917,6 +917,15 @@ exports.updateWorkItemStatus = async (req, res) => {
             });
         }
 
+        const { NON_ANALYTICAL } = require('../services/workEligibility');
+        if (Object.prototype.hasOwnProperty.call(req.body, 'result') &&
+            !NON_ANALYTICAL.includes((item.analysis || '').toUpperCase())) {
+            return res.status(410).json({
+                error: 'Enter analytical results in the workbench.', code: 'USE_WORKBENCH',
+                destination: `/workbench?workItemId=${encodeURIComponent(item.id)}`
+            });
+        }
+
         // SD-09: Validate work-item status writes against WORK_ITEM_TRANSITIONS (409 Conflict)
         if (status && status !== item.status) {
             if (!workflow.isValidWorkItemTransition(item.status, status)) {

@@ -1,4 +1,5 @@
 {
+  "dataSheet": {"title":"Feuille de données","readOnlyDescription":"Les résultats enregistrés sont en lecture seule ici. Ouvrez le plan de travail pour saisir ou modifier des résultats.","openWorkbench":"Ouvrir le plan de travail"},
   "common": {
     "copySecretFailed": "La copie a échoué. Sélectionnez la clé et copiez-la manuellement avant de fermer cette fenêtre.",
     "save": "Enregistrer",
