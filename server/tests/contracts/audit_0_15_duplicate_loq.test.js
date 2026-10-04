@@ -23,7 +23,7 @@ describe('Audit 0.15: independent duplicate numeric criteria', () => {
         expect(evaluateDuplicate({ value1: 7, value2: 7 }).details).toContain('NO_LOQ');
     });
     test('an invalid duplicate contributes a QC_FAIL verdict, never a batch pass', () => {
-        expect(evaluateBatchQc({ duplicates: [{ value1: -1, value2: 1 }] })).toMatchObject({ overallStatus: 'QC_FAIL', failedCount: 1 });
+        expect(evaluateBatchQc({ duplicates: [{ value1: -1, value2: 1 }] })).toMatchObject({ overallStatus: 'QC_FAIL', summary: { failed: 1, passed: 0 } });
     });
 });
 
