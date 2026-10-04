@@ -511,6 +511,21 @@ async function runSuite() {
     // 3. Multi-Lab Sample Intake: Concurrent ingestion across Lab Alpha & Lab Beta
     const createdAlphaSamples = [];
     const createdBetaSamples = [];
+    // A physical walk-in receipt deliberately has no laboratory accession.
+    // The synthetic workload must perform the real reviewed acceptance before
+    // testing accession-bearing register exports, rather than bypassing intake.
+    async function acceptSyntheticReceipt(sample,token) {
+        if(sample.status!=='RECEIVED'||sample.labId) throw new Error('Receipt prematurely accepted or issued an accession');
+        const headers={'Content-Type':'application/json','Authorization':`Bearer ${token}`};
+        const read=await fetch(`http://127.0.0.1:${globalPort}/api/reception/sample-context/${sample.id}`,{headers});
+        if(read.status!==200) throw new Error(`Synthetic intake review failed: ${read.status}`);
+        const context=await read.json(),form=context.intakeTemplate;
+        const response=await fetch(`http://127.0.0.1:${globalPort}/api/reception/intake`,{method:'POST',headers,body:JSON.stringify({sampleId:sample.id,originalId:sample.originalId,intent:'ACCEPT',expectedUpdatedAt:context.sample.updatedAt,intakeTemplate:{templateId:form.templateId,revisionId:form.revisionId,schemaHash:form.schemaHash},checklist:{items:Object.fromEntries(form.criteria.filter(r=>r.enabled!==false).map(r=>[r.id,{status:'PASS'}]))}})});
+        if(response.status!==200) throw new Error(`Synthetic acceptance failed: ${response.status}`);
+        const accepted=await response.json();
+        if(accepted.status!=='ACCEPTED'||!accepted.labId||accepted.labId===sample.assignedLab) throw new Error('Acceptance failed to issue a genuine specimen accession');
+        return {...sample,...accepted};
+    }
     const intakePromises = [];
     for (let i = 1; i <= 5; i++) {
         intakePromises.push(
@@ -521,7 +536,7 @@ async function runSuite() {
             }).then(async r => {
                 if (r.status !== 200 && r.status !== 201) throw new Error(`Alpha sample ${i} failed: ${r.status}`);
                 const resJson = await r.json();
-                createdAlphaSamples.push(resJson.sample);
+                createdAlphaSamples.push(await acceptSyntheticReceipt(resJson.sample,tokenA));
             })
         );
         intakePromises.push(
@@ -532,7 +547,7 @@ async function runSuite() {
             }).then(async r => {
                 if (r.status !== 200 && r.status !== 201) throw new Error(`Beta sample ${i} failed: ${r.status}`);
                 const resJson = await r.json();
-                createdBetaSamples.push(resJson.sample);
+                createdBetaSamples.push(await acceptSyntheticReceipt(resJson.sample,tokenB));
             })
         );
     }

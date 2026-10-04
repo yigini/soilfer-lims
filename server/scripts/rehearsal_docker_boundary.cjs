@@ -361,7 +361,7 @@ async function runRealDockerBoundarySuite() {
             throw new Error(`Smoke test failed: expected exit 1 with argument error, got status ${smokeStatus}: ${smokeOutput}`);
         }
 
-        // 2. Verify packaged controllers contain AMBIGUOUS_PROVENANCE_HOLD guards
+        // 2. Verify both transports use the packaged canonical hold-guarded command.
         const guardsCheck = cp.execFileSync('docker', [
             'run', '--rm',
             '--entrypoint', 'node',
@@ -371,7 +371,8 @@ async function runRealDockerBoundarySuite() {
 const fs = require('fs');
 const rc = fs.readFileSync('/app/server/controllers/receptionController.js', 'utf8');
 const sc = fs.readFileSync('/app/server/controllers/sampleController.js', 'utf8');
-if (!rc.includes('AMBIGUOUS_PROVENANCE_HOLD') || !sc.includes('AMBIGUOUS_PROVENANCE_HOLD')) {
+const command = fs.readFileSync('/app/server/services/intakeCommandService.js', 'utf8');
+if (!rc.includes('intakeCommandService') || !sc.includes('intakeCommandService') || !command.includes('AMBIGUOUS_PROVENANCE_HOLD')) {
     console.error('ERROR: AMBIGUOUS_PROVENANCE_HOLD intake guards missing!');
     process.exit(1);
 }
@@ -382,7 +383,7 @@ console.log('GUARDS_VERIFIED');
         if (!guardsCheck.includes('GUARDS_VERIFIED')) {
             throw new Error('Intake guards verification failed in packaged image: ' + guardsCheck);
         }
-        console.log('  ✓ Smoke Test PASSED: Packaged runner (/app/server/scripts/execute_ghana_apply_146.cjs) loaded cleanly with Alpine musl native modules; intake guards confirmed in controllers.\n');
+        console.log('  ✓ Smoke Test PASSED: Packaged runner loaded cleanly with Alpine musl native modules; both intake transports use the canonical hold-guarded command.\n');
 
         // ====================================================================
         // SCENARIO 1: Real Wrapper Success Path Through Disposable Docker
