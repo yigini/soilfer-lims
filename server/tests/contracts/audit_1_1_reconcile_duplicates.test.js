@@ -73,7 +73,7 @@ describe('Audit 1.1: duplicate references and atomic analysis reconciliation', (
                 return tx.workItem.delete(args);
             } } });
         }));
-        expect(await controller.reconcileWorkItemsForSample(sample, ['PH_H2O'], { username: 'manager' }, 'Reviewed removal'))
+        expect(await controller.reconcileWorkItemsForSample(sample, ['PH_H2O'], { username: 'manager', role: 'LAB_MANAGER', labId: 'LAB-GTM' }, 'Reviewed removal'))
             .toMatchObject({ conflict: true, status: 409, code: 'WORKITEM_REFERENCE_CONFLICT' });
         expect(await snapshot(sample.id)).toEqual(before);
     });
@@ -82,7 +82,7 @@ describe('Audit 1.1: duplicate references and atomic analysis reconciliation', (
         const transact = prisma.$transaction.bind(prisma);
         jest.spyOn(prisma, '$transaction').mockImplementationOnce(callback => transact(tx => callback({ ...tx,
             auditLog: { ...tx.auditLog, create: async () => { throw new Error('Injected reconciliation audit failure'); } } })));
-        await expect(controller.reconcileWorkItemsForSample(sample, ['PH_H2O'], { username: 'manager' }, 'Reviewed removal'))
+        await expect(controller.reconcileWorkItemsForSample(sample, ['PH_H2O'], { username: 'manager', role: 'LAB_MANAGER', labId: 'LAB-GTM' }, 'Reviewed removal'))
             .rejects.toThrow('Injected reconciliation audit failure');
         expect(await snapshot(sample.id)).toEqual(before);
     });
@@ -91,7 +91,7 @@ describe('Audit 1.1: duplicate references and atomic analysis reconciliation', (
         await prisma.workItem.delete({ where: { id: `${sample.id}-CEC` } });
         require('../../services/analysisService').invalidateCache();
         jest.spyOn(prisma.analysis, 'findMany').mockImplementation(() => { throw new Error('Catalogue read escaped the transaction'); });
-        const outcome = await controller.reconcileWorkItemsForSample(sample, ['PH_H2O', 'SOC', 'CEC'], { username: 'manager' }, 'Add requested analysis');
+        const outcome = await controller.reconcileWorkItemsForSample(sample, ['PH_H2O', 'SOC', 'CEC'], { username: 'manager', role: 'LAB_MANAGER', labId: 'LAB-GTM' }, 'Add requested analysis');
         expect(outcome).toMatchObject({ conflict: false, added: ['CEC'] });
         expect(await prisma.workItem.findUnique({ where: { id: `${sample.id}-CEC` } })).toBeNull();
         expect(await prisma.workItem.count({ where: { sampleId: sample.id, analysis: 'CEC' } })).toBe(1);

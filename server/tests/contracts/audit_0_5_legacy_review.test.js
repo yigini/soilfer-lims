@@ -68,7 +68,7 @@ describe('Audit 0.5: legacy review delegates to the guarded authority', () => {
     test('legacy REJECT preserves scalar values and invokes canonical RETURN invalidation', async () => {
         const f = await fixture();
         const response = await review(f, { decision: 'REJECT', reason: 'Check drift' });
-        expect(response.status).toBe(200); expect(response.body.item.status).toBe('REANALYSIS_REQUIRED');
+        expect(response.status).toBe(200); expect(response.body.item.status).toBe('REPEAT_REQUIRED');
         const after = await state(f);
         expect(after.results[0].value).toBe('6.2'); expect(after.results[0].numericValue).toBe(6.2);
         expect(after.results[0].isValid).toBe(false);
@@ -81,7 +81,7 @@ describe('Audit 0.5: legacy review delegates to the guarded authority', () => {
         const response = await review(f, { decision: 'WAIVE', reason: 'Insufficient material' });
         expect(response.status).toBe(200); expect(response.body.item.status).toBe('WAIVED');
         const after = await state(f);
-        expect(after.decisions).toHaveLength(1); expect(after.decisions[0].decision).toBe('WAIVE');
+        expect(after.decisions).toHaveLength(1); expect(after.decisions[0].decision).toBe('OMIT');
         expect(after.decisions[0].reason).toBe('Insufficient material'); expect(after.results[0]).toEqual(before);
     });
     test.each([

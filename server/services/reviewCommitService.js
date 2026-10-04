@@ -1,5 +1,6 @@
 const { randomUUID } = require('crypto');
 const workflow = require('../workflowContract');
+const { transitionWorkItem } = require('./workItemStateService');
 
 function itemStateError(item) {
     return Object.assign(new Error(`Work item ${item.id} is no longer eligible for this review. Only submitted work items can be reviewed.`), {
@@ -11,34 +12,34 @@ function assertReviewable(item, status) {
     const closure = workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis);
     const allowed = closure
         ? (status === workflow.WORK_ITEM_STATES.ACCEPTED
-            ? ['PENDING', 'COMPLETED', 'SUBMITTED'].includes(item.status)
+            ? ['PENDING', 'NOT_ASSIGNED', 'ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'SUBMITTED'].includes(item.status)
             : workflow.isValidWorkItemTransition(item.status, status))
         : item.status === workflow.WORK_ITEM_STATES.SUBMITTED && workflow.isValidWorkItemTransition(item.status, status);
     if (!allowed) throw itemStateError(item);
 }
 
 // The first transaction write is the CAS. A refused row creates no side effects.
-async function commitReview(prisma, item, status, user, data, operations, submissionId) {
+async function commitReview(prisma, item, status, user, data, operations, submissionId, audit = {}) {
+    status = workflow.normalizeWorkItemState(status);
     assertReviewable(item, status);
     try {
         return await prisma.$transaction(async tx => {
-            const changed = await tx.workItem.updateMany({
-                where: { id: item.id, status: item.status, version: item.version, ...(submissionId && { submissionId }) },
-                data: { ...data, reviewedBy: user.username, reviewedAt: data.reviewedAt || new Date(),
-                    version: item.version === null ? 1 : { increment: 1 } }
+            const current = await tx.workItem.findUnique({ where: { id: item.id } });
+            if (submissionId && current?.submissionId !== submissionId) throw Object.assign(itemStateError(item), { code: 'ITEM_NOT_IN_SUBMISSION' });
+            if (!current || current.status !== item.status || current.version !== item.version) throw itemStateError(item);
+            assertReviewable(current, status);
+            const history = typeof data.history === 'string' ? JSON.parse(data.history) : data.history;
+            const reason = audit.reason || data.reanalysisReason || data.waiveReason || history?.at(-1)?.reason || history?.at(-1)?.note || null;
+            await transitionWorkItem(item.id, status, user, reason, data, tx, {
+                expected: item, submissionId, conflictCode: 'ITEM_NOT_SUBMITTED',
+                action: workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis) ? 'CLOSURE_REVIEW' : 'REVIEW',
+                audit: { action: audit.action || 'REVIEW', details: audit.details || `Work Item ${status} by ${user.username}` }
             });
-            if (changed.count !== 1) {
-                if (submissionId) {
-                    const current = await tx.workItem.findUnique({ where: { id: item.id }, select: { submissionId: true } });
-                    if (current?.submissionId !== submissionId) throw Object.assign(itemStateError(item), { code: 'ITEM_NOT_IN_SUBMISSION' });
-                }
-                throw itemStateError(item);
-            }
             await operations(tx);
             return tx.workItem.findUnique({ where: { id: item.id } });
         });
     } catch (error) {
-        if (['P2025', 'P2034'].includes(error.code)) throw itemStateError(item);
+        if (['P2025', 'P2034', 'STATE_CHANGED'].includes(error.code)) throw itemStateError(item);
         throw error;
     }
 }
@@ -52,7 +53,7 @@ async function reconcileSubmission(prisma, submissionId, user, results, errors =
         if (!committed.length) return;
         const refused = errors.filter(row => ids.includes(row.workItemId));
         const items = await tx.workItem.findMany({ where: { id: { in: ids }, submissionId }, select: { status: true } });
-        const reviewed = items.every(item => ['ACCEPTED', 'REANALYSIS_REQUIRED', 'WAIVED'].includes(item.status));
+        const reviewed = items.every(item => ['ACCEPTED', 'REPEAT_REQUIRED', 'WAIVED'].includes(workflow.normalizeWorkItemState(item.status)));
         const now = new Date();
         await tx.submission.update({ where: { id: submissionId }, data: {
             status: reviewed ? 'REVIEWED' : 'PARTIALLY_REVIEWED', reviewedBy: user.username, reviewedAt: now,

@@ -6,15 +6,30 @@ const prisma = require('../../prisma');
 const workflow = require('../../workflowContract');
 const qcController = require('../../controllers/qcController');
 const { getAuthToken } = require('../setup');
+const { createLegacyClosureDatabase, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
 const labId = 'LAB-AUDIT-06';
 const id = prefix => `${prefix}-${crypto.randomUUID()}`;
 
 describe('Audit 0.6: review state and atomic status/version compare-and-set', () => {
     let manager, technician;
+    const legacyDatabases = [];
     beforeAll(async () => { manager = await getAuthToken('LAB_MANAGER', labId); technician = await getAuthToken('LAB_TECHNICIAN', labId); });
     afterEach(() => jest.restoreAllMocks());
+    afterAll(async () => { for (const database of legacyDatabases) await database.close(); });
     const post = (path, body) => request(app).post(path).set('Authorization', `Bearer ${manager}`).send(body);
     async function fixture({ status = 'SUBMITTED', analysis = 'PH_H2O', sampleStatus = 'PROCESSING', batchStatus } = {}) {
+        if (status === 'PENDING') {
+            const database = await createLegacyClosureDatabase({ analysis, labId });
+            legacyDatabases.push(database);
+            useLegacyRouteDatabase(prisma, database.client);
+            const submitter = jwt.decode(technician);
+            await database.client.user.create({ data: { id: submitter.id, username: submitter.username,
+                email: `${submitter.username}@example.test`, password: 'isolated-fixture', role: 'LAB_TECHNICIAN', labId } });
+            const item = await prisma.workItem.findUnique({ where: { id: database.workItemId } });
+            const result = await prisma.result.create({ data: { id: id('R-06-LEGACY'), sampleId: database.sampleId, param: analysis,
+                value: '6.2', numericValue: 6.2, isCurrent: true, isValid: true, flags: '[]' } });
+            return { sampleId: database.sampleId, item, result, batch: null };
+        }
         const sampleId = id('S-06');
         await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
             status: sampleStatus, dryingStatus: 'DONE', preparationStatus: 'DONE' } });
@@ -78,7 +93,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         const valid = await fixture(), refused = await fixture({ status: 'ACCEPTED' }), before = await snapshot(refused);
         const response = await post('/api/work/review/bulk', { workItemIds: [valid.item.id, refused.item.id], status, reason: 'Bulk reason' });
         expect(response.status).toBe(200); expect(response.body.count).toBe(1);
-        expect(response.body.results).toEqual([expect.objectContaining({ workItemId: valid.item.id, status })]);
+        expect(response.body.results).toEqual([expect.objectContaining({ workItemId: valid.item.id, status: workflow.normalizeWorkItemState(status) })]);
         expect(response.body.errors).toEqual([{ workItemId: refused.item.id, code: 'ITEM_NOT_SUBMITTED' }]);
         expect(await snapshot(refused)).toEqual(before);
         expect(await prisma.reviewDecision.count({ where: { workItemId: valid.item.id } })).toBe(1);

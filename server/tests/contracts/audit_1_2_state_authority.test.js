@@ -13,6 +13,11 @@ const operations = require('../../services/operationalConfirmationService');
 const gates = require('../../services/operationalGateStateService');
 const policyService = require('../../services/policyService');
 const { registry } = require('../../config/policyRegistry');
+const analysisOrders = require('../../services/sampleAnalysisStateService');
+const reconciliation = require('../../services/workItemReconciliationService');
+const receipts = require('../../services/commandReceiptService');
+const qcDispositions = require('../../services/qcDispositionStateService');
+const { commitReview } = require('../../services/reviewCommitService');
 const manager = { username: 'audit-state-manager', role: 'LAB_MANAGER', labId: 'AUDIT-STATE' };
 const technician = { username: 'audit-state-tech', role: 'LAB_TECHNICIAN', labId: manager.labId };
 const id = () => randomUUID();
@@ -40,7 +45,7 @@ beforeAll(async () => {
         for (const index of indexes) db.exec(index.sql);
         const now = Date.now();
         for (const [sampleId, status, history] of [
-            ['legacy-collected', 'COLLECTED', null], ['legacy-released', 'RELEASED', null],
+            ['legacy-collected', 'COLLECTED', null], ['legacy-released', 'RELEASED', null], ['legacy-qc-released', 'RELEASED', null],
             ['legacy-unmapped', 'VALIDATED', null], ['hold-history', 'ON_HOLD', '[{"status":"PROCESSING"},{"status":"ON_HOLD"}]'],
             ['hold-unknown', 'ON_HOLD', 'broken history']
         ]) db.prepare('INSERT INTO Sample (id, originalId, status, assignedLab, history, updatedAt, createdAt) VALUES (?,?,?,?,?,?,?)')
@@ -54,6 +59,7 @@ beforeAll(async () => {
     for (const user of [manager, technician]) await client.user.create({ data: { id: user.username, username: user.username,
         email: `${user.username}@example.test`, password: 'isolated-fixture', role: user.role, labId: user.labId } });
     for (const code of ['DRYING', 'PREPARATION', 'PH_H2O']) await client.analysis.create({ data: { code, name: code } });
+    await client.analysis.create({ data: { code: 'SOC', name: 'Soil organic carbon' } });
 });
 
 afterAll(async () => {
@@ -78,9 +84,202 @@ async function snapshot(sampleId) {
         items: await client.workItem.findMany({ where: { sampleId }, orderBy: { id: 'asc' } }),
         results: await client.result.findMany({ where: { sampleId }, orderBy: { id: 'asc' } }),
         events: await client.resultEvidenceEvent.findMany({ where: { sampleId }, orderBy: { id: 'asc' } }),
-        audits: await client.auditLog.findMany({ where: { sampleId }, orderBy: { id: 'asc' } })
+        audits: await client.auditLog.findMany({ where: { sampleId }, orderBy: { id: 'asc' } }),
+        orders: await client.sampleOrderRevision.findMany({ where: { sampleId }, include: { lines: true }, orderBy: { id: 'asc' } }),
+        receipts: await client.commandReceipt.findMany({ where: { targetResource: `Sample:${sampleId}` }, orderBy: { idempotencyKey: 'asc' } })
     };
 }
+
+test.each(['analyses', 'order'].flatMap(mode => ['APPROVED', 'ARCHIVED', 'DISPOSED'].map(status => [mode, status])))
+    ('%s edits refuse a final %s sample, including no-op saves, with zero writes', async (mode, status) => {
+        const { sample } = await fixture(status, 'PH_H2O', 'ACCEPTED');
+        await samples.transitionSample(sample.id, status, manager, null, { requiredAnalyses: '["PH_H2O"]' }, client);
+        const before = await snapshot(sample.id);
+        for (const analyses of [['PH_H2O'], ['PH_H2O', 'SOC']]) {
+            await expect(analysisOrders.reviseAnalyses(sample.id, { analyses }, manager,
+                { mode, tx: client, idempotencyKey: id() })).rejects.toMatchObject({ statusCode: 409, code: 'AMENDMENT_WORKFLOW_REQUIRED' });
+            expect(await snapshot(sample.id)).toEqual(before);
+        }
+    });
+
+test.each(['analyses', 'order'])('%s adding work to SUBMITTED_FULL atomically resumes processing', async mode => {
+    const { sample } = await fixture('SUBMITTED_FULL', 'PH_H2O', 'ACCEPTED');
+    await samples.transitionSample(sample.id, sample.status, manager, null, { requiredAnalyses: '["PH_H2O"]' }, client);
+    const outcome = await analysisOrders.reviseAnalyses(sample.id, { analyses: ['PH_H2O', 'SOC'], reason: 'Additional ordered parameter' },
+        manager, { mode, tx: client, idempotencyKey: id() });
+    expect(outcome).toMatchObject({ sample: { status: 'PROCESSING', requiredAnalyses: '["PH_H2O","SOC"]' }, added: ['SOC'] });
+    expect(await client.workItem.findFirst({ where: { sampleId: sample.id, analysis: 'SOC' } })).toMatchObject({ status: 'NOT_ASSIGNED' });
+    const saved = await snapshot(sample.id);
+    expect(saved.orders).toHaveLength(1);
+    expect(saved.orders[0].lines.map(line => line.analysis).sort()).toEqual(['PH_H2O', 'SOC']);
+    expect(saved.audits.filter(row => row.action === 'SAMPLE_STATUS_TRANSITION')).toHaveLength(1);
+    expect(saved.receipts).toHaveLength(mode === 'order' ? 1 : 0);
+});
+
+test('reconciliation re-reads a stale sample before writing work items', async () => {
+    const { sample } = await fixture('PROCESSING', 'PH_H2O', 'NOT_ASSIGNED');
+    await samples.transitionSample(sample.id, 'APPROVED', manager, 'Reviewed', {}, client);
+    const before = await snapshot(sample.id);
+    await expect(client.$transaction(tx => reconciliation.reconcileWorkItemsForSample(sample, ['PH_H2O', 'SOC'], manager, 'Add', tx)))
+        .rejects.toMatchObject({ code: 'AMENDMENT_WORKFLOW_REQUIRED' });
+    expect(await snapshot(sample.id)).toEqual(before);
+});
+
+test.each(['COMPLETED', 'ON_HOLD', 'AWAITING_VERIFICATION'])('removal of %s refuses the full edit before writes and lists its resolution', async status => {
+    const { sample, item } = await fixture('PROCESSING', 'PH_H2O', status);
+    await samples.transitionSample(sample.id, sample.status, manager, null, { requiredAnalyses: '["PH_H2O"]' }, client);
+    const before = await snapshot(sample.id);
+    for (const mode of ['analyses', 'order']) {
+        await expect(analysisOrders.reviseAnalyses(sample.id, { analyses: ['SOC'], reason: 'Change the ordered parameter' }, manager, { mode, tx: client }))
+            .rejects.toMatchObject({ statusCode: 409, code: 'WORKITEM_REMOVAL_STATE_CONFLICT', details: {
+                refused: [{ workItemId: item.id, analysis: item.analysis, status, resolution: expect.any(String) }]
+            } });
+        expect(await snapshot(sample.id)).toEqual(before);
+    }
+});
+
+test.each(['analyses', 'order'])('%s a failed order snapshot rolls back already generated work and audits', async mode => {
+    const { sample } = await fixture('PROCESSING', 'PH_H2O', 'IN_PROGRESS');
+    await samples.transitionSample(sample.id, sample.status, manager, null, { requiredAnalyses: '["PH_H2O"]' }, client);
+    const before = await snapshot(sample.id);
+    await expect(client.$transaction(tx => analysisOrders.reviseAnalyses(sample.id, { analyses: ['PH_H2O', 'SOC'] }, manager, { mode,
+        tx: { ...tx, sampleOrderRevision: { ...tx.sampleOrderRevision, create: async () => { throw new Error('Injected order failure'); } } } })))
+        .rejects.toThrow('Injected order failure');
+    expect(await snapshot(sample.id)).toEqual(before);
+});
+
+test('a failed command receipt rolls back the new order, sample processing transition and work', async () => {
+    const { sample } = await fixture('SUBMITTED_FULL', 'PH_H2O', 'ACCEPTED');
+    await samples.transitionSample(sample.id, sample.status, manager, null, { requiredAnalyses: '["PH_H2O"]' }, client);
+    const before = await snapshot(sample.id);
+    const spy = jest.spyOn(receipts, 'recordReceipt').mockRejectedValueOnce(new Error('Injected receipt failure'));
+    try {
+        await expect(analysisOrders.reviseAnalyses(sample.id, { analyses: ['PH_H2O', 'SOC'] }, manager,
+            { mode: 'order', tx: client, idempotencyKey: id() })).rejects.toThrow('Injected receipt failure');
+        expect(await snapshot(sample.id)).toEqual(before);
+    } finally { spy.mockRestore(); }
+});
+
+test('a failed analysis audit rolls back a waiver and preserves its original history and review identity', async () => {
+    const { sample } = await fixture('PROCESSING', 'PH_H2O', 'IN_PROGRESS');
+    await samples.transitionSample(sample.id, sample.status, manager, null, { requiredAnalyses: '["PH_H2O"]' }, client);
+    const before = await snapshot(sample.id);
+    await expect(client.$transaction(tx => analysisOrders.reviseAnalyses(sample.id, { analyses: [], reason: 'Insufficient material' }, manager,
+        { tx: { ...tx, auditLog: { ...tx.auditLog, create: async args => {
+            if (args.data.action === 'ANALYSES_UPDATE') throw new Error('Injected analysis audit failure');
+            return tx.auditLog.create(args);
+        } } } }))).rejects.toThrow('Injected analysis audit failure');
+    expect(await snapshot(sample.id)).toEqual(before);
+});
+
+async function failedQcFixture(status = 'IN_PROGRESS', sampleStatus = 'PROCESSING') {
+    const { sample, item } = await fixture(sampleStatus, 'PH_H2O', status);
+    const batch = await client.batch.create({ data: { id: id(), analysis: 'PH_H2O', labId: manager.labId, status: 'QC_FAIL', createdBy: technician.username } });
+    await client.workItem.update({ where: { id: item.id }, data: { batchId: batch.id, history: '[{"note":"Existing task history"}]' } });
+    return { sample, item, batch };
+}
+
+test.each(['REANALYZE_BATCH', 'REJECT_BATCH'].flatMap(decision =>
+    ['NOT_ASSIGNED', 'ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'SUBMITTED'].map(status => [decision, status])))
+    ('%s moves active %s work to canonical repeat required and preserves scientific values', async (decision, status) => {
+        const { sample, item, batch } = await failedQcFixture(status);
+        const result = await client.result.create({ data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.24',
+            numericValue: 6.24, unit: 'pH', batchId: batch.id, isCurrent: true } });
+        await qcDispositions.dispositionBatch(batch.id, decision, 'Control outside configured acceptance', manager, client);
+        const updated = await client.workItem.findUnique({ where: { id: item.id } });
+        expect(updated).toMatchObject({ status: 'REPEAT_REQUIRED', reviewedBy: manager.username, reviewedAt: expect.any(Date) });
+        expect(JSON.parse(updated.history)).toEqual([ { note: 'Existing task history' }, expect.objectContaining({ action: decision, reason: 'Control outside configured acceptance' }) ]);
+        expect(await client.result.findUnique({ where: { id: result.id } })).toMatchObject({ value: result.value, numericValue: result.numericValue, unit: result.unit });
+        expect(await client.auditLog.count({ where: { entityId: item.id, action: decision } })).toBe(1);
+    });
+
+test.each(['REPEAT_REQUIRED', 'REANALYSIS_REQUIRED'])('QC preserves the %s alias and review provenance while appending history', async status => {
+    const { item, batch } = await failedQcFixture(status);
+    await client.workItem.update({ where: { id: item.id }, data: { reviewedBy: 'earlier-reviewer', reviewedAt: new Date('2026-01-01'),
+        reanalysisReason: 'Earlier repeat reason', reanalysisRequestedBy: 'earlier-reviewer' } });
+    const before = await client.workItem.findUnique({ where: { id: item.id } });
+    await qcDispositions.dispositionBatch(batch.id, 'REJECT_BATCH', 'Rejected failed QC batch', manager, client);
+    const after = await client.workItem.findUnique({ where: { id: item.id } });
+    expect(after).toMatchObject({ status, reviewedBy: before.reviewedBy, reviewedAt: before.reviewedAt,
+        reanalysisReason: before.reanalysisReason, reanalysisRequestedBy: before.reanalysisRequestedBy, submissionId: before.submissionId });
+    expect(JSON.parse(after.history)).toHaveLength(2);
+});
+
+test.each([['ON_HOLD', 'QC_DISPOSITION_ITEMS_ON_HOLD'], ['AWAITING_VERIFICATION', 'QC_DISPOSITION_ITEMS_UNVERIFIED']])
+    ('a batch member in %s refuses the whole QC decision before writes', async (status, code) => {
+        const { sample, item, batch } = await failedQcFixture(status);
+        const second = await fixture('PROCESSING', 'PH_H2O', 'IN_PROGRESS');
+        await client.workItem.update({ where: { id: second.item.id }, data: { batchId: batch.id } });
+        const before = await snapshot(sample.id), secondBefore = await snapshot(second.sample.id);
+        const batchBefore = await client.batch.findUnique({ where: { id: batch.id } });
+        await expect(qcDispositions.dispositionBatch(batch.id, 'REJECT_BATCH', 'Rejected failed QC batch', manager, client))
+            .rejects.toMatchObject({ statusCode: 409, code, details: { items: [{ workItemId: item.id, analysis: 'PH_H2O', status }] } });
+        expect(await snapshot(sample.id)).toEqual(before);
+        expect(await snapshot(second.sample.id)).toEqual(secondBefore);
+        expect(await client.batch.findUnique({ where: { id: batch.id } })).toEqual(batchBefore);
+        expect(await client.auditLog.count({ where: { entityId: batch.id } })).toBe(0);
+    });
+
+test.each([['ACCEPTED', 'PROCESSING'], ['WAIVED', 'PROCESSING'], ['CANCELLED', 'PROCESSING'],
+    ['IN_PROGRESS', 'APPROVED'], ['IN_PROGRESS', 'ARCHIVED'], ['IN_PROGRESS', 'DISPOSED']])
+    ('QC preserves final %s work on a %s sample', async (status, sampleStatus) => {
+        const { item, batch } = await failedQcFixture(status, sampleStatus);
+        const before = await client.workItem.findUnique({ where: { id: item.id } });
+        await qcDispositions.dispositionBatch(batch.id, 'REJECT_BATCH', 'Rejected failed QC batch', manager, client);
+        expect(await client.workItem.findUnique({ where: { id: item.id } })).toEqual(before);
+    });
+
+test('a failed QC audit rolls back disposition, history, repeat status and result flags', async () => {
+    const { sample, batch } = await failedQcFixture('SUBMITTED');
+    await client.result.create({ data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.24', numericValue: 6.24,
+        unit: 'pH', batchId: batch.id, flags: '["ORIGINAL_FLAG"]' } });
+    const before = await snapshot(sample.id), batchBefore = await client.batch.findUnique({ where: { id: batch.id } });
+    await expect(client.$transaction(tx => qcDispositions.dispositionBatch(batch.id, 'REJECT_BATCH', 'Rejected failed QC batch', manager,
+        { ...tx, auditLog: { ...tx.auditLog, create: async args => {
+            if (args.data.action === 'QC_DISPOSITION') throw new Error('Injected QC audit failure');
+            return tx.auditLog.create(args);
+        } } }))).rejects.toThrow('Injected QC audit failure');
+    expect(await snapshot(sample.id)).toEqual(before);
+    expect(await client.batch.findUnique({ where: { id: batch.id } })).toEqual(batchBefore);
+});
+
+test('QC also preserves a RELEASED sample that existed before the additive state guards', async () => {
+    const sampleId = 'legacy-qc-released';
+    const batch = await client.batch.create({ data: { id: id(), analysis: 'PH_H2O', labId: manager.labId, status: 'QC_FAIL', createdBy: technician.username } });
+    await work.createWorkItem({ id: id(), sampleId, analysis: 'PH_H2O', status: 'IN_PROGRESS', batchId: batch.id, assignedLab: manager.labId },
+        'system:fixture', { context: 'fixture', tx: client });
+    await client.result.create({ data: { id: id(), sampleId, param: 'PH_H2O', value: '6.24', numericValue: 6.24,
+        unit: 'pH', batchId: batch.id, flags: '["RETAINED_LEGACY_FLAG"]' } });
+    const before = await snapshot(sampleId);
+    await qcDispositions.dispositionBatch(batch.id, 'REJECT_BATCH', 'Rejected failed QC batch', manager, client);
+    expect(await snapshot(sampleId)).toEqual(before);
+});
+
+test('manager RETURN of a completed gate records current-result reversion in the review transaction', async () => {
+    const { sample, item } = await fixture('PROCESSING', 'DRYING', 'SUBMITTED');
+    const result = await client.result.create({ data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.24', numericValue: 6.24,
+        unit: 'pH', flags: '["ORIGINAL_FLAG"]' } });
+    const reason = 'Drying protocol requires repetition';
+    const updated = await commitReview(client, item, 'REPEAT_REQUIRED', manager,
+        { status: 'REPEAT_REQUIRED', history: JSON.stringify([{ status: 'REPEAT_REQUIRED', reason }]) },
+        tx => gates.resetReviewedGate(item, manager, reason, tx), null, { reason });
+    expect(updated.status).toBe('REPEAT_REQUIRED');
+    expect(await client.sample.findUnique({ where: { id: sample.id } })).toMatchObject({ dryingStatus: 'PENDING' });
+    expect(await client.resultEvidenceEvent.findMany({ where: { resultId: result.id } }))
+        .toEqual([expect.objectContaining({ eventType: 'PREP_REVERTED', gate: 'DRYING', reason })]);
+    expect(await client.result.findUnique({ where: { id: result.id } })).toEqual(result);
+});
+
+test('a failed gate-review evidence append rolls back the review CAS, review identity and audit', async () => {
+    const { sample, item } = await fixture('PROCESSING', 'DRYING', 'SUBMITTED');
+    await client.result.create({ data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.24', unit: 'pH' } });
+    const before = await snapshot(sample.id), reason = 'Drying protocol requires repetition';
+    await expect(client.$transaction(tx => commitReview({ $transaction: callback => callback({ ...tx,
+        resultEvidenceEvent: { ...tx.resultEvidenceEvent, create: async () => { throw new Error('Injected evidence failure'); } } }) },
+        item, 'REPEAT_REQUIRED', manager, { status: 'REPEAT_REQUIRED', history: JSON.stringify([{ status: 'REPEAT_REQUIRED', reason }]) },
+        inner => gates.resetReviewedGate(item, manager, reason, inner), null, { reason }))).rejects.toThrow('Injected evidence failure');
+    expect(await snapshot(sample.id)).toEqual(before);
+});
 
 test('ordinary creation refuses advanced states before any write, and logs canonical creation', async () => {
     const sampleId = id();

@@ -16,6 +16,7 @@ const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const app = require('../../app');
 const prisma = require('../../prisma');
+const { createSample } = require('../../services/sampleStateService');
 const { JWT_SECRET } = require('../../config/auth');
 const { canFinalApprove, canPublish } = require('../../services/workEligibility');
 
@@ -404,18 +405,18 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             }
         });
 
-        // Sample fixture in RELEASED status
+        // Sample fixture in canonical APPROVED status
         const releasedSample = await prisma.sample.create({
             data: {
                 id: `smp-rel-${Date.now()}`,
                 originalId: `SMP-REL-${Date.now()}`,
-                status: 'RELEASED',
+                status: 'APPROVED',
                 projectCode: 'SoilFER-P1',
                 assignedLab: testLab1.id
             }
         });
 
-        // Result 2: Belongs to already RELEASED sample (must be immutable)
+        // Result 2: Belongs to already approved sample (must be immutable)
         const resReleased = await prisma.result.create({
             data: {
                 id: `res-released-${Date.now()}`,
@@ -485,8 +486,15 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         await prisma.auditLog.deleteMany({ where: { entityId: testBatchId } }).catch(() => {});
     });
 
+    async function activeQcSample() {
+        const sampleId = `qc-active-${require('node:crypto').randomUUID()}`;
+        return createSample({ id: sampleId, originalId: sampleId, status: 'PROCESSING', assignedLab: testLab1.id,
+            labId: testLab1.id, country: 'Guatemala', projectCode: 'SOILFER-GTM' }, 'system:fixture', { context: 'fixture' });
+    }
+
     // ─── Test 9: REANALYZE_BATCH Establishes Linked WorkItem Reanalysis Flow ───
-    test('9. REANALYZE_BATCH updates associated workItems to REANALYSIS_REQUIRED atomically', async () => {
+    test('9. REANALYZE_BATCH updates associated workItems to REPEAT_REQUIRED atomically', async () => {
+        const activeSample = await activeQcSample();
         const reanalyzeBatchId = `batch-reanal-${Date.now()}`;
         await prisma.batch.create({
             data: {
@@ -501,9 +509,9 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const wiToReanalyze = await prisma.workItem.create({
             data: {
                 id: `wi-reanal-${Date.now()}`,
-                sampleId: sample1.id,
+                sampleId: activeSample.id,
                 analysis: 'pH',
-                status: 'PENDING_REVIEW',
+                status: 'SUBMITTED',
                 batchId: reanalyzeBatchId,
                 labId: testLab1.id
             }
@@ -519,15 +527,16 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
         expect(dispRes.status).toBe(200);
 
-        // Verify work item updated to REANALYSIS_REQUIRED with author and reason
+        // Verify work item updated to REPEAT_REQUIRED with author and reason
         const refreshedWi = await prisma.workItem.findUnique({ where: { id: wiToReanalyze.id } });
-        expect(refreshedWi.status).toBe('REANALYSIS_REQUIRED');
+        expect(refreshedWi.status).toBe('REPEAT_REQUIRED');
         expect(refreshedWi.reanalysisReason).toContain('Calibration curve failed');
         expect(refreshedWi.reanalysisRequestedBy).toBe(lab1Manager.username);
 
         // Cleanup
         await prisma.workItem.delete({ where: { id: wiToReanalyze.id } }).catch(() => {});
         await prisma.batch.delete({ where: { id: reanalyzeBatchId } }).catch(() => {});
+        await prisma.sample.delete({ where: { id: activeSample.id } });
         await prisma.auditLog.deleteMany({ where: { entityId: reanalyzeBatchId } }).catch(() => {});
     });
 
@@ -847,7 +856,8 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
     });
 
     // ─── Test 15: REANALYZE_BATCH Protects Historical Accepted / Released Work Items ───
-    test('15. REANALYZE_BATCH updates only active work items, preserving historical ACCEPTED and COMPLETED work items', async () => {
+    test('15. REANALYZE_BATCH updates only active work items, preserving ACCEPTED history and repeating completed active work', async () => {
+        const activeSample = await activeQcSample();
         const batchWiTestId = `batch-wi-guard-${Date.now()}`;
         await prisma.batch.create({
             data: {
@@ -859,13 +869,13 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             }
         });
 
-        // Active work item (PENDING_REVIEW)
+        // Active submitted work item
         const wiActive = await prisma.workItem.create({
             data: {
                 id: `wi-act-${Date.now()}`,
-                sampleId: sample1.id,
+                sampleId: activeSample.id,
                 analysis: 'pH',
-                status: 'PENDING_REVIEW',
+                status: 'SUBMITTED',
                 batchId: batchWiTestId,
                 labId: testLab1.id
             }
@@ -876,7 +886,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             data: {
                 id: `wi-acc-${Date.now()}`,
                 duplicateOf: wiActive.id,
-                sampleId: sample1.id,
+                sampleId: activeSample.id,
                 analysis: 'pH',
                 status: 'ACCEPTED',
                 batchId: batchWiTestId,
@@ -889,7 +899,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             data: {
                 id: `wi-comp-${Date.now()}`,
                 duplicateOf: wiActive.id,
-                sampleId: sample1.id,
+                sampleId: activeSample.id,
                 analysis: 'pH',
                 status: 'COMPLETED',
                 batchId: batchWiTestId,
@@ -908,17 +918,17 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
         expect(dispRes.status).toBe(200);
 
-        // Verify: Active work item was updated to REANALYSIS_REQUIRED
+        // Verify: Active work item was updated to REPEAT_REQUIRED
         const refActive = await prisma.workItem.findUnique({ where: { id: wiActive.id } });
-        expect(refActive.status).toBe('REANALYSIS_REQUIRED');
+        expect(refActive.status).toBe('REPEAT_REQUIRED');
 
         // Verify: Historical ACCEPTED work item was NOT overwritten (scientific immutability)
         const refAccepted = await prisma.workItem.findUnique({ where: { id: wiAccepted.id } });
         expect(refAccepted.status).toBe('ACCEPTED');
 
-        // Verify: Completed-unsubmitted work item transitions to REANALYSIS_REQUIRED (R3 operational repeat)
+        // Verify: Completed-unsubmitted work item transitions to REPEAT_REQUIRED (R3 operational repeat)
         const refCompleted = await prisma.workItem.findUnique({ where: { id: wiCompleted.id } });
-        expect(refCompleted.status).toBe('REANALYSIS_REQUIRED');
+        expect(refCompleted.status).toBe('REPEAT_REQUIRED');
         expect(refCompleted.reanalysisReason).toBe('Reanalyze active items only');
 
         // Cleanup

@@ -14,12 +14,12 @@ class CommandReceiptService {
      * @param {string} [payloadHash]
      * @returns {Promise<{ isExisting: boolean, receipt?: object, conflict?: boolean, reason?: string }>}
      */
-    static async checkReceipt(idempotencyKey, commandType, actor, targetResource, payloadHash = null) {
+    static async checkReceipt(idempotencyKey, commandType, actor, targetResource, payloadHash = null, db = prisma) {
         if (!idempotencyKey) {
             return { isExisting: false };
         }
 
-        const receipt = await prisma.commandReceipt.findUnique({
+        const receipt = await db.commandReceipt.findUnique({
             where: { idempotencyKey }
         });
 

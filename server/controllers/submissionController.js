@@ -56,7 +56,7 @@ const checkFullEligibility = async (sampleId, currentSubmissionItemIds = []) => 
                 analysis: item.analysis,
                 displayName: config.displayName || item.analysis,
                 status: item.status,
-                reason: item.status === 'REANALYSIS_REQUIRED' ? item.reanalysisReason : null
+                reason: workflow.normalizeWorkItemState(item.status) === 'REPEAT_REQUIRED' ? item.reanalysisReason : null
             });
         }
     });
@@ -341,7 +341,7 @@ exports.reviewSubmission = async (req, res) => {
         if (!Array.isArray(normalizedDecisions) || !normalizedDecisions.length) {
             return res.status(400).json({ error: 'decisions array required', code: 'INVALID_REVIEW_DECISION' });
         }
-        const aliases = { ACCEPTED: 'ACCEPT', REJECT: 'REJECT_REANALYSIS', RETURN: 'REJECT_REANALYSIS', REANALYSIS_REQUIRED: 'REJECT_REANALYSIS', WAIVED: 'WAIVE' };
+        const aliases = { ACCEPTED: 'ACCEPT', REJECT: 'REJECT_REANALYSIS', RETURN: 'REJECT_REANALYSIS', REANALYSIS_REQUIRED: 'REJECT_REANALYSIS', REPEAT_REQUIRED: 'REJECT_REANALYSIS', OMIT: 'WAIVE', WAIVED: 'WAIVE' };
         const validated = [];
         for (const decision of normalizedDecisions) {
             if (!decision || typeof decision !== 'object' || Array.isArray(decision) || typeof decision.workItemId !== 'string') {
@@ -439,7 +439,7 @@ exports.reviewSubmission = async (req, res) => {
             let newStatus;
             switch (verdict) {
                 case 'ACCEPT': newStatus = workflow.WORK_ITEM_STATES.ACCEPTED; break;
-                case 'REJECT_REANALYSIS': newStatus = workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED; break;
+                case 'REJECT_REANALYSIS': newStatus = workflow.WORK_ITEM_STATES.REPEAT_REQUIRED; break;
                 case 'WAIVE': newStatus = workflow.WORK_ITEM_STATES.WAIVED; break;
             }
 
@@ -476,18 +476,7 @@ exports.reviewSubmission = async (req, res) => {
 
 
             const analysisName = await getAnalysisName(item.analysis);
-            operations.push(tx => tx.auditLog.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    entity: 'WORKITEM',
-                    entityId: workItemId,
-                    action: verdict === 'REJECT_REANALYSIS' ? 'REANALYSIS_REQUESTED' : 'REVIEW_DECISION_MADE',
-                    details: `${user.username} ${verdict.toLowerCase()}ed ${analysisName}`,
-                    performedBy: user.username,
-                    timestamp: now,
-                    sampleId: String(submission.sampleId)
-                }
-            }));
+
 
             operations.push(tx => tx.reviewDecision.create({
                 data: {
@@ -495,7 +484,7 @@ exports.reviewSubmission = async (req, res) => {
                     sampleId: String(submission.sampleId),
                     workItemId,
                     submissionItemId: submission.id,
-                    decision: verdict === 'ACCEPT' ? 'ACCEPT' : (verdict === 'REJECT_REANALYSIS' ? 'RETURN' : 'WAIVE'),
+                    decision: verdict === 'ACCEPT' ? 'ACCEPT' : (verdict === 'REJECT_REANALYSIS' ? 'RETURN' : 'OMIT'),
                     reason: reason || null,
                     reviewerId: user.id || user.username,
                     reviewerName: user.username,
@@ -511,12 +500,17 @@ exports.reviewSubmission = async (req, res) => {
                     if (newStatus === workflow.WORK_ITEM_STATES.ACCEPTED && workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis)) {
                         const { transitionSample } = require('../services/sampleStateService');
                         await transitionSample(item.sampleId, workflow.CLOSURE_TASK_SAMPLE_STATES[item.analysis], user,
-                            'Sample closed via submission review', {}, tx).catch(error => {
-                            console.warn('[reviewSubmission] Warning: sample closure transition failed:', error.message);
-                        });
+                            'Sample closed via submission review', {}, tx);
                     }
-                    if (verdict === 'REJECT_REANALYSIS') await invalidateReturnedResults(tx, item, user, reason);
-                }, id);
+                    if (verdict === 'REJECT_REANALYSIS') {
+                        if (['DRYING', 'PREPARATION'].includes(item.analysis)) {
+                            await require('../services/operationalGateStateService').resetReviewedGate(item, user, reason, tx);
+                        }
+                        await invalidateReturnedResults(tx, item, user, reason);
+                    }
+                }, id, { reason,
+                    action: verdict === 'REJECT_REANALYSIS' ? 'REANALYSIS_REQUESTED' : 'REVIEW_DECISION_MADE',
+                    details: `${user.username} ${verdict.toLowerCase()}ed ${analysisName}` });
                 results.push({ workItemId, status: newStatus, decision: verdict });
             } catch (error) {
                 if (!['ITEM_NOT_SUBMITTED', 'ITEM_NOT_IN_SUBMISSION'].includes(error.code)) throw error;
@@ -539,7 +533,7 @@ exports.getReanalysisRequests = async (req, res) => {
 
     try {
         const where = {
-            status: workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED
+            status: { in: [workflow.WORK_ITEM_STATES.REPEAT_REQUIRED, workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED] }
         };
 
         if (user.role === 'LAB_TECHNICIAN') {
@@ -558,7 +552,7 @@ exports.getReanalysisRequests = async (req, res) => {
 
         const enriched = items.map(i => {
             const history = typeof i.history === 'string' ? JSON.parse(i.history) : (i.history || []);
-            const lastReject = history.slice().reverse().find(h => h.status === 'REANALYSIS_REQUIRED');
+            const lastReject = history.slice().reverse().find(h => workflow.normalizeWorkItemState(h.status) === 'REPEAT_REQUIRED');
             return {
                 ...i,
                 reanalysisReason: lastReject ? lastReject.reason || lastReject.note : i.reanalysisReason || 'QC Rejection'

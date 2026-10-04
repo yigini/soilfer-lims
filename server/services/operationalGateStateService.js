@@ -77,4 +77,31 @@ async function changeGate({ sampleId, gate, status, reason, actor, resumeSampleS
     });
 }
 
-module.exports = { changeGate };
+/** A manager RETURN already performed the review CAS in this transaction. */
+async function resetReviewedGate(item, actor, reason, tx) {
+    if (!tx || typeof tx.$transaction === 'function') throw new TransitionError('Gate review requires its review transaction.', 409, 'EVIDENCE_TRANSACTION_REQUIRED');
+    if (!hasPermission(actor, 'APPROVE_RESULTS')) throw new TransitionError('Manager review permission required.', 403, 'OPERATIONAL_PERMISSION_DENIED');
+    const field = evidence.GATE_FIELDS[item.analysis];
+    if (!field) throw new TransitionError('Unknown operational gate.', 400, 'INVALID_PREPARATION_GATE');
+    rules.requireReason(reason);
+    const reviewed = await tx.workItem.findUnique({ where: { id: item.id } });
+    if (!reviewed || workflow.normalizeWorkItemState(reviewed.status) !== 'REPEAT_REQUIRED' || reviewed.reviewedBy !== rules.actorName(actor)) {
+        throw new TransitionError('The gate must first be returned through manager review.', 409, 'GATE_REVIEW_REQUIRED');
+    }
+    const sample = await tx.sample.findUnique({ where: { id: item.sampleId } });
+    if (!sample) throw new TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
+    rules.assertScope(actor, sample);
+    evidence.assertAmendable(sample);
+    const accepted = await tx.workItem.findFirst({ where: { sampleId: sample.id, analysis: item.analysis, status: 'ACCEPTED' } });
+    if (accepted) throw new TransitionError('Accepted gate work requires an amendment.', 409, 'AMENDMENT_WORKFLOW_REQUIRED');
+    const count = sample[field] === 'DONE' ? await evidence.recordPreparationRevert(tx, sample, item.analysis, reason, actor) : 0;
+    await transitionSample(sample.id, sample.status, actor, reason, { [field]: 'PENDING' }, tx);
+    if (sample[field] !== 'PENDING') await tx.auditLog.create({ data: {
+        id: randomUUID(), entity: 'SAMPLE', entityId: sample.id, sampleId: sample.id,
+        action: item.analysis === 'DRYING' ? 'DRYING_STATUS_CHANGED' : 'PREP_STATUS_CHANGED',
+        details: JSON.stringify({ gate: item.analysis, from: sample[field], to: 'PENDING', reason, resultEvidenceCount: count }),
+        performedBy: rules.actorName(actor), labId: sample.assignedLab || null, timestamp: new Date()
+    } });
+}
+
+module.exports = { changeGate, resetReviewedGate };

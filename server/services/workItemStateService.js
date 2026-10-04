@@ -144,8 +144,8 @@ async function createWorkItem(data, actor, options = {}) {
         }
         const item = await client.workItem.create({ data: { ...data, status } });
         await client.auditLog.create({ data: {
-            id: randomUUID(), entity: 'WORKITEM', entityId: item.id, action: 'WORKITEM_CREATED', performedBy,
-            details: JSON.stringify({ status, context: options.context || 'ordinary' }), sampleId: item.sampleId,
+            id: randomUUID(), entity: 'WORKITEM', entityId: item.id, action: options.audit?.action || 'WORKITEM_CREATED', performedBy,
+            details: options.audit?.details || JSON.stringify({ status, context: options.context || 'ordinary' }), sampleId: item.sampleId,
             labId: item.assignedLab || sample.assignedLab || null, analysisCode: item.analysis, timestamp: new Date()
         } });
         return item;
