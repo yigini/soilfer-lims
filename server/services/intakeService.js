@@ -59,6 +59,8 @@ async function consumeStoredApproval(tx, approval) {
 function responseFor(sample, plan) {
     if (plan.responseKind === 'draft') return { success: true, id: sample.id, originalId: sample.originalId, status: sample.status, message: 'Draft saved.' };
     if (plan.responseKind === 'rejected') return { success: true, rejected: true, id: sample.id, originalId: sample.originalId, status: sample.status, rejectionReason: sample.rejectionReason,
+        assignedLab: sample.assignedLab || null, projectCode: sample.projectCode || null, projectId: sample.projectId || null,
+        receptionDate: sample.receptionDate?.toISOString() || null, fieldMetadata: sample.fieldMetadata || null, receptionData: sample.receptionData || null,
         custodyHandoverAt: sample.custodyHandoverAt, custodyCarrierName: sample.custodyCarrierName, custodyTrackingNumber: sample.custodyTrackingNumber, receivingOfficerName: sample.receivingOfficerName,
         message: 'Sample intake non-conformance recorded. Status: RECEIVED_REJECTED.', sample };
     const fm = require('./intakeProfileService').parseFieldMetadata(sample.fieldMetadata);
