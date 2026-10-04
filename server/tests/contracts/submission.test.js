@@ -129,6 +129,11 @@ describe('8.1 Section D: Submission Rules', () => {
     });
 
     test('Scenario 4: Rejection (COND)', async () => {
+        // Submit the recorded measurement for review before requesting a repeat.
+        const initialCondSubmission = await request(app).post('/api/submissions')
+            .set('Authorization', `Bearer ${techToken}`)
+            .send({ sampleId, type: 'PARTIAL', workItemIds: [condItemId] });
+        expect(initialCondSubmission.status).toBe(201);
         // Request a repeat before re-entry; completed measurements are sealed
         // by the canonical workbench rather than overwritten through status.
         const returned = await request(app).post(`/api/work/${condItemId}/review`)

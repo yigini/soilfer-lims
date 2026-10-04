@@ -105,7 +105,8 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
             const refused = await post(`/api/submissions/${f.submission.id}/review`, {
                 decisions: [{ workItemId: f.item.id, decision, reason }]
             });
-            expect(refused.status).toBe(409); expect(refused.body.code).toBe('ITEM_NOT_IN_SUBMISSION');
+            expect(refused.status).toBe(409); expect(refused.body.code).toBe('ITEM_NOT_SUBMITTED');
+            expect(refused.body.errors).toEqual([{ workItemId: f.item.id, code: 'ITEM_NOT_IN_SUBMISSION' }]);
             expect(await prisma.workItem.findUnique({ where: { id: f.item.id } })).toEqual(before);
             expect(await prisma.reviewDecision.count()).toBe(decisionsBefore);
             expect(await prisma.auditLog.count()).toBe(auditsBefore);
@@ -147,7 +148,9 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
             details: '0 items reviewed; 1 moved to later submissions'
         });
         expect((await prisma.submission.findUnique({ where: { id: f.submission.id } })).status).toBe('REVIEWED');
-        expect((await post(`/api/submissions/${f.submission.id}/review`, { decision: 'ACCEPT' })).status).toBe(400);
+        const alreadyReviewed = await post(`/api/submissions/${f.submission.id}/review`, { decision: 'ACCEPT' });
+        expect(alreadyReviewed.status).toBe(409);
+        expect(alreadyReviewed.body).toMatchObject({ code: 'SUBMISSION_NOT_REVIEWABLE', status: 'REVIEWED' });
         expect(await prisma.auditLog.count()).toBe(auditsBefore + 1);
     });
 });
