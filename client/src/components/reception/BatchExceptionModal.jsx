@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, AlertTriangle, CheckCircle, Camera, Upload, Trash2 } from 'lucide-react';
 import axios from 'axios';
+import { useLanguage } from '../../context/LanguageContext';
 
 const PRESET_REASONS = [
     'Bag torn / sample leaked in transit',
@@ -12,10 +13,11 @@ const PRESET_REASONS = [
 ];
 
 const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
+    const { t } = useLanguage();
     const [status, setStatus] = useState(sample?.status || 'ACCEPTED');
     const [rejectionReason, setRejectionReason] = useState(sample?.rejectionReason || '');
     const [receivedMass, setReceivedMass] = useState(sample?.receivedMass !== undefined && sample?.receivedMass !== null ? sample.receivedMass : '');
-    const [moistureOnArrival, setMoistureOnArrival] = useState(sample?.moistureOnArrival || 'MOIST');
+    const [moistureOnArrival, setMoistureOnArrival] = useState(sample?.moistureOnArrival || '');
     const [notes, setNotes] = useState(sample?.notes || '');
     const [photos, setPhotos] = useState(sample?.intakePhotos || []);
     const [uploading, setUploading] = useState(false);
@@ -73,7 +75,7 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
             status,
             rejectionReason: status === 'REJECTED' ? rejectionReason.trim() : null,
             receivedMass: receivedMass !== '' ? parseFloat(receivedMass) : null,
-            moistureOnArrival,
+            moistureOnArrival: moistureOnArrival || null,
             notes: notes.trim(),
             intakePhotos: photos
         });
@@ -185,6 +187,7 @@ const BatchExceptionModal = ({ isOpen, sample, index, onClose, onSave }) => {
                                 onChange={(e) => setMoistureOnArrival(e.target.value)}
                                 className="w-full p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text text-xs focus:ring-1 focus:ring-emerald-500"
                             >
+                                <option value="">{t('batchIntake.notRecorded')}</option>
                                 <option value="DRY">Dry (&lt;10%)</option>
                                 <option value="MOIST">Moist (10-25%)</option>
                                 <option value="WET">Wet (25-40%)</option>

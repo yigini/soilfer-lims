@@ -115,6 +115,7 @@ describe('Stage C: Consignment & High-Throughput Batch Intake Contract (RC-12 - 
                     coc: { status: 'PASS' }
                 }
             },
+            bulkApplications: [{ fields: { receivedMass: 550.0, moistureOnArrival: 'MOIST' }, sampleIds: testSamples }],
             samples: [
                 {
                     originalId: testSamples[0], // Pre-existing EXPECTED sample

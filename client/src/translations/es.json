@@ -2381,5 +2381,16 @@
     "recordedCount": "Registrados",
     "retryFailed": "Reintentar fallidos",
     "recordingUnconfirmed": "No se confirmó el registro de esta fila."
+  },
+  "batchIntake": {
+    "massToApply": "Masa a aplicar (g)",
+    "moistureToApply": "Humedad a aplicar",
+    "notRecorded": "No registrado",
+    "massNotRecorded": "Masa no registrada",
+    "applyToAll": "Aplicar la masa y humedad introducidas a todas las filas",
+    "massDeficit": "Masa insuficiente",
+    "acknowledgeMass": "Confirmar la advertencia de masa de esta muestra",
+    "massCheckFailed": "No se pudieron cargar los requisitos de masa. El servidor comprobará cada fila al enviar.",
+    "positionalUncertainty": "Incertidumbre posicional registrada (m)"
   }
 }

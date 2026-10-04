@@ -9,6 +9,7 @@ import BatchExceptionModal from './BatchExceptionModal';
 import ManifestImportModal from './ManifestImportModal';
 import LabelPrintDialog from '../common/LabelPrintDialog';
 import { playSuccessChime, playErrorBuzz } from '../../utils/audioCues';
+import { useLanguage } from '../../context/LanguageContext';
 
 const BatchIntake = ({ 
     user, 
@@ -17,6 +18,7 @@ const BatchIntake = ({
     onBack, 
     onSuccess 
 }) => {
+    const { t } = useLanguage();
     // --- CONSIGNMENT HEADER STATE (RC-12) ---
     const [consignment, setConsignment] = useState({
         deliveryNoteRef: '',
@@ -33,8 +35,8 @@ const BatchIntake = ({
 
     // --- BULK DEFAULTS (RC-13) ---
     const [defaults, setDefaults] = useState({
-        receivedMass: 500,
-        moistureOnArrival: 'MOIST',
+        receivedMass: '',
+        moistureOnArrival: '',
         foreignMaterial: [],
         analysisBundle: analysisGroups[0]?.id || '',
         requiredAnalyses: analysisGroups[0]?.analyses || ['PH_H2O'],
@@ -55,6 +57,33 @@ const BatchIntake = ({
     const [scanInput, setScanInput] = useState('');
     const [isScanning, setIsScanning] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [bulkApplications, setBulkApplications] = useState([]);
+    const [massRequirements, setMassRequirements] = useState({});
+    const [massCheckFailed, setMassCheckFailed] = useState(false);
+    const requirementKey = codes => JSON.stringify([...new Set(codes || [])].sort());
+    const massKeys = JSON.stringify([...new Set(samples.filter(sample => sample.status !== 'REJECTED')
+        .map(sample => requirementKey(sample.requiredAnalyses ?? defaults.requiredAnalyses)))]);
+
+    useEffect(() => {
+        let cancelled = false;
+        const keys = JSON.parse(massKeys);
+        Promise.all(keys.map(async key => [key, (await axios.post('/api/reception/mass-check', { analysisCodes: JSON.parse(key) })).data]))
+            .then(entries => { if (!cancelled) { setMassRequirements(Object.fromEntries(entries)); setMassCheckFailed(false); } })
+            .catch(() => { if (!cancelled) setMassCheckFailed(true); });
+        return () => { cancelled = true; };
+    }, [massKeys]);
+
+    const hasMassDeficit = sample => sample.status !== 'REJECTED' && sample.receivedMass !== null && sample.receivedMass !== '' &&
+        sample.receivedMass !== undefined && Number(sample.receivedMass) < massRequirements[requirementKey(sample.requiredAnalyses ?? defaults.requiredAnalyses)]?.totalRequiredMass;
+
+    const handleApplyObservations = () => {
+        const fields = {};
+        if (defaults.receivedMass !== '') fields.receivedMass = Number(defaults.receivedMass);
+        if (defaults.moistureOnArrival) fields.moistureOnArrival = defaults.moistureOnArrival;
+        if (!samples.length || !Object.keys(fields).length) return;
+        setSamples(previous => previous.map(sample => ({ ...sample, ...fields, massWarningAcknowledged: false })));
+        setBulkApplications(previous => [...previous, { fields, sampleIds: samples.map(sample => sample.originalId) }]);
+    };
 
     // --- MODALS ---
     const [editingSampleIdx, setEditingSampleIdx] = useState(null);
@@ -77,6 +106,7 @@ const BatchIntake = ({
             analysisBundle: groupId,
             requiredAnalyses: group ? group.analyses : ['PH_H2O']
         }));
+        setSamples(previous => previous.map(sample => ({ ...sample, massWarningAcknowledged: false })));
     };
 
     // Fast Add / Scan Handler
@@ -114,11 +144,12 @@ const BatchIntake = ({
                 originalId: cleanId,
                 status: 'ACCEPTED',
                 rejectionReason: null,
-                receivedMass: defaults.receivedMass,
-                moistureOnArrival: defaults.moistureOnArrival,
-                latitude: foundExpected?.coordinates?.lat || null,
-                longitude: foundExpected?.coordinates?.lng || null,
-                positionalUncertaintyM: foundExpected?.coordinates?.accuracy || (foundExpected?.coordinates ? 10 : null),
+                receivedMass: null,
+                moistureOnArrival: null,
+                massWarningAcknowledged: false,
+                latitude: foundExpected?.coordinates?.lat ?? null,
+                longitude: foundExpected?.coordinates?.lng ?? null,
+                positionalUncertaintyM: foundExpected?.coordinates?.accuracy ?? null,
                 depthTopCm: defaults.depthTopCm,
                 depthBottomCm: defaults.depthBottomCm,
                 siteName: foundExpected?.location || null,
@@ -138,14 +169,18 @@ const BatchIntake = ({
     };
 
     const handleRemoveSample = (index) => {
+        const removedId = samples[index].originalId;
         setSamples(prev => prev.filter((_, i) => i !== index));
+        setBulkApplications(previous => previous.map(action => ({ ...action, sampleIds: action.sampleIds.filter(id => id !== removedId) }))
+            .filter(action => action.sampleIds.length));
     };
 
     const handleUpdateSample = (updatedSample) => {
         if (editingSampleIdx === null) return;
         setSamples(prev => {
             const copy = [...prev];
-            copy[editingSampleIdx] = updatedSample;
+            copy[editingSampleIdx] = { ...updatedSample, massWarningAcknowledged:
+                updatedSample.receivedMass === copy[editingSampleIdx].receivedMass && copy[editingSampleIdx].massWarningAcknowledged === true };
             return copy;
         });
     };
@@ -182,8 +217,6 @@ const BatchIntake = ({
                     projectCode: consignment.projectCode || null
                 },
                 defaults: {
-                    receivedMass: parseFloat(defaults.receivedMass) || 500,
-                    moistureOnArrival: defaults.moistureOnArrival,
                     foreignMaterial: defaults.foreignMaterial,
                     requiredAnalyses: defaults.requiredAnalyses,
                     depthTopCm: defaults.depthTopCm,
@@ -191,7 +224,10 @@ const BatchIntake = ({
                     compositeRadiusM: defaults.compositeRadiusM ? parseFloat(defaults.compositeRadiusM) : null,
                     checklist: defaults.checklist
                 },
-                samples
+                samples,
+                bulkApplications: bulkApplications.map(action => ({ ...action,
+                    sampleIds: action.sampleIds.filter(id => samples.some(sample => sample.originalId === id))
+                })).filter(action => action.sampleIds.length)
             };
 
             const res = await axios.post('/api/reception/consignments', payload);
@@ -462,6 +498,9 @@ const BatchIntake = ({
                         <span className="text-sf-muted">Std Mass (g):</span>
                         <input
                             type="number"
+                            min="0"
+                            aria-label={t('batchIntake.massToApply')}
+                            placeholder={t('batchIntake.notRecorded')}
                             value={defaults.receivedMass}
                             onChange={(e) => setDefaults(prev => ({ ...prev, receivedMass: e.target.value }))}
                             className="w-20 p-1.5 rounded-lg border border-sf-divider bg-sf-surface text-sf-text text-xs text-center font-bold"
@@ -471,10 +510,12 @@ const BatchIntake = ({
                     <div className="flex items-center gap-1.5">
                         <span className="text-sf-muted">Moisture:</span>
                         <select
+                            aria-label={t('batchIntake.moistureToApply')}
                             value={defaults.moistureOnArrival}
                             onChange={(e) => setDefaults(prev => ({ ...prev, moistureOnArrival: e.target.value }))}
                             className="p-1.5 rounded-lg border border-sf-divider bg-sf-surface text-sf-text text-xs"
                         >
+                            <option value="">{t('batchIntake.notRecorded')}</option>
                             <option value="DRY">Dry</option>
                             <option value="MOIST">Moist</option>
                             <option value="WET">Wet</option>
@@ -501,6 +542,13 @@ const BatchIntake = ({
                     </div>
                 </div>
             </div>
+
+            <button type="button" onClick={handleApplyObservations}
+                disabled={!samples.length || (defaults.receivedMass === '' && !defaults.moistureOnArrival)}
+                className="px-3 py-2 rounded-lg bg-blue-600 text-white text-xs font-bold disabled:opacity-50">
+                {t('batchIntake.applyToAll')}
+            </button>
+            {massCheckFailed && <p className="text-amber-700 text-sm" role="alert">{t('batchIntake.massCheckFailed')}</p>}
 
             {/* Fast Rapid-Scan Intake Bar & Running Counter */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -573,7 +621,8 @@ const BatchIntake = ({
                             type="button"
                             onClick={() => {
                                 if (confirm('Are you sure you want to clear all scanned samples in this batch?')) {
-                                    setSamples([]);
+                                setSamples([]);
+                                setBulkApplications([]);
                                 }
                             }}
                             className="text-xs text-red-500 hover:text-red-700 font-bold"
@@ -620,8 +669,20 @@ const BatchIntake = ({
                                                 </span>
                                             )}
                                         </td>
-                                        <td className="p-3 font-mono text-sf-text">{s.receivedMass ? `${s.receivedMass}g` : '—'}</td>
-                                        <td className="p-3 capitalize text-sf-muted">{s.moistureOnArrival?.toLowerCase() || 'moist'}</td>
+                                        <td className="p-3 text-sf-text">
+                                            {s.receivedMass !== null && s.receivedMass !== undefined && s.receivedMass !== '' ? <span className="font-mono">{s.receivedMass}g</span> :
+                                                <span className="text-amber-700">{t('batchIntake.massNotRecorded')}</span>}
+                                            {hasMassDeficit(s) && <div className="text-amber-700 mt-1" role="alert">
+                                                <p>{t('batchIntake.massDeficit')} ({s.receivedMass}g / {massRequirements[requirementKey(s.requiredAnalyses ?? defaults.requiredAnalyses)].totalRequiredMass}g)</p>
+                                                <label className="flex items-center gap-1 mt-1">
+                                                    <input type="checkbox" checked={s.massWarningAcknowledged === true}
+                                                        onChange={event => setSamples(previous => previous.map(row => row.originalId === s.originalId ?
+                                                            { ...row, massWarningAcknowledged: event.target.checked } : row))} />
+                                                    {t('batchIntake.acknowledgeMass')}
+                                                </label>
+                                            </div>}
+                                        </td>
+                                        <td className="p-3 capitalize text-sf-muted">{s.moistureOnArrival?.toLowerCase() || t('batchIntake.notRecorded')}</td>
                                         <td className="p-3 text-sf-muted">
                                             {s.latitude && s.longitude ? (
                                                 <span className="font-mono">{s.latitude.toFixed(4)}, {s.longitude.toFixed(4)}</span>
