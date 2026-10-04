@@ -1,4 +1,5 @@
 {
+  "dataSheet": {"title":"Hoja de datos","readOnlyDescription":"Los resultados registrados son de solo lectura aquí. Abra el banco de trabajo para ingresar o actualizar resultados.","openWorkbench":"Abrir banco de trabajo"},
   "common": {
     "copySecretFailed": "No se pudo copiar. Seleccione la clave y cópiela manualmente antes de cerrar esta ventana.",
     "save": "Guardar",

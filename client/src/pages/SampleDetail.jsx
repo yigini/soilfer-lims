@@ -327,18 +327,8 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
     }, [isManager, isTech, isReception, user]);
 
     // ─── Actions & Handlers ───
-    const handleUpdateStatus = async (itemId, status, result, options = {}) => {
-        try {
-            await axios.put(`/api/work/${itemId}/status`, {
-                status,
-                result,
-                equipmentId: options.equipmentId
-            });
-            fetchWorkspaceData(true);
-        } catch (err) {
-            console.error('Update failed', err);
-            showInfo(t('common.error', 'Update Failed'), err.response?.data?.error || err.message);
-        }
+    const handleUpdateStatus = (itemId) => {
+        navigate(`/workbench?workItemId=${encodeURIComponent(itemId)}`);
     };
 
     const handleReviewItem = async (itemId, status, note = 'Item review decision') => {

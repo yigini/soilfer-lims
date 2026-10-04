@@ -1,21 +1,17 @@
 import { useAnalysisNames } from '../context/AnalysisCatalogueContext';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Save, Filter, Search, CheckCircle, AlertCircle, FlaskConical, ClipboardList } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { useDialog } from '../context/DialogContext';
+import { Filter, Search, FlaskConical, ClipboardList } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 
 const DataSheet = () => {
     const getAnalysisDisplayName = useAnalysisNames();
-    const { user } = useAuth();
-    const { showDialog } = useDialog();
     const { t } = useLanguage();
     const [workItems, setWorkItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterAnalysis, setFilterAnalysis] = useState('');
     const [filterSample, setFilterSample] = useState('');
-    const [inputs, setInputs] = useState({}); // { [itemId]: value }
 
     // Fetch Unique Analysis Types for Filter
     const [analysisTypes, setAnalysisTypes] = useState([]);
@@ -52,52 +48,6 @@ const DataSheet = () => {
         }
     };
 
-    const handleInputChange = (id, val) => {
-        setInputs(prev => ({ ...prev, [id]: val }));
-    };
-
-    const handleSaveRow = async (item) => {
-        const val = inputs[item.id];
-        if (val === undefined || val === '') return; // Nothing to save
-
-        try {
-            await axios.put(`/api/work/${item.id}/status`, {
-                status: 'COMPLETED',
-                result: val
-            });
-            // Update local state to reflect success immediately
-            setWorkItems(prev => prev.map(i => i.id === item.id ? { ...i, status: 'COMPLETED', result: val } : i));
-            // Maybe clear input or keep it? Keeping it shows what was entered.
-        } catch (e) {
-            showDialog({ title: 'Save Failed', message: e.message, type: 'error' });
-        }
-    };
-
-    const handleBatchSave = async () => {
-        // Find all dirty inputs
-        const promises = Object.entries(inputs).map(async ([id, val]) => {
-            const item = workItems.find(i => i.id === id);
-            if (item && val !== '' && val !== item.result) {
-                return axios.put(`/api/work/${id}/status`, {
-                    status: 'COMPLETED',
-                    result: val
-                }).then(() => {
-                    setWorkItems(prev => prev.map(i => i.id === id ? { ...i, status: 'COMPLETED', result: val } : i));
-                }); // Fire and forget (await all later)
-            }
-        });
-
-        try {
-            await Promise.all(promises);
-            showDialog({ title: 'Success', message: 'Batch save completed!', type: 'success' });
-            // Refresh logic handled optimistically above
-            setInputs({}); // Clear inputs on full batch save?
-        } catch (e) {
-            showDialog({ title: 'Partial Failure', message: 'Some items failed to save.', type: 'error' });
-            fetchWork(); // Re-fetch to ensure consistency
-        }
-    };
-
     // Filter Logic
     const filteredItems = workItems.filter(item => {
         const matchAna = filterAnalysis ? item.analysis === filterAnalysis : true;
@@ -111,21 +61,13 @@ const DataSheet = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-sf-text flex items-center gap-2">
-                        <ClipboardList className="text-blue-600 dark:text-blue-400" /> Data Sheet Entry
+                        <ClipboardList className="text-blue-600 dark:text-blue-400" /> {t('dataSheet.title', 'Data Sheet')}
                     </h1>
                     <p className="text-sf-muted text-sm">
-                        Batch result entry for assigned analysis tasks.
+                        {t('dataSheet.readOnlyDescription', 'Recorded results are read-only here. Open the workbench to enter or update results.')}
                     </p>
                 </div>
 
-                <div className="flex gap-2">
-                    <button
-                        onClick={handleBatchSave}
-                        className="bg-blue-600 text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 font-bold flex items-center gap-2 transition-transform transform active:scale-95"
-                    >
-                        <Save size={18} /> Save Changes
-                    </button>
-                </div>
             </div>
 
             {/* Filters */}
@@ -133,7 +75,6 @@ const DataSheet = () => {
                 <div className="flex items-center gap-2 text-sf-muted font-medium">
                     <Filter size={18} /> Filters:
                 </div>
-
                 <select
                     value={filterAnalysis}
                     onChange={e => setFilterAnalysis(e.target.value)}
@@ -189,29 +130,13 @@ const DataSheet = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-3">
-                                        <input
-                                            type="text"
-                                            value={inputs[item.id] !== undefined ? inputs[item.id] : (item.result || '')}
-                                            onChange={e => handleInputChange(item.id, e.target.value)}
-                                            placeholder="Enter result..."
-                                            className={`input-base w-full border rounded px-3 py-2 text-sm focus:ring-2 outline-none transition-all ${item.status === 'COMPLETED' ? 'bg-sf-raised text-sf-muted border-transparent' : 'border-sf-divider focus:ring-blue-200 dark:focus:ring-blue-400 focus:border-blue-400 dark:focus:border-blue-500 font-bold'
-                                                }`}
-                                        />
+                                        <span className="text-sm text-sf-text">{item.result ?? '—'}</span>
                                     </td>
                                     <td className="px-6 py-3 text-right">
-                                        {((inputs[item.id] && inputs[item.id] !== item.result) || (item.status !== 'COMPLETED')) && (
-                                            <button
-                                                onClick={() => handleSaveRow(item)}
-                                                className="text-blue-600 hover:text-blue-800 font-medium text-sm px-3 py-1 hover:bg-blue-50 rounded transition-colors"
-                                            >
-                                                Save
-                                            </button>
-                                        )}
-                                        {item.status === 'COMPLETED' && !inputs[item.id] && (
-                                            <span className="text-green-600 flex items-center justify-end gap-1 text-sm">
-                                                <CheckCircle size={14} /> Saved
-                                            </span>
-                                        )}
+                                        <Link to={`/workbench?workItemId=${encodeURIComponent(item.id)}`}
+                                            className="text-blue-600 hover:text-blue-800 font-medium text-sm px-3 py-1 hover:bg-blue-50 rounded transition-colors">
+                                            {t('dataSheet.openWorkbench', 'Open workbench')}
+                                        </Link>
                                     </td>
                                 </tr>
                             ))}
@@ -220,7 +145,7 @@ const DataSheet = () => {
                                     <td colSpan="5" className="px-6 py-12 text-center text-gray-400 bg-gray-50/30">
                                         <div className="flex flex-col items-center gap-2">
                                             <FlaskConical size={32} className="opacity-20" />
-                                            <p>No work items found matching filters.</p>
+                                            <p>{loading ? t('common.loading', 'Loading...') : 'No work items found matching filters.'}</p>
                                         </div>
                                     </td>
                                 </tr>
