@@ -75,8 +75,8 @@ function valid(name, value) {
     case 'runProfiles':
         return !!value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length > 0 && Object.entries(value).every(([code, p]) =>
             /^[A-Za-z0-9_-]+$/.test(code) && p && typeof p.name === 'string' && p.name.trim() && Number.isSafeInteger(p.capacity) && p.capacity >= 1 &&
-            Array.isArray(p.qcSlots) && new Set(p.qcSlots.map(s => s.position)).size === p.qcSlots.length && p.qcSlots.every(s =>
-                Number.isSafeInteger(s.position) && s.position >= 1 && s.position <= p.capacity && ['BLANK', 'DUPLICATE', 'CONTROL'].includes(s.type) && typeof s.label === 'string'));
+            Array.isArray(p.qcSlots) && p.qcSlots.length > 0 && new Set(p.qcSlots.map(s => s?.position)).size === p.qcSlots.length && p.qcSlots.every(s =>
+                s && typeof s === 'object' && !Array.isArray(s) && Number.isSafeInteger(s.position) && s.position >= 1 && s.position <= p.capacity && ['BLANK', 'DUPLICATE', 'CONTROL'].includes(s.type) && typeof s.label === 'string'));
     case 'reportFormat': case 'sampleFormat': {
         if (typeof value !== 'string' || !value.trim() || value.length > 200 || !/\{SEQ(?::\d+)?\}/.test(value)) return false;
         const tokens = d.type === 'reportFormat' ? ['LAB', 'YYYY'] : ['LAB', 'YY', 'YYYY', 'CHK'];

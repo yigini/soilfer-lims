@@ -77,7 +77,8 @@ describe('Audit 1.0: persistent lab policies', () => {
         expect(await prisma.auditLog.count({ where: { labId } })).toBe(2);
     });
     test.each([['qc.maxBatchSize', -1], ['qc.duplicateEvery', 0.5], ['qc.mode', 'UNKNOWN'], ['numbers.decimalSeparator', ';'],
-        ['qc.westgardRules', { reject: ['1-3s'], warn: ['1-3s'] }], ['qc.runProfiles', { tray: { name: 'Tray', capacity: 2, qcSlots: [{ position: 3, type: 'BLANK', label: 'Blank' }] } }]])('invalid %s returns 400 without writes', async (key, value) => {
+        ['qc.westgardRules', { reject: ['1-3s'], warn: ['1-3s'] }], ['qc.runProfiles', { tray: { name: 'Tray', capacity: 2, qcSlots: [{ position: 3, type: 'BLANK', label: 'Blank' }] } }],
+        ['qc.runProfiles', { tray: { name: 'Tray', capacity: 2, qcSlots: [null] } }], ['qc.runProfiles', { tray: { name: 'Tray', capacity: 2, qcSlots: [] } }]])('invalid %s returns 400 without writes', async (key, value) => {
         const result = await request(app).patch(`/api/labs/${labId}/policies`).set('Authorization', `Bearer ${manager}`).send({ reason: 'Invalid value', expectedVersion: 0, changes: [{ key, value }] });
         expect(result.status).toBe(400); expect(result.body.code).toBe('POLICY_VALUE_INVALID');
         expect(await prisma.labPolicy.count({ where: { labId } })).toBe(0); expect(await prisma.auditLog.count({ where: { labId } })).toBe(0);
@@ -166,7 +167,7 @@ describe('Audit 1.0: persistent lab policies', () => {
         await policy.change(actor, labId, { presetCode: null, reason: 'Restore profile format' }, options);
         expect(JSON.parse((await prisma.lab.findUnique({ where: { id: labId } })).settings).decimalSeparator).toBe(',');
     });
-    test.each(['not-json', '[]', 'null'])('malformed settings %s fail with no policy, audit or legacy writes', async settings => {
+    test.each(['not-json', '[]', 'null', ''])('malformed settings %s fail with no policy, audit or legacy writes', async settings => {
         await prisma.lab.update({ where: { id: labId }, data: { settings } });
         await expect(edit([{ key: 'numbers.decimalSeparator', value: ',' }])).rejects.toMatchObject({ statusCode: 409, code: 'LAB_SETTINGS_INVALID' });
         expect((await prisma.lab.findUnique({ where: { id: labId } })).settings).toBe(settings);
@@ -236,6 +237,8 @@ describe('Audit 1.0: registry and pure evaluator defaults', () => {
         expect(evaluateBlank({ value: .04 }).status).toBe('PASS');
         expect(evaluateControl({ expected: 100, measured: 95 }).status).toBe('PASS');
         expect(evaluateDuplicate({ value1: 100, value2: 100 }).status).toBe('PASS');
+        const { resolveRunProfile } = require('../../controllers/qcController');
+        expect(resolveRunProfile('SOC', '', null, 'toString').profileKey).toBe('RACK_40');
     });
     test('QC consumers contain no inline acceptance limits', () => {
         const fs = require('fs'), path = require('path');

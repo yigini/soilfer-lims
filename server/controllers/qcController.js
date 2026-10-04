@@ -142,7 +142,7 @@ async function persistBatchMutation(tx, batch, data, evaluated, user, reason) {
 function resolveRunProfile(analysis, instrument, requestedCapacity, requestedProfile, profiles = policyService.getStrict('qc.runProfiles')) {
     const keys = Object.keys(profiles);
     const fallback = profiles.RACK_40 ? 'RACK_40' : keys[0];
-    let selected = requestedProfile && profiles[requestedProfile] ? requestedProfile : null;
+    let selected = requestedProfile && Object.hasOwn(profiles, requestedProfile) ? requestedProfile : null;
     const inst = (instrument || '').toLowerCase();
     if (!selected && (inst.includes('microplate') || inst.includes('elisa') || inst.includes('96') || requestedCapacity === 96)) {
         selected = profiles.MICROPLATE_96 ? 'MICROPLATE_96' : keys.find(k => profiles[k].capacity === requestedCapacity);

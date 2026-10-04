@@ -153,7 +153,7 @@ async function mutateInTransaction(actor, reference, request, tx, options = {}) 
     let compatibilitySettings;
     if (!options.preserveLegacySettings && ['numbers.decimalSeparator', 'numbers.thousandsSeparator'].some(key => before.values[key] !== after.values[key])) {
         let settings;
-        try { settings = current.lab.settings ? JSON.parse(current.lab.settings) : {}; }
+        try { settings = current.lab.settings == null ? {} : JSON.parse(current.lab.settings); }
         catch (_) { throw error(409, 'LAB_SETTINGS_INVALID', 'Stored laboratory settings must be valid JSON.'); }
         if (!settings || typeof settings !== 'object' || Array.isArray(settings)) throw error(409, 'LAB_SETTINGS_INVALID', 'Stored laboratory settings must be an object.');
         const values = { decimalSeparator: after.values['numbers.decimalSeparator'], thousandsSeparator: after.values['numbers.thousandsSeparator'] };
