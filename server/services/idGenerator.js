@@ -14,8 +14,8 @@ class IdGenerator {
      * Format: {Prefix}{Number}
      * Example: W001 (Walk-in), P001 (PT)
      */
-    async generateWalkInOriginalId(prefixType = 'W') {
-        return await this._getSequencedId(prefixType, 3, false);
+    async generateWalkInOriginalId(prefixType = 'W', db = prisma) {
+        return await this._getSequencedId(prefixType, 3, false, db);
     }
 
     /**
