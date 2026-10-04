@@ -130,4 +130,24 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
         expect(await prisma.reviewDecision.findFirst({ where: { workItemId: f.item.id, decision: 'ACCEPT' } })).toMatchObject({ submissionItemId: newSubmissionId });
         expect((await prisma.result.findUnique({ where: { id: f.result.id } })).value).toBe('6.2');
     });
+    test('empty shorthand reconciles a stale QC-return package with one summary and no phantom item reviews', async () => {
+        const f = await fixture({ batchStatus: 'QC_FAIL' });
+        expect((await post(`/api/qc/batches/${f.batch.id}/disposition`, { decision: 'REANALYZE_BATCH', reason })).status).toBe(200);
+        expect((await post('/api/workbench/batch-save', { draft: false, entries: [{ workItemId: f.item.id, value: '6.4' }] }, technician)).body.saved).toBe(1);
+        const submitted = await post('/api/workbench/v2/submissions/commit', { sampleIds: [f.sampleId], workItemIds: [f.item.id] }, technician);
+        expect(submitted.status).toBe(200);
+        const before = await prisma.workItem.findUnique({ where: { id: f.item.id } });
+        const decisionsBefore = await prisma.reviewDecision.count(), auditsBefore = await prisma.auditLog.count();
+        const response = await post(`/api/submissions/${f.submission.id}/review`, { decision: 'ACCEPT' });
+        expect(response.status).toBe(200); expect(response.body.results).toEqual([]);
+        expect(await prisma.workItem.findUnique({ where: { id: f.item.id } })).toEqual(before);
+        expect(await prisma.reviewDecision.count()).toBe(decisionsBefore);
+        expect(await prisma.auditLog.count()).toBe(auditsBefore + 1);
+        expect(await prisma.auditLog.findFirst({ where: { entityId: f.submission.id, action: 'SUBMISSION_REVIEWED' } })).toMatchObject({
+            details: '0 items reviewed; 1 moved to later submissions'
+        });
+        expect((await prisma.submission.findUnique({ where: { id: f.submission.id } })).status).toBe('REVIEWED');
+        expect((await post(`/api/submissions/${f.submission.id}/review`, { decision: 'ACCEPT' })).status).toBe(400);
+        expect(await prisma.auditLog.count()).toBe(auditsBefore + 1);
+    });
 });

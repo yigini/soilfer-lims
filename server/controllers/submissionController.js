@@ -382,6 +382,28 @@ exports.reviewSubmission = async (req, res) => {
             });
         }
         if (isShorthand) normalizedDecisions = normalizedDecisions.filter(decision => currentMemberIds.has(decision.workItemId));
+        if (isShorthand && normalizedDecisions.length === 0) {
+            // A package whose members moved must leave the pending-review queue.
+            // Recheck membership in the transaction before its status-only reconciliation.
+            const reconciled = await prisma.$transaction(async tx => {
+                const currentItems = await tx.workItem.findMany({ where: { id: { in: workItemIds } } });
+                if (currentItems.some(item => item.submissionId === submission.id)) return false;
+                const currentSubmission = await tx.submission.findUnique({ where: { id } });
+                if (currentSubmission.status !== 'REVIEWED') {
+                    const now = new Date();
+                    await tx.submission.update({ where: { id }, data: { status: 'REVIEWED', reviewedBy: user.username, reviewedAt: now } });
+                    const movedCount = currentItems.filter(item => item.submissionId && item.submissionId !== submission.id).length;
+                    await tx.auditLog.create({ data: {
+                        id: `audit-sub-moved-${id}-${Date.now()}`, entity: 'SUBMISSION', entityId: id,
+                        action: 'SUBMISSION_REVIEWED', performedBy: user.username, timestamp: now, sampleId: String(submission.sampleId),
+                        details: `0 items reviewed; ${movedCount} moved to later submissions`
+                    } });
+                }
+                return true;
+            });
+            if (!reconciled) return res.status(409).json({ error: 'Submission membership changed. Please refresh.', code: 'ITEM_NOT_IN_SUBMISSION' });
+            return res.json({ success: true, results: [] });
+        }
 
         const batchFailures = [];
         for (const wiId of normalizedDecisions.map(decision => decision.workItemId)) {
