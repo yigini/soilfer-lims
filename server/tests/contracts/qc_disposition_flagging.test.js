@@ -81,7 +81,8 @@ describe('WP-29: QC Service & Batch Disposition Result Flagging', () => {
             params: { id: testBatchId },
             body: {
                 blanks: [{ value: 0.12, maxAllowed: 0.05, label: 'Reagent Blank' }], // FAILS
-                controls: [{ expected: 100, measured: 99, label: 'Standard CRM' }]  // PASSES
+                controls: [{ expected: 100, measured: 99, label: 'Standard CRM' }], // PASSES
+                duplicates: [{ value1: 10, value2: 10, label: 'Analytical Duplicate' }] // PASSES
             },
             user: { username: 'test_tech', role: 'LAB_TECHNICIAN', labId: 'LAB-TEST' }
         };
@@ -91,12 +92,14 @@ describe('WP-29: QC Service & Batch Disposition Result Flagging', () => {
         };
 
         await qcController.evaluateBatch(req, res);
+        expect(res.status).not.toHaveBeenCalled();
         expect(res.json).toHaveBeenCalled();
 
         // 1. Verify typed BatchQcResult rows created
         const typedRows = await prisma.batchQcResult.findMany({ where: { batchId: testBatchId } });
-        expect(typedRows.length).toBe(2);
+        expect(typedRows.length).toBe(3);
         expect(typedRows.some(r => r.type === 'BLANK' && r.status === 'FAIL')).toBe(true);
+        expect(typedRows.some(r => r.type === 'DUPLICATE' && r.status === 'PASS')).toBe(true);
 
         // 2. Verify Result carrying this batchId is flagged
         const flaggedResult = await prisma.result.findUnique({ where: { id: testResultId } });

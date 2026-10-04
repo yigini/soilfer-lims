@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const prisma = require('../prisma');
-const { evaluateBatchQc, checkBatchDisposition, flagBatchResults } = require('../services/qcService');
+const { evaluateBatchQc, checkBatchDisposition, flagBatchResults, getMissingQcValueTypes } = require('../services/qcService');
 const scopeGuard = require('../utils/scopeGuard');
 
 const BATCH_STATES = {
@@ -459,6 +459,14 @@ exports.evaluateBatch = async (req, res) => {
         }
 
         const runProfile = resolveRunProfile(batch.analysis, batch.instrument, batch.maxCapacity, batch.profile);
+        const missingTypes = getMissingQcValueTypes({ blanks, duplicates, controls }, runProfile);
+        if (missingTypes.length > 0) {
+            return res.status(400).json({
+                code: 'QC_VALUES_MISSING',
+                error: 'Numeric values are required for every required QC type.',
+                missingTypes
+            });
+        }
         const evaluated = evaluateBatchQc({ blanks, duplicates, controls }, { runProfile });
         const newStatus = evaluated.overallStatus; // 'QC_PASS', 'QC_FAIL', or 'OPEN' (when empty, invalidates QC_PASS)
 
