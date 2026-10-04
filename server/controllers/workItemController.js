@@ -1070,7 +1070,11 @@ exports.updateWorkItemStatus = async (req, res) => {
                 try { rules = JSON.parse(rules); } catch (e) { rules = {}; }
             }
             if (['PH_H2O', 'PH_CACL2', 'PH_KCL', 'pH'].includes(item.analysis)) {
-                rules = { ...rules, type: 'numeric', min: 2, max: 14 };
+                const policy = require('../services/policyService');
+                const context = { analysisCode: item.analysis, methodologyId: item.methodologyId || null };
+                rules = { ...rules, type: 'numeric',
+                    min: await policy.get(item.assignedLab || item.labId, 'results.phMin', context),
+                    max: await policy.get(item.assignedLab || item.labId, 'results.phMax', context) };
             }
 
             const isNumeric = rules.type === 'numeric' || rules.type === 'number' || rules.min !== undefined || rules.max !== undefined;

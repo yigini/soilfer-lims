@@ -83,6 +83,17 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.6.0',
+        date: 'October 2026',
+        tag: 'Laboratory Policy Settings (Audit 1.0)',
+        badgeColor: 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800',
+        changes: [
+            'Laboratories can choose Strict, Basic or Advisory defaults and record reasoned overrides by analysis and method, with effective sources and change history.',
+            'Managers can edit Policies; every laboratory role can read them. QC evaluations, exports and reports retain their policy version.',
+            'Number-format changes share one service and an atomic rollback copy. The additive migration preserves original settings and historical analytical records.'
+        ]
+    },
+    {
         version: 'v1.5.0',
         date: 'October 2026',
         tag: 'Data Exchange (OpenNSIS / GloSIS), Audit Phase 0 Hardening & Canonical Policy',

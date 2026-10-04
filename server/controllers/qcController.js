@@ -5,7 +5,8 @@ const scopeGuard = require('../utils/scopeGuard');
 const { hasPermission } = require('../config/roles');
 const { getNumberFormat } = require('../services/numberFormatService');
 const { normalizeQcNumbers, retainQcRawInput } = require('../services/qcNumberInputService');
-const { resolveDuplicatePolicy } = require('../services/duplicateQcPolicyService');
+const { resolveQcPolicy } = require('../services/qcPolicyService');
+const policyService = require('../services/policyService');
 
 const BATCH_STATES = {
     OPEN: 'OPEN',
@@ -37,7 +38,7 @@ async function syncTypedQcItems(tx, batchId, evaluated) {
             recoveryPct: null,
             rpd: null,
             status: b.status || 'PASS',
-            details: b.rawInput ? JSON.stringify({ evaluation: b.details || null, rawInput: b.rawInput }) : b.details || null
+            details: b.rawInput ? JSON.stringify({ evaluation: b.details || null, rawInput: b.rawInput, policyVersion: evaluated.policyVersion }) : b.details || null
         });
     });
 
@@ -54,7 +55,7 @@ async function syncTypedQcItems(tx, batchId, evaluated) {
             recoveryPct: null,
             rpd: d.rpd !== null && d.rpd !== undefined ? Number(d.rpd) : null,
             status: d.status || 'PASS',
-            details: JSON.stringify({ evaluation: d.details || null, rawInput: d.rawInput || {},
+            details: JSON.stringify({ evaluation: d.details || null, rawInput: d.rawInput || {}, policyVersion: evaluated.policyVersion,
                 loq: d.loq, loqSource: d.loqSource, methodologyId: d.methodologyId, notes: d.notes,
                 criterion: d.criterion, censoringLimits: d.censoringLimits || null, absoluteDifference: d.absoluteDifference ?? null })
         });
@@ -73,7 +74,7 @@ async function syncTypedQcItems(tx, batchId, evaluated) {
             recoveryPct: c.recoveryPct !== null && c.recoveryPct !== undefined ? Number(c.recoveryPct) : null,
             rpd: null,
             status: c.status || 'PASS',
-            details: c.rawInput ? JSON.stringify({ evaluation: c.details || null, rawInput: c.rawInput }) : c.details || null
+            details: c.rawInput ? JSON.stringify({ evaluation: c.details || null, rawInput: c.rawInput, policyVersion: evaluated.policyVersion }) : c.details || null
         });
     });
 
@@ -138,60 +139,25 @@ async function persistBatchMutation(tx, batch, data, evaluated, user, reason) {
     return updated;
 }
 
-const RUN_PROFILES = {
-    // 96-well microplate methods (e.g. spectrophotometric microplate assays)
-    MICROPLATE_96: {
-        profileKey: 'MICROPLATE_96',
-        capacity: 96,
-        name: '96-Well Microplate',
-        qcSlots: [
-            { position: 1, type: 'BLANK', label: 'Reagent Blank' },
-            { position: 2, type: 'CONTROL', label: 'Standard Soil CRM' },
-            { position: 48, type: 'DUPLICATE', label: 'Mid-plate Duplicate' },
-            { position: 96, type: 'DUPLICATE', label: 'End-plate Duplicate' }
-        ]
-    },
-    // 24-place centrifuge or digestion block
-    CENTRIFUGE_24: {
-        profileKey: 'CENTRIFUGE_24',
-        capacity: 24,
-        name: '24-Place Tube Rack / Digestion Block',
-        qcSlots: [
-            { position: 1, type: 'BLANK', label: 'Method Blank' },
-            { position: 2, type: 'CONTROL', label: 'Reference Soil CRM' },
-            { position: 12, type: 'DUPLICATE', label: 'Mid-run Duplicate' }
-        ]
-    },
-    // 40-place standard sedimentation / pipette / hydrometer rack / carousel (Standard practical UAT profile)
-    RACK_40: {
-        profileKey: 'RACK_40',
-        capacity: 40,
-        name: '40-Place Sedimentation / Carousel Rack',
-        qcSlots: [
-            { position: 1, type: 'BLANK', label: 'Reagent / Hydrometer Blank' },
-            { position: 2, type: 'CONTROL', label: 'Standard Soil CRM' },
-            { position: 20, type: 'DUPLICATE', label: 'Mid-rack Duplicate' },
-            { position: 40, type: 'DUPLICATE', label: 'End-rack Duplicate' }
-        ]
-    }
-};
-
-function resolveRunProfile(analysis, instrument, requestedCapacity, requestedProfile) {
-    if (requestedProfile && RUN_PROFILES[requestedProfile]) {
-        return { ...RUN_PROFILES[requestedProfile] };
-    }
+function resolveRunProfile(analysis, instrument, requestedCapacity, requestedProfile, profiles = policyService.getStrict('qc.runProfiles')) {
+    const keys = Object.keys(profiles);
+    const fallback = profiles.RACK_40 ? 'RACK_40' : keys[0];
+    let selected = requestedProfile && Object.hasOwn(profiles, requestedProfile) ? requestedProfile : null;
     const inst = (instrument || '').toLowerCase();
-    if (inst.includes('microplate') || inst.includes('elisa') || inst.includes('96') || requestedCapacity === 96) {
-        return { ...RUN_PROFILES.MICROPLATE_96 };
+    if (!selected && (inst.includes('microplate') || inst.includes('elisa') || inst.includes('96') || requestedCapacity === 96)) {
+        selected = profiles.MICROPLATE_96 ? 'MICROPLATE_96' : keys.find(k => profiles[k].capacity === requestedCapacity);
     }
-    if (inst.includes('centrifuge') || inst.includes('digest') || inst.includes('block') || inst.includes('24') || requestedCapacity === 24) {
-        return { ...RUN_PROFILES.CENTRIFUGE_24 };
+    if (!selected && (inst.includes('centrifuge') || inst.includes('digest') || inst.includes('block') || inst.includes('24') || requestedCapacity === 24)) {
+        selected = profiles.CENTRIFUGE_24 ? 'CENTRIFUGE_24' : keys.find(k => profiles[k].capacity === requestedCapacity);
     }
-    const base = { ...RUN_PROFILES.RACK_40 };
-    if (typeof requestedCapacity === 'number' && requestedCapacity > 0) {
-        base.capacity = requestedCapacity;
-    }
-    return base;
+    const result = { ...require('../config/policyRegistry').clone(profiles[selected || fallback]), profileKey: selected || fallback };
+    if (!selected && typeof requestedCapacity === 'number' && requestedCapacity > 0) result.capacity = requestedCapacity;
+    return result;
+}
+
+async function resolveBatchRunProfile(batch, db = prisma) {
+    const profiles = await policyService.get(batch.labId, 'qc.runProfiles', { db, analysisCode: batch.analysis });
+    return resolveRunProfile(batch.analysis, batch.instrument, batch.maxCapacity, batch.profile, profiles);
 }
 
 exports.createBatch = async (req, res) => {
@@ -204,7 +170,7 @@ exports.createBatch = async (req, res) => {
         const batchId = (typeof id === 'string' && id.trim()) ? id.trim() : `BATCH-${Date.now()}`;
         const now = new Date();
 
-        const runProfile = resolveRunProfile(analysis, instrument, reqMaxCap || reqCapacity, reqProfile);
+        const runProfile = await resolveBatchRunProfile({ labId: user.labId, analysis, instrument, maxCapacity: reqMaxCap || reqCapacity, profile: reqProfile });
 
         const newBatch = await prisma.batch.create({
             data: {
@@ -277,7 +243,7 @@ exports.getBatches = async (req, res) => {
         const dataWithProfiles = await Promise.all(batches.map(async b => ({
             ...b,
             numberFormat: await getNumberFormat(b.labId),
-            runProfile: resolveRunProfile(b.analysis, b.instrument, b.maxCapacity, b.profile)
+            runProfile: await resolveBatchRunProfile(b)
         })));
 
         res.json({ data: dataWithProfiles });
@@ -316,7 +282,7 @@ exports.getBatchById = async (req, res) => {
             return res.status(403).json({ error: 'Access denied: Batch outside your laboratory scope' });
         }
 
-        const runProfile = resolveRunProfile(batch.analysis, batch.instrument, batch.maxCapacity, batch.profile);
+        const runProfile = await resolveBatchRunProfile(batch);
 
         let qcResults = null;
         try {
@@ -366,7 +332,7 @@ exports.updateBatch = async (req, res) => {
                 throw batchError(400, { error: 'Batch is CLOSED and cannot be modified.' });
             }
 
-            const runProfile = resolveRunProfile(batch.analysis, batch.instrument, batch.maxCapacity, batch.profile);
+            const runProfile = await resolveBatchRunProfile(batch, tx);
 
             // Restrict updates to explicitly allowed fields; membership & disposition are managed via dedicated routes
             const data = {};
@@ -396,8 +362,10 @@ exports.updateBatch = async (req, res) => {
                 };
                 const numberFormat = await getNumberFormat(batch.labId, { db: tx });
                 const qcPayload = normalizeQcNumbers(sourcePayload, numberFormat);
-                const duplicate = { ...await resolveDuplicatePolicy(batch, tx), numberFormat };
-                evaluated = retainQcRawInput(evaluateBatchQc(qcPayload, { runProfile, policy: { duplicate } }), qcPayload);
+                const policy = await resolveQcPolicy(batch, tx, numberFormat);
+                evaluated = retainQcRawInput(evaluateBatchQc(qcPayload, { runProfile, policy }), qcPayload);
+                evaluated.policyVersion = policy.policyVersion;
+                evaluated.policyValues = policy.policyValues;
                 data.qcResults = JSON.stringify(evaluated);
                 if (batch.status === BATCH_STATES.QC_PASS && evaluated.overallStatus === BATCH_STATES.OPEN) reopened = true;
                 if (evaluated.overallStatus === 'OPEN') {
@@ -513,15 +481,17 @@ exports.evaluateBatch = async (req, res) => {
             if (batch.status === BATCH_STATES.QC_FAIL || batch.disposition) {
                 throw batchError(409, { code: 'QC_BATCH_LOCKED', error: 'Failed or dispositioned QC evidence cannot be re-evaluated.' });
             }
-            const runProfile = resolveRunProfile(batch.analysis, batch.instrument, batch.maxCapacity, batch.profile);
+            const runProfile = await resolveBatchRunProfile(batch, tx);
             const numberFormat = await getNumberFormat(batch.labId, { db: tx });
             const qcPayload = normalizeQcNumbers({ blanks, duplicates, controls }, numberFormat);
             const missingTypes = getMissingQcValueTypes(qcPayload, runProfile, numberFormat);
             if (missingTypes.length) {
                 throw batchError(400, { code: 'QC_VALUES_MISSING', error: 'Required QC values are missing or non-numeric.', missingTypes });
             }
-            const duplicate = { ...await resolveDuplicatePolicy(batch, tx), numberFormat };
-            const evaluated = retainQcRawInput(evaluateBatchQc(qcPayload, { runProfile, policy: { duplicate } }), qcPayload);
+            const policy = await resolveQcPolicy(batch, tx, numberFormat);
+            const evaluated = retainQcRawInput(evaluateBatchQc(qcPayload, { runProfile, policy }), qcPayload);
+            evaluated.policyVersion = policy.policyVersion;
+            evaluated.policyValues = policy.policyValues;
             const reopened = batch.status === BATCH_STATES.QC_PASS && evaluated.overallStatus === BATCH_STATES.OPEN;
             if (reopened) requireReopenAuthority(user, req.body.reason);
             const data = {
@@ -565,7 +535,7 @@ exports.addItemsToBatch = async (req, res) => {
         const currentIds = new Set(currentIdsArray);
 
         // Resolve method/instrument profile capacity and reserved QC slots
-        const runProfile = resolveRunProfile(batch.analysis, batch.instrument, batch.maxCapacity, batch.profile);
+        const runProfile = await resolveBatchRunProfile(batch);
         const capacity = batch.maxCapacity || runProfile.capacity;
 
         const qcSlotMap = new Map();
@@ -983,5 +953,5 @@ exports.dispositionBatch = async (req, res) => {
     }
 };
 
-exports.RUN_PROFILES = RUN_PROFILES;
+exports.RUN_PROFILES = policyService.getStrict('qc.runProfiles');
 exports.resolveRunProfile = resolveRunProfile;

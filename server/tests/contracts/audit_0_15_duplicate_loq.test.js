@@ -42,7 +42,11 @@ describe('Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring 
         token = await getAuthToken('LAB_TECHNICIAN', labId);
         await prisma.lab.upsert({ where: { id: labId }, update: { settings: '{}' }, create: { id: labId, code: labId, name: labId, country: 'GTM', settings: '{}' } });
     });
-    afterEach(async () => { await prisma.lab.update({ where: { id: labId }, data: { settings: '{}' } }); });
+    afterEach(async () => {
+        await prisma.lab.update({ where: { id: labId }, data: { settings: '{}' } });
+        if (await prisma.labPolicy.findUnique({ where: { labId } })) await policyService.change({ role: 'SUPER_ADMIN', username: 'FIXTURE', isActive: true }, labId,
+            { reason: 'Reset number-format fixture', changes: [{ key: 'numbers.decimalSeparator', value: '.' }, { key: 'numbers.thousandsSeparator', value: null }] });
+    });
     async function fixture({ methodLoqs = [.1], analysisLoq = .2 } = {}) {
         const analysis = id('HTTP-A015'), batchId = id('HTTP-B015');
         await prisma.analysis.create({ data: { code: analysis, name: analysis, loq: analysisLoq } });
@@ -100,6 +104,8 @@ describe('Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring 
     });
     test('raw localized censoring syntax is reparsed once with its lab format, never with a canonical grouping separator', async () => {
         await prisma.lab.update({ where: { id: labId }, data: { settings: '{"decimalSeparator":",","thousandsSeparator":"."}' } });
+        await policyService.change({ role: 'SUPER_ADMIN', username: 'FIXTURE', isActive: true }, labId, { reason: 'Localized number-format fixture',
+            changes: [{ key: 'numbers.decimalSeparator', value: ',' }, { key: 'numbers.thousandsSeparator', value: '.' }] });
         const { batch } = await fixture();
         const data = payload('<1.234', '<1.234');
         data.duplicates[0].rawInput = { value1: ' <1,234 ', value2: '<1,234' };
@@ -239,7 +245,8 @@ describe('Audit 0.15: real batch method and analysis evidence', () => {
 describe('Audit 0.15: recorded methodology resolution', () => {
     const batch = { id: 'batch', labId: 'lab', analysis: 'analysis' };
     function db({ members = [], results = [], methodLoq = null, analysisLoq = null, validation = null } = {}) {
-        return { analysis: { findUnique: jest.fn().mockResolvedValue({ loq: analysisLoq, validation }) },
+        return { lab: { findUnique: jest.fn().mockResolvedValue(null) },
+            analysis: { findUnique: jest.fn().mockResolvedValue({ loq: analysisLoq, validation }) },
             workItem: { findMany: jest.fn().mockResolvedValue(members) }, result: { findMany: jest.fn().mockResolvedValue(results) },
             methodology: { findUnique: jest.fn().mockResolvedValue({ loq: methodLoq }) } };
     }

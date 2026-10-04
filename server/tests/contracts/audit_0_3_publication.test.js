@@ -206,7 +206,8 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         const policy = mockQcMode(mode);
         const before = await reviewedState(f);
         const res = await generate(f);
-        expect(policy).toHaveBeenCalledWith(labId, 'qc.mode', { analysisCode: 'PH_H2O', methodologyId: null });
+        expect(policy).toHaveBeenCalledWith(labId, 'qc.mode', { analysisCode: 'PH_H2O', methodologyId: null,
+            db: expect.objectContaining({ lab: expect.anything() }) });
         if (mode === 'REQUIRED_BLOCKING') { expect(res.status).toBe(409); expect(res.body.code).toBe('QC_BATCH_FAILED'); }
         else {
             expect(res.status).toBe(200);

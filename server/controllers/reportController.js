@@ -128,7 +128,7 @@ async function generateReport(req, res) {
             const qcModes = {};
             for (const result of currentSample.results) {
                 qcModes[result.id] = await policyService.get(currentSample.assignedLab || currentSample.labId, 'qc.mode', {
-                    analysisCode: result.param, methodologyId: result.methodologyId || null
+                    analysisCode: result.param, methodologyId: result.methodologyId || null, db: tx
                 });
             }
             const { canPublish } = require('../services/workEligibility');
@@ -148,8 +148,11 @@ async function generateReport(req, res) {
             const lab = await tx.lab.findFirst({ where: { OR: [{ id: currentSample.assignedLab || currentSample.labId },
                 { code: currentSample.assignedLab || currentSample.labId }] } });
             const identity = await allocateReportIdentity(tx, { sampleId, lab, publishedAt,
-                resolveFormat: () => policyService.get(lab.id, 'report.numberFormat') });
+                resolveFormat: () => policyService.get(lab.id, 'report.numberFormat', { db: tx }) });
+            const policySnapshot = await policyService.snapshot(lab.id, { db: tx });
             const { content, searchKeys } = await assembleReport(sampleId, req.user, { db: tx, qcBatches, qcModes });
+            content.policy = { version: policySnapshot.version, presetCode: policySnapshot.presetCode,
+                reportNumberFormat: policySnapshot.values['report.numberFormat'], qcModes };
             content.reportNumber = displayNumber(identity.reportNumberBase, identity.revision);
             content.publication = { ...identity, publishedAt: publishedAt.toISOString(), status: 'PUBLISHED' };
             await tx.reportShareLink.updateMany({
@@ -167,6 +170,7 @@ async function generateReport(req, res) {
                     version,
                     reportNumberBase: identity.reportNumberBase,
                     revision: identity.revision,
+                    policyVersion: policySnapshot.version,
                     status: 'PUBLISHED',
                     content: JSON.stringify(content),
                     generatedBy: req.user?.username || 'system',

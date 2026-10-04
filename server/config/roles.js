@@ -195,6 +195,9 @@ const PERMISSIONS = {
         'SUPER_ADMIN', 'LAB_MANAGER'
     ],
 
+    'VIEW_LAB_POLICIES': ALL_ROLES,
+    'MANAGE_LAB_POLICIES': ['SUPER_ADMIN', 'LAB_MANAGER'],
+
     // Appearance & Themes
     'MANAGE_GLOBAL_APPEARANCE': [
         'SUPER_ADMIN'
