@@ -56,7 +56,6 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
                             result: '7.12',
                             category: 'Chemical',
                             status: 'SUBMITTED',
-                            submissionId: 'p6-sub-001',
                             assignedTo: techUser.username,
                             labId: 'LAB-P6'
                         },
@@ -66,7 +65,6 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
                             result: '1.45',
                             category: 'Chemical',
                             status: 'SUBMITTED',
-                            submissionId: 'p6-sub-001',
                             assignedTo: techUser.username,
                             labId: 'LAB-P6'
                         }
@@ -114,6 +112,10 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
                 workItemCount: 2,
                 workItemIds: JSON.stringify(['p6-wi-ph-01', 'p6-wi-ec-01'])
             }
+        });
+
+        await prisma.workItem.updateMany({
+            where: { id: { in: ['p6-wi-ph-01', 'p6-wi-ec-01'] } }, data: { submissionId: 'p6-sub-001' }
         });
 
         // Create sample in DISPOSED status to verify immutability
