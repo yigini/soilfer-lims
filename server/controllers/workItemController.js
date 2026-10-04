@@ -1297,6 +1297,7 @@ exports.reviewWorkItem = async (req, res) => {
         history.push({
             status,
             note: effectiveReason || note || 'Manager Review',
+            ...(status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED ? { submissionId: item.submissionId, reason: effectiveReason } : {}),
             changedBy: user.username,
             timestamp: now
         });
@@ -1307,6 +1308,7 @@ exports.reviewWorkItem = async (req, res) => {
         };
         if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
             updateData.reanalysisReason = effectiveReason;
+            updateData.submissionId = null;
         }
 
         const operations = [];
@@ -1647,6 +1649,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
             history.push({
                 status,
                 note: effectiveReason || note || 'Bulk Manager Review',
+                ...(status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED ? { submissionId: item.submissionId, reason: effectiveReason } : {}),
                 changedBy: user.username,
                 timestamp: now
             });
@@ -1657,26 +1660,10 @@ exports.reviewWorkItemsBulk = async (req, res) => {
             };
             if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
                 updateData.reanalysisReason = effectiveReason;
+                updateData.submissionId = null;
             }
 
-            operations.push(tx => tx.workItem.update({
-                where: { id: item.id },
-                data: updateData
-            }));
-
             if (status === workflow.WORK_ITEM_STATES.ACCEPTED) {
-                if (item.analysis === 'ARCHIVING' || item.analysis === 'ARCH' || item.analysis === 'Archive') {
-                    const { transitionSample } = require('../services/sampleStateService');
-                    await transitionSample(item.sampleId, 'ARCHIVED', user, 'Sample archived via batch work item review').catch(err => {
-                        console.warn('[reviewBatch] Warning: sample transition to ARCHIVED failed:', err.message);
-                    });
-                } else if (item.analysis === 'DISPOSAL' || item.analysis === 'DISP' || item.analysis === 'Dispose') {
-                    const { transitionSample } = require('../services/sampleStateService');
-                    await transitionSample(item.sampleId, 'DISPOSED', user, 'Sample disposed via batch work item review').catch(err => {
-                        console.warn('[reviewBatch] Warning: sample transition to DISPOSED failed:', err.message);
-                    });
-                }
-
                 // Sync spectralData status when spectral work item is approved
                 // S05: Only sync exact linked scan or exact attempt
                 const bulkAnalysisUpper = (item.analysis || '').toUpperCase();

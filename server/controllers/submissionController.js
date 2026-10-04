@@ -452,7 +452,8 @@ exports.reviewSubmission = async (req, res) => {
                 reason: reason || null,
                 reviewedBy: user.username,
                 timestamp: now,
-                action: 'REVIEWED'
+                action: 'REVIEWED',
+                ...(verdict === 'REJECT_REANALYSIS' ? { submissionId: item.submissionId } : {})
             });
 
             const updates = {
@@ -466,6 +467,7 @@ exports.reviewSubmission = async (req, res) => {
             if (verdict === 'REJECT_REANALYSIS') {
                 updates.reanalysisReason = reason;
                 updates.reanalysisRequestedBy = user.username;
+                updates.submissionId = null;
             }
             if (verdict === 'WAIVE') {
                 updates.waiveReason = reason;
@@ -505,6 +507,13 @@ exports.reviewSubmission = async (req, res) => {
             try {
                 await commitReview(prisma, item, newStatus, user, updates, async tx => {
                     for (const operation of operations) await operation(tx);
+                    if (newStatus === workflow.WORK_ITEM_STATES.ACCEPTED && workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis)) {
+                        const { transitionSample } = require('../services/sampleStateService');
+                        await transitionSample(item.sampleId, workflow.CLOSURE_TASK_SAMPLE_STATES[item.analysis], user,
+                            'Sample closed via submission review', {}, tx).catch(error => {
+                            console.warn('[reviewSubmission] Warning: sample closure transition failed:', error.message);
+                        });
+                    }
                     if (verdict === 'REJECT_REANALYSIS') await invalidateReturnedResults(tx, item, user, reason);
                 }, id);
                 results.push({ workItemId, status: newStatus, decision: verdict });
