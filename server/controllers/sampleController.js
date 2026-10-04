@@ -1874,6 +1874,7 @@ exports.updateSampleAnalyses = async (req, res) => {
         if (reconcileResult.conflict) {
             return res.status(reconcileResult.status || 409).json({
                 error: reconcileResult.error,
+                code: reconcileResult.code,
                 conflicts: reconcileResult.conflicts,
                 refused: reconcileResult.refused
             });
@@ -2625,6 +2626,7 @@ exports.applyOrderRevision = async (req, res) => {
         if (reconcileResult.conflict) {
             return res.status(reconcileResult.status || 409).json({
                 error: reconcileResult.error,
+                code: reconcileResult.code,
                 conflicts: reconcileResult.conflicts,
                 refused: reconcileResult.refused
             });

@@ -18,9 +18,9 @@ const getEffectiveAnalyses = (sample) => {
 };
 
 
-async function preflightDefaults(codes, sample, existingCodes = []) {
+async function preflightDefaults(codes, sample, existingCodes = [], db = prisma) {
     const resolved = new Map();
-    const selections = await require('../services/methodResolution').resolveDefaultSelections(codes.filter(c => !existingCodes.includes(c)), sample.assignedLab || sample.labId);
+    const selections = await require('../services/methodResolution').resolveDefaultSelections(codes.filter(c => !existingCodes.includes(c)), sample.assignedLab || sample.labId, db);
     for (const [analysisCode, selection] of selections) {
         if (selection.error) throw new Error(selection.error);
         resolved.set(analysisCode, selection.method?.id || null);
@@ -44,18 +44,16 @@ exports.generateWorkItemsForSample = async (sample, tx) => {
  * 2. Assigned or in progress, no result -> Require reason; set WAIVED with reason and actor; audit
  * 3. Any result recorded (current or superseded) -> Refuse with 409 naming analysis and result
  */
-exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reason) => {
+async function reconcileWorkItems(tx, sample, targetAnalyses, user, reason) {
     const { id } = sample;
     const labId = sample.assignedLab || null;
     const targetList = Array.isArray(targetAnalyses) ? targetAnalyses : [];
-
-
 
     const uniqueTarget = normalizeAnalysisCodes(targetList);
     const targetSet = new Set(uniqueTarget);
 
     const operationalGates = ['DRYING', 'PREPARATION', 'ARCHIVING', 'DISPOSAL'];
-    const existingItems = await prisma.workItem.findMany({
+    const existingItems = await tx.workItem.findMany({
         where: {
             sampleId: String(id),
             analysis: { notIn: operationalGates }
@@ -64,6 +62,24 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
 
     const itemsToRemove = existingItems.filter(item => !targetSet.has(item.analysis) && item.status !== 'WAIVED');
 
+    // Refuse before any mutation: a canonical item may still be referenced by
+    // a marked duplicate, including a waived duplicate outside the removal set.
+    const canonicalRemovalIds = itemsToRemove.filter(item => item.duplicateOf == null).map(item => item.id);
+    const duplicateReferences = canonicalRemovalIds.length ? await tx.workItem.findMany({
+        where: { duplicateOf: { in: canonicalRemovalIds } },
+        select: { id: true, analysis: true }
+    }) : [];
+    if (duplicateReferences.length) {
+        return {
+            conflict: true,
+            status: 409,
+            code: 'WORKITEM_DUPLICATES_PRESENT',
+            error: 'Cannot remove an analysis while marked duplicate work items refer to its canonical item.',
+            refused: duplicateReferences
+        };
+    }
+
+
     // 1. Check for recorded results on any items to be removed
     const conflicts = [];
     for (const item of itemsToRemove) {
@@ -71,7 +87,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
         if (item.result && String(item.result).trim() !== '') {
             recordedResult = item.result;
         } else {
-            const dbResult = await prisma.result.findFirst({
+            const dbResult = await tx.result.findFirst({
                 where: {
                     sampleId: String(id),
                     param: item.analysis
@@ -113,7 +129,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
 
     const existingCodeSet = new Set(existingItems.map(i => i.analysis));
     const codesToAdd = uniqueTarget.filter(code => !existingCodeSet.has(code));
-    const defaultMethods = await preflightDefaults(codesToAdd, sample);
+    const defaultMethods = await preflightDefaults(codesToAdd, sample, [], tx);
 
     const deletedItems = [];
     const waivedItems = [];
@@ -122,8 +138,8 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
     // 3. Process Removals and Waivers
     for (const item of itemsToRemove) {
         if (item.status === workflow.WORK_ITEM_STATES.NOT_ASSIGNED) {
-            await prisma.workItem.delete({ where: { id: item.id } });
-            await prisma.auditLog.create({
+            await tx.workItem.delete({ where: { id: item.id } });
+            await tx.auditLog.create({
                 data: {
                     id: crypto.randomUUID(),
                     entity: 'WORKITEM',
@@ -147,7 +163,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
                 timestamp: new Date().toISOString()
             });
 
-            await prisma.workItem.update({
+            await tx.workItem.update({
                 where: { id: item.id },
                 data: {
                     status: workflow.WORK_ITEM_STATES.WAIVED,
@@ -156,7 +172,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
                 }
             });
 
-            await prisma.auditLog.create({
+            await tx.auditLog.create({
                 data: {
                     id: crypto.randomUUID(),
                     entity: 'WORKITEM',
@@ -178,7 +194,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
     // 4. Process Additions
 
     if (codesToAdd.length > 0) {
-        const catalogueRecords = await prisma.analysis.findMany({
+        const catalogueRecords = await tx.analysis.findMany({
             where: { code: { in: codesToAdd } },
             select: { code: true, executionOrder: true }
         });
@@ -198,7 +214,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
 
             const defaultMethodId = defaultMethods.get(analysisCode) || null;
 
-            const wi = await prisma.workItem.create({
+            const wi = await tx.workItem.create({
                 data: {
                     id: wiId,
                     sampleId: String(id),
@@ -214,7 +230,7 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
                 }
             });
 
-            await prisma.auditLog.create({
+            await tx.auditLog.create({
                 data: {
                     id: crypto.randomUUID(),
                     entity: 'SAMPLE',
@@ -239,6 +255,19 @@ exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reaso
         removed: deletedItems,
         summary: `${addedItems.length} added, ${waivedItems.length} waived, ${deletedItems.length} removed`
     };
+}
+
+exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reason) => {
+    try {
+        return await prisma.$transaction(tx => reconcileWorkItems(tx, sample, targetAnalyses, user, reason));
+    } catch (error) {
+        // The rejected transaction has already rolled back every earlier write.
+        if (error.code === 'P2003' || error.code === 'SQLITE_CONSTRAINT_FOREIGNKEY') {
+            return { conflict: true, status: 409, code: 'WORKITEM_REFERENCE_CONFLICT',
+                error: 'A referenced work item cannot be removed; no reconciliation changes were saved.' };
+        }
+        throw error;
+    }
 };
 
 // --- API ENDPOINTS ---

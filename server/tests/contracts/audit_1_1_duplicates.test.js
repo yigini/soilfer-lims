@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
-const { execFileSync } = require('child_process');
+const { execFileSync, spawnSync } = require('child_process');
 const { listDuplicates, readGroup, resolveGroup, argumentsFor } = require('../../scripts/workitem_duplicates');
 
 const markerSql = fs.readFileSync(path.join(__dirname, '../../prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql'), 'utf8');
@@ -18,10 +18,11 @@ function seed(db) {
     db.prepare('INSERT INTO WorkItem VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').run('duplicate', 'sample', 'PH', 'COMPLETED', '7.2', 'otherSubmission', 'otherBatch', '2026-10-02', '["measured"]');
     db.exec("INSERT INTO Result VALUES ('result', 'sample', 'PH'); INSERT INTO SpectralData VALUES ('scan', 'duplicate');");
 }
-const request = overrides => ({ sampleId: 'sample', analysis: 'PH', keep: 'keep', reason: 'Manager reviewed both measurements', actor: 'manager', ...overrides });
+
 
 describe('Audit 1.1: additive, audited duplicate resolution', () => {
     let db;
+    const request = overrides => ({ sampleId: 'sample', analysis: 'PH', keep: 'keep', reason: 'Manager reviewed both measurements', actor: 'manager', fingerprint: readGroup(db, 'sample', 'PH').fingerprint, ...overrides });
     beforeEach(() => { db = new Database(':memory:'); seed(db); db.exec(markerSql); db.pragma('foreign_keys = ON'); });
     afterEach(() => db.close());
     test('lists every active group with result, submission and batch links, and never chooses a kept item', () => {
@@ -56,16 +57,18 @@ describe('Audit 1.1: additive, audited duplicate resolution', () => {
     test.each([
         [{ keep: 'unrelated' }, 'WORKITEM_DUPLICATE_KEEP_INVALID'],
         [{ reason: '   ' }, 'WORKITEM_DUPLICATE_REASON_REQUIRED'],
-        [{ actor: '' }, 'WORKITEM_DUPLICATE_ACTOR_REQUIRED']
+        [{ actor: '' }, 'WORKITEM_DUPLICATE_ACTOR_REQUIRED'],
+        [{ fingerprint: undefined }, 'WORKITEM_DUPLICATE_FINGERPRINT_REQUIRED'],
+        [{ fingerprint: 'invented' }, 'WORKITEM_DUPLICATE_FINGERPRINT_REQUIRED']
     ])('refuses unsafe resolution %p without any writes', (overrides, code) => {
         expect(() => resolveGroup(db, request(overrides))).toThrow(expect.objectContaining({ code }));
         expect(listDuplicates(db).groupCount).toBe(1);
         expect(db.prepare('SELECT COUNT(*) n FROM AuditLog').get().n).toBe(0);
     });
     test('a group changed after reading is refused, including result or submission changes', () => {
-        const snapshot = readGroup(db, 'sample', 'PH');
+        const reviewedRequest = request();
         db.exec("UPDATE WorkItem SET submissionId = 'changed' WHERE id = 'duplicate';");
-        expect(() => resolveGroup(db, request(), snapshot)).toThrow(expect.objectContaining({ code: 'WORKITEM_DUPLICATE_GROUP_CHANGED' }));
+        expect(() => resolveGroup(db, reviewedRequest)).toThrow(expect.objectContaining({ code: 'WORKITEM_DUPLICATE_GROUP_CHANGED' }));
         expect(db.prepare('SELECT COUNT(*) n FROM AuditLog').get().n).toBe(0);
         expect(listDuplicates(db).groupCount).toBe(1);
     });
@@ -77,9 +80,9 @@ describe('Audit 1.1: additive, audited duplicate resolution', () => {
     });
     test.each(['Result', 'SpectralData'])('a changed %s value is refused even when its link and id are unchanged', table => {
         db.exec(`ALTER TABLE ${table} ADD COLUMN retainedEvidence TEXT;`);
-        const snapshot = readGroup(db, 'sample', 'PH');
+        const reviewedRequest = request();
         db.prepare(`UPDATE ${table} SET retainedEvidence = ?`).run('new measurement evidence');
-        expect(() => resolveGroup(db, request(), snapshot)).toThrow(expect.objectContaining({ code: 'WORKITEM_DUPLICATE_GROUP_CHANGED' }));
+        expect(() => resolveGroup(db, reviewedRequest)).toThrow(expect.objectContaining({ code: 'WORKITEM_DUPLICATE_GROUP_CHANGED' }));
         expect(db.prepare('SELECT COUNT(*) n FROM AuditLog').get().n).toBe(0);
         expect(listDuplicates(db).groupCount).toBe(1);
     });
@@ -98,6 +101,30 @@ describe('Audit 1.1: additive, audited duplicate resolution', () => {
             expect(JSON.parse(stdout)).toMatchObject({ mode: 'dry-run', groupCount: 1 });
             expect(fs.readFileSync(file)).toEqual(before);
         } finally { fs.unlinkSync(file); }
+    });
+
+    test.each(['added', 'changed'])('real CLI refuses a group %s after the manager reviewed its dry-run', change => {
+        const file = path.join(os.tmpdir(), `audit11-reviewed-dupes-${crypto.randomUUID()}.db`);
+        const script = path.join(__dirname, '../../scripts/workitem_duplicates.js');
+        const raw = new Database(file); seed(raw); raw.exec(markerSql); raw.close();
+        try {
+            const report = JSON.parse(execFileSync(process.execPath, [script, '--database', file], { encoding: 'utf8' }));
+            const reviewed = report.groups[0].fingerprint;
+            const changed = new Database(file);
+            if (change === 'added') changed.exec("INSERT INTO WorkItem (id,sampleId,analysis,status) VALUES ('third','sample','PH','NOT_ASSIGNED');");
+            else changed.exec("UPDATE WorkItem SET submissionId='manager-did-not-review' WHERE id='duplicate';");
+            const before = changed.prepare('SELECT * FROM WorkItem ORDER BY id').all(); changed.close();
+            const result = spawnSync(process.execPath, [script, '--database', file, '--resolve', '--sample', 'sample', '--analysis', 'PH', '--keep', 'keep', '--reason', 'Reviewed earlier', '--actor', 'manager', '--fingerprint', reviewed], { encoding: 'utf8' });
+            expect(result.status).toBe(1);
+            expect(JSON.parse(result.stderr)).toMatchObject({ code: 'WORKITEM_DUPLICATE_GROUP_CHANGED' });
+            const after = new Database(file, { readonly: true });
+            expect(after.prepare('SELECT * FROM WorkItem ORDER BY id').all()).toEqual(before);
+            expect(after.prepare('SELECT count(*) n FROM AuditLog').get().n).toBe(0); after.close();
+        } finally { fs.unlinkSync(file); }
+    });
+    test('CLI resolution requires the reviewed fingerprint before opening a database', () => {
+        expect(() => argumentsFor(['--database', 'copy.db', '--resolve', '--sample', 'sample', '--analysis', 'PH', '--keep', 'keep', '--reason', 'Reviewed', '--actor', 'manager']))
+            .toThrow(expect.objectContaining({ code: 'WORKITEM_DUPLICATE_FINGERPRINT_REQUIRED' }));
     });
     test('argument validation never turns a dry-run into a write or accepts ambiguous flags', () => {
         expect(argumentsFor(['--database', 'copy.db'])).toEqual({ '--database': 'copy.db' });

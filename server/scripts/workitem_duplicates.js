@@ -34,17 +34,20 @@ function listDuplicates(db) {
     const groups = db.prepare(`SELECT sampleId, analysis FROM WorkItem WHERE 1 = 1${active(db)} GROUP BY sampleId, analysis HAVING COUNT(*) > 1 ORDER BY sampleId, analysis`).all();
     return { mode: 'dry-run', groupCount: groups.length, groups: groups.map(group => readGroup(db, group.sampleId, group.analysis)) };
 }
-function resolveGroup(db, input, expected = readGroup(db, input.sampleId, input.analysis)) {
+function requireReviewedFingerprint(fingerprint) {
+    if (typeof fingerprint !== 'string' || !/^[a-f0-9]{64}$/.test(fingerprint)) fail('WORKITEM_DUPLICATE_FINGERPRINT_REQUIRED', 'Supply the exact fingerprint from the reviewed dry-run.');
+}
+function resolveGroup(db, input) {
     if (!markerExists(db)) fail('WORKITEM_DUPLICATE_SCHEMA_REQUIRED', 'Apply the additive duplicate marker migration before resolving rows.');
     if (!input.reason?.trim()) fail('WORKITEM_DUPLICATE_REASON_REQUIRED', 'An explicit manager reason is required.');
     if (!input.actor?.trim()) fail('WORKITEM_DUPLICATE_ACTOR_REQUIRED', 'An authenticated manager username must be recorded.');
-    if (expected.sampleId !== input.sampleId || expected.analysis !== input.analysis) fail('WORKITEM_DUPLICATE_GROUP_CHANGED', 'The reviewed group does not match this request.');
-    if (!expected.rows.some(row => row.id === input.keep)) fail('WORKITEM_DUPLICATE_KEEP_INVALID', 'The kept item must belong to the reviewed active group.');
-    if (expected.rows.length < 2) fail('WORKITEM_DUPLICATE_GROUP_NOT_FOUND', 'No active duplicate group exists for this sample and analysis.');
+    requireReviewedFingerprint(input.fingerprint);
     require('../services/exchangeDbFunctions').registerDbFunctions(db);
     return db.transaction(() => {
         const current = readGroup(db, input.sampleId, input.analysis);
-        if (current.fingerprint !== expected.fingerprint) fail('WORKITEM_DUPLICATE_GROUP_CHANGED', 'The group changed after it was reviewed; rerun the dry-run.');
+        if (current.fingerprint !== input.fingerprint) fail('WORKITEM_DUPLICATE_GROUP_CHANGED', 'The group changed after it was reviewed; rerun the dry-run.');
+        if (!current.rows.some(row => row.id === input.keep)) fail('WORKITEM_DUPLICATE_KEEP_INVALID', 'The kept item must belong to the reviewed active group.');
+        if (current.rows.length < 2) fail('WORKITEM_DUPLICATE_GROUP_NOT_FOUND', 'No active duplicate group exists for this sample and analysis.');
         const update = db.prepare('UPDATE WorkItem SET duplicateOf = ? WHERE id = ? AND duplicateOf IS NULL');
         const audit = db.prepare('INSERT INTO AuditLog (id, entity, entityId, action, details, performedBy, timestamp, sampleId, analysisCode, before, after) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         const changedIds = [];
@@ -59,7 +62,7 @@ function resolveGroup(db, input, expected = readGroup(db, input.sampleId, input.
 }
 
 function argumentsFor(argv) {
-    const values = new Set(['--database', '--sample', '--analysis', '--keep', '--reason', '--actor']);
+    const values = new Set(['--database', '--sample', '--analysis', '--keep', '--reason', '--actor', '--fingerprint']);
     const flags = new Set(['--resolve', '--dry-run']);
     const parsed = {};
     for (let i = 0; i < argv.length; i++) {
@@ -69,8 +72,9 @@ function argumentsFor(argv) {
         else if (values.has(key) && argv[i + 1] !== undefined && !argv[i + 1].startsWith('--')) parsed[key] = argv[++i];
         else fail('WORKITEM_DUPLICATE_ARGUMENTS_INVALID', `Invalid argument: ${key}`);
     }
-    if (!parsed['--database'] || parsed['--resolve'] && parsed['--dry-run'] || !parsed['--resolve'] && [...values].some(key => key !== '--database' && parsed[key] !== undefined)) fail('WORKITEM_DUPLICATE_ARGUMENTS_INVALID', 'Use --database <existing file> [--dry-run] or --resolve --sample <id> --analysis <code> --keep <id> --reason <text> --actor <username>.');
+    if (!parsed['--database'] || parsed['--resolve'] && parsed['--dry-run'] || !parsed['--resolve'] && [...values].some(key => key !== '--database' && parsed[key] !== undefined)) fail('WORKITEM_DUPLICATE_ARGUMENTS_INVALID', 'Use --database <existing file> [--dry-run] or --resolve --sample <id> --analysis <code> --keep <id> --reason <text> --actor <username> --fingerprint <reviewed dry-run fingerprint>.');
     if (parsed['--resolve'] && ['--sample', '--analysis', '--keep', '--actor'].some(key => !parsed[key]?.trim())) fail('WORKITEM_DUPLICATE_ARGUMENTS_INVALID', 'Resolve requires a sample, analysis, kept item and actor.');
+    if (parsed['--resolve']) requireReviewedFingerprint(parsed['--fingerprint']);
     return parsed;
 }
 if (require.main === module) {
@@ -78,7 +82,7 @@ if (require.main === module) {
     try {
         const args = argumentsFor(process.argv.slice(2));
         db = new Database(path.resolve(args['--database']), { readonly: !args['--resolve'], fileMustExist: true });
-        const report = args['--resolve'] ? resolveGroup(db, { sampleId: args['--sample'], analysis: args['--analysis'], keep: args['--keep'], reason: args['--reason'], actor: args['--actor'] }) : listDuplicates(db);
+        const report = args['--resolve'] ? resolveGroup(db, { sampleId: args['--sample'], analysis: args['--analysis'], keep: args['--keep'], reason: args['--reason'], actor: args['--actor'], fingerprint: args['--fingerprint'] }) : listDuplicates(db);
         console.log(JSON.stringify(report, null, 2));
     } catch (error) { console.error(JSON.stringify({ code: error.code || 'WORKITEM_DUPLICATE_FAILED', message: error.message })); process.exitCode = 1; }
     finally { db?.close(); }
