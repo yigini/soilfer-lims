@@ -324,16 +324,7 @@ echo "✓ Verified: Container '${APP_CONTAINER_NAME}' mounts volume '${VOLUME_NA
 
 # 1.6 Verify reviewed intake guards exist in reviewed image
 echo "Verifying reviewed intake guards in target image..."
-docker run --rm --entrypoint node --network none "${REVIEWED_IMAGE_ID}" -e "
-const fs = require('fs');
-const rc = fs.readFileSync('/app/server/controllers/receptionController.js', 'utf8');
-const sc = fs.readFileSync('/app/server/controllers/sampleController.js', 'utf8');
-if (!rc.includes('AMBIGUOUS_PROVENANCE_HOLD') || !sc.includes('AMBIGUOUS_PROVENANCE_HOLD')) {
-    console.error('ERROR: Reviewed AMBIGUOUS_PROVENANCE_HOLD intake guards missing from image!');
-    process.exit(1);
-}
-console.log('✓ Target image confirmed: contains reviewed AMBIGUOUS_PROVENANCE_HOLD intake guards.');
-"
+docker run --rm --entrypoint node --network none "${REVIEWED_IMAGE_ID}" /app/server/scripts/verify_intake_guards.cjs
 
 # --- Step 2: Enforce Ingress Write Quiescence (Apache 503 Rewrite) ---
 echo "--- Step 2: Enforce Ingress Write Quiescence (Apache 503 Rewrite) ---"
