@@ -169,7 +169,10 @@ const BatchIntake = ({
     };
 
     const handleRemoveSample = (index) => {
+        const removedId = samples[index].originalId;
         setSamples(prev => prev.filter((_, i) => i !== index));
+        setBulkApplications(previous => previous.map(action => ({ ...action, sampleIds: action.sampleIds.filter(id => id !== removedId) }))
+            .filter(action => action.sampleIds.length));
     };
 
     const handleUpdateSample = (updatedSample) => {
@@ -618,7 +621,8 @@ const BatchIntake = ({
                             type="button"
                             onClick={() => {
                                 if (confirm('Are you sure you want to clear all scanned samples in this batch?')) {
-                                    setSamples([]);
+                                setSamples([]);
+                                setBulkApplications([]);
                                 }
                             }}
                             className="text-xs text-red-500 hover:text-red-700 font-bold"
