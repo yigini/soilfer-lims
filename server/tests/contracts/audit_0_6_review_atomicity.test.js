@@ -124,7 +124,9 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         const path = route === 'bulk' ? '/api/work/review/bulk' : `/api/submissions/${f.submission.id}/review`;
         const responses = await Promise.all([1, 2].map(() => post(path, body)));
         expect(responses.map(res => res.status).sort()).toEqual([200, 409]);
-        expect(responses.find(res => res.status === 409).body.errors).toEqual([{ workItemId: f.item.id, code: 'ITEM_NOT_SUBMITTED' }]);
+        const refused = responses.find(res => res.status === 409);
+        if (refused.body.code === 'SUBMISSION_NOT_REVIEWABLE') expect(refused.body.status).toBe('REVIEWED');
+        else expect(refused.body.errors).toEqual([{ workItemId: f.item.id, code: 'ITEM_NOT_SUBMITTED' }]);
         expect(await prisma.reviewDecision.count({ where: { workItemId: f.item.id } })).toBe(1);
         expect(await prisma.auditLog.count({ where: { entityId: f.item.id } })).toBe(1);
         expect(await prisma.auditLog.count({ where: { entityId: f.submission.id, action: 'SUBMISSION_REVIEWED' } })).toBe(1);
@@ -183,6 +185,17 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         expect(workflow.isValidWorkItemTransition('SUBMITTED', 'WAIVED')).toBe(true);
         const res = await request(app).put(`/api/work/${f.item.id}/status`).set('Authorization', `Bearer ${technician}`).send({ status: 'WAIVED' });
         expect(res.status).toBe(403); expect(await snapshot(f)).toEqual(before);
+    });
+    test('legacy PENDING closure accepts once and terminal decisions cannot change any records', async () => {
+        const f = await fixture({ analysis: 'ARCHIVING', status: 'PENDING', sampleStatus: 'APPROVED' });
+        expect((await post(`/api/work/${f.item.id}/review`, { status: 'ACCEPTED' })).status).toBe(200);
+        expect((await prisma.sample.findUnique({ where: { id: f.sampleId } })).status).toBe('ARCHIVED');
+        const before = await snapshot(f);
+        for (const status of ['ACCEPTED', 'REANALYSIS_REQUIRED', 'WAIVED']) {
+            const response = await post(`/api/work/${f.item.id}/review`, { status, reason: 'Review again' });
+            expect(response.status).toBe(409); expect(response.body.code).toBe('ITEM_NOT_SUBMITTED');
+            expect(await snapshot(f)).toEqual(before);
+        }
     });
     test('a failed decision insert rolls back the item CAS and audit together', async () => {
         const f = await fixture(), before = await snapshot(f), original = prisma.$transaction.bind(prisma);

@@ -11,7 +11,7 @@ function assertReviewable(item, status) {
     const closure = workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis);
     const allowed = closure
         ? (status === workflow.WORK_ITEM_STATES.ACCEPTED
-            ? ['COMPLETED', 'SUBMITTED'].includes(item.status)
+            ? ['PENDING', 'COMPLETED', 'SUBMITTED'].includes(item.status)
             : workflow.isValidWorkItemTransition(item.status, status))
         : item.status === workflow.WORK_ITEM_STATES.SUBMITTED && workflow.isValidWorkItemTransition(item.status, status);
     if (!allowed) throw itemStateError(item);

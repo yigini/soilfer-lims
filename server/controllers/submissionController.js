@@ -329,7 +329,7 @@ exports.reviewSubmission = async (req, res) => {
 
         // S20: Allow review on PENDING_REVIEW and PARTIALLY_REVIEWED submissions
         if (!['PENDING_REVIEW', 'PARTIALLY_REVIEWED'].includes(submission.status)) {
-            return res.status(400).json({ error: `Cannot review submission in '${submission.status}' status` });
+            return res.status(409).json({ error: `Cannot review submission in '${submission.status}' status`, code: 'SUBMISSION_NOT_REVIEWABLE', status: submission.status });
         }
 
         const workItemIds = typeof submission.workItemIds === 'string' ? JSON.parse(submission.workItemIds) : (submission.workItemIds || []);
