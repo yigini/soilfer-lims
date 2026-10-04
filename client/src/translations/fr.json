@@ -2308,8 +2308,7 @@
       "reset": "Réinitialiser",
       "applyFilters": "Appliquer les filtres"
     }
-  }
-,
+  },
   "profileReference": {
     "label": "Profil pédologique / point de prélèvement",
     "code": "Code consigné sur le terrain",
@@ -2353,5 +2352,17 @@
       "profileRelation": "Signification consignée (SITE_POINT, COMPOSITE, CONFIRMED_PROFILE)",
       "collectionDate": "Date de prélèvement sur le terrain"
     }
+  },
+  "workbench": {
+    "previousValue": "Précédent",
+    "previousRejected": "rejeté",
+    "previousRecorded": "enregistré",
+    "selectInstrument": "Sélectionner un instrument",
+    "recordThisSample": "Enregistrer cet échantillon",
+    "nextSample": "Échantillon suivant",
+    "recordingIncomplete": "Enregistrement incomplet",
+    "recordedCount": "Enregistrés",
+    "retryFailed": "Réessayer les échecs",
+    "recordingUnconfirmed": "L’enregistrement de cette ligne n’a pas été confirmé."
   }
 }
