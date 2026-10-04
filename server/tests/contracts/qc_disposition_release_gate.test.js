@@ -922,6 +922,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         expect(refCompleted.reanalysisReason).toBe('Reanalyze active items only');
 
         // Cleanup
+        await prisma.workItem.deleteMany({ where: { id: { in: [wiAccepted.id, wiCompleted.id] } } });
         await prisma.workItem.deleteMany({
             where: { id: { in: [wiActive.id, wiAccepted.id, wiCompleted.id] } }
         });

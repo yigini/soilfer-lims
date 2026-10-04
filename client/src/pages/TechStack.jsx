@@ -83,6 +83,17 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.8.0',
+        date: 'October 4, 2026',
+        tag: 'Atomic Intake',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Arrival records custody; acceptance validates the checklist and commits sample codes, work and orders together.',
+            'Laboratories control consignment numbering, and undeclared delivery counts remain unknown.',
+            'Duplicate work is retained with manager audit evidence and continues to count in safety checks.',
+        ],
+    },
+    {
         version: 'v1.7.0',
         date: 'October 4, 2026',
         tag: 'Atomic Sample Numbering',

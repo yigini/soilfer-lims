@@ -2,8 +2,8 @@ class IntakeError extends Error {
     constructor(statusCode, payload) {
         super(payload.message || payload.error || payload.code || 'Intake failed.');
         this.statusCode = statusCode;
-        this.code = payload.code || payload.error;
-        this.payload = payload;
+        this.code = payload.code || (typeof payload.error === 'string' && /^[A-Z][A-Z0-9_]+$/.test(payload.error) ? payload.error : 'INTAKE_VALIDATION_FAILED');
+        this.payload = { ...payload, code: this.code };
     }
 }
 function respond(res, error) {

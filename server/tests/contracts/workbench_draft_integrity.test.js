@@ -83,6 +83,7 @@ describe('Workbench Draft Integrity Contract (P0)', () => {
     afterAll(async () => {
         await prisma.workItemDraft.deleteMany({ where: { sampleId: testSampleId } });
         await prisma.result.deleteMany({ where: { sampleId: testSampleId } });
+        await prisma.workItem.deleteMany({ where: { id: testWorkItemId2 } });
         await prisma.workItem.deleteMany({ where: { sampleId: testSampleId } });
         await prisma.sample.deleteMany({ where: { id: testSampleId } });
     });
