@@ -239,7 +239,8 @@ describe('Audit 0.15: real batch method and analysis evidence', () => {
 describe('Audit 0.15: recorded methodology resolution', () => {
     const batch = { id: 'batch', labId: 'lab', analysis: 'analysis' };
     function db({ members = [], results = [], methodLoq = null, analysisLoq = null, validation = null } = {}) {
-        return { analysis: { findUnique: jest.fn().mockResolvedValue({ loq: analysisLoq, validation }) },
+        return { lab: { findUnique: jest.fn().mockResolvedValue(null) },
+            analysis: { findUnique: jest.fn().mockResolvedValue({ loq: analysisLoq, validation }) },
             workItem: { findMany: jest.fn().mockResolvedValue(members) }, result: { findMany: jest.fn().mockResolvedValue(results) },
             methodology: { findUnique: jest.fn().mockResolvedValue({ loq: methodLoq }) } };
     }
