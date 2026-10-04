@@ -30,7 +30,7 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
                 id: testProjectId,
                 code: testProjectId,
                 name: 'Stage F Regression Test Project',
-                status: 'ACTIVE'
+                status: 'ACTIVE',labId:testLab
             }
         });
 
@@ -420,7 +420,8 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
                     senderSignature: 'Lopez / Carrier Driver',
                     officerSignature: 'CONFIRMED:reception_officer'
                 },
-                samples
+                bulkAttestation:{confirmed:true},defaults:{checklist:{items:Object.fromEntries(['container','label','quantity','condition','coc'].map(id=>[id,{status:'PASS'}]))}},
+                samples:samples.map(row=>({...row,checklist:{items:{...Object.fromEntries(['container','label','quantity','condition','coc'].map(id=>[id,{status:'PASS'}])),...row.checklist}}}))
             };
 
             const res = await request(app)

@@ -5,6 +5,10 @@ const { verifyToken, checkPermission } = require('../middleware/authMiddleware')
 
 router.use(verifyToken);
 
+const intakeTemplates=require('../controllers/intakeTemplateController');
+router.get('/:projectId/intake-template-bindings',checkPermission('MANAGE_PROJECTS'),intakeTemplates.projectBindings);
+router.put('/:projectId/intake-template-bindings',checkPermission('MANAGE_PROJECTS'),intakeTemplates.bind);
+
 router.get('/', projectController.getProjects);
 router.get('/:id', projectController.getProject);
 router.post('/', checkPermission('MANAGE_PROJECTS'), projectController.createProject);

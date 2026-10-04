@@ -35,7 +35,9 @@ function notifyListeners(event) {
  * Calculates SHA-256 hash of a payload object for cryptographic idempotency
  */
 export async function computePayloadHash(payload) {
-    const jsonStr = JSON.stringify(payload || {}, Object.keys(payload || {}).sort());
+    const canonical = value => Array.isArray(value) ? value.map(canonical) : value && typeof value === 'object'
+        ? Object.fromEntries(Object.keys(value).sort().map(key => [key,canonical(value[key])])) : value;
+    const jsonStr = JSON.stringify(canonical(payload || {}));
     if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
         const encoder = new TextEncoder();
         const data = encoder.encode(jsonStr);
@@ -66,10 +68,12 @@ export async function recordSyncOperation({
     attachmentIds = [],
     packId = null,
     userId = null,
-    labId = null
+    labId = null,
+    operationId: suppliedOperationId = null,
+    capturedAtLocal = null
 }) {
     const deviceId = await ensureDeviceId();
-    const operationId = 'op_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    const operationId = suppliedOperationId || 'op_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
     const payloadHash = await computePayloadHash(payload);
 
     // Resolve user and lab context from session if not explicitly provided
@@ -98,7 +102,7 @@ export async function recordSyncOperation({
         baseVersion,
         dependsOn,
         schemaRevision,
-        capturedAtLocal: new Date().toISOString(),
+        capturedAtLocal: capturedAtLocal || payload.capturedAtLocal || new Date().toISOString(),
         payloadHash,
         payload,
         attachmentIds,
@@ -304,6 +308,19 @@ export async function triggerSync(authToken = null, userContext = null) {
         for (const receipt of receipts) {
             const opId = receipt.operationId;
             if (receipt.status === 'APPLIED' || receipt.status === 'DUPLICATE_APPLIED' || receipt.status === 'SUCCESS') {
+                const operation=pending.find(op=>op.operationId===opId);
+                if(operation?.type==='RECORD_INTAKE') {
+                    try {
+                        const receiptKey='limsi_intake_receipt:'+JSON.stringify([operation.userId,operation.labId,opId]);
+                        localStorage.setItem(receiptKey,JSON.stringify({ownerId:operation.userId,labId:operation.labId,receipt}));
+                        const keys=[];for(let i=0;i<localStorage.length;i++) keys.push(localStorage.key(i));
+                        for(const key of keys.filter(key=>key?.startsWith('limsi_intake_v2:'))) {
+                            const draft=JSON.parse(localStorage.getItem(key));
+                            if(draft?.ownerId===operation.userId && draft.labId===operation.labId && draft.queuedOperationId===opId) localStorage.removeItem(key);
+                        }
+                    } catch { /* The server receipt remains durable even when browser storage is full. */ }
+                    notifyListeners({type:'INTAKE_CONFIRMED',operationId:opId,userId:operation.userId,labId:operation.labId,outcome:receipt.outcome});
+                }
                 await removeOutboxOperation(opId);
                 appliedCount++;
             } else if (receipt.status === 'CONFLICT') {
@@ -312,6 +329,7 @@ export async function triggerSync(authToken = null, userContext = null) {
                     conflictReason: receipt.reason || receipt.error,
                     serverVersion: receipt.serverVersion,
                     serverState: receipt.serverState
+                    ,recovery:receipt.recovery,conflictCode:receipt.code
                 });
                 conflictCount++;
             } else {

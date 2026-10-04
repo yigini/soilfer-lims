@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { AlertCircle, Check, X, HelpCircle, ShieldCheck, Minus, Camera, Loader2 } from 'lucide-react';
+import {formCriteria,formLabel,allowsNA} from './intakeForm';
 import InfoTooltip from '../common/InfoTooltip';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -13,45 +14,14 @@ const ComplianceChecklist = ({
     onUploadPhoto,
     onRemovePhoto,
     uploadingPhoto = false,
+    template = null,
     isWalkIn = false
 }) => {
-    const { t } = useLanguage();
+    const { t,locale } = useLanguage();
 
-    const CHECKLIST_ITEMS = [
-        {
-            key: 'container',
-            label: t('reception.containerIntact', 'Container Intact / Sealed'),
-            tooltip: t('reception.containerTooltip', 'Verify the sample bag or container is not torn, open, or leaking. Compromised containers may lead to contamination.'),
-            failHint: 'e.g. Bag torn, lid loose, visible leakage...'
-        },
-        {
-            key: 'label',
-            label: t('reception.labelLegible', 'Label Legible & Matches ID'),
-            tooltip: t('reception.labelTooltip', 'Confirm the label on the container matches the scanned/entered Sample ID. Illegible labels risk misidentification.'),
-            failHint: 'e.g. Smudged ink, wrong ID on label...'
-        },
-        {
-            key: 'quantity',
-            label: t('reception.quantitySufficient', 'Sample Quantity Sufficient'),
-            tooltip: t('reception.quantityTooltip', 'Ensure there is enough material (~500g minimum) to perform all requested analyses.'),
-            failHint: 'e.g. Less than 200g, half-empty bag...'
-        },
-        {
-            key: 'condition',
-            label: t('reception.conditionDry', 'Sample Condition (Dry, No Contam.)'),
-            tooltip: t('reception.conditionTooltip', 'Check that the sample is air-dry and free of visible contaminants (rocks, roots, mold, excessive moisture).'),
-            failHint: 'e.g. Wet/muddy, contains large roots, mold...'
-        },
-        {
-            key: 'coc',
-            label: t('reception.cocPresent', 'Chain of Custody Present'),
-            tooltip: t('reception.cocTooltip', 'A Chain of Custody document should accompany the sample, recording who collected and delivered it.'),
-            failHint: 'e.g. No CoC form, missing signatures...'
-        }
-    ];
-
-    // Helper: N/A is strictly prohibited for standard criteria, and permitted for CoC only when isWalkIn is true
-    const isNAAllowed = (key) => key === 'coc' && Boolean(isWalkIn);
+    const CHECKLIST_ITEMS = formCriteria(template).map(rule=>({...rule,key:rule.id,label:formLabel(rule,locale),tooltip:rule.help?.[locale] || rule.help?.en || '',failHint:t('intakeRules.reason')}));
+    const isNAAllowed = key => allowsNA(CHECKLIST_ITEMS.find(r=>r.key === key)||{},template?.context);
+    const blockingFailure = items => CHECKLIST_ITEMS.some(rule=>rule.severity !== 'WARNING' && items[rule.key]?.status === 'FAIL');
 
     // value = { items: { container: { status: 'PASS'|'FAIL'|'NA'|undefined, note: '' } }, nonConformance: false, reason: '' }
 
@@ -66,8 +36,8 @@ const ComplianceChecklist = ({
             ...currentItems,
             [key]: { ...currentItems[key], status }
         };
-        const anyFail = Object.values(newItems).some(it => it?.status === 'FAIL');
-        const wasAnyFail = Object.values(currentItems).some(it => it?.status === 'FAIL');
+        const anyFail = blockingFailure(newItems);
+        const wasAnyFail = blockingFailure(currentItems);
 
         // Check if an independent other-problem was recorded or active
         // Legacy draft: otherProblem is undefined, but nonConformance is true and no items failed.
@@ -116,21 +86,22 @@ const ComplianceChecklist = ({
     const failCount = CHECKLIST_ITEMS.filter(
         item => value?.items?.[item.key]?.status === 'FAIL'
     ).length;
-    const pendingCount = totalItems - checkedCount;
-    const anyFail = failCount > 0;
+    const pendingCount = CHECKLIST_ITEMS.filter(rule=>rule.required && !value?.items?.[rule.key]?.status).length;
+    const anyFail = blockingFailure(value?.items || {});
     const hasUnanswered = pendingCount > 0;
 
     // Derived routine compliant outcome:
     // All items checked, none failed, and every item is either PASS or permitted NA (#113)
     const allCompliant = !hasUnanswered && !anyFail && CHECKLIST_ITEMS.every(item => {
         const s = value?.items?.[item.key]?.status;
-        return s === 'PASS' || (s === 'NA' && isNAAllowed(item.key));
+        return (!item.required && !s) || s === 'PASS' || (s === 'NA' && isNAAllowed(item.key));
     });
 
     // Explicit other-problem route (uncovered by checklist):
     const isLegacyOtherProblemRender = value?.otherProblem === undefined && value?.nonConformance === true && !anyFail;
     const hasOtherProblem = Boolean(value?.otherProblem === true || isLegacyOtherProblemRender);
 
+    if (!template) return <p className="text-sm text-sf-muted">{t('intakeRules.resolving')}</p>;
     return (
         <div className="space-y-4">
             {/* Header */}
@@ -191,7 +162,7 @@ const ComplianceChecklist = ({
                                         'border-sf-divider bg-sf-surface'
                                 }`}
                         >
-                            <div className="flex items-center gap-3 p-3">
+                            <div className="flex flex-wrap items-center gap-3 p-3">
                                 {/* Label + tooltip */}
                                 <div className="flex-1 flex items-center gap-2 min-w-0">
                                     {isPending && (
@@ -214,7 +185,7 @@ const ComplianceChecklist = ({
                                     )}
                                     <span className={`font-medium text-sm truncate ${isFail ? 'text-red-800 dark:text-red-400' : isNA ? 'text-sf-muted' : isPending ? 'text-amber-900 dark:text-amber-400' : 'text-sf-text'
                                         }`}>
-                                        {item.label}
+                                        {item.label} {item.required && '*'}
                                     </span>
                                     {isFail && (
                                         <span className="text-[10px] font-black uppercase text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/40 px-1.5 py-0.5 rounded flex items-center gap-0.5">
@@ -285,7 +256,7 @@ const ComplianceChecklist = ({
                             </div>
 
                             {/* Failure note input (slides in) */}
-                            {isFail && (
+                            {(isFail || isNA && item.noteOnNA) && (
                                 <div className="px-3 pb-3 animate-in fade-in slide-in-from-top-1 duration-200">
                                     <input
                                         placeholder={item.failHint}
@@ -304,7 +275,7 @@ const ComplianceChecklist = ({
             <div className="flex gap-2">
                 <button
                     onClick={() => {
-                        const newItems = {};
+                        const newItems = {...value?.items};
                         CHECKLIST_ITEMS.forEach(item => {
                             newItems[item.key] = { ...value?.items?.[item.key], status: 'PASS' };
                         });

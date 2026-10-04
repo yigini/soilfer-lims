@@ -1,3 +1,4 @@
+const {ensureTestLab}=require('../setup');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -13,6 +14,7 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
     let createdConsignmentId = null;
 
     beforeAll(async () => {
+        await ensureTestLab('LAB-GTM','GTM');
         const token = await getAuthToken('SAMPLE_RECEPTION', testLab, ['GTM'], [testProjectId]);
         authHeader = `Bearer ${token}`;
 
@@ -27,7 +29,7 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
                 id: testProjectId,
                 code: testProjectId,
                 name: 'Stage E Chain of Custody Test Project',
-                status: 'ACTIVE'
+                status: 'ACTIVE',labId:testLab
             }
         });
     });
@@ -211,6 +213,7 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
         const handoverTime = new Date('2026-09-04T07:15:00Z');
 
         const consignmentPayload = {
+            bulkAttestation:{confirmed:true},
             consignment: {
                 projectCode: testProjectId,
                 deliveryNoteRef: 'DN-E-CUSTODY-8819',
@@ -224,6 +227,7 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
                 submitter: { name: 'Regional Agricultural Office' }
             },
             defaults: {
+                checklist:{items:Object.fromEntries(['container','label','quantity','condition','coc'].map(id=>[id,{status:'PASS'}]))},
                 receivedMass: 400.0,
                 moistureOnArrival: 'MOIST'
             },

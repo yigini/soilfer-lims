@@ -26,6 +26,11 @@ function parseOptionalCapacity(val) {
 
 router.use(verifyToken);
 
+const intakeTemplates=require('../controllers/intakeTemplateController');
+router.get('/:labId/intake-templates',intakeTemplates.list);
+router.post('/:labId/intake-templates/basic',intakeTemplates.basic);
+router.put('/:labId/intake-template-defaults',intakeTemplates.bind);
+
 // ─── GET /api/labs ─── Enriched list with stats (Operational Catalogue)
 router.get('/', async (req, res) => {
     try {

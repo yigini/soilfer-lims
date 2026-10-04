@@ -93,7 +93,7 @@ class SyncService {
 
             try {
                 // 1. Idempotency & Deduplication Check
-                if (opId) {
+                if (opId && op.type !== 'RECORD_INTAKE') {
                     const check = await CommandReceiptService.checkReceipt(
                         opId,
                         op.type,
@@ -832,79 +832,8 @@ class SyncService {
                     outcome = { workItemId, status: 'COMPLETED', result: rawVal, resultId: newResultId };
                     savedReceiptId = savedReceipt?.id;
                 } else if (op.type === 'RECORD_INTAKE') {
-                    // Sample intake
-                    if (!hasPermission(user, 'REGISTER_SAMPLES') && !hasPermission(user, 'RECEIVE_SAMPLE') && !hasPermission(user, 'RECEIVE_SAMPLES') && !['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
-                        receipts.push({
-                            operationId: opId,
-                            status: 'REJECTED',
-                            code: 'PERMISSION_DENIED',
-                            reason: 'User lacks sample intake permissions'
-                        });
-                        continue;
-                    }
-
-                    const originalId = op.payload?.originalId || op.payload?.sampleId;
-                    if (!originalId) throw new Error('Sample identifier is required');
-
-                    const sampleLab = user.labId || op.payload?.labId;
-                    if (!sampleLab && user.role !== 'SUPER_ADMIN') {
-                        receipts.push({
-                            operationId: opId,
-                            status: 'REJECTED',
-                            code: 'MISSING_LAB_SCOPE',
-                            reason: 'Laboratory assignment is required for sample intake'
-                        });
-                        continue;
-                    }
-
-                    // Check if sample already exists
-                    const existing = await prisma.sample.findFirst({
-                        where: { originalId }
-                    });
-
-                    if (existing) {
-                        receipts.push({
-                            operationId: opId,
-                            status: 'CONFLICT',
-                            reason: `Sample with ID '${originalId}' already exists in laboratory database.`,
-                            serverState: { id: existing.id, status: existing.status }
-                        });
-                        continue;
-                    }
-
-                    let savedReceipt = null;
-                    const sampleId = 'SMP-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6);
-                    await prisma.$transaction(async (tx) => {
-                        const receptionData = JSON.stringify({
-                            notes: op.payload?.notes || null,
-                            capturedAtLocal: op.capturedAtLocal || null
-                        });
-
-                        const newSample = await tx.sample.create({
-                            data: {
-                                id: sampleId,
-                                originalId,
-                                labId: sampleLab,
-                                assignedLab: sampleLab,
-                                status: 'RECEIVED',
-                                receptionDate: new Date(op.capturedAtLocal || Date.now()),
-                                receivedBy: user.username,
-                                receptionData
-                            }
-                        });
-
-                        savedReceipt = await CommandReceiptService.recordReceipt(tx, {
-                            idempotencyKey: opId,
-                            commandType: op.type,
-                            targetResource: targetResource,
-                            actor: user.username,
-                            status: 'SUCCESS',
-                            outcome: { sampleId, originalId, status: 'RECEIVED' }
-                        });
-
-                        outcome = { sampleId, originalId, status: 'RECEIVED' };
-                    });
-                    savedReceiptId = savedReceipt?.id;
+                    outcome=await require('./intakeCommandService').executeIntake({actor:user,payload:op.payload||{},intent:op.payload?.intent||(op.payload?.isDraft?'SAVE_DRAFT':'ACCEPT'),operationId:opId,capturedAtLocal:op.capturedAtLocal,offline:true});
+                    savedReceiptId=outcome.receiptId;
                 } else {
                     // Unsupported command
                     receipts.push({
@@ -944,7 +873,7 @@ class SyncService {
                 // Successful outcome
                 receipts.push({
                     operationId: opId,
-                    status: 'APPLIED',
+                    status: outcome?.duplicate ? 'DUPLICATE_APPLIED' : 'APPLIED',
                     receiptId: savedReceiptId || ('rcpt_' + Date.now()),
                     serverTimestamp,
                     outcome
@@ -954,8 +883,10 @@ class SyncService {
                 console.error(`[SYNC_OP_ERROR] Failed to process ${op.type} (${opId}):`, err);
                 receipts.push({
                     operationId: opId,
-                    status: 'REJECTED',
-                    reason: err.message || 'Operation failed server validation',
+                    status: op.type==='RECORD_INTAKE' && (err.status===409||err.statusCode===409) ? 'CONFLICT' : 'REJECTED',
+                    code:err.code||'SYNC_VALIDATION_FAILED',
+                    recovery:op.type==='RECORD_INTAKE'?{preserveInput:true,...err.details}:undefined,
+                    reason: (err.status||err.statusCode) ? err.message : 'Operation could not be saved. Your input has been kept.',
                     serverTimestamp
                 });
             }

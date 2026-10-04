@@ -2307,8 +2307,7 @@
       "reset": "Réinitialiser",
       "applyFilters": "Appliquer les filtres"
     }
-  }
-,
+  },
   "profileReference": {
     "label": "Profil pédologique / point de prélèvement",
     "code": "Code consigné sur le terrain",
@@ -2352,5 +2351,89 @@
       "profileRelation": "Signification consignée (SITE_POINT, COMPOSITE, CONFIRMED_PROFILE)",
       "collectionDate": "Date de prélèvement sur le terrain"
     }
+  },
+  "intakeRules": {
+    "effectiveForm": "Formulaire de réception",
+    "version": "Version",
+    "inputKept": "Vos données ont été conservées.",
+    "cached": "Formulaire enregistré ; les droits actuels seront vérifiés à la synchronisation.",
+    "resolving": "Chargement des règles de réception applicables…",
+    "context": "Contexte de l’échantillon",
+    "required": "Obligatoire",
+    "labelFallback": "Libellé en anglais ; traduction non fournie.",
+    "unrecorded": "Non renseigné",
+    "reason": "Motif / observation",
+    "optionalFacts": "Renseignez les faits disponibles. Laissez les observations inconnues vides. Le formulaire indique les champs obligatoires.",
+    "restore": "Restaurer mon brouillon",
+    "restoreHint": "Un formulaire inachevé de votre compte et laboratoire est enregistré sur cet appareil. Le restaurer ? La copie sera conservée jusqu’à la confirmation du serveur.",
+    "keepStored": "Commencer un autre ; conserver la copie",
+    "legacyRetained": "Cet appareil conserve un ancien brouillon sans propriétaire identifié. Demandez au responsable du laboratoire de vérifier sa propriété avant récupération. Il n’a pas été supprimé.",
+    "resolveBeforeAccept": "Connectez-vous et vérifiez le formulaire applicable avant de continuer. Votre brouillon est conservé.",
+    "chooseAnalyses": "Sélectionnez les analyses demandées.",
+    "invalidNumber": "Saisissez une valeur numérique valide.",
+    "massAcknowledgement": "Confirmez l’insuffisance de masse pour les analyses demandées.",
+    "deviceSaved": "Enregistré sur cet appareil",
+    "awaitingSync": "En attente de synchronisation avec le serveur",
+    "noAccessionYet": "Il ne s’agit pas encore d’une réception ou acceptation confirmée par le serveur. Aucun numéro de laboratoire n’a été attribué.",
+    "backToDraft": "Revenir au formulaire",
+    "settings": "Règles et formulaire de réception",
+    "settingsHint": "Choisissez les règles publiées pour les nouvelles réceptions. Les modifications créent une version immuable. Les brouillons et dossiers acceptés conservent leur version initiale.",
+    "loadFailed": "Impossible de charger les règles de réception.",
+    "saveFailed": "Impossible d’enregistrer les paramètres.",
+    "saved": "Enregistré et confirmé par le serveur.",
+    "material": "Matière",
+    "origin": "Origine de l’échantillon",
+    "template": "Formulaire publié",
+    "choose": "Choisir…",
+    "criteria": "Contrôles d’acceptation",
+    "contextFields": "Champs de contexte",
+    "enabled": "Activé",
+    "saveVersion": "Enregistrer et appliquer une nouvelle version",
+    "usePublished": "Appliquer cette version publiée",
+    "bulkConfirm": "Confirmer les contrôles observés pour les lignes sélectionnées",
+    "bulkHint": "Sélectionnez uniquement les échantillons effectivement contrôlés. Les exceptions et les faits d’origine sont conservés.",
+    "planned": "Acceptation prévue",
+    "rowReview": "Vérifier la ligne et les contrôles",
+    "batchLocal": "Brouillon d’envoi enregistré sur cet appareil. Connectez-vous pour confirmer l’envoi complet ; aucun échantillon n’est encore reçu.",
+    "legacyRecover": "Vérifier et récupérer l’ancien brouillon",
+    "legacyOwnership": "Récupérez ce formulaire uniquement si vous confirmez qu’il appartient à votre laboratoire et que vous êtes autorisé à y accéder. L’original sera conservé.",
+    "source": {
+      "SAVED_REVISION": "Version enregistrée initiale",
+      "PROJECT_BINDING": "Sélectionné par ce projet",
+      "LAB_DEFAULT": "Règle par défaut du laboratoire",
+      "COMPATIBLE_SEED": "Formulaire standard compatible"
+    },
+    "originNames": {
+      "*": "Toutes les origines",
+      "PROJECT_SAMPLE": "Échantillon de projet",
+      "DESK_WALKIN": "Externe / sans rendez-vous"
+    },
+    "intent": {
+      "SAVE_DRAFT": "Brouillon",
+      "RECEIVE": "Réception physique",
+      "ACCEPT": "Acceptation",
+      "REJECT": "Rejet"
+    },
+    "moisture": {
+      "DRY": "Sec",
+      "MOIST": "Humide",
+      "WET": "Mouillé",
+      "SATURATED": "Saturé"
+    },
+    "contact": {
+      "name": "Prénom / contact",
+      "surname": "Nom",
+      "phone": "Téléphone",
+      "email": "Courriel",
+      "organization": "Organisme"
+    },
+    "seedNames": {
+      "INTAKE-SEED-SOILFER": "Réception de sol SoilFER",
+      "INTAKE-SEED-RESEARCH": "Réception de sol pour la recherche",
+      "INTAKE-SEED-COMMERCIAL": "Réception commerciale de sol",
+      "INTAKE-SEED-COMPATIBLE": "Réception d’autres matériaux"
+    },
+    "labCopy": "Copie du laboratoire",
+    "seedCopy": "Formulaire du système"
   }
 }

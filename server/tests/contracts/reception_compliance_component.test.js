@@ -47,6 +47,7 @@ function loadComplianceChecklistComponent() {
             if (mod === 'react') return React;
             if (mod === 'lucide-react') return mockLucide;
             if (mod.includes('InfoTooltip')) return mockTooltip;
+            if (mod === './intakeForm') {const src=fs.readFileSync(path.resolve(__dirname,'../../../client/src/components/reception/intakeForm.js'),'utf8');const mod2={exports:{}};vm.runInNewContext(esbuild.transformSync(src,{loader:'js',format:'cjs'}).code,{module:mod2,exports:mod2.exports});return mod2.exports;}
             if (mod.includes('LanguageContext')) return mockLanguage;
             return {};
         },
@@ -57,7 +58,8 @@ function loadComplianceChecklistComponent() {
     return runContext.module.exports.default;
 }
 
-const ComplianceChecklist = loadComplianceChecklistComponent();
+const LoadedChecklist = loadComplianceChecklistComponent();
+const ComplianceChecklist = props => LoadedChecklist({...props,template:{...require('../../services/intakeSchema').seed('SOILFER'),context:{matrix:'SOIL',origin:props.isWalkIn ? 'DESK_WALKIN':'PROJECT_SAMPLE'}}});
 
 // Helper: Traverse React element tree to find element matching predicate
 function findElement(vnode, predicate) {
@@ -107,7 +109,7 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
             isWalkIn: false
         });
 
-        const okBtn = findButtonByAriaLabel(tree, 'Container Intact / Sealed: OK');
+        const okBtn = findButtonByAriaLabel(tree, 'Container intact and sealed: OK');
         expect(okBtn).toBeDefined();
         expect(okBtn.props.disabled).toBeFalsy();
 
@@ -132,7 +134,7 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
             isWalkIn: false
         });
 
-        const failBtn = findButtonByAriaLabel(tree, 'Label Legible & Matches ID: Fail');
+        const failBtn = findButtonByAriaLabel(tree, 'Label legible and matches the sample: Fail');
         expect(failBtn).toBeDefined();
         failBtn.props.onClick();
 
@@ -148,7 +150,7 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
             isWalkIn: false
         });
 
-        const correctOkBtn = findButtonByAriaLabel(tree, 'Label Legible & Matches ID: OK');
+        const correctOkBtn = findButtonByAriaLabel(tree, 'Label legible and matches the sample: OK');
         correctOkBtn.props.onClick();
 
         expect(checklistData.items.label.status).toBe('PASS');
@@ -171,7 +173,7 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
         });
 
         // Correct label to PASS
-        const okBtn = findButtonByAriaLabel(tree, 'Label Legible & Matches ID: OK');
+        const okBtn = findButtonByAriaLabel(tree, 'Label legible and matches the sample: OK');
         okBtn.props.onClick();
 
         expect(checklistData.items.label.status).toBe('PASS');
@@ -190,9 +192,9 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
             isWalkIn: false
         });
 
-        const cocNAShipment = findButtonByAriaLabel(shipmentTree, 'Chain of Custody Present: N/A');
-        const containerNAShipment = findButtonByAriaLabel(shipmentTree, 'Container Intact / Sealed: N/A');
-        const labelNAShipment = findButtonByAriaLabel(shipmentTree, 'Label Legible & Matches ID: N/A');
+        const cocNAShipment = findButtonByAriaLabel(shipmentTree, 'Chain of custody present: N/A');
+        const containerNAShipment = findButtonByAriaLabel(shipmentTree, 'Container intact and sealed: N/A');
+        const labelNAShipment = findButtonByAriaLabel(shipmentTree, 'Label legible and matches the sample: N/A');
 
         expect(cocNAShipment.props.disabled).toBe(true);
         expect(containerNAShipment.props.disabled).toBe(true);
@@ -209,8 +211,8 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
             isWalkIn: true
         });
 
-        const cocNAWalkIn = findButtonByAriaLabel(walkInTree, 'Chain of Custody Present: N/A');
-        const containerNAWalkIn = findButtonByAriaLabel(walkInTree, 'Container Intact / Sealed: N/A');
+        const cocNAWalkIn = findButtonByAriaLabel(walkInTree, 'Chain of custody present: N/A');
+        const containerNAWalkIn = findButtonByAriaLabel(walkInTree, 'Container intact and sealed: N/A');
 
         expect(cocNAWalkIn.props.disabled).toBe(false);
         expect(containerNAWalkIn.props.disabled).toBe(true);
@@ -237,7 +239,7 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
         });
 
         // The failure note input renders when an item is marked FAIL
-        const noteInput = findElement(tree, el => el.type === 'input' && el.props && el.props.placeholder === 'e.g. Bag torn, lid loose, visible leakage...');
+        const noteInput = findElement(tree, el => el.type === 'input' && el.props && el.props.placeholder === 'intakeRules.reason');
         expect(noteInput).toBeDefined();
 
         // Simulate typing note
@@ -263,8 +265,8 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
             isWalkIn: false
         });
 
-        const containerOkBtn = findButtonByAriaLabel(tree, 'Container Intact / Sealed: OK');
-        const labelFailBtn = findButtonByAriaLabel(tree, 'Label Legible & Matches ID: Fail');
+        const containerOkBtn = findButtonByAriaLabel(tree, 'Container intact and sealed: OK');
+        const labelFailBtn = findButtonByAriaLabel(tree, 'Label legible and matches the sample: Fail');
 
         expect(containerOkBtn.props['aria-checked']).toBe(true);
         expect(labelFailBtn.props['aria-checked']).toBe(true);
@@ -275,40 +277,11 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
         expect(html).toContain('General package dampness noted at reception');
     });
 
-    test('7. Reception intake mode switch resets prohibited CoC N/A status', () => {
-        // Simulates the Reception.jsx useEffect hook behavior:
-        // When mode changes from WALK_IN to PROJECT, any coc: 'NA' is cleared to undefined
-        let checklistData = {
-            items: {
-                coc: { status: 'NA', note: 'Farmer drop-off' },
-                container: { status: 'PASS' }
-            },
-            nonConformance: false
-        };
-
-        let mode = 'WALK_IN';
-
-        function handleModeSwitch(newMode) {
-            mode = newMode;
-            if (mode !== 'WALK_IN' && checklistData?.items?.coc?.status === 'NA') {
-                checklistData = {
-                    ...checklistData,
-                    items: {
-                        ...checklistData.items,
-                        coc: { ...checklistData.items.coc, status: undefined }
-                    }
-                };
-            }
-        }
-
-        expect(checklistData.items.coc.status).toBe('NA');
-
-        // Switch to Project mode
-        handleModeSwitch('PROJECT');
-
-        expect(checklistData.items.coc.status).toBeUndefined();
-        expect(checklistData.items.coc.note).toBe('Farmer drop-off'); // Note preserved
-        expect(checklistData.items.container.status).toBe('PASS');
+    test('7. A recorded NA answer is retained when another form disallows it; selection remains disabled',()=>{
+        const value={items:{coc:{status:'NA',note:'Farmer drop-off'}}};
+        const tree=ComplianceChecklist({value,onChange:()=>{},isWalkIn:false});
+        expect(findButtonByAriaLabel(tree,'Chain of custody present: N/A').props.disabled).toBe(true);
+        expect(value.items.coc).toEqual({status:'NA',note:'Farmer drop-off'});
     });
 
     test('8. All-Pass routine compliant outcome derives disabled ordinary NC control (#113)', () => {
@@ -465,7 +438,7 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
         });
 
         // Correct container to PASS
-        const containerOkBtn = findButtonByAriaLabel(treeA, 'Container Intact / Sealed: OK');
+        const containerOkBtn = findButtonByAriaLabel(treeA, 'Container intact and sealed: OK');
         containerOkBtn.props.onClick();
 
         expect(checklistA.items.container.status).toBe('PASS');
@@ -492,7 +465,7 @@ describe('Reception ComplianceChecklist Component & Parent State Contract (#113,
             isWalkIn: false
         });
 
-        const containerOkBtnB = findButtonByAriaLabel(treeB, 'Container Intact / Sealed: OK');
+        const containerOkBtnB = findButtonByAriaLabel(treeB, 'Container intact and sealed: OK');
         containerOkBtnB.props.onClick();
 
         expect(checklistB.items.container.status).toBe('PASS');
@@ -636,11 +609,13 @@ describe('Reception Parent Page Component & Intake Mode Contracts (#113, #114, #
                     post: () => Promise.resolve({ data: {} }),
                     put: () => Promise.resolve({ data: {} })
                 };
+                if (mod.includes('useIntakeForm')) return ()=>({form:null,error:null,cached:false});
+                if (mod.includes('intakeForm')) {const source=fs.readFileSync(path.resolve(__dirname,'../../../client/src/components/reception/intakeForm.js'),'utf8');const mod2={exports:{}};vm.runInNewContext(esbuild.transformSync(source,{loader:'js',format:'cjs'}).code,{module:mod2,exports:mod2.exports});return mod2.exports;}
                 if (mod.includes('mapConfig')) return loadMapConfigModule();
                 return createMockModule(mod);
             },
             console,
-            localStorage: mockLocalStorage,
+            crypto:require('crypto'),localStorage: mockLocalStorage,
             window: {
                 addEventListener: () => {},
                 removeEventListener: () => {}
@@ -718,19 +693,10 @@ describe('Reception Parent Page Component & Intake Mode Contracts (#113, #114, #
         }).not.toThrow();
     });
 
-    test('5. Reception intake mode switch enforces N/A policy cleanup (WALK_IN to PROJECT reset)', () => {
-        // Source Reception.jsx source code directly to ensure the effect is placed AFTER useState
-        const componentPath = path.resolve(__dirname, '../../../client/src/pages/Reception.jsx');
-        const source = fs.readFileSync(componentPath, 'utf8');
-
-        const stateDeclIndex = source.indexOf('const [checklistData, setChecklistData] = useState');
-        const effectIndex = source.indexOf("if (mode !== 'WALK_IN' && checklistData?.items?.coc?.status === 'NA')");
-
-        expect(stateDeclIndex).toBeGreaterThan(0);
-        expect(effectIndex).toBeGreaterThan(0);
-        // Effect MUST be declared after checklistData useState declaration to prevent TDZ ReferenceError
-        expect(effectIndex).toBeGreaterThan(stateDeclIndex);
+    test('5. Parent renders all recorded answers without a mode-switch deletion effect',()=>{
+        const Reception=loadReceptionParent();expect(()=>ReactDOMServer.renderToString(React.createElement(Reception))).not.toThrow();
     });
+
 });
 describe('Codex Review: ComplianceChecklist Independent PR145 Bugfixes', () => {
     test('Fix 1: Legacy uncovered-problem draft preserves effective exception flag on unrelated PASS', () => {
@@ -759,7 +725,7 @@ describe('Codex Review: ComplianceChecklist Independent PR145 Bugfixes', () => {
         const otherProblemCheckbox = findCheckboxByTestId(tree, 'other-problem-checkbox');
         expect(otherProblemCheckbox.props.checked).toBe(true);
 
-        const labelPassBtn = findButtonByAriaLabel(tree, 'Label Legible & Matches ID: OK');
+        const labelPassBtn = findButtonByAriaLabel(tree, 'Label legible and matches the sample: OK');
         labelPassBtn.props.onClick();
 
         expect(lastVal.nonConformance).toBe(true);
@@ -794,7 +760,7 @@ describe('Codex Review: ComplianceChecklist Independent PR145 Bugfixes', () => {
         const otherProblemCheckbox = findCheckboxByTestId(tree, 'other-problem-checkbox');
         expect(otherProblemCheckbox.props.checked).toBe(false);
 
-        const containerPassBtn = findButtonByAriaLabel(tree, 'Container Intact / Sealed: OK');
+        const containerPassBtn = findButtonByAriaLabel(tree, 'Container intact and sealed: OK');
         containerPassBtn.props.onClick();
 
         expect(lastVal.nonConformance).toBe(false);

@@ -121,7 +121,7 @@ describe('Reception Package ID Resolution & Boundary Contracts (Mandatory Correc
                 .post('/api/reception/intake')
                 .set('Authorization', `Bearer ${mgrToken}`)
                 .send({
-                    originalId: testOriginalId,
+                    originalId: testOriginalId,expectedUpdatedAt:(await prisma.sample.findUnique({where:{id:testSampleId}})).updatedAt.toISOString(),
                     decision: 'ACCEPT',
                     receivedMass: 500,
                     checklist: { labelLegible: true, containerIntact: true, noLeakage: true, massAdequate: true, cocPresent: true },
@@ -143,7 +143,7 @@ describe('Reception Package ID Resolution & Boundary Contracts (Mandatory Correc
                 .post('/api/reception/intake')
                 .set('Authorization', `Bearer ${mgrToken}`)
                 .send({
-                    originalId: testOriginalId,
+                    originalId: testOriginalId,expectedUpdatedAt:(await prisma.sample.findUnique({where:{id:testSampleId}})).updatedAt.toISOString(),
                     decision: 'ACCEPT',
                     receivedMass: 500,
                     checklist: { labelLegible: true, containerIntact: true, noLeakage: true, massAdequate: true, cocPresent: true },
@@ -159,7 +159,7 @@ describe('Reception Package ID Resolution & Boundary Contracts (Mandatory Correc
                 .post('/api/reception/intake')
                 .set('Authorization', `Bearer ${mgrToken}`)
                 .send({
-                    originalId: testOriginalId,
+                    originalId: testOriginalId,expectedUpdatedAt:(await prisma.sample.findUnique({where:{id:testSampleId}})).updatedAt.toISOString(),
                     decision: 'ACCEPT',
                     receivedMass: 500,
                     checklist: { labelLegible: true, containerIntact: true, noLeakage: true, massAdequate: true, cocPresent: true },

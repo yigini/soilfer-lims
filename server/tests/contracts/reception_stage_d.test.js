@@ -1,3 +1,4 @@
+const {ensureTestLab}=require('../setup');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -12,6 +13,7 @@ describe('Stage D: Desk Ergonomics & Hardware Contract Tests (RC-16 - RC-18)', (
     let createdSampleDbId = null;
 
     beforeAll(async () => {
+        await ensureTestLab('LAB-GTM','GTM');
         const token = await getAuthToken('SAMPLE_RECEPTION', testLab, ['GTM'], [testProjectId]);
         authHeader = `Bearer ${token}`;
 
@@ -26,7 +28,7 @@ describe('Stage D: Desk Ergonomics & Hardware Contract Tests (RC-16 - RC-18)', (
                 id: testProjectId,
                 code: testProjectId,
                 name: 'Stage D Ergonomics Test Project',
-                status: 'ACTIVE'
+                status: 'ACTIVE',labId:testLab
             }
         });
 
@@ -143,7 +145,7 @@ describe('Stage D: Desk Ergonomics & Hardware Contract Tests (RC-16 - RC-18)', (
 
     // RC-17: Batch Consignment Label Payload Delivery
     test('RC-17: Consignment batch query delivers all sample barcodes and statuses for thermal batch printing', async () => {
-        const csgBatchPayload = {
+        const csgBatchPayload = {bulkAttestation:{confirmed:true},
             consignment: {
                 deliveryNoteRef: `DN-D-${Date.now()}`,
                 deliveredBy: 'Courier Driver',

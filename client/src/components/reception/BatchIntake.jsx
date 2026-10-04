@@ -1,22 +1,29 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-    PackageCheck, Truck, FileText, AlertTriangle, CheckCircle, Plus, 
+import {
+    PackageCheck, Truck, FileText, AlertTriangle, CheckCircle, Plus,
     Trash2, Edit3, Upload, ArrowLeft, Loader2, Layers, Check, RefreshCw,
     Scale, Droplet, Hash, Printer
 } from 'lucide-react';
 import axios from 'axios';
+import {useLanguage} from '../../context/LanguageContext';
+import {formCriteria,pinFor,draftScope} from './intakeForm';
 import BatchExceptionModal from './BatchExceptionModal';
 import ManifestImportModal from './ManifestImportModal';
 import LabelPrintDialog from '../common/LabelPrintDialog';
 import { playSuccessChime, playErrorBuzz } from '../../utils/audioCues';
 
-const BatchIntake = ({ 
-    user, 
-    availableProjects = [], 
-    analysisGroups = [], 
-    onBack, 
-    onSuccess 
+const BatchIntake = ({
+    user,
+    availableProjects = [],
+    analysisGroups = [],
+    onBack,
+    onSuccess
 }) => {
+    const {t}=useLanguage();
+    const [selectedRows,setSelectedRows]=useState(new Set());
+    const [bulkConfirmed,setBulkConfirmed]=useState(false);
+    const commandRef=useRef(null);
+    const draftKey='limsi_consignment_v2:'+JSON.stringify([String(user?.id),user?.labId]);
     // --- CONSIGNMENT HEADER STATE (RC-12) ---
     const [consignment, setConsignment] = useState({
         deliveryNoteRef: '',
@@ -33,21 +40,7 @@ const BatchIntake = ({
 
     // --- BULK DEFAULTS (RC-13) ---
     const [defaults, setDefaults] = useState({
-        receivedMass: 500,
-        moistureOnArrival: 'MOIST',
-        foreignMaterial: [],
-        analysisBundle: analysisGroups[0]?.id || '',
-        requiredAnalyses: analysisGroups[0]?.analyses || ['PH_H2O'],
-        compositeRadiusM: '',
-        depthTopCm: 0,
-        depthBottomCm: 20,
-        checklist: {
-            container: { status: 'PASS' },
-            label: { status: 'PASS' },
-            quantity: { status: 'PASS' },
-            condition: { status: 'PASS' },
-            coc: { status: 'PASS' }
-        }
+        receivedMass:'',moistureOnArrival:'',foreignMaterial:[],analysisBundle:'',requiredAnalyses:[],compositeRadiusM:'',depthTopCm:'',depthBottomCm:''
     });
 
     // --- SAMPLES LIST IN BATCH ---
@@ -75,8 +68,44 @@ const BatchIntake = ({
         setDefaults(prev => ({
             ...prev,
             analysisBundle: groupId,
-            requiredAnalyses: group ? group.analyses : ['PH_H2O']
+            requiredAnalyses: group ? (typeof group.analyses === 'string' ? JSON.parse(group.analyses) : group.analyses) : []
         }));
+    };
+
+    useEffect(()=>{
+        try {const stored=JSON.parse(localStorage.getItem(draftKey));if(stored?.ownerId===String(user?.id)&&stored.labId===user?.labId&&window.confirm(t('intakeRules.restoreHint'))) {setConsignment(stored.consignment);setDefaults(stored.defaults);setSamples(stored.samples);setBulkConfirmed(stored.bulkConfirmed || false);}} catch {}
+    },[draftKey]);
+    useEffect(()=>{if(!samples.length || submissionResult) return;try {localStorage.setItem(draftKey,JSON.stringify({ownerId:String(user?.id),labId:user?.labId,consignment,defaults,samples,bulkConfirmed,savedAt:Date.now()}));}catch{}},[consignment,defaults,samples,bulkConfirmed,submissionResult]);
+    const resolveRow=async row=>{
+        const key='limsi_intake_form:'+draftScope(user,{projectId:consignment.projectCode || null,origin:'PROJECT_SAMPLE',matrix:row.matrix||'SOIL'},row.originalId,null);
+        let data;
+        try {
+            try {data=(await axios.get('/api/reception/sample-context',{params:{originalId:row.originalId}})).data;}
+            catch(err) {if(err.response?.status!==404) throw err;data=(await axios.get('/api/reception/sample-context',{params:{projectId:consignment.projectCode || undefined,origin:consignment.projectCode ? 'PROJECT_SAMPLE' : 'DESK_WALKIN',matrix:row.matrix||'SOIL'}})).data;}
+            try {localStorage.setItem(key,JSON.stringify({ownerId:String(user.id),labId:user.labId,data}));}catch{}
+        } catch(err) {if(err.response) throw err;const cached=JSON.parse(localStorage.getItem(key)||'null');if(cached?.ownerId!==String(user.id)||cached.labId!==user.labId) throw err;data=cached.data;}
+        const specimen=data.sample || {},rd=typeof specimen.receptionData === 'string' ? JSON.parse(specimen.receptionData) : specimen.receptionData || {};
+        return {...row,sampleId:specimen.id,expectedUpdatedAt:specimen.updatedAt,projectId:specimen.projectId || data.intakeTemplate.context.projectId,
+            isWalkIn:data.intakeTemplate.context.origin==='DESK_WALKIN',matrix:data.intakeTemplate.context.matrix,
+            receivedMass:row.receivedMass ?? specimen.receivedMass ?? undefined,moistureOnArrival:row.moistureOnArrival ?? specimen.moistureOnArrival ?? undefined,
+            foreignMaterial:row.foreignMaterial ?? (typeof specimen.foreignMaterial === 'string' ? JSON.parse(specimen.foreignMaterial) : specimen.foreignMaterial) ?? undefined,
+            requiredAnalyses:row.requiredAnalyses ?? (typeof specimen.requiredAnalyses === 'string' ? JSON.parse(specimen.requiredAnalyses) : specimen.requiredAnalyses) ?? undefined,
+            analysisGroupIds:row.analysisGroupIds ?? (typeof specimen.analysisGroupIds === 'string' ? JSON.parse(specimen.analysisGroupIds) : specimen.analysisGroupIds) ?? undefined,
+            latitude:row.latitude ?? specimen.latitude ?? specimen.coordinates?.lat ?? undefined,longitude:row.longitude ?? specimen.longitude ?? specimen.coordinates?.lng ?? undefined,
+            positionalUncertaintyM:row.positionalUncertaintyM ?? specimen.positionalUncertaintyM ?? undefined,
+            depthTopCm:row.depthTopCm ?? specimen.depthTopCm ?? undefined,depthBottomCm:row.depthBottomCm ?? specimen.depthBottomCm ?? undefined,
+            intakePhotos:row.intakePhotos || (specimen.intakePhotos ? typeof specimen.intakePhotos==='string' ? JSON.parse(specimen.intakePhotos) : specimen.intakePhotos : []),
+            checklist:row.checklist || rd.intakeTemplate?.checklist || rd.checklist || {items:{}},contextAnswers:row.contextAnswers || rd.intakeTemplate?.contextAnswers || {},
+            intakeTemplate:pinFor(data.intakeTemplate),_form:data.intakeTemplate};
+    };
+    const confirmObserved=()=>{
+        if(!selectedRows.size || !window.confirm(t('intakeRules.bulkHint'))) return;
+        setSamples(prev=>prev.map(row=>{
+            if(!selectedRows.has(row.originalId) || row.status==='REJECTED') return row;
+            const items={...row.checklist?.items};
+            for(const rule of formCriteria(row._form)) if(rule.allowed.includes('PASS') && !['FAIL','NA'].includes(items[rule.id]?.status)) items[rule.id]={...items[rule.id],status:'PASS'};
+            return {...row,checklist:{...row.checklist,items},bulkAttestation:{confirmed:true,criterionIds:formCriteria(row._form).map(rule=>rule.id)}};
+        }));setBulkConfirmed(true);
     };
 
     // Fast Add / Scan Handler
@@ -94,44 +123,12 @@ const BatchIntake = ({
 
         setIsScanning(true);
         try {
-            // Optional lookup against project expected samples
-            let foundExpected = null;
-            if (consignment.projectCode) {
-                try {
-                    const lookupRes = await axios.get('/api/samples/expected', {
-                        params: { q: cleanId, projectId: consignment.projectCode, limit: 1 }
-                    });
-                    if (Array.isArray(lookupRes.data) && lookupRes.data.length > 0) {
-                        const hit = lookupRes.data.find(h => h.originalId?.toLowerCase() === cleanId.toLowerCase());
-                        if (hit) foundExpected = hit;
-                    }
-                } catch (e) {
-                    // non-fatal lookup error
-                }
-            }
-
-            const newSample = {
-                originalId: cleanId,
-                status: 'ACCEPTED',
-                rejectionReason: null,
-                receivedMass: defaults.receivedMass,
-                moistureOnArrival: defaults.moistureOnArrival,
-                latitude: foundExpected?.coordinates?.lat || null,
-                longitude: foundExpected?.coordinates?.lng || null,
-                positionalUncertaintyM: foundExpected?.coordinates?.accuracy || (foundExpected?.coordinates ? 10 : null),
-                depthTopCm: defaults.depthTopCm,
-                depthBottomCm: defaults.depthBottomCm,
-                siteName: foundExpected?.location || null,
-                village: null,
-                admin1: foundExpected?.country || null,
-                intakePhotos: [],
-                notes: ''
-            };
+            const newSample=await resolveRow({originalId:cleanId,status:'ACCEPTED',rejectionReason:null,notes:''});
 
             setSamples(prev => [newSample, ...prev]);
             setScanInput('');
             playSuccessChime();
-        } finally {
+        } catch(err) {playErrorBuzz();alert((err.response?.data?.code || t('intakeRules.loadFailed'))+' · '+t('intakeRules.inputKept'));} finally {
             setIsScanning(false);
             scanInputRef.current?.focus();
         }
@@ -150,13 +147,15 @@ const BatchIntake = ({
         });
     };
 
-    const handleImportFromManifest = (importedList) => {
-        // Merge with deduplication
-        setSamples(prev => {
-            const existingIds = new Set(prev.map(s => s.originalId.toLowerCase()));
-            const newToAdd = importedList.filter(s => !existingIds.has(s.originalId.toLowerCase()));
-            return [...newToAdd, ...prev];
-        });
+    const handleImportFromManifest=async importedList=>{
+        setIsScanning(true);
+        try {
+            const existing=new Set(samples.map(row=>row.originalId.toLowerCase()));
+            const resolved=[];
+            for(const row of importedList.filter(row=>!existing.has(row.originalId.toLowerCase()))) resolved.push(await resolveRow(row));
+            setSamples(prev=>[...resolved,...prev]);
+        } catch(err) {alert((err.response?.data?.code || t('intakeRules.loadFailed'))+' · '+t('intakeRules.inputKept'));}
+        finally {setIsScanning(false);}
     };
 
     // Atomic Consignment Submission (RC-12, RC-13, RC-14)
@@ -166,6 +165,8 @@ const BatchIntake = ({
             return;
         }
 
+        if(!navigator.onLine) {alert(t('intakeRules.batchLocal'));return;}
+        if(samples.some(row=>!row._form)) {alert(t('intakeRules.resolveBeforeAccept'));return;}
         setSubmitting(true);
         try {
             const payload = {
@@ -182,22 +183,24 @@ const BatchIntake = ({
                     projectCode: consignment.projectCode || null
                 },
                 defaults: {
-                    receivedMass: parseFloat(defaults.receivedMass) || 500,
-                    moistureOnArrival: defaults.moistureOnArrival,
-                    foreignMaterial: defaults.foreignMaterial,
-                    requiredAnalyses: defaults.requiredAnalyses,
-                    depthTopCm: defaults.depthTopCm,
-                    depthBottomCm: defaults.depthBottomCm,
-                    compositeRadiusM: defaults.compositeRadiusM ? parseFloat(defaults.compositeRadiusM) : null,
-                    checklist: defaults.checklist
+                    receivedMass: defaults.receivedMass === '' ? undefined : defaults.receivedMass,
+                    moistureOnArrival: defaults.moistureOnArrival || undefined,
+                    foreignMaterial: defaults.foreignMaterial.length ? defaults.foreignMaterial : undefined,
+                    requiredAnalyses: defaults.analysisBundle ? defaults.requiredAnalyses : undefined,
+                    depthTopCm: defaults.depthTopCm === '' ? undefined : defaults.depthTopCm,
+                    depthBottomCm: defaults.depthBottomCm === '' ? undefined : defaults.depthBottomCm,
+                    compositeRadiusM: defaults.compositeRadiusM === '' ? undefined : defaults.compositeRadiusM
                 },
-                samples
+                bulkAttestation:bulkConfirmed ? {confirmed:true} : undefined,
+                samples:samples.map(({_form,...row})=>defaults.analysisBundle ? {...row,requiredAnalyses:[...new Set([...(row.requiredAnalyses || []),...defaults.requiredAnalyses])],analysisGroupIds:[...new Set([...(row.analysisGroupIds || []),defaults.analysisBundle])]} : row)
             };
 
+            const semantic=JSON.stringify(payload);if(!commandRef.current || commandRef.current.semantic!==semantic) commandRef.current={semantic,id:crypto.randomUUID()};
+            payload.operationId=commandRef.current.id;
             const res = await axios.post('/api/reception/consignments', payload);
             if (res.data.success) {
                 playSuccessChime();
-                setSubmissionResult(res.data);
+                setSubmissionResult(res.data);localStorage.removeItem(draftKey);
                 if (onSuccess) onSuccess(res.data);
             }
         } catch (err) {
@@ -222,7 +225,7 @@ const BatchIntake = ({
                     <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Check size={36} />
                     </div>
-                    
+
                     <h2 className="text-2xl font-bold text-sf-text mb-1">
                         Consignment Received Successfully
                     </h2>
@@ -452,7 +455,7 @@ const BatchIntake = ({
                             onChange={(e) => handleBundleChange(e.target.value)}
                             className="p-1.5 rounded-lg border border-sf-divider bg-sf-surface text-sf-text text-xs font-bold"
                         >
-                            {analysisGroups.map(g => (
+                            <option value="">{t('intakeRules.choose')}</option>{analysisGroups.map(g => (
                                 <option key={g.id} value={g.id}>{g.name}</option>
                             ))}
                         </select>
@@ -475,10 +478,10 @@ const BatchIntake = ({
                             onChange={(e) => setDefaults(prev => ({ ...prev, moistureOnArrival: e.target.value }))}
                             className="p-1.5 rounded-lg border border-sf-divider bg-sf-surface text-sf-text text-xs"
                         >
-                            <option value="DRY">Dry</option>
+                            <option value="">{t('intakeRules.unrecorded')}</option><option value="DRY">{t('intakeRules.moisture.DRY')}</option>
                             <option value="MOIST">Moist</option>
                             <option value="WET">Wet</option>
-                            <option value="SATURATED">Saturated</option>
+
                         </select>
                     </div>
 
@@ -539,7 +542,7 @@ const BatchIntake = ({
                             {samples.length} <span className="text-sm font-normal text-sf-muted">/ {expectedNum > 0 ? expectedNum : '—'} expected</span>
                         </div>
                         <div className="flex gap-2 text-[11px] mt-1 font-medium">
-                            <span className="text-emerald-600 dark:text-emerald-400">{acceptedCount} Accepted</span>
+                            <span className="text-emerald-600 dark:text-emerald-400">{acceptedCount} {t('intakeRules.planned')}</span>
                             {rejectedCount > 0 && (
                                 <span className="text-red-600 dark:text-red-400 font-bold">• {rejectedCount} Rejected (Exception)</span>
                             )}
@@ -560,6 +563,7 @@ const BatchIntake = ({
                 </div>
             </div>
 
+            {samples.length > 0 && <div className="rounded-xl bg-sf-canvas border border-sf-divider p-4 space-y-2"><p className="text-sm text-sf-muted">{t('intakeRules.bulkHint')}</p><button type="button" disabled={!selectedRows.size} onClick={confirmObserved} className="px-4 py-2 rounded-lg bg-sf-primary text-white disabled:opacity-50">{t('intakeRules.bulkConfirm')} ({selectedRows.size})</button></div>}
             {/* High-Throughput Scanned Samples Table */}
             <div className="bg-sf-surface rounded-2xl shadow-sm border border-sf-divider overflow-hidden">
                 <div className="p-4 border-b border-sf-divider flex justify-between items-center bg-sf-raised">
@@ -583,7 +587,7 @@ const BatchIntake = ({
                     )}
                 </div>
 
-                <div className="max-h-[450px] overflow-y-auto">
+                <div className="max-h-[450px] overflow-auto">
                     {samples.length === 0 ? (
                         <div className="text-center py-16 text-sf-muted">
                             <PackageCheck size={40} className="mx-auto mb-2 opacity-30" />
@@ -607,8 +611,8 @@ const BatchIntake = ({
                             <tbody className="divide-y divide-sf-divider">
                                 {samples.map((s, idx) => (
                                     <tr key={idx} className={`hover:bg-sf-canvas transition-colors ${s.status === 'REJECTED' ? 'bg-red-50/40 dark:bg-red-950/20' : ''}`}>
-                                        <td className="p-3 text-sf-muted font-mono">{idx + 1}</td>
-                                        <td className="p-3 font-mono font-bold text-sf-text">{s.originalId}</td>
+                                        <td className="p-3 text-sf-muted font-mono"><input type="checkbox" aria-label={s.originalId} checked={selectedRows.has(s.originalId)} onChange={e=>setSelectedRows(prev=>{const next=new Set(prev);e.target.checked ? next.add(s.originalId):next.delete(s.originalId);return next;})}/> {idx + 1}</td>
+                                        <td className="p-3 font-mono font-bold text-sf-text">{s.originalId}<span className="block font-sans font-normal text-sf-muted">{s._form?.name} · {t('intakeRules.version')} {s._form?.version} · {formCriteria(s._form).filter(rule=>rule.required && !s.checklist?.items?.[rule.id]?.status).length} {t('intakeRules.unrecorded')}</span></td>
                                         <td className="p-3">
                                             {s.status === 'REJECTED' ? (
                                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300 flex items-center gap-1 w-max">
@@ -616,14 +620,14 @@ const BatchIntake = ({
                                                 </span>
                                             ) : (
                                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 flex items-center gap-1 w-max">
-                                                    <CheckCircle size={10} /> ACCEPTED
+                                                    <CheckCircle size={10} /> {t('intakeRules.planned')}
                                                 </span>
                                             )}
                                         </td>
-                                        <td className="p-3 font-mono text-sf-text">{s.receivedMass ? `${s.receivedMass}g` : '—'}</td>
-                                        <td className="p-3 capitalize text-sf-muted">{s.moistureOnArrival?.toLowerCase() || 'moist'}</td>
+                                        <td className="p-3 font-mono text-sf-text">{s.receivedMass !== undefined && s.receivedMass !== null && s.receivedMass !== '' ? `${s.receivedMass}g` : '—'}</td>
+                                        <td className="p-3 capitalize text-sf-muted">{s.moistureOnArrival ? t('intakeRules.moisture.'+s.moistureOnArrival) : t('intakeRules.unrecorded')}</td>
                                         <td className="p-3 text-sf-muted">
-                                            {s.latitude && s.longitude ? (
+                                            {s.latitude != null && s.longitude != null ? (
                                                 <span className="font-mono">{s.latitude.toFixed(4)}, {s.longitude.toFixed(4)}</span>
                                             ) : s.siteName ? (
                                                 <span>{s.siteName}</span>

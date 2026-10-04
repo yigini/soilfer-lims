@@ -129,6 +129,10 @@ node scripts/migrate_project_templates_and_policy.js
 echo "📦 Applying sitewide theme library migration..."
 node scripts/migrate_sitewide_theme_library.js
 
+# Intake templates: additive tables and immutable compatible seeds, fail closed.
+echo "Applying versioned intake template migration..."
+node scripts/migrate_intake_templates.js
+
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."
 exec node index.js

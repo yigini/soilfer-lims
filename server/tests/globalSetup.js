@@ -19,6 +19,7 @@ module.exports = async function globalSetup() {
 
     process.env.DATABASE_PATH = testDbPath;
     process.env.DATABASE_URL = `file:${testDbPath}`;
+    require('../scripts/migrate_intake_templates').migrateIntakeTemplates(testDbPath);
 
     fs.writeFileSync(path.resolve(tmpDir, 'current_test_db.txt'), testDbPath, 'utf8');
 };

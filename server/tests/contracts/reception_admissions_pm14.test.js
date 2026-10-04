@@ -514,11 +514,12 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
         trackedSampleIds.add(sampleId);
 
         // 2. Reopen and save draft a second time
+        const expectedUpdatedAt=(await prisma.sample.findUnique({where:{id:sampleId}})).updatedAt.toISOString();
         const secondRes = await request(app)
             .post('/api/reception/intake')
             .set('Authorization', authReception)
             .send({
-                originalId,
+                originalId,expectedUpdatedAt,
                 isWalkIn: true,
                 isDraft: true,
                 decision: 'DRAFT'

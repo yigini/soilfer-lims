@@ -2307,8 +2307,7 @@
       "reset": "Reset",
       "applyFilters": "Apply Filters"
     }
-  }
-,
+  },
   "profileReference": {
     "label": "Soil profile / sampling point",
     "code": "Recorded field code",
@@ -2352,5 +2351,89 @@
       "profileRelation": "Recorded meaning (SITE_POINT, COMPOSITE, CONFIRMED_PROFILE)",
       "collectionDate": "Field collection date"
     }
+  },
+  "intakeRules": {
+    "effectiveForm": "Intake form",
+    "version": "Version",
+    "inputKept": "Your input has been kept.",
+    "cached": "Saved form; current authorization will be checked during synchronization.",
+    "resolving": "Loading the applicable intake rules…",
+    "context": "Sample context",
+    "required": "Required",
+    "labelFallback": "English label; a translation has not been provided.",
+    "unrecorded": "Not recorded",
+    "reason": "Reason / observation",
+    "optionalFacts": "Record available facts. Leave unknown observations blank. The selected form identifies any required fields.",
+    "restore": "Restore my draft",
+    "restoreHint": "An unfinished form for your account and laboratory is stored on this device. Restore it? The stored copy will be retained until the server confirms a save.",
+    "keepStored": "Start another; keep stored copy",
+    "legacyRetained": "An older unassigned draft is still stored on this device. Ask your laboratory manager to review ownership before recovering it. It has not been deleted.",
+    "resolveBeforeAccept": "Connect and review the applicable form before continuing. Your draft is retained.",
+    "chooseAnalyses": "Choose the requested analyses.",
+    "invalidNumber": "Enter a valid laboratory number.",
+    "massAcknowledgement": "Acknowledge the mass shortage for the requested analyses.",
+    "deviceSaved": "Saved on this device",
+    "awaitingSync": "Awaiting server synchronization",
+    "noAccessionYet": "This is not a server-confirmed receipt or acceptance. No specimen accession has been issued.",
+    "backToDraft": "Return to form",
+    "settings": "Intake rules and form",
+    "settingsHint": "Choose published rules for new intakes. Saving changed controls creates an immutable version. Existing drafts and accepted records keep their original version.",
+    "loadFailed": "Intake settings could not be loaded.",
+    "saveFailed": "The settings could not be saved.",
+    "saved": "Saved and confirmed by the server.",
+    "material": "Material",
+    "origin": "Sample origin",
+    "template": "Published form",
+    "choose": "Choose…",
+    "criteria": "Acceptance checks",
+    "contextFields": "Context fields",
+    "enabled": "Enabled",
+    "saveVersion": "Save a new version and apply",
+    "usePublished": "Apply this published version",
+    "bulkConfirm": "Confirm observed checks for selected rows",
+    "bulkHint": "Select only samples you have physically checked. Row exceptions and recorded source facts are preserved.",
+    "planned": "Planned for acceptance",
+    "rowReview": "Review row and checks",
+    "batchLocal": "Consignment draft stored on this device. Connect to confirm the complete consignment; no sample is received yet.",
+    "legacyRecover": "Review and recover older draft",
+    "legacyOwnership": "Only recover this form if you confirm it belongs to your laboratory and you are authorized to access it. The original will remain stored.",
+    "source": {
+      "SAVED_REVISION": "Original saved version",
+      "PROJECT_BINDING": "Selected by this project",
+      "LAB_DEFAULT": "Laboratory default",
+      "COMPATIBLE_SEED": "Compatible standard form"
+    },
+    "originNames": {
+      "*": "All origins",
+      "PROJECT_SAMPLE": "Project sample",
+      "DESK_WALKIN": "External / walk-in"
+    },
+    "intent": {
+      "SAVE_DRAFT": "Draft",
+      "RECEIVE": "Physical receipt",
+      "ACCEPT": "Acceptance",
+      "REJECT": "Rejection"
+    },
+    "moisture": {
+      "DRY": "Dry",
+      "MOIST": "Moist",
+      "WET": "Wet",
+      "SATURATED": "Saturated"
+    },
+    "contact": {
+      "name": "First name / contact",
+      "surname": "Surname",
+      "phone": "Telephone",
+      "email": "Email",
+      "organization": "Organization"
+    },
+    "seedNames": {
+      "INTAKE-SEED-SOILFER": "SoilFER soil intake",
+      "INTAKE-SEED-RESEARCH": "Research soil intake",
+      "INTAKE-SEED-COMMERCIAL": "Commercial soil intake",
+      "INTAKE-SEED-COMPATIBLE": "Other material intake"
+    },
+    "labCopy": "Laboratory copy",
+    "seedCopy": "System template"
   }
 }

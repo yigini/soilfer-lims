@@ -83,6 +83,7 @@ model Project {
   parentProjectId        String?
   parentProject          Project?  @relation("ProgrammeChildProjects", fields: [parentProjectId], references: [id])
   childProjects          Project[] @relation("ProgrammeChildProjects")
+  intakeBindings         IntakeTemplateBinding[]
 
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
@@ -429,6 +430,59 @@ model Lab {
   projectLabs       ProjectLab[]  // Many-to-many: projects this lab is assigned to
   proficiencyRounds ProficiencyRound[]
   appearanceSetting LabAppearanceSetting?
+  intakeTemplates   IntakeTemplate[]
+  intakeBindings    IntakeTemplateBinding[]
+}
+
+// Reception configuration is independent of Project.templateId (admission policy).
+model IntakeTemplate {
+  id        String @id
+  labId     String?
+  lab       Lab? @relation(fields: [labId], references: [id], onDelete: Restrict)
+  name      String
+  matrix    String
+  status    String @default("ACTIVE")
+  createdBy String
+  createdAt DateTime @default(now())
+  revisions IntakeTemplateRevision[]
+}
+
+model IntakeTemplateRevision {
+  id            String @id
+  templateId    String
+  template      IntakeTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  version       Int
+  schemaVersion String
+  schemaJson    String
+  schemaHash    String
+  state         String @default("DRAFT")
+  editVersion   Int @default(1)
+  createdBy     String
+  createdAt     DateTime @default(now())
+  publishedBy   String?
+  publishedAt   DateTime?
+  retiredBy     String?
+  retiredAt     DateTime?
+  reason        String?
+  bindings      IntakeTemplateBinding[]
+  @@unique([templateId, version])
+}
+
+model IntakeTemplateBinding {
+  id            String @id
+  selectorKey   String @unique
+  labId         String
+  lab           Lab @relation(fields: [labId], references: [id], onDelete: Restrict)
+  projectId     String?
+  project       Project? @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  matrix        String
+  origin        String
+  revisionId    String
+  revision      IntakeTemplateRevision @relation(fields: [revisionId], references: [id], onDelete: Restrict)
+  editVersion   Int @default(1)
+  updatedBy     String
+  updatedAt     DateTime @updatedAt
+  @@index([labId, projectId, matrix, origin])
 }
 
 model ProficiencyRound {

@@ -9,6 +9,7 @@ import WorkspaceHeader from '../components/projects/WorkspaceHeader';
 import OverviewTab from '../components/projects/OverviewTab';
 import SamplesTab from '../components/projects/SamplesTab';
 import AnalysisPlanTab from '../components/projects/AnalysisPlanTab';
+import IntakeTemplateSettings from '../components/reception/IntakeTemplateSettings';
 import LabsAndPeopleTab from '../components/projects/LabsAndPeopleTab';
 import DataConnectionsTab from '../components/projects/DataConnectionsTab';
 import ActivityTab from '../components/projects/ActivityTab';
@@ -351,13 +352,13 @@ export default function ProjectWorkspace() {
                 )}
 
                 {activeTab === 'team' && (
-                    <LabsAndPeopleTab
+                    <div className="space-y-6"><LabsAndPeopleTab
                         project={project}
                         labAccess={labAccess}
                         capabilities={capabilities}
                         userRole={user?.role}
                         onOpenManageLabs={() => handleOpenActionsModal('lab-access')}
-                    />
+                    /><IntakeTemplateSettings labId={user?.role === 'SUPER_ADMIN' ? project.labId : user?.labId} projectId={project.id}/></div>
                 )}
 
                 {activeTab === 'connections' && (

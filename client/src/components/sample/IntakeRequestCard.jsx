@@ -80,8 +80,8 @@ const IntakeRequestCard = ({ sample }) => {
                 </div>
             </div>
 
-            {/* RIGHT: Compliance & Conditions */}
-            <div className="bg-sf-surface rounded-xl shadow-sm border border-sf-divider overflow-hidden">
+            {/* Versioned conditions are shown once in IntakeHistory above. */}
+            {!sample.receptionData?.intakeTemplate && <div className="bg-sf-surface rounded-xl shadow-sm border border-sf-divider overflow-hidden">
                 <div className="bg-gray-50/50 p-3 border-b border-gray-100 flex items-center justify-between">
                     <h3 className="font-bold text-gray-900 flex items-center gap-2 text-sm">
                         <ClipboardList size={16} className="text-gray-500" />
@@ -125,7 +125,7 @@ const IntakeRequestCard = ({ sample }) => {
                         )}
                     </div>
                 </div>
-            </div>
+            </div>}
 
         </div>
     );

@@ -4,7 +4,7 @@ import LocationPicker from './LocationPicker';
 import InfoTooltip from '../common/InfoTooltip';
 import { useLanguage } from '../../context/LanguageContext';
 
-const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [], onPurposeSelect, errors = [], labCoordinates = null, countryCode = null }) => {
+const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [], onPurposeSelect, errors = [], labCoordinates = null, countryCode = null, compact = false }) => {
     const { t } = useLanguage();
 
     const STATIC_PURPOSES = [
@@ -20,6 +20,18 @@ const WalkInForm = ({ submitter, setSubmitter, sampling, setSampling, groups = [
         if (section === 'submitter') setSubmitter(prev => ({ ...prev, [key]: value }));
         if (section === 'sampling') setSampling(prev => ({ ...prev, [key]: value }));
     };
+
+    if (compact) return <fieldset className="rounded-xl border border-sf-divider p-4">
+        <legend className="font-semibold text-sf-text">{t('reception.submitterDetails')}</legend>
+        <p className="text-sm text-sf-muted mb-3">{t('intakeRules.optionalFacts')}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {['name','surname','phone','email','organization'].map(key => <label key={key} className="text-sm text-sf-text">
+                <span className="block mb-1">{t(`intakeRules.contact.${key}`)}</span>
+                <input className="w-full p-2 rounded-lg bg-sf-surface border border-sf-divider" value={submitter[key] ?? ''} onChange={e => handleChange('submitter',key,e.target.value)} type={key === 'email' ? 'email' : key === 'phone' ? 'tel' : 'text'}/>
+            </label>)}
+            <label className="text-sm text-sf-text"><span className="block mb-1">{t('reception.sampleLocation','Sample location')}</span><input className="w-full p-2 rounded-lg bg-sf-surface border border-sf-divider" value={sampling.location ?? ''} onChange={e => handleChange('sampling','location',e.target.value)}/></label>
+        </div>
+    </fieldset>;
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
