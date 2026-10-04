@@ -129,6 +129,22 @@ describe('Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring 
         expect(await prisma.batchQcResult.count({ where: { batchId: batch.id } })).toBe(0);
         expect(await prisma.auditLog.count({ where: { entityId: batch.id } })).toBe(0);
     });
+    test.each([null, '', '<LOQjunk', '?0.1', '6 ,42'])('missing, malformed or unknown duplicate %s is refused as missing with no writes', async value => {
+        const { batch } = await fixture(); const before = await prisma.batch.findUnique({ where: { id: batch.id } });
+        const response = await evaluate(batch, payload(value, 7));
+        expect(response.status).toBe(400); expect(response.body).toMatchObject({ code: 'QC_VALUES_MISSING', missingTypes: ['DUPLICATE'] });
+        expect(await prisma.batch.findUnique({ where: { id: batch.id } })).toEqual(before);
+        expect(await prisma.batchQcResult.count({ where: { batchId: batch.id } })).toBe(0);
+        expect(await prisma.auditLog.count({ where: { entityId: batch.id } })).toBe(0);
+    });
+    test('ambiguous duplicate syntax retains the shared typed refusal without changing evidence', async () => {
+        const { batch } = await fixture(); const before = await prisma.batch.findUnique({ where: { id: batch.id } });
+        const response = await evaluate(batch, payload('<1,234', 7));
+        expect(response.status).toBe(400); expect(response.body.code).toBe('AMBIGUOUS_NUMBER');
+        expect(await prisma.batch.findUnique({ where: { id: batch.id } })).toEqual(before);
+        expect(await prisma.batchQcResult.count({ where: { batchId: batch.id } })).toBe(0);
+        expect(await prisma.auditLog.count({ where: { entityId: batch.id } })).toBe(0);
+    });
 });
 
 describe('Audit 0.15: independent duplicate numeric criteria', () => {
