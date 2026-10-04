@@ -84,7 +84,7 @@ describe('Audit 0.13: scan and reception callers', () => {
         const axios = { get: jest.fn().mockResolvedValue({ data: { id: 'database-013', originalId: 'FIELD-013', status: 'EXPECTED' } }) };
         const search = '?sampleId=database-013', h = harness('Reception', { axios, search });
         h.render();
-        const effect = h.effects.find(entry => entry.deps?.includes(search));
+        const effect = h.effects.find(entry => entry.deps?.includes(search) && entry.deps.includes('auth-013'));
         expect(effect).toBeDefined(); effect.fn(); await settle();
         expect(axios.get).toHaveBeenCalledWith('/api/samples/lookup', { params: { code: 'database-013' }, headers: { Authorization: 'Bearer auth-013' } });
         expect(h.showDialog).not.toHaveBeenCalled();
