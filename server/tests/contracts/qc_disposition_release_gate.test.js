@@ -131,6 +131,8 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Link work item to batch
+        await prisma.result.create({ data: { id: `RES-118-${Date.now()}`, sampleId: sample1.id,
+            param: 'PH_H2O', value: '6.45', isCurrent: true, isValid: true, batchId: batch1.id } });
         await prisma.workItem.update({
             where: { id: workItem1.id },
             data: { batchId: batch1.id }
@@ -140,6 +142,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
     afterAll(async () => {
         // Clean up test data
         await prisma.report.deleteMany({ where: { sampleId: sample1.id } }).catch(() => {});
+        await prisma.result.deleteMany({ where: { sampleId: sample1.id } });
         await prisma.workItem.deleteMany({ where: { id: workItem1.id } }).catch(() => {});
         await prisma.sample.deleteMany({ where: { id: sample1.id } }).catch(() => {});
         await prisma.batch.deleteMany({ where: { id: batch1.id } }).catch(() => {});
@@ -201,7 +204,11 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         expect(eligibility.blockers.some(b => b.startsWith('QC_BATCH_FAILED'))).toBe(true);
 
         // B. workEligibility.canPublish blocks official report publication
-        const publishCheck = canPublish(sample1, null, lab1Manager, { qcBatches: [freshBatch] });
+        // Report QC is tested on an approved, reviewed fixture so the new universal
+        // sample-review gate does not mask the QC gate under test.
+        await prisma.sample.update({ where: { id: sample1.id }, data: { status: 'APPROVED' } });
+        const reportSample = await prisma.sample.findUnique({ where: { id: sample1.id }, include: { workItems: true, results: true } });
+        const publishCheck = canPublish(reportSample, null, lab1Manager, { qcBatches: [freshBatch] });
         expect(publishCheck.allowed).toBe(false);
         expect(publishCheck.code).toBe('QC_BATCH_FAILED');
 
@@ -211,6 +218,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             .set('Authorization', `Bearer ${lab1Manager.token}`);
         expect(genRes.status).toBe(409);
         expect(genRes.body.code).toBe('QC_BATCH_FAILED');
+        await prisma.sample.update({ where: { id: sample1.id }, data: { status: 'PROCESSING' } });
     });
 
     // ─── Test 3: Manager QC Disposition Authorization & Validation ───

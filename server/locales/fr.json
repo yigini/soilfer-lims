@@ -1,4 +1,5 @@
 {
+  "resultReports": { "qcWarningStatement": "Avertissement QC : Une ou plusieurs valeurs rapportées ont un QC de lot échoué ou incomplet. Consultez les avertissements de lot enregistrés." },
   "common": {
     "save": "Enregistrer",
     "cancel": "Annuler",

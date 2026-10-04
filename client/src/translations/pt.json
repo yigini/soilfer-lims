@@ -2112,6 +2112,7 @@
     "stepReceipt": "4. Custódia"
   },
   "resultReports": {
+    "qcWarningStatement": "Aviso de QC: Um ou mais valores relatados têm QC de lote reprovado ou incompleto. Consulte os avisos de lote registrados.",
     "title": "Relatórios de resultados",
     "reportsFound": "{count, plural, one {1 relatório encontrado} other {# relatórios encontrados}}",
     "searchPlaceholder": "Pesquisar por nome, telefone, projeto, ID de amostra ou ID de laboratório...",

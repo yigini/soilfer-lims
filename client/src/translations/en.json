@@ -2112,6 +2112,7 @@
     "stepReceipt": "4. Handover"
   },
   "resultReports": {
+    "qcWarningStatement": "QC warning: One or more reported values have failed or incomplete batch QC. See the recorded batch warnings.",
     "title": "Result Reports",
     "reportsFound": "{count, plural, one {1 report found} other {# reports found}}",
     "searchPlaceholder": "Search by name, phone, project, sample ID, or lab ID...",

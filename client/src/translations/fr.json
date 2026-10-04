@@ -2112,6 +2112,7 @@
     "stepReceipt": "4. Garde"
   },
   "resultReports": {
+    "qcWarningStatement": "Avertissement QC : Une ou plusieurs valeurs rapportées ont un QC de lot échoué ou incomplet. Consultez les avertissements de lot enregistrés.",
     "title": "Rapports de résultats",
     "reportsFound": "{count, plural, one {1 rapport trouvé} other {# rapports trouvés}}",
     "searchPlaceholder": "Rechercher par nom, téléphone, projet, ID échantillon ou ID laboratoire...",
