@@ -1,5 +1,6 @@
 const request = require('supertest');
 const app = require('../../app');
+const prisma = require('../../prisma');
 const { samplesDb, workItemsDb, usersDb, batchesDb } = require('../../db');
 
 describe('Scenario E: QC Batch Management', () => {
@@ -84,6 +85,7 @@ describe('Scenario E: QC Batch Management', () => {
             workItemIds: workItemIds,
             submittedBy: `tech_qc_${Date.now()}` // Bypass check
         });
+        await prisma.workItem.updateMany({ where: { id: { in: workItemIds } }, data: { submissionId: subId, status: 'SUBMITTED' } });
 
         // 3. Manager Review - Attempt Accept
         const reviewRes = await request(app)

@@ -2,6 +2,7 @@ const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
 const { samplesDb, workItemsDb, usersDb, submissionsDb } = require('../../db');
+const prisma = require('../../prisma');
 const {
     evaluateBlank,
     evaluateDuplicate,
@@ -113,6 +114,7 @@ describe('BLK-2: Minimum Viable Typed QC Controls Contract', () => {
             workItemIds: [workItemId],
             submittedBy: `tech_qc2_${Date.now()}`
         });
+        await prisma.workItem.update({ where: { id: workItemId }, data: { submissionId: subId, status: 'SUBMITTED' } });
 
         const reviewRes = await request(app)
             .post(`/api/submissions/${subId}/review`)

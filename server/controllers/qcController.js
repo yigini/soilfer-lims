@@ -900,6 +900,7 @@ exports.dispositionBatch = async (req, res) => {
                             changedBy: user.username,
                             timestamp: now.toISOString(),
                             action: 'REANALYZE_BATCH',
+                            submissionId: wi.submissionId,
                             reason: trimmedReason
                         });
 
@@ -909,6 +910,7 @@ exports.dispositionBatch = async (req, res) => {
                                 status: 'REANALYSIS_REQUIRED',
                                 reanalysisReason: trimmedReason,
                                 reanalysisRequestedBy: user.username,
+                                submissionId: null,
                                 history: JSON.stringify(history),
                                 updatedAt: now
                             }
