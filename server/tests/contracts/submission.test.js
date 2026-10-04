@@ -1,6 +1,7 @@
 const { ensureTestLab } = require('../setup');
 const request = require('supertest');
 const app = require('../../app');
+const prisma = require('../../prisma');
 const { generateToken } = require('../setup');
 const { usersDb, workItemsDb, samplesDb, submissionsDb } = require('../../db');
 
@@ -65,10 +66,11 @@ describe('8.1 Section D: Submission Rules', () => {
 
     test('Scenario 1: Tech can Submit Partial (PH)', async () => {
         const completeRes = await request(app)
-            .put(`/api/work/${phItemId}/status`)
+            .post('/api/workbench/batch-save')
             .set('Authorization', `Bearer ${techToken}`)
-            .send({ status: 'COMPLETED', result: '7.0' });
+            .send({ draft: false, entries: [{ workItemId: phItemId, value: '7.0' }] });
         expect(completeRes.status).toBe(200);
+        expect((await prisma.result.findFirst({ where: { sampleId, param: 'PH_H2O', isCurrent: true } })).value).toBe('7.0');
 
         const subRes = await request(app)
             .post('/api/submissions')
@@ -85,11 +87,12 @@ describe('8.1 Section D: Submission Rules', () => {
 
     test('Scenario 2: Full Submission Blocked if items incomplete', async () => {
         const completeRes = await request(app)
-            .put(`/api/work/${condItemId}/status`)
+            .post('/api/workbench/batch-save')
             .set('Authorization', `Bearer ${techToken}`)
-            .send({ status: 'COMPLETED', result: '5.0' });
+            .send({ draft: false, entries: [{ workItemId: condItemId, value: '5.0' }] });
         if (completeRes.status !== 200) console.log('DEBUG Scenario 2 Complete Failure:', completeRes.body);
         expect(completeRes.status).toBe(200);
+        expect((await prisma.result.findFirst({ where: { sampleId, param: 'EC', isCurrent: true } })).value).toBe('5.0');
 
         const subRes = await request(app)
             .post('/api/submissions')
@@ -128,10 +131,11 @@ describe('8.1 Section D: Submission Rules', () => {
     test('Scenario 4: Rejection (COND)', async () => {
         // Re-complete the rejected item
         const completeRes = await request(app)
-            .put(`/api/work/${condItemId}/status`)
+            .post('/api/workbench/batch-save')
             .set('Authorization', `Bearer ${techToken}`)
-            .send({ status: 'COMPLETED', result: '5.1' });
+            .send({ draft: false, entries: [{ workItemId: condItemId, value: '5.1' }] });
         expect(completeRes.status).toBe(200);
+        expect((await prisma.result.findFirst({ where: { sampleId, param: 'EC', isCurrent: true } })).value).toBe('5.1');
 
         const subRes = await request(app)
             .post('/api/submissions')
