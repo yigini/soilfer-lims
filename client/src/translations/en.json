@@ -1,4 +1,5 @@
 {
+  "numbers": {"ambiguous":"Clarify the decimal or thousands separator.","invalid":"Invalid number format.","policyInvalid":"Laboratory number format is unavailable or invalid.","decimal":"Decimal separator","thousands":"Thousands separator","noGrouping":"Not configured","space":"Space"},
   "sampleLookup": { "title": "Sample lookup", "ambiguous": "This identifier matches several samples:", "failed": "Sample could not be found or loaded. Check the identifier and connection." },
   "dataSheet": {
     "title": "Data Sheet",

@@ -101,8 +101,8 @@ function modalHost() {
     };
     const axios = {
         get: jest.fn().mockResolvedValue({ data: { data: [
-            { id: 'fixture-batch', status: 'OPEN', profile: 'RACK_40' },
-            { id: 'second-batch', status: 'OPEN', profile: 'RACK_40' }
+            { id: 'fixture-batch', status: 'OPEN', profile: 'RACK_40', numberFormat: { decimal: '.', thousands: null } },
+            { id: 'second-batch', status: 'OPEN', profile: 'RACK_40', numberFormat: { decimal: '.', thousands: null } }
         ] } }),
         post: jest.fn().mockResolvedValue({ data: { status: 'QC_PASS' } }),
         put: jest.fn()
@@ -120,6 +120,8 @@ function modalHost() {
         if (name === 'lucide-react') return new Proxy({}, { get: () => () => null });
         if (name.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => code => code };
         if (name.includes('messageFormatter')) return parser;
+        if (name === '@lims/number-parse') return require('../../../shared/numberParse');
+        if (name === './NumberPreview') return () => null;
         throw new Error(`Unexpected component dependency: ${name}`);
     }).default;
     let tree;
@@ -147,6 +149,17 @@ function modalHost() {
 }
 
 describe('Audit 0.1: BatchModal explicit input component behavior', () => {
+    test.each(['1,234', '1.234', '6 ,42'])('ambiguous or malformed QC input %s cannot be sent', async raw => {
+        const host = modalHost();
+        await host.render(); host.qcTab().props.onClick(); await host.render();
+        for (const id of ['qc-blank-input', 'qc-ctrl-exp-input', 'qc-ctrl-meas-input', 'qc-dup1-input', 'qc-dup2-input']) {
+            host.find(id).props.onChange({ target: { value: id === 'qc-dup1-input' ? raw : '7' } });
+            await host.render();
+        }
+        expect(host.find('evaluate-qc-btn').props.disabled).toBe(true);
+        await host.find('evaluate-qc-btn').props.onClick();
+        expect(host.axios.post).not.toHaveBeenCalled();
+    });
     test('opening QC with no input disables evaluation and clicking its handler sends no request', async () => {
         const host = modalHost();
         await host.render();
@@ -179,8 +192,8 @@ describe('Audit 0.1: BatchModal explicit input component behavior', () => {
         expect(host.find('evaluate-qc-btn').props.disabled).toBe(false);
         await host.find('evaluate-qc-btn').props.onClick();
         expect(host.axios.post).toHaveBeenCalledWith('/api/qc/batches/fixture-batch/evaluate', {
-            blanks: [{ value: 0 }], controls: [{ expected: 7, measured: 7.03 }],
-            duplicates: [{ value1: 6.85, value2: 6.87 }]
+            blanks: [{ value: 0, rawInput: { value: '0' } }], controls: [{ expected: 7, measured: 7.03, rawInput: { expected: '7,00', measured: '7,03' } }],
+            duplicates: [{ value1: 6.85, value2: 6.87, rawInput: { value1: '6,85', value2: '6,87' } }]
         });
         await host.render(false);
         await host.render(true);

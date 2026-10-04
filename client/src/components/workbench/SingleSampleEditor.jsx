@@ -200,6 +200,7 @@ export default function SingleSampleEditor({
                 {/* Editor Components */}
                 {isTexture ? (
                     <TextureEditor
+                        numberFormat={currentItem.numberFormat}
                         values={draft?.values || []}
                         onChange={values => onDraftChange(currentItem.workItemId, null, { values })}
                         disabled={disabled}
@@ -232,6 +233,7 @@ export default function SingleSampleEditor({
                 ) : (
                     <div className="space-y-3">
                         <NumericEditor
+                            numberFormat={currentItem.numberFormat}
                             value={draft?.value ?? ''}
                             unit={activeGroup?.unit}
                             onChange={value => onDraftChange(currentItem.workItemId, value)}

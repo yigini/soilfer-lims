@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { X, Layers, ShieldCheck, AlertTriangle, CheckCircle2, FlaskConical, PlusCircle } from 'lucide-react';
 import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
-import { parseLaboratoryNumber } from '../../utils/messageFormatter';
+import numberParse from '@lims/number-parse';
+import NumberPreview from './NumberPreview';
 
 const EMPTY_QC_FORM = { blankVal: '', ctrlExpected: '', ctrlMeasured: '', dupVal1: '', dupVal2: '' };
 
@@ -66,8 +67,8 @@ export default function BatchModal({
 
     const currentBatch = batches.find(b => b.id === selectedBatchId) || batches[0] || null;
     const qcMeasurements = Object.fromEntries(Object.entries(qcForm).map(([field, raw]) => {
-        const parsed = parseLaboratoryNumber(raw);
-        return [field, parsed.valid && parsed.value !== null ? Number(parsed.canonical) : NaN];
+        const parsed = numberParse.parseNumber(raw, currentBatch?.numberFormat);
+        return [field, parsed.valid && !parsed.qualifier ? parsed.value : NaN];
     }));
     const qcFormComplete = Object.values(qcMeasurements).every(Number.isFinite);
 
@@ -141,9 +142,9 @@ export default function BatchModal({
         setSuccessMsg(null);
         try {
             setLoading(true);
-            const blanks = [{ value: qcMeasurements.blankVal }];
-            const controls = [{ expected: qcMeasurements.ctrlExpected, measured: qcMeasurements.ctrlMeasured }];
-            const duplicates = [{ value1: qcMeasurements.dupVal1, value2: qcMeasurements.dupVal2 }];
+            const blanks = [{ value: qcMeasurements.blankVal, rawInput: { value: qcForm.blankVal } }];
+            const controls = [{ expected: qcMeasurements.ctrlExpected, measured: qcMeasurements.ctrlMeasured, rawInput: { expected: qcForm.ctrlExpected, measured: qcForm.ctrlMeasured } }];
+            const duplicates = [{ value1: qcMeasurements.dupVal1, value2: qcMeasurements.dupVal2, rawInput: { value1: qcForm.dupVal1, value2: qcForm.dupVal2 } }];
 
             const res = await axios.post(`/api/qc/batches/${selectedBatchId}/evaluate`, {
                 blanks,
@@ -452,6 +453,7 @@ export default function BatchModal({
                                             className="w-full text-xs p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text font-mono focus:ring-1 focus:ring-emerald-500"
                                             data-testid="qc-blank-input"
                                         />
+                                        <NumberPreview value={qcForm.blankVal} numberFormat={currentBatch?.numberFormat} />
                                     </div>
 
                                     <div className="p-3 rounded-xl border border-sf-divider bg-sf-surface">
@@ -468,6 +470,7 @@ export default function BatchModal({
                                                 className="w-1/2 text-xs p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text font-mono focus:ring-1 focus:ring-emerald-500"
                                                 data-testid="qc-ctrl-exp-input"
                                             />
+                                            <NumberPreview value={qcForm.ctrlExpected} numberFormat={currentBatch?.numberFormat} />
                                             <input
                                                 type="text"
                                                 value={qcForm.ctrlMeasured}
@@ -477,6 +480,7 @@ export default function BatchModal({
                                                 className="w-1/2 text-xs p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text font-mono focus:ring-1 focus:ring-emerald-500"
                                                 data-testid="qc-ctrl-meas-input"
                                             />
+                                            <NumberPreview value={qcForm.ctrlMeasured} numberFormat={currentBatch?.numberFormat} />
                                         </div>
                                     </div>
 
@@ -493,6 +497,7 @@ export default function BatchModal({
                                                 className="w-1/2 text-xs p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text font-mono focus:ring-1 focus:ring-emerald-500"
                                                 data-testid="qc-dup1-input"
                                             />
+                                            <NumberPreview value={qcForm.dupVal1} numberFormat={currentBatch?.numberFormat} />
                                             <input
                                                 type="text"
                                                 value={qcForm.dupVal2}
@@ -501,6 +506,7 @@ export default function BatchModal({
                                                 className="w-1/2 text-xs p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text font-mono focus:ring-1 focus:ring-emerald-500"
                                                 data-testid="qc-dup2-input"
                                             />
+                                            <NumberPreview value={qcForm.dupVal2} numberFormat={currentBatch?.numberFormat} />
                                         </div>
                                     </div>
                                 </div>

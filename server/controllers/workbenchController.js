@@ -5,6 +5,7 @@ const workflow = require('../workflowContract');
 const validationController = require('./validationController');
 const draftService = require('../services/draftService');
 const validationService = require('../services/workbenchValidationService');
+const { getNumberFormat } = require('../services/numberFormatService');
 const readinessService = require('../services/workbenchReadinessService');
 const { calculateUsdaTexture } = require('../utils/soilCalculations');
 const { broadcastToLab } = require('../wsServer');
@@ -518,9 +519,11 @@ exports.getQueue = async (req, res) => {
 
         // Group by analysis
         const groupsMap = {};
+        const numberFormats = new Map();
         for (const item of items) {
             const code = item.analysis;
-            const labId = item.sample?.assignedLab || item.labId;
+            const labId = item.sample?.assignedLab || item.assignedLab || item.labId;
+            if (!numberFormats.has(labId)) numberFormats.set(labId, await getNumberFormat(labId));
             const equipKey = `${labId}::${code}`;
 
             if (!groupsMap[code]) {
@@ -567,6 +570,7 @@ exports.getQueue = async (req, res) => {
                 labId: item.sample?.labId || item.labId,
                 originalId: item.sample?.originalId || null,
                 laboratoryId: item.sample?.assignedLab || item.assignedLab || item.labId || null,
+                numberFormat: numberFormats.get(labId),
                 projectCode: item.sample?.projectCode || null,
                 analysis: code,
                 analysisCode: code,
@@ -649,6 +653,7 @@ exports.getQueue = async (req, res) => {
         res.json({ groups, stats, targetScopedItem: targetScopedItem?.id || null });
     } catch (error) {
         console.error('[workbench.getQueue] Error:', error);
+        if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
         res.status(500).json({ error: 'Failed to fetch workbench queue' });
     }
 };
@@ -850,6 +855,7 @@ exports.batchSave = async (req, res) => {
             let validation = { valid: true, flags: [] };
             let value = entry.value;
             let textureClassification = null;
+            const numberFormat = !isOperationalTask ? await getNumberFormat(item.sample?.assignedLab || item.assignedLab || item.labId) : null;
 
             if (isOperationalTask) {
                 value = !draft ? JSON.stringify({ revision: checklist.revision, steps: checklist.steps, checks: entry.checks, recordedBy: user.username, recordedAt: now.toISOString() }) : null;
@@ -868,13 +874,13 @@ exports.batchSave = async (req, res) => {
                         });
                         continue;
                     }
-                    const textVal = validationService.validateTextureFractions(textureFractions, methodTolerance);
+                    const textVal = validationService.validateTextureFractions(textureFractions, methodTolerance, numberFormat);
                     if (!textVal.isValid) {
                         if (textVal.flags?.includes('INVALID_FORMAT') || textVal.flags?.includes('BELOW_MIN')) {
                             errors.push({
                                 workItemId: entry.workItemId,
                                 error: 'Invalid fraction format: fractions must be numbers between 0 and 100%',
-                                code: 'INVALID_FORMAT'
+                                code: textVal.code || 'INVALID_FORMAT'
                             });
                             continue;
                         }
@@ -903,12 +909,17 @@ exports.batchSave = async (req, res) => {
                     value = textVal.className || 'Loam';
                     validation = { ...validation, valid: textVal.isValid || !!validation.overrideReason, className: textVal.className, code: textVal.code, closureError: textVal.closureError };
                 } else if (hasTextureDraft) {
-                    const textVal = validationService.validateTextureFractions(textureFractions, methodTolerance);
+                    const textVal = validationService.validateTextureFractions(textureFractions, methodTolerance, numberFormat);
                     validation = { valid: textVal.isValid, flags: textVal.flags || [], className: textVal.className, code: textVal.code, closureError: textVal.closureError };
                 }
             } else if (!isOperationalTask && value !== null && value !== undefined && value !== '') {
-                const checked = validationService.validateNumericMethod(value, methodMap[item.analysis]?.validation);
+                const checked = validationService.validateNumericMethod(value, methodMap[item.analysis]?.validation, numberFormat);
                 validation = { ...checked, valid: checked.isValid };
+                if (!draft && ['AMBIGUOUS_NUMBER', 'INVALID_NUMBER'].includes(checked.code)) {
+                    errors.push({ workItemId: item.id, code: checked.code, error: checked.code === 'AMBIGUOUS_NUMBER' ? 'Clarify the decimal or thousands separator.' : 'Invalid number format.' });
+                    continue;
+                }
+                if (!draft && checked.isValid) value = checked.raw;
             }
 
             // ─── Fix 3: Compute target status and enforce workflow transitions ───
@@ -1115,9 +1126,9 @@ exports.batchSave = async (req, res) => {
                 const validBasis = ['AIR_DRY', 'OVEN_DRY', 'FIELD_MOIST'].includes(entry.basis) ? entry.basis : 'AIR_DRY';
 
                 if (isTextureTask && textureClassification && !draft) {
-                    const sandNum = Number(String(textureFractions.sand).replace(',', '.'));
-                    const siltNum = Number(String(textureFractions.silt).replace(',', '.'));
-                    const clayNum = Number(String(textureFractions.clay).replace(',', '.'));
+                    const sandNum = textureClassification.fractions.sand;
+                    const siltNum = textureClassification.fractions.silt;
+                    const clayNum = textureClassification.fractions.clay;
 
                     const sandResId = `res-${Date.now()}-sand-${Math.random().toString(36).substr(2, 5)}`;
                     const siltResId = `res-${Date.now()}-silt-${Math.random().toString(36).substr(2, 5)}`;
@@ -1147,6 +1158,7 @@ exports.batchSave = async (req, res) => {
                             id: sandResId,
                             sampleId: item.sampleId,
                             param: 'SAND',
+                            rawInput: String(textureFractions.sand),
                             value: String(sandNum),
                             numericValue: sandNum,
                             unit: '%',
@@ -1173,6 +1185,7 @@ exports.batchSave = async (req, res) => {
                             id: siltResId,
                             sampleId: item.sampleId,
                             param: 'SILT',
+                            rawInput: String(textureFractions.silt),
                             value: String(siltNum),
                             numericValue: siltNum,
                             unit: '%',
@@ -1199,6 +1212,7 @@ exports.batchSave = async (req, res) => {
                             id: clayResId,
                             sampleId: item.sampleId,
                             param: 'CLAY',
+                            rawInput: String(textureFractions.clay),
                             value: String(clayNum),
                             numericValue: clayNum,
                             unit: '%',
@@ -1233,6 +1247,7 @@ exports.batchSave = async (req, res) => {
                             id: textResId,
                             sampleId: item.sampleId,
                             param: 'TEXTURE',
+                            rawInput: JSON.stringify(entry.values),
                             value: textureClassification.className,
                             numericValue: null,
                             unit: 'USDA_12_CLASS',
@@ -1283,7 +1298,7 @@ exports.batchSave = async (req, res) => {
                         flagsData.push('MANAGER_OVERRIDE');
                     }
 
-                    const strVal = String(value).trim();
+                    const strVal = validation.raw || String(value).trim();
                     const isCensored = validation.isCensored || /^[<>]/.test(strVal);
                     const censoringType = isCensored ? (strVal.startsWith('<') ? 'BELOW_LOQ' : 'ABOVE_RANGE') : 'NONE';
                     let numericVal = null;
@@ -1317,6 +1332,7 @@ exports.batchSave = async (req, res) => {
                             sampleId: item.sampleId,
                             param: item.analysis,
                             value: strVal,
+                            rawInput: String(entry.value),
                             numericValue: numericVal,
                             unit: method?.unit || null,
                             flags: JSON.stringify(flagsData),
@@ -1467,6 +1483,7 @@ exports.batchSave = async (req, res) => {
                                         sampleId,
                                         param: 'TEXTURE',
                                         value: tex.className,
+                                        rawInput: JSON.stringify({ sand: sandR.rawInput, silt: siltR.rawInput, clay: clayR.rawInput }),
                                         numericValue: null,
                                         unit: '',
                                         isValid: true,
@@ -1556,6 +1573,7 @@ exports.batchSave = async (req, res) => {
         });
     } catch (error) {
         console.error('[workbench.batchSave] Error:', error);
+        if (error.statusCode) return res.status(error.statusCode).json({ code: error.code, error: error.message });
         res.status(500).json({ error: 'Failed to save batch results' });
     }
 };
@@ -1806,12 +1824,12 @@ exports.previewCompletion = async (req, res) => {
             } else if (isTextureAnalysis) {
                 const method = methodMap[item.analysis];
                 const tolerance = (method?.validation && typeof method.validation.tolerance === 'number') ? method.validation.tolerance : null;
-                validation = validationService.validateTextureFractions(entry.values, tolerance);
+                validation = validationService.validateTextureFractions(entry.values, tolerance, await getNumberFormat(labId));
             } else if (item.category === 'Operational Gates') {
                 validation = validationService.validateOperationalTask(entry.checks, operationalChecklists[item.analysis]?.steps.length || 3);
             } else {
                 const method = methodMap[item.analysis];
-                validation = validationService.validateNumericMethod(entry.value, method?.validation);
+                validation = validationService.validateNumericMethod(entry.value, method?.validation, await getNumberFormat(labId));
             }
 
             // Version check
@@ -1909,6 +1927,7 @@ exports.previewCompletion = async (req, res) => {
         });
     } catch (err) {
         console.error('[workbench.previewCompletion] Error:', err);
+        if (err.statusCode) return res.status(err.statusCode).json({ code: err.code, error: err.message });
         res.status(500).json({ error: 'Failed to generate completion preview' });
     }
 };
