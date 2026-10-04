@@ -32,7 +32,7 @@ describe('Audit 0.5: legacy review delegates to the guarded authority', () => {
     test.each(['ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'ACCEPTED'])('legacy ACCEPT cannot bypass the %s state guard or mutate evidence', async status => {
         const f = await fixture({ status }), before = await state(f);
         const response = await review(f, { decision: 'ACCEPT', status: 'WAIVED' });
-        expect(response.status).toBe(400); expect(response.body.code).toBe('INVALID_TRANSITION');
+        expect(response.status).toBe(409); expect(response.body.code).toBe('ITEM_NOT_SUBMITTED');
         expect(await state(f)).toEqual(before);
     });
     test('legacy ACCEPT enforces laboratory scope using the linked sample', async () => {

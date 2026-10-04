@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -38,7 +39,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
             id: id('WI-06-PACKAGE'), sampleId: f.sampleId, assignedLab: labId, analysis: 'EC', status, result: '5.4', history: '[]'
         } }));
         const submission = await prisma.submission.create({ data: { id: id('SUB-06'), sampleId: f.sampleId, assignedLab: labId,
-            status: 'PENDING_REVIEW', type: 'PARTIAL', submittedBy: 'test', workItemCount: items.length,
+            status: 'PENDING_REVIEW', type: 'PARTIAL', submittedBy: jwt.decode(technician).username, workItemCount: items.length,
             workItemIds: JSON.stringify(items.map(item => item.id)) } });
         await prisma.workItem.updateMany({ where: { id: { in: items.map(item => item.id) } }, data: { submissionId: submission.id } });
         return { ...f, items, submission };
