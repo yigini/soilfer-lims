@@ -115,9 +115,21 @@ if (!process.env.JWT_SECRET) {
 }
 const SECRET_KEY = process.env.JWT_SECRET;
 
+const pkg = require('./package.json');
+
 // Health Check (used by Docker healthcheck)
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', uptime: process.uptime() });
+    res.json({ status: 'ok', version: pkg.version, uptime: process.uptime() });
+});
+
+// Canonical Version Info Endpoint
+app.get('/api/version', (req, res) => {
+    res.json({
+        name: 'soilfer-lims',
+        version: pkg.version,
+        status: 'ok',
+        uptime: process.uptime()
+    });
 });
 
 // Background Schedulers Lifecycle Management

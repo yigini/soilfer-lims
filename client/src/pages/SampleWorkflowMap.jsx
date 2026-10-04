@@ -228,7 +228,7 @@ export default function SampleWorkflowMap() {
             {/* Footnote */}
             <div className="sf-top text-xs text-sf-muted border-t border-sf-divider">
                 <span>Path shown reflects assigned determinations for this sample. Keyboard shortcuts: [1] Overview, [2] Dependencies, [3] Analysis list.</span>
-                <span>SoilFER LIMS v1.4.0</span>
+                <span>SoilFER LIMS v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.5.0'}</span>
             </div>
         </div>
     );
