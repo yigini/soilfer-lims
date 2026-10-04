@@ -11,7 +11,7 @@ const { allocateReportIdentity, storedNumber, displayNumber } = require('../serv
 async function pdfPublication(report) {
     if (!report) return { status: 'DRAFT', publishedAt: null };
     const replacement = report.status === 'SUPERSEDED' ? await prisma.report.findFirst({ where: {
-        sampleId: report.sampleId, version: { gt: report.version }, status: { in: ['PUBLISHED', 'SUPERSEDED'] }
+        sampleId: report.sampleId, version: { gt: report.version }, status: { in: ['PUBLISHED', 'SUPERSEDED'] }, publishedAt: { not: null }
     }, orderBy: { version: 'asc' } }) : null;
     const number = row => row?.reportNumberBase ? displayNumber(row.reportNumberBase, row.revision) : row ? storedNumber(row) : null;
     return { status: report.status, publishedAt: report.publishedAt, reportNumber: number(report), replacementNumber: number(replacement) };

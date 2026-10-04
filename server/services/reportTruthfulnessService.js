@@ -20,8 +20,10 @@ function freezeReportEvidence(results, workItems, batches) {
     }
     const preparation = workItems.filter(item => ['DRYING', 'PREPARATION'].includes(item.analysis)).flatMap(item => {
         const receipt = parseObject(item.result);
-        if (!receipt || !Array.isArray(receipt.checklist) || !receipt.checklist.length ||
-            !receipt.checklist.every(check => check === true) || !Array.isArray(receipt.steps) ||
+        const checks = receipt?.checks || receipt?.checklist;
+        if (!receipt || !Array.isArray(checks) || !checks.length ||
+            !checks.every(check => check === true) || !Array.isArray(receipt.steps) || receipt.steps.length !== checks.length ||
+            !receipt.steps.every(step => typeof step === 'string' && step.trim()) ||
             !['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(item.status)) return [];
         return [{ workItemId: item.id, analysis: item.analysis, status: item.status, steps: receipt.steps,
             recordedAt: receipt.recordedAt || null, recordedBy: receipt.recordedBy || null, observations: receipt.observations || null }];
