@@ -67,10 +67,12 @@ export default function BatchModal({
 
     const currentBatch = batches.find(b => b.id === selectedBatchId) || batches[0] || null;
     const qcMeasurements = Object.fromEntries(Object.entries(qcForm).map(([field, raw]) => {
-        const parsed = numberParse.parseNumber(raw, currentBatch?.numberFormat);
-        return [field, parsed.valid && !parsed.qualifier ? parsed.value : NaN];
+        const duplicate = field.startsWith('dup');
+        const parsed = duplicate ? numberParse.parseDuplicateObservation(raw, currentBatch?.numberFormat) : numberParse.parseNumber(raw, currentBatch?.numberFormat);
+        return [field, parsed.valid && (!parsed.qualifier || duplicate) ? (parsed.censored ? parsed.canonical : parsed.value) : NaN];
     }));
-    const qcFormComplete = Object.values(qcMeasurements).every(Number.isFinite);
+    const qcFormComplete = Object.entries(qcMeasurements).every(([field, value]) => field.startsWith('dup')
+        ? numberParse.parseDuplicateObservation(qcForm[field], currentBatch?.numberFormat).valid : Number.isFinite(value));
 
     // Handle Create Batch
     const handleCreateBatch = async (e) => {
@@ -497,7 +499,7 @@ export default function BatchModal({
                                                 className="w-1/2 text-xs p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text font-mono focus:ring-1 focus:ring-emerald-500"
                                                 data-testid="qc-dup1-input"
                                             />
-                                            <NumberPreview value={qcForm.dupVal1} numberFormat={currentBatch?.numberFormat} />
+                                            <NumberPreview value={qcForm.dupVal1} numberFormat={currentBatch?.numberFormat} duplicateObservation />
                                             <input
                                                 type="text"
                                                 value={qcForm.dupVal2}
@@ -506,7 +508,7 @@ export default function BatchModal({
                                                 className="w-1/2 text-xs p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text font-mono focus:ring-1 focus:ring-emerald-500"
                                                 data-testid="qc-dup2-input"
                                             />
-                                            <NumberPreview value={qcForm.dupVal2} numberFormat={currentBatch?.numberFormat} />
+                                            <NumberPreview value={qcForm.dupVal2} numberFormat={currentBatch?.numberFormat} duplicateObservation />
                                         </div>
                                     </div>
                                 </div>
