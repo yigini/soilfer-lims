@@ -177,6 +177,9 @@ async function generateReport(req, res) {
             generatedBy: report.generatedBy
         });
     } catch (err) {
+        if (err.code === 'P2002') {
+            return res.status(409).json({ error: 'The report number was already issued.', code: 'REPORT_NUMBER_CONFLICT' });
+        }
         if (err.statusCode) {
             const { code, workItemIds, params } = err.publishCheck || {};
             return res.status(err.statusCode).json({ error: err.message, code: code || err.code, workItemIds, params });

@@ -378,6 +378,10 @@ function generateReportPdfBuffer(reportContent, publication = {}) {
                 // from flowing its text into a new page while numbering pages.
                 const bottomMargin = doc.page.margins.bottom;
                 doc.page.margins.bottom = 0;
+                if (status === 'SUPERSEDED') {
+                    doc.fillColor('#B91C1C').font('Helvetica-Bold').fontSize(8)
+                        .text(`${labels.superseded} - ${labels.see} ${publication.replacementNumber || labels.notRecorded}`, startX, 787, { width: pageWidth, lineBreak: false });
+                }
                 doc.rect(36, 805, pageWidth, 0.5).fill(cBorder);
 
                 doc.fillColor(cGray)
