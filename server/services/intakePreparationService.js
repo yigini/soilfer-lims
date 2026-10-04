@@ -277,7 +277,7 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
                     metadata: JSON.stringify(initialMetadata),
                     country: receivingLab.country,
                     countryName: receivingLab.country,
-                    fieldMetadata: JSON.stringify(await intakeProfile.captureConfigured({projectCode: resolvedTargetProject?.code || null, assignedLab: user.labId, country: receivingLab.country}, initialFieldMetadata, body, {actor: user.id || receivedBy, isNew: true}, prisma)),
+                    fieldMetadata: JSON.stringify(await intakeProfile.captureConfigured({projectCode: resolvedTargetProject?.code || null, assignedLab: user.labId, country: receivingLab.country}, initialFieldMetadata, body, {actor: user.id || receivedBy, source: body.intakeChannel === 'MANIFEST' ? 'MANIFEST_INTAKE' : 'INTAKE', isNew: true}, prisma)),
                     history: JSON.stringify([])
             };
             sample = { ...createData, updatedAt: new Date() };
@@ -497,7 +497,7 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
         const { requiredAnalyses, canonicalGroupIds } = await orderedAnalyses(prisma, sample, body, user);
 
         // RC-01: Recheck the current observation, rather than trusting an earlier arrival validation.
-        const currentMass = receivedMass === undefined ? sample.receivedMass : receivedMass;
+        const currentMass = receivedMass === undefined || receivedMass === null || receivedMass === '' ? sample.receivedMass : receivedMass;
         const parsedMass = currentMass !== undefined && currentMass !== null && currentMass !== '' ? Number(currentMass) : null;
 
         let massDeficitInfo = null;

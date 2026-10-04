@@ -12,9 +12,16 @@ const tableExists = (db, name) => !!db.prepare('SELECT 1 FROM sqlite_master WHER
 
 function readGroup(db, sampleId, analysis) {
     const rows = db.prepare(`SELECT * FROM WorkItem WHERE sampleId = ? AND analysis = ?${active(db)} ORDER BY id`).all(sampleId, analysis);
-    const results = tableExists(db, 'Result') ? db.prepare('SELECT id FROM Result WHERE sampleId = ? AND param = ? ORDER BY id').all(sampleId, analysis) : [];
-    const scans = tableExists(db, 'SpectralData') ? db.prepare('SELECT id, workItemId FROM SpectralData WHERE workItemId IN (SELECT id FROM WorkItem WHERE sampleId = ? AND analysis = ?) ORDER BY id').all(sampleId, analysis) : [];
-    const fingerprint = crypto.createHash('sha256').update(JSON.stringify({ rows, results, scans })).digest('hex');
+    // Hash linked evidence too, without retaining potentially large spectra.
+    const hash = crypto.createHash('sha256').update(JSON.stringify(rows));
+    const results = [], scans = [];
+    for (const row of tableExists(db, 'Result') ? db.prepare('SELECT * FROM Result WHERE sampleId = ? AND param = ? ORDER BY id').iterate(sampleId, analysis) : []) {
+        hash.update('\nResult\n').update(JSON.stringify(row)); results.push({ id: row.id });
+    }
+    for (const row of tableExists(db, 'SpectralData') ? db.prepare('SELECT * FROM SpectralData WHERE workItemId IN (SELECT id FROM WorkItem WHERE sampleId = ? AND analysis = ?) ORDER BY id').iterate(sampleId, analysis) : []) {
+        hash.update('\nSpectralData\n').update(JSON.stringify(row)); scans.push({ id: row.id, workItemId: row.workItemId });
+    }
+    const fingerprint = hash.digest('hex');
     return { sampleId, analysis, fingerprint, rows: rows.map(row => ({
         id: row.id, status: row.status, createdAt: row.createdAt, duplicateOf: row.duplicateOf ?? null,
         submissionId: row.submissionId, batchId: row.batchId,

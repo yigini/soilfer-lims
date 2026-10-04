@@ -50,6 +50,7 @@ async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
                 const resolved = await projects.resolveProject(rowProject, tx);
                 if (!resolved || resolved.id !== project.id) throw new IntakeError(400, { code: 'CROSS_PROJECT_CONFLICT', message: 'The row belongs to a different project.' });
             }
+            const samplingDetails = { ...defaults.samplingDetails, ...sample.samplingDetails, ...(sample.coordinates ? { coordinates: sample.coordinates } : {}) };
             const input = { ...defaults, ...sample, ...observed, originalId,
                 massWarningAcknowledged: sample.massWarningAcknowledged === true,
                 projectId: project?.id || rowProject || null, isWalkIn: !project && !rowProject,
@@ -62,7 +63,7 @@ async function receiveConsignment(tx, { body, user, expectedSnapshots }) {
                 custodyTrackingNumber: sample.custodyTrackingNumber || header.custodyTrackingNumber || header.deliveryNoteRef,
                 custodySenderSignature: sample.custodySenderSignature || header.custodySenderSignature,
                 receivingOfficerSignature: sample.receivingOfficerSignature || header.receivingOfficerSignature,
-                samplingDetails: { ...defaults.samplingDetails, ...sample.samplingDetails, ...(sample.coordinates ? { coordinates: sample.coordinates } : {}) }
+                samplingDetails: Object.keys(samplingDetails).length ? samplingDetails : undefined
             };
             const plan = await intake.prepareIntake(tx, { body: input, user, expectedSnapshot: expectedSnapshots?.[index], newSampleId: crypto.randomUUID(), initialFieldMetadata: sample.fieldMetadata || (sample.collectionDate ? { collectionDate: sample.collectionDate } : {}) });
             plans.push({ index, plan });

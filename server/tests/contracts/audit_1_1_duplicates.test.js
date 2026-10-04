@@ -75,6 +75,14 @@ describe('Audit 1.1: additive, audited duplicate resolution', () => {
         expect(listDuplicates(db).groupCount).toBe(1);
         expect(db.prepare('SELECT COUNT(*) n FROM WorkItem WHERE duplicateOf IS NOT NULL').get().n).toBe(0);
     });
+    test.each(['Result', 'SpectralData'])('a changed %s value is refused even when its link and id are unchanged', table => {
+        db.exec(`ALTER TABLE ${table} ADD COLUMN retainedEvidence TEXT;`);
+        const snapshot = readGroup(db, 'sample', 'PH');
+        db.prepare(`UPDATE ${table} SET retainedEvidence = ?`).run('new measurement evidence');
+        expect(() => resolveGroup(db, request(), snapshot)).toThrow(expect.objectContaining({ code: 'WORKITEM_DUPLICATE_GROUP_CHANGED' }));
+        expect(db.prepare('SELECT COUNT(*) n FROM AuditLog').get().n).toBe(0);
+        expect(listDuplicates(db).groupCount).toBe(1);
+    });
     test('index migration fails atomically on unresolved groups, and never removes old rows', () => {
         const old = db.prepare('SELECT * FROM WorkItem ORDER BY id').all();
         expect(() => db.transaction(() => db.exec(indexSql))()).toThrow(/UNIQUE/);

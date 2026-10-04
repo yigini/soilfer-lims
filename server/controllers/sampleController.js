@@ -728,7 +728,7 @@ exports.updatePhaseStatus = async (req, res) => {
         const gateItem = await prisma.workItem.findFirst({
             where: {
                 sampleId: String(id),
-                analysis: phase
+                analysis: phase, duplicateOf: null
             }
         });
         if (gateItem) {

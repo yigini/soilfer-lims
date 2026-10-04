@@ -132,7 +132,7 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
         const old = await prisma.sample.create({ data: { id: id(), originalId: id(), labId: `S${Date.now()}`, assignedLab: lab.id, status: 'EXPECTED' } });
         const response = await receive({ samples: [{ originalId: old.originalId, status: 'ACCEPTED' }] });
         expect(response.status).toBe(201); expect(response.body.samples[0].labSampleCode).toBe(old.labId);
-        expect(await prisma.labSequence.count({ where: { labId: lab.id } })).toBe(0);
+        expect(await prisma.labSequence.count({ where: { labId: lab.id, scope: 'SAMPLE' } })).toBe(0);
         expect((await request(app).get('/api/samples/lookup').set('Authorization', `Bearer ${token}`).query({ code: old.labId })).body.id).toBe(old.id);
         await prisma.sample.create({ data: { id: id(), originalId: `S999999${id()}`, assignedLab: lab.id, status: 'EXPECTED' } });
         expect((await issue()).labSampleCode).toContain('-000001');

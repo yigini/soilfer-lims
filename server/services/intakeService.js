@@ -22,6 +22,11 @@ async function commitPrepared(tx, plan, { consumeApproval = true } = {}) {
     if (!current || current.updatedAt.getTime() !== sample.updatedAt.getTime()) throw new profileIdentity.ProfileReferenceConflictError('SOURCE_CHANGED');
     scopeGuard.ensureScope(user, current, { altLabField: 'assignedLab' });
     if (current.approvedAt || LOCKED_INTAKE_STATUSES.includes(current.status) && !(current.status === 'RECEIVED_REJECTED' && body.isResubmission === true && plan.responseKind !== 'draft')) throw new profileIdentity.ProfileReferenceConflictError('SAMPLE_LOCKED');
+    if (current.status === 'RECEIVED' && plan.responseKind !== 'draft') {
+        for (const field of ['receptionDate', 'receivedBy', 'receivingOfficerId', 'receivingOfficerName']) if (current[field] != null) updateData[field] = current[field];
+        const reception = JSON.parse(updateData.receptionData || '{}');
+        updateData.receptionData = JSON.stringify({ ...reception, receivedBy: updateData.receivedBy, receivedAt: updateData.receptionDate?.toISOString() });
+    }
     let updated;
     if (plan.responseKind === 'draft') {
         updated = await tx.sample.update({ where: { id: current.id }, data: updateData });

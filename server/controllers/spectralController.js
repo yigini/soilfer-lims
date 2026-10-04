@@ -523,7 +523,7 @@ exports.previewBatch = async (req, res) => {
             } else if (matchedSample && matchedSample.workItems) {
                 const mMod = (parsed.modality || effectiveModality || 'NIR').toUpperCase();
                 const spectralItems = matchedSample.workItems.filter(w =>
-                    !['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'].includes(w.status)
+                    w.duplicateOf == null && !['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'].includes(w.status)
                 );
                 matchedWorkItem = spectralItems.find(w => {
                     const wa = (w.analysis || '').toUpperCase();
@@ -1522,6 +1522,7 @@ exports.uploadBatch = async (req, res) => {
                 const openWorkItems = await prisma.workItem.findMany({
                     where: {
                         sampleId: sample.id,
+                        duplicateOf: null,
                         status: { notIn: ['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'] }
                     }
                 });

@@ -136,6 +136,7 @@ describe('Audit 1.1: one atomic intake service', () => {
         expect(incomplete.status).toBe(400); expect(await counts()).toEqual(before);
         const accepted = await post(`/api/samples/${arrived.id}/accept`, { checklist });
         expect(accepted.status).toBe(200); expect(accepted.body.status).toBe('ACCEPTED'); expect(accepted.body.labSampleCode).toBeTruthy();
+        expect(accepted.body.receptionDate).toBe(arrived.receptionDate); expect(accepted.body.receivedBy).toBe(arrived.receivedBy);
         expect((await evidence(arrived.id)).items).toHaveLength(3);
     });
     test('arrival records an open provenance hold and custody; the hold blocks acceptance without writes', async () => {
@@ -167,5 +168,44 @@ describe('Audit 1.1: one atomic intake service', () => {
         expect(denied.status).toBe(400); expect(denied.body.error).toBe('MASS_DEFICIT'); expect(await counts()).toEqual(before);
         const accepted = await post(`/api/samples/${sample.id}/accept`, { checklist, massWarningAcknowledged: true });
         expect(accepted.status).toBe(200); expect(accepted.body.receivedMass).toBe(0);
+    });
+    test('the migrated index rejects unmarked duplicates; marked rows stay in safety gates but do not drive generation', async () => {
+        const received = await single(input()); expect(received.status).toBe(200);
+        const sample = await prisma.sample.findUnique({ where: { id: received.body.id } });
+        const canonical = await prisma.workItem.findFirst({ where: { sampleId: sample.id, analysis: analysis.code, duplicateOf: null } });
+        await expect(prisma.workItem.create({ data: { id: uid(), sampleId: sample.id, analysis: analysis.code, status: 'SUBMITTED' } })).rejects.toMatchObject({ code: 'P2002' });
+        const marked = await prisma.workItem.create({ data: { id: uid(), sampleId: sample.id, analysis: analysis.code, duplicateOf: canonical.id, status: 'REANALYSIS_REQUIRED', methodologyId: method.id, result: '7.2' } });
+        const plan = await work.prepare(prisma, sample);
+        expect(plan.existingCodes.has(analysis.code)).toBe(true); expect(plan.methods.get(analysis.code)).toBe(canonical.methodologyId);
+        const before = await prisma.workItem.findMany({ where: { sampleId: sample.id }, orderBy: { id: 'asc' } });
+        expect(await prisma.$transaction(tx => work.generate(tx, sample))).toEqual([]);
+        expect(await prisma.workItem.findMany({ where: { sampleId: sample.id }, orderBy: { id: 'asc' } })).toEqual(before);
+        const { isReviewedReportResult } = require('../../services/reportResultGovernance');
+        const result = { sampleId: sample.id, param: analysis.code, isCurrent: true, isValid: true };
+        expect(isReviewedReportResult(result, [{ ...canonical, status: 'ACCEPTED' }, marked])).toBe(false);
+        expect(require('../../services/workEligibility').canPublish({ ...sample, status: 'APPROVED', workItems: [{ ...canonical, status: 'ACCEPTED' }, marked], results: [result] }, null, actor)).toMatchObject({ allowed: false, code: 'ITEMS_NOT_ACCEPTED', workItemIds: [marked.id] });
+        expect(isReviewedReportResult(result, [{ ...canonical, status: 'ACCEPTED' }, { ...marked, status: 'WAIVED' }])).toBe(true);
+    });
+    test('partial intake with only runtime failures rolls back the header, all rows, audits and both counters', async () => {
+        const original = intake.acceptSample;
+        jest.spyOn(intake, 'acceptSample').mockImplementation(async (tx, ...args) => {
+            await original(tx, ...args); throw new Error('synthetic failure after all row writes');
+        });
+        const before = await counts(), response = await batch([input(), input()], { allowPartial: true });
+        expect(response.status).toBe(422); expect(response.body.code).toBe('CONSIGNMENT_ALL_ROWS_FAILED');
+        expect(response.body.errors.map(error => error.row)).toEqual([1, 2]); expect(await counts()).toEqual(before);
+    });
+    test.each([null, 'analysis', [null], [42]])('malformed catalogue %p fails both final intake routes before writes', async requiredAnalyses => {
+        const before = await counts(), body = input({ requiredAnalyses });
+        const one = await single(body); expect(one.status).toBe(422); expect(one.body.code).toBe('INTAKE_CATALOGUE_INVALID');
+        const many = await batch([body]); expect(many.status).toBe(422); expect(many.body.errors[0].code).toBe('INTAKE_CATALOGUE_INVALID');
+        expect(await counts()).toEqual(before);
+    });
+    test('an omitted or cleared acceptance field cannot bypass a stored zero-mass observation', async () => {
+        const response = await post('/api/samples/walkin', { submitter: 'Retained mass', receivedMass: 0, analyses: [analysis.code] });
+        const sampleId = response.body.sample.id, before = await counts();
+        const refused = await post(`/api/samples/${sampleId}/accept`, { checklist, receivedMass: null });
+        expect(refused.status).toBe(400); expect(refused.body.code).toBe('MASS_DEFICIT'); expect(await counts()).toEqual(before);
+        expect((await prisma.sample.findUnique({ where: { id: sampleId } })).receivedMass).toBe(0);
     });
 });

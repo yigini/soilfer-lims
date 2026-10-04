@@ -55,4 +55,15 @@ describe('Audit 1.1: nullable consignment counts preserve historical deliveries'
         expect(db.prepare('SELECT * FROM Consignment ORDER BY id').all()).toEqual(old);
         expect(inspect(db).columns.find(column => column.name === 'expectedCount')).toMatchObject({ notnull: 1 });
     });
+    test.each([
+        'DROP INDEX Consignment_labId_idx; CREATE UNIQUE INDEX Consignment_labId_idx ON Consignment(labId);',
+        'DROP INDEX Consignment_labId_idx; CREATE INDEX Consignment_labId_idx ON Consignment(labId) WHERE labId IS NOT NULL;',
+        'ALTER TABLE Consignment ADD COLUMN computedNote TEXT GENERATED ALWAYS AS (notes) VIRTUAL;'
+    ])('refuses changed index semantics or hidden columns without losing them: %s', sql => {
+        db.exec(sql); const before = db.serialize();
+        expect(() => db.exec(migration)).toThrow(/CHECK constraint/);
+        db.exec('ROLLBACK'); db.pragma('foreign_keys = ON');
+        expect(db.serialize()).toEqual(before);
+        expect(db.prepare('SELECT * FROM Sample').get().consignmentId).toBe('old-zero');
+    });
 });
