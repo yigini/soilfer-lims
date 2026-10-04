@@ -101,7 +101,12 @@ function evaluateDuplicate(dup = {}, policy = {}) {
     const label = dup.label || 'Analytical Duplicate';
     const v1 = parseNumericMeasurement(dup.value1 !== undefined ? dup.value1 : dup.val1);
     const v2 = parseNumericMeasurement(dup.value2 !== undefined ? dup.value2 : dup.val2);
-    const maxRpd = (policy && typeof policy.maxRpd === 'number') ? policy.maxRpd : 10.0;
+    const defaults = require('./policyService');
+    const maxRpd = typeof policy.maxRpd === 'number' ? policy.maxRpd : defaults.get(null, 'qc.duplicateMaxRpd');
+    const nearLoqMultiplier = policy.nearLoqMultiplier ?? defaults.get(null, 'qc.duplicateNearLoqMultiplier');
+    const loq = typeof policy.loq === 'number' && Number.isFinite(policy.loq) && policy.loq >= 0 ? policy.loq : null;
+    const notes = loq === null ? ['NO_LOQ', ...(policy.noLoqReason ? [policy.noLoqReason] : [])] : [];
+    const evidence = { loq, loqSource: loq === null ? null : policy.loqSource || null, methodologyId: policy.methodologyId || null, notes };
 
     if (isNaN(v1) || isNaN(v2)) {
         return {
@@ -113,17 +118,26 @@ function evaluateDuplicate(dup = {}, policy = {}) {
             rpd: null,
             maxRpd,
             status: 'FAIL',
+            ...evidence,
             error: 'Missing, non-numeric, or non-finite duplicate values',
             details: 'Invalid duplicate measurement'
         };
     }
 
-    const avg = (v1 + v2) / 2;
-    let rpd = 0;
-    if (avg !== 0) {
-        rpd = (Math.abs(v1 - v2) / Math.abs(avg)) * 100;
+    const avg = v1 / 2 + v2 / 2;
+    if (v1 <= 0 || v2 <= 0 || avg === 0) {
+        return { id, label, type: 'DUPLICATE', value1: v1, value2: v2, rpd: null, maxRpd,
+            ...evidence, status: 'INVALID', criterion: 'INVALID_NONPOSITIVE',
+            details: ['Duplicate readings must both be greater than zero.', ...notes].join(' ') };
     }
-
+    const difference = Math.abs(v1 - v2);
+    if (loq !== null && (v1 < nearLoqMultiplier * loq || v2 < nearLoqMultiplier * loq)) {
+        const passed = difference <= loq;
+        return { id, label, type: 'DUPLICATE', value1: v1, value2: v2, rpd: null, maxRpd,
+            ...evidence, status: passed ? 'PASS' : 'FAIL', criterion: 'ABSOLUTE_DIFFERENCE', absoluteDifference: difference,
+            details: `Absolute difference ${difference} ${passed ? '≤' : '>'} LOQ ${loq}` };
+    }
+    const rpd = (difference / avg) * 100;
     const passed = rpd <= maxRpd;
     return {
         id,
@@ -133,8 +147,10 @@ function evaluateDuplicate(dup = {}, policy = {}) {
         value2: Number(v2.toFixed(4)),
         rpd: Number(rpd.toFixed(2)),
         maxRpd,
+        ...evidence,
+        criterion: 'RPD',
         status: passed ? 'PASS' : 'FAIL',
-        details: passed ? `RPD ${rpd.toFixed(1)}% ≤ ${maxRpd}% (Acceptable)` : `RPD ${rpd.toFixed(1)}% > ${maxRpd}% (Precision failure)`
+        details: (passed ? `RPD ${rpd.toFixed(1)}% ≤ ${maxRpd}% (Acceptable)` : `RPD ${rpd.toFixed(1)}% > ${maxRpd}% (Precision failure)`) + (notes.length ? ` ${notes.join(' ')}` : '')
     };
 }
 
