@@ -875,6 +875,8 @@
       "report_amendmentRequiresSecondPerson": "Exiger une seconde personne pour les modifications",
       "report_numberFormat": "Format du numéro de rapport",
       "sample_codeFormat": "Format du code d’échantillon",
+      "consignment_numberFormat": "Format du numéro de bordereau",
+      "consignment_sequenceReset": "Réinitialisation des numéros de bordereau",
       "sample_sequenceReset": "Réinitialisation de la séquence des échantillons",
       "sample_retentionDaysAfterReport": "Conservation des échantillons après rapport",
       "bench_idleLockMinutes": "Verrouillage par inactivité (0 : désactivé)",

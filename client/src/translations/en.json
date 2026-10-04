@@ -2424,6 +2424,8 @@
       "report_amendmentRequiresSecondPerson": "Require a second person for amendments",
       "report_numberFormat": "Report number pattern",
       "sample_codeFormat": "Sample code pattern",
+      "consignment_numberFormat": "Consignment number format",
+      "consignment_sequenceReset": "Restart consignment numbering",
       "sample_sequenceReset": "Sample sequence reset",
       "sample_retentionDaysAfterReport": "Sample retention after report",
       "bench_idleLockMinutes": "Idle bench lock (0: off)",

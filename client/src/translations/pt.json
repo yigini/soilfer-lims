@@ -2424,6 +2424,8 @@
       "report_amendmentRequiresSecondPerson": "Exigir outra pessoa para emendas",
       "report_numberFormat": "Padrão do número de relatório",
       "sample_codeFormat": "Padrão do código de amostra",
+      "consignment_numberFormat": "Formato do número de remessa",
+      "consignment_sequenceReset": "Reinício da numeração de remessas",
       "sample_sequenceReset": "Reinício da sequência de amostras",
       "sample_retentionDaysAfterReport": "Retenção de amostras após relatório",
       "bench_idleLockMinutes": "Bloqueio por inatividade (0: desativado)",

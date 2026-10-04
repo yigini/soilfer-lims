@@ -2424,6 +2424,8 @@
       "report_amendmentRequiresSecondPerson": "Exigir otra persona para modificaciones",
       "report_numberFormat": "Patrón del número de informe",
       "sample_codeFormat": "Patrón del código de muestra",
+      "consignment_numberFormat": "Formato del número de envío",
+      "consignment_sequenceReset": "Reinicio de la numeración de envíos",
       "sample_sequenceReset": "Reinicio de la secuencia de muestras",
       "sample_retentionDaysAfterReport": "Conservación de muestras después del informe",
       "bench_idleLockMinutes": "Bloqueo por inactividad (0: desactivado)",
