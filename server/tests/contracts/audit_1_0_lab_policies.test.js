@@ -155,6 +155,14 @@ describe('Audit 1.0: persistent lab policies', () => {
         expect(JSON.parse(lab.settings)).toEqual({ language: 'fr', unrelated: 42, decimalSeparator: '.', thousandsSeparator: null });
         expect(await prisma.auditLog.count({ where: { labId } })).toBe(2); expect((await policy.snapshot(labId)).version).toBe(2);
     });
+    test('a frozen parsing decision keeps both separators from its policy version', async () => {
+        await edit([{ key: 'numbers.decimalSeparator', value: ',' }, { key: 'numbers.thousandsSeparator', value: '.' }]);
+        const recorded = await policy.snapshot(labId);
+        await edit([{ key: 'numbers.decimalSeparator', value: '.' }, { key: 'numbers.thousandsSeparator', value: ',' }]);
+        expect(await getNumberFormat(labId, { snapshot: recorded })).toEqual({ decimal: ',', thousands: '.' });
+        expect(await getNumberFormat(labId)).toEqual({ decimal: '.', thousands: ',' });
+        expect(recorded.version).toBe(1);
+    });
     test('preset change copies an altered inherited format and leaves unchanged settings byte-identical', async () => {
         const settings = '{ "language": "fr", "decimalSeparator": ",", "thousandsSeparator": null }';
         await prisma.lab.update({ where: { id: labId }, data: { settings } });

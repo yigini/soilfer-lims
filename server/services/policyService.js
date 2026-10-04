@@ -37,6 +37,9 @@ function loadProfile(context = {}) {
 }
 async function state(reference, context = {}) {
     const db = context.db || require('../prisma');
+    // Standalone readers freeze the version and its overrides together. Write
+    // paths supply their existing transaction so they see the same decision.
+    if (!context.db) return db.$transaction(tx => state(reference, { ...context, db: tx }));
     const lab = await resolveLab(reference, db);
     const [policy, overrides] = lab ? await Promise.all([
         db.labPolicy.findUnique({ where: { labId: lab.id } }),
