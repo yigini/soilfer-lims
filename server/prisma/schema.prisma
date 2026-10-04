@@ -429,6 +429,35 @@ model Lab {
   projectLabs       ProjectLab[]  // Many-to-many: projects this lab is assigned to
   proficiencyRounds ProficiencyRound[]
   appearanceSetting LabAppearanceSetting?
+  policy             LabPolicy?
+  policyOverrides    LabPolicyOverride[]
+}
+
+model LabPolicy {
+  id          String   @id @default(uuid())
+  labId       String   @unique
+  lab         Lab      @relation(fields: [labId], references: [id])
+  presetCode  String?
+  version     Int      @default(1)
+  updatedBy   String
+  updatedAt   DateTime @updatedAt
+}
+
+model LabPolicyOverride {
+  id            String   @id @default(uuid())
+  labId         String
+  lab           Lab      @relation(fields: [labId], references: [id])
+  key           String
+  analysisCode  String?
+  methodologyId String?
+  value         String   // JSON; old rows remain immutable when revoked.
+  reason        String
+  setBy         String
+  setAt         DateTime @default(now())
+  revokedAt     DateTime?
+  revokedBy     String?
+
+  @@index([labId, key])
 }
 
 model ProficiencyRound {
@@ -1000,6 +1029,7 @@ model Report {
   status        String    @default("DRAFT")  // DRAFT, PUBLISHED, SUPERSEDED
   reportNumberBase String?
   revision      Int?
+  policyVersion Int?
 
   // Denormalized search keys (populated at generation time)
   firstName     String?

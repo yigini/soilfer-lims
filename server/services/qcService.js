@@ -65,7 +65,7 @@ function evaluateBlank(blank = {}, policy = {}) {
     const value = parseNumericMeasurement(rawVal);
     
     // Limits must come from policy/standard, not arbitrarily loosened by caller
-    const maxAllowed = (policy && typeof policy.maxAllowed === 'number') ? policy.maxAllowed : 0.05;
+    const maxAllowed = (policy && typeof policy.maxAllowed === 'number') ? policy.maxAllowed : require('./policyService').getStrict('qc.blankMaxAllowed');
 
     if (isNaN(value)) {
         return {
@@ -108,8 +108,8 @@ function evaluateDuplicate(dup = {}, policy = {}) {
         dup.rawInput && Object.prototype.hasOwnProperty.call(dup.rawInput, `value${index}`) ? dup.rawInput[`value${index}`]
             : (dup[`value${index}`] !== undefined ? dup[`value${index}`] : dup[`val${index}`]), format));
     const [v1, v2] = observations.map(observation => observation.valid && !observation.censored ? observation.value : NaN);
-    const maxRpd = typeof policy.maxRpd === 'number' ? policy.maxRpd : defaults.get(null, 'qc.duplicateMaxRpd');
-    const nearLoqMultiplier = policy.nearLoqMultiplier ?? defaults.get(null, 'qc.duplicateNearLoqMultiplier');
+    const maxRpd = typeof policy.maxRpd === 'number' ? policy.maxRpd : defaults.getStrict('qc.duplicateMaxRpd');
+    const nearLoqMultiplier = policy.nearLoqMultiplier ?? defaults.getStrict('qc.duplicateNearLoqMultiplier');
     const loq = typeof policy.loq === 'number' && Number.isFinite(policy.loq) && policy.loq >= 0 ? policy.loq : null;
     const notes = loq === null ? ['NO_LOQ', ...(policy.noLoqReason ? [policy.noLoqReason] : [])] : [];
     const evidence = { loq, loqSource: loq === null ? null : policy.loqSource || null, methodologyId: policy.methodologyId || null, notes };
@@ -186,8 +186,8 @@ function evaluateControl(crm = {}, policy = {}) {
     const label = crm.label || 'Certified Reference Material';
     const expected = parseNumericMeasurement(crm.expected !== undefined ? crm.expected : crm.expectedValue);
     const measured = parseNumericMeasurement(crm.measured !== undefined ? crm.measured : (crm.value !== undefined ? crm.value : crm.val));
-    const minRecovery = (policy && typeof policy.minRecovery === 'number') ? policy.minRecovery : 90.0;
-    const maxRecovery = (policy && typeof policy.maxRecovery === 'number') ? policy.maxRecovery : 110.0;
+    const minRecovery = (policy && typeof policy.minRecovery === 'number') ? policy.minRecovery : require('./policyService').getStrict('qc.controlMinRecovery');
+    const maxRecovery = (policy && typeof policy.maxRecovery === 'number') ? policy.maxRecovery : require('./policyService').getStrict('qc.controlMaxRecovery');
 
     if (isNaN(expected) || isNaN(measured) || expected <= 0) {
         return {

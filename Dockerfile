@@ -15,6 +15,7 @@ RUN cd server && npm ci --ignore-scripts
 COPY client/ ./client/
 COPY server/ ./server/
 COPY shared/ ./shared/
+COPY profiles/ ./profiles/
 
 # Generate Prisma client (Prisma 7 uses prisma.config.ts)
 RUN cd server && npx prisma generate
@@ -51,6 +52,7 @@ COPY server/ ./server/
 # Copy Prisma client generated in builder
 COPY shared/ ./shared/
 COPY --from=builder /app/server/prisma_client ./server/prisma_client/
+COPY profiles/ ./profiles/
 
 # Copy built client
 COPY --from=builder /app/client/dist ./client/dist/
