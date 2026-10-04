@@ -877,7 +877,7 @@ exports.createApiKey = async (req, res) => {
                     INSERT INTO AuditLog (id, entity, entityId, action, details, performedBy, timestamp)
                     VALUES (?, 'SIS_API_KEY', ?, 'SIS_KEY_CREATED', ?, ?, ?)
                 `).run(
-                    `audit-sis-key-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
+                    crypto.randomUUID(),
                     newKeyId,
                     `Created API key '${name}' with connectionId: ${effectiveConnectionId}, capabilities: ${JSON.stringify(effectiveCaps)}, labs: ${JSON.stringify(effectiveLabs)}`,
                     req.user?.username || 'admin',
@@ -1187,7 +1187,7 @@ exports.rotateApiKey = async (req, res) => {
                     INSERT INTO AuditLog (id, entity, entityId, action, details, performedBy, timestamp)
                     VALUES (?, 'SIS_API_KEY', ?, 'SIS_KEY_ROTATED', ?, ?, ?)
                 `).run(
-                    `audit-sis-rotate-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
+                    crypto.randomUUID(),
                     newKeyId,
                     `Rotated API key from '${oldKey.id}' to '${newKeyId}' for connection '${effectiveConnectionId}' with bounded overlap`,
                     req.user?.username || 'admin',

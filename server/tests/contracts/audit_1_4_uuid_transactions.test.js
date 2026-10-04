@@ -1,4 +1,8 @@
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
+const { parse } = require('@babel/parser');
+const traverse = require('@babel/traverse').default;
 const jwt = require('jsonwebtoken');
 const request = require('supertest');
 const Database = require('better-sqlite3');
@@ -13,6 +17,69 @@ const id = () => crypto.randomUUID();
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const labId = 'LAB-AUDIT-14';
 
+// Inspect bound ids as well as inline Prisma and SQL writes. A text search of
+// create({ data: { id: ... } }) alone misses aliases and prepared statements.
+function weakAuditIds(source) {
+    const failures = new Set();
+    const propertyName = node => node?.property?.name || node?.property?.value;
+    const key = node => node?.key?.name || node?.key?.value;
+    function bound(node, scope) {
+        if (node?.type !== 'Identifier') return { node, scope };
+        const binding = scope.getBinding(node.name);
+        return binding?.path.node.type === 'VariableDeclarator'
+            ? { node: binding.path.node.init, scope: binding.path.scope } : { node, scope };
+    }
+    function weak(node, scope, seen = new Set()) {
+        if (!node || seen.has(node)) return false;
+        seen.add(node);
+        if (node.type === 'CallExpression' && node.callee.type === 'MemberExpression' &&
+            ((node.callee.object.name === 'Date' && propertyName(node.callee) === 'now') ||
+             (node.callee.object.name === 'Math' && propertyName(node.callee) === 'random'))) return true;
+        const resolved = bound(node, scope);
+        if (resolved.node !== node) return weak(resolved.node, resolved.scope, seen);
+        return Object.values(node).some(value => Array.isArray(value)
+            ? value.some(child => child?.type && weak(child, scope, seen))
+            : value?.type && weak(value, scope, seen));
+    }
+    function dataIds(node, scope, seen = new Set()) {
+        if (!node || seen.has(node)) return;
+        seen.add(node);
+        const resolved = bound(node, scope);
+        if (resolved.node !== node) return dataIds(resolved.node, resolved.scope, seen);
+        if (node.type === 'ArrayExpression') return node.elements.forEach(item => dataIds(item, scope, seen));
+        if (node.type !== 'ObjectExpression') return;
+        for (const property of node.properties) {
+            if (property.type === 'SpreadElement') dataIds(property.argument, scope, seen);
+            else if (key(property) === 'id' && weak(property.value, scope)) failures.add(property.loc.start.line);
+        }
+    }
+    traverse(parse(source, { sourceType: 'unambiguous' }), {
+        VariableDeclarator(p) {
+            if (/^audit.*id$/i.test(p.node.id.name || '') && weak(p.node.init, p.scope)) failures.add(p.node.loc.start.line);
+        },
+        CallExpression(p) {
+            const call = p.node, callee = call.callee;
+            if (callee.type !== 'MemberExpression') return;
+            if (callee.object.type === 'MemberExpression' && propertyName(callee.object) === 'auditLog' &&
+                ['create', 'createMany', 'upsert'].includes(propertyName(callee))) {
+                const argument = bound(call.arguments[0], p.scope);
+                const data = argument.node?.properties?.find(property => key(property) ===
+                    (propertyName(callee) === 'upsert' ? 'create' : 'data'))?.value;
+                dataIds(data, argument.scope);
+            }
+            if (propertyName(callee) === 'run' && callee.object.type === 'CallExpression' &&
+                propertyName(callee.object.callee) === 'prepare') {
+                const sql = callee.object.arguments[0];
+                const text = sql?.type === 'TemplateLiteral' ? sql.quasis.map(part => part.value.cooked).join('') : sql?.value;
+                if (/INSERT\s+INTO\s+["`]?AuditLog\b/i.test(text || '') && weak(call.arguments[0], p.scope)) {
+                    failures.add(call.loc.start.line);
+                }
+            }
+        }
+    });
+    return [...failures].sort((a, b) => a - b);
+}
+
 describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
     let token, username;
     beforeAll(async () => {
@@ -21,6 +88,29 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
         username = jwt.decode(token).username;
     });
     afterEach(() => jest.restoreAllMocks());
+
+    test('the source guard catches timestamp/random audit ids through aliases, inline writes and SQL', () => {
+        for (const source of [
+            'const auditLogId = `audit-${Date.now()}`;',
+            'db.auditLog.create({ data: { id: `log-${Math.random()}` } });',
+            'const rowId = Date.now().toString(); db.auditLog.create({ data: { id: rowId } });',
+            'const row = { id: `${Math.random()}` }; db.auditLog.create({ data: row });',
+            'db.prepare(`INSERT INTO AuditLog (id, entity) VALUES (?, ?)`).run(`audit-${Date.now()}`, "SAMPLE");'
+        ]) expect(weakAuditIds(source)).not.toEqual([]);
+        expect(weakAuditIds('db.auditLog.create({ data: { id: crypto.randomUUID(), timestamp: Date.now() } });')).toEqual([]);
+    });
+
+    test('active audit ids never derive from Date.now or Math.random', () => {
+        const serverDir = path.resolve(__dirname, '../..');
+        const files = directory => fs.readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
+            const filename = path.join(directory, entry.name);
+            return entry.isDirectory() ? files(filename) : entry.name.endsWith('.js') ? [filename] : [];
+        });
+        const failures = ['controllers', 'services', 'utils', 'routes'].flatMap(directory =>
+            files(path.join(serverDir, directory)).flatMap(filename =>
+                weakAuditIds(fs.readFileSync(filename, 'utf8')).map(line => `${path.relative(serverDir, filename)}:${line}`)));
+        expect(failures).toEqual([]);
+    });
 
     // Inject a storage failure inside the real SQLite transaction, rather than
     // mocking rollback or the controller's response.

@@ -138,7 +138,7 @@ exports.createSubmission = async (req, res) => {
 
         const now = new Date();
         const submissionId = `SUB-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        const auditLogId = `audit-sub-${Date.now()}`;
+        const auditLogId = crypto.randomUUID();
 
         // Prepare operations for transaction
         const operations = [
@@ -160,7 +160,7 @@ exports.createSubmission = async (req, res) => {
             }),
             prisma.auditLog.create({
                 data: {
-                    id: crypto.randomUUID(),
+                    id: auditLogId,
                     entity: 'SUBMISSION',
                     entityId: submissionId,
                     action: 'SUBMISSION_CREATED',
