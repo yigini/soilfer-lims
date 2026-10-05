@@ -127,7 +127,7 @@ describe('Project Management Audit Regression & Acceptance Contracts', () => {
                 status: 'EXPECTED'
             }
         });
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-B-' + SUFFIX,
                 originalId: 'SMP-B-' + SUFFIX,
@@ -135,7 +135,7 @@ describe('Project Management Audit Regression & Acceptance Contracts', () => {
                 projectCode: projectAlpha.code,
                 labId: 'ACC-B-' + SUFFIX,
                 assignedLab: labB.id,
-                status: 'RELEASED',
+                status: 'APPROVED',
                 receptionDate: new Date()
             }
         });

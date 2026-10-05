@@ -15,6 +15,7 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
     const timestamp = Date.now();
 
     beforeAll(async () => {
+        exchangeStateService.getDb();
         // 1. Create test samples
         sampleApproved = await createSampleFixture(prisma, {
             data: {
@@ -59,7 +60,7 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
             }
         });
 
-        sampleHold = await prisma.sample.create({
+        sampleHold = await createSampleFixture(prisma, {
             data: {
                 id: `a0-sample-hold-${timestamp}`,
                 originalId: `ORIG-A0-HOLD-${timestamp}`,
@@ -67,7 +68,7 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
                 assignedLab: 'GTM-LAB1',
                 country: 'GTM',
                 projectCode: 'SOILFER-GTM',
-                status: 'AMBIGUOUS_PROVENANCE_HOLD',
+                status: 'ON_HOLD',
                 metadata: JSON.stringify({
                     provenanceHold: {
                         status: 'AMBIGUOUS_PROVENANCE_HOLD',

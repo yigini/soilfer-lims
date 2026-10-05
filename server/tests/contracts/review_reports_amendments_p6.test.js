@@ -175,6 +175,9 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
     });
 
     test('2. Disposed material strictly rejects order modifications', async () => {
+        const before = { sample: await prisma.sample.findUnique({ where: { id: sampleDisposed.id } }),
+            work: await prisma.workItem.findMany({ where: { sampleId: sampleDisposed.id }, orderBy: { id: 'asc' } }),
+            audits: await prisma.auditLog.findMany({ where: { sampleId: sampleDisposed.id }, orderBy: { id: 'asc' } }) };
         const res = await request(app)
             .post(`/api/samples/${sampleDisposed.id}/orders`)
             .set('Authorization', `Bearer ${mgrToken}`)
@@ -183,8 +186,11 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
                 reason: 'Attempting to add analyses to disposed specimen'
             });
 
-        expect(res.status).toBe(400);
-        expect(res.body.code).toBe('DISPOSED_MATERIAL_IMMUTABLE');
+        expect(res.status).toBe(409);
+        expect(res.body.code).toBe('AMENDMENT_WORKFLOW_REQUIRED');
+        expect({ sample: await prisma.sample.findUnique({ where: { id: sampleDisposed.id } }),
+            work: await prisma.workItem.findMany({ where: { sampleId: sampleDisposed.id }, orderBy: { id: 'asc' } }),
+            audits: await prisma.auditLog.findMany({ where: { sampleId: sampleDisposed.id }, orderBy: { id: 'asc' } }) }).toEqual(before);
     });
 
     test('3. Generates report v1 with immutable snapshot and monotonic versioning', async () => {

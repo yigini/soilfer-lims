@@ -13,6 +13,7 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
     let sampleHoldGtm;
 
     beforeAll(async () => {
+        require('../../services/exchangeStateService').getDb();
         const timestamp = Date.now();
 
         // 1. Approved GTM Sample
@@ -73,7 +74,7 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
         });
 
         // 4. Sample on Provenance Hold
-        sampleHoldGtm = await prisma.sample.create({
+        sampleHoldGtm = await createSampleFixture(prisma, {
             data: {
                 id: `test-s-hold-gtm-${timestamp}`,
                 originalId: `GTM-HOLD-${timestamp}`,
@@ -81,7 +82,7 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
                 assignedLab: 'GTM-LAB1',
                 country: 'GTM',
                 projectCode: 'SOILFER-GTM',
-                status: 'AMBIGUOUS_PROVENANCE_HOLD',
+                status: 'ON_HOLD',
                 rejectionReason: 'PROVENANCE_HOLD: Conflicting field submissions'
             }
         });

@@ -146,7 +146,7 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
                 originalId: 'ORIG-' + testPrefix,
                 labId: labA.id,
                 assignedLab: labA.id,
-                status: 'ACCEPTED',
+                status: 'PROCESSING',
                 receptionDate: new Date(),
                 dryingStatus: 'DONE',
                 preparationStatus: 'DONE'
@@ -161,7 +161,7 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
                 assignedLab: labA.id,
                 analysis: 'PH_H2O',
                 category: 'Chemical Analysis',
-                status: 'ASSIGNED',
+                status: 'IN_PROGRESS',
                 assignedTo: techA.username,
                 version: 1
             }
@@ -175,7 +175,7 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
                 assignedLab: labA.id,
                 analysis: 'DRYING',
                 category: 'Operational Gates',
-                status: 'ASSIGNED',
+                status: 'COMPLETED',
                 assignedTo: techA.username,
                 version: 1
             }
@@ -298,25 +298,26 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
             // Query with issued key against data exchange
             const liveKey = res.body.apiKey;
 
-            // Create authorized RELEASED sample in labA
-            const releasedSampleA = await prisma.sample.create({
+            require('../../services/exchangeStateService').getDb();
+            // Create authorized approved sample in labA.
+            const releasedSampleA = await createSampleFixture(prisma, {
                 data: {
                     id: 'SMP-REL-A-' + testPrefix,
                     originalId: 'ORIG-REL-A-' + testPrefix,
                     labId: labA.id,
                     assignedLab: labA.id,
-                    status: 'RELEASED'
+                    status: 'APPROVED'
                 }
             });
 
-            // Create a foreign RELEASED sample in labB
-            const foreignSample = await prisma.sample.create({
+            // Create a foreign approved sample in labB.
+            const foreignSample = await createSampleFixture(prisma, {
                 data: {
                     id: 'SMP-FOREIGN-' + testPrefix,
                     originalId: 'ORIG-FOREIGN-' + testPrefix,
                     labId: labB.id,
                     assignedLab: labB.id,
-                    status: 'RELEASED'
+                    status: 'APPROVED'
                 }
             });
 
