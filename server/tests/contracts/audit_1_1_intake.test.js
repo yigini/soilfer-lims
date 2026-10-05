@@ -208,7 +208,7 @@ describe('Audit 1.1: one atomic intake service', () => {
         const sample = await prisma.sample.findUnique({ where: { id: received.body.id } });
         const canonical = await prisma.workItem.findFirst({ where: { sampleId: sample.id, analysis: analysis.code, duplicateOf: null } });
         await expect(createWorkItemFixture(prisma, { data: { id: uid(), sampleId: sample.id, analysis: analysis.code, status: 'SUBMITTED' } })).rejects.toMatchObject({ code: 'P2002' });
-        const marked = await prisma.workItem.create({ data: { id: uid(), sampleId: sample.id, analysis: analysis.code, duplicateOf: canonical.id, status: 'REANALYSIS_REQUIRED', methodologyId: method.id, result: '7.2' } });
+        const marked = await createWorkItemFixture(prisma, { data: { id: uid(), sampleId: sample.id, analysis: analysis.code, duplicateOf: canonical.id, status: 'REPEAT_REQUIRED', methodologyId: method.id, result: '7.2' } });
         const plan = await work.planForSample(prisma, sample);
         expect(plan.existingCodes.has(analysis.code)).toBe(true); expect(plan.methods.get(analysis.code)).toBe(canonical.methodologyId);
         const before = await prisma.workItem.findMany({ where: { sampleId: sample.id }, orderBy: { id: 'asc' } });

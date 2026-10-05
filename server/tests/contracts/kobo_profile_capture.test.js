@@ -7,6 +7,7 @@ const app = require('../../app');
 const prisma = require('../../prisma');
 const jwt = require('jsonwebtoken');
 const {getAuthToken} = require('../setup');
+const { transitionSample } = require('../../services/sampleStateService');
 
 const mapping = {profileReference: {codePath:'soil/pit', sitePath:'soil/site', namespace:'SURVEY-2026', relation:'CONFIRMED_PROFILE', depthTopD1Path:'soil/top1', depthBottomD1Path:'soil/bottom1', depthTopD2Path:'soil/top2', depthBottomD2Path:'soil/bottom2', collectionDatePath:'soil/date'}};
 const submission = {_id:9001, _uuid:'synthetic-survey-9001', barcode_d1:'BAG-9001-D1', barcode_d2:'BAG-9001-D2', 'soil/pit':{value:0}, 'soil/site':'SITE-901', 'soil/top1':0, 'soil/bottom1':20.5, 'soil/top2':20.5, 'soil/bottom2':50, 'soil/date':'2026-09-15', start:'2026-09-16', _submission_time:'2026-09-17', _attachments:[]};
@@ -133,7 +134,8 @@ describe('Actual mounted Kobo capture, hold and force-refresh paths',()=>{
         const response=await request(app).post(`/api/kobo/sync-sample/${sample.id}`).set('Authorization',`Bearer ${token}`);
         expect(response.status).toBe(200);
         expect(JSON.parse((await prisma.sample.findUnique({where:{id:sample.id}})).fieldMetadata).profileReference.code).toBe('MANUAL-PIT');
-        await prisma.sample.update({where:{id:sample.id},data:{status:'DISPOSED',approvedAt:new Date()}});
+        await transitionSample(sample.id, 'RECEIVED_REJECTED', jwt.decode(token), 'Fixture rejected before disposal', {}, prisma);
+        await transitionSample(sample.id, 'DISPOSED', jwt.decode(token), 'Fixture disposal', {approvedAt:new Date()}, prisma);
         fetch.mockClear();
         expect((await request(app).post(`/api/kobo/sync-sample/${sample.id}`).set('Authorization',`Bearer ${token}`)).status).toBe(409);
         expect(fetch).not.toHaveBeenCalled();
