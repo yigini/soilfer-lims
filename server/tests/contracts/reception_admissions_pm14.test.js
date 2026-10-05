@@ -1,10 +1,13 @@
 'use strict';
 
-const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { createSampleFixture, createAuthTokenFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
-const { getAuthToken } = require('../setup');
+const getAuthToken = (...args) => createAuthTokenFixture(prisma, ...args);
+const { PrismaClient } = require('../../prisma_client');
+const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+const { beforeGuards, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
 
 describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts', () => {
     const SUFFIX = 'PM14-' + Date.now();
@@ -13,8 +16,16 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
     const testLab = 'LAB-' + SUFFIX;
     const trackedSampleIds = new Set();
     const trackedProjectIds = new Set();
+    let rehearsal, client;
 
     beforeAll(async () => {
+        const timestamp = Date.now();
+        rehearsal = beforeGuards({ actor: 'system:fixture', samples: ['SMP-REL-PROT-', 'SMP-REL-BATCH-'].map(prefix => ({
+            id: prefix + SUFFIX, originalId: prefix + SUFFIX, status: 'RELEASED', assignedLab: testLab,
+            approvedAt: new Date(timestamp), approvedBy: 'admin', createdAt: timestamp, updatedAt: timestamp
+        })) });
+        client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
+        useLegacyRouteDatabase(prisma, client, { allModels: true });
         // Setup lab
         await prisma.lab.create({
             data: { id: testLab, code: SUFFIX.slice(-4), name: 'Lab ' + SUFFIX, country: 'Guatemala', isActive: true }
@@ -35,17 +46,9 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
     });
 
     afterAll(async () => {
-        // Clean up tracked records
-        if (trackedSampleIds.size > 0) {
-            await prisma.workItem.deleteMany({ where: { sampleId: { in: Array.from(trackedSampleIds) } } });
-            await prisma.result.deleteMany({ where: { sampleId: { in: Array.from(trackedSampleIds) } } });
-            await prisma.sample.deleteMany({ where: { id: { in: Array.from(trackedSampleIds) } } });
-        }
-        if (trackedProjectIds.size > 0) {
-            await prisma.koboConfig.deleteMany({ where: { projectCode: { in: Array.from(trackedProjectIds) } } });
-            await prisma.project.deleteMany({ where: { id: { in: Array.from(trackedProjectIds) } } });
-        }
-        await prisma.lab.deleteMany({ where: { id: testLab } });
+        jest.restoreAllMocks();
+        await client?.$disconnect();
+        rehearsal?.close();
     });
 
     it('blocks POST /api/reception/intake when project admissions are PAUSED', async () => {
@@ -551,17 +554,11 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
 
         const sampleId = 'SMP-REL-PROT-' + SUFFIX;
         trackedSampleIds.add(sampleId);
-        const approvalDate = new Date();
-        await prisma.sample.create({
+        await prisma.sample.update({
+            where: { id: sampleId },
             data: {
-                id: sampleId,
-                originalId: sampleId,
                 projectId: prjId,
-                projectCode: prjId,
-                status: 'RELEASED',
-                assignedLab: testLab,
-                approvedAt: approvalDate,
-                approvedBy: 'admin'
+                projectCode: prjId
             }
         });
 
@@ -589,16 +586,11 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
 
         const sampleId = 'SMP-REL-BATCH-' + SUFFIX;
         trackedSampleIds.add(sampleId);
-        await prisma.sample.create({
+        await prisma.sample.update({
+            where: { id: sampleId },
             data: {
-                id: sampleId,
-                originalId: sampleId,
                 projectId: prjId,
-                projectCode: prjId,
-                status: 'RELEASED',
-                assignedLab: testLab,
-                approvedAt: new Date(),
-                approvedBy: 'admin'
+                projectCode: prjId
             }
         });
 

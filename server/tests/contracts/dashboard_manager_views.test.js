@@ -1,21 +1,12 @@
-const { createSampleFixture, createWorkItemFixture, createSamplesFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
+const { createSampleFixture, createWorkItemFixture, createSamplesFixture, createWorkItemsFixture, createAuthTokenFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
-const { generateToken } = require('../setup');
 const prisma = require('../../prisma');
-const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('../../prisma_client');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { beforeGuards, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
 
-// Actual users and sessions live in the same owned database as the real routes.
-async function getAuthToken(role, labId, countries, projects) {
-    const username = `test_${role.toLowerCase()}_${labId.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
-    const user = await prisma.user.create({ data: { id: username, username, email: `${username}@example.test`,
-        password: await bcrypt.hash('password', 4), role, labId, isActive: true,
-        countries: JSON.stringify(countries), projects: JSON.stringify(projects) } });
-    return generateToken({ ...user, countries, projects });
-}
+const getAuthToken = (...args) => createAuthTokenFixture(prisma, ...args);
 
 describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () => {
     let tokenManagerA, tokenManagerB, labAId, labBId;

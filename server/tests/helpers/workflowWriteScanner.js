@@ -4,7 +4,7 @@ const parser = require('@babel/parser');
 const traverse = require('@babel/traverse').default;
 
 const mutations = new Set(['create', 'createMany', 'createManyAndReturn', 'update', 'updateMany', 'updateManyAndReturn', 'upsert', 'save', 'saveMany', 'bulkUpdate']);
-const sqlMethods = new Set(['prepare', 'exec', 'execute', '$executeRaw', '$executeRawUnsafe', '$queryRaw', '$queryRawUnsafe']);
+const sqlMethods = new Set(['prepare', 'exec', 'execute', 'pragma', '$executeRaw', '$executeRawUnsafe', '$queryRaw', '$queryRawUnsafe']);
 const workflowModels = new Map([['sample', 'Sample'], ['samples', 'Sample'], ['workItem', 'WorkItem'], ['workItems', 'WorkItem']]);
 const union = sets => [...new Set(sets.flat())];
 
@@ -181,7 +181,7 @@ function scanSource(source, filename, exceptions = []) {
                     if (writes && !authorized(p, entities)) report(p.node, 'WORKFLOW_WRITE_OUTSIDE_AUTHORITY', `${entities.join('/')} ${target.name}`);
                 }
                 if (sqlMethods.has(target.name) && !(target.name === 'exec' && regularExpression(target.object))) for (const sql of strings(p.get('arguments.0'))) {
-                    if (disabling(sql)) report(p.node, 'WORKFLOW_GUARD_DISABLED', target.name);
+                    if (disabling(target.name === 'pragma' ? `PRAGMA ${sql}` : sql)) report(p.node, 'WORKFLOW_GUARD_DISABLED', target.name);
                     if (rawWrite(sql) && !authorized(p, ['Sample', 'WorkItem'])) report(p.node, 'RAW_WORKFLOW_SQL', target.name);
                     if (sql === '<unknown>' && !schemaFileRead(p.get('arguments.0')) && !authorized(p, ['Sample', 'WorkItem'])) {
                         report(p.node, 'UNRESOLVED_WORKFLOW_SQL', target.name);

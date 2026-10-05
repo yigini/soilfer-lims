@@ -77,3 +77,18 @@ test('metadata-only updates and other models are permitted, and guard disabling 
     expect(scanSource("db.exec('DROP TRIGGER unrelated_exchange_trigger; UPDATE Sample SET updatedAt = 1 WHERE status = 2')", 'scripts/probe.js', exceptions)).toEqual([]);
     expect(scanSource("const pattern=/x/; pattern.exec(text)", 'scripts/probe.js', exceptions)).toEqual([]);
 });
+
+test.each([
+    "db.pragma('foreign_keys = OFF')",
+    "const setting='recursive_triggers=0'; database.pragma(setting)",
+    "const {pragma: configure}=db; configure('foreign_keys=0')",
+    "const method='pragma'; client[method]('foreign_keys = OFF')"
+])('native pragma calls cannot disable constraints: %s', source => {
+    expect(scanSource(source, 'tests/probe.test.js', exceptions))
+        .toEqual([expect.objectContaining({ code: 'WORKFLOW_GUARD_DISABLED' })]);
+});
+
+test('native pragma reads and enabled constraints remain permitted', () => {
+    expect(scanSource("db.pragma('foreign_keys = ON'); db.pragma('foreign_keys', {simple:true}); db.pragma('busy_timeout = 5000')",
+        'tests/probe.test.js', exceptions)).toEqual([]);
+});

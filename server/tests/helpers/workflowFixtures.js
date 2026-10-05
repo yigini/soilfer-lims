@@ -32,4 +32,17 @@ async function createWorkItemsFixture(db, { data }) {
     });
 }
 
-module.exports = { createSampleFixture, createWorkItemFixture, createSamplesFixture, createWorkItemsFixture };
+// Isolated route rehearsals use actual users and normal JWT/session validation.
+async function createAuthTokenFixture(db, role = 'SUPER_ADMIN', labId = 'LAB-GTM', countries = ['GTM'], projects = ['SOILFER-US']) {
+    if (process.env.NODE_ENV !== 'test') throw new Error('Authentication fixtures are test-only.');
+    const username = `test_${role.toLowerCase()}_${(labId || 'global').toLowerCase().replace(/[^a-z0-9]/g, '')}`;
+    const user = await db.user.upsert({ where: { username }, update: {}, create: { id: username, username,
+        email: `${username}@example.test`, password: await require('bcryptjs').hash('password', 4),
+        role, labId: role === 'SUPER_ADMIN' ? null : labId, isActive: true,
+        countries: JSON.stringify(role === 'SUPER_ADMIN' ? [] : countries),
+        projects: JSON.stringify(role === 'SUPER_ADMIN' ? [] : projects) } });
+    return require('../setup').generateToken({ ...user,
+        countries: JSON.parse(user.countries || '[]'), projects: JSON.parse(user.projects || '[]') });
+}
+
+module.exports = { createSampleFixture, createWorkItemFixture, createSamplesFixture, createWorkItemsFixture, createAuthTokenFixture };
