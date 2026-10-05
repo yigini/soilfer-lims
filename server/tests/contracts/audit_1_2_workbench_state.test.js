@@ -9,9 +9,11 @@ const workbench = require('../../controllers/workbenchController');
 const submissions = require('../../controllers/submissionController');
 const operations = require('../../services/operationalConfirmationService');
 const workController = require('../../controllers/workItemController');
+const sampleController = require('../../controllers/sampleController');
 const { deriveSubmissionLifecycle } = require('../../services/submissionLifecycleService');
 const workflow = require('../../workflowContract');
 const { commitReview } = require('../../services/reviewCommitService');
+const { requestClosure } = require('../../services/closureTaskService');
 const labId = randomUUID();
 const technician = { username: `state-tech-${randomUUID()}`, role: 'LAB_TECHNICIAN', labId };
 const manager = { username: `state-manager-${randomUUID()}`, role: 'LAB_MANAGER', labId };
@@ -294,5 +296,54 @@ test('a failed FULL review lifecycle audit rolls back its decision, history and 
     const row = await submittedFixture(), before = await snapshot([row.sample.id]);
     failAudit('REVIEW_RETURNED');
     expect((await call(workController.reviewWorkItem, { status: 'REPEAT_REQUIRED', reason: 'Repeat review reason' }, { id: row.item.id }, manager)).statusCode).toBe(500);
+    expect(await snapshot([row.sample.id])).toEqual(before);
+});
+
+test.each(['ARCHIVING', 'DISPOSAL'])('%s request creates NOT_ASSIGNED through the authority and preserves Sample approval', async analysis => {
+    const row = await fixture('APPROVED', 'ACCEPTED');
+    const result = await requestClosure(row.sample.id, analysis, { archiveLocation: 'Shelf 4', disposalMethod: 'Laboratory procedure' }, manager);
+    expect(result).toMatchObject({ status: 'APPROVED', workItem: { status: 'NOT_ASSIGNED', analysis } });
+    expect(await prisma.sample.findUnique({ where: { id: row.sample.id } })).toMatchObject({ status: 'APPROVED',
+        approvedAt: row.sample.approvedAt, approvedBy: row.sample.approvedBy });
+    expect(await prisma.auditLog.findFirst({ where: { entityId: row.sample.id,
+        action: analysis === 'ARCHIVING' ? 'ARCHIVE_TASK_CREATED' : 'DISPOSAL_TASK_CREATED' } })).toMatchObject({ performedBy: manager.username });
+    const retry = await requestClosure(row.sample.id, analysis, { notes: 'Retain existing closure task' }, manager);
+    expect(retry.workItem.id).toBe(result.workItem.id);
+    expect(await prisma.workItem.count({ where: { sampleId: row.sample.id, analysis } })).toBe(1);
+});
+test.each(['ARCHIVING', 'DISPOSAL'])('%s request rolls back creation and metadata if its audit fails', async analysis => {
+    const row = await fixture('APPROVED', 'ACCEPTED'), before = await snapshot([row.sample.id]);
+    failAudit(analysis === 'ARCHIVING' ? 'ARCHIVE_TASK_CREATED' : 'DISPOSAL_TASK_CREATED');
+    await expect(requestClosure(row.sample.id, analysis, { notes: 'Closure note' }, manager)).rejects.toThrow('Injected workflow audit failure');
+    expect(await snapshot([row.sample.id])).toEqual(before);
+});
+test('closure state/scope refusals happen before creation or metadata writes', async () => {
+    const row = await fixture('PROCESSING', 'ACCEPTED'), before = await snapshot([row.sample.id]);
+    await expect(requestClosure(row.sample.id, 'ARCHIVING', { notes: 'Closure note' }, manager))
+        .rejects.toMatchObject({ statusCode: 409, code: 'SAMPLE_NOT_APPROVED' });
+    await expect(requestClosure(row.sample.id, 'DISPOSAL', { notes: 'Closure note' }, { ...manager, labId: randomUUID() }))
+        .rejects.toMatchObject({ statusCode: 403 });
+    expect(await snapshot([row.sample.id])).toEqual(before);
+});
+
+test('generic Sample status audit failure rolls back the hold and provenance together', async () => {
+    const row = await fixture(), before = await snapshot([row.sample.id]);
+    failAudit('STATUS_CHANGE');
+    expect((await call(sampleController.updateStatus, { status: 'ON_HOLD', reason: 'Check specimen custody' }, { id: row.sample.id }, manager)).statusCode).toBe(500);
+    expect(await snapshot([row.sample.id])).toEqual(before);
+});
+test('generic Sample cancellation needs the supplied reason and retains all WorkItems', async () => {
+    const row = await fixture('EXPECTED', 'NOT_ASSIGNED'), before = await snapshot([row.sample.id]);
+    expect(await call(sampleController.updateStatus, { status: 'CANCELLED' }, { id: row.sample.id }, manager))
+        .toMatchObject({ statusCode: 400, body: { code: 'TRANSITION_REASON_REQUIRED' } });
+    expect(await snapshot([row.sample.id])).toEqual(before);
+    expect((await call(sampleController.updateStatus, { status: 'CANCELLED', reason: 'Field specimen withdrawn' }, { id: row.sample.id }, manager)).statusCode).toBe(200);
+    expect(await prisma.sample.findUnique({ where: { id: row.sample.id } })).toMatchObject({ status: 'CANCELLED' });
+    expect((await snapshot([row.sample.id])).items).toEqual(before.items);
+});
+test('generic Sample status cannot reopen an approved sample and writes no audit', async () => {
+    const row = await fixture('APPROVED'), before = await snapshot([row.sample.id]);
+    expect(await call(sampleController.updateStatus, { status: 'PROCESSING' }, { id: row.sample.id }, manager))
+        .toMatchObject({ statusCode: 409, body: { code: 'ILLEGAL_STATUS_TRANSITION' } });
     expect(await snapshot([row.sample.id])).toEqual(before);
 });

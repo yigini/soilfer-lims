@@ -7,8 +7,13 @@ const submittedStates = ['SUBMITTED', 'ACCEPTED', 'WAIVED', 'CANCELLED'];
 async function deriveSubmissionLifecycle(db, sampleId, { previewSelection = [] } = {}) {
     const items = await db.workItem.findMany({ where: { sampleId: String(sampleId), duplicateOf: null, analysis: { notIn: excluded } },
         select: { id: true, analysis: true, status: true }, orderBy: { id: 'asc' } });
+    return deriveSubmissionFromItems(items, { previewSelection });
+}
+
+function deriveSubmissionFromItems(items, { previewSelection = [] } = {}) {
     const selected = new Set(previewSelection);
-    const counted = items.map(item => ({ ...item, status: selected.has(item.id) && item.status === 'COMPLETED'
+    const counted = items.filter(item => item.duplicateOf == null && !excluded.includes(item.analysis))
+        .map(item => ({ ...item, status: selected.has(item.id) && item.status === 'COMPLETED'
         ? 'SUBMITTED' : workflow.normalizeWorkItemState(item.status) }));
     const blocking = counted.filter(item => !submittedStates.includes(item.status))
         .map(item => ({ workItemId: item.id, analysis: item.analysis, status: item.status }));
@@ -26,4 +31,4 @@ function assertRequestedType(requested, derived) {
     }
 }
 
-module.exports = { deriveSubmissionLifecycle, assertRequestedType };
+module.exports = { deriveSubmissionLifecycle, deriveSubmissionFromItems, assertRequestedType };

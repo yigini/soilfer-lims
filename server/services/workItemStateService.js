@@ -100,6 +100,11 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
                 const gates = require('./gateEvidenceService');
                 const required = item.analysis === 'DRYING' ? [] : item.analysis === 'PREPARATION' ? ['DRYING'] : ['DRYING', 'PREPARATION'];
                 gateAudit = gates.auditEvidence(await gates.assertGateEvidence(client, sample, required));
+                const engine = require('../utils/workflowEngine');
+                const allItems = await client.workItem.findMany({ where: { sampleId: sample.id } });
+                const prerequisite = await engine.withCatalogue(client, () => engine.checkPrerequisites(item, allItems, sample));
+                if (!prerequisite.canStart) throw new TransitionError(prerequisite.reason, 409,
+                    prerequisite.code || 'ANALYSIS_PREREQUISITE_BLOCKED', { blockedBy: prerequisite.blockedBy });
             }
         }
         if (item.status === nextStatus && !Object.keys(data).length && !migrating && !options.action) return item;

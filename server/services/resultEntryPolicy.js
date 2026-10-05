@@ -1,6 +1,6 @@
 const { parseJson, GATE_CODES, configurationIssues } = require('./cataloguePolicy');
 const { isAvailable } = require('./methodResolution');
-const { evaluateItemReadiness } = require('./workbenchReadinessService');
+const { evaluateExecutionReadiness } = require('./workbenchReadinessService');
 
 // The legacy sample results endpoint must not bypass catalogue, assignment or sealed-work rules.
 async function validateResultEntries(db, sample, measurements, user) {
@@ -26,7 +26,7 @@ async function validateResultEntries(db, sample, measurements, user) {
         if (items.some(item => ['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'APPROVED', 'VALIDATED'].includes(item.status))) return `${analysis.name} is already recorded or sealed. Use the correction workflow.`;
         if (user?.role === 'LAB_TECHNICIAN' && !items.some(item => item.assignedTo === user.username)) return `${analysis.name} is not assigned to you.`;
         for (const item of items) {
-            const readiness = evaluateItemReadiness({ ...item, sample }, user);
+            const readiness = await evaluateExecutionReadiness(db, { ...item, sample }, user);
             if (!readiness.isReady) return readiness.reasons.join(' ');
             if (item.methodologyId && methodologyId !== item.methodologyId) return `${analysis.name}: use the method assigned to this work item.`;
         }

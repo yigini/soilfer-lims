@@ -66,6 +66,10 @@ async function saveDraft(user, input, db = null) {
         }
     }
 
+    const readiness = await require('./workbenchReadinessService').evaluateExecutionReadiness(db, workItem, user);
+    if (!readiness.isReady) throw new rules.TransitionError(readiness.reasons.join(' '), 409,
+        readiness.blockers.includes('GATE_STATE_MISMATCH') ? 'GATE_STATE_MISMATCH' : 'EXECUTION_BLOCKED');
+
     const sId = sampleId || workItem.sampleId;
     const labId = workItem.sample?.assignedLab || workItem.sample?.labId || workItem.labId || user.labId;
     const analysisCode = analysis || workItem.analysis;

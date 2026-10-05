@@ -468,150 +468,43 @@ const STATUS_REQUIRED_PERMISSIONS = {
 };
 
 exports.updateStatus = async (req, res) => {
-    const { id } = req.params;
     const { status } = req.body;
     const user = req.user;
-
     try {
-        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
-        if (!sample) return error(res, 404, 'SAMPLE_NOT_FOUND', { id }, 'Sample not found');
-
-        // SECURITY: Enforce Lab Scope
-        const scopeGuard = require('../utils/scopeGuard');
-        try {
-            scopeGuard.ensureScope(user, sample, { altLabField: 'assignedLab' });
-        } catch (e) {
-            return error(res, 403, 'ACCESS_DENIED_LAB', null, 'Access Denied: You cannot modify samples from another lab.');
-        }
-
-        // STRICT: Reject legacy/unknown statuses
-        if (workflow.isLegacySampleState(status)) {
-            return res.status(400).json({
-                error: `Legacy status '${status}' is not allowed.`,
-                validStates: workflow.SAMPLE_STATE_LIST
-            });
-        }
-        if (!workflow.isValidSampleState(status)) {
-            return res.status(400).json({
-                error: `Unknown status '${status}'.`
-            });
-        }
-
-        // S03: Generic status update endpoint cannot directly transition to APPROVED, ARCHIVED, or DISPOSED
-        if (['ACCEPTED', 'APPROVED', 'ARCHIVED', 'DISPOSED'].includes(status)) {
-            return res.status(400).json({
-                error: `Direct transition to '${status}' via generic status update is prohibited. Approval requires analytical review / report release, and archiving/disposal must be recorded through custody operations.`,
-                code: 'DIRECT_TRANSITION_PROHIBITED'
-            });
-        }
-
-        // 1. Validate Transition
-        if (!workflow.isValidSampleTransition(sample.status, status)) {
-            return res.status(400).json({
-                error: `Invalid transition from ${sample.status} to ${status}.`
-            });
-        }
-
-        // 2. Validate Permissions
-        const reqPerm = STATUS_REQUIRED_PERMISSIONS[status];
-        if (reqPerm && !hasPermission(user, reqPerm)) {
-            return res.status(403).json({ error: 'Insufficient permissions' });
-        }
-
-        if (status === 'RECEIVED') {
-            const updated = await prisma.$transaction(tx => require('../services/intakeService').receiveSample(tx, { sampleId: String(id), body: req.body, user }));
-            return res.json(updated);
-        }
-        if (status === 'RECEIVED_REJECTED' && sample.status === 'RECEIVED') {
-            const result = await prisma.$transaction(tx => require('../services/intakeService').rejectSample(tx, { body: { ...req.body, sampleId: sample.id, originalId: sample.originalId, ncReason: req.body.ncReason || req.body.reason }, user }));
-            return res.json(result.sample);
-        }
-
-        const updates = { status };
-        if (status === 'RECEIVED' && !sample.receptionDate) {
-            updates.receptionDate = new Date();
-        }
-
-        // Critical: Generate Lab ID on transition to LAB_ID_ASSIGNED or ACCEPTED
-        if ((status === 'LAB_ID_ASSIGNED' || status === 'ACCEPTED') && !sample.labSampleCode) {
-
-            // --- AUTOMATION: Enforce SoilFER Bundle ---
-            const projectPolicyService = require('../services/projectPolicyService');
-            const isSoilFer = projectPolicyService.isSoilFerTemplate(sample.projectCode || sample.projectId);
-
-            if (isSoilFer) {
-                // Load analysis groups from database
-                const analysisGroupsRaw = await prisma.analysisGroup.findMany({ where: { id: 'std-soil' } });
-                const stdGroup = analysisGroupsRaw[0];
-                if (stdGroup) {
-                    const groupAnalyses = stdGroup.analyses ? JSON.parse(stdGroup.analyses) : [];
-                    // Finding #7: Start from existing analyses to avoid overwriting on partial payloads
-                    const existingAnalyses = sample.requiredAnalyses
-                        ? (typeof sample.requiredAnalyses === 'string' ? JSON.parse(sample.requiredAnalyses) : sample.requiredAnalyses)
-                        : [];
-                    let requiredAnalyses = new Set(existingAnalyses);
-                    groupAnalyses.forEach(code => requiredAnalyses.add(code));
-                    updates.requiredAnalyses = JSON.stringify(Array.from(requiredAnalyses));
-                }
-            }
-        }
-
-        if (updates.requiredAnalyses) {
-            const selected = await cataloguePolicy.validateSelection(JSON.parse(updates.requiredAnalyses), { labId: sample.assignedLab || user.labId, existing: cataloguePolicy.parseJson(sample.requiredAnalyses, []) });
-            if (!selected.valid) return res.status(400).json({ error: selected.error, issues: selected.issues });
-        }
-
-        if (status === 'ACCEPTED') {
-            updates.dryingStatus = 'PENDING';
-            updates.preparationStatus = 'PENDING';
-        }
-
-        const { transitionSample } = require('../services/sampleStateService');
-        const nextStatus = status;
-        delete updates.status;
-        const updated = await prisma.$transaction(async tx => {
-            if (nextStatus === 'LAB_ID_ASSIGNED' || nextStatus === 'ACCEPTED') {
-                const current = await tx.sample.findUnique({ where: { id: String(id) } });
-                const code = await sampleCodes.issuedCode(current, tx) || await idGenerator.generateLabId(current.assignedLab || user.labId, 'S', tx, { projectCode: current.projectCode });
-                updates.labSampleCode = code; updates.labId = code;
-            }
-            return transitionSample(id, nextStatus, user, updates.notes || updates.reason || 'Status updated via API', updates, tx);
+        const rules = require('../services/workflowStateRules');
+        const sample = await prisma.sample.findUnique({ where: { id: String(req.params.id) } });
+        if (!sample) return error(res, 404, 'SAMPLE_NOT_FOUND', { id: req.params.id }, 'Sample not found');
+        rules.assertScope(user, sample);
+        if (workflow.isLegacySampleState(status)) return res.status(409).json({
+            error: `Legacy status '${status}' is not allowed.`, code: 'ILLEGAL_LEGACY_STATUS', validStates: workflow.SAMPLE_STATE_LIST
         });
-
-        // Post-Update Hook for Work Items
-        if (nextStatus === 'ACCEPTED') {
-            try {
-                const workItemController = require('./workItemController');
-                await workItemController.generateWorkItemsForSample(updated, null, req.user);
-            } catch (e) {
-                console.error('Failed to generate work items', e);
-            }
-        }
-
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'SAMPLE',
-                entityId: id,
-                action: 'STATUS_CHANGE',
-                details: `Status changed from ${sample.status} to ${status}`,
-                performedBy: user ? user.username : 'UNKNOWN',
-                performedByName: user ? (user.name || user.username) : 'System',
-                timestamp: new Date(),
-                before: JSON.stringify({ status: sample.status }),
-                after: JSON.stringify({ status: status }),
-                sampleId: String(id)
-            }
+        if (!workflow.isValidSampleState(status)) return res.status(400).json({ error: `Unknown status '${status}'.`, code: 'UNKNOWN_SAMPLE_STATUS' });
+        if (['ACCEPTED', 'APPROVED', 'ARCHIVED', 'DISPOSED'].includes(status)) return res.status(400).json({
+            error: `Direct transition to '${status}' via generic status update is prohibited. Use the authorized intake, review or custody action.`,
+            code: 'DIRECT_TRANSITION_PROHIBITED'
         });
-
-        res.json(updated);
+        const permission = STATUS_REQUIRED_PERMISSIONS[status] || 'CHANGE_STATUS';
+        if (!hasPermission(user, permission)) return res.status(403).json({ error: 'Insufficient permissions', code: 'STATUS_PERMISSION_DENIED' });
+        const updated = await rules.inTransaction(prisma, async tx => {
+            if (status === 'RECEIVED') return require('../services/intakeService').receiveSample(tx,
+                { sampleId: sample.id, body: req.body, user });
+            if (status === 'RECEIVED_REJECTED') {
+                const current = await tx.sample.findUnique({ where: { id: sample.id } });
+                if (current.status === 'RECEIVED') return (await require('../services/intakeService').rejectSample(tx, {
+                    body: { ...req.body, sampleId: current.id, originalId: current.originalId, ncReason: req.body.ncReason || req.body.reason }, user
+                })).sample;
+            }
+            return sampleStateService.transitionSample(sample.id, status, user, req.body.reason || req.body.notes || null, {}, tx,
+                { action: 'STATUS_CHANGE', expectedStatus: sample.status });
+        });
+        return res.json(updated);
     } catch (err) {
+        const mapped = require('../services/workflowStateRules').mapStateError(err);
+        if (mapped.statusCode) return res.status(mapped.statusCode).json({ code: mapped.code, error: mapped.message, ...(mapped.details && { details: mapped.details }) });
         console.error('[updateStatus] Error:', err);
-        if (err.statusCode) return res.status(err.statusCode).json({ code: err.code, error: err.message });
         return error(res, 500, 'SAMPLE_UPDATE_ERROR', null, 'Failed to update status');
     }
 };
-
 exports.updatePhaseStatus = async (req, res) => {
     const gate = typeof req.body.phase === 'string' ? req.body.phase.toUpperCase() : '';
     const status = typeof req.body.status === 'string' ? req.body.status.toUpperCase() : '';
@@ -962,7 +855,7 @@ exports.getSampleDetail = async (req, res) => {
 
         // Calculate workflow summary using the Workflow Engine
         const workflowEngine = require('../utils/workflowEngine');
-        const workflowSummary = workflowEngine.getWorkflowSummary(enrichedSample, parsedWorkItems);
+        const workflowSummary = await workflowEngine.withCatalogue(prisma, () => workflowEngine.getWorkflowSummary(sample, parsedWorkItems));
 
         // Check if this sample has a Kobo connection
         // Walk-in samples should NEVER show Kobo sync — they are manual by definition
@@ -1071,9 +964,7 @@ exports.getMapState = async (req, res) => {
 
         // Build map-state from engine
         const workflowEngine = require('../utils/workflowEngine');
-        const catalogueDefinitions = await require('../services/analysisService').loadAnalyses();
-        catalogueDefinitions.forEach(definition => workflowEngine.registerAnalysisConfig(definition.code, definition));
-        const mapState = workflowEngine.buildMapState(sample, workItems, auditLog);
+        const mapState = await workflowEngine.withCatalogue(prisma, () => workflowEngine.buildMapState(sample, workItems, auditLog));
 
         res.json({
             snapshot: {
@@ -1820,237 +1711,28 @@ exports.clearPreparationEvidence = async (req, res) => {
 };
 
 exports.archiveSample = async (req, res) => {
-    const { id } = req.params;
-    const user = req.user;
-    const { archiveLocation, notes } = req.body;
-
     try {
-        if (!hasPermission(user, 'ARCHIVE_SAMPLE')) {
-            return res.status(403).json({ error: 'Insufficient permissions to archive.' });
-        }
-
-        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
-        if (!sample) return res.status(404).json({ error: 'Sample not found' });
-
-        if (sample.status !== 'APPROVED') {
-            return res.status(409).json({ error: 'Sample must be in APPROVED status before archiving.' });
-        }
-
-        // WP-09: Block terminal transitions while work is live
-        const activeWork = await prisma.workItem.findMany({
-            where: {
-                sampleId: String(id),
-                analysis: { notIn: ['ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP', 'DRYING', 'PREPARATION'] },
-                status: { notIn: ['ACCEPTED', 'WAIVED'] }
-            },
-            select: { id: true, analysis: true, status: true }
-        });
-        const uncompletedGates = await prisma.workItem.findMany({
-            where: {
-                sampleId: String(id),
-                analysis: { in: ['DRYING', 'PREPARATION'] },
-                status: { notIn: ['COMPLETED', 'ACCEPTED', 'WAIVED'] }
-            },
-            select: { id: true, analysis: true, status: true }
-        });
-        if (activeWork.length > 0 || uncompletedGates.length > 0) {
-            const allUnfinished = [...activeWork, ...uncompletedGates];
-            const codes = allUnfinished.map(w => `${w.analysis || w.id} (${w.status})`).join(', ');
-            return res.status(409).json({
-                error: `Cannot archive sample: active work items are not terminal: ${codes}`,
-                activeWorkItems: allUnfinished
-            });
-        }
-
-        // WP-08: Check mutual exclusion with DISPOSAL
-        const existingDisposal = await prisma.workItem.findFirst({
-            where: {
-                sampleId: String(id),
-                analysis: { in: ['DISPOSAL', 'DISP'] },
-                status: { notIn: ['WAIVED', 'CANCELLED'] }
-            }
-        });
-        if (existingDisposal && ['ASSIGNED', 'IN_PROGRESS', 'SUBMITTED', 'ACCEPTED'].includes(existingDisposal.status)) {
-            return res.status(409).json({
-                error: 'Cannot archive: A disposal task is already active or completed for this sample.'
-            });
-        }
-
-        // WP-08: Create or retrieve ARCHIVING work item
-        let archiveItem = await prisma.workItem.findFirst({
-            where: {
-                sampleId: String(id),
-                analysis: { in: ['ARCHIVING', 'ARCH'] }, duplicateOf: null
-            }
-        });
-
-        if (!archiveItem) {
-            archiveItem = await prisma.workItem.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    sampleId: String(id),
-                    analysis: 'ARCHIVING',
-                    status: 'PENDING',
-                    priority: sample.priority || 'NORMAL',
-                    labId: sample.labId || sample.assignedLab || user.labId || null,
-                    assignedLab: sample.assignedLab || sample.labId || user.labId || null
-                }
-            });
-        }
-
-        const meta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
-        if (archiveLocation) meta.archiveLocation = archiveLocation;
-        if (notes) meta.archiveNotes = notes;
-
-        await prisma.sample.update({
-            where: { id: String(id) },
-            data: { metadata: JSON.stringify(meta) }
-        });
-
-        const now = new Date();
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'SAMPLE',
-                entityId: id,
-                action: 'ARCHIVE_TASK_CREATED',
-                details: `Archiving work item created for location ${archiveLocation || 'ARCHIVE'}`,
-                performedBy: user.username,
-                timestamp: now,
-                sampleId: String(id),
-                labId: sample.labId || user.labId || null
-            }
-        });
-
-        res.json({
-            success: true,
-            message: 'Archiving task created. Please assign a technician in the work items table.',
-            status: sample.status,
-            workItem: archiveItem,
-            archiveLocation: archiveLocation || meta.archiveLocation || 'ARCHIVE'
-        });
+        const result = await require('../services/closureTaskService').requestClosure(req.params.id, 'ARCHIVING', req.body, req.user);
+        return res.json({ success: true, message: 'Archiving task created. Please assign a technician in the work items table.', ...result });
     } catch (error) {
-        console.error('[archiveSample] Error:', error);
-        res.status(500).json({ error: 'Failed to archive sample' });
+        const mapped = require('../services/workflowStateRules').mapStateError(error);
+        if (!mapped.statusCode) console.error('[archiveSample] Error:', error);
+        return res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to archive sample',
+            ...(mapped.code && { code: mapped.code }), ...(mapped.details || {}) });
     }
 };
 
 exports.disposeSample = async (req, res) => {
-    const { id } = req.params;
-    const user = req.user;
-    const { disposalMethod, notes } = req.body;
-
     try {
-        if (!hasPermission(user, 'DISPOSE_SAMPLE')) {
-            return res.status(403).json({ error: 'Insufficient permissions to dispose.' });
-        }
-
-        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
-        if (!sample) return res.status(404).json({ error: 'Sample not found' });
-
-        if (sample.status !== 'APPROVED') {
-            return res.status(409).json({ error: 'Sample must be in APPROVED status before disposal.' });
-        }
-
-        // WP-09: Block terminal transitions while work is live
-        const activeWork = await prisma.workItem.findMany({
-            where: {
-                sampleId: String(id),
-                analysis: { notIn: ['ARCHIVING', 'ARCH', 'DISPOSAL', 'DISP', 'DRYING', 'PREPARATION'] },
-                status: { notIn: ['ACCEPTED', 'WAIVED'] }
-            },
-            select: { id: true, analysis: true, status: true }
-        });
-        const uncompletedGates = await prisma.workItem.findMany({
-            where: {
-                sampleId: String(id),
-                analysis: { in: ['DRYING', 'PREPARATION'] },
-                status: { notIn: ['COMPLETED', 'ACCEPTED', 'WAIVED'] }
-            },
-            select: { id: true, analysis: true, status: true }
-        });
-        if (activeWork.length > 0 || uncompletedGates.length > 0) {
-            const allUnfinished = [...activeWork, ...uncompletedGates];
-            const codes = allUnfinished.map(w => `${w.analysis || w.id} (${w.status})`).join(', ');
-            return res.status(409).json({
-                error: `Cannot dispose sample: active work items are not terminal: ${codes}`,
-                activeWorkItems: allUnfinished
-            });
-        }
-
-        // WP-08: Check mutual exclusion with ARCHIVING
-        const existingArchiving = await prisma.workItem.findFirst({
-            where: {
-                sampleId: String(id),
-                analysis: { in: ['ARCHIVING', 'ARCH'] },
-                status: { notIn: ['WAIVED', 'CANCELLED'] }
-            }
-        });
-        if (existingArchiving && ['ASSIGNED', 'IN_PROGRESS', 'SUBMITTED', 'ACCEPTED'].includes(existingArchiving.status)) {
-            return res.status(409).json({
-                error: 'Cannot dispose: An archiving task is already assigned or completed for this sample.'
-            });
-        }
-
-        // WP-08: Create or retrieve DISPOSAL work item
-        let disposalItem = await prisma.workItem.findFirst({
-            where: {
-                sampleId: String(id),
-                analysis: { in: ['DISPOSAL', 'DISP'] }, duplicateOf: null
-            }
-        });
-
-        if (!disposalItem) {
-            disposalItem = await prisma.workItem.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    sampleId: String(id),
-                    analysis: 'DISPOSAL',
-                    status: 'PENDING',
-                    priority: sample.priority || 'NORMAL',
-                    labId: sample.labId || sample.assignedLab || user.labId || null,
-                    assignedLab: sample.assignedLab || sample.labId || user.labId || null
-                }
-            });
-        }
-
-        const meta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
-        if (disposalMethod) meta.disposalMethod = disposalMethod;
-        if (notes) meta.disposalNotes = notes;
-
-        await prisma.sample.update({
-            where: { id: String(id) },
-            data: { metadata: JSON.stringify(meta) }
-        });
-
-        const now = new Date();
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'SAMPLE',
-                entityId: id,
-                action: 'DISPOSAL_TASK_CREATED',
-                details: `Disposal work item created via ${disposalMethod || 'STANDARD'}`,
-                performedBy: user.username,
-                timestamp: now,
-                sampleId: String(id),
-                labId: sample.labId || user.labId || null
-            }
-        });
-
-        res.json({
-            success: true,
-            message: 'Disposal task created. Please assign a technician in the work items table.',
-            status: sample.status,
-            workItem: disposalItem,
-            disposalMethod: disposalMethod || meta.disposalMethod || 'STANDARD'
-        });
+        const result = await require('../services/closureTaskService').requestClosure(req.params.id, 'DISPOSAL', req.body, req.user);
+        return res.json({ success: true, message: 'Disposal task created. Please assign a technician in the work items table.', ...result });
     } catch (error) {
-        console.error('[disposeSample] Error:', error);
-        res.status(500).json({ error: 'Failed to dispose sample' });
+        const mapped = require('../services/workflowStateRules').mapStateError(error);
+        if (!mapped.statusCode) console.error('[disposeSample] Error:', error);
+        return res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to dispose sample',
+            ...(mapped.code && { code: mapped.code }), ...(mapped.details || {}) });
     }
 };
-
 // ─── GET /api/samples/locations ─── (Globe GPS data)
 exports.getSampleLocations = async (req, res) => {
     try {

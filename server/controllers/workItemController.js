@@ -546,26 +546,15 @@ exports.updateWorkItemStatus = async (req, res) => {
         stateRules.assertScope(user, sample);
 
         if (status === workflow.WORK_ITEM_STATES.IN_PROGRESS || status === workflow.WORK_ITEM_STATES.COMPLETED) {
-            if (item.category !== 'Post-Analytical') {
-                if (sample.dryingStatus === 'FAILED') {
-                    return res.status(400).json({ error: 'Analysis locked: Drying FAILED.' });
-                }
-
-                if (item.analysis === 'DRYING') {
-                    const allowedStates = ['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL'];
-                    if (!allowedStates.includes(sample.status)) {
-                        return res.status(400).json({ error: `Cannot start DRYING. Sample status: ${sample.status}` });
-                    }
-                } else if (item.analysis === 'PREPARATION') {
-                    if (sample.dryingStatus !== 'DONE') {
-                        return res.status(400).json({ error: 'Analysis locked: Drying not completed.' });
-                    }
-                } else if (item.category !== 'Operational Gates') {
-                    // SD-05: Enforce prerequisite gate on execution (HTTP 412 Precondition Failed)
-                    if (sample.preparationStatus !== 'DONE') {
-                        return res.status(412).json({ error: 'Sample preparation has not been completed' });
-                    }
-                }
+            const readiness = await require('../services/workbenchReadinessService').evaluateExecutionReadiness(prisma, { ...item, sample }, user);
+            if (!readiness.isReady) {
+                const missingPreparation = !readiness.blockers.includes('GATE_STATE_MISMATCH') &&
+                    readiness.blockers.includes('PREPARATION_PREREQUISITE_BLOCKED');
+                return res.status(missingPreparation ? 412 : 409).json({ error: missingPreparation
+                    ? 'Sample preparation has not been completed' : readiness.reasons.join(' '),
+                code: readiness.blockers.includes('GATE_STATE_MISMATCH') ? 'GATE_STATE_MISMATCH'
+                    : readiness.blockers.includes('ANALYSIS_PREREQUISITE_BLOCKED') ? 'ANALYSIS_PREREQUISITE_BLOCKED'
+                        : readiness.blockers[0] || 'EXECUTION_BLOCKED' });
             }
         }
 

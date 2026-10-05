@@ -557,7 +557,7 @@ exports.getQueue = async (req, res) => {
             const resultKey = `${item.sampleId}::${code}`;
             const itemDraft = draftMap[item.id] || null;
             const selectedEquipId = item.equipmentId || itemDraft?.instrumentId || null;
-            const readiness = readinessService.evaluateItemReadiness(item, user, {
+            const readiness = await readinessService.evaluateExecutionReadiness(prisma, item, user, {
                 equipReq: equipReqMap[equipKey],
                 asset: assetMap[selectedEquipId],
                 selectedEquipmentId: selectedEquipId
@@ -787,8 +787,10 @@ exports.batchSave = async (req, res) => {
 
             const checklist = operationalChecklists[item.analysis];
             const isOperationalTask = !!checklist;
-            const executionReadiness = readinessService.evaluateItemReadiness(item, user);
+            const executionReadiness = await readinessService.evaluateExecutionReadiness(prisma, item, user);
             if (!executionReadiness.isReady) {
+                if (executionReadiness.blockers.includes('GATE_STATE_MISMATCH')) throw new stateRules.TransitionError(
+                    executionReadiness.reasons.join('; '), 409, 'GATE_STATE_MISMATCH');
                 errors.push({ workItemId: entry.workItemId, error: executionReadiness.reasons.join('; '), code: 'EXECUTION_BLOCKED' });
                 continue;
             }
@@ -1765,7 +1767,7 @@ exports.previewCompletion = async (req, res) => {
             const asset = assetMap[entry.equipmentId || item.equipmentId];
 
             // 1. Readiness check
-            const readiness = readinessService.evaluateItemReadiness(item, user, {
+            const readiness = await readinessService.evaluateExecutionReadiness(prisma, item, user, {
                 equipReq,
                 asset,
                 selectedEquipmentId: entry.equipmentId || item.equipmentId

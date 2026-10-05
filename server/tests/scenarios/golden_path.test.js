@@ -155,7 +155,7 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
             .send({ decisions: [{ workItemId: phItem.id, decision: 'REJECT_REANALYSIS', reason: 'Outlier detected' }] });
 
         const phItemReload = workItemsDb.findById(phItem.id);
-        expect(phItemReload.status).toBe('REANALYSIS_REQUIRED'); // Sent back to technician
+        expect(phItemReload.status).toBe('REPEAT_REQUIRED'); // Sent back to technician
 
         // 7. Tech Fixes and Completes All
         await completeAnalyticalWork(phItem.id, techToken, '7.1');
@@ -266,7 +266,8 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
             .put(`/api/samples/${sampleId}/phase`)
             .set('Authorization', `Bearer ${mgrRedToken}`)
             .send({ phase: 'PREPARATION', status: 'DONE', checklist: [true, true, true] });
-        expect(prepRes.status).toBe(400);
+        expect(prepRes.status).toBe(409);
+        expect(prepRes.body.code).toBe('DRYING_PREREQUISITE_FAILED');
 
         // 3. Verify Analysis completion blocked
         const items = await request(app).get('/api/work').set('Authorization', `Bearer ${mgrRedToken}`).query({ sampleId });

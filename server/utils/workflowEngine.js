@@ -14,9 +14,13 @@ const {
     SAMPLE_STATES,
     WORK_ITEM_STATES,
     FINAL_SAMPLE_STATES,
+    CLOSURE_TASK_ANALYSES,
     isValidSampleTransition,
     isValidWorkItemTransition
 } = require('../workflowContract');
+const { AsyncLocalStorage } = require('node:async_hooks');
+const { evaluateGateEvidence } = require('../services/gateEvidenceService');
+const catalogueContext = new AsyncLocalStorage();
 
 // =============================================================================
 // WORK ITEM CATEGORIES & DEPENDENCY GRAPH
@@ -84,19 +88,31 @@ const DYNAMIC_CONFIGS = {};
 /**
  * Register or update an analysis configuration dynamically from the database catalogue.
  */
-function registerAnalysisConfig(code, config) {
-    if (!code) return;
-    const previous = ANALYSIS_CONFIG[code] || { prerequisites: ['PREPARATION'], category: WORK_ITEM_CATEGORIES.WET_CHEMISTRY, order: 50 };
+function analysisConfig(code, config) {
+    const previous = ANALYSIS_CONFIG[code] || (CLOSURE_TASK_ANALYSES.includes(code) ? ANALYSIS_CONFIG.ARCHIVING
+        : { prerequisites: ['PREPARATION'], category: WORK_ITEM_CATEGORIES.WET_CHEMISTRY, order: 50 });
     let prereqs = config.prerequisites ?? previous.prerequisites;
     if (typeof prereqs === 'string') {
         try { prereqs = JSON.parse(prereqs); } catch (e) { prereqs = previous.prerequisites; }
     }
-    DYNAMIC_CONFIGS[code] = {
-        category: typeof config.category === 'string' ? config.category : previous.category,
-        order: config.order ?? config.executionOrder ?? 50,
-        prerequisites: Array.isArray(prereqs) ? prereqs : previous.prerequisites,
+    return {
+        category: config.categoryName || (typeof config.category === 'string' ? config.category : config.category?.name) || previous.category,
+        order: config.order ?? config.executionOrder ?? previous.order,
+        prerequisites: Object.freeze([...(Array.isArray(prereqs) ? prereqs : previous.prerequisites)]),
         displayName: config.displayName || config.name || code
     };
+}
+
+function registerAnalysisConfig(code, config) {
+    if (code) DYNAMIC_CONFIGS[code] = analysisConfig(code, config);
+}
+
+/** Each request/transaction evaluates a fresh immutable catalogue snapshot. */
+async function withCatalogue(db, evaluate) {
+    const definitions = await require('../services/analysisService').loadAnalyses(db);
+    const snapshot = Object.fromEntries(definitions.map(definition => [definition.code,
+        Object.freeze(analysisConfig(definition.code, definition))]));
+    return catalogueContext.run(Object.freeze(snapshot), evaluate);
 }
 
 /**
@@ -197,15 +213,17 @@ function validatePrerequisites(code, newPrerequisites, existingAnalyses = []) {
  * Checks dynamic catalogue cache first, then built-in defaults, then general fallback.
  */
 function getAnalysisConfig(analysisCode) {
-    if (DYNAMIC_CONFIGS[analysisCode]) {
+    const snapshot = catalogueContext.getStore();
+    if (snapshot?.[analysisCode]) return snapshot[analysisCode];
+    if (!snapshot && DYNAMIC_CONFIGS[analysisCode]) {
         return DYNAMIC_CONFIGS[analysisCode];
     }
-    return ANALYSIS_CONFIG[analysisCode] || {
+    return ANALYSIS_CONFIG[analysisCode] || (CLOSURE_TASK_ANALYSES.includes(analysisCode) ? ANALYSIS_CONFIG.ARCHIVING : {
         category: WORK_ITEM_CATEGORIES.WET_CHEMISTRY,
         order: 50,
         prerequisites: ['PREPARATION'],
           displayName: require('../data/analysisDisplayNames.json')[analysisCode] || 'Unconfigured parameter'
-    };
+    });
 }
 
 // =============================================================================
@@ -219,7 +237,7 @@ function getAnalysisConfig(analysisCode) {
  * @param {Array} allWorkItems - All work items for the sample.
  * @returns {Object} - { canStart: boolean, blockedBy: string | null, reason: string }
  */
-function checkPrerequisites(workItem, allWorkItems) {
+function checkPrerequisites(workItem, allWorkItems, sample = workItem.sample || {}) {
     const config = getAnalysisConfig(workItem.analysis);
 
     // No prerequisites? Always can start.
@@ -234,11 +252,12 @@ function checkPrerequisites(workItem, allWorkItems) {
                 getAnalysisConfig(wi.analysis).category !== WORK_ITEM_CATEGORIES.POST_ANALYTICAL
             );
 
-            const allApproved = nonPostItems.length > 0 && nonPostItems.every(wi =>
+            const allApproved = evaluateGateEvidence(sample, allWorkItems).satisfied &&
+                !nonPostItems.some(wi => wi.duplicateOf) && nonPostItems.length > 0 && nonPostItems.every(wi =>
                 ['ACCEPTED', 'WAIVED'].includes(wi.status) ||
-                // Gates can be COMPLETED/SUBMITTED (don't require manager approval)
+                // Gates use the independently checked authoritative evidence.
                 (getAnalysisConfig(wi.analysis).category === WORK_ITEM_CATEGORIES.OPERATIONAL_GATES &&
-                    ['COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(wi.status))
+                    ['COMPLETED', 'ACCEPTED'].includes(wi.status))
             );
 
             if (!allApproved) {
@@ -252,11 +271,20 @@ function checkPrerequisites(workItem, allWorkItems) {
             continue;
         }
 
+        if (['DRYING', 'PREPARATION'].includes(prereq)) {
+            const report = evaluateGateEvidence(sample, allWorkItems, [prereq]);
+            if (!report.satisfied) return { canStart: false, blockedBy: prereq,
+                code: report.blocked[0].mismatch ? 'GATE_STATE_MISMATCH' : `${prereq}_PREREQUISITE_BLOCKED`,
+                reason: report.blocked[0].mismatch ? `${prereq} WorkItem and sample flag disagree`
+                    : `Waiting for ${getAnalysisConfig(prereq).displayName} to complete` };
+            continue;
+        }
+
         // Standard prerequisite: check if that analysis is done
         const prereqItem = allWorkItems.find(wi => wi.analysis === prereq);
         if (!prereqItem) {
-            // Prerequisite doesn't exist - might be waived or not applicable
-            continue;
+            return { canStart: false, blockedBy: prereq, code: 'ANALYSIS_PREREQUISITE_BLOCKED',
+                reason: `Required prerequisite ${getAnalysisConfig(prereq).displayName} is missing` };
         }
 
         // Check if prerequisite is in a "complete enough" state
@@ -265,6 +293,7 @@ function checkPrerequisites(workItem, allWorkItems) {
             return {
                 canStart: false,
                 blockedBy: prereq,
+                code: 'ANALYSIS_PREREQUISITE_BLOCKED',
                 reason: `Waiting for ${getAnalysisConfig(prereq).displayName} to complete (current: ${prereqItem.status})`
             };
         }
@@ -333,14 +362,11 @@ function calculateSampleStatus(sample, workItems) {
     );
 
     // Check operational gates (Drying, Preparation)
-    const gatesComplete = gateItems.length > 0 && gateItems.every(wi =>
-        ['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(wi.status)
-    );
+    const gatesComplete = evaluateGateEvidence(sample, workItems).satisfied;
 
     // Check submission & approval eligibility
-    const submittedCount = analyticalItems.filter(wi =>
-        ['SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(wi.status)
-    ).length;
+    const submission = require('../services/submissionLifecycleService').deriveSubmissionFromItems(workItems);
+    const submittedCount = submission.counted - submission.blocking.length;
     const acceptedCount = analyticalItems.filter(wi =>
         ['ACCEPTED', 'WAIVED'].includes(wi.status)
     ).length;
@@ -348,15 +374,15 @@ function calculateSampleStatus(sample, workItems) {
         ['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(wi.status)
     ).length;
 
-    const isPartiallySubmitted = submittedCount > 0 && submittedCount < analyticalItems.length;
-    const isFullySubmitted = submittedCount === analyticalItems.length && analyticalItems.length > 0;
-    const isFullyApproved = acceptedCount === analyticalItems.length && analyticalItems.length > 0 && gatesComplete;
+    const isPartiallySubmitted = submission.hasSubmission && submission.type === 'PARTIAL';
+    const isFullySubmitted = submission.type === 'FULL';
+    const isFullyApproved = !analyticalItems.some(wi => wi.duplicateOf) && acceptedCount === analyticalItems.length && analyticalItems.length > 0 && gatesComplete;
 
     // Determine status
     let status = sample.status;
 
     // Auto-advance status if not in locked or intake state
-    if (!isLocked && !['EXPECTED', 'RECEIVED', 'RECEIVED_REJECTED'].includes(sample.status)) {
+    if (!isLocked && !['EXPECTED', 'DRAFT', 'RECEIVED', 'RECEIVED_REJECTED', 'ON_HOLD'].includes(sample.status)) {
         if (isFullyApproved) {
             status = SAMPLE_STATES.APPROVED;
         } else if (isFullySubmitted) {
@@ -388,6 +414,7 @@ function calculateSampleStatus(sample, workItems) {
             acceptedCount,
             completedExecutionCount,
             totalAnalyses: analyticalItems.length,
+            totalSubmissionAnalyses: submission.counted,
             totalGates: gateItems.length,
             isPartiallySubmitted,
             isFullySubmitted,
@@ -443,8 +470,9 @@ function getWorkflowSummary(sample, workItems) {
         };
     } else {
         // Evaluate Operational Gates
-        const dryingDone = !dryingItem || ['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'].includes(dryingItem.status);
-        const prepDone = !prepItem || ['COMPLETED', 'ACCEPTED', 'SUBMITTED', 'WAIVED'].includes(prepItem.status);
+        const gateEvidence = evaluateGateEvidence(sample, workItems);
+        const dryingDone = gateEvidence.gates.find(gate => gate.analysis === 'DRYING').satisfied;
+        const prepDone = gateEvidence.gates.find(gate => gate.analysis === 'PREPARATION').satisfied;
 
         if (!dryingDone) {
             phase = 'Preparation (Drying)';
@@ -510,7 +538,7 @@ function getWorkflowSummary(sample, workItems) {
                     destination: `/workbench?sampleId=${sample.id}&room=${encodeURIComponent(resolveRoom(readyAnalysis.analysis))}`
                 };
             } else {
-                const title = `Submit remaining analyses (${eligibility.submittedCount}/${eligibility.totalAnalyses})`;
+                const title = `Submit remaining analyses (${eligibility.submittedCount}/${eligibility.totalSubmissionAnalyses})`;
                 nextActions.push(title);
                 nextEligibleAction = {
                     title,
@@ -653,7 +681,7 @@ function buildMapState(sample, workItems, auditLog = []) {
     const stageBlockerMap = {};
     for (const wi of workItems) {
         if (['ACCEPTED', 'WAIVED', 'COMPLETED', 'SUBMITTED'].includes(wi.status)) continue;
-        const prereq = checkPrerequisites(wi, workItems);
+        const prereq = checkPrerequisites(wi, workItems, sample);
         if (!prereq.canStart) {
             const room = resolveRoom(wi.analysis);
             blockerGraph.push({
@@ -867,7 +895,7 @@ function buildMapState(sample, workItems, auditLog = []) {
             return 'done';
         }
         if (wi.status === 'IN_PROGRESS') return 'active';
-        const prereq = checkPrerequisites(wi, workItems);
+        const prereq = checkPrerequisites(wi, workItems, sample);
         if (!prereq.canStart) return 'blocked';
         return 'pending';
     };
@@ -876,7 +904,7 @@ function buildMapState(sample, workItems, auditLog = []) {
         const config = getAnalysisConfig(wi.analysis);
         const tone = getItemTone(wi);
         const nodeId = `wi_${wi.id}`;
-        const prereq = checkPrerequisites(wi, workItems);
+        const prereq = checkPrerequisites(wi, workItems, sample);
 
         depNodes.push({
             id: nodeId,
@@ -1013,6 +1041,7 @@ module.exports = {
     DYNAMIC_CONFIGS,
     getAnalysisConfig,
     registerAnalysisConfig,
+    withCatalogue,
 
     // Dependency Checks & DAG Cycle Validation
     detectCycle,
