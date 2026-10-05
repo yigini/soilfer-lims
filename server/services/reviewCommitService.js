@@ -28,6 +28,9 @@ async function commitReview(prisma, item, status, user, data, operations, submis
             if (submissionId && current?.submissionId !== submissionId) throw Object.assign(itemStateError(item), { code: 'ITEM_NOT_IN_SUBMISSION' });
             if (!current || current.status !== item.status || current.version !== item.version) throw itemStateError(item);
             assertReviewable(current, status);
+            const sample = await tx.sample.findUnique({ where: { id: current.sampleId } });
+            const returned = status === 'REPEAT_REQUIRED' && !workflow.CLOSURE_TASK_ANALYSES.includes(current.analysis);
+            if (returned) require('./resultEvidenceService').assertAmendable(sample);
             const history = typeof data.history === 'string' ? JSON.parse(data.history) : data.history;
             const reason = audit.reason || data.reanalysisReason || data.waiveReason || history?.at(-1)?.reason || history?.at(-1)?.note || null;
             await transitionWorkItem(item.id, status, user, reason, data, tx, {
@@ -35,7 +38,20 @@ async function commitReview(prisma, item, status, user, data, operations, submis
                 action: workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis) ? 'CLOSURE_REVIEW' : 'REVIEW',
                 audit: { action: audit.action || 'REVIEW', details: audit.details || `Work Item ${status} by ${user.username}` }
             });
-            await operations(tx);
+            const decisions = await operations(tx);
+            if (returned && sample.status === 'SUBMITTED_FULL') {
+                const decision = (Array.isArray(decisions) ? decisions : [decisions]).find(row =>
+                    row?.workItemId === current.id && row.decision === 'RETURN');
+                if (!decision?.id) throw Object.assign(new Error('The repeat review must include its ReviewDecision.'), {
+                    statusCode: 409, code: 'REVIEW_DECISION_REQUIRED' });
+                const entry = { status: 'PROCESSING', action: 'REVIEW_RETURNED', workItemId: current.id,
+                    reviewDecisionId: decision.id, reason: decision.reason, changedBy: user.username, timestamp: new Date().toISOString() };
+                await require('./sampleStateService').transitionSample(sample.id, 'PROCESSING', user, decision.reason, {
+                    history: JSON.stringify([...require('./workflowStateRules').requireHistory(sample.history), entry])
+                }, tx, { expectedStatus: 'SUBMITTED_FULL', action: 'REVIEW_RETURNED',
+                    details: JSON.stringify(entry), after: JSON.stringify({ status: 'PROCESSING', reviewDecisionId: decision.id,
+                        workItemId: current.id, reason: decision.reason }) });
+            }
             return tx.workItem.findUnique({ where: { id: item.id } });
         });
     } catch (error) {

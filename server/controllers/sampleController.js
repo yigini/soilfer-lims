@@ -872,19 +872,14 @@ exports.getSampleDetail = async (req, res) => {
             let status = wi.status;
             let assignedLab = wi.assignedLab;
 
-            // Self-healing 1: Status repair
+            // Display legacy assignment inconsistencies without writing in GET.
             if (status === 'ASSIGNED' && !wi.assignedTo) {
                 status = 'NOT_ASSIGNED';
             }
 
-            // Self-healing 2: AssignedLab repair (copy from sample if missing)
+            // Display the sample's lab fallback without persisting it in GET.
             if (!assignedLab && sample.assignedLab) {
                 assignedLab = sample.assignedLab;
-                // Async update in background for persistence
-                prisma.workItem.update({
-                    where: { id: wi.id },
-                    data: { assignedLab: sample.assignedLab }
-                }).catch(err => console.error(`[SELF-HEALING] Failed to update WI ${wi.id}:`, err));
             }
 
             return {

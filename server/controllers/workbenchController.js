@@ -16,6 +16,7 @@ const { SPECTRAL_ACQUISITION_CODES } = require('../config/spectralAcquisition');
 const stateRules = require('../services/workflowStateRules');
 const { transitionWorkItem } = require('../services/workItemStateService');
 const { transitionSample } = require('../services/sampleStateService');
+const { deriveSubmissionLifecycle } = require('../services/submissionLifecycleService');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/workbench/queue
@@ -1989,36 +1990,21 @@ exports.previewSubmissions = async (req, res) => {
         }
 
         const targetSampleIds = Object.keys(sampleGroupMap);
-        let allItemsBySample = {};
-        if (targetSampleIds.length > 0) {
-            const allSampleItems = await prisma.workItem.findMany({
-                where: {
-                    sampleId: { in: targetSampleIds },
-                    analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] }
-                },
-                select: { id: true, sampleId: true, status: true, analysis: true }
-            });
-            allSampleItems.forEach(wi => {
-                if (!allItemsBySample[wi.sampleId]) allItemsBySample[wi.sampleId] = [];
-                allItemsBySample[wi.sampleId].push(wi);
-            });
-        }
-
         const eligibleSamples = [];
         for (const sId of targetSampleIds) {
             const group = sampleGroupMap[sId];
-            const allItems = allItemsBySample[sId] || [];
             const completedCount = group.completedItems.length;
-            const totalCount = allItems.length;
-            const isFull = allItems.length > 0 && allItems.every(i => i.status === 'COMPLETED' || group.completedItems.some(ci => ci.workItemId === i.id));
+            const derived = await deriveSubmissionLifecycle(prisma, sId, {
+                previewSelection: group.completedItems.map(item => item.workItemId)
+            });
 
             eligibleSamples.push({
                 sampleId: sId,
                 originalId: group.sample?.originalId || null,
                 projectCode: group.sample?.projectCode || null,
-                submissionType: isFull ? 'FULL' : 'PARTIAL',
+                submissionType: derived.type,
                 completedCount,
-                totalCount,
+                totalCount: derived.counted,
                 items: group.completedItems
             });
         }
@@ -2094,18 +2080,8 @@ exports.commitSubmissions = async (req, res) => {
             resultEvidence.assertAmendable(sample);
             await resultEvidence.assertNoPreparationRevert(tx, sample.id);
             await require('../services/sampleStateService').advanceCompletedGates(sample, user, tx);
-            const allSampleItems = await tx.workItem.findMany({
-                where: {
-                    sampleId,
-                    analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] }
-                }
-            });
             const itemIds = items.map(i => i.id);
-            const isFull = allSampleItems.length > 0 && allSampleItems.every(i => itemIds.includes(i.id) || i.status === 'COMPLETED' || i.status === 'SUBMITTED');
-
             const subId = `SUB-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
-            // S19: Canonical status must be SUBMITTED_FULL (never legacy SUBMITTED)
-            const targetSampleStatus = isFull ? 'SUBMITTED_FULL' : 'SUBMITTED_PARTIAL';
 
             // Atomic transaction for submission, work items, sample status, and audit
                 await tx.submission.create({
@@ -2114,7 +2090,7 @@ exports.commitSubmissions = async (req, res) => {
                         sampleId,
                         labId: sample.assignedLab || user.labId,
                         assignedLab: sample.assignedLab,
-                        type: isFull ? 'FULL' : 'PARTIAL',
+                        type: 'PARTIAL',
                         status: 'PENDING_REVIEW',
                         note: note || null,
                         submittedBy: user.username,
@@ -2129,7 +2105,11 @@ exports.commitSubmissions = async (req, res) => {
                         history: JSON.stringify([...stateRules.requireHistory(item.history), { status: 'SUBMITTED', action: 'SUBMITTED',
                             submissionId: subId, timestamp: now.toISOString(), changedBy: user.username }])
                 }, tx, { expected: { status: item.status, version: item.version }, audit: { action: 'WORKITEM_SUBMITTED' } });
-                await transitionSample(sampleId, targetSampleStatus, user, 'Workbench submission', {}, tx);
+                const derived = await deriveSubmissionLifecycle(tx, sampleId);
+                await tx.submission.update({ where: { id: subId }, data: { type: derived.type } });
+                await transitionSample(sampleId, derived.sampleStatus, user, 'Workbench submission', {
+                    lastSubmissionId: subId, lastSubmissionType: derived.type, lastSubmissionAt: now
+                }, tx);
                 await tx.auditLog.create({
                     data: {
                         id: crypto.randomUUID(),
@@ -2138,7 +2118,8 @@ exports.commitSubmissions = async (req, res) => {
                         sampleId,
                         action: 'WORKBENCH_SUBMIT',
                         performedBy: user.username,
-                        details: `Submitted ${itemIds.length} item(s) for sample ${sampleId} (${isFull ? 'FULL' : 'PARTIAL'})`,
+                        details: `Submitted ${itemIds.length} item(s) for sample ${sampleId} (${derived.type})`,
+                        after: JSON.stringify({ derivedType: derived.type, sampleStatus: derived.sampleStatus }),
                         timestamp: now
                     }
                 });
@@ -2146,10 +2127,12 @@ exports.commitSubmissions = async (req, res) => {
             createdSubmissions.push({
                 submissionId: subId,
                 sampleId,
-                type: isFull ? 'FULL' : 'PARTIAL',
+                type: derived.type,
                 itemCount: itemIds.length
             });
         }
+        if (createdSubmissions.length === 0) throw new stateRules.TransitionError(
+            'Select completed work items before submitting.', 400, 'EMPTY_SUBMISSION_SELECTION');
         });
 
         // Broadcast to lab

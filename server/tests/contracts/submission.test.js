@@ -72,6 +72,25 @@ describe('8.1 Section D: Submission Rules', () => {
         expect(completeRes.status).toBe(200);
         expect((await prisma.result.findFirst({ where: { sampleId, param: 'PH_H2O', isCurrent: true } })).value).toBe('7.0');
 
+        const beforeFull = {
+            sample: await prisma.sample.findUnique({ where: { id: sampleId } }),
+            items: await prisma.workItem.findMany({ where: { sampleId }, orderBy: { id: 'asc' } }),
+            submissions: await prisma.submission.findMany({ where: { sampleId } }),
+            audits: await prisma.auditLog.findMany({ where: { sampleId }, orderBy: { id: 'asc' } })
+        };
+        const incomplete = await request(app).post('/api/submissions').set('Authorization', `Bearer ${techToken}`)
+            .send({ sampleId, type: 'FULL', workItemIds: [phItemId] });
+        expect(incomplete.status).toBe(409);
+        expect(incomplete.body).toMatchObject({ code: 'SUBMISSION_NOT_FULL', details: {
+            blocking: [{ workItemId: condItemId, analysis: 'EC', status: 'ASSIGNED' }]
+        } });
+        expect({
+            sample: await prisma.sample.findUnique({ where: { id: sampleId } }),
+            items: await prisma.workItem.findMany({ where: { sampleId }, orderBy: { id: 'asc' } }),
+            submissions: await prisma.submission.findMany({ where: { sampleId } }),
+            audits: await prisma.auditLog.findMany({ where: { sampleId }, orderBy: { id: 'asc' } })
+        }).toEqual(beforeFull);
+
         const subRes = await request(app)
             .post('/api/submissions')
             .set('Authorization', `Bearer ${techToken}`)
@@ -85,7 +104,7 @@ describe('8.1 Section D: Submission Rules', () => {
         expect(subRes.body.submission.status).toBe('PENDING_REVIEW');
     });
 
-    test('Scenario 2: Full Submission Blocked if items incomplete', async () => {
+    test('Scenario 2: Previously submitted work counts toward a full submission', async () => {
         const completeRes = await request(app)
             .post('/api/workbench/batch-save')
             .set('Authorization', `Bearer ${techToken}`)
@@ -103,9 +122,9 @@ describe('8.1 Section D: Submission Rules', () => {
                 workItemIds: [condItemId]
             });
 
-        if (subRes.status !== 409) console.log('DEBUG Scenario 2:', subRes.body);
-        expect(subRes.status).toBe(409);
-        expect(subRes.body.blocking).toBeDefined();
+        expect(subRes.status).toBe(201);
+        expect(subRes.body.submission.type).toBe('FULL');
+        expect(await prisma.sample.findUnique({ where: { id: sampleId } })).toMatchObject({ status: 'SUBMITTED_FULL' });
     });
 
     test('Scenario 3: Manager accepts Submission (PH)', async () => {
@@ -129,11 +148,9 @@ describe('8.1 Section D: Submission Rules', () => {
     });
 
     test('Scenario 4: Rejection (COND)', async () => {
-        // Submit the recorded measurement for review before requesting a repeat.
-        const initialCondSubmission = await request(app).post('/api/submissions')
-            .set('Authorization', `Bearer ${techToken}`)
-            .send({ sampleId, type: 'PARTIAL', workItemIds: [condItemId] });
-        expect(initialCondSubmission.status).toBe(201);
+        // Scenario 2 already submitted EC. Request its repeat from that reviewed
+        // membership without manufacturing a second submission of the same item.
+        expect(await prisma.workItem.findUnique({ where: { id: condItemId } })).toMatchObject({ status: 'SUBMITTED' });
         // Request a repeat before re-entry; completed measurements are sealed
         // by the canonical workbench rather than overwritten through status.
         const returned = await request(app).post(`/api/work/${condItemId}/review`)

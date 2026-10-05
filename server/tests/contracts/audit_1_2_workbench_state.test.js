@@ -9,6 +9,9 @@ const workbench = require('../../controllers/workbenchController');
 const submissions = require('../../controllers/submissionController');
 const operations = require('../../services/operationalConfirmationService');
 const workController = require('../../controllers/workItemController');
+const { deriveSubmissionLifecycle } = require('../../services/submissionLifecycleService');
+const workflow = require('../../workflowContract');
+const { commitReview } = require('../../services/reviewCommitService');
 const labId = randomUUID();
 const technician = { username: `state-tech-${randomUUID()}`, role: 'LAB_TECHNICIAN', labId };
 const manager = { username: `state-manager-${randomUUID()}`, role: 'LAB_MANAGER', labId };
@@ -38,12 +41,13 @@ async function snapshot(sampleIds) {
         results: await prisma.result.findMany({ where: sampleWhere, orderBy: { id: 'asc' } }),
         submissions: await prisma.submission.findMany({ where: sampleWhere, orderBy: { id: 'asc' } }),
         audits: await prisma.auditLog.findMany({ where: sampleWhere, orderBy: { id: 'asc' } }),
-        events: await prisma.resultEvidenceEvent.findMany({ where: sampleWhere, orderBy: { id: 'asc' } })
+        events: await prisma.resultEvidenceEvent.findMany({ where: sampleWhere, orderBy: { id: 'asc' } }),
+        decisions: await prisma.reviewDecision.findMany({ where: sampleWhere, orderBy: { id: 'asc' } })
     };
 }
-async function call(handler, body, params = {}) {
+async function call(handler, body, params = {}, user = technician) {
     const res = { statusCode: 200, status(code) { this.statusCode = code; return this; }, json(value) { this.body = value; return this; } };
-    await handler({ user: technician, body, params }, res);
+    await handler({ user, body, params }, res);
     return res;
 }
 function failAudit(action, aggregateOnly = false) {
@@ -150,4 +154,145 @@ test('completed work requires a real reason before the generic reopen edge', asy
     expect((await call(workController.updateWorkItemStatus, { status: 'IN_PROGRESS', reason: 'Repeat the preparation check',
         version: row.item.version }, { id: row.item.id })).statusCode).toBe(200);
     expect(await prisma.workItem.findUnique({ where: { id: row.item.id } })).toMatchObject({ status: 'IN_PROGRESS', result: row.item.result });
+});
+
+async function additionalItem(row, status, analysis = 'EC', extra = {}) {
+    return work.createWorkItem({ id: randomUUID(), sampleId: row.sample.id, assignedLab: labId, labId,
+        analysis, status, assignedTo: technician.username, result: '2.0', ...extra },
+    'system:fixture', { context: 'fixture' });
+}
+
+const submissionMatrix = [
+    ['SUBMITTED', 'FULL'], ['ACCEPTED', 'FULL'], ['WAIVED', 'FULL'], ['CANCELLED', 'FULL'],
+    ['COMPLETED', 'PARTIAL'], ['ON_HOLD', 'PARTIAL'], ['REPEAT_REQUIRED', 'PARTIAL'],
+    ['AWAITING_VERIFICATION', 'PARTIAL'], ['NOT_ASSIGNED', 'PARTIAL'], ['ASSIGNED', 'PARTIAL'], ['IN_PROGRESS', 'PARTIAL']
+];
+test.each(paths.flatMap(([name, handler, body]) => submissionMatrix.map(([status, type]) => [name, status, type, handler, body])))
+    ('%s submission derives %s companion work as %s after selected work is submitted', async (_, status, type, handler, body) => {
+        const row = await fixture();
+        await additionalItem(row, status);
+        const response = await call(handler, body(row));
+        expect(response.statusCode).toBeLessThan(300);
+        expect(await prisma.sample.findUnique({ where: { id: row.sample.id } })).toMatchObject({
+            status: `SUBMITTED_${type}`, lastSubmissionType: type, approvedAt: null, approvedBy: null
+        });
+        expect(await prisma.submission.findFirst({ where: { sampleId: row.sample.id } })).toMatchObject({ type });
+        expect(await prisma.workItem.findUnique({ where: { id: row.item.id } })).toMatchObject({ status: 'SUBMITTED' });
+        const companion = await prisma.workItem.findFirst({ where: { sampleId: row.sample.id, analysis: 'EC' } });
+        expect(companion.status).toBe(status);
+    });
+
+test('FULL derivation excludes duplicates, gates and every closure alias', async () => {
+    const row = await fixture();
+    await additionalItem(row, 'ON_HOLD', 'PH', { duplicateOf: row.item.id });
+    for (const analysis of ['DRYING', 'PREPARATION', ...workflow.CLOSURE_TASK_ANALYSES]) {
+        await additionalItem(row, 'NOT_ASSIGNED', analysis);
+    }
+    // The unfinished gates still prevent execution. This test isolates the
+    // counted set by exercising the read-only derivation after projected submit.
+    expect(await deriveSubmissionLifecycle(prisma, row.sample.id, { previewSelection: [row.item.id] }))
+        .toMatchObject({ type: 'FULL', counted: 1, blocking: [] });
+    expect(await deriveSubmissionLifecycle(prisma, row.sample.id)).toMatchObject({ type: 'PARTIAL' });
+});
+
+test.each(['COMPLETED', 'ON_HOLD', 'REPEAT_REQUIRED', 'AWAITING_VERIFICATION', 'NOT_ASSIGNED', 'ASSIGNED', 'IN_PROGRESS'])
+    ('an explicit FULL request lists its %s blocker and rolls back every write', async status => {
+        const row = await fixture(), other = await additionalItem(row, status), before = await snapshot([row.sample.id]);
+        expect(await call(submissions.createSubmission, { sampleId: row.sample.id, workItemIds: [row.item.id], type: 'FULL' }))
+            .toMatchObject({ statusCode: 409, body: { code: 'SUBMISSION_NOT_FULL', details: {
+                blocking: [{ workItemId: other.id, analysis: other.analysis, status }]
+            } } });
+        expect(await snapshot([row.sample.id])).toEqual(before);
+    });
+
+test('requested PARTIAL is preserved in the audit when the derived lifecycle becomes FULL', async () => {
+    const row = await fixture();
+    expect((await call(submissions.createSubmission, { sampleId: row.sample.id, workItemIds: [row.item.id], type: 'PARTIAL' })).statusCode).toBe(201);
+    const audit = await prisma.auditLog.findFirst({ where: { sampleId: row.sample.id, action: 'SUBMISSION_CREATED' } });
+    expect(JSON.parse(audit.after)).toMatchObject({ requestedType: 'PARTIAL', derivedType: 'FULL', sampleStatus: 'SUBMITTED_FULL' });
+});
+
+test('a counted set containing only waived/cancelled work does not create a full submission', async () => {
+    const row = await fixture('PROCESSING', 'WAIVED');
+    await additionalItem(row, 'CANCELLED');
+    expect(await deriveSubmissionLifecycle(prisma, row.sample.id)).toMatchObject({ type: 'PARTIAL', hasSubmission: false });
+});
+
+test('submission preview projects only selected items and reads leave every fixture row unchanged', async () => {
+    const row = await fixture(), other = await additionalItem(row, 'COMPLETED'), before = await snapshot([row.sample.id]);
+    const preview = await call(workbench.previewSubmissions, { sampleIds: [row.sample.id], workItemIds: [row.item.id] });
+    expect(preview).toMatchObject({ statusCode: 200, body: { eligibleSamples: [{ submissionType: 'PARTIAL', totalCount: 2, completedCount: 1 }] } });
+    expect(await snapshot([row.sample.id])).toEqual(before);
+    await call(submissions.createSubmission, { sampleId: row.sample.id, workItemIds: [row.item.id, other.id], type: 'FULL' });
+    const submission = await prisma.submission.findFirst({ where: { sampleId: row.sample.id } });
+    const submitted = await snapshot([row.sample.id]);
+    expect((await call(submissions.getSubmission, {}, { id: submission.id })).statusCode).toBe(200);
+    expect(await snapshot([row.sample.id])).toEqual(submitted);
+});
+
+test.each(paths)('%s empty submission selection is refused without writes', async (name, handler) => {
+    const row = await fixture('PROCESSING', 'ASSIGNED'), before = await snapshot([row.sample.id]);
+    const body = name === 'legacy' ? { sampleId: row.sample.id, workItemIds: [], type: 'PARTIAL' } : { sampleIds: [row.sample.id] };
+    expect((await call(handler, body)).statusCode).toBe(400);
+    expect(await snapshot([row.sample.id])).toEqual(before);
+});
+
+const reviewPaths = [
+    ['single', workController.reviewWorkItem, (row, status) => [{ status, reason: 'Repeat review reason' }, { id: row.item.id }]],
+    ['bulk', workController.reviewWorkItemsBulk, (row, status) => [{ status, reason: 'Repeat review reason', workItemIds: [row.item.id] }, {}]],
+    ['submission', submissions.reviewSubmission, (row, status) => [{ decisions: [{ workItemId: row.item.id,
+        decision: status === 'REPEAT_REQUIRED' ? 'RETURN' : status === 'WAIVED' ? 'OMIT' : 'ACCEPT', reason: 'Repeat review reason' }] },
+    { id: row.item.submissionId }]]
+];
+async function submittedFixture(sampleStatus = 'SUBMITTED_FULL') {
+    const row = await fixture(sampleStatus, 'SUBMITTED');
+    const sub = await prisma.submission.create({ data: { id: randomUUID(), sampleId: row.sample.id, assignedLab: labId, labId,
+        submittedBy: technician.username, type: sampleStatus === 'SUBMITTED_FULL' ? 'FULL' : 'PARTIAL', status: 'PENDING_REVIEW',
+        workItemIds: JSON.stringify([row.item.id]), workItemCount: 1 } });
+    row.item = await prisma.workItem.update({ where: { id: row.item.id }, data: { submissionId: sub.id } });
+    return row;
+}
+test.each(reviewPaths)('%s review RETURN reopens FULL atomically and records its decision in Sample history/audit', async (_, handler, payload) => {
+    const row = await submittedFixture(), [body, params] = payload(row, 'REPEAT_REQUIRED');
+    expect((await call(handler, body, params, manager)).statusCode).toBe(200);
+    const decision = await prisma.reviewDecision.findFirst({ where: { workItemId: row.item.id, decision: 'RETURN' } });
+    const sample = await prisma.sample.findUnique({ where: { id: row.sample.id } });
+    expect(sample).toMatchObject({ status: 'PROCESSING', approvedAt: row.sample.approvedAt, approvedBy: row.sample.approvedBy });
+    expect(JSON.parse(sample.history).at(-1)).toMatchObject({ action: 'REVIEW_RETURNED', reviewDecisionId: decision.id, reason: decision.reason });
+    const audit = await prisma.auditLog.findFirst({ where: { sampleId: row.sample.id, action: 'REVIEW_RETURNED' } });
+    expect(JSON.parse(audit.after)).toMatchObject({ status: 'PROCESSING', reviewDecisionId: decision.id, reason: decision.reason });
+    expect(await prisma.workItem.findUnique({ where: { id: row.item.id } })).toMatchObject({ status: 'REPEAT_REQUIRED', result: row.item.result });
+});
+test.each(reviewPaths)('%s review RETURN retains a partial lifecycle', async (_, handler, payload) => {
+    const row = await submittedFixture('SUBMITTED_PARTIAL'), [body, params] = payload(row, 'REPEAT_REQUIRED');
+    expect((await call(handler, body, params, manager)).statusCode).toBe(200);
+    expect(await prisma.sample.findUnique({ where: { id: row.sample.id } })).toMatchObject({ status: 'SUBMITTED_PARTIAL' });
+    expect(await prisma.auditLog.count({ where: { sampleId: row.sample.id, action: 'REVIEW_RETURNED' } })).toBe(0);
+});
+test.each(reviewPaths.flatMap(([name, handler, payload]) => ['ACCEPTED', 'WAIVED'].map(status => [name, status, handler, payload])))
+    ('%s review %s leaves FULL lifecycle unchanged', async (_, status, handler, payload) => {
+        const row = await submittedFixture(), [body, params] = payload(row, status);
+        expect((await call(handler, body, params, manager)).statusCode).toBe(200);
+        expect(await prisma.sample.findUnique({ where: { id: row.sample.id } })).toMatchObject({ status: 'SUBMITTED_FULL' });
+    });
+test.each(reviewPaths)('%s review RETURN refuses an approved Sample with zero writes', async (_, handler, payload) => {
+    const row = await submittedFixture('APPROVED'), [body, params] = payload(row, 'REPEAT_REQUIRED'), before = await snapshot([row.sample.id]);
+    expect(await call(handler, body, params, manager)).toMatchObject({ statusCode: 409, body: { code: 'AMENDMENT_WORKFLOW_REQUIRED' } });
+    expect(await snapshot([row.sample.id])).toEqual(before);
+});
+test('a Sample status change during FULL review rolls back its decision and WorkItem', async () => {
+    const row = await submittedFixture(), before = await snapshot([row.sample.id]);
+    await expect(commitReview(prisma, row.item, 'REPEAT_REQUIRED', manager, { reanalysisReason: 'Repeat review reason' }, async tx => {
+        const decision = await tx.reviewDecision.create({ data: { id: randomUUID(), sampleId: row.sample.id, workItemId: row.item.id,
+            decision: 'RETURN', reviewerId: manager.username, reviewerName: manager.username, reason: 'Repeat review reason' } });
+        await samples.transitionSample(row.sample.id, 'ON_HOLD', manager, 'Concurrent manager hold', {}, tx);
+        return [decision];
+    })).rejects.toMatchObject({ statusCode: 409, code: 'SAMPLE_STATE_CHANGED' });
+    expect(await snapshot([row.sample.id])).toEqual(before);
+});
+test('a failed FULL review lifecycle audit rolls back its decision, history and WorkItem', async () => {
+    const row = await submittedFixture(), before = await snapshot([row.sample.id]);
+    failAudit('REVIEW_RETURNED');
+    expect((await call(workController.reviewWorkItem, { status: 'REPEAT_REQUIRED', reason: 'Repeat review reason' }, { id: row.item.id }, manager)).statusCode).toBe(500);
+    expect(await snapshot([row.sample.id])).toEqual(before);
 });

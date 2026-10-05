@@ -81,6 +81,7 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
         if (!sample) throw new TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
         rules.assertScope(actor, sample);
         let provenance = {};
+        let gateAudit = {};
         if (migrating) {
             provenance = require('./statusMigrationPlan').assertReviewedRow(options.migrationPlan, 'WorkItem', item, nextStatus, performedBy);
             rules.requireReason(reason);
@@ -93,6 +94,12 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
             provenance = rules.holdData(item, nextStatus, actor, reason, 'WorkItem');
             if (['SUBMITTED', 'ACCEPTED'].includes(nextStatus) && !workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis)) {
                 await require('./resultEvidenceService').assertNoPreparationRevert(client, sample.id);
+            }
+            if (['IN_PROGRESS', 'COMPLETED', 'SUBMITTED', 'ACCEPTED'].includes(nextStatus) &&
+                !workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis)) {
+                const gates = require('./gateEvidenceService');
+                const required = item.analysis === 'DRYING' ? [] : item.analysis === 'PREPARATION' ? ['DRYING'] : ['DRYING', 'PREPARATION'];
+                gateAudit = gates.auditEvidence(await gates.assertGateEvidence(client, sample, required));
             }
         }
         if (item.status === nextStatus && !Object.keys(data).length && !migrating && !options.action) return item;
@@ -117,7 +124,7 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
             details: options.audit?.details || JSON.stringify({ from: item.status, to: nextStatus, reason: reason || null }),
             performedBy, sampleId: sample.id, labId: item.assignedLab || sample.assignedLab || null, analysisCode: item.analysis,
             before: JSON.stringify({ status: item.status, version: item.version, holdPriorStatus: item.holdPriorStatus ?? null, legacyStatus: item.legacyStatus ?? null }),
-            after: JSON.stringify({ status: updated.status, version: updated.version, holdPriorStatus: updated.holdPriorStatus ?? null, legacyStatus: updated.legacyStatus ?? null }),
+            after: JSON.stringify({ status: updated.status, version: updated.version, holdPriorStatus: updated.holdPriorStatus ?? null, legacyStatus: updated.legacyStatus ?? null, ...gateAudit }),
             timestamp: new Date()
         } });
         return updated;

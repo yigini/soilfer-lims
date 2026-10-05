@@ -63,6 +63,22 @@ function inspectDatabase(databasePath, direction = 'apply') {
             const sampleColumns = columns('Sample'), workColumns = columns('WorkItem');
             const query = (table, names) => db.prepare(`SELECT id, status, updatedAt, ${names.includes('legacyStatus') ? 'legacyStatus' : 'NULL AS legacyStatus'}${table === 'WorkItem' ? ', version' : ''} FROM "${table}" ORDER BY id`).all();
             const report = buildReport(query('Sample', sampleColumns), query('WorkItem', workColumns), direction);
+            report.legacyGateInventoryAvailable = ['assignedLab', 'dryingStatus', 'preparationStatus'].every(name => sampleColumns.includes(name)) &&
+                ['sampleId', 'analysis'].every(name => workColumns.includes(name));
+            report.legacyGateEvidence = report.legacyGateInventoryAvailable ? db.prepare(`
+                SELECT s.assignedLab AS labId,
+                    COUNT(*) AS sampleCount,
+                    SUM(CASE WHEN s.dryingStatus = 'DONE' AND NOT EXISTS
+                        (SELECT 1 FROM WorkItem w WHERE w.sampleId = s.id AND w.analysis = 'DRYING') THEN 1 ELSE 0 END) AS dryingCount,
+                    SUM(CASE WHEN s.preparationStatus = 'DONE' AND NOT EXISTS
+                        (SELECT 1 FROM WorkItem w WHERE w.sampleId = s.id AND w.analysis = 'PREPARATION') THEN 1 ELSE 0 END) AS preparationCount
+                FROM Sample s
+                WHERE (s.dryingStatus = 'DONE' AND NOT EXISTS
+                    (SELECT 1 FROM WorkItem w WHERE w.sampleId = s.id AND w.analysis = 'DRYING'))
+                    OR (s.preparationStatus = 'DONE' AND NOT EXISTS
+                    (SELECT 1 FROM WorkItem w WHERE w.sampleId = s.id AND w.analysis = 'PREPARATION'))
+                GROUP BY s.assignedLab ORDER BY s.assignedLab
+            `).all() : [];
             const installed = new Set(db.prepare("SELECT name FROM sqlite_master WHERE type='trigger'").all().map(row => row.name));
             report.schemaReady = [sampleColumns, workColumns].every(names => ['legacyStatus', 'holdPriorStatus'].every(name => names.includes(name))) &&
                 !!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='ResultEvidenceEvent'").get() && requiredGuards.every(name => installed.has(name));

@@ -41,10 +41,10 @@ async function loadOperation(tx, actor, workItemId, verification = false) {
     }
     if (sampleStatus === 'RECEIVED_REJECTED') throw new TransitionError('Sample intake was rejected.', 409, 'SAMPLE_REJECTED');
     evidence.assertAmendable(sample);
-    if (analysis === 'PREPARATION' && sample.dryingStatus !== 'DONE') {
-        throw new TransitionError('Air drying must be completed before sample preparation.', 409, 'DRYING_PREREQUISITE_FAILED');
-    }
-    return { item, sample, analysis };
+    const gates = require('./gateEvidenceService');
+    const gateEvidence = await gates.assertGateEvidence(tx, sample, analysis === 'PREPARATION' ? ['DRYING'] : [],
+        { DRYING: 'DRYING_PREREQUISITE_FAILED' });
+    return { item, sample, analysis, gateEvidence: gates.auditEvidence(gateEvidence) };
 }
 
 async function setGate(tx, sample, analysis, status, actor, reason) {
@@ -76,7 +76,7 @@ class OperationalConfirmationService {
             if (existing.conflict) throw new TransitionError('The receipt belongs to a different command.', 409, 'COMMAND_RECEIPT_CONFLICT');
         }
         const outcome = await rules.inTransaction(db, async tx => {
-            const { item, sample, analysis } = await loadOperation(tx, actor, workItemId);
+            const { item, sample, analysis, gateEvidence } = await loadOperation(tx, actor, workItemId);
             const definition = checklists[analysis];
             if (!definition) throw new TransitionError('Operational checklist definition missing.', 409, 'CHECKLIST_DEF_MISSING');
             if (!Array.isArray(checklist) || checklist.length !== definition.steps.length) {
@@ -102,7 +102,7 @@ class OperationalConfirmationService {
             const updatedItem = await transitionWorkItem(item.id, status, actor, 'Operational checklist confirmed', updates, tx, {
                 action: 'OPERATION_CONFIRMED', verificationRequired: requiresVerification, expected, conflictCode: 'VERSION_CONFLICT',
                 audit: { details: JSON.stringify({ analysis, receiptId, checklistRevision: definition.revision,
-                    policyVersion: policy.version, verificationPolicy: policy.value, verificationRequired: requiresVerification }) }
+                    policyVersion: policy.version, verificationPolicy: policy.value, verificationRequired: requiresVerification, ...gateEvidence }) }
             });
             await tx.workItemDraft.deleteMany({ where: { workItemId: item.id } });
             const updatedSample = requiresVerification ? sample : await setGate(tx, sample, analysis, 'DONE', actor, 'Drying and preparation completed');

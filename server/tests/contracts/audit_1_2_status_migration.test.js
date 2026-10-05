@@ -7,6 +7,8 @@ const migrations = require('../../services/statusMigrationService');
 const plans = require('../../services/statusMigrationPlan');
 const { parseArguments } = require('../../scripts/migrate_legacy_statuses');
 const { createLegacyClosureDatabase } = require('../helpers/legacyWorkflowDatabase');
+const samples = require('../../services/sampleStateService');
+const work = require('../../services/workItemStateService');
 const databases = [];
 const script = path.resolve(__dirname, '../../scripts/migrate_legacy_statuses.js');
 afterAll(async () => { for (const database of databases) await database.close(); });
@@ -107,6 +109,29 @@ test('default CLI dry run reports every approved mapping and unmapped row withou
     expect(report.plan.rows.find(row => row.id === 'migration-s-COLLECTED').updatedAt).toBe('2026-10-04T14:00:00.000Z');
     expect(digest()).toBe(beforeHash);
     expect(await snapshot(database.client)).toEqual(before);
+});
+
+test('dry-run gate inventory groups actual legacy reliance by lab without changing data or the reviewed status plan', async () => {
+    const database = await fixture(), client = database.client, labId = 'SECOND-GATE-INVENTORY-LAB';
+    await client.lab.create({ data: { id: labId, code: labId, name: 'Second inventory laboratory', country: 'TEST' } });
+    const create = (id, flags) => samples.createSample({ id, originalId: id, assignedLab: labId, status: 'PROCESSING', ...flags },
+        'system:fixture', { context: 'fixture', tx: client });
+    await create('inventory-both', { dryingStatus: 'DONE', preparationStatus: 'DONE' });
+    await create('inventory-drying', { dryingStatus: 'DONE', preparationStatus: null });
+    const gateWI = await create('inventory-present', { dryingStatus: 'DONE', preparationStatus: 'PENDING' });
+    await work.createWorkItem({ id: 'inventory-gate', sampleId: gateWI.id, analysis: 'DRYING', status: 'COMPLETED' },
+        'system:fixture', { context: 'fixture', tx: client });
+    const before = await snapshot(client), file = databaseFile(database);
+    const digest = createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+    const report = migrations.inspectDatabase(file);
+    expect(report.legacyGateInventoryAvailable).toBe(true);
+    expect(report.legacyGateEvidence).toContainEqual({ labId, sampleCount: 2, dryingCount: 2, preparationCount: 1 });
+    const output = spawnSync(process.execPath, [script, '--db', file], { encoding: 'utf8' });
+    expect(output.status).toBe(0);
+    expect(JSON.parse(output.stdout).legacyGateEvidence).toEqual(report.legacyGateEvidence);
+    expect(JSON.parse(output.stdout).fingerprint).toBe(report.fingerprint);
+    expect(createHash('sha256').update(fs.readFileSync(file)).digest('hex')).toBe(digest);
+    expect(await snapshot(client)).toEqual(before);
 });
 
 test('reviewed apply and revert restore exact original states once and append one audit per row', async () => {

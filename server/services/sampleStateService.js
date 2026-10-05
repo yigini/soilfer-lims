@@ -19,10 +19,14 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
         const sample = await client.sample.findUnique({ where: { id: String(sampleId) } });
         if (!sample) throw new TransitionError(`Sample ${sampleId} not found.`, 404, 'SAMPLE_NOT_FOUND');
         rules.assertScope(actor, sample);
+        if (audit.expectedStatus != null && sample.status !== audit.expectedStatus) {
+            throw new TransitionError('Sample changed. Reload before retrying.', 409, 'SAMPLE_STATE_CHANGED');
+        }
         if ('id' in data && data.id !== sample.id) throw new TransitionError('Sample identity cannot change during a transition.', 400, 'WORKFLOW_ID_IMMUTABLE');
         rules.assertScope(actor, { ...sample, ...data });
         const currentStatus = workflow.normalizeSampleState(sample.status);
         let provenance = {};
+        let gateAudit = {};
         if (migrating) {
             provenance = require('./statusMigrationPlan').assertReviewedRow(audit.migrationPlan, 'Sample', sample, nextStatus, performedBy);
             rules.requireReason(reason);
@@ -41,13 +45,19 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
         }
         if (!migrating && ['SUBMITTED_PARTIAL', 'SUBMITTED_FULL', 'APPROVED'].includes(nextStatus)) {
             await require('./resultEvidenceService').assertNoPreparationRevert(client, sample.id);
+            const gates = require('./gateEvidenceService');
+            gateAudit = gates.auditEvidence(await gates.assertGateEvidence(client, { ...sample, ...data }));
+        }
+        if (!migrating && currentStatus === 'ACCEPTED' && nextStatus === 'PROCESSING') {
+            const gates = require('./gateEvidenceService');
+            gateAudit = gates.auditEvidence(await gates.assertGateEvidence(client, { ...sample, ...data }));
         }
         if (sample.status === nextStatus && !Object.keys(data).length && !migrating) return sample;
         const changed = await client.sample.updateMany({
             // The row was read inside this SQLite transaction. Keep the CAS on
             // its raw state; DateTime equality would reject historical epoch
             // timestamps that Prisma reads as dates but binds back as ISO text.
-            where: { id: sample.id, status: sample.status,
+            where: { id: sample.id, status: audit.expectedStatus ?? sample.status,
                 ...(migrating && { legacyStatus: sample.legacyStatus }) },
             data: { ...data, ...provenance, status: nextStatus, updatedAt: new Date() }
         });
@@ -59,7 +69,7 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
                 action: audit.action || (migrating ? 'SAMPLE_STATUS_MIGRATED' : 'SAMPLE_STATUS_TRANSITION'),
                 details: audit.details || `Status transition from ${sample.status} to ${nextStatus}${reason ? `: ${reason}` : ''}`,
                 before: audit.before || JSON.stringify({ status: sample.status, holdPriorStatus: sample.holdPriorStatus ?? null, legacyStatus: sample.legacyStatus ?? null }),
-                after: audit.after || JSON.stringify({ status: updated.status, holdPriorStatus: updated.holdPriorStatus ?? null, legacyStatus: updated.legacyStatus ?? null }),
+                after: audit.after || JSON.stringify({ status: updated.status, holdPriorStatus: updated.holdPriorStatus ?? null, legacyStatus: updated.legacyStatus ?? null, ...gateAudit }),
                 performedBy, sampleId: sample.id, labId: updated.assignedLab || null, timestamp: new Date()
             } });
         }
@@ -103,7 +113,8 @@ async function createSample(data, actor, options = {}) {
 }
 
 async function advanceCompletedGates(sample, actor, tx) {
-    if (workflow.normalizeSampleState(sample.status) === 'ACCEPTED' && sample.dryingStatus === 'DONE' && sample.preparationStatus === 'DONE') {
+    await require('./gateEvidenceService').assertGateEvidence(tx, sample);
+    if (workflow.normalizeSampleState(sample.status) === 'ACCEPTED') {
         return transitionSample(sample.id, 'PROCESSING', actor, 'Drying and preparation gates completed', {}, tx);
     }
     return sample;

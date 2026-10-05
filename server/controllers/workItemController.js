@@ -1043,10 +1043,12 @@ exports.reviewWorkItem = async (req, res) => {
         }
 
         const updated = await commitReview(prisma, item, status, user, updateData, async tx => {
-            for (const operation of operations) await operation(tx);
+            const rows = [];
+            for (const operation of operations) rows.push(await operation(tx));
             if (status === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED) {
                 await invalidateReturnedResults(tx, item, user, effectiveReason);
             }
+            return rows;
         });
         const result = { workItemId: id, status, decision: decisionVerdict };
         if (item.submissionId) await reconcileSubmission(prisma, item.submissionId, user, [result]);
@@ -1331,13 +1333,15 @@ exports.reviewWorkItemsBulk = async (req, res) => {
             }
             try {
                 await commitReview(prisma, item, status, user, updateData, async tx => {
-                    for (const operation of operations) await operation(tx);
+                    const rows = [];
+                    for (const operation of operations) rows.push(await operation(tx));
                     if (status === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED) {
                         if (['DRYING', 'PREPARATION'].includes(item.analysis)) {
                             await require('../services/operationalGateStateService').resetReviewedGate(item, user, effectiveReason, tx);
                         }
                         await invalidateReturnedResults(tx, item, user, effectiveReason);
                     }
+                    return rows;
                 });
                 results.push({ workItemId: item.id, status, decision: decisionVerdict });
                 for (const notify of notifications) await notify();

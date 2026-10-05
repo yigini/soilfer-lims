@@ -10,6 +10,7 @@ const stateRules = require('../services/workflowStateRules');
 const { transitionWorkItem } = require('../services/workItemStateService');
 const { transitionSample } = require('../services/sampleStateService');
 const resultEvidence = require('../services/resultEvidenceService');
+const { deriveSubmissionLifecycle, assertRequestedType } = require('../services/submissionLifecycleService');
 
 
 // =============================================================================
@@ -21,64 +22,6 @@ const userHasLabScope = (user, labId) => {
         return user.labId === labId;
     }
     return false;
-};
-
-// =============================================================================
-// HELPER: Get work items for a sample
-// =============================================================================
-const getWorkItemsForSample = async (sampleId, db = prisma) => {
-    return await db.workItem.findMany({
-        where: { sampleId: String(sampleId) }
-    });
-};
-
-// =============================================================================
-// HELPER: Check FULL submission eligibility (Using Workflow Engine)
-// =============================================================================
-const checkFullEligibility = async (sampleId, currentSubmissionItemIds = [], db = prisma) => {
-    const workflowEngine = require('../utils/workflowEngine');
-    const items = await getWorkItemsForSample(sampleId, db);
-    const blocking = [];
-    const eligible = [];
-
-    items.forEach(item => {
-        // Use Workflow Engine to get category configuration
-        const config = workflowEngine.getAnalysisConfig(item.analysis);
-        const code = (item.analysis || '').toUpperCase();
-
-        // Skip Post-Analytical and Operational Gate items for full submission eligibility
-        if (config.category === workflowEngine.WORK_ITEM_CATEGORIES.POST_ANALYTICAL ||
-            config.category === workflowEngine.WORK_ITEM_CATEGORIES.OPERATIONAL_GATES ||
-            ['DRYING', 'PREPARATION', 'ARCHIVING', 'DISPOSAL'].includes(code)) return;
-
-        // An item is eligible for FULL closure if it's already accepted/waived OR included in this submission
-        if (['ACCEPTED', 'WAIVED'].includes(item.status) || (currentSubmissionItemIds.includes(item.id) && item.status === 'COMPLETED')) {
-            eligible.push(item);
-        } else {
-            blocking.push({
-                id: item.id,
-                analysis: item.analysis,
-                displayName: config.displayName || item.analysis,
-                status: item.status,
-                reason: workflow.normalizeWorkItemState(item.status) === 'REPEAT_REQUIRED' ? item.reanalysisReason : null
-            });
-        }
-    });
-
-    const analyticalItems = items.filter(i => {
-        const cfg = workflowEngine.getAnalysisConfig(i.analysis);
-        const code = (i.analysis || '').toUpperCase();
-        return cfg.category !== workflowEngine.WORK_ITEM_CATEGORIES.POST_ANALYTICAL &&
-               cfg.category !== workflowEngine.WORK_ITEM_CATEGORIES.OPERATIONAL_GATES &&
-               !['DRYING', 'PREPARATION', 'ARCHIVING', 'DISPOSAL'].includes(code);
-    });
-
-    return {
-        isEligible: blocking.length === 0 && analyticalItems.length > 0,
-        blocking,
-        eligible,
-        totalRequired: analyticalItems.length
-    };
 };
 
 exports.createSubmission = async (req, res) => {
@@ -130,16 +73,6 @@ exports.createSubmission = async (req, res) => {
             return res.status(400).json({ error: 'Invalid work items', details: errors });
         }
 
-        if (type === 'FULL') {
-            const eligibility = await checkFullEligibility(sampleId, workItemIds);
-            if (!eligibility.isEligible) {
-                return res.status(409).json({
-                    error: 'Not eligible for FULL submission',
-                    blocking: eligibility.blocking
-                });
-            }
-        }
-
         const now = new Date();
         const submissionId = `SUB-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
         const auditLogId = crypto.randomUUID();
@@ -151,9 +84,6 @@ exports.createSubmission = async (req, res) => {
             resultEvidence.assertAmendable(current);
             await resultEvidence.assertNoPreparationRevert(tx, current.id);
             await require('../services/sampleStateService').advanceCompletedGates(current, user, tx);
-            if (type === 'FULL' && !(await checkFullEligibility(sampleId, workItemIds, tx)).isEligible) {
-                throw new stateRules.TransitionError('Full submission eligibility changed. Reload before submitting.', 409, 'SUBMISSION_ELIGIBILITY_CHANGED');
-            }
             const freshItems = [];
             for (const item of validItems) {
                 const fresh = await tx.workItem.findUnique({ where: { id: item.id } });
@@ -179,18 +109,6 @@ exports.createSubmission = async (req, res) => {
                     createdAt: now
                 }
             });
-            await tx.auditLog.create({
-                data: {
-                    id: auditLogId,
-                    entity: 'SUBMISSION',
-                    entityId: submissionId,
-                    action: 'SUBMISSION_CREATED',
-                    details: `${user.username} submitted ${validItems.length} items for ${type} review`,
-                    performedBy: user.username,
-                    timestamp: now,
-                    sampleId: String(sampleId)
-                }
-            });
 
         // Update work items
         for (const item of freshItems) {
@@ -209,18 +127,24 @@ exports.createSubmission = async (req, res) => {
             }, tx, { expected: { status: item.status, version: item.version }, audit: {
                 action: 'WORKITEM_SUBMITTED', details: `${user.username} submitted ${await getAnalysisName(item.analysis, tx)}` } });
         }
-        const targetStatus = type === 'FULL' ? 'SUBMITTED_FULL' : 'SUBMITTED_PARTIAL';
-        await transitionSample(sampleId, targetStatus, user, `${user.username} submitted ${validItems.length} items for ${type} review`, {
+        const derived = await deriveSubmissionLifecycle(tx, sampleId);
+        assertRequestedType(type, derived);
+        const updatedSubmission = await tx.submission.update({ where: { id: created.id }, data: { type: derived.type } });
+        await tx.auditLog.create({ data: { id: auditLogId, entity: 'SUBMISSION', entityId: submissionId, action: 'SUBMISSION_CREATED',
+            details: `${user.username} submitted ${validItems.length} items; requested ${type}, derived ${derived.type}`,
+            after: JSON.stringify({ requestedType: type, derivedType: derived.type, sampleStatus: derived.sampleStatus }),
+            performedBy: user.username, timestamp: now, sampleId: String(sampleId) } });
+        await transitionSample(sampleId, derived.sampleStatus, user, `${user.username} submitted ${validItems.length} items for ${derived.type} review`, {
             lastSubmissionId: submissionId,
-            lastSubmissionType: type,
+            lastSubmissionType: derived.type,
             lastSubmissionAt: now
         }, tx);
-            return created;
+            return updatedSubmission;
         });
 
         res.status(201).json({
             submission,
-            message: `${type} submission created`
+            message: `${submission.type} submission created`
         });
 
     } catch (error) {
@@ -498,7 +422,8 @@ exports.reviewSubmission = async (req, res) => {
 
             try {
                 await commitReview(prisma, item, newStatus, user, updates, async tx => {
-                    for (const operation of operations) await operation(tx);
+                    const rows = [];
+                    for (const operation of operations) rows.push(await operation(tx));
                     if (newStatus === workflow.WORK_ITEM_STATES.ACCEPTED && workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis)) {
                         const { transitionSample } = require('../services/sampleStateService');
                         await transitionSample(item.sampleId, workflow.CLOSURE_TASK_SAMPLE_STATES[item.analysis], user,
@@ -510,6 +435,7 @@ exports.reviewSubmission = async (req, res) => {
                         }
                         await invalidateReturnedResults(tx, item, user, reason);
                     }
+                    return rows;
                 }, id, { reason,
                     action: verdict === 'REJECT_REANALYSIS' ? 'REANALYSIS_REQUESTED' : 'REVIEW_DECISION_MADE',
                     details: `${user.username} ${verdict.toLowerCase()}ed ${analysisName}` });
