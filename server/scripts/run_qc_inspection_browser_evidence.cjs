@@ -22,6 +22,7 @@ const WebSocket = require('ws');
 const {
     WORKING_DEV_DB,
     createDisposableDatabase,
+    configureDisposableWorkflowFixtures,
     cleanupDisposableDatabase,
     validateDisposableDbPath
 } = require('./journey_db_isolation.cjs');
@@ -53,6 +54,8 @@ const { runnerDir, dbPath } = createDisposableDatabase();
 process.env.DATABASE_PATH = validateDisposableDbPath(dbPath, runnerDir);
 process.env.DATABASE_URL = `file:${process.env.DATABASE_PATH}`;
 process.env.NODE_ENV = 'production';
+configureDisposableWorkflowFixtures(dbPath, runnerDir);
+const { createSampleFixture, createWorkItemFixture } = require('../tests/helpers/workflowFixtures');
 process.env.DISABLE_BACKGROUND_JOBS = 'true';
 process.env.SERVE_CLIENT = 'true';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_jwt_for_local_testing_12345';
@@ -242,7 +245,7 @@ async function runQCInspectionEvidence() {
 
         // 4. Seed Sample & WorkItem
         const sampleId = `SMP-GTM-${RUN_ID}`;
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 labId: TEST_LAB_ID,
@@ -255,14 +258,14 @@ async function runQCInspectionEvidence() {
         });
 
         const workItemId = `WI-GTM-${RUN_ID}`;
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: workItemId,
                 sampleId: sampleId,
                 labId: TEST_LAB_ID,
                 assignedLab: TEST_LAB_ID,
                 analysis: 'SOC',
-                status: 'REANALYSIS_REQUIRED',
+                status: 'REPEAT_REQUIRED',
                 rackPosition: 4
             }
         });

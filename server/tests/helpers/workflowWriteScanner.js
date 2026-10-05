@@ -55,6 +55,7 @@ function scanSource(source, filename, exceptions = []) {
         if (!p?.node) return ['<unknown>'];
         if (p.isStringLiteral() || p.isNumericLiteral()) return [String(p.node.value)];
         if (p.isIdentifier()) {
+            if (p.node.name === '__dirname' && !p.scope.getBinding('__dirname')) return [path.dirname(path.resolve(__dirname, '../..', filename))];
             const values = bindingValue(p, seen);
             return values.length ? union(values.map(v => v.property ? ['<unknown>'] : strings(v.path, v.seen))) : ['<unknown>'];
         }
@@ -73,11 +74,31 @@ function scanSource(source, filename, exceptions = []) {
             ['resolve', 'join'].includes(p.node.callee.property.name)) {
             return [p.get('arguments').map(argument => strings(argument, seen).join('|')).join('/')];
         }
+        if (nodeFsRead(p)) {
+            const candidates = strings(p.get('arguments.0'), seen), serverRoot = path.resolve(__dirname, '../..');
+            if (candidates.some(file => file.includes('<unknown>') || !path.isAbsolute(file) || !file.endsWith('.sql') ||
+                path.relative(serverRoot, path.resolve(file)).startsWith('..') || !fs.existsSync(file))) return ['<unknown>'];
+            // Inspect literal checked-in SQL rather than exempting its caller.
+            // Loaded workflow writes and disabled guards are still violations.
+            return candidates.map(file => fs.readFileSync(file, 'utf8'));
+        }
         return ['<unknown>'];
+    }
+    function nodeFsRead(p) {
+        if (!p?.isCallExpression() || !p.get('callee').isMemberExpression() ||
+            !p.get('callee.object').isIdentifier({ name: 'fs' }) || p.node.callee.property.name !== 'readFileSync') return false;
+        const binding = p.scope.getBinding('fs');
+        if (!binding || binding.constantViolations.length) return false;
+        if (binding.path.isImportDefaultSpecifier() || binding.path.isImportNamespaceSpecifier()) {
+            return ['fs', 'node:fs'].includes(binding.path.parentPath.node.source?.value);
+        }
+        const init = binding.path.isVariableDeclarator() && binding.path.get('init');
+        return init?.isCallExpression() && init.get('callee').isIdentifier({ name: 'require' }) &&
+            strings(init.get('arguments.0')).every(name => ['fs', 'node:fs'].includes(name));
     }
     function schemaFileRead(p, seen = new Set()) {
         if (p?.isIdentifier()) return bindingValue(p, seen).some(value => !value.property && schemaFileRead(value.path, value.seen));
-        return p?.isCallExpression() && p.get('callee').isMemberExpression() && p.node.callee.property.name === 'readFileSync' &&
+        return nodeFsRead(p) &&
             strings(p.get('arguments.0')).some(value => /(?:prisma\/migrations\/.+\/migration\.sql|scripts\/schema\/[^/]+\.sql)$/.test(value));
     }
     function regularExpression(p, seen = new Set()) {

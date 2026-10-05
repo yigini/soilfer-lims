@@ -27,6 +27,7 @@ describe('Issue #140 Codex Remediations Contract Tests', () => {
             if (v instanceof Date) return +a === +v;
             if (v && typeof v === 'object') return Object.entries(v).every(([op, b]) => ({
                 in: () => Array.isArray(b) && b.includes(a),
+                notIn: () => Array.isArray(b) && !b.includes(a),
                 not: () => {
                     if (b === null) return a !== null && a !== undefined;
                     if (typeof b === 'object') return !matches({ [k]: a }, { [k]: b });
@@ -120,6 +121,26 @@ describe('Issue #140 Codex Remediations Contract Tests', () => {
     });
 
     describe('R2: Immutable Frozen Snapshots (Probes 1 & 2)', () => {
+        test('An unrelated durable hold cannot hide eligible specimens in the isolated query adapter', async () => {
+            const prisma = require('../../prisma');
+            const { createSampleFixture } = require('../helpers/workflowFixtures');
+            const heldId = `issue140-held-${crypto.randomUUID()}`;
+            await createSampleFixture(prisma, { data: { id: heldId, originalId: heldId, assignedLab: 'LAB-A', country: 'AAA',
+                projectCode: 'P', status: 'APPROVED', approvedAt: new Date(),
+                metadata: JSON.stringify({ provenanceHold: { status: 'AMBIGUOUS_PROVENANCE_HOLD' } }) } });
+            try {
+                expect(policy.getHeldSampleIds()).toContain(heldId);
+                mockSamples = [fixture('eligible-isolated', '2026-01-01'), fixture(heldId, '2026-01-01')];
+                await stateService.syncJournal(auth);
+                const snap = await stateService.createSnapshot(auth);
+                const page = await stateService.getSnapshotPage(snap.snapshotId, auth);
+                expect(page.data.map(row => row.specimenId)).toEqual(['eligible-isolated']);
+                expect(snap.totalSamples).toBe(1);
+            } finally {
+                await prisma.sample.delete({ where: { id: heldId } });
+                await prisma.auditLog.deleteMany({ where: { entityId: heldId } });
+            }
+        });
         test('Probe 1: Snapshot remains frozen after subsequent result-only edit', async () => {
             const a = fixture('a', '2026-01-01');
             mockSamples = [a];

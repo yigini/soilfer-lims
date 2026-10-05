@@ -52,6 +52,12 @@ test('a real temporary non-allowlisted test file fails the source guard', () => 
     } finally { fs.rmSync(file); }
 });
 
+test('a shadowed file reader cannot impersonate a known schema load', () => {
+    const source = "const path=require('node:path'); const fs={readFileSync:()=>statement}; db.exec(fs.readFileSync(path.resolve(__dirname,'../../scripts/schema/full_application_schema.sql'),'utf8'));";
+    expect(scanSource(source, 'tests/contracts/shadow-probe.js', exceptions))
+        .toEqual([expect.objectContaining({ code: 'UNRESOLVED_WORKFLOW_SQL' })]);
+});
+
 test('the two exceptions apply to the named export only, never to the caller or the rest of its file', () => {
     const allowed = "function beforeGuards(){db.exec('INSERT INTO Sample (id,status) VALUES (1,2)')} module.exports={beforeGuards}";
     expect(scanSource(allowed, exceptions[0].file, exceptions)).toEqual([]);
@@ -91,4 +97,18 @@ test.each([
 test('native pragma reads and enabled constraints remain permitted', () => {
     expect(scanSource("db.pragma('foreign_keys = ON'); db.pragma('foreign_keys', {simple:true}); db.pragma('busy_timeout = 5000')",
         'tests/probe.test.js', exceptions)).toEqual([]);
+});
+
+test.each([
+    ['UPDATE Consignment SET declaredExpectedCount = ? WHERE id = ?', null],
+    ['UPDATE Sample SET status = ? WHERE id = ?', 'RAW_WORKFLOW_SQL'],
+    ['PRAGMA foreign_keys = OFF', 'WORKFLOW_GUARD_DISABLED']
+])('loaded SQL is inspected without a caller exemption: %s', (sql, code) => {
+    const name = `loaded-source-${randomUUID()}.sql`, file = path.resolve(serverRoot, 'tests/.tmp', name);
+    fs.writeFileSync(file, sql, { flag: 'wx' });
+    try {
+        const source = `const fs=require('node:fs'), path=require('node:path'); const sql=fs.readFileSync(path.join(__dirname,'${name}'),'utf8'); db.exec(sql);`;
+        const found = scanSource(source, 'tests/.tmp/loaded-source-probe.cjs', exceptions);
+        expect(found).toEqual(code ? [expect.objectContaining({ code })] : []);
+    } finally { fs.rmSync(file); }
 });
