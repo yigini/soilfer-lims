@@ -3,3 +3,5 @@ server/tests/helpers/fixtures/pre11_full_application_schema.sql -text
 server/prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql text eol=lf
 server/prisma/migrations/20261004190100_unique_active_workitem/migration.sql text eol=lf
 server/prisma/migrations/20261004190200_add_declared_consignment_count/migration.sql text eol=lf
+server/tests/helpers/fixtures/project_pre_template_policy.sql -text
+server/scripts/migrate_project_templates_and_policy.js text eol=lf

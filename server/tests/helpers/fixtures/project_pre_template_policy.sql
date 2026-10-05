@@ -1,0 +1,20 @@
+CREATE TABLE "Project" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "code" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "notes" TEXT,
+    "client" TEXT,
+    "startDate" DATETIME,
+    "deliveryDeadline" DATETIME,
+    "status" TEXT NOT NULL,
+    "projectType" TEXT NOT NULL DEFAULT 'OPEN_INTAKE',
+    "expectedSampleCount" INTEGER DEFAULT 0,
+    "priority" TEXT DEFAULT 'NORMAL',
+    "defaultAnalysisBundle" TEXT,
+    "labId" TEXT,
+    "countries" TEXT,
+    "assignedLabIds" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);

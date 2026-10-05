@@ -3,7 +3,7 @@ const { createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 
-const variants = ['PRE_1_1_DUPLICATES', 'CONSIGNMENT_PRE_1_1_A', 'CONSIGNMENT_PRE_1_1_B'];
+const variants = ['PRE_1_1_DUPLICATES', 'CONSIGNMENT_PRE_1_1_A', 'CONSIGNMENT_PRE_1_1_B', 'PROJECT_PRE_TEMPLATE_POLICY'];
 function schema(file) {
     const db = new Database(file, { readonly: true, fileMustExist: true });
     try {
@@ -20,7 +20,8 @@ describe('Audit 1.2: pinned historical rehearsals retain production migration or
         const rehearsal = beforeGuards({ actor: 'system:fixture', schemaVariant });
         try {
             expect(real.pendingMigrations).toEqual([]);
-            expect(rehearsal.pendingMigrations).toEqual([schemaVariant === 'PRE_1_1_DUPLICATES' ? 'INDEX' : 'DECLARATION']);
+            expect(rehearsal.pendingMigrations).toEqual([schemaVariant === 'PRE_1_1_DUPLICATES' ? 'INDEX'
+                : schemaVariant === 'PROJECT_PRE_TEMPLATE_POLICY' ? 'PROJECT_POLICY' : 'DECLARATION']);
             rehearsal.applyPendingMigration();
             expect(schema(rehearsal.file)).toEqual(schema(real.file));
             expect(schema(real.file).objects.filter(row => row.type === 'trigger')).toHaveLength(11);
@@ -34,8 +35,8 @@ describe('Audit 1.2: pinned historical rehearsals retain production migration or
     test('an unknown variant is rejected before creating a database', () => {
         expect(() => beforeGuards({ actor: 'system:fixture', schemaVariant: 'INVENTED_SCHEMA' })).toThrow('Unknown pinned historical schema variant.');
     });
-    test('teardown fails and discards an unaccounted pending migration', () => {
-        const rehearsal = beforeGuards({ actor: 'system:fixture', schemaVariant: 'CONSIGNMENT_PRE_1_1_A' });
+    test.each(['CONSIGNMENT_PRE_1_1_A', 'PROJECT_PRE_TEMPLATE_POLICY'])('teardown fails and discards an unaccounted %s migration', schemaVariant => {
+        const rehearsal = beforeGuards({ actor: 'system:fixture', schemaVariant });
         expect(() => rehearsal.close()).toThrow('unaccounted pending migration');
         expect(fs.existsSync(rehearsal.file)).toBe(false);
     });
