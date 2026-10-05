@@ -24,6 +24,7 @@ const WebSocket = require('ws');
 // --- DATABASE ISOLATION SETUP ---
 const {
     createDisposableDatabase,
+    configureDisposableWorkflowFixtures,
     cleanupDisposableDatabase,
     validateDisposableDbPath
 } = require('./journey_db_isolation.cjs');
@@ -32,6 +33,8 @@ const { runnerDir, dbPath } = createDisposableDatabase();
 process.env.DATABASE_PATH = validateDisposableDbPath(dbPath, runnerDir);
 process.env.DATABASE_URL = `file:${process.env.DATABASE_PATH}`;
 process.env.NODE_ENV = 'production';
+configureDisposableWorkflowFixtures(dbPath, runnerDir);
+const { createSampleFixture, createWorkItemFixture } = require('../tests/helpers/workflowFixtures');
 process.env.DISABLE_BACKGROUND_JOBS = 'true';
 process.env.SERVE_CLIENT = 'true';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_jwt_for_local_testing_12345';
@@ -209,7 +212,7 @@ async function runDashboardJourney() {
 
         // 4. Seed operational data to populate manager queues:
         // 4a. A sample in RECEIVED status -> manager.intake
-        const intakeSample = await prisma.sample.create({
+        const intakeSample = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-INTAKE-${RUN_ID}`,
                 originalId: `GTM26-REC-001`,
@@ -223,7 +226,7 @@ async function runDashboardJourney() {
         });
 
         // 4b. Work items unassigned -> manager.assign
-        const assignSample = await prisma.sample.create({
+        const assignSample = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-ASSIGN-${RUN_ID}`,
                 originalId: `GTM26-ASN-002`,
@@ -236,7 +239,7 @@ async function runDashboardJourney() {
             }
         });
 
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-DRY-${RUN_ID}`,
                 sampleId: assignSample.id,
@@ -247,7 +250,7 @@ async function runDashboardJourney() {
             }
         });
 
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-PH-${RUN_ID}`,
                 sampleId: assignSample.id,

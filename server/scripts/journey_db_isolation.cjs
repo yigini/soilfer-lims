@@ -13,6 +13,7 @@ const fs = require('fs');
 const path = require('path');
 
 const WORKING_DEV_DB = path.resolve(__dirname, '..', 'prisma', 'dev.db');
+const createdDisposableDatabases = new Map();
 
 /**
  * Validates that a database path is strictly inside the dedicated runner directory
@@ -104,10 +105,24 @@ function createDisposableDatabase() {
     } finally {
         if (tempDb.open) tempDb.close();
     }
+    createdDisposableDatabases.set(runnerDir, disposableDbPath);
     return {
         runnerDir,
         dbPath: disposableDbPath
     };
+}
+
+/** Explicitly authorize positive fixtures only for this process's fresh database. */
+function configureDisposableWorkflowFixtures(dbPath, runnerDir) {
+    const validated = validateDisposableDbPath(dbPath, runnerDir);
+    const owned = createdDisposableDatabases.get(path.resolve(runnerDir));
+    if (owned !== validated || !fs.existsSync(validated) || fs.realpathSync(validated) !== validated ||
+        path.resolve(process.env.DATABASE_PATH || '') !== validated || process.env.DATABASE_URL !== `file:${validated}` ||
+        (process.env.PRODUCTION_DATABASE_PATH && path.resolve(process.env.PRODUCTION_DATABASE_PATH) === validated)) {
+        throw new Error('[DB_ISOLATION_REFUSAL] Workflow fixtures require the freshly owned and configured runner database');
+    }
+    process.env.PRODUCTION_DATABASE_PATH ||= WORKING_DEV_DB;
+    process.env.ALLOW_WORKFLOW_FIXTURES = '1';
 }
 
 /**
@@ -132,6 +147,7 @@ function cleanupDisposableDatabase(runnerDir) {
         console.warn(`[DB_ISOLATION] Refusing to clean up directory outside owned runner pattern: ${resolved}`);
         return;
     }
+    createdDisposableDatabases.delete(resolved);
 
     try {
         if (fs.existsSync(resolved)) {
@@ -177,5 +193,6 @@ module.exports = {
     WORKING_DEV_DB,
     validateDisposableDbPath,
     createDisposableDatabase,
+    configureDisposableWorkflowFixtures,
     cleanupDisposableDatabase
 };

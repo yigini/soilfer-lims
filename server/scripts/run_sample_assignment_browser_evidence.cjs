@@ -36,6 +36,7 @@ const WebSocket = require('ws');
 const {
     WORKING_DEV_DB,
     createDisposableDatabase,
+    configureDisposableWorkflowFixtures,
     cleanupDisposableDatabase,
     validateDisposableDbPath
 } = require('./journey_db_isolation.cjs');
@@ -67,6 +68,8 @@ const { runnerDir, dbPath } = createDisposableDatabase();
 process.env.DATABASE_PATH = validateDisposableDbPath(dbPath, runnerDir);
 process.env.DATABASE_URL = `file:${process.env.DATABASE_PATH}`;
 process.env.NODE_ENV = 'production';
+configureDisposableWorkflowFixtures(dbPath, runnerDir);
+const { createSampleFixture, createWorkItemFixture } = require('../tests/helpers/workflowFixtures');
 process.env.DISABLE_BACKGROUND_JOBS = 'true';
 process.env.SERVE_CLIENT = 'true';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_jwt_for_local_testing_12345';
@@ -278,7 +281,7 @@ async function run() {
         });
 
         // Seed S005
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleS005CanonicalId,
                 labId: sampleS005DisplayLabId,
@@ -295,7 +298,7 @@ async function run() {
             }
         });
         for (let i = 0; i < s005Analyses.length; i++) {
-            await prisma.workItem.create({
+            await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-JOURNEY-S005-${i + 1}`,
                     sampleId: sampleS005CanonicalId,
@@ -310,7 +313,7 @@ async function run() {
         }
 
         // Seed S004
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleS004CanonicalId,
                 labId: sampleS004DisplayLabId,
@@ -327,7 +330,7 @@ async function run() {
             }
         });
         for (let i = 0; i < s004Analyses.length; i++) {
-            await prisma.workItem.create({
+            await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-JOURNEY-S004-${i + 1}`,
                     sampleId: sampleS004CanonicalId,

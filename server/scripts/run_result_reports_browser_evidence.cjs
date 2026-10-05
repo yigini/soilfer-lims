@@ -26,6 +26,7 @@ const WebSocket = require('ws');
 const {
     WORKING_DEV_DB,
     createDisposableDatabase,
+    configureDisposableWorkflowFixtures,
     cleanupDisposableDatabase,
     validateDisposableDbPath
 } = require('./journey_db_isolation.cjs');
@@ -57,6 +58,8 @@ const { runnerDir, dbPath } = createDisposableDatabase();
 process.env.DATABASE_PATH = validateDisposableDbPath(dbPath, runnerDir);
 process.env.DATABASE_URL = `file:${process.env.DATABASE_PATH}`;
 process.env.NODE_ENV = 'production';
+configureDisposableWorkflowFixtures(dbPath, runnerDir);
+const { createSampleFixture } = require('../tests/helpers/workflowFixtures');
 process.env.DISABLE_BACKGROUND_JOBS = 'true';
 process.env.SERVE_CLIENT = 'true';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_jwt_for_local_testing_12345';
@@ -214,7 +217,7 @@ async function run() {
 
 
         // 1. Sample GTM26-0001 (Julio Morales): 2 versions (v1 SUPERSEDED, v2 PUBLISHED)
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-GTM26-0001',
                 labId: 'GTM26-0001',
@@ -256,7 +259,7 @@ async function run() {
         });
 
         // 2. Sample GTM26-0002: Exactly 1 report (v1 PUBLISHED)
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-GTM26-0002',
                 labId: 'GTM26-0002',
@@ -283,7 +286,7 @@ async function run() {
         });
 
         // 3. Sample GTM26-0003: 2 reports (v1 SUPERSEDED, v2 PUBLISHED)
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-GTM26-0003',
                 labId: 'GTM26-0003',
@@ -325,7 +328,7 @@ async function run() {
         });
 
         // 4. Sample GTM26-0004 (Marco Alvarez) in GTM-PILOT-2026: 1 report (v1 PUBLISHED)
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-GTM26-0004',
                 labId: 'GTM26-0004',

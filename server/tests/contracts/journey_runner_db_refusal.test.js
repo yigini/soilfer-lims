@@ -20,6 +20,7 @@ const {
     WORKING_DEV_DB,
     validateDisposableDbPath,
     createDisposableDatabase,
+    configureDisposableWorkflowFixtures,
     cleanupDisposableDatabase
 } = require('../../scripts/journey_db_isolation.cjs');
 
@@ -151,6 +152,38 @@ describe('Browser Journey Database Isolation & Refusal Contract', () => {
             if (fs.existsSync(otherRunnerDir)) {
                 fs.rmSync(otherRunnerDir, { recursive: true, force: true });
             }
+        }
+    });
+
+    test('10. Production-mode browser fixtures require fresh ownership and use both real creation authorities', async () => {
+        const { runnerDir, dbPath } = createDisposableDatabase();
+        const names = ['NODE_ENV', 'DATABASE_PATH', 'DATABASE_URL', 'PRODUCTION_DATABASE_PATH', 'ALLOW_WORKFLOW_FIXTURES'];
+        const previous = Object.fromEntries(names.map(name => [name, process.env[name]]));
+        const { PrismaClient } = require('../../prisma_client');
+        const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+        const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
+        const fixtureDb = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${dbPath}` }) });
+        try {
+            process.env.NODE_ENV = 'production';
+            process.env.DATABASE_PATH = dbPath; process.env.DATABASE_URL = `file:${dbPath}`;
+            delete process.env.ALLOW_WORKFLOW_FIXTURES; delete process.env.PRODUCTION_DATABASE_PATH;
+            await expect(createSampleFixture(fixtureDb, { data: { id: 'browser-sample', originalId: 'browser-sample', status: 'PROCESSING' } }))
+                .rejects.toMatchObject({ code: 'WORKFLOW_FIXTURE_REFUSED' });
+            expect(() => configureDisposableWorkflowFixtures(path.join(tempTestDir, 'arbitrary.db'), tempTestDir)).toThrow('[DB_ISOLATION_REFUSAL]');
+            configureDisposableWorkflowFixtures(dbPath, runnerDir);
+            await createSampleFixture(fixtureDb, { data: { id: 'browser-sample', originalId: 'browser-sample', status: 'PROCESSING' } });
+            await createWorkItemFixture(fixtureDb, { data: { id: 'browser-work', sampleId: 'browser-sample', analysis: 'PH_H2O', status: 'NOT_ASSIGNED' } });
+            expect((await fixtureDb.sample.findUnique({ where: { id: 'browser-sample' } })).status).toBe('PROCESSING');
+            expect((await fixtureDb.workItem.findUnique({ where: { id: 'browser-work' } })).status).toBe('NOT_ASSIGNED');
+            expect(await fixtureDb.auditLog.count({ where: { performedBy: 'system:fixture' } })).toBe(2);
+            await expect(createSampleFixture(fixtureDb, { data: { id: 'legacy-forbidden', originalId: 'legacy-forbidden', status: 'COLLECTED' } }))
+                .rejects.toMatchObject({ code: 'WORKFLOW_FIXTURE_REFUSED' });
+            process.env.DATABASE_PATH = previous.DATABASE_PATH;
+            expect(() => configureDisposableWorkflowFixtures(dbPath, runnerDir)).toThrow('[DB_ISOLATION_REFUSAL]');
+        } finally {
+            await fixtureDb.$disconnect();
+            for (const name of names) { if (previous[name] === undefined) delete process.env[name]; else process.env[name] = previous[name]; }
+            cleanupDisposableDatabase(runnerDir);
         }
     });
 });

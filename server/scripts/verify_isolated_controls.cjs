@@ -34,6 +34,7 @@ const WebSocket = require('ws');
 const {
     WORKING_DEV_DB,
     createDisposableDatabase,
+    configureDisposableWorkflowFixtures,
     cleanupDisposableDatabase,
     validateDisposableDbPath
 } = require('./journey_db_isolation.cjs');
@@ -42,6 +43,8 @@ const { runnerDir, dbPath } = createDisposableDatabase();
 process.env.DATABASE_PATH = validateDisposableDbPath(dbPath, runnerDir);
 process.env.DATABASE_URL = `file:${process.env.DATABASE_PATH}`;
 process.env.NODE_ENV = 'production';
+configureDisposableWorkflowFixtures(dbPath, runnerDir);
+const { createSampleFixture } = require('../tests/helpers/workflowFixtures');
 process.env.DISABLE_BACKGROUND_JOBS = 'true';
 process.env.SERVE_CLIENT = 'true';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_jwt_for_local_testing_12345';
@@ -270,7 +273,7 @@ async function runCompleteVerification() {
 
         // Seed expected project sample for authentic rejection journey
         const TEST_EXP_SAMPLE_ID = `SMP-EXP-${RUN_ID}`;
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: TEST_EXP_SAMPLE_ID,
                 originalId: TEST_EXP_SAMPLE_ID,
@@ -290,7 +293,7 @@ async function runCompleteVerification() {
 
         // Seed expected project sample for authentic routine all-pass browser journey (#113)
         const TEST_ROUTINE_EXP_ID = `SMP-ROUTINE-EXP-${RUN_ID}`;
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: TEST_ROUTINE_EXP_ID,
                 originalId: TEST_ROUTINE_EXP_ID,

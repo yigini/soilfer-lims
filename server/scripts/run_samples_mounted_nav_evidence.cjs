@@ -36,6 +36,7 @@ const WebSocket = require('ws');
 const {
     WORKING_DEV_DB,
     createDisposableDatabase,
+    configureDisposableWorkflowFixtures,
     cleanupDisposableDatabase,
     validateDisposableDbPath
 } = require('./journey_db_isolation.cjs');
@@ -67,6 +68,8 @@ const { runnerDir, dbPath } = createDisposableDatabase();
 process.env.DATABASE_PATH = validateDisposableDbPath(dbPath, runnerDir);
 process.env.DATABASE_URL = `file:${process.env.DATABASE_PATH}`;
 process.env.NODE_ENV = 'production';
+configureDisposableWorkflowFixtures(dbPath, runnerDir);
+const { createSampleFixture } = require('../tests/helpers/workflowFixtures');
 process.env.DISABLE_BACKGROUND_JOBS = 'true';
 process.env.SERVE_CLIENT = 'true';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_jwt_for_local_testing_12345';
@@ -220,7 +223,7 @@ async function run() {
 
         // Seed Samples:
         // 1. Daily Active Sample in SOILFER-GTM
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-GTM-ACTIVE-1',
                 labId: 'GTM-ACT-001',
@@ -232,7 +235,7 @@ async function run() {
         });
 
         // 2. Expected Arrival Sample in SOILFER-GTM (from Kobo sync)
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-GTM-EXPECTED-1',
                 labId: 'GTM-EXP-001',
@@ -244,7 +247,7 @@ async function run() {
         });
 
         // 3. Expected Arrival matching search 'SMP-TEST-SEARCH'
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-GTM-EXP-SEARCH',
                 labId: 'SMP-TEST-SEARCH-01',
@@ -256,7 +259,7 @@ async function run() {
         });
 
         // 4. Daily Active sample matching search 'SMP-TEST-SEARCH'
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-GTM-ACT-SEARCH',
                 labId: 'SMP-TEST-SEARCH-DAILY',
@@ -268,7 +271,7 @@ async function run() {
         });
 
         // 5. Expected Arrival in OTHER project (should be excluded when filtered by SOILFER-GTM)
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-OTHER-PROJECT',
                 labId: 'OTH-EXP-001',

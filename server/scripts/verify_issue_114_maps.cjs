@@ -43,6 +43,7 @@ const WebSocket = require('ws');
 const {
     WORKING_DEV_DB,
     createDisposableDatabase,
+    configureDisposableWorkflowFixtures,
     cleanupDisposableDatabase,
     validateDisposableDbPath
 } = require('./journey_db_isolation.cjs');
@@ -51,6 +52,8 @@ const { runnerDir, dbPath } = createDisposableDatabase();
 process.env.DATABASE_PATH = validateDisposableDbPath(dbPath, runnerDir);
 process.env.DATABASE_URL = `file:${process.env.DATABASE_PATH}`;
 process.env.NODE_ENV = 'production';
+configureDisposableWorkflowFixtures(dbPath, runnerDir);
+const { createSampleFixture } = require('../tests/helpers/workflowFixtures');
 process.env.DISABLE_BACKGROUND_JOBS = 'true';
 process.env.SERVE_CLIENT = 'true';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_jwt_for_local_testing_12345';
@@ -329,7 +332,7 @@ async function main() {
         const SAMPLE_WITH_COORDS_ID = `SMP-GEO-WITH-${RUN_ID}`;
         const SAMPLE_NO_COORDS_ID = `SMP-GEO-NONE-${RUN_ID}`;
 
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: SAMPLE_WITH_COORDS_ID,
                 originalId: SAMPLE_WITH_COORDS_ID,
@@ -346,7 +349,7 @@ async function main() {
             }
         });
 
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: SAMPLE_NO_COORDS_ID,
                 originalId: SAMPLE_NO_COORDS_ID,
