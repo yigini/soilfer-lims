@@ -34,7 +34,7 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     const attempt = attemptId ? await tx.workAttempt.findUnique({ where: { id: attemptId }, include: { workItem: true } }) : null;
     if (attemptId && !attempt) throw new TransitionError('Result attempt not found.', 409, 'RESULT_ATTEMPT_NOT_FOUND');
     let item = workItemId ? await tx.workItem.findUnique({ where: { id: workItemId }, include: { sample: true } })
-        : attempt?.workItem || await tx.workItem.findFirst({ where: { sampleId, analysis: measurement.param, duplicateOf: null, status: { not: 'WAIVED' } }, include: { sample: true } });
+        : attempt?.workItem || await tx.workItem.findFirst({ where: { sampleId, analysis: measurement.param, duplicateOf: null }, include: { sample: true } });
     if (workItemId && !item) throw new TransitionError('Work item not found.', 404, 'WORK_ITEM_NOT_FOUND');
     if (item && item.sampleId !== sampleId || attempt && (attempt.workItem.sampleId !== sampleId || item && attempt.workItemId !== item.id)) {
         throw new TransitionError('Result, attempt and work item must share a sample.', 409, 'RESULT_ATTEMPT_SAMPLE_MISMATCH');
@@ -63,7 +63,9 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     if (issues.length) throw new TransitionError(issues.join(' '), 409, 'RESULT_CONFIGURATION_INVALID');
     const method = methodId ? await tx.methodology.findUnique({ where: { id: methodId } }) : null;
     if (methodId && !isAvailable(method, analysisCode, labId)) throw new TransitionError('Method belongs to another parameter or laboratory.', 409, 'RESULT_METHOD_MISMATCH');
-    if (!importing) {
+    // #182 pin 6005018712: historical imports have no work to execute. An
+    // existing canonical item must satisfy the same commit rules as every path.
+    if (!importing || item) {
         require('./resultEvidenceService').assertAmendable(sample);
         if (item) {
             if (['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'WAIVED', 'CANCELLED', 'AWAITING_VERIFICATION'].includes(item.status) && source !== 'derived') {

@@ -46,6 +46,10 @@ function snapshot() {
 
 const measurement = extra => ({ param: code, value: '6,42', methodologyId: methodId, unit: 'g/kg', ...extra });
 const apiSave = (sampleId, measurements) => request(app).post(`/api/results/${sampleId}`).set('Authorization', `Bearer ${token}`).send({ measurements });
+const importSave = sampleId => request(app).post('/api/import/execute').set('Authorization', `Bearer ${token}`)
+    .send({ sampleIdColumn: 'sample', labId,
+        columnMappings: [{ column: 'value', analysisCode: code, methodologyId: methodId, unitCode: 'g/kg' }],
+        rows: [{ sample: sampleId, value: '6.42' }] });
 
 test('workbench, offline sync, results API and import have a common shape and server batch', async () => {
     const outputs = [];
@@ -92,6 +96,21 @@ test('unbatched measurement and historical import succeed with null batch and at
     expect(response).toMatchObject({ status: 200, body: { importedResults: 1 } });
     expect(await prisma.result.findFirst({ where: { sampleId: imported } })).toMatchObject({ batchId: null, attemptId: null, provenance: 'IMPORTED',
         value: '<0.5', numericValue: 0.5, censoring: 'BELOW_LOQ', rawInput: '<0,5' });
+});
+
+test.each(['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'WAIVED'])('import refuses sealed %s work with all-table zero changes', async itemStatus => {
+    const f = await fixture({ itemStatus }), before = snapshot();
+    expect(await importSave(f.sample.id)).toMatchObject({ status: 409, body: { code: 'RESULT_WORKITEM_SEALED' } });
+    expect(snapshot()).toEqual(before);
+});
+
+test('import cannot bypass an existing work item prerequisite', async () => {
+    const f = await fixture();
+    await prisma.sample.update({ where: { id: f.sample.id }, data: { preparationStatus: 'PENDING' } });
+    const before = snapshot(), response = await importSave(f.sample.id);
+    expect(response.status).toBe(409);
+    expect(response.body.code).toBe('PREPARATION_PREREQUISITE_BLOCKED');
+    expect(snapshot()).toEqual(before);
 });
 
 test.each([null, 'assigned'])('client batch mismatch (%s) rolls back every table, including earlier entries', async batch => {
@@ -168,6 +187,8 @@ test('fresh calibration due date overrides a stale OK label and leaves all table
     const response = await apiSave(f.sample.id, [measurement()]);
     expect(response.status).toBeGreaterThanOrEqual(400); expect(response.status).toBeLessThan(500);
     expect(snapshot()).toEqual(before);
+    expect(await importSave(f.sample.id)).toMatchObject({ status: 409, body: { code: 'INSTRUMENT_CALIBRATION_OVERDUE' } });
+    expect(snapshot()).toEqual(before);
     await expect(prisma.$transaction(tx => writer.writeResult(tx, { sampleId: f.sample.id, workItemId: f.item.id, actor, measurement: measurement() })))
         .rejects.toMatchObject({ statusCode: 409, code: 'INSTRUMENT_CALIBRATION_OVERDUE' });
     expect(snapshot()).toEqual(before);
@@ -236,3 +257,14 @@ test.each(['Result_attempt_insert_guard', 'Result_attempt_update_guard', 'WorkAt
         expect(scanSource(`db.exec('DROP TRIGGER "${name}"')`, 'controllers/result-canary.js'))
             .toEqual([expect.objectContaining({ code: 'WORKFLOW_GUARD_DISABLED' })]);
     });
+
+test.each([
+    "writer.writeResult(tx,{source:'legacy-import'})",
+    "const mode='legacy-import';writer.writeResult(tx,{source:mode})",
+    "const key='source';writer.writeResult(tx,{[key]:'legacy-import'})",
+    "options.source='legacy-import'"
+])('the inventory restricts the historical option to the import entry point: %s', source => {
+    expect(scanSource(source, 'controllers/result-canary.js'))
+        .toEqual([expect.objectContaining({ code: 'HISTORICAL_IMPORT_CALLER_FORBIDDEN' })]);
+    expect(scanSource(source, 'controllers/importController.js')).toEqual([]);
+});

@@ -451,6 +451,19 @@ function scanSource(source, filename, exceptions = []) {
             }
     }
     traverse(ast, {
+        ObjectProperty(p) {
+            const names = p.node.computed ? strings(p.get('key')) : [p.node.key.name || p.node.key.value];
+            if (filename !== 'controllers/importController.js' && names.includes('source') && strings(p.get('value')).includes('legacy-import')) {
+                report(p.node, 'HISTORICAL_IMPORT_CALLER_FORBIDDEN', 'Only importController may request historical result entry.');
+            }
+        },
+        AssignmentExpression(p) {
+            const left = p.get('left');
+            if (filename !== 'controllers/importController.js' && left.isMemberExpression() && keys(left).includes('source') &&
+                strings(p.get('right')).includes('legacy-import')) {
+                report(p.node, 'HISTORICAL_IMPORT_CALLER_FORBIDDEN', 'Only importController may request historical result entry.');
+            }
+        },
         ImportDeclaration(p) { helperImport(p, [p.node.source.value]); },
         NewExpression(p) { embeddedProgram(p); },
         CallExpression: inspectCall,
