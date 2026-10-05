@@ -83,6 +83,17 @@ const techStack = [
 
 const changelog = [
     {
+        version: 'v1.9.0',
+        date: 'October 5, 2026',
+        tag: 'Workflow State Integrity',
+        badgeColor: 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
+        changes: [
+            'Sample and work changes validate legal transitions, laboratory access and concurrent edits, with an audit trail.',
+            'Laboratories configure gate verification; preparation reversions preserve results and require manager clearance before release.',
+            'Final samples require the forthcoming amendment workflow, and incomplete or interrupted upgrades keep the lab from serving.',
+        ],
+    },
+    {
         version: 'v1.8.0',
         date: 'October 4, 2026',
         tag: 'Atomic Intake',
