@@ -5,3 +5,5 @@ server/prisma/migrations/20261004190100_unique_active_workitem/migration.sql tex
 server/prisma/migrations/20261004190200_add_declared_consignment_count/migration.sql text eol=lf
 server/tests/helpers/fixtures/project_pre_template_policy.sql -text
 server/scripts/migrate_project_templates_and_policy.js text eol=lf
+server/prisma/migrations/20260930140000_add_sitewide_theme_appearance/migration.sql text eol=lf
+server/prisma/migrations/20261004033000_add_report_number_lineage/migration.sql text eol=lf

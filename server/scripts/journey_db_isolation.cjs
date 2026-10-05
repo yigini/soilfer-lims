@@ -66,50 +66,47 @@ const child_process = require('child_process');
 const Database = require('better-sqlite3');
 
 /**
- * Creates a dedicated disposable database by copying schema/template from dev.db
- * into a unique runner-owned temporary directory, and wiping all copied records
- * to guarantee a clean schema-only synthetic fixture environment.
+ * Creates a new schema-only database from checked-in release DDL. No working
+ * database, analytical rows, credentials or installed guards are copied or wiped.
  * 
  * @returns {{ runnerDir: string, dbPath: string }}
  */
 function createDisposableDatabase() {
-    const timestamp = Date.now();
-    const nonce = Math.random().toString(36).slice(2, 8);
-    const runnerDirName = `.tmp_journey_runner_${timestamp}_${nonce}`;
-    const runnerDir = path.resolve(__dirname, '..', runnerDirName);
-
-    fs.mkdirSync(runnerDir, { recursive: true });
-
-    const disposableDbPath = path.join(runnerDir, `disposable_journey_${nonce}.db`);
-
-    // Copy template schema if dev.db exists
-    if (fs.existsSync(WORKING_DEV_DB)) {
-        fs.copyFileSync(WORKING_DEV_DB, disposableDbPath);
-    } else {
-        throw new Error(`[DB_ISOLATION_REFUSAL] Source database template '${WORKING_DEV_DB}' not found`);
-    }
-
-    // Wipe all copied data rows to guarantee a schema-only synthetic database.
-    // This strictly prevents executing copied Kobo/integration configs or using real credentials.
-    const tempDb = new Database(disposableDbPath);
+    const runnerDir = fs.mkdtempSync(path.resolve(__dirname, '..', '.tmp_journey_runner_'));
+    const disposableDbPath = validateDisposableDbPath(path.join(runnerDir, 'disposable_journey.db'), runnerDir);
+    fs.closeSync(fs.openSync(disposableDbPath, 'wx'));
+    const tempDb = new Database(disposableDbPath, { fileMustExist: true });
     try {
-        tempDb.pragma('foreign_keys = OFF');
-        const userTables = tempDb.prepare(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%'"
-        ).all();
-        for (const { name } of userTables) {
-            tempDb.prepare(`DELETE FROM "${name}"`).run();
-        }
         tempDb.pragma('foreign_keys = ON');
-    } finally {
+        tempDb.transaction(() => {
+            tempDb.exec(fs.readFileSync(path.resolve(__dirname, '../scripts/schema/full_application_schema.sql'), 'utf8'));
+            // The full-schema snapshot already includes 1.1. Replay the actual
+            // subsequent additive DDL, including the theme snapshot omission.
+            for (const migration of [
+                '20260930140000_add_sitewide_theme_appearance',
+                '20261004033000_add_report_number_lineage',
+                '20261005000000_workflow_state_evidence',
+                '20261005000100_workflow_state_guards'
+            ]) tempDb.exec(fs.readFileSync(path.resolve(__dirname, '../prisma/migrations', migration, 'migration.sql'), 'utf8'));
+        })();
+        const guardSql = fs.readFileSync(path.resolve(__dirname, '../prisma/migrations/20261005000100_workflow_state_guards/migration.sql'), 'utf8');
+        const installed = tempDb.prepare("SELECT name,sql FROM sqlite_master WHERE type='trigger'").all();
+        for (const match of guardSql.matchAll(/CREATE TRIGGER "([^"]+)"/g)) {
+            if (!installed.some(row => row.name === match[1])) throw new Error(`[DB_ISOLATION_REFUSAL] Missing release guard ${match[1]}`);
+        }
+        if (tempDb.pragma('foreign_keys', { simple: true }) !== 1 || tempDb.pragma('foreign_key_check').length) {
+            throw new Error('[DB_ISOLATION_REFUSAL] Fresh release schema failed foreign-key verification');
+        }
+    } catch (error) {
         tempDb.close();
+        cleanupDisposableDatabase(runnerDir);
+        throw error;
+    } finally {
+        if (tempDb.open) tempDb.close();
     }
-
-    const validatedPath = validateDisposableDbPath(disposableDbPath, runnerDir);
-
     return {
         runnerDir,
-        dbPath: validatedPath
+        dbPath: disposableDbPath
     };
 }
 

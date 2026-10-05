@@ -3,7 +3,7 @@ const path = require('node:path');
 const { randomUUID, createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
 const assert = require('node:assert/strict');
-const { PrismaClient } = require('../../prisma_client');
+const { PrismaClient, Prisma } = require('../../prisma_client');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { assertOwnedTestDatabase } = require('./testOwnedDatabase');
 
@@ -12,6 +12,12 @@ const { assertOwnedTestDatabase } = require('./testOwnedDatabase');
 const PRE11_SHA256 = 'ff776730ff70102f018c3a02af76534ada332f2f4484600bde069b45c92f0513';
 const PROJECT_SHAPE_SHA256 = '0915342087544cde959571f2d2bc9fc4ecf2825c400cc4ad1f17066fbb121115';
 const PROJECT_MIGRATION_SHA256 = '3e63e37f4bce011c6d80efa5329f810ceffb9d5ff96653a406f90d818202e123';
+// #179 pins 5988872290 / 5989464829: the closed, evidenced completion of
+// the lagging SQL baseline, solely for the Project variant before seeding.
+const BASELINE_COMPLETION = Object.freeze([{ path: '20260930140000_add_sitewide_theme_appearance/migration.sql',
+    sha256: 'a682ab8b25fcf561527afea4200005cc60a349f692ab1ce3956d594dd31fdb7f' },
+{ path: '20261004033000_add_report_number_lineage/migration.sql',
+    sha256: 'b59697f94f28daa5db9590c4d7ebd304e00d941309bc514f44a4abd9c02871b3' }]);
 const MIGRATIONS = Object.freeze({
     MARKER: '20261004190000_add_workitem_duplicate_marker',
     INDEX: '20261004190100_unique_active_workitem',
@@ -43,6 +49,20 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
     }
     const projectVariant = schemaVariant === 'PROJECT_PRE_TEMPLATE_POLICY';
     const projectColumns = ['templateId', 'templateVersion', 'policyConfig', 'programmeCode', 'parentProjectId'];
+    function assertGeneratedSchemaCompleteness(handle, projectPending = false) {
+        const missing = [];
+        for (const model of Prisma.dmmf.datamodel.models) {
+            const table = model.dbName || model.name;
+            const columns = handle.prepare(`PRAGMA table_info("${table.replace(/"/g, '""')}")`).all().map(row => row.name);
+            if (!columns.length) { missing.push({ table, missingTable: true }); continue; }
+            const fields = model.fields.filter(field => field.kind !== 'object' && !columns.includes(field.dbName || field.name)).map(field => field.dbName || field.name);
+            if (fields.length) missing.push({ table, fields });
+        }
+        // The one accountable pending migration deliberately lacks exactly five
+        // Project columns. After it runs, every current model/column must exist.
+        assert.equal(JSON.stringify(missing), JSON.stringify(projectPending ? [{ table: 'Project', fields: projectColumns }] : []),
+            'Pinned historical baseline does not match the generated Prisma datamodel.');
+    }
     const relatedTables = ['User', 'Lab', 'Consignment', 'Submission', 'Result', 'SpectralData',
         ...(projectVariant ? ['Project', 'Report', 'ReportShareLink', 'AuditLog'] : [])];
     if (!relatedRows || Object.keys(relatedRows).some(table => !relatedTables.includes(table) || !Array.isArray(relatedRows[table]))) {
@@ -85,6 +105,13 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
             }
             db.exec(schema);
             if (projectVariant) {
+                assert.equal(db.pragma('foreign_keys', { simple: true }), 1);
+                assert.equal(db.prepare('SELECT COUNT(*) AS count FROM User').get().count, 0, 'Baseline completion must precede User seeding.');
+                for (const entry of BASELINE_COMPLETION) {
+                    const sql = fs.readFileSync(path.resolve(__dirname, '../../prisma/migrations', entry.path));
+                    if (createHash('sha256').update(sql).digest('hex') !== entry.sha256) throw new Error('Pinned baseline completion digest mismatch.');
+                    db.transaction(() => db.exec(sql.toString('utf8')))();
+                }
                 const baselineDb = new Database(':memory:');
                 try {
                     baselineDb.pragma('foreign_keys = ON'); baselineDb.exec(baseline.toString('utf8'));
@@ -109,8 +136,15 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
         }
         if (db.prepare("SELECT name FROM sqlite_master WHERE type='trigger'").all().length) throw new Error('Legacy fixture must have no release guards before inserting.');
         const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all();
-        for (const table of tables) if (db.prepare(`SELECT COUNT(*) AS count FROM "${table.name}"`).get().count !== 0) {
-            throw new Error('Legacy fixture must be a fresh schema-only file.');
+        for (const table of tables) {
+            if (projectVariant && table.name === 'GlobalAppearanceSetting') {
+                // The immutable completion SQL seeds exactly this singleton;
+                // every operational table is still empty before legacy seeding.
+                assert.equal(JSON.stringify(db.prepare('SELECT id,themeId,defaultMode,revision,updatedBy FROM GlobalAppearanceSetting').all()),
+                    JSON.stringify([{ id: 'global', themeId: 'soilfer-classic', defaultMode: 'light', revision: 1, updatedBy: null }]));
+            } else if (db.prepare(`SELECT COUNT(*) AS count FROM "${table.name}"`).get().count !== 0) {
+                throw new Error('Legacy fixture must be a fresh schema-only file.');
+            }
         }
         for (const [table, rows] of [['Lab', relatedRows.Lab || []], ...(projectVariant ? [['Project', relatedRows.Project || []]] : []),
             ['User', relatedRows.User || []], ['Consignment', relatedRows.Consignment || []],
@@ -167,6 +201,7 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
         for (const match of guardSql.matchAll(/CREATE TRIGGER "([^"]+)"/g)) {
             if (!installed.has(match[1])) throw new Error(`Missing release guard ${match[1]}`);
         }
+        if (projectVariant) assertGeneratedSchemaCompleteness(db, outcomes.get('PROJECT_POLICY') === 'PENDING');
     } catch (error) {
         if (db.open) db.close();
         // This helper exclusively created the owned file; a failed build cannot
@@ -197,6 +232,7 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
                     if (!result.success || !result.applied || !projectColumns.every(name => columns.includes(name)) ||
                         !handle.prepare("SELECT name FROM sqlite_master WHERE type='index' AND name='Project_parentProjectId_idx'").get() ||
                         handle.prepare('PRAGMA foreign_key_check("Project")').all().length) throw new Error('The exact Project migration did not complete.');
+                    assertGeneratedSchemaCompleteness(handle);
                     outcomes.set(migration, 'APPLIED'); return result;
                 } finally { handle.close(); }
             }

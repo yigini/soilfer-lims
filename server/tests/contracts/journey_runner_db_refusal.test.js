@@ -9,7 +9,7 @@
  * 3. validateDisposableDbPath rejects any database ending with dev.db.
  * 4. validateDisposableDbPath rejects database paths outside the designated disposable runner directory.
  * 5. validateDisposableDbPath accepts a properly isolated candidate inside runnerDir.
- * 6. createDisposableDatabase copies schema safely and returns a validated disposable path.
+ * 6. createDisposableDatabase builds the guarded release schema without reading a working database.
  * 7. cleanupDisposableDatabase removes the temporary runner directory and refuses to delete non-runner paths.
  * 8. Inherited working database path cannot be executed by the runner (fails closed).
  */
@@ -65,26 +65,47 @@ describe('Browser Journey Database Isolation & Refusal Contract', () => {
         expect(result).toBe(validDb);
     });
 
-    test('6. createDisposableDatabase safely creates isolated DB, validates path, and ensures schema-only fixtures', () => {
-        const { runnerDir, dbPath } = createDisposableDatabase();
+    test('6. createDisposableDatabase builds an isolated guarded release schema without accessing working data', () => {
+        const actualRead = fs.readFileSync;
+        const read = jest.spyOn(fs, 'readFileSync').mockImplementation((file, ...args) => {
+            if (path.resolve(String(file)) === WORKING_DEV_DB) throw new Error('Working database must never be read');
+            return actualRead(file, ...args);
+        });
+        const copy = jest.spyOn(fs, 'copyFileSync').mockImplementation(() => { throw new Error('No database may be copied'); });
+        let runnerDir;
         try {
+            const created = createDisposableDatabase();
+            runnerDir = created.runnerDir;
+            const { dbPath } = created;
             expect(fs.existsSync(runnerDir)).toBe(true);
             expect(fs.existsSync(dbPath)).toBe(true);
             expect(dbPath.startsWith(runnerDir)).toBe(true);
             expect(path.basename(dbPath)).not.toBe('dev.db');
 
-            // Verify that all copied data rows were wiped for a schema-only synthetic database
+            // The release schema starts empty; it never contains copied rows.
             const Database = require('better-sqlite3');
-            const testDb = new Database(dbPath);
-            const koboCount = testDb.prepare("SELECT COUNT(*) as c FROM KoboConfig").get().c;
-            const userCount = testDb.prepare("SELECT COUNT(*) as c FROM User").get().c;
-            testDb.close();
-
-            expect(koboCount).toBe(0);
-            expect(userCount).toBe(0);
+            const testDb = new Database(dbPath, { readonly: true, fileMustExist: true });
+            try {
+                expect(testDb.prepare('SELECT COUNT(*) as c FROM KoboConfig').get().c).toBe(0);
+                expect(testDb.prepare('SELECT COUNT(*) as c FROM User').get().c).toBe(0);
+                expect(testDb.prepare('SELECT COUNT(*) as c FROM Sample').get().c).toBe(0);
+                expect(testDb.prepare('SELECT COUNT(*) as c FROM WorkItem').get().c).toBe(0);
+                expect(testDb.prepare('SELECT COUNT(*) as c FROM ReportSequence').get().c).toBe(0);
+                const sql = actualRead(require.resolve('../../prisma/migrations/20261005000100_workflow_state_guards/migration.sql'), 'utf8');
+                const names = [...sql.matchAll(/CREATE TRIGGER "([^"]+)"/g)].map(match => match[1]);
+                expect(names).toHaveLength(11);
+                expect(testDb.prepare("SELECT name FROM sqlite_master WHERE type='trigger'").all().map(row => row.name).sort()).toEqual(names.sort());
+                for (const table of ['Sample', 'WorkItem']) {
+                    expect(testDb.prepare(`PRAGMA table_info("${table}")`).all().map(row => row.name)).toEqual(expect.arrayContaining(['holdPriorStatus', 'legacyStatus']));
+                }
+                expect(testDb.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+            } finally { testDb.close(); }
+            expect(copy).not.toHaveBeenCalled();
+            expect(read.mock.calls.some(([file]) => path.resolve(String(file)) === WORKING_DEV_DB)).toBe(false);
         } finally {
+            read.mockRestore(); copy.mockRestore();
             cleanupDisposableDatabase(runnerDir);
-            expect(fs.existsSync(runnerDir)).toBe(false);
+            if (runnerDir) expect(fs.existsSync(runnerDir)).toBe(false);
         }
     });
 
@@ -97,19 +118,16 @@ describe('Browser Journey Database Isolation & Refusal Contract', () => {
     });
 
     test('8. Refusal guard enforces working dev.db immutability when inherited', () => {
-        // Record size and mtime of working dev.db before test
-        const devDbStatsBefore = fs.statSync(WORKING_DEV_DB);
-
-        // Simulate an inherited DATABASE_PATH pointing to working dev.db
-        const inheritedPath = WORKING_DEV_DB;
-        expect(() => {
-            validateDisposableDbPath(inheritedPath, tempTestDir);
-        }).toThrow('[DB_ISOLATION_REFUSAL]');
-
-        // Verify dev.db was untouched (no modifications)
-        const devDbStatsAfter = fs.statSync(WORKING_DEV_DB);
-        expect(devDbStatsAfter.size).toBe(devDbStatsBefore.size);
-        expect(devDbStatsAfter.mtimeMs).toBe(devDbStatsBefore.mtimeMs);
+        const stat = jest.spyOn(fs, 'statSync');
+        const read = jest.spyOn(fs, 'readFileSync');
+        const copy = jest.spyOn(fs, 'copyFileSync');
+        try {
+            expect(() => validateDisposableDbPath(WORKING_DEV_DB, tempTestDir)).toThrow('[DB_ISOLATION_REFUSAL]');
+            // Refusal happens before even inspecting the protected file.
+            expect(stat).not.toHaveBeenCalled();
+            expect(read).not.toHaveBeenCalled();
+            expect(copy).not.toHaveBeenCalled();
+        } finally { stat.mockRestore(); read.mockRestore(); copy.mockRestore(); }
     });
 
     test('9. cleanupDisposableDatabase strictly confines cleanup to exact owned root and preserves other active runs', () => {
