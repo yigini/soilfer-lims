@@ -270,7 +270,7 @@ exports.getQueue = async (req, res) => {
             whereClause.status = { in: ['ACCEPTED', 'COMPLETED', 'WAIVED'] };
         } else {
             // Default: 'my_work'
-            whereClause.status = { in: ['ASSIGNED', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'] };
+            whereClause.status = { in: ['ASSIGNED', 'IN_PROGRESS', 'REPEAT_REQUIRED', 'REANALYSIS_REQUIRED'] };
         }
 
         if (searchTerm) {
@@ -636,7 +636,7 @@ exports.getQueue = async (req, res) => {
         }
 
         const [myWorkCount, readyToSubmitCount, submittedCount, completedCount] = await Promise.all([
-            prisma.workItem.count({ where: { ...baseCountWhere, status: { in: ['ASSIGNED', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'] } } }),
+            prisma.workItem.count({ where: { ...baseCountWhere, status: { in: ['ASSIGNED', 'IN_PROGRESS', 'REPEAT_REQUIRED', 'REANALYSIS_REQUIRED'] } } }),
             prisma.workItem.count({ where: { ...baseCountWhere, status: 'COMPLETED', submissionId: null, analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] } } }),
             prisma.workItem.count({ where: { ...baseCountWhere, status: 'SUBMITTED' } }),
             prisma.workItem.count({ where: { ...baseCountWhere, status: { in: ['ACCEPTED', 'COMPLETED', 'WAIVED'] } } })
@@ -646,7 +646,7 @@ exports.getQueue = async (req, res) => {
         const stats = {
             totalPending: items.filter(i => i.status === 'ASSIGNED').length,
             totalInProgress: items.filter(i => i.status === 'IN_PROGRESS').length,
-            totalReanalysis: items.filter(i => i.status === 'REANALYSIS_REQUIRED').length,
+            totalReanalysis: items.filter(i => workflow.normalizeWorkItemState(i.status) === 'REPEAT_REQUIRED').length,
             totalDrafts: userDrafts.length,
             totalGroups: groups.length,
             totalItems: items.length,
@@ -944,7 +944,7 @@ exports.batchSave = async (req, res) => {
                     errors.push({
                         workItemId: entry.workItemId,
                         error: `Cannot transition from ${item.status} to ${targetStatus}. ` +
-                            (item.status === 'REANALYSIS_REQUIRED'
+                            (workflow.normalizeWorkItemState(item.status) === 'REPEAT_REQUIRED'
                                 ? 'This item must be reassigned before results can be entered.'
                                 : `Allowed transitions: ${(workflow.WORK_ITEM_TRANSITIONS[item.status] || []).join(', ')}`)
                     });
@@ -955,7 +955,7 @@ exports.batchSave = async (req, res) => {
                     errors.push({
                         workItemId: entry.workItemId,
                         error: `Cannot transition from ${item.status} to ${targetStatus}. ` +
-                            (item.status === 'REANALYSIS_REQUIRED'
+                            (workflow.normalizeWorkItemState(item.status) === 'REPEAT_REQUIRED'
                                 ? 'This item must be reassigned before results can be entered.'
                                 : `Allowed transitions: ${(workflow.WORK_ITEM_TRANSITIONS[item.status] || []).join(', ')}`)
                     });

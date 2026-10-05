@@ -25,12 +25,14 @@ async function checkStoredCompletion(db, sample, item, results, actor) {
         }
     }
     const mapping = await db.equipmentMethodEligibility.findFirst({ where: { labId: sample.assignedLab || sample.labId, analysisCode: item.analysis } });
-    const eligibleIds = mapping ? parseJson(mapping.eligibleEquipmentIds, []) : [];
+    const eligibleIds = mapping?.eligibleEquipmentIds ? parseJson(mapping.eligibleEquipmentIds, null) : [];
     if (!Array.isArray(eligibleIds)) return { ready: false, code: 'INSTRUMENT_CONFIGURATION_INVALID' };
     for (const result of current) {
         const selectedEquipmentId = result.equipmentId || item.equipmentId;
-        const asset = selectedEquipmentId ? await db.equipmentAsset.findUnique({ where: { id: selectedEquipmentId } }) : null;
-        if (selectedEquipmentId && (!asset || asset.status !== 'IN_SERVICE')) return { ready: false, code: 'INSTRUMENT_NOT_AVAILABLE' };
+        const asset = selectedEquipmentId ? await db.equipmentAsset.findUnique({ where: { id: selectedEquipmentId }, include: { qualification: true } }) : null;
+        if (selectedEquipmentId && (!asset || asset.labId !== (sample.assignedLab || sample.labId) || asset.status !== 'IN_SERVICE')) {
+            return { ready: false, code: 'INSTRUMENT_NOT_AVAILABLE' };
+        }
         const readiness = await evaluateExecutionReadiness(db, { ...item, sample }, actor, { selectedEquipmentId, asset,
             equipReq: mapping && { isRequired: mapping.isRequired, eligibleIds } });
         if (!readiness.isReady) return { ready: false, code: readiness.blockers[0], blockers: readiness.blockers };

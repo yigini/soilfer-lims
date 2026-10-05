@@ -165,7 +165,7 @@ async function getDashboardHome(user, options = {}) {
 
         // 1. Returned determinations
         const returnedCount = await prisma.workItem.count({
-            where: scopedWhere(workWhere, { status: 'REANALYSIS_REQUIRED' })
+            where: scopedWhere(workWhere, { status: { in: ['REPEAT_REQUIRED', 'REANALYSIS_REQUIRED'] } })
         });
 
         // 2. Open runs / in-progress work
@@ -894,7 +894,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
 
     // ─── TECHNICIAN QUEUES (Method-first grouping, 40 samples per run) ───
     if (queueKey === 'bench.returned') {
-        const where = scopedWhere(workWhere, { status: 'REANALYSIS_REQUIRED' });
+        const where = scopedWhere(workWhere, { status: { in: ['REPEAT_REQUIRED', 'REANALYSIS_REQUIRED'] } });
         const [total, items] = await Promise.all([
             prisma.workItem.count({ where }),
             prisma.workItem.findMany({

@@ -90,8 +90,8 @@ async function createLegacyClosureDatabase({ analysis, labId, samples = [], work
 function useLegacyRouteDatabase(prisma, client) {
     jest.spyOn(prisma, '$transaction').mockImplementation((...args) => client.$transaction(...args));
     const methods = {
-        sample: ['findUnique', 'create', 'update', 'updateMany'],
-        workItem: ['findUnique', 'findMany', 'create', 'update', 'updateMany'],
+        sample: ['findUnique', 'findMany', 'count', 'create', 'update', 'updateMany'],
+        workItem: ['findUnique', 'findMany', 'count', 'create', 'update', 'updateMany'],
         result: ['findUnique', 'findMany', 'create', 'update'],
         reviewDecision: ['create', 'findMany', 'count'],
         auditLog: ['create', 'findMany', 'findFirst', 'count'],

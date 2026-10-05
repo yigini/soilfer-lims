@@ -14,13 +14,13 @@ beforeAll(async () => {
         prerequisites: '[]', validation: '{"min":0,"max":14}' } });
 });
 afterEach(() => jest.restoreAllMocks());
-async function fixture(status = 'PROCESSING', flags = {}, itemStatus = 'IN_PROGRESS') {
+async function fixture(status = 'PROCESSING', flags = {}, itemStatus = 'IN_PROGRESS', resultData = {}) {
     const sample = await createSampleFixture(prisma, { data: { id: randomUUID(), originalId: randomUUID(), assignedLab: labId,
         status, receptionDate: new Date(), requiredAnalyses: JSON.stringify([analysis]), dryingStatus: 'DONE', preparationStatus: 'DONE', ...flags } });
     const item = await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, assignedLab: labId,
         assignedTo: actor.username, analysis, status: itemStatus } });
     const result = await prisma.result.create({ data: { id: randomUUID(), sampleId: sample.id, param: analysis, value: '6.2',
-        numericValue: 6.2, unit: 'pH', isCurrent: true, isValid: true, flags: '["ORIGINAL_NOTE"]' } });
+        numericValue: 6.2, unit: 'pH', isCurrent: true, isValid: true, flags: '["ORIGINAL_NOTE"]', ...resultData } });
     return { sample, item, result };
 }
 const save = row => request(app).post(`/api/results/${row.sample.id}`).set('Authorization', `Bearer ${token}`)
@@ -149,4 +149,55 @@ test.each(['APPROVED', 'ARCHIVED', 'DISPOSED'])('legacy submit never reopens a f
     const row = await fixture(status, {}, 'COMPLETED'), before = await snapshot(row), response = await submit(row);
     expect(response.status).toBe(409); expect(response.body.code).toBe('AMENDMENT_WORKFLOW_REQUIRED');
     expect(await snapshot(row)).toEqual(before);
+});
+
+test.each([
+    ['', true, 'RESULT_NOT_COMPLETE'], ['not-a-number', true, 'RESULT_NOT_COMPLETE'],
+    ['19', true, 'RESULT_NOT_COMPLETE'], ['6.2', false, 'CURRENT_RESULT_REQUIRED']
+])('legacy submission refuses incomplete stored value %s without changing evidence', async (value, isValid, reasonCode) => {
+    const row = await fixture('PROCESSING', {}, 'IN_PROGRESS', { value, isValid });
+    const before = await snapshot(row), response = await submit(row);
+    expect(response.status).toBe(409); expect(response.body.code).toBe('SUBMISSION_NOT_FULL');
+    expect(response.body.details.blocking).toEqual([expect.objectContaining({ workItemId: row.item.id, reasonCode })]);
+    expect(await snapshot(row)).toEqual(before);
+});
+
+test.each([
+    ['malformed mapping', 'INSTRUMENT_CONFIGURATION_INVALID'], ['missing instrument', 'INSTRUMENT_REQUIRED'],
+    ['ineligible instrument', 'INSTRUMENT_NOT_ELIGIBLE'], ['out of service', 'INSTRUMENT_NOT_AVAILABLE'],
+    ['different laboratory', 'INSTRUMENT_NOT_AVAILABLE'], ['overdue calibration', 'INSTRUMENT_CALIBRATION_OVERDUE']
+])('legacy submission refuses %s with zero lifecycle or evidence writes', async (kind, reasonCode) => {
+    const row = await fixture(), equipmentId = randomUUID(), mappingId = randomUUID();
+    await prisma.equipmentAsset.create({ data: { id: equipmentId, labId: kind === 'different laboratory' ? 'OTHER-LAB' : labId,
+        name: 'Stored result instrument', assetType: 'OTHER', criticality: 'IMPORTANT',
+        status: kind === 'out of service' ? 'OUT_OF_SERVICE' : 'IN_SERVICE',
+        qualification: { create: { id: randomUUID(), labId, calibrationStatus: kind === 'overdue calibration' ? 'OVERDUE' : 'OK', verificationStatus: 'OK' } } } });
+    await prisma.equipmentMethodEligibility.create({ data: { id: mappingId, labId, analysisCode: analysis, isRequired: true,
+        eligibleEquipmentIds: kind === 'malformed mapping' ? '{broken' : JSON.stringify([kind === 'ineligible instrument' ? randomUUID() : equipmentId]) } });
+    if (kind !== 'missing instrument') await prisma.workItem.update({ where: { id: row.item.id }, data: { equipmentId } });
+    try {
+        const before = await snapshot(row), response = await submit(row);
+        expect(response.status).toBe(409); expect(response.body.code).toBe('SUBMISSION_NOT_FULL');
+        expect(response.body.details.blocking).toEqual([expect.objectContaining({ workItemId: row.item.id, reasonCode })]);
+        expect(await snapshot(row)).toEqual(before);
+    } finally {
+        await prisma.equipmentMethodEligibility.delete({ where: { id: mappingId } });
+    }
+});
+
+test('legacy submit preserves the no-results refusal before lifecycle checks', async () => {
+    const row = await fixture('APPROVED', {}, 'COMPLETED', { isCurrent: false }), before = await snapshot(row);
+    const response = await submit(row);
+    expect(response.status).toBe(400); expect(response.body.error).toBe('No results entered');
+    expect(await snapshot(row)).toEqual(before);
+});
+
+test('uncleared preparation reversion prevents submission and preserves its append-only evidence', async () => {
+    const row = await fixture('PROCESSING', {}, 'COMPLETED');
+    const event = await prisma.resultEvidenceEvent.create({ data: { id: randomUUID(), sampleId: row.sample.id, resultId: row.result.id,
+        gate: 'PREPARATION', eventType: 'PREP_REVERTED', reason: 'Preparation needs rechecking', actor: actor.username } });
+    const before = await snapshot(row), response = await submit(row);
+    expect(response.status).toBe(409); expect(response.body.code).toBe('PREP_REVERTED_RESULTS');
+    expect(await snapshot(row)).toEqual(before);
+    expect(await prisma.resultEvidenceEvent.findUnique({ where: { id: event.id } })).toEqual(event);
 });
