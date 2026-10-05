@@ -1,7 +1,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { randomUUID, createHash } = require('node:crypto');
-const { spawnSync } = require('node:child_process');
+const { spawnSync, spawn } = require('node:child_process');
+const net = require('node:net');
 const Database = require('better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const { rejectedGuardWrite } = require('../helpers/rejectedGuardWrite');
@@ -51,14 +52,86 @@ function cli(file, args = [], entry = script, preload) {
         { env: { ...process.env, DATABASE_PATH: file, DATABASE_URL: `file:${file}` }, encoding: 'utf8' });
     expect(child.error).toBeUndefined(); return child;
 }
-function assertRefusal(file, code, entry, preload) {
-    const before = fingerprint(file), child = cli(file, ['--apply'], entry, preload);
+function assertRefusal(file, code, entry, preload, args = []) {
+    const before = fingerprint(file), child = cli(file, ['--apply', ...args], entry, preload);
     expect(child.status).not.toBe(0);
     const error = JSON.parse(child.stderr);
     expect(error.error).toBe(code);
     expect(fingerprint(file)).toBe(before);
     expect(child.stdout).toBe('');
     return error;
+}
+
+function reviewedLegacyFixture(status = 'COLLECTED') {
+    const id = `reviewed-${randomUUID()}`, time = Date.now(), lab = `lab-${id}`;
+    const rows = {
+        samples: [{ id, originalId: id, status, assignedLab: lab, history: '[{"original":true}]', createdAt: time, updatedAt: time },
+            { id: `released-${id}`, originalId: `released-${id}`, status: 'RELEASED', assignedLab: lab,
+                approvedBy: 'historical-approver', approvedAt: time, history: '[{"released":true}]', createdAt: time, updatedAt: time }],
+        workItems: [{ id: `w-${id}`, sampleId: id, analysis: 'SOC', status: 'PENDING', assignedLab: lab,
+            result: 'retained scalar', history: '[{"work":true}]', version: 7, createdAt: time, updatedAt: time }],
+        relatedRows: { Lab: [{ id: lab, code: lab, name: 'Reviewed upgrade test lab', country: 'TEST', createdAt: time, updatedAt: time }],
+            Result: [{ id: `r-${id}`, sampleId: id, param: 'SOC', value: '1.8', numericValue: 1.8, unit: '%', createdAt: time, updatedAt: time }] }
+    };
+    const origin = beforeGuards({ actor: 'system:fixture', ...rows, preMigrationSnapshot: true }); fixtures.push(origin);
+    const immutable = origin.preMigrationSnapshot;
+    expect(fs.statSync(immutable.path).mode & 0o222).toBe(0);
+    const dry = cli(immutable.path, ['--db', immutable.path], path.join(root, 'scripts/migrate_legacy_statuses.js'));
+    expect(dry.status).toBe(0); expect(dry.stderr).toBe('');
+    const report = JSON.parse(dry.stdout);
+    expect(report).toMatchObject({ mode: 'DRY_RUN', schemaReady: false, blockedCount: 0 });
+    expect(fingerprint(immutable.path)).toBe(immutable.sha256);
+    for (const suffix of ['-wal', '-shm', '-journal']) expect(fs.existsSync(`${immutable.path}${suffix}`)).toBe(false);
+    return { id, rows, report, reviewedStatusPlan: { plan: report.plan, fingerprint: report.fingerprint } };
+}
+
+function legacyRows(file) {
+    const db = new Database(file, { readonly: true, fileMustExist: true });
+    try { return Object.fromEntries(['Sample', 'WorkItem', 'Result', 'ReviewDecision', 'ResultEvidenceEvent', 'AuditLog']
+        .map(table => [table, db.prepare(`SELECT * FROM "${table}" ORDER BY rowid`).all()])); }
+    finally { db.close(); }
+}
+
+async function realStartup(file, expectedPass = false) {
+    const listener = net.createServer();
+    await new Promise(resolve => listener.listen(0, '127.0.0.1', resolve));
+    const port = listener.address().port;
+    await new Promise(resolve => listener.close(resolve));
+    const child = spawn(process.execPath, [path.join(root, 'index.js')], { cwd: root,
+        env: { ...process.env, DATABASE_PATH: file, DATABASE_URL: `file:${file}`, PORT: String(port),
+            DISABLE_BACKGROUND_JOBS: 'true', LAB_JOBS_MODE: 'hold', JWT_SECRET: 'audit-startup-contract-secret' } });
+    let stdout = '', stderr = '', accepted = false, timer;
+    child.stdout.on('data', data => { stdout += data; }); child.stderr.on('data', data => { stderr += data; });
+    const completion = new Promise((resolve, reject) => {
+        child.on('error', reject);
+        child.on('close', (code, signal) => { clearTimeout(timer); resolve({ code, signal }); });
+    });
+    const connections = new Set();
+    const inspectPort = () => {
+        const socket = net.connect({ host: '127.0.0.1', port }); connections.add(socket);
+        socket.on('connect', () => { accepted = true; socket.destroy(); });
+        socket.on('error', () => socket.destroy()); socket.on('close', () => connections.delete(socket));
+    };
+    const polling = setInterval(inspectPort, 20);
+    timer = setTimeout(() => child.kill(), 10000);
+    try {
+        if (expectedPass) {
+            const startedAt = Date.now();
+            while (!stdout.includes('Enterprise Server running on') && Date.now() - startedAt < 9000) {
+                if (child.exitCode !== null) throw new Error(`The real app refused startup: ${stderr}`);
+                await new Promise(resolve => setTimeout(resolve, 25));
+            }
+            expect(stdout).toContain('Enterprise Server running on');
+            const response = await fetch(`http://127.0.0.1:${port}/api/health`);
+            expect(response.status).toBe(200); expect(await response.json()).toMatchObject({ status: 'ok' });
+            child.kill();
+        }
+        const outcome = await completion;
+        return { ...outcome, stdout, stderr, accepted };
+    } finally {
+        clearInterval(polling); clearTimeout(timer); for (const socket of connections) socket.destroy();
+        if (child.exitCode === null && child.signalCode === null) { child.kill(); await completion; }
+    }
 }
 
 afterAll(async () => {
@@ -140,6 +213,158 @@ test.each(['UNMAPPED_SAMPLE', 'COLLECTED'])('unreviewed %s refuses the actual ch
     expect(fs.existsSync(file)).toBe(false);
 });
 
+test('the real reviewed legacy upgrade preserves science, refuses interrupted startup, then maps and starts without writes', () => {
+    const record = reviewedLegacyFixture();
+    expect(record.report).toMatchObject({ candidateCount: 3, unmappedCount: 0, blockedCount: 0 });
+    const fixture = beforeGuards({ actor: 'system:fixture', ...record.rows, installWorkflowStateGuards: true,
+        reviewedStatusPlan: record.reviewedStatusPlan }); fixtures.push(fixture);
+    const before = legacyRows(fixture.file);
+    expect(before.Sample.find(row => row.id === record.id).status).toBe('COLLECTED');
+    expect(before.WorkItem[0]).toMatchObject({ status: 'PENDING', version: 7, legacyStatus: null });
+    // An interruption between schema installation and mapping cannot serve.
+    const pending = assertRefusal(fixture.file, 'WORKFLOW_STATUS_PLAN_PENDING');
+    expect(pending.differences[0]).toMatchObject({ candidateCount: 3, blockedCount: 0, unmappedCount: 0 });
+    assertRefusal(fixture.file, 'WORKFLOW_STATUS_PLAN_PENDING', undefined, undefined,
+        ['--reviewed-status-sha256', record.report.fingerprint]);
+    expect(legacyRows(fixture.file)).toEqual(before);
+    const planFile = `${fixture.file}.plan.json`; files.push(planFile);
+    fs.writeFileSync(planFile, JSON.stringify(record.report), { flag: 'wx' });
+    const mapped = cli(fixture.file, ['--db', fixture.file, '--apply', '--plan', planFile,
+        '--reviewed-sha256', record.report.fingerprint], path.join(root, 'scripts/migrate_legacy_statuses.js'));
+    expect(mapped.status).toBe(0); expect(mapped.stderr).toBe('');
+    expect(JSON.parse(mapped.stdout)).toMatchObject({ mode: 'APPLIED', changedRows: 3, auditsAdded: 3, unmappedCount: 0 });
+    const after = legacyRows(fixture.file);
+    for (const table of ['Result', 'ReviewDecision', 'ResultEvidenceEvent']) expect(after[table]).toEqual(before[table]);
+    for (const table of ['Sample', 'WorkItem']) for (const original of before[table]) {
+        const row = after[table].find(item => item.id === original.id), candidate = record.report.plan.rows.find(item => item.id === original.id);
+        expect(row.status).toBe(candidate.to); expect(row.legacyStatus).toBe(original.status);
+        const retained = { ...row, status: original.status, legacyStatus: original.legacyStatus, updatedAt: original.updatedAt,
+            ...(table === 'WorkItem' && { version: original.version }) };
+        expect(retained).toEqual(original);
+        if (table === 'WorkItem') expect(row.version).toBe(original.version + 1);
+    }
+    expect(after.AuditLog).toHaveLength(before.AuditLog.length + 3);
+    expect(after.AuditLog.slice(0, before.AuditLog.length)).toEqual(before.AuditLog);
+    expect(after.AuditLog.slice(before.AuditLog.length).every(row => row.performedBy === 'system:status-migration')).toBe(true);
+    const completedSha = fingerprint(fixture.file), startup = cli(fixture.file, ['--apply']);
+    expect(startup.status).toBe(0);
+    expect(JSON.parse(startup.stdout)).toMatchObject({ classification: 'COMPLETE', mode: 'NO_OP', totalChanges: 0,
+        inventory: { candidateCount: 0, unmappedCount: 0, blockedCount: 0 },
+        postflight: { integrity: 'ok', foreignKeyViolations: [], marker: { id: MARKER, details } } });
+    expect(fingerprint(fixture.file)).toBe(completedSha); expect(legacyRows(fixture.file)).toEqual(after);
+});
+
+test('a real timestamp race invalidates the review and the actual installer refuses without writes or a returned file', () => {
+    const record = reviewedLegacyFixture(), file = ownedFile(); let error;
+    try { beforeGuards({ actor: 'system:fixture', file, ...record.rows, installWorkflowStateGuards: true,
+        reviewedStatusPlan: record.reviewedStatusPlan,
+        installerStatusRace: { sampleId: record.id, updatedAt: new Date(record.rows.samples[0].updatedAt + 1000).toISOString() } }); }
+    catch (caught) { error = caught; }
+    expect(error).toMatchObject({ code: 'WORKFLOW_STATUS_PLAN_STALE', exitStatus: 1 });
+    expect(error.beforeSha).toMatch(/^[a-f0-9]{64}$/); expect(error.afterSha).toBe(error.beforeSha);
+    expect(fs.existsSync(file)).toBe(false);
+});
+
+test('a reviewed fingerprint cannot approve an unmapped status', () => {
+    const record = reviewedLegacyFixture('UNMAPPED_SAMPLE'), file = ownedFile(); let error;
+    expect(record.report.unmappedCount).toBe(1);
+    try { beforeGuards({ actor: 'system:fixture', file, ...record.rows, installWorkflowStateGuards: true,
+        reviewedStatusPlan: record.reviewedStatusPlan }); } catch (caught) { error = caught; }
+    expect(error).toMatchObject({ code: 'WORKFLOW_STATUS_PLAN_REQUIRED', exitStatus: 1 });
+    expect(error.afterSha).toBe(error.beforeSha); expect(fs.existsSync(file)).toBe(false);
+});
+
+test('a blocked legacy marker refuses startup even with a reviewed fingerprint and preserves all bytes', () => {
+    const record = reviewedLegacyFixture(), fixture = beforeGuards({ actor: 'system:fixture', ...record.rows }); fixtures.push(fixture);
+    const db = new Database(fixture.file, { fileMustExist: true });
+    try {
+        db.prepare('UPDATE "Sample" SET "legacyStatus" = ? WHERE "id" = ?').run('COLLECTED', record.id);
+        if (!db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_schema_migrations'").get()) db.exec(markerDdl);
+        db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run(MARKER, details);
+    } finally { db.close(); }
+    const before = legacyRows(fixture.file);
+    const refused = assertRefusal(fixture.file, 'WORKFLOW_STATUS_PLAN_PENDING', undefined, undefined,
+        ['--reviewed-status-sha256', record.report.fingerprint]);
+    expect(refused.differences[0]).toMatchObject({ blockedCount: 1 });
+    expect(legacyRows(fixture.file)).toEqual(before);
+});
+
+test('malformed or unsupported reviewed fixture options refuse before creating any file', () => {
+    const record = reviewedLegacyFixture(), review = record.reviewedStatusPlan;
+    const validRace = { sampleId: record.id, updatedAt: new Date(record.rows.samples[0].updatedAt + 1000).toISOString() };
+    const invalid = [
+        { reviewedStatusPlan: review }, { installWorkflowStateGuards: true, reviewedStatusPlan: undefined },
+        { installWorkflowStateGuards: true, reviewedStatusPlan: { ...review, extra: true } },
+        { installWorkflowStateGuards: true, reviewedStatusPlan: { plan: review.plan, fingerprint: '0'.repeat(64) } },
+        { installWorkflowStateGuards: true, reviewedStatusPlan: { plan: null, fingerprint: review.fingerprint } },
+        { installWorkflowStateGuards: true, reviewedStatusPlan: review, schemaVariant: 'PRE_1_1_DUPLICATES' },
+        { installWorkflowStateGuards: true, installerStatusRace: validRace },
+        ...[undefined, { ...validRace, extra: true }, { ...validRace, sampleId: 'not-seeded' },
+            { ...validRace, sampleId: `w-${record.id}` }, { ...validRace, updatedAt: 'invalid' },
+            { ...validRace, updatedAt: new Date(record.rows.samples[0].updatedAt).toISOString() }]
+            .map(installerStatusRace => ({ installWorkflowStateGuards: true, reviewedStatusPlan: review, installerStatusRace }))
+    ];
+    for (const options of invalid) {
+        const file = ownedFile();
+        expect(() => beforeGuards({ actor: 'system:fixture', ...record.rows, file, ...options })).toThrow();
+        expect(fs.existsSync(file)).toBe(false);
+    }
+});
+
+test('direct startup refuses a pre-179 file before app import, scheduler or listen, with unchanged bytes', async () => {
+    const record = reviewedLegacyFixture(), origin = fixtures.at(-1), file = origin.preMigrationSnapshot.path;
+    const before = fingerprint(file), child = await realStartup(file);
+    expect(child).toMatchObject({ code: 1, accepted: false });
+    expect(JSON.parse(child.stderr)).toMatchObject({ error: 'WORKFLOW_GUARDS_NOT_INSTALLED', nextStep: expect.any(String) });
+    expect(child.stdout).not.toMatch(/SCHEDULER|Enterprise Server|\[PRISMA\]/);
+    expect(fingerprint(file)).toBe(before); expect(record.report.candidateCount).toBe(3);
+});
+
+test('direct startup refuses a fresh db push, without writes, serving or scheduler initialization', async () => {
+    const file = createFresh(), before = fingerprint(file), child = await realStartup(file);
+    expect(child).toMatchObject({ code: 1, accepted: false });
+    expect(JSON.parse(child.stderr)).toMatchObject({ error: 'WORKFLOW_GUARDS_NOT_INSTALLED' });
+    expect(child.stdout).not.toMatch(/SCHEDULER|Enterprise Server|\[PRISMA\]/); expect(fingerprint(file)).toBe(before);
+});
+
+test('direct startup refuses an interrupted reviewed upgrade with unchanged SHA and no listener', async () => {
+    const record = reviewedLegacyFixture(), fixture = beforeGuards({ actor: 'system:fixture', ...record.rows,
+        installWorkflowStateGuards: true, reviewedStatusPlan: record.reviewedStatusPlan }); fixtures.push(fixture);
+    const before = fingerprint(fixture.file), child = await realStartup(fixture.file);
+    expect(child).toMatchObject({ code: 1, accepted: false });
+    expect(JSON.parse(child.stderr)).toMatchObject({ error: 'WORKFLOW_STATUS_PLAN_PENDING' });
+    expect(child.stdout).not.toMatch(/SCHEDULER|Enterprise Server|\[PRISMA\]/); expect(fingerprint(fixture.file)).toBe(before);
+});
+
+test('direct startup reports a mismatched trigger before serving and preserves the file', async () => {
+    const file = createFresh(db => db.exec('CREATE TRIGGER "Sample_status_insert_guard" BEFORE INSERT ON "Sample" BEGIN SELECT RAISE(ABORT, \'WRONG_GUARD\'); END;'));
+    const before = fingerprint(file), child = await realStartup(file);
+    expect(child).toMatchObject({ code: 1, accepted: false });
+    const refused = JSON.parse(child.stderr);
+    expect(refused.error).toBe('WORKFLOW_GUARDS_SCHEMA_MISMATCH');
+    expect(refused.differences.some(item => item.object === 'Sample_status_insert_guard')).toBe(true);
+    expect(child.stdout).not.toMatch(/SCHEDULER|Enterprise Server|\[PRISMA\]/); expect(fingerprint(file)).toBe(before);
+});
+
+test('direct startup refuses a missing file without implicitly creating it', async () => {
+    const file = ownedFile(), child = await realStartup(file);
+    expect(child).toMatchObject({ code: 1, accepted: false });
+    expect(JSON.parse(child.stderr)).toMatchObject({ error: 'DATABASE_NOT_FOUND' });
+    expect(child.stdout).not.toMatch(/SCHEDULER|Enterprise Server|\[PRISMA\]/); expect(fs.existsSync(file)).toBe(false);
+});
+
+test('a complete guarded database passes the read-only gate, listens and answers a real health request', async () => {
+    const fixture = beforeGuards({ actor: 'system:fixture', installWorkflowStateGuards: true }); fixtures.push(fixture);
+    const child = await realStartup(fixture.file, true);
+    expect(child.accepted).toBe(true);
+    const ready = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"WORKFLOW_STARTUP_READY"')));
+    expect(ready).toMatchObject({ classification: 'COMPLETE', totalChanges: 0,
+        inventory: { candidateCount: 0, unmappedCount: 0, blockedCount: 0 } });
+    // Prisma intentionally suppresses its startup log in NODE_ENV=test. The
+    // real listening event is present in every mode and must follow the gate.
+    expect(child.stdout.indexOf('WORKFLOW_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
+});
+
 test.each([
     ['partial schema', createPartial],
     ['tampered trigger', () => createFresh(db => db.exec('CREATE TRIGGER "Sample_status_insert_guard" BEFORE INSERT ON "Sample" BEGIN SELECT RAISE(ABORT, \'WRONG_GUARD\'); END;'))],
@@ -186,7 +411,9 @@ test('startup calls the installer after the existing migrations and fails before
     expect(entry.indexOf('node scripts/install_workflow_state_guards.js --apply')).toBeGreaterThan(entry.indexOf('node scripts/migrate_sitewide_theme_library.js'));
     expect(entry.indexOf('node scripts/install_workflow_state_guards.js --apply')).toBeLessThan(entry.indexOf('exec node index.js'));
     expect(entry).toContain('set -e');
-    for (const args of [['--override'], ['--apply', '--dry-run'], ['--apply', '--apply']]) expect(() => parseArguments(args)).toThrow();
+    for (const args of [['--override'], ['--apply', '--dry-run'], ['--apply', '--apply'], ['--apply', '--reviewed-status-sha256'],
+        ['--apply', '--reviewed-status-sha256', 'not a fingerprint'], ['--reviewed-status-sha256', 'a'.repeat(64)]]) expect(() => parseArguments(args)).toThrow();
+    expect(entry).not.toContain('--reviewed-status-sha256');
     for (const option of [false, undefined, 'true']) expect(() => beforeGuards({ actor: 'system:fixture', installWorkflowStateGuards: option })).toThrow('default schema-only');
     for (const options of [{ installWorkflowStateGuards: true, schemaVariant: 'PRE_1_1_DUPLICATES' },
         { installWorkflowStateGuards: true, applyPendingMigration: true }, { unknown: true }]) {

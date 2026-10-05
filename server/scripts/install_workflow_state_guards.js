@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const path = require('node:path');
+const fs = require('node:fs');
 const Database = require('better-sqlite3');
 const { loadWorkflowMigrationSources, evidenceCreates } = require('../services/workflowMigrationSources');
 const MARKER = '179_workflow_state_guards';
@@ -123,9 +124,6 @@ function classify(db, evidenceSql, guardsSql, evidenceSha256, guardsSha256, expe
     }
     if (differences.length) throw refusal('WORKFLOW_GUARDS_SCHEMA_MISMATCH', 'The workflow schema differs from the release.', differences);
     const inventory = preflight(db);
-    if (classification !== 'COMPLETE' && [inventory.candidateCount, inventory.unmappedCount, inventory.blockedCount].some(count => count > 0)) {
-        throw refusal('WORKFLOW_STATUS_PLAN_REQUIRED', 'Review the separate legacy-status plan before installing workflow guards.', [inventory]);
-    }
     const markerDetails = JSON.stringify({ evidenceSha256, guardsSha256 });
     const statements = classification === 'COMPLETE' ? [] : [
         ...(classification === 'PRE_179' ? [evidenceSql] : []), guardsSql,
@@ -135,6 +133,20 @@ function classify(db, evidenceSql, guardsSql, evidenceSha256, guardsSha256, expe
     return { classification, inventory, statements, sources: { evidenceSha256, guardsSha256 } };
 }
 
+function assertReviewedStatusPlan({ classification, inventory }, reviewedStatusSha256) {
+    const pending = [inventory.candidateCount, inventory.unmappedCount, inventory.blockedCount].some(count => count > 0);
+    if (classification === 'COMPLETE' && pending) {
+        throw refusal('WORKFLOW_STATUS_PLAN_PENDING', 'Complete the separately reviewed legacy-status plan before starting the lab.', [inventory]);
+    }
+    if (classification !== 'COMPLETE' && (inventory.unmappedCount > 0 || inventory.blockedCount > 0 ||
+        (inventory.candidateCount > 0 && !reviewedStatusSha256))) {
+        throw refusal('WORKFLOW_STATUS_PLAN_REQUIRED', 'Review the separate legacy-status plan before installing workflow guards.', [inventory]);
+    }
+    if (classification !== 'COMPLETE' && reviewedStatusSha256 && inventory.fingerprint !== reviewedStatusSha256) {
+        throw refusal('WORKFLOW_STATUS_PLAN_STALE', 'The reviewed legacy-status plan changed; run and review a new dry run.', [inventory]);
+    }
+}
+
 function postflight(db, expected) {
     const counts = Object.fromEntries(['Sample', 'WorkItem', 'Result', 'ReviewDecision', 'ResultEvidenceEvent']
         .map(table => [table, db.prepare(`SELECT COUNT(*) AS n FROM "${table}"`).get().n]));
@@ -142,8 +154,11 @@ function postflight(db, expected) {
         guards: expected.triggers.map(({ name }) => name), marker: db.prepare('SELECT * FROM "_schema_migrations" WHERE id=?').get(MARKER) };
 }
 
-function installWorkflowStateGuards({ dbPath, apply = false } = {}) {
+function installWorkflowStateGuards({ dbPath, apply = false, reviewedStatusSha256 } = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw refusal('WORKFLOW_GUARDS_DATABASE_REQUIRED', 'An explicit database path is required.');
+    if (reviewedStatusSha256 !== undefined && (!apply || !/^[a-f0-9]{64}$/.test(reviewedStatusSha256))) {
+        throw refusal('WORKFLOW_GUARDS_ARGUMENT_INVALID', '--reviewed-status-sha256 requires --apply and an exact 64-hex reviewed fingerprint.');
+    }
     // Validate both release sources before opening even a read-only connection.
     const sources = loadWorkflowMigrationSources(), expected = sourceShape();
     const target = path.resolve(dbPath);
@@ -151,6 +166,7 @@ function installWorkflowStateGuards({ dbPath, apply = false } = {}) {
     let plan;
     try { plan = reader.transaction(() => classify(reader, sources.evidence.sql, sources.guards.sql, sources.evidence.sha256, sources.guards.sha256, expected))(); }
     finally { reader.close(); }
+    if (apply) assertReviewedStatusPlan(plan, reviewedStatusSha256);
     if (!apply || plan.classification === 'COMPLETE') {
         const observer = new Database(target, { readonly: true, fileMustExist: true });
         try { return { mode: apply ? 'NO_OP' : 'DRY_RUN', ...plan,
@@ -164,6 +180,7 @@ function installWorkflowStateGuards({ dbPath, apply = false } = {}) {
             // Reclassify and reread statuses while holding the writer lock. A
             // concurrent partial upgrade or legacy write never leaves half a schema.
             const locked = classify(db, sources.evidence.sql, sources.guards.sql, sources.evidence.sha256, sources.guards.sha256, expected);
+            assertReviewedStatusPlan(locked, reviewedStatusSha256);
             if (locked.classification === 'PRE_179') db.exec(sources.evidence.sql);
             if (locked.classification !== 'COMPLETE') {
                 db.exec(sources.guards.sql);
@@ -171,6 +188,9 @@ function installWorkflowStateGuards({ dbPath, apply = false } = {}) {
                 db.prepare('INSERT INTO "_schema_migrations" ("id","details") VALUES (?,?)')
                     .run(MARKER, JSON.stringify({ evidenceSha256: sources.evidence.sha256, guardsSha256: sources.guards.sha256 }));
             }
+            // A reviewed one-off schema installation intentionally precedes
+            // mapping. Validate its schema now; normal startup will independently
+            // refuse the pending plan until the unchanged status CLI completes it.
             const complete = classify(db, sources.evidence.sql, sources.guards.sql, sources.evidence.sha256, sources.guards.sha256, expected);
             if (complete.classification !== 'COMPLETE') throw refusal('WORKFLOW_GUARDS_SCHEMA_MISMATCH', 'The postflight schema is incomplete.');
             const evidence = postflight(db, expected);
@@ -193,10 +213,26 @@ function parseArguments(args) {
         if (arg === '--apply') options.apply = true;
         else if (arg === '--dry-run') continue;
         else if (arg === '--db' && args[index + 1] && !args[index + 1].startsWith('--')) options.dbPath = args[++index];
+        else if (arg === '--reviewed-status-sha256' && args[index + 1] && !args[index + 1].startsWith('--')) options.reviewedStatusSha256 = args[++index];
         else throw refusal('WORKFLOW_GUARDS_ARGUMENT_INVALID', `Unknown or incomplete argument: ${arg}`);
     }
     if (options.apply && seen.has('--dry-run')) throw refusal('WORKFLOW_GUARDS_ARGUMENT_INVALID', '--apply and --dry-run are mutually exclusive.');
+    if (options.reviewedStatusSha256 !== undefined && (!options.apply || !/^[a-f0-9]{64}$/.test(options.reviewedStatusSha256))) {
+        throw refusal('WORKFLOW_GUARDS_ARGUMENT_INVALID', '--reviewed-status-sha256 requires --apply and an exact 64-hex reviewed fingerprint.');
+    }
     return options;
+}
+
+// #179 pin 5992946755: the app process never installs a schema. Reuse the
+// installer's read-only classification and inventory, then require COMPLETE.
+function assertWorkflowStartupReady(dbPath) {
+    if (!fs.existsSync(dbPath)) throw refusal('DATABASE_NOT_FOUND',
+        'The database does not exist. Set DATABASE_PATH to the existing lab file and follow the reviewed setup procedure.');
+    const plan = installWorkflowStateGuards({ dbPath });
+    if (plan.classification !== 'COMPLETE') throw refusal('WORKFLOW_GUARDS_NOT_INSTALLED',
+        'Run node scripts/install_workflow_state_guards.js --apply, or the reviewed legacy-status upgrade procedure when candidates exist.');
+    assertReviewedStatusPlan(plan);
+    return { classification: plan.classification, inventory: plan.inventory, totalChanges: plan.totalChanges };
 }
 
 if (require.main === module) {
@@ -208,4 +244,4 @@ if (require.main === module) {
     }
 }
 
-module.exports = { MARKER, installWorkflowStateGuards, parseArguments };
+module.exports = { MARKER, installWorkflowStateGuards, parseArguments, assertWorkflowStartupReady };

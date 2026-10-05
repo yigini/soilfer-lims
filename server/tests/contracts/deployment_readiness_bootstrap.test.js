@@ -14,6 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const cp = require('child_process');
+const { createHash } = require('node:crypto');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const { assertOwnedTestDatabase } = require('../helpers/testOwnedDatabase');
 
@@ -319,7 +320,10 @@ bash "${entryScript.replace(/\\/g, '/')}"
 
         const serverDir = path.resolve(__dirname, '..', '..');
         const targetDb = path.join(testDir, 'prisma', 'dev.db');
-        fs.copyFileSync(path.join(serverDir, 'prisma', 'dev.db'), targetDb);
+        const fixture = beforeGuards({ actor: 'system:fixture', installWorkflowStateGuards: true });
+        ownedSchemaDatabases.push(fixture.file);
+        // The inspection uses a fresh guarded schema, never working specimens.
+        fs.copyFileSync(fixture.file, targetDb, fs.constants.COPYFILE_EXCL);
 
         const Database = require('better-sqlite3');
         const db = new Database(targetDb);
@@ -330,6 +334,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
               .run('u-inspect-test', 'inspectadmin', 'hashedpass', 'inspect@soilfer.local', 'LAB_MANAGER', 1, now, now);
         }
         db.close();
+        const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');
+        const beforeSha = hashDb();
         fs.writeFileSync(path.join(testDir, 'prisma', '.seed_complete'), 'done');
 
         const entryContent = fs.readFileSync(path.join(repoRoot, 'docker-entrypoint.sh'), 'utf8');
@@ -337,6 +343,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
             .replace('cd /app/server', `cd "${testDir.replace(/\\/g, '/')}"`)
             .replace('cp /app/server/.schema-backup/schema.prisma', '# noop')
             .replace('exec node index.js', 'echo "LIMS_STARTED_SUCCESS"')
+            .replace('node scripts/install_workflow_state_guards.js --apply',
+                `node "${path.join(serverDir, 'scripts/install_workflow_state_guards.js').replace(/\\/g, '/')}" --apply`)
             .replace(/node scripts\/migrate_[^\n]+/g, '# noop migration');
 
         const entryScript = path.join(testDir, 'entrypoint.sh');
@@ -348,6 +356,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
             env: {
                 ...process.env,
                 JWT_SECRET: 'test-secret',
+                DATABASE_PATH: targetDb,
+                DATABASE_URL: `file:${targetDb}`,
                 NODE_PATH: path.join(repoRoot, 'server', 'node_modules')
             },
             encoding: 'utf8'
@@ -356,6 +366,10 @@ bash "${entryScript.replace(/\\/g, '/')}"
         expect(res.status).toBe(0);
         expect(res.stdout).toMatch(/LIMS_STARTED_SUCCESS/);
         expect(res.stdout + res.stderr).not.toMatch(/Database inspection failed/i);
+        expect(res.stdout).toContain('"mode": "NO_OP"');
+        expect(res.stdout).toContain('"classification": "COMPLETE"');
+        expect(res.stdout).toContain('"totalChanges": 0');
+        expect(hashDb()).toBe(beforeSha);
     });
 
     test('seed.js recovers from real partial state ({ labs: 1, users: 0 }) and does not duplicate LAB01', () => {

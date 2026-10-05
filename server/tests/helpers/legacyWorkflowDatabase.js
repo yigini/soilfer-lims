@@ -48,7 +48,8 @@ const VARIANTS = Object.freeze({
 // are installed. Existing constraints are never dropped, disabled or bypassed.
 function beforeGuards(options) {
     const allowedOptions = ['actor', 'file', 'samples', 'workItems', 'batches', 'preMigrationSnapshot',
-        'schemaVariant', 'markerPending', 'migrationOrder', 'relatedRows', 'installWorkflowStateGuards'];
+        'schemaVariant', 'markerPending', 'migrationOrder', 'relatedRows', 'installWorkflowStateGuards',
+        'reviewedStatusPlan', 'installerStatusRace'];
     if (Object.keys(options).some(key => !allowedOptions.includes(key))) throw new Error('Unknown historical fixture option.');
     const { actor, samples = [], workItems = [], batches = [], preMigrationSnapshot = false,
         schemaVariant = null, markerPending = false, migrationOrder = 'REHEARSAL', relatedRows = {} } = options;
@@ -56,6 +57,32 @@ function beforeGuards(options) {
     const useInstaller = Object.hasOwn(options, 'installWorkflowStateGuards');
     if (useInstaller && (options.installWorkflowStateGuards !== true || schemaVariant !== null || markerPending || migrationOrder !== 'REHEARSAL')) {
         throw new Error('The actual workflow installer is allowed only on the default schema-only fixture.');
+    }
+    // #179 pin 5992733495: the caller supplies the real read-only CLI record.
+    // This helper validates that review; it never creates an approval digest.
+    const hasReview = Object.hasOwn(options, 'reviewedStatusPlan');
+    const hasRace = Object.hasOwn(options, 'installerStatusRace');
+    let reviewedPlan;
+    if (hasReview) {
+        const record = options.reviewedStatusPlan;
+        if (!useInstaller || !record || typeof record !== 'object' || Array.isArray(record) ||
+            Object.keys(record).length !== 2 || Object.keys(record).some(key => !['plan', 'fingerprint'].includes(key)) ||
+            record.plan?.direction !== 'apply') throw new Error('A reviewed status record requires the default actual installer fixture.');
+        reviewedPlan = require('../../services/statusMigrationPlan').reviewPlan(record.plan, record.fingerprint);
+    }
+    if (hasRace) {
+        const race = options.installerStatusRace;
+        if (!hasReview || !race || typeof race !== 'object' || Array.isArray(race) ||
+            Object.keys(race).length !== 2 || Object.keys(race).some(key => !['sampleId', 'updatedAt'].includes(key))) {
+            throw new Error('An installer status race requires the reviewed status record and its exact declarative fields.');
+        }
+        const candidate = reviewedPlan.rows.find(row => row.entity === 'Sample' && row.id === race.sampleId);
+        const seeded = Array.isArray(samples) && samples.find(row => row.id === race.sampleId);
+        const date = typeof race.updatedAt === 'string' && new Date(race.updatedAt);
+        if (!candidate || !seeded || !date || !Number.isFinite(date.getTime()) || date.toISOString() !== race.updatedAt ||
+            new Date(seeded.updatedAt).toISOString() === race.updatedAt) {
+            throw new Error('The installer race must name a seeded Sample candidate and a different valid ISO timestamp.');
+        }
     }
     file = assertOwnedTestDatabase(file, actor);
     if (![samples, workItems, batches].every(Array.isArray)) throw new Error('Legacy fixture rows must be declarative arrays.');
@@ -257,22 +284,51 @@ function beforeGuards(options) {
                 indexes: db.prepare(`PRAGMA index_list("${name}")`).all(),
                 rows: db.prepare(`SELECT * FROM "${name}" ORDER BY rowid`).all() }));
             db.close();
+            if (hasRace) {
+                const statusScript = path.resolve(__dirname, '../../scripts/migrate_legacy_statuses.js');
+                const beforeRace = require('node:child_process').spawnSync(process.execPath, [statusScript, '--db', file], { encoding: 'utf8' });
+                assert.equal(beforeRace.status, 0, beforeRace.stderr);
+                assert.equal(JSON.parse(beforeRace.stdout).fingerprint, options.reviewedStatusPlan.fingerprint,
+                    'The owned seeded file must match the recorded review before the race.');
+                db = new Database(file, { fileMustExist: true });
+                db.pragma('foreign_keys = ON');
+                const race = options.installerStatusRace;
+                assert.equal(db.prepare('UPDATE "Sample" SET "updatedAt" = ? WHERE "id" = ?').run(race.updatedAt, race.sampleId).changes, 1);
+                for (const table of oldTables) {
+                    const retained = db.prepare(`SELECT * FROM "${table.name}" ORDER BY rowid`).all();
+                    const expected = table.rows.map(row => table.name === 'Sample' && row.id === race.sampleId
+                        ? { ...row, updatedAt: race.updatedAt } : row);
+                    assert.equal(JSON.stringify(retained), JSON.stringify(expected), 'The race may change only the candidate timestamp.');
+                }
+                db.close();
+                const afterRace = require('node:child_process').spawnSync(process.execPath, [statusScript, '--db', file], { encoding: 'utf8' });
+                assert.equal(afterRace.status, 0, afterRace.stderr);
+                assert.notEqual(JSON.parse(afterRace.stdout).fingerprint, options.reviewedStatusPlan.fingerprint,
+                    'The race must actually invalidate the reviewed fingerprint.');
+            }
             const beforeSha = createHash('sha256').update(fs.readFileSync(file)).digest('hex');
             const child = require('node:child_process').spawnSync(process.execPath,
-                [path.resolve(__dirname, '../../scripts/install_workflow_state_guards.js'), '--apply'],
+                [path.resolve(__dirname, '../../scripts/install_workflow_state_guards.js'), '--apply',
+                    ...(hasReview ? ['--reviewed-status-sha256', options.reviewedStatusPlan.fingerprint] : [])],
                 { env: { ...process.env, DATABASE_PATH: file, DATABASE_URL: `file:${file}` }, encoding: 'utf8' });
             const afterSha = createHash('sha256').update(fs.readFileSync(file)).digest('hex');
             if (child.error || child.status !== 0) {
                 assert.equal(afterSha, beforeSha, 'An installer refusal must preserve the owned file bytes.');
                 const response = child.stderr && JSON.parse(child.stderr);
+                if (hasRace) assert.equal(response?.error, 'WORKFLOW_STATUS_PLAN_STALE');
                 throw Object.assign(new Error(response?.message || child.error?.message || 'The real workflow installer refused the fixture.'),
                     { code: response?.error, differences: response?.differences, beforeSha, afterSha, exitStatus: child.status });
             }
+            if (hasRace) throw new Error('The actual installer accepted a stale reviewed plan.');
             installerOutcome = JSON.parse(child.stdout);
             assert.equal(installerOutcome.classification, 'PRE_179');
             assert.equal(installerOutcome.mode, 'APPLIED');
             db = new Database(file, { fileMustExist: true });
             db.pragma('foreign_keys = ON');
+            if (hasReview) for (const candidate of reviewedPlan.rows) {
+                const row = db.prepare(`SELECT status FROM "${candidate.entity}" WHERE id=?`).get(candidate.id);
+                assert.equal(row?.status, candidate.from, 'The installer must retain every original legacy status.');
+            }
             for (const table of oldTables) {
                 const names = table.columns.map(column => `"${column.name}"`).join(',');
                 const retained = table.name === '_schema_migrations'
