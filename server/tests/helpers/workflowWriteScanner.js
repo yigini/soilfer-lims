@@ -310,6 +310,7 @@ function scanSource(source, filename, exceptions = []) {
     }
     function embeddedProgram(p) {
         function childProcessModule(object, seen = new Set()) {
+            if (object?.isImportSpecifier()) return ['child_process', 'node:child_process'].includes(object.parentPath.node.source.value);
             if (object?.isCallExpression() && object.get('callee').isIdentifier({ name: 'require' })) {
                 return strings(object.get('arguments.0')).some(name => ['child_process', 'node:child_process'].includes(name));
             }
@@ -324,7 +325,14 @@ function scanSource(source, filename, exceptions = []) {
         }
         const argumentsToCheck = [];
         if (p.get('callee').isIdentifier({ name: 'Function' })) argumentsToCheck.push(...p.get('arguments'));
-        for (const target of method(p.get('callee'))) {
+        const targets = method(p.get('callee'));
+        if (p.get('callee').isIdentifier()) {
+            const imported = p.scope.getBinding(p.node.callee.name)?.path;
+            if (imported?.isImportSpecifier() && ['child_process', 'node:child_process', 'fs', 'node:fs', 'vm', 'node:vm']
+                .includes(imported.parentPath.node.source.value)) targets.push({
+                name: imported.node.imported.name || imported.node.imported.value, object: imported });
+        }
+        for (const target of targets) {
             if (['spawn', 'spawnSync', 'execFile', 'execFileSync'].includes(target.name) ||
                 (['exec', 'execSync'].includes(target.name) && childProcessModule(target.object))) {
                 argumentsToCheck.push(...p.get('arguments'));

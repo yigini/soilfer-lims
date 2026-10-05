@@ -54,6 +54,8 @@ test('all handwritten runtime, script, seed and test Sample/WorkItem writes use 
 });
 
 test.each([
+    "import {execSync as launch} from 'node:child_process';launch(\"node -e `db.exec('DELETE FROM Sample')`\")",
+    "import {writeFileSync as saveProgram} from 'node:fs';saveProgram('program.cjs',\"db.exec('UPDATE WorkItem SET metadata = 1')\")",
     "const {spawnSync}=require('node:child_process');spawnSync('node',['-e',\"db.exec('INSERT INTO Sample (id) VALUES (1)')\"])",
     "const cp=require('child_process');const code=`db.prepare('UPDATE \\\"WorkItem\\\" SET result = 1')`;cp.spawn('node',['-e',code])",
     "const cp=require('child_process');cp.exec(`node -e \\\"db.exec('delete from \\\\\\\"Sample\\\\\\\"')\\\"`)",
