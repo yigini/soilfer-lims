@@ -8,6 +8,7 @@ const policies = require('../../services/policyService');
 const workbench = require('../../controllers/workbenchController');
 const submissions = require('../../controllers/submissionController');
 const operations = require('../../services/operationalConfirmationService');
+const workController = require('../../controllers/workItemController');
 const labId = randomUUID();
 const technician = { username: `state-tech-${randomUUID()}`, role: 'LAB_TECHNICIAN', labId };
 const manager = { username: `state-manager-${randomUUID()}`, role: 'LAB_MANAGER', labId };
@@ -133,4 +134,20 @@ test('one preparation-blocked sample rolls back the whole workbench submission b
     const before = await snapshot(ids);
     expect(await call(workbench.commitSubmissions, { sampleIds: ids })).toMatchObject({ statusCode: 409, body: { code: 'PREP_REVERTED_RESULTS' } });
     expect(await snapshot(ids)).toEqual(before);
+});
+
+test('generic work status audit failure rolls back the state, version and history', async () => {
+    const row = await fixture('PROCESSING', 'ASSIGNED'), before = await snapshot([row.sample.id]);
+    failAudit('STATUS_CHANGE');
+    expect((await call(workController.updateWorkItemStatus, { status: 'IN_PROGRESS', version: row.item.version }, { id: row.item.id })).statusCode).toBe(500);
+    expect(await snapshot([row.sample.id])).toEqual(before);
+});
+test('completed work requires a real reason before the generic reopen edge', async () => {
+    const row = await fixture(), before = await snapshot([row.sample.id]);
+    expect(await call(workController.updateWorkItemStatus, { status: 'IN_PROGRESS', version: row.item.version }, { id: row.item.id }))
+        .toMatchObject({ statusCode: 400, body: { code: 'TRANSITION_REASON_REQUIRED' } });
+    expect(await snapshot([row.sample.id])).toEqual(before);
+    expect((await call(workController.updateWorkItemStatus, { status: 'IN_PROGRESS', reason: 'Repeat the preparation check',
+        version: row.item.version }, { id: row.item.id })).statusCode).toBe(200);
+    expect(await prisma.workItem.findUnique({ where: { id: row.item.id } })).toMatchObject({ status: 'IN_PROGRESS', result: row.item.result });
 });

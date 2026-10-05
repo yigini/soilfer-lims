@@ -86,6 +86,7 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
             rules.requireReason(reason);
         } else {
             const current = workflow.normalizeWorkItemState(item.status);
+            if (current === 'COMPLETED' && nextStatus === 'IN_PROGRESS') rules.requireReason(reason);
             if ((current !== nextStatus || options.action) && !assertActionEdge(item, sample, nextStatus, actor, reason, options)) {
                 throw new TransitionError(`Illegal status transition: ${current} → ${nextStatus}.`, 409, 'ILLEGAL_STATUS_TRANSITION');
             }

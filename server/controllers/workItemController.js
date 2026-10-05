@@ -11,6 +11,8 @@ const { createNotification } = require('./notificationController');
 const { getAnalysisName } = require('../services/analysisService');
 const { getDisplayName } = require('./messageController');
 const wsServer = require('../wsServer');
+const stateRules = require('../services/workflowStateRules');
+const { transitionWorkItem } = require('../services/workItemStateService');
 
 // Helper to get effective analysis list for a sample
 const getEffectiveAnalyses = (sample) => {
@@ -246,33 +248,23 @@ exports.assignWork = async (req, res) => {
                 action: 'ASSIGNED'
             });
 
-            await prisma.workItem.update({
-                where: { id: item.id },
-                data: {
-                    status: workflow.WORK_ITEM_STATES.ASSIGNED,
+            const analysis = await getAnalysisName(item.analysis);
+            try {
+                await transitionWorkItem(item.id, workflow.WORK_ITEM_STATES.ASSIGNED, user,
+                    item.status === 'ON_HOLD' ? req.body.reason : `Assigned to ${assignee}`, {
                     assignedTo: assignee,
                     assignedBy: user.username,
                     assignedAt: now,
                     priority: priority || item.priority || 'NORMAL',
                     dueDate: dueDate ? new Date(dueDate) : (item.dueDate || null),
                     history: JSON.stringify(history)
-                }
-            });
-
-            const analysis = await getAnalysisName(item.analysis);
-            await prisma.auditLog.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    entity: 'WORKITEM',
-                    entityId: item.id,
-                    action: 'WORKITEM_ASSIGNED',
-                    details: `${user.username} assigned ${analysis} to ${assignee}`,
-                    performedBy: user.username,
-                    timestamp: now,
-                    sampleId: item.sampleId,
-                    analysisCode: item.analysis
-                }
-            });
+                }, null, { expected: { status: item.status, version: item.version }, audit: {
+                    action: 'WORKITEM_ASSIGNED', details: `${user.username} assigned ${analysis} to ${assignee}` } });
+            } catch (error) {
+                if (!error.statusCode) throw error;
+                errors.push({ id: item.id, error: error.message, code: error.code });
+                continue;
+            }
 
             // Send notification (bell) to assignee
             await createNotification(
@@ -308,19 +300,21 @@ exports.assignWork = async (req, res) => {
         // Cleanup: If any items were in broken state but now assigned, it's fixed.
         // We also run a global cleanup for this specific sample just in case.
         if (dbItems.length > 0) {
-            await prisma.workItem.updateMany({
+            const orphaned = await prisma.workItem.findMany({
                 where: {
                     sampleId: dbItems[0].sampleId,
                     status: 'ASSIGNED',
                     assignedTo: null
-                },
-                data: { status: 'NOT_ASSIGNED' }
+                }
             });
+            for (const item of orphaned) await transitionWorkItem(item.id, 'NOT_ASSIGNED', user, 'Repair assignment without an assignee', {},
+                null, { expected: { status: item.status, version: item.version }, audit: { action: 'WORKITEM_ASSIGNMENT_REPAIRED' } });
         }
         if (assignedCount === 0 && dbItems.length > 0) {
             return res.status(400).json({
                 success: false,
                 error: errors[0]?.error || 'Failed to assign work items due to business rules.',
+                ...(errors[0]?.code && { code: errors[0].code }),
                 errors
             });
         }
@@ -350,7 +344,8 @@ exports.assignWork = async (req, res) => {
         res.json({ success: true, assigned: assignedCount, errors: errors.length > 0 ? errors : undefined });
     } catch (error) {
         console.error('[assignWork] Error:', error);
-        res.status(500).json({ error: 'Failed to assign work' });
+        res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to assign work',
+            ...(error.code && { code: error.code }) });
     }
 };
 
@@ -548,6 +543,7 @@ exports.updateWorkItemStatus = async (req, res) => {
 
         const sample = await prisma.sample.findUnique({ where: { id: String(item.sampleId) } });
         if (!sample) return res.status(404).json({ error: 'Parent Sample not found' });
+        stateRules.assertScope(user, sample);
 
         if (status === workflow.WORK_ITEM_STATES.IN_PROGRESS || status === workflow.WORK_ITEM_STATES.COMPLETED) {
             if (item.category !== 'Post-Analytical') {
@@ -714,49 +710,32 @@ exports.updateWorkItemStatus = async (req, res) => {
             updateData.completedAt = now;
         }
 
-        // Concurrency check using version
-        const updatedItem = await prisma.workItem.update({
-            where: { id, version: version !== undefined ? version : item.version },
-            data: updateData
-        });
-
-        const analysisName = getAnalysisName(item.analysis);
-        const operations = [];
-
-        if (item.status !== status) {
-            operations.push(prisma.auditLog.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    entity: 'WORKITEM',
-                    entityId: id,
-                    action: 'STATUS_CHANGE',
-                    details: `${user.username} changed status to ${status}${equipmentId ? ` using equipment ${equipmentId}` : ''}`,
-                    performedBy: user.username,
-                    timestamp: now,
-                    sampleId: String(item.sampleId),
-                    analysisCode: item.analysis
-                }
-            }));
-        }
-
-        // Handle Equipment Usage Logging
-        if (equipmentId) {
-            operations.push(prisma.workItemEquipmentUse.create({
+        const nextStatus = status || item.status;
+        delete updateData.status;
+        const reasonRequired = nextStatus === 'ON_HOLD' || item.status === 'ON_HOLD' ||
+            item.status === 'COMPLETED' && nextStatus === 'IN_PROGRESS';
+        const updatedItem = await stateRules.inTransaction(prisma, async tx => {
+            const updated = await transitionWorkItem(id, nextStatus, user,
+                reasonRequired ? req.body.reason : req.body.reason || 'Work item updated via API', updateData, tx,
+                { expected: { status: item.status, version: version !== undefined ? version : item.version },
+                    conflictCode: 'VERSION_CONFLICT', audit: {
+                        action: item.status !== nextStatus ? 'STATUS_CHANGE' : 'WORKITEM_UPDATED',
+                        details: `${user.username} updated ${item.analysis} to ${nextStatus}${equipmentId ? ` using equipment ${equipmentId}` : ''}`
+                    } });
+            if (equipmentId) await tx.workItemEquipmentUse.create({
                 data: {
                     id: `use-${id}-${Date.now()}`,
-                    labId: item.labId || item.assignedLab,
+                    labId: item.assignedLab || sample.assignedLab || user.labId,
                     workItemId: id,
                     sampleId: item.sampleId,
                     equipmentId,
                     usedAt: now,
                     notes: `Used during ${item.analysis} result entry`
                 }
-            }));
-        }
-
-        if (operations.length > 0) {
-            await prisma.$transaction(operations);
-        }
+            });
+            return updated;
+        });
+        const analysisName = await getAnalysisName(item.analysis);
 
         // Real-time push: broadcast WORKITEM_UPDATE to all connected users
         try {
@@ -785,7 +764,9 @@ exports.updateWorkItemStatus = async (req, res) => {
             return res.status(409).json({ error: 'Version conflict or item not found', code: 'VERSION_CONFLICT' });
         }
         console.error('[updateWorkItemStatus] Error:', error);
-        res.status(500).json({ error: 'Failed to update status' });
+        const mapped = stateRules.mapStateError(error);
+        res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to update status',
+            ...(mapped.code && { code: mapped.code }) });
     }
 };
 
