@@ -9,8 +9,8 @@ const { createHash } = require('node:crypto');
 const WORKFLOW_LOADER = 'services/workflowMigrationSources.js';
 const WORKFLOW_LOADER_SHA256 = '0b7f6010cc7b69a03ffe5aceb3c467dd5a718f51d25968e5aba07fcf8aaa1733';
 const RESULT_LOADER = 'services/resultAttemptMigrationSource.js';
-const RESULT_LOADER_SHA256 = '23c5d0cead64b5ef3c74d2c8782ad2e9c32e4a5c9d1a2daeb3e7d705dd52eca2';
-const RESULT_SQL_SHA256 = '332edb0ea6491b4c66dd581c34acbb5ba7db757cd48c5b502eac8f00a21d51f1';
+const RESULT_LOADER_SHA256 = '36658af9e2a6fa817ff4938ad08ac6879ff10a2969acf1a395a68cad5f37a655';
+const RESULT_SQL_SHA256 = 'aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d';
 const WORKFLOW_SOURCES = Object.freeze({
     evidence: { directory: '20261005000000_workflow_state_evidence', sha256: 'ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552' },
     guards: { directory: '20261005000100_workflow_state_guards', sha256: '84921ef45fa8609621b38908de5261d716820f2135f2dde1b9a20fafa6fc81ed' }
@@ -39,7 +39,7 @@ function scanSource(source, filename, exceptions = []) {
     const rawResultCreate = text => /\b(?:INSERT\s+(?:OR\s+\w+\s+)?INTO|REPLACE\s+INTO)\s+(?:["`\[]?\w+["`\]]?\s*\.\s*)?["`\[]?Result(?:["`\]]|\b)/i.test(text);
     const rawCacheWrite = text => [...text.matchAll(/\bUPDATE(?:\s+OR\s+\w+)?\s+(?:["`\[]?\w+["`\]]?\s*\.\s*)?["`\[]?WorkItem(?:["`\]]|\b)\s+SET\s+([\s\S]*?)(?=\bWHERE\b|;|$)/gi)]
         .some(match => /(?:^|,)\s*["`\[]?result["`\]]?\s*=/i.test(match[1]));
-    const disabling = text => /\bDROP\s+TRIGGER\s+(?:IF\s+EXISTS\s+)?["`\[]?(?:Sample_status_(?:insert|update)_guard|WorkItem_status_(?:insert|update)_guard|Batch_status_(?:insert|update)_guard|ReviewDecision_decision_(?:insert_guard|immutable)|ResultEvidenceEvent_(?:insert_guard|update_immutable|delete_immutable))\b|\bPRAGMA\s+(?:foreign_keys|recursive_triggers)\s*=\s*(?:OFF|0)\b/i.test(text) ||
+    const disabling = text => /\bDROP\s+TRIGGER\s+(?:IF\s+EXISTS\s+)?["`\[]?(?:Sample_status_(?:insert|update)_guard|WorkItem_status_(?:insert|update)_guard|Batch_status_(?:insert|update)_guard|ReviewDecision_decision_(?:insert_guard|immutable)|ResultEvidenceEvent_(?:insert_guard|update_immutable|delete_immutable)|Result_attempt_(?:insert|update)_guard|WorkAttempt_result_reference_guard)\b|\bPRAGMA\s+(?:foreign_keys|recursive_triggers)\s*=\s*(?:OFF|0)\b/i.test(text) ||
         (exceptions.some(entry => entry.file === filename) && /\bDROP\s+TRIGGER\b|db\s+push\s+--accept-data-loss/i.test(text));
     if (!/\.(?:js|cjs|mjs)$/.test(filename)) {
         if (rawWrite(source)) report(null, 'RAW_WORKFLOW_SQL', 'Sample/WorkItem SQL write outside the central authority.');

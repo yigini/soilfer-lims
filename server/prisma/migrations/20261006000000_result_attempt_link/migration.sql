@@ -15,7 +15,7 @@ BEGIN
 END;
 
 CREATE TRIGGER "Result_attempt_update_guard"
-BEFORE UPDATE OF "attemptId" ON "Result"
+BEFORE UPDATE OF "attemptId", "sampleId" ON "Result"
 WHEN NEW."attemptId" IS NOT NULL
 BEGIN
     SELECT CASE

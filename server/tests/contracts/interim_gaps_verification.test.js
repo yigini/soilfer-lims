@@ -202,11 +202,11 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
             await prisma.commandReceipt.deleteMany({
                 where: { actor: { in: [techA.username, techA2.username, managerA.username, superAdmin.username] } }
             });
-            await prisma.workAttempt.deleteMany({
-                where: { workItemId: { in: [testAnalyticalItem.id, testDryingItem.id, testSpectralItem.id] } }
-            });
             await prisma.result.deleteMany({
                 where: { sampleId: testSample.id }
+            });
+            await prisma.workAttempt.deleteMany({
+                where: { workItemId: { in: [testAnalyticalItem.id, testDryingItem.id, testSpectralItem.id] } }
             });
             await prisma.workItemDraft.deleteMany({
                 where: { workItemId: { in: [testAnalyticalItem.id, testDryingItem.id, testSpectralItem.id] } }

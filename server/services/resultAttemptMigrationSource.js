@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
 const DIRECTORY = '20261006000000_result_attempt_link';
-const SHA256 = '332edb0ea6491b4c66dd581c34acbb5ba7db757cd48c5b502eac8f00a21d51f1';
+const SHA256 = 'aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d';
 
 function loadResultAttemptMigrationSource() {
     const root = path.resolve(__dirname, '..', fs.existsSync('/.dockerenv') ? '.migrations-backup/182' : 'prisma/migrations');

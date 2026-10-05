@@ -505,7 +505,7 @@ exports.getQueue = async (req, res) => {
             const assets = await prisma.equipmentAsset.findMany({
                 where: { id: { in: allEligibleIds }, status: 'IN_SERVICE' },
                 select: {
-                    id: true, name: true, assetType: true, status: true,
+                    id: true, labId: true, name: true, assetType: true, status: true,
                     qualification: {
                         select: { calibrationStatus: true, nextCalibrationDueDate: true }
                     }
@@ -514,11 +514,13 @@ exports.getQueue = async (req, res) => {
             assets.forEach(a => {
                 assetMap[a.id] = {
                     id: a.id,
+                    labId: a.labId,
                     name: a.name,
                     assetType: a.assetType,
                     status: a.status,
                     calibrationStatus: a.qualification?.calibrationStatus || 'NOT_CONFIGURED',
-                    nextCalibrationDue: a.qualification?.nextCalibrationDueDate || null
+                    nextCalibrationDue: a.qualification?.nextCalibrationDueDate || null,
+                    nextCalibrationDueDate: a.qualification?.nextCalibrationDueDate || null
                 };
             });
         }
@@ -787,7 +789,8 @@ exports.batchSave = async (req, res) => {
 
             const checklist = operationalChecklists[item.analysis];
             const isOperationalTask = !!checklist;
-            const executionReadiness = await readinessService.evaluateExecutionReadiness(prisma, item, user);
+            const executionReadiness = await readinessService.evaluateExecutionReadiness(prisma, item, user,
+                { selectedEquipmentId: entry.equipmentId || item.equipmentId });
             if (!executionReadiness.isReady) {
                 if (executionReadiness.blockers.includes('GATE_STATE_MISMATCH')) throw new stateRules.TransitionError(
                     executionReadiness.reasons.join('; '), 409, 'GATE_STATE_MISMATCH');
@@ -1130,7 +1133,8 @@ exports.batchSave = async (req, res) => {
                     const measurement = { param: item.analysis, value: entry.value, replicateNo: entry.replicateNo,
                         basis: entry.basis, methodologyId: item.methodologyId, equipmentId: entry.equipmentId,
                         provenance: entry.provenance || 'MEASURED', flags: validation.flags || [],
-                        overrideReason: entry.overrideReason };
+                        overrideReason: entry.overrideReason,
+                        ...(Object.hasOwn(entry, 'batchId') && { batchId: entry.batchId }) };
                     let attemptId = null;
                     // Link the texture attempt that this path already produced;
                     // general attempt creation/numbering remains in #190.
@@ -1509,15 +1513,17 @@ exports.previewCompletion = async (req, res) => {
             const assets = await prisma.equipmentAsset.findMany({
                 where: { id: { in: allEquipIds } },
                 select: {
-                    id: true, name: true, status: true,
-                    qualification: { select: { calibrationStatus: true } }
+                    id: true, labId: true, name: true, status: true,
+                    qualification: { select: { calibrationStatus: true, nextCalibrationDueDate: true } }
                 }
             });
             assets.forEach(a => assetMap[a.id] = {
                 id: a.id,
+                labId: a.labId,
                 name: a.name,
                 status: a.status,
-                calibrationStatus: a.qualification?.calibrationStatus || 'NOT_CONFIGURED'
+                calibrationStatus: a.qualification?.calibrationStatus || 'NOT_CONFIGURED',
+                nextCalibrationDueDate: a.qualification?.nextCalibrationDueDate || null
             });
         }
 

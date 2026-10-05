@@ -1,5 +1,4 @@
 'use strict';
-const { createResultFixture } = require('../../services/resultWriteService');
 
 
 const { createSampleFixture } = require('../helpers/workflowFixtures');
@@ -77,6 +76,8 @@ describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts',
         require('../../scripts/migrate_exchange_journal_tables.cjs').migrateExchangeTables(databasePath);
 
         prisma = require('../../prisma');
+        // Bind the fixture writer only after selecting this owned database.
+        const { createResultFixture } = require('../../services/resultWriteService');
         state = require('../../services/exchangeStateService');
         db = state.getDb();
         middleware = require('../../middleware/apiKeyAuth');

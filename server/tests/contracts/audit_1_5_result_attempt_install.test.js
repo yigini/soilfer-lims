@@ -94,7 +94,7 @@ test('startup refuses a pending additive install and CLI rejects conflicting mod
 });
 
 test('closed migration loader is hash-bound, cannot be aliased or shadowed into SQL authority', () => {
-    expect(loadResultAttemptMigrationSource().sha256).toBe('332edb0ea6491b4c66dd581c34acbb5ba7db757cd48c5b502eac8f00a21d51f1');
+    expect(loadResultAttemptMigrationSource().sha256).toBe('aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d');
     const header = "const {loadResultAttemptMigrationSource}=require('../services/resultAttemptMigrationSource');const source=loadResultAttemptMigrationSource();";
     expect(scanSource(header + 'db.exec(source.sql)', 'scripts/result-attempt-probe.js')).toEqual([]);
     expect(scanSource(header + 'const alias=source; db.exec(alias.sql)', 'scripts/result-attempt-probe.js')).toEqual(expect.arrayContaining([expect.objectContaining({ code: 'UNRESOLVED_WORKFLOW_SQL' })]));

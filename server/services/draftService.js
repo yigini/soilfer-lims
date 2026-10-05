@@ -66,7 +66,8 @@ async function saveDraft(user, input, db = null) {
         }
     }
 
-    const readiness = await require('./workbenchReadinessService').evaluateExecutionReadiness(db, workItem, user);
+    const readiness = await require('./workbenchReadinessService').evaluateExecutionReadiness(db, workItem, user,
+        { selectedEquipmentId: instrumentId || workItem.equipmentId });
     if (!readiness.isReady) throw new rules.TransitionError(readiness.reasons.join(' '), 409,
         readiness.blockers.includes('GATE_STATE_MISMATCH') ? 'GATE_STATE_MISMATCH' : 'EXECUTION_BLOCKED');
 

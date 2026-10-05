@@ -72,7 +72,9 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
             item = { ...item, sample, equipmentId: measurement.equipmentId || item.equipmentId };
             const ready = await evaluateExecutionReadiness(tx, item, actor);
             if (!ready.isReady) throw new TransitionError(ready.reasons.join('; '), 409, ready.blockers[0] || 'EXECUTION_BLOCKED');
-        } else if (!parseJson(sample.requiredAnalyses, []).includes(measurement.param)) {
+        } else if (!parseJson(sample.requiredAnalyses, []).includes(measurement.param) &&
+            !(source === 'derived' && measurement.param === 'TEXTURE' &&
+                FRACTIONS.every(param => parseJson(sample.requiredAnalyses, []).includes(param)))) {
             throw new TransitionError('Parameter is not ordered for the sample.', 409, 'RESULT_NOT_ORDERED');
         }
     }
@@ -167,7 +169,7 @@ async function writeTextureDetermination(tx, options) {
     const now = options.now || new Date(), rows = [];
     for (const param of FRACTIONS) {
         const value = options.fractions[param.toLowerCase()] ?? options.fractions[param];
-        const fraction = { ...measurement, param, value, rawInput: String(value) };
+        const fraction = { ...measurement, id: randomUUID(), param, value, rawInput: String(value) };
         rows.push(await appendResult(tx, ctx, fraction, await numericValues(tx, ctx, fraction), now));
     }
     const flags = ['DERIVED_USDA_12_CLASS', ...rows.map(row => `SOURCE_${row.param}_${row.id}`),

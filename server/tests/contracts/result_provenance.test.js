@@ -23,7 +23,8 @@ describe('WP-31: Result Provenance Tracking', () => {
             email: `${analyst.username}@example.test`, password: 'isolated-fixture'
         } });
         for (const [code, name, units] of [['EC', 'Electrical conductivity', 'dS/m'], ['CLAY_PRED', 'Predicted clay fraction', '%'], ['SOC', 'Soil organic carbon', 'g/kg'], ['TOTAL_N', 'Total nitrogen', 'g/kg']]) {
-            await prisma.analysis.upsert({ where: { code }, create: { code, name, units, status: 'active' }, update: { name, units, labId: null } });
+            await prisma.analysis.upsert({ where: { code }, create: { code, name, units, status: 'active', validation: '{}' },
+                update: { name, units, labId: null, validation: '{}' } });
         }
         await createSampleFixture(prisma, {
             data: {

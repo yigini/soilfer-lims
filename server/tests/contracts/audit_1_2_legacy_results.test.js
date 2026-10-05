@@ -35,12 +35,15 @@ async function snapshot(row) {
         submissions: await prisma.submission.findMany({ where: { sampleId: row.sample.id }, orderBy: { id: 'asc' } }) };
 }
 
-test.each(['PROCESSING', 'SUBMITTED_PARTIAL'])('saving results keeps %s lifecycle and every WorkItem unchanged', async status => {
+test.each(['PROCESSING', 'SUBMITTED_PARTIAL'])('saving results keeps %s lifecycle and WorkItem state while refreshing only its result cache', async status => {
     const row = await fixture(status), before = await snapshot(row);
     expect((await save(row)).status).toBe(200);
     const after = await snapshot(row);
     expect(after.sample).toEqual(before.sample);
-    expect(after.items).toEqual(before.items);
+    const withoutCache = items => items.map(({ result, updatedAt, ...item }) => item);
+    expect(withoutCache(after.items)).toEqual(withoutCache(before.items));
+    expect(after.items[0].result).toBe('7.2');
+    expect(after.audits.filter(audit => audit.action === 'RESULT_RECORDED')).toHaveLength(1);
     expect(after.submissions).toEqual(before.submissions);
     expect(after.results).toHaveLength(2);
     const previous = after.results.find(result => result.id === row.result.id);

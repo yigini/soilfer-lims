@@ -593,7 +593,8 @@ class SyncService {
                     // 3. Grouped soil texture validation
                     const isTextureTask = item.analysis === 'TEXTURE' || ['SAND', 'SILT', 'CLAY', 'pSA', 'PSA', 'textureSum'].includes(item.analysis);
                     const textureFractions = op.payload?.values || (op.payload?.sand !== undefined ? { sand: op.payload.sand, silt: op.payload.silt, clay: op.payload.clay } : null);
-                    const numberFormat = await require('./numberFormatService').getNumberFormat(item.sample.assignedLab || item.assignedLab || item.sample.labId);
+                    const numberFormat = await require('./numberFormatService').getNumberFormat(
+                        item.sample.assignedLab || item.assignedLab || item.sample.labId, { db: prisma });
                     let textVal = null;
                     if (isTextureTask && textureFractions) {
                         const analysis = await prisma.analysis.findUnique({ where: { code: item.analysis } });
@@ -727,7 +728,8 @@ class SyncService {
                         const measurement = { id: newResultId, param: item.analysis, value: op.payload?.value ?? op.payload?.result,
                             replicateNo: repNo, basis: validBasis, equipmentId: op.payload?.equipmentId,
                             methodologyId: item.methodologyId, provenance: op.payload?.provenance || 'MEASURED',
-                            unit: op.payload?.unit, flags: op.payload?.flags || [], overrideReason: op.payload?.overrideReason };
+                            unit: op.payload?.unit, flags: op.payload?.flags || [], overrideReason: op.payload?.overrideReason,
+                            ...(Object.hasOwn(op.payload || {}, 'batchId') && { batchId: op.payload.batchId }) };
                         const writer = require('./resultWriteService');
                         const resultOptions = { sampleId: item.sampleId, workItemId: item.id, attemptId, actor: user, measurement, now };
                         if (isTextureTask && textVal && textureFractions) {

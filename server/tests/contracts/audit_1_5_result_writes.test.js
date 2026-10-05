@@ -53,17 +53,17 @@ test('workbench, offline sync, results API and import have a common shape and se
         const f = await fixture();
         if (source === 'workbench') {
             const response = await request(app).post('/api/workbench/batch-save').set('Authorization', `Bearer ${token}`)
-                .send({ draft: false, entries: [{ workItemId: f.item.id, value: '6,42', version: 0 }] });
+                .send({ draft: false, entries: [{ workItemId: f.item.id, value: '6,42', version: 0, batchId }] });
             expect(response).toMatchObject({ status: 200, body: { saved: 1 } });
         } else if (source === 'sync') {
             const response = await sync.applySyncOperations(actor, [{ operationId: randomUUID(), type: 'COMPLETE_WORK',
-                target: { workItemId: f.item.id }, baseVersion: 0, payload: { value: '6,42', unit: 'g/kg' } }]);
+                target: { workItemId: f.item.id }, baseVersion: 0, payload: { value: '6,42', unit: 'g/kg', batchId } }]);
             expect(response.receipts[0]).toMatchObject({ status: 'APPLIED' });
         } else if (source === 'api') {
             expect((await apiSave(f.sample.id, [measurement({ batchId })])).status).toBe(200);
         } else {
             const response = await request(app).post('/api/import/execute').set('Authorization', `Bearer ${token}`)
-                .send({ sampleIdColumn: 'sample', labId, columnMappings: [{ column: 'value', analysisCode: code, methodologyId: methodId, unitCode: 'g/kg' }],
+                .send({ sampleIdColumn: 'sample', labId, columnMappings: [{ column: 'value', analysisCode: code, methodologyId: methodId, unitCode: 'g/kg', batchId }],
                     rows: [{ sample: f.sample.id, value: '6,42' }] });
             expect(response).toMatchObject({ status: 200, body: { importedResults: 1 } });
         }
@@ -109,6 +109,27 @@ test('conflicting attempt and work item batches refuse with all-table zero write
         .rejects.toMatchObject({ statusCode: 409, code: 'RESULT_BATCH_CONFLICT' });
     expect(snapshot()).toEqual(before);
 });
+
+test.each(['workbench', 'sync', 'import'].flatMap(source => [null, 'assigned'].map(batch => [source, batch])))
+    ('%s refuses a client batch mismatch against %s without changing any table', async (source, batch) => {
+        const f = await fixture({ batch: batch === null ? null : batchId }), before = snapshot();
+        if (source === 'workbench') {
+            const response = await request(app).post('/api/workbench/batch-save').set('Authorization', `Bearer ${token}`)
+                .send({ draft: false, entries: [{ workItemId: f.item.id, value: '7.5', batchId: 'wrong-client-batch' }] });
+            expect(response).toMatchObject({ status: 409, body: { code: 'RESULT_BATCH_MISMATCH' } });
+        } else if (source === 'sync') {
+            const response = await sync.applySyncOperations(actor, [{ operationId: randomUUID(), type: 'COMPLETE_WORK',
+                target: { workItemId: f.item.id }, baseVersion: 0, payload: { value: '7.5', batchId: 'wrong-client-batch' } }]);
+            expect(response.receipts[0]).toMatchObject({ status: 'REJECTED', code: 'RESULT_BATCH_MISMATCH' });
+        } else {
+            const response = await request(app).post('/api/import/execute').set('Authorization', `Bearer ${token}`)
+                .send({ sampleIdColumn: 'sample', labId,
+                    columnMappings: [{ column: 'value', analysisCode: code, methodologyId: methodId, unitCode: 'g/kg', batchId: 'wrong-client-batch' }],
+                    rows: [{ sample: f.sample.id, value: '7.5' }] });
+            expect(response).toMatchObject({ status: 409, body: { code: 'RESULT_BATCH_MISMATCH' } });
+        }
+        expect(snapshot()).toEqual(before);
+    });
 
 test('texture creates one derived row per existing attempt, with original source provenance, and retry adds none', async () => {
     const f = await fixture({ analysis: 'TEXTURE' });
@@ -184,6 +205,8 @@ test('attempt insert/update and delete guards preserve every table and map stabl
     const f = await fixture(), other = await fixture(), attemptId = randomUUID();
     await prisma.workAttempt.create({ data: { id: attemptId, workItemId: f.item.id, author: actor.username } });
     const row = await prisma.$transaction(tx => writer.writeResult(tx, { sampleId: f.sample.id, workItemId: f.item.id, attemptId, actor, measurement: measurement() }));
+    const otherRow = await prisma.$transaction(tx => writer.writeResult(tx,
+        { sampleId: other.sample.id, workItemId: other.item.id, actor, measurement: measurement() }));
     const file = path.resolve(__dirname, '../.tmp', `audit_result_link_${randomUUID()}.db`);
     const original = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
     try { await original.backup(file); } finally { original.close(); }
@@ -192,6 +215,8 @@ test('attempt insert/update and delete guards preserve every table and map stabl
             ['INSERT INTO "Result" (id,sampleId,param,value,updatedAt,attemptId) VALUES (?,?,?,?,?,?)', [randomUUID(), f.sample.id, code, '5', new Date().toISOString(), 'missing-attempt'], 'RESULT_ATTEMPT_NOT_FOUND'],
             ['INSERT INTO "Result" (id,sampleId,param,value,updatedAt,attemptId) VALUES (?,?,?,?,?,?)', [randomUUID(), other.sample.id, code, '5', new Date().toISOString(), attemptId], 'RESULT_ATTEMPT_SAMPLE_MISMATCH'],
             ['UPDATE "Result" SET attemptId=? WHERE id=?', ['missing-attempt', row.id], 'RESULT_ATTEMPT_NOT_FOUND'],
+            ['UPDATE "Result" SET attemptId=? WHERE id=?', [attemptId, otherRow.id], 'RESULT_ATTEMPT_SAMPLE_MISMATCH'],
+            ['UPDATE "Result" SET sampleId=? WHERE id=?', [other.sample.id, row.id], 'RESULT_ATTEMPT_SAMPLE_MISMATCH'],
             ['DELETE FROM "WorkAttempt" WHERE id=?', [attemptId], 'RESULT_ATTEMPT_REFERENCED']
         ]) rejectedGuardWrite({ file, actor: 'system:fixture', statement, parameters, expectedGuardCode });
     } finally { fs.unlinkSync(file); }
@@ -205,3 +230,9 @@ test.each([
 ])('the write inventory catches an unauthorized result/cache writer: %s', source => {
     expect(scanSource(source, 'controllers/result-canary.js')).toHaveLength(1);
 });
+
+test.each(['Result_attempt_insert_guard', 'Result_attempt_update_guard', 'WorkAttempt_result_reference_guard'])
+    ('the write inventory refuses disabling %s', name => {
+        expect(scanSource(`db.exec('DROP TRIGGER "${name}"')`, 'controllers/result-canary.js'))
+            .toEqual([expect.objectContaining({ code: 'WORKFLOW_GUARD_DISABLED' })]);
+    });

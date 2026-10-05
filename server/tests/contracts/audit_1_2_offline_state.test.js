@@ -63,7 +63,10 @@ test('offline completion centrally records provenance and preserves superseded a
         flags: '["ORIGINAL_NOTE"]', isCurrent: false });
     expect(after.results.find(result => result.isCurrent)).toMatchObject({ value: '7.2', enteredBy: actor.username });
     expect(after.attempts).toHaveLength(1); expect(after.receipts).toHaveLength(1);
-    expect(after.audits).toHaveLength(before.audits.length + 1);
+    expect(after.audits.filter(audit => audit.action !== 'RESULT_RECORDED')).toHaveLength(before.audits.length + 1);
+    const resultAudits = after.audits.filter(audit => audit.action === 'RESULT_RECORDED');
+    expect(resultAudits).toHaveLength(1);
+    expect(resultAudits[0]).toMatchObject({ entityId: receipt.outcome.resultId, performedBy: actor.username });
     expect(after.audits.find(audit => audit.action === 'OFFLINE_WORK_COMPLETED').performedBy).toBe(actor.username);
 });
 
