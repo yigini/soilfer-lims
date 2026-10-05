@@ -196,7 +196,7 @@ async function createLegacyClosureDatabase({ analysis, labId, samples = [], work
 
 // Redirect only the existing route's database dependency. Every query and write
 // still executes against real Prisma/SQLite with the actual release triggers.
-function useLegacyRouteDatabase(prisma, client) {
+function useLegacyRouteDatabase(prisma, client, { allModels = false } = {}) {
     jest.spyOn(prisma, '$transaction').mockImplementation((...args) => client.$transaction(...args));
     const methods = {
         sample: ['findUnique', 'findMany', 'count', 'create', 'update', 'updateMany'],
@@ -210,6 +210,21 @@ function useLegacyRouteDatabase(prisma, client) {
         batch: ['findUnique', 'findMany', 'count', 'create', 'update', 'updateMany'],
         batchQcResult: ['findMany', 'count']
     };
+    if (allModels) {
+        // Forward database operations only, without fabricating auth, scope,
+        // policy or workflow outcomes. Integration tests keep the real routes,
+        // services, transactions, SQLite constraints and release guards.
+        const names = ['findUnique', 'findUniqueOrThrow', 'findFirst', 'findFirstOrThrow', 'findMany', 'count',
+            'aggregate', 'groupBy', 'create', 'createMany', 'update', 'updateMany', 'upsert', 'delete', 'deleteMany'];
+        for (const model of Object.keys(client)) {
+            if (!model.startsWith('_') && !model.startsWith('$') && typeof client[model]?.findMany === 'function') {
+                methods[model] = names.filter(name => typeof client[model][name] === 'function');
+            }
+        }
+        for (const name of ['$queryRaw', '$queryRawUnsafe', '$executeRaw', '$executeRawUnsafe']) {
+            jest.spyOn(prisma, name).mockImplementation((...args) => client[name](...args));
+        }
+    }
     for (const [model, names] of Object.entries(methods)) for (const name of names) {
         jest.spyOn(prisma[model], name).mockImplementation(args => client[model][name](args));
     }

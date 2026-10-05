@@ -374,12 +374,16 @@ app.get('/api/dashboard/live', verifyToken, async (req, res) => {
 
         // ── LAB_MANAGER / SUPER_ADMIN ──
         if (['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role)) {
+            const approvalDay = await require('./services/dashboardScope').resolveActorScope(user, { selectedLabId: effectiveLabId });
             // KPIs
             const [pendingIntakes, totalSamples, inProgress, completedToday] = await Promise.all([
                 prisma.sample.count({ where: { ...sampleWhere, status: { in: ['RECEIVED', 'COLLECTED'] } } }),
                 prisma.sample.count({ where: sampleWhere }),
                 prisma.sample.count({ where: { ...sampleWhere, status: { in: ['PROCESSING', 'PREPARATION', 'ANALYSIS', 'PARTIALLY_COMPLETE'] } } }),
-                prisma.sample.count({ where: { ...sampleWhere, status: 'COMPLETED', updatedAt: { gte: today } } }),
+                // Match the current dashboard's authoritative approval event;
+                // a historical COMPLETED spelling does not establish approval.
+                prisma.sample.count({ where: { ...sampleWhere, status: 'APPROVED',
+                    approvedAt: { gte: approvalDay.dayStart, lt: approvalDay.dayEnd } } }),
             ]);
 
             // Work items - Scoped via Scope Guard
