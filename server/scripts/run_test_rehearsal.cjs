@@ -5,7 +5,15 @@ const { spawnSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 
 // #179 pin 5990137651: a closed test-process boundary, never a fixture import.
-const rehearsals = new Set(['run_manager_dashboard_tasklist_side_by_side.cjs']);
+const rehearsals = new Set([
+    'run_manager_dashboard_tasklist_side_by_side.cjs',
+    'verify_issue149_3643053_remediations.cjs',
+    'verify_issue149_932cb6a_remediations.cjs',
+    'verify_issue149_9ac1202_remediations.cjs',
+    'verify_issue149_complete_remediations.cjs',
+    'verify_issue149_9850d78_remediations.cjs',
+    'verify_issue149_ccc08c2_remediations.cjs'
+]);
 function runTestRehearsal(name) {
     const owned = path.resolve(__dirname, '../tests/.tmp');
     const refuse = message => { console.error(`TEST_REHEARSAL_REFUSED: ${message}`); process.exitCode = 1; };
