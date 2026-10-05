@@ -33,8 +33,9 @@ describe('Spectral Library Stage B (SL-06 to SL-12)', () => {
                 originalId: sampleGtmId,
                 assignedLab: 'LAB-GTM',
                 labId: 'LAB-GTM',
-                status: 'APPROVED',
-                matrix: 'SOIL'
+                status: 'PROCESSING',
+                matrix: 'SOIL',
+                receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE'
             }
         });
 

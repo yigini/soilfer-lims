@@ -29,8 +29,9 @@ describe('Spectral Library Stage C (SL-13 to SL-16)', () => {
                 originalId: sampleGtmId,
                 assignedLab: 'LAB-GTM',
                 labId: 'LAB-GTM',
-                status: 'APPROVED',
-                matrix: 'SOIL'
+                status: 'PROCESSING',
+                matrix: 'SOIL',
+                receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE'
             }
         });
 
@@ -129,11 +130,12 @@ describe('Spectral Library Stage C (SL-13 to SL-16)', () => {
                 originalId: id,
                 assignedLab: 'LAB-GTM',
                 labId: 'LAB-GTM',
-                status: 'APPROVED',
-                matrix: 'SOIL'
+                status: 'PROCESSING',
+                matrix: 'SOIL',
+                receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE'
             });
         }
-        await prisma.sample.createMany({ data: dummySamples });
+        for (const data of dummySamples) await createSampleFixture(prisma, { data });
 
         // Target sample is at the end (record > 500)
         const targetSampleId = 'TEST-STAGEC-SMP-DUMMY-0505';

@@ -30,8 +30,9 @@ describe('Spectral Library Stage A (SL-01 to SL-05)', () => {
                 originalId: sampleGtmId,
                 assignedLab: 'LAB-GTM',
                 labId: 'LAB-GTM',
-                status: 'APPROVED',
-                matrix: 'SOIL'
+                status: 'PROCESSING',
+                matrix: 'SOIL',
+                receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE'
             }
         });
 
@@ -43,8 +44,9 @@ describe('Spectral Library Stage A (SL-01 to SL-05)', () => {
                 originalId: sampleMozId,
                 assignedLab: 'LAB-MOZ',
                 labId: 'LAB-MOZ',
-                status: 'APPROVED',
-                matrix: 'SOIL'
+                status: 'PROCESSING',
+                matrix: 'SOIL',
+                receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE'
             }
         });
 

@@ -94,6 +94,7 @@ function useLegacyRouteDatabase(prisma, client) {
         workItem: ['findUnique', 'findMany', 'count', 'create', 'update', 'updateMany'],
         result: ['findUnique', 'findFirst', 'findMany', 'count', 'create', 'update'],
         report: ['findUnique', 'findMany', 'count', 'create'],
+        spectralData: ['findUnique', 'findFirst', 'findMany', 'count', 'create', 'update', 'updateMany'],
         reviewDecision: ['create', 'findMany', 'count'],
         auditLog: ['create', 'findMany', 'findFirst', 'count'],
         submission: ['create', 'findUnique', 'update'],

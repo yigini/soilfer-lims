@@ -55,8 +55,9 @@ describe('Spectral Library Stage D: Quality Control Worth the Name (SL-17 to SL-
                 originalId: sampleGtmId,
                 assignedLab: 'LAB-GTM',
                 labId: 'LAB-GTM',
-                status: 'APPROVED',
-                matrix: 'SOIL'
+                status: 'PROCESSING',
+                matrix: 'SOIL',
+                receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE'
             }
         });
     });

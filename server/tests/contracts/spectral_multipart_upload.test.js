@@ -32,7 +32,8 @@ describe('Spectral Multipart Raw Ingest & Byte-Identical Preservation Contract (
                 labId: 'LAB-GTM',
                 assignedLab: 'LAB-GTM',
                 status: 'PROCESSING',
-                matrix: 'SOIL'
+                matrix: 'SOIL',
+                receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE'
             }
         });
     });

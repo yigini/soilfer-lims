@@ -166,7 +166,8 @@ describe('SD-13: Native Binary Spectral Parsers (Bruker OPUS, ASD, SPC)', () => 
                 country: 'GTM',
                 projectCode: 'SOILFER-US',
                 status: 'PROCESSING',
-                matrix: 'SOIL'
+                matrix: 'SOIL',
+                receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE'
             }
         });
     });
