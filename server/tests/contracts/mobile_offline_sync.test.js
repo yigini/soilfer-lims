@@ -1,5 +1,5 @@
-const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');

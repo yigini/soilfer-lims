@@ -716,7 +716,18 @@ exports.commitBatch = async (req, res) => {
 
         const manifestDir = path.join(UPLOADS_STAGING_DIR, manifestId);
         const committedEntries = { ...manifest.committedEntries };
+        const settledEntries = { ...manifest.settledEntries };
         const entryKey = item => String(item.id || item.filename);
+        const saveReceipt = () => {
+            const pendingPath = `${manifestPath}.pending`;
+            try {
+                fs.writeFileSync(pendingPath, JSON.stringify({ ...manifest, committedEntries, settledEntries }));
+                fs.renameSync(pendingPath, manifestPath);
+            } catch (receiptError) {
+                // Committed scan identities can recover an interrupted receipt.
+                console.warn('[COMMIT] Receipt save interrupted:', receiptError.message);
+            }
+        };
         const receiptFor = (scan, item, sample) => ({ id: scan.id, filename: item.filename, sampleId: scan.sampleId,
             labId: sample?.labId || null, qcStatus: scan.qcStatus, workItemId: scan.workItemId || null });
 
@@ -724,7 +735,7 @@ exports.commitBatch = async (req, res) => {
         // after the transaction committed. The entry identity travels with the scan.
         for (const item of manifest.items) {
             const key = entryKey(item);
-            if (Object.hasOwn(committedEntries, key)) continue;
+            if (Object.hasOwn(committedEntries, key) || Object.hasOwn(settledEntries, key)) continue;
             const scan = await prisma.spectralData.findFirst({ where: { AND: [
                 { metadata: { contains: `"manifestId":${JSON.stringify(manifestId)}` } },
                 { metadata: { contains: `"manifestEntryId":${JSON.stringify(key)}` } }
@@ -738,7 +749,7 @@ exports.commitBatch = async (req, res) => {
         }
 
         await spectralState.preflightBatch(manifest.items.filter(item => !item.parseError &&
-            !Object.hasOwn(committedEntries, entryKey(item))).map(item => ({ id: item.id, filename: item.filename,
+            !Object.hasOwn(committedEntries, entryKey(item)) && !Object.hasOwn(settledEntries, entryKey(item))).map(item => ({ id: item.id, filename: item.filename,
             check: async () => {
                 const decisionObj = decisions[item.id] || decisions[item.filename] || {};
                 const decision = decisionObj.decision || item.suggestedAction || 'PROCEED';
@@ -751,7 +762,7 @@ exports.commitBatch = async (req, res) => {
                 const target = targetId ? sample.workItems.find(w => w.id === targetId) ||
                     await prisma.workItem.findUnique({ where: { id: targetId } }) : null;
                 if (target && user.role === 'LAB_TECHNICIAN' && target.assignedTo && target.assignedTo !== user.username) return;
-                const reason = req.body.reopenReason || decisionObj.reopenReason;
+                const reason = spectralState.suppliedReopenReason(req.body.reopenReason, decisionObj.reopenReason);
                 const executableItem = await spectralState.prepareItem(prisma, target, sample.id, user,
                     { reopenReason: reason, preflight: true });
                 if (decision === 'REPLACE' || item.duplicateScanId) {
@@ -775,9 +786,20 @@ exports.commitBatch = async (req, res) => {
                 results.committedScans.push(committedEntries[key]);
                 continue;
             }
+            if (Object.hasOwn(settledEntries, key)) {
+                const receipt = settledEntries[key];
+                if (receipt.status === 'SKIPPED') results.skipped++;
+                else {
+                    results.failed++;
+                    results.errors.push({ filename: receipt.filename, error: receipt.error, terminal: true });
+                }
+                continue;
+            }
             if (item.parseError) {
                 results.failed++;
-                results.errors.push({ filename: item.filename, error: item.parseError });
+                results.errors.push({ filename: item.filename, error: item.parseError, terminal: true });
+                settledEntries[key] = { id: key, filename: item.filename, status: 'PARSE_ERROR', error: item.parseError };
+                saveReceipt();
                 continue;
             }
 
@@ -786,6 +808,8 @@ exports.commitBatch = async (req, res) => {
 
             if (decision === 'SKIP') {
                 results.skipped++;
+                settledEntries[key] = { id: key, filename: item.filename, status: 'SKIPPED' };
+                saveReceipt();
                 continue;
             }
 
@@ -844,7 +868,7 @@ exports.commitBatch = async (req, res) => {
             try {
                 const committedScan = await prisma.$transaction(async (tx) => {
                     const executableItem = await spectralState.prepareItem(tx, targetWorkItem, sample.id, user,
-                        { reopenReason: req.body.reopenReason || decisionObj.reopenReason });
+                        { reopenReason: spectralState.suppliedReopenReason(req.body.reopenReason, decisionObj.reopenReason) });
                     let supersedesId = null;
                     if (decision === 'REPLACE' || item.duplicateScanId) {
                         const priorScan = await tx.spectralData.findFirst({
@@ -860,7 +884,7 @@ exports.commitBatch = async (req, res) => {
                             supersedesId = priorScan.id;
                             const currentPrior = await spectralState.freshScan(tx, priorScan, user);
                             const priorItem = await spectralState.preparePriorItem(tx, currentPrior, user,
-                                executableItem?.id, req.body.reopenReason || decisionObj.reopenReason);
+                                executableItem?.id, spectralState.suppliedReopenReason(req.body.reopenReason, decisionObj.reopenReason));
                             await spectralState.updateScan(tx, currentPrior, {
                                 isCurrent: false, supersededBy: newScanId, supersededAt: new Date(),
                                 supersedeReason: decisionObj.rescanReason || 'Replaced by authorized rescan'
@@ -940,14 +964,7 @@ exports.commitBatch = async (req, res) => {
                 const receipt = receiptFor(committedScan, item, sample);
                 results.committedScans.push(receipt);
                 committedEntries[key] = receipt;
-                const pendingPath = `${manifestPath}.pending`;
-                try {
-                    fs.writeFileSync(pendingPath, JSON.stringify({ ...manifest, committedEntries }));
-                    fs.renameSync(pendingPath, manifestPath);
-                } catch (receiptError) {
-                    // The committed scan carries its entry identity for recovery.
-                    console.warn('[COMMIT] Receipt will be recovered from committed evidence:', receiptError.message);
-                }
+                saveReceipt();
             } catch (caughtError) {
                 const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
@@ -957,7 +974,7 @@ exports.commitBatch = async (req, res) => {
         }
 
         // A partial receipt remains retryable; successful entries are never replayed.
-        const complete = manifest.items.every(item => Object.hasOwn(committedEntries, entryKey(item)));
+        const complete = manifest.items.every(item => Object.hasOwn(committedEntries, entryKey(item)) || Object.hasOwn(settledEntries, entryKey(item)));
         try {
             if (complete && fs.existsSync(manifestDir)) {
                 fs.rmSync(manifestDir, { recursive: true, force: true });
@@ -970,6 +987,7 @@ exports.commitBatch = async (req, res) => {
             success: true,
             manifestId,
             complete,
+            settledEntries: Object.values(settledEntries),
             ...results
         };
 
@@ -1501,11 +1519,11 @@ exports.uploadBatch = async (req, res) => {
             if (preflight) {
                 checks.push({ filename: scanItem.filename, sampleId: sample?.id, check: async () => {
                     const executableItem = await spectralState.prepareItem(prisma, targetWorkItem, sample?.id, user,
-                        { reopenReason: req.body.reopenReason || scanItem.reopenReason, preflight: true });
+                        { reopenReason: spectralState.suppliedReopenReason(req.body.reopenReason, scanItem.reopenReason), preflight: true });
                     if (priorScan) {
                         const currentPrior = await spectralState.freshScan(prisma, priorScan, user);
                         await spectralState.preparePriorItem(prisma, currentPrior, user, executableItem?.id,
-                            req.body.reopenReason || scanItem.reopenReason, { preflight: true });
+                            spectralState.suppliedReopenReason(req.body.reopenReason, scanItem.reopenReason), { preflight: true });
                     }
                 } });
                 continue;
@@ -1520,12 +1538,12 @@ exports.uploadBatch = async (req, res) => {
                         await tx.sample.update({ where: { id: sample.id }, data: { assignedLab: user.labId } });
                     }
                     const executableItem = await spectralState.prepareItem(tx, targetWorkItem, sample?.id, user,
-                        { reopenReason: req.body.reopenReason || scanItem.reopenReason });
+                        { reopenReason: spectralState.suppliedReopenReason(req.body.reopenReason, scanItem.reopenReason) });
                     // Update prior scan supersession
                     if (priorScan) {
                         const currentPrior = await spectralState.freshScan(tx, priorScan, user);
                         const priorItem = await spectralState.preparePriorItem(tx, currentPrior, user,
-                            executableItem?.id, req.body.reopenReason || scanItem.reopenReason);
+                            executableItem?.id, spectralState.suppliedReopenReason(req.body.reopenReason, scanItem.reopenReason));
                         await spectralState.updateScan(tx, currentPrior, {
                             isCurrent: false, supersededBy: newScanId, supersededAt: new Date(),
                             supersedeReason: scanItem.rescanReason || 'New determination/rescan uploaded'

@@ -137,7 +137,7 @@ function updateData(extraData, nextStatus, normalize = value => value) {
 function assertNoRelationWrites(value, seen = new Set()) {
     if (!value || typeof value !== 'object' || value instanceof Date || seen.has(value)) return;
     seen.add(value);
-    const commands = ['create', 'createMany', 'connectOrCreate', 'update', 'updateMany', 'upsert', 'delete', 'deleteMany'];
+    const commands = ['create', 'createMany', 'connectOrCreate', 'update', 'updateMany', 'upsert', 'delete', 'deleteMany', 'connect', 'set', 'disconnect'];
     if (!Array.isArray(value) && commands.some(key => Object.hasOwn(value, key))) {
         throw new TransitionError('Nested relation writes must use the workflow authority.', 400, 'WORKFLOW_RELATION_WRITE_REFUSED');
     }

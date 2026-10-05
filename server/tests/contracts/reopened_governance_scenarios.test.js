@@ -1,5 +1,5 @@
-const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
 /**
  * Reopened Governance & Parity Scenarios Contract Tests

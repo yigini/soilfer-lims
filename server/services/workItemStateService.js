@@ -171,6 +171,7 @@ async function removeUnstartedWorkItems(tx, where, { actor, reason, code = 'WORK
     rules.requireTransaction(tx);
     const performedBy = rules.actorName(actor), note = rules.requireReason(reason);
     const items = await tx.workItem.findMany({ where });
+    const labs = new Map();
     if (where.sampleId && (await tx.result.count({ where: { sampleId: where.sampleId } }) ||
         await tx.spectralData.count({ where: { sampleId: where.sampleId } }))) {
         throw new TransitionError('Recorded analytical evidence must be retained.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
@@ -178,6 +179,7 @@ async function removeUnstartedWorkItems(tx, where, { actor, reason, code = 'WORK
     for (const item of items) {
         const sample = await tx.sample.findUnique({ where: { id: item.sampleId } });
         rules.assertScope(actor, sample);
+        labs.set(item.id, sample?.assignedLab || sample?.labId || item.assignedLab || item.labId || null);
         if (!['NOT_ASSIGNED', 'ASSIGNED'].includes(item.status)) {
             throw new TransitionError('Only unstarted work can be removed.', 409, 'ACTIVE_WORK_IN_PROGRESS');
         }
@@ -189,7 +191,10 @@ async function removeUnstartedWorkItems(tx, where, { actor, reason, code = 'WORK
     if (items.length) await tx.auditLog.create({ data: { id: randomUUID(), entity: 'WORKITEM', entityId: items.length === 1 ? items[0].id : 'BATCH',
         action: code, performedBy, details: note, timestamp: new Date(),
         sampleId: items.every(item => item.sampleId === items[0].sampleId) ? items[0].sampleId : null,
-        before: JSON.stringify(items.map(item => ({ id: item.id, status: item.status, sampleId: item.sampleId }))) } });
+        analysisCode: items.every(item => item.analysis === items[0].analysis) ? items[0].analysis : null,
+        labId: items.every(item => labs.get(item.id) === labs.get(items[0].id)) ? labs.get(items[0].id) : null,
+        before: JSON.stringify(items.map(item => ({ id: item.id, status: item.status, sampleId: item.sampleId,
+            analysisCode: item.analysis, labId: labs.get(item.id) }))) } });
     return { count: items.length };
 }
 

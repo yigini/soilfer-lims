@@ -143,7 +143,9 @@ async function removePreAnalyticSample(tx, ids, { actor, reason, code = 'SAMPLE_
     await require('./workItemStateService').removeUnstartedWorkItems(tx, sampleWhere, { actor, reason: note });
     await tx.submission.deleteMany({ where: sampleWhere });
     await tx.auditLog.create({ data: { id: randomUUID(), entity: 'SAMPLE', entityId: uniqueIds.length === 1 ? uniqueIds[0] : 'BATCH',
-        action: code, performedBy, details: note, before: JSON.stringify(uniqueIds), timestamp: new Date() } });
+        action: code, performedBy, details: note, before: JSON.stringify(uniqueIds), timestamp: new Date(),
+        labId: rows.every(row => (row.assignedLab || row.labId || null) === (rows[0].assignedLab || rows[0].labId || null))
+            ? rows[0].assignedLab || rows[0].labId || null : null } });
     const removed = await tx.sample.deleteMany({ where });
     return removed;
 }

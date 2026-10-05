@@ -1,5 +1,5 @@
-const { cleanupWorkflowFixtures } = require("../tests/helpers/workflowFixtures");
 'use strict';
+const { cleanupWorkflowFixtures } = require("../tests/helpers/workflowFixtures");
 
 /**
  * Browser Evidence Runner: Result Reports Query/Filter Lifecycle & Truthful No-Match (#124 Residual)
@@ -58,7 +58,7 @@ if (process.argv.includes('--refusal-check')) {
 const { runnerDir, dbPath } = createDisposableDatabase();
 process.env.DATABASE_PATH = validateDisposableDbPath(dbPath, runnerDir);
 process.env.DATABASE_URL = `file:${process.env.DATABASE_PATH}`;
-process.env.NODE_ENV = 'production';
+process.env.NODE_ENV = 'test';
 configureDisposableWorkflowFixtures(dbPath, runnerDir);
 const { createSampleFixture } = require('../tests/helpers/workflowFixtures');
 process.env.DISABLE_BACKGROUND_JOBS = 'true';

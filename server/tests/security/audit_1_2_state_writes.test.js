@@ -11,6 +11,9 @@ test.each([
     ['controllers/canary.js', 'prisma.project.create({data:{samples:{create:[{status:"APPROVED"}]}}})'],
     ['controllers/canary.js', 'const nested={create:[{status:"APPROVED"}]};prisma.project.create({data:{samples:nested}})'],
     ['controllers/canary.js', 'const key="workItems";const op="deleteMany";prisma.sample.update({data:{[key]:{[op]:{}}}})'],
+    ['controllers/canary.js', 'prisma.sample.create({data:{workItems:{connect:[{id:otherSampleItem}]}}})'],
+    ['controllers/canary.js', 'const relation={set:[{id}]};prisma.project.update({data:{samples:relation}})'],
+    ['controllers/canary.js', 'const op="disconnect";prisma.sample.update({data:{workItems:{[op]:[{id}]}}})'],
     ['controllers/canary.js', 'prisma.sample.update({where:{id},data:{workItems:{upsert:{create:{status:"ACCEPTED"},update:{status:"ACCEPTED"}}}}})'],
     ['controllers/canary.js', 'prisma.sample?.update({data:{status:"APPROVED"}})'],
     ['controllers/canary.js', 'prisma.sample.update?.({data:{status:"APPROVED"}})'],
@@ -25,6 +28,11 @@ test.each([
 test('the original rehearsal cannot reintroduce a direct Sample deletion', () => {
     expect(scanSource('db.prepare("DELETE FROM Sample WHERE id = ?").run(id)', 'tests/rehearsals/verify_issue149_working_review.cjs'))
         .toHaveLength(1);
+});
+
+test.each(['connect', 'set', 'disconnect'])('nested %s association has one actual authority finding', command => {
+    expect(scanSource(`prisma.project.update({data:{samples:{${command}:[{id}]}}})`, 'controllers/canary.js'))
+        .toEqual([expect.objectContaining({ code: 'WORKFLOW_WRITE_OUTSIDE_AUTHORITY' })]);
 });
 
 test.each(['unknown case', 'configured candidate'])('the closed FK runner refuses %s', kind => {

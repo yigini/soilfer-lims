@@ -1,5 +1,5 @@
-const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
 /**
  * Project Management Audit Regression & Acceptance Contract Suite (A01-A20, P01-P14)

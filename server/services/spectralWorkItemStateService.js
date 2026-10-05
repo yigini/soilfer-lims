@@ -5,6 +5,10 @@ const gates = require('./gateEvidenceService');
 const { transitionWorkItem } = require('./workItemStateService');
 const { evaluateExecutionReadiness } = require('./workbenchReadinessService');
 
+function suppliedReopenReason(...candidates) {
+    return candidates.find(value => typeof value === 'string' && value.trim())?.trim();
+}
+
 async function assertParent(tx, sampleId, actor) {
     if (!sampleId) return null; // Unlinked/control scans retain their existing contract.
     const sample = await tx.sample.findUnique({ where: { id: String(sampleId) } });
@@ -182,4 +186,4 @@ async function preflightBatch(entries) {
 }
 
 module.exports = { assertParent, freshScan, updateScan, prepareItem, completeItem, relatedItem,
-    preparePriorItem, recomputePriorItem, trashScan, auditScan, prepareReview, reviewScan, preflightBatch };
+    preparePriorItem, recomputePriorItem, trashScan, auditScan, prepareReview, reviewScan, preflightBatch, suppliedReopenReason };

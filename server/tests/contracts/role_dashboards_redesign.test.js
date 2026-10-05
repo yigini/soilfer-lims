@@ -1,3 +1,4 @@
+'use strict';
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Contract Test Suite: Coordinated All-Role Dashboard Redesign (v1)
@@ -17,7 +18,6 @@ const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
  * - Final approval eligibility & concurrency conflict (A17, A18, A19)
  * - Audit user read-only enforcement (A29)
  */
-'use strict';
 
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');

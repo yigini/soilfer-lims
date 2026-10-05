@@ -1,3 +1,4 @@
+'use strict';
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Contract Test Suite: QC Batch Inspection, Disposition & Release Gates (Refs #118)
@@ -11,7 +12,6 @@ const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
  * - Duplicate retry is idempotent (no duplicate audit/history)
  * - Resolved batch clears from pending dashboard exception counts while remaining in history
  */
-'use strict';
 
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');

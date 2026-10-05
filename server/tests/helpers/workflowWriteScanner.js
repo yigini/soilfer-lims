@@ -270,7 +270,7 @@ function scanSource(source, filename, exceptions = []) {
         }
         return null;
     }
-    const relationCommands = new Set(['create', 'createMany', 'connectOrCreate', 'update', 'updateMany', 'upsert', 'delete', 'deleteMany']);
+    const relationCommands = new Set(['create', 'createMany', 'connectOrCreate', 'update', 'updateMany', 'upsert', 'delete', 'deleteMany', 'connect', 'set', 'disconnect']);
     function hasRelationCommand(p, seen = new Set()) {
         if (!p?.node) return false;
         if (p.isIdentifier()) return bindingValue(p, seen).some(value => hasRelationCommand(value.path, value.seen));

@@ -285,6 +285,59 @@ test.each(['saved', 'interrupted'])('partial staged commit preserves the manifes
     expect(cached.body).toEqual(retry.body); expect(allTables()).toEqual(after);
 });
 
+test('SKIP and terminal parse failures settle a staged commit with retained per-entry receipts', async () => {
+    const committed = await fixture({ status: 'ASSIGNED' }), skipped = await fixture({ status: 'ASSIGNED' }), invalid = await fixture({ status: 'ASSIGNED' });
+    const batch = prepareAcquisition('commit', [committed, skipped, invalid]);
+    const manifest = JSON.parse(fs.readFileSync(batch.manifestPath));
+    manifest.items[2].parseError = 'Invalid spectral axis';
+    fs.writeFileSync(batch.manifestPath, JSON.stringify(manifest));
+    const beforeSkipped = await snapshot(skipped), beforeInvalid = await snapshot(invalid);
+    const payload = { idempotencyKey: `settled-${batch.manifestId}`, decisions: { [batch.scans[1].id]: { decision: 'SKIP' } } };
+    const response = await batch.send(payload);
+    expect(response.status).toBe(200); expect(response.body).toMatchObject({ complete: true, success: 1, skipped: 1, failed: 1,
+        errors: [expect.objectContaining({ filename: batch.scans[2].filename, error: 'Invalid spectral axis', terminal: true })] });
+    expect(response.body.settledEntries).toEqual([
+        { id: batch.scans[1].id, filename: batch.scans[1].filename, status: 'SKIPPED' },
+        { id: batch.scans[2].id, filename: batch.scans[2].filename, status: 'PARSE_ERROR', error: 'Invalid spectral axis' }
+    ]);
+    expect(fs.existsSync(batch.manifestPath)).toBe(false);
+    expect(await snapshot(skipped)).toEqual(beforeSkipped); expect(await snapshot(invalid)).toEqual(beforeInvalid);
+    const beforeReplay = allTables();
+    expect((await batch.send(payload)).body).toEqual(response.body); expect(allTables()).toEqual(beforeReplay);
+});
+
+test('settled SKIP and parse receipts survive a partial manifest and merge without replay on retry', async () => {
+    const ready = await fixture({ status: 'ASSIGNED' }), raced = await fixture(), skipped = await fixture({ status: 'ASSIGNED' });
+    const batch = prepareAcquisition('commit', [ready, raced, skipped]);
+    const manifest = JSON.parse(fs.readFileSync(batch.manifestPath));
+    manifest.items.push({ id: 'terminal-parse-entry', filename: 'invalid.csv', parseError: 'Unparseable file' });
+    fs.writeFileSync(batch.manifestPath, JSON.stringify(manifest));
+    const state = require('../../services/spectralWorkItemStateService'), prepare = state.prepareItem;
+    jest.spyOn(state, 'prepareItem').mockImplementation((tx, expected, sampleId, actor, options) =>
+        options?.preflight && expected?.id === raced.item.id ? Promise.resolve(expected) : prepare(tx, expected, sampleId, actor, options));
+    const payload = { decisions: { [batch.scans[2].id]: { decision: 'SKIP' } } };
+    const first = await batch.send(payload);
+    expect(first.body).toMatchObject({ complete: false, success: 1, failed: 2, skipped: 1 });
+    const partial = JSON.parse(fs.readFileSync(batch.manifestPath));
+    expect(Object.keys(partial.settledEntries).sort()).toEqual([batch.scans[2].id, 'terminal-parse-entry'].sort());
+    const readyBefore = await snapshot(ready), skippedBefore = await snapshot(skipped);
+    jest.restoreAllMocks();
+    const retry = await batch.send({ ...payload, reopenReason: 'Concurrent completion reviewed' });
+    expect(retry.body).toMatchObject({ complete: true, success: 2, failed: 1, skipped: 1,
+        errors: [expect.objectContaining({ filename: 'invalid.csv', terminal: true })] });
+    expect(retry.body.settledEntries).toEqual(first.body.settledEntries);
+    expect(await snapshot(ready)).toEqual(readyBefore); expect(await snapshot(skipped)).toEqual(skippedBefore);
+    expect((await snapshot(raced)).scans).toHaveLength(2); expect(fs.existsSync(batch.manifestPath)).toBe(false);
+});
+
+test.each(['upload', 'commit'])('%s uses the trimmed entry reason when the request reason is only whitespace', async mode => {
+    const f = await fixture(), batch = prepareAcquisition(mode, [f]);
+    batch.scans[0].reopenReason = '  Reviewed acquisition correction  ';
+    const response = await batch.send({ reopenReason: '   ', decisions: { [batch.scans[0].id]: { reopenReason: batch.scans[0].reopenReason } } });
+    expect(response.status).toBe(200); expect((mode === 'upload' ? response.body.results : response.body)).toMatchObject({ success: 1, failed: 0 });
+    expect(JSON.parse((await snapshot(f)).items[0].history).at(-2).reason).toBe('Reviewed acquisition correction');
+});
+
 test.each(['SUBMITTED', 'ACCEPTED', 'WAIVED', 'CANCELLED', 'ON_HOLD', 'AWAITING_VERIFICATION', 'NOT_ASSIGNED']
     .flatMap(status => ['upload', 'commit'].map(mode => [status, mode])))
     ('%s work refuses %s acquisition with zero changes', async (status, mode) => {

@@ -1,3 +1,4 @@
+'use strict';
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Laboratory Governance WP-A Companion Contract Tests
@@ -7,7 +8,6 @@ const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
  * Corresponds to acceptance scenarios A01, A02, A03, A07, A09, A13, A14,
  * A16, A17, A18, A19, A24, A27, A28, A29, A30, A32, A33, A37, A41.
  */
-'use strict';
 
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const { createWorkItemFixture } = require('../helpers/workflowFixtures');

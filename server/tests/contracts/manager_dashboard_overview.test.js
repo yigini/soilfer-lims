@@ -1,3 +1,4 @@
+'use strict';
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Manager Dashboard Progress & Bottleneck Overview Contract Tests (Refs #120)
@@ -9,7 +10,6 @@ const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
  * 4. Scoped authorization: cross-lab technicians and specimens are strictly excluded.
  * 5. Scoped System Admin (SUPER_ADMIN with ?labId=) receives matching lab progress overview.
  */
-'use strict';
 
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');

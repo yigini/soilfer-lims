@@ -33,7 +33,7 @@ test('central Sample creation retains an existing caller creation action with ex
     expect(JSON.parse(audit[0].details)).toEqual({ status: 'EXPECTED', context: 'ordinary' });
 });
 
-test.each(['create', 'createMany', 'connectOrCreate', 'update', 'updateMany', 'upsert', 'delete', 'deleteMany'].flatMap(command =>
+test.each(['create', 'createMany', 'connectOrCreate', 'update', 'updateMany', 'upsert', 'delete', 'deleteMany', 'connect', 'set', 'disconnect'].flatMap(command =>
     ['createSample', 'createWorkItem', 'transitionSample', 'transitionWorkItem'].map(operation => [command, operation])))
     ('%s nested relation commands are refused by %s before any writes', async (command, operation) => {
         const { sample, item } = await fixture(), before = await snapshot(sample.id);
@@ -45,6 +45,36 @@ test.each(['create', 'createMany', 'connectOrCreate', 'update', 'updateMany', 'u
         await expect(request()).rejects.toMatchObject({ statusCode: 400, code: 'WORKFLOW_RELATION_WRITE_REFUSED' });
         expect(await snapshot(sample.id)).toEqual(before);
     });
+
+test('reconciliation removal retains analysis and laboratory identity in its one audit row', async () => {
+    const { sample, item } = await fixture('PROCESSING', 'PH_H2O', 'NOT_ASSIGNED');
+    const outcome = await client.$transaction(tx => reconciliation.reconcileWorkItemsForSample(sample, [], manager, 'Order corrected', tx));
+    expect(outcome.removed).toEqual(['PH_H2O']);
+    expect(await client.workItem.findUnique({ where: { id: item.id } })).toBeNull();
+    const audit = await client.auditLog.findMany({ where: { entityId: item.id, action: 'WORKITEM_DELETED' } });
+    expect(audit).toHaveLength(1);
+    expect(audit[0]).toMatchObject({ analysisCode: item.analysis, labId: manager.labId, sampleId: sample.id, performedBy: manager.username });
+    expect(JSON.parse(audit[0].before)).toEqual([expect.objectContaining({ id: item.id, analysisCode: item.analysis, labId: manager.labId })]);
+});
+
+test.each(['connect', 'set', 'disconnect'])('%s cannot reassociate another sample work item through caller data', async command => {
+    const current = await fixture(), other = await fixture();
+    const beforeCurrent = await snapshot(current.sample.id), beforeOther = await snapshot(other.sample.id);
+    await expect(samples.transitionSample(current.sample.id, current.sample.status, manager, null,
+        { workItems: { [command]: [{ id: other.item.id }] } }, client))
+        .rejects.toMatchObject({ statusCode: 400, code: 'WORKFLOW_RELATION_WRITE_REFUSED' });
+    expect(await snapshot(current.sample.id)).toEqual(beforeCurrent); expect(await snapshot(other.sample.id)).toEqual(beforeOther);
+});
+
+test('pre-analytical sample removal retains the known laboratory on its audit row', async () => {
+    const sample = await samples.createSample({ id: id(), originalId: id(), assignedLab: manager.labId }, manager, { tx: client });
+    const removed = await client.$transaction(tx => samples.removePreAnalyticSample(tx, [sample.id], { actor: manager, reason: 'Duplicate registry entry' }));
+    expect(removed.count).toBe(1);
+    expect(await client.sample.findUnique({ where: { id: sample.id } })).toBeNull();
+    const audit = await client.auditLog.findMany({ where: { entityId: sample.id, action: 'SAMPLE_DELETED' } });
+    expect(audit).toHaveLength(1);
+    expect(audit[0]).toMatchObject({ labId: manager.labId, performedBy: manager.username });
+});
 
 // Build a schema-only, disposable pre-migration database. No template data is
 // copied and no production constraints are dropped or disabled. This exercises
