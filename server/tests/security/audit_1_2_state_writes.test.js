@@ -6,10 +6,29 @@ const { scanSource, scanFiles } = require('../helpers/workflowWriteScanner');
 
 // Exactly the file/export pairs pinned by the author in #179 comment 5986548250.
 const exceptions = [
-    { file: 'tests/helpers/legacyWorkflowDatabase.js', exportName: 'beforeGuards' },
+    { file: 'tests/helpers/legacyWorkflowDatabase.js', exportName: 'beforeGuards', foreignKeysOffVariant: 'PROJECT_FK_CORRUPT_SYNTHETIC' },
     { file: 'tests/helpers/rejectedGuardWrite.js', exportName: 'rejectedGuardWrite' }
 ];
 const serverRoot = path.resolve(__dirname, '../..');
+
+test('FK OFF is confined to the exact pinned synthetic branch, export and helper file', () => {
+    const source = "function beforeGuards({schemaVariant}){if(schemaVariant==='PROJECT_FK_CORRUPT_SYNTHETIC'){db.pragma('foreign_keys = OFF')}} module.exports={beforeGuards}";
+    expect(scanSource(source, exceptions[0].file, exceptions)).toEqual([]);
+    for (const probe of [
+        source.replace('PROJECT_FK_CORRUPT_SYNTHETIC', 'PROJECT_PRE_TEMPLATE_POLICY'),
+        source.replace("if(schemaVariant==='PROJECT_FK_CORRUPT_SYNTHETIC')", ''),
+        source.replace("{db.pragma", '{}else{db.pragma'),
+        source.replace('foreign_keys = OFF', 'recursive_triggers = OFF'),
+        source.replace('foreign_keys = OFF', 'foreign_keys = 0'),
+        source.replace('foreign_keys = OFF', 'foreign_keys = OFF; DROP TRIGGER Sample_status_insert_guard'),
+        source.replaceAll('beforeGuards', 'other')
+    ]) expect(scanSource(probe, exceptions[0].file, exceptions)).toEqual([
+        expect.objectContaining({ code: 'WORKFLOW_GUARD_DISABLED' })]);
+    expect(scanSource(source, 'tests/caller.test.js', exceptions)).toEqual([
+        expect.objectContaining({ code: 'WORKFLOW_GUARD_DISABLED' })]);
+    expect(scanSource(source, exceptions[0].file, [{ file: exceptions[0].file, exportName: 'beforeGuards' }])).toEqual([
+        expect.objectContaining({ code: 'WORKFLOW_GUARD_DISABLED' })]);
+});
 
 test('all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities', () => {
     const files = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '--', 'server'],

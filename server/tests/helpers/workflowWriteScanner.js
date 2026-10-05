@@ -183,6 +183,19 @@ function scanSource(source, filename, exceptions = []) {
         if (filename === 'services/workItemStateService.js' && ['createWorkItem', 'transitionWorkItem'].includes(name) && entities.every(entity => entity === 'WorkItem')) return true;
         return exceptions.some(entry => entry.file === filename && entry.exportName === name);
     }
+    function pinnedCorruptProjectConnection(p, sql) {
+        if (!/^PRAGMA\s+foreign_keys\s*=\s*OFF$/i.test(sql.trim()) || owner(p) !== 'beforeGuards' || !exportedNames.has('beforeGuards') ||
+            !exceptions.some(entry => entry.file === filename && entry.exportName === 'beforeGuards' && entry.foreignKeysOffVariant === 'PROJECT_FK_CORRUPT_SYNTHETIC')) return false;
+        for (let current = p; current.parentPath; current = current.parentPath) {
+            const parent = current.parentPath;
+            if (parent.isIfStatement() && current.key === 'consequent') {
+                const condition = parent.get('test');
+                if (condition.isBinaryExpression({ operator: '===' }) && condition.get('left').isIdentifier({ name: 'schemaVariant' }) &&
+                    condition.get('right').isStringLiteral({ value: 'PROJECT_FK_CORRUPT_SYNTHETIC' })) return true;
+            }
+        }
+        return false;
+    }
     function helperImport(p, specifiers) {
         if (filename.startsWith('tests/')) return;
         for (const specifier of specifiers) {
@@ -202,7 +215,8 @@ function scanSource(source, filename, exceptions = []) {
                     if (writes && !authorized(p, entities)) report(p.node, 'WORKFLOW_WRITE_OUTSIDE_AUTHORITY', `${entities.join('/')} ${target.name}`);
                 }
                 if (sqlMethods.has(target.name) && !(target.name === 'exec' && regularExpression(target.object))) for (const sql of strings(p.get('arguments.0'))) {
-                    if (disabling(target.name === 'pragma' ? `PRAGMA ${sql}` : sql)) report(p.node, 'WORKFLOW_GUARD_DISABLED', target.name);
+                    const statement = target.name === 'pragma' ? `PRAGMA ${sql}` : sql;
+                    if (disabling(statement) && !pinnedCorruptProjectConnection(p, statement)) report(p.node, 'WORKFLOW_GUARD_DISABLED', target.name);
                     if (rawWrite(sql) && !authorized(p, ['Sample', 'WorkItem'])) report(p.node, 'RAW_WORKFLOW_SQL', target.name);
                     if (sql === '<unknown>' && !schemaFileRead(p.get('arguments.0')) && !authorized(p, ['Sample', 'WorkItem'])) {
                         report(p.node, 'UNRESOLVED_WORKFLOW_SQL', target.name);

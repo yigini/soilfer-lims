@@ -12,6 +12,7 @@ const { assertOwnedTestDatabase } = require('./testOwnedDatabase');
 const PRE11_SHA256 = 'ff776730ff70102f018c3a02af76534ada332f2f4484600bde069b45c92f0513';
 const PROJECT_SHAPE_SHA256 = '0915342087544cde959571f2d2bc9fc4ecf2825c400cc4ad1f17066fbb121115';
 const PROJECT_MIGRATION_SHA256 = '3e63e37f4bce011c6d80efa5329f810ceffb9d5ff96653a406f90d818202e123';
+const PROJECT_FK_CORRUPT_SHA256 = 'd7302e4c84d0da5e632256d04f19c1df20f21806949bbb720b5704a569b5f03c';
 // #179 pins 5988872290 / 5989464829: the closed, evidenced completion of
 // the lagging SQL baseline, solely for the Project variant before seeding.
 const BASELINE_COMPLETION = Object.freeze([{ path: '20260930140000_add_sitewide_theme_appearance/migration.sql',
@@ -34,7 +35,8 @@ const VARIANTS = Object.freeze({
     // columns and DEFAULT CURRENT_TIMESTAMP. Both literal shapes are test-owned.
     CONSIGNMENT_PRE_1_1_A: '13b40b8e5a0acd4deb04f238eedb2deb58c5d4b57d48245c0d938deeaffda123',
     CONSIGNMENT_PRE_1_1_B: 'e87950361986185105cb813b9b16226c178f4b65ad590a9e5e96dcb135bb15d6',
-    PROJECT_PRE_TEMPLATE_POLICY: PROJECT_SHAPE_SHA256
+    PROJECT_PRE_TEMPLATE_POLICY: PROJECT_SHAPE_SHA256,
+    PROJECT_FK_CORRUPT_SYNTHETIC: PROJECT_FK_CORRUPT_SHA256
 });
 
 // Legacy values are inserted into a new schema before its real additive guards
@@ -46,6 +48,35 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
     if (schemaVariant !== null && !Object.hasOwn(VARIANTS, schemaVariant)) throw new Error('Unknown pinned historical schema variant.');
     if (!['REHEARSAL', 'REAL'].includes(migrationOrder) || (markerPending && schemaVariant !== 'PRE_1_1_DUPLICATES')) {
         throw new Error('Unknown historical migration order or pending marker.');
+    }
+    // #179 pin 5989961445: the sole connection-scoped FK exception is a
+    // synthetic, corrupt Parent/Project file containing no workflow objects.
+    if (schemaVariant === 'PROJECT_FK_CORRUPT_SYNTHETIC') {
+        if (samples.length || workItems.length || batches.length || Object.keys(relatedRows).length || preMigrationSnapshot || markerPending || migrationOrder !== 'REHEARSAL') {
+            throw new Error('The corrupt Project variant accepts only its exact literal fixture.');
+        }
+        const literal = fs.readFileSync(path.resolve(__dirname, 'fixtures/project_fk_corrupt_synthetic.sql'));
+        if (createHash('sha256').update(literal).digest('hex') !== PROJECT_FK_CORRUPT_SHA256) throw new Error('Pinned corrupt Project fixture digest mismatch.');
+        fs.closeSync(fs.openSync(file, 'wx'));
+        const corrupt = new Database(file, { fileMustExist: true });
+        try {
+            corrupt.pragma('foreign_keys = OFF');
+            corrupt.exec(literal.toString('utf8'));
+            assert.equal(JSON.stringify(corrupt.pragma('foreign_key_check')),
+                JSON.stringify([{ table: 'Project', rowid: 1, parent: 'Parent', fkid: 0 }]));
+            assert.equal(corrupt.prepare('SELECT id,parentRef FROM Project WHERE rowid=1').get().id, 'p-1');
+            const objects = corrupt.prepare('SELECT type,name,tbl_name FROM sqlite_master ORDER BY type,name').all();
+            assert.equal(JSON.stringify(objects), JSON.stringify([
+                { type: 'index', name: 'sqlite_autoindex_Parent_1', tbl_name: 'Parent' },
+                { type: 'index', name: 'sqlite_autoindex_Project_1', tbl_name: 'Project' },
+                { type: 'index', name: 'sqlite_autoindex_Project_2', tbl_name: 'Project' },
+                { type: 'table', name: 'Parent', tbl_name: 'Parent' },
+                { type: 'table', name: 'Project', tbl_name: 'Project' }
+            ]), 'The synthetic corrupt fixture must contain only Parent, Project and their autoindexes.');
+        } catch (error) {
+            corrupt.close(); fs.rmSync(file, { force: true }); throw error;
+        } finally { if (corrupt.open) corrupt.close(); }
+        return file;
     }
     const projectVariant = schemaVariant === 'PROJECT_PRE_TEMPLATE_POLICY';
     const projectColumns = ['templateId', 'templateVersion', 'policyConfig', 'programmeCode', 'parentProjectId'];

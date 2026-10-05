@@ -985,23 +985,9 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
         });
 
         test('Atomic rollback guarantees database remains unmodified if foreign key check fails during migration', () => {
-            const rollbackDbPath = path.join(os.tmpdir(), `test_rollback_${Date.now()}.db`);
-            const db = new Database(rollbackDbPath);
-            db.pragma('foreign_keys = OFF');
-            db.exec(`
-                CREATE TABLE "Parent" ("id" TEXT PRIMARY KEY);
-                CREATE TABLE "Project" (
-                    "id" TEXT PRIMARY KEY,
-                    "code" TEXT UNIQUE NOT NULL,
-                    "name" TEXT NOT NULL,
-                    "status" TEXT NOT NULL DEFAULT 'ACTIVE',
-                    "parentRef" TEXT REFERENCES "Parent"("id")
-                );
-                INSERT INTO "Parent" ("id") VALUES ('valid-parent');
-                INSERT INTO "Project" ("id", "code", "name", "status", "parentRef")
-                VALUES ('p-1', 'PRJ-1', 'Project 1', 'ACTIVE', 'invalid-parent-fk');
-            `);
-            db.close();
+            const rollbackDbPath = require('../helpers/legacyWorkflowDatabase').beforeGuards({
+                actor: 'system:fixture', schemaVariant: 'PROJECT_FK_CORRUPT_SYNTHETIC'
+            });
 
             try {
                 expect(() => migrateProjectTemplatesAndPolicy(rollbackDbPath)).toThrow(

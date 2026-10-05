@@ -18,6 +18,25 @@ function legacy(options = {}) {
 const probe = (file, options = {}) => rejectedGuardWrite({ actor: 'system:fixture', file,
     statement: 'UPDATE Sample SET status = ? WHERE id = ?', parameters: ['INVALID', 'legacy'], expectedGuardCode: 'INVALID_SAMPLE_STATUS', ...options });
 
+test('the pinned corrupt Project fixture returns only a closed owned path with no workflow objects', () => {
+    const file = newPath();
+    expect(beforeGuards({ actor: 'system:fixture', file, schemaVariant: 'PROJECT_FK_CORRUPT_SYNTHETIC' })).toBe(file);
+    const db = new Database(file, { readonly: true, fileMustExist: true });
+    try {
+        expect(db.pragma('foreign_keys', { simple: true })).toBe(1);
+        expect(db.pragma('foreign_key_check')).toEqual([{ table: 'Project', rowid: 1, parent: 'Parent', fkid: 0 }]);
+        expect(db.prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").all()).toEqual([{ name: 'Parent' }, { name: 'Project' }]);
+        expect(db.prepare("SELECT name FROM sqlite_master WHERE type='trigger'").all()).toEqual([]);
+    } finally { db.close(); }
+    const bytes = fs.readFileSync(file);
+    expect(() => beforeGuards({ actor: 'system:fixture', file, schemaVariant: 'PROJECT_FK_CORRUPT_SYNTHETIC' })).toThrow(/EEXIST/);
+    expect(fs.readFileSync(file)).toEqual(bytes);
+    const extra = newPath();
+    expect(() => beforeGuards({ actor: 'system:fixture', file: extra, schemaVariant: 'PROJECT_FK_CORRUPT_SYNTHETIC',
+        samples: [{ id: 'forbidden', status: 'EXPECTED' }] })).toThrow('only its exact literal fixture');
+    expect(fs.existsSync(extra)).toBe(false);
+});
+
 test('the named legacy inserter installs every actual release guard and refuses reusing a file', () => {
     const { file, preMigrationSnapshot } = legacy();
     expect(preMigrationSnapshot).toBeNull();
