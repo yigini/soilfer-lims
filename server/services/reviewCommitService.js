@@ -8,7 +8,11 @@ function itemStateError(item) {
     });
 }
 
-function assertReviewable(item, status) {
+function assertReviewable(item, status, sample = item.sample) {
+    if (sample && workflow.normalizeWorkItemState(status) === 'REPEAT_REQUIRED'
+        && !workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis)) {
+        require('./resultEvidenceService').assertAmendable(sample);
+    }
     const closure = workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis);
     const allowed = closure
         ? (status === workflow.WORK_ITEM_STATES.ACCEPTED
@@ -21,14 +25,14 @@ function assertReviewable(item, status) {
 // The first transaction write is the CAS. A refused row creates no side effects.
 async function commitReview(prisma, item, status, user, data, operations, submissionId, audit = {}) {
     status = workflow.normalizeWorkItemState(status);
-    assertReviewable(item, status);
     try {
         return await prisma.$transaction(async tx => {
             const current = await tx.workItem.findUnique({ where: { id: item.id } });
             if (submissionId && current?.submissionId !== submissionId) throw Object.assign(itemStateError(item), { code: 'ITEM_NOT_IN_SUBMISSION' });
             if (!current || current.status !== item.status || current.version !== item.version) throw itemStateError(item);
-            assertReviewable(current, status);
             const sample = await tx.sample.findUnique({ where: { id: current.sampleId } });
+            require('./workflowStateRules').assertScope(user, sample);
+            assertReviewable(current, status, sample);
             const returned = status === 'REPEAT_REQUIRED' && !workflow.CLOSURE_TASK_ANALYSES.includes(current.analysis);
             if (returned) require('./resultEvidenceService').assertAmendable(sample);
             const history = typeof data.history === 'string' ? JSON.parse(data.history) : data.history;

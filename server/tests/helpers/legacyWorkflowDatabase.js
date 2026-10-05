@@ -92,7 +92,8 @@ function useLegacyRouteDatabase(prisma, client) {
     const methods = {
         sample: ['findUnique', 'findMany', 'count', 'create', 'update', 'updateMany'],
         workItem: ['findUnique', 'findMany', 'count', 'create', 'update', 'updateMany'],
-        result: ['findUnique', 'findMany', 'create', 'update'],
+        result: ['findUnique', 'findFirst', 'findMany', 'count', 'create', 'update'],
+        report: ['findUnique', 'findMany', 'count', 'create'],
         reviewDecision: ['create', 'findMany', 'count'],
         auditLog: ['create', 'findMany', 'findFirst', 'count'],
         submission: ['create', 'findUnique', 'update'],

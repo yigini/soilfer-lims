@@ -1199,7 +1199,10 @@ exports.reviewWorkItemsBulk = async (req, res) => {
         const errors = [];
         for (const item of items) {
             try { assertReviewable(item, status); }
-            catch (error) { errors.push({ workItemId: item.id, code: error.code }); continue; }
+            catch (error) {
+                if (error.code !== 'ITEM_NOT_SUBMITTED') throw error;
+                errors.push({ workItemId: item.id, code: error.code }); continue;
+            }
             const operations = [];
             const notifications = [];
             const history = typeof item.history === 'string' ? JSON.parse(item.history) : (item.history || []);

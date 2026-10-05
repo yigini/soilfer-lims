@@ -248,6 +248,29 @@ test('QC also preserves a RELEASED sample that existed before the additive state
     expect(await snapshot(sampleId)).toEqual(before);
 });
 
+test.each(['APPROVED', 'ARCHIVED', 'DISPOSED'].flatMap(status => ['SUBMITTED', 'ACCEPTED'].map(itemStatus => [status, itemStatus])))
+    ('central RETURN re-reads final %s parent of %s work and refuses amendments before review writes', async (status, itemStatus) => {
+        const { sample, item } = await fixture(status, 'PH_H2O', itemStatus);
+        const before = await snapshot(sample.id), operations = jest.fn();
+        const decisions = await client.reviewDecision.findMany({ where: { sampleId: sample.id } });
+        await expect(commitReview(client, item, 'REPEAT_REQUIRED', manager,
+            { history: '[]', reanalysisReason: 'Review correction' }, operations, null, { reason: 'Review correction' }))
+            .rejects.toMatchObject({ statusCode: 409, code: 'AMENDMENT_WORKFLOW_REQUIRED' });
+        expect(operations).not.toHaveBeenCalled();
+        expect(await snapshot(sample.id)).toEqual(before);
+        expect(await client.reviewDecision.findMany({ where: { sampleId: sample.id } })).toEqual(decisions);
+    });
+
+test('central RETURN checks fresh parent scope before its amendment refusal and changes no rows', async () => {
+    const { sample, item } = await fixture('APPROVED', 'PH_H2O', 'ACCEPTED');
+    const before = await snapshot(sample.id), operations = jest.fn();
+    await expect(commitReview(client, item, 'REPEAT_REQUIRED', { ...manager, labId: 'OTHER-LAB' },
+        { history: '[]', reanalysisReason: 'Review correction' }, operations, null, { reason: 'Review correction' }))
+        .rejects.toMatchObject({ statusCode: 403, code: 'ACCESS_DENIED_LAB' });
+    expect(operations).not.toHaveBeenCalled();
+    expect(await snapshot(sample.id)).toEqual(before);
+});
+
 test('manager RETURN of a completed gate records current-result reversion in the review transaction', async () => {
     const { sample, item } = await fixture('PROCESSING', 'DRYING', 'SUBMITTED');
     const result = await client.result.create({ data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.24', numericValue: 6.24,

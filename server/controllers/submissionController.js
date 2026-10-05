@@ -301,7 +301,10 @@ exports.reviewSubmission = async (req, res) => {
             }
 
             try { assertReviewable(item, newStatus); }
-            catch (error) { errors.push({ workItemId, code: error.code }); continue; }
+            catch (error) {
+                if (error.code !== 'ITEM_NOT_SUBMITTED') throw error;
+                errors.push({ workItemId, code: error.code }); continue;
+            }
 
             const history = typeof item.history === 'string' ? JSON.parse(item.history) : (item.history || []);
             history.push({

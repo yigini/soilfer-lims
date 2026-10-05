@@ -64,7 +64,8 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         const f = await fixture({ status, sampleStatus: 'APPROVED' }), before = await snapshot(f);
         for (const verdict of ['REANALYSIS_REQUIRED', 'WAIVED']) {
             const res = await post(`/api/work/${f.item.id}/review`, { status: verdict, reason: 'Review reason' });
-            expect(res.status).toBe(409); expect(res.body.code).toBe('ITEM_NOT_SUBMITTED');
+            expect(res.status).toBe(409);
+            expect(res.body.code).toBe(verdict === 'REANALYSIS_REQUIRED' ? 'AMENDMENT_WORKFLOW_REQUIRED' : 'ITEM_NOT_SUBMITTED');
             expect(await snapshot(f)).toEqual(before);
         }
     });
