@@ -1,4 +1,5 @@
 const fs = require('node:fs');
+const path = require('node:path');
 const { createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
@@ -35,7 +36,7 @@ describe('Audit 1.2: pinned historical rehearsals retain production migration or
             if (schemaVariant === 'PRE_1_3_SAMPLE_CODES') {
                 const baseline = new Database(':memory:');
                 try {
-                    baseline.exec(fs.readFileSync(require.resolve('../helpers/fixtures/pre13_full_application_schema.sql'), 'utf8'));
+                    baseline.exec(fs.readFileSync(path.resolve(__dirname, '../helpers/fixtures/pre13_full_application_schema.sql'), 'utf8'));
                     for (const [table, order] of Object.entries(appendedOrders)) {
                         const prefix = baseline.prepare(`PRAGMA table_xinfo("${table}")`).all().map(row => row.name);
                         const realColumns = reference.columns.find(row => row.table === table).columns;

@@ -11,6 +11,16 @@ const exceptions = [
 ];
 const serverRoot = path.resolve(__dirname, '../..');
 
+test('legacy CLI launchers cannot import any fixture or test module', () => {
+    for (const filename of ['scripts/run_manager_dashboard_tasklist_side_by_side.cjs', 'scripts/verify_issue149_probe.cjs', 'scripts/run_test_rehearsal.cjs']) {
+        for (const specifier of ['../tests/helpers/workflowFixtures', '../tests/helpers/legacyWorkflowDatabase', '../tests/rehearsals/scenario.cjs']) {
+            expect(scanSource(`require('${specifier}')`, filename, exceptions)).toEqual([
+                expect.objectContaining({ code: 'TEST_HELPER_IMPORTED_BY_RUNTIME' })]);
+        }
+    }
+    expect(scanSource("require('../tests/helpers/workflowFixtures')", 'scripts/run_dashboard_i18n_browser_journey.cjs', exceptions)).toEqual([]);
+});
+
 test('FK OFF is confined to the exact pinned synthetic branch, export and helper file', () => {
     const source = "function beforeGuards({schemaVariant}){if(schemaVariant==='PROJECT_FK_CORRUPT_SYNTHETIC'){db.pragma('foreign_keys = OFF')}} module.exports={beforeGuards}";
     expect(scanSource(source, exceptions[0].file, exceptions)).toEqual([]);

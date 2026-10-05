@@ -198,10 +198,13 @@ function scanSource(source, filename, exceptions = []) {
     }
     function helperImport(p, specifiers) {
         if (filename.startsWith('tests/')) return;
+        const rehearsalLauncher = /^scripts\/(?:run_manager_dashboard_tasklist_side_by_side|run_test_rehearsal|verify_issue149_[^/]+)\.cjs$/.test(filename);
         for (const specifier of specifiers) {
             if (specifier.includes('<unknown>')) continue;
             const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(filename), specifier.replace(/\\/g, '/'))).replace(/\.(?:js|cjs)$/, '');
-            if (exceptions.some(entry => resolved === entry.file.replace(/\.js$/, ''))) report(p.node, 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
+            if (exceptions.some(entry => resolved === entry.file.replace(/\.js$/, '')) || (rehearsalLauncher && resolved.startsWith('tests/'))) {
+                report(p.node, 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
+            }
         }
     }
     traverse(ast, {
