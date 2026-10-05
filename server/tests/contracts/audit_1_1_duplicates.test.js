@@ -1,30 +1,44 @@
 const Database = require('better-sqlite3');
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
-const crypto = require('crypto');
 const { execFileSync, spawnSync } = require('child_process');
+const { PrismaClient } = require('../../prisma_client');
+const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
+const { rejectedGuardWrite } = require('../helpers/rejectedGuardWrite');
+const { createWorkItemFixture } = require('../helpers/workflowFixtures');
 const { listDuplicates, readGroup, resolveGroup, argumentsFor } = require('../../scripts/workitem_duplicates');
 
-const markerSql = fs.readFileSync(path.join(__dirname, '../../prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql'), 'utf8');
-const indexSql = fs.readFileSync(path.join(__dirname, '../../prisma/migrations/20261004190100_unique_active_workitem/migration.sql'), 'utf8');
-const schema = `CREATE TABLE WorkItem (id TEXT PRIMARY KEY, sampleId TEXT, analysis TEXT, status TEXT, result TEXT, submissionId TEXT, batchId TEXT, createdAt TEXT, history TEXT);
-CREATE TABLE Result (id TEXT PRIMARY KEY, sampleId TEXT, param TEXT);
-CREATE TABLE SpectralData (id TEXT PRIMARY KEY, workItemId TEXT REFERENCES WorkItem(id));
-CREATE TABLE AuditLog (id TEXT PRIMARY KEY, entity TEXT, entityId TEXT, action TEXT, details TEXT, performedBy TEXT, timestamp TEXT, sampleId TEXT, analysisCode TEXT, before TEXT, after TEXT);`;
-function seed(db) {
-    db.exec(schema);
-    db.prepare('INSERT INTO WorkItem VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').run('keep', 'sample', 'PH', 'ACCEPTED', '0', 'submission', 'batch', '2026-10-01', '["reviewed"]');
-    db.prepare('INSERT INTO WorkItem VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').run('duplicate', 'sample', 'PH', 'COMPLETED', '7.2', 'otherSubmission', 'otherBatch', '2026-10-02', '["measured"]');
-    db.exec("INSERT INTO Result VALUES ('result', 'sample', 'PH'); INSERT INTO SpectralData VALUES ('scan', 'duplicate');");
+function createRehearsal(options = {}) {
+    const now = Date.UTC(2026, 9, 1);
+    return beforeGuards({ actor: 'system:fixture', schemaVariant: 'PRE_1_1_DUPLICATES', ...options,
+        samples: [{ id: 'sample', originalId: 'sample', status: 'PROCESSING', createdAt: now, updatedAt: now }],
+        batches: ['batch', 'otherBatch'].map(id => ({ id, analysis: 'PH', status: 'OPEN', createdBy: 'manager' })),
+        workItems: [
+            { id: 'keep', sampleId: 'sample', analysis: 'PH', status: 'ACCEPTED', result: '0', submissionId: 'submission', batchId: 'batch', createdAt: '2026-10-01', updatedAt: now, history: '["reviewed"]' },
+            { id: 'duplicate', sampleId: 'sample', analysis: 'PH', status: 'COMPLETED', result: '7.2', submissionId: 'otherSubmission', batchId: 'otherBatch', createdAt: '2026-10-02', updatedAt: now, history: '["measured"]' }
+        ], relatedRows: {
+            User: [{ id: 'manager', username: 'manager', password: 'fixture', email: 'manager@example.test', role: 'MANAGER', updatedAt: now }],
+            Submission: ['submission', 'otherSubmission', 'changed', 'manager-did-not-review'].map(id => ({ id, sampleId: 'sample', type: 'FULL', status: 'PENDING', submittedBy: 'manager', updatedAt: now })),
+            Result: [{ id: 'result', sampleId: 'sample', param: 'PH', value: '0', updatedAt: now }],
+            SpectralData: [{ id: 'scan', workItemId: 'duplicate', modality: 'MIR', filename: 'legacy.scan' }]
+        }
+    });
 }
 
+function discardRehearsal(rehearsal) {
+    try {
+        if (rehearsal.pendingMigrations.includes('INDEX')) {
+            expect(() => rehearsal.applyPendingMigration({ expectedFailure: 'SQLITE_CONSTRAINT_UNIQUE' })).toThrow(/UNIQUE/);
+        }
+    } finally { rehearsal.close(); }
+}
 
 describe('Audit 1.1: additive, audited duplicate resolution', () => {
-    let db;
+    let db, rehearsal;
     const request = overrides => ({ sampleId: 'sample', analysis: 'PH', keep: 'keep', reason: 'Manager reviewed both measurements', actor: 'manager', fingerprint: readGroup(db, 'sample', 'PH').fingerprint, ...overrides });
-    beforeEach(() => { db = new Database(':memory:'); seed(db); db.exec(markerSql); db.pragma('foreign_keys = ON'); });
-    afterEach(() => db.close());
+    beforeEach(() => { rehearsal = createRehearsal(); db = new Database(rehearsal.file); db.pragma('foreign_keys = ON'); });
+    afterEach(() => { db?.close(); if (rehearsal) discardRehearsal(rehearsal); });
     test('lists every active group with result, submission and batch links, and never chooses a kept item', () => {
         const before = db.prepare('SELECT * FROM WorkItem ORDER BY id').all();
         const report = listDuplicates(db);
@@ -50,9 +64,14 @@ describe('Audit 1.1: additive, audited duplicate resolution', () => {
         expect(audits).toHaveLength(1);
         expect(audits[0]).toMatchObject({ entityId: 'duplicate', action: 'WORKITEM_DUPLICATE_RESOLVED', performedBy: 'manager', before: '{"duplicateOf":null}', after: '{"duplicateOf":"keep"}' });
         expect(JSON.parse(audits[0].details)).toMatchObject({ reason: request().reason, flags: ['HAS_RESULTS'] });
-        db.exec(indexSql);
-        expect(() => db.prepare('INSERT INTO WorkItem (id, sampleId, analysis) VALUES (?, ?, ?)').run('third', 'sample', 'PH')).toThrow(/UNIQUE/);
-        expect(() => db.prepare('DELETE FROM WorkItem WHERE id = ?').run('keep')).toThrow(/FOREIGN KEY/);
+        rehearsal.applyPendingMigration({ connection: db });
+        rejectedGuardWrite({ actor: 'system:fixture', file: rehearsal.file,
+            statement: 'INSERT INTO WorkItem (id,sampleId,analysis,status,updatedAt) VALUES (?,?,?,?,?)',
+            parameters: ['third', 'sample', 'PH', 'NOT_ASSIGNED', Date.now()],
+            expectedGuardCode: 'SQLITE_CONSTRAINT_UNIQUE', expectedConstraint: 'WorkItem_one_active_per_analysis' });
+        rejectedGuardWrite({ actor: 'system:fixture', file: rehearsal.file,
+            statement: 'DELETE FROM WorkItem WHERE id = ?', parameters: ['keep'],
+            expectedGuardCode: 'SQLITE_CONSTRAINT_TRIGGER', expectedConstraint: 'WorkItem_duplicateOf_restrict' });
     });
     test.each([
         [{ keep: 'unrelated' }, 'WORKITEM_DUPLICATE_KEEP_INVALID'],
@@ -79,48 +98,56 @@ describe('Audit 1.1: additive, audited duplicate resolution', () => {
         expect(db.prepare('SELECT COUNT(*) n FROM WorkItem WHERE duplicateOf IS NOT NULL').get().n).toBe(0);
     });
     test.each(['Result', 'SpectralData'])('a changed %s value is refused even when its link and id are unchanged', table => {
-        db.exec(`ALTER TABLE ${table} ADD COLUMN retainedEvidence TEXT;`);
+        if (table === 'Result') db.exec('ALTER TABLE Result ADD COLUMN retainedEvidence TEXT');
+        else db.exec('ALTER TABLE SpectralData ADD COLUMN retainedEvidence TEXT');
         const reviewedRequest = request();
-        db.prepare(`UPDATE ${table} SET retainedEvidence = ?`).run('new measurement evidence');
+        if (table === 'Result') db.prepare('UPDATE Result SET retainedEvidence = ?').run('new measurement evidence');
+        else db.prepare('UPDATE SpectralData SET retainedEvidence = ?').run('new measurement evidence');
         expect(() => resolveGroup(db, reviewedRequest)).toThrow(expect.objectContaining({ code: 'WORKITEM_DUPLICATE_GROUP_CHANGED' }));
         expect(db.prepare('SELECT COUNT(*) n FROM AuditLog').get().n).toBe(0);
         expect(listDuplicates(db).groupCount).toBe(1);
     });
     test('index migration fails atomically on unresolved groups, and never removes old rows', () => {
         const old = db.prepare('SELECT * FROM WorkItem ORDER BY id').all();
-        expect(() => db.transaction(() => db.exec(indexSql))()).toThrow(/UNIQUE/);
+        expect(() => rehearsal.applyPendingMigration({ connection: db, expectedFailure: 'SQLITE_CONSTRAINT_UNIQUE' })).toThrow(/UNIQUE/);
         expect(db.prepare("SELECT name FROM sqlite_master WHERE name = 'WorkItem_one_active_per_analysis'").get()).toBeUndefined();
         expect(db.prepare('SELECT * FROM WorkItem ORDER BY id').all()).toEqual(old);
+        expect(() => rehearsal.applyPendingMigration()).toThrow('unusable');
     });
     test('CLI default uses a read-only connection before the marker migration and leaves file bytes unchanged', () => {
-        const file = path.join(os.tmpdir(), `audit11-dupes-${crypto.randomUUID()}.db`);
-        const raw = new Database(file); seed(raw); raw.close();
+        const snapshotRehearsal = createRehearsal({ preMigrationSnapshot: true });
+        const file = snapshotRehearsal.preMigrationSnapshot.path;
         try {
             const before = fs.readFileSync(file);
             const stdout = execFileSync(process.execPath, [path.join(__dirname, '../../scripts/workitem_duplicates.js'), '--database', file], { encoding: 'utf8' });
             expect(JSON.parse(stdout)).toMatchObject({ mode: 'dry-run', groupCount: 1 });
             expect(fs.readFileSync(file)).toEqual(before);
-        } finally { fs.unlinkSync(file); }
+        } finally { discardRehearsal(snapshotRehearsal); }
     });
 
-    test.each(['added', 'changed'])('real CLI refuses a group %s after the manager reviewed its dry-run', change => {
-        const file = path.join(os.tmpdir(), `audit11-reviewed-dupes-${crypto.randomUUID()}.db`);
+    test.each(['added', 'changed'])('real CLI refuses a group %s after the manager reviewed its dry-run', async change => {
+        const cliRehearsal = createRehearsal(), file = cliRehearsal.file;
         const script = path.join(__dirname, '../../scripts/workitem_duplicates.js');
-        const raw = new Database(file); seed(raw); raw.exec(markerSql); raw.close();
         try {
             const report = JSON.parse(execFileSync(process.execPath, [script, '--database', file], { encoding: 'utf8' }));
             const reviewed = report.groups[0].fingerprint;
-            const changed = new Database(file);
-            if (change === 'added') changed.exec("INSERT INTO WorkItem (id,sampleId,analysis,status) VALUES ('third','sample','PH','NOT_ASSIGNED');");
+            const changed = new Database(file); changed.pragma('foreign_keys = ON');
+            if (change === 'added') {
+                const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
+                try { await createWorkItemFixture(client, { data: { id: 'third', sampleId: 'sample', analysis: 'PH', status: 'NOT_ASSIGNED' } }); }
+                finally { await client.$disconnect(); }
+            }
             else changed.exec("UPDATE WorkItem SET submissionId='manager-did-not-review' WHERE id='duplicate';");
-            const before = changed.prepare('SELECT * FROM WorkItem ORDER BY id').all(); changed.close();
+            const before = changed.prepare('SELECT * FROM WorkItem ORDER BY id').all();
+            const audits = changed.prepare('SELECT * FROM AuditLog ORDER BY id').all(); changed.close();
             const result = spawnSync(process.execPath, [script, '--database', file, '--resolve', '--sample', 'sample', '--analysis', 'PH', '--keep', 'keep', '--reason', 'Reviewed earlier', '--actor', 'manager', '--fingerprint', reviewed], { encoding: 'utf8' });
             expect(result.status).toBe(1);
             expect(JSON.parse(result.stderr)).toMatchObject({ code: 'WORKITEM_DUPLICATE_GROUP_CHANGED' });
             const after = new Database(file, { readonly: true });
             expect(after.prepare('SELECT * FROM WorkItem ORDER BY id').all()).toEqual(before);
-            expect(after.prepare('SELECT count(*) n FROM AuditLog').get().n).toBe(0); after.close();
-        } finally { fs.unlinkSync(file); }
+            expect(after.prepare('SELECT * FROM AuditLog ORDER BY id').all()).toEqual(audits);
+            expect(after.prepare("SELECT count(*) n FROM AuditLog WHERE action='WORKITEM_DUPLICATE_RESOLVED'").get().n).toBe(0); after.close();
+        } finally { discardRehearsal(cliRehearsal); }
     });
     test('CLI resolution requires the reviewed fingerprint before opening a database', () => {
         expect(() => argumentsFor(['--database', 'copy.db', '--resolve', '--sample', 'sample', '--analysis', 'PH', '--keep', 'keep', '--reason', 'Reviewed', '--actor', 'manager']))

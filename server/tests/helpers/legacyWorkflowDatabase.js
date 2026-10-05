@@ -6,28 +6,83 @@ const { PrismaClient } = require('../../prisma_client');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { assertOwnedTestDatabase } = require('./testOwnedDatabase');
 
+// #179 pins 5987778735, 5987866354 and 5987967145. The literal baseline is
+// deployed pre-1.1 main eb273f4, byte-identical to c50415b; no schema is invented.
+const PRE11_SHA256 = 'ff776730ff70102f018c3a02af76534ada332f2f4484600bde069b45c92f0513';
+const MIGRATIONS = Object.freeze({
+    MARKER: '20261004190000_add_workitem_duplicate_marker',
+    INDEX: '20261004190100_unique_active_workitem',
+    DECLARATION: '20261004190200_add_declared_consignment_count'
+});
+const MIGRATION_SHA256 = Object.freeze({
+    MARKER: '80278c2d318bc47fa92746015ec278a204a7ff08a9e36d24faca0a56ef05fa1e',
+    INDEX: 'a6e1cf6a26319954e35f4008bc4d18e904014f086db0e31d88e42948fac6556e',
+    DECLARATION: '849f07ae38eafdb05cf702cf55a5c2f549ee19d04b7bf2ad36fca1322ebb673b'
+});
+const VARIANTS = Object.freeze({
+    PRE_1_1_DUPLICATES: null,
+    // A: Prisma order/no updatedAt default; B: observed deployed appended custody
+    // columns and DEFAULT CURRENT_TIMESTAMP. Both literal shapes are test-owned.
+    CONSIGNMENT_PRE_1_1_A: '13b40b8e5a0acd4deb04f238eedb2deb58c5d4b57d48245c0d938deeaffda123',
+    CONSIGNMENT_PRE_1_1_B: 'e87950361986185105cb813b9b16226c178f4b65ad590a9e5e96dcb135bb15d6'
+});
+
 // Legacy values are inserted into a new schema before its real additive guards
 // are installed. Existing constraints are never dropped, disabled or bypassed.
-function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_legacy_${randomUUID()}.db`), samples = [], workItems = [], batches = [], preMigrationSnapshot = false }) {
+function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_legacy_${randomUUID()}.db`), samples = [], workItems = [], batches = [], preMigrationSnapshot = false,
+    schemaVariant = null, markerPending = false, migrationOrder = 'REHEARSAL', relatedRows = {} }) {
     file = assertOwnedTestDatabase(file, actor);
     if (![samples, workItems, batches].every(Array.isArray)) throw new Error('Legacy fixture rows must be declarative arrays.');
+    if (schemaVariant !== null && !Object.hasOwn(VARIANTS, schemaVariant)) throw new Error('Unknown pinned historical schema variant.');
+    if (!['REHEARSAL', 'REAL'].includes(migrationOrder) || (markerPending && schemaVariant !== 'PRE_1_1_DUPLICATES')) {
+        throw new Error('Unknown historical migration order or pending marker.');
+    }
+    const relatedTables = ['User', 'Lab', 'Consignment', 'Submission', 'Result', 'SpectralData'];
+    if (!relatedRows || Object.keys(relatedRows).some(table => !relatedTables.includes(table) || !Array.isArray(relatedRows[table]))) {
+        throw new Error('Related legacy rows must name an allowed table and declarative array.');
+    }
+    const pending = schemaVariant === 'PRE_1_1_DUPLICATES' ? [...(markerPending ? ['MARKER'] : []), 'INDEX']
+        : schemaVariant ? ['DECLARATION'] : [];
+    const outcomes = new Map(pending.map(name => [name, 'PENDING']));
+    let unusable = false, closed = false;
     // Exclusive creation makes a reused file fail before any database is opened.
     fs.closeSync(fs.openSync(file, 'wx'));
-    const source = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
-    const tables = source.prepare("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%' AND name != 'ResultEvidenceEvent'").all();
-    const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent'").all();
-    source.close();
     let db = new Database(file), snapshot = null;
     try {
         db.pragma('foreign_keys = ON');
-        for (const table of tables) db.exec(['Sample', 'WorkItem'].includes(table.name)
-            ? table.sql.replace(/,\s*"(?:holdPriorStatus|legacyStatus)"\s+TEXT(?=\s*[,)])/g, '') : table.sql);
-        for (const index of indexes) db.exec(index.sql);
+        if (schemaVariant) {
+            const baseline = fs.readFileSync(path.resolve(__dirname, 'fixtures/pre11_full_application_schema.sql'));
+            if (createHash('sha256').update(baseline).digest('hex') !== PRE11_SHA256) throw new Error('Pinned pre-1.1 schema digest mismatch.');
+            let schema = baseline.toString('utf8');
+            if (schemaVariant !== 'PRE_1_1_DUPLICATES') {
+                const shape = require('./fixtures/consignment_pre11_shapes.json')[schemaVariant];
+                if (shape.sha256 !== VARIANTS[schemaVariant] || createHash('sha256').update(shape.ddl).digest('hex') !== VARIANTS[schemaVariant]) {
+                    throw new Error('Pinned historical Consignment shape digest mismatch.');
+                }
+                // Select its literal CREATE before anything exists; never rebuild,
+                // drop or disable an already installed table, index or constraint.
+                const original = schema.match(/CREATE TABLE "Consignment" \([\s\S]*?\n\);/);
+                if (!original) throw new Error('Pinned baseline lacks Consignment.');
+                schema = schema.replace(original[0], shape.ddl);
+            }
+            db.exec(schema);
+        } else {
+            const source = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
+            const tables = source.prepare("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%' AND name != 'ResultEvidenceEvent'").all();
+            const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent'").all();
+            source.close();
+            for (const table of tables) db.exec(['Sample', 'WorkItem'].includes(table.name)
+                ? table.sql.replace(/,\s*"(?:holdPriorStatus|legacyStatus)"\s+TEXT(?=\s*[,)])/g, '') : table.sql);
+            for (const index of indexes) db.exec(index.sql);
+        }
         if (db.prepare("SELECT name FROM sqlite_master WHERE type='trigger'").all().length) throw new Error('Legacy fixture must have no release guards before inserting.');
+        const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all();
         for (const table of tables) if (db.prepare(`SELECT COUNT(*) AS count FROM "${table.name}"`).get().count !== 0) {
             throw new Error('Legacy fixture must be a fresh schema-only file.');
         }
-        for (const [table, rows] of [['Sample', samples], ['Batch', batches], ['WorkItem', workItems]]) {
+        for (const [table, rows] of [['User', relatedRows.User || []], ['Lab', relatedRows.Lab || []], ['Consignment', relatedRows.Consignment || []],
+            ['Sample', samples], ['Batch', batches], ['Submission', relatedRows.Submission || []], ['WorkItem', workItems],
+            ['Result', relatedRows.Result || []], ['SpectralData', relatedRows.SpectralData || []]]) {
             const columns = new Set(db.prepare(`PRAGMA table_info("${table}")`).all().map(column => column.name));
             for (const row of rows) {
                 const fields = Object.keys(row);
@@ -50,6 +105,13 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
             db = new Database(file, { fileMustExist: true });
             db.pragma('foreign_keys = ON');
         }
+        if (schemaVariant) for (const [name, directory] of Object.entries(MIGRATIONS)) {
+            if (pending.includes(name) && migrationOrder === 'REHEARSAL') continue;
+            const sql = fs.readFileSync(path.resolve(__dirname, '../../prisma/migrations', directory, 'migration.sql'));
+            if (createHash('sha256').update(sql).digest('hex') !== MIGRATION_SHA256[name]) throw new Error(`Pinned ${name} migration digest mismatch.`);
+            db.transaction(() => db.exec(sql.toString('utf8')))();
+            if (outcomes.has(name)) outcomes.set(name, 'APPLIED');
+        }
         for (const name of ['20261005000000_workflow_state_evidence', '20261005000100_workflow_state_guards']) {
             db.exec(fs.readFileSync(path.resolve(__dirname, '../../prisma/migrations', name, 'migration.sql'), 'utf8'));
         }
@@ -58,8 +120,55 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
         for (const match of guardSql.matchAll(/CREATE TRIGGER "([^"]+)"/g)) {
             if (!installed.has(match[1])) throw new Error(`Missing release guard ${match[1]}`);
         }
+    } catch (error) {
+        if (db.open) db.close();
+        // This helper exclusively created the owned file; a failed build cannot
+        // leave a reusable rehearsal with missing guards or partial migrations.
+        for (const suffix of ['', '-wal', '-shm', '-journal']) fs.rmSync(`${file}${suffix}`, { force: true });
+        if (snapshot) { fs.chmodSync(snapshot.path, 0o600); fs.rmSync(snapshot.path); }
+        throw error;
     } finally { if (db.open) db.close(); }
-    return { file, preMigrationSnapshot: snapshot };
+    return { file, preMigrationSnapshot: snapshot,
+        get pendingMigrations() { return [...outcomes].filter(([, outcome]) => outcome === 'PENDING').map(([name]) => name); },
+        applyPendingMigration: ({ connection, migration = pending.at(-1), expectedFailure } = {}) => {
+            assertOwnedTestDatabase(file, actor);
+            if (closed || unusable || outcomes.get(migration) !== 'PENDING') throw new Error('Historical migration is not pending or its rehearsal is unusable.');
+            if (migration === 'INDEX' && outcomes.get('MARKER') === 'PENDING') throw new Error('The marker must be applied before the index.');
+            if (expectedFailure !== undefined && !(migration === 'INDEX' && expectedFailure === 'SQLITE_CONSTRAINT_UNIQUE')) {
+                throw new Error('Only the exact unresolved duplicate-index refusal is pinned.');
+            }
+            const sql = fs.readFileSync(path.resolve(__dirname, '../../prisma/migrations', MIGRATIONS[migration], 'migration.sql'));
+            if (createHash('sha256').update(sql).digest('hex') !== MIGRATION_SHA256[migration]) throw new Error(`Pinned ${migration} migration digest mismatch.`);
+            const handle = connection || new Database(file, { fileMustExist: true });
+            try {
+                if (path.resolve(handle.name) !== file || !handle.open || handle.readonly) throw new Error('Migration connection must be the owned writable rehearsal.');
+                if (!handle.inTransaction) handle.pragma('foreign_keys = ON');
+                if (handle.pragma('foreign_keys', { simple: true }) !== 1) throw new Error('Historical migrations require foreign keys ON.');
+                try { handle.transaction(() => handle.exec(sql.toString('utf8')))(); }
+                catch (error) {
+                    if (expectedFailure && error.code === expectedFailure && error.message === 'UNIQUE constraint failed: WorkItem.sampleId, WorkItem.analysis') {
+                        if (handle.prepare("SELECT name FROM sqlite_master WHERE name='WorkItem_one_active_per_analysis'").get()) throw new Error('Failed index migration left its index installed.');
+                        outcomes.set(migration, 'ASSERTED_FAILURE');
+                        unusable = true; // A failed-index file is discarded, never reused.
+                    }
+                    throw error;
+                }
+                if (expectedFailure) throw new Error('The expected index failure unexpectedly succeeded.');
+                outcomes.set(migration, 'APPLIED');
+            } finally { if (!connection) handle.close(); }
+        },
+        close: () => {
+            if (closed) return;
+            closed = true;
+            try {
+                if ([...outcomes.values()].includes('PENDING')) throw new Error('Historical rehearsal has an unaccounted pending migration.');
+            } finally {
+                assertOwnedTestDatabase(file, actor);
+                for (const suffix of ['', '-wal', '-shm', '-journal']) fs.rmSync(`${file}${suffix}`, { force: true });
+                if (snapshot) { fs.chmodSync(snapshot.path, 0o600); fs.rmSync(snapshot.path); }
+            }
+        }
+    };
 }
 
 async function createLegacyClosureDatabase({ analysis, labId, samples = [], workItems = [], batches = [], preMigrationSnapshot = false }) {
