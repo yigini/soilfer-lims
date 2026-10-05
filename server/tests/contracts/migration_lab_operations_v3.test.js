@@ -12,63 +12,27 @@
 const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
+const { spawnSync } = require('child_process');
+const { PrismaClient } = require('../../prisma_client');
+const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const { runMigration, METHODOLOGY_RECONCILIATION, UNRESOLVED_SYNTHETIC_PLACEHOLDERS } = require('../../scripts/migrate_lab_operations_v3');
 
 describe('Lab Operations v3 Database Migration & Reconciliation', () => {
-    const tempDir = path.resolve(__dirname, '..', '..', 'prisma', 'test_scratch');
-    const rehearsalDbPath = path.join(tempDir, 'rehearsal.db');
-    const bakSourcePath = path.resolve(__dirname, '..', '..', 'prisma', 'dev.db.pre_reconciliation_bak');
-    const currentDbPath = path.resolve(__dirname, '..', '..', 'prisma', 'dev.db');
-
-    beforeAll(() => {
-        if (!fs.existsSync(tempDir)) {
-            fs.mkdirSync(tempDir, { recursive: true });
-        }
-    });
-
-    afterAll(() => {
+    let rehearsal, rehearsalDbPath, client;
+    beforeEach(async () => {
+        const now = Date.now();
+        rehearsal = beforeGuards({ actor: 'system:fixture', samples: [
+            { id: 'SMP-PREMATURE-01', originalId: 'ORIG-SMP-PREMATURE-01', status: 'REGISTERED', labId: 'LAB-TUN', createdAt: now, updatedAt: now },
+            { id: 'SMP-WRONG-TEX-01', originalId: 'ORIG-SMP-WRONG-TEX-01', status: 'COMPLETED', labId: 'LAB-GTM', createdAt: now, updatedAt: now }
+        ] });
+        rehearsalDbPath = rehearsal.file;
+        client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: 'file:' + rehearsalDbPath }) });
+        await createSampleFixture(client, { data: { id: 'MIG-SMP-001', originalId: 'ORIG-MIG-001', status: 'ACCEPTED', preparationStatus: 'DONE', dryingStatus: 'DONE' } });
+        await client.user.create({ data: { id: 'usr-mig-mgr', username: 'mig_mgr', password: 'hash', email: 'mgr@example.test', role: 'LAB_MANAGER', name: 'Migration Manager' } });
+        const db = new Database(rehearsalDbPath); db.pragma('foreign_keys = ON');
         try {
-            if (fs.existsSync(rehearsalDbPath)) {
-                fs.unlinkSync(rehearsalDbPath);
-            }
-            if (fs.existsSync(tempDir)) {
-                fs.rmdirSync(tempDir, { recursive: true });
-            }
-        } catch (e) {
-            // Ignore cleanup errors on Windows
-        }
-    });
-
-    beforeEach(() => {
-        // Prepare isolated test database
-        if (fs.existsSync(rehearsalDbPath)) {
-            fs.unlinkSync(rehearsalDbPath);
-        }
-
-        if (fs.existsSync(bakSourcePath)) {
-            // Rehearse using the exact pre-reconciliation state
-            fs.copyFileSync(bakSourcePath, rehearsalDbPath);
-        } else {
-            // Fallback: copy current dev.db and inject pre-reconciliation state
-            fs.copyFileSync(currentDbPath, rehearsalDbPath);
-            const db = new Database(rehearsalDbPath);
-
-            // Ensure baseline sample and user exist for invariant checks
-            const sampleCount = db.prepare('SELECT COUNT(*) as c FROM "Sample"').get().c;
-            if (sampleCount === 0) {
-                db.prepare(`
-                    INSERT INTO "Sample" (id, originalId, status, preparationStatus, dryingStatus, createdAt, updatedAt)
-                    VALUES ('MIG-SMP-001', 'ORIG-MIG-001', 'ACCEPTED', 'DONE', 'DONE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-                `).run();
-            }
-            const userCount = db.prepare('SELECT COUNT(*) as c FROM "User"').get().c;
-            if (userCount === 0) {
-                db.prepare(`
-                    INSERT INTO "User" (id, username, password, email, role, name, createdAt, updatedAt)
-                    VALUES ('usr-mig-mgr', 'mig_mgr', 'hash', 'mgr@example.com', 'LAB_MANAGER', 'Migration Manager', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-                `).run();
-            }
-
             for (const item of METHODOLOGY_RECONCILIATION) {
                 db.prepare(`
                     INSERT OR IGNORE INTO "Analysis" (code, name, isGlobal, status)
@@ -103,11 +67,20 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
                     db.prepare('INSERT INTO "Methodology" (id, analysisCode, name, isDefault, createdAt, updatedAt) VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)').run(sp, analysisCode, 'Synthetic Placeholder ' + sp);
                 }
             }
-            db.close();
-        }
+        } finally { db.close(); }
     });
+    afterEach(async () => { await client?.$disconnect(); rehearsal?.close(); });
+    function evidence() {
+        const db = new Database(rehearsalDbPath, { readonly: true });
+        try {
+            const schema = db.prepare("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name").all();
+            return { schema, tables: schema.filter(row => row.type === 'table').map(row => ({ name: row.name,
+                rows: db.prepare(`SELECT * FROM "${row.name.replace(/"/g, '""')}"`).all().map(value => JSON.stringify(value)).sort() })) };
+        } finally { db.close(); }
+    }
 
     test('1. Dry-Run Mode: Performs read-only audit with zero file or row mutations', () => {
+        const fileBefore = fs.readFileSync(rehearsalDbPath);
         const dbPre = new Database(rehearsalDbPath);
         const preMethDefaults = dbPre.prepare('SELECT id FROM "Methodology" WHERE isDefault = 1').all().map(r => r.id);
         const preWorkItemCount = dbPre.prepare('SELECT COUNT(*) as c FROM "WorkItem"').get().c;
@@ -128,6 +101,7 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
 
         expect(postMethDefaults).toEqual(preMethDefaults);
         expect(postWorkItemCount).toBe(preWorkItemCount);
+        expect(fs.readFileSync(rehearsalDbPath)).toEqual(fileBefore);
     });
 
     test('2. Apply Mode: Atomically applies DDL and methodology reconciliation', () => {
@@ -135,6 +109,7 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
 
         expect(result.success).toBe(true);
         expect(result.mode).toBe('APPLY');
+        expect(result.audit.a94Candidates).toEqual([]);
 
         const db = new Database(rehearsalDbPath);
 
@@ -189,18 +164,15 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
         expect(secondRun.audit.analysisStatusUpdates).toBe(0);
     });
 
-    test('4. Preservation Invariant: Existing assigned work items and sample records are preserved', () => {
+    test('4. Preservation Invariant: Existing assigned work items and sample records are preserved', async () => {
         const db = new Database(rehearsalDbPath);
         // Create an assigned work item with explicit methodology
-        const sample = db.prepare('SELECT id FROM "Sample" LIMIT 1').get();
+        const sample = db.prepare("SELECT id FROM Sample WHERE id='MIG-SMP-001'").get();
         const user = db.prepare('SELECT username FROM "User" LIMIT 1').get();
         const meth = db.prepare('SELECT id FROM "Methodology" WHERE analysisCode = \'PH_H2O\' LIMIT 1').get();
-        if (sample && meth) {
-            db.prepare(`
-                INSERT INTO "WorkItem" (id, sampleId, analysis, status, methodologyId, assignedTo, createdAt, updatedAt)
-                VALUES ('TEST_WORK_ITEM_PRESERVED', ?, 'PH_H2O', 'IN_PROGRESS', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            `).run(sample.id, meth.id, user ? user.username : null);
-        }
+        expect(sample).toBeDefined(); expect(meth).toBeDefined(); expect(user).toBeDefined();
+        await createWorkItemFixture(client, { data: { id: 'TEST_WORK_ITEM_PRESERVED', sampleId: sample.id,
+            analysis: 'PH_H2O', status: 'IN_PROGRESS', methodologyId: meth.id, assignedTo: user.username } });
         db.close();
 
         // Run migration
@@ -260,44 +232,82 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
         dbCheck.close();
     });
 
-    test('6. A94: Consolidates unstarted separate texture fraction tasks into unified TEXTURE work items', () => {
-        const db = new Database(rehearsalDbPath);
-        let sId;
-        try {
-            const sample = db.prepare('SELECT id FROM "Sample" LIMIT 1').get();
-            expect(sample).toBeDefined();
-
-            // Create 3 unstarted fraction tasks for SAND, SILT, CLAY
-            sId = sample.id;
-            db.prepare(`INSERT INTO "WorkItem" (id, sampleId, analysis, status, updatedAt) VALUES ('WI_UNSTARTED_SAND', ?, 'SAND', 'PENDING', CURRENT_TIMESTAMP)`).run(sId);
-            db.prepare(`INSERT INTO "WorkItem" (id, sampleId, analysis, status, updatedAt) VALUES ('WI_UNSTARTED_SILT', ?, 'SILT', 'PENDING', CURRENT_TIMESTAMP)`).run(sId);
-            db.prepare(`INSERT INTO "WorkItem" (id, sampleId, analysis, status, updatedAt) VALUES ('WI_UNSTARTED_CLAY', ?, 'CLAY', 'PENDING', CURRENT_TIMESTAMP)`).run(sId);
-        } finally {
-            db.close();
-        }
-
-        const res = runMigration({ dryRun: false, apply: true, dbPath: rehearsalDbPath });
+    test('6. A94: Dry-run lists grouped fractions; apply refuses the whole migration with zero writes and no marker', async () => {
+        await client.sample.update({ where: { id: 'MIG-SMP-001' }, data: { requiredAnalyses: '["TEXTURE"]' } });
+        for (const analysis of ['SAND', 'SILT', 'CLAY']) await createWorkItemFixture(client, { data: {
+            id: `WI_UNSTARTED_${analysis}`, sampleId: 'MIG-SMP-001', analysis, status: 'NOT_ASSIGNED' } });
+        const before = fs.readFileSync(rehearsalDbPath), allEvidence = evidence(), rows = await client.workItem.findMany({ orderBy: { id: 'asc' } });
+        const audits = await client.auditLog.findMany({ orderBy: { id: 'asc' } });
+        const res = runMigration({ dryRun: true, apply: false, dbPath: rehearsalDbPath });
         expect(res.success).toBe(true);
-        expect(res.audit.a94Consolidated.tasks).toBeGreaterThanOrEqual(3);
-
-        const dbCheck = new Database(rehearsalDbPath);
-        try {
-            const sandItem = dbCheck.prepare('SELECT status FROM "WorkItem" WHERE id = ?').get('WI_UNSTARTED_SAND');
-            expect(sandItem.status).toBe('SUPERSEDED');
-
-            const textureItem = dbCheck.prepare('SELECT id, status FROM "WorkItem" WHERE sampleId = ? AND analysis = \'TEXTURE\'').get(sId);
-            expect(textureItem).toBeDefined();
-            expect(textureItem.status).toBe('PENDING');
-        } finally {
-            dbCheck.close();
-        }
+        expect(res.audit.a94Candidates).toEqual([expect.objectContaining({ sampleId: 'MIG-SMP-001',
+            reasons: ['COMPLETE_LEGACY_FRACTION_SET', 'DECLARED_REQUIRED_ANALYSES'],
+            tasks: expect.arrayContaining(['SAND', 'SILT', 'CLAY'].map(analysis => expect.objectContaining({
+                id: `WI_UNSTARTED_${analysis}`, analysis, status: 'NOT_ASSIGNED', assignedTo: null }))) })]);
+        expect(res.audit.a94Consolidated).toEqual({ samples: 0, tasks: 0 });
+        expect(() => runMigration({ dryRun: false, apply: true, dbPath: rehearsalDbPath }))
+            .toThrow(expect.objectContaining({ code: 'A94_REQUIRES_ORDER_WORKFLOW', candidates: res.audit.a94Candidates }));
+        expect(fs.readFileSync(rehearsalDbPath)).toEqual(before);
+        expect(evidence()).toEqual(allEvidence);
+        expect(await client.workItem.findMany({ orderBy: { id: 'asc' } })).toEqual(rows);
+        expect(await client.auditLog.findMany({ orderBy: { id: 'asc' } })).toEqual(audits);
+        const db = new Database(rehearsalDbPath, { readonly: true });
+        try { expect(db.prepare("SELECT id FROM _schema_migrations WHERE id='v3_lab_operations_20260906'").get()).toBeUndefined(); }
+        finally { db.close(); }
     });
 
-    test('7. A95: Reconciles legacy fraction results with explicit WorkAttempt linkage', () => {
+    test('real CLI default is read-only and --apply prints its stable A94 refusal before any source write', async () => {
+        await client.sample.update({ where: { id: 'MIG-SMP-001' }, data: { requiredAnalyses: '["TEXTURE"]' } });
+        await createWorkItemFixture(client, { data: { id: 'WI_CLI_SAND', sampleId: 'MIG-SMP-001', analysis: 'SAND', status: 'NOT_ASSIGNED' } });
+        const before = evidence(), bytes = fs.readFileSync(rehearsalDbPath);
+        const script = path.resolve(__dirname, '../../scripts/migrate_lab_operations_v3.js');
+        const dry = spawnSync(process.execPath, [script, '--db', rehearsalDbPath], { encoding: 'utf8' });
+        expect(dry.status).toBe(0); expect(dry.stdout).toContain('DECLARED_REQUIRED_ANALYSES');
+        expect(evidence()).toEqual(before); expect(fs.readFileSync(rehearsalDbPath)).toEqual(bytes);
+        const apply = spawnSync(process.execPath, [script, '--apply', '--db', rehearsalDbPath], { encoding: 'utf8' });
+        expect(apply.status).toBe(1);
+        const refusal = JSON.parse(apply.stderr.split(/\r?\n/).find(line => line.startsWith('{"code":')));
+        expect(refusal).toMatchObject({ code: 'A94_REQUIRES_ORDER_WORKFLOW', candidates: [{ sampleId: 'MIG-SMP-001',
+            reasons: ['DECLARED_REQUIRED_ANALYSES'], tasks: [{ id: 'WI_CLI_SAND', status: 'NOT_ASSIGNED', assignedTo: null }] }] });
+        expect(evidence()).toEqual(before); expect(fs.readFileSync(rehearsalDbPath)).toEqual(bytes);
+    });
+
+    test('A94 reports explicit grouped-order evidence without creating or superseding work', async () => {
+        const revision = await client.sampleOrderRevision.create({ data: { sampleId: 'MIG-SMP-001', version: 1, requestedBy: 'mig_mgr' } });
+        await client.orderLine.create({ data: { revisionId: revision.id, analysis: 'TEXTURE' } });
+        await createWorkItemFixture(client, { data: { id: 'WI_ORDER_CLAY', sampleId: 'MIG-SMP-001', analysis: 'CLAY', status: 'ASSIGNED', assignedTo: 'mig_mgr' } });
+        const before = evidence(), dry = runMigration({ dryRun: true, apply: false, dbPath: rehearsalDbPath });
+        expect(dry.audit.a94Candidates).toMatchObject([{ sampleId: 'MIG-SMP-001', reasons: ['EXPLICIT_GROUPED_ORDER'],
+            tasks: [{ id: 'WI_ORDER_CLAY', status: 'ASSIGNED', assignedTo: 'mig_mgr' }] }]);
+        expect(() => runMigration({ dryRun: false, apply: true, dbPath: rehearsalDbPath })).toThrow(expect.objectContaining({ code: 'A94_REQUIRES_ORDER_WORKFLOW' }));
+        expect(evidence()).toEqual(before);
+    });
+
+    test('a candidate appearing after preflight is refused under the transaction lock before any migration write', async () => {
+        await createWorkItemFixture(client, { data: { id: 'WI_RACE_CLAY', sampleId: 'MIG-SMP-001', analysis: 'CLAY', status: 'NOT_ASSIGNED' } });
+        const originalTransaction = Database.prototype.transaction;
+        let afterExternalEdit;
+        const intercept = jest.spyOn(Database.prototype, 'transaction').mockImplementationOnce(function (callback) {
+            const concurrent = new Database(rehearsalDbPath); concurrent.pragma('foreign_keys = ON');
+            try { concurrent.prepare('UPDATE Sample SET requiredAnalyses = ? WHERE id = ?').run('["TEXTURE"]', 'MIG-SMP-001'); }
+            finally { concurrent.close(); }
+            afterExternalEdit = evidence();
+            return originalTransaction.call(this, callback);
+        });
+        try {
+            expect(() => runMigration({ dryRun: false, apply: true, dbPath: rehearsalDbPath }))
+                .toThrow(expect.objectContaining({ code: 'A94_REQUIRES_ORDER_WORKFLOW', candidates: [expect.objectContaining({
+                    sampleId: 'MIG-SMP-001', reasons: ['DECLARED_REQUIRED_ANALYSES'] })] }));
+            expect(afterExternalEdit).toBeDefined();
+            expect(evidence()).toEqual(afterExternalEdit);
+        } finally { intercept.mockRestore(); }
+    });
+
+    test('7. A95: Reconciles legacy fraction results with explicit WorkAttempt linkage', async () => {
         const db = new Database(rehearsalDbPath);
         let sId;
         try {
-            const sample = db.prepare('SELECT id FROM "Sample" LIMIT 1').get();
+            const sample = db.prepare("SELECT id FROM Sample WHERE id='MIG-SMP-001'").get();
             sId = sample.id;
 
             // Create legacy results for SAND, SILT, CLAY
@@ -306,7 +316,7 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
             db.prepare(`INSERT INTO "Result" (id, sampleId, param, value, enteredBy, updatedAt) VALUES ('RES_LEG_CLAY', ?, 'CLAY', '20.0', 'tech_legacy', CURRENT_TIMESTAMP)`).run(sId);
 
             // Ensure a TEXTURE work item exists
-            db.prepare(`INSERT OR IGNORE INTO "WorkItem" (id, sampleId, analysis, status, updatedAt) VALUES ('WI_LEG_TEXTURE', ?, 'TEXTURE', 'COMPLETED', CURRENT_TIMESTAMP)`).run(sId);
+            await createWorkItemFixture(client, { data: { id: 'WI_LEG_TEXTURE', sampleId: sId, analysis: 'TEXTURE', status: 'COMPLETED' } });
         } finally {
             db.close();
         }
@@ -329,12 +339,11 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
         }
     });
 
-    test('8. A96: Flags premature drafts with [WARNING: PREPARATION_PENDING] in durable notes without corrupting checks array', () => {
+    test('8. A96: Flags premature drafts with [WARNING: PREPARATION_PENDING] in durable notes without corrupting checks array', async () => {
         const db = new Database(rehearsalDbPath);
         const sampleId = 'SMP-PREMATURE-01';
         try {
-            db.prepare(`INSERT INTO "Sample" (id, originalId, status, labId, updatedAt) VALUES (?, ?, 'REGISTERED', 'LAB-TUN', CURRENT_TIMESTAMP)`).run(sampleId, `ORIG-${sampleId}`);
-            db.prepare(`INSERT INTO "WorkItem" (id, sampleId, analysis, status, updatedAt) VALUES ('WI_PREM_01', ?, 'PH_H2O', 'ASSIGNED', CURRENT_TIMESTAMP)`).run(sampleId);
+            await createWorkItemFixture(client, { data: { id: 'WI_PREM_01', sampleId, analysis: 'PH_H2O', status: 'ASSIGNED' } });
             db.prepare(`INSERT INTO "WorkItemDraft" (id, workItemId, sampleId, userId, analysis, value, checks, updatedAt) VALUES ('DRAFT_PREM_01', 'WI_PREM_01', ?, 'tech_tun', 'PH_H2O', '6.5', '[true,false]', CURRENT_TIMESTAMP)`).run(sampleId);
         } finally {
             db.close();
@@ -366,7 +375,6 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
         const db = new Database(rehearsalDbPath);
         const sampleId = 'SMP-WRONG-TEX-01';
         try {
-            db.prepare(`INSERT INTO "Sample" (id, originalId, status, labId, updatedAt) VALUES (?, ?, 'COMPLETED', 'LAB-GTM', CURRENT_TIMESTAMP)`).run(sampleId, `ORIG-${sampleId}`);
             // 50 sand / 35 silt / 15 clay is officially Loam (L), but legacy algorithm called it Sandy Loam (SL)
             db.prepare(`INSERT INTO "Result" (id, sampleId, param, value, provenance, updatedAt) VALUES ('RES_WRONG_TEX', ?, 'TEXTURE', 'Sandy Loam', ?, CURRENT_TIMESTAMP)`)
                 .run(sampleId, JSON.stringify({ fractions: { sand: 50, silt: 35, clay: 15 } }));
@@ -392,13 +400,13 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
         }
     });
 
-    test('10. Review Defect 4: Preserves standalone assigned fraction tasks without confirmed grouped order', () => {
+    test('10. Review Defect 4: Preserves standalone assigned fraction tasks without confirmed grouped order', async () => {
         const db = new Database(rehearsalDbPath);
         const sampleId = 'SMP-STANDALONE-SAND';
         try {
             db.prepare(`INSERT OR IGNORE INTO "User" (id, username, password, email, role, updatedAt) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`).run('tech_specialist', 'tech_specialist', 'pw', 'tech@example.com', 'LAB_TECHNICIAN');
-            db.prepare(`INSERT INTO "Sample" (id, originalId, status, assignedLab, updatedAt) VALUES (?, ?, 'RECEIVED', 'GTM-LAB1', CURRENT_TIMESTAMP)`).run(sampleId, sampleId);
-            db.prepare(`INSERT INTO "WorkItem" (id, sampleId, analysis, status, assignedTo, updatedAt) VALUES ('WI_STANDALONE_SAND', ?, 'SAND', 'ASSIGNED', 'tech_specialist', CURRENT_TIMESTAMP)`).run(sampleId);
+            await createSampleFixture(client, { data: { id: sampleId, originalId: sampleId, status: 'RECEIVED', assignedLab: 'GTM-LAB1' } });
+            await createWorkItemFixture(client, { data: { id: 'WI_STANDALONE_SAND', sampleId, analysis: 'SAND', status: 'ASSIGNED', assignedTo: 'tech_specialist' } });
         } finally {
             db.close();
         }
@@ -420,12 +428,12 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
         }
     });
 
-    test('11. Review Defect 3: Refuses to fabricate WorkAttempt when fractions have mixed replicate numbers or moisture bases', () => {
+    test('11. Review Defect 3: Refuses to fabricate WorkAttempt when fractions have mixed replicate numbers or moisture bases', async () => {
         const db = new Database(rehearsalDbPath);
         const sampleId = 'SMP-MIXED-REP-BASIS';
         try {
-            db.prepare(`INSERT INTO "Sample" (id, originalId, status, assignedLab, updatedAt) VALUES (?, ?, 'RECEIVED', 'GTM-LAB1', CURRENT_TIMESTAMP)`).run(sampleId, sampleId);
-            db.prepare(`INSERT INTO "WorkItem" (id, sampleId, analysis, status, updatedAt) VALUES ('WI_MIXED_TEX', ?, 'TEXTURE', 'COMPLETED', CURRENT_TIMESTAMP)`).run(sampleId);
+            await createSampleFixture(client, { data: { id: sampleId, originalId: sampleId, status: 'RECEIVED', assignedLab: 'GTM-LAB1' } });
+            await createWorkItemFixture(client, { data: { id: 'WI_MIXED_TEX', sampleId, analysis: 'TEXTURE', status: 'COMPLETED' } });
             // Incompatible fractions: rep 1 AIR_DRY, rep 2 OVEN_DRY, rep 3 FIELD_MOIST
             db.prepare(`INSERT INTO "Result" (id, sampleId, param, value, replicateNo, basis, updatedAt) VALUES ('RES_MIX_SAND', ?, 'SAND', '50.0', 1, 'AIR_DRY', CURRENT_TIMESTAMP)`).run(sampleId);
             db.prepare(`INSERT INTO "Result" (id, sampleId, param, value, replicateNo, basis, updatedAt) VALUES ('RES_MIX_SILT', ?, 'SILT', '35.0', 2, 'OVEN_DRY', CURRENT_TIMESTAMP)`).run(sampleId);

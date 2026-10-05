@@ -348,6 +348,40 @@ function parseArgs() {
     return { dryRun, apply, dbPath };
 }
 
+// Read-only inventory of exactly the old A94 mutation candidates. A complete
+// historical fraction set is reported as such, never treated as a new order.
+function collectA94Candidates(db) {
+    const tableExists = name => !!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?").get(name);
+    const draftClause = tableExists('WorkItemDraft') ? 'AND NOT EXISTS (SELECT 1 FROM WorkItemDraft d WHERE d.workItemId=w.id)' : '';
+    const rows = db.prepare(`SELECT w.id,w.sampleId,w.analysis,w.status,w.assignedTo FROM WorkItem w
+        WHERE w.analysis IN ('SAND','SILT','CLAY') AND w.status IN ('PENDING','ASSIGNED','NOT_ASSIGNED')
+        ${draftClause} AND NOT EXISTS (SELECT 1 FROM Result r WHERE r.sampleId=w.sampleId AND r.param=w.analysis)
+        ORDER BY w.sampleId,w.id`).all();
+    const bySample = new Map();
+    for (const row of rows) { if (!bySample.has(row.sampleId)) bySample.set(row.sampleId, []); bySample.get(row.sampleId).push(row); }
+    const canReadOrders = tableExists('OrderLine') && tableExists('SampleOrderRevision');
+    const canReadRequired = db.prepare('PRAGMA table_info(Sample)').all().some(row => row.name === 'requiredAnalyses');
+    const candidates = [], unresolvedStandaloneFractions = [];
+    for (const [sampleId, tasks] of bySample) {
+        const analyses = new Set(tasks.map(task => task.analysis));
+        const completeLegacySet = ['SAND','SILT','CLAY'].every(analysis => analyses.has(analysis));
+        const groupedOrder = canReadOrders && !!db.prepare(`SELECT 1 FROM OrderLine ol JOIN SampleOrderRevision sor ON ol.revisionId=sor.id
+            WHERE sor.sampleId=? AND ol.analysis IN ('TEXTURE','SOIL_PSD_TEXTURE','SOIL_TEXTURE','PSA') LIMIT 1`).get(sampleId);
+        const requiredAnalyses = canReadRequired ? db.prepare('SELECT requiredAnalyses FROM Sample WHERE id=?').get(sampleId)?.requiredAnalyses : null;
+        const text = typeof requiredAnalyses === 'string' ? requiredAnalyses.toUpperCase() : '';
+        const declaredGroup = text.includes('TEXTURE') || text.includes('PSA') || ['SAND','SILT','CLAY'].every(analysis => text.includes(analysis));
+        if (completeLegacySet || groupedOrder || declaredGroup) {
+            candidates.push({ sampleId, tasks, requiredAnalyses: requiredAnalyses || null,
+                reasons: [...(completeLegacySet ? ['COMPLETE_LEGACY_FRACTION_SET'] : []),
+                    ...(groupedOrder ? ['EXPLICIT_GROUPED_ORDER'] : []), ...(declaredGroup ? ['DECLARED_REQUIRED_ANALYSES'] : [])] });
+        } else {
+            unresolvedStandaloneFractions.push({ sampleId, preservedAnalyses: [...analyses], tasks,
+                reason: 'Standalone or incomplete fraction tasks preserved without confirmed grouped texture order.' });
+        }
+    }
+    return { candidates, unresolvedStandaloneFractions };
+}
+
 function runMigration({ dryRun, apply, dbPath }) {
     console.log('╔══════════════════════════════════════════════════════════════╗');
     console.log('║  SoilFER-LIMS Lab Operations v3 Fail-Closed DB Migration    ║');
@@ -360,9 +394,23 @@ function runMigration({ dryRun, apply, dbPath }) {
         throw new Error(`Target database file does not exist at: ${dbPath}`);
     }
 
-    const db = new Database(dbPath, { timeout: 10000 });
+    // Default dry-run opens its source read-only. Existing simulation/rollback
+    // runs only in a private in-memory copy, never against the source file.
+    const source = new Database(dbPath, { timeout: 10000, readonly: !apply || dryRun, fileMustExist: true });
+    let db;
 
     try {
+        db = apply ? source : new Database(source.serialize());
+        db.pragma('foreign_keys = ON');
+        let a94 = collectA94Candidates(db);
+        console.log('A94 manual-review candidates:', JSON.stringify(a94.candidates));
+        // #179 pin 5988222743: do not commit other steps or a migration marker
+        // while silently deferring A94. No supersession/order model is invented.
+        if (apply && a94.candidates.length) {
+            const error = new Error('A94 consolidation requires the audited order/cancellation workflow (#182/#183).');
+            error.code = 'A94_REQUIRES_ORDER_WORKFLOW'; error.candidates = a94.candidates;
+            throw error;
+        }
         // 1. Snapshot baseline metrics for preservation audit
         const countWorkItems = db.prepare('SELECT COUNT(*) as c FROM "WorkItem"').get()?.c || 0;
         const countResults = db.prepare('SELECT COUNT(*) as c FROM "Result"').get()?.c || 0;
@@ -407,6 +455,7 @@ function runMigration({ dryRun, apply, dbPath }) {
         }
 
         const auditTrail = {
+            a94Candidates: a94.candidates,
             ddlApplied: [],
             methodologyChanges: [],
             syntheticPlaceholdersDeprecations: [],
@@ -424,6 +473,16 @@ function runMigration({ dryRun, apply, dbPath }) {
         // If in dry-run mode, we wrap everything in a transaction and rollback at the end.
         // If in apply mode, we commit the transaction upon successful completion.
         const migrateTx = db.transaction(() => {
+            // Recheck after acquiring the write lock, before DDL or any row
+            // mutation; a candidate inserted since the first inventory blocks
+            // the entire transaction too.
+            a94 = collectA94Candidates(db);
+            if (apply && a94.candidates.length) {
+                const error = new Error('A94 consolidation requires the audited order/cancellation workflow (#182/#183).');
+                error.code = 'A94_REQUIRES_ORDER_WORKFLOW'; error.candidates = a94.candidates;
+                throw error;
+            }
+            auditTrail.a94Candidates = a94.candidates;
             // STEP 1: DDL Check / Idempotent table & column creation
             console.log('STEP 1: Idempotent Schema Synchronization (DDL)...');
 
@@ -773,131 +832,10 @@ function runMigration({ dryRun, apply, dbPath }) {
             }
             console.log('');
 
-            // STEP 5 (A94): Consolidate unstarted separate texture tasks (SAND, SILT, CLAY) into unified TEXTURE work items
-            console.log('STEP 5 (A94): Consolidating unstarted legacy texture fraction tasks...');
-            const unstartedFractions = db.prepare(`
-                SELECT w.id, w.sampleId, w.analysis, w.status, w.assignedTo, w.assignedBy, w.assignedAt,
-                       w.priority, w.labId, w.assignedLab, w.batchId, w.rackPosition, w.methodologyId
-                FROM "WorkItem" w
-                WHERE w.analysis IN ('SAND', 'SILT', 'CLAY')
-                  AND w.status IN ('PENDING', 'ASSIGNED', 'NOT_ASSIGNED')
-                  AND NOT EXISTS (
-                      SELECT 1 FROM "WorkItemDraft" d WHERE d.workItemId = w.id
-                  )
-                  AND NOT EXISTS (
-                      SELECT 1 FROM "Result" r WHERE r.sampleId = w.sampleId AND r.param = w.analysis
-                  )
-            `).all();
-
-            const fractionsBySample = {};
-            for (const row of unstartedFractions) {
-                if (!fractionsBySample[row.sampleId]) fractionsBySample[row.sampleId] = [];
-                fractionsBySample[row.sampleId].push(row);
-            }
-
-            let consolidatedSampleCount = 0;
-            let consolidatedTaskCount = 0;
-
-            for (const [sampleId, tasks] of Object.entries(fractionsBySample)) {
-                // Check if all 3 fractions exist in unstarted tasks
-                const taskAnalyses = new Set(tasks.map(t => t.analysis));
-                const hasAllThreeFractions = taskAnalyses.has('SAND') && taskAnalyses.has('SILT') && taskAnalyses.has('CLAY');
-
-                // Check if sample has an explicit confirmed grouped texture order
-                let orderHasTexture = false;
-                try {
-                    const revOrder = db.prepare(`
-                        SELECT 1 FROM "OrderLine" ol
-                        JOIN "SampleOrderRevision" sor ON ol.revisionId = sor.id
-                        WHERE sor.sampleId = ? AND ol.analysis IN ('TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA')
-                        LIMIT 1
-                    `).get(sampleId);
-                    if (revOrder) orderHasTexture = true;
-                } catch (e) {}
-
-                if (!orderHasTexture) {
-                    try {
-                        const sampleRow = db.prepare('SELECT requiredAnalyses FROM "Sample" WHERE id = ?').get(sampleId);
-                        if (sampleRow?.requiredAnalyses) {
-                            const reqStr = sampleRow.requiredAnalyses.toUpperCase();
-                            if (reqStr.includes('TEXTURE') || reqStr.includes('PSA') ||
-                                (reqStr.includes('SAND') && reqStr.includes('SILT') && reqStr.includes('CLAY'))) {
-                                orderHasTexture = true;
-                            }
-                        }
-                    } catch (e) {}
-                }
-
-                // If not confirmed grouped order, keep standalone fractions untouched and report for review
-                if (!hasAllThreeFractions && !orderHasTexture) {
-                    auditTrail.unresolvedStandaloneFractions.push({
-                        sampleId,
-                        preservedAnalyses: Array.from(taskAnalyses),
-                        tasks: tasks.map(t => ({ id: t.id, analysis: t.analysis, status: t.status, assignedTo: t.assignedTo })),
-                        reason: 'Standalone or incomplete fraction tasks preserved without confirmed grouped texture order.'
-                    });
-                    continue;
-                }
-
-                // Check if sample already has an active TEXTURE work item
-                const existingTexture = db.prepare(`
-                    SELECT id FROM "WorkItem"
-                    WHERE sampleId = ? AND analysis IN ('TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA')
-                      AND status != 'SUPERSEDED'
-                `).get(sampleId);
-
-                // Preserve assignment, priority, batch, and status from consolidated tasks
-                const preservedStatus = tasks.some(t => t.status === 'ASSIGNED') ? 'ASSIGNED' : 'PENDING';
-                const preservedAssignedTo = tasks.find(t => t.assignedTo)?.assignedTo || null;
-                const preservedAssignedBy = tasks.find(t => t.assignedBy)?.assignedBy || null;
-                const preservedAssignedAt = tasks.find(t => t.assignedAt)?.assignedAt || null;
-                const preservedPriority = Math.max(...tasks.map(t => typeof t.priority === 'number' ? t.priority : 0), 0);
-                const preservedLabId = tasks.find(t => t.labId)?.labId || null;
-                const preservedAssignedLab = tasks.find(t => t.assignedLab)?.assignedLab || null;
-                const preservedBatchId = tasks.find(t => t.batchId)?.batchId || null;
-                const preservedRackPosition = tasks.find(t => t.rackPosition != null)?.rackPosition || null;
-                const preservedMethodologyId = tasks.find(t => t.methodologyId)?.methodologyId || null;
-
-                if (!existingTexture) {
-                    const textureId = `WI_TEXTURE_${sampleId.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
-                    db.prepare(`
-                        INSERT INTO "WorkItem" (
-                            id, sampleId, analysis, status, assignedTo, assignedBy, assignedAt,
-                            priority, labId, assignedLab, batchId, rackPosition, methodologyId,
-                            createdAt, updatedAt
-                        )
-                        VALUES (?, ?, 'TEXTURE', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-                    `).run(
-                        textureId,
-                        sampleId,
-                        preservedStatus,
-                        preservedAssignedTo,
-                        preservedAssignedBy,
-                        preservedAssignedAt,
-                        preservedPriority,
-                        preservedLabId,
-                        preservedAssignedLab,
-                        preservedBatchId,
-                        preservedRackPosition,
-                        preservedMethodologyId
-                    );
-                    consolidatedSampleCount++;
-                }
-
-                // Supercede the unstarted separate fraction items
-                for (const task of tasks) {
-                    db.prepare(`
-                        UPDATE "WorkItem"
-                        SET status = 'SUPERSEDED',
-                            updatedAt = CURRENT_TIMESTAMP
-                        WHERE id = ?
-                    `).run(task.id);
-                    consolidatedTaskCount++;
-                }
-            }
-            auditTrail.a94Consolidated = { samples: consolidatedSampleCount, tasks: consolidatedTaskCount };
-            console.log(`  ✓ Consolidated ${consolidatedTaskCount} unstarted fraction tasks across ${consolidatedSampleCount} samples into unified TEXTURE work items.`);
-            console.log(`  ✓ Preserved ${auditTrail.unresolvedStandaloneFractions.length} standalone fraction samples untouched for manual review.\n`);
+            // STEP 5 (A94): inventory only; mutation is deferred under #179.
+            auditTrail.unresolvedStandaloneFractions = a94.unresolvedStandaloneFractions;
+            auditTrail.a94Consolidated = { samples: 0, tasks: 0 };
+            console.log('  A94 manual review:', auditTrail.a94Candidates.length, 'candidate samples; no workflow writes.');
 
             // STEP 6 (A95): Audit and reconcile partial/approved legacy fractions with explicit attempt linkage
             console.log('STEP 6 (A95): Reconciling legacy fraction results with explicit WorkAttempt linkage...');
@@ -1284,7 +1222,7 @@ function runMigration({ dryRun, apply, dbPath }) {
 
         let resultAudit;
         try {
-            migrateTx();
+            migrateTx.immediate();
             resultAudit = auditTrail;
             console.log('\n✅ [APPLY SUCCESS] Lab operations v3 migration committed successfully!');
         } catch (err) {
@@ -1302,7 +1240,8 @@ function runMigration({ dryRun, apply, dbPath }) {
             audit: resultAudit
         };
     } finally {
-        db.close();
+        if (db?.open) db.close();
+        if (source !== db && source.open) source.close();
     }
 }
 
@@ -1312,6 +1251,7 @@ if (require.main === module) {
         const res = runMigration(opts);
         process.exit(0);
     } catch (err) {
+        if (err.code) console.error(JSON.stringify({ code: err.code, candidates: err.candidates || [] }));
         console.error('\n❌ [MIGRATION FAILED - CLOSED]:', err.message || err);
         if (err.stack) console.error(err.stack);
         process.exit(1);
@@ -1320,6 +1260,7 @@ if (require.main === module) {
 
 module.exports = {
     runMigration,
+    collectA94Candidates,
     METHODOLOGY_RECONCILIATION,
     UNRESOLVED_SYNTHETIC_PLACEHOLDERS,
     UNRESOLVED_METHODOLOGY_MAPPINGS
