@@ -1,17 +1,47 @@
 const { createSampleFixture, createWorkItemFixture, createSamplesFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
-const { getAuthToken } = require('../setup');
+const { generateToken } = require('../setup');
 const prisma = require('../../prisma');
+const bcrypt = require('bcryptjs');
+const { PrismaClient } = require('../../prisma_client');
+const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+const { beforeGuards, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
+
+// Actual users and sessions live in the same owned database as the real routes.
+async function getAuthToken(role, labId, countries, projects) {
+    const username = `test_${role.toLowerCase()}_${labId.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
+    const user = await prisma.user.create({ data: { id: username, username, email: `${username}@example.test`,
+        password: await bcrypt.hash('password', 4), role, labId, isActive: true,
+        countries: JSON.stringify(countries), projects: JSON.stringify(projects) } });
+    return generateToken({ ...user, countries, projects });
+}
 
 describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () => {
     let tokenManagerA, tokenManagerB, labAId, labBId;
     let sampleActiveA, sampleExpectedA, sampleCollectedA, sampleApprovedA, sampleReceivedRejectedA, sampleRejectedA, sampleWalkInA, sampleSubmittedFullA;
     let sampleBatchQCA, sampleResolvedQCA;
+    let rehearsal, client;
 
     beforeAll(async () => {
         labAId = `LAB-VIEW-A-${Date.now()}`;
         labBId = `LAB-VIEW-B-${Date.now()}`;
+
+        const timestamp = Date.now();
+        const historicalRows = [
+            { id: `SMP-REJ-${timestamp}`, originalId: `ORIG-REJ-${timestamp}`,
+                assignedLab: labAId, labId: labAId, country: 'GTM', projectCode: 'PROJECT-A',
+                status: 'REJECTED', receptionDate: new Date(), createdAt: timestamp, updatedAt: timestamp },
+            { id: `SMP-COL-${timestamp}`, originalId: `ORIG-COL-${timestamp}`,
+                assignedLab: labAId, labId: labAId, country: 'GTM', projectCode: 'PROJECT-A', status: 'COLLECTED',
+                fieldMetadata: JSON.stringify({ surveyor: 'Field Tech 2', collected_at: new Date().toISOString() }),
+                createdAt: timestamp, updatedAt: timestamp }
+        ];
+        rehearsal = beforeGuards({ actor: 'system:fixture', samples: historicalRows });
+        client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
+        useLegacyRouteDatabase(prisma, client, { allModels: true });
+        sampleRejectedA = await prisma.sample.findUnique({ where: { id: historicalRows[0].id } });
+        sampleCollectedA = await prisma.sample.findUnique({ where: { id: historicalRows[1].id } });
 
         await prisma.lab.createMany({
             data: [
@@ -79,19 +109,6 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
             }
         });
 
-        sampleRejectedA = await prisma.sample.create({
-            data: {
-                id: `SMP-REJ-${Date.now()}`,
-                originalId: `ORIG-REJ-${Date.now()}`,
-                assignedLab: labAId,
-                labId: labAId,
-                country: 'GTM',
-                projectCode: 'PROJECT-A',
-                status: 'REJECTED',
-                receptionDate: new Date()
-            }
-        });
-
         // 1e. Completed bench work awaiting manager approval in Lab A (SUBMITTED_FULL) (#120)
         sampleSubmittedFullA = await createSampleFixture(prisma, {
             data: {
@@ -152,18 +169,8 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
         });
 
         // 2b. COLLECTED field sample without laboratory physical intake (#120)
-        sampleCollectedA = await prisma.sample.create({
-            data: {
-                id: `SMP-COL-${Date.now()}`,
-                originalId: `ORIG-COL-${Date.now()}`,
-                assignedLab: labAId,
-                labId: labAId,
-                country: 'GTM',
-                projectCode: 'PROJECT-A',
-                status: 'COLLECTED',
-                fieldMetadata: JSON.stringify({ surveyor: 'Field Tech 2', collected_at: new Date().toISOString() })
-            }
-        });
+        // COLLECTED and REJECTED are unchanged historical rows, seeded only
+        // before the real release guards. Every positive fixture uses authority.
 
         // 3. Unresolved QC exception batch in Lab A
         sampleBatchQCA = await prisma.batch.create({
@@ -191,6 +198,8 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
             }
         });
     });
+
+    afterAll(async () => { jest.restoreAllMocks(); await client?.$disconnect(); rehearsal?.close(); });
 
     test('1. GET /api/samples?view=daily defaults to physically received and active lab work', async () => {
         const res = await request(app)

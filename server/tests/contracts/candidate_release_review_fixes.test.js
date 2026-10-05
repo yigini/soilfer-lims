@@ -564,12 +564,12 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 }
             });
 
-            const releasedSample = await prisma.sample.create({
+            const releasedSample = await createSampleFixture(prisma, {
                 data: {
                     id: `SMP-R3-REL-${ts}`,
                     originalId: `FIELD-R3-REL-${ts}`,
                     assignedLab: labId,
-                    status: 'RELEASED',
+                    status: 'APPROVED',
                     dryingStatus: 'DONE',
                     preparationStatus: 'DONE',
                     projectCode: 'PRJ-R3'
@@ -612,7 +612,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 }
             });
 
-            // Work item on a RELEASED sample
+            // Work item on an approved sample: QC must retain its immutable state.
             wiReleasedSample = await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-R3-RELSMP-${ts}`,
@@ -625,7 +625,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             });
         });
 
-        test('REANALYZE_BATCH transitions completed-unsubmitted work to REANALYSIS_REQUIRED while preserving immutable history', async () => {
+        test('REANALYZE_BATCH transitions completed-unsubmitted work to REPEAT_REQUIRED while preserving immutable history', async () => {
             const res = await request(app)
                 .post(`/api/qc/batches/${batchId}/disposition`)
                 .set('Authorization', `Bearer ${mgrToken}`)
@@ -639,7 +639,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
 
             // Completed unsubmitted item MUST have transitioned
             const updatedComp = await prisma.workItem.findUnique({ where: { id: wiCompleted.id } });
-            expect(updatedComp.status).toBe('REANALYSIS_REQUIRED');
+            expect(updatedComp.status).toBe('REPEAT_REQUIRED');
             expect(updatedComp.reanalysisReason).toBe('Control standard outside tolerance');
 
             // Accepted item must NOT have changed
