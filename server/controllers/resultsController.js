@@ -6,6 +6,11 @@ const { validateResultEntries } = require('../services/resultEntryPolicy');
 const stateRules = require('../services/workflowStateRules');
 const resultEvidence = require('../services/resultEvidenceService');
 const gateEvidence = require('../services/gateEvidenceService');
+const workflow = require('../workflowContract');
+const { createSubmissionForItems } = require('../services/submissionStateService');
+const { checkStoredCompletion } = require('../services/storedResultCompletenessService');
+const { transitionWorkItem } = require('../services/workItemStateService');
+const { governsResult } = require('../services/reportResultGovernance');
 
 async function assertResultSaveReadiness(db, sample, user) {
     stateRules.assertScope(user, sample);
@@ -234,37 +239,65 @@ exports.submitForApproval = async (req, res) => {
     const user = req.user;
 
     try {
-        const sample = await prisma.sample.findUnique({ where: { id: sampleId } });
-        if (!sample) return res.status(404).json({ error: 'Sample not found' });
-
-        // Lab Isolation Check (S07)
-        const scopeGuard = require('../utils/scopeGuard');
-        if (user && user.role && !scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
-            return res.status(403).json({ error: 'Access denied: Sample not in your Lab scope' });
-        }
-
-        // Check if results exist
-        const allActiveResults = await prisma.result.findMany({ where: { sampleId, isCurrent: true } });
-        if (allActiveResults.length === 0) {
-            return res.status(400).json({ error: 'No results entered' });
-        }
-
-        const matrixDiagnostics = validationController.validateSampleMatrix(allActiveResults);
-        if (matrixDiagnostics.isBlocking) {
-            return res.status(422).json({
-                error: 'BLOCKING_MATRIX_DIAGNOSTICS',
-                message: 'Scientific matrix validation failed: ' + matrixDiagnostics.blockingErrors.map(b => b.message).join('; '),
-                blockingErrors: matrixDiagnostics.blockingErrors,
-                matrixDiagnostics
-            });
-        }
-
-        const { transitionSample } = require('../services/sampleStateService');
-        const updated = await transitionSample(sampleId, 'SUBMITTED_FULL', user, 'Results submitted for manager approval');
-
-        res.json({ success: true, status: 'SUBMITTED_FULL', sample: updated, matrixDiagnostics });
+        const outcome = await stateRules.inTransaction(prisma, async tx => {
+            const sample = await tx.sample.findUnique({ where: { id: sampleId } });
+            if (!sample) throw new stateRules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
+            stateRules.assertScope(user, sample);
+            const results = await tx.result.findMany({ where: { sampleId, isCurrent: true } });
+            if (!results.length) throw Object.assign(new Error('No results entered'), { statusCode: 400 });
+            const matrixDiagnostics = validationController.validateSampleMatrix(results);
+            if (matrixDiagnostics.isBlocking) throw new stateRules.TransitionError('Scientific matrix validation failed: ' +
+                matrixDiagnostics.blockingErrors.map(error => error.message).join('; '), 422, 'BLOCKING_MATRIX_DIAGNOSTICS', {
+                blockingErrors: matrixDiagnostics.blockingErrors, matrixDiagnostics });
+            // Retain the pinned pre-write diagnostic ordering, then enforce sealed/evidence gates.
+            resultEvidence.assertAmendable(sample);
+            await resultEvidence.assertNoPreparationRevert(tx, sample.id);
+            await assertResultSaveReadiness(tx, sample, user);
+            const items = await tx.workItem.findMany({ where: { sampleId, duplicateOf: null,
+                analysis: { notIn: ['DRYING', 'PREPARATION', ...workflow.CLOSURE_TASK_ANALYSES] } }, orderBy: { id: 'asc' } });
+            const selected = [], blocking = [], completion = new Map();
+            for (const item of items) {
+                const status = workflow.normalizeWorkItemState(item.status);
+                if (['WAIVED', 'CANCELLED'].includes(status)) continue;
+                if (status === 'ACCEPTED') {
+                    if (!results.some(result => governsResult(item, result))) blocking.push({ workItemId: item.id, analysis: item.analysis, status, reasonCode: 'CURRENT_RESULT_REQUIRED' });
+                    continue;
+                }
+                if (!['ASSIGNED', 'IN_PROGRESS', 'COMPLETED'].includes(status)) {
+                    blocking.push({ workItemId: item.id, analysis: item.analysis, status });
+                    continue;
+                }
+                const checked = await checkStoredCompletion(tx, sample, item, results, user);
+                if (!checked.ready) blocking.push({ workItemId: item.id, analysis: item.analysis, status, reasonCode: checked.code });
+                else { selected.push(item); completion.set(item.id, checked); }
+            }
+            if (blocking.length) throw new stateRules.TransitionError('Some canonical analytical work cannot be submitted for approval.',
+                409, 'SUBMISSION_NOT_FULL', { blocking });
+            const committed = await createSubmissionForItems({ db: tx, actor: user, sampleId, type: 'FULL',
+                workItemIds: selected.map(item => item.id), expectedItems: selected,
+                prepareItems: async (db, current, freshItems) => {
+                    const completed = [];
+                    for (const item of freshItems) {
+                        if (item.status === 'COMPLETED') { completed.push(item); continue; }
+                        const now = new Date(), checked = completion.get(item.id), history = stateRules.requireHistory(item.history);
+                        history.push({ status: 'COMPLETED', action: 'STORED_RESULTS_COMPLETED', timestamp: now,
+                            changedBy: user.username, resultIds: checked.resultIds, policyVersion: checked.policyVersion });
+                        completed.push(await transitionWorkItem(item.id, 'COMPLETED', user, 'Existing current results complete for approval submission', {
+                            completedAt: now, history: JSON.stringify(history)
+                        }, db, { expected: { status: item.status, version: item.version }, audit: {
+                            action: 'STORED_RESULTS_COMPLETED', details: JSON.stringify({ resultIds: checked.resultIds, policyVersion: checked.policyVersion }) } }));
+                    }
+                    return completed;
+                } });
+            return { ...committed, matrixDiagnostics };
+        });
+        res.json({ success: true, status: 'SUBMITTED_FULL', sample: outcome.sample, submission: outcome.submission,
+            matrixDiagnostics: outcome.matrixDiagnostics });
     } catch (error) {
         console.error('[submitForApproval] Error:', error);
-        res.status(500).json({ error: 'Failed to submit for approval' });
+        if (error.code === 'BLOCKING_MATRIX_DIAGNOSTICS') return res.status(422).json({ error: error.code,
+            message: error.message, blockingErrors: error.details.blockingErrors, matrixDiagnostics: error.details.matrixDiagnostics });
+        res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to submit for approval',
+            ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
     }
 };

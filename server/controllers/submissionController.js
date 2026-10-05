@@ -7,10 +7,7 @@ const prisma = require('../prisma');
 const workflow = require('../workflowContract');
 const { getAnalysisName } = require('../services/analysisService');
 const stateRules = require('../services/workflowStateRules');
-const { transitionWorkItem } = require('../services/workItemStateService');
-const { transitionSample } = require('../services/sampleStateService');
-const resultEvidence = require('../services/resultEvidenceService');
-const { deriveSubmissionLifecycle, assertRequestedType } = require('../services/submissionLifecycleService');
+const { createSubmissionForItems } = require('../services/submissionStateService');
 
 
 // =============================================================================
@@ -73,74 +70,8 @@ exports.createSubmission = async (req, res) => {
             return res.status(400).json({ error: 'Invalid work items', details: errors });
         }
 
-        const now = new Date();
-        const submissionId = `SUB-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        const auditLogId = crypto.randomUUID();
-
-        const submission = await stateRules.inTransaction(prisma, async tx => {
-            const current = await tx.sample.findUnique({ where: { id: String(sampleId) } });
-            if (!current) throw new stateRules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
-            stateRules.assertScope(user, current);
-            resultEvidence.assertAmendable(current);
-            await resultEvidence.assertNoPreparationRevert(tx, current.id);
-            await require('../services/sampleStateService').advanceCompletedGates(current, user, tx);
-            const freshItems = [];
-            for (const item of validItems) {
-                const fresh = await tx.workItem.findUnique({ where: { id: item.id } });
-                if (!fresh || fresh.status !== 'COMPLETED' || fresh.version !== item.version ||
-                    fresh.sampleId !== current.id || fresh.assignedTo !== user.username) {
-                    throw new stateRules.TransitionError('Work item changed. Reload before submitting.', 409, 'WORKITEM_STATE_CHANGED');
-                }
-                freshItems.push(fresh);
-            }
-            const created = await tx.submission.create({
-                data: {
-                    id: submissionId,
-                    sampleId: String(sampleId),
-                    labId: current.assignedLab || user.labId,
-                    assignedLab: current.assignedLab,
-                    submittedBy: user.username,
-                    type,
-                    status: 'PENDING_REVIEW',
-                    submittedAt: now,
-                    note: note || null,
-                    workItemIds: JSON.stringify(validItems.map(wi => wi.id)),
-                    workItemCount: validItems.length,
-                    createdAt: now
-                }
-            });
-
-        // Update work items
-        for (const item of freshItems) {
-            const history = stateRules.requireHistory(item.history);
-            history.push({
-                status: workflow.WORK_ITEM_STATES.SUBMITTED,
-                submissionId: submissionId,
-                timestamp: now,
-                action: 'SUBMITTED'
-            });
-
-            await transitionWorkItem(item.id, workflow.WORK_ITEM_STATES.SUBMITTED, user, 'Submitted for manager review', {
-                    submissionId: submissionId,
-                    submittedAt: now,
-                    history: JSON.stringify(history)
-            }, tx, { expected: { status: item.status, version: item.version }, audit: {
-                action: 'WORKITEM_SUBMITTED', details: `${user.username} submitted ${await getAnalysisName(item.analysis, tx)}` } });
-        }
-        const derived = await deriveSubmissionLifecycle(tx, sampleId);
-        assertRequestedType(type, derived);
-        const updatedSubmission = await tx.submission.update({ where: { id: created.id }, data: { type: derived.type } });
-        await tx.auditLog.create({ data: { id: auditLogId, entity: 'SUBMISSION', entityId: submissionId, action: 'SUBMISSION_CREATED',
-            details: `${user.username} submitted ${validItems.length} items; requested ${type}, derived ${derived.type}`,
-            after: JSON.stringify({ requestedType: type, derivedType: derived.type, sampleStatus: derived.sampleStatus }),
-            performedBy: user.username, timestamp: now, sampleId: String(sampleId) } });
-        await transitionSample(sampleId, derived.sampleStatus, user, `${user.username} submitted ${validItems.length} items for ${derived.type} review`, {
-            lastSubmissionId: submissionId,
-            lastSubmissionType: derived.type,
-            lastSubmissionAt: now
-        }, tx);
-            return updatedSubmission;
-        });
+        const { submission } = await createSubmissionForItems({ db: prisma, actor: user, sampleId, type, workItemIds,
+            expectedItems: validItems, note: note || null, requireOwnAssignment: true });
 
         res.status(201).json({
             submission,
