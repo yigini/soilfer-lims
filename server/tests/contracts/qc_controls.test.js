@@ -1,8 +1,10 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
 const { samplesDb, workItemsDb, usersDb, submissionsDb } = require('../../db');
 const prisma = require('../../prisma');
+const { transitionWorkItem } = require('../../services/workItemStateService');
 const {
     evaluateBlank,
     evaluateDuplicate,
@@ -19,22 +21,27 @@ describe('BLK-2: Minimum Viable Typed QC Controls Contract', () => {
         mgrToken = await getAuthToken('LAB_MANAGER', 'LAB-QC2', ['GTM'], ['QC-PROJ']);
 
         // Create sample and work item
-        const s = samplesDb.create({
-            id: `SMP-QC2-${Date.now()}`,
+        const s = await createSampleFixture(prisma, { data: { id: `SMP-QC2-${Date.now()}`,
             labId: 'LAB-QC2-001',
             assignedLab: 'LAB-QC2',
-            status: 'ACCEPTED'
-        });
+            status: 'ACCEPTED',
+            originalId: 'LAB-QC2-001',
+            country: 'GTM',
+            countryName: 'GTM',
+            projectCode: 'SOILFER-US',
+            dryingStatus: 'DONE',
+            preparationStatus: 'DONE',
+            receptionDate: new Date(),
+            metadata: '{}',
+            history: '[]' } });
         sampleId = s.id;
 
-        const wi = workItemsDb.create({
-            id: `WI-QC2-${Date.now()}`,
+        const wi = await createWorkItemFixture(prisma, { data: { id: `WI-QC2-${Date.now()}`,
             sampleId: s.id,
             analysis: 'PH_H2O',
             assignedLab: 'LAB-QC2',
             status: 'COMPLETED',
-            result: '6.8'
-        });
+            result: '6.8' } });
         workItemId = wi.id;
     });
 
@@ -114,7 +121,7 @@ describe('BLK-2: Minimum Viable Typed QC Controls Contract', () => {
             workItemIds: [workItemId],
             submittedBy: `tech_qc2_${Date.now()}`
         });
-        await prisma.workItem.update({ where: { id: workItemId }, data: { submissionId: subId, status: 'SUBMITTED' } });
+        await transitionWorkItem(workItemId, 'SUBMITTED', require('jsonwebtoken').decode(techToken), null, { submissionId: subId });
 
         const reviewRes = await request(app)
             .post(`/api/submissions/${subId}/review`)

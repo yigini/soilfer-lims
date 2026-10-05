@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -10,8 +11,7 @@ describe('WP-22: Dual Export Paths (As-Measured & Normalized Controlled Units)',
     beforeAll(async () => {
         superAdminToken = await getAuthToken('SUPER_ADMIN', null, ['*'], ['*']);
 
-        testSample = samplesDb.create({
-            id: `SMP-EXP-${Date.now()}`,
+        testSample = await createSampleFixture(prisma, { data: { id: `SMP-EXP-${Date.now()}`,
             labId: 'LAB-EXP-001',
             originalId: `ORIG-EXP-${Date.now()}`,
             assignedLab: 'LAB-DEFAULT',
@@ -19,8 +19,12 @@ describe('WP-22: Dual Export Paths (As-Measured & Normalized Controlled Units)',
             projectCode: 'EXP-PROJ',
             country: 'GTM',
             countryName: 'Guatemala',
-            requiredAnalyses: ['SOC']
-        });
+            requiredAnalyses: JSON.stringify(['SOC']),
+            dryingStatus: 'DONE',
+            preparationStatus: 'DONE',
+            receptionDate: new Date(),
+            metadata: '{}',
+            history: '[]' } });
         sampleId = testSample.id;
 
         const now = new Date();

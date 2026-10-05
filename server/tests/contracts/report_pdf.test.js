@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken, ensureTestLab } = require('../setup');
@@ -12,20 +13,26 @@ describe('BLK-3: Report & Certificate PDF Generation Contract', () => {
         mgrToken = await getAuthToken('LAB_MANAGER', 'LAB-PDF', ['PDF'], ['PDF-PROJ']);
 
         // Create an approved sample with results
-        const s = samplesDb.create({
-            id: `SMP-PDF-${Date.now()}`,
+        const s = await createSampleFixture(prisma, { data: { id: `SMP-PDF-${Date.now()}`,
             labId: 'LAB-PDF-001',
             originalId: `FLD-PDF-${Date.now()}`,
             assignedLab: 'LAB-PDF',
             status: 'APPROVED',
             dryingStatus: 'DONE',
             preparationStatus: 'DONE',
-            requiredAnalyses: ['PH_H2O', 'SOC', 'SAND', 'SILT', 'CLAY']
-        });
+            requiredAnalyses: JSON.stringify(['PH_H2O', 'SOC', 'SAND', 'SILT', 'CLAY']),
+            country: 'GTM',
+            countryName: 'GTM',
+            projectCode: 'SOILFER-US',
+            receptionDate: new Date(),
+            metadata: '{}',
+            history: '[]' } });
         sampleId = s.id;
-        await prisma.workItem.createMany({ data: ["PH_H2O","SOC","SAND","SILT","CLAY"].map(analysis => ({
-            id: `reviewed-${s.id}-${analysis}`, sampleId: s.id, analysis, status: 'ACCEPTED'
-        })) });
+        for (const analysis of ["PH_H2O","SOC","SAND","SILT","CLAY"]) {
+            await createWorkItemFixture(prisma, { data: {
+                id: `reviewed-${s.id}-${analysis}`, sampleId: s.id, analysis, assignedLab: 'LAB-PDF', status: 'ACCEPTED'
+            } });
+        }
 
         // Add verified results to the sample in DB
         const now = new Date();

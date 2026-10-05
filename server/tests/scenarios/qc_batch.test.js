@@ -1,11 +1,14 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
-const { samplesDb, workItemsDb, usersDb, batchesDb } = require('../../db');
+const { workItemsDb, usersDb, submissionsDb } = require('../../db');
+const { transitionWorkItem } = require('../../services/workItemStateService');
 
 describe('Scenario E: QC Batch Management', () => {
     let mgrToken, techToken;
     let workItemIds = [];
+    let sampleIds = [];
 
     beforeAll(async () => {
         // Setup Users
@@ -19,8 +22,28 @@ describe('Scenario E: QC Batch Management', () => {
         techToken = techLog.body.token;
 
         // Create Sample & WorkItems
-        workItemsDb.create({ id: `WI1_${suffix}`, sampleId: `S1_${suffix}`, analysis: 'PH_H2O', status: 'COMPLETED', assignedTo: `tech_qc_${suffix}`, assignedLab: 'LAB-QC', batchId: null });
-        workItemsDb.create({ id: `WI2_${suffix}`, sampleId: `S2_${suffix}`, analysis: 'PH_H2O', status: 'COMPLETED', assignedTo: `tech_qc_${suffix}`, assignedLab: 'LAB-QC', batchId: null });
+        sampleIds = [`S1_${suffix}`, `S2_${suffix}`];
+        for (const id of sampleIds) {
+            await createSampleFixture(prisma, { data: {
+                id, originalId: id, labId: id, assignedLab: 'LAB-QC', country: 'QC',
+                status: 'SUBMITTED_PARTIAL', receptionDate: new Date(),
+                dryingStatus: 'DONE', preparationStatus: 'DONE'
+            } });
+        }
+        await createWorkItemFixture(prisma, { data: { id: `WI1_${suffix}`,
+            sampleId: `S1_${suffix}`,
+            analysis: 'PH_H2O',
+            status: 'COMPLETED',
+            assignedTo: `tech_qc_${suffix}`,
+            assignedLab: 'LAB-QC',
+            batchId: null } });
+        await createWorkItemFixture(prisma, { data: { id: `WI2_${suffix}`,
+            sampleId: `S2_${suffix}`,
+            analysis: 'PH_H2O',
+            status: 'COMPLETED',
+            assignedTo: `tech_qc_${suffix}`,
+            assignedLab: 'LAB-QC',
+            batchId: null } });
         workItemIds = [`WI1_${suffix}`, `WI2_${suffix}`];
     });
 
@@ -61,42 +84,24 @@ describe('Scenario E: QC Batch Management', () => {
         expect(failRes.status).toBe(200);
         expect(failRes.body.status).toBe('QC_FAIL');
 
-        // 2. Create Submission
-        const subRes = await request(app)
-            .post('/api/submissions')
-            .set('Authorization', `Bearer ${techToken}`)
-            .send({
-                sampleId: `S1_${Date.now()}`, // Fake sample just for test structure if controller validates it
-                // Actually controller validates sample existence. Need real sample.
-                // Let's skip full submission flow and test Review Logic directly? 
-                // Creating a submission manually in DB is easier for unit test.
+        // Each submission owns work from its actual parent; both specimens share the failed batch.
+        const technician = usersDb.findByUsername(require('jsonwebtoken').decode(techToken).username);
+        for (const [index, workItemId] of workItemIds.entries()) {
+            const subId = `SUB_QC_${workItemId}`;
+            submissionsDb.create({
+                id: subId, status: 'PENDING_REVIEW', sampleId: sampleIds[index],
+                assignedLab: 'LAB-QC', workItemIds: [workItemId], submittedBy: technician.username
             });
+            await transitionWorkItem(workItemId, 'SUBMITTED', technician, null, { submissionId: subId });
 
-        // Setup Manual Submission
-        const { submissionsDb, samplesDb } = require('../../db');
-        const subId = `SUB_QC_${Date.now()}`;
-        const sampleId = `S_QC_${Date.now()}`;
-        samplesDb.create({ id: sampleId, labId: 'LAB-QC-01', assignedLab: 'LAB-QC', status: 'SUBMITTED_PARTIAL' });
-        submissionsDb.create({
-            id: subId,
-            status: 'PENDING_REVIEW',
-            sampleId: sampleId,
-            assignedLab: 'LAB-QC',
-            workItemIds: workItemIds,
-            submittedBy: `tech_qc_${Date.now()}` // Bypass check
-        });
-        await prisma.workItem.updateMany({ where: { id: { in: workItemIds } }, data: { submissionId: subId, status: 'SUBMITTED' } });
+            const reviewRes = await request(app)
+                .post(`/api/submissions/${subId}/review`)
+                .set('Authorization', `Bearer ${mgrToken}`)
+                .send({ decisions: [{ workItemId, decision: 'ACCEPT' }] });
 
-        // 3. Manager Review - Attempt Accept
-        const reviewRes = await request(app)
-            .post(`/api/submissions/${subId}/review`)
-            .set('Authorization', `Bearer ${mgrToken}`)
-            .send({
-                decisions: workItemIds.map(id => ({ workItemId: id, decision: 'ACCEPT' }))
-            });
-
-        expect(reviewRes.status).toBe(409); // Conflict
-        expect(reviewRes.body.error).toMatch(/FAILED QC Batch/);
+            expect(reviewRes.status).toBe(409);
+            expect(reviewRes.body.error).toMatch(/FAILED QC Batch/);
+        }
     });
 
     it('should allow manager to disposition failed batch', async () => {

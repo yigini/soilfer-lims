@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -17,18 +18,26 @@ describe('BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine', 
         mgrToken = await getAuthToken('LAB_MANAGER', 'LAB-INTERP', ['GTM'], ['INTERP-PROJ']);
 
         // Create sample
-        const s = samplesDb.create({
-            id: `SMP-INTERP-${Date.now()}`,
+        const s = await createSampleFixture(prisma, { data: { id: `SMP-INTERP-${Date.now()}`,
             labId: 'LAB-INT-001',
             originalId: `FLD-INT-${Date.now()}`,
             assignedLab: 'LAB-INTERP',
             status: 'APPROVED',
-            requiredAnalyses: ['PH_H2O', 'SOC', 'TN', 'P_OLSEN', 'EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA', 'CEC', 'SAND', 'SILT', 'CLAY']
-        });
+            requiredAnalyses: JSON.stringify(['PH_H2O', 'SOC', 'TN', 'P_OLSEN', 'EXCH_CA', 'EXCH_MG', 'EXCH_K', 'EXCH_NA', 'CEC', 'SAND', 'SILT', 'CLAY']),
+            country: 'GTM',
+            countryName: 'GTM',
+            projectCode: 'SOILFER-US',
+            dryingStatus: 'DONE',
+            preparationStatus: 'DONE',
+            receptionDate: new Date(),
+            metadata: '{}',
+            history: '[]' } });
         sampleId = s.id;
-        await prisma.workItem.createMany({ data: ["PH_H2O","SOC","TN","P_OLSEN","EXCH_CA","EXCH_MG","EXCH_K","CEC","SAND","SILT","CLAY"].map(analysis => ({
-            id: `reviewed-${s.id}-${analysis}`, sampleId: s.id, analysis, status: 'ACCEPTED'
-        })) });
+        for (const analysis of ["PH_H2O","SOC","TN","P_OLSEN","EXCH_CA","EXCH_MG","EXCH_K","CEC","SAND","SILT","CLAY"]) {
+            await createWorkItemFixture(prisma, { data: {
+                id: `reviewed-${s.id}-${analysis}`, sampleId: s.id, analysis, assignedLab: 'LAB-INTERP', status: 'ACCEPTED'
+            } });
+        }
 
         const now = new Date();
         await prisma.result.createMany({
