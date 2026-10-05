@@ -8,9 +8,9 @@ const { assertOwnedTestDatabase } = require('./testOwnedDatabase');
 
 // Legacy values are inserted into a new schema before its real additive guards
 // are installed. Existing constraints are never dropped, disabled or bypassed.
-function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_legacy_${randomUUID()}.db`), samples = [], workItems = [], preMigrationSnapshot = false }) {
+function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_legacy_${randomUUID()}.db`), samples = [], workItems = [], batches = [], preMigrationSnapshot = false }) {
     file = assertOwnedTestDatabase(file, actor);
-    if (!Array.isArray(samples) || !Array.isArray(workItems)) throw new Error('Legacy fixture rows must be declarative arrays.');
+    if (![samples, workItems, batches].every(Array.isArray)) throw new Error('Legacy fixture rows must be declarative arrays.');
     // Exclusive creation makes a reused file fail before any database is opened.
     fs.closeSync(fs.openSync(file, 'wx'));
     const source = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
@@ -27,7 +27,7 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
         for (const table of tables) if (db.prepare(`SELECT COUNT(*) AS count FROM "${table.name}"`).get().count !== 0) {
             throw new Error('Legacy fixture must be a fresh schema-only file.');
         }
-        for (const [table, rows] of [['Sample', samples], ['WorkItem', workItems]]) {
+        for (const [table, rows] of [['Sample', samples], ['Batch', batches], ['WorkItem', workItems]]) {
             const columns = new Set(db.prepare(`PRAGMA table_info("${table}")`).all().map(column => column.name));
             for (const row of rows) {
                 const fields = Object.keys(row);
@@ -62,9 +62,9 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
     return { file, preMigrationSnapshot: snapshot };
 }
 
-async function createLegacyClosureDatabase({ analysis, labId, samples = [], workItems = [], preMigrationSnapshot = false }) {
+async function createLegacyClosureDatabase({ analysis, labId, samples = [], workItems = [], batches = [], preMigrationSnapshot = false }) {
     const sampleId = randomUUID(), workItemId = randomUUID(), now = Date.now();
-    const database = beforeGuards({ actor: 'system:fixture', preMigrationSnapshot, samples: [
+    const database = beforeGuards({ actor: 'system:fixture', preMigrationSnapshot, batches, samples: [
         { id: sampleId, originalId: sampleId, status: 'APPROVED', assignedLab: labId, dryingStatus: 'DONE',
             preparationStatus: 'DONE', createdAt: now, updatedAt: now }, ...samples], workItems: [
         { id: workItemId, sampleId, analysis, status: 'PENDING', assignedLab: labId, result: '6.2', history: '[]',
@@ -95,7 +95,9 @@ function useLegacyRouteDatabase(prisma, client) {
         result: ['findUnique', 'findMany', 'create', 'update'],
         reviewDecision: ['create', 'findMany', 'count'],
         auditLog: ['create', 'findMany', 'findFirst', 'count'],
-        submission: ['create', 'findUnique', 'update']
+        submission: ['create', 'findUnique', 'update'],
+        batch: ['findUnique', 'findMany', 'count', 'create', 'update', 'updateMany'],
+        batchQcResult: ['findMany', 'count']
     };
     for (const [model, names] of Object.entries(methods)) for (const name of names) {
         jest.spyOn(prisma[model], name).mockImplementation(args => client[model][name](args));
