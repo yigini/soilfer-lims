@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const workflowEngine = require('../../utils/workflowEngine');
 const prisma = require('../../prisma');
@@ -79,8 +80,8 @@ describe('WP-25: Catalogue-Driven Workflow Graph and DAG Validation', () => {
         expect(analyticalItems[1].analysis).toBe('DAG_TEST_LATE');
 
         // Cleanup
-        await prisma.workItem.deleteMany({ where: { sampleId: sample.id } });
-        await prisma.sample.delete({ where: { id: sample.id } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: sample.id } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample.id } }), select: { id: true } })).map(row => row.id), { single: true });
         await prisma.analysis.deleteMany({ where: { code: { in: ['DAG_TEST_LATE', 'DAG_TEST_EARLY'] } } });
     });
 });

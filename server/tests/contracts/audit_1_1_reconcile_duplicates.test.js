@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const request = require('supertest');
@@ -13,12 +14,12 @@ describe('Audit 1.1: duplicate references and atomic analysis reconciliation', (
     afterEach(() => jest.restoreAllMocks());
     afterAll(async () => {
         const where = { sampleId: { in: samples } };
-        await prisma.workItem.deleteMany({ where: { ...where, duplicateOf: { not: null } } });
-        await prisma.workItem.deleteMany({ where });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { ...where, duplicateOf: { not: null } } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.orderLine.deleteMany({ where: { revision: { sampleId: { in: samples } } } });
         await prisma.sampleOrderRevision.deleteMany({ where });
         await prisma.auditLog.deleteMany({ where });
-        await prisma.sample.deleteMany({ where: { id: { in: samples } } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: samples } } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     async function fixture(duplicateStatus) {
@@ -71,7 +72,7 @@ describe('Audit 1.1: duplicate references and atomic analysis reconciliation', (
             let deletes = 0;
             return callback({ ...tx, workItem: { ...tx.workItem, delete: async args => {
                 if (++deletes === 2) throw Object.assign(new Error('Referenced row'), { code: 'P2003' });
-                return tx.workItem.delete(args);
+                return cleanupWorkflowFixtures(tx, "workItem", (await tx.workItem.findMany({ ...(args), select: { id: true } })).map(row => row.id), { single: true });
             } } });
         }));
         expect(await controller.reconcileWorkItemsForSample(sample, ['PH_H2O'], { username: 'manager', role: 'LAB_MANAGER', labId: 'LAB-GTM' }, 'Reviewed removal'))
@@ -89,7 +90,7 @@ describe('Audit 1.1: duplicate references and atomic analysis reconciliation', (
     });
     test('cold catalogue lookups during additions stay inside the reconciliation transaction', async () => {
         const sample = await fixture();
-        await prisma.workItem.delete({ where: { id: `${sample.id}-CEC` } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: `${sample.id}-CEC` } }), select: { id: true } })).map(row => row.id), { single: true });
         require('../../services/analysisService').invalidateCache();
         jest.spyOn(prisma.analysis, 'findMany').mockImplementation(() => { throw new Error('Catalogue read escaped the transaction'); });
         const outcome = await controller.reconcileWorkItemsForSample(sample, ['PH_H2O', 'SOC', 'CEC'], { username: 'manager', role: 'LAB_MANAGER', labId: 'LAB-GTM' }, 'Add requested analysis');

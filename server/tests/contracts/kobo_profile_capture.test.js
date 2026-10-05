@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const service = require('../../services/koboService');
 const source = require('../../services/koboProfileService');
 const identity = require('../../services/profileIdentityService');
@@ -73,7 +74,7 @@ describe('Actual mounted Kobo capture, hold and force-refresh paths',()=>{
     afterAll(async()=>{
         fetch.mockRestore();
         await prisma.auditLog.deleteMany({where:{entityId:{in:(await prisma.sample.findMany({where:{projectCode:project},select:{id:true}})).map(s=>s.id)}}});
-        await prisma.sample.deleteMany({where:{projectCode:project}});
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({where:{projectCode:project}}), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.koboConfig.delete({where:{id:config}});
         await prisma.project.delete({where:{id:project}});
         await prisma.user.update({where:{id:jwt.decode(token).id},data:{labId:null}});

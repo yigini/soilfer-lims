@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
@@ -33,8 +34,8 @@ describe('Mounted profile correction, scope and immutable export contracts',()=>
         await prisma.sampleAmendment.deleteMany({where:{sampleId:{in:Object.values(ids)}}});
         await prisma.auditLog.deleteMany({where:{sampleId:{in:Object.values(ids)}}});
         await prisma.result.deleteMany({where:{sampleId:{in:Object.values(ids)}}});
-        await prisma.workItem.deleteMany({where:{sampleId:{in:Object.values(ids)}}});
-        await prisma.sample.deleteMany({where:{id:{in:Object.values(ids)}}});
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({where:{sampleId:{in:Object.values(ids)}}}), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({where:{id:{in:Object.values(ids)}}}), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.project.deleteMany({where:{id:{in:[project,project+'-NEXT']}}});
         await prisma.user.update({where:{id:managerId},data:{labId:null}});
         await prisma.lab.deleteMany({where:{id:{in:[lab,foreignLab]}}});

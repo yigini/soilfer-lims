@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -284,7 +285,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
 
                 expect(ownDetailRes.status).toBe(200);
             } finally {
-                await prisma.workItem.delete({ where: { id: staleWorkItem.id } }).catch(() => {});
+                await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: staleWorkItem.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
             }
         });
 
@@ -295,7 +296,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             }
             const sampleIds = [sampleA?.id, sampleB?.id].filter(Boolean);
             if (sampleIds.length > 0) {
-                await prisma.sample.deleteMany({ where: { id: { in: sampleIds } } }).catch(() => {});
+                await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: sampleIds } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
             }
             await prisma.project.deleteMany({ where: { code: { in: [prjACode, prjBCode] } } }).catch(() => {});
         });
@@ -510,18 +511,18 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             expect(res.body.stats.totalItems).toBe(1);
 
             // Cleanup
-            await prisma.workItem.deleteMany({ where: { id: conflictItem.id } }).catch(() => {});
-            await prisma.sample.deleteMany({ where: { id: conflictSample.id } }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: conflictItem.id } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: conflictSample.id } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
         });
 
         afterAll(async () => {
             const wiIds = [localItem?.id, crossLabItem?.id].filter(Boolean);
             if (wiIds.length > 0) {
-                await prisma.workItem.deleteMany({ where: { id: { in: wiIds } } }).catch(() => {});
+                await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: { in: wiIds } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
             }
             const sampleIds = [sampleA?.id, sampleB?.id].filter(Boolean);
             if (sampleIds.length > 0) {
-                await prisma.sample.deleteMany({ where: { id: { in: sampleIds } } }).catch(() => {});
+                await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: sampleIds } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
             }
             await prisma.analysis.deleteMany({ where: { code: 'R2_PH' } }).catch(() => {});
         });
@@ -679,12 +680,12 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
 
         afterAll(async () => {
             if (batchId) {
-                await prisma.workItem.deleteMany({ where: { batchId: batchId } }).catch(() => {});
+                await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { batchId: batchId } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
                 await prisma.batch.deleteMany({ where: { id: batchId } }).catch(() => {});
             }
             const sampleIds = [wiCompleted?.sampleId, wiReleasedSample?.sampleId].filter(Boolean);
             if (sampleIds.length > 0) {
-                await prisma.sample.deleteMany({ where: { id: { in: sampleIds } } }).catch(() => {});
+                await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: sampleIds } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
             }
             await prisma.analysis.deleteMany({ where: { code: 'R3_PH' } }).catch(() => {});
         });

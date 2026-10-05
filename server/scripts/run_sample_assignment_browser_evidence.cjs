@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../tests/helpers/workflowFixtures");
 'use strict';
 
 /**
@@ -273,12 +274,12 @@ async function run() {
         ]; // 12 ordered analyses
 
         // Clean any existing test items
-        await prisma.workItem.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
             where: { sampleId: { in: [sampleS005CanonicalId, sampleS004CanonicalId] } }
-        });
-        await prisma.sample.deleteMany({
+        }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { in: [sampleS005CanonicalId, sampleS004CanonicalId] } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
 
         // Seed S005
         await createSampleFixture(prisma, {

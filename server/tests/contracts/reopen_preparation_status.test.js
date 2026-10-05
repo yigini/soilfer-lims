@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -13,8 +14,8 @@ describe('SD-08: Stop Fabricating Preparation Records on Reopen Contract', () =>
         mgrGtmToken = await getAuthToken('LAB_MANAGER', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
 
         // Clean up
-        await prisma.workItem.deleteMany({ where: { sampleId: { in: [sampleNullId, sampleDoneId] } } });
-        await prisma.sample.deleteMany({ where: { id: { in: [sampleNullId, sampleDoneId] } } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: { in: [sampleNullId, sampleDoneId] } } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: [sampleNullId, sampleDoneId] } } }), select: { id: true } })).map(row => row.id), { single: false });
 
         // Sample with NULL drying and prep (bypassed / legacy import)
         await createSampleFixture(prisma, {
@@ -52,8 +53,8 @@ describe('SD-08: Stop Fabricating Preparation Records on Reopen Contract', () =>
     });
 
     afterAll(async () => {
-        await prisma.workItem.deleteMany({ where: { sampleId: { in: [sampleNullId, sampleDoneId] } } });
-        await prisma.sample.deleteMany({ where: { id: { in: [sampleNullId, sampleDoneId] } } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: { in: [sampleNullId, sampleDoneId] } } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: [sampleNullId, sampleDoneId] } } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. Adding orders to an approved sample refuses without fabricating NULL preparation evidence', async () => {

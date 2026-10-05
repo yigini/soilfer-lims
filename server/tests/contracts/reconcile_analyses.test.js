@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -14,8 +15,8 @@ describe('SD-03: Work Item Reconciliation on Analysis List Change Contract', () 
 
         // Clean up
         await prisma.result.deleteMany({ where: { sampleId } });
-        await prisma.workItem.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
 
         // Create sample with initial analyses: PH_H2O, SOC, CEC
         await createSampleFixture(prisma, {
@@ -87,8 +88,8 @@ describe('SD-03: Work Item Reconciliation on Analysis List Change Contract', () 
 
     afterAll(async () => {
         await prisma.result.deleteMany({ where: { sampleId } });
-        await prisma.workItem.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. Removing an analysis with a recorded result is refused (HTTP 409) naming analysis and result', async () => {

@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -15,8 +16,8 @@ describe('SD-10: Mandatory Reason on Rejection and Reopening Contract', () => {
 
         // Clean up
         await prisma.auditLog.deleteMany({ where: { sampleId } });
-        await prisma.workItem.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
 
         // Manager return operates on submitted work before final approval.
         await createSampleFixture(prisma, {
@@ -53,10 +54,10 @@ describe('SD-10: Mandatory Reason on Rejection and Reopening Contract', () => {
 
     afterAll(async () => {
         await prisma.auditLog.deleteMany({ where: { sampleId: approvedSampleId } });
-        await prisma.sample.deleteMany({ where: { id: approvedSampleId } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: approvedSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.auditLog.deleteMany({ where: { sampleId } });
-        await prisma.workItem.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. Calling reviewWorkItem with REJECT and no note/reason returns HTTP 400', async () => {

@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
 
 const { createSampleFixture, createWorkItemFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
@@ -68,8 +69,8 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         await prisma.auditLog.deleteMany({ where: { sampleId: { in: [sample26Id, sampleApprId] } } });
         await prisma.orderLine.deleteMany({ where: { revision: { sampleId: { in: [sample26Id, sampleApprId] } } } });
         await prisma.sampleOrderRevision.deleteMany({ where: { sampleId: { in: [sample26Id, sampleApprId] } } });
-        await prisma.workItem.deleteMany({ where: { sampleId: { in: [sample26Id, sampleApprId] } } });
-        await prisma.sample.deleteMany({ where: { id: { in: [sample26Id, sampleApprId] } } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: { in: [sample26Id, sampleApprId] } } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: [sample26Id, sampleApprId] } } }), select: { id: true } })).map(row => row.id), { single: false });
 
         // Ensure operational gates exist
         await prisma.operationalGate.upsert({
@@ -122,8 +123,8 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         await prisma.auditLog.deleteMany({ where: { sampleId: { in: [sample26Id, sampleApprId] } } });
         await prisma.orderLine.deleteMany({ where: { revision: { sampleId: { in: [sample26Id, sampleApprId] } } } });
         await prisma.sampleOrderRevision.deleteMany({ where: { sampleId: { in: [sample26Id, sampleApprId] } } });
-        await prisma.workItem.deleteMany({ where: { sampleId: { in: [sample26Id, sampleApprId] } } });
-        await prisma.sample.deleteMany({ where: { id: { in: [sample26Id, sampleApprId] } } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: { in: [sample26Id, sampleApprId] } } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: [sample26Id, sampleApprId] } } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. 26-task fixture exposes all 26 tasks with honest totals and pagination (no silent 20-item truncation)', async () => {
@@ -480,8 +481,8 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         expect(ws.capabilities.canFinalApprove.blockers.some(b => b.includes('QC_BATCH_FAILED'))).toBe(true);
 
         // Cleanup
-        await prisma.workItem.deleteMany({ where: { sampleId: qcBatchSampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: qcBatchSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.batch.delete({ where: { id: qcBatchId } });
-        await prisma.sample.delete({ where: { id: qcBatchSampleId } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: qcBatchSampleId } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 });

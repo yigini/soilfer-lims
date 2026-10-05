@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const { transitionSample, TransitionError } = require('../../services/sampleStateService');
@@ -22,8 +23,8 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
     afterEach(async () => {
         if (testSample) {
             await prisma.auditLog.deleteMany({ where: { sampleId: testSample.id } }).catch(() => {});
-            await prisma.workItem.deleteMany({ where: { sampleId: testSample.id } }).catch(() => {});
-            await prisma.sample.delete({ where: { id: testSample.id } }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSample.id } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSample.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
         }
     });
     async function approveFixture() {
@@ -152,7 +153,7 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
         }));
 
         // Cleanup active work item
-        await prisma.workItem.delete({ where: { id: activeWi.id } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: activeWi.id } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 
     test('7. WP-08: disposeSample creates DISPOSAL work item and leaves sample APPROVED', async () => {
@@ -189,7 +190,7 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
         expect(currentSample.status).toBe('APPROVED');
 
         // Cleanup
-        await prisma.workItem.deleteMany({ where: { sampleId: testSample.id } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSample.id } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 });
 

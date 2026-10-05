@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
 
 const { createSampleFixture } = require('../helpers/workflowFixtures');
@@ -850,7 +851,7 @@ describe('projectPolicyService - Templates, Admission & Capabilities', () => {
 
         afterAll(async () => {
             await prisma.sampleAmendment.deleteMany({ where: { sample: { projectId: httpProject?.id } } }).catch(() => {});
-            await prisma.sample.deleteMany({ where: { projectId: httpProject?.id } }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { projectId: httpProject?.id } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
             await prisma.projectLab.deleteMany({ where: { projectCode: httpProject?.code } }).catch(() => {});
             await prisma.project.delete({ where: { id: httpProject?.id } }).catch(() => {});
             await prisma.user.deleteMany({ where: { id: { in: [httpAdmin?.id, httpManager?.id] } } }).catch(() => {});

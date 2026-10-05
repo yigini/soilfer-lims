@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
 
 /**
@@ -224,8 +225,8 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
         await prisma.workAttempt.deleteMany({ where: { workItemId: { in: [workItemTexture.id, workItemSpectral.id, workItemNormal.id, workItemDryingBlocked.id] } } }).catch(() => {});
         await prisma.workItemDraft.deleteMany({ where: { workItemId: { in: [workItemTexture.id, workItemSpectral.id, workItemNormal.id, workItemDryingBlocked.id] } } }).catch(() => {});
         await prisma.commandReceipt.deleteMany({ where: { author: { in: [userTechA.username, userTechB.username] } } }).catch(() => {});
-        await prisma.workItem.deleteMany({ where: { id: { in: [workItemTexture.id, workItemSpectral.id, workItemNormal.id, workItemDryingBlocked.id] } } }).catch(() => {});
-        await prisma.sample.deleteMany({ where: { id: { in: [sampleA.id, samplePendingDrying.id] } } }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: { in: [workItemTexture.id, workItemSpectral.id, workItemNormal.id, workItemDryingBlocked.id] } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: [sampleA.id, samplePendingDrying.id] } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
         await prisma.methodology.deleteMany({ where: { id: customSpectralMethod.id } }).catch(() => {});
         await prisma.user.deleteMany({ where: { id: { in: [userTechA.id, userTechB.id, userMgrA.id, userSA.id] } } }).catch(() => {});
         await prisma.lab.deleteMany({ where: { id: { in: [labA.id, labB.id] } } }).catch(() => {});

@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -50,12 +51,12 @@ describe('Stage D: Desk Ergonomics & Hardware Contract Tests (RC-16 - RC-18)', (
                 await prisma.auditLog.deleteMany({
                     where: { OR: [{ sampleId: createdSampleDbId }, { entityId: createdSampleDbId }] }
                 });
-                await prisma.workItem.deleteMany({
+                await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
                     where: { sampleId: createdSampleDbId }
-                });
-                await prisma.sample.deleteMany({
+                }), select: { id: true } })).map(row => row.id), { single: false });
+                await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
                     where: { id: createdSampleDbId }
-                });
+                }), select: { id: true } })).map(row => row.id), { single: false });
             }
             await prisma.project.deleteMany({
                 where: { id: testProjectId }
@@ -205,12 +206,12 @@ describe('Stage D: Desk Ergonomics & Hardware Contract Tests (RC-16 - RC-18)', (
         await prisma.auditLog.deleteMany({
             where: { OR: [{ sampleId: { in: sampleIds } }, { entityId: { in: sampleIds } }] }
         });
-        await prisma.workItem.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
             where: { sampleId: { in: sampleIds } }
-        });
-        await prisma.sample.deleteMany({
+        }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { in: sampleIds } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.consignment.deleteMany({
             where: { id: csgId }
         });

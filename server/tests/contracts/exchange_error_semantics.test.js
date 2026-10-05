@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -123,9 +124,9 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
             where: { id: { in: [`res-a0-1-${timestamp}`] } }
         }).catch(() => {});
 
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { in: [sampleApproved?.id, sampleProcessing?.id, sampleHold?.id].filter(Boolean) } }
-        }).catch(() => {});
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
 
         await prisma.apiKey.deleteMany({
             where: { id: testKey?.id }

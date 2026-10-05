@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const { getAuthToken } = require('../setup');
@@ -26,8 +27,8 @@ describe('SD-14: Work Escalation Service Contract', () => {
 
         // Clean up
         await prisma.notification.deleteMany({ where: { userId: mgrUser.id } });
-        await prisma.workItem.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
 
         // Create sample in PROCESSING
         await createSampleFixture(prisma, {
@@ -81,8 +82,8 @@ describe('SD-14: Work Escalation Service Contract', () => {
 
     afterAll(async () => {
         await prisma.notification.deleteMany({ where: { userId: mgrUser.id } });
-        await prisma.workItem.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. An unassigned work item sitting for >2 days escalates to the manager without opening a page', async () => {

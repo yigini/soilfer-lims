@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Laboratory Governance WP-A Companion Contract Tests
  *
@@ -246,12 +247,12 @@ describe('WP-A: Laboratory Governance Security & Access Repairs', () => {
         await prisma.workItemDraft.deleteMany({
             where: { workItem: { sample: { originalId: { startsWith: testPrefix } } } }
         }).catch(() => {});
-        await prisma.workItem.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
             where: { sample: { originalId: { startsWith: testPrefix } } }
-        }).catch(() => {});
-        await prisma.sample.deleteMany({
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { originalId: { startsWith: testPrefix } }
-        }).catch(() => {});
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
         await prisma.equipmentAsset.deleteMany({
             where: { id: { contains: testPrefix } }
         }).catch(() => {});

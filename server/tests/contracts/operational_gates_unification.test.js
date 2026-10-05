@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const sampleController = require('../../controllers/sampleController');
@@ -48,8 +49,8 @@ describe('WP-26: Single Representation for Operational Gates', () => {
     });
 
     afterEach(async () => {
-        await prisma.workItem.deleteMany({ where: { sampleId: testSampleId } });
-        await prisma.sample.deleteMany({ where: { id: testSampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. updatePhaseStatus DONE synchronizes WorkItem to COMPLETED with verified receipt', async () => {

@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -15,9 +16,9 @@ describe('Spectral Library Stage A (SL-01 to SL-05)', () => {
         await prisma.spectralData.deleteMany({
             where: { id: { startsWith: 'test-spec-' } }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { startsWith: 'TEST-SPEC-SMP-' } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
 
         mgrGtmToken = await getAuthToken('LAB_MANAGER', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
         mgrMozToken = await getAuthToken('LAB_MANAGER', 'LAB-MOZ', ['MOZ'], ['SOILFER-US']);
@@ -95,9 +96,9 @@ describe('Spectral Library Stage A (SL-01 to SL-05)', () => {
         await prisma.spectralData.deleteMany({
             where: { id: { startsWith: 'test-spec-' } }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { startsWith: 'TEST-SPEC-SMP-' } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('SL-01: GET /api/spectral returns 200 without ReferenceError and applies lab scoping', async () => {

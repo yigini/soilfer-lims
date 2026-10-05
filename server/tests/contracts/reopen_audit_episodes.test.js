@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -16,8 +17,8 @@ describe('SD-17: Reopen Audit Episodes Contract', () => {
         // Clean up
         await prisma.result.deleteMany({ where: { sampleId } });
         await prisma.auditLog.deleteMany({ where: { sampleId } });
-        await prisma.workItem.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
 
         // Create sample in APPROVED state
         const initialApprovalDate = new Date('2026-08-15T10:00:00Z');
@@ -57,8 +58,8 @@ describe('SD-17: Reopen Audit Episodes Contract', () => {
     afterAll(async () => {
         await prisma.result.deleteMany({ where: { sampleId } });
         await prisma.auditLog.deleteMany({ where: { sampleId } });
-        await prisma.workItem.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. An approved sample has a single analytical episode with an approval date', async () => {

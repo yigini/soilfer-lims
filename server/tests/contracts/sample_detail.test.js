@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -19,8 +20,8 @@ describe('SD-15: Comprehensive Sample Detail End-to-End Contract Suite', () => {
         // Clean up
         await prisma.result.deleteMany({ where: { sampleId: sampleLabGtmId } });
         await prisma.auditLog.deleteMany({ where: { sampleId: sampleLabGtmId } });
-        await prisma.workItem.deleteMany({ where: { sampleId: sampleLabGtmId } });
-        await prisma.sample.deleteMany({ where: { id: sampleLabGtmId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: sampleLabGtmId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleLabGtmId } }), select: { id: true } })).map(row => row.id), { single: false });
 
         // Seed Sample in LAB-GTM
         await createSampleFixture(prisma, {
@@ -75,11 +76,11 @@ describe('SD-15: Comprehensive Sample Detail End-to-End Contract Suite', () => {
 
     afterAll(async () => {
         await prisma.auditLog.deleteMany({ where: { sampleId: `${sampleLabGtmId}-approved` } });
-        await prisma.sample.deleteMany({ where: { id: `${sampleLabGtmId}-approved` } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: `${sampleLabGtmId}-approved` } }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.result.deleteMany({ where: { sampleId: sampleLabGtmId } });
         await prisma.auditLog.deleteMany({ where: { sampleId: sampleLabGtmId } });
-        await prisma.workItem.deleteMany({ where: { sampleId: sampleLabGtmId } });
-        await prisma.sample.deleteMany({ where: { id: sampleLabGtmId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: sampleLabGtmId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleLabGtmId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     describe('1. Cross-Laboratory Assignment Refusal for Every Role (SD-02)', () => {

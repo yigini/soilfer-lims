@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -15,9 +16,9 @@ describe('Spectral Library Stage C (SL-13 to SL-16)', () => {
         await prisma.spectralData.deleteMany({
             where: { id: { startsWith: 'test-spec-c-' } }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { startsWith: 'TEST-STAGEC-SMP-' } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
 
         mgrGtmToken = await getAuthToken('LAB_MANAGER', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
 
@@ -52,12 +53,12 @@ describe('Spectral Library Stage C (SL-13 to SL-16)', () => {
         await prisma.spectralData.deleteMany({
             where: { id: { startsWith: 'test-spec-c-' } }
         });
-        await prisma.workItem.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
             where: { id: { startsWith: 'TEST-WORKITEM-SPEC-' } }
-        });
-        await prisma.sample.deleteMany({
+        }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { startsWith: 'TEST-STAGEC-SMP-' } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('SL-13 & SL-14: Server parses raw JCAMP-DX file directly and extracts acquisition metadata', async () => {

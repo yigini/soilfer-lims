@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Issue #140 Codex Independent Review Remediations Test Suite
  * 
@@ -137,7 +138,7 @@ describe('Issue #140 Codex Remediations Contract Tests', () => {
                 expect(page.data.map(row => row.specimenId)).toEqual(['eligible-isolated']);
                 expect(snap.totalSamples).toBe(1);
             } finally {
-                await prisma.sample.delete({ where: { id: heldId } });
+                await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: heldId } }), select: { id: true } })).map(row => row.id), { single: true });
                 await prisma.auditLog.deleteMany({ where: { entityId: heldId } });
             }
         });

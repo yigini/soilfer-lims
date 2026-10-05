@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const qcService = require('../../services/qcService');
@@ -54,7 +55,7 @@ describe('WP-29: QC Service & Batch Disposition Result Flagging', () => {
         await prisma.batchQcResult.deleteMany({ where: { batchId: testBatchId } });
         await prisma.result.deleteMany({ where: { batchId: testBatchId } });
         await prisma.batch.deleteMany({ where: { id: testBatchId } });
-        await prisma.sample.deleteMany({ where: { id: testSampleId } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. qcService accurately computes blank threshold, duplicate RPD, and control recovery', () => {

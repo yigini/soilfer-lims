@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { ensureTestLab } = require('../setup');
 const request = require('supertest');
 const app = require('../../app');
@@ -36,14 +37,14 @@ describe('Stage A: Sample Reception Desk-Only Facts Contract (RC-01 - RC-04)', (
 
     afterAll(async () => {
         // Clean up test data
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: {
                 OR: [
                     { originalId: { startsWith: 'TEST-SMP-' } },
                     { originalId: { startsWith: 'TEST-DUP-' } }
                 ]
             }
-        }).catch(() => {});
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
 
         await prisma.analysis.delete({ where: { code: testAnalysisCode } }).catch(() => {});
     });

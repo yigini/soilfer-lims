@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -137,9 +138,9 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
             where: { sampleId: { in: [sample1?.id, sample2NoLabId?.id].filter(Boolean) } }
         }).catch(() => {});
 
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { in: [sample1?.id, sample2NoLabId?.id].filter(Boolean) } }
-        }).catch(() => {});
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
 
         await prisma.apiKey.deleteMany({
             where: { id: testKey?.id }

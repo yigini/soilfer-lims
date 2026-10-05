@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const prisma = require('../../prisma');
 const importController = require('../../controllers/importController');
 const { createSample } = require('../../services/sampleStateService');
@@ -22,7 +23,7 @@ describe('WP-32: Legacy Data Import Harmonisation Mandate', () => {
     afterAll(async () => {
         if (createdSampleIds.length > 0) {
             await prisma.result.deleteMany({ where: { sampleId: { in: createdSampleIds } } });
-            await prisma.sample.deleteMany({ where: { id: { in: createdSampleIds } } });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: createdSampleIds } } }), select: { id: true } })).map(row => row.id), { single: false });
         }
         await prisma.lab.delete({ where: { id: testLabId } }).catch(() => {});
         await prisma.lab.delete({ where: { id: otherLabId } }).catch(() => {});

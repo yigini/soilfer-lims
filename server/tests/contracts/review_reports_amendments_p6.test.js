@@ -1,4 +1,5 @@
-const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -48,9 +49,10 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
                 status: 'SUBMITTED_FULL',
                 dryingStatus: 'DONE',
                 preparationStatus: 'DONE',
-                requiredAnalyses: JSON.stringify(['PH_H2O', 'EC']),
-                workItems: {
-                    create: [
+                requiredAnalyses: JSON.stringify(['PH_H2O', 'EC'])
+            }
+        });
+        for (const data of [
                         {
                             id: 'p6-wi-ph-01',
                             analysis: 'PH_H2O',
@@ -69,10 +71,9 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
                             assignedTo: techUser.username,
                             labId: 'LAB-P6'
                         }
-                    ]
-                }
-            }
-        });
+                    ]) {
+            await createWorkItemFixture(prisma, { data: { ...data, sampleId: sampleForReview.id } });
+        }
 
         // Add valid results for both items
         await prisma.result.createMany({
@@ -146,12 +147,12 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
         await prisma.sampleAmendment.deleteMany({
             where: { sampleId: { in: [sampleForReview.id, sampleDisposed.id] } }
         });
-        await prisma.workItem.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
             where: { sampleId: { in: [sampleForReview.id, sampleDisposed.id] } }
-        });
-        await prisma.sample.deleteMany({
+        }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { in: [sampleForReview.id, sampleDisposed.id] } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. Review submission accepts normalized decisions and updates status to ACCEPTED', async () => {
@@ -217,6 +218,26 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
         });
         expect(report).toBeDefined();
         expect(report.version).toBe(1);
+    });
+
+    test.each([
+        ['orders/preview', { analyses: ['PH_H2O', 'VIS_NIR'] }],
+        ['amendments', { type: 'RETEST', reason: 'Attempt physical retesting of disposed material' }],
+        ['custody/move', { location: 'Retesting bench', reason: 'Attempt to move disposed material' }]
+    ])('disposed material refuses %s with its stable code and zero writes', async (route, body) => {
+        const snapshot = async () => ({
+            sample: await prisma.sample.findUnique({ where: { id: sampleDisposed.id } }),
+            work: await prisma.workItem.findMany({ where: { sampleId: sampleDisposed.id }, orderBy: { id: 'asc' } }),
+            results: await prisma.result.findMany({ where: { sampleId: sampleDisposed.id }, orderBy: { id: 'asc' } }),
+            amendments: await prisma.sampleAmendment.findMany({ where: { sampleId: sampleDisposed.id }, orderBy: { id: 'asc' } }),
+            audits: await prisma.auditLog.findMany({ where: { sampleId: sampleDisposed.id }, orderBy: { id: 'asc' } })
+        });
+        const before = await snapshot();
+        const response = await request(app).post(`/api/samples/${sampleDisposed.id}/${route}`)
+            .set('Authorization', `Bearer ${mgrToken}`).send(body);
+        expect(response.status).toBe(400);
+        expect(response.body.code).toBe('DISPOSED_MATERIAL_IMMUTABLE');
+        expect(await snapshot()).toEqual(before);
     });
 
     test('4. Generates superseding report v2 after authorized change', async () => {

@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -29,10 +30,10 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
     afterEach(async () => {
         try {
             if (createdWorkItemIds.length > 0) {
-                await prisma.workItem.deleteMany({ where: { id: { in: createdWorkItemIds } } });
+                await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: { in: createdWorkItemIds } } }), select: { id: true } })).map(row => row.id), { single: false });
             }
             if (createdSampleIds.length > 0) {
-                await prisma.sample.deleteMany({ where: { id: { in: createdSampleIds } } });
+                await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: createdSampleIds } } }), select: { id: true } })).map(row => row.id), { single: false });
             }
             if (batchId) {
                 await prisma.batch.deleteMany({ where: { id: batchId } });

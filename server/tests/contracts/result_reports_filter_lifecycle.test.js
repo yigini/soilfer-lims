@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
 
 /**
@@ -237,9 +238,9 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
         await prisma.report.deleteMany({
             where: { id: { in: [reportId0002v1, reportId0003v1, reportId0003v2] } }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { in: [sampleId0002, sampleId0003] } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     // ─── 1. COMPONENT SSR RENDERING ───

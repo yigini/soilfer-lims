@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
 
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
@@ -210,12 +211,12 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
             await prisma.workItemDraft.deleteMany({
                 where: { workItemId: { in: [testAnalyticalItem.id, testDryingItem.id, testSpectralItem.id] } }
             });
-            await prisma.workItem.deleteMany({
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
                 where: { sampleId: testSample.id }
-            });
-            await prisma.sample.deleteMany({
+            }), select: { id: true } })).map(row => row.id), { single: false });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
                 where: { id: testSample.id }
-            });
+            }), select: { id: true } })).map(row => row.id), { single: false });
             await prisma.apiKey.deleteMany({
                 where: { name: { contains: testPrefix } }
             });
@@ -344,8 +345,8 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
             expect(unauthQueryRes.body.data).toHaveLength(0);
 
             // Clean up temporary samples
-            await prisma.sample.delete({ where: { id: releasedSampleA.id } }).catch(() => {});
-            await prisma.sample.delete({ where: { id: foreignSample.id } }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: releasedSampleA.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: foreignSample.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
         });
     });
 

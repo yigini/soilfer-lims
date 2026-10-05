@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -66,12 +67,12 @@ describe('Stage C: Consignment & High-Throughput Batch Intake Contract (RC-12 - 
                     ]
                 }
             });
-            await prisma.workItem.deleteMany({
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
                 where: { sampleId: { in: sampleIds } }
-            });
-            await prisma.sample.deleteMany({
+            }), select: { id: true } })).map(row => row.id), { single: false });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
                 where: { id: { in: sampleIds } }
-            });
+            }), select: { id: true } })).map(row => row.id), { single: false });
             if (createdConsignmentId) {
                 await prisma.consignment.deleteMany({
                     where: { id: createdConsignmentId }

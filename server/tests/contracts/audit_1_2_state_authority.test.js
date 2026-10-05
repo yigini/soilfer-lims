@@ -33,6 +33,19 @@ test('central Sample creation retains an existing caller creation action with ex
     expect(JSON.parse(audit[0].details)).toEqual({ status: 'EXPECTED', context: 'ordinary' });
 });
 
+test.each(['create', 'createMany', 'connectOrCreate', 'update', 'updateMany', 'upsert'].flatMap(command =>
+    ['createSample', 'createWorkItem', 'transitionSample', 'transitionWorkItem'].map(operation => [command, operation])))
+    ('%s nested relation commands are refused by %s before any writes', async (command, operation) => {
+        const { sample, item } = await fixture(), before = await snapshot(sample.id);
+        const data = { nested: { workItems: { [command]: [{ status: 'ACCEPTED' }] } } };
+        const request = operation === 'createSample' ? () => samples.createSample({ id: id(), originalId: id(), ...data }, manager, { tx: client })
+            : operation === 'createWorkItem' ? () => work.createWorkItem({ sampleId: sample.id, analysis: 'SOC', ...data }, manager, { tx: client })
+                : operation === 'transitionSample' ? () => samples.transitionSample(sample.id, sample.status, manager, null, data, client)
+                    : () => work.transitionWorkItem(item.id, item.status, technician, null, data, client);
+        await expect(request()).rejects.toMatchObject({ statusCode: 400, code: 'WORKFLOW_RELATION_WRITE_REFUSED' });
+        expect(await snapshot(sample.id)).toEqual(before);
+    });
+
 // Build a schema-only, disposable pre-migration database. No template data is
 // copied and no production constraints are dropped or disabled. This exercises
 // the exact additive release SQL, including legacy rows present before release.

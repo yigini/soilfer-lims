@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
 
 /**
@@ -172,8 +173,8 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
 
         // Clean up any pre-existing records for these test identities
         const allSampleIds = [sampleS005CanonicalId, sampleS004CanonicalId, sampleW001CanonicalId, sampleCollisionDecoyId];
-        await prisma.workItem.deleteMany({ where: { sampleId: { in: allSampleIds } } });
-        await prisma.sample.deleteMany({ where: { id: { in: allSampleIds } } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: { in: allSampleIds } } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: allSampleIds } } }), select: { id: true } })).map(row => row.id), { single: false });
 
         // Ensure operational gates exist
         await prisma.operationalGate.upsert({
@@ -317,8 +318,8 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
 
     afterAll(async () => {
         const allSampleIds = [sampleS005CanonicalId, sampleS004CanonicalId, sampleW001CanonicalId, sampleCollisionDecoyId];
-        await prisma.workItem.deleteMany({ where: { sampleId: { in: allSampleIds } } });
-        await prisma.sample.deleteMany({ where: { id: { in: allSampleIds } } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: { in: allSampleIds } } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: allSampleIds } } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     describe('1. Component Render Regression: ArrowRight and Eye Definition (#119)', () => {

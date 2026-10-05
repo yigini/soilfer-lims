@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -37,8 +38,8 @@ describe('WP-15: Blocking vs Advisory Scientific Matrix Diagnostics', () => {
         if (testSampleId) {
             await prisma.result.deleteMany({ where: { sampleId: testSampleId } }).catch(() => {});
             await prisma.auditLog.deleteMany({ where: { sampleId: testSampleId } }).catch(() => {});
-            await prisma.workItem.deleteMany({ where: { sampleId: testSampleId } }).catch(() => {});
-            await prisma.sample.delete({ where: { id: testSampleId } }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSampleId } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
         }
     });
 

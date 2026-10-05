@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -24,9 +25,9 @@ describe('Spectral Library Stage D: Quality Control Worth the Name (SL-17 to SL-
         await prisma.equipmentAsset.deleteMany({
             where: { id: { startsWith: 'TEST-EQ-STAGED-' } }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { startsWith: 'TEST-STAGED-SMP-' } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
 
         mgrGtmToken = await getAuthToken('LAB_MANAGER', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
 
@@ -74,9 +75,9 @@ describe('Spectral Library Stage D: Quality Control Worth the Name (SL-17 to SL-
         await prisma.equipmentAsset.deleteMany({
             where: { id: { startsWith: 'TEST-EQ-STAGED-' } }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { startsWith: 'TEST-STAGED-SMP-' } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('SL-17: Quantity-aware validation passes valid absorbance of 1.4 without flagging HIGH_REFLECTANCE_VALUES', () => {

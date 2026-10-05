@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
 
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
@@ -144,10 +145,10 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
     });
 
     afterAll(async () => {
-        await prisma.workItem.deleteMany({ where: { sampleId: testSampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.orderLine.deleteMany({ where: { revision: { sampleId: testSampleId } } });
         await prisma.sampleOrderRevision.deleteMany({ where: { sampleId: testSampleId } });
-        await prisma.sample.deleteMany({ where: { id: testSampleId } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     // ─────────────────────────────────────────────────────────────────────────

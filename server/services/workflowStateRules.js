@@ -121,6 +121,7 @@ function heldPriorState(row, entity) {
 }
 
 function updateData(extraData, nextStatus, normalize = value => value) {
+    assertNoRelationWrites(extraData);
     const data = { ...extraData };
     if ('status' in data && normalize(data.status) !== nextStatus) {
         throw new TransitionError('Additional data cannot override the requested status.', 400, 'STATUS_OVERRIDE_REFUSED');
@@ -130,6 +131,17 @@ function updateData(extraData, nextStatus, normalize = value => value) {
         if (field in data) throw new TransitionError('State provenance is controlled by the transition service.', 400, 'STATE_METADATA_NOT_ALLOWED');
     }
     return data;
+}
+
+// Nested Prisma commands would bypass the related entity's authority and audit.
+function assertNoRelationWrites(value, seen = new Set()) {
+    if (!value || typeof value !== 'object' || value instanceof Date || seen.has(value)) return;
+    seen.add(value);
+    const commands = ['create', 'createMany', 'connectOrCreate', 'update', 'updateMany', 'upsert'];
+    if (!Array.isArray(value) && commands.some(key => Object.hasOwn(value, key))) {
+        throw new TransitionError('Nested relation writes must use the workflow authority.', 400, 'WORKFLOW_RELATION_WRITE_REFUSED');
+    }
+    for (const child of Object.values(value)) assertNoRelationWrites(child, seen);
 }
 
 function resolvedPath(value) {
@@ -158,5 +170,11 @@ async function inTransaction(tx, execute) {
     } catch (error) { throw mapStateError(error); }
 }
 
+function requireTransaction(tx) {
+    if (!tx || typeof tx.$transaction === 'function' || !tx.sample || !tx.workItem) {
+        throw new TransitionError('Removal requires the caller workflow transaction.', 400, 'WORKFLOW_TRANSACTION_REQUIRED');
+    }
+}
+
 module.exports = { TransitionError, TRIGGER_CODES, mapStateError, actorName, assertScope, requireReason,
-    parseHistory, requireHistory, holdData, heldPriorState, updateData, assertFixtureContext, inTransaction };
+    parseHistory, requireHistory, holdData, heldPriorState, updateData, assertNoRelationWrites, assertFixtureContext, inTransaction, requireTransaction };

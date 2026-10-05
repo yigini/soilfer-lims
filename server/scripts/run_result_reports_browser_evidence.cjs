@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../tests/helpers/workflowFixtures");
 'use strict';
 
 /**
@@ -213,7 +214,7 @@ async function run() {
         // Clean up previous test sample & report records
         const sampleIds = ['SMP-GTM26-0001', 'SMP-GTM26-0002', 'SMP-GTM26-0003', 'SMP-GTM26-0004'];
         await prisma.report.deleteMany({ where: { sampleId: { in: sampleIds } } });
-        await prisma.sample.deleteMany({ where: { id: { in: sampleIds } } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: sampleIds } } }), select: { id: true } })).map(row => row.id), { single: false });
 
 
         // 1. Sample GTM26-0001 (Julio Morales): 2 versions (v1 SUPERSEDED, v2 PUBLISHED)

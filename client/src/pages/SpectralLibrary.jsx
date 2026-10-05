@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useLanguage } from '../context/LanguageContext';
+import { requestWithSpectralReopen } from '../utils/spectralWorkflowRequest';
 
 const SpectralLibrary = () => {
     const { user } = useAuth();
@@ -130,12 +131,14 @@ const SpectralLibrary = () => {
     // Soft delete (move to trash)
     const handleDelete = async (scanId, labId) => {
         showDialog({
-            type: 'confirm',
-            title: 'Move to Trash',
-            message: `Move spectrum for ${labId} to trash? You can restore it later from the Trash view.`,
-            onConfirm: async () => {
+            type: 'prompt', inputRequired: true,
+            title: t('spectralWorkflow.trashTitle'),
+            message: t('spectralWorkflow.trashMessage', { label: labId }),
+            inputPlaceholder: t('spectralWorkflow.reason'), confirmText: t('spectralWorkflow.trashConfirm'), cancelText: t('common.cancel'),
+            onConfirm: async reason => {
+                if (!reason?.trim()) return;
                 try {
-                    await axios.delete(`/api/spectral/${scanId}`);
+                    await axios.delete(`/api/spectral/${scanId}`, { data: { reason: reason.trim() } });
                     setSpectraList(prev => prev.filter(s => s.id !== scanId));
                     showDialog({ type: 'success', title: 'Moved to Trash', message: 'Spectrum moved to trash. Restore from the Trash view if needed.' });
                 } catch (e) {
@@ -149,7 +152,8 @@ const SpectralLibrary = () => {
     // Restore from trash
     const handleRestore = async (scanId, labId) => {
         try {
-            await axios.post(`/api/spectral/${scanId}/restore`);
+            const response = await requestWithSpectralReopen(reopenReason => axios.post(`/api/spectral/${scanId}/restore`, { reopenReason }), showDialog, t);
+            if (!response) return;
             setSpectraList(prev => prev.filter(s => s.id !== scanId));
             showDialog({ type: 'success', title: 'Restored', message: `Spectrum for ${labId} restored successfully.` });
         } catch (e) {
@@ -179,7 +183,8 @@ const SpectralLibrary = () => {
     const handleReview = async (scanId, action, labId) => {
         if (action === 'UNDO') {
             try {
-                await axios.post(`/api/spectral/${scanId}/review`, { action: 'UNDO' });
+                const response = await requestWithSpectralReopen(reopenReason => axios.post(`/api/spectral/${scanId}/review`, { action: 'UNDO', reopenReason }), showDialog, t);
+                if (!response) return;
                 fetchLibrary();
                 showDialog({ type: 'success', title: 'Undone', message: `Rejection of ${labId} undone. Returned to Awaiting Review.` });
             } catch (e) {
@@ -195,7 +200,8 @@ const SpectralLibrary = () => {
             message: `Are you sure you want to ${actionText} the spectrum for ${labId}?${action === 'APPROVE' ? ' This will mark the work item as COMPLETED.' : ''}`,
             onConfirm: async () => {
                 try {
-                    await axios.post(`/api/spectral/${scanId}/review`, { action });
+                    const response = await requestWithSpectralReopen(reopenReason => axios.post(`/api/spectral/${scanId}/review`, { action, reopenReason }), showDialog, t);
+                    if (!response) return;
                     fetchLibrary();
                     showDialog({ type: 'success', title: 'Success', message: `Spectrum ${actionText}d successfully.` });
                 } catch (e) {
@@ -236,14 +242,16 @@ const SpectralLibrary = () => {
     const handleBatchDelete = async () => {
         if (selectedIds.size === 0) return;
         showDialog({
-            type: 'confirm',
-            title: 'Batch Delete',
-            message: `Move ${selectedIds.size} selected spectra to trash? You can restore them later from the Trash tab.`,
-            onConfirm: async () => {
+            type: 'prompt', inputRequired: true,
+            title: t('spectralWorkflow.trashTitle'),
+            message: t('spectralWorkflow.batchTrashMessage', { count: selectedIds.size }),
+            inputPlaceholder: t('spectralWorkflow.reason'), confirmText: t('spectralWorkflow.trashConfirm'), cancelText: t('common.cancel'),
+            onConfirm: async reason => {
+                if (!reason?.trim()) return;
                 setBatchLoading(true);
                 try {
                     const res = await axios.post('/api/spectral/batch-delete', {
-                        ids: Array.from(selectedIds)
+                        ids: Array.from(selectedIds), reason: reason.trim()
                     });
                     setSelectedIds(new Set());
                     fetchLibrary();

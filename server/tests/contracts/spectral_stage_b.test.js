@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -16,9 +17,9 @@ describe('Spectral Library Stage B (SL-06 to SL-12)', () => {
         await prisma.spectralData.deleteMany({
             where: { id: { startsWith: 'test-spec-b-' } }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { startsWith: 'TEST-STAGEB-SMP-' } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.equipmentAsset.deleteMany({
             where: { id: { startsWith: 'TEST-EQ-SPEC-' } }
         });
@@ -60,9 +61,9 @@ describe('Spectral Library Stage B (SL-06 to SL-12)', () => {
         await prisma.spectralData.deleteMany({
             where: { id: { startsWith: 'test-spec-b-' } }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { startsWith: 'TEST-STAGEB-SMP-' } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.equipmentAsset.deleteMany({
             where: { id: { startsWith: 'TEST-EQ-SPEC-' } }
         });

@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Contract Test Suite: QC Batch Inspection, Disposition & Release Gates (Refs #118)
  *
@@ -145,14 +146,14 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
     afterAll(async () => {
         await prisma.result.deleteMany({ where: { sampleId: { in: reportFixtureIds } } });
-        await prisma.workItem.deleteMany({ where: { sampleId: { in: reportFixtureIds } } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: { in: reportFixtureIds } } }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.auditLog.deleteMany({ where: { sampleId: { in: reportFixtureIds } } });
-        await prisma.sample.deleteMany({ where: { id: { in: reportFixtureIds } } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: reportFixtureIds } } }), select: { id: true } })).map(row => row.id), { single: false });
         // Clean up test data
         await prisma.report.deleteMany({ where: { sampleId: sample1.id } }).catch(() => {});
         await prisma.result.deleteMany({ where: { sampleId: sample1.id } });
-        await prisma.workItem.deleteMany({ where: { id: workItem1.id } }).catch(() => {});
-        await prisma.sample.deleteMany({ where: { id: sample1.id } }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: workItem1.id } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample1.id } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
         await prisma.batch.deleteMany({ where: { id: batch1.id } }).catch(() => {});
         await prisma.auditLog.deleteMany({ where: { entityId: batch1.id } }).catch(() => {});
         await prisma.user.deleteMany({
@@ -489,8 +490,8 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
         // Cleanup
         await prisma.result.deleteMany({ where: { id: { in: [resWithManualInvalid.id, resReleased.id, resSuperseded.id] } } });
-        await prisma.sample.delete({ where: { id: activeSample.id } }).catch(() => {});
-        await prisma.sample.delete({ where: { id: releasedSample.id } }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: activeSample.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: releasedSample.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
         await prisma.batch.delete({ where: { id: testBatchId } }).catch(() => {});
         await prisma.auditLog.deleteMany({ where: { entityId: testBatchId } }).catch(() => {});
     });
@@ -543,9 +544,9 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         expect(refreshedWi.reanalysisRequestedBy).toBe(lab1Manager.username);
 
         // Cleanup
-        await prisma.workItem.delete({ where: { id: wiToReanalyze.id } }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: wiToReanalyze.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
         await prisma.batch.delete({ where: { id: reanalyzeBatchId } }).catch(() => {});
-        await prisma.sample.delete({ where: { id: activeSample.id } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: activeSample.id } }), select: { id: true } })).map(row => row.id), { single: true });
         await prisma.auditLog.deleteMany({ where: { entityId: reanalyzeBatchId } }).catch(() => {});
     });
 
@@ -665,7 +666,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         await prisma.result.deleteMany({
             where: { id: { in: [resUnflagged.id, resSensorFailure.id, resPriorReject.id, resQcOnly.id] } }
         });
-        await prisma.sample.delete({ where: { id: activeSample.id } }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: activeSample.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
     });
 
     // ─── Test 12: flagBatchResults Strictly Preserves Immutability for Published Reports & Terminal Samples ───
@@ -773,9 +774,9 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             where: { id: { in: [resArchived.id, resDisposed.id, resPublished.id] } }
         });
         await prisma.report.delete({ where: { id: pubReport.id } }).catch(() => {});
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { in: [archivedSample.id, disposedSample.id, pubSample.id] } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     // ─── Test 13: Conflicting Disposition Rejected with 409 DISPOSITION_CONFLICT ───
@@ -941,10 +942,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         expect(refCompleted.reanalysisReason).toBe('Reanalyze active items only');
 
         // Cleanup
-        await prisma.workItem.deleteMany({ where: { id: { in: [wiAccepted.id, wiCompleted.id] } } });
-        await prisma.workItem.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: { in: [wiAccepted.id, wiCompleted.id] } } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
             where: { id: { in: [wiActive.id, wiAccepted.id, wiCompleted.id] } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.batch.delete({ where: { id: batchWiTestId } }).catch(() => {});
         await prisma.auditLog.deleteMany({ where: { entityId: batchWiTestId } }).catch(() => {});
     });
@@ -997,7 +998,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
         // Cleanup
         await prisma.result.delete({ where: { id: res.id } });
-        await prisma.sample.delete({ where: { id: sample.id } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample.id } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 
     // ─── Test 17: Multi-Step Validity Provenance: Unflagged Invalid Stays Invalid Across FAIL -> PROCEED_WITH_WARNING ───
@@ -1041,7 +1042,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
         // Cleanup
         await prisma.result.delete({ where: { id: res.id } });
-        await prisma.sample.delete({ where: { id: sample.id } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample.id } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 
     // ─── Test 18: Multi-Step Validity Provenance: Initially Valid Results Correctly Restored ───
@@ -1094,7 +1095,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
         // Cleanup
         await prisma.result.delete({ where: { id: res.id } });
-        await prisma.sample.delete({ where: { id: sample.id } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample.id } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 
     // ─── Test 19: Unknown and Malformed Flags Handled Safely and Remain Invalid ───
@@ -1154,7 +1155,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
         // Cleanup
         await prisma.result.deleteMany({ where: { id: { in: [resUnknown.id, resMalformed.id] } } });
-        await prisma.sample.delete({ where: { id: sample.id } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample.id } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 
     // ─── Test 20: History Protection Accounts for SUPERSEDED Reports and Fails Closed on DB Error ───
@@ -1219,6 +1220,6 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Cleanup
         await prisma.result.delete({ where: { id: resSupersededReport.id } });
         await prisma.report.delete({ where: { id: supersededReport.id } });
-        await prisma.sample.delete({ where: { id: histSample.id } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: histSample.id } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 });

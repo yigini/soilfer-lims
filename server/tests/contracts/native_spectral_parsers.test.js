@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -155,7 +156,7 @@ describe('SD-13: Native Binary Spectral Parsers (Bruker OPUS, ASD, SPC)', () => 
         mgrGtmToken = await getAuthToken('LAB_MANAGER', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
 
         await prisma.spectralData.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
 
         await createSampleFixture(prisma, {
             data: {
@@ -174,7 +175,7 @@ describe('SD-13: Native Binary Spectral Parsers (Bruker OPUS, ASD, SPC)', () => 
 
     afterAll(async () => {
         await prisma.spectralData.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. parseSpectralFile identifies and parses Bruker OPUS binary buffer', () => {

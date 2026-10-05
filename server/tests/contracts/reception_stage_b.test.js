@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const { ensureTestLab } = require('../setup');
 const request = require('supertest');
@@ -62,18 +63,18 @@ describe('Stage B: Location, Provenance & Depth Contract (RC-05 - RC-11)', () =>
     });
 
     afterAll(async () => {
-        await prisma.workItem.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
             where: { sampleId: { startsWith: 'TEST-B-' } }
-        }).catch(() => {});
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
 
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: {
                 OR: [
                     { originalId: { startsWith: 'TEST-B-' } },
                     { id: { startsWith: 'TEST-B-' } }
                 ]
             }
-        }).catch(() => {});
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
 
         await prisma.project.delete({
             where: { id: testProjectId }

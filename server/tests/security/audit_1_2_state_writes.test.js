@@ -4,6 +4,40 @@ const { randomUUID } = require('node:crypto');
 const { execFileSync } = require('node:child_process');
 const { scanSource, scanFiles, deferredSources } = require('../helpers/workflowWriteScanner');
 
+test.each([
+    ['controllers/canary.js', 'prisma.workItem.deleteMany({where:{sampleId:id}})'],
+    ['tests/contracts/canary.test.js', 'prisma.sample.deleteMany({where:{id}})'],
+    ['controllers/canary.js', 'state.removeUnstartedWorkItems(prisma, {}, {actor,reason})'],
+    ['controllers/canary.js', 'prisma.project.create({data:{samples:{create:[{status:"APPROVED"}]}}})'],
+    ['controllers/canary.js', 'prisma.sample.update({where:{id},data:{workItems:{upsert:{create:{status:"ACCEPTED"},update:{status:"ACCEPTED"}}}}})'],
+    ['controllers/canary.js', 'prisma.sample?.update({data:{status:"APPROVED"}})'],
+    ['controllers/canary.js', 'prisma.sample.update?.({data:{status:"APPROVED"}})'],
+    ['controllers/canary.js', 'db.prepare("UPDATE main.Sample SET status = ?")'],
+    ['controllers/canary.js', 'db.prepare("UPDATE OR ABORT main.WorkItem SET status = ?")'],
+    ['controllers/canary.js', 'db.exec("REPLACE INTO Sample (id,status) VALUES (1,2)")'],
+    ['controllers/canary.js', 'db.exec("INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)")']
+])('audit gap form is one scanner finding (%s / %s)', (filename, source) => {
+    expect(scanSource(source, filename)).toHaveLength(1);
+});
+
+test('the original rehearsal cannot reintroduce a direct Sample deletion', () => {
+    expect(scanSource('db.prepare("DELETE FROM Sample WHERE id = ?").run(id)', 'tests/rehearsals/verify_issue149_working_review.cjs'))
+        .toHaveLength(1);
+});
+
+test.each(['unknown case', 'configured candidate'])('the closed FK runner refuses %s', kind => {
+    const candidate = process.env.DATABASE_PATH;
+    try {
+        execFileSync(process.execPath, [path.resolve(serverRoot, 'tests/rehearsals/workflow_restrict_probe.cjs'),
+            kind === 'unknown case' ? 'UNKNOWN' : 'Sample_Result_restrict', candidate, 'sample-id'],
+        { encoding: 'utf8', env: { ...process.env, NODE_ENV: 'test', DATABASE_PATH: candidate, DATABASE_URL: `file:${candidate}` } });
+        throw new Error('Refusal runner unexpectedly succeeded');
+    } catch (error) {
+        expect(error.status).toBe(1);
+        expect(JSON.parse(error.stdout)).toMatchObject({ passed: false, code: 'GUARD_PROBE_RUNNER_REFUSED' });
+    }
+});
+
 // Exactly the file/export pairs pinned by the author in #179 comment 5986548250.
 const exceptions = [
     { file: 'tests/helpers/legacyWorkflowDatabase.js', exportName: 'beforeGuards', foreignKeysOffVariant: 'PROJECT_FK_CORRUPT_SYNTHETIC' },

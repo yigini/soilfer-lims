@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const intake = require('../../services/intakeProfileService');
 const identity = require('../../services/profileIdentityService');
@@ -48,10 +49,10 @@ describe('Mounted intake draft and manifest paths preserve source identity',()=>
     });
     afterAll(async()=>{
         const batchIds = (await prisma.sample.findMany({where:{projectCode:project,id:{not:sampleId}},select:{id:true}})).map(row=>row.id);
-        await prisma.workItem.deleteMany({where:{sampleId:{in:batchIds}}});
-        await prisma.sample.deleteMany({where:{id:{in:batchIds}}});
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({where:{sampleId:{in:batchIds}}}), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({where:{id:{in:batchIds}}}), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.auditLog.deleteMany({where:{sampleId}});
-        await prisma.sample.delete({where:{id:sampleId}});
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({where:{id:sampleId}}), select: { id: true } })).map(row => row.id), { single: true });
         await prisma.project.delete({where:{id:project}});
         await prisma.user.update({where:{id:jwt.decode(token).id},data:{labId:null}});
         await prisma.lab.delete({where:{id:lab}});

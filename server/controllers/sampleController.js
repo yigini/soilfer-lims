@@ -642,59 +642,39 @@ exports.undoIntake = async (req, res) => {
     }
 
     try {
-        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
-        if (!sample) return res.status(404).json({ error: 'Sample not found' });
-
-        // Lab scope guard — prevent cross-lab mutations (Finding #1)
-        if (!scopeGuard.hasGlobalAccess(user) && sample.assignedLab && sample.assignedLab !== user.labId) {
-            return res.status(403).json({ error: 'Access denied: this sample belongs to another lab.' });
-        }
-
-        // Validate State
-        if (sample.status !== 'ACCEPTED' && sample.status !== 'LAB_ID_ASSIGNED') {
-            return res.status(400).json({
-                error: `Cannot undo intake. Sample must be ACCEPTED or LAB_ID_ASSIGNED. Current: ${sample.status}`
-            });
-        }
-
-        // Safety Check: Are there completed work items?
-        const items = await prisma.workItem.findMany({ where: { sampleId: String(id) } });
-        const hasProgress = items.some(w => w.status !== 'PENDING');
-
-        if (hasProgress) {
-            console.warn(`[Undo Intake] deleting work items with progress for sample ${id}`);
-        }
-
-        // Transaction: Delete WorkItems, Update Sample, Audit
-        await prisma.workItem.deleteMany({ where: { sampleId: String(id) } });
-
-        const { transitionSample } = require('../services/sampleStateService');
-        await transitionSample(id, 'RECEIVED', user, `Intake undone. Status reverted to RECEIVED. ${items.length} work items deleted.`, {
-            dryingStatus: null,
-            preparationStatus: null,
-            acceptedBy: null,
-            acceptedAt: null
-        });
-
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'SAMPLE',
-                entityId: id,
-                action: 'UNDO_INTAKE',
-                details: `Intake undone. Status reverted to RECEIVED. ${items.length} work items deleted.`,
-                performedBy: user.username,
-                timestamp: new Date(),
-                sampleId: String(id)
+        const updatedSample = await prisma.$transaction(async tx => {
+            const sample = await tx.sample.findUnique({ where: { id: String(id) } });
+            if (!sample) throw new sampleStateService.TransitionError('Sample not found', 404, 'SAMPLE_NOT_FOUND');
+            if (!scopeGuard.hasGlobalAccess(user) && sample.assignedLab && sample.assignedLab !== user.labId) {
+                throw new sampleStateService.TransitionError('Access denied: this sample belongs to another lab.', 403, 'ACCESS_DENIED_LAB');
             }
+            if (sample.status !== 'ACCEPTED' && sample.status !== 'LAB_ID_ASSIGNED') {
+                throw new sampleStateService.TransitionError(
+                    `Cannot undo intake. Sample must be ACCEPTED or LAB_ID_ASSIGNED. Current: ${sample.status}`,
+                    400, 'UNDO_INTAKE_STATE_INVALID');
+            }
+            const items = await tx.workItem.findMany({ where: { sampleId: String(id) } });
+            const reason = `Intake undone. Status reverted to RECEIVED. ${items.length} work items deleted.`;
+            // Refuse the transition before removing tasks. Any later failure also
+            // rolls back the transition, task removal and both audit records.
+            await sampleStateService.transitionSample(id, 'RECEIVED', user, reason, {
+                dryingStatus: null, preparationStatus: null, acceptedBy: null, acceptedAt: null
+            }, tx);
+            await require('../services/workItemStateService').removeUnstartedWorkItems(tx, { sampleId: String(id) }, { actor: user, reason });
+            await tx.auditLog.create({ data: {
+                id: crypto.randomUUID(), entity: 'SAMPLE', entityId: id,
+                action: 'UNDO_INTAKE', details: reason, performedBy: user.username,
+                timestamp: new Date(), sampleId: String(id)
+            } });
+            return tx.sample.findUnique({ where: { id: String(id) } });
         });
-
-        const updatedSample = await prisma.sample.findUnique({ where: { id: String(id) } });
         res.json({ message: 'Intake undone successfully', sample: updatedSample });
 
     } catch (error) {
-        console.error('[undoIntake] Error:', error);
-        res.status(500).json({ error: 'Failed to undo intake' });
+        const mapped = require('../services/workflowStateRules').mapStateError(error);
+        if (!mapped.statusCode) console.error('[undoIntake] Error:', error);
+        res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to undo intake',
+            ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
     }
 };
 
@@ -1089,7 +1069,8 @@ exports.deleteSample = async (req, res) => {
                     throw new sampleStateService.TransitionError('Cannot discard sample with analytical work completed or submitted.', 409, 'ACTIVE_WORK_IN_PROGRESS');
                 }
 
-                await tx.workItem.deleteMany({ where: { sampleId: String(id) } });
+                await require('../services/workItemStateService').removeUnstartedWorkItems(tx, { sampleId: String(id) },
+                    { actor: user, reason: 'Sample intake discarded by manager' });
                 await tx.submission.deleteMany({ where: { sampleId: String(id) } });
                 await tx.spectralData.deleteMany({ where: { sampleId: String(id) } });
                 await tx.result.deleteMany({ where: { sampleId: String(id) } });
@@ -1168,7 +1149,8 @@ exports.deleteSample = async (req, res) => {
                 throw new sampleStateService.TransitionError('Cannot delete sample with existing analytical results.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
             }
 
-            await tx.workItem.deleteMany({ where: { sampleId: String(id) } });
+            await require('../services/workItemStateService').removeUnstartedWorkItems(tx, { sampleId: String(id) },
+                { actor: user, reason: 'Walk-in sample removed by manager' });
             await tx.submission.deleteMany({ where: { sampleId: String(id) } });
             await tx.spectralData.deleteMany({ where: { sampleId: String(id) } });
             await tx.result.deleteMany({ where: { sampleId: String(id) } });
@@ -1185,7 +1167,8 @@ exports.deleteSample = async (req, res) => {
                 }
             });
 
-            await tx.sample.delete({ where: { id: String(id) } });
+            await sampleStateService.removePreAnalyticSample(tx, [String(id)], { actor: user,
+                reason: 'Walk-in sample removed by manager', code: 'PREANALYTIC_SAMPLE_REMOVED' });
         });
 
         res.json({ message: 'Sample deleted successfully' });
@@ -1318,7 +1301,8 @@ exports.batchDeleteSamples = async (req, res) => {
             }
 
             // Clean up related records
-            await tx.workItem.deleteMany({ where: { sampleId: { in: allIds } } });
+            await require('../services/workItemStateService').removeUnstartedWorkItems(tx, { sampleId: { in: allIds } },
+                { actor: user, reason: 'Sample intake discarded in batch' });
             await tx.submission.deleteMany({ where: { sampleId: { in: allIds } } });
             await tx.spectralData.deleteMany({ where: { sampleId: { in: allIds } } });
             await tx.result.deleteMany({ where: { sampleId: { in: allIds } } });
@@ -1369,7 +1353,8 @@ exports.batchDeleteSamples = async (req, res) => {
 
             if (toDelete.length > 0) {
                 const deleteIds = toDelete.map(s => String(s.id));
-                await tx.sample.deleteMany({ where: { id: { in: deleteIds } } });
+                await sampleStateService.removePreAnalyticSample(tx, deleteIds, { actor: user,
+                    reason: 'Walk-in samples removed in batch', code: 'PREANALYTIC_SAMPLE_REMOVED' });
             }
 
             await tx.auditLog.create({
@@ -1685,8 +1670,10 @@ exports.approveSample = async (req, res) => {
 
         res.json({ ...updated, success: true, status: 'APPROVED' });
     } catch (error) {
-        console.error('[approveSample] Error:', error);
-        res.status(500).json({ error: 'Failed to approve sample' });
+        const mapped = require('../services/workflowStateRules').mapStateError(error);
+        if (!mapped.statusCode) console.error('[approveSample] Error:', error);
+        res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to approve sample',
+            ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
     }
 };
 

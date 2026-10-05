@@ -78,6 +78,7 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
 }
 
 async function createSample(data, actor, options = {}) {
+    rules.assertNoRelationWrites(data);
     const performedBy = rules.actorName(actor);
     const status = data.status || 'EXPECTED';
     if (options.context === 'fixture') {
@@ -120,4 +121,31 @@ async function advanceCompletedGates(sample, actor, tx) {
     return sample;
 }
 
-module.exports = { transitionSample, createSample, advanceCompletedGates, TransitionError };
+async function removePreAnalyticSample(tx, ids, { actor, reason, code = 'SAMPLE_DELETED' }) {
+    rules.requireTransaction(tx);
+    const performedBy = rules.actorName(actor), note = rules.requireReason(reason);
+    if (!Array.isArray(ids) || !ids.length || ids.some(value => typeof value !== 'string' || !value)) {
+        throw new TransitionError('Explicit sample ids are required.', 400, 'SAMPLE_IDS_REQUIRED');
+    }
+    const uniqueIds = [...new Set(ids)], where = { id: { in: uniqueIds } };
+    const rows = await tx.sample.findMany({ where });
+    if (rows.length !== uniqueIds.length) throw new TransitionError('Sample not found', 404, 'SAMPLE_NOT_FOUND');
+    for (const sample of rows) {
+        rules.assertScope(actor, sample);
+        if (!['DRAFT', 'EXPECTED', 'RECEIVED', 'COLLECTED'].includes(sample.status)) {
+            throw new TransitionError('Samples in progress or completed cannot be deleted.', 409, 'ILLEGAL_STATUS_TRANSITION');
+        }
+    }
+    const sampleWhere = { sampleId: { in: uniqueIds } };
+    if (await tx.result.count({ where: sampleWhere }) || await tx.spectralData.count({ where: sampleWhere })) {
+        throw new TransitionError('Recorded analytical evidence must be retained.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
+    }
+    await require('./workItemStateService').removeUnstartedWorkItems(tx, sampleWhere, { actor, reason: note });
+    await tx.submission.deleteMany({ where: sampleWhere });
+    await tx.auditLog.create({ data: { id: randomUUID(), entity: 'SAMPLE', entityId: uniqueIds.length === 1 ? uniqueIds[0] : 'BATCH',
+        action: code, performedBy, details: note, before: JSON.stringify(uniqueIds), timestamp: new Date() } });
+    const removed = await tx.sample.deleteMany({ where });
+    return removed;
+}
+
+module.exports = { transitionSample, createSample, advanceCompletedGates, TransitionError, removePreAnalyticSample };

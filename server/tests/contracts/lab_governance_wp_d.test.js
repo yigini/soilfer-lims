@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
 
 /**
@@ -192,8 +193,8 @@ describe('WP-D: Laboratory Lifecycle & Project Relationships', () => {
     afterAll(async () => {
         try {
             await prisma.projectLab.deleteMany({ where: { labId: { in: [labA.id, labB.id, labRetired.id] } } });
-            await prisma.workItem.deleteMany({ where: { labId: { in: [labA.id, labB.id, labRetired.id] } } });
-            await prisma.sample.deleteMany({ where: { labId: { in: [labA.id, labB.id, labRetired.id] } } });
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { labId: { in: [labA.id, labB.id, labRetired.id] } } }), select: { id: true } })).map(row => row.id), { single: false });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { labId: { in: [labA.id, labB.id, labRetired.id] } } }), select: { id: true } })).map(row => row.id), { single: false });
             await prisma.project.deleteMany({ where: { id: projectOwnedA.id } });
             await prisma.user.deleteMany({ where: { id: { in: [superAdmin.id, managerA.id, managerB.id, techA.id, techB.id] } } });
             await prisma.lab.deleteMany({ where: { id: { in: [labA.id, labB.id, labRetired.id] } } });

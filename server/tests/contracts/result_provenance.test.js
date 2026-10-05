@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const { transitionWorkItem } = require('../../services/workItemStateService');
@@ -46,8 +47,8 @@ describe('WP-31: Result Provenance Tracking', () => {
             await prisma.result.deleteMany({ where: { id: { in: createdResultIds } } });
         }
         await prisma.result.deleteMany({ where: { sampleId: testSampleId } });
-        await prisma.workItem.deleteMany({ where: { sampleId: testSampleId } });
-        await prisma.sample.deleteMany({ where: { id: testSampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. Direct prisma create defaults Result.provenance to MEASURED', async () => {

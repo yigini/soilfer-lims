@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
 
 /**
@@ -77,9 +78,9 @@ describe('Project Governance Retry Recovery & Preview Contracts (C01, C02)', () 
         await prisma.commandReceipt.deleteMany({
             where: { targetResource: { in: [`Project:${testProject.id}`, `Project:${testProject.code}`] } }
         }).catch(() => {});
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { projectId: testProject.id }
-        }).catch(() => {});
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
         await prisma.auditLog.deleteMany({
             where: { entityId: testProject.id }
         }).catch(() => {});

@@ -137,6 +137,7 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
 }
 
 async function createWorkItem(data, actor, options = {}) {
+    rules.assertNoRelationWrites(data);
     const performedBy = rules.actorName(actor);
     const status = data.status || 'NOT_ASSIGNED';
     if (options.context === 'fixture') {
@@ -166,4 +167,30 @@ async function createWorkItem(data, actor, options = {}) {
     });
 }
 
-module.exports = { transitionWorkItem, createWorkItem, assertActionEdge, TransitionError };
+async function removeUnstartedWorkItems(tx, where, { actor, reason, code = 'WORKITEM_DELETED' }) {
+    rules.requireTransaction(tx);
+    const performedBy = rules.actorName(actor), note = rules.requireReason(reason);
+    const items = await tx.workItem.findMany({ where });
+    if (where.sampleId && (await tx.result.count({ where: { sampleId: where.sampleId } }) ||
+        await tx.spectralData.count({ where: { sampleId: where.sampleId } }))) {
+        throw new TransitionError('Recorded analytical evidence must be retained.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
+    }
+    for (const item of items) {
+        const sample = await tx.sample.findUnique({ where: { id: item.sampleId } });
+        rules.assertScope(actor, sample);
+        if (!['NOT_ASSIGNED', 'ASSIGNED'].includes(item.status)) {
+            throw new TransitionError('Only unstarted work can be removed.', 409, 'ACTIVE_WORK_IN_PROGRESS');
+        }
+        const recorded = !!item.result?.trim() || await tx.result.count({ where: { sampleId: item.sampleId, param: item.analysis } }) ||
+            await tx.spectralData.count({ where: { workItemId: item.id } }) || await tx.workItemDraft.count({ where: { workItemId: item.id } });
+        if (recorded) throw new TransitionError('Recorded analytical evidence must be retained.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
+    }
+    for (const item of items) await tx.workItem.delete({ where: { id: item.id } });
+    if (items.length) await tx.auditLog.create({ data: { id: randomUUID(), entity: 'WORKITEM', entityId: items.length === 1 ? items[0].id : 'BATCH',
+        action: code, performedBy, details: note, timestamp: new Date(),
+        sampleId: items.every(item => item.sampleId === items[0].sampleId) ? items[0].sampleId : null,
+        before: JSON.stringify(items.map(item => ({ id: item.id, status: item.status, sampleId: item.sampleId }))) } });
+    return { count: items.length };
+}
+
+module.exports = { transitionWorkItem, createWorkItem, assertActionEdge, TransitionError, removeUnstartedWorkItems };

@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Manager Dashboard Progress & Bottleneck Overview Contract Tests (Refs #120)
  * 
@@ -890,6 +891,6 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         // stageLab has exactly 1 completedToday (sampleApprovedToday)
         expect(scopedRes.body.kpis.completedToday).toBe(1);
         expect(scopedRes.body.kpis.totalSamples).toBeLessThan(unscopedRes.body.kpis.totalSamples);
-        await prisma.sample.delete({ where: { id: futureApproval.id } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: futureApproval.id } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 });

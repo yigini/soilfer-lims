@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
 
 const { createSampleFixture, createWorkItemFixture, createSamplesFixture } = require('../helpers/workflowFixtures');
@@ -126,8 +127,8 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
             await prisma.$executeRawUnsafe('DELETE FROM "StaffInvitation" WHERE "email" LIKE ?', `%${SUFFIX}%`);
             await prisma.$executeRawUnsafe('DELETE FROM "LabLifecycleState" WHERE "labId" IN (?,?,?)', labGTM.id, labFRA.id, labSetup.id);
             await prisma.projectLab.deleteMany({ where: { labId: { in: [labGTM.id, labFRA.id, labSetup.id] } } });
-            await prisma.workItem.deleteMany({ where: { labId: { in: [labGTM.id, labFRA.id, labSetup.id] } } });
-            await prisma.sample.deleteMany({ where: { assignedLab: { in: [labGTM.id, labFRA.id, labSetup.id] } } });
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { labId: { in: [labGTM.id, labFRA.id, labSetup.id] } } }), select: { id: true } })).map(row => row.id), { single: false });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { assignedLab: { in: [labGTM.id, labFRA.id, labSetup.id] } } }), select: { id: true } })).map(row => row.id), { single: false });
             await prisma.project.deleteMany({ where: { code: { contains: SUFFIX } } });
             await prisma.user.deleteMany({ where: { id: { contains: SUFFIX } } });
             await prisma.lab.deleteMany({ where: { id: { in: [labGTM.id, labFRA.id, labSetup.id] } } });
@@ -257,8 +258,8 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
             expect(res.status).toBe(400);
             expect(res.body.error).toBe('LAB_PAUSED');
 
-            await prisma.workItem.delete({ where: { id: workInSetup.id } });
-            await prisma.sample.delete({ where: { id: sampleInSetup.id } });
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: workInSetup.id } }), select: { id: true } })).map(row => row.id), { single: true });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleInSetup.id } }), select: { id: true } })).map(row => row.id), { single: true });
             await prisma.user.delete({ where: { id: techSetup.id } });
         });
 
@@ -373,7 +374,7 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
             expect(res.status).toBe(200);
             expect(res.body.openAssignmentsCount).toBeGreaterThanOrEqual(1);
 
-            await prisma.workItem.delete({ where: { id: wi.id } });
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: wi.id } }), select: { id: true } })).map(row => row.id), { single: true });
         });
 
         test('Access preview accounts for REPEAT_REQUIRED work needing rework', async () => {
@@ -397,7 +398,7 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
             expect(res.status).toBe(200);
             expect(res.body.openAssignmentsCount).toBeGreaterThanOrEqual(1);
 
-            await prisma.workItem.delete({ where: { id: wi.id } });
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: wi.id } }), select: { id: true } })).map(row => row.id), { single: true });
         });
 
         test('Access preview accounts for COMPLETED results without submission (unsubmitted bench work)', async () => {
@@ -422,7 +423,7 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
             expect(res.status).toBe(200);
             expect(res.body.openAssignmentsCount).toBeGreaterThanOrEqual(1);
 
-            await prisma.workItem.delete({ where: { id: wi.id } });
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: wi.id } }), select: { id: true } })).map(row => row.id), { single: true });
         });
 
         test.each(['ON_HOLD', 'AWAITING_VERIFICATION'])('Access preview retains assigned %s work in its unfinished count', async status => {
@@ -435,7 +436,7 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
                 expect(res.status).toBe(200);
                 expect(res.body.openAssignmentsCount).toBeGreaterThanOrEqual(1);
                 expect((await prisma.workItem.findUnique({ where: { id: wi.id } })).status).toBe(status);
-            } finally { await prisma.workItem.delete({ where: { id: wi.id } }); }
+            } finally { await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: wi.id } }), select: { id: true } })).map(row => row.id), { single: true }); }
         });
     });
 

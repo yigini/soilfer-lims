@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
 
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
@@ -105,12 +106,12 @@ describe('Mobile Offline Work & Idempotent Synchronization Contracts', () => {
             await prisma.workAttempt.deleteMany({
                 where: { sampleId: testSample.id }
             });
-            await prisma.workItem.deleteMany({
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
                 where: { sampleId: testSample.id }
-            });
-            await prisma.sample.deleteMany({
+            }), select: { id: true } })).map(row => row.id), { single: false });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
                 where: { id: { in: [testSample.id, 'SMP-NEW-SYNC-001'] } }
-            });
+            }), select: { id: true } })).map(row => row.id), { single: false });
         } catch (e) {
             // Ignore cleanup errors
         }

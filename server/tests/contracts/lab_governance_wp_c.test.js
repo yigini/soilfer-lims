@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
 
 /**
@@ -191,8 +192,8 @@ describe('WP-C: Staff Lifecycle, Access Control & Lockout Prevention', () => {
 
     afterAll(async () => {
         try {
-            await prisma.workItem.deleteMany({ where: { labId: { in: [labActiveA.id, labActiveB.id, labPaused.id] } } });
-            await prisma.sample.deleteMany({ where: { labId: { in: [labActiveA.id, labActiveB.id, labPaused.id] } } });
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { labId: { in: [labActiveA.id, labActiveB.id, labPaused.id] } } }), select: { id: true } })).map(row => row.id), { single: false });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { labId: { in: [labActiveA.id, labActiveB.id, labPaused.id] } } }), select: { id: true } })).map(row => row.id), { single: false });
             await prisma.user.deleteMany({ where: { id: { in: [superAdmin1.id, superAdmin2.id, managerA.id, techA1.id, techA2.id, techB1.id, viewerA.id] } } });
             await prisma.lab.deleteMany({ where: { id: { in: [labActiveA.id, labActiveB.id, labPaused.id] } } });
         } catch (e) {

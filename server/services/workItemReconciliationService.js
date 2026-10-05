@@ -134,21 +134,8 @@ async function reconcileWorkItems(tx, sample, targetAnalyses, user, reason) {
     // 3. Process Removals and Waivers
     for (const item of itemsToRemove) {
         if (item.status === workflow.WORK_ITEM_STATES.NOT_ASSIGNED) {
-            await tx.workItem.delete({ where: { id: item.id } });
-            await tx.auditLog.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    entity: 'WORKITEM',
-                    entityId: item.id,
-                    action: 'WORKITEM_DELETED',
-                    details: `${performedBy} removed unstarted analysis ${item.analysis}`,
-                    performedBy: performedBy,
-                    timestamp: new Date(),
-                    sampleId: String(id),
-                    analysisCode: item.analysis,
-                    labId: sample.assignedLab || sample.labId
-                }
-            });
+            await workItemState.removeUnstartedWorkItems(tx, { id: item.id }, { actor: user,
+                reason: `${performedBy} removed unstarted analysis ${item.analysis}`, code: 'WORKITEM_DELETED' });
             deletedItems.push(item.analysis);
         } else {
             const history = typeof item.history === 'string' ? JSON.parse(item.history) : (item.history || []);

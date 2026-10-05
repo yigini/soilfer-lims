@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Contract & Real Integration Test: Generated Assignment Message Attribution (#126)
  *
@@ -283,16 +284,16 @@ describe('Issue #126: Assignment Message Attribution Contract & Real DB Integrat
                         ]
                     }
                 });
-                await prisma.workItem.deleteMany({
+                await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
                     where: {
                         OR: [
                             { id: { in: createdIds.items } },
                             { sampleId: { in: createdIds.samples } }
                         ]
                     }
-                });
+                }), select: { id: true } })).map(row => row.id), { single: false });
                 if (createdIds.samples.length > 0) {
-                    await prisma.sample.deleteMany({ where: { id: { in: createdIds.samples } } });
+                    await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: createdIds.samples } } }), select: { id: true } })).map(row => row.id), { single: false });
                 }
                 if (createdIds.users.length > 0) {
                     await prisma.user.deleteMany({ where: { id: { in: createdIds.users } } });

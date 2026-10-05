@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const spectralController = require('../../controllers/spectralController');
@@ -118,8 +119,8 @@ describe('Spectroscopy Operational Corrections Contract & Regression', () => {
         // Clean up test records
         await prisma.spectralData.deleteMany({ where: { sampleId: testSampleId } });
         await prisma.result.deleteMany({ where: { sampleId: testSampleId } });
-        await prisma.workItem.deleteMany({ where: { sampleId: testSampleId } });
-        await prisma.sample.deleteMany({ where: { id: testSampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.equipmentAsset.deleteMany({ where: { id: testEquipmentId } });
     });
 

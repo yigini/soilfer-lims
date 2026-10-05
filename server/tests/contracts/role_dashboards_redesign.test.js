@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Contract Test Suite: Coordinated All-Role Dashboard Redesign (v1)
  * 
@@ -184,9 +185,9 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
         });
 
         afterAll(async () => {
-            await prisma.sample.deleteMany({
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
                 where: { id: { in: [expectedSample.id, receivedSample.id] } }
-            }).catch(() => {});
+            }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
         });
 
         test('EXPECTED sample with legacy PENDING drying/prep flags contributes 0 to technician ready bench', async () => {
@@ -252,8 +253,8 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
         });
 
         afterAll(async () => {
-            await prisma.workItem.deleteMany({ where: { id: { in: workItemIds } } }).catch(() => {});
-            await prisma.sample.deleteMany({ where: { id: { in: sampleIds } } }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: { in: workItemIds } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: sampleIds } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
         });
 
         test('40 pH determinations appear as 1 grouped method row in bench.ready', async () => {
@@ -291,7 +292,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
         });
 
         afterAll(async () => {
-            await prisma.sample.delete({ where: { id: foreignSample.id } }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: foreignSample.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
         });
 
         test('Foreign lab draft is strictly excluded from testLab1 reception.drafts queue', async () => {
@@ -378,7 +379,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
             }
             const sampleIds = [draftSample?.id, pubSample?.id].filter(Boolean);
             if (sampleIds.length > 0) {
-                await prisma.sample.deleteMany({ where: { id: { in: sampleIds } } }).catch(() => {});
+                await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: sampleIds } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
             }
         });
 

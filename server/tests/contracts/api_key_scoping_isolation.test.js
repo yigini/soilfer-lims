@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -20,9 +21,9 @@ describe('API Key Scoping Isolation Contract (SL-22 Security Fix)', () => {
         await prisma.spectralData.deleteMany({
             where: { sampleId: { in: [sampleGtmId, sampleMozId] } }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { in: [sampleGtmId, sampleMozId] } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.apiKey.deleteMany({
             where: { id: { in: ['test-iso-key-gtm', 'test-iso-key-moz', 'test-iso-key-unscoped'] } }
         });
@@ -122,9 +123,9 @@ describe('API Key Scoping Isolation Contract (SL-22 Security Fix)', () => {
         await prisma.spectralData.deleteMany({
             where: { sampleId: { in: [sampleGtmId, sampleMozId] } }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { in: [sampleGtmId, sampleMozId] } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.apiKey.deleteMany({
             where: { id: { in: ['test-iso-key-gtm', 'test-iso-key-moz', 'test-iso-key-unscoped'] } }
         });

@@ -190,10 +190,12 @@ async function assertFinalRefusals() {
     assert.match(sampleDeleteTriggers[0].sql,/\bAFTER\s+DELETE\b/i);
     assert.equal(db.prepare("SELECT sql FROM sqlite_master WHERE type='trigger'").all()
         .filter(row=>row.sql.includes('FOREIGN KEY constraint failed')).length,0);
-    assert.throws(()=>db.prepare("DELETE FROM Sample WHERE id='a'").run(),error=> {
-        return error.name === 'SqliteError' && error.code === 'SQLITE_CONSTRAINT_TRIGGER' &&
-            error.message === 'FOREIGN KEY constraint failed';
-    });
+    const refusal = JSON.parse(require('node:child_process').execFileSync(process.execPath,
+        [path.resolve(__dirname, 'workflow_restrict_probe.cjs'), 'Sample_Result_restrict', databasePath, 'a'],
+        { encoding: 'utf8', env: { ...process.env, NODE_ENV: 'test', DATABASE_PATH: sourceFixture.dbPath,
+            DATABASE_URL: `file:${sourceFixture.dbPath}` } }));
+    assert.deepEqual(refusal, { passed: true, name: 'SqliteError', code: 'SQLITE_CONSTRAINT_TRIGGER',
+        message: 'FOREIGN KEY constraint failed' });
     assert.deepEqual(footprint(),beforeDelete);
     assert.equal(state.isSpecimenEligible(beforeDelete.sample),true);
     const heldMetadata=JSON.stringify({...JSON.parse(beforeDelete.sample.metadata || '{}'),

@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
 
 const { createSampleFixture } = require('../helpers/workflowFixtures');
@@ -114,7 +115,7 @@ describe('Project Workspace Samples Server-Side Search, Filtering & Pagination C
 
     afterAll(async () => {
         if (trackedSampleIds.length > 0) {
-            await prisma.sample.deleteMany({ where: { id: { in: trackedSampleIds } } });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: trackedSampleIds } } }), select: { id: true } })).map(row => row.id), { single: false });
         }
         if (project) {
             await prisma.projectLab.deleteMany({ where: { projectCode: project.code } });

@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const workbenchController = require('../../controllers/workbenchController');
@@ -81,8 +82,8 @@ describe('Workbench Two-Step Record & Submit Pipeline (Phase 4)', () => {
         await prisma.submission.deleteMany({ where: { sampleId: testSampleId } });
         await prisma.result.deleteMany({ where: { sampleId: testSampleId } });
         await prisma.workItemDraft.deleteMany({ where: { sampleId: testSampleId } });
-        await prisma.workItem.deleteMany({ where: { sampleId: testSampleId } });
-        await prisma.sample.deleteMany({ where: { id: testSampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.auditLog.deleteMany({ where: { sampleId: testSampleId } });
     });
 

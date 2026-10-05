@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -216,12 +217,12 @@ describe('WP-41: Multi-Tenancy Lab Isolation Regression Suite', () => {
         });
 
         afterAll(async () => {
-            await prisma.workItem.deleteMany({
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
                 where: { id: wiGTMId }
-            });
-            await prisma.sample.deleteMany({
+            }), select: { id: true } })).map(row => row.id), { single: false });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
                 where: { id: testSampleId }
-            });
+            }), select: { id: true } })).map(row => row.id), { single: false });
         });
 
         test('SUPER_ADMIN cannot assign a GTM sample work item to an HND technician (HTTP 403)', async () => {

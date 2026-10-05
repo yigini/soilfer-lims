@@ -1,4 +1,5 @@
 {
+  "spectralWorkflow": {"reopenTitle":"Reabrir trabalho concluído","reopenMessage":"Esta alteração afeta um trabalho concluído. Introduza um motivo para o reabrir e tentar novamente.","reason":"Motivo (obrigatório)","retry":"Reabrir e tentar novamente","trashTitle":"Mover para o lixo","trashMessage":"Mover o espectro de {label} para o lixo? Introduza um motivo. Poderá restaurá-lo depois.","batchTrashMessage":"Mover {count} espectros selecionados para o lixo? Introduza um motivo. Poderá restaurá-los depois.","trashConfirm":"Mover para o lixo"},
   "numbers": {"ambiguous":"Esclareça o separador decimal ou de milhares.","invalid":"Formato de número inválido.","policyInvalid":"O formato numérico do laboratório está indisponível ou é inválido.","decimal":"Separador decimal","thousands":"Separador de milhares","noGrouping":"Não configurado","space":"Espaço"},
   "sampleLookup": { "title": "Busca de amostra", "ambiguous": "Este identificador corresponde a várias amostras:", "failed": "Não foi possível encontrar ou carregar a amostra. Verifique o identificador e a conexão." },
   "dataSheet": {

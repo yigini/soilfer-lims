@@ -20,7 +20,7 @@ const deferredSources = Object.freeze([Object.freeze({
     reason: '#146 synthetic Docker fault adapter; deferred, see #245'
 })]);
 
-const mutations = new Set(['create', 'createMany', 'createManyAndReturn', 'update', 'updateMany', 'updateManyAndReturn', 'upsert', 'save', 'saveMany', 'bulkUpdate']);
+const mutations = new Set(['create', 'createMany', 'createManyAndReturn', 'update', 'updateMany', 'updateManyAndReturn', 'upsert', 'save', 'saveMany', 'bulkUpdate', 'delete', 'deleteMany']);
 const sqlMethods = new Set(['prepare', 'exec', 'execute', 'pragma', '$executeRaw', '$executeRawUnsafe', '$queryRaw', '$queryRawUnsafe']);
 const workflowModels = new Map([['sample', 'Sample'], ['samples', 'Sample'], ['workItem', 'WorkItem'], ['workItems', 'WorkItem']]);
 const union = sets => [...new Set(sets.flat())];
@@ -28,8 +28,9 @@ const union = sets => [...new Set(sets.flat())];
 function scanSource(source, filename, exceptions = []) {
     const violations = [];
     const report = (node, code, detail) => violations.push({ file: filename, line: node?.loc?.start.line || 1, code, detail });
-    const rawWrite = text => /\bINSERT\s+(?:OR\s+\w+\s+)?INTO\s+["`\[]?(?:Sample|WorkItem)\b/i.test(text) ||
-        [...text.matchAll(/\bUPDATE\s+["`\[]?(?:Sample|WorkItem)["`\]]?\s+SET\s+([\s\S]*?)(?=\bWHERE\b|;|$)/gi)]
+    const sqlTable = '(?:["`\\[]?\\w+["`\\]]?\\s*\\.\\s*)?["`\\[]?(?:Sample|WorkItem)(?:["`\\]]|\\b)';
+    const rawWrite = text => new RegExp('\\b(?:INSERT\\s+(?:OR\\s+\\w+\\s+)?INTO|REPLACE\\s+INTO|DELETE\\s+FROM)\\s+' + sqlTable, 'i').test(text) ||
+        [...text.matchAll(new RegExp('\\bUPDATE(?:\\s+OR\\s+\\w+)?\\s+' + sqlTable + '\\s+SET\\s+([\\s\\S]*?)(?=\\bWHERE\\b|;|$)', 'gi'))]
             .some(match => /(?:^|,)\s*["`\[]?status["`\]]?\s*=|<unknown>/i.test(match[1])) ||
         (/\b(?:INSERT\s+INTO|UPDATE)\s+<unknown>/i.test(text));
     const disabling = text => /\bDROP\s+TRIGGER\s+(?:IF\s+EXISTS\s+)?["`\[]?(?:Sample_status_(?:insert|update)_guard|WorkItem_status_(?:insert|update)_guard|Batch_status_(?:insert|update)_guard|ReviewDecision_decision_(?:insert_guard|immutable)|ResultEvidenceEvent_(?:insert_guard|update_immutable|delete_immutable))\b|\bPRAGMA\s+(?:foreign_keys|recursive_triggers)\s*=\s*(?:OFF|0)\b/i.test(text) ||
@@ -212,13 +213,13 @@ function scanSource(source, filename, exceptions = []) {
             if (/^(?:prisma|tx|client|db|database|delegate|model)$/.test(p.node.name)) return true;
             return bindingValue(p, seen).some(value => databaseRoot(value.path, value.seen));
         }
-        if (p.isMemberExpression()) return databaseRoot(p.get('object'), seen);
+        if (p.isMemberExpression() || p.isOptionalMemberExpression()) return databaseRoot(p.get('object'), seen);
         if (p.isCallExpression() && p.get('callee').isIdentifier({ name: 'require' })) return strings(p.get('arguments.0')).some(value => /(?:prisma|\/db)$/.test(value));
         return false;
     }
     function models(p, seen = new Set()) {
         if (!p?.node) return [];
-        if (p.isMemberExpression()) {
+        if (p.isMemberExpression() || p.isOptionalMemberExpression()) {
             const names = keys(p), known = names.filter(name => workflowModels.has(name)).map(name => workflowModels.get(name));
             if (known.length) return known;
             if (names.includes('<unknown>') && databaseRoot(p.get('object'))) return ['Sample', 'WorkItem'];
@@ -231,7 +232,7 @@ function scanSource(source, filename, exceptions = []) {
     }
     function method(p, seen = new Set()) {
         if (!p?.node) return [];
-        if (p.isMemberExpression()) return keys(p).map(name => ({ name, object: p.get('object') }));
+        if (p.isMemberExpression() || p.isOptionalMemberExpression()) return keys(p).map(name => ({ name, object: p.get('object') }));
         if (p.isIdentifier()) return bindingValue(p, seen).flatMap(value => value.property
             ? [{ name: value.property, object: value.path }] : method(value.path, value.seen));
         if (p.isCallExpression() && p.get('callee').isMemberExpression() && keys(p.get('callee')).includes('bind')) return method(p.get('callee.object'), seen);
@@ -269,6 +270,21 @@ function scanSource(source, filename, exceptions = []) {
         }
         return null;
     }
+    function relationWrites(p, seen = new Set()) {
+        if (!p?.node) return [];
+        if (p.isIdentifier()) return union(bindingValue(p, seen).map(value => relationWrites(value.path, value.seen)));
+        if (p.isArrayExpression()) return union(p.get('elements').map(value => relationWrites(value, seen)));
+        if (p.isConditionalExpression()) return union([relationWrites(p.get('consequent'), seen), relationWrites(p.get('alternate'), seen)]);
+        if (!p.isObjectExpression()) return [];
+        return union(p.get('properties').map(property => {
+            if (property.isSpreadElement()) return relationWrites(property.get('argument'), seen);
+            if (!property.isObjectProperty()) return [];
+            const name = property.node.key.name || property.node.key.value, value = property.get('value');
+            const commands = value.isObjectExpression() && value.node.properties.some(entry =>
+                ['create', 'createMany', 'connectOrCreate', 'update', 'updateMany', 'upsert', 'delete', 'deleteMany'].includes(entry.key?.name || entry.key?.value));
+            return union([commands && workflowModels.has(name) ? [workflowModels.get(name)] : [], relationWrites(value, seen)]);
+        }));
+    }
     function owner(p) {
         for (let current = p.parentPath; current; current = current.parentPath) {
             if (current.isFunctionDeclaration() && current.node.id) return current.node.id.name;
@@ -277,11 +293,13 @@ function scanSource(source, filename, exceptions = []) {
         }
         return null;
     }
-    function authorized(p, entities) {
+    function authorized(p, entities, operation) {
         const name = owner(p);
         if (!exportedNames.has(name)) return false;
-        if (filename === 'services/sampleStateService.js' && ['createSample', 'transitionSample'].includes(name) && entities.every(entity => entity === 'Sample')) return true;
-        if (filename === 'services/workItemStateService.js' && ['createWorkItem', 'transitionWorkItem'].includes(name) && entities.every(entity => entity === 'WorkItem')) return true;
+        const removal = ['delete', 'deleteMany'].includes(operation);
+        if (filename === 'services/sampleStateService.js' && (['createSample', 'transitionSample'].includes(name) || removal && name === 'removePreAnalyticSample') && entities.every(entity => entity === 'Sample')) return true;
+        if (filename === 'services/workItemStateService.js' && (['createWorkItem', 'transitionWorkItem'].includes(name) || removal && name === 'removeUnstartedWorkItems') && entities.every(entity => entity === 'WorkItem')) return true;
+        if (removal && filename === 'tests/helpers/workflowFixtures.js' && name === 'cleanupWorkflowFixtures') return true;
         return exceptions.some(entry => entry.file === filename && entry.exportName === name);
     }
     function pinnedCorruptProjectConnection(p, sql) {
@@ -350,17 +368,17 @@ function scanSource(source, filename, exceptions = []) {
         report(p.node, entry ? 'DEFERRED_SYNTHETIC_FAULT_FIXTURE' : 'EMBEDDED_WORKFLOW_WRITE',
             entry?.reason || 'Embedded Sample/WorkItem DML cannot bypass the workflow source inventory.');
     }
-    traverse(ast, {
-        ImportDeclaration(p) { helperImport(p, [p.node.source.value]); },
-        NewExpression(p) { embeddedProgram(p); },
-        CallExpression(p) {
+    function inspectCall(p) {
             embeddedProgram(p);
             if (p.get('callee').isIdentifier({ name: 'require' }) || p.node.callee.type === 'Import') helperImport(p, strings(p.get('arguments.0')));
             for (const target of method(p.get('callee'))) {
-                const entities = models(target.object);
+                const entities = union([models(target.object), relationWrites(p.get('arguments.0'))]);
+                if (['removePreAnalyticSample', 'removeUnstartedWorkItems'].includes(target.name) && !p.get('arguments.0')?.isIdentifier({ name: 'tx' })) {
+                    report(p.node, 'WORKFLOW_REMOVAL_WITHOUT_TRANSACTION', target.name);
+                }
                 if (mutations.has(target.name) && entities.length) {
-                    const writes = !['update', 'updateMany', 'updateManyAndReturn'].includes(target.name) || hasStatus(dataArgument(p.get('arguments.0')));
-                    if (writes && !authorized(p, entities)) report(p.node, 'WORKFLOW_WRITE_OUTSIDE_AUTHORITY', `${entities.join('/')} ${target.name}`);
+                    const writes = relationWrites(p.get('arguments.0')).length || !['update', 'updateMany', 'updateManyAndReturn'].includes(target.name) || hasStatus(dataArgument(p.get('arguments.0')));
+                    if (writes && !authorized(p, entities, target.name)) report(p.node, 'WORKFLOW_WRITE_OUTSIDE_AUTHORITY', `${entities.join('/')} ${target.name}`);
                 }
                 if (sqlMethods.has(target.name) && !(target.name === 'exec' && regularExpression(target.object))) for (const sql of strings(p.get('arguments.0'))) {
                     const statement = target.name === 'pragma' ? `PRAGMA ${sql}` : sql;
@@ -371,7 +389,12 @@ function scanSource(source, filename, exceptions = []) {
                     }
                 }
             }
-        },
+    }
+    traverse(ast, {
+        ImportDeclaration(p) { helperImport(p, [p.node.source.value]); },
+        NewExpression(p) { embeddedProgram(p); },
+        CallExpression: inspectCall,
+        OptionalCallExpression: inspectCall,
         TaggedTemplateExpression(p) {
             for (const target of method(p.get('tag'))) if (sqlMethods.has(target.name)) for (const sql of strings(p.get('quasi'))) {
                 if (rawWrite(sql) && !authorized(p, ['Sample', 'WorkItem'])) report(p.node, 'RAW_WORKFLOW_SQL', target.name);

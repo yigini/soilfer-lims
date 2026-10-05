@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -128,11 +129,11 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
             where: { id: { in: [`res-app-gtm-${sampleApprovedGtm?.id.split('-').pop()}`] } }
         }).catch(() => {});
 
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: {
                 id: { in: [sampleApprovedGtm?.id, samplePendingGtm?.id, sampleApprovedHnd?.id, sampleHoldGtm?.id].filter(Boolean) }
             }
-        }).catch(() => {});
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
 
         await prisma.apiKey.deleteMany({
             where: {

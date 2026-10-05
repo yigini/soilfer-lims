@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
 
 const { createSampleFixture } = require('../helpers/workflowFixtures');
@@ -693,7 +694,7 @@ describe('K01: Kobo Explicit Destination & Mapping Invariant Tests', () => {
             expect(res.body.message).toContain('Arbitrary laboratory form fallback is prohibited');
 
             // Cleanup
-            await prisma.sample.delete({ where: { id: unlinkedSample.id } });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: unlinkedSample.id } }), select: { id: true } })).map(row => row.id), { single: true });
             await prisma.project.delete({ where: { id: unlinkedProj.id } });
         });
 
@@ -773,7 +774,7 @@ describe('K01: Kobo Explicit Destination & Mapping Invariant Tests', () => {
 
             // Cleanup
             await prisma.auditLog.deleteMany({ where: { entityId: resyncSample.id } });
-            await prisma.sample.delete({ where: { id: resyncSample.id } });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: resyncSample.id } }), select: { id: true } })).map(row => row.id), { single: true });
         });
     });
 });

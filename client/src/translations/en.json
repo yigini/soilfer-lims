@@ -1,4 +1,5 @@
 {
+  "spectralWorkflow": {"reopenTitle":"Reopen completed work","reopenMessage":"This change affects a completed work item. Enter a reason to reopen it and retry.","reason":"Reason (required)","retry":"Reopen and retry","trashTitle":"Move to Trash","trashMessage":"Move the spectrum for {label} to trash? Enter a reason. You can restore it later.","batchTrashMessage":"Move {count} selected spectra to trash? Enter a reason. You can restore them later.","trashConfirm":"Move to Trash"},
   "numbers": {"ambiguous":"Clarify the decimal or thousands separator.","invalid":"Invalid number format.","policyInvalid":"Laboratory number format is unavailable or invalid.","decimal":"Decimal separator","thousands":"Thousands separator","noGrouping":"Not configured","space":"Space"},
   "sampleLookup": { "title": "Sample lookup", "ambiguous": "This identifier matches several samples:", "failed": "Sample could not be found or loaded. Check the identifier and connection." },
   "dataSheet": {

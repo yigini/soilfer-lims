@@ -26,6 +26,62 @@ beforeAll(async () => {
 });
 afterEach(() => jest.restoreAllMocks());
 
+test('final approval returns the preparation-reversion 409 and preserves every row', async () => {
+    const row = await fixture('SUBMITTED_FULL', 'ACCEPTED');
+    await prisma.sample.update({ where: { id: row.sample.id }, data: { receptionDate: new Date() } });
+    const result = await prisma.result.create({ data: { id: randomUUID(), sampleId: row.sample.id, param: row.item.analysis,
+        value: '6.25', numericValue: 6.25, unit: 'pH_units', isCurrent: true } });
+    await prisma.resultEvidenceEvent.create({ data: { id: randomUUID(), sampleId: row.sample.id, resultId: result.id,
+        gate: 'PREPARATION', eventType: 'PREP_REVERTED', reason: 'Preparation recheck required', actor: manager.username } });
+    const before = await snapshot([row.sample.id]);
+    expect(await call(sampleController.approveSample, {}, { id: row.sample.id }, manager))
+        .toMatchObject({ statusCode: 409, body: { code: 'PREP_REVERTED_RESULTS', details: { resultIds: [result.id] } } });
+    expect(await snapshot([row.sample.id])).toEqual(before);
+});
+
+test('undo intake preserves every task when the transition is refused by a database guard', async () => {
+    const row = await fixture('ACCEPTED', 'NOT_ASSIGNED');
+    await work.createWorkItem({ id: randomUUID(), sampleId: row.sample.id, analysis: 'PREPARATION', assignedLab: labId }, manager);
+    const before = await snapshot([row.sample.id]), transaction = prisma.$transaction.bind(prisma);
+    jest.spyOn(prisma, '$transaction').mockImplementationOnce(execute => transaction(tx => execute({ ...tx,
+        sample: { ...tx.sample, updateMany: async () => { throw new Error('INVALID_SAMPLE_STATUS'); } }
+    })));
+    expect(await call(sampleController.undoIntake, {}, { id: row.sample.id }, manager))
+        .toMatchObject({ statusCode: 409, body: { code: 'INVALID_SAMPLE_STATUS' } });
+    expect(await snapshot([row.sample.id])).toEqual(before);
+});
+
+test('undo intake rolls back task deletion and the transition when its final audit fails', async () => {
+    const row = await fixture('ACCEPTED', 'NOT_ASSIGNED');
+    await prisma.workItem.update({ where: { id: row.item.id }, data: { result: null } });
+    const before = await snapshot([row.sample.id]);
+    failAudit('UNDO_INTAKE');
+    expect((await call(sampleController.undoIntake, {}, { id: row.sample.id }, manager)).statusCode).toBe(500);
+    expect(await snapshot([row.sample.id])).toEqual(before);
+});
+
+test('fixture cleanup refuses a database outside the owned test directory before deletion', async () => {
+    const { cleanupWorkflowFixtures } = require('../helpers/workflowFixtures');
+    const delegated = { $queryRawUnsafe: async () => [{ name: 'main', file: require.resolve('../../package.json') }],
+        sample: { deleteMany: jest.fn() }, workItem: { deleteMany: jest.fn() } };
+    await expect(cleanupWorkflowFixtures(delegated, 'sample', ['owned-test-id'])).rejects.toThrow('non-test-owned');
+    expect(delegated.sample.deleteMany).not.toHaveBeenCalled();
+    expect(delegated.workItem.deleteMany).not.toHaveBeenCalled();
+});
+
+test.each(['removePreAnalyticSample', 'removeUnstartedWorkItems'])('%s refuses a full client outside a transaction', async name => {
+    const removal = name === 'removePreAnalyticSample' ? samples[name] : work[name];
+    await expect(removal(prisma, name === 'removePreAnalyticSample' ? ['owned-test-id'] : {}, { actor: manager, reason: 'Refusal proof' }))
+        .rejects.toMatchObject({ statusCode: 400, code: 'WORKFLOW_TRANSACTION_REQUIRED' });
+});
+
+test.each(['COMPLETED', 'IN_PROGRESS', 'ASSIGNED'])('undo intake preserves %s work and its recorded evidence on refusal', async status => {
+    const row = await fixture('ACCEPTED', status), before = await snapshot([row.sample.id]);
+    expect(await call(sampleController.undoIntake, {}, { id: row.sample.id }, manager))
+        .toMatchObject({ statusCode: 409, body: { code: status === 'ASSIGNED' ? 'CANNOT_DELETE_SAMPLE_WITH_RESULTS' : 'ACTIVE_WORK_IN_PROGRESS' } });
+    expect(await snapshot([row.sample.id])).toEqual(before);
+});
+
 async function fixture(sampleStatus = 'PROCESSING', itemStatus = 'COMPLETED', analysis = 'PH') {
     const sample = await samples.createSample({ id: randomUUID(), originalId: randomUUID(), assignedLab: labId, status: sampleStatus,
         dryingStatus: 'DONE', preparationStatus: 'DONE' }, 'system:fixture', { context: 'fixture' });

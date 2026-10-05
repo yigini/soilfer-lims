@@ -100,7 +100,8 @@ exports.discardDraft = async (req, res) => {
                     throw new sampleStateService.TransitionError('Cannot discard sample with analytical work completed or submitted.', 409, 'ACTIVE_WORK_IN_PROGRESS');
                 }
 
-                await tx.workItem.deleteMany({ where: { sampleId: String(sample.id) } });
+                await require('../services/workItemStateService').removeUnstartedWorkItems(tx, { sampleId: String(sample.id) },
+                    { actor: user, reason: 'Draft/intake discarded by reception' });
                 await tx.result.deleteMany({ where: { sampleId: String(sample.id) } });
                 await tx.submission.deleteMany({ where: { sampleId: String(sample.id) } });
                 await tx.spectralData.deleteMany({ where: { sampleId: String(sample.id) } });
@@ -179,7 +180,8 @@ exports.discardDraft = async (req, res) => {
                     throw new sampleStateService.TransitionError('Cannot delete sample with existing analytical results.', 409, 'CANNOT_DELETE_SAMPLE_WITH_RESULTS');
                 }
 
-                await tx.workItem.deleteMany({ where: { sampleId: String(sample.id) } });
+                await require('../services/workItemStateService').removeUnstartedWorkItems(tx, { sampleId: String(sample.id) },
+                    { actor: user, reason: 'Walk-in sample removed by reception' });
                 await tx.result.deleteMany({ where: { sampleId: String(sample.id) } });
                 await tx.submission.deleteMany({ where: { sampleId: String(sample.id) } });
                 await tx.spectralData.deleteMany({ where: { sampleId: String(sample.id) } });
@@ -196,7 +198,8 @@ exports.discardDraft = async (req, res) => {
                     }
                 });
 
-                await tx.sample.delete({ where: { id: String(sample.id) } });
+                await sampleStateService.removePreAnalyticSample(tx, [String(sample.id)], { actor: user,
+                    reason: 'Walk-in sample removed by reception', code: 'PREANALYTIC_SAMPLE_REMOVED' });
             });
 
             console.log(`[DISCARD] Hard deleted walk-in sample ${sample.id}`);

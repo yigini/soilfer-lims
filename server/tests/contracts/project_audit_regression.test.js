@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 'use strict';
 
 /**
@@ -143,7 +144,7 @@ describe('Project Management Audit Regression & Acceptance Contracts', () => {
 
     afterAll(async () => {
         try {
-            await prisma.sample.deleteMany({ where: { projectCode: { in: [projectAlpha?.code, projectSecret?.code] } } });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { projectCode: { in: [projectAlpha?.code, projectSecret?.code] } } }), select: { id: true } })).map(row => row.id), { single: false });
             await prisma.projectLab.deleteMany({ where: { projectCode: { in: [projectAlpha?.code, projectSecret?.code] } } });
             await prisma.project.deleteMany({ where: { code: { in: [projectAlpha?.code, projectSecret?.code] } } });
             await prisma.user.deleteMany({ where: { id: { in: [userAdmin?.id, userOwner?.id, userService?.id, userForeign?.id, userPM?.id, userNational?.id] } } });
@@ -386,7 +387,7 @@ describe('Project Management Audit Regression & Acceptance Contracts', () => {
             expect(res.body.messageCode).toBe('MANIFEST_PROCESSED');
             expect(res.body.data).toEqual({ count: 1, skipped: 0 });
 
-            await prisma.sample.deleteMany({ where: { id: 'MANIFEST-TEST-1' } });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: 'MANIFEST-TEST-1' } }), select: { id: true } })).map(row => row.id), { single: false });
         });
     });
 });
