@@ -39,7 +39,10 @@ module.exports = async function globalSetup() {
             const present = guardNames.map(name => installed.has(name));
             if (present.every(value => !value)) db.transaction(() => db.exec(guardSql))();
             else if (!present.every(Boolean)) throw new Error('Disposable test template has partial workflow-state guards.');
+            db.exec(`CREATE TABLE IF NOT EXISTS "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL,
+                "appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "details" TEXT)`);
         } finally { db.close(); }
+        require('../scripts/install_result_attempt_links').installResultAttemptLinks({ dbPath: testDbPath, apply: true });
     }
 
     process.env.DATABASE_PATH = testDbPath;

@@ -108,24 +108,29 @@ function evaluateItemReadiness(item, user, options = {}) {
     const selectedAssetId = options.selectedEquipmentId || item.equipmentId;
     const asset = options.asset;
 
-    if (equipReq?.isRequired && category !== 'Operational Gates' && category !== 'Post-Analytical') {
+    if ((equipReq?.isRequired || selectedAssetId) && category !== 'Operational Gates' && category !== 'Post-Analytical') {
         if (!selectedAssetId) {
             blockers.push('INSTRUMENT_REQUIRED');
             reasons.push(`Method ${analysis} requires an eligible instrument`);
         } else {
-            if (equipReq.eligibleIds && equipReq.eligibleIds.length > 0 && !equipReq.eligibleIds.includes(selectedAssetId)) {
+            if (equipReq?.eligibleIds && equipReq.eligibleIds.length > 0 && !equipReq.eligibleIds.includes(selectedAssetId)) {
                 blockers.push('INSTRUMENT_NOT_ELIGIBLE');
                 reasons.push('Selected instrument is not qualified for this analysis method');
             }
 
-            if (asset) {
+            if (!asset) {
+                blockers.push('INSTRUMENT_NOT_FOUND');
+                reasons.push('Selected instrument is unavailable');
+            } else {
                 if (asset.status !== 'IN_SERVICE') {
                     blockers.push('INSTRUMENT_OUT_OF_SERVICE');
                     reasons.push(`Instrument ${asset.name} is ${asset.status}`);
                 }
 
                 const calStatus = asset.calibrationStatus || asset.qualification?.calibrationStatus;
-                if (calStatus === 'OVERDUE') {
+                const due = asset.qualification?.nextCalibrationDueDate ?? asset.nextCalibrationDueDate;
+                const overdue = due != null && new Date(due).getTime() < (options.now || new Date()).getTime();
+                if (calStatus === 'OVERDUE' || overdue) {
                     blockers.push('INSTRUMENT_CALIBRATION_OVERDUE');
                     reasons.push(`Instrument ${asset.name} calibration is overdue`);
                 } else if (calStatus === 'DUE_SOON') {
@@ -150,6 +155,17 @@ async function evaluateExecutionReadiness(db, item, user, options = {}) {
     const workflow = require('../workflowContract');
     const gates = require('./gateEvidenceService');
     if (!item.sample) return evaluateItemReadiness(item, user, options);
+    const labId = item.sample.assignedLab || item.assignedLab || item.sample.labId;
+    const selectedEquipmentId = options.selectedEquipmentId || item.equipmentId;
+    // A transaction caller must read qualification dates afresh, rather than
+    // trusting the queue's cached calibration label.
+    const equipReq = options.equipReq === undefined ? await db.equipmentMethodEligibility.findFirst({
+        where: { labId, analysisCode: item.analysis, OR: [{ methodId: null }, { methodId: item.methodologyId || null }] }
+    }) : options.equipReq;
+    const asset = options.asset === undefined && selectedEquipmentId ? await db.equipmentAsset.findUnique({
+        where: { id: selectedEquipmentId }, include: { qualification: true }
+    }) : options.asset;
+    if (asset && asset.labId !== labId) return { isReady: false, blockers: ['INSTRUMENT_LAB_MISMATCH'], warnings: [], reasons: ['Instrument belongs to a different laboratory'] };
     const workItems = await db.workItem.findMany({ where: { sampleId: item.sample.id } });
     const required = workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis) ? [] : item.analysis === 'DRYING' ? []
         : item.analysis === 'PREPARATION' ? ['DRYING'] : ['DRYING', 'PREPARATION'];
@@ -158,7 +174,8 @@ async function evaluateExecutionReadiness(db, item, user, options = {}) {
         category: workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis) ? 'Post-Analytical'
             : ['DRYING', 'PREPARATION'].includes(item.analysis) ? 'Operational Gates' : item.category || engine.getAnalysisConfig(item.analysis).category
     }));
-    return evaluateItemReadiness({ ...item, category }, user, { ...options, prerequisite,
+    return evaluateItemReadiness({ ...item, category }, user, { ...options, selectedEquipmentId, asset,
+        equipReq: equipReq && { ...equipReq, eligibleIds: equipReq.eligibleIds || require('./cataloguePolicy').parseJson(equipReq.eligibleEquipmentIds, []) }, prerequisite,
         gateEvidence: gates.evaluateGateEvidence(item.sample, workItems, required) });
 }
 

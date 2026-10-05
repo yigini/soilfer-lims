@@ -1,3 +1,4 @@
+const { createResultsFixture } = require('../../services/resultWriteService');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
@@ -76,7 +77,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
         }
 
         // Add valid results for both items
-        await prisma.result.createMany({
+        await createResultsFixture(prisma, {
             data: [
                 {
                     id: 'p6-res-ph-01',

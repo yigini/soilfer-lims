@@ -15,3 +15,5 @@ server/prisma/migrations/20261005000100_workflow_state_guards/migration.sql text
 server/services/workflowMigrationSources.js text eol=lf
 # Exact committed bytes of the declared #146 synthetic-source deferral.
 server/scripts/rehearsal_docker_boundary.cjs text eol=lf
+server/prisma/migrations/20261006000000_result_attempt_link/migration.sql text eol=lf
+server/services/resultAttemptMigrationSource.js text eol=lf

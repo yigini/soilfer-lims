@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
@@ -52,7 +53,7 @@ describe('WP-31: Result Provenance Tracking', () => {
     });
 
     test('1. Direct prisma create defaults Result.provenance to MEASURED', async () => {
-        const r = await prisma.result.create({
+        const r = await createResultFixture(prisma, {
             data: {
                 id: `RES-DEF-${Date.now()}`,
                 sampleId: testSampleId,
@@ -100,7 +101,7 @@ describe('WP-31: Result Provenance Tracking', () => {
 
     test('3. assembleReport includes provenance for each result item', async () => {
         // Also add a DERIVED result
-        const derivedRes = await prisma.result.create({
+        const derivedRes = await createResultFixture(prisma, {
             data: {
                 id: `RES-DER-${Date.now()}`,
                 sampleId: testSampleId,

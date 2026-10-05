@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
@@ -217,7 +218,7 @@ describe('SD-15: Comprehensive Sample Detail End-to-End Contract Suite', () => {
 
         test('3.4. Removing an analysis with recorded results is refused with HTTP 409 Conflict (Branch C)', async () => {
             // Record result on EC
-            await prisma.result.create({
+            await createResultFixture(prisma, {
                 data: {
                     id: 'RES-SD15-EC-01',
                     sampleId: sampleLabGtmId,

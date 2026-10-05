@@ -136,6 +136,12 @@ function beforeGuards(options) {
         const expected = pendingName === 'PROJECT_POLICY' ? [{ table: 'Project', fields: projectColumns }]
             : pendingName === 'SAMPLE_CODES' ? [{ table: 'Sample', fields: ['labSampleCode'] },
                 { table: 'WorkItem', fields: ['legacyLabId'] }, { table: 'LabSequence', missingTable: true }] : [];
+        // #182 adds one nullable scalar absent from each pinned older schema.
+        // Require that exact historical gap; all other completeness checks stay.
+        if (schemaVariant !== null) {
+            const beforeSequence = expected.findIndex(row => row.table === 'LabSequence');
+            expected.splice(beforeSequence < 0 ? expected.length : beforeSequence, 0, { table: 'Result', fields: ['attemptId'] });
+        }
         assert.equal(JSON.stringify(missing), JSON.stringify(expected),
             'Pinned historical baseline does not match the generated Prisma datamodel.');
     }

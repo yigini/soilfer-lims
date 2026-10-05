@@ -1,4 +1,6 @@
 'use strict';
+const { createResultFixture } = require('../../services/resultWriteService');
+
 
 const { createSampleFixture, createAuthTokenFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
@@ -619,7 +621,7 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
             }
         });
 
-        await prisma.result.create({
+        await createResultFixture(prisma, {
             data: {
                 id: 'RES-' + SUFFIX,
                 sampleId,

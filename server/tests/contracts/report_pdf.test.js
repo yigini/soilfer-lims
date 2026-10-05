@@ -1,3 +1,4 @@
+const { createResultsFixture } = require('../../services/resultWriteService');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -36,7 +37,7 @@ describe('BLK-3: Report & Certificate PDF Generation Contract', () => {
 
         // Add verified results to the sample in DB
         const now = new Date();
-        await prisma.result.createMany({
+        await createResultsFixture(prisma, {
             data: [
                 { id: `RES-1-${Date.now()}`, sampleId: s.id, param: 'PH_H2O', value: '6.8', unit: 'pH units', isValid: true, createdAt: now, updatedAt: now },
                 { id: `RES-2-${Date.now()}`, sampleId: s.id, param: 'SOC', value: '18.5', unit: 'g/kg', isValid: true, createdAt: now, updatedAt: now },

@@ -1,4 +1,6 @@
 'use strict';
+const { createResultFixture } = require('../../services/resultWriteService');
+
 
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
@@ -104,7 +106,7 @@ describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts',
                     depthBottomCm: 20
                 }
             });
-            await prisma.result.create({
+            await createResultFixture(prisma, {
                 data: {
                     id: id + '-result',
                     sampleId: id,

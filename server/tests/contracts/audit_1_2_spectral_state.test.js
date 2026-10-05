@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const request = require('supertest');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs');
@@ -43,7 +44,7 @@ async function fixture({ status = 'COMPLETED', parentStatus = 'PROCESSING' } = {
         sample = await createSampleFixture(db, { data: sampleData });
         item = await createWorkItemFixture(db, { data: itemData });
     }
-    const result = await db.result.create({ data: { id: randomUUID(), sampleId: sample.id, param: 'PH_H2O',
+    const result = await createResultFixture(db, { data: { id: randomUUID(), sampleId: sample.id, param: 'PH_H2O',
         value: '6.27', numericValue: 6.27, unit: 'pH', flags: '["RETAINED_SCIENTIFIC_FLAG"]' } });
     const scan = await db.spectralData.create({ data: { id: randomUUID(), sampleId: sample.id, workItemId: item.id,
         labId, filename: `${randomUUID()}.csv`, modality: 'MIR', quantity: 'ABSORBANCE', qcStatus: 'PASS',

@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
@@ -27,7 +28,7 @@ describe('Mounted profile correction, scope and immutable export contracts',()=>
         for (const [name,id] of Object.entries(ids)) await createSampleFixture(prisma, {data:{id,originalId:`FIELD-${id}`,labId:`ACCESSION-${id}`,assignedLab:lab,projectId:project,projectCode:project,country:'GTM',status:name==='draft'?'RECEIVED':'APPROVED',approvedAt:name==='draft'?null:new Date(),fieldMetadata:JSON.stringify({site_id:{value:'SITE-OLD'},pit_id:{value:'PIT-FIELD'}})}});
         await createWorkItemFixture(prisma, { data: { id: `${ids.released}-PH`, sampleId: ids.released,
             assignedLab: lab, analysis: 'PH_H2O', status: 'ACCEPTED' } });
-        await prisma.result.create({data:{id:'PROFILE-RESULT-UNCHANGED',sampleId:ids.released,param:'PH_H2O',value:'6.4',numericValue:6.4,unit:'pH',isCurrent:true,isValid:true}});
+        await createResultFixture(prisma, {data:{id:'PROFILE-RESULT-UNCHANGED',sampleId:ids.released,param:'PH_H2O',value:'6.4',numericValue:6.4,unit:'pH',isCurrent:true,isValid:true}});
     });
     afterAll(async()=>{
         await prisma.commandReceipt.deleteMany({where:{idempotencyKey:'profile-correction-operation'}});

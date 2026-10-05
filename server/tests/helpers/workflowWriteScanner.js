@@ -8,6 +8,9 @@ const { createHash } = require('node:crypto');
 // it grants no write authority and never accepts an arbitrary SQL loader.
 const WORKFLOW_LOADER = 'services/workflowMigrationSources.js';
 const WORKFLOW_LOADER_SHA256 = '0b7f6010cc7b69a03ffe5aceb3c467dd5a718f51d25968e5aba07fcf8aaa1733';
+const RESULT_LOADER = 'services/resultAttemptMigrationSource.js';
+const RESULT_LOADER_SHA256 = '23c5d0cead64b5ef3c74d2c8782ad2e9c32e4a5c9d1a2daeb3e7d705dd52eca2';
+const RESULT_SQL_SHA256 = '332edb0ea6491b4c66dd581c34acbb5ba7db757cd48c5b502eac8f00a21d51f1';
 const WORKFLOW_SOURCES = Object.freeze({
     evidence: { directory: '20261005000000_workflow_state_evidence', sha256: 'ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552' },
     guards: { directory: '20261005000100_workflow_state_guards', sha256: '84921ef45fa8609621b38908de5261d716820f2135f2dde1b9a20fafa6fc81ed' }
@@ -22,7 +25,7 @@ const deferredSources = Object.freeze([Object.freeze({
 
 const mutations = new Set(['create', 'createMany', 'createManyAndReturn', 'update', 'updateMany', 'updateManyAndReturn', 'upsert', 'save', 'saveMany', 'bulkUpdate', 'delete', 'deleteMany']);
 const sqlMethods = new Set(['prepare', 'exec', 'execute', 'pragma', '$executeRaw', '$executeRawUnsafe', '$queryRaw', '$queryRawUnsafe']);
-const workflowModels = new Map([['sample', 'Sample'], ['samples', 'Sample'], ['workItem', 'WorkItem'], ['workItems', 'WorkItem']]);
+const workflowModels = new Map([['sample', 'Sample'], ['samples', 'Sample'], ['workItem', 'WorkItem'], ['workItems', 'WorkItem'], ['result', 'Result'], ['results', 'Result']]);
 const union = sets => [...new Set(sets.flat())];
 
 function scanSource(source, filename, exceptions = []) {
@@ -33,10 +36,14 @@ function scanSource(source, filename, exceptions = []) {
         [...text.matchAll(new RegExp('\\bUPDATE(?:\\s+OR\\s+\\w+)?\\s+' + sqlTable + '\\s+SET\\s+([\\s\\S]*?)(?=\\bWHERE\\b|;|$)', 'gi'))]
             .some(match => /(?:^|,)\s*["`\[]?status["`\]]?\s*=|<unknown>/i.test(match[1])) ||
         (/\b(?:INSERT\s+INTO|UPDATE)\s+<unknown>/i.test(text));
+    const rawResultCreate = text => /\b(?:INSERT\s+(?:OR\s+\w+\s+)?INTO|REPLACE\s+INTO)\s+(?:["`\[]?\w+["`\]]?\s*\.\s*)?["`\[]?Result(?:["`\]]|\b)/i.test(text);
+    const rawCacheWrite = text => [...text.matchAll(/\bUPDATE(?:\s+OR\s+\w+)?\s+(?:["`\[]?\w+["`\]]?\s*\.\s*)?["`\[]?WorkItem(?:["`\]]|\b)\s+SET\s+([\s\S]*?)(?=\bWHERE\b|;|$)/gi)]
+        .some(match => /(?:^|,)\s*["`\[]?result["`\]]?\s*=/i.test(match[1]));
     const disabling = text => /\bDROP\s+TRIGGER\s+(?:IF\s+EXISTS\s+)?["`\[]?(?:Sample_status_(?:insert|update)_guard|WorkItem_status_(?:insert|update)_guard|Batch_status_(?:insert|update)_guard|ReviewDecision_decision_(?:insert_guard|immutable)|ResultEvidenceEvent_(?:insert_guard|update_immutable|delete_immutable))\b|\bPRAGMA\s+(?:foreign_keys|recursive_triggers)\s*=\s*(?:OFF|0)\b/i.test(text) ||
         (exceptions.some(entry => entry.file === filename) && /\bDROP\s+TRIGGER\b|db\s+push\s+--accept-data-loss/i.test(text));
     if (!/\.(?:js|cjs|mjs)$/.test(filename)) {
         if (rawWrite(source)) report(null, 'RAW_WORKFLOW_SQL', 'Sample/WorkItem SQL write outside the central authority.');
+        if (rawResultCreate(source) || rawCacheWrite(source)) report(null, 'RAW_RESULT_SQL', 'Result creation/cache write outside resultWriteService.');
         if (disabling(source)) report(null, 'WORKFLOW_GUARD_DISABLED', 'Workflow enforcement cannot be disabled.');
         return violations;
     }
@@ -173,6 +180,8 @@ function scanSource(source, filename, exceptions = []) {
         });
     }
     function migrationSql(p) {
+        const resultSql = resultMigrationSql(p);
+        if (resultSql !== null) return resultSql;
         if (p?.isCallExpression() && sourceFunction(p.get('callee'), 'evidenceCreates') && p.node.arguments.length === 1) {
             const argument = p.get('arguments.0');
             if (!argument.isMemberExpression() || argument.node.computed || argument.node.property.name !== 'sql' ||
@@ -185,6 +194,34 @@ function scanSource(source, filename, exceptions = []) {
         const member = p.get('object');
         if (!member.isMemberExpression() || member.node.computed || !Object.hasOwn(WORKFLOW_SOURCES, member.node.property.name) || !sourceObject(member.get('object'))) return null;
         return verifiedSources()?.[member.node.property.name] || null;
+    }
+    function resultMigrationSql(p) {
+        if (!p?.isMemberExpression() || p.node.computed || !['sql', 'guardsSql'].includes(p.node.property.name)) return null;
+        const object = p.get('object');
+        if (!object.isIdentifier()) return null;
+        const binding = object.scope.getBinding(object.node.name);
+        if (!binding || binding.kind !== 'const' || binding.constantViolations.length || !binding.path.isVariableDeclarator()) return null;
+        const init = binding.path.get('init');
+        if (!init.isCallExpression() || init.node.arguments.length || !init.get('callee').isIdentifier({ name: 'loadResultAttemptMigrationSource' })) return null;
+        const loaderBinding = init.scope.getBinding('loadResultAttemptMigrationSource');
+        const declaration = loaderBinding?.path;
+        if (!loaderBinding || loaderBinding.kind !== 'const' || loaderBinding.constantViolations.length || !declaration?.isVariableDeclarator() || !declaration.get('id').isObjectPattern()) return null;
+        const imported = declaration.get('init');
+        if (!imported.isCallExpression() || !imported.get('callee').isIdentifier({ name: 'require' }) || imported.scope.getBinding('require') || imported.node.arguments.length !== 1) return null;
+        const root = path.resolve(__dirname, '../..');
+        const specifier = path.relative(path.dirname(path.resolve(root, filename)), path.join(root, RESULT_LOADER)).replace(/\\/g, '/').replace(/\.js$/, '');
+        if (!imported.get('arguments.0').isStringLiteral({ value: specifier.startsWith('.') ? specifier : `./${specifier}` })) return null;
+        const properties = declaration.node.id.properties;
+        if (!properties.some(property => property.type === 'ObjectProperty' && !property.computed && property.key.name === 'loadResultAttemptMigrationSource' && property.value.name === property.key.name)) return null;
+        if (binding.referencePaths.some(reference => !reference.parentPath.isMemberExpression() || reference.parentPath.node.computed ||
+            !['sql', 'guardsSql', 'sha256'].includes(reference.parentPath.node.property.name) || reference.parentPath.parentPath.isAssignmentExpression())) return null;
+        try {
+            if (createHash('sha256').update(fs.readFileSync(path.join(root, RESULT_LOADER))).digest('hex') !== RESULT_LOADER_SHA256) return null;
+            const bytes = fs.readFileSync(path.join(root, 'prisma/migrations/20261006000000_result_attempt_link/migration.sql'));
+            if (createHash('sha256').update(bytes).digest('hex') !== RESULT_SQL_SHA256) return null;
+            const sql = bytes.toString('utf8');
+            return p.node.property.name === 'guardsSql' ? sql.slice(sql.indexOf('CREATE TRIGGER')) : sql;
+        } catch { return null; }
     }
     function nodeFsRead(p) {
         if (!p?.isCallExpression() || !p.get('callee').isMemberExpression() ||
@@ -238,23 +275,26 @@ function scanSource(source, filename, exceptions = []) {
         if (p.isCallExpression() && p.get('callee').isMemberExpression() && keys(p.get('callee')).includes('bind')) return method(p.get('callee.object'), seen);
         return [];
     }
-    function hasStatus(p, seen = new Set()) {
+    function hasStatus(p, seen = new Set(), field = 'status') {
         if (!p?.node) return true;
         if (p.isObjectExpression()) return p.get('properties').some(property => {
-            if (property.isSpreadElement()) return hasStatus(property.get('argument'), seen);
+            if (property.isSpreadElement()) return hasStatus(property.get('argument'), seen, field);
             const names = property.node.computed ? strings(property.get('key')) : [property.node.key.name || property.node.key.value];
-            return names.includes('status') || names.includes('<unknown>');
+            return names.includes(field) || names.includes('<unknown>');
         });
         if (p.isIdentifier()) {
             const binding = p.scope.getBinding(p.node.name), values = bindingValue(p, seen);
+            if (binding?.path.isVariableDeclarator() && binding.path.get('id').isObjectPattern() &&
+                binding.path.node.id.properties.some(property => property.type === 'RestElement' && property.argument.name === p.node.name) &&
+                binding.path.node.id.properties.some(property => property.type === 'ObjectProperty' && !property.computed && (property.key.name || property.key.value) === field)) return false;
             if (binding?.referencePaths.some(reference => reference.parentPath.isMemberExpression() && reference.key === 'object' &&
-                (keys(reference.parentPath).includes('status') || keys(reference.parentPath).includes('<unknown>')) &&
+                (keys(reference.parentPath).includes(field) || keys(reference.parentPath).includes('<unknown>')) &&
                 reference.parentPath.parentPath.isAssignmentExpression())) return true;
-            return values.length ? values.some(value => value.property || hasStatus(value.path, value.seen)) : true;
+            return values.length ? values.some(value => value.property || hasStatus(value.path, value.seen, field)) : true;
         }
-        if (p.isConditionalExpression()) return hasStatus(p.get('consequent'), seen) || hasStatus(p.get('alternate'), seen);
+        if (p.isConditionalExpression()) return hasStatus(p.get('consequent'), seen, field) || hasStatus(p.get('alternate'), seen, field);
         if (p.isCallExpression() && p.get('callee').isMemberExpression() && p.get('callee.object').isIdentifier({ name: 'Object' }) && keys(p.get('callee')).includes('assign')) {
-            return p.get('arguments').some(argument => hasStatus(argument, seen));
+            return p.get('arguments').some(argument => hasStatus(argument, seen, field));
         }
         return true;
     }
@@ -311,6 +351,10 @@ function scanSource(source, filename, exceptions = []) {
         if (filename === 'services/workItemStateService.js' && (['createWorkItem', 'transitionWorkItem'].includes(name) || removal && name === 'removeUnstartedWorkItems') && entities.every(entity => entity === 'WorkItem')) return true;
         if (removal && filename === 'tests/helpers/workflowFixtures.js' && name === 'cleanupWorkflowFixtures') return true;
         return exceptions.some(entry => entry.file === filename && entry.exportName === name);
+    }
+    function resultProbe(p) {
+        const name = owner(p);
+        return exportedNames.has(name) && exceptions.some(entry => entry.file === filename && entry.exportName === name);
     }
     function pinnedCorruptProjectConnection(p, sql) {
         if (!/^PRAGMA\s+foreign_keys\s*=\s*OFF$/i.test(sql.trim()) || owner(p) !== 'beforeGuards' || !exportedNames.has('beforeGuards') ||
@@ -387,13 +431,19 @@ function scanSource(source, filename, exceptions = []) {
                     report(p.node, 'WORKFLOW_REMOVAL_WITHOUT_TRANSACTION', target.name);
                 }
                 if (mutations.has(target.name) && entities.length) {
-                    const writes = relationWrites(p.get('arguments.0')).length || !['update', 'updateMany', 'updateManyAndReturn'].includes(target.name) || hasStatus(dataArgument(p.get('arguments.0')));
-                    if (writes && !authorized(p, entities, target.name)) report(p.node, 'WORKFLOW_WRITE_OUTSIDE_AUTHORITY', `${entities.join('/')} ${target.name}`);
+                    const stateEntities = entities.filter(entity => entity !== 'Result');
+                    const writes = relationWrites(p.get('arguments.0')).filter(entity => entity !== 'Result').length || !['update', 'updateMany', 'updateManyAndReturn'].includes(target.name) || hasStatus(dataArgument(p.get('arguments.0')));
+                    if (stateEntities.length && writes && !authorized(p, stateEntities, target.name)) report(p.node, 'WORKFLOW_WRITE_OUTSIDE_AUTHORITY', `${stateEntities.join('/')} ${target.name}`);
+                    if (filename !== 'services/resultWriteService.js') {
+                        if (entities.includes('Result') && (['create', 'createMany', 'createManyAndReturn', 'upsert'].includes(target.name) || relationWrites(p.get('arguments.0')).includes('Result'))) report(p.node, 'RESULT_CREATE_OUTSIDE_AUTHORITY', target.name);
+                        if (entities.includes('WorkItem') && !['delete', 'deleteMany'].includes(target.name) && hasStatus(dataArgument(p.get('arguments.0')), new Set(), 'result')) report(p.node, 'RESULT_CACHE_OUTSIDE_AUTHORITY', target.name);
+                    }
                 }
                 if (sqlMethods.has(target.name) && !(target.name === 'exec' && regularExpression(target.object))) for (const sql of strings(p.get('arguments.0'))) {
                     const statement = target.name === 'pragma' ? `PRAGMA ${sql}` : sql;
                     if (disabling(statement) && !pinnedCorruptProjectConnection(p, statement)) report(p.node, 'WORKFLOW_GUARD_DISABLED', target.name);
                     if (rawWrite(sql) && !authorized(p, ['Sample', 'WorkItem'])) report(p.node, 'RAW_WORKFLOW_SQL', target.name);
+                    if ((rawResultCreate(sql) || rawCacheWrite(sql)) && filename !== 'services/resultWriteService.js' && !resultProbe(p)) report(p.node, 'RAW_RESULT_SQL', target.name);
                     if (sql === '<unknown>' && !schemaFileRead(p.get('arguments.0')) && !authorized(p, ['Sample', 'WorkItem'])) {
                         report(p.node, 'UNRESOLVED_WORKFLOW_SQL', target.name);
                     }
@@ -408,6 +458,7 @@ function scanSource(source, filename, exceptions = []) {
         TaggedTemplateExpression(p) {
             for (const target of method(p.get('tag'))) if (sqlMethods.has(target.name)) for (const sql of strings(p.get('quasi'))) {
                 if (rawWrite(sql) && !authorized(p, ['Sample', 'WorkItem'])) report(p.node, 'RAW_WORKFLOW_SQL', target.name);
+                if ((rawResultCreate(sql) || rawCacheWrite(sql)) && filename !== 'services/resultWriteService.js' && !resultProbe(p)) report(p.node, 'RAW_RESULT_SQL', target.name);
                 if (disabling(sql)) report(p.node, 'WORKFLOW_GUARD_DISABLED', target.name);
                 if (sql === '<unknown>' && !authorized(p, ['Sample', 'WorkItem'])) report(p.node, 'UNRESOLVED_WORKFLOW_SQL', target.name);
             }

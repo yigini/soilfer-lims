@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const prisma = require('../prisma');
-const { deriveTextureResult } = require('../services/textureResultService');
+const { writeResult, deriveTextureResult } = require('../services/resultWriteService');
 const validationController = require('./validationController');
 const { validateResultEntries } = require('../services/resultEntryPolicy');
 const stateRules = require('../services/workflowStateRules');
@@ -130,68 +130,14 @@ exports.saveResults = async (req, res) => {
             const gateReport = await assertResultSaveReadiness(tx, current, user);
             if (current.status !== sample.status) throw new stateRules.TransitionError('Sample readiness changed. Refresh before saving.', 409, 'SAMPLE_STATE_CHANGED');
             const entryError = await validateResultEntries(tx, current, measurements, user);
-            if (entryError) throw Object.assign(new Error(entryError), { statusCode: 400 });
+            if (entryError) throw Object.assign(new Error(entryError), { statusCode: 400, code: 'RESULT_ENTRY_INVALID' });
 
-            // Validate
-            const validatedMeasurements = await validationController.validateBatch(measurements, tx);
-            if (validatedMeasurements.some(m => m.value == null || String(m.value).trim() === '' || m.validation.flags.includes('INVALID_FORMAT'))) {
-                throw Object.assign(new Error('Every measurement must contain a valid numeric value or supported censoring qualifier.'), { statusCode: 400 });
-            }
-
+            const validatedMeasurements = [];
             const operations = [];
             const now = new Date();
-
-            // Append-only results with supersession
-            for (const m of validatedMeasurements) {
-                const strVal = String(m.value).trim();
-                const isCensored = m.validation?.isCensored || /^[<>]/.test(strVal);
-                const censoringType = isCensored ? (strVal.startsWith('<') ? 'BELOW_LOQ' : 'ABOVE_RANGE') : 'NONE';
-                const numericVal = m.validation?.normalizedValue !== undefined ? m.validation.normalizedValue : (isNaN(Number(strVal.replace(',', '.'))) ? null : Number(strVal.replace(',', '.')));
-
-                const newResultId = crypto.randomUUID();
-
-                const repNo = (m.replicateNo !== undefined && m.replicateNo !== null) ? Number(m.replicateNo) : 1;
-                const validBasis = ['AIR_DRY', 'OVEN_DRY', 'FIELD_MOIST'].includes(m.basis) ? m.basis : 'AIR_DRY';
-
-                // Supersede previous active result ONLY for the matching replicate number
-                operations.push(db => db.result.updateMany({
-                    where: {
-                        sampleId,
-                        param: m.param,
-                        replicateNo: repNo,
-                        isCurrent: true
-                    },
-                    data: {
-                        isCurrent: false,
-                        supersededBy: newResultId
-                    }
-                }));
-
-                // Create new immutable record
-                operations.push(db => db.result.create({
-                    data: {
-                        id: newResultId,
-                        sampleId,
-                        param: m.param,
-                        value: strVal,
-                        numericValue: numericVal,
-                        unit: m.unit || null,
-                        flags: JSON.stringify(m.validation?.flags || []),
-                        isValid: m.validation?.valid,
-                        censoring: censoringType,
-                        basis: validBasis,
-                        provenance: m.provenance || 'MEASURED',
-                        methodologyId: m.methodologyId || null,
-                        replicateNo: repNo,
-                        isCurrent: true,
-                        enteredBy: performedBy,
-                        analysedAt: now,
-                        equipmentId: m.equipmentId || null,
-                        batchId: m.batchId || null,
-                        createdAt: now,
-                        updatedAt: now
-                    }
-                }));
+            for (const measurement of measurements) {
+                const row = await writeResult(tx, { sampleId, measurement, actor: user, now });
+                validatedMeasurements.push({ ...measurement, validation: { valid: row.isValid, flags: JSON.parse(row.flags || '[]') } });
             }
 
             operations.push(db => db.auditLog.create({
@@ -209,7 +155,7 @@ exports.saveResults = async (req, res) => {
 
             for (const operation of operations) await operation(tx);
             const replicates = new Set(validatedMeasurements.filter(m => ['SAND', 'SILT', 'CLAY'].includes(m.param)).map(m => Number(m.replicateNo ?? 1)));
-            for (const replicateNo of replicates) await deriveTextureResult(tx, { sampleId, replicateNo, actor: user?.username, now });
+            for (const replicateNo of replicates) await deriveTextureResult(tx, { sampleId, replicateNo, actor: user, now });
 
             // Compute cross-parameter sample matrix diagnostics
             const allActiveResults = await tx.result.findMany({

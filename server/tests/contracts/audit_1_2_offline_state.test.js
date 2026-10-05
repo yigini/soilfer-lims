@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const jwt = require('jsonwebtoken');
 const { randomUUID } = require('node:crypto');
 const prisma = require('../../prisma');
@@ -18,7 +19,7 @@ async function fixture(status = 'PROCESSING') {
         status, receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' } });
     const item = await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, analysis,
         assignedLab: labId, assignedTo: actor.username, status: 'ASSIGNED', version: 0 } });
-    const result = await prisma.result.create({ data: { id: randomUUID(), sampleId: sample.id, param: analysis,
+    const result = await createResultFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, param: analysis,
         value: '6.2', numericValue: 6.2, flags: '["ORIGINAL_NOTE"]', isCurrent: true } });
     return { sample, item, result };
 }

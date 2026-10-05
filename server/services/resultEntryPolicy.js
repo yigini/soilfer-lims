@@ -2,6 +2,14 @@ const { parseJson, GATE_CODES, configurationIssues } = require('./cataloguePolic
 const { isAvailable } = require('./methodResolution');
 const { evaluateExecutionReadiness } = require('./workbenchReadinessService');
 
+// These are the existing entry classifiers, also used by the result authority.
+const PREP_CODES = new Set(['PREP', 'SAMPLE_PREP', 'SIEVING', 'MILLING', 'HOMOGENIZATION']);
+const SPECTRAL_CODES = new Set(['SPEC_MIR', 'SPEC_VIS_NIR', 'SPEC_NIR', 'SPEC_FTIR']);
+function isNonMeasurement(item) {
+    return GATE_CODES.has(item.analysis) || PREP_CODES.has(item.analysis) || SPECTRAL_CODES.has(item.analysis) ||
+        Object.hasOwn(require('../data/operationalChecklists.json'), item.analysis);
+}
+
 // The legacy sample results endpoint must not bypass catalogue, assignment or sealed-work rules.
 async function validateResultEntries(db, sample, measurements, user) {
     if (!Array.isArray(measurements) || !measurements.length || measurements.length > 1000) return 'Provide between 1 and 1000 measurements.';
@@ -15,8 +23,8 @@ async function validateResultEntries(db, sample, measurements, user) {
         const key = `${param}:${Number(replicate)}`;
         if (keys.has(key)) return 'A parameter and replicate may appear only once in each save.';
         keys.add(key);
-        if (GATE_CODES.has(param) || ['PREP', 'SAMPLE_PREP', 'SIEVING', 'MILLING', 'HOMOGENIZATION'].includes(param)) return 'Record operational evidence through the assigned checklist.';
-        if (['SPEC_MIR', 'SPEC_VIS_NIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(param)) return 'Upload or link a spectrum through spectral intake; a numerical value is not a spectrum.';
+        if (GATE_CODES.has(param) || PREP_CODES.has(param)) return 'Record operational evidence through the assigned checklist.';
+        if (SPECTRAL_CODES.has(param)) return 'Upload or link a spectrum through spectral intake; a numerical value is not a spectrum.';
         const analysis = await db.analysis.findUnique({ where: { code: param } });
         const labId = sample.assignedLab || sample.labId;
         if (!analysis || (analysis.labId && analysis.labId !== labId)) return 'A selected parameter is not available to this laboratory.';
@@ -40,4 +48,4 @@ async function validateResultEntries(db, sample, measurements, user) {
     return null;
 }
 
-module.exports = { validateResultEntries };
+module.exports = { validateResultEntries, isNonMeasurement, SPECTRAL_CODES };

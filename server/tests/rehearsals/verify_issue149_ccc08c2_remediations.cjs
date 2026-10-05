@@ -1,4 +1,6 @@
 'use strict';
+const { createResultFixture } = require('../../services/resultWriteService');
+
 /**
  * Verification Suite for Issue #149 ccc08c2 Remediations
  * Verifies all 4 preserved fixes and all 5 remediated defects against
@@ -127,7 +129,7 @@ async function assertFinalRefusals() {
         }
     });
 
-    await prisma.result.create({
+    await createResultFixture(prisma, {
         data: {
             id: 'synthetic-result',
             sampleId: 'synthetic-sample',

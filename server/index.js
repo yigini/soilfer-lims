@@ -20,6 +20,8 @@ try {
     const dbPath = process.env.DATABASE_PATH ? path.resolve(process.env.DATABASE_PATH) : path.resolve(__dirname, 'prisma', 'dev.db');
     const ready = require('./scripts/install_workflow_state_guards').assertWorkflowStartupReady(dbPath);
     console.log(JSON.stringify({ event: 'WORKFLOW_STARTUP_READY', ...ready }));
+    const resultsReady = require('./scripts/install_result_attempt_links').assertResultAttemptStartupReady(dbPath);
+    console.log(JSON.stringify({ event: 'RESULT_ATTEMPT_STARTUP_READY', ...resultsReady }));
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
         nextStep: 'Keep the lab stopped and follow docs/audit/1.2-state-machine.md.', differences: error.differences || [] }));

@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const fs = require('node:fs');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
@@ -219,7 +220,7 @@ test.each(['REANALYZE_BATCH', 'REJECT_BATCH'].flatMap(decision =>
     ['NOT_ASSIGNED', 'ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'SUBMITTED'].map(status => [decision, status])))
     ('%s moves active %s work to canonical repeat required and preserves scientific values', async (decision, status) => {
         const { sample, item, batch } = await failedQcFixture(status);
-        const result = await client.result.create({ data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.24',
+        const result = await createResultFixture(client, { data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.24',
             numericValue: 6.24, unit: 'pH', batchId: batch.id, isCurrent: true } });
         await qcDispositions.dispositionBatch(batch.id, decision, 'Control outside configured acceptance', manager, client);
         const updated = await client.workItem.findUnique({ where: { id: item.id } });
@@ -267,7 +268,7 @@ test.each([['ACCEPTED', 'PROCESSING'], ['WAIVED', 'PROCESSING'], ['CANCELLED', '
 
 test('a failed QC audit rolls back disposition, history, repeat status and result flags', async () => {
     const { sample, batch } = await failedQcFixture('SUBMITTED');
-    await client.result.create({ data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.24', numericValue: 6.24,
+    await createResultFixture(client, { data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.24', numericValue: 6.24,
         unit: 'pH', batchId: batch.id, flags: '["ORIGINAL_FLAG"]' } });
     const before = await snapshot(sample.id), batchBefore = await client.batch.findUnique({ where: { id: batch.id } });
     await expect(client.$transaction(tx => qcDispositions.dispositionBatch(batch.id, 'REJECT_BATCH', 'Rejected failed QC batch', manager,
@@ -284,7 +285,7 @@ test('QC also preserves a RELEASED sample that existed before the additive state
     const batch = await client.batch.create({ data: { id: id(), analysis: 'PH_H2O', labId: manager.labId, status: 'QC_FAIL', createdBy: technician.username } });
     await work.createWorkItem({ id: id(), sampleId, analysis: 'PH_H2O', status: 'IN_PROGRESS', batchId: batch.id, assignedLab: manager.labId },
         'system:fixture', { context: 'fixture', tx: client });
-    await client.result.create({ data: { id: id(), sampleId, param: 'PH_H2O', value: '6.24', numericValue: 6.24,
+    await createResultFixture(client, { data: { id: id(), sampleId, param: 'PH_H2O', value: '6.24', numericValue: 6.24,
         unit: 'pH', batchId: batch.id, flags: '["RETAINED_LEGACY_FLAG"]' } });
     const before = await snapshot(sampleId);
     await qcDispositions.dispositionBatch(batch.id, 'REJECT_BATCH', 'Rejected failed QC batch', manager, client);
@@ -316,7 +317,7 @@ test('central RETURN checks fresh parent scope before its amendment refusal and 
 
 test('manager RETURN of a completed gate records current-result reversion in the review transaction', async () => {
     const { sample, item } = await fixture('PROCESSING', 'DRYING', 'SUBMITTED');
-    const result = await client.result.create({ data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.24', numericValue: 6.24,
+    const result = await createResultFixture(client, { data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.24', numericValue: 6.24,
         unit: 'pH', flags: '["ORIGINAL_FLAG"]' } });
     const reason = 'Drying protocol requires repetition';
     const updated = await commitReview(client, item, 'REPEAT_REQUIRED', manager,
@@ -331,7 +332,7 @@ test('manager RETURN of a completed gate records current-result reversion in the
 
 test('a failed gate-review evidence append rolls back the review CAS, review identity and audit', async () => {
     const { sample, item } = await fixture('PROCESSING', 'DRYING', 'SUBMITTED');
-    await client.result.create({ data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.24', unit: 'pH' } });
+    await createResultFixture(client, { data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.24', unit: 'pH' } });
     const before = await snapshot(sample.id), reason = 'Drying protocol requires repetition';
     await expect(client.$transaction(tx => commitReview({ $transaction: callback => callback({ ...tx,
         resultEvidenceEvent: { ...tx.resultEvidenceEvent, create: async () => { throw new Error('Injected evidence failure'); } } }) },
@@ -480,7 +481,7 @@ test('migration fingerprint and row CAS refuse a modified plan or changed row', 
 
 test('preparation reverts preserve scientific values and block review until a valid manager clearance', async () => {
     const { sample, item } = await fixture('PROCESSING', 'PH_H2O', 'COMPLETED');
-    const result = await client.result.create({ data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.42', numericValue: 6.42,
+    const result = await createResultFixture(client, { data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.42', numericValue: 6.42,
         flags: '["QC_WARN"]', unit: 'pH_units', isCurrent: true } });
     await client.$transaction(async tx => {
         expect(await evidence.recordPreparationRevert(tx, sample, 'PREPARATION', 'Material prepared again', manager)).toBe(1);
@@ -505,12 +506,12 @@ test('preparation reverts preserve scientific values and block review until a va
 
 test('superseding a reverted result clears only the current-result block, retaining all old evidence', async () => {
     const { sample } = await fixture();
-    const old = await client.result.create({ data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.2' } });
+    const old = await createResultFixture(client, { data: { id: id(), sampleId: sample.id, param: 'PH_H2O', value: '6.2' } });
     await client.$transaction(tx => evidence.recordPreparationRevert(tx, sample, 'DRYING', 'Drying repeated', manager));
     const replacementId = id();
     await client.$transaction(async tx => {
         await tx.result.update({ where: { id: old.id }, data: { isCurrent: false, supersededBy: replacementId } });
-        await tx.result.create({ data: { id: replacementId, sampleId: sample.id, param: 'PH_H2O', value: '6.3' } });
+        await createResultFixture(tx, { data: { id: replacementId, sampleId: sample.id, param: 'PH_H2O', value: '6.3' } });
     });
     await evidence.assertNoPreparationRevert(client, sample.id);
     expect(await client.resultEvidenceEvent.count({ where: { resultId: old.id } })).toBe(1);
@@ -642,7 +643,7 @@ test('reasoned gate revert records each current result once and preserves all an
     const { sample, item } = await fixture('PROCESSING', 'PREPARATION', 'COMPLETED');
     const results = [];
     for (const [param, isCurrent] of [['PH_H2O', true], ['EC', true], ['PH_H2O', false]]) {
-        results.push(await client.result.create({ data: { id: id(), sampleId: sample.id, param, value: '6.2', numericValue: 6.2, isCurrent, flags: '["QC_WARN"]' } }));
+        results.push(await createResultFixture(client, { data: { id: id(), sampleId: sample.id, param, value: '6.2', numericValue: 6.2, isCurrent, flags: '["QC_WARN"]' } }));
     }
     const before = await snapshot(sample.id);
     await expect(gates.changeGate({ sampleId: sample.id, gate: 'PREPARATION', status: 'PENDING', reason: ' ', actor: manager, db: client }))

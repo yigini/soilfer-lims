@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -26,7 +27,7 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
             status: 'PENDING_REVIEW', type: 'PARTIAL', workItemCount: 1, workItemIds: JSON.stringify([itemId]) } });
         const item = await createWorkItemFixture(prisma, { data: { id: itemId, sampleId, analysis, assignedLab: labId, assignedTo: username,
             status: itemStatus, result: '6.2', submissionId, batchId: batch?.id, history: JSON.stringify([{ action: 'SUBMITTED', submissionId }]) } });
-        const result = await prisma.result.create({ data: { id: id('R-07'), sampleId, param: analysis, value: '6.2', numericValue: 6.2,
+        const result = await createResultFixture(prisma, { data: { id: id('R-07'), sampleId, param: analysis, value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true, flags: '[]', batchId: batch?.id } });
         return { sampleId, analysis, item, submission, result, batch };
     }

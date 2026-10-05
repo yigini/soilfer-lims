@@ -1,3 +1,4 @@
+const { createResultsFixture } = require('../../services/resultWriteService');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
@@ -31,7 +32,7 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
                 depthBottomCm: 20
             }
         });
-        await prisma.result.createMany({ data: [
+        await createResultsFixture(prisma, { data: [
                         {
                             id: `res-app-gtm-${timestamp}`,
                             param: 'PH_H2O',
