@@ -14,6 +14,7 @@
  * 7. Project-to-Lab Servicing Membership (Owner authority, servicing reconciliation)
  */
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const { createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -138,13 +139,13 @@ describe('WP-D: Laboratory Lifecycle & Project Relationships', () => {
         });
 
         // Create Sample & WorkItem in Lab A
-        sampleA1 = await prisma.sample.create({
+        sampleA1 = await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-WPD-A1-' + SUFFIX,
                 originalId: 'ORIG-A1-' + SUFFIX,
                 labId: labA.id,
                 assignedLab: labA.id,
-                status: 'IN_ANALYSIS',
+                status: 'PROCESSING',
                 matrix: 'SOIL'
             }
         });

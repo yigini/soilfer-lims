@@ -30,7 +30,7 @@ describe('Audit 1.1: duplicate references and atomic analysis reconciliation', (
             await createWorkItemFixture(prisma, { data: { id: `${id}-${analysis}`, sampleId: id, labId: 'LAB-GTM', assignedLab: 'LAB-GTM', analysis, status: 'NOT_ASSIGNED' } });
         }
         if (duplicateStatus) {
-            await prisma.workItem.create({ data: { id: `${id}-duplicate`, sampleId: id, labId: 'LAB-GTM', assignedLab: 'LAB-GTM',
+            await createWorkItemFixture(prisma, { data: { id: `${id}-duplicate`, sampleId: id, labId: 'LAB-GTM', assignedLab: 'LAB-GTM',
                 analysis: 'SOC', status: duplicateStatus, duplicateOf: `${id}-SOC`, history: '[{"note":"Original duplicate retained"}]' } });
         }
         return sample;

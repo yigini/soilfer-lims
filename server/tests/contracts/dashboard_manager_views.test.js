@@ -1,4 +1,4 @@
-const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
+const { createSampleFixture, createWorkItemFixture, createSamplesFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -416,7 +416,7 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
             dryingStatus: 'DONE',
             preparationStatus: 'DONE'
         }));
-        await prisma.sample.createMany({ data: capSamples });
+        await createSamplesFixture(prisma, { data: capSamples });
 
         const capWorkItems = capSamples.map(s => ({
             id: `WI-${s.id}`,
@@ -425,7 +425,7 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
             analysis: 'PH',
             status: 'ACCEPTED'
         }));
-        await prisma.workItem.createMany({ data: capWorkItems });
+        await createWorkItemsFixture(prisma, { data: capWorkItems });
 
         // 1. Dashboard home metric evaluates all 215 candidates (not capped at 200)
         const homeRes = await request(app)

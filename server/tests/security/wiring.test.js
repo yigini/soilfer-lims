@@ -144,9 +144,11 @@ describe('WP-03: Dead-Code & System Wiring Regression Tests', () => {
         expect(readinessCode).toContain("sample.preparationStatus !== 'DONE'");
         expect(stateAuthority).toContain('assertGateEvidence(client, sample, required)');
 
-        // resultsController must reject result entry if preparationStatus !== 'DONE' with 412
-        expect(resultsControllerCode).toContain("sample.preparationStatus !== 'DONE'");
-        expect(resultsControllerCode).toContain("status(412)");
+        // Sample result entry loads the same authoritative gate evidence and retains HTTP 412 for missing evidence.
+        expect(resultsControllerCode).toContain('gateEvidence.loadGateEvidence(db, sample)');
+        expect(resultsControllerCode).toContain('gateEvidence.assertEvidence(report)');
+        expect(resultsControllerCode).toContain("['PREPARATION', 'Sample preparation has not been completed']");
+        expect(resultsControllerCode).toContain('statusCode: 412');
     });
 });
 

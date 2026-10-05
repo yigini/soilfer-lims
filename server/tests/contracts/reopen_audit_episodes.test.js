@@ -73,14 +73,18 @@ describe('SD-17: Reopen Audit Episodes Contract', () => {
         expect(new Date(res.body.sample.episodes[0].approvedAt).toISOString()).toBe('2026-08-15T10:00:00.000Z');
     });
 
-    test('2. Reopening the sample separates analytical episodes in sample detail', async () => {
+    test('2. Refused undo preserves the approved analytical episode and evidence', async () => {
+        const before = await prisma.sample.findUnique({ where: { id: sampleId } });
+        const beforeAudits = await prisma.auditLog.findMany({ where: { sampleId }, orderBy: { id: 'asc' } });
+        const beforeResults = await prisma.result.findMany({ where: { sampleId }, orderBy: { id: 'asc' } });
         const reopenReason = 'Client requested additional micronutrient determinations';
         const res = await request(app)
             .post(`/api/samples/${sampleId}/undo-approve`)
             .set('Authorization', `Bearer ${mgrToken}`)
             .send({ reason: reopenReason });
 
-        expect(res.status).toBe(200);
+        expect(res.status).toBe(409);
+        expect(res.body.code).toBe('AMENDMENT_WORKFLOW_REQUIRED');
 
         const detailRes = await request(app)
             .get(`/api/samples/${sampleId}/detail`)
@@ -89,25 +93,24 @@ describe('SD-17: Reopen Audit Episodes Contract', () => {
         expect(detailRes.status).toBe(200);
         const episodes = detailRes.body.sample.episodes;
         expect(episodes).toBeDefined();
-        expect(episodes.length).toBe(2);
+        expect(episodes.length).toBe(1);
 
         // Episode 1 (Pass 1)
         expect(episodes[0].episodeNumber).toBe(1);
         expect(episodes[0].approvedBy).toBe('initial_manager');
         expect(new Date(episodes[0].approvedAt).toISOString()).toBe('2026-08-15T10:00:00.000Z');
 
-        // Episode 2 (Pass 2)
-        expect(episodes[1].episodeNumber).toBe(2);
-        expect(episodes[1].reopenReason).toContain(reopenReason);
-        expect(episodes[1].reopenedAt).toBeDefined();
+        expect(await prisma.sample.findUnique({ where: { id: sampleId } })).toEqual(before);
+        expect(await prisma.auditLog.findMany({ where: { sampleId }, orderBy: { id: 'asc' } })).toEqual(beforeAudits);
+        expect(await prisma.result.findMany({ where: { sampleId }, orderBy: { id: 'asc' } })).toEqual(beforeResults);
     });
 
-    test('3. Certificate reportAssembly names the approval date and episodes of each pass', async () => {
+    test('3. Certificate reportAssembly retains the approved episode after a refused undo', async () => {
         const { content } = await assembleReport(sampleId, { username: 'test_manager' });
 
         expect(content.sample.episodes).toBeDefined();
-        expect(content.sample.episodes.length).toBe(2);
+        expect(content.sample.episodes.length).toBe(1);
         expect(new Date(content.sample.episodes[0].approvedAt).toISOString()).toBe('2026-08-15T10:00:00.000Z');
-        expect(content.sample.episodes[1].reopenReason).toContain('micronutrient');
+        expect(content.sample.episodes[0].approvedBy).toBe('initial_manager');
     });
 });

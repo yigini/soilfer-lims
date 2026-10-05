@@ -2,6 +2,7 @@ const { createSampleFixture, createWorkItemFixture } = require('../helpers/workf
 const crypto = require('crypto');
 const request = require('supertest');
 const prisma = require('../../prisma');
+const { transitionWorkItem } = require('../../services/workItemStateService');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
 const controller = require('../../controllers/resultsController');
@@ -56,7 +57,7 @@ describe('Catalogue rules also govern the sample results endpoint', () => {
     });
     test('Completed or submitted work cannot be edited through the sample results endpoint', async () => {
         for (const status of ['COMPLETED', 'SUBMITTED', 'ACCEPTED']) {
-            await prisma.workItem.update({ where: { id: workItem.id }, data: { status } });
+            await transitionWorkItem(workItem.id, status, user, 'Reviewed fixture determination');
             expect((await save([{ param, value: '6', methodologyId: method.id }])).code).toBe(400);
         }
         expect((await prisma.result.findFirst({ where: { sampleId, isCurrent: true } })).value).toBe('5');

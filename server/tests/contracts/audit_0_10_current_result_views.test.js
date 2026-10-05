@@ -1,4 +1,4 @@
-const { createWorkItemFixture } = require('../helpers/workflowFixtures');
+const { createWorkItemFixture, createSampleFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const request = require('supertest');
 const app = require('../../app');
@@ -22,7 +22,7 @@ describe('Audit 0.10: current results in exports and working grid', () => {
     });
     async function fixture({ status = 'APPROVED', receptionDate, projectCode = id('PROJ-010').toUpperCase(), assignedLab = labId } = {}) {
         const sampleId = id('SMP-010');
-        const sample = await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId,
+        const sample = await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId,
             assignedLab, status, projectCode, receptionDate: receptionDate ? new Date(receptionDate) : new Date(), requiredAnalyses: '["SOC"]' } });
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-010'), sampleId, analysis: 'SOC', status: 'ACCEPTED', result: '9999' } });
         return { sample, item, projectCode };

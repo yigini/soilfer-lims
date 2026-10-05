@@ -14,6 +14,7 @@
  * 7. Self-Profile Scope Enforcement (PATCH /api/auth/profile allows only name/lang/theme)
  */
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const { createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -158,13 +159,13 @@ describe('WP-C: Staff Lifecycle, Access Control & Lockout Prevention', () => {
         });
 
         // Create a WorkItem assigned to techA1
-        const sample = await prisma.sample.create({
+        const sample = await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-WPC-' + SUFFIX,
                 originalId: 'ORIG-' + SUFFIX,
                 labId: labActiveA.id,
                 assignedLab: labActiveA.id,
-                status: 'IN_ANALYSIS',
+                status: 'PROCESSING',
                 matrix: 'SOIL'
             }
         });

@@ -19,7 +19,7 @@ async function requestClosure(sampleId, analysis, input, actor, db = null) {
         const items = await tx.workItem.findMany({ where: { sampleId: sample.id } });
         const unfinished = items.filter(item => !workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis) &&
             !(['DRYING', 'PREPARATION'].includes(item.analysis) ? ['COMPLETED', 'ACCEPTED', 'WAIVED'] : ['ACCEPTED', 'WAIVED']).includes(item.status));
-        if (unfinished.length) throw new rules.TransitionError('Active work must finish before requesting closure.', 409,
+        if (unfinished.length) throw new rules.TransitionError(`Active work must finish before requesting closure: ${unfinished.map(item => `${item.analysis} (${item.status})`).join(', ')}.`, 409,
             'CLOSURE_ACTIVE_WORK', { activeWorkItems: unfinished.map(({ id, analysis, status }) => ({ id, analysis, status })) });
         const target = archive ? 'ARCHIVED' : 'DISPOSED';
         const sameTask = item => workflow.CLOSURE_TASK_SAMPLE_STATES[item.analysis] === target;

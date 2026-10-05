@@ -1,4 +1,4 @@
-const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { createSampleFixture, createSamplesFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -484,7 +484,7 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
             const now = new Date();
 
             // Create foreign lab samples
-            await prisma.sample.createMany({
+            await createSamplesFixture(prisma, {
                 data: [
                     {
                         id: sForeignRejected,

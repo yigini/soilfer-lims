@@ -514,7 +514,7 @@ exports.updatePhaseStatus = async (req, res) => {
         }
         if (!['DRYING', 'PREPARATION'].includes(gate) ||
             !(gate === 'DRYING' ? workflow.isValidDryingStatus(status) : workflow.isValidPreparationStatus(status))) {
-            return res.status(400).json({ code: 'INVALID_PREPARATION_GATE', error: 'Invalid operational gate or status.' });
+            return res.status(400).json({ code: 'INVALID_PREPARATION_GATE', error: `Invalid operational gate or status: ${gate}=${status}.` });
         }
         if (status === 'DONE') {
             const sample = await prisma.sample.findUnique({ where: { id: String(req.params.id) } });

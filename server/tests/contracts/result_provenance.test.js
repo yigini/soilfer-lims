@@ -1,14 +1,25 @@
-const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { createSampleFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
+const { transitionWorkItem } = require('../../services/workItemStateService');
 const resultsController = require('../../controllers/resultsController');
 const { assembleReport } = require('../../services/reportAssembly');
 
 describe('WP-31: Result Provenance Tracking', () => {
     let testSampleId;
     let createdResultIds = [];
+    const analyst = { username: 'test_analyst', role: 'LAB_TECHNICIAN', labId: 'LAB-DEFAULT' };
+    async function reviewFixture(analyses) {
+        for (const analysis of analyses) for (const status of ['COMPLETED', 'SUBMITTED', 'ACCEPTED']) {
+            await transitionWorkItem(`entry-${testSampleId}-${analysis}`, status, 'system:fixture', 'Reviewed provenance fixture');
+        }
+    }
 
     beforeAll(async () => {
         testSampleId = `SMP-PROV-${Date.now()}`;
+        await prisma.user.upsert({ where: { username: analyst.username }, update: {}, create: {
+            id: analyst.username, username: analyst.username, role: analyst.role, labId: analyst.labId,
+            email: `${analyst.username}@example.test`, password: 'isolated-fixture'
+        } });
         for (const [code, name, units] of [['EC', 'Electrical conductivity', 'dS/m'], ['CLAY_PRED', 'Predicted clay fraction', '%'], ['SOC', 'Soil organic carbon', 'g/kg'], ['TOTAL_N', 'Total nitrogen', 'g/kg']]) {
             await prisma.analysis.upsert({ where: { code }, create: { code, name, units, status: 'active' }, update: { name, units, labId: null } });
         }
@@ -24,6 +35,10 @@ describe('WP-31: Result Provenance Tracking', () => {
                 requiredAnalyses: JSON.stringify(['EC', 'CLAY_PRED', 'SOC', 'TOTAL_N'])
             }
         });
+        await createWorkItemsFixture(prisma, { data: ['EC', 'CLAY_PRED', 'SOC', 'TOTAL_N'].map(analysis => ({
+            id: `entry-${testSampleId}-${analysis}`, sampleId: testSampleId, analysis,
+            assignedLab: analyst.labId, assignedTo: analyst.username, status: 'IN_PROGRESS'
+        })) });
     });
 
     afterAll(async () => {
@@ -61,7 +76,7 @@ describe('WP-31: Result Provenance Tracking', () => {
                     { param: 'CLAY_PRED', value: '28.5', unit: '%', provenance: 'PREDICTED', validation: { valid: true } }
                 ]
             },
-            user: { username: 'test_analyst' }
+            user: analyst
         };
         const res = {
             status: jest.fn().mockReturnThis(),
@@ -96,7 +111,8 @@ describe('WP-31: Result Provenance Tracking', () => {
         });
         createdResultIds.push(derivedRes.id);
 
-        await prisma.workItem.createMany({ data: ['PH', 'EC', 'CLAY_PRED', 'TEXTURE'].map(analysis => ({
+        await reviewFixture(['EC', 'CLAY_PRED']);
+        await createWorkItemsFixture(prisma, { data: ['PH', 'TEXTURE'].map(analysis => ({
             id: `reviewed-${testSampleId}-${analysis}`, sampleId: testSampleId, analysis, status: 'ACCEPTED'
         })) });
 
@@ -122,7 +138,7 @@ describe('WP-31: Result Provenance Tracking', () => {
                     { param: 'SOC', value: '<0.01', unit: 'g/kg', basis: 'OVEN_DRY', validation: { valid: true } }
                 ]
             },
-            user: { username: 'test_analyst' }
+            user: analyst
         };
         const res = {
             status: jest.fn().mockReturnThis(),
@@ -147,7 +163,7 @@ describe('WP-31: Result Provenance Tracking', () => {
                     { param: 'TOTAL_N', value: '1.20', unit: 'g/kg', replicateNo: 1, validation: { valid: true } }
                 ]
             },
-            user: { username: 'test_analyst' }
+            user: analyst
         };
         const reqR2 = {
             params: { sampleId: testSampleId },
@@ -156,7 +172,7 @@ describe('WP-31: Result Provenance Tracking', () => {
                     { param: 'TOTAL_N', value: '1.24', unit: 'g/kg', replicateNo: 2, validation: { valid: true } }
                 ]
             },
-            user: { username: 'test_analyst' }
+            user: analyst
         };
         const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
 
@@ -177,9 +193,7 @@ describe('WP-31: Result Provenance Tracking', () => {
     });
 
     test('6. WP-40: assembleReport embeds basis, replicateNo, and censoring on result items', async () => {
-        await prisma.workItem.createMany({ data: ['SOC', 'TOTAL_N'].map(analysis => ({
-            id: `reviewed-${testSampleId}-${analysis}`, sampleId: testSampleId, analysis, status: 'ACCEPTED'
-        })) });
+        await reviewFixture(['SOC', 'TOTAL_N']);
         const { content } = await assembleReport(testSampleId, { username: 'admin' });
         const allItems = content.resultGroups.flatMap(g => g.items || []);
         

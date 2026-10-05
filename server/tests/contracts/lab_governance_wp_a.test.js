@@ -8,6 +8,7 @@
  */
 'use strict';
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const { createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
@@ -522,13 +523,13 @@ describe('WP-A: Laboratory Governance Security & Access Repairs', () => {
         let testSampleA, testWorkItemA;
 
         beforeAll(async () => {
-            testSampleA = await prisma.sample.create({
+            testSampleA = await createSampleFixture(prisma, {
                 data: {
                     id: 'SMP-A-' + testPrefix,
                     originalId: testPrefix + '-SMP-01',
                     labId: labA.id,
                     assignedLab: labA.id,
-                    status: 'IN_ANALYSIS',
+                    status: 'PROCESSING',
                     receptionDate: new Date(),
                     dryingStatus: 'DONE',
                     preparationStatus: 'DONE',

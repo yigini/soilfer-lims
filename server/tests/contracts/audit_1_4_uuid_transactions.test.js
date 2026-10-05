@@ -1,4 +1,4 @@
-const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
+const { createSampleFixture, createWorkItemFixture, createSamplesFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -152,7 +152,7 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
     test('the production generator creates 500 distinct UUID WorkItems and audit rows at the same timestamp', async () => {
         const samples = Array.from({ length: 250 }, () => ({ id: id(), originalId: id(), labId, assignedLab: labId,
             status: 'PROCESSING', requiredAnalyses: '[]' }));
-        await prisma.sample.createMany({ data: samples });
+        await createSamplesFixture(prisma, { data: samples });
         jest.spyOn(Date, 'now').mockReturnValue(1234567890000);
         jest.spyOn(Math, 'random').mockReturnValue(0);
         const generated = [];

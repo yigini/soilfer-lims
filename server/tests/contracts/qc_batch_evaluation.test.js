@@ -1,4 +1,4 @@
-const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
+const { createSampleFixture, createWorkItemFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -79,7 +79,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
                 assignedLab: labId
             });
         }
-        await prisma.workItem.createMany({ data: itemData });
+        await createWorkItemsFixture(prisma, { data: itemData });
 
         // Attempt to add 41 items to batch -> Should fail with 400
         const addRes = await request(app)
@@ -229,7 +229,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
         const sampleId2 = await specimen('SMP-QC-RACK');
         createdWorkItemIds.push(wid1, wid2);
 
-        await prisma.workItem.createMany({
+        await createWorkItemsFixture(prisma, {
             data: [
                 { id: wid1, sampleId, analysis: 'SOC', status: 'ASSIGNED', labId, assignedLab: labId },
                 { id: wid2, sampleId: sampleId2, analysis: 'SOC', status: 'ASSIGNED', labId, assignedLab: labId }
@@ -392,7 +392,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
             const wid2 = `WI-DUP-2-${Date.now()}`;
             const sampleId2 = await specimen('SMP-QC-DUP');
             createdWorkItemIds.push(wid1, wid2);
-            await prisma.workItem.createMany({
+            await createWorkItemsFixture(prisma, {
                 data: [
                     { id: wid1, sampleId, analysis: 'PH_H2O', status: 'ASSIGNED', labId, assignedLab: labId },
                     { id: wid2, sampleId: sampleId2, analysis: 'PH_H2O', status: 'ASSIGNED', labId, assignedLab: labId }

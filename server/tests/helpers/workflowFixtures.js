@@ -18,4 +18,18 @@ async function createWorkItemFixture(db, { data, include, select }) {
     });
 }
 
-module.exports = { createSampleFixture, createWorkItemFixture };
+async function createSamplesFixture(db, { data }) {
+    return inTransaction(db, async tx => {
+        for (const row of data) await createSampleFixture(tx, { data: row });
+        return { count: data.length };
+    });
+}
+
+async function createWorkItemsFixture(db, { data }) {
+    return inTransaction(db, async tx => {
+        for (const row of data) await createWorkItemFixture(tx, { data: row });
+        return { count: data.length };
+    });
+}
+
+module.exports = { createSampleFixture, createWorkItemFixture, createSamplesFixture, createWorkItemsFixture };

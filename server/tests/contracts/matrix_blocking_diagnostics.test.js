@@ -1,4 +1,4 @@
-const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { createSampleFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -18,17 +18,26 @@ describe('WP-15: Blocking vs Advisory Scientific Matrix Diagnostics', () => {
                 id: testSampleId,
                 originalId: `ORIG-${testSampleId}`,
                 status: 'PROCESSING',
+                dryingStatus: 'DONE', preparationStatus: 'DONE', receptionDate: new Date(),
                 assignedLab: 'GTM-LAB1',
                 labId: 'GTM-LAB1',
                 country: 'GTM'
             }
         });
+        const analysisDefinitions = [['SAND', '%'], ['SILT', '%'], ['CLAY', '%'], ['SOC', 'g/kg'], ['TN', 'g/kg']];
+        for (const [code, units] of analysisDefinitions) await prisma.analysis.upsert({ where: { code },
+            create: { code, name: code, units, status: 'active' }, update: { units, labId: null } });
+        await createWorkItemsFixture(prisma, { data: analysisDefinitions.map(([analysis]) => ({
+            id: `${testSampleId}-${analysis}`, sampleId: testSampleId, assignedLab: 'GTM-LAB1',
+            assignedTo: require('jsonwebtoken').decode(token).username, analysis, status: 'IN_PROGRESS'
+        })) });
     });
 
     afterEach(async () => {
         if (testSampleId) {
             await prisma.result.deleteMany({ where: { sampleId: testSampleId } }).catch(() => {});
             await prisma.auditLog.deleteMany({ where: { sampleId: testSampleId } }).catch(() => {});
+            await prisma.workItem.deleteMany({ where: { sampleId: testSampleId } }).catch(() => {});
             await prisma.sample.delete({ where: { id: testSampleId } }).catch(() => {});
         }
     });

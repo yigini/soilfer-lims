@@ -2,6 +2,7 @@ const { createSampleFixture, createWorkItemFixture } = require('../helpers/workf
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
+const { transitionWorkItem } = require('../../services/workItemStateService');
 const { getAuthToken } = require('../setup');
 
 describe('SD-09: Work Item Status Transition Validation Contract', () => {
@@ -79,11 +80,9 @@ describe('SD-09: Work Item Status Transition Validation Contract', () => {
     });
 
     test('3. Illegal jump from final ACCEPTED state (ACCEPTED → IN_PROGRESS) returns HTTP 409 Conflict', async () => {
-        // Force work item to ACCEPTED
-        await prisma.workItem.update({
-            where: { id: wiId },
-            data: { status: 'ACCEPTED' }
-        });
+        for (const status of ['COMPLETED', 'SUBMITTED', 'ACCEPTED']) {
+            await transitionWorkItem(wiId, status, require('jsonwebtoken').decode(mgrGtmToken), 'Reviewed fixture determination');
+        }
 
         const res = await request(app)
             .put(`/api/work/${wiId}/status`)

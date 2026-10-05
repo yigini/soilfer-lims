@@ -166,10 +166,14 @@ test('late spectral audit failure rolls back scan trash, reopening, history and 
 
 test('a concurrent work item version change loses the reopening CAS and rolls back every write', async () => {
     const f = await fixture(), before = await snapshot(f), transaction = prisma.$transaction.bind(prisma);
+    let reads = 0;
     jest.spyOn(prisma, '$transaction').mockImplementation(callback => transaction(tx => callback({ ...tx,
-        workItem: { ...tx.workItem, updateMany: async args => {
-            await tx.workItem.update({ where: { id: f.item.id }, data: { version: { increment: 1 } } });
-            return tx.workItem.updateMany(args);
+        workItem: { ...tx.workItem, findUnique: async args => {
+            const row = await tx.workItem.findUnique(args);
+            if (args.where.id === f.item.id && ++reads === 2) {
+                await tx.workItem.update({ where: { id: f.item.id }, data: { version: { increment: 1 } } });
+            }
+            return row;
         } } })));
     const response = await remove(f.scan.id);
     expect(response.status).toBe(409); expect(response.body.code).toBe('WORKITEM_STATE_CHANGED');

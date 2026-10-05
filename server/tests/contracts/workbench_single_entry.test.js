@@ -2,6 +2,7 @@
 
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
+const { transitionWorkItem } = require('../../services/workItemStateService');
 const operationalConfirmationService = require('../../services/operationalConfirmationService');
 const workbenchController = require('../../controllers/workbenchController');
 const workItemController = require('../../controllers/workItemController');
@@ -286,10 +287,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
 
         test('Submitting and reviewing scientific determination reconciles Submission and ReviewDecision', async () => {
             // 1. Record pH result
-            await prisma.workItem.update({
-                where: { id: testPhId },
-                data: { status: 'COMPLETED', result: '6.85' }
-            });
+            await transitionWorkItem(testPhId, 'COMPLETED', testTech, 'Recorded pH determination', { result: '6.85' });
 
             // 2. Submit via workbenchController.commitSubmissions
             const submitReq = {

@@ -1,9 +1,12 @@
 'use strict';
 
-const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
+const { createSampleFixture, createWorkItemFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
+const { transitionWorkItem } = require('../../services/workItemStateService');
+const OperationalConfirmationService = require('../../services/operationalConfirmationService');
+const operationalChecklists = require('../../data/operationalChecklists.json');
 const { getAuthToken } = require('../setup');
 const { canFinalApprove } = require('../../services/workEligibility');
 const sampleWorkspaceService = require('../../services/sampleWorkspaceService');
@@ -99,7 +102,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         });
 
         // Seed 26 work items
-        await prisma.workItem.createMany({
+        await createWorkItemsFixture(prisma, {
             data: analyses26.map((a, idx) => ({
                 id: `WI-26-${String(idx + 1).padStart(2, '0')}`,
                 sampleId: sample26Id,
@@ -297,7 +300,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
             }
         });
 
-        await prisma.workItem.createMany({
+        await createWorkItemsFixture(prisma, {
             data: [
                 {
                     id: 'WI-APPR-DRY',
@@ -306,7 +309,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
                     assignedLab: 'LAB-GTM',
                     analysis: 'DRYING',
                     category: 'Operational Gates',
-                    status: 'PENDING'
+                    status: 'NOT_ASSIGNED'
                 },
                 {
                     id: 'WI-APPR-PREP',
@@ -315,7 +318,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
                     assignedLab: 'LAB-GTM',
                     analysis: 'PREPARATION',
                     category: 'Operational Gates',
-                    status: 'PENDING'
+                    status: 'NOT_ASSIGNED'
                 },
                 {
                     id: 'WI-APPR-PH',
@@ -341,22 +344,14 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         expect(prematureRes.body.blockers.length).toBeGreaterThan(0);
 
         // Now satisfy all gates and analyses
-        await prisma.sample.update({
-            where: { id: sampleApprId },
-            data: { dryingStatus: 'DONE', preparationStatus: 'DONE' }
-        });
-        await prisma.workItem.update({
-            where: { id: 'WI-APPR-DRY' },
-            data: { status: 'COMPLETED' }
-        });
-        await prisma.workItem.update({
-            where: { id: 'WI-APPR-PREP' },
-            data: { status: 'COMPLETED' }
-        });
-        await prisma.workItem.update({
-            where: { id: 'WI-APPR-PH' },
-            data: { status: 'ACCEPTED' }
-        });
+        const manager = require('jsonwebtoken').decode(mgrGtmToken);
+        for (const [analysis, workItemId] of [['DRYING', 'WI-APPR-DRY'], ['PREPARATION', 'WI-APPR-PREP']]) {
+            await OperationalConfirmationService.confirmOperation({ actor: manager, workItemId,
+                checklist: operationalChecklists[analysis].steps.map(() => true) });
+        }
+        for (const status of ['ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'SUBMITTED', 'ACCEPTED']) {
+            await transitionWorkItem('WI-APPR-PH', status, manager, 'Reviewed fixture determination');
+        }
 
         // Re-attempt final approval
         const approvedRes = await request(app)
