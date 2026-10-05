@@ -13,3 +13,5 @@ server/prisma/migrations/20261004170000_add_atomic_sample_codes/migration.sql te
 server/prisma/migrations/20261005000000_workflow_state_evidence/migration.sql text eol=lf
 server/prisma/migrations/20261005000100_workflow_state_guards/migration.sql text eol=lf
 server/services/workflowMigrationSources.js text eol=lf
+# Exact committed bytes of the declared #146 synthetic-source deferral.
+server/scripts/rehearsal_docker_boundary.cjs text eol=lf

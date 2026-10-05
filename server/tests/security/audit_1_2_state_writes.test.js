@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 const { execFileSync } = require('node:child_process');
-const { scanSource, scanFiles } = require('../helpers/workflowWriteScanner');
+const { scanSource, scanFiles, deferredSources } = require('../helpers/workflowWriteScanner');
 
 // Exactly the file/export pairs pinned by the author in #179 comment 5986548250.
 const exceptions = [
@@ -47,7 +47,48 @@ test('all handwritten runtime, script, seed and test Sample/WorkItem writes use 
     expect(files).toEqual(expect.arrayContaining(['controllers/sampleController.js', 'services/sampleStateService.js',
         'services/workItemStateService.js', 'tests/contracts/audit_1_2_state_authority.test.js', 'seed.js']));
     const violations = scanFiles(serverRoot, [...new Set(files)], exceptions);
-    expect(violations).toEqual([]);
+    const deferred = violations.filter(finding => finding.code === 'DEFERRED_SYNTHETIC_FAULT_FIXTURE');
+    expect(deferred.length).toBeGreaterThan(0);
+    expect(deferred.every(finding => finding.file === 'scripts/rehearsal_docker_boundary.cjs' && finding.detail.includes('#245'))).toBe(true);
+    expect(violations.filter(finding => finding.code !== 'DEFERRED_SYNTHETIC_FAULT_FIXTURE')).toEqual([]);
+});
+
+test.each([
+    "const {spawnSync}=require('node:child_process');spawnSync('node',['-e',\"db.exec('INSERT INTO Sample (id) VALUES (1)')\"])",
+    "const cp=require('child_process');const code=`db.prepare('UPDATE \\\"WorkItem\\\" SET result = 1')`;cp.spawn('node',['-e',code])",
+    "const cp=require('child_process');cp.exec(`node -e \\\"db.exec('delete from \\\\\\\"Sample\\\\\\\"')\\\"`)",
+    "const fs=require('fs');fs.writeFileSync('program.cjs',`db.exec('UPDATE \\\"WorkItem\\\" SET status = 1')`)",
+    "const fs=require('fs');fs.writeFile('program.mjs','db.exec(`insert into [WorkItem] (id) values (1)`)')",
+    "new Function(\"db.exec('INSERT INTO \\\"Sample\\\" (id) VALUES (1)')\")",
+    "const vm=require('vm');vm.runInNewContext(\"db.exec('DELETE FROM WorkItem')\")",
+    "const vm=require('vm');new vm.Script(\"db.exec('UPDATE Sample SET metadata = 1')\")"
+])('embedded literal programs cannot hide workflow DML: %s', source => {
+    expect(scanSource(source, 'scripts/new-embedded-program.cjs', exceptions))
+        .toEqual([expect.objectContaining({ code: 'EMBEDDED_WORKFLOW_WRITE' })]);
+});
+
+test('a new physical source file with embedded node-e Sample inserts fails the inventory', () => {
+    const file = path.resolve(serverRoot, 'tests/.tmp', `embedded-canary-${randomUUID()}.cjs`);
+    // A source fixture is stored as bytes for inspection; it is never executed.
+    const program = "const {spawn}=require('child_process');spawn('node',['-e',\"db.exec('INSERT INTO Sample (id) VALUES (1)')\"]);";
+    fs.writeFileSync(file, Buffer.from(program, 'utf8'), { flag: 'wx' });
+    try { expect(scanFiles(serverRoot, [path.relative(serverRoot, file)], exceptions))
+        .toEqual([expect.objectContaining({ code: 'EMBEDDED_WORKFLOW_WRITE' })]); }
+    finally { fs.rmSync(file); }
+});
+
+test('the sole deferral is byte-bound inventory; a one-byte change becomes a failing embedded writer', () => {
+    expect(exceptions).toHaveLength(2);
+    expect(deferredSources).toEqual([{ path: 'server/scripts/rehearsal_docker_boundary.cjs',
+        sha256: 'c215311a252b83fb95dcf410d4e9c9bc79c24864ca782123d19631472b226f32',
+        reason: '#146 synthetic Docker fault adapter; deferred, see #245' }]);
+    const filename = 'scripts/rehearsal_docker_boundary.cjs', source = fs.readFileSync(path.join(serverRoot, filename), 'utf8');
+    const reported = scanSource(source, filename, exceptions);
+    expect(reported.length).toBeGreaterThan(0);
+    expect(reported.every(finding => finding.code === 'DEFERRED_SYNTHETIC_FAULT_FIXTURE')).toBe(true);
+    const changed = scanSource(`${source}\n`, filename, exceptions);
+    expect(changed).toHaveLength(reported.length);
+    expect(changed.every(finding => finding.code === 'EMBEDDED_WORKFLOW_WRITE')).toBe(true);
 });
 
 test.each([

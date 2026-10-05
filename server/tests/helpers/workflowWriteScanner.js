@@ -12,6 +12,13 @@ const WORKFLOW_SOURCES = Object.freeze({
     evidence: { directory: '20261005000000_workflow_state_evidence', sha256: 'ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552' },
     guards: { directory: '20261005000100_workflow_state_guards', sha256: '84921ef45fa8609621b38908de5261d716820f2135f2dde1b9a20fafa6fc81ed' }
 });
+// #179 pin 5993219622. This is reported inventory, not a writer/helper
+// exception. A byte change restores failing embedded-write findings.
+const deferredSources = Object.freeze([Object.freeze({
+    path: 'server/scripts/rehearsal_docker_boundary.cjs',
+    sha256: 'c215311a252b83fb95dcf410d4e9c9bc79c24864ca782123d19631472b226f32',
+    reason: '#146 synthetic Docker fault adapter; deferred, see #245'
+})]);
 
 const mutations = new Set(['create', 'createMany', 'createManyAndReturn', 'update', 'updateMany', 'updateManyAndReturn', 'upsert', 'save', 'saveMany', 'bulkUpdate']);
 const sqlMethods = new Set(['prepare', 'exec', 'execute', 'pragma', '$executeRaw', '$executeRawUnsafe', '$queryRaw', '$queryRawUnsafe']);
@@ -301,9 +308,45 @@ function scanSource(source, filename, exceptions = []) {
             }
         }
     }
+    function embeddedProgram(p) {
+        function childProcessModule(object, seen = new Set()) {
+            if (object?.isCallExpression() && object.get('callee').isIdentifier({ name: 'require' })) {
+                return strings(object.get('arguments.0')).some(name => ['child_process', 'node:child_process'].includes(name));
+            }
+            if (object?.isIdentifier()) {
+                const binding = object.scope.getBinding(object.node.name);
+                if (binding?.path.isImportNamespaceSpecifier() || binding?.path.isImportDefaultSpecifier()) {
+                    return ['child_process', 'node:child_process'].includes(binding.path.parentPath.node.source.value);
+                }
+                return bindingValue(object, seen).some(value => childProcessModule(value.path, value.seen));
+            }
+            return false;
+        }
+        const argumentsToCheck = [];
+        if (p.get('callee').isIdentifier({ name: 'Function' })) argumentsToCheck.push(...p.get('arguments'));
+        for (const target of method(p.get('callee'))) {
+            if (['spawn', 'spawnSync', 'execFile', 'execFileSync'].includes(target.name) ||
+                (['exec', 'execSync'].includes(target.name) && childProcessModule(target.object))) {
+                argumentsToCheck.push(...p.get('arguments'));
+            }
+            if (/^writeFile(?:Sync)?$/.test(target.name) &&
+                strings(p.get('arguments.0')).some(file => /\.(?:js|cjs|mjs)$/.test(file))) argumentsToCheck.push(p.get('arguments.1'));
+            if (['Script', 'runInContext', 'runInNewContext', 'runInThisContext', 'compileFunction'].includes(target.name)) {
+                argumentsToCheck.push(p.get('arguments.0'));
+            }
+        }
+        const embeddedDml = /\b(?:INSERT\s+(?:OR\s+\w+\s+)?INTO|UPDATE(?:\s+OR\s+\w+)?|DELETE\s+FROM)\s+\\*["`\[]?(?:Sample|WorkItem)(?:["`\]]|\b)/i;
+        if (!argumentsToCheck.some(argument => strings(argument).some(text => embeddedDml.test(text)))) return;
+        const entry = deferredSources.find(record => record.path === `server/${filename}` &&
+            record.sha256 === createHash('sha256').update(source).digest('hex'));
+        report(p.node, entry ? 'DEFERRED_SYNTHETIC_FAULT_FIXTURE' : 'EMBEDDED_WORKFLOW_WRITE',
+            entry?.reason || 'Embedded Sample/WorkItem DML cannot bypass the workflow source inventory.');
+    }
     traverse(ast, {
         ImportDeclaration(p) { helperImport(p, [p.node.source.value]); },
+        NewExpression(p) { embeddedProgram(p); },
         CallExpression(p) {
+            embeddedProgram(p);
             if (p.get('callee').isIdentifier({ name: 'require' }) || p.node.callee.type === 'Import') helperImport(p, strings(p.get('arguments.0')));
             for (const target of method(p.get('callee'))) {
                 const entities = models(target.object);
@@ -336,4 +379,4 @@ function scanFiles(serverRoot, files, exceptions) {
     return files.flatMap(file => scanSource(fs.readFileSync(path.resolve(serverRoot, file), 'utf8'), file.replace(/\\/g, '/'), exceptions));
 }
 
-module.exports = { scanSource, scanFiles };
+module.exports = { scanSource, scanFiles, deferredSources };

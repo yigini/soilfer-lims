@@ -303,7 +303,14 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
         expect(await client.workItem.findMany({ orderBy: { id: 'asc' } })).toEqual(rows);
         expect(await client.auditLog.findMany({ orderBy: { id: 'asc' } })).toEqual(audits);
         const db = new Database(rehearsalDbPath, { readonly: true });
-        try { expect(db.prepare("SELECT id FROM _schema_migrations WHERE id='v3_lab_operations_20260906'").get()).toBeUndefined(); }
+        try {
+            // Cold CI schemas have no marker table; an existing table on a
+            // marked development template must still contain no new v3 marker.
+            // The complete schema/row/file assertions above cover both shapes.
+            const table = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='_schema_migrations'").get();
+            const marker = table ? db.prepare("SELECT id FROM _schema_migrations WHERE id='v3_lab_operations_20260906'").get() : undefined;
+            expect(marker).toBeUndefined();
+        }
         finally { db.close(); }
     });
 
