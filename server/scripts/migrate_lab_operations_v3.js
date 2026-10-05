@@ -404,27 +404,8 @@ function runMigration({ dryRun, apply, dbPath }) {
         db.pragma('foreign_keys = ON');
         let a94 = collectA94Candidates(db);
         console.log('A94 manual-review candidates:', JSON.stringify(a94.candidates));
-        // #179 pin 5988222743: do not commit other steps or a migration marker
-        // while silently deferring A94. No supersession/order model is invented.
-        if (apply && a94.candidates.length) {
-            const error = new Error('A94 consolidation requires the audited order/cancellation workflow (#182/#183).');
-            error.code = 'A94_REQUIRES_ORDER_WORKFLOW'; error.candidates = a94.candidates;
-            throw error;
-        }
-        // 1. Snapshot baseline metrics for preservation audit
-        const countWorkItems = db.prepare('SELECT COUNT(*) as c FROM "WorkItem"').get()?.c || 0;
-        const countResults = db.prepare('SELECT COUNT(*) as c FROM "Result"').get()?.c || 0;
-        const countReports = db.prepare('SELECT COUNT(*) as c FROM "Report"').get()?.c || 0;
-        const countSamples = db.prepare('SELECT COUNT(*) as c FROM "Sample"').get()?.c || 0;
-
-        console.log('--- BASELINE PRESERVATION METRICS ---');
-        console.log(`Samples:     ${countSamples}`);
-        console.log(`WorkItems:   ${countWorkItems}`);
-        console.log(`Results:     ${countResults}`);
-        console.log(`Reports:     ${countReports}`);
-        console.log('-------------------------------------\n');
-
-        // 0. Check _schema_migrations idempotency gate (read-only; no table creation in dry run)
+        // #179 pin 5991763890: an already-applied startup is a zero-write
+        // no-op. Its read-only A94 inventory must remain visible for #182/#183.
         const MIGRATION_KEY = 'v3_lab_operations_20260906';
         const schemaTableExists = db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='_schema_migrations'").get();
         if (schemaTableExists) {
@@ -432,11 +413,16 @@ function runMigration({ dryRun, apply, dbPath }) {
             if (priorMigration && apply) {
                 console.log(`ℹ️ [SCHEMA MIGRATIONS] Migration '${MIGRATION_KEY}' was already applied at ${priorMigration.appliedAt}.`);
                 console.log('Skipping default re-assertions and data migrations to preserve administrative changes.\n');
+                if (a94.candidates.length) {
+                    console.warn(`A94_MANUAL_REVIEW_PENDING: ${a94.candidates.length} candidate sample(s) tracked on #162 for #182/#183`);
+                    console.warn(JSON.stringify(a94.candidates));
+                }
                 return {
                     success: true,
                     mode: 'APPLY',
                     alreadyApplied: true,
                     audit: {
+                        a94Candidates: a94.candidates,
                         ddlApplied: [],
                         methodologyChanges: [],
                         syntheticPlaceholdersDeprecations: [],
@@ -453,6 +439,25 @@ function runMigration({ dryRun, apply, dbPath }) {
                 };
             }
         }
+
+        // #179 pin 5988222743: an actual unmarked migration cannot apply
+        // other steps or record completion while silently deferring A94.
+        if (apply && a94.candidates.length) {
+            const error = new Error('A94 consolidation requires the audited order/cancellation workflow (#182/#183).');
+            error.code = 'A94_REQUIRES_ORDER_WORKFLOW'; error.candidates = a94.candidates;
+            throw error;
+        }
+        // Snapshot baseline metrics for preservation audit.
+        const countWorkItems = db.prepare('SELECT COUNT(*) as c FROM "WorkItem"').get()?.c || 0;
+        const countResults = db.prepare('SELECT COUNT(*) as c FROM "Result"').get()?.c || 0;
+        const countReports = db.prepare('SELECT COUNT(*) as c FROM "Report"').get()?.c || 0;
+        const countSamples = db.prepare('SELECT COUNT(*) as c FROM "Sample"').get()?.c || 0;
+        console.log('--- BASELINE PRESERVATION METRICS ---');
+        console.log(`Samples:     ${countSamples}`);
+        console.log(`WorkItems:   ${countWorkItems}`);
+        console.log(`Results:     ${countResults}`);
+        console.log(`Reports:     ${countReports}`);
+        console.log('-------------------------------------\n');
 
         const auditTrail = {
             a94Candidates: a94.candidates,

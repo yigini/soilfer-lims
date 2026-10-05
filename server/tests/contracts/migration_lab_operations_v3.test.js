@@ -13,6 +13,7 @@ const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
 const { spawnSync } = require('child_process');
+const { createHash } = require('node:crypto');
 const { PrismaClient } = require('../../prisma_client');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
@@ -162,6 +163,56 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
         expect(secondRun.audit.methodologyChanges.length).toBe(0);
         expect(secondRun.audit.syntheticPlaceholdersDeprecations.length).toBe(0);
         expect(secondRun.audit.analysisStatusUpdates).toBe(0);
+    });
+
+    test.each([true,false])('already-applied startup preserves bytes, marker and rows with A94 candidates=%s', async hasCandidates => {
+        // #179 pin 5991763890: marked deployments never reapply the old
+        // migration, and still expose candidates to the later order workflow.
+        if (hasCandidates) {
+            await client.sample.update({where:{id:'MIG-SMP-001'},data:{requiredAnalyses:'["TEXTURE"]'}});
+            await createWorkItemFixture(client,{data:{id:'WI_MARKED_SAND',sampleId:'MIG-SMP-001',
+                analysis:'SAND',status:'NOT_ASSIGNED'}});
+        }
+        const db=new Database(rehearsalDbPath);
+        let marker;
+        try {
+            db.exec('CREATE TABLE IF NOT EXISTS _schema_migrations(id TEXT PRIMARY KEY,appliedAt DATETIME DEFAULT CURRENT_TIMESTAMP,details TEXT)');
+            db.prepare('INSERT INTO _schema_migrations(id,appliedAt,details) VALUES (?,?,?)')
+                .run('v3_lab_operations_20260906','2026-09-06 14:15:52','Existing deployment marker: preserve exactly');
+            marker=db.prepare('SELECT * FROM _schema_migrations WHERE id=?').get('v3_lab_operations_20260906');
+            expect(db.pragma('wal_checkpoint(FULL)')[0].busy).toBe(0);
+        } finally {db.close();}
+        const before=evidence();
+        const fingerprint=()=>createHash('sha256').update(fs.readFileSync(rehearsalDbPath)).digest('hex');
+        const fileBefore=fingerprint(), changes=[];
+        const originalClose=Database.prototype.close;
+        const capture=jest.spyOn(Database.prototype,'close').mockImplementation(function () {
+            // Observe SQLite's actual counter on the migration connection,
+            // before it closes. A newly opened observer would always report 0.
+            changes.push(this.prepare('SELECT total_changes() AS n').get().n);
+            return originalClose.call(this);
+        });
+        let result;
+        try {result=runMigration({dryRun:false,apply:true,dbPath:rehearsalDbPath});}
+        finally {capture.mockRestore();}
+        expect(changes).toEqual([0]);
+        expect(result).toMatchObject({success:true,mode:'APPLY',alreadyApplied:true,
+            audit:{a94Consolidated:{samples:0,tasks:0}}});
+        expect(result.audit.a94Candidates).toHaveLength(hasCandidates ? 1 : 0);
+        expect(evidence()).toEqual(before);
+        expect(fingerprint()).toBe(fileBefore);
+        const reader=new Database(rehearsalDbPath,{readonly:true});
+        try {expect(reader.prepare('SELECT * FROM _schema_migrations WHERE id=?').get('v3_lab_operations_20260906')).toEqual(marker);}
+        finally {reader.close();}
+        const cli=spawnSync(process.execPath,[path.resolve(__dirname,'../../scripts/migrate_lab_operations_v3.js'),'--apply',
+            '--db',rehearsalDbPath],{encoding:'utf8'});
+        expect(cli.error).toBeUndefined(); expect(cli.status).toBe(0);
+        if (hasCandidates) {
+            expect(cli.stderr).toContain('A94_MANUAL_REVIEW_PENDING: 1 candidate sample(s) tracked on #162 for #182/#183');
+            expect(cli.stderr.split(/\r?\n/).filter(line=>line.startsWith('A94_MANUAL_REVIEW_PENDING:'))).toHaveLength(1);
+            expect(JSON.parse(cli.stderr.split(/\r?\n/).find(line=>line.startsWith('[{')))).toEqual(result.audit.a94Candidates);
+        } else expect(cli.stderr).not.toContain('A94_MANUAL_REVIEW_PENDING');
+        expect(evidence()).toEqual(before); expect(fingerprint()).toBe(fileBefore);
     });
 
     test('4. Preservation Invariant: Existing assigned work items and sample records are preserved', async () => {
