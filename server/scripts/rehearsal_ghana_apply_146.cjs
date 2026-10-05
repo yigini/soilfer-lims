@@ -14,6 +14,10 @@ const path = require('path');
 const cp = require('child_process');
 const crypto = require('crypto');
 const Database = require('better-sqlite3');
+const { createDisposableDatabase, cleanupDisposableDatabase } = require('./journey_db_isolation.cjs');
+const { createSampleFixture } = require('../tests/helpers/workflowFixtures');
+const { PrismaClient } = require('../prisma_client');
+const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 
 const serverDir = path.resolve(__dirname, '..');
 const tmpDir = path.join(serverDir, `.tmp_rehearsal_ghana_${Date.now()}`);
@@ -42,17 +46,10 @@ const baseEnv = {
     GHANA_MANIFEST_PATH: privateManPath
 };
 
-function initBaselineFixture(dbFile) {
-    const srcDb = new Database(path.join(serverDir, 'prisma/dev.db'), { readonly: true });
-    const schemaSqls = srcDb.prepare("SELECT sql FROM sqlite_master WHERE type IN ('table', 'index') AND sql IS NOT NULL AND name NOT LIKE 'sqlite_%'").all().map(r => r.sql);
-    srcDb.close();
-
-    const db = new Database(dbFile);
-    for (const sql of schemaSqls) {
-        try { db.exec(sql); } catch (_) {}
-    }
-
-    // Insert baseline data
+async function initBaselineFixture(dbFile) {
+    // Build checked-in release schema plus every additive guard, without reading working data.
+    const source = createDisposableDatabase();
+    const db = new Database(source.dbPath, {fileMustExist:true});
     db.prepare(`INSERT INTO Lab (id, code, name, country, isActive, createdAt, updatedAt) VALUES (?, 'GHA', 'SoilFER Ghana Lab', 'GHA', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).run(EXPECTED_LAB);
     db.prepare(`INSERT INTO Project (id, code, name, status, labId, createdAt, updatedAt) VALUES ('proj-us-uuid', ?, 'SoilFER USA', 'ACTIVE', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).run(EXPECTED_PROJECT, EXPECTED_LAB);
     db.prepare(`INSERT INTO ProjectLab (id, projectCode, labId, role, createdAt) VALUES ('pl-1', ?, ?, 'PRIMARY', CURRENT_TIMESTAMP)`).run(EXPECTED_PROJECT, EXPECTED_LAB);
@@ -62,18 +59,30 @@ function initBaselineFixture(dbFile) {
     `).run(CONFIG_ID, EXPECTED_LAB, EXPECTED_FORM, EXPECTED_SERVER);
 
     // Insert baseline non-Ghana sample to verify non-interference
-    db.prepare(`
-        INSERT INTO Sample (id, originalId, projectCode, assignedLab, status, metadata, createdAt, updatedAt)
-        VALUES ('smp-base-1', 'GTM-EXISTING-01', 'SOILFER-GTM', 'GTM-LAB1', 'EXPECTED', '{"kept":"original"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    `).run();
-
     db.close();
+    const saved = { path:process.env.DATABASE_PATH, url:process.env.DATABASE_URL, mode:process.env.NODE_ENV };
+    process.env.DATABASE_PATH=source.dbPath;
+    process.env.DATABASE_URL='file:' + source.dbPath;
+    process.env.NODE_ENV='test';
+    const client = new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:' + source.dbPath})});
+    try {
+        await createSampleFixture(client, {data:{id:'smp-base-1',originalId:'GTM-EXISTING-01',
+            projectCode:'SOILFER-GTM',assignedLab:'GTM-LAB1',status:'EXPECTED',metadata:'{"kept":"original"}'}});
+        await client.$disconnect();
+        fs.copyFileSync(source.dbPath, dbFile, fs.constants.COPYFILE_EXCL);
+    } finally {
+        await client.$disconnect();
+        if(saved.path === undefined) delete process.env.DATABASE_PATH; else process.env.DATABASE_PATH=saved.path;
+        if(saved.url === undefined) delete process.env.DATABASE_URL; else process.env.DATABASE_URL=saved.url;
+        if(saved.mode === undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV=saved.mode;
+        cleanupDisposableDatabase(source.runnerDir);
+    }
 }
 
 async function runRehearsal() {
     try {
         const fixtureDb = path.join(tmpDir, 'dev.db');
-        initBaselineFixture(fixtureDb);
+        await initBaselineFixture(fixtureDb);
 
         console.log('\n[Stage 1] Rehearsing Dry-Run Validation...');
         const dryRunEnv = { ...baseEnv, DATABASE_PATH: fixtureDb };
@@ -136,7 +145,7 @@ async function runRehearsal() {
 
         console.log('\n[Stage 3] Rehearsing Precondition Failure & Quiesced External Recovery...');
         const failDb = path.join(tmpDir, 'fail_fixture.db');
-        initBaselineFixture(failDb);
+        await initBaselineFixture(failDb);
 
         // Take quiesced pre-operation backup
         const failDbHandle = new Database(failDb);
@@ -195,7 +204,7 @@ async function runRehearsal() {
 
         console.log('\n[Stage 4] Rehearsing Partial-Apply Mid-Flight Failure & Quiesced External Recovery...');
         const partialDb = path.join(tmpDir, 'partial_fixture.db');
-        initBaselineFixture(partialDb);
+        await initBaselineFixture(partialDb);
 
         // Pre-operation consistent backup
         const partDbHandle = new Database(partialDb);
@@ -208,9 +217,23 @@ async function runRehearsal() {
         // Simulate dirty state: CAS update executed and partial samples inserted
         const dirtyDb = new Database(partialDb);
         dirtyDb.prepare(`UPDATE KoboConfig SET isActive = 1, projectCode = ? WHERE id = ?`).run(EXPECTED_PROJECT, CONFIG_ID);
-        dirtyDb.prepare(`INSERT INTO Sample (id, originalId, projectCode, assignedLab, status, createdAt, updatedAt) VALUES ('smp-part-1', 'GHA-PART-01', ?, ?, 'EXPECTED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).run(EXPECTED_PROJECT, EXPECTED_LAB);
-        dirtyDb.prepare(`INSERT INTO Sample (id, originalId, projectCode, assignedLab, status, createdAt, updatedAt) VALUES ('smp-part-2', 'GHA-PART-02', ?, ?, 'EXPECTED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).run(EXPECTED_PROJECT, EXPECTED_LAB);
         dirtyDb.close();
+        const dirtySettings={path:process.env.DATABASE_PATH,url:process.env.DATABASE_URL,mode:process.env.NODE_ENV};
+        process.env.DATABASE_PATH=partialDb;
+        process.env.DATABASE_URL='file:' + partialDb;
+        process.env.NODE_ENV='test';
+        const dirtyClient=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:' + partialDb})});
+        try {
+            for(const [id, originalId] of [['smp-part-1','GHA-PART-01'],['smp-part-2','GHA-PART-02']]) {
+                await createSampleFixture(dirtyClient,{data:{id,originalId,projectCode:EXPECTED_PROJECT,
+                    assignedLab:EXPECTED_LAB,status:'EXPECTED'}});
+            }
+        } finally {
+            await dirtyClient.$disconnect();
+            if(dirtySettings.path === undefined) delete process.env.DATABASE_PATH; else process.env.DATABASE_PATH=dirtySettings.path;
+            if(dirtySettings.url === undefined) delete process.env.DATABASE_URL; else process.env.DATABASE_URL=dirtySettings.url;
+            if(dirtySettings.mode === undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV=dirtySettings.mode;
+        }
 
         // Verify database is now dirty
         const dirtyCheck = new Database(partialDb, { readonly: true });
@@ -248,7 +271,7 @@ async function runRehearsal() {
 
         console.log('\n[Stage 5] Rehearsing Interruption & Child Process Termination...');
         const interruptDb = path.join(tmpDir, 'interrupt_fixture.db');
-        initBaselineFixture(interruptDb);
+        await initBaselineFixture(interruptDb);
 
         // Pre-operation consistent backup
         const intDbHandle = new Database(interruptDb);

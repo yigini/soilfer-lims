@@ -378,6 +378,10 @@ function canPublish(sample, report, user, options = {}) {
 const UNFINISHED_WORK_STATUSES = [
     'ASSIGNED',
     'IN_PROGRESS',
+    'REPEAT_REQUIRED',
+    'REANALYSIS_REQUIRED',
+    'ON_HOLD',
+    'AWAITING_VERIFICATION',
     'RECORDED',
     'SUBMITTED',
     'PENDING_REVIEW',
@@ -387,7 +391,7 @@ const UNFINISHED_WORK_STATUSES = [
 
 /**
  * Canonical predicate building Prisma WHERE clause for unfinished work items.
- * Accounts for analytical work in progress, recorded, submitted for review, or returned,
+ * Accounts for analytical work in progress, held, awaiting verification, or needing a repeat,
  * as well as completed determinations awaiting technician submission.
  */
 function getUnfinishedWorkWhere(username = null, labId = null) {

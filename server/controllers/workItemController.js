@@ -8,9 +8,11 @@ const prisma = require('../prisma');
 const analysisService = require('../services/analysisService');
 const workflow = require('../workflowContract');
 const { createNotification } = require('./notificationController');
-const { getAnalysisName, getAnalysisCategory } = require('../services/analysisService');
+const { getAnalysisName } = require('../services/analysisService');
 const { getDisplayName } = require('./messageController');
 const wsServer = require('../wsServer');
+const stateRules = require('../services/workflowStateRules');
+const { transitionWorkItem } = require('../services/workItemStateService');
 
 // Helper to get effective analysis list for a sample
 const getEffectiveAnalyses = (sample) => {
@@ -18,257 +20,16 @@ const getEffectiveAnalyses = (sample) => {
 };
 
 
-async function preflightDefaults(codes, sample, existingCodes = [], db = prisma) {
-    const resolved = new Map();
-    const selections = await require('../services/methodResolution').resolveDefaultSelections(codes.filter(c => !existingCodes.includes(c)), sample.assignedLab || sample.labId, db);
-    for (const [analysisCode, selection] of selections) {
-        if (selection.error) throw new Error(selection.error);
-        resolved.set(analysisCode, selection.method?.id || null);
-    }
-    return resolved;
-}
-
 /**
  * Generate Work Items for a Sample (Internal Hook)
  * Called when Sample -> LAB_ID_ASSIGNED or ACCEPTED
  */
-exports.generateWorkItemsForSample = async (sample, tx) => {
+exports.generateWorkItemsForSample = async (sample, tx, actor = 'system:intake-work-generation') => {
     const service = require('../services/intakeWorkItemService');
-    return tx ? service.generate(tx, sample) : prisma.$transaction(client => service.generate(client, sample));
+    return tx ? service.generate(tx, sample, undefined, actor) : prisma.$transaction(client => service.generate(client, sample, undefined, actor));
 };
 
-/**
- * SD-03: Reconcile Work Items when sample analysis list changes
- * Three-way reconcile:
- * 1. NOT_ASSIGNED, no result -> Delete row, audit deletion
- * 2. Assigned or in progress, no result -> Require reason; set WAIVED with reason and actor; audit
- * 3. Any result recorded (current or superseded) -> Refuse with 409 naming analysis and result
- */
-async function reconcileWorkItems(tx, sample, targetAnalyses, user, reason) {
-    const { id } = sample;
-    const labId = sample.assignedLab || null;
-    const targetList = Array.isArray(targetAnalyses) ? targetAnalyses : [];
-
-    const uniqueTarget = normalizeAnalysisCodes(targetList);
-    const targetSet = new Set(uniqueTarget);
-
-    const operationalGates = ['DRYING', 'PREPARATION', 'ARCHIVING', 'DISPOSAL'];
-    const existingItems = await tx.workItem.findMany({
-        where: {
-            sampleId: String(id),
-            analysis: { notIn: operationalGates }
-        }
-    });
-
-    const itemsToRemove = existingItems.filter(item => !targetSet.has(item.analysis) && item.status !== 'WAIVED');
-
-    // Refuse before any mutation: a canonical item may still be referenced by
-    // a marked duplicate, including a waived duplicate outside the removal set.
-    const canonicalRemovalIds = itemsToRemove.filter(item => item.duplicateOf == null).map(item => item.id);
-    const duplicateReferences = canonicalRemovalIds.length ? await tx.workItem.findMany({
-        where: { duplicateOf: { in: canonicalRemovalIds } },
-        select: { id: true, analysis: true }
-    }) : [];
-    if (duplicateReferences.length) {
-        return {
-            conflict: true,
-            status: 409,
-            code: 'WORKITEM_DUPLICATES_PRESENT',
-            error: 'Cannot remove an analysis while marked duplicate work items refer to its canonical item.',
-            refused: duplicateReferences
-        };
-    }
-
-
-    // 1. Check for recorded results on any items to be removed
-    const conflicts = [];
-    for (const item of itemsToRemove) {
-        let recordedResult = null;
-        if (item.result && String(item.result).trim() !== '') {
-            recordedResult = item.result;
-        } else {
-            const dbResult = await tx.result.findFirst({
-                where: {
-                    sampleId: String(id),
-                    param: item.analysis
-                }
-            });
-            if (dbResult) {
-                recordedResult = dbResult.value || (dbResult.numericValue != null ? String(dbResult.numericValue) : 'Recorded');
-            }
-        }
-
-        if (recordedResult) {
-            conflicts.push({
-                analysis: item.analysis,
-                workItemId: item.id,
-                result: recordedResult
-            });
-        }
-    }
-
-    if (conflicts.length > 0) {
-        return {
-            conflict: true,
-            status: 409,
-            error: `Cannot remove analysis '${conflicts[0].analysis}': a result is already recorded (${conflicts[0].result})`,
-            conflicts,
-            refused: conflicts
-        };
-    }
-
-    // 2. Check for reason if any assigned / in-progress item is being removed
-    const assignedOrInProgress = itemsToRemove.filter(i => i.status !== workflow.WORK_ITEM_STATES.NOT_ASSIGNED);
-    if (assignedOrInProgress.length > 0 && (!reason || String(reason).trim() === '')) {
-        return {
-            conflict: true,
-            status: 400,
-            error: `A reason is required to remove or waive in-progress analysis '${assignedOrInProgress[0].analysis}'.`
-        };
-    }
-
-    const existingCodeSet = new Set(existingItems.map(i => i.analysis));
-    const codesToAdd = uniqueTarget.filter(code => !existingCodeSet.has(code));
-    const defaultMethods = await preflightDefaults(codesToAdd, sample, [], tx);
-
-    const deletedItems = [];
-    const waivedItems = [];
-    const addedItems = [];
-
-    // 3. Process Removals and Waivers
-    for (const item of itemsToRemove) {
-        if (item.status === workflow.WORK_ITEM_STATES.NOT_ASSIGNED) {
-            await tx.workItem.delete({ where: { id: item.id } });
-            await tx.auditLog.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    entity: 'WORKITEM',
-                    entityId: item.id,
-                    action: 'WORKITEM_DELETED',
-                    details: `${user?.username || 'User'} removed unstarted analysis ${item.analysis}`,
-                    performedBy: user?.username || 'SYSTEM',
-                    timestamp: new Date(),
-                    sampleId: String(id),
-                    analysisCode: item.analysis,
-                    labId: sample.assignedLab || sample.labId
-                }
-            });
-            deletedItems.push(item.analysis);
-        } else {
-            const history = typeof item.history === 'string' ? JSON.parse(item.history) : (item.history || []);
-            history.push({
-                status: workflow.WORK_ITEM_STATES.WAIVED,
-                reason: String(reason).trim(),
-                waivedBy: user?.username || 'SYSTEM',
-                timestamp: new Date().toISOString()
-            });
-
-            await tx.workItem.update({
-                where: { id: item.id },
-                data: {
-                    status: workflow.WORK_ITEM_STATES.WAIVED,
-                    reanalysisReason: String(reason).trim(),
-                    history: JSON.stringify(history)
-                }
-            });
-
-            await tx.auditLog.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    entity: 'WORKITEM',
-                    entityId: item.id,
-                    action: 'WORKITEM_WAIVED',
-                    details: `${user?.username || 'User'} waived ${item.analysis}. Reason: ${String(reason).trim()}`,
-                    performedBy: user?.username || 'SYSTEM',
-                    timestamp: new Date(),
-                    sampleId: String(id),
-                    analysisCode: item.analysis,
-                    labId: sample.assignedLab || sample.labId,
-                    after: JSON.stringify({ status: 'WAIVED', reason: String(reason).trim() })
-                }
-            });
-            waivedItems.push({ analysis: item.analysis, reason: String(reason).trim() });
-        }
-    }
-
-    // 4. Process Additions
-
-    if (codesToAdd.length > 0) {
-        const catalogueRecords = await tx.analysis.findMany({
-            where: { code: { in: codesToAdd } },
-            select: { code: true, executionOrder: true }
-        });
-        const orderMap = {};
-        catalogueRecords.forEach(a => { orderMap[a.code] = a.executionOrder ?? 100; });
-        codesToAdd.sort((a, b) => (orderMap[a] ?? 100) - (orderMap[b] ?? 100));
-
-        for (const analysisCode of codesToAdd) {
-            const name = await getAnalysisName(analysisCode, tx);
-            const category = await getAnalysisCategory(analysisCode, tx);
-            const wiId = crypto.randomUUID();
-            const history = [{
-                status: workflow.WORK_ITEM_STATES.NOT_ASSIGNED,
-                timestamp: new Date().toISOString(),
-                note: 'Work Item Generated'
-            }];
-
-            const defaultMethodId = defaultMethods.get(analysisCode) || null;
-
-            const wi = await tx.workItem.create({
-                data: {
-                    id: wiId,
-                    sampleId: String(id),
-                    labId: labId,
-                    assignedLab: sample.assignedLab,
-                    analysis: analysisCode,
-                    category: category,
-                    status: workflow.WORK_ITEM_STATES.NOT_ASSIGNED,
-                    assignedTo: null,
-                    priority: 'NORMAL',
-                    methodologyId: defaultMethodId,
-                    history: JSON.stringify(history)
-                }
-            });
-
-            await tx.auditLog.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    entity: 'SAMPLE',
-                    entityId: String(id),
-                    action: 'WORKITEM_GENERATED',
-                    details: `System generated analysis: ${name}`,
-                    performedBy: user?.username || 'SYSTEM',
-                    timestamp: new Date(),
-                    analysisCode: analysisCode,
-                    labId: sample.assignedLab || labId
-                }
-            });
-
-            addedItems.push(analysisCode);
-        }
-    }
-
-    return {
-        conflict: false,
-        added: addedItems,
-        waived: waivedItems,
-        removed: deletedItems,
-        summary: `${addedItems.length} added, ${waivedItems.length} waived, ${deletedItems.length} removed`
-    };
-}
-
-exports.reconcileWorkItemsForSample = async (sample, targetAnalyses, user, reason) => {
-    try {
-        return await prisma.$transaction(tx => reconcileWorkItems(tx, sample, targetAnalyses, user, reason));
-    } catch (error) {
-        // The rejected transaction has already rolled back every earlier write.
-        if (error.code === 'P2003' || error.code === 'SQLITE_CONSTRAINT_FOREIGNKEY') {
-            return { conflict: true, status: 409, code: 'WORKITEM_REFERENCE_CONFLICT',
-                error: 'A referenced work item cannot be removed; no reconciliation changes were saved.' };
-        }
-        throw error;
-    }
-};
+exports.reconcileWorkItemsForSample = require('../services/workItemReconciliationService').reconcileWorkItemsForSample;
 
 // --- API ENDPOINTS ---
 
@@ -487,33 +248,23 @@ exports.assignWork = async (req, res) => {
                 action: 'ASSIGNED'
             });
 
-            await prisma.workItem.update({
-                where: { id: item.id },
-                data: {
-                    status: workflow.WORK_ITEM_STATES.ASSIGNED,
+            const analysis = await getAnalysisName(item.analysis);
+            try {
+                await transitionWorkItem(item.id, workflow.WORK_ITEM_STATES.ASSIGNED, user,
+                    item.status === 'ON_HOLD' ? req.body.reason : `Assigned to ${assignee}`, {
                     assignedTo: assignee,
                     assignedBy: user.username,
                     assignedAt: now,
                     priority: priority || item.priority || 'NORMAL',
                     dueDate: dueDate ? new Date(dueDate) : (item.dueDate || null),
                     history: JSON.stringify(history)
-                }
-            });
-
-            const analysis = await getAnalysisName(item.analysis);
-            await prisma.auditLog.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    entity: 'WORKITEM',
-                    entityId: item.id,
-                    action: 'WORKITEM_ASSIGNED',
-                    details: `${user.username} assigned ${analysis} to ${assignee}`,
-                    performedBy: user.username,
-                    timestamp: now,
-                    sampleId: item.sampleId,
-                    analysisCode: item.analysis
-                }
-            });
+                }, null, { expected: { status: item.status, version: item.version }, audit: {
+                    action: 'WORKITEM_ASSIGNED', details: `${user.username} assigned ${analysis} to ${assignee}` } });
+            } catch (error) {
+                if (!error.statusCode) throw error;
+                errors.push({ id: item.id, error: error.message, code: error.code });
+                continue;
+            }
 
             // Send notification (bell) to assignee
             await createNotification(
@@ -549,19 +300,21 @@ exports.assignWork = async (req, res) => {
         // Cleanup: If any items were in broken state but now assigned, it's fixed.
         // We also run a global cleanup for this specific sample just in case.
         if (dbItems.length > 0) {
-            await prisma.workItem.updateMany({
+            const orphaned = await prisma.workItem.findMany({
                 where: {
                     sampleId: dbItems[0].sampleId,
                     status: 'ASSIGNED',
                     assignedTo: null
-                },
-                data: { status: 'NOT_ASSIGNED' }
+                }
             });
+            for (const item of orphaned) await transitionWorkItem(item.id, 'NOT_ASSIGNED', user, 'Repair assignment without an assignee', {},
+                null, { expected: { status: item.status, version: item.version }, audit: { action: 'WORKITEM_ASSIGNMENT_REPAIRED' } });
         }
         if (assignedCount === 0 && dbItems.length > 0) {
             return res.status(400).json({
                 success: false,
                 error: errors[0]?.error || 'Failed to assign work items due to business rules.',
+                ...(errors[0]?.code && { code: errors[0].code }),
                 errors
             });
         }
@@ -591,7 +344,8 @@ exports.assignWork = async (req, res) => {
         res.json({ success: true, assigned: assignedCount, errors: errors.length > 0 ? errors : undefined });
     } catch (error) {
         console.error('[assignWork] Error:', error);
-        res.status(500).json({ error: 'Failed to assign work' });
+        res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to assign work',
+            ...(error.code && { code: error.code }) });
     }
 };
 
@@ -789,28 +543,18 @@ exports.updateWorkItemStatus = async (req, res) => {
 
         const sample = await prisma.sample.findUnique({ where: { id: String(item.sampleId) } });
         if (!sample) return res.status(404).json({ error: 'Parent Sample not found' });
+        stateRules.assertScope(user, sample);
 
         if (status === workflow.WORK_ITEM_STATES.IN_PROGRESS || status === workflow.WORK_ITEM_STATES.COMPLETED) {
-            if (item.category !== 'Post-Analytical') {
-                if (sample.dryingStatus === 'FAILED') {
-                    return res.status(400).json({ error: 'Analysis locked: Drying FAILED.' });
-                }
-
-                if (item.analysis === 'DRYING') {
-                    const allowedStates = ['ACCEPTED', 'PROCESSING', 'SUBMITTED_PARTIAL'];
-                    if (!allowedStates.includes(sample.status)) {
-                        return res.status(400).json({ error: `Cannot start DRYING. Sample status: ${sample.status}` });
-                    }
-                } else if (item.analysis === 'PREPARATION') {
-                    if (sample.dryingStatus !== 'DONE') {
-                        return res.status(400).json({ error: 'Analysis locked: Drying not completed.' });
-                    }
-                } else if (item.category !== 'Operational Gates') {
-                    // SD-05: Enforce prerequisite gate on execution (HTTP 412 Precondition Failed)
-                    if (sample.preparationStatus !== 'DONE') {
-                        return res.status(412).json({ error: 'Sample preparation has not been completed' });
-                    }
-                }
+            const readiness = await require('../services/workbenchReadinessService').evaluateExecutionReadiness(prisma, { ...item, sample }, user);
+            if (!readiness.isReady) {
+                const missingPreparation = !readiness.blockers.includes('GATE_STATE_MISMATCH') &&
+                    readiness.blockers.includes('PREPARATION_PREREQUISITE_BLOCKED');
+                return res.status(missingPreparation ? 412 : 409).json({ error: missingPreparation
+                    ? 'Sample preparation has not been completed' : readiness.reasons.join(' '),
+                code: readiness.blockers.includes('GATE_STATE_MISMATCH') ? 'GATE_STATE_MISMATCH'
+                    : readiness.blockers.includes('ANALYSIS_PREREQUISITE_BLOCKED') ? 'ANALYSIS_PREREQUISITE_BLOCKED'
+                        : readiness.blockers[0] || 'EXECUTION_BLOCKED' });
             }
         }
 
@@ -955,49 +699,32 @@ exports.updateWorkItemStatus = async (req, res) => {
             updateData.completedAt = now;
         }
 
-        // Concurrency check using version
-        const updatedItem = await prisma.workItem.update({
-            where: { id, version: version !== undefined ? version : item.version },
-            data: updateData
-        });
-
-        const analysisName = getAnalysisName(item.analysis);
-        const operations = [];
-
-        if (item.status !== status) {
-            operations.push(prisma.auditLog.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    entity: 'WORKITEM',
-                    entityId: id,
-                    action: 'STATUS_CHANGE',
-                    details: `${user.username} changed status to ${status}${equipmentId ? ` using equipment ${equipmentId}` : ''}`,
-                    performedBy: user.username,
-                    timestamp: now,
-                    sampleId: String(item.sampleId),
-                    analysisCode: item.analysis
-                }
-            }));
-        }
-
-        // Handle Equipment Usage Logging
-        if (equipmentId) {
-            operations.push(prisma.workItemEquipmentUse.create({
+        const nextStatus = status || item.status;
+        delete updateData.status;
+        const reasonRequired = nextStatus === 'ON_HOLD' || item.status === 'ON_HOLD' ||
+            item.status === 'COMPLETED' && nextStatus === 'IN_PROGRESS';
+        const updatedItem = await stateRules.inTransaction(prisma, async tx => {
+            const updated = await transitionWorkItem(id, nextStatus, user,
+                reasonRequired ? req.body.reason : req.body.reason || 'Work item updated via API', updateData, tx,
+                { expected: { status: item.status, version: version !== undefined ? version : item.version },
+                    conflictCode: 'VERSION_CONFLICT', audit: {
+                        action: item.status !== nextStatus ? 'STATUS_CHANGE' : 'WORKITEM_UPDATED',
+                        details: `${user.username} updated ${item.analysis} to ${nextStatus}${equipmentId ? ` using equipment ${equipmentId}` : ''}`
+                    } });
+            if (equipmentId) await tx.workItemEquipmentUse.create({
                 data: {
                     id: `use-${id}-${Date.now()}`,
-                    labId: item.labId || item.assignedLab,
+                    labId: item.assignedLab || sample.assignedLab || user.labId,
                     workItemId: id,
                     sampleId: item.sampleId,
                     equipmentId,
                     usedAt: now,
                     notes: `Used during ${item.analysis} result entry`
                 }
-            }));
-        }
-
-        if (operations.length > 0) {
-            await prisma.$transaction(operations);
-        }
+            });
+            return updated;
+        });
+        const analysisName = await getAnalysisName(item.analysis);
 
         // Real-time push: broadcast WORKITEM_UPDATE to all connected users
         try {
@@ -1026,7 +753,9 @@ exports.updateWorkItemStatus = async (req, res) => {
             return res.status(409).json({ error: 'Version conflict or item not found', code: 'VERSION_CONFLICT' });
         }
         console.error('[updateWorkItemStatus] Error:', error);
-        res.status(500).json({ error: 'Failed to update status' });
+        const mapped = stateRules.mapStateError(error);
+        res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to update status',
+            ...(mapped.code && { code: mapped.code }) });
     }
 };
 
@@ -1043,8 +772,9 @@ exports.reviewWorkItem = async (req, res) => {
     const { id } = req.params;
     let { status, note, decision, reason } = req.body;
     if (!status && decision) {
-        status = decision === 'ACCEPT' ? 'ACCEPTED' : (decision === 'REJECT' ? 'REANALYSIS_REQUIRED' : decision);
+        status = decision === 'ACCEPT' ? 'ACCEPTED' : (['REJECT', 'RETURN'].includes(decision) ? 'REPEAT_REQUIRED' : (['WAIVE', 'OMIT'].includes(decision) ? 'WAIVED' : decision));
     }
+    status = workflow.normalizeWorkItemState(status);
     const user = req.user;
 
     try {
@@ -1058,7 +788,7 @@ exports.reviewWorkItem = async (req, res) => {
         const effectiveReason = (note || reason || '').trim();
 
         // SD-10: Require mandatory reason on rejection
-        if ([workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED, workflow.WORK_ITEM_STATES.WAIVED].includes(status)) {
+        if ([workflow.WORK_ITEM_STATES.REPEAT_REQUIRED, workflow.WORK_ITEM_STATES.WAIVED].includes(status)) {
             if (!effectiveReason) {
                 return res.status(400).json({ error: status === workflow.WORK_ITEM_STATES.WAIVED ? 'A reason is required when waiving work' : 'A reason is required when rejecting work for reanalysis', code: 'REVIEW_REASON_REQUIRED' });
             }
@@ -1086,7 +816,7 @@ exports.reviewWorkItem = async (req, res) => {
 
         const allowedReviewStatuses = [
             workflow.WORK_ITEM_STATES.ACCEPTED,
-            workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED,
+            workflow.WORK_ITEM_STATES.REPEAT_REQUIRED,
             workflow.WORK_ITEM_STATES.WAIVED
         ];
         if (!allowedReviewStatuses.includes(status)) {
@@ -1142,7 +872,7 @@ exports.reviewWorkItem = async (req, res) => {
         history.push({
             status,
             note: effectiveReason || note || 'Manager Review',
-            ...(status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED ? { submissionId: item.submissionId, reason: effectiveReason } : {}),
+            ...(status === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED ? { submissionId: item.submissionId, reason: effectiveReason } : {}),
             changedBy: user.username,
             timestamp: now
         });
@@ -1151,7 +881,7 @@ exports.reviewWorkItem = async (req, res) => {
             status,
             history: JSON.stringify(history)
         };
-        if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
+        if (status === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED) {
             updateData.reanalysisReason = effectiveReason;
             updateData.submissionId = null;
         }
@@ -1168,9 +898,7 @@ exports.reviewWorkItem = async (req, res) => {
                 operations.push(async tx => {
                     const { transitionSample } = require('../services/sampleStateService');
                     await transitionSample(item.sampleId, workflow.CLOSURE_TASK_SAMPLE_STATES[item.analysis], user,
-                        'Sample closed via work item review', {}, tx).catch(err => {
-                        console.warn('[reviewItem] Warning: sample closure transition failed:', err.message);
-                    });
+                        'Sample closed via work item review', {}, tx);
                 });
             }
 
@@ -1192,17 +920,9 @@ exports.reviewWorkItem = async (req, res) => {
                     }
                 }));
             }
-        } else if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
-            if (item.analysis === 'DRYING') {
-                operations.push(tx => tx.sample.update({
-                    where: { id: String(item.sampleId) },
-                    data: { dryingStatus: 'PENDING' }
-                }));
-            } else if (item.analysis === 'PREPARATION') {
-                operations.push(tx => tx.sample.update({
-                    where: { id: String(item.sampleId) },
-                    data: { preparationStatus: 'PENDING' }
-                }));
+        } else if (status === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED) {
+            if (['DRYING', 'PREPARATION'].includes(item.analysis)) {
+                operations.push(tx => require('../services/operationalGateStateService').resetReviewedGate(item, user, effectiveReason, tx));
             }
 
             // Sync spectralData status to REJECTED when spectral work is rejected
@@ -1228,7 +948,7 @@ exports.reviewWorkItem = async (req, res) => {
 
         const decisionVerdict = status === workflow.WORK_ITEM_STATES.ACCEPTED
             ? 'ACCEPT'
-            : (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED ? 'RETURN' : 'WAIVE');
+            : (status === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED ? 'RETURN' : 'OMIT');
 
         operations.push(tx => tx.reviewDecision.create({
             data: {
@@ -1246,18 +966,7 @@ exports.reviewWorkItem = async (req, res) => {
             }
         }));
 
-        operations.push(tx => tx.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'WORKITEM',
-                entityId: id,
-                action: 'REVIEW',
-                details: `Work Item ${status} by ${user.username}`,
-                performedBy: user.username,
-                timestamp: now,
-                sampleId: String(item.sampleId)
-            }
-        }));
+
 
         // Send message to technician if assigned
         if (item.assignedTo) {
@@ -1276,7 +985,7 @@ exports.reviewWorkItem = async (req, res) => {
 
             const isApproved = status === workflow.WORK_ITEM_STATES.ACCEPTED;
             const isWaived = status === workflow.WORK_ITEM_STATES.WAIVED;
-            const isRejected = status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED;
+            const isRejected = status === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED;
 
             let subject, body;
             if (isApproved) {
@@ -1323,10 +1032,12 @@ exports.reviewWorkItem = async (req, res) => {
         }
 
         const updated = await commitReview(prisma, item, status, user, updateData, async tx => {
-            for (const operation of operations) await operation(tx);
-            if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
+            const rows = [];
+            for (const operation of operations) rows.push(await operation(tx));
+            if (status === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED) {
                 await invalidateReturnedResults(tx, item, user, effectiveReason);
             }
+            return rows;
         });
         const result = { workItemId: id, status, decision: decisionVerdict };
         if (item.submissionId) await reconcileSubmission(prisma, item.submissionId, user, [result]);
@@ -1359,7 +1070,8 @@ exports.reviewWorkItem = async (req, res) => {
 };
 
 exports.reviewWorkItemsBulk = async (req, res) => {
-    const { workItemIds, status, note, reason } = req.body;
+    const { workItemIds, note, reason } = req.body;
+    const status = workflow.normalizeWorkItemState(req.body.status);
     const user = req.user;
 
     try {
@@ -1371,7 +1083,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
             return res.status(400).json({ error: 'Review note and reason must be text.', code: 'INVALID_REVIEW_REASON' });
         }
         const effectiveReason = (note || reason || '').trim();
-        if ([workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED, workflow.WORK_ITEM_STATES.WAIVED].includes(status)) {
+        if ([workflow.WORK_ITEM_STATES.REPEAT_REQUIRED, workflow.WORK_ITEM_STATES.WAIVED].includes(status)) {
             if (!effectiveReason) {
                 return res.status(400).json({ error: status === workflow.WORK_ITEM_STATES.WAIVED ? 'A reason is required when waiving work' : 'A reason is required when rejecting work for reanalysis', code: 'REVIEW_REASON_REQUIRED' });
             }
@@ -1379,7 +1091,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
 
         const allowedReviewStatuses = [
             workflow.WORK_ITEM_STATES.ACCEPTED,
-            workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED,
+            workflow.WORK_ITEM_STATES.REPEAT_REQUIRED,
             workflow.WORK_ITEM_STATES.WAIVED
         ];
         if (!allowedReviewStatuses.includes(status)) {
@@ -1487,14 +1199,17 @@ exports.reviewWorkItemsBulk = async (req, res) => {
         const errors = [];
         for (const item of items) {
             try { assertReviewable(item, status); }
-            catch (error) { errors.push({ workItemId: item.id, code: error.code }); continue; }
+            catch (error) {
+                if (error.code !== 'ITEM_NOT_SUBMITTED') throw error;
+                errors.push({ workItemId: item.id, code: error.code }); continue;
+            }
             const operations = [];
             const notifications = [];
             const history = typeof item.history === 'string' ? JSON.parse(item.history) : (item.history || []);
             history.push({
                 status,
                 note: effectiveReason || note || 'Bulk Manager Review',
-                ...(status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED ? { submissionId: item.submissionId, reason: effectiveReason } : {}),
+                ...(status === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED ? { submissionId: item.submissionId, reason: effectiveReason } : {}),
                 changedBy: user.username,
                 timestamp: now
             });
@@ -1503,7 +1218,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                 status,
                 history: JSON.stringify(history)
             };
-            if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
+            if (status === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED) {
                 updateData.reanalysisReason = effectiveReason;
                 updateData.submissionId = null;
             }
@@ -1531,22 +1246,11 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                 }
             }
 
-            operations.push(tx => tx.auditLog.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    entity: 'WORKITEM',
-                    entityId: item.id,
-                    action: 'REVIEW',
-                    details: `Work Item ${status} by ${user.username} (Bulk)`,
-                    performedBy: user.username,
-                    timestamp: now,
-                    sampleId: String(item.sampleId)
-                }
-            }));
+
 
             const decisionVerdict = status === workflow.WORK_ITEM_STATES.ACCEPTED
                 ? 'ACCEPT'
-                : (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED ? 'RETURN' : 'WAIVE');
+                : (status === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED ? 'RETURN' : 'OMIT');
 
             operations.push(tx => tx.reviewDecision.create({
                 data: {
@@ -1574,7 +1278,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
 
                 const isApproved = status === workflow.WORK_ITEM_STATES.ACCEPTED;
                 const isWaived = status === workflow.WORK_ITEM_STATES.WAIVED;
-                const isRejected = status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED;
+                const isRejected = status === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED;
 
                 let subject, body;
                 if (isApproved) {
@@ -1621,10 +1325,15 @@ exports.reviewWorkItemsBulk = async (req, res) => {
             }
             try {
                 await commitReview(prisma, item, status, user, updateData, async tx => {
-                    for (const operation of operations) await operation(tx);
-                    if (status === workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED) {
+                    const rows = [];
+                    for (const operation of operations) rows.push(await operation(tx));
+                    if (status === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED) {
+                        if (['DRYING', 'PREPARATION'].includes(item.analysis)) {
+                            await require('../services/operationalGateStateService').resetReviewedGate(item, user, effectiveReason, tx);
+                        }
                         await invalidateReturnedResults(tx, item, user, effectiveReason);
                     }
+                    return rows;
                 });
                 results.push({ workItemId: item.id, status, decision: decisionVerdict });
                 for (const notify of notifications) await notify();

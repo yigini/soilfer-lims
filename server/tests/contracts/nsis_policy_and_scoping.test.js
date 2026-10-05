@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -12,10 +14,11 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
     let sampleHoldGtm;
 
     beforeAll(async () => {
+        require('../../services/exchangeStateService').getDb();
         const timestamp = Date.now();
 
         // 1. Approved GTM Sample
-        sampleApprovedGtm = await prisma.sample.create({
+        sampleApprovedGtm = await createSampleFixture(prisma, {
             data: {
                 id: `test-s-app-gtm-${timestamp}`,
                 originalId: `GTM-APPROVED-${timestamp}`,
@@ -25,9 +28,10 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
                 projectCode: 'SOILFER-GTM',
                 status: 'APPROVED',
                 depthTopCm: 0,
-                depthBottomCm: 20,
-                results: {
-                    create: [
+                depthBottomCm: 20
+            }
+        });
+        await prisma.result.createMany({ data: [
                         {
                             id: `res-app-gtm-${timestamp}`,
                             param: 'PH_H2O',
@@ -36,13 +40,10 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
                             unit: 'pH_units',
                             isCurrent: true
                         }
-                    ]
-                }
-            }
-        });
+                    ].map(result => ({ ...result, sampleId: sampleApprovedGtm.id })) });
 
         // 2. Pending / Unapproved GTM Sample
-        samplePendingGtm = await prisma.sample.create({
+        samplePendingGtm = await createSampleFixture(prisma, {
             data: {
                 id: `test-s-pend-gtm-${timestamp}`,
                 originalId: `GTM-PENDING-${timestamp}`,
@@ -57,7 +58,7 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
         });
 
         // 3. Approved HND Sample (different lab)
-        sampleApprovedHnd = await prisma.sample.create({
+        sampleApprovedHnd = await createSampleFixture(prisma, {
             data: {
                 id: `test-s-app-hnd-${timestamp}`,
                 originalId: `HND-APPROVED-${timestamp}`,
@@ -72,7 +73,7 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
         });
 
         // 4. Sample on Provenance Hold
-        sampleHoldGtm = await prisma.sample.create({
+        sampleHoldGtm = await createSampleFixture(prisma, {
             data: {
                 id: `test-s-hold-gtm-${timestamp}`,
                 originalId: `GTM-HOLD-${timestamp}`,
@@ -80,7 +81,7 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
                 assignedLab: 'GTM-LAB1',
                 country: 'GTM',
                 projectCode: 'SOILFER-GTM',
-                status: 'AMBIGUOUS_PROVENANCE_HOLD',
+                status: 'ON_HOLD',
                 rejectionReason: 'PROVENANCE_HOLD: Conflicting field submissions'
             }
         });
@@ -126,11 +127,11 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
             where: { id: { in: [`res-app-gtm-${sampleApprovedGtm?.id.split('-').pop()}`] } }
         }).catch(() => {});
 
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: {
                 id: { in: [sampleApprovedGtm?.id, samplePendingGtm?.id, sampleApprovedHnd?.id, sampleHoldGtm?.id].filter(Boolean) }
             }
-        }).catch(() => {});
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
 
         await prisma.apiKey.deleteMany({
             where: {

@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const request = require('supertest');
@@ -185,8 +186,8 @@ describe('Audit 1.0: persistent lab policies', () => {
     test('reported-value export stores the exact resolved version and selection rule without changing old selections', async () => {
         const sampleId = id('POL-EXPORT'), project = id('POL-PROJECT');
         await edit([{ key: 'results.reportedValueRule', value: 'LATEST_VALID' }]);
-        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, assignedLab: labId, projectCode: project, status: 'APPROVED', requiredAnalyses: '["SOC"]' } });
-        await prisma.workItem.create({ data: { id: id('POL-EXPORT-WI'), sampleId, assignedLab: labId, analysis: 'SOC', status: 'ACCEPTED', result: '9999' } });
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, assignedLab: labId, projectCode: project, status: 'APPROVED', requiredAnalyses: '["SOC"]' } });
+        await createWorkItemFixture(prisma, { data: { id: id('POL-EXPORT-WI'), sampleId, assignedLab: labId, analysis: 'SOC', status: 'ACCEPTED', result: '9999' } });
         for (const value of [10, 20]) await prisma.result.create({ data: { id: id('POL-EXPORT-RES'), sampleId, param: 'SOC', value: String(value), unit: 'g/kg', isValid: true, isCurrent: true,
             createdAt: new Date(`2026-10-0${value / 10}T12:00:00Z`) } });
         const response = await request(app).post('/api/exports/data').set('Authorization', `Bearer ${manager}`).send({ type: 'WET_CHEM', project });
@@ -202,8 +203,8 @@ describe('Audit 1.0: persistent lab policies', () => {
     test('QC evaluates persisted lab and method limits and leaves old evaluations unchanged on a policy edit', async () => {
         const batch = await prisma.batch.create({ data: { id: id('POL-BATCH'), labId, analysis: analysisCode, profile: 'RACK_40', status: 'OPEN', createdBy: 'fixture' } });
         const sampleId = id('POL-SAMPLE');
-        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, assignedLab: labId, status: 'PROCESSING' } });
-        await prisma.workItem.create({ data: { id: id('POL-WORK'), sampleId, assignedLab: labId, analysis: analysisCode, methodologyId, batchId: batch.id, status: 'COMPLETED' } });
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, assignedLab: labId, status: 'PROCESSING' } });
+        await createWorkItemFixture(prisma, { data: { id: id('POL-WORK'), sampleId, assignedLab: labId, analysis: analysisCode, methodologyId, batchId: batch.id, status: 'COMPLETED' } });
         await edit([{ key: 'qc.blankMaxAllowed', value: .2 }, { key: 'qc.controlMinRecovery', value: 80 },
             { key: 'qc.controlMaxRecovery', value: 120 }, { key: 'qc.duplicateMaxRpd', value: 30, analysisCode, methodologyId }]);
         const response = await request(app).post(`/api/qc/batches/${batch.id}/evaluate`).set('Authorization', `Bearer ${technician}`)
@@ -228,8 +229,8 @@ describe('Audit 1.0: persistent lab policies', () => {
     test('report generation freezes the lab policy version and content across later changes', async () => {
         const sampleId = id('POL-REPORT');
         await edit([], { presetCode: 'ADVISORY' });
-        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status: 'APPROVED' } });
-        await prisma.workItem.create({ data: { id: id('POL-REPORT-WI'), sampleId, assignedLab: labId, analysis: 'PH_H2O', status: 'ACCEPTED', result: '7.2' } });
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status: 'APPROVED' } });
+        await createWorkItemFixture(prisma, { data: { id: id('POL-REPORT-WI'), sampleId, assignedLab: labId, analysis: 'PH_H2O', status: 'ACCEPTED', result: '7.2' } });
         await prisma.result.create({ data: { id: id('POL-REPORT-RES'), sampleId, param: 'PH_H2O', value: '7.2', numericValue: 7.2, isValid: true, isCurrent: true } });
         const response = await request(app).post(`/api/reports/generate/${sampleId}`).set('Authorization', `Bearer ${manager}`).send({});
         expect({ status: response.status, body: response.body }).toMatchObject({ status: 200 });

@@ -1,4 +1,5 @@
 {
+  "spectralWorkflow": {"reopenTitle":"Rouvrir le travail terminé","reopenMessage":"Cette modification affecte un travail terminé. Saisissez un motif pour le rouvrir et réessayer.","reason":"Motif (obligatoire)","retry":"Rouvrir et réessayer","trashTitle":"Mettre à la corbeille","trashMessage":"Mettre le spectre de {label} à la corbeille ? Saisissez un motif. Vous pourrez le restaurer ensuite.","batchTrashMessage":"Mettre les {count} spectres sélectionnés à la corbeille ? Saisissez un motif. Vous pourrez les restaurer ensuite.","trashConfirm":"Mettre à la corbeille","partialTitle":"Importation partiellement terminée","receiptTitle":"Reçu d’importation","receiptCounts":"{count} spectres enregistrés ; {failed} échecs.","retryFailed":"Vérifier et réessayer les entrées restantes"},
   "numbers": {"ambiguous":"Précisez le séparateur décimal ou de milliers.","invalid":"Format de nombre invalide.","policyInvalid":"Le format numérique du laboratoire est indisponible ou invalide.","decimal":"Séparateur décimal","thousands":"Séparateur de milliers","noGrouping":"Non configuré","space":"Espace"},
   "sampleLookup": { "title": "Recherche d'échantillon", "ambiguous": "Cet identifiant correspond à plusieurs échantillons :", "failed": "L'échantillon est introuvable ou ne peut pas être chargé. Vérifiez l'identifiant et la connexion." },
   "dataSheet": {
@@ -2424,6 +2425,7 @@
       "repeats_maxAttemptsBeforeNcr": "Tentatives avant revue de non-conformité (0 : sans limite)",
       "repeats_technicianSelfRepeatBeforeSubmit": "Autoriser la répétition par le technicien avant soumission",
       "review_secondPersonRequired": "Exiger un second réviseur",
+      "gate_verificationRequired": "Exiger la vérification des étapes de préparation par un responsable",
       "report_amendmentRequiresSecondPerson": "Exiger une seconde personne pour les modifications",
       "report_numberFormat": "Format du numéro de rapport",
       "sample_codeFormat": "Format du code d’échantillon",

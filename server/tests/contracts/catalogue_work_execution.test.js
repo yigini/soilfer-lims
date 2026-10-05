@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const crypto = require('crypto');
 const workbench = require('../../controllers/workbenchController');
@@ -20,9 +21,9 @@ describe('Catalogue to operational work and numeric validation', () => {
     beforeAll(async () => {
         await prisma.analysis.create({ data: { code: analysis, name: 'Configured test measurement', status: 'active', units: 'mg/kg', validation: JSON.stringify({ min: 0, max: 10 }) } });
         await prisma.user.create({ data: { id: `CAT_USER_${tag}`, username: user.username, email: `${user.username}@example.test`, password: 'test-only', role: user.role, labId: user.labId } });
-        await prisma.sample.create({ data: { id: sampleId, originalId: `FIELD_${tag}`, labId: `S_${tag}`, assignedLab: user.labId, status: 'ACCEPTED', dryingStatus: 'PENDING', preparationStatus: 'PENDING' } });
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: `FIELD_${tag}`, labId: `S_${tag}`, assignedLab: user.labId, status: 'ACCEPTED', dryingStatus: 'PENDING', preparationStatus: 'PENDING' } });
         for (const [key, code] of [['drying', 'DRYING'], ['prep', 'PREPARATION'], ['numeric', analysis]]) {
-            await prisma.workItem.create({ data: { id: ids[key], sampleId, labId: user.labId, assignedLab: user.labId, analysis: code, category: key === 'numeric' ? 'Chemical' : 'Operational Gates', assignedTo: user.username, status: 'ASSIGNED', version: 1 } });
+            await createWorkItemFixture(prisma, { data: { id: ids[key], sampleId, labId: user.labId, assignedLab: user.labId, analysis: code, category: key === 'numeric' ? 'Chemical' : 'Operational Gates', assignedTo: user.username, status: 'ASSIGNED', version: 1 } });
         }
     });
     test('Numeric drafts are blocked before preparation; no Result or draft is written', async () => {

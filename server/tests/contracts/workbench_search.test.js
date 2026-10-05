@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -33,7 +34,7 @@ describe('Issue #123: Workbench Search & Multi-Field Query Contract', () => {
         const ts = Date.now();
 
         // Sample A1 (SOC analysis)
-        sampleA1 = await prisma.sample.create({
+        sampleA1 = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-SRCH-A1-${ts}`,
                 labId: `LAB-SRCH-001-${ts}`,
@@ -45,7 +46,7 @@ describe('Issue #123: Workbench Search & Multi-Field Query Contract', () => {
         });
 
         // Sample A2 (PH analysis)
-        sampleA2 = await prisma.sample.create({
+        sampleA2 = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-SRCH-A2-${ts}`,
                 labId: `LAB-SRCH-002-${ts}`,
@@ -57,7 +58,7 @@ describe('Issue #123: Workbench Search & Multi-Field Query Contract', () => {
         });
 
         // Sample B (in Lab B, also SOC analysis)
-        sampleB = await prisma.sample.create({
+        sampleB = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-SRCH-B-${ts}`,
                 labId: `LAB-SRCH-B-${ts}`,
@@ -69,7 +70,7 @@ describe('Issue #123: Workbench Search & Multi-Field Query Contract', () => {
         });
 
         // Work items
-        workItemA1 = await prisma.workItem.create({
+        workItemA1 = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-SRCH-A1-${ts}`,
                 sampleId: sampleA1.id,
@@ -81,7 +82,7 @@ describe('Issue #123: Workbench Search & Multi-Field Query Contract', () => {
             }
         });
 
-        workItemA2 = await prisma.workItem.create({
+        workItemA2 = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-SRCH-A2-${ts}`,
                 sampleId: sampleA2.id,
@@ -93,7 +94,7 @@ describe('Issue #123: Workbench Search & Multi-Field Query Contract', () => {
             }
         });
 
-        workItemB = await prisma.workItem.create({
+        workItemB = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-SRCH-B-${ts}`,
                 sampleId: sampleB.id,
@@ -215,7 +216,7 @@ describe('Issue #123: Workbench Search & Multi-Field Query Contract', () => {
         const specimenCode = `GHA0816-QUEUE-${ts}`;
         const techAUsername = 'test_lab_technician_labsearcha';
 
-        const sampleReal = await prisma.sample.create({
+        const sampleReal = await createSampleFixture(prisma, {
             data: {
                 id: specimenCode,
                 labId: specimenCode,
@@ -226,7 +227,7 @@ describe('Issue #123: Workbench Search & Multi-Field Query Contract', () => {
             }
         });
 
-        const workItemSpecimen = await prisma.workItem.create({
+        const workItemSpecimen = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-SPECIMEN-${ts}`,
                 sampleId: sampleReal.id,
@@ -263,7 +264,7 @@ describe('Issue #123: Workbench Search & Multi-Field Query Contract', () => {
             }
         });
 
-        const workItemWithMethod = await prisma.workItem.create({
+        const workItemWithMethod = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-METH-${ts}`,
                 duplicateOf: workItemA2.id,
@@ -301,7 +302,7 @@ describe('Issue #123: Workbench Search & Multi-Field Query Contract', () => {
             }
         });
 
-        const workItemWithStd = await prisma.workItem.create({
+        const workItemWithStd = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-STD-${ts}`,
                 duplicateOf: workItemA1.id,
@@ -331,7 +332,7 @@ describe('Issue #123: Workbench Search & Multi-Field Query Contract', () => {
         const specimenCode = `GHA0816-SEARCH-${ts}`;
         const techAUsername = 'test_lab_technician_labsearcha';
 
-        const sampleReal = await prisma.sample.create({
+        const sampleReal = await createSampleFixture(prisma, {
             data: {
                 id: specimenCode,
                 labId: specimenCode,
@@ -342,7 +343,7 @@ describe('Issue #123: Workbench Search & Multi-Field Query Contract', () => {
             }
         });
 
-        const workItemReal = await prisma.workItem.create({
+        const workItemReal = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-GHA-SRCH-${ts}`,
                 sampleId: sampleReal.id,

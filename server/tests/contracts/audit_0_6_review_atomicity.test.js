@@ -6,20 +6,36 @@ const prisma = require('../../prisma');
 const workflow = require('../../workflowContract');
 const qcController = require('../../controllers/qcController');
 const { getAuthToken } = require('../setup');
+const { createLegacyClosureDatabase, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const labId = 'LAB-AUDIT-06';
 const id = prefix => `${prefix}-${crypto.randomUUID()}`;
 
 describe('Audit 0.6: review state and atomic status/version compare-and-set', () => {
     let manager, technician;
+    const legacyDatabases = [];
     beforeAll(async () => { manager = await getAuthToken('LAB_MANAGER', labId); technician = await getAuthToken('LAB_TECHNICIAN', labId); });
     afterEach(() => jest.restoreAllMocks());
+    afterAll(async () => { for (const database of legacyDatabases) await database.close(); });
     const post = (path, body) => request(app).post(path).set('Authorization', `Bearer ${manager}`).send(body);
     async function fixture({ status = 'SUBMITTED', analysis = 'PH_H2O', sampleStatus = 'PROCESSING', batchStatus } = {}) {
+        if (status === 'PENDING') {
+            const database = await createLegacyClosureDatabase({ analysis, labId });
+            legacyDatabases.push(database);
+            useLegacyRouteDatabase(prisma, database.client);
+            const submitter = jwt.decode(technician);
+            await database.client.user.create({ data: { id: submitter.id, username: submitter.username,
+                email: `${submitter.username}@example.test`, password: 'isolated-fixture', role: 'LAB_TECHNICIAN', labId } });
+            const item = await prisma.workItem.findUnique({ where: { id: database.workItemId } });
+            const result = await prisma.result.create({ data: { id: id('R-06-LEGACY'), sampleId: database.sampleId, param: analysis,
+                value: '6.2', numericValue: 6.2, isCurrent: true, isValid: true, flags: '[]' } });
+            return { sampleId: database.sampleId, item, result, batch: null };
+        }
         const sampleId = id('S-06');
-        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
             status: sampleStatus, dryingStatus: 'DONE', preparationStatus: 'DONE' } });
         const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-06'), analysis, labId, status: batchStatus, createdBy: 'test' } }) : null;
-        const item = await prisma.workItem.create({ data: { id: id('WI-06'), sampleId, analysis, assignedLab: labId,
+        const item = await createWorkItemFixture(prisma, { data: { id: id('WI-06'), sampleId, analysis, assignedLab: labId,
             status, result: '6.2', history: '[]', batchId: batch?.id } });
         const result = await prisma.result.create({ data: { id: id('R-06'), sampleId, param: analysis, value: '6.2',
             numericValue: 6.2, isCurrent: true, isValid: true, flags: '[]', batchId: batch?.id } });
@@ -35,7 +51,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
     async function packageFixture(states) {
         const f = await fixture({ status: states[0] });
         const items = [f.item];
-        for (const status of states.slice(1)) items.push(await prisma.workItem.create({ data: {
+        for (const status of states.slice(1)) items.push(await createWorkItemFixture(prisma, { data: {
             id: id('WI-06-PACKAGE'), sampleId: f.sampleId, assignedLab: labId, analysis: 'EC', status, result: '5.4', history: '[]', duplicateOf: items.find(item => item.analysis === 'EC')?.id || null
         } }));
         const submission = await prisma.submission.create({ data: { id: id('SUB-06'), sampleId: f.sampleId, assignedLab: labId,
@@ -48,7 +64,8 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         const f = await fixture({ status, sampleStatus: 'APPROVED' }), before = await snapshot(f);
         for (const verdict of ['REANALYSIS_REQUIRED', 'WAIVED']) {
             const res = await post(`/api/work/${f.item.id}/review`, { status: verdict, reason: 'Review reason' });
-            expect(res.status).toBe(409); expect(res.body.code).toBe('ITEM_NOT_SUBMITTED');
+            expect(res.status).toBe(409);
+            expect(res.body.code).toBe(verdict === 'REANALYSIS_REQUIRED' ? 'AMENDMENT_WORKFLOW_REQUIRED' : 'ITEM_NOT_SUBMITTED');
             expect(await snapshot(f)).toEqual(before);
         }
     });
@@ -64,6 +81,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
     });
     test('a changed version with the same submitted status loses the CAS with no review writes', async () => {
         const f = await fixture();
+        const beforeAudits = await prisma.auditLog.findMany({ where: { entityId: f.item.id }, orderBy: { id: 'asc' } });
         jest.spyOn(qcController, 'checkItemBatchStatus').mockImplementationOnce(async () => {
             await prisma.workItem.update({ where: { id: f.item.id }, data: { version: { increment: 1 } } });
             return { allowed: true };
@@ -71,14 +89,14 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         const res = await post(`/api/work/${f.item.id}/review`, { status: 'ACCEPTED' });
         expect(res.status).toBe(409); expect(res.body.code).toBe('ITEM_NOT_SUBMITTED');
         expect(await prisma.reviewDecision.count({ where: { workItemId: f.item.id } })).toBe(0);
-        expect(await prisma.auditLog.count({ where: { entityId: f.item.id } })).toBe(0);
+        expect(await prisma.auditLog.findMany({ where: { entityId: f.item.id }, orderBy: { id: 'asc' } })).toEqual(beforeAudits);
         expect((await prisma.workItem.findUnique({ where: { id: f.item.id } })).status).toBe('SUBMITTED');
     });
     test.each(['ACCEPTED', 'REANALYSIS_REQUIRED', 'WAIVED'])('bulk %s commits eligible rows and refuses already accepted rows', async status => {
         const valid = await fixture(), refused = await fixture({ status: 'ACCEPTED' }), before = await snapshot(refused);
         const response = await post('/api/work/review/bulk', { workItemIds: [valid.item.id, refused.item.id], status, reason: 'Bulk reason' });
         expect(response.status).toBe(200); expect(response.body.count).toBe(1);
-        expect(response.body.results).toEqual([expect.objectContaining({ workItemId: valid.item.id, status })]);
+        expect(response.body.results).toEqual([expect.objectContaining({ workItemId: valid.item.id, status: workflow.normalizeWorkItemState(status) })]);
         expect(response.body.errors).toEqual([{ workItemId: refused.item.id, code: 'ITEM_NOT_SUBMITTED' }]);
         expect(await snapshot(refused)).toEqual(before);
         expect(await prisma.reviewDecision.count({ where: { workItemId: valid.item.id } })).toBe(1);
@@ -119,6 +137,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
     });
     test.each(['bulk', 'submission'])('concurrent %s review has one successful row and exactly one decision', async route => {
         const f = await packageFixture(['SUBMITTED']);
+        const beforeAudits = await prisma.auditLog.findMany({ where: { entityId: f.item.id }, orderBy: { id: 'asc' } });
         const body = route === 'bulk' ? { workItemIds: [f.item.id], status: 'ACCEPTED' }
             : { decisions: [{ workItemId: f.item.id, decision: 'ACCEPT' }] };
         const path = route === 'bulk' ? '/api/work/review/bulk' : `/api/submissions/${f.submission.id}/review`;
@@ -128,7 +147,11 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         if (refused.body.code === 'SUBMISSION_NOT_REVIEWABLE') expect(refused.body.status).toBe('REVIEWED');
         else expect(refused.body.errors).toEqual([{ workItemId: f.item.id, code: 'ITEM_NOT_SUBMITTED' }]);
         expect(await prisma.reviewDecision.count({ where: { workItemId: f.item.id } })).toBe(1);
-        expect(await prisma.auditLog.count({ where: { entityId: f.item.id } })).toBe(1);
+        const afterAudits = await prisma.auditLog.findMany({ where: { entityId: f.item.id }, orderBy: { id: 'asc' } });
+        expect(afterAudits).toHaveLength(beforeAudits.length + 1);
+        expect(afterAudits.filter(row => !beforeAudits.some(previous => previous.id === row.id))).toEqual([
+            expect.objectContaining({ action: route === 'submission' ? 'REVIEW_DECISION_MADE' : 'REVIEW' })]);
+        for (const previous of beforeAudits) expect(afterAudits.find(row => row.id === previous.id)).toEqual(previous);
         expect(await prisma.auditLog.count({ where: { entityId: f.submission.id, action: 'SUBMISSION_REVIEWED' } })).toBe(1);
     });
     test('partial submission summary uses committed state and RETURN keeps the scientific value', async () => {

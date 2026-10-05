@@ -1,4 +1,5 @@
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
 /**
  * Project Management Audit Regression & Acceptance Contract Suite (A01-A20, P01-P14)
@@ -17,6 +18,7 @@
  * - Truthful stage counts & cumulative received decoupling (A15 / PM-09)
  */
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -115,7 +117,7 @@ describe('Project Management Audit Regression & Acceptance Contracts', () => {
         });
 
         // Samples: SA assigned to Lab A, SB assigned to Lab B
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-A-' + SUFFIX,
                 originalId: 'SMP-A-' + SUFFIX,
@@ -126,7 +128,7 @@ describe('Project Management Audit Regression & Acceptance Contracts', () => {
                 status: 'EXPECTED'
             }
         });
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-B-' + SUFFIX,
                 originalId: 'SMP-B-' + SUFFIX,
@@ -134,7 +136,7 @@ describe('Project Management Audit Regression & Acceptance Contracts', () => {
                 projectCode: projectAlpha.code,
                 labId: 'ACC-B-' + SUFFIX,
                 assignedLab: labB.id,
-                status: 'RELEASED',
+                status: 'APPROVED',
                 receptionDate: new Date()
             }
         });
@@ -142,7 +144,7 @@ describe('Project Management Audit Regression & Acceptance Contracts', () => {
 
     afterAll(async () => {
         try {
-            await prisma.sample.deleteMany({ where: { projectCode: { in: [projectAlpha?.code, projectSecret?.code] } } });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { projectCode: { in: [projectAlpha?.code, projectSecret?.code] } } }), select: { id: true } })).map(row => row.id), { single: false });
             await prisma.projectLab.deleteMany({ where: { projectCode: { in: [projectAlpha?.code, projectSecret?.code] } } });
             await prisma.project.deleteMany({ where: { code: { in: [projectAlpha?.code, projectSecret?.code] } } });
             await prisma.user.deleteMany({ where: { id: { in: [userAdmin?.id, userOwner?.id, userService?.id, userForeign?.id, userPM?.id, userNational?.id] } } });
@@ -385,7 +387,7 @@ describe('Project Management Audit Regression & Acceptance Contracts', () => {
             expect(res.body.messageCode).toBe('MANIFEST_PROCESSED');
             expect(res.body.data).toEqual({ count: 1, skipped: 0 });
 
-            await prisma.sample.deleteMany({ where: { id: 'MANIFEST-TEST-1' } });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: 'MANIFEST-TEST-1' } }), select: { id: true } })).map(row => row.id), { single: false });
         });
     });
 });

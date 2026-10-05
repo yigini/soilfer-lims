@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -36,7 +38,7 @@ describe('Stage C: Consignment & High-Throughput Batch Intake Contract (RC-12 - 
         });
 
         // Pre-create one EXPECTED sample to verify transitioning to ACCEPTED in batch
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testSamples[0],
                 originalId: testSamples[0],
@@ -65,12 +67,12 @@ describe('Stage C: Consignment & High-Throughput Batch Intake Contract (RC-12 - 
                     ]
                 }
             });
-            await prisma.workItem.deleteMany({
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
                 where: { sampleId: { in: sampleIds } }
-            });
-            await prisma.sample.deleteMany({
+            }), select: { id: true } })).map(row => row.id), { single: false });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
                 where: { id: { in: sampleIds } }
-            });
+            }), select: { id: true } })).map(row => row.id), { single: false });
             if (createdConsignmentId) {
                 await prisma.consignment.deleteMany({
                     where: { id: createdConsignmentId }

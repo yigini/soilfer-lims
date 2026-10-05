@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -30,24 +31,28 @@ describe('Scenario H: Scientific Validation', () => {
         techToken = loginRes.body.token;
 
         // 2. Create Sample & WorkItem directly (shortcut for unit test)
-        const sample = samplesDb.create({
-            labId: 'LAB-VAL-001',
+        const sample = await createSampleFixture(prisma, { data: { labId: 'LAB-VAL-001',
             assignedLab: 'LAB-VAL',
             status: 'PROCESSING',
             dryingStatus: 'DONE',
-            preparationStatus: 'DONE'
-        });
+            preparationStatus: 'DONE',
+            id: require('node:crypto').randomUUID(),
+            originalId: 'LAB-VAL-001',
+            country: 'GTM',
+            countryName: 'GTM',
+            projectCode: 'SOILFER-US',
+            receptionDate: new Date(),
+            metadata: '{}',
+            history: '[]' } });
         sampleId = sample.id;
 
-        const wi = workItemsDb.create({
-            id: `WI-VAL-${uniqueSuffix}`,
+        const wi = await createWorkItemFixture(prisma, { data: { id: `WI-VAL-${uniqueSuffix}`,
             sampleId: sample.id,
             analysis: 'PH_H2O',
             assignedLab: 'LAB-VAL',
             assignedTo: techUser.username,
             status: 'IN_PROGRESS',
-            history: []
-        });
+            history: JSON.stringify([]) } });
         workItemId = wi.id;
     });
 

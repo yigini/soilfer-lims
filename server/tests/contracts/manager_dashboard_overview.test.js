@@ -1,3 +1,5 @@
+'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Manager Dashboard Progress & Bottleneck Overview Contract Tests (Refs #120)
  * 
@@ -8,14 +10,17 @@
  * 4. Scoped authorization: cross-lab technicians and specimens are strictly excluded.
  * 5. Scoped System Admin (SUPER_ADMIN with ?labId=) receives matching lab progress overview.
  */
-'use strict';
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { canFinalApprove } = require('../../services/workEligibility');
+const { PrismaClient } = require('../../prisma_client');
+const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+const { beforeGuards, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_key_12345';
 
@@ -30,9 +35,15 @@ describe('Manager Dashboard Progress & Bottleneck Overview (Refs #120)', () => {
     let otherTech;
     let sampleActive;
     let sampleCompleted;
+    let rehearsal, client;
 
     beforeAll(async () => {
         const unique = Date.now();
+        rehearsal = beforeGuards({ actor: 'system:fixture', samples: [{ id: `SMP-A-${unique}-2`,
+            originalId: `FLD-A-${unique}-2`, labId: `LA-${unique}-002`, assignedLab: `LAB-MGR-A-${unique}`,
+            status: 'COMPLETED', receptionDate: new Date('2026-09-19T10:00:00Z'), createdAt: Date.now(), updatedAt: Date.now() }] });
+        client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
+        useLegacyRouteDatabase(prisma, client, { allModels: true });
         const pwHash = await bcrypt.hash('password123', 10);
 
         // Labs
@@ -121,7 +132,7 @@ describe('Manager Dashboard Progress & Bottleneck Overview (Refs #120)', () => {
         });
 
         // Samples in Lab 1
-        sampleActive = await prisma.sample.create({
+        sampleActive = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-A-${unique}-1`,
                 originalId: `FLD-A-${unique}-1`,
@@ -134,39 +145,29 @@ describe('Manager Dashboard Progress & Bottleneck Overview (Refs #120)', () => {
             }
         });
 
-        sampleCompleted = await prisma.sample.create({
-            data: {
-                id: `SMP-A-${unique}-2`,
-                originalId: `FLD-A-${unique}-2`,
-                labId: `LA-${unique}-002`,
-                assignedLab: testLab1.id,
-                status: 'COMPLETED',
-                receptionDate: new Date('2026-09-19T10:00:00Z'),
-                updatedAt: new Date()
-            }
-        });
+        sampleCompleted = await prisma.sample.findUnique({ where: { id: `SMP-A-${unique}-2` } });
 
         // Work items for sampleActive in Lab 1:
         // 1 Gate item (DRYING) -> must NOT count as analytical progress
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: { id: `WI-${unique}-G1`, sampleId: sampleActive.id, analysis: 'DRYING', status: 'COMPLETED', assignedLab: testLab1.id }
         });
         // 3 Analytical items:
         // Item 1: PH_H2O completed by tech1
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: { id: `WI-${unique}-A1`, sampleId: sampleActive.id, analysis: 'PH_H2O', status: 'COMPLETED', assignedTo: tech1.username, assignedLab: testLab1.id }
         });
         // Item 2: EC_1_5 in progress by tech1
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: { id: `WI-${unique}-A2`, sampleId: sampleActive.id, analysis: 'EC_1_5', status: 'IN_PROGRESS', assignedTo: tech1.username, assignedLab: testLab1.id }
         });
         // Item 3: OC_WALKLEY_BLACK not assigned
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: { id: `WI-${unique}-A3`, sampleId: sampleActive.id, analysis: 'OC_WALKLEY_BLACK', status: 'NOT_ASSIGNED', assignedLab: testLab1.id }
         });
 
         // Foreign sample in Lab 2
-        const sampleForeign = await prisma.sample.create({
+        const sampleForeign = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-B-${unique}-1`,
                 originalId: `FLD-B-${unique}-1`,
@@ -176,14 +177,15 @@ describe('Manager Dashboard Progress & Bottleneck Overview (Refs #120)', () => {
                 receptionDate: new Date('2026-09-20T10:00:00Z')
             }
         });
-        await prisma.workItem.create({
-            data: { id: `WI-${unique}-FB`, sampleId: sampleForeign.id, analysis: 'PH_H2O', status: 'PENDING', assignedTo: otherTech.username, assignedLab: testLab2.id }
+        await createWorkItemFixture(prisma, {
+            data: { id: `WI-${unique}-FB`, sampleId: sampleForeign.id, analysis: 'PH_H2O', status: 'NOT_ASSIGNED', assignedTo: otherTech.username, assignedLab: testLab2.id }
         });
 
         manager1Token = jwt.sign({ id: mgr1.id, username: mgr1.username, role: 'LAB_MANAGER', labId: testLab1.id }, JWT_SECRET, { expiresIn: '1h' });
         manager2Token = jwt.sign({ id: mgr2.id, username: mgr2.username, role: 'LAB_MANAGER', labId: testLab2.id }, JWT_SECRET, { expiresIn: '1h' });
         adminToken = jwt.sign({ id: adminUser.id, username: adminUser.username, role: 'SUPER_ADMIN' }, JWT_SECRET, { expiresIn: '1h' });
     });
+    afterAll(async () => { jest.restoreAllMocks(); await client?.$disconnect(); rehearsal?.close(); });
 
     test('1. LAB_MANAGER dashboard home includes progressOverview with analytical oversight and techWorkload', async () => {
         const res = await request(app)
@@ -273,6 +275,8 @@ describe('Manager Dashboard Progress & Bottleneck Overview (Refs #120)', () => {
 });
 
 describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', () => {
+    let rehearsal, client;
+    afterAll(async () => { jest.restoreAllMocks(); await client?.$disconnect(); rehearsal?.close(); });
     let stageLab;
     let stageLab2;
     let stageManagerToken;
@@ -297,6 +301,11 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
 
     beforeAll(async () => {
         const unique = Date.now() + 5000;
+        rehearsal = beforeGuards({ actor: 'system:fixture', samples: [{ id: `SMP-STG-COMP-${unique}`,
+            originalId: `FLD-STG-COMP-${unique}`, labId: `L-STG-COMP-${unique}`, assignedLab: `LAB-STAGE-${unique}`,
+            status: 'COMPLETED', receptionDate: new Date('2026-09-05T08:00:00Z'), createdAt: Date.now(), updatedAt: Date.now() }] });
+        client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
+        useLegacyRouteDatabase(prisma, client, { allModels: true });
         const pwHash = await bcrypt.hash('password123', 10);
 
         stageLab = await prisma.lab.create({
@@ -357,7 +366,7 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         );
 
         // 0. Sample physically received awaiting intake validation (RECEIVED)
-        sampleReceived = await prisma.sample.create({
+        sampleReceived = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-STG-REC-${unique}`,
                 originalId: `FLD-STG-REC-${unique}`,
@@ -369,7 +378,7 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         });
 
         // 1. Sample with SUBMITTED work + Closure task (ARCHIVING)
-        sampleReview = await prisma.sample.create({
+        sampleReview = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-STG-REV-${unique}`,
                 originalId: `FLD-STG-REV-${unique}`,
@@ -381,19 +390,19 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
                 preparationStatus: 'DONE'
             }
         });
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: { id: `WI-REV-1-${unique}`, sampleId: sampleReview.id, analysis: 'PH_H2O', status: 'SUBMITTED', assignedTo: techAlpha.username, assignedLab: stageLab.id }
         });
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: { id: `WI-REV-2-${unique}`, sampleId: sampleReview.id, analysis: 'EC_1_5', status: 'SUBMITTED', assignedTo: techAlpha.username, assignedLab: stageLab.id }
         });
         // Closure item: ARCHIVING must be excluded from denominator!
-        await prisma.workItem.create({
-            data: { id: `WI-REV-3-${unique}`, sampleId: sampleReview.id, analysis: 'ARCHIVING', status: 'PENDING', assignedLab: stageLab.id }
+        await createWorkItemFixture(prisma, {
+            data: { id: `WI-REV-3-${unique}`, sampleId: sampleReview.id, analysis: 'ARCHIVING', status: 'NOT_ASSIGNED', assignedLab: stageLab.id }
         });
 
         // 2. Sample with all ACCEPTED work + Closure task (DISPOSAL)
-        sampleApproval = await prisma.sample.create({
+        sampleApproval = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-STG-APP-${unique}`,
                 originalId: `FLD-STG-APP-${unique}`,
@@ -405,19 +414,19 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
                 preparationStatus: 'DONE'
             }
         });
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: { id: `WI-APP-1-${unique}`, sampleId: sampleApproval.id, analysis: 'PH_H2O', status: 'ACCEPTED', assignedTo: techAlpha.username, assignedLab: stageLab.id }
         });
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: { id: `WI-APP-2-${unique}`, sampleId: sampleApproval.id, analysis: 'EC_1_5', status: 'ACCEPTED', assignedTo: techAlpha.username, assignedLab: stageLab.id }
         });
         // Closure item: DISPOSAL must be excluded from denominator!
-        await prisma.workItem.create({
-            data: { id: `WI-APP-3-${unique}`, sampleId: sampleApproval.id, analysis: 'DISPOSAL', status: 'PENDING', assignedLab: stageLab.id }
+        await createWorkItemFixture(prisma, {
+            data: { id: `WI-APP-3-${unique}`, sampleId: sampleApproval.id, analysis: 'DISPOSAL', status: 'NOT_ASSIGNED', assignedLab: stageLab.id }
         });
 
         // 3. Sample actively in progress at bench
-        sampleBench = await prisma.sample.create({
+        sampleBench = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-STG-BCH-${unique}`,
                 originalId: `FLD-STG-BCH-${unique}`,
@@ -429,15 +438,15 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
                 preparationStatus: 'DONE'
             }
         });
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: { id: `WI-BCH-1-${unique}`, sampleId: sampleBench.id, analysis: 'PH_H2O', status: 'IN_PROGRESS', assignedTo: techAlpha.username, assignedLab: stageLab.id }
         });
-        await prisma.workItem.create({
-            data: { id: `WI-BCH-2-${unique}`, sampleId: sampleBench.id, analysis: 'EC_1_5', status: 'PENDING', assignedLab: stageLab.id }
+        await createWorkItemFixture(prisma, {
+            data: { id: `WI-BCH-2-${unique}`, sampleId: sampleBench.id, analysis: 'EC_1_5', status: 'NOT_ASSIGNED', assignedLab: stageLab.id }
         });
 
         // 4. Sample approved today (authoritative approvedAt today)
-        sampleApprovedToday = await prisma.sample.create({
+        sampleApprovedToday = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-STG-TODAY-${unique}`,
                 originalId: `FLD-STG-TODAY-${unique}`,
@@ -451,7 +460,7 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         });
 
         // 5. Sample approved in the past, but updated today (updatedAt today)
-        sampleApprovedPast = await prisma.sample.create({
+        sampleApprovedPast = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-STG-PAST-${unique}`,
                 originalId: `FLD-STG-PAST-${unique}`,
@@ -465,7 +474,7 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         });
 
         // 6. Sample with SUBMITTED_FULL status without accepted work (unapproved)
-        sampleSubmittedFull = await prisma.sample.create({
+        sampleSubmittedFull = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-STG-SFULL-${unique}`,
                 originalId: `FLD-STG-SFULL-${unique}`,
@@ -477,7 +486,7 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         });
 
         // 7. Sample with SUBMITTED_FULL status PLUS accepted analytical work (bench-complete, eligible for final approval)
-        sampleSubmittedFullAccepted = await prisma.sample.create({
+        sampleSubmittedFullAccepted = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-STG-SFULL-ACC-${unique}`,
                 originalId: `FLD-STG-SFULL-ACC-${unique}`,
@@ -489,7 +498,7 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
                 preparationStatus: 'DONE'
             }
         });
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-SFULL-ACC-1-${unique}`,
                 sampleId: sampleSubmittedFullAccepted.id,
@@ -501,20 +510,10 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         });
 
         // 7. Sample with COMPLETED status (non-canonical sample status)
-        sampleCompletedNoApprovedAt = await prisma.sample.create({
-            data: {
-                id: `SMP-STG-COMP-${unique}`,
-                originalId: `FLD-STG-COMP-${unique}`,
-                labId: `L-STG-COMP-${unique}`,
-                assignedLab: stageLab.id,
-                status: 'COMPLETED',
-                receptionDate: new Date('2026-09-05T08:00:00Z'),
-                updatedAt: new Date()
-            }
-        });
+        sampleCompletedNoApprovedAt = await prisma.sample.findUnique({ where: { id: `SMP-STG-COMP-${unique}` } });
 
         // 8. Sample in second lab (foreign lab) with APPROVED status
-        sampleOtherLabApproved = await prisma.sample.create({
+        sampleOtherLabApproved = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-STG2-APP-${unique}`,
                 originalId: `FLD-STG2-APP-${unique}`,
@@ -528,7 +527,7 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         });
 
         // 9. Sample with accepted PH, required EC missing from work items, and unfinished drying gate
-        sampleMissingRequired = await prisma.sample.create({
+        sampleMissingRequired = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-STG-MISSING-${unique}`,
                 originalId: `FLD-STG-MISSING-${unique}`,
@@ -541,7 +540,7 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
                 requiredAnalyses: JSON.stringify(['PH_H2O', 'EC_1_5'])
             }
         });
-        wiMissingPH = await prisma.workItem.create({
+        wiMissingPH = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-MISSING-1-${unique}`,
                 sampleId: sampleMissingRequired.id,
@@ -553,7 +552,7 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         });
 
         // 10. Sample with accepted-plus-waived work and completed operational gates
-        sampleAcceptedWaived = await prisma.sample.create({
+        sampleAcceptedWaived = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-STG-ACC-WAIVE-${unique}`,
                 originalId: `FLD-STG-ACC-WAIVE-${unique}`,
@@ -566,7 +565,7 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
                 requiredAnalyses: JSON.stringify(['PH_H2O', 'EC_1_5'])
             }
         });
-        wiAccPH = await prisma.workItem.create({
+        wiAccPH = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-ACCW-1-${unique}`,
                 sampleId: sampleAcceptedWaived.id,
@@ -576,7 +575,7 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
                 assignedLab: stageLab.id
             }
         });
-        wiAccEC = await prisma.workItem.create({
+        wiAccEC = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-ACCW-2-${unique}`,
                 sampleId: sampleAcceptedWaived.id,
@@ -869,6 +868,9 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
     });
 
     test('11. /api/dashboard/live correctly scopes KPIs and recent logs when requested by SUPER_ADMIN with labId', async () => {
+        const future = new Date(); future.setUTCDate(future.getUTCDate() + 2);
+        const futureApproval = await createSampleFixture(prisma, { data: { id: `future-approval-${Date.now()}`,
+            originalId: `future-field-${Date.now()}`, assignedLab: stageLab.id, status: 'APPROVED', approvedAt: future } });
         // Unscoped SUPER_ADMIN sees all labs:
         const unscopedRes = await request(app)
             .get('/api/dashboard/live')
@@ -889,5 +891,6 @@ describe('Bounded Correctness & Stage Precedence (Review Comment 5796060402)', (
         // stageLab has exactly 1 completedToday (sampleApprovedToday)
         expect(scopedRes.body.kpis.completedToday).toBe(1);
         expect(scopedRes.body.kpis.totalSamples).toBeLessThan(unscopedRes.body.kpis.totalSamples);
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: futureApproval.id } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 });

@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const spectralController = require('../../controllers/spectralController');
 const workbenchController = require('../../controllers/workbenchController');
@@ -64,7 +66,7 @@ describe('Spectroscopy Operational Corrections Contract & Regression', () => {
         });
 
         // Create test sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testSampleId,
                 originalId: `ORIG-SMP-${timestamp}`,
@@ -77,7 +79,7 @@ describe('Spectroscopy Operational Corrections Contract & Regression', () => {
         });
 
         // Create gate work items (DRYING, PREPARATION) as DONE
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testDryingItemId,
                 sampleId: testSampleId,
@@ -88,7 +90,7 @@ describe('Spectroscopy Operational Corrections Contract & Regression', () => {
             }
         });
 
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testPrepItemId,
                 sampleId: testSampleId,
@@ -100,7 +102,7 @@ describe('Spectroscopy Operational Corrections Contract & Regression', () => {
         });
 
         // Create spectral work item for SPEC_MIR assigned to tech_marcos
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testWorkItemId,
                 sampleId: testSampleId,
@@ -117,8 +119,8 @@ describe('Spectroscopy Operational Corrections Contract & Regression', () => {
         // Clean up test records
         await prisma.spectralData.deleteMany({ where: { sampleId: testSampleId } });
         await prisma.result.deleteMany({ where: { sampleId: testSampleId } });
-        await prisma.workItem.deleteMany({ where: { sampleId: testSampleId } });
-        await prisma.sample.deleteMany({ where: { id: testSampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.equipmentAsset.deleteMany({ where: { id: testEquipmentId } });
     });
 

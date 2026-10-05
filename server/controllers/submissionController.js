@@ -6,6 +6,8 @@ const { invalidateReturnedResults } = require('../services/reportResultGovernanc
 const prisma = require('../prisma');
 const workflow = require('../workflowContract');
 const { getAnalysisName } = require('../services/analysisService');
+const stateRules = require('../services/workflowStateRules');
+const { createSubmissionForItems } = require('../services/submissionStateService');
 
 
 // =============================================================================
@@ -17,64 +19,6 @@ const userHasLabScope = (user, labId) => {
         return user.labId === labId;
     }
     return false;
-};
-
-// =============================================================================
-// HELPER: Get work items for a sample
-// =============================================================================
-const getWorkItemsForSample = async (sampleId) => {
-    return await prisma.workItem.findMany({
-        where: { sampleId: String(sampleId) }
-    });
-};
-
-// =============================================================================
-// HELPER: Check FULL submission eligibility (Using Workflow Engine)
-// =============================================================================
-const checkFullEligibility = async (sampleId, currentSubmissionItemIds = []) => {
-    const workflowEngine = require('../utils/workflowEngine');
-    const items = await getWorkItemsForSample(sampleId);
-    const blocking = [];
-    const eligible = [];
-
-    items.forEach(item => {
-        // Use Workflow Engine to get category configuration
-        const config = workflowEngine.getAnalysisConfig(item.analysis);
-        const code = (item.analysis || '').toUpperCase();
-
-        // Skip Post-Analytical and Operational Gate items for full submission eligibility
-        if (config.category === workflowEngine.WORK_ITEM_CATEGORIES.POST_ANALYTICAL ||
-            config.category === workflowEngine.WORK_ITEM_CATEGORIES.OPERATIONAL_GATES ||
-            ['DRYING', 'PREPARATION', 'ARCHIVING', 'DISPOSAL'].includes(code)) return;
-
-        // An item is eligible for FULL closure if it's already accepted/waived OR included in this submission
-        if (['ACCEPTED', 'WAIVED'].includes(item.status) || (currentSubmissionItemIds.includes(item.id) && item.status === 'COMPLETED')) {
-            eligible.push(item);
-        } else {
-            blocking.push({
-                id: item.id,
-                analysis: item.analysis,
-                displayName: config.displayName || item.analysis,
-                status: item.status,
-                reason: item.status === 'REANALYSIS_REQUIRED' ? item.reanalysisReason : null
-            });
-        }
-    });
-
-    const analyticalItems = items.filter(i => {
-        const cfg = workflowEngine.getAnalysisConfig(i.analysis);
-        const code = (i.analysis || '').toUpperCase();
-        return cfg.category !== workflowEngine.WORK_ITEM_CATEGORIES.POST_ANALYTICAL &&
-               cfg.category !== workflowEngine.WORK_ITEM_CATEGORIES.OPERATIONAL_GATES &&
-               !['DRYING', 'PREPARATION', 'ARCHIVING', 'DISPOSAL'].includes(code);
-    });
-
-    return {
-        isEligible: blocking.length === 0 && analyticalItems.length > 0,
-        blocking,
-        eligible,
-        totalRequired: analyticalItems.length
-    };
 };
 
 exports.createSubmission = async (req, res) => {
@@ -126,106 +70,19 @@ exports.createSubmission = async (req, res) => {
             return res.status(400).json({ error: 'Invalid work items', details: errors });
         }
 
-        if (type === 'FULL') {
-            const eligibility = await checkFullEligibility(sampleId, workItemIds);
-            if (!eligibility.isEligible) {
-                return res.status(409).json({
-                    error: 'Not eligible for FULL submission',
-                    blocking: eligibility.blocking
-                });
-            }
-        }
-
-        const now = new Date();
-        const submissionId = `SUB-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        const auditLogId = crypto.randomUUID();
-
-        // Prepare operations for transaction
-        const operations = [
-            prisma.submission.create({
-                data: {
-                    id: submissionId,
-                    sampleId: String(sampleId),
-                    labId: sample.labId,
-                    assignedLab: sample.assignedLab,
-                    submittedBy: user.username,
-                    type,
-                    status: 'PENDING_REVIEW',
-                    submittedAt: now,
-                    note: note || null,
-                    workItemIds: JSON.stringify(validItems.map(wi => wi.id)),
-                    workItemCount: validItems.length,
-                    createdAt: now
-                }
-            }),
-            prisma.auditLog.create({
-                data: {
-                    id: auditLogId,
-                    entity: 'SUBMISSION',
-                    entityId: submissionId,
-                    action: 'SUBMISSION_CREATED',
-                    details: `${user.username} submitted ${validItems.length} items for ${type} review`,
-                    performedBy: user.username,
-                    timestamp: now,
-                    sampleId: String(sampleId)
-                }
-            })
-        ];
-
-        // Update work items
-        for (const item of validItems) {
-            const history = typeof item.history === 'string' ? JSON.parse(item.history) : (item.history || []);
-            history.push({
-                status: workflow.WORK_ITEM_STATES.SUBMITTED,
-                submissionId: submissionId,
-                timestamp: now,
-                action: 'SUBMITTED'
-            });
-
-            operations.push(prisma.workItem.update({
-                where: { id: item.id },
-                data: {
-                    status: workflow.WORK_ITEM_STATES.SUBMITTED,
-                    submissionId: submissionId,
-                    submittedAt: now,
-                    history: JSON.stringify(history)
-                }
-            }));
-
-            operations.push(prisma.auditLog.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    entity: 'WORKITEM',
-                    entityId: item.id,
-                    action: 'WORKITEM_SUBMITTED',
-                    details: `${user.username} submitted ${await getAnalysisName(item.analysis)}`,
-                    performedBy: user.username,
-                    timestamp: now,
-                    sampleId: String(sampleId)
-                }
-            }));
-        }
-
-        const [submission] = await prisma.$transaction(operations);
-
-        const { transitionSample } = require('../services/sampleStateService');
-        const targetStatus = type === 'FULL' ? 'SUBMITTED_FULL' : 'SUBMITTED_PARTIAL';
-        await transitionSample(sampleId, targetStatus, user, `${user.username} submitted ${validItems.length} items for ${type} review`, {
-            lastSubmissionId: submissionId,
-            lastSubmissionType: type,
-            lastSubmissionAt: now
-        }).catch(err => {
-            console.warn('[createSubmission] Warning: sample status transition failed:', err.message);
-        });
+        const { submission } = await createSubmissionForItems({ db: prisma, actor: user, sampleId, type, workItemIds,
+            expectedItems: validItems, note: note || null, requireOwnAssignment: true });
 
         res.status(201).json({
             submission,
-            message: `${type} submission created`
+            message: `${submission.type} submission created`
         });
 
     } catch (error) {
         console.error('[createSubmission] Error:', error);
-        res.status(500).json({ error: 'Failed to create submission' });
+        const mapped = stateRules.mapStateError(error);
+        res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to create submission',
+            ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
     }
 };
 
@@ -341,7 +198,7 @@ exports.reviewSubmission = async (req, res) => {
         if (!Array.isArray(normalizedDecisions) || !normalizedDecisions.length) {
             return res.status(400).json({ error: 'decisions array required', code: 'INVALID_REVIEW_DECISION' });
         }
-        const aliases = { ACCEPTED: 'ACCEPT', REJECT: 'REJECT_REANALYSIS', RETURN: 'REJECT_REANALYSIS', REANALYSIS_REQUIRED: 'REJECT_REANALYSIS', WAIVED: 'WAIVE' };
+        const aliases = { ACCEPTED: 'ACCEPT', REJECT: 'REJECT_REANALYSIS', RETURN: 'REJECT_REANALYSIS', REANALYSIS_REQUIRED: 'REJECT_REANALYSIS', REPEAT_REQUIRED: 'REJECT_REANALYSIS', OMIT: 'WAIVE', WAIVED: 'WAIVE' };
         const validated = [];
         for (const decision of normalizedDecisions) {
             if (!decision || typeof decision !== 'object' || Array.isArray(decision) || typeof decision.workItemId !== 'string') {
@@ -439,12 +296,15 @@ exports.reviewSubmission = async (req, res) => {
             let newStatus;
             switch (verdict) {
                 case 'ACCEPT': newStatus = workflow.WORK_ITEM_STATES.ACCEPTED; break;
-                case 'REJECT_REANALYSIS': newStatus = workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED; break;
+                case 'REJECT_REANALYSIS': newStatus = workflow.WORK_ITEM_STATES.REPEAT_REQUIRED; break;
                 case 'WAIVE': newStatus = workflow.WORK_ITEM_STATES.WAIVED; break;
             }
 
             try { assertReviewable(item, newStatus); }
-            catch (error) { errors.push({ workItemId, code: error.code }); continue; }
+            catch (error) {
+                if (error.code !== 'ITEM_NOT_SUBMITTED') throw error;
+                errors.push({ workItemId, code: error.code }); continue;
+            }
 
             const history = typeof item.history === 'string' ? JSON.parse(item.history) : (item.history || []);
             history.push({
@@ -476,18 +336,7 @@ exports.reviewSubmission = async (req, res) => {
 
 
             const analysisName = await getAnalysisName(item.analysis);
-            operations.push(tx => tx.auditLog.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    entity: 'WORKITEM',
-                    entityId: workItemId,
-                    action: verdict === 'REJECT_REANALYSIS' ? 'REANALYSIS_REQUESTED' : 'REVIEW_DECISION_MADE',
-                    details: `${user.username} ${verdict.toLowerCase()}ed ${analysisName}`,
-                    performedBy: user.username,
-                    timestamp: now,
-                    sampleId: String(submission.sampleId)
-                }
-            }));
+
 
             operations.push(tx => tx.reviewDecision.create({
                 data: {
@@ -495,7 +344,7 @@ exports.reviewSubmission = async (req, res) => {
                     sampleId: String(submission.sampleId),
                     workItemId,
                     submissionItemId: submission.id,
-                    decision: verdict === 'ACCEPT' ? 'ACCEPT' : (verdict === 'REJECT_REANALYSIS' ? 'RETURN' : 'WAIVE'),
+                    decision: verdict === 'ACCEPT' ? 'ACCEPT' : (verdict === 'REJECT_REANALYSIS' ? 'RETURN' : 'OMIT'),
                     reason: reason || null,
                     reviewerId: user.id || user.username,
                     reviewerName: user.username,
@@ -507,16 +356,23 @@ exports.reviewSubmission = async (req, res) => {
 
             try {
                 await commitReview(prisma, item, newStatus, user, updates, async tx => {
-                    for (const operation of operations) await operation(tx);
+                    const rows = [];
+                    for (const operation of operations) rows.push(await operation(tx));
                     if (newStatus === workflow.WORK_ITEM_STATES.ACCEPTED && workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis)) {
                         const { transitionSample } = require('../services/sampleStateService');
                         await transitionSample(item.sampleId, workflow.CLOSURE_TASK_SAMPLE_STATES[item.analysis], user,
-                            'Sample closed via submission review', {}, tx).catch(error => {
-                            console.warn('[reviewSubmission] Warning: sample closure transition failed:', error.message);
-                        });
+                            'Sample closed via submission review', {}, tx);
                     }
-                    if (verdict === 'REJECT_REANALYSIS') await invalidateReturnedResults(tx, item, user, reason);
-                }, id);
+                    if (verdict === 'REJECT_REANALYSIS') {
+                        if (['DRYING', 'PREPARATION'].includes(item.analysis)) {
+                            await require('../services/operationalGateStateService').resetReviewedGate(item, user, reason, tx);
+                        }
+                        await invalidateReturnedResults(tx, item, user, reason);
+                    }
+                    return rows;
+                }, id, { reason,
+                    action: verdict === 'REJECT_REANALYSIS' ? 'REANALYSIS_REQUESTED' : 'REVIEW_DECISION_MADE',
+                    details: `${user.username} ${verdict.toLowerCase()}ed ${analysisName}` });
                 results.push({ workItemId, status: newStatus, decision: verdict });
             } catch (error) {
                 if (!['ITEM_NOT_SUBMITTED', 'ITEM_NOT_IN_SUBMISSION'].includes(error.code)) throw error;
@@ -539,7 +395,7 @@ exports.getReanalysisRequests = async (req, res) => {
 
     try {
         const where = {
-            status: workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED
+            status: { in: [workflow.WORK_ITEM_STATES.REPEAT_REQUIRED, workflow.WORK_ITEM_STATES.REANALYSIS_REQUIRED] }
         };
 
         if (user.role === 'LAB_TECHNICIAN') {
@@ -558,7 +414,7 @@ exports.getReanalysisRequests = async (req, res) => {
 
         const enriched = items.map(i => {
             const history = typeof i.history === 'string' ? JSON.parse(i.history) : (i.history || []);
-            const lastReject = history.slice().reverse().find(h => h.status === 'REANALYSIS_REQUIRED');
+            const lastReject = history.slice().reverse().find(h => workflow.normalizeWorkItemState(h.status) === 'REPEAT_REQUIRED');
             return {
                 ...i,
                 reanalysisReason: lastReject ? lastReject.reason || lastReject.note : i.reanalysisReason || 'QC Rejection'

@@ -7,9 +7,11 @@ const os = require('os');
 const Database = require('better-sqlite3');
 const supertest = require('supertest');
 const express = require('express');
+const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
+const originalDatabasePath = process.env.DATABASE_PATH;
 
 describe('Issue #149 Head 9ac1202 Remediation Contracts (Codex Independent Review)', () => {
-    let dir;
+    let rehearsal;
     let databasePath;
     let db;
     let app;
@@ -46,30 +48,24 @@ describe('Issue #149 Head 9ac1202 Remediation Contracts (Codex Independent Revie
     }
 
     beforeAll(async () => {
-        dir = fs.mkdtempSync(path.join(os.tmpdir(), 'jest-9ac1202-'));
-        databasePath = path.join(dir, 'test-remediations.db');
-        process.env.DATABASE_PATH = databasePath;
-        process.env.NODE_ENV = 'test';
-        process.env.JWT_SECRET = crypto.randomBytes(32).toString('hex');
-        delete process.env.SOURCE_SYSTEM_ID;
-
-        const setup = new Database(databasePath);
-        const now = new Date().toISOString();
-        setup.exec(fs.readFileSync(path.join(__dirname, '../../scripts/schema/full_application_schema.sql'), 'utf8'));
-
-        for (const [id, status, approvedAt, metadata] of [
+        const now = new Date();
+        const specimens = [
             ['legacy-approved', 'APPROVED', now, null],
             ['legacy-unapproved-archive', 'ARCHIVED', null, null],
             ['legacy-approved-disposed', 'DISPOSED', now, null],
             ['legacy-held-approved', 'APPROVED', now, JSON.stringify({ provenanceHold: { status: 'AMBIGUOUS_PROVENANCE_HOLD' } })],
             ['legacy-processing-prior-approval', 'PROCESSING', now, null]
-        ]) {
-            setup.prepare('INSERT INTO Sample (id,originalId,labId,assignedLab,country,projectCode,status,approvedAt,updatedAt,latitude,longitude,metadata) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
-                .run(id, id + '-field', id + '-accession', 'SYNTHETIC-LAB', 'AAA', 'SYNTHETIC-PROJECT', status, approvedAt, now, 12, 34, metadata);
-            setup.prepare('INSERT INTO Result (id,sampleId,param,value,numericValue,unit,isValid,isCurrent,updatedAt) VALUES (?,?,?,?,?,?,?,?,?)')
-                .run(id + '-result', id, 'PH_H2O', '6.2', 6.2, 'pH units', 1, 1, now);
-        }
-        setup.close();
+        ];
+        rehearsal = beforeGuards({ actor: 'system:fixture', samples: specimens.map(([id, status, approvedAt, metadata]) => ({
+            id, originalId: `${id}-field`, labId: `${id}-accession`, assignedLab: 'SYNTHETIC-LAB', country: 'AAA',
+            projectCode: 'SYNTHETIC-PROJECT', status, approvedAt, metadata, createdAt: now, updatedAt: now, latitude: 12, longitude: 34
+        })), relatedRows: { Result: specimens.map(([id]) => ({ id: `${id}-result`, sampleId: id, param: 'PH_H2O',
+            value: '6.2', numericValue: 6.2, unit: 'pH units', isValid: 1, isCurrent: 1, createdAt: now, updatedAt: now })) } });
+        databasePath = rehearsal.file;
+        process.env.DATABASE_PATH = databasePath;
+        process.env.NODE_ENV = 'test';
+        process.env.JWT_SECRET = crypto.randomBytes(32).toString('hex');
+        delete process.env.SOURCE_SYSTEM_ID;
 
         require('../../scripts/migrate_exchange_journal_tables.cjs').migrateExchangeTables(databasePath);
 
@@ -93,7 +89,8 @@ describe('Issue #149 Head 9ac1202 Remediation Contracts (Codex Independent Revie
     afterAll(async () => {
         if (prisma) await prisma.$disconnect();
         if (db && db.open) db.close();
-        try { if (dir) fs.rmSync(dir, { recursive: true, force: true }); } catch (e) {}
+        process.env.DATABASE_PATH = originalDatabasePath;
+        rehearsal?.close();
     });
 
     test('Package 1: JSON null metadata consistently excluded across canonical predicate, sample list & count, and observations', async () => {

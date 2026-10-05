@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -41,12 +43,12 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
                 await prisma.auditLog.deleteMany({
                     where: { OR: [{ sampleId: sid }, { entityId: sid }] }
                 });
-                await prisma.workItem.deleteMany({
+                await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
                     where: { sampleId: sid }
-                });
-                await prisma.sample.deleteMany({
+                }), select: { id: true } })).map(row => row.id), { single: false });
+                await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
                     where: { OR: [{ id: sid }, { originalId: sid }] }
-                });
+                }), select: { id: true } })).map(row => row.id), { single: false });
             }
 
             // Clean up consignment
@@ -56,10 +58,10 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
                     select: { id: true }
                 });
                 for (const s of csgSamples) {
-                    await prisma.workItem.deleteMany({ where: { sampleId: s.id } });
+                    await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: s.id } }), select: { id: true } })).map(row => row.id), { single: false });
                     await prisma.auditLog.deleteMany({ where: { sampleId: s.id } });
                 }
-                await prisma.sample.deleteMany({ where: { consignmentId: createdConsignmentId } });
+                await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { consignmentId: createdConsignmentId } }), select: { id: true } })).map(row => row.id), { single: false });
                 await prisma.consignment.deleteMany({ where: { id: createdConsignmentId } });
             }
 
@@ -74,7 +76,7 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
     // 1. RC-19: Explicit RECEIVED_REJECTED state & exclusion from expected count
     test('RC-19: Intake rejection transitions sample to RECEIVED_REJECTED (not EXPECTED) and excludes it from expected backlog', async () => {
         // Pre-create expected sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testRejectSampleId,
                 originalId: testRejectSampleId,
@@ -145,7 +147,7 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
     // 2. RC-19: Separate Handover Timestamp & Officer Counter-Signature for Accepted Samples
     test('RC-19: Accepted intake separates custody handover timestamp from system entry and immutably records officer counter-signature', async () => {
         // Pre-create expected sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testAcceptSampleId,
                 originalId: testAcceptSampleId,

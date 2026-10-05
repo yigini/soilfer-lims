@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -50,7 +52,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             });
 
             // Sample A: Guatemala, Lab A, Project Alpha
-            sampleA = await prisma.sample.create({
+            sampleA = await createSampleFixture(prisma, {
                 data: {
                     id: `SMP-R1-A-${ts}`,
                     labId: `LAB-R1-A-${ts}`,
@@ -64,7 +66,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             });
 
             // Sample B: Kenya, Lab B, Project Beta
-            sampleB = await prisma.sample.create({
+            sampleB = await createSampleFixture(prisma, {
                 data: {
                     id: `SMP-R1-B-${ts}`,
                     labId: `LAB-R1-B-${ts}`,
@@ -246,7 +248,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             const techUsername = decoded?.username || 'test_lab_technician_labr1gtm';
             const ts = Date.now();
 
-            const staleWorkItem = await prisma.workItem.create({
+            const staleWorkItem = await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-STALE-CROSS-${ts}`,
                     sampleId: sampleB.id,
@@ -283,7 +285,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
 
                 expect(ownDetailRes.status).toBe(200);
             } finally {
-                await prisma.workItem.delete({ where: { id: staleWorkItem.id } }).catch(() => {});
+                await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: staleWorkItem.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
             }
         });
 
@@ -294,7 +296,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             }
             const sampleIds = [sampleA?.id, sampleB?.id].filter(Boolean);
             if (sampleIds.length > 0) {
-                await prisma.sample.deleteMany({ where: { id: { in: sampleIds } } }).catch(() => {});
+                await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: sampleIds } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
             }
             await prisma.project.deleteMany({ where: { code: { in: [prjACode, prjBCode] } } }).catch(() => {});
         });
@@ -336,7 +338,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             const decodedA = jwt.decode(techTokenA);
             usernameA = decodedA.username;
 
-            sampleA = await prisma.sample.create({
+            sampleA = await createSampleFixture(prisma, {
                 data: {
                     id: `SMP-R2-A-${ts}`,
                     labId: `LAB-R2-A-${ts}`,
@@ -349,7 +351,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 }
             });
 
-            sampleB = await prisma.sample.create({
+            sampleB = await createSampleFixture(prisma, {
                 data: {
                     id: `SMP-R2-B-${ts}`,
                     labId: `LAB-R2-B-${ts}`,
@@ -363,7 +365,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             });
 
             // Local work item for tech A in Lab A
-            localItem = await prisma.workItem.create({
+            localItem = await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-R2-LOCAL-${ts}`,
                     sampleId: sampleA.id,
@@ -375,7 +377,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             });
 
             // Stale cross-lab assignment: assignedTo is tech A, but work item and sample are in Lab B
-            crossLabItem = await prisma.workItem.create({
+            crossLabItem = await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-R2-CROSS-${ts}`,
                     sampleId: sampleB.id,
@@ -470,7 +472,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
         test('Conflicting lab IDs: work item labId=B, assignedLab=A and sample assignedLab=B, labId=A excluded from SQL count and list', async () => {
             // Create conflicting work item and sample
             const ts = Date.now();
-            const conflictSample = await prisma.sample.create({
+            const conflictSample = await createSampleFixture(prisma, {
                 data: {
                     id: `SMP-R2-CONF-${ts}`,
                     originalId: `FIELD-R2-CONF-${ts}`,
@@ -483,7 +485,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 }
             });
 
-            const conflictItem = await prisma.workItem.create({
+            const conflictItem = await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-R2-CONF-${ts}`,
                     sampleId: conflictSample.id,
@@ -509,18 +511,18 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             expect(res.body.stats.totalItems).toBe(1);
 
             // Cleanup
-            await prisma.workItem.deleteMany({ where: { id: conflictItem.id } }).catch(() => {});
-            await prisma.sample.deleteMany({ where: { id: conflictSample.id } }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: conflictItem.id } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: conflictSample.id } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
         });
 
         afterAll(async () => {
             const wiIds = [localItem?.id, crossLabItem?.id].filter(Boolean);
             if (wiIds.length > 0) {
-                await prisma.workItem.deleteMany({ where: { id: { in: wiIds } } }).catch(() => {});
+                await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: { in: wiIds } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
             }
             const sampleIds = [sampleA?.id, sampleB?.id].filter(Boolean);
             if (sampleIds.length > 0) {
-                await prisma.sample.deleteMany({ where: { id: { in: sampleIds } } }).catch(() => {});
+                await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: sampleIds } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
             }
             await prisma.analysis.deleteMany({ where: { code: 'R2_PH' } }).catch(() => {});
         });
@@ -551,7 +553,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 create: { code: 'R3_PH', name: 'R3 pH', units: 'pH', status: 'active' }
             });
 
-            const normalSample = await prisma.sample.create({
+            const normalSample = await createSampleFixture(prisma, {
                 data: {
                     id: `SMP-R3-NORM-${ts}`,
                     originalId: `FIELD-R3-NORM-${ts}`,
@@ -563,12 +565,12 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 }
             });
 
-            const releasedSample = await prisma.sample.create({
+            const releasedSample = await createSampleFixture(prisma, {
                 data: {
                     id: `SMP-R3-REL-${ts}`,
                     originalId: `FIELD-R3-REL-${ts}`,
                     assignedLab: labId,
-                    status: 'RELEASED',
+                    status: 'APPROVED',
                     dryingStatus: 'DONE',
                     preparationStatus: 'DONE',
                     projectCode: 'PRJ-R3'
@@ -587,7 +589,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             });
 
             // Completed but unsubmitted work item
-            wiCompleted = await prisma.workItem.create({
+            wiCompleted = await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-R3-COMP-${ts}`,
                     sampleId: normalSample.id,
@@ -599,7 +601,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             });
 
             // Already ACCEPTED work item
-            wiAccepted = await prisma.workItem.create({
+            wiAccepted = await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-R3-ACC-${ts}`,
                     duplicateOf: wiCompleted.id,
@@ -611,8 +613,8 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 }
             });
 
-            // Work item on a RELEASED sample
-            wiReleasedSample = await prisma.workItem.create({
+            // Work item on an approved sample: QC must retain its immutable state.
+            wiReleasedSample = await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-R3-RELSMP-${ts}`,
                     sampleId: releasedSample.id,
@@ -624,7 +626,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             });
         });
 
-        test('REANALYZE_BATCH transitions completed-unsubmitted work to REANALYSIS_REQUIRED while preserving immutable history', async () => {
+        test('REANALYZE_BATCH transitions completed-unsubmitted work to REPEAT_REQUIRED while preserving immutable history', async () => {
             const res = await request(app)
                 .post(`/api/qc/batches/${batchId}/disposition`)
                 .set('Authorization', `Bearer ${mgrToken}`)
@@ -638,7 +640,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
 
             // Completed unsubmitted item MUST have transitioned
             const updatedComp = await prisma.workItem.findUnique({ where: { id: wiCompleted.id } });
-            expect(updatedComp.status).toBe('REANALYSIS_REQUIRED');
+            expect(updatedComp.status).toBe('REPEAT_REQUIRED');
             expect(updatedComp.reanalysisReason).toBe('Control standard outside tolerance');
 
             // Accepted item must NOT have changed
@@ -678,12 +680,12 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
 
         afterAll(async () => {
             if (batchId) {
-                await prisma.workItem.deleteMany({ where: { batchId: batchId } }).catch(() => {});
+                await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { batchId: batchId } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
                 await prisma.batch.deleteMany({ where: { id: batchId } }).catch(() => {});
             }
             const sampleIds = [wiCompleted?.sampleId, wiReleasedSample?.sampleId].filter(Boolean);
             if (sampleIds.length > 0) {
-                await prisma.sample.deleteMany({ where: { id: { in: sampleIds } } }).catch(() => {});
+                await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: sampleIds } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
             }
             await prisma.analysis.deleteMany({ where: { code: 'R3_PH' } }).catch(() => {});
         });
@@ -984,23 +986,9 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
         });
 
         test('Atomic rollback guarantees database remains unmodified if foreign key check fails during migration', () => {
-            const rollbackDbPath = path.join(os.tmpdir(), `test_rollback_${Date.now()}.db`);
-            const db = new Database(rollbackDbPath);
-            db.pragma('foreign_keys = OFF');
-            db.exec(`
-                CREATE TABLE "Parent" ("id" TEXT PRIMARY KEY);
-                CREATE TABLE "Project" (
-                    "id" TEXT PRIMARY KEY,
-                    "code" TEXT UNIQUE NOT NULL,
-                    "name" TEXT NOT NULL,
-                    "status" TEXT NOT NULL DEFAULT 'ACTIVE',
-                    "parentRef" TEXT REFERENCES "Parent"("id")
-                );
-                INSERT INTO "Parent" ("id") VALUES ('valid-parent');
-                INSERT INTO "Project" ("id", "code", "name", "status", "parentRef")
-                VALUES ('p-1', 'PRJ-1', 'Project 1', 'ACTIVE', 'invalid-parent-fk');
-            `);
-            db.close();
+            const rollbackDbPath = require('../helpers/legacyWorkflowDatabase').beforeGuards({
+                actor: 'system:fixture', schemaVariant: 'PROJECT_FK_CORRUPT_SYNTHETIC'
+            });
 
             try {
                 expect(() => migrateProjectTemplatesAndPolicy(rollbackDbPath)).toThrow(
@@ -1022,91 +1010,58 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
         });
 
         test('Populated upgrade rehearsal on full legacy schema preserves 100% rows, verifies result/report/history/share checksums, exercises migrated HTTP auth and supported-channel policy', async () => {
-            const iso = require('../../scripts/journey_db_isolation.cjs');
-            const fixture = iso.createDisposableDatabase();
-            const rehearsalDbPath = fixture.dbPath;
-
+            const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
+            const now = new Date();
+            const stamp = { createdAt: now, updatedAt: now };
+            const rehearsal = beforeGuards({ actor: 'system:fixture', schemaVariant: 'PROJECT_PRE_TEMPLATE_POLICY',
+                samples: [
+                    { id:'SMP-001', originalId:'FIELD-001', projectId:'PRJ-GTM', projectCode:'PRJ-GTM-ALPHA', country:'GTM', assignedLab:'LAB-GTM', status:'ACCEPTED', depthTop:0, depthBottom:20, ...stamp },
+                    { id:'SMP-002', originalId:'FIELD-002', projectId:'PRJ-KEN', projectCode:'PRJ-KEN-BETA', country:'KEN', assignedLab:'LAB-KEN', status:'ACCEPTED', depthTop:20, depthBottom:50, ...stamp }
+                ],
+                batches: [
+                    { id:'BATCH-001', analysis:'PH', labId:'LAB-GTM', status:'COMPLETED', createdBy:'gtm_mgr', createdAt:now },
+                    { id:'BATCH-002', analysis:'PH', labId:'LAB-KEN', status:'COMPLETED', createdBy:'ken_pm', createdAt:now }
+                ],
+                workItems: [
+                    { id:'WI-001', sampleId:'SMP-001', analysis:'PH', status:'COMPLETED', assignedTo:'gtm_tech', labId:'LAB-GTM', assignedLab:'LAB-GTM', batchId:'BATCH-001', ...stamp },
+                    { id:'WI-002', sampleId:'SMP-002', analysis:'PH', status:'ASSIGNED', assignedTo:null, labId:'LAB-KEN', assignedLab:'LAB-KEN', batchId:'BATCH-002', ...stamp }
+                ],
+                relatedRows: {
+                    Lab: [
+                        { id:'LAB-GTM', code:'GTM1', name:'Guatemala Central Lab', country:'GTM', address:'Guatemala City', email:'gtm@example.com', isActive:1, ...stamp },
+                        { id:'LAB-KEN', code:'KEN1', name:'Nairobi Soil Lab', country:'KEN', address:'Nairobi', email:'ken@example.com', isActive:1, ...stamp }
+                    ],
+                    Project: [
+                        { id:'PRJ-GTM', code:'PRJ-GTM-ALPHA', name:'Guatemala Soil Project', status:'ACTIVE', projectType:'OPEN_INTAKE', ...stamp },
+                        { id:'PRJ-KEN', code:'PRJ-KEN-BETA', name:'Kenya Agronomy Project', status:'ACTIVE', projectType:'OPEN_INTAKE', ...stamp }
+                    ],
+                    User: [
+                        { id:'USR-TECH', username:'gtm_tech', password:'hash', email:'tech@example.com', role:'LAB_TECHNICIAN', labId:'LAB-GTM', countries:'["GTM"]', projects:'[]', isActive:1, tokenVersion:0, ...stamp },
+                        { id:'USR-MGR', username:'gtm_mgr', password:'hash', email:'mgr@example.com', role:'LAB_MANAGER', labId:'LAB-GTM', countries:'["GTM"]', projects:'[]', isActive:1, tokenVersion:0, ...stamp },
+                        { id:'USR-NAT', username:'gtm_nat', password:'hash', email:'nat@example.com', role:'MASTER_USER', labId:null, countries:'["GTM"]', projects:'[]', isActive:1, tokenVersion:0, ...stamp },
+                        { id:'USR-PM', username:'ken_pm', password:'hash', email:'pm@example.com', role:'PROJECT_MANAGER', labId:null, countries:'[]', projects:'["PRJ-KEN-BETA"]', isActive:1, tokenVersion:0, ...stamp }
+                    ],
+                    Result: [
+                        { id:'RES-001', sampleId:'SMP-001', param:'pH', value:'6.85', numericValue:6.85, unit:'pH', isValid:1, isCurrent:1, provenance:'MEASURED', ...stamp },
+                        { id:'RES-002', sampleId:'SMP-002', param:'pH', value:'7.12', numericValue:7.12, unit:'pH', isValid:1, isCurrent:1, provenance:'MEASURED', ...stamp }
+                    ],
+                    Report: [
+                        { id:'REP-PUB', sampleId:'SMP-001', labId:'LAB-GTM', status:'PUBLISHED', projectCode:'PRJ-GTM-ALPHA', generatedBy:'gtm_tech', content:'{"status":"ok","ph":6.85}', version:1, ...stamp },
+                        { id:'REP-SUP', sampleId:'SMP-001', labId:'LAB-GTM', status:'SUPERSEDED', projectCode:'PRJ-GTM-ALPHA', generatedBy:'gtm_tech', content:'{"status":"old","ph":6.80}', version:0, ...stamp },
+                        { id:'REP-KEN', sampleId:'SMP-002', labId:'LAB-KEN', status:'PUBLISHED', projectCode:'PRJ-KEN-BETA', generatedBy:'ken_pm', content:'{"status":"ok","ph":7.12}', version:1, ...stamp }
+                    ],
+                    ReportShareLink: [{ id:'RSL-001', reportId:'REP-PUB', tokenHash:'synthetic-token-hash-pub1', expiresAt:new Date('2030-01-01T00:00:00Z'), isRevoked:0, createdBy:'gtm_mgr', createdAt:now }],
+                    AuditLog: [
+                        { id:'AUD-001', entity:'REPORT', entityId:'REP-PUB', action:'REPORT_GENERATED', performedBy:'USR-MGR', performedByName:'gtm_mgr', details:'Report published', timestamp:now },
+                        { id:'AUD-002', entity:'SAMPLE', entityId:'SMP-001', action:'SAMPLE_ACCEPTED', performedBy:'USR-TECH', performedByName:'gtm_tech', details:'Sample accepted', timestamp:now }
+                    ]
+                }
+            });
+            const rehearsalDbPath = rehearsal.file;
+            const verifyScriptPath = path.join(path.dirname(rehearsalDbPath), `verify_http_${require('crypto').randomUUID()}.cjs`);
             const db = new Database(rehearsalDbPath);
-            db.pragma('foreign_keys = OFF');
-            // Wipe all rows to guarantee clean synthetic test state
-            const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%'").all();
-            for (const { name } of tables) {
-                db.prepare(`DELETE FROM "${name}"`).run();
-            }
-
-            // Downgrade Project table to legacy schema without the 5 additive columns
-            db.exec(`
-                CREATE TABLE "Project_legacy" (
-                    "id" TEXT PRIMARY KEY,
-                    "code" TEXT UNIQUE NOT NULL,
-                    "name" TEXT NOT NULL,
-                    "description" TEXT,
-                    "notes" TEXT,
-                    "client" TEXT,
-                    "startDate" DATETIME,
-                    "deliveryDeadline" DATETIME,
-                    "status" TEXT NOT NULL DEFAULT 'ACTIVE',
-                    "projectType" TEXT NOT NULL DEFAULT 'OPEN_INTAKE',
-                    "expectedSampleCount" INTEGER DEFAULT 0,
-                    "priority" TEXT DEFAULT 'NORMAL',
-                    "defaultAnalysisBundle" TEXT,
-                    "labId" TEXT,
-                    "countries" TEXT,
-                    "assignedLabIds" TEXT,
-                    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-                );
-                DROP TABLE "Project";
-                ALTER TABLE "Project_legacy" RENAME TO "Project";
-                DROP INDEX IF EXISTS "Project_parentProjectId_idx";
-            `);
-
-            // Populate full legacy schema across all operational domains: Labs, Projects, Users, Samples, Batches, WorkItems, Results, Reports, ReportShareLinks, AuditLogs
-            db.exec(`
-                INSERT INTO "Lab" ("id", "code", "name", "country", "address", "email", "isActive", "createdAt", "updatedAt")
-                VALUES ('LAB-GTM', 'GTM1', 'Guatemala Central Lab', 'GTM', 'Guatemala City', 'gtm@example.com', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                       ('LAB-KEN', 'KEN1', 'Nairobi Soil Lab', 'KEN', 'Nairobi', 'ken@example.com', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-                INSERT INTO "Project" ("id", "code", "name", "status", "projectType", "createdAt", "updatedAt")
-                VALUES ('PRJ-GTM', 'PRJ-GTM-ALPHA', 'Guatemala Soil Project', 'ACTIVE', 'OPEN_INTAKE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                       ('PRJ-KEN', 'PRJ-KEN-BETA', 'Kenya Agronomy Project', 'ACTIVE', 'OPEN_INTAKE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-                INSERT INTO "User" ("id", "username", "password", "email", "role", "labId", "countries", "projects", "isActive", "tokenVersion", "createdAt", "updatedAt")
-                VALUES ('USR-TECH', 'gtm_tech', 'hash', 'tech@example.com', 'LAB_TECHNICIAN', 'LAB-GTM', '["GTM"]', '[]', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                       ('USR-MGR', 'gtm_mgr', 'hash', 'mgr@example.com', 'LAB_MANAGER', 'LAB-GTM', '["GTM"]', '[]', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                       ('USR-NAT', 'gtm_nat', 'hash', 'nat@example.com', 'MASTER_USER', NULL, '["GTM"]', '[]', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                       ('USR-PM', 'ken_pm', 'hash', 'pm@example.com', 'PROJECT_MANAGER', NULL, '[]', '["PRJ-KEN-BETA"]', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-                INSERT INTO "Sample" ("id", "originalId", "projectId", "projectCode", "country", "assignedLab", "status", "depthTop", "depthBottom", "createdAt", "updatedAt")
-                VALUES ('SMP-001', 'FIELD-001', 'PRJ-GTM', 'PRJ-GTM-ALPHA', 'GTM', 'LAB-GTM', 'ACCEPTED', 0, 20, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                       ('SMP-002', 'FIELD-002', 'PRJ-KEN', 'PRJ-KEN-BETA', 'KEN', 'LAB-KEN', 'ACCEPTED', 20, 50, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-                INSERT INTO "Batch" ("id", "analysis", "labId", "status", "createdBy", "createdAt")
-                VALUES ('BATCH-001', 'PH', 'LAB-GTM', 'COMPLETED', 'gtm_mgr', CURRENT_TIMESTAMP),
-                       ('BATCH-002', 'PH', 'LAB-KEN', 'COMPLETED', 'ken_pm', CURRENT_TIMESTAMP);
-
-                INSERT INTO "WorkItem" ("id", "sampleId", "analysis", "status", "assignedTo", "labId", "assignedLab", "batchId", "createdAt", "updatedAt")
-                VALUES ('WI-001', 'SMP-001', 'PH', 'COMPLETED', 'gtm_tech', 'LAB-GTM', 'LAB-GTM', 'BATCH-001', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                       ('WI-002', 'SMP-002', 'PH', 'ASSIGNED', NULL, 'LAB-KEN', 'LAB-KEN', 'BATCH-002', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-                INSERT INTO "Result" ("id", "sampleId", "param", "value", "numericValue", "unit", "isValid", "isCurrent", "provenance", "createdAt", "updatedAt")
-                VALUES ('RES-001', 'SMP-001', 'pH', '6.85', 6.85, 'pH', 1, 1, 'MEASURED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                       ('RES-002', 'SMP-002', 'pH', '7.12', 7.12, 'pH', 1, 1, 'MEASURED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-                INSERT INTO "Report" ("id", "sampleId", "labId", "status", "projectCode", "generatedBy", "content", "version", "createdAt", "updatedAt")
-                VALUES ('REP-PUB', 'SMP-001', 'LAB-GTM', 'PUBLISHED', 'PRJ-GTM-ALPHA', 'gtm_tech', '{"status":"ok","ph":6.85}', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                       ('REP-SUP', 'SMP-001', 'LAB-GTM', 'SUPERSEDED', 'PRJ-GTM-ALPHA', 'gtm_tech', '{"status":"old","ph":6.80}', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                       ('REP-KEN', 'SMP-002', 'LAB-KEN', 'PUBLISHED', 'PRJ-KEN-BETA', 'ken_pm', '{"status":"ok","ph":7.12}', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-                INSERT INTO "ReportShareLink" ("id", "reportId", "tokenHash", "expiresAt", "isRevoked", "createdBy", "createdAt")
-                VALUES ('RSL-001', 'REP-PUB', 'synthetic-token-hash-pub1', '2030-01-01 00:00:00', 0, 'gtm_mgr', CURRENT_TIMESTAMP);
-
-                INSERT INTO "AuditLog" ("id", "entity", "entityId", "action", "performedBy", "performedByName", "details", "timestamp")
-                VALUES ('AUD-001', 'REPORT', 'REP-PUB', 'REPORT_GENERATED', 'USR-MGR', 'gtm_mgr', 'Report published', CURRENT_TIMESTAMP),
-                       ('AUD-002', 'SAMPLE', 'SMP-001', 'SAMPLE_ACCEPTED', 'USR-TECH', 'gtm_tech', 'Sample accepted', CURRENT_TIMESTAMP);
-            `);
             db.pragma('foreign_keys = ON');
-
+            expect(db.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
             // Compute exact SHA256 checksums of raw table contents BEFORE migration
             const crypto = require('crypto');
             const getTableSnapshot = (table, orderCol = 'id') => {
@@ -1136,7 +1091,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             expect(preSnapshots.projects.count).toBe(2);
 
             // Execute additive migration runner on populated legacy DB
-            const migResult = migrateProjectTemplatesAndPolicy(rehearsalDbPath);
+            const migResult = rehearsal.applyPendingMigration();
             expect(migResult.success).toBe(true);
             expect(migResult.applied).toBe(true);
             expect(migResult.totalProjects).toBe(2);
@@ -1318,9 +1273,8 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 `;
 
                 const cp = require('child_process');
-                const verifyScriptPath = path.join(fixture.runnerDir, 'verify_http.js');
-                fs.writeFileSync(verifyScriptPath, childScript, 'utf8');
-                const outBuffer = cp.execSync(`node "${verifyScriptPath}"`, { cwd: path.resolve(__dirname, '..', '..') });
+                fs.writeFileSync(verifyScriptPath, childScript, { encoding: 'utf8', flag: 'wx' });
+                const outBuffer = cp.execFileSync(process.execPath, [verifyScriptPath], { cwd: path.resolve(__dirname, '..', '..') });
                 const outLine = outBuffer.toString().split('\n').find(l => l.includes('HTTP_MIGRATED_RESULTS:'));
                 expect(outLine).toBeDefined();
                 const httpResults = JSON.parse(outLine.replace('HTTP_MIGRATED_RESULTS:', '').trim());
@@ -1347,7 +1301,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 expect(rerun.totalProjects).toBe(2);
             } finally {
                 await rehearsalPrisma.$disconnect();
-                iso.cleanupDisposableDatabase(fixture.runnerDir);
+                fs.rmSync(verifyScriptPath, { force: true }); rehearsal.close();
             }
         });
     });

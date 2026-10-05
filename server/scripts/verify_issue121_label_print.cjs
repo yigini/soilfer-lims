@@ -60,6 +60,7 @@ const { spawn } = require('child_process');
 const {
     WORKING_DEV_DB,
     createDisposableDatabase,
+    configureDisposableWorkflowFixtures,
     cleanupDisposableDatabase,
     validateDisposableDbPath
 } = require('./journey_db_isolation.cjs');
@@ -89,6 +90,8 @@ const { runnerDir, dbPath } = createDisposableDatabase();
 process.env.DATABASE_PATH = validateDisposableDbPath(dbPath, runnerDir);
 process.env.DATABASE_URL = `file:${process.env.DATABASE_PATH}`;
 process.env.NODE_ENV = 'production';
+configureDisposableWorkflowFixtures(dbPath, runnerDir);
+const { createSampleFixture } = require('../tests/helpers/workflowFixtures');
 process.env.DISABLE_BACKGROUND_JOBS = 'true';
 process.env.SERVE_CLIENT = 'true';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_jwt_for_local_testing_12345';
@@ -452,16 +455,7 @@ async function main() {
 
     // Sample S004 (persisted receptionDate, missing collectionDate)
     const sampleS004Id = 'SMP-S004-GTM';
-    await prisma.sample.upsert({
-        where: { id: sampleS004Id },
-        update: {
-            status: 'ACCEPTED',
-            labId: 'S004',
-            originalId: 'FIELD-S004',
-            receptionDate: new Date('2026-09-05T23:33:06.081Z'),
-            fieldMetadata: JSON.stringify({})
-        },
-        create: {
+    await createSampleFixture(prisma, { data: {
             id: sampleS004Id,
             labId: 'S004',
             originalId: 'FIELD-S004',
@@ -470,8 +464,7 @@ async function main() {
             status: 'ACCEPTED',
             receptionDate: new Date('2026-09-05T23:33:06.081Z'),
             fieldMetadata: JSON.stringify({})
-        }
-    });
+        } });
 
     // Batch Samples S001, S002, S003
     const batchDbSamples = [
@@ -481,16 +474,7 @@ async function main() {
     ];
 
     for (const b of batchDbSamples) {
-        await prisma.sample.upsert({
-            where: { id: b.id },
-            update: {
-                status: 'ACCEPTED',
-                labId: b.labId,
-                originalId: b.originalId,
-                receptionDate: new Date(b.rec),
-                fieldMetadata: JSON.stringify({ collectionDate: b.coll })
-            },
-            create: {
+        await createSampleFixture(prisma, { data: {
                 id: b.id,
                 labId: b.labId,
                 originalId: b.originalId,
@@ -499,15 +483,13 @@ async function main() {
                 status: 'ACCEPTED',
                 receptionDate: new Date(b.rec),
                 fieldMetadata: JSON.stringify({ collectionDate: b.coll })
-            }
-        });
+            } });
     }
 
     // Pre-arrival EXPECTED sample for Reception intake journey
     const expectedIntakeSampleId = `SMP-EXP-INTAKE-${RUN_SUFFIX}`;
     const expectedOriginalId = `FIELD-INTAKE-${RUN_SUFFIX}`;
-    await prisma.sample.create({
-        data: {
+    await createSampleFixture(prisma, { data: {
             id: expectedIntakeSampleId,
             originalId: expectedOriginalId,
             assignedLab: TEST_LAB_ID,
@@ -515,8 +497,7 @@ async function main() {
             projectCode: TEST_PROJECT_CODE,
             status: 'EXPECTED',
             fieldMetadata: JSON.stringify({ collectionDate: '2026-09-18' })
-        }
-    });
+        } });
 
     console.log('✓ Synthetic test database seeded under isolated runner directory.');
 

@@ -1,4 +1,5 @@
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
 /**
  * Project Governance Retry Recovery & Preview Contract Verification (C01, C02, A12, A14)
@@ -12,6 +13,7 @@
  * - C02: Stale preview token rejected with 409 PREVIEW_STALE_REVISION even when caller provides a fresh If-Match header.
  */
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -76,9 +78,9 @@ describe('Project Governance Retry Recovery & Preview Contracts (C01, C02)', () 
         await prisma.commandReceipt.deleteMany({
             where: { targetResource: { in: [`Project:${testProject.id}`, `Project:${testProject.code}`] } }
         }).catch(() => {});
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { projectId: testProject.id }
-        }).catch(() => {});
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
         await prisma.auditLog.deleteMany({
             where: { entityId: testProject.id }
         }).catch(() => {});
@@ -276,7 +278,7 @@ describe('Project Governance Retry Recovery & Preview Contracts (C01, C02)', () 
         it('mixed manifest (existing + new) signs validSampleIds and commits valid rows cleanly', async () => {
             // Seed 1 existing sample in DB
             const existingSid = 'SMP-EXIST-' + SUFFIX;
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: existingSid,
                     originalId: existingSid,

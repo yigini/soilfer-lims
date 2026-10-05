@@ -30,6 +30,19 @@ function evaluateItemReadiness(item, user, options = {}) {
         reasons.push(`Assigned to ${item.assignedTo}, not you`);
     }
 
+    if (options.prerequisite && !options.prerequisite.canStart) {
+        blockers.push(options.prerequisite.code || 'ANALYSIS_PREREQUISITE_BLOCKED');
+        reasons.push(options.prerequisite.reason);
+    }
+    if (options.gateEvidence && !options.gateEvidence.satisfied) {
+        for (const gate of options.gateEvidence.blocked) {
+            const code = gate.mismatch ? 'GATE_STATE_MISMATCH' : `${gate.analysis}_PREREQUISITE_BLOCKED`;
+            if (!blockers.includes(code)) blockers.push(code);
+            reasons.push(gate.mismatch ? `${gate.analysis} WorkItem and sample flag disagree`
+                : `${gate.analysis} must be completed before continuing`);
+        }
+    }
+
     // 2. Sealed state check
     const sealedStates = ['SUBMITTED', 'ACCEPTED', 'WAIVED'];
     if (sealedStates.includes(item.status)) {
@@ -131,6 +144,25 @@ function evaluateItemReadiness(item, user, options = {}) {
     };
 }
 
+/** Application callers load evidence and catalogue before the pure evaluation. */
+async function evaluateExecutionReadiness(db, item, user, options = {}) {
+    const engine = require('../utils/workflowEngine');
+    const workflow = require('../workflowContract');
+    const gates = require('./gateEvidenceService');
+    if (!item.sample) return evaluateItemReadiness(item, user, options);
+    const workItems = await db.workItem.findMany({ where: { sampleId: item.sample.id } });
+    const required = workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis) ? [] : item.analysis === 'DRYING' ? []
+        : item.analysis === 'PREPARATION' ? ['DRYING'] : ['DRYING', 'PREPARATION'];
+    const { prerequisite, category } = await engine.withCatalogue(db, () => ({
+        prerequisite: engine.checkPrerequisites(item, workItems, item.sample),
+        category: workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis) ? 'Post-Analytical'
+            : ['DRYING', 'PREPARATION'].includes(item.analysis) ? 'Operational Gates' : item.category || engine.getAnalysisConfig(item.analysis).category
+    }));
+    return evaluateItemReadiness({ ...item, category }, user, { ...options, prerequisite,
+        gateEvidence: gates.evaluateGateEvidence(item.sample, workItems, required) });
+}
+
 module.exports = {
-    evaluateItemReadiness
+    evaluateItemReadiness,
+    evaluateExecutionReadiness
 };

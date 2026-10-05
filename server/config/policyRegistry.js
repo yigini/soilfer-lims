@@ -41,6 +41,7 @@ key('results.phMax', 'number', 14, 14, 14, { min: 0, unit: 'pH' });
 key('repeats.maxAttemptsBeforeNcr', 'integer', 3, 5, 0, integer);
 key('repeats.technicianSelfRepeatBeforeSubmit', 'boolean', true);
 key('review.secondPersonRequired', 'boolean', true, true, false);
+key('gate.verificationRequired', 'boolean', false, false, false, { scope: 'LAB', analysisOverrides: ['DRYING', 'PREPARATION'] });
 key('report.amendmentRequiresSecondPerson', 'boolean', true, true, false);
 key('report.numberFormat', 'reportFormat', 'RPT-{LAB}-{YYYY}-{SEQ:5}', undefined, undefined, { scope: 'LAB' });
 key('sample.codeFormat', 'sampleFormat', '{LAB}-{YY}-{SEQ:6}{CHK}', undefined, undefined, { scope: 'LAB' });

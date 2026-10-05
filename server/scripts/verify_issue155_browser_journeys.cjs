@@ -31,46 +31,11 @@ const { chromium } = require('C:/Users/yigin/.cache/codex-runtimes/codex-primary
 const CHROME_PATH = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 
 const Database = require('better-sqlite3');
-const tempDbPath = path.join(require('os').tmpdir(), `issue155-browser-${randomUUID()}.db`);
-const sourceDbPath = path.join(root, 'server/prisma/dev.db');
-
-// 1. Create disposable database from source schema DDL
-const sourceDb = new Database(sourceDbPath, { readonly: true, fileMustExist: true });
-const ddl = sourceDb.prepare("SELECT sql FROM sqlite_master WHERE sql IS NOT NULL AND name NOT LIKE 'sqlite_%' AND type IN ('table','index') ORDER BY CASE type WHEN 'table' THEN 0 ELSE 1 END").all();
-sourceDb.close();
-
-const disposableDb = new Database(tempDbPath);
-disposableDb.pragma('foreign_keys=OFF');
-for (const { sql } of ddl) {
-    disposableDb.exec(sql);
-}
+const { createDisposableDatabase, cleanupDisposableDatabase } = require('./journey_db_isolation.cjs');
+// Build the checked-in release schema with FK enforcement and every real guard.
+const { runnerDir, dbPath: tempDbPath } = createDisposableDatabase();
+const disposableDb = new Database(tempDbPath, { fileMustExist: true });
 disposableDb.pragma('foreign_keys=ON');
-
-// Ensure theme tables exist in disposable database
-try {
-    disposableDb.exec(`
-        CREATE TABLE IF NOT EXISTS "LabAppearanceSetting" (
-            "id" TEXT PRIMARY KEY,
-            "labId" TEXT UNIQUE NOT NULL REFERENCES "Lab"("id") ON DELETE CASCADE,
-            "themeId" TEXT,
-            "defaultMode" TEXT DEFAULT 'inherit',
-            "revision" INTEGER NOT NULL DEFAULT 1,
-            "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            "updatedBy" TEXT
-        );
-        CREATE TABLE IF NOT EXISTS "GlobalAppearanceSetting" (
-            "id" TEXT PRIMARY KEY,
-            "settingKey" TEXT UNIQUE NOT NULL,
-            "themeId" TEXT NOT NULL DEFAULT 'soilfer-classic',
-            "defaultMode" TEXT NOT NULL DEFAULT 'light',
-            "revision" INTEGER NOT NULL DEFAULT 1,
-            "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            "updatedBy" TEXT
-        );
-    `);
-} catch (e) {
-    // Already present
-}
 
 // Seed synthetic testing entities
 const now = new Date().toISOString();
@@ -8720,11 +8685,7 @@ async function runBrowserEvidence() {
     } finally {
         await browser.close();
         server.close();
-        try {
-            fs.unlinkSync(tempDbPath);
-        } catch (e) {
-            // ignore
-        }
+        cleanupDisposableDatabase(runnerDir);
     }
 
     const totalPassed = suiteResults.filter(r => r.passed).length;
@@ -8752,5 +8713,6 @@ async function runBrowserEvidence() {
 
 runBrowserEvidence().catch(err => {
     console.error('Fatal error in browser journeys suite:', err);
+    cleanupDisposableDatabase(runnerDir);
     process.exit(1);
 });

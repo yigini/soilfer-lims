@@ -1,5 +1,7 @@
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -139,20 +141,20 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
         );
 
         // 3. Create Sample and WorkItems
-        testSample = await prisma.sample.create({
+        testSample = await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-' + testPrefix,
                 originalId: 'ORIG-' + testPrefix,
                 labId: labA.id,
                 assignedLab: labA.id,
-                status: 'ACCEPTED',
+                status: 'PROCESSING',
                 receptionDate: new Date(),
                 dryingStatus: 'DONE',
                 preparationStatus: 'DONE'
             }
         });
 
-        testAnalyticalItem = await prisma.workItem.create({
+        testAnalyticalItem = await createWorkItemFixture(prisma, {
             data: {
                 id: 'WI-ANA-' + testPrefix,
                 sampleId: testSample.id,
@@ -160,13 +162,13 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
                 assignedLab: labA.id,
                 analysis: 'PH_H2O',
                 category: 'Chemical Analysis',
-                status: 'ASSIGNED',
+                status: 'IN_PROGRESS',
                 assignedTo: techA.username,
                 version: 1
             }
         });
 
-        testDryingItem = await prisma.workItem.create({
+        testDryingItem = await createWorkItemFixture(prisma, {
             data: {
                 id: 'WI-DRY-' + testPrefix,
                 sampleId: testSample.id,
@@ -174,13 +176,13 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
                 assignedLab: labA.id,
                 analysis: 'DRYING',
                 category: 'Operational Gates',
-                status: 'ASSIGNED',
+                status: 'COMPLETED',
                 assignedTo: techA.username,
                 version: 1
             }
         });
 
-        testSpectralItem = await prisma.workItem.create({
+        testSpectralItem = await createWorkItemFixture(prisma, {
             data: {
                 id: 'WI-SPEC-' + testPrefix,
                 sampleId: testSample.id,
@@ -209,12 +211,12 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
             await prisma.workItemDraft.deleteMany({
                 where: { workItemId: { in: [testAnalyticalItem.id, testDryingItem.id, testSpectralItem.id] } }
             });
-            await prisma.workItem.deleteMany({
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
                 where: { sampleId: testSample.id }
-            });
-            await prisma.sample.deleteMany({
+            }), select: { id: true } })).map(row => row.id), { single: false });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
                 where: { id: testSample.id }
-            });
+            }), select: { id: true } })).map(row => row.id), { single: false });
             await prisma.apiKey.deleteMany({
                 where: { name: { contains: testPrefix } }
             });
@@ -297,25 +299,26 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
             // Query with issued key against data exchange
             const liveKey = res.body.apiKey;
 
-            // Create authorized RELEASED sample in labA
-            const releasedSampleA = await prisma.sample.create({
+            require('../../services/exchangeStateService').getDb();
+            // Create authorized approved sample in labA.
+            const releasedSampleA = await createSampleFixture(prisma, {
                 data: {
                     id: 'SMP-REL-A-' + testPrefix,
                     originalId: 'ORIG-REL-A-' + testPrefix,
                     labId: labA.id,
                     assignedLab: labA.id,
-                    status: 'RELEASED'
+                    status: 'APPROVED'
                 }
             });
 
-            // Create a foreign RELEASED sample in labB
-            const foreignSample = await prisma.sample.create({
+            // Create a foreign approved sample in labB.
+            const foreignSample = await createSampleFixture(prisma, {
                 data: {
                     id: 'SMP-FOREIGN-' + testPrefix,
                     originalId: 'ORIG-FOREIGN-' + testPrefix,
                     labId: labB.id,
                     assignedLab: labB.id,
-                    status: 'RELEASED'
+                    status: 'APPROVED'
                 }
             });
 
@@ -342,8 +345,8 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
             expect(unauthQueryRes.body.data).toHaveLength(0);
 
             // Clean up temporary samples
-            await prisma.sample.delete({ where: { id: releasedSampleA.id } }).catch(() => {});
-            await prisma.sample.delete({ where: { id: foreignSample.id } }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: releasedSampleA.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: foreignSample.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
         });
     });
 

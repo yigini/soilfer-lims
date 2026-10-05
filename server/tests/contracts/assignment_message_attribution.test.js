@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Contract & Real Integration Test: Generated Assignment Message Attribution (#126)
  *
@@ -25,6 +26,7 @@
  *    - Direct prisma.auditLog queries verify audit trails are completely untouched.
  */
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { generateToken } = require('../setup');
@@ -214,7 +216,7 @@ describe('Issue #126: Assignment Message Attribution Contract & Real DB Integrat
             createdIds.users.push(deactivatedUnnamed.id);
 
             // Create accepted sample and work items in GTM-LAB1
-            testSample = await prisma.sample.create({
+            testSample = await createSampleFixture(prisma, {
                 data: {
                     id: `sample_${suffix}`,
                     originalId: `ORIG_${suffix}`,
@@ -225,7 +227,7 @@ describe('Issue #126: Assignment Message Attribution Contract & Real DB Integrat
             });
             createdIds.samples.push(testSample.id);
 
-            testItem1 = await prisma.workItem.create({
+            testItem1 = await createWorkItemFixture(prisma, {
                 data: {
                     id: `wi_1_${suffix}`,
                     sampleId: testSample.id,
@@ -236,7 +238,7 @@ describe('Issue #126: Assignment Message Attribution Contract & Real DB Integrat
             });
             createdIds.items.push(testItem1.id);
 
-            testItem2 = await prisma.workItem.create({
+            testItem2 = await createWorkItemFixture(prisma, {
                 data: {
                     id: `wi_2_${suffix}`,
                     sampleId: testSample.id,
@@ -282,16 +284,16 @@ describe('Issue #126: Assignment Message Attribution Contract & Real DB Integrat
                         ]
                     }
                 });
-                await prisma.workItem.deleteMany({
+                await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
                     where: {
                         OR: [
                             { id: { in: createdIds.items } },
                             { sampleId: { in: createdIds.samples } }
                         ]
                     }
-                });
+                }), select: { id: true } })).map(row => row.id), { single: false });
                 if (createdIds.samples.length > 0) {
-                    await prisma.sample.deleteMany({ where: { id: { in: createdIds.samples } } });
+                    await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: createdIds.samples } } }), select: { id: true } })).map(row => row.id), { single: false });
                 }
                 if (createdIds.users.length > 0) {
                     await prisma.user.deleteMany({ where: { id: { in: createdIds.users } } });

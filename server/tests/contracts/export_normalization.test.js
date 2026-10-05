@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -10,17 +11,24 @@ describe('WP-22: Dual Export Paths (As-Measured & Normalized Controlled Units)',
     beforeAll(async () => {
         superAdminToken = await getAuthToken('SUPER_ADMIN', null, ['*'], ['*']);
 
-        testSample = samplesDb.create({
-            id: `SMP-EXP-${Date.now()}`,
+        // #179 pin 5991651044: this scientific normalization probe owns its
+        // lab scope, independently of other suites' conflicting profile rows.
+        const fixtureLab = 'LAB-EXPNORM-' + require('node:crypto').randomUUID();
+
+        testSample = await createSampleFixture(prisma, { data: { id: `SMP-EXP-${Date.now()}`,
             labId: 'LAB-EXP-001',
             originalId: `ORIG-EXP-${Date.now()}`,
-            assignedLab: 'LAB-DEFAULT',
+            assignedLab: fixtureLab,
             status: 'APPROVED',
             projectCode: 'EXP-PROJ',
             country: 'GTM',
             countryName: 'Guatemala',
-            requiredAnalyses: ['SOC']
-        });
+            requiredAnalyses: JSON.stringify(['SOC']),
+            dryingStatus: 'DONE',
+            preparationStatus: 'DONE',
+            receptionDate: new Date(),
+            metadata: '{}',
+            history: '[]' } });
         sampleId = testSample.id;
 
         const now = new Date();
@@ -75,10 +83,20 @@ describe('WP-22: Dual Export Paths (As-Measured & Normalized Controlled Units)',
 
         const res = await request(app)
             .get('/api/v1/sis/geojson')
+            .query({labId:testSample.assignedLab})
             .set('Authorization', `Bearer ${superAdminToken}`);
 
         expect(res.status).toBe(200);
         expect(res.body.type).toBe('FeatureCollection');
+
+        // V1 GeoJSON's labId is the accession alias. Check the authoritative
+        // laboratory through actual stored specimen identities instead.
+        const exportedIds=res.body.features.map(feature=>feature.properties.id);
+        const scopeRows=await prisma.sample.findMany({where:{OR:[{id:{in:exportedIds}},{originalId:{in:exportedIds}}]},
+            select:{id:true,originalId:true,assignedLab:true}});
+        expect(res.body.features.every(feature=>scopeRows.some(row=>row.assignedLab === testSample.assignedLab &&
+            [row.id,row.originalId].includes(feature.properties.id)))).toBe(true);
+        expect(res.body.features.filter(feature=>[testSample.id,testSample.originalId].includes(feature.properties.id))).toHaveLength(1);
 
         const feat = res.body.features.find(f => f.properties.id === testSample.originalId || f.properties.id === testSample.id);
         expect(feat).toBeDefined();

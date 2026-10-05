@@ -53,7 +53,10 @@ function resolvedFromState(current, key, context = {}) {
     const candidates = d.scope === 'LAB+METHOD' ? [
         ...(analysisCode && methodologyId ? [[analysisCode, methodologyId, 'METHOD_OVERRIDE']] : []),
         ...(analysisCode ? [[analysisCode, null, 'ANALYSIS_OVERRIDE']] : []), [null, null, 'LAB_OVERRIDE']
-    ] : [[null, null, 'LAB_OVERRIDE']];
+    ] : [
+        ...(d.analysisOverrides?.includes(analysisCode) ? [[analysisCode, null, 'ANALYSIS_OVERRIDE']] : []),
+        [null, null, 'LAB_OVERRIDE']
+    ];
     for (const [analysis, method, source] of candidates) {
         const rows = current.overrides.filter(row => row.key === key && (row.analysisCode || null) === analysis && (row.methodologyId || null) === method);
         if (rows.length > 1) throw error(409, 'POLICY_SCOPE_CONFLICT', 'Multiple current overrides exist for the same policy scope.');
@@ -116,7 +119,8 @@ async function validateChange(change, db) {
     const analysisCode = change.analysisCode ?? null, methodologyId = change.methodologyId ?? null;
     if ((analysisCode !== null && (typeof analysisCode !== 'string' || !analysisCode.trim())) ||
         (methodologyId !== null && (typeof methodologyId !== 'string' || !methodologyId.trim())) ||
-        (d.scope === 'LAB' && (analysisCode !== null || methodologyId !== null)) || (methodologyId !== null && analysisCode === null)) {
+        (d.scope === 'LAB' && (methodologyId !== null || (analysisCode !== null && !d.analysisOverrides?.includes(analysisCode)))) ||
+        (methodologyId !== null && analysisCode === null)) {
         throw error(422, 'POLICY_SCOPE_INVALID', 'Invalid policy scope.');
     }
     if (analysisCode !== null && !await db.analysis.findUnique({ where: { code: analysisCode }, select: { code: true } })) {

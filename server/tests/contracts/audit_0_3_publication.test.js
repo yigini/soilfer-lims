@@ -1,3 +1,5 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
+const { createLegacyClosureDatabase, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const request = require('supertest');
@@ -21,14 +23,30 @@ const mockQcMode = mode => jest.spyOn(policyService, 'get').mockImplementation((
 
 describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     let token;
+    const ownedDatabases = [];
     beforeAll(async () => { await ensureTestLab(labId, 'GTM'); token = await getAuthToken('LAB_MANAGER', labId); });
     afterEach(() => jest.restoreAllMocks());
+    afterAll(async () => { for (const database of ownedDatabases) await database.close(); });
     const call = (path, body) => request(app).post(path).set('Authorization', `Bearer ${token}`).send(body);
     async function fixture({ status = 'APPROVED', itemStatus = 'ACCEPTED', param = 'PH_H2O', batchStatus, flags = [], valid = true } = {}) {
         const sampleId = id('SMP-03'), workItemId = id('WI-03'), resultId = id('RES-03');
         const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-03'), analysis: param, status: batchStatus, labId, createdBy: 'review-test' } }) : null;
-        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status } });
-        const item = await prisma.workItem.create({ data: { id: workItemId, sampleId, analysis: param, status: itemStatus, result: '7.2', assignedLab: labId, batchId: batch?.id } });
+        const sampleData = { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status,
+            receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' };
+        const itemData = { id: workItemId, sampleId, analysis: param, status: itemStatus, result: '7.2', assignedLab: labId, batchId: batch?.id };
+        let item;
+        if (status === 'COMPLETED' || itemStatus === 'CANCELLED') {
+            const now = Date.now();
+            const database = await createLegacyClosureDatabase({ analysis: 'ARCHIVING', labId,
+                samples: [{ ...sampleData, createdAt: now, updatedAt: now }],
+                workItems: [{ ...itemData, createdAt: now, updatedAt: now }],
+                batches: batch ? [{ ...batch, createdAt: batch.createdAt.getTime() }] : [] });
+            ownedDatabases.push(database); useLegacyRouteDatabase(prisma, database.client);
+            item = await database.client.workItem.findUnique({ where: { id: workItemId } });
+        } else {
+            await createSampleFixture(prisma, { data: sampleData });
+            item = await createWorkItemFixture(prisma, { data: itemData });
+        }
         const result = await prisma.result.create({ data: { id: resultId, sampleId, param, value: '7.2', numericValue: 7.2, isCurrent: true,
             isValid: valid, flags: JSON.stringify(flags), batchId: batch?.id } });
         return { sampleId, item, result, batch };
@@ -36,7 +54,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     const generate = f => call(`/api/reports/generate/${f.sampleId}`, {});
     async function spectralFixture(analysis = 'SPEC_MIR', scanOverrides = {}) {
         const f = await fixture();
-        f.spectralItem = await prisma.workItem.create({ data: {
+        f.spectralItem = await createWorkItemFixture(prisma, { data: {
             id: id('WI-SCAN'), sampleId: f.sampleId, assignedLab: labId, analysis, status: 'ACCEPTED'
         } });
         f.scan = await prisma.spectralData.create({ data: {
@@ -77,23 +95,23 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         const f = await fixture({ param: analysis });
         expect((await generate(f)).status).toBe(200);
         const techToken = await getAuthToken('LAB_TECHNICIAN', labId);
-        await prisma.sample.update({ where: { id: f.sampleId }, data: {
-            status: 'PROCESSING', receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE'
-        } });
-        await prisma.workItem.update({ where: { id: f.item.id }, data: { status: 'IN_PROGRESS', assignedTo: jwt.decode(techToken).username } });
+        const acquisition = await fixture({ status: 'PROCESSING', itemStatus: 'IN_PROGRESS', param: analysis });
+        await prisma.workItem.update({ where: { id: acquisition.item.id }, data: { assignedTo: jwt.decode(techToken).username } });
         const saved = await request(app).post('/api/workbench/batch-save').set('Authorization', `Bearer ${techToken}`)
-            .send({ draft: false, entries: [{ workItemId: f.item.id, value: '12' }] });
+            .send({ draft: false, entries: [{ workItemId: acquisition.item.id, value: '12' }] });
         expect(saved.status).toBe(200);
         expect(saved.body.saved).toBe(1);
-        expect((await prisma.result.findFirst({ where: { sampleId: f.sampleId, param: analysis, isCurrent: true } })).numericValue).toBe(12);
-        expect((await prisma.result.findUnique({ where: { id: f.result.id } })).isCurrent).toBe(false);
+        expect((await prisma.result.findFirst({ where: { sampleId: acquisition.sampleId, param: analysis, isCurrent: true } })).numericValue).toBe(12);
+        expect((await prisma.result.findUnique({ where: { id: acquisition.result.id } })).isCurrent).toBe(false);
+        expect((await prisma.result.findUnique({ where: { id: f.result.id } })).isCurrent).toBe(true);
     });
     async function reportValues(f, language = 'en') {
         const { content } = await assembleReport(f.sampleId, { ...manager, language });
         return { content, values: content.resultGroups.flatMap(group => group.items) };
     }
     async function reviewedState(f) {
-        return wire({ item: await prisma.workItem.findUnique({ where: { id: f.item.id } }), result: await prisma.result.findUnique({ where: { id: f.result.id } }),
+        return wire({ sample: await prisma.sample.findUnique({ where: { id: f.sampleId } }),
+            item: await prisma.workItem.findUnique({ where: { id: f.item.id } }), result: await prisma.result.findUnique({ where: { id: f.result.id } }),
             decisions: await prisma.reviewDecision.findMany({ where: { workItemId: f.item.id } }), audit: await prisma.auditLog.findMany({ where: { sampleId: f.sampleId } }) });
     }
     async function returnFixture(path) {
@@ -114,7 +132,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         const res = await generate(await fixture({ status }));
         expect(res.status).toBe(409); expect(res.body.code).toBe('SAMPLE_NOT_APPROVED');
     });
-    test.each(['REANALYSIS_REQUIRED', 'SUBMITTED', 'COMPLETED'])('%s analytical work blocks even an approved sample', async itemStatus => {
+    test.each(['REPEAT_REQUIRED', 'SUBMITTED', 'COMPLETED'])('%s analytical work blocks even an approved sample', async itemStatus => {
         const f = await fixture({ itemStatus });
         const res = await generate(f);
         expect(res.status).toBe(409); expect(res.body.code).toBe('ITEMS_NOT_ACCEPTED'); expect(res.body.workItemIds).toEqual([f.item.id]);
@@ -122,7 +140,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     });
     test.each(modes)('%s never bypasses manager review', async mode => {
         mockQcMode(mode);
-        const res = await generate(await fixture({ itemStatus: 'REANALYSIS_REQUIRED' }));
+        const res = await generate(await fixture({ itemStatus: 'REPEAT_REQUIRED' }));
         expect(res.status).toBe(409); expect(res.body.code).toBe('ITEMS_NOT_ACCEPTED');
     });
     test('RUNNING QC blocks with a stable 409', async () => {
@@ -147,9 +165,9 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     test('legacy accepted no-batch work can publish', async () => expect((await generate(await fixture())).status).toBe(200));
     test('unfinished drying and preparation gates do not count as analytical publication work', async () => {
         const f = await fixture();
-        await prisma.workItem.createMany({ data: ['DRYING', 'PREPARATION'].map(analysis => ({
-            id: id('GATE-03'), sampleId: f.sampleId, analysis, status: 'ASSIGNED'
-        })) });
+        for (const analysis of ['DRYING', 'PREPARATION']) await createWorkItemFixture(prisma, { data: {
+            id: id('GATE-03'), sampleId: f.sampleId, analysis, status: 'ASSIGNED', assignedLab: labId
+        } });
         expect((await generate(f)).status).toBe(200);
         expect((await reportValues(f)).values).toHaveLength(1);
     });
@@ -175,7 +193,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     });
     test('a mix of waived and accepted matches prints once and preserves the stored row', async () => {
         const f = await fixture();
-        await prisma.workItem.create({ data: { id: id('WI-OMIT-03'), sampleId: f.sampleId, analysis: f.item.analysis, status: 'WAIVED', duplicateOf: f.item.id } });
+        await createWorkItemFixture(prisma, { data: { id: id('WI-OMIT-03'), sampleId: f.sampleId, analysis: f.item.analysis, status: 'WAIVED', duplicateOf: f.item.id } });
         const before = await reviewedState(f);
         expect((await generate(f)).status).toBe(200);
         const { content, values } = await reportValues(f);
@@ -196,10 +214,13 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     });
     test('two governing items print one current result only when both are accepted', async () => {
         const f = await fixture();
-        const other = await prisma.workItem.create({ data: { id: id('WI-03'), sampleId: f.sampleId, analysis: f.item.analysis, status: 'ACCEPTED', assignedLab: labId, duplicateOf: f.item.id } });
+        const other = await createWorkItemFixture(prisma, { data: { id: id('WI-03'), sampleId: f.sampleId, analysis: f.item.analysis, status: 'ACCEPTED', assignedLab: labId, duplicateOf: f.item.id } });
         expect((await reportValues(f)).values).toHaveLength(1);
-        await prisma.workItem.update({ where: { id: other.id }, data: { status: 'REANALYSIS_REQUIRED' } });
-        expect((await reportValues(f)).values).toHaveLength(0);
+        const returned = await fixture({ itemStatus: 'REPEAT_REQUIRED' });
+        await createWorkItemFixture(prisma, { data: { id: id('WI-03'), sampleId: returned.sampleId, analysis: returned.item.analysis,
+            status: 'ACCEPTED', assignedLab: labId, duplicateOf: returned.item.id } });
+        expect((await reportValues(returned)).values).toHaveLength(0);
+        expect((await prisma.workItem.findUnique({ where: { id: other.id } })).status).toBe('ACCEPTED');
     });
     test.each(modes)('QC_FAIL in %s retains storage and applies the policy at read time', async mode => {
         const f = await fixture({ batchStatus: 'QC_FAIL', valid: false, flags: ['QC_BATCH_FAILED'] });
@@ -242,7 +263,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         const res = await returnItem(path, f);
         expect(res.status).toBe(200);
         const after = await reviewedState(f);
-        expect(after.item.status).toBe('REANALYSIS_REQUIRED'); expect(after.result.isValid).toBe(false);
+        expect(after.item.status).toBe('REPEAT_REQUIRED'); expect(after.result.isValid).toBe(false);
         expect(after.result.value).toBe('7.2'); expect(after.result.numericValue).toBe(7.2);
         expect(JSON.parse(after.result.flags)).toEqual(['METHOD_NOTE', 'REVIEW_RETURNED']);
         const log = after.audit.find(row => row.entity === 'RESULT' && row.action === 'REVIEW_RETURNED');
@@ -271,7 +292,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     });
     test('RETURN invalidates a shared current result even if another governing item is accepted', async () => {
         const f = await returnFixture('individual');
-        await prisma.workItem.create({ data: { id: id('WI-03'), sampleId: f.sampleId, analysis: f.item.analysis, status: 'ACCEPTED', duplicateOf: f.item.id } });
+        await createWorkItemFixture(prisma, { data: { id: id('WI-03'), sampleId: f.sampleId, analysis: f.item.analysis, status: 'ACCEPTED', duplicateOf: f.item.id } });
         expect((await returnItem('individual', f)).status).toBe(200);
         expect((await prisma.result.findUnique({ where: { id: f.result.id } })).isValid).toBe(false);
     });
@@ -284,12 +305,22 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
             expect(await reviewedState(f)).toEqual(before);
         } finally { await prisma.$executeRawUnsafe(`DROP TRIGGER ${trigger}`); }
     });
-    test('RETURN preserves an existing published report snapshot', async () => {
+    test.each(['individual', 'bulk', 'submission'])('%s RETURN of accepted work refuses amendments and preserves the published snapshot and all review records', async path => {
         const f = await fixture();
+        if (path === 'submission') {
+            f.submission = await prisma.submission.create({ data: { id: id('SUB-FINAL-03'), sampleId: f.sampleId, assignedLab: labId,
+                submittedBy: jwt.decode(token).username, status: 'PENDING_REVIEW', type: 'FULL', workItemCount: 1,
+                workItemIds: JSON.stringify([f.item.id]) } });
+            await prisma.workItem.update({ where: { id: f.item.id }, data: { submissionId: f.submission.id } });
+        }
         const res = await generate(f); expect(res.status).toBe(200);
         const before = await prisma.report.findUnique({ where: { id: res.body.id } });
-        await prisma.workItem.update({ where: { id: f.item.id }, data: { status: 'SUBMITTED' } });
-        expect((await returnItem('individual', f)).status).toBe(200);
+        const records = await reviewedState(f);
+        const submissionBefore = f.submission && await prisma.submission.findUnique({ where: { id: f.submission.id } });
+        const returned = await returnItem(path, f);
+        expect(returned.status).toBe(409); expect(returned.body.code).toBe('AMENDMENT_WORKFLOW_REQUIRED');
+        expect(await reviewedState(f)).toEqual(records);
+        if (f.submission) expect(await prisma.submission.findUnique({ where: { id: f.submission.id } })).toEqual(submissionBefore);
         expect(await prisma.report.findUnique({ where: { id: before.id } })).toEqual(before);
     });
 });

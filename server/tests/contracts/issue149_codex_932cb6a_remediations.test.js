@@ -7,9 +7,11 @@ const crypto = require('crypto');
 const Database = require('better-sqlite3');
 const express = require('express');
 const supertest = require('supertest');
+const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
+const originalDatabasePath = process.env.DATABASE_PATH;
 
 describe('Issue #149 Head 932cb6a Remediation Contracts (Codex Independent Review)', () => {
-    let dir, databasePath, setupDb, prisma, state, db, management, app, http;
+    let databasePath, rehearsal, prisma, state, db, management, app, http;
     const admin = { id: 'synthetic-admin', role: 'SUPER_ADMIN', username: 'synthetic-review-admin' };
 
     const response = () => ({
@@ -45,32 +47,25 @@ describe('Issue #149 Head 932cb6a Remediation Contracts (Codex Independent Revie
     }
 
     beforeAll(async () => {
-        const root = path.resolve(__dirname, '../../..');
-        dir = fs.mkdtempSync(path.join(root, 'server', 'issue149-jest-disposable-'));
-        databasePath = path.join(dir, 'synthetic-test.db');
-        process.env.DATABASE_PATH = databasePath;
-        process.env.NODE_ENV = 'test';
-        process.env.JWT_SECRET = crypto.randomBytes(32).toString('hex');
-        delete process.env.SOURCE_SYSTEM_ID;
-
-        setupDb = new Database(databasePath);
-        const now = new Date().toISOString();
-        setupDb.exec(fs.readFileSync(path.join(root, 'server/scripts/schema/full_application_schema.sql'), 'utf8'));
-
-        for (const [id, status, approvedAt, metadata] of [
+        const now = new Date();
+        const specimens = [
             ['legacy-approved', 'APPROVED', now, null],
             ['legacy-unapproved-archive', 'ARCHIVED', null, null],
             ['legacy-approved-disposed', 'DISPOSED', now, null],
             ['legacy-held-approved', 'APPROVED', now, JSON.stringify({ provenanceHold: { status: 'AMBIGUOUS_PROVENANCE_HOLD' } })],
             ['legacy-processing-prior-approval', 'PROCESSING', now, null],
             ['legacy-resolved-hold', 'APPROVED', now, JSON.stringify({ provenanceHold: { status: 'RESOLVED', history: [{ status: 'AMBIGUOUS_PROVENANCE_HOLD' }] } })]
-        ]) {
-            setupDb.prepare('INSERT INTO Sample (id, originalId, labId, assignedLab, country, projectCode, status, approvedAt, updatedAt, latitude, longitude, metadata) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
-                .run(id, id + '-field', id + '-accession', 'SYNTHETIC-LAB', 'AAA', 'SYNTHETIC-PROJECT', status, approvedAt, now, 12, 34, metadata);
-            setupDb.prepare('INSERT INTO Result (id, sampleId, param, value, numericValue, unit, isValid, isCurrent, updatedAt) VALUES (?,?,?,?,?,?,?,?,?)')
-                .run(id + '-result', id, 'PH_H2O', '6.2', 6.2, 'pH units', 1, 1, now);
-        }
-        setupDb.close();
+        ];
+        rehearsal = beforeGuards({ actor: 'system:fixture', samples: specimens.map(([id, status, approvedAt, metadata]) => ({
+            id, originalId: `${id}-field`, labId: `${id}-accession`, assignedLab: 'SYNTHETIC-LAB', country: 'AAA',
+            projectCode: 'SYNTHETIC-PROJECT', status, approvedAt, metadata, createdAt: now, updatedAt: now, latitude: 12, longitude: 34
+        })), relatedRows: { Result: specimens.map(([id]) => ({ id: `${id}-result`, sampleId: id, param: 'PH_H2O',
+            value: '6.2', numericValue: 6.2, unit: 'pH units', isValid: 1, isCurrent: 1, createdAt: now, updatedAt: now })) } });
+        databasePath = rehearsal.file;
+        process.env.DATABASE_PATH = databasePath;
+        process.env.NODE_ENV = 'test';
+        process.env.JWT_SECRET = crypto.randomBytes(32).toString('hex');
+        delete process.env.SOURCE_SYSTEM_ID;
 
         require('../../scripts/migrate_exchange_journal_tables.cjs').migrateExchangeTables(databasePath);
 
@@ -91,9 +86,8 @@ describe('Issue #149 Head 932cb6a Remediation Contracts (Codex Independent Revie
     afterAll(async () => {
         await prisma.$disconnect();
         if (db && db.open) db.close();
-        try {
-            fs.rmSync(dir, { recursive: true, force: true });
-        } catch (e) {}
+        process.env.DATABASE_PATH = originalDatabasePath;
+        rehearsal?.close();
     });
 
     test('Package 1: Canonical hold and history predicate correctly backfills and publishes', async () => {

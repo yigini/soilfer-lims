@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const identity = require('../services/profileIdentityService');
+const { createSample } = require('../services/sampleStateService');
 const MARKER = 'issue140-two-layer-v1';
 const ROOT = 'PROFILE-FIXTURE-140';
 
@@ -45,7 +46,7 @@ async function loadFixture(db, env = process.env) {
         await tx.koboConfig.create({data: {id: manifest.configId, labId: manifest.labId, projectCode: manifest.projectId, formId: 'synthetic-not-a-kobo-asset', apiToken: 'unused-fixture-token', fieldMapping: JSON.stringify({profileReference: {namespace: 'DEMO-SURVEY-2026', relation: 'CONFIRMED_PROFILE'}})}});
         for (const row of records) {
             const reference = identity.captureReference({profileReference: {code: row.suffix === 'UNKNOWN' ? null : 'PIT-DEMO-01', relation: row.suffix === 'UNKNOWN' ? 'UNSPECIFIED' : 'CONFIRMED_PROFILE'}}, {sample: {}, authorizedNamespace: row.namespace || 'DEMO-SURVEY-2026', actor: 'fixture-loader', source: 'SYNTHETIC_FIXTURE', sourceRecordId: row.suffix});
-            await tx.sample.create({data: {id: ROOT + '-' + row.suffix, originalId: 'DEMO-BAG-' + row.suffix, assignedLab: manifest.labId, projectId: manifest.projectId, projectCode: manifest.projectId, country: 'GTM', matrix: 'SOIL', status: 'EXPECTED', depthTopCm: row.top, depthBottomCm: row.bottom, latitude: null, longitude: null, fieldMetadata: JSON.stringify({profileReference: reference, site_id: 'DEMO-SITE-INDEPENDENT', collectionDate: '2026-10-01'}), metadata: JSON.stringify({fixtureMarker: MARKER})}});
+            await createSample({id: ROOT + '-' + row.suffix, originalId: 'DEMO-BAG-' + row.suffix, assignedLab: manifest.labId, projectId: manifest.projectId, projectCode: manifest.projectId, country: 'GTM', matrix: 'SOIL', status: 'EXPECTED', depthTopCm: row.top, depthBottomCm: row.bottom, latitude: null, longitude: null, fieldMetadata: JSON.stringify({profileReference: reference, site_id: 'DEMO-SITE-INDEPENDENT', collectionDate: '2026-10-01'}), metadata: JSON.stringify({fixtureMarker: MARKER})}, 'system:profile-fixture', { tx });
         }
     });
     return {...manifest, reused: false};

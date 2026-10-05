@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const workbenchController = require('../../controllers/workbenchController');
 const draftService = require('../../services/draftService');
@@ -41,7 +43,7 @@ describe('Workbench Draft Integrity Contract (P0)', () => {
         });
 
         // Create sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testSampleId,
                 originalId: `ORIG-${testSampleId}`,
@@ -54,7 +56,7 @@ describe('Workbench Draft Integrity Contract (P0)', () => {
         });
 
         // Create work items assigned to tech_marcos
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testWorkItemId1,
                 sampleId: testSampleId,
@@ -66,7 +68,7 @@ describe('Workbench Draft Integrity Contract (P0)', () => {
             }
         });
 
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testWorkItemId2,
                 duplicateOf: testWorkItemId1,
@@ -83,9 +85,9 @@ describe('Workbench Draft Integrity Contract (P0)', () => {
     afterAll(async () => {
         await prisma.workItemDraft.deleteMany({ where: { sampleId: testSampleId } });
         await prisma.result.deleteMany({ where: { sampleId: testSampleId } });
-        await prisma.workItem.deleteMany({ where: { id: testWorkItemId2 } });
-        await prisma.workItem.deleteMany({ where: { sampleId: testSampleId } });
-        await prisma.sample.deleteMany({ where: { id: testSampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: testWorkItemId2 } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. Saving draft writes strictly to WorkItemDraft and produces 0 Result rows', async () => {

@@ -1,5 +1,7 @@
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -50,7 +52,7 @@ describe('Mobile Offline Work & Idempotent Synchronization Contracts', () => {
         }
 
         // Create test sample and work items
-        testSample = await prisma.sample.create({
+        testSample = await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-SYNC-TEST-001',
                 originalId: 'ORIG-SYNC-TEST-001',
@@ -63,7 +65,7 @@ describe('Mobile Offline Work & Idempotent Synchronization Contracts', () => {
             }
         });
 
-        testDryingItem = await prisma.workItem.create({
+        testDryingItem = await createWorkItemFixture(prisma, {
             data: {
                 id: 'WI-SYNC-DRY-001',
                 sampleId: testSample.id,
@@ -76,7 +78,7 @@ describe('Mobile Offline Work & Idempotent Synchronization Contracts', () => {
             }
         });
 
-        testAnalyticalItem = await prisma.workItem.create({
+        testAnalyticalItem = await createWorkItemFixture(prisma, {
             data: {
                 id: 'WI-SYNC-PH-001',
                 sampleId: testSample.id,
@@ -104,12 +106,12 @@ describe('Mobile Offline Work & Idempotent Synchronization Contracts', () => {
             await prisma.workAttempt.deleteMany({
                 where: { sampleId: testSample.id }
             });
-            await prisma.workItem.deleteMany({
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
                 where: { sampleId: testSample.id }
-            });
-            await prisma.sample.deleteMany({
+            }), select: { id: true } })).map(row => row.id), { single: false });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
                 where: { id: { in: [testSample.id, 'SMP-NEW-SYNC-001'] } }
-            });
+            }), select: { id: true } })).map(row => row.id), { single: false });
         } catch (e) {
             // Ignore cleanup errors
         }

@@ -15,9 +15,9 @@ export const DialogProvider = ({ children }) => {
 
     const [inputValue, setInputValue] = useState('');
 
-    const showDialog = useCallback(({ title, message, type = 'info', onConfirm, onCancel, confirmText = 'OK', cancelText = 'Cancel', inputPlaceholder = '', defaultValue = '' }) => {
+    const showDialog = useCallback(({ title, message, type = 'info', onConfirm, onCancel, confirmText = 'OK', cancelText = 'Cancel', inputPlaceholder = '', defaultValue = '', inputRequired = false }) => {
         setInputValue(defaultValue);
-        setDialog({ title, message, type, onConfirm, onCancel, confirmText, cancelText, inputPlaceholder });
+        setDialog({ title, message, type, onConfirm, onCancel, confirmText, cancelText, inputPlaceholder, inputRequired });
     }, []);
 
     const closeDialog = useCallback(() => {
@@ -27,6 +27,7 @@ export const DialogProvider = ({ children }) => {
 
     const handleConfirm = () => {
         if (!dialog) return;
+        if (dialog.type === 'prompt' && dialog.inputRequired && !inputValue.trim()) return;
 
         const callback = dialog.onConfirm;
         const type = dialog.type;
@@ -97,6 +98,8 @@ export const DialogProvider = ({ children }) => {
                                             type="text"
                                             autoFocus
                                             placeholder={dialog.inputPlaceholder}
+                                            aria-label={dialog.inputPlaceholder || dialog.title}
+                                            required={dialog.inputRequired}
                                             value={inputValue}
                                             onChange={(e) => setInputValue(e.target.value)}
                                             onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
@@ -117,6 +120,7 @@ export const DialogProvider = ({ children }) => {
                                 ) : null}
                                 <button
                                     onClick={handleConfirm}
+                                    disabled={dialog.type === 'prompt' && dialog.inputRequired && !inputValue.trim()}
                                     className={`px-6 py-2.5 rounded-xl font-bold shadow-md transition-all text-sm ${dialog.type === 'error' ? 'bg-rose-600 hover:bg-rose-700 text-white' :
                                         dialog.type === 'success' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' :
                                             dialog.type === 'confirm' || dialog.type === 'prompt' ? 'bg-sf-primary hover:bg-sf-primary-hover text-sf-on-primary' :

@@ -1,4 +1,5 @@
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
 /**
  * Work Package C (WP-C) Contract Tests:
@@ -14,6 +15,8 @@
  * 7. Self-Profile Scope Enforcement (PATCH /api/auth/profile allows only name/lang/theme)
  */
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -157,18 +160,18 @@ describe('WP-C: Staff Lifecycle, Access Control & Lockout Prevention', () => {
         });
 
         // Create a WorkItem assigned to techA1
-        const sample = await prisma.sample.create({
+        const sample = await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-WPC-' + SUFFIX,
                 originalId: 'ORIG-' + SUFFIX,
                 labId: labActiveA.id,
                 assignedLab: labActiveA.id,
-                status: 'IN_ANALYSIS',
+                status: 'PROCESSING',
                 matrix: 'SOIL'
             }
         });
 
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: 'WI-WPC-1-' + SUFFIX,
                 sampleId: sample.id,
@@ -189,8 +192,8 @@ describe('WP-C: Staff Lifecycle, Access Control & Lockout Prevention', () => {
 
     afterAll(async () => {
         try {
-            await prisma.workItem.deleteMany({ where: { labId: { in: [labActiveA.id, labActiveB.id, labPaused.id] } } });
-            await prisma.sample.deleteMany({ where: { labId: { in: [labActiveA.id, labActiveB.id, labPaused.id] } } });
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { labId: { in: [labActiveA.id, labActiveB.id, labPaused.id] } } }), select: { id: true } })).map(row => row.id), { single: false });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { labId: { in: [labActiveA.id, labActiveB.id, labPaused.id] } } }), select: { id: true } })).map(row => row.id), { single: false });
             await prisma.user.deleteMany({ where: { id: { in: [superAdmin1.id, superAdmin2.id, managerA.id, techA1.id, techA2.id, techB1.id, viewerA.id] } } });
             await prisma.lab.deleteMany({ where: { id: { in: [labActiveA.id, labActiveB.id, labPaused.id] } } });
         } catch (e) {

@@ -120,10 +120,13 @@ describe('WP-03: Dead-Code & System Wiring Regression Tests', () => {
         // Route must gate EDIT_ANALYSES
         expect(sampleRoutesCode).toMatch(/router\.put\(['"]\/:id\/analyses['"],\s*checkPermission\(['"]EDIT_ANALYSES['"]\)/);
 
-        // Controller must use hasPermission('EDIT_ANALYSES') and not hardcode role array
-        expect(sampleControllerCode).toContain("hasPermission(user, 'EDIT_ANALYSES')");
-        const updateAnalysesFn = sampleControllerCode.match(/exports\.updateSampleAnalyses = async \([\s\S]*?try \{([\s\S]*?)const sample/);
+        // The controller delegates to the state authority, which must retain
+        // the same domain permission check in addition to the route guard.
+        const analysisAuthority = fs.readFileSync(path.join(serverDir, 'services/sampleAnalysisStateService.js'), 'utf8');
+        expect(analysisAuthority).toContain("hasPermission(actor, 'EDIT_ANALYSES')");
+        const updateAnalysesFn = sampleControllerCode.match(/exports\.updateSampleAnalyses = async ([\s\S]*?)\n};/);
         expect(updateAnalysesFn).not.toBeNull();
+        expect(updateAnalysesFn[1]).toContain('sampleAnalysisStateService.reviseAnalyses');
         expect(updateAnalysesFn[1]).not.toMatch(/\['LAB_MANAGER',\s*'SUPER_ADMIN'\]\.includes\(user\.role\)/);
     });
 
@@ -131,13 +134,21 @@ describe('WP-03: Dead-Code & System Wiring Regression Tests', () => {
         const workItemControllerCode = fs.readFileSync(path.join(serverDir, 'controllers/workItemController.js'), 'utf8');
         const resultsControllerCode = fs.readFileSync(path.join(serverDir, 'controllers/resultsController.js'), 'utf8');
 
-        // workItemController must reject execution if preparationStatus !== 'DONE' with 412
-        expect(workItemControllerCode).toContain("sample.preparationStatus !== 'DONE'");
-        expect(workItemControllerCode).toContain("status(412)");
+        // WorkItem execution delegates to the evidence authority. Preserve the
+        // existing 412 response for missing preparation and 409 for mismatch.
+        const readinessCode = fs.readFileSync(path.join(serverDir, 'services/workbenchReadinessService.js'), 'utf8');
+        const stateAuthority = fs.readFileSync(path.join(serverDir, 'services/workItemStateService.js'), 'utf8');
+        expect(workItemControllerCode).toContain('evaluateExecutionReadiness');
+        expect(workItemControllerCode).toContain('missingPreparation ? 412 : 409');
+        expect(readinessCode).toContain('evaluateGateEvidence');
+        expect(readinessCode).toContain("sample.preparationStatus !== 'DONE'");
+        expect(stateAuthority).toContain('assertGateEvidence(client, sample, required)');
 
-        // resultsController must reject result entry if preparationStatus !== 'DONE' with 412
-        expect(resultsControllerCode).toContain("sample.preparationStatus !== 'DONE'");
-        expect(resultsControllerCode).toContain("status(412)");
+        // Sample result entry loads the same authoritative gate evidence and retains HTTP 412 for missing evidence.
+        expect(resultsControllerCode).toContain('gateEvidence.loadGateEvidence(db, sample)');
+        expect(resultsControllerCode).toContain('gateEvidence.assertEvidence(report)');
+        expect(resultsControllerCode).toContain("['PREPARATION', 'Sample preparation has not been completed']");
+        expect(resultsControllerCode).toContain('statusCode: 412');
     });
 });
 

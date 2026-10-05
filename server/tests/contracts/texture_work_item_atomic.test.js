@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { generateToken } = require('../setup');
@@ -63,7 +65,7 @@ describe('Texture Work Item & Atomic Linked Results Contracts (Mandatory Correct
             const uniqueLabId = `LAB-TEX-${Date.now()}-${sampleCounter}`;
 
             // Create sample with TEXTURE analysis
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sampleId,
                     originalId: `ORIG-${sampleId}`,
@@ -78,7 +80,7 @@ describe('Texture Work Item & Atomic Linked Results Contracts (Mandatory Correct
 
             // Create single work item for TEXTURE
             workItemId = `WI-TEX-${Date.now()}-${sampleCounter}`;
-            await prisma.workItem.create({
+            await createWorkItemFixture(prisma, {
                 data: {
                     id: workItemId,
                     sampleId,
@@ -96,8 +98,8 @@ describe('Texture Work Item & Atomic Linked Results Contracts (Mandatory Correct
                 await prisma.workAttempt.deleteMany({ where: { workItemId } });
                 await prisma.workItemDraft.deleteMany({ where: { workItemId } });
                 await prisma.result.deleteMany({ where: { sampleId } });
-                await prisma.workItem.deleteMany({ where: { sampleId } });
-                await prisma.sample.deleteMany({ where: { id: sampleId } });
+                await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+                await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
             } catch (e) {
                 // cleanup best-effort
             }

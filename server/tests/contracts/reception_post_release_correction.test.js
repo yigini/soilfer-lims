@@ -1,8 +1,12 @@
+const { createSampleFixture, createSamplesFixture, createAuthTokenFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
-const { getAuthToken } = require('../setup');
+const getAuthToken = (...args) => createAuthTokenFixture(prisma, ...args);
 const { resolveCoordinates } = require('../../utils/coordinateResolver');
+const { PrismaClient } = require('../../prisma_client');
+const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+const { beforeGuards, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
 
 describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashboard Metrics', () => {
     let authHeader;
@@ -11,8 +15,20 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
     const foreignLab = 'LAB-HND-FOREIGN';
     const testProjectId = `PROJ-POST-${Date.now()}`;
     const trackedSampleIds = new Set();
+    const historicalIds = new Map();
+    let rehearsal, client;
 
     beforeAll(async () => {
+        const timestamp = Date.now();
+        const samples = ['LAB_ID_ASSIGNED', 'COMPLETED'].map(status => {
+            const id = `SMP-LOCK-${status}-${timestamp}`;
+            historicalIds.set(status, id);
+            return { id, originalId: id, status, assignedLab: testLab, projectCode: testProjectId,
+                receptionDate: new Date(), createdAt: timestamp, updatedAt: timestamp };
+        });
+        rehearsal = beforeGuards({ actor: 'system:fixture', samples });
+        client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
+        useLegacyRouteDatabase(prisma, client, { allModels: true });
         // Ensure test labs exist
         await prisma.lab.upsert({
             where: { id: testLab },
@@ -48,6 +64,8 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
                 labId: testLab
             }
         });
+        // Link existing legacy rows only after their actual FK parent exists.
+        await prisma.sample.updateMany({ where: { id: { in: [...historicalIds.values()] } }, data: { projectId: testProjectId } });
 
         // Tokens
         const token = await getAuthToken('SAMPLE_RECEPTION', testLab, ['GTM'], [testProjectId]);
@@ -63,24 +81,9 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
     });
 
     afterAll(async () => {
-        try {
-            const sampleIds = Array.from(trackedSampleIds);
-            if (sampleIds.length > 0) {
-                await prisma.auditLog.deleteMany({
-                    where: { OR: [{ entityId: { in: sampleIds } }, { sampleId: { in: sampleIds } }] }
-                });
-                await prisma.workItem.deleteMany({
-                    where: { sampleId: { in: sampleIds } }
-                });
-                await prisma.sample.deleteMany({
-                    where: { id: { in: sampleIds } }
-                });
-            }
-            await prisma.project.deleteMany({ where: { id: testProjectId } });
-            await prisma.lab.deleteMany({ where: { id: { in: [testLab, foreignLab] } } });
-        } catch (err) {
-            console.warn('[afterAll] Cleanup error:', err.message);
-        }
+        jest.restoreAllMocks();
+        await client?.$disconnect();
+        rehearsal?.close();
     });
 
     // ─────────────────────────────────────────────────────────────
@@ -99,10 +102,10 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
         ];
 
         test.each(lockedStatuses)('Draft save must reject regressing %s sample and preserve its status', async (lockedStatus) => {
-            const sampleId = `SMP-LOCK-${lockedStatus}-${Date.now()}`;
+            const sampleId = historicalIds.get(lockedStatus) || `SMP-LOCK-${lockedStatus}-${Date.now()}`;
             trackedSampleIds.add(sampleId);
 
-            await prisma.sample.create({
+            if (!historicalIds.has(lockedStatus)) await createSampleFixture(prisma, {
                 data: {
                     id: sampleId,
                     originalId: sampleId,
@@ -137,7 +140,7 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
             const sampleId = `SMP-RCV-DRAFT-${Date.now()}`;
             trackedSampleIds.add(sampleId);
 
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sampleId,
                     originalId: sampleId,
@@ -170,7 +173,7 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
             const sampleId = `SMP-PRESERVE-PROJ-${Date.now()}`;
             trackedSampleIds.add(sampleId);
 
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sampleId,
                     originalId: sampleId,
@@ -204,7 +207,7 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
             const sampleId = `SMP-FOREIGN-LAB-${Date.now()}`;
             trackedSampleIds.add(sampleId);
 
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sampleId,
                     originalId: sampleId,
@@ -247,7 +250,7 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
                 analysisRemovals: ['TEXTURE']
             };
 
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sampleId,
                     originalId: sampleId,
@@ -279,7 +282,7 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
             const sampleId = `SMP-ZERO-COORD-${Date.now()}`;
             trackedSampleIds.add(sampleId);
 
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sampleId,
                     originalId: sampleId,
@@ -303,7 +306,7 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
             const sampleId = `SMP-FOREIGN-CTX-${Date.now()}`;
             trackedSampleIds.add(sampleId);
 
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sampleId,
                     originalId: sampleId,
@@ -338,7 +341,7 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
             const now = new Date();
 
             // Create EXPECTED with legacy PENDING flags & null receptionDate
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sExpected,
                     originalId: sExpected,
@@ -351,7 +354,7 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
             });
 
             // Create DRAFT with legacy PENDING flags & null receptionDate
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sDraft,
                     originalId: sDraft,
@@ -364,7 +367,7 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
             });
 
             // Create RECEIVED sample intaken today
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sReceived,
                     originalId: sReceived,
@@ -405,7 +408,7 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
             const sDried = `DASH-DRIED-${Date.now()}`;
             trackedSampleIds.add(sDried);
 
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sDried,
                     originalId: sDried,
@@ -430,7 +433,7 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
             trackedSampleIds.add(sNullDrying);
 
             // Create a sample with dryingStatus: null and preparationStatus: PENDING
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sNullDrying,
                     originalId: sNullDrying,
@@ -483,7 +486,7 @@ describe('Reception Post-Release Corrections: Lifecycle Safety, Context & Dashbo
             const now = new Date();
 
             // Create foreign lab samples
-            await prisma.sample.createMany({
+            await createSamplesFixture(prisma, {
                 data: [
                     {
                         id: sForeignRejected,

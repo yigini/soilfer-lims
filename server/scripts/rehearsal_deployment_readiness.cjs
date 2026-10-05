@@ -808,7 +808,8 @@ async function runSuite() {
     console.log(`  ✓ Bound supported baseline: ${BASELINE_IMAGE_TAG} (Tree: ${BASELINE_COMMIT}, ID: ${baselineImageId})`);
     console.log(`  ✓ Bound candidate target:   ${IMAGE_TAG} (ID: ${IMMUTABLE_IMAGE_ID})`);
 
-    // 2. Initialize populated baseline database, signing secret & exchange state
+    // 2. Initialize baseline labs, users and signing secret. Samples are
+    // created through this real baseline's own API (#179 pin 5993497236).
     const baselineSecretHex = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
     cp.execFileSync('docker', [
         'run', '--rm',
@@ -818,7 +819,7 @@ async function runSuite() {
         `mkdir -p /app/server/prisma && printf "${baselineSecretHex}" > /app/server/prisma/.jwt_secret`
     ]);
 
-    const initBaselineOut = cp.execFileSync('docker', [
+    cp.execFileSync('docker', [
         'run', '--rm',
         '-v', `${upgDataVol}:/app/server/prisma`,
         BASELINE_IMAGE_TAG,
@@ -826,12 +827,7 @@ async function runSuite() {
         `npx prisma db push && node -e "
             const Database = require('better-sqlite3');
             const bcrypt = require('bcryptjs');
-            const exchange = require('./services/exchangeStateService');
-            const { ensureTriggers, encodeCursor, getCurrentEpoch } = exchange;
-
-            const db = typeof exchange.getDb === 'function' ? exchange.getDb() : new Database('prisma/dev.db');
-            if (typeof exchange.initTables === 'function') exchange.initTables(db);
-            ensureTriggers(db);
+            const db = new Database('prisma/dev.db');
 
             const now = new Date().toISOString();
             const hash = bcrypt.hashSync('BaselinePass123!', 10);
@@ -850,31 +846,11 @@ async function runSuite() {
             db.prepare('INSERT INTO User (id, username, password, email, role, labId, isActive, mustChangePassword, tokenVersion, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
               .run('u-base-mgr2', 'base_mgr2', hash, 'mgr2@baseline.local', 'LAB_MANAGER', 'lab-base-2', 1, 0, 1, now, now);
 
-            // 10 Baseline Samples
-            for (let i = 1; i <= 5; i++) {
-                const code1 = 'BASE-SMP-' + String(i).padStart(3, '0');
-                db.prepare('INSERT INTO Sample (id, originalId, labId, assignedLab, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)')
-                  .run('smp-base-1-' + i, code1, code1, 'lab-base-1', 'REGISTERED', now, now);
-            }
-            for (let i = 1; i <= 5; i++) {
-                const code2 = 'BASE-SMP-' + String(i + 5).padStart(3, '0');
-                db.prepare('INSERT INTO Sample (id, originalId, labId, assignedLab, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)')
-                  .run('smp-base-2-' + i, code2, code2, 'lab-base-2', 'REGISTERED', now, now);
-            }
-
-            // Set initial epoch and generate signed cursor
-            db.prepare(\\"INSERT OR REPLACE INTO _exchange_meta (key, value, updated_at) VALUES ('epoch', 'epoch-baseline-initial', ?)\\").run(now);
-            const cursor = encodeCursor({ lastId: 'BASE-SMP-005', issuedAt: Date.now() }, db);
-            console.log('[BASELINE_CURSOR]:' + cursor);
-            console.log('[BASELINE_EPOCH]:' + getCurrentEpoch(db));
             db.close();
         "`
     ], { encoding: 'utf8' });
 
-    const cursorMatch = initBaselineOut.match(/\[BASELINE_CURSOR\]:(.+)/);
-    const initialCursor = cursorMatch ? cursorMatch[1].trim() : null;
-    if (!initialCursor) throw new Error('Failed to generate initial baseline exchange cursor');
-    console.log('  ✓ Populated baseline database with 2 labs, 3 users, 10 samples, and signed cursor');
+    console.log('  ✓ Initialized real baseline database with 2 labs and 3 users');
 
     // 3. Populate uploaded asset file in assets volume
     const assetJson = JSON.stringify({ calibrationVersion: '1.0', curve: [0.12, 0.45, 0.89], timestamp: TS });
@@ -918,8 +894,70 @@ async function runSuite() {
     if (baseApiRes.status !== 200) throw new Error(`Baseline API call failed: ${baseApiRes.status}`);
     console.log('  ✓ Baseline operational login and API access verified');
 
+    // The pinned historical API creates canonical EXPECTED manifest samples.
+    // A route refusal is fatal; there is no raw or Prisma fixture fallback.
+    const expectedSampleCodes = Array.from({ length: 10 }, (_, i) => 'BASE-SMP-' + String(i + 1).padStart(3, '0'));
+    for (let index = 0; index < 2; index++) {
+        const code = `BASE-P${index + 1}`;
+        const projectRes = await fetch(`http://127.0.0.1:${basePort}/api/projects`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${preUpgradeToken}` },
+            body: JSON.stringify({ code, name: `Baseline manifest ${index + 1}`,
+                projectType: 'TEMPLATE_PREDEFINED_IDS', expectedSampleCount: 5,
+                labId: `lab-base-${index + 1}`, sampleIds: expectedSampleCodes.slice(index * 5, index * 5 + 5) })
+        });
+        if (!projectRes.ok) throw new Error(`Baseline manifest ${code} refused (${projectRes.status}): ${await projectRes.text()}`);
+        const project = await projectRes.json();
+        if (project.code !== code || !project.id) throw new Error(`Baseline project response mismatch: ${JSON.stringify(project)}`);
+        const statsRes = await fetch(`http://127.0.0.1:${basePort}/api/projects/${encodeURIComponent(project.id)}/stats`, {
+            headers: { 'Authorization': `Bearer ${preUpgradeToken}` }
+        });
+        if (!statsRes.ok) throw new Error(`Baseline manifest stats refused (${statsRes.status}): ${await statsRes.text()}`);
+        const stats = await statsRes.json();
+        if (stats.total !== 5 || stats.expected !== 5) throw new Error(`Baseline manifest ${code} expected five EXPECTED samples: ${JSON.stringify(stats)}`);
+    }
+    const baselineRecordsOutput = cp.execFileSync('docker', [
+        'run', '--rm', '-v', `${upgDataVol}:/app/server/prisma`, BASELINE_IMAGE_TAG, 'node', '-e',
+        `const Database = require('better-sqlite3');
+         const db = new Database('prisma/dev.db', { readonly: true });
+         const samples = db.prepare('SELECT id, originalId, labId, assignedLab, projectCode, status, createdAt FROM Sample ORDER BY originalId').all();
+         db.close(); console.log(JSON.stringify(samples));`
+    ], { encoding: 'utf8' }).trim();
+    const expectedSampleRecords = JSON.parse(baselineRecordsOutput);
+    if (!Array.isArray(expectedSampleRecords) || expectedSampleRecords.length !== 10) throw new Error('Baseline manifests must create exactly ten samples');
+    for (let index = 0; index < 10; index++) {
+        const row = expectedSampleRecords[index], code = expectedSampleCodes[index];
+        const lab = index < 5 ? 'lab-base-1' : 'lab-base-2';
+        const project = index < 5 ? 'BASE-P1' : 'BASE-P2';
+        if (row.id !== code || row.originalId !== code || row.labId !== lab || row.assignedLab !== lab ||
+            row.projectCode !== project || row.status !== 'EXPECTED' || !row.createdAt) {
+            throw new Error(`Baseline manifest row mismatch for ${code}: ${JSON.stringify(row)}`);
+        }
+    }
+    console.log('  ✓ Created ten EXPECTED samples through baseline project manifests; API and read-only preservation record agree');
+
     // Quiesce baseline container before creating backup snapshots
     cp.execFileSync('docker', ['stop', baseContainer]);
+
+    // Preserve the existing stopped-writer epoch/cursor setup after the real
+    // baseline manifests have been captured (#179 pin 5993497236).
+    const initBaselineOut = cp.execFileSync('docker', [
+        'run', '--rm', '-v', `${upgDataVol}:/app/server/prisma`, BASELINE_IMAGE_TAG, 'node', '-e',
+        `const Database = require('better-sqlite3');
+         const exchange = require('./services/exchangeStateService');
+         const { ensureTriggers, encodeCursor, getCurrentEpoch } = exchange;
+         const db = typeof exchange.getDb === 'function' ? exchange.getDb() : new Database('prisma/dev.db');
+         if (typeof exchange.initTables === 'function') exchange.initTables(db);
+         ensureTriggers(db);
+         db.prepare("INSERT OR REPLACE INTO _exchange_meta (key, value, updated_at) VALUES ('epoch', 'epoch-baseline-initial', ?)").run(new Date().toISOString());
+         const cursor = encodeCursor({ lastId: 'BASE-SMP-005', issuedAt: Date.now() }, db);
+         console.log('[BASELINE_CURSOR]:' + cursor);
+         console.log('[BASELINE_EPOCH]:' + getCurrentEpoch(db));
+         db.close();`
+    ], { encoding: 'utf8' });
+    const cursorMatch = initBaselineOut.match(/\[BASELINE_CURSOR\]:(.+)/);
+    const initialCursor = cursorMatch ? cursorMatch[1].trim() : null;
+    if (!initialCursor) throw new Error('Failed to generate initial baseline exchange cursor');
 
     // 5. Create Route B full volume tarball snapshots
     cp.execFileSync('docker', [
@@ -1007,6 +1045,19 @@ async function runSuite() {
     }
     console.log(`  ✓ Target container verified running candidate image ID: ${targetRunningImageId}`);
 
+    // Use the shipped installer's read-only gate, without an apply or bypass.
+    // The genuine baseline rows need no legacy mapping (#179 pin 5993497236).
+    const workflowStartupOutput = cp.execFileSync('docker', [
+        'run', '--rm', '-v', `${upgDataVol}:/app/server/prisma`, IMAGE_TAG, 'node', '-e',
+        `const { assertWorkflowStartupReady } = require('./scripts/install_workflow_state_guards');
+         console.log(JSON.stringify(assertWorkflowStartupReady('prisma/dev.db')));`
+    ], { encoding: 'utf8' }).trim();
+    const workflowStartup = JSON.parse(workflowStartupOutput);
+    if (workflowStartup.classification !== 'COMPLETE' || workflowStartup.totalChanges !== 0 ||
+        workflowStartup.inventory.candidateCount !== 0 || workflowStartup.inventory.unmappedCount !== 0 ||
+        workflowStartup.inventory.blockedCount !== 0) throw new Error(`Upgraded workflow startup inventory mismatch: ${workflowStartupOutput}`);
+    console.log('  ✓ Upgraded installer classification COMPLETE; candidates/unmapped/blocked 0; read-only gate writes 0');
+
     // Verify pre-upgrade operational token continues to authenticate (signing secret preservation)
     const preUpgApiRes = await fetch(`http://127.0.0.1:${upgTargetPort}/api/labs`, {
         headers: { 'Authorization': `Bearer ${preUpgradeToken}` }
@@ -1028,7 +1079,6 @@ async function runSuite() {
     console.log('  ✓ Credentials preserved across upgrade: all baseline accounts authenticated successfully');
 
     // Verify exact data preservation: all 10 sample codes present with exact IDs
-    const expectedSampleCodes = Array.from({ length: 10 }, (_, i) => 'BASE-SMP-' + String(i + 1).padStart(3, '0'));
     const checkDataOutput = cp.execFileSync('docker', [
         'run', '--rm',
         '-v', `${upgDataVol}:/app/server/prisma`,
@@ -1036,27 +1086,19 @@ async function runSuite() {
         'node', '-e',
         `const Database = require('better-sqlite3');
          const db = new Database('prisma/dev.db', { readonly: true });
-         const samples = db.prepare('SELECT originalId, labId, assignedLab, status FROM Sample ORDER BY originalId').all();
+         const samples = db.prepare('SELECT id, originalId, labId, assignedLab, projectCode, status, createdAt FROM Sample ORDER BY originalId').all();
          db.close();
          console.log(JSON.stringify(samples));`
     ], { encoding: 'utf8' }).trim();
     const upgSamples = JSON.parse(checkDataOutput);
     if (upgSamples.length !== 10) throw new Error(`Expected 10 samples, got ${upgSamples.length}`);
     for (let i = 0; i < 10; i++) {
-        const expectedCode = expectedSampleCodes[i];
-        if (upgSamples[i].originalId !== expectedCode) {
-            throw new Error(`Sample mismatch at index ${i}: expected ${expectedCode}, got ${upgSamples[i].originalId}`);
+        for (const field of ['id', 'originalId', 'labId', 'assignedLab', 'projectCode', 'status', 'createdAt']) {
+            if (upgSamples[i][field] !== expectedSampleRecords[i][field]) {
+                throw new Error(`Upgraded sample ${expectedSampleCodes[i]} field ${field} changed: expected ${expectedSampleRecords[i][field]}, got ${upgSamples[i][field]}`);
+            }
         }
-        if (upgSamples[i].labId !== expectedCode) {
-            throw new Error(`Sample labId mismatch for ${expectedCode}: expected ${expectedCode}, got ${upgSamples[i].labId}`);
-        }
-        const expectedLab = i < 5 ? 'lab-base-1' : 'lab-base-2';
-        if (upgSamples[i].assignedLab !== expectedLab) {
-            throw new Error(`Sample assignedLab mismatch for ${expectedCode}: expected ${expectedLab}, got ${upgSamples[i].assignedLab}`);
-        }
-        if (upgSamples[i].status !== 'REGISTERED') {
-            throw new Error(`Sample status mismatch for ${expectedCode}: ${upgSamples[i].status}`);
-        }
+        if (upgSamples[i].status !== 'EXPECTED') throw new Error(`Upgraded sample ${expectedSampleCodes[i]} is not EXPECTED`);
     }
     console.log('  ✓ Exact data preservation across upgrade: all 10 sample records, assigned labs, and statuses verified intact');
 
@@ -1196,7 +1238,7 @@ async function runSuite() {
         'node', '-e',
         `const Database = require('better-sqlite3');
          const db = new Database('prisma/dev.db', { readonly: true });
-         const samples = db.prepare('SELECT originalId, labId, assignedLab, status FROM Sample ORDER BY originalId').all();
+         const samples = db.prepare('SELECT id, originalId, labId, assignedLab, projectCode, status, createdAt FROM Sample ORDER BY originalId').all();
          db.close();
          console.log(JSON.stringify(samples));`
     ], { encoding: 'utf8' }).trim();
@@ -1209,20 +1251,12 @@ async function runSuite() {
         if (!item || typeof item !== 'object') {
             throw new Error(`Post-rollback row at index ${i} is not a valid object: ${JSON.stringify(item)}`);
         }
-        const expectedCode = expectedSampleCodes[i];
-        if (item.originalId !== expectedCode) {
-            throw new Error(`Post-rollback sample ID mismatch at index ${i}: expected ${expectedCode}, got ${item.originalId}`);
+        for (const field of ['id', 'originalId', 'labId', 'assignedLab', 'projectCode', 'status', 'createdAt']) {
+            if (item[field] !== expectedSampleRecords[i][field]) {
+                throw new Error(`Post-rollback sample ${expectedSampleCodes[i]} field ${field} changed: expected ${expectedSampleRecords[i][field]}, got ${item[field]}`);
+            }
         }
-        if (item.labId !== expectedCode) {
-            throw new Error(`Post-rollback labId mismatch for ${expectedCode}: expected ${expectedCode}, got ${item.labId}`);
-        }
-        const expectedLab = i < 5 ? 'lab-base-1' : 'lab-base-2';
-        if (item.assignedLab !== expectedLab) {
-            throw new Error(`Post-rollback assignedLab mismatch for ${expectedCode}: expected ${expectedLab}, got ${item.assignedLab}`);
-        }
-        if (item.status !== 'REGISTERED') {
-            throw new Error(`Post-rollback status mismatch for ${expectedCode}: expected REGISTERED, got ${item.status}`);
-        }
+        if (item.status !== 'EXPECTED') throw new Error(`Post-rollback sample ${expectedSampleCodes[i]} is not EXPECTED`);
     }
     console.log('  ✓ Post-rollback data verified: all 10 sample records, assigned labs, and statuses preserved with exact values in restored volume');
 

@@ -1,6 +1,9 @@
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
+const { transitionWorkItem } = require('../../services/workItemStateService');
 const operationalConfirmationService = require('../../services/operationalConfirmationService');
 const workbenchController = require('../../controllers/workbenchController');
 const workItemController = require('../../controllers/workItemController');
@@ -57,7 +60,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
         }
 
         // Create sample physically received
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testSampleId,
                 originalId: `ORIG-${testSampleId}`,
@@ -89,7 +92,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
         });
 
         // Create operational gates
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testDryingId,
                 sampleId: testSampleId,
@@ -101,7 +104,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
                 version: 1
             }
         });
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testPrepId,
                 sampleId: testSampleId,
@@ -115,7 +118,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
         });
 
         // Create analytical tasks
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testPhId,
                 sampleId: testSampleId,
@@ -127,7 +130,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
                 version: 1
             }
         });
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testEcId,
                 sampleId: testSampleId,
@@ -142,10 +145,10 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
     });
 
     afterAll(async () => {
-        await prisma.workItem.deleteMany({ where: { sampleId: testSampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.orderLine.deleteMany({ where: { revision: { sampleId: testSampleId } } });
         await prisma.sampleOrderRevision.deleteMany({ where: { sampleId: testSampleId } });
-        await prisma.sample.deleteMany({ where: { id: testSampleId } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -285,10 +288,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
 
         test('Submitting and reviewing scientific determination reconciles Submission and ReviewDecision', async () => {
             // 1. Record pH result
-            await prisma.workItem.update({
-                where: { id: testPhId },
-                data: { status: 'COMPLETED', result: '6.85' }
-            });
+            await transitionWorkItem(testPhId, 'COMPLETED', testTech, 'Recorded pH determination', { result: '6.85' });
 
             // 2. Submit via workbenchController.commitSubmissions
             const submitReq = {

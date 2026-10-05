@@ -1,6 +1,8 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const request = require('supertest');
 const prisma = require('../../prisma');
+const { transitionWorkItem } = require('../../services/workItemStateService');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
 const controller = require('../../controllers/resultsController');
@@ -19,8 +21,8 @@ describe('Catalogue rules also govern the sample results endpoint', () => {
         await prisma.user.create({ data: { id: `CAT_USER_${id}`, username: user.username, email: `${user.username}@example.test`, password: 'test-only', role: user.role, labId } });
         await prisma.analysis.create({ data: { code: param, name: 'Configured result test', units: 'mg/kg', status: 'active', validation: JSON.stringify({ min: 1, max: 10 }) } });
         method = await prisma.methodology.create({ data: { analysisCode: param, name: 'Assigned laboratory procedure', labId } });
-        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: `S_${id}`, assignedLab: labId, status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify([param]) } });
-        workItem = await prisma.workItem.create({ data: { id: `CAT_WI_${id}`, sampleId, analysis: param, labId, assignedLab: labId, assignedTo: user.username, status: 'IN_PROGRESS', methodologyId: method.id } });
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: `S_${id}`, assignedLab: labId, status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify([param]) } });
+        workItem = await createWorkItemFixture(prisma, { data: { id: `CAT_WI_${id}`, sampleId, analysis: param, labId, assignedLab: labId, assignedTo: user.username, status: 'IN_PROGRESS', methodologyId: method.id } });
     });
     test.each(['DRYING', 'PREPARATION', 'SPEC_MIR', 'SPEC_VIS_NIR'])('%s cannot accept a scalar through the alternate endpoint', async code => {
         expect((await save([{ param: code, value: '5' }])).code).toBe(400);
@@ -55,7 +57,7 @@ describe('Catalogue rules also govern the sample results endpoint', () => {
     });
     test('Completed or submitted work cannot be edited through the sample results endpoint', async () => {
         for (const status of ['COMPLETED', 'SUBMITTED', 'ACCEPTED']) {
-            await prisma.workItem.update({ where: { id: workItem.id }, data: { status } });
+            await transitionWorkItem(workItem.id, status, user, 'Reviewed fixture determination');
             expect((await save([{ param, value: '6', methodologyId: method.id }])).code).toBe(400);
         }
         expect((await prisma.result.findFirst({ where: { sampleId, isCurrent: true } })).value).toBe('5');

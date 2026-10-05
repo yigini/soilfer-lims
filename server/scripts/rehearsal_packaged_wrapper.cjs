@@ -29,6 +29,10 @@ const path = require('path');
 const cp = require('child_process');
 const crypto = require('crypto');
 const Database = require('better-sqlite3');
+const { createDisposableDatabase, cleanupDisposableDatabase } = require('./journey_db_isolation.cjs');
+const { createSampleFixture } = require('../tests/helpers/workflowFixtures');
+const { PrismaClient } = require('../prisma_client');
+const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 
 const serverDir = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(serverDir, '..');
@@ -60,7 +64,7 @@ const REVIEWED_IMAGE_ID = 'sha256:7777777777777777777777777777777777777777777777
 const privateSnapPath = 'C:/Users/yigin/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_snapshot_40747.json';
 const privateManPath = 'C:/Users/yigin/Documents/Codex/2026-09-21/se/work/private_kobo/ghana_kobo_manifest_40747.json';
 
-function setupEnvironmentFixture(testDir, options = {}) {
+async function setupEnvironmentFixture(testDir, options = {}) {
     fs.mkdirSync(testDir, { recursive: true });
 
     const mockBin = path.join(testDir, 'bin');
@@ -79,14 +83,9 @@ function setupEnvironmentFixture(testDir, options = {}) {
 
     // Initial SQLite database
     const fixtureDb = path.join(mockVol, 'dev.db');
-    const srcDb = new Database(path.join(serverDir, 'prisma/dev.db'), { readonly: true });
-    const schemaSqls = srcDb.prepare("SELECT sql FROM sqlite_master WHERE type IN ('table', 'index') AND sql IS NOT NULL AND name NOT LIKE 'sqlite_%'").all().map(r => r.sql);
-    srcDb.close();
-
-    const db = new Database(fixtureDb);
-    for (const sql of schemaSqls) {
-        try { db.exec(sql); } catch (_) {}
-    }
+    // Build checked-in release schema plus every additive guard, without reading working data.
+    const source = createDisposableDatabase();
+    const db = new Database(source.dbPath, {fileMustExist:true});
     db.prepare(`INSERT INTO Lab (id, code, name, country, isActive, createdAt, updatedAt) VALUES (?, 'GHA', 'SoilFER Ghana Lab', 'GHA', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).run(EXPECTED_LAB);
     db.prepare(`INSERT INTO Project (id, code, name, status, labId, createdAt, updatedAt) VALUES ('proj-us-uuid', ?, 'SoilFER USA', 'ACTIVE', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).run(EXPECTED_PROJECT, EXPECTED_LAB);
     db.prepare(`INSERT INTO ProjectLab (id, projectCode, labId, role, createdAt) VALUES ('pl-1', ?, ?, 'PRIMARY', CURRENT_TIMESTAMP)`).run(EXPECTED_PROJECT, EXPECTED_LAB);
@@ -94,11 +93,24 @@ function setupEnvironmentFixture(testDir, options = {}) {
         INSERT INTO KoboConfig (id, labId, labName, formId, koboServerUrl, apiToken, isActive, projectCode, lastSubmissionId, createdAt, updatedAt)
         VALUES (?, ?, 'SoilFER Ghana Lab', ?, ?, 'mock-api-token', 0, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     `).run(CONFIG_ID, EXPECTED_LAB, EXPECTED_FORM, EXPECTED_SERVER);
-    db.prepare(`
-        INSERT INTO Sample (id, originalId, projectCode, assignedLab, status, metadata, createdAt, updatedAt)
-        VALUES ('smp-base-1', 'GTM-EXISTING-01', 'SOILFER-GTM', 'GTM-LAB1', 'EXPECTED', '{"kept":"original"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    `).run();
     db.close();
+    const saved = { path:process.env.DATABASE_PATH, url:process.env.DATABASE_URL, mode:process.env.NODE_ENV };
+    process.env.DATABASE_PATH=source.dbPath;
+    process.env.DATABASE_URL='file:' + source.dbPath;
+    process.env.NODE_ENV='test';
+    const client = new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:' + source.dbPath})});
+    try {
+        await createSampleFixture(client, {data:{id:'smp-base-1',originalId:'GTM-EXISTING-01',
+            projectCode:'SOILFER-GTM',assignedLab:'GTM-LAB1',status:'EXPECTED',metadata:'{"kept":"original"}'}});
+        await client.$disconnect();
+        fs.copyFileSync(source.dbPath, fixtureDb, fs.constants.COPYFILE_EXCL);
+    } finally {
+        await client.$disconnect();
+        if(saved.path === undefined) delete process.env.DATABASE_PATH; else process.env.DATABASE_PATH=saved.path;
+        if(saved.url === undefined) delete process.env.DATABASE_URL; else process.env.DATABASE_URL=saved.url;
+        if(saved.mode === undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV=saved.mode;
+        cleanupDisposableDatabase(source.runnerDir);
+    }
 
     // Mock state file for container states and test behavior controls
     const stateFile = path.join(testDir, 'mock_state.json');
@@ -199,6 +211,15 @@ exec node "\$DIR/curl.cjs" -- "\$@"
     fs.writeFileSync(path.join(mockBin, 'curl.cjs'), curlScript);
     fs.chmodSync(path.join(mockBin, 'curl.cjs'), '755');
 
+    const partialFixtureScript = path.join(mockBin, 'partial_fixture.cjs');
+    fs.writeFileSync(partialFixtureScript, `'use strict';
+const prisma=require('${serverDir.replace(/\\/g, '/')}/prisma');
+const {createSampleFixture}=require('${serverDir.replace(/\\/g, '/')}/tests/helpers/workflowFixtures');
+(async () => {
+    await createSampleFixture(prisma,{data:{id:'p1',originalId:'GHA-P1',projectCode:'${EXPECTED_PROJECT}',
+        assignedLab:'${EXPECTED_LAB}',status:'EXPECTED'}});
+})().catch(error=>{console.error(error);process.exitCode=1;}).finally(()=>prisma.$disconnect());
+`);
     // Create mock docker executable
     const dockerScript = `#!/usr/bin/env node
 'use strict';
@@ -316,8 +337,11 @@ if (cmd === 'run') {
             const Database = require('${serverDir.replace(/\\/g, '/')}/node_modules/better-sqlite3');
             const db = new Database('${fixtureDb.replace(/\\/g, '/')}');
             db.prepare('UPDATE KoboConfig SET isActive = 1, projectCode = "${EXPECTED_PROJECT}" WHERE id = "${CONFIG_ID}"').run();
-            db.prepare('INSERT INTO Sample (id, originalId, projectCode, assignedLab, status, createdAt, updatedAt) VALUES ("p1", "GHA-P1", "${EXPECTED_PROJECT}", "${EXPECTED_LAB}", "EXPECTED", CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)').run();
             db.close();
+            cp.execFileSync(process.execPath, ['${partialFixtureScript.replace(/\\/g, '/')}'], {
+                env:{...process.env,NODE_ENV:'test',DATABASE_PATH:'${fixtureDb.replace(/\\/g, '/')}',
+                    DATABASE_URL:'file:${fixtureDb.replace(/\\/g, '/')}'}
+            });
             console.error('INJECTED_PARTIAL_APPLY_FAILURE: Fatal error during sample loop');
             state.containers[containerName].running = false;
             fs.writeFileSync(stateFile, JSON.stringify(state, null, 2));
@@ -405,7 +429,7 @@ async function runAllPackagedRehearsals() {
     try {
         console.log('\n[Packaged Rehearsal 1] Complete Successful Release Pipeline...');
         const dir1 = path.join(tmpDir, 'test_success');
-        const env1 = setupEnvironmentFixture(dir1, { healthOk: true });
+        const env1 = await setupEnvironmentFixture(dir1, { healthOk: true });
         const res1 = runWrapperInTestEnv(dir1, {});
         if (res1.status !== 0) {
             console.error('STDOUT:', res1.stdout);
@@ -437,7 +461,7 @@ async function runAllPackagedRehearsals() {
 
         console.log('\n[Packaged Rehearsal 2] Partial-Apply Mid-Flight Failure & Quiesced External Recovery...');
         const dir2 = path.join(tmpDir, 'test_partial_fail');
-        const env2 = setupEnvironmentFixture(dir2, { failDuringApply: true, healthOk: true });
+        const env2 = await setupEnvironmentFixture(dir2, { failDuringApply: true, healthOk: true });
         const res2 = runWrapperInTestEnv(dir2, {});
 
         if (res2.status === 0) {
@@ -467,7 +491,7 @@ async function runAllPackagedRehearsals() {
 
         console.log('\n[Packaged Rehearsal 3] Process Interruption with Live Writer...');
         const dir3 = path.join(tmpDir, 'test_interrupt');
-        const env3 = setupEnvironmentFixture(dir3, { interruptDelayMs: 2000, healthOk: true });
+        const env3 = await setupEnvironmentFixture(dir3, { interruptDelayMs: 2000, healthOk: true });
 
         const unixScript = toPosixPath(releaseScript);
         const winBin = path.resolve(dir3, 'bin');
@@ -548,7 +572,7 @@ async function runAllPackagedRehearsals() {
 
         console.log('\n[Packaged Rehearsal 4] Failed Health Check Retains Maintenance (Preserves Applied DB)...');
         const dir4 = path.join(tmpDir, 'test_health_fail');
-        const env4 = setupEnvironmentFixture(dir4, { healthOk: false });
+        const env4 = await setupEnvironmentFixture(dir4, { healthOk: false });
         const res4 = runWrapperInTestEnv(dir4, {});
 
         if (res4.status === 0) {
@@ -576,7 +600,7 @@ async function runAllPackagedRehearsals() {
 
         console.log('\n[Packaged Rehearsal 5] Retagged Old Container Rejection...');
         const dir5 = path.join(tmpDir, 'test_retagged_container');
-        const env5 = setupEnvironmentFixture(dir5, {
+        const env5 = await setupEnvironmentFixture(dir5, {
             appImage: REVIEWED_IMAGE,
             appImageId: 'sha256:OLD_OUTDATED_CONTAINER_DIGEST'
         });
@@ -606,7 +630,7 @@ async function runAllPackagedRehearsals() {
 
         console.log('\n[Packaged Rehearsal 6] Docker Inspect Unavailable Fails Closed...');
         const dir6 = path.join(tmpDir, 'test_inspect_unavailable');
-        const env6 = setupEnvironmentFixture(dir6, { daemonUnavailable: true });
+        const env6 = await setupEnvironmentFixture(dir6, { daemonUnavailable: true });
         const res6 = runWrapperInTestEnv(dir6, {});
 
         if (res6.status === 0) {
@@ -626,7 +650,7 @@ async function runAllPackagedRehearsals() {
 
         console.log('\n[Packaged Rehearsal 7] Preflight Failure (INIT Phase) Preserves Live App & Proxy...');
         const dir7 = path.join(tmpDir, 'test_preflight_init_fail');
-        const env7 = setupEnvironmentFixture(dir7, {});
+        const env7 = await setupEnvironmentFixture(dir7, {});
         // Run with nonexistent snapshot
         const res7 = runWrapperInTestEnv(dir7, {
             PRIVATE_SNAPSHOT: '/nonexistent/path/ghana_kobo_snapshot_40747.json'
@@ -652,7 +676,7 @@ async function runAllPackagedRehearsals() {
 
         console.log('\n[Packaged Rehearsal 8] Mismatched Image Tag Refuses Execution Before Mutation...');
         const dir8 = path.join(tmpDir, 'test_mismatch_image');
-        const env8 = setupEnvironmentFixture(dir8, {});
+        const env8 = await setupEnvironmentFixture(dir8, {});
         // Call wrapper with an un-reviewed or mismatched image tag
         const res8 = runWrapperInTestEnv(dir8, {}, ['soilfer-lims:unreviewed-tag']);
 
@@ -676,7 +700,7 @@ async function runAllPackagedRehearsals() {
 
         console.log('\n[Packaged Rehearsal 9] Maintenance Transition Failure Restores Live Ingress Config...');
         const dir9 = path.join(tmpDir, 'test_proxy_transition_fail');
-        const env9 = setupEnvironmentFixture(dir9, { failInitialProxyReload: true });
+        const env9 = await setupEnvironmentFixture(dir9, { failInitialProxyReload: true });
         const res9 = runWrapperInTestEnv(dir9, {});
 
         if (res9.status === 0) {

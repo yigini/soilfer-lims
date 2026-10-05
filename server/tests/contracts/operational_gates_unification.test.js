@@ -1,13 +1,18 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const sampleController = require('../../controllers/sampleController');
 const workflow = require('../../workflowContract');
+const operations = require('../../services/operationalConfirmationService');
+const { transitionWorkItem } = require('../../services/workItemStateService');
+const checklists = require('../../data/operationalChecklists.json');
 
 describe('WP-26: Single Representation for Operational Gates', () => {
     let testSampleId;
 
     beforeEach(async () => {
         testSampleId = `SMP-GATE-TEST-${Date.now()}`;
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testSampleId,
                 originalId: `ORIG-${testSampleId}`,
@@ -21,7 +26,7 @@ describe('WP-26: Single Representation for Operational Gates', () => {
         });
 
         // Create gate work items
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-DRY-${Date.now()}`,
                 sampleId: testSampleId,
@@ -31,7 +36,7 @@ describe('WP-26: Single Representation for Operational Gates', () => {
                 labId: 'LAB-DEFAULT'
             }
         });
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-PREP-${Date.now()}`,
                 sampleId: testSampleId,
@@ -44,8 +49,8 @@ describe('WP-26: Single Representation for Operational Gates', () => {
     });
 
     afterEach(async () => {
-        await prisma.workItem.deleteMany({ where: { sampleId: testSampleId } });
-        await prisma.sample.deleteMany({ where: { id: testSampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. updatePhaseStatus DONE synchronizes WorkItem to COMPLETED with verified receipt', async () => {
@@ -91,15 +96,17 @@ describe('WP-26: Single Representation for Operational Gates', () => {
     });
 
     test('3. getSampleDetail derives gate status dynamically from WorkItems', async () => {
-        // Explicitly set WorkItems to completed
-        await prisma.workItem.updateMany({
-            where: { sampleId: testSampleId, analysis: 'DRYING' },
-            data: { status: 'COMPLETED' }
-        });
-        await prisma.workItem.updateMany({
-            where: { sampleId: testSampleId, analysis: 'PREPARATION' },
-            data: { status: 'ACCEPTED' }
-        });
+        const manager = { username: 'test_mgr', role: 'LAB_MANAGER', labId: 'LAB-DEFAULT' };
+        let preparation;
+        for (const analysis of ['DRYING', 'PREPARATION']) {
+            const item = await prisma.workItem.findFirst({ where: { sampleId: testSampleId, analysis } });
+            await operations.confirmOperation({ actor: manager, workItemId: item.id,
+                checklist: checklists[analysis].steps.map(() => true) });
+            if (analysis === 'PREPARATION') preparation = item;
+        }
+        for (const status of ['SUBMITTED', 'ACCEPTED']) {
+            await transitionWorkItem(preparation.id, status, manager, 'Reviewed operational fixture');
+        }
 
         // Deliberately leave Sample table columns as 'PENDING'
         await prisma.sample.update({

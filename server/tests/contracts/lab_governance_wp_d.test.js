@@ -1,4 +1,5 @@
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
 /**
  * Work Package D (WP-D) Contract Tests:
@@ -14,6 +15,8 @@
  * 7. Project-to-Lab Servicing Membership (Owner authority, servicing reconciliation)
  */
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -137,18 +140,18 @@ describe('WP-D: Laboratory Lifecycle & Project Relationships', () => {
         });
 
         // Create Sample & WorkItem in Lab A
-        sampleA1 = await prisma.sample.create({
+        sampleA1 = await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-WPD-A1-' + SUFFIX,
                 originalId: 'ORIG-A1-' + SUFFIX,
                 labId: labA.id,
                 assignedLab: labA.id,
-                status: 'IN_ANALYSIS',
+                status: 'PROCESSING',
                 matrix: 'SOIL'
             }
         });
 
-        workItemA1 = await prisma.workItem.create({
+        workItemA1 = await createWorkItemFixture(prisma, {
             data: {
                 id: 'WI-WPD-A1-' + SUFFIX,
                 sampleId: sampleA1.id,
@@ -190,8 +193,8 @@ describe('WP-D: Laboratory Lifecycle & Project Relationships', () => {
     afterAll(async () => {
         try {
             await prisma.projectLab.deleteMany({ where: { labId: { in: [labA.id, labB.id, labRetired.id] } } });
-            await prisma.workItem.deleteMany({ where: { labId: { in: [labA.id, labB.id, labRetired.id] } } });
-            await prisma.sample.deleteMany({ where: { labId: { in: [labA.id, labB.id, labRetired.id] } } });
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { labId: { in: [labA.id, labB.id, labRetired.id] } } }), select: { id: true } })).map(row => row.id), { single: false });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { labId: { in: [labA.id, labB.id, labRetired.id] } } }), select: { id: true } })).map(row => row.id), { single: false });
             await prisma.project.deleteMany({ where: { id: projectOwnedA.id } });
             await prisma.user.deleteMany({ where: { id: { in: [superAdmin.id, managerA.id, managerB.id, techA.id, techB.id] } } });
             await prisma.lab.deleteMany({ where: { id: { in: [labA.id, labB.id, labRetired.id] } } });

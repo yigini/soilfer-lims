@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -76,22 +77,36 @@ describe('WP-20: Per-Lab Methodology Defaults & Isolation', () => {
 
     test('2. New work items in Lab A receive Dumas while Lab B receives Walkley-Black', async () => {
         // Sample for Lab A
-        const sampleA = samplesDb.create({
-            id: `SMP-METH-A-${Date.now()}`,
+        const sampleA = await createSampleFixture(prisma, { data: { id: `SMP-METH-A-${Date.now()}`,
             labId: 'LAB-A-001',
             assignedLab: labAId,
             status: 'ACCEPTED',
-            requiredAnalyses: ['SOC']
-        });
+            requiredAnalyses: JSON.stringify(['SOC']),
+            originalId: 'LAB-A-001',
+            country: 'GTM',
+            countryName: 'GTM',
+            projectCode: 'SOILFER-US',
+            dryingStatus: 'DONE',
+            preparationStatus: 'DONE',
+            receptionDate: new Date(),
+            metadata: '{}',
+            history: '[]' } });
 
         // Sample for Lab B
-        const sampleB = samplesDb.create({
-            id: `SMP-METH-B-${Date.now()}`,
+        const sampleB = await createSampleFixture(prisma, { data: { id: `SMP-METH-B-${Date.now()}`,
             labId: 'LAB-B-001',
             assignedLab: labBId,
             status: 'ACCEPTED',
-            requiredAnalyses: ['SOC']
-        });
+            requiredAnalyses: JSON.stringify(['SOC']),
+            originalId: 'LAB-B-001',
+            country: 'GTM',
+            countryName: 'GTM',
+            projectCode: 'SOILFER-US',
+            dryingStatus: 'DONE',
+            preparationStatus: 'DONE',
+            receptionDate: new Date(),
+            metadata: '{}',
+            history: '[]' } });
 
         // Generate work items for both samples
         const wiListA = await generateWorkItemsForSample(sampleA);

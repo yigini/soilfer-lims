@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const request = require('supertest');
 const app = require('../../app');
@@ -12,24 +14,24 @@ describe('Audit 1.1: duplicate references and atomic analysis reconciliation', (
     afterEach(() => jest.restoreAllMocks());
     afterAll(async () => {
         const where = { sampleId: { in: samples } };
-        await prisma.workItem.deleteMany({ where: { ...where, duplicateOf: { not: null } } });
-        await prisma.workItem.deleteMany({ where });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { ...where, duplicateOf: { not: null } } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.orderLine.deleteMany({ where: { revision: { sampleId: { in: samples } } } });
         await prisma.sampleOrderRevision.deleteMany({ where });
         await prisma.auditLog.deleteMany({ where });
-        await prisma.sample.deleteMany({ where: { id: { in: samples } } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: samples } } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     async function fixture(duplicateStatus) {
         const id = `audit11-reconcile-${crypto.randomUUID()}`; samples.push(id);
-        const sample = await prisma.sample.create({ data: { id, originalId: id, labId: 'LAB-GTM', assignedLab: 'LAB-GTM',
+        const sample = await createSampleFixture(prisma, { data: { id, originalId: id, labId: 'LAB-GTM', assignedLab: 'LAB-GTM',
             status: 'PROCESSING', matrix: 'SOIL', country: 'GTM', projectCode: 'SOILFER-US',
             requiredAnalyses: JSON.stringify(['PH_H2O', 'SOC', 'CEC']) } });
         for (const analysis of ['CEC', 'SOC', 'PH_H2O']) {
-            await prisma.workItem.create({ data: { id: `${id}-${analysis}`, sampleId: id, labId: 'LAB-GTM', assignedLab: 'LAB-GTM', analysis, status: 'NOT_ASSIGNED' } });
+            await createWorkItemFixture(prisma, { data: { id: `${id}-${analysis}`, sampleId: id, labId: 'LAB-GTM', assignedLab: 'LAB-GTM', analysis, status: 'NOT_ASSIGNED' } });
         }
         if (duplicateStatus) {
-            await prisma.workItem.create({ data: { id: `${id}-duplicate`, sampleId: id, labId: 'LAB-GTM', assignedLab: 'LAB-GTM',
+            await createWorkItemFixture(prisma, { data: { id: `${id}-duplicate`, sampleId: id, labId: 'LAB-GTM', assignedLab: 'LAB-GTM',
                 analysis: 'SOC', status: duplicateStatus, duplicateOf: `${id}-SOC`, history: '[{"note":"Original duplicate retained"}]' } });
         }
         return sample;
@@ -70,10 +72,10 @@ describe('Audit 1.1: duplicate references and atomic analysis reconciliation', (
             let deletes = 0;
             return callback({ ...tx, workItem: { ...tx.workItem, delete: async args => {
                 if (++deletes === 2) throw Object.assign(new Error('Referenced row'), { code: 'P2003' });
-                return tx.workItem.delete(args);
+                return cleanupWorkflowFixtures(tx, "workItem", (await tx.workItem.findMany({ ...(args), select: { id: true } })).map(row => row.id), { single: true });
             } } });
         }));
-        expect(await controller.reconcileWorkItemsForSample(sample, ['PH_H2O'], { username: 'manager' }, 'Reviewed removal'))
+        expect(await controller.reconcileWorkItemsForSample(sample, ['PH_H2O'], { username: 'manager', role: 'LAB_MANAGER', labId: 'LAB-GTM' }, 'Reviewed removal'))
             .toMatchObject({ conflict: true, status: 409, code: 'WORKITEM_REFERENCE_CONFLICT' });
         expect(await snapshot(sample.id)).toEqual(before);
     });
@@ -82,16 +84,16 @@ describe('Audit 1.1: duplicate references and atomic analysis reconciliation', (
         const transact = prisma.$transaction.bind(prisma);
         jest.spyOn(prisma, '$transaction').mockImplementationOnce(callback => transact(tx => callback({ ...tx,
             auditLog: { ...tx.auditLog, create: async () => { throw new Error('Injected reconciliation audit failure'); } } })));
-        await expect(controller.reconcileWorkItemsForSample(sample, ['PH_H2O'], { username: 'manager' }, 'Reviewed removal'))
+        await expect(controller.reconcileWorkItemsForSample(sample, ['PH_H2O'], { username: 'manager', role: 'LAB_MANAGER', labId: 'LAB-GTM' }, 'Reviewed removal'))
             .rejects.toThrow('Injected reconciliation audit failure');
         expect(await snapshot(sample.id)).toEqual(before);
     });
     test('cold catalogue lookups during additions stay inside the reconciliation transaction', async () => {
         const sample = await fixture();
-        await prisma.workItem.delete({ where: { id: `${sample.id}-CEC` } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: `${sample.id}-CEC` } }), select: { id: true } })).map(row => row.id), { single: true });
         require('../../services/analysisService').invalidateCache();
         jest.spyOn(prisma.analysis, 'findMany').mockImplementation(() => { throw new Error('Catalogue read escaped the transaction'); });
-        const outcome = await controller.reconcileWorkItemsForSample(sample, ['PH_H2O', 'SOC', 'CEC'], { username: 'manager' }, 'Add requested analysis');
+        const outcome = await controller.reconcileWorkItemsForSample(sample, ['PH_H2O', 'SOC', 'CEC'], { username: 'manager', role: 'LAB_MANAGER', labId: 'LAB-GTM' }, 'Add requested analysis');
         expect(outcome).toMatchObject({ conflict: false, added: ['CEC'] });
         expect(await prisma.workItem.findUnique({ where: { id: `${sample.id}-CEC` } })).toBeNull();
         expect(await prisma.workItem.count({ where: { sampleId: sample.id, analysis: 'CEC' } })).toBe(1);

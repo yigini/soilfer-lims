@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const request = require('supertest');
@@ -24,8 +25,8 @@ describe('Audit 0.14: normalized entries and lab number policy', () => {
     });
     async function fixture(analysis = 'SPEC_GRS') {
         const sampleId = id('SMP014'), workItemId = id('WI014');
-        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, assignedLab: lab, labId: sampleId, status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify([analysis]) } });
-        await prisma.workItem.create({ data: { id: workItemId, sampleId, labId: lab, assignedLab: lab, analysis, assignedTo: actor.username, status: 'IN_PROGRESS', version: 0 } });
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, assignedLab: lab, labId: sampleId, status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify([analysis]) } });
+        await createWorkItemFixture(prisma, { data: { id: workItemId, sampleId, labId: lab, assignedLab: lab, analysis, assignedTo: actor.username, status: 'IN_PROGRESS', version: 0 } });
         return { sampleId, workItemId };
     }
     const record = (f, value, extra = {}) => request(app).post('/api/workbench/batch-save').set('Authorization', `Bearer ${token}`).send({ draft: false, entries: [{ workItemId: f.workItemId, value, version: 0, ...extra }] });

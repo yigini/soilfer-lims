@@ -1,6 +1,9 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
+const { transitionWorkItem } = require('../../services/workItemStateService');
 const { getAuthToken } = require('../setup');
 
 describe('SD-09: Work Item Status Transition Validation Contract', () => {
@@ -14,11 +17,11 @@ describe('SD-09: Work Item Status Transition Validation Contract', () => {
         techGtmToken = await getAuthToken('LAB_TECHNICIAN', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
 
         // Clean up
-        await prisma.workItem.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
 
         // Sample in PROCESSING with preparation complete
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
@@ -35,7 +38,7 @@ describe('SD-09: Work Item Status Transition Validation Contract', () => {
         });
 
         // WorkItem in ASSIGNED state assigned to techUsername
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: wiId,
                 sampleId,
@@ -50,8 +53,8 @@ describe('SD-09: Work Item Status Transition Validation Contract', () => {
     });
 
     afterAll(async () => {
-        await prisma.workItem.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. Legal move (ASSIGNED → IN_PROGRESS) succeeds (HTTP 200)', async () => {
@@ -78,11 +81,9 @@ describe('SD-09: Work Item Status Transition Validation Contract', () => {
     });
 
     test('3. Illegal jump from final ACCEPTED state (ACCEPTED → IN_PROGRESS) returns HTTP 409 Conflict', async () => {
-        // Force work item to ACCEPTED
-        await prisma.workItem.update({
-            where: { id: wiId },
-            data: { status: 'ACCEPTED' }
-        });
+        for (const status of ['COMPLETED', 'SUBMITTED', 'ACCEPTED']) {
+            await transitionWorkItem(wiId, status, require('jsonwebtoken').decode(mgrGtmToken), 'Reviewed fixture determination');
+        }
 
         const res = await request(app)
             .put(`/api/work/${wiId}/status`)

@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -16,9 +17,13 @@ describe('Audit 0.4: legacy status result writes are disabled', () => {
     beforeAll(async () => { token = await getAuthToken('LAB_TECHNICIAN', labId); username = jwt.decode(token).username; });
     async function fixture(analysis = 'EC') {
         const sampleId = id('SMP-04');
-        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
-            status: 'PROCESSING', receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' } });
-        return prisma.workItem.create({ data: { id: id('WI-04'), sampleId, analysis, status: 'ASSIGNED', assignedTo: username,
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
+            status: ['ARCHIVING','DISPOSAL','ARCH','DISP','Archive','Dispose'].includes(analysis) ? 'APPROVED' : 'PROCESSING',
+            receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' } });
+        if (['ARCHIVING','DISPOSAL','ARCH','DISP','Archive','Dispose'].includes(analysis)) {
+            await createWorkItemFixture(prisma, { data: { id: id('APPROVED-04'), sampleId, analysis: 'PH_H2O', status: 'ACCEPTED', assignedLab: labId } });
+        }
+        return createWorkItemFixture(prisma, { data: { id: id('WI-04'), sampleId, analysis, status: 'ASSIGNED', assignedTo: username,
             assignedLab: labId, category: ['ARCHIVING','DISPOSAL','ARCH','DISP','Archive','Dispose'].includes(analysis) ? 'Post-Analytical'
                 : ['DRYING', 'PREPARATION'].includes(analysis) ? 'Operational Gates' : 'Chemical' } });
     }
@@ -26,12 +31,13 @@ describe('Audit 0.4: legacy status result writes are disabled', () => {
     test.each(['7.2', '<0.5', 0, '', null, { value: 7 }])('analytical result %j returns 410 and preserves data', async result => {
         const item = await fixture('PH_H2O');
         const before = wire(item);
+        const auditsBefore = await prisma.auditLog.findMany({ where: { sampleId: item.sampleId }, orderBy: { id: 'asc' } });
         const res = await put(item, { status: 'COMPLETED', result });
         expect(res.status).toBe(410); expect(res.body.code).toBe('USE_WORKBENCH');
         expect(res.body.destination).toBe(`/workbench?workItemId=${encodeURIComponent(item.id)}`);
         expect(wire(await prisma.workItem.findUnique({ where: { id: item.id } }))).toEqual(before);
         expect(await prisma.result.count({ where: { sampleId: item.sampleId } })).toBe(0);
-        expect(await prisma.auditLog.count({ where: { sampleId: item.sampleId } })).toBe(0);
+        expect(await prisma.auditLog.findMany({ where: { sampleId: item.sampleId }, orderBy: { id: 'asc' } })).toEqual(auditsBefore);
     });
     test('status-only analytical start still works without writing results', async () => {
         const item = await fixture();

@@ -1,4 +1,5 @@
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
 /**
  * Contract & Component Regression Test Suite:
@@ -35,6 +36,7 @@
  *    - GET /api/reports/search?status=SUPERSEDED returns superseded reports (including GTM26-0003 v1).
  */
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
@@ -157,7 +159,7 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
         });
 
         // Seed Sample GTM26-0002 (Only has 1 report: PUBLISHED v1)
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId0002,
                 labId: 'GTM26-0002',
@@ -186,7 +188,7 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
         });
 
         // Seed Sample GTM26-0003 (Has 2 reports: SUPERSEDED v1, PUBLISHED v2)
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId0003,
                 labId: 'GTM26-0003',
@@ -236,9 +238,9 @@ describe('Result Reports Query/Filter Lifecycle & Stale-Response Regression (#12
         await prisma.report.deleteMany({
             where: { id: { in: [reportId0002v1, reportId0003v1, reportId0003v2] } }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { in: [sampleId0002, sampleId0003] } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     // ─── 1. COMPONENT SSR RENDERING ───

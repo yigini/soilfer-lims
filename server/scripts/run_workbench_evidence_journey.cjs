@@ -25,6 +25,7 @@ const WebSocket = require('ws');
 
 const {
     createDisposableDatabase,
+    configureDisposableWorkflowFixtures,
     cleanupDisposableDatabase,
     validateDisposableDbPath
 } = require('./journey_db_isolation.cjs');
@@ -33,6 +34,8 @@ const { runnerDir, dbPath } = createDisposableDatabase();
 process.env.DATABASE_PATH = validateDisposableDbPath(dbPath, runnerDir);
 process.env.DATABASE_URL = `file:${process.env.DATABASE_PATH}`;
 process.env.NODE_ENV = 'production';
+configureDisposableWorkflowFixtures(dbPath, runnerDir);
+const { createSampleFixture, createWorkItemFixture } = require('../tests/helpers/workflowFixtures');
 process.env.DISABLE_BACKGROUND_JOBS = 'true';
 process.env.SERVE_CLIENT = 'true';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_jwt_for_local_testing_12345';
@@ -239,18 +242,7 @@ async function main() {
         });
 
         // Sample 1: GHA0816-1-1C-S (reported in Issue #128)
-        const sample1 = await prisma.sample.upsert({
-            where: { id: 'GHA0816-1-1C-S' },
-            update: {
-                originalId: 'GHA0816-1-1C-S',
-                labId: 'GHA0816-1-1C-S',
-                assignedLab: 'GTM-LAB1',
-                status: 'SUBMITTED_PARTIAL',
-                projectCode: 'DEMO-GTM-2026',
-                dryingStatus: 'DONE',
-                preparationStatus: 'DONE'
-            },
-            create: {
+        const sample1 = await createSampleFixture(prisma, { data: {
                 id: 'GHA0816-1-1C-S',
                 originalId: 'GHA0816-1-1C-S',
                 labId: 'GHA0816-1-1C-S',
@@ -259,23 +251,10 @@ async function main() {
                 projectCode: 'DEMO-GTM-2026',
                 dryingStatus: 'DONE',
                 preparationStatus: 'DONE'
-            }
-        });
+            } });
 
         // WorkItem reported in Issue #128: WI-1789634536044-167 assigned to tech_gtm_1
-        const workItem128 = await prisma.workItem.upsert({
-            where: { id: 'WI-1789634536044-167' },
-            update: {
-                sampleId: sample1.id,
-                labId: 'GHA0816-1-1C-S',
-                assignedLab: 'GTM-LAB1',
-                analysis: 'TN',
-                status: 'ASSIGNED',
-                assignedTo: 'tech_gtm_1',
-                methodologyId: methodTN.id,
-                priority: 'HIGH'
-            },
-            create: {
+        const workItem128 = await createWorkItemFixture(prisma, { data: {
                 id: 'WI-1789634536044-167',
                 sampleId: sample1.id,
                 labId: 'GHA0816-1-1C-S',
@@ -285,21 +264,10 @@ async function main() {
                 assignedTo: 'tech_gtm_1',
                 methodologyId: methodTN.id,
                 priority: 'HIGH'
-            }
-        });
+            } });
 
         // Completed work item for tech_gtm_2 on sample1
-        await prisma.workItem.upsert({
-            where: { id: 'WI-1789634535966-552' },
-            update: {
-                sampleId: sample1.id,
-                labId: 'GHA0816-1-1C-S',
-                assignedLab: 'GTM-LAB1',
-                analysis: 'DRYING',
-                status: 'COMPLETED',
-                assignedTo: 'tech_gtm_2'
-            },
-            create: {
+        await createWorkItemFixture(prisma, { data: {
                 id: 'WI-1789634535966-552',
                 sampleId: sample1.id,
                 labId: 'GHA0816-1-1C-S',
@@ -307,22 +275,10 @@ async function main() {
                 analysis: 'DRYING',
                 status: 'COMPLETED',
                 assignedTo: 'tech_gtm_2'
-            }
-        });
+            } });
 
         // Sample 2: S002 (with labId = S003, assigned to tech_gtm_2)
-        const sample2 = await prisma.sample.upsert({
-            where: { id: 'SMP-GTM-S002' },
-            update: {
-                originalId: 'FIELD-PLOT-002',
-                labId: 'S003',
-                assignedLab: 'GTM-LAB1',
-                status: 'ACCEPTED',
-                projectCode: 'DEMO-GTM-2026',
-                dryingStatus: 'DONE',
-                preparationStatus: 'DONE'
-            },
-            create: {
+        const sample2 = await createSampleFixture(prisma, { data: {
                 id: 'SMP-GTM-S002',
                 originalId: 'FIELD-PLOT-002',
                 labId: 'S003',
@@ -331,22 +287,9 @@ async function main() {
                 projectCode: 'DEMO-GTM-2026',
                 dryingStatus: 'DONE',
                 preparationStatus: 'DONE'
-            }
-        });
+            } });
 
-        const workItemS002PH = await prisma.workItem.upsert({
-            where: { id: 'WI-1789551515705-805' },
-            update: {
-                sampleId: sample2.id,
-                labId: 'S003',
-                assignedLab: 'GTM-LAB1',
-                analysis: 'PH_H2O',
-                status: 'ASSIGNED',
-                assignedTo: 'tech_gtm_2',
-                methodologyId: methodPH.id,
-                priority: 'NORMAL'
-            },
-            create: {
+        const workItemS002PH = await createWorkItemFixture(prisma, { data: {
                 id: 'WI-1789551515705-805',
                 sampleId: sample2.id,
                 labId: 'S003',
@@ -356,21 +299,9 @@ async function main() {
                 assignedTo: 'tech_gtm_2',
                 methodologyId: methodPH.id,
                 priority: 'NORMAL'
-            }
-        });
+            } });
 
-        const workItemS002SOC = await prisma.workItem.upsert({
-            where: { id: 'WI-1789551515731-354' },
-            update: {
-                sampleId: sample2.id,
-                labId: 'S003',
-                assignedLab: 'GTM-LAB1',
-                analysis: 'SOC',
-                status: 'ASSIGNED',
-                assignedTo: 'tech_gtm_2',
-                priority: 'NORMAL'
-            },
-            create: {
+        const workItemS002SOC = await createWorkItemFixture(prisma, { data: {
                 id: 'WI-1789551515731-354',
                 sampleId: sample2.id,
                 labId: 'S003',
@@ -379,40 +310,19 @@ async function main() {
                 status: 'ASSIGNED',
                 assignedTo: 'tech_gtm_2',
                 priority: 'NORMAL'
-            }
-        });
+            } });
 
         // Sample 3 (HND Cross-Lab)
-        const sampleHnd = await prisma.sample.upsert({
-            where: { id: 'SMP-HND-999' },
-            update: {
-                originalId: 'FIELD-HND-999',
-                labId: 'HND-999',
-                assignedLab: 'HND-LAB1',
-                status: 'ACCEPTED',
-                projectCode: 'DEMO-HND-2026'
-            },
-            create: {
+        const sampleHnd = await createSampleFixture(prisma, { data: {
                 id: 'SMP-HND-999',
                 originalId: 'FIELD-HND-999',
                 labId: 'HND-999',
                 assignedLab: 'HND-LAB1',
                 status: 'ACCEPTED',
                 projectCode: 'DEMO-HND-2026'
-            }
-        });
+            } });
 
-        await prisma.workItem.upsert({
-            where: { id: 'WI-HND-CROSS-999' },
-            update: {
-                sampleId: sampleHnd.id,
-                labId: 'HND-999',
-                assignedLab: 'HND-LAB1',
-                analysis: 'TN',
-                status: 'ASSIGNED',
-                assignedTo: 'tech_hnd_1'
-            },
-            create: {
+        await createWorkItemFixture(prisma, { data: {
                 id: 'WI-HND-CROSS-999',
                 sampleId: sampleHnd.id,
                 labId: 'HND-999',
@@ -420,8 +330,7 @@ async function main() {
                 analysis: 'TN',
                 status: 'ASSIGNED',
                 assignedTo: 'tech_hnd_1'
-            }
-        });
+            } });
 
         console.log('[2/6] Starting application server on ephemeral port...');
         server = http.createServer(app);

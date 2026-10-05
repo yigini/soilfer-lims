@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const request = require('supertest');
 const app = require('../../app');
@@ -17,9 +18,9 @@ describe('Audit 0.9: superseded public links', () => {
     afterEach(() => jest.restoreAllMocks());
     async function sample() {
         const sampleId = id('SMP-09');
-        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId,
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId,
             assignedLab: labId, status: 'APPROVED' } });
-        await prisma.workItem.create({ data: { id: id('WI-09'), sampleId, analysis: 'PH_H2O', status: 'ACCEPTED' } });
+        await createWorkItemFixture(prisma, { data: { id: id('WI-09'), sampleId, analysis: 'PH_H2O', status: 'ACCEPTED' } });
         await prisma.result.create({ data: { id: id('R-09'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true } });
         return sampleId;

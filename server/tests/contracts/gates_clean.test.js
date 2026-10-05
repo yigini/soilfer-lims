@@ -2,6 +2,9 @@ const { ensureTestLab } = require('../setup');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
+const prisma = require('../../prisma');
+const jwt = require('jsonwebtoken');
+const { transitionWorkItem } = require('../../services/workItemStateService');
 
 describe('8.1 Section B: Gate Enforcement (Clean Flow)', () => {
     let managerToken;
@@ -44,6 +47,11 @@ describe('8.1 Section B: Gate Enforcement (Clean Flow)', () => {
 
         const phItem = workItems['PH_H2O'];
         const prepItem = workItems['PREPARATION'];
+        const manager = await prisma.user.findUnique({ where: { username: jwt.decode(managerToken).username } });
+        for (const item of items) {
+            await transitionWorkItem(item.id, 'ASSIGNED', manager, null,
+                { assignedTo: manager.username, assignedBy: manager.username, assignedLab: manager.labId });
+        }
 
         // 2. Prep work item status update blocked because Drying is PENDING?
         // Wait, "Preparation blocked if Drying not DONE" is the logic.
@@ -53,8 +61,9 @@ describe('8.1 Section B: Gate Enforcement (Clean Flow)', () => {
             .set('Authorization', `Bearer ${managerToken}`) // Manager can update any
             .send({ status: 'IN_PROGRESS' });
 
-        expect(prepRes.status).toBe(400); // Drying not DONE
-        expect(prepRes.body.error).toMatch(/Drying not completed/);
+        expect(prepRes.status).toBe(409);
+        expect(prepRes.body.code).toBe('DRYING_PREREQUISITE_BLOCKED');
+        expect(prepRes.body.error).toMatch(/DRYING must be completed/i);
 
         // 3. Complete Drying (via Phase API)
         await request(app)

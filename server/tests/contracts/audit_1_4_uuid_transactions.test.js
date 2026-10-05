@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture, createSamplesFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -133,7 +134,7 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
 
     async function textureFixture() {
         const sampleId = id();
-        await prisma.sample.create({ data: { id: sampleId, originalId: `CODE-${sampleId}`, labId, assignedLab: labId,
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: `CODE-${sampleId}`, labId, assignedLab: labId,
             status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE', receptionDate: new Date(),
             requiredAnalyses: '["SAND","SILT","CLAY"]' } });
         const rows = [];
@@ -151,7 +152,7 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
     test('the production generator creates 500 distinct UUID WorkItems and audit rows at the same timestamp', async () => {
         const samples = Array.from({ length: 250 }, () => ({ id: id(), originalId: id(), labId, assignedLab: labId,
             status: 'PROCESSING', requiredAnalyses: '[]' }));
-        await prisma.sample.createMany({ data: samples });
+        await createSamplesFixture(prisma, { data: samples });
         jest.spyOn(Date, 'now').mockReturnValue(1234567890000);
         jest.spyOn(Math, 'random').mockReturnValue(0);
         const generated = [];
@@ -230,7 +231,7 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
 
     test.each([false, true])('workbench fraction save is atomic with derived texture (storage failure: %s)', async fail => {
         const f = await textureFixture();
-        const item = await prisma.workItem.create({ data: { id: id(), sampleId: f.sampleId, assignedLab: labId,
+        const item = await createWorkItemFixture(prisma, { data: { id: id(), sampleId: f.sampleId, assignedLab: labId,
             analysis: 'SAND', status: 'ASSIGNED', assignedTo: username, version: 0 } });
         const audits = await prisma.auditLog.count();
         if (fail) failCreate('result', row => row.sampleId === f.sampleId && row.param === 'TEXTURE');
@@ -259,7 +260,7 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
         expect(method).not.toBeNull();
         const unit = await prisma.unit.findFirst();
         const sampleId = id();
-        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId, assignedLab: labId, status: 'APPROVED' } });
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId, assignedLab: labId, status: 'APPROVED' } });
         const rows = [];
         for (const replicateNo of [1, 2]) rows.push(await prisma.result.create({ data: {
             id: id(), sampleId, param: analysis.code, value: '5', replicateNo, isCurrent: true, isValid: true } }));

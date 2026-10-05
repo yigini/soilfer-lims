@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const request = require('supertest');
@@ -17,13 +18,13 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
     async function fixture({ batchStatus, itemStatus = 'SUBMITTED' } = {}) {
         const sampleId = id('SMP-07'), analysis = id('ANALYSIS-07');
         await prisma.analysis.create({ data: { code: analysis, name: 'Resubmission numeric fixture', units: 'mg/kg', status: 'active' } });
-        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
             status: 'PROCESSING', receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' } });
         const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-07'), analysis, status: batchStatus, labId, createdBy: username } }) : null;
         const itemId = id('WI-07'), submissionId = id('SUB-07');
         const submission = await prisma.submission.create({ data: { id: submissionId, sampleId, assignedLab: labId, submittedBy: username,
             status: 'PENDING_REVIEW', type: 'PARTIAL', workItemCount: 1, workItemIds: JSON.stringify([itemId]) } });
-        const item = await prisma.workItem.create({ data: { id: itemId, sampleId, analysis, assignedLab: labId, assignedTo: username,
+        const item = await createWorkItemFixture(prisma, { data: { id: itemId, sampleId, analysis, assignedLab: labId, assignedTo: username,
             status: itemStatus, result: '6.2', submissionId, batchId: batch?.id, history: JSON.stringify([{ action: 'SUBMITTED', submissionId }]) } });
         const result = await prisma.result.create({ data: { id: id('R-07'), sampleId, param: analysis, value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true, flags: '[]', batchId: batch?.id } });
@@ -39,7 +40,7 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
         const f = await fixture(), response = await returned(route, f);
         expect(response.status).toBe(200);
         const item = await prisma.workItem.findUnique({ where: { id: f.item.id } });
-        expect(item.status).toBe('REANALYSIS_REQUIRED'); expect(item.submissionId).toBeNull();
+        expect(item.status).toBe('REPEAT_REQUIRED'); expect(item.submissionId).toBeNull();
         const history = JSON.parse(item.history);
         expect(history[0]).toEqual({ action: 'SUBMITTED', submissionId: f.submission.id });
         expect(history.at(-1).submissionId).toBe(f.submission.id);
@@ -62,12 +63,12 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
     });
     test('QC REANALYZE detaches only mutable work and keeps the old package/reason in history', async () => {
         const f = await fixture({ batchStatus: 'QC_FAIL' });
-        const accepted = await prisma.workItem.create({ data: { id: id('WI-07-ACCEPTED'), sampleId: f.sampleId, analysis: f.analysis,
+        const accepted = await createWorkItemFixture(prisma, { data: { id: id('WI-07-ACCEPTED'), sampleId: f.sampleId, analysis: f.analysis,
             status: 'ACCEPTED', batchId: f.batch.id, submissionId: f.submission.id, result: '9.1', history: '[{"action":"ACCEPTED"}]', duplicateOf: f.item.id } });
         const response = await post(`/api/qc/batches/${f.batch.id}/disposition`, { decision: 'REANALYZE_BATCH', reason });
         expect(response.status).toBe(200);
         const item = await prisma.workItem.findUnique({ where: { id: f.item.id } });
-        expect(item.status).toBe('REANALYSIS_REQUIRED'); expect(item.submissionId).toBeNull();
+        expect(item.status).toBe('REPEAT_REQUIRED'); expect(item.submissionId).toBeNull();
         expect(JSON.parse(item.history).at(-1)).toMatchObject({ submissionId: f.submission.id, reason, action: 'REANALYZE_BATCH' });
         expect(await prisma.workItem.findUnique({ where: { id: accepted.id } })).toEqual(accepted);
         expect((await prisma.result.findUnique({ where: { id: f.result.id } })).numericValue).toBe(6.2);
@@ -84,7 +85,7 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
     });
     test.each(['individual', 'bulk'])('%s RETURN and real S2 resubmission cannot be reviewed through S1', async route => {
         const f = await fixture();
-        const remaining = await prisma.workItem.create({ data: { id: id('WI-07-REMAINING'), sampleId: f.sampleId,
+        const remaining = await createWorkItemFixture(prisma, { data: { id: id('WI-07-REMAINING'), sampleId: f.sampleId,
             analysis: `${f.analysis}-OTHER`, status: 'SUBMITTED', result: '5.4', assignedLab: labId,
             assignedTo: username, submissionId: f.submission.id } });
         await prisma.submission.update({ where: { id: f.submission.id }, data: {

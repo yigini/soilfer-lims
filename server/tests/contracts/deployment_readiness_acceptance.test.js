@@ -23,6 +23,10 @@ const cp = require('child_process');
 const Database = require('better-sqlite3');
 const { restoreBackup } = require('../../scripts/restore_db');
 const { rotateEpoch, getCurrentEpoch, initTables, ensureTriggers } = require('../../services/exchangeStateService');
+const { createDisposableDatabase, cleanupDisposableDatabase } = require('../../scripts/journey_db_isolation.cjs');
+const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { PrismaClient } = require('../../prisma_client');
+const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 
 describe('Deployment Readiness Acceptance Contract', () => {
     const TS = Date.now();
@@ -387,25 +391,33 @@ describe('Deployment Readiness Acceptance Contract', () => {
 
     describe('4. Stopped-Writer Database Restore & Automatic Epoch Invalidation', () => {
         const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), `lims_restore_test_${TS}_`));
-        const sourceDbPath = path.join(tmpDir, 'source.db');
         const targetDbPath = path.join(tmpDir, 'target.db');
+        const ownedRunnerDirectories = [];
+
+        async function createRestoreSource(userId, username, sampleId, labAlias) {
+            const { runnerDir, dbPath } = createDisposableDatabase();
+            ownedRunnerDirectories.push(runnerDir);
+            const fixtureDb = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${dbPath}` }) });
+            try {
+                await fixtureDb.user.create({ data: { id: userId, username, email: `${userId}@restore.example.test`,
+                    password: 'fixture-hash', role: 'SUPER_ADMIN' } });
+                await createSampleFixture(fixtureDb, { data: { id: sampleId, originalId: sampleId, labId: labAlias, status: 'EXPECTED' } });
+            } finally { await fixtureDb.$disconnect(); }
+            return dbPath;
+        }
 
         afterAll(() => {
+            for (const runnerDir of ownedRunnerDirectories) cleanupDisposableDatabase(runnerDir);
             try {
                 fs.rmSync(tmpDir, { recursive: true, force: true });
             } catch (_) {}
         });
 
         test('Restores database, verifies integrity & foreign keys, and rotates exchange epoch', async () => {
-            // Create source SQLite database with exchange tables
+            // Ordinary fixtures use the real creation authority and release guards.
+            const sourceDbPath = await createRestoreSource('u1', 'admin', 's1', 'LAB01');
             const sourceDb = new Database(sourceDbPath);
             sourceDb.pragma('journal_mode = WAL');
-            sourceDb.exec(`
-                CREATE TABLE User (id TEXT PRIMARY KEY, username TEXT);
-                INSERT INTO User VALUES ('u1', 'admin');
-                CREATE TABLE Sample (id TEXT PRIMARY KEY, labId TEXT);
-                INSERT INTO Sample VALUES ('s1', 'LAB01');
-            `);
             initTables(sourceDb);
             ensureTriggers(sourceDb);
             const initialEpoch = getCurrentEpoch(sourceDb);
@@ -431,7 +443,7 @@ describe('Deployment Readiness Acceptance Contract', () => {
         });
 
         test('Fails closed, exits non-zero, and preserves safety artifacts when SQL epoch rotation triggers fail', async () => {
-            const failBackupPath = path.join(tmpDir, 'fail_backup.db');
+            const failBackupPath = await createRestoreSource('u2', 'admin2', 's2', 'LAB02');
             const failTargetPath = path.join(tmpDir, 'fail_target.db');
 
             // 1. Create a prior target database with a WAL sidecar to test preservation
@@ -447,12 +459,6 @@ describe('Deployment Readiness Acceptance Contract', () => {
 
             // 2. Create source backup with a deliberate SQL trigger aborting epoch updates
             const failDb = new Database(failBackupPath);
-            failDb.exec(`
-                CREATE TABLE User (id TEXT PRIMARY KEY, username TEXT);
-                INSERT INTO User VALUES ('u2', 'admin2');
-                CREATE TABLE Sample (id TEXT PRIMARY KEY, labId TEXT);
-                INSERT INTO Sample VALUES ('s2', 'LAB02');
-            `);
             initTables(failDb);
             ensureTriggers(failDb);
             failDb.exec(`

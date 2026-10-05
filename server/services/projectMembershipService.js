@@ -1,5 +1,5 @@
-const crypto = require('crypto');
 'use strict';
+const crypto = require('crypto');
 
 const prisma = require('../prisma');
 const projectPolicyService = require('./projectPolicyService');

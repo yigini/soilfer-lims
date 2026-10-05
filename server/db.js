@@ -85,70 +85,6 @@ const usersDb = {
 };
 
 const samplesDb = {
-    create: (sample) => {
-        const id = sample.id || `SMP-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        const labId = sample.labId || id;
-        const originalId = sample.originalId || sample.labId || id;
-        const assignedLab = sample.assignedLab || sample.labId || 'LAB-DEFAULT';
-        const status = sample.status || 'RECEIVED';
-        const submitter = sample.submitter || 'Test Submitter';
-        const countryName = sample.countryName || sample.countryCode || 'GTM';
-        const countryCode = sample.countryCode || 'GTM';
-        const projectCode = sample.projectCode || 'SOILFER-US';
-        const dryingStatus = sample.dryingStatus || 'DONE';
-        const preparationStatus = sample.preparationStatus || 'DONE';
-        const receptionDate = sample.receptionDate || new Date().toISOString();
-        const requiredAnalyses = sample.analyses ? JSON.stringify(sample.analyses) : (sample.requiredAnalyses ? JSON.stringify(sample.requiredAnalyses) : null);
-        const metadata = sample.metadata ? (typeof sample.metadata === 'string' ? sample.metadata : JSON.stringify(sample.metadata)) : '{}';
-        const history = sample.history ? (typeof sample.history === 'string' ? sample.history : JSON.stringify(sample.history)) : '[]';
-
-        // Clean upsert to prevent FK delete issues
-        const existing = db.prepare('SELECT id FROM Sample WHERE id = ? OR originalId = ?').get(id, originalId);
-        if (existing) {
-            const stmt = db.prepare(`
-                UPDATE Sample SET
-                    labId = ?, originalId = ?, assignedLab = ?, status = ?, countryName = ?, country = ?,
-                    projectCode = ?, dryingStatus = ?, preparationStatus = ?, receptionDate = ?, requiredAnalyses = ?,
-                    metadata = ?, history = ?, updatedAt = CURRENT_TIMESTAMP
-                WHERE id = ?
-            `);
-            stmt.run(
-                labId, originalId, assignedLab, status, countryName, countryCode,
-                projectCode, dryingStatus, preparationStatus, receptionDate, requiredAnalyses,
-                metadata, history, existing.id
-            );
-            return samplesDb.findById(existing.id);
-        } else {
-            const stmt = db.prepare(`
-                INSERT INTO Sample (
-                    id, labId, originalId, assignedLab, status, countryName, country,
-                    projectCode, dryingStatus, preparationStatus, receptionDate, requiredAnalyses,
-                    metadata, history, createdAt, updatedAt
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            `);
-            stmt.run(
-                id, labId, originalId, assignedLab, status, countryName, countryCode,
-                projectCode, dryingStatus, preparationStatus, receptionDate, requiredAnalyses,
-                metadata, history
-            );
-        }
-
-        return {
-            id,
-            labId,
-            originalId,
-            assignedLab,
-            status,
-            submitter,
-            countryName,
-            countryCode,
-            projectCode,
-            dryingStatus,
-            preparationStatus,
-            receptionDate,
-            requiredAnalyses
-        };
-    },
     findById: (id) => {
         const row = db.prepare('SELECT * FROM Sample WHERE id = ?').get(id);
         if (!row) return null;
@@ -169,69 +105,10 @@ const samplesDb = {
             metadata: row.metadata ? JSON.parse(row.metadata) : {},
             history: row.history ? JSON.parse(row.history) : []
         }));
-    },
-    update: (id, updates) => {
-        const fields = [];
-        const values = [];
-        for (const [k, v] of Object.entries(updates)) {
-            fields.push(`${k} = ?`);
-            values.push(typeof v === 'object' && v !== null ? JSON.stringify(v) : v);
-        }
-        values.push(id);
-        db.prepare(`UPDATE Sample SET ${fields.join(', ')}, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`).run(...values);
-        return samplesDb.findById(id);
     }
 };
 
 const workItemsDb = {
-    create: (wi) => {
-        const id = wi.id || `WI-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        const sampleId = wi.sampleId;
-        const analysis = wi.analysis || 'PH_H2O';
-        const status = wi.status || 'PENDING';
-        const assignedTo = wi.assignedTo || null;
-        const assignedLab = wi.assignedLab || 'LAB-DEFAULT';
-        const batchId = wi.batchId || null;
-        const result = wi.result !== undefined ? String(wi.result) : null;
-        const history = wi.history ? (typeof wi.history === 'string' ? wi.history : JSON.stringify(wi.history)) : '[]';
-
-        // Auto-ensure parent sample exists to satisfy foreign key
-        if (sampleId) {
-            const sampleExists = db.prepare('SELECT id FROM Sample WHERE id = ?').get(sampleId);
-            if (!sampleExists) {
-                samplesDb.create({ id: sampleId, originalId: sampleId, labId: sampleId, assignedLab });
-            }
-        }
-
-        const existing = db.prepare('SELECT id FROM WorkItem WHERE id = ?').get(id);
-        if (existing) {
-            const stmt = db.prepare(`
-                UPDATE WorkItem SET
-                    sampleId = ?, analysis = ?, status = ?, assignedTo = ?, assignedLab = ?, batchId = ?, result = ?, history = ?, updatedAt = CURRENT_TIMESTAMP
-                WHERE id = ?
-            `);
-            stmt.run(sampleId, analysis, status, assignedTo, assignedLab, batchId, result, history, id);
-            return workItemsDb.findById(id);
-        } else {
-            const stmt = db.prepare(`
-                INSERT INTO WorkItem (
-                    id, sampleId, analysis, status, assignedTo, assignedLab, batchId, result, history, createdAt, updatedAt
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            `);
-            stmt.run(id, sampleId, analysis, status, assignedTo, assignedLab, batchId, result, history);
-        }
-
-        return {
-            id,
-            sampleId,
-            analysis,
-            status,
-            assignedTo,
-            assignedLab,
-            batchId,
-            result
-        };
-    },
     findById: (id) => {
         const row = db.prepare('SELECT * FROM WorkItem WHERE id = ?').get(id);
         if (!row) return null;
@@ -245,17 +122,6 @@ const workItemsDb = {
             ...row,
             history: row.history ? JSON.parse(row.history) : []
         }));
-    },
-    update: (id, updates) => {
-        const fields = [];
-        const values = [];
-        for (const [k, v] of Object.entries(updates)) {
-            fields.push(`${k} = ?`);
-            values.push(typeof v === 'object' && v !== null ? JSON.stringify(v) : v);
-        }
-        values.push(id);
-        db.prepare(`UPDATE WorkItem SET ${fields.join(', ')}, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`).run(...values);
-        return workItemsDb.findById(id);
     }
 };
 
@@ -322,17 +188,17 @@ const submissionsDb = {
         const workItemIds = sub.workItemIds ? (typeof sub.workItemIds === 'string' ? sub.workItemIds : JSON.stringify(sub.workItemIds)) : '[]';
         const workItemCount = sub.workItemCount || (Array.isArray(sub.workItemIds) ? sub.workItemIds.length : 0);
 
+        if (sampleId) {
+            const sampleExists = db.prepare('SELECT id FROM Sample WHERE id = ?').get(sampleId);
+            if (!sampleExists) throw Object.assign(new Error('Create the parent sample through the workflow state authority before recording a submission.'), {
+                statusCode: 404, code: 'SAMPLE_NOT_FOUND'
+            });
+        }
+
         if (submittedBy) {
             const userExists = db.prepare('SELECT id FROM User WHERE username = ?').get(submittedBy);
             if (!userExists) {
                 usersDb.create({ username: submittedBy, role: 'LAB_TECHNICIAN', labId: assignedLab });
-            }
-        }
-
-        if (sampleId) {
-            const sampleExists = db.prepare('SELECT id FROM Sample WHERE id = ?').get(sampleId);
-            if (!sampleExists) {
-                samplesDb.create({ id: sampleId, originalId: sampleId, labId: sampleId, assignedLab });
             }
         }
 

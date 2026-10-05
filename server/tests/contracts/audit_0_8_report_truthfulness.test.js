@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -26,8 +27,8 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
         const sampleId = id('SMP-08');
         const batch = await prisma.batch.create({ data: { id: id('B-08'), analysis: 'PH_H2O', status: batchStatus,
             disposition: disposition ? JSON.stringify(disposition) : null, labId, createdBy: 'report-test' } });
-        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status: 'APPROVED' } });
-        const item = await prisma.workItem.create({ data: { id: id('WI-08'), sampleId, analysis: 'PH_H2O', status: 'ACCEPTED', batchId: batch.id } });
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status: 'APPROVED' } });
+        const item = await createWorkItemFixture(prisma, { data: { id: id('WI-08'), sampleId, analysis: 'PH_H2O', status: 'ACCEPTED', batchId: batch.id } });
         await prisma.result.create({ data: { id: id('R-08'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true, batchId: batch.id } });
         return { sampleId, batch, item };

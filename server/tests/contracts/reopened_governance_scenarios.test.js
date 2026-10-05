@@ -1,4 +1,5 @@
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
 /**
  * Reopened Governance & Parity Scenarios Contract Tests
@@ -11,6 +12,7 @@
  * 5. Work Item Assignment Scoping & Receiving Lab Broadcasts (assignmentEligibilityService validation, receiving lab broadcast)
  */
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -134,7 +136,7 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
         });
 
         // Setup Samples
-        sampleA = await prisma.sample.create({
+        sampleA = await createSampleFixture(prisma, {
             data: {
                 id: 'smp-a-' + SUFFIX,
                 originalId: 'orig-a-' + SUFFIX,
@@ -148,7 +150,7 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
             }
         });
 
-        samplePendingDrying = await prisma.sample.create({
+        samplePendingDrying = await createSampleFixture(prisma, {
             data: {
                 id: 'smp-dry-' + SUFFIX,
                 originalId: 'orig-dry-' + SUFFIX,
@@ -163,7 +165,7 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
         });
 
         // Setup Work Items
-        workItemDryingBlocked = await prisma.workItem.create({
+        workItemDryingBlocked = await createWorkItemFixture(prisma, {
             data: {
                 id: 'wi-dry-' + SUFFIX,
                 sampleId: samplePendingDrying.id,
@@ -176,7 +178,7 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
             }
         });
 
-        workItemNormal = await prisma.workItem.create({
+        workItemNormal = await createWorkItemFixture(prisma, {
             data: {
                 id: 'wi-norm-' + SUFFIX,
                 sampleId: sampleA.id,
@@ -189,7 +191,7 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
             }
         });
 
-        workItemSpectral = await prisma.workItem.create({
+        workItemSpectral = await createWorkItemFixture(prisma, {
             data: {
                 id: 'wi-spec-' + SUFFIX,
                 sampleId: sampleA.id,
@@ -204,7 +206,7 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
             }
         });
 
-        workItemTexture = await prisma.workItem.create({
+        workItemTexture = await createWorkItemFixture(prisma, {
             data: {
                 id: 'wi-text-' + SUFFIX,
                 sampleId: sampleA.id,
@@ -223,8 +225,8 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
         await prisma.workAttempt.deleteMany({ where: { workItemId: { in: [workItemTexture.id, workItemSpectral.id, workItemNormal.id, workItemDryingBlocked.id] } } }).catch(() => {});
         await prisma.workItemDraft.deleteMany({ where: { workItemId: { in: [workItemTexture.id, workItemSpectral.id, workItemNormal.id, workItemDryingBlocked.id] } } }).catch(() => {});
         await prisma.commandReceipt.deleteMany({ where: { author: { in: [userTechA.username, userTechB.username] } } }).catch(() => {});
-        await prisma.workItem.deleteMany({ where: { id: { in: [workItemTexture.id, workItemSpectral.id, workItemNormal.id, workItemDryingBlocked.id] } } }).catch(() => {});
-        await prisma.sample.deleteMany({ where: { id: { in: [sampleA.id, samplePendingDrying.id] } } }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: { in: [workItemTexture.id, workItemSpectral.id, workItemNormal.id, workItemDryingBlocked.id] } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: [sampleA.id, samplePendingDrying.id] } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
         await prisma.methodology.deleteMany({ where: { id: customSpectralMethod.id } }).catch(() => {});
         await prisma.user.deleteMany({ where: { id: { in: [userTechA.id, userTechB.id, userMgrA.id, userSA.id] } } }).catch(() => {});
         await prisma.lab.deleteMany({ where: { id: { in: [labA.id, labB.id] } } }).catch(() => {});

@@ -1,8 +1,13 @@
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
+const { createSampleFixture, createWorkItemFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
+const { transitionWorkItem } = require('../../services/workItemStateService');
+const OperationalConfirmationService = require('../../services/operationalConfirmationService');
+const operationalChecklists = require('../../data/operationalChecklists.json');
 const { getAuthToken } = require('../setup');
 const { canFinalApprove } = require('../../services/workEligibility');
 const sampleWorkspaceService = require('../../services/sampleWorkspaceService');
@@ -64,8 +69,8 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         await prisma.auditLog.deleteMany({ where: { sampleId: { in: [sample26Id, sampleApprId] } } });
         await prisma.orderLine.deleteMany({ where: { revision: { sampleId: { in: [sample26Id, sampleApprId] } } } });
         await prisma.sampleOrderRevision.deleteMany({ where: { sampleId: { in: [sample26Id, sampleApprId] } } });
-        await prisma.workItem.deleteMany({ where: { sampleId: { in: [sample26Id, sampleApprId] } } });
-        await prisma.sample.deleteMany({ where: { id: { in: [sample26Id, sampleApprId] } } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: { in: [sample26Id, sampleApprId] } } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: [sample26Id, sampleApprId] } } }), select: { id: true } })).map(row => row.id), { single: false });
 
         // Ensure operational gates exist
         await prisma.operationalGate.upsert({
@@ -80,7 +85,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         });
 
         // 1. Seed 26-task Sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sample26Id,
                 labId: sample26LabCode,
@@ -98,7 +103,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         });
 
         // Seed 26 work items
-        await prisma.workItem.createMany({
+        await createWorkItemsFixture(prisma, {
             data: analyses26.map((a, idx) => ({
                 id: `WI-26-${String(idx + 1).padStart(2, '0')}`,
                 sampleId: sample26Id,
@@ -118,8 +123,8 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         await prisma.auditLog.deleteMany({ where: { sampleId: { in: [sample26Id, sampleApprId] } } });
         await prisma.orderLine.deleteMany({ where: { revision: { sampleId: { in: [sample26Id, sampleApprId] } } } });
         await prisma.sampleOrderRevision.deleteMany({ where: { sampleId: { in: [sample26Id, sampleApprId] } } });
-        await prisma.workItem.deleteMany({ where: { sampleId: { in: [sample26Id, sampleApprId] } } });
-        await prisma.sample.deleteMany({ where: { id: { in: [sample26Id, sampleApprId] } } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: { in: [sample26Id, sampleApprId] } } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: [sample26Id, sampleApprId] } } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. 26-task fixture exposes all 26 tasks with honest totals and pagination (no silent 20-item truncation)', async () => {
@@ -279,7 +284,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
 
     test('4. Final approval readiness independently enforced on server: rejects premature approval with 409 and blockers', async () => {
         // Create a new sample with unapproved items and pending gates
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleApprId,
                 labId: 'LAB-APPR-01',
@@ -296,7 +301,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
             }
         });
 
-        await prisma.workItem.createMany({
+        await createWorkItemsFixture(prisma, {
             data: [
                 {
                     id: 'WI-APPR-DRY',
@@ -305,7 +310,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
                     assignedLab: 'LAB-GTM',
                     analysis: 'DRYING',
                     category: 'Operational Gates',
-                    status: 'PENDING'
+                    status: 'NOT_ASSIGNED'
                 },
                 {
                     id: 'WI-APPR-PREP',
@@ -314,7 +319,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
                     assignedLab: 'LAB-GTM',
                     analysis: 'PREPARATION',
                     category: 'Operational Gates',
-                    status: 'PENDING'
+                    status: 'NOT_ASSIGNED'
                 },
                 {
                     id: 'WI-APPR-PH',
@@ -340,22 +345,14 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         expect(prematureRes.body.blockers.length).toBeGreaterThan(0);
 
         // Now satisfy all gates and analyses
-        await prisma.sample.update({
-            where: { id: sampleApprId },
-            data: { dryingStatus: 'DONE', preparationStatus: 'DONE' }
-        });
-        await prisma.workItem.update({
-            where: { id: 'WI-APPR-DRY' },
-            data: { status: 'COMPLETED' }
-        });
-        await prisma.workItem.update({
-            where: { id: 'WI-APPR-PREP' },
-            data: { status: 'COMPLETED' }
-        });
-        await prisma.workItem.update({
-            where: { id: 'WI-APPR-PH' },
-            data: { status: 'ACCEPTED' }
-        });
+        const manager = require('jsonwebtoken').decode(mgrGtmToken);
+        for (const [analysis, workItemId] of [['DRYING', 'WI-APPR-DRY'], ['PREPARATION', 'WI-APPR-PREP']]) {
+            await OperationalConfirmationService.confirmOperation({ actor: manager, workItemId,
+                checklist: operationalChecklists[analysis].steps.map(() => true) });
+        }
+        for (const status of ['ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'SUBMITTED', 'ACCEPTED']) {
+            await transitionWorkItem('WI-APPR-PH', status, manager, 'Reviewed fixture determination');
+        }
 
         // Re-attempt final approval
         const approvedRes = await request(app)
@@ -444,7 +441,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         const qcBatchSampleId = `SMP-QC-GATE-${Date.now()}`;
         const qcBatchId = `BATCH-QC-GATE-${Date.now()}`;
 
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: qcBatchSampleId,
                 originalId: `FIELD-QC-GATE-${Date.now()}`,
@@ -468,7 +465,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
             }
         });
 
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-QC-GATE-${Date.now()}`,
                 sampleId: qcBatchSampleId,
@@ -484,8 +481,8 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         expect(ws.capabilities.canFinalApprove.blockers.some(b => b.includes('QC_BATCH_FAILED'))).toBe(true);
 
         // Cleanup
-        await prisma.workItem.deleteMany({ where: { sampleId: qcBatchSampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: qcBatchSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.batch.delete({ where: { id: qcBatchId } });
-        await prisma.sample.delete({ where: { id: qcBatchSampleId } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: qcBatchSampleId } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 });

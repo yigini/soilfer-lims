@@ -129,6 +129,10 @@ node scripts/migrate_project_templates_and_policy.js
 echo "📦 Applying sitewide theme library migration..."
 node scripts/migrate_sitewide_theme_library.js
 
+# Mandatory workflow-state schema and guards (Additive, Fail-Closed, Idempotent)
+echo "📦 Installing workflow-state schema and guards..."
+node scripts/install_workflow_state_guards.js --apply
+
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."
 exec node index.js

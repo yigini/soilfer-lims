@@ -1,3 +1,4 @@
+const { createWorkItemFixture, createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -9,7 +10,7 @@ async function assignOrderedWork(sampleId, token) {
     await prisma.sample.update({ where: { id: sampleId }, data: { dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify(parameters.map(([code]) => code)) } });
     for (const [code, units] of parameters) {
         await prisma.analysis.upsert({ where: { code }, create: { code, name: `${code} matrix test parameter`, units }, update: { units, labId: null } });
-        await prisma.workItem.create({ data: { id: `${sampleId}_${code}`, sampleId, analysis: code, assignedTo: username, assignedLab: 'LAB-MX', labId: 'LAB-MX', status: 'IN_PROGRESS' } });
+        await createWorkItemFixture(prisma, { data: { id: `${sampleId}_${code}`, sampleId, analysis: code, assignedTo: username, assignedLab: 'LAB-MX', labId: 'LAB-MX', status: 'IN_PROGRESS' } });
     }
 }
 
@@ -19,12 +20,19 @@ describe('Sample Matrix Cross-Parameter Validation Contract', () => {
     beforeAll(async () => {
         techToken = await getAuthToken('LAB_TECHNICIAN', 'LAB-MX', ['GTM'], ['MX-PROJ']);
 
-        const s = samplesDb.create({
-            id: `SMP-MX-${Date.now()}`,
+        const s = await createSampleFixture(prisma, { data: { id: `SMP-MX-${Date.now()}`,
             labId: 'LAB-MX-001',
             assignedLab: 'LAB-MX',
-            status: 'PROCESSING'
-        });
+            status: 'PROCESSING',
+            originalId: 'LAB-MX-001',
+            country: 'GTM',
+            countryName: 'GTM',
+            projectCode: 'SOILFER-US',
+            dryingStatus: 'DONE',
+            preparationStatus: 'DONE',
+            receptionDate: new Date(),
+            metadata: '{}',
+            history: '[]' } });
         sampleId = s.id;
         await assignOrderedWork(sampleId, techToken);
     });
@@ -67,12 +75,19 @@ describe('Sample Matrix Cross-Parameter Validation Contract', () => {
     });
 
     test('2. Emits warning when texture fractions fail 100% closure tolerance', async () => {
-        const sBad = samplesDb.create({
-            id: `SMP-MX-BAD-${Date.now()}`,
+        const sBad = await createSampleFixture(prisma, { data: { id: `SMP-MX-BAD-${Date.now()}`,
             labId: 'LAB-MX-002',
             assignedLab: 'LAB-MX',
-            status: 'PROCESSING'
-        });
+            status: 'PROCESSING',
+            originalId: 'LAB-MX-002',
+            country: 'GTM',
+            countryName: 'GTM',
+            projectCode: 'SOILFER-US',
+            dryingStatus: 'DONE',
+            preparationStatus: 'DONE',
+            receptionDate: new Date(),
+            metadata: '{}',
+            history: '[]' } });
         await assignOrderedWork(sBad.id, techToken);
 
         const res = await request(app)

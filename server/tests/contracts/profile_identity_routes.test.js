@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const app = require('../../app');
@@ -13,6 +15,7 @@ describe('Mounted profile correction, scope and immutable export contracts',()=>
     let admin,manager,foreign,managerId;
     const amend = {type:'CLERICAL',reason:'Verified against the original field record',expectedProfileRevision:0,profileCorrection:{code:'PIT-NEW',relation:'CONFIRMED_PROFILE'},idempotencyKey:'profile-correction-operation'};
     beforeAll(async()=>{
+        state.getDb(); // Install the actual publication triggers before creating released fixtures.
         for (const id of [lab,foreignLab]) await prisma.lab.create({data:{id,code:id,name:id,country:'GTM'}});
         await prisma.project.create({data:{id:project,code:project,name:project,labId:lab,status:'ACTIVE'}});
         await prisma.project.create({data:{id:project+'-NEXT',code:project+'-NEXT',name:'Next project',labId:lab,status:'ACTIVE'}});
@@ -21,7 +24,9 @@ describe('Mounted profile correction, scope and immutable export contracts',()=>
         foreign = await getAuthToken('LAB_MANAGER',foreignLab,['GTM'],[]);
         managerId = jwt.decode(manager).id;
         await prisma.user.updateMany({where:{id:{in:[admin,manager,foreign].map(token=>jwt.decode(token).id)}},data:{mustChangePassword:false}});
-        for (const [name,id] of Object.entries(ids)) await prisma.sample.create({data:{id,originalId:`FIELD-${id}`,labId:`ACCESSION-${id}`,assignedLab:lab,projectId:project,projectCode:project,country:'GTM',status:name==='draft'?'RECEIVED':'APPROVED',approvedAt:name==='draft'?null:new Date(),fieldMetadata:JSON.stringify({site_id:{value:'SITE-OLD'},pit_id:{value:'PIT-FIELD'}})}});
+        for (const [name,id] of Object.entries(ids)) await createSampleFixture(prisma, {data:{id,originalId:`FIELD-${id}`,labId:`ACCESSION-${id}`,assignedLab:lab,projectId:project,projectCode:project,country:'GTM',status:name==='draft'?'RECEIVED':'APPROVED',approvedAt:name==='draft'?null:new Date(),fieldMetadata:JSON.stringify({site_id:{value:'SITE-OLD'},pit_id:{value:'PIT-FIELD'}})}});
+        await createWorkItemFixture(prisma, { data: { id: `${ids.released}-PH`, sampleId: ids.released,
+            assignedLab: lab, analysis: 'PH_H2O', status: 'ACCEPTED' } });
         await prisma.result.create({data:{id:'PROFILE-RESULT-UNCHANGED',sampleId:ids.released,param:'PH_H2O',value:'6.4',numericValue:6.4,unit:'pH',isCurrent:true,isValid:true}});
     });
     afterAll(async()=>{
@@ -29,7 +34,8 @@ describe('Mounted profile correction, scope and immutable export contracts',()=>
         await prisma.sampleAmendment.deleteMany({where:{sampleId:{in:Object.values(ids)}}});
         await prisma.auditLog.deleteMany({where:{sampleId:{in:Object.values(ids)}}});
         await prisma.result.deleteMany({where:{sampleId:{in:Object.values(ids)}}});
-        await prisma.sample.deleteMany({where:{id:{in:Object.values(ids)}}});
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({where:{sampleId:{in:Object.values(ids)}}}), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({where:{id:{in:Object.values(ids)}}}), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.project.deleteMany({where:{id:{in:[project,project+'-NEXT']}}});
         await prisma.user.update({where:{id:managerId},data:{labId:null}});
         await prisma.lab.deleteMany({where:{id:{in:[lab,foreignLab]}}});

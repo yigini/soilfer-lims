@@ -1,5 +1,7 @@
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
+const { createSampleFixture, createWorkItemFixture, createSamplesFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -125,8 +127,8 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
             await prisma.$executeRawUnsafe('DELETE FROM "StaffInvitation" WHERE "email" LIKE ?', `%${SUFFIX}%`);
             await prisma.$executeRawUnsafe('DELETE FROM "LabLifecycleState" WHERE "labId" IN (?,?,?)', labGTM.id, labFRA.id, labSetup.id);
             await prisma.projectLab.deleteMany({ where: { labId: { in: [labGTM.id, labFRA.id, labSetup.id] } } });
-            await prisma.workItem.deleteMany({ where: { labId: { in: [labGTM.id, labFRA.id, labSetup.id] } } });
-            await prisma.sample.deleteMany({ where: { assignedLab: { in: [labGTM.id, labFRA.id, labSetup.id] } } });
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { labId: { in: [labGTM.id, labFRA.id, labSetup.id] } } }), select: { id: true } })).map(row => row.id), { single: false });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { assignedLab: { in: [labGTM.id, labFRA.id, labSetup.id] } } }), select: { id: true } })).map(row => row.id), { single: false });
             await prisma.project.deleteMany({ where: { code: { contains: SUFFIX } } });
             await prisma.user.deleteMany({ where: { id: { contains: SUFFIX } } });
             await prisma.lab.deleteMany({ where: { id: { in: [labGTM.id, labFRA.id, labSetup.id] } } });
@@ -224,7 +226,7 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
                 }
             });
 
-            const sampleInSetup = await prisma.sample.create({
+            const sampleInSetup = await createSampleFixture(prisma, {
                 data: {
                     id: 'smp-setup-' + SUFFIX,
                     originalId: 'smp-setup-' + SUFFIX,
@@ -234,7 +236,7 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
                 }
             });
 
-            const workInSetup = await prisma.workItem.create({
+            const workInSetup = await createWorkItemFixture(prisma, {
                 data: {
                     id: 'wi-setup-' + SUFFIX,
                     sampleId: sampleInSetup.id,
@@ -256,8 +258,8 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
             expect(res.status).toBe(400);
             expect(res.body.error).toBe('LAB_PAUSED');
 
-            await prisma.workItem.delete({ where: { id: workInSetup.id } });
-            await prisma.sample.delete({ where: { id: sampleInSetup.id } });
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: workInSetup.id } }), select: { id: true } })).map(row => row.id), { single: true });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleInSetup.id } }), select: { id: true } })).map(row => row.id), { single: true });
             await prisma.user.delete({ where: { id: techSetup.id } });
         });
 
@@ -301,13 +303,13 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
             });
 
             // Create mixed sample states in labGTM
-            await prisma.sample.createMany({
+            await createSamplesFixture(prisma, {
                 data: [
                     { id: 'smp-exp-' + SUFFIX, originalId: 'exp-' + SUFFIX, labId: labGTM.id, assignedLab: labGTM.id, status: 'EXPECTED' },
-                    { id: 'smp-rel-' + SUFFIX, originalId: 'rel-' + SUFFIX, labId: labGTM.id, assignedLab: labGTM.id, status: 'RELEASED' },
+                    { id: 'smp-rel-' + SUFFIX, originalId: 'rel-' + SUFFIX, labId: labGTM.id, assignedLab: labGTM.id, status: 'APPROVED' },
                     { id: 'smp-app-' + SUFFIX, originalId: 'app-' + SUFFIX, labId: labGTM.id, assignedLab: labGTM.id, status: 'APPROVED' },
                     { id: 'smp-rec-' + SUFFIX, originalId: 'rec-' + SUFFIX, labId: labGTM.id, assignedLab: labGTM.id, status: 'RECEIVED' },
-                    { id: 'smp-ana-' + SUFFIX, originalId: 'ana-' + SUFFIX, labId: labGTM.id, assignedLab: labGTM.id, status: 'IN_ANALYSIS' }
+                    { id: 'smp-ana-' + SUFFIX, originalId: 'ana-' + SUFFIX, labId: labGTM.id, assignedLab: labGTM.id, status: 'PROCESSING' }
                 ]
             });
         });
@@ -322,17 +324,17 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
             expect(projectCodes).toContain('PRJ-JUNC-' + SUFFIX);
         });
 
-        test('F04: Workload excludes EXPECTED, RELEASED, and APPROVED from active analytical work', async () => {
+        test('F04: Workload excludes EXPECTED and APPROVED from active analytical work', async () => {
             const res = await request(app)
                 .get(`/api/labs/${labGTM.id}/workspace`)
                 .set('Authorization', `Bearer ${tokenMgrGTM}`);
 
             expect(res.status).toBe(200);
             const { samples } = res.body.workload;
-            // 2 active samples: RECEIVED and IN_ANALYSIS
+            // 2 active samples: RECEIVED and PROCESSING
             expect(samples.active).toBe(2);
             expect(samples.expected).toBeGreaterThanOrEqual(1);
-            expect(samples.released).toBeGreaterThanOrEqual(2); // RELEASED + APPROVED
+            expect(samples.released).toBeGreaterThanOrEqual(2); // Both approved specimens.
         });
     });
 
@@ -340,7 +342,7 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
         let inworkSample;
 
         beforeAll(async () => {
-            inworkSample = await prisma.sample.create({
+            inworkSample = await createSampleFixture(prisma, {
                 data: {
                     id: 'smp-unfin-' + SUFFIX,
                     originalId: 'unfin-' + SUFFIX,
@@ -352,7 +354,7 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
         });
 
         test('F05: Access preview accounts for SUBMITTED work awaiting review', async () => {
-            const wi = await prisma.workItem.create({
+            const wi = await createWorkItemFixture(prisma, {
                 data: {
                     id: 'wi-sub-' + SUFFIX,
                     sampleId: inworkSample.id,
@@ -372,11 +374,11 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
             expect(res.status).toBe(200);
             expect(res.body.openAssignmentsCount).toBeGreaterThanOrEqual(1);
 
-            await prisma.workItem.delete({ where: { id: wi.id } });
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: wi.id } }), select: { id: true } })).map(row => row.id), { single: true });
         });
 
-        test('Access preview accounts for RETURNED work needing rework', async () => {
-            const wi = await prisma.workItem.create({
+        test('Access preview accounts for REPEAT_REQUIRED work needing rework', async () => {
+            const wi = await createWorkItemFixture(prisma, {
                 data: {
                     id: 'wi-ret-' + SUFFIX,
                     sampleId: inworkSample.id,
@@ -384,7 +386,7 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
                     labId: labGTM.id,
                     assignedLab: labGTM.id,
                     assignedTo: techGTM.username,
-                    status: 'RETURNED'
+                    status: 'REPEAT_REQUIRED'
                 }
             });
 
@@ -396,11 +398,11 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
             expect(res.status).toBe(200);
             expect(res.body.openAssignmentsCount).toBeGreaterThanOrEqual(1);
 
-            await prisma.workItem.delete({ where: { id: wi.id } });
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: wi.id } }), select: { id: true } })).map(row => row.id), { single: true });
         });
 
         test('Access preview accounts for COMPLETED results without submission (unsubmitted bench work)', async () => {
-            const wi = await prisma.workItem.create({
+            const wi = await createWorkItemFixture(prisma, {
                 data: {
                     id: 'wi-comp-unsub-' + SUFFIX,
                     sampleId: inworkSample.id,
@@ -421,7 +423,20 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
             expect(res.status).toBe(200);
             expect(res.body.openAssignmentsCount).toBeGreaterThanOrEqual(1);
 
-            await prisma.workItem.delete({ where: { id: wi.id } });
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: wi.id } }), select: { id: true } })).map(row => row.id), { single: true });
+        });
+
+        test.each(['ON_HOLD', 'AWAITING_VERIFICATION'])('Access preview retains assigned %s work in its unfinished count', async status => {
+            const wi = await createWorkItemFixture(prisma, { data: { id: `wi-${status}-${SUFFIX}`,
+                sampleId: inworkSample.id, analysis: 'PH_H2O', labId: labGTM.id, assignedLab: labGTM.id,
+                assignedTo: techGTM.username, status } });
+            try {
+                const res = await request(app).post(`/api/users/${techGTM.id}/access-preview`)
+                    .set('Authorization', `Bearer ${tokenMgrGTM}`).send({ role: 'VIEWER' });
+                expect(res.status).toBe(200);
+                expect(res.body.openAssignmentsCount).toBeGreaterThanOrEqual(1);
+                expect((await prisma.workItem.findUnique({ where: { id: wi.id } })).status).toBe(status);
+            } finally { await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: wi.id } }), select: { id: true } })).map(row => row.id), { single: true }); }
         });
     });
 

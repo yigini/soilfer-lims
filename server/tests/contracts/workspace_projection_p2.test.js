@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -36,7 +38,7 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations', 
         crossLabToken = generateToken(crossLabUser);
 
         // Create sample in LAB-P2
-        testSample = await prisma.sample.create({
+        testSample = await createSampleFixture(prisma, {
             data: {
                 id: 'ws-sample-test-001',
                 originalId: 'FIELD-P2-001',
@@ -46,9 +48,10 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations', 
                 status: 'PROCESSING',
                 dryingStatus: 'DONE',
                 preparationStatus: 'DONE',
-                requiredAnalyses: JSON.stringify(['PH_H2O', 'VIS_NIR']),
-                workItems: {
-                    create: [
+                requiredAnalyses: JSON.stringify(['PH_H2O', 'VIS_NIR'])
+            }
+        });
+        for (const data of [
                         {
                             id: 'wi-gate-dry-001',
                             analysis: 'DRYING',
@@ -78,10 +81,9 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations', 
                             status: 'ACCEPTED', // S003-like anomaly: ACCEPTED without any results/scans
                             labId: 'LAB-P2'
                         }
-                    ]
-                }
-            }
-        });
+                    ]) {
+            await createWorkItemFixture(prisma, { data: { ...data, sampleId: testSample.id } });
+        }
 
         // Add result for pH so it has evidence
         await prisma.result.create({
@@ -101,11 +103,11 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations', 
     afterAll(async () => {
         try {
             await prisma.result.deleteMany({ where: { sampleId: testSample.id } });
-            await prisma.workItem.deleteMany({ where: { sampleId: testSample.id } });
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSample.id } }), select: { id: true } })).map(row => row.id), { single: false });
             await prisma.sampleOrderRevision.deleteMany({ where: { sampleId: testSample.id } });
             await prisma.sampleAmendment.deleteMany({ where: { sampleId: testSample.id } });
             await prisma.commandReceipt.deleteMany({ where: { targetResource: `Sample:${testSample.id}` } });
-            await prisma.sample.deleteMany({ where: { id: testSample.id } });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSample.id } }), select: { id: true } })).map(row => row.id), { single: false });
         } catch (e) {}
     });
 
@@ -145,7 +147,7 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations', 
     });
 
     test('3. Expected sample shows "Not yet received" without fabricating received date', async () => {
-        const expSample = await prisma.sample.create({
+        const expSample = await createSampleFixture(prisma, {
             data: {
                 id: 'ws-exp-sample-001',
                 originalId: 'EXP-P2-001',
@@ -165,7 +167,7 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations', 
         expect(res.body.capabilities.canReceive.allowed).toBe(true);
         expect(res.body.nextAction.action).toBe('RECEIVE');
 
-        await prisma.sample.delete({ where: { id: expSample.id } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: expSample.id } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 
     test('4. Cross-lab access is strictly denied (403)', async () => {
@@ -207,7 +209,7 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations', 
         expect(retryRes.body.revision.id).toBe(res.body.revision.id);
 
         // Clean up created work item for EC
-        await prisma.workItem.deleteMany({ where: { sampleId: testSample.id, analysis: 'EC' } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSample.id, analysis: 'EC' } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('6. POST /api/samples/:id/custody/move records physical location change and audit', async () => {

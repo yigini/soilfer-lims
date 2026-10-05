@@ -1,3 +1,5 @@
+'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Contract Test Suite: Coordinated All-Role Dashboard Redesign (v1)
  * 
@@ -16,8 +18,8 @@
  * - Final approval eligibility & concurrency conflict (A17, A18, A19)
  * - Audit user read-only enforcement (A29)
  */
-'use strict';
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const app = require('../../app');
@@ -153,7 +155,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
         let expectedSample, receivedSample;
 
         beforeAll(async () => {
-            expectedSample = await prisma.sample.create({
+            expectedSample = await createSampleFixture(prisma, {
                 data: {
                     id: `${testPrefix}-EXP-1`,
                     originalId: `${testPrefix}-FLD-EXP-1`,
@@ -167,7 +169,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
                 }
             });
 
-            receivedSample = await prisma.sample.create({
+            receivedSample = await createSampleFixture(prisma, {
                 data: {
                     id: `${testPrefix}-RCV-1`,
                     originalId: `${testPrefix}-FLD-RCV-1`,
@@ -183,9 +185,9 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
         });
 
         afterAll(async () => {
-            await prisma.sample.deleteMany({
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
                 where: { id: { in: [expectedSample.id, receivedSample.id] } }
-            }).catch(() => {});
+            }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
         });
 
         test('EXPECTED sample with legacy PENDING drying/prep flags contributes 0 to technician ready bench', async () => {
@@ -220,7 +222,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
             for (let i = 1; i <= 40; i++) {
                 const sId = `${testPrefix}-PH-SMP-${i}`;
                 sampleIds.push(sId);
-                await prisma.sample.create({
+                await createSampleFixture(prisma, {
                     data: {
                         id: sId,
                         originalId: `FLD-PH-${i}`,
@@ -235,7 +237,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
 
                 const wId = `${testPrefix}-PH-WI-${i}`;
                 workItemIds.push(wId);
-                await prisma.workItem.create({
+                await createWorkItemFixture(prisma, {
                     data: {
                         id: wId,
                         sampleId: sId,
@@ -251,8 +253,8 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
         });
 
         afterAll(async () => {
-            await prisma.workItem.deleteMany({ where: { id: { in: workItemIds } } }).catch(() => {});
-            await prisma.sample.deleteMany({ where: { id: { in: sampleIds } } }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: { in: workItemIds } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: sampleIds } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
         });
 
         test('40 pH determinations appear as 1 grouped method row in bench.ready', async () => {
@@ -277,7 +279,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
         let foreignSample;
 
         beforeAll(async () => {
-            foreignSample = await prisma.sample.create({
+            foreignSample = await createSampleFixture(prisma, {
                 data: {
                     id: `${testPrefix}-FOREIGN-1`,
                     originalId: `${testPrefix}-FLD-FOR-1`,
@@ -290,7 +292,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
         });
 
         afterAll(async () => {
-            await prisma.sample.delete({ where: { id: foreignSample.id } }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: foreignSample.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
         });
 
         test('Foreign lab draft is strictly excluded from testLab1 reception.drafts queue', async () => {
@@ -320,7 +322,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
         let draftReport, publishedReport, draftSample, pubSample;
 
         beforeAll(async () => {
-            draftSample = await prisma.sample.create({
+            draftSample = await createSampleFixture(prisma, {
                 data: {
                     id: `${testPrefix}-SMP-DFT-REP`,
                     originalId: `FLD-DFT-REP`,
@@ -331,7 +333,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
                 }
             });
 
-            pubSample = await prisma.sample.create({
+            pubSample = await createSampleFixture(prisma, {
                 data: {
                     id: `${testPrefix}-SMP-PUB-REP`,
                     originalId: `FLD-PUB-REP`,
@@ -377,7 +379,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
             }
             const sampleIds = [draftSample?.id, pubSample?.id].filter(Boolean);
             if (sampleIds.length > 0) {
-                await prisma.sample.deleteMany({ where: { id: { in: sampleIds } } }).catch(() => {});
+                await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: sampleIds } } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
             }
         });
 

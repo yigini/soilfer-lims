@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -18,11 +20,11 @@ describe('SD-15: Comprehensive Sample Detail End-to-End Contract Suite', () => {
         // Clean up
         await prisma.result.deleteMany({ where: { sampleId: sampleLabGtmId } });
         await prisma.auditLog.deleteMany({ where: { sampleId: sampleLabGtmId } });
-        await prisma.workItem.deleteMany({ where: { sampleId: sampleLabGtmId } });
-        await prisma.sample.deleteMany({ where: { id: sampleLabGtmId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: sampleLabGtmId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleLabGtmId } }), select: { id: true } })).map(row => row.id), { single: false });
 
         // Seed Sample in LAB-GTM
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleLabGtmId,
                 originalId: sampleLabGtmId,
@@ -39,7 +41,7 @@ describe('SD-15: Comprehensive Sample Detail End-to-End Contract Suite', () => {
         });
 
         // Seed work items
-        await prisma.workItem.createMany({
+        await createWorkItemsFixture(prisma, {
             data: [
                 {
                     id: 'WI-SD15-PH',
@@ -73,10 +75,12 @@ describe('SD-15: Comprehensive Sample Detail End-to-End Contract Suite', () => {
     });
 
     afterAll(async () => {
+        await prisma.auditLog.deleteMany({ where: { sampleId: `${sampleLabGtmId}-approved` } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: `${sampleLabGtmId}-approved` } }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.result.deleteMany({ where: { sampleId: sampleLabGtmId } });
         await prisma.auditLog.deleteMany({ where: { sampleId: sampleLabGtmId } });
-        await prisma.workItem.deleteMany({ where: { sampleId: sampleLabGtmId } });
-        await prisma.sample.deleteMany({ where: { id: sampleLabGtmId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: sampleLabGtmId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleLabGtmId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     describe('1. Cross-Laboratory Assignment Refusal for Every Role (SD-02)', () => {
@@ -152,7 +156,7 @@ describe('SD-15: Comprehensive Sample Detail End-to-End Contract Suite', () => {
         test('2.3. Completing preparation unblocks startWork and execution (HTTP 200)', async () => {
             await prisma.sample.update({
                 where: { id: sampleLabGtmId },
-                data: { preparationStatus: 'DONE' }
+                data: { dryingStatus: 'DONE', preparationStatus: 'DONE' }
             });
 
             const res = await request(app)
@@ -251,38 +255,38 @@ describe('SD-15: Comprehensive Sample Detail End-to-End Contract Suite', () => {
             expect(res.body.error).toMatch(/reason is required/i);
         });
 
-        test('4.2. Undoing approval on finished sample without reason returns HTTP 400', async () => {
+        test('4.2. Undoing approval requires the amendment workflow even without a reason', async () => {
             const res = await request(app)
                 .post(`/api/samples/${sampleLabGtmId}/undo-approve`)
                 .set('Authorization', `Bearer ${mgrGtmToken}`)
                 .send({});
 
-            expect(res.status).toBe(400);
-            expect(res.body.error).toMatch(/reason is required/i);
+            expect(res.status).toBe(409);
+            expect(res.body.code).toBe('AMENDMENT_WORKFLOW_REQUIRED');
         });
     });
 
     describe('5. Gate Back-Fill Refusal on Reopen (SD-08)', () => {
-        test('5.1. Undoing approval never fabricates preparation status as DONE', async () => {
-            // Set sample to APPROVED with null preparation
-            await prisma.sample.update({
-                where: { id: sampleLabGtmId },
-                data: {
-                    status: 'APPROVED',
-                    dryingStatus: null,
-                    preparationStatus: null
-                }
-            });
+        test('5.1. Refused undo never fabricates preparation evidence on an approved sample', async () => {
+            const approved = await createSampleFixture(prisma, { data: {
+                id: `${sampleLabGtmId}-approved`, originalId: `${sampleLabGtmId}-approved`,
+                assignedLab: 'LAB-GTM', status: 'APPROVED', dryingStatus: null, preparationStatus: null
+            } });
+            const before = await prisma.sample.findUnique({ where: { id: approved.id } });
+            const beforeAudits = await prisma.auditLog.findMany({ where: { sampleId: approved.id }, orderBy: { id: 'asc' } });
 
             const res = await request(app)
-                .post(`/api/samples/${sampleLabGtmId}/undo-approve`)
+                .post(`/api/samples/${approved.id}/undo-approve`)
                 .set('Authorization', `Bearer ${mgrGtmToken}`)
                 .send({ reason: 'Contract verification for SD-08 gate preservation' });
 
-            expect(res.status).toBe(200);
+            expect(res.status).toBe(409);
+            expect(res.body.code).toBe('AMENDMENT_WORKFLOW_REQUIRED');
 
-            const sample = await prisma.sample.findUnique({ where: { id: sampleLabGtmId } });
-            expect(sample.status).toBe('PROCESSING');
+            const sample = await prisma.sample.findUnique({ where: { id: approved.id } });
+            expect(sample).toEqual(before);
+            expect(await prisma.auditLog.findMany({ where: { sampleId: approved.id }, orderBy: { id: 'asc' } })).toEqual(beforeAudits);
+            expect(sample.status).toBe('APPROVED');
             expect(sample.dryingStatus).toBeNull();
             expect(sample.preparationStatus).toBeNull();
         });

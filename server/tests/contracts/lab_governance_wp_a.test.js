@@ -1,3 +1,5 @@
+'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Laboratory Governance WP-A Companion Contract Tests
  *
@@ -6,8 +8,9 @@
  * Corresponds to acceptance scenarios A01, A02, A03, A07, A09, A13, A14,
  * A16, A17, A18, A19, A24, A27, A28, A29, A30, A32, A33, A37, A41.
  */
-'use strict';
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const app = require('../../app');
@@ -244,12 +247,12 @@ describe('WP-A: Laboratory Governance Security & Access Repairs', () => {
         await prisma.workItemDraft.deleteMany({
             where: { workItem: { sample: { originalId: { startsWith: testPrefix } } } }
         }).catch(() => {});
-        await prisma.workItem.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
             where: { sample: { originalId: { startsWith: testPrefix } } }
-        }).catch(() => {});
-        await prisma.sample.deleteMany({
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { originalId: { startsWith: testPrefix } }
-        }).catch(() => {});
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
         await prisma.equipmentAsset.deleteMany({
             where: { id: { contains: testPrefix } }
         }).catch(() => {});
@@ -521,13 +524,13 @@ describe('WP-A: Laboratory Governance Security & Access Repairs', () => {
         let testSampleA, testWorkItemA;
 
         beforeAll(async () => {
-            testSampleA = await prisma.sample.create({
+            testSampleA = await createSampleFixture(prisma, {
                 data: {
                     id: 'SMP-A-' + testPrefix,
                     originalId: testPrefix + '-SMP-01',
                     labId: labA.id,
                     assignedLab: labA.id,
-                    status: 'IN_ANALYSIS',
+                    status: 'PROCESSING',
                     receptionDate: new Date(),
                     dryingStatus: 'DONE',
                     preparationStatus: 'DONE',
@@ -536,7 +539,7 @@ describe('WP-A: Laboratory Governance Security & Access Repairs', () => {
                 }
             });
 
-            testWorkItemA = await prisma.workItem.create({
+            testWorkItemA = await createWorkItemFixture(prisma, {
                 data: {
                     id: 'WI-A-' + testPrefix,
                     sampleId: testSampleA.id,

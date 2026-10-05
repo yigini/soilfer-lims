@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -15,11 +17,11 @@ describe('SD-06: EDIT_ANALYSES Permission Gate Contract', () => {
         techToken = await getAuthToken('LAB_TECHNICIAN', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
 
         // Clean up
-        await prisma.workItem.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
 
         // Create sample in GTM
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
@@ -35,8 +37,8 @@ describe('SD-06: EDIT_ANALYSES Permission Gate Contract', () => {
     });
 
     afterAll(async () => {
-        await prisma.workItem.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. EDIT_ANALYSES is registered in roles.js and includes SAMPLE_RECEPTION and LAB_MANAGER', () => {

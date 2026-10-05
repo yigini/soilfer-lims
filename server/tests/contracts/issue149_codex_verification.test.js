@@ -1,5 +1,7 @@
 'use strict';
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert/strict');
@@ -7,9 +9,10 @@ const crypto = require('crypto');
 const Database = require('better-sqlite3');
 const express = require('express');
 const supertest = require('supertest');
+const originalDatabasePath = process.env.DATABASE_PATH;
 
 describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts', () => {
-    let dir, databasePath, setupDb, prisma, state, db, middleware, management, app, http;
+    let databasePath, rehearsal, prisma, state, db, middleware, management, app, http;
     const admin = { role: 'SUPER_ADMIN', username: 'synthetic-review-admin' };
 
     const response = () => ({
@@ -62,16 +65,12 @@ describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts',
     }
 
     beforeAll(async () => {
-        dir = fs.mkdtempSync(path.join(path.resolve(__dirname, '../../..'), 'tmp-codex-verify-'));
-        databasePath = path.join(dir, 'synthetic-review.db');
+        rehearsal = beforeGuards({ actor: 'system:fixture' });
+        databasePath = rehearsal.file;
         process.env.DATABASE_PATH = databasePath;
         process.env.NODE_ENV = 'test';
         process.env.JWT_SECRET = crypto.randomBytes(32).toString('hex');
         delete process.env.SOURCE_SYSTEM_ID;
-
-        setupDb = new Database(databasePath);
-        setupDb.exec(fs.readFileSync(path.resolve(__dirname, '../../scripts/schema/full_application_schema.sql'), 'utf8'));
-        setupDb.close();
 
         require('../../scripts/migrate_exchange_journal_tables.cjs').migrateExchangeTables(databasePath);
 
@@ -89,7 +88,7 @@ describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts',
 
         await prisma.lab.create({ data: { id: 'SYNTHETIC-LAB', code: 'SYNTHETIC-LAB', name: 'Synthetic Lab', country: 'AAA' } });
         for (const [id, country, projectCode] of [['sample-a', 'AAA', 'SYNTHETIC-PROJECT'], ['sample-b', 'BBB', 'OTHER-PROJECT']]) {
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id,
                     originalId: id + '-field',
@@ -97,7 +96,8 @@ describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts',
                     assignedLab: 'SYNTHETIC-LAB',
                     country,
                     projectCode,
-                    status: 'EXPECTED',
+                    status: 'APPROVED',
+                    approvedAt: new Date(),
                     latitude: 12,
                     longitude: 34,
                     depthTopCm: 0,
@@ -116,14 +116,14 @@ describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts',
                     isCurrent: true
                 }
             });
-            await prisma.sample.update({ where: { id }, data: { status: 'APPROVED', approvedAt: new Date() } });
         }
     });
 
     afterAll(async () => {
         try { await prisma.$disconnect(); } catch (e) {}
         if (db && db.open) { try { db.close(); } catch (e) {} }
-        try { fs.rmSync(dir, { recursive: true, force: true }); } catch (e) {}
+        process.env.DATABASE_PATH = originalDatabasePath;
+        rehearsal?.close();
     });
 
     test('Check 1: Real publication UDF preserves spatial data for authorized snapshot consumers', async () => {
@@ -355,30 +355,24 @@ describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts',
     });
 
     test('Check 14: Canonical migration backfill queries valid release evidence, includes observations, uses persisted identity, and emits non-null event IDs', async () => {
-        const tempDir = fs.mkdtempSync(path.join(path.resolve(__dirname, '../../..'), 'tmp-migration-verify-'));
-        const tempDbPath = path.join(tempDir, 'migration-test.db');
-        const tempDb = new Database(tempDbPath);
-        tempDb.exec(fs.readFileSync(path.resolve(__dirname, '../../scripts/schema/full_application_schema.sql'), 'utf8'));
-
-        const nowIso = new Date().toISOString();
+        const now = new Date();
         const testSpecs = [
-            ['legacy-approved', 'APPROVED', nowIso],
+            ['legacy-approved', 'APPROVED', now],
             ['legacy-unapproved-archive', 'ARCHIVED', null],
-            ['legacy-approved-disposed', 'DISPOSED', nowIso]
+            ['legacy-approved-disposed', 'DISPOSED', now]
         ];
-
-        for (const [id, status, approvedAt] of testSpecs) {
-            tempDb.prepare('INSERT INTO Sample (id, originalId, labId, assignedLab, country, projectCode, status, approvedAt, updatedAt, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-                .run(id, id + '-field', id + '-accession', 'SYNTHETIC-LAB', 'AAA', 'SYNTHETIC-PROJECT', status, approvedAt, nowIso, 12, 34);
-            tempDb.prepare('INSERT INTO Result (id, sampleId, param, value, numericValue, unit, isValid, isCurrent, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
-                .run(id + '-result', id, 'PH_H2O', '6.2', 6.2, 'pH units', 1, 1, nowIso);
-        }
-        tempDb.close();
-
+        const migrationRehearsal = beforeGuards({ actor: 'system:fixture', samples: testSpecs.map(([id, status, approvedAt]) => ({
+            id, originalId: `${id}-field`, labId: `${id}-accession`, assignedLab: 'SYNTHETIC-LAB', country: 'AAA',
+            projectCode: 'SYNTHETIC-PROJECT', status, approvedAt, createdAt: now, updatedAt: now, latitude: 12, longitude: 34
+        })), relatedRows: { Result: testSpecs.map(([id]) => ({ id: `${id}-result`, sampleId: id, param: 'PH_H2O',
+            value: '6.2', numericValue: 6.2, unit: 'pH units', isValid: 1, isCurrent: 1, createdAt: now, updatedAt: now })) } });
+        const tempDbPath = migrationRehearsal.file;
+        let verifyDb;
+        try {
         const migrateRes = require('../../scripts/migrate_exchange_journal_tables.cjs').migrateExchangeTables(tempDbPath);
         expect(migrateRes.success).toBe(true);
 
-        const verifyDb = new Database(tempDbPath);
+        verifyDb = new Database(tempDbPath);
         const backfill = verifyDb.prepare("SELECT specimen_id, id, payload FROM _exchange_journal WHERE specimen_id LIKE 'legacy-%' ORDER BY sequence").all();
         const includedIds = backfill.map(x => x.specimen_id);
 
@@ -403,8 +397,7 @@ describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts',
         expect(payload.sourceSystemId).toBe(metaRow.value);
         expect(payload.sourceSystemId).not.toBe('soilfer-lims-core');
 
-        verifyDb.close();
-        fs.rmSync(tempDir, { recursive: true, force: true });
+        } finally { verifyDb?.close(); migrationRehearsal.close(); }
     });
 
     test('Check 15: Reader operations do not mutate journal (snapshot creation is purely reader-driven)', async () => {

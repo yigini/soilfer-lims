@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import { Upload, FileText, CheckCircle, AlertTriangle, FileCode } from 'lucide-react';
 import axios from 'axios';
+import { useLanguage } from '../context/LanguageContext';
+import { useDialog } from '../context/DialogContext';
+import { requestWithSpectralReopen } from '../utils/spectralWorkflowRequest';
 
 const SpectraUpload = ({ sampleId, onUploadSuccess }) => {
+    const { t } = useLanguage();
+    const { showDialog } = useDialog();
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -68,12 +73,14 @@ const SpectraUpload = ({ sampleId, onUploadSuccess }) => {
                 formData.append('labId', sampleId);
             }
 
-            const res = await axios.post('/api/spectral/batch', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const res = await requestWithSpectralReopen(reopenReason => {
+                if (reopenReason) formData.set('reopenReason', reopenReason);
+                return axios.post('/api/spectral/batch', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            }, showDialog, t);
+            if (!res) return;
 
             if (res.data?.results?.failed > 0 && res.data?.results?.errors?.length > 0) {
-                setError(res.data.results.errors[0].error || 'Upload failed');
+                setError(res.data.results.errors.map(entry => `${entry.filename || ''}: ${entry.error || 'Upload failed'}`).join('\n'));
             } else {
                 setFile(null);
                 setPreview(null);

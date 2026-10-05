@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -17,21 +19,22 @@ describe('Spectral Multipart Raw Ingest & Byte-Identical Preservation Contract (
         await prisma.spectralData.deleteMany({
             where: { sampleId }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: sampleId }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
 
         techToken = await getAuthToken('LAB_MANAGER', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
 
         // Create sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
                 labId: 'LAB-GTM',
                 assignedLab: 'LAB-GTM',
                 status: 'PROCESSING',
-                matrix: 'SOIL'
+                matrix: 'SOIL',
+                receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE'
             }
         });
     });
@@ -40,9 +43,9 @@ describe('Spectral Multipart Raw Ingest & Byte-Identical Preservation Contract (
         await prisma.spectralData.deleteMany({
             where: { sampleId }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: sampleId }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. Multipart raw JCAMP-DX upload preserves exact binary bytes and downloads back byte-identical', async () => {

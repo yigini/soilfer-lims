@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -11,10 +13,12 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
     let highWaterSequence;
 
     beforeAll(async () => {
+        // Install the publication journal before creating released fixtures.
+        require('../../services/exchangeStateService').getDb();
         const timestamp = Date.now();
 
         // 1. Sample with full lab accession and 2 replicate results
-        sample1 = await prisma.sample.create({
+        sample1 = await createSampleFixture(prisma, {
             data: {
                 id: `v2-specimen-1-${timestamp}`,
                 originalId: `FIELD-V2-001-${timestamp}`,
@@ -33,9 +37,10 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
                     site_id: { value: 'PLOT-ALPHA' },
                     collectionDate: '2026-04-10',
                     collector: 'Dr. Maria Perez'
-                }),
-                results: {
-                    create: [
+                })
+            }
+        });
+        await prisma.result.createMany({ data: [
                         {
                             id: `res-v2-1-${timestamp}`,
                             param: 'PH_H2O',
@@ -58,13 +63,10 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
                             censoring: 'NONE',
                             isCurrent: true
                         }
-                    ]
-                }
-            }
-        });
+                    ].map(result => ({ ...result, sampleId: sample1.id })) });
 
         // 2. Approved sample WITHOUT labId (walk-in or field registry without lab accession)
-        sample2NoLabId = await prisma.sample.create({
+        sample2NoLabId = await createSampleFixture(prisma, {
             data: {
                 id: `v2-specimen-2-${timestamp}`,
                 originalId: `FIELD-V2-002-${timestamp}`,
@@ -136,9 +138,9 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
             where: { sampleId: { in: [sample1?.id, sample2NoLabId?.id].filter(Boolean) } }
         }).catch(() => {});
 
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { in: [sample1?.id, sample2NoLabId?.id].filter(Boolean) } }
-        }).catch(() => {});
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
 
         await prisma.apiKey.deleteMany({
             where: { id: testKey?.id }
@@ -323,7 +325,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
 
     test('9. GET /api/v2/data-exchange/geojson keyset seek and cachedTotal pagination contract', async () => {
         const timestamp = Date.now();
-        const p1 = await prisma.sample.create({
+        const p1 = await createSampleFixture(prisma, {
             data: {
                 id: `seek-t1-${timestamp}`,
                 originalId: `FIELD-S1-${timestamp}`,
@@ -339,7 +341,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
             }
         });
 
-        const p2 = await prisma.sample.create({
+        const p2 = await createSampleFixture(prisma, {
             data: {
                 id: `seek-t2-${timestamp}`,
                 originalId: `FIELD-S2-${timestamp}`,

@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -14,8 +16,9 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
     const timestamp = Date.now();
 
     beforeAll(async () => {
+        exchangeStateService.getDb();
         // 1. Create test samples
-        sampleApproved = await prisma.sample.create({
+        sampleApproved = await createSampleFixture(prisma, {
             data: {
                 id: `a0-sample-approved-${timestamp}`,
                 originalId: `ORIG-A0-APP-${timestamp}`,
@@ -27,9 +30,10 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
                 depthTopCm: 0,
                 depthBottomCm: 20,
                 latitude: 14.5,
-                longitude: -90.5,
-                results: {
-                    create: [
+                longitude: -90.5
+            }
+        });
+        await prisma.result.createMany({ data: [
                         {
                             id: `res-a0-1-${timestamp}`,
                             param: 'PH_H2O',
@@ -39,12 +43,9 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
                             isCurrent: true,
                             provenance: 'MEASURED'
                         }
-                    ]
-                }
-            }
-        });
+                    ].map(result => ({ ...result, sampleId: sampleApproved.id })) });
 
-        sampleProcessing = await prisma.sample.create({
+        sampleProcessing = await createSampleFixture(prisma, {
             data: {
                 id: `a0-sample-proc-${timestamp}`,
                 originalId: `ORIG-A0-PROC-${timestamp}`,
@@ -58,7 +59,7 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
             }
         });
 
-        sampleHold = await prisma.sample.create({
+        sampleHold = await createSampleFixture(prisma, {
             data: {
                 id: `a0-sample-hold-${timestamp}`,
                 originalId: `ORIG-A0-HOLD-${timestamp}`,
@@ -66,7 +67,7 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
                 assignedLab: 'GTM-LAB1',
                 country: 'GTM',
                 projectCode: 'SOILFER-GTM',
-                status: 'AMBIGUOUS_PROVENANCE_HOLD',
+                status: 'ON_HOLD',
                 metadata: JSON.stringify({
                     provenanceHold: {
                         status: 'AMBIGUOUS_PROVENANCE_HOLD',
@@ -121,9 +122,9 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
             where: { id: { in: [`res-a0-1-${timestamp}`] } }
         }).catch(() => {});
 
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { in: [sampleApproved?.id, sampleProcessing?.id, sampleHold?.id].filter(Boolean) } }
-        }).catch(() => {});
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
 
         await prisma.apiKey.deleteMany({
             where: { id: testKey?.id }

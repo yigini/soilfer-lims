@@ -4,6 +4,7 @@ const { success, error } = require('../i18n/response');
 const projectPolicyService = require('../services/projectPolicyService');
 const projectMembershipService = require('../services/projectMembershipService');
 const commandReceiptService = require('../services/commandReceiptService');
+const { createSample } = require('../services/sampleStateService');
 const defaultAuditCreate = prisma.auditLog?.create;
 
 async function resolveAuthorizedNationalLabIds(user, tx = prisma) {
@@ -408,8 +409,7 @@ exports.createProject = async (req, res) => {
 
             // Insert predefined manifest samples
             if (hasSampleIds && uniqueSampleIds.length > 0) {
-                await tx.sample.createMany({
-                    data: uniqueSampleIds.map(sid => ({
+                for (const sid of uniqueSampleIds) await createSample({
                         id: sid,
                         originalId: sid,
                         projectId: proj.id,
@@ -420,8 +420,7 @@ exports.createProject = async (req, res) => {
                         receptionDate: null,
                         createdAt: new Date(),
                         updatedAt: new Date()
-                    }))
-                });
+                    }, req.user, { tx });
             }
 
             // Create KoboConfig entry atomically inside transaction
@@ -965,8 +964,7 @@ exports.uploadManifest = async (req, res) => {
             }
 
             if (newIds.length > 0) {
-                await tx.sample.createMany({
-                    data: newIds.map(sid => ({
+                for (const sid of newIds) await createSample({
                         id: sid,
                         originalId: sid,
                         projectId: project.id,
@@ -977,8 +975,7 @@ exports.uploadManifest = async (req, res) => {
                         receptionDate: null,
                         createdAt: new Date(),
                         updatedAt: new Date()
-                    }))
-                });
+                    }, req.user, { tx });
             }
 
             if (project.status === 'PENDING_MANIFEST') {

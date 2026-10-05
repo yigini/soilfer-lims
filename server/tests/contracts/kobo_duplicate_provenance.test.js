@@ -1,28 +1,21 @@
 'use strict';
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 const { createHash } = require('crypto');
-const Database = require('better-sqlite3');
+const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 
 // 1. Ensure 100% database isolation with temporary fixture DB
 const sourcePath = path.join(__dirname, '../../prisma/dev.db');
 const devDbHashBefore = createHash('sha256').update(fs.readFileSync(sourcePath)).digest('hex');
 
-const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kobo-dup-test-'));
-const fixtureDbPath = path.join(tmpDir, 'fixture.db');
-
-const sourceDb = new Database(sourcePath, { readonly: true, fileMustExist: true });
-const ddl = sourceDb.prepare("SELECT sql FROM sqlite_master WHERE sql IS NOT NULL AND name NOT LIKE 'sqlite_%' AND type IN ('table','index') ORDER BY CASE type WHEN 'table' THEN 0 ELSE 1 END").all();
-sourceDb.close();
-
-const fixtureDb = new Database(fixtureDbPath);
-fixtureDb.pragma('foreign_keys=OFF');
-for (const row of ddl) {
-    fixtureDb.exec(row.sql);
-}
-fixtureDb.close();
+const SUFFIX = 'DUP-' + Date.now();
+const { file: fixtureDbPath } = beforeGuards({ actor: 'system:fixture', samples: [{
+    id: 'rejected-smp-' + SUFFIX, originalId: 'HIST-REJECTED-' + SUFFIX, assignedLab: 'GHA-LAB1-' + SUFFIX,
+    projectCode: 'SOILFER-US-' + SUFFIX, status: 'REJECTED', rejectionReason: 'SAMPLE_DAMAGED_IN_TRANSIT',
+    metadata: JSON.stringify({ kobo_id: 222, histOriginal: true }), createdAt: Date.now(), updatedAt: Date.now()
+}] });
 
 process.env.DATABASE_PATH = fixtureDbPath;
 process.env.DATABASE_URL = 'file:' + fixtureDbPath;
@@ -56,7 +49,6 @@ jest.mock('../../services/koboService', () => ({
 }));
 
 describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)', () => {
-    const SUFFIX = 'DUP-' + Date.now();
     let labGHA;
     let projUS;
     let configGHA;
@@ -134,7 +126,7 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
     afterAll(async () => {
         await prisma.$disconnect();
         try {
-            fs.rmSync(tmpDir, { recursive: true, force: true });
+            for (const suffix of ['', '-wal', '-shm']) fs.rmSync(`${fixtureDbPath}${suffix}`, { force: true });
         } catch (e) {
             // ignore cleanup errors
         }
@@ -403,7 +395,7 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
         const foreignSubId = 40600;
 
         // Create a foreign sample belonging to GTM lab and different project
-        const foreignSample = await prisma.sample.create({
+        const foreignSample = await createSampleFixture(prisma, {
             data: {
                 id: 'foreign-sample-' + SUFFIX,
                 originalId: foreignBarcode,
@@ -415,6 +407,7 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
             }
         });
 
+        const foreignAuditsBefore = await prisma.auditLog.findMany({ where: { entityId: foreignSample.id }, orderBy: { id: 'asc' } });
         // Config GHA attempts to sync a submission with this foreign barcode
         const cursorBefore = (await prisma.koboConfig.findUnique({ where: { id: configGHA.id } })).lastSubmissionId;
 
@@ -448,11 +441,12 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
         expect(metaAfter.originalData).toBe('DO_NOT_TOUCH');
         expect(metaAfter.conflictingSubmissions).toBeUndefined();
 
-        // Verify no audit log on foreign sample
+        // Verify the fixture's creation audit is unchanged and no sync audit is added.
         const foreignAudits = await prisma.auditLog.findMany({
-            where: { entityId: foreignSample.id }
+            where: { entityId: foreignSample.id }, orderBy: { id: 'asc' }
         });
-        expect(foreignAudits.length).toBe(0);
+        expect(foreignAudits).toEqual(foreignAuditsBefore);
+        expect(foreignSampleAfter).toEqual(foreignSample);
 
         // Verify skip reported
         expect(result.skipped).toBe(1);
@@ -572,7 +566,7 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
         const caseSubId = 40720;
 
         // Insert lowercase sample directly in DB
-        const lowerSample = await prisma.sample.create({
+        const lowerSample = await createSampleFixture(prisma, {
             data: {
                 id: 'sample-lower-' + SUFFIX,
                 originalId: lowerBarcode,
@@ -710,7 +704,7 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
 
         // In contrast, a normal unambiguous sample receives cleanly
         const normalBarcode = 'GHA-NORMAL-' + SUFFIX;
-        const normalSample = await prisma.sample.create({
+        const normalSample = await createSampleFixture(prisma, {
             data: {
                 id: 'normal-sample-' + SUFFIX,
                 originalId: normalBarcode,
@@ -823,7 +817,7 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
         const sharedSubId = 40850;
 
         // Existing sample in DB has an occurrence from a DIFFERENT form (source-B/form-B)
-        const initialSample = await prisma.sample.create({
+        const initialSample = await createSampleFixture(prisma, {
             data: {
                 id: 'xform-smp-' + SUFFIX,
                 originalId: xformBarcode,
@@ -916,7 +910,7 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
         // Subcase A: Sample with unknown ownership (assignedLab: null)
         const unassignedBarcode = 'UNASSIGNED-' + SUFFIX;
         const unassignedSub = 40901;
-        const unassignedSample = await prisma.sample.create({
+        const unassignedSample = await createSampleFixture(prisma, {
             data: {
                 id: 'unassigned-smp-' + SUFFIX,
                 originalId: unassignedBarcode,
@@ -945,17 +939,8 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
         // Subcase B: Historical sample (status: REJECTED with existing rejectionReason)
         const rejectedBarcode = 'HIST-REJECTED-' + SUFFIX;
         const rejectedSub = 40902;
-        const rejectedSample = await prisma.sample.create({
-            data: {
-                id: 'rejected-smp-' + SUFFIX,
-                originalId: rejectedBarcode,
-                assignedLab: labGHA.id,
-                projectCode: projUS.code,
-                status: 'REJECTED',
-                rejectionReason: 'SAMPLE_DAMAGED_IN_TRANSIT',
-                metadata: JSON.stringify({ kobo_id: 222, histOriginal: true })
-            }
-        });
+        const rejectedSample = await prisma.sample.findUnique({ where: { id: 'rejected-smp-' + SUFFIX } });
+        expect(rejectedSample.status).toBe('REJECTED');
 
         koboService.fetchSubmissions.mockResolvedValueOnce([
             { _id: rejectedSub, _uuid: 'uuid-rejected-' + SUFFIX, _submission_time: '2026-09-24T21:05:00', _attachments: [] }
@@ -976,7 +961,7 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
 
     test('13. Real isolated reception intake and consignment routes block AMBIGUOUS_PROVENANCE_HOLD with HTTP 409, while normal sample succeeds', async () => {
         const heldBarcode = 'INTAKE-HELD-' + SUFFIX;
-        const heldSample = await prisma.sample.create({
+        const heldSample = await createSampleFixture(prisma, {
             data: {
                 id: 'intake-held-smp-' + SUFFIX,
                 originalId: heldBarcode,
@@ -1036,7 +1021,7 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
 
         // 3. Normal unambiguous sample passes intake
         const normalBarcode = 'INTAKE-NORMAL-' + SUFFIX;
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: 'intake-normal-smp-' + SUFFIX,
                 originalId: normalBarcode,
@@ -1063,7 +1048,7 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
 
     test('14. SampleWorkspaceService blocks canAcceptIntake when AMBIGUOUS_PROVENANCE_HOLD is active', async () => {
         const heldBarcode = 'WS-HELD-' + SUFFIX;
-        const heldSample = await prisma.sample.create({
+        const heldSample = await createSampleFixture(prisma, {
             data: {
                 id: 'ws-held-smp-' + SUFFIX,
                 originalId: heldBarcode,
@@ -1088,7 +1073,7 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
 
         // Unambiguous sample has canAcceptIntake allowed
         const normalBarcode = 'WS-NORMAL-' + SUFFIX;
-        const normalSample = await prisma.sample.create({
+        const normalSample = await createSampleFixture(prisma, {
             data: {
                 id: 'ws-normal-smp-' + SUFFIX,
                 originalId: normalBarcode,
@@ -1109,7 +1094,7 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
         const sharedId = 41001;
 
         // Existing sample in DB was created by Source B (different form/server) as primary
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: 'smp-b-' + SUFFIX,
                 originalId: crossBarcode,

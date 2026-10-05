@@ -4,6 +4,8 @@ import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useDialog } from '../context/DialogContext';
+import { requestWithSpectralReopen } from '../utils/spectralWorkflowRequest';
 
 /**
  * @param {object} props
@@ -23,6 +25,7 @@ const SpectraBatchUpload = ({
 }) => {
     const { user } = useAuth();
     const { t } = useLanguage();
+    const { showDialog } = useDialog();
     const isManager = ['SUPER_ADMIN', 'LAB_MANAGER'].includes(user?.role);
     const [step, setStep] = useState(1); // 1: Select, 2: Preview, 3: Result
     const [file, setFile] = useState(null);
@@ -353,9 +356,11 @@ const SpectraBatchUpload = ({
                 formData.append('scans', JSON.stringify(previewData.scans));
             }
 
-            const res = await axios.post('/api/spectral/batch', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const res = await requestWithSpectralReopen(reopenReason => {
+                if (reopenReason) formData.set('reopenReason', reopenReason);
+                return axios.post('/api/spectral/batch', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            }, showDialog, t);
+            if (!res) return;
 
             setUploadResult(res.data.results);
             setStep(3);
@@ -866,7 +871,7 @@ const SpectraBatchUpload = ({
                 {uploadResult.errors.length > 0 && (
                     <div className="text-left text-xs bg-red-50 p-3 rounded max-h-32 overflow-y-auto mb-4 border border-red-100">
                         {uploadResult.errors.map((e, i) => (
-                            <div key={i} className="text-red-700">{e.error}</div>
+                            <div key={i} className="text-red-700">{e.filename}: {e.error}</div>
                         ))}
                     </div>
                 )}

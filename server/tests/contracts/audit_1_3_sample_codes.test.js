@@ -1,9 +1,9 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const Database = require('better-sqlite3');
+const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const app = require('../../app');
 const prisma = require('../../prisma');
 const policy = require('../../services/policyService');
@@ -12,7 +12,6 @@ const codes = require('../../services/sampleCodeService');
 const { backfill } = require('../../scripts/backfill_sample_codes');
 const { getAuthToken } = require('../setup');
 const id = () => crypto.randomUUID();
-const migration = fs.readFileSync(path.resolve(__dirname, '../../prisma/migrations/20261004170000_add_atomic_sample_codes/migration.sql'), 'utf8');
 
 describe('Audit 1.3: atomic laboratory sample codes', () => {
     let lab, token, manager;
@@ -27,7 +26,7 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
     async function issue(issuedAt = new Date(), projectCode) {
         return prisma.$transaction(async tx => {
             const labSampleCode = await codes.allocateSampleCode(tx, { labReference: lab.id, projectCode, issuedAt });
-            return tx.sample.create({ data: { id: id(), originalId: id(), assignedLab: lab.id, labId: labSampleCode, labSampleCode, status: 'RECEIVED' } });
+            return createSampleFixture(tx, { data: { id: id(), originalId: id(), assignedLab: lab.id, labId: labSampleCode, labSampleCode, status: 'RECEIVED' } });
         });
     }
     test('50 parallel real intakes issue 50 unique codes and each work item belongs to the lab', async () => {
@@ -53,7 +52,7 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
         let reserved;
         await expect(prisma.$transaction(async tx => {
             reserved = await codes.allocateSampleCode(tx, { labReference: lab.id });
-            await tx.sample.create({ data: { id: id(), originalId: 'FAILED-A13', assignedLab: lab.id, labSampleCode: reserved, status: 'RECEIVED' } });
+            await createSampleFixture(tx, { data: { id: id(), originalId: 'FAILED-A13', assignedLab: lab.id, labSampleCode: reserved, status: 'RECEIVED' } });
             throw new Error('synthetic intake failure');
         })).rejects.toThrow('synthetic intake failure');
         expect(await prisma.labSequence.count({ where: { labId: lab.id } })).toBe(0);
@@ -61,7 +60,7 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
         expect((await issue()).labSampleCode).toBe(reserved);
     });
     test('normal single and walk-in paths issue policy codes, with laboratory work-item ownership', async () => {
-        const sample = await prisma.sample.create({ data: { id: id(), originalId: id(), assignedLab: lab.id, status: 'RECEIVED' } });
+        const sample = await createSampleFixture(prisma, { data: { id: id(), originalId: id(), assignedLab: lab.id, status: 'RECEIVED' } });
         const response = await request(app).post(`/api/samples/${sample.id}/accept`).set('Authorization', `Bearer ${await getAuthToken('LAB_MANAGER', lab.id)}`).send({ checklist });
         expect(response.status).toBe(200); expect(codes.verifyCheckCharacter(response.body.labSampleCode)).toBe(true);
         const work = await prisma.workItem.findMany({ where: { sampleId: sample.id } });
@@ -79,8 +78,8 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
     });
     test('historical duplicate intake returns a stable conflict and preserves both records', async () => {
         const oldCode = `S${Date.now()}`;
-        await prisma.sample.create({ data: { id: id(), originalId: id(), assignedLab: lab.id, labId: oldCode, labSampleCode: oldCode, status: 'RECEIVED' } });
-        const sample = await prisma.sample.create({ data: { id: id(), originalId: id(), assignedLab: lab.id, labId: oldCode, status: 'EXPECTED' } });
+        await createSampleFixture(prisma, { data: { id: id(), originalId: id(), assignedLab: lab.id, labId: oldCode, labSampleCode: oldCode, status: 'RECEIVED' } });
+        const sample = await createSampleFixture(prisma, { data: { id: id(), originalId: id(), assignedLab: lab.id, labId: oldCode, status: 'EXPECTED' } });
         const response = await receive({ samples: [{ originalId: sample.originalId, status: 'ACCEPTED' }] });
         expect(response.status).toBe(422); expect(response.body.code).toBe('SAMPLE_CODE_CONFLICT');
         expect(response.body.errors).toHaveLength(1);
@@ -103,7 +102,7 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
         const a = await issue('2026-05-01T12:00:00Z');
         const otherIssue = projectCode => prisma.$transaction(async tx => {
             const labSampleCode = await codes.allocateSampleCode(tx, { labReference: other.code, projectCode, issuedAt: '2026-05-01T12:00:00Z' });
-            return tx.sample.create({ data: { id: id(), originalId: id(), assignedLab: other.id, labSampleCode, status: 'RECEIVED' } });
+            return createSampleFixture(tx, { data: { id: id(), originalId: id(), assignedLab: other.id, labSampleCode, status: 'RECEIVED' } });
         });
         const b = await otherIssue('PRJ1'), c = await otherIssue('PRJ2');
         expect(b.labSampleCode).toMatch(/^PRJ1\.B13.*\.2026\.0001[A-Z0-9]$/);
@@ -129,12 +128,12 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
         expect(await prisma.labSequence.count({ where: { labId: lab.id } })).toBe(0);
     });
     test('issued legacy S codes stay unchanged, resolvable and separate from S-prefixed originalIds', async () => {
-        const old = await prisma.sample.create({ data: { id: id(), originalId: id(), labId: `S${Date.now()}`, assignedLab: lab.id, status: 'EXPECTED' } });
+        const old = await createSampleFixture(prisma, { data: { id: id(), originalId: id(), labId: `S${Date.now()}`, assignedLab: lab.id, status: 'EXPECTED' } });
         const response = await receive({ samples: [{ originalId: old.originalId, status: 'ACCEPTED' }] });
         expect(response.status).toBe(201); expect(response.body.samples[0].labSampleCode).toBe(old.labId);
         expect(await prisma.labSequence.count({ where: { labId: lab.id, scope: 'SAMPLE' } })).toBe(0);
         expect((await request(app).get('/api/samples/lookup').set('Authorization', `Bearer ${token}`).query({ code: old.labId })).body.id).toBe(old.id);
-        await prisma.sample.create({ data: { id: id(), originalId: `S999999${id()}`, assignedLab: lab.id, status: 'EXPECTED' } });
+        await createSampleFixture(prisma, { data: { id: id(), originalId: `S999999${id()}`, assignedLab: lab.id, status: 'EXPECTED' } });
         expect((await issue()).labSampleCode).toContain('-000001');
     });
     test('format changes affect future codes only, and new code lookup remains scoped', async () => {
@@ -150,7 +149,7 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
     });
     test('legacy alias collision skips a reserved value, and bare root-client allocation is refused', async () => {
         const reserved = codes.formatCode(registry['sample.codeFormat'].presets.ISO17025_STRICT, { labCode: lab.code, year: 2026, sequence: 1 });
-        await prisma.sample.create({ data: { id: id(), originalId: id(), labId: reserved, assignedLab: lab.id, status: 'EXPECTED' } });
+        await createSampleFixture(prisma, { data: { id: id(), originalId: id(), labId: reserved, assignedLab: lab.id, status: 'EXPECTED' } });
         expect((await issue('2026-05-01T12:00:00Z')).labSampleCode).toContain('-000002');
         await expect(codes.allocateSampleCode(prisma, { labReference: lab.id })).rejects.toMatchObject({ statusCode: 409, code: 'SAMPLE_CODE_TRANSACTION_REQUIRED' });
     });
@@ -163,14 +162,32 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
 });
 
 describe('Audit 1.3: additive migration and idempotent back-fill', () => {
-    let db;
+    let db, rehearsal;
+    function historicalDatabase(extraSamples = []) {
+        const now = Date.UTC(2026, 0, 1);
+        rehearsal = beforeGuards({ actor: 'system:fixture', schemaVariant: 'PRE_1_3_SAMPLE_CODES',
+            samples: [['s1', 'S123', 'lab-a'], ['s2', 'old-format', 'lab-a'], ['blank', ' ', 'lab-a'],
+                ['lab-valued', 'AAA', 'lab-a'], ['ambiguous', ' aaa ', 'lab-a'], ['unowned', null, 'unknown']]
+                .map(([sampleId, labId, assignedLab]) => ({ id: sampleId, originalId: sampleId, labId, assignedLab,
+                    status: 'EXPECTED', metadata: 'raw', createdAt: now, updatedAt: now })).concat(extraSamples),
+            workItems: [['w1', 's1', 'S123', 'lab-a'], ['referred', 's1', 'old-code', 'BBB'],
+                ['fallback', 's2', 'old-code', null], ['unresolved', 'unowned', 'lost', 'unknown']]
+                .map(([itemId, sampleId, labId, assignedLab], index) => ({ id: itemId, sampleId, labId, assignedLab,
+                    analysis: index === 1 ? 'EC_1_5' : 'PH_H2O', status: 'NOT_ASSIGNED', createdAt: now, updatedAt: now })),
+            relatedRows: {
+                Lab: [{ id: 'lab-a', code: 'AAA', name: 'Historical lab A', country: 'TEST' },
+                    { id: 'lab-b', code: 'BBB', name: 'Historical lab B', country: 'TEST' }],
+                AuditLog: [{ id: 'a', entity: 'Sample', entityId: 's1', action: 'LEGACY_FIXTURE', performedBy: 'system:fixture', details: 'original audit' }],
+                Result: [{ id: 'r', sampleId: 's1', param: 'PH_H2O', value: '12.5', updatedAt: now }]
+            }
+        });
+        db = new Database(rehearsal.file, { fileMustExist: true });
+        rehearsal.applyPendingMigration({ connection: db });
+    }
     beforeEach(() => {
-        db = new Database(':memory:');
-        db.exec('CREATE TABLE Lab(id TEXT PRIMARY KEY, code TEXT); CREATE TABLE Sample(id TEXT PRIMARY KEY, labId TEXT, assignedLab TEXT, metadata TEXT); CREATE TABLE WorkItem(id TEXT PRIMARY KEY, sampleId TEXT, labId TEXT, assignedLab TEXT); CREATE TABLE AuditLog(id TEXT PRIMARY KEY, details TEXT); CREATE TABLE Result(id TEXT PRIMARY KEY, value TEXT);');
-        db.exec("INSERT INTO Lab VALUES ('lab-a','AAA'),('lab-b','BBB'); INSERT INTO Sample VALUES ('s1','S123','lab-a','raw'),('s2','old-format','lab-a','raw'),('blank',' ','lab-a','raw'),('lab-valued','AAA','lab-a','raw'),('ambiguous',' aaa ','lab-a','raw'),('unowned',NULL,'unknown','raw'); INSERT INTO WorkItem VALUES ('w1','s1','S123','lab-a'),('referred','s1','old-code','BBB'),('fallback','s2','old-code',NULL),('unresolved','unowned','lost','unknown'); INSERT INTO AuditLog VALUES ('a','original audit'); INSERT INTO Result VALUES ('r','12.5');");
-        db.exec(migration);
+        historicalDatabase();
     });
-    afterEach(() => db.close());
+    afterEach(() => { if (db?.open) db.close(); rehearsal?.close(); });
     test('dry-run has no writes; apply copies issued codes, retains aliases/old work-item ids, reports unresolved and referral ownership', () => {
         const before = db.serialize(), dry = backfill(db);
         expect(db.serialize()).toEqual(before);
@@ -190,8 +207,29 @@ describe('Audit 1.3: additive migration and idempotent back-fill', () => {
         expect(db.prepare('SELECT details FROM AuditLog').get().details).toBe('original audit');
         expect(db.prepare('SELECT value FROM Result').get().value).toBe('12.5');
     });
-    test.each(['legacy duplicate', 'existing code collision'])('%s refuses the entire apply, including otherwise-valid work-item corrections', kind => {
-        db.prepare('INSERT INTO Sample(id, labId, assignedLab, labSampleCode) VALUES (?, ?, ?, ?)').run('duplicate', kind === 'legacy duplicate' ? 'S123' : null, 'lab-b', kind === 'existing code collision' ? 'S123' : null);
+    test.each(['legacy duplicate', 'existing code collision'])('%s refuses the entire apply, including otherwise-valid work-item corrections', async kind => {
+        if (kind === 'legacy duplicate') {
+            // #179 pin 5989961445: genuinely pre-existing alias collisions are
+            // declarative historical rows before the unchanged #180 migration.
+            db.close(); rehearsal.close();
+            historicalDatabase([{ id: 'duplicate', originalId: 'duplicate', labId: 'S123', assignedLab: 'lab-b',
+                status: 'EXPECTED', updatedAt: Date.UTC(2026, 0, 1) }]);
+        } else {
+            // This collision uses a post-#180 code, so central creation runs
+            // against the fully guarded owned file, never raw SQL.
+            const { PrismaClient } = require('../../prisma_client');
+            const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+            const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
+            const previousPath = process.env.DATABASE_PATH, previousUrl = process.env.DATABASE_URL;
+            process.env.DATABASE_PATH = rehearsal.file; process.env.DATABASE_URL = `file:${rehearsal.file}`;
+            try { await createSampleFixture(client, { data: { id: 'duplicate', originalId: 'duplicate', labId: null,
+                labSampleCode: 'S123', assignedLab: 'lab-b', status: 'EXPECTED' } }); }
+            finally {
+                await client.$disconnect();
+                process.env.DATABASE_PATH = previousPath;
+                if (previousUrl === undefined) delete process.env.DATABASE_URL; else process.env.DATABASE_URL = previousUrl;
+            }
+        }
         const before = db.serialize(), report = backfill(db, true);
         expect(report.refused).toBe(true); expect(report.duplicates[0].code).toBe('SAMPLE_CODE_DUPLICATE'); expect(db.serialize()).toEqual(before);
     });

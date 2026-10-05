@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -14,36 +16,38 @@ describe('Spectral Library Stage A (SL-01 to SL-05)', () => {
         await prisma.spectralData.deleteMany({
             where: { id: { startsWith: 'test-spec-' } }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { startsWith: 'TEST-SPEC-SMP-' } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
 
         mgrGtmToken = await getAuthToken('LAB_MANAGER', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
         mgrMozToken = await getAuthToken('LAB_MANAGER', 'LAB-MOZ', ['MOZ'], ['SOILFER-US']);
 
         // Create sample in GTM
         sampleGtmId = 'TEST-SPEC-SMP-GTM-01';
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleGtmId,
                 originalId: sampleGtmId,
                 assignedLab: 'LAB-GTM',
                 labId: 'LAB-GTM',
-                status: 'APPROVED',
-                matrix: 'SOIL'
+                status: 'PROCESSING',
+                matrix: 'SOIL',
+                receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE'
             }
         });
 
         // Create sample in MOZ
         sampleMozId = 'TEST-SPEC-SMP-MOZ-01';
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleMozId,
                 originalId: sampleMozId,
                 assignedLab: 'LAB-MOZ',
                 labId: 'LAB-MOZ',
-                status: 'APPROVED',
-                matrix: 'SOIL'
+                status: 'PROCESSING',
+                matrix: 'SOIL',
+                receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE'
             }
         });
 
@@ -92,9 +96,9 @@ describe('Spectral Library Stage A (SL-01 to SL-05)', () => {
         await prisma.spectralData.deleteMany({
             where: { id: { startsWith: 'test-spec-' } }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { startsWith: 'TEST-SPEC-SMP-' } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('SL-01: GET /api/spectral returns 200 without ReferenceError and applies lab scoping', async () => {

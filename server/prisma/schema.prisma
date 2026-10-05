@@ -104,6 +104,8 @@ model Sample {
   labId             String?    // Legacy sample-code alias, retained for one release
   labSampleCode     String?    @unique // Issued laboratory sample code; never renumbered
   status            String     // EXPECTED, RECEIVED, ACCEPTED, PROCESSING, etc.
+  holdPriorStatus   String?    // Recorded state to restore when releasing a hold
+  legacyStatus      String?    // Original value retained by the reversible status migration
   
   // Workflow Gates
   dryingStatus      String?    // PENDING, DONE, FAILED
@@ -189,6 +191,7 @@ model Sample {
   orderRevisions    SampleOrderRevision[]
   amendments        SampleAmendment[]
   reviewDecisions   ReviewDecision[]
+  resultEvidenceEvents ResultEvidenceEvent[]
 
   @@index([consignmentId])
 }
@@ -248,6 +251,8 @@ model WorkItem {
   duplicates     WorkItem[] @relation("WorkItemDuplicates")
   category       String?   // Operational Gates, Spectroscopy, etc.
   status         String    // NOT_ASSIGNED, ASSIGNED, IN_PROGRESS, COMPLETED, ACCEPTED
+  holdPriorStatus String?
+  legacyStatus    String?
   
   assignedTo     String?
   assignee       User?     @relation("AssignedTo", fields: [assignedTo], references: [username])
@@ -893,8 +898,27 @@ model Result {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  evidenceEvents ResultEvidenceEvent[]
+
   @@index([sampleId, param, isCurrent])
   @@index([batchId])
+}
+
+// Preparation reversions preserve the result and its QC flags. Evidence is append-only.
+model ResultEvidenceEvent {
+  id        String   @id
+  resultId  String
+  result    Result   @relation(fields: [resultId], references: [id], onDelete: Restrict)
+  sampleId  String
+  sample    Sample   @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+  eventType String   // PREP_REVERTED | PREP_REVERT_CLEARED; enforced by additive triggers
+  gate      String   // DRYING | PREPARATION
+  reason    String
+  actor     String
+  createdAt DateTime @default(now())
+
+  @@index([resultId, gate, createdAt])
+  @@index([sampleId, createdAt])
 }
 
 model Unit {

@@ -1,5 +1,7 @@
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -21,7 +23,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         mgrGtmToken = await getAuthToken('LAB_MANAGER', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
 
         // 1. Create standard processing sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testSampleId,
                 labId: testSampleLabCode,
@@ -38,7 +40,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         });
 
         // 2. Create intake rejected sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: rejectedSampleId,
                 labId: `LAB-REJ-${Date.now()}`,
@@ -52,7 +54,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         });
 
         // 3. Create pre-arrival EXPECTED sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: expectedSampleId,
                 originalId: `FIELD-EXP-${Date.now()}`,
@@ -65,9 +67,9 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
     });
 
     afterAll(async () => {
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { in: [testSampleId, rejectedSampleId, expectedSampleId] } }
-        }).catch(() => {});
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
     });
 
     test('1. GET /api/public/branding provides branding configuration without requiring auth', async () => {
@@ -287,7 +289,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         const receptionToken = await getAuthToken('SAMPLE_RECEPTION', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
         const testIntakeSampleId = `SMP-INTAKE-DATES-${Date.now()}`;
         const testOriginalId = `FIELD-INTAKE-${Date.now()}`;
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testIntakeSampleId,
                 originalId: testOriginalId,
@@ -324,7 +326,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         expect(res.body.custodyHandoverAt).toBeDefined();
         expect(res.body.collectionDate).toBe('2026-09-18');
 
-        await prisma.sample.delete({ where: { id: testIntakeSampleId } }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testIntakeSampleId } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
     });
 
     test('9. POST /api/reception/consignments returns persisted receptionDate, custodyHandoverAt, assignedLab, projectCode, and collectionDate for batch label printing', async () => {
@@ -353,7 +355,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         };
 
         // Create pre-arrival EXPECTED sample with full field/Kobo provenance
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testExpectedId,
                 originalId: testExpectedOrig,
@@ -448,9 +450,9 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         expect(s4.receptionDate).toBeDefined();
 
         // Cleanup
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { originalId: { in: [testExpectedOrig, newSampleOrig, newSampleWithDateOrig, `FIELD-CSG-REJ-${runId}`] } }
-        }).catch(() => {});
+        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
         if (res.body.consignment?.id) {
             await prisma.consignment.delete({ where: { id: res.body.consignment.id } }).catch(() => {});
         }

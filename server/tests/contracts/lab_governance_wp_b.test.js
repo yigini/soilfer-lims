@@ -10,6 +10,8 @@
  */
 'use strict';
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const app = require('../../app');
@@ -381,19 +383,19 @@ describe('WP-B: Unified Action and Scope Model', () => {
         let testSample, testWorkItem;
 
         beforeAll(async () => {
-            testSample = await prisma.sample.create({
+            testSample = await createSampleFixture(prisma, {
                 data: {
                     id: 'SMP-ASS-' + testPrefix,
                     originalId: testPrefix + '-SMP-ASS',
                     labId: labA.id,
                     assignedLab: labA.id,
-                    status: 'IN_ANALYSIS',
+                    status: 'PROCESSING',
                     matrix: 'SOIL',
                     country: 'Guatemala'
                 }
             });
 
-            testWorkItem = await prisma.workItem.create({
+            testWorkItem = await createWorkItemFixture(prisma, {
                 data: {
                     id: 'WI-ASS-' + testPrefix,
                     sampleId: testSample.id,
@@ -429,19 +431,19 @@ describe('WP-B: Unified Action and Scope Model', () => {
         });
 
         test('A23: Assignment in paused/inactive lab is rejected with LAB_PAUSED (400)', async () => {
-            const pausedSample = await prisma.sample.create({
+            const pausedSample = await createSampleFixture(prisma, {
                 data: {
                     id: 'SMP-P-' + testPrefix,
                     originalId: testPrefix + '-SMP-P',
                     labId: labPaused.id,
                     assignedLab: labPaused.id,
-                    status: 'IN_ANALYSIS',
+                    status: 'PROCESSING',
                     matrix: 'SOIL',
                     country: 'France'
                 }
             });
 
-            const pausedWorkItem = await prisma.workItem.create({
+            const pausedWorkItem = await createWorkItemFixture(prisma, {
                 data: {
                     id: 'WI-P-' + testPrefix,
                     sampleId: pausedSample.id,

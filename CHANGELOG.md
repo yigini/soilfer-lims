@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.0] - 2026-10-05
+
+### Added
+- Shared Sample and WorkItem state authorities with transactional scope, concurrency and audit checks (Audit 1.2, #179).
+- Recoverable holds, per-laboratory gate verification policy, append-only preparation-reversion evidence and generated client workflow definitions.
+- Additive state guards, a reviewed reversible legacy-status migration, and startup checks that refuse incomplete or interrupted upgrades without serving.
+
+### Fixed
+- Intake, preparation, analytical work, QC, review, offline and spectral paths now use legal transitions and preserve prior scientific evidence.
+- Final samples cannot silently reopen; amendment-only actions return a conflict until the Phase 6 workflow ships.
+- Missing prerequisites block execution, submissions share one lifecycle calculation, and dashboard completion uses the actual approval event.
+
 ## [1.8.0] - 2026-10-04
 
 ### Added

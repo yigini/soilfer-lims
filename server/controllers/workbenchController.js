@@ -13,6 +13,10 @@ const { calculateUsdaTexture } = require('../utils/soilCalculations');
 const { broadcastToLab } = require('../wsServer');
 const scopeGuard = require('../utils/scopeGuard');
 const { SPECTRAL_ACQUISITION_CODES } = require('../config/spectralAcquisition');
+const stateRules = require('../services/workflowStateRules');
+const { transitionWorkItem } = require('../services/workItemStateService');
+const { transitionSample } = require('../services/sampleStateService');
+const { deriveSubmissionLifecycle } = require('../services/submissionLifecycleService');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/workbench/queue
@@ -266,7 +270,7 @@ exports.getQueue = async (req, res) => {
             whereClause.status = { in: ['ACCEPTED', 'COMPLETED', 'WAIVED'] };
         } else {
             // Default: 'my_work'
-            whereClause.status = { in: ['ASSIGNED', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'] };
+            whereClause.status = { in: ['ASSIGNED', 'IN_PROGRESS', 'REPEAT_REQUIRED', 'REANALYSIS_REQUIRED'] };
         }
 
         if (searchTerm) {
@@ -553,7 +557,7 @@ exports.getQueue = async (req, res) => {
             const resultKey = `${item.sampleId}::${code}`;
             const itemDraft = draftMap[item.id] || null;
             const selectedEquipId = item.equipmentId || itemDraft?.instrumentId || null;
-            const readiness = readinessService.evaluateItemReadiness(item, user, {
+            const readiness = await readinessService.evaluateExecutionReadiness(prisma, item, user, {
                 equipReq: equipReqMap[equipKey],
                 asset: assetMap[selectedEquipId],
                 selectedEquipmentId: selectedEquipId
@@ -632,7 +636,7 @@ exports.getQueue = async (req, res) => {
         }
 
         const [myWorkCount, readyToSubmitCount, submittedCount, completedCount] = await Promise.all([
-            prisma.workItem.count({ where: { ...baseCountWhere, status: { in: ['ASSIGNED', 'IN_PROGRESS', 'REANALYSIS_REQUIRED'] } } }),
+            prisma.workItem.count({ where: { ...baseCountWhere, status: { in: ['ASSIGNED', 'IN_PROGRESS', 'REPEAT_REQUIRED', 'REANALYSIS_REQUIRED'] } } }),
             prisma.workItem.count({ where: { ...baseCountWhere, status: 'COMPLETED', submissionId: null, analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] } } }),
             prisma.workItem.count({ where: { ...baseCountWhere, status: 'SUBMITTED' } }),
             prisma.workItem.count({ where: { ...baseCountWhere, status: { in: ['ACCEPTED', 'COMPLETED', 'WAIVED'] } } })
@@ -642,7 +646,7 @@ exports.getQueue = async (req, res) => {
         const stats = {
             totalPending: items.filter(i => i.status === 'ASSIGNED').length,
             totalInProgress: items.filter(i => i.status === 'IN_PROGRESS').length,
-            totalReanalysis: items.filter(i => i.status === 'REANALYSIS_REQUIRED').length,
+            totalReanalysis: items.filter(i => workflow.normalizeWorkItemState(i.status) === 'REPEAT_REQUIRED').length,
             totalDrafts: userDrafts.length,
             totalGroups: groups.length,
             totalItems: items.length,
@@ -783,8 +787,10 @@ exports.batchSave = async (req, res) => {
 
             const checklist = operationalChecklists[item.analysis];
             const isOperationalTask = !!checklist;
-            const executionReadiness = readinessService.evaluateItemReadiness(item, user);
+            const executionReadiness = await readinessService.evaluateExecutionReadiness(prisma, item, user);
             if (!executionReadiness.isReady) {
+                if (executionReadiness.blockers.includes('GATE_STATE_MISMATCH')) throw new stateRules.TransitionError(
+                    executionReadiness.reasons.join('; '), 409, 'GATE_STATE_MISMATCH');
                 errors.push({ workItemId: entry.workItemId, error: executionReadiness.reasons.join('; '), code: 'EXECUTION_BLOCKED' });
                 continue;
             }
@@ -938,7 +944,7 @@ exports.batchSave = async (req, res) => {
                     errors.push({
                         workItemId: entry.workItemId,
                         error: `Cannot transition from ${item.status} to ${targetStatus}. ` +
-                            (item.status === 'REANALYSIS_REQUIRED'
+                            (workflow.normalizeWorkItemState(item.status) === 'REPEAT_REQUIRED'
                                 ? 'This item must be reassigned before results can be entered.'
                                 : `Allowed transitions: ${(workflow.WORK_ITEM_TRANSITIONS[item.status] || []).join(', ')}`)
                     });
@@ -949,7 +955,7 @@ exports.batchSave = async (req, res) => {
                     errors.push({
                         workItemId: entry.workItemId,
                         error: `Cannot transition from ${item.status} to ${targetStatus}. ` +
-                            (item.status === 'REANALYSIS_REQUIRED'
+                            (workflow.normalizeWorkItemState(item.status) === 'REPEAT_REQUIRED'
                                 ? 'This item must be reassigned before results can be entered.'
                                 : `Allowed transitions: ${(workflow.WORK_ITEM_TRANSITIONS[item.status] || []).join(', ')}`)
                     });
@@ -979,10 +985,10 @@ exports.batchSave = async (req, res) => {
                         status: 'drafted',
                         validation,
                         draftId: savedDraft.id,
-                        newVersion: item.version
+                        newVersion: savedDraft.workItemVersion
                     });
                 } catch (draftErr) {
-                    errors.push({ workItemId: entry.workItemId, error: draftErr.message });
+                    errors.push({ workItemId: entry.workItemId, error: draftErr.message, ...(draftErr.code && { code: draftErr.code }) });
                 }
                 continue;
             }
@@ -1082,7 +1088,7 @@ exports.batchSave = async (req, res) => {
             }
 
             // Build work item update
-            const history = typeof item.history === 'string' ? JSON.parse(item.history) : (item.history || []);
+            const history = stateRules.requireHistory(item.history);
 
             history.push({
                 status: targetStatus,
@@ -1110,16 +1116,19 @@ exports.batchSave = async (req, res) => {
             const expectedVersion = entry.version !== undefined ? entry.version : item.version;
             const ops = [];
 
-            ops.push(tx => tx.workItem.update({
-                where: { id: item.id, version: expectedVersion },
-                data: updateData
-            }));
-
             if (isOperationalTask) {
-                ops.push(tx => tx.sample.update({
-                    where: { id: sample.id, status: sample.status, dryingStatus: sample.dryingStatus, preparationStatus: sample.preparationStatus },
-                    data: item.analysis === 'DRYING' ? { dryingStatus: 'DONE' } : { preparationStatus: 'DONE' }
-                }));
+                ops.push(async tx => {
+                    const outcome = await require('../services/operationalConfirmationService').confirmOperation({
+                        actor: user, workItemId: item.id, checklist: entry.checks, observations: entry.notes,
+                        verificationRequired: entry.verificationRequired ?? false,
+                        expected: { status: item.status, version: expectedVersion }, db: tx
+                    });
+                    const result = results.find(row => row.workItemId === item.id);
+                    if (result) { result.status = outcome.workItem.status === 'AWAITING_VERIFICATION' ? 'awaiting_verification' : 'completed'; result.newVersion = outcome.workItem.version; }
+                });
+            } else {
+                ops.push(tx => transitionWorkItem(item.id, targetStatus, user, 'Determination recorded in workbench', updateData, tx,
+                    { expected: { status: item.status, version: expectedVersion }, conflictCode: 'VERSION_CONFLICT' }));
             }
 
             // Create/update Result record (Append-Only with Replicate & History)
@@ -1423,7 +1432,7 @@ exports.batchSave = async (req, res) => {
                 await commitBundles(operationBundles);
             } catch (txError) {
                 // ─── Fix 3: Handle version conflict (P2025 = record not found) ───
-                if (txError.code === 'P2025') {
+                if (['P2025', 'VERSION_CONFLICT', 'WORKITEM_STATE_CHANGED'].includes(txError.code)) {
                     // Determine which items had version conflicts
                     // Re-run individually to identify conflicts
                     const verifiedResults = [];
@@ -1438,7 +1447,7 @@ exports.batchSave = async (req, res) => {
                                 validation: bundle.validation
                             });
                         } catch (itemErr) {
-                            if (itemErr.code === 'P2025') {
+                            if (['P2025', 'VERSION_CONFLICT', 'WORKITEM_STATE_CHANGED'].includes(itemErr.code)) {
                                 verifiedErrors.push({
                                     workItemId: bundle.workItemId,
                                     error: 'Version conflict — this item was modified by another user. Refresh the page to get the latest data.',
@@ -1447,7 +1456,7 @@ exports.batchSave = async (req, res) => {
                             } else {
                                 verifiedErrors.push({
                                     workItemId: bundle.workItemId,
-                                    error: `Save failed: ${itemErr.message}`
+                                    error: `Save failed: ${itemErr.message}`, ...(itemErr.code && { code: itemErr.code })
                                 });
                             }
                         }
@@ -1484,7 +1493,8 @@ exports.batchSave = async (req, res) => {
                             workItemId: b.workItemId,
                             sampleId: item?.sampleId,
                             analysis: item?.analysis,
-                            status: draft ? (item?.status === 'ASSIGNED' ? 'IN_PROGRESS' : item?.status) : 'COMPLETED',
+                            status: results.find(row => row.workItemId === b.workItemId)?.status === 'awaiting_verification' ? 'AWAITING_VERIFICATION' :
+                                draft ? (item?.status === 'ASSIGNED' ? 'IN_PROGRESS' : item?.status) : 'COMPLETED',
                             result: entry?.value ?? null,
                             isDraft: draft,
                             version: (entry?.version ?? item?.version ?? 0) + 1
@@ -1598,31 +1608,9 @@ exports.clearDrafts = async (req, res) => {
             return res.json({ success: true, message: `No authorized drafts found for ${analysis}`, count: 0 });
         }
 
-        const workItemIds = userDrafts.map(d => d.workItemId);
-
-        // Delete from WorkItemDraft
-        await prisma.workItemDraft.deleteMany({
-            where: {
-                id: { in: userDrafts.map(d => d.id) }
-            }
-        });
-
-        // Revert work items if in progress and uncompleted
-        if (workItemIds.length > 0) {
-            await prisma.workItem.updateMany({
-                where: {
-                    id: { in: workItemIds },
-                    status: 'IN_PROGRESS',
-                    completedAt: null
-                },
-                data: {
-                    status: 'ASSIGNED'
-                }
-            });
-        }
-
-        // Log audit event
-        await prisma.auditLog.create({
+        await stateRules.inTransaction(prisma, async tx => {
+            for (const draft of userDrafts) await draftService.discardDraft(user, draft.workItemId, tx);
+            await tx.auditLog.create({
             data: {
                 id: crypto.randomUUID(),
                 entity: 'WorkItemDraft',
@@ -1631,12 +1619,14 @@ exports.clearDrafts = async (req, res) => {
                 details: `Cleared ${userDrafts.length} drafts for ${analysis}`,
                 timestamp: new Date()
             }
-        }).catch(() => {});
+            });
+        });
 
         res.json({ success: true, message: `Drafts cleared for ${analysis}`, count: userDrafts.length });
     } catch (error) {
         console.error('[workbench.clearDrafts] Error:', error);
-        res.status(500).json({ error: 'Failed to clear drafts' });
+        res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to clear drafts',
+            ...(error.code && { code: error.code }) });
     }
 };
 
@@ -1653,7 +1643,7 @@ exports.discardDraft = async (req, res) => {
         res.json(result);
     } catch (err) {
         const status = err.status || err.statusCode || 400;
-        res.status(status).json({ error: err.message });
+        res.status(status).json({ error: err.message, ...(err.code && { code: err.code }) });
     }
 };
 
@@ -1777,7 +1767,7 @@ exports.previewCompletion = async (req, res) => {
             const asset = assetMap[entry.equipmentId || item.equipmentId];
 
             // 1. Readiness check
-            const readiness = readinessService.evaluateItemReadiness(item, user, {
+            const readiness = await readinessService.evaluateExecutionReadiness(prisma, item, user, {
                 equipReq,
                 asset,
                 selectedEquipmentId: entry.equipmentId || item.equipmentId
@@ -2002,36 +1992,21 @@ exports.previewSubmissions = async (req, res) => {
         }
 
         const targetSampleIds = Object.keys(sampleGroupMap);
-        let allItemsBySample = {};
-        if (targetSampleIds.length > 0) {
-            const allSampleItems = await prisma.workItem.findMany({
-                where: {
-                    sampleId: { in: targetSampleIds },
-                    analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] }
-                },
-                select: { id: true, sampleId: true, status: true, analysis: true }
-            });
-            allSampleItems.forEach(wi => {
-                if (!allItemsBySample[wi.sampleId]) allItemsBySample[wi.sampleId] = [];
-                allItemsBySample[wi.sampleId].push(wi);
-            });
-        }
-
         const eligibleSamples = [];
         for (const sId of targetSampleIds) {
             const group = sampleGroupMap[sId];
-            const allItems = allItemsBySample[sId] || [];
             const completedCount = group.completedItems.length;
-            const totalCount = allItems.length;
-            const isFull = allItems.length > 0 && allItems.every(i => i.status === 'COMPLETED' || group.completedItems.some(ci => ci.workItemId === i.id));
+            const derived = await deriveSubmissionLifecycle(prisma, sId, {
+                previewSelection: group.completedItems.map(item => item.workItemId)
+            });
 
             eligibleSamples.push({
                 sampleId: sId,
                 originalId: group.sample?.originalId || null,
                 projectCode: group.sample?.projectCode || null,
-                submissionType: isFull ? 'FULL' : 'PARTIAL',
+                submissionType: derived.type,
                 completedCount,
-                totalCount,
+                totalCount: derived.counted,
                 items: group.completedItems
             });
         }
@@ -2075,6 +2050,7 @@ exports.commitSubmissions = async (req, res) => {
             }
         }
 
+        await stateRules.inTransaction(prisma, async tx => {
         for (const sampleId of sampleIds) {
             const itemWhere = {
                 sampleId,
@@ -2087,7 +2063,7 @@ exports.commitSubmissions = async (req, res) => {
                 itemWhere.id = { in: workItemIds };
             }
 
-            const rawItems = await prisma.workItem.findMany({
+            const rawItems = await tx.workItem.findMany({
                 where: itemWhere,
                 include: { sample: true }
             });
@@ -2101,28 +2077,22 @@ exports.commitSubmissions = async (req, res) => {
             if (items.length === 0) continue;
 
             const sample = items[0].sample;
-            const allSampleItems = await prisma.workItem.findMany({
-                where: {
-                    sampleId,
-                    analysis: { notIn: ['DRYING', 'PREPARATION', 'ARCHIVING', 'ARCH', 'Archive', 'DISPOSAL', 'DISP', 'Dispose'] }
-                }
-            });
+            stateRules.assertScope(user, sample);
+            const resultEvidence = require('../services/resultEvidenceService');
+            resultEvidence.assertAmendable(sample);
+            await resultEvidence.assertNoPreparationRevert(tx, sample.id);
+            await require('../services/sampleStateService').advanceCompletedGates(sample, user, tx);
             const itemIds = items.map(i => i.id);
-            const isFull = allSampleItems.length > 0 && allSampleItems.every(i => itemIds.includes(i.id) || i.status === 'COMPLETED' || i.status === 'SUBMITTED');
-
             const subId = `SUB-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
-            // S19: Canonical status must be SUBMITTED_FULL (never legacy SUBMITTED)
-            const targetSampleStatus = isFull ? 'SUBMITTED_FULL' : 'SUBMITTED_PARTIAL';
 
             // Atomic transaction for submission, work items, sample status, and audit
-            await prisma.$transaction([
-                prisma.submission.create({
+                await tx.submission.create({
                     data: {
                         id: subId,
                         sampleId,
-                        labId: user.labId || sample?.labId || sample?.assignedLab,
-                        assignedLab: sample?.assignedLab || sample?.labId,
-                        type: isFull ? 'FULL' : 'PARTIAL',
+                        labId: sample.assignedLab || user.labId,
+                        assignedLab: sample.assignedLab,
+                        type: 'PARTIAL',
                         status: 'PENDING_REVIEW',
                         note: note || null,
                         submittedBy: user.username,
@@ -2130,20 +2100,19 @@ exports.commitSubmissions = async (req, res) => {
                         workItemIds: JSON.stringify(itemIds),
                         workItemCount: itemIds.length
                     }
-                }),
-                prisma.workItem.updateMany({
-                    where: { id: { in: itemIds } },
-                    data: {
-                        status: 'SUBMITTED',
+                });
+                for (const item of items) await transitionWorkItem(item.id, 'SUBMITTED', user, 'Workbench submission', {
                         submissionId: subId,
-                        submittedAt: now
-                    }
-                }),
-                prisma.sample.update({
-                    where: { id: sampleId },
-                    data: { status: targetSampleStatus }
-                }),
-                prisma.auditLog.create({
+                        submittedAt: now,
+                        history: JSON.stringify([...stateRules.requireHistory(item.history), { status: 'SUBMITTED', action: 'SUBMITTED',
+                            submissionId: subId, timestamp: now.toISOString(), changedBy: user.username }])
+                }, tx, { expected: { status: item.status, version: item.version }, audit: { action: 'WORKITEM_SUBMITTED' } });
+                const derived = await deriveSubmissionLifecycle(tx, sampleId);
+                await tx.submission.update({ where: { id: subId }, data: { type: derived.type } });
+                await transitionSample(sampleId, derived.sampleStatus, user, 'Workbench submission', {
+                    lastSubmissionId: subId, lastSubmissionType: derived.type, lastSubmissionAt: now
+                }, tx);
+                await tx.auditLog.create({
                     data: {
                         id: crypto.randomUUID(),
                         entity: 'Submission',
@@ -2151,19 +2120,22 @@ exports.commitSubmissions = async (req, res) => {
                         sampleId,
                         action: 'WORKBENCH_SUBMIT',
                         performedBy: user.username,
-                        details: `Submitted ${itemIds.length} item(s) for sample ${sampleId} (${isFull ? 'FULL' : 'PARTIAL'})`,
+                        details: `Submitted ${itemIds.length} item(s) for sample ${sampleId} (${derived.type})`,
+                        after: JSON.stringify({ derivedType: derived.type, sampleStatus: derived.sampleStatus }),
                         timestamp: now
                     }
-                })
-            ]);
+                });
 
             createdSubmissions.push({
                 submissionId: subId,
                 sampleId,
-                type: isFull ? 'FULL' : 'PARTIAL',
+                type: derived.type,
                 itemCount: itemIds.length
             });
         }
+        if (createdSubmissions.length === 0) throw new stateRules.TransitionError(
+            'Select completed work items before submitting.', 400, 'EMPTY_SUBMISSION_SELECTION');
+        });
 
         // Broadcast to lab
         if (createdSubmissions.length > 0) {
@@ -2193,7 +2165,9 @@ exports.commitSubmissions = async (req, res) => {
         });
     } catch (err) {
         console.error('[workbench.commitSubmissions] Error:', err);
-        res.status(500).json({ error: 'Failed to commit submissions' });
+        const mapped = stateRules.mapStateError(err);
+        res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to commit submissions',
+            ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
     }
 };
 

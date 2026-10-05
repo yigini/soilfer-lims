@@ -123,6 +123,7 @@ async function generateReport(req, res) {
             if (!scopeGuard.canAccessEntity(req.user, currentSample, { labField: 'labId', altLabField: 'assignedLab' })) {
                 throw Object.assign(new Error('Access denied: Sample not in your Lab scope'), { statusCode: 403 });
             }
+            await require('../services/resultEvidenceService').assertNoPreparationRevert(tx, sampleId);
             const batchIds = [...new Set(currentSample.results.flatMap(result => linkedBatchIds(result, currentSample.workItems)))];
             const qcBatches = batchIds.length ? await tx.batch.findMany({ where: { id: { in: batchIds } } }) : [];
             const qcModes = {};

@@ -3,7 +3,7 @@ const { prepareIntake } = require('./intakePreparationService');
 const { LOCKED_INTAKE_STATUSES } = require('./intakeValidationService');
 const sampleCodes = require('./sampleCodeService');
 const workItems = require('./intakeWorkItemService');
-const { transitionSample } = require('./sampleStateService');
+const { transitionSample, createSample } = require('./sampleStateService');
 const { IntakeError } = require('./intakeErrors');
 const profileIdentity = require('./profileIdentityService');
 const scopeGuard = require('../utils/scopeGuard');
@@ -15,10 +15,11 @@ async function commitPrepared(tx, plan, { consumeApproval = true } = {}) {
     requireTransaction(tx);
     const { user, body, now, updateData, nextStatus } = plan;
     let sample = plan.sample;
-    if (plan.createData) sample = await tx.sample.create({ data: plan.createData });
+    if (plan.createData) sample = await createSample({ ...plan.createData,
+        status: plan.responseKind === 'draft' ? 'DRAFT' : 'EXPECTED' }, user, { tx });
     const current = await tx.sample.findUnique({ where: { id: sample.id } });
     const hold = current && require('./intakeProfileService').parseFieldMetadata(current.metadata).provenanceHold;
-    if (hold?.status === 'AMBIGUOUS_PROVENANCE_HOLD') throw new IntakeError(409, { code: 'AMBIGUOUS_PROVENANCE_HOLD', error: 'PROVENANCE_HOLD', message: 'Resolve the current provenance hold before final intake.' });
+    if (plan.responseKind === 'accepted' && hold?.status === 'AMBIGUOUS_PROVENANCE_HOLD') throw new IntakeError(409, { code: 'AMBIGUOUS_PROVENANCE_HOLD', error: 'PROVENANCE_HOLD', message: 'Resolve the current provenance hold before final intake.' });
     if (!current || current.updatedAt.getTime() !== sample.updatedAt.getTime()) throw new profileIdentity.ProfileReferenceConflictError('SOURCE_CHANGED');
     scopeGuard.ensureScope(user, current, { altLabField: 'assignedLab' });
     if (current.approvedAt || LOCKED_INTAKE_STATUSES.includes(current.status) && !(current.status === 'RECEIVED_REJECTED' && body.isResubmission === true && plan.responseKind !== 'draft')) throw new profileIdentity.ProfileReferenceConflictError('SAMPLE_LOCKED');
@@ -29,7 +30,7 @@ async function commitPrepared(tx, plan, { consumeApproval = true } = {}) {
     }
     let updated;
     if (plan.responseKind === 'draft') {
-        updated = await tx.sample.update({ where: { id: current.id }, data: updateData });
+        updated = await transitionSample(current.id, nextStatus, user, 'Intake draft saved', updateData, tx, { action: 'INTAKE_DRAFT_SAVED' });
     } else {
         if (plan.responseKind === 'accepted') {
             const code = await sampleCodes.issuedCode(current, tx) || await sampleCodes.allocateSampleCode(tx, { labReference: user.labId, projectCode: updateData.projectCode || current.projectCode, issuedAt: now });
@@ -41,7 +42,7 @@ async function commitPrepared(tx, plan, { consumeApproval = true } = {}) {
             updateData.history = JSON.stringify(history);
         }
         updated = await transitionSample(current.id, nextStatus, user, plan.responseKind === 'rejected' ? `Sample rejected during intake: ${updateData.rejectionReason || ''}` : 'Intake completed at reception', updateData, tx);
-        if (plan.responseKind === 'accepted') await workItems.generate(tx, updated, plan.workPlan);
+        if (plan.responseKind === 'accepted') await workItems.generate(tx, updated, plan.workPlan, user);
         await tx.auditLog.create({ data: { id: crypto.randomUUID(), entity: 'SAMPLE', entityId: updated.id,
             action: plan.responseKind === 'rejected' ? 'SAMPLE_REJECTED' : 'SAMPLE_RECEIVED',
             details: plan.responseKind === 'rejected' ? `Sample intake rejected and non-conformance recorded: ${updated.rejectionReason || ''}` : 'Intake completed at reception',

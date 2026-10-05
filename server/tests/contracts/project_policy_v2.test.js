@@ -1,5 +1,7 @@
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -849,7 +851,7 @@ describe('projectPolicyService - Templates, Admission & Capabilities', () => {
 
         afterAll(async () => {
             await prisma.sampleAmendment.deleteMany({ where: { sample: { projectId: httpProject?.id } } }).catch(() => {});
-            await prisma.sample.deleteMany({ where: { projectId: httpProject?.id } }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { projectId: httpProject?.id } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
             await prisma.projectLab.deleteMany({ where: { projectCode: httpProject?.code } }).catch(() => {});
             await prisma.project.delete({ where: { id: httpProject?.id } }).catch(() => {});
             await prisma.user.deleteMany({ where: { id: { in: [httpAdmin?.id, httpManager?.id] } } }).catch(() => {});
@@ -859,7 +861,7 @@ describe('projectPolicyService - Templates, Admission & Capabilities', () => {
         test('HTTP 1: Manifest upload with DESK_ADMISSION_EXCEPTION fails closed with 422 channel mismatch', async () => {
             const sampleId = `SMP-HTTP-M1-${Date.now()}`;
             // Create target sample in DB
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sampleId,
                     originalId: sampleId,
@@ -898,7 +900,7 @@ describe('projectPolicyService - Templates, Admission & Capabilities', () => {
 
         test('HTTP 2: Manifest upload with valid MANIFEST_ADMISSION_EXCEPTION succeeds and consumes approval', async () => {
             const sampleId = `SMP-HTTP-M2-${Date.now()}`;
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sampleId,
                     originalId: sampleId,

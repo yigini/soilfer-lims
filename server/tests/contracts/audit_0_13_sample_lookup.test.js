@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const request = require('supertest');
 const app = require('../../app');
@@ -10,7 +11,7 @@ describe('Audit 0.13: authenticated scoped sample lookup', () => {
     let token;
     beforeAll(async () => { token = await getAuthToken('LAB_TECHNICIAN', lab); });
     const lookup = (code, auth = token) => request(app).get('/api/samples/lookup').set('Authorization', `Bearer ${auth}`).query({ code });
-    const sample = data => prisma.sample.create({ data: { id: id('SMP013'), originalId: id('FIELD013'),
+    const sample = data => createSampleFixture(prisma, { data: { id: id('SMP013'), originalId: id('FIELD013'),
         labId: id('LABEL013'), assignedLab: lab, status: 'EXPECTED', ...data } });
     test.each(['labId', 'originalId', 'id'])('an exact %s lookup resolves the immutable sample, including whitespace', async field => {
         const row = await sample();

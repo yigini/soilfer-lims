@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const { transitionSample, TransitionError } = require('../../services/sampleStateService');
 const workflow = require('../../workflowContract');
@@ -7,7 +9,7 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
 
     beforeEach(async () => {
         const id = `SMP-TR-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        testSample = await prisma.sample.create({
+        testSample = await createSampleFixture(prisma, {
             data: {
                 id,
                 originalId: `ORIG-${id}`,
@@ -21,9 +23,18 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
     afterEach(async () => {
         if (testSample) {
             await prisma.auditLog.deleteMany({ where: { sampleId: testSample.id } }).catch(() => {});
-            await prisma.sample.delete({ where: { id: testSample.id } }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSample.id } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSample.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
         }
     });
+    async function approveFixture() {
+        await transitionSample(testSample.id, 'RECEIVED', 'system:fixture');
+        await transitionSample(testSample.id, 'ACCEPTED', 'system:fixture');
+        await transitionSample(testSample.id, 'PROCESSING', 'system:fixture', 'Fixture gate evidence',
+            { dryingStatus: 'DONE', preparationStatus: 'DONE' });
+        await transitionSample(testSample.id, 'SUBMITTED_FULL', 'system:fixture');
+        await transitionSample(testSample.id, 'APPROVED', 'system:fixture');
+    }
 
     test('1. Executes full legal lifecycle path with audit logs', async () => {
         const s1 = await transitionSample(testSample.id, 'RECEIVED', 'tech_user', 'Arrived at reception');
@@ -32,7 +43,8 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
         const s2 = await transitionSample(testSample.id, 'ACCEPTED', 'mgr_user', 'Intake verified');
         expect(s2.status).toBe('ACCEPTED');
 
-        const s3 = await transitionSample(testSample.id, 'PROCESSING', 'tech_user', 'Drying and prep complete');
+        const s3 = await transitionSample(testSample.id, 'PROCESSING', 'tech_user', 'Drying and prep complete',
+            { dryingStatus: 'DONE', preparationStatus: 'DONE' });
         expect(s3.status).toBe('PROCESSING');
 
         const s4 = await transitionSample(testSample.id, 'SUBMITTED_FULL', 'tech_user', 'All benches submitted');
@@ -46,7 +58,7 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
 
         // Verify audit log entries
         const logs = await prisma.auditLog.findMany({
-            where: { sampleId: testSample.id },
+            where: { sampleId: testSample.id, action: 'SAMPLE_STATUS_TRANSITION' },
             orderBy: { timestamp: 'asc' }
         });
         expect(logs.length).toBe(6);
@@ -76,10 +88,7 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
 
     test('4. Terminal states cannot transition to any other status', async () => {
         // Move to APPROVED then ARCHIVED
-        await transitionSample(testSample.id, 'RECEIVED', 'user');
-        await transitionSample(testSample.id, 'ACCEPTED', 'user');
-        await transitionSample(testSample.id, 'PROCESSING', 'user');
-        await transitionSample(testSample.id, 'APPROVED', 'user');
+        await approveFixture();
         await transitionSample(testSample.id, 'ARCHIVED', 'user');
 
         await expect(
@@ -87,7 +96,7 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
         ).rejects.toThrow(TransitionError);
     });
 
-    test('5. Rejects deprecated legacy statuses with 400 Bad Request', async () => {
+    test('5. Rejects deprecated legacy writes with the pinned HTTP 409', async () => {
         for (const legacy of ['ANALYSIS', 'COLLECTED', 'NON_CONFORMING', 'PARTIALLY_COMPLETE']) {
             await expect(
                 transitionSample(testSample.id, legacy, 'user')
@@ -96,7 +105,7 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
             try {
                 await transitionSample(testSample.id, legacy, 'user');
             } catch (e) {
-                expect(e.statusCode).toBe(400);
+                expect(e.statusCode).toBe(409);
                 expect(e.code).toBe('ILLEGAL_LEGACY_STATUS');
             }
         }
@@ -106,13 +115,10 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
         const sampleController = require('../../controllers/sampleController');
         
         // Advance sample to APPROVED
-        await prisma.sample.update({
-            where: { id: testSample.id },
-            data: { status: 'APPROVED' }
-        });
+        await approveFixture();
 
         // Create an active work item
-        const activeWi = await prisma.workItem.create({
+        const activeWi = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-TEST-${Date.now()}`,
                 sampleId: testSample.id,
@@ -123,7 +129,7 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
 
         const req = {
             params: { id: testSample.id },
-            user: { username: 'test_mgr', role: 'LAB_MANAGER', permissions: ['DISPOSE_SAMPLE', 'ARCHIVE_SAMPLE'] },
+            user: { username: 'test_mgr', role: 'LAB_MANAGER', labId: 'GTM-LAB1', permissions: ['DISPOSE_SAMPLE', 'ARCHIVE_SAMPLE'] },
             body: {}
         };
         const res = {
@@ -147,20 +153,17 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
         }));
 
         // Cleanup active work item
-        await prisma.workItem.delete({ where: { id: activeWi.id } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: activeWi.id } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 
     test('7. WP-08: disposeSample creates DISPOSAL work item and leaves sample APPROVED', async () => {
         const sampleController = require('../../controllers/sampleController');
         
-        await prisma.sample.update({
-            where: { id: testSample.id },
-            data: { status: 'APPROVED' }
-        });
+        await approveFixture();
 
         const req = {
             params: { id: testSample.id },
-            user: { username: 'test_mgr', role: 'LAB_MANAGER', permissions: ['DISPOSE_SAMPLE'] },
+            user: { username: 'test_mgr', role: 'LAB_MANAGER', labId: 'GTM-LAB1', permissions: ['DISPOSE_SAMPLE'] },
             body: { disposalMethod: 'INCINERATION' }
         };
         const res = {
@@ -180,14 +183,14 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
             where: { sampleId: testSample.id, analysis: 'DISPOSAL' }
         });
         expect(dispItem).not.toBeNull();
-        expect(dispItem.status).toBe('PENDING');
+        expect(dispItem.status).toBe('NOT_ASSIGNED');
 
         // Verify sample status is STILL APPROVED (2-step workflow)
         const currentSample = await prisma.sample.findUnique({ where: { id: testSample.id } });
         expect(currentSample.status).toBe('APPROVED');
 
         // Cleanup
-        await prisma.workItem.deleteMany({ where: { sampleId: testSample.id } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSample.id } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 });
 

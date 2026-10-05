@@ -6,6 +6,8 @@ describe('Workflow Map Redesign Contract Tests', () => {
             id: '5e2dd71d-1708-482e-a74e-8bfed3a334a1',
             originalId: 'S002',
             status: 'ACCEPTED',
+            dryingStatus: 'DONE',
+            preparationStatus: 'DONE',
             projectCode: 'SOILFER-US',
             sampleType: 'SOIL',
             createdAt: new Date(Date.now() - 3600000 * 24 * 3).toISOString()
@@ -125,7 +127,7 @@ describe('Workflow Map Redesign Contract Tests', () => {
 
     describe('3. Dynamic Stage Pruning for Wet Chemistry Only', () => {
         test('sample with only pH and EC only renders Chemical Analysis and Preparation', () => {
-            const sample = { id: 'SMP-CHEM-1', status: 'ACCEPTED' };
+            const sample = { id: 'SMP-CHEM-1', status: 'ACCEPTED', dryingStatus: 'DONE', preparationStatus: 'DONE' };
             const workItems = [
                 { id: 'wi-dry', analysis: 'DRYING', status: 'COMPLETED' },
                 { id: 'wi-prep', analysis: 'PREPARATION', status: 'COMPLETED' },
@@ -144,7 +146,7 @@ describe('Workflow Map Redesign Contract Tests', () => {
 
     describe('4. Explicit Edge DAG Validity', () => {
         test('overview and dependency edges have valid source and destination references', () => {
-            const sample = { id: 'SMP-DAG-1', status: 'ACCEPTED' };
+            const sample = { id: 'SMP-DAG-1', status: 'ACCEPTED', dryingStatus: 'DONE', preparationStatus: 'DONE' };
             const workItems = [
                 { id: 'wi-dry', analysis: 'DRYING', status: 'COMPLETED' },
                 { id: 'wi-prep', analysis: 'PREPARATION', status: 'COMPLETED' },

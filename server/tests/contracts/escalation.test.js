@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const { getAuthToken } = require('../setup');
 const { runEscalationChecks } = require('../../services/escalationService');
@@ -25,11 +27,11 @@ describe('SD-14: Work Escalation Service Contract', () => {
 
         // Clean up
         await prisma.notification.deleteMany({ where: { userId: mgrUser.id } });
-        await prisma.workItem.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
 
         // Create sample in PROCESSING
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
@@ -46,7 +48,7 @@ describe('SD-14: Work Escalation Service Contract', () => {
 
         // Create work item that has been NOT_ASSIGNED for 3 days (72h > 48h)
         const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: wiUnassignedId,
                 sampleId,
@@ -62,7 +64,7 @@ describe('SD-14: Work Escalation Service Contract', () => {
 
         // Create work item that has been IN_PROGRESS for 4 days (96h > 72h)
         const fourDaysAgo = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: wiStalledId,
                 sampleId,
@@ -80,8 +82,8 @@ describe('SD-14: Work Escalation Service Contract', () => {
 
     afterAll(async () => {
         await prisma.notification.deleteMany({ where: { userId: mgrUser.id } });
-        await prisma.workItem.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. An unassigned work item sitting for >2 days escalates to the manager without opening a page', async () => {

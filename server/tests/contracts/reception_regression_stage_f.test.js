@@ -1,3 +1,4 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { ensureTestLab } = require('../setup');
 const request = require('supertest');
 const app = require('../../app');
@@ -61,12 +62,12 @@ describe('Stage F: Reception Contract and End-to-End Regression Suite (RC-20)', 
                         ]
                     }
                 });
-                await prisma.workItem.deleteMany({
+                await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
                     where: { sampleId: { in: sampleIds } }
-                });
-                await prisma.sample.deleteMany({
+                }), select: { id: true } })).map(row => row.id), { single: false });
+                await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
                     where: { id: { in: sampleIds } }
-                });
+                }), select: { id: true } })).map(row => row.id), { single: false });
             }
             if (trackedConsignmentId) {
                 await prisma.consignment.deleteMany({

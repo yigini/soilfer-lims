@@ -1,4 +1,5 @@
 'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 
 const request = require('supertest');
 const app = require('../../app');
@@ -45,9 +46,9 @@ describe('Reception Compliance Checklist & Manager Exception Contracts (#117, #1
 
     afterAll(async () => {
         if (trackedSampleIds.size > 0) {
-            await prisma.workItem.deleteMany({ where: { sampleId: { in: Array.from(trackedSampleIds) } } });
+            await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: { in: Array.from(trackedSampleIds) } } }), select: { id: true } })).map(row => row.id), { single: false });
             await prisma.result.deleteMany({ where: { sampleId: { in: Array.from(trackedSampleIds) } } });
-            await prisma.sample.deleteMany({ where: { id: { in: Array.from(trackedSampleIds) } } });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: Array.from(trackedSampleIds) } } }), select: { id: true } })).map(row => row.id), { single: false });
         }
         if (trackedProjectIds.size > 0) {
             await prisma.project.deleteMany({ where: { id: { in: Array.from(trackedProjectIds) } } });

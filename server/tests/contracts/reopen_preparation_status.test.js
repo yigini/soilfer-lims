@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -12,11 +14,11 @@ describe('SD-08: Stop Fabricating Preparation Records on Reopen Contract', () =>
         mgrGtmToken = await getAuthToken('LAB_MANAGER', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
 
         // Clean up
-        await prisma.workItem.deleteMany({ where: { sampleId: { in: [sampleNullId, sampleDoneId] } } });
-        await prisma.sample.deleteMany({ where: { id: { in: [sampleNullId, sampleDoneId] } } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: { in: [sampleNullId, sampleDoneId] } } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: [sampleNullId, sampleDoneId] } } }), select: { id: true } })).map(row => row.id), { single: false });
 
         // Sample with NULL drying and prep (bypassed / legacy import)
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleNullId,
                 originalId: sampleNullId,
@@ -33,7 +35,7 @@ describe('SD-08: Stop Fabricating Preparation Records on Reopen Contract', () =>
         });
 
         // Sample with DONE drying and prep
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleDoneId,
                 originalId: sampleDoneId,
@@ -51,11 +53,12 @@ describe('SD-08: Stop Fabricating Preparation Records on Reopen Contract', () =>
     });
 
     afterAll(async () => {
-        await prisma.workItem.deleteMany({ where: { sampleId: { in: [sampleNullId, sampleDoneId] } } });
-        await prisma.sample.deleteMany({ where: { id: { in: [sampleNullId, sampleDoneId] } } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: { in: [sampleNullId, sampleDoneId] } } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: [sampleNullId, sampleDoneId] } } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
-    test('1. Reopening a sample with NULL preparation status leaves them NULL', async () => {
+    test('1. Adding orders to an approved sample refuses without fabricating NULL preparation evidence', async () => {
+        const before = await prisma.sample.findUnique({ where: { id: sampleNullId } });
         const res = await request(app)
             .put(`/api/samples/${sampleNullId}/analyses`)
             .set('Authorization', `Bearer ${mgrGtmToken}`)
@@ -63,15 +66,18 @@ describe('SD-08: Stop Fabricating Preparation Records on Reopen Contract', () =>
                 analyses: ['PH_H2O', 'EC']
             });
 
-        expect(res.status).toBe(200);
+        expect(res.status).toBe(409);
+        expect(res.body.code).toBe('AMENDMENT_WORKFLOW_REQUIRED');
 
         const sample = await prisma.sample.findUnique({ where: { id: sampleNullId } });
-        expect(sample.status).toBe('PROCESSING');
+        expect(sample).toEqual(before);
+        expect(sample.status).toBe('APPROVED');
         expect(sample.dryingStatus).toBeNull();
         expect(sample.preparationStatus).toBeNull();
     });
 
-    test('2. Reopening a sample with DONE preparation status leaves them DONE', async () => {
+    test('2. Adding orders to an approved sample preserves DONE preparation evidence', async () => {
+        const before = await prisma.sample.findUnique({ where: { id: sampleDoneId } });
         const res = await request(app)
             .put(`/api/samples/${sampleDoneId}/analyses`)
             .set('Authorization', `Bearer ${mgrGtmToken}`)
@@ -79,29 +85,31 @@ describe('SD-08: Stop Fabricating Preparation Records on Reopen Contract', () =>
                 analyses: ['PH_H2O', 'EC']
             });
 
-        expect(res.status).toBe(200);
+        expect(res.status).toBe(409);
+        expect(res.body.code).toBe('AMENDMENT_WORKFLOW_REQUIRED');
 
         const sample = await prisma.sample.findUnique({ where: { id: sampleDoneId } });
-        expect(sample.status).toBe('PROCESSING');
+        expect(sample).toEqual(before);
+        expect(sample.status).toBe('APPROVED');
         expect(sample.dryingStatus).toBe('DONE');
         expect(sample.preparationStatus).toBe('DONE');
     });
 
-    test('3. Undoing approval on sample with NULL preparation status preserves NULL', async () => {
-        // Put sampleNullId back to APPROVED to test undoApproval path
-        await prisma.sample.update({
-            where: { id: sampleNullId },
-            data: { status: 'APPROVED' }
-        });
+    test('3. Refused undo preserves approval and NULL preparation evidence', async () => {
+        const before = await prisma.sample.findUnique({ where: { id: sampleNullId } });
+        const beforeAudits = await prisma.auditLog.findMany({ where: { sampleId: sampleNullId }, orderBy: { id: 'asc' } });
 
         const res = await request(app)
             .post(`/api/samples/${sampleNullId}/undo-approve`)
             .set('Authorization', `Bearer ${mgrGtmToken}`)
             .send({ reason: 'Audit verification test' });
 
-        expect(res.status).toBe(200);
+        expect(res.status).toBe(409);
+        expect(res.body.code).toBe('AMENDMENT_WORKFLOW_REQUIRED');
 
         const sample = await prisma.sample.findUnique({ where: { id: sampleNullId } });
+        expect(sample).toEqual(before);
+        expect(await prisma.auditLog.findMany({ where: { sampleId: sampleNullId }, orderBy: { id: 'asc' } })).toEqual(beforeAudits);
         expect(sample.dryingStatus).toBeNull();
         expect(sample.preparationStatus).toBeNull();
     });

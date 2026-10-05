@@ -5,13 +5,16 @@ const { generateToken } = require('../setup');
 const { usersDb, workItemsDb, samplesDb } = require('../../db');
 
 describe('8.1 Section E: Approval & Closure Rules', () => {
-    let mgrToken;
+    let mgrToken, techToken, technicianUsername;
     let sampleId, workItemId;
 
     beforeAll(async () => {
         await ensureTestLab('LAB-CLO', 'CLO');
         const suffix = Date.now();
         const mgr = usersDb.create({ username: `mgr_clo_${suffix}`, role: 'LAB_MANAGER', labId: 'LAB-CLO', countries: ['CLO'] });
+        const tech = usersDb.create({ username: `tech_clo_${suffix}`, role: 'LAB_TECHNICIAN', labId: 'LAB-CLO' });
+        technicianUsername = tech.username;
+        techToken = generateToken(tech);
         mgrToken = generateToken(mgr);
     });
 
@@ -49,13 +52,15 @@ describe('8.1 Section E: Approval & Closure Rules', () => {
     });
 
     test('Scenario 2: Approve Success after All Items Accepted', async () => {
-        // Force WorkItem to ACCEPTED (simulating review)
-        // Force WorkItem to ACCEPTED (simulating review)
-        const allItems = workItemsDb.getAll().filter(w => String(w.sampleId) === String(sampleId));
-
-        allItems.forEach(w => {
-            workItemsDb.update(w.id, { status: 'ACCEPTED' });
-        });
+        const item = workItemsDb.getAll().find(w => String(w.sampleId) === String(sampleId) && w.analysis === 'PH_H2O');
+        expect((await request(app).post('/api/work/assign').set('Authorization', `Bearer ${mgrToken}`)
+            .send({ workItemIds: [item.id], assignee: technicianUsername })).status).toBe(200);
+        expect((await request(app).post('/api/workbench/batch-save').set('Authorization', `Bearer ${techToken}`)
+            .send({ draft: false, entries: [{ workItemId: item.id, value: '6.5' }] })).status).toBe(200);
+        expect((await request(app).post('/api/workbench/v2/submissions/commit').set('Authorization', `Bearer ${techToken}`)
+            .send({ sampleIds: [sampleId], workItemIds: [item.id] })).status).toBe(200);
+        expect((await request(app).post(`/api/work/${item.id}/review`).set('Authorization', `Bearer ${mgrToken}`)
+            .send({ decision: 'ACCEPT' })).status).toBe(200);
 
         const res = await request(app)
             .post(`/api/samples/${sampleId}/approve`)
@@ -105,7 +110,8 @@ describe('8.1 Section E: Approval & Closure Rules', () => {
             .set('Authorization', `Bearer ${mgrToken}`)
             .send({ status: 'PROCESSING' });
 
-        expect(res.status).toBe(400);
-        expect(res.body.error).toMatch(/Invalid transition/);
+        expect(res.status).toBe(409);
+        expect(res.body.code).toBe('ILLEGAL_STATUS_TRANSITION');
+        expect(samplesDb.findById(sampleId).status).toBe('ARCHIVED');
     });
 });

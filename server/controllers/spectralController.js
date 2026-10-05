@@ -7,6 +7,8 @@ const fs = require('fs');
 const path = require('path');
 const { broadcastToLab } = require('../wsServer');
 const scopeGuard = require('../utils/scopeGuard');
+const spectralState = require('../services/spectralWorkItemStateService');
+const stateRules = require('../services/workflowStateRules');
 
 const UPLOADS_SPECTRA_DIR = path.join(__dirname, '..', 'uploads', 'spectra');
 if (!fs.existsSync(UPLOADS_SPECTRA_DIR)) {
@@ -664,8 +666,9 @@ exports.commitBatch = async (req, res) => {
         const { manifestId, idempotencyKey, decisions = {}, equipmentId: bodyEquipmentId, autoApprove } = req.body || {};
 
         // Idempotency check
-        if (idempotencyKey && idempotencyReceipts.has(idempotencyKey)) {
-            return res.json(idempotencyReceipts.get(idempotencyKey));
+        const receiptKey = JSON.stringify([user.username, user.labId, manifestId, idempotencyKey]);
+        if (idempotencyKey && idempotencyReceipts.has(receiptKey)) {
+            return res.json(idempotencyReceipts.get(receiptKey));
         }
 
         if (!manifestId) {
@@ -712,11 +715,91 @@ exports.commitBatch = async (req, res) => {
         };
 
         const manifestDir = path.join(UPLOADS_STAGING_DIR, manifestId);
+        const committedEntries = { ...manifest.committedEntries };
+        const settledEntries = { ...manifest.settledEntries };
+        const entryKey = item => String(item.id || item.filename);
+        const saveReceipt = () => {
+            const pendingPath = `${manifestPath}.pending`;
+            try {
+                fs.writeFileSync(pendingPath, JSON.stringify({ ...manifest, committedEntries, settledEntries }));
+                fs.renameSync(pendingPath, manifestPath);
+            } catch (receiptError) {
+                // Committed scan identities can recover an interrupted receipt.
+                console.warn('[COMMIT] Receipt save interrupted:', receiptError.message);
+            }
+        };
+        const receiptFor = (scan, item, sample) => ({ id: scan.id, filename: item.filename, sampleId: scan.sampleId,
+            labId: sample?.labId || null, qcStatus: scan.qcStatus, workItemId: scan.workItemId || null });
+
+        // Recover a committed receipt even if saving the manifest was interrupted
+        // after the transaction committed. The entry identity travels with the scan.
+        for (const item of manifest.items) {
+            const key = entryKey(item);
+            if (Object.hasOwn(committedEntries, key) || Object.hasOwn(settledEntries, key)) continue;
+            const scan = await prisma.spectralData.findFirst({ where: { AND: [
+                { metadata: { contains: `"manifestId":${JSON.stringify(manifestId)}` } },
+                { metadata: { contains: `"manifestEntryId":${JSON.stringify(key)}` } }
+            ] } });
+            if (scan) {
+                await spectralState.assertParent(prisma, scan.sampleId, user);
+                stateRules.assertScope(user, { assignedLab: scan.labId });
+                const sample = await prisma.sample.findUnique({ where: { id: scan.sampleId } });
+                committedEntries[key] = receiptFor(scan, item, sample);
+            }
+        }
+
+        await spectralState.preflightBatch(manifest.items.filter(item => !item.parseError &&
+            !Object.hasOwn(committedEntries, entryKey(item)) && !Object.hasOwn(settledEntries, entryKey(item))).map(item => ({ id: item.id, filename: item.filename,
+            check: async () => {
+                const decisionObj = decisions[item.id] || decisions[item.filename] || {};
+                const decision = decisionObj.decision || item.suggestedAction || 'PROCEED';
+                if (decision === 'SKIP') return;
+                const sampleId = decisionObj.sampleId || item.sampleId || item.matchedSample?.id;
+                if (!sampleId) return;
+                const sample = await prisma.sample.findUnique({ where: { id: sampleId }, include: { workItems: true } });
+                if (!sample) return;
+                const targetId = decisionObj.targetWorkItemId || item.targetWorkItemId || item.matchedWorkItem?.id;
+                const target = targetId ? sample.workItems.find(w => w.id === targetId) ||
+                    await prisma.workItem.findUnique({ where: { id: targetId } }) : null;
+                if (target && user.role === 'LAB_TECHNICIAN' && target.assignedTo && target.assignedTo !== user.username) return;
+                const reason = spectralState.suppliedReopenReason(req.body.reopenReason, decisionObj.reopenReason);
+                const executableItem = await spectralState.prepareItem(prisma, target, sample.id, user,
+                    { reopenReason: reason, preflight: true });
+                if (decision === 'REPLACE' || item.duplicateScanId) {
+                    let replicateNo = decisionObj.replicateNo ? parseInt(decisionObj.replicateNo, 10) : 1;
+                    if (decision === 'ADD_REPLICATE') replicateNo = 1 + await prisma.spectralData.count({
+                        where: { sampleId: sample.id, modality: item.modality, status: { not: 'DELETED' } }
+                    });
+                    const priorScan = await prisma.spectralData.findFirst({ where: { sampleId: sample.id,
+                        modality: item.modality, replicateNo, isCurrent: true, status: { not: 'DELETED' } } });
+                    if (priorScan) {
+                        const prior = await spectralState.freshScan(prisma, priorScan, user);
+                        await spectralState.preparePriorItem(prisma, prior, user, executableItem?.id, reason, { preflight: true });
+                    }
+                }
+            } })));
 
         for (const item of manifest.items) {
+            const key = entryKey(item);
+            if (Object.hasOwn(committedEntries, key)) {
+                results.success++;
+                results.committedScans.push(committedEntries[key]);
+                continue;
+            }
+            if (Object.hasOwn(settledEntries, key)) {
+                const receipt = settledEntries[key];
+                if (receipt.status === 'SKIPPED') results.skipped++;
+                else {
+                    results.failed++;
+                    results.errors.push({ filename: receipt.filename, error: receipt.error, terminal: true });
+                }
+                continue;
+            }
             if (item.parseError) {
                 results.failed++;
-                results.errors.push({ filename: item.filename, error: item.parseError });
+                results.errors.push({ filename: item.filename, error: item.parseError, terminal: true });
+                settledEntries[key] = { id: key, filename: item.filename, status: 'PARSE_ERROR', error: item.parseError };
+                saveReceipt();
                 continue;
             }
 
@@ -725,6 +808,8 @@ exports.commitBatch = async (req, res) => {
 
             if (decision === 'SKIP') {
                 results.skipped++;
+                settledEntries[key] = { id: key, filename: item.filename, status: 'SKIPPED' };
+                saveReceipt();
                 continue;
             }
 
@@ -743,28 +828,6 @@ exports.commitBatch = async (req, res) => {
             if (!sample) {
                 results.failed++;
                 results.errors.push({ filename: item.filename, error: 'SAMPLE_NOT_FOUND' });
-                continue;
-            }
-
-            // Operational Gates Prerequisite Check (Amendment 4)
-            const dryingGate = sample.workItems.find(w => w.analysis === 'DRYING');
-            const prepGate = sample.workItems.find(w => w.analysis === 'PREPARATION');
-            const isDone = g => g && ['COMPLETED', 'ACCEPTED', 'SUBMITTED'].includes(g.status);
-
-            if (dryingGate && !isDone(dryingGate)) {
-                results.failed++;
-                results.errors.push({
-                    filename: item.filename,
-                    error: `DRYING_PREREQUISITE_INCOMPLETE: Sample ${sample.labId || sample.id} drying gate must be completed.`
-                });
-                continue;
-            }
-            if (prepGate && !isDone(prepGate)) {
-                results.failed++;
-                results.errors.push({
-                    filename: item.filename,
-                    error: `PREPARATION_PREREQUISITE_INCOMPLETE: Sample ${sample.labId || sample.id} preparation gate must be completed.`
-                });
                 continue;
             }
 
@@ -804,6 +867,8 @@ exports.commitBatch = async (req, res) => {
 
             try {
                 const committedScan = await prisma.$transaction(async (tx) => {
+                    const executableItem = await spectralState.prepareItem(tx, targetWorkItem, sample.id, user,
+                        { reopenReason: spectralState.suppliedReopenReason(req.body.reopenReason, decisionObj.reopenReason) });
                     let supersedesId = null;
                     if (decision === 'REPLACE' || item.duplicateScanId) {
                         const priorScan = await tx.spectralData.findFirst({
@@ -817,15 +882,14 @@ exports.commitBatch = async (req, res) => {
                         });
                         if (priorScan) {
                             supersedesId = priorScan.id;
-                            await tx.spectralData.update({
-                                where: { id: priorScan.id },
-                                data: {
-                                    isCurrent: false,
-                                    supersededBy: newScanId,
-                                    supersededAt: new Date(),
-                                    supersedeReason: decisionObj.rescanReason || 'Replaced by authorized rescan'
-                                }
+                            const currentPrior = await spectralState.freshScan(tx, priorScan, user);
+                            const priorItem = await spectralState.preparePriorItem(tx, currentPrior, user,
+                                executableItem?.id, spectralState.suppliedReopenReason(req.body.reopenReason, decisionObj.reopenReason));
+                            await spectralState.updateScan(tx, currentPrior, {
+                                isCurrent: false, supersededBy: newScanId, supersededAt: new Date(),
+                                supersedeReason: decisionObj.rescanReason || 'Replaced by authorized rescan'
                             });
+                            await spectralState.recomputePriorItem(tx, priorItem, user);
                         }
                     }
 
@@ -868,6 +932,7 @@ exports.commitBatch = async (req, res) => {
                                 operator: user.username,
                                 scanDate: new Date().toISOString(),
                                 manifestId: manifestId,
+                                manifestEntryId: key,
                                 replicateNo: replicateNo,
                                 attemptNo: attemptNo
                             }),
@@ -880,80 +945,38 @@ exports.commitBatch = async (req, res) => {
                         }
                     });
 
-                    // Physical Replicate Completeness Check (Amendment 3 & 6)
-                    if (targetWorkItem && item.qcStatus !== 'FAIL') {
-                        const requiredReplicates = 1; // standard requirement
-                        const validScansCount = await tx.spectralData.count({
-                            where: {
-                                workItemId: targetWorkItem.id,
-                                isCurrent: true,
-                                status: { notIn: ['REJECTED', 'DELETED'] },
-                                qcStatus: { not: 'FAIL' }
-                            }
+                    if (executableItem && item.qcStatus !== 'FAIL') {
+                        await spectralState.completeItem(tx, executableItem, user, {
+                            result: `Spectrum Acquired (${item.modality} · QC ${item.qcStatus})`,
+                            equipmentId: effectiveEquipmentId,
+                            note: `Spectrum acquired (${item.modality} · QC ${item.qcStatus}) by ${user.username}`
                         });
-
-                        // validScansCount includes the new scan just created in the transaction
-                        if (validScansCount >= requiredReplicates) {
-                            const history = Array.isArray(targetWorkItem.history)
-                                ? targetWorkItem.history
-                                : (typeof targetWorkItem.history === 'string' ? JSON.parse(targetWorkItem.history || '[]') : []);
-
-                            history.push({
-                                status: 'COMPLETED',
-                                note: `Spectrum acquired (${item.modality} · QC ${item.qcStatus}) by ${user.username}`,
-                                changedBy: user.username,
-                                timestamp: new Date().toISOString()
-                            });
-
-                            // Update WorkItem status to COMPLETED — ZERO Result rows created!
-                            await tx.workItem.update({
-                                where: { id: targetWorkItem.id },
-                                data: {
-                                    status: 'COMPLETED',
-                                    completedAt: new Date(),
-                                    result: `Spectrum Acquired (${item.modality} · QC ${item.qcStatus})`,
-                                    equipmentId: effectiveEquipmentId,
-                                    history: JSON.stringify(history)
-                                }
-                            });
-                        }
                     }
 
-                    // AuditLog entry
-                    await tx.auditLog.create({
-                        data: {
-                            id: crypto.randomUUID(),
-                            entity: 'SPECTRA',
-                            entityId: created.id,
-                            action: canAutoApprove ? 'SPECTRA_AUTO_APPROVED' : 'SPECTRA_COMMIT',
-                            performedBy: user.username,
-                            timestamp: new Date(),
-                            details: `Committed ${item.modality} scan for sample ${sample.labId || sample.id} (QC: ${item.qcStatus})`
-                        }
-                    });
+                    await spectralState.auditScan(tx, created, user,
+                        canAutoApprove ? 'SPECTRA_AUTO_APPROVED' : 'SPECTRA_COMMIT',
+                        `Committed ${item.modality} scan for sample ${sample.labId || sample.id} (QC: ${item.qcStatus})`);
 
                     return created;
                 });
 
                 results.success++;
-                results.committedScans.push({
-                    id: committedScan.id,
-                    filename: item.filename,
-                    sampleId: sample.id,
-                    labId: sample.labId,
-                    qcStatus: item.qcStatus,
-                    workItemId: targetWorkItem?.id || null
-                });
-            } catch (itemErr) {
+                const receipt = receiptFor(committedScan, item, sample);
+                results.committedScans.push(receipt);
+                committedEntries[key] = receipt;
+                saveReceipt();
+            } catch (caughtError) {
+                const itemErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
                 console.error(`[COMMIT] Error on item ${item.filename}:`, itemErr.message);
                 results.failed++;
-                results.errors.push({ filename: item.filename, error: itemErr.message });
+                results.errors.push({ filename: item.filename, error: itemErr.message, ...(itemErr.code && { code: itemErr.code }) });
             }
         }
 
-        // Clean up staged manifest folder on completion
+        // A partial receipt remains retryable; successful entries are never replayed.
+        const complete = manifest.items.every(item => Object.hasOwn(committedEntries, entryKey(item)) || Object.hasOwn(settledEntries, entryKey(item)));
         try {
-            if (fs.existsSync(manifestDir)) {
+            if (complete && fs.existsSync(manifestDir)) {
                 fs.rmSync(manifestDir, { recursive: true, force: true });
             }
         } catch (cleanupErr) {
@@ -963,17 +986,21 @@ exports.commitBatch = async (req, res) => {
         const responsePayload = {
             success: true,
             manifestId,
+            complete,
+            settledEntries: Object.values(settledEntries),
             ...results
         };
 
-        if (idempotencyKey) {
-            idempotencyReceipts.set(idempotencyKey, responsePayload);
+        if (idempotencyKey && complete) {
+            idempotencyReceipts.set(receiptKey, responsePayload);
         }
 
         res.json(responsePayload);
     } catch (e) {
         console.error('[SPECTRAL COMMIT] Error:', e);
-        res.status(500).json({ error: e.message });
+        const error = stateRules.mapStateError(e);
+        res.status(error.statusCode || 500).json({ error: error.message, ...(error.code && { code: error.code }),
+            ...(error.details && { details: error.details }) });
     }
 };
 
@@ -1049,75 +1076,25 @@ exports.linkTask = async (req, res) => {
             });
         }
 
-        // Operational gates prerequisite check
-        const sample = workItem.sample;
-        if (sample) {
-            const gates = await prisma.workItem.findMany({
-                where: { sampleId: sample.id, analysis: { in: ['DRYING', 'PREPARATION'] } }
+        const updated = await prisma.$transaction(async tx => {
+            const currentScan = await spectralState.freshScan(tx, scan, user);
+            const item = await spectralState.prepareItem(tx, workItem, workItem.sampleId, user,
+                { reopenReason: req.body.reopenReason });
+            const priorItem = await spectralState.preparePriorItem(tx, currentScan, user, item.id, req.body.reopenReason);
+            const updatedScan = await spectralState.updateScan(tx, currentScan, {
+                workItemId: item.id, sampleId: item.sampleId
             });
-            const dryingGate = gates.find(g => g.analysis === 'DRYING');
-            const prepGate = gates.find(g => g.analysis === 'PREPARATION');
-            const isDone = g => g && ['COMPLETED', 'ACCEPTED', 'SUBMITTED'].includes(g.status);
-
-            if (dryingGate && !isDone(dryingGate)) {
-                return res.status(400).json({
-                    error: 'DRYING_PREREQUISITE_INCOMPLETE',
-                    message: `Sample drying must be completed before linking spectra.`
-                });
-            }
-            if (prepGate && !isDone(prepGate)) {
-                return res.status(400).json({
-                    error: 'PREPARATION_PREREQUISITE_INCOMPLETE',
-                    message: `Sample preparation must be completed before linking spectra.`
-                });
-            }
-        }
-
-        // Link in transaction
-        const updated = await prisma.$transaction(async (tx) => {
-            const updatedScan = await tx.spectralData.update({
-                where: { id: scan.id },
-                data: {
-                    workItemId: workItem.id,
-                    sampleId: sample ? sample.id : scan.sampleId
-                }
+            await spectralState.recomputePriorItem(tx, priorItem, user);
+            const updatedWI = await spectralState.completeItem(tx, item, user, {
+                result: `Spectrum Linked (${currentScan.modality} · QC ${currentScan.qcStatus})`,
+                equipmentId: currentScan.equipmentId || item.equipmentId,
+                note: `Linked existing spectrum (${currentScan.id}) by ${user.username}${managerOverrideReason ? ` [Override: ${managerOverrideReason}]` : ''}`
             });
-
-            // Update WorkItem to COMPLETED
-            const history = Array.isArray(workItem.history)
-                ? workItem.history
-                : (typeof workItem.history === 'string' ? JSON.parse(workItem.history || '[]') : []);
-
-            history.push({
-                status: 'COMPLETED',
-                note: `Linked existing spectrum (${scan.id}) by ${user.username}${managerOverrideReason ? ` [Override: ${managerOverrideReason}]` : ''}`,
-                changedBy: user.username,
-                timestamp: new Date().toISOString()
-            });
-
-            const updatedWI = await tx.workItem.update({
-                where: { id: workItem.id },
-                data: {
-                    status: 'COMPLETED',
-                    completedAt: new Date(),
-                    result: `Spectrum Linked (${scan.modality} · QC ${scan.qcStatus})`,
-                    equipmentId: scan.equipmentId || workItem.equipmentId,
-                    history: JSON.stringify(history)
-                }
-            });
-
-            await tx.auditLog.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    entity: 'WORK_ITEM',
-                    entityId: workItem.id,
-                    action: 'LINK_SPECTRUM',
-                    performedBy: user.username,
-                    timestamp: new Date(),
-                    details: `Linked scan ${scan.id} to workItem ${workItem.id} (${workItem.analysis})`
-                }
-            });
-
+            await tx.auditLog.create({ data: {
+                id: crypto.randomUUID(), entity: 'WORK_ITEM', entityId: item.id,
+                action: 'LINK_SPECTRUM', performedBy: user.username, timestamp: new Date(), sampleId: item.sampleId,
+                details: `Linked scan ${currentScan.id} to workItem ${item.id} (${item.analysis})`
+            } });
             return { updatedScan, updatedWI };
         });
 
@@ -1127,9 +1104,9 @@ exports.linkTask = async (req, res) => {
             workItemId: updated.updatedWI.id,
             workItemStatus: updated.updatedWI.status
         });
-    } catch (e) {
-        console.error('[SPECTRAL LINK-TASK] Error:', e);
-        res.status(500).json({ error: e.message });
+    } catch (error) {
+        const mapped = stateRules.mapStateError(error);
+        res.status(mapped.statusCode || 500).json({ error: mapped.message, ...(mapped.code && { code: mapped.code }) });
     }
 };
 
@@ -1202,6 +1179,8 @@ exports.uploadBatch = async (req, res) => {
             console.log(`[SPECTRAL] Context sample: ${contextSample?.id} (labId=${contextSample?.labId}, originalId=${contextSample?.originalId})`);
         }
 
+        async function processScans(preflight) {
+        const checks = [];
         const results = {
             success: 0,
             failed: 0,
@@ -1279,12 +1258,7 @@ exports.uploadBatch = async (req, res) => {
                     continue;
                 }
 
-                if (!sample.assignedLab && user.labId) {
-                    await prisma.sample.update({
-                        where: { id: sample.id },
-                        data: { assignedLab: user.labId }
-                    });
-                }
+
             }
 
             // --- STRICT MATCH: Reject unmatched spectra (unless CONTROL scan) ---
@@ -1376,29 +1350,30 @@ exports.uploadBatch = async (req, res) => {
             // SL-06: Raw File Storage (Byte-identical binary preservation)
             const newScanId = `spec-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
             let sourceFilePath = null;
-            try {
-                let rawBuffer = scanItem.rawBuffer;
-                if (!rawBuffer) {
-                    if (scanItem.rawContent) {
-                        rawBuffer = Buffer.isBuffer(scanItem.rawContent)
-                            ? scanItem.rawContent
-                            : Buffer.from(scanItem.rawContent, 'utf8');
-                    } else {
-                        const lines = ['wavelength,value'];
-                        for (let i = 0; i < wavelengths.length; i++) {
-                            lines.push(`${wavelengths[i]},${values[i] !== undefined ? values[i] : ''}`);
+            const persistRawFile = () => {
+                try {
+                    let rawBuffer = scanItem.rawBuffer;
+                    if (!rawBuffer) {
+                        if (scanItem.rawContent) {
+                            rawBuffer = Buffer.isBuffer(scanItem.rawContent)
+                                ? scanItem.rawContent
+                                : Buffer.from(scanItem.rawContent, 'utf8');
+                        } else {
+                            const lines = ['wavelength,value'];
+                            for (let i = 0; i < wavelengths.length; i++) {
+                                lines.push(`${wavelengths[i]},${values[i] !== undefined ? values[i] : ''}`);
+                            }
+                            rawBuffer = Buffer.from(lines.join('\n'), 'utf8');
                         }
-                        rawBuffer = Buffer.from(lines.join('\n'), 'utf8');
                     }
+                    const safeName = (scanItem.filename || 'scan.csv').replace(/[^a-zA-Z0-9._-]/g, '_');
+                    const fullFilePath = path.join(UPLOADS_SPECTRA_DIR, `${newScanId}_${safeName}`);
+                    fs.writeFileSync(fullFilePath, rawBuffer);
+                    sourceFilePath = path.relative(path.join(__dirname, '..'), fullFilePath).replace(/\\/g, '/');
+                } catch (fsErr) {
+                    console.warn('[SPECTRAL] Warning: Failed to persist raw file blob:', fsErr.message);
                 }
-                const safeName = (scanItem.filename || 'scan.csv').replace(/[^a-zA-Z0-9._-]/g, '_');
-                const fullFilePath = path.join(UPLOADS_SPECTRA_DIR, `${newScanId}_${safeName}`);
-                fs.writeFileSync(fullFilePath, rawBuffer);
-                sourceFilePath = path.relative(path.join(__dirname, '..'), fullFilePath).replace(/\\/g, '/');
-            } catch (fsErr) {
-                console.warn('[SPECTRAL] Warning: Failed to persist raw file blob:', fsErr.message);
-            }
-
+            };
             let equipmentId = scanItem.equipmentId || req.body?.equipmentId || null;
             if (!equipmentId && effectiveLabId) {
                 const activeEqs = await prisma.equipmentAsset.findMany({
@@ -1541,30 +1516,17 @@ exports.uploadBatch = async (req, res) => {
                 }) || null;
             }
 
-            // Check operational gates if linking to work item (Amendment 4)
-            if (sample && targetWorkItem) {
-                const gates = await prisma.workItem.findMany({
-                    where: { sampleId: sample.id, analysis: { in: ['DRYING', 'PREPARATION'] } }
-                });
-                const dryingGate = gates.find(g => g.analysis === 'DRYING');
-                const prepGate = gates.find(g => g.analysis === 'PREPARATION');
-                const isDone = g => g && ['COMPLETED', 'ACCEPTED', 'SUBMITTED'].includes(g.status);
-                if (dryingGate && !isDone(dryingGate)) {
-                    results.failed++;
-                    results.errors.push({
-                        filename: scanItem.filename,
-                        error: `DRYING_PREREQUISITE_INCOMPLETE: Sample drying must be completed before recording spectra.`
-                    });
-                    continue;
-                }
-                if (prepGate && !isDone(prepGate)) {
-                    results.failed++;
-                    results.errors.push({
-                        filename: scanItem.filename,
-                        error: `PREPARATION_PREREQUISITE_INCOMPLETE: Sample preparation must be completed before recording spectra.`
-                    });
-                    continue;
-                }
+            if (preflight) {
+                checks.push({ filename: scanItem.filename, sampleId: sample?.id, check: async () => {
+                    const executableItem = await spectralState.prepareItem(prisma, targetWorkItem, sample?.id, user,
+                        { reopenReason: spectralState.suppliedReopenReason(req.body.reopenReason, scanItem.reopenReason), preflight: true });
+                    if (priorScan) {
+                        const currentPrior = await spectralState.freshScan(prisma, priorScan, user);
+                        await spectralState.preparePriorItem(prisma, currentPrior, user, executableItem?.id,
+                            spectralState.suppliedReopenReason(req.body.reopenReason, scanItem.reopenReason), { preflight: true });
+                    }
+                } });
+                continue;
             }
 
             // SL-15 & SL-16: Atomic Database Transaction
@@ -1572,18 +1534,24 @@ exports.uploadBatch = async (req, res) => {
             let updatedWorkItemId = null;
             try {
                 newScan = await prisma.$transaction(async (tx) => {
+                    if (sample && !sample.assignedLab && user?.labId && user.role !== 'SUPER_ADMIN') {
+                        await tx.sample.update({ where: { id: sample.id }, data: { assignedLab: user.labId } });
+                    }
+                    const executableItem = await spectralState.prepareItem(tx, targetWorkItem, sample?.id, user,
+                        { reopenReason: spectralState.suppliedReopenReason(req.body.reopenReason, scanItem.reopenReason) });
                     // Update prior scan supersession
                     if (priorScan) {
-                        await tx.spectralData.update({
-                            where: { id: priorScan.id },
-                            data: {
-                                isCurrent: false,
-                                supersededBy: newScanId,
-                                supersededAt: new Date(),
-                                supersedeReason: scanItem.rescanReason || 'New determination/rescan uploaded'
-                            }
+                        const currentPrior = await spectralState.freshScan(tx, priorScan, user);
+                        const priorItem = await spectralState.preparePriorItem(tx, currentPrior, user,
+                            executableItem?.id, spectralState.suppliedReopenReason(req.body.reopenReason, scanItem.reopenReason));
+                        await spectralState.updateScan(tx, currentPrior, {
+                            isCurrent: false, supersededBy: newScanId, supersededAt: new Date(),
+                            supersedeReason: scanItem.rescanReason || 'New determination/rescan uploaded'
                         });
+                        await spectralState.recomputePriorItem(tx, priorItem, user);
                     }
+
+                    persistRawFile();
 
                     // Create new spectral record with workItemId and attemptNo (Amendment 3)
                     const attemptNo = scanItem.attemptNo || (supersedesId ? 2 : 1);
@@ -1650,66 +1618,29 @@ exports.uploadBatch = async (req, res) => {
                         }
                     });
 
-                    // Create Audit Log
-                    await tx.auditLog.create({
-                        data: {
-                            id: crypto.randomUUID(),
-                            entity: 'SPECTRA',
-                            entityId: createdScan.id,
-                            action: canAutoApprove ? 'SPECTRA_AUTO_APPROVED' : 'SPECTRA_UPLOAD',
-                            performedBy: user ? user.username : 'system',
-                            timestamp: new Date(),
-                            details: `Uploaded ${createdScan.modality} scan${sample ? ` for Sample ${sample.labId}` : ` (CSV ID: ${scanItem.labId})`}. Status: ${workflowStatus}`
-                        }
-                    });
+                    await spectralState.auditScan(tx, createdScan, user,
+                        canAutoApprove ? 'SPECTRA_AUTO_APPROVED' : 'SPECTRA_UPLOAD',
+                        `Uploaded ${createdScan.modality} scan${sample ? ` for Sample ${sample.labId}` : ` (CSV ID: ${scanItem.labId})`}. Status: ${workflowStatus}`);
 
-                    // Replicate Completeness Check: Route WorkItem Status (Amendment 3 & 6)
-                    if (targetWorkItem && validation.qcStatus !== 'FAIL') {
-                        const requiredReplicates = 1; // standard
-                        const activeScansCount = await tx.spectralData.count({
-                            where: {
-                                workItemId: targetWorkItem.id,
-                                isCurrent: true,
-                                status: { notIn: ['REJECTED', 'DELETED'] },
-                                qcStatus: { not: 'FAIL' }
-                            }
+                    if (executableItem && validation.qcStatus !== 'FAIL') {
+                        const completed = await spectralState.completeItem(tx, executableItem, user, {
+                            result: `Spectrum Uploaded (${validation.qcStatus})${canAutoApprove ? ' - Auto-Approved' : ''}`,
+                            equipmentId,
+                            note: `Spectrum uploaded by ${user.username}. QC: ${validation.qcStatus}${canAutoApprove ? ' (Auto-Approved)' : ''}`
                         });
-
-                        if (activeScansCount >= requiredReplicates) {
-                            updatedWorkItemId = targetWorkItem.id;
-                            const history = typeof targetWorkItem.history === 'string'
-                                ? JSON.parse(targetWorkItem.history)
-                                : (targetWorkItem.history || []);
-
-                            history.push({
-                                status: 'COMPLETED',
-                                note: `Spectrum uploaded by ${user ? user.username : 'system'}. QC: ${validation.qcStatus}${canAutoApprove ? ' (Auto-Approved)' : ''}`,
-                                changedBy: user ? user.username : 'system',
-                                timestamp: new Date().toISOString()
-                            });
-
-                            // Zero Result rows created!
-                            await tx.workItem.update({
-                                where: { id: targetWorkItem.id },
-                                data: {
-                                    status: 'COMPLETED',
-                                    result: `Spectrum Uploaded (${validation.qcStatus})${canAutoApprove ? ' - Auto-Approved' : ''}`,
-                                    equipmentId: equipmentId,
-                                    completedAt: new Date(),
-                                    history: JSON.stringify(history)
-                                }
-                            });
-                        }
+                        if (completed.status === 'COMPLETED') updatedWorkItemId = completed.id;
                     }
 
                     return createdScan;
                 });
-            } catch (txErr) {
+            } catch (caughtError) {
+                const txErr = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
                 console.error('[SPECTRAL] Transaction error:', txErr.message);
                 results.failed++;
                 results.errors.push({
                     filename: scanItem.filename,
-                    error: `Database transaction error: ${txErr.message}`
+                    error: `Database transaction error: ${txErr.message}`,
+                    ...(txErr.code && { code: txErr.code })
                 });
                 continue;
             }
@@ -1742,6 +1673,13 @@ exports.uploadBatch = async (req, res) => {
             }
         }
 
+        if (preflight) await spectralState.preflightBatch(checks);
+        return results;
+        }
+
+        // The same planning and authority checks run before any database/file write.
+        await processScans(true);
+        const results = await processScans(false);
         const skippedMsg = results.skipped > 0
             ? ` ${results.skipped} skipped (no matching sample).`
             : '';
@@ -1758,240 +1696,92 @@ exports.uploadBatch = async (req, res) => {
 
     } catch (e) {
         console.error("Upload Error:", e);
-        res.status(500).json({ error: e.message });
+        const error = stateRules.mapStateError(e);
+        res.status(error.statusCode || 500).json({ error: error.message, ...(error.code && { code: error.code }),
+            ...(error.details && { details: error.details }) });
     }
 };
 
 // Batch review — approve/reject multiple spectra at once
 exports.batchReview = async (req, res) => {
     try {
-        const { ids, action } = req.body; // ids: string[], action: 'APPROVE' | 'REJECT'
+        const { ids, action } = req.body;
         const user = req.user;
-
-        if (!['SUPER_ADMIN', 'LAB_MANAGER'].includes(user.role)) {
-            return res.status(403).json({ error: 'Only managers can batch review spectra.' });
-        }
-        if (!ids || !Array.isArray(ids) || ids.length === 0) {
-            return res.status(400).json({ error: 'No spectrum IDs provided.' });
-        }
-        if (!['APPROVE', 'REJECT'].includes(action)) {
-            return res.status(400).json({ error: 'Action must be APPROVE or REJECT.' });
-        }
-
-        const newStatus = action === 'APPROVE' ? 'APPROVED' : 'REJECTED';
+        if (!['SUPER_ADMIN', 'LAB_MANAGER'].includes(user.role)) return res.status(403).json({ error: 'Only managers can batch review spectra.' });
+        if (!Array.isArray(ids) || !ids.length) return res.status(400).json({ error: 'No spectrum IDs provided.' });
+        if (!['APPROVE', 'REJECT'].includes(action)) return res.status(400).json({ error: 'Action must be APPROVE or REJECT.' });
+        await spectralState.preflightBatch(ids.map(id => ({ id, check: async () => {
+            const scan = await prisma.spectralData.findUnique({ where: { id } });
+            if (scan) await spectralState.prepareReview(prisma, scan, user,
+                { action, batch: true, reopenReason: req.body.reopenReason, preflight: true });
+        } })));
         const results = { succeeded: 0, failed: 0, errors: [] };
-
         for (const id of ids) {
             try {
                 const scan = await prisma.spectralData.findUnique({ where: { id } });
-                if (!scan) { results.failed++; results.errors.push({ id, error: 'Not found' }); continue; }
-                if (!['PENDING', 'VALIDATED'].includes(scan.status)) { results.failed++; results.errors.push({ id, error: `Cannot review in ${scan.status} status` }); continue; }
-
-                await prisma.spectralData.update({
-                    where: { id },
-                    data: { status: newStatus, reviewedBy: user.username, reviewedAt: new Date(), reviewNotes: `Batch ${action.toLowerCase()}d` }
-                });
-
-                // If approved, complete the work item
-                if (newStatus === 'APPROVED' && scan.sampleId) {
-                    const sModality = (scan.modality || 'NIR').toUpperCase();
-                    const workItems = await prisma.workItem.findMany({
-                        where: { sampleId: scan.sampleId, status: { notIn: ['COMPLETED', 'ACCEPTED', 'SUBMITTED'] } }
-                    });
-                    const relatedItem = workItems.find(w => {
-                        const wA = (w.analysis || '').toUpperCase();
-                        if (sModality === 'NIR') return wA.includes('NIR');
-                        if (sModality === 'MIR') return wA.includes('MIR');
-                        return false;
-                    });
-                    if (relatedItem) {
-                        const history = typeof relatedItem.history === 'string' ? JSON.parse(relatedItem.history) : (relatedItem.history || []);
-                        history.push({ status: 'COMPLETED', note: `Spectrum batch-approved by ${user.username}`, changedBy: user.username, timestamp: new Date().toISOString() });
-                        await prisma.workItem.update({ where: { id: relatedItem.id }, data: { status: 'COMPLETED', result: `Spectrum Approved (${scan.qcStatus})`, completedAt: new Date(), history: JSON.stringify(history) } });
-                        broadcastToLab(user.labId,'WORKITEM_CHANGED', { sampleId: scan.sampleId, workItemId: relatedItem.id, status: 'COMPLETED', source: 'spectral_batch_review' });
-                    }
-                }
-
+                if (!scan) throw new stateRules.TransitionError('Not found', 404, 'SPECTRAL_NOT_FOUND');
+                const changed = await prisma.$transaction(tx => spectralState.reviewScan(tx, scan, user,
+                    { action, batch: true, notes: `Batch ${action.toLowerCase()}d`, reopenReason: req.body.reopenReason }));
                 results.succeeded++;
-            } catch (err) {
+                if (changed.item) broadcastToLab(user.labId, 'WORKITEM_CHANGED', { sampleId: scan.sampleId,
+                    workItemId: changed.item.id, status: changed.item.status, source: 'spectral_batch_review' });
+            } catch (caughtError) {
+                const error = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
                 results.failed++;
-                results.errors.push({ id, error: err.message });
+                results.errors.push({ id, error: error.message, ...(error.code && { code: error.code }) });
             }
         }
-
-        // Single audit log for the batch
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'SPECTRA', entityId: ids.join(',').substring(0, 200), action: `SPECTRA_BATCH_${action}`,
-                performedBy: user.username, timestamp: new Date(),
-                details: `Batch ${action.toLowerCase()}: ${results.succeeded} succeeded, ${results.failed} failed out of ${ids.length} spectra.`
-            }
-        });
-
-        broadcastToLab(user.labId,'SPECTRAL_UPDATE', { action: `BATCH_${action}`, count: results.succeeded });
+        if (results.succeeded) broadcastToLab(user.labId, 'SPECTRAL_UPDATE', { action: `BATCH_${action}`, count: results.succeeded });
         res.json({ success: true, message: `Batch ${action.toLowerCase()} complete: ${results.succeeded}/${ids.length} succeeded.`, results });
-    } catch (e) {
-        console.error("Batch Review Error:", e);
-        res.status(500).json({ error: e.message });
+    } catch (error) {
+        res.status(error.statusCode || 500).json({ error: error.message, ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
     }
 };
 
-// Batch delete — move multiple spectra to trash at once
+// Batch trash keeps the existing independent per-scan success/refusal contract.
 exports.batchDelete = async (req, res) => {
     try {
-        const { ids } = req.body;
+        const { ids, reason } = req.body;
         const user = req.user;
-
-        if (!['SUPER_ADMIN', 'LAB_MANAGER'].includes(user.role)) {
-            return res.status(403).json({ error: 'Only managers can batch delete spectra.' });
-        }
-        if (!ids || !Array.isArray(ids) || ids.length === 0) {
-            return res.status(400).json({ error: 'No spectrum IDs provided.' });
-        }
-
+        if (!['SUPER_ADMIN', 'LAB_MANAGER'].includes(user.role)) return res.status(403).json({ error: 'Only managers can batch delete spectra.' });
+        if (!Array.isArray(ids) || !ids.length) return res.status(400).json({ error: 'No spectrum IDs provided.' });
+        if (typeof reason !== 'string' || !reason.trim()) return res.status(422).json({ error: 'A reason is required to move spectral evidence to trash.', code: 'SPECTRAL_TRASH_REASON_REQUIRED' });
         const results = { succeeded: 0, failed: 0, errors: [] };
-
         for (const id of ids) {
             try {
                 const scan = await prisma.spectralData.findUnique({ where: { id } });
-                if (!scan) { results.failed++; results.errors.push({ id, error: 'Not found' }); continue; }
-                if (scan.status === 'DELETED') { results.failed++; results.errors.push({ id, error: 'Already in trash' }); continue; }
-
-                const previousStatus = scan.status;
-                const meta = parseJson(scan.metadata) || {};
-                meta._deletedPreviousStatus = previousStatus;
-                meta._deletedBy = user.username;
-                meta._deletedAt = new Date().toISOString();
-
-                await prisma.spectralData.update({
-                    where: { id },
-                    data: { status: 'DELETED', metadata: JSON.stringify(meta) }
-                });
-
-                // Revert work item if it was COMPLETED
-                if (scan.sampleId) {
-                    const sModality = (scan.modality || 'NIR').toUpperCase();
-                    const workItems = await prisma.workItem.findMany({
-                        where: { sampleId: scan.sampleId, status: 'COMPLETED' }
-                    });
-                    const relatedItem = workItems.find(w => {
-                        const wA = (w.analysis || '').toUpperCase();
-                        if (sModality === 'NIR') return wA.includes('NIR');
-                        if (sModality === 'MIR') return wA.includes('MIR');
-                        return false;
-                    });
-                    if (relatedItem) {
-                        const history = typeof relatedItem.history === 'string' ? JSON.parse(relatedItem.history) : (relatedItem.history || []);
-                        history.push({ status: 'IN_PROGRESS', note: `Spectrum batch-trashed by ${user.username}. Task reverted.`, changedBy: user.username, timestamp: new Date().toISOString() });
-                        await prisma.workItem.update({ where: { id: relatedItem.id }, data: { status: 'IN_PROGRESS', result: null, completedAt: null, history: JSON.stringify(history) } });
-                        broadcastToLab(user.labId,'WORKITEM_CHANGED', { sampleId: scan.sampleId, workItemId: relatedItem.id, status: 'IN_PROGRESS', source: 'spectral_batch_trash' });
-                    }
-                }
-
+                if (!scan) throw new stateRules.TransitionError('Not found', 404, 'SPECTRAL_NOT_FOUND');
+                const changed = await prisma.$transaction(tx => spectralState.trashScan(tx, scan, user, reason, 'SPECTRA_BATCH_TRASH'));
                 results.succeeded++;
-            } catch (err) {
+                if (changed.item) broadcastToLab(user.labId, 'WORKITEM_CHANGED', { sampleId: changed.scan.sampleId,
+                    workItemId: changed.item.id, status: changed.item.status, source: 'spectral_batch_trash' });
+            } catch (caughtError) {
+                const error = stateRules.mapStateError(caughtError, 'WORKITEM_STATE_CHANGED');
                 results.failed++;
-                results.errors.push({ id, error: err.message });
+                results.errors.push({ id, error: error.message, ...(error.code && { code: error.code }) });
             }
         }
-
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'SPECTRA', entityId: ids.join(',').substring(0, 200), action: 'SPECTRA_BATCH_TRASH',
-                performedBy: user.username, timestamp: new Date(),
-                details: `Batch trash: ${results.succeeded} moved to trash, ${results.failed} failed out of ${ids.length} spectra.`
-            }
-        });
-
-        broadcastToLab(user.labId,'SPECTRAL_UPDATE', { action: 'BATCH_TRASH', count: results.succeeded });
+        if (results.succeeded) broadcastToLab(user.labId, 'SPECTRAL_UPDATE', { action: 'BATCH_TRASH', count: results.succeeded });
         res.json({ success: true, message: `${results.succeeded}/${ids.length} spectra moved to trash.`, results });
-    } catch (e) {
-        console.error("Batch Delete Error:", e);
-        res.status(500).json({ error: e.message });
+    } catch (error) {
+        res.status(error.statusCode || 500).json({ error: error.message, ...(error.code && { code: error.code }) });
     }
 };
 
-// Soft delete — moves spectrum to trash (status: DELETED)
 exports.deleteScan = async (req, res) => {
     try {
-        const { id } = req.params;
         const user = req.user;
-
-        const scan = await prisma.spectralData.findUnique({ where: { id } });
+        const scan = await prisma.spectralData.findUnique({ where: { id: req.params.id } });
         if (!scan) return res.status(404).json({ error: 'Scan not found' });
-
-        const isSuperAdmin = user.role === 'SUPER_ADMIN';
-        const isLabManager = user.role === 'LAB_MANAGER' && user.labId === scan.labId;
-        if (!isSuperAdmin && !isLabManager) {
-            return res.status(403).json({ error: 'Permission Denied: Only Admins or Lab Managers can delete spectral records.' });
-        }
-
-        if (scan.status === 'DELETED') {
-            return res.status(400).json({ error: 'Spectrum is already in trash.' });
-        }
-
-        // C10: Do not allow trashing spectra linked to ACCEPTED or SUBMITTED work items
-        if (scan.workItemId) {
-            const linkedWi = await prisma.workItem.findUnique({ where: { id: scan.workItemId } });
-            if (linkedWi && ['ACCEPTED', 'SUBMITTED'].includes(linkedWi.status)) {
-                return res.status(400).json({
-                    error: `Cannot delete spectrum linked to a ${linkedWi.status} work item. An authorized amendment or return is required.`,
-                    code: 'LINKED_EVIDENCE_IMMUTABLE'
-                });
-            }
-        }
-
-        const previousStatus = scan.status;
-        const meta = parseJson(scan.metadata) || {};
-        meta._deletedPreviousStatus = previousStatus;
-        meta._deletedBy = user.username;
-        meta._deletedAt = new Date().toISOString();
-
-        // Soft delete: set status to DELETED
-        await prisma.spectralData.update({
-            where: { id },
-            data: {
-                status: 'DELETED',
-                metadata: JSON.stringify(meta)
-            }
-        });
-
-        // Revert work item if it was COMPLETED
-        if (scan.sampleId) {
-            const sModality = (scan.modality || 'NIR').toUpperCase();
-            const workItems = await prisma.workItem.findMany({
-                where: { sampleId: scan.sampleId, status: 'COMPLETED' }
-            });
-            const relatedItem = workItems.find(w => {
-                const wAnalysis = (w.analysis || '').toUpperCase();
-                if (sModality === 'NIR') return wAnalysis.includes('NIR');
-                if (sModality === 'MIR') return wAnalysis.includes('MIR');
-                return false;
-            });
-            if (relatedItem) {
-                const history = typeof relatedItem.history === 'string' ? JSON.parse(relatedItem.history) : (relatedItem.history || []);
-                history.push({ status: 'IN_PROGRESS', note: `Spectrum moved to trash by ${user.username}. Task reverted.`, changedBy: user.username, timestamp: new Date().toISOString() });
-                await prisma.workItem.update({ where: { id: relatedItem.id }, data: { status: 'IN_PROGRESS', result: null, completedAt: null, history: JSON.stringify(history) } });
-                broadcastToLab(user.labId,'WORKITEM_CHANGED', { sampleId: scan.sampleId, workItemId: relatedItem.id, status: 'IN_PROGRESS', source: 'spectral_trash' });
-            }
-        }
-
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'SPECTRA', entityId: id, action: 'SPECTRA_TRASH',
-                performedBy: user.username, timestamp: new Date(), labId: scan.labId,
-                details: `Moved ${scan.modality} spectrum to trash (was ${previousStatus}). Sample: ${scan.sampleId || 'unlinked'}`
-            }
-        });
-
-        broadcastToLab(user.labId,'SPECTRAL_UPDATE', { sampleId: scan.sampleId, action: 'TRASH' });
+        if (!['SUPER_ADMIN', 'LAB_MANAGER'].includes(user.role)) return res.status(403).json({ error: 'Permission Denied: Only Admins or Lab Managers can delete spectral records.' });
+        const changed = await prisma.$transaction(tx => spectralState.trashScan(tx, scan, user, req.body?.reason));
+        if (changed.item) broadcastToLab(user.labId, 'WORKITEM_CHANGED', { sampleId: scan.sampleId,
+            workItemId: changed.item.id, status: changed.item.status, source: 'spectral_trash' });
+        broadcastToLab(user.labId, 'SPECTRAL_UPDATE', { sampleId: scan.sampleId, action: 'TRASH' });
         res.json({ success: true, message: 'Spectrum moved to trash.' });
-    } catch (e) {
-        console.error("Delete Scan Error:", e);
-        res.status(500).json({ error: e.message });
+    } catch (error) {
+        const mapped = stateRules.mapStateError(error);
+        res.status(mapped.statusCode || 500).json({ error: mapped.message, ...(mapped.code && { code: mapped.code }) });
     }
 };
 
@@ -2073,131 +1863,20 @@ exports.permanentlyDeleteScan = async (req, res) => {
  * Manager review endpoint - approve or reject pending spectra
  */
 exports.reviewSpectrum = async (req, res) => {
-    const { id } = req.params;
-    const { action, notes } = req.body; // action: 'APPROVE' or 'REJECT'
-    const user = req.user;
-
     try {
-        // 1. Authorization - only managers
-        if (!['SUPER_ADMIN', 'LAB_MANAGER'].includes(user.role)) {
-            return res.status(403).json({ error: 'Only Lab Managers can review spectral data.' });
-        }
-
-        const scan = await prisma.spectralData.findUnique({ where: { id } });
+        const user = req.user;
+        if (!['SUPER_ADMIN', 'LAB_MANAGER'].includes(user.role)) return res.status(403).json({ error: 'Only Lab Managers can review spectral data.' });
+        const scan = await prisma.spectralData.findUnique({ where: { id: req.params.id } });
         if (!scan) return res.status(404).json({ error: 'Spectrum not found' });
-
-        // 2. Check status — allow undo for REJECTED spectra
-        if (action === 'UNDO') {
-            if (scan.status !== 'REJECTED') {
-                return res.status(400).json({ error: 'Can only undo rejection on REJECTED spectra.' });
-            }
-            await prisma.spectralData.update({
-                where: { id },
-                data: { status: 'VALIDATED', reviewedBy: null, reviewedAt: null, reviewNotes: null }
-            });
-            await prisma.auditLog.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    entity: 'SPECTRA', entityId: id, action: 'SPECTRA_UNDO_REJECT',
-                    performedBy: user.username, timestamp: new Date(), sampleId: scan.sampleId,
-                    details: `Undid rejection of ${scan.modality} spectrum. Returned to VALIDATED.`
-                }
-            });
-            return res.json({ success: true, message: 'Rejection undone. Spectrum returned to Awaiting Review.', status: 'VALIDATED' });
-        }
-
-        if (!['PENDING', 'VALIDATED'].includes(scan.status)) {
-            return res.status(400).json({ error: `Cannot review spectrum in ${scan.status} status.` });
-        }
-
-        if (action === 'APPROVE') {
-            // SL-07: Cannot approve if physical quantity is unconfirmed or UNVERIFIED
-            if (!scan.quantity || scan.quantity === 'UNVERIFIED') {
-                return res.status(400).json({
-                    error: 'Cannot approve spectrum: physical quantity must be confirmed (cannot be empty or UNVERIFIED).'
-                });
-            }
-        }
-
-        const newStatus = action === 'APPROVE' ? 'APPROVED' : 'REJECTED';
-
-        // 3. Update spectrum
-        await prisma.spectralData.update({
-            where: { id },
-            data: {
-                status: newStatus,
-                reviewedBy: user.username,
-                reviewedAt: new Date(),
-                reviewNotes: notes || null
-            }
-        });
-
-        // 4. If approved, complete the work item
-        if (newStatus === 'APPROVED') {
-            const sModality = (scan.modality || 'NIR').toUpperCase();
-            const workItems = await prisma.workItem.findMany({
-                where: {
-                    sampleId: scan.sampleId,
-                    status: { notIn: ['COMPLETED', 'ACCEPTED', 'SUBMITTED'] }
-                }
-            });
-
-            const relatedItem = workItems.find(w => {
-                const wAnalysis = (w.analysis || '').toUpperCase();
-                if (sModality === 'NIR') {
-                    return wAnalysis === 'SPEC_VIS_NIR' || wAnalysis === 'SPEC_NIR' || wAnalysis.includes('NIR');
-                }
-                if (sModality === 'MIR') {
-                    return wAnalysis === 'SPEC_MIR' || wAnalysis.includes('MIR');
-                }
-                return false;
-            });
-
-            if (relatedItem) {
-                const history = typeof relatedItem.history === 'string'
-                    ? JSON.parse(relatedItem.history)
-                    : (relatedItem.history || []);
-
-                history.push({
-                    status: 'COMPLETED',
-                    note: `Spectrum approved by ${user.username}. QC: ${scan.qcStatus}`,
-                    changedBy: user.username,
-                    timestamp: new Date().toISOString()
-                });
-
-                await prisma.workItem.update({
-                    where: { id: relatedItem.id },
-                    data: {
-                        status: 'COMPLETED',
-                        result: `Spectrum Approved (${scan.qcStatus})`,
-                        completedAt: new Date(),
-                        history: JSON.stringify(history)
-                    }
-                });
-                broadcastToLab(user.labId,'WORKITEM_CHANGED', { sampleId: scan.sampleId, workItemId: relatedItem.id, status: 'COMPLETED', source: 'spectral_review_approve' });
-            }
-        }
-
-        // 5. Audit log
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'SPECTRA',
-                entityId: id,
-                action: newStatus === 'APPROVED' ? 'SPECTRA_APPROVED' : 'SPECTRA_REJECTED',
-                performedBy: user.username,
-                timestamp: new Date(),
-                sampleId: scan.sampleId,
-                details: `${scan.modality} spectrum ${newStatus.toLowerCase()} by manager. ${notes || ''}`
-            }
-        });
-
-        broadcastToLab(user.labId,'SPECTRAL_UPDATE', { sampleId: scan.sampleId, action: newStatus });
-        res.json({ success: true, message: `Spectrum ${newStatus.toLowerCase()}.`, status: newStatus });
-
-    } catch (e) {
-        console.error("Review Spectrum Error:", e);
-        res.status(500).json({ error: e.message });
+        const changed = await prisma.$transaction(tx => spectralState.reviewScan(tx, scan, user, req.body));
+        if (changed.item) broadcastToLab(user.labId, 'WORKITEM_CHANGED', { sampleId: scan.sampleId,
+            workItemId: changed.item.id, status: changed.item.status, source: 'spectral_review' });
+        broadcastToLab(user.labId, 'SPECTRAL_UPDATE', { sampleId: scan.sampleId, action: changed.scan.status });
+        res.json({ success: true, message: req.body.action === 'UNDO' ? 'Rejection undone. Spectrum returned to Awaiting Review.'
+            : `Spectrum ${changed.scan.status.toLowerCase()}.`, status: changed.scan.status });
+    } catch (error) {
+        const mapped = stateRules.mapStateError(error);
+        res.status(mapped.statusCode || 500).json({ error: mapped.message, ...(mapped.code && { code: mapped.code }) });
     }
 };
 

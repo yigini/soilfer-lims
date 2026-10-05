@@ -6,6 +6,8 @@ const prisma = require('../../prisma');
 const { getAuthToken } = require('../setup');
 const { canPublish } = require('../../services/workEligibility');
 const qcController = require('../../controllers/qcController');
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
+const { createLegacyClosureDatabase, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
 
 const labId = 'LAB-AUDIT-02';
 const readings = {
@@ -18,6 +20,9 @@ const wire = value => JSON.parse(JSON.stringify(value));
 
 describe('Audit 0.2: batch QC lock and durable evidence', () => {
     let tokens;
+    const legacyDatabases = [];
+    afterEach(() => jest.restoreAllMocks());
+    afterAll(async () => { for (const database of legacyDatabases) await database.close(); });
     beforeAll(async () => {
         tokens = Object.fromEntries(await Promise.all(['LAB_TECHNICIAN', 'LAB_MANAGER', 'SUPER_ADMIN']
             .map(async role => [role, await getAuthToken(role, labId)])));
@@ -45,17 +50,30 @@ describe('Audit 0.2: batch QC lock and durable evidence', () => {
         expect(res.body.status).toBe('QC_PASS');
     }
     async function reviewFixture(status, disposition) {
-        const batchId = await batch(status, disposition);
+        let batchId;
+        if (status === 'UNKNOWN') {
+            batchId = id('BATCH-UNKNOWN-LEGACY');
+            const database = await createLegacyClosureDatabase({ analysis: 'ARCHIVING', labId,
+                batches: [{ id: batchId, labId, analysis: 'PH_H2O', status, createdBy: 'system:fixture', createdAt: Date.now() }] });
+            legacyDatabases.push(database);
+            useLegacyRouteDatabase(prisma, database.client);
+            for (const role of ['LAB_TECHNICIAN', 'LAB_MANAGER']) {
+                const actor = jwt.decode(tokens[role]);
+                await database.client.user.create({ data: { id: actor.id, username: actor.username, email: `${actor.username}@example.test`,
+                    password: 'isolated-fixture', role, labId } });
+            }
+        } else batchId = await batch(status, disposition);
         const sampleId = id('SMP');
         const workItemId = id('WI');
         const submissionId = id('SUB');
-        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status: 'PROCESSING' } });
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
+            status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE' } });
         await prisma.submission.create({ data: {
             id: submissionId, sampleId, assignedLab: labId, type: 'PARTIAL', status: 'PENDING_REVIEW',
             submittedBy: jwt.decode(tokens.LAB_TECHNICIAN).username,
             workItemIds: JSON.stringify([workItemId]), workItemCount: 1
         } });
-        await prisma.workItem.create({ data: {
+        await createWorkItemFixture(prisma, { data: {
             id: workItemId, sampleId, batchId, submissionId, analysis: 'PH_H2O',
             status: 'SUBMITTED', result: '7', assignedLab: labId
         } });

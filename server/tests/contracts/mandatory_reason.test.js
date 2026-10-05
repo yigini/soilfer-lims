@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -7,17 +9,18 @@ describe('SD-10: Mandatory Reason on Rejection and Reopening Contract', () => {
     let mgrGtmToken;
     const sampleId = 'SMP-SD10-TEST-01';
     const wiId = 'WI-SD10-PH-01';
+    const approvedSampleId = `${sampleId}-approved`;
 
     beforeAll(async () => {
         mgrGtmToken = await getAuthToken('LAB_MANAGER', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
 
         // Clean up
         await prisma.auditLog.deleteMany({ where: { sampleId } });
-        await prisma.workItem.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
 
-        // Create sample in APPROVED state
-        await prisma.sample.create({
+        // Manager return operates on submitted work before final approval.
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
@@ -25,16 +28,18 @@ describe('SD-10: Mandatory Reason on Rejection and Reopening Contract', () => {
                 labId: 'LAB-GTM',
                 country: 'GTM',
                 projectCode: 'SOILFER-US',
-                status: 'APPROVED',
+                status: 'SUBMITTED_FULL',
                 matrix: 'SOIL',
                 dryingStatus: 'DONE',
                 preparationStatus: 'DONE',
                 requiredAnalyses: JSON.stringify(['PH_H2O'])
             }
         });
+        await createSampleFixture(prisma, { data: { id: approvedSampleId, originalId: approvedSampleId,
+            assignedLab: 'LAB-GTM', status: 'APPROVED', dryingStatus: 'DONE', preparationStatus: 'DONE' } });
 
         // Create work item in SUBMITTED state
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: wiId,
                 sampleId,
@@ -48,9 +53,11 @@ describe('SD-10: Mandatory Reason on Rejection and Reopening Contract', () => {
     });
 
     afterAll(async () => {
+        await prisma.auditLog.deleteMany({ where: { sampleId: approvedSampleId } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: approvedSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.auditLog.deleteMany({ where: { sampleId } });
-        await prisma.workItem.deleteMany({ where: { sampleId } });
-        await prisma.sample.deleteMany({ where: { id: sampleId } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     test('1. Calling reviewWorkItem with REJECT and no note/reason returns HTTP 400', async () => {
@@ -83,49 +90,40 @@ describe('SD-10: Mandatory Reason on Rejection and Reopening Contract', () => {
         expect(res.body.success).toBe(true);
 
         const wi = await prisma.workItem.findUnique({ where: { id: wiId } });
-        expect(wi.status).toBe('REANALYSIS_REQUIRED');
+        expect(wi.status).toBe('REPEAT_REQUIRED');
         expect(wi.reanalysisReason).toBe(rejectionNote);
     });
 
-    test('3. Calling undoApproval with no reason returns HTTP 400', async () => {
+    test('3. Calling undoApproval without a reason requires an amendment', async () => {
         const res = await request(app)
-            .post(`/api/samples/${sampleId}/undo-approve`)
+            .post(`/api/samples/${approvedSampleId}/undo-approve`)
             .set('Authorization', `Bearer ${mgrGtmToken}`)
             .send({});
 
-        expect(res.status).toBe(400);
-        expect(res.body.error).toMatch(/A reason is required when reopening a finished sample/i);
+        expect(res.status).toBe(409);
+        expect(res.body.code).toBe('AMENDMENT_WORKFLOW_REQUIRED');
 
         // Sample status remains APPROVED
-        const sample = await prisma.sample.findUnique({ where: { id: sampleId } });
+        const sample = await prisma.sample.findUnique({ where: { id: approvedSampleId } });
         expect(sample.status).toBe('APPROVED');
     });
 
-    test('4. Calling undoApproval with reason records reason in audit log (HTTP 200)', async () => {
+    test('4. Calling undoApproval with a reason preserves approval and audit evidence', async () => {
+        const before = await prisma.sample.findUnique({ where: { id: approvedSampleId } });
+        const beforeAudits = await prisma.auditLog.findMany({ where: { sampleId: approvedSampleId }, orderBy: { id: 'asc' } });
         const reopenReason = 'Customer requested additional organic carbon verification';
         const res = await request(app)
-            .post(`/api/samples/${sampleId}/undo-approve`)
+            .post(`/api/samples/${approvedSampleId}/undo-approve`)
             .set('Authorization', `Bearer ${mgrGtmToken}`)
             .send({
                 reason: reopenReason
             });
 
-        expect(res.status).toBe(200);
-        expect(res.body.success).toBe(true);
+        expect(res.status).toBe(409);
+        expect(res.body.code).toBe('AMENDMENT_WORKFLOW_REQUIRED');
 
-        const sample = await prisma.sample.findUnique({ where: { id: sampleId } });
-        expect(sample.status).toBe('PROCESSING');
-
-        // Verify audit log contains the reason
-        const audit = await prisma.auditLog.findFirst({
-            where: {
-                sampleId,
-                action: 'UNDO_APPROVAL'
-            },
-            orderBy: { timestamp: 'desc' }
-        });
-
-        expect(audit).not.toBeNull();
-        expect(audit.details).toContain(reopenReason);
+        const sample = await prisma.sample.findUnique({ where: { id: approvedSampleId } });
+        expect(sample).toEqual(before);
+        expect(await prisma.auditLog.findMany({ where: { sampleId: approvedSampleId }, orderBy: { id: 'asc' } })).toEqual(beforeAudits);
     });
 });

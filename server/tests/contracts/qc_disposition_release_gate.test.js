@@ -1,3 +1,5 @@
+'use strict';
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Contract Test Suite: QC Batch Inspection, Disposition & Release Gates (Refs #118)
  *
@@ -10,12 +12,13 @@
  * - Duplicate retry is idempotent (no duplicate audit/history)
  * - Resolved batch clears from pending dashboard exception counts while remaining in history
  */
-'use strict';
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const app = require('../../app');
 const prisma = require('../../prisma');
+const { createSample, transitionSample } = require('../../services/sampleStateService');
 const { JWT_SECRET } = require('../../config/auth');
 const { canFinalApprove, canPublish } = require('../../services/workEligibility');
 
@@ -23,6 +26,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
     let testLab1, testLab2;
     let lab1Manager, lab2Manager, lab1Tech;
     let sample1, workItem1, batch1;
+    const reportFixtureIds = [];
     const testPrefix = `QC-118-${Date.now()}`;
 
     beforeAll(async () => {
@@ -75,13 +79,14 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         lab1Tech = await createTestUser('LAB_TECHNICIAN', testLab1.id, 'l1tech');
 
         // 3. Create Sample in Lab 1
-        sample1 = await prisma.sample.create({
+        sample1 = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-118-${Date.now()}`,
                 labId: testLab1.id,
                 assignedLab: testLab1.id,
                 originalId: `FIELD-118-${Date.now()}`,
                 status: 'PROCESSING',
+                dryingStatus: 'DONE', preparationStatus: 'DONE',
                 receptionDate: new Date(),
                 projectCode: 'SOILFER-GTM',
                 country: 'Guatemala'
@@ -89,7 +94,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // 4. Create WorkItem linked to sample
-        workItem1 = await prisma.workItem.create({
+        workItem1 = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-118-${Date.now()}`,
                 sampleId: sample1.id,
@@ -140,11 +145,15 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
     });
 
     afterAll(async () => {
+        await prisma.result.deleteMany({ where: { sampleId: { in: reportFixtureIds } } });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: { in: reportFixtureIds } } }), select: { id: true } })).map(row => row.id), { single: false });
+        await prisma.auditLog.deleteMany({ where: { sampleId: { in: reportFixtureIds } } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: reportFixtureIds } } }), select: { id: true } })).map(row => row.id), { single: false });
         // Clean up test data
         await prisma.report.deleteMany({ where: { sampleId: sample1.id } }).catch(() => {});
         await prisma.result.deleteMany({ where: { sampleId: sample1.id } });
-        await prisma.workItem.deleteMany({ where: { id: workItem1.id } }).catch(() => {});
-        await prisma.sample.deleteMany({ where: { id: sample1.id } }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: workItem1.id } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample1.id } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
         await prisma.batch.deleteMany({ where: { id: batch1.id } }).catch(() => {});
         await prisma.auditLog.deleteMany({ where: { entityId: batch1.id } }).catch(() => {});
         await prisma.user.deleteMany({
@@ -206,19 +215,23 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // B. workEligibility.canPublish blocks official report publication
         // Report QC is tested on an approved, reviewed fixture so the new universal
         // sample-review gate does not mask the QC gate under test.
-        await prisma.sample.update({ where: { id: sample1.id }, data: { status: 'APPROVED' } });
-        const reportSample = await prisma.sample.findUnique({ where: { id: sample1.id }, include: { workItems: true, results: true } });
+        const reportId = `REPORT-${sample1.id}`;
+        reportFixtureIds.push(reportId);
+        await createSampleFixture(prisma, { data: { ...sample1, id: reportId, originalId: reportId, status: 'APPROVED' } });
+        await createWorkItemFixture(prisma, { data: { ...workItem1, id: `WI-${reportId}`, sampleId: reportId, batchId: batch1.id } });
+        await prisma.result.create({ data: { id: `RES-${reportId}`, sampleId: reportId,
+            param: 'PH_H2O', value: '6.45', isCurrent: true, isValid: true, batchId: batch1.id } });
+        const reportSample = await prisma.sample.findUnique({ where: { id: reportId }, include: { workItems: true, results: true } });
         const publishCheck = canPublish(reportSample, null, lab1Manager, { qcBatches: [freshBatch] });
         expect(publishCheck.allowed).toBe(false);
         expect(publishCheck.code).toBe('QC_BATCH_FAILED');
 
         // C. POST /api/reports/generate/:sampleId returns 409 Conflict with code QC_BATCH_FAILED
         const genRes = await request(app)
-            .post(`/api/reports/generate/${sample1.id}`)
+            .post(`/api/reports/generate/${reportId}`)
             .set('Authorization', `Bearer ${lab1Manager.token}`);
         expect(genRes.status).toBe(409);
         expect(genRes.body.code).toBe('QC_BATCH_FAILED');
-        await prisma.sample.update({ where: { id: sample1.id }, data: { status: 'PROCESSING' } });
     });
 
     // ─── Test 3: Manager QC Disposition Authorization & Validation ───
@@ -308,10 +321,8 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         expect(eligibility.blockers).toHaveLength(0);
 
         // Update sample to APPROVED following successful approval eligibility
-        const approvedSample = await prisma.sample.update({
-            where: { id: sample1.id },
-            data: { status: 'APPROVED' }
-        });
+        await transitionSample(sample1.id, 'SUBMITTED_FULL', lab1Manager, 'Reviewed analytical fixture');
+        const approvedSample = await transitionSample(sample1.id, 'APPROVED', lab1Manager, 'QC disposition and analytical sign-off');
 
         // canPublish is now allowed for approved sample with dispositioned QC
         const publishCheck = canPublish(approvedSample, null, lab1Manager, { qcBatches: [dispositionedBatch] });
@@ -379,7 +390,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Active sample fixture (in PROCESSING status)
-        const activeSample = await prisma.sample.create({
+        const activeSample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-active-${Date.now()}`,
                 originalId: `SMP-ACT-${Date.now()}`,
@@ -404,18 +415,18 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             }
         });
 
-        // Sample fixture in RELEASED status
-        const releasedSample = await prisma.sample.create({
+        // Sample fixture in canonical APPROVED status
+        const releasedSample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-rel-${Date.now()}`,
                 originalId: `SMP-REL-${Date.now()}`,
-                status: 'RELEASED',
+                status: 'APPROVED',
                 projectCode: 'SoilFER-P1',
                 assignedLab: testLab1.id
             }
         });
 
-        // Result 2: Belongs to already RELEASED sample (must be immutable)
+        // Result 2: Belongs to already approved sample (must be immutable)
         const resReleased = await prisma.result.create({
             data: {
                 id: `res-released-${Date.now()}`,
@@ -479,14 +490,21 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
         // Cleanup
         await prisma.result.deleteMany({ where: { id: { in: [resWithManualInvalid.id, resReleased.id, resSuperseded.id] } } });
-        await prisma.sample.delete({ where: { id: activeSample.id } }).catch(() => {});
-        await prisma.sample.delete({ where: { id: releasedSample.id } }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: activeSample.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: releasedSample.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
         await prisma.batch.delete({ where: { id: testBatchId } }).catch(() => {});
         await prisma.auditLog.deleteMany({ where: { entityId: testBatchId } }).catch(() => {});
     });
 
+    async function activeQcSample() {
+        const sampleId = `qc-active-${require('node:crypto').randomUUID()}`;
+        return createSample({ id: sampleId, originalId: sampleId, status: 'PROCESSING', assignedLab: testLab1.id,
+            labId: testLab1.id, country: 'Guatemala', projectCode: 'SOILFER-GTM' }, 'system:fixture', { context: 'fixture' });
+    }
+
     // ─── Test 9: REANALYZE_BATCH Establishes Linked WorkItem Reanalysis Flow ───
-    test('9. REANALYZE_BATCH updates associated workItems to REANALYSIS_REQUIRED atomically', async () => {
+    test('9. REANALYZE_BATCH updates associated workItems to REPEAT_REQUIRED atomically', async () => {
+        const activeSample = await activeQcSample();
         const reanalyzeBatchId = `batch-reanal-${Date.now()}`;
         await prisma.batch.create({
             data: {
@@ -498,12 +516,12 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             }
         });
 
-        const wiToReanalyze = await prisma.workItem.create({
+        const wiToReanalyze = await createWorkItemFixture(prisma, {
             data: {
                 id: `wi-reanal-${Date.now()}`,
-                sampleId: sample1.id,
+                sampleId: activeSample.id,
                 analysis: 'pH',
-                status: 'PENDING_REVIEW',
+                status: 'SUBMITTED',
                 batchId: reanalyzeBatchId,
                 labId: testLab1.id
             }
@@ -519,15 +537,16 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
         expect(dispRes.status).toBe(200);
 
-        // Verify work item updated to REANALYSIS_REQUIRED with author and reason
+        // Verify work item updated to REPEAT_REQUIRED with author and reason
         const refreshedWi = await prisma.workItem.findUnique({ where: { id: wiToReanalyze.id } });
-        expect(refreshedWi.status).toBe('REANALYSIS_REQUIRED');
+        expect(refreshedWi.status).toBe('REPEAT_REQUIRED');
         expect(refreshedWi.reanalysisReason).toContain('Calibration curve failed');
         expect(refreshedWi.reanalysisRequestedBy).toBe(lab1Manager.username);
 
         // Cleanup
-        await prisma.workItem.delete({ where: { id: wiToReanalyze.id } }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: wiToReanalyze.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
         await prisma.batch.delete({ where: { id: reanalyzeBatchId } }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: activeSample.id } }), select: { id: true } })).map(row => row.id), { single: true });
         await prisma.auditLog.deleteMany({ where: { entityId: reanalyzeBatchId } }).catch(() => {});
     });
 
@@ -551,7 +570,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const passBatchId = `batch-pass-val-${Date.now()}`;
 
         // Create an active non-terminal sample for validity evaluation
-        const activeSample = await prisma.sample.create({
+        const activeSample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-val-${Date.now()}`,
                 originalId: `SMP-VAL-${Date.now()}`,
@@ -647,7 +666,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         await prisma.result.deleteMany({
             where: { id: { in: [resUnflagged.id, resSensorFailure.id, resPriorReject.id, resQcOnly.id] } }
         });
-        await prisma.sample.delete({ where: { id: activeSample.id } }).catch(() => {});
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: activeSample.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
     });
 
     // ─── Test 12: flagBatchResults Strictly Preserves Immutability for Published Reports & Terminal Samples ───
@@ -656,7 +675,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const immBatchId = `batch-imm-${Date.now()}`;
 
         // 1. Terminal ARCHIVED sample
-        const archivedSample = await prisma.sample.create({
+        const archivedSample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-arch-${Date.now()}`,
                 originalId: `SMP-ARCH-${Date.now()}`,
@@ -680,7 +699,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // 2. Terminal DISPOSED sample
-        const disposedSample = await prisma.sample.create({
+        const disposedSample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-disp-${Date.now()}`,
                 originalId: `SMP-DISP-${Date.now()}`,
@@ -704,7 +723,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // 3. Sample with PUBLISHED report
-        const pubSample = await prisma.sample.create({
+        const pubSample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-pub-${Date.now()}`,
                 originalId: `SMP-PUB-${Date.now()}`,
@@ -755,9 +774,9 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             where: { id: { in: [resArchived.id, resDisposed.id, resPublished.id] } }
         });
         await prisma.report.delete({ where: { id: pubReport.id } }).catch(() => {});
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { in: [archivedSample.id, disposedSample.id, pubSample.id] } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
     });
 
     // ─── Test 13: Conflicting Disposition Rejected with 409 DISPOSITION_CONFLICT ───
@@ -847,7 +866,8 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
     });
 
     // ─── Test 15: REANALYZE_BATCH Protects Historical Accepted / Released Work Items ───
-    test('15. REANALYZE_BATCH updates only active work items, preserving historical ACCEPTED and COMPLETED work items', async () => {
+    test('15. REANALYZE_BATCH updates only active work items, preserving ACCEPTED history and repeating completed active work', async () => {
+        const activeSample = await activeQcSample();
         const batchWiTestId = `batch-wi-guard-${Date.now()}`;
         await prisma.batch.create({
             data: {
@@ -859,24 +879,24 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             }
         });
 
-        // Active work item (PENDING_REVIEW)
-        const wiActive = await prisma.workItem.create({
+        // Active submitted work item
+        const wiActive = await createWorkItemFixture(prisma, {
             data: {
                 id: `wi-act-${Date.now()}`,
-                sampleId: sample1.id,
+                sampleId: activeSample.id,
                 analysis: 'pH',
-                status: 'PENDING_REVIEW',
+                status: 'SUBMITTED',
                 batchId: batchWiTestId,
                 labId: testLab1.id
             }
         });
 
         // Historical ACCEPTED work item
-        const wiAccepted = await prisma.workItem.create({
+        const wiAccepted = await createWorkItemFixture(prisma, {
             data: {
                 id: `wi-acc-${Date.now()}`,
                 duplicateOf: wiActive.id,
-                sampleId: sample1.id,
+                sampleId: activeSample.id,
                 analysis: 'pH',
                 status: 'ACCEPTED',
                 batchId: batchWiTestId,
@@ -885,11 +905,11 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Historical COMPLETED work item
-        const wiCompleted = await prisma.workItem.create({
+        const wiCompleted = await createWorkItemFixture(prisma, {
             data: {
                 id: `wi-comp-${Date.now()}`,
                 duplicateOf: wiActive.id,
-                sampleId: sample1.id,
+                sampleId: activeSample.id,
                 analysis: 'pH',
                 status: 'COMPLETED',
                 batchId: batchWiTestId,
@@ -908,24 +928,24 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
         expect(dispRes.status).toBe(200);
 
-        // Verify: Active work item was updated to REANALYSIS_REQUIRED
+        // Verify: Active work item was updated to REPEAT_REQUIRED
         const refActive = await prisma.workItem.findUnique({ where: { id: wiActive.id } });
-        expect(refActive.status).toBe('REANALYSIS_REQUIRED');
+        expect(refActive.status).toBe('REPEAT_REQUIRED');
 
         // Verify: Historical ACCEPTED work item was NOT overwritten (scientific immutability)
         const refAccepted = await prisma.workItem.findUnique({ where: { id: wiAccepted.id } });
         expect(refAccepted.status).toBe('ACCEPTED');
 
-        // Verify: Completed-unsubmitted work item transitions to REANALYSIS_REQUIRED (R3 operational repeat)
+        // Verify: Completed-unsubmitted work item transitions to REPEAT_REQUIRED (R3 operational repeat)
         const refCompleted = await prisma.workItem.findUnique({ where: { id: wiCompleted.id } });
-        expect(refCompleted.status).toBe('REANALYSIS_REQUIRED');
+        expect(refCompleted.status).toBe('REPEAT_REQUIRED');
         expect(refCompleted.reanalysisReason).toBe('Reanalyze active items only');
 
         // Cleanup
-        await prisma.workItem.deleteMany({ where: { id: { in: [wiAccepted.id, wiCompleted.id] } } });
-        await prisma.workItem.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: { in: [wiAccepted.id, wiCompleted.id] } } }), select: { id: true } })).map(row => row.id), { single: false });
+        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
             where: { id: { in: [wiActive.id, wiAccepted.id, wiCompleted.id] } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.batch.delete({ where: { id: batchWiTestId } }).catch(() => {});
         await prisma.auditLog.deleteMany({ where: { entityId: batchWiTestId } }).catch(() => {});
     });
@@ -935,7 +955,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const { flagBatchResults } = require('../../services/qcService');
         const probeBatchId = `batch-probe-${Date.now()}`;
 
-        const sample = await prisma.sample.create({
+        const sample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-probe-${Date.now()}`,
                 originalId: `SMP-PRB-${Date.now()}`,
@@ -978,7 +998,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
         // Cleanup
         await prisma.result.delete({ where: { id: res.id } });
-        await prisma.sample.delete({ where: { id: sample.id } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample.id } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 
     // ─── Test 17: Multi-Step Validity Provenance: Unflagged Invalid Stays Invalid Across FAIL -> PROCEED_WITH_WARNING ───
@@ -986,7 +1006,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const { flagBatchResults } = require('../../services/qcService');
         const warnBatchId = `batch-warn-${Date.now()}`;
 
-        const sample = await prisma.sample.create({
+        const sample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-warn-${Date.now()}`,
                 originalId: `SMP-WRN-${Date.now()}`,
@@ -1022,7 +1042,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
         // Cleanup
         await prisma.result.delete({ where: { id: res.id } });
-        await prisma.sample.delete({ where: { id: sample.id } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample.id } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 
     // ─── Test 18: Multi-Step Validity Provenance: Initially Valid Results Correctly Restored ───
@@ -1030,7 +1050,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const { flagBatchResults } = require('../../services/qcService');
         const validBatchId = `batch-valid-${Date.now()}`;
 
-        const sample = await prisma.sample.create({
+        const sample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-valid-${Date.now()}`,
                 originalId: `SMP-VLD-${Date.now()}`,
@@ -1075,7 +1095,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
         // Cleanup
         await prisma.result.delete({ where: { id: res.id } });
-        await prisma.sample.delete({ where: { id: sample.id } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample.id } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 
     // ─── Test 19: Unknown and Malformed Flags Handled Safely and Remain Invalid ───
@@ -1083,7 +1103,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const { flagBatchResults } = require('../../services/qcService');
         const malBatchId = `batch-mal-${Date.now()}`;
 
-        const sample = await prisma.sample.create({
+        const sample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-mal-${Date.now()}`,
                 originalId: `SMP-MAL-${Date.now()}`,
@@ -1135,7 +1155,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
         // Cleanup
         await prisma.result.deleteMany({ where: { id: { in: [resUnknown.id, resMalformed.id] } } });
-        await prisma.sample.delete({ where: { id: sample.id } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample.id } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 
     // ─── Test 20: History Protection Accounts for SUPERSEDED Reports and Fails Closed on DB Error ───
@@ -1143,7 +1163,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const { flagBatchResults } = require('../../services/qcService');
         const histBatchId = `batch-hist-${Date.now()}`;
 
-        const histSample = await prisma.sample.create({
+        const histSample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-hist-${Date.now()}`,
                 originalId: `SMP-HST-${Date.now()}`,
@@ -1200,6 +1220,6 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // Cleanup
         await prisma.result.delete({ where: { id: resSupersededReport.id } });
         await prisma.report.delete({ where: { id: supersededReport.id } });
-        await prisma.sample.delete({ where: { id: histSample.id } });
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: histSample.id } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 });

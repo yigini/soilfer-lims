@@ -1,3 +1,5 @@
+const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -22,9 +24,9 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
         await prisma.result.deleteMany({
             where: { id: resultId }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { in: [sampleGtmId, sampleMozId] } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.apiKey.deleteMany({
             where: {
                 id: { in: ['test-stage-e-key-gtm', 'test-stage-e-key-moz', 'test-stage-e-key-unscoped'] }
@@ -69,7 +71,7 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
         });
 
         // Create sample in GTM
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleGtmId,
                 originalId: sampleGtmId,
@@ -81,7 +83,7 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
         });
 
         // Create sample in MOZ
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleMozId,
                 originalId: sampleMozId,
@@ -164,9 +166,9 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
         await prisma.result.deleteMany({
             where: { id: resultId }
         });
-        await prisma.sample.deleteMany({
+        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
             where: { id: { in: [sampleGtmId, sampleMozId] } }
-        });
+        }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.apiKey.deleteMany({
             where: {
                 id: { in: ['test-stage-e-key-gtm', 'test-stage-e-key-moz', 'test-stage-e-key-unscoped'] }
@@ -279,7 +281,7 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
         try {
             await prisma.spectralData.deleteMany({ where: { id: { in: [scanGtmId, scanMozId] } } });
             await prisma.result.deleteMany({ where: { id: resultId } });
-            await prisma.sample.deleteMany({ where: { id: sampleGtmId } });
+            await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleGtmId } }), select: { id: true } })).map(row => row.id), { single: false });
             await prisma.apiKey.deleteMany({ where: { id: { in: ['test-stage-e-key-gtm', 'test-stage-e-key-moz', 'test-stage-e-key-unscoped'] } } });
         } catch (e) {}
     });
