@@ -19,7 +19,8 @@ const os = require('os');
 const assert = require('assert/strict');
 const { createRequire } = require('module');
 
-const root = 'C:/Users/yigin/Documents/soilfer-lims';
+const root = path.resolve(__dirname, '../..');
+const { createDisposableDatabase, cleanupDisposableDatabase } = require('./journey_db_isolation.cjs');
 const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'issue155-candidate-followthrough-'));
 const logFile = path.join(scratch, 'issue155-followthrough.log');
 fs.writeFileSync(logFile, '');
@@ -35,17 +36,12 @@ for (const level of ['log', 'warn', 'error']) {
 const sr = createRequire(path.join(root, 'server/package.json'));
 const cr = createRequire(path.join(root, 'client/package.json'));
 
-const dbPath = path.join(scratch, 'candidate-followthrough.db');
+const { dbPath, runnerDir } = createDisposableDatabase();
 process.env.NODE_ENV = 'test';
 process.env.DISABLE_BACKGROUND_JOBS = 'true';
 process.env.JWT_SECRET = 'issue155-candidate-followthrough-secret';
 process.env.DATABASE_PATH = dbPath;
-
-const Database = sr('better-sqlite3');
-const db = new Database(dbPath);
-const schemaPath = 'C:/Users/yigin/Documents/Codex/2026-09-21/se/work/issue149-schema-9850d78.sql';
-db.exec(fs.readFileSync(schemaPath, 'utf8').replace(/^\uFEFF/, ''));
-db.close();
+process.env.DATABASE_URL = `file:${dbPath}`;
 
 sr('./scripts/migrate_sitewide_theme_library').migrateThemeLibrary(dbPath);
 const prisma = sr('./prisma');
@@ -540,9 +536,11 @@ async function run() {
 
 run().then(async () => {
     await prisma.$disconnect();
+    cleanupDisposableDatabase(runnerDir);
     process.exit(0);
 }).catch(async err => {
     console.error('FOLLOWTHROUGH_FAILURE', err.stack);
     try { await prisma.$disconnect(); } catch {}
+    cleanupDisposableDatabase(runnerDir);
     process.exit(1);
 });
