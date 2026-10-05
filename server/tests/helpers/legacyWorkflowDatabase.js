@@ -46,8 +46,17 @@ const VARIANTS = Object.freeze({
 
 // Legacy values are inserted into a new schema before its real additive guards
 // are installed. Existing constraints are never dropped, disabled or bypassed.
-function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_legacy_${randomUUID()}.db`), samples = [], workItems = [], batches = [], preMigrationSnapshot = false,
-    schemaVariant = null, markerPending = false, migrationOrder = 'REHEARSAL', relatedRows = {} }) {
+function beforeGuards(options) {
+    const allowedOptions = ['actor', 'file', 'samples', 'workItems', 'batches', 'preMigrationSnapshot',
+        'schemaVariant', 'markerPending', 'migrationOrder', 'relatedRows', 'installWorkflowStateGuards'];
+    if (Object.keys(options).some(key => !allowedOptions.includes(key))) throw new Error('Unknown historical fixture option.');
+    const { actor, samples = [], workItems = [], batches = [], preMigrationSnapshot = false,
+        schemaVariant = null, markerPending = false, migrationOrder = 'REHEARSAL', relatedRows = {} } = options;
+    let { file = path.resolve(__dirname, '../.tmp', `audit_legacy_${randomUUID()}.db`) } = options;
+    const useInstaller = Object.hasOwn(options, 'installWorkflowStateGuards');
+    if (useInstaller && (options.installWorkflowStateGuards !== true || schemaVariant !== null || markerPending || migrationOrder !== 'REHEARSAL')) {
+        throw new Error('The actual workflow installer is allowed only on the default schema-only fixture.');
+    }
     file = assertOwnedTestDatabase(file, actor);
     if (![samples, workItems, batches].every(Array.isArray)) throw new Error('Legacy fixture rows must be declarative arrays.');
     if (schemaVariant !== null && !Object.hasOwn(VARIANTS, schemaVariant)) throw new Error('Unknown pinned historical schema variant.');
@@ -237,13 +246,64 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
         if (projectVariant && migrationOrder === 'REAL') {
             runProjectMigration(); outcomes.set('PROJECT_POLICY', 'APPLIED');
         }
-        for (const name of ['20261005000000_workflow_state_evidence', '20261005000100_workflow_state_guards']) {
+        let installerOutcome;
+        if (useInstaller) {
+            // #179 pin 5992194809: execute the same child entrypoint as Docker.
+            // No unguarded writable file or handle is returned to a caller.
+            const oldObjects = db.prepare("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name").all();
+            const oldTables = oldObjects.filter(object => object.type === 'table').map(({ name }) => ({ name,
+                columns: db.prepare(`PRAGMA table_xinfo("${name}")`).all(),
+                fks: db.prepare(`PRAGMA foreign_key_list("${name}")`).all(),
+                indexes: db.prepare(`PRAGMA index_list("${name}")`).all(),
+                rows: db.prepare(`SELECT * FROM "${name}" ORDER BY rowid`).all() }));
+            db.close();
+            const beforeSha = createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+            const child = require('node:child_process').spawnSync(process.execPath,
+                [path.resolve(__dirname, '../../scripts/install_workflow_state_guards.js'), '--apply'],
+                { env: { ...process.env, DATABASE_PATH: file, DATABASE_URL: `file:${file}` }, encoding: 'utf8' });
+            const afterSha = createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+            if (child.error || child.status !== 0) {
+                assert.equal(afterSha, beforeSha, 'An installer refusal must preserve the owned file bytes.');
+                const response = child.stderr && JSON.parse(child.stderr);
+                throw Object.assign(new Error(response?.message || child.error?.message || 'The real workflow installer refused the fixture.'),
+                    { code: response?.error, differences: response?.differences, beforeSha, afterSha, exitStatus: child.status });
+            }
+            installerOutcome = JSON.parse(child.stdout);
+            assert.equal(installerOutcome.classification, 'PRE_179');
+            assert.equal(installerOutcome.mode, 'APPLIED');
+            db = new Database(file, { fileMustExist: true });
+            db.pragma('foreign_keys = ON');
+            for (const table of oldTables) {
+                const names = table.columns.map(column => `"${column.name}"`).join(',');
+                const retained = table.name === '_schema_migrations'
+                    ? db.prepare(`SELECT ${names} FROM "_schema_migrations" WHERE id <> ? ORDER BY rowid`).all('179_workflow_state_guards')
+                    : db.prepare(`SELECT ${names} FROM "${table.name}" ORDER BY rowid`).all();
+                assert.equal(JSON.stringify(retained), JSON.stringify(table.rows), 'Historical row mutation.');
+                assert.equal(JSON.stringify(db.prepare(`PRAGMA table_xinfo("${table.name}")`).all().slice(0, table.columns.length)), JSON.stringify(table.columns), 'Historical column mutation.');
+                assert.equal(JSON.stringify(db.prepare(`PRAGMA foreign_key_list("${table.name}")`).all()), JSON.stringify(table.fks), 'Historical foreign-key mutation.');
+                assert.equal(JSON.stringify(db.prepare(`PRAGMA index_list("${table.name}")`).all()), JSON.stringify(table.indexes), 'Historical index mutation.');
+            }
+            for (const object of oldObjects) {
+                const actual = db.prepare('SELECT type,name,tbl_name,sql FROM sqlite_master WHERE type=? AND name=?').get(object.type, object.name);
+                if (object.type === 'table' && ['Sample', 'WorkItem'].includes(object.name)) {
+                    const removeAdditions = sql => sql.replace(/,\s*"(?:holdPriorStatus|legacyStatus)"\s+TEXT(?=\s*[,)])/g, '').replace(/\s+/g, ' ').trim();
+                    assert.equal(removeAdditions(actual.sql), removeAdditions(object.sql), 'Historical workflow DDL mutation.');
+                } else assert.equal(JSON.stringify(actual), JSON.stringify(object), 'Historical DDL mutation.');
+            }
+            const details = db.prepare('SELECT details FROM _schema_migrations WHERE id=?').get('179_workflow_state_guards');
+            const definitions = require('../../services/workflowMigrationSources').SOURCES;
+            assert.equal(details.details, JSON.stringify({ evidenceSha256: definitions.evidence.sha256, guardsSha256: definitions.guards.sha256 }));
+        } else for (const name of ['20261005000000_workflow_state_evidence', '20261005000100_workflow_state_guards']) {
             db.exec(fs.readFileSync(path.resolve(__dirname, '../../prisma/migrations', name, 'migration.sql'), 'utf8'));
         }
         const guardSql = fs.readFileSync(path.resolve(__dirname, '../../prisma/migrations/20261005000100_workflow_state_guards/migration.sql'), 'utf8');
         const installed = new Set(db.prepare("SELECT name FROM sqlite_master WHERE type='trigger'").all().map(row => row.name));
         for (const match of guardSql.matchAll(/CREATE TRIGGER "([^"]+)"/g)) {
             if (!installed.has(match[1])) throw new Error(`Missing release guard ${match[1]}`);
+        }
+        if (useInstaller) for (const match of guardSql.matchAll(/CREATE TRIGGER "([^"]+)"[\s\S]*?END;/g)) {
+            assert.equal(db.prepare("SELECT sql FROM sqlite_master WHERE type='trigger' AND name=?").get(match[1]).sql,
+                match[0].slice(0, -1), 'The installed guard must equal the exact release source.');
         }
         if (projectVariant || sampleCodeVariant) assertGeneratedSchemaCompleteness(db,
             outcomes.get(projectVariant ? 'PROJECT_POLICY' : 'SAMPLE_CODES') === 'PENDING' ? (projectVariant ? 'PROJECT_POLICY' : 'SAMPLE_CODES') : null);

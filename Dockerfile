@@ -61,6 +61,10 @@ COPY --from=builder /app/client/dist ./client/dist/
 RUN mkdir -p /app/server/.schema-backup && \
     cp /app/server/prisma/schema.prisma /app/server/.schema-backup/schema.prisma
 
+# Exact #179 release DDL must remain visible outside the persistent Prisma volume.
+COPY server/prisma/migrations/20261005000000_workflow_state_evidence/migration.sql /app/server/.migrations-backup/179/20261005000000_workflow_state_evidence/migration.sql
+COPY server/prisma/migrations/20261005000100_workflow_state_guards/migration.sql /app/server/.migrations-backup/179/20261005000100_workflow_state_guards/migration.sql
+
 # Copy and set entrypoint
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh
 RUN sed -i 's/\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh

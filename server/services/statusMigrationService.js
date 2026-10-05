@@ -1,10 +1,9 @@
-const fs = require('node:fs');
 const path = require('node:path');
 const Database = require('better-sqlite3');
 const workflow = require('../workflowContract');
 const plans = require('./statusMigrationPlan');
 const { TransitionError } = require('./workflowStateRules');
-const guardSql = fs.readFileSync(path.resolve(__dirname, '../prisma/migrations/20261005000100_workflow_state_guards/migration.sql'), 'utf8');
+const guardSql = require('./workflowMigrationSources').loadWorkflowMigrationSources().guards.sql;
 const requiredGuards = [...guardSql.matchAll(/CREATE TRIGGER "([^"]+)"/g)].map(match => match[1]);
 
 function timestamp(value) {

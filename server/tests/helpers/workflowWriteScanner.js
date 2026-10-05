@@ -2,6 +2,16 @@ const fs = require('node:fs');
 const path = require('node:path');
 const parser = require('@babel/parser');
 const traverse = require('@babel/traverse').default;
+const { createHash } = require('node:crypto');
+
+// #179 pin 5992389337. This resolves two fixed, digest-bound DDL assets;
+// it grants no write authority and never accepts an arbitrary SQL loader.
+const WORKFLOW_LOADER = 'services/workflowMigrationSources.js';
+const WORKFLOW_LOADER_SHA256 = '0b7f6010cc7b69a03ffe5aceb3c467dd5a718f51d25968e5aba07fcf8aaa1733';
+const WORKFLOW_SOURCES = Object.freeze({
+    evidence: { directory: '20261005000000_workflow_state_evidence', sha256: 'ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552' },
+    guards: { directory: '20261005000100_workflow_state_guards', sha256: '84921ef45fa8609621b38908de5261d716820f2135f2dde1b9a20fafa6fc81ed' }
+});
 
 const mutations = new Set(['create', 'createMany', 'createManyAndReturn', 'update', 'updateMany', 'updateManyAndReturn', 'upsert', 'save', 'saveMany', 'bulkUpdate']);
 const sqlMethods = new Set(['prepare', 'exec', 'execute', 'pragma', '$executeRaw', '$executeRawUnsafe', '$queryRaw', '$queryRawUnsafe']);
@@ -53,6 +63,8 @@ function scanSource(source, filename, exceptions = []) {
     }
     function strings(p, seen = new Set()) {
         if (!p?.node) return ['<unknown>'];
+        const resolvedMigration = migrationSql(p);
+        if (resolvedMigration !== null) return [resolvedMigration];
         if (p.isStringLiteral() || p.isNumericLiteral()) return [String(p.node.value)];
         if (p.isIdentifier()) {
             if (p.node.name === '__dirname' && !p.scope.getBinding('__dirname')) return [path.dirname(path.resolve(__dirname, '../..', filename))];
@@ -83,6 +95,88 @@ function scanSource(source, filename, exceptions = []) {
             return candidates.map(file => fs.readFileSync(file, 'utf8'));
         }
         return ['<unknown>'];
+    }
+    let validatedSources;
+    function verifiedSources() {
+        if (validatedSources !== undefined) return validatedSources;
+        validatedSources = null;
+        const root = path.resolve(__dirname, '../..'), loaderFile = path.join(root, WORKFLOW_LOADER);
+        try {
+            const bytes = fs.readFileSync(loaderFile);
+            if (createHash('sha256').update(bytes).digest('hex') !== WORKFLOW_LOADER_SHA256) return null;
+            const loaderAst = parser.parse(bytes.toString('utf8'), { sourceType: 'unambiguous' });
+            const declaration = loaderAst.program.body.filter(node => node.type === 'VariableDeclaration')
+                .flatMap(node => node.declarations).find(node => node.id.name === 'SOURCES');
+            const registry = declaration?.init?.arguments?.[0];
+            if (registry?.type !== 'ObjectExpression' || registry.properties.length !== 2) return null;
+            for (const property of registry.properties) {
+                const key = property.key.name, wanted = WORKFLOW_SOURCES[key];
+                const definition = property.value.arguments?.[0];
+                if (!wanted || definition?.type !== 'ObjectExpression' || definition.properties.length !== 2 || property.computed) return null;
+                const values = Object.fromEntries(definition.properties.map(item => [item.key.name, item.value.value]));
+                if (JSON.stringify(values) !== JSON.stringify(wanted)) return null;
+            }
+            const loaded = {};
+            for (const [key, definition] of Object.entries(WORKFLOW_SOURCES)) {
+                const sqlBytes = fs.readFileSync(path.join(root, 'prisma/migrations', definition.directory, 'migration.sql'));
+                if (createHash('sha256').update(sqlBytes).digest('hex') !== definition.sha256) return null;
+                const sql = sqlBytes.toString('utf8');
+                if (/\b(?:INSERT\s+(?:OR\s+\w+\s+)?INTO|UPDATE\s+["`\[]?\w+["`\]]?\s+SET|DELETE\s+FROM|DROP\s+TRIGGER|ATTACH)\b|\bPRAGMA\s+(?:foreign_keys|ignore_check_constraints|writable_schema)\b/i.test(sql)) return null;
+                loaded[key] = sql;
+            }
+            validatedSources = loaded;
+        } catch { return null; }
+        return validatedSources;
+    }
+    function sourceFunction(p, name) {
+        if (!p?.isIdentifier({ name })) return false;
+        const binding = p.scope.getBinding(name);
+        if (!binding || binding.kind !== 'const' || binding.constantViolations.length || !binding.path.isVariableDeclarator()) return false;
+        const declaration = binding.path, id = declaration.get('id'), init = declaration.get('init');
+        if (!id.isObjectPattern() || !init.isCallExpression() || !init.get('callee').isIdentifier({ name: 'require' }) || init.scope.getBinding('require')) return false;
+        const property = id.get('properties').find(item => item.isObjectProperty() && !item.node.computed &&
+            item.node.key.name === name && item.get('value').isIdentifier({ name }));
+        if (!property || init.node.arguments.length !== 1 || !init.get('arguments.0').isStringLiteral()) return false;
+        const root = path.resolve(__dirname, '../..');
+        let literal = path.relative(path.dirname(path.resolve(root, filename)), path.join(root, WORKFLOW_LOADER)).replace(/\\/g, '/').replace(/\.js$/, '');
+        if (!literal.startsWith('.')) literal = `./${literal}`;
+        return init.node.arguments[0].value === literal;
+    }
+    function sourceObject(p) {
+        if (p?.isCallExpression()) return p.node.arguments.length === 0 && sourceFunction(p.get('callee'), 'loadWorkflowMigrationSources');
+        if (!p?.isIdentifier()) return false;
+        const binding = p.scope.getBinding(p.node.name);
+        if (!binding || binding.kind !== 'const' || binding.constantViolations.length || !binding.path.isVariableDeclarator() ||
+            !binding.path.get('id').isIdentifier() || !binding.path.get('init').isCallExpression() || !sourceObject(binding.path.get('init'))) return false;
+        return binding.referencePaths.every(reference => {
+            let end = reference;
+            const members = [];
+            while (end.parentPath?.isMemberExpression() && end.parentPath.get('object').node === end.node) {
+                if (end.parentPath.node.computed) return false;
+                end = end.parentPath; members.push(end.node.property.name);
+            }
+            // The object or one of its objects cannot be aliased, spread or
+            // passed to another function. Its immutable scalar fields may be read.
+            if (members.length < 2 || !['evidence', 'guards'].includes(members[0]) ||
+                !['sql', 'sha256', 'directory', 'file'].includes(members[1]) ||
+                members.slice(2).some(name => !['matchAll', 'indexOf', 'slice'].includes(name))) return false;
+            return !(end.parentPath?.isAssignmentExpression() && end.parentPath.get('left').node === end.node) &&
+                !end.parentPath?.isUpdateExpression() && !(end.parentPath?.isUnaryExpression({ operator: 'delete' }));
+        });
+    }
+    function migrationSql(p) {
+        if (p?.isCallExpression() && sourceFunction(p.get('callee'), 'evidenceCreates') && p.node.arguments.length === 1) {
+            const argument = p.get('arguments.0');
+            if (!argument.isMemberExpression() || argument.node.computed || argument.node.property.name !== 'sql' ||
+                !argument.get('object').isMemberExpression() || argument.node.object.computed || argument.node.object.property.name !== 'evidence') return null;
+            const sql = migrationSql(argument), sliced = sql?.slice(sql.indexOf('CREATE TABLE'));
+            if (!sliced || sliced.split(';').filter(statement => statement.trim()).some(statement => !/^\s*CREATE (?:TABLE|INDEX)\b/.test(statement))) return null;
+            return sliced;
+        }
+        if (!p?.isMemberExpression() || p.node.computed || p.node.property.name !== 'sql') return null;
+        const member = p.get('object');
+        if (!member.isMemberExpression() || member.node.computed || !Object.hasOwn(WORKFLOW_SOURCES, member.node.property.name) || !sourceObject(member.get('object'))) return null;
+        return verifiedSources()?.[member.node.property.name] || null;
     }
     function nodeFsRead(p) {
         if (!p?.isCallExpression() || !p.get('callee').isMemberExpression() ||

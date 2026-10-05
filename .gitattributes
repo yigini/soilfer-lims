@@ -10,3 +10,6 @@ server/prisma/migrations/20261004033000_add_report_number_lineage/migration.sql 
 server/tests/helpers/fixtures/project_fk_corrupt_synthetic.sql -text
 server/tests/helpers/fixtures/pre13_full_application_schema.sql -text
 server/prisma/migrations/20261004170000_add_atomic_sample_codes/migration.sql text eol=lf
+server/prisma/migrations/20261005000000_workflow_state_evidence/migration.sql text eol=lf
+server/prisma/migrations/20261005000100_workflow_state_guards/migration.sql text eol=lf
+server/services/workflowMigrationSources.js text eol=lf
