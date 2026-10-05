@@ -28,9 +28,10 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
                 projectCode: 'SOILFER-GTM',
                 status: 'APPROVED',
                 depthTopCm: 0,
-                depthBottomCm: 20,
-                results: {
-                    create: [
+                depthBottomCm: 20
+            }
+        });
+        await prisma.result.createMany({ data: [
                         {
                             id: `res-app-gtm-${timestamp}`,
                             param: 'PH_H2O',
@@ -39,10 +40,7 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
                             unit: 'pH_units',
                             isCurrent: true
                         }
-                    ]
-                }
-            }
-        });
+                    ].map(result => ({ ...result, sampleId: sampleApprovedGtm.id })) });
 
         // 2. Pending / Unapproved GTM Sample
         samplePendingGtm = await createSampleFixture(prisma, {

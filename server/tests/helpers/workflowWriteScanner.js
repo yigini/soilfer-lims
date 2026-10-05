@@ -270,6 +270,16 @@ function scanSource(source, filename, exceptions = []) {
         }
         return null;
     }
+    const relationCommands = new Set(['create', 'createMany', 'connectOrCreate', 'update', 'updateMany', 'upsert', 'delete', 'deleteMany']);
+    function hasRelationCommand(p, seen = new Set()) {
+        if (!p?.node) return false;
+        if (p.isIdentifier()) return bindingValue(p, seen).some(value => hasRelationCommand(value.path, value.seen));
+        if (p.isConditionalExpression()) return hasRelationCommand(p.get('consequent'), seen) || hasRelationCommand(p.get('alternate'), seen);
+        if (!p.isObjectExpression()) return false;
+        return p.get('properties').some(property => property.isSpreadElement() ? hasRelationCommand(property.get('argument'), seen)
+            : property.isObjectProperty() && (property.node.computed ? strings(property.get('key'), seen)
+                : [property.node.key.name || property.node.key.value]).some(key => relationCommands.has(key)));
+    }
     function relationWrites(p, seen = new Set()) {
         if (!p?.node) return [];
         if (p.isIdentifier()) return union(bindingValue(p, seen).map(value => relationWrites(value.path, value.seen)));
@@ -279,10 +289,10 @@ function scanSource(source, filename, exceptions = []) {
         return union(p.get('properties').map(property => {
             if (property.isSpreadElement()) return relationWrites(property.get('argument'), seen);
             if (!property.isObjectProperty()) return [];
-            const name = property.node.key.name || property.node.key.value, value = property.get('value');
-            const commands = value.isObjectExpression() && value.node.properties.some(entry =>
-                ['create', 'createMany', 'connectOrCreate', 'update', 'updateMany', 'upsert', 'delete', 'deleteMany'].includes(entry.key?.name || entry.key?.value));
-            return union([commands && workflowModels.has(name) ? [workflowModels.get(name)] : [], relationWrites(value, seen)]);
+            const names = property.node.computed ? strings(property.get('key'), seen) : [property.node.key.name || property.node.key.value];
+            const value = property.get('value');
+            return union([hasRelationCommand(value, seen) ? names.filter(name => workflowModels.has(name)).map(name => workflowModels.get(name)) : [],
+                relationWrites(value, seen)]);
         }));
     }
     function owner(p) {
@@ -361,7 +371,7 @@ function scanSource(source, filename, exceptions = []) {
                 argumentsToCheck.push(p.get('arguments.0'));
             }
         }
-        const embeddedDml = /\b(?:INSERT\s+(?:OR\s+\w+\s+)?INTO|UPDATE(?:\s+OR\s+\w+)?|DELETE\s+FROM)\s+\\*["`\[]?(?:Sample|WorkItem)(?:["`\]]|\b)/i;
+        const embeddedDml = new RegExp('\\b(?:INSERT\\s+(?:OR\\s+\\w+\\s+)?INTO|REPLACE\\s+INTO|UPDATE(?:\\s+OR\\s+\\w+)?|DELETE\\s+FROM)\\s+\\\\*' + sqlTable, 'i');
         if (!argumentsToCheck.some(argument => strings(argument).some(text => embeddedDml.test(text)))) return;
         const entry = deferredSources.find(record => record.path === `server/${filename}` &&
             record.sha256 === createHash('sha256').update(source).digest('hex'));

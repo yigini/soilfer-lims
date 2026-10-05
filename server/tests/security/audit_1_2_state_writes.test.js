@@ -9,6 +9,8 @@ test.each([
     ['tests/contracts/canary.test.js', 'prisma.sample.deleteMany({where:{id}})'],
     ['controllers/canary.js', 'state.removeUnstartedWorkItems(prisma, {}, {actor,reason})'],
     ['controllers/canary.js', 'prisma.project.create({data:{samples:{create:[{status:"APPROVED"}]}}})'],
+    ['controllers/canary.js', 'const nested={create:[{status:"APPROVED"}]};prisma.project.create({data:{samples:nested}})'],
+    ['controllers/canary.js', 'const key="workItems";const op="deleteMany";prisma.sample.update({data:{[key]:{[op]:{}}}})'],
     ['controllers/canary.js', 'prisma.sample.update({where:{id},data:{workItems:{upsert:{create:{status:"ACCEPTED"},update:{status:"ACCEPTED"}}}}})'],
     ['controllers/canary.js', 'prisma.sample?.update({data:{status:"APPROVED"}})'],
     ['controllers/canary.js', 'prisma.sample.update?.({data:{status:"APPROVED"}})'],
@@ -88,6 +90,9 @@ test('all handwritten runtime, script, seed and test Sample/WorkItem writes use 
 });
 
 test.each([
+    "const vm=require('vm');vm.runInNewContext(\"db.exec('REPLACE INTO main.Sample (id,status) VALUES (1,2)')\")",
+    "const {spawnSync}=require('child_process');spawnSync('node',['-e',\"db.exec('INSERT OR REPLACE INTO main.WorkItem (id,status) VALUES (1,2)')\"])",
+    "const vm=require('vm');vm.runInNewContext(\"db.exec('UPDATE OR ABORT main.Sample SET status = 1')\")",
     "import {execSync as launch} from 'node:child_process';launch(\"node -e `db.exec('DELETE FROM Sample')`\")",
     "import {writeFileSync as saveProgram} from 'node:fs';saveProgram('program.cjs',\"db.exec('UPDATE WorkItem SET metadata = 1')\")",
     "const {spawnSync}=require('node:child_process');spawnSync('node',['-e',\"db.exec('INSERT INTO Sample (id) VALUES (1)')\"])",

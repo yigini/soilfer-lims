@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
+import { useLanguage } from '../../context/LanguageContext';
+import { useDialog } from '../../context/DialogContext';
+import { requestWithSpectralReopen } from '../../utils/spectralWorkflowRequest';
 import {
     X, Upload, FileText, CheckCircle2, AlertTriangle, ArrowRight,
     ArrowLeft, ShieldCheck, Activity, Eye, Check, RefreshCw, AlertOctagon, HelpCircle
@@ -25,6 +28,8 @@ export default function SpectralIntakeModal({
     modality = 'SPEC_MIR',
     eligibleEquipment = []
 }) {
+    const { t } = useLanguage();
+    const { showDialog } = useDialog();
     const [step, setStep] = useState(1);
     const [instruments, setInstruments] = useState(eligibleEquipment || []);
     const [selectedInstrument, setSelectedInstrument] = useState('');
@@ -306,12 +311,15 @@ export default function SpectralIntakeModal({
 
         try {
             const idempotencyKey = `commit-${manifestId}-${Date.now()}`;
-            const res = await axios.post('/api/spectral/batch/commit', {
+            const payload = {
                 manifestId,
                 equipmentId: selectedInstrument,
                 idempotencyKey,
                 decisions
-            });
+            };
+            const res = await requestWithSpectralReopen(reopenReason =>
+                axios.post('/api/spectral/batch/commit', { ...payload, reopenReason }), showDialog, t);
+            if (!res) return;
 
             setCommitReceipt(res.data);
             setStep(4);
@@ -754,11 +762,16 @@ export default function SpectralIntakeModal({
                         <div className="p-6 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-center flex flex-col items-center gap-3">
                             <CheckCircle2 size={36} className="text-emerald-600 dark:text-emerald-400" />
                             <h3 className="text-base font-bold text-sf-text">
-                                Spectral Intake Committed Successfully
+                                {t(commitReceipt.complete === false ? 'spectralWorkflow.partialTitle' : 'spectralWorkflow.receiptTitle')}
                             </h3>
                             <p className="text-xs text-sf-muted max-w-md">
-                                Recorded {commitReceipt.success || eligibleItems.length} scan(s) into the permanent library with cryptographic SHA-256 integrity and task linkage.
+                                {t('spectralWorkflow.receiptCounts', { count: commitReceipt.success ?? 0, failed: commitReceipt.failed ?? 0 })}
                             </p>
+                            {commitReceipt.errors?.length > 0 && (
+                                <ul className="text-left text-xs text-red-700 dark:text-red-300 max-w-md">
+                                    {commitReceipt.errors.map((entry, index) => <li key={`${entry.filename}-${index}`}>{entry.filename}: {entry.error}</li>)}
+                                </ul>
+                            )}
                             <div className="font-mono text-xs p-2.5 rounded bg-sf-surface border border-emerald-500/30 mt-2 text-sf-text">
                                 Manifest ID: {commitReceipt.manifestId || manifestId}
                             </div>
@@ -815,6 +828,11 @@ export default function SpectralIntakeModal({
                         )}
 
                         {step === 4 && (
+                            <>
+                            {commitReceipt?.complete === false && <button type="button" onClick={() => setStep(3)}
+                                className="px-4 py-1.5 rounded-lg text-xs font-semibold border border-sf-divider text-sf-text">
+                                {t('spectralWorkflow.retryFailed')}
+                            </button>}
                             <button
                                 type="button"
                                 onClick={onClose}
@@ -822,6 +840,7 @@ export default function SpectralIntakeModal({
                             >
                                 Close & Return to Workbench
                             </button>
+                            </>
                         )}
                     </div>
                 </div>

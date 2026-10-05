@@ -30,9 +30,10 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
                 depthTopCm: 0,
                 depthBottomCm: 20,
                 latitude: 14.5,
-                longitude: -90.5,
-                results: {
-                    create: [
+                longitude: -90.5
+            }
+        });
+        await prisma.result.createMany({ data: [
                         {
                             id: `res-a0-1-${timestamp}`,
                             param: 'PH_H2O',
@@ -42,10 +43,7 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
                             isCurrent: true,
                             provenance: 'MEASURED'
                         }
-                    ]
-                }
-            }
-        });
+                    ].map(result => ({ ...result, sampleId: sampleApproved.id })) });
 
         sampleProcessing = await createSampleFixture(prisma, {
             data: {

@@ -37,7 +37,7 @@ function rejectedGuardWrite({ actor, file, statement, parameters = [], expectedG
         if (restrictProbe) {
             const target = restrictTargets[expectedConstraint];
             assert.match(statement.trim(), new RegExp(`^DELETE\\s+FROM\\s+"?${target.parent}"?\\s+WHERE\\s+"?id"?\\s*=\\s*\\?$`, 'i'),
-                'The pinned RESTRICT probe requires a single bound parent id deletion.');
+                `The pinned RESTRICT probe requires a single bound ${target.parent} id deletion.`);
             assert.equal(parameters.length, 1, 'The pinned RESTRICT deletion needs one bound id.');
             const keys = db.prepare(`PRAGMA foreign_key_list("${target.child}")`).all().filter(row => row.from === target.field && row.table === target.parent);
             assert.equal(keys.length, 1, 'The exact duplicateOf foreign key must exist once.');
@@ -78,7 +78,11 @@ function rejectedGuardWrite({ actor, file, statement, parameters = [], expectedG
             assert.equal(refusal.message, uniqueProbe ? `UNIQUE constraint failed: ${UNIQUE_CONSTRAINTS[expectedConstraint]}`
                 : 'FOREIGN KEY constraint failed', 'SQLite refused with a different constraint identity.');
         }
-        return { name: refusal.name, code: refusal.code, message: refusal.message };
+        // The new closed child-process probe reports its verified native error.
+        // Existing guard probes retain their no-value contract.
+        if (expectedConstraint === 'Sample_Result_restrict') {
+            return { name: refusal.name, code: refusal.code, message: refusal.message };
+        }
     } finally {
         if (db.inTransaction) db.exec('ROLLBACK');
         db.close();

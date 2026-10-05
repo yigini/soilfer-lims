@@ -222,13 +222,18 @@ const SpectralLibrary = () => {
             onConfirm: async () => {
                 setBatchLoading(true);
                 try {
-                    const res = await axios.post('/api/spectral/batch-review', {
+                    const payload = {
                         ids: Array.from(selectedIds),
                         action: 'APPROVE'
-                    });
-                    setSelectedIds(new Set());
+                    };
+                    const res = await requestWithSpectralReopen(reopenReason =>
+                        axios.post('/api/spectral/batch-review', { ...payload, reopenReason }), showDialog, t);
+                    if (!res) return;
+                    const errors = res.data.results?.errors || [];
+                    setSelectedIds(new Set(errors.map(entry => entry.id)));
                     fetchLibrary();
-                    showDialog({ type: 'success', title: 'Batch Approve Complete', message: res.data.message });
+                    showDialog({ type: errors.length ? 'error' : 'success', title: errors.length ? t('spectralWorkflow.partialTitle') : 'Batch Approve Complete',
+                        message: [res.data.message, ...errors.map(entry => `${entry.id}: ${entry.error}`)].join('\n') });
                 } catch (e) {
                     showDialog({ type: 'error', title: 'Error', message: e.response?.data?.error || e.message });
                 } finally {

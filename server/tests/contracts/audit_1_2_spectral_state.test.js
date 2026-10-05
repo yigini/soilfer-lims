@@ -2,6 +2,7 @@ const request = require('supertest');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
+const Database = require('better-sqlite3');
 const app = require('../../app');
 const prisma = require('../../prisma');
 const { getAuthToken, ensureTestLab } = require('../setup');
@@ -60,19 +61,31 @@ async function snapshot(f) {
 const link = (f, body = {}) => post('/api/spectral/link-task', { scanId: f.scan.id, workItemId: f.item.id, ...body });
 const review = (f, body = {}) => post(`/api/spectral/${f.scan.id}/review`, { action: 'APPROVE', ...body });
 
-async function acquire(mode, fixtures, body = {}) {
+function prepareAcquisition(mode, fixtures) {
     const scans = fixtures.map(f => ({ id: randomUUID(), filename: `${randomUUID()}.csv`, sampleId: f.sample.id,
         targetWorkItemId: f.item.id, equipmentId, modality: 'MIR', quantity: 'ABSORBANCE', qcStatus: 'PASS',
         sha256: randomUUID(), wavelengths: [4000, 3600, 3200, 2800, 2400, 2000, 1600, 1200, 800, 400],
         values: [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.3, 0.2, 0.1] }));
-    if (mode === 'upload') return post('/api/spectral/batch', { scans, ...body });
+    if (mode === 'upload') return { scans, send: body => post('/api/spectral/batch', { scans, ...body }) };
     const manifestId = `audit-spectral-179-${randomUUID()}`;
     const directory = path.resolve(__dirname, '../../uploads/staging', manifestId);
     fs.mkdirSync(directory);
     for (const scan of scans) fs.writeFileSync(path.join(directory, scan.filename), 'wavelength,absorbance\n4000,0.1\n400,0.1', { flag: 'wx' });
     fs.writeFileSync(path.join(directory, 'manifest.json'), JSON.stringify({ equipmentId,
         expiresAt: new Date(Date.now() + 60000).toISOString(), items: scans }), { flag: 'wx' });
-    return post('/api/spectral/batch/commit', { manifestId, ...body });
+    return { scans, manifestId, manifestPath: path.join(directory, 'manifest.json'),
+        send: body => post('/api/spectral/batch/commit', { manifestId, ...body }) };
+}
+async function acquire(mode, fixtures, body = {}) {
+    return prepareAcquisition(mode, fixtures).send(body);
+}
+function allTables() {
+    const db = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
+    try {
+        return db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").all()
+            .map(({ name }) => ({ name, rows: db.prepare(`SELECT * FROM "${name.replace(/"/g, '""')}"`).all()
+                .map(row => JSON.stringify(row, (_, value) => typeof value === 'bigint' ? `${value}n` : value)).sort() }));
+    } finally { db.close(); }
 }
 
 test('link on COMPLETED without a supplied reopen reason refuses with zero changes', async () => {
@@ -201,8 +214,8 @@ test('a present incomplete preparation item overrides legacy DONE flags and refu
 
 test.each(['upload', 'commit'])('%s on COMPLETED without a reason refuses the scan and changes no rows', async mode => {
     const f = await fixture(), before = await snapshot(f), response = await acquire(mode, [f]);
-    expect(response.status).toBe(200); expect((mode === 'upload' ? response.body.results : response.body)).toMatchObject({ success: 0, failed: 1,
-        errors: [expect.objectContaining({ code: 'WORKITEM_REOPEN_REQUIRED' })] });
+    expect(response.status).toBe(409); expect(response.body).toMatchObject({ code: 'WORKITEM_REOPEN_REQUIRED',
+        details: { affected: [expect.objectContaining({ workItemId: f.item.id })] } });
     expect(await snapshot(f)).toEqual(before);
 });
 
@@ -217,6 +230,59 @@ test.each(['upload', 'commit'])('%s with a reason reopens, adds and completes at
         priorCompletedAt: f.item.completedAt.toISOString() });
     expect(after.audits).toHaveLength(before.audits.length + 3);
     if (mode === 'upload') expect(after.scans.find(scan => scan.id === f.scan.id)).toMatchObject({ isCurrent: false });
+});
+
+test.each(['upload', 'commit'])('%s preflight preserves every table and staged bytes; the same request resends without duplicates', async mode => {
+    const ready = await fixture({ status: 'ASSIGNED' }), first = await fixture(), second = await fixture();
+    const request = prepareAcquisition(mode, [ready, first, second]);
+    const before = allTables(), stagedBefore = request.manifestPath && fs.readFileSync(request.manifestPath);
+    const response = await request.send({});
+    expect(response.status).toBe(409); expect(response.body.code).toBe('WORKITEM_REOPEN_REQUIRED');
+    expect(response.body.details.affected.map(entry => entry.workItemId).sort()).toEqual([first.item.id, second.item.id].sort());
+    expect(allTables()).toEqual(before);
+    if (stagedBefore) expect(fs.readFileSync(request.manifestPath)).toEqual(stagedBefore);
+    const resent = await request.send({ reopenReason: 'Same batch acquisition correction' });
+    expect(resent.status).toBe(200); expect((mode === 'upload' ? resent.body.results : resent.body)).toMatchObject({ success: 3, failed: 0 });
+    for (const f of [ready, first, second]) {
+        const after = await snapshot(f);
+        expect(after.scans).toHaveLength(2);
+        expect(after.results).toEqual([f.result]);
+        expect(after.audits.filter(row => row.action === 'SPECTRAL_WORK_REOPENED')).toHaveLength(f === ready ? 0 : 1);
+    }
+});
+
+test.each(['saved', 'interrupted'])('partial staged commit preserves the manifest and skips committed entries when its receipt is %s', async receiptMode => {
+    const ready = await fixture({ status: 'ASSIGNED' }), raced = await fixture();
+    const batch = prepareAcquisition('commit', [ready, raced]);
+    const state = require('../../services/spectralWorkItemStateService'), prepare = state.prepareItem;
+    // Simulate a concurrent completion immediately after the read-only preflight.
+    jest.spyOn(state, 'prepareItem').mockImplementation((tx, expected, sampleId, actor, options) =>
+        options?.preflight && expected?.id === raced.item.id ? Promise.resolve(expected) : prepare(tx, expected, sampleId, actor, options));
+    if (receiptMode === 'interrupted') {
+        const rename = fs.renameSync;
+        jest.spyOn(fs, 'renameSync').mockImplementation((from, to) => {
+            if (to === batch.manifestPath) throw new Error('Injected interrupted receipt save');
+            return rename(from, to);
+        });
+    }
+    const first = await batch.send({ idempotencyKey: `partial-${batch.manifestId}` });
+    expect(first.status).toBe(200); expect(first.body).toMatchObject({ success: 1, failed: 1, complete: false,
+        errors: [expect.objectContaining({ code: 'WORKITEM_REOPEN_REQUIRED' })] });
+    expect(fs.existsSync(batch.manifestPath)).toBe(true);
+    const manifest = JSON.parse(fs.readFileSync(batch.manifestPath));
+    if (receiptMode === 'saved') expect(Object.keys(manifest.committedEntries)).toEqual([batch.scans[0].id]);
+    const readyBefore = await snapshot(ready), racedBefore = await snapshot(raced);
+    jest.restoreAllMocks();
+    const retry = await batch.send({ idempotencyKey: `partial-${batch.manifestId}`, reopenReason: 'Concurrent completion reviewed' });
+    expect(retry.status).toBe(200); expect(retry.body).toMatchObject({ success: 2, failed: 0, complete: true });
+    expect(retry.body.committedScans.map(scan => scan.id)).toContain(first.body.committedScans[0].id);
+    expect(new Set(retry.body.committedScans.map(scan => scan.id)).size).toBe(2);
+    expect(await snapshot(ready)).toEqual(readyBefore);
+    expect((await snapshot(raced)).scans).toHaveLength(racedBefore.scans.length + 1);
+    expect(fs.existsSync(batch.manifestPath)).toBe(false);
+    const after = allTables();
+    const cached = await batch.send({ idempotencyKey: `partial-${batch.manifestId}` });
+    expect(cached.body).toEqual(retry.body); expect(allTables()).toEqual(after);
 });
 
 test.each(['SUBMITTED', 'ACCEPTED', 'WAIVED', 'CANCELLED', 'ON_HOLD', 'AWAITING_VERIFICATION', 'NOT_ASSIGNED']
@@ -341,14 +407,22 @@ test.each(['APPROVED', 'ARCHIVED', 'DISPOSED', 'CANCELLED', 'RECEIVED_REJECTED']
         expect(await snapshot(f)).toEqual(before);
     });
 
-test('mixed batch review commits a count-stable scan and writes nothing for a refused count-changing scan', async () => {
+test('mixed batch review preflight refuses before any writes and a reasoned resend commits each scan once', async () => {
     const good = await fixture(), blocked = await fixture(), before = await snapshot(blocked);
     // REJECT is count-stable for a QC-FAIL scan and removes evidence for PASS.
     await good.db.spectralData.update({ where: { id: good.scan.id }, data: { qcStatus: 'FAIL' } });
-    const response = await post('/api/spectral/batch-review', { ids: [good.scan.id, blocked.scan.id], action: 'REJECT' });
-    expect(response.status).toBe(200); expect(response.body.results).toMatchObject({ succeeded: 1, failed: 1,
-        errors: [expect.objectContaining({ id: blocked.scan.id, code: 'WORKITEM_REOPEN_REQUIRED' })] });
-    expect((await snapshot(good)).scans[0].status).toBe('REJECTED'); expect(await snapshot(blocked)).toEqual(before);
+    const tablesBefore = allTables(), payload = { ids: [good.scan.id, blocked.scan.id], action: 'REJECT' };
+    const response = await post('/api/spectral/batch-review', payload);
+    expect(response.status).toBe(409); expect(response.body).toMatchObject({ code: 'WORKITEM_REOPEN_REQUIRED',
+        details: { affected: [expect.objectContaining({ id: blocked.scan.id, workItemId: blocked.item.id })] } });
+    expect(allTables()).toEqual(tablesBefore); expect(await snapshot(blocked)).toEqual(before);
+    const resend = await post('/api/spectral/batch-review', { ...payload, reopenReason: 'Review correction' });
+    expect(resend.status).toBe(200); expect(resend.body.results).toMatchObject({ succeeded: 2, failed: 0 });
+    expect((await snapshot(good)).scans[0].status).toBe('REJECTED');
+    const after = await snapshot(blocked);
+    expect(after.scans).toHaveLength(1); expect(after.scans[0].status).toBe('REJECTED');
+    expect(after.results).toEqual(before.results);
+    expect(after.audits.filter(row => row.action === 'SPECTRAL_WORK_REOPENED')).toHaveLength(1);
 });
 
 test('late scan review audit failure rolls back review, reopening and recompletion together', async () => {
@@ -381,12 +455,7 @@ test.each(['link', 'supersede'])('%s of another COMPLETED item evidence requires
         assignedLab: labId, status: 'ASSIGNED', duplicateOf: f.item.id } });
     const before = await snapshot(f), response = mode === 'link' ? await post('/api/spectral/link-task', {
         scanId: f.scan.id, workItemId: target.id }) : await acquire('upload', [{ ...f, item: target }]);
-    if (mode === 'link') {
-        expect(response.status).toBe(409); expect(response.body.code).toBe('WORKITEM_REOPEN_REQUIRED');
-    } else {
-        expect(response.status).toBe(200); expect(response.body.results).toMatchObject({ success: 0, failed: 1,
-            errors: [expect.objectContaining({ code: 'WORKITEM_REOPEN_REQUIRED' })] });
-    }
+    expect(response.status).toBe(409); expect(response.body.code).toBe('WORKITEM_REOPEN_REQUIRED');
     expect(await snapshot(f)).toEqual(before);
 });
 

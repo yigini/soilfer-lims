@@ -33,7 +33,7 @@ test('central Sample creation retains an existing caller creation action with ex
     expect(JSON.parse(audit[0].details)).toEqual({ status: 'EXPECTED', context: 'ordinary' });
 });
 
-test.each(['create', 'createMany', 'connectOrCreate', 'update', 'updateMany', 'upsert'].flatMap(command =>
+test.each(['create', 'createMany', 'connectOrCreate', 'update', 'updateMany', 'upsert', 'delete', 'deleteMany'].flatMap(command =>
     ['createSample', 'createWorkItem', 'transitionSample', 'transitionWorkItem'].map(operation => [command, operation])))
     ('%s nested relation commands are refused by %s before any writes', async (command, operation) => {
         const { sample, item } = await fixture(), before = await snapshot(sample.id);

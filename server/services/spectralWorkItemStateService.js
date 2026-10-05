@@ -37,7 +37,7 @@ async function updateScan(tx, expected, data) {
     return tx.spectralData.findUnique({ where: { id: expected.id } });
 }
 
-async function prepareItem(tx, expected, sampleId, actor, { mode = 'acquire', reopenReason } = {}) {
+async function prepareItem(tx, expected, sampleId, actor, { mode = 'acquire', reopenReason, preflight = false } = {}) {
     const sample = await assertParent(tx, sampleId, actor);
     if (!expected) return null;
     let item = await tx.workItem.findUnique({ where: { id: expected.id }, include: { sample: true } });
@@ -53,8 +53,9 @@ async function prepareItem(tx, expected, sampleId, actor, { mode = 'acquire', re
     if (!readiness.isReady) throw new rules.TransitionError(readiness.reasons.join('; '), 409, readiness.blockers[0] || 'EXECUTION_BLOCKED');
     if (status === 'COMPLETED' && mode !== 'review') {
         if (typeof reopenReason !== 'string' || !reopenReason.trim()) {
-            throw new rules.TransitionError('A supplied reason is required to reopen completed spectral work.', 409, 'WORKITEM_REOPEN_REQUIRED');
+            throw new rules.TransitionError('A supplied reason is required to reopen completed spectral work.', 409, 'WORKITEM_REOPEN_REQUIRED', { workItemId: item.id });
         }
+        if (preflight) return item;
         const entry = { status: 'IN_PROGRESS', action: 'SPECTRAL_WORK_REOPENED', reason: reopenReason.trim(),
             priorResult: item.result, priorCompletedAt: item.completedAt, changedBy: rules.actorName(actor), timestamp: new Date().toISOString() };
         item = await transitionWorkItem(item.id, 'IN_PROGRESS', actor, reopenReason, {
@@ -91,11 +92,11 @@ async function relatedItem(tx, scan, { trash = false } = {}) {
     return items.find(item => (item.analysis || '').toUpperCase().includes(modality)) || null;
 }
 
-async function preparePriorItem(tx, scan, actor, targetWorkItemId, reopenReason) {
+async function preparePriorItem(tx, scan, actor, targetWorkItemId, reopenReason, { preflight = false } = {}) {
     if (!scan.workItemId || scan.workItemId === targetWorkItemId) return null;
     const expected = await tx.workItem.findUnique({ where: { id: scan.workItemId } });
     if (!expected) throw new rules.TransitionError('Linked work item not found.', 409, 'WORK_ITEM_NOT_FOUND');
-    const item = await prepareItem(tx, expected, scan.sampleId, actor, { reopenReason });
+    const item = await prepareItem(tx, expected, scan.sampleId, actor, { reopenReason, preflight });
     return { item, reopened: expected.status === 'COMPLETED' };
 }
 
@@ -134,7 +135,7 @@ function countsTowardCompletion(scan) {
         && scan.qcStatus != null && scan.qcStatus !== 'FAIL');
 }
 
-async function reviewScan(tx, expected, actor, { action, notes, reopenReason, batch = false }) {
+async function prepareReview(tx, expected, actor, { action, reopenReason, batch = false, preflight = false }) {
     const scan = await freshScan(tx, expected, actor);
     if (!['APPROVE', 'REJECT', 'UNDO'].includes(action)) throw new rules.TransitionError('Action must be APPROVE, REJECT or UNDO.', 400, 'INVALID_SPECTRAL_REVIEW');
     if (action === 'UNDO' ? scan.status !== 'REJECTED' : !['PENDING', 'VALIDATED'].includes(scan.status)) {
@@ -149,7 +150,12 @@ async function reviewScan(tx, expected, actor, { action, notes, reopenReason, ba
     if (scan.workItemId && !expectedItem) throw new rules.TransitionError('Linked work item not found.', 409, 'WORK_ITEM_NOT_FOUND');
     const changesCount = countsTowardCompletion(scan) !== countsTowardCompletion({ ...scan, status });
     const item = await prepareItem(tx, expectedItem, scan.sampleId, actor,
-        { mode: changesCount ? 'acquire' : 'review', reopenReason });
+        { mode: changesCount ? 'acquire' : 'review', reopenReason, preflight });
+    return { scan, status, item, changesCount };
+}
+
+async function reviewScan(tx, expected, actor, { action, notes, reopenReason, batch = false }) {
+    const { scan, status, item, changesCount } = await prepareReview(tx, expected, actor, { action, reopenReason, batch });
     const updatedScan = await updateScan(tx, scan, { status, reviewedBy: action === 'UNDO' ? null : rules.actorName(actor),
         reviewedAt: action === 'UNDO' ? null : new Date(), reviewNotes: action === 'UNDO' ? null : notes || null });
     const updatedItem = action === 'APPROVE' || changesCount ? await completeItem(tx, item, actor, {
@@ -162,5 +168,18 @@ async function reviewScan(tx, expected, actor, { action, notes, reopenReason, ba
     return { scan: updatedScan, item: updatedItem };
 }
 
+// Reopen preflight is read-only. Other refusals retain their per-record contract.
+async function preflightBatch(entries) {
+    const affected = [];
+    for (const { check, ...entry } of entries) {
+        try { await check(); }
+        catch (error) {
+            if (error.code === 'WORKITEM_REOPEN_REQUIRED') affected.push({ ...entry, ...error.details });
+        }
+    }
+    if (affected.length) throw new rules.TransitionError('A reason is required to reopen completed spectral work in this batch.',
+        409, 'WORKITEM_REOPEN_REQUIRED', { affected });
+}
+
 module.exports = { assertParent, freshScan, updateScan, prepareItem, completeItem, relatedItem,
-    preparePriorItem, recomputePriorItem, trashScan, auditScan, reviewScan };
+    preparePriorItem, recomputePriorItem, trashScan, auditScan, prepareReview, reviewScan, preflightBatch };

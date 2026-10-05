@@ -13,6 +13,8 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
     let highWaterSequence;
 
     beforeAll(async () => {
+        // Install the publication journal before creating released fixtures.
+        require('../../services/exchangeStateService').getDb();
         const timestamp = Date.now();
 
         // 1. Sample with full lab accession and 2 replicate results
@@ -35,9 +37,10 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
                     site_id: { value: 'PLOT-ALPHA' },
                     collectionDate: '2026-04-10',
                     collector: 'Dr. Maria Perez'
-                }),
-                results: {
-                    create: [
+                })
+            }
+        });
+        await prisma.result.createMany({ data: [
                         {
                             id: `res-v2-1-${timestamp}`,
                             param: 'PH_H2O',
@@ -60,10 +63,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
                             censoring: 'NONE',
                             isCurrent: true
                         }
-                    ]
-                }
-            }
-        });
+                    ].map(result => ({ ...result, sampleId: sample1.id })) });
 
         // 2. Approved sample WITHOUT labId (walk-in or field registry without lab accession)
         sample2NoLabId = await createSampleFixture(prisma, {
