@@ -7,8 +7,9 @@ const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 
 // Legacy values are inserted into a new schema before its real additive guards
 // are installed. Existing constraints are never dropped, disabled or bypassed.
-async function createLegacyClosureDatabase({ analysis, labId }) {
+async function createLegacyClosureDatabase({ analysis, labId, beforeGuards }) {
     if (process.env.NODE_ENV !== 'test' || !process.env.DATABASE_PATH) throw new Error('Legacy fixtures require the isolated test database.');
+    require('../../services/workflowStateRules').assertFixtureContext();
     const file = path.resolve(__dirname, '../.tmp', `audit_legacy_${randomUUID()}.db`);
     const source = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
     const tables = source.prepare("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%' AND name != 'ResultEvidenceEvent'").all();
@@ -26,13 +27,14 @@ async function createLegacyClosureDatabase({ analysis, labId }) {
             .run(sampleId, sampleId, 'APPROVED', labId, 'DONE', 'DONE', now, now);
         db.prepare('INSERT INTO WorkItem (id, sampleId, analysis, status, assignedLab, result, history, createdAt, updatedAt) VALUES (?,?,?,?,?,?,?,?,?)')
             .run(workItemId, sampleId, analysis, 'PENDING', labId, '6.2', '[]', now, now);
+        if (beforeGuards) beforeGuards(db, { sampleId, workItemId });
         for (const name of ['20261005000000_workflow_state_evidence', '20261005000100_workflow_state_guards']) {
             db.exec(fs.readFileSync(path.resolve(__dirname, '../../prisma/migrations', name, 'migration.sql'), 'utf8'));
         }
     } finally { db.close(); }
     const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     await client.lab.create({ data: { id: labId, code: labId, name: 'Isolated legacy test laboratory', country: 'TEST' } });
-    return { client, sampleId, workItemId, async close() {
+    return { client, file, sampleId, workItemId, async close() {
         await client.$disconnect();
         const owned = path.resolve(__dirname, '../.tmp');
         if (path.dirname(file) !== owned || !path.basename(file).startsWith('audit_legacy_')) throw new Error('Invalid legacy fixture path.');

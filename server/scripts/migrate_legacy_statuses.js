@@ -1,49 +1,57 @@
-const path = require('path');
-const Database = require('better-sqlite3');
-const { SAMPLE_STATE_LIST } = require('../workflowContract');
+const fs = require('node:fs');
+const path = require('node:path');
+const migrations = require('../services/statusMigrationService');
 
-const dbPath = process.env.DATABASE_PATH || path.resolve(__dirname, '../prisma/dev.db');
-console.log(`[STATUS_MIGRATION] Opening database at: ${dbPath}`);
-const db = new Database(dbPath);
-
-function runMigration() {
-    // 1. Initial count & report
-    const beforeCounts = db.prepare('SELECT status, COUNT(*) as count FROM Sample GROUP BY status').all();
-    console.log('\n=== STATUS DISTRIBUTION BEFORE MIGRATION ===');
-    beforeCounts.forEach(r => console.log(`  ${(r.status || 'NULL').padEnd(25)} : ${r.count}`));
-
-    const totalSamples = db.prepare('SELECT COUNT(*) as count FROM Sample').get().count;
-    console.log(`Total samples: ${totalSamples}`);
-
-    // 2. Perform Migration in Transaction
-    const migrationTx = db.transaction(() => {
-        const m1 = db.prepare("UPDATE Sample SET status = 'PROCESSING' WHERE status = 'ANALYSIS'").run();
-        const m2 = db.prepare("UPDATE Sample SET status = 'SUBMITTED_PARTIAL' WHERE status = 'PARTIALLY_COMPLETE'").run();
-        const m3 = db.prepare("UPDATE Sample SET status = 'SUBMITTED_FULL' WHERE status = 'COMPLETED'").run();
-        const m4 = db.prepare("UPDATE Sample SET status = 'EXPECTED' WHERE status IN ('COLLECTED', 'NON_CONFORMING')").run();
-
-        console.log('\n=== MIGRATION CHANGES APPLIED ===');
-        console.log(`  ANALYSIS -> PROCESSING              : ${m1.changes} rows`);
-        console.log(`  PARTIALLY_COMPLETE -> SUBMITTED_PARTIAL : ${m2.changes} rows`);
-        console.log(`  COMPLETED -> SUBMITTED_FULL          : ${m3.changes} rows`);
-        console.log(`  COLLECTED/NON_CONFORMING -> EXPECTED: ${m4.changes} rows`);
-    });
-
-    migrationTx();
-
-    // 3. Post-migration audit
-    const afterCounts = db.prepare('SELECT status, COUNT(*) as count FROM Sample GROUP BY status').all();
-    console.log('\n=== STATUS DISTRIBUTION AFTER MIGRATION ===');
-    afterCounts.forEach(r => console.log(`  ${(r.status || 'NULL').padEnd(25)} : ${r.count}`));
-
-    // 4. Assert zero rows outside SAMPLE_STATE_LIST
-    const invalidRows = db.prepare(`SELECT id, status FROM Sample WHERE status NOT IN (${SAMPLE_STATE_LIST.map(() => '?').join(',')})`).all(...SAMPLE_STATE_LIST);
-    if (invalidRows.length > 0) {
-        console.error(`\n[ERROR] Found ${invalidRows.length} rows with invalid statuses:`, invalidRows.slice(0, 5));
-        process.exit(1);
-    } else {
-        console.log('\n? SUCCESS: All sample rows strictly conform to canonical SAMPLE_STATES!');
+function parseArguments(args) {
+    const options = { direction: 'apply', apply: false };
+    const valued = { '--db': 'databasePath', '--plan': 'planPath', '--reviewed-sha256': 'fingerprint', '--timeout-ms': 'timeoutMs' };
+    const seen = new Set();
+    for (let index = 0; index < args.length; index++) {
+        const arg = args[index];
+        if (seen.has(arg)) throw new Error(`Repeated argument: ${arg}`);
+        seen.add(arg);
+        if (arg === '--apply') options.apply = true;
+        else if (arg === '--revert') options.direction = 'revert';
+        else if (arg === '--dry-run') options.dryRun = true;
+        else if (valued[arg] && args[index + 1] && !args[index + 1].startsWith('--')) options[valued[arg]] = args[++index];
+        else throw new Error(`Unknown or incomplete argument: ${arg}`);
     }
+    if (!options.databasePath) throw new Error('An explicit --db path is required; there is no default writable database.');
+    if (options.apply && options.dryRun) throw new Error('--apply and --dry-run are mutually exclusive.');
+    if (options.timeoutMs != null) {
+        options.timeoutMs = Number(options.timeoutMs);
+        if (!Number.isSafeInteger(options.timeoutMs) || options.timeoutMs <= 0) throw new Error('--timeout-ms must be a positive integer.');
+    }
+    if (options.apply && (!options.planPath || !/^[a-f0-9]{64}$/.test(options.fingerprint || ''))) {
+        throw new Error('--apply requires --plan and its exact --reviewed-sha256 from a reviewed dry run.');
+    }
+    return options;
 }
 
-runMigration();
+async function main(args = process.argv.slice(2)) {
+    const options = parseArguments(args);
+    const report = migrations.inspectDatabase(options.databasePath, options.direction);
+    if (!options.apply) {
+        process.stdout.write(`${JSON.stringify({ mode: 'DRY_RUN', ...report }, null, 2)}\n`);
+        return;
+    }
+    if (!report.schemaReady) throw new Error('The complete additive state schema and guards are required before --apply.');
+    const document = JSON.parse(fs.readFileSync(path.resolve(options.planPath), 'utf8'));
+    const plan = document.plan || document;
+    if (plan.direction !== options.direction) throw new Error('The reviewed plan direction does not match --revert.');
+    // Import the writable runtime only after all read-only argument/schema checks.
+    const { PrismaClient } = require('../prisma_client');
+    const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+    const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${path.resolve(options.databasePath)}`, timeout: 5000 }) });
+    try {
+        const outcome = await migrations.applyReviewedPlan(client, plan, options.fingerprint, { timeoutMs: options.timeoutMs });
+        process.stdout.write(`${JSON.stringify({ mode: 'APPLIED', ...outcome }, null, 2)}\n`);
+    } finally { await client.$disconnect(); }
+}
+
+if (require.main === module) main().catch(error => {
+    process.stderr.write(`${JSON.stringify({ error: error.code || 'STATUS_MIGRATION_REFUSED', message: error.message, ...(error.details || {}) })}\n`);
+    process.exitCode = 1;
+});
+
+module.exports = { parseArguments, main };

@@ -1,0 +1,158 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const { createHash } = require('node:crypto');
+const { spawnSync } = require('node:child_process');
+const Database = require('better-sqlite3');
+const migrations = require('../../services/statusMigrationService');
+const plans = require('../../services/statusMigrationPlan');
+const { parseArguments } = require('../../scripts/migrate_legacy_statuses');
+const { createLegacyClosureDatabase } = require('../helpers/legacyWorkflowDatabase');
+const databases = [];
+const script = path.resolve(__dirname, '../../scripts/migrate_legacy_statuses.js');
+afterAll(async () => { for (const database of databases) await database.close(); });
+
+async function fixture() {
+    const database = await createLegacyClosureDatabase({ analysis: 'ARCHIVING', labId: 'STATUS-MIGRATION-TEST',
+        beforeGuards(db, { sampleId }) {
+            const time = Date.now();
+            for (const status of ['COLLECTED', 'REJECTED', 'RELEASED', 'PENDING', 'VALIDATED']) {
+                db.prepare('INSERT INTO Sample (id, originalId, status, assignedLab, createdAt, updatedAt, approvedBy, approvedAt) VALUES (?,?,?,?,?,?,?,?)')
+                    .run(`migration-s-${status}`, `migration-s-${status}`, status, 'STATUS-MIGRATION-TEST', time,
+                        status === 'COLLECTED' ? '2026-10-04 14:00:00' : time,
+                        status === 'RELEASED' ? 'recorded-historical-approver' : null, status === 'RELEASED' ? time : null);
+            }
+            for (const status of ['PENDING', 'APPROVED', 'QA_PENDING', 'REJECTED', 'REANALYSIS_REQUIRED', 'UNMAPPED_WI']) {
+                db.prepare('INSERT INTO WorkItem (id, sampleId, analysis, status, assignedLab, result, history, version, createdAt, updatedAt) VALUES (?,?,?,?,?,?,?,?,?,?)')
+                    .run(`migration-w-${status}`, sampleId, `MIGRATION_${status}`, status, 'STATUS-MIGRATION-TEST', 'retained scalar',
+                        '[{"note":"Retained original history"}]', 7, time, time);
+            }
+        } });
+    databases.push(database);
+    return database;
+}
+
+async function snapshot(client) {
+    return { samples: await client.sample.findMany({ orderBy: { id: 'asc' } }), work: await client.workItem.findMany({ orderBy: { id: 'asc' } }),
+        audits: await client.auditLog.findMany({ orderBy: { id: 'asc' } }) };
+}
+
+function databaseFile(database) { return database.file; }
+
+test('CLI requires an explicit database and a reviewed fingerprint for every apply', () => {
+    expect(() => parseArguments([])).toThrow('explicit --db');
+    expect(() => parseArguments(['--db', 'isolated.db', '--apply'])).toThrow('exact --reviewed-sha256');
+    expect(() => parseArguments(['--db', 'isolated.db', '--apply', '--dry-run'])).toThrow('mutually exclusive');
+    expect(() => parseArguments(['--db', 'isolated.db', '--timeout-ms', '-1'])).toThrow('positive integer');
+    expect(parseArguments(['--db', 'isolated.db', '--revert'])).toMatchObject({ apply: false, direction: 'revert' });
+    expect(() => parseArguments(['--db', 'one.db', '--db', 'two.db'])).toThrow('Repeated argument');
+});
+
+test('dry run works on a pre-migration database without adding schema or creating a writable runtime', async () => {
+    const database = await fixture(), file = `${databaseFile(database)}.pre-schema.db`;
+    const db = new Database(file);
+    try {
+        db.exec('CREATE TABLE Sample (id TEXT PRIMARY KEY, status TEXT, updatedAt INTEGER); CREATE TABLE WorkItem (id TEXT PRIMARY KEY, status TEXT, updatedAt INTEGER, version INTEGER)');
+        db.prepare('INSERT INTO Sample VALUES (?,?,?)').run('old-sample', 'COLLECTED', Date.now());
+        db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('old-work', 'QA_PENDING', Date.now(), 1);
+    } finally { db.close(); }
+    try {
+        const before = createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+        const output = spawnSync(process.execPath, [script, '--db', file], { encoding: 'utf8' });
+        expect(output.status).toBe(0);
+        expect(JSON.parse(output.stdout)).toMatchObject({ mode: 'DRY_RUN', schemaReady: false, candidateCount: 2 });
+        expect(createHash('sha256').update(fs.readFileSync(file)).digest('hex')).toBe(before);
+        const missing = `${file}.missing`;
+        expect(spawnSync(process.execPath, [script, '--db', missing], { encoding: 'utf8' }).status).toBe(1);
+        expect(fs.existsSync(missing)).toBe(false);
+    } finally { fs.rmSync(file); }
+});
+
+test('the explicit CLI apply and revert consume the reviewed plan and report exact counts', async () => {
+    const database = await fixture(), file = databaseFile(database), planFile = `${file}.plan.json`;
+    const run = args => spawnSync(process.execPath, [script, '--db', file, ...args], { encoding: 'utf8' });
+    try {
+        const apply = migrations.inspectDatabase(file);
+        fs.writeFileSync(planFile, JSON.stringify(apply), 'utf8');
+        const before = await snapshot(database.client);
+        const refused = run(['--apply', '--plan', planFile, '--reviewed-sha256', '0'.repeat(64)]);
+        expect(refused.status).toBe(1);
+        expect(JSON.parse(refused.stderr).error).toBe('STATUS_MIGRATION_PLAN_STALE');
+        expect(await snapshot(database.client)).toEqual(before);
+        const applied = run(['--apply', '--plan', planFile, '--reviewed-sha256', apply.fingerprint, '--timeout-ms', '30000']);
+        expect(applied.status).toBe(0);
+        expect(JSON.parse(applied.stdout)).toMatchObject({ mode: 'APPLIED', direction: 'apply', changedRows: 9, auditsAdded: 9 });
+        const revert = migrations.inspectDatabase(file, 'revert');
+        fs.writeFileSync(planFile, JSON.stringify(revert), 'utf8');
+        const restored = run(['--apply', '--revert', '--plan', planFile, '--reviewed-sha256', revert.fingerprint]);
+        expect(restored.status).toBe(0);
+        expect(JSON.parse(restored.stdout)).toMatchObject({ mode: 'APPLIED', direction: 'revert', changedRows: 9, auditsAdded: 9 });
+        expect(await database.client.auditLog.count()).toBe(18);
+    } finally { fs.rmSync(planFile, { force: true }); }
+});
+
+test('default CLI dry run reports every approved mapping and unmapped row without changing the database', async () => {
+    const database = await fixture(), file = databaseFile(database), before = await snapshot(database.client);
+    const digest = () => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+    const beforeHash = digest();
+    const output = spawnSync(process.execPath, [script, '--db', file], { encoding: 'utf8', cwd: path.dirname(file), env: { ...process.env, TZ: 'Europe/Rome' } });
+    expect(output.status).toBe(0); expect(output.stderr).toBe('');
+    const report = JSON.parse(output.stdout);
+    expect(report).toMatchObject({ mode: 'DRY_RUN', schemaReady: true, candidateCount: 9, unmappedCount: 3, blockedCount: 0 });
+    expect(report.mappings).toContainEqual({ entity: 'WorkItem', from: 'PENDING', to: 'NOT_ASSIGNED', count: 2 });
+    expect(report.unmapped).toEqual(expect.arrayContaining([
+        { entity: 'Sample', id: 'migration-s-PENDING', status: 'PENDING' },
+        { entity: 'Sample', id: 'migration-s-VALIDATED', status: 'VALIDATED' },
+        { entity: 'WorkItem', id: 'migration-w-UNMAPPED_WI', status: 'UNMAPPED_WI' }
+    ]));
+    expect(report.plan.rows.find(row => row.id === 'migration-s-COLLECTED').updatedAt).toBe('2026-10-04T14:00:00.000Z');
+    expect(digest()).toBe(beforeHash);
+    expect(await snapshot(database.client)).toEqual(before);
+});
+
+test('reviewed apply and revert restore exact original states once and append one audit per row', async () => {
+    const database = await fixture(), client = database.client, before = await snapshot(client);
+    const report = migrations.inspectDatabase(databaseFile(database));
+    const applied = await migrations.applyReviewedPlan(client, report.plan, report.fingerprint);
+    expect(applied).toMatchObject({ changedRows: 9, auditsAdded: 9, unmappedCount: 3 });
+    const after = await snapshot(client);
+    expect(after.samples.find(row => row.id === 'migration-s-RELEASED')).toMatchObject({ status: 'APPROVED', legacyStatus: 'RELEASED',
+        approvedBy: 'recorded-historical-approver', approvedAt: before.samples.find(row => row.id === 'migration-s-RELEASED').approvedAt });
+    expect(after.work.find(row => row.id === 'migration-w-APPROVED')).toMatchObject({ status: 'ACCEPTED', legacyStatus: 'APPROVED',
+        reviewedBy: null, reviewedAt: null, result: 'retained scalar', history: '[{"note":"Retained original history"}]' });
+    expect(after.audits).toHaveLength(9);
+    expect(after.audits.every(row => row.performedBy === 'system:status-migration')).toBe(true);
+    const revert = migrations.inspectDatabase(databaseFile(database), 'revert');
+    expect((await migrations.applyReviewedPlan(client, revert.plan, revert.fingerprint)).changedRows).toBe(9);
+    const restored = await snapshot(client);
+    for (const row of before.samples) expect(restored.samples.find(candidate => candidate.id === row.id)).toMatchObject({
+        status: row.status, legacyStatus: null, approvedAt: row.approvedAt, approvedBy: row.approvedBy });
+    for (const row of before.work) expect(restored.work.find(candidate => candidate.id === row.id)).toMatchObject({
+        status: row.status, legacyStatus: null, result: row.result, history: row.history });
+    expect(restored.audits).toHaveLength(18);
+    await expect(migrations.applyReviewedPlan(client, revert.plan, revert.fingerprint)).rejects.toMatchObject({ code: 'STATUS_MIGRATION_PLAN_STALE' });
+    expect(await snapshot(client)).toEqual(restored);
+});
+
+test('a changed complete plan refuses before any row is migrated', async () => {
+    const database = await fixture(), client = database.client;
+    const report = migrations.inspectDatabase(databaseFile(database));
+    await client.workItem.update({ where: { id: 'migration-w-QA_PENDING' }, data: { version: { increment: 1 } } });
+    const before = await snapshot(client);
+    await expect(migrations.applyReviewedPlan(client, report.plan, report.fingerprint)).rejects.toMatchObject({ code: 'STATUS_MIGRATION_PLAN_STALE' });
+    expect(await snapshot(client)).toEqual(before);
+    const incomplete = { ...report.plan, rows: report.plan.rows.slice(1) };
+    await expect(migrations.applyReviewedPlan(client, incomplete, plans.planFingerprint(incomplete))).rejects.toMatchObject({ code: 'STATUS_MIGRATION_PLAN_STALE' });
+    expect(await snapshot(client)).toEqual(before);
+});
+
+test('a failed later migration audit rolls back every earlier state and audit', async () => {
+    const database = await fixture(), client = database.client, before = await snapshot(client);
+    const report = migrations.inspectDatabase(databaseFile(database));
+    let audits = 0;
+    await expect(migrations.applyReviewedPlan({ $transaction: callback => client.$transaction(tx => callback({ ...tx,
+        auditLog: { ...tx.auditLog, create: args => {
+            if (++audits === 3) throw new Error('Injected later migration audit failure');
+            return tx.auditLog.create(args);
+        } } })) }, report.plan, report.fingerprint)).rejects.toThrow('Injected later migration audit failure');
+    expect(await snapshot(client)).toEqual(before);
+});

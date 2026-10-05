@@ -29,13 +29,16 @@ module.exports = async function globalSetup() {
             }).flat();
             const evidenceTable = !!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='ResultEvidenceEvent'").get();
             if (stateColumns.every(value => !value) && !evidenceTable) {
-                db.exec(fs.readFileSync(path.resolve(__dirname, '../prisma/migrations/20261005000000_workflow_state_evidence/migration.sql'), 'utf8'));
+                db.transaction(() => db.exec(fs.readFileSync(path.resolve(__dirname, '../prisma/migrations/20261005000000_workflow_state_evidence/migration.sql'), 'utf8')))();
             } else if (!stateColumns.every(Boolean) || !evidenceTable) {
                 throw new Error('Disposable test template has a partial workflow-state schema.');
             }
-            if (!db.prepare("SELECT 1 FROM sqlite_master WHERE type='trigger' AND name='Sample_status_insert_guard'").get()) {
-                db.exec(fs.readFileSync(path.resolve(__dirname, '../prisma/migrations/20261005000100_workflow_state_guards/migration.sql'), 'utf8'));
-            }
+            const guardSql = fs.readFileSync(path.resolve(__dirname, '../prisma/migrations/20261005000100_workflow_state_guards/migration.sql'), 'utf8');
+            const guardNames = [...guardSql.matchAll(/CREATE TRIGGER "([^"]+)"/g)].map(match => match[1]);
+            const installed = new Set(db.prepare("SELECT name FROM sqlite_master WHERE type='trigger'").all().map(row => row.name));
+            const present = guardNames.map(name => installed.has(name));
+            if (present.every(value => !value)) db.transaction(() => db.exec(guardSql))();
+            else if (!present.every(Boolean)) throw new Error('Disposable test template has partial workflow-state guards.');
         } finally { db.close(); }
     }
 

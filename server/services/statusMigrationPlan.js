@@ -11,7 +11,10 @@ function canonicalPlan(plan) {
         entity: row.entity, id: row.id, from: row.from, to: row.to,
         legacyStatus: row.legacyStatus ?? null, updatedAt: new Date(row.updatedAt).toISOString(),
         ...(row.entity === 'WorkItem' && { version: row.version })
-    })).sort((a, b) => a.entity.localeCompare(b.entity) || a.id.localeCompare(b.id)) };
+    })).sort((a, b) => {
+        const left = `${a.entity}\u0000${a.id}`, right = `${b.entity}\u0000${b.id}`;
+        return left < right ? -1 : left > right ? 1 : 0;
+    }) };
 }
 
 function planFingerprint(plan) {
