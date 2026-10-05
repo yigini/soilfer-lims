@@ -1,7 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
-const Database = require('better-sqlite3');
 const { PrismaClient } = require('../../prisma_client');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const samples = require('../../services/sampleStateService');
@@ -18,42 +17,27 @@ const reconciliation = require('../../services/workItemReconciliationService');
 const receipts = require('../../services/commandReceiptService');
 const qcDispositions = require('../../services/qcDispositionStateService');
 const { commitReview } = require('../../services/reviewCommitService');
+const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
+const { rejectedGuardWrite } = require('../helpers/rejectedGuardWrite');
 const manager = { username: 'audit-state-manager', role: 'LAB_MANAGER', labId: 'AUDIT-STATE' };
 const technician = { username: 'audit-state-tech', role: 'LAB_TECHNICIAN', labId: manager.labId };
 const id = () => randomUUID();
 let client, databasePath;
-const ddl = ['20261005000000_workflow_state_evidence', '20261005000100_workflow_state_guards']
-    .map(name => fs.readFileSync(path.resolve(__dirname, '../../prisma/migrations', name, 'migration.sql'), 'utf8')).join('\n');
 
 // Build a schema-only, disposable pre-migration database. No template data is
 // copied and no production constraints are dropped or disabled. This exercises
 // the exact additive release SQL, including legacy rows present before release.
 beforeAll(async () => {
-    databasePath = path.resolve(__dirname, '../.tmp', `audit_1_2_${id()}.db`);
-    const source = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
-    const definitions = source.prepare("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%'").all();
-    const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent'").all();
-    source.close();
-    const db = new Database(databasePath);
-    try {
-        db.pragma('foreign_keys = ON');
-        for (const table of definitions.filter(row => row.name !== 'ResultEvidenceEvent')) {
-            const sql = ['Sample', 'WorkItem'].includes(table.name)
-                ? table.sql.replace(/,\s*"(?:holdPriorStatus|legacyStatus)"\s+TEXT(?=\s*[,)])/g, '') : table.sql;
-            db.exec(sql);
-        }
-        for (const index of indexes) db.exec(index.sql);
-        const now = Date.now();
-        for (const [sampleId, status, history] of [
+    const now = Date.now();
+    databasePath = beforeGuards({ actor: 'system:fixture', file: path.resolve(__dirname, '../.tmp', `audit_1_2_${id()}.db`),
+        samples: [
             ['legacy-collected', 'COLLECTED', null], ['legacy-released', 'RELEASED', null], ['legacy-qc-released', 'RELEASED', null],
             ['legacy-unmapped', 'VALIDATED', null], ['hold-history', 'ON_HOLD', '[{"status":"PROCESSING"},{"status":"ON_HOLD"}]'],
             ['hold-unknown', 'ON_HOLD', 'broken history']
-        ]) db.prepare('INSERT INTO Sample (id, originalId, status, assignedLab, history, updatedAt, createdAt) VALUES (?,?,?,?,?,?,?)')
-            .run(sampleId, sampleId, status, manager.labId, history, now, now);
-        db.prepare('INSERT INTO WorkItem (id, sampleId, analysis, status, updatedAt, createdAt) VALUES (?,?,?,?,?,?)')
-            .run('legacy-pending', 'legacy-collected', 'PH_H2O', 'PENDING', now, now);
-        db.exec(ddl);
-    } finally { db.close(); }
+        ].map(([sampleId, status, history]) => ({ id: sampleId, originalId: sampleId, status, assignedLab: manager.labId,
+            history, updatedAt: now, createdAt: now })),
+        workItems: [{ id: 'legacy-pending', sampleId: 'legacy-collected', analysis: 'PH_H2O', status: 'PENDING', updatedAt: now, createdAt: now }]
+    }).file;
     client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${databasePath}` }) });
     await client.lab.create({ data: { id: manager.labId, code: manager.labId, name: 'Isolated workflow laboratory', country: 'TEST' } });
     for (const user of [manager, technician]) await client.user.create({ data: { id: user.username, username: user.username,
@@ -401,8 +385,8 @@ test('the reviewed legacy plan preserves original values and reverts once; unmap
         expect(await client.auditLog.count({ where: { entityId, performedBy: 'system:status-migration' } })).toBe(2);
     }
     expect((await client.sample.findUnique({ where: { id: 'legacy-unmapped' } })).status).toBe('VALIDATED');
-    await expect(rules.inTransaction(client, tx => tx.sample.update({ where: { id: 'legacy-unmapped' }, data: { status: 'COLLECTED' } })))
-        .rejects.toMatchObject({ statusCode: 409, code: 'INVALID_SAMPLE_STATUS' });
+    rejectedGuardWrite({ actor: 'system:fixture', file: databasePath,
+        statement: 'UPDATE Sample SET status = ? WHERE id = ?', parameters: ['COLLECTED', 'legacy-unmapped'], expectedGuardCode: 'INVALID_SAMPLE_STATUS' });
     expect((await client.sample.update({ where: { id: 'legacy-unmapped' }, data: { clientName: 'Metadata update' } })).status).toBe('VALIDATED');
 });
 

@@ -2,7 +2,6 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
 const { spawnSync } = require('node:child_process');
-const Database = require('better-sqlite3');
 const migrations = require('../../services/statusMigrationService');
 const plans = require('../../services/statusMigrationPlan');
 const { parseArguments } = require('../../scripts/migrate_legacy_statuses');
@@ -13,22 +12,16 @@ const databases = [];
 const script = path.resolve(__dirname, '../../scripts/migrate_legacy_statuses.js');
 afterAll(async () => { for (const database of databases) await database.close(); });
 
-async function fixture() {
+async function fixture(options = {}) {
+    const time = Date.now();
     const database = await createLegacyClosureDatabase({ analysis: 'ARCHIVING', labId: 'STATUS-MIGRATION-TEST',
-        beforeGuards(db, { sampleId }) {
-            const time = Date.now();
-            for (const status of ['COLLECTED', 'REJECTED', 'RELEASED', 'PENDING', 'VALIDATED']) {
-                db.prepare('INSERT INTO Sample (id, originalId, status, assignedLab, createdAt, updatedAt, approvedBy, approvedAt) VALUES (?,?,?,?,?,?,?,?)')
-                    .run(`migration-s-${status}`, `migration-s-${status}`, status, 'STATUS-MIGRATION-TEST', time,
-                        status === 'COLLECTED' ? '2026-10-04 14:00:00' : time,
-                        status === 'RELEASED' ? 'recorded-historical-approver' : null, status === 'RELEASED' ? time : null);
-            }
-            for (const status of ['PENDING', 'APPROVED', 'QA_PENDING', 'REJECTED', 'REANALYSIS_REQUIRED', 'UNMAPPED_WI']) {
-                db.prepare('INSERT INTO WorkItem (id, sampleId, analysis, status, assignedLab, result, history, version, createdAt, updatedAt) VALUES (?,?,?,?,?,?,?,?,?,?)')
-                    .run(`migration-w-${status}`, sampleId, `MIGRATION_${status}`, status, 'STATUS-MIGRATION-TEST', 'retained scalar',
-                        '[{"note":"Retained original history"}]', 7, time, time);
-            }
-        } });
+        ...options, samples: ['COLLECTED', 'REJECTED', 'RELEASED', 'PENDING', 'VALIDATED'].map(status => ({
+            id: `migration-s-${status}`, originalId: `migration-s-${status}`, status, assignedLab: 'STATUS-MIGRATION-TEST', createdAt: time,
+            updatedAt: status === 'COLLECTED' ? '2026-10-04 14:00:00' : time,
+            approvedBy: status === 'RELEASED' ? 'recorded-historical-approver' : null, approvedAt: status === 'RELEASED' ? time : null })),
+        workItems: ['PENDING', 'APPROVED', 'QA_PENDING', 'REJECTED', 'REANALYSIS_REQUIRED', 'UNMAPPED_WI'].map(status => ({
+            id: `migration-w-${status}`, analysis: `MIGRATION_${status}`, status, assignedLab: 'STATUS-MIGRATION-TEST', result: 'retained scalar',
+            history: '[{"note":"Retained original history"}]', version: 7, createdAt: time, updatedAt: time })) });
     databases.push(database);
     return database;
 }
@@ -50,23 +43,33 @@ test('CLI requires an explicit database and a reviewed fingerprint for every app
 });
 
 test('dry run works on a pre-migration database without adding schema or creating a writable runtime', async () => {
-    const database = await fixture(), file = `${databaseFile(database)}.pre-schema.db`;
-    const db = new Database(file);
-    try {
-        db.exec('CREATE TABLE Sample (id TEXT PRIMARY KEY, status TEXT, updatedAt INTEGER); CREATE TABLE WorkItem (id TEXT PRIMARY KEY, status TEXT, updatedAt INTEGER, version INTEGER)');
-        db.prepare('INSERT INTO Sample VALUES (?,?,?)').run('old-sample', 'COLLECTED', Date.now());
-        db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('old-work', 'QA_PENDING', Date.now(), 1);
-    } finally { db.close(); }
-    try {
-        const before = createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+    const database = await fixture({ preMigrationSnapshot: true }), { path: file, sha256: before } = database.preMigrationSnapshot;
+    {
         const output = spawnSync(process.execPath, [script, '--db', file], { encoding: 'utf8' });
         expect(output.status).toBe(0);
-        expect(JSON.parse(output.stdout)).toMatchObject({ mode: 'DRY_RUN', schemaReady: false, candidateCount: 2 });
+        expect(JSON.parse(output.stdout)).toMatchObject({ mode: 'DRY_RUN', schemaReady: false, candidateCount: 9, unmappedCount: 3 });
         expect(createHash('sha256').update(fs.readFileSync(file)).digest('hex')).toBe(before);
+        for (const suffix of ['-wal', '-shm', '-journal']) expect(fs.existsSync(`${file}${suffix}`)).toBe(false);
+        const report = migrations.inspectDatabase(file), planFile = `${database.file}.pre-schema-plan.json`;
+        fs.writeFileSync(planFile, JSON.stringify(report));
+        try {
+            for (const direction of [[], ['--revert']]) {
+                const refused = spawnSync(process.execPath, [script, '--db', file, '--apply', ...direction,
+                    '--plan', planFile, '--reviewed-sha256', report.fingerprint], { encoding: 'utf8' });
+                expect(refused.status).toBe(1);
+                expect(JSON.parse(refused.stderr)).toMatchObject({ error: 'STATUS_MIGRATION_REFUSED',
+                    message: 'The complete additive state schema and guards are required before --apply.' });
+                expect(createHash('sha256').update(fs.readFileSync(file)).digest('hex')).toBe(before);
+                for (const suffix of ['-wal', '-shm', '-journal']) expect(fs.existsSync(`${file}${suffix}`)).toBe(false);
+            }
+        } finally { fs.rmSync(planFile); }
+        const guarded = spawnSync(process.execPath, [script, '--db', database.file], { encoding: 'utf8' });
+        expect(guarded.status).toBe(0);
+        expect(JSON.parse(guarded.stdout)).toMatchObject({ mode: 'DRY_RUN', schemaReady: true, candidateCount: 9, unmappedCount: 3 });
         const missing = `${file}.missing`;
         expect(spawnSync(process.execPath, [script, '--db', missing], { encoding: 'utf8' }).status).toBe(1);
         expect(fs.existsSync(missing)).toBe(false);
-    } finally { fs.rmSync(file); }
+    }
 });
 
 test('the explicit CLI apply and revert consume the reviewed plan and report exact counts', async () => {

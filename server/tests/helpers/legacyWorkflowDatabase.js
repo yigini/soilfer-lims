@@ -1,44 +1,87 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { randomUUID } = require('node:crypto');
+const { randomUUID, createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
 const { PrismaClient } = require('../../prisma_client');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+const { assertOwnedTestDatabase } = require('./testOwnedDatabase');
 
 // Legacy values are inserted into a new schema before its real additive guards
 // are installed. Existing constraints are never dropped, disabled or bypassed.
-async function createLegacyClosureDatabase({ analysis, labId, beforeGuards }) {
-    if (process.env.NODE_ENV !== 'test' || !process.env.DATABASE_PATH) throw new Error('Legacy fixtures require the isolated test database.');
-    require('../../services/workflowStateRules').assertFixtureContext();
-    const file = path.resolve(__dirname, '../.tmp', `audit_legacy_${randomUUID()}.db`);
+function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_legacy_${randomUUID()}.db`), samples = [], workItems = [], preMigrationSnapshot = false }) {
+    file = assertOwnedTestDatabase(file, actor);
+    if (!Array.isArray(samples) || !Array.isArray(workItems)) throw new Error('Legacy fixture rows must be declarative arrays.');
+    // Exclusive creation makes a reused file fail before any database is opened.
+    fs.closeSync(fs.openSync(file, 'wx'));
     const source = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
     const tables = source.prepare("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%' AND name != 'ResultEvidenceEvent'").all();
     const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent'").all();
     source.close();
-    const sampleId = randomUUID(), workItemId = randomUUID();
-    const db = new Database(file);
+    let db = new Database(file), snapshot = null;
     try {
         db.pragma('foreign_keys = ON');
         for (const table of tables) db.exec(['Sample', 'WorkItem'].includes(table.name)
             ? table.sql.replace(/,\s*"(?:holdPriorStatus|legacyStatus)"\s+TEXT(?=\s*[,)])/g, '') : table.sql);
         for (const index of indexes) db.exec(index.sql);
-        const now = Date.now();
-        db.prepare('INSERT INTO Sample (id, originalId, status, assignedLab, dryingStatus, preparationStatus, createdAt, updatedAt) VALUES (?,?,?,?,?,?,?,?)')
-            .run(sampleId, sampleId, 'APPROVED', labId, 'DONE', 'DONE', now, now);
-        db.prepare('INSERT INTO WorkItem (id, sampleId, analysis, status, assignedLab, result, history, createdAt, updatedAt) VALUES (?,?,?,?,?,?,?,?,?)')
-            .run(workItemId, sampleId, analysis, 'PENDING', labId, '6.2', '[]', now, now);
-        if (beforeGuards) beforeGuards(db, { sampleId, workItemId });
+        if (db.prepare("SELECT name FROM sqlite_master WHERE type='trigger'").all().length) throw new Error('Legacy fixture must have no release guards before inserting.');
+        for (const table of tables) if (db.prepare(`SELECT COUNT(*) AS count FROM "${table.name}"`).get().count !== 0) {
+            throw new Error('Legacy fixture must be a fresh schema-only file.');
+        }
+        for (const [table, rows] of [['Sample', samples], ['WorkItem', workItems]]) {
+            const columns = new Set(db.prepare(`PRAGMA table_info("${table}")`).all().map(column => column.name));
+            for (const row of rows) {
+                const fields = Object.keys(row);
+                if (!fields.length || fields.some(field => !columns.has(field) || !/^[A-Za-z][A-Za-z0-9_]*$/.test(field))) {
+                    throw new Error('Unknown legacy fixture column.');
+                }
+                const values = fields.map(field => row[field] instanceof Date ? row[field].getTime() : row[field]);
+                db.prepare(`INSERT INTO "${table}" (${fields.map(field => `"${field}"`).join(',')}) VALUES (${fields.map(() => '?').join(',')})`).run(...values);
+            }
+        }
+        if (preMigrationSnapshot) {
+            db.close();
+            for (const suffix of ['-wal', '-shm', '-journal']) if (fs.existsSync(`${file}${suffix}`)) {
+                throw new Error('A pre-migration snapshot requires a closed file without sidecars.');
+            }
+            const snapshotPath = assertOwnedTestDatabase(`${file}.pre-migration.db`, actor);
+            fs.copyFileSync(file, snapshotPath, fs.constants.COPYFILE_EXCL);
+            fs.chmodSync(snapshotPath, 0o444);
+            snapshot = { path: snapshotPath, sha256: createHash('sha256').update(fs.readFileSync(snapshotPath)).digest('hex') };
+            db = new Database(file, { fileMustExist: true });
+            db.pragma('foreign_keys = ON');
+        }
         for (const name of ['20261005000000_workflow_state_evidence', '20261005000100_workflow_state_guards']) {
             db.exec(fs.readFileSync(path.resolve(__dirname, '../../prisma/migrations', name, 'migration.sql'), 'utf8'));
         }
-    } finally { db.close(); }
+        const guardSql = fs.readFileSync(path.resolve(__dirname, '../../prisma/migrations/20261005000100_workflow_state_guards/migration.sql'), 'utf8');
+        const installed = new Set(db.prepare("SELECT name FROM sqlite_master WHERE type='trigger'").all().map(row => row.name));
+        for (const match of guardSql.matchAll(/CREATE TRIGGER "([^"]+)"/g)) {
+            if (!installed.has(match[1])) throw new Error(`Missing release guard ${match[1]}`);
+        }
+    } finally { if (db.open) db.close(); }
+    return { file, preMigrationSnapshot: snapshot };
+}
+
+async function createLegacyClosureDatabase({ analysis, labId, samples = [], workItems = [], preMigrationSnapshot = false }) {
+    const sampleId = randomUUID(), workItemId = randomUUID(), now = Date.now();
+    const database = beforeGuards({ actor: 'system:fixture', preMigrationSnapshot, samples: [
+        { id: sampleId, originalId: sampleId, status: 'APPROVED', assignedLab: labId, dryingStatus: 'DONE',
+            preparationStatus: 'DONE', createdAt: now, updatedAt: now }, ...samples], workItems: [
+        { id: workItemId, sampleId, analysis, status: 'PENDING', assignedLab: labId, result: '6.2', history: '[]',
+            createdAt: now, updatedAt: now }, ...workItems.map(row => ({ ...row, sampleId: row.sampleId || sampleId }))] });
+    const { file } = database;
     const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     await client.lab.create({ data: { id: labId, code: labId, name: 'Isolated legacy test laboratory', country: 'TEST' } });
-    return { client, file, sampleId, workItemId, async close() {
+    return { client, file, sampleId, workItemId, preMigrationSnapshot: database.preMigrationSnapshot, async close() {
         await client.$disconnect();
         const owned = path.resolve(__dirname, '../.tmp');
         if (path.dirname(file) !== owned || !path.basename(file).startsWith('audit_legacy_')) throw new Error('Invalid legacy fixture path.');
         for (const suffix of ['', '-wal', '-shm']) fs.rmSync(`${file}${suffix}`, { force: true });
+        if (database.preMigrationSnapshot) {
+            const snapshotFile = assertOwnedTestDatabase(database.preMigrationSnapshot.path, 'system:fixture');
+            fs.chmodSync(snapshotFile, 0o600);
+            fs.rmSync(snapshotFile);
+        }
     } };
 }
 
@@ -59,4 +102,4 @@ function useLegacyRouteDatabase(prisma, client) {
     }
 }
 
-module.exports = { createLegacyClosureDatabase, useLegacyRouteDatabase };
+module.exports = { beforeGuards, createLegacyClosureDatabase, useLegacyRouteDatabase };
