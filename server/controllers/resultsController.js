@@ -3,6 +3,23 @@ const prisma = require('../prisma');
 const { deriveTextureResult } = require('../services/textureResultService');
 const validationController = require('./validationController');
 const { validateResultEntries } = require('../services/resultEntryPolicy');
+const stateRules = require('../services/workflowStateRules');
+const resultEvidence = require('../services/resultEvidenceService');
+const gateEvidence = require('../services/gateEvidenceService');
+
+async function assertResultSaveReadiness(db, sample, user) {
+    stateRules.assertScope(user, sample);
+    resultEvidence.assertAmendable(sample);
+    if (!['PROCESSING', 'SUBMITTED_PARTIAL'].includes(sample.status)) {
+        throw new stateRules.TransitionError(`Sample is not in Processing phase (current: ${sample.status})`, 400, 'SAMPLE_NOT_PROCESSING');
+    }
+    const report = await gateEvidence.loadGateEvidence(db, sample);
+    if (report.blocked.some(gate => gate.mismatch)) gateEvidence.assertEvidence(report);
+    for (const [gate, message] of [['PREPARATION', 'Sample preparation has not been completed'], ['DRYING', 'Sample drying has not been completed']]) {
+        if (report.blocked.some(blocked => blocked.analysis === gate)) throw Object.assign(new Error(message), { statusCode: 412 });
+    }
+    return report;
+}
 
 exports.getResults = async (req, res) => {
     const { sampleId } = req.params;
@@ -100,134 +117,114 @@ exports.saveResults = async (req, res) => {
         const sample = await prisma.sample.findUnique({ where: { id: sampleId } });
         if (!sample) return res.status(404).json({ error: 'Sample not found' });
 
-        // Lab Isolation Check (S07)
-        const scopeGuard = require('../utils/scopeGuard');
-        if (user && user.role && !scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
-            return res.status(403).json({ error: 'Access denied: Sample not in your Lab scope' });
-        }
-
-        if (!['PROCESSING', 'SUBMITTED_PARTIAL', 'ANALYSIS', 'PARTIALLY_COMPLETE'].includes(sample.status)) {
-            return res.status(400).json({ error: `Sample is not in Processing phase (current: ${sample.status})` });
-        }
-
-        // SD-05: Enforce prerequisite gate on work execution (HTTP 412 Precondition Failed)
-        if (sample.preparationStatus !== 'DONE') {
-            return res.status(412).json({ error: 'Sample preparation has not been completed' });
-        }
-        if (sample.dryingStatus !== 'DONE') {
-            return res.status(412).json({ error: 'Sample drying has not been completed' });
-        }
-
-        const entryError = await validateResultEntries(prisma, sample, measurements, user);
-        if (entryError) return res.status(400).json({ error: entryError });
-
-        // Validate
-        const validatedMeasurements = await validationController.validateBatch(measurements);
-        if (validatedMeasurements.some(m => m.value == null || String(m.value).trim() === '' || m.validation.flags.includes('INVALID_FORMAT'))) {
-            return res.status(400).json({ error: 'Every measurement must contain a valid numeric value or supported censoring qualifier.' });
-        }
-
-        const operations = [];
-        const now = new Date();
-
-        // Append-only results with supersession
-        for (const m of validatedMeasurements) {
-            const strVal = String(m.value).trim();
-            const isCensored = m.validation?.isCensored || /^[<>]/.test(strVal);
-            const censoringType = isCensored ? (strVal.startsWith('<') ? 'BELOW_LOQ' : 'ABOVE_RANGE') : 'NONE';
-            const numericVal = m.validation?.normalizedValue !== undefined ? m.validation.normalizedValue : (isNaN(Number(strVal.replace(',', '.'))) ? null : Number(strVal.replace(',', '.')));
-
-            const newResultId = crypto.randomUUID();
-
-            const repNo = (m.replicateNo !== undefined && m.replicateNo !== null) ? Number(m.replicateNo) : 1;
-            const validBasis = ['AIR_DRY', 'OVEN_DRY', 'FIELD_MOIST'].includes(m.basis) ? m.basis : 'AIR_DRY';
-
-            // Supersede previous active result ONLY for the matching replicate number
-            operations.push(db => db.result.updateMany({
-                where: {
-                    sampleId,
-                    param: m.param,
-                    replicateNo: repNo,
-                    isCurrent: true
-                },
-                data: {
-                    isCurrent: false,
-                    supersededBy: newResultId
-                }
-            }));
-
-            // Create new immutable record
-            operations.push(db => db.result.create({
-                data: {
-                    id: newResultId,
-                    sampleId,
-                    param: m.param,
-                    value: strVal,
-                    numericValue: numericVal,
-                    unit: m.unit || null,
-                    flags: JSON.stringify(m.validation?.flags || []),
-                    isValid: m.validation?.valid,
-                    censoring: censoringType,
-                    basis: validBasis,
-                    provenance: m.provenance || 'MEASURED',
-                    methodologyId: m.methodologyId || null,
-                    replicateNo: repNo,
-                    isCurrent: true,
-                    enteredBy: user ? user.username : 'SYSTEM',
-                    analysedAt: now,
-                    equipmentId: m.equipmentId || null,
-                    batchId: m.batchId || null,
-                    createdAt: now,
-                    updatedAt: now
-                }
-            }));
-        }
-
-        operations.push(db => db.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'RESULTS',
-                entityId: sampleId,
-                action: 'UPDATE_RESULTS',
-                performedBy: user ? user.username : 'SYSTEM',
-                timestamp: now,
-                details: `Appended ${measurements.length} defensible results`
-            }
-        }));
-
-        await prisma.$transaction(async tx => {
+        const performedBy = stateRules.actorName(user);
+        await assertResultSaveReadiness(prisma, sample, user);
+        const outcome = await stateRules.inTransaction(prisma, async tx => {
             const current = await tx.sample.findUnique({ where: { id: sampleId } });
-            if (!current || current.status !== sample.status || current.dryingStatus !== 'DONE' || current.preparationStatus !== 'DONE') {
-                throw Object.assign(new Error('Sample readiness changed. Refresh before saving.'), { statusCode: 409 });
+            if (!current) throw new stateRules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
+            const gateReport = await assertResultSaveReadiness(tx, current, user);
+            if (current.status !== sample.status) throw new stateRules.TransitionError('Sample readiness changed. Refresh before saving.', 409, 'SAMPLE_STATE_CHANGED');
+            const entryError = await validateResultEntries(tx, current, measurements, user);
+            if (entryError) throw Object.assign(new Error(entryError), { statusCode: 400 });
+
+            // Validate
+            const validatedMeasurements = await validationController.validateBatch(measurements, tx);
+            if (validatedMeasurements.some(m => m.value == null || String(m.value).trim() === '' || m.validation.flags.includes('INVALID_FORMAT'))) {
+                throw Object.assign(new Error('Every measurement must contain a valid numeric value or supported censoring qualifier.'), { statusCode: 400 });
             }
-            const conflict = await validateResultEntries(tx, current, measurements, user);
-            if (conflict) throw Object.assign(new Error(conflict), { statusCode: 409 });
+
+            const operations = [];
+            const now = new Date();
+
+            // Append-only results with supersession
+            for (const m of validatedMeasurements) {
+                const strVal = String(m.value).trim();
+                const isCensored = m.validation?.isCensored || /^[<>]/.test(strVal);
+                const censoringType = isCensored ? (strVal.startsWith('<') ? 'BELOW_LOQ' : 'ABOVE_RANGE') : 'NONE';
+                const numericVal = m.validation?.normalizedValue !== undefined ? m.validation.normalizedValue : (isNaN(Number(strVal.replace(',', '.'))) ? null : Number(strVal.replace(',', '.')));
+
+                const newResultId = crypto.randomUUID();
+
+                const repNo = (m.replicateNo !== undefined && m.replicateNo !== null) ? Number(m.replicateNo) : 1;
+                const validBasis = ['AIR_DRY', 'OVEN_DRY', 'FIELD_MOIST'].includes(m.basis) ? m.basis : 'AIR_DRY';
+
+                // Supersede previous active result ONLY for the matching replicate number
+                operations.push(db => db.result.updateMany({
+                    where: {
+                        sampleId,
+                        param: m.param,
+                        replicateNo: repNo,
+                        isCurrent: true
+                    },
+                    data: {
+                        isCurrent: false,
+                        supersededBy: newResultId
+                    }
+                }));
+
+                // Create new immutable record
+                operations.push(db => db.result.create({
+                    data: {
+                        id: newResultId,
+                        sampleId,
+                        param: m.param,
+                        value: strVal,
+                        numericValue: numericVal,
+                        unit: m.unit || null,
+                        flags: JSON.stringify(m.validation?.flags || []),
+                        isValid: m.validation?.valid,
+                        censoring: censoringType,
+                        basis: validBasis,
+                        provenance: m.provenance || 'MEASURED',
+                        methodologyId: m.methodologyId || null,
+                        replicateNo: repNo,
+                        isCurrent: true,
+                        enteredBy: performedBy,
+                        analysedAt: now,
+                        equipmentId: m.equipmentId || null,
+                        batchId: m.batchId || null,
+                        createdAt: now,
+                        updatedAt: now
+                    }
+                }));
+            }
+
+            operations.push(db => db.auditLog.create({
+                data: {
+                    id: crypto.randomUUID(),
+                    entity: 'RESULTS',
+                    entityId: sampleId,
+                    action: 'UPDATE_RESULTS',
+                    performedBy,
+                    timestamp: now,
+                    after: JSON.stringify(gateEvidence.auditEvidence(gateReport)),
+                    details: `Appended ${measurements.length} defensible results`
+                }
+            }));
+
             for (const operation of operations) await operation(tx);
             const replicates = new Set(validatedMeasurements.filter(m => ['SAND', 'SILT', 'CLAY'].includes(m.param)).map(m => Number(m.replicateNo ?? 1)));
             for (const replicateNo of replicates) await deriveTextureResult(tx, { sampleId, replicateNo, actor: user?.username, now });
-        });
 
-        if (sample.status === 'PROCESSING' || sample.status === 'ANALYSIS') {
-            const { transitionSample } = require('../services/sampleStateService');
-            await transitionSample(sampleId, 'SUBMITTED_PARTIAL', user, 'Partial results saved').catch(() => {});
-        }
-
-        // Compute cross-parameter sample matrix diagnostics
-        const allActiveResults = await prisma.result.findMany({
-            where: { sampleId, isCurrent: true }
+            // Compute cross-parameter sample matrix diagnostics
+            const allActiveResults = await tx.result.findMany({
+                where: { sampleId, isCurrent: true }
+            });
+            const matrixDiagnostics = validationController.validateSampleMatrix(allActiveResults);
+            return { validatedMeasurements, matrixDiagnostics };
         });
-        const matrixDiagnostics = validationController.validateSampleMatrix(allActiveResults);
 
         // Return validation feedback
         res.json({
             success: true,
-            validation: validatedMeasurements.map(m => ({ param: m.param, flags: m.validation.flags })),
-            matrixDiagnostics
+            validation: outcome.validatedMeasurements.map(m => ({ param: m.param, flags: m.validation.flags })),
+            matrixDiagnostics: outcome.matrixDiagnostics
         });
 
     } catch (error) {
         console.error('[saveResults] Error:', error);
-        if (error.statusCode) return res.status(error.statusCode).json({ error: error.message });
+        if (error.statusCode) return res.status(error.statusCode).json({ error: error.message,
+            ...(error.code && { code: error.code }), ...(error.details && { details: error.details }) });
         res.status(500).json({ error: 'Failed to save results' });
     }
 };

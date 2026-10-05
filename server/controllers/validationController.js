@@ -1,7 +1,7 @@
 const prisma = require('../prisma');
 const { calculateUsdaTexture, evaluateCnRatio, evaluateCecAndBases } = require('../utils/soilCalculations');
 
-exports.validateResult = async (paramId, value, methodologyId = null) => {
+exports.validateResult = async (paramId, value, methodologyId = null, db = prisma) => {
     if (value === null || value === undefined || String(value).trim() === '') {
         return { valid: true, flags: [] }; // Blank or pending
     }
@@ -37,8 +37,8 @@ exports.validateResult = async (paramId, value, methodologyId = null) => {
 
     if (paramId) {
         [analysis, methodology] = await Promise.all([
-            prisma.analysis.findUnique({ where: { code: paramId } }),
-            methodologyId ? prisma.methodology.findUnique({ where: { id: methodologyId } }) : null
+            db.analysis.findUnique({ where: { code: paramId } }),
+            methodologyId ? db.methodology.findUnique({ where: { id: methodologyId } }) : null
         ]);
     }
 
@@ -139,10 +139,10 @@ exports.validateSampleMatrix = (results) => {
 };
 
 // Also export a route handler helper for ResultsController
-exports.validateBatch = async (measurements) => {
+exports.validateBatch = async (measurements, db = prisma) => {
     return Promise.all(measurements.map(async m => ({
         ...m,
-        validation: await exports.validateResult(m.param, m.value, m.methodologyId)
+        validation: await exports.validateResult(m.param, m.value, m.methodologyId, db)
     })));
 };
 
