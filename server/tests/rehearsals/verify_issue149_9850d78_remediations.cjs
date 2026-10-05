@@ -24,7 +24,7 @@ process.env.NODE_ENV = 'test';
 
 
 // A stable delegate lets the original race hook intercept the real Prisma read.
-// Generated Prisma otherwise returns a fresh model delegate at each access.
+// Keep that interception local to the rehearsal's facade over the real client.
 const actualPrisma = require(path.join(root, 'server/prisma'));
 const sampleModel = actualPrisma.sample;
 const overrides = new Map();
@@ -319,8 +319,22 @@ async function assertFinalRefusals() {
         where: { id: 'synthetic-result' },
         data: { isValid: true }
     });
+    const scienceRevision = latestAfterInvalid();
     await state.getChanges(auth);
 
+    // #179 pins 5990780933 / 5990918325: explicit reconciler race,
+    // immutable historical boundary and producer-specific withdrawal hash.
+    await state.syncJournal(auth);
+    const reference = db.prepare('SELECT * FROM _exchange_journal WHERE specimen_id=? ORDER BY sequence DESC LIMIT 1').get('synthetic-sample');
+    assert.equal(reference.event_type, 'AMENDMENT');
+    assert.deepEqual(reference, scienceRevision);
+    const publication = db.prepare("SELECT * FROM _exchange_journal WHERE specimen_id=? AND event_type='PUBLICATION' ORDER BY sequence LIMIT 1").get('synthetic-sample');
+    assert.ok(publication);
+    assert.equal(db.prepare("SELECT COUNT(*) n FROM _exchange_journal WHERE specimen_id=? AND event_type='WITHDRAWAL'").get('synthetic-sample').n, 0);
+    const boundary = await state.createSnapshot(auth);
+    assert.equal(Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='trigger' AND name='trg_sample_au_withdraw'").get()), true);
+    let hookCount = 0;
+    let afterHoldRows;
     const origFindMany = prisma.sample.findMany;
     let interleaved = false;
     prisma.sample.findMany = async function(args) {
@@ -328,10 +342,20 @@ async function assertFinalRefusals() {
         if (!interleaved) {
             interleaved = true;
             // #179 pin 5990587479: W withdraws through metadata only, in this same read window.
-            const beforeHold = await prisma.sample.findUnique({where:{id:'synthetic-sample'}});
+            hookCount++;
+            const beforeHold = db.prepare('SELECT * FROM Sample WHERE id=?').get('synthetic-sample');
             const metadata = JSON.parse(beforeHold.metadata || '{}');
-            db.prepare('UPDATE Sample SET metadata=? WHERE id=?').run(JSON.stringify({...metadata,
-                provenanceHold:{status:'AMBIGUOUS_PROVENANCE_HOLD',reason:'issue149 withdrawal race fixture'}}), 'synthetic-sample');
+            const heldMetadata = JSON.stringify({...metadata, provenanceHold:{status:'AMBIGUOUS_PROVENANCE_HOLD',reason:'issue149 withdrawal race fixture'}});
+            assert.equal(db.prepare('UPDATE Sample SET metadata=? WHERE id=?').run(heldMetadata, 'synthetic-sample').changes, 1);
+            const live = db.prepare('SELECT * FROM Sample WHERE id=?').get('synthetic-sample');
+            assert.deepEqual(live, {...beforeHold, metadata:heldMetadata});
+            const withdrawal = db.prepare('SELECT * FROM _exchange_journal WHERE specimen_id=? ORDER BY sequence DESC LIMIT 1').get('synthetic-sample');
+            assert.equal(withdrawal.event_type, 'WITHDRAWAL');
+            assert.ok(withdrawal.sequence > reference.sequence);
+            assert.equal(withdrawal.payload, null);
+            assert.equal(withdrawal.content_hash, state.computeSampleContentHash({...live,
+                results:db.prepare('SELECT * FROM Result WHERE sampleId=?').all(live.id)}));
+            afterHoldRows = db.prepare('SELECT * FROM _exchange_journal WHERE specimen_id=? ORDER BY sequence').all('synthetic-sample');
             assert.equal(latestAfterInvalid().event_type, 'WITHDRAWAL', 'Sample cancellation must trigger WITHDRAWAL');
         }
         return rows;
@@ -339,10 +363,27 @@ async function assertFinalRefusals() {
 
     let racing;
     try {
-        racing = await state.createSnapshot(auth);
+        await state.syncJournal(auth);
+        assert.equal(hookCount, 1);
+        assert.deepEqual(db.prepare('SELECT * FROM _exchange_journal WHERE specimen_id=? ORDER BY sequence').all('synthetic-sample'), afterHoldRows);
     } finally {
         prisma.sample.findMany = origFindMany;
     }
+    await state.syncJournal(auth);
+    assert.deepEqual(db.prepare('SELECT * FROM _exchange_journal WHERE specimen_id=? ORDER BY sequence').all('synthetic-sample'), afterHoldRows);
+    assert.equal(afterHoldRows.filter(row=>row.event_type === 'WITHDRAWAL').length, 1);
+    assert.equal(afterHoldRows.at(-1).event_type, 'WITHDRAWAL');
+    const oldPage = await state.getSnapshotPage(boundary.snapshotId, auth);
+    const expectedBoundaryPayload = JSON.parse(reference.payload);
+    // Preserve the original auth and its production spatial projection.
+    if (!auth.capabilities?.includes('SPATIAL') && expectedBoundaryPayload.sampling) expectedBoundaryPayload.sampling.location=null;
+    assert.deepEqual(oldPage.data.find(row=>row.specimenId === 'synthetic-sample'), expectedBoundaryPayload);
+    const boundaryChanges = await state.getChanges(auth, {cursor:boundary.nextCursor});
+    assert.deepEqual(boundaryChanges.changes.filter(row=>row.specimenId === 'synthetic-sample').map(row=>row.eventType), ['WITHDRAWAL']);
+    racing = await state.createSnapshot(auth);
+    assert.deepEqual(db.prepare('SELECT * FROM _exchange_journal WHERE sequence=?').get(reference.sequence), reference);
+    assert.deepEqual(db.prepare('SELECT * FROM _exchange_journal WHERE sequence=?').get(publication.sequence), publication);
+
 
     const liveSample = await prisma.sample.findUnique({ where: { id: 'synthetic-sample' } });
     const racingPage = await state.getSnapshotPage(racing.snapshotId, auth);
@@ -352,8 +393,8 @@ async function assertFinalRefusals() {
     assert.equal(JSON.parse(liveSample.metadata).provenanceHold.status, 'AMBIGUOUS_PROVENANCE_HOLD');
     assert.equal(state.isSpecimenEligible(liveSample), false);
     assert.equal(latestAfterInvalid().event_type, 'WITHDRAWAL', 'Latest journal event must remain WITHDRAWAL, not overwritten by stale PUBLICATION');
-    assert.equal(racingPage.data.length, 0, 'Snapshot must not expose cancelled specimen');
-    pass('R10: Stale GET scan does not overwrite committed withdrawal; cancelled specimen excluded from snapshot');
+    assert.equal(racingPage.data.length, 0, 'Snapshot must not expose held specimen');
+    pass('R10: Explicit stale-read sync preserves committed withdrawal; held specimen excluded from snapshot');
 
     // Rem 11: Fail-closed epoch restore protocol and installation source system identity
     let epochStorageFailed = false;
@@ -387,6 +428,5 @@ async function assertFinalRefusals() {
     process.env.DATABASE_URL='file:' + sourceFixture.dbPath;
     rehearsal.close();
     cleanupDisposableDatabase(sourceFixture.runnerDir);
-    if (db && db.open) db.close();
-    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (e) {}
+    fs.rmSync(dir, { recursive: true, force: true });
 });

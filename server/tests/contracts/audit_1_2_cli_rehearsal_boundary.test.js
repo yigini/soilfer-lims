@@ -4,7 +4,21 @@ const os = require('node:os');
 const { createHash } = require('node:crypto');
 const { spawnSync } = require('node:child_process');
 
-test('the manager rehearsal CLI refuses external databases and path arguments before launching a child', () => {
+// #179 pin 5990137651: every public legacy entry point has the same closed
+// subprocess boundary. Exercise the actual CLIs, not just the shared helper.
+test.each([
+    'run_manager_dashboard_tasklist_side_by_side.cjs',
+    'verify_issue149_3643053_remediations.cjs',
+    'verify_issue149_932cb6a_remediations.cjs',
+    'verify_issue149_9ac1202_remediations.cjs',
+    'verify_issue149_complete_remediations.cjs',
+    'verify_issue149_9850d78_remediations.cjs',
+    'verify_issue149_ccc08c2_remediations.cjs',
+    'verify_issue149_6df8fe6_remediations.cjs',
+    'verify_issue149_b5ddd14_remediations.cjs',
+    'verify_issue149_working_review.cjs',
+    'verify_issue149_remediations.cjs'
+])('%s refuses external databases and path arguments before launching a child', name => {
     const owned = fs.mkdtempSync(path.join(os.tmpdir(), 'audit179-cli-refusal-'));
     const protectedFile = path.join(owned, 'protected.db');
     fs.writeFileSync(protectedFile, 'untouched analytical, QC and audit data');
@@ -17,7 +31,7 @@ test('the manager rehearsal CLI refuses external databases and path arguments be
         ]) {
             const env = { ...process.env, NODE_ENV: 'test', ALLOW_WORKFLOW_FIXTURES: '1' };
             delete env.DATABASE_PATH; delete env.DATABASE_URL;
-            const child = spawnSync(process.execPath, [path.resolve(__dirname, '../../scripts/run_manager_dashboard_tasklist_side_by_side.cjs'), ...args], {
+            const child = spawnSync(process.execPath, [path.resolve(__dirname, '../../scripts', name), ...args], {
                 encoding: 'utf8', env: { ...env, ...settings }, timeout: 5000
             });
             expect(child.error).toBeUndefined();

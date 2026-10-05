@@ -12,7 +12,11 @@ const rehearsals = new Set([
     'verify_issue149_9ac1202_remediations.cjs',
     'verify_issue149_complete_remediations.cjs',
     'verify_issue149_9850d78_remediations.cjs',
-    'verify_issue149_ccc08c2_remediations.cjs'
+    'verify_issue149_ccc08c2_remediations.cjs',
+    'verify_issue149_6df8fe6_remediations.cjs',
+    'verify_issue149_b5ddd14_remediations.cjs',
+    'verify_issue149_working_review.cjs',
+    'verify_issue149_remediations.cjs'
 ]);
 function runTestRehearsal(name) {
     const owned = path.resolve(__dirname, '../tests/.tmp');

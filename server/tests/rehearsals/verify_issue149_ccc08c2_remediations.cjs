@@ -32,7 +32,7 @@ delete process.env.SOURCE_SYSTEM_ID;
 
 
 // A stable delegate lets the original race hook intercept the real Prisma read.
-// Generated Prisma otherwise returns a fresh model delegate at each access.
+// Keep that interception local to the rehearsal's facade over the real client.
 const actualPrisma = require(path.join(root, 'server/prisma'));
 const sampleModel = actualPrisma.sample;
 const overrides = new Map();
@@ -169,12 +169,26 @@ async function assertFinalRefusals() {
         where: { id: 'synthetic-result' },
         data: { isValid: false }
     });
+    const scienceRevision = latest();
     assert.equal(JSON.parse(latest().payload).observations.length, 0);
     await state.getChanges(auth);
     assert.equal(JSON.parse(latest().payload).observations.length, 0);
     report('FIX VERIFIED: GET does not reintroduce invalid result');
 
     // 4. Previous controlled cancellation interleaving stays withdrawn
+    // #179 pins 5990780933 / 5990918325: explicit reconciler race,
+    // immutable historical boundary and producer-specific withdrawal hash.
+    await state.syncJournal(auth);
+    const reference = db.prepare('SELECT * FROM _exchange_journal WHERE specimen_id=? ORDER BY sequence DESC LIMIT 1').get('synthetic-sample');
+    assert.equal(reference.event_type, 'AMENDMENT');
+    assert.deepEqual(reference, scienceRevision);
+    const publication = db.prepare("SELECT * FROM _exchange_journal WHERE specimen_id=? AND event_type='PUBLICATION' ORDER BY sequence LIMIT 1").get('synthetic-sample');
+    assert.ok(publication);
+    assert.equal(db.prepare("SELECT COUNT(*) n FROM _exchange_journal WHERE specimen_id=? AND event_type='WITHDRAWAL'").get('synthetic-sample').n, 0);
+    const boundary = await state.createSnapshot(auth);
+    assert.equal(Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='trigger' AND name='trg_sample_au_withdraw'").get()), true);
+    let hookCount = 0;
+    let afterHoldRows;
     const originalFind = prisma.sample.findMany;
     let raced = false;
     prisma.sample.findMany = async function(args) {
@@ -182,20 +196,47 @@ async function assertFinalRefusals() {
         if (!raced) {
             raced = true;
             // #179 pin 5990587479: W withdraws through metadata only, in this same read window.
-            const beforeHold = await prisma.sample.findUnique({where:{id:'synthetic-sample'}});
+            hookCount++;
+            const beforeHold = db.prepare('SELECT * FROM Sample WHERE id=?').get('synthetic-sample');
             const metadata = JSON.parse(beforeHold.metadata || '{}');
-            db.prepare('UPDATE Sample SET metadata=? WHERE id=?').run(JSON.stringify({...metadata,
-                provenanceHold:{status:'AMBIGUOUS_PROVENANCE_HOLD',reason:'issue149 withdrawal race fixture'}}), 'synthetic-sample');
+            const heldMetadata = JSON.stringify({...metadata, provenanceHold:{status:'AMBIGUOUS_PROVENANCE_HOLD',reason:'issue149 withdrawal race fixture'}});
+            assert.equal(db.prepare('UPDATE Sample SET metadata=? WHERE id=?').run(heldMetadata, 'synthetic-sample').changes, 1);
+            const live = db.prepare('SELECT * FROM Sample WHERE id=?').get('synthetic-sample');
+            assert.deepEqual(live, {...beforeHold, metadata:heldMetadata});
+            const withdrawal = db.prepare('SELECT * FROM _exchange_journal WHERE specimen_id=? ORDER BY sequence DESC LIMIT 1').get('synthetic-sample');
+            assert.equal(withdrawal.event_type, 'WITHDRAWAL');
+            assert.ok(withdrawal.sequence > reference.sequence);
+            assert.equal(withdrawal.payload, null);
+            assert.equal(withdrawal.content_hash, state.computeSampleContentHash({...live,
+                results:db.prepare('SELECT * FROM Result WHERE sampleId=?').all(live.id)}));
+            afterHoldRows = db.prepare('SELECT * FROM _exchange_journal WHERE specimen_id=? ORDER BY sequence').all('synthetic-sample');
             assert.equal(latest().event_type, 'WITHDRAWAL');
         }
         return rows;
     };
     let snap;
     try {
-        snap = await state.createSnapshot(auth);
+        await state.syncJournal(auth);
+        assert.equal(hookCount, 1);
+        assert.deepEqual(db.prepare('SELECT * FROM _exchange_journal WHERE specimen_id=? ORDER BY sequence').all('synthetic-sample'), afterHoldRows);
     } finally {
         prisma.sample.findMany = originalFind;
     }
+    await state.syncJournal(auth);
+    assert.deepEqual(db.prepare('SELECT * FROM _exchange_journal WHERE specimen_id=? ORDER BY sequence').all('synthetic-sample'), afterHoldRows);
+    assert.equal(afterHoldRows.filter(row=>row.event_type === 'WITHDRAWAL').length, 1);
+    assert.equal(afterHoldRows.at(-1).event_type, 'WITHDRAWAL');
+    const oldPage = await state.getSnapshotPage(boundary.snapshotId, auth);
+    const expectedBoundaryPayload = JSON.parse(reference.payload);
+    // Preserve the original auth and its production spatial projection.
+    if (!auth.capabilities?.includes('SPATIAL') && expectedBoundaryPayload.sampling) expectedBoundaryPayload.sampling.location=null;
+    assert.deepEqual(oldPage.data.find(row=>row.specimenId === 'synthetic-sample'), expectedBoundaryPayload);
+    const boundaryChanges = await state.getChanges(auth, {cursor:boundary.nextCursor});
+    assert.deepEqual(boundaryChanges.changes.filter(row=>row.specimenId === 'synthetic-sample').map(row=>row.eventType), ['WITHDRAWAL']);
+    snap = await state.createSnapshot(auth);
+    assert.deepEqual(db.prepare('SELECT * FROM _exchange_journal WHERE sequence=?').get(reference.sequence), reference);
+    assert.deepEqual(db.prepare('SELECT * FROM _exchange_journal WHERE sequence=?').get(publication.sequence), publication);
+
     assert.equal(latest().event_type, 'WITHDRAWAL');
     const live = await prisma.sample.findUnique({where:{id:'synthetic-sample'}});
     assert.equal(live.status,'APPROVED');
@@ -342,7 +383,7 @@ async function assertFinalRefusals() {
 
     console.log(`\n======================================================`);
     console.log(`ALL ${n} BOUNDED CHECKS PASSED INDEPENDENTLY & FLAWLESSLY`);
-    console.log(`Synthetic DB retained at: ${databasePath}`);
+    console.log('Test-owned synthetic database is removed after verification.');
     console.log(`======================================================\n`);
     await assertFinalRefusals();
 })().catch(err => {
@@ -355,5 +396,5 @@ async function assertFinalRefusals() {
     process.env.DATABASE_URL='file:' + sourceFixture.dbPath;
     rehearsal.close();
     cleanupDisposableDatabase(sourceFixture.runnerDir);
-    if (db && db.open) db.close();
+    fs.rmSync(dir, { recursive: true, force: true });
 });
