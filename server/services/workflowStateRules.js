@@ -39,7 +39,13 @@ function actorName(actor) {
 }
 
 function assertScope(actor, sample) {
-    if (actor && typeof actor === 'object') scopeGuard.ensureScope(actor, sample, { altLabField: 'assignedLab' });
+    if (actor && typeof actor === 'object') {
+        try { scopeGuard.ensureScope(actor, sample, { altLabField: 'assignedLab' }); }
+        catch (error) {
+            if (error.statusCode === 403) throw new TransitionError(error.message, 403, error.code || 'ACCESS_DENIED_LAB');
+            throw error;
+        }
+    }
 }
 
 function requireReason(reason) {

@@ -8,6 +8,23 @@ const { parseDeterminationValue, validateValue, validateTexture, validateTexture
 const { canRecord } = require('./workEligibility');
 const { hasPermission } = require('../config/roles');
 const { randomUUID } = require('crypto');
+const stateRules = require('./workflowStateRules');
+const { transitionWorkItem } = require('./workItemStateService');
+const { createSample, transitionSample } = require('./sampleStateService');
+const { evaluateExecutionReadiness } = require('./workbenchReadinessService');
+
+async function freshExecutableItem(tx, expected, actor) {
+    const item = await tx.workItem.findUnique({ where: { id: expected.id }, include: { sample: true } });
+    if (!item || item.status !== expected.status || item.version !== expected.version) {
+        throw new stateRules.TransitionError('Work item changed before offline work was committed.', 409, 'WORKITEM_STATE_CHANGED');
+    }
+    stateRules.assertScope(actor, item.sample);
+    require('./resultEvidenceService').assertAmendable(item.sample);
+    const readiness = await evaluateExecutionReadiness(tx, item, actor);
+    if (!readiness.isReady) throw new stateRules.TransitionError(readiness.reasons.join('; '), 409,
+        readiness.blockers[0] || 'EXECUTION_BLOCKED');
+    return item;
+}
 
 function deepEqual(a, b) {
     if (a === b) return true;
@@ -186,7 +203,7 @@ class SyncService {
 
                     if (!workItemId) throw new Error('Target workItemId is required');
 
-                    const item = await prisma.workItem.findUnique({
+                    let item = await prisma.workItem.findUnique({
                         where: { id: workItemId },
                         include: { sample: true }
                     });
@@ -247,6 +264,7 @@ class SyncService {
                     const incomingInstrumentId = op.payload?.equipmentId || op.payload?.instrumentId || null;
 
                     await prisma.$transaction(async (tx) => {
+                        item = await freshExecutableItem(tx, item, user);
                         if (tx.workItemDraft) {
                             const existingDraft = await tx.workItemDraft.findUnique({
                                 where: { workItemId }
@@ -481,10 +499,9 @@ class SyncService {
 
                         // Advance work item status from ASSIGNED to IN_PROGRESS on first draft save
                         if (item.status === 'ASSIGNED') {
-                            await tx.workItem.update({
-                                where: { id: workItemId },
-                                data: { status: 'IN_PROGRESS', updatedAt: new Date() }
-                            });
+                            await transitionWorkItem(workItemId, 'IN_PROGRESS', user, 'Offline draft started',
+                                { version: item.version }, tx, { expected: { status: item.status, version: item.version },
+                                    audit: { action: 'DRAFT_STARTED', details: JSON.stringify({ operationId: opId }) } });
                         }
 
                         savedReceipt = await CommandReceiptService.recordReceipt(tx, {
@@ -516,7 +533,7 @@ class SyncService {
                         continue;
                     }
 
-                    const item = await prisma.workItem.findUnique({
+                    let item = await prisma.workItem.findUnique({
                         where: { id: workItemId },
                         include: { sample: true }
                     });
@@ -678,6 +695,7 @@ class SyncService {
 
                     // Execute atomic record transaction
                     await prisma.$transaction(async (tx) => {
+                        item = await freshExecutableItem(tx, item, user);
                         if (isTextureTask && textVal && textVal.isValid && textureFractions) {
                             const sandNum = Number(String(textureFractions.sand).replace(',', '.'));
                             const siltNum = Number(String(textureFractions.silt).replace(',', '.'));
@@ -808,16 +826,16 @@ class SyncService {
                         }
 
                         // Update WorkItem
-                        await tx.workItem.update({
-                            where: { id: workItemId },
-                            data: {
-                                status: 'COMPLETED',
+                        const history = stateRules.requireHistory(item.history);
+                        history.push({ status: 'COMPLETED', action: 'OFFLINE_WORK_COMPLETED', changedBy: user.username,
+                            timestamp: now, operationId: opId, resultId: newResultId, attemptId });
+                        await transitionWorkItem(workItemId, 'COMPLETED', user, 'Offline result recorded', {
                                 result: String(rawVal),
                                 version: { increment: 1 },
                                 completedAt: now,
-                                updatedAt: now
-                            }
-                        });
+                                history: JSON.stringify(history)
+                            }, tx, { expected: { status: item.status, version: item.version }, audit: {
+                                action: 'OFFLINE_WORK_COMPLETED', details: JSON.stringify({ operationId: opId, resultId: newResultId, attemptId }) } });
 
                         // Record Command Receipt
                         savedReceipt = await CommandReceiptService.recordReceipt(tx, {
@@ -881,18 +899,18 @@ class SyncService {
                             capturedAtLocal: op.capturedAtLocal || null
                         });
 
-                        const newSample = await tx.sample.create({
-                            data: {
+                        await createSample({
                                 id: sampleId,
                                 originalId,
                                 labId: sampleLab,
                                 assignedLab: sampleLab,
-                                status: 'RECEIVED',
+                                status: 'EXPECTED'
+                            }, user, { tx });
+                        await transitionSample(sampleId, 'RECEIVED', user, 'Offline specimen received', {
                                 receptionDate: new Date(op.capturedAtLocal || Date.now()),
                                 receivedBy: user.username,
                                 receptionData
-                            }
-                        });
+                            }, tx, { action: 'SAMPLE_RECEIVED' });
 
                         savedReceipt = await CommandReceiptService.recordReceipt(tx, {
                             idempotencyKey: opId,
@@ -951,12 +969,14 @@ class SyncService {
                     outcome
                 });
 
-            } catch (err) {
+            } catch (originalError) {
+                const err = stateRules.mapStateError(originalError);
                 console.error(`[SYNC_OP_ERROR] Failed to process ${op.type} (${opId}):`, err);
                 receipts.push({
                     operationId: opId,
                     status: 'REJECTED',
                     reason: err.message || 'Operation failed server validation',
+                    ...(err.code && { code: err.code }),
                     serverTimestamp
                 });
             }
