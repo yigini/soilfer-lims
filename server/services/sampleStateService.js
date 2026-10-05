@@ -27,6 +27,10 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
             provenance = require('./statusMigrationPlan').assertReviewedRow(audit.migrationPlan, 'Sample', sample, nextStatus, performedBy);
             rules.requireReason(reason);
         } else if (currentStatus !== nextStatus) {
+            if (nextStatus === 'DRAFT' && (currentStatus !== 'EXPECTED' || audit.action !== 'INTAKE_DRAFT_SAVED' ||
+                !hasPermission(actor, 'RECEIVE_SAMPLE'))) {
+                throw new TransitionError('Saving an expected specimen as a draft requires the authorized intake action.', 409, 'ILLEGAL_STATUS_TRANSITION');
+            }
             if (!workflow.isValidSampleTransition(currentStatus, nextStatus)) {
                 throw new TransitionError(`Illegal transition from '${currentStatus}' to '${nextStatus}'.`, 409, 'ILLEGAL_STATUS_TRANSITION', {
                     currentStatus, attemptedStatus: nextStatus, allowedTransitions: workflow.SAMPLE_TRANSITIONS[currentStatus] || []

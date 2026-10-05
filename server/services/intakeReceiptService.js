@@ -3,7 +3,7 @@ const { normalizeAnalysisCodes } = require('./analysisCodesService');
 const { validateSelection } = require('./cataloguePolicy');
 const projects = require('./projectPolicyService');
 const scope = require('../utils/scopeGuard');
-const { transitionSample } = require('./sampleStateService');
+const { transitionSample, createSample } = require('./sampleStateService');
 const profile = require('./intakeProfileService');
 const { evaluateChecklistCompliance } = require('./intakeValidationService');
 
@@ -48,7 +48,8 @@ async function receiveSample(tx, { sampleId, body = {}, user, createDataFactory 
     if (!sample) {
         if (!createDataFactory) throw new IntakeError(422, { code: 'INTAKE_IDENTIFIER_REQUIRED', message: 'A specimen identifier is required.' });
         const data = await createDataFactory(tx, lab);
-        sample = await tx.sample.create({ data: { ...data, status: 'EXPECTED', assignedLab: labId, labId: null, labSampleCode: null, requiredAnalyses: JSON.stringify(codes) } });
+        sample = await createSample({ ...data, status: 'EXPECTED', assignedLab: labId, labId: null, labSampleCode: null,
+            requiredAnalyses: JSON.stringify(codes) }, user, { tx });
     }
     const reception = profile.parseFieldMetadata(sample.receptionData);
     if (body.checklist !== undefined) {

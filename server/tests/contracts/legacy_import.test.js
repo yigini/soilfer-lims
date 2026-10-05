@@ -1,8 +1,10 @@
 const prisma = require('../../prisma');
 const importController = require('../../controllers/importController');
+const { createSample } = require('../../services/sampleStateService');
 
 describe('WP-32: Legacy Data Import Harmonisation Mandate', () => {
     const testLabId = 'LAB-IMPORT-TEST';
+    const otherLabId = 'LAB-IMPORT-OTHER';
     const testAnalysisCode = 'PH';
     let createdSampleIds = [];
 
@@ -13,6 +15,8 @@ describe('WP-32: Legacy Data Import Harmonisation Mandate', () => {
             create: { id: testLabId, code: 'IMP-TEST', name: 'Import Test Lab', country: 'Global' },
             update: {}
         });
+        await prisma.lab.upsert({ where: { id: otherLabId },
+            create: { id: otherLabId, code: 'IMP-OTHER', name: 'Other import laboratory', country: 'Global' }, update: {} });
     });
 
     afterAll(async () => {
@@ -21,6 +25,7 @@ describe('WP-32: Legacy Data Import Harmonisation Mandate', () => {
             await prisma.sample.deleteMany({ where: { id: { in: createdSampleIds } } });
         }
         await prisma.lab.delete({ where: { id: testLabId } }).catch(() => {});
+        await prisma.lab.delete({ where: { id: otherLabId } }).catch(() => {});
     });
 
     test('1. A CSV cannot be imported without every column mapped to an analysis, a method, and a controlled unit', async () => {
@@ -133,5 +138,47 @@ describe('WP-32: Legacy Data Import Harmonisation Mandate', () => {
         expect(importedResult.value).toBe('6.75');
         expect(importedResult.numericValue).toBe(6.75);
         expect(importedResult.unit).toBe(unit.code);
+        const sample = await prisma.sample.findUnique({ where: { id: sampleCode } });
+        expect(sample).toMatchObject({ status: 'APPROVED', approvedAt: null, approvedBy: null });
+        expect(JSON.parse(sample.receptionData)).toMatchObject({ isLegacy: true, importedBy: 'data_officer' });
+        const creation = await prisma.auditLog.findMany({ where: { entity: 'SAMPLE', entityId: sampleCode, action: 'SAMPLE_CREATED' } });
+        expect(creation).toHaveLength(1);
+        expect(creation[0].performedBy).toBe('system:legacy-import');
+        expect(JSON.parse(creation[0].details)).toMatchObject({ context: 'legacy-import', importingUser: 'data_officer' });
+    });
+
+    async function importRows(rows, user = { username: 'import_reception', role: 'SAMPLE_RECEPTION', labId: testLabId }) {
+        const analysis = await prisma.analysis.findFirst();
+        const method = await prisma.methodology.findFirst({ where: { analysisCode: analysis.code } }) || await prisma.methodReference.findFirst();
+        const unit = await prisma.unit.findFirst();
+        let status = 200, body;
+        const res = { status(code) { status = code; return this; }, json(value) { body = value; } };
+        await importController.executeImport({ user, body: { sampleIdColumn: 'Sample_ID', labId: testLabId,
+            columnMappings: [{ column: 'value', analysisCode: analysis.code, methodologyId: method.id, unitCode: unit.code }], rows } }, res);
+        return { status, body };
+    }
+
+    test('4. importing into an existing sample preserves its status and approval identity', async () => {
+        const sampleCode = `LEG-EXISTING-${Date.now()}`;
+        createdSampleIds.push(sampleCode);
+        const original = await createSample({ id: sampleCode, originalId: sampleCode, assignedLab: testLabId,
+            status: 'EXPECTED', receptionData: JSON.stringify({ observed: 'unchanged' }) }, 'system:fixture', { context: 'fixture' });
+        const response = await importRows([{ Sample_ID: sampleCode, value: '4.2' }]);
+        expect(response).toMatchObject({ status: 200, body: { success: true, importedSamples: 0, importedResults: 1 } });
+        expect(await prisma.sample.findUnique({ where: { id: sampleCode } })).toEqual(original);
+        expect(await prisma.auditLog.count({ where: { entityId: sampleCode, action: 'SAMPLE_CREATED' } })).toBe(1);
+    });
+
+    test('5. a cross-lab existing sample refuses and rolls back the whole import', async () => {
+        const foreign = `LEG-FOREIGN-${Date.now()}`, first = `LEG-ROLLBACK-${Date.now()}`;
+        createdSampleIds.push(foreign, first);
+        await createSample({ id: foreign, originalId: foreign, assignedLab: otherLabId, status: 'EXPECTED' },
+            'system:fixture', { context: 'fixture' });
+        const before = await Promise.all([prisma.sample.count(), prisma.result.count(), prisma.auditLog.count()]);
+        const response = await importRows([{ Sample_ID: first, value: '3.1' }, { Sample_ID: foreign, value: '5.2' }]);
+        expect(response.status).toBe(403);
+        expect(await Promise.all([prisma.sample.count(), prisma.result.count(), prisma.auditLog.count()])).toEqual(before);
+        expect(await prisma.sample.findUnique({ where: { id: first } })).toBeNull();
+        expect(await prisma.result.count({ where: { sampleId: foreign } })).toBe(0);
     });
 });

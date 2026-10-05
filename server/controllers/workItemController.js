@@ -22,9 +22,9 @@ const getEffectiveAnalyses = (sample) => {
  * Generate Work Items for a Sample (Internal Hook)
  * Called when Sample -> LAB_ID_ASSIGNED or ACCEPTED
  */
-exports.generateWorkItemsForSample = async (sample, tx) => {
+exports.generateWorkItemsForSample = async (sample, tx, actor = 'system:intake-work-generation') => {
     const service = require('../services/intakeWorkItemService');
-    return tx ? service.generate(tx, sample) : prisma.$transaction(client => service.generate(client, sample));
+    return tx ? service.generate(tx, sample, undefined, actor) : prisma.$transaction(client => service.generate(client, sample, undefined, actor));
 };
 
 exports.reconcileWorkItemsForSample = require('../services/workItemReconciliationService').reconcileWorkItemsForSample;

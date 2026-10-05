@@ -582,7 +582,7 @@ exports.updateStatus = async (req, res) => {
         if (nextStatus === 'ACCEPTED') {
             try {
                 const workItemController = require('./workItemController');
-                await workItemController.generateWorkItemsForSample(updated);
+                await workItemController.generateWorkItemsForSample(updated, null, req.user);
             } catch (e) {
                 console.error('Failed to generate work items', e);
             }
@@ -2446,7 +2446,7 @@ exports.repairWorkItems = async (req, res) => {
         }
 
         const workItemController = require('./workItemController');
-        const generated = await workItemController.generateWorkItemsForSample(sample);
+        const generated = await workItemController.generateWorkItemsForSample(sample, null, user);
 
         res.json({
             success: true,
@@ -2455,7 +2455,7 @@ exports.repairWorkItems = async (req, res) => {
         });
     } catch (err) {
         console.error('[repairWorkItems] Error:', err);
-        res.status(500).json({ error: 'Failed to repair work items' });
+        res.status(err.statusCode || 500).json({ error: err.statusCode ? err.message : 'Failed to repair work items', ...(err.code && { code: err.code }) });
     }
 };
 

@@ -157,7 +157,9 @@ describe('Audit 1.1: one atomic intake service', () => {
         const response = await post('/api/samples/walkin', { submitter: 'Contract submitter', analyses: [analysis.code], receivedMass: 250 });
         expect(response.status).toBe(201); expect(response.body.sample).toMatchObject({ status: 'RECEIVED', labSampleCode: null, labId: null });
         const arrived = response.body.sample, details = await evidence(arrived.id);
-        expect(details.items).toEqual([]); expect(details.revisions).toEqual([]); expect(details.lines).toEqual([]); expect(details.audit).toHaveLength(1);
+        expect(details.items).toEqual([]); expect(details.revisions).toEqual([]); expect(details.lines).toEqual([]);
+        expect(details.audit).toHaveLength(2);
+        expect(details.audit.map(row => row.action).sort()).toEqual(['SAMPLE_CREATED', 'SAMPLE_RECEIVED']);
         expect(await prisma.labSequence.count({ where: { labId: lab.id } })).toBe(beforeSequence);
         const before = await counts(), incomplete = await post(`/api/samples/${arrived.id}/accept`, { checklist: {} });
         expect(incomplete.status).toBe(400); expect(await counts()).toEqual(before);

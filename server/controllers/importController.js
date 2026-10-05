@@ -1,5 +1,8 @@
 const crypto = require('crypto');
 const prisma = require('../prisma');
+const { createSample } = require('../services/sampleStateService');
+const rules = require('../services/workflowStateRules');
+const { hasPermission } = require('../config/roles');
 
 /**
  * Parses simple CSV string into headers and rows
@@ -188,12 +191,23 @@ exports.executeImport = async (req, res) => {
         }
 
         // 2. Perform import
-        const targetLabId = labId || user?.labId || 'LAB-DEFAULT';
+        const targetLabId = labId || user?.labId;
+        if (typeof targetLabId !== 'string' || !targetLabId.trim()) {
+            throw new rules.TransitionError('Choose a laboratory for the import.', 400, 'IMPORT_LAB_REQUIRED');
+        }
+        if (!hasPermission(user, 'RECEIVE_SAMPLE')) {
+            throw new rules.TransitionError('Historical import is not authorized.', 403, 'LEGACY_IMPORT_NOT_AUTHORIZED');
+        }
+        const importingActor = rules.actorName(user);
+        rules.assertScope(user, { assignedLab: targetLabId });
         let importedSamplesCount = 0;
         let importedResultsCount = 0;
         const now = new Date();
 
         await prisma.$transaction(async tx => {
+            if (!await tx.lab.findUnique({ where: { id: targetLabId } })) {
+                throw new rules.TransitionError('Import laboratory not found.', 400, 'IMPORT_LAB_NOT_FOUND');
+            }
             for (const row of rows) {
                 const rawSampleId = row[sampleIdColumn];
                 if (!rawSampleId) continue;
@@ -204,8 +218,7 @@ exports.executeImport = async (req, res) => {
                 });
 
                 if (!sample) {
-                    sample = await tx.sample.create({
-                        data: {
+                    sample = await createSample({
                             id: sampleCode,
                             originalId: sampleCode,
                             status: 'APPROVED',
@@ -214,12 +227,12 @@ exports.executeImport = async (req, res) => {
                             receptionData: JSON.stringify({
                                 isLegacy: true,
                                 importedAt: now,
-                                importedBy: user?.username || 'SYSTEM'
+                                importedBy: importingActor
                             })
-                        }
-                    });
+                    }, 'system:legacy-import', { tx, context: 'legacy-import', importingUser: user });
                     importedSamplesCount++;
                 }
+                rules.assertScope(user, sample);
 
                 // Create imported results for each mapped column
                 for (const map of columnMappings) {
@@ -247,7 +260,7 @@ exports.executeImport = async (req, res) => {
                             replicateNo: 1,
                             isValid: true,
                             isCurrent: true,
-                            enteredBy: user?.username || 'LEGACY_IMPORT',
+                            enteredBy: importingActor,
                             analysedAt: now,
                             createdAt: now,
                             updatedAt: now
@@ -265,7 +278,7 @@ exports.executeImport = async (req, res) => {
                     entityId: `IMPORT-${Date.now()}`,
                     action: 'IMPORT_LEGACY_DATA',
                     details: `Imported ${importedSamplesCount} historical samples and ${importedResultsCount} results with provenance IMPORTED`,
-                    performedBy: user?.username || 'system',
+                    performedBy: importingActor,
                     timestamp: now
                 }
             });
@@ -280,7 +293,9 @@ exports.executeImport = async (req, res) => {
         });
     } catch (error) {
         console.error('[executeImport] Error:', error);
-        res.status(500).json({ error: 'Failed to execute legacy import: ' + error.message });
+        const mapped = rules.mapStateError(error);
+        res.status(mapped.statusCode || 500).json({ error: 'Failed to execute legacy import: ' + mapped.message,
+            ...(mapped.code && { code: mapped.code }) });
     }
 };
 
