@@ -1,10 +1,9 @@
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const Database = require('better-sqlite3');
+const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const app = require('../../app');
 const prisma = require('../../prisma');
 const policy = require('../../services/policyService');
@@ -13,7 +12,6 @@ const codes = require('../../services/sampleCodeService');
 const { backfill } = require('../../scripts/backfill_sample_codes');
 const { getAuthToken } = require('../setup');
 const id = () => crypto.randomUUID();
-const migration = fs.readFileSync(path.resolve(__dirname, '../../prisma/migrations/20261004170000_add_atomic_sample_codes/migration.sql'), 'utf8');
 
 describe('Audit 1.3: atomic laboratory sample codes', () => {
     let lab, token, manager;
@@ -164,14 +162,32 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
 });
 
 describe('Audit 1.3: additive migration and idempotent back-fill', () => {
-    let db;
+    let db, rehearsal;
+    function historicalDatabase(extraSamples = []) {
+        const now = Date.UTC(2026, 0, 1);
+        rehearsal = beforeGuards({ actor: 'system:fixture', schemaVariant: 'PRE_1_3_SAMPLE_CODES',
+            samples: [['s1', 'S123', 'lab-a'], ['s2', 'old-format', 'lab-a'], ['blank', ' ', 'lab-a'],
+                ['lab-valued', 'AAA', 'lab-a'], ['ambiguous', ' aaa ', 'lab-a'], ['unowned', null, 'unknown']]
+                .map(([sampleId, labId, assignedLab]) => ({ id: sampleId, originalId: sampleId, labId, assignedLab,
+                    status: 'EXPECTED', metadata: 'raw', createdAt: now, updatedAt: now })).concat(extraSamples),
+            workItems: [['w1', 's1', 'S123', 'lab-a'], ['referred', 's1', 'old-code', 'BBB'],
+                ['fallback', 's2', 'old-code', null], ['unresolved', 'unowned', 'lost', 'unknown']]
+                .map(([itemId, sampleId, labId, assignedLab], index) => ({ id: itemId, sampleId, labId, assignedLab,
+                    analysis: index === 1 ? 'EC_1_5' : 'PH_H2O', status: 'NOT_ASSIGNED', createdAt: now, updatedAt: now })),
+            relatedRows: {
+                Lab: [{ id: 'lab-a', code: 'AAA', name: 'Historical lab A', country: 'TEST' },
+                    { id: 'lab-b', code: 'BBB', name: 'Historical lab B', country: 'TEST' }],
+                AuditLog: [{ id: 'a', entity: 'Sample', entityId: 's1', action: 'LEGACY_FIXTURE', performedBy: 'system:fixture', details: 'original audit' }],
+                Result: [{ id: 'r', sampleId: 's1', param: 'PH_H2O', value: '12.5', updatedAt: now }]
+            }
+        });
+        db = new Database(rehearsal.file, { fileMustExist: true });
+        rehearsal.applyPendingMigration({ connection: db });
+    }
     beforeEach(() => {
-        db = new Database(':memory:');
-        db.exec('CREATE TABLE Lab(id TEXT PRIMARY KEY, code TEXT); CREATE TABLE Sample(id TEXT PRIMARY KEY, labId TEXT, assignedLab TEXT, metadata TEXT); CREATE TABLE WorkItem(id TEXT PRIMARY KEY, sampleId TEXT, labId TEXT, assignedLab TEXT); CREATE TABLE AuditLog(id TEXT PRIMARY KEY, details TEXT); CREATE TABLE Result(id TEXT PRIMARY KEY, value TEXT);');
-        db.exec("INSERT INTO Lab VALUES ('lab-a','AAA'),('lab-b','BBB'); INSERT INTO Sample VALUES ('s1','S123','lab-a','raw'),('s2','old-format','lab-a','raw'),('blank',' ','lab-a','raw'),('lab-valued','AAA','lab-a','raw'),('ambiguous',' aaa ','lab-a','raw'),('unowned',NULL,'unknown','raw'); INSERT INTO WorkItem VALUES ('w1','s1','S123','lab-a'),('referred','s1','old-code','BBB'),('fallback','s2','old-code',NULL),('unresolved','unowned','lost','unknown'); INSERT INTO AuditLog VALUES ('a','original audit'); INSERT INTO Result VALUES ('r','12.5');");
-        db.exec(migration);
+        historicalDatabase();
     });
-    afterEach(() => db.close());
+    afterEach(() => { if (db?.open) db.close(); rehearsal?.close(); });
     test('dry-run has no writes; apply copies issued codes, retains aliases/old work-item ids, reports unresolved and referral ownership', () => {
         const before = db.serialize(), dry = backfill(db);
         expect(db.serialize()).toEqual(before);
@@ -191,8 +207,29 @@ describe('Audit 1.3: additive migration and idempotent back-fill', () => {
         expect(db.prepare('SELECT details FROM AuditLog').get().details).toBe('original audit');
         expect(db.prepare('SELECT value FROM Result').get().value).toBe('12.5');
     });
-    test.each(['legacy duplicate', 'existing code collision'])('%s refuses the entire apply, including otherwise-valid work-item corrections', kind => {
-        db.prepare('INSERT INTO Sample(id, labId, assignedLab, labSampleCode) VALUES (?, ?, ?, ?)').run('duplicate', kind === 'legacy duplicate' ? 'S123' : null, 'lab-b', kind === 'existing code collision' ? 'S123' : null);
+    test.each(['legacy duplicate', 'existing code collision'])('%s refuses the entire apply, including otherwise-valid work-item corrections', async kind => {
+        if (kind === 'legacy duplicate') {
+            // #179 pin 5989961445: genuinely pre-existing alias collisions are
+            // declarative historical rows before the unchanged #180 migration.
+            db.close(); rehearsal.close();
+            historicalDatabase([{ id: 'duplicate', originalId: 'duplicate', labId: 'S123', assignedLab: 'lab-b',
+                status: 'EXPECTED', updatedAt: Date.UTC(2026, 0, 1) }]);
+        } else {
+            // This collision uses a post-#180 code, so central creation runs
+            // against the fully guarded owned file, never raw SQL.
+            const { PrismaClient } = require('../../prisma_client');
+            const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+            const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${rehearsal.file}` }) });
+            const previousPath = process.env.DATABASE_PATH, previousUrl = process.env.DATABASE_URL;
+            process.env.DATABASE_PATH = rehearsal.file; process.env.DATABASE_URL = `file:${rehearsal.file}`;
+            try { await createSampleFixture(client, { data: { id: 'duplicate', originalId: 'duplicate', labId: null,
+                labSampleCode: 'S123', assignedLab: 'lab-b', status: 'EXPECTED' } }); }
+            finally {
+                await client.$disconnect();
+                process.env.DATABASE_PATH = previousPath;
+                if (previousUrl === undefined) delete process.env.DATABASE_URL; else process.env.DATABASE_URL = previousUrl;
+            }
+        }
         const before = db.serialize(), report = backfill(db, true);
         expect(report.refused).toBe(true); expect(report.duplicates[0].code).toBe('SAMPLE_CODE_DUPLICATE'); expect(db.serialize()).toEqual(before);
     });

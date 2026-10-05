@@ -10,21 +10,25 @@ const { assertOwnedTestDatabase } = require('./testOwnedDatabase');
 // #179 pins 5987778735, 5987866354 and 5987967145. The literal baseline is
 // deployed pre-1.1 main eb273f4, byte-identical to c50415b; no schema is invented.
 const PRE11_SHA256 = 'ff776730ff70102f018c3a02af76534ada332f2f4484600bde069b45c92f0513';
+const PRE13_SHA256 = '7727cd04e0bb7ba7da66e54f49a3a9e53cc64f61be390c9d68efdec3e40284c8';
 const PROJECT_SHAPE_SHA256 = '0915342087544cde959571f2d2bc9fc4ecf2825c400cc4ad1f17066fbb121115';
 const PROJECT_MIGRATION_SHA256 = '3e63e37f4bce011c6d80efa5329f810ceffb9d5ff96653a406f90d818202e123';
 const PROJECT_FK_CORRUPT_SHA256 = 'd7302e4c84d0da5e632256d04f19c1df20f21806949bbb720b5704a569b5f03c';
 // #179 pins 5988872290 / 5989464829: the closed, evidenced completion of
-// the lagging SQL baseline, solely for the Project variant before seeding.
+// the lagging SQL baseline for the Project and pre-1.3 variants before seeding
+// (#179's extension to the latter is pinned in 5989961445).
 const BASELINE_COMPLETION = Object.freeze([{ path: '20260930140000_add_sitewide_theme_appearance/migration.sql',
     sha256: 'a682ab8b25fcf561527afea4200005cc60a349f692ab1ce3956d594dd31fdb7f' },
 { path: '20261004033000_add_report_number_lineage/migration.sql',
     sha256: 'b59697f94f28daa5db9590c4d7ebd304e00d941309bc514f44a4abd9c02871b3' }]);
 const MIGRATIONS = Object.freeze({
+    SAMPLE_CODES: '20261004170000_add_atomic_sample_codes',
     MARKER: '20261004190000_add_workitem_duplicate_marker',
     INDEX: '20261004190100_unique_active_workitem',
     DECLARATION: '20261004190200_add_declared_consignment_count'
 });
 const MIGRATION_SHA256 = Object.freeze({
+    SAMPLE_CODES: 'e52a11bb7fc8dfee678184025dda8e8342cde3896d3b5f1c89b83897702d8ff0',
     MARKER: '80278c2d318bc47fa92746015ec278a204a7ff08a9e36d24faca0a56ef05fa1e',
     INDEX: 'a6e1cf6a26319954e35f4008bc4d18e904014f086db0e31d88e42948fac6556e',
     DECLARATION: '849f07ae38eafdb05cf702cf55a5c2f549ee19d04b7bf2ad36fca1322ebb673b'
@@ -36,7 +40,8 @@ const VARIANTS = Object.freeze({
     CONSIGNMENT_PRE_1_1_A: '13b40b8e5a0acd4deb04f238eedb2deb58c5d4b57d48245c0d938deeaffda123',
     CONSIGNMENT_PRE_1_1_B: 'e87950361986185105cb813b9b16226c178f4b65ad590a9e5e96dcb135bb15d6',
     PROJECT_PRE_TEMPLATE_POLICY: PROJECT_SHAPE_SHA256,
-    PROJECT_FK_CORRUPT_SYNTHETIC: PROJECT_FK_CORRUPT_SHA256
+    PROJECT_FK_CORRUPT_SYNTHETIC: PROJECT_FK_CORRUPT_SHA256,
+    PRE_1_3_SAMPLE_CODES: PRE13_SHA256
 });
 
 // Legacy values are inserted into a new schema before its real additive guards
@@ -79,8 +84,9 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
         return file;
     }
     const projectVariant = schemaVariant === 'PROJECT_PRE_TEMPLATE_POLICY';
+    const sampleCodeVariant = schemaVariant === 'PRE_1_3_SAMPLE_CODES';
     const projectColumns = ['templateId', 'templateVersion', 'policyConfig', 'programmeCode', 'parentProjectId'];
-    function assertGeneratedSchemaCompleteness(handle, projectPending = false) {
+    function assertGeneratedSchemaCompleteness(handle, pendingName = null) {
         const missing = [];
         for (const model of Prisma.dmmf.datamodel.models) {
             const table = model.dbName || model.name;
@@ -91,16 +97,19 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
         }
         // The one accountable pending migration deliberately lacks exactly five
         // Project columns. After it runs, every current model/column must exist.
-        assert.equal(JSON.stringify(missing), JSON.stringify(projectPending ? [{ table: 'Project', fields: projectColumns }] : []),
+        const expected = pendingName === 'PROJECT_POLICY' ? [{ table: 'Project', fields: projectColumns }]
+            : pendingName === 'SAMPLE_CODES' ? [{ table: 'Sample', fields: ['labSampleCode'] },
+                { table: 'WorkItem', fields: ['legacyLabId'] }, { table: 'LabSequence', missingTable: true }] : [];
+        assert.equal(JSON.stringify(missing), JSON.stringify(expected),
             'Pinned historical baseline does not match the generated Prisma datamodel.');
     }
     const relatedTables = ['User', 'Lab', 'Consignment', 'Submission', 'Result', 'SpectralData',
-        ...(projectVariant ? ['Project', 'Report', 'ReportShareLink', 'AuditLog'] : [])];
+        ...(projectVariant ? ['Project', 'Report', 'ReportShareLink', 'AuditLog'] : sampleCodeVariant ? ['AuditLog'] : [])];
     if (!relatedRows || Object.keys(relatedRows).some(table => !relatedTables.includes(table) || !Array.isArray(relatedRows[table]))) {
         throw new Error('Related legacy rows must name an allowed table and declarative array.');
     }
     const pending = schemaVariant === 'PRE_1_1_DUPLICATES' ? [...(markerPending ? ['MARKER'] : []), 'INDEX']
-        : projectVariant ? ['PROJECT_POLICY'] : schemaVariant ? ['DECLARATION'] : [];
+        : projectVariant ? ['PROJECT_POLICY'] : sampleCodeVariant ? ['SAMPLE_CODES'] : schemaVariant ? ['DECLARATION'] : [];
     const outcomes = new Map(pending.map(name => [name, 'PENDING']));
     let unusable = false, closed = false;
     // Exclusive creation makes a reused file fail before any database is opened.
@@ -109,8 +118,8 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
     try {
         db.pragma('foreign_keys = ON');
         if (schemaVariant) {
-            const baseline = fs.readFileSync(path.resolve(__dirname, 'fixtures/pre11_full_application_schema.sql'));
-            if (createHash('sha256').update(baseline).digest('hex') !== PRE11_SHA256) throw new Error('Pinned pre-1.1 schema digest mismatch.');
+            const baseline = fs.readFileSync(path.resolve(__dirname, sampleCodeVariant ? 'fixtures/pre13_full_application_schema.sql' : 'fixtures/pre11_full_application_schema.sql'));
+            if (createHash('sha256').update(baseline).digest('hex') !== (sampleCodeVariant ? PRE13_SHA256 : PRE11_SHA256)) throw new Error('Pinned historical schema digest mismatch.');
             let schema = baseline.toString('utf8');
             if (projectVariant) {
                 // #179 pins 5988657821 / 5988713306: select the evidenced
@@ -123,7 +132,7 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
                     !/^    CONSTRAINT "Project_parentProjectId_fkey" /.test(line)).join('\n').replace('"updatedAt" DATETIME NOT NULL,', '"updatedAt" DATETIME NOT NULL');
                 assert.equal(shape.toString('utf8'), derived, 'Project shape must remove only the five policy columns and self-FK.');
                 schema = schema.replace(original[0], shape.toString('utf8'));
-            } else if (schemaVariant !== 'PRE_1_1_DUPLICATES') {
+            } else if (!sampleCodeVariant && schemaVariant !== 'PRE_1_1_DUPLICATES') {
                 const shape = require('./fixtures/consignment_pre11_shapes.json')[schemaVariant];
                 if (shape.sha256 !== VARIANTS[schemaVariant] || createHash('sha256').update(shape.ddl).digest('hex') !== VARIANTS[schemaVariant]) {
                     throw new Error('Pinned historical Consignment shape digest mismatch.');
@@ -135,7 +144,7 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
                 schema = schema.replace(original[0], shape.ddl);
             }
             db.exec(schema);
-            if (projectVariant) {
+            if (projectVariant || sampleCodeVariant) {
                 assert.equal(db.pragma('foreign_keys', { simple: true }), 1);
                 assert.equal(db.prepare('SELECT COUNT(*) AS count FROM User').get().count, 0, 'Baseline completion must precede User seeding.');
                 for (const entry of BASELINE_COMPLETION) {
@@ -143,6 +152,8 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
                     if (createHash('sha256').update(sql).digest('hex') !== entry.sha256) throw new Error('Pinned baseline completion digest mismatch.');
                     db.transaction(() => db.exec(sql.toString('utf8')))();
                 }
+            }
+            if (projectVariant) {
                 const baselineDb = new Database(':memory:');
                 try {
                     baselineDb.pragma('foreign_keys = ON'); baselineDb.exec(baseline.toString('utf8'));
@@ -168,7 +179,7 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
         if (db.prepare("SELECT name FROM sqlite_master WHERE type='trigger'").all().length) throw new Error('Legacy fixture must have no release guards before inserting.');
         const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all();
         for (const table of tables) {
-            if (projectVariant && table.name === 'GlobalAppearanceSetting') {
+            if ((projectVariant || sampleCodeVariant) && table.name === 'GlobalAppearanceSetting') {
                 // The immutable completion SQL seeds exactly this singleton;
                 // every operational table is still empty before legacy seeding.
                 assert.equal(JSON.stringify(db.prepare('SELECT id,themeId,defaultMode,revision,updatedBy FROM GlobalAppearanceSetting').all()),
@@ -181,7 +192,8 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
             ['User', relatedRows.User || []], ['Consignment', relatedRows.Consignment || []],
             ['Sample', samples], ['Batch', batches], ['Submission', relatedRows.Submission || []], ['WorkItem', workItems],
             ['Result', relatedRows.Result || []], ['SpectralData', relatedRows.SpectralData || []],
-            ...(projectVariant ? [['Report', relatedRows.Report || []], ['ReportShareLink', relatedRows.ReportShareLink || []], ['AuditLog', relatedRows.AuditLog || []]] : [])]) {
+            ...(projectVariant ? [['Report', relatedRows.Report || []], ['ReportShareLink', relatedRows.ReportShareLink || []], ['AuditLog', relatedRows.AuditLog || []]]
+                : sampleCodeVariant ? [['AuditLog', relatedRows.AuditLog || []]] : [])]) {
             const columns = new Set(db.prepare(`PRAGMA table_info("${table}")`).all().map(column => column.name));
             for (const row of rows) {
                 const fields = Object.keys(row);
@@ -205,6 +217,7 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
             db.pragma('foreign_keys = ON');
         }
         if (schemaVariant) for (const [name, directory] of Object.entries(MIGRATIONS)) {
+            if (name === 'SAMPLE_CODES' && !sampleCodeVariant) continue;
             if (pending.includes(name) && migrationOrder === 'REHEARSAL') continue;
             const sql = fs.readFileSync(path.resolve(__dirname, '../../prisma/migrations', directory, 'migration.sql'));
             if (createHash('sha256').update(sql).digest('hex') !== MIGRATION_SHA256[name]) throw new Error(`Pinned ${name} migration digest mismatch.`);
@@ -232,7 +245,8 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
         for (const match of guardSql.matchAll(/CREATE TRIGGER "([^"]+)"/g)) {
             if (!installed.has(match[1])) throw new Error(`Missing release guard ${match[1]}`);
         }
-        if (projectVariant) assertGeneratedSchemaCompleteness(db, outcomes.get('PROJECT_POLICY') === 'PENDING');
+        if (projectVariant || sampleCodeVariant) assertGeneratedSchemaCompleteness(db,
+            outcomes.get(projectVariant ? 'PROJECT_POLICY' : 'SAMPLE_CODES') === 'PENDING' ? (projectVariant ? 'PROJECT_POLICY' : 'SAMPLE_CODES') : null);
     } catch (error) {
         if (db.open) db.close();
         // This helper exclusively created the owned file; a failed build cannot
@@ -284,6 +298,7 @@ function beforeGuards({ actor, file = path.resolve(__dirname, '../.tmp', `audit_
                     throw error;
                 }
                 if (expectedFailure) throw new Error('The expected index failure unexpectedly succeeded.');
+                if (migration === 'SAMPLE_CODES') assertGeneratedSchemaCompleteness(handle);
                 outcomes.set(migration, 'APPLIED');
             } finally { if (!connection) handle.close(); }
         },
