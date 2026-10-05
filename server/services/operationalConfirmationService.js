@@ -65,7 +65,8 @@ function broadcast(sample, actor, analysis, status, action) {
 }
 
 class OperationalConfirmationService {
-    static async confirmOperation({ actor, workItemId, checklist, observations, idempotencyKey, verificationRequired = false, db = require('../prisma') }) {
+    static async confirmOperation({ actor, workItemId, checklist, observations, idempotencyKey, verificationRequired = false,
+        expected, db = require('../prisma') }) {
         if (!actor) throw new TransitionError('Authentication required.', 401, 'UNAUTHORIZED');
         if (!workItemId) throw new TransitionError('workItemId is required.', 400, 'MISSING_WORK_ITEM_ID');
         if (typeof verificationRequired !== 'boolean') throw new TransitionError('Verification request must be a boolean.', 400, 'INVALID_VERIFICATION_REQUEST');
@@ -89,7 +90,7 @@ class OperationalConfirmationService {
                 throw new TransitionError('Revert the completed gate with a reason before a new verification attempt.', 409, 'GATE_ALREADY_DONE');
             }
             const now = new Date(), receiptId = `REC-OPS-${randomUUID()}`;
-            const payload = { kind: 'operational-checklist-v1', analysis, checklist, steps: definition.steps,
+            const payload = { kind: 'operational-checklist-v1', analysis, checklist, checks: checklist, steps: definition.steps,
                 observations: observations || null, recordedBy: actor.username, recordedAt: now.toISOString(), receiptId,
                 schemaVersion: definition.revision || 'operational-checklist-v1' };
             const history = historyOf(item);
@@ -99,7 +100,7 @@ class OperationalConfirmationService {
             const updates = { result: JSON.stringify(payload), completedAt: now, history: JSON.stringify(history) };
             if (!item.assignedTo && !hasPermission(actor, 'ASSIGN_WORK')) updates.assignedTo = actor.username;
             const updatedItem = await transitionWorkItem(item.id, status, actor, 'Operational checklist confirmed', updates, tx, {
-                action: 'OPERATION_CONFIRMED', verificationRequired: requiresVerification,
+                action: 'OPERATION_CONFIRMED', verificationRequired: requiresVerification, expected, conflictCode: 'VERSION_CONFLICT',
                 audit: { details: JSON.stringify({ analysis, receiptId, checklistRevision: definition.revision,
                     policyVersion: policy.version, verificationPolicy: policy.value, verificationRequired: requiresVerification }) }
             });
@@ -112,7 +113,7 @@ class OperationalConfirmationService {
                 targetResource: item.id, actor: actor.username, status: 'SUCCESS', outcome: { receipt, workItem: updatedItem, sample: updatedSample } });
             return { success: true, receipt, workItem: updatedItem, sample: updatedSample };
         });
-        broadcast(outcome.sample, actor, outcome.receipt.analysis, outcome.workItem.status, 'OPERATION_CONFIRMED');
+        if (typeof db.$transaction === 'function') broadcast(outcome.sample, actor, outcome.receipt.analysis, outcome.workItem.status, 'OPERATION_CONFIRMED');
         return outcome;
     }
 
@@ -140,7 +141,7 @@ class OperationalConfirmationService {
             const updatedSample = await setGate(tx, sample, analysis, decision === 'ACCEPT' ? 'DONE' : 'PENDING', actor, note || 'Operational gate verified');
             return { success: true, decision, workItemId: item.id, sampleId: sample.id, analysis, status, sample: updatedSample };
         });
-        broadcast(outcome.sample, actor, outcome.analysis, outcome.status, 'OPERATION_VERIFIED');
+        if (typeof db.$transaction === 'function') broadcast(outcome.sample, actor, outcome.analysis, outcome.status, 'OPERATION_VERIFIED');
         return outcome;
     }
 }

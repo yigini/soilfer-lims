@@ -56,6 +56,15 @@ function parseHistory(value) {
     } catch (_) { return []; }
 }
 
+function requireHistory(value) {
+    if (value == null) return [];
+    try {
+        const history = typeof value === 'string' ? JSON.parse(value) : value;
+        if (Array.isArray(history)) return history;
+    } catch (_) { /* Refuse rather than replace existing workflow evidence. */ }
+    throw new TransitionError('Stored workflow history must be reviewed before changing it.', 409, 'WORKITEM_HISTORY_INVALID');
+}
+
 function historyPriorStatus(row, normalize, allowed) {
     const history = parseHistory(row.history);
     for (let index = history.length - 1; index >= 0; index--) {
@@ -144,4 +153,4 @@ async function inTransaction(tx, execute) {
 }
 
 module.exports = { TransitionError, TRIGGER_CODES, mapStateError, actorName, assertScope, requireReason,
-    parseHistory, holdData, heldPriorState, updateData, assertFixtureContext, inTransaction };
+    parseHistory, requireHistory, holdData, heldPriorState, updateData, assertFixtureContext, inTransaction };

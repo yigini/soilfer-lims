@@ -6,6 +6,10 @@ const { invalidateReturnedResults } = require('../services/reportResultGovernanc
 const prisma = require('../prisma');
 const workflow = require('../workflowContract');
 const { getAnalysisName } = require('../services/analysisService');
+const stateRules = require('../services/workflowStateRules');
+const { transitionWorkItem } = require('../services/workItemStateService');
+const { transitionSample } = require('../services/sampleStateService');
+const resultEvidence = require('../services/resultEvidenceService');
 
 
 // =============================================================================
@@ -22,8 +26,8 @@ const userHasLabScope = (user, labId) => {
 // =============================================================================
 // HELPER: Get work items for a sample
 // =============================================================================
-const getWorkItemsForSample = async (sampleId) => {
-    return await prisma.workItem.findMany({
+const getWorkItemsForSample = async (sampleId, db = prisma) => {
+    return await db.workItem.findMany({
         where: { sampleId: String(sampleId) }
     });
 };
@@ -31,9 +35,9 @@ const getWorkItemsForSample = async (sampleId) => {
 // =============================================================================
 // HELPER: Check FULL submission eligibility (Using Workflow Engine)
 // =============================================================================
-const checkFullEligibility = async (sampleId, currentSubmissionItemIds = []) => {
+const checkFullEligibility = async (sampleId, currentSubmissionItemIds = [], db = prisma) => {
     const workflowEngine = require('../utils/workflowEngine');
-    const items = await getWorkItemsForSample(sampleId);
+    const items = await getWorkItemsForSample(sampleId, db);
     const blocking = [];
     const eligible = [];
 
@@ -140,14 +144,31 @@ exports.createSubmission = async (req, res) => {
         const submissionId = `SUB-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
         const auditLogId = crypto.randomUUID();
 
-        // Prepare operations for transaction
-        const operations = [
-            prisma.submission.create({
+        const submission = await stateRules.inTransaction(prisma, async tx => {
+            const current = await tx.sample.findUnique({ where: { id: String(sampleId) } });
+            if (!current) throw new stateRules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
+            stateRules.assertScope(user, current);
+            resultEvidence.assertAmendable(current);
+            await resultEvidence.assertNoPreparationRevert(tx, current.id);
+            await require('../services/sampleStateService').advanceCompletedGates(current, user, tx);
+            if (type === 'FULL' && !(await checkFullEligibility(sampleId, workItemIds, tx)).isEligible) {
+                throw new stateRules.TransitionError('Full submission eligibility changed. Reload before submitting.', 409, 'SUBMISSION_ELIGIBILITY_CHANGED');
+            }
+            const freshItems = [];
+            for (const item of validItems) {
+                const fresh = await tx.workItem.findUnique({ where: { id: item.id } });
+                if (!fresh || fresh.status !== 'COMPLETED' || fresh.version !== item.version ||
+                    fresh.sampleId !== current.id || fresh.assignedTo !== user.username) {
+                    throw new stateRules.TransitionError('Work item changed. Reload before submitting.', 409, 'WORKITEM_STATE_CHANGED');
+                }
+                freshItems.push(fresh);
+            }
+            const created = await tx.submission.create({
                 data: {
                     id: submissionId,
                     sampleId: String(sampleId),
-                    labId: sample.labId,
-                    assignedLab: sample.assignedLab,
+                    labId: current.assignedLab || user.labId,
+                    assignedLab: current.assignedLab,
                     submittedBy: user.username,
                     type,
                     status: 'PENDING_REVIEW',
@@ -157,8 +178,8 @@ exports.createSubmission = async (req, res) => {
                     workItemCount: validItems.length,
                     createdAt: now
                 }
-            }),
-            prisma.auditLog.create({
+            });
+            await tx.auditLog.create({
                 data: {
                     id: auditLogId,
                     entity: 'SUBMISSION',
@@ -169,12 +190,11 @@ exports.createSubmission = async (req, res) => {
                     timestamp: now,
                     sampleId: String(sampleId)
                 }
-            })
-        ];
+            });
 
         // Update work items
-        for (const item of validItems) {
-            const history = typeof item.history === 'string' ? JSON.parse(item.history) : (item.history || []);
+        for (const item of freshItems) {
+            const history = stateRules.requireHistory(item.history);
             history.push({
                 status: workflow.WORK_ITEM_STATES.SUBMITTED,
                 submissionId: submissionId,
@@ -182,40 +202,20 @@ exports.createSubmission = async (req, res) => {
                 action: 'SUBMITTED'
             });
 
-            operations.push(prisma.workItem.update({
-                where: { id: item.id },
-                data: {
-                    status: workflow.WORK_ITEM_STATES.SUBMITTED,
+            await transitionWorkItem(item.id, workflow.WORK_ITEM_STATES.SUBMITTED, user, 'Submitted for manager review', {
                     submissionId: submissionId,
                     submittedAt: now,
                     history: JSON.stringify(history)
-                }
-            }));
-
-            operations.push(prisma.auditLog.create({
-                data: {
-                    id: crypto.randomUUID(),
-                    entity: 'WORKITEM',
-                    entityId: item.id,
-                    action: 'WORKITEM_SUBMITTED',
-                    details: `${user.username} submitted ${await getAnalysisName(item.analysis)}`,
-                    performedBy: user.username,
-                    timestamp: now,
-                    sampleId: String(sampleId)
-                }
-            }));
+            }, tx, { expected: { status: item.status, version: item.version }, audit: {
+                action: 'WORKITEM_SUBMITTED', details: `${user.username} submitted ${await getAnalysisName(item.analysis, tx)}` } });
         }
-
-        const [submission] = await prisma.$transaction(operations);
-
-        const { transitionSample } = require('../services/sampleStateService');
         const targetStatus = type === 'FULL' ? 'SUBMITTED_FULL' : 'SUBMITTED_PARTIAL';
         await transitionSample(sampleId, targetStatus, user, `${user.username} submitted ${validItems.length} items for ${type} review`, {
             lastSubmissionId: submissionId,
             lastSubmissionType: type,
             lastSubmissionAt: now
-        }).catch(err => {
-            console.warn('[createSubmission] Warning: sample status transition failed:', err.message);
+        }, tx);
+            return created;
         });
 
         res.status(201).json({
@@ -225,7 +225,9 @@ exports.createSubmission = async (req, res) => {
 
     } catch (error) {
         console.error('[createSubmission] Error:', error);
-        res.status(500).json({ error: 'Failed to create submission' });
+        const mapped = stateRules.mapStateError(error);
+        res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to create submission',
+            ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
     }
 };
 

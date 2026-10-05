@@ -102,4 +102,11 @@ async function createSample(data, actor, options = {}) {
     });
 }
 
-module.exports = { transitionSample, createSample, TransitionError };
+async function advanceCompletedGates(sample, actor, tx) {
+    if (workflow.normalizeSampleState(sample.status) === 'ACCEPTED' && sample.dryingStatus === 'DONE' && sample.preparationStatus === 'DONE') {
+        return transitionSample(sample.id, 'PROCESSING', actor, 'Drying and preparation gates completed', {}, tx);
+    }
+    return sample;
+}
+
+module.exports = { transitionSample, createSample, advanceCompletedGates, TransitionError };

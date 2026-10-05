@@ -174,6 +174,6 @@ describe('8.1 Section D: Submission Rules', () => {
         expect(reviewRes.status).toBe(200);
 
         const cond = workItemsDb.findById(condItemId);
-        expect(cond.status).toBe('REANALYSIS_REQUIRED');
+        expect(cond.status).toBe('REPEAT_REQUIRED');
     });
 });

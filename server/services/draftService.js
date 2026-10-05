@@ -1,5 +1,7 @@
 const crypto = require('crypto');
 const prisma = require('../prisma');
+const rules = require('./workflowStateRules');
+const { transitionWorkItem } = require('./workItemStateService');
 
 /**
  * Draft Service
@@ -11,7 +13,9 @@ const prisma = require('../prisma');
 /**
  * Save or update a draft determination
  */
-async function saveDraft(user, {
+async function saveDraft(user, input, db = null) {
+    if (!db) return rules.inTransaction(prisma, tx => saveDraft(user, input, tx));
+    const {
     workItemId,
     sampleId,
     analysis,
@@ -24,11 +28,11 @@ async function saveDraft(user, {
     methodologyId = null,
     notes = null,
     baseVersion = 0
-}) {
+    } = input;
     if (!workItemId) throw new Error('workItemId is required to save a draft');
 
     // 1. Verify work item existence and ownership/scope
-    const workItem = await prisma.workItem.findUnique({
+    const workItem = await db.workItem.findUnique({
         where: { id: workItemId },
         include: { sample: true }
     });
@@ -83,13 +87,13 @@ async function saveDraft(user, {
     const rawValue = value !== null && value !== undefined ? String(value) : null;
 
     // 3. Upsert WorkItemDraft
-    const existingDraft = await prisma.workItemDraft.findUnique({
+    const existingDraft = await db.workItemDraft.findUnique({
         where: { workItemId }
     });
 
     let draft;
     if (existingDraft) {
-        draft = await prisma.workItemDraft.update({
+        draft = await db.workItemDraft.update({
             where: { workItemId },
             data: {
                 value: rawValue,
@@ -107,7 +111,7 @@ async function saveDraft(user, {
             }
         });
     } else {
-        draft = await prisma.workItemDraft.create({
+        draft = await db.workItemDraft.create({
             data: {
                 workItemId,
                 sampleId: sId,
@@ -131,9 +135,7 @@ async function saveDraft(user, {
 
     // 4. Update WorkItem status to IN_PROGRESS if currently ASSIGNED (without touching Result table)
     if (workItem.status === 'ASSIGNED') {
-        const history = typeof workItem.history === 'string'
-            ? JSON.parse(workItem.history)
-            : (workItem.history || []);
+        const history = rules.requireHistory(workItem.history);
 
         history.push({
             status: 'IN_PROGRESS',
@@ -142,17 +144,13 @@ async function saveDraft(user, {
             action: 'DRAFT_STARTED'
         });
 
-        await prisma.workItem.update({
-            where: { id: workItemId },
-            data: {
-                status: 'IN_PROGRESS',
-                history: JSON.stringify(history),
-                updatedAt: new Date()
-            }
-        }).catch(err => console.error('[draftService] Failed to advance WorkItem status to IN_PROGRESS:', err));
+        const updated = await transitionWorkItem(workItemId, 'IN_PROGRESS', user, 'Draft started',
+            { history: JSON.stringify(history), version: workItem.version }, db, { expected: { status: workItem.status, version: workItem.version },
+                audit: { action: 'DRAFT_STARTED' } });
+        return { ...draft, workItemVersion: updated.version };
     }
 
-    return draft;
+    return { ...draft, workItemVersion: workItem.version };
 }
 
 /**
@@ -246,8 +244,9 @@ async function getDrafts(user) {
 /**
  * Discard a draft determination with receipt and audit logging
  */
-async function discardDraft(user, workItemId) {
-    const draft = await prisma.workItemDraft.findUnique({
+async function discardDraft(user, workItemId, db = null) {
+    if (!db) return rules.inTransaction(prisma, tx => discardDraft(user, workItemId, tx));
+    const draft = await db.workItemDraft.findUnique({
         where: { workItemId },
         include: {
             workItem: {
@@ -273,35 +272,28 @@ async function discardDraft(user, workItemId) {
     }
 
     // 1. Delete draft record
-    await prisma.workItemDraft.delete({
+    await db.workItemDraft.delete({
         where: { workItemId }
     });
 
     // 2. Record discard event and revert status to ASSIGNED if currently IN_PROGRESS
     if (draft.workItem && !draft.workItem.completedAt) {
-        const history = typeof draft.workItem.history === 'string'
-            ? JSON.parse(draft.workItem.history)
-            : (draft.workItem.history || []);
+        const history = rules.requireHistory(draft.workItem.history);
 
         history.push({
-            status: 'ASSIGNED',
+            status: draft.workItem.status === 'IN_PROGRESS' ? 'ASSIGNED' : draft.workItem.status,
             changedBy: user.username,
             timestamp: new Date().toISOString(),
             action: 'DRAFT_DISCARDED'
         });
 
-        await prisma.workItem.update({
-            where: { id: workItemId },
-            data: {
-                status: draft.workItem.status === 'IN_PROGRESS' ? 'ASSIGNED' : draft.workItem.status,
-                history: JSON.stringify(history),
-                updatedAt: new Date()
-            }
-        }).catch(err => console.error('[draftService] Failed to revert WorkItem to ASSIGNED:', err));
+        await transitionWorkItem(workItemId, draft.workItem.status === 'IN_PROGRESS' ? 'ASSIGNED' : draft.workItem.status,
+            user, 'Draft discarded', { history: JSON.stringify(history), version: draft.workItem.version }, db,
+            { expected: { status: draft.workItem.status, version: draft.workItem.version } });
     }
 
     // 3. Log audit event
-    await prisma.auditLog.create({
+    await db.auditLog.create({
         data: {
             id: crypto.randomUUID(),
             entity: 'WorkItemDraft',
@@ -314,7 +306,7 @@ async function discardDraft(user, workItemId) {
             before: JSON.stringify({ value: draft.value, draftVersion: draft.draftVersion }),
             timestamp: new Date()
         }
-    }).catch(err => console.error('[draftService] Failed to log audit event for discard:', err));
+    });
 
     return {
         success: true,
