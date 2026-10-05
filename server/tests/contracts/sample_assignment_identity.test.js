@@ -1,5 +1,6 @@
 'use strict';
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -80,7 +81,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         });
 
         // 1. Seed 26-task Sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sample26Id,
                 labId: sample26LabCode,
@@ -279,7 +280,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
 
     test('4. Final approval readiness independently enforced on server: rejects premature approval with 409 and blockers', async () => {
         // Create a new sample with unapproved items and pending gates
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleApprId,
                 labId: 'LAB-APPR-01',
@@ -444,7 +445,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
         const qcBatchSampleId = `SMP-QC-GATE-${Date.now()}`;
         const qcBatchId = `BATCH-QC-GATE-${Date.now()}`;
 
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: qcBatchSampleId,
                 originalId: `FIELD-QC-GATE-${Date.now()}`,
@@ -468,7 +469,7 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
             }
         });
 
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-QC-GATE-${Date.now()}`,
                 sampleId: qcBatchSampleId,

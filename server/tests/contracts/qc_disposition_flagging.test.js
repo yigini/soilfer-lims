@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const qcService = require('../../services/qcService');
 const qcController = require('../../controllers/qcController');
@@ -13,7 +14,7 @@ describe('WP-29: QC Service & Batch Disposition Result Flagging', () => {
         testResultId = `RES-QC-${Date.now()}`;
 
         // Create sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testSampleId,
                 originalId: `ORIG-${testSampleId}`,

@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { generateToken } = require('../setup');
@@ -63,7 +64,7 @@ describe('Texture Work Item & Atomic Linked Results Contracts (Mandatory Correct
             const uniqueLabId = `LAB-TEX-${Date.now()}-${sampleCounter}`;
 
             // Create sample with TEXTURE analysis
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sampleId,
                     originalId: `ORIG-${sampleId}`,
@@ -78,7 +79,7 @@ describe('Texture Work Item & Atomic Linked Results Contracts (Mandatory Correct
 
             // Create single work item for TEXTURE
             workItemId = `WI-TEX-${Date.now()}-${sampleCounter}`;
-            await prisma.workItem.create({
+            await createWorkItemFixture(prisma, {
                 data: {
                     id: workItemId,
                     sampleId,

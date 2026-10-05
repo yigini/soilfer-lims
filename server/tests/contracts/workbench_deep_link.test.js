@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -35,7 +36,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         const ts = Date.now();
 
         // Create Sample A (Lab A)
-        sampleA = await prisma.sample.create({
+        sampleA = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-DEEP-A-${ts}`,
                 labId: `LAB-A-${ts}`,
@@ -49,7 +50,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         });
 
         // Create Sample B (Lab B)
-        sampleB = await prisma.sample.create({
+        sampleB = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-DEEP-B-${ts}`,
                 labId: `LAB-B-${ts}`,
@@ -63,7 +64,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         });
 
         // Create Sample A2 (Lab A)
-        sampleA2 = await prisma.sample.create({
+        sampleA2 = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-DEEP-A2-${ts}`,
                 labId: `LAB-A2-${ts}`,
@@ -77,7 +78,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         });
 
         // Work Item 1 (Sample A, ASSIGNED to techA)
-        workItemAActive = await prisma.workItem.create({
+        workItemAActive = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-A-ACT-${ts}`,
                 sampleId: sampleA.id,
@@ -90,7 +91,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         });
 
         // Work Item 2 (Sample A, COMPLETED, outside default 'my_work' view)
-        workItemACompleted = await prisma.workItem.create({
+        workItemACompleted = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-A-COMP-${ts}`,
                 sampleId: sampleA.id,
@@ -103,7 +104,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         });
 
         // Work Item 3 (Sample B, Lab B)
-        workItemB = await prisma.workItem.create({
+        workItemB = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-B-ACT-${ts}`,
                 sampleId: sampleB.id,
@@ -218,7 +219,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
             }
         });
 
-        const workItemTechC = await prisma.workItem.create({
+        const workItemTechC = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-A-TECHC-${ts}`,
                 sampleId: sampleA.id,
@@ -305,7 +306,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
     test('11. Conflicting sample/work-item laboratories return 403 FORBIDDEN for lab technician', async () => {
         const ts = Date.now();
         // Sample is assigned to Lab B, but WorkItem is assigned to Lab A
-        const conflictingWI = await prisma.workItem.create({
+        const conflictingWI = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-CONFLICT-${ts}`,
                 sampleId: sampleB.id, // sampleB is in Lab B
@@ -348,7 +349,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         const collisionId = `COLLIDE-${ts}`;
 
         // Sample 1 has id = collisionId
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: collisionId,
                 labId: `LAB-COL-1-${ts}`,
@@ -360,7 +361,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         });
 
         // Sample 2 has originalId = collisionId
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: `SMP-COL-2-${ts}`,
                 labId: `LAB-COL-2-${ts}`,
@@ -388,7 +389,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         const workItemId = `WI-1789634536044-167-${ts}`;
         const techAUsername = 'test_lab_technician_labdeepa';
 
-        const sampleReal = await prisma.sample.create({
+        const sampleReal = await createSampleFixture(prisma, {
             data: {
                 id: specimenCode,
                 labId: specimenCode,
@@ -401,7 +402,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
             }
         });
 
-        const workItemReal = await prisma.workItem.create({
+        const workItemReal = await createWorkItemFixture(prisma, {
             data: {
                 id: workItemId,
                 sampleId: sampleReal.id,
@@ -439,7 +440,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         const workItemIdB = `WI-CROSS-B-${ts}`;
         const techBUsername = 'test_lab_technician_labdeepb';
 
-        const sampleRealB = await prisma.sample.create({
+        const sampleRealB = await createSampleFixture(prisma, {
             data: {
                 id: specimenCodeB,
                 labId: specimenCodeB,
@@ -452,7 +453,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
             }
         });
 
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: workItemIdB,
                 sampleId: sampleRealB.id,
@@ -484,7 +485,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         const workItemIdAlone = `WI-ALONE-${ts}`;
         const techAUsername = 'test_lab_technician_labdeepa';
 
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: specimenCodeAlone,
                 labId: specimenCodeAlone,
@@ -497,7 +498,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
             }
         });
 
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: workItemIdAlone,
                 sampleId: specimenCodeAlone,
@@ -527,7 +528,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         const ts = Date.now();
         const techAUsername = 'test_lab_technician_labdeepa';
 
-        const sampleForItem = await prisma.sample.create({
+        const sampleForItem = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-FOR-ITEM-${ts}`,
                 labId: labAId,
@@ -540,7 +541,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
             }
         });
 
-        const wiForeignItem = await prisma.workItem.create({
+        const wiForeignItem = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-FOR-ITEM-${ts}`,
                 sampleId: sampleForItem.id,
@@ -592,7 +593,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         const ts = Date.now();
         const techAUsername = 'test_lab_technician_labdeepa';
 
-        const sampleForSample = await prisma.sample.create({
+        const sampleForSample = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-FOR-SMP-${ts}`,
                 labId: labAId, // matching legacy labId
@@ -605,7 +606,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
             }
         });
 
-        const wiForeignSample = await prisma.workItem.create({
+        const wiForeignSample = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-FOR-SMP-${ts}`,
                 sampleId: sampleForSample.id,
@@ -658,7 +659,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         const techAUsername = 'test_lab_technician_labdeepa';
 
         // 1. Foreign-item
-        const sample1 = await prisma.sample.create({
+        const sample1 = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-DIR-FOR-ITEM-${ts}`,
                 labId: labAId,
@@ -671,7 +672,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
             }
         });
 
-        const wi1 = await prisma.workItem.create({
+        const wi1 = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-DIR-FOR-ITEM-${ts}`,
                 sampleId: sample1.id,
@@ -685,7 +686,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         });
 
         // 2. Foreign-sample
-        const sample2 = await prisma.sample.create({
+        const sample2 = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-DIR-FOR-SMP-${ts}`,
                 labId: labAId,
@@ -698,7 +699,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
             }
         });
 
-        const wi2 = await prisma.workItem.create({
+        const wi2 = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-DIR-FOR-SMP-${ts}`,
                 sampleId: sample2.id,
@@ -734,7 +735,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
         const techAUsername = 'test_lab_technician_labdeepa';
         const specimenCode = `GHA0816-COMPAT-${ts}`;
 
-        const sampleCompat = await prisma.sample.create({
+        const sampleCompat = await createSampleFixture(prisma, {
             data: {
                 id: specimenCode,
                 labId: specimenCode, // Specimen code in labId
@@ -747,7 +748,7 @@ describe('Issue #128: Workbench Deep Link Contract', () => {
             }
         });
 
-        const wiCompat = await prisma.workItem.create({
+        const wiCompat = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-COMPAT-${ts}`,
                 sampleId: sampleCompat.id,

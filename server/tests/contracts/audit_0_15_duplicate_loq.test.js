@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const { evaluateDuplicate, evaluateBatchQc } = require('../../services/qcService');
 const { resolveDuplicatePolicy } = require('../../services/duplicateQcPolicyService');
 const policyService = require('../../services/policyService');
@@ -55,8 +56,8 @@ describe('Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring 
         for (const loq of methodLoqs) {
             const methodId = id('HTTP-M015'), sampleId = id('HTTP-S015');
             await prisma.methodology.create({ data: { id: methodId, analysisCode: analysis, name: methodId, loq } });
-            await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, assignedLab: labId, status: 'PROCESSING' } });
-            await prisma.workItem.create({ data: { id: id('HTTP-W015'), sampleId, analysis, assignedLab: labId, batchId, methodologyId: methodId, status: 'COMPLETED' } });
+            await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, assignedLab: labId, status: 'PROCESSING' } });
+            await createWorkItemFixture(prisma, { data: { id: id('HTTP-W015'), sampleId, analysis, assignedLab: labId, batchId, methodologyId: methodId, status: 'COMPLETED' } });
             methods.push(methodId);
         }
         return { batch, methods };
@@ -208,8 +209,8 @@ describe('Audit 0.15: real batch method and analysis evidence', () => {
         for (const loq of methods) {
             const methodId = id('METHOD015'), sampleId = id('S015');
             await prisma.methodology.create({ data: { id: methodId, analysisCode: analysis, name: 'Recorded fixture method', loq } });
-            await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, assignedLab: batch.labId, status: 'PROCESSING' } });
-            await prisma.workItem.create({ data: { id: id('WI015'), sampleId, analysis, assignedLab: batch.labId, batchId, methodologyId: methodId, status: 'COMPLETED' } });
+            await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, assignedLab: batch.labId, status: 'PROCESSING' } });
+            await createWorkItemFixture(prisma, { data: { id: id('WI015'), sampleId, analysis, assignedLab: batch.labId, batchId, methodologyId: methodId, status: 'COMPLETED' } });
             recorded.push({ methodId, sampleId });
         }
         return { batch, recorded };

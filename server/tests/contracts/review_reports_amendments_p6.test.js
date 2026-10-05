@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -36,7 +37,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
         crossLabToken = generateToken(crossLabUser);
 
         // Create sample for review and reporting
-        sampleForReview = await prisma.sample.create({
+        sampleForReview = await createSampleFixture(prisma, {
             data: {
                 id: 'p6-sample-review-01',
                 originalId: 'FIELD-P6-01',
@@ -119,7 +120,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
         });
 
         // Create sample in DISPOSED status to verify immutability
-        sampleDisposed = await prisma.sample.create({
+        sampleDisposed = await createSampleFixture(prisma, {
             data: {
                 id: 'p6-sample-disposed-01',
                 originalId: 'FIELD-DISP-01',

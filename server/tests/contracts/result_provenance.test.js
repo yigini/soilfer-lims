@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const resultsController = require('../../controllers/resultsController');
 const { assembleReport } = require('../../services/reportAssembly');
@@ -11,7 +12,7 @@ describe('WP-31: Result Provenance Tracking', () => {
         for (const [code, name, units] of [['EC', 'Electrical conductivity', 'dS/m'], ['CLAY_PRED', 'Predicted clay fraction', '%'], ['SOC', 'Soil organic carbon', 'g/kg'], ['TOTAL_N', 'Total nitrogen', 'g/kg']]) {
             await prisma.analysis.upsert({ where: { code }, create: { code, name, units, status: 'active' }, update: { name, units, labId: null } });
         }
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testSampleId,
                 originalId: `ORIG-${testSampleId}`,

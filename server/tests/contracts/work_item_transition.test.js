@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -18,7 +19,7 @@ describe('SD-09: Work Item Status Transition Validation Contract', () => {
         await prisma.sample.deleteMany({ where: { id: sampleId } });
 
         // Sample in PROCESSING with preparation complete
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
@@ -35,7 +36,7 @@ describe('SD-09: Work Item Status Transition Validation Contract', () => {
         });
 
         // WorkItem in ASSIGNED state assigned to techUsername
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: wiId,
                 sampleId,

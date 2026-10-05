@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -15,7 +16,7 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
 
     beforeAll(async () => {
         // 1. Create test samples
-        sampleApproved = await prisma.sample.create({
+        sampleApproved = await createSampleFixture(prisma, {
             data: {
                 id: `a0-sample-approved-${timestamp}`,
                 originalId: `ORIG-A0-APP-${timestamp}`,
@@ -44,7 +45,7 @@ describe('Issue #140 Work Package A0: Exchange Eligibility 503 Semantics & Invar
             }
         });
 
-        sampleProcessing = await prisma.sample.create({
+        sampleProcessing = await createSampleFixture(prisma, {
             data: {
                 id: `a0-sample-proc-${timestamp}`,
                 originalId: `ORIG-A0-PROC-${timestamp}`,

@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -50,7 +51,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             });
 
             // Sample A: Guatemala, Lab A, Project Alpha
-            sampleA = await prisma.sample.create({
+            sampleA = await createSampleFixture(prisma, {
                 data: {
                     id: `SMP-R1-A-${ts}`,
                     labId: `LAB-R1-A-${ts}`,
@@ -64,7 +65,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             });
 
             // Sample B: Kenya, Lab B, Project Beta
-            sampleB = await prisma.sample.create({
+            sampleB = await createSampleFixture(prisma, {
                 data: {
                     id: `SMP-R1-B-${ts}`,
                     labId: `LAB-R1-B-${ts}`,
@@ -246,7 +247,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             const techUsername = decoded?.username || 'test_lab_technician_labr1gtm';
             const ts = Date.now();
 
-            const staleWorkItem = await prisma.workItem.create({
+            const staleWorkItem = await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-STALE-CROSS-${ts}`,
                     sampleId: sampleB.id,
@@ -336,7 +337,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             const decodedA = jwt.decode(techTokenA);
             usernameA = decodedA.username;
 
-            sampleA = await prisma.sample.create({
+            sampleA = await createSampleFixture(prisma, {
                 data: {
                     id: `SMP-R2-A-${ts}`,
                     labId: `LAB-R2-A-${ts}`,
@@ -349,7 +350,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 }
             });
 
-            sampleB = await prisma.sample.create({
+            sampleB = await createSampleFixture(prisma, {
                 data: {
                     id: `SMP-R2-B-${ts}`,
                     labId: `LAB-R2-B-${ts}`,
@@ -363,7 +364,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             });
 
             // Local work item for tech A in Lab A
-            localItem = await prisma.workItem.create({
+            localItem = await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-R2-LOCAL-${ts}`,
                     sampleId: sampleA.id,
@@ -375,7 +376,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             });
 
             // Stale cross-lab assignment: assignedTo is tech A, but work item and sample are in Lab B
-            crossLabItem = await prisma.workItem.create({
+            crossLabItem = await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-R2-CROSS-${ts}`,
                     sampleId: sampleB.id,
@@ -470,7 +471,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
         test('Conflicting lab IDs: work item labId=B, assignedLab=A and sample assignedLab=B, labId=A excluded from SQL count and list', async () => {
             // Create conflicting work item and sample
             const ts = Date.now();
-            const conflictSample = await prisma.sample.create({
+            const conflictSample = await createSampleFixture(prisma, {
                 data: {
                     id: `SMP-R2-CONF-${ts}`,
                     originalId: `FIELD-R2-CONF-${ts}`,
@@ -483,7 +484,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 }
             });
 
-            const conflictItem = await prisma.workItem.create({
+            const conflictItem = await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-R2-CONF-${ts}`,
                     sampleId: conflictSample.id,
@@ -551,7 +552,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                 create: { code: 'R3_PH', name: 'R3 pH', units: 'pH', status: 'active' }
             });
 
-            const normalSample = await prisma.sample.create({
+            const normalSample = await createSampleFixture(prisma, {
                 data: {
                     id: `SMP-R3-NORM-${ts}`,
                     originalId: `FIELD-R3-NORM-${ts}`,
@@ -587,7 +588,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             });
 
             // Completed but unsubmitted work item
-            wiCompleted = await prisma.workItem.create({
+            wiCompleted = await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-R3-COMP-${ts}`,
                     sampleId: normalSample.id,
@@ -599,7 +600,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             });
 
             // Already ACCEPTED work item
-            wiAccepted = await prisma.workItem.create({
+            wiAccepted = await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-R3-ACC-${ts}`,
                     duplicateOf: wiCompleted.id,
@@ -612,7 +613,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             });
 
             // Work item on a RELEASED sample
-            wiReleasedSample = await prisma.workItem.create({
+            wiReleasedSample = await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-R3-RELSMP-${ts}`,
                     sampleId: releasedSample.id,

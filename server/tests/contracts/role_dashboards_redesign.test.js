@@ -18,6 +18,7 @@
  */
 'use strict';
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const app = require('../../app');
@@ -153,7 +154,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
         let expectedSample, receivedSample;
 
         beforeAll(async () => {
-            expectedSample = await prisma.sample.create({
+            expectedSample = await createSampleFixture(prisma, {
                 data: {
                     id: `${testPrefix}-EXP-1`,
                     originalId: `${testPrefix}-FLD-EXP-1`,
@@ -167,7 +168,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
                 }
             });
 
-            receivedSample = await prisma.sample.create({
+            receivedSample = await createSampleFixture(prisma, {
                 data: {
                     id: `${testPrefix}-RCV-1`,
                     originalId: `${testPrefix}-FLD-RCV-1`,
@@ -220,7 +221,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
             for (let i = 1; i <= 40; i++) {
                 const sId = `${testPrefix}-PH-SMP-${i}`;
                 sampleIds.push(sId);
-                await prisma.sample.create({
+                await createSampleFixture(prisma, {
                     data: {
                         id: sId,
                         originalId: `FLD-PH-${i}`,
@@ -235,7 +236,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
 
                 const wId = `${testPrefix}-PH-WI-${i}`;
                 workItemIds.push(wId);
-                await prisma.workItem.create({
+                await createWorkItemFixture(prisma, {
                     data: {
                         id: wId,
                         sampleId: sId,
@@ -277,7 +278,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
         let foreignSample;
 
         beforeAll(async () => {
-            foreignSample = await prisma.sample.create({
+            foreignSample = await createSampleFixture(prisma, {
                 data: {
                     id: `${testPrefix}-FOREIGN-1`,
                     originalId: `${testPrefix}-FLD-FOR-1`,
@@ -320,7 +321,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
         let draftReport, publishedReport, draftSample, pubSample;
 
         beforeAll(async () => {
-            draftSample = await prisma.sample.create({
+            draftSample = await createSampleFixture(prisma, {
                 data: {
                     id: `${testPrefix}-SMP-DFT-REP`,
                     originalId: `FLD-DFT-REP`,
@@ -331,7 +332,7 @@ describe('Role Dashboards Redesign (v1) Contract Tests', () => {
                 }
             });
 
-            pubSample = await prisma.sample.create({
+            pubSample = await createSampleFixture(prisma, {
                 data: {
                     id: `${testPrefix}-SMP-PUB-REP`,
                     originalId: `FLD-PUB-REP`,

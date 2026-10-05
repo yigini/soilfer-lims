@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -20,7 +21,7 @@ describe('SD-17: Reopen Audit Episodes Contract', () => {
 
         // Create sample in APPROVED state
         const initialApprovalDate = new Date('2026-08-15T10:00:00Z');
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,

@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const intake = require('../../services/intakeProfileService');
 const identity = require('../../services/profileIdentityService');
 const adapter = require('../../services/sisAdapterService');
@@ -41,7 +42,7 @@ describe('Mounted intake draft and manifest paths preserve source identity',()=>
     beforeAll(async()=>{
         await prisma.lab.create({data:{id:lab,code:lab,name:lab,country:'GTM'}});
         await prisma.project.create({data:{id:project,code:project,name:project,labId:lab,status:'ACTIVE'}});
-        await prisma.sample.create({data:{id:sampleId,originalId:sampleId,assignedLab:lab,projectId:project,projectCode:project,status:'EXPECTED',fieldMetadata:JSON.stringify({site_id:'SOURCE-SITE'})}});
+        await createSampleFixture(prisma, {data:{id:sampleId,originalId:sampleId,assignedLab:lab,projectId:project,projectCode:project,status:'EXPECTED',fieldMetadata:JSON.stringify({site_id:'SOURCE-SITE'})}});
         token=await getAuthToken('SAMPLE_RECEPTION',lab,['GTM'],[project]);
         await prisma.user.update({where:{id:jwt.decode(token).id},data:{mustChangePassword:false}});
     });

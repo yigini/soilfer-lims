@@ -24,6 +24,15 @@ const technician = { username: 'audit-state-tech', role: 'LAB_TECHNICIAN', labId
 const id = () => randomUUID();
 let client, databasePath;
 
+test('central Sample creation retains an existing caller creation action with exactly one audit', async () => {
+    const sample = await samples.createSample({ id: id(), originalId: id(), assignedLab: manager.labId, status: 'EXPECTED' },
+        manager, { tx: client, audit: { action: 'CREATE_KOBO_SYNC' } });
+    const audit = await client.auditLog.findMany({ where: { entityId: sample.id } });
+    expect(audit).toHaveLength(1);
+    expect(audit[0]).toMatchObject({ entity: 'SAMPLE', action: 'CREATE_KOBO_SYNC', performedBy: manager.username, sampleId: sample.id });
+    expect(JSON.parse(audit[0].details)).toEqual({ status: 'EXPECTED', context: 'ordinary' });
+});
+
 // Build a schema-only, disposable pre-migration database. No template data is
 // copied and no production constraints are dropped or disabled. This exercises
 // the exact additive release SQL, including legacy rows present before release.

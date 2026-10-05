@@ -1,5 +1,6 @@
 'use strict';
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -139,7 +140,7 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
         );
 
         // 3. Create Sample and WorkItems
-        testSample = await prisma.sample.create({
+        testSample = await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-' + testPrefix,
                 originalId: 'ORIG-' + testPrefix,
@@ -152,7 +153,7 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
             }
         });
 
-        testAnalyticalItem = await prisma.workItem.create({
+        testAnalyticalItem = await createWorkItemFixture(prisma, {
             data: {
                 id: 'WI-ANA-' + testPrefix,
                 sampleId: testSample.id,
@@ -166,7 +167,7 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
             }
         });
 
-        testDryingItem = await prisma.workItem.create({
+        testDryingItem = await createWorkItemFixture(prisma, {
             data: {
                 id: 'WI-DRY-' + testPrefix,
                 sampleId: testSample.id,
@@ -180,7 +181,7 @@ describe('Interim Gaps 1, 2, 3 Verification (IR-14, Staff/Lab Review Tokens, Syn
             }
         });
 
-        testSpectralItem = await prisma.workItem.create({
+        testSpectralItem = await createWorkItemFixture(prisma, {
             data: {
                 id: 'WI-SPEC-' + testPrefix,
                 sampleId: testSample.id,

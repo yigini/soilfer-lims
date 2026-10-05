@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -23,7 +24,7 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
         tokenManagerB = await getAuthToken('LAB_MANAGER', labBId, ['HND'], ['PROJECT-B']);
 
         // 1. Physically received / active sample in Lab A
-        sampleActiveA = await prisma.sample.create({
+        sampleActiveA = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-ACT-${Date.now()}`,
                 originalId: `ORIG-ACT-${Date.now()}`,
@@ -37,7 +38,7 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
         });
 
         // 1b. Physically received projectless walk-in sample in Lab A (#120)
-        sampleWalkInA = await prisma.sample.create({
+        sampleWalkInA = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-WLK-${Date.now()}`,
                 originalId: `ORIG-WLK-${Date.now()}`,
@@ -51,7 +52,7 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
         });
 
         // 1c. Completed sample in Lab A (APPROVED) (#120)
-        sampleApprovedA = await prisma.sample.create({
+        sampleApprovedA = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-APP-${Date.now()}`,
                 originalId: `ORIG-APP-${Date.now()}`,
@@ -65,7 +66,7 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
         });
 
         // 1d. Rejected samples in Lab A (#120)
-        sampleReceivedRejectedA = await prisma.sample.create({
+        sampleReceivedRejectedA = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-RRJ-${Date.now()}`,
                 originalId: `ORIG-RRJ-${Date.now()}`,
@@ -92,7 +93,7 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
         });
 
         // 1e. Completed bench work awaiting manager approval in Lab A (SUBMITTED_FULL) (#120)
-        sampleSubmittedFullA = await prisma.sample.create({
+        sampleSubmittedFullA = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-SUB-${Date.now()}`,
                 originalId: `ORIG-SUB-${Date.now()}`,
@@ -125,7 +126,7 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
         });
 
         // 1g. Accepted analytical work item for sampleSubmittedFullA for final approval readiness (#120)
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: `wi-${sampleSubmittedFullA.id}`,
                 sampleId: sampleSubmittedFullA.id,
@@ -137,7 +138,7 @@ describe('Dashboard, Manager Task List & Field Registry Separation (#120)', () =
         });
 
         // 2. Expected field registration in Lab A (e.g. from Kobo field survey)
-        sampleExpectedA = await prisma.sample.create({
+        sampleExpectedA = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-EXP-${Date.now()}`,
                 originalId: `ORIG-EXP-${Date.now()}`,

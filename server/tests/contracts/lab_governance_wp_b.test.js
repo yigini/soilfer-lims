@@ -10,6 +10,7 @@
  */
 'use strict';
 
+const { createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const app = require('../../app');
@@ -393,7 +394,7 @@ describe('WP-B: Unified Action and Scope Model', () => {
                 }
             });
 
-            testWorkItem = await prisma.workItem.create({
+            testWorkItem = await createWorkItemFixture(prisma, {
                 data: {
                     id: 'WI-ASS-' + testPrefix,
                     sampleId: testSample.id,
@@ -441,7 +442,7 @@ describe('WP-B: Unified Action and Scope Model', () => {
                 }
             });
 
-            const pausedWorkItem = await prisma.workItem.create({
+            const pausedWorkItem = await createWorkItemFixture(prisma, {
                 data: {
                     id: 'WI-P-' + testPrefix,
                     sampleId: pausedSample.id,

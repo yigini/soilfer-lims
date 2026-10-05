@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -19,7 +20,7 @@ describe('SD-06: EDIT_ANALYSES Permission Gate Contract', () => {
         await prisma.sample.deleteMany({ where: { id: sampleId } });
 
         // Create sample in GTM
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,

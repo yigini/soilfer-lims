@@ -1,5 +1,6 @@
 'use strict';
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -70,7 +71,7 @@ describe('Project Workspace Samples Server-Side Search, Filtering & Pagination C
         for (let i = 1; i <= 50; i++) {
             const sid = `SMP-${SUFFIX}-P1-${String(i).padStart(3, '0')}`;
             trackedSampleIds.push(sid);
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sid,
                     originalId: sid,
@@ -85,7 +86,7 @@ describe('Project Workspace Samples Server-Side Search, Filtering & Pagination C
         for (let i = 51; i <= 59; i++) {
             const sid = `SMP-${SUFFIX}-P2-${String(i).padStart(3, '0')}`;
             trackedSampleIds.push(sid);
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sid,
                     originalId: sid,
@@ -99,7 +100,7 @@ describe('Project Workspace Samples Server-Side Search, Filtering & Pagination C
 
         const specialId = `SMP-${SUFFIX}-SPECIAL-BEYOND-P1`;
         trackedSampleIds.push(specialId);
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: specialId,
                 originalId: specialId,

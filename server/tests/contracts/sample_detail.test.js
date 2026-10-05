@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -22,7 +23,7 @@ describe('SD-15: Comprehensive Sample Detail End-to-End Contract Suite', () => {
         await prisma.sample.deleteMany({ where: { id: sampleLabGtmId } });
 
         // Seed Sample in LAB-GTM
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleLabGtmId,
                 originalId: sampleLabGtmId,

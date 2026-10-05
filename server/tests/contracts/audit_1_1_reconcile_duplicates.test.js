@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const request = require('supertest');
 const app = require('../../app');
@@ -22,11 +23,11 @@ describe('Audit 1.1: duplicate references and atomic analysis reconciliation', (
 
     async function fixture(duplicateStatus) {
         const id = `audit11-reconcile-${crypto.randomUUID()}`; samples.push(id);
-        const sample = await prisma.sample.create({ data: { id, originalId: id, labId: 'LAB-GTM', assignedLab: 'LAB-GTM',
+        const sample = await createSampleFixture(prisma, { data: { id, originalId: id, labId: 'LAB-GTM', assignedLab: 'LAB-GTM',
             status: 'PROCESSING', matrix: 'SOIL', country: 'GTM', projectCode: 'SOILFER-US',
             requiredAnalyses: JSON.stringify(['PH_H2O', 'SOC', 'CEC']) } });
         for (const analysis of ['CEC', 'SOC', 'PH_H2O']) {
-            await prisma.workItem.create({ data: { id: `${id}-${analysis}`, sampleId: id, labId: 'LAB-GTM', assignedLab: 'LAB-GTM', analysis, status: 'NOT_ASSIGNED' } });
+            await createWorkItemFixture(prisma, { data: { id: `${id}-${analysis}`, sampleId: id, labId: 'LAB-GTM', assignedLab: 'LAB-GTM', analysis, status: 'NOT_ASSIGNED' } });
         }
         if (duplicateStatus) {
             await prisma.workItem.create({ data: { id: `${id}-duplicate`, sampleId: id, labId: 'LAB-GTM', assignedLab: 'LAB-GTM',

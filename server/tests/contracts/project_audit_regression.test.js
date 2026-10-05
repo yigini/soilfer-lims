@@ -17,6 +17,7 @@
  * - Truthful stage counts & cumulative received decoupling (A15 / PM-09)
  */
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -115,7 +116,7 @@ describe('Project Management Audit Regression & Acceptance Contracts', () => {
         });
 
         // Samples: SA assigned to Lab A, SB assigned to Lab B
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-A-' + SUFFIX,
                 originalId: 'SMP-A-' + SUFFIX,

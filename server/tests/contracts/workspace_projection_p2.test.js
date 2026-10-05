@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -36,7 +37,7 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations', 
         crossLabToken = generateToken(crossLabUser);
 
         // Create sample in LAB-P2
-        testSample = await prisma.sample.create({
+        testSample = await createSampleFixture(prisma, {
             data: {
                 id: 'ws-sample-test-001',
                 originalId: 'FIELD-P2-001',
@@ -145,7 +146,7 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations', 
     });
 
     test('3. Expected sample shows "Not yet received" without fabricating received date', async () => {
-        const expSample = await prisma.sample.create({
+        const expSample = await createSampleFixture(prisma, {
             data: {
                 id: 'ws-exp-sample-001',
                 originalId: 'EXP-P2-001',

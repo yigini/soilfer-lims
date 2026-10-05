@@ -1,5 +1,6 @@
 'use strict';
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -21,7 +22,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         mgrGtmToken = await getAuthToken('LAB_MANAGER', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
 
         // 1. Create standard processing sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testSampleId,
                 labId: testSampleLabCode,
@@ -38,7 +39,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         });
 
         // 2. Create intake rejected sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: rejectedSampleId,
                 labId: `LAB-REJ-${Date.now()}`,
@@ -52,7 +53,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         });
 
         // 3. Create pre-arrival EXPECTED sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: expectedSampleId,
                 originalId: `FIELD-EXP-${Date.now()}`,
@@ -287,7 +288,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         const receptionToken = await getAuthToken('SAMPLE_RECEPTION', 'LAB-GTM', ['GTM'], ['SOILFER-US']);
         const testIntakeSampleId = `SMP-INTAKE-DATES-${Date.now()}`;
         const testOriginalId = `FIELD-INTAKE-${Date.now()}`;
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testIntakeSampleId,
                 originalId: testOriginalId,
@@ -353,7 +354,7 @@ describe('Contract: Sample Label Printing, Sizing & Offline QR Code Isolation (I
         };
 
         // Create pre-arrival EXPECTED sample with full field/Kobo provenance
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testExpectedId,
                 originalId: testExpectedOrig,

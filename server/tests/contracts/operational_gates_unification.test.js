@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const sampleController = require('../../controllers/sampleController');
 const workflow = require('../../workflowContract');
@@ -7,7 +8,7 @@ describe('WP-26: Single Representation for Operational Gates', () => {
 
     beforeEach(async () => {
         testSampleId = `SMP-GATE-TEST-${Date.now()}`;
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testSampleId,
                 originalId: `ORIG-${testSampleId}`,
@@ -21,7 +22,7 @@ describe('WP-26: Single Representation for Operational Gates', () => {
         });
 
         // Create gate work items
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-DRY-${Date.now()}`,
                 sampleId: testSampleId,
@@ -31,7 +32,7 @@ describe('WP-26: Single Representation for Operational Gates', () => {
                 labId: 'LAB-DEFAULT'
             }
         });
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-PREP-${Date.now()}`,
                 sampleId: testSampleId,

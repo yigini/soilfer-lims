@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -12,7 +13,7 @@ describe('WP-15: Blocking vs Advisory Scientific Matrix Diagnostics', () => {
 
     beforeEach(async () => {
         testSampleId = `SMP-MX-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testSampleId,
                 originalId: `ORIG-${testSampleId}`,

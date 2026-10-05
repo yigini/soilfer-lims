@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -74,7 +75,7 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
     // 1. RC-19: Explicit RECEIVED_REJECTED state & exclusion from expected count
     test('RC-19: Intake rejection transitions sample to RECEIVED_REJECTED (not EXPECTED) and excludes it from expected backlog', async () => {
         // Pre-create expected sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testRejectSampleId,
                 originalId: testRejectSampleId,
@@ -145,7 +146,7 @@ describe('Stage E: Distinct RECEIVED_REJECTED State & Immutable Chain of Custody
     // 2. RC-19: Separate Handover Timestamp & Officer Counter-Signature for Accepted Samples
     test('RC-19: Accepted intake separates custody handover timestamp from system entry and immutably records officer counter-signature', async () => {
         // Pre-create expected sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testAcceptSampleId,
                 originalId: testAcceptSampleId,

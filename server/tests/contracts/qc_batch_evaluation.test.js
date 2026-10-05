@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -21,7 +22,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
     async function specimen(prefix) {
         const sampleId = `${prefix}-${Date.now()}-${createdSampleIds.length}`;
         createdSampleIds.push(sampleId);
-        await prisma.sample.create({ data: { id: sampleId, originalId: `ORIG-${sampleId}`, labId: `LAB-${sampleId}`, assignedLab: labId, status: 'PROCESSING' } });
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: `ORIG-${sampleId}`, labId: `LAB-${sampleId}`, assignedLab: labId, status: 'PROCESSING' } });
         return sampleId;
     }
 
@@ -55,7 +56,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
         // Create 41 work items
         const sampleId = `SMP-QC-CAP-${Date.now()}`;
         createdSampleIds.push(sampleId);
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: `ORIG-${sampleId}`,
@@ -102,7 +103,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
         const sampleId = `SMP-QC-TEX-${Date.now()}`;
         createdSampleIds.push(sampleId);
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: `ORIG-${sampleId}`,
@@ -117,7 +118,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
         const widEc = `WI-EC-${Date.now()}`;
         createdWorkItemIds.push(widPsa, widEc);
 
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: widPsa,
                 sampleId,
@@ -127,7 +128,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
                 assignedLab: labId
             }
         });
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: widEc,
                 sampleId,
@@ -166,7 +167,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
         const sampleId = `SMP-QC-SEAL-${Date.now()}`;
         createdSampleIds.push(sampleId);
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: `ORIG-${sampleId}`,
@@ -178,7 +179,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
         const widSealed = `WI-SEAL-${Date.now()}`;
         createdWorkItemIds.push(widSealed);
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: widSealed,
                 sampleId,
@@ -213,7 +214,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
         const sampleId = `SMP-QC-RACK-${Date.now()}`;
         createdSampleIds.push(sampleId);
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: `ORIG-${sampleId}`,
@@ -339,7 +340,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
             const sampleId = `SMP-QC-RES-${Date.now()}`;
             createdSampleIds.push(sampleId);
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sampleId,
                     originalId: `ORIG-${sampleId}`,
@@ -351,7 +352,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
             const widRes = `WI-RES-${Date.now()}`;
             createdWorkItemIds.push(widRes);
-            await prisma.workItem.create({
+            await createWorkItemFixture(prisma, {
                 data: { id: widRes, sampleId, analysis: 'PH_H2O', status: 'ASSIGNED', labId, assignedLab: labId }
             });
 
@@ -377,7 +378,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
             const sampleId = `SMP-QC-DUP-${Date.now()}`;
             createdSampleIds.push(sampleId);
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sampleId,
                     originalId: `ORIG-${sampleId}`,
@@ -442,7 +443,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
             const sampleId = `SMP-QC-REM-${Date.now()}`;
             createdSampleIds.push(sampleId);
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sampleId,
                     originalId: `ORIG-${sampleId}`,
@@ -454,7 +455,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
             const widRem = `WI-REM-${Date.now()}`;
             createdWorkItemIds.push(widRem);
-            await prisma.workItem.create({
+            await createWorkItemFixture(prisma, {
                 data: { id: widRem, sampleId, analysis: 'PH_H2O', status: 'ASSIGNED', labId, assignedLab: labId }
             });
 

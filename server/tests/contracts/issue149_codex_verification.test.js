@@ -1,5 +1,6 @@
 'use strict';
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert/strict');
@@ -89,7 +90,7 @@ describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts',
 
         await prisma.lab.create({ data: { id: 'SYNTHETIC-LAB', code: 'SYNTHETIC-LAB', name: 'Synthetic Lab', country: 'AAA' } });
         for (const [id, country, projectCode] of [['sample-a', 'AAA', 'SYNTHETIC-PROJECT'], ['sample-b', 'BBB', 'OTHER-PROJECT']]) {
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id,
                     originalId: id + '-field',

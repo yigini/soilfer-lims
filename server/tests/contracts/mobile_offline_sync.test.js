@@ -1,5 +1,6 @@
 'use strict';
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -50,7 +51,7 @@ describe('Mobile Offline Work & Idempotent Synchronization Contracts', () => {
         }
 
         // Create test sample and work items
-        testSample = await prisma.sample.create({
+        testSample = await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-SYNC-TEST-001',
                 originalId: 'ORIG-SYNC-TEST-001',
@@ -63,7 +64,7 @@ describe('Mobile Offline Work & Idempotent Synchronization Contracts', () => {
             }
         });
 
-        testDryingItem = await prisma.workItem.create({
+        testDryingItem = await createWorkItemFixture(prisma, {
             data: {
                 id: 'WI-SYNC-DRY-001',
                 sampleId: testSample.id,
@@ -76,7 +77,7 @@ describe('Mobile Offline Work & Idempotent Synchronization Contracts', () => {
             }
         });
 
-        testAnalyticalItem = await prisma.workItem.create({
+        testAnalyticalItem = await createWorkItemFixture(prisma, {
             data: {
                 id: 'WI-SYNC-PH-001',
                 sampleId: testSample.id,

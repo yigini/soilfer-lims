@@ -25,6 +25,7 @@
  *    - Direct prisma.auditLog queries verify audit trails are completely untouched.
  */
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { generateToken } = require('../setup');
@@ -214,7 +215,7 @@ describe('Issue #126: Assignment Message Attribution Contract & Real DB Integrat
             createdIds.users.push(deactivatedUnnamed.id);
 
             // Create accepted sample and work items in GTM-LAB1
-            testSample = await prisma.sample.create({
+            testSample = await createSampleFixture(prisma, {
                 data: {
                     id: `sample_${suffix}`,
                     originalId: `ORIG_${suffix}`,
@@ -225,7 +226,7 @@ describe('Issue #126: Assignment Message Attribution Contract & Real DB Integrat
             });
             createdIds.samples.push(testSample.id);
 
-            testItem1 = await prisma.workItem.create({
+            testItem1 = await createWorkItemFixture(prisma, {
                 data: {
                     id: `wi_1_${suffix}`,
                     sampleId: testSample.id,
@@ -236,7 +237,7 @@ describe('Issue #126: Assignment Message Attribution Contract & Real DB Integrat
             });
             createdIds.items.push(testItem1.id);
 
-            testItem2 = await prisma.workItem.create({
+            testItem2 = await createWorkItemFixture(prisma, {
                 data: {
                     id: `wi_2_${suffix}`,
                     sampleId: testSample.id,

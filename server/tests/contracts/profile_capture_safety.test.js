@@ -1,4 +1,5 @@
 'use strict';
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const app = require('../../app');
@@ -34,7 +35,7 @@ describe('Source capture cannot discard provenance or bypass current authority',
         expect((await prisma.koboConfig.findUnique({where: {id: config}})).formId).toBe('fixture');
     });
     test('rejecting a specimen preserves entered reference and raw provenance', async () => {
-        await prisma.sample.create({data: {id: 'PROFILE-SAFETY-REJECT', originalId: 'PROFILE-SAFETY-REJECT', assignedLab: lab, projectId: project, projectCode: project, status: 'EXPECTED', metadata: JSON.stringify({sourceEvidence: 'fixture-retained'})}});
+        await createSampleFixture(prisma, {data: {id: 'PROFILE-SAFETY-REJECT', originalId: 'PROFILE-SAFETY-REJECT', assignedLab: lab, projectId: project, projectCode: project, status: 'EXPECTED', metadata: JSON.stringify({sourceEvidence: 'fixture-retained'})}});
         const response = await request(app).post('/api/reception/intake').set('Authorization', `Bearer ${receiver}`).send({originalId: 'PROFILE-SAFETY-REJECT', decision: 'REJECTED', ncReason: 'Damaged synthetic container', profileReference: {code: 'ENTERED-PIT'}});
         expect(response.status).toBe(200);
         const row = await prisma.sample.findUnique({where: {id: 'PROFILE-SAFETY-REJECT'}});
@@ -43,7 +44,7 @@ describe('Source capture cannot discard provenance or bypass current authority',
     });
     test('a concurrent source edit is not overwritten by final intake', async () => {
         const id = 'PROFILE-SAFETY-CONCURRENT';
-        await prisma.sample.create({data: {id, originalId: id, assignedLab: lab, projectId: project, projectCode: project, status: 'EXPECTED', fieldMetadata: '{}'}});
+        await createSampleFixture(prisma, {data: {id, originalId: id, assignedLab: lab, projectId: project, projectCode: project, status: 'EXPECTED', fieldMetadata: '{}'}});
         // Allocation now occurs inside the intake transaction. Inject the
         // independent committed edit just before that transaction begins.
         const transact = prisma.$transaction.bind(prisma);
@@ -62,7 +63,7 @@ describe('Source capture cannot discard provenance or bypass current authority',
     });
     test('force source refresh refuses malformed provenance without clearing it', async () => {
         const id = 'PROFILE-SAFETY-MALFORMED';
-        await prisma.sample.create({data: {id, originalId: 'SAFETY-BAG', assignedLab: lab, projectId: project, projectCode: project, status: 'EXPECTED', metadata: '{broken', fieldMetadata: '{}'}});
+        await createSampleFixture(prisma, {data: {id, originalId: 'SAFETY-BAG', assignedLab: lab, projectId: project, projectCode: project, status: 'EXPECTED', metadata: '{broken', fieldMetadata: '{}'}});
         const spy = jest.spyOn(kobo, 'fetchSubmissions').mockResolvedValue([{_id: 1, _uuid: 'fixture', barcode_d1: 'SAFETY-BAG', pit: 'PIT', sampling_succeeded: 'yes'}]);
         try {
             expect((await request(app).post(`/api/kobo/sync-sample/${id}`).set('Authorization', `Bearer ${manager}`)).status).toBe(409);
@@ -87,7 +88,7 @@ describe('Source capture cannot discard provenance or bypass current authority',
     });
     test('force sync also rejects a changed mapping after its fetch', async () => {
         const id = 'PROFILE-SAFETY-FORCE-STALE';
-        await prisma.sample.create({data: {id, originalId: 'SAFETY-FORCE-BAG', assignedLab: lab, projectId: project, projectCode: project, status: 'EXPECTED', fieldMetadata: '{}', metadata: '{}'}});
+        await createSampleFixture(prisma, {data: {id, originalId: 'SAFETY-FORCE-BAG', assignedLab: lab, projectId: project, projectCode: project, status: 'EXPECTED', fieldMetadata: '{}', metadata: '{}'}});
         const before = await prisma.koboConfig.findUnique({where: {id: config}});
         const spy = jest.spyOn(kobo, 'fetchSubmissions').mockImplementationOnce(async () => {
             await prisma.koboConfig.update({where: {id: config}, data: {fieldMapping: JSON.stringify({profileReference: {namespace: 'NEXT-SURVEY', codePath: 'pit'}})}});
@@ -109,7 +110,7 @@ describe('Source capture cannot discard provenance or bypass current authority',
     });
     test('batch capture rechecks a durable hold added after preflight', async () => {
         const id = 'PROFILE-SAFETY-BATCH-HOLD';
-        await prisma.sample.create({data: {id, originalId: id, assignedLab: lab, projectId: project, projectCode: project, status: 'EXPECTED', fieldMetadata: '{}', metadata: '{}'}});
+        await createSampleFixture(prisma, {data: {id, originalId: id, assignedLab: lab, projectId: project, projectCode: project, status: 'EXPECTED', fieldMetadata: '{}', metadata: '{}'}});
         const transact = prisma.$transaction.bind(prisma);
         const spy = jest.spyOn(prisma, '$transaction').mockImplementationOnce(async (...args) => {
             await prisma.sample.update({where: {id}, data: {metadata: JSON.stringify({provenanceHold: {status: 'AMBIGUOUS_PROVENANCE_HOLD', reason: 'New field evidence'}})}});

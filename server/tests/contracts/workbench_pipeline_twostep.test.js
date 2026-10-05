@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const workbenchController = require('../../controllers/workbenchController');
 
@@ -39,7 +40,7 @@ describe('Workbench Two-Step Record & Submit Pipeline (Phase 4)', () => {
         });
 
         // Create sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testSampleId,
                 originalId: `ORIG-${testSampleId}`,
@@ -52,7 +53,7 @@ describe('Workbench Two-Step Record & Submit Pipeline (Phase 4)', () => {
         });
 
         // Create work items
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testWorkItemId1,
                 sampleId: testSampleId,
@@ -63,7 +64,7 @@ describe('Workbench Two-Step Record & Submit Pipeline (Phase 4)', () => {
                 version: 1
             }
         });
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testWorkItemId2,
                 sampleId: testSampleId,

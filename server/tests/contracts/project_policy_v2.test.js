@@ -1,5 +1,6 @@
 'use strict';
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -859,7 +860,7 @@ describe('projectPolicyService - Templates, Admission & Capabilities', () => {
         test('HTTP 1: Manifest upload with DESK_ADMISSION_EXCEPTION fails closed with 422 channel mismatch', async () => {
             const sampleId = `SMP-HTTP-M1-${Date.now()}`;
             // Create target sample in DB
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sampleId,
                     originalId: sampleId,
@@ -898,7 +899,7 @@ describe('projectPolicyService - Templates, Admission & Capabilities', () => {
 
         test('HTTP 2: Manifest upload with valid MANIFEST_ADMISSION_EXCEPTION succeeds and consumes approval', async () => {
             const sampleId = `SMP-HTTP-M2-${Date.now()}`;
-            await prisma.sample.create({
+            await createSampleFixture(prisma, {
                 data: {
                     id: sampleId,
                     originalId: sampleId,

@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const { transitionSample, TransitionError } = require('../../services/sampleStateService');
 const workflow = require('../../workflowContract');
@@ -7,7 +8,7 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
 
     beforeEach(async () => {
         const id = `SMP-TR-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        testSample = await prisma.sample.create({
+        testSample = await createSampleFixture(prisma, {
             data: {
                 id,
                 originalId: `ORIG-${id}`,
@@ -112,7 +113,7 @@ describe('WP-11: Canonical Sample State Transition Authority', () => {
         });
 
         // Create an active work item
-        const activeWi = await prisma.workItem.create({
+        const activeWi = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-TEST-${Date.now()}`,
                 sampleId: testSample.id,

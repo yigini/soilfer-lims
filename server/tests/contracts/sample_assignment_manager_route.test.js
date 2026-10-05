@@ -20,6 +20,7 @@
  *    - Back button detects manager-queue returnTo and labels 'Back to queue'.
  */
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
@@ -187,7 +188,7 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
         });
 
         // 1. Seed S005: canonical ID 'GTM-LAB1', display code 'S005'
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleS005CanonicalId,
                 labId: sampleS005DisplayLabId,
@@ -204,7 +205,7 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
             }
         });
         for (let i = 0; i < s005Analyses.length; i++) {
-            await prisma.workItem.create({
+            await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-S005-${i + 1}`,
                     sampleId: sampleS005CanonicalId,
@@ -219,7 +220,7 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
         }
 
         // 2. Seed S004: canonical ID 'SMP-S004-GTM', display code 'S004'
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleS004CanonicalId,
                 labId: sampleS004DisplayLabId,
@@ -236,7 +237,7 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
             }
         });
         for (let i = 0; i < s004Analyses.length; i++) {
-            await prisma.workItem.create({
+            await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-S004-${i + 1}`,
                     sampleId: sampleS004CanonicalId,
@@ -251,7 +252,7 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
         }
 
         // 3. Seed W001: canonical ID 'SMP-W001-CLO-ROUTE', display code 'W001-ROUTE', in LAB-CLO
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleW001CanonicalId,
                 labId: sampleW001DisplayLabId,
@@ -268,7 +269,7 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
             }
         });
         for (let i = 0; i < w001Analyses.length; i++) {
-            await prisma.workItem.create({
+            await createWorkItemFixture(prisma, {
                 data: {
                     id: `WI-W001-${i + 1}`,
                     sampleId: sampleW001CanonicalId,
@@ -284,7 +285,7 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
 
         // 4. Seed Collision Decoy: sample whose labId intentionally matches canonical ID 'GTM-LAB1'
         // This explicitly exercises the canonical-vs-display collision regression.
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleCollisionDecoyId,
                 labId: sampleS005CanonicalId, // 'GTM-LAB1'
@@ -300,7 +301,7 @@ describe('Contract & Component Regression: Manager Queue Assignment Route (#119)
                 requiredAnalyses: JSON.stringify(['PH_H2O'])
             }
         });
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: 'WI-DECOY-COLLISION-1',
                 sampleId: sampleCollisionDecoyId,

@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -15,7 +16,7 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
         const timestamp = Date.now();
 
         // 1. Approved GTM Sample
-        sampleApprovedGtm = await prisma.sample.create({
+        sampleApprovedGtm = await createSampleFixture(prisma, {
             data: {
                 id: `test-s-app-gtm-${timestamp}`,
                 originalId: `GTM-APPROVED-${timestamp}`,
@@ -42,7 +43,7 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
         });
 
         // 2. Pending / Unapproved GTM Sample
-        samplePendingGtm = await prisma.sample.create({
+        samplePendingGtm = await createSampleFixture(prisma, {
             data: {
                 id: `test-s-pend-gtm-${timestamp}`,
                 originalId: `GTM-PENDING-${timestamp}`,
@@ -57,7 +58,7 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
         });
 
         // 3. Approved HND Sample (different lab)
-        sampleApprovedHnd = await prisma.sample.create({
+        sampleApprovedHnd = await createSampleFixture(prisma, {
             data: {
                 id: `test-s-app-hnd-${timestamp}`,
                 originalId: `HND-APPROVED-${timestamp}`,

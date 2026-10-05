@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const workbenchController = require('../../controllers/workbenchController');
 const draftService = require('../../services/draftService');
@@ -41,7 +42,7 @@ describe('Workbench Draft Integrity Contract (P0)', () => {
         });
 
         // Create sample
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testSampleId,
                 originalId: `ORIG-${testSampleId}`,
@@ -54,7 +55,7 @@ describe('Workbench Draft Integrity Contract (P0)', () => {
         });
 
         // Create work items assigned to tech_marcos
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testWorkItemId1,
                 sampleId: testSampleId,
@@ -66,7 +67,7 @@ describe('Workbench Draft Integrity Contract (P0)', () => {
             }
         });
 
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testWorkItemId2,
                 duplicateOf: testWorkItemId1,

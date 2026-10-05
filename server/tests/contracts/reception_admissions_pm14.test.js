@@ -1,5 +1,6 @@
 'use strict';
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -91,7 +92,7 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
 
         const sampleId = 'SMP-EXP-CLOSED-' + SUFFIX;
         trackedSampleIds.add(sampleId);
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
@@ -157,7 +158,7 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
 
         const sampleId = 'SMP-PREREG-' + SUFFIX;
         trackedSampleIds.add(sampleId);
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
@@ -185,7 +186,7 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
     it('hard deletes ad-hoc walk-in draft sample on discard', async () => {
         const sampleId = 'SMP-WALKIN-' + SUFFIX;
         trackedSampleIds.add(sampleId);
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
@@ -266,7 +267,7 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
 
         const sampleId = 'SMP-PRE-PAUSED-' + SUFFIX;
         trackedSampleIds.add(sampleId);
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
@@ -310,7 +311,7 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
 
         const sampleId = 'SMP-CROSS-' + SUFFIX;
         trackedSampleIds.add(sampleId);
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
@@ -344,7 +345,7 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
 
         const sampleId = 'SMP-PRE-ACTIVE-' + SUFFIX;
         trackedSampleIds.add(sampleId);
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
@@ -393,7 +394,7 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
 
         const sampleId = 'SMP-DEL-PRE-' + SUFFIX;
         trackedSampleIds.add(sampleId);
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
@@ -420,7 +421,7 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
     it('hard deletes unattached walk-in sample on DELETE /api/samples/:id', async () => {
         const sampleId = 'SMP-DEL-WALK-' + SUFFIX;
         trackedSampleIds.add(sampleId);
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
@@ -454,7 +455,7 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
         trackedSampleIds.add(preRegSampleId);
         trackedSampleIds.add(walkInSampleId);
 
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: preRegSampleId,
                 originalId: preRegSampleId,
@@ -465,7 +466,7 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
                 receptionData: JSON.stringify({ isWalkIn: true })
             }
         });
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: walkInSampleId,
                 originalId: walkInSampleId,
@@ -617,7 +618,7 @@ describe('PM-14 Reception Admissions & Provenance-Based Draft Discard Contracts'
     it('denies reception discard on sample with existing analytical results', async () => {
         const sampleId = 'SMP-WITH-RES-' + SUFFIX;
         trackedSampleIds.add(sampleId);
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,

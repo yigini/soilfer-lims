@@ -1,5 +1,6 @@
 'use strict';
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -224,7 +225,7 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
                 }
             });
 
-            const sampleInSetup = await prisma.sample.create({
+            const sampleInSetup = await createSampleFixture(prisma, {
                 data: {
                     id: 'smp-setup-' + SUFFIX,
                     originalId: 'smp-setup-' + SUFFIX,
@@ -234,7 +235,7 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
                 }
             });
 
-            const workInSetup = await prisma.workItem.create({
+            const workInSetup = await createWorkItemFixture(prisma, {
                 data: {
                     id: 'wi-setup-' + SUFFIX,
                     sampleId: sampleInSetup.id,
@@ -340,7 +341,7 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
         let inworkSample;
 
         beforeAll(async () => {
-            inworkSample = await prisma.sample.create({
+            inworkSample = await createSampleFixture(prisma, {
                 data: {
                     id: 'smp-unfin-' + SUFFIX,
                     originalId: 'unfin-' + SUFFIX,
@@ -352,7 +353,7 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
         });
 
         test('F05: Access preview accounts for SUBMITTED work awaiting review', async () => {
-            const wi = await prisma.workItem.create({
+            const wi = await createWorkItemFixture(prisma, {
                 data: {
                     id: 'wi-sub-' + SUFFIX,
                     sampleId: inworkSample.id,
@@ -400,7 +401,7 @@ describe('Final Governance Probes & Companion Scenarios Contract Tests (F01-F07)
         });
 
         test('Access preview accounts for COMPLETED results without submission (unsubmitted bench work)', async () => {
-            const wi = await prisma.workItem.create({
+            const wi = await createWorkItemFixture(prisma, {
                 data: {
                     id: 'wi-comp-unsub-' + SUFFIX,
                     sampleId: inworkSample.id,

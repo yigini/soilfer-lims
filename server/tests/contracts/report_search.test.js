@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -31,7 +32,7 @@ describe('Issue #124: Result Reports Search & Query Filter Contract', () => {
         });
 
         // Sample A1 (Lab A, Project Alpha)
-        sampleA1 = await prisma.sample.create({
+        sampleA1 = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-RPT-A1-${ts}`,
                 labId: `LAB-RPT-001-${ts}`,
@@ -43,7 +44,7 @@ describe('Issue #124: Result Reports Search & Query Filter Contract', () => {
         });
 
         // Sample A2 (Lab A, Project Beta)
-        sampleA2 = await prisma.sample.create({
+        sampleA2 = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-RPT-A2-${ts}`,
                 labId: `LAB-RPT-002-${ts}`,
@@ -55,7 +56,7 @@ describe('Issue #124: Result Reports Search & Query Filter Contract', () => {
         });
 
         // Sample B (Lab B, Project Alpha)
-        sampleB = await prisma.sample.create({
+        sampleB = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-RPT-B-${ts}`,
                 labId: `LAB-RPT-B-${ts}`,

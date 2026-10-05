@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -14,7 +15,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
         const timestamp = Date.now();
 
         // 1. Sample with full lab accession and 2 replicate results
-        sample1 = await prisma.sample.create({
+        sample1 = await createSampleFixture(prisma, {
             data: {
                 id: `v2-specimen-1-${timestamp}`,
                 originalId: `FIELD-V2-001-${timestamp}`,
@@ -64,7 +65,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
         });
 
         // 2. Approved sample WITHOUT labId (walk-in or field registry without lab accession)
-        sample2NoLabId = await prisma.sample.create({
+        sample2NoLabId = await createSampleFixture(prisma, {
             data: {
                 id: `v2-specimen-2-${timestamp}`,
                 originalId: `FIELD-V2-002-${timestamp}`,
@@ -323,7 +324,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
 
     test('9. GET /api/v2/data-exchange/geojson keyset seek and cachedTotal pagination contract', async () => {
         const timestamp = Date.now();
-        const p1 = await prisma.sample.create({
+        const p1 = await createSampleFixture(prisma, {
             data: {
                 id: `seek-t1-${timestamp}`,
                 originalId: `FIELD-S1-${timestamp}`,
@@ -339,7 +340,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
             }
         });
 
-        const p2 = await prisma.sample.create({
+        const p2 = await createSampleFixture(prisma, {
             data: {
                 id: `seek-t2-${timestamp}`,
                 originalId: `FIELD-S2-${timestamp}`,

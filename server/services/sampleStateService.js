@@ -103,8 +103,8 @@ async function createSample(data, actor, options = {}) {
     return rules.inTransaction(options.tx, async client => {
         const sample = await client.sample.create({ data: { ...data, status } });
         await client.auditLog.create({ data: {
-            id: randomUUID(), entity: 'SAMPLE', entityId: sample.id, action: 'SAMPLE_CREATED', performedBy,
-            details: JSON.stringify({ status, context: options.context || 'ordinary',
+            id: randomUUID(), entity: 'SAMPLE', entityId: sample.id, action: options.audit?.action || 'SAMPLE_CREATED', performedBy,
+            details: options.audit?.details || JSON.stringify({ status, context: options.context || 'ordinary',
                 ...(options.importingUser && { importingUser: rules.actorName(options.importingUser) }) }),
             sampleId: sample.id, labId: sample.assignedLab || null, timestamp: new Date()
         } });

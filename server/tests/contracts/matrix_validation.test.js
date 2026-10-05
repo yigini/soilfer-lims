@@ -1,3 +1,4 @@
+const { createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -9,7 +10,7 @@ async function assignOrderedWork(sampleId, token) {
     await prisma.sample.update({ where: { id: sampleId }, data: { dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify(parameters.map(([code]) => code)) } });
     for (const [code, units] of parameters) {
         await prisma.analysis.upsert({ where: { code }, create: { code, name: `${code} matrix test parameter`, units }, update: { units, labId: null } });
-        await prisma.workItem.create({ data: { id: `${sampleId}_${code}`, sampleId, analysis: code, assignedTo: username, assignedLab: 'LAB-MX', labId: 'LAB-MX', status: 'IN_PROGRESS' } });
+        await createWorkItemFixture(prisma, { data: { id: `${sampleId}_${code}`, sampleId, analysis: code, assignedTo: username, assignedLab: 'LAB-MX', labId: 'LAB-MX', status: 'IN_PROGRESS' } });
     }
 }
 

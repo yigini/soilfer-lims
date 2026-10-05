@@ -11,6 +11,7 @@
  * 5. Work Item Assignment Scoping & Receiving Lab Broadcasts (assignmentEligibilityService validation, receiving lab broadcast)
  */
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -134,7 +135,7 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
         });
 
         // Setup Samples
-        sampleA = await prisma.sample.create({
+        sampleA = await createSampleFixture(prisma, {
             data: {
                 id: 'smp-a-' + SUFFIX,
                 originalId: 'orig-a-' + SUFFIX,
@@ -148,7 +149,7 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
             }
         });
 
-        samplePendingDrying = await prisma.sample.create({
+        samplePendingDrying = await createSampleFixture(prisma, {
             data: {
                 id: 'smp-dry-' + SUFFIX,
                 originalId: 'orig-dry-' + SUFFIX,
@@ -163,7 +164,7 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
         });
 
         // Setup Work Items
-        workItemDryingBlocked = await prisma.workItem.create({
+        workItemDryingBlocked = await createWorkItemFixture(prisma, {
             data: {
                 id: 'wi-dry-' + SUFFIX,
                 sampleId: samplePendingDrying.id,
@@ -176,7 +177,7 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
             }
         });
 
-        workItemNormal = await prisma.workItem.create({
+        workItemNormal = await createWorkItemFixture(prisma, {
             data: {
                 id: 'wi-norm-' + SUFFIX,
                 sampleId: sampleA.id,
@@ -189,7 +190,7 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
             }
         });
 
-        workItemSpectral = await prisma.workItem.create({
+        workItemSpectral = await createWorkItemFixture(prisma, {
             data: {
                 id: 'wi-spec-' + SUFFIX,
                 sampleId: sampleA.id,
@@ -204,7 +205,7 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
             }
         });
 
-        workItemTexture = await prisma.workItem.create({
+        workItemTexture = await createWorkItemFixture(prisma, {
             data: {
                 id: 'wi-text-' + SUFFIX,
                 sampleId: sampleA.id,

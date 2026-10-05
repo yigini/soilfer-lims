@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -156,7 +157,7 @@ describe('SD-13: Native Binary Spectral Parsers (Bruker OPUS, ASD, SPC)', () => 
         await prisma.spectralData.deleteMany({ where: { sampleId } });
         await prisma.sample.deleteMany({ where: { id: sampleId } });
 
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,

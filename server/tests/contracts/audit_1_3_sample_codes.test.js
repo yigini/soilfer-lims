@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -27,7 +28,7 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
     async function issue(issuedAt = new Date(), projectCode) {
         return prisma.$transaction(async tx => {
             const labSampleCode = await codes.allocateSampleCode(tx, { labReference: lab.id, projectCode, issuedAt });
-            return tx.sample.create({ data: { id: id(), originalId: id(), assignedLab: lab.id, labId: labSampleCode, labSampleCode, status: 'RECEIVED' } });
+            return createSampleFixture(tx, { data: { id: id(), originalId: id(), assignedLab: lab.id, labId: labSampleCode, labSampleCode, status: 'RECEIVED' } });
         });
     }
     test('50 parallel real intakes issue 50 unique codes and each work item belongs to the lab', async () => {
@@ -53,7 +54,7 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
         let reserved;
         await expect(prisma.$transaction(async tx => {
             reserved = await codes.allocateSampleCode(tx, { labReference: lab.id });
-            await tx.sample.create({ data: { id: id(), originalId: 'FAILED-A13', assignedLab: lab.id, labSampleCode: reserved, status: 'RECEIVED' } });
+            await createSampleFixture(tx, { data: { id: id(), originalId: 'FAILED-A13', assignedLab: lab.id, labSampleCode: reserved, status: 'RECEIVED' } });
             throw new Error('synthetic intake failure');
         })).rejects.toThrow('synthetic intake failure');
         expect(await prisma.labSequence.count({ where: { labId: lab.id } })).toBe(0);
@@ -61,7 +62,7 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
         expect((await issue()).labSampleCode).toBe(reserved);
     });
     test('normal single and walk-in paths issue policy codes, with laboratory work-item ownership', async () => {
-        const sample = await prisma.sample.create({ data: { id: id(), originalId: id(), assignedLab: lab.id, status: 'RECEIVED' } });
+        const sample = await createSampleFixture(prisma, { data: { id: id(), originalId: id(), assignedLab: lab.id, status: 'RECEIVED' } });
         const response = await request(app).post(`/api/samples/${sample.id}/accept`).set('Authorization', `Bearer ${await getAuthToken('LAB_MANAGER', lab.id)}`).send({ checklist });
         expect(response.status).toBe(200); expect(codes.verifyCheckCharacter(response.body.labSampleCode)).toBe(true);
         const work = await prisma.workItem.findMany({ where: { sampleId: sample.id } });
@@ -79,8 +80,8 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
     });
     test('historical duplicate intake returns a stable conflict and preserves both records', async () => {
         const oldCode = `S${Date.now()}`;
-        await prisma.sample.create({ data: { id: id(), originalId: id(), assignedLab: lab.id, labId: oldCode, labSampleCode: oldCode, status: 'RECEIVED' } });
-        const sample = await prisma.sample.create({ data: { id: id(), originalId: id(), assignedLab: lab.id, labId: oldCode, status: 'EXPECTED' } });
+        await createSampleFixture(prisma, { data: { id: id(), originalId: id(), assignedLab: lab.id, labId: oldCode, labSampleCode: oldCode, status: 'RECEIVED' } });
+        const sample = await createSampleFixture(prisma, { data: { id: id(), originalId: id(), assignedLab: lab.id, labId: oldCode, status: 'EXPECTED' } });
         const response = await receive({ samples: [{ originalId: sample.originalId, status: 'ACCEPTED' }] });
         expect(response.status).toBe(422); expect(response.body.code).toBe('SAMPLE_CODE_CONFLICT');
         expect(response.body.errors).toHaveLength(1);
@@ -103,7 +104,7 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
         const a = await issue('2026-05-01T12:00:00Z');
         const otherIssue = projectCode => prisma.$transaction(async tx => {
             const labSampleCode = await codes.allocateSampleCode(tx, { labReference: other.code, projectCode, issuedAt: '2026-05-01T12:00:00Z' });
-            return tx.sample.create({ data: { id: id(), originalId: id(), assignedLab: other.id, labSampleCode, status: 'RECEIVED' } });
+            return createSampleFixture(tx, { data: { id: id(), originalId: id(), assignedLab: other.id, labSampleCode, status: 'RECEIVED' } });
         });
         const b = await otherIssue('PRJ1'), c = await otherIssue('PRJ2');
         expect(b.labSampleCode).toMatch(/^PRJ1\.B13.*\.2026\.0001[A-Z0-9]$/);
@@ -129,12 +130,12 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
         expect(await prisma.labSequence.count({ where: { labId: lab.id } })).toBe(0);
     });
     test('issued legacy S codes stay unchanged, resolvable and separate from S-prefixed originalIds', async () => {
-        const old = await prisma.sample.create({ data: { id: id(), originalId: id(), labId: `S${Date.now()}`, assignedLab: lab.id, status: 'EXPECTED' } });
+        const old = await createSampleFixture(prisma, { data: { id: id(), originalId: id(), labId: `S${Date.now()}`, assignedLab: lab.id, status: 'EXPECTED' } });
         const response = await receive({ samples: [{ originalId: old.originalId, status: 'ACCEPTED' }] });
         expect(response.status).toBe(201); expect(response.body.samples[0].labSampleCode).toBe(old.labId);
         expect(await prisma.labSequence.count({ where: { labId: lab.id, scope: 'SAMPLE' } })).toBe(0);
         expect((await request(app).get('/api/samples/lookup').set('Authorization', `Bearer ${token}`).query({ code: old.labId })).body.id).toBe(old.id);
-        await prisma.sample.create({ data: { id: id(), originalId: `S999999${id()}`, assignedLab: lab.id, status: 'EXPECTED' } });
+        await createSampleFixture(prisma, { data: { id: id(), originalId: `S999999${id()}`, assignedLab: lab.id, status: 'EXPECTED' } });
         expect((await issue()).labSampleCode).toContain('-000001');
     });
     test('format changes affect future codes only, and new code lookup remains scoped', async () => {
@@ -150,7 +151,7 @@ describe('Audit 1.3: atomic laboratory sample codes', () => {
     });
     test('legacy alias collision skips a reserved value, and bare root-client allocation is refused', async () => {
         const reserved = codes.formatCode(registry['sample.codeFormat'].presets.ISO17025_STRICT, { labCode: lab.code, year: 2026, sequence: 1 });
-        await prisma.sample.create({ data: { id: id(), originalId: id(), labId: reserved, assignedLab: lab.id, status: 'EXPECTED' } });
+        await createSampleFixture(prisma, { data: { id: id(), originalId: id(), labId: reserved, assignedLab: lab.id, status: 'EXPECTED' } });
         expect((await issue('2026-05-01T12:00:00Z')).labSampleCode).toContain('-000002');
         await expect(codes.allocateSampleCode(prisma, { labReference: lab.id })).rejects.toMatchObject({ statusCode: 409, code: 'SAMPLE_CODE_TRANSACTION_REQUIRED' });
     });

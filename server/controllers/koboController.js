@@ -9,6 +9,7 @@ const workflow = require('../workflowContract');
 const crypto = require('crypto');
 const profileIdentity = require('../services/profileIdentityService');
 const koboProfile = require('../services/koboProfileService');
+const { createSample } = require('../services/sampleStateService');
 
 async function assertLabAccess(actor, targetLabId) {
     if (!actor) return false;
@@ -266,7 +267,7 @@ exports.syncLab = async (req, res) => {
             });
         }
 
-        const result = await syncLabSubmissions(configs[0], req.user?.username || 'SYSTEM');
+        const result = await syncLabSubmissions(configs[0], req.user?.username, { actor: req.user });
 
         res.json(result);
     } catch (error) {
@@ -298,7 +299,7 @@ exports.syncAll = async (req, res) => {
         const results = [];
         for (const config of configs) {
             try {
-                const result = await syncLabSubmissions(config, 'SCHEDULER');
+                const result = await syncLabSubmissions(config, req.user?.username || 'system:kobo-sync', { actor: req.user || 'system:kobo-sync' });
                 results.push({ labId: config.labId, configId: config.id, projectCode: config.projectCode, ...result });
             } catch (error) {
                 results.push({ labId: config.labId, configId: config.id, projectCode: config.projectCode, error: error.message });
@@ -1160,8 +1161,7 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
 
                     sampleData.persistedCompactMeta = compactMeta;
 
-                    await tx.sample.create({
-                        data: {
+                    await createSample({
                             id: sampleId,
                             originalId: sampleData.original_id,
                             projectCode: projectCode,
@@ -1179,19 +1179,7 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                             depthBottomCm: capturedDepth?.depthBottomCm ?? null,
                             receptionDate: null,
                             rejectionReason: rejectionReason
-                        }
-                    });
-
-                    await tx.auditLog.create({
-                        data: {
-                            id: crypto.randomUUID(),
-                            entity: 'SAMPLE',
-                            entityId: sampleId,
-                            action: 'CREATE_KOBO_SYNC',
-                            performedBy: performedBy,
-                            timestamp: new Date()
-                        }
-                    });
+                        }, options.actor || performedBy, { tx, audit: { action: 'CREATE_KOBO_SYNC' } });
 
                     if (sampleData.intraSubDuplicates && sampleData.intraSubDuplicates.length > 0) {
                         await tx.auditLog.create({

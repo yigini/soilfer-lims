@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -17,7 +18,7 @@ describe('SD-10: Mandatory Reason on Rejection and Reopening Contract', () => {
         await prisma.sample.deleteMany({ where: { id: sampleId } });
 
         // Create sample in APPROVED state
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
@@ -34,7 +35,7 @@ describe('SD-10: Mandatory Reason on Rejection and Reopening Contract', () => {
         });
 
         // Create work item in SUBMITTED state
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: wiId,
                 sampleId,

@@ -8,6 +8,7 @@
  */
 'use strict';
 
+const { createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const app = require('../../app');
@@ -536,7 +537,7 @@ describe('WP-A: Laboratory Governance Security & Access Repairs', () => {
                 }
             });
 
-            testWorkItemA = await prisma.workItem.create({
+            testWorkItemA = await createWorkItemFixture(prisma, {
                 data: {
                     id: 'WI-A-' + testPrefix,
                     sampleId: testSampleA.id,

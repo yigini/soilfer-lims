@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const workflowEngine = require('../../utils/workflowEngine');
 const prisma = require('../../prisma');
 const { generateWorkItemsForSample } = require('../../controllers/workItemController');
@@ -58,7 +59,7 @@ describe('WP-25: Catalogue-Driven Workflow Graph and DAG Validation', () => {
         });
 
         const sampleId = `SMP-DAG-${Date.now()}`;
-        const sample = await prisma.sample.create({
+        const sample = await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: `ORIG-${sampleId}`,

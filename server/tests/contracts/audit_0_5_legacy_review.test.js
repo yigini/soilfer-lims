@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const request = require('supertest');
 const app = require('../../app');
@@ -14,9 +15,10 @@ describe('Audit 0.5: legacy review delegates to the guarded authority', () => {
     });
     async function fixture({ status = 'SUBMITTED', evidence = true, batchStatus, assignedLab = labId } = {}) {
         const sampleId = id('SMP-05');
-        await prisma.sample.create({ data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab, status: 'PROCESSING' } });
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab, status: 'PROCESSING',
+            dryingStatus: 'DONE', preparationStatus: 'DONE' } });
         const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-05'), analysis: 'PH_H2O', status: batchStatus, labId: assignedLab, createdBy: 'test' } }) : null;
-        const item = await prisma.workItem.create({ data: { id: id('WI-05'), sampleId, analysis: 'PH_H2O', assignedLab, status,
+        const item = await createWorkItemFixture(prisma, { data: { id: id('WI-05'), sampleId, analysis: 'PH_H2O', assignedLab, status,
             result: evidence ? '6.2' : null, batchId: batch?.id } });
         const result = evidence ? await prisma.result.create({ data: { id: id('R-05'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true, flags: JSON.stringify(['METHOD_NOTE']), batchId: batch?.id } }) : null;

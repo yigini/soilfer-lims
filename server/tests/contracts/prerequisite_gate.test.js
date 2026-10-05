@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -19,7 +20,7 @@ describe('SD-05: Server-Side Prerequisite Gate Contract', () => {
         await prisma.sample.deleteMany({ where: { id: sampleId } });
 
         // Create sample in PROCESSING, with preparation NOT completed
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
@@ -36,7 +37,7 @@ describe('SD-05: Server-Side Prerequisite Gate Contract', () => {
         });
 
         // Create unassigned work item
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: wiId,
                 sampleId,

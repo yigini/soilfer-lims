@@ -17,11 +17,11 @@
  * 4. Cross-lab isolation: Manager B cannot view Manager A's expected arrivals via the scoped link.
  */
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 const { createHash } = require('crypto');
-const Database = require('better-sqlite3');
+const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 
@@ -29,19 +29,7 @@ const jwt = require('jsonwebtoken');
 const sourcePath = path.join(__dirname, '../../prisma/dev.db');
 const devDbHashBefore = createHash('sha256').update(fs.readFileSync(sourcePath)).digest('hex');
 
-const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kobo-notif-link-test-'));
-const fixtureDbPath = path.join(tmpDir, 'fixture.db');
-
-const sourceDb = new Database(sourcePath, { readonly: true, fileMustExist: true });
-const ddl = sourceDb.prepare("SELECT sql FROM sqlite_master WHERE sql IS NOT NULL AND name NOT LIKE 'sqlite_%' AND type IN ('table','index') ORDER BY CASE type WHEN 'table' THEN 0 ELSE 1 END").all();
-sourceDb.close();
-
-const fixtureDb = new Database(fixtureDbPath);
-fixtureDb.pragma('foreign_keys=OFF');
-for (const row of ddl) {
-    fixtureDb.exec(row.sql);
-}
-fixtureDb.close();
+const { file: fixtureDbPath } = beforeGuards({ actor: 'system:fixture' });
 
 process.env.DATABASE_PATH = fixtureDbPath;
 process.env.DATABASE_URL = 'file:' + fixtureDbPath;
@@ -188,7 +176,7 @@ describe('Kobo Notification Deep Link & View Parameter Lifecycle (Refs #120)', (
         }, JWT_SECRET);
 
         // Pre-create an active, physically received sample in Lab A to verify operational separation
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: 'SMP-ACT-A-' + SUFFIX,
                 originalId: 'ORIG-ACT-A-' + SUFFIX,
@@ -207,7 +195,7 @@ describe('Kobo Notification Deep Link & View Parameter Lifecycle (Refs #120)', (
     afterAll(async () => {
         await prisma.$disconnect();
         try {
-            fs.rmSync(tmpDir, { recursive: true, force: true });
+            for (const suffix of ['', '-wal', '-shm']) fs.rmSync(`${fixtureDbPath}${suffix}`, { force: true });
         } catch (e) {
             // ignore cleanup errors
         }

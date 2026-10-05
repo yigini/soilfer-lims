@@ -1,28 +1,17 @@
 'use strict';
 
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 const { createHash } = require('crypto');
+const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const Database = require('better-sqlite3');
 
 // 1. Ensure 100% database isolation with temporary fixture DB
 const sourcePath = path.join(__dirname, '../../prisma/dev.db');
 const devDbHashBefore = createHash('sha256').update(fs.readFileSync(sourcePath)).digest('hex');
 
-const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kobo-mapping-test-'));
-const fixtureDbPath = path.join(tmpDir, 'fixture.db');
-
-const sourceDb = new Database(sourcePath, { readonly: true, fileMustExist: true });
-const ddl = sourceDb.prepare("SELECT sql FROM sqlite_master WHERE sql IS NOT NULL AND name NOT LIKE 'sqlite_%' AND type IN ('table','index') ORDER BY CASE type WHEN 'table' THEN 0 ELSE 1 END").all();
-sourceDb.close();
-
-const fixtureDb = new Database(fixtureDbPath);
-fixtureDb.pragma('foreign_keys=OFF');
-for (const row of ddl) {
-    fixtureDb.exec(row.sql);
-}
-fixtureDb.close();
+const { file: fixtureDbPath } = beforeGuards({ actor: 'system:fixture' });
 
 process.env.DATABASE_PATH = fixtureDbPath;
 process.env.DATABASE_URL = 'file:' + fixtureDbPath;
@@ -177,7 +166,7 @@ describe('K01: Kobo Explicit Destination & Mapping Invariant Tests', () => {
     afterAll(async () => {
         await prisma.$disconnect();
         try {
-            fs.rmSync(tmpDir, { recursive: true, force: true });
+            for (const suffix of ['', '-wal', '-shm']) fs.rmSync(`${fixtureDbPath}${suffix}`, { force: true });
         } catch (e) {
             // ignore cleanup errors
         }
@@ -684,7 +673,7 @@ describe('K01: Kobo Explicit Destination & Mapping Invariant Tests', () => {
                 }
             });
 
-            const unlinkedSample = await prisma.sample.create({
+            const unlinkedSample = await createSampleFixture(prisma, {
                 data: {
                     id: `SMP-UNLINKED-${SUFFIX}`,
                     originalId: `SMP-UNLINKED-${SUFFIX}`,
@@ -709,7 +698,7 @@ describe('K01: Kobo Explicit Destination & Mapping Invariant Tests', () => {
         });
 
         test('syncSample strictly preserves manual field overrides and updates atomically with audit log', async () => {
-            const resyncSample = await prisma.sample.create({
+            const resyncSample = await createSampleFixture(prisma, {
                 data: {
                     id: `SMP-RESYNC-${SUFFIX}`,
                     originalId: `ORIG-RESYNC-${SUFFIX}`,

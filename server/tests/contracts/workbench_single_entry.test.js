@@ -1,5 +1,6 @@
 'use strict';
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const operationalConfirmationService = require('../../services/operationalConfirmationService');
 const workbenchController = require('../../controllers/workbenchController');
@@ -57,7 +58,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
         }
 
         // Create sample physically received
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testSampleId,
                 originalId: `ORIG-${testSampleId}`,
@@ -89,7 +90,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
         });
 
         // Create operational gates
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testDryingId,
                 sampleId: testSampleId,
@@ -101,7 +102,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
                 version: 1
             }
         });
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testPrepId,
                 sampleId: testSampleId,
@@ -115,7 +116,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
         });
 
         // Create analytical tasks
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testPhId,
                 sampleId: testSampleId,
@@ -127,7 +128,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
                 version: 1
             }
         });
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: testEcId,
                 sampleId: testSampleId,

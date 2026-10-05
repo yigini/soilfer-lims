@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -36,7 +37,7 @@ describe('Stage C: Consignment & High-Throughput Batch Intake Contract (RC-12 - 
         });
 
         // Pre-create one EXPECTED sample to verify transitioning to ACCEPTED in batch
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: testSamples[0],
                 originalId: testSamples[0],

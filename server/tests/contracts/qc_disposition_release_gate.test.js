@@ -12,6 +12,7 @@
  */
 'use strict';
 
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const app = require('../../app');
@@ -76,7 +77,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         lab1Tech = await createTestUser('LAB_TECHNICIAN', testLab1.id, 'l1tech');
 
         // 3. Create Sample in Lab 1
-        sample1 = await prisma.sample.create({
+        sample1 = await createSampleFixture(prisma, {
             data: {
                 id: `SMP-118-${Date.now()}`,
                 labId: testLab1.id,
@@ -90,7 +91,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // 4. Create WorkItem linked to sample
-        workItem1 = await prisma.workItem.create({
+        workItem1 = await createWorkItemFixture(prisma, {
             data: {
                 id: `WI-118-${Date.now()}`,
                 sampleId: sample1.id,
@@ -380,7 +381,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Active sample fixture (in PROCESSING status)
-        const activeSample = await prisma.sample.create({
+        const activeSample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-active-${Date.now()}`,
                 originalId: `SMP-ACT-${Date.now()}`,
@@ -406,7 +407,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Sample fixture in canonical APPROVED status
-        const releasedSample = await prisma.sample.create({
+        const releasedSample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-rel-${Date.now()}`,
                 originalId: `SMP-REL-${Date.now()}`,
@@ -506,7 +507,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             }
         });
 
-        const wiToReanalyze = await prisma.workItem.create({
+        const wiToReanalyze = await createWorkItemFixture(prisma, {
             data: {
                 id: `wi-reanal-${Date.now()}`,
                 sampleId: activeSample.id,
@@ -560,7 +561,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const passBatchId = `batch-pass-val-${Date.now()}`;
 
         // Create an active non-terminal sample for validity evaluation
-        const activeSample = await prisma.sample.create({
+        const activeSample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-val-${Date.now()}`,
                 originalId: `SMP-VAL-${Date.now()}`,
@@ -665,7 +666,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const immBatchId = `batch-imm-${Date.now()}`;
 
         // 1. Terminal ARCHIVED sample
-        const archivedSample = await prisma.sample.create({
+        const archivedSample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-arch-${Date.now()}`,
                 originalId: `SMP-ARCH-${Date.now()}`,
@@ -689,7 +690,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // 2. Terminal DISPOSED sample
-        const disposedSample = await prisma.sample.create({
+        const disposedSample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-disp-${Date.now()}`,
                 originalId: `SMP-DISP-${Date.now()}`,
@@ -713,7 +714,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // 3. Sample with PUBLISHED report
-        const pubSample = await prisma.sample.create({
+        const pubSample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-pub-${Date.now()}`,
                 originalId: `SMP-PUB-${Date.now()}`,
@@ -870,7 +871,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Active submitted work item
-        const wiActive = await prisma.workItem.create({
+        const wiActive = await createWorkItemFixture(prisma, {
             data: {
                 id: `wi-act-${Date.now()}`,
                 sampleId: activeSample.id,
@@ -882,7 +883,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Historical ACCEPTED work item
-        const wiAccepted = await prisma.workItem.create({
+        const wiAccepted = await createWorkItemFixture(prisma, {
             data: {
                 id: `wi-acc-${Date.now()}`,
                 duplicateOf: wiActive.id,
@@ -895,7 +896,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Historical COMPLETED work item
-        const wiCompleted = await prisma.workItem.create({
+        const wiCompleted = await createWorkItemFixture(prisma, {
             data: {
                 id: `wi-comp-${Date.now()}`,
                 duplicateOf: wiActive.id,
@@ -945,7 +946,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const { flagBatchResults } = require('../../services/qcService');
         const probeBatchId = `batch-probe-${Date.now()}`;
 
-        const sample = await prisma.sample.create({
+        const sample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-probe-${Date.now()}`,
                 originalId: `SMP-PRB-${Date.now()}`,
@@ -996,7 +997,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const { flagBatchResults } = require('../../services/qcService');
         const warnBatchId = `batch-warn-${Date.now()}`;
 
-        const sample = await prisma.sample.create({
+        const sample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-warn-${Date.now()}`,
                 originalId: `SMP-WRN-${Date.now()}`,
@@ -1040,7 +1041,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const { flagBatchResults } = require('../../services/qcService');
         const validBatchId = `batch-valid-${Date.now()}`;
 
-        const sample = await prisma.sample.create({
+        const sample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-valid-${Date.now()}`,
                 originalId: `SMP-VLD-${Date.now()}`,
@@ -1093,7 +1094,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const { flagBatchResults } = require('../../services/qcService');
         const malBatchId = `batch-mal-${Date.now()}`;
 
-        const sample = await prisma.sample.create({
+        const sample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-mal-${Date.now()}`,
                 originalId: `SMP-MAL-${Date.now()}`,
@@ -1153,7 +1154,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const { flagBatchResults } = require('../../services/qcService');
         const histBatchId = `batch-hist-${Date.now()}`;
 
-        const histSample = await prisma.sample.create({
+        const histSample = await createSampleFixture(prisma, {
             data: {
                 id: `smp-hist-${Date.now()}`,
                 originalId: `SMP-HST-${Date.now()}`,

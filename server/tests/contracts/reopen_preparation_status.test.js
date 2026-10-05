@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -16,7 +17,7 @@ describe('SD-08: Stop Fabricating Preparation Records on Reopen Contract', () =>
         await prisma.sample.deleteMany({ where: { id: { in: [sampleNullId, sampleDoneId] } } });
 
         // Sample with NULL drying and prep (bypassed / legacy import)
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleNullId,
                 originalId: sampleNullId,
@@ -33,7 +34,7 @@ describe('SD-08: Stop Fabricating Preparation Records on Reopen Contract', () =>
         });
 
         // Sample with DONE drying and prep
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleDoneId,
                 originalId: sampleDoneId,

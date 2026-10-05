@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const { getAuthToken } = require('../setup');
 const { runEscalationChecks } = require('../../services/escalationService');
@@ -29,7 +30,7 @@ describe('SD-14: Work Escalation Service Contract', () => {
         await prisma.sample.deleteMany({ where: { id: sampleId } });
 
         // Create sample in PROCESSING
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleId,
                 originalId: sampleId,
@@ -46,7 +47,7 @@ describe('SD-14: Work Escalation Service Contract', () => {
 
         // Create work item that has been NOT_ASSIGNED for 3 days (72h > 48h)
         const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: wiUnassignedId,
                 sampleId,
@@ -62,7 +63,7 @@ describe('SD-14: Work Escalation Service Contract', () => {
 
         // Create work item that has been IN_PROGRESS for 4 days (96h > 72h)
         const fourDaysAgo = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
-        await prisma.workItem.create({
+        await createWorkItemFixture(prisma, {
             data: {
                 id: wiStalledId,
                 sampleId,

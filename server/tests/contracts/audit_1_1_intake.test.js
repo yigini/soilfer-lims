@@ -1,3 +1,4 @@
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const request = require('supertest');
@@ -79,7 +80,7 @@ describe('Audit 1.1: one atomic intake service', () => {
         expect(await prisma.sample.findFirst({ where: { originalId: body.originalId } })).toBeNull();
     });
     test('a failure on an existing sample keeps its state and every old field intact', async () => {
-        const sample = await prisma.sample.create({ data: { id: uid(), originalId: uid(), assignedLab: lab.id, status: 'RECEIVED', receivedMass: 250, history: '[]', metadata: '{"untouched":true}' } });
+        const sample = await createSampleFixture(prisma, { data: { id: uid(), originalId: uid(), assignedLab: lab.id, status: 'RECEIVED', receivedMass: 250, history: '[]', metadata: '{"untouched":true}' } });
         const original = work.generate;
         jest.spyOn(work, 'generate').mockImplementation(async () => { throw new Error('synthetic gate failure'); });
         const before = await counts(), result = await single(input({ originalId: sample.originalId }));
@@ -170,16 +171,20 @@ describe('Audit 1.1: one atomic intake service', () => {
     });
     test('arrival records an open provenance hold and custody; the hold blocks acceptance without writes', async () => {
         const hold = { status: 'AMBIGUOUS_PROVENANCE_HOLD', reason: 'Identity review required' };
-        const sample = await prisma.sample.create({ data: { id: uid(), originalId: uid(), assignedLab: lab.id, status: 'EXPECTED', metadata: JSON.stringify({ provenanceHold: hold }), history: '[]' } });
+        const sample = await createSampleFixture(prisma, { data: { id: uid(), originalId: uid(), assignedLab: lab.id, status: 'EXPECTED', metadata: JSON.stringify({ provenanceHold: hold }), history: '[]' } });
+        const auditsBefore = await prisma.auditLog.findMany({ where: { sampleId: sample.id } });
         const arrived = await post(`/api/samples/${sample.id}/receive`, {});
         expect(arrived.status).toBe(200); expect(arrived.body.status).toBe('RECEIVED');
         const audits = await prisma.auditLog.findMany({ where: { sampleId: sample.id } });
-        expect(audits).toHaveLength(1); expect(JSON.parse(audits[0].details).provenanceHold).toEqual(hold);
+        expect(audits).toHaveLength(auditsBefore.length + 1);
+        expect(audits).toEqual(expect.arrayContaining(auditsBefore));
+        const receiveAudit = audits.filter(audit => audit.action === 'SAMPLE_RECEIVED');
+        expect(receiveAudit).toHaveLength(1); expect(JSON.parse(receiveAudit[0].details).provenanceHold).toEqual(hold);
         const before = await counts(), denied = await post(`/api/samples/${sample.id}/accept`, { checklist });
         expect(denied.status).toBe(409); expect(denied.body.code).toBe('AMBIGUOUS_PROVENANCE_HOLD'); expect(await counts()).toEqual(before);
     });
     test('generic status PUT cannot bypass acceptance validation or create work', async () => {
-        const sample = await prisma.sample.create({ data: { id: uid(), originalId: uid(), assignedLab: lab.id, status: 'RECEIVED' } });
+        const sample = await createSampleFixture(prisma, { data: { id: uid(), originalId: uid(), assignedLab: lab.id, status: 'RECEIVED' } });
         const before = await counts(), response = await request(app).put(`/api/samples/${sample.id}/status`).set('Authorization', `Bearer ${token}`).send({ status: 'ACCEPTED' });
         expect(response.status).toBe(400); expect(response.body.code).toBe('DIRECT_TRANSITION_PROHIBITED'); expect(await counts()).toEqual(before);
     });
@@ -202,7 +207,7 @@ describe('Audit 1.1: one atomic intake service', () => {
         const received = await single(input()); expect(received.status).toBe(200);
         const sample = await prisma.sample.findUnique({ where: { id: received.body.id } });
         const canonical = await prisma.workItem.findFirst({ where: { sampleId: sample.id, analysis: analysis.code, duplicateOf: null } });
-        await expect(prisma.workItem.create({ data: { id: uid(), sampleId: sample.id, analysis: analysis.code, status: 'SUBMITTED' } })).rejects.toMatchObject({ code: 'P2002' });
+        await expect(createWorkItemFixture(prisma, { data: { id: uid(), sampleId: sample.id, analysis: analysis.code, status: 'SUBMITTED' } })).rejects.toMatchObject({ code: 'P2002' });
         const marked = await prisma.workItem.create({ data: { id: uid(), sampleId: sample.id, analysis: analysis.code, duplicateOf: canonical.id, status: 'REANALYSIS_REQUIRED', methodologyId: method.id, result: '7.2' } });
         const plan = await work.prepare(prisma, sample);
         expect(plan.existingCodes.has(analysis.code)).toBe(true); expect(plan.methods.get(analysis.code)).toBe(canonical.methodologyId);

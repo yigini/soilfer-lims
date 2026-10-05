@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -23,7 +24,7 @@ describe('Spectral Library Stage A (SL-01 to SL-05)', () => {
 
         // Create sample in GTM
         sampleGtmId = 'TEST-SPEC-SMP-GTM-01';
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleGtmId,
                 originalId: sampleGtmId,
@@ -36,7 +37,7 @@ describe('Spectral Library Stage A (SL-01 to SL-05)', () => {
 
         // Create sample in MOZ
         sampleMozId = 'TEST-SPEC-SMP-MOZ-01';
-        await prisma.sample.create({
+        await createSampleFixture(prisma, {
             data: {
                 id: sampleMozId,
                 originalId: sampleMozId,

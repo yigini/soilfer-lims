@@ -1,3 +1,4 @@
+const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -70,7 +71,7 @@ describe('Stage D: Desk Ergonomics & Hardware Contract Tests (RC-16 - RC-18)', (
     // RC-16: Fast Hardware Wedge Barcode Lookup
     test('RC-16: Rapid wedge barcode scanner lookup returns expected sample metadata immediately', async () => {
         // Pre-create expected sample in project
-        const expected = await prisma.sample.create({
+        const expected = await createSampleFixture(prisma, {
             data: {
                 id: testSampleId,
                 originalId: testSampleId,
