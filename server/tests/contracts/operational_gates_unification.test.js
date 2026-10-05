@@ -2,6 +2,9 @@ const { createSampleFixture, createWorkItemFixture } = require('../helpers/workf
 const prisma = require('../../prisma');
 const sampleController = require('../../controllers/sampleController');
 const workflow = require('../../workflowContract');
+const operations = require('../../services/operationalConfirmationService');
+const { transitionWorkItem } = require('../../services/workItemStateService');
+const checklists = require('../../data/operationalChecklists.json');
 
 describe('WP-26: Single Representation for Operational Gates', () => {
     let testSampleId;
@@ -92,15 +95,17 @@ describe('WP-26: Single Representation for Operational Gates', () => {
     });
 
     test('3. getSampleDetail derives gate status dynamically from WorkItems', async () => {
-        // Explicitly set WorkItems to completed
-        await prisma.workItem.updateMany({
-            where: { sampleId: testSampleId, analysis: 'DRYING' },
-            data: { status: 'COMPLETED' }
-        });
-        await prisma.workItem.updateMany({
-            where: { sampleId: testSampleId, analysis: 'PREPARATION' },
-            data: { status: 'ACCEPTED' }
-        });
+        const manager = { username: 'test_mgr', role: 'LAB_MANAGER', labId: 'LAB-DEFAULT' };
+        let preparation;
+        for (const analysis of ['DRYING', 'PREPARATION']) {
+            const item = await prisma.workItem.findFirst({ where: { sampleId: testSampleId, analysis } });
+            await operations.confirmOperation({ actor: manager, workItemId: item.id,
+                checklist: checklists[analysis].steps.map(() => true) });
+            if (analysis === 'PREPARATION') preparation = item;
+        }
+        for (const status of ['SUBMITTED', 'ACCEPTED']) {
+            await transitionWorkItem(preparation.id, status, manager, 'Reviewed operational fixture');
+        }
 
         // Deliberately leave Sample table columns as 'PENDING'
         await prisma.sample.update({

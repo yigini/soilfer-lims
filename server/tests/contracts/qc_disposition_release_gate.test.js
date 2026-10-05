@@ -17,7 +17,7 @@ const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const app = require('../../app');
 const prisma = require('../../prisma');
-const { createSample } = require('../../services/sampleStateService');
+const { createSample, transitionSample } = require('../../services/sampleStateService');
 const { JWT_SECRET } = require('../../config/auth');
 const { canFinalApprove, canPublish } = require('../../services/workEligibility');
 
@@ -25,6 +25,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
     let testLab1, testLab2;
     let lab1Manager, lab2Manager, lab1Tech;
     let sample1, workItem1, batch1;
+    const reportFixtureIds = [];
     const testPrefix = `QC-118-${Date.now()}`;
 
     beforeAll(async () => {
@@ -84,6 +85,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
                 assignedLab: testLab1.id,
                 originalId: `FIELD-118-${Date.now()}`,
                 status: 'PROCESSING',
+                dryingStatus: 'DONE', preparationStatus: 'DONE',
                 receptionDate: new Date(),
                 projectCode: 'SOILFER-GTM',
                 country: 'Guatemala'
@@ -142,6 +144,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
     });
 
     afterAll(async () => {
+        await prisma.result.deleteMany({ where: { sampleId: { in: reportFixtureIds } } });
+        await prisma.workItem.deleteMany({ where: { sampleId: { in: reportFixtureIds } } });
+        await prisma.auditLog.deleteMany({ where: { sampleId: { in: reportFixtureIds } } });
+        await prisma.sample.deleteMany({ where: { id: { in: reportFixtureIds } } });
         // Clean up test data
         await prisma.report.deleteMany({ where: { sampleId: sample1.id } }).catch(() => {});
         await prisma.result.deleteMany({ where: { sampleId: sample1.id } });
@@ -208,19 +214,23 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // B. workEligibility.canPublish blocks official report publication
         // Report QC is tested on an approved, reviewed fixture so the new universal
         // sample-review gate does not mask the QC gate under test.
-        await prisma.sample.update({ where: { id: sample1.id }, data: { status: 'APPROVED' } });
-        const reportSample = await prisma.sample.findUnique({ where: { id: sample1.id }, include: { workItems: true, results: true } });
+        const reportId = `REPORT-${sample1.id}`;
+        reportFixtureIds.push(reportId);
+        await createSampleFixture(prisma, { data: { ...sample1, id: reportId, originalId: reportId, status: 'APPROVED' } });
+        await createWorkItemFixture(prisma, { data: { ...workItem1, id: `WI-${reportId}`, sampleId: reportId, batchId: batch1.id } });
+        await prisma.result.create({ data: { id: `RES-${reportId}`, sampleId: reportId,
+            param: 'PH_H2O', value: '6.45', isCurrent: true, isValid: true, batchId: batch1.id } });
+        const reportSample = await prisma.sample.findUnique({ where: { id: reportId }, include: { workItems: true, results: true } });
         const publishCheck = canPublish(reportSample, null, lab1Manager, { qcBatches: [freshBatch] });
         expect(publishCheck.allowed).toBe(false);
         expect(publishCheck.code).toBe('QC_BATCH_FAILED');
 
         // C. POST /api/reports/generate/:sampleId returns 409 Conflict with code QC_BATCH_FAILED
         const genRes = await request(app)
-            .post(`/api/reports/generate/${sample1.id}`)
+            .post(`/api/reports/generate/${reportId}`)
             .set('Authorization', `Bearer ${lab1Manager.token}`);
         expect(genRes.status).toBe(409);
         expect(genRes.body.code).toBe('QC_BATCH_FAILED');
-        await prisma.sample.update({ where: { id: sample1.id }, data: { status: 'PROCESSING' } });
     });
 
     // ─── Test 3: Manager QC Disposition Authorization & Validation ───
@@ -310,10 +320,8 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         expect(eligibility.blockers).toHaveLength(0);
 
         // Update sample to APPROVED following successful approval eligibility
-        const approvedSample = await prisma.sample.update({
-            where: { id: sample1.id },
-            data: { status: 'APPROVED' }
-        });
+        await transitionSample(sample1.id, 'SUBMITTED_FULL', lab1Manager, 'Reviewed analytical fixture');
+        const approvedSample = await transitionSample(sample1.id, 'APPROVED', lab1Manager, 'QC disposition and analytical sign-off');
 
         // canPublish is now allowed for approved sample with dispositioned QC
         const publishCheck = canPublish(approvedSample, null, lab1Manager, { qcBatches: [dispositionedBatch] });
