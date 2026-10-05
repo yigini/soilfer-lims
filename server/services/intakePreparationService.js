@@ -751,7 +751,7 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
         updateData.fieldMetadata = JSON.stringify(intakeProfile.preserveForContextChange(sample, currentFieldMeta, updateData, user.id || receivedBy));
         delete updateData.status;
         if (sample.status === 'RECEIVED_REJECTED') updateData.rejectionReason = null;
-        const workPlan = await workItems.prepare(prisma, { ...sample, ...updateData });
+        const workPlan = await workItems.planForSample(prisma, { ...sample, ...updateData });
         return { sample, createData, updateData, nextStatus: workflow.SAMPLE_STATES.ACCEPTED, body, user, now, responseKind: 'accepted', workPlan, approval: complianceExceptionRecord || admissionExceptionRecord };
 }
 

@@ -14,6 +14,8 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const cp = require('child_process');
+const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
+const { assertOwnedTestDatabase } = require('../helpers/testOwnedDatabase');
 
 describe('Deployment Readiness Bootstrap & Packaging Verification', () => {
     const repoRoot = path.resolve(__dirname, '..', '..', '..');
@@ -23,8 +25,10 @@ describe('Deployment Readiness Bootstrap & Packaging Verification', () => {
 
     const TS = Date.now();
     const scratchDir = fs.mkdtempSync(path.join(os.tmpdir(), `lims_bootstrap_test_${TS}_`));
+    const ownedSchemaDatabases = [];
 
     afterAll(() => {
+        for (const file of ownedSchemaDatabases) fs.rmSync(assertOwnedTestDatabase(file, 'system:fixture'), { force: true });
         try {
             fs.rmSync(scratchDir, { recursive: true, force: true });
         } catch (_) {}
@@ -356,13 +360,14 @@ bash "${entryScript.replace(/\\/g, '/')}"
 
     test('seed.js recovers from real partial state ({ labs: 1, users: 0 }) and does not duplicate LAB01', () => {
         const Database = require('better-sqlite3');
-        const testDbPath = path.join(scratchDir, 'partial_resumption.db');
+        const testDbPath = beforeGuards({ actor: 'system:fixture' }).file;
+        ownedSchemaDatabases.push(testDbPath);
         const serverDir = path.resolve(__dirname, '..', '..');
 
-        // Copy template database
-        fs.copyFileSync(path.join(serverDir, 'prisma', 'dev.db'), testDbPath);
+        // A fresh schema-only owned fixture starts with no labs/users/settings.
+        // The real additive state guards and all foreign keys remain enabled.
         const db = new Database(testDbPath);
-        db.exec('PRAGMA foreign_keys = OFF; DELETE FROM User; DELETE FROM Lab; DELETE FROM SystemSetting; PRAGMA foreign_keys = ON;');
+        for (const table of ['User', 'Lab', 'SystemSetting']) expect(db.prepare(`SELECT count(*) n FROM ${table}`).get().n).toBe(0);
         db.prepare('INSERT INTO Lab (id, name, code, country, isActive, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)')
             .run('lab-preexisting', 'My Laboratory', 'LAB01', 'INT', 1, new Date().toISOString(), new Date().toISOString());
         db.close();

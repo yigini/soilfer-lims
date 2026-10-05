@@ -6,7 +6,7 @@ const workflow = require('../workflowContract');
 const rules = require('./workflowStateRules');
 const { createWorkItem } = require('./workItemStateService');
 
-async function prepare(db, sample) {
+async function planForSample(db, sample) {
     const raw = typeof sample.requiredAnalyses === 'string' ? JSON.parse(sample.requiredAnalyses) : sample.requiredAnalyses || [];
     const codes = normalizeAnalysisCodes(raw);
     const existing = await db.workItem.findMany({ where: { sampleId: String(sample.id), duplicateOf: null } });
@@ -28,7 +28,7 @@ async function generate(tx, sample, plan, actor = 'system:intake-work-generation
     if (!sample) throw new rules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
     rules.assertScope(actor, sample);
     require('./resultEvidenceService').assertAmendable(sample);
-    plan ||= await prepare(tx, sample);
+    plan ||= await planForSample(tx, sample);
     const generated = [];
     const gates = ['DRYING', 'PREPARATION'];
     for (const code of [...new Set([...gates, ...plan.codes])]) {
@@ -52,4 +52,4 @@ async function generate(tx, sample, plan, actor = 'system:intake-work-generation
     }
     return generated;
 }
-module.exports = { normalizeAnalysisCodes, prepare, generate };
+module.exports = { normalizeAnalysisCodes, planForSample, generate };
