@@ -888,6 +888,7 @@
       "qc_lrmPerBatch": "Matériaux de référence du laboratoire par lot",
       "qc_crmEveryNBatches": "Intervalle des matériaux de référence certifiés",
       "qc_ccvEvery": "Intervalle de vérification continue de l’étalonnage",
+      "qc_calibrationVerification": "Vérification de l’étalonnage",
       "qc_lrmLimitMode": "Mode de limites du matériau de référence",
       "qc_westgardRules": "Règles de décision de Westgard",
       "qc_runProfiles": "Plans des plateaux et positions de contrôle",

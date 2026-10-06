@@ -2463,6 +2463,7 @@
       "qc_lrmPerBatch": "Materiales de referencia del laboratorio por lote",
       "qc_crmEveryNBatches": "Intervalo de materiales de referencia certificados",
       "qc_ccvEvery": "Intervalo de verificación continua de calibración",
+      "qc_calibrationVerification": "Verificación de calibración",
       "qc_lrmLimitMode": "Modo de límites del material de referencia",
       "qc_westgardRules": "Reglas de decisión de Westgard",
       "qc_runProfiles": "Diseños de bandejas y posiciones de control",

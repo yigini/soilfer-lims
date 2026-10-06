@@ -888,6 +888,7 @@
       "qc_lrmPerBatch": "Laboratory reference materials per batch",
       "qc_crmEveryNBatches": "Certified reference material interval",
       "qc_ccvEvery": "Continuing calibration verification interval",
+      "qc_calibrationVerification": "Calibration verification",
       "qc_lrmLimitMode": "Reference material limit mode",
       "qc_westgardRules": "Westgard decision rules",
       "qc_runProfiles": "Tray layouts and QC positions",

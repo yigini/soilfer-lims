@@ -25,6 +25,7 @@ key('qc.duplicateEvery', 'integer', 10, 20, 0, { ...integer, unit: 'samples' });
 key('qc.lrmPerBatch', 'integer', 1, 0, 0, integer);
 key('qc.crmEveryNBatches', 'integer', 10, 0, 0, { ...integer, unit: 'batches' });
 key('qc.ccvEvery', 'integer', 10, 20, 0, { ...integer, unit: 'samples' });
+key('qc.calibrationVerification', 'boolean', false);
 key('qc.lrmLimitMode', 'enum', 'CONTROL_CHART', 'FIXED_WINDOW', 'FIXED_WINDOW', { allowedValues: ['CONTROL_CHART', 'FIXED_WINDOW'] });
 key('qc.westgardRules', 'westgard', { reject: ['1-3s', '2-2s', 'R-4s'], warn: ['1-2s'] }, { reject: ['1-3s'], warn: [] }, { reject: [], warn: [] },
     { allowedValues: ['1-2s', '1-3s', '2-2s', 'R-4s', '4-1s', '10x'] });

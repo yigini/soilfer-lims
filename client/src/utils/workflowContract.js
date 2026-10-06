@@ -114,9 +114,29 @@ const LEGACY_WORK_ITEM_STATE_MAP = Object.freeze({
     REANALYSIS_REQUIRED: WORK_ITEM_STATES.REPEAT_REQUIRED
 });
 const BATCH_STATE_LIST = Object.freeze(['OPEN', 'RUNNING', 'QC_PASS', 'QC_FAIL', 'CLOSED']);
+// Physical runs retain the legacy aggregate labels. Each analyte has its own
+// canonical lifecycle and verdict (#186 scope pin 6025566698).
+const BATCH_ANALYTE_STATE_LIST = Object.freeze(['OPEN', 'IN_RUN', 'QC_PENDING', 'QC_PASS', 'QC_WARN', 'QC_FAIL',
+    'ACCEPTED_WITH_DEVIATION', 'REPEAT_ORDERED', 'REJECTED', 'CLOSED']);
+const BATCH_POSITION_KIND_LIST = Object.freeze(['SAMPLE', 'BLANK', 'DUPLICATE', 'LRM', 'CRM', 'ICV', 'CCV', 'CCB', 'CAL_STD']);
+const BATCH_PROVENANCE_LIST = Object.freeze(['NATIVE', 'LEGACY_MIGRATED', 'PROFILE_ONLY']);
+const QC_VERDICT_LIST = Object.freeze(['PASS', 'WARN', 'FAIL', 'INCOMPLETE']);
+const BATCH_DISPOSITION_DECISION_LIST = Object.freeze(['ACCEPT_WITH_DEVIATION', 'REPEAT_BATCH', 'REPEAT_BRACKET', 'REJECT']);
 const REVIEW_DECISION_LIST = Object.freeze(['ACCEPT', 'RETURN', 'REJECT', 'OMIT']);
 function normalizeSampleState(state) { return LEGACY_SAMPLE_STATE_MAP[state] || state; }
 function normalizeWorkItemState(state) { return LEGACY_WORK_ITEM_STATE_MAP[state] || state; }
+function normalizeBatchState(state) { return state === 'IN_RUN' ? 'RUNNING' : state; }
+function aggregateBatchStatus(analytes, { startedAt = null, reopened = false } = {}) {
+    const states = analytes.map(row => typeof row === 'string' ? row : row.status);
+    if (states.some(state => !BATCH_ANALYTE_STATE_LIST.includes(state))) {
+        throw Object.assign(new Error('Invalid batch analyte state.'), { statusCode: 400, code: 'BATCH_ANALYTE_STATE_INVALID' });
+    }
+    if (states.some(state => ['QC_FAIL', 'REJECTED', 'REPEAT_ORDERED'].includes(state))) return 'QC_FAIL';
+    if (states.length && states.every(state => state === 'CLOSED')) return 'CLOSED';
+    if (states.length && states.every(state => ['QC_PASS', 'QC_WARN', 'ACCEPTED_WITH_DEVIATION'].includes(state))) return 'QC_PASS';
+    if (!startedAt || reopened) return 'OPEN';
+    return 'RUNNING';
+}
 
 const CLOSURE_TASK_SAMPLE_STATES = Object.freeze({
     ARCHIVING: SAMPLE_STATES.ARCHIVED, ARCH: SAMPLE_STATES.ARCHIVED, Archive: SAMPLE_STATES.ARCHIVED,
@@ -197,6 +217,13 @@ module.exports = {
     LEGACY_SAMPLE_STATE_MAP,
     LEGACY_WORK_ITEM_STATE_MAP,
     BATCH_STATE_LIST,
+    BATCH_ANALYTE_STATE_LIST,
+    BATCH_POSITION_KIND_LIST,
+    BATCH_PROVENANCE_LIST,
+    QC_VERDICT_LIST,
+    BATCH_DISPOSITION_DECISION_LIST,
+    normalizeBatchState,
+    aggregateBatchStatus,
     REVIEW_DECISION_LIST,
     normalizeSampleState,
     normalizeWorkItemState,
