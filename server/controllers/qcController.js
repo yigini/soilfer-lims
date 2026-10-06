@@ -7,6 +7,7 @@ const { getNumberFormat } = require('../services/numberFormatService');
 const { normalizeQcNumbers, retainQcRawInput } = require('../services/qcNumberInputService');
 const { resolveQcPolicy } = require('../services/qcPolicyService');
 const policyService = require('../services/policyService');
+const { linkReferences, retainReferences } = require('../services/referencePlacementService');
 
 const BATCH_STATES = {
     OPEN: 'OPEN',
@@ -66,6 +67,8 @@ async function syncTypedQcItems(tx, batchId, evaluated) {
             id: crypto.randomUUID(),
             batchId,
             type: 'CONTROL',
+            referenceMaterialId: c.referenceMaterialId || null,
+            referenceValueId: c.referenceValueId || null,
             label: c.label || 'Certified Reference Material',
             expected: c.expected !== null && c.expected !== undefined ? Number(c.expected) : null,
             measured: c.measured !== null && c.measured !== undefined ? Number(c.measured) : null,
@@ -74,7 +77,8 @@ async function syncTypedQcItems(tx, batchId, evaluated) {
             recoveryPct: c.recoveryPct !== null && c.recoveryPct !== undefined ? Number(c.recoveryPct) : null,
             rpd: null,
             status: c.status || 'PASS',
-            details: c.rawInput ? JSON.stringify({ evaluation: c.details || null, rawInput: c.rawInput, policyVersion: evaluated.policyVersion }) : c.details || null
+            details: c.referenceSnapshot || c.rawInput ? JSON.stringify({ evaluation: c.details || null, rawInput: c.rawInput || {},
+                policyVersion: evaluated.policyVersion, referenceUse: c.referenceUse || null, referenceSnapshot: c.referenceSnapshot || null }) : c.details || null
         });
     });
 
@@ -361,9 +365,9 @@ exports.updateBatch = async (req, res) => {
                     controls: updates.controls
                 };
                 const numberFormat = await getNumberFormat(batch.labId, { db: tx });
-                const qcPayload = normalizeQcNumbers(sourcePayload, numberFormat);
+                const qcPayload = await linkReferences(tx, batch, user, normalizeQcNumbers(sourcePayload, numberFormat));
                 const policy = await resolveQcPolicy(batch, tx, numberFormat);
-                evaluated = retainQcRawInput(evaluateBatchQc(qcPayload, { runProfile, policy }), qcPayload);
+                evaluated = retainReferences(retainQcRawInput(evaluateBatchQc(qcPayload, { runProfile, policy }), qcPayload), qcPayload);
                 evaluated.policyVersion = policy.policyVersion;
                 evaluated.policyValues = policy.policyValues;
                 data.qcResults = JSON.stringify(evaluated);
@@ -483,13 +487,13 @@ exports.evaluateBatch = async (req, res) => {
             }
             const runProfile = await resolveBatchRunProfile(batch, tx);
             const numberFormat = await getNumberFormat(batch.labId, { db: tx });
-            const qcPayload = normalizeQcNumbers({ blanks, duplicates, controls }, numberFormat);
+            const qcPayload = await linkReferences(tx, batch, user, normalizeQcNumbers({ blanks, duplicates, controls }, numberFormat));
             const missingTypes = getMissingQcValueTypes(qcPayload, runProfile, numberFormat);
             if (missingTypes.length) {
                 throw batchError(400, { code: 'QC_VALUES_MISSING', error: 'Required QC values are missing or non-numeric.', missingTypes });
             }
             const policy = await resolveQcPolicy(batch, tx, numberFormat);
-            const evaluated = retainQcRawInput(evaluateBatchQc(qcPayload, { runProfile, policy }), qcPayload);
+            const evaluated = retainReferences(retainQcRawInput(evaluateBatchQc(qcPayload, { runProfile, policy }), qcPayload), qcPayload);
             evaluated.policyVersion = policy.policyVersion;
             evaluated.policyValues = policy.policyValues;
             const reopened = batch.status === BATCH_STATES.QC_PASS && evaluated.overallStatus === BATCH_STATES.OPEN;

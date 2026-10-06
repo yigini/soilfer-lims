@@ -54,7 +54,7 @@ async function listMaterials(db, actor, { labId, now = new Date() } = {}) {
     return Promise.all(rows.map(async material => present(db, await hydrateLot(db, material), now)));
 }
 function text(value, field, required = false) {
-    if (value == null && !required) return null;
+    if ((value == null || value === '') && !required) return null;
     if (typeof value !== 'string' || !value.trim()) throw error(400, 'REFERENCE_FIELD_REQUIRED', `${field} is required.`, { field });
     return value.trim();
 }
@@ -107,11 +107,13 @@ async function valueData(db, actor, material, body) {
     const analysisCode = text(body.analysisCode, 'analysisCode', true);
     const analysis = await db.analysis.findUnique({ where: { code: analysisCode }, include: { unit: true } });
     const normalized = await scopedActor(db, actor);
-    if (!analysis || analysis.labId && !scopeGuard.canAccessEntity(normalized, analysis, { labField: 'labId', altLabField: 'labId' })) throw error(409, 'REFERENCE_ANALYSIS_INVALID', 'Choose an analysis available to this laboratory.');
+    if (!analysis || analysis.labId && ((await policyService.resolveLab(analysis.labId, db))?.id !== material.labId ||
+        !scopeGuard.canAccessEntity(normalized, { labId: material.labId }, { labField: 'labId', altLabField: 'labId' }))) throw error(409, 'REFERENCE_ANALYSIS_INVALID', 'Choose an analysis available to this laboratory.');
     const methodologyId = text(body.methodologyId, 'methodologyId');
     if (methodologyId) {
         const method = await db.methodology.findUnique({ where: { id: methodologyId } });
-        if (!method || method.analysisCode !== analysisCode || method.labId && !scopeGuard.canAccessEntity(normalized, method, { labField: 'labId', altLabField: 'labId' })) throw error(409, 'REFERENCE_METHOD_INVALID', 'Reference methodology must belong to the analysis and laboratory.');
+        if (!method || method.analysisCode !== analysisCode || method.labId && ((await policyService.resolveLab(method.labId, db))?.id !== material.labId ||
+            !scopeGuard.canAccessEntity(normalized, { labId: material.labId }, { labField: 'labId', altLabField: 'labId' }))) throw error(409, 'REFERENCE_METHOD_INVALID', 'Reference methodology must belong to the analysis and laboratory.');
     }
     const format = await require('./numberFormatService').getNumberFormat(material.labId, { db });
     const number = (value, field, optional = false) => {
