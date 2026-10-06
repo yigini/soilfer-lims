@@ -506,7 +506,8 @@ exports.evaluateBatch = async (req, res) => {
             // become verdicts. Submitted partial values are invalid in every mode.
             const suppliedProfile = { qcSlots: ['BLANK', 'DUPLICATE', 'CONTROL'].filter((type, index) =>
                 (policy.qcMode === 'REQUIRED_BLOCKING' && (requirements[type].required > 0 || (type === 'CONTROL' && requirements.LRM.required > 0))) ||
-                (Array.isArray(qcPayload[['blanks', 'duplicates', 'controls'][index]]) && qcPayload[['blanks', 'duplicates', 'controls'][index]].length > 0)).map(type => ({ type })) };
+                (qcPayload[['blanks', 'duplicates', 'controls'][index]] != null &&
+                    (!Array.isArray(qcPayload[['blanks', 'duplicates', 'controls'][index]]) || qcPayload[['blanks', 'duplicates', 'controls'][index]].length > 0))).map(type => ({ type })) };
             const missingTypes = getMissingQcValueTypes(qcPayload, suppliedProfile, numberFormat);
             if (missingTypes.length) {
                 throw batchError(400, { code: 'QC_VALUES_MISSING', error: 'Required QC values are missing or non-numeric.', missingTypes });

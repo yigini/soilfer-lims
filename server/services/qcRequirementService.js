@@ -1,8 +1,9 @@
 function countRequirements(qcRule, sampleCount, runProfile = {}, qcData = {}, mode) {
     const value = field => qcRule.resolved[field].value;
     const slots = type => (runProfile.qcSlots || []).filter(slot => slot.type === type).length;
-    const counts = { BLANK: (qcData.blanks || []).length, DUPLICATE: (qcData.duplicates || []).length,
-        CONTROL: (qcData.controls || []).length, LRM: (qcData.controls || []).filter(row => row?.referenceUse !== 'CRM').length };
+    const entries = key => Array.isArray(qcData[key]) ? qcData[key] : [];
+    const counts = { BLANK: entries('blanks').length, DUPLICATE: entries('duplicates').length,
+        CONTROL: entries('controls').length, LRM: entries('controls').filter(row => row?.referenceUse !== 'CRM').length };
     const enforce = ['REQUIRED_BLOCKING', 'REQUIRED_WARN'].includes(mode);
     const requirements = {};
     function add(type, ruleCount, profileCount, enabled) {

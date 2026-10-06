@@ -21,6 +21,7 @@ function validateCriteria(values) {
     }
 }
 async function target(reference, analysisCode, methodologyId, db) {
+    if (typeof reference !== 'string' || !reference.trim()) throw error(422, 'QC_RULE_SCOPE_INVALID', 'A laboratory reference is required.');
     const lab = await policyService.resolveLab(reference, db);
     if (!lab) throw error(404, 'LAB_NOT_FOUND', 'Laboratory not found.');
     const analysis = typeof analysisCode === 'string' && await db.analysis.findUnique({ where: { code: analysisCode } });

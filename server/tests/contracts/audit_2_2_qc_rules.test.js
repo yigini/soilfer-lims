@@ -206,3 +206,40 @@ test('rule API uses policy permission and lab scope, exposes field resolution, a
     const raced = await request(app).post('/api/qc/rules').set('Authorization', `Bearer ${manager}`).send(f);
     expect(raced.status).toBe(409); expect(raced.body.code).toBe('QC_RULE_VERSION_CONFLICT');
 });
+
+test.each(['REQUIRED_BLOCKING', 'REQUIRED_WARN', 'ADVISORY', 'OFF'])('real %s API keeps partial input atomic and applies resolved count requirements', async mode => {
+    const f = await fixture();
+    await policies.change(actor, f.labId, { expectedVersion: 0, reason: 'Input guard mode test', changes: [{ key: 'qc.mode', value: mode }] }, { db: prisma });
+    const token = await getAuthToken('LAB_MANAGER', f.labId);
+    const batch = await prisma.batch.create({ data: { id: randomUUID(), labId: f.labId, analysis: f.analysisCode, profile: 'RACK_40', status: 'OPEN', createdBy: 'system:fixture' } });
+    const state = async () => ({ batch: await prisma.batch.findUnique({ where: { id: batch.id } }),
+        typed: await prisma.batchQcResult.findMany({ where: { batchId: batch.id } }), audits: await prisma.auditLog.findMany({ where: { entityId: batch.id } }) });
+    const before = await state();
+    const evaluate = payload => request(app).post(`/api/qc/batches/${batch.id}/evaluate`).set('Authorization', `Bearer ${token}`).send(payload);
+    const partial = await evaluate({ ...readings, duplicates: [{ value1: 7 }] });
+    expect(partial.status).toBe(400); expect(partial.body.code).toBe('QC_VALUES_MISSING'); expect(await state()).toEqual(before);
+    const malformed = await evaluate({ ...readings, controls: { expected: 7, measured: 7 } });
+    expect(malformed.status).toBe(400); expect(malformed.body.code).toBe('QC_VALUES_MISSING'); expect(await state()).toEqual(before);
+    const omitted = await evaluate({ blanks: [{ value: 0 }] });
+    if (mode === 'REQUIRED_BLOCKING') {
+        expect(omitted.status).toBe(400); expect(omitted.body.code).toBe('QC_VALUES_MISSING'); expect(await state()).toEqual(before);
+        const insufficient = await evaluate({ controls: readings.controls, duplicates: readings.duplicates.slice(0, 1) });
+        expect(insufficient.status).toBe(200); expect(insufficient.body.status).toBe('QC_FAIL');
+        expect(insufficient.body.evaluation.summary.missingRequired).toEqual([expect.objectContaining({ type: 'DUPLICATE', required: 2, found: 1 })]);
+    } else {
+        expect(omitted.status).toBe(200); expect(omitted.body.status).toBe('QC_PASS');
+        if (mode === 'REQUIRED_WARN') expect(omitted.body.evaluation.summary.warnings).toEqual(expect.arrayContaining([
+            expect.objectContaining({ type: 'DUPLICATE', required: 2, found: 0 }), expect.objectContaining({ type: 'LRM', required: 1, found: 0 })]));
+        else expect(omitted.body.evaluation.summary.missingRequired).toEqual([]);
+    }
+});
+
+test('malformed rule laboratory references return a stable 422 without creating rules or audits', async () => {
+    const f = await fixture(), token = await getAuthToken('LAB_MANAGER', f.labId);
+    for (const labId of [null, [], {}]) {
+        const response = await request(app).post('/api/qc/rules').set('Authorization', `Bearer ${token}`).send({ ...f, labId });
+        expect(response.status).toBe(422); expect(response.body.code).toBe('QC_RULE_SCOPE_INVALID');
+    }
+    expect(await prisma.qcRule.count({ where: { labId: f.labId } })).toBe(0);
+    expect(await prisma.auditLog.count({ where: { entity: 'QC_RULE', labId: f.labId } })).toBe(0);
+});
