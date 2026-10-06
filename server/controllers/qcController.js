@@ -8,6 +8,7 @@ const { normalizeQcNumbers, retainQcRawInput } = require('../services/qcNumberIn
 const { resolveQcPolicy } = require('../services/qcPolicyService');
 const policyService = require('../services/policyService');
 const { linkReferences, retainReferences } = require('../services/referencePlacementService');
+const { countRequirements } = require('../services/qcRequirementService');
 
 const BATCH_STATES = {
     OPEN: 'OPEN',
@@ -39,7 +40,9 @@ async function syncTypedQcItems(tx, batchId, evaluated) {
             recoveryPct: null,
             rpd: null,
             status: b.status || 'PASS',
-            details: b.rawInput ? JSON.stringify({ evaluation: b.details || null, rawInput: b.rawInput, policyVersion: evaluated.policyVersion }) : b.details || null
+            details: JSON.stringify({ evaluation: b.details || null, rawInput: b.rawInput || {}, policyVersion: evaluated.policyVersion,
+                qcRule: evaluated.qcRule, criterion: b.criterion || 'ABSOLUTE', loq: b.loq ?? null, loqSource: b.loqSource || null,
+                notes: b.notes || [], failAction: b.failAction, maxAllowed: b.maxAllowed })
         });
     });
 
@@ -57,6 +60,7 @@ async function syncTypedQcItems(tx, batchId, evaluated) {
             rpd: d.rpd !== null && d.rpd !== undefined ? Number(d.rpd) : null,
             status: d.status || 'PASS',
             details: JSON.stringify({ evaluation: d.details || null, rawInput: d.rawInput || {}, policyVersion: evaluated.policyVersion,
+                qcRule: evaluated.qcRule, failAction: d.failAction, absMax: d.absMax ?? null,
                 loq: d.loq, loqSource: d.loqSource, methodologyId: d.methodologyId, notes: d.notes,
                 criterion: d.criterion, censoringLimits: d.censoringLimits || null, absoluteDifference: d.absoluteDifference ?? null })
         });
@@ -77,8 +81,10 @@ async function syncTypedQcItems(tx, batchId, evaluated) {
             recoveryPct: c.recoveryPct !== null && c.recoveryPct !== undefined ? Number(c.recoveryPct) : null,
             rpd: null,
             status: c.status || 'PASS',
-            details: c.referenceSnapshot || c.rawInput ? JSON.stringify({ evaluation: c.details || null, rawInput: c.rawInput || {},
-                policyVersion: evaluated.policyVersion, referenceUse: c.referenceUse || null, referenceSnapshot: c.referenceSnapshot || null }) : c.details || null
+            details: JSON.stringify({ evaluation: c.details || null, rawInput: c.rawInput || {},
+                policyVersion: evaluated.policyVersion, qcRule: evaluated.qcRule, criterion: c.criterion, notes: c.notes || [], failAction: c.failAction,
+                crmAbsWindow: c.crmAbsWindow, lrmWindowPct: c.lrmWindowPct,
+                referenceUse: c.referenceUse || null, referenceSnapshot: c.referenceSnapshot || null })
         });
     });
 
@@ -244,10 +250,12 @@ exports.getBatches = async (req, res) => {
             orderBy: { createdAt: 'desc' }
         });
 
-        const dataWithProfiles = await Promise.all(batches.map(async b => ({
-            ...b,
-            numberFormat: await getNumberFormat(b.labId),
-            runProfile: await resolveBatchRunProfile(b)
+        const dataWithProfiles = await Promise.all(batches.map(async b => prisma.$transaction(async tx => {
+            const numberFormat = await getNumberFormat(b.labId, { db: tx });
+            const runProfile = await resolveBatchRunProfile(b, tx);
+            const policy = await resolveQcPolicy(b, tx, numberFormat);
+            return { ...b, numberFormat, runProfile, qcRule: policy.qcRule, qcMode: policy.qcMode,
+                qcRequirements: countRequirements(policy.qcRule, policy.sampleCount, runProfile, {}, policy.qcMode) };
         })));
 
         res.json({ data: dataWithProfiles });
@@ -287,6 +295,7 @@ exports.getBatchById = async (req, res) => {
         }
 
         const runProfile = await resolveBatchRunProfile(batch);
+        const currentPolicy = await prisma.$transaction(tx => resolveQcPolicy(batch, tx));
 
         let qcResults = null;
         try {
@@ -306,6 +315,8 @@ exports.getBatchById = async (req, res) => {
         res.json({
             data: {
                 ...batch,
+                qcRule: currentPolicy.qcRule, qcMode: currentPolicy.qcMode,
+                qcRequirements: countRequirements(currentPolicy.qcRule, currentPolicy.sampleCount, runProfile, {}, currentPolicy.qcMode),
                 qcResults,
                 disposition,
                 history
@@ -488,11 +499,19 @@ exports.evaluateBatch = async (req, res) => {
             const runProfile = await resolveBatchRunProfile(batch, tx);
             const numberFormat = await getNumberFormat(batch.labId, { db: tx });
             const qcPayload = await linkReferences(tx, batch, user, normalizeQcNumbers({ blanks, duplicates, controls }, numberFormat));
-            const missingTypes = getMissingQcValueTypes(qcPayload, runProfile, numberFormat);
+            const policy = await resolveQcPolicy(batch, tx, numberFormat);
+            const requirements = countRequirements(policy.qcRule, policy.sampleCount, runProfile, qcPayload, policy.qcMode);
+            // #185 pin 6016488612 retains #163's input guard for an entirely
+            // missing enabled type in blocking mode. Nonempty insufficient counts
+            // become verdicts. Submitted partial values are invalid in every mode.
+            const suppliedProfile = { qcSlots: ['BLANK', 'DUPLICATE', 'CONTROL'].filter((type, index) =>
+                (policy.qcMode === 'REQUIRED_BLOCKING' && (requirements[type].required > 0 || (type === 'CONTROL' && requirements.LRM.required > 0))) ||
+                (qcPayload[['blanks', 'duplicates', 'controls'][index]] != null &&
+                    (!Array.isArray(qcPayload[['blanks', 'duplicates', 'controls'][index]]) || qcPayload[['blanks', 'duplicates', 'controls'][index]].length > 0))).map(type => ({ type })) };
+            const missingTypes = getMissingQcValueTypes(qcPayload, suppliedProfile, numberFormat);
             if (missingTypes.length) {
                 throw batchError(400, { code: 'QC_VALUES_MISSING', error: 'Required QC values are missing or non-numeric.', missingTypes });
             }
-            const policy = await resolveQcPolicy(batch, tx, numberFormat);
             const evaluated = retainReferences(retainQcRawInput(evaluateBatchQc(qcPayload, { runProfile, policy }), qcPayload), qcPayload);
             evaluated.policyVersion = policy.policyVersion;
             evaluated.policyValues = policy.policyValues;

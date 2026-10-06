@@ -153,7 +153,8 @@ function beforeGuards(options) {
             // The captured historical baselines predate exactly the two #184
             // tables and two nullable QC links. They stay genuinely historical.
             expected.push({ table: 'BatchQcResult', fields: ['referenceMaterialId', 'referenceValueId'] },
-                { table: 'ReferenceMaterial', missingTable: true }, { table: 'ReferenceValue', missingTable: true });
+                { table: 'ReferenceMaterial', missingTable: true }, { table: 'ReferenceValue', missingTable: true },
+                { table: 'QcRule', missingTable: true });
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }
@@ -227,7 +228,7 @@ function beforeGuards(options) {
         } else {
             const source = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
             const tables = source.prepare("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%' AND name != 'ResultEvidenceEvent'").all();
-            const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent' AND name NOT IN ('ReferenceValue_current_generic','ReferenceValue_current_method')").all();
+            const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent' AND name NOT IN ('ReferenceValue_current_generic','ReferenceValue_current_method','QcRule_scope_version_unique')").all();
             source.close();
             for (const table of tables) db.exec(['Sample', 'WorkItem'].includes(table.name)
                 ? table.sql.replace(/,\s*"(?:holdPriorStatus|legacyStatus)"\s+TEXT(?=\s*[,)])/g, '') : table.sql);

@@ -209,7 +209,7 @@ describe('Audit 1.0: persistent lab policies', () => {
         await edit([{ key: 'qc.blankMaxAllowed', value: .2 }, { key: 'qc.controlMinRecovery', value: 80 },
             { key: 'qc.controlMaxRecovery', value: 120 }, { key: 'qc.duplicateMaxRpd', value: 30, analysisCode, methodologyId }]);
         const response = await request(app).post(`/api/qc/batches/${batch.id}/evaluate`).set('Authorization', `Bearer ${technician}`)
-            .send({ blanks: [{ value: '0.1' }], controls: [{ expected: '100', measured: '85' }], duplicates: [{ value1: '100', value2: '120' }] });
+            .send({ blanks: [{ value: '0.1' }], controls: [{ expected: '100', measured: '85' }], duplicates: [{ value1: '100', value2: '120' }, { value1: '100', value2: '120' }] });
         expect({ status: response.status, body: response.body }).toMatchObject({ status: 200 });
         const evaluated = await prisma.batch.findUnique({ where: { id: batch.id } });
         expect(JSON.parse(evaluated.qcResults)).toMatchObject({ overallStatus: 'QC_PASS', policyVersion: 1,

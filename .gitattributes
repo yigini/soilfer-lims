@@ -22,3 +22,6 @@ server/services/resultAttemptMigrationSource.js text eol=lf
 server/prisma/migrations/20261006000200_reference_material_catalogue/migration.sql text eol=lf
 server/prisma/migrations/20261006000200_reference_material_catalogue/fresh-prisma-tables.json text eol=lf
 server/services/referenceMaterialMigrationSource.js text eol=lf
+server/prisma/migrations/20261006000300_qc_rules/migration.sql text eol=lf
+server/prisma/migrations/20261006000300_qc_rules/fresh-prisma-tables.json text eol=lf
+server/services/qcRuleMigrationSource.js text eol=lf

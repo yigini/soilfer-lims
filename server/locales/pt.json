@@ -877,8 +877,7 @@
         "name": "Preparação de amostras"
       }
     }
-  }
-,
+  },
   "policies": {
     "sampleCodeNoCheck": "Sem um caractere de verificação, os erros de leitura são mais difíceis de detectar.",
     "keys": {
@@ -918,7 +917,21 @@
       "numbers_thousandsSeparator": "Separador de milhares",
       "intake_defaultAnalysisMassG": "Massa de análise padrão",
       "intake_retentionMassG": "Massa de amostra retida",
-      "referenceMaterials_expiryWarningDays": "Aviso de validade dos materiais de referência (dias)"
+      "referenceMaterials_expiryWarningDays": "Aviso de validade dos materiais de referência (dias)",
+      "qc_duplicateMode": "Critério de duplicatas",
+      "qc_duplicateAbsMax": "Limite absoluto de duplicatas",
+      "qc_duplicateAbsMaxBelow5LOQ": "Limite de duplicatas abaixo de 5 LOQ",
+      "qc_blankLimitMode": "Critério do branco",
+      "qc_crmMode": "Critério do CRM",
+      "qc_crmAbsWindow": "Janela absoluta do CRM",
+      "qc_lrmWindowPct": "Janela do LRM (%)",
+      "qc_ccvMin": "Recuperação mínima do CCV",
+      "qc_ccvMax": "Recuperação máxima do CCV",
+      "qc_curveMinPoints": "Pontos mínimos da curva",
+      "qc_curveMinR": "Correlação mínima da curva",
+      "qc_repeatabilityLimit": "Limite de repetibilidade",
+      "qc_blankCorrection": "Correção do branco",
+      "qc_failAction": "Ação em caso de falha de QC"
     },
     "title": "Políticas",
     "yes": "Sim",
@@ -984,7 +997,10 @@
       "LAB_PRESET": "Predefinição do laboratório",
       "PROFILE_OVERRIDE": "Substituição da implantação",
       "PROFILE_PRESET": "Predefinição da implantação",
-      "REGISTRY_DEFAULT": "Padrão rigoroso"
+      "REGISTRY_DEFAULT": "Padrão rigoroso",
+      "QC_RULE": "Regras de QC versionadas",
+      "DEFAULT_RULE": "Valores herdados",
+      "SHIPPED_ANALYSIS_DEFAULT": "Valor padrão da análise"
     },
     "options": {
       "YEARLY": "A cada ano",
@@ -1001,7 +1017,19 @@
       "REPORT_VALUE_FLAGGED": "Relatar valor com indicador",
       "BLANK": "Branco",
       "DUPLICATE": "Duplicata",
-      "CONTROL": "Controle de referência"
+      "CONTROL": "Controle de referência",
+      "ABS_DIFF": "Limite absoluto de duplicatas",
+      "ABS_WINDOW": "Janela absoluta do CRM",
+      "RPD": "RPD",
+      "ABSOLUTE": "Limite absoluto",
+      "LT_LOQ": "< LOQ",
+      "LT_HALF_LOQ": "< LOQ / 2",
+      "RECOVERY": "Recuperação",
+      "EN_SCORE": "En",
+      "NONE": "Nenhum",
+      "SUBTRACT_MEAN_BLANK": "Correção do branco",
+      "FAIL_BATCH": "Reprovar lote",
+      "WARN": "Avisar"
     },
     "units": {
       "samples": "amostras",
@@ -1013,6 +1041,7 @@
     },
     "errors": {
       "POLICY_REASON_REQUIRED": "Informe um motivo para a alteração da política.",
+      "POLICY_QC_RULE_CONFLICT": "Esta política entraria em conflito com uma regra de controle de qualidade atual ou programada. Ajuste essa regra antes de salvar.",
       "POLICY_VERSION_CONFLICT": "As políticas mudaram durante a edição. Atualize e revise os valores antes de salvar.",
       "POLICY_VALUE_INVALID": "O valor está fora do intervalo permitido ou tem formato inválido.",
       "POLICY_KEY_INVALID": "Configuração de política desconhecida.",
@@ -1135,7 +1164,63 @@
       "REFERENCE_MATERIAL_REQUIRED": "Selecione um material de referência.",
       "REFERENCE_WRITE_BUSY": "Outra gravação está em curso. Recarregue antes de tentar novamente.",
       "REFERENCE_LINK_INVALID": "A ligação de referência é inválida.",
-      "REFERENCE_ERROR": "A operação de referência falhou."
+      "REFERENCE_ERROR": "A operação de referência falhou.",
+      "TRANSITION_REASON_REQUIRED": "Indique um motivo para esta alteração.",
+      "AMBIGUOUS_NUMBER": "Use o formato numérico do laboratório; este número é ambíguo.",
+      "INVALID_REFERENCE_MATERIAL": "Os campos do material de referência são inválidos.",
+      "REFERENCE_MATERIAL_IMMUTABLE": "Os dados do lote e do certificado não podem ser alterados. Crie um novo lote de referência.",
+      "INVALID_REFERENCE_VALUE": "O valor atribuído ou os dados do certificado são inválidos.",
+      "REFERENCE_VALUE_IMMUTABLE": "Os valores atribuídos não podem ser alterados. Corrija-os adicionando uma nova revisão.",
+      "REFERENCE_VALUE_REFERENCED": "Os valores vinculados ou corrigidos não podem ser excluídos.",
+      "INVALID_QC_REFERENCE_LINK": "A ligação de referência do controle de qualidade é inválida. Recarregue o lote antes de tentar novamente."
+    }
+  },
+  "qcRules": {
+    "title": "Regras de QC versionadas",
+    "measurements": "Medições de QC",
+    "required": "obrigatórios",
+    "optional": "opcional / não utilizado",
+    "add": "Adicionar",
+    "reset": "Restaurar valores herdados",
+    "inheritanceHelp": "Cada critério vazio herda a política efetiva da análise, método ou laboratório. Cada salvamento cria uma versão imutável; avaliações anteriores mantêm suas regras. Uma regra de método redefinida continua tendo prioridade sobre a regra independente do método; seus campos vazios herdam os valores da política.",
+    "deferredHelp": "Tamanho do lote, CRM periódico, padrões de verificação e critérios de curva serão aplicados quando as posições da corrida estiverem disponíveis.",
+    "types": {
+      "BLANK": "Branco",
+      "DUPLICATE": "Par de duplicatas",
+      "CONTROL": "Controle",
+      "LRM": "Material de referência do laboratório",
+      "CRM": "Material de referência certificado"
+    },
+    "fields": {
+      "value": "Valor medido",
+      "expected": "Valor atribuído",
+      "measured": "Valor medido",
+      "value1": "Primeira leitura",
+      "value2": "Segunda leitura"
+    },
+    "actions": {
+      "FAIL_BATCH": "Reprovar lote",
+      "WARN": "Avisar"
+    },
+    "errors": {
+      "QC_RULE_VERSION_CONFLICT": "A regra mudou. Atualize antes de salvar.",
+      "QC_RULE_REASON_REQUIRED": "É necessário um motivo.",
+      "QC_RULE_EFFECTIVE_FROM_INVALID": "Use uma data futura válida; não é permitida retroatividade.",
+      "QC_RULE_SCOPE_INVALID": "A análise e o método devem pertencer a este laboratório.",
+      "QC_RULE_VALUE_INVALID": "Critério de QC inválido ou limites inconsistentes.",
+      "QC_RULE_POLICY_CONFLICT": "Esta regra de controle de qualidade entraria em conflito com uma política do laboratório ou do método. Ajuste os critérios antes de salvar.",
+      "QC_RULE_MODE_UNSUPPORTED": "Este modo requer uma implementação posterior da auditoria.",
+      "QC_RULE_LOQ_MISSING": "Não há LOQ utilizável; este critério do branco será inválido.",
+      "QC_RULE_IMMUTABLE": "As regras são imutáveis; salve uma nova versão.",
+      "QC_REQUIRED_COUNT_MISSING": "Faltam medições de QC obrigatórias.",
+      "QC_RULE_REQUEST_FAILED": "Não foi possível processar as regras de QC.",
+      "QC_RULE_SOURCE_MISMATCH": "A fonte da migração difere da versão revisada.",
+      "QC_RULE_SCHEMA_MISMATCH": "O esquema de QC está incompleto ou difere da versão.",
+      "QC_RULE_INTEGRITY_REFUSED": "A integridade das regras de QC requer revisão.",
+      "QC_RULE_DATABASE_REQUIRED": "É necessário um caminho explícito de banco de dados.",
+      "QC_RULE_NOT_INSTALLED": "Instale a migração revisada antes de iniciar.",
+      "QC_RULE_ARGUMENT_INVALID": "Argumentos do instalador de QC inválidos.",
+      "QC_RULE_INSTALL_REFUSED": "A instalação das regras de QC foi recusada."
     }
   }
 }

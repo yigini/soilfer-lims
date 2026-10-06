@@ -530,7 +530,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
                 .send({
                     blanks: [{ value: 0.01 }],
                     controls: [{ expected: 7.0, measured: 7.05 }],
-                    duplicates: [{ value1: 7.0, value2: 7.02 }]
+                    duplicates: [{ value1: 7.0, value2: 7.02 }, { value1: 7.0, value2: 7.02 }]
                 });
 
             expect(updateRes.statusCode).toBe(200);
@@ -574,7 +574,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
                 .send({
                     blanks: [{ value: 0.01 }],
                     controls: [{ expected: 7.0, measured: 7.05 }],
-                    duplicates: [{ value1: 7.0, value2: 7.02 }]
+                    duplicates: [{ value1: 7.0, value2: 7.02 }, { value1: 7.0, value2: 7.02 }]
                 });
 
             // Manager closes batch
@@ -620,7 +620,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
             const parsed = JSON.parse(batch.qcResults);
             expect(parsed.blanks[0].value).toBeNull();
             expect(parsed.blanks[0].status).toBe('FAIL');
-            expect(parsed.summary.missingRequired).toEqual(expect.arrayContaining(['CONTROL', 'DUPLICATE']));
+            expect(parsed.summary.missingRequired).toEqual(expect.arrayContaining([expect.objectContaining({ type: 'CONTROL' }), expect.objectContaining({ type: 'DUPLICATE' })]));
         });
 
         test('Dedicated evaluate route rejects mutating a CLOSED batch (400)', async () => {
@@ -637,7 +637,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
                 .send({
                     blanks: [{ value: 0.01 }],
                     controls: [{ expected: 7.0, measured: 7.05 }],
-                    duplicates: [{ value1: 7.0, value2: 7.02 }]
+                    duplicates: [{ value1: 7.0, value2: 7.02 }, { value1: 7.0, value2: 7.02 }]
                 });
 
             await request(app)
@@ -672,7 +672,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
                 .send({
                     blanks: [{ value: 0.01 }],
                     controls: [{ expected: 7.0, measured: 7.05 }],
-                    duplicates: [{ value1: 7.0, value2: 7.02 }]
+                    duplicates: [{ value1: 7.0, value2: 7.02 }, { value1: 7.0, value2: 7.02 }]
                 });
 
             const passedBatch = await prisma.batch.findUnique({ where: { id: batchId } });

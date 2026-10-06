@@ -349,6 +349,49 @@ model WorkItemDraft {
   @@index([sampleId, analysis])
 }
 
+// Criteria are nullable overrides; rule rows are immutable revisions (#185).
+model QcRule {
+  id                         String   @id
+  labId                      String
+  analysisCode               String
+  methodologyId              String?
+  version                    Int
+  effectiveFrom              DateTime
+  approvedBy                 String
+  reason                     String
+  createdAt                  DateTime @default(now())
+  maxBatchSize               Int?
+  blankPerBatch              Int?
+  blankLimitMode             String?
+  blankAbsLimit              Float?
+  duplicateEvery            Int?
+  duplicateRpdMax            Float?
+  duplicateMode              String?
+  duplicateAbsMax            Float?
+  duplicateAbsMaxBelow5LOQ    Float?
+  lrmPerBatch                Int?
+  lrmMode                    String?
+  lrmWindowPct               Float?
+  crmEveryNBatches            Int?
+  crmMode                    String?
+  crmRecoveryMin             Float?
+  crmRecoveryMax             Float?
+  crmAbsWindow               Float?
+  ccvEvery                   Int?
+  ccvMin                     Float?
+  ccvMax                     Float?
+  curveMinPoints             Int?
+  curveMinR                  Float?
+  repeatabilityLimit         Float?
+  blankCorrection            String?
+  failAction                 String?
+  lab                        Lab @relation(fields: [labId], references: [id], onDelete: Restrict)
+  analysis                   Analysis @relation(fields: [analysisCode], references: [code], onDelete: Restrict)
+  methodology                Methodology? @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+
+  @@index([labId, analysisCode, methodologyId, effectiveFrom])
+}
+
 model Batch {
   id          String   @id
   labId       String?
@@ -468,6 +511,7 @@ model Lab {
   appearanceSetting LabAppearanceSetting?
   policy             LabPolicy?
   policyOverrides    LabPolicyOverride[]
+  qcRules            QcRule[]
   referenceMaterials ReferenceMaterial[]
 }
 
@@ -1024,6 +1068,7 @@ model Analysis {
   sampleMassRequired Float?            @default(10.0) // Sample mass required in grams (RC-01)
   version            Int?              @default(1)
   methodologies      Methodology[]
+  qcRules            QcRule[]
   referenceValues    ReferenceValue[]
 }
 
@@ -1068,6 +1113,7 @@ model Methodology {
   updatedAt        DateTime         @updatedAt
 
   workItems        WorkItem[]
+  qcRules          QcRule[]
   referenceValues  ReferenceValue[]
 }
 

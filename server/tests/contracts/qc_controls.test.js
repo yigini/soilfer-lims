@@ -177,7 +177,7 @@ describe('BLK-2: Minimum Viable Typed QC Controls Contract', () => {
             .set('Authorization', `Bearer ${techToken}`)
             .send({
                 blanks: [{ id: 'B2', value: 0.01, maxAllowed: 0.05 }],
-                duplicates: [{ id: 'D2', value1: 6.8, value2: 6.9, maxRpd: 10.0 }], // RPD 1.46% -> PASS
+                duplicates: [{ id: 'D2', value1: 6.8, value2: 6.9, maxRpd: 10.0 }, { id: 'D3', value1: 6.8, value2: 6.9, maxRpd: 10.0 }], // RPD 1.46% -> PASS
                 controls: [{ id: 'C2', expected: 7.0, measured: 6.95, minRecovery: 90, maxRecovery: 110 }] // Recovery 99.3% -> PASS
             });
 

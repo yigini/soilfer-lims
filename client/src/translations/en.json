@@ -28,9 +28,34 @@
       "HOLD_RESOLVE_ERROR": "The hold could not be resolved. Refresh and try again."
     }
   },
-  "spectralWorkflow": {"reopenTitle":"Reopen completed work","reopenMessage":"This change affects a completed work item. Enter a reason to reopen it and retry.","reason":"Reason (required)","retry":"Reopen and retry","trashTitle":"Move to Trash","trashMessage":"Move the spectrum for {label} to trash? Enter a reason. You can restore it later.","batchTrashMessage":"Move {count} selected spectra to trash? Enter a reason. You can restore them later.","trashConfirm":"Move to Trash","partialTitle":"Import partially completed","receiptTitle":"Import receipt","receiptCounts":"Recorded {count} scans; {failed} failed.","retryFailed":"Review and retry remaining entries"},
-  "numbers": {"ambiguous":"Clarify the decimal or thousands separator.","invalid":"Invalid number format.","policyInvalid":"Laboratory number format is unavailable or invalid.","decimal":"Decimal separator","thousands":"Thousands separator","noGrouping":"Not configured","space":"Space"},
-  "sampleLookup": { "title": "Sample lookup", "ambiguous": "This identifier matches several samples:", "failed": "Sample could not be found or loaded. Check the identifier and connection." },
+  "spectralWorkflow": {
+    "reopenTitle": "Reopen completed work",
+    "reopenMessage": "This change affects a completed work item. Enter a reason to reopen it and retry.",
+    "reason": "Reason (required)",
+    "retry": "Reopen and retry",
+    "trashTitle": "Move to Trash",
+    "trashMessage": "Move the spectrum for {label} to trash? Enter a reason. You can restore it later.",
+    "batchTrashMessage": "Move {count} selected spectra to trash? Enter a reason. You can restore them later.",
+    "trashConfirm": "Move to Trash",
+    "partialTitle": "Import partially completed",
+    "receiptTitle": "Import receipt",
+    "receiptCounts": "Recorded {count} scans; {failed} failed.",
+    "retryFailed": "Review and retry remaining entries"
+  },
+  "numbers": {
+    "ambiguous": "Clarify the decimal or thousands separator.",
+    "invalid": "Invalid number format.",
+    "policyInvalid": "Laboratory number format is unavailable or invalid.",
+    "decimal": "Decimal separator",
+    "thousands": "Thousands separator",
+    "noGrouping": "Not configured",
+    "space": "Space"
+  },
+  "sampleLookup": {
+    "title": "Sample lookup",
+    "ambiguous": "This identifier matches several samples:",
+    "failed": "Sample could not be found or loaded. Check the identifier and connection."
+  },
   "dataSheet": {
     "title": "Data Sheet",
     "readOnlyDescription": "Recorded results are read-only here. Open the workbench to enter or update results.",
@@ -2427,8 +2452,7 @@
     "acknowledgeMass": "Acknowledge this sample’s mass warning",
     "massCheckFailed": "Mass requirements could not be loaded. The server will check each row when you submit.",
     "positionalUncertainty": "Recorded positional uncertainty (m)"
-  }
-,
+  },
   "policies": {
     "sampleCodeNoCheck": "Without a check character, scanning errors are harder to detect.",
     "keys": {
@@ -2468,7 +2492,21 @@
       "numbers_thousandsSeparator": "Thousands separator",
       "intake_defaultAnalysisMassG": "Default analysis mass",
       "intake_retentionMassG": "Sample retention mass",
-      "referenceMaterials_expiryWarningDays": "Reference material expiry warning (days)"
+      "referenceMaterials_expiryWarningDays": "Reference material expiry warning (days)",
+      "qc_duplicateMode": "Duplicate criterion",
+      "qc_duplicateAbsMax": "Absolute duplicate limit",
+      "qc_duplicateAbsMaxBelow5LOQ": "Duplicate limit below 5 LOQ",
+      "qc_blankLimitMode": "Blank criterion",
+      "qc_crmMode": "CRM criterion",
+      "qc_crmAbsWindow": "Absolute CRM window",
+      "qc_lrmWindowPct": "LRM window (%)",
+      "qc_ccvMin": "Minimum CCV recovery",
+      "qc_ccvMax": "Maximum CCV recovery",
+      "qc_curveMinPoints": "Minimum curve points",
+      "qc_curveMinR": "Minimum curve correlation",
+      "qc_repeatabilityLimit": "Repeatability limit",
+      "qc_blankCorrection": "Blank correction",
+      "qc_failAction": "Action on QC failure"
     },
     "title": "Policies",
     "yes": "Yes",
@@ -2534,7 +2572,10 @@
       "LAB_PRESET": "Laboratory preset",
       "PROFILE_OVERRIDE": "Deployment override",
       "PROFILE_PRESET": "Deployment preset",
-      "REGISTRY_DEFAULT": "Strict default"
+      "REGISTRY_DEFAULT": "Strict default",
+      "QC_RULE": "Versioned QC rules",
+      "DEFAULT_RULE": "Inherited defaults",
+      "SHIPPED_ANALYSIS_DEFAULT": "Shipped analysis default"
     },
     "options": {
       "YEARLY": "Each year",
@@ -2551,7 +2592,19 @@
       "REPORT_VALUE_FLAGGED": "Report value with a flag",
       "BLANK": "Blank",
       "DUPLICATE": "Duplicate",
-      "CONTROL": "Reference control"
+      "CONTROL": "Reference control",
+      "ABS_DIFF": "Absolute duplicate limit",
+      "ABS_WINDOW": "Absolute CRM window",
+      "RPD": "RPD",
+      "ABSOLUTE": "Absolute limit",
+      "LT_LOQ": "< LOQ",
+      "LT_HALF_LOQ": "< LOQ / 2",
+      "RECOVERY": "Recovery",
+      "EN_SCORE": "En",
+      "NONE": "None",
+      "SUBTRACT_MEAN_BLANK": "Blank correction",
+      "FAIL_BATCH": "Fail batch",
+      "WARN": "Warn"
     },
     "units": {
       "samples": "samples",
@@ -2563,6 +2616,7 @@
     },
     "errors": {
       "POLICY_REASON_REQUIRED": "Enter a reason for the policy change.",
+      "POLICY_QC_RULE_CONFLICT": "This policy would conflict with a current or scheduled QC rule. Adjust that rule before saving.",
       "POLICY_VERSION_CONFLICT": "Policies changed while you were editing. Refresh and review the current values before saving.",
       "POLICY_VALUE_INVALID": "The value is outside the permitted range or has an invalid format.",
       "POLICY_KEY_INVALID": "Unknown policy setting.",
@@ -2685,7 +2739,63 @@
       "REFERENCE_MATERIAL_REQUIRED": "Select a reference material.",
       "REFERENCE_WRITE_BUSY": "Another write is in progress. Reload before retrying.",
       "REFERENCE_LINK_INVALID": "The reference link is invalid.",
-      "REFERENCE_ERROR": "The reference operation failed."
+      "REFERENCE_ERROR": "The reference operation failed.",
+      "TRANSITION_REASON_REQUIRED": "Provide a reason for this change.",
+      "AMBIGUOUS_NUMBER": "Use the laboratory number format; this number is ambiguous.",
+      "INVALID_REFERENCE_MATERIAL": "Reference material fields are invalid.",
+      "REFERENCE_MATERIAL_IMMUTABLE": "Lot and certificate details cannot be changed. Create a new reference lot.",
+      "INVALID_REFERENCE_VALUE": "The assigned value or certificate details are invalid.",
+      "REFERENCE_VALUE_IMMUTABLE": "Assigned values cannot be changed. Correct them by adding a new revision.",
+      "REFERENCE_VALUE_REFERENCED": "Referenced or corrected values cannot be deleted.",
+      "INVALID_QC_REFERENCE_LINK": "The QC reference link is invalid. Reload the batch before retrying."
+    }
+  },
+  "qcRules": {
+    "title": "Versioned QC rules",
+    "measurements": "QC measurements",
+    "required": "required",
+    "optional": "optional / not used",
+    "add": "Add",
+    "reset": "Reset to inherited defaults",
+    "inheritanceHelp": "Each blank criterion inherits the effective analysis, method or laboratory policy. Every save creates an immutable version; earlier evaluations keep their own rules. Resetting a method rule also keeps it selected ahead of the method-independent rule; its blank fields inherit policy defaults.",
+    "deferredHelp": "Batch size, periodic CRM, verification standards and curve criteria apply once run positions land.",
+    "types": {
+      "BLANK": "Blank",
+      "DUPLICATE": "Duplicate pair",
+      "CONTROL": "Control",
+      "LRM": "Laboratory reference material",
+      "CRM": "Certified reference material"
+    },
+    "fields": {
+      "value": "Measured value",
+      "expected": "Assigned value",
+      "measured": "Measured value",
+      "value1": "First reading",
+      "value2": "Second reading"
+    },
+    "actions": {
+      "FAIL_BATCH": "Fail batch",
+      "WARN": "Warn"
+    },
+    "errors": {
+      "QC_RULE_VERSION_CONFLICT": "QC rule changed. Refresh before saving.",
+      "QC_RULE_REASON_REQUIRED": "A reason is required.",
+      "QC_RULE_EFFECTIVE_FROM_INVALID": "Use a valid future timestamp; rules cannot be backdated.",
+      "QC_RULE_SCOPE_INVALID": "The analysis and method must belong to this laboratory.",
+      "QC_RULE_VALUE_INVALID": "Invalid QC criterion or inconsistent limits.",
+      "QC_RULE_POLICY_CONFLICT": "This QC rule would conflict with a laboratory or method policy. Adjust the criteria before saving.",
+      "QC_RULE_MODE_UNSUPPORTED": "This mode requires a later audit implementation.",
+      "QC_RULE_LOQ_MISSING": "No usable LOQ is configured; this blank criterion will be invalid.",
+      "QC_RULE_IMMUTABLE": "QC rules are immutable; save a new version.",
+      "QC_REQUIRED_COUNT_MISSING": "Required QC measurements are missing.",
+      "QC_RULE_REQUEST_FAILED": "Failed to process QC rules.",
+      "QC_RULE_SOURCE_MISMATCH": "QC migration source differs from the reviewed release.",
+      "QC_RULE_SCHEMA_MISMATCH": "QC schema is incomplete or differs from the release.",
+      "QC_RULE_INTEGRITY_REFUSED": "QC rule integrity needs review.",
+      "QC_RULE_DATABASE_REQUIRED": "An explicit database path is required.",
+      "QC_RULE_NOT_INSTALLED": "Install the reviewed QC rule migration before startup.",
+      "QC_RULE_ARGUMENT_INVALID": "Invalid QC installer arguments.",
+      "QC_RULE_INSTALL_REFUSED": "QC rule installation was refused."
     }
   }
 }

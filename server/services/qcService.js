@@ -27,6 +27,9 @@ function parseNumericMeasurement(val) {
     }
     return NaN;
 }
+// Preserve inclusive absolute boundaries despite binary floating-point subtraction.
+const withinAbsoluteLimit = (difference, limit) => difference <= limit ||
+    difference - limit <= Number.EPSILON * Math.max(1, difference, limit) * 4;
 
 // Validate explicit measurements by required QC type, without introducing position rules.
 function getMissingQcValueTypes(qcData = {}, runProfile = {}, numberFormat = require('./policyService').getStrictNumberFormat()) {
@@ -68,6 +71,16 @@ function evaluateBlank(blank = {}, policy = {}) {
     
     // Limits must come from policy/standard, not arbitrarily loosened by caller
     const maxAllowed = (policy && typeof policy.maxAllowed === 'number') ? policy.maxAllowed : require('./policyService').getStrict('qc.blankMaxAllowed');
+    const mode = policy.mode || require('./policyService').getStrict('qc.blankLimitMode');
+    if (mode !== 'ABSOLUTE') {
+        const notes = policy.noLoqReason ? [policy.noLoqReason] : [];
+        if (typeof policy.loq !== 'number' || !Number.isFinite(policy.loq) || policy.loq < 0) return { id, label, type: 'BLANK', value: Number.isFinite(value) ? value : null,
+            status: 'INVALID', criterion: 'NO_LOQ', loq: null, notes: ['NO_LOQ', ...notes], details: ['NO_LOQ', ...notes].join(' ') };
+        const limit = mode === 'LT_HALF_LOQ' ? policy.loq / 2 : policy.loq;
+        return { id, label, type: 'BLANK', value: Number.isFinite(value) ? value : null, maxAllowed: limit,
+            loq: policy.loq, loqSource: policy.loqSource, methodologyId: policy.methodologyId, criterion: mode, notes,
+            status: Number.isFinite(value) && Math.abs(value) < limit ? 'PASS' : 'FAIL', details: `|${value}| < ${limit}` };
+    }
 
     if (isNaN(value)) {
         return {
@@ -146,18 +159,28 @@ function evaluateDuplicate(dup = {}, policy = {}) {
         };
     }
 
+    const difference = Math.abs(v1 - v2);
+    if ((policy.mode || defaults.getStrict('qc.duplicateMode')) === 'ABS_DIFF') {
+        const limit = policy.absMax ?? defaults.getStrict('qc.duplicateAbsMax');
+        if (limit === null) return { id, label, type: 'DUPLICATE', value1: v1, value2: v2, rpd: null, maxRpd,
+            ...evidence, status: 'INVALID', criterion: 'ABS_DIFF_UNSET', details: 'ABS_DIFF_UNSET' };
+        const passed = withinAbsoluteLimit(difference, limit);
+        return { id, label, type: 'DUPLICATE', value1: v1, value2: v2, rpd: null, maxRpd, ...evidence,
+            status: passed ? 'PASS' : 'FAIL', criterion: 'ABS_DIFF', absoluteDifference: difference, absMax: limit,
+            details: `Absolute difference ${difference} ${passed ? '≤' : '>'} ${limit}` };
+    }
     const avg = v1 / 2 + v2 / 2;
     if (v1 <= 0 || v2 <= 0 || avg === 0) {
         return { id, label, type: 'DUPLICATE', value1: v1, value2: v2, rpd: null, maxRpd,
             ...evidence, status: 'INVALID', criterion: 'INVALID_NONPOSITIVE',
             details: ['Duplicate readings must both be greater than zero.', ...notes].join(' ') };
     }
-    const difference = Math.abs(v1 - v2);
     if (loq !== null && (v1 < nearLoqMultiplier * loq || v2 < nearLoqMultiplier * loq)) {
-        const passed = difference <= loq;
+        const limit = policy.absMaxBelow5LOQ ?? loq;
+        const passed = difference <= limit;
         return { id, label, type: 'DUPLICATE', value1: v1, value2: v2, rpd: null, maxRpd,
             ...evidence, status: passed ? 'PASS' : 'FAIL', criterion: 'ABSOLUTE_DIFFERENCE', absoluteDifference: difference,
-            details: `Absolute difference ${difference} ${passed ? '≤' : '>'} LOQ ${loq}` };
+            absMax: limit, details: `Absolute difference ${difference} ${passed ? '≤' : '>'} ${limit}` };
     }
     const rpd = (difference / avg) * 100;
     const passed = rpd <= maxRpd;
@@ -208,7 +231,19 @@ function evaluateControl(crm = {}, policy = {}) {
     }
 
     const recoveryPct = (measured / expected) * 100;
-    const passed = recoveryPct >= minRecovery && recoveryPct <= maxRecovery;
+    const isCrm = crm.referenceUse === 'CRM';
+    const notes = [];
+    let criterion = 'RECOVERY';
+    let lower = minRecovery, upper = maxRecovery;
+    if (!isCrm && policy.lrmMode === 'CONTROL_CHART') notes.push('PROVISIONAL_NO_CHART');
+    if (!isCrm && policy.lrmWindowPct !== null && policy.lrmWindowPct !== undefined) {
+        lower = 100 - policy.lrmWindowPct; upper = 100 + policy.lrmWindowPct;
+    }
+    let passed = recoveryPct >= lower && recoveryPct <= upper;
+    if (isCrm && policy.crmMode === 'ABS_WINDOW') {
+        if (policy.crmAbsWindow === null) notes.push('ABS_WINDOW_UNSET');
+        else { criterion = 'ABS_WINDOW'; passed = withinAbsoluteLimit(Math.abs(measured - expected), policy.crmAbsWindow); }
+    }
 
     return {
         id,
@@ -219,8 +254,10 @@ function evaluateControl(crm = {}, policy = {}) {
         recoveryPct: Number(recoveryPct.toFixed(2)),
         minRecovery,
         maxRecovery,
+        criterion, notes, crmAbsWindow: policy.crmAbsWindow ?? null, lrmWindowPct: policy.lrmWindowPct ?? null,
         status: passed ? 'PASS' : 'FAIL',
-        details: passed ? `Recovery ${recoveryPct.toFixed(1)}% within [${minRecovery}%, ${maxRecovery}%]` : `Recovery ${recoveryPct.toFixed(1)}% out of bounds [${minRecovery}%, ${maxRecovery}%]`
+        details: (criterion === 'ABS_WINDOW' ? `Absolute difference ${Math.abs(measured - expected)} compared with ${policy.crmAbsWindow}` :
+            `Recovery ${recoveryPct.toFixed(1)}% ${passed ? 'within' : 'out of bounds'} [${lower}%, ${upper}%]`) + (notes.length ? ` ${notes.join(' ')}` : '')
     };
 }
 
@@ -241,6 +278,31 @@ function evaluateBatchQc(qcData = {}, options = {}) {
     const evaluatedControls = rawControls.map(c => evaluateControl(c, policy.control));
 
     const allEvaluated = [...evaluatedBlanks, ...evaluatedDuplicates, ...evaluatedControls];
+    if (policy.qcRule) {
+        const requirements = require('./qcRequirementService').countRequirements(policy.qcRule, policy.sampleCount, options.runProfile, qcData, policy.qcMode);
+        const missingRequired = Object.entries(requirements).filter(([, row]) => row.found < row.required).map(([type, row]) => ({ type, ...row }));
+        const failAction = policy.qcRule.resolved.failAction.value;
+        const warnings = [];
+        let failed = 0;
+        const qcRule = { ...policy.qcRule, requirements };
+        allEvaluated.forEach((item, index) => {
+            const type = item.type === 'CONTROL' ? rawControls[index - evaluatedBlanks.length - evaluatedDuplicates.length]?.referenceUse === 'CRM' ? 'CRM' : 'LRM' : item.type;
+            item.qcRule = qcRule;
+            item.failAction = failAction[type];
+            if (['FAIL', 'INVALID'].includes(item.status)) {
+                if (item.failAction === 'WARN') warnings.push({ type, id: item.id, status: item.status, criterion: item.criterion });
+                else failed++;
+            }
+        });
+        if (policy.qcMode === 'REQUIRED_WARN') warnings.push(...missingRequired.map(row => ({ ...row, code: 'QC_REQUIRED_COUNT_MISSING' })));
+        const total = allEvaluated.length;
+        const blocking = missingRequired.length > 0 && policy.qcMode === 'REQUIRED_BLOCKING';
+        return { blanks: evaluatedBlanks, duplicates: evaluatedDuplicates, controls: evaluatedControls, qcRule,
+            summary: { totalQcSamples: total, passed: allEvaluated.filter(row => row.status === 'PASS').length, failed,
+                missingRequired, warnings, requirements, qcRule, evaluatedAt: qcRule.evaluatedAt,
+                incompleteReason: blocking ? 'QC_REQUIRED_COUNT_MISSING' : null },
+            overallStatus: total === 0 ? 'OPEN' : failed || blocking ? 'QC_FAIL' : 'QC_PASS' };
+    }
     const totalCount = allEvaluated.length;
     const failedCount = allEvaluated.filter(item => item.status === 'FAIL' || item.status === 'INVALID').length;
     const passedCount = allEvaluated.filter(item => item.status === 'PASS').length;
