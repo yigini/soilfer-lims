@@ -61,6 +61,19 @@ test('canonical holds and legacy metadata/mirror markers use the same fail-close
     expect(await holds.isHeld(prisma, await prisma.sample.findUnique({ where: { id: s.id } }))).toBe(false);
 });
 
+test('prepared acceptance preserves the legacy refusal code and blocks a canonical hold with zero table writes', async () => {
+    const legacy = await sample({ metadata: JSON.stringify({ provenanceHold: { status: holds.ACTIVE, reason: 'Legacy conflict' } }) });
+    const canonical = await sample();
+    await prisma.$transaction(tx => holds.raiseHold(tx, { sampleId: canonical.id, type: 'CLIENT_QUERY', reason: 'Confirm client identity', actor }));
+    for (const [s, code] of [[legacy, 'AMBIGUOUS_PROVENANCE_HOLD'], [canonical, 'SAMPLE_HELD']]) {
+        const before = snapshot();
+        await expect(prisma.$transaction(tx => require('../../services/intakeService').commitPrepared(tx, {
+            sample: s, responseKind: 'accepted', body: {}, user: actor, updateData: {}, now: new Date()
+        }))).rejects.toMatchObject({ statusCode: 409, code });
+        expect(snapshot()).toEqual(before);
+    }
+});
+
 test('resolving one of two bound holds keeps the sample held; the last clears both markers and preserves every old field', async () => {
     const s = await sample({ metadata: JSON.stringify({ unrelated: { kept: true }, provenanceHold: { status: holds.ACTIVE,
         reason: 'CONFLICTING_FIELD_SUBMISSIONS: historical reason', evidence: ['original evidence'] } }),

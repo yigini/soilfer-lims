@@ -18,7 +18,13 @@ async function commitPrepared(tx, plan, { consumeApproval = true } = {}) {
     if (plan.createData) sample = await createSample({ ...plan.createData,
         status: plan.responseKind === 'draft' ? 'DRAFT' : 'EXPECTED' }, user, { tx });
     const current = await tx.sample.findUnique({ where: { id: sample.id } });
-    if (plan.responseKind === 'accepted' && current) await require('./sampleHoldService').assertNotHeld(tx, current);
+    if (plan.responseKind === 'accepted' && current) {
+        const holds = require('./sampleHoldService');
+        if (await holds.isHeld(tx, current)) throw new IntakeError(409, {
+            code: holds.legacyHoldState(current).active ? 'AMBIGUOUS_PROVENANCE_HOLD' : 'SAMPLE_HELD',
+            message: 'Resolve all sample holds before acceptance.'
+        });
+    }
     if (!current || current.updatedAt.getTime() !== sample.updatedAt.getTime()) throw new profileIdentity.ProfileReferenceConflictError('SOURCE_CHANGED');
     scopeGuard.ensureScope(user, current, { altLabField: 'assignedLab' });
     if (current.approvedAt || LOCKED_INTAKE_STATUSES.includes(current.status) && !(current.status === 'RECEIVED_REJECTED' && body.isResubmission === true && plan.responseKind !== 'draft')) throw new profileIdentity.ProfileReferenceConflictError('SAMPLE_LOCKED');
