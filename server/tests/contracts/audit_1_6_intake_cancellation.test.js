@@ -1,11 +1,14 @@
 const { randomUUID, createHash } = require('node:crypto');
 const jwt = require('jsonwebtoken');
+const express = require('express');
+const request = require('supertest');
 const Database = require('better-sqlite3');
 const prisma = require('../../prisma');
 const work = require('../../services/workItemStateService');
 const { transitionSample } = require('../../services/sampleStateService');
 const holds = require('../../services/sampleHoldService');
-const { createSampleFixture, createWorkItemFixture, createResultFixture } = require('../helpers/workflowFixtures');
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
+const { createResultFixture } = require('../../services/resultWriteService');
 const { getAuthToken } = require('../setup');
 const { scanSource } = require('../helpers/workflowWriteScanner');
 const labId = `CANCEL-LAB-${randomUUID()}`;
@@ -135,4 +138,18 @@ test('the scanner confines reactivation to the central sample re-acceptance tran
     const source = "require('./workItemStateService').reactivateCancelledIntakeWork(tx, options)";
     expect(scanSource(source, 'controllers/canary.js')).toEqual([expect.objectContaining({ code: 'INTAKE_REACTIVATION_CALLER_FORBIDDEN' })]);
     expect(scanSource(source, 'services/sampleStateService.js')).toEqual([]);
+});
+
+test('undo-intake HTTP route refuses analytical evidence with 409 and no table writes', async () => {
+    const f = await fixture('IN_PROGRESS');
+    await createResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id, param: f.item.analysis, value: '1.2', numericValue: 1.2 } });
+    const app = express();
+    app.use(express.json());
+    app.use((req, _res, next) => { req.user = actor; next(); });
+    app.use('/api/samples', require('../../routes/sampleRoutes'));
+    const before = snapshot();
+    const response = await request(app).post(`/api/samples/${f.sample.id}/undo-intake`).send({ reason: 'Evidence must be preserved' });
+    expect(response.status).toBe(409);
+    expect(response.body).toMatchObject({ code: 'INTAKE_UNDO_HAS_WORK', details: { blockingItemIds: [f.item.id] } });
+    expect(snapshot()).toEqual(before);
 });

@@ -10,6 +10,9 @@ const WORKFLOW_LOADER = 'services/workflowMigrationSources.js';
 const WORKFLOW_LOADER_SHA256 = '0b7f6010cc7b69a03ffe5aceb3c467dd5a718f51d25968e5aba07fcf8aaa1733';
 const RESULT_LOADER = 'services/resultAttemptMigrationSource.js';
 const RESULT_LOADER_SHA256 = '36658af9e2a6fa817ff4938ad08ac6879ff10a2969acf1a395a68cad5f37a655';
+const HOLD_LOADER = 'services/sampleHoldMigrationSource.js';
+const HOLD_LOADER_SHA256 = '1568c3e40c2ac79938255ba5c002cf31aacad694eac3f6c636e1520c59ae8a12';
+const HOLD_SQL_SHA256 = 'e6221516725c3c66001fb15b09db9f81553285486552b0c0b3f810b9b6572227';
 const RESULT_SQL_SHA256 = 'aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d';
 const WORKFLOW_SOURCES = Object.freeze({
     evidence: { directory: '20261005000000_workflow_state_evidence', sha256: 'ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552' },
@@ -180,6 +183,8 @@ function scanSource(source, filename, exceptions = []) {
         });
     }
     function migrationSql(p) {
+        const holdSql = holdMigrationSql(p);
+        if (holdSql !== null) return holdSql;
         const resultSql = resultMigrationSql(p);
         if (resultSql !== null) return resultSql;
         if (p?.isCallExpression() && sourceFunction(p.get('callee'), 'evidenceCreates') && p.node.arguments.length === 1) {
@@ -221,6 +226,35 @@ function scanSource(source, filename, exceptions = []) {
             if (createHash('sha256').update(bytes).digest('hex') !== RESULT_SQL_SHA256) return null;
             const sql = bytes.toString('utf8');
             return p.node.property.name === 'guardsSql' ? sql.slice(sql.indexOf('CREATE TRIGGER')) : sql;
+        } catch { return null; }
+    }
+    function holdMigrationSql(p) {
+        if (!p?.isMemberExpression() || p.node.computed || !['sql', 'guardsSql', 'indexSql'].includes(p.node.property.name)) return null;
+        const object = p.get('object');
+        if (!object.isIdentifier()) return null;
+        const binding = object.scope.getBinding(object.node.name);
+        if (!binding || binding.kind !== 'const' || binding.constantViolations.length || !binding.path.isVariableDeclarator()) return null;
+        const init = binding.path.get('init');
+        if (!init.isCallExpression() || init.node.arguments.length || !init.get('callee').isIdentifier({ name: 'loadSampleHoldMigrationSource' })) return null;
+        const loaderBinding = init.scope.getBinding('loadSampleHoldMigrationSource');
+        const declaration = loaderBinding?.path;
+        if (!loaderBinding || loaderBinding.kind !== 'const' || loaderBinding.constantViolations.length || !declaration?.isVariableDeclarator() || !declaration.get('id').isObjectPattern()) return null;
+        const imported = declaration.get('init');
+        if (!imported.isCallExpression() || !imported.get('callee').isIdentifier({ name: 'require' }) || imported.scope.getBinding('require') || imported.node.arguments.length !== 1) return null;
+        const root = path.resolve(__dirname, '../..');
+        const specifier = path.relative(path.dirname(path.resolve(root, filename)), path.join(root, HOLD_LOADER)).replace(/\\/g, '/').replace(/\.js$/, '');
+        if (!imported.get('arguments.0').isStringLiteral({ value: specifier.startsWith('.') ? specifier : `./${specifier}` })) return null;
+        const properties = declaration.node.id.properties;
+        if (!properties.some(property => property.type === 'ObjectProperty' && !property.computed && property.key.name === 'loadSampleHoldMigrationSource' && property.value.name === property.key.name)) return null;
+        if (binding.referencePaths.some(reference => !reference.parentPath.isMemberExpression() || reference.parentPath.node.computed ||
+            !['sql', 'guardsSql', 'indexSql', 'sha256'].includes(reference.parentPath.node.property.name) || reference.parentPath.parentPath.isAssignmentExpression())) return null;
+        try {
+            if (createHash('sha256').update(fs.readFileSync(path.join(root, HOLD_LOADER))).digest('hex') !== HOLD_LOADER_SHA256) return null;
+            const bytes = fs.readFileSync(path.join(root, 'prisma/migrations/20261006000100_sample_holds_cancellation/migration.sql'));
+            if (createHash('sha256').update(bytes).digest('hex') !== HOLD_SQL_SHA256) return null;
+            const sql = bytes.toString('utf8');
+            return p.node.property.name === 'guardsSql' ? sql.slice(sql.indexOf('CREATE TRIGGER')) :
+                p.node.property.name === 'indexSql' ? sql.slice(sql.indexOf('CREATE UNIQUE INDEX'), sql.indexOf('-- Fresh Prisma')) : sql;
         } catch { return null; }
     }
     function nodeFsRead(p) {

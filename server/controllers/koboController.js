@@ -899,7 +899,7 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                         }
                         meta.conflictingSubmissions.push(revisionRecord);
 
-                        meta.provenanceHold = {
+                        const holdMarker = {
                             status: 'AMBIGUOUS_PROVENANCE_HOLD',
                             reason: 'REVISED_FIELD_EVIDENCE: Primary occurrence re-submitted with conflicting survey coordinates or attachments',
                             primaryOccurrence: {
@@ -925,6 +925,10 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                         await tx.sample.update({
                             where: { id: existingSample.id },
                             data: updateData
+                        });
+
+                        await require('../services/sampleHoldService').raiseKoboHold(tx, {
+                            sampleId: existingSample.id, marker: holdMarker, actor: 'system:kobo-sync'
                         });
 
                         await tx.auditLog.create({
@@ -1010,7 +1014,7 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                 meta.conflictingSubmissions = conflicting;
 
                 // Surface durable review/hold disposition (Finding 4)
-                meta.provenanceHold = {
+                const holdMarker = {
                     status: 'AMBIGUOUS_PROVENANCE_HOLD',
                     reason: 'CONFLICTING_FIELD_SUBMISSIONS: Multiple field submissions claimed this barcode with conflicting survey evidence',
                     primaryOccurrence: {
@@ -1035,6 +1039,10 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                 await tx.sample.update({
                     where: { id: existingSample.id },
                     data: updateData
+                });
+
+                await require('../services/sampleHoldService').raiseKoboHold(tx, {
+                    sampleId: existingSample.id, marker: holdMarker, actor: 'system:kobo-sync'
                 });
 
                 await tx.auditLog.create({
@@ -1180,6 +1188,12 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                             receptionDate: null,
                             rejectionReason: rejectionReason
                         }, options.actor || performedBy, { tx, audit: { action: 'CREATE_KOBO_SYNC' } });
+
+                    if (sampleData.hasProvenanceHold) {
+                        await require('../services/sampleHoldService').raiseKoboHold(tx, {
+                            sampleId, marker: compactMeta.provenanceHold, actor: 'system:kobo-sync'
+                        });
+                    }
 
                     if (sampleData.intraSubDuplicates && sampleData.intraSubDuplicates.length > 0) {
                         await tx.auditLog.create({

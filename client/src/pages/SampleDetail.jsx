@@ -20,6 +20,7 @@ import ReportContent from '../components/report/ReportContent';
 import SpectraViewer from '../components/SpectraViewer';
 import StorageMovementModal from '../components/sample/StorageMovementModal';
 import EvidenceInspectionModal from '../components/sample/EvidenceInspectionModal';
+import SampleHoldsPanel from '../components/sample/SampleHoldsPanel';
 
 import {
     ArrowLeft,
@@ -353,10 +354,10 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
     };
 
     const handleUndoIntake = async () => {
-        requestConfirmation(t('sampleDetail.undoIntake', 'Undo Intake'), '⚠️ UNDO INTAKE? \n\nThis will:\n1. Revert status to RECEIVED\n2. Delete generated Work Items\n3. Preserve the Lab ID for re-processing', async () => {
+        requestConfirmation(t('sampleDetail.undoIntake', 'Undo Intake'), t('sampleHolds.undoConfirmation'), async () => {
             try {
                 await axios.post(`/api/samples/${id}/undo-intake`);
-                showInfo(t('common.success', 'Success'), 'Intake Undone. Sample reverted to RECEIVED.');
+                showInfo(t('common.success', 'Success'), t('sampleHolds.undoSuccess'));
                 fetchWorkspaceData();
             } catch (e) {
                 showInfo(t('common.error', 'Error'), e.response?.data?.error || e.message);
@@ -805,6 +806,8 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                         </div>
                     </div>
                 </header>
+
+                <SampleHoldsPanel sampleId={id} refreshKey={workspace} onResolved={() => fetchWorkspaceData(true)} />
 
                 {/* ─── 3. ORDER INTEGRITY WARNING (W001: Order Revision vs Tasks Mismatch) ─── */}
                 {(workspace?.orderIntegrityWarning || workspace?.order?.warning) && (

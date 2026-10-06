@@ -401,6 +401,7 @@ const SamplesTable = ({ data, sort, order, onSort, selected = [], onSelect, onSe
                                                         ? (sample.originalId || 'PENDING')
                                                         : (sample.labId || sample.siteId || sample.originalId || 'PENDING')}
                                                 </span>
+                                                {sample.held && <span className="text-xs font-semibold text-[var(--sf-warning)]">{t('sampleHolds.badge')}</span>}
                                                 <span className="text-xs text-sf-muted flex items-center gap-1">
                                                     {sample.status === 'EXPECTED'
                                                         ? <span className="text-amber-500 font-medium">Lab ID: Pending</span>

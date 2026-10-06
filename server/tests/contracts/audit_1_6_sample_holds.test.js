@@ -1,6 +1,8 @@
 const { randomUUID, createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
 const jwt = require('jsonwebtoken');
+const express = require('express');
+const request = require('supertest');
 const prisma = require('../../prisma');
 const holds = require('../../services/sampleHoldService');
 const { createSampleFixture } = require('../helpers/workflowFixtures');
@@ -37,7 +39,10 @@ test('canonical holds and legacy metadata/mirror markers use the same fail-close
     const cases = [
         {}, { metadata: JSON.stringify({ provenanceHold: { status: holds.ACTIVE, reason: 'Legacy conflict' } }) },
         { fieldMetadata: JSON.stringify({ provenanceHold: { value: holds.ACTIVE, source: 'KOBO' } }) },
-        { metadata: '{invalid' }, { metadata: JSON.stringify({ provenanceHold: { status: 'UNKNOWN' } }) },
+        { metadata: '{invalid' }, { metadata: '[]' }, { metadata: 'null' },
+        { metadata: JSON.stringify({ provenanceHold: null }) }, { metadata: JSON.stringify({ provenanceHold: 'invalid' }) },
+        { fieldMetadata: JSON.stringify({ provenanceHold: [] }) },
+        { metadata: JSON.stringify({ provenanceHold: { status: 'UNKNOWN' } }) },
         { metadata: JSON.stringify({ provenanceHold: { status: 'RESOLVED' } }), fieldMetadata: JSON.stringify({ provenanceHold: { value: 'RESOLVED', source: 'KOBO' } }) }
     ];
     for (const data of cases) {
@@ -130,4 +135,73 @@ test('an audit failure rolls back resolution, both compatibility markers and all
 test('legacy updatedAt attribution is presented as an upper bound', () => {
     expect(holds.presentHold({ attributionSource: 'LEGACY_HOLD_UPDATED_AT' }).raisedAtIsUpperBound).toBe(true);
     expect(holds.presentHold({ attributionSource: 'KOBO_CONFLICT_AUDIT' }).raisedAtIsUpperBound).toBe(false);
+});
+
+test('wrapper-only resolution adds one marker after the last bound hold and preserves unrelated metadata bytes', async () => {
+    const metadata = '{\n  "unrelated" : { "scientificValue": 1.2300, "text": "kept" }, "list": [ 1, 2 ]\n}';
+    const mirror = { value: holds.ACTIVE, source: 'KOBO', lastUpdatedAt: '2026-10-01T12:00:00Z', lastUpdatedBy: 'SYNC' };
+    const s = await sample({ metadata, fieldMetadata: JSON.stringify({ site: 'kept', provenanceHold: mirror }) });
+    const create = () => prisma.$transaction(tx => holds.raiseHold(tx, { sampleId: s.id, type: 'PROVENANCE',
+        reason: 'Reviewed wrapper-only identity evidence', actor: 'system:kobo-sync', compatMarker: holds.COMPAT }));
+    const first = await create(), last = await create();
+    await resolve(s, first);
+    let fresh = await prisma.sample.findUnique({ where: { id: s.id } });
+    expect(fresh.metadata).toBe(metadata);
+    expect(JSON.parse(fresh.fieldMetadata).provenanceHold).toEqual(mirror);
+    expect(await holds.isHeld(prisma, fresh)).toBe(true);
+    await resolve(s, last);
+    fresh = await prisma.sample.findUnique({ where: { id: s.id } });
+    const closing = metadata.lastIndexOf('}');
+    expect(fresh.metadata.slice(0, closing)).toBe(metadata.slice(0, closing));
+    const marker = JSON.parse(fresh.metadata).provenanceHold;
+    expect(marker).toMatchObject({ status: 'RESOLVED', createdByResolution: true });
+    expect(marker.boundHoldIds.sort()).toEqual([first.id, last.id].sort());
+    expect(marker.resolutions.map(row => row.holdId).sort()).toEqual([first.id, last.id].sort());
+    expect(JSON.parse(fresh.fieldMetadata)).toEqual({ site: 'kept', provenanceHold: { ...mirror, value: 'RESOLVED' } });
+    expect(await holds.isHeld(prisma, fresh)).toBe(false);
+    const audit = await prisma.auditLog.findFirst({ where: { entityId: last.id, action: 'HOLD_RESOLVED' } });
+    expect(JSON.parse(audit.details)).toEqual({ markerCreatedByResolution: true,
+        metadataBeforeSha256: createHash('sha256').update(metadata).digest('hex'),
+        metadataAfterSha256: createHash('sha256').update(fresh.metadata).digest('hex') });
+});
+
+test.each(['{unparseable', '["non-object root"]', '{"provenanceHold":"non-object marker","untouched":1}'])
+('malformed hold metadata %s refuses resolution and preserves every raw byte and table', async metadata => {
+    const s = await sample({ metadata });
+    const h = await prisma.$transaction(tx => holds.raiseHold(tx, { sampleId: s.id, type: 'PROVENANCE',
+        reason: 'Reviewed legacy hold: metadata repair needed', actor: 'system:kobo-sync', compatMarker: holds.COMPAT }));
+    const before = snapshot();
+    await expect(resolve(s, h)).rejects.toMatchObject({ statusCode: 409, code: 'HOLD_MARKER_INVALID' });
+    expect(snapshot()).toEqual(before);
+    const fresh = await prisma.sample.findUnique({ where: { id: s.id } });
+    expect(fresh.metadata).toBe(metadata);
+    expect(await holds.isHeld(prisma, fresh)).toBe(true);
+    expect((await request(holdRoutes(actor)).get(`/api/samples/${s.id}/holds`)).body).toMatchObject({ held: true, metadataRepairNeeded: true });
+});
+
+function holdRoutes(user) {
+    const app = express();
+    app.use(express.json());
+    app.use((req, _res, next) => { req.user = user; next(); });
+    app.use('/api/samples', require('../../routes/sampleRoutes'));
+    return app;
+}
+
+test('hold routes enforce manager permission and sample scope, then return resolved attribution', async () => {
+    const s = await sample(), h = await boundHold(s.id, 'REVISED_FIELD_EVIDENCE: route reconciliation');
+    const before = snapshot();
+    const outside = holdRoutes({ ...actor, labId: 'outside-laboratory' });
+    expect((await request(outside).get(`/api/samples/${s.id}/holds`)).status).toBe(403);
+    expect((await request(outside).post(`/api/samples/${s.id}/holds/${h.id}/resolve`).send({ reason: 'Outside scope' })).status).toBe(403);
+    const reception = holdRoutes({ ...actor, role: 'SAMPLE_RECEPTION' });
+    expect((await request(reception).get(`/api/samples/${s.id}/holds`)).body).toMatchObject({ held: true, canResolve: false });
+    expect((await request(reception).post(`/api/samples/${s.id}/holds/${h.id}/resolve`).send({ reason: 'Reception cannot resolve' })).status).toBe(403);
+    const manager = holdRoutes(actor);
+    expect((await request(manager).post(`/api/samples/${s.id}/holds/${h.id}/resolve`).send({ reason: ' ' })).status).toBe(400);
+    expect(snapshot()).toEqual(before);
+    const resolved = await request(manager).post(`/api/samples/${s.id}/holds/${h.id}/resolve`).send({ reason: 'Field source reconciled by manager' });
+    expect(resolved.status).toBe(200);
+    expect(resolved.body.hold).toMatchObject({ resolvedBy: actor.username, resolution: 'Field source reconciled by manager', raisedAtIsUpperBound: false });
+    const fresh = await request(manager).get(`/api/samples/${s.id}/holds`);
+    expect(fresh.body).toMatchObject({ held: false, canResolve: true, holds: [expect.objectContaining({ id: h.id, resolvedAt: expect.any(String) })] });
 });

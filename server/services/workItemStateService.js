@@ -242,6 +242,9 @@ async function createWorkItem(data, actor, options = {}) {
         throw new TransitionError('A new work item must start at NOT_ASSIGNED.', 409, 'INITIAL_STATE_NOT_ALLOWED');
     }
     if (data.holdPriorStatus != null || data.legacyStatus != null) throw new TransitionError('Creation cannot set state provenance.', 400, 'STATE_METADATA_NOT_ALLOWED');
+    if (options.context !== 'fixture' && ['cancellationCode', 'cancellationReason', 'cancelledBy', 'cancelledAt'].some(key => Object.hasOwn(data, key))) {
+        throw new TransitionError('Cancellation provenance is controlled by the intake action.', 400, 'STATE_METADATA_NOT_ALLOWED');
+    }
     return rules.inTransaction(options.tx, async client => {
         const sample = await client.sample.findUnique({ where: { id: data.sampleId } });
         if (!sample) throw new TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');

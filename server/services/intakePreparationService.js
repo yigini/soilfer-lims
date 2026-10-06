@@ -79,7 +79,7 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
                 throw new IntakeError(409, {
                     error: 'PROVENANCE_HOLD',
                     code: 'AMBIGUOUS_PROVENANCE_HOLD',
-                    message: `Cannot process intake for sample '${sample.originalId}': Resolve all sample holds before physical intake.`
+                    message: `Cannot process intake for sample '${sample.originalId}': ${require('./sampleHoldService').legacyHoldState(sample).active ? 'Ambiguous field specimen identity. ' : ''}Resolve all sample holds before physical intake.`
                 });
             }
 

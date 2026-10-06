@@ -13,6 +13,31 @@ const sampleOriginService = require('../services/sampleOriginService');
 const sampleStateService = require('../services/sampleStateService');
 const sampleAnalysisStateService = require('../services/sampleAnalysisStateService');
 const profileIdentity = require('../services/profileIdentityService');
+const sampleHolds = require('../services/sampleHoldService');
+
+exports.getSampleHolds = async (req, res) => {
+    try {
+        const sample = await prisma.sample.findUnique({ where: { id: String(req.params.id) } });
+        if (!sample) return res.status(404).json({ code: 'SAMPLE_NOT_FOUND', error: 'Sample not found.' });
+        require('../services/workflowStateRules').assertScope(req.user, sample);
+        const holds = await prisma.sampleHold.findMany({ where: { sampleId: sample.id }, orderBy: [{ raisedAt: 'asc' }, { id: 'asc' }] });
+        return res.json({ holds: holds.map(sampleHolds.presentHold), held: await sampleHolds.isHeld(prisma, sample),
+            metadataRepairNeeded: sampleHolds.legacyHoldState(sample).metadataRepairNeeded, canResolve: hasPermission(req.user, 'APPROVE_RESULTS') });
+    } catch (err) {
+        return res.status(err.statusCode || 500).json({ code: err.code || 'HOLD_FETCH_ERROR', error: err.message });
+    }
+};
+
+exports.resolveSampleHold = async (req, res) => {
+    try {
+        const hold = await prisma.$transaction(tx => sampleHolds.resolveHold(tx, {
+            sampleId: req.params.id, holdId: req.params.holdId, actor: req.user, reason: req.body.reason
+        }));
+        return res.json({ hold: sampleHolds.presentHold(hold) });
+    } catch (err) {
+        return res.status(err.statusCode || 500).json({ code: err.code || 'HOLD_RESOLVE_ERROR', error: err.message });
+    }
+};
 
 // Printed labels and imported field barcodes encode a lab/original identifier.
 // Apply scope before matching so neither missing nor ambiguous responses leak
@@ -31,7 +56,7 @@ exports.lookupSample = async (req, res) => {
         if (!matches.length) return res.status(404).json({ code: 'SAMPLE_NOT_FOUND', error: 'Sample not found.' });
         if (matches.length > 1) return res.status(409).json({ code: 'SAMPLE_LOOKUP_AMBIGUOUS', error: 'This identifier matches several samples.',
             candidates: matches.map(sample => ({ id: sample.id, displayId: sample.originalId || sample.labId || sample.id, labId: sample.labId, originalId: sample.originalId })) });
-        return res.json(matches[0]);
+        return res.json({ ...matches[0], held: await sampleHolds.isHeld(prisma, matches[0]) });
     } catch (err) {
         console.error('[Sample lookup]', err);
         return res.status(500).json({ code: 'SAMPLE_LOOKUP_ERROR', error: 'Sample lookup failed.' });
@@ -100,6 +125,8 @@ exports.searchExpectedSamples = async (req, res) => {
                 projectCode: true,
                 status: true,
                 fieldMetadata: true,
+                metadata: true,
+                holds: true,
                 country: true
             },
             take: parseInt(limit),
@@ -116,6 +143,7 @@ exports.searchExpectedSamples = async (req, res) => {
                 projectId: s.projectId,
                 projectCode: s.projectCode,
                 status: s.status,
+                held: sampleHolds.isHeldSnapshot(s),
                 country: s.country,
                 coordinates: resolved.isRecorded ? {
                     lat: resolved.lat,
@@ -364,6 +392,7 @@ exports.getSamples = async (req, res) => {
                     receptionDate: true, createdAt: true, updatedAt: true,
                     fieldMetadata: true, metadata: true, rejectionReason: true,
                     custodyHandoverAt: true, custodyCarrierName: true, custodyTrackingNumber: true, receivingOfficerName: true,
+                    holds: true,
                     workItems: {  select: { analysis: true, status: true, category: true } }
                 }
             }) : [];
@@ -382,6 +411,7 @@ exports.getSamples = async (req, res) => {
                     receptionDate: true, createdAt: true, updatedAt: true,
                     fieldMetadata: true, metadata: true, rejectionReason: true,
                     custodyHandoverAt: true, custodyCarrierName: true, custodyTrackingNumber: true, receivingOfficerName: true,
+                    holds: true,
                     workItems: {  select: { analysis: true, status: true, category: true } }
                 },
                 orderBy: { [safeSort]: safeOrder },
@@ -437,8 +467,10 @@ exports.getSamples = async (req, res) => {
                 siteId,
                 workItemProgress: { total: totalWI, completed: completedWI, items: progressItems },
                 hasInProgressWork, hasAssignedWork, hasReanalysisWork, pendingReview, attentionRank,
+                held: sampleHolds.isHeldSnapshot(s),
+                holds: s.holds.map(sampleHolds.presentHold),
                 gatesComplete: s.dryingStatus === 'DONE' && s.preparationStatus === 'DONE',
-                nextAction: s.status === 'EXPECTED' ? (metadata?.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD' ? 'Reconcile' : 'Receive') :
+                nextAction: sampleHolds.isHeldSnapshot(s) ? 'Reconcile' : s.status === 'EXPECTED' ? 'Receive' :
                     s.status === 'RECEIVED' ? 'Accept' :
                         s.status === 'ACCEPTED' ? 'Process' : 'View'
             };
@@ -655,12 +687,12 @@ exports.undoIntake = async (req, res) => {
             }
             const items = await tx.workItem.findMany({ where: { sampleId: String(id) } });
             const reason = req.body?.reason?.trim() || `Intake undone. Status reverted to RECEIVED. ${items.length} work items cancelled and retained.`;
-            // Refuse the transition before removing tasks. Any later failure also
-            // rolls back the transition, task removal and both audit records.
+            // Validate and retain every task before changing the sample's intake
+            // state. A later failure rolls back all cancellations and audits.
+            await require('../services/workItemStateService').cancelForIntakeUndo(tx, { sampleId: String(id), actor: user, reason });
             await sampleStateService.transitionSample(id, 'RECEIVED', user, reason, {
                 dryingStatus: null, preparationStatus: null, acceptedBy: null, acceptedAt: null
             }, tx);
-            await require('../services/workItemStateService').cancelForIntakeUndo(tx, { sampleId: String(id), actor: user, reason });
             await tx.auditLog.create({ data: {
                 id: crypto.randomUUID(), entity: 'SAMPLE', entityId: id,
                 action: 'UNDO_INTAKE', details: reason, performedBy: user.username,

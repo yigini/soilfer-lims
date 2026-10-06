@@ -17,3 +17,5 @@ server/services/workflowMigrationSources.js text eol=lf
 server/scripts/rehearsal_docker_boundary.cjs text eol=lf
 server/prisma/migrations/20261006000000_result_attempt_link/migration.sql text eol=lf
 server/services/resultAttemptMigrationSource.js text eol=lf
+/server/prisma/migrations/20261006000100_sample_holds_cancellation/migration.sql text eol=lf
+/server/services/sampleHoldMigrationSource.js text eol=lf

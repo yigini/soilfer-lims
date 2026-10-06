@@ -1,4 +1,4 @@
-const { randomUUID } = require('node:crypto');
+const { randomUUID, createHash } = require('node:crypto');
 const rules = require('./workflowStateRules');
 const { hasPermission } = require('../config/roles');
 const { TransitionError } = rules;
@@ -14,15 +14,32 @@ function object(value) {
     } catch (_) { return null; }
 }
 
+function markerObject(value) {
+    return value && typeof value === 'object' && !Array.isArray(value) ? value : null;
+}
+
 // One compatibility reader for the marker and its known Kobo field wrapper.
 function legacyHoldState(sample) {
     const metadata = object(sample.metadata), fieldMetadata = object(sample.fieldMetadata);
     const marker = metadata?.provenanceHold, mirror = fieldMetadata?.provenanceHold;
-    const invalid = !metadata || !fieldMetadata || marker != null && !object(marker) || mirror != null && !object(mirror);
-    const markerActive = marker != null && marker.status !== 'RESOLVED';
-    const mirrorActive = mirror != null && (mirror.value ?? mirror.status) !== 'RESOLVED';
-    return { metadata, fieldMetadata, marker, mirror, invalid: Boolean(invalid),
+    const markerPresent = metadata && Object.hasOwn(metadata, 'provenanceHold'), mirrorPresent = fieldMetadata && Object.hasOwn(fieldMetadata, 'provenanceHold');
+    const invalid = !metadata || !fieldMetadata || markerPresent && !markerObject(marker) || mirrorPresent && !markerObject(mirror);
+    const markerActive = markerPresent && marker?.status !== 'RESOLVED';
+    const mirrorActive = mirrorPresent && (mirror?.value ?? mirror?.status) !== 'RESOLVED';
+    const metadataRepairNeeded = Boolean(invalid || mirror && !markerPresent &&
+        (typeof sample.metadata !== 'string' || !sample.metadata.trim()));
+    return { metadata, fieldMetadata, marker, mirror, invalid: Boolean(invalid), metadataRepairNeeded,
         active: Boolean(invalid || markerActive || mirrorActive), reason: marker?.reason || null };
+}
+
+function isHeldSnapshot(sample) {
+    return Boolean(sample && (legacyHoldState(sample).active || sample.holds?.some(hold => !hold.resolvedAt)));
+}
+
+function isHeldSqlite(db, sample) {
+    if (isHeldSnapshot(sample)) return true;
+    if (!sample || !db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='SampleHold'").get()) return false;
+    return Boolean(db.prepare('SELECT 1 FROM SampleHold WHERE sampleId = ? AND resolvedAt IS NULL LIMIT 1').get(sample.id));
 }
 
 async function isHeld(db, sample) {
@@ -102,26 +119,46 @@ async function resolveHold(tx, { sampleId, holdId, reason, actor, now = new Date
     const hold = await tx.sampleHold.findUnique({ where: { id: String(holdId) } });
     if (!hold || hold.sampleId !== sample.id) throw new TransitionError('Sample hold not found.', 404, 'HOLD_NOT_FOUND');
     if (hold.resolvedAt) return hold;
-    if (legacy.invalid || hold.compatMarker && (!legacy.marker || !object(legacy.marker) ||
-        legacy.marker.resolutions != null && !Array.isArray(legacy.marker.resolutions))) {
+    const wrapperOnly = hold.compatMarker && !Object.hasOwn(legacy.metadata || {}, 'provenanceHold') && legacy.mirror &&
+        typeof sample.metadata === 'string' && sample.metadata.trim() && !legacy.invalid;
+    if (legacy.invalid || hold.compatMarker && (!wrapperOnly && !markerObject(legacy.marker) ||
+        legacy.marker?.resolutions != null && !Array.isArray(legacy.marker.resolutions))) {
         throw new TransitionError('Stored hold metadata needs review.', 409, 'HOLD_MARKER_INVALID');
     }
     const changed = await tx.sampleHold.updateMany({ where: { id: hold.id, resolvedAt: null }, data: { resolvedBy, resolvedAt: now, resolution: note } });
     if (changed.count !== 1) throw new TransitionError('Hold changed. Refresh before resolution.', 409, 'HOLD_STATE_CHANGED');
+    let markerCreatedByResolution = false, metadataAfter = sample.metadata;
     if (hold.compatMarker) {
         const otherOpen = await tx.sampleHold.count({ where: { sampleId: sample.id, compatMarker: COMPAT, resolvedAt: null } });
-        const resolutions = [...(legacy.marker.resolutions || []), { holdId: hold.id, resolvedBy, resolvedAt: now.toISOString(), reason: note }];
-        const metadata = { ...legacy.metadata, provenanceHold: { ...legacy.marker, resolutions,
-            ...(!otherOpen && { status: 'RESOLVED' }) } };
+        let marker = legacy.marker;
+        if (wrapperOnly && !otherOpen) {
+            const bound = await tx.sampleHold.findMany({ where: { sampleId: sample.id, compatMarker: COMPAT }, orderBy: [{ resolvedAt: 'asc' }, { id: 'asc' }] });
+            marker = { status: 'RESOLVED', createdByResolution: true, boundHoldIds: bound.map(row => row.id),
+                resolutions: bound.filter(row => row.resolvedAt).map(row => ({ holdId: row.id, resolvedBy: row.resolvedBy,
+                    resolvedAt: row.resolvedAt.toISOString(), reason: row.resolution })) };
+            // Insert an additive key into the original JSON text. Existing key
+            // values, number spellings, whitespace and raw text remain exact.
+            const closing = sample.metadata.lastIndexOf('}');
+            metadataAfter = sample.metadata.slice(0, closing) + (Object.keys(legacy.metadata).length ? ',' : '') +
+                `"provenanceHold":${JSON.stringify(marker)}` + sample.metadata.slice(closing);
+            markerCreatedByResolution = true;
+        } else if (!wrapperOnly) {
+            const resolutions = [...(marker.resolutions || []), { holdId: hold.id, resolvedBy, resolvedAt: now.toISOString(), reason: note }];
+            metadataAfter = JSON.stringify({ ...legacy.metadata, provenanceHold: { ...marker, resolutions,
+                ...(!otherOpen && { status: 'RESOLVED' }) } });
+        }
         const fieldMetadata = { ...legacy.fieldMetadata, ...(legacy.mirror && { provenanceHold: { ...legacy.mirror,
             ...(!otherOpen && { value: 'RESOLVED', ...(Object.hasOwn(legacy.mirror, 'status') && { status: 'RESOLVED' }) }) } }) };
         await require('./sampleStateService').writeSampleHoldCompatibility(tx, sample,
-            { metadata: JSON.stringify(metadata), ...(legacy.mirror && { fieldMetadata: JSON.stringify(fieldMetadata) }) }, actor);
+            { metadata: metadataAfter, ...(legacy.mirror && { fieldMetadata: JSON.stringify(fieldMetadata) }) }, actor);
     }
     const updated = await tx.sampleHold.findUnique({ where: { id: hold.id } });
     await tx.auditLog.create({ data: { id: randomUUID(), entity: 'SAMPLE_HOLD', entityId: hold.id, action: 'HOLD_RESOLVED',
         performedBy: resolvedBy, sampleId: sample.id, labId: sample.assignedLab || null, timestamp: now,
-        before: JSON.stringify(hold), after: JSON.stringify(updated) } });
+        before: JSON.stringify(hold), after: JSON.stringify(updated),
+        ...(markerCreatedByResolution && { details: JSON.stringify({ markerCreatedByResolution: true,
+            metadataBeforeSha256: createHash('sha256').update(sample.metadata).digest('hex'),
+            metadataAfterSha256: createHash('sha256').update(metadataAfter).digest('hex') }) }) } });
     return updated;
 }
 
@@ -129,4 +166,4 @@ function presentHold(hold) {
     return { ...hold, raisedAtIsUpperBound: hold.attributionSource === 'LEGACY_HOLD_UPDATED_AT' };
 }
 
-module.exports = { TYPES, ACTIVE, COMPAT, legacyHoldState, isHeld, heldSql, assertNotHeld, raiseHold, raiseKoboHold, resolveHold, presentHold };
+module.exports = { TYPES, ACTIVE, COMPAT, legacyHoldState, isHeld, isHeldSnapshot, isHeldSqlite, heldSql, assertNotHeld, raiseHold, raiseKoboHold, resolveHold, presentHold };

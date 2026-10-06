@@ -205,15 +205,6 @@ exports.assignWork = async (req, res) => {
                 continue;
             }
 
-            // CHECK: Block Assignment for Draft/Info-Only states
-            if (sample.status === 'Draft Intake' || sample.status === 'DRAFT' || sample.status === 'EXPECTED') {
-                errors.push({
-                    id: item.id,
-                    error: `Cannot assign work. Sample is in '${sample.status}'. Please ACCEPT the sample first.`
-                });
-                continue;
-            }
-
             if (item.status === 'ACCEPTED') {
                 errors.push({ id: item.id, error: `Item is already ACCEPTED. Reject/Re-open it first to reassign.` });
                 continue;
@@ -262,7 +253,7 @@ exports.assignWork = async (req, res) => {
                     action: 'WORKITEM_ASSIGNED', details: `${user.username} assigned ${analysis} to ${assignee}` } });
             } catch (error) {
                 if (!error.statusCode) throw error;
-                errors.push({ id: item.id, error: error.message, code: error.code });
+                errors.push({ id: item.id, error: error.message, code: error.code, statusCode: error.statusCode });
                 continue;
             }
 
@@ -299,7 +290,7 @@ exports.assignWork = async (req, res) => {
         // We also run a global cleanup for this specific sample just in case.
         // Cleanup: If any items were in broken state but now assigned, it's fixed.
         // We also run a global cleanup for this specific sample just in case.
-        if (dbItems.length > 0) {
+        if (assignedCount > 0) {
             const orphaned = await prisma.workItem.findMany({
                 where: {
                     sampleId: dbItems[0].sampleId,
@@ -311,7 +302,7 @@ exports.assignWork = async (req, res) => {
                 null, { expected: { status: item.status, version: item.version }, audit: { action: 'WORKITEM_ASSIGNMENT_REPAIRED' } });
         }
         if (assignedCount === 0 && dbItems.length > 0) {
-            return res.status(400).json({
+            return res.status(errors[0]?.statusCode || 400).json({
                 success: false,
                 error: errors[0]?.error || 'Failed to assign work items due to business rules.',
                 ...(errors[0]?.code && { code: errors[0].code }),
