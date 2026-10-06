@@ -2783,6 +2783,7 @@
       "QC_RULE_EFFECTIVE_FROM_INVALID": "Use a valid future timestamp; rules cannot be backdated.",
       "QC_RULE_SCOPE_INVALID": "The analysis and method must belong to this laboratory.",
       "QC_RULE_VALUE_INVALID": "Invalid QC criterion or inconsistent limits.",
+      "QC_RULE_POLICY_CONFLICT": "This QC rule would conflict with a laboratory or method policy. Adjust the criteria before saving.",
       "QC_RULE_MODE_UNSUPPORTED": "This mode requires a later audit implementation.",
       "QC_RULE_LOQ_MISSING": "No usable LOQ is configured; this blank criterion will be invalid.",
       "QC_RULE_IMMUTABLE": "QC rules are immutable; save a new version.",

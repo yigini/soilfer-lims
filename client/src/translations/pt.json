@@ -2783,6 +2783,7 @@
       "QC_RULE_EFFECTIVE_FROM_INVALID": "Use uma data futura válida; não é permitida retroatividade.",
       "QC_RULE_SCOPE_INVALID": "A análise e o método devem pertencer a este laboratório.",
       "QC_RULE_VALUE_INVALID": "Critério de QC inválido ou limites inconsistentes.",
+      "QC_RULE_POLICY_CONFLICT": "Esta regra de controle de qualidade entraria em conflito com uma política do laboratório ou do método. Ajuste os critérios antes de salvar.",
       "QC_RULE_MODE_UNSUPPORTED": "Este modo requer uma implementação posterior da auditoria.",
       "QC_RULE_LOQ_MISSING": "Não há LOQ utilizável; este critério do branco será inválido.",
       "QC_RULE_IMMUTABLE": "As regras são imutáveis; salve uma nova versão.",

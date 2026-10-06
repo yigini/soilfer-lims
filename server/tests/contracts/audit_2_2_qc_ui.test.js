@@ -111,5 +111,5 @@ test.each(['en', 'es', 'es-419', 'fr', 'pt'])('all new messages, errors and poli
     const client = require(`../../../client/src/translations/${locale}.json`), server = require(`../../locales/${locale}.json`);
     expect(client.qcRules).toEqual(server.qcRules);
     for (const key of Object.values(FIELD_POLICIES)) expect(typeof client.policies.keys[key.replaceAll('.', '_')]).toBe('string');
-    for (const key of ['QC_RULE_VERSION_CONFLICT', 'QC_RULE_MODE_UNSUPPORTED', 'QC_RULE_LOQ_MISSING', 'QC_RULE_IMMUTABLE', 'QC_RULE_SCHEMA_MISMATCH']) expect(typeof client.qcRules.errors[key]).toBe('string');
+    for (const key of ['QC_RULE_VERSION_CONFLICT', 'QC_RULE_POLICY_CONFLICT', 'QC_RULE_MODE_UNSUPPORTED', 'QC_RULE_LOQ_MISSING', 'QC_RULE_IMMUTABLE', 'QC_RULE_SCHEMA_MISMATCH']) expect(typeof client.qcRules.errors[key]).toBe('string');
 });

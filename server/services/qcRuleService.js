@@ -75,15 +75,15 @@ async function list(actor, reference, analysisCode, methodologyId = null, option
     });
 }
 
-// Validate the proposed policy inside its write transaction. Only rules selected
-// now or at a future activation matter; superseded historical rows stay untouched.
-async function assertPolicyCompatible(labId, db, policyContexts = [], now = new Date()) {
-    const rows = await db.qcRule.findMany({ where: { labId }, select: { analysisCode: true, methodologyId: true, effectiveFrom: true } });
+// Validate selected scopes at the change's effective time and later activations.
+// Superseded historical rows stay untouched and do not block compatible changes.
+async function assertCompatibleScopes(labId, db, policyContexts, from, conflictCode, analysisCode) {
+    const rows = await db.qcRule.findMany({ where: { labId, ...(analysisCode ? { analysisCode } : {}) }, select: { analysisCode: true, methodologyId: true, effectiveFrom: true } });
     const scopes = new Map(), times = new Map();
     for (const row of rows) {
         scopes.set(JSON.stringify([row.analysisCode, row.methodologyId]), row);
-        if (!times.has(row.analysisCode)) times.set(row.analysisCode, new Set([now.getTime()]));
-        if (row.effectiveFrom > now) times.get(row.analysisCode).add(row.effectiveFrom.getTime());
+        if (!times.has(row.analysisCode)) times.set(row.analysisCode, new Set([from.getTime()]));
+        if (row.effectiveFrom > from) times.get(row.analysisCode).add(row.effectiveFrom.getTime());
     }
     // A method policy can also interact with its analysis's generic QC rule.
     for (const context of policyContexts) if (times.has(context.analysisCode)) {
@@ -93,9 +93,19 @@ async function assertPolicyCompatible(labId, db, policyContexts = [], now = new 
         try { await resolve(labId, scope.analysisCode, { db, methodologyId: scope.methodologyId, evaluatedAt: new Date(time) }); }
         catch (e) {
             if (e.code !== 'QC_RULE_VALUE_INVALID') throw e;
-            throw error(409, 'POLICY_QC_RULE_CONFLICT', 'The policy conflicts with an effective QC rule. Adjust the rule before saving.');
+            throw error(409, conflictCode, 'The policy and effective QC rule have conflicting bounds. Adjust them before saving.');
         }
     }
+}
+
+async function assertPolicyCompatible(labId, db, policyContexts = [], now = new Date()) {
+    await assertCompatibleScopes(labId, db, policyContexts, now, 'POLICY_QC_RULE_CONFLICT');
+}
+
+async function assertRuleCompatible(labId, analysisCode, db, effectiveFrom) {
+    const policyContexts = await db.labPolicyOverride.findMany({ where: { labId, analysisCode, revokedAt: null },
+        select: { analysisCode: true, methodologyId: true } });
+    await assertCompatibleScopes(labId, db, policyContexts, effectiveFrom, 'QC_RULE_POLICY_CONFLICT', analysisCode);
 }
 
 async function change(actor, request, options = {}) {
@@ -124,6 +134,7 @@ async function change(actor, request, options = {}) {
         await tx.qcRule.create({ data: prospective });
         // Validate inherited bounds too. A scheduled revision is checked at its own effective time.
         const after = await resolve(lab.id, request.analysisCode, { ...options, db: tx, methodologyId, evaluatedAt: effectiveFrom });
+        await assertRuleCompatible(lab.id, request.analysisCode, tx, effectiveFrom);
         await tx.auditLog.create({ data: { id: crypto.randomUUID(), entity: 'QC_RULE', entityId: prospective.id, labId: lab.id,
             action: 'CREATE_QC_RULE_VERSION', performedBy: actor.username, timestamp: now,
             before: JSON.stringify(previous), after: JSON.stringify(prospective),

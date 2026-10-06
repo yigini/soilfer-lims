@@ -302,3 +302,74 @@ test('superseded historical QC bounds do not block a compatible policy edit', as
     expect(await prisma.qcRule.findUnique({ where: { id: first.rule.id } })).toEqual(before);
     expect((await resolve(f)).resolved).toMatchObject({ crmRecoveryMin: { value: 90 }, crmRecoveryMax: { value: 92 } });
 });
+
+test.each(['immediate', 'future'])('a %s generic rule saved after a conflicting method policy is an atomic 409 and preserves batch reads', async kind => {
+    const f = await fixture();
+    await policies.change(actor, f.labId, { expectedVersion: 0, reason: 'Existing method upper bound', changes: [
+        { key: 'qc.controlMaxRecovery', value: 92, analysisCode: f.analysisCode, methodologyId: f.methodologyId }] }, { db: prisma });
+    const token = await getAuthToken('LAB_MANAGER', f.labId);
+    const batch = await prisma.batch.create({ data: { id: randomUUID(), labId: f.labId, analysis: f.analysisCode, profile: 'RACK_40', status: 'OPEN', createdBy: 'system:fixture' } });
+    const sample = await createSampleFixture(prisma, { data: { id: randomUUID(), originalId: randomUUID(), assignedLab: f.labId, labId: f.labId, status: 'PROCESSING' } });
+    await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, analysis: f.analysisCode, status: 'IN_PROGRESS', batchId: batch.id, methodologyId: f.methodologyId } });
+    const evaluated = await request(app).post(`/api/qc/batches/${batch.id}/evaluate`).set('Authorization', `Bearer ${token}`)
+        .send({ ...readings, controls: [{ expected: 7, measured: 6.4 }] });
+    expect(evaluated.status).toBe(200); expect(evaluated.body.status).toBe('QC_PASS');
+    const state = async () => ({ policy: await prisma.labPolicy.findUnique({ where: { labId: f.labId } }),
+        overrides: await prisma.labPolicyOverride.findMany({ where: { labId: f.labId }, orderBy: { id: 'asc' } }),
+        rules: await prisma.qcRule.findMany({ where: { labId: f.labId }, orderBy: { id: 'asc' } }),
+        audits: await prisma.auditLog.findMany({ where: { labId: f.labId }, orderBy: { id: 'asc' } }),
+        batch: await prisma.batch.findUnique({ where: { id: batch.id } }),
+        typed: await prisma.batchQcResult.findMany({ where: { batchId: batch.id }, orderBy: { id: 'asc' } }),
+        sample: await prisma.sample.findUnique({ where: { id: sample.id } }),
+        workItems: await prisma.workItem.findMany({ where: { batchId: batch.id }, orderBy: { id: 'asc' } }) });
+    const before = await state();
+    const response = await request(app).post('/api/qc/rules').set('Authorization', `Bearer ${token}`).send({ ...f, methodologyId: null, criteria: { crmRecoveryMin: 95 },
+        ...(kind === 'future' ? { effectiveFrom: new Date(Date.now() + 60000).toISOString() } : {}) });
+    expect(response.status).toBe(409); expect(response.body.code).toBe('QC_RULE_POLICY_CONFLICT');
+    expect(await state()).toEqual(before);
+    expect((await resolve(f)).resolved).toMatchObject({ crmRecoveryMin: { value: 90 }, crmRecoveryMax: { value: 92 } });
+    expect((await request(app).get('/api/qc/batches').set('Authorization', `Bearer ${token}`)).status).toBe(200);
+    expect((await request(app).get(`/api/qc/batches/${batch.id}`).set('Authorization', `Bearer ${token}`)).status).toBe(200);
+});
+
+test('a generic rule compatible with an existing method policy is still saved', async () => {
+    const f = await fixture();
+    await policies.change(actor, f.labId, { expectedVersion: 0, reason: 'Existing method upper bound', changes: [
+        { key: 'qc.controlMaxRecovery', value: 92, analysisCode: f.analysisCode, methodologyId: f.methodologyId }] }, { db: prisma });
+    const saved = await save({ ...f, methodologyId: null }, { crmRecoveryMin: 91 });
+    expect(saved.rule.version).toBe(1);
+    expect((await resolve(f)).resolved).toMatchObject({ crmRecoveryMin: { value: 91 }, crmRecoveryMax: { value: 92 } });
+    expect(await prisma.auditLog.count({ where: { labId: f.labId, entity: 'QC_RULE' } })).toBe(1);
+});
+
+test('a method rule active before a scheduled generic change keeps its own compatible policy inheritance', async () => {
+    const f = await fixture();
+    await policies.change(actor, f.labId, { expectedVersion: 0, reason: 'Existing method upper bound', changes: [
+        { key: 'qc.controlMaxRecovery', value: 92, analysisCode: f.analysisCode, methodologyId: f.methodologyId }] }, { db: prisma });
+    const methodFrom = new Date(Date.now() + 60000).toISOString();
+    const genericFrom = new Date(Date.now() + 120000).toISOString();
+    const method = await save(f, { crmRecoveryMin: 90 }, { effectiveFrom: methodFrom });
+    await save({ ...f, methodologyId: null }, { crmRecoveryMin: 95 }, { effectiveFrom: genericFrom });
+    const effective = await resolve(f, { evaluatedAt: new Date(genericFrom) });
+    expect(effective.id).toBe(method.rule.id);
+    expect(effective.resolved).toMatchObject({ crmRecoveryMin: { value: 90 }, crmRecoveryMax: { value: 92 } });
+});
+
+test('a rule save checks later generic activations against another method policy and can repair a prior incompatible schedule', async () => {
+    const f = await fixture();
+    await policies.change(actor, f.labId, { expectedVersion: 0, reason: 'Existing method upper bound', changes: [
+        { key: 'qc.controlMaxRecovery', value: 92, analysisCode: f.analysisCode, methodologyId: f.methodologyId }] }, { db: prisma });
+    // This is the scheduled row the pre-fix generic save could accept. Preserve
+    // it immutably while checking the later activation from another method.
+    const scheduled = await prisma.qcRule.create({ data: { id: randomUUID(), labId: f.labId, analysisCode: f.analysisCode, methodologyId: null,
+        version: 1, effectiveFrom: new Date(Date.now() + 60000), crmRecoveryMin: 95, approvedBy: actor.username, reason: 'Prior scheduled generic revision' } });
+    const otherMethod = await prisma.methodology.create({ data: { analysisCode: f.analysisCode, name: 'Another recorded test method' } });
+    const beforeRules = await prisma.qcRule.findMany({ where: { labId: f.labId } });
+    const beforeAudits = await prisma.auditLog.findMany({ where: { labId: f.labId } });
+    await expect(save({ ...f, methodologyId: otherMethod.id }, { duplicateAbsMax: 0.4 })).rejects.toMatchObject({ statusCode: 409, code: 'QC_RULE_POLICY_CONFLICT' });
+    expect(await prisma.qcRule.findMany({ where: { labId: f.labId } })).toEqual(beforeRules);
+    expect(await prisma.auditLog.findMany({ where: { labId: f.labId } })).toEqual(beforeAudits);
+    await save({ ...f, methodologyId: null }, {}, { expectedVersion: 1, reset: true });
+    expect(await prisma.qcRule.findUnique({ where: { id: scheduled.id } })).toEqual(scheduled);
+    expect((await resolve(f, { evaluatedAt: scheduled.effectiveFrom })).resolved).toMatchObject({ crmRecoveryMin: { value: 90 }, crmRecoveryMax: { value: 92 } });
+});
