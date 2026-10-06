@@ -362,6 +362,7 @@ test('a complete guarded database passes the read-only gate, listens and answers
     const fixture = beforeGuards({ actor: 'system:fixture', installWorkflowStateGuards: true }); fixtures.push(fixture);
     require('../../scripts/install_result_attempt_links').installResultAttemptLinks({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_sample_holds').installSampleHolds({ dbPath: fixture.file, apply: true });
+    require('../../scripts/install_reference_materials').installReferenceMaterials({ dbPath: fixture.file, apply: true });
     const child = await realStartup(fixture.file, true);
     expect(child.accepted).toBe(true);
     const ready = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"WORKFLOW_STARTUP_READY"')));

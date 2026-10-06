@@ -44,6 +44,7 @@ module.exports = async function globalSetup() {
         } finally { db.close(); }
         require('../scripts/install_result_attempt_links').installResultAttemptLinks({ dbPath: testDbPath, apply: true });
         require('../scripts/install_sample_holds').installSampleHolds({ dbPath: testDbPath, apply: true });
+        require('../scripts/install_reference_materials').installReferenceMaterials({ dbPath: testDbPath, apply: true });
     }
 
     process.env.DATABASE_PATH = testDbPath;

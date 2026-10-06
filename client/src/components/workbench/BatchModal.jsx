@@ -4,6 +4,7 @@ import { X, Layers, ShieldCheck, AlertTriangle, CheckCircle2, FlaskConical, Plus
 import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import numberParse from '@lims/number-parse';
 import NumberPreview from './NumberPreview';
+import { useLanguage } from '../../context/LanguageContext';
 
 const EMPTY_QC_FORM = { blankVal: '', ctrlExpected: '', ctrlMeasured: '', dupVal1: '', dupVal2: '' };
 
@@ -15,6 +16,7 @@ export default function BatchModal({
     onBatchUpdated
 }) {
     const getAnalysisDisplayName = useAnalysisNames();
+    const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState('create'); // 'create' | 'allocate' | 'qc'
     const [batches, setBatches] = useState([]);
     const [selectedBatchId, setSelectedBatchId] = useState('');
@@ -32,10 +34,29 @@ export default function BatchModal({
 
     // Form state for QC Evaluation
     const [qcForm, setQcForm] = useState({ ...EMPTY_QC_FORM });
+    const [referenceMaterials, setReferenceMaterials] = useState([]);
+    const [referenceLink, setReferenceLink] = useState({ referenceMaterialId: '', referenceUse: '' });
+    const [referenceLoadError, setReferenceLoadError] = useState(false);
+    const currentBatch = batches.find(b => b.id === selectedBatchId) || batches[0] || null;
+    let savedControl;
+    try { savedControl = (typeof currentBatch?.qcResults === 'string' ? JSON.parse(currentBatch.qcResults) : currentBatch?.qcResults)?.controls?.[0]; }
+    catch { /* Unreadable evidence is handled by the existing QC authority. */ }
 
     useEffect(() => {
         setQcForm({ ...EMPTY_QC_FORM });
     }, [isOpen, selectedBatchId]);
+
+    useEffect(() => {
+        let current = true;
+        setReferenceMaterials([]); setReferenceLoadError(false);
+        if (isOpen && currentBatch?.labId) axios.get('/api/reference-materials', { params: { labId: currentBatch.labId } })
+            .then(response => { if (current) setReferenceMaterials(response.data.data || []); })
+            .catch(() => { if (current) setReferenceLoadError(true); });
+        return () => { current = false; };
+    }, [isOpen, currentBatch?.labId]);
+    useEffect(() => {
+        setReferenceLink({ referenceMaterialId: savedControl?.referenceMaterialId || '', referenceUse: savedControl?.referenceUse || '' });
+    }, [isOpen, selectedBatchId, savedControl?.referenceMaterialId, savedControl?.referenceUse]);
 
     const fetchBatches = useCallback(async () => {
         try {
@@ -65,14 +86,14 @@ export default function BatchModal({
 
     if (!isOpen) return null;
 
-    const currentBatch = batches.find(b => b.id === selectedBatchId) || batches[0] || null;
     const qcMeasurements = Object.fromEntries(Object.entries(qcForm).map(([field, raw]) => {
         const duplicate = field.startsWith('dup');
         const parsed = duplicate ? numberParse.parseDuplicateObservation(raw, currentBatch?.numberFormat) : numberParse.parseNumber(raw, currentBatch?.numberFormat);
         return [field, parsed.valid && (!parsed.qualifier || duplicate) ? (parsed.censored ? parsed.canonical : parsed.value) : NaN];
     }));
-    const qcFormComplete = Object.entries(qcMeasurements).every(([field, value]) => field.startsWith('dup')
-        ? numberParse.parseDuplicateObservation(qcForm[field], currentBatch?.numberFormat).valid : Number.isFinite(value));
+    const qcFormComplete = Object.entries(qcMeasurements).every(([field, value]) => referenceLink.referenceMaterialId && field === 'ctrlExpected' ? true : field.startsWith('dup')
+        ? numberParse.parseDuplicateObservation(qcForm[field], currentBatch?.numberFormat).valid : Number.isFinite(value)) &&
+        (!referenceLink.referenceMaterialId || ['CRM', 'LRM'].includes(referenceLink.referenceUse));
 
     // Handle Create Batch
     const handleCreateBatch = async (e) => {
@@ -145,7 +166,10 @@ export default function BatchModal({
         try {
             setLoading(true);
             const blanks = [{ value: qcMeasurements.blankVal, rawInput: { value: qcForm.blankVal } }];
-            const controls = [{ expected: qcMeasurements.ctrlExpected, measured: qcMeasurements.ctrlMeasured, rawInput: { expected: qcForm.ctrlExpected, measured: qcForm.ctrlMeasured } }];
+            const sameLink = savedControl?.referenceMaterialId === referenceLink.referenceMaterialId && savedControl?.referenceUse === referenceLink.referenceUse;
+            const controls = [{ ...(savedControl?.id && { id: savedControl.id }),
+                ...(referenceLink.referenceMaterialId ? { ...referenceLink, ...(sameLink && { referenceValueId: savedControl.referenceValueId }) } : { expected: qcMeasurements.ctrlExpected }),
+                measured: qcMeasurements.ctrlMeasured, rawInput: { expected: referenceLink.referenceMaterialId ? null : qcForm.ctrlExpected, measured: qcForm.ctrlMeasured } }];
             const duplicates = [{ value1: qcMeasurements.dupVal1, value2: qcMeasurements.dupVal2, rawInput: { value1: qcForm.dupVal1, value2: qcForm.dupVal2 } }];
 
             const res = await axios.post(`/api/qc/batches/${selectedBatchId}/evaluate`, {
@@ -158,7 +182,7 @@ export default function BatchModal({
             await fetchBatches();
             if (onBatchUpdated) onBatchUpdated();
         } catch (err) {
-            setError(err.response?.data?.error || err.message || 'QC evaluation failed');
+            setError(err.response?.data?.code?.startsWith('REFERENCE_') ? t(`referenceMaterials.errors.${err.response.data.code}`, err.response.data.error) : err.response?.data?.error || err.message || 'QC evaluation failed');
         } finally {
             setLoading(false);
         }
@@ -462,6 +486,24 @@ export default function BatchModal({
                                         <label className="block text-[11px] font-bold text-sf-muted mb-1">
                                             CRM Control (Slot #2)
                                         </label>
+                                        <label className="grid gap-1 mb-2 text-xs">{t('referenceMaterials.controlMaterial')}
+                                            <select data-testid="qc-reference-material" value={referenceLink.referenceMaterialId}
+                                                onChange={e => setReferenceLink({ referenceMaterialId: e.target.value, referenceUse: '' })}
+                                                className="p-2 rounded border border-sf-divider bg-sf-canvas text-sf-text">
+                                                <option value="">{t('referenceMaterials.unlinked')}</option>
+                                                {referenceMaterials.filter(row => ['CRM', 'LRM', 'CHECK_STANDARD'].includes(row.kind)).map(row => <option key={row.id} value={row.id}
+                                                    disabled={!row.eligible && row.id !== savedControl?.referenceMaterialId}>
+                                                    {row.code} · {row.lotNumber}{!row.eligible ? ` · ${t('referenceMaterials.ineligible')}` : ''}
+                                                </option>)}
+                                            </select>
+                                        </label>
+                                        {referenceLoadError && <p role="alert" className="text-xs text-red-600">{t('referenceMaterials.loadFailed')}</p>}
+                                        {referenceLink.referenceMaterialId && <label className="grid gap-1 mb-2 text-xs">{t('referenceMaterials.referenceUse')}
+                                            <select data-testid="qc-reference-use" value={referenceLink.referenceUse} onChange={e => setReferenceLink({ ...referenceLink, referenceUse: e.target.value })}
+                                                className="p-2 rounded border border-sf-divider bg-sf-canvas text-sf-text">
+                                                <option value="">{t('referenceMaterials.choose')}</option><option value="CRM">{t('referenceMaterials.kinds.CRM')}</option><option value="LRM">{t('referenceMaterials.kinds.LRM')}</option>
+                                            </select><span className="text-sf-muted">{t('referenceMaterials.expectedFromCertificate')}</span>
+                                        </label>}
                                         <div className="flex gap-1.5">
                                             <input
                                                 type="text"
@@ -471,6 +513,7 @@ export default function BatchModal({
                                                 title="Expected"
                                                 className="w-1/2 text-xs p-2 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text font-mono focus:ring-1 focus:ring-emerald-500"
                                                 data-testid="qc-ctrl-exp-input"
+                                                disabled={!!referenceLink.referenceMaterialId}
                                             />
                                             <NumberPreview value={qcForm.ctrlExpected} numberFormat={currentBatch?.numberFormat} />
                                             <input

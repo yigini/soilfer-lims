@@ -24,6 +24,8 @@ try {
     console.log(JSON.stringify({ event: 'RESULT_ATTEMPT_STARTUP_READY', ...resultsReady }));
     const holdsReady = require('./scripts/install_sample_holds').assertSampleHoldStartupReady(dbPath);
     console.log(JSON.stringify({ event: 'SAMPLE_HOLD_STARTUP_READY', ...holdsReady }));
+    const referencesReady = require('./scripts/install_reference_materials').assertReferenceStartupReady(dbPath);
+    console.log(JSON.stringify({ event: 'REFERENCE_STARTUP_READY', ...referencesReady }));
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
         nextStep: error.code?.startsWith('SAMPLE_HOLD_') ? 'Keep the lab stopped and follow docs/audit/1.6-sample-holds.md.'

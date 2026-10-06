@@ -49,6 +49,7 @@ function modalHost() {
         if (name === 'axios') return axios;
         if (name === 'lucide-react') return new Proxy({}, { get: () => () => null });
         if (name.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => code => code };
+        if (name.includes('LanguageContext')) return { useLanguage: () => ({ t: key => key }) };
         if (name.includes('messageFormatter')) return parser;
         if (name === '@lims/number-parse') return require('../../../shared/numberParse');
         if (name === './NumberPreview') return () => null;
