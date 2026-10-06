@@ -242,7 +242,7 @@ exports.executeImport = async (req, res) => {
                     await require('../services/resultWriteService').writeResult(tx, {
                         sampleId: sample.id, actor: user, source: 'legacy-import', now,
                         measurement: { param: map.analysisCode, value: cellVal, unit: map.unitCode,
-                            methodologyId: map.methodologyId, provenance: 'IMPORTED', replicateNo: 1,
+                            methodologyId: map.methodologyId, replicateNo: 1,
                             ...(Object.hasOwn(map, 'batchId') && { batchId: map.batchId }) }
                     });
                     importedResultsCount++;

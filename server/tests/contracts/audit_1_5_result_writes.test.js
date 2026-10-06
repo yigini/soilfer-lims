@@ -196,8 +196,81 @@ test('fresh calibration due date overrides a stale OK label and leaves all table
 
 test('numeric MIR predictions retain PREDICTED provenance', async () => {
     const f = await fixture();
-    expect((await apiSave(f.sample.id, [measurement({ provenance: 'PREDICTED' })])).status).toBe(200);
+    await prisma.$transaction(tx => writer.writeSpectralPrediction(tx, { sampleId: f.sample.id, actor, measurement: measurement() }));
     expect(await prisma.result.findFirst({ where: { sampleId: f.sample.id } })).toMatchObject({ provenance: 'PREDICTED', numericValue: 6.42 });
+});
+
+test.each([
+    ['id', 'colliding-result'], ['rawInput', 'invented parser evidence'],
+    ['flags', ['MANAGER_OVERRIDE', 'BELOW_LOQ']], ['flags', 'not-an-array'],
+    ...['PREDICTED', 'IMPORTED', 'DERIVED'].map(value => ['provenance', value])
+])('the results API ignores smuggled %s=%j and preserves the actual parser evidence', async (field, value) => {
+    const f = await fixture();
+    expect((await apiSave(f.sample.id, [measurement()])).status).toBe(200);
+    const previous = await prisma.result.findFirst({ where: { sampleId: f.sample.id } });
+    const response = await apiSave(f.sample.id, [measurement({ [field]: field === 'id' ? previous.id : value, value: '7,42' })]);
+    expect(response.status).toBe(200);
+    const current = await prisma.result.findFirst({ where: { sampleId: f.sample.id, isCurrent: true } });
+    expect(current).toMatchObject({ value: '7.42', rawInput: '7,42', numericValue: 7.42, flags: '[]', provenance: 'MEASURED', isValid: true });
+    expect(current.id).not.toBe(previous.id);
+    expect(await prisma.result.findUnique({ where: { id: previous.id } }))
+        .toEqual({ ...previous, isCurrent: false, supersededBy: current.id, updatedAt: expect.any(Date) });
+    expect(await prisma.result.count({ where: { sampleId: f.sample.id } })).toBe(2);
+});
+
+test('historical import retains invalid text and out-of-range pH while importing the other cells', async () => {
+    const analysis = await prisma.analysis.findUniqueOrThrow({ where: { code: 'PH_H2O' } });
+    const method = await prisma.methodology.findFirstOrThrow({ where: { analysisCode: analysis.code, labId: null } });
+    const sampleId = randomUUID();
+    const response = await request(app).post('/api/import/execute').set('Authorization', `Bearer ${token}`).send({ sampleIdColumn: 'sample', labId,
+        columnMappings: [
+            { column: 'text', analysisCode: code, methodologyId: methodId, unitCode: 'g/kg' },
+            { column: 'ph', analysisCode: analysis.code, methodologyId: method.id, unitCode: analysis.unitCode }
+        ], rows: [{ sample: sampleId, text: ' ND ', ph: '100' }, { sample: sampleId, text: 'Loam', ph: '6.42' }] });
+    expect(response).toMatchObject({ status: 200, body: { importedSamples: 1, importedResults: 4 } });
+    const rows = await prisma.result.findMany({ where: { sampleId } });
+    expect(rows).toHaveLength(4);
+    expect(rows.every(row => row.provenance === 'IMPORTED' && row.batchId === null && row.attemptId === null)).toBe(true);
+    for (const value of [' ND ', 'Loam']) {
+        const row = rows.find(row => row.value === value);
+        expect(row).toMatchObject({ rawInput: value, numericValue: null, isValid: false });
+        expect(JSON.parse(row.flags)).toEqual(expect.arrayContaining(['INVALID_FORMAT', 'IMPORTED_UNVALIDATED']));
+    }
+    const invalidPh = rows.find(row => row.param === analysis.code && row.value === '100');
+    expect(invalidPh).toMatchObject({ rawInput: '100', numericValue: 100, isValid: false });
+    expect(JSON.parse(invalidPh.flags)).toEqual(expect.arrayContaining(['ABOVE_MAX', 'IMPORTED_UNVALIDATED']));
+    expect(rows.find(row => row.param === analysis.code && row.isCurrent)).toMatchObject({ value: '6.42', isValid: true, flags: '[]' });
+    expect(await prisma.auditLog.count({ where: { sampleId, action: 'RESULT_RECORDED' } })).toBe(4);
+});
+
+test('offline texture supersedes legacy non-numeric PSA classes, preserves numeric rows, and replays without writes', async () => {
+    await prisma.analysis.upsert({ where: { code: 'PSA' }, update: {},
+        create: { code: 'PSA', name: 'Legacy particle size analysis', units: '%', validation: '{"type":"texture","tolerance":2}' } });
+    const f = await fixture({ analysis: 'PSA' });
+    const oldClass = await writer.createResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id,
+        param: 'PSA', value: 'Sandy clay', numericValue: null, rawInput: 'historical class', flags: '["HISTORICAL"]' } });
+    const numeric = await writer.createResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id,
+        param: 'PSA', value: '50', numericValue: 50 } });
+    const operation = { operationId: randomUUID(), type: 'COMPLETE_WORK', target: { workItemId: f.item.id }, baseVersion: 0,
+        payload: { values: { sand: '50', silt: '35', clay: '15' }, flags: ['OFFLINE_CAPTURE'] } };
+    expect((await sync.applySyncOperations(actor, [operation])).receipts[0]).toMatchObject({ status: 'APPLIED' });
+    const texture = await prisma.result.findFirstOrThrow({ where: { sampleId: f.sample.id, param: 'TEXTURE', isCurrent: true } });
+    expect(await prisma.result.findUnique({ where: { id: oldClass.id } }))
+        .toEqual({ ...oldClass, isCurrent: false, supersededBy: texture.id, updatedAt: expect.any(Date) });
+    expect(await prisma.result.findUnique({ where: { id: numeric.id } })).toEqual(numeric);
+    expect(JSON.parse(texture.flags)).toContain('OFFLINE_CAPTURE');
+    const receipt = await prisma.commandReceipt.findFirstOrThrow({ where: { idempotencyKey: operation.operationId } });
+    expect(JSON.parse(receipt.outcome).resultId).toBe(texture.id);
+    const before = snapshot();
+    expect((await sync.applySyncOperations(actor, [operation])).receipts[0].status).toBe('DUPLICATE_APPLIED');
+    expect(snapshot()).toEqual(before);
+});
+
+test.each(['derived'])('a generic result writer cannot use %s to bypass sealed work', async source => {
+    const f = await fixture({ itemStatus: 'COMPLETED' }), before = snapshot();
+    await expect(prisma.$transaction(tx => writer.writeResult(tx, { sampleId: f.sample.id, actor, source, measurement: measurement() })))
+        .rejects.toMatchObject({ statusCode: 409, code: 'RESULT_SOURCE_FORBIDDEN' });
+    expect(snapshot()).toEqual(before);
 });
 
 test.each(['SPEC_MIR', 'DRYING'])('%s summary writes one audit and never enters numerical results, reports or exports', async analysis => {
@@ -267,4 +340,30 @@ test.each([
     expect(scanSource(source, 'controllers/result-canary.js'))
         .toEqual([expect.objectContaining({ code: 'HISTORICAL_IMPORT_CALLER_FORBIDDEN' })]);
     expect(scanSource(source, 'controllers/importController.js')).toEqual([]);
+});
+
+test.each([
+    "writer.writeResult(tx,{source:'derived'})",
+    "const mode='derived';writer.writeResult(tx,{source:mode})",
+    "const key='source';writer.writeResult(tx,{[key]:'derived'})",
+    "options.source='derived'"
+])('the inventory confines the derived option to the two texture functions: %s', source => {
+    for (const file of ['controllers/result-canary.js', 'tests/caller.test.js', 'services/resultWriteService.js']) {
+        expect(scanSource(source, file)).toEqual([expect.objectContaining({ code: 'DERIVED_RESULT_CALLER_FORBIDDEN' })]);
+    }
+    for (const name of ['deriveTextureResult', 'writeTextureDetermination']) {
+        expect(scanSource(`function ${name}(){${source}}`, 'services/resultWriteService.js')).toEqual([]);
+    }
+    expect(scanSource(`function writeResult(){${source}}`, 'services/resultWriteService.js'))
+        .toEqual([expect.objectContaining({ code: 'DERIVED_RESULT_CALLER_FORBIDDEN' })]);
+});
+
+test('the inventory confines sync identity/flags and prediction provenance to internal callers', () => {
+    for (const source of ["writer.writeResult(tx,{syncResult:{id:'known',flags:[]}})", "options.syncResult={id:'known'}"]) {
+        expect(scanSource(source, 'controllers/result-canary.js')).toEqual([expect.objectContaining({ code: 'SYNC_RESULT_CALLER_FORBIDDEN' })]);
+        expect(scanSource(source, 'services/syncService.js')).toEqual([]);
+    }
+    const prediction = "writer.writeResult(tx,{source:'spectral-prediction'})";
+    expect(scanSource(prediction, 'controllers/result-canary.js')).toEqual([expect.objectContaining({ code: 'PREDICTED_RESULT_CALLER_FORBIDDEN' })]);
+    expect(scanSource(`function writeSpectralPrediction(){${prediction}}`, 'services/resultWriteService.js')).toEqual([]);
 });

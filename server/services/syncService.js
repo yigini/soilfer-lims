@@ -725,13 +725,14 @@ class SyncService {
                             }
                         });
 
-                        const measurement = { id: newResultId, param: item.analysis, value: op.payload?.value ?? op.payload?.result,
+                        const measurement = { param: item.analysis, value: op.payload?.value ?? op.payload?.result,
                             replicateNo: repNo, basis: validBasis, equipmentId: op.payload?.equipmentId,
-                            methodologyId: item.methodologyId, provenance: op.payload?.provenance || 'MEASURED',
-                            unit: op.payload?.unit, flags: op.payload?.flags || [], overrideReason: op.payload?.overrideReason,
+                            methodologyId: item.methodologyId,
+                            unit: op.payload?.unit, overrideReason: op.payload?.overrideReason,
                             ...(Object.hasOwn(op.payload || {}, 'batchId') && { batchId: op.payload.batchId }) };
                         const writer = require('./resultWriteService');
-                        const resultOptions = { sampleId: item.sampleId, workItemId: item.id, attemptId, actor: user, measurement, now };
+                        const resultOptions = { sampleId: item.sampleId, workItemId: item.id, attemptId, actor: user, measurement, now,
+                            syncResult: { id: newResultId, flags: op.payload?.flags || [] } };
                         if (isTextureTask && textVal && textureFractions) {
                             await writer.writeTextureDetermination(tx, { ...resultOptions, fractions: textureFractions });
                         } else {

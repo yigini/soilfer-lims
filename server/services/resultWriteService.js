@@ -12,6 +12,27 @@ const TEXTURE_ANALYSES = new Set(['TEXTURE', 'SAND', 'SILT', 'CLAY', 'pSA', 'PSA
 const FRACTIONS = ['SAND', 'SILT', 'CLAY'];
 const ATTEMPT_ERRORS = ['RESULT_ATTEMPT_NOT_FOUND', 'RESULT_ATTEMPT_SAMPLE_MISMATCH', 'RESULT_ATTEMPT_REFERENCED'];
 
+// Request data never supplies Result identity, parser evidence or provenance.
+// batchId is retained only to compare with the server-derived batch in context.
+function selectMeasurement(measurement) {
+    if (!measurement || typeof measurement !== 'object') return measurement;
+    return Object.fromEntries(['param', 'value', 'unit', 'methodologyId', 'equipmentId', 'basis', 'overrideReason', 'replicateNo', 'batchId']
+        .filter(key => Object.hasOwn(measurement, key)).map(key => [key, measurement[key]]));
+}
+
+function writeOptions(options) {
+    if (!['measurement', 'legacy-import', 'spectral-prediction'].includes(options.source || 'measurement')) {
+        throw new TransitionError('Use the authorized result workflow.', 409, 'RESULT_SOURCE_FORBIDDEN');
+    }
+    const measurement = selectMeasurement(options.measurement);
+    if (options.syncResult) {
+        if (options.source && options.source !== 'measurement') throw new TransitionError('Sync cannot change result provenance.', 409, 'RESULT_SOURCE_FORBIDDEN');
+        measurement.id = options.syncResult.id;
+        measurement.flags = options.syncResult.flags;
+    }
+    return { ...options, measurement };
+}
+
 function mapResultWriteError(error) {
     const message = `${error.message || ''} ${JSON.stringify(error.meta || {})}`;
     const code = ATTEMPT_ERRORS.find(value => message.includes(value));
@@ -80,7 +101,7 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
             throw new TransitionError('Parameter is not ordered for the sample.', 409, 'RESULT_NOT_ORDERED');
         }
     }
-    return { sample, item, attemptId, batchId, replicateNo, performedBy, labId, methodId, analysis, method,
+    return { sample, item, attemptId, batchId, replicateNo, performedBy, labId, methodId, analysis, method, source,
         basis: ['AIR_DRY', 'OVEN_DRY', 'FIELD_MOIST'].includes(measurement.basis) ? measurement.basis : 'AIR_DRY',
         equipmentId: measurement.equipmentId || item?.equipmentId || null };
 }
@@ -120,10 +141,11 @@ async function numericValues(tx, ctx, measurement) {
         validationRules.max = await policy.get(ctx.labId, 'results.phMax', scope);
     }
     const validation = validateNumericMethod(measurement.value, validationRules, format);
-    if (!validation.isValid && (!validation.normalizedValue && validation.normalizedValue !== 0 || validation.flags.includes('INVALID_FORMAT') || validation.isBlank)) {
+    const importing = ctx.source === 'legacy-import';
+    if (!importing && !validation.isValid && (!validation.normalizedValue && validation.normalizedValue !== 0 || validation.flags.includes('INVALID_FORMAT') || validation.isBlank)) {
         throw new TransitionError('Enter a valid numeric value or censoring qualifier.', 400, validation.code || 'INVALID_NUMBER');
     }
-    if (!validation.isValid && (!measurement.overrideReason?.trim() || !hasPermission(ctx.actor, 'APPROVE_RESULTS'))) {
+    if (!importing && !validation.isValid && (!measurement.overrideReason?.trim() || !hasPermission(ctx.actor, 'APPROVE_RESULTS'))) {
         throw new TransitionError('Result is outside the configured limits; a manager override reason is required.', 422, 'OUT_OF_RANGE', { flags: validation.flags });
     }
     const fraction = FRACTIONS.includes(measurement.param) && TEXTURE_ANALYSES.has(ctx.analysis.code);
@@ -131,13 +153,18 @@ async function numericValues(tx, ctx, measurement) {
     if (!fraction && measurement.unit && ctx.analysis.units && ![ctx.analysis.units, ctx.analysis.unitCode].includes(measurement.unit)) {
         throw new TransitionError('Use the configured reporting unit.', 409, 'RESULT_UNIT_MISMATCH');
     }
-    const flags = [...new Set([...validation.flags, ...(measurement.flags || []), ...(measurement.overrideReason?.trim() ? ['MANAGER_OVERRIDE'] : [])])];
-    return { value: validation.raw, rawInput: measurement.rawInput ?? validation.rawInput, numericValue: validation.normalizedValue,
-        unit, flags: JSON.stringify(flags), isValid: validation.isValid || Boolean(measurement.overrideReason?.trim()),
-        censoring: validation.censoring, provenance: measurement.provenance || 'MEASURED' };
+    const overridden = !importing && !validation.isValid && Boolean(measurement.overrideReason?.trim()) && hasPermission(ctx.actor, 'APPROVE_RESULTS');
+    const flags = [...new Set([...validation.flags, ...(measurement.flags || []),
+        ...(importing && !validation.isValid ? ['IMPORTED_UNVALIDATED'] : []),
+        ...(overridden ? ['MANAGER_OVERRIDE'] : [])])];
+    return { value: importing && !validation.isValid ? validation.rawInput : validation.raw, rawInput: validation.rawInput,
+        numericValue: validation.normalizedValue, unit, flags: JSON.stringify(flags),
+        isValid: validation.isValid || overridden,
+        censoring: validation.censoring, provenance: importing ? 'IMPORTED' : ctx.source === 'spectral-prediction' ? 'PREDICTED' : 'MEASURED' };
 }
 
 async function writeResult(tx, options) {
+    options = writeOptions(options);
     const ctx = await context(tx, options);
     ctx.actor = options.actor;
     if (options.measurement.param !== ctx.item?.analysis && ctx.item &&
@@ -150,7 +177,14 @@ async function writeResult(tx, options) {
     return row;
 }
 
+// Internal spectral ingestion uses an explicit option; a typed API measurement
+// cannot claim this provenance. Readiness and sealing checks still apply.
+async function writeSpectralPrediction(tx, options) {
+    return writeResult(tx, { ...options, source: 'spectral-prediction' });
+}
+
 async function writeTextureDetermination(tx, options) {
+    options = writeOptions(options);
     const measurement = { ...options.measurement, param: 'TEXTURE' };
     const ctx = await context(tx, { ...options, measurement });
     ctx.actor = options.actor;
@@ -181,6 +215,13 @@ async function writeTextureDetermination(tx, options) {
         rawInput: JSON.stringify(options.fractions), numericValue: null, unit: 'USDA_12_CLASS',
         flags: JSON.stringify(flags), isValid: classification.isValid || Boolean(measurement.overrideReason?.trim()),
         censoring: 'NONE', provenance: 'DERIVED' }, now);
+    // Main's offline path stored class labels under PSA/pSA/etc. Preserve those
+    // values as superseded evidence while leaving numerical determinations alone.
+    if (options.syncResult && ctx.item && ctx.item.analysis !== 'TEXTURE') {
+        await tx.result.updateMany({ where: { sampleId: ctx.sample.id, param: ctx.item.analysis,
+            replicateNo: ctx.replicateNo, isCurrent: true, numericValue: null },
+        data: { isCurrent: false, supersededBy: row.id } });
+    }
     await cacheResult(tx, ctx.item, row.value);
     return row;
 }
@@ -261,5 +302,5 @@ function createRawResultFixture(db, data) {
         .run(...fields.map(field => data[field]));
 }
 
-module.exports = { writeResult, writeTextureDetermination, deriveTextureResult, writeNonMeasurementSummary, writeFixtureCache,
+module.exports = { writeResult, writeSpectralPrediction, selectMeasurement, writeTextureDetermination, deriveTextureResult, writeNonMeasurementSummary, writeFixtureCache,
     createResultFixture, createResultsFixture, createRawResultFixture, mapResultWriteError };

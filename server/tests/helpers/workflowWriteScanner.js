@@ -450,19 +450,31 @@ function scanSource(source, filename, exceptions = []) {
                 }
             }
     }
+    function resultOption(p, names, values) {
+        if (names.includes('source')) {
+            if (filename !== 'controllers/importController.js' && values.includes('legacy-import')) {
+                report(p.node, 'HISTORICAL_IMPORT_CALLER_FORBIDDEN', 'Only importController may request historical result entry.');
+            }
+            if (values.includes('derived') && !(filename === 'services/resultWriteService.js' &&
+                ['deriveTextureResult', 'writeTextureDetermination'].includes(owner(p)))) {
+                report(p.node, 'DERIVED_RESULT_CALLER_FORBIDDEN', 'Only texture derivation may request derived result readiness.');
+            }
+            if (values.includes('spectral-prediction') && !(filename === 'services/resultWriteService.js' && owner(p) === 'writeSpectralPrediction')) {
+                report(p.node, 'PREDICTED_RESULT_CALLER_FORBIDDEN', 'Use the internal spectral prediction writer.');
+            }
+        }
+        if (names.includes('syncResult') && filename !== 'services/syncService.js') {
+            report(p.node, 'SYNC_RESULT_CALLER_FORBIDDEN', 'Only offline sync may supply Result identity and payload flags.');
+        }
+    }
     traverse(ast, {
         ObjectProperty(p) {
             const names = p.node.computed ? strings(p.get('key')) : [p.node.key.name || p.node.key.value];
-            if (filename !== 'controllers/importController.js' && names.includes('source') && strings(p.get('value')).includes('legacy-import')) {
-                report(p.node, 'HISTORICAL_IMPORT_CALLER_FORBIDDEN', 'Only importController may request historical result entry.');
-            }
+            resultOption(p, names, strings(p.get('value')));
         },
         AssignmentExpression(p) {
             const left = p.get('left');
-            if (filename !== 'controllers/importController.js' && left.isMemberExpression() && keys(left).includes('source') &&
-                strings(p.get('right')).includes('legacy-import')) {
-                report(p.node, 'HISTORICAL_IMPORT_CALLER_FORBIDDEN', 'Only importController may request historical result entry.');
-            }
+            if (left.isMemberExpression()) resultOption(p, keys(left), strings(p.get('right')));
         },
         ImportDeclaration(p) { helperImport(p, [p.node.source.value]); },
         NewExpression(p) { embeddedProgram(p); },

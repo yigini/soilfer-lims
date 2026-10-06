@@ -1132,7 +1132,6 @@ exports.batchSave = async (req, res) => {
                 ops.push(async tx => {
                     const measurement = { param: item.analysis, value: entry.value, replicateNo: entry.replicateNo,
                         basis: entry.basis, methodologyId: item.methodologyId, equipmentId: entry.equipmentId,
-                        provenance: entry.provenance || 'MEASURED', flags: validation.flags || [],
                         overrideReason: entry.overrideReason,
                         ...(Object.hasOwn(entry, 'batchId') && { batchId: entry.batchId }) };
                     let attemptId = null;

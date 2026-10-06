@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const prisma = require('../prisma');
-const { writeResult, deriveTextureResult } = require('../services/resultWriteService');
+const { writeResult, deriveTextureResult, selectMeasurement } = require('../services/resultWriteService');
 const validationController = require('./validationController');
 const { validateResultEntries } = require('../services/resultEntryPolicy');
 const stateRules = require('../services/workflowStateRules');
@@ -136,7 +136,7 @@ exports.saveResults = async (req, res) => {
             const operations = [];
             const now = new Date();
             for (const measurement of measurements) {
-                const row = await writeResult(tx, { sampleId, measurement, actor: user, now });
+                const row = await writeResult(tx, { sampleId, measurement: selectMeasurement(measurement), actor: user, now });
                 validatedMeasurements.push({ ...measurement, validation: { valid: row.isValid, flags: JSON.parse(row.flags || '[]') } });
             }
 
