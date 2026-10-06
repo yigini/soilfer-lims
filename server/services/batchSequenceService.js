@@ -13,7 +13,9 @@ async function resolveSequenceCriteria(labId, analysisCode, methodologyId, db) {
     if (!db) return require('../prisma').$transaction(tx => resolveSequenceCriteria(labId, analysisCode, methodologyId, tx));
     const policy = await policyService.snapshot(labId, { db, analysisCode, methodologyId });
     const qcRule = await qcRuleService.resolve(labId, analysisCode, { db, methodologyId, policySnapshot: policy });
-    return { analysisCode, methodologyId, qcRule, policyVersion: policy.version,
+    return { analysisCode, methodologyId, qcRule, policyVersion: policy.version, policySnapshot: policy,
+        methodContext: await require('./qcMethodContextService').resolveLoq(analysisCode, methodologyId, db),
+        numberFormat: await require('./numberFormatService').getNumberFormat(labId, { db, snapshot: policy }),
         qcMode: policy.values['qc.mode'], calibrationVerification: policy.values['qc.calibrationVerification'] };
 }
 
@@ -120,4 +122,4 @@ function planSequence({ sampleIds, criteria, crmOrdinal, seed }) {
     return { ...plan, forecast: plan.forecasts[0] };
 }
 
-module.exports = { resolveSequenceCriteria, planSequence, planRunSequence, DUPLICATE_ALGORITHM };
+module.exports = { resolveSequenceCriteria, planSequence, planRunSequence, sequenceRequirements: countsFor, DUPLICATE_ALGORITHM };

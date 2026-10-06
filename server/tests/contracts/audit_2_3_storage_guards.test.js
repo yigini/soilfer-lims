@@ -84,6 +84,27 @@ function binding(f, p, lot, code = f.a, extra = {}) {
 }
 afterAll(() => { for (const file of files) if (fs.existsSync(file)) fs.unlinkSync(file); });
 
+test('part 8 preserves frozen samples while allowing append-only compatibility QC rounds', () => {
+    const f = fixture();
+    try {
+        insert(f.db, 'BatchAnalyte', { id: randomUUID(), batchId: f.legacyId, labId: f.labId,
+            analysisCode: f.a, status: 'QC_PENDING', provenance: 'LEGACY_MIGRATED', legacyMembershipFrozen: 1 });
+        const historicalId = randomUUID();
+        insert(f.db, 'BatchPosition', { id: historicalId, batchId: f.legacyId, position: 1, kind: 'BLANK',
+            provenance: 'PROFILE_ONLY' });
+        insert(f.db, 'QcMeasurement', { id: randomUUID(), batchId: f.legacyId, positionId: historicalId,
+            analysisCode: f.a, replicateNo: 1, value: 0.123456789, rawInput: '0.123456789' });
+        const original = f.db.prepare('SELECT * FROM QcMeasurement WHERE positionId=?').all(historicalId);
+        insert(f.db, 'BatchPosition', { id: randomUUID(), batchId: f.legacyId, position: 2, kind: 'CONTROL', provenance: 'PROFILE_ONLY' });
+        expect(() => insert(f.db, 'BatchPosition', { id: randomUUID(), batchId: f.legacyId, position: 3,
+            kind: 'SAMPLE', sampleId: f.sampleId, provenance: 'PROFILE_ONLY' })).toThrow('BATCH_MEMBERSHIP_FROZEN');
+        expect(f.db.prepare('SELECT * FROM QcMeasurement WHERE positionId=?').all(historicalId)).toEqual(original);
+        const p = position(f); start(f);
+        expect(() => position(f, 'BLANK', { provenance: 'PROFILE_ONLY' })).toThrow('BATCH_MEMBERSHIP_FROZEN');
+        expect(p).toBeTruthy();
+    } finally { f.db.close(); }
+});
+
 test('additive DDL preserves legacy JSON and typed scientific values, and their freeze guards refuse new writes', () => {
     const f = fixture();
     try {
@@ -163,6 +184,8 @@ test('native duplicate uses the sample parent and only replicate one; work-item 
         start(f);
         insert(f.db, 'QcMeasurement', measurement(f, parent));
         insert(f.db, 'QcMeasurement', measurement(f, duplicate));
+        expect(() => insert(f.db, 'QcMeasurement', measurement(f, parent, { analysisCode: f.b }))).toThrow('QC_MEASUREMENT_INVALID');
+        expect(() => insert(f.db, 'QcMeasurement', measurement(f, duplicate, { analysisCode: f.b }))).toThrow('QC_MEASUREMENT_INVALID');
         expect(() => insert(f.db, 'QcMeasurement', measurement(f, duplicate, { replicateNo: 2 }))).toThrow('QC_MEASUREMENT_INVALID');
         expect(f.db.prepare('SELECT COUNT(*) count FROM QcMeasurement').get().count).toBe(2);
     } finally { f.db.close(); }

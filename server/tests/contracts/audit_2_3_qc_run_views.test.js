@@ -41,6 +41,27 @@ test('a correction shows only replacement values while old measurements and eval
     expect(result.analytes[0].evaluation.id).toBe('eval-2');
 });
 
+test('part 8 ordinary compatibility resubmission selects only its own round without altering earlier evidence', () => {
+    const { batch, blank } = fixture();
+    batch.analytes[0].provenance = 'PROFILE_ONLY';
+    batch.positions.forEach(row => { row.provenance = 'PROFILE_ONLY'; });
+    const replacement = { ...batch.positions.find(row => row.id === blank), id: 'new-blank', position: 4 };
+    batch.positions.push(replacement);
+    batch.measurements.push({ id: 'new-value', positionId: replacement.id, analysisCode: 'A', replicateNo: 1,
+        value: 0.02, rawInput: '0.02', supersededById: null });
+    const previous = JSON.stringify(batch.measurements.slice(0, 3));
+    batch.evaluations.push({ id: 'resubmission', analysisCode: 'A', version: 2, supersedesId: 'eval-1', verdict: 'PASS',
+        details: JSON.stringify({ entryMode: 'LEGACY_RESUBMISSION', reopenEventId: 'manager-reopen',
+            positionIds: [replacement.id], measurementIds: ['new-value'], evaluation: { blanks: [{ id: replacement.id, status: 'PASS' }] } }) });
+    const result = batchApiView(batch);
+    expect(result.qcResults.blanks).toEqual([expect.objectContaining({ positionId: replacement.id, value: 0.02 })]);
+    expect(result.qcResults.duplicates).toEqual([]);
+    expect(result.positions.map(row => row.id)).toEqual([batch.positions[0].id, replacement.id]);
+    expect(result.measurements).toHaveLength(4);
+    expect(JSON.stringify(batch.measurements.slice(0, 3))).toBe(previous);
+    expect(result.analytes[0].evaluation.supersedesId).toBe('eval-1');
+});
+
 test('a migrated clear excludes every historical position/value, keeps real membership and exposes earlier snapshots in history', () => {
     const { batch, sample, duplicate, blank } = fixture();
     batch.analytes[0].provenance = 'LEGACY_MIGRATED';

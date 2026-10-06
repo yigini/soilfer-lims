@@ -155,6 +155,15 @@ function beforeGuards(options) {
             expected.push({ table: 'BatchQcResult', fields: ['referenceMaterialId', 'referenceValueId'] },
                 { table: 'ReferenceMaterial', missingTable: true }, { table: 'ReferenceValue', missingTable: true },
                 { table: 'QcRule', missingTable: true });
+            // #186 adds exactly four nullable Batch scalars and eight tables.
+            // Preserve the literal pre-audit schemas and account for only these
+            // new gaps when checking a freshly generated #186 datamodel.
+            const runTables = ['BatchAnalyte', 'BatchPosition', 'BatchPositionWorkItem', 'BatchPositionReference',
+                'QcMeasurement', 'QcEvaluation', 'BatchDisposition', 'BatchEvent'];
+            const runModels = runTables.filter(table => modelNames.includes(table));
+            assert.ok(runModels.length === 0 || runModels.length === runTables.length, 'Generated QC datamodel is partial.');
+            if (runModels.length) expected.push({ table: 'Batch', fields: ['instrumentId', 'analystUsername', 'startedAt', 'completedAt'] },
+                ...runTables.map(table => ({ table, missingTable: true })));
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }

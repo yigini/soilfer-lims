@@ -28,12 +28,13 @@ function currentDisposition(batch, evaluation, analysisCode) {
 }
 function currentAnalyteEvidence(batch, analysisCode = batch.analysis) {
     const evaluation = latestEvaluation(batch, analysisCode), details = parsed(evaluation?.details, {});
-    const imported = details.legacy === true, selectedPositions = new Set(details.positionIds || []), selectedMeasurements = new Set(details.measurementIds || []);
-    const built = (batch.events || []).filter(row => row.type === 'RUN_BUILT').slice().sort((a, b) => time(b.at) - time(a.at))[0];
+    const isolatedRound = details.legacy === true || details.entryMode === 'LEGACY_RESUBMISSION';
+    const selectedPositions = new Set(details.positionIds || []), selectedMeasurements = new Set(details.measurementIds || []);
+    const built = (batch.events || []).filter(row => ['RUN_BUILT', 'RUN_STARTED'].includes(row.type)).slice().reverse().sort((a, b) => time(b.at) - time(a.at))[0];
     const served = new Map((parsed(built?.payload, {}).positions || []).map(row => [row.id, row.servedAnalytes || []]));
     function serves(row) {
         if (row.kind === 'SAMPLE') return (row.workItems || []).some(link => link.analysisCode === analysisCode);
-        if (imported) return selectedPositions.has(row.id);
+        if (isolatedRound) return selectedPositions.has(row.id);
         if (row.kind === 'DUPLICATE' && row.duplicateOfPositionId) return serves((batch.positions || []).find(parent => parent.id === row.duplicateOfPositionId) || { kind: 'SAMPLE' });
         if (served.has(row.id)) return served.get(row.id).includes(analysisCode);
         return row.provenance === 'NATIVE' ? (batch.measurements || []).some(measurement => measurement.positionId === row.id && measurement.analysisCode === analysisCode)
@@ -42,7 +43,7 @@ function currentAnalyteEvidence(batch, analysisCode = batch.analysis) {
     const positions = (batch.positions || []).filter(row => row.historicalSnapshotSeq === null || row.historicalSnapshotSeq === undefined)
         .filter(serves).sort((a, b) => a.position - b.position);
     const current = (batch.measurements || []).filter(row => row.analysisCode === analysisCode && !row.supersededById &&
-        (!imported || selectedMeasurements.has(row.id)) && positions.some(position => position.id === row.positionId));
+        (!isolatedRound || selectedMeasurements.has(row.id)) && positions.some(position => position.id === row.positionId));
     const at = (positionId, replicateNo = 1) => current.find(row => row.positionId === positionId && row.replicateNo === replicateNo);
     const evaluated = parsed(details.evaluation ?? details.qcResults, {});
     const qcResults = { ...evaluated, blanks: [], controls: [], duplicates: [] }, qcItems = [];

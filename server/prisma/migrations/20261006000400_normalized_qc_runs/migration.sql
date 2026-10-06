@@ -292,9 +292,11 @@ BEGIN
 END;
 
 CREATE TRIGGER "BatchPosition_membership_insert_guard" BEFORE INSERT ON "BatchPosition"
-WHEN EXISTS (SELECT 1 FROM "Batch" b WHERE b.id=NEW.batchId AND b.startedAt IS NOT NULL)
+WHEN (NEW.kind='SAMPLE' OR NEW.provenance<>'PROFILE_ONLY'
+  OR NOT EXISTS (SELECT 1 FROM "BatchAnalyte" a WHERE a.batchId=NEW.batchId AND a.provenance<>'NATIVE'))
+  AND (EXISTS (SELECT 1 FROM "Batch" b WHERE b.id=NEW.batchId AND b.startedAt IS NOT NULL)
   OR EXISTS (SELECT 1 FROM "BatchAnalyte" a WHERE a.batchId=NEW.batchId AND a.legacyMembershipFrozen=1)
-  OR EXISTS (SELECT 1 FROM "QcMeasurement" q WHERE q.batchId=NEW.batchId)
+  OR EXISTS (SELECT 1 FROM "QcMeasurement" q WHERE q.batchId=NEW.batchId))
 BEGIN
   SELECT RAISE(ABORT, 'BATCH_MEMBERSHIP_FROZEN');
 END;
@@ -417,6 +419,9 @@ CREATE TRIGGER "QcMeasurement_insert_guard" BEFORE INSERT ON "QcMeasurement"
 WHEN typeof(NEW.replicateNo)<>'integer' OR NEW.replicateNo<1 OR NEW.supersededById IS NOT NULL
   OR NOT EXISTS (SELECT 1 FROM "BatchPosition" p JOIN "BatchAnalyte" a ON a.batchId=p.batchId AND a.analysisCode=NEW.analysisCode WHERE p.id=NEW.positionId AND p.batchId=NEW.batchId)
   OR EXISTS (SELECT 1 FROM "BatchPosition" p WHERE p.id=NEW.positionId AND p.provenance='NATIVE' AND p.kind IN ('SAMPLE','DUPLICATE') AND NEW.replicateNo<>1)
+  OR EXISTS (SELECT 1 FROM "BatchPosition" p WHERE p.id=NEW.positionId AND p.provenance='NATIVE' AND p.kind IN ('SAMPLE','DUPLICATE')
+    AND NOT EXISTS (SELECT 1 FROM "BatchPositionWorkItem" w WHERE w.analysisCode=NEW.analysisCode
+      AND w.positionId=CASE WHEN p.kind='DUPLICATE' THEN p.duplicateOfPositionId ELSE p.id END))
   OR (EXISTS (SELECT 1 FROM "BatchAnalyte" a WHERE a.batchId=NEW.batchId AND a.analysisCode=NEW.analysisCode AND a.provenance='NATIVE')
     AND (COALESCE(length(trim(NEW.enteredBy)),0)=0 OR NEW.enteredAt IS NULL
       OR (NEW.value IS NULL AND NEW.censoring IS NULL) OR (NEW.value IS NOT NULL AND typeof(NEW.value) NOT IN ('integer','real'))
