@@ -302,8 +302,11 @@ test('storage audit insertion failure rolls back the location and every table', 
     const transaction = prisma.$transaction.bind(prisma);
     let metadataWasWritten = false;
     const spy = jest.spyOn(prisma, '$transaction').mockImplementationOnce(callback => transaction(tx => callback({ ...tx,
-        sample: { ...tx.sample, updateMany: async args => { const changed = await tx.sample.updateMany(args); metadataWasWritten = changed.count === 1; return changed; } },
-        auditLog: { ...tx.auditLog, create: () => { throw new Error('Owned storage audit fault'); } }
+        auditLog: { ...tx.auditLog, create: async () => {
+            const attempted = await tx.sample.findUnique({ where: { id: s.id } });
+            metadataWasWritten = JSON.parse(attempted.metadata).archiveLocation === 'Faulted shelf';
+            throw new Error('Owned storage audit fault');
+        } }
     })));
     try {
         const response = await request(holdRoutes(actor)).post(`/api/samples/${s.id}/custody/move`).send({ location: 'Faulted shelf' });
