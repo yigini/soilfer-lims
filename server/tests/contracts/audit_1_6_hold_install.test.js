@@ -102,3 +102,8 @@ test('the hold loader is digest-bound and aliases/shadow functions cannot obtain
     expect(scanSource('function loadSampleHoldMigrationSource(){return {sql:input}};const source=loadSampleHoldMigrationSource();db.exec(source.sql)', 'scripts/hold-probe.js'))
         .toEqual(expect.arrayContaining([expect.objectContaining({ code: 'UNRESOLVED_WORKFLOW_SQL' })]));
 });
+
+test('unparseable source stays a closed scanner finding with its original line', () => {
+    expect(scanSource('const okay = 1;\nconst broken = ;', 'scripts/hold-invalid-canary.js'))
+        .toEqual([expect.objectContaining({ code: 'SOURCE_PARSE_FAILED', line: 2 })]);
+});

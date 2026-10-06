@@ -26,7 +26,8 @@ try {
     console.log(JSON.stringify({ event: 'SAMPLE_HOLD_STARTUP_READY', ...holdsReady }));
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
-        nextStep: 'Keep the lab stopped and follow docs/audit/1.2-state-machine.md.', differences: error.differences || [] }));
+        nextStep: error.code?.startsWith('SAMPLE_HOLD_') ? 'Keep the lab stopped and follow docs/audit/1.6-sample-holds.md.'
+            : 'Keep the lab stopped and follow docs/audit/1.2-state-machine.md.', differences: error.differences || [] }));
     process.exit(1);
 }
 const http = require('http');

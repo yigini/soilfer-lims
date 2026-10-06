@@ -42,6 +42,8 @@ test('final approval returns the preparation-reversion 409 and preserves every r
 
 test('undo intake preserves every task when the transition is refused by a database guard', async () => {
     const row = await fixture('ACCEPTED', 'NOT_ASSIGNED');
+    // This probes the later Sample guard, so start with truly unrecorded work.
+    await prisma.$transaction(tx => require('../../services/resultWriteService').writeFixtureCache(tx, row.item, null, 'system:fixture'));
     await work.createWorkItem({ id: randomUUID(), sampleId: row.sample.id, analysis: 'PREPARATION', assignedLab: labId }, manager);
     const before = await snapshot([row.sample.id]), transaction = prisma.$transaction.bind(prisma);
     jest.spyOn(prisma, '$transaction').mockImplementationOnce(execute => transaction(tx => execute({ ...tx,

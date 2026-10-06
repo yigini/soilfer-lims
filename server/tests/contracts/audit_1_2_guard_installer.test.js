@@ -356,6 +356,7 @@ test('direct startup refuses a missing file without implicitly creating it', asy
 test('a complete guarded database passes the read-only gate, listens and answers a real health request', async () => {
     const fixture = beforeGuards({ actor: 'system:fixture', installWorkflowStateGuards: true }); fixtures.push(fixture);
     require('../../scripts/install_result_attempt_links').installResultAttemptLinks({ dbPath: fixture.file, apply: true });
+    require('../../scripts/install_sample_holds').installSampleHolds({ dbPath: fixture.file, apply: true });
     const child = await realStartup(fixture.file, true);
     expect(child.accepted).toBe(true);
     const ready = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"WORKFLOW_STARTUP_READY"')));
@@ -364,6 +365,9 @@ test('a complete guarded database passes the read-only gate, listens and answers
     // Prisma intentionally suppresses its startup log in NODE_ENV=test. The
     // real listening event is present in every mode and must follow the gate.
     expect(child.stdout.indexOf('WORKFLOW_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
+    const holdsReady = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"SAMPLE_HOLD_STARTUP_READY"')));
+    expect(holdsReady).toMatchObject({ classification: 'COMPLETE', totalChanges: 0 });
+    expect(child.stdout.indexOf('SAMPLE_HOLD_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
 });
 
 test.each([

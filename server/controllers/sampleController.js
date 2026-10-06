@@ -705,8 +705,11 @@ exports.undoIntake = async (req, res) => {
     } catch (error) {
         const mapped = require('../services/workflowStateRules').mapStateError(error);
         if (!mapped.statusCode) console.error('[undoIntake] Error:', error);
+        // Keep the public undo endpoint's established evidence conflict codes.
+        // The action service additionally reports exact blocking item IDs.
+        const code = mapped.code === 'INTAKE_UNDO_HAS_WORK' ? mapped.details?.legacyUndoCode || mapped.code : mapped.code;
         res.status(mapped.statusCode || 500).json({ error: mapped.statusCode ? mapped.message : 'Failed to undo intake',
-            ...(mapped.code && { code: mapped.code }), ...(mapped.details && { details: mapped.details }) });
+            ...(code && { code }), ...(mapped.details && { details: mapped.details }) });
     }
 };
 
