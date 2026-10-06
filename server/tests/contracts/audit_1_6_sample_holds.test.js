@@ -133,6 +133,34 @@ test('re-raising a wrapper-only resolution removes stale association flags and r
     expect(fresh.resolutions).toEqual(marker.resolutions); expect(fresh.status).toBe(holds.ACTIVE);
 });
 
+test('fixture cleanup cannot erase a sample with immutable hold history', async () => {
+    const s = await sample();
+    await boundHold(s.id, 'REVISED_FIELD_EVIDENCE: retained history');
+    const before = snapshot();
+    await expect(require('../helpers/workflowFixtures').cleanupWorkflowFixtures(prisma, 'sample', [s.id])).rejects.toThrow();
+    expect(snapshot()).toEqual(before);
+});
+
+test('a v11 exchange installation upgrades and suppresses amendments for canonical and wrapper holds', async () => {
+    const canonical = await sample({ status: 'APPROVED' });
+    const wrapper = await sample({ status: 'APPROVED', fieldMetadata: JSON.stringify({ provenanceHold: { value: holds.ACTIVE, source: 'KOBO' } }) });
+    const clear = await sample({ status: 'APPROVED' });
+    await prisma.$transaction(tx => holds.raiseHold(tx, { sampleId: canonical.id, type: 'CUSTODY', reason: 'Post-approval custody check', actor }));
+    const db = new Database(process.env.DATABASE_PATH, { fileMustExist: true });
+    try {
+        const exchange = require('../../services/exchangeStateService');
+        exchange.initTables(db);
+        db.prepare("INSERT OR REPLACE INTO _exchange_meta (key,value,updated_at) VALUES ('exchange_triggers_version','11',datetime('now'))").run();
+        exchange.ensureTriggers(db);
+        expect(db.prepare("SELECT value FROM _exchange_meta WHERE key='exchange_triggers_version'").get().value).toBe('12');
+    } finally { db.close(); }
+    const count = async id => Number((await prisma.$queryRawUnsafe('SELECT count(*) n FROM _exchange_journal WHERE specimen_id=?', id))[0].n);
+    const before = await Promise.all([canonical, wrapper, clear].map(row => count(row.id)));
+    for (const row of [canonical, wrapper, clear]) await prisma.sample.update({ where: { id: row.id }, data: { siteName: 'Reviewed source amendment' } });
+    expect(await count(canonical.id)).toBe(before[0]); expect(await count(wrapper.id)).toBe(before[1]);
+    expect(await count(clear.id)).toBeGreaterThan(before[2]);
+});
+
 test('an active marker with only resolved bound holds remains held', async () => {
     const s = await sample(), h = await boundHold(s.id, 'REVISED_FIELD_EVIDENCE: reconciled');
     await resolve(s, h);

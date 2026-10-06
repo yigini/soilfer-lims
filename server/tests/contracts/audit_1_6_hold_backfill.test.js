@@ -171,9 +171,20 @@ test.each([
     ['backfill-operator', { labId: 'OUTSIDE-LAB' }, 'BACKFILL_OPERATOR_OUT_OF_SCOPE']
 ])('apply refuses operator %s with %p using %s and zero writes', (operator, changes, code) => {
     const { file } = fixture();
+    if (operator && /^(?:system|service):/.test(operator)) withDb(file, db =>
+        db.prepare('INSERT INTO User (id,username,email,password,role,labId,isActive,updatedAt) VALUES (?,?,?,?,?,?,?,?)')
+            .run(randomUUID(), operator, `${randomUUID()}@fixture.test`, 'fixture-password', 'LAB_MANAGER', 'HOLD-BACKFILL-TEST', 1, now.toISOString()));
     if (changes) withDb(file, db => { for (const [key, value] of Object.entries(changes)) db.prepare(`UPDATE User SET "${key}"=? WHERE username='backfill-operator'`).run(value); });
     const plan = dry(file), before = state(file), bytes = digest(fs.readFileSync(file));
     expect(() => apply(file, plan, { operator })).toThrow(expect.objectContaining({ code }));
+    expect(state(file)).toEqual(before); expect(digest(fs.readFileSync(file))).toBe(bytes);
+});
+
+test('scope validation covers every proposed sample before any insert', () => {
+    const { file } = fixture([{}, { assignedLab: 'OUTSIDE-LAB' }]);
+    const plan = dry(file), before = state(file), bytes = digest(fs.readFileSync(file));
+    expect(plan.proposedCount).toBe(2);
+    expect(() => apply(file, plan)).toThrow(expect.objectContaining({ code: 'BACKFILL_OPERATOR_OUT_OF_SCOPE' }));
     expect(state(file)).toEqual(before); expect(digest(fs.readFileSync(file))).toBe(bytes);
 });
 

@@ -64,8 +64,6 @@ async function cleanupWorkflowFixtures(db, entity, ids, { single = false } = {})
     const explicitIds = [...new Set(ids)];
     if (single && explicitIds.length > 1) throw new Error('Single-row cleanup requires at most one id.');
     if (entity === 'sample') {
-        const holdsTable = await db.$queryRawUnsafe("SELECT 1 FROM sqlite_master WHERE type='table' AND name='SampleHold'");
-        if (holdsTable.length) await db.sampleHold.deleteMany({ where: { sampleId: { in: explicitIds } } });
         return single && explicitIds.length ? db.sample.delete({ where: { id: explicitIds[0] } })
             : db.sample.deleteMany({ where: { id: { in: explicitIds } } });
     }

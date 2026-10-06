@@ -117,7 +117,10 @@ function failAudit(action, aggregateOnly = false) {
         get(target, key) {
             if (key === 'auditLog') return new Proxy(target.auditLog, { get(delegate, operation) {
                 if (operation === 'create') return args => {
-                    if ((!action || args.data.action === action) && (!aggregateOnly || args.data.entityId == null)) throw new Error('Injected workflow audit failure');
+                    if ((!action || args.data.action === action) && (!aggregateOnly || args.data.details?.startsWith('Cleared '))) {
+                        if (aggregateOnly) expect(args.data.entityId).toBe('PH');
+                        throw new Error('Injected workflow audit failure');
+                    }
                     return delegate.create(args);
                 };
                 return delegate[operation];

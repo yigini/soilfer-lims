@@ -268,7 +268,9 @@ exports.syncLab = async (req, res) => {
         }
 
         const result = await syncLabSubmissions(configs[0], req.user?.username, { actor: req.user });
-
+        if (!result.newSamples && result.skippedReasons?.length && result.skippedReasons.every(row => row.reason === 'HOLD_MARKER_INVALID')) {
+            return res.status(409).json({ ...result, code: 'HOLD_MARKER_INVALID', message: 'Stored hold metadata needs repair. Skipped submissions remain retriable.' });
+        }
         res.json(result);
     } catch (error) {
         console.error('[KOBO] Sync error:', error);
