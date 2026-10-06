@@ -12,8 +12,8 @@ const RESULT_LOADER = 'services/resultAttemptMigrationSource.js';
 const RESULT_LOADER_SHA256 = '36658af9e2a6fa817ff4938ad08ac6879ff10a2969acf1a395a68cad5f37a655';
 const RESULT_SQL_SHA256 = 'aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d';
 const REFERENCE_LOADER = 'services/referenceMaterialMigrationSource.js';
-const REFERENCE_LOADER_SHA256 = '741e6f80785aa6aeba8c9c5ae1235ad88cd1b3d8c185b127d97790c3663dde6e';
-const REFERENCE_SQL_SHA256 = '5cf133efab664cf72a6817c808c13f6028141baba9705b30fe0817f31b3f596f';
+const REFERENCE_LOADER_SHA256 = 'aec02b50c02946f7fb35606524ebb5ced033d43107aa810905fa7c8d4b245ae9';
+const REFERENCE_SQL_SHA256 = '5da12ca98c6402002ab2701105eb9e2a51539d4421f53d70c60f47ab98bd51e3';
 const WORKFLOW_SOURCES = Object.freeze({
     evidence: { directory: '20261005000000_workflow_state_evidence', sha256: 'ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552' },
     guards: { directory: '20261005000100_workflow_state_guards', sha256: '84921ef45fa8609621b38908de5261d716820f2135f2dde1b9a20fafa6fc81ed' }

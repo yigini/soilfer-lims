@@ -91,7 +91,7 @@ test('receipt write failure rolls back tables, columns, indexes and guards toget
 });
 
 test('closed reference loader never accepts alias, mutation or shadowed SQL authority', () => {
-    expect(loadReferenceMaterialMigrationSource().sha256).toBe('5cf133efab664cf72a6817c808c13f6028141baba9705b30fe0817f31b3f596f');
+    expect(loadReferenceMaterialMigrationSource().sha256).toBe('5da12ca98c6402002ab2701105eb9e2a51539d4421f53d70c60f47ab98bd51e3');
     const header = "const {loadReferenceMaterialMigrationSource}=require('../services/referenceMaterialMigrationSource');const source=loadReferenceMaterialMigrationSource();";
     expect(scanSource(header + 'db.exec(source.sql)', 'scripts/reference-probe.js')).toEqual([]);
     for (const code of ['const alias=source;db.exec(alias.sql)', 'source.sql=input;db.exec(source.sql)', 'delete source.sql;db.exec(source.sql)']) {

@@ -93,7 +93,8 @@ BEGIN
   SELECT RAISE(ABORT, 'REFERENCE_VALUE_IMMUTABLE');
 END;
 CREATE TRIGGER "ReferenceValue_delete_guard" BEFORE DELETE ON "ReferenceValue"
-WHEN EXISTS (SELECT 1 FROM "BatchQcResult" q WHERE q.referenceValueId=OLD.id)
+WHEN OLD."supersededById" IS NOT NULL
+  OR EXISTS (SELECT 1 FROM "BatchQcResult" q WHERE q.referenceValueId=OLD.id)
   OR EXISTS (SELECT 1 FROM "ReferenceValue" v WHERE v.supersededById=OLD.id)
   OR EXISTS (SELECT 1 FROM "AuditLog" a, json_tree(CASE WHEN json_valid(a.details) THEN a.details ELSE '{}' END) j
     WHERE a.entity='BATCH' AND a.action='QC_EVIDENCE_SNAPSHOT' AND j.key='referenceValueId' AND j.value=OLD.id)

@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
 const DIRECTORY = '20261006000200_reference_material_catalogue';
-const SHA256 = '5cf133efab664cf72a6817c808c13f6028141baba9705b30fe0817f31b3f596f';
+const SHA256 = '5da12ca98c6402002ab2701105eb9e2a51539d4421f53d70c60f47ab98bd51e3';
 const ORACLE_SHA256 = '7a626b66bd31a7e7305d8c1b091207f3fb26348345a431fb77b63f875d3b99b5';
 
 function loadReferenceMaterialMigrationSource() {

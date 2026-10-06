@@ -206,6 +206,17 @@ test('correction appends immutable facts and supersession is final; raw value mu
     expect(snapshot()).toEqual(historical);
 });
 
+test('unplaced corrected value history and its replacement cannot be deleted', async () => {
+    const rm = await material(), old = await value(rm);
+    const corrected = await call('post', `/api/reference-materials/${rm.id}/values/${old.id}/correct`, { assignedValue: 8, reason: 'Certificate transcription' });
+    expect(corrected.status).toBe(201);
+    const before = snapshot();
+    for (const id of [old.id, corrected.body.data.id]) {
+        await expect(prisma.$executeRawUnsafe('DELETE FROM "ReferenceValue" WHERE id=?', id)).rejects.toThrow('REFERENCE_VALUE_REFERENCED');
+        expect(snapshot()).toEqual(before);
+    }
+});
+
 test('read-only catalogue warnings use per-lab policy and report days without changing expired status', async () => {
     const rm = await material({ expiryDate: new Date(Date.now() + 5 * 86400000).toISOString() }), expired = await material({ expiryDate: new Date(Date.now() - 86400000).toISOString() });
     await prisma.labPolicyOverride.create({ data: { id: randomUUID(), labId, key: 'referenceMaterials.expiryWarningDays', value: '2', reason: 'Owned warning policy', setBy: actor.username } });
