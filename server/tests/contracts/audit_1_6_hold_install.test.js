@@ -63,10 +63,11 @@ test('real additive hold install preserves all old science, QC, audit, schema an
     expect(hash(file)).toBe(installedHash);
 });
 
-test('fresh Prisma schemas get the exact partial index, four guards and marker without rebuilding tables', () => {
+test('fresh Prisma schemas get the exact partial index, seven guards and marker without rebuilding tables', () => {
     const file = fixture(null), before = state(file);
     expect(installSampleHolds({ dbPath: file })).toMatchObject({ classification: 'FRESH_PRISMA' });
     expect(installSampleHolds({ dbPath: file, apply: true })).toMatchObject({ previousClassification: 'FRESH_PRISMA', totalChanges: 1, guards: expect.any(Array) });
+    expect(assertSampleHoldStartupReady(file).guards).toHaveLength(7);
     const after = state(file);
     for (const object of before.objects) expect(after.objects.find(row => row.type === object.type && row.name === object.name)).toEqual(object);
     for (const table of before.tables) {
@@ -95,7 +96,7 @@ test('startup requires an exact complete installation and conflicting CLI modes 
 });
 
 test('the hold loader is digest-bound and aliases/shadow functions cannot obtain SQL authority', () => {
-    expect(loadSampleHoldMigrationSource().sha256).toBe('e6221516725c3c66001fb15b09db9f81553285486552b0c0b3f810b9b6572227');
+    expect(loadSampleHoldMigrationSource().sha256).toBe('5fce16e8bc148e07880fe6afcc7f5aec1c94c319a5c98ddaeaf47450906b06a8');
     const header = "const {loadSampleHoldMigrationSource}=require('../services/sampleHoldMigrationSource');const source=loadSampleHoldMigrationSource();";
     expect(scanSource(header + 'db.exec(source.sql); db.exec(source.guardsSql); db.exec(source.indexSql)', 'scripts/hold-probe.js')).toEqual([]);
     expect(scanSource(header + 'const alias=source; db.exec(alias.sql)', 'scripts/hold-probe.js')).toEqual(expect.arrayContaining([expect.objectContaining({ code: 'UNRESOLVED_WORKFLOW_SQL' })]));
@@ -106,4 +107,40 @@ test('the hold loader is digest-bound and aliases/shadow functions cannot obtain
 test('unparseable source stays a closed scanner finding with its original line', () => {
     expect(scanSource('const okay = 1;\nconst broken = ;', 'scripts/hold-invalid-canary.js'))
         .toEqual([expect.objectContaining({ code: 'SOURCE_PARSE_FAILED', line: 2 })]);
+});
+
+test.each(['PRE_1_3_SAMPLE_CODES', null])('hold history is immutable on %s installs, including raw SQL writes', variant => {
+    const file = fixture(variant); installSampleHolds({ dbPath: file, apply: true });
+    const db = new Database(file);
+    try {
+        db.pragma('foreign_keys=ON');
+        const sampleId = db.prepare('SELECT id FROM Sample LIMIT 1').get().id, id = randomUUID();
+        db.prepare('INSERT INTO SampleHold (id,sampleId,type,reason,raisedBy,raisedAt,attributionSource) VALUES (?,?,?,?,?,?,?)')
+            .run(id, sampleId, 'CUSTODY', 'Original evidence', 'original-manager', '2026-10-01T10:00:00Z', 'LIVE');
+        const original = state(file);
+        for (const [key, value] of Object.entries({ id: randomUUID(), sampleId: 'another-sample', type: 'OTHER', reason: 'Replacement',
+            raisedBy: 'forged-manager', raisedAt: '2026-10-02T10:00:00Z', attributionSource: 'KOBO_CONFLICT_AUDIT', compatMarker: 'KOBO_PROVENANCE' })) {
+            expect(() => db.prepare(`UPDATE SampleHold SET "${key}"=? WHERE id=?`).run(value, id)).toThrow('SAMPLE_HOLD_RAISE_IMMUTABLE');
+            expect(state(file)).toEqual(original);
+        }
+        expect(() => db.prepare('DELETE FROM SampleHold WHERE id=?').run(id)).toThrow('SAMPLE_HOLD_DELETE_REFUSED');
+        expect(state(file)).toEqual(original);
+        db.prepare('UPDATE SampleHold SET resolvedAt=?,resolvedBy=?,resolution=? WHERE id=?')
+            .run('2026-10-03T10:00:00Z', 'reviewing-manager', 'Evidence reconciled', id);
+        const resolved = state(file);
+        for (const [key, value] of [['resolvedAt', null], ['resolvedBy', 'replacement-manager'], ['resolution', 'Replacement reason']]) {
+            expect(() => db.prepare(`UPDATE SampleHold SET "${key}"=? WHERE id=?`).run(value, id)).toThrow('SAMPLE_HOLD_RESOLUTION_IMMUTABLE');
+            expect(state(file)).toEqual(resolved);
+        }
+        expect(() => db.prepare('DELETE FROM SampleHold WHERE id=?').run(id)).toThrow('SAMPLE_HOLD_DELETE_REFUSED');
+        expect(state(file)).toEqual(resolved);
+    } finally { db.close(); }
+});
+
+test.each(['SampleHold_raise_immutable', 'SampleHold_resolution_final', 'SampleHold_delete_refusal'])('startup refuses a missing %s history guard with zero writes', guard => {
+    const file = fixture(); installSampleHolds({ dbPath: file, apply: true });
+    const db = new Database(file); try { db.exec(`DROP TRIGGER "${guard}"`); } finally { db.close(); }
+    const before = state(file), bytes = hash(file);
+    expect(() => assertSampleHoldStartupReady(file)).toThrow(expect.objectContaining({ code: 'SAMPLE_HOLD_SCHEMA_MISMATCH' }));
+    expect(state(file)).toEqual(before); expect(hash(file)).toBe(bytes);
 });

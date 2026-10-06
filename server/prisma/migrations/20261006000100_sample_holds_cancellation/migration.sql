@@ -53,6 +53,27 @@ BEGIN
   SELECT RAISE(ABORT, 'INVALID_SAMPLE_HOLD');
 END;
 
+CREATE TRIGGER "SampleHold_raise_immutable" BEFORE UPDATE ON "SampleHold"
+WHEN NEW."id" IS NOT OLD."id" OR NEW."sampleId" IS NOT OLD."sampleId"
+  OR NEW."type" IS NOT OLD."type" OR NEW."reason" IS NOT OLD."reason"
+  OR NEW."raisedBy" IS NOT OLD."raisedBy" OR NEW."raisedAt" IS NOT OLD."raisedAt"
+  OR NEW."attributionSource" IS NOT OLD."attributionSource" OR NEW."compatMarker" IS NOT OLD."compatMarker"
+BEGIN
+  SELECT RAISE(ABORT, 'SAMPLE_HOLD_RAISE_IMMUTABLE');
+END;
+
+CREATE TRIGGER "SampleHold_resolution_final" BEFORE UPDATE ON "SampleHold"
+WHEN OLD."resolvedAt" IS NOT NULL AND (NEW."resolvedAt" IS NOT OLD."resolvedAt"
+  OR NEW."resolvedBy" IS NOT OLD."resolvedBy" OR NEW."resolution" IS NOT OLD."resolution")
+BEGIN
+  SELECT RAISE(ABORT, 'SAMPLE_HOLD_RESOLUTION_IMMUTABLE');
+END;
+
+CREATE TRIGGER "SampleHold_delete_refusal" BEFORE DELETE ON "SampleHold"
+BEGIN
+  SELECT RAISE(ABORT, 'SAMPLE_HOLD_DELETE_REFUSED');
+END;
+
 CREATE TRIGGER "WorkItem_cancellation_insert_guard" BEFORE INSERT ON "WorkItem"
 WHEN (NEW."cancellationCode" IS NULL AND (NEW."cancellationReason" IS NOT NULL OR NEW."cancelledBy" IS NOT NULL OR NEW."cancelledAt" IS NOT NULL))
   OR (NEW."cancellationCode" IS NOT NULL AND (NEW."cancellationCode" NOT IN ('INTAKE_UNDONE','INTAKE_REJECTED')

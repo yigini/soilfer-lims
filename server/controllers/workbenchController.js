@@ -1415,6 +1415,7 @@ exports.clearDrafts = async (req, res) => {
                 action: 'DRAFT_DISCARDED',
                 performedBy: user.username,
                 details: `Cleared ${userDrafts.length} drafts for ${analysis}`,
+                entityId: analysis || 'all',
                 timestamp: new Date()
             }
             });

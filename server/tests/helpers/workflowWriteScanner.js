@@ -11,8 +11,8 @@ const WORKFLOW_LOADER_SHA256 = '0b7f6010cc7b69a03ffe5aceb3c467dd5a718f51d25968e5
 const RESULT_LOADER = 'services/resultAttemptMigrationSource.js';
 const RESULT_LOADER_SHA256 = '36658af9e2a6fa817ff4938ad08ac6879ff10a2969acf1a395a68cad5f37a655';
 const HOLD_LOADER = 'services/sampleHoldMigrationSource.js';
-const HOLD_LOADER_SHA256 = '1568c3e40c2ac79938255ba5c002cf31aacad694eac3f6c636e1520c59ae8a12';
-const HOLD_SQL_SHA256 = 'e6221516725c3c66001fb15b09db9f81553285486552b0c0b3f810b9b6572227';
+const HOLD_LOADER_SHA256 = '8092708bf3f0f83111d56b00174a6b9dee9f2d996b7a874ad821801abeb37bb9';
+const HOLD_SQL_SHA256 = '5fce16e8bc148e07880fe6afcc7f5aec1c94c319a5c98ddaeaf47450906b06a8';
 const RESULT_SQL_SHA256 = 'aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d';
 const WORKFLOW_SOURCES = Object.freeze({
     evidence: { directory: '20261005000000_workflow_state_evidence', sha256: 'ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552' },

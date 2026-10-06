@@ -68,7 +68,7 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
             const requested = typeof updated.requiredAnalyses === 'string' ? JSON.parse(updated.requiredAnalyses) : updated.requiredAnalyses || [];
             if (!Array.isArray(requested)) throw new TransitionError('Requested analyses need review.', 409, 'INTAKE_ANALYSES_INVALID');
             await require('./workItemStateService').reactivateCancelledIntakeWork(client, { sampleId: sample.id,
-                previousSampleStatus: currentStatus, analyses: [...new Set(['DRYING', 'PREPARATION', ...requested])],
+                previousSampleStatus: currentStatus, analyses: require('./analysisCodesService').normalizeAnalysisCodes(['DRYING', 'PREPARATION', ...requested]),
                 actor, reason: reason || 'Sample legally re-accepted at intake' });
         }
         if (sample.status !== nextStatus || migrating) {

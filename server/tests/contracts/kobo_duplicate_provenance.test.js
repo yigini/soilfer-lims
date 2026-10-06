@@ -1395,4 +1395,46 @@ describe('Kobo Duplicate Provenance & Expected Arrivals Contracts (Issue #146)',
         });
         expect(auditsAfterPass3.length).toBe(1); // STILL 1!
     });
+
+    test.each([[false, false], [true, false], [false, true], [true, true]])('malformed hold submissions are skipped and retriable while later healthy submissions commit (mixed=%s, history=%s)', async (mixed, history) => {
+        const base = 50000 + (mixed ? 1000 : 0) + (history ? 2000 : 0), barcode = `MALFORMED-HOLD-${base}-${SUFFIX}`;
+        const primary = { _id: base, _uuid: `primary-${base}`, _submission_time: '2026-10-01T12:00:00', surveyor_name: 'fixture' };
+        const first = { original_id: barcode, depth: 'D1', site_id: 'FIXTURE-SITE', lat: 5, lng: 1, kobo_submission_id: base };
+        koboService.fetchSubmissions.mockResolvedValueOnce([primary]);
+        koboService.transformSubmission.mockReturnValueOnce([first]);
+        expect((await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC')).newSamples).toBe(1);
+        const existing = await prisma.sample.findUnique({ where: { originalId: barcode } });
+        await prisma.sample.update({ where: { id: existing.id }, data: history ? { metadata: JSON.stringify({ ...JSON.parse(existing.metadata),
+            provenanceHold: { status: 'AMBIGUOUS_PROVENANCE_HOLD', reason: 'REVISED_FIELD_EVIDENCE: fixture', resolutions: 'malformed history' } }) } :
+            { fieldMetadata: '["malformed root"]' } });
+        const before = await prisma.sample.findUnique({ where: { id: existing.id } });
+        const auditsBefore = await prisma.auditLog.findMany({ where: { entityId: existing.id }, orderBy: { id: 'asc' } });
+        const configBefore = await prisma.koboConfig.findUnique({ where: { id: configGHA.id } });
+        const conflict = { ...primary, _id: base + 1, _uuid: `conflict-${base}` }, healthy = { ...primary, _id: base + 2, _uuid: `healthy-${base}` };
+        const conflictSamples = [{ ...first, lat: 8, kobo_submission_id: base + 1 },
+            ...(mixed ? [{ ...first, original_id: `ROLLED-BACK-${base}-${SUFFIX}`, kobo_submission_id: base + 1 }] : [])];
+        const healthySample = { ...first, original_id: `HEALTHY-${base}-${SUFFIX}`, kobo_submission_id: base + 2 };
+        const mockRun = () => {
+            koboService.fetchSubmissions.mockResolvedValueOnce([conflict, healthy]);
+            koboService.transformSubmission.mockReturnValueOnce(conflictSamples).mockReturnValueOnce([healthySample]);
+        };
+        mockRun();
+        const result = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+        expect(result.newSamples).toBe(1);
+        expect(result.skippedReasons).toEqual(expect.arrayContaining([expect.objectContaining({ originalId: barcode, reason: 'HOLD_MARKER_INVALID' })]));
+        expect(result.lastSubmissionId).toBe(configBefore.lastSubmissionId);
+        expect((await prisma.koboConfig.findUnique({ where: { id: configGHA.id } })).lastSubmissionId).toBe(configBefore.lastSubmissionId);
+        expect(await prisma.sample.findUnique({ where: { id: existing.id } })).toEqual(before);
+        expect(await prisma.auditLog.findMany({ where: { entityId: existing.id }, orderBy: { id: 'asc' } })).toEqual(auditsBefore);
+        expect(await prisma.sampleHold.count({ where: { sampleId: existing.id } })).toBe(0);
+        expect(await prisma.sample.count({ where: { originalId: healthySample.original_id } })).toBe(1);
+        if (mixed) expect(await prisma.sample.count({ where: { originalId: conflictSamples[1].original_id } })).toBe(0);
+        // Repair is confined to this synthetic fixture; production repair is #247.
+        await prisma.sample.update({ where: { id: existing.id }, data: { fieldMetadata: existing.fieldMetadata, metadata: existing.metadata } });
+        mockRun();
+        const retried = await koboController._syncLabSubmissions(configGHA, 'TEST_SYNC');
+        expect(retried.lastSubmissionId).toBe(String(base + 2));
+        expect(await prisma.sampleHold.count({ where: { sampleId: existing.id } })).toBe(1);
+        expect(await prisma.sample.count({ where: { originalId: healthySample.original_id } })).toBe(1);
+    });
 });

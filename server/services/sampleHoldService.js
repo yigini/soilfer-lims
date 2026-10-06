@@ -97,6 +97,8 @@ async function raiseKoboHold(tx, { sampleId, marker, actor, now = new Date() }) 
     const hold = await raiseHold(tx, { sampleId, type: 'PROVENANCE', reason: marker.reason, actor, now, compatMarker: COMPAT });
     const nextMarker = { ...legacy.marker, ...marker, status: ACTIVE,
         ...(legacy.marker?.resolutions && { resolutions: legacy.marker.resolutions }) };
+    delete nextMarker.createdByResolution;
+    delete nextMarker.boundHoldIds;
     const fieldMetadata = { ...legacy.fieldMetadata };
     if (legacy.mirror) fieldMetadata.provenanceHold = { ...legacy.mirror, value: ACTIVE };
     await require('./sampleStateService').writeSampleHoldCompatibility(tx, sample,

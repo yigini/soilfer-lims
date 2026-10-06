@@ -19,14 +19,15 @@ const TRIGGER_CODES = Object.freeze([
     'INVALID_REVIEW_DECISION', 'REVIEW_DECISION_IMMUTABLE',
     'INVALID_RESULT_EVIDENCE', 'RESULT_EVIDENCE_IMMUTABLE',
     'RESULT_ATTEMPT_NOT_FOUND', 'RESULT_ATTEMPT_SAMPLE_MISMATCH', 'RESULT_ATTEMPT_REFERENCED',
-    'INVALID_SAMPLE_HOLD', 'INVALID_CANCELLATION_PROVENANCE'
+    'INVALID_SAMPLE_HOLD', 'INVALID_CANCELLATION_PROVENANCE',
+    'SAMPLE_HOLD_RAISE_IMMUTABLE', 'SAMPLE_HOLD_RESOLUTION_IMMUTABLE', 'SAMPLE_HOLD_DELETE_REFUSED'
 ]);
 
 function mapStateError(error, conflictCode = 'STATE_CHANGED') {
     const text = `${error.message || ''} ${JSON.stringify(error.meta || {})}`;
     const code = TRIGGER_CODES.find(value => text.includes(value));
     if (code) return new TransitionError('The database refused an invalid workflow write.', 409, code);
-    if (['P2025', 'P2034', 'P1008'].includes(error.code)) {
+    if (['P2025', 'P2034', 'P1008', 'SQLITE_BUSY', 'SQLITE_LOCKED'].includes(error.code) || /database is (?:locked|busy)/i.test(text)) {
         return new TransitionError('The workflow row changed. Reload before retrying.', 409, conflictCode);
     }
     return error;

@@ -106,6 +106,8 @@ test('a new LIVE Kobo hold preserves earlier resolution history and raises the m
     expect(second).toMatchObject({ raisedBy: 'system:kobo-sync', attributionSource: 'LIVE', compatMarker: 'KOBO_PROVENANCE' });
     expect(JSON.parse(fresh.metadata).provenanceHold).toMatchObject({ status: holds.ACTIVE, reason: second.reason,
         resolutions: [expect.objectContaining({ holdId: first.id })] });
+    expect(JSON.parse(fresh.metadata).provenanceHold).not.toHaveProperty('createdByResolution');
+    expect(JSON.parse(fresh.metadata).provenanceHold).not.toHaveProperty('boundHoldIds');
     expect(JSON.parse(fresh.fieldMetadata).provenanceHold.value).toBe(holds.ACTIVE);
     expect(await holds.isHeld(prisma, fresh)).toBe(true);
 });
@@ -116,6 +118,19 @@ test('an unbackfilled active marker refuses resolution with a stable code and ze
     await expect(resolve(s, { id: randomUUID() })).rejects.toMatchObject({ statusCode: 409, code: 'HOLD_BACKFILL_REQUIRED' });
     expect(snapshot()).toEqual(before);
     expect(await holds.isHeld(prisma, s)).toBe(true);
+});
+
+test('re-raising a wrapper-only resolution removes stale association flags and retains resolution evidence', async () => {
+    const s = await sample({ metadata: '{"untouched":1}', fieldMetadata: JSON.stringify({ provenanceHold: { value: holds.ACTIVE, source: 'KOBO' } }) });
+    const first = await prisma.$transaction(tx => holds.raiseHold(tx, { sampleId: s.id, type: 'PROVENANCE',
+        reason: 'Original wrapper evidence', actor: 'system:kobo-sync', compatMarker: holds.COMPAT }));
+    await resolve(s, first);
+    const marker = JSON.parse((await prisma.sample.findUnique({ where: { id: s.id } })).metadata).provenanceHold;
+    expect(marker).toMatchObject({ createdByResolution: true, boundHoldIds: [first.id] });
+    await boundHold(s.id, 'REVISED_FIELD_EVIDENCE: subsequent source');
+    const fresh = JSON.parse((await prisma.sample.findUnique({ where: { id: s.id } })).metadata).provenanceHold;
+    expect(fresh).not.toHaveProperty('createdByResolution'); expect(fresh).not.toHaveProperty('boundHoldIds');
+    expect(fresh.resolutions).toEqual(marker.resolutions); expect(fresh.status).toBe(holds.ACTIVE);
 });
 
 test('an active marker with only resolved bound holds remains held', async () => {
@@ -199,6 +214,28 @@ function holdRoutes(user) {
     app.use('/api/samples', require('../../routes/sampleRoutes'));
     return app;
 }
+
+test.each(['RESOLVED', holds.ACTIVE, { status: 'RESOLVED' }, null])('metadata edits cannot forge hold authority with %p', async value => {
+    const s = await sample({ fieldMetadata: JSON.stringify({ provenanceHold: { value: holds.ACTIVE, source: 'KOBO' } }) });
+    const before = snapshot();
+    const response = await request(holdRoutes(actor)).put(`/api/samples/${s.id}/metadata`).send({ metadata: { provenanceHold: value } });
+    expect(response.status).toBe(409);
+    expect(response.body.code).toBe('HOLD_MARKER_MANAGED');
+    expect(snapshot()).toEqual(before);
+    expect(await holds.isHeld(prisma, await prisma.sample.findUnique({ where: { id: s.id } }))).toBe(true);
+});
+
+test.each(['get', 'resolve'])('hold %s route maps database busy errors to a stable conflict', async action => {
+    const s = await sample();
+    const method = action === 'get' ? 'findMany' : null;
+    const spy = action === 'get' ? jest.spyOn(prisma.sampleHold, method) : jest.spyOn(prisma, '$transaction');
+    spy.mockRejectedValueOnce(Object.assign(new Error('database is locked'), { code: 'SQLITE_BUSY' }));
+    try {
+        const response = action === 'get' ? await request(holdRoutes(actor)).get(`/api/samples/${s.id}/holds`) :
+            await request(holdRoutes(actor)).post(`/api/samples/${s.id}/holds/fault/resolve`).send({ reason: 'Reviewed' });
+        expect(response.status).toBe(409); expect(response.body.code).toBe('STATE_CHANGED');
+    } finally { spy.mockRestore(); }
+});
 
 test('hold routes enforce manager permission and sample scope, then return resolved attribution', async () => {
     const s = await sample(), h = await boundHold(s.id, 'REVISED_FIELD_EVIDENCE: route reconciliation');

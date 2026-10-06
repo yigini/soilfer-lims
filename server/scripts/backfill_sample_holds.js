@@ -5,6 +5,8 @@ const { createHash, randomUUID } = require('node:crypto');
 const Database = require('better-sqlite3');
 const { assertSampleHoldStartupReady } = require('./install_sample_holds');
 const { legacyHoldState, ACTIVE, COMPAT } = require('../services/sampleHoldService');
+const { hasPermission } = require('../config/roles');
+const scopeGuard = require('../utils/scopeGuard');
 const PREFIXES = ['REVISED_FIELD_EVIDENCE:', 'CONFLICTING_FIELD_SUBMISSIONS:', 'INTRA_SUBMISSION_DUPLICATE_DEPTH:'];
 // The scope pin permits at most 24 hours of historical clock skew.
 const MAX_CLOCK_SKEW_MS = 24 * 60 * 60 * 1000;
@@ -64,6 +66,11 @@ function inventoryLegacyHolds(db, { now = new Date(), mapping = { rows: [], sha2
         const fingerprint = digest(JSON.stringify({ sample, audits, bound }));
         const row = { sampleId: sample.id, fingerprint, action: 'SKIP_RESOLVED', diagnostics: [], refusals: [], proposed: null,
             metadataRepairNeeded: legacy.metadataRepairNeeded };
+        if (!legacy.fieldMetadata && !legacy.marker) {
+            row.action = 'METADATA_REPAIR_NEEDED';
+            row.diagnostics.push('HOLD_MARKER_INVALID');
+            rows.push(row); continue;
+        }
         if (!legacy.active) {
             if (bound.some(hold => hold.attributionSource !== 'LIVE')) row.action = 'ALREADY_BACKFILLED';
             rows.push(row); continue;
@@ -71,7 +78,6 @@ function inventoryLegacyHolds(db, { now = new Date(), mapping = { rows: [], sha2
         if (!bound.some(hold => !hold.resolvedAt)) row.diagnostics.push('HOLD_MARKER_INCONSISTENT');
         if (bound.some(hold => hold.attributionSource !== 'LIVE')) {
             row.action = 'ALREADY_BACKFILLED';
-            if (!bound.some(hold => !hold.resolvedAt)) row.refusals.push('HOLD_MARKER_INCONSISTENT');
             rows.push(row); continue;
         }
         if (bound.some(hold => !hold.resolvedAt)) { row.action = 'BOUND_LIVE_HOLD'; rows.push(row); continue; }
@@ -87,12 +93,13 @@ function inventoryLegacyHolds(db, { now = new Date(), mapping = { rows: [], sha2
         const raisedAt = audit?.timestamp || isoTimestamp(legacy.marker?.updatedAt);
         const timeRefusal = validateTime(raisedAt, sample, now);
         if (timeRefusal) row.refusals.push(timeRefusal);
-        const raisedBy = typeof audit?.performedBy === 'string' && audit.performedBy.trim() ? audit.performedBy : 'system:kobo-sync';
+        const raisedBy = 'system:kobo-sync';
+        row.triggeringUser = audit?.performedBy ?? null;
         if (!row.refusals.length) row.proposed = { sampleId: sample.id, type: 'PROVENANCE', reason: legacy.marker.reason,
             raisedBy, raisedAt, attributionSource: audit ? 'KOBO_CONFLICT_AUDIT' : 'LEGACY_HOLD_UPDATED_AT', compatMarker: COMPAT };
         const review = mapping.rows.find(entry => entry.sampleId === sample.id);
         if (review) {
-            if (!row.refusals.length || review.fingerprint !== fingerprint || ![raisedBy, 'system:kobo-sync'].includes(review.raisedBy) || validateTime(isoTimestamp(review.raisedAt), sample, now)) {
+            if (!row.refusals.length || review.fingerprint !== fingerprint || review.raisedBy !== raisedBy || validateTime(isoTimestamp(review.raisedAt), sample, now)) {
                 throw fail('HOLD_MAPPING_STALE', 'A mapping row does not match the refused marker and its permissible attribution.');
             }
             usedMappings.add(sample.id);
@@ -109,10 +116,28 @@ function inventoryLegacyHolds(db, { now = new Date(), mapping = { rows: [], sha2
         proposedCount: rows.filter(row => row.proposed).length, refusedCount: rows.filter(row => row.refusals.length).length,
         upperBoundCount: rows.filter(row => row.proposed?.attributionSource === 'LEGACY_HOLD_UPDATED_AT').length };
     plan.metadataRepairNeededCount = rows.filter(row => row.metadataRepairNeeded).length;
+    plan.alreadyBackfilledInconsistentCount = rows.filter(row => row.action === 'ALREADY_BACKFILLED' && row.diagnostics.includes('HOLD_MARKER_INCONSISTENT')).length;
     return { ...plan, fingerprint: digest(JSON.stringify(plan)), asOf: now.toISOString(), mode: 'DRY_RUN', totalChanges: 0 };
 }
 
-function backfillSampleHolds({ dbPath, apply = false, mappingPath = null, reviewedMappingSha256 = null, planSha256 = null, now = null } = {}) {
+function validateOperator(db, username, rows) {
+    if (typeof username !== 'string' || !username.trim() || username !== username.trim() || /^(?:system|service)(?::|_|$)/i.test(username)) {
+        throw fail('BACKFILL_OPERATOR_INVALID', 'Apply requires an existing active human operator username.');
+    }
+    const operator = db.prepare('SELECT * FROM User WHERE username=?').get(username);
+    if (!operator || operator.isActive !== 1) throw fail('BACKFILL_OPERATOR_INVALID', 'The operator must be an existing active User.');
+    if (!hasPermission(operator, 'APPROVE_RESULTS')) throw fail('BACKFILL_OPERATOR_FORBIDDEN', 'The operator requires APPROVE_RESULTS.');
+    // SQLite stores booleans as integers; scopeGuard expects an active User.
+    operator.isActive = true;
+    for (const row of rows.filter(row => row.proposed)) {
+        const sample = db.prepare('SELECT * FROM Sample WHERE id=?').get(row.sampleId);
+        try { scopeGuard.ensureScope(operator, sample, { altLabField: 'assignedLab' }); }
+        catch { throw fail('BACKFILL_OPERATOR_OUT_OF_SCOPE', 'The operator must be in scope for every proposed sample.'); }
+    }
+    return operator.username;
+}
+
+function backfillSampleHolds({ dbPath, apply = false, mappingPath = null, reviewedMappingSha256 = null, planSha256 = null, operator = null, now = null } = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('HOLD_BACKFILL_DATABASE_REQUIRED', 'An explicit database path is required.');
     const target = path.resolve(dbPath), ready = assertSampleHoldStartupReady(target);
     const mapping = readMapping(mappingPath, reviewedMappingSha256);
@@ -122,29 +147,32 @@ function backfillSampleHolds({ dbPath, apply = false, mappingPath = null, review
     finally { reader.close(); }
     if (!apply) return plan;
     if (plan.refusedCount) throw fail('HOLD_BACKFILL_MAPPING_REQUIRED', 'Review every refused marker before applying. No rows were changed.', plan);
-    if (!plan.proposedCount) return { ...plan, mode: 'NO_OP', totalChanges: 0, backfillCount: 0 };
-    if (!/^[a-f0-9]{64}$/.test(planSha256 || '') || plan.fingerprint !== planSha256) throw fail('HOLD_BACKFILL_PLAN_STALE', 'Dry-run and review the exact plan before applying. No rows were changed.', plan);
+    if (plan.proposedCount && (!/^[a-f0-9]{64}$/.test(planSha256 || '') || plan.fingerprint !== planSha256)) throw fail('HOLD_BACKFILL_PLAN_STALE', 'Dry-run and review the exact plan before applying. No rows were changed.', plan);
     const db = new Database(target, { fileMustExist: true, timeout: 5000 });
     try {
         db.pragma('foreign_keys = ON');
         return db.transaction(() => {
             const locked = inventoryLegacyHolds(db, { mapping, now: now || new Date() });
+            const performedBy = validateOperator(db, operator, locked.rows);
+            if (!locked.proposedCount && !locked.refusedCount) return { ...locked, operator: performedBy, mode: 'NO_OP', totalChanges: 0, backfillCount: 0 };
             if (locked.fingerprint !== planSha256 || locked.refusedCount) throw fail('HOLD_BACKFILL_PLAN_STALE', 'The marker inventory changed. No rows were changed.', locked);
             const insert = db.prepare(`INSERT INTO SampleHold (id,sampleId,type,reason,raisedBy,raisedAt,attributionSource,compatMarker) VALUES (?,?,?,?,?,?,?,?)`);
             const audit = db.prepare(`INSERT INTO AuditLog (id,entity,entityId,action,performedBy,sampleId,timestamp,details) VALUES (?,?,?,?,?,?,?,?)`);
             for (const row of locked.rows.filter(row => row.proposed)) {
                 const id = randomUUID(), hold = row.proposed;
                 insert.run(id, hold.sampleId, hold.type, hold.reason, hold.raisedBy, hold.raisedAt, hold.attributionSource, hold.compatMarker);
-                audit.run(randomUUID(), 'SAMPLE_HOLD', id, 'HOLD_BACKFILLED', row.review?.reviewer || hold.raisedBy, hold.sampleId,
+                audit.run(randomUUID(), 'SAMPLE_HOLD', id, 'HOLD_BACKFILLED', performedBy, hold.sampleId,
                     (now || new Date()).toISOString(), JSON.stringify({ planSha256, legacyFingerprint: row.fingerprint,
-                        attributionSource: hold.attributionSource, raisedAtIsUpperBound: hold.attributionSource === 'LEGACY_HOLD_UPDATED_AT', review: row.review || null }));
+                        attributionSource: hold.attributionSource, triggeringUser: row.triggeringUser,
+                        raisedAtIsUpperBound: hold.attributionSource === 'LEGACY_HOLD_UPDATED_AT', review: row.review || null }));
             }
             db.prepare('INSERT INTO "_schema_migrations" (id,details) VALUES (?,?)').run(`183_hold_backfill:${planSha256}`,
                 JSON.stringify({ migrationSha256: ready.sources.migrationSha256, planSha256, mappingSha256: mapping.sha256,
                     backfillCount: locked.proposedCount, upperBoundCount: locked.upperBoundCount,
-                    metadataRepairNeededCount: locked.metadataRepairNeededCount }));
+                    metadataRepairNeededCount: locked.metadataRepairNeededCount,
+                    alreadyBackfilledInconsistentCount: locked.alreadyBackfilledInconsistentCount, operator: performedBy }));
             if (db.pragma('integrity_check', { simple: true }) !== 'ok' || db.pragma('foreign_key_check').length) throw fail('HOLD_BACKFILL_INTEGRITY_REFUSED', 'The backfill failed integrity checks.');
-            return { ...locked, mode: 'APPLIED', backfillCount: locked.proposedCount, auditRowsAdded: locked.proposedCount,
+            return { ...locked, operator: performedBy, mode: 'APPLIED', backfillCount: locked.proposedCount, auditRowsAdded: locked.proposedCount,
                 originalMetadataRowsChanged: 0, oldAuditRowsChanged: 0, totalChanges: db.prepare('SELECT total_changes() n').get().n };
         }).immediate();
     } finally { db.close(); }
@@ -152,7 +180,7 @@ function backfillSampleHolds({ dbPath, apply = false, mappingPath = null, review
 
 function parseArguments(args) {
     const options = { dbPath: process.env.DATABASE_PATH || path.resolve(__dirname, '../prisma/dev.db'), apply: false }, seen = new Set();
-    const values = { '--db': 'dbPath', '--mapping': 'mappingPath', '--reviewed-mapping-sha256': 'reviewedMappingSha256', '--plan-sha256': 'planSha256' };
+    const values = { '--db': 'dbPath', '--mapping': 'mappingPath', '--reviewed-mapping-sha256': 'reviewedMappingSha256', '--plan-sha256': 'planSha256', '--operator': 'operator' };
     for (let i = 0; i < args.length; i++) {
         const arg = args[i];
         if (seen.has(arg)) throw fail('HOLD_BACKFILL_ARGUMENT_INVALID', 'Repeated argument.');

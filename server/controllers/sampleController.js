@@ -24,7 +24,8 @@ exports.getSampleHolds = async (req, res) => {
         return res.json({ holds: holds.map(sampleHolds.presentHold), held: await sampleHolds.isHeld(prisma, sample),
             metadataRepairNeeded: sampleHolds.legacyHoldState(sample).metadataRepairNeeded, canResolve: hasPermission(req.user, 'APPROVE_RESULTS') });
     } catch (err) {
-        return res.status(err.statusCode || 500).json({ code: err.code || 'HOLD_FETCH_ERROR', error: err.message });
+        const mapped = require('../services/workflowStateRules').mapStateError(err);
+        return res.status(mapped.statusCode || 500).json({ code: mapped.code || 'HOLD_FETCH_ERROR', error: mapped.message });
     }
 };
 
@@ -35,7 +36,8 @@ exports.resolveSampleHold = async (req, res) => {
         }));
         return res.json({ hold: sampleHolds.presentHold(hold) });
     } catch (err) {
-        return res.status(err.statusCode || 500).json({ code: err.code || 'HOLD_RESOLVE_ERROR', error: err.message });
+        const mapped = require('../services/workflowStateRules').mapStateError(err);
+        return res.status(mapped.statusCode || 500).json({ code: mapped.code || 'HOLD_RESOLVE_ERROR', error: mapped.message });
     }
 };
 
@@ -522,7 +524,7 @@ exports.updateStatus = async (req, res) => {
                 { sampleId: sample.id, body: req.body, user });
             if (status === 'RECEIVED_REJECTED') {
                 const current = await tx.sample.findUnique({ where: { id: sample.id } });
-                if (current.status === 'RECEIVED') return (await require('../services/intakeService').rejectSample(tx, {
+                return (await require('../services/intakeService').rejectSample(tx, {
                     body: { ...req.body, sampleId: current.id, originalId: current.originalId, ncReason: req.body.ncReason || req.body.reason }, user
                 })).sample;
             }
@@ -1446,6 +1448,9 @@ exports.updateSampleMetadata = async (req, res) => {
 
         if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata) || Object.keys(metadata).some(key => ['__proto__','constructor','prototype','profileCompatibility'].includes(key))) {
             return res.status(400).json({ error: 'Metadata must contain supported fields. Compatibility references are server-managed.' });
+        }
+        if (Object.hasOwn(metadata, 'provenanceHold')) {
+            return res.status(409).json({ code: 'HOLD_MARKER_MANAGED', error: 'Use the sample hold resolution action to change a provenance hold.' });
         }
         const identityKeys = Object.keys(metadata).filter(key => profileIdentity.IDENTITY_KEYS.has(key));
         const released = !!sample.approvedAt || ['APPROVED','RELEASED','ARCHIVED','DISPOSED'].includes(sample.status);

@@ -151,7 +151,7 @@ const {
     installSqliteHooks
 } = require('./exchangeDbFunctions');
 
-const CURRENT_TRIGGER_VERSION = '11';
+const CURRENT_TRIGGER_VERSION = '12';
 
 function ensureTriggers(db, force = false) {
     registerDbFunctions(db);

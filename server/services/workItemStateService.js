@@ -11,28 +11,30 @@ const CANCELLABLE = Object.freeze(['NOT_ASSIGNED', 'ASSIGNED', 'IN_PROGRESS', 'O
 const CANCELLATION_CODES = Object.freeze({ cancelForIntakeUndo: 'INTAKE_UNDONE', cancelForIntakeRejection: 'INTAKE_REJECTED' });
 
 async function hasIntakeEvidence(tx, item) {
-    return Boolean(item.result?.trim() || await tx.result.count({ where: { sampleId: item.sampleId, param: item.analysis } }) ||
+    return Boolean(item.batchId || item.result?.trim() || await tx.result.count({ where: { sampleId: item.sampleId, param: item.analysis } }) ||
         await tx.spectralData.count({ where: { OR: [{ workItemId: item.id }, { sampleId: item.sampleId, workItemId: null }] } }) ||
         await tx.resultEvidenceEvent.count({ where: { sampleId: item.sampleId, result: { param: item.analysis } } }) ||
         await tx.workAttempt.count({ where: { workItemId: item.id } }) ||
-        await tx.workItemDraft.count({ where: { workItemId: item.id } }));
+        await tx.workItemDraft.count({ where: { workItemId: item.id } }) ||
+        await tx.workItemEquipmentUse.count({ where: { workItemId: item.id } }) ||
+        await tx.inventoryTransaction.count({ where: { workItemId: item.id } }));
 }
 
 function assertActionEdge(item, sample, nextStatus, actor, reason, options) {
     const current = workflow.normalizeWorkItemState(item.status);
     const operational = OPERATIONAL.includes(item.analysis);
     const action = options.action;
-    if (nextStatus === 'CANCELLED') {
-        if (options.intakeAction !== INTAKE_ACTION || !Object.hasOwn(CANCELLATION_CODES, action)) {
-            throw new TransitionError('Use the named intake cancellation action.', 409, 'WORKITEM_CANCEL_ACTION_REQUIRED');
-        }
-        return CANCELLABLE.includes(current);
-    }
     if (current === 'CANCELLED') {
         if (options.intakeAction !== INTAKE_ACTION || action !== 'reactivateCancelledIntakeWork' || nextStatus !== 'NOT_ASSIGNED') {
             throw new TransitionError('Cancelled work requires legal intake re-acceptance.', 409, 'WORKITEM_REACTIVATION_ACTION_REQUIRED');
         }
         return true;
+    }
+    if (nextStatus === 'CANCELLED') {
+        if (options.intakeAction !== INTAKE_ACTION || !Object.hasOwn(CANCELLATION_CODES, action)) {
+            throw new TransitionError('Use the named intake cancellation action.', 409, 'WORKITEM_CANCEL_ACTION_REQUIRED');
+        }
+        return CANCELLABLE.includes(current);
     }
     if (nextStatus === 'AWAITING_VERIFICATION' || current === 'AWAITING_VERIFICATION') {
         if (nextStatus === 'AWAITING_VERIFICATION' && operational && action === 'OPERATION_CONFIRMED' && hasPermission(actor, 'ENTER_RESULTS') &&
@@ -114,7 +116,17 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
             rules.requireReason(reason);
         } else {
             const current = workflow.normalizeWorkItemState(item.status);
-            if (nextStatus === 'ASSIGNED') {
+            if (current === 'CANCELLED' || nextStatus === 'CANCELLED') {
+                assertActionEdge(item, sample, nextStatus, actor, reason, options);
+            }
+            const assigneeChanged = Object.hasOwn(data, 'assignedTo') && data.assignedTo !== item.assignedTo;
+            const assignment = current === 'NOT_ASSIGNED' && nextStatus === 'ASSIGNED' || assigneeChanged;
+            if ((assignment || options.audit?.action === 'WORKITEM_REASSIGNED') && ['SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(current)) {
+                throw new TransitionError('Sealed work cannot be reassigned.', 409, 'WORKITEM_ASSIGNMENT_SEALED');
+            }
+            // Re-acceptance clears the former assignee under its private intake
+            // capability. Draft reverts and same-state edits are not assignments.
+            if (assignment && current !== 'CANCELLED') {
                 if (!['ACCEPTED', 'PROCESSING'].includes(workflow.normalizeSampleState(sample.status))) {
                     throw new TransitionError('Accept the sample before assignment.', 409, 'SAMPLE_NOT_ASSIGNABLE');
                 }
@@ -193,18 +205,20 @@ async function cancelIntakeWork(tx, { sampleId, actor, reason }, action) {
     if (!sample) throw new TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
     rules.assertScope(actor, sample);
     if (action === 'cancelForIntakeUndo' ? workflow.normalizeSampleState(sample.status) !== 'ACCEPTED' :
-        !workflow.isValidSampleTransition(workflow.normalizeSampleState(sample.status), 'RECEIVED_REJECTED')) {
+        !(workflow.normalizeSampleState(sample.status) === 'RECEIVED_REJECTED' ||
+            workflow.isValidSampleTransition(workflow.normalizeSampleState(sample.status), 'RECEIVED_REJECTED'))) {
         throw new TransitionError('Sample is not eligible for this intake action.', 409, 'INTAKE_CANCEL_STATE_INVALID');
     }
     const items = await tx.workItem.findMany({ where: { sampleId: sample.id } }), blockingItemIds = [];
-    for (const item of items) if (!CANCELLABLE.includes(workflow.normalizeWorkItemState(item.status)) || await hasIntakeEvidence(tx, item)) blockingItemIds.push(item.id);
+    const activeItems = items.filter(item => workflow.normalizeWorkItemState(item.status) !== 'CANCELLED');
+    for (const item of activeItems) if (!CANCELLABLE.includes(workflow.normalizeWorkItemState(item.status)) || await hasIntakeEvidence(tx, item)) blockingItemIds.push(item.id);
     // Unlinked or historically mis-keyed specimen evidence also blocks the whole action.
     const specimenEvidence = await tx.result.count({ where: { sampleId: sample.id } }) || await tx.spectralData.count({ where: { sampleId: sample.id } }) ||
         await tx.resultEvidenceEvent.count({ where: { sampleId: sample.id } });
     if (blockingItemIds.length || specimenEvidence) throw new TransitionError('Intake has recorded work and cannot be cancelled.', 409, 'INTAKE_UNDO_HAS_WORK',
         { blockingItemIds: blockingItemIds.length ? blockingItemIds : items.map(item => item.id) });
     const cancelled = [];
-    for (const item of items) cancelled.push(await transitionWorkItem(item.id, 'CANCELLED', actor, reason, {}, tx,
+    for (const item of activeItems) cancelled.push(await transitionWorkItem(item.id, 'CANCELLED', actor, reason, {}, tx,
         { action, intakeAction: INTAKE_ACTION, expected: item }));
     return cancelled;
 }
@@ -224,7 +238,7 @@ async function reactivateCancelledIntakeWork(tx, { sampleId, previousSampleStatu
     rules.assertScope(actor, sample);
     const items = await tx.workItem.findMany({ where: { sampleId: sample.id, status: 'CANCELLED', analysis: { in: analyses } } });
     if (items.length && !hasPermission(actor, 'RECEIVE_SAMPLE')) {
-        throw new TransitionError('Reactivation requires legal intake re-acceptance.', 409, 'WORKITEM_REACTIVATION_ACTION_REQUIRED');
+        throw new TransitionError('Reactivation requires intake permission.', 403, 'INTAKE_REACTIVATION_FORBIDDEN');
     }
     const reactivated = [];
     for (const item of items) reactivated.push(await transitionWorkItem(item.id, 'NOT_ASSIGNED', actor, reason, {}, tx,

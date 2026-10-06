@@ -126,7 +126,7 @@ exports.assignWork = async (req, res) => {
     const user = req.user;
 
     try {
-        if (!['LAB_MANAGER', 'SUPER_ADMIN', 'MASTER_USER'].includes(user.role)) {
+        if (!hasPermission(user, 'ASSIGN_WORK')) {
             return res.status(403).json({ error: 'Only Managers can assign work.' });
         }
 
@@ -364,12 +364,12 @@ exports.reassignWork = async (req, res) => {
     const user = req.user;
 
     try {
-        if (!['LAB_MANAGER', 'SUPER_ADMIN', 'MASTER_USER'].includes(user.role)) {
+        if (!hasPermission(user, 'ASSIGN_WORK')) {
             return res.status(403).json({ error: 'Only Managers can reassign work.' });
         }
 
         if (!technicianUserId) return res.status(400).json({ error: 'technicianUserId is required' });
-        if (!reason) return res.status(400).json({ error: 'reason is required for reassignment' });
+        stateRules.requireReason(reason);
 
         const item = await prisma.workItem.findUnique({ where: { id } });
         if (!item) return res.status(404).json({ error: 'Work item not found' });
@@ -396,13 +396,11 @@ exports.reassignWork = async (req, res) => {
 
         const techUser = validation.assignee;
 
-        if (user.role === 'LAB_MANAGER' && user.labId !== owningLab) {
-            return res.status(403).json({ error: 'Work item outside your lab scope' });
-        }
+        stateRules.assertScope(user, sample);
 
         const previousAssignee = item.assignedTo;
         const now = new Date();
-        const history = typeof item.history === 'string' ? JSON.parse(item.history) : (item.history || []);
+        const history = stateRules.requireHistory(item.history);
 
         history.push({
             status: item.status,
@@ -414,31 +412,25 @@ exports.reassignWork = async (req, res) => {
             action: 'REASSIGNED'
         });
 
-        const updated = await prisma.workItem.update({
-            where: { id },
-            data: {
+        const analysis = await getAnalysisName(item.analysis);
+        const updated = await stateRules.inTransaction(prisma, async tx => {
+            const current = await tx.workItem.findUnique({ where: { id } });
+            if (!current || current.status !== item.status || current.version !== item.version) {
+                throw new stateRules.TransitionError('Work item changed. Reload before retrying.', 409, 'WORKITEM_STATE_CHANGED');
+            }
+            const currentSample = await tx.sample.findUnique({ where: { id: current.sampleId } });
+            const eligible = await assignmentEligibilityService.validateAssignmentTarget({ actor: user,
+                assigneeUsername: technicianUserId, owningLab: currentSample?.assignedLab || currentSample?.labId }, tx);
+            if (!eligible.valid) throw new stateRules.TransitionError(eligible.error, eligible.statusCode || 400, eligible.code);
+            return transitionWorkItem(id, item.status, user, reason, {
                 assignedTo: technicianUserId,
                 assignedBy: user.username,
                 assignedAt: now,
                 history: JSON.stringify(history)
-            }
-        });
-
-        const analysis = await getAnalysisName(item.analysis);
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'WORKITEM',
-                entityId: id,
+            }, tx, { expected: item, audit: {
                 action: 'WORKITEM_REASSIGNED',
-                details: `${user.username} reassigned ${analysis} from ${previousAssignee || 'Unassigned'} to ${technicianUserId}. Reason: ${reason}`,
-                performedBy: user.username,
-                timestamp: now,
-                sampleId: item.sampleId,
-                analysisCode: item.analysis,
-                labId: owningLab,
-                after: JSON.stringify({ assignedTo: technicianUserId, reason })
-            }
+                details: `${user.username} reassigned ${analysis} from ${previousAssignee || 'Unassigned'} to ${technicianUserId}. Reason: ${reason}`
+            } });
         });
 
         // Notify new assignee with bell and message
@@ -480,6 +472,8 @@ exports.reassignWork = async (req, res) => {
 
         res.json({ success: true, workItem: updated, previousAssignee, newAssignee: technicianUserId });
     } catch (error) {
+        const mapped = stateRules.mapStateError(error);
+        if (mapped.statusCode) return res.status(mapped.statusCode).json({ code: mapped.code, error: mapped.message });
         console.error('[reassignWork] Error:', error);
         res.status(500).json({ error: 'Failed to reassign work' });
     }
@@ -527,6 +521,9 @@ exports.updateWorkItemStatus = async (req, res) => {
             }
         }
 
+        if (item.status === 'CANCELLED') {
+            return res.status(409).json({ code: 'WORKITEM_REACTIVATION_ACTION_REQUIRED', error: 'Cancelled work requires legal intake re-acceptance.' });
+        }
         const sealedStates = ['SUBMITTED', 'ACCEPTED', 'WAIVED'];
         if (sealedStates.includes(item.status)) {
             return res.status(403).json({ error: `Item is SEALED (${item.status}). You cannot edit it.` });

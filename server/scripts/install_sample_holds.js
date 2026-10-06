@@ -47,7 +47,7 @@ function classify(db, sql, sha256) {
         return Boolean(index);
     });
     const wantedGuards = [...sql.matchAll(/^CREATE TRIGGER "([^"]+)"[\s\S]*?^END;/gm)].map(match => ({ name: match[1], sql: match[0] }));
-    if (wantedIndexes.length !== 2 || wantedGuards.length !== 4) throw fail('SAMPLE_HOLD_SOURCE_MISMATCH', 'The release requires two hold indexes and four integrity guards.');
+    if (wantedIndexes.length !== 2 || wantedGuards.length !== 7) throw fail('SAMPLE_HOLD_SOURCE_MISMATCH', 'The release requires two hold indexes and seven integrity guards.');
     const guards = wantedGuards.map(wanted => {
         const guard = db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(wanted.name);
         if (guard && (guard.type !== 'trigger' || normalized(guard.sql) !== normalized(wanted.sql))) differences.push(`${wanted.name} differs`);

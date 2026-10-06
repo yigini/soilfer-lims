@@ -19,6 +19,8 @@ function fixture(inputs = [{}]) {
     const { file } = beforeGuards({ actor: 'system:fixture', samples });
     files.push(file);
     installSampleHolds({ dbPath: file, apply: true });
+    withDb(file, db => db.prepare('INSERT INTO User (id,username,email,password,role,labId,isActive,updatedAt) VALUES (?,?,?,?,?,?,?,?)')
+        .run(randomUUID(), 'backfill-operator', 'backfill-operator@fixture.test', 'fixture-password', 'LAB_MANAGER', 'HOLD-BACKFILL-TEST', 1, now.toISOString()));
     return { file, samples };
 }
 function withDb(file, callback) {
@@ -34,7 +36,7 @@ function audit(file, sampleId, timestamp, performedBy) {
         .run(randomUUID(), 'SAMPLE', sampleId, 'KOBO_CONFLICTING_PROVENANCE', sampleId, timestamp, performedBy));
 }
 const dry = (file, extra = {}) => backfillSampleHolds({ dbPath: file, now, ...extra });
-const apply = (file, plan, extra = {}) => backfillSampleHolds({ dbPath: file, now, apply: true, planSha256: plan.fingerprint, ...extra });
+const apply = (file, plan, extra = {}) => backfillSampleHolds({ dbPath: file, now, apply: true, operator: 'backfill-operator', planSha256: plan.fingerprint, ...extra });
 function mapping(file, plan) {
     const mappingPath = path.join(path.dirname(file), `hold_mapping_${randomUUID()}.json`);
     const bytes = JSON.stringify({ rows: plan.rows.filter(row => row.refusals.length).map(row => ({ sampleId: row.sampleId,
@@ -54,11 +56,16 @@ test('dry run maps earliest conflict audit verbatim and metadata plus mirror to 
     const before = state(file), hash = digest(fs.readFileSync(file));
     const plan = dry(file);
     expect(plan).toMatchObject({ mode: 'DRY_RUN', totalChanges: 0, markerCount: 2, proposedCount: 2, refusedCount: 0, upperBoundCount: 1 });
-    expect(plan.rows.find(row => row.sampleId === samples[0].id).proposed).toMatchObject({ raisedAt: '2026-10-02T09:00:00.000Z', raisedBy: 'verbatim-conflict-actor', attributionSource: 'KOBO_CONFLICT_AUDIT' });
+    expect(plan.rows.find(row => row.sampleId === samples[0].id)).toMatchObject({ triggeringUser: 'verbatim-conflict-actor',
+        proposed: { raisedAt: '2026-10-02T09:00:00.000Z', raisedBy: 'system:kobo-sync', attributionSource: 'KOBO_CONFLICT_AUDIT' } });
     expect(plan.rows.find(row => row.sampleId === samples[1].id).proposed).toMatchObject({ raisedBy: 'system:kobo-sync', attributionSource: 'LEGACY_HOLD_UPDATED_AT', compatMarker: COMPAT });
     expect(state(file)).toEqual(before); expect(digest(fs.readFileSync(file))).toBe(hash);
     expect(apply(file, plan)).toMatchObject({ mode: 'APPLIED', backfillCount: 2, auditRowsAdded: 2, originalMetadataRowsChanged: 0, oldAuditRowsChanged: 0 });
     const after = state(file);
+    const backfilled = after.find(row => row.name === 'AuditLog').rows.filter(row => row.action === 'HOLD_BACKFILLED');
+    expect(backfilled.every(row => row.performedBy === 'backfill-operator')).toBe(true);
+    expect(JSON.parse(backfilled.find(row => row.sampleId === samples[0].id).details).triggeringUser).toBe('verbatim-conflict-actor');
+    expect(JSON.parse(after.find(row => row.name === '_schema_migrations').rows.find(row => row.id.startsWith('183_hold_backfill:')).details).operator).toBe('backfill-operator');
     for (const table of before) {
         if (table.name === 'SampleHold') expect(after.find(row => row.name === table.name).rows).toHaveLength(2);
         else if (table.name === 'AuditLog' || table.name === '_schema_migrations') {
@@ -128,17 +135,46 @@ test('an audit insertion failure rolls back every hold, audit and migration mark
     expect(state(file)).toEqual(before);
 });
 
-test('active markers with only resolved bound holds remain blocking and are inventoried as inconsistent', () => {
+test('active markers with only resolved bound holds remain held, and their diagnostics do not refuse unrelated valid rows', () => {
     const { file, samples } = fixture();
     const plan = dry(file); apply(file, plan);
     withDb(file, db => db.prepare('UPDATE SampleHold SET resolvedAt=?,resolvedBy=?,resolution=? WHERE sampleId=?')
         .run(now.toISOString(), 'reviewed-fixture-manager', 'Synthetic inconsistent marker fixture', samples[0].id));
     const inventory = dry(file);
-    expect(inventory.rows[0]).toMatchObject({ action: 'ALREADY_BACKFILLED', refusals: ['HOLD_MARKER_INCONSISTENT'], diagnostics: ['HOLD_MARKER_INCONSISTENT'] });
+    expect(inventory.rows[0]).toMatchObject({ action: 'ALREADY_BACKFILLED', refusals: [], diagnostics: ['HOLD_MARKER_INCONSISTENT'] });
+    expect(inventory.alreadyBackfilledInconsistentCount).toBe(1);
     const before = state(file);
-    expect(() => apply(file, inventory)).toThrow(expect.objectContaining({ code: 'HOLD_BACKFILL_MAPPING_REQUIRED' }));
+    expect(apply(file, inventory)).toMatchObject({ mode: 'NO_OP', totalChanges: 0, alreadyBackfilledInconsistentCount: 1 });
     expect(state(file)).toEqual(before);
     withDb(file, db => expect(isHeldSqlite(db, db.prepare('SELECT * FROM Sample WHERE id=?').get(samples[0].id))).toBe(true));
+});
+
+test.each(['{unparseable', '[]', 'null'])('unreadable fieldMetadata root %s without a marker is a repair diagnostic, never an invented Kobo hold', fieldMetadata => {
+    const { file, samples } = fixture([{ metadata: '{}', fieldMetadata }, {}]);
+    const before = state(file), plan = dry(file);
+    expect(plan).toMatchObject({ proposedCount: 1, refusedCount: 0, metadataRepairNeededCount: 1 });
+    expect(plan.rows.find(row => row.sampleId === samples[0].id)).toMatchObject({ action: 'METADATA_REPAIR_NEEDED',
+        diagnostics: ['HOLD_MARKER_INVALID'], refusals: [], proposed: null });
+    expect(apply(file, plan)).toMatchObject({ backfillCount: 1, metadataRepairNeededCount: 1 });
+    withDb(file, db => {
+        expect(db.prepare('SELECT count(*) n FROM SampleHold WHERE sampleId=?').get(samples[0].id).n).toBe(0);
+        expect(isHeldSqlite(db, db.prepare('SELECT * FROM Sample WHERE id=?').get(samples[0].id))).toBe(true);
+    });
+    expect(state(file).find(row => row.name === 'Sample')).toEqual(before.find(row => row.name === 'Sample'));
+});
+
+test.each([
+    [null, null, 'BACKFILL_OPERATOR_INVALID'], ['missing-user', null, 'BACKFILL_OPERATOR_INVALID'],
+    ['system:kobo-sync', null, 'BACKFILL_OPERATOR_INVALID'], ['service:backfill', null, 'BACKFILL_OPERATOR_INVALID'],
+    ['backfill-operator', { isActive: 0 }, 'BACKFILL_OPERATOR_INVALID'],
+    ['backfill-operator', { role: 'SAMPLE_RECEPTION' }, 'BACKFILL_OPERATOR_FORBIDDEN'],
+    ['backfill-operator', { labId: 'OUTSIDE-LAB' }, 'BACKFILL_OPERATOR_OUT_OF_SCOPE']
+])('apply refuses operator %s with %p using %s and zero writes', (operator, changes, code) => {
+    const { file } = fixture();
+    if (changes) withDb(file, db => { for (const [key, value] of Object.entries(changes)) db.prepare(`UPDATE User SET "${key}"=? WHERE username='backfill-operator'`).run(value); });
+    const plan = dry(file), before = state(file), bytes = digest(fs.readFileSync(file));
+    expect(() => apply(file, plan, { operator })).toThrow(expect.objectContaining({ code }));
+    expect(state(file)).toEqual(before); expect(digest(fs.readFileSync(file))).toBe(bytes);
 });
 
 test('CLI modes and ISO-8601 validation reject ambiguous input', () => {
