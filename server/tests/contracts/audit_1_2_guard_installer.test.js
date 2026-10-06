@@ -122,6 +122,11 @@ async function realStartup(file, expectedPass = false) {
                 await new Promise(resolve => setTimeout(resolve, 25));
             }
             expect(stdout).toContain('Enterprise Server running on');
+            // The health fetch can finish before the interval's first TCP
+            // probe runs. Require that independent connection proof before
+            // stopping the child, under the existing startup deadline.
+            while (!accepted && Date.now() - startedAt < 9000) await new Promise(resolve => setTimeout(resolve, 25));
+            expect(accepted).toBe(true);
             const response = await fetch(`http://127.0.0.1:${port}/api/health`);
             expect(response.status).toBe(200); expect(await response.json()).toMatchObject({ status: 'ok' });
             child.kill();
