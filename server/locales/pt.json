@@ -1184,6 +1184,7 @@
     "add": "Adicionar",
     "reset": "Restaurar valores herdados",
     "inheritanceHelp": "Cada critério vazio herda a política efetiva da análise, método ou laboratório. Cada salvamento cria uma versão imutável; avaliações anteriores mantêm suas regras. Uma regra de método redefinida continua tendo prioridade sobre a regra independente do método; seus campos vazios herdam os valores da política.",
+    "duplicateCountHelp": "Duplicatas = ceil(número de amostras / intervalo), incluindo o último grupo parcial. Intervalo 0 desativa as duplicatas.",
     "deferredHelp": "Tamanho do lote, CRM periódico, padrões de verificação e critérios de curva serão aplicados quando as posições da corrida estiverem disponíveis.",
     "types": {
       "BLANK": "Branco",

@@ -1184,6 +1184,7 @@
     "add": "Añadir",
     "reset": "Restablecer valores heredados",
     "inheritanceHelp": "Cada criterio vacío hereda la política efectiva del análisis, método o laboratorio. Cada guardado crea una versión inmutable; las evaluaciones anteriores conservan sus reglas. Al restablecer una regla de método, esta sigue teniendo prioridad sobre la regla independiente del método; sus campos vacíos heredan los valores de la política.",
+    "duplicateCountHelp": "Duplicados = ceil(número de muestras / intervalo), incluido el último grupo parcial. Un intervalo de 0 desactiva los duplicados.",
     "deferredHelp": "El tamaño de lote, CRM periódico, estándares de verificación y criterios de curva se aplicarán cuando estén disponibles las posiciones de corrida.",
     "types": {
       "BLANK": "Blanco",

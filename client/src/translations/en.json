@@ -2759,6 +2759,7 @@
     "add": "Add",
     "reset": "Reset to inherited defaults",
     "inheritanceHelp": "Each blank criterion inherits the effective analysis, method or laboratory policy. Every save creates an immutable version; earlier evaluations keep their own rules. Resetting a method rule also keeps it selected ahead of the method-independent rule; its blank fields inherit policy defaults.",
+    "duplicateCountHelp": "Duplicates = ceil(sample count / interval), including a partial final group. Interval 0 disables duplicates.",
     "deferredHelp": "Batch size, periodic CRM, verification standards and curve criteria apply once run positions land.",
     "types": {
       "BLANK": "Blank",

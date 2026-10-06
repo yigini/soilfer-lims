@@ -2759,6 +2759,7 @@
     "add": "Ajouter",
     "reset": "Rétablir les valeurs héritées",
     "inheritanceHelp": "Chaque critère vide hérite de la politique effective de l’analyse, de la méthode ou du laboratoire. Chaque sauvegarde crée une version immuable ; les évaluations antérieures gardent leurs règles. Une règle de méthode réinitialisée reste prioritaire sur la règle indépendante de la méthode ; ses champs vides héritent des valeurs de la politique.",
+    "duplicateCountHelp": "Duplicatas = ceil(nombre d'échantillons / intervalle), y compris le dernier groupe incomplet. Un intervalle de 0 désactive les duplicatas.",
     "deferredHelp": "La taille du lot, le CRM périodique, les étalons de vérification et les critères de courbe s’appliqueront après la mise en place des positions de série.",
     "types": {
       "BLANK": "Blanc",
