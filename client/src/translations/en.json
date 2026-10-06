@@ -1,4 +1,33 @@
 {
+  "sampleHolds": {
+    "metadataRepairNeeded": "Metadata repair is needed before this hold can be resolved.",
+    "title": "Sample holds",
+    "badge": "Sample held",
+    "open": "Open",
+    "resolved": "Resolved",
+    "resolve": "Resolve hold",
+    "resolutionReason": "Resolution reason (required)",
+    "raisedAt": "Raised at",
+    "raisedAtOrBefore": "Raised at or before",
+    "backfillRequired": "A legacy hold still blocks this sample. A manager must review and backfill it before resolution.",
+    "undoConfirmation": "Return the sample to RECEIVED and cancel eligible work items? Work items and their history are retained, and the lab ID is preserved. Work with results, scans, attempts or other evidence blocks this action.",
+    "undoSuccess": "Intake undone. The sample is RECEIVED; cancelled work items and their history are retained.",
+    "types": {
+      "PROVENANCE": "Provenance",
+      "CUSTODY": "Custody",
+      "CLIENT_QUERY": "Client query",
+      "QC": "Quality control",
+      "OTHER": "Other"
+    },
+    "errors": {
+      "HOLD_FETCH_ERROR": "Sample holds could not be loaded. Refresh before accepting or assigning work.",
+      "HOLD_BACKFILL_REQUIRED": "Review and backfill the legacy hold before resolving it.",
+      "HOLD_MARKER_INVALID": "Stored hold metadata needs manager review before resolution.",
+      "HOLD_RESOLVE_FORBIDDEN": "Manager authority is required to resolve a hold.",
+      "HOLD_STATE_CHANGED": "The hold changed. Refresh and review it again.",
+      "HOLD_RESOLVE_ERROR": "The hold could not be resolved. Refresh and try again."
+    }
+  },
   "spectralWorkflow": {"reopenTitle":"Reopen completed work","reopenMessage":"This change affects a completed work item. Enter a reason to reopen it and retry.","reason":"Reason (required)","retry":"Reopen and retry","trashTitle":"Move to Trash","trashMessage":"Move the spectrum for {label} to trash? Enter a reason. You can restore it later.","batchTrashMessage":"Move {count} selected spectra to trash? Enter a reason. You can restore them later.","trashConfirm":"Move to Trash","partialTitle":"Import partially completed","receiptTitle":"Import receipt","receiptCounts":"Recorded {count} scans; {failed} failed.","retryFailed":"Review and retry remaining entries"},
   "numbers": {"ambiguous":"Clarify the decimal or thousands separator.","invalid":"Invalid number format.","policyInvalid":"Laboratory number format is unavailable or invalid.","decimal":"Decimal separator","thousands":"Thousands separator","noGrouping":"Not configured","space":"Space"},
   "sampleLookup": { "title": "Sample lookup", "ambiguous": "This identifier matches several samples:", "failed": "Sample could not be found or loaded. Check the identifier and connection." },

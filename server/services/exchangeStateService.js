@@ -151,7 +151,7 @@ const {
     installSqliteHooks
 } = require('./exchangeDbFunctions');
 
-const CURRENT_TRIGGER_VERSION = '11';
+const CURRENT_TRIGGER_VERSION = '12';
 
 function ensureTriggers(db, force = false) {
     registerDbFunctions(db);
@@ -288,29 +288,8 @@ function ensureTriggers(db, force = false) {
 
     const isEligibleSql = (prefix) => {
         const statusCond = `(${prefix}.status IN ('APPROVED', 'RELEASED') OR (${prefix}.status IN ('ARCHIVED', 'DISPOSED') AND ${prefix}.approvedAt IS NOT NULL))`;
-        const holdConds = [];
-        if (sampleCols.has('metadata')) {
-            holdConds.push(`(CASE
-                WHEN ${prefix}.metadata IS NULL OR ${prefix}.metadata = '' THEN 0
-                WHEN NOT json_valid(${prefix}.metadata) THEN 1
-                WHEN json_type(${prefix}.metadata) != 'object' THEN 1
-                WHEN COALESCE(json_extract(${prefix}.metadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD' THEN 1
-                ELSE 0
-            END = 1)`);
-        }
-        if (sampleCols.has('fieldMetadata')) {
-            holdConds.push(`(CASE
-                WHEN ${prefix}.fieldMetadata IS NULL OR ${prefix}.fieldMetadata = '' THEN 0
-                WHEN NOT json_valid(${prefix}.fieldMetadata) THEN 1
-                WHEN json_type(${prefix}.fieldMetadata) != 'object' THEN 1
-                WHEN COALESCE(json_extract(${prefix}.fieldMetadata, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD' THEN 1
-                ELSE 0
-            END = 1)`);
-        }
-        if (holdConds.length > 0) {
-            return `(${statusCond} AND NOT (${holdConds.join(' OR ')}))`;
-        }
-        return `(${statusCond})`;
+        const hasHoldTable = Boolean(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='SampleHold'").get());
+        return `(${statusCond} AND NOT ${require('./sampleHoldService').heldSql(prefix, { columns: sampleCols, hasHoldTable })})`;
     };
 
     const installTx = db.transaction(() => {
@@ -794,22 +773,10 @@ function getConnectionId(auth) {
 
 
 function isProvenanceHeld(meta) {
-    if (meta === null || meta === undefined || meta === '') return false;
-    try {
-        const parsed = typeof meta === 'string' ? JSON.parse(meta) : meta;
-        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-            return true;
-        }
-        if (parsed.provenanceHold && parsed.provenanceHold.status === 'AMBIGUOUS_PROVENANCE_HOLD') {
-            return true;
-        }
-        return false;
-    } catch (e) {
-        return true;
-    }
+    return require('./sampleHoldService').legacyHoldState({ metadata: meta }).active;
 }
 
-function isSpecimenEligible(sample) {
+function isSpecimenEligible(sample, db = null) {
     if (!sample) return false;
     const status = sample.status;
     const isCurrentRelease = status === 'APPROVED' || status === 'RELEASED';
@@ -817,7 +784,7 @@ function isSpecimenEligible(sample) {
     if (!isCurrentRelease && !isApprovedHistory) {
         return false;
     }
-    if (isProvenanceHeld(sample.metadata) || isProvenanceHeld(sample.fieldMetadata)) {
+    if (require('./sampleHoldService').isHeldSqlite(db || getDb(), sample)) {
         return false;
     }
     return true;
@@ -928,7 +895,7 @@ async function syncJournal(auth, maps = {}) {
                 continue;
             }
 
-            const isEligible = isSpecimenEligible(live);
+            const isEligible = isSpecimenEligible(live, db);
             const isWithdrawnStatus = !isEligible;
             const latest = getLatestStmt.get(live.id);
 

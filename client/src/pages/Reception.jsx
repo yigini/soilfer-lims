@@ -18,6 +18,7 @@ import KeyboardShortcutsModal from '../components/reception/KeyboardShortcutsMod
 import LabelPrintDialog from '../components/common/LabelPrintDialog';
 import QRScanner from '../components/common/QRScanner';
 import InfoTooltip from '../components/common/InfoTooltip';
+import SampleHoldsPanel from '../components/sample/SampleHoldsPanel';
 import { playSuccessChime, playErrorBuzz, playNoticeChime, isAudioEnabled, setAudioEnabled } from '../utils/audioCues';
 import { resolveCoordinates } from '../utils/coordinateResolver';
 import { recordSyncOperation } from '../services/offline/syncEngine';
@@ -1838,6 +1839,7 @@ const Reception = () => {
                 </div>
             )}
 
+            {sampleData?.id && !result && <SampleHoldsPanel sampleId={sampleData.id} refreshKey={sampleData.updatedAt} />}
             {sampleData && !result && (
                 <>
                     {/* MOBILE STEP NAVIGATION (Phone viewports < md) */}

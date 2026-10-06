@@ -87,7 +87,8 @@ function createDisposableDatabase() {
                 '20260930140000_add_sitewide_theme_appearance',
                 '20261004033000_add_report_number_lineage',
                 '20261005000000_workflow_state_evidence',
-                '20261005000100_workflow_state_guards'
+                '20261005000100_workflow_state_guards',
+                '20261006000100_sample_holds_cancellation'
             ]) tempDb.exec(fs.readFileSync(path.resolve(__dirname, '../prisma/migrations', migration, 'migration.sql'), 'utf8'));
         })();
         const guardSql = fs.readFileSync(path.resolve(__dirname, '../prisma/migrations/20261005000100_workflow_state_guards/migration.sql'), 'utf8');

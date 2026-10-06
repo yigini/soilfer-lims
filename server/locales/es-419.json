@@ -1,4 +1,33 @@
 {
+  "sampleHolds": {
+    "metadataRepairNeeded": "Es necesario reparar los metadatos antes de resolver esta retención.",
+    "title": "Retenciones de la muestra",
+    "badge": "Muestra retenida",
+    "open": "Abierta",
+    "resolved": "Resuelta",
+    "resolve": "Resolver retención",
+    "resolutionReason": "Motivo de resolución (obligatorio)",
+    "raisedAt": "Creada el",
+    "raisedAtOrBefore": "Creada el o antes del",
+    "backfillRequired": "Una retención antigua sigue bloqueando esta muestra. Un responsable debe revisarla y registrarla antes de resolverla.",
+    "undoConfirmation": "¿Devolver la muestra a RECIBIDA y cancelar los trabajos elegibles? Se conservan los trabajos, su historial y el identificador del laboratorio. Los resultados, espectros, intentos u otras evidencias impiden esta acción.",
+    "undoSuccess": "Recepción deshecha. La muestra está RECIBIDA; se conservan los trabajos cancelados y su historial.",
+    "types": {
+      "PROVENANCE": "Procedencia",
+      "CUSTODY": "Custodia",
+      "CLIENT_QUERY": "Consulta del cliente",
+      "QC": "Control de calidad",
+      "OTHER": "Otra"
+    },
+    "errors": {
+      "HOLD_FETCH_ERROR": "No se pudieron cargar las retenciones. Actualice antes de aceptar o asignar trabajos.",
+      "HOLD_BACKFILL_REQUIRED": "Revise y registre la retención antigua antes de resolverla.",
+      "HOLD_MARKER_INVALID": "Un responsable debe revisar los metadatos de la retención antes de resolverla.",
+      "HOLD_RESOLVE_FORBIDDEN": "Se requiere autorización de responsable para resolver una retención.",
+      "HOLD_STATE_CHANGED": "La retención ha cambiado. Actualice y revísela de nuevo.",
+      "HOLD_RESOLVE_ERROR": "No se pudo resolver la retención. Actualice e inténtelo de nuevo."
+    }
+  },
   "resultReports": {
     "qcWarningStatement": "Advertencia de QC: Uno o más valores reportados tienen QC de lote fallido o incompleto. Consulte las advertencias de lote registradas.",
     "qcWithinLimits": "QC dentro de los límites para todos los valores reportados.",

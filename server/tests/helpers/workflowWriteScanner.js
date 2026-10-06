@@ -10,6 +10,9 @@ const WORKFLOW_LOADER = 'services/workflowMigrationSources.js';
 const WORKFLOW_LOADER_SHA256 = '0b7f6010cc7b69a03ffe5aceb3c467dd5a718f51d25968e5aba07fcf8aaa1733';
 const RESULT_LOADER = 'services/resultAttemptMigrationSource.js';
 const RESULT_LOADER_SHA256 = '36658af9e2a6fa817ff4938ad08ac6879ff10a2969acf1a395a68cad5f37a655';
+const HOLD_LOADER = 'services/sampleHoldMigrationSource.js';
+const HOLD_LOADER_SHA256 = '8092708bf3f0f83111d56b00174a6b9dee9f2d996b7a874ad821801abeb37bb9';
+const HOLD_SQL_SHA256 = '5fce16e8bc148e07880fe6afcc7f5aec1c94c319a5c98ddaeaf47450906b06a8';
 const RESULT_SQL_SHA256 = 'aac7a1fc8e7a19ea993f6995032812e43ee4887bf0683da446438659061b235d';
 const REFERENCE_LOADER = 'services/referenceMaterialMigrationSource.js';
 const REFERENCE_LOADER_SHA256 = 'aec02b50c02946f7fb35606524ebb5ced033d43107aa810905fa7c8d4b245ae9';
@@ -33,7 +36,7 @@ const union = sets => [...new Set(sets.flat())];
 
 function scanSource(source, filename, exceptions = []) {
     const violations = [];
-    const report = (node, code, detail) => violations.push({ file: filename, line: node?.loc?.start.line || 1, code, detail });
+    const report = (node, code, detail) => violations.push({ file: filename, line: node?.loc?.start?.line || node?.loc?.line || 1, code, detail });
     const sqlTable = '(?:["`\\[]?\\w+["`\\]]?\\s*\\.\\s*)?["`\\[]?(?:Sample|WorkItem)(?:["`\\]]|\\b)';
     const rawWrite = text => new RegExp('\\b(?:INSERT\\s+(?:OR\\s+\\w+\\s+)?INTO|REPLACE\\s+INTO|DELETE\\s+FROM)\\s+' + sqlTable, 'i').test(text) ||
         [...text.matchAll(new RegExp('\\bUPDATE(?:\\s+OR\\s+\\w+)?\\s+' + sqlTable + '\\s+SET\\s+([\\s\\S]*?)(?=\\bWHERE\\b|;|$)', 'gi'))]
@@ -183,6 +186,8 @@ function scanSource(source, filename, exceptions = []) {
         });
     }
     function migrationSql(p) {
+        const holdSql = holdMigrationSql(p);
+        if (holdSql !== null) return holdSql;
         const referenceSql = referenceMigrationSql(p);
         if (referenceSql !== null) return referenceSql;
         const resultSql = resultMigrationSql(p);
@@ -226,6 +231,35 @@ function scanSource(source, filename, exceptions = []) {
             if (createHash('sha256').update(bytes).digest('hex') !== RESULT_SQL_SHA256) return null;
             const sql = bytes.toString('utf8');
             return p.node.property.name === 'guardsSql' ? sql.slice(sql.indexOf('CREATE TRIGGER')) : sql;
+        } catch { return null; }
+    }
+    function holdMigrationSql(p) {
+        if (!p?.isMemberExpression() || p.node.computed || !['sql', 'guardsSql', 'indexSql'].includes(p.node.property.name)) return null;
+        const object = p.get('object');
+        if (!object.isIdentifier()) return null;
+        const binding = object.scope.getBinding(object.node.name);
+        if (!binding || binding.kind !== 'const' || binding.constantViolations.length || !binding.path.isVariableDeclarator()) return null;
+        const init = binding.path.get('init');
+        if (!init.isCallExpression() || init.node.arguments.length || !init.get('callee').isIdentifier({ name: 'loadSampleHoldMigrationSource' })) return null;
+        const loaderBinding = init.scope.getBinding('loadSampleHoldMigrationSource');
+        const declaration = loaderBinding?.path;
+        if (!loaderBinding || loaderBinding.kind !== 'const' || loaderBinding.constantViolations.length || !declaration?.isVariableDeclarator() || !declaration.get('id').isObjectPattern()) return null;
+        const imported = declaration.get('init');
+        if (!imported.isCallExpression() || !imported.get('callee').isIdentifier({ name: 'require' }) || imported.scope.getBinding('require') || imported.node.arguments.length !== 1) return null;
+        const root = path.resolve(__dirname, '../..');
+        const specifier = path.relative(path.dirname(path.resolve(root, filename)), path.join(root, HOLD_LOADER)).replace(/\\/g, '/').replace(/\.js$/, '');
+        if (!imported.get('arguments.0').isStringLiteral({ value: specifier.startsWith('.') ? specifier : `./${specifier}` })) return null;
+        const properties = declaration.node.id.properties;
+        if (!properties.some(property => property.type === 'ObjectProperty' && !property.computed && property.key.name === 'loadSampleHoldMigrationSource' && property.value.name === property.key.name)) return null;
+        if (binding.referencePaths.some(reference => !reference.parentPath.isMemberExpression() || reference.parentPath.node.computed ||
+            !['sql', 'guardsSql', 'indexSql', 'sha256'].includes(reference.parentPath.node.property.name) || reference.parentPath.parentPath.isAssignmentExpression())) return null;
+        try {
+            if (createHash('sha256').update(fs.readFileSync(path.join(root, HOLD_LOADER))).digest('hex') !== HOLD_LOADER_SHA256) return null;
+            const bytes = fs.readFileSync(path.join(root, 'prisma/migrations/20261006000100_sample_holds_cancellation/migration.sql'));
+            if (createHash('sha256').update(bytes).digest('hex') !== HOLD_SQL_SHA256) return null;
+            const sql = bytes.toString('utf8');
+            return p.node.property.name === 'guardsSql' ? sql.slice(sql.indexOf('CREATE TRIGGER')) :
+                p.node.property.name === 'indexSql' ? sql.slice(sql.indexOf('CREATE UNIQUE INDEX'), sql.indexOf('-- Fresh Prisma')) : sql;
         } catch { return null; }
     }
     function referenceMigrationSql(p) {
@@ -384,7 +418,7 @@ function scanSource(source, filename, exceptions = []) {
         const name = owner(p);
         if (!exportedNames.has(name)) return false;
         const removal = ['delete', 'deleteMany'].includes(operation);
-        if (filename === 'services/sampleStateService.js' && (['createSample', 'transitionSample'].includes(name) || removal && name === 'removePreAnalyticSample') && entities.every(entity => entity === 'Sample')) return true;
+        if (filename === 'services/sampleStateService.js' && (['createSample', 'transitionSample', 'writeSampleHoldCompatibility'].includes(name) || removal && name === 'removePreAnalyticSample') && entities.every(entity => entity === 'Sample')) return true;
         if (filename === 'services/workItemStateService.js' && (['createWorkItem', 'transitionWorkItem'].includes(name) || removal && name === 'removeUnstartedWorkItems') && entities.every(entity => entity === 'WorkItem')) return true;
         if (removal && filename === 'tests/helpers/workflowFixtures.js' && name === 'cleanupWorkflowFixtures') return true;
         return exceptions.some(entry => entry.file === filename && entry.exportName === name);
@@ -463,6 +497,12 @@ function scanSource(source, filename, exceptions = []) {
             embeddedProgram(p);
             if (p.get('callee').isIdentifier({ name: 'require' }) || p.node.callee.type === 'Import') helperImport(p, strings(p.get('arguments.0')));
             for (const target of method(p.get('callee'))) {
+                if (target.name === 'reactivateCancelledIntakeWork' && filename !== 'services/sampleStateService.js') {
+                    report(p.node, 'INTAKE_REACTIVATION_CALLER_FORBIDDEN', 'Only the sample re-acceptance transaction may reactivate cancelled work.');
+                }
+                if (target.name === 'writeSampleHoldCompatibility' && filename !== 'services/sampleHoldService.js') {
+                    report(p.node, 'HOLD_MARKER_CALLER_FORBIDDEN', 'Only the hold service may update compatibility markers.');
+                }
                 const entities = union([models(target.object), relationWrites(p.get('arguments.0'))]);
                 if (['removePreAnalyticSample', 'removeUnstartedWorkItems'].includes(target.name) && !p.get('arguments.0')?.isIdentifier({ name: 'tx' })) {
                     report(p.node, 'WORKFLOW_REMOVAL_WITHOUT_TRANSACTION', target.name);

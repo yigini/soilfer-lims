@@ -23,6 +23,8 @@ router.put('/:id/metadata', checkPermission('CHANGE_STATUS'), sampleController.u
 router.put('/:id/project', checkPermission('CHANGE_STATUS'), sampleController.updateSampleProject);
 router.put('/:id/analyses', checkPermission('EDIT_ANALYSES'), sampleController.updateSampleAnalyses);
 router.get('/:id/detail', checkPermission('VIEW_SAMPLES'), sampleController.getSampleDetail);
+router.get('/:id/holds', checkPermission('VIEW_SAMPLES'), sampleController.getSampleHolds);
+router.post('/:id/holds/:holdId/resolve', checkPermission('APPROVE_RESULTS'), sampleController.resolveSampleHold);
 router.get('/:id/workspace', checkPermission('VIEW_SAMPLES'), sampleController.getSampleWorkspace);
 router.get('/:id/map-state', checkPermission('VIEW_SAMPLES'), sampleController.getMapState);
 

@@ -1,4 +1,3 @@
-const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const service = require('../../services/koboService');
 const source = require('../../services/koboProfileService');
 const identity = require('../../services/profileIdentityService');
@@ -73,12 +72,8 @@ describe('Actual mounted Kobo capture, hold and force-refresh paths',()=>{
     });
     afterAll(async()=>{
         fetch.mockRestore();
-        await prisma.auditLog.deleteMany({where:{entityId:{in:(await prisma.sample.findMany({where:{projectCode:project},select:{id:true}})).map(s=>s.id)}}});
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({where:{projectCode:project}}), select: { id: true } })).map(row => row.id), { single: false });
-        await prisma.koboConfig.delete({where:{id:config}});
-        await prisma.project.delete({where:{id:project}});
-        await prisma.user.update({where:{id:jwt.decode(token).id},data:{labId:null}});
-        await prisma.lab.delete({where:{id:lab}});
+        // Canonical hold history is retained, even in a fixture. Global
+        // teardown disposes of the entire owned test database after all suites.
     });
     test('normal sync captures two distinct EXPECTED specimens under one pit; unchanged replay creates no hold',async()=>{
         const response=await request(app).post(`/api/kobo/sync/${lab}?configId=${config}`).set('Authorization',`Bearer ${token}`);

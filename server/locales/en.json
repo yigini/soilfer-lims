@@ -1,4 +1,33 @@
 {
+  "sampleHolds": {
+    "metadataRepairNeeded": "Metadata repair is needed before this hold can be resolved.",
+    "title": "Sample holds",
+    "badge": "Sample held",
+    "open": "Open",
+    "resolved": "Resolved",
+    "resolve": "Resolve hold",
+    "resolutionReason": "Resolution reason (required)",
+    "raisedAt": "Raised at",
+    "raisedAtOrBefore": "Raised at or before",
+    "backfillRequired": "A legacy hold still blocks this sample. A manager must review and backfill it before resolution.",
+    "undoConfirmation": "Return the sample to RECEIVED and cancel eligible work items? Work items and their history are retained, and the lab ID is preserved. Work with results, scans, attempts or other evidence blocks this action.",
+    "undoSuccess": "Intake undone. The sample is RECEIVED; cancelled work items and their history are retained.",
+    "types": {
+      "PROVENANCE": "Provenance",
+      "CUSTODY": "Custody",
+      "CLIENT_QUERY": "Client query",
+      "QC": "Quality control",
+      "OTHER": "Other"
+    },
+    "errors": {
+      "HOLD_FETCH_ERROR": "Sample holds could not be loaded. Refresh before accepting or assigning work.",
+      "HOLD_BACKFILL_REQUIRED": "Review and backfill the legacy hold before resolving it.",
+      "HOLD_MARKER_INVALID": "Stored hold metadata needs manager review before resolution.",
+      "HOLD_RESOLVE_FORBIDDEN": "Manager authority is required to resolve a hold.",
+      "HOLD_STATE_CHANGED": "The hold changed. Refresh and review it again.",
+      "HOLD_RESOLVE_ERROR": "The hold could not be resolved. Refresh and try again."
+    }
+  },
   "resultReports": {
     "qcWarningStatement": "QC warning: One or more reported values have failed or incomplete batch QC. See the recorded batch warnings.",
     "qcWithinLimits": "QC within limits for all reported values.",

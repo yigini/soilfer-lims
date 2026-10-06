@@ -1,4 +1,33 @@
 {
+  "sampleHolds": {
+    "metadataRepairNeeded": "Les métadonnées doivent être réparées avant de résoudre ce blocage.",
+    "title": "Blocages de l’échantillon",
+    "badge": "Échantillon bloqué",
+    "open": "Ouvert",
+    "resolved": "Résolu",
+    "resolve": "Résoudre le blocage",
+    "resolutionReason": "Motif de résolution (obligatoire)",
+    "raisedAt": "Créé le",
+    "raisedAtOrBefore": "Créé au plus tard le",
+    "backfillRequired": "Un ancien blocage reste actif. Un responsable doit le vérifier et l’enregistrer avant sa résolution.",
+    "undoConfirmation": "Rétablir l’état REÇU et annuler les travaux admissibles ? Les travaux, leur historique et l’identifiant du laboratoire sont conservés. Des résultats, spectres, tentatives ou autres preuves empêchent cette action.",
+    "undoSuccess": "Réception annulée. L’échantillon est REÇU ; les travaux annulés et leur historique sont conservés.",
+    "types": {
+      "PROVENANCE": "Provenance",
+      "CUSTODY": "Chaîne de garde",
+      "CLIENT_QUERY": "Question du client",
+      "QC": "Contrôle qualité",
+      "OTHER": "Autre"
+    },
+    "errors": {
+      "HOLD_FETCH_ERROR": "Impossible de charger les blocages. Actualisez avant d’accepter ou d’affecter des travaux.",
+      "HOLD_BACKFILL_REQUIRED": "Vérifiez et enregistrez l’ancien blocage avant de le résoudre.",
+      "HOLD_MARKER_INVALID": "Les métadonnées du blocage doivent être vérifiées par un responsable.",
+      "HOLD_RESOLVE_FORBIDDEN": "Une autorisation de responsable est nécessaire pour résoudre un blocage.",
+      "HOLD_STATE_CHANGED": "Le blocage a changé. Actualisez et vérifiez-le à nouveau.",
+      "HOLD_RESOLVE_ERROR": "Impossible de résoudre le blocage. Actualisez et réessayez."
+    }
+  },
   "resultReports": {
     "qcWarningStatement": "Avertissement QC : Une ou plusieurs valeurs rapportées ont un QC de lot échoué ou incomplet. Consultez les avertissements de lot enregistrés.",
     "qcWithinLimits": "QC dans les limites pour toutes les valeurs rapportées.",

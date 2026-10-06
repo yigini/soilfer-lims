@@ -1,4 +1,33 @@
 {
+  "sampleHolds": {
+    "metadataRepairNeeded": "É necessário reparar os metadados antes de resolver esta retenção.",
+    "title": "Bloqueios da amostra",
+    "badge": "Amostra bloqueada",
+    "open": "Aberto",
+    "resolved": "Resolvido",
+    "resolve": "Resolver bloqueio",
+    "resolutionReason": "Motivo da resolução (obrigatório)",
+    "raisedAt": "Criado em",
+    "raisedAtOrBefore": "Criado em ou antes de",
+    "backfillRequired": "Um bloqueio antigo ainda impede esta amostra. Um responsável deve revê-lo e registá-lo antes da resolução.",
+    "undoConfirmation": "Devolver a amostra a RECEBIDA e cancelar os trabalhos elegíveis? Os trabalhos, o histórico e o identificador do laboratório são preservados. Resultados, espectros, tentativas ou outras evidências impedem esta ação.",
+    "undoSuccess": "Receção desfeita. A amostra está RECEBIDA; os trabalhos cancelados e o histórico são preservados.",
+    "types": {
+      "PROVENANCE": "Proveniência",
+      "CUSTODY": "Custódia",
+      "CLIENT_QUERY": "Consulta do cliente",
+      "QC": "Controlo de qualidade",
+      "OTHER": "Outro"
+    },
+    "errors": {
+      "HOLD_FETCH_ERROR": "Não foi possível carregar os bloqueios. Atualize antes de aceitar ou atribuir trabalhos.",
+      "HOLD_BACKFILL_REQUIRED": "Reveja e registe o bloqueio antigo antes de o resolver.",
+      "HOLD_MARKER_INVALID": "Um responsável deve rever os metadados do bloqueio antes da resolução.",
+      "HOLD_RESOLVE_FORBIDDEN": "É necessária autorização de responsável para resolver um bloqueio.",
+      "HOLD_STATE_CHANGED": "O bloqueio mudou. Atualize e reveja novamente.",
+      "HOLD_RESOLVE_ERROR": "Não foi possível resolver o bloqueio. Atualize e tente novamente."
+    }
+  },
   "spectralWorkflow": {"reopenTitle":"Reabrir trabalho concluído","reopenMessage":"Esta alteração afeta um trabalho concluído. Introduza um motivo para o reabrir e tentar novamente.","reason":"Motivo (obrigatório)","retry":"Reabrir e tentar novamente","trashTitle":"Mover para o lixo","trashMessage":"Mover o espectro de {label} para o lixo? Introduza um motivo. Poderá restaurá-lo depois.","batchTrashMessage":"Mover {count} espectros selecionados para o lixo? Introduza um motivo. Poderá restaurá-los depois.","trashConfirm":"Mover para o lixo","partialTitle":"Importação parcialmente concluída","receiptTitle":"Comprovante de importação","receiptCounts":"{count} espectros registrados; {failed} falharam.","retryFailed":"Revisar e tentar novamente as entradas restantes"},
   "numbers": {"ambiguous":"Esclareça o separador decimal ou de milhares.","invalid":"Formato de número inválido.","policyInvalid":"O formato numérico do laboratório está indisponível ou é inválido.","decimal":"Separador decimal","thousands":"Separador de milhares","noGrouping":"Não configurado","space":"Espaço"},
   "sampleLookup": { "title": "Busca de amostra", "ambiguous": "Este identificador corresponde a várias amostras:", "failed": "Não foi possível encontrar ou carregar a amostra. Verifique o identificador e a conexão." },

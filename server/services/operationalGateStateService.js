@@ -41,7 +41,7 @@ async function changeGate({ sampleId, gate, status, reason, actor, resumeSampleS
         const item = items.find(row => !row.duplicateOf);
         if (!item) throw new TransitionError('Operational gate work item not found.', 404, 'WORK_ITEM_NOT_FOUND');
         const previous = sample[field] || 'PENDING';
-        let eventCount = 0, updatedItem = item;
+        let eventCount = 0, updatedItem = item, resumeItemStatus = null;
         const updates = { [field]: status };
         let sampleStatus = workflow.normalizeSampleState(sample.status);
         if (previous === 'DONE' && status === 'PENDING') {
@@ -62,11 +62,14 @@ async function changeGate({ sampleId, gate, status, reason, actor, resumeSampleS
         } else if (status === 'PENDING' && previous === 'FAILED') {
             rules.requireReason(reason);
             if (workflow.normalizeWorkItemState(item.status) === 'ON_HOLD') {
-                updatedItem = await transitionWorkItem(item.id, restoreTarget(item, 'WorkItem', resumeWorkItemStatus), actor, reason, {}, tx);
+                resumeItemStatus = restoreTarget(item, 'WorkItem', resumeWorkItemStatus);
             }
             if (sampleStatus === 'ON_HOLD') sampleStatus = restoreTarget(sample, 'Sample', resumeSampleStatus);
         }
         const updatedSample = await transitionSample(sample.id, sampleStatus, actor, reason, updates, tx);
+        // Assignment reads the sample's current intake state. Restore the
+        // sample first; either restoration still rolls back the whole gate.
+        if (resumeItemStatus) updatedItem = await transitionWorkItem(item.id, resumeItemStatus, actor, reason, {}, tx);
         if (previous !== status) await tx.auditLog.create({ data: {
             id: randomUUID(), entity: 'SAMPLE', entityId: sample.id,
             action: gate === 'DRYING' ? 'DRYING_STATUS_CHANGED' : 'PREP_STATUS_CHANGED',

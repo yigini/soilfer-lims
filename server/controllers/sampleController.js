@@ -13,6 +13,33 @@ const sampleOriginService = require('../services/sampleOriginService');
 const sampleStateService = require('../services/sampleStateService');
 const sampleAnalysisStateService = require('../services/sampleAnalysisStateService');
 const profileIdentity = require('../services/profileIdentityService');
+const sampleHolds = require('../services/sampleHoldService');
+
+exports.getSampleHolds = async (req, res) => {
+    try {
+        const sample = await prisma.sample.findUnique({ where: { id: String(req.params.id) } });
+        if (!sample) return res.status(404).json({ code: 'SAMPLE_NOT_FOUND', error: 'Sample not found.' });
+        require('../services/workflowStateRules').assertScope(req.user, sample);
+        const holds = await prisma.sampleHold.findMany({ where: { sampleId: sample.id }, orderBy: [{ raisedAt: 'asc' }, { id: 'asc' }] });
+        return res.json({ holds: holds.map(sampleHolds.presentHold), held: await sampleHolds.isHeld(prisma, sample),
+            metadataRepairNeeded: sampleHolds.legacyHoldState(sample).metadataRepairNeeded, canResolve: hasPermission(req.user, 'APPROVE_RESULTS') });
+    } catch (err) {
+        const mapped = require('../services/workflowStateRules').mapStateError(err);
+        return res.status(mapped.statusCode || 500).json({ code: mapped.code || 'HOLD_FETCH_ERROR', error: mapped.message });
+    }
+};
+
+exports.resolveSampleHold = async (req, res) => {
+    try {
+        const hold = await prisma.$transaction(tx => sampleHolds.resolveHold(tx, {
+            sampleId: req.params.id, holdId: req.params.holdId, actor: req.user, reason: req.body.reason
+        }));
+        return res.json({ hold: sampleHolds.presentHold(hold) });
+    } catch (err) {
+        const mapped = require('../services/workflowStateRules').mapStateError(err);
+        return res.status(mapped.statusCode || 500).json({ code: mapped.code || 'HOLD_RESOLVE_ERROR', error: mapped.message });
+    }
+};
 
 // Printed labels and imported field barcodes encode a lab/original identifier.
 // Apply scope before matching so neither missing nor ambiguous responses leak
@@ -31,7 +58,7 @@ exports.lookupSample = async (req, res) => {
         if (!matches.length) return res.status(404).json({ code: 'SAMPLE_NOT_FOUND', error: 'Sample not found.' });
         if (matches.length > 1) return res.status(409).json({ code: 'SAMPLE_LOOKUP_AMBIGUOUS', error: 'This identifier matches several samples.',
             candidates: matches.map(sample => ({ id: sample.id, displayId: sample.originalId || sample.labId || sample.id, labId: sample.labId, originalId: sample.originalId })) });
-        return res.json(matches[0]);
+        return res.json({ ...matches[0], held: await sampleHolds.isHeld(prisma, matches[0]) });
     } catch (err) {
         console.error('[Sample lookup]', err);
         return res.status(500).json({ code: 'SAMPLE_LOOKUP_ERROR', error: 'Sample lookup failed.' });
@@ -100,6 +127,8 @@ exports.searchExpectedSamples = async (req, res) => {
                 projectCode: true,
                 status: true,
                 fieldMetadata: true,
+                metadata: true,
+                holds: true,
                 country: true
             },
             take: parseInt(limit),
@@ -116,6 +145,7 @@ exports.searchExpectedSamples = async (req, res) => {
                 projectId: s.projectId,
                 projectCode: s.projectCode,
                 status: s.status,
+                held: sampleHolds.isHeldSnapshot(s),
                 country: s.country,
                 coordinates: resolved.isRecorded ? {
                     lat: resolved.lat,
@@ -364,6 +394,7 @@ exports.getSamples = async (req, res) => {
                     receptionDate: true, createdAt: true, updatedAt: true,
                     fieldMetadata: true, metadata: true, rejectionReason: true,
                     custodyHandoverAt: true, custodyCarrierName: true, custodyTrackingNumber: true, receivingOfficerName: true,
+                    holds: true,
                     workItems: {  select: { analysis: true, status: true, category: true } }
                 }
             }) : [];
@@ -382,6 +413,7 @@ exports.getSamples = async (req, res) => {
                     receptionDate: true, createdAt: true, updatedAt: true,
                     fieldMetadata: true, metadata: true, rejectionReason: true,
                     custodyHandoverAt: true, custodyCarrierName: true, custodyTrackingNumber: true, receivingOfficerName: true,
+                    holds: true,
                     workItems: {  select: { analysis: true, status: true, category: true } }
                 },
                 orderBy: { [safeSort]: safeOrder },
@@ -437,8 +469,10 @@ exports.getSamples = async (req, res) => {
                 siteId,
                 workItemProgress: { total: totalWI, completed: completedWI, items: progressItems },
                 hasInProgressWork, hasAssignedWork, hasReanalysisWork, pendingReview, attentionRank,
+                held: sampleHolds.isHeldSnapshot(s),
+                holds: s.holds.map(sampleHolds.presentHold),
                 gatesComplete: s.dryingStatus === 'DONE' && s.preparationStatus === 'DONE',
-                nextAction: s.status === 'EXPECTED' ? (metadata?.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD' ? 'Reconcile' : 'Receive') :
+                nextAction: sampleHolds.isHeldSnapshot(s) ? 'Reconcile' : s.status === 'EXPECTED' ? 'Receive' :
                     s.status === 'RECEIVED' ? 'Accept' :
                         s.status === 'ACCEPTED' ? 'Process' : 'View'
             };
@@ -490,7 +524,7 @@ exports.updateStatus = async (req, res) => {
                 { sampleId: sample.id, body: req.body, user });
             if (status === 'RECEIVED_REJECTED') {
                 const current = await tx.sample.findUnique({ where: { id: sample.id } });
-                if (current.status === 'RECEIVED') return (await require('../services/intakeService').rejectSample(tx, {
+                return (await require('../services/intakeService').rejectSample(tx, {
                     body: { ...req.body, sampleId: current.id, originalId: current.originalId, ncReason: req.body.ncReason || req.body.reason }, user
                 })).sample;
             }
@@ -654,13 +688,13 @@ exports.undoIntake = async (req, res) => {
                     400, 'UNDO_INTAKE_STATE_INVALID');
             }
             const items = await tx.workItem.findMany({ where: { sampleId: String(id) } });
-            const reason = `Intake undone. Status reverted to RECEIVED. ${items.length} work items deleted.`;
-            // Refuse the transition before removing tasks. Any later failure also
-            // rolls back the transition, task removal and both audit records.
+            const reason = req.body?.reason?.trim() || `Intake undone. Status reverted to RECEIVED. ${items.length} work items cancelled and retained.`;
+            // Validate and retain every task before changing the sample's intake
+            // state. A later failure rolls back all cancellations and audits.
+            await require('../services/workItemStateService').cancelForIntakeUndo(tx, { sampleId: String(id), actor: user, reason });
             await sampleStateService.transitionSample(id, 'RECEIVED', user, reason, {
                 dryingStatus: null, preparationStatus: null, acceptedBy: null, acceptedAt: null
             }, tx);
-            await require('../services/workItemStateService').removeUnstartedWorkItems(tx, { sampleId: String(id) }, { actor: user, reason });
             await tx.auditLog.create({ data: {
                 id: crypto.randomUUID(), entity: 'SAMPLE', entityId: id,
                 action: 'UNDO_INTAKE', details: reason, performedBy: user.username,
@@ -1415,6 +1449,9 @@ exports.updateSampleMetadata = async (req, res) => {
         if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata) || Object.keys(metadata).some(key => ['__proto__','constructor','prototype','profileCompatibility'].includes(key))) {
             return res.status(400).json({ error: 'Metadata must contain supported fields. Compatibility references are server-managed.' });
         }
+        if (Object.hasOwn(metadata, 'provenanceHold')) {
+            return res.status(409).json({ code: 'HOLD_MARKER_MANAGED', error: 'Use the sample hold resolution action to change a provenance hold.' });
+        }
         const identityKeys = Object.keys(metadata).filter(key => profileIdentity.IDENTITY_KEYS.has(key));
         const released = !!sample.approvedAt || ['APPROVED','RELEASED','ARCHIVED','DISPOSED'].includes(sample.status);
         if (released && identityKeys.length) {
@@ -2034,62 +2071,35 @@ exports.recordStorageMovement = async (req, res) => {
     const user = req.user;
 
     try {
-        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
-        if (!sample) return res.status(404).json({ error: 'Sample not found' });
-
-        if (user && user.role && !scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
-            return res.status(403).json({ error: 'Sample is outside your authorized scope' });
-        }
-
-        if (sample.status === 'DISPOSED') {
-            return res.status(400).json({
-                error: 'Cannot move disposed sample material.',
-                code: 'DISPOSED_MATERIAL_IMMUTABLE'
-            });
-        }
-
-        let meta = {};
-        try {
-            if (sample.metadata) meta = JSON.parse(sample.metadata);
-        } catch (e) {
-            meta = {};
-        }
-
-        const oldLocation = meta.archiveLocation || 'Not recorded';
-        meta.archiveLocation = location || oldLocation;
-        meta.lastMovementReason = reason || 'Storage movement';
-        meta.lastMovementAt = new Date().toISOString();
-        meta.lastMovementBy = user.username;
-
-        const updatedSample = await prisma.sample.update({
-            where: { id: sample.id },
-            data: {
-                metadata: JSON.stringify(meta)
-            }
-        });
-
-        const crypto = require('crypto');
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'SAMPLE',
-                entityId: sample.id,
-                action: 'STORAGE_MOVEMENT',
+        const rules = require('../services/workflowStateRules');
+        const outcome = await prisma.$transaction(async tx => {
+            const sample = await tx.sample.findUnique({ where: { id: String(id) } });
+            if (!sample) throw new rules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
+            rules.assertScope(user, sample);
+            if (sample.status === 'DISPOSED') throw new rules.TransitionError('Cannot move disposed sample material.', 400, 'DISPOSED_MATERIAL_IMMUTABLE');
+            const meta = sampleHolds.legacyHoldState(sample).metadata;
+            if (!meta) throw new rules.TransitionError('Stored sample metadata needs review before storage movement.', 409, 'SAMPLE_METADATA_INVALID');
+            const oldLocation = meta.archiveLocation || 'Not recorded';
+            const movedAt = new Date();
+            const changed = await tx.sample.updateMany({ where: { id: sample.id, updatedAt: sample.updatedAt }, data: {
+                metadata: JSON.stringify({ ...meta, archiveLocation: location || oldLocation, lastMovementReason: reason || 'Storage movement',
+                    lastMovementAt: movedAt.toISOString(), lastMovementBy: user.username }),
+                updatedAt: new Date(Math.max(movedAt.getTime(), sample.updatedAt.getTime() + 1))
+            } });
+            if (changed.count !== 1) throw new rules.TransitionError('Sample changed. Reload before retrying.', 409, 'SAMPLE_STATE_CHANGED');
+            await tx.auditLog.create({ data: {
+                id: crypto.randomUUID(), entity: 'SAMPLE', entityId: sample.id, action: 'STORAGE_MOVEMENT',
                 details: `Sample material moved from '${oldLocation}' to '${location}' (${reason || 'Storage movement'})`,
-                performedBy: user.username,
-                sampleId: sample.id
-            }
+                performedBy: user.username, sampleId: sample.id
+            } });
+            return { success: true, location, oldLocation, sample: await tx.sample.findUnique({ where: { id: sample.id } }) };
         });
-
-        res.json({
-            success: true,
-            location,
-            oldLocation,
-            sample: updatedSample
-        });
+        res.json(outcome);
     } catch (err) {
+        const mapped = require('../services/workflowStateRules').mapStateError(err, 'SAMPLE_STATE_CHANGED');
+        if (mapped.statusCode) return res.status(mapped.statusCode).json({ code: mapped.code, error: mapped.message });
         console.error('[recordStorageMovement] Error:', err);
-        res.status(500).json({ error: 'Failed to record storage movement' });
+        res.status(500).json({ code: 'SAMPLE_MOVEMENT_ERROR', error: 'Failed to record storage movement' });
     }
 };
 
