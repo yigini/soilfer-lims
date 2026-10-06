@@ -307,7 +307,7 @@ function scanSource(source, filename, exceptions = []) {
         const name = owner(p);
         if (!exportedNames.has(name)) return false;
         const removal = ['delete', 'deleteMany'].includes(operation);
-        if (filename === 'services/sampleStateService.js' && (['createSample', 'transitionSample'].includes(name) || removal && name === 'removePreAnalyticSample') && entities.every(entity => entity === 'Sample')) return true;
+        if (filename === 'services/sampleStateService.js' && (['createSample', 'transitionSample', 'writeSampleHoldCompatibility'].includes(name) || removal && name === 'removePreAnalyticSample') && entities.every(entity => entity === 'Sample')) return true;
         if (filename === 'services/workItemStateService.js' && (['createWorkItem', 'transitionWorkItem'].includes(name) || removal && name === 'removeUnstartedWorkItems') && entities.every(entity => entity === 'WorkItem')) return true;
         if (removal && filename === 'tests/helpers/workflowFixtures.js' && name === 'cleanupWorkflowFixtures') return true;
         return exceptions.some(entry => entry.file === filename && entry.exportName === name);
@@ -382,6 +382,12 @@ function scanSource(source, filename, exceptions = []) {
             embeddedProgram(p);
             if (p.get('callee').isIdentifier({ name: 'require' }) || p.node.callee.type === 'Import') helperImport(p, strings(p.get('arguments.0')));
             for (const target of method(p.get('callee'))) {
+                if (target.name === 'reactivateCancelledIntakeWork' && filename !== 'services/sampleStateService.js') {
+                    report(p.node, 'INTAKE_REACTIVATION_CALLER_FORBIDDEN', 'Only the sample re-acceptance transaction may reactivate cancelled work.');
+                }
+                if (target.name === 'writeSampleHoldCompatibility' && filename !== 'services/sampleHoldService.js') {
+                    report(p.node, 'HOLD_MARKER_CALLER_FORBIDDEN', 'Only the hold service may update compatibility markers.');
+                }
                 const entities = union([models(target.object), relationWrites(p.get('arguments.0'))]);
                 if (['removePreAnalyticSample', 'removeUnstartedWorkItems'].includes(target.name) && !p.get('arguments.0')?.isIdentifier({ name: 'tx' })) {
                     report(p.node, 'WORKFLOW_REMOVAL_WITHOUT_TRANSACTION', target.name);

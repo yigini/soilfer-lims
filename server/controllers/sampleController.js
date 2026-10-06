@@ -654,13 +654,13 @@ exports.undoIntake = async (req, res) => {
                     400, 'UNDO_INTAKE_STATE_INVALID');
             }
             const items = await tx.workItem.findMany({ where: { sampleId: String(id) } });
-            const reason = `Intake undone. Status reverted to RECEIVED. ${items.length} work items deleted.`;
+            const reason = req.body?.reason?.trim() || `Intake undone. Status reverted to RECEIVED. ${items.length} work items cancelled and retained.`;
             // Refuse the transition before removing tasks. Any later failure also
             // rolls back the transition, task removal and both audit records.
             await sampleStateService.transitionSample(id, 'RECEIVED', user, reason, {
                 dryingStatus: null, preparationStatus: null, acceptedBy: null, acceptedAt: null
             }, tx);
-            await require('../services/workItemStateService').removeUnstartedWorkItems(tx, { sampleId: String(id) }, { actor: user, reason });
+            await require('../services/workItemStateService').cancelForIntakeUndo(tx, { sampleId: String(id), actor: user, reason });
             await tx.auditLog.create({ data: {
                 id: crypto.randomUUID(), entity: 'SAMPLE', entityId: id,
                 action: 'UNDO_INTAKE', details: reason, performedBy: user.username,

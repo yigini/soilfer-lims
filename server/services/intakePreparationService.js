@@ -74,16 +74,12 @@ async function prepareIntake(prisma, { body: rawBody, user, newSampleId, initial
 
         if (sample) {
             // Check for active provenance hold (Finding 4: Ambiguous specimen identity must remain visibly unresolved)
-            let sampleMeta = {};
-            try {
-                sampleMeta = typeof sample.metadata === 'string' ? JSON.parse(sample.metadata) : (sample.metadata || {});
-            } catch (e) {}
             if (!body.isDraft && !['REJECT', 'REJECTED'].includes(body.decision) &&
-                sampleMeta.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD') {
+                await require('./sampleHoldService').isHeld(prisma, sample)) {
                 throw new IntakeError(409, {
                     error: 'PROVENANCE_HOLD',
                     code: 'AMBIGUOUS_PROVENANCE_HOLD',
-                    message: `Cannot process intake for sample '${sample.originalId}': Ambiguous field specimen identity. Reconciliation required before physical intake. Reason: ${sampleMeta.provenanceHold.reason}`
+                    message: `Cannot process intake for sample '${sample.originalId}': Resolve all sample holds before physical intake.`
                 });
             }
 

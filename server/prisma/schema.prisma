@@ -192,6 +192,7 @@ model Sample {
   amendments        SampleAmendment[]
   reviewDecisions   ReviewDecision[]
   resultEvidenceEvents ResultEvidenceEvent[]
+  holds             SampleHold[]
 
   @@index([consignmentId])
 }
@@ -253,6 +254,10 @@ model WorkItem {
   status         String    // NOT_ASSIGNED, ASSIGNED, IN_PROGRESS, COMPLETED, ACCEPTED
   holdPriorStatus String?
   legacyStatus    String?
+  cancellationCode   String?
+  cancellationReason String?
+  cancelledBy        String?
+  cancelledAt        DateTime?
   
   assignedTo     String?
   assignee       User?     @relation("AssignedTo", fields: [assignedTo], references: [username])
@@ -299,6 +304,23 @@ model WorkItem {
   spectralScans   SpectralData[]
   workAttempts    WorkAttempt[]
   reviewDecisions ReviewDecision[]
+}
+
+model SampleHold {
+  id                String   @id
+  sampleId          String
+  sample            Sample   @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+  type              String
+  reason            String
+  raisedBy          String
+  raisedAt          DateTime
+  resolvedBy        String?
+  resolvedAt        DateTime?
+  resolution        String?
+  attributionSource String
+  compatMarker      String?
+
+  @@index([sampleId, resolvedAt])
 }
 
 model WorkItemDraft {

@@ -25,6 +25,7 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
         if ('id' in data && data.id !== sample.id) throw new TransitionError('Sample identity cannot change during a transition.', 400, 'WORKFLOW_ID_IMMUTABLE');
         rules.assertScope(actor, { ...sample, ...data });
         const currentStatus = workflow.normalizeSampleState(sample.status);
+        if (!migrating && nextStatus === 'ACCEPTED') await require('./sampleHoldService').assertNotHeld(client, sample);
         let provenance = {};
         let gateAudit = {};
         if (migrating) {
@@ -63,6 +64,13 @@ async function transitionSample(sampleId, nextStatus, actor, reason = null, extr
         });
         if (changed.count !== 1) throw new TransitionError('Sample changed. Reload before retrying.', 409, 'SAMPLE_STATE_CHANGED');
         const updated = await client.sample.findUnique({ where: { id: sample.id } });
+        if (!migrating && nextStatus === 'ACCEPTED' && ['EXPECTED', 'RECEIVED', 'RECEIVED_REJECTED'].includes(currentStatus)) {
+            const requested = typeof updated.requiredAnalyses === 'string' ? JSON.parse(updated.requiredAnalyses) : updated.requiredAnalyses || [];
+            if (!Array.isArray(requested)) throw new TransitionError('Requested analyses need review.', 409, 'INTAKE_ANALYSES_INVALID');
+            await require('./workItemStateService').reactivateCancelledIntakeWork(client, { sampleId: sample.id,
+                previousSampleStatus: currentStatus, analyses: [...new Set(['DRYING', 'PREPARATION', ...requested])],
+                actor, reason: reason || 'Sample legally re-accepted at intake' });
+        }
         if (sample.status !== nextStatus || migrating) {
             await client.auditLog.create({ data: {
                 id: randomUUID(), entity: 'SAMPLE', entityId: sample.id,
@@ -150,4 +158,17 @@ async function removePreAnalyticSample(tx, ids, { actor, reason, code = 'SAMPLE_
     return removed;
 }
 
-module.exports = { transitionSample, createSample, advanceCompletedGates, TransitionError, removePreAnalyticSample };
+// Marker compatibility updates preserve the raw lifecycle value, including
+// pre-migration legacy states. Only the hold service invokes this narrow writer.
+async function writeSampleHoldCompatibility(tx, sample, data, actor) {
+    rules.requireTransaction(tx);
+    rules.actorName(actor);
+    rules.assertScope(actor, sample);
+    if (Object.keys(data).some(key => !['metadata', 'fieldMetadata'].includes(key)) ||
+        Object.values(data).some(value => value !== null && typeof value !== 'string')) {
+        throw new TransitionError('Hold compatibility updates may only change serialized markers.', 400, 'HOLD_MARKER_UPDATE_INVALID');
+    }
+    return tx.sample.update({ where: { id: sample.id }, data });
+}
+
+module.exports = { transitionSample, createSample, advanceCompletedGates, TransitionError, removePreAnalyticSample, writeSampleHoldCompatibility };
