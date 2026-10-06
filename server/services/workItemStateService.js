@@ -202,9 +202,7 @@ async function cancelIntakeWork(tx, { sampleId, actor, reason }, action) {
     const specimenEvidence = await tx.result.count({ where: { sampleId: sample.id } }) || await tx.spectralData.count({ where: { sampleId: sample.id } }) ||
         await tx.resultEvidenceEvent.count({ where: { sampleId: sample.id } });
     if (blockingItemIds.length || specimenEvidence) throw new TransitionError('Intake has recorded work and cannot be cancelled.', 409, 'INTAKE_UNDO_HAS_WORK',
-        { blockingItemIds: blockingItemIds.length ? blockingItemIds : items.map(item => item.id),
-            legacyUndoCode: items.some(item => blockingItemIds.includes(item.id) && !['NOT_ASSIGNED', 'ASSIGNED'].includes(item.status))
-                ? 'ACTIVE_WORK_IN_PROGRESS' : 'CANNOT_DELETE_SAMPLE_WITH_RESULTS' });
+        { blockingItemIds: blockingItemIds.length ? blockingItemIds : items.map(item => item.id) });
     const cancelled = [];
     for (const item of items) cancelled.push(await transitionWorkItem(item.id, 'CANCELLED', actor, reason, {}, tx,
         { action, intakeAction: INTAKE_ACTION, expected: item }));

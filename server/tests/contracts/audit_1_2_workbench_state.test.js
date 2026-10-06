@@ -81,7 +81,7 @@ test.each(['removePreAnalyticSample', 'removeUnstartedWorkItems'])('%s refuses a
 test.each(['COMPLETED', 'IN_PROGRESS', 'ASSIGNED'])('undo intake preserves %s work and its recorded evidence on refusal', async status => {
     const row = await fixture('ACCEPTED', status), before = await snapshot([row.sample.id]);
     expect(await call(sampleController.undoIntake, {}, { id: row.sample.id }, manager))
-        .toMatchObject({ statusCode: 409, body: { code: status === 'ASSIGNED' ? 'CANNOT_DELETE_SAMPLE_WITH_RESULTS' : 'ACTIVE_WORK_IN_PROGRESS' } });
+        .toMatchObject({ statusCode: 409, body: { code: 'INTAKE_UNDO_HAS_WORK', details: { blockingItemIds: [row.item.id] } } });
     expect(await snapshot([row.sample.id])).toEqual(before);
 });
 

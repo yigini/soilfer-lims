@@ -150,6 +150,6 @@ test('undo-intake HTTP route refuses analytical evidence with 409 and no table w
     const before = snapshot();
     const response = await request(app).post(`/api/samples/${f.sample.id}/undo-intake`).send({ reason: 'Evidence must be preserved' });
     expect(response.status).toBe(409);
-    expect(response.body).toMatchObject({ code: 'ACTIVE_WORK_IN_PROGRESS', details: { blockingItemIds: [f.item.id] } });
+    expect(response.body).toMatchObject({ code: 'INTAKE_UNDO_HAS_WORK', details: { blockingItemIds: [f.item.id] } });
     expect(snapshot()).toEqual(before);
 });

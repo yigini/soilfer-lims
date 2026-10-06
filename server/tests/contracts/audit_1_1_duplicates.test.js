@@ -135,6 +135,7 @@ describe('Audit 1.1: additive, audited duplicate resolution', () => {
             if (change === 'added') {
                 // Generated Prisma reads the current nullable columns; install
                 // the real additive hold DDL before using that current client.
+                changed.exec('CREATE TABLE IF NOT EXISTS "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL, "appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "details" TEXT)');
                 require('../../scripts/install_sample_holds').installSampleHolds({ dbPath: file, apply: true });
                 const client = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
                 try { await createWorkItemFixture(client, { data: { id: 'third', sampleId: 'sample', analysis: 'PH', status: 'NOT_ASSIGNED' } }); }
