@@ -363,6 +363,10 @@ model BatchQcResult {
   status      String   // PASS, FAIL, INVALID
   details     String?
   createdAt   DateTime @default(now())
+  referenceMaterialId String?
+  referenceMaterial   ReferenceMaterial? @relation(fields: [referenceMaterialId], references: [id], onDelete: Restrict)
+  referenceValueId    String?
+  referenceValue      ReferenceValue? @relation(fields: [referenceValueId], references: [id], onDelete: Restrict)
 
   @@index([batchId])
 }
@@ -442,6 +446,7 @@ model Lab {
   appearanceSetting LabAppearanceSetting?
   policy             LabPolicy?
   policyOverrides    LabPolicyOverride[]
+  referenceMaterials ReferenceMaterial[]
 }
 
 model LabPolicy {
@@ -564,6 +569,7 @@ model InventoryLot {
   // Relations
   transactions     InventoryTransaction[]
   reservations     InventoryReservation[]
+  referenceMaterials ReferenceMaterial[]
 
   @@index([inventoryItemId])
   @@index([labId])
@@ -933,6 +939,7 @@ model Unit {
   updatedAt    DateTime   @updatedAt
 
   analyses     Analysis[]
+  referenceValues ReferenceValue[]
 }
 
 model MethodReference {
@@ -995,6 +1002,7 @@ model Analysis {
   sampleMassRequired Float?            @default(10.0) // Sample mass required in grams (RC-01)
   version            Int?              @default(1)
   methodologies      Methodology[]
+  referenceValues    ReferenceValue[]
 }
 
 model ExternalMapping {
@@ -1038,6 +1046,58 @@ model Methodology {
   updatedAt        DateTime         @updatedAt
 
   workItems        WorkItem[]
+  referenceValues  ReferenceValue[]
+}
+
+// #184: each certificate/lot has its own material; assigned values are immutable.
+model ReferenceMaterial {
+  id             String   @id
+  labId          String
+  lab            Lab      @relation(fields: [labId], references: [id], onDelete: Restrict)
+  code           String
+  name           String
+  kind           String
+  matrix         String
+  supplier       String?
+  certificateRef String?
+  inventoryLotId String?
+  inventoryLot   InventoryLot? @relation(fields: [inventoryLotId], references: [id], onDelete: Restrict)
+  lotNumber      String
+  expiryDate     DateTime?
+  openedAt       DateTime?
+  status         String
+  createdBy      String
+  createdAt      DateTime @default(now())
+  values         ReferenceValue[]
+  qcItems        BatchQcResult[]
+
+  @@index([labId, code])
+}
+
+model ReferenceValue {
+  id                  String   @id
+  referenceMaterialId String
+  referenceMaterial   ReferenceMaterial @relation(fields: [referenceMaterialId], references: [id], onDelete: Restrict)
+  analysisCode        String
+  analysis            Analysis @relation(fields: [analysisCode], references: [code], onDelete: Restrict)
+  methodologyId       String?
+  methodology         Methodology? @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+  assignedValue       Float
+  unit                String
+  measurementUnit     Unit     @relation(fields: [unit], references: [code], onDelete: Restrict)
+  expandedUncertainty Float?
+  coverageFactor      Float?
+  valueType           String
+  createdBy           String
+  createdAt           DateTime @default(now())
+  supersededById      String?
+  supersededAt        DateTime?
+  supersededBy        String?
+  correctionReason    String?
+  qcItems             BatchQcResult[]
+
+  @@index([referenceMaterialId, analysisCode])
+  // Two migration-only partial unique indexes enforce current generic/method values.
 }
 
 model OperationalGate {
