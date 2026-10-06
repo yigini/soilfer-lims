@@ -145,6 +145,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
     });
 
     afterAll(async () => {
+        await prisma.result.deleteMany({ where: { sampleId: testSampleId } });
         await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
         await prisma.orderLine.deleteMany({ where: { revision: { sampleId: testSampleId } } });
         await prisma.sampleOrderRevision.deleteMany({ where: { sampleId: testSampleId } });
@@ -288,7 +289,11 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
 
         test('Submitting and reviewing scientific determination reconciles Submission and ReviewDecision', async () => {
             // 1. Record pH result
-            await transitionWorkItem(testPhId, 'COMPLETED', testTech, 'Recorded pH determination', { result: '6.85' });
+            await prisma.$transaction(async tx => {
+                await require('../../services/resultWriteService').writeResult(tx, { sampleId: testSampleId,
+                    workItemId: testPhId, actor: testTech, measurement: { param: 'PH', value: '6.85' } });
+                await transitionWorkItem(testPhId, 'COMPLETED', testTech, 'Recorded pH determination', {}, tx);
+            });
 
             // 2. Submit via workbenchController.commitSubmissions
             const submitReq = {

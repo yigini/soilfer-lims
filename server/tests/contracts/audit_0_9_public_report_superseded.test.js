@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const request = require('supertest');
@@ -21,7 +22,7 @@ describe('Audit 0.9: superseded public links', () => {
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId,
             assignedLab: labId, status: 'APPROVED' } });
         await createWorkItemFixture(prisma, { data: { id: id('WI-09'), sampleId, analysis: 'PH_H2O', status: 'ACCEPTED' } });
-        await prisma.result.create({ data: { id: id('R-09'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
+        await createResultFixture(prisma, { data: { id: id('R-09'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true } });
         return sampleId;
     }

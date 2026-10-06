@@ -77,10 +77,12 @@ async function completeItem(tx, item, actor, { result, equipmentId, note }) {
     if (count < 1) return item;
     const entry = { status: 'COMPLETED', action: 'SPECTRAL_WORK_COMPLETED', note,
         changedBy: rules.actorName(actor), timestamp: new Date().toISOString() };
-    return transitionWorkItem(item.id, 'COMPLETED', actor, null, {
-        result, completedAt: new Date(), ...(equipmentId !== undefined && { equipmentId }),
+    await transitionWorkItem(item.id, 'COMPLETED', actor, null, {
+        completedAt: new Date(), ...(equipmentId !== undefined && { equipmentId }),
         history: JSON.stringify([...rules.requireHistory(item.history), entry])
     }, tx, { expected: item, action: entry.action });
+    return require('./resultWriteService').writeNonMeasurementSummary(tx, item,
+        { kind: 'spectral-review', text: result ?? item.result, actor });
 }
 
 async function relatedItem(tx, scan, { trash = false } = {}) {

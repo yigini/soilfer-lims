@@ -56,8 +56,9 @@ async function changeGate({ sampleId, gate, status, reason, actor, resumeSampleS
         } else if (status === 'FAILED') {
             updates.metadata = JSON.stringify({ ...objectMetadata(sample.metadata), dryingFailedReason: reason.trim() });
             sampleStatus = 'ON_HOLD';
-            updatedItem = await transitionWorkItem(item.id, 'ON_HOLD', actor, reason,
-                { result: `Gate Failed: ${reason.trim()}` }, tx, { audit: { action: 'GATE_FAILED' } });
+            await transitionWorkItem(item.id, 'ON_HOLD', actor, reason, {}, tx, { audit: { action: 'GATE_FAILED' } });
+            updatedItem = await require('./resultWriteService').writeNonMeasurementSummary(tx, item,
+                { kind: 'gate-failure', text: `Gate Failed: ${reason.trim()}`, actor });
         } else if (status === 'PENDING' && previous === 'FAILED') {
             rules.requireReason(reason);
             if (workflow.normalizeWorkItemState(item.status) === 'ON_HOLD') {

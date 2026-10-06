@@ -1,4 +1,6 @@
 'use strict';
+const { createResultFixture } = require('../../services/resultWriteService');
+
 /**
  * Self-contained verification for issue149 remediations addressing Codex review of head 3643053.
  * Runs on disposable isolated SQLite database outside production.
@@ -80,7 +82,7 @@ async function authenticate(token) {
             depthBottomCm: 20
         }
     });
-    await prisma.result.create({
+    await createResultFixture(prisma, {
         data: {
             id: 'synthetic-result',
             sampleId: 'synthetic-sample',

@@ -1,4 +1,6 @@
 'use strict';
+const { createResultFixture } = require('../../services/resultWriteService');
+
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Contract Test Suite: QC Batch Inspection, Disposition & Release Gates (Refs #118)
@@ -136,7 +138,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Link work item to batch
-        await prisma.result.create({ data: { id: `RES-118-${Date.now()}`, sampleId: sample1.id,
+        await createResultFixture(prisma, { data: { id: `RES-118-${Date.now()}`, sampleId: sample1.id,
             param: 'PH_H2O', value: '6.45', isCurrent: true, isValid: true, batchId: batch1.id } });
         await prisma.workItem.update({
             where: { id: workItem1.id },
@@ -219,7 +221,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         reportFixtureIds.push(reportId);
         await createSampleFixture(prisma, { data: { ...sample1, id: reportId, originalId: reportId, status: 'APPROVED' } });
         await createWorkItemFixture(prisma, { data: { ...workItem1, id: `WI-${reportId}`, sampleId: reportId, batchId: batch1.id } });
-        await prisma.result.create({ data: { id: `RES-${reportId}`, sampleId: reportId,
+        await createResultFixture(prisma, { data: { id: `RES-${reportId}`, sampleId: reportId,
             param: 'PH_H2O', value: '6.45', isCurrent: true, isValid: true, batchId: batch1.id } });
         const reportSample = await prisma.sample.findUnique({ where: { id: reportId }, include: { workItems: true, results: true } });
         const publishCheck = canPublish(reportSample, null, lab1Manager, { qcBatches: [freshBatch] });
@@ -401,7 +403,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result 1: Has both QC_BATCH_FAILED and MANUAL_INVALID on active sample
-        const resWithManualInvalid = await prisma.result.create({
+        const resWithManualInvalid = await createResultFixture(prisma, {
             data: {
                 id: `res-manual-inv-${Date.now()}`,
                 sampleId: activeSample.id,
@@ -427,7 +429,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result 2: Belongs to already approved sample (must be immutable)
-        const resReleased = await prisma.result.create({
+        const resReleased = await createResultFixture(prisma, {
             data: {
                 id: `res-released-${Date.now()}`,
                 sampleId: releasedSample.id,
@@ -442,7 +444,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result 3: Superseded historical result (must be immutable)
-        const resSuperseded = await prisma.result.create({
+        const resSuperseded = await createResultFixture(prisma, {
             data: {
                 id: `res-super-${Date.now()}`,
                 sampleId: activeSample.id,
@@ -581,7 +583,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Unflagged invalid result (isValid: false, flags: [])
-        const resUnflagged = await prisma.result.create({
+        const resUnflagged = await createResultFixture(prisma, {
             data: {
                 id: `res-unflagged-${Date.now()}`,
                 sampleId: activeSample.id,
@@ -596,7 +598,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result with unknown / non-QC flag (isValid: false, flags: ['SENSOR_FAILURE'])
-        const resSensorFailure = await prisma.result.create({
+        const resSensorFailure = await createResultFixture(prisma, {
             data: {
                 id: `res-sensor-${Date.now()}`,
                 sampleId: activeSample.id,
@@ -611,7 +613,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result with prior rejection (isValid: false, flags: ['QC_BATCH_REJECTED'])
-        const resPriorReject = await prisma.result.create({
+        const resPriorReject = await createResultFixture(prisma, {
             data: {
                 id: `res-reject-${Date.now()}`,
                 sampleId: activeSample.id,
@@ -626,7 +628,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result whose ONLY reason for invalidity was QC_BATCH_FAILED
-        const resQcOnly = await prisma.result.create({
+        const resQcOnly = await createResultFixture(prisma, {
             data: {
                 id: `res-qconly-${Date.now()}`,
                 sampleId: activeSample.id,
@@ -684,7 +686,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
                 assignedLab: testLab1.id
             }
         });
-        const resArchived = await prisma.result.create({
+        const resArchived = await createResultFixture(prisma, {
             data: {
                 id: `res-arch-${Date.now()}`,
                 sampleId: archivedSample.id,
@@ -708,7 +710,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
                 assignedLab: testLab1.id
             }
         });
-        const resDisposed = await prisma.result.create({
+        const resDisposed = await createResultFixture(prisma, {
             data: {
                 id: `res-disp-${Date.now()}`,
                 sampleId: disposedSample.id,
@@ -740,7 +742,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
                 generatedBy: lab1Manager.username
             }
         });
-        const resPublished = await prisma.result.create({
+        const resPublished = await createResultFixture(prisma, {
             data: {
                 id: `res-pub-${Date.now()}`,
                 sampleId: pubSample.id,
@@ -966,7 +968,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Step 1: Initial row isValid: false, flags: []
-        const res = await prisma.result.create({
+        const res = await createResultFixture(prisma, {
             data: {
                 id: `res-probe-${Date.now()}`,
                 sampleId: sample.id,
@@ -1016,7 +1018,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             }
         });
 
-        const res = await prisma.result.create({
+        const res = await createResultFixture(prisma, {
             data: {
                 id: `res-warn-${Date.now()}`,
                 sampleId: sample.id,
@@ -1061,7 +1063,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Initially valid result
-        const res = await prisma.result.create({
+        const res = await createResultFixture(prisma, {
             data: {
                 id: `res-valid-${Date.now()}`,
                 sampleId: sample.id,
@@ -1114,7 +1116,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result with unknown flag
-        const resUnknown = await prisma.result.create({
+        const resUnknown = await createResultFixture(prisma, {
             data: {
                 id: `res-unknown-${Date.now()}`,
                 sampleId: sample.id,
@@ -1129,7 +1131,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result with malformed JSON string flags
-        const resMalformed = await prisma.result.create({
+        const resMalformed = await createResultFixture(prisma, {
             data: {
                 id: `res-malformed-${Date.now()}`,
                 sampleId: sample.id,
@@ -1182,7 +1184,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             }
         });
 
-        const resSupersededReport = await prisma.result.create({
+        const resSupersededReport = await createResultFixture(prisma, {
             data: {
                 id: `res-hist-${Date.now()}`,
                 sampleId: histSample.id,

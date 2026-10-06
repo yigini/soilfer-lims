@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const request = require('supertest');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs');
@@ -43,7 +44,7 @@ async function fixture({ status = 'COMPLETED', parentStatus = 'PROCESSING' } = {
         sample = await createSampleFixture(db, { data: sampleData });
         item = await createWorkItemFixture(db, { data: itemData });
     }
-    const result = await db.result.create({ data: { id: randomUUID(), sampleId: sample.id, param: 'PH_H2O',
+    const result = await createResultFixture(db, { data: { id: randomUUID(), sampleId: sample.id, param: 'PH_H2O',
         value: '6.27', numericValue: 6.27, unit: 'pH', flags: '["RETAINED_SCIENTIFIC_FLAG"]' } });
     const scan = await db.spectralData.create({ data: { id: randomUUID(), sampleId: sample.id, workItemId: item.id,
         labId, filename: `${randomUUID()}.csv`, modality: 'MIR', quantity: 'ABSORBANCE', qcStatus: 'PASS',
@@ -108,7 +109,10 @@ test('reasoned link atomically reopens and completes work, snapshots prior evide
         expect.objectContaining({ action: 'SPECTRAL_WORK_COMPLETED', status: 'COMPLETED' })]);
     const audit = after.audits.find(row => row.action === 'SPECTRAL_WORK_REOPENED');
     expect(JSON.parse(audit.details)).toMatchObject({ reason, priorResult: f.item.result, priorCompletedAt: f.item.completedAt.toISOString() });
-    expect(after.audits).toHaveLength(before.audits.length + 3);
+    expect(after.audits.filter(row => row.action !== 'NON_MEASUREMENT_SUMMARY')).toHaveLength(before.audits.length + 3);
+    expect(after.audits.filter(row => row.action === 'NON_MEASUREMENT_SUMMARY')).toEqual([
+        expect.objectContaining({ entityId: f.item.id, performedBy: require('jsonwebtoken').decode(token).username })
+    ]);
 });
 
 test('trash on COMPLETED preserves the summary, clears only completion time and audits its prior identity', async () => {
@@ -228,7 +232,8 @@ test.each(['upload', 'commit'])('%s with a reason reopens, adds and completes at
     expect(after.results).toEqual(before.results); expect(after.sample).toEqual(before.sample);
     expect(JSON.parse(after.items[0].history).at(-2)).toMatchObject({ reason, priorResult: f.item.result,
         priorCompletedAt: f.item.completedAt.toISOString() });
-    expect(after.audits).toHaveLength(before.audits.length + 3);
+    expect(after.audits.filter(row => row.action !== 'NON_MEASUREMENT_SUMMARY')).toHaveLength(before.audits.length + 3);
+    expect(after.audits.filter(row => row.action === 'NON_MEASUREMENT_SUMMARY')).toHaveLength(1);
     if (mode === 'upload') expect(after.scans.find(scan => scan.id === f.scan.id)).toMatchObject({ isCurrent: false });
 });
 
@@ -421,7 +426,9 @@ test.each(['REJECT', 'UNDO'])('reasoned %s review recompletes only when current 
     const after = await snapshot(f);
     expect(after.items[0]).toMatchObject({ status: 'COMPLETED', version: f.item.version + 2 });
     expect(JSON.parse(after.items[0].history).at(-2)).toMatchObject({ reason, priorResult: f.item.result });
-    expect(after.results).toEqual(before.results); expect(after.audits).toHaveLength(before.audits.length + 3);
+    expect(after.results).toEqual(before.results);
+    expect(after.audits.filter(row => row.action !== 'NON_MEASUREMENT_SUMMARY')).toHaveLength(before.audits.length + 3);
+    expect(after.audits.filter(row => row.action === 'NON_MEASUREMENT_SUMMARY')).toHaveLength(1);
 });
 
 test('approval of an unlinked scan creates no inferred association and completes no matching work', async () => {

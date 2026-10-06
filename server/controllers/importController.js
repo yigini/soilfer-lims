@@ -239,32 +239,11 @@ exports.executeImport = async (req, res) => {
                     const cellVal = row[map.column];
                     if (cellVal === undefined || cellVal === null || String(cellVal).trim() === '') continue;
 
-                    const strVal = String(cellVal).trim();
-                    const numVal = isNaN(Number(strVal)) ? null : Number(strVal);
-                    const resultId = crypto.randomUUID();
-
-                    await tx.result.updateMany({
-                        where: { sampleId: sample.id, param: map.analysisCode, replicateNo: 1, isCurrent: true },
-                        data: { isCurrent: false, supersededBy: resultId }
-                    });
-                    await tx.result.create({
-                        data: {
-                            id: resultId,
-                            sampleId: sample.id,
-                            param: map.analysisCode,
-                            value: strVal,
-                            numericValue: numVal,
-                            unit: map.unitCode,
-                            methodologyId: map.methodologyId,
-                            provenance: 'IMPORTED',
-                            replicateNo: 1,
-                            isValid: true,
-                            isCurrent: true,
-                            enteredBy: importingActor,
-                            analysedAt: now,
-                            createdAt: now,
-                            updatedAt: now
-                        }
+                    await require('../services/resultWriteService').writeResult(tx, {
+                        sampleId: sample.id, actor: user, source: 'legacy-import', now,
+                        measurement: { param: map.analysisCode, value: cellVal, unit: map.unitCode,
+                            methodologyId: map.methodologyId, replicateNo: 1,
+                            ...(Object.hasOwn(map, 'batchId') && { batchId: map.batchId }) }
                     });
                     importedResultsCount++;
                 }

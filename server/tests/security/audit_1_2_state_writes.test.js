@@ -195,7 +195,9 @@ test.each(exceptions)('runtime cannot import the test helper $file', entry => {
 });
 
 test('metadata-only updates and other models are permitted, and guard disabling is always refused', () => {
-    expect(scanSource("const data={clientName:'Corrected'}; prisma.sample.update({data}); prisma.result.create({data:{status:'IMPORTED'}})", 'controllers/probe.js', exceptions)).toEqual([]);
+    expect(scanSource("const data={clientName:'Corrected'}; prisma.sample.update({data})", 'controllers/probe.js', exceptions)).toEqual([]);
+    expect(scanSource("prisma.result.create({data:{status:'IMPORTED'}})", 'controllers/probe.js', exceptions))
+        .toEqual([expect.objectContaining({ code: 'RESULT_CREATE_OUTSIDE_AUTHORITY' })]);
     expect(scanSource("function beforeGuards(){db.exec('PRAGMA foreign_keys = OFF')}", exceptions[0].file, exceptions))
         .toEqual([expect.objectContaining({ code: 'WORKFLOW_GUARD_DISABLED' })]);
     expect(scanSource("db.exec('DROP TRIGGER Sample_status_update_guard')", 'scripts/probe.js', exceptions)).toHaveLength(1);

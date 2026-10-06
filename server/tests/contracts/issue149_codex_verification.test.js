@@ -1,5 +1,6 @@
 'use strict';
 
+
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const fs = require('fs');
@@ -75,6 +76,8 @@ describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts',
         require('../../scripts/migrate_exchange_journal_tables.cjs').migrateExchangeTables(databasePath);
 
         prisma = require('../../prisma');
+        // Bind the fixture writer only after selecting this owned database.
+        const { createResultFixture } = require('../../services/resultWriteService');
         state = require('../../services/exchangeStateService');
         db = state.getDb();
         middleware = require('../../middleware/apiKeyAuth');
@@ -104,7 +107,7 @@ describe('Issue #149 Codex Verification: 9 Lifecycle & Authorization Contracts',
                     depthBottomCm: 20
                 }
             });
-            await prisma.result.create({
+            await createResultFixture(prisma, {
                 data: {
                     id: id + '-result',
                     sampleId: id,

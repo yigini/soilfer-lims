@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const { createSampleFixture, createWorkItemFixture, createSamplesFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -139,7 +140,7 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
             requiredAnalyses: '["SAND","SILT","CLAY"]' } });
         const rows = [];
         for (const replicateNo of [1, 2]) for (const [param, value] of [['SAND', '20'], ['SILT', '20'], ['CLAY', '60'], ['TEXTURE', 'Old class']]) {
-            rows.push(await prisma.result.create({ data: { id: id(), sampleId, param, value,
+            rows.push(await createResultFixture(prisma, { data: { id: id(), sampleId, param, value,
                 numericValue: param === 'TEXTURE' ? null : Number(value), replicateNo, unit: '%', isCurrent: true, isValid: true } }));
         }
         return { sampleId, rows };
@@ -172,7 +173,7 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
         const db = new Database(':memory:');
         try {
             db.exec('CREATE TABLE Result(id TEXT, sampleId TEXT, param TEXT, replicateNo INTEGER, isCurrent INTEGER)');
-            const insert = db.prepare('INSERT INTO Result VALUES (?,?,?,?,?)');
+            const insert = { run: (id, sampleId, param, replicateNo, isCurrent) => require('../../services/resultWriteService').createRawResultFixture(db, { id, sampleId, param, replicateNo, isCurrent }) };
             insert.run('old', 'sample', 'PH', 1, 0);
             insert.run('a', 'sample', 'PH', 1, 1); insert.run('b', 'sample', 'PH', 1, 1);
             insert.run('other-replicate', 'sample', 'PH', 2, 1);
@@ -262,7 +263,7 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
         const sampleId = id();
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId, assignedLab: labId, status: 'APPROVED' } });
         const rows = [];
-        for (const replicateNo of [1, 2]) rows.push(await prisma.result.create({ data: {
+        for (const replicateNo of [1, 2]) rows.push(await createResultFixture(prisma, { data: {
             id: id(), sampleId, param: analysis.code, value: '5', replicateNo, isCurrent: true, isValid: true } }));
         return { sampleId, rows, request: { body: { sampleIdColumn: 'sample', labId,
             columnMappings: [{ column: 'value', analysisCode: analysis.code, methodologyId: method.id, unitCode: unit.code }],

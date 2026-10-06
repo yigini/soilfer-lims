@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const { createWorkItemFixture, createSampleFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const request = require('supertest');
@@ -28,7 +29,7 @@ describe('Audit 0.10: current results in exports and working grid', () => {
         return { sample, item, projectCode };
     }
     async function result(f, value, data = {}) {
-        return prisma.result.create({ data: { id: id('R-010'), sampleId: f.sample.id, param: 'SOC', value: String(value), unit: 'g/kg',
+        return createResultFixture(prisma, { data: { id: id('R-010'), sampleId: f.sample.id, param: 'SOC', value: String(value), unit: 'g/kg',
             isCurrent: true, isValid: true, ...data } });
     }
     const exportData = (project, auth = token) => request(app).post('/api/exports/data').set('Authorization', `Bearer ${auth}`).send({ type: 'WET_CHEM', project });

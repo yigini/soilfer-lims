@@ -334,6 +334,7 @@ bash "${entryScript.replace(/\\/g, '/')}"
               .run('u-inspect-test', 'inspectadmin', 'hashedpass', 'inspect@soilfer.local', 'LAB_MANAGER', 1, now, now);
         }
         db.close();
+        require('../../scripts/install_result_attempt_links').installResultAttemptLinks({ dbPath: targetDb, apply: true });
         const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');
         const beforeSha = hashDb();
         fs.writeFileSync(path.join(testDir, 'prisma', '.seed_complete'), 'done');
@@ -345,6 +346,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
             .replace('exec node index.js', 'echo "LIMS_STARTED_SUCCESS"')
             .replace('node scripts/install_workflow_state_guards.js --apply',
                 `node "${path.join(serverDir, 'scripts/install_workflow_state_guards.js').replace(/\\/g, '/')}" --apply`)
+            .replace('node scripts/install_result_attempt_links.js --apply',
+                `node "${path.join(serverDir, 'scripts/install_result_attempt_links.js').replace(/\\/g, '/')}" --apply`)
             .replace(/node scripts\/migrate_[^\n]+/g, '# noop migration');
 
         const entryScript = path.join(testDir, 'entrypoint.sh');

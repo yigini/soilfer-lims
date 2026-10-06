@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const prisma = require('../prisma');
 const CommandReceiptService = require('./commandReceiptService');
 const OperationalConfirmationService = require('./operationalConfirmationService');
-const { parseDeterminationValue, validateValue, validateTexture, validateTextureFractions, validateNumericMethod } = require('./workbenchValidationService');
+const { parseDeterminationValue, validateTextureFractions } = require('./workbenchValidationService');
 const { canRecord } = require('./workEligibility');
 const { hasPermission } = require('../config/roles');
 const { randomUUID } = require('crypto');
@@ -593,9 +593,12 @@ class SyncService {
                     // 3. Grouped soil texture validation
                     const isTextureTask = item.analysis === 'TEXTURE' || ['SAND', 'SILT', 'CLAY', 'pSA', 'PSA', 'textureSum'].includes(item.analysis);
                     const textureFractions = op.payload?.values || (op.payload?.sand !== undefined ? { sand: op.payload.sand, silt: op.payload.silt, clay: op.payload.clay } : null);
+                    const numberFormat = await require('./numberFormatService').getNumberFormat(
+                        item.sample.assignedLab || item.assignedLab || item.sample.labId, { db: prisma });
                     let textVal = null;
                     if (isTextureTask && textureFractions) {
-                        textVal = validateTextureFractions(textureFractions);
+                        const analysis = await prisma.analysis.findUnique({ where: { code: item.analysis } });
+                        textVal = validateTextureFractions(textureFractions, parseJsonSafe(analysis?.validation)?.tolerance, numberFormat);
                         if (!textVal.isValid) {
                             if (textVal.flags?.includes('INVALID_FORMAT') || textVal.flags?.includes('INCOMPLETE_FRACTIONS')) {
                                 receipts.push({
@@ -676,7 +679,7 @@ class SyncService {
                         continue;
                     }
 
-                    const parsed = parseDeterminationValue(rawVal);
+                    const parsed = parseDeterminationValue(rawVal, numberFormat);
                     if (!isTextureTask && !parsed.isValid && !parsed.isCensored) {
                         receipts.push({
                             operationId: opId,
@@ -696,106 +699,8 @@ class SyncService {
                     // Execute atomic record transaction
                     await prisma.$transaction(async (tx) => {
                         item = await freshExecutableItem(tx, item, user);
-                        if (isTextureTask && textVal && textVal.isValid && textureFractions) {
-                            const sandNum = Number(String(textureFractions.sand).replace(',', '.'));
-                            const siltNum = Number(String(textureFractions.silt).replace(',', '.'));
-                            const clayNum = Number(String(textureFractions.clay).replace(',', '.'));
-                            const textClassName = textVal.className || 'Loam';
-
-                            const textResId = crypto.randomUUID();
-                            const sandResId = crypto.randomUUID();
-                            const siltResId = crypto.randomUUID();
-                            const clayResId = crypto.randomUUID();
-
-                            await tx.result.updateMany({
-                                where: {
-                                    sampleId: item.sampleId,
-                                    param: { in: ['SAND', 'SILT', 'CLAY', 'TEXTURE', item.analysis] },
-                                    replicateNo: repNo,
-                                    isCurrent: true
-                                },
-                                data: {
-                                    isCurrent: false,
-                                    supersededBy: textResId
-                                }
-                            });
-
-                            const fractions = [
-                                { id: sandResId, param: 'SAND', valStr: String(sandNum), num: sandNum, unit: '%' },
-                                { id: siltResId, param: 'SILT', valStr: String(siltNum), num: siltNum, unit: '%' },
-                                { id: clayResId, param: 'CLAY', valStr: String(clayNum), num: clayNum, unit: '%' },
-                                { id: textResId, param: item.analysis, valStr: textClassName, num: null, unit: null }
-                            ];
-
-                            for (const f of fractions) {
-                                await tx.result.create({
-                                    data: {
-                                        id: f.id,
-                                        sampleId: item.sampleId,
-                                        param: f.param,
-                                        value: f.valStr,
-                                        numericValue: f.num,
-                                        unit: f.unit,
-                                        flags: JSON.stringify(op.payload?.flags || []),
-                                        isValid: true,
-                                        censoring: 'NONE',
-                                        basis: validBasis,
-                                        provenance: op.payload?.provenance || 'MEASURED',
-                                        methodologyId: item.methodologyId || null,
-                                        replicateNo: repNo,
-                                        isCurrent: true,
-                                        enteredBy: user.username,
-                                        analysedAt: now,
-                                        equipmentId: op.payload?.equipmentId || item.equipmentId || null,
-                                        batchId: item.batchId || null,
-                                        createdAt: now,
-                                        updatedAt: now
-                                    }
-                                });
-                            }
-                        } else {
-                            // Single parameter determination
-                            await tx.result.updateMany({
-                                where: {
-                                    sampleId: item.sampleId,
-                                    param: item.analysis,
-                                    replicateNo: repNo,
-                                    isCurrent: true
-                                },
-                                data: {
-                                    isCurrent: false,
-                                    supersededBy: newResultId
-                                }
-                            });
-
-                            await tx.result.create({
-                                data: {
-                                    id: newResultId,
-                                    sampleId: item.sampleId,
-                                    param: item.analysis,
-                                    value: String(rawVal),
-                                    numericValue: parsed.normalizedValue !== undefined ? parsed.normalizedValue : null,
-                                    unit: op.payload?.unit || null,
-                                    flags: JSON.stringify(op.payload?.flags || []),
-                                    isValid: parsed.isValid,
-                                    censoring: parsed.censoring || 'NONE',
-                                    basis: validBasis,
-                                    provenance: op.payload?.provenance || 'MEASURED',
-                                    methodologyId: item.methodologyId || null,
-                                    replicateNo: repNo,
-                                    isCurrent: true,
-                                    enteredBy: user.username,
-                                    analysedAt: now,
-                                    equipmentId: op.payload?.equipmentId || item.equipmentId || null,
-                                    batchId: item.batchId || null,
-                                    createdAt: now,
-                                    updatedAt: now
-                                }
-                            });
-                        }
-
                         // Create WorkAttempt record
-                        const attemptId = `att-${item.id}-${Date.now()}`;
+                        const attemptId = `att-${item.id}-${crypto.randomUUID()}`;
                         await tx.workAttempt.create({
                             data: {
                                 id: attemptId,
@@ -820,6 +725,20 @@ class SyncService {
                             }
                         });
 
+                        const measurement = { param: item.analysis, value: op.payload?.value ?? op.payload?.result,
+                            replicateNo: repNo, basis: validBasis, equipmentId: op.payload?.equipmentId,
+                            methodologyId: item.methodologyId,
+                            unit: op.payload?.unit, overrideReason: op.payload?.overrideReason,
+                            ...(Object.hasOwn(op.payload || {}, 'batchId') && { batchId: op.payload.batchId }) };
+                        const writer = require('./resultWriteService');
+                        const resultOptions = { sampleId: item.sampleId, workItemId: item.id, attemptId, actor: user, measurement, now,
+                            syncResult: { id: newResultId, flags: op.payload?.flags || [] } };
+                        if (isTextureTask && textVal && textureFractions) {
+                            await writer.writeTextureDetermination(tx, { ...resultOptions, fractions: textureFractions });
+                        } else {
+                            await writer.writeResult(tx, resultOptions);
+                        }
+
                         // Clean up working draft if present
                         if (tx.workItemDraft) {
                             await tx.workItemDraft.deleteMany({ where: { workItemId } });
@@ -830,7 +749,6 @@ class SyncService {
                         history.push({ status: 'COMPLETED', action: 'OFFLINE_WORK_COMPLETED', changedBy: user.username,
                             timestamp: now, operationId: opId, resultId: newResultId, attemptId });
                         await transitionWorkItem(workItemId, 'COMPLETED', user, 'Offline result recorded', {
-                                result: String(rawVal),
                                 version: { increment: 1 },
                                 completedAt: now,
                                 history: JSON.stringify(history)
@@ -970,7 +888,7 @@ class SyncService {
                 });
 
             } catch (originalError) {
-                const err = stateRules.mapStateError(originalError);
+                const err = require('./resultWriteService').mapResultWriteError(originalError);
                 console.error(`[SYNC_OP_ERROR] Failed to process ${op.type} (${opId}):`, err);
                 receipts.push({
                     operationId: opId,

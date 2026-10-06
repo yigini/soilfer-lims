@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
@@ -160,7 +161,7 @@ async function assertFinalRefusals() {
     // The old minimal table omitted the required parameter. This explicit
     // synthetic parameter preserves its original numeric values without
     // pretending that 12.5 belongs to any real analytical method.
-    await fixturePrisma.result.create({data:{id:'r1',sampleId:'a',param:'SYNTHETIC_REVIEW_PARAM',value:'12.5',numericValue:12.5,isValid:true,isCurrent:true}});
+    await createResultFixture(fixturePrisma, {data:{id:'r1',sampleId:'a',param:'SYNTHETIC_REVIEW_PARAM',value:'12.5',numericValue:12.5,isValid:true,isCurrent:true}});
     const afterResultInsert = await state.getChanges(a, { cursor: changes.nextCursor });
     assert.ok(afterResultInsert.changes.some(e => e.eventType === 'AMENDMENT' && e.specimenId === 'a'), 'Result insert should emit AMENDMENT');
     console.log(`[PASS] 6. Result insertion emitted AMENDMENT event for approved sample`);

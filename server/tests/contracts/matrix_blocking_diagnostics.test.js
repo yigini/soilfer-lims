@@ -1,3 +1,4 @@
+const { createResultsFixture } = require('../../services/resultWriteService');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
@@ -45,7 +46,7 @@ describe('WP-15: Blocking vs Advisory Scientific Matrix Diagnostics', () => {
 
     test('1. Invalid texture closure (Sand+Silt+Clay = 87%) is strictly BLOCKED (HTTP 422)', async () => {
         // Seed invalid texture results
-        await prisma.result.createMany({
+        await createResultsFixture(prisma, {
             data: [
                 { id: `r1-${Date.now()}`, sampleId: testSampleId, param: 'SAND', value: '40', numericValue: 40, isCurrent: true },
                 { id: `r2-${Date.now()}`, sampleId: testSampleId, param: 'SILT', value: '30', numericValue: 30, isCurrent: true },
@@ -69,7 +70,7 @@ describe('WP-15: Blocking vs Advisory Scientific Matrix Diagnostics', () => {
 
     test('2. Valid texture with advisory C:N warning (C:N = 45) SUCCEEDS with warnings', async () => {
         // Seed valid texture (40 + 40 + 20 = 100%) and high C:N (SOC=90, TN=2 -> C:N=45)
-        await prisma.result.createMany({
+        await createResultsFixture(prisma, {
             data: [
                 { id: `r1-${Date.now()}`, sampleId: testSampleId, param: 'SAND', value: '40', numericValue: 40, isCurrent: true },
                 { id: `r2-${Date.now()}`, sampleId: testSampleId, param: 'SILT', value: '40', numericValue: 40, isCurrent: true },

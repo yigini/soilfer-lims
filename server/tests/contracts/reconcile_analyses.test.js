@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
@@ -72,7 +73,7 @@ describe('SD-03: Work Item Reconciliation on Analysis List Change Contract', () 
                 result: '18.5 cmol(+)/kg'
             }
         });
-        await prisma.result.create({
+        await createResultFixture(prisma, {
             data: {
                 id: 'RES-SD03-CEC',
                 sampleId,

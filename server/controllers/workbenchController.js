@@ -1,4 +1,4 @@
-const { deriveTextureResult } = require('../services/textureResultService');
+const { writeResult, writeTextureDetermination, deriveTextureResult } = require('../services/resultWriteService');
 const crypto = require('crypto');
 const operationalChecklists = require('../data/operationalChecklists.json');
 const prisma = require('../prisma');
@@ -505,7 +505,7 @@ exports.getQueue = async (req, res) => {
             const assets = await prisma.equipmentAsset.findMany({
                 where: { id: { in: allEligibleIds }, status: 'IN_SERVICE' },
                 select: {
-                    id: true, name: true, assetType: true, status: true,
+                    id: true, labId: true, name: true, assetType: true, status: true,
                     qualification: {
                         select: { calibrationStatus: true, nextCalibrationDueDate: true }
                     }
@@ -514,11 +514,13 @@ exports.getQueue = async (req, res) => {
             assets.forEach(a => {
                 assetMap[a.id] = {
                     id: a.id,
+                    labId: a.labId,
                     name: a.name,
                     assetType: a.assetType,
                     status: a.status,
                     calibrationStatus: a.qualification?.calibrationStatus || 'NOT_CONFIGURED',
-                    nextCalibrationDue: a.qualification?.nextCalibrationDueDate || null
+                    nextCalibrationDue: a.qualification?.nextCalibrationDueDate || null,
+                    nextCalibrationDueDate: a.qualification?.nextCalibrationDueDate || null
                 };
             });
         }
@@ -787,7 +789,8 @@ exports.batchSave = async (req, res) => {
 
             const checklist = operationalChecklists[item.analysis];
             const isOperationalTask = !!checklist;
-            const executionReadiness = await readinessService.evaluateExecutionReadiness(prisma, item, user);
+            const executionReadiness = await readinessService.evaluateExecutionReadiness(prisma, item, user,
+                { selectedEquipmentId: entry.equipmentId || item.equipmentId });
             if (!executionReadiness.isReady) {
                 if (executionReadiness.blockers.includes('GATE_STATE_MISMATCH')) throw new stateRules.TransitionError(
                     executionReadiness.reasons.join('; '), 409, 'GATE_STATE_MISMATCH');
@@ -1101,7 +1104,6 @@ exports.batchSave = async (req, res) => {
 
             const updateData = {
                 status: targetStatus,
-                result: value !== undefined && value !== null && value !== '' ? String(value) : item.result,
                 equipmentId: entry.equipmentId || item.equipmentId,
                 version: { increment: 1 },
                 history: JSON.stringify(history),
@@ -1127,242 +1129,38 @@ exports.batchSave = async (req, res) => {
                     if (result) { result.status = outcome.workItem.status === 'AWAITING_VERIFICATION' ? 'awaiting_verification' : 'completed'; result.newVersion = outcome.workItem.version; }
                 });
             } else {
-                ops.push(tx => transitionWorkItem(item.id, targetStatus, user, 'Determination recorded in workbench', updateData, tx,
-                    { expected: { status: item.status, version: expectedVersion }, conflictCode: 'VERSION_CONFLICT' }));
-            }
-
-            // Create/update Result record (Append-Only with Replicate & History)
-            if (!isOperationalTask && value !== undefined && value !== null && value !== '') {
-                const repNo = (entry.replicateNo !== undefined && entry.replicateNo !== null) ? Number(entry.replicateNo) : 1;
-                const validBasis = ['AIR_DRY', 'OVEN_DRY', 'FIELD_MOIST'].includes(entry.basis) ? entry.basis : 'AIR_DRY';
-
-                if (isTextureTask && textureClassification && !draft) {
-                    const sandNum = textureClassification.fractions.sand;
-                    const siltNum = textureClassification.fractions.silt;
-                    const clayNum = textureClassification.fractions.clay;
-
-                    const sandResId = crypto.randomUUID();
-                    const siltResId = crypto.randomUUID();
-                    const clayResId = crypto.randomUUID();
-                    const textResId = crypto.randomUUID();
-
-                    // Supersede prior active result for SAND, SILT, CLAY, and TEXTURE
-                    ops.push(tx => tx.result.updateMany({
-                        where: {
-                            sampleId: item.sampleId,
-                            param: { in: ['SAND', 'SILT', 'CLAY', 'TEXTURE', item.analysis] },
-                            replicateNo: repNo,
-                            isCurrent: true
-                        },
-                        data: {
-                            isCurrent: false,
-                            supersededBy: textResId
-                        }
-                    }));
-
-                    const flagsData = [...(validation.flags || [])];
-                    if (validation.overrideReason) flagsData.push('MANAGER_OVERRIDE');
-
-                    // Sand
-                    ops.push(tx => tx.result.create({
-                        data: {
-                            id: sandResId,
-                            sampleId: item.sampleId,
-                            param: 'SAND',
-                            rawInput: String(textureFractions.sand),
-                            value: String(sandNum),
-                            numericValue: sandNum,
-                            unit: '%',
-                            flags: JSON.stringify(flagsData),
-                            isValid: true,
-                            censoring: 'NONE',
-                            basis: validBasis,
-                            provenance: 'MEASURED',
-                            methodologyId: item.methodologyId || null,
-                            replicateNo: repNo,
-                            isCurrent: true,
-                            enteredBy: user.username,
-                            analysedAt: now,
-                            equipmentId: entry.equipmentId || item.equipmentId || null,
-                            batchId: item.batchId || null,
-                            createdAt: now,
-                            updatedAt: now
-                        }
-                    }));
-
-                    // Silt
-                    ops.push(tx => tx.result.create({
-                        data: {
-                            id: siltResId,
-                            sampleId: item.sampleId,
-                            param: 'SILT',
-                            rawInput: String(textureFractions.silt),
-                            value: String(siltNum),
-                            numericValue: siltNum,
-                            unit: '%',
-                            flags: JSON.stringify(flagsData),
-                            isValid: true,
-                            censoring: 'NONE',
-                            basis: validBasis,
-                            provenance: 'MEASURED',
-                            methodologyId: item.methodologyId || null,
-                            replicateNo: repNo,
-                            isCurrent: true,
-                            enteredBy: user.username,
-                            analysedAt: now,
-                            equipmentId: entry.equipmentId || item.equipmentId || null,
-                            batchId: item.batchId || null,
-                            createdAt: now,
-                            updatedAt: now
-                        }
-                    }));
-
-                    // Clay
-                    ops.push(tx => tx.result.create({
-                        data: {
-                            id: clayResId,
-                            sampleId: item.sampleId,
-                            param: 'CLAY',
-                            rawInput: String(textureFractions.clay),
-                            value: String(clayNum),
-                            numericValue: clayNum,
-                            unit: '%',
-                            flags: JSON.stringify(flagsData),
-                            isValid: true,
-                            censoring: 'NONE',
-                            basis: validBasis,
-                            provenance: 'MEASURED',
-                            methodologyId: item.methodologyId || null,
-                            replicateNo: repNo,
-                            isCurrent: true,
-                            enteredBy: user.username,
-                            analysedAt: now,
-                            equipmentId: entry.equipmentId || item.equipmentId || null,
-                            batchId: item.batchId || null,
-                            createdAt: now,
-                            updatedAt: now
-                        }
-                    }));
-
-                    // Derived Texture Class
-                    const textFlags = [
-                        'DERIVED_USDA_12_CLASS',
-                        `SOURCE_SAND_${sandResId}`,
-                        `SOURCE_SILT_${siltResId}`,
-                        `SOURCE_CLAY_${clayResId}`,
-                        `CLOSURE_ERROR_${textureClassification.closureError ?? 0}`,
-                        ...flagsData
-                    ];
-                    ops.push(tx => tx.result.create({
-                        data: {
-                            id: textResId,
-                            sampleId: item.sampleId,
-                            param: 'TEXTURE',
-                            rawInput: JSON.stringify(entry.values),
-                            value: textureClassification.className,
-                            numericValue: null,
-                            unit: 'USDA_12_CLASS',
-                            flags: JSON.stringify(textFlags),
-                            isValid: textureClassification.isValid || !!validation.overrideReason,
-                            censoring: 'NONE',
-                            basis: validBasis,
-                            provenance: 'DERIVED',
-                            methodologyId: item.methodologyId || null,
-                            replicateNo: repNo,
-                            isCurrent: true,
-                            enteredBy: user.username,
-                            analysedAt: now,
-                            equipmentId: entry.equipmentId || item.equipmentId || null,
-                            batchId: item.batchId || null,
-                            createdAt: now,
-                            updatedAt: now
-                        }
-                    }));
-
-                    // WorkAttempt for defensible metrology
-                    ops.push(tx => tx.workAttempt.create({
-                        data: {
-                            id: `att-${item.id}-${Date.now()}`,
-                            workItemId: item.id,
-                            attemptNo: 1,
-                            author: user.username,
-                            authorName: user.name || user.username,
-                            materialAliquot: 'FINE_EARTH_2MM',
-                            instrumentId: entry.equipmentId || item.equipmentId || null,
-                            qcBatchId: item.batchId || null,
-                            version: expectedVersion + 1,
-                            status: 'RECORDED',
-                            evidenceData: JSON.stringify({
-                                fractions: { sand: sandNum, silt: siltNum, clay: clayNum },
-                                className: textureClassification.className,
-                                closureError: textureClassification.closureError,
-                                sourceResultIds: [sandResId, siltResId, clayResId, textResId]
-                            }),
-                            createdAt: now,
-                            updatedAt: now
-                        }
-                    }));
-                } else {
-                    const method = methodMap[item.analysis];
-                    const flagsData = validation.flags || [];
-                    if (validation.overrideReason) {
-                        flagsData.push('MANAGER_OVERRIDE');
-                    }
-
-                    const strVal = validation.raw || String(value).trim();
-                    const isCensored = validation.isCensored || /^[<>]/.test(strVal);
-                    const censoringType = isCensored ? (strVal.startsWith('<') ? 'BELOW_LOQ' : 'ABOVE_RANGE') : 'NONE';
-                    let numericVal = null;
-                    if (isCensored) {
-                        const cleanNum = strVal.replace(/^[<>=\s]+/, '').replace(',', '.');
-                        numericVal = isNaN(Number(cleanNum)) ? null : Number(cleanNum);
+                ops.push(async tx => {
+                    const measurement = { param: item.analysis, value: entry.value, replicateNo: entry.replicateNo,
+                        basis: entry.basis, methodologyId: item.methodologyId, equipmentId: entry.equipmentId,
+                        overrideReason: entry.overrideReason,
+                        ...(Object.hasOwn(entry, 'batchId') && { batchId: entry.batchId }) };
+                    let attemptId = null;
+                    // Link the texture attempt that this path already produced;
+                    // general attempt creation/numbering remains in #190.
+                    if (isTextureTask && textureClassification) {
+                        attemptId = `att-${item.id}-${crypto.randomUUID()}`;
+                        await tx.workAttempt.create({ data: {
+                            id: attemptId, workItemId: item.id, attemptNo: 1, author: user.username,
+                            authorName: user.name || user.username, materialAliquot: 'FINE_EARTH_2MM',
+                            instrumentId: entry.equipmentId || item.equipmentId || null, qcBatchId: item.batchId || null,
+                            version: expectedVersion + 1, status: 'RECORDED',
+                            evidenceData: JSON.stringify({ fractions: textureClassification.fractions,
+                                className: textureClassification.className, closureError: textureClassification.closureError }),
+                            createdAt: now, updatedAt: now
+                        } });
+                        const texture = await writeTextureDetermination(tx, { sampleId: item.sampleId, workItemId: item.id,
+                            attemptId, actor: user, measurement, fractions: textureFractions, now });
+                        const sourceResults = await tx.result.findMany({ where: { attemptId }, select: { id: true } });
+                        await tx.workAttempt.update({ where: { id: attemptId }, data: { evidenceData: JSON.stringify({
+                            fractions: textureClassification.fractions, className: texture.value,
+                            closureError: textureClassification.closureError, sourceResultIds: sourceResults.map(row => row.id)
+                        }) } });
                     } else {
-                        numericVal = validation.normalizedValue !== undefined ? validation.normalizedValue : (isNaN(Number(strVal.replace(',', '.'))) ? null : Number(strVal.replace(',', '.')));
+                        await writeResult(tx, { sampleId: item.sampleId, workItemId: item.id, actor: user, measurement, now });
                     }
-
-                    const newResultId = crypto.randomUUID();
-
-                    // Supersede prior active result for this sample & parameter ONLY for the same replicateNo
-                    ops.push(tx => tx.result.updateMany({
-                        where: {
-                            sampleId: item.sampleId,
-                            param: item.analysis,
-                            replicateNo: repNo,
-                            isCurrent: true
-                        },
-                        data: {
-                            isCurrent: false,
-                            supersededBy: newResultId
-                        }
-                    }));
-
-                    // Append new defensible Result row
-                    ops.push(tx => tx.result.create({
-                        data: {
-                            id: newResultId,
-                            sampleId: item.sampleId,
-                            param: item.analysis,
-                            value: strVal,
-                            rawInput: String(entry.value),
-                            numericValue: numericVal,
-                            unit: method?.unit || null,
-                            flags: JSON.stringify(flagsData),
-                            isValid: validation.valid,
-                            censoring: censoringType,
-                            basis: validBasis,
-                            provenance: entry.provenance || 'MEASURED',
-                            methodologyId: item.methodologyId || null,
-                            replicateNo: repNo,
-                            isCurrent: true,
-                            enteredBy: user.username,
-                            analysedAt: now,
-                            equipmentId: entry.equipmentId || item.equipmentId || null,
-                            batchId: item.batchId || null,
-                            createdAt: now,
-                            updatedAt: now
-                        }
-                    }));
-                }
+                    await transitionWorkItem(item.id, targetStatus, user, 'Determination recorded in workbench', updateData, tx,
+                        { expected: { status: item.status, version: expectedVersion }, conflictCode: 'VERSION_CONFLICT' });
+                });
             }
 
             // Both analytical results and operational evidence replace their working draft.
@@ -1403,8 +1201,8 @@ exports.batchSave = async (req, res) => {
             }));
 
             operationBundles.push({ workItemId: entry.workItemId, ops, validation, draft,
-                texture: !draft && ['SAND', 'SILT', 'CLAY'].includes(item.analysis)
-                    ? { sampleId: item.sampleId, replicateNo: Number(entry.replicateNo ?? 1), actor: 'SYSTEM_CALC', now, retainRawInput: true }
+                texture: !draft && !textureClassification && ['SAND', 'SILT', 'CLAY'].includes(item.analysis)
+                    ? { sampleId: item.sampleId, replicateNo: Number(entry.replicateNo ?? 1), actor: user, workItemId: item.id, now, retainRawInput: true }
                     : null });
 
             results.push({
@@ -1714,15 +1512,17 @@ exports.previewCompletion = async (req, res) => {
             const assets = await prisma.equipmentAsset.findMany({
                 where: { id: { in: allEquipIds } },
                 select: {
-                    id: true, name: true, status: true,
-                    qualification: { select: { calibrationStatus: true } }
+                    id: true, labId: true, name: true, status: true,
+                    qualification: { select: { calibrationStatus: true, nextCalibrationDueDate: true } }
                 }
             });
             assets.forEach(a => assetMap[a.id] = {
                 id: a.id,
+                labId: a.labId,
                 name: a.name,
                 status: a.status,
-                calibrationStatus: a.qualification?.calibrationStatus || 'NOT_CONFIGURED'
+                calibrationStatus: a.qualification?.calibrationStatus || 'NOT_CONFIGURED',
+                nextCalibrationDueDate: a.qualification?.nextCalibrationDueDate || null
             });
         }
 

@@ -1,3 +1,4 @@
+const { createResultsFixture } = require('../../services/resultWriteService');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
@@ -40,7 +41,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
                 })
             }
         });
-        await prisma.result.createMany({ data: [
+        await createResultsFixture(prisma, { data: [
                         {
                             id: `res-v2-1-${timestamp}`,
                             param: 'PH_H2O',

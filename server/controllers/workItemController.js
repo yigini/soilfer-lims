@@ -688,7 +688,6 @@ exports.updateWorkItemStatus = async (req, res) => {
 
         const updateData = {
             status,
-            result: result !== undefined ? String(result) : item.result,
             equipmentId: equipmentId || item.equipmentId,
             version: { increment: 1 },
             history: JSON.stringify(history),
@@ -704,13 +703,15 @@ exports.updateWorkItemStatus = async (req, res) => {
         const reasonRequired = nextStatus === 'ON_HOLD' || item.status === 'ON_HOLD' ||
             item.status === 'COMPLETED' && nextStatus === 'IN_PROGRESS';
         const updatedItem = await stateRules.inTransaction(prisma, async tx => {
-            const updated = await transitionWorkItem(id, nextStatus, user,
+            let updated = await transitionWorkItem(id, nextStatus, user,
                 reasonRequired ? req.body.reason : req.body.reason || 'Work item updated via API', updateData, tx,
                 { expected: { status: item.status, version: version !== undefined ? version : item.version },
                     conflictCode: 'VERSION_CONFLICT', audit: {
                         action: item.status !== nextStatus ? 'STATUS_CHANGE' : 'WORKITEM_UPDATED',
                         details: `${user.username} updated ${item.analysis} to ${nextStatus}${equipmentId ? ` using equipment ${equipmentId}` : ''}`
                     } });
+            if (result !== undefined) updated = await require('../services/resultWriteService').writeNonMeasurementSummary(tx, updated,
+                { kind: 'operational-status', text: result === null ? null : String(result), actor: user });
             if (equipmentId) await tx.workItemEquipmentUse.create({
                 data: {
                     id: `use-${id}-${Date.now()}`,

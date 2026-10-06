@@ -192,8 +192,10 @@ describe('Workbench Draft Integrity Contract (P0)', () => {
         // Simulate server modification by bumping workItem version & setting result
         await prisma.workItem.update({
             where: { id: testWorkItemId2 },
-            data: { version: 2, result: '7.10' }
+            data: { version: 2 }
         });
+
+        await prisma.$transaction(tx => require('../../services/resultWriteService').writeFixtureCache(tx, { id: testWorkItemId2 }, '7.10', 'system:fixture'));
 
         // Save draft with outdated baseVersion (1 < 2)
         const updatedDraft = await draftService.saveDraft(testUser, {

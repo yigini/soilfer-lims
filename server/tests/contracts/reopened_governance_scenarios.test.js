@@ -329,6 +329,10 @@ describe('Reopened Governance & Offline Parity Contract Tests', () => {
                 where: { sampleId: sampleA.id, isCurrent: true }
             });
             const params = createdResults.map(r => r.param);
+            expect(createdResults).toHaveLength(4);
+            expect(new Set(createdResults.map(row => row.id)).size).toBe(4);
+            expect(new Set(createdResults.map(row => row.attemptId)).size).toBe(1);
+            expect(createdResults[0].attemptId).toBeTruthy();
             expect(params).toContain('SAND');
             expect(params).toContain('SILT');
             expect(params).toContain('CLAY');

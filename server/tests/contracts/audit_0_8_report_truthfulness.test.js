@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -29,7 +30,7 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
             disposition: disposition ? JSON.stringify(disposition) : null, labId, createdBy: 'report-test' } });
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status: 'APPROVED' } });
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-08'), sampleId, analysis: 'PH_H2O', status: 'ACCEPTED', batchId: batch.id } });
-        await prisma.result.create({ data: { id: id('R-08'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
+        await createResultFixture(prisma, { data: { id: id('R-08'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true, batchId: batch.id } });
         return { sampleId, batch, item };
     }

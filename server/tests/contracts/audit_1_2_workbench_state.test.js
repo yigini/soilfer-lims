@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const { randomUUID } = require('node:crypto');
 const prisma = require('../../prisma');
 const samples = require('../../services/sampleStateService');
@@ -29,7 +30,7 @@ afterEach(() => jest.restoreAllMocks());
 test('final approval returns the preparation-reversion 409 and preserves every row', async () => {
     const row = await fixture('SUBMITTED_FULL', 'ACCEPTED');
     await prisma.sample.update({ where: { id: row.sample.id }, data: { receptionDate: new Date() } });
-    const result = await prisma.result.create({ data: { id: randomUUID(), sampleId: row.sample.id, param: row.item.analysis,
+    const result = await createResultFixture(prisma, { data: { id: randomUUID(), sampleId: row.sample.id, param: row.item.analysis,
         value: '6.25', numericValue: 6.25, unit: 'pH_units', isCurrent: true } });
     await prisma.resultEvidenceEvent.create({ data: { id: randomUUID(), sampleId: row.sample.id, resultId: result.id,
         gate: 'PREPARATION', eventType: 'PREP_REVERTED', reason: 'Preparation recheck required', actor: manager.username } });
@@ -53,7 +54,7 @@ test('undo intake preserves every task when the transition is refused by a datab
 
 test('undo intake rolls back task deletion and the transition when its final audit fails', async () => {
     const row = await fixture('ACCEPTED', 'NOT_ASSIGNED');
-    await prisma.workItem.update({ where: { id: row.item.id }, data: { result: null } });
+    await prisma.$transaction(tx => require('../../services/resultWriteService').writeFixtureCache(tx, row.item, null, 'system:fixture'));
     const before = await snapshot([row.sample.id]);
     failAudit('UNDO_INTAKE');
     expect((await call(sampleController.undoIntake, {}, { id: row.sample.id }, manager)).statusCode).toBe(500);
@@ -171,7 +172,7 @@ const paths = [
 ];
 test.each(paths)('%s submission refuses current preparation-revert evidence before writes', async (_, handler, body) => {
     const row = await fixture();
-    await prisma.result.create({ data: { id: randomUUID(), sampleId: row.sample.id, param: 'PH', value: '6.25', isCurrent: true } });
+    await createResultFixture(prisma, { data: { id: randomUUID(), sampleId: row.sample.id, param: 'PH', value: '6.25', isCurrent: true } });
     await prisma.$transaction(tx => evidence.recordPreparationRevert(tx, row.sample, 'PREPARATION', 'Reprepare specimen', manager));
     const before = await snapshot([row.sample.id]);
     expect(await call(handler, body(row))).toMatchObject({ statusCode: 409, body: { code: 'PREP_REVERTED_RESULTS' } });
@@ -191,7 +192,7 @@ test.each(paths)('%s submission rolls back sample/work/submit/audit after a late
 });
 test('one preparation-blocked sample rolls back the whole workbench submission batch', async () => {
     const first = await fixture(), second = await fixture(), ids = [first.sample.id, second.sample.id];
-    await prisma.result.create({ data: { id: randomUUID(), sampleId: second.sample.id, param: 'PH', value: '6.25', isCurrent: true } });
+    await createResultFixture(prisma, { data: { id: randomUUID(), sampleId: second.sample.id, param: 'PH', value: '6.25', isCurrent: true } });
     await prisma.$transaction(tx => evidence.recordPreparationRevert(tx, second.sample, 'PREPARATION', 'Reprepare specimen', manager));
     const before = await snapshot(ids);
     expect(await call(workbench.commitSubmissions, { sampleIds: ids })).toMatchObject({ statusCode: 409, body: { code: 'PREP_REVERTED_RESULTS' } });
