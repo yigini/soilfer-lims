@@ -620,7 +620,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
             const parsed = JSON.parse(batch.qcResults);
             expect(parsed.blanks[0].value).toBeNull();
             expect(parsed.blanks[0].status).toBe('FAIL');
-            expect(parsed.summary.missingRequired).toEqual(expect.arrayContaining(['CONTROL', 'DUPLICATE']));
+            expect(parsed.summary.missingRequired).toEqual(expect.arrayContaining([expect.objectContaining({ type: 'CONTROL' }), expect.objectContaining({ type: 'DUPLICATE' })]));
         });
 
         test('Dedicated evaluate route rejects mutating a CLOSED batch (400)', async () => {
