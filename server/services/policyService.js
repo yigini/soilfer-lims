@@ -190,6 +190,7 @@ async function mutateInTransaction(actor, reference, request, tx, options = {}) 
             key: c.key, analysisCode: c.analysisCode, methodologyId: c.methodologyId, value: JSON.stringify(c.value), reason, setBy: actor.username, setAt: now } });
     }
     if (compatibilityCopy.written) await tx.lab.update({ where: { id: current.lab.id }, data: { settings: compatibilitySettings } });
+    await require('./qcRuleService').assertPolicyCompatible(current.lab.id, tx, affectedContexts, now);
     await tx.auditLog.create({ data: { id: crypto.randomUUID(), entity: 'LAB', entityId: current.lab.id, labId: current.lab.id,
         action: options.auditAction || 'UPDATE_POLICY', performedBy: actor.username, timestamp: now,
         before: JSON.stringify({ ...before, overrides: current.overrides }), after: JSON.stringify({ ...after,

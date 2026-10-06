@@ -2616,6 +2616,7 @@
     },
     "errors": {
       "POLICY_REASON_REQUIRED": "Indiquez un motif pour le changement de politique.",
+      "POLICY_QC_RULE_CONFLICT": "Cette politique serait incompatible avec une règle de contrôle qualité actuelle ou programmée. Modifiez cette règle avant de sauvegarder.",
       "POLICY_VERSION_CONFLICT": "Les politiques ont changé pendant la modification. Actualisez et vérifiez les valeurs avant d’enregistrer.",
       "POLICY_VALUE_INVALID": "La valeur est hors de la plage autorisée ou son format est invalide.",
       "POLICY_KEY_INVALID": "Paramètre de politique inconnu.",
@@ -2756,7 +2757,7 @@
     "optional": "facultatif / non utilisé",
     "add": "Ajouter",
     "reset": "Rétablir les valeurs héritées",
-    "inheritanceHelp": "Chaque critère vide hérite de la politique effective de l’analyse, de la méthode ou du laboratoire. Chaque sauvegarde crée une version immuable ; les évaluations antérieures gardent leurs règles.",
+    "inheritanceHelp": "Chaque critère vide hérite de la politique effective de l’analyse, de la méthode ou du laboratoire. Chaque sauvegarde crée une version immuable ; les évaluations antérieures gardent leurs règles. Une règle de méthode réinitialisée reste prioritaire sur la règle indépendante de la méthode ; ses champs vides héritent des valeurs de la politique.",
     "deferredHelp": "La taille du lot, le CRM périodique, les étalons de vérification et les critères de courbe s’appliqueront après la mise en place des positions de série.",
     "types": {
       "BLANK": "Blanc",

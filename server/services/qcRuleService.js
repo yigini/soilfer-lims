@@ -75,6 +75,29 @@ async function list(actor, reference, analysisCode, methodologyId = null, option
     });
 }
 
+// Validate the proposed policy inside its write transaction. Only rules selected
+// now or at a future activation matter; superseded historical rows stay untouched.
+async function assertPolicyCompatible(labId, db, policyContexts = [], now = new Date()) {
+    const rows = await db.qcRule.findMany({ where: { labId }, select: { analysisCode: true, methodologyId: true, effectiveFrom: true } });
+    const scopes = new Map(), times = new Map();
+    for (const row of rows) {
+        scopes.set(JSON.stringify([row.analysisCode, row.methodologyId]), row);
+        if (!times.has(row.analysisCode)) times.set(row.analysisCode, new Set([now.getTime()]));
+        if (row.effectiveFrom > now) times.get(row.analysisCode).add(row.effectiveFrom.getTime());
+    }
+    // A method policy can also interact with its analysis's generic QC rule.
+    for (const context of policyContexts) if (times.has(context.analysisCode)) {
+        scopes.set(JSON.stringify([context.analysisCode, context.methodologyId || null]), context);
+    }
+    for (const scope of scopes.values()) for (const time of times.get(scope.analysisCode)) {
+        try { await resolve(labId, scope.analysisCode, { db, methodologyId: scope.methodologyId, evaluatedAt: new Date(time) }); }
+        catch (e) {
+            if (e.code !== 'QC_RULE_VALUE_INVALID') throw e;
+            throw error(409, 'POLICY_QC_RULE_CONFLICT', 'The policy conflicts with an effective QC rule. Adjust the rule before saving.');
+        }
+    }
+}
+
 async function change(actor, request, options = {}) {
     const db = options.db || require('../prisma');
     try { return await db.$transaction(async tx => {
@@ -113,4 +136,4 @@ async function change(actor, request, options = {}) {
         throw e;
     }
 }
-module.exports = { resolve, list, change, criteria, validateCriteria, FIELD_POLICIES, DEFERRED_FIELDS };
+module.exports = { resolve, list, change, criteria, validateCriteria, assertPolicyCompatible, FIELD_POLICIES, DEFERRED_FIELDS };

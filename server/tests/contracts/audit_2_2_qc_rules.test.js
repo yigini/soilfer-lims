@@ -251,3 +251,54 @@ test('an empty count evaluation stays OPEN so existing clear/reopen authority re
     expect(empty.summary.missingRequired).toEqual(expect.arrayContaining([expect.objectContaining({ type: 'DUPLICATE', required: 4, found: 0 })]));
     expect(empty.summary.totalQcSamples).toBe(0);
 });
+
+test.each([[0, 1], [0, 0]])('texture ABS_DIFF accepts numeric readings %s/%s while RPD retains its positivity guard', async (value1, value2) => {
+    const f = await fixture('CLAY');
+    const batch = await prisma.batch.create({ data: { id: randomUUID(), labId: f.labId, analysis: f.analysisCode, status: 'OPEN', createdBy: 'system:fixture' } });
+    const policy = await resolveQcPolicy(batch, prisma);
+    expect(evaluateDuplicate({ value1, value2 }, policy.duplicate)).toMatchObject({ criterion: 'ABS_DIFF', status: 'PASS', absMax: 3 });
+    expect(evaluateDuplicate({ value1, value2 }, { mode: 'RPD' })).toMatchObject({ status: 'INVALID', criterion: 'INVALID_NONPOSITIVE' });
+    const evaluated = evaluateBatchQc({ ...readings, duplicates: [{ value1, value2 }, { value1, value2 }] }, { policy });
+    expect(evaluated.overallStatus).toBe('QC_PASS');
+});
+
+test.each(['generic', 'method', 'future'])('a policy edit conflicting with a %s QC rule is an atomic 409 and keeps batch reads available', async kind => {
+    const f = await fixture();
+    const target = { ...f, methodologyId: kind === 'generic' ? null : f.methodologyId };
+    await save(target, { crmRecoveryMin: 95 }, kind === 'future' ? { effectiveFrom: new Date(Date.now() + 60000).toISOString() } : {});
+    const token = await getAuthToken('LAB_MANAGER', f.labId);
+    const batch = await prisma.batch.create({ data: { id: randomUUID(), labId: f.labId, analysis: f.analysisCode, profile: 'RACK_40', status: 'OPEN', createdBy: 'system:fixture' } });
+    const evaluated = await request(app).post(`/api/qc/batches/${batch.id}/evaluate`).set('Authorization', `Bearer ${token}`).send(readings);
+    expect(evaluated.status).toBe(200); expect(evaluated.body.status).toBe('QC_PASS');
+    const state = async () => ({ lab: await prisma.lab.findUnique({ where: { id: f.labId } }), policy: await prisma.labPolicy.findUnique({ where: { labId: f.labId } }),
+        overrides: await prisma.labPolicyOverride.findMany({ where: { labId: f.labId }, orderBy: { id: 'asc' } }),
+        rules: await prisma.qcRule.findMany({ where: { labId: f.labId }, orderBy: { id: 'asc' } }),
+        audits: await prisma.auditLog.findMany({ where: { labId: f.labId }, orderBy: { id: 'asc' } }),
+        batch: await prisma.batch.findUnique({ where: { id: batch.id } }), typed: await prisma.batchQcResult.findMany({ where: { batchId: batch.id }, orderBy: { id: 'asc' } }) });
+    const before = await state();
+    const response = await request(app).patch(`/api/labs/${f.labId}/policies`).set('Authorization', `Bearer ${token}`).send({ expectedVersion: 0, reason: 'Incompatible inherited bound',
+        changes: [{ key: 'qc.controlMaxRecovery', value: 92 }, { key: 'numbers.decimalSeparator', value: ',' }] });
+    expect(response.status).toBe(409); expect(response.body.code).toBe('POLICY_QC_RULE_CONFLICT');
+    expect(await state()).toEqual(before);
+    expect((await request(app).get('/api/qc/batches').set('Authorization', `Bearer ${token}`)).status).toBe(200);
+    expect((await request(app).get(`/api/qc/batches/${batch.id}`).set('Authorization', `Bearer ${token}`)).status).toBe(200);
+});
+
+test('a method policy bound cannot conflict with an inherited generic QC rule', async () => {
+    const f = await fixture();
+    await save({ ...f, methodologyId: null }, { crmRecoveryMin: 95 });
+    await expect(policies.change(actor, f.labId, { expectedVersion: 0, reason: 'Method upper bound', changes: [
+        { key: 'qc.controlMaxRecovery', value: 92, analysisCode: f.analysisCode, methodologyId: f.methodologyId }] }, { db: prisma }))
+        .rejects.toMatchObject({ statusCode: 409, code: 'POLICY_QC_RULE_CONFLICT' });
+    expect(await prisma.labPolicy.count({ where: { labId: f.labId } })).toBe(0);
+    expect(await prisma.labPolicyOverride.count({ where: { labId: f.labId } })).toBe(0);
+});
+
+test('superseded historical QC bounds do not block a compatible policy edit', async () => {
+    const f = await fixture(), first = await save(f, { crmRecoveryMin: 95 });
+    const before = await prisma.qcRule.findUnique({ where: { id: first.rule.id } });
+    await save(f, { crmRecoveryMin: 90 }, { expectedVersion: 1 });
+    await policies.change(actor, f.labId, { expectedVersion: 0, reason: 'Compatible current bound', changes: [{ key: 'qc.controlMaxRecovery', value: 92 }] }, { db: prisma });
+    expect(await prisma.qcRule.findUnique({ where: { id: first.rule.id } })).toEqual(before);
+    expect((await resolve(f)).resolved).toMatchObject({ crmRecoveryMin: { value: 90 }, crmRecoveryMax: { value: 92 } });
+});

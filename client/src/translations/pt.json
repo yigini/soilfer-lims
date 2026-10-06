@@ -2616,6 +2616,7 @@
     },
     "errors": {
       "POLICY_REASON_REQUIRED": "Informe um motivo para a alteração da política.",
+      "POLICY_QC_RULE_CONFLICT": "Esta política entraria em conflito com uma regra de controle de qualidade atual ou programada. Ajuste essa regra antes de salvar.",
       "POLICY_VERSION_CONFLICT": "As políticas mudaram durante a edição. Atualize e revise os valores antes de salvar.",
       "POLICY_VALUE_INVALID": "O valor está fora do intervalo permitido ou tem formato inválido.",
       "POLICY_KEY_INVALID": "Configuração de política desconhecida.",
@@ -2756,7 +2757,7 @@
     "optional": "opcional / não utilizado",
     "add": "Adicionar",
     "reset": "Restaurar valores herdados",
-    "inheritanceHelp": "Cada critério vazio herda a política efetiva da análise, método ou laboratório. Cada salvamento cria uma versão imutável; avaliações anteriores mantêm suas regras.",
+    "inheritanceHelp": "Cada critério vazio herda a política efetiva da análise, método ou laboratório. Cada salvamento cria uma versão imutável; avaliações anteriores mantêm suas regras. Uma regra de método redefinida continua tendo prioridade sobre a regra independente do método; seus campos vazios herdam os valores da política.",
     "deferredHelp": "Tamanho do lote, CRM periódico, padrões de verificação e critérios de curva serão aplicados quando as posições da corrida estiverem disponíveis.",
     "types": {
       "BLANK": "Branco",

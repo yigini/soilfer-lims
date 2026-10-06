@@ -159,12 +159,6 @@ function evaluateDuplicate(dup = {}, policy = {}) {
         };
     }
 
-    const avg = v1 / 2 + v2 / 2;
-    if (v1 <= 0 || v2 <= 0 || avg === 0) {
-        return { id, label, type: 'DUPLICATE', value1: v1, value2: v2, rpd: null, maxRpd,
-            ...evidence, status: 'INVALID', criterion: 'INVALID_NONPOSITIVE',
-            details: ['Duplicate readings must both be greater than zero.', ...notes].join(' ') };
-    }
     const difference = Math.abs(v1 - v2);
     if ((policy.mode || defaults.getStrict('qc.duplicateMode')) === 'ABS_DIFF') {
         const limit = policy.absMax ?? defaults.getStrict('qc.duplicateAbsMax');
@@ -174,6 +168,12 @@ function evaluateDuplicate(dup = {}, policy = {}) {
         return { id, label, type: 'DUPLICATE', value1: v1, value2: v2, rpd: null, maxRpd, ...evidence,
             status: passed ? 'PASS' : 'FAIL', criterion: 'ABS_DIFF', absoluteDifference: difference, absMax: limit,
             details: `Absolute difference ${difference} ${passed ? '≤' : '>'} ${limit}` };
+    }
+    const avg = v1 / 2 + v2 / 2;
+    if (v1 <= 0 || v2 <= 0 || avg === 0) {
+        return { id, label, type: 'DUPLICATE', value1: v1, value2: v2, rpd: null, maxRpd,
+            ...evidence, status: 'INVALID', criterion: 'INVALID_NONPOSITIVE',
+            details: ['Duplicate readings must both be greater than zero.', ...notes].join(' ') };
     }
     if (loq !== null && (v1 < nearLoqMultiplier * loq || v2 < nearLoqMultiplier * loq)) {
         const limit = policy.absMaxBelow5LOQ ?? loq;

@@ -2616,6 +2616,7 @@
     },
     "errors": {
       "POLICY_REASON_REQUIRED": "Enter a reason for the policy change.",
+      "POLICY_QC_RULE_CONFLICT": "This policy would conflict with a current or scheduled QC rule. Adjust that rule before saving.",
       "POLICY_VERSION_CONFLICT": "Policies changed while you were editing. Refresh and review the current values before saving.",
       "POLICY_VALUE_INVALID": "The value is outside the permitted range or has an invalid format.",
       "POLICY_KEY_INVALID": "Unknown policy setting.",
@@ -2756,7 +2757,7 @@
     "optional": "optional / not used",
     "add": "Add",
     "reset": "Reset to inherited defaults",
-    "inheritanceHelp": "Each blank criterion inherits the effective analysis, method or laboratory policy. Every save creates an immutable version; earlier evaluations keep their own rules.",
+    "inheritanceHelp": "Each blank criterion inherits the effective analysis, method or laboratory policy. Every save creates an immutable version; earlier evaluations keep their own rules. Resetting a method rule also keeps it selected ahead of the method-independent rule; its blank fields inherit policy defaults.",
     "deferredHelp": "Batch size, periodic CRM, verification standards and curve criteria apply once run positions land.",
     "types": {
       "BLANK": "Blank",
