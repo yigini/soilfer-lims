@@ -66,7 +66,7 @@ function inventoryLegacyHolds(db, { now = new Date(), mapping = { rows: [], sha2
         const fingerprint = digest(JSON.stringify({ sample, audits, bound }));
         const row = { sampleId: sample.id, fingerprint, action: 'SKIP_RESOLVED', diagnostics: [], refusals: [], proposed: null,
             metadataRepairNeeded: legacy.metadataRepairNeeded };
-        if (!legacy.fieldMetadata && !legacy.marker) {
+        if (!legacy.fieldMetadata && (!legacy.marker || legacy.marker.status === 'RESOLVED')) {
             row.action = 'METADATA_REPAIR_NEEDED';
             row.diagnostics.push('HOLD_MARKER_INVALID');
             rows.push(row); continue;

@@ -170,7 +170,8 @@ test('generic rejection of accepted work with a result is refused without changi
     await createResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id, param: f.item.analysis, value: '1.2', numericValue: 1.2 } });
     const before = snapshot();
     const response = await request(routes(actor)).put(`/api/samples/${f.sample.id}/status`).send({ status: 'RECEIVED_REJECTED', reason: 'Reject' });
-    expect([403, 409]).toContain(response.status);
+    expect(response.status).toBe(403);
+    expect(response.body.code).toBe('SAMPLE_LOCKED');
     expect(snapshot()).toEqual(before);
 });
 

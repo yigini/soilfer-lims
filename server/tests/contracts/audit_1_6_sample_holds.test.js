@@ -243,6 +243,85 @@ function holdRoutes(user) {
     return app;
 }
 
+test.each(['{unparseable', '[]', 'null', '"primitive root"', '42'])('storage movement refuses unreadable metadata %s, retaining every byte, hold and table', async metadata => {
+    const s = await sample({ metadata }), before = snapshot();
+    expect(await holds.isHeld(prisma, s)).toBe(true);
+    const response = await request(holdRoutes(actor)).post(`/api/samples/${s.id}/custody/move`).send({ location: 'Reviewed shelf' });
+    expect(response).toMatchObject({ status: 409, body: { code: 'SAMPLE_METADATA_INVALID' } });
+    expect(snapshot()).toEqual(before);
+    const fresh = await prisma.sample.findUnique({ where: { id: s.id } });
+    expect(fresh.metadata).toBe(metadata); expect(await holds.isHeld(prisma, fresh)).toBe(true);
+});
+
+test('storage movement preserves readable hold markers and resolution history and writes its audit atomically', async () => {
+    const marker = { status: holds.ACTIVE, reason: 'REVISED_FIELD_EVIDENCE: custody review', resolutions: [{ holdId: 'historical', reason: 'Earlier review' }] };
+    const s = await sample({ metadata: JSON.stringify({ archiveLocation: 'Old shelf', provenanceHold: marker, untouched: { value: 'kept' } }) });
+    const response = await request(holdRoutes(actor)).post(`/api/samples/${s.id}/custody/move`).send({ location: 'New shelf', reason: 'Storage inventory' });
+    expect(response).toMatchObject({ status: 200, body: { success: true, oldLocation: 'Old shelf', location: 'New shelf' } });
+    const fresh = await prisma.sample.findUnique({ where: { id: s.id } });
+    expect(JSON.parse(fresh.metadata)).toMatchObject({ archiveLocation: 'New shelf', provenanceHold: marker, untouched: { value: 'kept' }, lastMovementBy: actor.username });
+    expect(await holds.isHeld(prisma, fresh)).toBe(true);
+    expect(await prisma.auditLog.count({ where: { sampleId: s.id, action: 'STORAGE_MOVEMENT' } })).toBe(1);
+});
+
+test.each(['raise', 'resolve'])('storage movement refuses a stale read after a concurrent hold %s and preserves the committed hold history', async action => {
+    const s = await sample({ metadata: '{"untouched":"original source"}' });
+    const existing = action === 'resolve' ? await boundHold(s.id, 'REVISED_FIELD_EVIDENCE: original hold') : null;
+    const stale = await prisma.sample.findUnique({ where: { id: s.id } });
+    const transaction = prisma.$transaction.bind(prisma);
+    let concurrentState;
+    // Commit the actual hold authority after the observed read, then let the
+    // storage writer attempt that exact stale updatedAt in its real transaction.
+    const spy = jest.spyOn(prisma, '$transaction').mockImplementationOnce(async callback => {
+        await transaction(async tx => {
+            if (action === 'raise') await holds.raiseKoboHold(tx, { sampleId: s.id, actor: 'system:kobo-sync',
+                marker: { status: holds.ACTIVE, reason: 'REVISED_FIELD_EVIDENCE: concurrent source', updatedAt: new Date().toISOString() } });
+            else await holds.resolveHold(tx, { sampleId: s.id, holdId: existing.id, actor, reason: 'Concurrent source reconciliation' });
+        });
+        concurrentState = snapshot();
+        let first = true;
+        return transaction(tx => callback({ ...tx, sample: { ...tx.sample, findUnique: args => {
+            if (first) { first = false; return Promise.resolve(stale); }
+            return tx.sample.findUnique(args);
+        } } }));
+    });
+    try {
+        const response = await request(holdRoutes(actor)).post(`/api/samples/${s.id}/custody/move`).send({ location: 'Stale shelf' });
+        expect(response).toMatchObject({ status: 409, body: { code: 'SAMPLE_STATE_CHANGED' } });
+        expect(snapshot()).toEqual(concurrentState);
+        const fresh = await prisma.sample.findUnique({ where: { id: s.id } });
+        expect(JSON.parse(fresh.metadata).archiveLocation).toBeUndefined();
+        expect(await holds.isHeld(prisma, fresh)).toBe(action === 'raise');
+        expect(await prisma.auditLog.count({ where: { sampleId: s.id, action: 'STORAGE_MOVEMENT' } })).toBe(0);
+        if (action === 'resolve') expect(JSON.parse(fresh.metadata).provenanceHold.resolutions).toHaveLength(1);
+    } finally { spy.mockRestore(); }
+});
+
+test('storage audit insertion failure rolls back the location and every table', async () => {
+    const s = await sample({ metadata: '{"archiveLocation":"Original shelf","untouched":1.2300}' }), before = snapshot();
+    const transaction = prisma.$transaction.bind(prisma);
+    let metadataWasWritten = false;
+    const spy = jest.spyOn(prisma, '$transaction').mockImplementationOnce(callback => transaction(tx => callback({ ...tx,
+        sample: { ...tx.sample, updateMany: async args => { const changed = await tx.sample.updateMany(args); metadataWasWritten = changed.count === 1; return changed; } },
+        auditLog: { ...tx.auditLog, create: () => { throw new Error('Owned storage audit fault'); } }
+    })));
+    try {
+        const response = await request(holdRoutes(actor)).post(`/api/samples/${s.id}/custody/move`).send({ location: 'Faulted shelf' });
+        expect(response).toMatchObject({ status: 500, body: { code: 'SAMPLE_MOVEMENT_ERROR' } });
+        expect(metadataWasWritten).toBe(true); expect(snapshot()).toEqual(before);
+    } finally { spy.mockRestore(); }
+});
+
+test('storage movement busy errors return a stable conflict', async () => {
+    const s = await sample(), before = snapshot();
+    const spy = jest.spyOn(prisma, '$transaction').mockRejectedValueOnce(Object.assign(new Error('database is locked'), { code: 'SQLITE_BUSY' }));
+    try {
+        expect(await request(holdRoutes(actor)).post(`/api/samples/${s.id}/custody/move`).send({ location: 'Busy shelf' }))
+            .toMatchObject({ status: 409, body: { code: 'SAMPLE_STATE_CHANGED' } });
+        expect(snapshot()).toEqual(before);
+    } finally { spy.mockRestore(); }
+});
+
 test.each(['RESOLVED', holds.ACTIVE, { status: 'RESOLVED' }, null])('metadata edits cannot forge hold authority with %p', async value => {
     const s = await sample({ fieldMetadata: JSON.stringify({ provenanceHold: { value: holds.ACTIVE, source: 'KOBO' } }) });
     const before = snapshot();

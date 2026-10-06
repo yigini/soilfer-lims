@@ -163,6 +163,21 @@ test.each(['{unparseable', '[]', 'null'])('unreadable fieldMetadata root %s with
     expect(state(file).find(row => row.name === 'Sample')).toEqual(before.find(row => row.name === 'Sample'));
 });
 
+test.each(['{unparseable', '[]', 'null'])('unreadable fieldMetadata root %s with a readable resolved marker stays a repair diagnostic', fieldMetadata => {
+    const { file, samples } = fixture([{ metadata: marker({ status: 'RESOLVED' }), fieldMetadata }, {}]);
+    const before = state(file), bytes = digest(fs.readFileSync(file)), plan = dry(file);
+    expect(plan).toMatchObject({ proposedCount: 1, refusedCount: 0, metadataRepairNeededCount: 1 });
+    expect(plan.rows.find(row => row.sampleId === samples[0].id)).toMatchObject({ action: 'METADATA_REPAIR_NEEDED',
+        diagnostics: ['HOLD_MARKER_INVALID'], refusals: [], proposed: null });
+    expect(state(file)).toEqual(before); expect(digest(fs.readFileSync(file))).toBe(bytes);
+    expect(apply(file, plan)).toMatchObject({ backfillCount: 1, metadataRepairNeededCount: 1 });
+    withDb(file, db => {
+        expect(db.prepare('SELECT count(*) n FROM SampleHold WHERE sampleId=?').get(samples[0].id).n).toBe(0);
+        expect(isHeldSqlite(db, db.prepare('SELECT * FROM Sample WHERE id=?').get(samples[0].id))).toBe(true);
+    });
+    expect(state(file).find(row => row.name === 'Sample')).toEqual(before.find(row => row.name === 'Sample'));
+});
+
 test.each([
     [null, null, 'BACKFILL_OPERATOR_INVALID'], ['missing-user', null, 'BACKFILL_OPERATOR_INVALID'],
     ['system:kobo-sync', null, 'BACKFILL_OPERATOR_INVALID'], ['service:backfill', null, 'BACKFILL_OPERATOR_INVALID'],

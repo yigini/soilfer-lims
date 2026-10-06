@@ -2071,62 +2071,35 @@ exports.recordStorageMovement = async (req, res) => {
     const user = req.user;
 
     try {
-        const sample = await prisma.sample.findUnique({ where: { id: String(id) } });
-        if (!sample) return res.status(404).json({ error: 'Sample not found' });
-
-        if (user && user.role && !scopeGuard.canAccessEntity(user, sample, { labField: 'labId', altLabField: 'assignedLab' })) {
-            return res.status(403).json({ error: 'Sample is outside your authorized scope' });
-        }
-
-        if (sample.status === 'DISPOSED') {
-            return res.status(400).json({
-                error: 'Cannot move disposed sample material.',
-                code: 'DISPOSED_MATERIAL_IMMUTABLE'
-            });
-        }
-
-        let meta = {};
-        try {
-            if (sample.metadata) meta = JSON.parse(sample.metadata);
-        } catch (e) {
-            meta = {};
-        }
-
-        const oldLocation = meta.archiveLocation || 'Not recorded';
-        meta.archiveLocation = location || oldLocation;
-        meta.lastMovementReason = reason || 'Storage movement';
-        meta.lastMovementAt = new Date().toISOString();
-        meta.lastMovementBy = user.username;
-
-        const updatedSample = await prisma.sample.update({
-            where: { id: sample.id },
-            data: {
-                metadata: JSON.stringify(meta)
-            }
-        });
-
-        const crypto = require('crypto');
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'SAMPLE',
-                entityId: sample.id,
-                action: 'STORAGE_MOVEMENT',
+        const rules = require('../services/workflowStateRules');
+        const outcome = await prisma.$transaction(async tx => {
+            const sample = await tx.sample.findUnique({ where: { id: String(id) } });
+            if (!sample) throw new rules.TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
+            rules.assertScope(user, sample);
+            if (sample.status === 'DISPOSED') throw new rules.TransitionError('Cannot move disposed sample material.', 400, 'DISPOSED_MATERIAL_IMMUTABLE');
+            const meta = sampleHolds.legacyHoldState(sample).metadata;
+            if (!meta) throw new rules.TransitionError('Stored sample metadata needs review before storage movement.', 409, 'SAMPLE_METADATA_INVALID');
+            const oldLocation = meta.archiveLocation || 'Not recorded';
+            const movedAt = new Date();
+            const changed = await tx.sample.updateMany({ where: { id: sample.id, updatedAt: sample.updatedAt }, data: {
+                metadata: JSON.stringify({ ...meta, archiveLocation: location || oldLocation, lastMovementReason: reason || 'Storage movement',
+                    lastMovementAt: movedAt.toISOString(), lastMovementBy: user.username }),
+                updatedAt: new Date(Math.max(movedAt.getTime(), sample.updatedAt.getTime() + 1))
+            } });
+            if (changed.count !== 1) throw new rules.TransitionError('Sample changed. Reload before retrying.', 409, 'SAMPLE_STATE_CHANGED');
+            await tx.auditLog.create({ data: {
+                id: crypto.randomUUID(), entity: 'SAMPLE', entityId: sample.id, action: 'STORAGE_MOVEMENT',
                 details: `Sample material moved from '${oldLocation}' to '${location}' (${reason || 'Storage movement'})`,
-                performedBy: user.username,
-                sampleId: sample.id
-            }
+                performedBy: user.username, sampleId: sample.id
+            } });
+            return { success: true, location, oldLocation, sample: await tx.sample.findUnique({ where: { id: sample.id } }) };
         });
-
-        res.json({
-            success: true,
-            location,
-            oldLocation,
-            sample: updatedSample
-        });
+        res.json(outcome);
     } catch (err) {
+        const mapped = require('../services/workflowStateRules').mapStateError(err, 'SAMPLE_STATE_CHANGED');
+        if (mapped.statusCode) return res.status(mapped.statusCode).json({ code: mapped.code, error: mapped.message });
         console.error('[recordStorageMovement] Error:', err);
-        res.status(500).json({ error: 'Failed to record storage movement' });
+        res.status(500).json({ code: 'SAMPLE_MOVEMENT_ERROR', error: 'Failed to record storage movement' });
     }
 };
 
