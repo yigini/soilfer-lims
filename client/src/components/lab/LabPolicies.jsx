@@ -1,19 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useLanguage } from '../../context/LanguageContext';
+import QcRules from './QcRules';
 
 export function PolicyValueEditor({ definition, value, onChange, t }) {
     if (definition.type === 'boolean') return <select value={String(value)} onChange={e => onChange(e.target.value === 'true')}>
         <option value="true">{t('policies.yes')}</option><option value="false">{t('policies.no')}</option></select>;
     if (definition.type === 'enum') return <select value={value === null ? '__null' : value} onChange={e => onChange(e.target.value === '__null' ? null : e.target.value)}>
         {definition.nullable && <option value="__null">{t('policies.none')}</option>}
-        {definition.allowedValues.map(option => <option key={option} value={option}>{t(`policies.options.${option}`, option)}</option>)}</select>;
+        {definition.allowedValues.map(option => <option key={option} value={option} disabled={definition.unsupportedValues?.includes(option)}>{t(`policies.options.${option}`, option)}</option>)}</select>;
     if (definition.type === 'westgard') return <div>{definition.allowedValues.map(code => <div key={code} className="flex gap-4 items-center py-2">
         <span>{code}</span>{['reject', 'warn'].map(kind => <label key={kind}>
             <input type="checkbox" checked={value[kind].includes(code)} onChange={e => onChange({
                 reject: value.reject.filter(v => v !== code), warn: value.warn.filter(v => v !== code),
                 [kind]: e.target.checked ? [...value[kind].filter(v => v !== code), code] : value[kind].filter(v => v !== code)
             })} /> {t(`policies.${kind}`)}</label>)}</div>)}</div>;
+    if (definition.type === 'qcFailAction') return <div className="space-y-2">{['BLANK', 'DUPLICATE', 'LRM', 'CRM'].map(type => <label key={type}>
+        {t(`qcRules.types.${type}`)}<select value={value[type]} onChange={e => onChange({ ...value, [type]: e.target.value })}>
+            {['FAIL_BATCH', 'WARN'].map(action => <option key={action} value={action}>{t(`qcRules.actions.${action}`)}</option>)}
+        </select></label>)}</div>;
     if (definition.type === 'runProfiles') {
         const update = (code, patch) => onChange({ ...value, [code]: { ...value[code], ...patch } });
         return <div className="space-y-4">{Object.entries(value).map(([code, tray]) => <fieldset key={code} className="border rounded p-3 space-y-2">
@@ -34,7 +39,7 @@ export function PolicyValueEditor({ definition, value, onChange, t }) {
     }
     if (['integer', 'number'].includes(definition.type)) return <div>
         {definition.nullable && <label><input type="checkbox" checked={value === null} onChange={e => onChange(e.target.checked ? null : '')} /> {t('policies.noLimit')}</label>}
-        {value !== null && <input required type="number" min={definition.min} step={definition.type === 'integer' ? '1' : 'any'} value={value}
+        {value !== null && <input required type="number" min={definition.min} max={definition.max} step={definition.type === 'integer' ? '1' : 'any'} value={value}
             onChange={e => onChange(e.target.value === '' ? '' : Number(e.target.value))} />}</div>;
     return <div><input required value={value} onChange={e => onChange(e.target.value)} />
         {definition.type === 'sampleFormat' && !value.includes('{CHK}') && <p role="alert">{t('policies.sampleCodeNoCheck')}</p>}</div>;
@@ -68,6 +73,7 @@ export default function LabPolicies({ labId }) {
         if (typeof value === 'boolean') return t(value ? 'policies.yes' : 'policies.no');
         if (definition.type === 'westgard') return `${t('policies.reject')}: ${value.reject.join(', ') || '—'}; ${t('policies.warn')}: ${value.warn.join(', ') || '—'}`;
         if (definition.type === 'runProfiles') return Object.values(value).map(p => `${p.name} (${p.capacity})`).join('; ');
+        if (definition.type === 'qcFailAction') return Object.entries(value).map(([type, action]) => `${t(`qcRules.types.${type}`)}: ${t(`qcRules.actions.${action}`)}`).join('; ');
         if (definition.key === 'numbers.thousandsSeparator' && value === ' ') return t('numbers.space');
         return definition.type === 'enum' ? t(`policies.options.${value}`, value) : String(value);
     };
@@ -123,6 +129,7 @@ export default function LabPolicies({ labId }) {
                 <td>{data.canEdit && <button type="button" onClick={() => { setEditing({ key: row.key, clear: true, scope: row }); setReason(''); }}>{t('policies.clear')}</button>}</td>
             </tr>)}</tbody></table></div>
         <h3 className="font-bold">{t('policies.history')}</h3>
+        {analysisCode && <QcRules key={`${labId}-${analysisCode}-${methodologyId}`} labId={labId} analysisCode={analysisCode} methodologyId={methodologyId || null} registry={data.registry} canEdit={data.canEdit} Editor={PolicyValueEditor} />}
         <ul>{data.history.map(row => { const event = JSON.parse(row.details); return <li key={row.id} className="border-t py-2">
             <time>{new Date(row.timestamp).toLocaleString()}</time> · {row.performedBy} · {t('policies.version')} {event.policyVersion}: {event.reason}
         </li>; })}</ul>

@@ -138,6 +138,8 @@ node scripts/install_result_attempt_links.js --apply
 node scripts/install_sample_holds.js --apply
 echo "📦 Installing reference material catalogue..."
 node scripts/install_reference_materials.js --apply
+echo "📦 Installing versioned QC rules..."
+node scripts/install_qc_rules.js --apply
 
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."

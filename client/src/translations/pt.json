@@ -28,9 +28,34 @@
       "HOLD_RESOLVE_ERROR": "Não foi possível resolver o bloqueio. Atualize e tente novamente."
     }
   },
-  "spectralWorkflow": {"reopenTitle":"Reabrir trabalho concluído","reopenMessage":"Esta alteração afeta um trabalho concluído. Introduza um motivo para o reabrir e tentar novamente.","reason":"Motivo (obrigatório)","retry":"Reabrir e tentar novamente","trashTitle":"Mover para o lixo","trashMessage":"Mover o espectro de {label} para o lixo? Introduza um motivo. Poderá restaurá-lo depois.","batchTrashMessage":"Mover {count} espectros selecionados para o lixo? Introduza um motivo. Poderá restaurá-los depois.","trashConfirm":"Mover para o lixo","partialTitle":"Importação parcialmente concluída","receiptTitle":"Comprovante de importação","receiptCounts":"{count} espectros registrados; {failed} falharam.","retryFailed":"Revisar e tentar novamente as entradas restantes"},
-  "numbers": {"ambiguous":"Esclareça o separador decimal ou de milhares.","invalid":"Formato de número inválido.","policyInvalid":"O formato numérico do laboratório está indisponível ou é inválido.","decimal":"Separador decimal","thousands":"Separador de milhares","noGrouping":"Não configurado","space":"Espaço"},
-  "sampleLookup": { "title": "Busca de amostra", "ambiguous": "Este identificador corresponde a várias amostras:", "failed": "Não foi possível encontrar ou carregar a amostra. Verifique o identificador e a conexão." },
+  "spectralWorkflow": {
+    "reopenTitle": "Reabrir trabalho concluído",
+    "reopenMessage": "Esta alteração afeta um trabalho concluído. Introduza um motivo para o reabrir e tentar novamente.",
+    "reason": "Motivo (obrigatório)",
+    "retry": "Reabrir e tentar novamente",
+    "trashTitle": "Mover para o lixo",
+    "trashMessage": "Mover o espectro de {label} para o lixo? Introduza um motivo. Poderá restaurá-lo depois.",
+    "batchTrashMessage": "Mover {count} espectros selecionados para o lixo? Introduza um motivo. Poderá restaurá-los depois.",
+    "trashConfirm": "Mover para o lixo",
+    "partialTitle": "Importação parcialmente concluída",
+    "receiptTitle": "Comprovante de importação",
+    "receiptCounts": "{count} espectros registrados; {failed} falharam.",
+    "retryFailed": "Revisar e tentar novamente as entradas restantes"
+  },
+  "numbers": {
+    "ambiguous": "Esclareça o separador decimal ou de milhares.",
+    "invalid": "Formato de número inválido.",
+    "policyInvalid": "O formato numérico do laboratório está indisponível ou é inválido.",
+    "decimal": "Separador decimal",
+    "thousands": "Separador de milhares",
+    "noGrouping": "Não configurado",
+    "space": "Espaço"
+  },
+  "sampleLookup": {
+    "title": "Busca de amostra",
+    "ambiguous": "Este identificador corresponde a várias amostras:",
+    "failed": "Não foi possível encontrar ou carregar a amostra. Verifique o identificador e a conexão."
+  },
   "dataSheet": {
     "title": "Folha de dados",
     "readOnlyDescription": "Os resultados registrados são somente leitura aqui. Abra a bancada para inserir ou atualizar resultados.",
@@ -2427,8 +2452,7 @@
     "acknowledgeMass": "Confirmar o aviso de massa desta amostra",
     "massCheckFailed": "Não foi possível carregar os requisitos de massa. O servidor verificará cada linha ao enviar.",
     "positionalUncertainty": "Incerteza de posição registrada (m)"
-  }
-,
+  },
   "policies": {
     "sampleCodeNoCheck": "Sem um caractere de verificação, os erros de leitura são mais difíceis de detectar.",
     "keys": {
@@ -2468,7 +2492,21 @@
       "numbers_thousandsSeparator": "Separador de milhares",
       "intake_defaultAnalysisMassG": "Massa de análise padrão",
       "intake_retentionMassG": "Massa de amostra retida",
-      "referenceMaterials_expiryWarningDays": "Aviso de validade dos materiais de referência (dias)"
+      "referenceMaterials_expiryWarningDays": "Aviso de validade dos materiais de referência (dias)",
+      "qc_duplicateMode": "Critério de duplicatas",
+      "qc_duplicateAbsMax": "Limite absoluto de duplicatas",
+      "qc_duplicateAbsMaxBelow5LOQ": "Limite de duplicatas abaixo de 5 LOQ",
+      "qc_blankLimitMode": "Critério do branco",
+      "qc_crmMode": "Critério do CRM",
+      "qc_crmAbsWindow": "Janela absoluta do CRM",
+      "qc_lrmWindowPct": "Janela do LRM (%)",
+      "qc_ccvMin": "Recuperação mínima do CCV",
+      "qc_ccvMax": "Recuperação máxima do CCV",
+      "qc_curveMinPoints": "Pontos mínimos da curva",
+      "qc_curveMinR": "Correlação mínima da curva",
+      "qc_repeatabilityLimit": "Limite de repetibilidade",
+      "qc_blankCorrection": "Correção do branco",
+      "qc_failAction": "Ação em caso de falha de QC"
     },
     "title": "Políticas",
     "yes": "Sim",
@@ -2534,7 +2572,10 @@
       "LAB_PRESET": "Predefinição do laboratório",
       "PROFILE_OVERRIDE": "Substituição da implantação",
       "PROFILE_PRESET": "Predefinição da implantação",
-      "REGISTRY_DEFAULT": "Padrão rigoroso"
+      "REGISTRY_DEFAULT": "Padrão rigoroso",
+      "QC_RULE": "Regras de QC versionadas",
+      "DEFAULT_RULE": "Valores herdados",
+      "SHIPPED_ANALYSIS_DEFAULT": "Valor padrão da análise"
     },
     "options": {
       "YEARLY": "A cada ano",
@@ -2551,7 +2592,19 @@
       "REPORT_VALUE_FLAGGED": "Relatar valor com indicador",
       "BLANK": "Branco",
       "DUPLICATE": "Duplicata",
-      "CONTROL": "Controle de referência"
+      "CONTROL": "Controle de referência",
+      "ABS_DIFF": "Limite absoluto de duplicatas",
+      "ABS_WINDOW": "Janela absoluta do CRM",
+      "RPD": "RPD",
+      "ABSOLUTE": "Limite absoluto de duplicatas",
+      "LT_LOQ": "< LOQ",
+      "LT_HALF_LOQ": "< LOQ / 2",
+      "RECOVERY": "Recuperação",
+      "EN_SCORE": "En",
+      "NONE": "Nenhum",
+      "SUBTRACT_MEAN_BLANK": "Correção do branco",
+      "FAIL_BATCH": "Reprovar lote",
+      "WARN": "Avisar"
     },
     "units": {
       "samples": "amostras",
@@ -2694,6 +2747,53 @@
       "REFERENCE_VALUE_IMMUTABLE": "Os valores atribuídos não podem ser alterados. Corrija-os adicionando uma nova revisão.",
       "REFERENCE_VALUE_REFERENCED": "Os valores vinculados ou corrigidos não podem ser excluídos.",
       "INVALID_QC_REFERENCE_LINK": "A ligação de referência do controle de qualidade é inválida. Recarregue o lote antes de tentar novamente."
+    }
+  },
+  "qcRules": {
+    "title": "Regras de QC versionadas",
+    "measurements": "Medições de QC",
+    "required": "obrigatórios",
+    "optional": "opcional / não utilizado",
+    "add": "Adicionar",
+    "reset": "Restaurar valores herdados",
+    "inheritanceHelp": "Cada critério vazio herda a política efetiva da análise, método ou laboratório. Cada salvamento cria uma versão imutável; avaliações anteriores mantêm suas regras.",
+    "deferredHelp": "Tamanho do lote, CRM periódico, padrões de verificação e critérios de curva serão aplicados quando as posições da corrida estiverem disponíveis.",
+    "types": {
+      "BLANK": "Branco",
+      "DUPLICATE": "Par de duplicatas",
+      "CONTROL": "Controle",
+      "LRM": "Material de referência do laboratório",
+      "CRM": "Material de referência certificado"
+    },
+    "fields": {
+      "value": "Valor medido",
+      "expected": "Valor atribuído",
+      "measured": "Valor medido",
+      "value1": "Primeira leitura",
+      "value2": "Segunda leitura"
+    },
+    "actions": {
+      "FAIL_BATCH": "Reprovar lote",
+      "WARN": "Avisar"
+    },
+    "errors": {
+      "QC_RULE_VERSION_CONFLICT": "A regra mudou. Atualize antes de salvar.",
+      "QC_RULE_REASON_REQUIRED": "É necessário um motivo.",
+      "QC_RULE_EFFECTIVE_FROM_INVALID": "Use uma data futura válida; não é permitida retroatividade.",
+      "QC_RULE_SCOPE_INVALID": "A análise e o método devem pertencer a este laboratório.",
+      "QC_RULE_VALUE_INVALID": "Critério de QC inválido ou limites inconsistentes.",
+      "QC_RULE_MODE_UNSUPPORTED": "Este modo requer uma implementação posterior da auditoria.",
+      "QC_RULE_LOQ_MISSING": "Não há LOQ utilizável; este critério do branco será inválido.",
+      "QC_RULE_IMMUTABLE": "As regras são imutáveis; salve uma nova versão.",
+      "QC_REQUIRED_COUNT_MISSING": "Faltam medições de QC obrigatórias.",
+      "QC_RULE_REQUEST_FAILED": "Não foi possível processar as regras de QC.",
+      "QC_RULE_SOURCE_MISMATCH": "A fonte da migração difere da versão revisada.",
+      "QC_RULE_SCHEMA_MISMATCH": "O esquema de QC está incompleto ou difere da versão.",
+      "QC_RULE_INTEGRITY_REFUSED": "A integridade das regras de QC requer revisão.",
+      "QC_RULE_DATABASE_REQUIRED": "É necessário um caminho explícito de banco de dados.",
+      "QC_RULE_NOT_INSTALLED": "Instale a migração revisada antes de iniciar.",
+      "QC_RULE_ARGUMENT_INVALID": "Argumentos do instalador de QC inválidos.",
+      "QC_RULE_INSTALL_REFUSED": "A instalação das regras de QC foi recusada."
     }
   }
 }

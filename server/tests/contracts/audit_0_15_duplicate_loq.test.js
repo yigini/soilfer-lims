@@ -63,7 +63,7 @@ describe('Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring 
         }
         return { batch, methods };
     }
-    const payload = (value1, value2) => ({ blanks: [{ value: '0' }], controls: [{ expected: '7', measured: '7' }], duplicates: [{ value1, value2 }] });
+    const payload = (value1, value2) => ({ blanks: [{ value: '0' }], controls: [{ expected: '7', measured: '7' }], duplicates: [{ value1, value2 }, { value1: 7, value2: 7 }] });
     const evaluate = (batch, data, route = 'post') => request(app)[route](`/api/qc/batches/${batch.id}${route === 'post' ? '/evaluate' : ''}`)
         .set('Authorization', `Bearer ${token}`).send(data);
     const duplicate = async batch => {

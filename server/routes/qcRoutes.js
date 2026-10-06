@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const qcController = require('../controllers/qcController');
+const qcRuleController = require('../controllers/qcRuleController');
 const { verifyToken, checkPermission } = require('../middleware/authMiddleware');
 
 router.use(verifyToken);
+router.get('/rules', checkPermission('VIEW_LAB_POLICIES'), qcRuleController.list);
+router.post('/rules', checkPermission('MANAGE_LAB_POLICIES'), qcRuleController.change);
 
 router.post('/batches', checkPermission('CHANGE_STATUS'), qcController.createBatch);
 router.get('/batches', qcController.getBatches);

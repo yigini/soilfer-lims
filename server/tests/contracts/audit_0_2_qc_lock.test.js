@@ -13,7 +13,7 @@ const labId = 'LAB-AUDIT-02';
 const readings = {
     blanks: [{ value: 0.01 }],
     controls: [{ expected: 7, measured: 7 }],
-    duplicates: [{ value1: 7, value2: 7.01 }]
+    duplicates: [{ value1: 7, value2: 7.01 }, { value1: 7, value2: 7.01 }]
 };
 const id = prefix => `${prefix}-${crypto.randomUUID()}`;
 const wire = value => JSON.parse(JSON.stringify(value));

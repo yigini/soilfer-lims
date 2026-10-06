@@ -12,7 +12,7 @@ const React = require(path.join(clientRoot, 'node_modules/react'));
 
 const completeValues = () => ({
     blanks: [{ value: 0 }], controls: [{ expected: 7, measured: 7 }],
-    duplicates: [{ value1: 7, value2: 7 }]
+    duplicates: [{ value1: 7, value2: 7 }, { value1: 7, value2: 7 }]
 });
 
 describe('Audit 0.1: explicit QC measurements at evaluation', () => {

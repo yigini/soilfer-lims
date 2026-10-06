@@ -34,6 +34,20 @@ key('qc.controlMinRecovery', 'number', 90, 90, 90, { min: 0, unit: '%' });
 key('qc.controlMaxRecovery', 'number', 110, 110, 110, { min: 0, unit: '%' });
 key('qc.duplicateNearLoqMultiplier', 'number', 5, 5, 5, { min: 0, unit: 'LOQ multiplier' });
 key('qc.duplicateMaxRpd', 'number', 10, 10, 10, { min: 0, unit: '%' });
+key('qc.duplicateMode', 'enum', 'RPD', undefined, undefined, { allowedValues: ['RPD', 'ABS_DIFF'] });
+key('qc.duplicateAbsMax', 'number', null, null, null, { min: 0, nullable: true, unit: 'method unit' });
+key('qc.duplicateAbsMaxBelow5LOQ', 'number', null, null, null, { min: 0, nullable: true, unit: 'method unit' });
+key('qc.blankLimitMode', 'enum', 'ABSOLUTE', undefined, undefined, { allowedValues: ['ABSOLUTE', 'LT_LOQ', 'LT_HALF_LOQ'] });
+key('qc.crmMode', 'enum', 'RECOVERY', undefined, undefined, { allowedValues: ['RECOVERY', 'ABS_WINDOW', 'EN_SCORE'], unsupportedValues: ['EN_SCORE'] });
+key('qc.crmAbsWindow', 'number', null, null, null, { min: 0, nullable: true, unit: 'method unit' });
+key('qc.lrmWindowPct', 'number', null, null, null, { min: 0, nullable: true, unit: '%' });
+key('qc.ccvMin', 'number', 90, undefined, undefined, { min: 0, unit: '%' });
+key('qc.ccvMax', 'number', 110, undefined, undefined, { min: 0, unit: '%' });
+key('qc.curveMinPoints', 'integer', 5, undefined, undefined, { min: 1 });
+key('qc.curveMinR', 'number', 0.995, undefined, undefined, { min: 0, max: 1 });
+key('qc.repeatabilityLimit', 'number', null, null, null, { min: 0, nullable: true, unit: 'method unit' });
+key('qc.blankCorrection', 'enum', 'NONE', undefined, undefined, { allowedValues: ['NONE', 'SUBTRACT_MEAN_BLANK'], unsupportedValues: ['SUBTRACT_MEAN_BLANK'] });
+key('qc.failAction', 'qcFailAction', { BLANK: 'FAIL_BATCH', DUPLICATE: 'FAIL_BATCH', LRM: 'FAIL_BATCH', CRM: 'FAIL_BATCH' });
 key('results.reportedValueRule', 'enum', 'MEAN_IF_WITHIN_R', 'MEAN_IF_WITHIN_R', 'LATEST_VALID', { allowedValues: ['MEAN_IF_WITHIN_R', 'LATEST_VALID'] });
 key('results.betweenLodLoq', 'enum', 'REPORT_LT_LOQ', 'REPORT_LT_LOQ', 'REPORT_VALUE_FLAGGED', { allowedValues: ['REPORT_LT_LOQ', 'REPORT_VALUE_FLAGGED'] });
 key('results.phMin', 'number', 2, 2, 2, { min: 0, unit: 'pH' });
@@ -67,10 +81,12 @@ function valid(name, value) {
     const d = definition(name);
     if (value === null) return d.nullable === true;
     switch (d.type) {
-    case 'enum': return d.allowedValues.includes(value);
+    case 'enum': return d.allowedValues.includes(value) && !d.unsupportedValues?.includes(value);
     case 'boolean': return typeof value === 'boolean';
     case 'integer': return Number.isSafeInteger(value) && value >= (d.min ?? 0);
-    case 'number': return typeof value === 'number' && Number.isFinite(value) && value >= (d.min ?? 0);
+    case 'number': return typeof value === 'number' && Number.isFinite(value) && value >= (d.min ?? 0) && (d.max === undefined || value <= d.max);
+    case 'qcFailAction': return !!value && typeof value === 'object' && !Array.isArray(value) &&
+        Object.keys(value).length === 4 && ['BLANK', 'DUPLICATE', 'LRM', 'CRM'].every(type => ['FAIL_BATCH', 'WARN'].includes(value[type]));
     case 'westgard': {
         if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(k => !['reject', 'warn'].includes(k))) return false;
         if (!['reject', 'warn'].every(k => Array.isArray(value[k]) && value[k].every(v => d.allowedValues.includes(v)))) return false;

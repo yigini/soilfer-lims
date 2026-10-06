@@ -56,7 +56,7 @@ async function batch(methods = []) {
     }
     return id;
 }
-const payload = controls => ({ blanks: [{ value: 0.001 }], duplicates: [{ value1: 7, value2: 7 }], controls });
+const payload = controls => ({ blanks: [{ value: 0.001 }], duplicates: [{ value1: 7, value2: 7 }, { value1: 7, value2: 7 }], controls: [...controls, { expected: 7, measured: 7 }] });
 const path = (id, endpoint) => `/api/qc/batches/${id}${endpoint === 'evaluate' ? '/evaluate' : ''}`;
 const place = (id, endpoint, controls, auth = token) => call(endpoint === 'evaluate' ? 'post' : 'put', path(id, endpoint), payload(controls), auth);
 

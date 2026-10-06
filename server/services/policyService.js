@@ -89,7 +89,12 @@ function snapshotFromState(current, context = {}) {
         inheritedPreset: current.profile.preset || 'ISO17025_STRICT',
         values: Object.fromEntries(Object.entries(resolved).map(([key, row]) => [key, row.value])), resolved };
 }
-async function resolve(reference, key, context = {}) { return resolvedFromState(await state(reference, context), key, context); }
+async function resolve(reference, key, context = {}) {
+    definition(key);
+    // Internal callers can reuse one transaction's complete snapshot, including source metadata.
+    if (context.snapshot) return clone(context.snapshot.resolved[key]);
+    return resolvedFromState(await state(reference, context), key, context);
+}
 async function get(reference, key, context = {}) {
     definition(key);
     return context.snapshot ? clone(context.snapshot.values[key]) : (await resolve(reference, key, context)).value;
@@ -100,7 +105,7 @@ function validatePairs(values, status = 400, code = 'POLICY_VALUE_INVALID') {
     if (!require('../../shared/numberParse').validateNumberFormat({ decimal: values['numbers.decimalSeparator'], thousands: values['numbers.thousandsSeparator'] })) {
         throw error(status, code, 'Decimal and thousands separators must differ.');
     }
-    if (values['qc.controlMinRecovery'] > values['qc.controlMaxRecovery'] || values['results.phMin'] > values['results.phMax']) {
+    if (values['qc.controlMinRecovery'] > values['qc.controlMaxRecovery'] || values['qc.ccvMin'] > values['qc.ccvMax'] || values['results.phMin'] > values['results.phMax']) {
         throw error(status, code, 'A policy lower bound cannot exceed its upper bound.');
     }
 }
