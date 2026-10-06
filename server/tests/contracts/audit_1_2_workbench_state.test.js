@@ -42,6 +42,8 @@ test('final approval returns the preparation-reversion 409 and preserves every r
 
 test('undo intake preserves every task when the transition is refused by a database guard', async () => {
     const row = await fixture('ACCEPTED', 'NOT_ASSIGNED');
+    // This probes the later Sample guard, so start with truly unrecorded work.
+    await prisma.$transaction(tx => require('../../services/resultWriteService').writeFixtureCache(tx, row.item, null, 'system:fixture'));
     await work.createWorkItem({ id: randomUUID(), sampleId: row.sample.id, analysis: 'PREPARATION', assignedLab: labId }, manager);
     const before = await snapshot([row.sample.id]), transaction = prisma.$transaction.bind(prisma);
     jest.spyOn(prisma, '$transaction').mockImplementationOnce(execute => transaction(tx => execute({ ...tx,
@@ -79,7 +81,7 @@ test.each(['removePreAnalyticSample', 'removeUnstartedWorkItems'])('%s refuses a
 test.each(['COMPLETED', 'IN_PROGRESS', 'ASSIGNED'])('undo intake preserves %s work and its recorded evidence on refusal', async status => {
     const row = await fixture('ACCEPTED', status), before = await snapshot([row.sample.id]);
     expect(await call(sampleController.undoIntake, {}, { id: row.sample.id }, manager))
-        .toMatchObject({ statusCode: 409, body: { code: status === 'ASSIGNED' ? 'CANNOT_DELETE_SAMPLE_WITH_RESULTS' : 'ACTIVE_WORK_IN_PROGRESS' } });
+        .toMatchObject({ statusCode: 409, body: { code: 'INTAKE_UNDO_HAS_WORK', details: { blockingItemIds: [row.item.id] } } });
     expect(await snapshot([row.sample.id])).toEqual(before);
 });
 
@@ -115,7 +117,10 @@ function failAudit(action, aggregateOnly = false) {
         get(target, key) {
             if (key === 'auditLog') return new Proxy(target.auditLog, { get(delegate, operation) {
                 if (operation === 'create') return args => {
-                    if ((!action || args.data.action === action) && (!aggregateOnly || args.data.entityId == null)) throw new Error('Injected workflow audit failure');
+                    if ((!action || args.data.action === action) && (!aggregateOnly || args.data.details?.startsWith('Cleared '))) {
+                        if (aggregateOnly) expect(args.data.entityId).toBe('PH');
+                        throw new Error('Injected workflow audit failure');
+                    }
                     return delegate.create(args);
                 };
                 return delegate[operation];

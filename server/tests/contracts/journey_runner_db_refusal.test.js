@@ -95,7 +95,10 @@ describe('Browser Journey Database Isolation & Refusal Contract', () => {
                 const sql = actualRead(require.resolve('../../prisma/migrations/20261005000100_workflow_state_guards/migration.sql'), 'utf8');
                 const names = [...sql.matchAll(/CREATE TRIGGER "([^"]+)"/g)].map(match => match[1]);
                 expect(names).toHaveLength(11);
-                expect(testDb.prepare("SELECT name FROM sqlite_master WHERE type='trigger'").all().map(row => row.name).sort()).toEqual(names.sort());
+                const holdSql = require('../../services/sampleHoldMigrationSource').loadSampleHoldMigrationSource().guardsSql;
+                const holdNames = [...holdSql.matchAll(/CREATE TRIGGER "([^"]+)"/g)].map(match => match[1]);
+                expect(holdNames).toHaveLength(7);
+                expect(testDb.prepare("SELECT name FROM sqlite_master WHERE type='trigger'").all().map(row => row.name).sort()).toEqual([...names, ...holdNames].sort());
                 for (const table of ['Sample', 'WorkItem']) {
                     expect(testDb.prepare(`PRAGMA table_info("${table}")`).all().map(row => row.name)).toEqual(expect.arrayContaining(['holdPriorStatus', 'legacyStatus']));
                 }

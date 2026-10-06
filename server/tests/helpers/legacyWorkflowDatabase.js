@@ -141,6 +141,15 @@ function beforeGuards(options) {
         if (schemaVariant !== null) {
             const beforeSequence = expected.findIndex(row => row.table === 'LabSequence');
             expected.splice(beforeSequence < 0 ? expected.length : beforeSequence, 0, { table: 'Result', fields: ['attemptId'] });
+            // #183 adds exactly these nullable history fields and one table.
+            // Literal historical schemas remain unchanged; unexpected gaps fail.
+            const cancellationFields = ['cancellationCode', 'cancellationReason', 'cancelledBy', 'cancelledAt'];
+            const workGap = expected.find(row => row.table === 'WorkItem');
+            if (workGap) workGap.fields.push(...cancellationFields);
+            else expected.push({ table: 'WorkItem', fields: cancellationFields });
+            expected.push({ table: 'SampleHold', missingTable: true });
+            const modelNames = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
+            expected.sort((left, right) => modelNames.indexOf(left.table) - modelNames.indexOf(right.table));
         }
         assert.equal(JSON.stringify(missing), JSON.stringify(expected),
             'Pinned historical baseline does not match the generated Prisma datamodel.');

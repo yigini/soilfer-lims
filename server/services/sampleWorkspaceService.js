@@ -1,6 +1,7 @@
 const prisma = require('../prisma');
 const scopeGuard = require('../utils/scopeGuard');
 const { hasPermission } = require('../config/roles');
+const sampleHolds = require('./sampleHoldService');
 
 const TEXTURE_ALIASES = new Set([
     'TEXTURE',
@@ -510,11 +511,14 @@ class SampleWorkspaceService {
                 message: 'One or more work items are blocked by a failed QC batch'
             });
         }
-        if (parsedMetadata?.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD') {
+        const holds = await prisma.sampleHold.findMany({ where: { sampleId: sample.id }, orderBy: [{ raisedAt: 'asc' }, { id: 'asc' }] });
+        const held = sampleHolds.isHeldSnapshot({ ...sample, holds });
+        const holdReason = holds.find(hold => !hold.resolvedAt)?.reason || sampleHolds.legacyHoldState(sample).reason;
+        if (held) {
             integrityIssues.push({
                 code: 'AMBIGUOUS_PROVENANCE_HOLD',
                 severity: 'CRITICAL',
-                message: `Ambiguous field specimen identity: ${parsedMetadata.provenanceHold.reason}. Acceptance blocked pending manual reconciliation.`,
+                message: 'Resolve all sample holds before acceptance or assignment.',
                 count: 1
             });
         }
@@ -541,9 +545,9 @@ class SampleWorkspaceService {
                 reason: sample.status !== 'EXPECTED' ? 'Sample already received' : (isReception ? null : 'Requires reception authority')
             },
             canAcceptIntake: {
-                allowed: isReception && ['EXPECTED', 'RECEIVED'].includes(sample.status) && !(parsedMetadata?.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD'),
-                reason: (parsedMetadata?.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD')
-                    ? `Ambiguous specimen identity: ${parsedMetadata.provenanceHold.reason}`
+                allowed: hasPermission(user, 'RECEIVE_SAMPLE') && ['EXPECTED', 'RECEIVED'].includes(sample.status) && !held,
+                reason: held
+                    ? `Ambiguous specimen identity: ${holdReason || 'Resolve all sample holds'}`
                     : (isReception ? null : 'Requires reception or manager authority')
             },
             canManageAnalyses: {
@@ -551,9 +555,10 @@ class SampleWorkspaceService {
                 reason: isDisposed ? 'Material is disposed and immutable' : (isManagerOrAdmin ? null : 'Requires lab manager authority')
             },
             canAssign: {
-                allowed: isManagerOrAdmin && !isDisposed,
-                reason: isDisposed ? 'Material is disposed' : (isManagerOrAdmin ? null : 'Requires lab manager authority')
+                allowed: hasPermission(user, 'ASSIGN_WORK') && ['ACCEPTED', 'PROCESSING'].includes(sample.status) && !held,
+                reason: held ? holdReason : (!['ACCEPTED', 'PROCESSING'].includes(sample.status) ? 'Sample must be accepted or processing' : (hasPermission(user, 'ASSIGN_WORK') ? null : 'Requires assignment authority'))
             },
+            canResolveHold: { allowed: held && hasPermission(user, 'APPROVE_RESULTS'), reason: held ? null : 'No open hold' },
             canSubmit: {
                 allowed: isTechnician && !isDisposed && enrichedWorkItems.some(w => ['RECORDED', 'COMPLETED'].includes(w.status)),
                 reason: isDisposed ? 'Material is disposed' : (!isTechnician ? 'Requires technician role' : 'No recorded work eligible for submission')
@@ -595,12 +600,12 @@ class SampleWorkspaceService {
 
         // Determine Primary Next Action
         let nextAction = { action: 'VIEW', label: 'View sample workspace', role: 'ALL' };
-        if (sample.status === 'EXPECTED') {
+        if (held && ['RECEIVED', 'ACCEPTED', 'PROCESSING'].includes(sample.status)) {
+            nextAction = { action: 'RECONCILE_HOLD', label: 'Resolve sample hold', role: 'LAB_MANAGER', disabled: !capabilities.canResolveHold.allowed, reason: holdReason };
+        } else if (sample.status === 'EXPECTED') {
             nextAction = { action: 'RECEIVE', label: 'Receive physical sample', role: 'SAMPLE_RECEPTION' };
         } else if (sample.status === 'RECEIVED') {
-            nextAction = parsedMetadata?.provenanceHold?.status === 'AMBIGUOUS_PROVENANCE_HOLD'
-                ? { action: 'RECONCILE_HOLD', label: 'Reconciliation required (Ambiguous Provenance Hold)', role: 'LAB_MANAGER', disabled: true, reason: parsedMetadata.provenanceHold.reason }
-                : { action: 'ACCEPT_INTAKE', label: 'Accept intake & generate work', role: 'SAMPLE_RECEPTION' };
+            nextAction = { action: 'ACCEPT_INTAKE', label: 'Accept intake & generate work', role: 'SAMPLE_RECEPTION' };
         } else if (unassignedCount > 0 && isManagerOrAdmin) {
             nextAction = { action: 'ASSIGN', label: `Assign ${unassignedCount} unassigned task(s) to technician`, role: 'LAB_MANAGER' };
         } else if (!gates.allGatesPassed && analyticalItems.length > 0) {
@@ -628,6 +633,8 @@ class SampleWorkspaceService {
         }
 
         return {
+            held,
+            holds: holds.map(sampleHolds.presentHold),
             identity: {
                 profileReference,
                 id: sample.id,

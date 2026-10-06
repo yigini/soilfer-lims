@@ -1,4 +1,33 @@
 {
+  "sampleHolds": {
+    "metadataRepairNeeded": "É necessário reparar os metadados antes de resolver esta retenção.",
+    "title": "Bloqueios da amostra",
+    "badge": "Amostra bloqueada",
+    "open": "Aberto",
+    "resolved": "Resolvido",
+    "resolve": "Resolver bloqueio",
+    "resolutionReason": "Motivo da resolução (obrigatório)",
+    "raisedAt": "Criado em",
+    "raisedAtOrBefore": "Criado em ou antes de",
+    "backfillRequired": "Um bloqueio antigo ainda impede esta amostra. Um responsável deve revê-lo e registá-lo antes da resolução.",
+    "undoConfirmation": "Devolver a amostra a RECEBIDA e cancelar os trabalhos elegíveis? Os trabalhos, o histórico e o identificador do laboratório são preservados. Resultados, espectros, tentativas ou outras evidências impedem esta ação.",
+    "undoSuccess": "Receção desfeita. A amostra está RECEBIDA; os trabalhos cancelados e o histórico são preservados.",
+    "types": {
+      "PROVENANCE": "Proveniência",
+      "CUSTODY": "Custódia",
+      "CLIENT_QUERY": "Consulta do cliente",
+      "QC": "Controlo de qualidade",
+      "OTHER": "Outro"
+    },
+    "errors": {
+      "HOLD_FETCH_ERROR": "Não foi possível carregar os bloqueios. Atualize antes de aceitar ou atribuir trabalhos.",
+      "HOLD_BACKFILL_REQUIRED": "Reveja e registe o bloqueio antigo antes de o resolver.",
+      "HOLD_MARKER_INVALID": "Um responsável deve rever os metadados do bloqueio antes da resolução.",
+      "HOLD_RESOLVE_FORBIDDEN": "É necessária autorização de responsável para resolver um bloqueio.",
+      "HOLD_STATE_CHANGED": "O bloqueio mudou. Atualize e reveja novamente.",
+      "HOLD_RESOLVE_ERROR": "Não foi possível resolver o bloqueio. Atualize e tente novamente."
+    }
+  },
   "resultReports": {
     "qcWarningStatement": "Aviso de QC: Um ou mais valores relatados têm QC de lote reprovado ou incompleto. Consulte os avisos de lote registrados.",
     "qcWithinLimits": "QC dentro dos limites para todos os valores relatados.",

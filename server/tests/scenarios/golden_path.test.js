@@ -131,11 +131,13 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         const itemsRes = await request(app).get('/api/work').set('Authorization', `Bearer ${mgrToken}`).query({ sampleId });
         const phItem = itemsRes.body.data.find(i => i.analysis === 'PH_H2O');
         const condItem = itemsRes.body.data.find(i => i.analysis === 'EC');
+        const socItem = itemsRes.body.data.find(i => i.analysis === 'SOC');
 
-        await request(app)
+        const assignRes = await request(app)
             .post('/api/work/assign')
             .set('Authorization', `Bearer ${mgrToken}`)
-            .send({ workItemIds: [phItem.id, condItem.id], assignee: techUsername });
+            .send({ workItemIds: [phItem.id, condItem.id, socItem.id], assignee: techUsername });
+        expect(assignRes.status).toBe(200);
 
         // 4. Tech Completes partial
         await completeAnalyticalWork(phItem.id, techToken, '7.2');
@@ -162,8 +164,6 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         await completeAnalyticalWork(condItem.id, techToken, '1.5');
 
         // 8. Full Submission
-        const socItem = itemsRes.body.data.find(i => i.analysis === 'SOC');
-        await request(app).post('/api/work/assign').set('Authorization', `Bearer ${mgrToken}`).send({ workItemIds: [socItem.id], assignee: techUsername });
         await completeAnalyticalWork(socItem.id, techToken, '15.0');
 
         const fullSubRes = await request(app)
@@ -254,6 +254,13 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
             });
         const sampleId = intakeRes.body.id;
 
+        // Assign while intake is accepted; the subsequent hold must block
+        // execution of that assigned task, rather than allow a new assignment.
+        const items = await request(app).get('/api/work').set('Authorization', `Bearer ${mgrRedToken}`).query({ sampleId });
+        const phId = items.body.data.find(i => i.analysis === 'PH_H2O').id;
+        const assigned = await request(app).post('/api/work/assign').set('Authorization', `Bearer ${mgrRedToken}`).send({ workItemIds: [phId], assignee: techRedUsername });
+        expect(assigned.status).toBe(200);
+
         // 1. Fail Drying WITHOUT reason (should fail if validation exists, or just verify it blocks)
         const failRes = await request(app)
             .put(`/api/samples/${sampleId}/phase`)
@@ -270,10 +277,6 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         expect(prepRes.body.code).toBe('DRYING_PREREQUISITE_FAILED');
 
         // 3. Verify Analysis completion blocked
-        const items = await request(app).get('/api/work').set('Authorization', `Bearer ${mgrRedToken}`).query({ sampleId });
-        const phId = items.body.data.find(i => i.analysis === 'PH_H2O').id;
-        await request(app).post('/api/work/assign').set('Authorization', `Bearer ${mgrRedToken}`).send({ workItemIds: [phId], assignee: techRedUsername });
-
         const completeRes = await request(app)
             .post('/api/workbench/batch-save')
             .set('Authorization', `Bearer ${techRedToken}`)

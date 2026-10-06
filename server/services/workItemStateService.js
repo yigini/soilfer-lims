@@ -6,11 +6,36 @@ const { TransitionError } = rules;
 const OPERATIONAL = Object.freeze(['DRYING', 'PREPARATION']);
 const CONFIRMABLE = Object.freeze(['NOT_ASSIGNED', 'ASSIGNED', 'IN_PROGRESS', 'REPEAT_REQUIRED']);
 const QC_REPEATABLE = Object.freeze(['NOT_ASSIGNED', 'ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'SUBMITTED', 'REPEAT_REQUIRED']);
+const INTAKE_ACTION = Symbol('authorized intake work action');
+const CANCELLABLE = Object.freeze(['NOT_ASSIGNED', 'ASSIGNED', 'IN_PROGRESS', 'ON_HOLD']);
+const CANCELLATION_CODES = Object.freeze({ cancelForIntakeUndo: 'INTAKE_UNDONE', cancelForIntakeRejection: 'INTAKE_REJECTED' });
+
+async function hasIntakeEvidence(tx, item) {
+    return Boolean(item.batchId || item.result?.trim() || await tx.result.count({ where: { sampleId: item.sampleId, param: item.analysis } }) ||
+        await tx.spectralData.count({ where: { OR: [{ workItemId: item.id }, { sampleId: item.sampleId, workItemId: null }] } }) ||
+        await tx.resultEvidenceEvent.count({ where: { sampleId: item.sampleId, result: { param: item.analysis } } }) ||
+        await tx.workAttempt.count({ where: { workItemId: item.id } }) ||
+        await tx.workItemDraft.count({ where: { workItemId: item.id } }) ||
+        await tx.workItemEquipmentUse.count({ where: { workItemId: item.id } }) ||
+        await tx.inventoryTransaction.count({ where: { workItemId: item.id } }));
+}
 
 function assertActionEdge(item, sample, nextStatus, actor, reason, options) {
     const current = workflow.normalizeWorkItemState(item.status);
     const operational = OPERATIONAL.includes(item.analysis);
     const action = options.action;
+    if (current === 'CANCELLED') {
+        if (options.intakeAction !== INTAKE_ACTION || action !== 'reactivateCancelledIntakeWork' || nextStatus !== 'NOT_ASSIGNED') {
+            throw new TransitionError('Cancelled work requires legal intake re-acceptance.', 409, 'WORKITEM_REACTIVATION_ACTION_REQUIRED');
+        }
+        return true;
+    }
+    if (nextStatus === 'CANCELLED') {
+        if (options.intakeAction !== INTAKE_ACTION || !Object.hasOwn(CANCELLATION_CODES, action)) {
+            throw new TransitionError('Use the named intake cancellation action.', 409, 'WORKITEM_CANCEL_ACTION_REQUIRED');
+        }
+        return CANCELLABLE.includes(current);
+    }
     if (nextStatus === 'AWAITING_VERIFICATION' || current === 'AWAITING_VERIFICATION') {
         if (nextStatus === 'AWAITING_VERIFICATION' && operational && action === 'OPERATION_CONFIRMED' && hasPermission(actor, 'ENTER_RESULTS') &&
             options.verificationRequired === true && CONFIRMABLE.includes(current)) return true;
@@ -68,10 +93,13 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
     if (!migrating && workflow.isLegacyWorkItemState(nextStatus)) {
         throw new TransitionError(`Status '${nextStatus}' is a deprecated legacy status.`, 409, 'ILLEGAL_LEGACY_STATUS');
     }
-    if (!migrating && (!workflow.isValidWorkItemState(nextStatus) || nextStatus === 'CANCELLED')) {
+    if (!migrating && !workflow.isValidWorkItemState(nextStatus)) {
         throw new TransitionError(`Status '${nextStatus}' cannot be written.`, 409, 'UNKNOWN_WORKITEM_STATUS');
     }
     const { result: _excludedResult, ...data } = rules.updateData(extraData, nextStatus, workflow.normalizeWorkItemState);
+    if (['cancellationCode', 'cancellationReason', 'cancelledBy', 'cancelledAt'].some(key => Object.hasOwn(data, key))) {
+        throw new TransitionError('Cancellation provenance is controlled by the intake action.', 400, 'STATE_METADATA_NOT_ALLOWED');
+    }
     return rules.inTransaction(tx, async client => {
         const item = await client.workItem.findUnique({ where: { id: String(workItemId) } });
         if (!item) throw new TransitionError('Work item not found.', 404, 'WORK_ITEM_NOT_FOUND');
@@ -88,11 +116,39 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
             rules.requireReason(reason);
         } else {
             const current = workflow.normalizeWorkItemState(item.status);
+            if (current === 'CANCELLED' || nextStatus === 'CANCELLED') {
+                assertActionEdge(item, sample, nextStatus, actor, reason, options);
+            }
+            const assigneeChanged = Object.hasOwn(data, 'assignedTo') && data.assignedTo !== item.assignedTo;
+            const assignment = current === 'NOT_ASSIGNED' && nextStatus === 'ASSIGNED' || assigneeChanged;
+            if ((assignment || options.audit?.action === 'WORKITEM_REASSIGNED') && ['SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(current)) {
+                throw new TransitionError('Sealed work cannot be reassigned.', 409, 'WORKITEM_ASSIGNMENT_SEALED');
+            }
+            // Re-acceptance clears the former assignee under its private intake
+            // capability. Draft reverts and same-state edits are not assignments.
+            if (assignment && current !== 'CANCELLED') {
+                if (!['ACCEPTED', 'PROCESSING'].includes(workflow.normalizeSampleState(sample.status))) {
+                    throw new TransitionError('Accept the sample before assignment.', 409, 'SAMPLE_NOT_ASSIGNABLE');
+                }
+                await require('./sampleHoldService').assertNotHeld(client, sample);
+            }
             if (current === 'COMPLETED' && nextStatus === 'IN_PROGRESS') rules.requireReason(reason);
             if ((current !== nextStatus || options.action) && !assertActionEdge(item, sample, nextStatus, actor, reason, options)) {
                 throw new TransitionError(`Illegal status transition: ${current} → ${nextStatus}.`, 409, 'ILLEGAL_STATUS_TRANSITION');
             }
-            provenance = rules.holdData(item, nextStatus, actor, reason, 'WorkItem');
+            if (nextStatus === 'CANCELLED') {
+                const note = rules.requireReason(reason);
+                if (await hasIntakeEvidence(client, item)) throw new TransitionError('Recorded work must be retained.', 409, 'INTAKE_UNDO_HAS_WORK', { blockingItemIds: [item.id] });
+                provenance = { cancellationCode: CANCELLATION_CODES[options.action], cancellationReason: note, cancelledBy: performedBy, cancelledAt: new Date() };
+            } else if (current === 'CANCELLED') {
+                rules.requireReason(reason);
+                if (!['INTAKE_UNDONE', 'INTAKE_REJECTED'].includes(item.cancellationCode)) {
+                    throw new TransitionError('Legacy cancelled work needs manager review.', 409, 'WORKITEM_LEGACY_CANCELLED_CONFLICT', { workItemId: item.id });
+                }
+                if (await hasIntakeEvidence(client, item)) throw new TransitionError('Recorded work must be retained.', 409, 'INTAKE_UNDO_HAS_WORK', { blockingItemIds: [item.id] });
+                provenance = { assignedTo: null, assignedBy: null, assignedAt: null, completedAt: null, submittedAt: null,
+                    reviewedBy: null, reviewedAt: null, reviewDecision: null, holdPriorStatus: null };
+            } else provenance = rules.holdData(item, nextStatus, actor, reason, 'WorkItem');
             if (['SUBMITTED', 'ACCEPTED'].includes(nextStatus) && !workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis)) {
                 await require('./resultEvidenceService').assertNoPreparationRevert(client, sample.id);
             }
@@ -128,7 +184,8 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
         await client.auditLog.create({ data: {
             id: randomUUID(), entity: 'WORKITEM', entityId: item.id,
             action: options.audit?.action || (migrating ? 'WORKITEM_STATUS_MIGRATED' : options.action || 'WORKITEM_STATUS_TRANSITION'),
-            details: options.audit?.details || JSON.stringify({ from: item.status, to: nextStatus, reason: reason || null }),
+            details: options.audit?.details || JSON.stringify({ from: item.status, to: nextStatus, reason: reason || null,
+                ...(item.status === 'CANCELLED' && { cancellation: { code: item.cancellationCode, reason: item.cancellationReason, by: item.cancelledBy, at: item.cancelledAt } }) }),
             performedBy, sampleId: sample.id, labId: item.assignedLab || sample.assignedLab || null, analysisCode: item.analysis,
             before: JSON.stringify({ status: item.status, version: item.version, holdPriorStatus: item.holdPriorStatus ?? null, legacyStatus: item.legacyStatus ?? null }),
             after: JSON.stringify({ status: updated.status, version: updated.version, holdPriorStatus: updated.holdPriorStatus ?? null, legacyStatus: updated.legacyStatus ?? null, ...gateAudit }),
@@ -136,6 +193,57 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
         } });
         return updated;
     });
+}
+
+async function cancelIntakeWork(tx, { sampleId, actor, reason }, action) {
+    rules.requireTransaction(tx);
+    rules.requireReason(reason);
+    if (!hasPermission(actor, action === 'cancelForIntakeUndo' ? 'APPROVE_RESULTS' : 'RECEIVE_SAMPLE')) {
+        throw new TransitionError('Intake cancellation is not authorized.', 403, 'INTAKE_CANCEL_FORBIDDEN');
+    }
+    const sample = await tx.sample.findUnique({ where: { id: String(sampleId) } });
+    if (!sample) throw new TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
+    rules.assertScope(actor, sample);
+    if (action === 'cancelForIntakeUndo' ? workflow.normalizeSampleState(sample.status) !== 'ACCEPTED' :
+        !(workflow.normalizeSampleState(sample.status) === 'RECEIVED_REJECTED' ||
+            workflow.isValidSampleTransition(workflow.normalizeSampleState(sample.status), 'RECEIVED_REJECTED'))) {
+        throw new TransitionError('Sample is not eligible for this intake action.', 409, 'INTAKE_CANCEL_STATE_INVALID');
+    }
+    const items = await tx.workItem.findMany({ where: { sampleId: sample.id } }), blockingItemIds = [];
+    const activeItems = items.filter(item => workflow.normalizeWorkItemState(item.status) !== 'CANCELLED');
+    for (const item of activeItems) if (!CANCELLABLE.includes(workflow.normalizeWorkItemState(item.status)) || await hasIntakeEvidence(tx, item)) blockingItemIds.push(item.id);
+    // Unlinked or historically mis-keyed specimen evidence also blocks the whole action.
+    const specimenEvidence = await tx.result.count({ where: { sampleId: sample.id } }) || await tx.spectralData.count({ where: { sampleId: sample.id } }) ||
+        await tx.resultEvidenceEvent.count({ where: { sampleId: sample.id } });
+    if (blockingItemIds.length || specimenEvidence) throw new TransitionError('Intake has recorded work and cannot be cancelled.', 409, 'INTAKE_UNDO_HAS_WORK',
+        { blockingItemIds: blockingItemIds.length ? blockingItemIds : items.map(item => item.id) });
+    const cancelled = [];
+    for (const item of activeItems) cancelled.push(await transitionWorkItem(item.id, 'CANCELLED', actor, reason, {}, tx,
+        { action, intakeAction: INTAKE_ACTION, expected: item }));
+    return cancelled;
+}
+
+async function cancelForIntakeUndo(tx, options) { return cancelIntakeWork(tx, options, 'cancelForIntakeUndo'); }
+async function cancelForIntakeRejection(tx, options) { return cancelIntakeWork(tx, options, 'cancelForIntakeRejection'); }
+
+// Only sampleStateService calls this after its legal re-acceptance edge, inside
+// that same transaction. The private capability cannot come from HTTP options.
+async function reactivateCancelledIntakeWork(tx, { sampleId, previousSampleStatus, analyses, actor, reason }) {
+    rules.requireTransaction(tx);
+    if (!['EXPECTED', 'RECEIVED', 'RECEIVED_REJECTED'].includes(previousSampleStatus)) {
+        throw new TransitionError('Reactivation requires legal intake re-acceptance.', 409, 'WORKITEM_REACTIVATION_ACTION_REQUIRED');
+    }
+    const sample = await tx.sample.findUnique({ where: { id: String(sampleId) } });
+    if (!sample || sample.status !== 'ACCEPTED') throw new TransitionError('Reactivation requires legal intake re-acceptance.', 409, 'WORKITEM_REACTIVATION_ACTION_REQUIRED');
+    rules.assertScope(actor, sample);
+    const items = await tx.workItem.findMany({ where: { sampleId: sample.id, status: 'CANCELLED', analysis: { in: analyses } } });
+    if (items.length && !hasPermission(actor, 'RECEIVE_SAMPLE')) {
+        throw new TransitionError('Reactivation requires intake permission.', 403, 'INTAKE_REACTIVATION_FORBIDDEN');
+    }
+    const reactivated = [];
+    for (const item of items) reactivated.push(await transitionWorkItem(item.id, 'NOT_ASSIGNED', actor, reason, {}, tx,
+        { action: 'reactivateCancelledIntakeWork', intakeAction: INTAKE_ACTION, expected: item }));
+    return reactivated;
 }
 
 async function createWorkItem(data, actor, options = {}) {
@@ -151,6 +259,9 @@ async function createWorkItem(data, actor, options = {}) {
         throw new TransitionError('A new work item must start at NOT_ASSIGNED.', 409, 'INITIAL_STATE_NOT_ALLOWED');
     }
     if (data.holdPriorStatus != null || data.legacyStatus != null) throw new TransitionError('Creation cannot set state provenance.', 400, 'STATE_METADATA_NOT_ALLOWED');
+    if (options.context !== 'fixture' && ['cancellationCode', 'cancellationReason', 'cancelledBy', 'cancelledAt'].some(key => Object.hasOwn(data, key))) {
+        throw new TransitionError('Cancellation provenance is controlled by the intake action.', 400, 'STATE_METADATA_NOT_ALLOWED');
+    }
     return rules.inTransaction(options.tx, async client => {
         const sample = await client.sample.findUnique({ where: { id: data.sampleId } });
         if (!sample) throw new TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
@@ -203,4 +314,5 @@ async function removeUnstartedWorkItems(tx, where, { actor, reason, code = 'WORK
     return { count: items.length };
 }
 
-module.exports = { transitionWorkItem, createWorkItem, assertActionEdge, TransitionError, removeUnstartedWorkItems };
+module.exports = { transitionWorkItem, createWorkItem, assertActionEdge, TransitionError, removeUnstartedWorkItems,
+    cancelForIntakeUndo, cancelForIntakeRejection, reactivateCancelledIntakeWork };

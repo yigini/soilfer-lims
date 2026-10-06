@@ -103,7 +103,10 @@ describe('Source capture cannot discard provenance or bypass current authority',
         const before = await prisma.koboConfig.findUnique({where: {id: config}});
         const spy = jest.spyOn(kobo, 'fetchSubmissions').mockResolvedValue([{_id: 7, _uuid: 'malformed-replay', barcode_d1: 'SAFETY-BAG', pit: 'PIT', sampling_succeeded: 'yes'}]);
         try {
-            expect((await request(app).post(`/api/kobo/sync/${lab}?configId=${config}`).set('Authorization', `Bearer ${manager}`)).status).toBe(409);
+            const response = await request(app).post(`/api/kobo/sync/${lab}?configId=${config}`).set('Authorization', `Bearer ${manager}`);
+            expect(response.status).toBe(409);
+            expect(response.body.code).toBe('HOLD_MARKER_INVALID');
+            expect(response.body.skippedReasons).toEqual(expect.arrayContaining([expect.objectContaining({ originalId: 'SAFETY-BAG', reason: 'HOLD_MARKER_INVALID' })]));
             expect((await prisma.sample.findUnique({where: {id: 'PROFILE-SAFETY-MALFORMED'}})).metadata).toBe('{broken');
             expect((await prisma.koboConfig.findUnique({where: {id: config}})).lastSubmissionId).toBe(before.lastSubmissionId);
         } finally {spy.mockRestore();}

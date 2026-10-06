@@ -268,7 +268,9 @@ exports.syncLab = async (req, res) => {
         }
 
         const result = await syncLabSubmissions(configs[0], req.user?.username, { actor: req.user });
-
+        if (!result.newSamples && result.skippedReasons?.length && result.skippedReasons.every(row => row.reason === 'HOLD_MARKER_INVALID')) {
+            return res.status(409).json({ ...result, code: 'HOLD_MARKER_INVALID', message: 'Stored hold metadata needs repair. Skipped submissions remain retriable.' });
+        }
         res.json(result);
     } catch (error) {
         console.error('[KOBO] Sync error:', error);
@@ -592,6 +594,9 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
     const skippedReasons = [];
     let lastCommittedSubmissionId = currentConfig.lastSubmissionId;
     let hasRetriableSkip = false;
+    // A malformed hold is isolated to its submission. Later submissions may
+    // commit, but keep the cursor before the gap so repair can be retried.
+    let hasHoldRepairSkip = false;
 
     // Helper for commit-time verification gates inside transactions (Finding 1)
     async function verifyCommitGates(tx) {
@@ -641,7 +646,7 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
         return { commitLab, commitConfig, currentProject };
     }
 
-    for (const submission of submissions) {
+    submissionsLoop: for (const submission of submissions) {
         // Transform submission to samples (could be 1 or 2 per submission)
         const rawSamples = koboService.transformSubmission(submission, fieldMapping, currentConfig.labId);
         const samples = Array.isArray(rawSamples) ? rawSamples : (rawSamples ? [rawSamples] : []);
@@ -729,6 +734,12 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                 }
 
                 // Parse existing metadata to check for primary occurrence replay (Finding 1)
+                if (require('../services/sampleHoldService').legacyHoldState(existingEntry).invalid) {
+                    skippedCount += samples.length;
+                    for (const specimen of samples) skippedReasons.push({ originalId: specimen.original_id, reason: 'HOLD_MARKER_INVALID' });
+                    hasHoldRepairSkip = true;
+                    continue submissionsLoop;
+                }
                 const meta = require('../services/intakeProfileService').parseFieldMetadata(existingEntry.metadata);
                 require('../services/intakeProfileService').parseFieldMetadata(existingEntry.fieldMetadata);
 
@@ -899,7 +910,7 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                         }
                         meta.conflictingSubmissions.push(revisionRecord);
 
-                        meta.provenanceHold = {
+                        const holdMarker = {
                             status: 'AMBIGUOUS_PROVENANCE_HOLD',
                             reason: 'REVISED_FIELD_EVIDENCE: Primary occurrence re-submitted with conflicting survey coordinates or attachments',
                             primaryOccurrence: {
@@ -925,6 +936,10 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                         await tx.sample.update({
                             where: { id: existingSample.id },
                             data: updateData
+                        });
+
+                        await require('../services/sampleHoldService').raiseKoboHold(tx, {
+                            sampleId: existingSample.id, marker: holdMarker, actor: 'system:kobo-sync'
                         });
 
                         await tx.auditLog.create({
@@ -1010,7 +1025,7 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                 meta.conflictingSubmissions = conflicting;
 
                 // Surface durable review/hold disposition (Finding 4)
-                meta.provenanceHold = {
+                const holdMarker = {
                     status: 'AMBIGUOUS_PROVENANCE_HOLD',
                     reason: 'CONFLICTING_FIELD_SUBMISSIONS: Multiple field submissions claimed this barcode with conflicting survey evidence',
                     primaryOccurrence: {
@@ -1035,6 +1050,10 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                 await tx.sample.update({
                     where: { id: existingSample.id },
                     data: updateData
+                });
+
+                await require('../services/sampleHoldService').raiseKoboHold(tx, {
+                    sampleId: existingSample.id, marker: holdMarker, actor: 'system:kobo-sync'
                 });
 
                 await tx.auditLog.create({
@@ -1064,15 +1083,16 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                     for (const { sampleData } of crossSubDuplicates) {
                         skippedReasons.push({
                             originalId: sampleData.original_id,
-                            reason: 'PROVENANCE_PRESERVATION_FAILED: ' + dupAuditErr.message
+                            reason: dupAuditErr.code === 'HOLD_MARKER_INVALID' ? 'HOLD_MARKER_INVALID' : 'PROVENANCE_PRESERVATION_FAILED: ' + dupAuditErr.message
                         });
                     }
-                    hasRetriableSkip = true;
+                    if (dupAuditErr.code === 'HOLD_MARKER_INVALID') hasHoldRepairSkip = true;
+                    else hasRetriableSkip = true;
                     continue;
                 }
             }
 
-            if (!hasRetriableSkip) {
+            if (!hasRetriableSkip && !hasHoldRepairSkip) {
                 const subIdNum = Number(submission._id);
                 const lastIdNum = Number(lastCommittedSubmissionId || 0);
                 if (!isNaN(subIdNum) && !isNaN(lastIdNum)) {
@@ -1181,6 +1201,12 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                             rejectionReason: rejectionReason
                         }, options.actor || performedBy, { tx, audit: { action: 'CREATE_KOBO_SYNC' } });
 
+                    if (sampleData.hasProvenanceHold) {
+                        await require('../services/sampleHoldService').raiseKoboHold(tx, {
+                            sampleId, marker: compactMeta.provenanceHold, actor: 'system:kobo-sync'
+                        });
+                    }
+
                     if (sampleData.intraSubDuplicates && sampleData.intraSubDuplicates.length > 0) {
                         await tx.auditLog.create({
                             data: {
@@ -1220,14 +1246,23 @@ async function syncLabSubmissions(config, performedBy, options = {}) {
                 });
             }
 
-            const subIdNum = Number(submission._id);
-            const lastIdNum = Number(lastCommittedSubmissionId || 0);
-            if (!isNaN(subIdNum) && !isNaN(lastIdNum)) {
-                if (subIdNum > lastIdNum) lastCommittedSubmissionId = String(submission._id);
-            } else {
-                lastCommittedSubmissionId = String(submission._id);
+            if (!hasHoldRepairSkip) {
+                const subIdNum = Number(submission._id);
+                const lastIdNum = Number(lastCommittedSubmissionId || 0);
+                if (!isNaN(subIdNum) && !isNaN(lastIdNum)) {
+                    if (subIdNum > lastIdNum) lastCommittedSubmissionId = String(submission._id);
+                } else {
+                    lastCommittedSubmissionId = String(submission._id);
+                }
             }
         } catch (err) {
+            if (err.code === 'HOLD_MARKER_INVALID') {
+                const skipped = [...candidateSamples, ...crossSubDuplicates.map(entry => entry.sampleData)];
+                skippedCount += skipped.length;
+                for (const sampleData of skipped) skippedReasons.push({ originalId: sampleData.original_id, reason: 'HOLD_MARKER_INVALID' });
+                hasHoldRepairSkip = true;
+                continue;
+            }
             if (
                 err.message?.includes('ADMISSION_POLICY_BLOCKED') ||
                 err.message?.includes('MEMBERSHIP_REVOKED') ||

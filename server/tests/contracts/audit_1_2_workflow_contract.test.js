@@ -27,7 +27,9 @@ test('verification is a work-item gate state with restricted outgoing edges', ()
     expect(workflow.WORK_ITEM_TRANSITIONS.AWAITING_VERIFICATION).toEqual(['COMPLETED', 'REPEAT_REQUIRED']);
     expect(workflow.isValidWorkItemTransition('AWAITING_VERIFICATION', 'ON_HOLD')).toBe(false);
     expect(workflow.isValidWorkItemTransition('AWAITING_VERIFICATION', 'WAIVED')).toBe(false);
-    expect(workflow.WORK_ITEM_TRANSITIONS.CANCELLED).toEqual([]);
+    // #183 adds only the private reacceptance edge; its service contracts
+    // separately prove generic callers still cannot reactivate cancelled work.
+    expect(workflow.WORK_ITEM_TRANSITIONS.CANCELLED).toEqual(['NOT_ASSIGNED']);
 });
 
 test('repeat aliases have the same outgoing edges and new review targets use REPEAT_REQUIRED', () => {

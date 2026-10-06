@@ -1,4 +1,33 @@
 {
+  "sampleHolds": {
+    "metadataRepairNeeded": "Les métadonnées doivent être réparées avant de résoudre ce blocage.",
+    "title": "Blocages de l’échantillon",
+    "badge": "Échantillon bloqué",
+    "open": "Ouvert",
+    "resolved": "Résolu",
+    "resolve": "Résoudre le blocage",
+    "resolutionReason": "Motif de résolution (obligatoire)",
+    "raisedAt": "Créé le",
+    "raisedAtOrBefore": "Créé au plus tard le",
+    "backfillRequired": "Un ancien blocage reste actif. Un responsable doit le vérifier et l’enregistrer avant sa résolution.",
+    "undoConfirmation": "Rétablir l’état REÇU et annuler les travaux admissibles ? Les travaux, leur historique et l’identifiant du laboratoire sont conservés. Des résultats, spectres, tentatives ou autres preuves empêchent cette action.",
+    "undoSuccess": "Réception annulée. L’échantillon est REÇU ; les travaux annulés et leur historique sont conservés.",
+    "types": {
+      "PROVENANCE": "Provenance",
+      "CUSTODY": "Chaîne de garde",
+      "CLIENT_QUERY": "Question du client",
+      "QC": "Contrôle qualité",
+      "OTHER": "Autre"
+    },
+    "errors": {
+      "HOLD_FETCH_ERROR": "Impossible de charger les blocages. Actualisez avant d’accepter ou d’affecter des travaux.",
+      "HOLD_BACKFILL_REQUIRED": "Vérifiez et enregistrez l’ancien blocage avant de le résoudre.",
+      "HOLD_MARKER_INVALID": "Les métadonnées du blocage doivent être vérifiées par un responsable.",
+      "HOLD_RESOLVE_FORBIDDEN": "Une autorisation de responsable est nécessaire pour résoudre un blocage.",
+      "HOLD_STATE_CHANGED": "Le blocage a changé. Actualisez et vérifiez-le à nouveau.",
+      "HOLD_RESOLVE_ERROR": "Impossible de résoudre le blocage. Actualisez et réessayez."
+    }
+  },
   "spectralWorkflow": {"reopenTitle":"Rouvrir le travail terminé","reopenMessage":"Cette modification affecte un travail terminé. Saisissez un motif pour le rouvrir et réessayer.","reason":"Motif (obligatoire)","retry":"Rouvrir et réessayer","trashTitle":"Mettre à la corbeille","trashMessage":"Mettre le spectre de {label} à la corbeille ? Saisissez un motif. Vous pourrez le restaurer ensuite.","batchTrashMessage":"Mettre les {count} spectres sélectionnés à la corbeille ? Saisissez un motif. Vous pourrez les restaurer ensuite.","trashConfirm":"Mettre à la corbeille","partialTitle":"Importation partiellement terminée","receiptTitle":"Reçu d’importation","receiptCounts":"{count} spectres enregistrés ; {failed} échecs.","retryFailed":"Vérifier et réessayer les entrées restantes"},
   "numbers": {"ambiguous":"Précisez le séparateur décimal ou de milliers.","invalid":"Format de nombre invalide.","policyInvalid":"Le format numérique du laboratoire est indisponible ou invalide.","decimal":"Séparateur décimal","thousands":"Séparateur de milliers","noGrouping":"Non configuré","space":"Espace"},
   "sampleLookup": { "title": "Recherche d'échantillon", "ambiguous": "Cet identifiant correspond à plusieurs échantillons :", "failed": "L'échantillon est introuvable ou ne peut pas être chargé. Vérifiez l'identifiant et la connexion." },

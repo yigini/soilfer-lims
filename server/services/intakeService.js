@@ -18,8 +18,13 @@ async function commitPrepared(tx, plan, { consumeApproval = true } = {}) {
     if (plan.createData) sample = await createSample({ ...plan.createData,
         status: plan.responseKind === 'draft' ? 'DRAFT' : 'EXPECTED' }, user, { tx });
     const current = await tx.sample.findUnique({ where: { id: sample.id } });
-    const hold = current && require('./intakeProfileService').parseFieldMetadata(current.metadata).provenanceHold;
-    if (plan.responseKind === 'accepted' && hold?.status === 'AMBIGUOUS_PROVENANCE_HOLD') throw new IntakeError(409, { code: 'AMBIGUOUS_PROVENANCE_HOLD', error: 'PROVENANCE_HOLD', message: 'Resolve the current provenance hold before final intake.' });
+    if (plan.responseKind === 'accepted' && current) {
+        const holds = require('./sampleHoldService');
+        if (await holds.isHeld(tx, current)) throw new IntakeError(409, {
+            code: holds.legacyHoldState(current).active ? 'AMBIGUOUS_PROVENANCE_HOLD' : 'SAMPLE_HELD',
+            message: 'Resolve all sample holds before acceptance.'
+        });
+    }
     if (!current || current.updatedAt.getTime() !== sample.updatedAt.getTime()) throw new profileIdentity.ProfileReferenceConflictError('SOURCE_CHANGED');
     scopeGuard.ensureScope(user, current, { altLabField: 'assignedLab' });
     if (current.approvedAt || LOCKED_INTAKE_STATUSES.includes(current.status) && !(current.status === 'RECEIVED_REJECTED' && body.isResubmission === true && plan.responseKind !== 'draft')) throw new profileIdentity.ProfileReferenceConflictError('SAMPLE_LOCKED');
@@ -41,6 +46,8 @@ async function commitPrepared(tx, plan, { consumeApproval = true } = {}) {
             history.push({ status: 'ACCEPTED', changedBy: user.username, timestamp: now, note: `Intake completed. Assigned Lab ID: ${code}` });
             updateData.history = JSON.stringify(history);
         }
+        if (plan.responseKind === 'rejected') await require('./workItemStateService').cancelForIntakeRejection(tx,
+            { sampleId: current.id, actor: user, reason: updateData.rejectionReason });
         updated = await transitionSample(current.id, nextStatus, user, plan.responseKind === 'rejected' ? `Sample rejected during intake: ${updateData.rejectionReason || ''}` : 'Intake completed at reception', updateData, tx);
         if (plan.responseKind === 'accepted') await workItems.generate(tx, updated, plan.workPlan, user);
         await tx.auditLog.create({ data: { id: crypto.randomUUID(), entity: 'SAMPLE', entityId: updated.id,

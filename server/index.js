@@ -22,9 +22,12 @@ try {
     console.log(JSON.stringify({ event: 'WORKFLOW_STARTUP_READY', ...ready }));
     const resultsReady = require('./scripts/install_result_attempt_links').assertResultAttemptStartupReady(dbPath);
     console.log(JSON.stringify({ event: 'RESULT_ATTEMPT_STARTUP_READY', ...resultsReady }));
+    const holdsReady = require('./scripts/install_sample_holds').assertSampleHoldStartupReady(dbPath);
+    console.log(JSON.stringify({ event: 'SAMPLE_HOLD_STARTUP_READY', ...holdsReady }));
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
-        nextStep: 'Keep the lab stopped and follow docs/audit/1.2-state-machine.md.', differences: error.differences || [] }));
+        nextStep: error.code?.startsWith('SAMPLE_HOLD_') ? 'Keep the lab stopped and follow docs/audit/1.6-sample-holds.md.'
+            : 'Keep the lab stopped and follow docs/audit/1.2-state-machine.md.', differences: error.differences || [] }));
     process.exit(1);
 }
 const http = require('http');

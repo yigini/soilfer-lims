@@ -106,31 +106,14 @@ function getHeldSampleIds(db, {publicationOnly = false} = {}) {
             return [];
         }
         const cols = new Set((metaDb.prepare("PRAGMA table_info(Sample)").all() || []).map(c => c.name));
-        const conds = [];
-        const holdCondition = (col) => `(CASE
-            WHEN ${col} IS NULL OR ${col} = '' THEN 0
-            WHEN NOT json_valid(${col}) THEN 1
-            WHEN json_type(${col}) != 'object' THEN 1
-            WHEN COALESCE(json_extract(${col}, '$.provenanceHold.status'), '') = 'AMBIGUOUS_PROVENANCE_HOLD' THEN 1
-            ELSE 0
-        END = 1)`;
-
-        if (cols.has('metadata')) {
-            conds.push(holdCondition('metadata'));
-        }
-        if (cols.has('fieldMetadata')) {
-            conds.push(holdCondition('fieldMetadata'));
-        }
-        if (conds.length === 0) {
-            if (createdInstance && metaDb.open) metaDb.close();
-            return [];
-        }
+        const hasHoldTable = Boolean(metaDb.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='SampleHold'").get());
+        const held = require('./sampleHoldService').heldSql('s', { columns: cols, hasHoldTable });
         // Only the restricted publication path may narrow candidate rows. All other callers
         // retain broad hold discovery; incomplete schemas conservatively use that same broad query.
         const eligible = publicationOnly && cols.has('status') && cols.has('approvedAt')
             ? "(status IN ('APPROVED','RELEASED') OR (status IN ('ARCHIVED','DISPOSED') AND approvedAt IS NOT NULL)) AND "
             : '';
-        const rows = metaDb.prepare(`SELECT id FROM Sample WHERE ${eligible}(${conds.join(' OR ')})`).all();
+        const rows = metaDb.prepare(`SELECT s.id FROM Sample s WHERE ${eligible}${held}`).all();
         if (createdInstance && metaDb.open) metaDb.close();
         return rows.map(r => r.id);
     } catch (e) {

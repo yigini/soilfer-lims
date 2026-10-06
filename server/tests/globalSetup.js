@@ -43,6 +43,7 @@ module.exports = async function globalSetup() {
                 "appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "details" TEXT)`);
         } finally { db.close(); }
         require('../scripts/install_result_attempt_links').installResultAttemptLinks({ dbPath: testDbPath, apply: true });
+        require('../scripts/install_sample_holds').installSampleHolds({ dbPath: testDbPath, apply: true });
     }
 
     process.env.DATABASE_PATH = testDbPath;
