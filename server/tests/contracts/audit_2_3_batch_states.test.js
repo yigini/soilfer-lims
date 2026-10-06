@@ -1,4 +1,4 @@
-const { aggregateBatchStatus, normalizeBatchState } = require('../../workflowContract');
+const { aggregateBatchStatus, normalizeBatchState, legacyBatchAnalyteStatus } = require('../../workflowContract');
 const startedAt = new Date('2026-10-06T12:00:00Z');
 
 test('one failed analyte blocks a multi-element run despite other passing analytes', () => {
@@ -27,4 +27,15 @@ test('an unstarted run remains OPEN and IN_RUN input preserves the stored RUNNIN
     expect(normalizeBatchState('IN_RUN')).toBe('RUNNING');
     expect(normalizeBatchState('QC_FAIL')).toBe('QC_FAIL');
     expect(() => aggregateBatchStatus(['UNKNOWN'], { startedAt })).toThrow(expect.objectContaining({ statusCode: 400, code: 'BATCH_ANALYTE_STATE_INVALID' }));
+});
+
+test('legacy import preserves reopened QC_PENDING and the accepted-deviation lifecycle', () => {
+    expect(legacyBatchAnalyteStatus('OPEN')).toBe('OPEN');
+    expect(legacyBatchAnalyteStatus('OPEN', { reopened: true })).toBe('QC_PENDING');
+    expect(legacyBatchAnalyteStatus('RUNNING')).toBe('IN_RUN');
+    expect(legacyBatchAnalyteStatus('QC_FAIL', { decision: 'PROCEED_WITH_WARNING' })).toBe('ACCEPTED_WITH_DEVIATION');
+    expect(legacyBatchAnalyteStatus('QC_FAIL', { decision: 'REANALYZE_BATCH' })).toBe('REPEAT_ORDERED');
+    expect(legacyBatchAnalyteStatus('QC_FAIL', { decision: 'REJECT_BATCH' })).toBe('REJECTED');
+    expect(legacyBatchAnalyteStatus('CLOSED', { decision: 'PROCEED_WITH_WARNING' })).toBe('CLOSED');
+    expect(() => legacyBatchAnalyteStatus('UNKNOWN')).toThrow(expect.objectContaining({ code: 'BATCH_ANALYTE_STATE_INVALID' }));
 });

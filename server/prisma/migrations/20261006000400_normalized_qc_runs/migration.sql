@@ -36,6 +36,7 @@ CREATE TABLE "BatchPosition" (
     "kind" TEXT NOT NULL,
     "sampleId" TEXT,
     "duplicateOfPositionId" TEXT,
+    "historicalSnapshotSeq" INTEGER,
     "provenance" TEXT NOT NULL,
     "legacySource" TEXT,
     CONSTRAINT "BatchPosition_batchId_fkey" FOREIGN KEY ("batchId") REFERENCES "Batch" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -266,6 +267,7 @@ END;
 
 CREATE TRIGGER "BatchPosition_insert_guard" BEFORE INSERT ON "BatchPosition"
 WHEN typeof(NEW.position)<>'integer' OR NEW.position<1
+  OR (NEW.historicalSnapshotSeq IS NOT NULL AND (typeof(NEW.historicalSnapshotSeq)<>'integer' OR NEW.historicalSnapshotSeq<1 OR NEW.provenance<>'LEGACY_MIGRATED'))
   OR NEW.kind NOT IN ('SAMPLE','BLANK','DUPLICATE','LRM','CRM','ICV','CCV','CCB','CAL_STD','CONTROL')
   OR NEW.provenance NOT IN ('NATIVE','LEGACY_MIGRATED','PROFILE_ONLY')
   OR (NEW.provenance='NATIVE' AND ((NEW.kind IN ('SAMPLE','DUPLICATE') AND NEW.sampleId IS NULL)
@@ -278,6 +280,7 @@ END;
 
 CREATE TRIGGER "BatchPosition_update_guard" BEFORE UPDATE ON "BatchPosition"
 WHEN typeof(NEW.position)<>'integer' OR NEW.position<1
+  OR (NEW.historicalSnapshotSeq IS NOT NULL AND (typeof(NEW.historicalSnapshotSeq)<>'integer' OR NEW.historicalSnapshotSeq<1 OR NEW.provenance<>'LEGACY_MIGRATED'))
   OR NEW.kind NOT IN ('SAMPLE','BLANK','DUPLICATE','LRM','CRM','ICV','CCV','CCB','CAL_STD','CONTROL')
   OR NEW.provenance NOT IN ('NATIVE','LEGACY_MIGRATED','PROFILE_ONLY')
   OR (NEW.provenance='NATIVE' AND ((NEW.kind IN ('SAMPLE','DUPLICATE') AND NEW.sampleId IS NULL)
@@ -313,7 +316,7 @@ BEGIN
 END;
 
 CREATE TRIGGER "BatchPosition_identity_guard" BEFORE UPDATE ON "BatchPosition"
-WHEN NEW.id IS NOT OLD.id OR NEW.batchId IS NOT OLD.batchId
+WHEN NEW.id IS NOT OLD.id OR NEW.batchId IS NOT OLD.batchId OR NEW.historicalSnapshotSeq IS NOT OLD.historicalSnapshotSeq OR NEW.legacySource IS NOT OLD.legacySource
 BEGIN
   SELECT RAISE(ABORT, 'BATCH_POSITION_INVALID');
 END;

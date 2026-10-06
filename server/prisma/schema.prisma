@@ -430,7 +430,7 @@ model Batch {
   events      BatchEvent[]
 }
 
-// #186 scope pins 1–6. String enums and immutable evidence are guarded by the
+// #186 scope pins 1–7. String enums and immutable evidence are guarded by the
 // additive release SQL; unknown historical metadata remains nullable.
 model BatchAnalyte {
   id                      String @id
@@ -467,6 +467,7 @@ model BatchPosition {
   duplicateOfPositionId   String?
   duplicateOf             BatchPosition? @relation("PhysicalDuplicate", fields: [duplicateOfPositionId], references: [id], onDelete: Restrict)
   duplicates              BatchPosition[] @relation("PhysicalDuplicate")
+  historicalSnapshotSeq   Int? // #186 part 7: isolated historical evidence, never a current/native position.
   provenance              String
   legacySource            String?
   workItems               BatchPositionWorkItem[]

@@ -126,6 +126,16 @@ const REVIEW_DECISION_LIST = Object.freeze(['ACCEPT', 'RETURN', 'REJECT', 'OMIT'
 function normalizeSampleState(state) { return LEGACY_SAMPLE_STATE_MAP[state] || state; }
 function normalizeWorkItemState(state) { return LEGACY_WORK_ITEM_STATE_MAP[state] || state; }
 function normalizeBatchState(state) { return state === 'IN_RUN' ? 'RUNNING' : state; }
+function legacyBatchAnalyteStatus(status, { reopened = false, decision = null } = {}) {
+    const states = { OPEN: reopened ? 'QC_PENDING' : 'OPEN', RUNNING: 'IN_RUN', QC_PASS: 'QC_PASS', QC_FAIL: 'QC_FAIL', CLOSED: 'CLOSED' };
+    if (!Object.hasOwn(states, status)) throw Object.assign(new Error('Invalid legacy batch state.'), { statusCode: 400, code: 'BATCH_ANALYTE_STATE_INVALID' });
+    if (status === 'QC_FAIL') {
+        if (decision === 'PROCEED_WITH_WARNING') return 'ACCEPTED_WITH_DEVIATION';
+        if (decision === 'REANALYZE_BATCH') return 'REPEAT_ORDERED';
+        if (decision === 'REJECT_BATCH') return 'REJECTED';
+    }
+    return states[status];
+}
 function aggregateBatchStatus(analytes, { startedAt = null, reopened = false } = {}) {
     const states = analytes.map(row => typeof row === 'string' ? row : row.status);
     if (states.some(state => !BATCH_ANALYTE_STATE_LIST.includes(state))) {
@@ -223,6 +233,7 @@ module.exports = {
     QC_VERDICT_LIST,
     BATCH_DISPOSITION_DECISION_LIST,
     normalizeBatchState,
+    legacyBatchAnalyteStatus,
     aggregateBatchStatus,
     REVIEW_DECISION_LIST,
     normalizeSampleState,

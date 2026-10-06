@@ -182,6 +182,17 @@ test('legacy unknown start remains null while its retained freeze flag cannot be
     } finally { f.db.close(); }
 });
 
+test('historical snapshot identity is immutable and unavailable to native positions', () => {
+    const f = fixture();
+    try {
+        expect(() => position(f, 'BLANK', { historicalSnapshotSeq: 1 })).toThrow('BATCH_POSITION_INVALID');
+        const id = randomUUID();
+        insert(f.db, 'BatchPosition', { id, batchId: f.legacyId, position: 1, kind: 'CONTROL', provenance: 'LEGACY_MIGRATED', historicalSnapshotSeq: 7 });
+        expect(() => f.db.prepare('UPDATE BatchPosition SET historicalSnapshotSeq=NULL WHERE id=?').run(id)).toThrow('BATCH_POSITION_INVALID');
+        expect(f.db.prepare('SELECT historicalSnapshotSeq FROM BatchPosition WHERE id=?').get(id).historicalSnapshotSeq).toBe(7);
+    } finally { f.db.close(); }
+});
+
 test('one physical reference lot retains separate analyte value snapshots and rejects conflicting current lots', () => {
     const f = fixture();
     try {
