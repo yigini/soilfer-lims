@@ -1135,7 +1135,15 @@
       "REFERENCE_MATERIAL_REQUIRED": "Select a reference material.",
       "REFERENCE_WRITE_BUSY": "Another write is in progress. Reload before retrying.",
       "REFERENCE_LINK_INVALID": "The reference link is invalid.",
-      "REFERENCE_ERROR": "The reference operation failed."
+      "REFERENCE_ERROR": "The reference operation failed.",
+      "TRANSITION_REASON_REQUIRED": "Provide a reason for this change.",
+      "AMBIGUOUS_NUMBER": "Use the laboratory number format; this number is ambiguous.",
+      "INVALID_REFERENCE_MATERIAL": "Reference material fields are invalid.",
+      "REFERENCE_MATERIAL_IMMUTABLE": "Lot and certificate details cannot be changed. Create a new reference lot.",
+      "INVALID_REFERENCE_VALUE": "The assigned value or certificate details are invalid.",
+      "REFERENCE_VALUE_IMMUTABLE": "Assigned values cannot be changed. Correct them by adding a new revision.",
+      "REFERENCE_VALUE_REFERENCED": "Referenced or corrected values cannot be deleted.",
+      "INVALID_QC_REFERENCE_LINK": "The QC reference link is invalid. Reload the batch before retrying."
     }
   }
 }

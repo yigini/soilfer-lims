@@ -29,6 +29,7 @@ try {
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
         nextStep: error.code?.startsWith('SAMPLE_HOLD_') ? 'Keep the lab stopped and follow docs/audit/1.6-sample-holds.md.'
+            : error.code?.startsWith('REFERENCE_') ? 'Keep the lab stopped and follow docs/audit/2.1-reference-materials.md.'
             : 'Keep the lab stopped and follow docs/audit/1.2-state-machine.md.', differences: error.differences || [] }));
     process.exit(1);
 }

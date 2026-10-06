@@ -2685,7 +2685,15 @@
       "REFERENCE_MATERIAL_REQUIRED": "Selecione um material de referência.",
       "REFERENCE_WRITE_BUSY": "Outra gravação está em curso. Recarregue antes de tentar novamente.",
       "REFERENCE_LINK_INVALID": "A ligação de referência é inválida.",
-      "REFERENCE_ERROR": "A operação de referência falhou."
+      "REFERENCE_ERROR": "A operação de referência falhou.",
+      "TRANSITION_REASON_REQUIRED": "Indique um motivo para esta alteração.",
+      "AMBIGUOUS_NUMBER": "Use o formato numérico do laboratório; este número é ambíguo.",
+      "INVALID_REFERENCE_MATERIAL": "Os campos do material de referência são inválidos.",
+      "REFERENCE_MATERIAL_IMMUTABLE": "Os dados do lote e do certificado não podem ser alterados. Crie um novo lote de referência.",
+      "INVALID_REFERENCE_VALUE": "O valor atribuído ou os dados do certificado são inválidos.",
+      "REFERENCE_VALUE_IMMUTABLE": "Os valores atribuídos não podem ser alterados. Corrija-os adicionando uma nova revisão.",
+      "REFERENCE_VALUE_REFERENCED": "Os valores vinculados ou corrigidos não podem ser excluídos.",
+      "INVALID_QC_REFERENCE_LINK": "A ligação de referência do controle de qualidade é inválida. Recarregue o lote antes de tentar novamente."
     }
   }
 }

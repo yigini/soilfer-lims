@@ -1135,7 +1135,15 @@
       "REFERENCE_MATERIAL_REQUIRED": "Seleccione un material de referencia.",
       "REFERENCE_WRITE_BUSY": "Hay otra escritura en curso. Recargue antes de reintentar.",
       "REFERENCE_LINK_INVALID": "El vínculo de referencia no es válido.",
-      "REFERENCE_ERROR": "Falló la operación de referencia."
+      "REFERENCE_ERROR": "Falló la operación de referencia.",
+      "TRANSITION_REASON_REQUIRED": "Indique un motivo para este cambio.",
+      "AMBIGUOUS_NUMBER": "Use el formato numérico del laboratorio; este número es ambiguo.",
+      "INVALID_REFERENCE_MATERIAL": "Los campos del material de referencia no son válidos.",
+      "REFERENCE_MATERIAL_IMMUTABLE": "Los datos del lote y del certificado no se pueden cambiar. Cree un nuevo lote de referencia.",
+      "INVALID_REFERENCE_VALUE": "El valor asignado o los datos del certificado no son válidos.",
+      "REFERENCE_VALUE_IMMUTABLE": "Los valores asignados no se pueden cambiar. Corríjalos añadiendo una nueva revisión.",
+      "REFERENCE_VALUE_REFERENCED": "Los valores vinculados o corregidos no se pueden eliminar.",
+      "INVALID_QC_REFERENCE_LINK": "El vínculo de referencia del control de calidad no es válido. Recargue el lote antes de reintentar."
     }
   }
 }
