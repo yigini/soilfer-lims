@@ -1,3 +1,4 @@
+const { createResultsFixture } = require('../../services/resultWriteService');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
@@ -92,7 +93,7 @@ describe('API Key Scoping Isolation Contract (SL-22 Security Fix)', () => {
         });
 
         // Create results
-        await prisma.result.createMany({
+        await createResultsFixture(prisma, {
             data: [
                 {
                     id: 'res-iso-gtm-1',

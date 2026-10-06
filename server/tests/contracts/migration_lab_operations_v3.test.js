@@ -369,9 +369,9 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
             sId = sample.id;
 
             // Create legacy results for SAND, SILT, CLAY
-            db.prepare(`INSERT INTO "Result" (id, sampleId, param, value, enteredBy, updatedAt) VALUES ('RES_LEG_SAND', ?, 'SAND', '45.0', 'tech_legacy', CURRENT_TIMESTAMP)`).run(sId);
-            db.prepare(`INSERT INTO "Result" (id, sampleId, param, value, enteredBy, updatedAt) VALUES ('RES_LEG_SILT', ?, 'SILT', '35.0', 'tech_legacy', CURRENT_TIMESTAMP)`).run(sId);
-            db.prepare(`INSERT INTO "Result" (id, sampleId, param, value, enteredBy, updatedAt) VALUES ('RES_LEG_CLAY', ?, 'CLAY', '20.0', 'tech_legacy', CURRENT_TIMESTAMP)`).run(sId);
+            require('../../services/resultWriteService').createRawResultFixture(db, { id: 'RES_LEG_SAND', sampleId: sId, param: 'SAND', value: '45.0', enteredBy: 'tech_legacy', updatedAt: db.prepare('SELECT CURRENT_TIMESTAMP now').get().now });
+            require('../../services/resultWriteService').createRawResultFixture(db, { id: 'RES_LEG_SILT', sampleId: sId, param: 'SILT', value: '35.0', enteredBy: 'tech_legacy', updatedAt: db.prepare('SELECT CURRENT_TIMESTAMP now').get().now });
+            require('../../services/resultWriteService').createRawResultFixture(db, { id: 'RES_LEG_CLAY', sampleId: sId, param: 'CLAY', value: '20.0', enteredBy: 'tech_legacy', updatedAt: db.prepare('SELECT CURRENT_TIMESTAMP now').get().now });
 
             // Ensure a TEXTURE work item exists
             await createWorkItemFixture(client, { data: { id: 'WI_LEG_TEXTURE', sampleId: sId, analysis: 'TEXTURE', status: 'COMPLETED' } });
@@ -434,8 +434,7 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
         const sampleId = 'SMP-WRONG-TEX-01';
         try {
             // 50 sand / 35 silt / 15 clay is officially Loam (L), but legacy algorithm called it Sandy Loam (SL)
-            db.prepare(`INSERT INTO "Result" (id, sampleId, param, value, provenance, updatedAt) VALUES ('RES_WRONG_TEX', ?, 'TEXTURE', 'Sandy Loam', ?, CURRENT_TIMESTAMP)`)
-                .run(sampleId, JSON.stringify({ fractions: { sand: 50, silt: 35, clay: 15 } }));
+            require('../../services/resultWriteService').createRawResultFixture(db, { id: 'RES_WRONG_TEX', sampleId, param: 'TEXTURE', value: 'Sandy Loam', provenance: JSON.stringify({ fractions: { sand: 50, silt: 35, clay: 15 } }), updatedAt: db.prepare('SELECT CURRENT_TIMESTAMP now').get().now });
         } finally {
             db.close();
         }
@@ -493,9 +492,9 @@ describe('Lab Operations v3 Database Migration & Reconciliation', () => {
             await createSampleFixture(client, { data: { id: sampleId, originalId: sampleId, status: 'RECEIVED', assignedLab: 'GTM-LAB1' } });
             await createWorkItemFixture(client, { data: { id: 'WI_MIXED_TEX', sampleId, analysis: 'TEXTURE', status: 'COMPLETED' } });
             // Incompatible fractions: rep 1 AIR_DRY, rep 2 OVEN_DRY, rep 3 FIELD_MOIST
-            db.prepare(`INSERT INTO "Result" (id, sampleId, param, value, replicateNo, basis, updatedAt) VALUES ('RES_MIX_SAND', ?, 'SAND', '50.0', 1, 'AIR_DRY', CURRENT_TIMESTAMP)`).run(sampleId);
-            db.prepare(`INSERT INTO "Result" (id, sampleId, param, value, replicateNo, basis, updatedAt) VALUES ('RES_MIX_SILT', ?, 'SILT', '35.0', 2, 'OVEN_DRY', CURRENT_TIMESTAMP)`).run(sampleId);
-            db.prepare(`INSERT INTO "Result" (id, sampleId, param, value, replicateNo, basis, updatedAt) VALUES ('RES_MIX_CLAY', ?, 'CLAY', '15.0', 3, 'FIELD_MOIST', CURRENT_TIMESTAMP)`).run(sampleId);
+            require('../../services/resultWriteService').createRawResultFixture(db, { id: 'RES_MIX_SAND', sampleId, param: 'SAND', value: '50.0', replicateNo: 1, basis: 'AIR_DRY', updatedAt: db.prepare('SELECT CURRENT_TIMESTAMP now').get().now });
+            require('../../services/resultWriteService').createRawResultFixture(db, { id: 'RES_MIX_SILT', sampleId, param: 'SILT', value: '35.0', replicateNo: 2, basis: 'OVEN_DRY', updatedAt: db.prepare('SELECT CURRENT_TIMESTAMP now').get().now });
+            require('../../services/resultWriteService').createRawResultFixture(db, { id: 'RES_MIX_CLAY', sampleId, param: 'CLAY', value: '15.0', replicateNo: 3, basis: 'FIELD_MOIST', updatedAt: db.prepare('SELECT CURRENT_TIMESTAMP now').get().now });
         } finally {
             db.close();
         }

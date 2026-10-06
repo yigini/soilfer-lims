@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const { createLegacyClosureDatabase, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
 const crypto = require('crypto');
@@ -47,7 +48,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
             await createSampleFixture(prisma, { data: sampleData });
             item = await createWorkItemFixture(prisma, { data: itemData });
         }
-        const result = await prisma.result.create({ data: { id: resultId, sampleId, param, value: '7.2', numericValue: 7.2, isCurrent: true,
+        const result = await createResultFixture(prisma, { data: { id: resultId, sampleId, param, value: '7.2', numericValue: 7.2, isCurrent: true,
             isValid: valid, flags: JSON.stringify(flags), batchId: batch?.id } });
         return { sampleId, item, result, batch };
     }
@@ -202,7 +203,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     });
     test('composite texture governs sand, silt, clay and texture without duplicating values', async () => {
         const f = await fixture({ param: 'TEXTURE' });
-        for (const param of ['SAND', 'SILT', 'CLAY']) await prisma.result.create({ data: { id: id('TEXT-03'), sampleId: f.sampleId, param, value: '25', isCurrent: true } });
+        for (const param of ['SAND', 'SILT', 'CLAY']) await createResultFixture(prisma, { data: { id: id('TEXT-03'), sampleId: f.sampleId, param, value: '25', isCurrent: true } });
         expect((await reportValues(f)).values.map(row => row.param).sort()).toEqual(['CLAY', 'SAND', 'SILT', 'TEXTURE']);
         expect(governsResult({ ...f.item, analysis: 'SAND' }, { ...f.result, param: 'CLAY' })).toBe(false);
     });
@@ -273,7 +274,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     });
     test('RETURN of composite texture invalidates all four current parameters', async () => {
         const f = await fixture({ status: 'PROCESSING', itemStatus: 'SUBMITTED', param: 'TEXTURE' });
-        for (const param of ['SAND', 'SILT', 'CLAY']) await prisma.result.create({ data: {
+        for (const param of ['SAND', 'SILT', 'CLAY']) await createResultFixture(prisma, { data: {
             id: id('TEXT-RETURN-03'), sampleId: f.sampleId, param, value: '25', isCurrent: true, isValid: true, flags: '["METHOD_NOTE"]'
         } });
         expect((await returnItem('individual', f)).status).toBe(200);

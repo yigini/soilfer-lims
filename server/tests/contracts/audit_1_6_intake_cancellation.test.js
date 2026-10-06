@@ -5,7 +5,7 @@ const prisma = require('../../prisma');
 const work = require('../../services/workItemStateService');
 const { transitionSample } = require('../../services/sampleStateService');
 const holds = require('../../services/sampleHoldService');
-const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
+const { createSampleFixture, createWorkItemFixture, createResultFixture } = require('../helpers/workflowFixtures');
 const { getAuthToken } = require('../setup');
 const { scanSource } = require('../helpers/workflowWriteScanner');
 const labId = `CANCEL-LAB-${randomUUID()}`;
@@ -56,7 +56,7 @@ test.each(['result', 'scan', 'attempt', 'draft', 'evidence-event'])('%s evidence
     const unstarted = await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id,
         analysis: 'SOC', status: 'NOT_ASSIGNED', assignedLab: labId } });
     if (['result', 'evidence-event'].includes(evidence)) {
-        const result = await prisma.result.create({ data: { id: randomUUID(), sampleId: f.sample.id, param: f.item.analysis, value: '1.2', numericValue: 1.2 } });
+        const result = await createResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id, param: f.item.analysis, value: '1.2', numericValue: 1.2 } });
         if (evidence === 'evidence-event') await prisma.resultEvidenceEvent.create({ data: { id: randomUUID(), resultId: result.id,
             sampleId: f.sample.id, eventType: 'PREP_REVERTED', gate: 'PREPARATION', reason: 'Reverted preparation evidence', actor: actor.username } });
     }

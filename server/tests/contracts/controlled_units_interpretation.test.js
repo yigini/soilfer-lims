@@ -1,3 +1,4 @@
+const { createResultsFixture } = require('../../services/resultWriteService');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -40,7 +41,7 @@ describe('BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine', 
         }
 
         const now = new Date();
-        await prisma.result.createMany({
+        await createResultsFixture(prisma, {
             data: [
                 { id: `RES-I1-${Date.now()}`, sampleId: s.id, param: 'PH_H2O', value: '5.2', unit: 'pH', isValid: true, createdAt: now, updatedAt: now },
                 { id: `RES-I2-${Date.now()}`, sampleId: s.id, param: 'SOC', value: '1.5', unit: '%', isValid: true, createdAt: now, updatedAt: now }, // Should convert to 15.0 g/kg

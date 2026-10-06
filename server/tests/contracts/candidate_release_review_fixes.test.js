@@ -1142,6 +1142,20 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
 
             postDb.close();
 
+            // The legacy Project upgrade proof above stays byte-for-byte. Apply
+            // the separate additive #182 upgrade before loading the current client.
+            const markerDb = new Database(rehearsalDbPath);
+            markerDb.exec(`CREATE TABLE "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL,
+                "appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "details" TEXT)`);
+            markerDb.close();
+            const attemptUpgrade = require('../../scripts/install_result_attempt_links').installResultAttemptLinks({ dbPath: rehearsalDbPath, apply: true });
+            expect(attemptUpgrade).toMatchObject({ classification: 'COMPLETE', backfillCount: 0,
+                counts: { results: 2, linked: 0 } });
+            const verified = new Database(rehearsalDbPath, { readonly: true });
+            const originalResultFields = Object.keys(preSnapshots.results.rows[0]).map(field => `"${field}"`).join(',');
+            expect(verified.prepare(`SELECT ${originalResultFields} FROM "Result" ORDER BY id`).all()).toEqual(preSnapshots.results.rows);
+            verified.close();
+
             // Query via Prisma Client using Better-Sqlite3 adapter — guarantees NO P2022 column missing errors
             const adapter = new PrismaBetterSqlite3({ url: 'file:' + rehearsalDbPath, timeout: 5000 });
             const rehearsalPrisma = new PrismaClient({ adapter });

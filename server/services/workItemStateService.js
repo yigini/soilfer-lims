@@ -84,6 +84,7 @@ function assertActionEdge(item, sample, nextStatus, actor, reason, options) {
 
 /** The only WorkItem status writer, including action-bound edges and review CAS. */
 async function transitionWorkItem(workItemId, requestedStatus, actor, reason = null, extraData = {}, tx = null, options = {}) {
+    if (Object.hasOwn(extraData, 'result')) throw new TransitionError('Result caches are controlled by resultWriteService.', 409, 'RESULT_CACHE_AUTHORITY_REQUIRED');
     const performedBy = rules.actorName(actor);
     const migrating = !!options.migrationPlan;
     const nextStatus = !migrating && requestedStatus === 'REANALYSIS_REQUIRED' ? 'REPEAT_REQUIRED' : requestedStatus;
@@ -93,7 +94,7 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
     if (!migrating && !workflow.isValidWorkItemState(nextStatus)) {
         throw new TransitionError(`Status '${nextStatus}' cannot be written.`, 409, 'UNKNOWN_WORKITEM_STATUS');
     }
-    const data = rules.updateData(extraData, nextStatus, workflow.normalizeWorkItemState);
+    const { result: _excludedResult, ...data } = rules.updateData(extraData, nextStatus, workflow.normalizeWorkItemState);
     if (['cancellationCode', 'cancellationReason', 'cancelledBy', 'cancelledAt'].some(key => Object.hasOwn(data, key))) {
         throw new TransitionError('Cancellation provenance is controlled by the intake action.', 400, 'STATE_METADATA_NOT_ALLOWED');
     }
@@ -158,12 +159,13 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
         const writeStatus = isRepeatHistory ? item.status : nextStatus;
         const reviewData = !migrating && !isRepeatHistory && ['ACCEPTED', 'REPEAT_REQUIRED', 'WAIVED'].includes(nextStatus)
             ? { reviewedBy: performedBy, reviewedAt: data.reviewedAt || new Date() } : {};
+        const { result: _cache, ...changes } = { ...data, ...provenance, ...reviewData, status: writeStatus, updatedAt: new Date(),
+            version: data.version ?? (item.version === null ? 1 : { increment: 1 }) };
         const changed = await client.workItem.updateMany({
             where: { id: item.id, status: expected.status ?? item.status, version: expected.version === null ? null : (expected.version ?? item.version),
                 ...(options.submissionId && { submissionId: options.submissionId }),
                 ...(migrating && { legacyStatus: item.legacyStatus }) },
-            data: { ...data, ...provenance, ...reviewData, status: writeStatus, updatedAt: new Date(),
-                version: data.version ?? (item.version === null ? 1 : { increment: 1 }) }
+            data: changes
         });
         if (changed.count !== 1) throw new TransitionError('Work item changed. Reload before retrying.', 409, options.conflictCode || 'WORKITEM_STATE_CHANGED');
         const updated = await client.workItem.findUnique({ where: { id: item.id } });
@@ -247,7 +249,10 @@ async function createWorkItem(data, actor, options = {}) {
         if (options.context !== 'fixture' && !workflow.CLOSURE_TASK_ANALYSES.includes(data.analysis)) {
             require('./resultEvidenceService').assertAmendable(sample);
         }
-        const item = await client.workItem.create({ data: { ...data, status } });
+        const { result, ...creationData } = data;
+        if (result !== undefined && options.context !== 'fixture') throw new TransitionError('New work requires its result recording workflow.', 409, 'RESULT_CACHE_AUTHORITY_REQUIRED');
+        let item = await client.workItem.create({ data: { ...creationData, status } });
+        if (result !== undefined) item = await require('./resultWriteService').writeFixtureCache(client, item, result, actor);
         await client.auditLog.create({ data: {
             id: randomUUID(), entity: options.audit?.entity || 'WORKITEM', entityId: options.audit?.entityId || item.id,
             action: options.audit?.action || 'WORKITEM_CREATED', performedBy,

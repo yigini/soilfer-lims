@@ -917,6 +917,7 @@ model Result {
   analysedAt    DateTime?
   equipmentId   String?
   batchId       String?
+  attemptId     String?   // Additive scalar; reference-preserving triggers enforce integrity.
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -924,6 +925,7 @@ model Result {
 
   @@index([sampleId, param, isCurrent])
   @@index([batchId])
+  @@index([attemptId])
 }
 
 // Preparation reversions preserve the result and its QC flags. Evidence is append-only.

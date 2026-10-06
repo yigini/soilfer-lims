@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const jwt = require('jsonwebtoken');
 const { randomUUID } = require('node:crypto');
 const prisma = require('../../prisma');
@@ -18,7 +19,7 @@ async function fixture(status = 'PROCESSING') {
         status, receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' } });
     const item = await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, analysis,
         assignedLab: labId, assignedTo: actor.username, status: 'ASSIGNED', version: 0 } });
-    const result = await prisma.result.create({ data: { id: randomUUID(), sampleId: sample.id, param: analysis,
+    const result = await createResultFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, param: analysis,
         value: '6.2', numericValue: 6.2, flags: '["ORIGINAL_NOTE"]', isCurrent: true } });
     return { sample, item, result };
 }
@@ -62,7 +63,10 @@ test('offline completion centrally records provenance and preserves superseded a
         flags: '["ORIGINAL_NOTE"]', isCurrent: false });
     expect(after.results.find(result => result.isCurrent)).toMatchObject({ value: '7.2', enteredBy: actor.username });
     expect(after.attempts).toHaveLength(1); expect(after.receipts).toHaveLength(1);
-    expect(after.audits).toHaveLength(before.audits.length + 1);
+    expect(after.audits.filter(audit => audit.action !== 'RESULT_RECORDED')).toHaveLength(before.audits.length + 1);
+    const resultAudits = after.audits.filter(audit => audit.action === 'RESULT_RECORDED');
+    expect(resultAudits).toHaveLength(1);
+    expect(resultAudits[0]).toMatchObject({ entityId: receipt.outcome.resultId, performedBy: actor.username });
     expect(after.audits.find(audit => audit.action === 'OFFLINE_WORK_COMPLETED').performedBy).toBe(actor.username);
 });
 

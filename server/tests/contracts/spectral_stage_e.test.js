@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
@@ -95,7 +96,7 @@ describe('Spectral Library Stage E: Turn the Endpoint into a Contract (SL-22 to 
         });
 
         // Create paired reference wet chemistry result
-        await prisma.result.create({
+        await createResultFixture(prisma, {
             data: {
                 id: resultId,
                 sampleId: sampleGtmId,

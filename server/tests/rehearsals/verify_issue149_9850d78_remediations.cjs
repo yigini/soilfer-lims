@@ -1,4 +1,6 @@
 'use strict';
+const { createResultFixture } = require('../../services/resultWriteService');
+
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -104,7 +106,7 @@ async function assertFinalRefusals() {
     });
 
     // 2. Create result with non-default provenance/censoring/basis/replicate
-    await prisma.result.create({
+    await createResultFixture(prisma, {
         data: {
             id: 'synthetic-result',
             sampleId: 'synthetic-sample',

@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const prisma = require('../../prisma');
@@ -93,7 +94,7 @@ describe('Catalogue governance and connected selections', () => {
     test('Historical results prevent deletion and unit reinterpretation', async () => {
         const a = await parameter('HISTORY', { units: 'mg/kg' });
         const sample = await createSampleFixture(prisma, { data: { id: code('SAMPLE'), originalId: code('FIELD'), assignedLab: lab, status: 'APPROVED' } });
-        await prisma.result.create({ data: { id: code('RESULT'), sampleId: sample.id, param: a.code, value: '12', unit: 'mg/kg' } });
+        await createResultFixture(prisma, { data: { id: code('RESULT'), sampleId: sample.id, param: a.code, value: '12', unit: 'mg/kg' } });
         const deletion = await invoke(controller.deleteAnalysis, req({}, { code: a.code }));
         expect(deletion.statusCode).toBe(409);
         expect(deletion.body.usage.results).toBe(1);

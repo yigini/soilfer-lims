@@ -1,3 +1,4 @@
+const { createResultFixture, writeSpectralPrediction } = require('../../services/resultWriteService');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
@@ -22,7 +23,8 @@ describe('WP-31: Result Provenance Tracking', () => {
             email: `${analyst.username}@example.test`, password: 'isolated-fixture'
         } });
         for (const [code, name, units] of [['EC', 'Electrical conductivity', 'dS/m'], ['CLAY_PRED', 'Predicted clay fraction', '%'], ['SOC', 'Soil organic carbon', 'g/kg'], ['TOTAL_N', 'Total nitrogen', 'g/kg']]) {
-            await prisma.analysis.upsert({ where: { code }, create: { code, name, units, status: 'active' }, update: { name, units, labId: null } });
+            await prisma.analysis.upsert({ where: { code }, create: { code, name, units, status: 'active', validation: '{}' },
+                update: { name, units, labId: null, validation: '{}' } });
         }
         await createSampleFixture(prisma, {
             data: {
@@ -52,7 +54,7 @@ describe('WP-31: Result Provenance Tracking', () => {
     });
 
     test('1. Direct prisma create defaults Result.provenance to MEASURED', async () => {
-        const r = await prisma.result.create({
+        const r = await createResultFixture(prisma, {
             data: {
                 id: `RES-DEF-${Date.now()}`,
                 sampleId: testSampleId,
@@ -68,7 +70,7 @@ describe('WP-31: Result Provenance Tracking', () => {
         expect(fetched.provenance).toBe('MEASURED');
     });
 
-    test('2. resultsController.saveResults preserves specified provenance or defaults to MEASURED', async () => {
+    test('2. typed results ignore claimed provenance and internal predictions retain PREDICTED', async () => {
         const req = {
             params: { sampleId: testSampleId },
             body: {
@@ -92,6 +94,10 @@ describe('WP-31: Result Provenance Tracking', () => {
         expect(ecRes.provenance).toBe('MEASURED');
         createdResultIds.push(ecRes.id);
 
+        const typedClay = await prisma.result.findFirst({ where: { sampleId: testSampleId, param: 'CLAY_PRED', isCurrent: true } });
+        expect(typedClay.provenance).toBe('MEASURED');
+        await prisma.$transaction(tx => writeSpectralPrediction(tx, { sampleId: testSampleId, actor: analyst,
+            measurement: { param: 'CLAY_PRED', value: '28.5', unit: '%' } }));
         const clayRes = await prisma.result.findFirst({ where: { sampleId: testSampleId, param: 'CLAY_PRED', isCurrent: true } });
         expect(clayRes).not.toBeNull();
         expect(clayRes.provenance).toBe('PREDICTED');
@@ -100,7 +106,7 @@ describe('WP-31: Result Provenance Tracking', () => {
 
     test('3. assembleReport includes provenance for each result item', async () => {
         // Also add a DERIVED result
-        const derivedRes = await prisma.result.create({
+        const derivedRes = await createResultFixture(prisma, {
             data: {
                 id: `RES-DER-${Date.now()}`,
                 sampleId: testSampleId,

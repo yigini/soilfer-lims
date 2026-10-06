@@ -11,6 +11,7 @@ const UNIQUE_CONSTRAINTS = Object.freeze({ WorkItem_one_active_per_analysis: 'Wo
 function rejectedGuardWrite({ actor, file, statement, parameters = [], expectedGuardCode, expectedConstraint }) {
     file = assertOwnedTestDatabase(file, actor);
     const triggerProbe = TRIGGER_CODES.includes(expectedGuardCode);
+    const attemptProbe = ['RESULT_ATTEMPT_NOT_FOUND', 'RESULT_ATTEMPT_SAMPLE_MISMATCH', 'RESULT_ATTEMPT_REFERENCED'].includes(expectedGuardCode);
     const uniqueProbe = expectedGuardCode === 'SQLITE_CONSTRAINT_UNIQUE' && Object.hasOwn(UNIQUE_CONSTRAINTS, expectedConstraint);
     const foreignKeyProbe = expectedGuardCode === 'SQLITE_CONSTRAINT_FOREIGNKEY';
     // #179 pin 5988155355: SQLite implements this one ON DELETE RESTRICT FK
@@ -22,7 +23,9 @@ function rejectedGuardWrite({ actor, file, statement, parameters = [], expectedG
         throw new Error('A statement and exact expected release guard code are required.');
     }
     // One bound DML statement only; the helper cannot execute guard/schema changes.
-    if (!/^(?:UPDATE\s+|INSERT\s+INTO\s+|DELETE\s+FROM\s+)["`\[]?(?:Sample|WorkItem|Batch|ReviewDecision|ResultEvidenceEvent)["`\]]?\s/i.test(statement.trim()) ||
+    const permitted = attemptProbe ? /^(?:UPDATE\s+|INSERT\s+INTO\s+|DELETE\s+FROM\s+)["`\[]?(?:Result|WorkAttempt)["`\]]?\s/i
+        : /^(?:UPDATE\s+|INSERT\s+INTO\s+|DELETE\s+FROM\s+)["`\[]?(?:Sample|WorkItem|Batch|ReviewDecision|ResultEvidenceEvent)["`\]]?\s/i;
+    if (!permitted.test(statement.trim()) ||
         /;|--|\/\*|\b(?:PRAGMA|TRIGGER|ATTACH|DETACH)\b/i.test(statement)) throw new Error('Only a single workflow guard probe is allowed.');
     const db = new Database(file, { fileMustExist: true });
     try {

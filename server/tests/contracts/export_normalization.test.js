@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -32,7 +33,7 @@ describe('WP-22: Dual Export Paths (As-Measured & Normalized Controlled Units)',
         sampleId = testSample.id;
 
         const now = new Date();
-        await prisma.result.create({
+        await createResultFixture(prisma, {
             data: {
                 id: `RES-EXP-${Date.now()}`,
                 sampleId: testSample.id,

@@ -97,13 +97,15 @@ class OperationalConfirmationService {
             history.push({ status, action: 'OPERATION_CONFIRMED', checklistRevision: definition.revision,
                 confirmedBy: actor.username, timestamp: now.toISOString(), receiptId, policyVersion: policy.version,
                 verificationPolicy: policy.value, verificationRequested: verificationRequired, verificationRequired: requiresVerification });
-            const updates = { result: JSON.stringify(payload), completedAt: now, history: JSON.stringify(history) };
+            const updates = { completedAt: now, history: JSON.stringify(history) };
             if (!item.assignedTo && !hasPermission(actor, 'ASSIGN_WORK')) updates.assignedTo = actor.username;
-            const updatedItem = await transitionWorkItem(item.id, status, actor, 'Operational checklist confirmed', updates, tx, {
+            await transitionWorkItem(item.id, status, actor, 'Operational checklist confirmed', updates, tx, {
                 action: 'OPERATION_CONFIRMED', verificationRequired: requiresVerification, expected, conflictCode: 'VERSION_CONFLICT',
                 audit: { details: JSON.stringify({ analysis, receiptId, checklistRevision: definition.revision,
                     policyVersion: policy.version, verificationPolicy: policy.value, verificationRequired: requiresVerification, ...gateEvidence }) }
             });
+            const updatedItem = await require('./resultWriteService').writeNonMeasurementSummary(tx, item,
+                { kind: payload.kind, text: JSON.stringify(payload), actor });
             await tx.workItemDraft.deleteMany({ where: { workItemId: item.id } });
             const updatedSample = requiresVerification ? sample : await setGate(tx, sample, analysis, 'DONE', actor, 'Drying and preparation completed');
             const receipt = { receiptId, commandType: 'CONFIRM_OPERATION', analysis, workItemId: item.id, sampleId: sample.id,

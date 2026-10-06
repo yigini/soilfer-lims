@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const request = require('supertest');
@@ -27,7 +28,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
             await database.client.user.create({ data: { id: submitter.id, username: submitter.username,
                 email: `${submitter.username}@example.test`, password: 'isolated-fixture', role: 'LAB_TECHNICIAN', labId } });
             const item = await prisma.workItem.findUnique({ where: { id: database.workItemId } });
-            const result = await prisma.result.create({ data: { id: id('R-06-LEGACY'), sampleId: database.sampleId, param: analysis,
+            const result = await createResultFixture(prisma, { data: { id: id('R-06-LEGACY'), sampleId: database.sampleId, param: analysis,
                 value: '6.2', numericValue: 6.2, isCurrent: true, isValid: true, flags: '[]' } });
             return { sampleId: database.sampleId, item, result, batch: null };
         }
@@ -37,7 +38,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-06'), analysis, labId, status: batchStatus, createdBy: 'test' } }) : null;
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-06'), sampleId, analysis, assignedLab: labId,
             status, result: '6.2', history: '[]', batchId: batch?.id } });
-        const result = await prisma.result.create({ data: { id: id('R-06'), sampleId, param: analysis, value: '6.2',
+        const result = await createResultFixture(prisma, { data: { id: id('R-06'), sampleId, param: analysis, value: '6.2',
             numericValue: 6.2, isCurrent: true, isValid: true, flags: '[]', batchId: batch?.id } });
         return { sampleId, item, result, batch };
     }

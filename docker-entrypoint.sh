@@ -133,6 +133,9 @@ node scripts/migrate_sitewide_theme_library.js
 echo "📦 Installing workflow-state schema and guards..."
 node scripts/install_workflow_state_guards.js --apply
 
+echo "📦 Installing result attempt links..."
+node scripts/install_result_attempt_links.js --apply
+
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."
 exec node index.js

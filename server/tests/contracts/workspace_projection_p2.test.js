@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
@@ -86,7 +87,7 @@ describe('Package P2: Sample Workspace Projection & Transactional Foundations', 
         }
 
         // Add result for pH so it has evidence
-        await prisma.result.create({
+        await createResultFixture(prisma, {
             data: {
                 id: 'res-ph-001',
                 sampleId: testSample.id,

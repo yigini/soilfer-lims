@@ -1,16 +1,42 @@
 'use strict';
+const mockConnections = [];
+jest.mock('better-sqlite3', () => {
+    const Database = jest.requireActual('better-sqlite3');
+    return class TrackedFixtureDatabase extends Database {
+        constructor(...args) {
+            super(...args);
+            mockConnections.push(this);
+        }
+    };
+});
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
-const app = require('../../app');
-const prisma = require('../../prisma');
-const fixture = require('../../scripts/profile_fixture');
-const {getAuthToken} = require('../setup');
+const {beforeGuards} = require('../helpers/legacyWorkflowDatabase');
+const originalDatabasePath = process.env.DATABASE_PATH;
+const originalDatabaseUrl = process.env.DATABASE_URL;
+let app, prisma, fixture, rehearsal;
+const getAuthToken = (...args) => require('../helpers/workflowFixtures').createAuthTokenFixture(prisma, ...args);
 
 describe('Guarded profile fixture through the laboratory workflow', () => {
     let manifest, reception, manager, tech, technician;
     const rawKey = 'slims_fixture_profile140_only';
     const call = (url, token, body) => request(app).post(url).set('Authorization', `Bearer ${token}`).send(body);
     beforeAll(async () => {
+        // Other contract suites can leave more than 1,000 synthetic specimens.
+        // Keep the loader's populated-database refusal and give this workflow a
+        // fresh owned schema with the real release guards, independent of order.
+        rehearsal = beforeGuards({actor: 'system:fixture', installWorkflowStateGuards: true});
+        require('../../scripts/install_result_attempt_links').installResultAttemptLinks({dbPath: rehearsal.file, apply: true});
+        process.env.DATABASE_PATH = rehearsal.file;
+        process.env.DATABASE_URL = `file:${rehearsal.file}`;
+        jest.resetModules();
+        prisma = require('../../prisma');
+        app = require('../../app');
+        fixture = require('../../scripts/profile_fixture');
+        await require('../../seeds/units').seedUnits(prisma);
+        await require('../../seeds/references').seedReferences(prisma);
+        await require('../../seeds/catalogue').seedCatalogue({confirmMatches: true});
+        expect(await prisma.sample.count()).toBe(0);
         process.env.LIMS_PROFILE_FIXTURE_ENV = fixture.MARKER;
         manifest = await fixture.loadFixture(prisma);
         reception = await getAuthToken('SAMPLE_RECEPTION', manifest.labId, ['GTM'], [manifest.projectId]);
@@ -24,7 +50,18 @@ describe('Guarded profile fixture through the laboratory workflow', () => {
         db.prepare("INSERT INTO _exchange_connections (id,name,capabilities,countries,projects,labs,auth_version,status,created_at,updated_at) VALUES (?,?,?,?,?,?,1,'ACTIVE',datetime('now'),datetime('now'))").run(key.connectionId,key.name,key.capabilities,key.countries,key.projects,key.labs);
         db.prepare("INSERT INTO _exchange_connection_keys (id,connection_id,api_key_id,key_status,created_at) VALUES (?,?,?,'ACTIVE',datetime('now'))").run('PROFILE-FIXTURE-140-LINK',key.connectionId,key.id);
     });
-    afterAll(() => {delete process.env.LIMS_PROFILE_FIXTURE_ENV;});
+    afterAll(async () => {
+        delete process.env.LIMS_PROFILE_FIXTURE_ENV;
+        await prisma?.$disconnect();
+        // app.db keeps a synchronous authentication connection. Close every
+        // connection opened on this owned fixture before Windows file cleanup.
+        for (const db of mockConnections) {
+            if (db.open && rehearsal && require('path').resolve(db.name) === rehearsal.file) db.close();
+        }
+        process.env.DATABASE_PATH = originalDatabasePath;
+        process.env.DATABASE_URL = originalDatabaseUrl;
+        rehearsal?.close();
+    });
     test('loader refuses production and ordinary databases and is idempotent', async () => {
         expect(() => fixture.assertFixtureEnvironment({...process.env, NODE_ENV: 'production'})).toThrow();
         expect(() => fixture.assertFixtureEnvironment({...process.env, DATABASE_PATH: require('path').resolve(__dirname, '../../prisma/dev.db')})).toThrow();

@@ -1,3 +1,4 @@
+const { createResultFixture } = require('../../services/resultWriteService');
 // Comprehensive Verification: Issue #149 Remediations on 6df8fe6
 // Exercises all 12 positive contracts corresponding to Codex review findings.
 // Uses test-owned guarded SQLite and actual service, adapter, and policy implementations.
@@ -132,7 +133,7 @@ async function assertFinalRefusals() {
     await insert('a');
 
     // ── Contract 1: Full analytical results & reception date captured on first approval ──
-    await fixturePrisma.result.create({data:{id:'r1',sampleId:'a',param:'PH_H2O',value:'6.2',numericValue:6.2,isValid:true,isCurrent:true,unit:'pH units',methodologyId:'METHOD-1'}});
+    await createResultFixture(fixturePrisma, {data:{id:'r1',sampleId:'a',param:'PH_H2O',value:'6.2',numericValue:6.2,isValid:true,isCurrent:true,unit:'pH units',methodologyId:'METHOD-1'}});
     await transitionSample('a','APPROVED','system:fixture','Synthetic first publication',{approvedAt:new Date()},fixturePrisma);
     assert.equal(count(), 1, 'Contract 1: First approval emits 1 journal event');
     const pub = db.prepare('SELECT * FROM _exchange_journal ORDER BY sequence LIMIT 1').get();
