@@ -243,3 +243,11 @@ test('malformed rule laboratory references return a stable 422 without creating 
     expect(await prisma.qcRule.count({ where: { labId: f.labId } })).toBe(0);
     expect(await prisma.auditLog.count({ where: { entity: 'QC_RULE', labId: f.labId } })).toBe(0);
 });
+
+test('an empty count evaluation stays OPEN so existing clear/reopen authority remains effective', async () => {
+    const f = await fixture(), snapshot = await resolve(f);
+    const empty = evaluateBatchQc({ blanks: [], controls: [], duplicates: [] }, { policy: { qcRule: snapshot, qcMode: 'REQUIRED_BLOCKING', sampleCount: 40 } });
+    expect(empty.overallStatus).toBe('OPEN');
+    expect(empty.summary.missingRequired).toEqual(expect.arrayContaining([expect.objectContaining({ type: 'DUPLICATE', required: 4, found: 0 })]));
+    expect(empty.summary.totalQcSamples).toBe(0);
+});

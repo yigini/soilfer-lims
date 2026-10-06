@@ -286,7 +286,7 @@ function evaluateBatchQc(qcData = {}, options = {}) {
         let failed = 0;
         const qcRule = { ...policy.qcRule, requirements };
         allEvaluated.forEach((item, index) => {
-            const type = item.type === 'CONTROL' ? rawControls[index - evaluatedBlanks.length - evaluatedDuplicates.length].referenceUse === 'CRM' ? 'CRM' : 'LRM' : item.type;
+            const type = item.type === 'CONTROL' ? rawControls[index - evaluatedBlanks.length - evaluatedDuplicates.length]?.referenceUse === 'CRM' ? 'CRM' : 'LRM' : item.type;
             item.qcRule = qcRule;
             item.failAction = failAction[type];
             if (['FAIL', 'INVALID'].includes(item.status)) {
@@ -301,7 +301,7 @@ function evaluateBatchQc(qcData = {}, options = {}) {
             summary: { totalQcSamples: total, passed: allEvaluated.filter(row => row.status === 'PASS').length, failed,
                 missingRequired, warnings, requirements, qcRule, evaluatedAt: qcRule.evaluatedAt,
                 incompleteReason: blocking ? 'QC_REQUIRED_COUNT_MISSING' : null },
-            overallStatus: failed || blocking ? 'QC_FAIL' : total > 0 ? 'QC_PASS' : 'OPEN' };
+            overallStatus: total === 0 ? 'OPEN' : failed || blocking ? 'QC_FAIL' : 'QC_PASS' };
     }
     const totalCount = allEvaluated.length;
     const failedCount = allEvaluated.filter(item => item.status === 'FAIL' || item.status === 'INVALID').length;
