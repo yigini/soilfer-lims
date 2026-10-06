@@ -4,11 +4,11 @@ const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const prisma = require('../../prisma');
 const app = require('../../app');
-const service = require('../../services/referenceMaterialService');
 const { linkReferences } = require('../../services/referencePlacementService');
 const { getAuthToken } = require('../setup');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const { installReferenceMaterials } = require('../../scripts/install_reference_materials');
+const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const labId = `RM-LAB-${randomUUID()}`, otherLab = `RM-OTHER-${randomUUID()}`, analysisCode = `RM_${randomUUID().replaceAll('-', '')}`;
 const unit = `RM-UNIT-${randomUUID()}`, smallerUnit = `RM-SMALL-${randomUUID()}`, incompatibleUnit = `RM-OTHER-UNIT-${randomUUID()}`;
 const methodA = randomUUID(), methodB = randomUUID();
@@ -125,7 +125,7 @@ test('CRM needs certified kind and value; LRM allows uncertified CRM, LRM and ch
     }
 });
 
-test.each([[methodA], [], [methodA, methodB], [methodA, null]])('recorded batch methods %j choose exact then generic; clients cannot force a specific value', async methods => {
+test.each([[methodA], [], [methodA, methodB], [methodA, null]].map(methods => [methods]))('recorded batch methods %j choose exact then generic; clients cannot force a specific value', async methods => {
     const rm = await material(), generic = await value(rm), specific = await value(rm, { methodologyId: methodA, assignedValue: 8 });
     const id = await batch(methods), resolved = methods.length === 1 ? specific : generic;
     const response = await place(id, 'evaluate', [{ referenceMaterialId: rm.id, referenceUse: 'CRM', measured: resolved.assignedValue }]);
@@ -136,7 +136,7 @@ test.each([[methodA], [], [methodA, methodB], [methodA, null]])('recorded batch 
     expect(snapshot()).toEqual(before);
 });
 
-test.each([[], [methodA, methodB], [methodA, null]])('ambiguous batch %j refuses a catalogue with only method-specific values', async methods => {
+test.each([[], [methodA, methodB], [methodA, null]].map(methods => [methods]))('ambiguous batch %j refuses a catalogue with only method-specific values', async methods => {
     const rm = await material(); await value(rm, { methodologyId: methodA });
     for (const endpoint of ['update', 'evaluate']) {
         const id = await batch(methods), before = snapshot();
@@ -187,7 +187,8 @@ test('correction appends immutable facts and supersession is final; raw value mu
     const corrected = await call('post', `/api/reference-materials/${rm.id}/values/${old.id}/correct`, { assignedValue: 8, reason: 'Certificate transcription' });
     expect(corrected.status).toBe(201);
     const oldAfter = await prisma.referenceValue.findUnique({ where: { id: old.id } });
-    expect(wire(oldAfter)).toMatchObject({ ...old, supersededById: corrected.body.data.id, correctionReason: 'Certificate transcription' });
+    expect(wire(oldAfter)).toMatchObject({ ...old, supersededById: corrected.body.data.id, supersededAt: expect.any(String),
+        supersededBy: actor.username, correctionReason: 'Certificate transcription' });
     const before = snapshot();
     expect(await call('post', `/api/reference-materials/${rm.id}/values/${old.id}/correct`, { assignedValue: 9, reason: 'Second correction' }))
         .toMatchObject({ status: 409, body: { code: 'REFERENCE_VALUE_SUPERSEDED' } });
@@ -215,11 +216,29 @@ test('read-only catalogue warnings use per-lab policy and report days without ch
     expect(snapshot()).toEqual(before);
 });
 
-test('startup integrity rejects missing supersession targets without writing', async () => {
-    const rm = await material(), old = await value(rm);
-    await prisma.referenceValue.update({ where: { id: old.id }, data: { supersededById: randomUUID(), supersededAt: new Date(), supersededBy: actor.username, correctionReason: 'Owned malformed pointer probe' } });
-    const before = snapshot();
-    expect(() => installReferenceMaterials({ dbPath: process.env.DATABASE_PATH })).toThrow(expect.objectContaining({ code: 'REFERENCE_INTEGRITY_REFUSED',
-        differences: expect.arrayContaining([expect.objectContaining({ type: 'SUPERSESSION', id: old.id })]) }));
-    expect(snapshot()).toEqual(before);
+test.each(['missing', 'other-material', 'other-analyte'])('startup integrity rejects %s supersession targets in an isolated owned file without writing', kind => {
+    const fileLab = randomUUID(), fileUnit = randomUUID(), firstCode = randomUUID(), nextCode = randomUUID(), materialId = randomUUID(), otherMaterialId = randomUUID();
+    const oldId = randomUUID(), replacementId = randomUUID(), now = new Date().toISOString();
+    const fixture = beforeGuards({ actor: 'system:fixture', relatedRows: { Lab: [{ id: fileLab, code: fileLab, name: 'Owned pointer laboratory', country: 'GTM', updatedAt: now }] } });
+    try {
+        installReferenceMaterials({ dbPath: fixture.file, apply: true });
+        const db = new Database(fixture.file, { fileMustExist: true });
+        try {
+            db.pragma('foreign_keys=ON');
+            db.prepare('INSERT INTO "Unit" (code,display,quantityKind,factorToBase,updatedAt) VALUES (?,?,?,?,?)').run(fileUnit, fileUnit, 'MASS_FRACTION', 1, now);
+            for (const code of [firstCode, nextCode]) db.prepare('INSERT INTO "Analysis" (code,name,unitCode) VALUES (?,?,?)').run(code, code, fileUnit);
+            for (const id of [materialId, otherMaterialId]) db.prepare('INSERT INTO "ReferenceMaterial" (id,labId,code,name,kind,matrix,lotNumber,status,createdBy) VALUES (?,?,?,?,?,?,?,?,?)')
+                .run(id, fileLab, id, id, 'CRM', 'SOIL', id, 'ACTIVE', 'system:fixture');
+            db.prepare('INSERT INTO "ReferenceValue" (id,referenceMaterialId,analysisCode,assignedValue,unit,valueType,createdBy) VALUES (?,?,?,?,?,?,?)')
+                .run(oldId, materialId, firstCode, 7, fileUnit, 'CERTIFIED', 'system:fixture');
+            db.prepare('UPDATE "ReferenceValue" SET supersededById=?,supersededAt=?,supersededBy=?,correctionReason=? WHERE id=?')
+                .run(replacementId, now, 'system:fixture', 'Owned malformed pointer probe', oldId);
+            if (kind !== 'missing') db.prepare('INSERT INTO "ReferenceValue" (id,referenceMaterialId,analysisCode,assignedValue,unit,valueType,createdBy) VALUES (?,?,?,?,?,?,?)')
+                .run(replacementId, kind === 'other-material' ? otherMaterialId : materialId, kind === 'other-analyte' ? nextCode : firstCode, 8, fileUnit, 'CERTIFIED', 'system:fixture');
+        } finally { db.close(); }
+        const fs = require('node:fs'), before = createHash('sha256').update(fs.readFileSync(fixture.file)).digest('hex');
+        expect(() => installReferenceMaterials({ dbPath: fixture.file, apply: true })).toThrow(expect.objectContaining({ code: 'REFERENCE_INTEGRITY_REFUSED',
+            differences: expect.arrayContaining([expect.objectContaining({ type: 'SUPERSESSION', id: oldId })]) }));
+        expect(createHash('sha256').update(fs.readFileSync(fixture.file)).digest('hex')).toBe(before);
+    } finally { fixture.close(); }
 });

@@ -461,7 +461,7 @@ exports.updateBatch = async (req, res) => {
         });
         res.json(response);
     } catch (error) {
-        if (error.statusCode) return res.status(error.statusCode).json(error.body || { code: error.code, error: error.message });
+        if (error.statusCode) return res.status(error.statusCode).json(error.body || { code: error.code, error: error.message, ...(error.details && { details: error.details }) });
         console.error('[updateBatch] Error:', error);
         res.status(500).json({ error: 'Failed to update batch' });
     }
@@ -508,7 +508,7 @@ exports.evaluateBatch = async (req, res) => {
         });
         res.json(response);
     } catch (error) {
-        if (error.statusCode) return res.status(error.statusCode).json(error.body || { code: error.code, error: error.message });
+        if (error.statusCode) return res.status(error.statusCode).json(error.body || { code: error.code, error: error.message, ...(error.details && { details: error.details }) });
         console.error('[evaluateBatch] Error:', error);
         res.status(500).json({ error: 'Failed to evaluate batch' });
     }

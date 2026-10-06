@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import { Globe, Palette, Users, FlaskConical, ShieldCheck, Key, Sparkles } from 'lucide-react';
 import AnalysisConfig from '../components/AnalysisConfig';
+import ReferenceMaterials from '../components/admin/ReferenceMaterials';
 import AuditLogs from './AuditLogs';
 import UsersComponent from './Users';
 import BrandingManager from '../components/admin/BrandingManager';
@@ -14,6 +15,8 @@ import { useDialog } from '../context/DialogContext';
 import { useAuth } from '../context/AuthContext';
 
 const TAB_ALIASES = {
+    'quality': 'quality',
+    'reference-materials': 'quality',
     'translations': 'languages',
     'languages': 'languages',
     'branding': 'branding',
@@ -45,6 +48,7 @@ const AdminPanel = () => {
 
     const canManageBranding = isSuperAdmin || isMasterUser || isLabManager || hasPermission('MANAGE_BRANDING');
     const canManageAnalyses = isSuperAdmin || isMasterUser || isLabManager || hasPermission('MANAGE_ANALYSES');
+    const canViewQuality = hasPermission('VIEW_INVENTORY');
     const canViewAudit = isSuperAdmin || isMasterUser || isLabManager || hasPermission('VIEW_AUDIT');
     const canManageApiKeys = isSuperAdmin;
     const canManageUsers = isSuperAdmin || isMasterUser || isLabManager || hasPermission('MANAGE_USERS');
@@ -56,6 +60,7 @@ const AdminPanel = () => {
             case 'languages': return canManageBranding;
             case 'appearance': return canManageAppearance;
             case 'lab-config': return canManageAnalyses;
+            case 'quality': return canViewQuality;
             case 'audit': return canViewAudit;
             case 'api-keys': return canManageApiKeys;
             case 'users': return canManageUsers;
@@ -226,6 +231,10 @@ const AdminPanel = () => {
                         <FlaskConical size={17} /> {t('admin.analysis', 'Analysis Configuration')}
                     </button>
                 )}
+                {canViewQuality && <button onClick={() => handleTabChange('quality')}
+                    className={`flex items-center gap-2 px-4 py-3 border-b-2 text-xs font-bold whitespace-nowrap ${activeTab === 'quality' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400' : 'border-transparent text-sf-muted'}`}>
+                    <ShieldCheck size={17} /> {t('referenceMaterials.quality')}
+                </button>}
                 {canViewAudit && (
                     <button
                         onClick={() => handleTabChange('audit')}
@@ -255,6 +264,7 @@ const AdminPanel = () => {
             <div className={`flex-1 overflow-y-auto ${activeTab === 'branding' || activeTab === 'lab-config' || activeTab === 'api-keys' ? 'p-0' : 'card-base rounded-2xl shadow-sm border border-sf-divider p-6'}`}>
 
                 {activeTab === 'branding' && <BrandingManager />}
+                {activeTab === 'quality' && canViewQuality && <ReferenceMaterials />}
 
                 {activeTab === 'appearance' && (
                     <div className="space-y-6">
