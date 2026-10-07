@@ -32,3 +32,7 @@ server/prisma/migrations/20261007000100_qc_gate_scope/migration.sql text eol=lf
 server/prisma/migrations/20261007000200_qc_bracket_membership/migration.sql text eol=lf
 server/services/qcDispositionScopeMigrationSource.js text eol=lf
 server/services/qcBracketMembershipMigrationSource.js text eol=lf
+server/prisma/migrations/20261007000300_proficiency_evidence/migration.sql text eol=lf
+server/services/proficiencyMigrationSource.js text eol=lf
+server/prisma/migrations/20261007000400_result_equipment_evidence/migration.sql text eol=lf
+server/services/resultEquipmentMigrationSource.js text eol=lf

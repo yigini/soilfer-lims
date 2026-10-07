@@ -74,6 +74,8 @@ COPY server/prisma/migrations/20261006000400_normalized_qc_runs/migration.sql /a
 COPY server/prisma/migrations/20261006000400_normalized_qc_runs/fresh-prisma-tables.json /app/server/.migrations-backup/186/20261006000400_normalized_qc_runs/fresh-prisma-tables.json
 COPY server/prisma/migrations/20261007000100_qc_gate_scope/migration.sql /app/server/.migrations-backup/187/20261007000100_qc_gate_scope/migration.sql
 COPY server/prisma/migrations/20261007000200_qc_bracket_membership/migration.sql /app/server/.migrations-backup/187/20261007000200_qc_bracket_membership/migration.sql
+COPY server/prisma/migrations/20261007000300_proficiency_evidence/migration.sql /app/server/.migrations-backup/189/20261007000300_proficiency_evidence/migration.sql
+COPY server/prisma/migrations/20261007000400_result_equipment_evidence/migration.sql /app/server/.migrations-backup/189/20261007000400_result_equipment_evidence/migration.sql
 
 # Copy and set entrypoint
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh

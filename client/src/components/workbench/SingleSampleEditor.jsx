@@ -52,7 +52,7 @@ export default function SingleSampleEditor({
     const currentItem = items[currentIndex] || items[0];
     const totalCount = items.length;
     const draft = currentItem.draft;
-    const equipment = activeGroup?.eligibleEquipment || [];
+    const equipment = currentItem.eligibleEquipment || activeGroup?.eligibleEquipment || [];
     const disabled = !isEntryReady(currentItem, equipment);
     let savedReceipt = null;
     try {

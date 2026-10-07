@@ -1509,6 +1509,7 @@
     "warning": "Étalonnage Bientôt Expiré",
     "blocked": "Étalonnage Expiré / Bloqué",
     "notConfigured": "Non Configuré",
+    "unconfiguredWarning": "La qualification n’est pas configurée ; la politique du laboratoire autorise l’utilisation avec un avertissement.",
     "lastCalibration": "Dernier Étalonnage",
     "nextCalibration": "Prochain Étalonnage",
     "location": "Emplacement au Laboratoire",
@@ -2514,7 +2515,10 @@
       "qc_blankCorrection": "Correction du blanc",
       "qc_failAction": "Action en cas de défaut de QC",
       "qc_requireBatchQc": "Exigence de CQ du lot",
-      "qc_calibrationFailAction": "Action après échec de l’étalonnage"
+      "qc_calibrationFailAction": "Action après échec de l’étalonnage",
+      "equipment_requireEquipment": "Équipement requis",
+      "equipment_unconfiguredReadiness": "Disponibilité des équipements non configurés",
+      "pt_zScoreLimits": "Limites du score z des essais d’aptitude"
     },
     "title": "Politiques",
     "yes": "Oui",
@@ -2615,7 +2619,9 @@
       "WARN": "Avertir",
       "AUTO": "Automatique",
       "REQUIRED": "Obligatoire",
-      "NOT_REQUIRED": "Non obligatoire"
+      "NOT_REQUIRED": "Non obligatoire",
+      "BLOCK": "Bloquer",
+      "ALLOW": "Autoriser"
     },
     "units": {
       "samples": "échantillons",
@@ -2643,6 +2649,15 @@
     "help": {
       "qc_requireBatchQc": "AUTO exige le CQ du lot pour les méthodes de mesure dont les critères de CQ résolus sont actifs. Une dérogation de méthode peut exiger ou dispenser l’appartenance au lot et son évaluation.",
       "qc_calibrationFailAction": "Choisir l’action après un échec de vérification initiale ou continue de l’étalonnage ou d’un blanc d’étalonnage."
+    },
+    "criticality": {
+      "CRITICAL": "Critique",
+      "IMPORTANT": "Important",
+      "NON_CRITICAL": "Non critique"
+    },
+    "ptLimits": {
+      "questionable": "Seuil discutable",
+      "unsatisfactory": "Seuil non satisfaisant"
     }
   },
   "referenceMaterials": {
@@ -2910,5 +2925,9 @@
       "QC_GATE_NO_BATCH": "Cette méthode nécessite un lot de CQ lié.",
       "QC_GATE_REPEAT_ORDERED": "Une nouvelle analyse est requise avant l’acceptation ou la publication."
     }
+  },
+  "proficiencyTesting": {
+    "legacySigmaMissing": "Ce score historique d’aptitude a été enregistré sans sigma d’évaluation. Il n’a pas été recalculé ; fournissez un sigma valide dans une correction explicite.",
+    "legacySigmaNonpositive": "Ce score historique d’aptitude utilisait un sigma d’évaluation non positif ou non fini. Il n’a pas été recalculé ; fournissez un sigma valide dans une correction explicite."
   }
 }

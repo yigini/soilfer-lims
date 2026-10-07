@@ -1,4 +1,5 @@
 const { randomUUID } = require('node:crypto');
+const { auditRunCommand } = require('./qcRunAuditService');
 const { hasPermission } = require('../config/roles');
 const { BATCH_STATE_LIST, normalizeBatchState, aggregateBatchStatus } = require('../workflowContract');
 const { actorName, inTransaction } = require('./workflowStateRules');
@@ -135,4 +136,5 @@ async function event(tx, batchId, type, by, at, payload) {
     await tx.batchEvent.create({ data: { id: randomUUID(), batchId, type, by, at,
         payload: JSON.stringify({ ...payload, historyEntry: { ...payload, changedBy: by, timestamp: at } }) } });
 }
-module.exports = { mutateQcRun, isNative };
+module.exports = { mutateQcRun: auditRunCommand(mutateQcRun, (input, options = {}) =>
+    options.correction ? 'MEASUREMENT_CORRECTION' : options.explicit ? 'EVALUATION' : 'RUN_UPDATE'), isNative };

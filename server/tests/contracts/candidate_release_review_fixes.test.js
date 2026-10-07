@@ -1152,6 +1152,8 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
             const attemptUpgrade = require('../../scripts/install_result_attempt_links').installResultAttemptLinks({ dbPath: rehearsalDbPath, apply: true });
             expect(attemptUpgrade).toMatchObject({ classification: 'COMPLETE', backfillCount: 0,
                 counts: { results: 2, linked: 0 } });
+            const equipmentUpgrade = require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: rehearsalDbPath, apply: true });
+            expect(equipmentUpgrade).toMatchObject({ classification: 'COMPLETE', backfillCount: 0 });
             const verified = new Database(rehearsalDbPath, { readonly: true });
             const originalResultFields = Object.keys(preSnapshots.results.rows[0]).map(field => `"${field}"`).join(',');
             expect(verified.prepare(`SELECT ${originalResultFields} FROM "Result" ORDER BY id`).all()).toEqual(preSnapshots.results.rows);

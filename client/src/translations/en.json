@@ -1509,6 +1509,7 @@
     "warning": "Calibration Expiring Soon",
     "blocked": "Calibration Overdue / Blocked",
     "notConfigured": "Not Configured",
+    "unconfiguredWarning": "Qualification is not configured; laboratory policy permits use with a warning.",
     "lastCalibration": "Last Calibration",
     "nextCalibration": "Next Due Date",
     "location": "Room / Bench Location",
@@ -2514,7 +2515,10 @@
       "qc_blankCorrection": "Blank correction",
       "qc_failAction": "Action on QC failure",
       "qc_requireBatchQc": "Batch QC requirement",
-      "qc_calibrationFailAction": "Calibration failure action"
+      "qc_calibrationFailAction": "Calibration failure action",
+      "equipment_requireEquipment": "Required equipment",
+      "equipment_unconfiguredReadiness": "Unconfigured equipment readiness",
+      "pt_zScoreLimits": "PT z-score limits"
     },
     "title": "Policies",
     "yes": "Yes",
@@ -2615,7 +2619,9 @@
       "WARN": "Warn",
       "AUTO": "Automatic",
       "REQUIRED": "Required",
-      "NOT_REQUIRED": "Not required"
+      "NOT_REQUIRED": "Not required",
+      "BLOCK": "Block",
+      "ALLOW": "Allow"
     },
     "units": {
       "samples": "samples",
@@ -2643,6 +2649,15 @@
     "help": {
       "qc_requireBatchQc": "AUTO requires batch QC for measurement methods with enabled resolved QC criteria. A method override can require or waive batch membership and evaluation.",
       "qc_calibrationFailAction": "Choose the action for failed initial or continuing calibration verification and calibration blanks."
+    },
+    "criticality": {
+      "CRITICAL": "Critical",
+      "IMPORTANT": "Important",
+      "NON_CRITICAL": "Non-critical"
+    },
+    "ptLimits": {
+      "questionable": "Questionable boundary",
+      "unsatisfactory": "Unsatisfactory boundary"
     }
   },
   "referenceMaterials": {
@@ -2910,5 +2925,9 @@
       "QC_GATE_NO_BATCH": "This method requires a linked QC batch.",
       "QC_GATE_REPEAT_ORDERED": "Repeat analysis is required before acceptance or publication."
     }
+  },
+  "proficiencyTesting": {
+    "legacySigmaMissing": "This historical PT score was recorded without an assessment sigma. It has not been recomputed; supply a valid sigma in an explicit correction.",
+    "legacySigmaNonpositive": "This historical PT score used a nonpositive or nonfinite assessment sigma. It has not been recomputed; supply a valid sigma in an explicit correction."
   }
 }

@@ -2,7 +2,8 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    # Preview validation only; omit this branch when transferring to PR #255.
+    branches: [ main, codex/audit-qc-integration-preview ]
   pull_request:
     branches: [ main ]
 

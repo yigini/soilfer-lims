@@ -62,6 +62,21 @@ const item = (id, extra = {}) => ({ workItemId: id, sampleId: `database-${id}`, 
 
 describe('Audit 0.11: workbench component behavior', () => {
     afterEach(() => jest.useRealTimers());
+    test('picker uses the selected row method list and displays its projected OVERDUE state', () => {
+        const row = item('method-row', { readiness: { isReady: false, blockers: ['INSTRUMENT_REQUIRED'] },
+            eligibleEquipment: [{ id: 'specific', name: 'Specific asset', calibrationStatus: 'OVERDUE', readinessState: 'OVERDUE', readiness: 'BLOCKED', status: 'IN_SERVICE' }] });
+        const html = ReactDOMServer.renderToStaticMarkup(harness('WorkbenchInspector').render({ selectedItem: row,
+            eligibleEquipment: [{ id: 'fallback', name: 'Other method asset', calibrationStatus: 'OK', status: 'IN_SERVICE' }] }));
+        expect(html).toContain('Specific asset (OVERDUE)'); expect(html).not.toContain('Other method asset');
+        row.draft = { instrumentId: 'specific' };
+        const props = { activeGroup: { analysis: row.analysis }, items: [row] };
+        const card = harness('SingleSampleEditor');
+        expect(child(card, card.render(props), 'NumericEditor').props.disabled).toBe(true);
+        row.eligibleEquipment[0] = { ...row.eligibleEquipment[0], calibrationStatus: 'NOT_CONFIGURED', readinessState: 'NOT_CONFIGURED', readiness: 'WARNING' };
+        expect(child(card, card.render(props), 'NumericEditor').props.disabled).toBe(false);
+        row.eligibleEquipment[0].readiness = 'BLOCKED';
+        expect(child(card, card.render(props), 'NumericEditor').props.disabled).toBe(true);
+    });
     test('card numeric typing creates the same draft and records this sample through review', () => {
         const h = harness('SingleSampleEditor'), onDraftChange = jest.fn(), onReviewRecord = jest.fn();
         const row = item('card', { currentResult: '9', previousResult: { value: '9', isValid: false } });

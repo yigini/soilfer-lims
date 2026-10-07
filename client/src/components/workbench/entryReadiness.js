@@ -9,9 +9,11 @@ export function canSelectInstrument(item) {
 
 export function isEntryReady(item, equipment = []) {
     if (!item || SEALED.includes(item.status)) return false;
+    const selectedId = item.draft?.instrumentId || item.equipmentId;
+    const asset = (item.eligibleEquipment || equipment).find(candidate => candidate.id === selectedId);
+    if (asset && (asset.status !== 'IN_SERVICE' || ['BLOCKED', 'NOT_CONFIGURED'].includes(asset.readiness) ||
+        ['OVERDUE', 'FAILED'].includes(asset.calibrationStatus))) return false;
     if (item.readiness?.isReady === true) return true;
     if (!canSelectInstrument(item)) return false;
-    const selectedId = item.draft?.instrumentId || item.equipmentId;
-    const asset = equipment.find(candidate => candidate.id === selectedId);
-    return !!asset && asset.status === 'IN_SERVICE' && asset.calibrationStatus !== 'OVERDUE';
+    return !!asset;
 }

@@ -5,6 +5,7 @@ const { verifyToken, checkPermission } = require('../middleware/authMiddleware')
 
 // Record a new PT round (Lab technicians, managers, admins)
 router.post('/rounds', verifyToken, checkPermission('ENTER_RESULTS'), ptController.recordRound);
+router.patch('/rounds/:id', verifyToken, checkPermission('ENTER_RESULTS'), ptController.updateRound);
 
 // List/filter PT rounds
 router.get('/rounds', verifyToken, ptController.getRounds);
