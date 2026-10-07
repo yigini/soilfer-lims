@@ -159,7 +159,9 @@ test.each(['qcMeasurement', 'batchPositionReference'])('the application Prisma c
                 const batch = await runtime.batch.findUnique({ where: { id: f.batchId } });
                 const dangling = randomUUID(); let reachedCommit = false;
                 await expect(runtime.$transaction(async tx => {
-                    await tx[model].update({ where: { id: original.id }, data: { supersededById: dangling } });
+                    const update = { where: { id: original.id }, data: { supersededById: dangling } };
+                    if (model === 'qcMeasurement') await tx.qcMeasurement.update(update);
+                    else await tx.batchPositionReference.update(update);
                     await tx.batch.update({ where: { id: f.batchId }, data: { notes: 'Failed commit must leave zero writes' } });
                     await tx.auditLog.create({ data: { id: randomUUID(), entity: 'QC_BATCH', entityId: f.batchId, action: 'QC_CORRECTED',
                         details: 'Dangling replacement must roll back', performedBy: f.user } });
@@ -172,8 +174,15 @@ test.each(['qcMeasurement', 'batchPositionReference'])('the application Prisma c
                 expect(f.db.prepare(`SELECT supersededById FROM "${model === 'qcMeasurement' ? 'QcMeasurement' : 'BatchPositionReference'}" WHERE id=?`).get(original.id).supersededById).toBeNull();
                 const replacementId = randomUUID();
                 await runtime.$transaction(async tx => {
-                    await tx[model].update({ where: { id: original.id }, data: { supersededById: replacementId } });
-                    await tx[model].create({ data: { ...before[0], id: replacementId, correctionReason: 'Checked replacement after failed commit' } });
+                    const update = { where: { id: original.id }, data: { supersededById: replacementId } };
+                    const replacement = { data: { ...before[0], id: replacementId, correctionReason: 'Checked replacement after failed commit' } };
+                    if (model === 'qcMeasurement') {
+                        await tx.qcMeasurement.update(update);
+                        await tx.qcMeasurement.create(replacement);
+                    } else {
+                        await tx.batchPositionReference.update(update);
+                        await tx.batchPositionReference.create(replacement);
+                    }
                     await tx.batch.update({ where: { id: f.batchId }, data: { notes: 'The same runtime connection remains writable' } });
                 });
                 expect(await runtime[model].findUnique({ where: { id: original.id } })).toEqual({ ...before[0], supersededById: replacementId });
