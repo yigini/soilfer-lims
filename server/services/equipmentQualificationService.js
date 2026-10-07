@@ -184,28 +184,25 @@ const qualificationAtRead = (asset, now = new Date()) => {
     return qualification;
 };
 
-const getReadiness = (asset, options = {}) => {
-    if (!asset) return 'BLOCKED';
-    if (asset.status === 'OUT_OF_SERVICE' || asset.status === 'DECOMMISSIONED') return 'BLOCKED';
-
+const readinessAtRead = (asset, options = {}) => {
+    if (!asset) return 'NOT_AVAILABLE';
+    if (asset.status === 'OUT_OF_SERVICE' || asset.status === 'DECOMMISSIONED') return asset.status;
     const q = qualificationAtRead(asset, options.now);
+    if (!q) return 'NOT_CONFIGURED';
+    const states = [q.calibrationStatus, q.verificationStatus];
+    for (const state of ['FAILED', 'OVERDUE', 'DUE_SOON']) if (states.includes(state)) return state;
+    return states.includes('OK') ? 'READY' : 'NOT_CONFIGURED';
+};
+
+const getReadiness = (asset, options = {}) => {
+    const state = readinessAtRead(asset, options);
     const unconfigured = () => {
         const action = options.unconfiguredReadiness?.[asset.criticality];
         return action === 'BLOCK' ? 'BLOCKED' : action === 'WARN' ? 'WARNING'
             : action === 'ALLOW' ? 'READY' : 'NOT_CONFIGURED';
     };
-    if (!q) return unconfigured();
-
-    if (['OVERDUE', 'FAILED'].includes(q.calibrationStatus) || ['OVERDUE', 'FAILED'].includes(q.verificationStatus)) {
-        return 'BLOCKED';
-    }
-    if (q.calibrationStatus === 'DUE_SOON' || q.verificationStatus === 'DUE_SOON') {
-        return 'WARNING';
-    }
-    if (q.calibrationStatus === 'OK' || q.verificationStatus === 'OK') {
-        return 'READY';
-    }
-    return unconfigured();
+    if (state === 'NOT_CONFIGURED') return unconfigured();
+    return state === 'READY' ? 'READY' : state === 'DUE_SOON' ? 'WARNING' : 'BLOCKED';
 };
 
 async function equipmentView(asset, options = {}) {
@@ -215,7 +212,7 @@ async function equipmentView(asset, options = {}) {
     const readiness = getReadiness(asset, { ...options, unconfiguredReadiness });
     const unconfigured = !qualification || [qualification.calibrationStatus, qualification.verificationStatus]
         .every(status => status === 'NOT_CONFIGURED' || status == null);
-    return { ...asset, qualification, readiness,
+    return { ...asset, qualification, readiness, readinessState: readinessAtRead(asset, options),
         readinessWarnings: unconfigured && unconfiguredReadiness[asset.criticality] === 'WARN'
             ? ['EQUIPMENT_NOT_CONFIGURED_WARNING'] : [] };
 }
@@ -346,6 +343,7 @@ module.exports = {
     calculateQualification,
     getReadiness,
     qualificationAtRead,
+    readinessAtRead,
     equipmentView,
     recomputeAndPersist,
     generateMismatchReport

@@ -171,6 +171,20 @@ async function resolveEquipmentRequirement(db, item, labId) {
             methodId: mapping?.methodId || null } : { policy: policy.source, scope: policy.scope }, mappingId: mapping?.id || null };
 }
 
+async function eligibleEquipmentForItem(db, item, labId, options = {}) {
+    const requirement = await resolveEquipmentRequirement(db, item, labId);
+    const assets = requirement.eligibleIds.length ? await db.equipmentAsset.findMany({
+        where: { id: { in: requirement.eligibleIds }, labId, status: 'IN_SERVICE' }, include: { qualification: true }
+    }) : [];
+    const views = await Promise.all(assets.map(asset => require('./equipmentQualificationService').equipmentView(asset, { db, ...options })));
+    return { requirement, eligibleEquipment: views.map(asset => ({ id: asset.id, labId: asset.labId, name: asset.name,
+        assetType: asset.assetType, status: asset.status, criticality: asset.criticality,
+        calibrationStatus: asset.qualification?.calibrationStatus || 'NOT_CONFIGURED',
+        nextCalibrationDue: asset.qualification?.nextCalibrationDueDate || null,
+        nextCalibrationDueDate: asset.qualification?.nextCalibrationDueDate || null,
+        readiness: asset.readiness, readinessState: asset.readinessState, readinessWarnings: asset.readinessWarnings })) };
+}
+
 /** Application callers load evidence and catalogue before the pure evaluation. */
 async function evaluateExecutionReadiness(db, item, user, options = {}) {
     const engine = require('../utils/workflowEngine');
@@ -200,8 +214,8 @@ async function evaluateExecutionReadiness(db, item, user, options = {}) {
         equipReq, prerequisite,
         gateEvidence: gates.evaluateGateEvidence(item.sample, workItems, required) });
     return { ...readiness, equipmentRequired: equipReq.isRequired,
-        equipmentBlocked: readiness.blockers.some(code => code.startsWith('INSTRUMENT_')),
-        equipmentSnapshot: asset ? { equipmentId: asset.id, assetStatus: asset.status, readiness: asset.readiness,
+        equipmentBlocked: Boolean(readiness.blockers[0]?.startsWith('INSTRUMENT_')),
+        equipmentSnapshot: asset ? { equipmentId: asset.id, assetStatus: asset.status, readiness: asset.readinessState,
             calibrationDueDate: asset.qualification?.nextCalibrationDueDate || null, criticality: asset.criticality,
             requirement: equipReq.requirement, requirementSource: equipReq.requirementSource, evaluatedAt: now.toISOString() } : null };
 }
@@ -209,5 +223,6 @@ async function evaluateExecutionReadiness(db, item, user, options = {}) {
 module.exports = {
     evaluateItemReadiness,
     evaluateExecutionReadiness,
-    resolveEquipmentRequirement
+    resolveEquipmentRequirement,
+    eligibleEquipmentForItem
 };

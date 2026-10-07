@@ -12,6 +12,24 @@ function fixture(rounds = [null, 0, -1, Infinity, 1, 2, 3].map(sigma => ({ sigma
 }
 afterAll(() => { for (const f of owned) f.close(); });
 
+test('deleted unsatisfactory rounds are listed but excluded from new NCR marking', () => {
+    const f = fixture([{ sigma: 1, outcome: 'UNSATISFACTORY' }, { sigma: 1, outcome: 'UNSATISFACTORY' }]);
+    const db = new Database(f.file), deletedAt = '2026-10-07T00:00:00.000Z';
+    db.prepare('UPDATE "ProficiencyRound" SET deletedAt=?,deletedBy=?,deleteReason=? WHERE id=?').run(deletedAt, f.by, 'Owned duplicate fixture', 'round-0');
+    const before = db.prepare('SELECT * FROM "ProficiencyRound" WHERE id=?').get('round-0'); db.close();
+    const byteHash = hash(f.file), dry = backfillProficiencyEvidence({ dbPath: f.file });
+    expect(dry.deletedRounds).toEqual([{ id: 'round-0', deletedAt }]); expect(dry.ncrPendingCount).toBe(1); expect(hash(f.file)).toBe(byteHash);
+    const applied = backfillProficiencyEvidence({ dbPath: f.file, apply: true, planSha256: dry.planSha256, by: f.by });
+    expect(applied).toMatchObject({ ncrPendingCount: 1, scoresAndOutcomesPreserved: true, deletedRounds: [{ id: 'round-0', deletedAt }] });
+    const check = new Database(f.file);
+    expect(check.prepare('SELECT * FROM "ProficiencyRound" WHERE id=?').get('round-0')).toEqual(before);
+    expect(check.prepare('SELECT ncrStatus FROM "ProficiencyRound" WHERE id=?').get('round-1').ncrStatus).toBe('PENDING');
+    expect(check.prepare('SELECT count(*) n FROM "AuditLog" WHERE entityId=?').get('round-0').n).toBe(0); check.close();
+    const finalHash = hash(f.file);
+    expect(backfillProficiencyEvidence({ dbPath: f.file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0, deletedRounds: [{ id: 'round-0', deletedAt }] });
+    expect(hash(f.file)).toBe(finalHash);
+});
+
 test('dry-run lists missing/nonpositive/nonfinite sigma and catalogue mismatches without changing a byte', () => {
     const f = fixture(), before = hash(f.file), dry = backfillProficiencyEvidence({ dbPath: f.file });
     expect(dry).toMatchObject({ mode: 'DRY_RUN', totalChanges: 0, flagCounts: { SIGMA_MISSING: 1, SIGMA_NONPOSITIVE: 3 },

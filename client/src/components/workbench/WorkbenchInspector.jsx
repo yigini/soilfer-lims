@@ -19,7 +19,7 @@ import { canSelectInstrument } from './entryReadiness';
 export default function WorkbenchInspector({
     selectedItem,
     methodDefinition,
-    eligibleEquipment = [],
+    eligibleEquipment: groupEquipment = [],
     onUpdateMeta,
     onDiscardDraft,
     onResolveConflict,
@@ -34,6 +34,7 @@ export default function WorkbenchInspector({
         );
     }
 
+    const eligibleEquipment = selectedItem.eligibleEquipment || groupEquipment;
     const {
         workItemId,
         sampleId,
@@ -199,7 +200,7 @@ export default function WorkbenchInspector({
                             <option value="">-- Select Instrument --</option>
                             {eligibleEquipment.map(eq => (
                                 <option key={eq.id} value={eq.id}>
-                                    {eq.name} ({eq.calibrationStatus})
+                                    {eq.name} ({eq.readinessState || eq.calibrationStatus})
                                 </option>
                             ))}
                         </select>

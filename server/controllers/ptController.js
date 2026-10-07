@@ -2,20 +2,6 @@ const prisma = require('../prisma');
 const rounds = require('../services/proficiencyRoundService');
 const policyService = require('../services/policyService');
 
-/**
- * Calculates standard ISO/IEC 17043 & ISO 13528 z-score and outcome.
- * z = (x_lab - x_assigned) / sigma_pt
- * @param {number} assignedValue - Consensus / certified reference value
- * @param {number} labResult - Result reported by the participating laboratory
- * @param {number} uncertainty - Standard deviation for proficiency assessment (sigma_pt) or standard uncertainty
- * @returns {{ zScore: number, outcome: 'SATISFACTORY'|'QUESTIONABLE'|'UNSATISFACTORY' }}
- */
-function evaluateProficiency(assignedValue, labResult, uncertainty) {
-    const { zScore, outcome } = require('../services/proficiencyAssessmentService').evaluateProficiency(
-        assignedValue, labResult, uncertainty, policyService.getStrict('pt.zScoreLimits'));
-    return { zScore, outcome };
-}
-
 function respondError(res, error, fallback) {
     if (!error.statusCode) console.error('[proficiencyRound] Error:', error);
     return res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : fallback,
@@ -159,5 +145,3 @@ exports.deleteRound = async (req, res) => {
         respondError(res, error, 'Failed to delete round');
     }
 };
-
-exports.evaluateProficiency = evaluateProficiency;

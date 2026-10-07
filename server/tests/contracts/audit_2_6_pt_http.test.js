@@ -9,6 +9,33 @@ const { JWT_SECRET } = require('../../config/auth');
 const policyService = require('../../services/policyService');
 const owned = [];
 
+test.each([null, 0, true, false, '', 'invalid-date'])('explicit invalid PT date %s refuses create and update with zero writes', async date => {
+    const f = await fixture(), before = await f.snapshot(), created = await f.post({ ...f.body, date });
+    expect(created.status).toBe(400); expect(created.body.code).toBe('PT_INPUT_INVALID'); expect(await f.snapshot()).toEqual(before);
+    const round = (await f.post(f.body)).body.data, recorded = await f.snapshot();
+    const updated = await request(app).patch(`/api/pt/rounds/${round.id}`).set('Authorization', f.auth).send({ date });
+    expect(updated.status).toBe(400); expect(updated.body.code).toBe('PT_INPUT_INVALID'); expect(await f.snapshot()).toEqual(recorded);
+});
+
+test('PT create resolves a known lab code and rejects an unknown lab id with a stable 4xx', async () => {
+    const f = await fixture(), code = `PT-CODE-${randomUUID()}`;
+    await prisma.lab.update({ where: { id: f.labId }, data: { code } });
+    const before = await f.snapshot(), missing = await f.post({ ...f.body, labId: `missing-${randomUUID()}` });
+    expect(missing.status).toBe(400); expect(missing.body.code).toBe('PT_LAB_INVALID'); expect(await f.snapshot()).toEqual(before);
+    const created = await f.post({ ...f.body, labId: code });
+    expect(created.status).toBe(201); expect(created.body.data.labId).toBe(f.labId);
+});
+
+test('correction away from UNSATISFACTORY keeps pending NCR evidence and audits the old/new outcomes', async () => {
+    const f = await fixture(), round = (await f.post(f.body)).body.data;
+    const updated = await request(app).patch(`/api/pt/rounds/${round.id}`).set('Authorization', f.auth).send({ labResult: 0, uncertainty: 1 });
+    expect(updated.status).toBe(200); expect(updated.body.data).toMatchObject({ outcome: 'SATISFACTORY', zScore: 0, ncrStatus: 'PENDING' });
+    const audit = await prisma.auditLog.findFirst({ where: { entityId: round.id, action: 'UPDATE_PT' } });
+    expect(JSON.parse(audit.before)).toMatchObject({ outcome: 'UNSATISFACTORY', ncrStatus: 'PENDING' });
+    expect(JSON.parse(audit.after)).toMatchObject({ outcome: 'SATISFACTORY', ncrStatus: 'PENDING' });
+    expect(await prisma.auditLog.count({ where: { entityId: round.id, action: 'PT_UNSATISFACTORY' } })).toBe(1);
+});
+
 async function fixture() {
     const id = randomUUID(), analysisCode = `pSA-${id}`, unitCode = `pt-unit-${id}`;
     await prisma.lab.create({ data: { id, code: id, name: 'Owned PT HTTP fixture', country: 'TEST' } });

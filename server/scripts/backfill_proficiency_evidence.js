@@ -21,16 +21,17 @@ function plan(db) {
             throw fail('PT_BACKFILL_REFUSED', `Round ${row.id} has an unsupported legacy score flag.`);
         }
         if (flag && !row.legacyScoreFlag) after.legacyScoreFlag = flag;
-        if (!flag && !row.legacyScoreFlag && row.outcome === 'UNSATISFACTORY' && row.ncrStatus == null) after.ncrStatus = 'PENDING';
+        if (row.deletedAt == null && !flag && !row.legacyScoreFlag && row.outcome === 'UNSATISFACTORY' && row.ncrStatus == null) after.ncrStatus = 'PENDING';
         if (Object.keys(after).length) changes.push({ id: row.id, before: row, after });
     }
     const codeMismatches = rows.filter(row => !codes.has(row.analysisCode)).map(row => ({ id: row.id, analysisCode: row.analysisCode }));
-    return { changes, flagged, codeMismatches, planSha256: digest({ rows, codes: [...codes] }), scoreOutcomeSha256: scoreOutcomeDigest(db) };
+    const deletedRounds = rows.filter(row => row.deletedAt != null).map(row => ({ id: row.id, deletedAt: row.deletedAt }));
+    return { changes, flagged, codeMismatches, deletedRounds, planSha256: digest({ rows, codes: [...codes] }), scoreOutcomeSha256: scoreOutcomeDigest(db) };
 }
 function receipt(planned, mode, afterHash, totalChanges = 0) {
     return { mode, planSha256: planned.planSha256, totalChanges,
         flagCounts: Object.fromEntries(['SIGMA_MISSING', 'SIGMA_NONPOSITIVE'].map(flag => [flag, planned.flagged.filter(row => row.flag === flag).length])),
-        flaggedRounds: planned.flagged, codeMismatches: planned.codeMismatches,
+        flaggedRounds: planned.flagged, codeMismatches: planned.codeMismatches, deletedRounds: planned.deletedRounds,
         newFlagCount: planned.changes.filter(row => row.after.legacyScoreFlag).length,
         ncrPendingCount: planned.changes.filter(row => row.after.ncrStatus).length,
         scoreOutcomeSha256Before: planned.scoreOutcomeSha256, scoreOutcomeSha256After: afterHash,

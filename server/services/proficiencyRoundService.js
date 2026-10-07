@@ -22,7 +22,10 @@ function metadata(input, creating) {
         if (creating || owns(input, key)) data[key] = text(input[key], key !== 'notes');
     }
     if (creating || owns(input, 'date')) {
-        const date = input.date == null && creating ? new Date() : new Date(input.date);
+        if (owns(input, 'date') && !(input.date instanceof Date) && (typeof input.date !== 'string' || !input.date.trim())) {
+            throw fail(400, 'PT_INPUT_INVALID', 'PT round date must be a date string.');
+        }
+        const date = !owns(input, 'date') && creating ? new Date() : new Date(input.date);
         if (!Number.isFinite(date.getTime())) throw fail(400, 'PT_INPUT_INVALID', 'PT round date must be valid.');
         data.date = date;
     }
@@ -47,8 +50,13 @@ async function audit(tx, actor, action, before, after, reason = null) {
 async function record(actor, input, { db = require('../prisma') } = {}) {
     const identity = { labId: input.labId || actor.labId, analysisCode: text(input.analysisCode, true) };
     if (!identity.labId) throw fail(400, 'PT_LAB_REQUIRED', 'A laboratory is required.');
+    if (typeof identity.labId !== 'string') throw fail(400, 'PT_INPUT_INVALID', 'PT laboratory must be an id or code string.');
     authorize(actor, 'ENTER_RESULTS', identity);
     return db.$transaction(async tx => {
+        const lab = await policyService.resolveLab(identity.labId, tx);
+        if (!lab) throw fail(400, 'PT_LAB_INVALID', 'PT laboratory was not found.');
+        identity.labId = lab.id;
+        authorize(actor, 'ENTER_RESULTS', identity);
         const values = await classify(input, identity, tx);
         const round = await tx.proficiencyRound.create({ data: { id: randomUUID(), ...identity, ...metadata(input, true), ...values } });
         await audit(tx, actor, 'RECORD_PT', null, round);
@@ -72,6 +80,7 @@ async function update(actor, id, input, { db = require('../prisma') } = {}) {
             if (!owns(input, 'uncertainty')) throw fail(400, 'PT_SIGMA_REQUIRED', 'Explicit proficiency-assessment sigma is required for a correction.');
             data = { ...data, ...await classify({ assignedValue: before.assignedValue, labResult: before.labResult, ...input }, before, tx),
                 legacyScoreFlag: null, legacyFlaggedAt: null };
+            if (before.ncrStatus === 'PENDING') data.ncrStatus = 'PENDING';
         }
         if (!Object.keys(data).length) throw fail(400, 'PT_INPUT_INVALID', 'A PT update must change a supported field.');
         const after = await tx.proficiencyRound.update({ where: { id: before.id }, data });

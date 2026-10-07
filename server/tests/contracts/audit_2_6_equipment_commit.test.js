@@ -13,10 +13,10 @@ async function fixture() {
     await prisma.analysis.create({ data: { code: analysis, name: 'Controlled equipment fixture', units: 'mg/kg',
         status: 'active', validation: JSON.stringify({ type: 'numeric', min: 0, max: 100 }) } });
     const f = { labId, analysis, actor, auth: `Bearer ${jwt.sign({ id: actor.id, tokenVersion: 0 }, JWT_SECRET, { expiresIn: '10m' })}` };
-    f.item = async (code = analysis) => {
+    f.item = async (code = analysis, sampleOverrides = {}) => {
         const sampleId = randomUUID(), workItemId = randomUUID();
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
-            status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify([code]) } });
+            status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE', requiredAnalyses: JSON.stringify([code]), ...sampleOverrides } });
         await createWorkItemFixture(prisma, { data: { id: workItemId, sampleId, analysis: code, assignedLab: labId,
             assignedTo: actor.username, status: 'ASSIGNED', version: 0 } });
         return { sampleId, workItemId, version: 0, value: '6.2' };
@@ -60,6 +60,54 @@ test('an instrument made overdue at the transaction boundary rejects only its ro
     expect(new Date(JSON.parse(result.equipmentReadiness).calibrationDueDate).getTime()).toBeGreaterThan(Date.now());
     expect(Number.isFinite(new Date(JSON.parse(result.equipmentReadiness).evaluatedAt).getTime())).toBe(true);
 });
+
+test('default NON_CRITICAL ALLOW retains NOT_CONFIGURED in the immutable Result evidence', async () => {
+    const f = await fixture(), item = await f.item(), asset = await f.asset('NON_CRITICAL', false);
+    expect((await f.save([{ ...item, equipmentId: asset.id }])).body.saved).toBe(1);
+    const result = await prisma.result.findFirst({ where: { sampleId: item.sampleId } });
+    expect(JSON.parse(result.equipmentReadiness)).toMatchObject({ readiness: 'NOT_CONFIGURED', calibrationDueDate: null,
+        criticality: 'NON_CRITICAL', equipmentId: asset.id });
+});
+
+test('queue projects overdue dates and unconfigured policy at read time and keeps each method-specific picker list', async () => {
+    const f = await fixture(), item = await f.item(), fallbackItem = await f.item(), overdue = await f.asset(), fallback = await f.asset();
+    const unconfigured = await f.asset('NON_CRITICAL', false), warning = await f.asset('IMPORTANT', false);
+    const method = await prisma.methodology.create({ data: { id: randomUUID(), analysisCode: f.analysis, name: 'Specific picker method' } });
+    await prisma.workItem.update({ where: { id: item.workItemId }, data: { methodologyId: method.id } });
+    await prisma.equipmentQualification.update({ where: { equipmentId: overdue.id }, data: { nextCalibrationDueDate: new Date(Date.now() - 86400000) } });
+    await prisma.equipmentMethodEligibility.create({ data: { id: randomUUID(), labId: f.labId, analysisCode: f.analysis,
+        isRequired: true, eligibleEquipmentIds: JSON.stringify([fallback.id]) } });
+    await prisma.equipmentMethodEligibility.create({ data: { id: randomUUID(), labId: f.labId, analysisCode: f.analysis, methodId: method.id,
+        isRequired: false, eligibleEquipmentIds: JSON.stringify([overdue.id, unconfigured.id, warning.id]) } });
+    const eventsBefore = await prisma.equipmentEvent.count();
+    const response = await request(app).get('/api/workbench/queue').set('Authorization', f.auth);
+    expect(response.status).toBe(200);
+    const group = response.body.groups.find(row => row.analysis === f.analysis);
+    const specificRow = group.items.find(row => row.workItemId === item.workItemId), fallbackRow = group.items.find(row => row.workItemId === fallbackItem.workItemId);
+    expect(specificRow.equipmentRequired).toBe(false); expect(fallbackRow.equipmentRequired).toBe(true);
+    expect(specificRow.eligibleEquipment.map(row => row.id).sort()).toEqual([overdue.id, unconfigured.id, warning.id].sort());
+    expect(fallbackRow.eligibleEquipment.map(row => row.id)).toEqual([fallback.id]);
+    expect(specificRow.eligibleEquipment.find(row => row.id === overdue.id)).toMatchObject({ calibrationStatus: 'OVERDUE', readinessState: 'OVERDUE', readiness: 'BLOCKED' });
+    expect(specificRow.eligibleEquipment.find(row => row.id === unconfigured.id)).toMatchObject({ calibrationStatus: 'NOT_CONFIGURED', readinessState: 'NOT_CONFIGURED', readiness: 'READY' });
+    expect(specificRow.eligibleEquipment.find(row => row.id === warning.id)).toMatchObject({ readiness: 'WARNING', readinessWarnings: ['EQUIPMENT_NOT_CONFIGURED_WARNING'] });
+    expect((await prisma.equipmentQualification.findUnique({ where: { equipmentId: overdue.id } })).calibrationStatus).toBe('OK');
+    expect(await prisma.equipmentEvent.count()).toBe(eventsBefore);
+    const preview = await request(app).post('/api/workbench/v2/completion/preview').set('Authorization', f.auth)
+        .send({ entries: [{ ...item, equipmentId: overdue.id }] });
+    expect(preview.status).toBe(200); expect(preview.body.excluded[0].blockers).toContain('INSTRUMENT_CALIBRATION_OVERDUE');
+});
+
+test('sample hold stays the first refusal when equipment is also overdue, with zero row writes', async () => {
+    const f = await fixture(), item = await f.item(f.analysis, { status: 'ON_HOLD' }), asset = await f.asset();
+    await prisma.equipmentQualification.update({ where: { equipmentId: asset.id }, data: { nextCalibrationDueDate: new Date(Date.now() - 86400000) } });
+    const before = await prisma.workItem.findUnique({ where: { id: item.workItemId } }), audits = await prisma.auditLog.count();
+    const response = await f.save([{ ...item, equipmentId: asset.id }]);
+    expect(response.status).toBe(422); expect(response.body.saved).toBe(0);
+    expect(response.body.errors[0].code).toBe('EXECUTION_BLOCKED');
+    expect(await prisma.workItem.findUnique({ where: { id: item.workItemId } })).toEqual(before);
+    expect(await prisma.result.count({ where: { sampleId: item.sampleId } })).toBe(0);
+    expect(await prisma.auditLog.count()).toBe(audits);
+});
 test('a required missing instrument and an unconfigured critical instrument refuse EQUIPMENT_NOT_READY; lab ALLOW permits only unconfigured evidence', async () => {
     const f = await fixture(), item = await f.item(), asset = await f.asset('CRITICAL', false);
     await f.require('REQUIRED');
@@ -73,7 +121,7 @@ test('a required missing instrument and an unconfigured critical instrument refu
         value: { CRITICAL: 'ALLOW', IMPORTANT: 'WARN', NON_CRITICAL: 'ALLOW' } }] });
     expect((await f.save([{ ...item, equipmentId: asset.id }])).body.saved).toBe(1);
     expect(JSON.parse((await prisma.result.findFirst({ where: { sampleId: item.sampleId } })).equipmentReadiness))
-        .toMatchObject({ equipmentId: asset.id, calibrationDueDate: null, requirement: 'REQUIRED', readiness: 'READY' });
+        .toMatchObject({ equipmentId: asset.id, calibrationDueDate: null, requirement: 'REQUIRED', readiness: 'NOT_CONFIGURED' });
 });
 test('AUTO chooses method-specific eligibility over the fallback and explicit NOT_REQUIRED overrides the mapping', async () => {
     const f = await fixture(), method = await prisma.methodology.create({ data: { id: randomUUID(), analysisCode: f.analysis, name: 'Owned specific method' } });
