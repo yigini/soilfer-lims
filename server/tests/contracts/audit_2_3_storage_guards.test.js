@@ -96,6 +96,61 @@ function binding(f, p, lot, code = f.a, extra = {}) {
 }
 afterAll(() => { for (const file of files) if (fs.existsSync(file)) fs.unlinkSync(file); });
 
+test.each(['QcMeasurement', 'BatchPositionReference'])('%s deferred supersession rejects dangling, self and shared targets with zero writes', table => {
+    const f = fixture();
+    try {
+        expect(f.db.pragma('foreign_keys', { simple: true })).toBe(1);
+        expect(f.db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(table).sql)
+            .toContain(`CONSTRAINT "${table}_supersededById_fkey" FOREIGN KEY ("supersededById") REFERENCES "${table}" ("id") ON DELETE RESTRICT ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED`);
+        const p = position(f, table === 'QcMeasurement' ? 'BLANK' : 'LRM'), other = position(f, table === 'QcMeasurement' ? 'BLANK' : 'LRM');
+        const lot = table === 'BatchPositionReference' ? reference(f) : null;
+        start(f);
+        const originals = table === 'QcMeasurement' ? [measurement(f, p), measurement(f, other)] : [binding(f, p, lot), binding(f, other, lot)];
+        originals.forEach(row => insert(f.db, table, row));
+        const before = f.db.prepare(`SELECT * FROM "${table}" ORDER BY id`).all(), audits = f.db.prepare('SELECT * FROM AuditLog ORDER BY id').all();
+        const target = randomUUID();
+        let reachedCommit = false;
+        expect(() => f.db.transaction(() => {
+            f.db.prepare(`UPDATE "${table}" SET supersededById=? WHERE id=?`).run(target, originals[0].id);
+            insert(f.db, 'AuditLog', { id: randomUUID(), entity: 'BATCH', entityId: f.batchId, action: 'QC_CORRECTED',
+                details: 'Dangling transaction must roll back', performedBy: f.user, timestamp: now });
+            reachedCommit = true;
+        })()).toThrow('FOREIGN KEY constraint failed');
+        expect(reachedCommit).toBe(true);
+        expect(f.db.prepare(`SELECT * FROM "${table}" ORDER BY id`).all()).toEqual(before);
+        expect(f.db.prepare('SELECT * FROM AuditLog ORDER BY id').all()).toEqual(audits);
+        expect(() => f.db.prepare(`UPDATE "${table}" SET supersededById=? WHERE id=?`).run(originals[0].id, originals[0].id)).toThrow();
+        expect(() => f.db.transaction(() => {
+            originals.forEach(row => f.db.prepare(`UPDATE "${table}" SET supersededById=? WHERE id=?`).run(target, row.id));
+        })()).toThrow(table === 'QcMeasurement' ? 'QC_MEASUREMENT_IMMUTABLE' : 'QC_REFERENCE_IMMUTABLE');
+        expect(f.db.prepare(`SELECT * FROM "${table}" ORDER BY id`).all()).toEqual(before);
+        for (const field of table === 'QcMeasurement' ? ['batchId', 'positionId', 'analysisCode', 'replicateNo'] : ['positionId', 'analysisCode']) {
+            const change = field === 'batchId' ? randomUUID() : field === 'positionId' ? other : field === 'analysisCode' ? f.b : 2;
+            const replacement = { ...originals[0], id: target, [field]: change, correctionReason: 'Checked replacement' };
+            expect(() => f.db.transaction(() => {
+                f.db.prepare(`UPDATE "${table}" SET supersededById=? WHERE id=?`).run(target, originals[0].id);
+                insert(f.db, table, replacement);
+            })()).toThrow('QC_SUPERSEDE_TARGET_MISMATCH');
+            expect(f.db.prepare(`SELECT * FROM "${table}" ORDER BY id`).all()).toEqual(before);
+        }
+        expect(f.db.pragma('foreign_key_check')).toEqual([]);
+    } finally { f.db.close(); }
+});
+
+test('an imported historical position cannot accept another measurement after its import receipt event', () => {
+    const f = fixture();
+    try {
+        const id = randomUUID();
+        insert(f.db, 'BatchPosition', { id, batchId: f.legacyId, position: 1, kind: 'BLANK', historicalSnapshotSeq: 1, provenance: 'LEGACY_MIGRATED' });
+        insert(f.db, 'BatchAnalyte', { id: randomUUID(), batchId: f.legacyId, labId: f.labId, analysisCode: f.a,
+            status: 'QC_PENDING', provenance: 'LEGACY_MIGRATED', legacyMembershipFrozen: 1 });
+        insert(f.db, 'BatchEvent', { id: randomUUID(), batchId: f.legacyId, type: 'LEGACY_IMPORTED', payload: '{}', by: f.user, at: now });
+        const before = f.db.prepare('SELECT * FROM QcMeasurement ORDER BY id').all();
+        expect(() => insert(f.db, 'QcMeasurement', measurement(f, id, { batchId: f.legacyId }))).toThrow('QC_MEASUREMENT_IMMUTABLE');
+        expect(f.db.prepare('SELECT * FROM QcMeasurement ORDER BY id').all()).toEqual(before);
+    } finally { f.db.close(); }
+});
+
 test('part 8 preserves frozen samples while allowing append-only compatibility QC rounds', () => {
     const f = fixture();
     try {

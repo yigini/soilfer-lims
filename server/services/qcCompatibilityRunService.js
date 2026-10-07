@@ -1,4 +1,5 @@
 const { randomUUID } = require('node:crypto');
+const { runAnalyteCode } = require('./analysisCodesService');
 const { hasPermission } = require('../config/roles');
 const scopeGuard = require('../utils/scopeGuard');
 const policyService = require('./policyService');
@@ -12,12 +13,12 @@ const { countRequirements } = require('./qcRequirementService');
 const { evaluateBatchQc, getMissingQcValueTypes, flagBatchResults } = require('./qcService');
 const { linkReferences, retainReferences } = require('./referencePlacementService');
 const { resolveBatchRunProfile } = require('./qcRunProfileService');
-const { QC_RUN_INCLUDE, batchApiView, currentAnalyteEvidence } = require('./qcRunViewService');
+const { QC_RUN_INCLUDE, batchApiView, currentAnalyteEvidence, activeReopenEvent } = require('./qcRunViewService');
 const { snapshotEvidence } = require('./qcRunAuditService');
 const failure = (statusCode, code, message, details = {}) => Object.assign(new Error(message), { statusCode, code, details });
 const parsed = (value, fallback = null) => typeof value === 'string' ? JSON.parse(value) : value ?? fallback;
 
-async function editableRun(tx, batchId, actor) {
+async function editableRun(tx, batchId, actor, analysisCode = null) {
     const batch = await tx.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE });
     if (!batch) throw failure(404, 'BATCH_NOT_FOUND', 'Batch not found.');
     const [actorLab, targetLab] = await Promise.all([policyService.resolveLab(actor.labId, tx), policyService.resolveLab(batch.labId, tx)]);
@@ -26,7 +27,9 @@ async function editableRun(tx, batchId, actor) {
     if (!batch.analytes.length || batch.analytes.some(row => row.provenance === 'NATIVE')) {
         throw failure(409, 'QC_COMPATIBILITY_RUN_REQUIRED', 'This entry requires a migrated or profile-only run.');
     }
-    if (batch.status === 'QC_FAIL' || batch.analytes.some(row => currentAnalyteEvidence(batch, row.analysisCode).disposition)) {
+    const selected = batch.analytes.find(row => row.analysisCode === (analysisCode || batch.analysis));
+    if (!selected) throw failure(400, 'QC_ANALYSIS_NOT_IN_RUN', 'The analysis is not a member of this run.');
+    if (['QC_FAIL', 'REJECTED', 'REPEAT_ORDERED', 'CLOSED'].includes(selected.status) || currentAnalyteEvidence(batch, selected.analysisCode).disposition) {
         throw failure(409, 'QC_BATCH_LOCKED', 'Failed or dispositioned QC evidence is locked.');
     }
     // Never silently discard an invalid legacy history when creating its next
@@ -65,7 +68,7 @@ async function writeCompatibilityMeasurements(db, batchId, actor, input = {}, { 
     if (!hasPermission(actor, 'CHANGE_STATUS')) throw failure(403, 'QC_RUN_PERMISSION_REQUIRED', 'QC entry permission is required.');
     const performedBy = actorName(actor);
     return inTransaction(db, async tx => {
-        const batch = await editableRun(tx, batchId, actor), analysisCode = input.analysisCode || batch.analysis;
+        const batch = await editableRun(tx, batchId, actor, input.analysisCode), analysisCode = input.analysisCode || batch.analysis;
         const analyte = batch.analytes.find(row => row.analysisCode === analysisCode);
         if (!analyte) throw failure(400, 'QC_ANALYSIS_NOT_IN_RUN', 'The analysis is not a member of this run.');
         const contextBatch = { ...batchApiView(batch), analysis: analysisCode, qcResults: currentAnalyteEvidence(batch, analysisCode).qcResults };
@@ -83,13 +86,13 @@ async function writeCompatibilityMeasurements(db, batchId, actor, input = {}, { 
             (!Array.isArray(payload[['blanks', 'duplicates', 'controls'][index]]) || payload[['blanks', 'duplicates', 'controls'][index]].length > 0));
         const missingTypes = getMissingQcValueTypes(payload, { qcSlots: supplied.map(type => ({ type })) }, numberFormat);
         if (missingTypes.length) throw failure(400, 'QC_VALUES_MISSING', 'Required QC values are missing or non-numeric.', { missingTypes });
-        if (clear && ['QC_PASS', 'QC_WARN'].includes(analyte.status)) return reopenInTransaction(tx, batch, actor, input.reason, now);
+        if (clear && ['QC_PASS', 'QC_WARN'].includes(analyte.status)) return reopenInTransaction(tx, batch, actor, input.reason, now, analysisCode);
         const evaluated = retainReferences(retainQcRawInput(evaluateBatchQc(payload, { runProfile, policy }), payload), payload);
         evaluated.policyVersion = policy.policyVersion; evaluated.policyValues = policy.policyValues;
         let positionNumber = Math.max(0, ...batch.positions.map(row => row.position));
         const positions = [], measurements = [], bindings = [], replacements = [], parentReadings = new Map(), previous = currentAnalyteEvidence(batch, analysisCode).evaluation;
-        const reopen = batch.events.filter(row => row.type === 'REOPENED').sort((a, b) => new Date(b.at) - new Date(a.at))[0];
-        const currentSample = batch.positions.filter(row => row.kind === 'SAMPLE' && (row.workItems || []).some(link => link.analysisCode === analysisCode));
+        const reopen = activeReopenEvent(batch, analysisCode);
+        const currentSample = batch.positions.filter(row => row.kind === 'SAMPLE' && (row.workItems || []).some(link => runAnalyteCode(batch, link.analysisCode) === analysisCode));
         const observation = (positionId, field, entry, replicateNo) => {
             const raw = entry.rawInput[field], duplicate = field === 'value1' || field === 'value2';
             const parsedValue = duplicate ? parseDuplicateObservation(raw, numberFormat) : null;
@@ -162,21 +165,25 @@ async function writeCompatibilityMeasurements(db, batchId, actor, input = {}, { 
     });
 }
 
-async function reopenInTransaction(tx, batch, actor, reason, now) {
+async function reopenInTransaction(tx, batch, actor, reason, now, analysisCode = null) {
     if (!hasPermission(actor, 'APPROVE_RESULTS')) throw failure(403, 'QC_REOPEN_PERMISSION_REQUIRED', 'Reopening accepted QC requires APPROVE_RESULTS.');
     if (typeof reason !== 'string' || !reason.trim()) throw failure(400, 'REASON_REQUIRED', 'A reason is required to reopen accepted QC.');
-    if (batch.status !== 'QC_PASS') throw failure(409, 'QC_BATCH_LOCKED', 'Only accepted compatibility QC can be reopened.');
+    const selected = batch.analytes.filter(row => (!analysisCode || row.analysisCode === analysisCode) && ['QC_PASS', 'QC_WARN'].includes(row.status));
+    if (!selected.length) throw failure(409, 'QC_BATCH_LOCKED', 'Only accepted compatibility QC can be reopened.');
     await snapshotEvidence(tx, batch, actor, reason.trim(), now);
-    for (const analyte of batch.analytes) await tx.batchAnalyte.update({ where: { id: analyte.id }, data: { status: 'QC_PENDING' } });
-    await tx.batch.update({ where: { id: batch.id }, data: { status: 'OPEN' } });
+    for (const analyte of selected) {
+        await tx.batchAnalyte.update({ where: { id: analyte.id }, data: { status: 'QC_PENDING' } }); analyte.status = 'QC_PENDING';
+    }
+    const status = aggregateBatchStatus(batch.analytes, { startedAt: batch.startedAt, reopened: true });
+    await tx.batch.update({ where: { id: batch.id }, data: { status } });
     await tx.batchEvent.create({ data: { id: randomUUID(), batchId: batch.id, type: 'REOPENED', by: actorName(actor), at: now,
-        payload: JSON.stringify({ reason: reason.trim(), discardCurrentEvidence: true,
-            previousEvaluationIds: batch.analytes.map(row => currentAnalyteEvidence(batch, row.analysisCode).evaluation?.id).filter(Boolean),
-            historyEntry: { status: 'OPEN', changedBy: actorName(actor), timestamp: now } }) } });
-    await flagBatchResults(tx, batch.id, 'OPEN');
+        payload: JSON.stringify({ analysisCodes: selected.map(row => row.analysisCode), reason: reason.trim(), discardCurrentEvidence: true,
+            previousEvaluationIds: selected.map(row => currentAnalyteEvidence(batch, row.analysisCode).evaluation?.id).filter(Boolean),
+            historyEntry: { status, changedBy: actorName(actor), timestamp: now } }) } });
+    for (const row of selected) await flagBatchResults(tx, batch.id, 'OPEN', null, row.analysisCode);
     return { batch: batchApiView(await tx.batch.findUnique({ where: { id: batch.id }, include: QC_RUN_INCLUDE })), evaluation: null };
 }
-async function reopenCompatibilityRun(db, batchId, actor, reason) {
-    return inTransaction(db, async tx => reopenInTransaction(tx, await editableRun(tx, batchId, actor), actor, reason, new Date()));
+async function reopenCompatibilityRun(db, batchId, actor, reason, analysisCode = null) {
+    return inTransaction(db, async tx => reopenInTransaction(tx, await editableRun(tx, batchId, actor, analysisCode), actor, reason, new Date(), analysisCode));
 }
 module.exports = { createProfileRun, writeCompatibilityMeasurements, reopenCompatibilityRun, editableRun };

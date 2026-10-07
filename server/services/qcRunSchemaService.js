@@ -7,7 +7,7 @@ const normalized = sql => (sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|`(?:``|[^`])
 function validBackfillCounts(counts) {
     if (!counts || typeof counts !== 'object' || Array.isArray(counts)) return false;
     const grouped = { legacyDispositionMapped: ['REJECT_REANALYSIS', 'ACCEPT_OPAQUE'],
-        dispositionAttribution: ['AUDIT_LOG', 'BATCH_DISPOSITION_FIELD'] };
+        dispositionAttribution: ['AUDIT_LOG', 'BATCH_DISPOSITION_FIELD', 'SNAPSHOT_DISPOSITION_FIELD'] };
     const nonnegative = count => Number.isInteger(count) && count >= 0;
     if (!Object.entries(grouped).every(([name, keys]) => {
         const value = counts[name];
@@ -32,7 +32,15 @@ function classifyQcRunSchema(db, source) {
     const tables = TABLES.map(name => {
         const actual = db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(name);
         const wanted = source.sql.match(new RegExp(`CREATE TABLE "${name}" \\([\\s\\S]*?\\n\\);`))?.[0];
-        if (!wanted || normalized(wanted) !== normalized(source.freshTables[name] || '')) throw fail('QC_RUN_SOURCE_MISMATCH', 'Normalized QC tables differ from the fresh Prisma oracle.');
+        // #186 part 19: Prisma cannot emit deferred FKs. Only these two exact
+        // self-FK clauses may differ by this suffix; all other DDL is exact.
+        const deferred = { QcMeasurement: 'QcMeasurement_supersededById_fkey', BatchPositionReference: 'BatchPositionReference_supersededById_fkey' };
+        const clause = deferred[name] && `CONSTRAINT "${deferred[name]}" FOREIGN KEY ("supersededById") REFERENCES "${name}" ("id") ON DELETE RESTRICT ON UPDATE CASCADE`;
+        const deferredClause = clause && `${clause} DEFERRABLE INITIALLY DEFERRED`;
+        const comparable = deferredClause && wanted?.includes(deferredClause) ? wanted.replace(deferredClause, clause) : wanted;
+        if (!wanted || clause && !wanted.includes(deferredClause) || normalized(comparable) !== normalized(source.freshTables[name] || '')) {
+            throw fail('QC_RUN_SOURCE_MISMATCH', 'Normalized QC tables differ from the fresh Prisma oracle.');
+        }
         if (actual && (actual.type !== 'table' || normalized(actual.sql) !== normalized(wanted))) differences.push(`${name} definition differs`);
         return Boolean(actual);
     });
@@ -46,7 +54,7 @@ function classifyQcRunSchema(db, source) {
     });
     const indexes = [...source.sql.matchAll(/^CREATE (?:UNIQUE )?INDEX "([^"]+)"[\s\S]*?;/gm)].map(match => ({ name: match[1], sql: match[0] }));
     const guards = [...source.sql.matchAll(/^CREATE TRIGGER "([^"]+)"[\s\S]*?^END;/gm)].map(match => ({ name: match[1], sql: match[0] }));
-    if (indexes.length !== 14 || guards.length !== 43) throw fail('QC_RUN_SOURCE_MISMATCH', 'Normalized QC release needs fourteen indexes and forty-three guards.');
+    if (indexes.length !== 14 || guards.length !== 47) throw fail('QC_RUN_SOURCE_MISMATCH', 'Normalized QC release needs fourteen indexes and forty-seven guards.');
     function present(wanted, type) {
         const actual = db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(wanted.name);
         if (actual && (actual.type !== type || normalized(actual.sql) !== normalized(wanted.sql))) differences.push(`${wanted.name} differs`);

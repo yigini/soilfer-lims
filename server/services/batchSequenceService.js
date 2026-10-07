@@ -2,7 +2,7 @@ const { createHash, randomBytes, randomUUID } = require('node:crypto');
 const policyService = require('./policyService');
 const qcRuleService = require('./qcRuleService');
 
-const DUPLICATE_ALGORITHM = 'sha256-unmet-analytes-v1';
+const DUPLICATE_ALGORITHM = 'sha256-unmet-analytes-without-replacement-v2';
 function error(statusCode, code, details = {}) {
     return Object.assign(new Error(code), { statusCode, code, details });
 }
@@ -46,13 +46,15 @@ function parentIndex(seed, step, size) {
 // the parent covering most unmet analytes; seeded tie-breaking is replayable.
 function selectParents(samples, forecasts, seed) {
     const remaining = new Map(forecasts.map(row => [row.analysisCode, row.counts.duplicate]));
-    const parents = [];
+    const parents = [], picked = new Set();
     while ([...remaining.values()].some(count => count > 0)) {
-        const scores = samples.map(sample => ({ sample, score: sample.analysisCodes.filter(code => remaining.get(code) > 0).length }));
+        const available = samples.filter(sample => !picked.has(sample.sampleId) && sample.analysisCodes.some(code => remaining.get(code) > 0));
+        const scores = (available.length ? available : samples).map(sample => ({ sample, score: sample.analysisCodes.filter(code => remaining.get(code) > 0).length }));
         const best = scores.reduce((maximum, row) => Math.max(maximum, row.score), 0);
         const eligible = scores.filter(row => row.score === best).map(row => row.sample);
         const parent = eligible[parentIndex(seed, parents.length, eligible.length)];
         parents.push(parent);
+        picked.add(parent.sampleId);
         parent.analysisCodes.forEach(code => remaining.set(code, Math.max(0, remaining.get(code) - 1)));
     }
     return parents;

@@ -41,7 +41,8 @@
     "see": "ver",
     "replaces": "Substitui",
     "preparationRecords": "Registros de preparação",
-    "qcNotRequired": "CQ não necessário (modo OFF)"
+    "qcNotRequired": "CQ não necessário (modo OFF)",
+    "qcEvidenceIncomplete": "A aceitação histórica do CQ tem evidência registrada incompleta"
   },
   "common": {
     "save": "Salvar",
@@ -1174,7 +1175,8 @@
       "INVALID_REFERENCE_VALUE": "O valor atribuído ou os dados do certificado são inválidos.",
       "REFERENCE_VALUE_IMMUTABLE": "Os valores atribuídos não podem ser alterados. Corrija-os adicionando uma nova revisão.",
       "REFERENCE_VALUE_REFERENCED": "Os valores vinculados ou corrigidos não podem ser excluídos.",
-      "INVALID_QC_REFERENCE_LINK": "A ligação de referência do controle de qualidade é inválida. Recarregue o lote antes de tentar novamente."
+      "INVALID_QC_REFERENCE_LINK": "A ligação de referência do controle de qualidade é inválida. Recarregue o lote antes de tentar novamente.",
+      "REFERENCE_POSITION_LOT_CONFLICT": "Uma posição física de referência deve usar o mesmo lote para todos os analitos atendidos."
     }
   },
   "qcRules": {
@@ -1250,7 +1252,59 @@
       "QC_VALUES_MISSING": "Insira observações válidas em cada posição necessária antes de avaliar.",
       "QC_BATCH_LOCKED": "Esta evidência de CQ está bloqueada. Use a decisão do lote ou uma nova corrida.",
       "QC_CORRECTION_REASON_REQUIRED": "Registre um motivo para a correção.",
-      "BATCH_MEMBERSHIP_FROZEN": "Uma corrida iniciada ou com medições não pode ser reordenada."
-    }
+      "BATCH_MEMBERSHIP_FROZEN": "Uma corrida iniciada ou com medições não pode ser reordenada.",
+      "QC_BATCH_TOO_LARGE": "A corrida excede a capacidade configurada. Selecione menos amostras.",
+      "QC_BATCH_CAPACITY_EXCEEDED": "A corrida excede a capacidade configurada. Selecione menos amostras.",
+      "QC_RACK_CAPACITY_EXCEEDED": "A corrida excede a capacidade configurada. Selecione menos amostras.",
+      "QC_RUN_NOT_STARTED": "Inicie a corrida antes de inserir ou avaliar CQ.",
+      "QC_REFERENCE_UNBOUND": "Mantenha cada posição de referência obrigatória vinculada a um lote elegível.",
+      "QC_REFERENCE_BOUND": "Mantenha cada posição de referência obrigatória vinculada a um lote elegível.",
+      "QC_ANALYTE_REMOVAL_BLOCKED": "Este analito mantém referências vinculadas. Abandone a corrida ABERTA e crie outra antes de removê-lo.",
+      "QC_WORK_ITEM_ALREADY_BATCHED": "Esta tarefa já pertence a outra corrida. É necessária uma decisão de repetição ou rejeição para movê-la.",
+      "QC_DUPLICATE_PARENT_REQUIRED": "Selecione a posição real da amostra original de cada duplicata.",
+      "REFERENCE_POSITION_LOT_CONFLICT": "Uma posição física de referência deve usar o mesmo lote para todos os analitos atendidos.",
+      "QC_INSTRUMENT_FROZEN": "A identidade do instrumento fica fixa após o primeiro início.",
+      "QC_NATIVE_RUN_REQUIRED": "Use o fluxo de entrada correspondente à origem registrada desta corrida.",
+      "QC_COMPATIBILITY_RUN_REQUIRED": "Use o fluxo de entrada correspondente à origem registrada desta corrida.",
+      "QC_WORK_ITEM_SEALED": "Uma tarefa enviada, aceita, dispensada ou cancelada não pode entrar em uma corrida.",
+      "QC_BATCH_METHOD_AMBIGUOUS": "Selecione o método registrado para todas as tarefas deste analito.",
+      "QC_ANALYSIS_MISMATCH": "Selecione uma análise correspondente a esta corrida e suas tarefas.",
+      "QC_ANALYSIS_NOT_IN_RUN": "Selecione uma análise correspondente a esta corrida e suas tarefas.",
+      "QC_ANALYSIS_REQUIRED": "Selecione uma análise correspondente a esta corrida e suas tarefas.",
+      "QC_SEQUENCE_ANALYSES_INVALID": "Selecione uma análise correspondente a esta corrida e suas tarefas.",
+      "QC_CLOSE_PERMISSION_REQUIRED": "Você não tem permissão para esta operação de CQ.",
+      "QC_REOPEN_PERMISSION_REQUIRED": "Você não tem permissão para esta operação de CQ.",
+      "QC_RUN_PERMISSION_REQUIRED": "Você não tem permissão para esta operação de CQ.",
+      "QC_DUPLICATE_PARENT_VALUE_CONFLICT": "Todas as duplicatas com a mesma amostra original devem registrar a mesma observação original.",
+      "QC_MEASUREMENT_CHANGED": "A observação mudou. Recarregue antes de tentar novamente.",
+      "QC_MEASUREMENT_NOT_FOUND": "Selecione uma observação ou posição real pertencente a este analito da corrida.",
+      "QC_POSITION_NOT_IN_ANALYSIS": "Selecione uma observação ou posição real pertencente a este analito da corrida.",
+      "QC_RACK_POSITION_DUPLICATE": "Selecione posições de rack disponíveis e distintas dentro da capacidade configurada, fora dos espaços reservados para CQ.",
+      "QC_RACK_POSITION_OCCUPIED": "Selecione posições de rack disponíveis e distintas dentro da capacidade configurada, fora dos espaços reservados para CQ.",
+      "QC_RACK_POSITION_RESERVED": "Selecione posições de rack disponíveis e distintas dentro da capacidade configurada, fora dos espaços reservados para CQ.",
+      "QC_RACK_POSITION_INVALID": "Selecione posições de rack disponíveis e distintas dentro da capacidade configurada, fora dos espaços reservados para CQ.",
+      "QC_BATCH_MEMBERSHIP_LOCKED": "Somente uma corrida ABERTA pode alterar suas amostras.",
+      "QC_RULE_VIOLATION": "O estado de CQ solicitado contradiz a avaliação ou decisão registrada.",
+      "QC_REOPEN_SEPARATE_EVALUATION": "Reabra primeiro a corrida aceita e depois envie uma avaliação separada.",
+      "QC_RUN_LAB_REQUIRED": "Selecione tarefas e uma corrida no âmbito do seu laboratório registrado.",
+      "QC_WORK_ITEM_SCOPE_DENIED": "Selecione tarefas e uma corrida no âmbito do seu laboratório registrado.",
+      "QC_ANALYST_REQUIRED": "O analista da corrida deve ser um usuário registrado.",
+      "QC_WORK_ITEMS_REQUIRED": "Selecione tarefas distintas, uma por amostra e análise.",
+      "QC_SAMPLE_ANALYSIS_DUPLICATE": "Selecione tarefas distintas, uma por amostra e análise.",
+      "QC_SEQUENCE_SAMPLES_INVALID": "Selecione tarefas distintas, uma por amostra e análise.",
+      "QC_SEQUENCE_ORDER_INVALID": "Recarregue ou reconstrua a corrida com uma sequência registrada válida.",
+      "QC_SEQUENCE_ORDINAL_INVALID": "Recarregue ou reconstrua a corrida com uma sequência registrada válida.",
+      "QC_SEQUENCE_SEED_INVALID": "Recarregue ou reconstrua a corrida com uma sequência registrada válida.",
+      "QC_RUN_STORAGE_REQUIRED": "Peça a um responsável que aplique a atualização revisada do armazenamento de CQ antes de usar esta corrida.",
+      "BATCH_HISTORY_INVALID": "O histórico registrado do lote precisa de reparo antes de ser modificado.",
+      "BATCH_NOT_FOUND": "A corrida ou tarefa selecionada não foi encontrada. Recarregue a lista.",
+      "WORKITEM_NOT_FOUND": "A corrida ou tarefa selecionada não foi encontrada. Recarregue a lista.",
+      "REASON_REQUIRED": "Registre um motivo para esta alteração de CQ.",
+      "REFERENCE_VALUE_MISMATCH": "O valor de referência enviado deve corresponder à posição registrada.",
+      "QC_SUPERSEDE_TARGET_MISMATCH": "A substituição deve corresponder à mesma observação ou posição de referência registrada."
+    },
+    "chooseDuplicateParent": "Selecione a posição da amostra original",
+    "analysis": "Análise",
+    "closeAnalyte": "Encerrar este analito"
   }
 }

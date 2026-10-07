@@ -306,7 +306,7 @@ model WorkItem {
   spectralScans   SpectralData[]
   workAttempts    WorkAttempt[]
   reviewDecisions ReviewDecision[]
-  batchPosition   BatchPositionWorkItem?
+  batchPositions  BatchPositionWorkItem[]
 }
 
 model SampleHold {
@@ -481,11 +481,12 @@ model BatchPositionWorkItem {
   id                      String @id
   positionId              String
   position                BatchPosition @relation(fields: [positionId], references: [id], onDelete: Restrict)
-  workItemId              String @unique
+  workItemId              String
   workItem                WorkItem @relation(fields: [workItemId], references: [id], onDelete: Restrict)
   analysisCode            String
 
   @@unique([positionId, analysisCode])
+  @@index([workItemId])
 }
 
 model BatchPositionReference {
@@ -503,6 +504,9 @@ model BatchPositionReference {
   boundBy                 String?
   boundAt                 DateTime?
   supersededById          String?
+  supersededBy            BatchPositionReference? @relation("PositionReferenceRevision", fields: [supersededById], references: [id], onDelete: Restrict)
+  revisions               BatchPositionReference[] @relation("PositionReferenceRevision")
+  // #186 part 19: migration adds DEFERRABLE INITIALLY DEFERRED; Prisma cannot emit it.
   correctionReason        String?
 
   @@index([positionId, analysisCode])
@@ -524,6 +528,9 @@ model QcMeasurement {
   enteredBy               String?
   enteredAt               DateTime?
   supersededById          String?
+  supersededBy            QcMeasurement? @relation("MeasurementRevision", fields: [supersededById], references: [id], onDelete: Restrict)
+  revisions               QcMeasurement[] @relation("MeasurementRevision")
+  // #186 part 19: migration adds DEFERRABLE INITIALLY DEFERRED; Prisma cannot emit it.
   correctionReason        String?
   legacySource            String?
 

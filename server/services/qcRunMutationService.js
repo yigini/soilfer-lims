@@ -55,7 +55,7 @@ async function mutateQcRun(db, batchId, actor, input = {}, { explicit = false, c
         let evaluation = null;
         if (reopen) {
             batch = native ? await reopenNativeRun(tx, batchId, actor, input.reason, targetCode)
-                : (await reopenCompatibilityRun(tx, batchId, actor, input.reason)).batch;
+                : (await reopenCompatibilityRun(tx, batchId, actor, input.reason, targetCode)).batch;
         } else if (payload || explicit) {
             if (native) {
                 batch = await writeNativeMeasurements(tx, batchId, actor, nativeInput(batch, input, { correction }), { correction, explicit });

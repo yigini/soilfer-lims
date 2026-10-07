@@ -6,17 +6,19 @@ import NumberPreview from './NumberPreview';
 
 export default function NativeRunPanel({ batch, referenceMaterials, onChanged, loading, setLoading, setError, setSuccessMsg }) {
     const { t } = useLanguage();
+    const [selectedCode, setSelectedCode] = useState(batch.analysis);
     const [values, setValues] = useState({}), [lots, setLots] = useState({}), [correcting, setCorrecting] = useState({});
     const [reason, setReason] = useState(''), [draggedId, setDraggedId] = useState(null);
-    const analyte = batch.analytes.find(row => row.analysisCode === batch.analysis) || batch.analytes[0];
+    const analyte = batch.analytes.find(row => row.analysisCode === selectedCode) || batch.analytes.find(row => row.analysisCode === batch.analysis) || batch.analytes[0];
     const positions = batch.positions || [], served = new Set(analyte.positions.map(row => row.id));
     const parents = new Set(positions.filter(row => row.kind === 'DUPLICATE' && served.has(row.id)).map(row => row.duplicateOfPositionId));
     const measured = id => analyte.measurements?.find(row => row.positionId === id && row.replicateNo === 1);
     const binding = row => row.references?.find(reference => reference.analysisCode === analyte.analysisCode && !reference.supersededById && reference.serviceStatus !== 'NOT_SERVED');
-    const locked = batch.status === 'CLOSED' || batch.status === 'QC_FAIL' || batch.analytes.some(row => row.disposition);
+    const locked = batch.status === 'CLOSED' || ['QC_FAIL', 'REJECTED', 'REPEAT_ORDERED', 'CLOSED'].includes(analyte.status) || Boolean(analyte.disposition);
     const accepted = ['QC_PASS', 'QC_WARN'].includes(analyte.status);
     const sequenceKey = positions.map(row => `${row.id}:${row.position}`).join(',');
-    useEffect(() => { setValues({}); setLots({}); setCorrecting({}); setReason(''); }, [batch.id, analyte.evaluation?.id, batch.startedAt, sequenceKey]);
+    useEffect(() => { setSelectedCode(batch.analysis); }, [batch.id, batch.analysis]);
+    useEffect(() => { setValues({}); setLots({}); setCorrecting({}); setReason(''); }, [batch.id, analyte.analysisCode, analyte.evaluation?.id, batch.startedAt, sequenceKey]);
     const isDuplicate = row => ['SAMPLE', 'DUPLICATE'].includes(row.kind);
     const canMeasure = row => served.has(row.id) && row.kind !== 'CAL_STD' && (row.kind !== 'SAMPLE' || parents.has(row.id));
     const corrections = Object.keys(correcting).filter(id => correcting[id]);
@@ -51,6 +53,12 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
     };
     const submitAllowed = !loading && batch.startedAt && !locked && valid && (!correction || reason.trim()) && corrections.every(id => String(values[id] || '').trim());
     return <section className="space-y-3" data-testid="native-qc-run">
+        {batch.analytes.length > 1 && <label className="grid gap-1 text-xs">{t('qcRuns.analysis')}
+            <select value={analyte.analysisCode} data-testid="native-analysis-select" disabled={loading}
+                onChange={event => setSelectedCode(event.target.value)} className="p-2 rounded border border-sf-divider bg-sf-canvas text-sf-text">
+                {batch.analytes.map(row => <option key={row.analysisCode} value={row.analysisCode}>{row.analysisCode}</option>)}
+            </select>
+        </label>}
         {analyte.qcMode === 'OFF' && <p data-testid="native-qc-not-required">{t('qcRuns.notRequired')}</p>}
         {!batch.startedAt && <>
             <p className="text-xs text-sf-muted">{t('qcRuns.startHelp')}</p>
@@ -100,7 +108,9 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
             <textarea value={reason} onChange={event => setReason(event.target.value)} data-testid="native-correction-reason" className="p-2 border border-sf-divider rounded" />
         </label>}
         {accepted && !locked && <button type="button" disabled={loading || !reason.trim()} data-testid="native-run-reopen"
-            onClick={() => perform(() => axios.put(`/api/qc/batches/${batch.id}`, { status: 'OPEN', reason }))}>{t('qcRuns.reopen')}</button>}
+            onClick={() => perform(() => axios.put(`/api/qc/batches/${batch.id}`, { analysisCode: analyte.analysisCode, status: 'OPEN', reason }))}>{t('qcRuns.reopen')}</button>}
+        {['QC_PASS', 'QC_WARN', 'ACCEPTED_WITH_DEVIATION'].includes(analyte.status) && <button type="button" disabled={loading} data-testid="native-analyte-close"
+            onClick={() => perform(() => axios.put(`/api/qc/batches/${batch.id}`, { analysisCode: analyte.analysisCode, status: 'CLOSED' }))}>{t('qcRuns.closeAnalyte')}</button>}
         <div className="flex gap-3">
             <button type="button" data-testid="native-qc-save" disabled={!submitAllowed || !(entered.length || changedLots.length)} onClick={() => submit(false)}>{t('qcRuns.save')}</button>
             <button type="button" data-testid="native-qc-evaluate" disabled={!submitAllowed} onClick={() => submit(true)}>{t('qcRuns.evaluate')}</button>

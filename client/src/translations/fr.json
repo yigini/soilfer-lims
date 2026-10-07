@@ -2218,7 +2218,8 @@
     "see": "voir",
     "replaces": "Remplace",
     "preparationRecords": "Enregistrements de préparation",
-    "qcNotRequired": "CQ non requis (mode OFF)"
+    "qcNotRequired": "CQ non requis (mode OFF)",
+    "qcEvidenceIncomplete": "L’acceptation historique du CQ dispose de preuves enregistrées incomplètes"
   },
   "qaSection": {
     "kicker": "Assurance qualité et conformité réglementaire",
@@ -2749,7 +2750,8 @@
       "INVALID_REFERENCE_VALUE": "La valeur assignée ou les données du certificat sont invalides.",
       "REFERENCE_VALUE_IMMUTABLE": "Les valeurs assignées ne peuvent pas être modifiées. Corrigez-les en ajoutant une nouvelle révision.",
       "REFERENCE_VALUE_REFERENCED": "Les valeurs liées ou corrigées ne peuvent pas être supprimées.",
-      "INVALID_QC_REFERENCE_LINK": "Le lien de référence du contrôle qualité est invalide. Rechargez le lot avant de réessayer."
+      "INVALID_QC_REFERENCE_LINK": "Le lien de référence du contrôle qualité est invalide. Rechargez le lot avant de réessayer.",
+      "REFERENCE_POSITION_LOT_CONFLICT": "Une position physique de référence doit utiliser le même lot pour tous les analytes concernés."
     }
   },
   "qcRules": {
@@ -2825,7 +2827,59 @@
       "QC_VALUES_MISSING": "Saisissez des observations valides à chaque position requise avant l’évaluation.",
       "QC_BATCH_LOCKED": "Ces preuves de CQ sont verrouillées. Utilisez la décision du lot ou une nouvelle série.",
       "QC_CORRECTION_REASON_REQUIRED": "Enregistrez un motif de correction.",
-      "BATCH_MEMBERSHIP_FROZEN": "Une série démarrée ou mesurée ne peut pas être réordonnée."
-    }
+      "BATCH_MEMBERSHIP_FROZEN": "Une série démarrée ou mesurée ne peut pas être réordonnée.",
+      "QC_BATCH_TOO_LARGE": "La série dépasse sa capacité configurée. Sélectionnez moins d’échantillons.",
+      "QC_BATCH_CAPACITY_EXCEEDED": "La série dépasse sa capacité configurée. Sélectionnez moins d’échantillons.",
+      "QC_RACK_CAPACITY_EXCEEDED": "La série dépasse sa capacité configurée. Sélectionnez moins d’échantillons.",
+      "QC_RUN_NOT_STARTED": "Démarrez la série avant de saisir ou d’évaluer le CQ.",
+      "QC_REFERENCE_UNBOUND": "Associez chaque position de référence requise à un lot admissible.",
+      "QC_REFERENCE_BOUND": "Associez chaque position de référence requise à un lot admissible.",
+      "QC_ANALYTE_REMOVAL_BLOCKED": "Cet analyte conserve des références associées. Abandonnez la série OUVERTE et créez une nouvelle série avant de le retirer.",
+      "QC_WORK_ITEM_ALREADY_BATCHED": "Cette tâche appartient déjà à une autre série. Une décision de répétition ou de rejet est nécessaire pour la déplacer.",
+      "QC_DUPLICATE_PARENT_REQUIRED": "Sélectionnez la position réelle de l’échantillon d’origine pour chaque duplicata.",
+      "REFERENCE_POSITION_LOT_CONFLICT": "Une position physique de référence doit utiliser le même lot pour tous les analytes concernés.",
+      "QC_INSTRUMENT_FROZEN": "L’identité de l’instrument est figée après le premier démarrage.",
+      "QC_NATIVE_RUN_REQUIRED": "Utilisez le mode de saisie correspondant à l’origine enregistrée de cette série.",
+      "QC_COMPATIBILITY_RUN_REQUIRED": "Utilisez le mode de saisie correspondant à l’origine enregistrée de cette série.",
+      "QC_WORK_ITEM_SEALED": "Une tâche soumise, acceptée, dispensée ou annulée ne peut pas rejoindre une série.",
+      "QC_BATCH_METHOD_AMBIGUOUS": "Sélectionnez la méthode enregistrée pour toutes les tâches de cet analyte.",
+      "QC_ANALYSIS_MISMATCH": "Sélectionnez une analyse correspondant à cette série et à ses tâches.",
+      "QC_ANALYSIS_NOT_IN_RUN": "Sélectionnez une analyse correspondant à cette série et à ses tâches.",
+      "QC_ANALYSIS_REQUIRED": "Sélectionnez une analyse correspondant à cette série et à ses tâches.",
+      "QC_SEQUENCE_ANALYSES_INVALID": "Sélectionnez une analyse correspondant à cette série et à ses tâches.",
+      "QC_CLOSE_PERMISSION_REQUIRED": "Vous n’avez pas l’autorisation pour cette opération de CQ.",
+      "QC_REOPEN_PERMISSION_REQUIRED": "Vous n’avez pas l’autorisation pour cette opération de CQ.",
+      "QC_RUN_PERMISSION_REQUIRED": "Vous n’avez pas l’autorisation pour cette opération de CQ.",
+      "QC_DUPLICATE_PARENT_VALUE_CONFLICT": "Tous les duplicatas d’un même échantillon doivent enregistrer la même observation d’origine.",
+      "QC_MEASUREMENT_CHANGED": "L’observation a changé. Rechargez avant de réessayer.",
+      "QC_MEASUREMENT_NOT_FOUND": "Sélectionnez une observation ou une position réelle de cet analyte de la série.",
+      "QC_POSITION_NOT_IN_ANALYSIS": "Sélectionnez une observation ou une position réelle de cet analyte de la série.",
+      "QC_RACK_POSITION_DUPLICATE": "Sélectionnez des positions de portoir disponibles et distinctes dans la capacité configurée, hors des emplacements de CQ réservés.",
+      "QC_RACK_POSITION_OCCUPIED": "Sélectionnez des positions de portoir disponibles et distinctes dans la capacité configurée, hors des emplacements de CQ réservés.",
+      "QC_RACK_POSITION_RESERVED": "Sélectionnez des positions de portoir disponibles et distinctes dans la capacité configurée, hors des emplacements de CQ réservés.",
+      "QC_RACK_POSITION_INVALID": "Sélectionnez des positions de portoir disponibles et distinctes dans la capacité configurée, hors des emplacements de CQ réservés.",
+      "QC_BATCH_MEMBERSHIP_LOCKED": "Seule une série OUVERTE peut modifier ses échantillons.",
+      "QC_RULE_VIOLATION": "L’état de CQ demandé contredit l’évaluation ou la décision enregistrée.",
+      "QC_REOPEN_SEPARATE_EVALUATION": "Rouvrez d’abord la série acceptée, puis soumettez une évaluation distincte.",
+      "QC_RUN_LAB_REQUIRED": "Sélectionnez des tâches et une série dans le périmètre de votre laboratoire enregistré.",
+      "QC_WORK_ITEM_SCOPE_DENIED": "Sélectionnez des tâches et une série dans le périmètre de votre laboratoire enregistré.",
+      "QC_ANALYST_REQUIRED": "L’analyste de la série doit être un utilisateur enregistré.",
+      "QC_WORK_ITEMS_REQUIRED": "Sélectionnez des tâches distinctes, une par échantillon et analyse.",
+      "QC_SAMPLE_ANALYSIS_DUPLICATE": "Sélectionnez des tâches distinctes, une par échantillon et analyse.",
+      "QC_SEQUENCE_SAMPLES_INVALID": "Sélectionnez des tâches distinctes, une par échantillon et analyse.",
+      "QC_SEQUENCE_ORDER_INVALID": "Rechargez ou reconstruisez la série avec une séquence enregistrée valide.",
+      "QC_SEQUENCE_ORDINAL_INVALID": "Rechargez ou reconstruisez la série avec une séquence enregistrée valide.",
+      "QC_SEQUENCE_SEED_INVALID": "Rechargez ou reconstruisez la série avec une séquence enregistrée valide.",
+      "QC_RUN_STORAGE_REQUIRED": "Demandez à un responsable d’appliquer la mise à niveau validée du stockage de CQ avant d’utiliser cette série.",
+      "BATCH_HISTORY_INVALID": "L’historique enregistré du lot doit être réparé avant toute modification.",
+      "BATCH_NOT_FOUND": "La série ou la tâche sélectionnée est introuvable. Rechargez la liste.",
+      "WORKITEM_NOT_FOUND": "La série ou la tâche sélectionnée est introuvable. Rechargez la liste.",
+      "REASON_REQUIRED": "Enregistrez un motif pour ce changement de CQ.",
+      "REFERENCE_VALUE_MISMATCH": "La valeur de référence soumise doit correspondre au placement enregistré.",
+      "QC_SUPERSEDE_TARGET_MISMATCH": "Le remplacement doit correspondre à la même observation ou position de référence enregistrée."
+    },
+    "chooseDuplicateParent": "Sélectionnez la position de l’échantillon d’origine",
+    "analysis": "Analyse",
+    "closeAnalyte": "Clôturer cet analyte"
   }
 }

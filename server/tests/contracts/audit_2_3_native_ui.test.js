@@ -70,10 +70,29 @@ test('accepted QC requires reasoned reopen and OFF evaluation sends zero invente
     expect(accepted.find('native-run-reopen').props.disabled).toBe(true);
     accepted.find('native-correction-reason').props.onChange({ target: { value: 'Review correction before re-entry' } }); await accepted.render();
     await accepted.find('native-run-reopen').props.onClick();
-    expect(accepted.axios.put).toHaveBeenCalledWith('/api/qc/batches/native-run', { status: 'OPEN', reason: 'Review correction before re-entry' });
+    expect(accepted.axios.put).toHaveBeenCalledWith('/api/qc/batches/native-run', { analysisCode: 'A', status: 'OPEN', reason: 'Review correction before re-entry' });
     const off = mount(fixture({ mode: 'OFF' })); await off.render();
     expect(off.find('native-qc-not-required')).toBeDefined(); expect(off.all().filter(node => node.type === 'input')).toHaveLength(0);
     await off.find('native-qc-evaluate').props.onClick();
     expect(off.axios.post).toHaveBeenCalledWith('/api/qc/batches/native-run/evaluate', { analysisCode: 'A', measurements: [], references: [] });
     expect(off.props.setSuccessMsg).toHaveBeenCalledWith('qcRuns.notRequired');
+});
+
+test('a failed sibling does not lock the selected analyte’s entry, reopen or close handlers', async () => {
+    const batch = fixture(); batch.status = 'QC_FAIL'; batch.analytes[0].status = 'QC_FAIL';
+    batch.analytes[0].disposition = { decision: 'REANALYZE_BATCH' };
+    batch.analytes.push({ ...batch.analytes[0], id: 'b', analysisCode: 'B', status: 'QC_PENDING', disposition: null });
+    const view = mount(batch); await view.render();
+    expect(view.find('native-value-blank').props.disabled).toBe(true);
+    view.find('native-analysis-select').props.onChange({ target: { value: 'B' } }); await view.render();
+    view.find('native-value-blank').props.onChange({ target: { value: '0.0123456789' } }); await view.render();
+    expect(view.find('native-qc-save').props.disabled).toBeFalsy(); await view.find('native-qc-save').props.onClick();
+    expect(view.axios.put).toHaveBeenCalledWith('/api/qc/batches/native-run', { analysisCode: 'B', measurements: [{ positionId: 'blank', replicateNo: 1, rawInput: '0.0123456789' }], references: [] });
+    batch.analytes[1].status = 'QC_PASS'; await view.render();
+    view.find('native-correction-reason').props.onChange({ target: { value: 'Recheck B evidence' } }); await view.render();
+    await view.find('native-run-reopen').props.onClick();
+    expect(view.axios.put).toHaveBeenCalledWith('/api/qc/batches/native-run', { analysisCode: 'B', status: 'OPEN', reason: 'Recheck B evidence' });
+    await view.find('native-analyte-close').props.onClick();
+    expect(view.axios.put).toHaveBeenCalledWith('/api/qc/batches/native-run', { analysisCode: 'B', status: 'CLOSED' });
+    expect(batch.analytes[0]).toMatchObject({ status: 'QC_FAIL', disposition: { decision: 'REANALYZE_BATCH' } });
 });

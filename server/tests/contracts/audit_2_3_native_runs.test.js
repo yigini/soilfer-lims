@@ -26,7 +26,8 @@ const { writeCompatibilityMeasurements } = require('../../services/qcCompatibili
 const { resolveReportingModes } = require('../../services/reportResultGovernance');
 const { assembleReport } = require('../../services/reportAssembly');
 const { canPublish } = require('../../services/workEligibility');
-const { QC_RUN_INCLUDE } = require('../../services/qcRunViewService');
+const { QC_RUN_INCLUDE, batchApiView } = require('../../services/qcRunViewService');
+const { changeRunMembers } = require('../../services/qcRunMembershipService');
 const { reorderNativeRun } = require('../../services/qcRunOrderService');
 const request = require('supertest');
 const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
@@ -297,6 +298,41 @@ test('Native builds refuse two active attempts for a sample/analyte and never at
     expect(await evidence(f.db)).toEqual(before);
 });
 
+test.each(['SUBMITTED', 'ACCEPTED', 'WAIVED', 'CANCELLED'])('sealed %s work items cannot join Native or ordinary runs', async status => {
+    const f = await fixture(), original = await f.db.workItem.findUnique({ where: { id: f.workItemIds[0] } });
+    const sealed = await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: original.sampleId, labId: f.labId,
+        analysis: f.analysisCode, methodologyId: f.method.id, duplicateOf: original.id, status } });
+    const profile = await createProfileRun(f.db, f.actor, { analysis: f.analysisCode, profile: 'RACK_40' });
+    const before = await evidence(f.db);
+    await expect(buildNativeRun(f.db, f.actor, { ...f.input, workItemIds: [sealed.id] })).rejects.toMatchObject({ statusCode: 400, code: 'QC_WORK_ITEM_SEALED' });
+    await expect(changeRunMembers(f.db, profile.id, f.actor, { workItemIds: [sealed.id] })).rejects.toMatchObject({ statusCode: 400, code: 'QC_WORK_ITEM_SEALED' });
+    expect(await evidence(f.db)).toEqual(before);
+});
+
+test('concurrent A/B first starts allocate distinct ordinals; abandoned OPEN builds do not consume C’s ordinal', async () => {
+    const f = await fixture(), lot = await referenceLot(f), runs = [];
+    const selections = [{ analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }];
+    for (let index = 0; index < 4; index++) runs.push(await buildNativeRun(f.db, f.actor, { ...f.input,
+        workItemIds: index ? await members(f, 1) : f.workItemIds, analyses: selections, seed: `concurrent-${index}` }));
+    expect(runs.every(row => row.analytes[0].crmOrdinal === null)).toBe(true);
+    const results = await Promise.allSettled(runs.slice(0, 2).map(run => startNativeRun(f.db, run.id, f.actor)));
+    expect(results.some(row => row.status === 'fulfilled')).toBe(true);
+    for (const [index, outcome] of results.entries()) if (outcome.status === 'rejected') {
+        expect(outcome.reason).toMatchObject({ statusCode: 409, code: 'QC_SEQUENCE_STALE' });
+        const refused = await f.db.batch.findUnique({ where: { id: runs[index].id }, include: QC_RUN_INCLUDE });
+        expect(refused.startedAt).toBeNull(); expect(refused.analytes[0].crmOrdinal).toBeNull();
+        expect(refused.events.some(row => row.type === 'RUN_STARTED')).toBe(false);
+        await startNativeRun(f.db, runs[index].id, f.actor);
+    }
+    const allocated = await f.db.batchAnalyte.findMany({ where: { batchId: { in: runs.slice(0, 2).map(row => row.id) } } });
+    expect(allocated.map(row => row.crmOrdinal).sort()).toEqual([1, 2]);
+    const third = await startNativeRun(f.db, runs[2].id, f.actor);
+    expect(third.analytes[0].crmOrdinal).toBe(3);
+    const abandoned = await f.db.batch.findUnique({ where: { id: runs[3].id }, include: QC_RUN_INCLUDE });
+    expect(abandoned.startedAt).toBeNull(); expect(abandoned.analytes[0].crmOrdinal).toBeNull();
+    expect(abandoned.events.some(row => row.type === 'RUN_STARTED')).toBe(false);
+});
+
 test('actual OPEN reorder retains physical ids, lot evidence and duplicate parents; invalid and frozen orders write nothing', async () => {
     const f = await fixture(2), run = await buildNativeRun(f.db, f.actor, f.input), lot = await referenceLot(f);
     const control = run.positions.find(row => row.kind === 'LRM');
@@ -511,6 +547,8 @@ test('reasoned corrections append two evaluation versions and exact measurements
 
 test('explicit evaluation after reopen appends fresh acceptance without rewriting retained readings', async () => {
     const f = await fixture(), lot = await referenceLot(f);
+    expect((await f.db.$queryRawUnsafe('PRAGMA foreign_keys')).map(row => Number(row.foreign_keys))).toEqual([1]);
+    expect((await require('../../prisma').$queryRawUnsafe('PRAGMA foreign_keys')).map(row => Number(row.foreign_keys))).toEqual([1]);
     const run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, { ...f.input,
         analyses: [{ analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }] })).id, f.actor);
     const first = await writeNativeMeasurements(f.db, run.id, f.actor, { measurements: readings(run) });
@@ -618,6 +656,43 @@ test.each(['REPEAT_BATCH', 'REJECT'])('failed Native disposition %s retains fail
     expect(await evidence(f.db)).toEqual(disposed);
     await expect(mutateQcRun(f.db, run.id, f.actor, { status: 'CLOSED' })).rejects.toHaveProperty('statusCode');
     expect(await evidence(f.db)).toEqual(disposed);
+    const oldJoins = await f.db.batchPositionWorkItem.findMany({ where: { position: { batchId: run.id } }, orderBy: { id: 'asc' } });
+    const repeated = await buildNativeRun(f.db, f.actor, { ...f.input,
+        analyses: [{ analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }] });
+    const started = await startNativeRun(f.db, repeated.id, f.actor);
+    expect(started.workItemIds).toEqual(run.workItemIds);
+    expect(repeated.events.filter(row => row.type === 'MEMBER_REPEATED').map(row => JSON.parse(row.payload)))
+        .toEqual(f.workItemIds.map(workItemId => ({ fromBatchId: run.id, workItemId, analysisCode: f.analysisCode })));
+    expect(await f.db.batchPositionWorkItem.findMany({ where: { position: { batchId: run.id } }, orderBy: { id: 'asc' } })).toEqual(oldJoins);
+    expect(await f.db.qcMeasurement.findMany()).toEqual(oldMeasurements);
+    expect(await f.db.qcEvaluation.findFirst()).toEqual(oldEvaluation);
+    const historical = batchApiView(await f.db.batch.findUnique({ where: { id: run.id }, include: QC_RUN_INCLUDE }));
+    expect(historical.workItemIds).toEqual(run.workItemIds);
+    expect(historical.workItems.map(row => row.id)).toEqual(run.workItems.map(row => row.id));
+    expect(historical.workItems.every(row => row.currentBatchId === repeated.id)).toBe(true);
+    expect(historical.analytes[0].result).toBe('FAIL');
+    const passing = await writeNativeMeasurements(f.db, started.id, f.actor, { measurements: readings(started) });
+    expect(passing.analytes[0].result).toBe('PASS');
+    expect(await f.db.qcMeasurement.findMany({ where: { batchId: run.id } })).toEqual(oldMeasurements);
+    expect(await f.db.qcEvaluation.findMany({ where: { batchId: run.id } })).toEqual([oldEvaluation]);
+});
+
+test.each([false, true])('failed membership cannot move without repeat/reject disposition (warning=%s)', async warning => {
+    const f = await fixture(), lot = await referenceLot(f);
+    const run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, { ...f.input,
+        analyses: [{ analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }] })).id, f.actor);
+    await writeNativeMeasurements(f.db, run.id, f.actor, { measurements: readings(run, { blank: 10 }) });
+    if (warning) await dispositionBatch(run.id, 'ACCEPT_WITH_DEVIATION', 'Retain the reviewed warning', f.actor, f.db);
+    const target = await createProfileRun(f.db, f.actor, { analysis: f.analysisCode, profile: 'RACK_40' });
+    const before = await evidence(f.db);
+    await expect(buildNativeRun(f.db, f.actor, f.input)).rejects.toMatchObject({ code: 'QC_WORK_ITEM_ALREADY_BATCHED' });
+    await expect(changeRunMembers(f.db, target.id, f.actor, { workItemIds: f.workItemIds })).rejects.toMatchObject({ code: 'QC_WORK_ITEM_ALREADY_BATCHED' });
+    await expect(f.db.workItem.update({ where: { id: f.workItemIds[0] }, data: { batchId: target.id, rackPosition: 1 } })).rejects.toThrow();
+    expect(await evidence(f.db)).toEqual(before);
+    const connection = new Database(f.file);
+    try { expect(() => connection.prepare('UPDATE WorkItem SET batchId=NULL,rackPosition=NULL WHERE id=?').run(f.workItemIds[0])).toThrow('BATCH_MEMBERSHIP_FROZEN'); }
+    finally { connection.close(); }
+    expect(await evidence(f.db)).toEqual(before);
 });
 
 test('actual manager disposition accepts a failed Native analyte with deviation, preserves warning flags and closes without changing failed readings', async () => {

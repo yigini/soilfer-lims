@@ -1,11 +1,13 @@
 const scopeGuard = require('../utils/scopeGuard');
 const policyService = require('./policyService');
+const { runAnalyteCode } = require('./analysisCodesService');
+const WORK_ITEM_SELECT = { id: true, sampleId: true, analysis: true, status: true, rackPosition: true, batchId: true,
+    methodologyId: true, sample: { select: { id: true, originalId: true, labId: true, assignedLab: true } } };
 const QC_RUN_INCLUDE = {
-    analytes: true, positions: { include: { workItems: true, references: true }, orderBy: { position: 'asc' } },
+    analytes: true, positions: { include: { workItems: { include: { workItem: { select: WORK_ITEM_SELECT } } }, references: true }, orderBy: { position: 'asc' } },
     measurements: true, evaluations: { orderBy: [{ analysisCode: 'asc' }, { version: 'asc' }] },
     dispositions: true, events: true,
-    workItems: { select: { id: true, sampleId: true, analysis: true, status: true, rackPosition: true,
-        methodologyId: true, sample: { select: { id: true, originalId: true, labId: true, assignedLab: true } } }, orderBy: { rackPosition: 'asc' } }
+    workItems: { select: WORK_ITEM_SELECT, orderBy: { rackPosition: 'asc' } }
 };
 function parsed(value, fallback = null) {
     if (typeof value !== 'string') return value ?? fallback;
@@ -16,6 +18,11 @@ const decisions = { ACCEPT_WITH_DEVIATION: 'PROCEED_WITH_WARNING', REPEAT_BATCH:
 
 function latestEvaluation(batch, analysisCode) {
     return (batch.evaluations || []).filter(row => row.analysisCode === analysisCode).reduce((latest, row) => !latest || row.version > latest.version ? row : latest, null);
+}
+function activeReopenEvent(batch, analysisCode) {
+    const evaluation = latestEvaluation(batch, analysisCode);
+    return (batch.events || []).filter(row => row.type === 'REOPENED' &&
+        parsed(row.payload, {}).previousEvaluationIds?.includes(evaluation?.id)).sort((a, b) => time(b.at) - time(a.at))[0] || null;
 }
 function currentDisposition(batch, evaluation, analysisCode) {
     const details = parsed(evaluation?.details, {});
@@ -33,15 +40,14 @@ function currentDisposition(batch, evaluation, analysisCode) {
 function currentAnalyteEvidence(batch, analysisCode = batch.analysis) {
     const evaluation = latestEvaluation(batch, analysisCode), details = parsed(evaluation?.details, {});
     const isolatedRound = details.legacy === true || details.entryMode === 'LEGACY_RESUBMISSION' || details.entryMode === 'CORRECTION' && details.compatibility === true;
-    const reopenEvent = (batch.events || []).find(row => row.type === 'REOPENED' &&
-        parsed(row.payload, {}).previousEvaluationIds?.includes(evaluation?.id));
+    const reopenEvent = activeReopenEvent(batch, analysisCode);
     const hiddenRound = isolatedRound && parsed(reopenEvent?.payload, {}).discardCurrentEvidence;
     const currentVerdict = reopenEvent ? null : evaluation?.verdict ?? null;
     const selectedPositions = new Set(hiddenRound ? [] : details.positionIds || []), selectedMeasurements = new Set(hiddenRound ? [] : details.measurementIds || []);
     const built = (batch.events || []).filter(row => ['RUN_BUILT', 'RUN_REORDERED', 'RUN_STARTED'].includes(row.type)).slice().reverse().sort((a, b) => time(b.at) - time(a.at))[0];
     const served = new Map((parsed(built?.payload, {}).positions || []).map(row => [row.id, row.servedAnalytes || []]));
     function serves(row) {
-        if (row.kind === 'SAMPLE') return (row.workItems || []).some(link => link.analysisCode === analysisCode);
+        if (row.kind === 'SAMPLE') return (row.workItems || []).some(link => runAnalyteCode(batch, link.analysisCode) === analysisCode);
         if (isolatedRound) return selectedPositions.has(row.id);
         if (row.kind === 'DUPLICATE' && row.duplicateOfPositionId) return serves((batch.positions || []).find(parent => parent.id === row.duplicateOfPositionId) || { kind: 'SAMPLE' });
         if ((row.references || []).some(reference => reference.analysisCode === analysisCode && !reference.supersededById && reference.serviceStatus === 'NOT_SERVED')) return false;
@@ -126,8 +132,12 @@ function batchApiView(batch, { serialized = false } = {}) {
     const current = currentAnalyteEvidence(batch), history = historyView(batch);
     const analytes = (batch.analytes || []).map(row => ({ ...row, ...currentAnalyteEvidence(batch, row.analysisCode) }));
     const workItemIds = [...new Set((batch.positions || []).flatMap(position => (position.workItems || []).map(link => link.workItemId)))];
+    const workItems = [...new Map((batch.positions || []).filter(position => position.kind === 'SAMPLE')
+        .flatMap(position => (position.workItems || []).filter(link => link.workItem).map(link => [link.workItemId,
+            { ...link.workItem, rackPosition: position.position, currentBatchId: link.workItem.batchId }]))).values()].sort((a, b) => a.rackPosition - b.rackPosition);
     return { ...batch, analytes, result: current.result, qcItems: current.qcItems, qcResults: serialized && current.qcResults !== null ? JSON.stringify(current.qcResults) : current.qcResults,
         workItemIds: serialized ? JSON.stringify(workItemIds) : workItemIds,
+        workItems: Array.isArray(batch.positions) ? workItems : batch.workItems || [],
         disposition: serialized && current.disposition !== null ? JSON.stringify(current.disposition) : current.disposition,
         history: serialized ? JSON.stringify(history) : history,
         positions: [...new Map([...analytes.flatMap(row => row.positions), ...(batch.positions || []).filter(row => row.provenance === 'NATIVE' && row.historicalSnapshotSeq == null)]
@@ -141,4 +151,4 @@ async function readQcRun(db, batchId, actor, options = {}) {
     catch (error) { error.code = error.code || 'QC_BATCH_SCOPE_DENIED'; if (error.statusCode === 403) error.message = 'Access denied: Batch outside your laboratory scope'; throw error; }
     return batchApiView(batch, options);
 }
-module.exports = { QC_RUN_INCLUDE, currentAnalyteEvidence, batchApiView, readQcRun };
+module.exports = { QC_RUN_INCLUDE, currentAnalyteEvidence, activeReopenEvent, batchApiView, readQcRun };

@@ -1,5 +1,6 @@
 const { createHash } = require('node:crypto');
 const { legacyBatchAnalyteStatus } = require('../workflowContract');
+const { TEXTURE_ALIASES } = require('./analysisCodesService');
 const hash = value => createHash('sha256').update(value).digest('hex');
 const identity = (...parts) => `qc186-${hash(JSON.stringify(parts))}`;
 const object = value => value && typeof value === 'object' && !Array.isArray(value);
@@ -10,32 +11,34 @@ function parsed(value) {
 }
 function reviewedDispositionAttribution(record, batch, disposition, users, audits, counts, diagnostic, refuse) {
     const rawDecision = disposition.decision;
-    let audit = record.auditRow || null, attributed = disposition;
-    if (record.seq !== null && !audit) {
-        refuse(batch.id, 'QC_LEGACY_DISPOSITION_UNRESOLVED', { rawDecision, reason: 'HISTORICAL_ATTRIBUTION_UNRESOLVED', seq: record.seq });
-        return null;
-    }
-    const relevant = audits.filter(row => row.entityId === batch.id);
-    if (!audit && relevant.length) {
-        const matches = relevant.flatMap(row => {
+    let audit = null, attributed = disposition;
+    const recordedReason = disposition.reason ?? disposition.justification ?? null;
+    const relevant = audits.filter(row => row.entityId === batch.id && row.action === 'QC_DISPOSITION');
+    const matches = relevant.flatMap(row => {
             const details = parsed(row.details).value;
             const decision = object(details?.disposition) ? details.disposition : object(details) ? details : null;
             const prefix = `QC batch disposition recorded: ${rawDecision}. Reason: `;
-            if (decision?.decision === rawDecision) return [{ row, reason: decision.reason ?? decision.justification ?? null }];
-            if (typeof row.details === 'string' && row.details.startsWith(prefix)) return [{ row, reason: row.details.slice(prefix.length) }];
+            const match = decision?.decision === rawDecision ? { row, reason: decision.reason ?? decision.justification ?? null }
+                : typeof row.details === 'string' && row.details.startsWith(prefix) ? { row, reason: row.details.slice(prefix.length) } : null;
+            if (match && (recordedReason === null || match.reason === null || match.reason === recordedReason)) return [match];
             return [];
         });
-        if (matches.length !== 1) {
+        if (matches.length > 1) {
             refuse(batch.id, 'QC_LEGACY_DISPOSITION_UNRESOLVED', { rawDecision, reason: 'AUDIT_ATTRIBUTION_UNRESOLVED', matchingAuditRows: matches.length });
             return null;
         }
+    if (matches.length === 1) {
         audit = matches[0].row;
         attributed = { ...disposition, reason: matches[0].reason, by: audit.performedBy, at: audit.timestamp,
             decidedBy: audit.performedBy, decidedAt: audit.timestamp };
     }
     const actor = attributed.decidedBy ?? attributed.by ?? null;
     const at = attributed.decidedAt ?? attributed.at ?? null;
-    const attributionSource = audit ? 'AUDIT_LOG' : 'BATCH_DISPOSITION_FIELD';
+    if (actor === null && at === null) {
+        refuse(batch.id, 'QC_LEGACY_DISPOSITION_UNRESOLVED', { rawDecision, reason: 'DISPOSITION_ATTRIBUTION_MISSING', seq: record.seq });
+        return null;
+    }
+    const attributionSource = audit ? 'AUDIT_LOG' : record.seq === null ? 'BATCH_DISPOSITION_FIELD' : 'SNAPSHOT_DISPOSITION_FIELD';
     const payload = record.seq === null ? batch.disposition : record.historyEvent?.snapshot?.disposition ?? record.snapshot.disposition;
     const fieldCopy = parsed(payload).value;
     const fieldTime = fieldCopy?.decidedAt ?? fieldCopy?.at ?? null;
@@ -50,6 +53,8 @@ function reviewedDispositionAttribution(record, batch, disposition, users, audit
     return { actor, at, reason: attributed.reason ?? attributed.justification ?? null,
         source: { rawDecision, payload, auditLogId: audit?.id ?? null, seq: record.seq, attributionSource,
             actor, actorUsername: users.has(actor) ? actor : null, timestamp: at, originalDisposition: disposition,
+            ...(record.seq !== null && { replacedBy: record.auditRow?.performedBy ?? record.snapshot.actor ?? null,
+                replacedAt: record.auditRow?.timestamp ?? record.snapshot.timestamp ?? null, snapshotAuditRow: record.auditRow ?? null }),
             ...(audit && { auditRow: audit }) } };
 }
 function timestamp(value) {
@@ -101,8 +106,9 @@ function inventoryLegacyQcRuns(db) {
         'unresolvedNumbers', 'unresolvedDuplicateParents', 'unresolvedRackPositions', 'missingWorkItems', 'malformedHistory',
         'malformedQcResults', 'orphanSnapshots', 'multiAttemptMembershipGroups', 'refusals'].map(key => [key, 0]));
     counts.legacyDispositionMapped = { REJECT_REANALYSIS: 0, ACCEPT_OPAQUE: 0 };
-    counts.dispositionAttribution = { AUDIT_LOG: 0, BATCH_DISPOSITION_FIELD: 0 };
+    counts.dispositionAttribution = { AUDIT_LOG: 0, BATCH_DISPOSITION_FIELD: 0, SNAPSHOT_DISPOSITION_FIELD: 0 };
     counts.dispositionAttributionConflicts = 0;
+    counts.TEXTURE_ALIAS_MERGED = 0;
     const diagnostics = [], refusals = [], metadata = [];
     const batches = db.prepare('SELECT id,labId,analysis,instrument,status,createdBy,createdAt,notes,qcResults,workItemIds,maxCapacity,profile,disposition,history FROM "Batch" ORDER BY id').all();
     // Empty historical QC inventories have no membership to import. Avoid
@@ -134,7 +140,11 @@ function inventoryLegacyQcRuns(db) {
         counts.typedRows += currentTyped.length;
         const storedMembers = parsed(batch.workItemIds);
         if (Array.isArray(storedMembers.value)) counts.missingWorkItems += storedMembers.value.filter(id => !members.some(row => row.id === id)).length;
-        const analysisCodes = [...new Set([batch.analysis, ...members.map(row => row.analysis)])].sort();
+        const analyteCode = code => TEXTURE_ALIASES.has(batch.analysis) && TEXTURE_ALIASES.has(code) ? batch.analysis : code;
+        const mergedAliases = members.filter(row => row.analysis !== batch.analysis && analyteCode(row.analysis) === batch.analysis);
+        counts.TEXTURE_ALIAS_MERGED += mergedAliases.length;
+        if (mergedAliases.length) diagnostic(batch.id, 'TEXTURE_ALIAS_MERGED', { workItemIds: mergedAliases.map(row => row.id), analysisCode: batch.analysis });
+        const analysisCodes = [...new Set([batch.analysis, ...members.map(row => analyteCode(row.analysis))])].sort();
         const snapshots = new Map();
         const historyCopies = new Map();
         for (const [index, event] of historyEntries.entries()) {
@@ -165,9 +175,9 @@ function inventoryLegacyQcRuns(db) {
         const reopened = batch.status === 'OPEN' && (historical.some(row => row.snapshot.status && row.snapshot.status !== 'OPEN') ||
             historyEntries.some(event => event?.status && event.status !== 'OPEN'));
         const currentQc = parsed(batch.qcResults).value;
-        const collections = ['blanks', 'controls', 'duplicates'];
-        const recordedQc = object(currentQc) && (collections.some(key => Array.isArray(currentQc[key]) && currentQc[key].length > 0) ||
-            Object.entries(currentQc).some(([key, value]) => !collections.includes(key) && value !== null && value !== undefined));
+        const qcCollections = ['blanks', 'controls', 'duplicates'];
+        const recordedQc = object(currentQc) && (qcCollections.some(key => Array.isArray(currentQc[key]) && currentQc[key].length > 0) ||
+            Object.entries(currentQc).some(([key, value]) => !qcCollections.includes(key) && value !== null && value !== undefined));
         const frozen = batch.status !== 'OPEN' || historical.length > 0 || currentTyped.length > 0 || recordedQc || batch.disposition !== null || reopened;
         const disposition = parsed(batch.disposition).value;
         let status;
@@ -184,8 +194,9 @@ function inventoryLegacyQcRuns(db) {
         if (!instrumentId) counts.unresolvedInstruments++;
         metadata.push({ batchId: batch.id, analystUsername, instrumentId });
         for (const analysisCode of analysisCodes) {
-            const candidateMembers = members.filter(row => row.analysis === analysisCode), methodIds = [...new Set(candidateMembers.map(row => row.methodologyId))];
-            const methodologyId = methodIds.length === 1 && methods.get(methodIds[0])?.analysisCode === analysisCode ? methodIds[0] : null;
+            const candidateMembers = members.filter(row => analyteCode(row.analysis) === analysisCode), methodIds = [...new Set(candidateMembers.map(row => row.methodologyId))];
+            const methodCode = methods.get(methodIds[0])?.analysisCode;
+            const methodologyId = methodIds.length === 1 && (methodCode === analysisCode || TEXTURE_ALIASES.has(analysisCode) && TEXTURE_ALIASES.has(methodCode)) ? methodIds[0] : null;
             if (!methodologyId) counts.unresolvedMethods++;
             rows.BatchAnalyte.push({ id: identity(batch.id, 'analyte', analysisCode), batchId: batch.id, labId: batch.labId, analysisCode,
                 methodologyId, methodResolution: methodologyId ? 'RESOLVED_LEGACY' : 'UNRESOLVED_LEGACY', status,
@@ -221,7 +232,9 @@ function inventoryLegacyQcRuns(db) {
             const id = identity(batch.id, 'sample-attempt', member.id);
             rows.BatchPosition.push({ id, batchId: batch.id, position, kind: 'SAMPLE', sampleId: member.sampleId,
                 duplicateOfPositionId: null, historicalSnapshotSeq: null, provenance: 'LEGACY_MIGRATED', legacySource: JSON.stringify({ workItem: member,
-                    workItemId: member.id, workItemStatusAtImport: member.status, duplicateOfWorkItemId: member.duplicateOf }) });
+                    workItemId: member.id, workItemStatusAtImport: member.status, duplicateOfWorkItemId: member.duplicateOf,
+                    ...(TEXTURE_ALIASES.has(batch.analysis) && TEXTURE_ALIASES.has(member.analysis) &&
+                        { textureAlias: true, batchAnalysis: batch.analysis, workItemAnalysis: member.analysis }) }) });
             rows.BatchPositionWorkItem.push({ id: identity(batch.id, 'membership', member.id), positionId: id, workItemId: member.id, analysisCode: member.analysis });
             counts.samplePositions++;
         }
@@ -274,7 +287,7 @@ function inventoryLegacyQcRuns(db) {
             const evaluatedAt = timestamp(json?.summary?.evaluatedAt);
             for (const source of entries) {
                 const { entry, type, fields, index, collection, typedRow, typedRowMatch = null, valueSource } = source;
-                const analysisCode = entry.analysisCode || batch.analysis;
+                const analysisCode = analyteCode(entry.analysisCode || batch.analysis);
                 if (!measurementIds.has(analysisCode)) { refuse(batch.id, 'QC_LEGACY_ANALYSIS_UNRESOLVED', { seq: record.seq, entry }); continue; }
                 const referenceValue = values.get(entry.referenceValueId);
                 const linked = type === 'CONTROL' && ['CRM', 'LRM'].includes(entry.referenceUse) && materials.has(entry.referenceMaterialId) &&
@@ -332,7 +345,7 @@ function inventoryLegacyQcRuns(db) {
                 }
                 if (['REJECT_REANALYSIS', 'ACCEPT'].includes(rawDecision)) {
                     const attribution = reviewedDispositionAttribution(record, batch, originalDisposition, users,
-                        [...audits, ...dispositionAudits], counts, diagnostic, refuse);
+                        dispositionAudits, counts, diagnostic, refuse);
                     if (!attribution) continue;
                     provenance = attribution.source; decidedBy = attribution.actor; decidedAt = attribution.at; reason = attribution.reason;
                 }

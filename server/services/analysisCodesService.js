@@ -36,4 +36,9 @@ function normalizeAnalysisCodes(codes) {
     return unique;
 }
 
-module.exports = { normalizeAnalysisCodes };
+function runAnalyteCode(batch, code) {
+    const compatibility = batch.analytes?.some(row => row.provenance === 'LEGACY_MIGRATED') || batch.provenance === 'LEGACY_MIGRATED';
+    return compatibility && TEXTURE_ALIASES.has(batch.analysis) && TEXTURE_ALIASES.has(code) ? batch.analysis : code;
+}
+
+module.exports = { normalizeAnalysisCodes, TEXTURE_ALIASES, runAnalyteCode };

@@ -41,7 +41,8 @@
     "see": "see",
     "replaces": "Replaces",
     "preparationRecords": "Preparation records",
-    "qcNotRequired": "QC not required (mode OFF)"
+    "qcNotRequired": "QC not required (mode OFF)",
+    "qcEvidenceIncomplete": "Historical QC acceptance has incomplete recorded evidence"
   },
   "common": {
     "save": "Save",
@@ -1174,7 +1175,8 @@
       "INVALID_REFERENCE_VALUE": "The assigned value or certificate details are invalid.",
       "REFERENCE_VALUE_IMMUTABLE": "Assigned values cannot be changed. Correct them by adding a new revision.",
       "REFERENCE_VALUE_REFERENCED": "Referenced or corrected values cannot be deleted.",
-      "INVALID_QC_REFERENCE_LINK": "The QC reference link is invalid. Reload the batch before retrying."
+      "INVALID_QC_REFERENCE_LINK": "The QC reference link is invalid. Reload the batch before retrying.",
+      "REFERENCE_POSITION_LOT_CONFLICT": "One physical reference position must use the same lot for all served analytes."
     }
   },
   "qcRules": {
@@ -1250,7 +1252,59 @@
       "QC_VALUES_MISSING": "Enter valid observations for every required position before evaluation.",
       "QC_BATCH_LOCKED": "This QC evidence is locked. Use batch disposition or a new run.",
       "QC_CORRECTION_REASON_REQUIRED": "Record a reason for the correction.",
-      "BATCH_MEMBERSHIP_FROZEN": "A started or measured run cannot be reordered."
-    }
+      "BATCH_MEMBERSHIP_FROZEN": "A started or measured run cannot be reordered.",
+      "QC_BATCH_TOO_LARGE": "The run exceeds its configured capacity. Select fewer samples.",
+      "QC_BATCH_CAPACITY_EXCEEDED": "The run exceeds its configured capacity. Select fewer samples.",
+      "QC_RACK_CAPACITY_EXCEEDED": "The run exceeds its configured capacity. Select fewer samples.",
+      "QC_RUN_NOT_STARTED": "Start the run before entering or evaluating QC.",
+      "QC_REFERENCE_UNBOUND": "Keep every required reference position bound to an eligible lot.",
+      "QC_REFERENCE_BOUND": "Keep every required reference position bound to an eligible lot.",
+      "QC_ANALYTE_REMOVAL_BLOCKED": "This analyte has retained reference bindings. Abandon the OPEN run and build a new run before removing it.",
+      "QC_WORK_ITEM_ALREADY_BATCHED": "This work item already belongs to another run. A repeat or reject disposition is required to move it.",
+      "QC_DUPLICATE_PARENT_REQUIRED": "Select the actual SAMPLE parent position for each duplicate.",
+      "REFERENCE_POSITION_LOT_CONFLICT": "One physical reference position must use the same lot for all served analytes.",
+      "QC_INSTRUMENT_FROZEN": "The instrument identity is frozen after the first start.",
+      "QC_NATIVE_RUN_REQUIRED": "Use the entry flow corresponding to this run’s recorded provenance.",
+      "QC_COMPATIBILITY_RUN_REQUIRED": "Use the entry flow corresponding to this run’s recorded provenance.",
+      "QC_WORK_ITEM_SEALED": "A submitted, accepted, waived or cancelled work item cannot join a run.",
+      "QC_BATCH_METHOD_AMBIGUOUS": "Select the recorded method for every work item in this analyte.",
+      "QC_ANALYSIS_MISMATCH": "Select an analysis matching this run and its work items.",
+      "QC_ANALYSIS_NOT_IN_RUN": "Select an analysis matching this run and its work items.",
+      "QC_ANALYSIS_REQUIRED": "Select an analysis matching this run and its work items.",
+      "QC_SEQUENCE_ANALYSES_INVALID": "Select an analysis matching this run and its work items.",
+      "QC_CLOSE_PERMISSION_REQUIRED": "You do not have permission for this QC operation.",
+      "QC_REOPEN_PERMISSION_REQUIRED": "You do not have permission for this QC operation.",
+      "QC_RUN_PERMISSION_REQUIRED": "You do not have permission for this QC operation.",
+      "QC_DUPLICATE_PARENT_VALUE_CONFLICT": "All duplicates sharing a SAMPLE parent must record the same original observation.",
+      "QC_MEASUREMENT_CHANGED": "The observation changed. Reload before retrying.",
+      "QC_MEASUREMENT_NOT_FOUND": "Select an actual observation or position belonging to this run analyte.",
+      "QC_POSITION_NOT_IN_ANALYSIS": "Select an actual observation or position belonging to this run analyte.",
+      "QC_RACK_POSITION_DUPLICATE": "Select distinct available rack positions within the configured capacity, outside reserved QC slots.",
+      "QC_RACK_POSITION_OCCUPIED": "Select distinct available rack positions within the configured capacity, outside reserved QC slots.",
+      "QC_RACK_POSITION_RESERVED": "Select distinct available rack positions within the configured capacity, outside reserved QC slots.",
+      "QC_RACK_POSITION_INVALID": "Select distinct available rack positions within the configured capacity, outside reserved QC slots.",
+      "QC_BATCH_MEMBERSHIP_LOCKED": "Only an OPEN run can change sample membership.",
+      "QC_RULE_VIOLATION": "The requested QC state contradicts the recorded evaluation or disposition.",
+      "QC_REOPEN_SEPARATE_EVALUATION": "Reopen the accepted run first, then submit a separate evaluation.",
+      "QC_RUN_LAB_REQUIRED": "Select work items and a run in your registered laboratory scope.",
+      "QC_WORK_ITEM_SCOPE_DENIED": "Select work items and a run in your registered laboratory scope.",
+      "QC_ANALYST_REQUIRED": "The run analyst must be a registered user.",
+      "QC_WORK_ITEMS_REQUIRED": "Select distinct work items, with one per sample and analysis.",
+      "QC_SAMPLE_ANALYSIS_DUPLICATE": "Select distinct work items, with one per sample and analysis.",
+      "QC_SEQUENCE_SAMPLES_INVALID": "Select distinct work items, with one per sample and analysis.",
+      "QC_SEQUENCE_ORDER_INVALID": "Reload or rebuild the run with a valid recorded sequence.",
+      "QC_SEQUENCE_ORDINAL_INVALID": "Reload or rebuild the run with a valid recorded sequence.",
+      "QC_SEQUENCE_SEED_INVALID": "Reload or rebuild the run with a valid recorded sequence.",
+      "QC_RUN_STORAGE_REQUIRED": "Ask a manager to apply the reviewed QC storage upgrade before using this run.",
+      "BATCH_HISTORY_INVALID": "The recorded batch history needs repair before modification.",
+      "BATCH_NOT_FOUND": "The selected run or work item was not found. Reload the list.",
+      "WORKITEM_NOT_FOUND": "The selected run or work item was not found. Reload the list.",
+      "REASON_REQUIRED": "Record a reason for this QC change.",
+      "REFERENCE_VALUE_MISMATCH": "The submitted reference value must match the recorded placement.",
+      "QC_SUPERSEDE_TARGET_MISMATCH": "The replacement must belong to the same recorded observation or reference position."
+    },
+    "chooseDuplicateParent": "Select the original sample position",
+    "analysis": "Analysis",
+    "closeAnalyte": "Close this analyte"
   }
 }

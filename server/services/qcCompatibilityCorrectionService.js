@@ -3,7 +3,7 @@ const { hasPermission } = require('../config/roles');
 const { aggregateBatchStatus } = require('../workflowContract');
 const { actorName, inTransaction } = require('./workflowStateRules');
 const { editableRun } = require('./qcCompatibilityRunService');
-const { QC_RUN_INCLUDE, currentAnalyteEvidence, batchApiView } = require('./qcRunViewService');
+const { QC_RUN_INCLUDE, currentAnalyteEvidence, activeReopenEvent, batchApiView } = require('./qcRunViewService');
 const { getNumberFormat } = require('./numberFormatService');
 const { resolveBatchRunProfile } = require('./qcRunProfileService');
 const { resolveQcPolicy } = require('./qcPolicyService');
@@ -19,7 +19,7 @@ async function correctCompatibilityMeasurements(db, batchId, actor, input) {
     const performedBy = actorName(actor), reason = typeof input.reason === 'string' && input.reason.trim();
     if (!reason) throw failure(400, 'QC_CORRECTION_REASON_REQUIRED', 'A correction reason is required.');
     return inTransaction(db, async tx => {
-        const batch = await editableRun(tx, batchId, actor), analysisCode = input.analysisCode || batch.analysis;
+        const batch = await editableRun(tx, batchId, actor, input.analysisCode), analysisCode = input.analysisCode || batch.analysis;
         const analyte = batch.analytes.find(row => row.analysisCode === analysisCode);
         if (!analyte) throw failure(400, 'QC_ANALYSIS_NOT_IN_RUN', 'The analysis is not a member of this run.');
         const previous = currentAnalyteEvidence(batch, analysisCode).evaluation;
@@ -50,7 +50,7 @@ async function correctCompatibilityMeasurements(db, batchId, actor, input) {
         const id = randomUUID(), positionIds = base.positions.filter(row => row.kind !== 'SAMPLE').map(row => row.id);
         const measurementIds = base.measurements.map(row => replacements.find(change => change.old.id === row.id)?.next.id || row.id);
         const details = { entryMode: 'CORRECTION', compatibility: true, correctionReason: reason, actor: { id: actor.id || null, username: actor.username },
-            reopenEventId: batch.events.filter(row => row.type === 'REOPENED').sort((a, b) => new Date(b.at) - new Date(a.at))[0]?.id || null, positionIds, measurementIds };
+            reopenEventId: activeReopenEvent(batch, analysisCode)?.id || null, positionIds, measurementIds };
         const candidate = { ...batch, measurements: [...batch.measurements.filter(row => !replacements.some(change => change.old.id === row.id)), ...replacements.map(change => change.next)],
             evaluations: [...batch.evaluations, { ...previous, id, version: previous.version + 1, details: JSON.stringify({ ...details, evaluation: JSON.parse(previous.details).evaluation || JSON.parse(previous.details).qcResults }) }] };
         const projected = currentAnalyteEvidence(candidate, analysisCode).qcResults;

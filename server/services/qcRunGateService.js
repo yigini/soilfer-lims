@@ -1,9 +1,11 @@
 const { currentAnalyteEvidence } = require('./qcRunViewService');
+const { runAnalyteCode } = require('./analysisCodesService');
 
 // Project an analyte into the retained batch-gate grammar. Aggregate failure
 // must not reject another analyte which has its own accepted evaluation.
 function analyteGateView(batch, analysisCode) {
     if (!batch || !Array.isArray(batch.analytes)) return batch;
+    analysisCode = runAnalyteCode(batch, analysisCode);
     const analyte = batch.analytes.find(row => row.analysisCode === analysisCode);
     if (!analyte) return { ...batch, status: 'ERROR', disposition: null, result: null };
     const evidence = currentAnalyteEvidence(batch, analysisCode);

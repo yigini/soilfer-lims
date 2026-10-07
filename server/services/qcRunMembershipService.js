@@ -6,8 +6,9 @@ const { actorName, inTransaction } = require('./workflowStateRules');
 const { QC_RUN_INCLUDE, readQcRun, batchApiView } = require('./qcRunViewService');
 const { rebuildNativeRun } = require('./qcNativeRunService');
 const { resolveBatchRunProfile } = require('./qcRunProfileService');
+const { TEXTURE_ALIASES, runAnalyteCode } = require('./analysisCodesService');
+const { repeatSource } = require('./qcRunRepeatService');
 const failure = (statusCode, code, message, details = {}) => Object.assign(new Error(message), { statusCode, code, details });
-const textureAliases = ['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis'];
 
 async function assertMemberScope(db, actor, batch, item) {
     const [actorLab, assigned, source, target, itemLab] = await Promise.all([policyService.resolveLab(actor.labId, db),
@@ -29,7 +30,7 @@ function requestedIds(input) {
     return input.workItemIds;
 }
 function assertBoundRemoval(batch, items) {
-    for (const row of batch.analytes.filter(analyte => !items.some(item => item.analysis === analyte.analysisCode))) {
+    for (const row of batch.analytes.filter(analyte => !items.some(item => runAnalyteCode(batch, item.analysis) === analyte.analysisCode))) {
         const boundPositionIds = batch.positions.filter(position => position.references.some(reference => reference.analysisCode === row.analysisCode)).map(position => position.id);
         if (boundPositionIds.length) throw failure(409, 'QC_ANALYTE_REMOVAL_BLOCKED', 'Abandon this OPEN run before dropping a bound analyte.', { analysisCode: row.analysisCode, boundPositionIds });
     }
@@ -45,21 +46,24 @@ async function changeRunMembers(db, batchId, actor, input, { remove = false } = 
         const items = await tx.workItem.findMany({ where: { id: { in: desired } }, include: { sample: true } });
         if (items.length !== desired.length) throw failure(404, 'WORKITEM_NOT_FOUND', 'One or more work items not found');
         const ordered = desired.map(id => items.find(item => item.id === id));
+        const repeated = new Map();
         for (const item of ordered) {
             await assertMemberScope(tx, actor, batch, item);
-            if (item.batchId && item.batchId !== batchId) throw failure(409, 'QC_WORK_ITEM_ALREADY_BATCHED', 'A work item already belongs to another run.', { workItemId: item.id });
             if (!remove && ids.includes(item.id) && ['SUBMITTED', 'ACCEPTED', 'WAIVED', 'CANCELLED'].includes(item.status)) {
                 throw failure(400, 'QC_WORK_ITEM_SEALED', `Item ${item.id} is already sealed (${item.status})`);
             }
+            const fromBatchId = await repeatSource(tx, item, batchId);
+            if (fromBatchId) repeated.set(item.id, fromBatchId);
             if (!batch.analytes.some(row => row.provenance === 'NATIVE') && item.analysis !== batch.analysis &&
-                !(textureAliases.includes(batch.analysis) && textureAliases.includes(item.analysis))) {
+                !(TEXTURE_ALIASES.has(batch.analysis) && TEXTURE_ALIASES.has(item.analysis))) {
                 throw failure(400, 'QC_ANALYSIS_MISMATCH', `Item ${item.id} analysis (${item.analysis}) does not match batch analysis (${batch.analysis})`);
             }
         }
         assertBoundRemoval(batch, ordered);
-        const groups = [...new Set(ordered.map(item => item.analysis))].map(code => ordered.filter(item => item.analysis === code));
+        const groups = [...new Set(ordered.map(item => runAnalyteCode(batch, item.analysis)))].map(code => ordered.filter(item => runAnalyteCode(batch, item.analysis) === code));
         const resolved = groups.length && groups.every(group => group.every(item => item.methodologyId) && new Set(group.map(item => item.methodologyId)).size === 1);
-        const native = batch.analytes.some(row => row.provenance === 'NATIVE') || resolved || input.analyses !== undefined;
+        const migratedTexture = batch.analytes.some(row => row.provenance === 'LEGACY_MIGRATED') && TEXTURE_ALIASES.has(batch.analysis);
+        const native = batch.analytes.some(row => row.provenance === 'NATIVE') || !migratedTexture && resolved || input.analyses !== undefined;
         let view;
         if (native && desired.length) view = await rebuildNativeRun(tx, batchId, actor, { ...input, workItemIds: desired, seed: input.seed || randomUUID() });
         else {
@@ -91,7 +95,7 @@ async function changeRunMembers(db, batchId, actor, input, { remove = false } = 
             await tx.batchPositionWorkItem.deleteMany({ where: { positionId: { in: batch.positions.map(row => row.id) } } });
             for (const kind of ['DUPLICATE', 'OTHER']) await tx.batchPosition.deleteMany({ where: { id: { in: batch.positions.filter(row =>
                 kind === 'DUPLICATE' ? row.kind === 'DUPLICATE' : row.kind !== 'DUPLICATE').map(row => row.id) } } });
-            const codes = [...new Set(ordered.map(item => item.analysis))];
+            const codes = [...new Set(ordered.map(item => runAnalyteCode(batch, item.analysis)))];
             await tx.batchAnalyte.deleteMany({ where: { batchId, analysisCode: { notIn: codes } } });
             for (const code of codes) if (!batch.analytes.some(row => row.analysisCode === code)) {
                 await tx.batchAnalyte.create({ data: { id: randomUUID(), batchId, labId: batch.labId, analysisCode: code,
@@ -101,7 +105,8 @@ async function changeRunMembers(db, batchId, actor, input, { remove = false } = 
             for (const item of ordered) {
                 let position = samples.get(item.sampleId);
                 if (!position) {
-                    position = { id: randomUUID(), batchId, position: assigned.get(item.id), sampleId: item.sampleId, kind: 'SAMPLE', provenance: 'PROFILE_ONLY' };
+                    position = { id: randomUUID(), batchId, position: assigned.get(item.id), sampleId: item.sampleId, kind: 'SAMPLE', provenance: 'PROFILE_ONLY',
+                        ...(migratedTexture && { legacySource: JSON.stringify({ textureAlias: true, batchAnalysis: batch.analysis, workItemAnalysis: item.analysis }) }) };
                     samples.set(item.sampleId, position); await tx.batchPosition.create({ data: position });
                 }
                 if (ordered.some(other => other.id !== item.id && other.sampleId === item.sampleId && other.analysis === item.analysis)) {
@@ -112,6 +117,9 @@ async function changeRunMembers(db, batchId, actor, input, { remove = false } = 
             }
             await tx.workItem.updateMany({ where: { id: { in: oldIds.filter(id => !desired.includes(id)) }, batchId }, data: { batchId: null, rackPosition: null } });
             const now = new Date();
+            for (const item of ordered.filter(row => repeated.has(row.id))) await tx.batchEvent.create({ data: {
+                id: randomUUID(), batchId, type: 'MEMBER_REPEATED', by: performedBy, at: now,
+                payload: JSON.stringify({ fromBatchId: repeated.get(item.id), workItemId: item.id, analysisCode: item.analysis }) } });
             await tx.batchEvent.create({ data: { id: randomUUID(), batchId, type: 'RUN_BUILT', by: performedBy, at: now,
                 payload: JSON.stringify({ profileOnly: !native, seed: randomUUID(), positions: [...samples.values()], removedAnalyteCodes: batch.analytes.filter(row => !codes.includes(row.analysisCode)).map(row => row.analysisCode), workItemIds: desired }) } });
             view = batchApiView(await tx.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE }));

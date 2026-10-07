@@ -37,6 +37,17 @@ test('23-sample plan uses method capacity and default frequencies with real samp
     expect(plan.duplicateSelection.picks.every(id => sampleIds(23).includes(id))).toBe(true);
 });
 
+test('200 recorded seeds pick distinct eligible duplicate parents and replay the same choices', async () => {
+    const f = await fixture({ maxBatchSize: 23, crmEveryNBatches: 0 });
+    for (let seed = 0; seed < 200; seed++) {
+        const input = { criteria: f.criteria, sampleIds: sampleIds(23), crmOrdinal: 1, seed: String(seed) };
+        const selection = planSequence(input).duplicateSelection;
+        expect(selection.picks).toHaveLength(3);
+        expect(new Set(selection.picks).size).toBe(3);
+        expect(planSequence(input).duplicateSelection).toEqual(selection);
+    }
+});
+
 test('default capacity refuses 23 without writing a run, measurement or audit', async () => {
     const f = await fixture(), before = { batches: await prisma.batch.count(), audit: await prisma.auditLog.count() };
     expect(() => planSequence({ criteria: f.criteria, sampleIds: sampleIds(23), crmOrdinal: 1 })).toThrow(expect.objectContaining({

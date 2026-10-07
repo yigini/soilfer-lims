@@ -12,6 +12,19 @@ function run() {
 const result = code => ({ id: code, sampleId: 'sample', param: code, batchId: 'mixed-run', isCurrent: true, isValid: true });
 const item = code => ({ id: `i${code}`, sampleId: 'sample', analysis: code, batchId: 'mixed-run', status: 'ACCEPTED' });
 
+test('a legacy accepted batch without recorded passing evidence has an explicit localized incomplete-evidence label', () => {
+    const batch = run(); batch.status = 'QC_PASS'; batch.analytes[0].provenance = 'LEGACY_MIGRATED';
+    batch.evaluations[0].verdict = 'INCOMPLETE'; batch.evaluations[0].details = JSON.stringify({ legacy: true, positionIds: [], measurementIds: [] });
+    const evidence = freezeReportEvidence([result('A')], [item('A')], [batch]);
+    expect(evidence.qc.withinLimits).toBe(false);
+    expect(evidence.qc.deviations[0].qcStatus).toBe('EVIDENCE_INCOMPLETE');
+    for (const locale of ['en', 'es', 'es-419', 'fr', 'pt']) {
+        const text = describeReportEvidence(evidence, locale).qcStatement;
+        expect(text).toContain(require(`../../locales/${locale}.json`).resultReports.qcEvidenceIncomplete);
+        expect(text).not.toContain('QC_PASS'); expect(text).not.toContain('EVIDENCE_INCOMPLETE');
+    }
+});
+
 test.each(['NATIVE', 'PROFILE_ONLY', 'LEGACY_MIGRATED'])('a reopened %s round retains its PASS evaluation but cannot report QC within limits', provenance => {
     const batch = run(); batch.status = 'OPEN'; batch.analytes[0].status = 'QC_PENDING'; batch.analytes[0].provenance = provenance;
     if (provenance !== 'NATIVE') batch.evaluations[0].details = JSON.stringify({ legacy: provenance === 'LEGACY_MIGRATED',

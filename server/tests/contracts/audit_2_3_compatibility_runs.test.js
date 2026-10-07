@@ -13,6 +13,8 @@ const { installQcRuns } = require('../../scripts/install_qc_runs');
 const { createProfileRun, writeCompatibilityMeasurements, reopenCompatibilityRun } = require('../../services/qcCompatibilityRunService');
 const { correctCompatibilityMeasurements } = require('../../services/qcCompatibilityCorrectionService');
 const { QC_RUN_INCLUDE, batchApiView, readQcRun } = require('../../services/qcRunViewService');
+const { changeRunMembers } = require('../../services/qcRunMembershipService');
+const { buildNativeRun, startNativeRun } = require('../../services/qcNativeRunService');
 const policies = require('../../services/policyService');
 const request = require('supertest');
 const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
@@ -21,14 +23,15 @@ const owned = [];
 const input = (blank = 0.0123456789) => ({ blanks: [{ value: blank }], controls: [{ expected: 7.123456789, measured: 7.123456780 }],
     duplicates: [{ value1: 2.123456789, value2: 2.123456780 }, { value1: 2.123456789, value2: 2.123456780 }] });
 
-async function fixture({ migrated = false, sampleMember = false, finalClear = false } = {}) {
+async function fixture({ migrated = false, sampleMember = false, finalClear = false, legacyRepeat = false } = {}) {
     const labId = randomUUID(), analysisCode = randomUUID(), username = 'system:fixture', batchId = randomUUID();
     const sampleId = randomUUID(), workItemId = randomUUID();
     const historical = beforeGuards({ actor: username, schemaVariant: 'PRE_1_3_SAMPLE_CODES',
         samples: sampleMember ? [{ id: sampleId, originalId: sampleId, assignedLab: labId, status: 'PROCESSING', updatedAt: Date.now() }] : [],
-        workItems: sampleMember ? [{ id: workItemId, sampleId, labId, analysis: analysisCode, batchId, rackPosition: 3, status: 'IN_PROGRESS', updatedAt: Date.now() }] : [],
-        batches: migrated ? [{ id: batchId, labId, analysis: analysisCode, status: 'OPEN', createdBy: username,
-            qcResults: JSON.stringify({ blanks: [], controls: [], duplicates: [] }), workItemIds: JSON.stringify(sampleMember ? [workItemId] : []),
+        workItems: sampleMember ? [{ id: workItemId, sampleId, labId, analysis: analysisCode, batchId, rackPosition: 3, status: legacyRepeat ? 'REPEAT_REQUIRED' : 'IN_PROGRESS', updatedAt: Date.now() }] : [],
+        batches: migrated ? [{ id: batchId, labId, analysis: analysisCode, status: legacyRepeat ? 'QC_FAIL' : 'OPEN', createdBy: username,
+            ...(legacyRepeat && { disposition: JSON.stringify({ decision: 'REJECT_REANALYSIS', reason: 'Recorded repeat required', by: username, at: '2026-09-20T09:00:00Z' }) }),
+            qcResults: JSON.stringify(legacyRepeat ? { ...input(10), overallStatus: 'QC_FAIL' } : { blanks: [], controls: [], duplicates: [] }), workItemIds: JSON.stringify(sampleMember ? [workItemId] : []),
             history: JSON.stringify([{ status: 'OPEN', changedBy: username, timestamp: new Date().toISOString() },
                 ...(finalClear ? [{ action: 'QC_EVIDENCE_SNAPSHOT', seq: 1, snapshot: { status: 'QC_PASS',
                     qcResults: JSON.stringify({ ...input(), overallStatus: 'QC_PASS' }), qcItems: [], disposition: null,
@@ -79,6 +82,40 @@ async function unbatchedMember(f) {
     return createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId, labId: f.labId, assignedLab: f.labId,
         analysis: f.analysisCode, status: 'ASSIGNED' } });
 }
+
+test.each(['PROFILE', 'NATIVE'])('a migrated REJECT_REANALYSIS item joins a new %s run while preserving its old evidence and membership', async targetKind => {
+    const f = await fixture({ migrated: true, sampleMember: true, legacyRepeat: true });
+    const old = await f.db.batch.findUnique({ where: { id: f.batch.id }, include: QC_RUN_INCLUDE });
+    const workItemId = f.batch.workItems[0].id;
+    expect(old.analytes[0].status).toBe('REPEAT_ORDERED');
+    let next;
+    if (targetKind === 'NATIVE') {
+        await f.db.unit.create({ data: { code: 'fixture-unit', display: 'Fixture unit', quantityKind: 'MASS_FRACTION', factorToBase: 1 } });
+        await f.db.analysis.update({ where: { code: f.analysisCode }, data: { unitCode: 'fixture-unit' } });
+        const method = await f.db.methodology.create({ data: { analysisCode: f.analysisCode, name: 'Repeat run selected method' } });
+        const lot = await f.db.referenceMaterial.create({ data: { id: randomUUID(), labId: f.labId, code: randomUUID(), name: 'Repeat lot',
+            kind: 'LRM', matrix: 'SOIL', lotNumber: 'repeat', status: 'ACTIVE', createdBy: f.actor.username } });
+        await f.db.referenceValue.create({ data: { id: randomUUID(), referenceMaterialId: lot.id, analysisCode: f.analysisCode,
+            assignedValue: 7.123456789, unit: 'fixture-unit', valueType: 'LAB_ASSIGNED', createdBy: f.actor.username } });
+        next = await buildNativeRun(f.db, f.actor, { workItemIds: [workItemId], analyses: [{ analysisCode: f.analysisCode,
+            methodologyId: method.id, references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }], seed: 'migrated-repeat' });
+        next = await startNativeRun(f.db, next.id, f.actor);
+    } else {
+        const target = await createProfileRun(f.db, f.actor, { analysis: f.analysisCode, profile: 'RACK_40' });
+        next = (await changeRunMembers(f.db, target.id, f.actor, { workItemIds: [workItemId] })).batch;
+    }
+    expect(next.workItemIds).toEqual([workItemId]);
+    expect(next.events.filter(row => row.type === 'MEMBER_REPEATED').map(row => JSON.parse(row.payload)))
+        .toEqual([{ fromBatchId: old.id, workItemId, analysisCode: f.analysisCode }]);
+    const retained = await f.db.batch.findUnique({ where: { id: old.id }, include: QC_RUN_INCLUDE });
+    for (const key of ['measurements', 'evaluations', 'dispositions', 'events', 'analytes']) expect(retained[key]).toEqual(old[key]);
+    expect(retained.positions.map(row => ({ ...row, workItems: row.workItems.map(({ workItem, ...link }) => link) })))
+        .toEqual(old.positions.map(row => ({ ...row, workItems: row.workItems.map(({ workItem, ...link }) => link) })));
+    const historical = await readQcRun(f.db, old.id, f.actor);
+    expect(historical.workItemIds).toEqual([workItemId]);
+    expect(historical.workItems[0]).toMatchObject({ id: workItemId, currentBatchId: next.id, rackPosition: 3 });
+    expect((await f.db.workItem.findUnique({ where: { id: workItemId } })).batchId).toBe(next.id);
+});
 
 test('a migrated never-run OPEN batch with main default empty QC arrays still accepts and removes real items', async () => {
     const f = await fixture({ migrated: true }), item = await unbatchedMember(f);
@@ -329,6 +366,12 @@ test('ordinary resubmission supersedes a changed real SAMPLE reading once and re
     expect(await f.db.qcMeasurement.count({ where: { positionId: parent.id } })).toBe(count);
     expect(JSON.parse(third.batch.analytes[0].evaluation.details).measurementIds).toContain(next.id);
     expect(await f.db.qcMeasurement.findUnique({ where: { id: next.id } })).toEqual(next);
+    const thirdEvaluation = third.batch.analytes[0].evaluation;
+    const fourth = await writeCompatibilityMeasurements(f.db, f.batch.id, f.actor, pair(2.125456789));
+    expect(JSON.parse(fourth.batch.analytes[0].evaluation.details).reopenEventId).toBeNull();
+    const fourthParent = await f.db.qcMeasurement.findFirst({ where: { positionId: parent.id, supersededById: null } });
+    expect(JSON.parse(fourthParent.legacySource).reopenEventId).toBeNull();
+    expect(await f.db.qcEvaluation.findUnique({ where: { id: thirdEvaluation.id } })).toEqual(thirdEvaluation);
 });
 
 test.each([null, '', true])('a submitted invalid value %s is refused before any snapshot, position, reading or evaluation write', async value => {

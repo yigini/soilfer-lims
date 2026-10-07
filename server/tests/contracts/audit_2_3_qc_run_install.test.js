@@ -8,6 +8,7 @@ const { installReferenceMaterials } = require('../../scripts/install_reference_m
 const { installQcRules } = require('../../scripts/install_qc_rules');
 const { installQcRuns, assertQcRunStartupReady, parseArguments } = require('../../scripts/install_qc_runs');
 const { loadQcRunMigrationSource } = require('../../services/qcRunMigrationSource');
+const { classifyQcRunSchema } = require('../../services/qcRunSchemaService');
 const { inventoryLegacyQcRuns } = require('../../services/qcRunBackfillPlan');
 const { scanSource } = require('../helpers/workflowWriteScanner');
 const files = [], hash = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -71,6 +72,21 @@ function expectOriginalEvidence(reader, before) {
     }
 }
 afterAll(() => { for (const file of files) if (fs.existsSync(file)) { fs.chmodSync(file, 0o600); fs.unlinkSync(file); } });
+
+test.each(['QcMeasurement', 'BatchPositionReference'])('the %s oracle exception requires exactly its deferred self-FK and refuses other DDL changes', table => {
+    const f = fixture(), source = loadQcRunMigrationSource(), reader = new Database(f.file, { readonly: true });
+    const clause = `CONSTRAINT "${table}_supersededById_fkey" FOREIGN KEY ("supersededById") REFERENCES "${table}" ("id") ON DELETE RESTRICT ON UPDATE CASCADE`;
+    try {
+        expect(classifyQcRunSchema(reader, source).classification).toBe('PRE_186');
+        expect(() => classifyQcRunSchema(reader, { ...source, sql: source.sql.replace(`${clause} DEFERRABLE INITIALLY DEFERRED`, clause) }))
+            .toThrow(expect.objectContaining({ code: 'QC_RUN_SOURCE_MISMATCH' }));
+        const alteredOracle = { ...source.freshTables, [table]: source.freshTables[table].replace('ON DELETE RESTRICT ON UPDATE CASCADE', 'ON DELETE CASCADE ON UPDATE CASCADE') };
+        expect(() => classifyQcRunSchema(reader, { ...source, freshTables: alteredOracle })).toThrow(expect.objectContaining({ code: 'QC_RUN_SOURCE_MISMATCH' }));
+        const foreignSuffix = source.sql.replace('REFERENCES "Batch" ("id") ON DELETE RESTRICT ON UPDATE CASCADE',
+            'REFERENCES "Batch" ("id") ON DELETE RESTRICT ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED');
+        expect(() => classifyQcRunSchema(reader, { ...source, sql: foreignSuffix })).toThrow(expect.objectContaining({ code: 'QC_RUN_SOURCE_MISMATCH' }));
+    } finally { reader.close(); }
+});
 
 test.each([false, true])('an empty pinned historical QC inventory with no duplicateOf column imports only its receipt, retaining orphan audit refusal=%s', orphan => {
     const historical = beforeGuards({ actor: 'system:fixture', schemaVariant: 'PRE_1_3_SAMPLE_CODES', preMigrationSnapshot: true });
@@ -232,6 +248,40 @@ test('field attribution resolves an existing username exactly without creating a
     } finally { reader.close(); }
 });
 
+test('legacy texture aliases retain raw membership codes while sharing the recorded batch analyte and QC', () => {
+    const f = fixture({ membership: true, status: 'QC_PASS', qcResults: JSON.stringify(evaluated({ blanks: [{ value: 0.0123456789, status: 'PASS' }] })) });
+    const secondId = randomUUID(), methodId = randomUUID(), connection = new Database(f.file);
+    try {
+        insert(connection, 'Analysis', { code: 'TEXTURE', name: 'Recorded texture method' });
+        insert(connection, 'Methodology', { id: methodId, analysisCode: 'TEXTURE', name: 'Recorded alias method', updatedAt: Date.now() });
+        connection.prepare('UPDATE Batch SET analysis=? WHERE id=?').run('pSA', f.batchId);
+        connection.prepare('UPDATE WorkItem SET analysis=?,methodologyId=?,createdAt=? WHERE id=?').run('TEXTURE', methodId, Date.parse(recordedAt), f.workItemId);
+        insert(connection, 'WorkItem', { id: secondId, sampleId: f.sampleId, analysis: 'PSA', methodologyId: methodId, labId: f.labId,
+            batchId: f.batchId, rackPosition: 8, status: 'IN_PROGRESS', createdAt: Date.parse(recordedAt) + 1000, updatedAt: Date.now() });
+    } finally { connection.close(); }
+    const before = state(f.file), dry = installQcRuns({ dbPath: f.file });
+    expect(dry.refusals).toEqual([]);
+    expect(dry.backfillCounts).toMatchObject({ analytes: 1, samplePositions: 2, measurements: 1, evaluations: 1, unresolvedMethods: 0, TEXTURE_ALIAS_MERGED: 2 });
+    expect(dry.diagnostics).toContainEqual(expect.objectContaining({ code: 'TEXTURE_ALIAS_MERGED' }));
+    apply(f);
+    const reader = new Database(f.file, { readonly: true });
+    try {
+        const analytes = reader.prepare('SELECT * FROM BatchAnalyte').all();
+        expect(analytes).toEqual([expect.objectContaining({ analysisCode: 'pSA', methodologyId: methodId, methodResolution: 'RESOLVED_LEGACY' })]);
+        const positions = reader.prepare('SELECT * FROM BatchPosition ORDER BY position').all().map(position => ({ ...position,
+            workItems: reader.prepare('SELECT * FROM BatchPositionWorkItem WHERE positionId=?').all(position.id), references: [] }));
+        expect(positions.filter(row => row.kind === 'SAMPLE').map(row => JSON.parse(row.legacySource)))
+            .toEqual(['TEXTURE', 'PSA'].map(workItemAnalysis => expect.objectContaining({ textureAlias: true, batchAnalysis: 'pSA', workItemAnalysis })));
+        expect(positions.flatMap(row => row.workItems).map(row => row.analysisCode)).toEqual(['TEXTURE', 'PSA']);
+        const evidence = require('../../services/qcRunViewService').currentAnalyteEvidence({ analysis: 'pSA', analytes, positions,
+            measurements: reader.prepare('SELECT * FROM QcMeasurement').all(), evaluations: reader.prepare('SELECT * FROM QcEvaluation').all(), events: [], dispositions: [] }, 'pSA');
+        expect(evidence.result).toBe('PASS');
+        expect(evidence.positions.filter(row => row.kind === 'SAMPLE')).toHaveLength(2);
+        expect(evidence.qcResults.blanks[0].value).toBe(0.0123456789);
+        expectOriginalEvidence(reader, before);
+    } finally { reader.close(); }
+});
+
 test.each([null, 'unparseable original time'])('field disposition retains raw missing/invalid time %s without assigning import time', at => {
     const disposition = JSON.stringify({ decision: 'ACCEPT', reason: 'Original reason', by: 'raw actor', ...(at !== null && { at }) });
     const f = fixture({ status: 'QC_PASS', disposition, qcResults: JSON.stringify(evaluated({ blanks: [{ value: 0.01, status: 'PASS' }] })) });
@@ -254,10 +304,11 @@ test.each([['ACCEPT', 'QC_FAIL'], ['UNREVIEWED_DECISION', 'QC_PASS']])('%s on %s
 });
 
 test('a matching AuditLog disposition wins conflicts while both original sources remain unchanged', () => {
-    const disposition = JSON.stringify({ decision: 'ACCEPT', reason: 'Field copy reason', by: 'field actor', at: 'bad field time' }, null, 2);
+    const reason = '  Exact audit reason.  ';
+    const disposition = JSON.stringify({ decision: 'ACCEPT', reason, by: 'field actor', at: 'bad field time' }, null, 2);
     const f = fixture({ status: 'QC_PASS', disposition, membership: true, result: true,
         qcResults: JSON.stringify(evaluated({ blanks: [{ value: 0.01, status: 'PASS' }] })) });
-    const auditId = randomUUID(), db = new Database(f.file), reason = '  Exact audit reason.  ';
+    const auditId = randomUUID(), db = new Database(f.file);
     try { insert(db, 'AuditLog', { id: auditId, entity: 'QC_BATCH', entityId: f.batchId, action: 'QC_DISPOSITION',
         performedBy: f.username, timestamp: recordedAt, details: `QC batch disposition recorded: ACCEPT. Reason: ${reason}` }); }
     finally { db.close(); }
@@ -276,31 +327,43 @@ test('a matching AuditLog disposition wins conflicts while both original sources
     } finally { reader.close(); }
 });
 
-test('historical AuditLog disposition retains the recorded actor/time rather than the later snapshot replacement actor', () => {
+test.each([0, 1, 2])('snapshot attribution uses decision provenance with %s matching QC_DISPOSITION rows', auditCount => {
     const event = snapshot(3, evaluated({ blanks: [{ value: 0.01, status: 'PASS' }] }));
     event.snapshot.disposition = { decision: 'ACCEPT', reason: 'Original historical acceptance', by: 'original decision actor', at: recordedAt };
     const f = fixture({ history: JSON.stringify([event]) }), auditId = randomUUID(), db = new Database(f.file);
-    try { insert(db, 'AuditLog', { id: auditId, entity: 'BATCH', entityId: f.batchId, action: 'QC_EVIDENCE_SNAPSHOT',
-        performedBy: 'later snapshot actor', timestamp: '2026-09-21T10:00:00.000Z', details: JSON.stringify(event) }); }
+    try {
+        insert(db, 'AuditLog', { id: auditId, entity: 'BATCH', entityId: f.batchId, action: 'QC_EVIDENCE_SNAPSHOT',
+            performedBy: 'later snapshot actor', timestamp: '2026-09-21T10:00:00.000Z', details: JSON.stringify(event) });
+        for (let index = 0; index < auditCount; index++) insert(db, 'AuditLog', { id: `${auditId}-${index}`, entity: 'QC_BATCH', entityId: f.batchId,
+            action: 'QC_DISPOSITION', performedBy: 'original decision actor', timestamp: recordedAt, details: JSON.stringify(event.snapshot.disposition) });
+    }
     finally { db.close(); }
     const before = state(f.file);
+    const digest = hash(f.file), dry = installQcRuns({ dbPath: f.file });
+    if (auditCount === 2) {
+        expect(dry.refusals).toEqual([expect.objectContaining({ code: 'QC_LEGACY_DISPOSITION_UNRESOLVED' })]);
+        expect(() => apply(f)).toThrow(expect.objectContaining({ code: 'QC_RUN_BACKFILL_REFUSED' }));
+        expect(state(f.file)).toEqual(before); expect(hash(f.file)).toBe(digest); return;
+    }
+    expect(dry.refusals).toEqual([]);
     apply(f);
     const reader = new Database(f.file, { readonly: true });
     try {
         const disposition = reader.prepare("SELECT * FROM BatchEvent WHERE type='LEGACY_DISPOSITION'").get();
         expect(disposition).toMatchObject({ by: 'original decision actor', at: Date.parse(recordedAt) });
-        expect(JSON.parse(disposition.payload)).toMatchObject({ auditLogId: auditId, seq: 3, actor: 'original decision actor',
-            attributionSource: 'AUDIT_LOG', timestamp: recordedAt });
+        expect(JSON.parse(disposition.payload)).toMatchObject({ auditLogId: auditCount ? `${auditId}-0` : null, seq: 3, actor: 'original decision actor',
+            attributionSource: auditCount ? 'AUDIT_LOG' : 'SNAPSHOT_DISPOSITION_FIELD', timestamp: recordedAt,
+            replacedBy: 'later snapshot actor', replacedAt: '2026-09-21T10:00:00.000Z', snapshotAuditRow: { id: auditId } });
         expectOriginalEvidence(reader, before);
     } finally { reader.close(); }
 });
 
-test('existing unresolved disposition audit evidence refuses rather than falling back to the Batch field', () => {
+test('ambiguous matching disposition audits refuse rather than falling back to the Batch field', () => {
     const f = fixture({ status: 'QC_PASS', disposition: JSON.stringify({ decision: 'ACCEPT', reason: 'Recorded field', by: 'field actor', at: recordedAt }),
         qcResults: JSON.stringify(evaluated({ blanks: [{ value: 0.01, status: 'PASS' }] })) });
     const db = new Database(f.file);
-    try { insert(db, 'AuditLog', { id: randomUUID(), entity: 'QC_BATCH', entityId: f.batchId, action: 'QC_DISPOSITION',
-        performedBy: f.username, timestamp: recordedAt, details: 'Unresolved historical details' }); }
+    try { for (let index = 0; index < 2; index++) insert(db, 'AuditLog', { id: randomUUID(), entity: 'QC_BATCH', entityId: f.batchId, action: 'QC_DISPOSITION',
+        performedBy: f.username, timestamp: recordedAt, details: 'QC batch disposition recorded: ACCEPT. Reason: Recorded field' }); }
     finally { db.close(); }
     const digest = hash(f.file), dry = installQcRuns({ dbPath: f.file });
     expect(dry.refusals).toEqual([expect.objectContaining({ code: 'QC_LEGACY_DISPOSITION_UNRESOLVED', source: expect.objectContaining({ reason: 'AUDIT_ATTRIBUTION_UNRESOLVED' }) })]);

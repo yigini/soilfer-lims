@@ -68,7 +68,8 @@ CREATE TABLE "BatchPositionReference" (
     "correctionReason" TEXT,
     CONSTRAINT "BatchPositionReference_positionId_fkey" FOREIGN KEY ("positionId") REFERENCES "BatchPosition" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "BatchPositionReference_referenceMaterialId_fkey" FOREIGN KEY ("referenceMaterialId") REFERENCES "ReferenceMaterial" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "BatchPositionReference_referenceValueId_fkey" FOREIGN KEY ("referenceValueId") REFERENCES "ReferenceValue" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "BatchPositionReference_referenceValueId_fkey" FOREIGN KEY ("referenceValueId") REFERENCES "ReferenceValue" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "BatchPositionReference_supersededById_fkey" FOREIGN KEY ("supersededById") REFERENCES "BatchPositionReference" ("id") ON DELETE RESTRICT ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE "QcMeasurement" (
@@ -87,7 +88,8 @@ CREATE TABLE "QcMeasurement" (
     "correctionReason" TEXT,
     "legacySource" TEXT,
     CONSTRAINT "QcMeasurement_batchId_fkey" FOREIGN KEY ("batchId") REFERENCES "Batch" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "QcMeasurement_positionId_fkey" FOREIGN KEY ("positionId") REFERENCES "BatchPosition" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "QcMeasurement_positionId_fkey" FOREIGN KEY ("positionId") REFERENCES "BatchPosition" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "QcMeasurement_supersededById_fkey" FOREIGN KEY ("supersededById") REFERENCES "QcMeasurement" ("id") ON DELETE RESTRICT ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED
 );
 
 CREATE TABLE "QcEvaluation" (
@@ -137,7 +139,7 @@ CREATE UNIQUE INDEX "BatchAnalyte_batchId_analysisCode_key" ON "BatchAnalyte"("b
 
 CREATE UNIQUE INDEX "BatchPosition_batchId_position_key" ON "BatchPosition"("batchId", "position");
 
-CREATE UNIQUE INDEX "BatchPositionWorkItem_workItemId_key" ON "BatchPositionWorkItem"("workItemId");
+CREATE INDEX "BatchPositionWorkItem_workItemId_idx" ON "BatchPositionWorkItem"("workItemId");
 
 CREATE UNIQUE INDEX "BatchPositionWorkItem_positionId_analysisCode_key" ON "BatchPositionWorkItem"("positionId", "analysisCode");
 
@@ -336,6 +338,13 @@ BEGIN
   SELECT RAISE(ABORT, 'BATCH_POSITION_WORK_ITEM_IMMUTABLE');
 END;
 
+CREATE TRIGGER "BatchPositionWorkItem_run_unique_guard" BEFORE INSERT ON "BatchPositionWorkItem"
+WHEN EXISTS (SELECT 1 FROM "BatchPositionWorkItem" m JOIN "BatchPosition" p ON p.id=m.positionId
+  WHERE m.workItemId=NEW.workItemId AND p.batchId=(SELECT target.batchId FROM "BatchPosition" target WHERE target.id=NEW.positionId))
+BEGIN
+  SELECT RAISE(ABORT, 'BATCH_POSITION_WORK_ITEM_INVALID');
+END;
+
 CREATE TRIGGER "BatchPositionWorkItem_membership_insert_guard" BEFORE INSERT ON "BatchPositionWorkItem"
 WHEN EXISTS (SELECT 1 FROM "Batch" b WHERE b.id=(SELECT p.batchId FROM "BatchPosition" p WHERE p.id=NEW.positionId) AND b.startedAt IS NOT NULL)
   OR EXISTS (SELECT 1 FROM "BatchAnalyte" a WHERE a.batchId=(SELECT p.batchId FROM "BatchPosition" p WHERE p.id=NEW.positionId) AND a.legacyMembershipFrozen=1)
@@ -353,9 +362,18 @@ BEGIN
 END;
 
 CREATE TRIGGER "WorkItem_batch_membership_guard" BEFORE UPDATE ON "WorkItem"
-WHEN (NEW.batchId IS NOT OLD.batchId OR NEW.rackPosition IS NOT OLD.rackPosition) AND ((EXISTS (SELECT 1 FROM "Batch" b WHERE b.id=OLD.batchId AND b.startedAt IS NOT NULL)
+WHEN (NEW.batchId IS NOT OLD.batchId OR NEW.rackPosition IS NOT OLD.rackPosition) AND (((EXISTS (SELECT 1 FROM "Batch" b WHERE b.id=OLD.batchId AND b.startedAt IS NOT NULL)
   OR EXISTS (SELECT 1 FROM "BatchAnalyte" a WHERE a.batchId=OLD.batchId AND a.legacyMembershipFrozen=1)
-  OR EXISTS (SELECT 1 FROM "QcMeasurement" q WHERE q.batchId=OLD.batchId)) OR (EXISTS (SELECT 1 FROM "Batch" b WHERE b.id=NEW.batchId AND b.startedAt IS NOT NULL)
+  OR EXISTS (SELECT 1 FROM "QcMeasurement" q WHERE q.batchId=OLD.batchId)) AND NOT (
+    NEW.batchId IS NOT OLD.batchId AND OLD.status NOT IN ('SUBMITTED','ACCEPTED','WAIVED','CANCELLED')
+    AND EXISTS (SELECT 1 FROM "BatchPositionWorkItem" m JOIN "BatchPosition" p ON p.id=m.positionId
+      JOIN "BatchAnalyte" a ON a.batchId=p.batchId AND (a.analysisCode=m.analysisCode
+        OR (json_valid(p.legacySource) AND json_extract(p.legacySource,'$.textureAlias')=1 AND a.analysisCode=json_extract(p.legacySource,'$.batchAnalysis')))
+      WHERE m.workItemId=OLD.id AND p.batchId=OLD.batchId AND a.status IN ('REPEAT_ORDERED','REJECTED'))
+    AND (NEW.batchId IS NULL OR EXISTS (SELECT 1 FROM "Batch" target WHERE target.id=NEW.batchId AND target.status='OPEN'
+      AND target.startedAt IS NULL AND NOT EXISTS (SELECT 1 FROM "BatchAnalyte" a WHERE a.batchId=target.id AND a.legacyMembershipFrozen=1)
+      AND NOT EXISTS (SELECT 1 FROM "QcMeasurement" q WHERE q.batchId=target.id)))
+  )) OR (EXISTS (SELECT 1 FROM "Batch" b WHERE b.id=NEW.batchId AND b.startedAt IS NOT NULL)
   OR EXISTS (SELECT 1 FROM "BatchAnalyte" a WHERE a.batchId=NEW.batchId AND a.legacyMembershipFrozen=1)
   OR EXISTS (SELECT 1 FROM "QcMeasurement" q WHERE q.batchId=NEW.batchId)))
 BEGIN
@@ -427,6 +445,7 @@ WHEN NEW."id" IS NOT OLD."id"
   OR NEW."boundAt" IS NOT OLD."boundAt"
   OR NEW."correctionReason" IS NOT OLD."correctionReason"
   OR OLD.supersededById IS NOT NULL OR NEW.supersededById IS NULL OR NEW.supersededById=NEW.id
+  OR EXISTS (SELECT 1 FROM "BatchPositionReference" r WHERE r.id<>OLD.id AND r.supersededById=NEW.supersededById)
 BEGIN
   SELECT RAISE(ABORT, 'QC_REFERENCE_IMMUTABLE');
 END;
@@ -454,6 +473,28 @@ BEGIN
   SELECT RAISE(ABORT, 'QC_MEASUREMENT_INVALID');
 END;
 
+CREATE TRIGGER "QcMeasurement_historical_write_guard" BEFORE INSERT ON "QcMeasurement"
+WHEN EXISTS (SELECT 1 FROM "BatchPosition" p WHERE p.id=NEW.positionId AND p.historicalSnapshotSeq IS NOT NULL
+  AND (EXISTS (SELECT 1 FROM "BatchEvent" e WHERE e.batchId=p.batchId AND e.type='LEGACY_IMPORTED')
+    OR EXISTS (SELECT 1 FROM "QcEvaluation" q,json_each(q.details,'$.positionIds') ids WHERE q.batchId=p.batchId AND ids.value=p.id)))
+BEGIN
+  SELECT RAISE(ABORT, 'QC_MEASUREMENT_IMMUTABLE');
+END;
+
+CREATE TRIGGER "QcMeasurement_replacement_guard" BEFORE INSERT ON "QcMeasurement"
+WHEN EXISTS (SELECT 1 FROM "QcMeasurement" q WHERE q.supersededById=NEW.id
+  AND (q.batchId<>NEW.batchId OR q.positionId<>NEW.positionId OR q.analysisCode<>NEW.analysisCode OR q.replicateNo<>NEW.replicateNo))
+BEGIN
+  SELECT RAISE(ABORT, 'QC_SUPERSEDE_TARGET_MISMATCH');
+END;
+
+CREATE TRIGGER "BatchPositionReference_replacement_guard" BEFORE INSERT ON "BatchPositionReference"
+WHEN EXISTS (SELECT 1 FROM "BatchPositionReference" r WHERE r.supersededById=NEW.id
+  AND (r.positionId<>NEW.positionId OR r.analysisCode<>NEW.analysisCode))
+BEGIN
+  SELECT RAISE(ABORT, 'QC_SUPERSEDE_TARGET_MISMATCH');
+END;
+
 CREATE TRIGGER "QcMeasurement_start_guard" BEFORE INSERT ON "QcMeasurement"
 WHEN EXISTS (SELECT 1 FROM "BatchAnalyte" a JOIN "Batch" b ON b.id=a.batchId WHERE a.batchId=NEW.batchId AND a.analysisCode=NEW.analysisCode AND a.provenance='NATIVE' AND b.startedAt IS NULL)
 BEGIN
@@ -475,6 +516,7 @@ WHEN NEW."id" IS NOT OLD."id"
   OR NEW."correctionReason" IS NOT OLD."correctionReason"
   OR NEW."legacySource" IS NOT OLD."legacySource"
   OR OLD.supersededById IS NOT NULL OR NEW.supersededById IS NULL OR NEW.supersededById=NEW.id
+  OR EXISTS (SELECT 1 FROM "QcMeasurement" q WHERE q.id<>OLD.id AND q.supersededById=NEW.supersededById)
 BEGIN
   SELECT RAISE(ABORT, 'QC_MEASUREMENT_IMMUTABLE');
 END;

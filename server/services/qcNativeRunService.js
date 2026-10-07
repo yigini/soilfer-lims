@@ -9,6 +9,7 @@ const { resolveSequenceCriteria, planRunSequence } = require('./batchSequenceSer
 const { validateRunSequence } = require('./qcRunSequenceValidation');
 const { prepareBuildBindings, applyPositionBindings } = require('./qcRunReferenceService');
 const { retainBoundPositions, replaceUnmeasuredPositions } = require('./qcRunRebuildService');
+const { repeatSource } = require('./qcRunRepeatService');
 const error = (statusCode, code, message, details = {}) => Object.assign(new Error(message), { statusCode, code, details });
 
 async function scope(db, actor, entity) {
@@ -72,6 +73,7 @@ async function buildNativeRun(db, actor, input, { existingBatchId = null } = {})
         const orderedItems = input.workItemIds.map(id => items.find(item => item.id === id));
         const actorLab = await policyService.resolveLab(actor.labId, tx);
         const memberships = new Set();
+        const repeated = new Map();
         for (const item of orderedItems) {
             const sampleLab = await policyService.resolveLab(item.sample?.assignedLab, tx);
             const sourceLab = await policyService.resolveLab(item.sample?.labId, tx);
@@ -79,8 +81,9 @@ async function buildNativeRun(db, actor, input, { existingBatchId = null } = {})
                 assignedLab: sampleLab?.id || item.sample?.assignedLab, labId: sourceLab?.id || item.sample?.labId }, { labField: 'assignedLab', altLabField: 'labId' });
             const itemLab = await policyService.resolveLab(item.assignedLab || item.labId || item.sample?.assignedLab, tx);
             if (itemLab?.id !== lab.id) throw error(403, 'QC_WORK_ITEM_SCOPE_DENIED', 'Work items must belong to the run laboratory.');
-            if (item.batchId && item.batchId !== previous?.id) throw error(409, 'QC_WORK_ITEM_ALREADY_BATCHED', 'A work item already belongs to a run.', { workItemId: item.id });
             if (['SUBMITTED', 'ACCEPTED', 'WAIVED', 'CANCELLED'].includes(item.status)) throw error(400, 'QC_WORK_ITEM_SEALED', 'A sealed work item cannot be attached to a run.', { workItemId: item.id, status: item.status });
+            const fromBatchId = await repeatSource(tx, item, previous?.id);
+            if (fromBatchId) repeated.set(item.id, fromBatchId);
             const key = JSON.stringify([item.sampleId, item.analysis]);
             if (memberships.has(key)) throw error(422, 'QC_BATCH_DUPLICATE_MEMBERSHIP', 'Select one active work item per sample and analysis.', { sampleId: item.sampleId, analysisCode: item.analysis });
             memberships.add(key);
@@ -148,6 +151,9 @@ async function buildNativeRun(db, actor, input, { existingBatchId = null } = {})
             }
         }
         for (const plan of referencePlans) await applyPositionBindings(tx, plan);
+        for (const item of orderedItems.filter(row => repeated.has(row.id))) await tx.batchEvent.create({ data: {
+            id: randomUUID(), batchId: batch.id, type: 'MEMBER_REPEATED', by: performedBy, at: now,
+            payload: JSON.stringify({ fromBatchId: repeated.get(item.id), workItemId: item.id, analysisCode: item.analysis }) } });
         await tx.batchEvent.create({ data: { id: randomUUID(), batchId: batch.id, type: 'RUN_BUILT', by: performedBy, at: now,
             payload: JSON.stringify({ positions: sequence.positions, duplicateSelection: sequence.duplicateSelection, forecasts: sequence.forecasts,
                 ...(sequence.rebuild && { rebuild: sequence.rebuild }),

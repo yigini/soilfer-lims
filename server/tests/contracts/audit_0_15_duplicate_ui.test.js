@@ -5,7 +5,7 @@ const clientRoot = path.resolve(__dirname, '../../../client');
 const esbuild = require(path.join(clientRoot, 'node_modules/esbuild'));
 const React = require(path.join(clientRoot, 'node_modules/react'));
 
-function modalHost() {
+function modalHost(batchPatch = {}) {
     const hooks = [];
     let cursor = 0;
     let pendingEffects = [];
@@ -31,7 +31,7 @@ function modalHost() {
     };
     const axios = {
         get: jest.fn().mockResolvedValue({ data: { data: [
-            { id: 'fixture-batch', status: 'OPEN', profile: 'RACK_40', numberFormat: { decimal: '.', thousands: null } },
+            { id: 'fixture-batch', status: 'OPEN', profile: 'RACK_40', numberFormat: { decimal: '.', thousands: null }, ...batchPatch },
             { id: 'second-batch', status: 'OPEN', profile: 'RACK_40', numberFormat: { decimal: '.', thousands: null } }
         ] } }),
         post: jest.fn().mockResolvedValue({ data: { status: 'QC_PASS' } }),
@@ -100,5 +100,32 @@ describe('Audit 0.15: actual BatchModal censored duplicate entry', () => {
         expect(host.find('evaluate-qc-btn').props.disabled).toBe(true);
         await host.find('evaluate-qc-btn').props.onClick();
         expect(host.axios.post).not.toHaveBeenCalled();
+    });
+    test.each(['PROFILE_ONLY', 'LEGACY_MIGRATED'])('primary and extra duplicates require selected physical SAMPLE parents on %s runs', async provenance => {
+        const positions = [{ id: 'sample-parent-1', kind: 'SAMPLE', position: 3, sampleId: 'sample-1' },
+            { id: 'sample-parent-2', kind: 'SAMPLE', position: 7, sampleId: 'sample-2' }];
+        const host = modalHost({ analysis: 'PH_H2O', positions,
+            analytes: [{ analysisCode: 'PH_H2O', provenance, positions }],
+            workItems: [{ sampleId: 'sample-1', sample: { originalId: 'SPECIMEN-1' } }, { sampleId: 'sample-2', sample: { originalId: 'SPECIMEN-2' } }] });
+        await enter(host, '7.123456789', '7.123456780');
+        expect(host.find('qc-duplicate-parent').props.value).toBe('');
+        expect(host.find('evaluate-qc-btn').props.disabled).toBe(true);
+        await host.find('evaluate-qc-btn').props.onClick(); expect(host.axios.post).not.toHaveBeenCalled();
+        host.find('qc-duplicate-parent').props.onChange({ target: { value: 'sample-parent-1' } }); await host.render();
+        expect(host.find('evaluate-qc-btn').props.disabled).toBe(false);
+        host.find('qc-add-DUPLICATE').props.onClick(); await host.render();
+        for (const field of ['value1', 'value2']) {
+            host.find(`qc-extra-DUPLICATE-0-${field}`).props.onChange({ target: { value: '2.123456789' } }); await host.render();
+        }
+        expect(host.find('evaluate-qc-btn').props.disabled).toBe(true);
+        host.find('qc-extra-DUPLICATE-0-parent').props.onChange({ target: { value: 'sample-parent-2' } }); await host.render();
+        expect(host.find('evaluate-qc-btn').props.disabled).toBe(false);
+        await host.find('evaluate-qc-btn').props.onClick();
+        expect(host.axios.post.mock.calls[0][1].duplicates).toEqual([
+            { duplicateOfPositionId: 'sample-parent-1', value1: 7.123456789, value2: 7.123456780, rawInput: { value1: '7.123456789', value2: '7.123456780' } },
+            { duplicateOfPositionId: 'sample-parent-2', value1: 2.123456789, value2: 2.123456789, rawInput: { value1: '2.123456789', value2: '2.123456789' } }
+        ]);
+        host.find('qc-duplicate-parent').props.onChange({ target: { value: 'outside-run-position' } }); await host.render();
+        expect(host.find('evaluate-qc-btn').props.disabled).toBe(true);
     });
 });

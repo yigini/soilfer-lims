@@ -30,6 +30,7 @@ class ExchangePrismaBetterSqlite3 extends PrismaBetterSqlite3 {
     async connect() {
         const adapter = await super.connect();
         if (adapter && adapter.client) {
+            adapter.client.pragma('foreign_keys = ON');
             registerDbFunctions(adapter.client);
         }
         return adapter;
@@ -37,6 +38,7 @@ class ExchangePrismaBetterSqlite3 extends PrismaBetterSqlite3 {
     async connectToShadowDb() {
         const adapter = await super.connectToShadowDb();
         if (adapter && adapter.client) {
+            adapter.client.pragma('foreign_keys = ON');
             registerDbFunctions(adapter.client);
         }
         return adapter;
