@@ -8,6 +8,50 @@ function parsed(value) {
     if (typeof value !== 'string') return { value, invalid: false };
     try { return { value: JSON.parse(value), invalid: false }; } catch { return { value: null, invalid: true }; }
 }
+function reviewedDispositionAttribution(record, batch, disposition, users, audits, counts, diagnostic, refuse) {
+    const rawDecision = disposition.decision;
+    let audit = record.auditRow || null, attributed = disposition;
+    if (record.seq !== null && !audit) {
+        refuse(batch.id, 'QC_LEGACY_DISPOSITION_UNRESOLVED', { rawDecision, reason: 'HISTORICAL_ATTRIBUTION_UNRESOLVED', seq: record.seq });
+        return null;
+    }
+    const relevant = audits.filter(row => row.entityId === batch.id);
+    if (!audit && relevant.length) {
+        const matches = relevant.flatMap(row => {
+            const details = parsed(row.details).value;
+            const decision = object(details?.disposition) ? details.disposition : object(details) ? details : null;
+            const prefix = `QC batch disposition recorded: ${rawDecision}. Reason: `;
+            if (decision?.decision === rawDecision) return [{ row, reason: decision.reason ?? decision.justification ?? null }];
+            if (typeof row.details === 'string' && row.details.startsWith(prefix)) return [{ row, reason: row.details.slice(prefix.length) }];
+            return [];
+        });
+        if (matches.length !== 1) {
+            refuse(batch.id, 'QC_LEGACY_DISPOSITION_UNRESOLVED', { rawDecision, reason: 'AUDIT_ATTRIBUTION_UNRESOLVED', matchingAuditRows: matches.length });
+            return null;
+        }
+        audit = matches[0].row;
+        attributed = { ...disposition, reason: matches[0].reason, by: audit.performedBy, at: audit.timestamp,
+            decidedBy: audit.performedBy, decidedAt: audit.timestamp };
+    }
+    const actor = attributed.decidedBy ?? attributed.by ?? null;
+    const at = attributed.decidedAt ?? attributed.at ?? null;
+    const attributionSource = audit ? 'AUDIT_LOG' : 'BATCH_DISPOSITION_FIELD';
+    const payload = record.seq === null ? batch.disposition : record.historyEvent?.snapshot?.disposition ?? record.snapshot.disposition;
+    const fieldCopy = parsed(payload).value;
+    const fieldTime = fieldCopy?.decidedAt ?? fieldCopy?.at ?? null;
+    const conflictingTime = timestamp(fieldTime) === null || timestamp(at) === null
+        ? fieldTime !== at : timestamp(fieldTime) !== timestamp(at);
+    if (audit && object(fieldCopy) && ((fieldCopy.decidedBy ?? fieldCopy.by ?? null) !== actor ||
+        conflictingTime || (fieldCopy.reason ?? fieldCopy.justification ?? null) !== (attributed.reason ?? attributed.justification ?? null))) {
+        counts.dispositionAttributionConflicts++;
+        diagnostic(batch.id, 'DISPOSITION_ATTRIBUTION_CONFLICT', { seq: record.seq, auditLogId: audit.id });
+    }
+    counts.dispositionAttribution[attributionSource]++;
+    return { actor, at, reason: attributed.reason ?? attributed.justification ?? null,
+        source: { rawDecision, payload, auditLogId: audit?.id ?? null, seq: record.seq, attributionSource,
+            actor, actorUsername: users.has(actor) ? actor : null, timestamp: at, originalDisposition: disposition,
+            ...(audit && { auditRow: audit }) } };
+}
 function timestamp(value) {
     if (value === null || value === undefined) return null;
     const source = typeof value === 'string' && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(value) ? value.replace(' ', 'T') + 'Z' : value;
@@ -56,11 +100,15 @@ function inventoryLegacyQcRuns(db) {
         'historyAuditConflicts', 'unresolvedMethods', 'unresolvedAnalysts', 'unresolvedInstruments', 'unlinkedReferences',
         'unresolvedNumbers', 'unresolvedDuplicateParents', 'unresolvedRackPositions', 'missingWorkItems', 'malformedHistory',
         'malformedQcResults', 'orphanSnapshots', 'multiAttemptMembershipGroups', 'refusals'].map(key => [key, 0]));
+    counts.legacyDispositionMapped = { REJECT_REANALYSIS: 0, ACCEPT_OPAQUE: 0 };
+    counts.dispositionAttribution = { AUDIT_LOG: 0, BATCH_DISPOSITION_FIELD: 0 };
+    counts.dispositionAttributionConflicts = 0;
     const diagnostics = [], refusals = [], metadata = [];
     const batches = db.prepare('SELECT id,labId,analysis,instrument,status,createdBy,createdAt,notes,qcResults,workItemIds,maxCapacity,profile,disposition,history FROM "Batch" ORDER BY id').all();
     const workItems = db.prepare('SELECT id,sampleId,analysis,methodologyId,batchId,rackPosition,labId,assignedLab,status,duplicateOf,createdAt FROM "WorkItem" WHERE batchId IS NOT NULL ORDER BY batchId,createdAt,id').all();
     const typedRows = db.prepare('SELECT * FROM "BatchQcResult" ORDER BY batchId,type,id').all();
     const audits = db.prepare('SELECT * FROM "AuditLog" WHERE entity=\'BATCH\' AND action=\'QC_EVIDENCE_SNAPSHOT\' ORDER BY entityId,id').all();
+    const dispositionAudits = db.prepare("SELECT * FROM AuditLog WHERE entity IN ('BATCH','QC_BATCH') AND action='QC_DISPOSITION' ORDER BY entityId,id").all();
     const users = new Set(db.prepare('SELECT username FROM "User"').all().map(row => row.username));
     const methods = new Map(db.prepare('SELECT id,analysisCode FROM "Methodology"').all().map(row => [row.id, row]));
     const assets = db.prepare('SELECT id,labId,name FROM "EquipmentAsset" ORDER BY id').all();
@@ -117,7 +165,8 @@ function inventoryLegacyQcRuns(db) {
         const frozen = batch.status !== 'OPEN' || historical.length > 0 || currentTyped.length > 0 || batch.qcResults !== null || batch.disposition !== null || reopened;
         const disposition = parsed(batch.disposition).value;
         let status;
-        try { status = legacyBatchAnalyteStatus(batch.status, { reopened, decision: disposition?.decision }); }
+        try { status = legacyBatchAnalyteStatus(batch.status, { reopened,
+            decision: disposition?.decision === 'REJECT_REANALYSIS' ? 'REANALYZE_BATCH' : disposition?.decision }); }
         catch { refuse(batch.id, 'QC_LEGACY_STATUS_INVALID', batch.status); status = 'QC_PENDING'; }
         const firstStart = historyEntries.find(event => event?.status === 'RUNNING' || event?.status === 'IN_RUN');
         const originalActor = firstStart?.changedBy ?? firstStart?.by ?? null;
@@ -265,13 +314,40 @@ function inventoryLegacyQcRuns(db) {
             }
             const originalDisposition = parsed(snapshot.disposition).value;
             if (object(originalDisposition)) {
-                const decisions = { PROCEED_WITH_WARNING: 'ACCEPT_WITH_DEVIATION', REANALYZE_BATCH: 'REPEAT_BATCH', REJECT_BATCH: 'REJECT' };
+                const rawDecision = originalDisposition.decision;
+                const actor = originalDisposition.decidedBy ?? originalDisposition.by ?? null;
+                const recordedTimestamp = originalDisposition.decidedAt ?? originalDisposition.at ?? null;
+                let provenance = { seq: record.seq, originalDisposition }, decidedBy = actor, decidedAt = recordedTimestamp;
+                let reason = originalDisposition.reason ?? originalDisposition.justification ?? null;
+                const latest = analysisCodes.map(code => rows.QcEvaluation.find(row => row.id === previousEvaluations.get(code)));
+                if (rawDecision === 'ACCEPT' && !latest.every(row => row?.verdict === 'PASS')) {
+                    refuse(batch.id, 'QC_LEGACY_DISPOSITION_UNRESOLVED', originalDisposition);
+                    continue;
+                }
+                if (['REJECT_REANALYSIS', 'ACCEPT'].includes(rawDecision)) {
+                    const attribution = reviewedDispositionAttribution(record, batch, originalDisposition, users,
+                        [...audits, ...dispositionAudits], counts, diagnostic, refuse);
+                    if (!attribution) continue;
+                    provenance = attribution.source; decidedBy = attribution.actor; decidedAt = attribution.at; reason = attribution.reason;
+                }
+                if (rawDecision === 'ACCEPT') {
+                    rows.BatchEvent.push({ id: identity(batch.id, 'legacy-disposition', versionIndex), batchId: batch.id,
+                        type: 'LEGACY_DISPOSITION', payload: JSON.stringify({ ...provenance, reason }), by: decidedBy, at: timestamp(decidedAt) });
+                    counts.legacyDispositionMapped.ACCEPT_OPAQUE++;
+                    if (record.seq === null) for (const analyte of rows.BatchAnalyte.filter(row => row.batchId === batch.id)) {
+                        analyte.status = legacyBatchAnalyteStatus(batch.status === 'CLOSED' ? 'CLOSED' : 'QC_PASS');
+                    }
+                    continue;
+                }
+                const decisions = { PROCEED_WITH_WARNING: 'ACCEPT_WITH_DEVIATION', REANALYZE_BATCH: 'REPEAT_BATCH',
+                    REJECT_REANALYSIS: 'REPEAT_BATCH', REJECT_BATCH: 'REJECT' };
                 const decision = decisions[originalDisposition.decision];
                 if (!decision) refuse(batch.id, 'QC_LEGACY_DISPOSITION_UNRESOLVED', originalDisposition);
-                else rows.BatchDisposition.push({ id: identity(batch.id, 'disposition', versionIndex), batchId: batch.id, analysisCode: batch.analysis,
-                    decision, reason: originalDisposition.reason ?? originalDisposition.justification ?? null,
-                    decidedBy: originalDisposition.decidedBy ?? originalDisposition.by ?? null,
-                    decidedAt: timestamp(originalDisposition.decidedAt ?? originalDisposition.at), legacySource: JSON.stringify({ seq: record.seq, originalDisposition }) });
+                else {
+                    rows.BatchDisposition.push({ id: identity(batch.id, 'disposition', versionIndex), batchId: batch.id, analysisCode: batch.analysis,
+                        decision, reason, decidedBy, decidedAt: timestamp(decidedAt), legacySource: JSON.stringify(provenance) });
+                    if (rawDecision === 'REJECT_REANALYSIS') counts.legacyDispositionMapped.REJECT_REANALYSIS++;
+                }
             }
         }
         let leftOpen = false;

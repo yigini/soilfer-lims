@@ -14,16 +14,25 @@ const recordedAt = '2026-09-20T09:15:00.000Z';
 function insert(db, table, row) {
     db.prepare(`INSERT INTO "${table}" (${Object.keys(row).map(key => `"${key}"`).join(',')}) VALUES (${Object.keys(row).map(() => '?').join(',')})`).run(...Object.values(row));
 }
-function fixture({ qcResults = null, history = null, status = 'OPEN', disposition = null, membership = false, fresh = false } = {}) {
+function fixture({ qcResults = null, history = null, status = 'OPEN', disposition = null, membership = false, fresh = false, multipleAttempts = false, result = false } = {}) {
     const labId = randomUUID(), batchId = randomUUID(), sampleId = randomUUID(), workItemId = randomUUID(), analysis = `Q-${randomUUID()}`;
-    const username = `fixture-${randomUUID()}`, now = Date.now();
-    const { file } = beforeGuards({ actor: 'system:fixture', schemaVariant: 'PRE_1_3_SAMPLE_CODES',
+    const username = `fixture-${randomUUID()}`, now = Date.now(), resultId = randomUUID();
+    const legacyDisposition = typeof disposition === 'function' ? disposition(username) : disposition;
+    const firstCreated = Date.parse('2026-09-19T09:00:00Z');
+    const attempts = multipleAttempts ? [['accepted-attempt', 'ACCEPTED', firstCreated + 1], ['completed-attempt', 'COMPLETED', firstCreated + 2]]
+        .map(([id, status, createdAt]) => ({ id, sampleId, analysis, labId, batchId, duplicateOf: workItemId, rackPosition: 5, status, createdAt, updatedAt: createdAt })) : [];
+    // Multiple attempts need the already-migrated duplicateOf column. The
+    // schema-only fixture still leaves QC guards/receipt to the real installer.
+    const { file } = beforeGuards({ actor: 'system:fixture', schemaVariant: multipleAttempts ? null : 'PRE_1_3_SAMPLE_CODES',
         relatedRows: { Lab: [{ id: labId, code: labId, name: 'QC import fixture', country: 'GTM', updatedAt: now }],
-            User: [{ id: randomUUID(), username, email: `${username}@example.test`, password: 'hash', role: 'LAB_MANAGER', updatedAt: now }] },
+            User: [{ id: randomUUID(), username, email: `${username}@example.test`, password: 'hash', role: 'LAB_MANAGER', updatedAt: now }],
+            Result: result ? [{ id: resultId, sampleId, param: analysis, batchId, value: '7.123456789', numericValue: 7.123456789,
+                flags: '[]', isValid: 1, updatedAt: now }] : [] },
         samples: membership ? [{ id: sampleId, originalId: sampleId, assignedLab: labId, status: 'PROCESSING', updatedAt: now }] : [],
-        batches: [{ id: batchId, labId, analysis, status, createdBy: username, instrument: 'Legacy free text', qcResults, history, disposition,
+        batches: [{ id: batchId, labId, analysis, status, createdBy: username, instrument: 'Legacy free text', qcResults, history, disposition: legacyDisposition,
             workItemIds: membership ? JSON.stringify([workItemId]) : '[]' }],
-        workItems: membership ? [{ id: workItemId, sampleId, analysis, labId, status: 'IN_PROGRESS', batchId, rackPosition: 5, updatedAt: now }] : [] });
+        workItems: membership ? [{ id: workItemId, sampleId, analysis, labId, status: multipleAttempts ? 'SUBMITTED' : 'IN_PROGRESS',
+            batchId, rackPosition: 5, updatedAt: now, ...(multipleAttempts && { createdAt: firstCreated }) }, ...attempts] : [] });
     files.push(file);
     const db = new Database(file, { fileMustExist: true });
     db.exec('CREATE TABLE IF NOT EXISTS "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL,"appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"details" TEXT)');
@@ -34,7 +43,7 @@ function fixture({ qcResults = null, history = null, status = 'OPEN', dispositio
         const connection = new Database(file), source = loadQcRunMigrationSource();
         try { connection.exec(source.schemaSql); } finally { connection.close(); }
     }
-    return { file, labId, batchId, sampleId, workItemId, analysis, username };
+    return { file, labId, batchId, sampleId, workItemId, analysis, username, resultId };
 }
 function state(file) {
     const db = new Database(file, { readonly: true, fileMustExist: true });
@@ -54,6 +63,11 @@ function snapshot(seq, qcResults, qcItems = []) {
     return { action: 'QC_EVIDENCE_SNAPSHOT', seq, reason: 'Recorded legacy change', snapshot: {
         qcResults, qcItems, status: 'QC_PASS', disposition: null, workItemIds: [],
         actor: { username: 'later-replacement-actor' }, timestamp: '2026-09-21T10:00:00.000Z' } };
+}
+function expectOriginalEvidence(reader, before) {
+    for (const table of before.tables.filter(row => ['Batch', 'Sample', 'WorkItem', 'Result', 'BatchQcResult', 'AuditLog', 'User'].includes(row.name))) {
+        expect(reader.prepare(`SELECT ${table.columns.map(row => `"${row.name}"`).join(',')} FROM "${table.name}" ORDER BY rowid`).all()).toEqual(table.rows);
+    }
 }
 afterAll(() => { for (const file of files) if (fs.existsSync(file)) fs.unlinkSync(file); });
 
@@ -96,15 +110,8 @@ test.each([false, true])('additive install on fresh=%s preserves every old field
 });
 
 test('legacy attempts keep separate current membership in creation order with unchanged statuses and a dry-run group count', () => {
-    const f = fixture({ membership: true, status: 'QC_FAIL' }), connection = new Database(f.file);
-    const acceptedId = 'accepted-attempt', completedId = 'completed-attempt', firstCreated = Date.parse('2026-09-19T09:00:00Z');
-    try {
-        connection.prepare('UPDATE WorkItem SET status=?,createdAt=? WHERE id=?').run('SUBMITTED', firstCreated, f.workItemId);
-        for (const [id, status, createdAt] of [[acceptedId, 'ACCEPTED', firstCreated + 1], [completedId, 'COMPLETED', firstCreated + 2]]) {
-            insert(connection, 'WorkItem', { id, sampleId: f.sampleId, analysis: f.analysis, labId: f.labId, batchId: f.batchId,
-                duplicateOf: f.workItemId, rackPosition: 5, status, createdAt, updatedAt: createdAt });
-        }
-    } finally { connection.close(); }
+    const f = fixture({ membership: true, status: 'QC_FAIL', multipleAttempts: true });
+    const acceptedId = 'accepted-attempt', completedId = 'completed-attempt';
     const before = state(f.file), digest = hash(f.file), dry = installQcRuns({ dbPath: f.file });
     expect(dry.refusals).toEqual([]);
     expect(dry.backfillCounts).toMatchObject({ samplePositions: 3, multiAttemptMembershipGroups: 1 });
@@ -126,6 +133,143 @@ test('legacy attempts keep separate current membership in creation order with un
         expect(reader.pragma('foreign_key_check')).toEqual([]);
         expect(reader.pragma('integrity_check', { simple: true })).toBe('ok');
     } finally { reader.close(); }
+});
+
+test('reviewed REJECT_REANALYSIS imports a repeat with exact field provenance and no new work or analytical changes', () => {
+    const reason = '  Repeat the recorded batch.\nKeep the original reason.  ';
+    const disposition = JSON.stringify({ decision: 'REJECT_REANALYSIS', reason, by: 'retired raw actor', at: recordedAt }, null, 2);
+    const f = fixture({ status: 'QC_FAIL', disposition, membership: true, result: true,
+        qcResults: JSON.stringify(evaluated({ overallStatus: 'QC_FAIL', blanks: [{ value: 3.141592653589793, status: 'FAIL' }] })) });
+    const before = state(f.file), digest = hash(f.file), dry = installQcRuns({ dbPath: f.file });
+    expect(dry.refusals).toEqual([]);
+    expect(dry.backfillCounts).toMatchObject({ legacyDispositionMapped: { REJECT_REANALYSIS: 1, ACCEPT_OPAQUE: 0 },
+        dispositionAttribution: { AUDIT_LOG: 0, BATCH_DISPOSITION_FIELD: 1 } });
+    expect(hash(f.file)).toBe(digest);
+    apply(f);
+    const reader = new Database(f.file, { readonly: true });
+    try {
+        const decision = reader.prepare('SELECT * FROM BatchDisposition').get();
+        expect(decision).toMatchObject({ decision: 'REPEAT_BATCH', reason, decidedBy: 'retired raw actor', decidedAt: Date.parse(recordedAt) });
+        expect(JSON.parse(decision.legacySource)).toMatchObject({ rawDecision: 'REJECT_REANALYSIS', payload: disposition,
+            auditLogId: null, seq: null, attributionSource: 'BATCH_DISPOSITION_FIELD', actor: 'retired raw actor', actorUsername: null, timestamp: recordedAt });
+        expect(reader.prepare('SELECT status FROM BatchAnalyte').get().status).toBe('REPEAT_ORDERED');
+        expectOriginalEvidence(reader, before);
+        expect(reader.pragma('foreign_key_check')).toEqual([]);
+    } finally { reader.close(); }
+});
+
+test('reviewed ACCEPT on passing QC adds opaque evidence only, preserving source bytes, results and users', () => {
+    const reason = '  Passing historical round accepted as recorded.  ';
+    const disposition = '{ "decision": "ACCEPT", "reason": ' + JSON.stringify(reason) + ', "by": "departed analyst", "at": ' + JSON.stringify(recordedAt) + ' }';
+    const f = fixture({ status: 'QC_PASS', disposition, membership: true, result: true,
+        qcResults: JSON.stringify(evaluated({ blanks: [{ value: 0.0123456789, status: 'PASS' }] })) });
+    const before = state(f.file), digest = hash(f.file), dry = installQcRuns({ dbPath: f.file });
+    expect(dry.refusals).toEqual([]);
+    expect(dry.backfillCounts).toMatchObject({ legacyDispositionMapped: { REJECT_REANALYSIS: 0, ACCEPT_OPAQUE: 1 },
+        dispositionAttribution: { AUDIT_LOG: 0, BATCH_DISPOSITION_FIELD: 1 } });
+    expect(hash(f.file)).toBe(digest);
+    apply(f);
+    const reader = new Database(f.file, { readonly: true });
+    try {
+        expect(reader.prepare('SELECT * FROM BatchDisposition').all()).toEqual([]);
+        const events = reader.prepare("SELECT * FROM BatchEvent WHERE type='LEGACY_DISPOSITION'").all();
+        expect(events).toHaveLength(1);
+        expect(events[0]).toMatchObject({ by: 'departed analyst', at: Date.parse(recordedAt) });
+        expect(JSON.parse(events[0].payload)).toMatchObject({ rawDecision: 'ACCEPT', reason, payload: disposition,
+            auditLogId: null, seq: null, attributionSource: 'BATCH_DISPOSITION_FIELD', actor: 'departed analyst', actorUsername: null, timestamp: recordedAt });
+        expect(reader.prepare('SELECT status FROM BatchAnalyte').get().status).toBe('QC_PASS');
+        expect(reader.prepare('SELECT flags,isValid FROM Result WHERE id=?').get(f.resultId)).toEqual({ flags: '[]', isValid: 1 });
+        expectOriginalEvidence(reader, before);
+    } finally { reader.close(); }
+});
+
+test('field attribution resolves an existing username exactly without creating an actor', () => {
+    const f = fixture({ status: 'QC_PASS', disposition: username => JSON.stringify({ decision: 'ACCEPT', reason: 'Recorded pass', by: username, at: recordedAt }),
+        qcResults: JSON.stringify(evaluated({ blanks: [{ value: 0.01, status: 'PASS' }] })) });
+    const before = state(f.file);
+    apply(f);
+    const reader = new Database(f.file, { readonly: true });
+    try {
+        const event = reader.prepare("SELECT * FROM BatchEvent WHERE type='LEGACY_DISPOSITION'").get();
+        expect(JSON.parse(event.payload)).toMatchObject({ actor: f.username, actorUsername: f.username });
+        expectOriginalEvidence(reader, before);
+    } finally { reader.close(); }
+});
+
+test.each([null, 'unparseable original time'])('field disposition retains raw missing/invalid time %s without assigning import time', at => {
+    const disposition = JSON.stringify({ decision: 'ACCEPT', reason: 'Original reason', by: 'raw actor', ...(at !== null && { at }) });
+    const f = fixture({ status: 'QC_PASS', disposition, qcResults: JSON.stringify(evaluated({ blanks: [{ value: 0.01, status: 'PASS' }] })) });
+    apply(f);
+    const reader = new Database(f.file, { readonly: true });
+    try {
+        const event = reader.prepare("SELECT * FROM BatchEvent WHERE type='LEGACY_DISPOSITION'").get();
+        expect(event.at).toBeNull();
+        expect(JSON.parse(event.payload)).toMatchObject({ payload: disposition, timestamp: at });
+    } finally { reader.close(); }
+});
+
+test.each([['ACCEPT', 'QC_FAIL'], ['UNREVIEWED_DECISION', 'QC_PASS']])('%s on %s refuses dry-run/apply without a byte change', (decision, status) => {
+    const f = fixture({ status, disposition: JSON.stringify({ decision, reason: 'Retained original', by: 'raw actor', at: recordedAt }),
+        membership: true, result: true, qcResults: JSON.stringify(evaluated({ overallStatus: status, blanks: [{ value: 0.01, status: status === 'QC_PASS' ? 'PASS' : 'FAIL' }] })) });
+    const before = state(f.file), digest = hash(f.file), dry = installQcRuns({ dbPath: f.file });
+    expect(dry.refusals).toEqual([expect.objectContaining({ code: 'QC_LEGACY_DISPOSITION_UNRESOLVED' })]);
+    expect(() => installQcRuns({ dbPath: f.file, apply: true, planSha256: dry.backfillFingerprint })).toThrow(expect.objectContaining({ code: 'QC_RUN_BACKFILL_REFUSED' }));
+    expect(state(f.file)).toEqual(before); expect(hash(f.file)).toBe(digest);
+});
+
+test('a matching AuditLog disposition wins conflicts while both original sources remain unchanged', () => {
+    const disposition = JSON.stringify({ decision: 'ACCEPT', reason: 'Field copy reason', by: 'field actor', at: 'bad field time' }, null, 2);
+    const f = fixture({ status: 'QC_PASS', disposition, membership: true, result: true,
+        qcResults: JSON.stringify(evaluated({ blanks: [{ value: 0.01, status: 'PASS' }] })) });
+    const auditId = randomUUID(), db = new Database(f.file), reason = '  Exact audit reason.  ';
+    try { insert(db, 'AuditLog', { id: auditId, entity: 'QC_BATCH', entityId: f.batchId, action: 'QC_DISPOSITION',
+        performedBy: f.username, timestamp: recordedAt, details: `QC batch disposition recorded: ACCEPT. Reason: ${reason}` }); }
+    finally { db.close(); }
+    const before = state(f.file), dry = installQcRuns({ dbPath: f.file });
+    expect(dry.refusals).toEqual([]);
+    expect(dry.backfillCounts).toMatchObject({ dispositionAttribution: { AUDIT_LOG: 1, BATCH_DISPOSITION_FIELD: 0 }, dispositionAttributionConflicts: 1 });
+    expect(dry.diagnostics).toContainEqual(expect.objectContaining({ code: 'DISPOSITION_ATTRIBUTION_CONFLICT' }));
+    apply(f);
+    const reader = new Database(f.file, { readonly: true });
+    try {
+        const event = reader.prepare("SELECT * FROM BatchEvent WHERE type='LEGACY_DISPOSITION'").get();
+        expect(event).toMatchObject({ by: f.username, at: Date.parse(recordedAt) });
+        expect(JSON.parse(event.payload)).toMatchObject({ rawDecision: 'ACCEPT', payload: disposition, reason,
+            auditLogId: auditId, seq: null, attributionSource: 'AUDIT_LOG', actor: f.username, actorUsername: f.username, timestamp: recordedAt });
+        expectOriginalEvidence(reader, before);
+    } finally { reader.close(); }
+});
+
+test('historical AuditLog disposition retains the recorded actor/time rather than the later snapshot replacement actor', () => {
+    const event = snapshot(3, evaluated({ blanks: [{ value: 0.01, status: 'PASS' }] }));
+    event.snapshot.disposition = { decision: 'ACCEPT', reason: 'Original historical acceptance', by: 'original decision actor', at: recordedAt };
+    const f = fixture({ history: JSON.stringify([event]) }), auditId = randomUUID(), db = new Database(f.file);
+    try { insert(db, 'AuditLog', { id: auditId, entity: 'BATCH', entityId: f.batchId, action: 'QC_EVIDENCE_SNAPSHOT',
+        performedBy: 'later snapshot actor', timestamp: '2026-09-21T10:00:00.000Z', details: JSON.stringify(event) }); }
+    finally { db.close(); }
+    const before = state(f.file);
+    apply(f);
+    const reader = new Database(f.file, { readonly: true });
+    try {
+        const disposition = reader.prepare("SELECT * FROM BatchEvent WHERE type='LEGACY_DISPOSITION'").get();
+        expect(disposition).toMatchObject({ by: 'original decision actor', at: Date.parse(recordedAt) });
+        expect(JSON.parse(disposition.payload)).toMatchObject({ auditLogId: auditId, seq: 3, actor: 'original decision actor',
+            attributionSource: 'AUDIT_LOG', timestamp: recordedAt });
+        expectOriginalEvidence(reader, before);
+    } finally { reader.close(); }
+});
+
+test('existing unresolved disposition audit evidence refuses rather than falling back to the Batch field', () => {
+    const f = fixture({ status: 'QC_PASS', disposition: JSON.stringify({ decision: 'ACCEPT', reason: 'Recorded field', by: 'field actor', at: recordedAt }),
+        qcResults: JSON.stringify(evaluated({ blanks: [{ value: 0.01, status: 'PASS' }] })) });
+    const db = new Database(f.file);
+    try { insert(db, 'AuditLog', { id: randomUUID(), entity: 'QC_BATCH', entityId: f.batchId, action: 'QC_DISPOSITION',
+        performedBy: f.username, timestamp: recordedAt, details: 'Unresolved historical details' }); }
+    finally { db.close(); }
+    const digest = hash(f.file), dry = installQcRuns({ dbPath: f.file });
+    expect(dry.refusals).toEqual([expect.objectContaining({ code: 'QC_LEGACY_DISPOSITION_UNRESOLVED', source: expect.objectContaining({ reason: 'AUDIT_ATTRIBUTION_UNRESOLVED' }) })]);
+    expect(() => installQcRuns({ dbPath: f.file, apply: true, planSha256: dry.backfillFingerprint })).toThrow(expect.objectContaining({ code: 'QC_RUN_BACKFILL_REFUSED' }));
+    expect(hash(f.file)).toBe(digest);
 });
 
 test('three snapshots with different counts and a final clear import exact isolated versions, AuditLog authority and empty current evidence', () => {
@@ -251,6 +395,25 @@ test.each(['partial', 'marker', 'tampered'])('%s schema or receipt refuses with 
         if (variant === 'partial') db.exec('ALTER TABLE Batch ADD COLUMN startedAt DATETIME');
         if (variant === 'marker') db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run('186_normalized_qc_runs', '{}');
         if (variant === 'tampered') db.prepare('UPDATE _schema_migrations SET details=? WHERE id=?').run('{}', '186_normalized_qc_runs');
+    } finally { db.close(); }
+    const before = state(f.file), digest = hash(f.file);
+    expect(() => installQcRuns({ dbPath: f.file, apply: true })).toThrow(expect.objectContaining({ code: 'QC_RUN_SCHEMA_MISMATCH' }));
+    expect(() => assertQcRunStartupReady(f.file)).toThrow(expect.objectContaining({ code: 'QC_RUN_SCHEMA_MISMATCH' }));
+    expect(state(f.file)).toEqual(before); expect(hash(f.file)).toBe(digest);
+});
+
+test.each(['negative', 'fractional', 'missing', 'extra', 'array', 'flat-negative'])('a %s disposition count receipt is refused by repeat install and startup without writes', variant => {
+    const f = fixture(); apply(f);
+    const db = new Database(f.file);
+    try {
+        const receipt = JSON.parse(db.prepare("SELECT details FROM _schema_migrations WHERE id='186_normalized_qc_runs'").get().details);
+        if (variant === 'negative') receipt.backfillCounts.legacyDispositionMapped.ACCEPT_OPAQUE = -1;
+        if (variant === 'fractional') receipt.backfillCounts.dispositionAttribution.AUDIT_LOG = 0.5;
+        if (variant === 'missing') delete receipt.backfillCounts.dispositionAttribution.BATCH_DISPOSITION_FIELD;
+        if (variant === 'extra') receipt.backfillCounts.legacyDispositionMapped.UNREVIEWED = 0;
+        if (variant === 'array') receipt.backfillCounts.legacyDispositionMapped = [0, 0];
+        if (variant === 'flat-negative') receipt.backfillCounts.measurements = -1;
+        db.prepare("UPDATE _schema_migrations SET details=? WHERE id='186_normalized_qc_runs'").run(JSON.stringify(receipt));
     } finally { db.close(); }
     const before = state(f.file), digest = hash(f.file);
     expect(() => installQcRuns({ dbPath: f.file, apply: true })).toThrow(expect.objectContaining({ code: 'QC_RUN_SCHEMA_MISMATCH' }));

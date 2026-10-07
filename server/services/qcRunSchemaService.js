@@ -4,6 +4,18 @@ const TABLES = Object.freeze(['BatchAnalyte', 'BatchPosition', 'BatchPositionWor
 const fail = (code, message, differences = []) => Object.assign(new Error(message), { code, differences });
 const normalized = sql => (sql.match(/'(?:''|[^'])*'|"(?:""|[^"])*"|`(?:``|[^`])*`|\[[^\]]*\]|\s+|[^\s'"`\[]+/g) || [])
     .filter(token => !/^\s+$/.test(token)).join('').replace(/;$/, '');
+function validBackfillCounts(counts) {
+    if (!counts || typeof counts !== 'object' || Array.isArray(counts)) return false;
+    const grouped = { legacyDispositionMapped: ['REJECT_REANALYSIS', 'ACCEPT_OPAQUE'],
+        dispositionAttribution: ['AUDIT_LOG', 'BATCH_DISPOSITION_FIELD'] };
+    const nonnegative = count => Number.isInteger(count) && count >= 0;
+    if (!Object.entries(grouped).every(([name, keys]) => {
+        const value = counts[name];
+        return value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === keys.length &&
+            keys.every(key => Object.hasOwn(value, key) && nonnegative(value[key]));
+    })) return false;
+    return Object.entries(counts).every(([name, count]) => Object.hasOwn(grouped, name) || nonnegative(count));
+}
 
 function classifyQcRunSchema(db, source) {
     const differences = [];
@@ -47,8 +59,8 @@ function classifyQcRunSchema(db, source) {
     if (marker) {
         try { receipt = JSON.parse(marker.details); } catch { /* Refuse malformed receipts. */ }
         if (receipt?.migrationSha256 !== sources.migrationSha256 || receipt?.oracleSha256 !== sources.oracleSha256 ||
-            !/^[a-f0-9]{64}$/.test(receipt?.backfillFingerprint || '') || !receipt?.backfillCounts ||
-            Object.values(receipt.backfillCounts).some(count => !Number.isInteger(count) || count < 0)) differences.push('Normalized QC receipt differs');
+            !/^[a-f0-9]{64}$/.test(receipt?.backfillFingerprint || '') ||
+            !validBackfillCounts(receipt?.backfillCounts)) differences.push('Normalized QC receipt differs');
     }
     const base = [...tables, ...columns, ...installedIndexes.slice(0, 11)], release = [...installedIndexes.slice(11), ...installedGuards, Boolean(marker)];
     let classification;
