@@ -197,6 +197,10 @@ function beforeGuards(options) {
             assert.ok(runModels.length === 0 || runModels.length === runTables.length, 'Generated QC datamodel is partial.');
             if (runModels.length) expected.push({ table: 'Batch', fields: ['instrumentId', 'analystUsername', 'startedAt', 'completedAt'] },
                 ...runTables.map(table => ({ table, missingTable: true })));
+            // #189 adds only these seven nullable fields. Keep the captured
+            // historical schema literal and continue refusing every other gap.
+            expected.push({ table: 'ProficiencyRound', fields: ['ncrStatus', 'classificationLimits',
+                'legacyScoreFlag', 'legacyFlaggedAt', 'deletedAt', 'deletedBy', 'deleteReason'] });
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }

@@ -646,7 +646,6 @@
     "warning": "Étalonnage Bientôt Expiré",
     "blocked": "Étalonnage Expiré / Bloqué",
     "notConfigured": "Non Configuré",
-
     "unconfiguredWarning": "La qualification n’est pas configurée ; la politique du laboratoire autorise l’utilisation avec un avertissement.",
     "lastCalibration": "Dernier Étalonnage",
     "nextCalibration": "Prochain Étalonnage",
@@ -936,7 +935,10 @@
       "qc_curveMinR": "Corrélation minimale de la courbe",
       "qc_repeatabilityLimit": "Limite de répétabilité",
       "qc_blankCorrection": "Correction du blanc",
-      "qc_failAction": "Action en cas de défaut de QC"
+      "qc_failAction": "Action en cas de défaut de QC",
+      "equipment_requireEquipment": "Équipement requis",
+      "equipment_unconfiguredReadiness": "Disponibilité des équipements non configurés",
+      "pt_zScoreLimits": "Limites du score z des essais d’aptitude"
     },
     "title": "Politiques",
     "yes": "Oui",
@@ -1034,7 +1036,12 @@
       "NONE": "Aucun",
       "SUBTRACT_MEAN_BLANK": "Correction du blanc",
       "FAIL_BATCH": "Rejeter le lot",
-      "WARN": "Avertir"
+      "WARN": "Avertir",
+      "AUTO": "Automatique",
+      "REQUIRED": "Requis",
+      "NOT_REQUIRED": "Non requis",
+      "BLOCK": "Bloquer",
+      "ALLOW": "Autoriser"
     },
     "units": {
       "samples": "échantillons",
@@ -1058,6 +1065,15 @@
       "POLICY_STORED_VALUE_INVALID": "Une valeur de politique enregistrée est invalide.",
       "POLICY_SCOPE_CONFLICT": "Plusieurs dérogations actuelles existent pour ce paramètre et cette portée.",
       "LAB_SETTINGS_INVALID": "Les paramètres enregistrés du laboratoire sont invalides. Le changement n’a pas été sauvegardé."
+    },
+    "criticality": {
+      "CRITICAL": "Critique",
+      "IMPORTANT": "Important",
+      "NON_CRITICAL": "Non critique"
+    },
+    "ptLimits": {
+      "questionable": "Seuil discutable",
+      "unsatisfactory": "Seuil non satisfaisant"
     }
   },
   "referenceMaterials": {
@@ -1309,5 +1325,9 @@
     "chooseDuplicateParent": "Sélectionnez la position de l’échantillon d’origine",
     "analysis": "Analyse",
     "closeAnalyte": "Clôturer cet analyte"
+  },
+  "proficiencyTesting": {
+    "legacySigmaMissing": "Ce score historique d’aptitude a été enregistré sans sigma d’évaluation. Il n’a pas été recalculé ; fournissez un sigma valide dans une correction explicite.",
+    "legacySigmaNonpositive": "Ce score historique d’aptitude utilisait un sigma d’évaluation non positif ou non fini. Il n’a pas été recalculé ; fournissez un sigma valide dans une correction explicite."
   }
 }

@@ -646,7 +646,6 @@
     "warning": "Calibration Expiring Soon",
     "blocked": "Calibration Overdue / Blocked",
     "notConfigured": "Not Configured",
-
     "unconfiguredWarning": "Qualification is not configured; laboratory policy permits use with a warning.",
     "lastCalibration": "Last Calibration",
     "nextCalibration": "Next Due Date",
@@ -936,7 +935,10 @@
       "qc_curveMinR": "Minimum curve correlation",
       "qc_repeatabilityLimit": "Repeatability limit",
       "qc_blankCorrection": "Blank correction",
-      "qc_failAction": "Action on QC failure"
+      "qc_failAction": "Action on QC failure",
+      "equipment_requireEquipment": "Required equipment",
+      "equipment_unconfiguredReadiness": "Unconfigured equipment readiness",
+      "pt_zScoreLimits": "PT z-score limits"
     },
     "title": "Policies",
     "yes": "Yes",
@@ -1034,7 +1036,12 @@
       "NONE": "None",
       "SUBTRACT_MEAN_BLANK": "Blank correction",
       "FAIL_BATCH": "Fail batch",
-      "WARN": "Warn"
+      "WARN": "Warn",
+      "AUTO": "Automatic",
+      "REQUIRED": "Required",
+      "NOT_REQUIRED": "Not required",
+      "BLOCK": "Block",
+      "ALLOW": "Allow"
     },
     "units": {
       "samples": "samples",
@@ -1058,6 +1065,15 @@
       "POLICY_STORED_VALUE_INVALID": "A stored policy value is invalid.",
       "POLICY_SCOPE_CONFLICT": "Several current overrides exist for this setting and scope.",
       "LAB_SETTINGS_INVALID": "Stored laboratory settings are invalid. The change was not saved."
+    },
+    "criticality": {
+      "CRITICAL": "Critical",
+      "IMPORTANT": "Important",
+      "NON_CRITICAL": "Non-critical"
+    },
+    "ptLimits": {
+      "questionable": "Questionable boundary",
+      "unsatisfactory": "Unsatisfactory boundary"
     }
   },
   "referenceMaterials": {
@@ -1309,5 +1325,9 @@
     "chooseDuplicateParent": "Select the original sample position",
     "analysis": "Analysis",
     "closeAnalyte": "Close this analyte"
+  },
+  "proficiencyTesting": {
+    "legacySigmaMissing": "This historical PT score was recorded without an assessment sigma. It has not been recomputed; supply a valid sigma in an explicit correction.",
+    "legacySigmaNonpositive": "This historical PT score used a nonpositive or nonfinite assessment sigma. It has not been recomputed; supply a valid sigma in an explicit correction."
   }
 }

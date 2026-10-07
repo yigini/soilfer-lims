@@ -49,6 +49,7 @@ module.exports = async function globalSetup() {
         const { installQcRuns } = require('../scripts/install_qc_runs');
         const reviewed = installQcRuns({ dbPath: testDbPath, apply: false });
         installQcRuns({ dbPath: testDbPath, apply: true, planSha256: reviewed.backfillFingerprint });
+        require('../scripts/install_proficiency_evidence').installProficiencyEvidence({ dbPath: testDbPath, apply: true });
     }
 
     process.env.DATABASE_PATH = testDbPath;

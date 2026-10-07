@@ -76,7 +76,8 @@ describe('WP-30: Proficiency Testing Model & Reportable Indicators', () => {
 
         expect(round.assignedValue).toBe(6.50);
         expect(round.labResult).toBe(6.60);
-        expect(round.zScore).toBe(0.40);
+        // Audit #189 stores the unrounded score; rounding is only for display.
+        expect(round.zScore).toBe((6.60 - 6.50) / 0.25);
         expect(round.outcome).toBe('SATISFACTORY');
 
         const dbRecord = await prisma.proficiencyRound.findUnique({ where: { id: round.id } });

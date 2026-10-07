@@ -1509,7 +1509,6 @@
     "warning": "Calibración por Vencer",
     "blocked": "Calibración Vencida / Bloqueado",
     "notConfigured": "No Configurado",
-
     "unconfiguredWarning": "La cualificación no está configurada; la política del laboratorio permite el uso con una advertencia.",
     "lastCalibration": "Última Calibración",
     "nextCalibration": "Próxima Calibración",
@@ -2512,7 +2511,10 @@
       "qc_curveMinR": "Correlación mínima de la curva",
       "qc_repeatabilityLimit": "Límite de repetibilidad",
       "qc_blankCorrection": "Corrección del blanco",
-      "qc_failAction": "Acción ante fallo de QC"
+      "qc_failAction": "Acción ante fallo de QC",
+      "equipment_requireEquipment": "Equipo obligatorio",
+      "equipment_unconfiguredReadiness": "Disponibilidad del equipo sin configurar",
+      "pt_zScoreLimits": "Límites de puntuación z de aptitud"
     },
     "title": "Políticas",
     "yes": "Sí",
@@ -2610,7 +2612,12 @@
       "NONE": "Ninguno",
       "SUBTRACT_MEAN_BLANK": "Corrección del blanco",
       "FAIL_BATCH": "Rechazar lote",
-      "WARN": "Advertir"
+      "WARN": "Advertir",
+      "AUTO": "Automático",
+      "REQUIRED": "Obligatorio",
+      "NOT_REQUIRED": "No obligatorio",
+      "BLOCK": "Bloquear",
+      "ALLOW": "Permitir"
     },
     "units": {
       "samples": "muestras",
@@ -2634,6 +2641,15 @@
       "POLICY_STORED_VALUE_INVALID": "Un valor de política almacenado es inválido.",
       "POLICY_SCOPE_CONFLICT": "Hay varios ajustes vigentes para este ajuste y ámbito.",
       "LAB_SETTINGS_INVALID": "Los ajustes almacenados del laboratorio son inválidos. El cambio no se guardó."
+    },
+    "criticality": {
+      "CRITICAL": "Crítico",
+      "IMPORTANT": "Importante",
+      "NON_CRITICAL": "No crítico"
+    },
+    "ptLimits": {
+      "questionable": "Límite cuestionable",
+      "unsatisfactory": "Límite insatisfactorio"
     }
   },
   "referenceMaterials": {
@@ -2885,5 +2901,9 @@
     "chooseDuplicateParent": "Seleccione la posición de la muestra original",
     "analysis": "Análisis",
     "closeAnalyte": "Cerrar este analito"
+  },
+  "proficiencyTesting": {
+    "legacySigmaMissing": "Esta puntuación histórica de aptitud se registró sin sigma de evaluación. No se ha recalculado; indique un sigma válido mediante una corrección explícita.",
+    "legacySigmaNonpositive": "Esta puntuación histórica de aptitud usó un sigma de evaluación no positivo o no finito. No se ha recalculado; indique un sigma válido mediante una corrección explícita."
   }
 }
