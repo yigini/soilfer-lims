@@ -8,7 +8,7 @@ const { assertOwnedTestDatabase } = require('../helpers/testOwnedDatabase');
 const { installProficiencyEvidence } = require('../../scripts/install_proficiency_evidence');
 const owned = [];
 const hash = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-function fixture() {
+function fixture({ scope = true } = {}) {
     const f = beforeGuards({ actor: 'system:fixture', installWorkflowStateGuards: true });
     owned.push(f.file);
     require('../../scripts/install_result_attempt_links').installResultAttemptLinks({ dbPath: f.file, apply: true });
@@ -16,6 +16,7 @@ function fixture() {
     require('../../scripts/install_reference_materials').installReferenceMaterials({ dbPath: f.file, apply: true });
     require('../../scripts/install_qc_rules').installQcRules({ dbPath: f.file, apply: true });
     require('../../scripts/install_qc_runs').installQcRuns({ dbPath: f.file, apply: true });
+    if (scope) require('../../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: f.file, apply: true });
     return f.file;
 }
 function startup(file) {
@@ -32,6 +33,17 @@ test('direct startup refuses an uninstalled PT schema before app/writers load, w
     expect(result.stderr).toContain('PT_NOT_INSTALLED');
     expect(result.stderr).toContain('docs/audit/2.6-qc-audit-pt-equipment.md');
     expect(result.stdout).not.toMatch(/Enterprise Server|SCHEDULER/);
+    expect(hash(file)).toBe(before);
+});
+
+test('direct startup checks #187 before otherwise complete #189 evidence and makes no writes', () => {
+    const file = fixture({ scope: false });
+    installProficiencyEvidence({ dbPath: file, apply: true });
+    require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: file, apply: true });
+    const before = hash(file), result = startup(file);
+    expect(result.status).toBe(1); expect(result.stdout).toContain('QC_RUN_STARTUP_READY');
+    expect(result.stderr).toContain('QC_GATE_SCOPE_NOT_INSTALLED');
+    expect(result.stdout).not.toMatch(/PT_STARTUP_READY|RESULT_EQUIPMENT_STARTUP_READY|Enterprise Server|SCHEDULER/);
     expect(hash(file)).toBe(before);
 });
 test('direct startup refuses a corrupted PT receipt without repairing it or loading the application', () => {
