@@ -48,7 +48,7 @@ async function changeRunMembers(db, batchId, actor, input, { remove = false } = 
         for (const item of ordered) {
             await assertMemberScope(tx, actor, batch, item);
             if (item.batchId && item.batchId !== batchId) throw failure(409, 'QC_WORK_ITEM_ALREADY_BATCHED', 'A work item already belongs to another run.', { workItemId: item.id });
-            if (!remove && ids.includes(item.id) && ['SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(item.status)) {
+            if (!remove && ids.includes(item.id) && ['SUBMITTED', 'ACCEPTED', 'WAIVED', 'CANCELLED'].includes(item.status)) {
                 throw failure(400, 'QC_WORK_ITEM_SEALED', `Item ${item.id} is already sealed (${item.status})`);
             }
             if (!batch.analytes.some(row => row.provenance === 'NATIVE') && item.analysis !== batch.analysis &&

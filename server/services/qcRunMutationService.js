@@ -24,14 +24,19 @@ async function mutateQcRun(db, batchId, actor, input = {}, { explicit = false, c
         if (batch.status === 'CLOSED') throw failure(400, 'QC_BATCH_LOCKED', 'Batch is CLOSED and cannot be modified.');
         if (!batch.analytes.length) throw failure(409, 'QC_RUN_STORAGE_REQUIRED', 'Install the reviewed QC run migration before modifying this batch.');
         const native = isNative(batch), payload = hasQcPayload(input) || correction, clear = payload && !explicit && !correction && emptyQcPayload(input);
-        const dispositioned = batch.analytes.some(row => row.disposition);
-        const accepted = batch.analytes.some(row => ['QC_PASS', 'QC_WARN'].includes(row.status));
-        const canClose = batch.analytes.every(row => ['QC_PASS', 'QC_WARN', 'ACCEPTED_WITH_DEVIATION'].includes(row.status));
-        if (payload && (batch.status === 'QC_FAIL' || dispositioned) || requested !== undefined && requested !== batch.status &&
-            (batch.status === 'QC_FAIL' || dispositioned) && !(requested === 'CLOSED' && canClose)) {
+        const targetCode = input.analysisCode || (native && (payload || explicit) ? batch.analysis : null);
+        const targetsOf = run => targetCode ? run.analytes.filter(row => row.analysisCode === targetCode) : run.analytes;
+        let targets = targetsOf(batch);
+        if (!targets.length) throw failure(400, 'QC_ANALYSIS_NOT_IN_RUN', 'The analysis is not a member of this run.');
+        const locked = row => ['QC_FAIL', 'REJECTED', 'REPEAT_ORDERED'].includes(row.status) || Boolean(row.disposition);
+        const accepted = targets.some(row => ['QC_PASS', 'QC_WARN'].includes(row.status));
+        const reopen = accepted && (['OPEN', 'RUNNING'].includes(requested) || clear);
+        const statusTargets = reopen ? targets.filter(row => ['QC_PASS', 'QC_WARN'].includes(row.status)) : targets;
+        const canClose = targets.every(row => ['QC_PASS', 'QC_WARN', 'ACCEPTED_WITH_DEVIATION', 'CLOSED'].includes(row.status));
+        if (payload && targets.some(row => locked(row) || row.status === 'CLOSED') || requested !== undefined && requested !== batch.status &&
+            statusTargets.some(locked) && !(requested === 'CLOSED' && canClose)) {
             throw failure(409, 'QC_BATCH_LOCKED', 'Failed or dispositioned QC evidence is locked; use batch disposition.');
         }
-        const reopen = accepted && (['OPEN', 'RUNNING'].includes(requested) || clear);
         if (reopen && payload && !clear) throw failure(409, 'QC_REOPEN_SEPARATE_EVALUATION', 'Reopen the batch before submitting new QC measurements.');
         if (input.instrumentId !== undefined) {
             if (batch.startedAt && input.instrumentId !== batch.instrumentId) throw failure(409, 'QC_INSTRUMENT_FROZEN', 'Started instrument identity is frozen.');
@@ -49,7 +54,7 @@ async function mutateQcRun(db, batchId, actor, input = {}, { explicit = false, c
         }
         let evaluation = null;
         if (reopen) {
-            batch = native ? await reopenNativeRun(tx, batchId, actor, input.reason)
+            batch = native ? await reopenNativeRun(tx, batchId, actor, input.reason, targetCode)
                 : (await reopenCompatibilityRun(tx, batchId, actor, input.reason)).batch;
         } else if (payload || explicit) {
             if (native) {
@@ -66,25 +71,30 @@ async function mutateQcRun(db, batchId, actor, input = {}, { explicit = false, c
                 batch = result.batch; evaluation = result.evaluation;
             }
         }
+        targets = targetsOf(batch);
         if (!reopen && requested !== undefined) {
             if (['QC_PASS', 'QC_FAIL'].includes(requested)) {
-                const evidence = batch.analytes.map(row => currentAnalyteEvidence(batch, row.analysisCode));
+                const evidence = targets.map(row => currentAnalyteEvidence(batch, row.analysisCode));
                 if (evidence.some(row => !row.evaluation || !['PASS', 'WARN', 'FAIL', 'NOT_REQUIRED'].includes(row.result))) {
                     throw failure(400, 'QC_RULE_VIOLATION', 'Cannot set this status without evaluated QC evidence.');
                 }
-                if (requested === 'QC_PASS' && batch.status === 'QC_FAIL') throw failure(payload ? 400 : 409,
+                if (requested === 'QC_PASS' && targets.some(row => ['QC_FAIL', 'REJECTED', 'REPEAT_ORDERED'].includes(row.status))) throw failure(payload ? 400 : 409,
                     payload ? 'QC_RULE_VIOLATION' : 'QC_BATCH_LOCKED', 'Failed QC cannot become QC_PASS through a status update.');
-                if (requested === 'QC_FAIL' && batch.status !== 'QC_FAIL') throw failure(400, 'QC_RULE_VIOLATION', 'The requested failure status contradicts the evaluated QC evidence.');
+                if (requested === 'QC_FAIL' && !targets.some(row => row.status === 'QC_FAIL')) throw failure(400, 'QC_RULE_VIOLATION', 'The requested failure status contradicts the evaluated QC evidence.');
                 // The persisted aggregate follows the actual verdicts, never a
                 // manually supplied acceptance or failure label.
             } else if (requested === 'CLOSED') {
                 if (!hasPermission(actor, 'APPROVE_RESULTS')) throw failure(403, 'QC_CLOSE_PERMISSION_REQUIRED', 'Only lab managers can close batches.');
-                const closable = batch.analytes.every(row => ['QC_PASS', 'QC_WARN', 'ACCEPTED_WITH_DEVIATION'].includes(row.status));
+                const closable = targets.every(row => ['QC_PASS', 'QC_WARN', 'ACCEPTED_WITH_DEVIATION', 'CLOSED'].includes(row.status));
                 if (!closable) throw failure(payload ? 409 : 400, payload ? 'QC_BATCH_FAILED' : 'QC_RULE_VIOLATION', 'QC must be passed or accepted before closing.');
                 const now = new Date();
-                for (const row of batch.analytes) await tx.batchAnalyte.update({ where: { id: row.id }, data: { status: 'CLOSED' } });
-                await tx.batch.update({ where: { id: batchId }, data: { status: aggregateBatchStatus(batch.analytes.map(() => 'CLOSED')), completedAt: now } });
-                await event(tx, batchId, 'CLOSED', performedBy, now, { status: 'CLOSED' });
+                for (const row of targets) {
+                    if (row.status !== 'CLOSED') await tx.batchAnalyte.update({ where: { id: row.id }, data: { status: 'CLOSED' } });
+                    row.status = 'CLOSED';
+                }
+                const status = aggregateBatchStatus(batch.analytes, { startedAt: batch.startedAt });
+                await tx.batch.update({ where: { id: batchId }, data: { status, ...(status === 'CLOSED' && { completedAt: now }) } });
+                await event(tx, batchId, 'CLOSED', performedBy, now, { status, analysisCodes: targets.map(row => row.analysisCode) });
             } else if (!payload && !explicit) {
                 if (native && requested === 'RUNNING') batch = await startNativeRun(tx, batchId, actor, input);
                 else if (native && batch.startedAt && requested === 'OPEN' && batch.status !== 'OPEN') {

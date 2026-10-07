@@ -121,6 +121,57 @@ async function reviewedSample(f) {
     return f.db.sample.findUnique({ where: { id: item.sampleId }, include: { workItems: true, results: true } });
 }
 
+test.each([false, true])('a failed analyte leaves its sibling measurable, reopenable and closable (deviation=%s)', async deviation => {
+    const criteria = { blankPerBatch: 1, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0 };
+    const f = await fixture(1, criteria), code = `B-${randomUUID()}`;
+    await f.db.analysis.create({ data: { code, name: 'Independent sibling', unitCode: 'fixture-unit' } });
+    const method = await f.db.methodology.create({ data: { analysisCode: code, name: 'Sibling method' } });
+    await rules.change(f.actor, { labId: f.labId, analysisCode: code, methodologyId: method.id, criteria,
+        expectedVersion: 0, reason: 'Reviewed independent sibling criteria' }, { db: f.db });
+    const sampleId = (await f.db.workItem.findUnique({ where: { id: f.workItemIds[0] } })).sampleId;
+    const item = await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId, labId: f.labId,
+        analysis: code, methodologyId: method.id, status: 'IN_PROGRESS' } });
+    const run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, { ...f.input, workItemIds: [...f.workItemIds, item.id] })).id, f.actor);
+    const blank = run.positions.find(row => row.kind === 'BLANK');
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const auth = { Authorization: `Bearer ${token}` }, route = `/api/qc/batches/${run.id}`;
+        const failed = await request(app).post(`${route}/evaluate`).set(auth).send({ analysisCode: f.analysisCode, measurements: [{ positionId: blank.id, value: 10 }] });
+        expect(failed.status).toBe(200); expect(failed.body.status).toBe('QC_FAIL');
+        if (deviation) await dispositionBatch(run.id, 'PROCEED_WITH_WARNING', 'Reviewed matrix interference in the first analyte', f.actor, f.db, { analysisCode: f.analysisCode });
+        const oldObservations = await f.db.qcMeasurement.findMany({ where: { batchId: run.id, analysisCode: f.analysisCode } });
+        const oldEvaluations = await f.db.qcEvaluation.findMany({ where: { batchId: run.id, analysisCode: f.analysisCode } });
+        const oldDisposition = await f.db.batchDisposition.findMany({ where: { batchId: run.id, analysisCode: f.analysisCode } });
+        const sibling = await request(app).post(`${route}/evaluate`).set(auth).send({ analysisCode: code, measurements: [{ positionId: blank.id, value: 0.01 }] });
+        expect(sibling.status).toBe(200); expect(sibling.body.batch.analytes.find(row => row.analysisCode === code).status).toBe('QC_PASS');
+        const before = await evidence(f.db);
+        const locked = await request(app).post(`${route}/evaluate`).set(auth).send({ analysisCode: f.analysisCode, measurements: [{ positionId: blank.id, value: 0.01 }] });
+        expect(locked.status).toBe(409); expect(locked.body.code).toBe('QC_BATCH_LOCKED'); expect(await evidence(f.db)).toEqual(before);
+        const reopened = await request(app).put(route).set(auth).send({ status: 'OPEN', analysisCode: code, reason: 'Review only the accepted sibling observation' });
+        expect(reopened.status).toBe(200); expect(reopened.body.batch.analytes.find(row => row.analysisCode === code).result).toBeNull();
+        expect(reopened.body.batch.analytes.find(row => row.analysisCode === f.analysisCode).status).toBe(deviation ? 'ACCEPTED_WITH_DEVIATION' : 'QC_FAIL');
+        if (deviation) expect(reopened.body.batch.analytes.find(row => row.analysisCode === f.analysisCode).disposition.reason).toBe('Reviewed matrix interference in the first analyte');
+        const corrected = await request(app).post(`${route}/corrections`).set(auth).send({ analysisCode: code, reason: 'Reviewed sibling transcription', corrections: [{ positionId: blank.id, value: 0.02 }] });
+        expect(corrected.status).toBe(200); expect(corrected.body.batch.analytes.find(row => row.analysisCode === code).status).toBe('QC_PASS');
+        const closed = await request(app).put(route).set(auth).send({ status: 'CLOSED', analysisCode: code });
+        expect(closed.status).toBe(200); expect(closed.body.batch.analytes.find(row => row.analysisCode === code).status).toBe('CLOSED');
+        expect(closed.body.batch.analytes.find(row => row.analysisCode === f.analysisCode).status).toBe(deviation ? 'ACCEPTED_WITH_DEVIATION' : 'QC_FAIL');
+        expect(await f.db.qcMeasurement.findMany({ where: { batchId: run.id, analysisCode: f.analysisCode } })).toEqual(oldObservations);
+        expect(await f.db.qcEvaluation.findMany({ where: { batchId: run.id, analysisCode: f.analysisCode } })).toEqual(oldEvaluations);
+        expect(await f.db.batchDisposition.findMany({ where: { batchId: run.id, analysisCode: f.analysisCode } })).toEqual(oldDisposition);
+    });
+});
+
+test('an explicit method cannot replace recorded strict work-item methods with a lax QC rule', async () => {
+    const f = await fixture(), method = await f.db.methodology.create({ data: { analysisCode: f.analysisCode, name: 'Different lax method' } });
+    await rules.change(f.actor, { labId: f.labId, analysisCode: f.analysisCode, methodologyId: method.id,
+        criteria: { blankPerBatch: 0, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0 }, expectedVersion: 0,
+        reason: 'A separate method has independently reviewed criteria' }, { db: f.db });
+    const before = await evidence(f.db);
+    await expect(buildNativeRun(f.db, f.actor, { ...f.input, analyses: [{ analysisCode: f.analysisCode, methodologyId: method.id }] }))
+        .rejects.toMatchObject({ statusCode: 422, code: 'QC_BATCH_METHOD_AMBIGUOUS' });
+    expect(await evidence(f.db)).toEqual(before);
+});
+
 test('a real failed Native blocking run remains excluded from reports and publication after live QC becomes OFF', async () => {
     const f = await fixture(), lot = await referenceLot(f);
     const run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, { ...f.input,
@@ -458,6 +509,22 @@ test('reasoned corrections append two evaluation versions and exact measurements
     }
 });
 
+test('explicit evaluation after reopen appends fresh acceptance without rewriting retained readings', async () => {
+    const f = await fixture(), lot = await referenceLot(f);
+    const run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, { ...f.input,
+        analyses: [{ analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }] })).id, f.actor);
+    const first = await writeNativeMeasurements(f.db, run.id, f.actor, { measurements: readings(run) });
+    const observations = await f.db.qcMeasurement.findMany({ orderBy: { id: 'asc' } });
+    const reopened = await reopenNativeRun(f.db, run.id, f.actor, 'Recheck the retained evidence before acceptance');
+    expect(reopened.analytes[0]).toMatchObject({ status: 'QC_PENDING', result: null });
+    const accepted = await writeNativeMeasurements(f.db, run.id, f.actor, { analysisCode: f.analysisCode }, { explicit: true });
+    expect(accepted.analytes[0]).toMatchObject({ status: 'QC_PASS', result: 'PASS' });
+    expect(accepted.evaluations).toHaveLength(2);
+    expect(accepted.evaluations[0]).toEqual(first.evaluations[0]);
+    expect(accepted.evaluations[1]).toMatchObject({ supersedesId: first.evaluations[0].id, version: 2, verdict: 'PASS' });
+    expect(await f.db.qcMeasurement.findMany({ orderBy: { id: 'asc' } })).toEqual(observations);
+});
+
 test('native censoring retains null numeric observations, canonical qualifiers and the frozen method limit', async () => {
     const f = await fixture(), lot = await referenceLot(f), built = await buildNativeRun(f.db, f.actor, { ...f.input, analyses: [{ analysisCode: f.analysisCode,
         references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }] }), run = await startNativeRun(f.db, built.id, f.actor);
@@ -682,7 +749,10 @@ test('mixed-analyte evaluations and flags are independent; a shared lot correcti
     const failed = await writeNativeMeasurements(f.db, run.id, f.actor, { analysisCode: f.analysisCode, reason: 'Correct one analyte blank only',
         corrections: [{ positionId: run.positions.find(row => row.kind === 'BLANK').id, value: 0.223456789 }] }, { correction: true });
     expect(failed.analytes.find(row => row.analysisCode === f.analysisCode).status).toBe('QC_FAIL');
-    expect(failed.analytes.find(row => row.analysisCode === b.analysisCode).result).toBe('PASS');
+    // Reopening withdraws current acceptance; the unaffected prior PASS is still
+    // immutable historical evidence, rather than a current accepted verdict.
+    expect(failed.evaluations.filter(row => row.analysisCode === b.analysisCode).at(-1).verdict).toBe('PASS');
+    expect(failed.analytes.find(row => row.analysisCode === b.analysisCode).result).toBeNull();
     expect(failed.analytes.find(row => row.analysisCode === b.analysisCode).status).toBe('QC_PENDING');
     expect(await f.db.result.findUnique({ where: { id: resultB.id } })).toEqual(expect.objectContaining({ isValid: true, flags: '[]', value: resultB.value, numericValue: resultB.numericValue }));
     expect(await f.db.result.findUnique({ where: { id: resultA.id } })).toEqual(expect.objectContaining({ isValid: false, flags: '["QC_BATCH_FAILED"]', value: resultA.value, numericValue: resultA.numericValue, rawInput: resultA.rawInput }));

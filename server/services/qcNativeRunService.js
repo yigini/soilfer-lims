@@ -80,7 +80,7 @@ async function buildNativeRun(db, actor, input, { existingBatchId = null } = {})
             const itemLab = await policyService.resolveLab(item.assignedLab || item.labId || item.sample?.assignedLab, tx);
             if (itemLab?.id !== lab.id) throw error(403, 'QC_WORK_ITEM_SCOPE_DENIED', 'Work items must belong to the run laboratory.');
             if (item.batchId && item.batchId !== previous?.id) throw error(409, 'QC_WORK_ITEM_ALREADY_BATCHED', 'A work item already belongs to a run.', { workItemId: item.id });
-            if (['SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(item.status)) throw error(400, 'QC_WORK_ITEM_SEALED', 'A sealed work item cannot be attached to a run.', { workItemId: item.id, status: item.status });
+            if (['SUBMITTED', 'ACCEPTED', 'WAIVED', 'CANCELLED'].includes(item.status)) throw error(400, 'QC_WORK_ITEM_SEALED', 'A sealed work item cannot be attached to a run.', { workItemId: item.id, status: item.status });
             const key = JSON.stringify([item.sampleId, item.analysis]);
             if (memberships.has(key)) throw error(422, 'QC_BATCH_DUPLICATE_MEMBERSHIP', 'Select one active work item per sample and analysis.', { sampleId: item.sampleId, analysisCode: item.analysis });
             memberships.add(key);
@@ -103,6 +103,9 @@ async function buildNativeRun(db, actor, input, { existingBatchId = null } = {})
             const members = orderedItems.filter(item => item.analysis === selection.analysisCode), methods = new Set(members.map(item => item.methodologyId));
             const methodologyId = selection.methodologyId || (methods.size === 1 && !methods.has(null) && [...methods][0]);
             if (!methodologyId) throw error(422, 'QC_BATCH_METHOD_AMBIGUOUS', 'Select the method for this run analyte.', { analysisCode: selection.analysisCode });
+            if (members.some(item => item.methodologyId && item.methodologyId !== methodologyId)) {
+                throw error(422, 'QC_BATCH_METHOD_AMBIGUOUS', 'The selected method contradicts a recorded work-item method.', { analysisCode: selection.analysisCode });
+            }
             const method = await tx.methodology.findUnique({ where: { id: methodologyId } });
             const methodLab = method?.labId && await policyService.resolveLab(method.labId, tx);
             if (!method || method.analysisCode !== selection.analysisCode || method.labId && methodLab?.id !== lab.id) {

@@ -36,12 +36,12 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         if (!batch.analytes.length || batch.analytes.some(row => row.provenance !== 'NATIVE')) throw failure(409, 'QC_NATIVE_RUN_REQUIRED', 'This entry requires a native run.');
         if (!batch.startedAt) throw failure(409, 'QC_RUN_NOT_STARTED', 'Start the run before entering or evaluating QC.');
         if (batch.status === 'CLOSED') throw failure(400, 'QC_BATCH_LOCKED', 'Closed QC evidence is locked.');
-        if (batch.status === 'QC_FAIL' || batch.analytes.some(row => currentAnalyteEvidence(batch, row.analysisCode).disposition)) {
-            throw failure(409, 'QC_BATCH_LOCKED', 'Failed or dispositioned evidence is locked; use batch disposition.');
-        }
         if (correction && !reason) throw failure(400, 'QC_CORRECTION_REASON_REQUIRED', 'A correction reason is required.');
         const analysisCode = input.analysisCode || batch.analysis, selected = batch.analytes.find(row => row.analysisCode === analysisCode);
         if (!selected) throw failure(400, 'QC_ANALYSIS_NOT_IN_RUN', 'The analysis is not a member of this run.');
+        const locked = row => ['QC_FAIL', 'REJECTED', 'REPEAT_ORDERED', 'CLOSED'].includes(row.status) ||
+            Boolean(currentAnalyteEvidence(batch, row.analysisCode).disposition);
+        if (locked(selected)) throw failure(409, 'QC_BATCH_LOCKED', 'Failed or dispositioned analyte evidence is locked; use batch disposition.');
         const criteria = JSON.parse(selected.criteriaSnapshot), now = new Date();
         if (input.expectedValues !== undefined && (!input.expectedValues || typeof input.expectedValues !== 'object' || Array.isArray(input.expectedValues))) {
             throw failure(400, 'REFERENCE_VALUE_MISMATCH', 'Submit expected values by actual position id.');
@@ -65,7 +65,7 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         const references = input.references ?? [];
         if (!Array.isArray(references) || new Set(references.map(row => row?.positionId)).size !== references.length) throw failure(400, 'REFERENCE_VALUE_MISMATCH', 'Submit distinct reference placements.');
         const plans = [], affected = new Set([analysisCode]);
-        if (explicit && input.analysisCode === undefined) batch.analytes.filter(row => JSON.parse(row.criteriaSnapshot).qcMode === 'OFF').forEach(row => affected.add(row.analysisCode));
+        if (explicit && input.analysisCode === undefined) batch.analytes.filter(row => !locked(row) && JSON.parse(row.criteriaSnapshot).qcMode === 'OFF').forEach(row => affected.add(row.analysisCode));
         for (const entry of references) {
             const position = batch.positions.find(row => row.id === entry?.positionId && row.historicalSnapshotSeq == null);
             if (!position) throw failure(400, 'REFERENCE_VALUE_MISMATCH', 'Reference position is not in this run.');
@@ -77,6 +77,9 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
             const plan = await preparePositionBindings(tx, { batch, position, analyses: served, actor,
                 referenceMaterialId: entry.referenceMaterialId, referenceValueIds, reason: correction ? reason : null, optionalAnalysisCodes }, now);
             plans.push(plan); plan.bindings.forEach(row => affected.add(row.analysisCode));
+        }
+        if ([...affected].some(code => locked(batch.analytes.find(row => row.analysisCode === code)))) {
+            throw failure(409, 'QC_BATCH_LOCKED', 'A shared reference change would alter locked analyte evidence.');
         }
         if (correction && [...affected].some(code => {
             const row = batch.analytes.find(analyte => analyte.analysisCode === code);
@@ -104,14 +107,14 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         }
         const evaluations = [];
         for (const code of affected) {
-            const analyte = batch.analytes.find(row => row.analysisCode === code), previous = currentAnalyteEvidence(batch, code).evaluation;
+            const analyte = batch.analytes.find(row => row.analysisCode === code), previousEvidence = currentAnalyteEvidence(batch, code), previous = previousEvidence.evaluation;
             const evaluated = evaluateNativeEvidence(candidate, analyte), requested = explicit && (code === analysisCode || input.analysisCode === undefined && evaluated.mode === 'OFF');
             if (!previous && !observations.some(row => row.analysisCode === code) && plans.some(plan =>
                 plan.bindings.some(row => row.analysisCode === code && row.serviceStatus === 'NOT_SERVED'))) continue;
             const changed = observations.some(row => row.analysisCode === code) || plans.some(plan => plan.replacements.some(row => row.previous.analysisCode === code) ||
                 plan.bindings.some(row => row.analysisCode === code && !batch.positions.some(position => (position.references || []).some(old => old.id === row.id))));
             const shouldEvaluate = requested || correction && previous || evaluated.mode !== 'OFF' && evaluated.missingPositions.length === 0;
-            if (!shouldEvaluate || previous && !changed) continue;
+            if (!shouldEvaluate || previous && !changed && !(requested && previousEvidence.result === null)) continue;
             if (evaluated.mode !== 'ADVISORY' && evaluated.mode !== 'OFF') {
                 if (evaluated.missingPositions.length) throw failure(400, 'QC_VALUES_MISSING', 'Required QC values are missing.', { positionIds: evaluated.missingPositions });
                 if (evaluated.unboundPositions.length) throw failure(400, 'QC_REFERENCE_UNBOUND', 'Required references are unbound.', { positionIds: evaluated.unboundPositions });

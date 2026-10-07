@@ -21,7 +21,11 @@ function currentDisposition(batch, evaluation, analysisCode) {
     const details = parsed(evaluation?.details, {});
     const latest = (batch.dispositions || []).filter(row => !row.analysisCode || row.analysisCode === analysisCode).sort((a, b) => time(b.decidedAt) - time(a.decidedAt))[0];
     if (!latest) return details.legacy ? parsed(details.disposition) : null;
-    const reopen = (batch.events || []).filter(row => row.type === 'REOPENED' && (!parsed(row.payload, {})?.analysisCode || parsed(row.payload, {}).analysisCode === analysisCode)).sort((a, b) => time(b.at) - time(a.at))[0];
+    const reopen = (batch.events || []).filter(row => {
+        const payload = parsed(row.payload, {});
+        return row.type === 'REOPENED' && (Array.isArray(payload.analysisCodes) ? payload.analysisCodes.includes(analysisCode)
+            : !payload.analysisCode || payload.analysisCode === analysisCode);
+    }).sort((a, b) => time(b.at) - time(a.at))[0];
     if (reopen && time(reopen.at) >= time(latest.decidedAt)) return null;
     return { decision: decisions[latest.decision] || latest.decision, canonicalDecision: latest.decision,
         reason: latest.reason, by: latest.decidedBy, at: latest.decidedAt, analysisCode: latest.analysisCode };
