@@ -29,9 +29,11 @@ function currentDisposition(batch, evaluation, analysisCode) {
 function currentAnalyteEvidence(batch, analysisCode = batch.analysis) {
     const evaluation = latestEvaluation(batch, analysisCode), details = parsed(evaluation?.details, {});
     const isolatedRound = details.legacy === true || details.entryMode === 'LEGACY_RESUBMISSION' || details.entryMode === 'CORRECTION' && details.compatibility === true;
-    const reopened = isolatedRound && (batch.events || []).some(row => row.type === 'REOPENED' &&
-        parsed(row.payload, {}).discardCurrentEvidence && parsed(row.payload, {}).previousEvaluationIds?.includes(evaluation?.id));
-    const selectedPositions = new Set(reopened ? [] : details.positionIds || []), selectedMeasurements = new Set(reopened ? [] : details.measurementIds || []);
+    const reopenEvent = (batch.events || []).find(row => row.type === 'REOPENED' &&
+        parsed(row.payload, {}).previousEvaluationIds?.includes(evaluation?.id));
+    const hiddenRound = isolatedRound && parsed(reopenEvent?.payload, {}).discardCurrentEvidence;
+    const currentVerdict = reopenEvent ? null : evaluation?.verdict ?? null;
+    const selectedPositions = new Set(hiddenRound ? [] : details.positionIds || []), selectedMeasurements = new Set(hiddenRound ? [] : details.measurementIds || []);
     const built = (batch.events || []).filter(row => ['RUN_BUILT', 'RUN_REORDERED', 'RUN_STARTED'].includes(row.type)).slice().reverse().sort((a, b) => time(b.at) - time(a.at))[0];
     const served = new Map((parsed(built?.payload, {}).positions || []).map(row => [row.id, row.servedAnalytes || []]));
     function serves(row) {
@@ -92,8 +94,8 @@ function currentAnalyteEvidence(batch, analysisCode = batch.analysis) {
                 referenceUse: row.referenceUse ?? null, referenceSnapshot: row.referenceSnapshot ?? null }),
             referenceMaterialId: row.referenceMaterialId ?? null, referenceValueId: row.referenceValueId ?? null });
     }
-    return { analysisCode, result: evaluation?.verdict ?? null, evaluation, positions, measurements: current,
-        qcResults: qcItems.length || evaluation?.verdict === 'NOT_REQUIRED' ? { ...qcResults, result: evaluation?.verdict ?? null } : null, qcItems,
+    return { analysisCode, result: currentVerdict, evaluation, positions, measurements: current,
+        qcResults: qcItems.length || currentVerdict === 'NOT_REQUIRED' ? { ...qcResults, result: currentVerdict } : null, qcItems,
         disposition: currentDisposition(batch, evaluation, analysisCode) };
 }
 

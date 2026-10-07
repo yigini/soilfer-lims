@@ -74,6 +74,7 @@ async function mutateQcRun(db, batchId, actor, input = {}, { explicit = false, c
                 }
                 if (requested === 'QC_PASS' && batch.status === 'QC_FAIL') throw failure(payload ? 400 : 409,
                     payload ? 'QC_RULE_VIOLATION' : 'QC_BATCH_LOCKED', 'Failed QC cannot become QC_PASS through a status update.');
+                if (requested === 'QC_FAIL' && batch.status !== 'QC_FAIL') throw failure(400, 'QC_RULE_VIOLATION', 'The requested failure status contradicts the evaluated QC evidence.');
                 // The persisted aggregate follows the actual verdicts, never a
                 // manually supplied acceptance or failure label.
             } else if (requested === 'CLOSED') {
@@ -91,7 +92,8 @@ async function mutateQcRun(db, batchId, actor, input = {}, { explicit = false, c
                 } else if (!native || !batch.startedAt) {
                     const status = requested === 'RUNNING' ? 'IN_RUN' : 'OPEN';
                     for (const row of batch.analytes) await tx.batchAnalyte.update({ where: { id: row.id }, data: { status } });
-                    await tx.batch.update({ where: { id: batchId }, data: { status: requested } });
+                    await tx.batch.update({ where: { id: batchId }, data: { status: requested,
+                        ...(requested === 'RUNNING' && !batch.startedAt && { startedAt: new Date() }) } });
                     if (batch.status !== requested) await event(tx, batchId, 'STATUS_CHANGED', performedBy, new Date(), { status: requested });
                     await flagBatchResults(tx, batchId, requested);
                 }

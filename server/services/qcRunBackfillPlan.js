@@ -164,7 +164,11 @@ function inventoryLegacyQcRuns(db) {
         counts.historicalSnapshots += historical.length;
         const reopened = batch.status === 'OPEN' && (historical.some(row => row.snapshot.status && row.snapshot.status !== 'OPEN') ||
             historyEntries.some(event => event?.status && event.status !== 'OPEN'));
-        const frozen = batch.status !== 'OPEN' || historical.length > 0 || currentTyped.length > 0 || batch.qcResults !== null || batch.disposition !== null || reopened;
+        const currentQc = parsed(batch.qcResults).value;
+        const collections = ['blanks', 'controls', 'duplicates'];
+        const recordedQc = object(currentQc) && (collections.some(key => Array.isArray(currentQc[key]) && currentQc[key].length > 0) ||
+            Object.entries(currentQc).some(([key, value]) => !collections.includes(key) && value !== null && value !== undefined));
+        const frozen = batch.status !== 'OPEN' || historical.length > 0 || currentTyped.length > 0 || recordedQc || batch.disposition !== null || reopened;
         const disposition = parsed(batch.disposition).value;
         let status;
         try { status = legacyBatchAnalyteStatus(batch.status, { reopened,

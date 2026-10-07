@@ -12,6 +12,22 @@ function run() {
 const result = code => ({ id: code, sampleId: 'sample', param: code, batchId: 'mixed-run', isCurrent: true, isValid: true });
 const item = code => ({ id: `i${code}`, sampleId: 'sample', analysis: code, batchId: 'mixed-run', status: 'ACCEPTED' });
 
+test.each(['NATIVE', 'PROFILE_ONLY', 'LEGACY_MIGRATED'])('a reopened %s round retains its PASS evaluation but cannot report QC within limits', provenance => {
+    const batch = run(); batch.status = 'OPEN'; batch.analytes[0].status = 'QC_PENDING'; batch.analytes[0].provenance = provenance;
+    if (provenance !== 'NATIVE') batch.evaluations[0].details = JSON.stringify({ legacy: provenance === 'LEGACY_MIGRATED',
+        entryMode: provenance === 'PROFILE_ONLY' ? 'LEGACY_RESUBMISSION' : undefined, positionIds: [], measurementIds: [] });
+    batch.events.push({ id: 'reopen', type: 'REOPENED', at: new Date(), payload: JSON.stringify({
+        analysisCodes: ['A'], previousEvaluationIds: ['e0'], discardCurrentEvidence: provenance !== 'NATIVE' }) });
+    expect(analyteGateView(batch, 'A').result).toBeNull();
+    expect(batch.evaluations[0].verdict).toBe('PASS');
+    const evidence = freezeReportEvidence([result('A')], [item('A')], [batch]);
+    expect(evidence.qc.withinLimits).toBe(false);
+    expect(evidence.qc.deviations).toEqual([{ analysisCode: 'A', batchId: batch.id, qcStatus: 'QC_PENDING', dispositionReason: null }]);
+    for (const locale of ['en', 'es', 'es-419', 'fr', 'pt']) {
+        expect(describeReportEvidence(evidence, locale).qcStatement).not.toContain(require(`../../locales/${locale}.json`).resultReports.qcWithinLimits);
+    }
+});
+
 test('report/review gates use independent analyte verdicts and fail closed for missing membership', () => {
     const batch = run();
     expect(checkBatchDisposition(analyteGateView(batch, 'A')).allowed).toBe(true);

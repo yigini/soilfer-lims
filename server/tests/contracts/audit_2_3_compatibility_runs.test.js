@@ -21,14 +21,18 @@ const owned = [];
 const input = (blank = 0.0123456789) => ({ blanks: [{ value: blank }], controls: [{ expected: 7.123456789, measured: 7.123456780 }],
     duplicates: [{ value1: 2.123456789, value2: 2.123456780 }, { value1: 2.123456789, value2: 2.123456780 }] });
 
-async function fixture({ migrated = false, sampleMember = false } = {}) {
+async function fixture({ migrated = false, sampleMember = false, finalClear = false } = {}) {
     const labId = randomUUID(), analysisCode = randomUUID(), username = 'system:fixture', batchId = randomUUID();
     const sampleId = randomUUID(), workItemId = randomUUID();
     const historical = beforeGuards({ actor: username, schemaVariant: 'PRE_1_3_SAMPLE_CODES',
         samples: sampleMember ? [{ id: sampleId, originalId: sampleId, assignedLab: labId, status: 'PROCESSING', updatedAt: Date.now() }] : [],
         workItems: sampleMember ? [{ id: workItemId, sampleId, labId, analysis: analysisCode, batchId, rackPosition: 3, status: 'IN_PROGRESS', updatedAt: Date.now() }] : [],
         batches: migrated ? [{ id: batchId, labId, analysis: analysisCode, status: 'OPEN', createdBy: username,
-            qcResults: JSON.stringify({ blanks: [], controls: [], duplicates: [] }), workItemIds: JSON.stringify(sampleMember ? [workItemId] : []), history: '[]', profile: 'RACK_40' }] : [],
+            qcResults: JSON.stringify({ blanks: [], controls: [], duplicates: [] }), workItemIds: JSON.stringify(sampleMember ? [workItemId] : []),
+            history: JSON.stringify([{ status: 'OPEN', changedBy: username, timestamp: new Date().toISOString() },
+                ...(finalClear ? [{ action: 'QC_EVIDENCE_SNAPSHOT', seq: 1, snapshot: { status: 'QC_PASS',
+                    qcResults: JSON.stringify({ ...input(), overallStatus: 'QC_PASS' }), qcItems: [], disposition: null,
+                    workItemIds: sampleMember ? [workItemId] : [] } }] : [])]), profile: 'RACK_40' }] : [],
         relatedRows: { Lab: [{ id: labId, code: `CODE-${labId}`, name: 'Compatibility fixture lab', country: 'TEST', updatedAt: Date.now() }],
             User: [{ id: username, username, email: 'compatibility@example.test', password: 'fixture', role: 'SUPER_ADMIN', updatedAt: Date.now() }] } });
     const record = { file: historical.file, db: null }; owned.push(record);
@@ -67,6 +71,70 @@ test('empty compatibility creation leaves all deprecated JSON null and resolves 
     expect(f.batch.analytes[0]).toMatchObject({ provenance: 'PROFILE_ONLY', methodologyId: null, criteriaSnapshot: null, crmOrdinal: null });
     expect(f.batch.runProfile.profileKey).toBe('RACK_40');
     expect(await f.db.qcMeasurement.count()).toBe(0); expect(await f.db.qcEvaluation.count()).toBe(0);
+});
+
+async function unbatchedMember(f) {
+    const sampleId = randomUUID();
+    await createSampleFixture(f.db, { data: { id: sampleId, originalId: sampleId, assignedLab: f.labId, status: 'PROCESSING' } });
+    return createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId, labId: f.labId, assignedLab: f.labId,
+        analysis: f.analysisCode, status: 'ASSIGNED' } });
+}
+
+test('a migrated never-run OPEN batch with main default empty QC arrays still accepts and removes real items', async () => {
+    const f = await fixture({ migrated: true }), item = await unbatchedMember(f);
+    const original = await f.db.batch.findUnique({ where: { id: f.batch.id } });
+    expect(f.batch.analytes[0].legacyMembershipFrozen).toBe(false);
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const auth = { Authorization: `Bearer ${token}` }, route = `/api/qc/batches/${f.batch.id}/items`;
+        const added = await request(app).post(route).set(auth).send({ workItemIds: [item.id] });
+        expect(added.status).toBe(200); expect(await f.db.batchPositionWorkItem.count()).toBe(1);
+        const removed = await request(app).delete(route).set(auth).send({ workItemIds: [item.id] });
+        expect(removed.status).toBe(200); expect(await f.db.batchPositionWorkItem.count()).toBe(0);
+    });
+    const retained = await f.db.batch.findUnique({ where: { id: f.batch.id } });
+    for (const key of ['qcResults', 'history', 'disposition', 'workItemIds']) expect(retained[key]).toBe(original[key]);
+});
+
+test('a migrated final-clear round retains historical evidence and refuses a real item add with zero writes', async () => {
+    const f = await fixture({ migrated: true, finalClear: true }), item = await unbatchedMember(f);
+    expect(f.batch.analytes[0].legacyMembershipFrozen).toBe(true);
+    expect(f.batch.analytes[0].evaluation.verdict).toBe('INCOMPLETE');
+    expect(await f.db.qcEvaluation.count()).toBe(2);
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const before = await evidence(f.db);
+        const refused = await request(app).post(`/api/qc/batches/${f.batch.id}/items`).set({ Authorization: `Bearer ${token}` })
+            .send({ workItemIds: [item.id] });
+        expect(refused.status).toBe(409); expect(refused.body.code).toBe('BATCH_MEMBERSHIP_FROZEN');
+        expect(await evidence(f.db)).toEqual(before);
+    });
+});
+
+test.each([false, true])('first RUNNING transition freezes compatibility membership permanently (migrated=%s)', async migrated => {
+    const f = await fixture({ migrated }), item = await unbatchedMember(f);
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const auth = { Authorization: `Bearer ${token}` }, route = `/api/qc/batches/${f.batch.id}`;
+        const started = await request(app).put(route).set(auth).send({ status: 'RUNNING' });
+        expect(started.status).toBe(200);
+        const firstStart = (await f.db.batch.findUnique({ where: { id: f.batch.id } })).startedAt;
+        expect(firstStart).toBeInstanceOf(Date);
+        expect((await request(app).put(route).set(auth).send({ status: 'RUNNING' })).status).toBe(200);
+        expect((await f.db.batch.findUnique({ where: { id: f.batch.id } })).startedAt).toEqual(firstStart);
+        expect((await request(app).put(route).set(auth).send({ status: 'OPEN' })).status).toBe(200);
+        const before = await evidence(f.db);
+        const refused = await request(app).post(`${route}/items`).set(auth).send({ workItemIds: [item.id] });
+        expect(refused.status).toBe(409); expect(refused.body.code).toBe('BATCH_MEMBERSHIP_FROZEN');
+        expect(await evidence(f.db)).toEqual(before);
+    });
+});
+
+test('manual QC_FAIL contradicting a passing evaluation is refused rather than acknowledged as a no-op', async () => {
+    const f = await fixture(); await writeCompatibilityMeasurements(f.db, f.batch.id, f.actor, input());
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const before = await evidence(f.db);
+        const refused = await request(app).put(`/api/qc/batches/${f.batch.id}`).set({ Authorization: `Bearer ${token}` }).send({ status: 'QC_FAIL' });
+        expect(refused.status).toBe(400); expect(refused.body.code).toBe('QC_RULE_VIOLATION');
+        expect(await evidence(f.db)).toEqual(before);
+    });
 });
 
 test('actual compatibility PUT and evaluate routes retain pass/reopen/resubmit cycles, missing-value refusals and manager authority', async () => {
