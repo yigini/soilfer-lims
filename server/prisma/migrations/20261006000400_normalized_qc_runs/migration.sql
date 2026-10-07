@@ -445,6 +445,7 @@ WHEN NEW."id" IS NOT OLD."id"
   OR NEW."boundAt" IS NOT OLD."boundAt"
   OR NEW."correctionReason" IS NOT OLD."correctionReason"
   OR OLD.supersededById IS NOT NULL OR NEW.supersededById IS NULL OR NEW.supersededById=NEW.id
+  OR EXISTS (SELECT 1 FROM "BatchPositionReference" r WHERE r.id=NEW.supersededById)
   OR EXISTS (SELECT 1 FROM "BatchPositionReference" r WHERE r.id<>OLD.id AND r.supersededById=NEW.supersededById)
 BEGIN
   SELECT RAISE(ABORT, 'QC_REFERENCE_IMMUTABLE');
@@ -516,6 +517,7 @@ WHEN NEW."id" IS NOT OLD."id"
   OR NEW."correctionReason" IS NOT OLD."correctionReason"
   OR NEW."legacySource" IS NOT OLD."legacySource"
   OR OLD.supersededById IS NOT NULL OR NEW.supersededById IS NULL OR NEW.supersededById=NEW.id
+  OR EXISTS (SELECT 1 FROM "QcMeasurement" q WHERE q.id=NEW.supersededById)
   OR EXISTS (SELECT 1 FROM "QcMeasurement" q WHERE q.id<>OLD.id AND q.supersededById=NEW.supersededById)
 BEGIN
   SELECT RAISE(ABORT, 'QC_MEASUREMENT_IMMUTABLE');

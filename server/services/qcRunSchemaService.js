@@ -18,7 +18,7 @@ function validBackfillCounts(counts) {
 }
 
 function classifyQcRunSchema(db, source) {
-    const differences = [];
+    const differences = [], bootstrapRebuild = [];
     for (const [table, fields] of [['Batch', ['id', 'labId', 'analysis', 'qcResults', 'workItemIds', 'disposition', 'history']],
         ['BatchQcResult', ['id', 'batchId', 'type', 'referenceMaterialId', 'referenceValueId']],
         ['WorkItem', ['id', 'sampleId', 'analysis', 'methodologyId', 'batchId', 'rackPosition']], ['Sample', ['id']],
@@ -41,7 +41,10 @@ function classifyQcRunSchema(db, source) {
         if (!wanted || clause && !wanted.includes(deferredClause) || normalized(comparable) !== normalized(source.freshTables[name] || '')) {
             throw fail('QC_RUN_SOURCE_MISMATCH', 'Normalized QC tables differ from the fresh Prisma oracle.');
         }
-        if (actual && (actual.type !== 'table' || normalized(actual.sql) !== normalized(wanted))) differences.push(`${name} definition differs`);
+        if (actual && (actual.type !== 'table' || normalized(actual.sql) !== normalized(wanted))) {
+            if (clause && actual.type === 'table' && normalized(actual.sql) === normalized(comparable)) bootstrapRebuild.push(name);
+            else differences.push(`${name} definition differs`);
+        }
         return Boolean(actual);
     });
     const batchColumns = db.prepare('PRAGMA table_xinfo("Batch")').all(), batchFks = db.prepare('PRAGMA foreign_key_list("Batch")').all();
@@ -68,7 +71,8 @@ function classifyQcRunSchema(db, source) {
         try { receipt = JSON.parse(marker.details); } catch { /* Refuse malformed receipts. */ }
         if (receipt?.migrationSha256 !== sources.migrationSha256 || receipt?.oracleSha256 !== sources.oracleSha256 ||
             !/^[a-f0-9]{64}$/.test(receipt?.backfillFingerprint || '') ||
-            !validBackfillCounts(receipt?.backfillCounts)) differences.push('Normalized QC receipt differs');
+            !validBackfillCounts(receipt?.backfillCounts) || !Array.isArray(receipt?.bootstrapRebuild) ||
+            ![JSON.stringify([]), JSON.stringify(['QcMeasurement', 'BatchPositionReference'])].includes(JSON.stringify(receipt.bootstrapRebuild))) differences.push('Normalized QC receipt differs');
     }
     const base = [...tables, ...columns, ...installedIndexes.slice(0, 11)], release = [...installedIndexes.slice(11), ...installedGuards, Boolean(marker)];
     let classification;
@@ -76,9 +80,17 @@ function classifyQcRunSchema(db, source) {
     else if (base.every(Boolean) && release.every(value => !value)) classification = 'FRESH_PRISMA';
     else if ([...base, ...release].every(Boolean)) classification = 'COMPLETE';
     else differences.push('Normalized QC installation is partial or unmarked');
+    if (bootstrapRebuild.length && (classification !== 'FRESH_PRISMA' || bootstrapRebuild.length !== 2)) differences.push('Deferred QC foreign keys require the empty fresh-Prisma bootstrap');
+    if (classification === 'FRESH_PRISMA') {
+        const objects = db.prepare(`SELECT type,name FROM sqlite_master WHERE sql IS NOT NULL AND type IN ('index','trigger') AND tbl_name IN (${TABLES.map(() => '?').join(',')})`).all(...TABLES);
+        const allowed = new Set(indexes.slice(0, 11).map(row => row.name));
+        if (objects.some(row => row.type !== 'index' || !allowed.has(row.name))) differences.push('Fresh normalized QC schema has foreign indexes or triggers');
+    }
     if (differences.length) throw fail('QC_RUN_SCHEMA_MISMATCH', 'Normalized QC schema differs from the release.', differences);
     const counts = Object.fromEntries(TABLES.map((table, index) => [table, tables[index] ? db.prepare(`SELECT COUNT(*) n FROM "${table}"`).get().n : 0]));
     if (classification === 'FRESH_PRISMA' && Object.values(counts).some(Boolean)) throw fail('QC_RUN_INTEGRITY_REFUSED', 'Unmarked normalized QC rows need review before import.');
-    return { classification, sources, counts, receipt, guards: guards.map(row => row.name), indexes: indexes.map(row => row.name) };
+    return { classification, sources, counts, receipt,
+        bootstrapRebuild: classification === 'COMPLETE' ? receipt.bootstrapRebuild : bootstrapRebuild.length ? ['QcMeasurement', 'BatchPositionReference'] : [],
+        guards: guards.map(row => row.name), indexes: indexes.map(row => row.name) };
 }
 module.exports = { classifyQcRunSchema, MARKER, TABLES };

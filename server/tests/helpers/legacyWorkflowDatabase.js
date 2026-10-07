@@ -47,6 +47,39 @@ const VARIANTS = Object.freeze({
 // Legacy values are inserted into a new schema before its real additive guards
 // are installed. Existing constraints are never dropped, disabled or bypassed.
 function beforeGuards(options) {
+    // #186 part 20: closed DDL-only probes on an independently owned file.
+    // Keep dynamic fixture SQL in this existing test authority, never runtime.
+    if (Object.hasOwn(options, 'qcBootstrap')) {
+        if (Object.keys(options).length !== 3 || Object.keys(options).some(key => !['actor', 'file', 'qcBootstrap'].includes(key)) ||
+            !['CREATE_PRISMA', 'FRESH_NONDEFERRED', 'COMPLETE_NONDEFERRED'].includes(options.qcBootstrap)) throw new Error('Unknown owned QC bootstrap probe.');
+        const file = assertOwnedTestDatabase(options.file, options.actor), mode = options.qcBootstrap;
+        if (mode === 'CREATE_PRISMA') {
+            if (fs.existsSync(file)) throw new Error('Fresh Prisma fixture refuses an existing file.');
+            const cli = path.resolve(__dirname, '../../node_modules/prisma/build/index.js'), cwd = path.resolve(__dirname, '../..');
+            const execute = args => require('node:child_process').execFileSync(process.execPath, [cli, ...args], { cwd, stdio: 'pipe', encoding: 'utf8' });
+            // Linux/CI uses real db push. Windows executes the same fresh DDL
+            // emitted by Prisma because its schema engine rejects owned URLs.
+            if (process.platform === 'win32') {
+                const sql = execute(['migrate', 'diff', '--from-empty', '--to-schema', path.resolve(cwd, 'prisma/schema.prisma'), '--script']);
+                const db = new Database(file); try { db.pragma('foreign_keys = ON'); db.exec(sql); } finally { db.close(); }
+            } else execute(['db', 'push', '--url', `file:${file}`]);
+            return { file };
+        }
+        const db = new Database(file, { fileMustExist: true }), source = require('../../services/qcRunMigrationSource').loadQcRunMigrationSource();
+        try {
+            db.pragma('foreign_keys = ON');
+            const tables = mode === 'FRESH_NONDEFERRED' ? Object.keys(source.freshTables) : ['QcMeasurement', 'BatchPositionReference'];
+            if (tables.some(table => db.prepare(`SELECT count(*) n FROM "${table}"`).get().n)) throw new Error('Owned QC DDL probe requires empty target tables.');
+            db.transaction(() => {
+                for (const table of ['QcMeasurement', 'BatchPositionReference']) {
+                    db.exec(`DROP TABLE "${table}"`); db.exec(source.freshTables[table]);
+                    for (const match of (mode === 'COMPLETE_NONDEFERRED' ? source.sql : source.schemaSql).matchAll(new RegExp(`^CREATE (?:UNIQUE )?INDEX "[^"]+" ON "${table}"[\\s\\S]*?;`, 'gm'))) db.exec(match[0]);
+                    if (mode === 'COMPLETE_NONDEFERRED') for (const match of source.guardsSql.matchAll(new RegExp(`^CREATE TRIGGER "[^"]+" BEFORE (?:INSERT|UPDATE|DELETE) ON "${table}"[\\s\\S]*?^END;`, 'gm'))) db.exec(match[0]);
+                }
+            })();
+            return { file };
+        } finally { db.close(); }
+    }
     const allowedOptions = ['actor', 'file', 'samples', 'workItems', 'batches', 'preMigrationSnapshot',
         'schemaVariant', 'markerPending', 'migrationOrder', 'relatedRows', 'installWorkflowStateGuards',
         'reviewedStatusPlan', 'installerStatusRace'];

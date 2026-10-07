@@ -21,8 +21,8 @@ const QC_RULE_LOADER = 'services/qcRuleMigrationSource.js';
 const QC_RULE_LOADER_SHA256 = '222ad51af3fe26ea4bddb9e4d522898857c0ec15f31295c0ce5f81b5dbc487fa';
 const QC_RULE_SQL_SHA256 = '4ee7f414ae3e6228faf52fe81d32bde2bdaf6ecb975ca62a438494db42e58b06';
 const QC_RUN_LOADER = 'services/qcRunMigrationSource.js';
-const QC_RUN_LOADER_SHA256 = '1e07d7635743573e19c3d41841b48779b9257027e288ca62151ee1cca306c016';
-const QC_RUN_SQL_SHA256 = '500c0246a9b71fe9292b327b76bad646f72f397354de7d39316faa20ad990b4d';
+const QC_RUN_LOADER_SHA256 = '9443bc78374817300000410723c97eb7d0d2f18b9f8e1b2fdfa5704c62149436';
+const QC_RUN_SQL_SHA256 = '2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221df71635e2046';
 const WORKFLOW_SOURCES = Object.freeze({
     evidence: { directory: '20261005000000_workflow_state_evidence', sha256: 'ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552' },
     guards: { directory: '20261005000100_workflow_state_guards', sha256: '84921ef45fa8609621b38908de5261d716820f2135f2dde1b9a20fafa6fc81ed' }
@@ -273,7 +273,7 @@ function scanSource(source, filename, exceptions = []) {
         } catch { return null; }
     }
     function referenceMigrationSql(p, qcRule = false, qcRun = false) {
-        if (!p?.isMemberExpression() || p.node.computed || !(qcRun ? ['sql', 'schemaSql', 'guardsSql'] : ['sql', 'guardsSql']).includes(p.node.property.name)) return null;
+        if (!p?.isMemberExpression() || p.node.computed || !(qcRun ? ['sql', 'schemaSql', 'guardsSql', 'bootstrapSql'] : ['sql', 'guardsSql']).includes(p.node.property.name)) return null;
         const object = p.get('object');
         if (!object.isIdentifier()) return null;
         const binding = object.scope.getBinding(object.node.name);
@@ -292,7 +292,7 @@ function scanSource(source, filename, exceptions = []) {
         if (!declaration.node.id.properties.some(property => property.type === 'ObjectProperty' && !property.computed && property.key.name === functionName && property.value.name === functionName)) return null;
         if (binding.referencePaths.some(reference => {
             const member = reference.parentPath;
-            if (!member.isMemberExpression() || member.node.computed || !(qcRun ? ['sql', 'schemaSql', 'guardsSql', 'sha256', 'oracleSha256', 'freshTables'] : ['sql', 'guardsSql', 'sha256', 'oracleSha256', 'freshTables']).includes(member.node.property.name)) return true;
+            if (!member.isMemberExpression() || member.node.computed || !(qcRun ? ['sql', 'schemaSql', 'guardsSql', 'bootstrapSql', 'sha256', 'oracleSha256', 'freshTables'] : ['sql', 'guardsSql', 'sha256', 'oracleSha256', 'freshTables']).includes(member.node.property.name)) return true;
             let end = member;
             while (end.parentPath?.isMemberExpression() && end.parentPath.get('object').node === end.node) end = end.parentPath;
             return (end.parentPath?.isAssignmentExpression() && end.parentPath.get('left').node === end.node) || end.parentPath?.isUpdateExpression() || end.parentPath?.isUnaryExpression({ operator: 'delete' });
@@ -303,6 +303,7 @@ function scanSource(source, filename, exceptions = []) {
             if (createHash('sha256').update(bytes).digest('hex') !== (qcRun ? QC_RUN_SQL_SHA256 : qcRule ? QC_RULE_SQL_SHA256 : REFERENCE_SQL_SHA256)) return null;
             const sql = bytes.toString('utf8');
             if (qcRun) {
+                if (p.node.property.name === 'bootstrapSql') return require(path.join(root, loader)).loadQcRunMigrationSource().bootstrapSql;
                 const boundary = sql.indexOf('CREATE UNIQUE INDEX "BatchAnalyte_crm_ordinal_unique"');
                 return p.node.property.name === 'schemaSql' ? sql.slice(0, boundary) : p.node.property.name === 'guardsSql' ? sql.slice(boundary) : sql;
             }

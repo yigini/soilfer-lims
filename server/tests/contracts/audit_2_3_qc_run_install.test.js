@@ -44,6 +44,7 @@ function fixture({ qcResults = null, history = null, status = 'OPEN', dispositio
     if (fresh) {
         const connection = new Database(file), source = loadQcRunMigrationSource();
         try { connection.exec(source.schemaSql); } finally { connection.close(); }
+        if (fresh === 'prisma') beforeGuards({ actor: 'system:fixture', file, qcBootstrap: 'FRESH_NONDEFERRED' });
     }
     return { file, labId, batchId, sampleId, workItemId, analysis, username, resultId };
 }
@@ -72,6 +73,81 @@ function expectOriginalEvidence(reader, before) {
     }
 }
 afterAll(() => { for (const file of files) if (fs.existsSync(file)) { fs.chmodSync(file, 0o600); fs.unlinkSync(file); } });
+
+test('fresh Prisma DDL installs deferred FKs once and records its empty-table bootstrap (Linux exercises actual db push)', () => {
+    const file = assertOwnedTestDatabase(path.resolve(__dirname, '../.tmp', `audit_prisma_qc_${randomUUID()}.db`), 'system:fixture');
+    files.push(file);
+    beforeGuards({ actor: 'system:fixture', file, qcBootstrap: 'CREATE_PRISMA' });
+    const connection = new Database(file);
+    try {
+        connection.exec('CREATE TABLE "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL,"appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"details" TEXT)');
+        for (const table of ['QcMeasurement', 'BatchPositionReference']) expect(connection.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(table).sql)
+            .not.toContain('DEFERRABLE INITIALLY DEFERRED');
+    } finally { connection.close(); }
+    installReferenceMaterials({ dbPath: file, apply: true }); installQcRules({ dbPath: file, apply: true });
+    const before = state(file), digest = hash(file), plan = installQcRuns({ dbPath: file });
+    expect(plan).toMatchObject({ classification: 'FRESH_PRISMA', bootstrapRebuild: ['QcMeasurement', 'BatchPositionReference'], totalChanges: 0 });
+    expect(hash(file)).toBe(digest); expect(state(file)).toEqual(before);
+    const outcome = installQcRuns({ dbPath: file, apply: true });
+    expect(outcome).toMatchObject({ classification: 'COMPLETE', bootstrapRebuild: ['QcMeasurement', 'BatchPositionReference'], backfillCount: 0 });
+    const reader = new Database(file, { readonly: true });
+    try {
+        for (const table of ['QcMeasurement', 'BatchPositionReference']) expect(reader.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(table).sql)
+            .toContain('DEFERRABLE INITIALLY DEFERRED');
+        expect(JSON.parse(reader.prepare('SELECT details FROM _schema_migrations WHERE id=?').get('186_normalized_qc_runs').details).bootstrapRebuild)
+            .toEqual(['QcMeasurement', 'BatchPositionReference']);
+        for (const table of before.tables.filter(row => !['QcMeasurement', 'BatchPositionReference', '_schema_migrations'].includes(row.name))) {
+            expect(reader.prepare(`SELECT * FROM "${table.name}" ORDER BY rowid`).all()).toEqual(table.rows);
+            expect(reader.prepare('PRAGMA table_xinfo("' + table.name + '")').all()).toEqual(table.columns);
+            expect(reader.prepare('PRAGMA foreign_key_list("' + table.name + '")').all()).toEqual(table.fks);
+        }
+        expect(reader.pragma('integrity_check', { simple: true })).toBe('ok'); expect(reader.pragma('foreign_key_check')).toEqual([]);
+    } finally { reader.close(); }
+    const applied = hash(file);
+    expect(installQcRuns({ dbPath: file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0, bootstrapRebuild: ['QcMeasurement', 'BatchPositionReference'] });
+    expect(assertQcRunStartupReady(file).totalChanges).toBe(0); expect(hash(file)).toBe(applied);
+}, 30000);
+
+test.each(['BatchAnalyte', 'BatchPosition', 'BatchPositionWorkItem', 'BatchPositionReference', 'QcMeasurement', 'QcEvaluation', 'BatchDisposition', 'BatchEvent'])
+('fresh Prisma bootstrap refuses a seeded %s row without changing any bytes, schema or evidence', table => {
+    const f = fixture({ fresh: 'prisma', membership: true }), db = new Database(f.file), p = randomUUID();
+    try {
+        if (table === 'BatchAnalyte') insert(db, table, { id: randomUUID(), batchId: f.batchId, labId: f.labId, analysisCode: f.analysis, provenance: 'PROFILE_ONLY', status: 'OPEN' });
+        if (['BatchPosition', 'BatchPositionWorkItem', 'BatchPositionReference', 'QcMeasurement'].includes(table)) insert(db, 'BatchPosition', { id: p, batchId: f.batchId, position: 1,
+            kind: table === 'BatchPositionWorkItem' ? 'SAMPLE' : table === 'BatchPositionReference' ? 'LRM' : 'BLANK',
+            sampleId: table === 'BatchPositionWorkItem' ? f.sampleId : null, provenance: 'PROFILE_ONLY' });
+        if (table === 'BatchPositionWorkItem') insert(db, table, { id: randomUUID(), positionId: p, workItemId: f.workItemId, analysisCode: f.analysis });
+        if (table === 'BatchPositionReference') {
+            const lot = randomUUID(); insert(db, 'ReferenceMaterial', { id: lot, labId: f.labId, code: lot, name: 'Bootstrap refusal fixture', kind: 'LRM', matrix: 'SOIL', lotNumber: lot, status: 'ACTIVE', createdBy: f.username });
+            insert(db, table, { id: randomUUID(), positionId: p, analysisCode: f.analysis, referenceMaterialId: lot, referenceUse: 'LRM', referenceSnapshot: '{}' });
+        }
+        if (table === 'QcMeasurement') insert(db, table, { id: randomUUID(), batchId: f.batchId, positionId: p, analysisCode: f.analysis, replicateNo: 1, value: .1, rawInput: '0.1' });
+        if (table === 'QcEvaluation') insert(db, table, { id: randomUUID(), batchId: f.batchId, analysisCode: f.analysis, version: 1, verdict: 'INCOMPLETE', details: '{}' });
+        if (table === 'BatchDisposition') insert(db, table, { id: randomUUID(), batchId: f.batchId, analysisCode: f.analysis, decision: 'REPEAT_BATCH', reason: 'Bootstrap refusal fixture' });
+        if (table === 'BatchEvent') insert(db, table, { id: randomUUID(), batchId: f.batchId, type: 'RUN_BUILT', payload: '{}' });
+    } finally { db.close(); }
+    const before = state(f.file), digest = hash(f.file);
+    for (const apply of [false, true]) expect(() => installQcRuns({ dbPath: f.file, apply })).toThrow(expect.objectContaining({ code: 'QC_RUN_INTEGRITY_REFUSED' }));
+    expect(hash(f.file)).toBe(digest); expect(state(f.file)).toEqual(before);
+});
+
+test.each(['column', 'index', 'trigger', 'complete', 'late failure'])('fresh Prisma bootstrap refuses %s and preserves the exact original file', fault => {
+    const f = fixture({ fresh: 'prisma' }), db = new Database(f.file);
+    try {
+        if (fault === 'column') db.exec('ALTER TABLE "QcMeasurement" ADD COLUMN foreignColumn TEXT');
+        if (fault === 'index') db.exec('CREATE INDEX "foreign_qc_index" ON "QcMeasurement"("rawInput")');
+        if (fault === 'trigger') db.exec('CREATE TRIGGER "foreign_qc_trigger" BEFORE INSERT ON "QcMeasurement" BEGIN SELECT 1; END');
+        if (fault === 'late failure') db.exec("CREATE TRIGGER reject_qc_receipt BEFORE INSERT ON _schema_migrations WHEN NEW.id='186_normalized_qc_runs' BEGIN SELECT RAISE(ABORT,'injected QC receipt failure'); END");
+    } finally { db.close(); }
+    if (fault === 'complete') {
+        apply(f); beforeGuards({ actor: 'system:fixture', file: f.file, qcBootstrap: 'COMPLETE_NONDEFERRED' });
+    }
+    const before = state(f.file), digest = hash(f.file);
+    const reviewed = fault === 'late failure' ? installQcRuns({ dbPath: f.file }).backfillFingerprint : null;
+    expect(() => installQcRuns({ dbPath: f.file, apply: true, planSha256: reviewed }))
+        .toThrow(fault === 'late failure' ? 'injected QC receipt failure' : expect.objectContaining({ code: 'QC_RUN_SCHEMA_MISMATCH' }));
+    expect(hash(f.file)).toBe(digest); expect(state(f.file)).toEqual(before);
+});
 
 test.each(['QcMeasurement', 'BatchPositionReference'])('the %s oracle exception requires exactly its deferred self-FK and refuses other DDL changes', table => {
     const f = fixture(), source = loadQcRunMigrationSource(), reader = new Database(f.file, { readonly: true });
@@ -524,10 +600,16 @@ test.each(['receipt', 'measurement'])('%s failure rolls back the entire reviewed
     const f = fixture({ fresh: fault === 'measurement', qcResults: JSON.stringify(evaluated({ duplicates: [{ value1: 7, value2: 7.01, status: 'PASS' }] })) }), db = new Database(f.file);
     try {
         if (fault === 'receipt') db.exec('CREATE TRIGGER qc186_receipt_fault BEFORE INSERT ON _schema_migrations WHEN NEW.id=\'186_normalized_qc_runs\' BEGIN SELECT RAISE(ABORT,\'OWNED_QC_RECEIPT_FAULT\'); END;');
-        else db.exec('CREATE TRIGGER qc186_measurement_fault BEFORE INSERT ON QcMeasurement WHEN NEW.replicateNo=2 BEGIN SELECT RAISE(ABORT,\'OWNED_QC_MEASUREMENT_FAULT\'); END;');
     } finally { db.close(); }
     const before = state(f.file), digest = hash(f.file);
-    expect(() => apply(f)).toThrow(fault === 'receipt' ? 'OWNED_QC_RECEIPT_FAULT' : 'OWNED_QC_MEASUREMENT_FAULT');
+    const originalPrepare = Database.prototype.prepare;
+    const injected = fault === 'measurement' ? jest.spyOn(Database.prototype, 'prepare').mockImplementation(function (sql) {
+        const statement = originalPrepare.call(this, sql);
+        if (!sql.startsWith('INSERT INTO "QcMeasurement"')) return statement;
+        return { run(row) { if (row.replicateNo === 2) throw Error('OWNED_QC_MEASUREMENT_FAULT'); return statement.run(row); } };
+    }) : null;
+    try { expect(() => apply(f)).toThrow(fault === 'receipt' ? 'OWNED_QC_RECEIPT_FAULT' : 'OWNED_QC_MEASUREMENT_FAULT'); }
+    finally { injected?.mockRestore(); }
     expect(state(f.file)).toEqual(before); expect(hash(f.file)).toBe(digest);
 });
 
@@ -549,7 +631,7 @@ test('the closed normalized-QC loader resolves only digest-bound segments and re
     const source = loadQcRunMigrationSource();
     expect(source.sql).toBe(source.schemaSql + source.guardsSql);
     const header = "const {loadQcRunMigrationSource}=require('../services/qcRunMigrationSource');const source=loadQcRunMigrationSource();";
-    for (const segment of ['sql', 'schemaSql', 'guardsSql']) expect(scanSource(header + `db.exec(source.${segment})`, 'scripts/qc-run-probe.js')).toEqual([]);
+    for (const segment of ['sql', 'schemaSql', 'guardsSql', 'bootstrapSql']) expect(scanSource(header + `db.exec(source.${segment})`, 'scripts/qc-run-probe.js')).toEqual([]);
     for (const code of ['const alias=source;db.exec(alias.sql)', 'source.schemaSql=input;db.exec(source.schemaSql)', 'delete source.guardsSql;db.exec(source.guardsSql)', 'source.freshTables.BatchPosition=input;db.exec(source.sql)']) {
         expect(scanSource(header + code, 'scripts/qc-run-probe.js')).toEqual(expect.arrayContaining([expect.objectContaining({ code: 'UNRESOLVED_WORKFLOW_SQL' })]));
     }

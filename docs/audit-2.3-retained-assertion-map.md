@@ -9,13 +9,18 @@ Fixture and helper edits without baseline assertions are mapped below. Every pri
 | Helper hunk before (main) | Current | Purpose and retained protection |
 | --- | --- | --- |
 | server/tests/globalSetup.js:46 | server/tests/globalSetup.js:46 | After the existing release installers, dry-run and apply the actual QC run installer with its reviewed fingerprint on the owned test database. |
-| server/tests/helpers/legacyWorkflowDatabase.js:155 | server/tests/helpers/legacyWorkflowDatabase.js:155 | Account for precisely four nullable Batch fields and all eight new models when comparing the unchanged historical datamodel; partial new model sets still refuse. |
-| server/tests/helpers/legacyWorkflowDatabase.js:228 | server/tests/helpers/legacyWorkflowDatabase.js:237 | Leave the three new release partial indexes for the actual installer when creating a schema-only disposable historical file. No installed database indexes are removed. |
+| server/tests/helpers/legacyWorkflowDatabase.js:49 | server/tests/helpers/legacyWorkflowDatabase.js:50 | Add closed QC bootstrap probes inside the existing fixture authority. They require system:fixture, NODE_ENV=test and the separate owned file; only CREATE_PRISMA, FRESH_NONDEFERRED or COMPLETE_NONDEFERRED are accepted. Fresh creation uses actual Prisma output; malformed completed-schema probes recreate only the two empty new tables. No arbitrary SQL or workflow rows are accepted. |
+| server/tests/helpers/legacyWorkflowDatabase.js:157 | server/tests/helpers/legacyWorkflowDatabase.js:191 | Account for precisely four nullable Batch fields and all eight new models when comparing the unchanged historical datamodel; partial new model sets still refuse. |
+| server/tests/helpers/legacyWorkflowDatabase.js:231 | server/tests/helpers/legacyWorkflowDatabase.js:273 | Leave the three new release partial indexes for the actual installer when creating a schema-only disposable historical file. No installed database indexes are removed. |
 | server/tests/helpers/workflowFixtures.js:63 | server/tests/helpers/workflowFixtures.js:63 | Keep QC-referenced sample/work-item fixture rows until owned database teardown. Existing ownership restrictions remain; cleanup only deletes explicitly selected, unreferenced fixture ids. |
 | server/tests/helpers/workflowWriteScanner.js:20 | server/tests/helpers/workflowWriteScanner.js:20 | Add exact QC run loader and migration source hashes alongside all retained release hashes. |
 | server/tests/helpers/workflowWriteScanner.js:195 | server/tests/helpers/workflowWriteScanner.js:198 | Resolve SQL from the new reviewed loader through the same source scanner. |
-| server/tests/helpers/workflowWriteScanner.js:267 | server/tests/helpers/workflowWriteScanner.js:272 | Allow schemaSql only for the QC run loader; require the exact const binding, named import and unmixed loader source. Existing reference/QC-rule paths retain their checks. |
-| server/tests/helpers/workflowWriteScanner.js:287 | server/tests/helpers/workflowWriteScanner.js:292 | Retain binding immutability and SHA256 verification; recognize the QC schema/guard boundary only after both exact source hashes match. |
+| server/tests/helpers/workflowWriteScanner.js:270 | server/tests/helpers/workflowWriteScanner.js:275 | Allow schemaSql and bootstrapSql only for the QC run loader; require the exact const binding, named import and unmixed loader source. Existing reference/QC-rule paths retain their checks. |
+| server/tests/helpers/workflowWriteScanner.js:277 | server/tests/helpers/workflowWriteScanner.js:282 | Select only the explicit QC run loader function/path alongside the retained release loaders. |
+| server/tests/helpers/workflowWriteScanner.js:290 | server/tests/helpers/workflowWriteScanner.js:295 | Retain binding immutability for every allowed scalar; aliases, mutations and shadow loaders still refuse. |
+| server/tests/helpers/workflowWriteScanner.js:296 | server/tests/helpers/workflowWriteScanner.js:301 | Retain loader and migration SHA256 verification. |
+| server/tests/helpers/workflowWriteScanner.js:299 | server/tests/helpers/workflowWriteScanner.js:305 | Resolve the loader's fixed two-table bootstrap DDL and schema/guard boundary only after both exact source hashes match. No general SQL or new caller exemption is introduced. |
+
 
 ## server/tests/contracts/audit_0_14_number_entry.test.js
 

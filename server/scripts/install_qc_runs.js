@@ -32,6 +32,22 @@ function importRows(db, plan) {
 function assertIntegrity(db) {
     if (db.pragma('integrity_check', { simple: true }) !== 'ok' || db.pragma('foreign_key_check').length) throw fail('QC_RUN_INTEGRITY_REFUSED', 'Normalized QC installation requires an intact database.');
 }
+function bootstrapDeferredTables(db, schemaSource, schema) {
+    if (!schema.bootstrapRebuild.length) return [];
+    // #186 part 20 permits only these two brand-new, empty Prisma tables.
+    // Classification and emptiness are rechecked under the install write lock.
+    if (schema.classification !== 'FRESH_PRISMA' || Object.values(schema.counts).some(Boolean)) {
+        throw fail('QC_RUN_INTEGRITY_REFUSED', 'Deferred QC bootstrap requires an empty unmarked fresh schema.');
+    }
+    const source = loadQcRunMigrationSource();
+    db.exec(source.bootstrapSql);
+    assertIntegrity(db);
+    const rebuilt = classifyQcRunSchema(db, schemaSource);
+    if (rebuilt.classification !== 'FRESH_PRISMA' || rebuilt.bootstrapRebuild.length) {
+        throw fail('QC_RUN_INTEGRITY_REFUSED', 'Deferred QC bootstrap did not reproduce authoritative DDL.');
+    }
+    return ['QcMeasurement', 'BatchPositionReference'];
+}
 function installQcRuns({ dbPath, apply = false, planSha256 = null } = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('QC_RUN_DATABASE_REQUIRED', 'An explicit database path is required.');
     const source = loadQcRunMigrationSource(), target = path.resolve(dbPath);
@@ -59,9 +75,10 @@ function installQcRuns({ dbPath, apply = false, planSha256 = null } = {}) {
             const current = inventoryLegacyQcRuns(db);
             if (current.fingerprint !== plan.fingerprint || current.refusals.length) throw fail('QC_RUN_PLAN_STALE', 'Legacy evidence changed after planning. No rows changed.');
             if (locked.classification === 'PRE_186') db.exec(source.schemaSql);
+            const bootstrapRebuild = bootstrapDeferredTables(db, schemaSource, locked);
             importRows(db, current);
             db.exec(source.guardsSql);
-            const receipt = { ...locked.sources, backfillFingerprint: current.fingerprint, backfillCounts: current.counts };
+            const receipt = { ...locked.sources, backfillFingerprint: current.fingerprint, backfillCounts: current.counts, bootstrapRebuild };
             db.prepare('INSERT INTO "_schema_migrations" (id,details) VALUES (?,?)').run(MARKER, JSON.stringify(receipt));
             const complete = classifyQcRunSchema(db, schemaSource); assertIntegrity(db);
             if (complete.classification !== 'COMPLETE') throw fail('QC_RUN_INTEGRITY_REFUSED', 'Normalized QC installation did not complete.');

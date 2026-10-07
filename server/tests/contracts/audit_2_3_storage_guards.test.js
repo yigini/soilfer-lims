@@ -120,6 +120,10 @@ test.each(['QcMeasurement', 'BatchPositionReference'])('%s deferred supersession
         expect(f.db.prepare(`SELECT * FROM "${table}" ORDER BY id`).all()).toEqual(before);
         expect(f.db.prepare('SELECT * FROM AuditLog ORDER BY id').all()).toEqual(audits);
         expect(() => f.db.prepare(`UPDATE "${table}" SET supersededById=? WHERE id=?`).run(originals[0].id, originals[0].id)).toThrow();
+        // Mark-then-insert uses a fresh replacement id, never an existing row
+        // belonging to another observation or a preceding supersession chain.
+        expect(() => f.db.prepare(`UPDATE "${table}" SET supersededById=? WHERE id=?`).run(originals[1].id, originals[0].id))
+            .toThrow(table === 'QcMeasurement' ? 'QC_MEASUREMENT_IMMUTABLE' : 'QC_REFERENCE_IMMUTABLE');
         expect(() => f.db.transaction(() => {
             originals.forEach(row => f.db.prepare(`UPDATE "${table}" SET supersededById=? WHERE id=?`).run(target, row.id));
         })()).toThrow(table === 'QcMeasurement' ? 'QC_MEASUREMENT_IMMUTABLE' : 'QC_REFERENCE_IMMUTABLE');
