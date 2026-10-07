@@ -28,3 +28,5 @@ server/services/qcRuleMigrationSource.js text eol=lf
 server/prisma/migrations/20261006000400_normalized_qc_runs/migration.sql text eol=lf
 server/prisma/migrations/20261006000400_normalized_qc_runs/fresh-prisma-tables.json text eol=lf
 server/services/qcRunMigrationSource.js text eol=lf
+server/prisma/migrations/20261007000300_proficiency_evidence/migration.sql text eol=lf
+server/services/proficiencyMigrationSource.js text eol=lf
