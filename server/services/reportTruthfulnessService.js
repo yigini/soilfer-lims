@@ -7,9 +7,26 @@ function parseObject(value) {
     try { return JSON.parse(value); } catch { return null; }
 }
 
-function freezeReportEvidence(results, workItems, batches) {
+function freezeReportEvidence(results, workItems, batches, options = {}) {
     const deviations = [];
+    const acknowledgements = [], calibrationBracketRepeats = [];
     for (const result of results) {
+        const gate = options.qcGates?.[result.id];
+        if (gate) {
+            const acknowledgement = options.qcAcknowledgements?.[result.id];
+            if (acknowledgement) acknowledgements.push({ resultId: result.id, ...acknowledgement });
+            const brackets = (gate.contributions || []).filter(row => row.calibrationBracketRepeat && row.value === 'PASS');
+            for (const row of brackets) calibrationBracketRepeats.push({ analysisCode: result.param, ...row.calibrationBracketRepeat });
+            if (gate.value === 'PASS' && !gate.contributions?.some(row => row.notRequired) && gate.mode !== 'OFF') continue;
+            const notRequired = gate.mode === 'OFF' || gate.contributions?.some(row => row.notRequired) ||
+                !gate.required && ['NO_BATCH', 'NOT_EVALUATED'].includes(gate.value);
+            deviations.push({ analysisCode: result.param, batchId: gate.batchIds[0] || null,
+                qcStatus: gate.value === 'REPEAT' ? 'REPEAT' : notRequired ? 'NOT_REQUIRED' : gate.value,
+                dispositionReason: gate.dispositionReason || null,
+                ...(acknowledgement && { acknowledgedBy: acknowledgement.actor, acknowledgedAt: acknowledgement.at,
+                    acknowledgementReason: acknowledgement.reason, acknowledgementAuditLogId: acknowledgement.auditLogId }) });
+            continue;
+        }
         const ids = linkedBatchIds(result, workItems);
         if (!ids.length) deviations.push({ analysisCode: result.param, batchId: null, qcStatus: 'NOT_RECORDED', dispositionReason: null });
         for (const batchId of ids) {
@@ -36,7 +53,8 @@ function freezeReportEvidence(results, workItems, batches) {
         return [{ workItemId: item.id, analysis: item.analysis, status: item.status, steps: receipt.steps,
             recordedAt: receipt.recordedAt || null, recordedBy: receipt.recordedBy || null, observations: receipt.observations || null }];
     });
-    return { qc: { withinLimits: results.length > 0 && deviations.length === 0, deviations }, preparation };
+    return { qc: { withinLimits: results.length > 0 && deviations.length === 0, deviations,
+        ...(acknowledgements.length && { acknowledgements }), ...(calibrationBracketRepeats.length && { calibrationBracketRepeats }) }, preparation };
 }
 
 function describeReportEvidence(evidence, locale = 'en') {
@@ -48,7 +66,7 @@ function describeReportEvidence(evidence, locale = 'en') {
     const qcStatement = qc?.withinLimits ? labels.qcWithinLimits
         : qc?.deviations?.length ? `${qc.deviations.every(row => row.qcStatus === 'NOT_REQUIRED') ? labels.qcNotRequired :
             qc.deviations.every(row => row.qcStatus === 'EVIDENCE_INCOMPLETE') ? labels.qcEvidenceIncomplete : labels.qcDeviations}\n${qc.deviations.map(row =>
-            `${row.analysisCode} · ${row.batchId || labels.noBatch}: ${statusLabel(row)}${row.dispositionReason ? ` · ${row.dispositionReason}` : ''}`).join('\n')}`
+            `${row.analysisCode} · ${row.batchId || labels.noBatch}: ${statusLabel(row)}${row.dispositionReason ? ` · ${row.dispositionReason}` : ''}${row.acknowledgementReason ? ` · ${labels.qcAcknowledgedBy}: ${row.acknowledgedBy} · ${row.acknowledgementReason}` : ''}`).join('\n')}`
             : labels.qcNotRecorded;
     const preparationStatement = ['DRYING', 'PREPARATION'].map(analysis => {
         const records = (evidence?.preparation || []).filter(record => record.analysis === analysis);
@@ -56,7 +74,9 @@ function describeReportEvidence(evidence, locale = 'en') {
         return records.length ? records.map(record => `${label}: ${record.status} · ${record.steps.join('; ')}`).join('\n')
             : `${label}: ${labels.notRecorded}`;
     }).join('\n');
-    return { qcStatement, preparationStatement };
+    const bracketStatement = (qc?.calibrationBracketRepeats || []).map(row =>
+        `${labels.qcCalibrationBracketRepeatInfo}: ${row.analysisCode} · ${row.batchId}`).join('\n');
+    return { qcStatement: bracketStatement ? `${qcStatement}\n${bracketStatement}` : qcStatement, preparationStatement };
 }
 
 module.exports = { freezeReportEvidence, describeReportEvidence };

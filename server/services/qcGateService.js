@@ -127,8 +127,9 @@ async function forWorkItem(item, db) {
     const results = (await db.result.findMany({ where: { sampleId: String(item.sampleId), isCurrent: true } }))
         .filter(result => require('./reportResultGovernance').governsResult(item, result));
     const candidates = results.length ? results : [{ sampleId: item.sampleId, param: item.analysis, batchId: item.batchId, methodologyId: item.methodologyId }];
+    const workItems = await db.workItem.findMany({ where: { sampleId: String(item.sampleId) } });
     return Promise.all(candidates.map(async result => ({ workItemId: item.id, ...(result.id && { resultId: result.id }),
-        gate: await forResult(result, { sample, workItems: [item], db }) })));
+        gate: await forResult(result, { sample, workItems, db }) })));
 }
 
 async function requireAcceptance(items, acknowledgement, db) {
@@ -152,4 +153,35 @@ async function recordAcknowledgements(rows, acknowledgement, actor, tx, now = ne
     return records;
 }
 
-module.exports = { forResult, gateFromEvidence, decision, forWorkItem, requireAcceptance, recordAcknowledgements };
+function evidenceKey(gate) {
+    return JSON.stringify({ value: gate.value, mode: gate.mode, modeSource: gate.modeSource,
+        batchIds: [...gate.batchIds].sort(), evaluationId: gate.evaluationId, dispositionId: gate.dispositionId,
+        contributions: (gate.contributions || []).map(row => ({ batchId: row.batchId, value: row.value,
+            evaluationId: row.evaluationId, dispositionId: row.dispositionId })).sort((a, b) => a.batchId.localeCompare(b.batchId)) });
+}
+
+async function resolveForSample(sample, batches, db) {
+    const qcGates = {}, qcAcknowledgements = {};
+    const results = (sample.results || []).filter(row => row.isCurrent &&
+        !isNonMeasurement({ analysis: row.param }));
+    const audits = results.length ? await db.auditLog.findMany({ where: { entity: 'RESULT',
+        entityId: { in: results.map(row => row.id) }, action: 'QC_GATE_ACKNOWLEDGED' }, orderBy: { timestamp: 'desc' } }) : [];
+    for (const result of results) {
+        const gate = await forResult(result, { sample, qcBatches: batches, workItems: sample.workItems || [], db });
+        qcGates[result.id] = gate;
+        for (const audit of audits.filter(row => row.entityId === result.id)) {
+            let record;
+            try {
+                record = parse(audit.details);
+                if (record?.resultId === result.id && typeof record.reason === 'string' && record.reason.trim() &&
+                    record.actor === audit.performedBy && new Date(record.at).getTime() === new Date(audit.timestamp).getTime() &&
+                    record.gate && evidenceKey(record.gate) === evidenceKey(gate)) {
+                    qcAcknowledgements[result.id] = { ...record, auditLogId: audit.id }; break;
+                }
+            } catch (_) { /* Malformed or stale audit evidence cannot authorize publication. */ }
+        }
+    }
+    return { qcGates, qcAcknowledgements };
+}
+
+module.exports = { forResult, gateFromEvidence, decision, forWorkItem, requireAcceptance, recordAcknowledgements, resolveForSample };

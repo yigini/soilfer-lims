@@ -129,24 +129,22 @@ function canReview(submission, sample, user, options = {}) {
         return { allowed: false, canAccept: false, blockers: ['NOT_PENDING_REVIEW'], reason: 'Submission is not pending review' };
     }
 
-    // Inspect linked QC batches
-    const qcBatches = options.qcBatches || [];
-    const failedQc = qcBatches.find(b => b.status === 'FAILED');
-    const pendingQc = qcBatches.find(b => b.status === 'PENDING');
-
-    if (failedQc) {
-        canAccept = false;
-        blockers.push(`QC_FAILED: Batch ${failedQc.batchNumber || failedQc.id} failed quality control tolerance`);
-    }
-    if (pendingQc) {
-        canAccept = false;
-        blockers.push(`QC_PENDING: Batch ${pendingQc.batchNumber || pendingQc.id} quality control is pending evaluation`);
-    }
+    const qcGate = require('./qcGateService');
+    const gates = options.qcGates || (sample?.results || []).filter(result => result.isCurrent &&
+        !require('./resultEntryPolicy').isNonMeasurement({ analysis: result.param })).map(result =>
+        qcGate.gateFromEvidence(result, sample.workItems || [], options.qcBatches || [], {
+            mode: getReportingMode(sample, result, options) }));
+    const checks = (Array.isArray(gates) ? gates : Object.values(gates)).map(row =>
+        qcGate.decision(row.gate || row, { acknowledgement: options.qcAcknowledgement }));
+    const refused = checks.filter(row => !row.allowed);
+    if (refused.length) { canAccept = false; blockers.push(...refused.map(row => row.code)); }
 
     // Submission can be opened/inspected even if QC is blocked
     return {
         allowed: true, // can inspect
         canAccept,     // can manager accept
+        gate: checks.map(row => row.gate),
+        acknowledgementRequired: checks.some(row => row.acknowledgementRequired),
         blockers,
         reason: canAccept ? null : blockers[0]
     };
@@ -349,8 +347,9 @@ function canPublish(sample, report, user, options = {}) {
     const qc = reportingQc(sample, options);
     if (qc.blocker) {
         const { batch, gate } = qc.blocker;
-        return { allowed: false, code: batch.status === 'QC_FAIL' ? 'QC_BATCH_FAILED' : 'QC_BATCH_PENDING',
-            reason: `Cannot publish report: ${gate.error}` };
+        return { allowed: false, code: gate.code || (batch.status === 'QC_FAIL' ? 'QC_BATCH_FAILED' : 'QC_BATCH_PENDING'),
+            reason: gate.code || `Cannot publish report: ${gate.error}`, gate: gate.gate,
+            acknowledgementRequired: gate.acknowledgementRequired };
     }
 
     const validResults = (options.results || sample.results || []).filter(result =>

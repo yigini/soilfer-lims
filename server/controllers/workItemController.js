@@ -1156,7 +1156,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                 });
             }
 
-            await require('../services/qcGateService').requireAcceptance(items, req.body.qcAcknowledgement, prisma);
+            await require('../services/qcGateService').requireAcceptance(items.filter(item => item.status === 'SUBMITTED'), req.body.qcAcknowledgement, prisma);
         }
 
         const now = new Date();

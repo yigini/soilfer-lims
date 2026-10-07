@@ -2,7 +2,6 @@ const crypto = require('crypto');
 const policyService = require('./policyService');
 const { isInvalidOnlyByQcFailure, checkBatchDisposition } = require('./qcService');
 const { SPECTRAL_ACQUISITION_CODES } = require('../config/spectralAcquisition');
-const { analyteGateView } = require('./qcRunGateService');
 
 const TEXTURE_ALIASES = new Set(['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis']);
 const DERIVED_TEXTURE_FRACTIONS = ['SAND', 'SILT', 'CLAY'];
@@ -104,36 +103,31 @@ function reportingQc(sample, options = {}) {
     const items = options.workItems || sample.workItems || [];
     const results = options.results || sample.results || [];
     const batches = options.qcBatches || [];
-    const warnings = [];
+    const warnings = [], gates = [];
     let blocker = null;
+    const qcGate = require('./qcGateService');
     for (const result of results.filter(row => row.isCurrent && !EXCLUDED_GATE_CODES.has(row.param))) {
         const governing = governingItems(result, items);
         if (!governing.length || !governing.every(item => item.status === 'ACCEPTED')) continue;
         const mode = getReportingMode(sample, result, options);
-        for (const batchId of linkedBatchIds(result, items)) {
-            const source = batches.find(row => row.id === batchId) || { id: batchId, status: 'ERROR' };
-            const analysisCode = governing.find(item => item.batchId === batchId)?.analysis || result.param;
-            const batch = analyteGateView(source, analysisCode);
-            const gate = checkBatchDisposition(batch);
-            if (mode === 'REQUIRED_BLOCKING' && !gate.allowed && !blocker) blocker = { batch, gate };
-            if (isReviewedReportResult(result, items, mode) &&
-                ((!gate.allowed && mode === 'REQUIRED_WARN') || batch.status === 'QC_FAIL')) {
-                let disposition = batch.disposition;
-                if (typeof disposition === 'string') {
-                    try { disposition = JSON.parse(disposition); } catch (_) { disposition = null; }
-                }
-                const warning = { batchId, analysisCode: result.param, qcStatus: batch.status,
-                    dispositionDecision: disposition?.decision || null };
-                if (!warnings.some(row => row.batchId === batchId && row.analysisCode === result.param)) warnings.push(warning);
-            }
+        const gate = options.qcGates?.[result.id] || qcGate.gateFromEvidence(result, items, batches, { mode });
+        const acknowledgement = options.qcAcknowledgements?.[result.id];
+        const check = qcGate.decision(gate, { acknowledgement, publication: true });
+        gates.push({ resultId: result.id, gate, ...check });
+        if (!check.allowed && !blocker) blocker = { gate: check, batch: { id: gate.batchIds[0] || null, status: gate.value }, resultId: result.id };
+        if (mode !== 'OFF' && (['WARN', 'FAIL'].includes(gate.value) || gate.required && ['NO_BATCH', 'NOT_EVALUATED'].includes(gate.value))) {
+            warnings.push({ resultId: result.id, batchId: gate.batchIds[0] || null, analysisCode: result.param,
+                qcStatus: gate.value, dispositionDecision: gate.acceptedWithDeviation ? 'ACCEPT_WITH_DEVIATION' : null,
+                dispositionReason: gate.dispositionReason || null, acknowledgement: acknowledgement || null });
         }
     }
-    // Retain the pure gate's batch-only evaluation for existing callers.
+    // Existing batch-only callers have no result identity. Preserve their
+    // fail-closed check until the IO caller supplies result-level gate evidence.
     if (!results.length) {
         const batch = batches.find(row => !checkBatchDisposition(row).allowed);
         if (batch) blocker = { batch, gate: checkBatchDisposition(batch) };
     }
-    return { blocker, warnings };
+    return { blocker, warnings, gates };
 }
 
 async function invalidateReturnedResults(tx, item, actor, reason) {

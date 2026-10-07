@@ -90,8 +90,8 @@ exports.checkItemBatchStatus = async (workItemId) => {
 };
 exports.dispositionBatch = async (req, res) => {
     try {
-        const { decision, reason, analysisCode } = req.body;
-        return res.json(await require('../services/qcDispositionStateService').dispositionBatch(req.params.id, decision, reason, req.user, prisma, { analysisCode }));
+        const { decision, reason, analysisCode, scope } = req.body;
+        return res.json(await require('../services/qcDispositionStateService').dispositionBatch(req.params.id, decision, reason, req.user, prisma, { analysisCode, scope }));
     } catch (error) {
         if (!error.statusCode) console.error('[dispositionBatch] Error:', error);
         return res.status(error.statusCode || 500).json({ error: error.code || error.message, message: error.message,

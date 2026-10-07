@@ -151,5 +151,8 @@ else
 fi
 
 # Start the server
+echo "📦 Installing QC disposition scope guards..."
+node scripts/install_qc_gate_scope.js --apply
+
 echo "🚀 Starting SoilFER-LIMS..."
 exec node index.js

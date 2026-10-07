@@ -41,8 +41,10 @@
     "see": "see",
     "replaces": "Replaces",
     "preparationRecords": "Preparation records",
-    "qcNotRequired": "QC not required (mode OFF)",
-    "qcEvidenceIncomplete": "Historical QC acceptance has incomplete recorded evidence"
+    "qcNotRequired": "QC not required",
+    "qcEvidenceIncomplete": "Historical QC acceptance has incomplete recorded evidence",
+    "qcAcknowledgedBy": "Acknowledged by",
+    "qcCalibrationBracketRepeatInfo": "A calibration bracket is being repeated; this result is outside the affected scope"
   },
   "common": {
     "save": "Save",
@@ -1317,5 +1319,20 @@
     "chooseDuplicateParent": "Select the original sample position",
     "analysis": "Analysis",
     "closeAnalyte": "Close this analyte"
+  },
+  "qcGate": {
+    "acknowledgementReason": "QC acknowledgement reason (required)",
+    "acknowledgementHelp": "Record why you accept the QC warning or deviation. Your name and reason will appear in the report evidence.",
+    "repeatBracket": "Repeat calibration bracket",
+    "repeatBracketHelp": "Repeat only the work covered by the failed continuing calibration checks.",
+    "affectedItems": "Affected work items",
+    "amendmentRequired": "Sealed results require amendments:",
+    "errors": {
+      "QC_ACKNOWLEDGEMENT_REQUIRED": "Enter a QC acknowledgement reason before acceptance.",
+      "QC_GATE_FAILED": "Failed batch QC requires a manager disposition.",
+      "QC_GATE_NOT_EVALUATED": "Required batch QC has not been evaluated.",
+      "QC_GATE_NO_BATCH": "This method requires a linked QC batch.",
+      "QC_GATE_REPEAT_ORDERED": "Repeat analysis is required before acceptance or publication."
+    }
   }
 }

@@ -167,6 +167,8 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
 
     // Review Tab Checkbox State
     const [reviewChecked, setReviewChecked] = useState(false);
+    const [qcAcknowledgementReason, setQcAcknowledgementReason] = useState('');
+    const [qcAcknowledgementRequested, setQcAcknowledgementRequested] = useState(false);
     const [returningSubmissionId, setReturningSubmissionId] = useState(null);
     const [returnReason, setReturnReason] = useState('');
 
@@ -334,22 +336,26 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
 
     const handleReviewItem = async (itemId, status, note = 'Item review decision') => {
         try {
-            await axios.post(`/api/work/${itemId}/review`, { status, note });
+            await axios.post(`/api/work/${itemId}/review`, { status, note,
+                ...(status === 'ACCEPTED' && qcAcknowledgementReason.trim() && { qcAcknowledgement: { reason: qcAcknowledgementReason.trim() } }) });
             fetchWorkspaceData(true);
         } catch (err) {
             console.error('Item review failed', err);
-            showInfo(t('common.error', 'Error'), err.response?.data?.error || err.message);
+            if (err.response?.data?.code === 'QC_ACKNOWLEDGEMENT_REQUIRED') setQcAcknowledgementRequested(true);
+            showInfo(t('common.error', 'Error'), t(`qcGate.errors.${err.response?.data?.code}`, err.response?.data?.error || err.message));
         }
     };
 
     const handleReviewBulk = async (itemIds, status) => {
         try {
-            await axios.post(`/api/work/review/bulk`, { workItemIds: itemIds, status, note: 'Bulk Review' });
+            await axios.post(`/api/work/review/bulk`, { workItemIds: itemIds, status, note: 'Bulk Review',
+                ...(status === 'ACCEPTED' && qcAcknowledgementReason.trim() && { qcAcknowledgement: { reason: qcAcknowledgementReason.trim() } }) });
             showInfo(t('common.success', 'Success'), `Successfully reviewed ${itemIds.length} items.`);
             fetchWorkspaceData(true);
         } catch (err) {
             console.error('Bulk review failed', err);
-            showInfo(t('common.error', 'Error'), err.response?.data?.error || err.message);
+            if (err.response?.data?.code === 'QC_ACKNOWLEDGEMENT_REQUIRED') setQcAcknowledgementRequested(true);
+            showInfo(t('common.error', 'Error'), t(`qcGate.errors.${err.response?.data?.code}`, err.response?.data?.error || err.message));
         }
     };
 
@@ -1156,7 +1162,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                                 <div className="text-xs text-gray-500 flex flex-wrap gap-3">
                                                     <span>Assigned: <strong>{item.assigneeName || item.assignedTo || 'Technician'}</strong></span>
                                                     <span>Method: <strong>{item.methodology?.name || 'Standard'}</strong></span>
-                                                    <span>QC: <strong className={item.qcStatus === 'QC_FAIL' ? 'text-red-500' : 'text-emerald-500'}>{item.qcStatus === 'NOT_REQUIRED' ? t('qcRuns.notRequired') : item.qcStatus || 'PASS'}</strong></span>
+                                                    <span>QC: <strong className={item.qcGateCode ? 'text-red-500' : 'text-emerald-500'}>{item.qcStatus === 'NOT_REQUIRED' ? t('qcRuns.notRequired') : item.qcStatus}</strong></span>
                                                 </div>
                                             </div>
 
@@ -1174,6 +1180,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                                     <div className="flex items-center gap-1">
                                                         <button
                                                             onClick={() => handleReviewItem(item.id, 'ACCEPTED')}
+                                                            disabled={Boolean(item.qcGateCode && item.qcGateCode !== 'QC_ACKNOWLEDGEMENT_REQUIRED') || item.qcAcknowledgementRequired && !qcAcknowledgementReason.trim()}
                                                             className="p-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
                                                             title="Accept Item"
                                                         >
@@ -1199,6 +1206,14 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                 {/* Confirmation & Bulk Accept */}
                                 {isManager && (
                                     <div className="pt-4 border-t border-sf-divider space-y-4">
+                                        {(qcAcknowledgementRequested || workItems.some(item => item.status === 'SUBMITTED' && item.qcAcknowledgementRequired)) && (
+                                            <label className="block text-xs text-sf-text space-y-2">
+                                                <span className="font-bold">{t('qcGate.acknowledgementReason')}</span>
+                                                <p className="text-sf-muted">{t('qcGate.acknowledgementHelp')}</p>
+                                                <textarea rows={3} value={qcAcknowledgementReason} onChange={event => setQcAcknowledgementReason(event.target.value)}
+                                                    className="w-full rounded-lg border border-sf-divider bg-sf-surface p-3" required />
+                                            </label>
+                                        )}
                                         <label className="flex items-start gap-3 cursor-pointer text-xs text-sf-muted">
                                             <input
                                                 type="checkbox"
@@ -1215,7 +1230,8 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                                     const subItems = workItems.filter(w => w.status === 'SUBMITTED');
                                                     handleReviewBulk(subItems.map(i => i.id), 'ACCEPTED');
                                                 }}
-                                                disabled={!reviewChecked}
+                                                disabled={!reviewChecked || workItems.some(item => item.status === 'SUBMITTED' &&
+                                                    (item.qcGateCode && item.qcGateCode !== 'QC_ACKNOWLEDGEMENT_REQUIRED' || item.qcAcknowledgementRequired && !qcAcknowledgementReason.trim()))}
                                                 className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold shadow transition-colors"
                                             >
                                                 Accept {counters.submitted} submitted result(s)

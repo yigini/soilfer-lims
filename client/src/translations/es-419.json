@@ -2219,8 +2219,10 @@
     "see": "ver",
     "replaces": "Sustituye",
     "preparationRecords": "Registros de preparación",
-    "qcNotRequired": "QC no requerido (modo OFF)",
-    "qcEvidenceIncomplete": "La aceptación histórica de QC tiene evidencia registrada incompleta"
+    "qcNotRequired": "QC no requerido",
+    "qcEvidenceIncomplete": "La aceptación histórica de QC tiene evidencia registrada incompleta",
+    "qcAcknowledgedBy": "Aceptado por",
+    "qcCalibrationBracketRepeatInfo": "Se repite un intervalo de calibración; este resultado está fuera del alcance afectado"
   },
   "qaSection": {
     "kicker": "Garantía de calidad y cumplimiento normativo",
@@ -2893,5 +2895,20 @@
     "chooseDuplicateParent": "Seleccione la posición de la muestra original",
     "analysis": "Análisis",
     "closeAnalyte": "Cerrar este analito"
+  },
+  "qcGate": {
+    "acknowledgementReason": "Motivo de aceptación del control de calidad (obligatorio)",
+    "acknowledgementHelp": "Registre por qué acepta la advertencia o desviación de QC. Su nombre y el motivo figurarán en la evidencia del informe.",
+    "repeatBracket": "Repetir intervalo de calibración",
+    "repeatBracketHelp": "Repetir solo el trabajo cubierto por los controles de calibración continua fallidos.",
+    "affectedItems": "Tareas afectadas",
+    "amendmentRequired": "Los resultados sellados requieren enmiendas:",
+    "errors": {
+      "QC_ACKNOWLEDGEMENT_REQUIRED": "Introduzca un motivo de aceptación de QC antes de aceptar.",
+      "QC_GATE_FAILED": "El QC del lote falló y requiere una decisión del responsable.",
+      "QC_GATE_NOT_EVALUATED": "El QC obligatorio del lote no se ha evaluado.",
+      "QC_GATE_NO_BATCH": "Este método requiere un lote de QC vinculado.",
+      "QC_GATE_REPEAT_ORDERED": "Se requiere repetir el análisis antes de aceptar o publicar."
+    }
   }
 }

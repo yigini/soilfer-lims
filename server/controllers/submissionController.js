@@ -251,7 +251,7 @@ exports.reviewSubmission = async (req, res) => {
         }
 
         const acceptingIds = new Set(normalizedDecisions.filter(row => row.decision === 'ACCEPT' && currentMemberIds.has(row.workItemId)).map(row => row.workItemId));
-        await require('../services/qcGateService').requireAcceptance(dbItems.filter(item => acceptingIds.has(item.id)), req.body.qcAcknowledgement, prisma);
+        await require('../services/qcGateService').requireAcceptance(dbItems.filter(item => acceptingIds.has(item.id) && item.status === 'SUBMITTED'), req.body.qcAcknowledgement, prisma);
 
         const now = new Date();
         const results = [];

@@ -2219,8 +2219,10 @@
     "see": "ver",
     "replaces": "Substitui",
     "preparationRecords": "Registros de preparação",
-    "qcNotRequired": "CQ não necessário (modo OFF)",
-    "qcEvidenceIncomplete": "A aceitação histórica do CQ tem evidência registrada incompleta"
+    "qcNotRequired": "CQ não obrigatório",
+    "qcEvidenceIncomplete": "A aceitação histórica do CQ tem evidência registrada incompleta",
+    "qcAcknowledgedBy": "Aceito por",
+    "qcCalibrationBracketRepeatInfo": "Um intervalo de calibração está sendo repetido; este resultado está fora do escopo afetado"
   },
   "qaSection": {
     "kicker": "Garantia de qualidade e conformidade regulamentar",
@@ -2893,5 +2895,20 @@
     "chooseDuplicateParent": "Selecione a posição da amostra original",
     "analysis": "Análise",
     "closeAnalyte": "Encerrar este analito"
+  },
+  "qcGate": {
+    "acknowledgementReason": "Motivo de aceitação do controle de qualidade (obrigatório)",
+    "acknowledgementHelp": "Registre por que aceita o aviso ou desvio de CQ. Seu nome e o motivo constarão nas evidências do relatório.",
+    "repeatBracket": "Repetir intervalo de calibração",
+    "repeatBracketHelp": "Repetir apenas o trabalho abrangido pelos controles de calibração contínua que falharam.",
+    "affectedItems": "Tarefas afetadas",
+    "amendmentRequired": "Os resultados selados exigem emendas:",
+    "errors": {
+      "QC_ACKNOWLEDGEMENT_REQUIRED": "Insira um motivo de aceitação do CQ antes de aceitar.",
+      "QC_GATE_FAILED": "O CQ do lote falhou e exige uma decisão do responsável.",
+      "QC_GATE_NOT_EVALUATED": "O CQ obrigatório do lote não foi avaliado.",
+      "QC_GATE_NO_BATCH": "Este método exige um lote de CQ vinculado.",
+      "QC_GATE_REPEAT_ORDERED": "É necessário repetir a análise antes da aceitação ou publicação."
+    }
   }
 }

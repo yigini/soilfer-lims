@@ -30,9 +30,12 @@ try {
     console.log(JSON.stringify({ event: 'QC_RULE_STARTUP_READY', ...qcRulesReady }));
     const qcRunsReady = require('./scripts/install_qc_runs').assertQcRunStartupReady(dbPath);
     console.log(JSON.stringify({ event: 'QC_RUN_STARTUP_READY', ...qcRunsReady }));
+    const qcScopeReady = require('./scripts/install_qc_gate_scope').assertQcGateScopeStartupReady(dbPath);
+    console.log(JSON.stringify({ event: 'QC_GATE_SCOPE_STARTUP_READY', ...qcScopeReady }));
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
-        nextStep: error.code?.startsWith('QC_RUN_') ? 'Keep the lab stopped and follow docs/audit-2.3-normalized-qc-migration.md.'
+        nextStep: error.code?.startsWith('QC_GATE_SCOPE_') ? 'Keep the lab stopped and follow docs/audit/2.4-qc-gate.md.'
+            : error.code?.startsWith('QC_RUN_') ? 'Keep the lab stopped and follow docs/audit-2.3-normalized-qc-migration.md.'
             : error.code?.startsWith('SAMPLE_HOLD_') ? 'Keep the lab stopped and follow docs/audit/1.6-sample-holds.md.'
             : error.code?.startsWith('REFERENCE_') ? 'Keep the lab stopped and follow docs/audit/2.1-reference-materials.md.'
             : error.code?.startsWith('QC_RULE_') ? 'Keep the lab stopped and follow docs/audit/2.2-qc-rules.md.'

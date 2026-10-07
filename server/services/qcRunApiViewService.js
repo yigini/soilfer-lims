@@ -50,6 +50,13 @@ async function apiRunView(db, batch, { detail = false } = {}) {
                 qcRequirements: countRequirements(policy.qcRule, policy.sampleCount, runProfile, evidence.qcResults || {}, policy.qcMode) });
         }
     }
+    for (const row of decorated) {
+        row.repeatBracketScope = null;
+        if (row.status === 'QC_FAIL') {
+            try { row.repeatBracketScope = require('./qcCalibrationBracketService').repeatBracketScope(row, currentAnalyteEvidence(batch, row.analysisCode)); }
+            catch (error) { if (error.code !== 'QC_BRACKET_REPEAT_NOT_ALLOWED') throw error; }
+        }
+    }
     const primary = decorated.find(row => row.analysisCode === batch.analysis) || decorated[0];
     const output = { ...view, analytes: decorated, runProfile, ...(primary && { numberFormat: primary.numberFormat,
         qcRule: primary.qcRule, qcMode: primary.qcMode, qcRequirements: primary.qcRequirements }) };

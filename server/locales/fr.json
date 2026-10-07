@@ -41,8 +41,10 @@
     "see": "voir",
     "replaces": "Remplace",
     "preparationRecords": "Enregistrements de préparation",
-    "qcNotRequired": "CQ non requis (mode OFF)",
-    "qcEvidenceIncomplete": "L’acceptation historique du CQ dispose de preuves enregistrées incomplètes"
+    "qcNotRequired": "CQ non requis",
+    "qcEvidenceIncomplete": "L’acceptation historique du CQ dispose de preuves enregistrées incomplètes",
+    "qcAcknowledgedBy": "Accepté par",
+    "qcCalibrationBracketRepeatInfo": "Un intervalle d’étalonnage est répété ; ce résultat est hors du périmètre concerné"
   },
   "common": {
     "save": "Enregistrer",
@@ -1317,5 +1319,20 @@
     "chooseDuplicateParent": "Sélectionnez la position de l’échantillon d’origine",
     "analysis": "Analyse",
     "closeAnalyte": "Clôturer cet analyte"
+  },
+  "qcGate": {
+    "acknowledgementReason": "Motif d’acceptation du contrôle qualité (obligatoire)",
+    "acknowledgementHelp": "Indiquez pourquoi vous acceptez l’avertissement ou l’écart de CQ. Votre nom et le motif figureront dans les preuves du rapport.",
+    "repeatBracket": "Répéter l’intervalle d’étalonnage",
+    "repeatBracketHelp": "Répéter uniquement le travail couvert par les contrôles d’étalonnage continu en échec.",
+    "affectedItems": "Tâches concernées",
+    "amendmentRequired": "Les résultats scellés nécessitent des amendements :",
+    "errors": {
+      "QC_ACKNOWLEDGEMENT_REQUIRED": "Saisissez un motif d’acceptation du CQ avant d’accepter.",
+      "QC_GATE_FAILED": "Le CQ du lot a échoué et nécessite une décision du responsable.",
+      "QC_GATE_NOT_EVALUATED": "Le CQ obligatoire du lot n’a pas été évalué.",
+      "QC_GATE_NO_BATCH": "Cette méthode nécessite un lot de CQ lié.",
+      "QC_GATE_REPEAT_ORDERED": "Une nouvelle analyse est requise avant l’acceptation ou la publication."
+    }
   }
 }
