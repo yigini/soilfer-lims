@@ -56,18 +56,18 @@ function installProficiencyEvidence({ dbPath, apply = false } = {}) {
     const target = path.resolve(dbPath), source = loadProficiencyMigrationSource();
     const reader = new Database(target, { readonly: true, fileMustExist: true });
     let plan;
-    try { plan = reader.transaction(() => classify(reader, source))(); }
+    try { plan = reader.transaction(() => classify(reader, { sql: source.sql, sha256: source.sha256 }))(); }
     finally { reader.close(); }
     if (!apply || plan.classification === 'COMPLETE') return { ...plan, mode: apply ? 'NO_OP' : 'DRY_RUN', totalChanges: 0 };
     const db = new Database(target, { fileMustExist: true, timeout: 5000 });
     try {
         db.pragma('foreign_keys = ON');
         return db.transaction(() => {
-            const current = classify(db, source);
+            const current = classify(db, { sql: source.sql, sha256: source.sha256 });
             if (current.classification === 'COMPLETE') return { ...current, mode: 'NO_OP', totalChanges: 0 };
             db.exec(current.classification === 'PRE_189' ? source.sql : source.guardsSql);
             db.prepare('INSERT INTO "_schema_migrations" (id,details) VALUES (?,?)').run(MARKER, JSON.stringify(current.sources));
-            const after = classify(db, source);
+            const after = classify(db, { sql: source.sql, sha256: source.sha256 });
             if (after.classification !== 'COMPLETE' || after.scoreOutcomeSha256 !== current.scoreOutcomeSha256 ||
                 db.pragma('integrity_check', { simple: true }) !== 'ok' || db.pragma('foreign_key_check').length) {
                 throw fail('PT_INTEGRITY_REFUSED', 'PT evidence installation failed preservation checks.');

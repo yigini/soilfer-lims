@@ -43,17 +43,17 @@ function installResultEquipmentEvidence({ dbPath, apply = false } = {}) {
     if (typeof dbPath !== 'string' || !dbPath.trim()) throw fail('RESULT_EQUIPMENT_DATABASE_REQUIRED', 'An explicit database path is required.');
     const target = path.resolve(dbPath), source = loadResultEquipmentMigrationSource();
     const reader = new Database(target, { readonly: true, fileMustExist: true });
-    let plan; try { plan = reader.transaction(() => classify(reader, source))(); } finally { reader.close(); }
+    let plan; try { plan = reader.transaction(() => classify(reader, { sql: source.sql, sha256: source.sha256 }))(); } finally { reader.close(); }
     if (!apply || plan.classification === 'COMPLETE') return { ...plan, mode: apply ? 'NO_OP' : 'DRY_RUN', totalChanges: 0 };
     const db = new Database(target, { fileMustExist: true, timeout: 5000 });
     try {
         db.pragma('foreign_keys = ON');
         return db.transaction(() => {
-            const before = classify(db, source);
+            const before = classify(db, { sql: source.sql, sha256: source.sha256 });
             if (before.classification === 'COMPLETE') return { ...before, mode: 'NO_OP', totalChanges: 0 };
             db.exec(before.classification === 'PRE_189' ? source.sql : source.guardsSql);
             db.prepare('INSERT INTO "_schema_migrations" (id,details) VALUES (?,?)').run(MARKER, JSON.stringify(before.sources));
-            const after = classify(db, source);
+            const after = classify(db, { sql: source.sql, sha256: source.sha256 });
             if (after.classification !== 'COMPLETE' || after.originalResultSha256 !== before.originalResultSha256 ||
                 db.pragma('integrity_check', { simple: true }) !== 'ok' || db.pragma('foreign_key_check').length) {
                 throw fail('RESULT_EQUIPMENT_INTEGRITY_REFUSED', 'Result equipment installation failed preservation checks.');

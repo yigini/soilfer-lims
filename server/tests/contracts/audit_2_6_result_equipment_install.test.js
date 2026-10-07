@@ -31,7 +31,7 @@ test('additive equipment evidence install preserves every old Result field, leav
 });
 test('fresh Prisma column gets guards and a receipt without rebuilding; invalid inserts and changing NULL or recorded evidence refuse exactly', () => {
     const file = fixture(), source = loadResultEquipmentMigrationSource(), db = new Database(file);
-    db.exec(source.sql.slice(0, source.sql.indexOf('CREATE TRIGGER'))); db.close();
+    db.exec(source.schemaSql); db.close();
     expect(installResultEquipmentEvidence({ dbPath: file, apply: true })).toMatchObject({ previousClassification: 'FRESH_PRISMA', bootstrapRebuild: [] });
     const check = new Database(file);
     try {

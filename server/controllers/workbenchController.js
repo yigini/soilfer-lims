@@ -1212,7 +1212,7 @@ exports.batchSave = async (req, res) => {
                 await commitBundles(operationBundles);
             } catch (txError) {
                 // ─── Fix 3: Handle version conflict (P2025 = record not found) ───
-                if (['P2025', 'VERSION_CONFLICT', 'WORKITEM_STATE_CHANGED', 'EQUIPMENT_NOT_READY'].includes(txError.code)) {
+                if (txError.details?.equipmentBlocked || ['P2025', 'VERSION_CONFLICT', 'WORKITEM_STATE_CHANGED', 'EQUIPMENT_NOT_READY'].includes(txError.code)) {
                     // Determine which items had version conflicts
                     // Re-run individually to identify conflicts
                     const verifiedResults = [];
@@ -1236,7 +1236,7 @@ exports.batchSave = async (req, res) => {
                             } else {
                                 verifiedErrors.push({
                                     workItemId: bundle.workItemId,
-                                    error: `Save failed: ${itemErr.message}`, ...(itemErr.code && { code: itemErr.code })
+                                    error: `Save failed: ${itemErr.message}`, ...(itemErr.code && { code: itemErr.details?.equipmentBlocked ? 'EQUIPMENT_NOT_READY' : itemErr.code })
                                 });
                             }
                         }

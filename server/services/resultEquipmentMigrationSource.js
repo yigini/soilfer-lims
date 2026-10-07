@@ -11,6 +11,7 @@ function loadResultEquipmentMigrationSource() {
         throw Object.assign(new Error('Result equipment release digest differs.'), { code: 'RESULT_EQUIPMENT_SOURCE_MISMATCH' });
     }
     const sql = bytes.toString('utf8');
-    return Object.freeze({ sql, guardsSql: sql.slice(sql.indexOf('CREATE TRIGGER')), sha256: SHA256 });
+    const boundary = sql.indexOf('CREATE TRIGGER');
+    return Object.freeze({ sql, schemaSql: sql.slice(0, boundary), guardsSql: sql.slice(boundary), sha256: SHA256 });
 }
 module.exports = { loadResultEquipmentMigrationSource };

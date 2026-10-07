@@ -45,7 +45,7 @@ test('legacy dry-run is byte-identical; additive install preserves scores, outco
 
 test('the fresh-column path adds only guards and receipt, without rebuilding the table', () => {
     const f = fixture(), source = loadProficiencyMigrationSource(), db = new Database(f.file);
-    db.exec(source.sql.slice(0, source.sql.indexOf('CREATE TRIGGER'))); db.close();
+    db.exec(source.schemaSql); db.close();
     expect(installProficiencyEvidence({ dbPath: f.file }).classification).toBe('FRESH_PRISMA');
     expect(installProficiencyEvidence({ dbPath: f.file, apply: true })).toMatchObject({ previousClassification: 'FRESH_PRISMA',
         classification: 'COMPLETE', bootstrapRebuild: [], totalChanges: 1 });

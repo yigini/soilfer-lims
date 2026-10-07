@@ -13,7 +13,8 @@ function loadProficiencyMigrationSource() {
         throw Object.assign(new Error('PT evidence release digest differs.'), { code: 'PT_SOURCE_MISMATCH' });
     }
     const sql = bytes.toString('utf8');
-    return Object.freeze({ sql, guardsSql: sql.slice(sql.indexOf('CREATE TRIGGER')), sha256: SHA256 });
+    const boundary = sql.indexOf('CREATE TRIGGER');
+    return Object.freeze({ sql, schemaSql: sql.slice(0, boundary), guardsSql: sql.slice(boundary), sha256: SHA256 });
 }
 
 module.exports = { loadProficiencyMigrationSource };

@@ -95,7 +95,8 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
             }
             item = { ...item, sample, equipmentId: measurement.equipmentId || item.equipmentId };
             const ready = await evaluateExecutionReadiness(tx, item, actor);
-            if (!ready.isReady) throw new TransitionError(ready.reasons.join('; '), 409, ready.equipmentBlocked ? 'EQUIPMENT_NOT_READY' : ready.blockers[0] || 'EXECUTION_BLOCKED');
+            if (!ready.isReady) throw new TransitionError(ready.reasons.join('; '), 409,
+                ready.blockers[0] || 'EXECUTION_BLOCKED', { equipmentBlocked: ready.equipmentBlocked });
             equipmentReadiness = ready.equipmentSnapshot;
         } else if (!parseJson(sample.requiredAnalyses, []).includes(measurement.param) &&
             !(source === 'derived' && measurement.param === 'TEXTURE' &&
