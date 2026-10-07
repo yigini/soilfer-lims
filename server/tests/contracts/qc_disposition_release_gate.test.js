@@ -23,6 +23,9 @@ const prisma = require('../../prisma');
 const { createSample, transitionSample } = require('../../services/sampleStateService');
 const { JWT_SECRET } = require('../../config/auth');
 const { canFinalApprove, canPublish } = require('../../services/workEligibility');
+const { normalizeLegacyQcFixture } = require('../helpers/normalizedQcFixture');
+const { QC_RUN_INCLUDE, batchApiView } = require('../../services/qcRunViewService');
+const evidenceBatch = async id => batchApiView(await prisma.batch.findUnique({ where: { id }, include: QC_RUN_INCLUDE }), { serialized: true });
 
 describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)', () => {
     let testLab1, testLab2;
@@ -144,6 +147,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             where: { id: workItem1.id },
             data: { batchId: batch1.id }
         });
+        await normalizeLegacyQcFixture(prisma, batch1.id);
     });
 
     afterAll(async () => {
@@ -203,7 +207,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
     // ─── Test 2: Unresolved Failed QC Release Gates ───
     test('2. Unresolved QC_FAIL strictly blocks downstream sample approval and report release', async () => {
         // A. workEligibility.canFinalApprove blocks approval
-        const freshBatch = await prisma.batch.findUnique({ where: { id: batch1.id } });
+        const freshBatch = await evidenceBatch(batch1.id);
         const eligibility = canFinalApprove(
             sample1,
             [workItem1],
@@ -219,12 +223,15 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         // sample-review gate does not mask the QC gate under test.
         const reportId = `REPORT-${sample1.id}`;
         reportFixtureIds.push(reportId);
+        const reportBatchId = `BATCH-${reportId}`;
+        await prisma.batch.create({ data: { ...batch1, id: reportBatchId, workItemIds: JSON.stringify([`WI-${reportId}`]) } });
         await createSampleFixture(prisma, { data: { ...sample1, id: reportId, originalId: reportId, status: 'APPROVED' } });
-        await createWorkItemFixture(prisma, { data: { ...workItem1, id: `WI-${reportId}`, sampleId: reportId, batchId: batch1.id } });
+        await createWorkItemFixture(prisma, { data: { ...workItem1, id: `WI-${reportId}`, sampleId: reportId, batchId: reportBatchId } });
         await createResultFixture(prisma, { data: { id: `RES-${reportId}`, sampleId: reportId,
-            param: 'PH_H2O', value: '6.45', isCurrent: true, isValid: true, batchId: batch1.id } });
+            param: 'PH_H2O', value: '6.45', isCurrent: true, isValid: true, batchId: reportBatchId } });
+        await normalizeLegacyQcFixture(prisma, reportBatchId);
         const reportSample = await prisma.sample.findUnique({ where: { id: reportId }, include: { workItems: true, results: true } });
-        const publishCheck = canPublish(reportSample, null, lab1Manager, { qcBatches: [freshBatch] });
+        const publishCheck = canPublish(reportSample, null, lab1Manager, { qcBatches: [await evidenceBatch(reportBatchId)] });
         expect(publishCheck.allowed).toBe(false);
         expect(publishCheck.code).toBe('QC_BATCH_FAILED');
 
@@ -274,7 +281,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         expect(validRes.body.disposition.by).toBe(lab1Manager.username);
 
         // Check persisted batch disposition and audit log
-        const dbBatch = await prisma.batch.findUnique({ where: { id: batch1.id } });
+        const dbBatch = await evidenceBatch(batch1.id);
         const parsedDisp = JSON.parse(dbBatch.disposition);
         expect(parsedDisp.decision).toBe('PROCEED_WITH_WARNING');
 
@@ -309,7 +316,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
     // ─── Test 5: Release Gates Unblocked After Manager Disposition ───
     test('5. Manager disposition override unblocks sample approval and report publication eligibility', async () => {
-        const dispositionedBatch = await prisma.batch.findUnique({ where: { id: batch1.id } });
+        const dispositionedBatch = await evidenceBatch(batch1.id);
 
         // canFinalApprove is now allowed
         const eligibility = canFinalApprove(
@@ -460,6 +467,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Execute manager disposition override: PROCEED_WITH_WARNING
+        await normalizeLegacyQcFixture(prisma, testBatchId);
         const dispRes = await request(app)
             .post(`/api/qc/batches/${testBatchId}/disposition`)
             .set('Authorization', `Bearer ${lab1Manager.token}`)
@@ -529,6 +537,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             }
         });
 
+        await normalizeLegacyQcFixture(prisma, reanalyzeBatchId);
         const dispRes = await request(app)
             .post(`/api/qc/batches/${reanalyzeBatchId}/disposition`)
             .set('Authorization', `Bearer ${lab1Manager.token}`)
@@ -795,6 +804,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // 1. Initial disposition: PROCEED_WITH_WARNING
+        await normalizeLegacyQcFixture(prisma, conflictBatchId);
         const firstRes = await request(app)
             .post(`/api/qc/batches/${conflictBatchId}/disposition`)
             .set('Authorization', `Bearer ${lab1Manager.token}`)
@@ -835,6 +845,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Fire two identical disposition requests concurrently
+        await normalizeLegacyQcFixture(prisma, concurrentBatchId);
         const [resA, resB] = await Promise.all([
             request(app)
                 .post(`/api/qc/batches/${concurrentBatchId}/disposition`)
@@ -857,7 +868,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         expect(resB.status).toBe(200);
 
         // Verify batch history has exactly 1 disposition record (no duplicates)
-        const batch = await prisma.batch.findUnique({ where: { id: concurrentBatchId } });
+        const batch = await evidenceBatch(concurrentBatchId);
         const history = JSON.parse(batch.history || '[]');
         const dispEntries = history.filter(h => h.disposition === 'PROCEED_WITH_WARNING');
         expect(dispEntries.length).toBe(1);
@@ -920,6 +931,13 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Trigger REANALYZE_BATCH
+        await normalizeLegacyQcFixture(prisma, batchWiTestId);
+        const membershipBefore = await prisma.batchPosition.findMany({ where: { batchId: batchWiTestId, kind: 'SAMPLE' },
+            orderBy: { position: 'asc' }, include: { workItems: true } });
+        expect(membershipBefore).toHaveLength(3);
+        expect(membershipBefore.flatMap(position => position.workItems.map(row => row.workItemId)))
+            .toEqual([wiActive.id, wiAccepted.id, wiCompleted.id]);
+        expect(membershipBefore.every(position => position.historicalSnapshotSeq === null)).toBe(true);
         const dispRes = await request(app)
             .post(`/api/qc/batches/${batchWiTestId}/disposition`)
             .set('Authorization', `Bearer ${lab1Manager.token}`)
@@ -942,6 +960,8 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const refCompleted = await prisma.workItem.findUnique({ where: { id: wiCompleted.id } });
         expect(refCompleted.status).toBe('REPEAT_REQUIRED');
         expect(refCompleted.reanalysisReason).toBe('Reanalyze active items only');
+        expect(await prisma.batchPosition.findMany({ where: { batchId: batchWiTestId, kind: 'SAMPLE' },
+            orderBy: { position: 'asc' }, include: { workItems: true } })).toEqual(membershipBefore);
 
         // Cleanup
         await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: { in: [wiAccepted.id, wiCompleted.id] } } }), select: { id: true } })).map(row => row.id), { single: false });

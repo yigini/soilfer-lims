@@ -9,6 +9,7 @@ const { getAuthToken } = require('../setup');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const { installReferenceMaterials } = require('../../scripts/install_reference_materials');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
+const { normalizeLegacyQcFixture } = require('../helpers/normalizedQcFixture');
 const labId = `RM-LAB-${randomUUID()}`, otherLab = `RM-OTHER-${randomUUID()}`, analysisCode = `RM_${randomUUID().replaceAll('-', '')}`;
 const unit = `RM-UNIT-${randomUUID()}`, smallerUnit = `RM-SMALL-${randomUUID()}`, incompatibleUnit = `RM-OTHER-UNIT-${randomUUID()}`;
 const methodA = randomUUID(), methodB = randomUUID();
@@ -54,11 +55,16 @@ async function batch(methods = []) {
         await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId, analysis: analysisCode, methodologyId,
             labId, assignedLab: labId, assignedTo: actor.username, batchId: id, status: 'IN_PROGRESS' } });
     }
+    await normalizeLegacyQcFixture(prisma, id);
     return id;
 }
 const payload = controls => ({ blanks: [{ value: 0.001 }], duplicates: [{ value1: 7, value2: 7 }, { value1: 7, value2: 7 }], controls: [...controls, { expected: 7, measured: 7 }] });
 const path = (id, endpoint) => `/api/qc/batches/${id}${endpoint === 'evaluate' ? '/evaluate' : ''}`;
-const place = (id, endpoint, controls, auth = token) => call(endpoint === 'evaluate' ? 'post' : 'put', path(id, endpoint), payload(controls), auth);
+const place = async (id, endpoint, controls, auth = token) => {
+    const input = payload(controls), parent = await prisma.batchPosition.findFirst({ where: { batchId: id, kind: 'SAMPLE' }, orderBy: { position: 'asc' } });
+    if (parent) input.duplicates = input.duplicates.map(row => ({ ...row, duplicateOfPositionId: parent.id }));
+    return call(endpoint === 'evaluate' ? 'post' : 'put', path(id, endpoint), input, auth);
+};
 
 test.each(['update', 'evaluate'].flatMap(endpoint => ['EXPIRED_RM', 'QUARANTINED_RM', 'QUARANTINED_LOT', 'EXPIRED_LOT', 'DISPOSED_LOT', 'LOT_EXPIRY'].map(kind => [endpoint, kind])))('%s refuses %s and writes no table', async (endpoint, kind) => {
     let inventoryLotId;

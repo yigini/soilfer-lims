@@ -163,7 +163,7 @@ describe('SD-13: Native Binary Spectral Parsers (Bruker OPUS, ASD, SPC)', () => 
                 id: sampleId,
                 originalId: sampleId,
                 assignedLab: 'LAB-GTM',
-                labId: 'LAB-GTM',
+                labId: sampleId,
                 country: 'GTM',
                 projectCode: 'SOILFER-US',
                 status: 'PROCESSING',
@@ -239,7 +239,7 @@ describe('SD-13: Native Binary Spectral Parsers (Bruker OPUS, ASD, SPC)', () => 
             .post('/api/spectral/upload-raw')
             .set('Authorization', `Bearer ${mgrGtmToken}`)
             .field('sampleId', sampleId)
-            .field('labId', 'LAB-GTM')
+            .field('labId', sampleId)
             .field('modality', 'MIR')
             .attach('files', opusBuffer, 'sample_alpha.0');
 

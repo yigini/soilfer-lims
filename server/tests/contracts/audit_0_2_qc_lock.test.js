@@ -8,6 +8,8 @@ const { canPublish } = require('../../services/workEligibility');
 const qcController = require('../../controllers/qcController');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const { createLegacyClosureDatabase, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
+const { QC_RUN_INCLUDE, batchApiView } = require('../../services/qcRunViewService');
+const { legacyBatchAnalyteStatus } = require('../../workflowContract');
 
 const labId = 'LAB-AUDIT-02';
 const readings = {
@@ -32,15 +34,26 @@ describe('Audit 0.2: batch QC lock and durable evidence', () => {
     async function batch(status = 'OPEN', disposition = null) {
         const res = await call('post', '/api/qc/batches', { id: id('AUDIT-02'), analysis: 'PH_H2O', profile: 'RACK_40' });
         expect(res.status).toBe(201);
-        if (status !== 'OPEN' || disposition) await prisma.batch.update({ where: { id: res.body.id }, data: {
-            status, disposition: disposition ? JSON.stringify(disposition) : null
-        } });
+        if (status !== 'OPEN') {
+            await prisma.batch.update({ where: { id: res.body.id }, data: { status } });
+            await prisma.batchAnalyte.updateMany({ where: { batchId: res.body.id }, data: { status: legacyBatchAnalyteStatus(status) } });
+        }
+        if (disposition) await prisma.batchDisposition.create({ data: { id: id('DISP'), batchId: res.body.id, analysisCode: 'PH_H2O',
+            decision: { PROCEED_WITH_WARNING: 'ACCEPT_WITH_DEVIATION', REANALYZE_BATCH: 'REPEAT_BATCH' }[disposition.decision],
+            reason: disposition.reason || null, decidedBy: jwt.decode(tokens.LAB_MANAGER).username, decidedAt: new Date(),
+            legacySource: JSON.stringify({ originalDisposition: disposition }) } });
         return res.body.id;
     }
     async function evidence(batchId) {
+        const raw = await prisma.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE });
+        const view = batchApiView(raw, { serialized: true });
         return wire({
-            batch: await prisma.batch.findUnique({ where: { id: batchId } }),
-            rows: await prisma.batchQcResult.findMany({ where: { batchId }, orderBy: { id: 'asc' } }),
+            batch: view,
+            rows: view.qcItems,
+            retained: { measurements: raw.measurements, evaluations: raw.evaluations, positions: raw.positions,
+                dispositions: raw.dispositions, events: raw.events,
+                legacy: await prisma.batch.findUnique({ where: { id: batchId } }),
+                typed: await prisma.batchQcResult.findMany({ where: { batchId }, orderBy: { id: 'asc' } }) },
             audit: await prisma.auditLog.findMany({ where: { entity: 'BATCH', entityId: batchId }, orderBy: { timestamp: 'asc' } })
         });
     }
@@ -187,7 +200,7 @@ describe('Audit 0.2: batch QC lock and durable evidence', () => {
         expect(JSON.parse((await evidence(batchId)).batch.history)).toEqual(expect.arrayContaining(reopenEvents));
     });
 
-    test.each(['BatchQcResult', 'AuditLog'])('%s write failure rolls back rows, batch and both snapshot copies', async table => {
+    test.each(['QcMeasurement', 'AuditLog'])('%s write failure rolls back rows, batch and both snapshot copies', async table => {
         const batchId = await batch();
         await pass(batchId);
         // Put the fixture in an editable state while retaining its old evidence.

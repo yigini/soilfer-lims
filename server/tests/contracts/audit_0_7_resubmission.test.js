@@ -66,6 +66,7 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
         const f = await fixture({ batchStatus: 'QC_FAIL' });
         const accepted = await createWorkItemFixture(prisma, { data: { id: id('WI-07-ACCEPTED'), sampleId: f.sampleId, analysis: f.analysis,
             status: 'ACCEPTED', batchId: f.batch.id, submissionId: f.submission.id, result: '9.1', history: '[{"action":"ACCEPTED"}]', duplicateOf: f.item.id } });
+        await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, f.batch.id);
         const response = await post(`/api/qc/batches/${f.batch.id}/disposition`, { decision: 'REANALYZE_BATCH', reason });
         expect(response.status).toBe(200);
         const item = await prisma.workItem.findUnique({ where: { id: f.item.id } });
@@ -135,6 +136,7 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
     });
     test('empty shorthand reconciles a stale QC-return package with one summary and no phantom item reviews', async () => {
         const f = await fixture({ batchStatus: 'QC_FAIL' });
+        await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, f.batch.id);
         expect((await post(`/api/qc/batches/${f.batch.id}/disposition`, { decision: 'REANALYZE_BATCH', reason })).status).toBe(200);
         expect((await post('/api/workbench/batch-save', { draft: false, entries: [{ workItemId: f.item.id, value: '6.4' }] }, technician)).body.saved).toBe(1);
         const submitted = await post('/api/workbench/v2/submissions/commit', { sampleIds: [f.sampleId], workItemIds: [f.item.id] }, technician);

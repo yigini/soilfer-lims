@@ -46,6 +46,9 @@ module.exports = async function globalSetup() {
         require('../scripts/install_sample_holds').installSampleHolds({ dbPath: testDbPath, apply: true });
         require('../scripts/install_reference_materials').installReferenceMaterials({ dbPath: testDbPath, apply: true });
         require('../scripts/install_qc_rules').installQcRules({ dbPath: testDbPath, apply: true });
+        const { installQcRuns } = require('../scripts/install_qc_runs');
+        const reviewed = installQcRuns({ dbPath: testDbPath, apply: false });
+        installQcRuns({ dbPath: testDbPath, apply: true, planSha256: reviewed.backfillFingerprint });
     }
 
     process.env.DATABASE_PATH = testDbPath;

@@ -427,7 +427,7 @@ function isInvalidOnlyByQcFailure(result) {
         !flags.includes('QC_BATCH_REJECTED') && !flags.includes('QC_BATCH_REANALYZE_REQUESTED');
 }
 
-async function flagBatchResults(prismaClient, batchId, status, disposition = null) {
+async function flagBatchResults(prismaClient, batchId, status, disposition = null, analysisCode = null) {
     if (!prismaClient || !batchId) return 0;
 
     let parsedDisp = disposition;
@@ -440,10 +440,17 @@ async function flagBatchResults(prismaClient, batchId, status, disposition = nul
     const isReanalyze = decision === 'REANALYZE_BATCH';
     const isReject = decision === 'REJECT_BATCH';
 
-    const results = await prismaClient.result.findMany({
+    let results = await prismaClient.result.findMany({
         where: { batchId },
         include: { sample: { select: { id: true, status: true } } }
     });
+    if (analysisCode) {
+        // Derived texture fractions are governed by their PSA/texture work,
+        // while other analytes in the physical run retain independent flags.
+        const { governingItems } = require('./reportResultGovernance');
+        const items = await prismaClient.workItem.findMany({ where: { batchId, analysis: analysisCode } });
+        results = results.filter(result => result.param === analysisCode || governingItems(result, items).length > 0);
+    }
     let count = 0;
 
     let publishedSampleIds = new Set();

@@ -8,6 +8,9 @@ const { resolveQcPolicy } = require('../../services/qcPolicyService');
 const { evaluateBatchQc, evaluateBlank, evaluateDuplicate, evaluateControl } = require('../../services/qcService');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const { getAuthToken } = require('../setup');
+const { normalizeLegacyQcFixture } = require('../helpers/normalizedQcFixture');
+const { QC_RUN_INCLUDE, batchApiView } = require('../../services/qcRunViewService');
+const normalizedEvidence = batchId => prisma.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE });
 const actor = { username: 'system:fixture', role: 'SUPER_ADMIN' };
 async function fixture(analysisCode = 'PH_H2O') {
     const labId = `QC-RULE-${randomUUID()}`;
@@ -165,14 +168,15 @@ test('real evaluation freezes selected rule and field sources in summary and eve
     const first = await save({ ...f, methodologyId: null }, { duplicateAbsMax: 0.4 });
     const batch = await prisma.batch.create({ data: { id: randomUUID(), labId: f.labId, analysis: f.analysisCode, profile: 'RACK_40', status: 'OPEN', createdBy: 'system:fixture' } });
     const token = await getAuthToken('LAB_MANAGER', f.labId);
+    await normalizeLegacyQcFixture(prisma, batch.id);
     const response = await request(app).post(`/api/qc/batches/${batch.id}/evaluate`).set('Authorization', `Bearer ${token}`).send(readings);
     expect(response.status).toBe(200); expect(response.body.status).toBe('QC_PASS');
-    const before = await prisma.batch.findUnique({ where: { id: batch.id } }), rows = await prisma.batchQcResult.findMany({ where: { batchId: batch.id } });
-    expect(JSON.parse(before.qcResults).summary.qcRule.id).toBe(first.rule.id);
+    const before = await normalizedEvidence(batch.id), view = batchApiView(before), rows = view.qcItems;
+    expect(view.qcResults.summary.qcRule.id).toBe(first.rule.id);
     for (const row of rows) expect(JSON.parse(row.details).qcRule).toMatchObject({ id: first.rule.id, version: 1, resolved: { duplicateAbsMax: { value: 0.4, source: 'QC_RULE' } } });
     await save({ ...f, methodologyId: null }, { duplicateAbsMax: 0.5 }, { expectedVersion: 1 });
-    expect(await prisma.batch.findUnique({ where: { id: batch.id } })).toEqual(before);
-    expect(await prisma.batchQcResult.findMany({ where: { batchId: batch.id } })).toEqual(rows);
+    expect(await normalizedEvidence(batch.id)).toEqual(before);
+    expect(batchApiView(await normalizedEvidence(batch.id)).qcItems).toEqual(rows);
 });
 
 test('concurrent saves with the same expected version permit one rule and one audit only', async () => {
@@ -212,7 +216,9 @@ test.each(['REQUIRED_BLOCKING', 'REQUIRED_WARN', 'ADVISORY', 'OFF'])('real %s AP
     await policies.change(actor, f.labId, { expectedVersion: 0, reason: 'Input guard mode test', changes: [{ key: 'qc.mode', value: mode }] }, { db: prisma });
     const token = await getAuthToken('LAB_MANAGER', f.labId);
     const batch = await prisma.batch.create({ data: { id: randomUUID(), labId: f.labId, analysis: f.analysisCode, profile: 'RACK_40', status: 'OPEN', createdBy: 'system:fixture' } });
+    await normalizeLegacyQcFixture(prisma, batch.id);
     const state = async () => ({ batch: await prisma.batch.findUnique({ where: { id: batch.id } }),
+        normalized: await normalizedEvidence(batch.id),
         typed: await prisma.batchQcResult.findMany({ where: { batchId: batch.id } }), audits: await prisma.auditLog.findMany({ where: { entityId: batch.id } }) });
     const before = await state();
     const evaluate = payload => request(app).post(`/api/qc/batches/${batch.id}/evaluate`).set('Authorization', `Bearer ${token}`).send(payload);
@@ -268,13 +274,14 @@ test.each(['generic', 'method', 'future'])('a policy edit conflicting with a %s 
     await save(target, { crmRecoveryMin: 95 }, kind === 'future' ? { effectiveFrom: new Date(Date.now() + 60000).toISOString() } : {});
     const token = await getAuthToken('LAB_MANAGER', f.labId);
     const batch = await prisma.batch.create({ data: { id: randomUUID(), labId: f.labId, analysis: f.analysisCode, profile: 'RACK_40', status: 'OPEN', createdBy: 'system:fixture' } });
+    await normalizeLegacyQcFixture(prisma, batch.id);
     const evaluated = await request(app).post(`/api/qc/batches/${batch.id}/evaluate`).set('Authorization', `Bearer ${token}`).send(readings);
     expect(evaluated.status).toBe(200); expect(evaluated.body.status).toBe('QC_PASS');
     const state = async () => ({ lab: await prisma.lab.findUnique({ where: { id: f.labId } }), policy: await prisma.labPolicy.findUnique({ where: { labId: f.labId } }),
         overrides: await prisma.labPolicyOverride.findMany({ where: { labId: f.labId }, orderBy: { id: 'asc' } }),
         rules: await prisma.qcRule.findMany({ where: { labId: f.labId }, orderBy: { id: 'asc' } }),
         audits: await prisma.auditLog.findMany({ where: { labId: f.labId }, orderBy: { id: 'asc' } }),
-        batch: await prisma.batch.findUnique({ where: { id: batch.id } }), typed: await prisma.batchQcResult.findMany({ where: { batchId: batch.id }, orderBy: { id: 'asc' } }) });
+        batch: await normalizedEvidence(batch.id), typed: await prisma.batchQcResult.findMany({ where: { batchId: batch.id }, orderBy: { id: 'asc' } }) });
     const before = await state();
     const response = await request(app).patch(`/api/labs/${f.labId}/policies`).set('Authorization', `Bearer ${token}`).send({ expectedVersion: 0, reason: 'Incompatible inherited bound',
         changes: [{ key: 'qc.controlMaxRecovery', value: 92 }, { key: 'numbers.decimalSeparator', value: ',' }] });
@@ -311,14 +318,16 @@ test.each(['immediate', 'future'])('a %s generic rule saved after a conflicting 
     const batch = await prisma.batch.create({ data: { id: randomUUID(), labId: f.labId, analysis: f.analysisCode, profile: 'RACK_40', status: 'OPEN', createdBy: 'system:fixture' } });
     const sample = await createSampleFixture(prisma, { data: { id: randomUUID(), originalId: randomUUID(), assignedLab: f.labId, labId: f.labId, status: 'PROCESSING' } });
     await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, analysis: f.analysisCode, status: 'IN_PROGRESS', batchId: batch.id, methodologyId: f.methodologyId } });
+    await normalizeLegacyQcFixture(prisma, batch.id);
+    const parent = await prisma.batchPosition.findFirst({ where: { batchId: batch.id, kind: 'SAMPLE' } });
     const evaluated = await request(app).post(`/api/qc/batches/${batch.id}/evaluate`).set('Authorization', `Bearer ${token}`)
-        .send({ ...readings, controls: [{ expected: 7, measured: 6.4 }] });
+        .send({ ...readings, duplicates: readings.duplicates.map(row => ({ ...row, duplicateOfPositionId: parent.id })), controls: [{ expected: 7, measured: 6.4 }] });
     expect(evaluated.status).toBe(200); expect(evaluated.body.status).toBe('QC_PASS');
     const state = async () => ({ policy: await prisma.labPolicy.findUnique({ where: { labId: f.labId } }),
         overrides: await prisma.labPolicyOverride.findMany({ where: { labId: f.labId }, orderBy: { id: 'asc' } }),
         rules: await prisma.qcRule.findMany({ where: { labId: f.labId }, orderBy: { id: 'asc' } }),
         audits: await prisma.auditLog.findMany({ where: { labId: f.labId }, orderBy: { id: 'asc' } }),
-        batch: await prisma.batch.findUnique({ where: { id: batch.id } }),
+        batch: await normalizedEvidence(batch.id),
         typed: await prisma.batchQcResult.findMany({ where: { batchId: batch.id }, orderBy: { id: 'asc' } }),
         sample: await prisma.sample.findUnique({ where: { id: sample.id } }),
         workItems: await prisma.workItem.findMany({ where: { batchId: batch.id }, orderBy: { id: 'asc' } }) });

@@ -4,6 +4,8 @@ const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
 const prisma = require('../../prisma');
+const { QC_RUN_INCLUDE, batchApiView } = require('../../services/qcRunViewService');
+const evidenceBatch = async id => batchApiView(await prisma.batch.findUnique({ where: { id }, include: QC_RUN_INCLUDE }), { serialized: true });
 
 describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)', () => {
     let techToken;
@@ -595,13 +597,14 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
     });
 
     describe('Review 5 Shared QC Evaluation & State Integrity Regressions', () => {
-        test('Null blank does not coerce to zero and missing required profile QC results in QC_FAIL', async () => {
+        test('Null blank does not coerce to zero and malformed submitted QC is refused without writing evidence', async () => {
             const batchRes = await request(app)
                 .post('/api/qc/batches')
                 .set('Authorization', `Bearer ${techToken}`)
                 .send({ analysis: 'PH_H2O', profile: 'RACK_40' });
             batchId = batchRes.body.id;
 
+            const before = await evidenceBatch(batchId);
             const res = await request(app)
                 .put(`/api/qc/batches/${batchId}`)
                 .set('Authorization', `Bearer ${techToken}`)
@@ -613,14 +616,12 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
                     }
                 });
 
-            expect(res.statusCode).toBe(200);
-            expect(res.body.status).toBe('QC_FAIL');
-            const batch = await prisma.batch.findUnique({ where: { id: batchId } });
-            expect(batch.status).toBe('QC_FAIL');
-            const parsed = JSON.parse(batch.qcResults);
-            expect(parsed.blanks[0].value).toBeNull();
-            expect(parsed.blanks[0].status).toBe('FAIL');
-            expect(parsed.summary.missingRequired).toEqual(expect.arrayContaining([expect.objectContaining({ type: 'CONTROL' }), expect.objectContaining({ type: 'DUPLICATE' })]));
+            expect(res.statusCode).toBe(400);
+            expect(res.body.code).toBe('QC_VALUES_MISSING');
+            expect(res.body.missingTypes).toEqual(expect.arrayContaining(['BLANK', 'CONTROL', 'DUPLICATE']));
+            expect(await evidenceBatch(batchId)).toEqual(before);
+            expect(await prisma.qcMeasurement.count({ where: { batchId } })).toBe(0);
+            expect(await prisma.qcEvaluation.count({ where: { batchId } })).toBe(0);
         });
 
         test('Dedicated evaluate route rejects mutating a CLOSED batch (400)', async () => {
@@ -675,7 +676,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
                     duplicates: [{ value1: 7.0, value2: 7.02 }, { value1: 7.0, value2: 7.02 }]
                 });
 
-            const passedBatch = await prisma.batch.findUnique({ where: { id: batchId } });
+            const passedBatch = await evidenceBatch(batchId);
             expect(passedBatch.status).toBe('QC_PASS');
 
             // Clear QC measurements
@@ -688,7 +689,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
 
             expect(clearRes.statusCode).toBe(403);
             expect(clearRes.body.code).toBe('QC_REOPEN_PERMISSION_REQUIRED');
-            expect((await prisma.batch.findUnique({ where: { id: batchId } })).qcResults).toBe(passedBatch.qcResults);
+            expect((await evidenceBatch(batchId)).qcResults).toBe(passedBatch.qcResults);
 
             const reopenRes = await request(app)
                 .put(`/api/qc/batches/${batchId}`)
@@ -697,7 +698,7 @@ describe('QC Batch 40-Sample Capacity & Scope Contracts (Mandatory Correction 3)
             expect(reopenRes.statusCode).toBe(200);
             expect(reopenRes.body.status).toBe('OPEN');
 
-            const batch = await prisma.batch.findUnique({ where: { id: batchId } });
+            const batch = await evidenceBatch(batchId);
             expect(batch.status).toBe('OPEN');
             expect(batch.qcResults).toBeNull();
             expect(batch.disposition).toBeNull();

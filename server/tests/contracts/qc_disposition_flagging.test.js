@@ -1,5 +1,4 @@
 const { createResultFixture } = require('../../services/resultWriteService');
-const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const qcService = require('../../services/qcService');
@@ -52,12 +51,7 @@ describe('WP-29: QC Service & Batch Disposition Result Flagging', () => {
         });
     });
 
-    afterEach(async () => {
-        await prisma.batchQcResult.deleteMany({ where: { batchId: testBatchId } });
-        await prisma.result.deleteMany({ where: { batchId: testBatchId } });
-        await prisma.batch.deleteMany({ where: { id: testBatchId } });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
-    });
+    // Keep the fixture's QC/results until disposable database teardown.
 
     test('1. qcService accurately computes blank threshold, duplicate RPD, and control recovery', () => {
         // Blank evaluation
@@ -80,6 +74,7 @@ describe('WP-29: QC Service & Batch Disposition Result Flagging', () => {
     });
 
     test('2. A batch evaluated as QC_FAIL creates typed BatchQcResult rows and flags associated results', async () => {
+        await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, testBatchId);
         const req = {
             params: { id: testBatchId },
             body: {
@@ -99,7 +94,8 @@ describe('WP-29: QC Service & Batch Disposition Result Flagging', () => {
         expect(res.json).toHaveBeenCalled();
 
         // 1. Verify typed BatchQcResult rows created
-        const typedRows = await prisma.batchQcResult.findMany({ where: { batchId: testBatchId } });
+        const normalized = await prisma.batch.findUnique({ where: { id: testBatchId }, include: require('../../services/qcRunViewService').QC_RUN_INCLUDE });
+        const typedRows = require('../../services/qcRunViewService').batchApiView(normalized).qcItems;
         expect(typedRows.length).toBe(3);
         expect(typedRows.some(r => r.type === 'BLANK' && r.status === 'FAIL')).toBe(true);
         expect(typedRows.some(r => r.type === 'DUPLICATE' && r.status === 'PASS')).toBe(true);
@@ -114,6 +110,7 @@ describe('WP-29: QC Service & Batch Disposition Result Flagging', () => {
     test('3. Manager disposition with PROCEED_WITH_WARNING overrides fail and restores result validity', async () => {
         // First, mark batch as QC_FAIL and flag results
         await prisma.batch.update({ where: { id: testBatchId }, data: { status: 'QC_FAIL' } });
+        await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, testBatchId);
         await qcService.flagBatchResults(prisma, testBatchId, 'QC_FAIL');
 
         const req = {

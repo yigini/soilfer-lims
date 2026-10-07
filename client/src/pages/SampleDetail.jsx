@@ -1156,7 +1156,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                                 <div className="text-xs text-gray-500 flex flex-wrap gap-3">
                                                     <span>Assigned: <strong>{item.assigneeName || item.assignedTo || 'Technician'}</strong></span>
                                                     <span>Method: <strong>{item.methodology?.name || 'Standard'}</strong></span>
-                                                    <span>QC: <strong className={item.qcStatus === 'QC_FAIL' ? 'text-red-500' : 'text-emerald-500'}>{item.qcStatus || 'PASS'}</strong></span>
+                                                    <span>QC: <strong className={item.qcStatus === 'QC_FAIL' ? 'text-red-500' : 'text-emerald-500'}>{item.qcStatus === 'NOT_REQUIRED' ? t('qcRuns.notRequired') : item.qcStatus || 'PASS'}</strong></span>
                                                 </div>
                                             </div>
 

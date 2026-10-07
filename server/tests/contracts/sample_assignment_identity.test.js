@@ -476,13 +476,14 @@ describe('Contract: Sample and Assignment Identity, Pagination, and Server-Side 
             }
         });
 
+        await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, qcBatchId);
         const ws = await sampleWorkspaceService.getSampleWorkspace(qcBatchSampleId, { role: 'LAB_MANAGER', labId: 'LAB-GTM' });
         expect(ws.capabilities.canFinalApprove.allowed).toBe(false);
         expect(ws.capabilities.canFinalApprove.blockers.some(b => b.includes('QC_BATCH_FAILED'))).toBe(true);
 
         // Cleanup
         await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: qcBatchSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
-        await prisma.batch.delete({ where: { id: qcBatchId } });
+        // The owned test database teardown retains QC membership and its batch.
         await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: qcBatchSampleId } }), select: { id: true } })).map(row => row.id), { single: true });
     });
 });

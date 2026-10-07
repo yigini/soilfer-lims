@@ -42,6 +42,7 @@ export default function QcRules({ labId, analysisCode, methodologyId, registry, 
                 return <fieldset key={field} className="border rounded p-3 space-y-1" disabled={!canEdit || saving}>
                     <legend>{t(definition.description)}{definition.unit && ` (${t(`policies.units.${definition.unit}`, definition.unit)})`}</legend>
                     <p className="text-xs">{t('policies.value')}: {typeof resolved.value === 'object' ? JSON.stringify(resolved.value) : String(resolved.value ?? '—')} · {t(`policies.sources.${resolved.source}`, resolved.source)}</p>
+                    {field === 'duplicateEvery' && <p className="text-xs">{t('qcRules.duplicateCountHelp')}</p>}
                     {canEdit && <><label><input type="checkbox" checked={draft[field] === null} data-testid={`qc-rule-inherit-${field}`}
                         onChange={e => setDraft(values => ({ ...values, [field]: e.target.checked ? null : resolved.value === null ? '' : resolved.value }))} />{t('policies.inherit')}</label>
                     {draft[field] !== null && <Editor definition={definition} value={draft[field]} t={t} onChange={value => setDraft(values => ({ ...values, [field]: value }))} />}</>}

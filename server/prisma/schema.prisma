@@ -35,6 +35,7 @@ model User {
   assignedWorkItems  WorkItem[] @relation("AssignedTo")
   createdWorkItems   WorkItem[] @relation("AssignedBy")
   submissions        Submission[]
+  analyticalBatches  Batch[] @relation("BatchAnalyst")
   
   sentMessages       Message[]  @relation("SentMessages")
   receivedMessages   Message[]  @relation("ReceivedMessages")
@@ -193,6 +194,7 @@ model Sample {
   reviewDecisions   ReviewDecision[]
   resultEvidenceEvents ResultEvidenceEvent[]
   holds             SampleHold[]
+  batchPositions    BatchPosition[]
 
   @@index([consignmentId])
 }
@@ -304,6 +306,7 @@ model WorkItem {
   spectralScans   SpectralData[]
   workAttempts    WorkAttempt[]
   reviewDecisions ReviewDecision[]
+  batchPositions  BatchPositionWorkItem[]
 }
 
 model SampleHold {
@@ -388,6 +391,8 @@ model QcRule {
   lab                        Lab @relation(fields: [labId], references: [id], onDelete: Restrict)
   analysis                   Analysis @relation(fields: [analysisCode], references: [code], onDelete: Restrict)
   methodology                Methodology? @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+  batchAnalytes              BatchAnalyte[]
+  evaluations                QcEvaluation[]
 
   @@index([labId, analysisCode, methodologyId, effectiveFrom])
 }
@@ -397,20 +402,189 @@ model Batch {
   labId       String?
   analysis    String
   instrument  String?
+  instrumentId String?
+  equipment   EquipmentAsset? @relation(fields: [instrumentId], references: [id], onDelete: Restrict)
+  analystUsername String?
+  analyst     User? @relation("BatchAnalyst", fields: [analystUsername], references: [username], onDelete: Restrict)
+  startedAt   DateTime? // First native start; never cleared on reopen. Legacy unknown stays null.
+  completedAt DateTime?
   status      String   // OPEN, RUNNING, QC_PASS, QC_FAIL, CLOSED
   createdBy   String
   createdAt   DateTime @default(now())
   notes       String?
-  qcResults   String?  // JSON string: { blanks: [], controls: [], duplicates: [] }
-  workItemIds String?  // JSON string: Array of strings
+  qcResults   String?  // Deprecated frozen legacy evidence; remove in audit 8.1.
+  workItemIds String?  // Deprecated frozen legacy evidence; remove in audit 8.1.
   maxCapacity Int?     @default(40)
   profile     String?
-  disposition String?  // JSON string: { decision, reason, by, at }
-  history     String?  // JSON string: Array of events
+  disposition String?  // Deprecated frozen legacy evidence; remove in audit 8.1.
+  history     String?  // Deprecated frozen legacy evidence; remove in audit 8.1.
 
   // Relations
   workItems   WorkItem[]
   qcItems     BatchQcResult[]
+  analytes    BatchAnalyte[]
+  positions   BatchPosition[]
+  measurements QcMeasurement[]
+  evaluations QcEvaluation[]
+  dispositions BatchDisposition[]
+  events      BatchEvent[]
+}
+
+// #186 scope pins 1–12. String enums and immutable evidence are guarded by the
+// additive release SQL; unknown historical metadata remains nullable.
+model BatchAnalyte {
+  id                      String @id
+  batchId                 String
+  batch                   Batch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  labId                   String?
+  analysisCode            String // Legacy codes need not still exist in the catalogue.
+  methodologyId           String?
+  methodology             Methodology? @relation(fields: [methodologyId], references: [id], onDelete: Restrict)
+  methodResolution        String?
+  qcRuleId                String?
+  qcRule                  QcRule? @relation(fields: [qcRuleId], references: [id], onDelete: Restrict)
+  qcRuleVersion           Int?
+  policyVersion           Int?
+  criteriaSnapshot        String? // Frozen at native first start, not at build.
+  crmOrdinal              Int?
+  status                  String
+  provenance              String
+  legacyMembershipFrozen  Boolean @default(false)
+  legacySource            String?
+
+  @@unique([batchId, analysisCode])
+  @@index([labId, analysisCode, methodologyId])
+}
+
+model BatchPosition {
+  id                      String @id
+  batchId                 String
+  batch                   Batch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  position                Int
+  kind                    String
+  sampleId                String?
+  sample                  Sample? @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+  duplicateOfPositionId   String?
+  duplicateOf             BatchPosition? @relation("PhysicalDuplicate", fields: [duplicateOfPositionId], references: [id], onDelete: Restrict)
+  duplicates              BatchPosition[] @relation("PhysicalDuplicate")
+  historicalSnapshotSeq   Int? // #186 part 7: isolated historical evidence, never a current/native position.
+  provenance              String
+  legacySource            String?
+  workItems               BatchPositionWorkItem[]
+  references              BatchPositionReference[]
+  measurements            QcMeasurement[]
+
+  @@unique([batchId, position])
+}
+
+model BatchPositionWorkItem {
+  id                      String @id
+  positionId              String
+  position                BatchPosition @relation(fields: [positionId], references: [id], onDelete: Restrict)
+  workItemId              String
+  workItem                WorkItem @relation(fields: [workItemId], references: [id], onDelete: Restrict)
+  analysisCode            String
+
+  @@unique([positionId, analysisCode])
+  @@index([workItemId])
+}
+
+model BatchPositionReference {
+  id                      String @id
+  positionId              String
+  position                BatchPosition @relation(fields: [positionId], references: [id], onDelete: Restrict)
+  analysisCode            String
+  referenceMaterialId     String
+  referenceMaterial       ReferenceMaterial @relation(fields: [referenceMaterialId], references: [id], onDelete: Restrict)
+  referenceValueId        String?
+  referenceValue          ReferenceValue? @relation(fields: [referenceValueId], references: [id], onDelete: Restrict)
+  referenceUse            String
+  referenceSnapshot       String? // Null only for explicitly NOT_SERVED optional service.
+  serviceStatus           String @default("SERVED")
+  boundBy                 String?
+  boundAt                 DateTime?
+  supersededById          String?
+  supersededBy            BatchPositionReference? @relation("PositionReferenceRevision", fields: [supersededById], references: [id], onDelete: Restrict)
+  revisions               BatchPositionReference[] @relation("PositionReferenceRevision")
+  // #186 part 19: migration adds DEFERRABLE INITIALLY DEFERRED; Prisma cannot emit it.
+  correctionReason        String?
+
+  @@index([positionId, analysisCode])
+  // Migration-only partial unique index: one current binding per analyte.
+}
+
+model QcMeasurement {
+  id                      String @id
+  batchId                 String
+  batch                   Batch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  positionId              String
+  position                BatchPosition @relation(fields: [positionId], references: [id], onDelete: Restrict)
+  analysisCode            String
+  replicateNo             Int
+  value                   Float?
+  rawInput                String?
+  censoring               String?
+  censoringLimit          Float?
+  enteredBy               String?
+  enteredAt               DateTime?
+  supersededById          String?
+  supersededBy            QcMeasurement? @relation("MeasurementRevision", fields: [supersededById], references: [id], onDelete: Restrict)
+  revisions               QcMeasurement[] @relation("MeasurementRevision")
+  // #186 part 19: migration adds DEFERRABLE INITIALLY DEFERRED; Prisma cannot emit it.
+  correctionReason        String?
+  legacySource            String?
+
+  @@index([batchId, analysisCode])
+  @@index([positionId, analysisCode, replicateNo])
+  // Migration-only partial unique index: one current physical observation.
+}
+
+model QcEvaluation {
+  id                      String @id
+  batchId                 String
+  batch                   Batch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  analysisCode            String
+  version                 Int
+  ruleId                  String?
+  rule                    QcRule? @relation(fields: [ruleId], references: [id], onDelete: Restrict)
+  ruleVersion             Int?
+  policyVersion           Int?
+  verdict                 String
+  details                 String
+  evaluatedBy             String?
+  evaluatedAt             DateTime?
+  supersedesId            String?
+  supersedes              QcEvaluation? @relation("EvaluationRevision", fields: [supersedesId], references: [id], onDelete: Restrict)
+  revisions               QcEvaluation[] @relation("EvaluationRevision")
+  legacySource            String?
+
+  @@unique([batchId, analysisCode, version])
+}
+
+model BatchDisposition {
+  id                      String @id
+  batchId                 String
+  batch                   Batch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  analysisCode            String?
+  decision                String
+  reason                  String?
+  decidedBy               String?
+  decidedAt               DateTime?
+  legacySource            String?
+
+  @@index([batchId, analysisCode])
+}
+
+model BatchEvent {
+  id                      String @id
+  batchId                 String
+  batch                   Batch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  type                    String
+  payload                 String
+  by                      String?
+  at                      DateTime?
+
+  @@index([batchId, at])
 }
 
 model BatchQcResult {
@@ -740,6 +914,7 @@ model EquipmentAsset {
   events             EquipmentEvent[]
   usage              WorkItemEquipmentUse[]
   spectralScans      SpectralData[]
+  batches            Batch[]
 }
 
 model EquipmentQualification {
@@ -1115,6 +1290,7 @@ model Methodology {
   workItems        WorkItem[]
   qcRules          QcRule[]
   referenceValues  ReferenceValue[]
+  batchAnalytes    BatchAnalyte[]
 }
 
 // #184: each certificate/lot has its own material; assigned values are immutable.
@@ -1138,6 +1314,7 @@ model ReferenceMaterial {
   createdAt      DateTime @default(now())
   values         ReferenceValue[]
   qcItems        BatchQcResult[]
+  batchReferences BatchPositionReference[]
 
   @@index([labId, code])
 }
@@ -1163,6 +1340,7 @@ model ReferenceValue {
   supersededBy        String?
   correctionReason    String?
   qcItems             BatchQcResult[]
+  batchReferences     BatchPositionReference[]
 
   @@index([referenceMaterialId, analysisCode])
   // Two migration-only partial unique indexes enforce current generic/method values.

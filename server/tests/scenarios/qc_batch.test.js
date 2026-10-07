@@ -74,12 +74,14 @@ describe('Scenario E: QC Batch Management', () => {
     });
 
     it('should fail submission review if Batch fails', async () => {
+        const parent = await prisma.batchPosition.findFirst({ where: { batchId, kind: 'SAMPLE' } });
         // 1. Fail Batch with evaluated failing QC data
         const failRes = await request(app)
             .put(`/api/qc/batches/${batchId}`)
             .set('Authorization', `Bearer ${techToken}`)
             .send({
-                blanks: [{ value: 99.0 }]
+                blanks: [{ value: 99.0 }], controls: [{ expected: 7, measured: 7 }],
+                duplicates: [{ duplicateOfPositionId: parent.id, value1: 7, value2: 7 }]
             });
         expect(failRes.status).toBe(200);
         expect(failRes.body.status).toBe('QC_FAIL');

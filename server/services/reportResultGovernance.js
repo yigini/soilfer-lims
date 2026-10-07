@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const policyService = require('./policyService');
 const { isInvalidOnlyByQcFailure, checkBatchDisposition } = require('./qcService');
 const { SPECTRAL_ACQUISITION_CODES } = require('../config/spectralAcquisition');
+const { analyteGateView } = require('./qcRunGateService');
 
 const TEXTURE_ALIASES = new Set(['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis']);
 const DERIVED_TEXTURE_FRACTIONS = ['SAND', 'SILT', 'CLAY'];
@@ -57,6 +58,48 @@ function linkedBatchIds(result, items) {
     return [...new Set([result.batchId, ...governingItems(result, items).map(item => item.batchId)].filter(Boolean))];
 }
 
+// Resolve once at the IO boundary, then use the existing qcModes hook in every
+// validity and publication check. Reopened Native runs retain their first start.
+async function resolveReportingModes(sample, batches, options = {}) {
+    const qcModes = {}, qcModeEvidence = [];
+    const ranks = ['OFF', 'ADVISORY', 'REQUIRED_WARN', 'REQUIRED_BLOCKING'];
+    const items = sample.workItems || [];
+    for (const result of sample.results || []) {
+        const ids = linkedBatchIds(result, items), governing = governingItems(result, items);
+        const contributions = [];
+        for (const batchId of ids.length ? ids : [null]) {
+            const batch = (batches || []).find(row => row.id === batchId);
+            const item = governing.find(row => row.batchId === batchId);
+            const analysisCode = item?.analysis || result.param;
+            const analyte = batch?.analytes?.find(row => row.analysisCode === analysisCode);
+            let mode, source = 'LIVE';
+            if (analyte?.provenance === 'NATIVE' && batch.startedAt) {
+                let snapshot;
+                try { snapshot = typeof analyte.criteriaSnapshot === 'string'
+                    ? JSON.parse(analyte.criteriaSnapshot) : analyte.criteriaSnapshot; } catch (_) { snapshot = null; }
+                mode = snapshot?.qcMode;
+                source = 'FROZEN';
+            } else {
+                mode = await policyService.get(sample.assignedLab || sample.labId, 'qc.mode', {
+                    analysisCode, methodologyId: result.methodologyId || item?.methodologyId || null, db: options.db
+                });
+            }
+            // Validate frozen snapshots as strictly as live policy; never fall
+            // back to today's policy when a started run's evidence is damaged.
+            if (!ranks.includes(mode)) throw Object.assign(new Error('QC policy mode could not be resolved.'),
+                { statusCode: 409, code: 'QC_POLICY_UNRESOLVED' });
+            contributions.push({ batchId, analysisCode, mode, source });
+        }
+        const rank = Math.max(...contributions.map(row => ranks.indexOf(row.mode)));
+        const effectiveMode = ranks[rank];
+        qcModes[result.id] = effectiveMode;
+        qcModeEvidence.push({ resultId: result.id, effectiveMode,
+            source: contributions.some(row => row.mode === effectiveMode && row.source === 'FROZEN') ? 'FROZEN' : 'LIVE',
+            contributingBatchIds: ids, contributions });
+    }
+    return { qcModes, qcModeEvidence };
+}
+
 function reportingQc(sample, options = {}) {
     const items = options.workItems || sample.workItems || [];
     const results = options.results || sample.results || [];
@@ -68,7 +111,9 @@ function reportingQc(sample, options = {}) {
         if (!governing.length || !governing.every(item => item.status === 'ACCEPTED')) continue;
         const mode = getReportingMode(sample, result, options);
         for (const batchId of linkedBatchIds(result, items)) {
-            const batch = batches.find(row => row.id === batchId) || { id: batchId, status: 'ERROR' };
+            const source = batches.find(row => row.id === batchId) || { id: batchId, status: 'ERROR' };
+            const analysisCode = governing.find(item => item.batchId === batchId)?.analysis || result.param;
+            const batch = analyteGateView(source, analysisCode);
             const gate = checkBatchDisposition(batch);
             if (mode === 'REQUIRED_BLOCKING' && !gate.allowed && !blocker) blocker = { batch, gate };
             if (isReviewedReportResult(result, items, mode) &&
@@ -115,4 +160,4 @@ async function invalidateReturnedResults(tx, item, actor, reason) {
 module.exports = { TEXTURE_ALIASES, DERIVED_TEXTURE_FRACTIONS, NON_ANALYTICAL, EXCLUDED_GATE_CODES,
     SPECTRAL_ACQUISITION_CODES, hasApprovedSpectralEvidence,
     matchesResult, matchingItems, governsResult, governingItems, isCurrentValidAnalyticalResult, isReviewedReportResult, invalidateReturnedResults,
-    getReportingMode, linkedBatchIds, reportingQc };
+    getReportingMode, linkedBatchIds, resolveReportingModes, reportingQc };

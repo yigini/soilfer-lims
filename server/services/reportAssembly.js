@@ -5,8 +5,7 @@
 const prisma = require('../prisma');
 const { normalizeUnit, interpretParameter, evaluateSoilProfile } = require('./interpretationService');
 const { isReviewedReportResult, isCurrentValidAnalyticalResult, matchingItems, governingItems,
-    getReportingMode, reportingQc, linkedBatchIds } = require('./reportResultGovernance');
-const policyService = require('./policyService');
+    getReportingMode, reportingQc, linkedBatchIds, resolveReportingModes } = require('./reportResultGovernance');
 const { freezeReportEvidence, describeReportEvidence } = require('./reportTruthfulnessService');
 
 /**
@@ -31,14 +30,11 @@ async function assembleReport(sampleId, user, options = {}) {
 
     if (!sample) throw new Error(`Sample ${sampleId} not found`);
 
-    const qcModes = options.qcModes || {};
-    for (const result of sample.results) {
-        if (!(result.id in qcModes)) qcModes[result.id] = await policyService.get(sample.assignedLab || sample.labId, 'qc.mode', {
-            analysisCode: result.param, methodologyId: result.methodologyId || null, db
-        });
-    }
     const batchIds = [...new Set(sample.results.flatMap(result => linkedBatchIds(result, sample.workItems)))];
-    const qcBatches = options.qcBatches || (batchIds.length ? await db.batch.findMany({ where: { id: { in: batchIds } } }) : []);
+    const qcBatches = options.qcBatches || (batchIds.length ? await db.batch.findMany({ where: { id: { in: batchIds } },
+        include: require('./qcRunViewService').QC_RUN_INCLUDE }) : []);
+    const { qcModes, qcModeEvidence } = options.qcModes && options.qcModeEvidence
+        ? options : await resolveReportingModes(sample, qcBatches, { db });
     const reportOptions = { qcModes, qcBatches };
     const reportableResults = sample.results.filter(result =>
         isReviewedReportResult(result, sample.workItems, getReportingMode(sample, result, reportOptions)));
@@ -254,6 +250,7 @@ async function assembleReport(sampleId, user, options = {}) {
     const qcWarningStatement = qcWarnings.length
         ? require(`../locales/${warningLocale}.json`).resultReports.qcWarningStatement : null;
     const evidence = freezeReportEvidence(reportableResults, sample.workItems, qcBatches);
+    evidence.qcModes = qcModeEvidence;
     const evidenceText = describeReportEvidence(evidence, warningLocale);
     const reportContent = {
         meta: {

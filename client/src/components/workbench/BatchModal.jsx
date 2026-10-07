@@ -5,8 +5,9 @@ import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import numberParse from '@lims/number-parse';
 import NumberPreview from './NumberPreview';
 import { useLanguage } from '../../context/LanguageContext';
+import NativeRunPanel from './NativeRunPanel';
 
-const EMPTY_QC_FORM = { blankVal: '', ctrlExpected: '', ctrlMeasured: '', dupVal1: '', dupVal2: '' };
+const EMPTY_QC_FORM = { blankVal: '', ctrlExpected: '', ctrlMeasured: '', dupVal1: '', dupVal2: '', duplicateOfPositionId: '' };
 
 export default function BatchModal({
     isOpen,
@@ -17,6 +18,10 @@ export default function BatchModal({
 }) {
     const getAnalysisDisplayName = useAnalysisNames();
     const { t } = useLanguage();
+    const qcError = (error, fallback) => {
+        const code = error.response?.data?.code, message = error.response?.data?.error || error.message || fallback;
+        return code ? t(`${code.startsWith('REFERENCE_') ? 'referenceMaterials' : 'qcRuns'}.errors.${code}`, message) : message;
+    };
     const [activeTab, setActiveTab] = useState('create'); // 'create' | 'allocate' | 'qc'
     const [batches, setBatches] = useState([]);
     const [selectedBatchId, setSelectedBatchId] = useState('');
@@ -39,6 +44,7 @@ export default function BatchModal({
     const [referenceLoadError, setReferenceLoadError] = useState(false);
     const [extraQc, setExtraQc] = useState([]);
     const currentBatch = batches.find(b => b.id === selectedBatchId) || batches[0] || null;
+    const native = currentBatch?.analytes?.length > 0 && currentBatch.analytes.every(row => row.provenance === 'NATIVE');
     let savedControl, savedEvaluation;
     try { savedEvaluation = typeof currentBatch?.qcResults === 'string' ? JSON.parse(currentBatch.qcResults) : currentBatch?.qcResults; savedControl = savedEvaluation?.controls?.[0]; }
     catch { /* Unreadable evidence is handled by the existing QC authority. */ }
@@ -105,13 +111,27 @@ export default function BatchModal({
     const includeBlank = !hasRules || entered(qcForm.blankVal);
     const includeControl = !hasRules || entered(qcForm.ctrlExpected) || entered(qcForm.ctrlMeasured) || !!referenceLink.referenceMaterialId;
     const includeDuplicate = !hasRules || entered(qcForm.dupVal1) || entered(qcForm.dupVal2);
+    const sampleParents = (currentBatch?.analytes?.find(row => row.analysisCode === currentBatch.analysis)?.positions || currentBatch?.positions || [])
+        .filter(row => row.kind === 'SAMPLE');
+    const validParent = id => !sampleParents.length || sampleParents.some(row => row.id === id);
+    const parentSelector = (value, onChange, testId) => sampleParents.length > 0 && <label className="grid gap-1 text-xs">
+        {t('qcRuns.duplicateParent')}
+        <select value={value || ''} onChange={e => onChange(e.target.value)} required data-testid={testId}
+            className="p-2 rounded border border-sf-divider bg-sf-canvas text-sf-text">
+            <option value="">{t('qcRuns.chooseDuplicateParent')}</option>
+            {sampleParents.map(position => <option key={position.id} value={position.id}>
+                {position.position} · {currentBatch.workItems?.find(item => item.sampleId === position.sampleId)?.sample?.originalId || position.sampleId}
+            </option>)}
+        </select>
+    </label>;
     const sameLink = savedControl?.referenceMaterialId === referenceLink.referenceMaterialId && savedControl?.referenceUse === referenceLink.referenceUse;
     const payload = {
         blanks: includeBlank ? [{ value: qcMeasurements.blankVal, rawInput: { value: qcForm.blankVal } }] : [],
         controls: includeControl ? [{ ...(savedControl?.id && { id: savedControl.id }),
             ...(referenceLink.referenceMaterialId ? { ...referenceLink, ...(sameLink && { referenceValueId: savedControl.referenceValueId }) } : { expected: qcMeasurements.ctrlExpected }),
             measured: qcMeasurements.ctrlMeasured, rawInput: { expected: referenceLink.referenceMaterialId ? null : qcForm.ctrlExpected, measured: qcForm.ctrlMeasured } }] : [],
-        duplicates: includeDuplicate ? [{ value1: qcMeasurements.dupVal1, value2: qcMeasurements.dupVal2, rawInput: { value1: qcForm.dupVal1, value2: qcForm.dupVal2 } }] : []
+        duplicates: includeDuplicate ? [{ ...(qcForm.duplicateOfPositionId && { duplicateOfPositionId: qcForm.duplicateOfPositionId }),
+            value1: qcMeasurements.dupVal1, value2: qcMeasurements.dupVal2, rawInput: { value1: qcForm.dupVal1, value2: qcForm.dupVal2 } }] : []
     };
     let extrasValid = true;
     const parseExtra = (raw, duplicate = false) => {
@@ -121,7 +141,11 @@ export default function BatchModal({
     };
     for (const entry of extraQc) {
         if (entry.type === 'BLANK') payload.blanks.push({ value: parseExtra(entry.value), rawInput: { value: entry.value } });
-        if (entry.type === 'DUPLICATE') payload.duplicates.push({ value1: parseExtra(entry.value1, true), value2: parseExtra(entry.value2, true), rawInput: { value1: entry.value1, value2: entry.value2 } });
+        if (entry.type === 'DUPLICATE') {
+            if (!validParent(entry.duplicateOfPositionId)) extrasValid = false;
+            payload.duplicates.push({ ...(entry.duplicateOfPositionId && { duplicateOfPositionId: entry.duplicateOfPositionId }),
+                value1: parseExtra(entry.value1, true), value2: parseExtra(entry.value2, true), rawInput: { value1: entry.value1, value2: entry.value2 } });
+        }
         if (entry.type === 'CONTROL') {
             if (entry.referenceMaterialId && !['CRM', 'LRM'].includes(entry.referenceUse)) extrasValid = false;
             payload.controls.push({ ...(entry.referenceMaterialId ? { referenceMaterialId: entry.referenceMaterialId, referenceUse: entry.referenceUse } : { expected: parseExtra(entry.expected) }),
@@ -130,7 +154,7 @@ export default function BatchModal({
     }
     const validPrimary = (!includeBlank || Number.isFinite(qcMeasurements.blankVal)) &&
         (!includeControl || (Number.isFinite(qcMeasurements.ctrlMeasured) && (referenceLink.referenceMaterialId ? ['CRM', 'LRM'].includes(referenceLink.referenceUse) : Number.isFinite(qcMeasurements.ctrlExpected)))) &&
-        (!includeDuplicate || ['dupVal1', 'dupVal2'].every(field => numberParse.parseDuplicateObservation(qcForm[field], currentBatch?.numberFormat).valid));
+        (!includeDuplicate || validParent(qcForm.duplicateOfPositionId) && ['dupVal1', 'dupVal2'].every(field => numberParse.parseDuplicateObservation(qcForm[field], currentBatch?.numberFormat).valid));
     const counts = { BLANK: payload.blanks.length, CONTROL: payload.controls.length, DUPLICATE: payload.duplicates.length, LRM: payload.controls.filter(row => row.referenceUse !== 'CRM').length };
     const completeCounts = !hasRules || currentBatch.qcMode !== 'REQUIRED_BLOCKING' || Object.entries(currentBatch.qcRequirements).every(([type, row]) => counts[type] >= row.required);
     const qcFormComplete = validPrimary && extrasValid && completeCounts && Object.values(counts).some(count => count > 0);
@@ -162,7 +186,7 @@ export default function BatchModal({
             setActiveTab('allocate');
             if (onBatchUpdated) onBatchUpdated();
         } catch (err) {
-            setError(err.response?.data?.error || err.message || 'Failed to create batch');
+            setError(qcError(err, 'Failed to create batch'));
         } finally {
             setLoading(false);
         }
@@ -192,7 +216,7 @@ export default function BatchModal({
             await fetchBatches();
             if (onBatchUpdated) onBatchUpdated();
         } catch (err) {
-            const errMsg = err.response?.data?.error || err.message || 'Allocation failed';
+            const errMsg = qcError(err, 'Allocation failed');
             setError(`Boundary error (HTTP ${err.response?.status || 400}): ${errMsg}`);
         } finally {
             setLoading(false);
@@ -208,11 +232,11 @@ export default function BatchModal({
             setLoading(true);
             const res = await axios.post(`/api/qc/batches/${selectedBatchId}/evaluate`, payload);
 
-            setSuccessMsg(`QC evaluated: Status is now ${res.data.status}`);
+            setSuccessMsg(res.data.batch?.result === 'NOT_REQUIRED' ? t('qcRuns.notRequired') : `QC evaluated: Status is now ${res.data.status}`);
             await fetchBatches();
             if (onBatchUpdated) onBatchUpdated();
         } catch (err) {
-            setError(err.response?.data?.code?.startsWith('REFERENCE_') ? t(`referenceMaterials.errors.${err.response.data.code}`, err.response.data.error) : err.response?.data?.error || err.message || 'QC evaluation failed');
+            setError(qcError(err, 'QC evaluation failed'));
         } finally {
             setLoading(false);
         }
@@ -230,7 +254,7 @@ export default function BatchModal({
             await fetchBatches();
         } catch (err) {
             const status = err.response?.status;
-            const errMsg = err.response?.data?.error || err.message;
+            const errMsg = qcError(err, 'Only Managers can close batches');
             setError(`HTTP ${status}: ${errMsg || 'Only Managers can close batches'}`);
         } finally {
             setLoading(false);
@@ -487,7 +511,7 @@ export default function BatchModal({
                                         currentBatch.status === 'CLOSED' ? 'bg-purple-500/15 text-purple-800 dark:text-purple-300' :
                                         'bg-sf-surface text-sf-muted'
                                     }`} data-testid="batch-qc-status-badge">
-                                        {currentBatch.status}
+                                        {currentBatch.result === 'NOT_REQUIRED' || currentBatch.qcMode === 'OFF' ? t('qcRuns.notRequired') : currentBatch.status}
                                     </span>
                                 </div>
                             )}
@@ -499,7 +523,9 @@ export default function BatchModal({
                                 </li>)}
                             </ul>}
 
-                            <div className="space-y-3 pt-2">
+                            {native && <NativeRunPanel batch={currentBatch} referenceMaterials={referenceMaterials} loading={loading} setLoading={setLoading}
+                                setError={setError} setSuccessMsg={setSuccessMsg} onChanged={async () => { await fetchBatches(); if (onBatchUpdated) onBatchUpdated(); }} />}
+                            {!native && <div className="space-y-3 pt-2">
                                 <h3 className="text-xs font-bold text-sf-text uppercase tracking-wider">
                                     {t('qcRules.measurements')}
                                 </h3>
@@ -591,6 +617,7 @@ export default function BatchModal({
                                             />
                                             <NumberPreview value={qcForm.dupVal2} numberFormat={currentBatch?.numberFormat} duplicateObservation />
                                         </div>
+                                        {parentSelector(qcForm.duplicateOfPositionId, duplicateOfPositionId => setQcForm({ ...qcForm, duplicateOfPositionId }), 'qc-duplicate-parent')}
                                     </div>
                                 </div>
                                 {hasRules && <div className="text-xs space-y-1" data-testid="qc-required-counts">
@@ -602,6 +629,8 @@ export default function BatchModal({
                                 </div>}
                                 {extraQc.map((row, index) => <fieldset key={row.id} className="p-3 border border-sf-divider rounded-xl space-y-2">
                                     <legend className="text-xs">{t(`qcRules.types.${row.type}`)} · {index + 2}</legend>
+                                    {row.type === 'DUPLICATE' && parentSelector(row.duplicateOfPositionId,
+                                        duplicateOfPositionId => updateExtra(row.id, { duplicateOfPositionId }), `qc-extra-DUPLICATE-${index}-parent`)}
                                     {row.type === 'CONTROL' && <>
                                         <label className="grid gap-1 text-xs">{t('referenceMaterials.controlMaterial')}
                                             <select value={row.referenceMaterialId} onChange={e => updateExtra(row.id, { referenceMaterialId: e.target.value, referenceUse: '' })}>
@@ -627,7 +656,7 @@ export default function BatchModal({
                                 <div className="flex gap-2 flex-wrap">{['BLANK', 'DUPLICATE', 'CONTROL'].map(type => <button key={type} type="button" data-testid={`qc-add-${type}`}
                                     onClick={() => setExtraQc(rows => [...rows, { id: `${type}-${Date.now()}-${rows.length}`, type, value: '', value1: '', value2: '', expected: '', measured: '', referenceMaterialId: '', referenceUse: '' }])}
                                     className="px-3 py-2 border border-sf-divider rounded text-xs">{t('qcRules.add')} {t(`qcRules.types.${type}`)}</button>)}</div>
-                            </div>
+                            </div>}
 
                             <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-sf-divider">
                                 <button
@@ -643,7 +672,7 @@ export default function BatchModal({
                                 <button
                                     type="button"
                                     onClick={handleEvaluateQc}
-                                    disabled={loading || !selectedBatchId || !qcFormComplete}
+                                    disabled={native || loading || !selectedBatchId || !qcFormComplete}
                                     data-testid="evaluate-qc-btn"
                                     className="px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white flex items-center gap-1.5 shadow transition-all"
                                 >

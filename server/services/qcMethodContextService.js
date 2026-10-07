@@ -1,4 +1,5 @@
 // Shared #177 resolution: recorded methods only, followed by the first supplied LOQ.
+const { runAnalyteCode } = require('./analysisCodesService');
 async function resolveLoq(analysisCode, methodologyId, db, noLoqReason = null) {
     const base = { loq: null, loqSource: null, methodologyId };
     if (noLoqReason === 'METHOD_AMBIGUOUS') return { ...base, methodologyId: null, noLoqReason };
@@ -17,7 +18,10 @@ async function resolveLoq(analysisCode, methodologyId, db, noLoqReason = null) {
 }
 
 async function resolveBatchMethodContext(batch, db) {
-    const members = await db.workItem.findMany({ where: { batchId: batch.id, analysis: batch.analysis }, select: { sampleId: true, methodologyId: true } });
+    const joins = Array.isArray(batch.analytes) && db.batchPositionWorkItem ? await db.batchPositionWorkItem.findMany({
+        where: { position: { batchId: batch.id } }, include: { workItem: { select: { sampleId: true, analysis: true, methodologyId: true } } } }) : null;
+    const members = joins ? joins.filter(link => runAnalyteCode(batch, link.analysisCode) === batch.analysis).map(link => link.workItem)
+        : await db.workItem.findMany({ where: { batchId: batch.id, analysis: batch.analysis }, select: { sampleId: true, methodologyId: true } });
     const results = members.length ? await db.result.findMany({ where: {
         batchId: batch.id, param: batch.analysis, isCurrent: true, sampleId: { in: members.map(item => item.sampleId) }
     }, select: { sampleId: true, methodologyId: true } }) : [];

@@ -26,20 +26,34 @@ try {
     }
 }
 
+function configureExchangeAdapter(adapter) {
+    adapter.client.pragma('foreign_keys = ON');
+    registerDbFunctions(adapter.client);
+    const startTransaction = adapter.startTransaction.bind(adapter);
+    adapter.startTransaction = async isolationLevel => {
+        const transaction = await startTransaction(isolationLevel);
+        const release = transaction.rollback.bind(transaction);
+        transaction.rollback = async () => {
+            // Prisma calls this hook after a failed COMMIT. SQLite leaves a
+            // deferred-FK failure open; the upstream hook only releases its
+            // mutex. Roll back the actual connection before releasing it.
+            try {
+                if (adapter.client.inTransaction) adapter.client.exec('ROLLBACK');
+            } finally {
+                await release();
+            }
+        };
+        return transaction;
+    };
+    return adapter;
+}
+
 class ExchangePrismaBetterSqlite3 extends PrismaBetterSqlite3 {
     async connect() {
-        const adapter = await super.connect();
-        if (adapter && adapter.client) {
-            registerDbFunctions(adapter.client);
-        }
-        return adapter;
+        return configureExchangeAdapter(await super.connect());
     }
     async connectToShadowDb() {
-        const adapter = await super.connectToShadowDb();
-        if (adapter && adapter.client) {
-            registerDbFunctions(adapter.client);
-        }
-        return adapter;
+        return configureExchangeAdapter(await super.connectToShadowDb());
     }
 }
 

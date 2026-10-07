@@ -39,6 +39,7 @@ function host(file, { canEdit = true, savedControl = null, materials = [material
             if (name === 'lucide-react') return new Proxy({}, { get: () => () => null });
             if (name === '@lims/number-parse') return require('../../../shared/numberParse');
             if (name === './NumberPreview') return () => null;
+            if (name === './NativeRunPanel') return () => null; // These retained contracts exercise the profile form.
             throw new Error(`Unexpected reference component dependency: ${name}`);
         } });
     return { axios,

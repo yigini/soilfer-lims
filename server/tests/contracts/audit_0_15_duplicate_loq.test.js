@@ -1,5 +1,6 @@
 const { createResultFixture } = require('../../services/resultWriteService');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
+const { createLegacyClosureDatabase, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
 const { evaluateDuplicate, evaluateBatchQc } = require('../../services/qcService');
 const { resolveDuplicatePolicy } = require('../../services/duplicateQcPolicyService');
 const policyService = require('../../services/policyService');
@@ -40,19 +41,32 @@ describe('Audit 0.15: censored observations use the shared number parser', () =>
 describe('Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring evidence', () => {
     const labId = 'LAB-AUDIT-015';
     let token;
+    const historicalFixtures = [];
     beforeAll(async () => {
         token = await getAuthToken('LAB_TECHNICIAN', labId);
         await prisma.lab.upsert({ where: { id: labId }, update: { settings: '{}' }, create: { id: labId, code: labId, name: labId, country: 'GTM', settings: '{}' } });
     });
     afterEach(async () => {
+        jest.restoreAllMocks();
+        for (const historical of historicalFixtures.splice(0)) await historical.close();
         await prisma.lab.update({ where: { id: labId }, data: { settings: '{}' } });
         if (await prisma.labPolicy.findUnique({ where: { labId } })) await policyService.change({ role: 'SUPER_ADMIN', username: 'FIXTURE', isActive: true }, labId,
             { reason: 'Reset number-format fixture', changes: [{ key: 'numbers.decimalSeparator', value: '.' }, { key: 'numbers.thousandsSeparator', value: null }] });
     });
-    async function fixture({ methodLoqs = [.1], analysisLoq = .2 } = {}) {
+    async function fixture({ methodLoqs = [.1], analysisLoq = .2, legacyPrior = false } = {}) {
+        if (legacyPrior) {
+            // Historical typed QC must be seeded before the real release
+            // installer freezes it. Never bypass the current DB's guards.
+            const user = await prisma.user.findUnique({ where: { id: require('jsonwebtoken').decode(token).id } });
+            const historical = await createLegacyClosureDatabase({ analysis: 'QC-015-HISTORICAL', labId });
+            historicalFixtures.push(historical);
+            await historical.client.user.create({ data: user });
+            useLegacyRouteDatabase(prisma, historical.client, { allModels: true });
+        }
         const analysis = id('HTTP-A015'), batchId = id('HTTP-B015');
         await prisma.analysis.create({ data: { code: analysis, name: analysis, loq: analysisLoq } });
-        const batch = await prisma.batch.create({ data: { id: batchId, analysis, labId, profile: 'RACK_40', status: 'OPEN', createdBy: 'fixture' } });
+        const batch = await prisma.batch.create({ data: { id: batchId, analysis, labId, profile: 'RACK_40', status: 'OPEN', createdBy: 'fixture',
+            ...(legacyPrior && { qcResults: '{"prior":"retained"}', history: '[{"prior":"retained"}]' }) } });
         const methods = [];
         for (const loq of methodLoqs) {
             const methodId = id('HTTP-M015'), sampleId = id('HTTP-S015');
@@ -61,13 +75,30 @@ describe('Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring 
             await createWorkItemFixture(prisma, { data: { id: id('HTTP-W015'), sampleId, analysis, assignedLab: labId, batchId, methodologyId: methodId, status: 'COMPLETED' } });
             methods.push(methodId);
         }
+        // The two recorded duplicate pairs use two actual SAMPLE parents.
+        // Retain the original method set so every LOQ-resolution assertion holds.
+        if (methods.length === 1) {
+            const sampleId = id('HTTP-S015');
+            await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, assignedLab: labId, status: 'PROCESSING' } });
+            await createWorkItemFixture(prisma, { data: { id: id('HTTP-W015'), sampleId, analysis, assignedLab: labId, batchId, methodologyId: methods[0], status: 'COMPLETED' } });
+        }
+        if (legacyPrior) {
+            await prisma.batchQcResult.create({ data: { id: id('PRIOR-QC015'), batchId: batch.id, type: 'BLANK', label: 'Prior QC', measured: .01, status: 'PASS', details: '{"prior":"retained"}' } });
+            await prisma.auditLog.create({ data: { id: id('PRIOR-AUDIT015'), entity: 'BATCH', entityId: batch.id, action: 'PRIOR_QC', details: '{"prior":"retained"}', performedBy: 'fixture', labId } });
+        }
+        await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, batchId);
         return { batch, methods };
     }
     const payload = (value1, value2) => ({ blanks: [{ value: '0' }], controls: [{ expected: '7', measured: '7' }], duplicates: [{ value1, value2 }, { value1: 7, value2: 7 }] });
-    const evaluate = (batch, data, route = 'post') => request(app)[route](`/api/qc/batches/${batch.id}${route === 'post' ? '/evaluate' : ''}`)
-        .set('Authorization', `Bearer ${token}`).send(data);
+    const evaluate = async (batch, data, route = 'post') => {
+        const parents = await prisma.batchPosition.findMany({ where: { batchId: batch.id, kind: 'SAMPLE' }, orderBy: { position: 'asc' } });
+        if (parents.length) data.duplicates = data.duplicates.map((row, index) => ({ ...row, duplicateOfPositionId: parents[index % parents.length].id }));
+        return request(app)[route](`/api/qc/batches/${batch.id}${route === 'post' ? '/evaluate' : ''}`)
+            .set('Authorization', `Bearer ${token}`).send(data);
+    };
     const duplicate = async batch => {
-        const typed = await prisma.batchQcResult.findFirst({ where: { batchId: batch.id, type: 'DUPLICATE' } });
+        const normalized = await prisma.batch.findUnique({ where: { id: batch.id }, include: require('../../services/qcRunViewService').QC_RUN_INCLUDE });
+        const typed = require('../../services/qcRunViewService').batchApiView(normalized).qcItems.find(row => row.type === 'DUPLICATE');
         return { typed, details: JSON.parse(typed.details) };
     };
     test.each(['post', 'put'])('%s resolves the recorded methodology LOQ and persists all decision evidence', async route => {
@@ -144,10 +175,7 @@ describe('Audit 0.15: both HTTP evaluation paths preserve LOQ and raw censoring 
         ['post', 'controls', 'measured', '<5'], ['put', 'controls', 'measured', '<5'],
         ['post', 'controls', 'expected', '≤7'], ['put', 'controls', 'expected', '≤7']
     ])('%s qualified %s.%s %s is rejected before QC, status, history or audit writes', async (route, collection, field, value) => {
-        const { batch } = await fixture();
-        await prisma.batch.update({ where: { id: batch.id }, data: { qcResults: '{"prior":"retained"}', history: '[{"prior":"retained"}]' } });
-        await prisma.batchQcResult.create({ data: { id: id('PRIOR-QC015'), batchId: batch.id, type: 'BLANK', label: 'Prior QC', measured: .01, status: 'PASS', details: '{"prior":"retained"}' } });
-        await prisma.auditLog.create({ data: { id: id('PRIOR-AUDIT015'), entity: 'BATCH', entityId: batch.id, action: 'PRIOR_QC', details: '{"prior":"retained"}', performedBy: 'fixture', labId } });
+        const { batch } = await fixture({ legacyPrior: true });
         const before = await prisma.batch.findUnique({ where: { id: batch.id } });
         const beforeRows = await prisma.batchQcResult.findMany({ where: { batchId: batch.id }, orderBy: { id: 'asc' } });
         const beforeAudit = await prisma.auditLog.findMany({ where: { entityId: batch.id }, orderBy: { id: 'asc' } });

@@ -25,11 +25,9 @@ describe('Audit 0.1: explicit QC measurements at evaluation', () => {
             id: batchId, labId: 'AUDIT-QC-VALUES', analysis: 'PH_H2O', profile: 'RACK_40',
             status: 'OPEN', createdBy: 'audit-fixture', history: '[]', qcResults: '{}'
         } });
+        await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, batchId);
     });
-    afterEach(async () => {
-        await prisma.batchQcResult.deleteMany({ where: { batchId } });
-        await prisma.batch.delete({ where: { id: batchId } });
-    });
+    // Retain normalized QC evidence until the disposable database teardown.
 
     test.each([
         ['empty payload', {}],
@@ -65,11 +63,13 @@ describe('Audit 0.1: explicit QC measurements at evaluation', () => {
         await request(app).post(`/api/qc/batches/${batchId}/evaluate`)
             .set('Authorization', `Bearer ${token}`).send(completeValues()).expect(200);
         const before = await prisma.batch.findUnique({ where: { id: batchId } });
-        const rows = await prisma.batchQcResult.findMany({ where: { batchId }, orderBy: { id: 'asc' } });
+        const rows = await prisma.qcMeasurement.findMany({ where: { batchId }, orderBy: { id: 'asc' } });
+        const evaluations = await prisma.qcEvaluation.findMany({ where: { batchId }, orderBy: { version: 'asc' } });
         await request(app).post(`/api/qc/batches/${batchId}/evaluate`)
             .set('Authorization', `Bearer ${token}`).send({}).expect(400);
         expect(await prisma.batch.findUnique({ where: { id: batchId } })).toEqual(before);
-        expect(await prisma.batchQcResult.findMany({ where: { batchId }, orderBy: { id: 'asc' } })).toEqual(rows);
+        expect(await prisma.qcMeasurement.findMany({ where: { batchId }, orderBy: { id: 'asc' } })).toEqual(rows);
+        expect(await prisma.qcEvaluation.findMany({ where: { batchId }, orderBy: { version: 'asc' } })).toEqual(evaluations);
     });
 });
 
@@ -123,6 +123,7 @@ function modalHost() {
         if (name.includes('messageFormatter')) return parser;
         if (name === '@lims/number-parse') return require('../../../shared/numberParse');
         if (name === './NumberPreview') return () => null;
+        if (name === './NativeRunPanel') return () => null; // Retained profile form; Native handlers are tested separately.
         throw new Error(`Unexpected component dependency: ${name}`);
     }).default;
     let tree;
