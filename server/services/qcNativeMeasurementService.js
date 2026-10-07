@@ -2,7 +2,7 @@ const { randomUUID } = require('node:crypto');
 const { hasPermission } = require('../config/roles');
 const scopeGuard = require('../utils/scopeGuard');
 const policyService = require('./policyService');
-const { actorName } = require('./workflowStateRules');
+const { actorName, inTransaction } = require('./workflowStateRules');
 const { aggregateBatchStatus } = require('../workflowContract');
 const { parseNumber, parseDuplicateObservation } = require('../../shared/numberParse');
 const { QC_RUN_INCLUDE, batchApiView, currentAnalyteEvidence } = require('./qcRunViewService');
@@ -28,7 +28,7 @@ function observation(entry, position, criteria, enteredBy, enteredAt) {
 async function writeNativeMeasurements(db, batchId, actor, input = {}, { correction = false, explicit = false } = {}) {
     if (!hasPermission(actor, 'CHANGE_STATUS')) throw failure(403, 'QC_RUN_PERMISSION_REQUIRED', 'QC entry permission is required.');
     const performedBy = actorName(actor), reason = typeof input.reason === 'string' ? input.reason.trim() : '';
-    return db.$transaction(async tx => {
+    return inTransaction(db, async tx => {
         const batch = await tx.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE });
         if (!batch) throw failure(404, 'BATCH_NOT_FOUND', 'Batch not found.');
         const [actorLab, targetLab] = await Promise.all([policyService.resolveLab(actor.labId, tx), policyService.resolveLab(batch.labId, tx)]);
@@ -43,12 +43,16 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         const analysisCode = input.analysisCode || batch.analysis, selected = batch.analytes.find(row => row.analysisCode === analysisCode);
         if (!selected) throw failure(400, 'QC_ANALYSIS_NOT_IN_RUN', 'The analysis is not a member of this run.');
         const criteria = JSON.parse(selected.criteriaSnapshot), now = new Date();
+        if (input.expectedValues !== undefined && (!input.expectedValues || typeof input.expectedValues !== 'object' || Array.isArray(input.expectedValues))) {
+            throw failure(400, 'REFERENCE_VALUE_MISMATCH', 'Submit expected values by actual position id.');
+        }
         const entries = input[correction ? 'corrections' : 'measurements'] ?? [];
         if (!Array.isArray(entries) || new Set(entries.map(row => row?.positionId)).size !== entries.length) {
             throw failure(400, 'QC_VALUES_MISSING', 'Submit distinct position observations.');
         }
         const evidence = currentAnalyteEvidence(batch, analysisCode), replacements = [], observations = [];
         for (const entry of entries) {
+            if (entry?.replicateNo !== undefined && entry.replicateNo !== 1) throw failure(400, 'QC_POSITION_NOT_IN_ANALYSIS', 'A Native physical position uses replicate 1.', { positionId: entry.positionId });
             const position = evidence.positions.find(row => row.id === entry?.positionId);
             if (!position || position.kind === 'CAL_STD') throw failure(400, 'QC_POSITION_NOT_IN_ANALYSIS', 'The position does not serve this analysis.', { positionId: entry?.positionId });
             const previous = evidence.measurements.find(row => row.positionId === position.id && row.replicateNo === 1);
@@ -61,6 +65,7 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         const references = input.references ?? [];
         if (!Array.isArray(references) || new Set(references.map(row => row?.positionId)).size !== references.length) throw failure(400, 'REFERENCE_VALUE_MISMATCH', 'Submit distinct reference placements.');
         const plans = [], affected = new Set([analysisCode]);
+        if (explicit && input.analysisCode === undefined) batch.analytes.filter(row => JSON.parse(row.criteriaSnapshot).qcMode === 'OFF').forEach(row => affected.add(row.analysisCode));
         for (const entry of references) {
             const position = batch.positions.find(row => row.id === entry?.positionId && row.historicalSnapshotSeq == null);
             if (!position) throw failure(400, 'REFERENCE_VALUE_MISMATCH', 'Reference position is not in this run.');
@@ -87,10 +92,20 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
             const position = candidate.positions.find(row => row.id === binding.positionId);
             position.references = position.references.filter(row => row.analysisCode !== binding.analysisCode).concat(binding);
         }
+        for (const [positionId, source] of Object.entries(input.expectedValues || {})) {
+            const position = candidate.positions.find(row => row.id === positionId), reference = position?.references.find(row => row.analysisCode === analysisCode && !row.supersededById);
+            const expected = reference?.referenceSnapshot && JSON.parse(reference.referenceSnapshot).expected, provided = parseNumber(source, criteria.numberFormat);
+            if (!provided.valid || provided.qualifier || !Number.isFinite(expected) || Math.abs(provided.value - expected) > Number.EPSILON * Math.max(1, Math.abs(expected), Math.abs(provided.value)) * 4) {
+                throw failure(409, 'REFERENCE_VALUE_MISMATCH', 'Expected value must match the immutable reference placement.', { positionId });
+            }
+        }
+        for (const row of observations) if (!currentAnalyteEvidence(candidate, row.analysisCode).positions.some(position => position.id === row.positionId)) {
+            throw failure(400, 'QC_POSITION_NOT_IN_ANALYSIS', 'The rebound reference position does not serve this analysis.', { positionId: row.positionId });
+        }
         const evaluations = [];
         for (const code of affected) {
             const analyte = batch.analytes.find(row => row.analysisCode === code), previous = currentAnalyteEvidence(batch, code).evaluation;
-            const evaluated = evaluateNativeEvidence(candidate, analyte), requested = explicit && code === analysisCode;
+            const evaluated = evaluateNativeEvidence(candidate, analyte), requested = explicit && (code === analysisCode || input.analysisCode === undefined && evaluated.mode === 'OFF');
             if (!previous && !observations.some(row => row.analysisCode === code) && plans.some(plan =>
                 plan.bindings.some(row => row.analysisCode === code && row.serviceStatus === 'NOT_SERVED'))) continue;
             const changed = observations.some(row => row.analysisCode === code) || plans.some(plan => plan.replacements.some(row => row.previous.analysisCode === code) ||
@@ -109,6 +124,10 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
             if (changed.count !== 1) throw failure(409, 'QC_MEASUREMENT_CHANGED', 'The observation changed. Reload before retrying.');
         }
         for (const data of observations) await tx.qcMeasurement.create({ data });
+        for (const row of batch.analytes.filter(analyte => analyte.status === 'IN_RUN' && observations.some(observation => observation.analysisCode === analyte.analysisCode) &&
+            !evaluations.some(evaluation => evaluation.analyte.analysisCode === analyte.analysisCode))) {
+            await tx.batchAnalyte.update({ where: { id: row.id }, data: { status: 'QC_PENDING' } }); row.status = 'QC_PENDING';
+        }
         for (const { analyte, previous, evaluated } of evaluations) {
             const id = randomUUID();
             await tx.qcEvaluation.create({ data: { id, batchId, analysisCode: analyte.analysisCode, version: (previous?.version || 0) + 1,

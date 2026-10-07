@@ -2,7 +2,7 @@ const { randomUUID } = require('node:crypto');
 const { hasPermission } = require('../config/roles');
 const scopeGuard = require('../utils/scopeGuard');
 const policyService = require('./policyService');
-const { actorName } = require('./workflowStateRules');
+const { actorName, inTransaction } = require('./workflowStateRules');
 const { QC_RUN_INCLUDE, batchApiView, currentAnalyteEvidence } = require('./qcRunViewService');
 const { snapshotEvidence } = require('./qcRunAuditService');
 const { flagBatchResults } = require('./qcService');
@@ -11,7 +11,7 @@ const failure = (statusCode, code, message) => Object.assign(new Error(message),
 // Used by the existing manager PUT reopen path. Failed evidence remains locked
 // for every role (#186 part 11); no new QC_FAIL reopen route is introduced.
 async function reopenNativeRun(db, batchId, actor, reason) {
-    return db.$transaction(async tx => {
+    return inTransaction(db, async tx => {
         const batch = await tx.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE });
         if (!batch) throw failure(404, 'BATCH_NOT_FOUND', 'Batch not found.');
         const [actorLab, targetLab] = await Promise.all([policyService.resolveLab(actor.labId, tx), policyService.resolveLab(batch.labId, tx)]);

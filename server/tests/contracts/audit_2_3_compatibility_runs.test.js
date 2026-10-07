@@ -13,6 +13,8 @@ const { installQcRuns } = require('../../scripts/install_qc_runs');
 const { createProfileRun, writeCompatibilityMeasurements, reopenCompatibilityRun } = require('../../services/qcCompatibilityRunService');
 const { QC_RUN_INCLUDE, batchApiView, readQcRun } = require('../../services/qcRunViewService');
 const policies = require('../../services/policyService');
+const request = require('supertest');
+const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
 const owned = [];
 const input = (blank = 0.0123456789) => ({ blanks: [{ value: blank }], controls: [{ expected: 7.123456789, measured: 7.123456780 }],
     duplicates: [{ value1: 2.123456789, value2: 2.123456780 }, { value1: 2.123456789, value2: 2.123456780 }] });
@@ -63,6 +65,45 @@ test('empty compatibility creation leaves all deprecated JSON null and resolves 
     expect(f.batch.analytes[0]).toMatchObject({ provenance: 'PROFILE_ONLY', methodologyId: null, criteriaSnapshot: null, crmOrdinal: null });
     expect(f.batch.runProfile.profileKey).toBe('RACK_40');
     expect(await f.db.qcMeasurement.count()).toBe(0); expect(await f.db.qcEvaluation.count()).toBe(0);
+});
+
+test('actual compatibility PUT and evaluate routes retain pass/reopen/resubmit cycles, missing-value refusals and manager authority', async () => {
+    const f = await fixture();
+    await f.db.user.update({ where: { id: f.actor.id }, data: { role: 'LAB_MANAGER', labId: f.labId } });
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const auth = { Authorization: `Bearer ${token}` }, id = f.batch.id;
+        const before = await evidence(f.db);
+        for (const route of ['put', 'post']) {
+            const response = route === 'put' ? await request(app).put(`/api/qc/batches/${id}`).set(auth).send({ ...input(), controls: [{ expected: 7, measured: null }] })
+                : await request(app).post(`/api/qc/batches/${id}/evaluate`).set(auth).send({ ...input(), controls: [{ expected: 7, measured: null }] });
+            expect(response.status).toBe(400); expect(response.body.code).toBe('QC_VALUES_MISSING');
+            expect(response.body.missingTypes).toContain('CONTROL'); expect(await evidence(f.db)).toEqual(before);
+        }
+        const first = await request(app).post(`/api/qc/batches/${id}/evaluate`).set(auth).send(input());
+        expect(first.status).toBe(200); expect(first.body.status).toBe('QC_PASS');
+        const oldMeasurements = await f.db.qcMeasurement.findMany({ orderBy: { id: 'asc' } });
+        await f.db.user.update({ where: { id: f.actor.id }, data: { role: 'LAB_TECHNICIAN' } });
+        const accepted = await evidence(f.db);
+        const denied = await request(app).put(`/api/qc/batches/${id}`).set(auth).send({ status: 'OPEN', reason: 'Only a manager can reopen' });
+        expect(denied.status).toBe(403); expect(denied.body.code).toBe('QC_REOPEN_PERMISSION_REQUIRED'); expect(await evidence(f.db)).toEqual(accepted);
+        await f.db.user.update({ where: { id: f.actor.id }, data: { role: 'LAB_MANAGER' } });
+        for (const [index, route] of ['put', 'post'].entries()) {
+            const reopened = await request(app).put(`/api/qc/batches/${id}`).set(auth).send({ status: 'OPEN', reason: 'Reviewed repeat of compatibility QC' });
+            expect(reopened.status).toBe(200); expect(reopened.body.status).toBe('OPEN'); expect(reopened.body.batch.qcResults).toBeNull();
+            const response = route === 'put' ? await request(app).put(`/api/qc/batches/${id}`).set(auth).send(input(0.0223456789 + index * 0.01))
+                : await request(app).post(`/api/qc/batches/${id}/evaluate`).set(auth).send(input(0.0223456789 + index * 0.01));
+            expect(response.status).toBe(200); expect(response.body.status).toBe('QC_PASS');
+        }
+        const evaluations = await f.db.qcEvaluation.findMany({ orderBy: { version: 'asc' } });
+        expect(evaluations).toHaveLength(3); expect(evaluations[1].supersedesId).toBe(evaluations[0].id); expect(evaluations[2].supersedesId).toBe(evaluations[1].id);
+        expect(evaluations.slice(1).every(row => JSON.parse(row.details).reopenEventId)).toBe(true);
+        for (const row of oldMeasurements) expect(await f.db.qcMeasurement.findUnique({ where: { id: row.id } })).toEqual(row);
+        const detail = await request(app).get(`/api/qc/batches/${id}`).set(auth);
+        expect(detail.status).toBe(200); expect(detail.body.data.qcResults.blanks).toHaveLength(1); expect(detail.body.data.qcResults.blanks[0].value).toBe(0.0323456789);
+        const raw = await f.db.batch.findUnique({ where: { id } });
+        for (const key of ['qcResults', 'workItemIds', 'disposition', 'history']) expect(raw[key]).toBeNull();
+        expect(await f.db.batchQcResult.count()).toBe(0);
+    });
 });
 
 test('normalized reads resolve the actor laboratory code while refusing another laboratory scope', async () => {

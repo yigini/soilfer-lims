@@ -18,7 +18,10 @@ const { preparePositionBindings, applyPositionBindings } = require('../../servic
 const { correctValue } = require('../../services/referenceMaterialService');
 const { writeNativeMeasurements } = require('../../services/qcNativeMeasurementService');
 const { reopenNativeRun } = require('../../services/qcNativeLifecycleService');
+const { mutateQcRun } = require('../../services/qcRunMutationService');
 const { createResultFixture } = require('../../services/resultWriteService');
+const request = require('supertest');
+const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
 const owned = [];
 
 async function fixture(count = 1, criteria = { crmEveryNBatches: 0 }) {
@@ -112,6 +115,7 @@ test('partial native entry is retained; missing explicit values, malformed value
     const blank = entries.find(row => run.positions.find(position => position.id === row.positionId).kind === 'BLANK');
     await writeNativeMeasurements(f.db, run.id, f.actor, { measurements: [blank] });
     expect(await f.db.qcMeasurement.count()).toBe(1); expect(await f.db.qcEvaluation.count()).toBe(0);
+    expect((await f.db.batchAnalyte.findFirst()).status).toBe('QC_PENDING');
     const before = await evidence(f.db);
     await expect(writeNativeMeasurements(f.db, run.id, f.actor, {}, { explicit: true })).rejects.toMatchObject({ statusCode: 400, code: 'QC_VALUES_MISSING' });
     expect(await evidence(f.db)).toEqual(before);
@@ -129,6 +133,87 @@ test('partial native entry is retained; missing explicit values, malformed value
     expect(completed.analytes[0]).toMatchObject({ status: 'QC_PASS', result: 'PASS' });
     expect(await f.db.qcMeasurement.count()).toBe(4); expect(await f.db.qcEvaluation.count()).toBe(1);
     expect((await f.db.batch.findUnique({ where: { id: run.id } })).qcResults).toBeNull();
+});
+
+test('retained Native collection input uses physical ids, real duplicate parents and immutable full-precision expected values', async () => {
+    const f = await fixture(), lot = await referenceLot(f), built = await buildNativeRun(f.db, f.actor, f.input);
+    const started = await mutateQcRun(f.db, built.id, f.actor, { status: 'IN_RUN' }), run = started.batch;
+    expect(started.status).toBe('RUNNING');
+    const blank = run.positions.find(row => row.kind === 'BLANK'), control = run.positions.find(row => row.kind === 'LRM'), duplicate = run.positions.find(row => row.kind === 'DUPLICATE');
+    const input = { blanks: [{ id: blank.id, value: 0.0123456789 }], controls: [{ id: control.id, measured: 7.123456789, expected: 7.123456789,
+        referenceMaterialId: lot.id, referenceUse: 'LRM' }], duplicates: [{ id: duplicate.id, value1: 2.123456789, value2: 2.123456789 }] };
+    const before = await evidence(f.db);
+    for (const invalid of [{ ...input, blanks: [{ id: 'client-invented-position', value: 0 }] },
+        { ...input, duplicates: [{ ...input.duplicates[0], duplicateOfPositionId: 'invented-parent' }] },
+        { ...input, duplicates: [{ id: duplicate.id, value1: 2.123456789 }] },
+        { ...input, controls: [{ ...input.controls[0], expected: 7.12 }] },
+        { measurements: [], expectedValues: [] }]) {
+        await expect(mutateQcRun(f.db, run.id, f.actor, invalid)).rejects.toHaveProperty('statusCode');
+        expect(await evidence(f.db)).toEqual(before);
+    }
+    const response = await mutateQcRun(f.db, run.id, f.actor, input, { explicit: true });
+    expect(response.status).toBe('QC_PASS');
+    expect(response.batch.qcResults.duplicates[0]).toMatchObject({ duplicateOfPositionId: duplicate.duplicateOfPositionId, value1: 2.123456789, value2: 2.123456789 });
+    expect(await f.db.qcMeasurement.findFirst({ where: { positionId: duplicate.duplicateOfPositionId } })).toMatchObject({ replicateNo: 1, value: 2.123456789 });
+    expect(await f.db.qcMeasurement.findFirst({ where: { positionId: duplicate.id } })).toMatchObject({ replicateNo: 1, value: 2.123456789 });
+    expect(await f.db.batchQcResult.count()).toBe(0);
+});
+
+test('the shared Native mutation rolls back evaluated observations when requested acceptance, close or metadata is refused', async () => {
+    const f = await fixture(), lot = await referenceLot(f), run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, { ...f.input,
+        analyses: [{ analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }] })).id, f.actor);
+    const before = await evidence(f.db);
+    for (const input of [{ measurements: readings(run, { blank: 10 }), status: 'QC_PASS', notes: 'Refused acceptance must not persist' },
+        { measurements: readings(run, { blank: 10 }), status: 'CLOSED' }, { measurements: readings(run), notes: { invalid: 'metadata' } }]) {
+        await expect(mutateQcRun(f.db, run.id, f.actor, input)).rejects.toHaveProperty('statusCode');
+        expect(await evidence(f.db)).toEqual(before);
+    }
+    const failed = await mutateQcRun(f.db, run.id, f.actor, { measurements: readings(run, { blank: 10 }), status: 'RUNNING' });
+    expect(failed.status).toBe('QC_FAIL'); expect(failed.batch.analytes[0].result).toBe('FAIL');
+    const locked = await evidence(f.db);
+    await expect(mutateQcRun(f.db, run.id, f.actor, { status: 'OPEN' })).rejects.toMatchObject({ statusCode: 409, code: 'QC_BATCH_LOCKED' });
+    expect(await evidence(f.db)).toEqual(locked);
+});
+
+test('actual authenticated Native routes build, start, evaluate, reopen and correct using frozen API criteria and exact retained values', async () => {
+    const f = await fixture(), lot = await referenceLot(f);
+    await f.db.user.update({ where: { username: f.actor.username }, data: { labId: f.labId } });
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const auth = { Authorization: `Bearer ${token}` };
+        const created = await request(app).post('/api/qc/batches').set(auth).send({ ...f.input, analyses: [{ analysisCode: f.analysisCode,
+            references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }] });
+        expect(created.status).toBe(201); const id = created.body.id;
+        const preStart = await evidence(f.db);
+        const refused = await request(app).post(`/api/qc/batches/${id}/evaluate`).set(auth).send({});
+        expect(refused.status).toBe(409); expect(refused.body.code).toBe('QC_RUN_NOT_STARTED'); expect(await evidence(f.db)).toEqual(preStart);
+        const started = await request(app).put(`/api/qc/batches/${id}`).set(auth).send({ status: 'IN_RUN' });
+        expect(started.status).toBe(200); expect(started.body.status).toBe('RUNNING');
+        const run = started.body.batch;
+        const evaluated = await request(app).post(`/api/qc/batches/${id}/evaluate`).set(auth).send({ measurements: readings(run) });
+        expect(evaluated.status).toBe(200); expect(evaluated.body.status).toBe('QC_PASS'); expect(typeof evaluated.body.batch.qcResults).toBe('string');
+        const frozen = JSON.parse(run.analytes[0].criteriaSnapshot);
+        await rules.change(f.actor, { labId: f.labId, analysisCode: f.analysisCode, methodologyId: f.method.id,
+            criteria: { blankAbsLimit: 10 }, expectedVersion: 1, reason: 'Later criteria must not change started API metadata' }, { db: f.db });
+        await policies.change(f.actor, f.labId, { reason: 'Later lab mode must not change this started run', changes: [{ key: 'qc.mode', value: 'OFF' }] }, { db: f.db });
+        const detail = await request(app).get(`/api/qc/batches/${id}`).set(auth);
+        expect(detail.status).toBe(200); expect(detail.body.data.qcRule).toEqual(frozen.qcRule);
+        expect(detail.body.data.numberFormat).toEqual(frozen.numberFormat); expect(detail.body.data.qcRequirements.LRM.required).toBe(1);
+        expect(detail.body.data.qcMode).toBe(frozen.qcMode);
+        expect(detail.body.data.qcResults.blanks[0].value).toBe(0.0123456789); expect(typeof detail.body.data.workItemIds).toBe('string');
+        const list = await request(app).get('/api/qc/batches').set(auth);
+        expect(list.status).toBe(200); const listed = list.body.data.find(row => row.id === id);
+        for (const key of ['qcResults', 'workItemIds', 'history']) expect(typeof listed[key]).toBe('string');
+        expect(JSON.parse(listed.qcResults)).toEqual(detail.body.data.qcResults);
+        const reopened = await request(app).put(`/api/qc/batches/${id}`).set(auth).send({ status: 'OPEN', reason: 'Reviewed Native transcription correction' });
+        expect(reopened.status).toBe(200); expect(reopened.body.status).toBe('OPEN');
+        const corrected = await request(app).post(`/api/qc/batches/${id}/corrections`).set(auth).send({ reason: 'Correct the measured blank',
+            analysisCode: f.analysisCode, corrections: [{ positionId: run.positions.find(row => row.kind === 'BLANK').id, replicateNo: 1, value: 0.0223456789 }] });
+        expect(corrected.status).toBe(200); expect(corrected.body.batch.analytes[0].result).toBe('PASS');
+        expect(await f.db.qcEvaluation.count()).toBe(2);
+        const raw = await f.db.batch.findUnique({ where: { id } });
+        for (const key of ['qcResults', 'workItemIds', 'history', 'disposition']) expect(raw[key]).toBeNull();
+        expect(await f.db.batchQcResult.count()).toBe(0);
+    });
 });
 
 test('reasoned corrections append two evaluation versions and exact measurements using the frozen start limit', async () => {

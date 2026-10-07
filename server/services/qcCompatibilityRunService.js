@@ -2,7 +2,7 @@ const { randomUUID } = require('node:crypto');
 const { hasPermission } = require('../config/roles');
 const scopeGuard = require('../utils/scopeGuard');
 const policyService = require('./policyService');
-const { actorName } = require('./workflowStateRules');
+const { actorName, inTransaction } = require('./workflowStateRules');
 const { aggregateBatchStatus } = require('../workflowContract');
 const { getNumberFormat } = require('./numberFormatService');
 const { normalizeQcNumbers, retainQcRawInput } = require('./qcNumberInputService');
@@ -40,7 +40,7 @@ async function createProfileRun(db, actor, input) {
     if (!hasPermission(actor, 'CHANGE_STATUS')) throw failure(403, 'QC_RUN_PERMISSION_REQUIRED', 'QC batch permission is required.');
     if (typeof input.analysis !== 'string' || !input.analysis.trim()) throw failure(400, 'QC_ANALYSIS_REQUIRED', 'Analysis type required.');
     const performedBy = actorName(actor);
-    return db.$transaction(async tx => {
+    return inTransaction(db, async tx => {
         const lab = await policyService.resolveLab(actor.labId, tx), labId = lab?.id || actor.labId;
         const profile = await resolveBatchRunProfile({ labId, analysis: input.analysis, instrument: input.instrument,
             maxCapacity: input.maxCapacity || input.capacity, profile: input.profile }, tx);
@@ -64,7 +64,7 @@ async function createProfileRun(db, actor, input) {
 async function writeCompatibilityMeasurements(db, batchId, actor, input = {}, { clear = false } = {}) {
     if (!hasPermission(actor, 'CHANGE_STATUS')) throw failure(403, 'QC_RUN_PERMISSION_REQUIRED', 'QC entry permission is required.');
     const performedBy = actorName(actor);
-    return db.$transaction(async tx => {
+    return inTransaction(db, async tx => {
         const batch = await editableRun(tx, batchId, actor), analysisCode = input.analysisCode || batch.analysis;
         const analyte = batch.analytes.find(row => row.analysisCode === analysisCode);
         if (!analyte) throw failure(400, 'QC_ANALYSIS_NOT_IN_RUN', 'The analysis is not a member of this run.');
@@ -177,6 +177,6 @@ async function reopenInTransaction(tx, batch, actor, reason, now) {
     return { batch: batchApiView(await tx.batch.findUnique({ where: { id: batch.id }, include: QC_RUN_INCLUDE })), evaluation: null };
 }
 async function reopenCompatibilityRun(db, batchId, actor, reason) {
-    return db.$transaction(async tx => reopenInTransaction(tx, await editableRun(tx, batchId, actor), actor, reason, new Date()));
+    return inTransaction(db, async tx => reopenInTransaction(tx, await editableRun(tx, batchId, actor), actor, reason, new Date()));
 }
 module.exports = { createProfileRun, writeCompatibilityMeasurements, reopenCompatibilityRun };
