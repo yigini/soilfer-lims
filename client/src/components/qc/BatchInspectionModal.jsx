@@ -9,7 +9,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 
-export function getDispositionInfo(disposition) {
+export function getDispositionInfo(disposition, t = key => key) {
     if (!disposition || !disposition.decision) return null;
     const dec = disposition.canonicalDecision === 'REPEAT_BRACKET' ? 'REPEAT_BRACKET' : String(disposition.decision).trim();
 
@@ -30,14 +30,14 @@ export function getDispositionInfo(disposition) {
         case 'REANALYZE_BATCH':
             return {
                 type: 'REANALYSIS_REQUIRED',
-                title: dec === 'REPEAT_BRACKET' ? 'REPEAT CALIBRATION BRACKET' : 'RE-ANALYZE BATCH',
+                title: dec === 'REPEAT_BRACKET' ? t('qcGate.repeatBracket') : 'RE-ANALYZE BATCH',
                 badgeText: 'Re-analysis Required',
                 badgeStyle: 'bg-rose-200 dark:bg-rose-900 text-rose-800 dark:text-rose-200 border border-rose-300 dark:border-rose-700',
                 bannerStyle: 'bg-rose-50 dark:bg-rose-950/50 border-2 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-200',
                 titleColor: 'text-rose-700 dark:text-rose-400',
                 boxStyle: 'bg-rose-100/60 dark:bg-rose-900/40 border-rose-200 dark:border-rose-800',
                 noteColor: 'text-rose-700 dark:text-rose-400',
-                note: dec === 'REPEAT_BRACKET' ? 'The recorded calibration bracket requires repeat analysis. Results outside its scope remain eligible.' : 'Batch results rejected by laboratory management. Associated sample work items are flagged for repeat preparation and re-analysis. Sample approval and report release remain blocked.'
+                note: dec === 'REPEAT_BRACKET' ? t('qcGate.repeatBracketHelp') : 'Batch results rejected by laboratory management. Associated sample work items are flagged for repeat preparation and re-analysis. Sample approval and report release remain blocked.'
             };
         case 'REJECT_REANALYSIS':
             return {
@@ -239,7 +239,7 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
 
     const isFailed = batch && (batch.status === 'QC_FAIL' || batch.status === 'FAILED');
     const disposition = batch?.disposition;
-    const dispInfo = getDispositionInfo(disposition);
+    const dispInfo = getDispositionInfo(disposition, t);
     const bracketAnalytes = (batch?.analytes || []).filter(row => row.repeatBracketScope);
     const bracketAnalyte = bracketAnalytes.find(row => row.analysisCode === bracketAnalysisCode) || bracketAnalytes[0];
 

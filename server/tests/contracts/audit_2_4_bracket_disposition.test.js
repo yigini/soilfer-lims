@@ -1,5 +1,6 @@
 const { randomUUID } = require('node:crypto');
 const request = require('supertest');
+const Database = require('better-sqlite3');
 const { qcGateFixture } = require('../helpers/qcGateFixture');
 const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
 const { buildNativeRun, startNativeRun } = require('../../services/qcNativeRunService');
@@ -12,16 +13,37 @@ const { createProfileRun } = require('../../services/qcCompatibilityRunService')
 const { changeRunMembers } = require('../../services/qcRunMembershipService');
 const owned = [];
 
-async function fixture() {
+function expectMembershipRefusal(f, item, data) {
+    const raw = new Database(f.file, { fileMustExist: true });
+    try {
+        expect(() => raw.prepare('UPDATE "WorkItem" SET "batchId"=?, "rackPosition"=? WHERE "id"=?')
+            .run(data.batchId === undefined ? item.batchId : data.batchId, data.rackPosition, item.id))
+            .toThrow('BATCH_MEMBERSHIP_FROZEN');
+    } finally { raw.close(); }
+}
+
+async function fixture({ mode, calibrationActions, legacySnapshot = false } = {}) {
     const f = await qcGateFixture({ count: 30, criteria: { maxBatchSize: 40, blankPerBatch: 0, lrmPerBatch: 0, duplicateEvery: 0, ccvEvery: 10 } });
     owned.push(f);
-    await f.setPolicy([{ key: 'qc.calibrationVerification', value: true }]);
+    await f.setPolicy([{ key: 'qc.calibrationVerification', value: true },
+        ...(mode ? [{ key: 'qc.mode', value: mode }] : []),
+        ...(calibrationActions ? [{ key: 'qc.calibrationFailAction', value: calibrationActions }] : [])]);
     const lot = await f.db.referenceMaterial.create({ data: { id: randomUUID(), labId: f.labId, code: randomUUID(), name: 'Calibration fixture',
         kind: 'CHECK_STANDARD', matrix: 'SOIL', lotNumber: 'fixture', status: 'ACTIVE', createdBy: f.actor.username } });
     await f.db.referenceValue.create({ data: { id: randomUUID(), referenceMaterialId: lot.id, analysisCode: f.analysisCode,
         assignedValue: 7, unit: 'fixture-unit', valueType: 'LAB_ASSIGNED', createdBy: f.actor.username } });
-    f.run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, { ...f.input, analyses: [{ analysisCode: f.analysisCode,
-        references: ['ICV', 'CCV'].map(positionKind => ({ positionKind, referenceMaterialLotId: lot.id })) }] })).id, f.actor);
+    const built = await buildNativeRun(f.db, f.actor, { ...f.input, analyses: [{ analysisCode: f.analysisCode,
+        references: ['ICV', 'CCV'].map(positionKind => ({ positionKind, referenceMaterialLotId: lot.id })) }] });
+    // Model the policy provider before this key existed at first start. The
+    // actual start freezes it once; no frozen row or guard is edited later.
+    const policy = require('../../services/policyService'), originalSnapshot = policy.snapshot;
+    const historicalPolicy = legacySnapshot ? jest.spyOn(policy, 'snapshot').mockImplementation(async (...args) => {
+        const snapshot = await originalSnapshot(...args);
+        delete snapshot.values['qc.calibrationFailAction'];
+        return snapshot;
+    }) : null;
+    try { f.run = await startNativeRun(f.db, built.id, f.actor); }
+    finally { historicalPolicy?.mockRestore(); }
     f.items = await f.db.workItem.findMany({ orderBy: { rackPosition: 'asc' } });
     f.results = await Promise.all(f.items.map(item => f.result(item)));
     f.readings = failures => f.run.positions.filter(row => row.kind !== 'SAMPLE').map(row => ({ positionId: row.id,
@@ -29,6 +51,66 @@ async function fixture() {
     return f;
 }
 afterAll(async () => { for (const f of owned) await f.close(); });
+
+test.each(['REQUIRED_WARN', 'ADVISORY'])('failed CCV in frozen %s mode can be reviewed, finally approved and published through authenticated routes', async mode => {
+    const f = await fixture({ mode });
+    await writeNativeMeasurements(f.db, f.run.id, f.actor, { measurements: f.readings([25]) });
+    const item = f.items[0];
+    for (const status of ['COMPLETED', 'SUBMITTED']) await require('../../services/workItemStateService')
+        .transitionWorkItem(item.id, status, f.actor, 'Ready for actual review', {}, f.db);
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const auth = `Bearer ${token}`;
+        const review = await request(app).post(`/api/work/${item.id}/review`).set('Authorization', auth)
+            .send({ status: 'ACCEPTED', ...(mode === 'REQUIRED_WARN' && { qcAcknowledgement: { reason: 'Reviewed failed CCV under warning policy' } }) });
+        expect(review.status).toBe(200);
+        const workspace = await request(app).get(`/api/samples/${item.sampleId}/workspace`).set('Authorization', auth);
+        expect(workspace.status).toBe(200); expect(workspace.body.capabilities.canFinalApprove.allowed).toBe(true);
+        const approval = await request(app).post(`/api/samples/${item.sampleId}/approve`).set('Authorization', auth);
+        expect(approval.status).toBe(200); expect(approval.body.status).toBe('APPROVED');
+        const publication = await request(app).post(`/api/reports/generate/${item.sampleId}`).set('Authorization', auth);
+        expect(publication.status).toBe(200);
+        const report = await f.db.report.findUnique({ where: { id: publication.body.id } });
+        expect(JSON.parse(report.content).evidence.qc.deviations[0].qcStatus).toBe('FAIL');
+        expect(await f.db.auditLog.count({ where: { action: 'QC_GATE_ACKNOWLEDGED' } })).toBe(mode === 'REQUIRED_WARN' ? 1 : 0);
+    }, { reviews: true, samples: true, reports: true });
+});
+
+test.each([false, true])('opening CCB failure refuses an empty bracket repeat (WARN ICV: %s) with zero writes', async warnIcv => {
+    const f = await fixture({ ...(warnIcv && { calibrationActions: { ICV: 'WARN', CCV: 'REPEAT_BRACKET', CCB: 'REPEAT_BRACKET' } }) });
+    await writeNativeMeasurements(f.db, f.run.id, f.actor, { measurements: f.readings(warnIcv ? [1, 2] : [2]) });
+    const stored = await f.db.qcEvaluation.findFirst({ orderBy: { evaluatedAt: 'desc' } });
+    const details = JSON.parse(stored.details);
+    expect(details.calibrationBrackets.find(row => row.kind === 'CCB').affectedPositionIds).toEqual([]);
+    if (warnIcv) expect(details.evaluation.controls.find(row => row.kind === 'ICV')).toMatchObject({ status: 'WARN', observedStatus: 'FAIL' });
+    const before = await f.snapshot();
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const response = await request(app).post(`/api/qc/batches/${f.run.id}/disposition`).set('Authorization', `Bearer ${token}`)
+            .send({ decision: 'REPEAT_BRACKET', analysisCode: f.analysisCode, reason: 'Opening calibration blank failed' });
+        expect(response.status).toBe(409); expect(response.body.code).toBe('QC_BRACKET_REPEAT_NOT_ALLOWED');
+    });
+    expect(await f.snapshot()).toEqual(before);
+    expect(await qcGate.forResult(f.results[0], { db: f.db })).toMatchObject({ value: 'FAIL' });
+});
+
+test('a real Native run frozen before calibrationFailAction uses its old LRM action and refuses bracket disposition', async () => {
+    const f = await fixture({ legacySnapshot: true });
+    const frozen = (await f.db.batchAnalyte.findFirst()).criteriaSnapshot, criteria = JSON.parse(frozen);
+    expect(criteria.policySnapshot.values).not.toHaveProperty('qc.calibrationFailAction');
+    await f.setPolicy([{ key: 'qc.calibrationFailAction', value: { ICV: 'WARN', CCV: 'REPEAT_BRACKET', CCB: 'REPEAT_BRACKET' } }]);
+    await writeNativeMeasurements(f.db, f.run.id, f.actor, { measurements: f.readings([25]) });
+    const details = JSON.parse((await f.db.qcEvaluation.findFirst({ orderBy: { evaluatedAt: 'desc' } })).details);
+    expect(details.calibrationFailActionSource).toBe('LEGACY_SNAPSHOT_FALLBACK');
+    expect(details.evaluation.controls.find(row => row.position === 25)).toMatchObject({ status: 'FAIL',
+        failAction: criteria.qcRule.resolved.failAction.value.LRM });
+    expect((await f.db.batchAnalyte.findFirst()).criteriaSnapshot).toBe(frozen);
+    const before = await f.snapshot();
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const response = await request(app).post(`/api/qc/batches/${f.run.id}/disposition`).set('Authorization', `Bearer ${token}`)
+            .send({ decision: 'REPEAT_BRACKET', analysisCode: f.analysisCode, reason: 'Legacy calibration failure' });
+        expect(response.status).toBe(409); expect(response.body.code).toBe('QC_BRACKET_REPEAT_NOT_ALLOWED');
+    });
+    expect(await f.snapshot()).toEqual(before);
+});
 
 test('actual CCV 25 repeat preserves sealed evidence, repeats only its bracket and permits outside publication', async () => {
     const f = await fixture();
@@ -38,7 +120,7 @@ test('actual CCV 25 repeat preserves sealed evidence, repeats only its bracket a
     for (const item of [sealed, outside]) {
         for (const status of ['COMPLETED', 'SUBMITTED', 'ACCEPTED']) await require('../../services/workItemStateService')
             .transitionWorkItem(item.id, status, f.actor, 'Previously reviewed fixture', {}, f.db);
-        await require('../../services/sampleStateService').transitionSample(item.sampleId, 'APPROVED', f.actor, 'Prior approval', {}, f.db);
+        if (item.id === sealed.id) await require('../../services/sampleStateService').transitionSample(item.sampleId, 'APPROVED', f.actor, 'Prior approval', {}, f.db);
     }
     const sealedBefore = await f.db.workItem.findUnique({ where: { id: sealed.id } });
     const oldReport = await f.db.report.create({ data: { id: randomUUID(), sampleId: sealed.sampleId, labId: f.labId,
@@ -62,6 +144,8 @@ test('actual CCV 25 repeat preserves sealed evidence, repeats only its bracket a
         expect(repeat.body.idempotent).toBe(true);
         const failedPublish = await request(app).post(`/api/reports/generate/${sealed.sampleId}`).set('Authorization', `Bearer ${token}`);
         expect(failedPublish.status).toBe(409); expect(failedPublish.body.code).toBe('QC_GATE_REPEAT_ORDERED');
+        const outsideApproval = await request(app).post(`/api/samples/${outside.sampleId}/approve`).set('Authorization', `Bearer ${token}`);
+        expect(outsideApproval.status).toBe(200); expect(outsideApproval.body.status).toBe('APPROVED');
         const outsidePublish = await request(app).post(`/api/reports/generate/${outside.sampleId}`).set('Authorization', `Bearer ${token}`);
         expect(outsidePublish.status).toBe(200);
         const issued = await f.db.report.findUnique({ where: { id: outsidePublish.body.id } });
@@ -69,7 +153,7 @@ test('actual CCV 25 repeat preserves sealed evidence, repeats only its bracket a
         expect(content.evidence.qc.deviations).toEqual([]);
         expect(content.evidence.qc.calibrationBracketRepeats).toEqual([{ analysisCode: f.analysisCode, batchId: f.run.id,
             failedPositionIds: [f.run.positions.find(row => row.position === 25).id] }]);
-    }, { reports: true });
+    }, { reports: true, samples: true });
     const updated = await f.db.workItem.findMany();
     const affectedIds = affectedPositions.flatMap(row => row.workItems.map(link => link.workItemId));
     expect(updated.filter(item => item.status === 'REPEAT_REQUIRED').map(item => item.id).sort()).toEqual(affectedIds.filter(id => id !== sealed.id).sort());
@@ -143,6 +227,7 @@ test.each(['outside', 'not-repeat-required', 'sealed-in-scope', 'no-scope', 'not
         if (fault !== 'rack-only') await expect(repeatSource(f.db, item, null)).rejects.toMatchObject({ code: 'QC_WORK_ITEM_ALREADY_BATCHED' });
         await expect(f.db.workItem.update({ where: { id: item.id }, data: fault === 'rack-only'
             ? { rackPosition: item.rackPosition + 1 } : { batchId: null, rackPosition: null } })).rejects.toThrow();
+        expectMembershipRefusal(f, item, fault === 'rack-only' ? { rackPosition: item.rackPosition + 1 } : { batchId: null, rackPosition: null });
         expect(await f.snapshot()).toEqual(before);
     });
 
@@ -173,6 +258,7 @@ test.each(['started', 'frozen', 'observations'])('a bracket repeat cannot join a
     const before = await f.snapshot();
     await expect(repeatSource(f.db, item, target.id)).rejects.toMatchObject({ code: 'QC_WORK_ITEM_ALREADY_BATCHED' });
     await expect(f.db.workItem.update({ where: { id: item.id }, data: { batchId: target.id, rackPosition: 1 } })).rejects.toThrow();
+    expectMembershipRefusal(f, item, { batchId: target.id, rackPosition: 1 });
     expect(await f.snapshot()).toEqual(before);
 });
 
@@ -197,5 +283,27 @@ test.each(['LEGACY_MIGRATED', 'PROFILE_ONLY'])('%s scope cannot authorize the Na
     const item = await f.db.workItem.findUnique({ where: { id: f.workItemIds[0] } }), before = await f.snapshot();
     await expect(repeatSource(f.db, item, null)).rejects.toMatchObject({ code: 'QC_WORK_ITEM_ALREADY_BATCHED' });
     await expect(f.db.workItem.update({ where: { id: item.id }, data: { batchId: null, rackPosition: null } })).rejects.toThrow();
+    expectMembershipRefusal(f, item, { batchId: null, rackPosition: null });
+    expect(await f.snapshot()).toEqual(before);
+});
+
+test('JS and SQL both allow the pinned bracket branch when the sealed list is absent', async () => {
+    const f = await fixture(); await writeNativeMeasurements(f.db, f.run.id, f.actor, { measurements: f.readings([25]) });
+    const response = await require('../../services/qcDispositionStateService').dispositionBatch(f.run.id, 'REPEAT_BRACKET',
+        'Reviewed bracket repeat', f.actor, f.db);
+    const previous = await f.db.batchDisposition.findFirst(), scope = { ...response.scopes[f.analysisCode] };
+    delete scope.sealedAffectedWorkItemIds;
+    await f.db.batchDisposition.create({ data: { id: randomUUID(), batchId: f.run.id, analysisCode: f.analysisCode,
+        decision: 'REPEAT_BRACKET', reason: 'Historical scope without optional sealed list', decidedBy: f.actor.username,
+        decidedAt: new Date(previous.decidedAt.getTime() + 1), scope: JSON.stringify(scope) } });
+    const item = await f.db.workItem.findUnique({ where: { id: scope.affectedWorkItemIds[0] } });
+    expect(await repeatSource(f.db, item, null)).toBe(f.run.id);
+    const before = await f.snapshot(), raw = new Database(f.file, { fileMustExist: true });
+    try {
+        expect(() => raw.transaction(() => {
+            expect(raw.prepare('UPDATE "WorkItem" SET "batchId"=NULL,"rackPosition"=NULL WHERE "id"=?').run(item.id).changes).toBe(1);
+            throw new Error('ROLLBACK_ALLOWED_PROBE');
+        })()).toThrow('ROLLBACK_ALLOWED_PROBE');
+    } finally { raw.close(); }
     expect(await f.snapshot()).toEqual(before);
 });

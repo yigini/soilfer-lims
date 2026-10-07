@@ -276,33 +276,12 @@ function canFinalApprove(sample, workItems = [], orderLines = [], user = null, o
         }
     }
 
-    // 7. QC Batch resolution
-    const qcBatches = (options.qcBatches || []).flatMap(batch => Array.isArray(batch.analytes)
-        ? [...new Set(workItems.filter(item => (item.batchId === batch.id || batch.workItems?.some(member => member.id === item.id)) &&
-            !['WAIVED', 'CANCELLED'].includes(item.status)).map(item => item.analysis))]
-            .map(code => require('./qcRunGateService').analyteGateView(batch, code)) : [batch]);
-    const failedQc = qcBatches.find(b => {
-        const isFailedStatus = b.status === 'QC_FAIL' || b.status === 'FAILED';
-        if (!isFailedStatus) return false;
-        let hasValidDisposition = false;
-        if (b.disposition) {
-            try {
-                const disp = typeof b.disposition === 'string' ? JSON.parse(b.disposition) : b.disposition;
-                if (disp && disp.decision === 'PROCEED_WITH_WARNING') {
-                    hasValidDisposition = true;
-                }
-            } catch (e) {}
-        }
-        return !hasValidDisposition;
-    });
-
-    const pendingQc = qcBatches.find(b => ['OPEN', 'RUNNING', 'PENDING'].includes(b.status));
-    if (failedQc) {
-        blockers.push(`QC_BATCH_FAILED: Linked QC batch ${failedQc.batchNumber || failedQc.id} failed quality control and lacks an authorized manager disposition override`);
-    }
-    if (pendingQc) {
-        blockers.push(`QC_BATCH_PENDING: Linked QC batch ${pendingQc.batchNumber || pendingQc.id} has not been evaluated`);
-    }
+    // 7. Use the same result identity, frozen mode and durable acknowledgement
+    // as publication. A bracket disposition does not fail unrelated results.
+    const qc = reportingQc(sample, { ...options, workItems });
+    const qcFailure = qc.blocker?.gate;
+    if (qcFailure) blockers.push(qcFailure.code ||
+        (qc.blocker.batch.status === 'QC_FAIL' ? 'QC_BATCH_FAILED' : 'QC_BATCH_PENDING'));
 
     // 8. Holds and historical evidence gaps
     if (sample.holdReason || options.hasActiveHold) {
@@ -316,7 +295,9 @@ function canFinalApprove(sample, workItems = [], orderLines = [], user = null, o
     return {
         allowed,
         blockers,
-        reason: allowed ? null : blockers[0]
+        reason: allowed ? null : blockers[0],
+        ...(qcFailure && { code: qcFailure.code, gate: qcFailure.gate,
+            acknowledgementRequired: qcFailure.acknowledgementRequired })
     };
 }
 

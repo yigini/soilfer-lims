@@ -54,14 +54,15 @@ test.each(['individual', 'bulk', 'submission'])('%s acceptance requires an ackno
     const labels = require('../../locales/en.json').resultReports;
     expect(describeReportEvidence(evidence, labels).qcStatement).toContain(f.actor.username);
     expect(describeReportEvidence(evidence, labels).qcStatement).toContain('Reviewed missing batch evidence');
-    await require('../../services/sampleStateService').transitionSample(sample.id, 'APPROVED', f.actor, 'Approved acknowledged fixture', {}, f.db);
     await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const approval = await request(app).post(`/api/samples/${sample.id}/approve`).set('Authorization', `Bearer ${token}`);
+        expect(approval.status).toBe(200); expect(approval.body.status).toBe('APPROVED');
         const response = await request(app).post(`/api/reports/generate/${sample.id}`).set('Authorization', `Bearer ${token}`);
         expect(response.status).toBe(200);
         const report = await f.db.report.findUnique({ where: { id: response.body.id } });
         expect(JSON.parse(report.content).qcStatement).toContain('Reviewed missing batch evidence');
         expect(JSON.parse(report.content).evidence.qc.acknowledgements).toHaveLength(sample.results.length);
-    }, { reports: true });
+    }, { reports: true, samples: true });
     expect(results).toHaveLength(count);
 });
 
@@ -99,5 +100,22 @@ test('publication cannot use a request acknowledgement without a matching durabl
             .send({ qcAcknowledgement: { reason: 'A request is not durable evidence', auditLogId: 'invented' } });
         expect(response.status).toBe(409); expect(response.body.code).toBe('QC_ACKNOWLEDGEMENT_REQUIRED');
     }, { reports: true });
+    expect(await f.snapshot()).toEqual(before);
+});
+
+test('final approval and workspace refuse an accepted historical result without a durable QC acknowledgement', async () => {
+    const f = await fixture({ status: 'ACCEPTED' }), item = f.items[0]; await f.result(item);
+    await f.setPolicy([{ key: 'qc.mode', value: 'REQUIRED_WARN' }, { key: 'qc.requireBatchQc', value: 'REQUIRED' }]);
+    const before = await f.snapshot();
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const auth = `Bearer ${token}`;
+        const workspace = await request(app).get(`/api/samples/${item.sampleId}/workspace`).set('Authorization', auth);
+        expect(workspace.status).toBe(200);
+        expect(workspace.body.capabilities.canFinalApprove.allowed).toBe(false);
+        expect(workspace.body.capabilities.canFinalApprove.blockers).toContain('QC_ACKNOWLEDGEMENT_REQUIRED');
+        const response = await request(app).post(`/api/samples/${item.sampleId}/approve`).set('Authorization', auth)
+            .send({ qcAcknowledgement: { reason: 'Request data is not review evidence', auditLogId: 'invented' } });
+        expect(response.status).toBe(409); expect(response.body.code).toBe('QC_ACKNOWLEDGEMENT_REQUIRED');
+    }, { samples: true });
     expect(await f.snapshot()).toEqual(before);
 });

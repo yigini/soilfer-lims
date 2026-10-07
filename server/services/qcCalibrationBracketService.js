@@ -26,7 +26,9 @@ function repeatBracketScope(analyte, evidence) {
     const failing = checks.filter(row => ['FAIL', 'INVALID'].includes(row.status) && row.failAction !== 'WARN');
     if (analyte.provenance !== 'NATIVE' || details?.calibrationFailActionSource !== 'SNAPSHOT' || !failing.length ||
         failing.some(row => !['CCV', 'CCB'].includes(row.kind) || row.failAction !== 'REPEAT_BRACKET') ||
-        !Array.isArray(details.calibrationBrackets) || failing.some(row => !details.calibrationBrackets.some(bracket => bracket.failedPositionId === row.positionId))) {
+        !Array.isArray(details.calibrationBrackets) || failing.some(row => !details.calibrationBrackets.some(bracket =>
+            bracket.failedPositionId === row.positionId && Array.isArray(bracket.affectedPositionIds) &&
+            bracket.affectedPositionIds.length > 0 && Array.isArray(bracket.affectedWorkItemIds) && bracket.affectedWorkItemIds.length > 0))) {
         throw Object.assign(new Error('Only failed continuing calibration brackets may be repeated independently.'),
             { statusCode: 409, code: 'QC_BRACKET_REPEAT_NOT_ALLOWED' });
     }

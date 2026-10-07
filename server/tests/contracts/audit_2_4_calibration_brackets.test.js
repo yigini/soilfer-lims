@@ -55,3 +55,13 @@ test('a failing non-calibration check retains the full-analyte disposition requi
         evaluation: { controls: f.checks, blanks: [{ positionId: 'blank', kind: 'BLANK', status: 'FAIL', failAction: 'FAIL_BATCH' }] } }) } };
     expect(() => repeatBracketScope({ provenance: 'NATIVE' }, evidence)).toThrow(expect.objectContaining({ code: 'QC_BRACKET_REPEAT_NOT_ALLOWED' }));
 });
+
+test('a valid later bracket cannot conceal an empty opening CCB bracket', () => {
+    const f = run();
+    const details = { calibrationFailActionSource: 'SNAPSHOT', evaluation: { controls: f.checks,
+        blanks: [{ positionId: 'opening-ccb', kind: 'CCB', status: 'FAIL', failAction: 'REPEAT_BRACKET' }] },
+        calibrationBrackets: [...calibrationBrackets(f.batch, 'A', f.positions, f.checks),
+            { failedPositionId: 'opening-ccb', affectedPositionIds: [], affectedWorkItemIds: [] }] };
+    expect(() => repeatBracketScope({ provenance: 'NATIVE' }, { evaluation: { id: 'eval', details } }))
+        .toThrow(expect.objectContaining({ statusCode: 409, code: 'QC_BRACKET_REPEAT_NOT_ALLOWED' }));
+});

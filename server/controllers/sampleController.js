@@ -1632,76 +1632,49 @@ exports.approveSample = async (req, res) => {
             return res.status(403).json({ error: 'Access Denied: Sample not in your lab scope.', code: 'ACCESS_DENIED_LAB' });
         }
 
-        // S04: Check analytical work items, active order lines, and QC batches
-        const [workItems, orderRevision, qcBatches] = await Promise.all([
-            prisma.workItem.findMany({
-                where: { sampleId: String(id) },
-                include: { batch: { include: require('../services/qcRunViewService').QC_RUN_INCLUDE } }
-            }),
-            prisma.sampleOrderRevision.findFirst({
-                where: { sampleId: String(id), status: 'ACTIVE' },
-                include: { lines: true },
-                orderBy: { version: 'desc' }
-            }),
-            prisma.batch.findMany({
-                include: require('../services/qcRunViewService').QC_RUN_INCLUDE,
-                where: {
-                    workItems: {
-                        some: {  sampleId: String(id) }
-                    }
-                }
-            })
-        ]);
-
-        // Concurrency validation
-        if (req.body?.expectedUpdatedAt) {
-            const currentMs = new Date(sample.updatedAt).getTime();
-            const expectedMs = new Date(req.body.expectedUpdatedAt).getTime();
-            if (currentMs !== expectedMs) {
-                return res.status(409).json({
-                    error: 'Sample was modified concurrently. Please reload the current record before approving.',
-                    code: 'CONCURRENCY_CONFLICT'
-                });
+        // Read the gate and its durable review acknowledgement in the same
+        // transaction that commits approval; request data cannot authorize QC.
+        const outcome = await prisma.$transaction(async tx => {
+            const current = await tx.sample.findUnique({ where: { id: String(id) },
+                include: { workItems: true, results: { where: { isCurrent: true } } } });
+            if (!current) throw Object.assign(new Error('Sample not found'), { statusCode: 404, code: 'SAMPLE_NOT_FOUND' });
+            scopeGuard.ensureScope(user, current, { altLabField: 'assignedLab' });
+            if (req.body?.expectedUpdatedAt && new Date(current.updatedAt).getTime() !== new Date(req.body.expectedUpdatedAt).getTime()) {
+                throw Object.assign(new Error('Sample was modified concurrently. Please reload the current record before approving.'),
+                    { statusCode: 409, code: 'CONCURRENCY_CONFLICT' });
             }
-        }
-
-        const { canFinalApprove } = require('../services/workEligibility');
-        const eligibility = canFinalApprove(
-            sample,
-            workItems,
-            orderRevision?.lines || [],
-            user,
-            { qcBatches }
-        );
+            const { linkedBatchIds, resolveReportingModes } = require('../services/reportResultGovernance');
+            const batchIds = [...new Set([...current.workItems.map(item => item.batchId),
+                ...current.results.flatMap(result => linkedBatchIds(result, current.workItems))].filter(Boolean))];
+            const qcBatches = await tx.batch.findMany({ where: { id: { in: batchIds } },
+                include: require('../services/qcRunViewService').QC_RUN_INCLUDE });
+            const orderRevision = await tx.sampleOrderRevision.findFirst({ where: { sampleId: String(id), status: 'ACTIVE' },
+                include: { lines: true }, orderBy: { version: 'desc' } });
+            const modes = await resolveReportingModes(current, qcBatches, { db: tx });
+            const gates = await require('../services/qcGateService').resolveForSample(current, qcBatches, tx);
+            const eligibility = require('../services/workEligibility').canFinalApprove(current, current.workItems,
+                orderRevision?.lines || [], user, { qcBatches, ...modes, ...gates });
+            if (!eligibility.allowed) return { eligibility };
+            const now = new Date();
+            const updated = await require('../services/sampleStateService').transitionSample(id, 'APPROVED', user,
+                'Final Approval by Manager', { approvedBy: user.username, approvedAt: now }, tx);
+            await tx.auditLog.create({ data: {
+                id: crypto.randomUUID(), entity: 'SAMPLE', entityId: String(id), action: 'SAMPLE_APPROVED',
+                details: 'Final Approval by Manager', performedBy: user.username, timestamp: now, sampleId: String(id)
+            } });
+            return { eligibility, updated };
+        });
+        const { eligibility, updated } = outcome;
 
         if (!eligibility.allowed) {
             const isNoWork = eligibility.blockers.some(b => b.startsWith('NO_ANALYTICAL_WORK') || b.startsWith('ALL_WORK_OMITTED'));
             return res.status(isNoWork ? 400 : 409).json({
                 error: eligibility.reason || 'Sample is not eligible for final approval',
-                code: isNoWork ? 'NO_WORK_ITEMS' : 'UNAPPROVED_WORK_ITEMS',
-                blockers: eligibility.blockers
+                code: isNoWork ? 'NO_WORK_ITEMS' : eligibility.code || 'UNAPPROVED_WORK_ITEMS',
+                blockers: eligibility.blockers,
+                ...(eligibility.gate && { gate: eligibility.gate, acknowledgementRequired: eligibility.acknowledgementRequired })
             });
         }
-
-        const now = new Date();
-        const { transitionSample } = require('../services/sampleStateService');
-        const updated = await transitionSample(id, 'APPROVED', req.user, 'Final Approval by Manager', {
-            approvedBy: req.user.username,
-            approvedAt: now
-        });
-
-        await prisma.auditLog.create({
-            data: {
-                id: crypto.randomUUID(),
-                entity: 'SAMPLE',
-                entityId: id,
-                action: 'SAMPLE_APPROVED',
-                details: 'Final Approval by Manager',
-                performedBy: req.user.username,
-                timestamp: now,
-                sampleId: String(id)
-            }
-        });
 
         // S05: Do not perform blanket spectralData approval cascade for entire sample.
         // Spectral scans are approved per work item during work item review.

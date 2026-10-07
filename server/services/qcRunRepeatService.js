@@ -16,7 +16,7 @@ async function repeatSource(db, item, targetBatchId) {
     const bracketRepeat = analyte?.provenance === 'NATIVE' && analyte.status === 'ACCEPTED_WITH_DEVIATION' &&
         item.status === 'REPEAT_REQUIRED' && disposition?.decision === 'REPEAT_BRACKET' &&
         Array.isArray(scope?.affectedWorkItemIds) && scope.affectedWorkItemIds.includes(item.id) &&
-        Array.isArray(scope.sealedAffectedWorkItemIds) && !scope.sealedAffectedWorkItemIds.includes(item.id);
+        (scope.sealedAffectedWorkItemIds == null || Array.isArray(scope.sealedAffectedWorkItemIds) && !scope.sealedAffectedWorkItemIds.includes(item.id));
     const target = targetBatchId ? await db.batch.findUnique({ where: { id: targetBatchId }, include: QC_RUN_INCLUDE }) : null;
     const targetAllowed = !targetBatchId || target?.status === 'OPEN' && !target.startedAt &&
         !target.analytes.some(row => row.legacyMembershipFrozen) && !target.measurements.length;

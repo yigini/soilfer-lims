@@ -525,13 +525,18 @@ class SampleWorkspaceService {
         const isReception = ['SAMPLE_RECEPTION', 'LAB_MANAGER', 'SUPER_ADMIN', 'MASTER_USER'].includes(userRole);
 
         const { canFinalApprove: evaluateFinalApproval } = require('./workEligibility');
-        const linkedBatches = (sample.workItems || []).map(w => w.batch).filter(Boolean);
+        const { linkedBatchIds, resolveReportingModes } = require('./reportResultGovernance');
+        const batchIds = [...new Set([...sample.workItems.map(item => item.batchId),
+            ...sample.results.flatMap(result => linkedBatchIds(result, sample.workItems))].filter(Boolean))];
+        const linkedBatches = await prisma.batch.findMany({ where: { id: { in: batchIds } }, include: QC_RUN_INCLUDE });
+        const qcModes = await resolveReportingModes(sample, linkedBatches, { db: prisma });
+        const qcEvidence = await qcGateService.resolveForSample(sample, linkedBatches, prisma);
         const finalApprovalEval = evaluateFinalApproval(
             sample,
             sample.workItems,
             activeRevision?.lines || orderLines || [],
             user,
-            { qcBatches: linkedBatches, hasHistoricalGap }
+            { qcBatches: linkedBatches, hasHistoricalGap, ...qcModes, ...qcEvidence }
         );
         const reviewEval = require('./workEligibility').canReview({ status: 'PENDING_REVIEW' }, sample, user, {
             qcGates: enrichedWorkItems.filter(item => item.status === 'SUBMITTED').flatMap(item => item.qcDetails.gates) });
