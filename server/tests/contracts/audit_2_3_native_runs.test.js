@@ -19,7 +19,9 @@ const { correctValue } = require('../../services/referenceMaterialService');
 const { writeNativeMeasurements } = require('../../services/qcNativeMeasurementService');
 const { reopenNativeRun } = require('../../services/qcNativeLifecycleService');
 const { mutateQcRun } = require('../../services/qcRunMutationService');
+const { dispositionBatch } = require('../../services/qcDispositionStateService');
 const { createResultFixture } = require('../../services/resultWriteService');
+const { createProfileRun } = require('../../services/qcCompatibilityRunService');
 const request = require('supertest');
 const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
 const owned = [];
@@ -68,7 +70,8 @@ async function evidence(db) {
         db.batchAnalyte.findMany({ orderBy: { id: 'asc' } }), db.batchPosition.findMany({ orderBy: { id: 'asc' } }),
         db.batchPositionWorkItem.findMany({ orderBy: { id: 'asc' } }), db.batchPositionReference.findMany({ orderBy: { id: 'asc' } }),
         db.qcMeasurement.findMany({ orderBy: { id: 'asc' } }), db.qcEvaluation.findMany({ orderBy: { id: 'asc' } }),
-        db.batchEvent.findMany({ orderBy: { id: 'asc' } }), db.workItem.findMany({ orderBy: { id: 'asc' } }), db.auditLog.count()])));
+        db.batchEvent.findMany({ orderBy: { id: 'asc' } }), db.workItem.findMany({ orderBy: { id: 'asc' } }), db.auditLog.count(),
+        db.batchDisposition.findMany({ orderBy: { id: 'asc' } }), db.result.findMany({ orderBy: { id: 'asc' } })])));
 }
 afterAll(async () => {
     for (const { file, db } of owned) {
@@ -289,6 +292,151 @@ test('OFF start writes no evaluation; explicit evaluation records NOT_REQUIRED a
     expect((await f.db.qcEvaluation.findFirst()).verdict).toBe('NOT_REQUIRED');
     await writeNativeMeasurements(f.db, run.id, f.actor, {}, { explicit: true });
     expect(await f.db.qcEvaluation.count()).toBe(1);
+});
+
+test('explicit evaluation records each OFF analyte without fake readings or passed QC counts', async () => {
+    const f = await fixture(), b = await secondAnalyte(f);
+    await policies.change(f.actor, f.labId, { reason: 'Both fixture analyses do not require QC', changes: [{ key: 'qc.mode', value: 'OFF' }] }, { db: f.db });
+    const run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, { ...f.input, workItemIds: [...f.workItemIds, b.item.id] })).id, f.actor);
+    expect(await f.db.qcEvaluation.count()).toBe(0);
+    const evaluated = await mutateQcRun(f.db, run.id, f.actor, {}, { explicit: true });
+    expect(evaluated.batch.analytes).toHaveLength(2);
+    for (const row of evaluated.batch.analytes) {
+        expect(row.result).toBe('NOT_REQUIRED'); expect(row.qcResults.summary).toMatchObject({ passed: 0, totalQcSamples: 0, notRequired: true });
+    }
+    expect(await f.db.qcEvaluation.count()).toBe(2); expect(await f.db.qcMeasurement.count()).toBe(0);
+});
+
+test('part 13 profile conversion and direct non-calibration runs preserve free text and may start without a registered asset', async () => {
+    const f = await fixture(), profile = await createProfileRun(f.db, f.actor, { analysis: f.analysisCode, instrument: 'Manual bench text', profile: 'RACK_40' });
+    const built = await rebuildNativeRun(f.db, profile.id, f.actor, { workItemIds: f.workItemIds });
+    expect(built).toMatchObject({ instrumentId: null, instrument: 'Manual bench text' }); expect(built.analytes[0].provenance).toBe('NATIVE');
+    const started = await startNativeRun(f.db, built.id, f.actor);
+    expect(started).toMatchObject({ instrumentId: null, instrument: 'Manual bench text', status: 'RUNNING' });
+    expect(JSON.parse(started.analytes[0].criteriaSnapshot)).toMatchObject({ instrumentId: null, instrumentText: 'Manual bench text' });
+    const direct = await buildNativeRun(f.db, f.actor, { workItemIds: await members(f, 1), instrument: 'Another manual bench' });
+    expect((await startNativeRun(f.db, direct.id, f.actor)).instrumentId).toBeNull();
+});
+
+test('part 13 calibration start requires a valid active scoped asset, refuses without writes and freezes its exact identity and text', async () => {
+    const f = await fixture();
+    await policies.change(f.actor, f.labId, { reason: 'Calibration verification requires a registered fixture instrument',
+        changes: [{ key: 'qc.calibrationVerification', value: true }] }, { db: f.db });
+    const profile = await createProfileRun(f.db, f.actor, { analysis: f.analysisCode, instrument: 'Recorded bench name' });
+    const built = await rebuildNativeRun(f.db, profile.id, f.actor, { workItemIds: f.workItemIds });
+    const before = await evidence(f.db);
+    await expect(startNativeRun(f.db, built.id, f.actor)).rejects.toMatchObject({ statusCode: 422, code: 'QC_INSTRUMENT_REQUIRED' });
+    expect(await evidence(f.db)).toEqual(before);
+    const outside = await f.db.equipmentAsset.create({ data: { id: randomUUID(), labId: 'OTHER-LAB', name: 'Outside instrument', assetType: 'OTHER', status: 'IN_SERVICE', criticality: 'NON_CRITICAL' } });
+    const inactive = await f.db.equipmentAsset.create({ data: { id: randomUUID(), labId: f.labId, name: 'Inactive instrument', assetType: 'OTHER', status: 'OUT_OF_SERVICE', criticality: 'NON_CRITICAL' } });
+    for (const id of ['nonexistent-asset', outside.id, inactive.id]) {
+        await expect(mutateQcRun(f.db, built.id, f.actor, { instrumentId: id })).rejects.toMatchObject({ statusCode: 422, code: 'QC_INSTRUMENT_INVALID' });
+        expect(await evidence(f.db)).toEqual(before);
+    }
+    const selected = await mutateQcRun(f.db, built.id, f.actor, { instrumentId: f.instrument.id });
+    expect(selected.batch).toMatchObject({ instrumentId: f.instrument.id, instrument: 'Recorded bench name' });
+    const started = await mutateQcRun(f.db, built.id, f.actor, { status: 'RUNNING' });
+    expect(JSON.parse(started.batch.analytes[0].criteriaSnapshot)).toMatchObject({ instrumentId: f.instrument.id, instrumentText: 'Recorded bench name' });
+    const frozen = await evidence(f.db);
+    await expect(mutateQcRun(f.db, built.id, f.actor, { instrumentId: null })).rejects.toMatchObject({ statusCode: 409, code: 'QC_INSTRUMENT_FROZEN' });
+    expect(await evidence(f.db)).toEqual(frozen);
+});
+
+test.each(['REPEAT_BATCH', 'REJECT'])('failed Native disposition %s retains failed evidence and uses the central work transition', async decision => {
+    const f = await fixture(), lot = await referenceLot(f), run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, { ...f.input,
+        analyses: [{ analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }] })).id, f.actor);
+    const failed = await writeNativeMeasurements(f.db, run.id, f.actor, { measurements: readings(run, { blank: 10 }) });
+    const before = await evidence(f.db), oldMeasurements = await f.db.qcMeasurement.findMany(), oldEvaluation = await f.db.qcEvaluation.findFirst();
+    await expect(dispositionBatch(run.id, decision, 'Reviewed disposition requires manager authority', { ...f.actor, role: 'LAB_TECHNICIAN' }, f.db))
+        .rejects.toMatchObject({ statusCode: 403, code: 'QC_DISPOSITION_FORBIDDEN' });
+    expect(await evidence(f.db)).toEqual(before);
+    const outcome = await dispositionBatch(run.id, decision, 'Reviewed failed evidence requires a new run', f.actor, f.db);
+    expect(outcome.disposition.canonicalDecision).toBe(decision);
+    const analyte = await f.db.batchAnalyte.findFirst(); expect(analyte.status).toBe(decision === 'REJECT' ? 'REJECTED' : 'REPEAT_ORDERED');
+    expect((await f.db.workItem.findUnique({ where: { id: f.workItemIds[0] } })).status).toBe('REPEAT_REQUIRED');
+    expect(await f.db.qcMeasurement.findMany()).toEqual(oldMeasurements); expect(await f.db.qcEvaluation.findFirst()).toEqual(oldEvaluation);
+    expect((await f.db.batch.findUnique({ where: { id: run.id } })).status).toBe(failed.status);
+    const disposed = await evidence(f.db);
+    expect((await dispositionBatch(run.id, decision, outcome.disposition.reason, f.actor, f.db)).idempotent).toBe(true);
+    expect(await evidence(f.db)).toEqual(disposed);
+    await expect(mutateQcRun(f.db, run.id, f.actor, { status: 'CLOSED' })).rejects.toHaveProperty('statusCode');
+    expect(await evidence(f.db)).toEqual(disposed);
+});
+
+test('actual manager disposition accepts a failed Native analyte with deviation, preserves warning flags and closes without changing failed readings', async () => {
+    const f = await fixture(), lot = await referenceLot(f), run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, { ...f.input,
+        analyses: [{ analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }] })).id, f.actor);
+    const item = await f.db.workItem.findUnique({ where: { id: f.workItemIds[0] } });
+    const result = await createResultFixture(f.db, { data: { id: randomUUID(), sampleId: item.sampleId, param: f.analysisCode, batchId: run.id,
+        value: '2.123456789', numericValue: 2.123456789, rawInput: '2.123456789', isValid: true, flags: '[]' } });
+    await writeNativeMeasurements(f.db, run.id, f.actor, { measurements: readings(run, { blank: 10 }) });
+    const oldMeasurements = await f.db.qcMeasurement.findMany(), oldEvaluation = await f.db.qcEvaluation.findFirst();
+    await f.db.user.update({ where: { username: f.actor.username }, data: { role: 'LAB_MANAGER', labId: f.labId } });
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const auth = { Authorization: `Bearer ${token}` };
+        const accepted = await request(app).post(`/api/qc/batches/${run.id}/disposition`).set(auth)
+            .send({ decision: 'PROCEED_WITH_WARNING', reason: 'Manager accepts the documented deviation' });
+        expect(accepted.status).toBe(200); expect(accepted.body.disposition.canonicalDecision).toBe('ACCEPT_WITH_DEVIATION');
+        expect((await f.db.batchAnalyte.findFirst()).status).toBe('ACCEPTED_WITH_DEVIATION');
+        const flagged = await f.db.result.findUnique({ where: { id: result.id } });
+        expect(flagged.isValid).toBe(true); expect(JSON.parse(flagged.flags)).toContain('QC_WARNING_OVERRIDDEN'); expect(flagged.value).toBe(result.value);
+        const close = await request(app).put(`/api/qc/batches/${run.id}`).set(auth).send({ status: 'CLOSED' });
+        expect(close.status).toBe(200); expect(close.body.status).toBe('CLOSED');
+        expect((await f.db.batchAnalyte.findFirst()).status).toBe('CLOSED');
+        expect(await f.db.result.findUnique({ where: { id: result.id } })).toEqual(flagged);
+        const detail = await request(app).get(`/api/qc/batches/${run.id}`).set(auth);
+        expect(detail.body.data).toMatchObject({ result: 'FAIL', disposition: { decision: 'PROCEED_WITH_WARNING' } });
+        expect(detail.body.data.qcResults.blanks[0].value).toBe(10);
+    });
+    expect(await f.db.qcMeasurement.findMany()).toEqual(oldMeasurements); expect(await f.db.qcEvaluation.findFirst()).toEqual(oldEvaluation);
+    const raw = await f.db.batch.findUnique({ where: { id: run.id } });
+    expect([raw.qcResults, raw.disposition, raw.history, raw.workItemIds]).toEqual([null, null, null, null]);
+});
+
+test('actual profile membership converts recorded methods to Native without an asset and remains frozen after manager reopen', async () => {
+    const f = await fixture(2), lot = await referenceLot(f);
+    await f.db.user.update({ where: { username: f.actor.username }, data: { labId: f.labId } });
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const auth = { Authorization: `Bearer ${token}` };
+        const profile = await request(app).post('/api/qc/batches').set(auth).send({ analysis: f.analysisCode, instrument: 'Manual bench text', profile: 'RACK_40' });
+        expect(profile.status).toBe(201); const id = profile.body.id;
+        const added = await request(app).post(`/api/qc/batches/${id}/items`).set(auth).send({ workItemIds: f.workItemIds,
+            analyses: [{ analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }] });
+        expect(added.status).toBe(200); expect(added.body.batch).toMatchObject({ instrumentId: null, instrument: 'Manual bench text' });
+        expect(added.body.batch.analytes[0].provenance).toBe('NATIVE'); expect(added.body.batch.positions.filter(row => row.kind === 'SAMPLE')).toHaveLength(2);
+        const removed = await request(app).delete(`/api/qc/batches/${id}/items`).set(auth).send({ workItemIds: [f.workItemIds[1]] });
+        expect(removed.status).toBe(200); expect(removed.body.remaining).toBe(1);
+        expect(await f.db.workItem.findUnique({ where: { id: f.workItemIds[1] } })).toMatchObject({ batchId: null, rackPosition: null });
+        const started = await request(app).post(`/api/qc/batches/${id}/start`).set(auth).send({});
+        expect(started.status).toBe(200); expect(started.body.batch.instrumentId).toBeNull();
+        const pass = await request(app).post(`/api/qc/batches/${id}/evaluate`).set(auth).send({ measurements: readings(started.body.batch) });
+        expect(pass.status).toBe(200); expect(pass.body.status).toBe('QC_PASS');
+        expect((await request(app).put(`/api/qc/batches/${id}`).set(auth).send({ status: 'OPEN', reason: 'Reviewed manager reopen' })).status).toBe(200);
+        const frozen = await evidence(f.db);
+        for (const remove of [false, true]) {
+            const response = remove ? await request(app).delete(`/api/qc/batches/${id}/items`).set(auth).send({ workItemIds: [f.workItemIds[0]] })
+                : await request(app).post(`/api/qc/batches/${id}/items`).set(auth).send({ workItemIds: [f.workItemIds[1]] });
+            expect(response.status).toBe(409); expect(response.body.code).toBe('BATCH_MEMBERSHIP_FROZEN'); expect(await evidence(f.db)).toEqual(frozen);
+        }
+    });
+});
+
+test('actual Native builder refuses 23 samples at the default limit and builds the specified 23-sample sequence through a method rule', async () => {
+    const f = await fixture(23);
+    await f.db.user.update({ where: { username: f.actor.username }, data: { labId: f.labId } });
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const auth = { Authorization: `Bearer ${token}` }, before = await evidence(f.db);
+        const tooLarge = await request(app).post('/api/qc/batches').set(auth).send(f.input);
+        expect(tooLarge.status).toBe(422); expect(tooLarge.body).toMatchObject({ code: 'QC_BATCH_TOO_LARGE', details: { maxBatchSize: 20, requested: 23 } });
+        expect(await evidence(f.db)).toEqual(before);
+        await rules.change(f.actor, { labId: f.labId, analysisCode: f.analysisCode, methodologyId: f.method.id,
+            criteria: { maxBatchSize: 23 }, expectedVersion: 1, reason: 'Approved 23-sample method capacity' }, { db: f.db });
+        const created = await request(app).post('/api/qc/batches').set(auth).send(f.input);
+        expect(created.status).toBe(201); const positions = created.body.positions;
+        for (const [kind, count] of [['SAMPLE', 23], ['BLANK', 1], ['LRM', 1], ['DUPLICATE', 3]]) expect(positions.filter(row => row.kind === kind)).toHaveLength(count);
+        expect(positions.map(row => row.position)).toEqual(Array.from({ length: positions.length }, (_, index) => index + 1));
+        expect(positions.filter(row => row.kind === 'DUPLICATE').every(row => positions.some(parent => parent.id === row.duplicateOfPositionId && parent.kind === 'SAMPLE'))).toBe(true);
+    });
 });
 
 test('ADVISORY explicit evaluation records INCOMPLETE; later complete values supersede it using frozen criteria', async () => {

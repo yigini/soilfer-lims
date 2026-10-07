@@ -53,6 +53,18 @@ function start(f) {
         f.db.prepare('UPDATE BatchAnalyte SET criteriaSnapshot=?,policyVersion=0,crmOrdinal=1,status=? WHERE batchId=?').run('{"fixture":"frozen criteria"}', 'IN_RUN', f.batchId);
     })();
 }
+
+test('creating a WorkItem directly cannot attach it to started or legacy-frozen sample membership', () => {
+    const f = fixture(), original = f.db.prepare('SELECT * FROM WorkItem WHERE id=?').get(f.workItemId);
+    try {
+        start(f);
+        expect(() => insert(f.db, 'WorkItem', { ...original, id: randomUUID() })).toThrow('BATCH_MEMBERSHIP_FROZEN');
+        insert(f.db, 'BatchAnalyte', { id: randomUUID(), batchId: f.legacyId, labId: f.labId, analysisCode: f.a,
+            provenance: 'LEGACY_MIGRATED', status: 'QC_PASS', legacyMembershipFrozen: 1 });
+        expect(() => insert(f.db, 'WorkItem', { ...original, id: randomUUID(), batchId: f.legacyId })).toThrow('BATCH_MEMBERSHIP_FROZEN');
+        expect(f.db.prepare('SELECT COUNT(*) count FROM WorkItem').get().count).toBe(1);
+    } finally { f.db.close(); }
+});
 function measurement(f, positionId, extra = {}) {
     return { id: randomUUID(), batchId: f.batchId, positionId, analysisCode: f.a, replicateNo: 1,
         value: 0.1, rawInput: '0.1', enteredBy: f.user, enteredAt: now, ...extra };

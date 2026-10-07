@@ -20,12 +20,14 @@ function permission(actor) {
     return actorName(actor);
 }
 async function instrumentFor(db, batch, id, actor) {
-    if (typeof id !== 'string' || !id) throw error(400, 'QC_INSTRUMENT_REQUIRED', 'Select a registered instrument.');
+    if (id == null) return null;
+    if (typeof id !== 'string' || !id) throw error(422, 'QC_INSTRUMENT_INVALID', 'Select an active instrument in the run laboratory.');
     const instrument = await db.equipmentAsset.findUnique({ where: { id } });
-    if (!instrument) throw error(400, 'QC_INSTRUMENT_REQUIRED', 'Select a registered instrument.');
-    await scope(db, actor, instrument);
+    if (!instrument || instrument.status !== 'IN_SERVICE') throw error(422, 'QC_INSTRUMENT_INVALID', 'Select an active instrument in the run laboratory.');
+    try { await scope(db, actor, instrument); }
+    catch { throw error(422, 'QC_INSTRUMENT_INVALID', 'Select an active instrument in the run laboratory.'); }
     const [lab, instrumentLab] = await Promise.all([policyService.resolveLab(batch.labId, db), policyService.resolveLab(instrument.labId, db)]);
-    if (!lab || lab.id !== instrumentLab?.id) throw error(403, 'QC_INSTRUMENT_SCOPE_DENIED', 'Instrument must belong to the run laboratory.');
+    if (!lab || lab.id !== instrumentLab?.id) throw error(422, 'QC_INSTRUMENT_INVALID', 'Select an active instrument in the run laboratory.');
     return instrument;
 }
 async function nextOrdinal(db, labId, analysisCode, methodologyId) {
@@ -63,8 +65,10 @@ async function buildNativeRun(db, actor, input, { existingBatchId = null } = {})
         const lab = await policyService.resolveLab(previous?.labId || input.labId || actor.labId || items[0].assignedLab || items[0].labId || items[0].sample?.assignedLab, tx);
         if (!lab) throw error(400, 'QC_RUN_LAB_REQUIRED', 'Select a registered run laboratory.');
         await scope(tx, actor, { labId: lab.id });
-        const batch = { id: previous?.id || (typeof input.id === 'string' && input.id.trim() ? input.id.trim() : `BATCH-${randomUUID()}`), labId: lab.id };
-        const instrument = await instrumentFor(tx, batch, input.instrumentId || previous?.instrumentId, actor);
+        const batch = { id: previous?.id || (typeof input.id === 'string' && input.id.trim() ? input.id.trim() : `BATCH-${randomUUID()}`), labId: previous?.labId || lab.id };
+        const instrument = await instrumentFor(tx, batch, Object.hasOwn(input, 'instrumentId') ? input.instrumentId : previous?.instrumentId, actor);
+        const instrumentText = input.instrument ?? previous?.instrument ?? instrument?.name ?? 'Manual';
+        if (typeof instrumentText !== 'string') throw error(422, 'QC_INSTRUMENT_INVALID', 'Instrument name must be text.');
         const orderedItems = input.workItemIds.map(id => items.find(item => item.id === id));
         const actorLab = await policyService.resolveLab(actor.labId, tx);
         for (const item of orderedItems) {
@@ -75,6 +79,7 @@ async function buildNativeRun(db, actor, input, { existingBatchId = null } = {})
             const itemLab = await policyService.resolveLab(item.assignedLab || item.labId || item.sample?.assignedLab, tx);
             if (itemLab?.id !== lab.id) throw error(403, 'QC_WORK_ITEM_SCOPE_DENIED', 'Work items must belong to the run laboratory.');
             if (item.batchId && item.batchId !== previous?.id) throw error(409, 'QC_WORK_ITEM_ALREADY_BATCHED', 'A work item already belongs to a run.', { workItemId: item.id });
+            if (['SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(item.status)) throw error(400, 'QC_WORK_ITEM_SEALED', 'A sealed work item cannot be attached to a run.', { workItemId: item.id, status: item.status });
         }
         const codes = [...new Set(orderedItems.map(item => item.analysis))];
         const removedBound = previous?.analytes.find(row => !codes.includes(row.analysisCode) &&
@@ -114,16 +119,16 @@ async function buildNativeRun(db, actor, input, { existingBatchId = null } = {})
         if (previous) {
             await replaceUnmeasuredPositions(tx, previous, sequence, input.workItemIds);
             await tx.batchAnalyte.deleteMany({ where: { batchId: batch.id, analysisCode: { notIn: codes } } });
-            await tx.batch.update({ where: { id: batch.id }, data: { analysis: selections[0].analysisCode, instrumentId: instrument.id, instrument: instrument.name,
+            await tx.batch.update({ where: { id: batch.id }, data: { analysis: selections[0].analysisCode, instrumentId: instrument?.id || null, instrument: instrumentText,
                 ...(input.notes !== undefined && { notes: input.notes }) } });
-        } else await tx.batch.create({ data: { ...batch, analysis: selections[0].analysisCode, instrumentId: instrument.id, instrument: instrument.name,
+        } else await tx.batch.create({ data: { ...batch, analysis: selections[0].analysisCode, instrumentId: instrument?.id || null, instrument: instrumentText,
             status: 'OPEN', createdBy: performedBy, createdAt: now, notes: input.notes || '', maxCapacity: null,
             qcResults: null, workItemIds: null, history: null, disposition: null } });
         for (const analyte of analyses) {
             const existing = previous?.analytes.find(row => row.analysisCode === analyte.analysisCode);
             const data = { methodologyId: analyte.methodologyId, methodResolution: analyte.methodResolution, status: 'OPEN', provenance: 'NATIVE' };
             if (existing) await tx.batchAnalyte.update({ where: { id: existing.id }, data });
-            else await tx.batchAnalyte.create({ data: { id: randomUUID(), batchId: batch.id, labId: lab.id, analysisCode: analyte.analysisCode, ...data } });
+            else await tx.batchAnalyte.create({ data: { id: randomUUID(), batchId: batch.id, labId: batch.labId, analysisCode: analyte.analysisCode, ...data } });
         }
         for (const position of sequence.positions) {
             if (sequence.rebuild?.retainedPositionIds.includes(position.id)) await tx.batchPosition.update({ where: { id: position.id }, data: { position: position.position } });
@@ -153,6 +158,7 @@ async function startNativeRun(db, batchId, actor, input = {}) {
         if (!batch.analytes.length || batch.analytes.some(row => row.provenance !== 'NATIVE')) throw error(409, 'QC_NATIVE_RUN_REQUIRED', 'This start flow requires a native run.');
         if (batch.status !== 'OPEN') throw error(409, 'QC_BATCH_LOCKED', 'The run must be OPEN before it starts.');
         if (batch.startedAt) {
+            if (input.instrumentId !== undefined && input.instrumentId !== batch.instrumentId) throw error(409, 'QC_INSTRUMENT_FROZEN', 'Started instrument identity is frozen.');
             if (batch.analytes.some(row => !row.criteriaSnapshot || !row.crmOrdinal)) throw error(409, 'QC_SEQUENCE_STALE', 'The started run lacks its frozen criteria.');
             const statuses = [];
             for (const row of batch.analytes) {
@@ -164,22 +170,24 @@ async function startNativeRun(db, batchId, actor, input = {}) {
             await tx.batchEvent.create({ data: { id: randomUUID(), batchId: batch.id, type: 'RUN_RESUMED', by: performedBy, at: new Date(), payload: JSON.stringify({ firstStartedAt: batch.startedAt }) } });
             return batchApiView(await tx.batch.findUnique({ where: { id: batch.id }, include: QC_RUN_INCLUDE }));
         }
-        const instrument = await instrumentFor(tx, batch, input.instrumentId || batch.instrumentId, actor);
         if (!await tx.user.findUnique({ where: { username: performedBy }, select: { username: true } })) throw error(400, 'QC_ANALYST_REQUIRED', 'The analyst must be a registered user.');
         const analyses = [];
         for (const row of batch.analytes) analyses.push({ ...await resolveSequenceCriteria(batch.labId, row.analysisCode, row.methodologyId, tx),
             crmOrdinal: await nextOrdinal(tx, batch.labId, row.analysisCode, row.methodologyId) });
+        const instrument = await instrumentFor(tx, batch, Object.hasOwn(input, 'instrumentId') ? input.instrumentId : batch.instrumentId, actor);
+        if (!instrument && analyses.some(row => row.calibrationVerification)) throw error(422, 'QC_INSTRUMENT_REQUIRED', 'Calibration verification requires a registered instrument.');
         const validated = validateRunSequence({ positions: batch.positions, analyses });
         const now = new Date(), changed = await tx.batch.updateMany({ where: { id: batch.id, status: 'OPEN', startedAt: null },
-            data: { startedAt: now, analystUsername: performedBy, instrumentId: instrument.id, status: aggregateBatchStatus(['IN_RUN'], { startedAt: now }) } });
+            data: { startedAt: now, analystUsername: performedBy, instrumentId: instrument?.id || null, status: aggregateBatchStatus(['IN_RUN'], { startedAt: now }) } });
         if (changed.count !== 1) throw error(409, 'QC_SEQUENCE_STALE', 'The run changed before first start.');
         for (const row of batch.analytes) {
             const criteria = validated.forecasts.find(forecast => forecast.analysisCode === row.analysisCode);
             await tx.batchAnalyte.update({ where: { id: row.id }, data: { status: 'IN_RUN', crmOrdinal: criteria.crmOrdinal,
-                policyVersion: criteria.policyVersion, qcRuleId: criteria.qcRule.id, qcRuleVersion: criteria.qcRule.version, criteriaSnapshot: JSON.stringify(criteria) } });
+                policyVersion: criteria.policyVersion, qcRuleId: criteria.qcRule.id, qcRuleVersion: criteria.qcRule.version,
+                criteriaSnapshot: JSON.stringify({ ...criteria, instrumentId: instrument?.id || null, instrumentText: batch.instrument }) } });
         }
         await tx.batchEvent.create({ data: { id: randomUUID(), batchId: batch.id, type: 'RUN_STARTED', by: performedBy, at: now,
-            payload: JSON.stringify({ positions: validated.positions, instrumentId: instrument.id,
+            payload: JSON.stringify({ positions: validated.positions, instrumentId: instrument?.id || null, instrumentText: batch.instrument,
                 crmOrdinals: analyses.map(row => ({ analysisCode: row.analysisCode, crmOrdinal: row.crmOrdinal })) }) } });
         return batchApiView(await tx.batch.findUnique({ where: { id: batch.id }, include: QC_RUN_INCLUDE }));
     });
@@ -189,4 +197,4 @@ async function rebuildNativeRun(db, batchId, actor, input) {
     return buildNativeRun(db, actor, input, { existingBatchId: batchId });
 }
 
-module.exports = { buildNativeRun, rebuildNativeRun, startNativeRun };
+module.exports = { buildNativeRun, rebuildNativeRun, startNativeRun, instrumentFor };

@@ -7,7 +7,7 @@ const { hasQcPayload, emptyQcPayload, nativeInput } = require('./qcRunApiInputSe
 const { writeNativeMeasurements } = require('./qcNativeMeasurementService');
 const { writeCompatibilityMeasurements, reopenCompatibilityRun } = require('./qcCompatibilityRunService');
 const { reopenNativeRun } = require('./qcNativeLifecycleService');
-const { startNativeRun } = require('./qcNativeRunService');
+const { startNativeRun, instrumentFor } = require('./qcNativeRunService');
 const { flagBatchResults } = require('./qcService');
 const failure = (statusCode, code, message) => Object.assign(new Error(message), { statusCode, code });
 const isNative = batch => batch.analytes.length > 0 && batch.analytes.every(row => row.provenance === 'NATIVE');
@@ -32,6 +32,20 @@ async function mutateQcRun(db, batchId, actor, input = {}, { explicit = false, c
         }
         const reopen = accepted && (['OPEN', 'RUNNING'].includes(requested) || clear);
         if (reopen && payload && !clear) throw failure(409, 'QC_REOPEN_SEPARATE_EVALUATION', 'Reopen the batch before submitting new QC measurements.');
+        if (input.instrumentId !== undefined) {
+            if (batch.startedAt && input.instrumentId !== batch.instrumentId) throw failure(409, 'QC_INSTRUMENT_FROZEN', 'Started instrument identity is frozen.');
+            if (!batch.startedAt) {
+                if (batch.status !== 'OPEN') throw failure(409, 'QC_BATCH_LOCKED', 'Select the instrument while the run is OPEN.');
+                const instrument = await instrumentFor(tx, batch, input.instrumentId, actor);
+                await tx.batch.update({ where: { id: batchId }, data: { instrumentId: instrument?.id || null } });
+                batch.instrumentId = instrument?.id || null;
+            }
+        }
+        if (native && !batch.startedAt && input.instrument !== undefined) {
+            if (typeof input.instrument !== 'string') throw failure(422, 'QC_INSTRUMENT_INVALID', 'Instrument name must be text.');
+            await tx.batch.update({ where: { id: batchId }, data: { instrument: input.instrument } });
+            batch.instrument = input.instrument;
+        }
         let evaluation = null;
         if (reopen) {
             batch = native ? await reopenNativeRun(tx, batchId, actor, input.reason)

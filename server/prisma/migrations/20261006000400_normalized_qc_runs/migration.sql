@@ -362,6 +362,14 @@ BEGIN
   SELECT RAISE(ABORT, 'BATCH_MEMBERSHIP_FROZEN');
 END;
 
+CREATE TRIGGER "WorkItem_batch_membership_insert_guard" BEFORE INSERT ON "WorkItem"
+WHEN NEW.batchId IS NOT NULL AND (EXISTS (SELECT 1 FROM "Batch" b WHERE b.id=NEW.batchId AND b.startedAt IS NOT NULL)
+  OR EXISTS (SELECT 1 FROM "BatchAnalyte" a WHERE a.batchId=NEW.batchId AND a.legacyMembershipFrozen=1)
+  OR EXISTS (SELECT 1 FROM "QcMeasurement" q WHERE q.batchId=NEW.batchId))
+BEGIN
+  SELECT RAISE(ABORT, 'BATCH_MEMBERSHIP_FROZEN');
+END;
+
 CREATE TRIGGER "BatchPositionReference_insert_guard" BEFORE INSERT ON "BatchPositionReference"
 WHEN NEW.serviceStatus NOT IN ('SERVED','NOT_SERVED') OR NEW.supersededById IS NOT NULL
   OR (NEW.serviceStatus='SERVED' AND (NEW.referenceSnapshot IS NULL OR NOT json_valid(NEW.referenceSnapshot)))

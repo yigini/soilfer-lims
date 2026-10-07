@@ -21,8 +21,8 @@ const QC_RULE_LOADER = 'services/qcRuleMigrationSource.js';
 const QC_RULE_LOADER_SHA256 = '222ad51af3fe26ea4bddb9e4d522898857c0ec15f31295c0ce5f81b5dbc487fa';
 const QC_RULE_SQL_SHA256 = '4ee7f414ae3e6228faf52fe81d32bde2bdaf6ecb975ca62a438494db42e58b06';
 const QC_RUN_LOADER = 'services/qcRunMigrationSource.js';
-const QC_RUN_LOADER_SHA256 = '71e8ba62a836feec803ef100085e51208b43dd7dc044ca8118677affd750dc16';
-const QC_RUN_SQL_SHA256 = '87982e2bb6db9ee7d1b67e01192574c6d6d2465a5ece0997f6599049cdadb89d';
+const QC_RUN_LOADER_SHA256 = '97a09d0b972146a7f9dd71eee57449e974337ac50cbbf3154169ea551d0312c0';
+const QC_RUN_SQL_SHA256 = '568a463fb60554d99983fa01336ca799acb43eb591de8e20268b0e020f8d340a';
 const WORKFLOW_SOURCES = Object.freeze({
     evidence: { directory: '20261005000000_workflow_state_evidence', sha256: 'ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552' },
     guards: { directory: '20261005000100_workflow_state_guards', sha256: '84921ef45fa8609621b38908de5261d716820f2135f2dde1b9a20fafa6fc81ed' }

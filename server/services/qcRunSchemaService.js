@@ -34,7 +34,7 @@ function classifyQcRunSchema(db, source) {
     });
     const indexes = [...source.sql.matchAll(/^CREATE (?:UNIQUE )?INDEX "([^"]+)"[\s\S]*?;/gm)].map(match => ({ name: match[1], sql: match[0] }));
     const guards = [...source.sql.matchAll(/^CREATE TRIGGER "([^"]+)"[\s\S]*?^END;/gm)].map(match => ({ name: match[1], sql: match[0] }));
-    if (indexes.length !== 14 || guards.length !== 42) throw fail('QC_RUN_SOURCE_MISMATCH', 'Normalized QC release needs fourteen indexes and forty-two guards.');
+    if (indexes.length !== 14 || guards.length !== 43) throw fail('QC_RUN_SOURCE_MISMATCH', 'Normalized QC release needs fourteen indexes and forty-three guards.');
     function present(wanted, type) {
         const actual = db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(wanted.name);
         if (actual && (actual.type !== type || normalized(actual.sql) !== normalized(wanted.sql))) differences.push(`${wanted.name} differs`);

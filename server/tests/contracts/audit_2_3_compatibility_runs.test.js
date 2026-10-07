@@ -15,6 +15,7 @@ const { QC_RUN_INCLUDE, batchApiView, readQcRun } = require('../../services/qcRu
 const policies = require('../../services/policyService');
 const request = require('supertest');
 const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const owned = [];
 const input = (blank = 0.0123456789) => ({ blanks: [{ value: blank }], controls: [{ expected: 7.123456789, measured: 7.123456780 }],
     duplicates: [{ value1: 2.123456789, value2: 2.123456780 }, { value1: 2.123456789, value2: 2.123456780 }] });
@@ -103,6 +104,35 @@ test('actual compatibility PUT and evaluate routes retain pass/reopen/resubmit c
         const raw = await f.db.batch.findUnique({ where: { id } });
         for (const key of ['qcResults', 'workItemIds', 'disposition', 'history']) expect(raw[key]).toBeNull();
         expect(await f.db.batchQcResult.count()).toBe(0);
+    });
+});
+
+test('actual unresolved profile membership retains reserved-slot, explicit rack and removal behavior using real SAMPLE joins', async () => {
+    const f = await fixture();
+    await f.db.user.update({ where: { id: f.actor.id }, data: { role: 'LAB_MANAGER', labId: f.labId } });
+    const ids = [];
+    for (let index = 0; index < 2; index++) {
+        const sampleId = randomUUID();
+        await createSampleFixture(f.db, { data: { id: sampleId, originalId: sampleId, assignedLab: f.labId, status: 'PROCESSING' } });
+        const item = await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId, labId: f.labId, assignedLab: f.labId, analysis: f.analysisCode, status: 'ASSIGNED' } }); ids.push(item.id);
+    }
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const auth = { Authorization: `Bearer ${token}` }, id = f.batch.id;
+        const available = Array.from({ length: f.batch.runProfile.capacity }, (_, index) => index + 1).filter(position => !f.batch.runProfile.qcSlots.some(slot => slot.position === position));
+        const before = await evidence(f.db);
+        const reserved = await request(app).post(`/api/qc/batches/${id}/items`).set(auth).send({ workItemIds: [ids[0]], rackPositions: { [ids[0]]: f.batch.runProfile.qcSlots[0].position } });
+        expect(reserved.status).toBe(400); expect(reserved.body.code).toBe('QC_RACK_POSITION_RESERVED'); expect(await evidence(f.db)).toEqual(before);
+        const duplicate = await request(app).post(`/api/qc/batches/${id}/items`).set(auth).send({ workItemIds: ids, rackPositions: { [ids[0]]: available[0], [ids[1]]: available[0] } });
+        expect(duplicate.status).toBe(400); expect(duplicate.body.code).toBe('QC_RACK_POSITION_DUPLICATE'); expect(await evidence(f.db)).toEqual(before);
+        const added = await request(app).post(`/api/qc/batches/${id}/items`).set(auth).send({ workItemIds: ids, rackPositions: { [ids[0]]: available[0], [ids[1]]: available[1] } });
+        expect(added.status).toBe(200); expect(added.body.positions).toEqual({ [ids[0]]: available[0], [ids[1]]: available[1] });
+        expect(added.body.batch.analytes[0].provenance).toBe('PROFILE_ONLY'); expect(await f.db.batchPositionWorkItem.count()).toBe(2);
+        const removed = await request(app).delete(`/api/qc/batches/${id}/items`).set(auth).send({ workItemIds: [ids[0]] });
+        expect(removed.status).toBe(200); expect(removed.body.remaining).toBe(1); expect(await f.db.batchPositionWorkItem.count()).toBe(1);
+        expect(await f.db.workItem.findUnique({ where: { id: ids[0] } })).toMatchObject({ batchId: null, rackPosition: null });
+        expect(await f.db.workItem.findUnique({ where: { id: ids[1] } })).toMatchObject({ batchId: id, rackPosition: available[1] });
+        const raw = await f.db.batch.findUnique({ where: { id } }); expect(raw.workItemIds).toBeNull();
+        const detail = await request(app).get(`/api/qc/batches/${id}`).set(auth); expect(JSON.parse(detail.body.data.workItemIds)).toEqual([ids[1]]);
     });
 });
 

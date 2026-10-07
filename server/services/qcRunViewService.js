@@ -127,7 +127,7 @@ async function readQcRun(db, batchId, actor, options = {}) {
     if (!batch) throw Object.assign(new Error('Batch not found.'), { statusCode: 404, code: 'BATCH_NOT_FOUND' });
     const [actorLab, targetLab] = db.lab ? await Promise.all([policyService.resolveLab(actor.labId, db), policyService.resolveLab(batch.labId, db)]) : [];
     try { scopeGuard.ensureScope({ ...actor, labId: actorLab?.id || actor.labId }, { ...batch, labId: targetLab?.id || batch.labId }, { labField: 'labId', altLabField: null }); }
-    catch (error) { error.code = error.code || 'QC_BATCH_SCOPE_DENIED'; throw error; }
+    catch (error) { error.code = error.code || 'QC_BATCH_SCOPE_DENIED'; if (error.statusCode === 403) error.message = 'Access denied: Batch outside your laboratory scope'; throw error; }
     return batchApiView(batch, options);
 }
 module.exports = { QC_RUN_INCLUDE, currentAnalyteEvidence, batchApiView, readQcRun };
