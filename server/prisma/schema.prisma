@@ -1148,6 +1148,7 @@ model Result {
   enteredBy     String?
   analysedAt    DateTime?
   equipmentId   String?
+  equipmentReadiness String? // Insert-only frozen commit-time equipment evidence (#189).
   batchId       String?
   attemptId     String?   // Additive scalar; reference-preserving triggers enforce integrity.
   createdAt     DateTime  @default(now())

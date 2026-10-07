@@ -30,9 +30,14 @@ try {
     console.log(JSON.stringify({ event: 'QC_RULE_STARTUP_READY', ...qcRulesReady }));
     const qcRunsReady = require('./scripts/install_qc_runs').assertQcRunStartupReady(dbPath);
     console.log(JSON.stringify({ event: 'QC_RUN_STARTUP_READY', ...qcRunsReady }));
+    const ptReady = require('./scripts/install_proficiency_evidence').assertProficiencyStartupReady(dbPath);
+    console.log(JSON.stringify({ event: 'PT_STARTUP_READY', ...ptReady }));
+    const equipmentReady = require('./scripts/install_result_equipment_evidence').assertResultEquipmentStartupReady(dbPath);
+    console.log(JSON.stringify({ event: 'RESULT_EQUIPMENT_STARTUP_READY', ...equipmentReady }));
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
-        nextStep: error.code?.startsWith('QC_RUN_') ? 'Keep the lab stopped and follow docs/audit-2.3-normalized-qc-migration.md.'
+        nextStep: error.code?.startsWith('PT_') || error.code?.startsWith('RESULT_EQUIPMENT_') ? 'Keep the lab stopped and follow docs/audit/2.6-qc-audit-pt-equipment.md.'
+            : error.code?.startsWith('QC_RUN_') ? 'Keep the lab stopped and follow docs/audit-2.3-normalized-qc-migration.md.'
             : error.code?.startsWith('SAMPLE_HOLD_') ? 'Keep the lab stopped and follow docs/audit/1.6-sample-holds.md.'
             : error.code?.startsWith('REFERENCE_') ? 'Keep the lab stopped and follow docs/audit/2.1-reference-materials.md.'
             : error.code?.startsWith('QC_RULE_') ? 'Keep the lab stopped and follow docs/audit/2.2-qc-rules.md.'

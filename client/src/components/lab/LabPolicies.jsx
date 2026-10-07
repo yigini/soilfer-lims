@@ -82,6 +82,10 @@ export default function LabPolicies({ labId }) {
         if (definition.type === 'westgard') return `${t('policies.reject')}: ${value.reject.join(', ') || '—'}; ${t('policies.warn')}: ${value.warn.join(', ') || '—'}`;
         if (definition.type === 'runProfiles') return Object.values(value).map(p => `${p.name} (${p.capacity})`).join('; ');
         if (definition.type === 'qcFailAction') return Object.entries(value).map(([type, action]) => `${t(`qcRules.types.${type}`)}: ${t(`qcRules.actions.${action}`)}`).join('; ');
+        if (definition.type === 'equipmentReadinessMap') return Object.entries(value).map(([criticality, action]) =>
+            `${t(`policies.criticality.${criticality}`)}: ${t(`policies.options.${action}`)}`).join('; ');
+        if (definition.type === 'ptZScoreLimits') return Object.entries(value).map(([boundary, limit]) =>
+            `${t(`policies.ptLimits.${boundary}`)}: ${limit}`).join('; ');
         if (definition.key === 'numbers.thousandsSeparator' && value === ' ') return t('numbers.space');
         return definition.type === 'enum' ? t(`policies.options.${value}`, value) : String(value);
     };

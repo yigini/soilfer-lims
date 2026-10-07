@@ -550,7 +550,7 @@ exports.getQueue = async (req, res) => {
                     category: categoryName,
                     unit: operationalChecklists[code] ? null : meta.unit || null,
                     validation: meta.validation || null,
-                    equipmentRequired: equipReqMap[equipKey]?.isRequired || false,
+                    equipmentRequired: false,
                     eligibleEquipment,
                     items: []
                 };
@@ -564,6 +564,7 @@ exports.getQueue = async (req, res) => {
                 asset: assetMap[selectedEquipId],
                 selectedEquipmentId: selectedEquipId
             });
+            groupsMap[code].equipmentRequired ||= readiness.equipmentRequired;
 
             const isSpectral = SPECTRAL_ACQUISITION_CODES.includes(code);
             const modality = (code === 'SPEC_MIR' || code === 'SPEC_FTIR') ? 'MIR' : 'NIR';
@@ -596,7 +597,7 @@ exports.getQueue = async (req, res) => {
                 currentUnit: resultMap[resultKey]?.unit || null,
                 previousResult: operationalChecklists[code] ? null : resultMap[resultKey] || null,
                 equipmentId: item.equipmentId || null,
-                equipmentRequired: equipReqMap[equipKey]?.isRequired || false,
+                equipmentRequired: readiness.equipmentRequired,
                 dryingStatus: item.sample?.dryingStatus || 'PENDING',
                 preparationStatus: item.sample?.preparationStatus || 'PENDING',
                 sampleStatus: item.sample?.status || null,
@@ -794,7 +795,7 @@ exports.batchSave = async (req, res) => {
             if (!executionReadiness.isReady) {
                 if (executionReadiness.blockers.includes('GATE_STATE_MISMATCH')) throw new stateRules.TransitionError(
                     executionReadiness.reasons.join('; '), 409, 'GATE_STATE_MISMATCH');
-                errors.push({ workItemId: entry.workItemId, error: executionReadiness.reasons.join('; '), code: 'EXECUTION_BLOCKED' });
+                errors.push({ workItemId: entry.workItemId, error: executionReadiness.reasons.join('; '), code: executionReadiness.equipmentBlocked ? 'EQUIPMENT_NOT_READY' : 'EXECUTION_BLOCKED' });
                 continue;
             }
             if (isOperationalTask && entry.value != null && entry.value !== '') {
@@ -1030,28 +1031,8 @@ exports.batchSave = async (req, res) => {
                     }
                 }
 
-                // ─── Fix 2b: Equipment validation (prefetched) ───
-                const equipLabId = sample.assignedLab || sample.labId;
-                const equipKey = `${equipLabId}::${item.analysis}`;
-                const equipReq = equipReqMap[equipKey];
-
-                if (entry.equipmentId) {
-                    const asset = assetMap[entry.equipmentId];
-                    if (!asset || asset.status !== 'IN_SERVICE') {
-                        errors.push({ workItemId: entry.workItemId, error: 'Selected equipment is not available (out of service or not found)' });
-                        continue;
-                    }
-                    // Verify it's in the eligible set
-                    if (equipReq && equipReq.eligibleIds.length > 0 && !equipReq.eligibleIds.includes(entry.equipmentId)) {
-                        errors.push({ workItemId: entry.workItemId, error: 'Selected equipment is not eligible for this analysis method' });
-                        continue;
-                    }
-                } else {
-                    if (equipReq?.isRequired && item.category !== 'Operational Gates' && item.category !== 'Post-Analytical') {
-                        errors.push({ workItemId: entry.workItemId, error: `Equipment required for ${item.analysis} — select an instrument before completing` });
-                        continue;
-                    }
-                }
+                // Equipment policy and method specificity use the shared
+                // readiness decision above and are re-read inside result writes.
 
                 // Block completion if value is empty
                 if (value === null || value === undefined || value === '') {
@@ -1153,7 +1134,8 @@ exports.batchSave = async (req, res) => {
                         const sourceResults = await tx.result.findMany({ where: { attemptId }, select: { id: true } });
                         await tx.workAttempt.update({ where: { id: attemptId }, data: { evidenceData: JSON.stringify({
                             fractions: textureClassification.fractions, className: texture.value,
-                            closureError: textureClassification.closureError, sourceResultIds: sourceResults.map(row => row.id)
+                            closureError: textureClassification.closureError, sourceResultIds: sourceResults.map(row => row.id),
+                            equipmentReadiness: texture.equipmentReadiness == null ? null : JSON.parse(texture.equipmentReadiness)
                         }) } });
                     } else {
                         await writeResult(tx, { sampleId: item.sampleId, workItemId: item.id, actor: user, measurement, now });
@@ -1230,7 +1212,7 @@ exports.batchSave = async (req, res) => {
                 await commitBundles(operationBundles);
             } catch (txError) {
                 // ─── Fix 3: Handle version conflict (P2025 = record not found) ───
-                if (['P2025', 'VERSION_CONFLICT', 'WORKITEM_STATE_CHANGED'].includes(txError.code)) {
+                if (['P2025', 'VERSION_CONFLICT', 'WORKITEM_STATE_CHANGED', 'EQUIPMENT_NOT_READY'].includes(txError.code)) {
                     // Determine which items had version conflicts
                     // Re-run individually to identify conflicts
                     const verifiedResults = [];

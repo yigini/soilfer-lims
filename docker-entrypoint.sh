@@ -150,6 +150,12 @@ else
     node scripts/install_qc_runs.js --apply
 fi
 
+# Install nullable PT evidence only. Legacy sigma/NCR backfill remains a
+# separate reviewed command; startup never approves its own backfill plan.
+echo "📦 Installing proficiency evidence..."
+node scripts/install_proficiency_evidence.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+node scripts/install_result_equipment_evidence.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."
 exec node index.js

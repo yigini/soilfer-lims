@@ -30,3 +30,5 @@ server/prisma/migrations/20261006000400_normalized_qc_runs/fresh-prisma-tables.j
 server/services/qcRunMigrationSource.js text eol=lf
 server/prisma/migrations/20261007000300_proficiency_evidence/migration.sql text eol=lf
 server/services/proficiencyMigrationSource.js text eol=lf
+server/prisma/migrations/20261007000400_result_equipment_evidence/migration.sql text eol=lf
+server/services/resultEquipmentMigrationSource.js text eol=lf

@@ -86,6 +86,7 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     if (methodId && !isAvailable(method, analysisCode, labId)) throw new TransitionError('Method belongs to another parameter or laboratory.', 409, 'RESULT_METHOD_MISMATCH');
     // #182 pin 6005018712: historical imports have no work to execute. An
     // existing canonical item must satisfy the same commit rules as every path.
+    let equipmentReadiness = null;
     if (!importing || item) {
         require('./resultEvidenceService').assertAmendable(sample);
         if (item) {
@@ -94,7 +95,8 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
             }
             item = { ...item, sample, equipmentId: measurement.equipmentId || item.equipmentId };
             const ready = await evaluateExecutionReadiness(tx, item, actor);
-            if (!ready.isReady) throw new TransitionError(ready.reasons.join('; '), 409, ready.blockers[0] || 'EXECUTION_BLOCKED');
+            if (!ready.isReady) throw new TransitionError(ready.reasons.join('; '), 409, ready.equipmentBlocked ? 'EQUIPMENT_NOT_READY' : ready.blockers[0] || 'EXECUTION_BLOCKED');
+            equipmentReadiness = ready.equipmentSnapshot;
         } else if (!parseJson(sample.requiredAnalyses, []).includes(measurement.param) &&
             !(source === 'derived' && measurement.param === 'TEXTURE' &&
                 FRACTIONS.every(param => parseJson(sample.requiredAnalyses, []).includes(param)))) {
@@ -103,7 +105,7 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     }
     return { sample, item, attemptId, batchId, replicateNo, performedBy, labId, methodId, analysis, method, source,
         basis: ['AIR_DRY', 'OVEN_DRY', 'FIELD_MOIST'].includes(measurement.basis) ? measurement.basis : 'AIR_DRY',
-        equipmentId: measurement.equipmentId || item?.equipmentId || null };
+        equipmentId: measurement.equipmentId || item?.equipmentId || null, equipmentReadiness };
 }
 
 async function appendResult(tx, ctx, measurement, values, now) {
@@ -115,6 +117,7 @@ async function appendResult(tx, ctx, measurement, values, now) {
         row = await tx.result.create({ data: { id, sampleId: ctx.sample.id, param: measurement.param,
             ...values, basis: ctx.basis, methodologyId: ctx.methodId, replicateNo: ctx.replicateNo,
             isCurrent: true, enteredBy: ctx.performedBy, analysedAt: now, equipmentId: ctx.equipmentId,
+            equipmentReadiness: ctx.equipmentReadiness ? JSON.stringify(ctx.equipmentReadiness) : null,
             batchId: ctx.batchId, attemptId: ctx.attemptId, createdAt: now, updatedAt: now } });
     } catch (error) { throw mapResultWriteError(error); }
     await tx.auditLog.create({ data: { id: randomUUID(), entity: 'RESULT', entityId: row.id, action: 'RESULT_RECORDED',
@@ -279,7 +282,9 @@ async function createResultFixture(db, args) {
     // helper never changes that historical schema or invents a link/value.
     const fields = require('../prisma_client').Prisma.dmmf.datamodel.models.find(model => model.name === 'Result').fields.filter(field => field.kind !== 'object').map(field => field.name);
     const missing = fields.filter(field => !columns.some(column => column.name === field));
-    if (missing.length && JSON.stringify(missing) !== '["attemptId"]') throw new TransitionError('Unknown historical result fixture shape.', 409, 'WORKFLOW_FIXTURE_REFUSED');
+    if (missing.length && !['["attemptId"]', '["equipmentReadiness"]', '["equipmentReadiness","attemptId"]'].includes(JSON.stringify(missing))) {
+        throw new TransitionError('Unknown historical result fixture shape.', 409, 'WORKFLOW_FIXTURE_REFUSED');
+    }
     const select = missing.length && !args.select && !args.include ? Object.fromEntries(fields.filter(field => !missing.includes(field)).map(field => [field, true])) : args.select;
     return db.result.create({ ...args, ...(select && { select }) });
 }

@@ -173,7 +173,7 @@ function beforeGuards(options) {
         // Require that exact historical gap; all other completeness checks stay.
         if (schemaVariant !== null) {
             const beforeSequence = expected.findIndex(row => row.table === 'LabSequence');
-            expected.splice(beforeSequence < 0 ? expected.length : beforeSequence, 0, { table: 'Result', fields: ['attemptId'] });
+            expected.splice(beforeSequence < 0 ? expected.length : beforeSequence, 0, { table: 'Result', fields: ['equipmentReadiness', 'attemptId'] });
             // #183 adds exactly these nullable history fields and one table.
             // Literal historical schemas remain unchanged; unexpected gaps fail.
             const cancellationFields = ['cancellationCode', 'cancellationReason', 'cancelledBy', 'cancelledAt'];
