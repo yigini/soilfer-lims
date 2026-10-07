@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
 const DIRECTORY = '20261006000400_normalized_qc_runs';
-const SHA256 = '640811039e7cb89088f2a2156cee7a843b2865635d2f6222521167799c8161a4';
+const SHA256 = 'ad8340b22930d9e0d10aa8e0818118d0176ab1d73860eb0f5afd91be283c01f9';
 const ORACLE_SHA256 = '738b46a3ebd65d0ee204ed6f24bf92e9018b0ed3d40c28110194b49a24efde7f';
 function loadQcRunMigrationSource() {
     const root = path.resolve(__dirname, '..', fs.existsSync('/.dockerenv') ? '.migrations-backup/186' : 'prisma/migrations', DIRECTORY);

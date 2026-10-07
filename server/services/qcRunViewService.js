@@ -36,6 +36,10 @@ function currentAnalyteEvidence(batch, analysisCode = batch.analysis) {
         if (row.kind === 'SAMPLE') return (row.workItems || []).some(link => link.analysisCode === analysisCode);
         if (isolatedRound) return selectedPositions.has(row.id);
         if (row.kind === 'DUPLICATE' && row.duplicateOfPositionId) return serves((batch.positions || []).find(parent => parent.id === row.duplicateOfPositionId) || { kind: 'SAMPLE' });
+        // Retained extras are visible through their immutable placement, even
+        // after a pre-start rebuild no longer requires that position kind.
+        if (row.provenance === 'NATIVE' && ((row.references || []).some(reference => reference.analysisCode === analysisCode && !reference.supersededById) ||
+            (batch.measurements || []).some(measurement => measurement.positionId === row.id && measurement.analysisCode === analysisCode))) return true;
         if (served.has(row.id)) return served.get(row.id).includes(analysisCode);
         return row.provenance === 'NATIVE' ? (batch.measurements || []).some(measurement => measurement.positionId === row.id && measurement.analysisCode === analysisCode)
             : (parsed(row.legacySource, {}).entry?.analysisCode || batch.analysis) === analysisCode;
@@ -80,7 +84,8 @@ function currentAnalyteEvidence(batch, analysisCode = batch.analysis) {
                 policyVersion: evaluation?.policyVersion ?? null, qcRule: evaluated?.qcRule ?? null, referenceSnapshot: row.referenceSnapshot ?? null }),
             referenceMaterialId: row.referenceMaterialId ?? null, referenceValueId: row.referenceValueId ?? null });
     }
-    return { analysisCode, evaluation, positions, measurements: current, qcResults: qcItems.length ? qcResults : null, qcItems,
+    return { analysisCode, result: evaluation?.verdict ?? null, evaluation, positions, measurements: current,
+        qcResults: qcItems.length || evaluation?.verdict === 'NOT_REQUIRED' ? { ...qcResults, result: evaluation?.verdict ?? null } : null, qcItems,
         disposition: currentDisposition(batch, evaluation, analysisCode) };
 }
 
@@ -111,7 +116,8 @@ function batchApiView(batch, { serialized = false } = {}) {
         workItemIds: serialized ? JSON.stringify(workItemIds) : workItemIds,
         disposition: serialized && current.disposition !== null ? JSON.stringify(current.disposition) : current.disposition,
         history: serialized ? JSON.stringify(history) : history,
-        positions: [...new Map(analytes.flatMap(row => row.positions).map(row => [row.id, row])).values()].sort((a, b) => a.position - b.position) };
+        positions: [...new Map([...analytes.flatMap(row => row.positions), ...(batch.positions || []).filter(row => row.provenance === 'NATIVE' && row.historicalSnapshotSeq == null)]
+            .map(row => [row.id, row])).values()].sort((a, b) => a.position - b.position) };
 }
 async function readQcRun(db, batchId, actor, options = {}) {
     const batch = await db.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE });

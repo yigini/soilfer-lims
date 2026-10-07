@@ -8,6 +8,7 @@ const { QC_RUN_INCLUDE, batchApiView } = require('./qcRunViewService');
 const { resolveSequenceCriteria, planRunSequence } = require('./batchSequenceService');
 const { validateRunSequence } = require('./qcRunSequenceValidation');
 const { prepareBuildBindings, applyPositionBindings } = require('./qcRunReferenceService');
+const { retainBoundPositions, replaceUnmeasuredPositions } = require('./qcRunRebuildService');
 const error = (statusCode, code, message, details = {}) => Object.assign(new Error(message), { statusCode, code, details });
 
 async function scope(db, actor, entity) {
@@ -43,18 +44,27 @@ async function transaction(db, execute) {
     }
 }
 
-async function buildNativeRun(db, actor, input) {
+async function buildNativeRun(db, actor, input, { existingBatchId = null } = {}) {
     const performedBy = permission(actor);
     if (!Array.isArray(input.workItemIds) || !input.workItemIds.length || input.workItemIds.some(id => typeof id !== 'string' || !id) ||
         new Set(input.workItemIds).size !== input.workItemIds.length) throw error(400, 'QC_WORK_ITEMS_REQUIRED', 'Select distinct work items.');
     return transaction(db, async tx => {
+        const previous = existingBatchId && await tx.batch.findUnique({ where: { id: existingBatchId }, include: QC_RUN_INCLUDE });
+        if (existingBatchId && !previous) throw error(404, 'BATCH_NOT_FOUND', 'Batch not found.');
+        if (previous) {
+            await scope(tx, actor, previous);
+            if (previous.startedAt || previous.measurements.length || previous.analytes.some(row => row.legacyMembershipFrozen)) {
+                throw error(409, 'BATCH_MEMBERSHIP_FROZEN', 'Started or measured membership cannot be rebuilt.');
+            }
+            if (previous.status !== 'OPEN') throw error(409, 'QC_BATCH_LOCKED', 'Only an OPEN run can be rebuilt.');
+        }
         const items = await tx.workItem.findMany({ where: { id: { in: input.workItemIds } }, include: { sample: true } });
         if (items.length !== input.workItemIds.length) throw error(404, 'WORKITEM_NOT_FOUND', 'One or more work items were not found.');
-        const lab = await policyService.resolveLab(input.labId || actor.labId || items[0].assignedLab || items[0].labId || items[0].sample?.assignedLab, tx);
+        const lab = await policyService.resolveLab(previous?.labId || input.labId || actor.labId || items[0].assignedLab || items[0].labId || items[0].sample?.assignedLab, tx);
         if (!lab) throw error(400, 'QC_RUN_LAB_REQUIRED', 'Select a registered run laboratory.');
         await scope(tx, actor, { labId: lab.id });
-        const batch = { id: typeof input.id === 'string' && input.id.trim() ? input.id.trim() : `BATCH-${randomUUID()}`, labId: lab.id };
-        const instrument = await instrumentFor(tx, batch, input.instrumentId, actor);
+        const batch = { id: previous?.id || (typeof input.id === 'string' && input.id.trim() ? input.id.trim() : `BATCH-${randomUUID()}`), labId: lab.id };
+        const instrument = await instrumentFor(tx, batch, input.instrumentId || previous?.instrumentId, actor);
         const orderedItems = input.workItemIds.map(id => items.find(item => item.id === id));
         const actorLab = await policyService.resolveLab(actor.labId, tx);
         for (const item of orderedItems) {
@@ -64,9 +74,12 @@ async function buildNativeRun(db, actor, input) {
                 assignedLab: sampleLab?.id || item.sample?.assignedLab, labId: sourceLab?.id || item.sample?.labId }, { labField: 'assignedLab', altLabField: 'labId' });
             const itemLab = await policyService.resolveLab(item.assignedLab || item.labId || item.sample?.assignedLab, tx);
             if (itemLab?.id !== lab.id) throw error(403, 'QC_WORK_ITEM_SCOPE_DENIED', 'Work items must belong to the run laboratory.');
-            if (item.batchId) throw error(409, 'QC_WORK_ITEM_ALREADY_BATCHED', 'A work item already belongs to a run.', { workItemId: item.id });
+            if (item.batchId && item.batchId !== previous?.id) throw error(409, 'QC_WORK_ITEM_ALREADY_BATCHED', 'A work item already belongs to a run.', { workItemId: item.id });
         }
         const codes = [...new Set(orderedItems.map(item => item.analysis))];
+        if (previous?.positions.some(position => (position.references || []).some(reference => !codes.includes(reference.analysisCode)))) {
+            throw error(409, 'QC_SEQUENCE_STALE', 'A bound analyte cannot disappear from an OPEN run without a defined retention policy.');
+        }
         let selections = input.analyses;
         if (selections === undefined) selections = codes.map(analysisCode => ({ analysisCode,
             ...((input.analysisCode || input.analysis) === analysisCode && input.methodologyId && { methodologyId: input.methodologyId }) }));
@@ -88,18 +101,29 @@ async function buildNativeRun(db, actor, input) {
         }
         const samples = [...new Map(orderedItems.map(item => [item.sampleId, { sampleId: item.sampleId,
             analysisCodes: orderedItems.filter(member => member.sampleId === item.sampleId).map(member => member.analysis) }])).values()];
-        const sequence = planRunSequence({ samples, analyses, seed: input.seed });
-        const now = new Date(), referencePlans = await prepareBuildBindings(tx, batch, sequence, selections, actor, now);
-        await tx.batch.create({ data: { ...batch, analysis: selections[0].analysisCode, instrumentId: instrument.id, instrument: instrument.name,
+        let sequence = planRunSequence({ samples, analyses, seed: input.seed });
+        if (previous) sequence = retainBoundPositions(sequence, previous);
+        const now = new Date(), referencePlans = await prepareBuildBindings(tx, batch, sequence, selections, actor, now, previous ? 'REBUILD_BEFORE_START' : null);
+        if (previous) {
+            await replaceUnmeasuredPositions(tx, previous, sequence, input.workItemIds);
+            await tx.batchAnalyte.deleteMany({ where: { batchId: batch.id, analysisCode: { notIn: codes } } });
+            await tx.batch.update({ where: { id: batch.id }, data: { analysis: selections[0].analysisCode, instrumentId: instrument.id, instrument: instrument.name,
+                ...(input.notes !== undefined && { notes: input.notes }) } });
+        } else await tx.batch.create({ data: { ...batch, analysis: selections[0].analysisCode, instrumentId: instrument.id, instrument: instrument.name,
             status: 'OPEN', createdBy: performedBy, createdAt: now, notes: input.notes || '', maxCapacity: null,
             qcResults: null, workItemIds: null, history: null, disposition: null } });
-        for (const analyte of analyses) await tx.batchAnalyte.create({ data: { id: randomUUID(), batchId: batch.id, labId: lab.id,
-            analysisCode: analyte.analysisCode, methodologyId: analyte.methodologyId, methodResolution: analyte.methodResolution, status: 'OPEN', provenance: 'NATIVE' } });
+        for (const analyte of analyses) {
+            const existing = previous?.analytes.find(row => row.analysisCode === analyte.analysisCode);
+            const data = { methodologyId: analyte.methodologyId, methodResolution: analyte.methodResolution, status: 'OPEN', provenance: 'NATIVE' };
+            if (existing) await tx.batchAnalyte.update({ where: { id: existing.id }, data });
+            else await tx.batchAnalyte.create({ data: { id: randomUUID(), batchId: batch.id, labId: lab.id, analysisCode: analyte.analysisCode, ...data } });
+        }
         for (const position of sequence.positions) {
-            await tx.batchPosition.create({ data: { id: position.id, batchId: batch.id, position: position.position, kind: position.kind,
+            if (sequence.rebuild?.retainedPositionIds.includes(position.id)) await tx.batchPosition.update({ where: { id: position.id }, data: { position: position.position } });
+            else await tx.batchPosition.create({ data: { id: position.id, batchId: batch.id, position: position.position, kind: position.kind,
                 sampleId: position.sampleId, duplicateOfPositionId: position.duplicateOfPositionId, provenance: 'NATIVE' } });
             if (position.kind === 'SAMPLE') for (const item of orderedItems.filter(row => row.sampleId === position.sampleId)) {
-                const changed = await tx.workItem.updateMany({ where: { id: item.id, batchId: null }, data: { batchId: batch.id, rackPosition: position.position } });
+                const changed = await tx.workItem.updateMany({ where: { id: item.id, batchId: item.batchId }, data: { batchId: batch.id, rackPosition: position.position } });
                 if (changed.count !== 1) throw error(409, 'QC_WORK_ITEM_ALREADY_BATCHED', 'A work item changed during the build.', { workItemId: item.id });
                 await tx.batchPositionWorkItem.create({ data: { id: randomUUID(), positionId: position.id, workItemId: item.id, analysisCode: item.analysis } });
             }
@@ -107,6 +131,7 @@ async function buildNativeRun(db, actor, input) {
         for (const plan of referencePlans) await applyPositionBindings(tx, plan);
         await tx.batchEvent.create({ data: { id: randomUUID(), batchId: batch.id, type: 'RUN_BUILT', by: performedBy, at: now,
             payload: JSON.stringify({ positions: sequence.positions, duplicateSelection: sequence.duplicateSelection, forecasts: sequence.forecasts,
+                ...(sequence.rebuild && { rebuild: sequence.rebuild }),
                 originalWorkItemMethods: orderedItems.map(item => ({ id: item.id, methodologyId: item.methodologyId })) }) } });
         return batchApiView(await tx.batch.findUnique({ where: { id: batch.id }, include: QC_RUN_INCLUDE }));
     });
@@ -153,4 +178,8 @@ async function startNativeRun(db, batchId, actor, input = {}) {
     });
 }
 
-module.exports = { buildNativeRun, startNativeRun };
+async function rebuildNativeRun(db, batchId, actor, input) {
+    return buildNativeRun(db, actor, input, { existingBatchId: batchId });
+}
+
+module.exports = { buildNativeRun, rebuildNativeRun, startNativeRun };

@@ -463,7 +463,7 @@ BEGIN
 END;
 
 CREATE TRIGGER "QcEvaluation_insert_guard" BEFORE INSERT ON "QcEvaluation"
-WHEN NEW.verdict NOT IN ('PASS','WARN','FAIL','INCOMPLETE') OR NOT json_valid(NEW.details)
+WHEN NEW.verdict NOT IN ('PASS','WARN','FAIL','INCOMPLETE','NOT_REQUIRED') OR NOT json_valid(NEW.details)
   OR typeof(NEW.version)<>'integer' OR NEW.version<>(SELECT COALESCE(MAX(q.version),0)+1 FROM "QcEvaluation" q WHERE q.batchId=NEW.batchId AND q.analysisCode=NEW.analysisCode)
   OR NOT EXISTS (SELECT 1 FROM "BatchAnalyte" a WHERE a.batchId=NEW.batchId AND a.analysisCode=NEW.analysisCode)
   OR (NEW.version=1 AND NEW.supersedesId IS NOT NULL)

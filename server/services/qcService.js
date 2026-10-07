@@ -427,7 +427,7 @@ function isInvalidOnlyByQcFailure(result) {
         !flags.includes('QC_BATCH_REJECTED') && !flags.includes('QC_BATCH_REANALYZE_REQUESTED');
 }
 
-async function flagBatchResults(prismaClient, batchId, status, disposition = null) {
+async function flagBatchResults(prismaClient, batchId, status, disposition = null, analysisCode = null) {
     if (!prismaClient || !batchId) return 0;
 
     let parsedDisp = disposition;
@@ -441,7 +441,7 @@ async function flagBatchResults(prismaClient, batchId, status, disposition = nul
     const isReject = decision === 'REJECT_BATCH';
 
     const results = await prismaClient.result.findMany({
-        where: { batchId },
+        where: { batchId, ...(analysisCode && { param: analysisCode }) },
         include: { sample: { select: { id: true, status: true } } }
     });
     let count = 0;

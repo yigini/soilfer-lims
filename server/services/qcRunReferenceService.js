@@ -9,7 +9,8 @@ const KINDS = Object.freeze({ CRM: ['CRM'], LRM: ['CRM', 'LRM', 'CHECK_STANDARD'
 
 // Resolve every served analyte before mutating any binding. Existing placements
 // retain their exact value revision; catalogue updates never refresh them.
-async function preparePositionBindings(db, { batch, position, analyses, actor, referenceMaterialId, referenceValueIds = {}, reason = null }, now = new Date()) {
+async function preparePositionBindings(db, { batch, position, analyses, actor, referenceMaterialId, referenceValueIds = {}, reason = null,
+    optionalAnalysisCodes = [] }, now = new Date()) {
     if (!KINDS[position.kind]) throw error('REFERENCE_USE_INCOMPATIBLE', 'This position cannot hold a reference material.');
     if (!analyses.length) throw error('REFERENCE_VALUE_MISMATCH', 'The reference position serves no analyte.');
     const current = (position.references || []).filter(row => !row.supersededById);
@@ -56,6 +57,8 @@ async function preparePositionBindings(db, { batch, position, analyses, actor, r
                     placedAt: now.toISOString(), placedBy: actorName(actor) }), boundBy: actorName(actor), boundAt: now,
                 correctionReason: correctionReason || null });
         } catch (cause) {
+            if (optionalAnalysisCodes.includes(analysisCode) && !current.some(row => row.analysisCode === analysisCode) &&
+                ['REFERENCE_VALUE_NOT_FOUND', 'REFERENCE_VALUE_NOT_CERTIFIED', 'REFERENCE_VALUE_METHOD_AMBIGUOUS'].includes(cause.code)) continue;
             if (cause.statusCode) cause.details = { ...cause.details, analysisCode };
             throw cause;
         }
@@ -74,7 +77,7 @@ async function applyPositionBindings(tx, plan) {
     }
 }
 
-async function prepareBuildBindings(db, batch, sequence, selections, actor, now = new Date()) {
+async function prepareBuildBindings(db, batch, sequence, selections, actor, now = new Date(), reason = null) {
     const chosen = new Map();
     for (const selection of selections) for (const reference of selection.references || []) {
         const matches = sequence.positions.filter(position => position.kind === reference.positionKind && position.servedAnalytes.includes(selection.analysisCode));
@@ -87,7 +90,7 @@ async function prepareBuildBindings(db, batch, sequence, selections, actor, now 
     }
     const plans = [];
     for (const { position, referenceMaterialId } of chosen.values()) plans.push(await preparePositionBindings(db, {
-        batch, position, analyses: sequence.forecasts.filter(row => position.servedAnalytes.includes(row.analysisCode)), actor, referenceMaterialId
+        batch, position, analyses: sequence.forecasts.filter(row => position.servedAnalytes.includes(row.analysisCode)), actor, referenceMaterialId, reason
     }, now));
     return plans;
 }
