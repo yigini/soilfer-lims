@@ -77,8 +77,12 @@ async function buildNativeRun(db, actor, input, { existingBatchId = null } = {})
             if (item.batchId && item.batchId !== previous?.id) throw error(409, 'QC_WORK_ITEM_ALREADY_BATCHED', 'A work item already belongs to a run.', { workItemId: item.id });
         }
         const codes = [...new Set(orderedItems.map(item => item.analysis))];
-        if (previous?.positions.some(position => (position.references || []).some(reference => !codes.includes(reference.analysisCode)))) {
-            throw error(409, 'QC_SEQUENCE_STALE', 'A bound analyte cannot disappear from an OPEN run without a defined retention policy.');
+        const removedBound = previous?.analytes.find(row => !codes.includes(row.analysisCode) &&
+            previous.positions.some(position => (position.references || []).some(reference => reference.analysisCode === row.analysisCode)));
+        if (removedBound) {
+            throw error(409, 'QC_ANALYTE_REMOVAL_BLOCKED', 'Abandon this OPEN run and build a new run before dropping a bound analyte.', {
+                analysisCode: removedBound.analysisCode, boundPositionIds: previous.positions.filter(position =>
+                    (position.references || []).some(reference => reference.analysisCode === removedBound.analysisCode)).map(position => position.id) });
         }
         let selections = input.analyses;
         if (selections === undefined) selections = codes.map(analysisCode => ({ analysisCode,
@@ -102,7 +106,10 @@ async function buildNativeRun(db, actor, input, { existingBatchId = null } = {})
         const samples = [...new Map(orderedItems.map(item => [item.sampleId, { sampleId: item.sampleId,
             analysisCodes: orderedItems.filter(member => member.sampleId === item.sampleId).map(member => member.analysis) }])).values()];
         let sequence = planRunSequence({ samples, analyses, seed: input.seed });
-        if (previous) sequence = retainBoundPositions(sequence, previous);
+        if (previous) {
+            sequence = retainBoundPositions(sequence, previous);
+            sequence.rebuild.removedAnalyteCodes = previous.analytes.filter(row => !codes.includes(row.analysisCode)).map(row => row.analysisCode);
+        }
         const now = new Date(), referencePlans = await prepareBuildBindings(tx, batch, sequence, selections, actor, now, previous ? 'REBUILD_BEFORE_START' : null);
         if (previous) {
             await replaceUnmeasuredPositions(tx, previous, sequence, input.workItemIds);

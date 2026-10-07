@@ -121,6 +121,7 @@ const BATCH_ANALYTE_STATE_LIST = Object.freeze(['OPEN', 'IN_RUN', 'QC_PENDING', 
 const BATCH_POSITION_KIND_LIST = Object.freeze(['SAMPLE', 'BLANK', 'DUPLICATE', 'LRM', 'CRM', 'ICV', 'CCV', 'CCB', 'CAL_STD', 'CONTROL']);
 const BATCH_PROVENANCE_LIST = Object.freeze(['NATIVE', 'LEGACY_MIGRATED', 'PROFILE_ONLY']);
 const QC_VERDICT_LIST = Object.freeze(['PASS', 'WARN', 'FAIL', 'INCOMPLETE', 'NOT_REQUIRED']);
+const QC_REFERENCE_SERVICE_STATUS_LIST = Object.freeze(['SERVED', 'NOT_SERVED']);
 const BATCH_DISPOSITION_DECISION_LIST = Object.freeze(['ACCEPT_WITH_DEVIATION', 'REPEAT_BATCH', 'REPEAT_BRACKET', 'REJECT']);
 const REVIEW_DECISION_LIST = Object.freeze(['ACCEPT', 'RETURN', 'REJECT', 'OMIT']);
 function normalizeSampleState(state) { return LEGACY_SAMPLE_STATE_MAP[state] || state; }
@@ -231,6 +232,7 @@ module.exports = {
     BATCH_POSITION_KIND_LIST,
     BATCH_PROVENANCE_LIST,
     QC_VERDICT_LIST,
+    QC_REFERENCE_SERVICE_STATUS_LIST,
     BATCH_DISPOSITION_DECISION_LIST,
     normalizeBatchState,
     legacyBatchAnalyteStatus,

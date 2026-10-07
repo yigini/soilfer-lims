@@ -36,6 +36,7 @@ function currentAnalyteEvidence(batch, analysisCode = batch.analysis) {
         if (row.kind === 'SAMPLE') return (row.workItems || []).some(link => link.analysisCode === analysisCode);
         if (isolatedRound) return selectedPositions.has(row.id);
         if (row.kind === 'DUPLICATE' && row.duplicateOfPositionId) return serves((batch.positions || []).find(parent => parent.id === row.duplicateOfPositionId) || { kind: 'SAMPLE' });
+        if ((row.references || []).some(reference => reference.analysisCode === analysisCode && !reference.supersededById && reference.serviceStatus === 'NOT_SERVED')) return false;
         // Retained extras are visible through their immutable placement, even
         // after a pre-start rebuild no longer requires that position kind.
         if (row.provenance === 'NATIVE' && ((row.references || []).some(reference => reference.analysisCode === analysisCode && !reference.supersededById) ||

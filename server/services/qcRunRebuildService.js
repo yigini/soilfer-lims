@@ -11,7 +11,7 @@ function retainBoundPositions(sequence, previous) {
         return { ...planned, id: position.id, references: position.references };
     });
     for (const position of available) {
-        const row = { ...position, servedAnalytes: [...new Set(position.references.filter(reference => !reference.supersededById).map(reference => reference.analysisCode))] };
+        const row = { ...position, servedAnalytes: [...new Set(position.references.filter(reference => !reference.supersededById && reference.serviceStatus !== 'NOT_SERVED').map(reference => reference.analysisCode))] };
         // Preserve closing calibration checks as the final bracket.
         const closing = positions.at(-2)?.kind === 'CCV' && positions.at(-1)?.kind === 'CCB' ? positions.length - 2 : positions.length;
         positions.splice(closing, 0, row);

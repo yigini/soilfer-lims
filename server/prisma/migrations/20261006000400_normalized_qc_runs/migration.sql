@@ -60,7 +60,8 @@ CREATE TABLE "BatchPositionReference" (
     "referenceMaterialId" TEXT NOT NULL,
     "referenceValueId" TEXT,
     "referenceUse" TEXT NOT NULL,
-    "referenceSnapshot" TEXT NOT NULL,
+    "referenceSnapshot" TEXT,
+    "serviceStatus" TEXT NOT NULL DEFAULT 'SERVED',
     "boundBy" TEXT,
     "boundAt" DATETIME,
     "supersededById" TEXT,
@@ -362,12 +363,24 @@ BEGIN
 END;
 
 CREATE TRIGGER "BatchPositionReference_insert_guard" BEFORE INSERT ON "BatchPositionReference"
-WHEN NOT json_valid(NEW.referenceSnapshot) OR NEW.supersededById IS NOT NULL
+WHEN NEW.serviceStatus NOT IN ('SERVED','NOT_SERVED') OR NEW.supersededById IS NOT NULL
+  OR (NEW.serviceStatus='SERVED' AND (NEW.referenceSnapshot IS NULL OR NOT json_valid(NEW.referenceSnapshot)))
+  OR (NEW.serviceStatus='NOT_SERVED' AND (NEW.referenceSnapshot IS NOT NULL OR NEW.referenceValueId IS NOT NULL
+    OR NOT EXISTS (SELECT 1 FROM "BatchPositionReference" r WHERE r.supersededById=NEW.id)
+    OR NOT EXISTS (SELECT 1 FROM "BatchPosition" p JOIN "BatchAnalyte" a ON a.batchId=p.batchId AND a.analysisCode=NEW.analysisCode
+      JOIN "Batch" b ON b.id=p.batchId WHERE p.id=NEW.positionId AND a.provenance='NATIVE'
+      AND ((b.startedAt IS NULL AND NEW.correctionReason='REBUILD_BEFORE_START')
+        OR (NEW.referenceUse='CRM' AND json_extract(a.criteriaSnapshot,'$.counts.crm')=0)
+        OR (NEW.referenceUse='LRM' AND json_extract(a.criteriaSnapshot,'$.counts.lrm')=0)
+        OR (NEW.referenceUse IN ('ICV','CCV') AND json_extract(a.criteriaSnapshot,'$.counts.calibration')=0)))))
   OR NOT EXISTS (SELECT 1 FROM "BatchPosition" p JOIN "BatchAnalyte" a ON a.batchId=p.batchId AND a.analysisCode=NEW.analysisCode
     JOIN "ReferenceMaterial" r ON r.id=NEW.referenceMaterialId JOIN "Lab" l ON l.id=r.labId
     WHERE p.id=NEW.positionId AND p.kind=NEW.referenceUse AND p.kind IN ('CRM','LRM','ICV','CCV','CCB') AND a.labId IN (l.id,l.code))
   OR (NEW.referenceUse='CCB' AND (NEW.referenceValueId IS NOT NULL OR NOT EXISTS (SELECT 1 FROM "ReferenceMaterial" r WHERE r.id=NEW.referenceMaterialId AND r.kind='BLANK_MATRIX')))
-  OR (NEW.referenceUse<>'CCB' AND NOT EXISTS (
+  OR (NEW.serviceStatus='NOT_SERVED' AND NOT EXISTS (SELECT 1 FROM "ReferenceMaterial" r WHERE r.id=NEW.referenceMaterialId
+    AND ((NEW.referenceUse='CRM' AND r.kind='CRM') OR (NEW.referenceUse='LRM' AND r.kind IN ('CRM','LRM','CHECK_STANDARD'))
+      OR (NEW.referenceUse='ICV' AND r.kind IN ('CHECK_STANDARD','CRM')) OR (NEW.referenceUse='CCV' AND r.kind IN ('CHECK_STANDARD','CALIBRATION_STANDARD','CRM')))))
+  OR (NEW.serviceStatus='SERVED' AND NEW.referenceUse<>'CCB' AND NOT EXISTS (
     SELECT 1 FROM "ReferenceValue" v JOIN "ReferenceMaterial" r ON r.id=v.referenceMaterialId
     JOIN "BatchPosition" p ON p.id=NEW.positionId JOIN "BatchAnalyte" a ON a.batchId=p.batchId AND a.analysisCode=NEW.analysisCode
     WHERE v.id=NEW.referenceValueId AND v.referenceMaterialId=NEW.referenceMaterialId AND v.analysisCode=NEW.analysisCode
@@ -402,6 +415,7 @@ WHEN NEW."id" IS NOT OLD."id"
   OR NEW."referenceValueId" IS NOT OLD."referenceValueId"
   OR NEW."referenceUse" IS NOT OLD."referenceUse"
   OR NEW."referenceSnapshot" IS NOT OLD."referenceSnapshot"
+  OR NEW."serviceStatus" IS NOT OLD."serviceStatus"
   OR NEW."boundBy" IS NOT OLD."boundBy"
   OR NEW."boundAt" IS NOT OLD."boundAt"
   OR NEW."correctionReason" IS NOT OLD."correctionReason"
@@ -418,6 +432,7 @@ END;
 CREATE TRIGGER "QcMeasurement_insert_guard" BEFORE INSERT ON "QcMeasurement"
 WHEN typeof(NEW.replicateNo)<>'integer' OR NEW.replicateNo<1 OR NEW.supersededById IS NOT NULL
   OR NOT EXISTS (SELECT 1 FROM "BatchPosition" p JOIN "BatchAnalyte" a ON a.batchId=p.batchId AND a.analysisCode=NEW.analysisCode WHERE p.id=NEW.positionId AND p.batchId=NEW.batchId)
+  OR EXISTS (SELECT 1 FROM "BatchPositionReference" r WHERE r.positionId=NEW.positionId AND r.analysisCode=NEW.analysisCode AND r.supersededById IS NULL AND r.serviceStatus='NOT_SERVED')
   OR EXISTS (SELECT 1 FROM "BatchPosition" p WHERE p.id=NEW.positionId AND p.provenance='NATIVE' AND p.kind IN ('SAMPLE','DUPLICATE') AND NEW.replicateNo<>1)
   OR EXISTS (SELECT 1 FROM "BatchPosition" p WHERE p.id=NEW.positionId AND p.provenance='NATIVE' AND p.kind IN ('SAMPLE','DUPLICATE')
     AND NOT EXISTS (SELECT 1 FROM "BatchPositionWorkItem" w WHERE w.analysisCode=NEW.analysisCode

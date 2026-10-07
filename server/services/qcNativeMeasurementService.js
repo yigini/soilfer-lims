@@ -84,6 +84,8 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         for (const code of affected) {
             const analyte = batch.analytes.find(row => row.analysisCode === code), previous = currentAnalyteEvidence(batch, code).evaluation;
             const evaluated = evaluateNativeEvidence(candidate, analyte), requested = explicit && code === analysisCode;
+            if (!previous && !observations.some(row => row.analysisCode === code) && plans.some(plan =>
+                plan.bindings.some(row => row.analysisCode === code && row.serviceStatus === 'NOT_SERVED'))) continue;
             const changed = observations.some(row => row.analysisCode === code) || plans.some(plan => plan.replacements.some(row => row.previous.analysisCode === code) ||
                 plan.bindings.some(row => row.analysisCode === code && !batch.positions.some(position => (position.references || []).some(old => old.id === row.id))));
             const shouldEvaluate = requested || correction && previous || evaluated.mode !== 'OFF' && evaluated.missingPositions.length === 0;

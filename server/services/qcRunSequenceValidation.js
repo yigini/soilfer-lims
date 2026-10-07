@@ -63,7 +63,7 @@ function validateRunSequence({ positions, analyses }) {
             if (['ICV', 'CCV', 'CCB'].includes(row.kind)) return criteria.counts.calibration;
             const field = { BLANK: 'blank', LRM: 'lrm', CRM: 'crm' }[row.kind];
             if (row.kind === 'CRM' && !criteria.counts.crm) return criteria.qcRule.resolved.crmEveryNBatches.value > 0 &&
-                (row.references || []).some(reference => reference.analysisCode === criteria.analysisCode && !reference.supersededById);
+                (row.references || []).some(reference => reference.analysisCode === criteria.analysisCode && !reference.supersededById && reference.serviceStatus !== 'NOT_SERVED');
             return field && criteria.counts[field] > 0;
         }).map(criteria => criteria.analysisCode);
     };

@@ -430,7 +430,7 @@ model Batch {
   events      BatchEvent[]
 }
 
-// #186 scope pins 1–8. String enums and immutable evidence are guarded by the
+// #186 scope pins 1–10. String enums and immutable evidence are guarded by the
 // additive release SQL; unknown historical metadata remains nullable.
 model BatchAnalyte {
   id                      String @id
@@ -498,7 +498,8 @@ model BatchPositionReference {
   referenceValueId        String?
   referenceValue          ReferenceValue? @relation(fields: [referenceValueId], references: [id], onDelete: Restrict)
   referenceUse            String
-  referenceSnapshot       String
+  referenceSnapshot       String? // Null only for explicitly NOT_SERVED optional service.
+  serviceStatus           String @default("SERVED")
   boundBy                 String?
   boundAt                 DateTime?
   supersededById          String?

@@ -21,8 +21,8 @@ const QC_RULE_LOADER = 'services/qcRuleMigrationSource.js';
 const QC_RULE_LOADER_SHA256 = '222ad51af3fe26ea4bddb9e4d522898857c0ec15f31295c0ce5f81b5dbc487fa';
 const QC_RULE_SQL_SHA256 = '4ee7f414ae3e6228faf52fe81d32bde2bdaf6ecb975ca62a438494db42e58b06';
 const QC_RUN_LOADER = 'services/qcRunMigrationSource.js';
-const QC_RUN_LOADER_SHA256 = 'cb9f1d352eeb231aee8f5c4cc36ce133093ca9fdcb95118a14f9ea15c2235fa7';
-const QC_RUN_SQL_SHA256 = 'ad8340b22930d9e0d10aa8e0818118d0176ab1d73860eb0f5afd91be283c01f9';
+const QC_RUN_LOADER_SHA256 = '52f81ee96dcb64a77d2573914d5e75325ee16a50a80be163ff38b875a2da9c74';
+const QC_RUN_SQL_SHA256 = 'fa59069405b46555e27a892f3bbb678961104c0d6027acbd691f17b865bf8ec3';
 const WORKFLOW_SOURCES = Object.freeze({
     evidence: { directory: '20261005000000_workflow_state_evidence', sha256: 'ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552' },
     guards: { directory: '20261005000100_workflow_state_guards', sha256: '84921ef45fa8609621b38908de5261d716820f2135f2dde1b9a20fafa6fc81ed' }

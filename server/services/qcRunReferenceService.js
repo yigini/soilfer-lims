@@ -24,8 +24,8 @@ async function preparePositionBindings(db, { batch, position, analyses, actor, r
     if (!KINDS[position.kind].includes(material.kind)) throw error('REFERENCE_USE_INCOMPATIBLE', 'The material kind cannot serve this QC position.');
     const unchanged = analyses.every(analyte => current.some(row => row.analysisCode === analyte.analysisCode &&
         row.referenceMaterialId === material.id && (!referenceValueIds[analyte.analysisCode] || row.referenceValueId === referenceValueIds[analyte.analysisCode]) &&
-        JSON.parse(row.referenceSnapshot).methodologyId === (analyte.methodologyId || null)));
-    if (unchanged) return { replacements: [], bindings: analyses.map(analyte => current.find(row => row.analysisCode === analyte.analysisCode)) };
+        row.serviceStatus !== 'NOT_SERVED' && JSON.parse(row.referenceSnapshot).methodologyId === (analyte.methodologyId || null)));
+    if (unchanged && !correctionReason) return { replacements: [], bindings: analyses.map(analyte => current.find(row => row.analysisCode === analyte.analysisCode)) };
     if (current.length && !correctionReason) throw error('QC_CORRECTION_REASON_REQUIRED', 'A reason is required to change a reference placement.', {}, 400);
     const state = eligibility(material, now);
     if (!state.eligible) throw error('REFERENCE_MATERIAL_INELIGIBLE', 'Reference material is ineligible for placement.', { reason: state.reason });
@@ -46,7 +46,7 @@ async function preparePositionBindings(db, { batch, position, analyses, actor, r
                 expected = convertValue(value.assignedValue, sourceUnit, analysis?.unit);
             } else if (referenceValueIds[analysisCode]) throw error('REFERENCE_VALUE_MISMATCH', 'A calibration blank has no assigned value.');
             bindings.push({ id: randomUUID(), positionId: position.id, analysisCode, referenceMaterialId: material.id,
-                referenceValueId: value?.id || null, referenceUse: position.kind,
+                referenceValueId: value?.id || null, referenceUse: position.kind, serviceStatus: 'SERVED',
                 referenceSnapshot: JSON.stringify({ referenceMaterialId: material.id, referenceValueId: value?.id || null,
                     referenceUse: position.kind, methodologyId, valueMethodologyId: value?.methodologyId || null, expected,
                     analysisUnit: analysis?.unit?.code || null, assignedValue: value?.assignedValue ?? null, unit: value?.unit || null,
@@ -57,8 +57,12 @@ async function preparePositionBindings(db, { batch, position, analyses, actor, r
                     placedAt: now.toISOString(), placedBy: actorName(actor) }), boundBy: actorName(actor), boundAt: now,
                 correctionReason: correctionReason || null });
         } catch (cause) {
-            if (optionalAnalysisCodes.includes(analysisCode) && !current.some(row => row.analysisCode === analysisCode) &&
-                ['REFERENCE_VALUE_NOT_FOUND', 'REFERENCE_VALUE_NOT_CERTIFIED', 'REFERENCE_VALUE_METHOD_AMBIGUOUS'].includes(cause.code)) continue;
+            if (optionalAnalysisCodes.includes(analysisCode) && ['REFERENCE_VALUE_NOT_FOUND', 'REFERENCE_VALUE_NOT_CERTIFIED', 'REFERENCE_VALUE_METHOD_AMBIGUOUS'].includes(cause.code)) {
+                if (current.some(row => row.analysisCode === analysisCode)) bindings.push({ id: randomUUID(), positionId: position.id, analysisCode,
+                    referenceMaterialId: material.id, referenceValueId: null, referenceSnapshot: null, referenceUse: position.kind,
+                    serviceStatus: 'NOT_SERVED', boundBy: actorName(actor), boundAt: now, correctionReason });
+                continue;
+            }
             if (cause.statusCode) cause.details = { ...cause.details, analysisCode };
             throw cause;
         }

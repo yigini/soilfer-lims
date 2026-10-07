@@ -317,6 +317,67 @@ test('a measured extra CRM is optional at a not-due ordinal and its failure cont
     expect(failed.analytes[0].crmOrdinal).toBe(2);
 });
 
+test('removing a bound analyte last member is refused without writes; an unbound analyte removal is recorded', async () => {
+    const f = await fixture(), b = await secondAnalyte(f), lot = await referenceLot(f);
+    await f.db.referenceValue.create({ data: { id: randomUUID(), referenceMaterialId: lot.id, analysisCode: b.analysisCode,
+        assignedValue: 12.987654321, unit: 'fixture-unit', valueType: 'LAB_ASSIGNED', createdBy: f.actor.username } });
+    const input = { ...f.input, workItemIds: [...f.workItemIds, b.item.id], analyses: [
+        { analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }, { analysisCode: b.analysisCode }] };
+    const bound = await buildNativeRun(f.db, f.actor, input), before = await evidence(f.db);
+    await expect(rebuildNativeRun(f.db, bound.id, f.actor, { ...f.input, analyses: [{ analysisCode: f.analysisCode }] }))
+        .rejects.toMatchObject({ statusCode: 409, code: 'QC_ANALYTE_REMOVAL_BLOCKED', details: { analysisCode: b.analysisCode,
+            boundPositionIds: [bound.positions.find(row => row.kind === 'LRM').id] } });
+    expect(await evidence(f.db)).toEqual(before);
+    const u = await fixture(), ub = await secondAnalyte(u), unbound = await buildNativeRun(u.db, u.actor, { ...u.input, workItemIds: [...u.workItemIds, ub.item.id] });
+    const rebuilt = await rebuildNativeRun(u.db, unbound.id, u.actor, u.input);
+    expect(rebuilt.analytes).toHaveLength(1); expect(rebuilt.analytes[0].analysisCode).toBe(u.analysisCode);
+    expect(await u.db.workItem.findUnique({ where: { id: ub.item.id } })).toMatchObject({ batchId: null, rackPosition: null });
+    expect(JSON.parse(rebuilt.events.filter(row => row.type === 'RUN_BUILT').at(-1).payload).rebuild.removedAnalyteCodes).toEqual([ub.analysisCode]);
+});
+
+test('optional CRM lot correction records NOT_SERVED with intact prior evidence; a due CRM refuses the same missing value', async () => {
+    const f = await fixture(1, { crmEveryNBatches: 2 }), b = await secondAnalyte(f), lrm = await referenceLot(f), crm = await referenceLot(f, 7.123456789, 'CRM');
+    await rules.change(f.actor, { labId: f.labId, analysisCode: b.analysisCode, methodologyId: b.method.id,
+        criteria: { crmEveryNBatches: 2 }, expectedVersion: 1, reason: 'Both analytes use the same CRM frequency' }, { db: f.db });
+    for (const lot of [lrm, crm]) await f.db.referenceValue.create({ data: { id: randomUUID(), referenceMaterialId: lot.id,
+        analysisCode: b.analysisCode, assignedValue: 12.987654321, unit: 'fixture-unit', valueType: lot.kind === 'CRM' ? 'CERTIFIED' : 'LAB_ASSIGNED', createdBy: f.actor.username } });
+    const selections = [{ analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: lrm.id },
+        { positionKind: 'CRM', referenceMaterialLotId: crm.id }] }, { analysisCode: b.analysisCode }];
+    const pending = await buildNativeRun(f.db, f.actor, { ...f.input, workItemIds: [...f.workItemIds, b.item.id], analyses: selections });
+    async function another() {
+        const ids = await members(f, 1), sampleId = (await f.db.workItem.findUnique({ where: { id: ids[0] } })).sampleId;
+        const item = await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId, labId: f.labId, analysis: b.analysisCode,
+            methodologyId: b.method.id, status: 'IN_PROGRESS' } });
+        return buildNativeRun(f.db, f.actor, { ...f.input, workItemIds: [...ids, item.id], analyses: selections });
+    }
+    await startNativeRun(f.db, (await another()).id, f.actor);
+    const run = await startNativeRun(f.db, pending.id, f.actor);
+    expect(run.analytes.map(row => row.crmOrdinal)).toEqual([2, 2]);
+    await writeNativeMeasurements(f.db, run.id, f.actor, { measurements: readings(run) });
+    const initial = await writeNativeMeasurements(f.db, run.id, f.actor, { analysisCode: b.analysisCode, measurements: readings(run, { control: 12.987654321 }) });
+    const oldMeasurements = await f.db.qcMeasurement.findMany({ orderBy: { id: 'asc' } }), oldEvaluations = await f.db.qcEvaluation.findMany({ orderBy: { id: 'asc' } });
+    const onlyA = await referenceLot(f, 7.123456789, 'CRM'), position = run.positions.find(row => row.kind === 'CRM');
+    const corrected = await writeNativeMeasurements(f.db, run.id, f.actor, { reason: 'Optional CRM no longer serves the second analyte',
+        references: [{ positionId: position.id, referenceMaterialId: onlyA.id }] }, { correction: true });
+    const current = (await f.db.batchPositionReference.findMany({ where: { positionId: position.id } })).filter(row => !row.supersededById);
+    expect(current).toHaveLength(2); expect(current.every(row => row.referenceMaterialId === onlyA.id)).toBe(true);
+    expect(current.find(row => row.analysisCode === b.analysisCode)).toMatchObject({ serviceStatus: 'NOT_SERVED', referenceValueId: null, referenceSnapshot: null });
+    const latestB = corrected.analytes.find(row => row.analysisCode === b.analysisCode);
+    expect(latestB.result).toBe('PASS'); expect(latestB.positions.some(row => row.id === position.id)).toBe(false);
+    expect(JSON.parse(latestB.evaluation.details).measurementIds).not.toContain(initial.measurements.find(row => row.positionId === position.id && row.analysisCode === b.analysisCode).id);
+    expect(await f.db.qcMeasurement.findMany({ orderBy: { id: 'asc' } })).toEqual(oldMeasurements);
+    for (const evaluation of oldEvaluations) expect(await f.db.qcEvaluation.findUnique({ where: { id: evaluation.id } })).toEqual(evaluation);
+    const due = await startNativeRun(f.db, (await another()).id, f.actor);
+    expect(due.analytes.map(row => row.crmOrdinal)).toEqual([3, 3]);
+    await writeNativeMeasurements(f.db, due.id, f.actor, { measurements: readings(due) });
+    await writeNativeMeasurements(f.db, due.id, f.actor, { analysisCode: b.analysisCode, measurements: readings(due, { control: 12.987654321 }) });
+    const before = await evidence(f.db);
+    await expect(writeNativeMeasurements(f.db, due.id, f.actor, { reason: 'Required service cannot be dropped',
+        references: [{ positionId: due.positions.find(row => row.kind === 'CRM').id, referenceMaterialId: onlyA.id }] }, { correction: true }))
+        .rejects.toMatchObject({ code: 'REFERENCE_VALUE_NOT_CERTIFIED', details: { analysisCode: b.analysisCode } });
+    expect(await evidence(f.db)).toEqual(before);
+});
+
 test('real 23-sample builder writes 28 physical members, recorded parent picks and no invented QC values or ordinal', async () => {
     const f = await fixture(23, { maxBatchSize: 23, crmEveryNBatches: 0 }), run = await buildNativeRun(f.db, f.actor, f.input);
     expect(run.positions).toHaveLength(28);
