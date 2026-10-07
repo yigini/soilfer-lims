@@ -206,13 +206,16 @@ describe('Audit 1.0: persistent lab policies', () => {
         const sampleId = id('POL-SAMPLE');
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, assignedLab: labId, status: 'PROCESSING' } });
         await createWorkItemFixture(prisma, { data: { id: id('POL-WORK'), sampleId, assignedLab: labId, analysis: analysisCode, methodologyId, batchId: batch.id, status: 'COMPLETED' } });
+        await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, batch.id);
+        const parent = await prisma.batchPosition.findFirst({ where: { batchId: batch.id, kind: 'SAMPLE' } });
         await edit([{ key: 'qc.blankMaxAllowed', value: .2 }, { key: 'qc.controlMinRecovery', value: 80 },
             { key: 'qc.controlMaxRecovery', value: 120 }, { key: 'qc.duplicateMaxRpd', value: 30, analysisCode, methodologyId }]);
         const response = await request(app).post(`/api/qc/batches/${batch.id}/evaluate`).set('Authorization', `Bearer ${technician}`)
-            .send({ blanks: [{ value: '0.1' }], controls: [{ expected: '100', measured: '85' }], duplicates: [{ value1: '100', value2: '120' }, { value1: '100', value2: '120' }] });
+            .send({ blanks: [{ value: '0.1' }], controls: [{ expected: '100', measured: '85' }], duplicates: [{ duplicateOfPositionId: parent.id, value1: '100', value2: '120' }, { duplicateOfPositionId: parent.id, value1: '100', value2: '120' }] });
         expect({ status: response.status, body: response.body }).toMatchObject({ status: 200 });
         const evaluated = await prisma.batch.findUnique({ where: { id: batch.id } });
-        expect(JSON.parse(evaluated.qcResults)).toMatchObject({ overallStatus: 'QC_PASS', policyVersion: 1,
+        const normalized = await prisma.batch.findUnique({ where: { id: batch.id }, include: require('../../services/qcRunViewService').QC_RUN_INCLUDE });
+        expect(require('../../services/qcRunViewService').batchApiView(normalized).qcResults).toMatchObject({ overallStatus: 'QC_PASS', policyVersion: 1,
             policyValues: { 'qc.blankMaxAllowed': .2, 'qc.controlMinRecovery': 80, 'qc.controlMaxRecovery': 120, 'qc.duplicateMaxRpd': 30 } });
         const typed = await prisma.batchQcResult.findMany({ where: { batchId: batch.id }, orderBy: { id: 'asc' } });
         await edit([{ key: 'qc.blankMaxAllowed', value: .01 }]);

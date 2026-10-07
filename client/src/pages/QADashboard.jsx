@@ -281,7 +281,7 @@ export default function QADashboard() {
                                                         ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
                                                         : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
                                                 }`}>
-                                                    {row.statusKey ? t(row.statusKey, row.status) : (row.status ? t('dashboard.workQueue.status.' + row.status, row.status) : row.status)}
+                                                    {row.status === 'NOT_REQUIRED' ? t('qcRuns.notRequired') : row.statusKey ? t(row.statusKey, row.status) : (row.status ? t('dashboard.workQueue.status.' + row.status, row.status) : row.status)}
                                                 </span>
                                             </td>
                                             <td className="py-3.5 px-4 text-right">

@@ -95,6 +95,39 @@ test.each([false, true])('additive install on fresh=%s preserves every old field
     expect(state(f.file)).toEqual(installed); expect(hash(f.file)).toBe(installedHash);
 });
 
+test('legacy attempts keep separate current membership in creation order with unchanged statuses and a dry-run group count', () => {
+    const f = fixture({ membership: true, status: 'QC_FAIL' }), connection = new Database(f.file);
+    const acceptedId = 'accepted-attempt', completedId = 'completed-attempt', firstCreated = Date.parse('2026-09-19T09:00:00Z');
+    try {
+        connection.prepare('UPDATE WorkItem SET status=?,createdAt=? WHERE id=?').run('SUBMITTED', firstCreated, f.workItemId);
+        for (const [id, status, createdAt] of [[acceptedId, 'ACCEPTED', firstCreated + 1], [completedId, 'COMPLETED', firstCreated + 2]]) {
+            insert(connection, 'WorkItem', { id, sampleId: f.sampleId, analysis: f.analysis, labId: f.labId, batchId: f.batchId,
+                duplicateOf: f.workItemId, rackPosition: 5, status, createdAt, updatedAt: createdAt });
+        }
+    } finally { connection.close(); }
+    const before = state(f.file), digest = hash(f.file), dry = installQcRuns({ dbPath: f.file });
+    expect(dry.refusals).toEqual([]);
+    expect(dry.backfillCounts).toMatchObject({ samplePositions: 3, multiAttemptMembershipGroups: 1 });
+    expect(hash(f.file)).toBe(digest);
+    installQcRuns({ dbPath: f.file, apply: true, planSha256: dry.backfillFingerprint });
+    const reader = new Database(f.file, { readonly: true });
+    try {
+        const positions = reader.prepare('SELECT p.*,j.workItemId,j.analysisCode FROM BatchPosition p JOIN BatchPositionWorkItem j ON j.positionId=p.id ORDER BY p.position').all();
+        expect(positions.map(row => row.workItemId)).toEqual([f.workItemId, acceptedId, completedId]);
+        expect(positions.map(row => row.position)).toEqual([5, 6, 7]);
+        for (const [index, row] of positions.entries()) {
+            expect(row).toMatchObject({ kind: 'SAMPLE', sampleId: f.sampleId, analysisCode: f.analysis, historicalSnapshotSeq: null, provenance: 'LEGACY_MIGRATED' });
+            expect(JSON.parse(row.legacySource)).toMatchObject({ workItemId: [f.workItemId, acceptedId, completedId][index],
+                workItemStatusAtImport: ['SUBMITTED', 'ACCEPTED', 'COMPLETED'][index], duplicateOfWorkItemId: index ? f.workItemId : null });
+        }
+        for (const table of before.tables.filter(row => ['Batch','WorkItem','BatchQcResult','AuditLog'].includes(row.name))) {
+            expect(reader.prepare(`SELECT ${table.columns.map(row => `"${row.name}"`).join(',')} FROM "${table.name}" ORDER BY rowid`).all()).toEqual(table.rows);
+        }
+        expect(reader.pragma('foreign_key_check')).toEqual([]);
+        expect(reader.pragma('integrity_check', { simple: true })).toBe('ok');
+    } finally { reader.close(); }
+});
+
 test('three snapshots with different counts and a final clear import exact isolated versions, AuditLog authority and empty current evidence', () => {
     const events = [snapshot(2, evaluated({ blanks: [{ value: 0.0000000123456789, status: 'PASS' }], duplicates: [{ value1: 7.123456789, value2: 7.123456780, status: 'PASS' }] })),
         snapshot(4, evaluated({ blanks: [{ value: 0.01, status: 'PASS' }, { value: -0.02, status: 'PASS' }], controls: [{ expected: 5, measured: 5.0123456789, status: 'PASS' }] })),

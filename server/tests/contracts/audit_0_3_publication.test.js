@@ -50,6 +50,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         }
         const result = await createResultFixture(prisma, { data: { id: resultId, sampleId, param, value: '7.2', numericValue: 7.2, isCurrent: true,
             isValid: valid, flags: JSON.stringify(flags), batchId: batch?.id } });
+        if (batch) await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, batch.id);
         return { sampleId, item, result, batch };
     }
     const generate = f => call(`/api/reports/generate/${f.sampleId}`, {});

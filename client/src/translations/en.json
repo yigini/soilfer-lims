@@ -2820,6 +2820,7 @@
     "errors": {
       "QC_INSTRUMENT_REQUIRED": "Calibration verification requires a registered instrument. Ask a manager to select one before starting.",
       "QC_INSTRUMENT_INVALID": "Select an active instrument in this laboratory.",
+      "QC_BATCH_DUPLICATE_MEMBERSHIP": "Select one active work item per sample and analysis.",
       "QC_SEQUENCE_STALE": "The sequence no longer meets the current criteria. Rebuild or correct its order before starting.",
       "QC_VALUES_MISSING": "Enter valid observations for every required position before evaluation.",
       "QC_BATCH_LOCKED": "This QC evidence is locked. Use batch disposition or a new run.",

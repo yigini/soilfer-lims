@@ -71,6 +71,7 @@ async function buildNativeRun(db, actor, input, { existingBatchId = null } = {})
         if (typeof instrumentText !== 'string') throw error(422, 'QC_INSTRUMENT_INVALID', 'Instrument name must be text.');
         const orderedItems = input.workItemIds.map(id => items.find(item => item.id === id));
         const actorLab = await policyService.resolveLab(actor.labId, tx);
+        const memberships = new Set();
         for (const item of orderedItems) {
             const sampleLab = await policyService.resolveLab(item.sample?.assignedLab, tx);
             const sourceLab = await policyService.resolveLab(item.sample?.labId, tx);
@@ -80,6 +81,9 @@ async function buildNativeRun(db, actor, input, { existingBatchId = null } = {})
             if (itemLab?.id !== lab.id) throw error(403, 'QC_WORK_ITEM_SCOPE_DENIED', 'Work items must belong to the run laboratory.');
             if (item.batchId && item.batchId !== previous?.id) throw error(409, 'QC_WORK_ITEM_ALREADY_BATCHED', 'A work item already belongs to a run.', { workItemId: item.id });
             if (['SUBMITTED', 'ACCEPTED', 'WAIVED'].includes(item.status)) throw error(400, 'QC_WORK_ITEM_SEALED', 'A sealed work item cannot be attached to a run.', { workItemId: item.id, status: item.status });
+            const key = JSON.stringify([item.sampleId, item.analysis]);
+            if (memberships.has(key)) throw error(422, 'QC_BATCH_DUPLICATE_MEMBERSHIP', 'Select one active work item per sample and analysis.', { sampleId: item.sampleId, analysisCode: item.analysis });
+            memberships.add(key);
         }
         const codes = [...new Set(orderedItems.map(item => item.analysis))];
         const removedBound = previous?.analytes.find(row => !codes.includes(row.analysisCode) &&

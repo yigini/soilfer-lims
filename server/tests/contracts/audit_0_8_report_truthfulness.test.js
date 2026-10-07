@@ -16,6 +16,7 @@ const { generateReportPdfBuffer } = require('../../services/pdfGenerator');
 const id = prefix => `${prefix}-${crypto.randomUUID()}`;
 const labId = 'LAB-AUDIT-08';
 const snapshot = { sample: { id: 's' }, lab: {}, client: {}, generated: {}, resultGroups: [] };
+const { normalizeLegacyQcFixture } = require('../helpers/normalizedQcFixture');
 
 describe('Audit 0.8: issued identity and truthful report evidence', () => {
     let token, lab;
@@ -27,11 +28,13 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
     async function fixture(batchStatus = 'QC_PASS', disposition) {
         const sampleId = id('SMP-08');
         const batch = await prisma.batch.create({ data: { id: id('B-08'), analysis: 'PH_H2O', status: batchStatus,
-            disposition: disposition ? JSON.stringify(disposition) : null, labId, createdBy: 'report-test' } });
+            disposition: disposition ? JSON.stringify(disposition) : null, labId, createdBy: 'report-test',
+            qcResults: JSON.stringify({ blanks: [{ value: batchStatus === 'QC_FAIL' ? 100 : 0.01, status: batchStatus === 'QC_FAIL' ? 'FAIL' : 'PASS' }], controls: [], duplicates: [] }) } });
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status: 'APPROVED' } });
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-08'), sampleId, analysis: 'PH_H2O', status: 'ACCEPTED', batchId: batch.id } });
         await createResultFixture(prisma, { data: { id: id('R-08'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true, batchId: batch.id } });
+        await normalizeLegacyQcFixture(prisma, batch.id);
         return { sampleId, batch, item };
     }
     async function generate(f) {

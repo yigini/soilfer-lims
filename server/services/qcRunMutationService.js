@@ -56,8 +56,13 @@ async function mutateQcRun(db, batchId, actor, input = {}, { explicit = false, c
                 batch = await writeNativeMeasurements(tx, batchId, actor, nativeInput(batch, input, { correction }), { correction, explicit });
                 evaluation = currentAnalyteEvidence(batch, input.analysisCode || batch.analysis).qcResults;
             } else {
-                const result = correction ? await correctCompatibilityMeasurements(tx, batchId, actor, input)
-                    : await writeCompatibilityMeasurements(tx, batchId, actor, input, { clear });
+                let result;
+                try { result = correction ? await correctCompatibilityMeasurements(tx, batchId, actor, input)
+                    : await writeCompatibilityMeasurements(tx, batchId, actor, input, { clear }); }
+                catch (error) {
+                    if (requested === 'QC_PASS' && error.code === 'QC_VALUES_MISSING') error.message = `Submitted QC failed acceptance criteria: ${error.message}`;
+                    throw error;
+                }
                 batch = result.batch; evaluation = result.evaluation;
             }
         }
@@ -65,7 +70,7 @@ async function mutateQcRun(db, batchId, actor, input = {}, { explicit = false, c
             if (['QC_PASS', 'QC_FAIL'].includes(requested)) {
                 const evidence = batch.analytes.map(row => currentAnalyteEvidence(batch, row.analysisCode));
                 if (evidence.some(row => !row.evaluation || !['PASS', 'WARN', 'FAIL', 'NOT_REQUIRED'].includes(row.result))) {
-                    throw failure(400, 'QC_RULE_VIOLATION', 'Evaluated QC evidence is required for this status.');
+                    throw failure(400, 'QC_RULE_VIOLATION', 'Cannot set this status without evaluated QC evidence.');
                 }
                 if (requested === 'QC_PASS' && batch.status === 'QC_FAIL') throw failure(payload ? 400 : 409,
                     payload ? 'QC_RULE_VIOLATION' : 'QC_BATCH_LOCKED', 'Failed QC cannot become QC_PASS through a status update.');
@@ -74,7 +79,7 @@ async function mutateQcRun(db, batchId, actor, input = {}, { explicit = false, c
             } else if (requested === 'CLOSED') {
                 if (!hasPermission(actor, 'APPROVE_RESULTS')) throw failure(403, 'QC_CLOSE_PERMISSION_REQUIRED', 'Only lab managers can close batches.');
                 const closable = batch.analytes.every(row => ['QC_PASS', 'QC_WARN', 'ACCEPTED_WITH_DEVIATION'].includes(row.status));
-                if (!closable) throw failure(payload ? 409 : 400, payload ? 'QC_BATCH_FAILED' : 'QC_RULE_VIOLATION', 'QC must be accepted before closing.');
+                if (!closable) throw failure(payload ? 409 : 400, payload ? 'QC_BATCH_FAILED' : 'QC_RULE_VIOLATION', 'QC must be passed or accepted before closing.');
                 const now = new Date();
                 for (const row of batch.analytes) await tx.batchAnalyte.update({ where: { id: row.id }, data: { status: 'CLOSED' } });
                 await tx.batch.update({ where: { id: batchId }, data: { status: aggregateBatchStatus(batch.analytes.map(() => 'CLOSED')), completedAt: now } });

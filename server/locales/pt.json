@@ -1245,6 +1245,7 @@
     "errors": {
       "QC_INSTRUMENT_REQUIRED": "A verificação de calibração exige um instrumento registrado. Solicite sua seleção antes de iniciar.",
       "QC_INSTRUMENT_INVALID": "Selecione um instrumento ativo deste laboratório.",
+      "QC_BATCH_DUPLICATE_MEMBERSHIP": "Selecione apenas uma tarefa ativa por amostra e análise.",
       "QC_SEQUENCE_STALE": "A sequência já não atende aos critérios atuais. Reconstrua-a ou corrija sua ordem antes de iniciar.",
       "QC_VALUES_MISSING": "Insira observações válidas em cada posição necessária antes de avaliar.",
       "QC_BATCH_LOCKED": "Esta evidência de CQ está bloqueada. Use a decisão do lote ou uma nova corrida.",

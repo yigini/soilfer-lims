@@ -188,6 +188,7 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
         const batchId = id();
         await prisma.batch.create({ data: { id: batchId, labId, analysis: 'PH_H2O', profile: 'RACK_40',
             status: 'OPEN', createdBy: username, history: '[]', qcResults: '{}' } });
+        await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, batchId);
         const response = await request(app).post(`/api/qc/batches/${batchId}/evaluate`)
             .set('Authorization', `Bearer ${token}`).send({
                 blanks: [{ id: 'same-legacy-id', value: 0 }, { id: 'same-legacy-id', value: 0 }],
@@ -195,7 +196,8 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
                 duplicates: [{ id: 'same-legacy-id', value1: 7, value2: 7 }]
             });
         expect(response.status).toBe(200);
-        const rows = await prisma.batchQcResult.findMany({ where: { batchId } });
+        const normalized = await prisma.batch.findUnique({ where: { id: batchId }, include: require('../../services/qcRunViewService').QC_RUN_INCLUDE });
+        const rows = require('../../services/qcRunViewService').batchApiView(normalized).qcItems;
         expect(rows).toHaveLength(4);
         expect(new Set(rows.map(row => row.id)).size).toBe(4);
         for (const row of rows) expect(row.id).toMatch(uuid);

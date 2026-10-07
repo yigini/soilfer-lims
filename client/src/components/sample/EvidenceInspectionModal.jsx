@@ -84,7 +84,7 @@ const EvidenceInspectionModal = ({ item, sample, isOpen, onClose, onViewSpectra 
                             <span className="block text-[11px] uppercase font-bold text-gray-400">Batch QC Status</span>
                             <span className={`font-semibold flex items-center gap-1 ${item.qcStatus === 'QC_FAIL' ? 'text-red-600' : 'text-emerald-600'}`}>
                                 {item.qcStatus === 'QC_FAIL' ? <AlertTriangle size={14} /> : <ShieldCheck size={14} />}
-                                {item.qcStatus || 'QC_PASS'}
+                                {item.qcStatus === 'NOT_REQUIRED' ? t('qcRuns.notRequired') : item.qcStatus || 'QC_PASS'}
                             </span>
                         </div>
                     </div>

@@ -237,7 +237,9 @@ function beforeGuards(options) {
         } else {
             const source = new Database(process.env.DATABASE_PATH, { readonly: true, fileMustExist: true });
             const tables = source.prepare("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%' AND name != 'ResultEvidenceEvent'").all();
-            const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent' AND name NOT IN ('ReferenceValue_current_generic','ReferenceValue_current_method','QcRule_scope_version_unique')").all();
+            // Copy schema-only indexes, leaving every additive release guard
+            // and partial index for its actual installer on this new file.
+            const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent' AND name NOT IN ('ReferenceValue_current_generic','ReferenceValue_current_method','QcRule_scope_version_unique','BatchAnalyte_crm_ordinal_unique','BatchPositionReference_current_unique','QcMeasurement_current_unique')").all();
             source.close();
             for (const table of tables) db.exec(['Sample', 'WorkItem'].includes(table.name)
                 ? table.sql.replace(/,\s*"(?:holdPriorStatus|legacyStatus)"\s+TEXT(?=\s*[,)])/g, '') : table.sql);

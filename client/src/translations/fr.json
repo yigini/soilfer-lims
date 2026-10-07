@@ -2820,6 +2820,7 @@
     "errors": {
       "QC_INSTRUMENT_REQUIRED": "La vérification de calibration exige un instrument enregistré. Demandez sa sélection avant le démarrage.",
       "QC_INSTRUMENT_INVALID": "Sélectionnez un instrument actif de ce laboratoire.",
+      "QC_BATCH_DUPLICATE_MEMBERSHIP": "Sélectionnez une seule tâche active par échantillon et analyse.",
       "QC_SEQUENCE_STALE": "La séquence ne répond plus aux critères actuels. Reconstruisez-la ou corrigez son ordre avant le démarrage.",
       "QC_VALUES_MISSING": "Saisissez des observations valides à chaque position requise avant l’évaluation.",
       "QC_BATCH_LOCKED": "Ces preuves de CQ sont verrouillées. Utilisez la décision du lot ou une nouvelle série.",

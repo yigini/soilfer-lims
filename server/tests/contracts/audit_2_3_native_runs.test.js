@@ -5,7 +5,7 @@ const { PrismaClient } = require('../../prisma_client');
 const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
 const Database = require('better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
-const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
+const { createSampleFixture, createWorkItemFixture, cleanupWorkflowFixtures } = require('../helpers/workflowFixtures');
 const { installReferenceMaterials } = require('../../scripts/install_reference_materials');
 const { installResultAttemptLinks } = require('../../scripts/install_result_attempt_links');
 const { installSampleHolds } = require('../../scripts/install_sample_holds');
@@ -104,6 +104,40 @@ function readings(run, { blank = 0.0123456789, control = 7.123456789, duplicate 
     return run.positions.filter(row => row.kind !== 'SAMPLE' || parents.has(row.id)).map(row => ({ positionId: row.id,
         value: ['BLANK', 'CCB'].includes(row.kind) ? blank : ['SAMPLE', 'DUPLICATE'].includes(row.kind) ? duplicate : control }));
 }
+
+test('test-owned cleanup retains QC-referenced workflow evidence and still removes unrelated explicit fixture ids', async () => {
+    const f = await fixture(), run = await buildNativeRun(f.db, f.actor, f.input);
+    const item = await f.db.workItem.findUnique({ where: { id: f.workItemIds[0] } });
+    const before = await evidence(f.db);
+    expect(await cleanupWorkflowFixtures(f.db, 'workItem', [item.id], { single: true }))
+        .toEqual({ count: 0, retainedIds: [item.id] });
+    expect(await cleanupWorkflowFixtures(f.db, 'sample', [item.sampleId], { single: true }))
+        .toEqual({ count: 0, retainedIds: [item.sampleId] });
+    expect(await evidence(f.db)).toEqual(before);
+    const [unrelatedId] = await members(f, 1);
+    const unrelated = await f.db.workItem.findUnique({ where: { id: unrelatedId } });
+    expect(await cleanupWorkflowFixtures(f.db, 'workItem', [item.id, unrelatedId])).toEqual({ count: 1 });
+    expect(await cleanupWorkflowFixtures(f.db, 'sample', [item.sampleId, unrelated.sampleId])).toEqual({ count: 1 });
+    expect(await f.db.workItem.findUnique({ where: { id: unrelatedId } })).toBeNull();
+    expect(await f.db.sample.findUnique({ where: { id: unrelated.sampleId } })).toBeNull();
+    expect(await f.db.batchPositionWorkItem.findMany({ where: { workItemId: item.id } })).toHaveLength(1);
+    expect(await f.db.batchPosition.count({ where: { batchId: run.id, kind: 'SAMPLE', sampleId: item.sampleId } })).toBe(1);
+});
+
+test('Native builds refuse two active attempts for a sample/analyte and never attach ACCEPTED history, with zero writes', async () => {
+    const f = await fixture(), original = await f.db.workItem.findUnique({ where: { id: f.workItemIds[0] } });
+    const duplicate = await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: original.sampleId, labId: f.labId,
+        analysis: f.analysisCode, methodologyId: f.method.id, duplicateOf: original.id, status: 'IN_PROGRESS' } });
+    const accepted = await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: original.sampleId, labId: f.labId,
+        analysis: f.analysisCode, methodologyId: f.method.id, duplicateOf: original.id, status: 'ACCEPTED' } });
+    const before = await evidence(f.db);
+    await expect(buildNativeRun(f.db, f.actor, { ...f.input, workItemIds: [original.id, duplicate.id] }))
+        .rejects.toMatchObject({ statusCode: 422, code: 'QC_BATCH_DUPLICATE_MEMBERSHIP' });
+    expect(await evidence(f.db)).toEqual(before);
+    await expect(buildNativeRun(f.db, f.actor, { ...f.input, workItemIds: [accepted.id] }))
+        .rejects.toMatchObject({ statusCode: 400, code: 'QC_WORK_ITEM_SEALED' });
+    expect(await evidence(f.db)).toEqual(before);
+});
 
 test('actual OPEN reorder retains physical ids, lot evidence and duplicate parents; invalid and frozen orders write nothing', async () => {
     const f = await fixture(2), run = await buildNativeRun(f.db, f.actor, f.input), lot = await referenceLot(f);

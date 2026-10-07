@@ -30,7 +30,7 @@ async function dispositionBatch(batchId, decision, reason, actor, db = null, { a
         const selected = batch.analytes.filter(row => analysisCode ? row.analysisCode === analysisCode :
             row.status === 'QC_FAIL' || currentAnalyteEvidence(batch, row.analysisCode).disposition);
         if (analysisCode && !selected.length) throw new rules.TransitionError('The analysis is not a member of this run.', 400, 'QC_ANALYSIS_NOT_IN_RUN');
-        if (!selected.length || batch.status === 'CLOSED') throw new rules.TransitionError('Batch is not in QC_FAIL state.', 400, 'BATCH_NOT_QC_FAILED');
+        if (!selected.length) throw new rules.TransitionError('Batch is not in QC_FAIL state.', 400, 'BATCH_NOT_QC_FAILED');
         const existing = selected.map(row => currentAnalyteEvidence(batch, row.analysisCode).disposition);
         if (existing.some(Boolean)) {
             if (existing.every(row => row && (row.canonicalDecision || DECISION_MAP[row.decision]) === canonical && row.reason === trimmedReason)) {
@@ -38,7 +38,7 @@ async function dispositionBatch(batchId, decision, reason, actor, db = null, { a
             }
             throw new rules.TransitionError(`Batch '${batch.id}' already has a conflicting disposition.`, 409, 'DISPOSITION_CONFLICT');
         }
-        if (selected.some(row => row.status !== 'QC_FAIL')) throw new rules.TransitionError('The selected analysis is not in QC_FAIL state.', 400, 'BATCH_NOT_QC_FAILED');
+        if (batch.status === 'CLOSED' || selected.some(row => row.status !== 'QC_FAIL')) throw new rules.TransitionError('The selected analysis is not in QC_FAIL state.', 400, 'BATCH_NOT_QC_FAILED');
         const codes = selected.map(row => row.analysisCode);
         const members = await tx.workItem.findMany({ where: { batchId: batch.id, analysis: { in: codes } }, include: { sample: true } });
         for (const item of members) rules.assertScope(actor, item.sample);
@@ -78,7 +78,8 @@ async function dispositionBatch(batchId, decision, reason, actor, db = null, { a
         }
         await tx.auditLog.create({ data: { id: randomUUID(), entity: 'QC_BATCH', entityId: batch.id, action: 'QC_DISPOSITION',
             details: `QC batch disposition recorded: ${legacyDecision}. Reason: ${trimmedReason}`, performedBy, timestamp: now } });
-        for (const row of selected) await flagBatchResults(tx, batch.id, 'QC_FAIL', disposition, row.analysisCode);
+        for (const row of selected) await flagBatchResults(tx, batch.id, 'QC_FAIL', disposition,
+            batch.analytes.length === 1 && row.provenance !== 'NATIVE' ? null : row.analysisCode);
         return { success: true, disposition };
     });
 }

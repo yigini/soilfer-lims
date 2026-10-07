@@ -17,7 +17,8 @@ function freezeReportEvidence(results, workItems, batches) {
             const analysisCode = governingItems(result, workItems).find(item => item.batchId === batchId)?.analysis || result.param;
             const batch = analyteGateView(source, analysisCode);
             if (batch?.result === 'PASS' && !batch.disposition || !Array.isArray(source?.analytes) && batch?.status === 'QC_PASS') continue;
-            const deviation = { analysisCode: result.param, batchId, qcStatus: batch?.result === 'NOT_REQUIRED' ? 'NOT_REQUIRED' : batch?.analyteStatus || batch?.status || 'NOT_RECORDED',
+            const deviation = { analysisCode: result.param, batchId, qcStatus: batch?.result === 'NOT_REQUIRED' ? 'NOT_REQUIRED' :
+                batch?.analyteStatus === 'IN_RUN' ? 'RUNNING' : batch?.analyteStatus || batch?.status || 'NOT_RECORDED',
                 dispositionReason: parseObject(batch?.disposition)?.reason || null };
             if (!deviations.some(row => row.analysisCode === deviation.analysisCode && row.batchId === batchId)) deviations.push(deviation);
         }

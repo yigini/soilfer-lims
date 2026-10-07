@@ -78,7 +78,7 @@ async function correctCompatibilityMeasurements(db, batchId, actor, input) {
         await tx.batch.update({ where: { id: batchId }, data: { status: aggregateBatchStatus(batch.analytes, { startedAt: batch.startedAt }) } });
         await tx.batchEvent.create({ data: { id: randomUUID(), batchId, type: 'QC_CORRECTED', by: performedBy, at: now,
             payload: JSON.stringify({ analysisCode, evaluationId: id, measurementIds: replacements.map(change => change.next.id), reason }) } });
-        await flagBatchResults(tx, batchId, evaluated.overallStatus, null, analysisCode);
+        await flagBatchResults(tx, batchId, evaluated.overallStatus, null, batch.analytes.length === 1 ? null : analysisCode);
         return { batch: batchApiView(await tx.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE })), evaluation: evaluated };
     });
 }

@@ -63,12 +63,32 @@ async function cleanupWorkflowFixtures(db, entity, ids, { single = false } = {})
     if (!owned || protectedPaths.includes(resolved.toLowerCase())) throw new Error('Cleanup refuses a non-test-owned database.');
     const explicitIds = [...new Set(ids)];
     if (single && explicitIds.length > 1) throw new Error('Single-row cleanup requires at most one id.');
-    if (entity === 'sample') {
-        return single && explicitIds.length ? db.sample.delete({ where: { id: explicitIds[0] } })
-            : db.sample.deleteMany({ where: { id: { in: explicitIds } } });
+    // Normalized QC membership retains its sample and work item evidence. Keep
+    // those fixture rows until the disposable database itself is torn down.
+    const tables = new Set((await db.$queryRawUnsafe("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('BatchPosition','BatchPositionWorkItem')"))
+        .map(row => row.name));
+    const retainedIds = new Set();
+    if (explicitIds.length) {
+        const placeholders = explicitIds.map(() => '?').join(',');
+        if (entity === 'sample' && tables.has('BatchPosition')) {
+            const rows = await db.$queryRawUnsafe(`SELECT DISTINCT sampleId AS id FROM "BatchPosition" WHERE sampleId IN (${placeholders})`, ...explicitIds);
+            for (const row of rows) retainedIds.add(row.id);
+        }
+        if (tables.has('BatchPositionWorkItem')) {
+            const sql = entity === 'sample'
+                ? `SELECT DISTINCT w.sampleId AS id FROM "BatchPositionWorkItem" p JOIN "WorkItem" w ON w.id=p.workItemId WHERE w.sampleId IN (${placeholders})`
+                : `SELECT DISTINCT workItemId AS id FROM "BatchPositionWorkItem" WHERE workItemId IN (${placeholders})`;
+            for (const row of await db.$queryRawUnsafe(sql, ...explicitIds)) retainedIds.add(row.id);
+        }
     }
-    return single && explicitIds.length ? db.workItem.delete({ where: { id: explicitIds[0] } })
-        : db.workItem.deleteMany({ where: { id: { in: explicitIds } } });
+    const removableIds = explicitIds.filter(id => !retainedIds.has(id));
+    if (retainedIds.size && !removableIds.length) return { count: 0, retainedIds: [...retainedIds] };
+    if (entity === 'sample') {
+        return single && removableIds.length ? db.sample.delete({ where: { id: removableIds[0] } })
+            : db.sample.deleteMany({ where: { id: { in: removableIds } } });
+    }
+    return single && removableIds.length ? db.workItem.delete({ where: { id: removableIds[0] } })
+        : db.workItem.deleteMany({ where: { id: { in: removableIds } } });
 }
 
 module.exports = { createSampleFixture, createWorkItemFixture, createSamplesFixture, createWorkItemsFixture, createAuthTokenFixture, cleanupWorkflowFixtures };

@@ -2820,6 +2820,7 @@
     "errors": {
       "QC_INSTRUMENT_REQUIRED": "La verificación de calibración requiere un instrumento registrado. Solicite su selección antes de iniciar.",
       "QC_INSTRUMENT_INVALID": "Seleccione un instrumento activo de este laboratorio.",
+      "QC_BATCH_DUPLICATE_MEMBERSHIP": "Seleccione una sola tarea activa por muestra y análisis.",
       "QC_SEQUENCE_STALE": "La secuencia ya no cumple los criterios actuales. Reconstrúyala o corrija su orden antes de iniciar.",
       "QC_VALUES_MISSING": "Introduzca observaciones válidas en cada posición requerida antes de evaluar.",
       "QC_BATCH_LOCKED": "Esta evidencia de QC está bloqueada. Utilice la disposición del lote o una nueva corrida.",

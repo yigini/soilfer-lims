@@ -55,10 +55,10 @@ function inventoryLegacyQcRuns(db) {
         'evaluations', 'measurements', 'typedRows', 'historicalTypedRows', 'jsonEntries', 'typedFallbackEntries', 'typedJsonConflicts',
         'historyAuditConflicts', 'unresolvedMethods', 'unresolvedAnalysts', 'unresolvedInstruments', 'unlinkedReferences',
         'unresolvedNumbers', 'unresolvedDuplicateParents', 'unresolvedRackPositions', 'missingWorkItems', 'malformedHistory',
-        'malformedQcResults', 'orphanSnapshots', 'refusals'].map(key => [key, 0]));
+        'malformedQcResults', 'orphanSnapshots', 'multiAttemptMembershipGroups', 'refusals'].map(key => [key, 0]));
     const diagnostics = [], refusals = [], metadata = [];
     const batches = db.prepare('SELECT id,labId,analysis,instrument,status,createdBy,createdAt,notes,qcResults,workItemIds,maxCapacity,profile,disposition,history FROM "Batch" ORDER BY id').all();
-    const workItems = db.prepare('SELECT id,sampleId,analysis,methodologyId,batchId,rackPosition FROM "WorkItem" WHERE batchId IS NOT NULL ORDER BY batchId,rackPosition,id').all();
+    const workItems = db.prepare('SELECT id,sampleId,analysis,methodologyId,batchId,rackPosition,labId,assignedLab,status,duplicateOf,createdAt FROM "WorkItem" WHERE batchId IS NOT NULL ORDER BY batchId,createdAt,id').all();
     const typedRows = db.prepare('SELECT * FROM "BatchQcResult" ORDER BY batchId,type,id').all();
     const audits = db.prepare('SELECT * FROM "AuditLog" WHERE entity=\'BATCH\' AND action=\'QC_EVIDENCE_SNAPSHOT\' ORDER BY entityId,id').all();
     const users = new Set(db.prepare('SELECT username FROM "User"').all().map(row => row.username));
@@ -139,25 +139,34 @@ function inventoryLegacyQcRuns(db) {
         }
 
         let positionNumber = 0;
-        const occupied = new Set(), samples = new Map();
+        const membershipGroups = new Map();
         for (const member of members) {
-            if (samples.has(member.sampleId)) {
-                const previous = samples.get(member.sampleId);
-                if (previous.rackPosition !== member.rackPosition || previous.codes.has(member.analysis)) {
-                    refuse(batch.id, 'QC_LEGACY_MEMBERSHIP_AMBIGUOUS', { sampleId: member.sampleId, workItemId: member.id }); continue;
-                }
-                previous.codes.add(member.analysis);
-                rows.BatchPositionWorkItem.push({ id: identity(batch.id, 'membership', member.id), positionId: previous.id, workItemId: member.id, analysisCode: member.analysis });
+            const key = JSON.stringify([member.sampleId, member.analysis]);
+            membershipGroups.set(key, (membershipGroups.get(key) || 0) + 1);
+        }
+        counts.multiAttemptMembershipGroups += [...membershipGroups.values()].filter(count => count > 1).length;
+        for (const member of members) {
+            const memberLab = member.assignedLab || member.labId;
+            const resolvedMemberLab = labs.find(row => row.id === memberLab || row.code === memberLab)?.id || memberLab;
+            const resolvedBatchLab = lab?.id || batch.labId;
+            if (resolvedMemberLab && resolvedMemberLab !== resolvedBatchLab) {
+                refuse(batch.id, 'QC_LEGACY_MEMBERSHIP_AMBIGUOUS', { workItemId: member.id, reason: 'LAB_SCOPE_MISMATCH', memberLab, batchLab: batch.labId });
                 continue;
             }
+            // Part 14: every real legacy attempt keeps its own current position.
+            // Retain a recorded rack number when it preserves creation order;
+            // otherwise allocate the next free number and retain the old rack
+            // in source metadata. No historical snapshot number is fabricated.
             let position = member.rackPosition;
-            if (!Number.isInteger(position) || position < 1) { counts.unresolvedRackPositions++; position = Math.max(positionNumber, ...occupied, 0) + 1; }
-            if (occupied.has(position)) { refuse(batch.id, 'QC_LEGACY_MEMBERSHIP_AMBIGUOUS', { workItemId: member.id, rackPosition: member.rackPosition }); continue; }
-            occupied.add(position); positionNumber = Math.max(positionNumber, position);
-            const id = identity(batch.id, 'sample', member.sampleId);
-            samples.set(member.sampleId, { id, rackPosition: member.rackPosition, codes: new Set([member.analysis]) });
+            if (!Number.isInteger(position) || position <= positionNumber) {
+                counts.unresolvedRackPositions++; position = positionNumber + 1;
+                diagnostic(batch.id, 'LEGACY_RACK_POSITION_UNRESOLVED', { workItemId: member.id, rackPosition: member.rackPosition, assignedPosition: position });
+            }
+            positionNumber = position;
+            const id = identity(batch.id, 'sample-attempt', member.id);
             rows.BatchPosition.push({ id, batchId: batch.id, position, kind: 'SAMPLE', sampleId: member.sampleId,
-                duplicateOfPositionId: null, historicalSnapshotSeq: null, provenance: 'LEGACY_MIGRATED', legacySource: JSON.stringify({ workItem: member }) });
+                duplicateOfPositionId: null, historicalSnapshotSeq: null, provenance: 'LEGACY_MIGRATED', legacySource: JSON.stringify({ workItem: member,
+                    workItemId: member.id, workItemStatusAtImport: member.status, duplicateOfWorkItemId: member.duplicateOf }) });
             rows.BatchPositionWorkItem.push({ id: identity(batch.id, 'membership', member.id), positionId: id, workItemId: member.id, analysisCode: member.analysis });
             counts.samplePositions++;
         }
