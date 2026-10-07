@@ -281,7 +281,7 @@ function canFinalApprove(sample, workItems = [], orderLines = [], user = null, o
     const qc = reportingQc(sample, { ...options, workItems });
     const qcFailure = qc.blocker?.gate;
     if (qcFailure) blockers.push(qcFailure.code ||
-        (qc.blocker.batch.status === 'QC_FAIL' ? 'QC_BATCH_FAILED' : 'QC_BATCH_PENDING'));
+        (['QC_FAIL', 'FAILED'].includes(qc.blocker.batch.status) ? 'QC_BATCH_FAILED' : 'QC_BATCH_PENDING'));
 
     // 8. Holds and historical evidence gaps
     if (sample.holdReason || options.hasActiveHold) {
