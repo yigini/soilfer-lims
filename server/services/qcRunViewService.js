@@ -1,6 +1,7 @@
 const scopeGuard = require('../utils/scopeGuard');
 const policyService = require('./policyService');
 const { runAnalyteCode } = require('./analysisCodesService');
+const { requireBatchHistory } = require('./qcHistoryService');
 const WORK_ITEM_SELECT = { id: true, sampleId: true, analysis: true, status: true, rackPosition: true, batchId: true,
     methodologyId: true, sample: { select: { id: true, originalId: true, labId: true, assignedLab: true } } };
 const QC_RUN_INCLUDE = {
@@ -129,6 +130,7 @@ function historyView(batch) {
     return entries.sort((a, b) => a.index - b.index || time(a.at) - time(b.at) || (a.seq || 0) - (b.seq || 0)).map(row => row.entry);
 }
 function batchApiView(batch, { serialized = false } = {}) {
+    requireBatchHistory(batch.history);
     const current = currentAnalyteEvidence(batch), history = historyView(batch);
     const analytes = (batch.analytes || []).map(row => ({ ...row, ...currentAnalyteEvidence(batch, row.analysisCode) }));
     const workItemIds = [...new Set((batch.positions || []).flatMap(position => (position.workItems || []).map(link => link.workItemId)))];

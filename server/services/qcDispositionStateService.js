@@ -5,6 +5,7 @@ const rules = require('./workflowStateRules');
 const work = require('./workItemStateService');
 const { flagBatchResults } = require('./qcService');
 const { QC_RUN_INCLUDE, readQcRun, currentAnalyteEvidence } = require('./qcRunViewService');
+const { withQcAudit, recordBatchAudit } = require('./qcRunAuditService');
 const DECISION_MAP = Object.freeze({ PROCEED_WITH_WARNING: 'ACCEPT_WITH_DEVIATION', REANALYZE_BATCH: 'REPEAT_BATCH', REJECT_BATCH: 'REJECT',
     ACCEPT_WITH_DEVIATION: 'ACCEPT_WITH_DEVIATION', REPEAT_BATCH: 'REPEAT_BATCH', REPEAT_BRACKET: 'REPEAT_BRACKET', REJECT: 'REJECT' });
 const LEGACY_DECISION = Object.freeze({ ACCEPT_WITH_DEVIATION: 'PROCEED_WITH_WARNING', REPEAT_BATCH: 'REANALYZE_BATCH', REPEAT_BRACKET: 'REANALYZE_BATCH', REJECT: 'REJECT_BATCH' });
@@ -76,12 +77,15 @@ async function dispositionBatch(batchId, decision, reason, actor, db = null, { a
             await work.transitionWorkItem(item.id, 'REPEAT_REQUIRED', actor, trimmedReason, data, tx,
                 { action: legacyDecision, expected: item });
         }
-        await tx.auditLog.create({ data: { id: randomUUID(), entity: 'QC_BATCH', entityId: batch.id, action: 'QC_DISPOSITION',
-            details: `QC batch disposition recorded: ${legacyDecision}. Reason: ${trimmedReason}`, performedBy, timestamp: now } });
+        await recordBatchAudit(tx, batch.id, { entity: 'QC_BATCH', action: 'QC_DISPOSITION', reason: trimmedReason, now,
+            details: { decision: legacyDecision, canonicalDecision: canonical,
+                message: `QC batch disposition recorded: ${legacyDecision}. Reason: ${trimmedReason}` } });
         for (const row of selected) await flagBatchResults(tx, batch.id, 'QC_FAIL', disposition,
             batch.analytes.length === 1 && row.provenance !== 'NATIVE' ? null : row.analysisCode);
         return { success: true, disposition };
     });
 }
 
-module.exports = { dispositionBatch };
+module.exports = { dispositionBatch: (batchId, decision, reason, actor, db = null, options = {}) =>
+    withQcAudit(db, { batchId: String(batchId), actor, reason, operation: 'QC_DISPOSITION' },
+        tx => dispositionBatch(batchId, decision, reason, actor, tx, options)) };

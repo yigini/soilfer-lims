@@ -11,7 +11,7 @@ const { normalizeQcNumbers, retainQcRawInput } = require('./qcNumberInputService
 const { retainReferences } = require('./referencePlacementService');
 const { evaluateBatchQc, getMissingQcValueTypes, flagBatchResults } = require('./qcService');
 const { parseNumber, parseDuplicateObservation } = require('../../shared/numberParse');
-const { snapshotEvidence } = require('./qcRunAuditService');
+const { snapshotEvidence, auditRunCommand } = require('./qcRunAuditService');
 const failure = (statusCode, code, message) => Object.assign(new Error(message), { statusCode, code });
 
 async function correctCompatibilityMeasurements(db, batchId, actor, input) {
@@ -82,4 +82,4 @@ async function correctCompatibilityMeasurements(db, batchId, actor, input) {
         return { batch: batchApiView(await tx.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE })), evaluation: evaluated };
     });
 }
-module.exports = { correctCompatibilityMeasurements };
+module.exports = { correctCompatibilityMeasurements: auditRunCommand(correctCompatibilityMeasurements, 'MEASUREMENT_CORRECTION') };

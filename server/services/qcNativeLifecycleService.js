@@ -4,7 +4,7 @@ const scopeGuard = require('../utils/scopeGuard');
 const policyService = require('./policyService');
 const { actorName, inTransaction } = require('./workflowStateRules');
 const { QC_RUN_INCLUDE, batchApiView, currentAnalyteEvidence } = require('./qcRunViewService');
-const { snapshotEvidence } = require('./qcRunAuditService');
+const { snapshotEvidence, auditRunCommand } = require('./qcRunAuditService');
 const { flagBatchResults } = require('./qcService');
 const { aggregateBatchStatus } = require('../workflowContract');
 const failure = (statusCode, code, message) => Object.assign(new Error(message), { statusCode, code });
@@ -46,4 +46,4 @@ async function reopenNativeRun(db, batchId, actor, reason, analysisCode = null) 
         return batchApiView(await tx.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE }));
     });
 }
-module.exports = { reopenNativeRun };
+module.exports = { reopenNativeRun: auditRunCommand(reopenNativeRun, 'REOPEN') };
