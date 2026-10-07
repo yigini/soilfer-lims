@@ -52,6 +52,7 @@ async function fixture({ migrated = false, sampleMember = false, finalClear = fa
     installReferenceMaterials({ dbPath: record.file, apply: true }); installQcRules({ dbPath: record.file, apply: true });
     const dryRun = installQcRuns({ dbPath: record.file, apply: false });
     installQcRuns({ dbPath: record.file, apply: true, planSha256: dryRun.backfillFingerprint });
+    require('../../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: record.file, apply: true });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${record.file}` }) }); record.db = db;
     const actor = { id: username, username, role: 'LAB_MANAGER', labId }, f = { db, file: record.file, actor, labId, analysisCode };
     await db.analysis.create({ data: { code: analysisCode, name: 'Compatibility fixture analysis' } });
