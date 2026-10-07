@@ -152,7 +152,7 @@ fi
 
 # Start the server
 echo "📦 Installing QC disposition scope guards..."
-node scripts/install_qc_gate_scope.js --apply
+node scripts/install_qc_gate_scope.js --db "${DATABASE_PATH:-/app/server/prisma/dev.db}" --apply
 
 echo "🚀 Starting SoilFER-LIMS..."
 exec node index.js

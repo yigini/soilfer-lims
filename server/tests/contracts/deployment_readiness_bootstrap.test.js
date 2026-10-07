@@ -361,8 +361,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_qc_rules.js').replace(/\\/g, '/')}" --apply`)
             .replaceAll('node scripts/install_qc_runs.js',
                 `node "${path.join(serverDir, 'scripts/install_qc_runs.js').replace(/\\/g, '/')}"`)
-            .replace('node scripts/install_qc_gate_scope.js --apply',
-                `node "${path.join(serverDir, 'scripts/install_qc_gate_scope.js').replace(/\\/g, '/')}" --apply`)
+            .replace('node scripts/install_qc_gate_scope.js --db "${DATABASE_PATH:-/app/server/prisma/dev.db}" --apply',
+                `node "${path.join(serverDir, 'scripts/install_qc_gate_scope.js').replace(/\\/g, '/')}" --db "\${DATABASE_PATH:-/app/server/prisma/dev.db}" --apply`)
             .replace(/node scripts\/migrate_[^\n]+/g, '# noop migration');
 
         const entryScript = path.join(testDir, 'entrypoint.sh');
