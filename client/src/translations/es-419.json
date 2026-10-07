@@ -112,7 +112,8 @@
     "none": "Ninguno",
     "inactive": "Inactivo",
     "mapUnavailable": "Mapa no disponible temporalmente. Aún puede ingresar coordenadas.",
-    "mapRetry": "Reintentar mapa"
+    "mapRetry": "Reintentar mapa",
+    "notRecorded": "No registrado"
   },
   "login": {
     "title": "Iniciar sesión en SoilFER LIMS",
@@ -2876,7 +2877,8 @@
       "WORKITEM_NOT_FOUND": "No se encontró la corrida o tarea seleccionada. Recargue la lista.",
       "REASON_REQUIRED": "Registre un motivo para este cambio de QC.",
       "REFERENCE_VALUE_MISMATCH": "El valor de referencia enviado debe coincidir con la colocación registrada.",
-      "QC_SUPERSEDE_TARGET_MISMATCH": "El reemplazo debe corresponder a la misma observación o posición de referencia registrada."
+      "QC_SUPERSEDE_TARGET_MISMATCH": "El reemplazo debe corresponder a la misma observación o posición de referencia registrada.",
+      "QC_BATCH_SCOPE_DENIED": "No tiene acceso a la serie de CC de este laboratorio."
     },
     "chooseDuplicateParent": "Seleccione la posición de la muestra original",
     "analysis": "Análisis",

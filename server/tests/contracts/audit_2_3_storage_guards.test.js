@@ -141,6 +141,62 @@ test.each(['QcMeasurement', 'BatchPositionReference'])('%s deferred supersession
     } finally { f.db.close(); }
 });
 
+test.each(['qcMeasurement', 'batchPositionReference'])('the application Prisma client rolls back a failed %s deferred COMMIT and remains writable', async model => {
+    const f = fixture(), p = position(f, model === 'qcMeasurement' ? 'BLANK' : 'LRM');
+    const lot = model === 'batchPositionReference' ? reference(f) : null;
+    start(f);
+    const original = model === 'qcMeasurement' ? measurement(f, p) : binding(f, p, lot);
+    insert(f.db, model === 'qcMeasurement' ? 'QcMeasurement' : 'BatchPositionReference', original);
+    const savedPath = process.env.DATABASE_PATH;
+    process.env.DATABASE_PATH = f.file;
+    try {
+        await jest.isolateModulesAsync(async () => {
+            const runtime = require('../../prisma');
+            try {
+                expect((await runtime.$queryRawUnsafe('PRAGMA foreign_keys')).map(row => Number(row.foreign_keys))).toEqual([1]);
+                const before = await runtime[model].findMany({ orderBy: { id: 'asc' } });
+                const audits = await runtime.auditLog.findMany({ orderBy: { id: 'asc' } });
+                const batch = await runtime.batch.findUnique({ where: { id: f.batchId } });
+                const dangling = randomUUID(); let reachedCommit = false;
+                await expect(runtime.$transaction(async tx => {
+                    await tx[model].update({ where: { id: original.id }, data: { supersededById: dangling } });
+                    await tx.batch.update({ where: { id: f.batchId }, data: { notes: 'Failed commit must leave zero writes' } });
+                    await tx.auditLog.create({ data: { id: randomUUID(), entity: 'QC_BATCH', entityId: f.batchId, action: 'QC_CORRECTED',
+                        details: 'Dangling replacement must roll back', performedBy: f.user } });
+                    reachedCommit = true;
+                })).rejects.toThrow();
+                expect(reachedCommit).toBe(true);
+                expect(await runtime[model].findMany({ orderBy: { id: 'asc' } })).toEqual(before);
+                expect(await runtime.auditLog.findMany({ orderBy: { id: 'asc' } })).toEqual(audits);
+                expect(await runtime.batch.findUnique({ where: { id: f.batchId } })).toEqual(batch);
+                expect(f.db.prepare(`SELECT supersededById FROM "${model === 'qcMeasurement' ? 'QcMeasurement' : 'BatchPositionReference'}" WHERE id=?`).get(original.id).supersededById).toBeNull();
+                const replacementId = randomUUID();
+                await runtime.$transaction(async tx => {
+                    await tx[model].update({ where: { id: original.id }, data: { supersededById: replacementId } });
+                    await tx[model].create({ data: { ...before[0], id: replacementId, correctionReason: 'Checked replacement after failed commit' } });
+                    await tx.batch.update({ where: { id: f.batchId }, data: { notes: 'The same runtime connection remains writable' } });
+                });
+                expect(await runtime[model].findUnique({ where: { id: original.id } })).toEqual({ ...before[0], supersededById: replacementId });
+                expect(await runtime[model].findUnique({ where: { id: replacementId } })).toMatchObject({ correctionReason: 'Checked replacement after failed commit' });
+                expect((await runtime.$queryRawUnsafe('PRAGMA foreign_key_check'))).toEqual([]);
+                expect(f.db.prepare('SELECT notes FROM Batch WHERE id=?').get(f.batchId).notes).toBe('The same runtime connection remains writable');
+                // The connection also retains normal callback-error rollback.
+                await expect(runtime.$transaction(async tx => {
+                    await tx.batch.update({ where: { id: f.batchId }, data: { notes: 'Callback error must roll back' } });
+                    throw new Error('QC186_CALLBACK_ROLLBACK');
+                })).rejects.toThrow('QC186_CALLBACK_ROLLBACK');
+                expect((await runtime.batch.findUnique({ where: { id: f.batchId } })).notes).toBe('The same runtime connection remains writable');
+                await runtime.$transaction(tx => tx.batch.update({ where: { id: f.batchId }, data: { notes: 'Normal rollback also remains writable' } }));
+                expect(f.db.prepare('SELECT notes FROM Batch WHERE id=?').get(f.batchId).notes).toBe('Normal rollback also remains writable');
+            } finally { await runtime.$disconnect(); }
+        });
+    } finally {
+        if (savedPath === undefined) delete process.env.DATABASE_PATH;
+        else process.env.DATABASE_PATH = savedPath;
+        f.db.close();
+    }
+});
+
 test('an imported historical position cannot accept another measurement after its import receipt event', () => {
     const f = fixture();
     try {

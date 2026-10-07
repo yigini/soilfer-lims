@@ -101,11 +101,18 @@ async function mutateQcRun(db, batchId, actor, input = {}, { explicit = false, c
                     throw failure(409, 'QC_BATCH_LOCKED', 'Use the authorized reopen path for a started run.');
                 } else if (!native || !batch.startedAt) {
                     const status = requested === 'RUNNING' ? 'IN_RUN' : 'OPEN';
-                    for (const row of batch.analytes) await tx.batchAnalyte.update({ where: { id: row.id }, data: { status } });
-                    await tx.batch.update({ where: { id: batchId }, data: { status: requested,
-                        ...(requested === 'RUNNING' && !batch.startedAt && { startedAt: new Date() }) } });
-                    if (batch.status !== requested) await event(tx, batchId, 'STATUS_CHANGED', performedBy, new Date(), { status: requested });
-                    await flagBatchResults(tx, batchId, requested);
+                    for (const row of statusTargets) {
+                        await tx.batchAnalyte.update({ where: { id: row.id }, data: { status } });
+                        row.status = status;
+                    }
+                    const startedAt = batch.startedAt || (requested === 'RUNNING' ? new Date() : null);
+                    const aggregate = aggregateBatchStatus(batch.analytes, { startedAt, reopened: requested === 'OPEN' });
+                    await tx.batch.update({ where: { id: batchId }, data: { status: aggregate,
+                        ...(startedAt && !batch.startedAt && { startedAt }) } });
+                    await event(tx, batchId, 'STATUS_CHANGED', performedBy, new Date(), {
+                        status: aggregate, requestedStatus: requested, analysisCodes: statusTargets.map(row => row.analysisCode)
+                    });
+                    for (const row of statusTargets) await flagBatchResults(tx, batchId, requested, null, row.analysisCode);
                 }
             }
         }

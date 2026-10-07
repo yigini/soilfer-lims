@@ -131,11 +131,13 @@ test.each(['BatchAnalyte', 'BatchPosition', 'BatchPositionWorkItem', 'BatchPosit
     expect(hash(f.file)).toBe(digest); expect(state(f.file)).toEqual(before);
 });
 
-test.each(['column', 'index', 'trigger', 'complete', 'late failure'])('fresh Prisma bootstrap refuses %s and preserves the exact original file', fault => {
+test.each(['column', 'index', 'other column', 'other index', 'trigger', 'complete', 'late failure'])('fresh Prisma bootstrap refuses %s and preserves the exact original file', fault => {
     const f = fixture({ fresh: 'prisma' }), db = new Database(f.file);
     try {
         if (fault === 'column') db.exec('ALTER TABLE "QcMeasurement" ADD COLUMN foreignColumn TEXT');
         if (fault === 'index') db.exec('CREATE INDEX "foreign_qc_index" ON "QcMeasurement"("rawInput")');
+        if (fault === 'other column') db.exec('ALTER TABLE "BatchEvent" ADD COLUMN foreignColumn TEXT');
+        if (fault === 'other index') db.exec('CREATE INDEX "foreign_qc_event_index" ON "BatchEvent"("payload")');
         if (fault === 'trigger') db.exec('CREATE TRIGGER "foreign_qc_trigger" BEFORE INSERT ON "QcMeasurement" BEGIN SELECT 1; END');
         if (fault === 'late failure') db.exec("CREATE TRIGGER reject_qc_receipt BEFORE INSERT ON _schema_migrations WHEN NEW.id='186_normalized_qc_runs' BEGIN SELECT RAISE(ABORT,'injected QC receipt failure'); END");
     } finally { db.close(); }

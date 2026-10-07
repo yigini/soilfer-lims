@@ -1301,7 +1301,8 @@
       "WORKITEM_NOT_FOUND": "A corrida ou tarefa selecionada não foi encontrada. Recarregue a lista.",
       "REASON_REQUIRED": "Registre um motivo para esta alteração de CQ.",
       "REFERENCE_VALUE_MISMATCH": "O valor de referência enviado deve corresponder à posição registrada.",
-      "QC_SUPERSEDE_TARGET_MISMATCH": "A substituição deve corresponder à mesma observação ou posição de referência registrada."
+      "QC_SUPERSEDE_TARGET_MISMATCH": "A substituição deve corresponder à mesma observação ou posição de referência registrada.",
+      "QC_BATCH_SCOPE_DENIED": "Você não tem acesso à série de CQ deste laboratório."
     },
     "chooseDuplicateParent": "Selecione a posição da amostra original",
     "analysis": "Análise",

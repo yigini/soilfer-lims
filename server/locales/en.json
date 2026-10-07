@@ -1301,7 +1301,8 @@
       "WORKITEM_NOT_FOUND": "The selected run or work item was not found. Reload the list.",
       "REASON_REQUIRED": "Record a reason for this QC change.",
       "REFERENCE_VALUE_MISMATCH": "The submitted reference value must match the recorded placement.",
-      "QC_SUPERSEDE_TARGET_MISMATCH": "The replacement must belong to the same recorded observation or reference position."
+      "QC_SUPERSEDE_TARGET_MISMATCH": "The replacement must belong to the same recorded observation or reference position.",
+      "QC_BATCH_SCOPE_DENIED": "You do not have access to this laboratory’s QC run."
     },
     "chooseDuplicateParent": "Select the original sample position",
     "analysis": "Analysis",

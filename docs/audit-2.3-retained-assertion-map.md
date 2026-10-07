@@ -22,6 +22,7 @@ Fixture and helper edits without baseline assertions are mapped below. Every pri
 | server/tests/helpers/workflowWriteScanner.js:299 | server/tests/helpers/workflowWriteScanner.js:305 | Resolve the loader's fixed two-table bootstrap DDL and schema/guard boundary only after both exact source hashes match. No general SQL or new caller exemption is introduced. |
 
 
+
 ## server/tests/contracts/audit_0_14_number_entry.test.js
 
 | Before (main) | Current | Matcher / preserved assertion | Mapping |

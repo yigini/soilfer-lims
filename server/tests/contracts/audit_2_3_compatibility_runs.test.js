@@ -15,6 +15,8 @@ const { correctCompatibilityMeasurements } = require('../../services/qcCompatibi
 const { QC_RUN_INCLUDE, batchApiView, readQcRun } = require('../../services/qcRunViewService');
 const { changeRunMembers } = require('../../services/qcRunMembershipService');
 const { buildNativeRun, startNativeRun } = require('../../services/qcNativeRunService');
+const { dispositionBatch } = require('../../services/qcDispositionStateService');
+const { createResultFixture } = require('../../services/resultWriteService');
 const policies = require('../../services/policyService');
 const request = require('supertest');
 const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
@@ -23,15 +25,18 @@ const owned = [];
 const input = (blank = 0.0123456789) => ({ blanks: [{ value: blank }], controls: [{ expected: 7.123456789, measured: 7.123456780 }],
     duplicates: [{ value1: 2.123456789, value2: 2.123456780 }, { value1: 2.123456789, value2: 2.123456780 }] });
 
-async function fixture({ migrated = false, sampleMember = false, finalClear = false, legacyRepeat = false } = {}) {
+async function fixture({ migrated = false, sampleMember = false, finalClear = false, legacyRepeat = false, multiAnalyte = false } = {}) {
     const labId = randomUUID(), analysisCode = randomUUID(), username = 'system:fixture', batchId = randomUUID();
-    const sampleId = randomUUID(), workItemId = randomUUID();
+    const sampleId = randomUUID(), workItemId = randomUUID(), secondCode = randomUUID(), secondItemId = randomUUID();
+    const members = sampleMember ? [{ id: workItemId, sampleId, labId, analysis: analysisCode, batchId, rackPosition: 3,
+        status: legacyRepeat ? 'REPEAT_REQUIRED' : 'IN_PROGRESS', updatedAt: Date.now() },
+        ...(multiAnalyte ? [{ id: secondItemId, sampleId, labId, analysis: secondCode, batchId, rackPosition: 3, status: 'IN_PROGRESS', updatedAt: Date.now() }] : [])] : [];
     const historical = beforeGuards({ actor: username, schemaVariant: 'PRE_1_3_SAMPLE_CODES',
         samples: sampleMember ? [{ id: sampleId, originalId: sampleId, assignedLab: labId, status: 'PROCESSING', updatedAt: Date.now() }] : [],
-        workItems: sampleMember ? [{ id: workItemId, sampleId, labId, analysis: analysisCode, batchId, rackPosition: 3, status: legacyRepeat ? 'REPEAT_REQUIRED' : 'IN_PROGRESS', updatedAt: Date.now() }] : [],
+        workItems: members,
         batches: migrated ? [{ id: batchId, labId, analysis: analysisCode, status: legacyRepeat ? 'QC_FAIL' : 'OPEN', createdBy: username,
             ...(legacyRepeat && { disposition: JSON.stringify({ decision: 'REJECT_REANALYSIS', reason: 'Recorded repeat required', by: username, at: '2026-09-20T09:00:00Z' }) }),
-            qcResults: JSON.stringify(legacyRepeat ? { ...input(10), overallStatus: 'QC_FAIL' } : { blanks: [], controls: [], duplicates: [] }), workItemIds: JSON.stringify(sampleMember ? [workItemId] : []),
+            qcResults: JSON.stringify(legacyRepeat ? { ...input(10), overallStatus: 'QC_FAIL' } : { blanks: [], controls: [], duplicates: [] }), workItemIds: JSON.stringify(members.map(row => row.id)),
             history: JSON.stringify([{ status: 'OPEN', changedBy: username, timestamp: new Date().toISOString() },
                 ...(finalClear ? [{ action: 'QC_EVIDENCE_SNAPSHOT', seq: 1, snapshot: { status: 'QC_PASS',
                     qcResults: JSON.stringify({ ...input(), overallStatus: 'QC_PASS' }), qcItems: [], disposition: null,
@@ -50,9 +55,10 @@ async function fixture({ migrated = false, sampleMember = false, finalClear = fa
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${record.file}` }) }); record.db = db;
     const actor = { id: username, username, role: 'LAB_MANAGER', labId }, f = { db, file: record.file, actor, labId, analysisCode };
     await db.analysis.create({ data: { code: analysisCode, name: 'Compatibility fixture analysis' } });
+    if (multiAnalyte) await db.analysis.create({ data: { code: secondCode, name: 'Second compatibility fixture analysis' } });
     const batch = migrated ? batchApiView(await db.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE }))
         : await createProfileRun(db, actor, { analysis: analysisCode, profile: 'RACK_40' });
-    return { ...f, batch };
+    return { ...f, batch, secondCode };
 }
 async function evidence(db) {
     return JSON.parse(JSON.stringify(await Promise.all([db.batch.findMany({ orderBy: { id: 'asc' } }),
@@ -82,6 +88,50 @@ async function unbatchedMember(f) {
     return createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId, labId: f.labId, assignedLab: f.labId,
         analysis: f.analysisCode, status: 'ASSIGNED' } });
 }
+
+test.each([null, 'REPEAT_BATCH', 'REJECT'])('a migrated sibling status change preserves failed/dispositioned evidence and result flags (%s)', async decision => {
+    const f = await fixture({ migrated: true, sampleMember: true, multiAnalyte: true });
+    expect(f.batch.analytes.map(row => row.provenance)).toEqual(['LEGACY_MIGRATED', 'LEGACY_MIGRATED']);
+    const parentFor = code => f.batch.positions.find(row => row.kind === 'SAMPLE' && row.workItems.some(link => link.analysisCode === code));
+    const parent = parentFor(f.analysisCode);
+    const payload = (code, blank) => ({ ...input(blank), analysisCode: code,
+        duplicates: input().duplicates.map(row => ({ ...row, duplicateOfPositionId: parentFor(code).id })) });
+    const failedResult = await createResultFixture(f.db, { data: { id: randomUUID(), sampleId: parent.sampleId,
+        param: f.analysisCode, batchId: f.batch.id, value: '2.123456789', numericValue: 2.123456789, isValid: true, flags: '[]' } });
+    await createResultFixture(f.db, { data: { ...failedResult, id: randomUUID(), param: f.secondCode } });
+    await writeCompatibilityMeasurements(f.db, f.batch.id, f.actor, payload(f.analysisCode, 100));
+    if (decision) await dispositionBatch(f.batch.id, decision, 'Reviewed failed analyte requires a new run', f.actor, f.db, { analysisCode: f.analysisCode });
+    const retained = async () => ({ analyte: await f.db.batchAnalyte.findFirst({ where: { batchId: f.batch.id, analysisCode: f.analysisCode } }),
+        measurements: await f.db.qcMeasurement.findMany({ where: { analysisCode: f.analysisCode }, orderBy: { id: 'asc' } }),
+        evaluations: await f.db.qcEvaluation.findMany({ where: { analysisCode: f.analysisCode }, orderBy: { id: 'asc' } }),
+        dispositions: await f.db.batchDisposition.findMany({ where: { analysisCode: f.analysisCode } }),
+        result: await f.db.result.findUnique({ where: { id: failedResult.id } }),
+        work: await f.db.workItem.findMany({ where: { batchId: f.batch.id, analysis: f.analysisCode } }) });
+    const before = await retained(), lockedStatus = decision === 'REJECT' ? 'REJECTED' : decision ? 'REPEAT_ORDERED' : 'QC_FAIL';
+    expect(before.analyte.status).toBe(lockedStatus);
+    expect(before.result.isValid).toBe(false);
+    await f.db.user.update({ where: { username: f.actor.username }, data: { role: 'LAB_TECHNICIAN', labId: f.labId } });
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const auth = { Authorization: `Bearer ${token}` };
+        for (const status of ['RUNNING', 'OPEN', 'RUNNING']) {
+            const response = await request(app).put(`/api/qc/batches/${f.batch.id}`).set(auth).send({ status, analysisCode: f.secondCode });
+            expect(response.status).toBe(200); expect(response.body.status).toBe('QC_FAIL');
+            expect(response.body.batch.analytes.find(row => row.analysisCode === f.secondCode).status).toBe(status === 'OPEN' ? 'OPEN' : 'IN_RUN');
+            expect(await retained()).toEqual(before);
+            const snapshot = await evidence(f.db);
+            const refused = await request(app).put(`/api/qc/batches/${f.batch.id}`).set(auth).send({ status: 'OPEN', analysisCode: f.analysisCode });
+            expect(refused.status).toBe(409); expect(refused.body.code).toBe('QC_BATCH_LOCKED');
+            expect(await evidence(f.db)).toEqual(snapshot);
+            const entry = await request(app).post(`/api/qc/batches/${f.batch.id}/evaluate`).set(auth).send(payload(f.analysisCode, 0.0123456789));
+            expect(entry.status).toBe(409); expect(entry.body.code).toBe('QC_BATCH_LOCKED');
+            expect(await evidence(f.db)).toEqual(snapshot);
+        }
+        const passed = await request(app).post(`/api/qc/batches/${f.batch.id}/evaluate`).set(auth).send(payload(f.secondCode, 0.0123456789));
+        expect(passed.status).toBe(200); expect(passed.body.status).toBe('QC_FAIL');
+        expect(passed.body.batch.analytes.find(row => row.analysisCode === f.secondCode).status).toBe('QC_PASS');
+        expect(await retained()).toEqual(before);
+    });
+});
 
 test.each(['PROFILE', 'NATIVE'])('a migrated REJECT_REANALYSIS item joins a new %s run while preserving its old evidence and membership', async targetKind => {
     const f = await fixture({ migrated: true, sampleMember: true, legacyRepeat: true });
