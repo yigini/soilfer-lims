@@ -1509,6 +1509,8 @@
     "warning": "Calibración por Vencer",
     "blocked": "Calibración Vencida / Bloqueado",
     "notConfigured": "No Configurado",
+
+    "unconfiguredWarning": "La calificación no está configurada; la política del laboratorio permite el uso con una advertencia.",
     "lastCalibration": "Última Calibración",
     "nextCalibration": "Próxima Calibración",
     "location": "Ubicación en Laboratorio",

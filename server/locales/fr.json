@@ -646,6 +646,8 @@
     "warning": "Étalonnage Bientôt Expiré",
     "blocked": "Étalonnage Expiré / Bloqué",
     "notConfigured": "Non Configuré",
+
+    "unconfiguredWarning": "La qualification n’est pas configurée ; la politique du laboratoire autorise l’utilisation avec un avertissement.",
     "lastCalibration": "Dernier Étalonnage",
     "nextCalibration": "Prochain Étalonnage",
     "location": "Emplacement au Laboratoire",

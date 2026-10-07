@@ -1509,6 +1509,8 @@
     "warning": "Calibração a Expirar",
     "blocked": "Calibração Expirada / Bloqueado",
     "notConfigured": "Não Configurado",
+
+    "unconfiguredWarning": "A qualificação não está configurada; a política do laboratório permite o uso com um aviso.",
     "lastCalibration": "Última Calibração",
     "nextCalibration": "Próxima Calibração",
     "location": "Localização no Laboratório",

@@ -169,12 +169,32 @@ const calculateQualification = (asset, events = [], scheduleRules = [], now = ne
 /**
  * Authoritative equipment readiness calculation.
  */
-const getReadiness = (asset) => {
+// Dates are authoritative on reads. This projection never persists a new
+// qualification or manufactures an equipment event as time passes.
+const qualificationAtRead = (asset, now = new Date()) => {
+    if (!asset?.qualification) return null;
+    const qualification = { ...asset.qualification };
+    for (const kind of ['Calibration', 'Verification']) {
+        const statusKey = `${kind.toLowerCase()}Status`;
+        const due = qualification[`next${kind}DueDate`];
+        if (due != null && new Date(due).getTime() < now.getTime() && qualification[statusKey] !== 'FAILED') {
+            qualification[statusKey] = 'OVERDUE';
+        }
+    }
+    return qualification;
+};
+
+const getReadiness = (asset, options = {}) => {
     if (!asset) return 'BLOCKED';
     if (asset.status === 'OUT_OF_SERVICE' || asset.status === 'DECOMMISSIONED') return 'BLOCKED';
 
-    const q = asset.qualification;
-    if (!q) return 'NOT_CONFIGURED';
+    const q = qualificationAtRead(asset, options.now);
+    const unconfigured = () => {
+        const action = options.unconfiguredReadiness?.[asset.criticality];
+        return action === 'BLOCK' ? 'BLOCKED' : action === 'WARN' ? 'WARNING'
+            : action === 'ALLOW' ? 'READY' : 'NOT_CONFIGURED';
+    };
+    if (!q) return unconfigured();
 
     if (['OVERDUE', 'FAILED'].includes(q.calibrationStatus) || ['OVERDUE', 'FAILED'].includes(q.verificationStatus)) {
         return 'BLOCKED';
@@ -185,8 +205,20 @@ const getReadiness = (asset) => {
     if (q.calibrationStatus === 'OK' || q.verificationStatus === 'OK') {
         return 'READY';
     }
-    return 'READY';
+    return unconfigured();
 };
+
+async function equipmentView(asset, options = {}) {
+    const unconfiguredReadiness = await require('./policyService').get(asset.labId,
+        'equipment.unconfiguredReadiness', { db: options.db || prisma });
+    const qualification = qualificationAtRead(asset, options.now);
+    const readiness = getReadiness(asset, { ...options, unconfiguredReadiness });
+    const unconfigured = !qualification || [qualification.calibrationStatus, qualification.verificationStatus]
+        .every(status => status === 'NOT_CONFIGURED' || status == null);
+    return { ...asset, qualification, readiness,
+        readinessWarnings: unconfigured && unconfiguredReadiness[asset.criticality] === 'WARN'
+            ? ['EQUIPMENT_NOT_CONFIGURED_WARNING'] : [] };
+}
 
 /**
  * Recompute qualification state from database records and persist atomically.
@@ -237,16 +269,11 @@ const recomputeAndPersist = async (equipmentId, txOrPrisma = prisma, actorUserna
         });
     }
 
-    return {
+    return equipmentView({
         ...asset,
         status: projected.shouldSetOutOfService && asset.status === 'IN_SERVICE' ? 'OUT_OF_SERVICE' : asset.status,
-        qualification: updatedQual,
-        readiness: getReadiness({
-            ...asset,
-            status: projected.shouldSetOutOfService && asset.status === 'IN_SERVICE' ? 'OUT_OF_SERVICE' : asset.status,
-            qualification: updatedQual
-        })
-    };
+        qualification: updatedQual
+    }, { db: txOrPrisma });
 };
 
 /**
@@ -318,6 +345,8 @@ module.exports = {
     parseEventDates,
     calculateQualification,
     getReadiness,
+    qualificationAtRead,
+    equipmentView,
     recomputeAndPersist,
     generateMismatchReport
 };

@@ -230,6 +230,9 @@ const MaintenanceTab = ({ asset, canManage, onAction }) => {
                 </div>
                 <div>
                     <h4 className="text-lg font-bold">Instrument Readiness: {asset.readiness}</h4>
+                    {asset.readinessWarnings?.includes('EQUIPMENT_NOT_CONFIGURED_WARNING') && (
+                        <p className="mt-2 text-sm">{t('equipment.unconfiguredWarning')}</p>
+                    )}
                     <p className="text-sm text-gray-500">System check shows {asset.status.replace(/_/g, ' ')} state with {calibStatus.toLowerCase()} calibration.</p>
                 </div>
             </div>

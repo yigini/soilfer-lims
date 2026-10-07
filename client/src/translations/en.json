@@ -1509,6 +1509,8 @@
     "warning": "Calibration Expiring Soon",
     "blocked": "Calibration Overdue / Blocked",
     "notConfigured": "Not Configured",
+
+    "unconfiguredWarning": "Qualification is not configured; laboratory policy permits use with a warning.",
     "lastCalibration": "Last Calibration",
     "nextCalibration": "Next Due Date",
     "location": "Room / Bench Location",
