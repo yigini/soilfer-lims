@@ -105,7 +105,9 @@ function inventoryLegacyQcRuns(db) {
     counts.dispositionAttributionConflicts = 0;
     const diagnostics = [], refusals = [], metadata = [];
     const batches = db.prepare('SELECT id,labId,analysis,instrument,status,createdBy,createdAt,notes,qcResults,workItemIds,maxCapacity,profile,disposition,history FROM "Batch" ORDER BY id').all();
-    const workItems = db.prepare('SELECT id,sampleId,analysis,methodologyId,batchId,rackPosition,labId,assignedLab,status,duplicateOf,createdAt FROM "WorkItem" WHERE batchId IS NOT NULL ORDER BY batchId,createdAt,id').all();
+    // Empty historical QC inventories have no membership to import. Avoid
+    // requiring unused later WorkItem metadata on a supported old baseline.
+    const workItems = batches.length ? db.prepare('SELECT id,sampleId,analysis,methodologyId,batchId,rackPosition,labId,assignedLab,status,duplicateOf,createdAt FROM "WorkItem" WHERE batchId IS NOT NULL ORDER BY batchId,createdAt,id').all() : [];
     const typedRows = db.prepare('SELECT * FROM "BatchQcResult" ORDER BY batchId,type,id').all();
     const audits = db.prepare('SELECT * FROM "AuditLog" WHERE entity=\'BATCH\' AND action=\'QC_EVIDENCE_SNAPSHOT\' ORDER BY entityId,id').all();
     const dispositionAudits = db.prepare("SELECT * FROM AuditLog WHERE entity IN ('BATCH','QC_BATCH') AND action='QC_DISPOSITION' ORDER BY entityId,id").all();

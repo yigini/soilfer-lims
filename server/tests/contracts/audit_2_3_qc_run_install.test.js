@@ -3,6 +3,7 @@ const path = require('node:path');
 const { randomUUID, createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
+const { assertOwnedTestDatabase } = require('../helpers/testOwnedDatabase');
 const { installReferenceMaterials } = require('../../scripts/install_reference_materials');
 const { installQcRules } = require('../../scripts/install_qc_rules');
 const { installQcRuns, assertQcRunStartupReady, parseArguments } = require('../../scripts/install_qc_runs');
@@ -69,7 +70,42 @@ function expectOriginalEvidence(reader, before) {
         expect(reader.prepare(`SELECT ${table.columns.map(row => `"${row.name}"`).join(',')} FROM "${table.name}" ORDER BY rowid`).all()).toEqual(table.rows);
     }
 }
-afterAll(() => { for (const file of files) if (fs.existsSync(file)) fs.unlinkSync(file); });
+afterAll(() => { for (const file of files) if (fs.existsSync(file)) { fs.chmodSync(file, 0o600); fs.unlinkSync(file); } });
+
+test.each([false, true])('an empty pinned historical QC inventory with no duplicateOf column imports only its receipt, retaining orphan audit refusal=%s', orphan => {
+    const historical = beforeGuards({ actor: 'system:fixture', schemaVariant: 'PRE_1_3_SAMPLE_CODES', preMigrationSnapshot: true });
+    const source = historical.preMigrationSnapshot.path, originalHash = hash(source);
+    files.push(historical.file, source);
+    const file = assertOwnedTestDatabase(path.resolve(__dirname, '../.tmp', `audit_empty_qc_${randomUUID()}.db`), 'system:fixture');
+    fs.copyFileSync(source, file, fs.constants.COPYFILE_EXCL); fs.chmodSync(file, 0o600); files.push(file);
+    const db = new Database(file);
+    try {
+        expect(db.prepare('PRAGMA table_info("WorkItem")').all().some(row => row.name === 'duplicateOf')).toBe(false);
+        db.exec('CREATE TABLE IF NOT EXISTS "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL,"appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"details" TEXT)');
+        if (orphan) insert(db, 'AuditLog', { id: randomUUID(), entity: 'BATCH', entityId: 'absent-batch', action: 'QC_EVIDENCE_SNAPSHOT',
+            performedBy: 'recorded raw actor', timestamp: recordedAt, details: JSON.stringify(snapshot(1, evaluated())) });
+    } finally { db.close(); }
+    installReferenceMaterials({ dbPath: file, apply: true }); installQcRules({ dbPath: file, apply: true });
+    const before = state(file), digest = hash(file), dry = installQcRuns({ dbPath: file });
+    expect(dry.backfillCount).toBe(0);
+    expect(dry.backfillCounts).toMatchObject({ batches: 0, samplePositions: 0, measurements: 0 });
+    expect(hash(file)).toBe(digest);
+    if (orphan) {
+        expect(dry.refusals).toEqual([expect.objectContaining({ code: 'QC_LEGACY_BATCH_UNRESOLVED' })]);
+        expect(() => installQcRuns({ dbPath: file, apply: true })).toThrow(expect.objectContaining({ code: 'QC_RUN_BACKFILL_REFUSED' }));
+        expect(hash(file)).toBe(digest); expect(state(file)).toEqual(before);
+    } else {
+        expect(dry.refusals).toEqual([]);
+        expect(installQcRuns({ dbPath: file, apply: true })).toMatchObject({ mode: 'APPLIED', backfillCount: 0, totalChanges: 1 });
+        const reader = new Database(file, { readonly: true });
+        try { expectOriginalEvidence(reader, before); } finally { reader.close(); }
+        const installed = hash(file);
+        expect(installQcRuns({ dbPath: file, apply: true })).toMatchObject({ mode: 'NO_OP', totalChanges: 0 });
+        expect(assertQcRunStartupReady(file)).toMatchObject({ classification: 'COMPLETE', totalChanges: 0 });
+        expect(hash(file)).toBe(installed);
+    }
+    expect(hash(source)).toBe(originalHash);
+});
 
 test.each([false, true])('additive install on fresh=%s preserves every old field and object; dry-run/repeat/startup change zero bytes', fresh => {
     const value = 0.012345678912345, f = fixture({ fresh, membership: true, status: 'QC_PASS', qcResults: JSON.stringify(evaluated({ blanks: [{ value, status: 'PASS' }] })) });
