@@ -2510,7 +2510,9 @@
       "qc_curveMinR": "Minimum curve correlation",
       "qc_repeatabilityLimit": "Repeatability limit",
       "qc_blankCorrection": "Blank correction",
-      "qc_failAction": "Action on QC failure"
+      "qc_failAction": "Action on QC failure",
+      "qc_requireBatchQc": "Batch QC requirement",
+      "qc_calibrationFailAction": "Calibration failure action"
     },
     "title": "Policies",
     "yes": "Yes",
@@ -2608,7 +2610,10 @@
       "NONE": "None",
       "SUBTRACT_MEAN_BLANK": "Blank correction",
       "FAIL_BATCH": "Fail batch",
-      "WARN": "Warn"
+      "WARN": "Warn",
+      "AUTO": "Automatic",
+      "REQUIRED": "Required",
+      "NOT_REQUIRED": "Not required"
     },
     "units": {
       "samples": "samples",
@@ -2632,6 +2637,10 @@
       "POLICY_STORED_VALUE_INVALID": "A stored policy value is invalid.",
       "POLICY_SCOPE_CONFLICT": "Several current overrides exist for this setting and scope.",
       "LAB_SETTINGS_INVALID": "Stored laboratory settings are invalid. The change was not saved."
+    },
+    "help": {
+      "qc_requireBatchQc": "AUTO requires batch QC for measurement methods with enabled resolved QC criteria. A method override can require or waive batch membership and evaluation.",
+      "qc_calibrationFailAction": "Choose the action for failed initial or continuing calibration verification and calibration blanks."
     }
   },
   "referenceMaterials": {
@@ -2781,7 +2790,8 @@
     },
     "actions": {
       "FAIL_BATCH": "Fail batch",
-      "WARN": "Warn"
+      "WARN": "Warn",
+      "REPEAT_BRACKET": "Repeat calibration bracket"
     },
     "errors": {
       "QC_RULE_VERSION_CONFLICT": "QC rule changed. Refresh before saving.",

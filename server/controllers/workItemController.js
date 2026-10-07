@@ -843,16 +843,7 @@ exports.reviewWorkItem = async (req, res) => {
                     });
                 }
 
-                // Batch QC check
-                const qcController = require('./qcController');
-                const batchInfo = await qcController.checkItemBatchStatus(item.id);
-                if (batchInfo && batchInfo.allowed === false) {
-                    return res.status(409).json({
-                        error: `Cannot ACCEPT work item ${item.id} because it belongs to a FAILED QC Batch (${batchInfo.batchId}). You must WAIVE or REJECT it.`,
-                        code: 'QC_FAIL_BLOCKER',
-                        batchId: batchInfo.batchId
-                    });
-                }
+                await require('../services/qcGateService').requireAcceptance([item], req.body.qcAcknowledgement, prisma);
             }
         }
 
@@ -1027,7 +1018,7 @@ exports.reviewWorkItem = async (req, res) => {
                 await invalidateReturnedResults(tx, item, user, effectiveReason);
             }
             return rows;
-        });
+        }, undefined, { qcAcknowledgement: req.body.qcAcknowledgement });
         const result = { workItemId: id, status, decision: decisionVerdict };
         if (item.submissionId) await reconcileSubmission(prisma, item.submissionId, user, [result]);
         for (const notify of notifications) await notify();
@@ -1054,7 +1045,7 @@ exports.reviewWorkItem = async (req, res) => {
         });
     } catch (error) {
         console.error('[reviewWorkItem] Error:', error);
-        res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }) });
+        res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work item', ...(error.code && { code: error.code }), ...(error.details || {}) });
     }
 };
 
@@ -1165,22 +1156,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                 });
             }
 
-            // Check QC status for each item
-            const qcController = require('./qcController');
-            const qcFailures = [];
-            for (const item of items) {
-                const batchInfo = await qcController.checkItemBatchStatus(item.id);
-                if (batchInfo && batchInfo.allowed === false) {
-                    qcFailures.push({ workItemId: item.id, batchId: batchInfo.batchId });
-                }
-            }
-            if (qcFailures.length > 0) {
-                return res.status(409).json({
-                    error: `Cannot approve work items belonging to failed QC batches: ${qcFailures.map(q => `${q.workItemId} (Batch: ${q.batchId})`).join(', ')}`,
-                    code: 'QC_FAIL_BLOCKER',
-                    qcFailures
-                });
-            }
+            await require('../services/qcGateService').requireAcceptance(items, req.body.qcAcknowledgement, prisma);
         }
 
         const now = new Date();
@@ -1323,7 +1299,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                         await invalidateReturnedResults(tx, item, user, effectiveReason);
                     }
                     return rows;
-                });
+                }, undefined, { qcAcknowledgement: req.body.qcAcknowledgement });
                 results.push({ workItemId: item.id, status, decision: decisionVerdict });
                 for (const notify of notifications) await notify();
             } catch (error) {
@@ -1357,7 +1333,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
         res.json({ success: true, count: results.length, results, errors });
     } catch (error) {
         console.error('[reviewWorkItemsBulk] Error:', error);
-        res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work items', ...(error.code && { code: error.code }) });
+        res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review work items', ...(error.code && { code: error.code }), ...(error.details || {}) });
     }
 };
 

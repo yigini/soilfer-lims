@@ -35,13 +35,22 @@ async function commitReview(prisma, item, status, user, data, operations, submis
             assertReviewable(current, status, sample);
             const returned = status === 'REPEAT_REQUIRED' && !workflow.CLOSURE_TASK_ANALYSES.includes(current.analysis);
             if (returned) require('./resultEvidenceService').assertAmendable(sample);
+            const qcGate = require('./qcGateService');
+            const qcRows = status === 'ACCEPTED' ? await qcGate.requireAcceptance([{ ...current, sample }], audit.qcAcknowledgement, tx) : [];
             const history = typeof data.history === 'string' ? JSON.parse(data.history) : data.history;
             const reason = audit.reason || data.reanalysisReason || data.waiveReason || history?.at(-1)?.reason || history?.at(-1)?.note || null;
+            if (qcRows.some(row => qcGate.decision(row.gate).acknowledgementRequired)) {
+                const acknowledgements = qcRows.filter(row => qcGate.decision(row.gate).acknowledgementRequired).map(row => ({
+                    action: 'QC_GATE_ACKNOWLEDGED', resultId: row.resultId || null, reason: audit.qcAcknowledgement.reason.trim(),
+                    gate: row.gate, changedBy: user.username, timestamp: new Date().toISOString() }));
+                data = { ...data, history: JSON.stringify([...require('./workflowStateRules').requireHistory(history), ...acknowledgements]) };
+            }
             await transitionWorkItem(item.id, status, user, reason, data, tx, {
                 expected: item, submissionId, conflictCode: 'ITEM_NOT_SUBMITTED',
                 action: workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis) ? 'CLOSURE_REVIEW' : 'REVIEW',
                 audit: { action: audit.action || 'REVIEW', details: audit.details || `Work Item ${status} by ${user.username}` }
             });
+            await qcGate.recordAcknowledgements(qcRows, audit.qcAcknowledgement, user, tx);
             const decisions = await operations(tx);
             if (returned && sample.status === 'SUBMITTED_FULL') {
                 const decision = (Array.isArray(decisions) ? decisions : [decisions]).find(row =>

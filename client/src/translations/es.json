@@ -2510,7 +2510,9 @@
       "qc_curveMinR": "Correlación mínima de la curva",
       "qc_repeatabilityLimit": "Límite de repetibilidad",
       "qc_blankCorrection": "Corrección del blanco",
-      "qc_failAction": "Acción ante fallo de QC"
+      "qc_failAction": "Acción ante fallo de QC",
+      "qc_requireBatchQc": "Requisito de CC del lote",
+      "qc_calibrationFailAction": "Acción ante fallo de calibración"
     },
     "title": "Políticas",
     "yes": "Sí",
@@ -2608,7 +2610,10 @@
       "NONE": "Ninguno",
       "SUBTRACT_MEAN_BLANK": "Corrección del blanco",
       "FAIL_BATCH": "Rechazar lote",
-      "WARN": "Advertir"
+      "WARN": "Advertir",
+      "AUTO": "Automático",
+      "REQUIRED": "Obligatorio",
+      "NOT_REQUIRED": "No obligatorio"
     },
     "units": {
       "samples": "muestras",
@@ -2632,6 +2637,10 @@
       "POLICY_STORED_VALUE_INVALID": "Un valor de política almacenado es inválido.",
       "POLICY_SCOPE_CONFLICT": "Hay varios ajustes vigentes para este ajuste y ámbito.",
       "LAB_SETTINGS_INVALID": "Los ajustes almacenados del laboratorio son inválidos. El cambio no se guardó."
+    },
+    "help": {
+      "qc_requireBatchQc": "AUTO exige CC de lote para métodos de medición con criterios de CC resueltos habilitados. Una excepción de método puede exigir o eximir la pertenencia al lote y su evaluación.",
+      "qc_calibrationFailAction": "Elija la acción ante fallos de verificación inicial o continua de calibración y blancos de calibración."
     }
   },
   "referenceMaterials": {
@@ -2781,7 +2790,8 @@
     },
     "actions": {
       "FAIL_BATCH": "Rechazar lote",
-      "WARN": "Advertir"
+      "WARN": "Advertir",
+      "REPEAT_BRACKET": "Repetir intervalo de calibración"
     },
     "errors": {
       "QC_RULE_VERSION_CONFLICT": "La regla cambió. Actualice antes de guardar.",

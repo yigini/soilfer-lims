@@ -19,6 +19,8 @@ function key(name, type, strict, basic = strict, advisory = strict, options = {}
 }
 const integer = { min: 0 };
 key('qc.mode', 'enum', 'REQUIRED_BLOCKING', 'REQUIRED_WARN', 'ADVISORY', { allowedValues: ['REQUIRED_BLOCKING', 'REQUIRED_WARN', 'ADVISORY', 'OFF'] });
+key('qc.requireBatchQc', 'enum', 'AUTO', undefined, undefined, { allowedValues: ['AUTO', 'REQUIRED', 'NOT_REQUIRED'],
+    help: 'policies.help.qc_requireBatchQc' });
 key('qc.maxBatchSize', 'integer', 20, 40, null, { min: 1, nullable: true, unit: 'samples' });
 key('qc.blankPerBatch', 'integer', 1, 1, 0, integer);
 key('qc.duplicateEvery', 'integer', 10, 20, 0, { ...integer, unit: 'samples' });
@@ -26,6 +28,9 @@ key('qc.lrmPerBatch', 'integer', 1, 0, 0, integer);
 key('qc.crmEveryNBatches', 'integer', 10, 0, 0, { ...integer, unit: 'batches' });
 key('qc.ccvEvery', 'integer', 10, 20, 0, { ...integer, unit: 'samples' });
 key('qc.calibrationVerification', 'boolean', false);
+key('qc.calibrationFailAction', 'calibrationFailAction', { ICV: 'FAIL_BATCH', CCV: 'REPEAT_BRACKET', CCB: 'REPEAT_BRACKET' }, undefined, undefined, {
+    allowedActions: { ICV: ['FAIL_BATCH', 'WARN'], CCV: ['FAIL_BATCH', 'REPEAT_BRACKET', 'WARN'], CCB: ['FAIL_BATCH', 'REPEAT_BRACKET', 'WARN'] },
+    help: 'policies.help.qc_calibrationFailAction' });
 key('qc.lrmLimitMode', 'enum', 'CONTROL_CHART', 'FIXED_WINDOW', 'FIXED_WINDOW', { allowedValues: ['CONTROL_CHART', 'FIXED_WINDOW'] });
 key('qc.westgardRules', 'westgard', { reject: ['1-3s', '2-2s', 'R-4s'], warn: ['1-2s'] }, { reject: ['1-3s'], warn: [] }, { reject: [], warn: [] },
     { allowedValues: ['1-2s', '1-3s', '2-2s', 'R-4s', '4-1s', '10x'] });
@@ -88,6 +93,9 @@ function valid(name, value) {
     case 'number': return typeof value === 'number' && Number.isFinite(value) && value >= (d.min ?? 0) && (d.max === undefined || value <= d.max);
     case 'qcFailAction': return !!value && typeof value === 'object' && !Array.isArray(value) &&
         Object.keys(value).length === 4 && ['BLANK', 'DUPLICATE', 'LRM', 'CRM'].every(type => ['FAIL_BATCH', 'WARN'].includes(value[type]));
+    case 'calibrationFailAction': return !!value && typeof value === 'object' && !Array.isArray(value) &&
+        Object.keys(value).length === Object.keys(d.allowedActions).length &&
+        Object.entries(d.allowedActions).every(([kind, actions]) => actions.includes(value[kind]));
     case 'westgard': {
         if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(k => !['reject', 'warn'].includes(k))) return false;
         if (!['reject', 'warn'].every(k => Array.isArray(value[k]) && value[k].every(v => d.allowedValues.includes(v)))) return false;

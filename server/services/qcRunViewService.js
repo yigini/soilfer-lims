@@ -34,7 +34,7 @@ function currentDisposition(batch, evaluation, analysisCode) {
             : !payload.analysisCode || payload.analysisCode === analysisCode);
     }).sort((a, b) => time(b.at) - time(a.at))[0];
     if (reopen && time(reopen.at) >= time(latest.decidedAt)) return null;
-    return { decision: decisions[latest.decision] || latest.decision, canonicalDecision: latest.decision,
+    return { id: latest.id, scope: parsed(latest.scope), decision: decisions[latest.decision] || latest.decision, canonicalDecision: latest.decision,
         reason: latest.reason, by: latest.decidedBy, at: latest.decidedAt, analysisCode: latest.analysisCode };
 }
 function currentAnalyteEvidence(batch, analysisCode = batch.analysis) {
