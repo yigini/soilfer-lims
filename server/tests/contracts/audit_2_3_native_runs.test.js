@@ -17,6 +17,7 @@ const { buildNativeRun, rebuildNativeRun, startNativeRun } = require('../../serv
 const { preparePositionBindings, applyPositionBindings } = require('../../services/qcRunReferenceService');
 const { correctValue } = require('../../services/referenceMaterialService');
 const { writeNativeMeasurements } = require('../../services/qcNativeMeasurementService');
+const { reopenNativeRun } = require('../../services/qcNativeLifecycleService');
 const { createResultFixture } = require('../../services/resultWriteService');
 const owned = [];
 
@@ -144,6 +145,17 @@ test('reasoned corrections append two evaluation versions and exact measurements
     await expect(writeNativeMeasurements(f.db, run.id, f.actor, { corrections: [{ positionId: blank.id, value: 0.223456789 }] }, { correction: true }))
         .rejects.toMatchObject({ code: 'QC_CORRECTION_REASON_REQUIRED' });
     expect(await evidence(f.db)).toEqual(before);
+    await expect(writeNativeMeasurements(f.db, run.id, f.actor, { reason: 'A correction does not itself reopen acceptance',
+        corrections: [{ positionId: blank.id, value: 0.223456789 }] }, { correction: true }))
+        .rejects.toMatchObject({ statusCode: 409, code: 'QC_BATCH_LOCKED' });
+    expect(await evidence(f.db)).toEqual(before);
+    await expect(reopenNativeRun(f.db, run.id, { ...f.actor, role: 'LAB_TECHNICIAN' }, 'Reopen needs manager authority'))
+        .rejects.toMatchObject({ statusCode: 403, code: 'QC_REOPEN_PERMISSION_REQUIRED' });
+    await expect(reopenNativeRun(f.db, run.id, f.actor, '')).rejects.toMatchObject({ statusCode: 400, code: 'REASON_REQUIRED' });
+    expect(await evidence(f.db)).toEqual(before);
+    const reopened = await reopenNativeRun(f.db, run.id, f.actor, 'Reopen the accepted run for checked transcription correction');
+    expect(reopened.analytes[0].status).toBe('QC_PENDING');
+    expect(reopened.qcResults.blanks[0].value).toBe(original.value);
     const failed = await writeNativeMeasurements(f.db, run.id, f.actor, { reason: 'Correct the transcribed blank',
         corrections: [{ positionId: blank.id, value: 0.223456789 }] }, { correction: true });
     expect(first.status).toBe('QC_PASS'); expect(failed.status).toBe('QC_FAIL');
@@ -155,9 +167,17 @@ test('reasoned corrections append two evaluation versions and exact measurements
     expect(next.value).toBe(0.223456789); expect(next.correctionReason).toBe('Correct the transcribed blank');
     expect(await f.db.qcMeasurement.findUnique({ where: { id: original.id } })).toEqual({ ...original, supersededById: next.id });
     const locked = await evidence(f.db);
-    await expect(writeNativeMeasurements(f.db, run.id, f.actor, { reason: 'Still needs manager reopen', corrections: [{ positionId: blank.id, value: 0 }] }, { correction: true }))
-        .rejects.toMatchObject({ statusCode: 409, code: 'QC_BATCH_LOCKED' });
-    expect(await evidence(f.db)).toEqual(locked);
+    for (const role of ['LAB_TECHNICIAN', 'LAB_MANAGER', 'SUPER_ADMIN']) {
+        const actor = { ...f.actor, role };
+        for (const change of [{ corrections: [{ positionId: blank.id, value: 0 }] },
+            { references: [{ positionId: run.positions.find(row => row.kind === 'LRM').id, referenceMaterialId: lot.id }] }]) {
+            await expect(writeNativeMeasurements(f.db, run.id, actor, { reason: 'Failed evidence stays locked', ...change }, { correction: true }))
+                .rejects.toMatchObject({ statusCode: 409, code: 'QC_BATCH_LOCKED' });
+            expect(await evidence(f.db)).toEqual(locked);
+        }
+        await expect(reopenNativeRun(f.db, run.id, actor, 'Failed evidence stays locked')).rejects.toMatchObject({ statusCode: 409, code: 'QC_BATCH_LOCKED' });
+        expect(await evidence(f.db)).toEqual(locked);
+    }
 });
 
 test('native censoring retains null numeric observations, canonical qualifiers and the frozen method limit', async () => {
@@ -198,6 +218,10 @@ test('ADVISORY explicit evaluation records INCOMPLETE; later complete values sup
     expect(complete.evaluations).toHaveLength(2);
     expect(complete.evaluations[1].supersedesId).toBe(complete.evaluations[0].id);
     expect(complete.evaluations.every(row => JSON.parse(row.details).criteriaSnapshot === run.analytes[0].criteriaSnapshot)).toBe(true);
+    const corrected = await writeNativeMeasurements(f.db, run.id, f.actor, { reason: 'Advisory evidence can be corrected without a reopen',
+        corrections: [{ positionId: run.positions.find(row => row.kind === 'BLANK').id, value: 0.0223456789 }] }, { correction: true });
+    expect(corrected.analytes[0].result).toBe('PASS'); expect(corrected.evaluations).toHaveLength(3);
+    expect(corrected.events.some(row => row.type === 'REOPENED')).toBe(false);
 });
 
 test('mixed-analyte evaluations and flags are independent; a shared lot correction appends both verdicts atomically', async () => {
@@ -213,6 +237,7 @@ test('mixed-analyte evaluations and flags are independent; a shared lot correcti
     expect(first.status).toBe('RUNNING'); expect(first.analytes.find(row => row.analysisCode === f.analysisCode).result).toBe('PASS');
     const both = await writeNativeMeasurements(f.db, run.id, f.actor, { analysisCode: b.analysisCode, measurements: readings(run, { control: 12.987654321 }) });
     expect(both.status).toBe('QC_PASS'); expect(both.evaluations).toHaveLength(2);
+    await reopenNativeRun(f.db, run.id, f.actor, 'Reopen both accepted analytes for a shared lot correction');
     const missingLot = await referenceLot(f, 7.223456789), lrm = run.positions.find(row => row.kind === 'LRM'), before = await evidence(f.db);
     await expect(writeNativeMeasurements(f.db, run.id, f.actor, { reason: 'A shared lot needs both analytes',
         references: [{ positionId: lrm.id, referenceMaterialId: missingLot.id }] }, { correction: true }))
@@ -230,10 +255,12 @@ test('mixed-analyte evaluations and flags are independent; a shared lot correcti
         const versions = corrected.evaluations.filter(row => row.analysisCode === code);
         expect(versions[1]).toMatchObject({ version: 2, supersedesId: versions[0].id, verdict: 'PASS' });
     }
+    await reopenNativeRun(f.db, run.id, f.actor, 'Reopen the accepted analytes before a blank correction');
     const failed = await writeNativeMeasurements(f.db, run.id, f.actor, { analysisCode: f.analysisCode, reason: 'Correct one analyte blank only',
         corrections: [{ positionId: run.positions.find(row => row.kind === 'BLANK').id, value: 0.223456789 }] }, { correction: true });
     expect(failed.analytes.find(row => row.analysisCode === f.analysisCode).status).toBe('QC_FAIL');
-    expect(failed.analytes.find(row => row.analysisCode === b.analysisCode).status).toBe('QC_PASS');
+    expect(failed.analytes.find(row => row.analysisCode === b.analysisCode).result).toBe('PASS');
+    expect(failed.analytes.find(row => row.analysisCode === b.analysisCode).status).toBe('QC_PENDING');
     expect(await f.db.result.findUnique({ where: { id: resultB.id } })).toEqual(expect.objectContaining({ isValid: true, flags: '[]', value: resultB.value, numericValue: resultB.numericValue }));
     expect(await f.db.result.findUnique({ where: { id: resultA.id } })).toEqual(expect.objectContaining({ isValid: false, flags: '["QC_BATCH_FAILED"]', value: resultA.value, numericValue: resultA.numericValue, rawInput: resultA.rawInput }));
 });
@@ -246,6 +273,7 @@ test('a late evaluation insert failure rolls back measurements, every shared bin
         { analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: firstLot.id }] }, { analysisCode: b.analysisCode }] })).id, f.actor);
     await writeNativeMeasurements(f.db, run.id, f.actor, { measurements: readings(run) });
     await writeNativeMeasurements(f.db, run.id, f.actor, { analysisCode: b.analysisCode, measurements: readings(run, { control: 12.987654321 }) });
+    await reopenNativeRun(f.db, run.id, f.actor, 'Reopen both accepted analytes before the rollback probe');
     const before = await evidence(f.db);
     const connection = new Database(f.file, { fileMustExist: true });
     connection.exec("CREATE TRIGGER qc186_fixture_evaluation_abort BEFORE INSERT ON QcEvaluation WHEN NEW.version=2 BEGIN SELECT RAISE(ABORT,'QC186_FIXTURE_EVALUATION_ABORT'); END;");
@@ -356,6 +384,7 @@ test('optional CRM lot correction records NOT_SERVED with intact prior evidence;
     await writeNativeMeasurements(f.db, run.id, f.actor, { measurements: readings(run) });
     const initial = await writeNativeMeasurements(f.db, run.id, f.actor, { analysisCode: b.analysisCode, measurements: readings(run, { control: 12.987654321 }) });
     const oldMeasurements = await f.db.qcMeasurement.findMany({ orderBy: { id: 'asc' } }), oldEvaluations = await f.db.qcEvaluation.findMany({ orderBy: { id: 'asc' } });
+    await reopenNativeRun(f.db, run.id, f.actor, 'Reopen both accepted analytes before the optional CRM lot correction');
     const onlyA = await referenceLot(f, 7.123456789, 'CRM'), position = run.positions.find(row => row.kind === 'CRM');
     const corrected = await writeNativeMeasurements(f.db, run.id, f.actor, { reason: 'Optional CRM no longer serves the second analyte',
         references: [{ positionId: position.id, referenceMaterialId: onlyA.id }] }, { correction: true });
@@ -371,6 +400,7 @@ test('optional CRM lot correction records NOT_SERVED with intact prior evidence;
     expect(due.analytes.map(row => row.crmOrdinal)).toEqual([3, 3]);
     await writeNativeMeasurements(f.db, due.id, f.actor, { measurements: readings(due) });
     await writeNativeMeasurements(f.db, due.id, f.actor, { analysisCode: b.analysisCode, measurements: readings(due, { control: 12.987654321 }) });
+    await reopenNativeRun(f.db, due.id, f.actor, 'Reopen accepted analytes for the required-service refusal probe');
     const before = await evidence(f.db);
     await expect(writeNativeMeasurements(f.db, due.id, f.actor, { reason: 'Required service cannot be dropped',
         references: [{ positionId: due.positions.find(row => row.kind === 'CRM').id, referenceMaterialId: onlyA.id }] }, { correction: true }))
@@ -435,13 +465,10 @@ test('a first-start count revision refuses stale positions and leaves every row,
 });
 
 test('resuming a reopened native run reuses first-start metadata and criteria without resolving later policy', async () => {
-    const f = await fixture(), run = await buildNativeRun(f.db, f.actor, f.input), initial = await startNativeRun(f.db, run.id, f.actor);
-    await f.db.$transaction(async tx => {
-        await tx.batchAnalyte.update({ where: { id: initial.analytes[0].id }, data: { status: 'QC_PENDING' } });
-        await tx.batch.update({ where: { id: initial.id }, data: { status: 'OPEN' } });
-        await tx.batchEvent.create({ data: { id: randomUUID(), batchId: initial.id, type: 'REOPENED', by: f.actor.username, at: new Date(),
-            payload: JSON.stringify({ reason: 'Native resume fixture' }) } });
-    });
+    const f = await fixture(), lot = await referenceLot(f), run = await buildNativeRun(f.db, f.actor, { ...f.input, analyses: [
+        { analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }] }), initial = await startNativeRun(f.db, run.id, f.actor);
+    await writeNativeMeasurements(f.db, run.id, f.actor, { measurements: readings(initial) });
+    await reopenNativeRun(f.db, run.id, f.actor, 'Native resume fixture');
     const policyRead = jest.spyOn(policies, 'snapshot').mockImplementation(() => { throw new Error('A started native run must not refresh policy.'); });
     try {
         const resumed = await startNativeRun(f.db, run.id, f.actor);

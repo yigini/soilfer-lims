@@ -358,12 +358,26 @@ test('direct startup refuses a missing file without implicitly creating it', asy
     expect(child.stdout).not.toMatch(/SCHEDULER|Enterprise Server|\[PRISMA\]/); expect(fs.existsSync(file)).toBe(false);
 });
 
+test('direct startup refuses missing normalized QC installation before app import and preserves the file', async () => {
+    const fixture = beforeGuards({ actor: 'system:fixture', installWorkflowStateGuards: true }); fixtures.push(fixture);
+    require('../../scripts/install_result_attempt_links').installResultAttemptLinks({ dbPath: fixture.file, apply: true });
+    require('../../scripts/install_sample_holds').installSampleHolds({ dbPath: fixture.file, apply: true });
+    require('../../scripts/install_reference_materials').installReferenceMaterials({ dbPath: fixture.file, apply: true });
+    require('../../scripts/install_qc_rules').installQcRules({ dbPath: fixture.file, apply: true });
+    const before = fingerprint(fixture.file), child = await realStartup(fixture.file);
+    expect(child).toMatchObject({ code: 1, accepted: false });
+    expect(JSON.parse(child.stderr)).toMatchObject({ error: 'QC_RUN_NOT_INSTALLED', nextStep: expect.stringContaining('audit-2.3-normalized-qc-migration.md') });
+    expect(child.stdout).not.toMatch(/SCHEDULER|Enterprise Server|\[PRISMA\]/);
+    expect(fingerprint(fixture.file)).toBe(before);
+});
+
 test('a complete guarded database passes the read-only gate, listens and answers a real health request', async () => {
     const fixture = beforeGuards({ actor: 'system:fixture', installWorkflowStateGuards: true }); fixtures.push(fixture);
     require('../../scripts/install_result_attempt_links').installResultAttemptLinks({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_sample_holds').installSampleHolds({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_reference_materials').installReferenceMaterials({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_qc_rules').installQcRules({ dbPath: fixture.file, apply: true });
+    require('../../scripts/install_qc_runs').installQcRuns({ dbPath: fixture.file, apply: true });
     const child = await realStartup(fixture.file, true);
     expect(child.accepted).toBe(true);
     const ready = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"WORKFLOW_STARTUP_READY"')));
@@ -375,6 +389,9 @@ test('a complete guarded database passes the read-only gate, listens and answers
     const holdsReady = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"SAMPLE_HOLD_STARTUP_READY"')));
     expect(holdsReady).toMatchObject({ classification: 'COMPLETE', totalChanges: 0 });
     expect(child.stdout.indexOf('SAMPLE_HOLD_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
+    const qcReady = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"QC_RUN_STARTUP_READY"')));
+    expect(qcReady).toMatchObject({ classification: 'COMPLETE', totalChanges: 0 });
+    expect(child.stdout.indexOf('QC_RUN_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
 });
 
 test.each([

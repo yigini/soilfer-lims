@@ -1,4 +1,5 @@
 const scopeGuard = require('../utils/scopeGuard');
+const policyService = require('./policyService');
 const QC_RUN_INCLUDE = {
     analytes: true, positions: { include: { workItems: true, references: true }, orderBy: { position: 'asc' } },
     measurements: true, evaluations: { orderBy: [{ analysisCode: 'asc' }, { version: 'asc' }] },
@@ -18,9 +19,8 @@ function latestEvaluation(batch, analysisCode) {
 }
 function currentDisposition(batch, evaluation, analysisCode) {
     const details = parsed(evaluation?.details, {});
-    if (details.legacy) return parsed(details.disposition);
     const latest = (batch.dispositions || []).filter(row => !row.analysisCode || row.analysisCode === analysisCode).sort((a, b) => time(b.decidedAt) - time(a.decidedAt))[0];
-    if (!latest) return null;
+    if (!latest) return details.legacy ? parsed(details.disposition) : null;
     const reopen = (batch.events || []).filter(row => row.type === 'REOPENED' && (!parsed(row.payload, {})?.analysisCode || parsed(row.payload, {}).analysisCode === analysisCode)).sort((a, b) => time(b.at) - time(a.at))[0];
     if (reopen && time(reopen.at) >= time(latest.decidedAt)) return null;
     return { decision: decisions[latest.decision] || latest.decision, canonicalDecision: latest.decision,
@@ -29,7 +29,9 @@ function currentDisposition(batch, evaluation, analysisCode) {
 function currentAnalyteEvidence(batch, analysisCode = batch.analysis) {
     const evaluation = latestEvaluation(batch, analysisCode), details = parsed(evaluation?.details, {});
     const isolatedRound = details.legacy === true || details.entryMode === 'LEGACY_RESUBMISSION';
-    const selectedPositions = new Set(details.positionIds || []), selectedMeasurements = new Set(details.measurementIds || []);
+    const reopened = isolatedRound && (batch.events || []).some(row => row.type === 'REOPENED' &&
+        parsed(row.payload, {}).discardCurrentEvidence && parsed(row.payload, {}).previousEvaluationIds?.includes(evaluation?.id));
+    const selectedPositions = new Set(reopened ? [] : details.positionIds || []), selectedMeasurements = new Set(reopened ? [] : details.measurementIds || []);
     const built = (batch.events || []).filter(row => ['RUN_BUILT', 'RUN_STARTED'].includes(row.type)).slice().reverse().sort((a, b) => time(b.at) - time(a.at))[0];
     const served = new Map((parsed(built?.payload, {}).positions || []).map(row => [row.id, row.servedAnalytes || []]));
     function serves(row) {
@@ -113,7 +115,7 @@ function batchApiView(batch, { serialized = false } = {}) {
     const current = currentAnalyteEvidence(batch), history = historyView(batch);
     const analytes = (batch.analytes || []).map(row => ({ ...row, ...currentAnalyteEvidence(batch, row.analysisCode) }));
     const workItemIds = [...new Set((batch.positions || []).flatMap(position => (position.workItems || []).map(link => link.workItemId)))];
-    return { ...batch, analytes, qcItems: current.qcItems, qcResults: serialized && current.qcResults !== null ? JSON.stringify(current.qcResults) : current.qcResults,
+    return { ...batch, analytes, result: current.result, qcItems: current.qcItems, qcResults: serialized && current.qcResults !== null ? JSON.stringify(current.qcResults) : current.qcResults,
         workItemIds: serialized ? JSON.stringify(workItemIds) : workItemIds,
         disposition: serialized && current.disposition !== null ? JSON.stringify(current.disposition) : current.disposition,
         history: serialized ? JSON.stringify(history) : history,
@@ -123,7 +125,8 @@ function batchApiView(batch, { serialized = false } = {}) {
 async function readQcRun(db, batchId, actor, options = {}) {
     const batch = await db.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE });
     if (!batch) throw Object.assign(new Error('Batch not found.'), { statusCode: 404, code: 'BATCH_NOT_FOUND' });
-    try { scopeGuard.ensureScope(actor, batch, { labField: 'labId' }); }
+    const [actorLab, targetLab] = db.lab ? await Promise.all([policyService.resolveLab(actor.labId, db), policyService.resolveLab(batch.labId, db)]) : [];
+    try { scopeGuard.ensureScope({ ...actor, labId: actorLab?.id || actor.labId }, { ...batch, labId: targetLab?.id || batch.labId }, { labField: 'labId', altLabField: null }); }
     catch (error) { error.code = error.code || 'QC_BATCH_SCOPE_DENIED'; throw error; }
     return batchApiView(batch, options);
 }

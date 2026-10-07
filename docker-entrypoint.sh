@@ -141,6 +141,15 @@ node scripts/install_reference_materials.js --apply
 echo "📦 Installing versioned QC rules..."
 node scripts/install_qc_rules.js --apply
 
+# Existing QC evidence needs a reviewed, quiescent dry-run fingerprint. Never
+# approve a backfill automatically from the container's own dry-run output.
+echo "📦 Installing normalized QC runs..."
+if [ -n "${QC_RUN_PLAN_SHA256:-}" ]; then
+    node scripts/install_qc_runs.js --apply --plan-sha256 "$QC_RUN_PLAN_SHA256"
+else
+    node scripts/install_qc_runs.js --apply
+fi
+
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."
 exec node index.js

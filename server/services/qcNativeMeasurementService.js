@@ -37,7 +37,7 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         if (!batch.startedAt) throw failure(409, 'QC_RUN_NOT_STARTED', 'Start the run before entering or evaluating QC.');
         if (batch.status === 'CLOSED') throw failure(400, 'QC_BATCH_LOCKED', 'Closed QC evidence is locked.');
         if (batch.status === 'QC_FAIL' || batch.analytes.some(row => currentAnalyteEvidence(batch, row.analysisCode).disposition)) {
-            throw failure(409, 'QC_BATCH_LOCKED', 'Reopen failed or dispositioned evidence before correcting it.');
+            throw failure(409, 'QC_BATCH_LOCKED', 'Failed or dispositioned evidence is locked; use batch disposition.');
         }
         if (correction && !reason) throw failure(400, 'QC_CORRECTION_REASON_REQUIRED', 'A correction reason is required.');
         const analysisCode = input.analysisCode || batch.analysis, selected = batch.analytes.find(row => row.analysisCode === analysisCode);
@@ -71,6 +71,12 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
             const plan = await preparePositionBindings(tx, { batch, position, analyses: served, actor,
                 referenceMaterialId: entry.referenceMaterialId, referenceValueIds, reason: correction ? reason : null, optionalAnalysisCodes }, now);
             plans.push(plan); plan.bindings.forEach(row => affected.add(row.analysisCode));
+        }
+        if (correction && [...affected].some(code => {
+            const row = batch.analytes.find(analyte => analyte.analysisCode === code);
+            return ['QC_PASS', 'QC_WARN'].includes(row.status) && JSON.parse(row.criteriaSnapshot).qcMode !== 'ADVISORY';
+        })) {
+            throw failure(409, 'QC_BATCH_LOCKED', 'Reopen accepted QC with manager authority and a reason before correcting it.');
         }
         // Evaluate an in-memory candidate before the first mutation, including
         // every analyte sharing a rebound physical lot. Any refusal writes zero.
