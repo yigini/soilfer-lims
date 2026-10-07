@@ -6,14 +6,13 @@ const { currentAnalyteEvidence } = require('./qcRunViewService');
 function evaluateNativeEvidence(batch, analyte) {
     const criteria = JSON.parse(analyte.criteriaSnapshot), evidence = currentAnalyteEvidence(batch, analyte.analysisCode);
     const values = Object.fromEntries(Object.entries(criteria.qcRule.resolved).map(([key, row]) => [key, row.value]));
-    const counts = criteria.counts, method = criteria.methodContext, format = criteria.numberFormat;
+    const method = criteria.methodContext, format = criteria.numberFormat;
     const at = positionId => evidence.measurements.find(row => row.positionId === positionId && row.replicateNo === 1);
     const binding = position => (position.references || []).find(row => row.analysisCode === analyte.analysisCode && !row.supersededById);
-    const required = position => ({ BLANK: counts.blank, LRM: counts.lrm, CRM: counts.crm,
-        DUPLICATE: counts.duplicate, ICV: counts.calibration, CCV: counts.calibration, CCB: counts.calibration })[position.kind] > 0;
+    const frozenRequired = new Set(Object.values(criteria.requiredPositions).flat());
+    const required = position => frozenRequired.has(position.id);
     const positions = evidence.positions.filter(row => row.kind !== 'SAMPLE' && row.kind !== 'CAL_STD');
-    const requiredIds = new Set(positions.filter(required).flatMap(row => row.kind === 'DUPLICATE'
-        ? [row.id, row.duplicateOfPositionId] : [row.id]));
+    const requiredIds = new Set([...frozenRequired, ...positions.filter(row => required(row) && row.kind === 'DUPLICATE').map(row => row.duplicateOfPositionId)]);
     const missingPositions = [...requiredIds].filter(id => !at(id));
     const unboundPositions = positions.filter(row => ['LRM', 'CRM', 'ICV', 'CCV'].includes(row.kind) &&
         (required(row) || at(row.id)) && !binding(row)).map(row => row.id);

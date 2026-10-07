@@ -17,11 +17,14 @@ const owned = [];
 const input = (blank = 0.0123456789) => ({ blanks: [{ value: blank }], controls: [{ expected: 7.123456789, measured: 7.123456780 }],
     duplicates: [{ value1: 2.123456789, value2: 2.123456780 }, { value1: 2.123456789, value2: 2.123456780 }] });
 
-async function fixture({ migrated = false } = {}) {
+async function fixture({ migrated = false, sampleMember = false } = {}) {
     const labId = randomUUID(), analysisCode = randomUUID(), username = 'system:fixture', batchId = randomUUID();
+    const sampleId = randomUUID(), workItemId = randomUUID();
     const historical = beforeGuards({ actor: username, schemaVariant: 'PRE_1_3_SAMPLE_CODES',
+        samples: sampleMember ? [{ id: sampleId, originalId: sampleId, assignedLab: labId, status: 'PROCESSING', updatedAt: Date.now() }] : [],
+        workItems: sampleMember ? [{ id: workItemId, sampleId, labId, analysis: analysisCode, batchId, rackPosition: 3, status: 'IN_PROGRESS', updatedAt: Date.now() }] : [],
         batches: migrated ? [{ id: batchId, labId, analysis: analysisCode, status: 'OPEN', createdBy: username,
-            qcResults: JSON.stringify({ blanks: [], controls: [], duplicates: [] }), workItemIds: '[]', history: '[]', profile: 'RACK_40' }] : [],
+            qcResults: JSON.stringify({ blanks: [], controls: [], duplicates: [] }), workItemIds: JSON.stringify(sampleMember ? [workItemId] : []), history: '[]', profile: 'RACK_40' }] : [],
         relatedRows: { Lab: [{ id: labId, code: `CODE-${labId}`, name: 'Compatibility fixture lab', country: 'TEST', updatedAt: Date.now() }],
             User: [{ id: username, username, email: 'compatibility@example.test', password: 'fixture', role: 'SUPER_ADMIN', updatedAt: Date.now() }] } });
     const record = { file: historical.file, db: null }; owned.push(record);
@@ -104,6 +107,29 @@ test('a migrated INCOMPLETE clear can receive an ordinary full submission withou
     expect(JSON.parse(result.batch.analytes[0].evaluation.details).reopenEventId).toBeNull();
     expect(result.batch.measurements.every(row => row.correctionReason === null && row.supersededById === null)).toBe(true);
     expect(result.batch.evaluations[0].verdict).toBe('INCOMPLETE'); expect(result.batch.evaluations).toHaveLength(2);
+});
+
+test('ordinary resubmission supersedes a changed real SAMPLE reading once and reuses an unchanged parent in the next round', async () => {
+    const f = await fixture({ migrated: true, sampleMember: true }), parent = f.batch.positions.find(row => row.kind === 'SAMPLE');
+    const pair = value1 => ({ ...input(), duplicates: input().duplicates.map(row => ({ ...row, value1, duplicateOfPositionId: parent.id })) });
+    const first = await writeCompatibilityMeasurements(f.db, f.batch.id, f.actor, pair(2.123456789));
+    const oldParent = await f.db.qcMeasurement.findFirst({ where: { positionId: parent.id } }), firstEval = first.batch.analytes[0].evaluation;
+    await reopenCompatibilityRun(f.db, f.batch.id, f.actor, 'Reopen the migrated run for the next full submission');
+    const second = await writeCompatibilityMeasurements(f.db, f.batch.id, f.actor, pair(2.124456789));
+    const next = await f.db.qcMeasurement.findFirst({ where: { positionId: parent.id, supersededById: null } });
+    expect(await f.db.qcMeasurement.findUnique({ where: { id: oldParent.id } })).toEqual({ ...oldParent, supersededById: next.id });
+    expect(next).toMatchObject({ positionId: parent.id, replicateNo: 1, value: 2.124456789, correctionReason: 'LEGACY_RESUBMISSION' });
+    expect(JSON.parse(next.legacySource).reopenEventId).toBe(JSON.parse(second.batch.analytes[0].evaluation.details).reopenEventId);
+    expect(second.batch.qcResults.duplicates.every(row => row.duplicateOfPositionId === parent.id && row.value1 === next.value)).toBe(true);
+    expect(JSON.parse(second.batch.analytes[0].evaluation.details).measurementIds).toContain(next.id);
+    expect(JSON.parse(second.batch.analytes[0].evaluation.details).measurementIds).not.toContain(oldParent.id);
+    expect(await f.db.qcEvaluation.findUnique({ where: { id: firstEval.id } })).toEqual(firstEval);
+    const count = await f.db.qcMeasurement.count({ where: { positionId: parent.id } });
+    await reopenCompatibilityRun(f.db, f.batch.id, f.actor, 'Reopen while retaining an unchanged parent observation');
+    const third = await writeCompatibilityMeasurements(f.db, f.batch.id, f.actor, pair(2.124456789));
+    expect(await f.db.qcMeasurement.count({ where: { positionId: parent.id } })).toBe(count);
+    expect(JSON.parse(third.batch.analytes[0].evaluation.details).measurementIds).toContain(next.id);
+    expect(await f.db.qcMeasurement.findUnique({ where: { id: next.id } })).toEqual(next);
 });
 
 test.each([null, '', true])('a submitted invalid value %s is refused before any snapshot, position, reading or evaluation write', async value => {

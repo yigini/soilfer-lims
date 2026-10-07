@@ -423,6 +423,60 @@ test('real 23-sample builder writes 28 physical members, recorded parent picks a
     expect(built.duplicateSelection.seed).toBe(f.input.seed); expect(built.duplicateSelection.picks).toHaveLength(3);
 });
 
+test('positive-minimum shared LRM extras use frozen required ids; only the extra may drop optional analyte service', async () => {
+    const f = await fixture(), b = await secondAnalyte(f), lot = await referenceLot(f);
+    await rules.change(f.actor, { labId: f.labId, analysisCode: b.analysisCode, methodologyId: b.method.id,
+        criteria: { lrmPerBatch: 2 }, expectedVersion: 1, reason: 'Second analyte needs two LRM positions' }, { db: f.db });
+    await f.db.referenceValue.create({ data: { id: randomUUID(), referenceMaterialId: lot.id, analysisCode: b.analysisCode,
+        assignedValue: 12.987654321, unit: 'fixture-unit', valueType: 'LAB_ASSIGNED', createdBy: f.actor.username } });
+    const onlyB = await f.db.referenceMaterial.create({ data: { id: randomUUID(), labId: f.labId, code: randomUUID(), name: 'Second analyte only lot',
+        kind: 'LRM', matrix: 'SOIL', lotNumber: 'fixture', status: 'ACTIVE', createdBy: f.actor.username } });
+    await f.db.referenceValue.create({ data: { id: randomUUID(), referenceMaterialId: onlyB.id, analysisCode: b.analysisCode,
+        assignedValue: 12.987654321, unit: 'fixture-unit', valueType: 'LAB_ASSIGNED', createdBy: f.actor.username } });
+    const run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, { ...f.input, workItemIds: [...f.workItemIds, b.item.id], analyses: [
+        { analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }, { analysisCode: b.analysisCode }] })).id, f.actor);
+    const positions = run.positions.filter(row => row.kind === 'LRM'), aRequired = JSON.parse(run.analytes.find(row => row.analysisCode === f.analysisCode).criteriaSnapshot).requiredPositions;
+    const bRequired = JSON.parse(run.analytes.find(row => row.analysisCode === b.analysisCode).criteriaSnapshot).requiredPositions;
+    expect(aRequired.LRM).toEqual([positions[0].id]); expect(bRequired.LRM).toEqual(positions.map(row => row.id));
+    const first = await writeNativeMeasurements(f.db, run.id, f.actor, { measurements: readings(run).filter(row => row.positionId !== positions[1].id) });
+    expect(first.analytes.find(row => row.analysisCode === f.analysisCode).result).toBe('PASS');
+    await writeNativeMeasurements(f.db, run.id, f.actor, { analysisCode: b.analysisCode, measurements: readings(run, { control: 12.987654321 }) });
+    await reopenNativeRun(f.db, run.id, f.actor, 'Reopen accepted QC for the optional second LRM placement');
+    const corrected = await writeNativeMeasurements(f.db, run.id, f.actor, { reason: 'Extra second LRM no longer serves the first analyte',
+        references: [{ positionId: positions[1].id, referenceMaterialId: onlyB.id }] }, { correction: true });
+    expect(corrected.analytes.find(row => row.analysisCode === f.analysisCode).result).toBe('PASS');
+    expect((await f.db.batchPositionReference.findMany({ where: { positionId: positions[1].id, analysisCode: f.analysisCode } })).find(row => !row.supersededById))
+        .toMatchObject({ serviceStatus: 'NOT_SERVED', referenceSnapshot: null });
+    await reopenNativeRun(f.db, run.id, f.actor, 'Reopen before checking mandatory first-position service');
+    const before = await evidence(f.db);
+    await expect(writeNativeMeasurements(f.db, run.id, f.actor, { reason: 'Required first LRM cannot drop service',
+        references: [{ positionId: positions[0].id, referenceMaterialId: onlyB.id }] }, { correction: true }))
+        .rejects.toMatchObject({ code: 'REFERENCE_VALUE_NOT_FOUND', details: { analysisCode: f.analysisCode } });
+    expect(await evidence(f.db)).toEqual(before);
+});
+
+test('mixed calibration frequencies freeze each analyte opening, closing and first boundary pair ids independently', async () => {
+    const f = await fixture(11), b = await secondAnalyte(f), ids = [b.item.id];
+    for (const id of f.workItemIds.slice(1)) {
+        const member = await f.db.workItem.findUnique({ where: { id } });
+        ids.push((await createWorkItemFixture(f.db, { data: { id: randomUUID(), sampleId: member.sampleId, labId: f.labId,
+            analysis: b.analysisCode, methodologyId: b.method.id, status: 'IN_PROGRESS' } })).id);
+    }
+    await policies.change(f.actor, f.labId, { reason: 'Enable shared calibration fixture positions', changes: [{ key: 'qc.calibrationVerification', value: true }] }, { db: f.db });
+    await rules.change(f.actor, { labId: f.labId, analysisCode: b.analysisCode, methodologyId: b.method.id,
+        criteria: { ccvEvery: 4 }, expectedVersion: 1, reason: 'Second analyte has a different calibration interval' }, { db: f.db });
+    const run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, { ...f.input, workItemIds: [...f.workItemIds, ...ids] })).id, f.actor);
+    const ownSamples = run.positions.filter(row => row.kind === 'SAMPLE'), pairAfter = sampleIndex => run.positions.find(row => row.kind === 'CCV' && row.position > ownSamples[sampleIndex].position);
+    const a = JSON.parse(run.analytes.find(row => row.analysisCode === f.analysisCode).criteriaSnapshot).requiredPositions;
+    const requiredB = JSON.parse(run.analytes.find(row => row.analysisCode === b.analysisCode).criteriaSnapshot).requiredPositions;
+    expect(a.CCV).toEqual([pairAfter(9).id, run.positions.at(-2).id]);
+    expect(requiredB.CCV).toEqual([pairAfter(3).id, pairAfter(7).id, run.positions.at(-2).id]);
+    for (const requirements of [a, requiredB]) {
+        expect(requirements.ICV).toEqual([run.positions[0].id]);
+        expect(requirements.CCB).toEqual([run.positions[1].id, ...requirements.CCV.map(id => run.positions[run.positions.findIndex(row => row.id === id) + 1].id)]);
+    }
+});
+
 test('real default-capacity, missing method and cross-lab builds refuse with zero normalized, membership or audit writes', async () => {
     const f = await fixture(23), before = await evidence(f.db);
     await expect(buildNativeRun(f.db, f.actor, f.input)).rejects.toMatchObject({ statusCode: 422, code: 'QC_BATCH_TOO_LARGE', details: { maxBatchSize: 20, requested: 23, analysisCode: f.analysisCode } });

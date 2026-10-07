@@ -64,9 +64,10 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         for (const entry of references) {
             const position = batch.positions.find(row => row.id === entry?.positionId && row.historicalSnapshotSeq == null);
             if (!position) throw failure(400, 'REFERENCE_VALUE_MISMATCH', 'Reference position is not in this run.');
-            const served = batch.analytes.filter(row => currentAnalyteEvidence(batch, row.analysisCode).positions.some(item => item.id === position.id) ||
+            const served = batch.analytes.filter(row => (position.references || []).some(reference => reference.analysisCode === row.analysisCode && !reference.supersededById) ||
+                currentAnalyteEvidence(batch, row.analysisCode).positions.some(item => item.id === position.id) ||
                 position.kind === 'CRM' && JSON.parse(row.criteriaSnapshot).qcRule.resolved.crmEveryNBatches.value > 0);
-            const optionalAnalysisCodes = position.kind === 'CRM' ? served.filter(row => !JSON.parse(row.criteriaSnapshot).counts.crm).map(row => row.analysisCode) : [];
+            const optionalAnalysisCodes = served.filter(row => !Object.values(JSON.parse(row.criteriaSnapshot).requiredPositions).flat().includes(position.id)).map(row => row.analysisCode);
             const referenceValueIds = entry.referenceValueId ? { [analysisCode]: entry.referenceValueId } : {};
             const plan = await preparePositionBindings(tx, { batch, position, analyses: served, actor,
                 referenceMaterialId: entry.referenceMaterialId, referenceValueIds, reason: correction ? reason : null, optionalAnalysisCodes }, now);

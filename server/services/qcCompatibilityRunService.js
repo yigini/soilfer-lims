@@ -87,7 +87,8 @@ async function writeCompatibilityMeasurements(db, batchId, actor, input = {}, { 
         const evaluated = retainReferences(retainQcRawInput(evaluateBatchQc(payload, { runProfile, policy }), payload), payload);
         evaluated.policyVersion = policy.policyVersion; evaluated.policyValues = policy.policyValues;
         let positionNumber = Math.max(0, ...batch.positions.map(row => row.position));
-        const positions = [], measurements = [], bindings = [], previous = currentAnalyteEvidence(batch, analysisCode).evaluation;
+        const positions = [], measurements = [], bindings = [], replacements = [], parentReadings = new Map(), previous = currentAnalyteEvidence(batch, analysisCode).evaluation;
+        const reopen = batch.events.filter(row => row.type === 'REOPENED').sort((a, b) => new Date(b.at) - new Date(a.at))[0];
         const currentSample = batch.positions.filter(row => row.kind === 'SAMPLE' && (row.workItems || []).some(link => link.analysisCode === analysisCode));
         const observation = (positionId, field, entry, replicateNo) => {
             const raw = entry.rawInput[field], duplicate = field === 'value1' || field === 'value2';
@@ -110,11 +111,21 @@ async function writeCompatibilityMeasurements(db, batchId, actor, input = {}, { 
                 evaluated[collection][index] = { ...evaluated[collection][index], id, positionId: id,
                     ...(parent && { duplicateOfPositionId: parent.id }) };
                 if (parent) {
-                    const next = observation(parent.id, 'value1', entry, 1), old = currentAnalyteEvidence(batch, analysisCode).measurements.find(row => row.positionId === parent.id);
-                    if (old && ['value', 'rawInput', 'censoring', 'censoringLimit'].some(key => old[key] !== next[key])) {
-                        throw failure(400, 'QC_CORRECTION_REASON_REQUIRED', 'A recorded sample observation needs a reasoned correction.');
+                    const next = observation(parent.id, 'value1', entry, 1), same = row => ['value', 'rawInput', 'censoring', 'censoringLimit'].every(key => row[key] === next[key]);
+                    if (parentReadings.has(parent.id) && !same(parentReadings.get(parent.id))) {
+                        throw failure(400, 'QC_DUPLICATE_PARENT_VALUE_CONFLICT', 'A physical sample has one parent reading in a submission.');
                     }
-                    if (!old) measurements.push(next);
+                    if (!parentReadings.has(parent.id)) {
+                        // A reopened compatibility view hides its preceding round,
+                        // but physical parent supersession still resolves all rows.
+                        const old = batch.measurements.find(row => row.analysisCode === analysisCode && row.positionId === parent.id && row.replicateNo === 1 && !row.supersededById);
+                        if (old && same(old)) parentReadings.set(parent.id, old);
+                        else {
+                            next.legacySource = JSON.stringify({ entryMode: 'LEGACY_RESUBMISSION', reopenEventId: reopen?.id || null });
+                            if (old) { next.correctionReason = 'LEGACY_RESUBMISSION'; replacements.push({ previous: old, next }); }
+                            measurements.push(next); parentReadings.set(parent.id, next);
+                        }
+                    }
                     measurements.push(observation(id, 'value2', entry, 1));
                 } else fields.forEach((field, fieldIndex) => measurements.push(observation(id, field, entry, fieldIndex + 1)));
                 if (linked) bindings.push({ id: randomUUID(), positionId: id, analysisCode, referenceMaterialId: entry.referenceMaterialId,
@@ -128,11 +139,13 @@ async function writeCompatibilityMeasurements(db, batchId, actor, input = {}, { 
         await snapshotEvidence(tx, batch, actor, reason, now);
         for (const data of positions) await tx.batchPosition.create({ data });
         for (const data of bindings) await tx.batchPositionReference.create({ data });
+        for (const { previous: old, next } of replacements) {
+            const changed = await tx.qcMeasurement.updateMany({ where: { id: old.id, supersededById: null }, data: { supersededById: next.id } });
+            if (changed.count !== 1) throw failure(409, 'QC_MEASUREMENT_CHANGED', 'The parent observation changed. Reload before retrying.');
+        }
         for (const data of measurements) await tx.qcMeasurement.create({ data });
-        const reopen = batch.events.filter(row => row.type === 'REOPENED').sort((a, b) => new Date(b.at) - new Date(a.at))[0];
         const id = randomUUID(), positionIds = positions.map(row => row.id);
-        const parentIds = positions.filter(row => row.duplicateOfPositionId).map(row => row.duplicateOfPositionId);
-        const measurementIds = [...measurements.map(row => row.id), ...batch.measurements.filter(row => parentIds.includes(row.positionId) && !row.supersededById).map(row => row.id)];
+        const measurementIds = [...new Set([...measurements.map(row => row.id), ...[...parentReadings.values()].map(row => row.id)])];
         await tx.qcEvaluation.create({ data: { id, batchId, analysisCode, version: (previous?.version || 0) + 1,
             ruleId: policy.qcRule.id, ruleVersion: policy.qcRule.version, policyVersion: policy.policyVersion,
             verdict, evaluatedBy: performedBy, evaluatedAt: now, supersedesId: previous?.id || null,

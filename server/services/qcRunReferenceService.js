@@ -82,6 +82,9 @@ async function applyPositionBindings(tx, plan) {
 }
 
 async function prepareBuildBindings(db, batch, sequence, selections, actor, now = new Date(), reason = null) {
+    // Preview service requirements for this unstarted sequence; only first
+    // start persists the write-once required-position set.
+    const forecasts = require('./qcRunSequenceValidation').validateRunSequence({ positions: sequence.positions, analyses: sequence.forecasts }).forecasts;
     const chosen = new Map();
     for (const selection of selections) for (const reference of selection.references || []) {
         const matches = sequence.positions.filter(position => position.kind === reference.positionKind && position.servedAnalytes.includes(selection.analysisCode));
@@ -93,9 +96,12 @@ async function prepareBuildBindings(db, batch, sequence, selections, actor, now 
         }
     }
     const plans = [];
-    for (const { position, referenceMaterialId } of chosen.values()) plans.push(await preparePositionBindings(db, {
-        batch, position, analyses: sequence.forecasts.filter(row => position.servedAnalytes.includes(row.analysisCode)), actor, referenceMaterialId, reason
-    }, now));
+    for (const { position, referenceMaterialId } of chosen.values()) {
+        const analyses = forecasts.filter(row => position.servedAnalytes.includes(row.analysisCode) ||
+            (position.references || []).some(reference => reference.analysisCode === row.analysisCode && !reference.supersededById));
+        plans.push(await preparePositionBindings(db, { batch, position, analyses, actor, referenceMaterialId, reason,
+            optionalAnalysisCodes: analyses.filter(row => !Object.values(row.requiredPositions).flat().includes(position.id)).map(row => row.analysisCode) }, now));
+    }
     return plans;
 }
 

@@ -430,7 +430,7 @@ model Batch {
   events      BatchEvent[]
 }
 
-// #186 scope pins 1–10. String enums and immutable evidence are guarded by the
+// #186 scope pins 1–12. String enums and immutable evidence are guarded by the
 // additive release SQL; unknown historical metadata remains nullable.
 model BatchAnalyte {
   id                      String @id

@@ -67,6 +67,25 @@ function validateRunSequence({ positions, analyses }) {
             return field && criteria.counts[field] > 0;
         }).map(criteria => criteria.analysisCode);
     };
+    for (const criteria of forecasts) {
+        const code = criteria.analysisCode, requiredPositions = Object.fromEntries(['BLANK', 'LRM', 'CRM', 'DUPLICATE', 'ICV', 'CCV', 'CCB'].map(kind => [kind, []]));
+        for (const [kind, field] of [['BLANK', 'blank'], ['LRM', 'lrm'], ['CRM', 'crm'], ['DUPLICATE', 'duplicate']]) {
+            requiredPositions[kind] = ordered.filter(row => row.kind === kind && served(row).includes(code)).slice(0, criteria.counts[field]).map(row => row.id);
+        }
+        if (criteria.counts.calibration) {
+            requiredPositions.ICV = [ordered[0].id];
+            const ccv = new Set([ordered.at(-2).id]), ccb = new Set([ordered[1].id, ordered.at(-1).id]);
+            const ownSamples = samples.filter(row => sampleCodes(row).includes(code)), interval = criteria.counts.ccvEvery;
+            if (interval > 0) for (let index = interval - 1; index < ownSamples.length; index += interval) {
+                const pair = ordered.findIndex(row => row.kind === 'CCV' && row.position > ownSamples[index].position);
+                if (pair < 0 || ordered[pair + 1]?.kind !== 'CCB') throw failure({ analysisCode: code, missing: [{ kind: 'CCV_CCB_BOUNDARY', positionId: ownSamples[index].id }] });
+                ccv.add(ordered[pair].id); ccb.add(ordered[pair + 1].id);
+            }
+            requiredPositions.CCV = ordered.filter(row => ccv.has(row.id)).map(row => row.id);
+            requiredPositions.CCB = ordered.filter(row => ccb.has(row.id)).map(row => row.id);
+        }
+        criteria.requiredPositions = requiredPositions;
+    }
     return { forecasts, positions: ordered.map(row => ({ id: row.id, position: row.position, kind: row.kind, servedAnalytes: served(row) })) };
 }
 

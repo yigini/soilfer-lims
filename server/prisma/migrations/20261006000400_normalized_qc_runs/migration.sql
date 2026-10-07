@@ -370,9 +370,8 @@ WHEN NEW.serviceStatus NOT IN ('SERVED','NOT_SERVED') OR NEW.supersededById IS N
     OR NOT EXISTS (SELECT 1 FROM "BatchPosition" p JOIN "BatchAnalyte" a ON a.batchId=p.batchId AND a.analysisCode=NEW.analysisCode
       JOIN "Batch" b ON b.id=p.batchId WHERE p.id=NEW.positionId AND a.provenance='NATIVE'
       AND ((b.startedAt IS NULL AND NEW.correctionReason='REBUILD_BEFORE_START')
-        OR (NEW.referenceUse='CRM' AND json_extract(a.criteriaSnapshot,'$.counts.crm')=0)
-        OR (NEW.referenceUse='LRM' AND json_extract(a.criteriaSnapshot,'$.counts.lrm')=0)
-        OR (NEW.referenceUse IN ('ICV','CCV') AND json_extract(a.criteriaSnapshot,'$.counts.calibration')=0)))))
+        OR (json_type(a.criteriaSnapshot,'$.requiredPositions')='object' AND NOT EXISTS (
+          SELECT 1 FROM json_each(json_extract(a.criteriaSnapshot,'$.requiredPositions.' || NEW.referenceUse)) r WHERE r.value=NEW.positionId))))))
   OR NOT EXISTS (SELECT 1 FROM "BatchPosition" p JOIN "BatchAnalyte" a ON a.batchId=p.batchId AND a.analysisCode=NEW.analysisCode
     JOIN "ReferenceMaterial" r ON r.id=NEW.referenceMaterialId JOIN "Lab" l ON l.id=r.labId
     WHERE p.id=NEW.positionId AND p.kind=NEW.referenceUse AND p.kind IN ('CRM','LRM','ICV','CCV','CCB') AND a.labId IN (l.id,l.code))
