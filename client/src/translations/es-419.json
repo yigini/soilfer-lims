@@ -2217,7 +2217,8 @@
     "superseded": "SUSTITUIDO",
     "see": "ver",
     "replaces": "Sustituye",
-    "preparationRecords": "Registros de preparación"
+    "preparationRecords": "Registros de preparación",
+    "qcNotRequired": "QC no requerido (modo OFF)"
   },
   "qaSection": {
     "kicker": "Garantía de calidad y cumplimiento normativo",
@@ -2798,6 +2799,32 @@
       "QC_RULE_NOT_INSTALLED": "Instale la migración revisada antes de iniciar.",
       "QC_RULE_ARGUMENT_INVALID": "Argumentos del instalador de QC inválidos.",
       "QC_RULE_INSTALL_REFUSED": "Se rechazó la instalación de reglas de QC."
+    }
+  },
+  "qcRuns": {
+    "notRequired": "QC no requerido (modo OFF)",
+    "start": "Iniciar corrida",
+    "startHelp": "Inicie la corrida antes de introducir observaciones. Sus criterios y miembros quedarán fijados.",
+    "reorderHelp": "Arrastre una posición para ordenar la corrida ABIERTA. El servidor comprueba los duplicados y los intervalos de calibración.",
+    "locked": "La evidencia de QC está bloqueada. Utilice la disposición registrada del lote o una nueva corrida.",
+    "duplicateParent": "Posición de la muestra original",
+    "boundLot": "Lote de referencia vinculado",
+    "expected": "Valor esperado",
+    "recorded": "Observación registrada",
+    "correct": "Corregir esta observación",
+    "reason": "Motivo de corrección o reapertura",
+    "reopen": "Reabrir QC aceptado",
+    "save": "Guardar observaciones",
+    "evaluate": "Evaluar QC",
+    "saved": "Observaciones de QC guardadas",
+    "errors": {
+      "QC_INSTRUMENT_REQUIRED": "La verificación de calibración requiere un instrumento registrado. Solicite su selección antes de iniciar.",
+      "QC_INSTRUMENT_INVALID": "Seleccione un instrumento activo de este laboratorio.",
+      "QC_SEQUENCE_STALE": "La secuencia ya no cumple los criterios actuales. Reconstrúyala o corrija su orden antes de iniciar.",
+      "QC_VALUES_MISSING": "Introduzca observaciones válidas en cada posición requerida antes de evaluar.",
+      "QC_BATCH_LOCKED": "Esta evidencia de QC está bloqueada. Utilice la disposición del lote o una nueva corrida.",
+      "QC_CORRECTION_REASON_REQUIRED": "Registre un motivo para la corrección.",
+      "BATCH_MEMBERSHIP_FROZEN": "No se puede reordenar una corrida iniciada o con mediciones."
     }
   }
 }

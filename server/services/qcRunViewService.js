@@ -28,11 +28,11 @@ function currentDisposition(batch, evaluation, analysisCode) {
 }
 function currentAnalyteEvidence(batch, analysisCode = batch.analysis) {
     const evaluation = latestEvaluation(batch, analysisCode), details = parsed(evaluation?.details, {});
-    const isolatedRound = details.legacy === true || details.entryMode === 'LEGACY_RESUBMISSION';
+    const isolatedRound = details.legacy === true || details.entryMode === 'LEGACY_RESUBMISSION' || details.entryMode === 'CORRECTION' && details.compatibility === true;
     const reopened = isolatedRound && (batch.events || []).some(row => row.type === 'REOPENED' &&
         parsed(row.payload, {}).discardCurrentEvidence && parsed(row.payload, {}).previousEvaluationIds?.includes(evaluation?.id));
     const selectedPositions = new Set(reopened ? [] : details.positionIds || []), selectedMeasurements = new Set(reopened ? [] : details.measurementIds || []);
-    const built = (batch.events || []).filter(row => ['RUN_BUILT', 'RUN_STARTED'].includes(row.type)).slice().reverse().sort((a, b) => time(b.at) - time(a.at))[0];
+    const built = (batch.events || []).filter(row => ['RUN_BUILT', 'RUN_REORDERED', 'RUN_STARTED'].includes(row.type)).slice().reverse().sort((a, b) => time(b.at) - time(a.at))[0];
     const served = new Map((parsed(built?.payload, {}).positions || []).map(row => [row.id, row.servedAnalytes || []]));
     function serves(row) {
         if (row.kind === 'SAMPLE') return (row.workItems || []).some(link => link.analysisCode === analysisCode);

@@ -197,4 +197,4 @@ async function rebuildNativeRun(db, batchId, actor, input) {
     return buildNativeRun(db, actor, input, { existingBatchId: batchId });
 }
 
-module.exports = { buildNativeRun, rebuildNativeRun, startNativeRun, instrumentFor };
+module.exports = { buildNativeRun, rebuildNativeRun, startNativeRun, instrumentFor, nextOrdinal };

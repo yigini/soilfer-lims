@@ -2217,7 +2217,8 @@
     "superseded": "SUPERSEDED",
     "see": "see",
     "replaces": "Replaces",
-    "preparationRecords": "Preparation records"
+    "preparationRecords": "Preparation records",
+    "qcNotRequired": "QC not required (mode OFF)"
   },
   "qaSection": {
     "kicker": "Quality & Regulatory Compliance",
@@ -2798,6 +2799,32 @@
       "QC_RULE_NOT_INSTALLED": "Install the reviewed QC rule migration before startup.",
       "QC_RULE_ARGUMENT_INVALID": "Invalid QC installer arguments.",
       "QC_RULE_INSTALL_REFUSED": "QC rule installation was refused."
+    }
+  },
+  "qcRuns": {
+    "notRequired": "QC not required (mode OFF)",
+    "start": "Start run",
+    "startHelp": "Start the run before entering observations. Its criteria and membership are then frozen.",
+    "reorderHelp": "Drag a position to reorder the OPEN run. The server checks duplicate parents and calibration intervals.",
+    "locked": "QC evidence is locked. Use the recorded batch disposition or a new run.",
+    "duplicateParent": "Duplicate parent position",
+    "boundLot": "Bound reference lot",
+    "expected": "Expected value",
+    "recorded": "Recorded observation",
+    "correct": "Correct this observation",
+    "reason": "Reason for correction or reopen",
+    "reopen": "Reopen accepted QC",
+    "save": "Save observations",
+    "evaluate": "Evaluate QC",
+    "saved": "QC observations saved",
+    "errors": {
+      "QC_INSTRUMENT_REQUIRED": "Calibration verification requires a registered instrument. Ask a manager to select one before starting.",
+      "QC_INSTRUMENT_INVALID": "Select an active instrument in this laboratory.",
+      "QC_SEQUENCE_STALE": "The sequence no longer meets the current criteria. Rebuild or correct its order before starting.",
+      "QC_VALUES_MISSING": "Enter valid observations for every required position before evaluation.",
+      "QC_BATCH_LOCKED": "This QC evidence is locked. Use batch disposition or a new run.",
+      "QC_CORRECTION_REASON_REQUIRED": "Record a reason for the correction.",
+      "BATCH_MEMBERSHIP_FROZEN": "A started or measured run cannot be reordered."
     }
   }
 }

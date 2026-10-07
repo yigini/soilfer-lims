@@ -16,6 +16,7 @@ router.post('/batches/:id/evaluate', checkPermission('CHANGE_STATUS'), qcControl
 router.post('/batches/:id/corrections', checkPermission('CHANGE_STATUS'), qcController.correctMeasurements);
 router.post('/batches/:id/start', checkPermission('CHANGE_STATUS'), qcController.startRun);
 router.post('/batches/:id/rebuild', checkPermission('CHANGE_STATUS'), qcController.rebuildRun);
+router.post('/batches/:id/reorder', checkPermission('CHANGE_STATUS'), qcController.reorderRun);
 router.post('/batches/:id/items', checkPermission('CHANGE_STATUS'), qcController.addItemsToBatch);
 router.delete('/batches/:id/items', checkPermission('CHANGE_STATUS'), qcController.removeItemsFromBatch);
 router.post('/batches/:id/disposition', checkPermission('APPROVE_RESULTS'), qcController.dispositionBatch);

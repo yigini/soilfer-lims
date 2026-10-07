@@ -2,6 +2,9 @@ const prisma = require('../prisma');
 const scopeGuard = require('../utils/scopeGuard');
 const { hasPermission } = require('../config/roles');
 const sampleHolds = require('./sampleHoldService');
+const { QC_RUN_INCLUDE } = require('./qcRunViewService');
+const { analyteGateView } = require('./qcRunGateService');
+const { checkBatchDisposition } = require('./qcService');
 
 const TEXTURE_ALIASES = new Set([
     'TEXTURE',
@@ -49,9 +52,7 @@ class SampleWorkspaceService {
                     manager: { select: { id: true, username: true, name: true } },
                     methodology: true,
                     batch: {
-                        include: {
-                            qcItems: true
-                        }
+                        include: QC_RUN_INCLUDE
                     },
                     spectralScans: true,
                     draft: true,
@@ -201,15 +202,16 @@ class SampleWorkspaceService {
             let qcStatus = 'QC_PASS';
             let qcDetails = null;
             if (item.batch) {
-                if (item.batch.status === 'QC_FAIL') {
+                const view = analyteGateView(item.batch, item.analysis), gate = checkBatchDisposition(view);
+                if (!gate.allowed && view.status === 'QC_FAIL') {
                     qcStatus = 'QC_FAIL';
                     activeQcFailCount++;
-                } else if (item.batch.status === 'OPEN' || item.batch.status === 'RUNNING') {
+                } else if (!gate.allowed) {
                     qcStatus = 'QC_PENDING';
-                }
+                } else if (view.result === 'NOT_REQUIRED') qcStatus = 'NOT_REQUIRED';
                 qcDetails = {
                     batchId: item.batch.id,
-                    batchStatus: item.batch.status,
+                    batchStatus: view.status, result: view.result, disposition: view.disposition,
                     notes: item.batch.notes
                 };
             }

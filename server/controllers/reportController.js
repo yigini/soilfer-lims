@@ -125,7 +125,8 @@ async function generateReport(req, res) {
             }
             await require('../services/resultEvidenceService').assertNoPreparationRevert(tx, sampleId);
             const batchIds = [...new Set(currentSample.results.flatMap(result => linkedBatchIds(result, currentSample.workItems)))];
-            const qcBatches = batchIds.length ? await tx.batch.findMany({ where: { id: { in: batchIds } } }) : [];
+            const qcBatches = batchIds.length ? await tx.batch.findMany({ where: { id: { in: batchIds } },
+                include: require('../services/qcRunViewService').QC_RUN_INCLUDE }) : [];
             const qcModes = {};
             for (const result of currentSample.results) {
                 qcModes[result.id] = await policyService.get(currentSample.assignedLab || currentSample.labId, 'qc.mode', {

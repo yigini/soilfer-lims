@@ -15,6 +15,8 @@ const {
     buildWorkItemScopeWhere
 } = require('./dashboardScope');
 const { canFinalApprove, GATE_ANALYSES, NON_ANALYTICAL } = require('./workEligibility');
+const { unresolvedQcWhere } = require('./qcRunGateService');
+const { QC_RUN_INCLUDE, batchApiView } = require('./qcRunViewService');
 
 const ALLOWED_ROLE_QUEUES = {
     SAMPLE_RECEPTION: ['reception.attention', 'reception.drafts', 'reception.expected', 'reception.receivedToday'],
@@ -252,8 +254,7 @@ async function getDashboardHome(user, options = {}) {
         // 1. Exceptions (QC batches failed/pending in lab without disposition)
         const exceptionBatchCount = await prisma.batch.count({
             where: {
-                status: { in: ['QC_FAIL', 'FAILED'] },
-                disposition: null,
+                AND: [unresolvedQcWhere()],
                 ...(actorScope.activeLabId ? {
                     OR: [
                         { labId: actorScope.activeLabId },
@@ -488,7 +489,7 @@ async function getDashboardHome(user, options = {}) {
         capabilities = { viewLaboratories: true, viewReports: true, chooseLaboratory: true };
 
         const [exceptionsCount, activeSamplesCount, releasedReportsCount] = await Promise.all([
-            prisma.batch.count({ where: { status: { in: ['QC_FAIL', 'FAILED'] }, disposition: null } }),
+            prisma.batch.count({ where: unresolvedQcWhere() }),
             prisma.sample.count({
                 where: scopedWhere(sampleWhere, {
                     status: { in: ['RECEIVED', 'ACCEPTED', 'PROCESSING', 'PREPARATION'] },
@@ -570,7 +571,7 @@ async function getDashboardHome(user, options = {}) {
                 where: scopedWhere(sampleWhere, { status: 'APPROVED', results: { none: {} } })
             }),
             prisma.batch.count({
-                where: { status: { in: ['QC_FAIL', 'FAILED', 'PENDING'] }, disposition: null }
+                where: unresolvedQcWhere(['QC_FAIL', 'FAILED', 'PENDING'])
             }),
             prisma.sampleAmendment.count()
         ]);
@@ -1161,8 +1162,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
     // ─── MANAGER QUEUES ───
     if (queueKey === 'manager.exceptions') {
         const batchWhere = {
-            status: { in: ['QC_FAIL', 'FAILED'] },
-            disposition: null,
+            AND: [unresolvedQcWhere()],
             ...(actorScope.activeLabId ? {
                 OR: [
                     { labId: actorScope.activeLabId },
@@ -1172,7 +1172,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
         };
         const batches = await prisma.batch.findMany({
             where: batchWhere,
-            include: { workItems: { select: { id: true, sampleId: true, analysis: true } } },
+            include: QC_RUN_INCLUDE,
             skip,
             take: pageSize
         });
@@ -1674,9 +1674,7 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
             prisma.batch.count({ where: batchWhere }),
             prisma.batch.count({
                 where: {
-                    ...batchWhere,
-                    status: { in: ['QC_FAIL', 'FAILED'] },
-                    disposition: null
+                    AND: [batchWhere, unresolvedQcWhere()]
                 }
             }),
             prisma.batch.findMany({
@@ -1685,8 +1683,9 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
                 skip,
                 take: pageSize,
                 include: {
+                    ...QC_RUN_INCLUDE,
                     _count: {
-                        select: { workItems: true, qcItems: true }
+                        select: { workItems: true }
                     }
                 }
             })
@@ -1698,17 +1697,19 @@ async function getQueueRowsInternal(actorScope, queueKey, options = {}) {
             qcFailedCount,
             rows: batches.map(b => {
                 const analysisName = catMap[b.analysis]?.name || b.analysis;
+                const view = batchApiView(b);
                 const isFailed = String(b.status || '').toUpperCase().includes('FAIL');
                 return {
                     key: b.id,
                     title: b.id,
                     context: `${analysisName} · ${b.labId || 'Global'} · ${b.instrument || 'Bench Run'}`,
-                    status: b.status || 'OPEN',
+                    status: view.result === 'NOT_REQUIRED' ? 'NOT_REQUIRED' : b.status || 'OPEN',
                     count: b._count?.workItems || 0,
                     unit: 'samples',
                     action: 'Inspect batch',
                     route: `/qa?tab=qc&batchId=${b.id}`,
-                    note: b.notes || (isFailed ? 'Batch failed QC thresholds; review required.' : 'Batch within acceptable tolerances.'),
+                    note: b.notes || (view.result === 'NOT_REQUIRED' ? 'QC not required (mode OFF)' : isFailed ? 'Batch failed QC thresholds; review required.'
+                        : view.result === 'PASS' ? 'Batch within acceptable tolerances.' : 'QC evidence awaiting evaluation.'),
                     tone: isFailed ? 'problem' : ''
                 };
             }),

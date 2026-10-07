@@ -272,7 +272,7 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                                 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
                                                 : 'bg-blue-100 text-blue-700 dark:bg-blue-950/80 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
                                     }`}>
-                                        {batch.status}
+                                        {batch.result === 'NOT_REQUIRED' || batch.qcMode === 'OFF' ? t('qcRuns.notRequired') : batch.status}
                                     </span>
                                 )}
                             </div>
@@ -344,7 +344,8 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                 </div>
                             )}
 
-                            {batch.status === 'QC_PASS' && !dispInfo && (
+                            {batch.result === 'NOT_REQUIRED' && <p data-testid="qc-not-required">{t('qcRuns.notRequired')}</p>}
+                            {batch.status === 'QC_PASS' && batch.result !== 'NOT_REQUIRED' && batch.qcMode !== 'OFF' && !dispInfo && (
                                 <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 flex items-center gap-3">
                                     <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                                     <div>

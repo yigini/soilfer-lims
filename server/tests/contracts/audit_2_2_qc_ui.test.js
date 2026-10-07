@@ -28,6 +28,7 @@ function host(filename, responses, props) {
             if (name === 'lucide-react') return new Proxy({}, { get: () => () => null });
             if (name === '@lims/number-parse') return require('../../../shared/numberParse');
             if (name === './NumberPreview') return () => null;
+            if (name === './NativeRunPanel') return () => null; // These retained contracts exercise the profile-only branch.
             throw new Error(`Unexpected component import ${name}`);
         } });
     return { axios, async render(nextProps) { if (nextProps) props = { ...props, ...nextProps };

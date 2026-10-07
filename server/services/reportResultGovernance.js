@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const policyService = require('./policyService');
 const { isInvalidOnlyByQcFailure, checkBatchDisposition } = require('./qcService');
 const { SPECTRAL_ACQUISITION_CODES } = require('../config/spectralAcquisition');
+const { analyteGateView } = require('./qcRunGateService');
 
 const TEXTURE_ALIASES = new Set(['TEXTURE', 'SOIL_PSD_TEXTURE', 'SOIL_TEXTURE', 'PSA', 'pSA', 'Particle Size Analysis']);
 const DERIVED_TEXTURE_FRACTIONS = ['SAND', 'SILT', 'CLAY'];
@@ -68,7 +69,9 @@ function reportingQc(sample, options = {}) {
         if (!governing.length || !governing.every(item => item.status === 'ACCEPTED')) continue;
         const mode = getReportingMode(sample, result, options);
         for (const batchId of linkedBatchIds(result, items)) {
-            const batch = batches.find(row => row.id === batchId) || { id: batchId, status: 'ERROR' };
+            const source = batches.find(row => row.id === batchId) || { id: batchId, status: 'ERROR' };
+            const analysisCode = governing.find(item => item.batchId === batchId)?.analysis || result.param;
+            const batch = analyteGateView(source, analysisCode);
             const gate = checkBatchDisposition(batch);
             if (mode === 'REQUIRED_BLOCKING' && !gate.allowed && !blocker) blocker = { batch, gate };
             if (isReviewedReportResult(result, items, mode) &&

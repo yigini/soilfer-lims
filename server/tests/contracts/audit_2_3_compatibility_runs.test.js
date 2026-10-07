@@ -11,6 +11,7 @@ const { installSampleHolds } = require('../../scripts/install_sample_holds');
 const { installQcRules } = require('../../scripts/install_qc_rules');
 const { installQcRuns } = require('../../scripts/install_qc_runs');
 const { createProfileRun, writeCompatibilityMeasurements, reopenCompatibilityRun } = require('../../services/qcCompatibilityRunService');
+const { correctCompatibilityMeasurements } = require('../../services/qcCompatibilityCorrectionService');
 const { QC_RUN_INCLUDE, batchApiView, readQcRun } = require('../../services/qcRunViewService');
 const policies = require('../../services/policyService');
 const request = require('supertest');
@@ -140,6 +141,65 @@ test('normalized reads resolve the actor laboratory code while refusing another 
     const f = await fixture(), actor = { ...f.actor, labId: `CODE-${f.labId}` };
     expect((await readQcRun(f.db, f.batch.id, actor)).id).toBe(f.batch.id);
     await expect(readQcRun(f.db, f.batch.id, { ...actor, labId: 'OUTSIDE-FIXTURE-LAB' })).rejects.toMatchObject({ statusCode: 403 });
+});
+
+test.each([false, true])('actual reasoned compatibility corrections retain both evaluations, supersede once and keep the full round (migrated=%s)', async migrated => {
+    const f = await fixture({ migrated });
+    await f.db.user.update({ where: { id: f.actor.id }, data: { role: 'LAB_MANAGER', labId: f.labId } });
+    const first = await writeCompatibilityMeasurements(f.db, f.batch.id, f.actor, input()), legacy = await f.db.batch.findUnique({ where: { id: f.batch.id } });
+    const oldRows = await f.db.qcMeasurement.findMany(), firstEval = first.batch.analytes[0].evaluation;
+    const blank = first.batch.qcResults.blanks[0], pair = first.batch.qcResults.duplicates[0];
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const auth = { Authorization: `Bearer ${token}` }, route = `/api/qc/batches/${f.batch.id}/corrections`;
+        const before = await evidence(f.db);
+        for (const [body, code] of [[{ corrections: [{ positionId: blank.id, value: 0.02 }] }, 'QC_CORRECTION_REASON_REQUIRED'],
+            [{ reason: 'Reviewed transcription', corrections: [{ positionId: blank.id, value: null }] }, 'QC_VALUES_MISSING'],
+            [{ reason: 'Reviewed transcription', corrections: [{ positionId: 'foreign-position', value: 0.02 }] }, 'QC_MEASUREMENT_NOT_FOUND']]) {
+            const refused = await request(app).post(route).set(auth).send(body);
+            expect(refused.status).toBe(code === 'QC_MEASUREMENT_NOT_FOUND' ? 404 : 400); expect(refused.body.code).toBe(code);
+            expect(await evidence(f.db)).toEqual(before);
+        }
+        const reason = 'Reviewed original worksheet transcription';
+        const corrected = await request(app).post(route).set(auth).send({ reason, corrections: [
+            { positionId: blank.id, replicateNo: 1, rawInput: '0.0223456789' },
+            { positionId: pair.id, replicateNo: 2, rawInput: '2.124456789' }] });
+        expect(corrected.status).toBe(200); expect(corrected.body.status).toBe('QC_PASS');
+        expect(corrected.body.batch.qcResults.blanks[0]).toMatchObject({ id: blank.id, value: 0.0223456789, rawInput: { value: '0.0223456789' } });
+        expect(corrected.body.batch.qcResults.duplicates).toHaveLength(2); expect(corrected.body.batch.qcResults.controls).toHaveLength(1);
+        expect(corrected.body.batch.qcResults.duplicates[0]).toMatchObject({ id: pair.id, value1: 2.123456789, value2: 2.124456789 });
+        const newRows = await f.db.qcMeasurement.findMany({ where: { correctionReason: reason } }); expect(newRows).toHaveLength(2);
+        for (const old of oldRows) {
+            const next = newRows.find(row => row.positionId === old.positionId && row.replicateNo === old.replicateNo);
+            expect(await f.db.qcMeasurement.findUnique({ where: { id: old.id } })).toEqual({ ...old, supersededById: next?.id || old.supersededById });
+        }
+        expect(await f.db.qcEvaluation.findUnique({ where: { id: firstEval.id } })).toEqual(firstEval);
+        const latest = await f.db.qcEvaluation.findFirst({ orderBy: { version: 'desc' } });
+        expect(latest).toMatchObject({ version: firstEval.version + 1, supersedesId: firstEval.id });
+        expect(JSON.parse(latest.details)).toMatchObject({ entryMode: 'CORRECTION', compatibility: true, correctionReason: reason });
+        const second = await request(app).post(route).set(auth).send({ reason: 'Second worksheet review', corrections: [{ positionId: blank.id, value: 0.0323456789 }] });
+        expect(second.status).toBe(200); expect(second.body.batch.qcResults.blanks[0].value).toBe(0.0323456789);
+        const raw = await f.db.batch.findUnique({ where: { id: f.batch.id } });
+        for (const key of ['qcResults', 'disposition', 'history', 'workItemIds']) expect(raw[key]).toBe(legacy[key]);
+        expect(await f.db.batchQcResult.count()).toBe(0); expect(await f.db.qcEvaluation.count()).toBe(migrated ? 4 : 3);
+    });
+});
+
+test('compatibility correction resolves the round after a reopen, refuses earlier round ids, and rolls back a late insert fault', async () => {
+    const f = await fixture(), first = await writeCompatibilityMeasurements(f.db, f.batch.id, f.actor, input());
+    await reopenCompatibilityRun(f.db, f.batch.id, f.actor, 'Review the existing observation before correction');
+    const corrected = await correctCompatibilityMeasurements(f.db, f.batch.id, f.actor, { reason: 'Correct reopened original', corrections: [{ positionId: first.batch.qcResults.blanks[0].id, value: 0.0223456789 }] });
+    expect(corrected.batch.qcResults.blanks[0].value).toBe(0.0223456789);
+    expect(JSON.parse(corrected.batch.analytes[0].evaluation.details).reopenEventId).toBeTruthy();
+    await reopenCompatibilityRun(f.db, f.batch.id, f.actor, 'Start another ordinary complete round');
+    const next = await writeCompatibilityMeasurements(f.db, f.batch.id, f.actor, input(0.0323456789)), before = await evidence(f.db);
+    await expect(correctCompatibilityMeasurements(f.db, f.batch.id, f.actor, { reason: 'Wrong round', corrections: [{ positionId: first.batch.qcResults.blanks[0].id, value: 0.04 }] }))
+        .rejects.toMatchObject({ statusCode: 404, code: 'QC_MEASUREMENT_NOT_FOUND' });
+    expect(await evidence(f.db)).toEqual(before);
+    await expect(correctCompatibilityMeasurements(f.db, f.batch.id, { ...f.actor, labId: 'OUTSIDE-LAB' }, { reason: 'Foreign scope', corrections: [{ positionId: next.batch.qcResults.blanks[0].id, value: 0.04 }] }))
+        .rejects.toMatchObject({ statusCode: 403 }); expect(await evidence(f.db)).toEqual(before);
+    await f.db.$executeRawUnsafe(`CREATE TRIGGER "fixture_compatibility_correction_fault" BEFORE INSERT ON "QcEvaluation" BEGIN SELECT RAISE(ABORT, 'fixture late insert fault'); END`);
+    await expect(correctCompatibilityMeasurements(f.db, f.batch.id, f.actor, { reason: 'Late fault must roll back', corrections: [{ positionId: next.batch.qcResults.blanks[0].id, value: 0.04 }] })).rejects.toThrow();
+    expect(await evidence(f.db)).toEqual(before);
 });
 
 test.each([false, true])('profile/migrated ordinary resubmission retains every preceding row and isolates the current round (migrated=%s)', async migrated => {

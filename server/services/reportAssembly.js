@@ -38,7 +38,8 @@ async function assembleReport(sampleId, user, options = {}) {
         });
     }
     const batchIds = [...new Set(sample.results.flatMap(result => linkedBatchIds(result, sample.workItems)))];
-    const qcBatches = options.qcBatches || (batchIds.length ? await db.batch.findMany({ where: { id: { in: batchIds } } }) : []);
+    const qcBatches = options.qcBatches || (batchIds.length ? await db.batch.findMany({ where: { id: { in: batchIds } },
+        include: require('./qcRunViewService').QC_RUN_INCLUDE }) : []);
     const reportOptions = { qcModes, qcBatches };
     const reportableResults = sample.results.filter(result =>
         isReviewedReportResult(result, sample.workItems, getReportingMode(sample, result, reportOptions)));

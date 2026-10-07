@@ -2217,7 +2217,8 @@
     "superseded": "REMPLACÉ",
     "see": "voir",
     "replaces": "Remplace",
-    "preparationRecords": "Enregistrements de préparation"
+    "preparationRecords": "Enregistrements de préparation",
+    "qcNotRequired": "CQ non requis (mode OFF)"
   },
   "qaSection": {
     "kicker": "Assurance qualité et conformité réglementaire",
@@ -2798,6 +2799,32 @@
       "QC_RULE_NOT_INSTALLED": "Installez la migration examinée avant le démarrage.",
       "QC_RULE_ARGUMENT_INVALID": "Arguments d’installation de QC invalides.",
       "QC_RULE_INSTALL_REFUSED": "L’installation des règles de QC a été refusée."
+    }
+  },
+  "qcRuns": {
+    "notRequired": "CQ non requis (mode OFF)",
+    "start": "Démarrer la série",
+    "startHelp": "Démarrez la série avant de saisir des observations. Ses critères et ses membres seront ensuite figés.",
+    "reorderHelp": "Déplacez une position pour réordonner la série OUVERTE. Le serveur vérifie les parents des duplicatas et les intervalles de calibration.",
+    "locked": "Les preuves de CQ sont verrouillées. Utilisez la décision enregistrée du lot ou une nouvelle série.",
+    "duplicateParent": "Position de l’échantillon parent",
+    "boundLot": "Lot de référence lié",
+    "expected": "Valeur attendue",
+    "recorded": "Observation enregistrée",
+    "correct": "Corriger cette observation",
+    "reason": "Motif de correction ou de réouverture",
+    "reopen": "Rouvrir le CQ accepté",
+    "save": "Enregistrer les observations",
+    "evaluate": "Évaluer le CQ",
+    "saved": "Observations de CQ enregistrées",
+    "errors": {
+      "QC_INSTRUMENT_REQUIRED": "La vérification de calibration exige un instrument enregistré. Demandez sa sélection avant le démarrage.",
+      "QC_INSTRUMENT_INVALID": "Sélectionnez un instrument actif de ce laboratoire.",
+      "QC_SEQUENCE_STALE": "La séquence ne répond plus aux critères actuels. Reconstruisez-la ou corrigez son ordre avant le démarrage.",
+      "QC_VALUES_MISSING": "Saisissez des observations valides à chaque position requise avant l’évaluation.",
+      "QC_BATCH_LOCKED": "Ces preuves de CQ sont verrouillées. Utilisez la décision du lot ou une nouvelle série.",
+      "QC_CORRECTION_REASON_REQUIRED": "Enregistrez un motif de correction.",
+      "BATCH_MEMBERSHIP_FROZEN": "Une série démarrée ou mesurée ne peut pas être réordonnée."
     }
   }
 }

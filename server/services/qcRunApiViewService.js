@@ -17,7 +17,7 @@ async function scopedBatchWhere(db, actor, filter = {}) {
 function forecast(batch, analysisCode) {
     const row = batch.analytes.find(analyte => analyte.analysisCode === analysisCode);
     if (row?.criteriaSnapshot) return JSON.parse(row.criteriaSnapshot);
-    const built = batch.events.filter(event => event.type === 'RUN_BUILT').sort((a, b) => new Date(b.at) - new Date(a.at))[0];
+    const built = batch.events.filter(event => ['RUN_BUILT', 'RUN_REORDERED'].includes(event.type)).sort((a, b) => new Date(b.at) - new Date(a.at))[0];
     return built && JSON.parse(built.payload).forecasts?.find(criteria => criteria.analysisCode === analysisCode);
 }
 function nativeRequirements(criteria, evidence) {

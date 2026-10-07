@@ -8,6 +8,7 @@ const { writeNativeMeasurements } = require('./qcNativeMeasurementService');
 const { writeCompatibilityMeasurements, reopenCompatibilityRun } = require('./qcCompatibilityRunService');
 const { reopenNativeRun } = require('./qcNativeLifecycleService');
 const { startNativeRun, instrumentFor } = require('./qcNativeRunService');
+const { correctCompatibilityMeasurements } = require('./qcCompatibilityCorrectionService');
 const { flagBatchResults } = require('./qcService');
 const failure = (statusCode, code, message) => Object.assign(new Error(message), { statusCode, code });
 const isNative = batch => batch.analytes.length > 0 && batch.analytes.every(row => row.provenance === 'NATIVE');
@@ -55,8 +56,8 @@ async function mutateQcRun(db, batchId, actor, input = {}, { explicit = false, c
                 batch = await writeNativeMeasurements(tx, batchId, actor, nativeInput(batch, input, { correction }), { correction, explicit });
                 evaluation = currentAnalyteEvidence(batch, input.analysisCode || batch.analysis).qcResults;
             } else {
-                if (correction) throw failure(409, 'QC_COMPATIBILITY_RESUBMISSION_REQUIRED', 'Use the retained full-submission route for this compatibility run.');
-                const result = await writeCompatibilityMeasurements(tx, batchId, actor, input, { clear });
+                const result = correction ? await correctCompatibilityMeasurements(tx, batchId, actor, input)
+                    : await writeCompatibilityMeasurements(tx, batchId, actor, input, { clear });
                 batch = result.batch; evaluation = result.evaluation;
             }
         }

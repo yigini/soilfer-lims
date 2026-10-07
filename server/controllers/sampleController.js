@@ -1636,7 +1636,7 @@ exports.approveSample = async (req, res) => {
         const [workItems, orderRevision, qcBatches] = await Promise.all([
             prisma.workItem.findMany({
                 where: { sampleId: String(id) },
-                include: { batch: true }
+                include: { batch: { include: require('../services/qcRunViewService').QC_RUN_INCLUDE } }
             }),
             prisma.sampleOrderRevision.findFirst({
                 where: { sampleId: String(id), status: 'ACTIVE' },
@@ -1644,6 +1644,7 @@ exports.approveSample = async (req, res) => {
                 orderBy: { version: 'desc' }
             }),
             prisma.batch.findMany({
+                include: require('../services/qcRunViewService').QC_RUN_INCLUDE,
                 where: {
                     workItems: {
                         some: {  sampleId: String(id) }

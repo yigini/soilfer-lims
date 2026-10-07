@@ -5,6 +5,7 @@ import { useAnalysisNames } from '../../context/AnalysisCatalogueContext';
 import numberParse from '@lims/number-parse';
 import NumberPreview from './NumberPreview';
 import { useLanguage } from '../../context/LanguageContext';
+import NativeRunPanel from './NativeRunPanel';
 
 const EMPTY_QC_FORM = { blankVal: '', ctrlExpected: '', ctrlMeasured: '', dupVal1: '', dupVal2: '' };
 
@@ -39,6 +40,7 @@ export default function BatchModal({
     const [referenceLoadError, setReferenceLoadError] = useState(false);
     const [extraQc, setExtraQc] = useState([]);
     const currentBatch = batches.find(b => b.id === selectedBatchId) || batches[0] || null;
+    const native = currentBatch?.analytes?.length > 0 && currentBatch.analytes.every(row => row.provenance === 'NATIVE');
     let savedControl, savedEvaluation;
     try { savedEvaluation = typeof currentBatch?.qcResults === 'string' ? JSON.parse(currentBatch.qcResults) : currentBatch?.qcResults; savedControl = savedEvaluation?.controls?.[0]; }
     catch { /* Unreadable evidence is handled by the existing QC authority. */ }
@@ -208,7 +210,7 @@ export default function BatchModal({
             setLoading(true);
             const res = await axios.post(`/api/qc/batches/${selectedBatchId}/evaluate`, payload);
 
-            setSuccessMsg(`QC evaluated: Status is now ${res.data.status}`);
+            setSuccessMsg(res.data.batch?.result === 'NOT_REQUIRED' ? t('qcRuns.notRequired') : `QC evaluated: Status is now ${res.data.status}`);
             await fetchBatches();
             if (onBatchUpdated) onBatchUpdated();
         } catch (err) {
@@ -487,7 +489,7 @@ export default function BatchModal({
                                         currentBatch.status === 'CLOSED' ? 'bg-purple-500/15 text-purple-800 dark:text-purple-300' :
                                         'bg-sf-surface text-sf-muted'
                                     }`} data-testid="batch-qc-status-badge">
-                                        {currentBatch.status}
+                                        {currentBatch.result === 'NOT_REQUIRED' || currentBatch.qcMode === 'OFF' ? t('qcRuns.notRequired') : currentBatch.status}
                                     </span>
                                 </div>
                             )}
@@ -499,7 +501,9 @@ export default function BatchModal({
                                 </li>)}
                             </ul>}
 
-                            <div className="space-y-3 pt-2">
+                            {native && <NativeRunPanel batch={currentBatch} referenceMaterials={referenceMaterials} loading={loading} setLoading={setLoading}
+                                setError={setError} setSuccessMsg={setSuccessMsg} onChanged={async () => { await fetchBatches(); if (onBatchUpdated) onBatchUpdated(); }} />}
+                            {!native && <div className="space-y-3 pt-2">
                                 <h3 className="text-xs font-bold text-sf-text uppercase tracking-wider">
                                     {t('qcRules.measurements')}
                                 </h3>
@@ -627,7 +631,7 @@ export default function BatchModal({
                                 <div className="flex gap-2 flex-wrap">{['BLANK', 'DUPLICATE', 'CONTROL'].map(type => <button key={type} type="button" data-testid={`qc-add-${type}`}
                                     onClick={() => setExtraQc(rows => [...rows, { id: `${type}-${Date.now()}-${rows.length}`, type, value: '', value1: '', value2: '', expected: '', measured: '', referenceMaterialId: '', referenceUse: '' }])}
                                     className="px-3 py-2 border border-sf-divider rounded text-xs">{t('qcRules.add')} {t(`qcRules.types.${type}`)}</button>)}</div>
-                            </div>
+                            </div>}
 
                             <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-sf-divider">
                                 <button
@@ -643,7 +647,7 @@ export default function BatchModal({
                                 <button
                                     type="button"
                                     onClick={handleEvaluateQc}
-                                    disabled={loading || !selectedBatchId || !qcFormComplete}
+                                    disabled={native || loading || !selectedBatchId || !qcFormComplete}
                                     data-testid="evaluate-qc-btn"
                                     className="px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white flex items-center gap-1.5 shadow transition-all"
                                 >

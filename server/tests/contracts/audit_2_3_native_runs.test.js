@@ -22,6 +22,7 @@ const { mutateQcRun } = require('../../services/qcRunMutationService');
 const { dispositionBatch } = require('../../services/qcDispositionStateService');
 const { createResultFixture } = require('../../services/resultWriteService');
 const { createProfileRun } = require('../../services/qcCompatibilityRunService');
+const { reorderNativeRun } = require('../../services/qcRunOrderService');
 const request = require('supertest');
 const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
 const owned = [];
@@ -103,6 +104,54 @@ function readings(run, { blank = 0.0123456789, control = 7.123456789, duplicate 
     return run.positions.filter(row => row.kind !== 'SAMPLE' || parents.has(row.id)).map(row => ({ positionId: row.id,
         value: ['BLANK', 'CCB'].includes(row.kind) ? blank : ['SAMPLE', 'DUPLICATE'].includes(row.kind) ? duplicate : control }));
 }
+
+test('actual OPEN reorder retains physical ids, lot evidence and duplicate parents; invalid and frozen orders write nothing', async () => {
+    const f = await fixture(2), run = await buildNativeRun(f.db, f.actor, f.input), lot = await referenceLot(f);
+    const control = run.positions.find(row => row.kind === 'LRM');
+    await f.db.$transaction(async tx => applyPositionBindings(tx, await preparePositionBindings(tx, { batch: run, position: control,
+        analyses: run.analytes, actor: f.actor, referenceMaterialId: lot.id }, new Date())));
+    const bindings = await f.db.batchPositionReference.findMany(), originalPositions = await f.db.batchPosition.findMany();
+    const samples = run.positions.filter(row => row.kind === 'SAMPLE'), ids = run.positions.map(row => row.id);
+    const duplicateIds = run.positions.filter(row => row.kind === 'DUPLICATE').map(row => row.id);
+    const swapped = [...ids.filter(id => !duplicateIds.includes(id)).map(id => id === samples[0].id ? samples[1].id : id === samples[1].id ? samples[0].id : id), ...duplicateIds];
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const auth = { Authorization: `Bearer ${token}` }, route = `/api/qc/batches/${run.id}/reorder`, before = await evidence(f.db);
+        const duplicate = run.positions.find(row => row.kind === 'DUPLICATE');
+        const parentFirst = [duplicate.id, ...ids.filter(id => id !== duplicate.id)];
+        for (const [positionIds, code] of [[ids.slice(1), 'QC_SEQUENCE_ORDER_INVALID'], [[ids[0], ...ids.slice(0, -1)], 'QC_SEQUENCE_ORDER_INVALID'], [parentFirst, 'QC_SEQUENCE_STALE']]) {
+            const refused = await request(app).post(route).set(auth).send({ positionIds });
+            expect(refused.status).toBe(code === 'QC_SEQUENCE_STALE' ? 409 : 400); expect(refused.body.code).toBe(code);
+            expect(await evidence(f.db)).toEqual(before);
+        }
+        const response = await request(app).post(route).set(auth).send({ positionIds: swapped });
+        expect(response.status).toBe(200); expect(response.body.batch.positions.map(row => row.id)).toEqual(swapped);
+        expect(await f.db.batchPositionReference.findMany()).toEqual(bindings); expect(await f.db.qcMeasurement.count()).toBe(0);
+        for (const old of originalPositions) expect(await f.db.batchPosition.findUnique({ where: { id: old.id } })).toEqual({ ...old, position: swapped.indexOf(old.id) + 1 });
+        for (const sample of samples) {
+            const item = await f.db.workItem.findFirst({ where: { sampleId: sample.sampleId } });
+            expect(item.rackPosition).toBe(swapped.indexOf(sample.id) + 1);
+        }
+        const analyte = await f.db.batchAnalyte.findFirst(); expect(analyte.crmOrdinal).toBeNull(); expect(analyte.criteriaSnapshot).toBeNull();
+        const event = await f.db.batchEvent.findFirst({ where: { type: 'RUN_REORDERED' } });
+        const buildEvent = await f.db.batchEvent.findFirst({ where: { type: 'RUN_BUILT' } });
+        expect(JSON.parse(event.payload).duplicateSelection).toEqual(JSON.parse(buildEvent.payload).duplicateSelection);
+        const started = await startNativeRun(f.db, run.id, f.actor); expect(started.positions.map(row => row.id)).toEqual(swapped);
+        const frozen = await evidence(f.db);
+        const refused = await request(app).post(route).set(auth).send({ positionIds: ids });
+        expect(refused.status).toBe(409); expect(refused.body.code).toBe('BATCH_MEMBERSHIP_FROZEN'); expect(await evidence(f.db)).toEqual(frozen);
+    });
+});
+
+test('a late reorder event fault rolls back temporary numbering and all work-item rack changes', async () => {
+    const f = await fixture(2), run = await buildNativeRun(f.db, f.actor, f.input), before = await evidence(f.db);
+    const samples = run.positions.filter(row => row.kind === 'SAMPLE');
+    const ids = [...run.positions.filter(row => row.kind !== 'DUPLICATE').map(row => row.id === samples[0].id ? samples[1].id : row.id === samples[1].id ? samples[0].id : row.id),
+        ...run.positions.filter(row => row.kind === 'DUPLICATE').map(row => row.id)];
+    await f.db.$executeRawUnsafe(`CREATE TRIGGER "fixture_reorder_event_fault" BEFORE INSERT ON "BatchEvent" WHEN NEW.type='RUN_REORDERED' BEGIN SELECT RAISE(ABORT, 'fixture reorder event fault'); END`);
+    // The SQLite adapter maps a trigger ABORT to P2003, losing its message.
+    await expect(reorderNativeRun(f.db, run.id, f.actor, { positionIds: ids })).rejects.toMatchObject({ code: 'P2003' });
+    expect(await evidence(f.db)).toEqual(before);
+});
 
 test('native entry, explicit evaluation and corrections before first start refuse without any write', async () => {
     const f = await fixture(), run = await buildNativeRun(f.db, f.actor, f.input), before = await evidence(f.db);

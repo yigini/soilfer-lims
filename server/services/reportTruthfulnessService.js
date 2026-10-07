@@ -1,4 +1,6 @@
 const { linkedBatchIds } = require('./reportResultGovernance');
+const { governingItems } = require('./reportResultGovernance');
+const { analyteGateView } = require('./qcRunGateService');
 
 function parseObject(value) {
     if (typeof value === 'object' && value !== null) return value;
@@ -11,9 +13,11 @@ function freezeReportEvidence(results, workItems, batches) {
         const ids = linkedBatchIds(result, workItems);
         if (!ids.length) deviations.push({ analysisCode: result.param, batchId: null, qcStatus: 'NOT_RECORDED', dispositionReason: null });
         for (const batchId of ids) {
-            const batch = batches.find(candidate => candidate.id === batchId);
-            if (batch?.status === 'QC_PASS') continue;
-            const deviation = { analysisCode: result.param, batchId, qcStatus: batch?.status || 'NOT_RECORDED',
+            const source = batches.find(candidate => candidate.id === batchId);
+            const analysisCode = governingItems(result, workItems).find(item => item.batchId === batchId)?.analysis || result.param;
+            const batch = analyteGateView(source, analysisCode);
+            if (batch?.result === 'PASS' && !batch.disposition || !Array.isArray(source?.analytes) && batch?.status === 'QC_PASS') continue;
+            const deviation = { analysisCode: result.param, batchId, qcStatus: batch?.result === 'NOT_REQUIRED' ? 'NOT_REQUIRED' : batch?.analyteStatus || batch?.status || 'NOT_RECORDED',
                 dispositionReason: parseObject(batch?.disposition)?.reason || null };
             if (!deviations.some(row => row.analysisCode === deviation.analysisCode && row.batchId === batchId)) deviations.push(deviation);
         }
@@ -36,8 +40,8 @@ function describeReportEvidence(evidence, locale = 'en') {
     const labels = require(`../locales/${canonical}.json`).resultReports;
     const qc = evidence?.qc;
     const qcStatement = qc?.withinLimits ? labels.qcWithinLimits
-        : qc?.deviations?.length ? `${labels.qcDeviations}\n${qc.deviations.map(row =>
-            `${row.analysisCode} · ${row.batchId || labels.noBatch}: ${row.qcStatus}${row.dispositionReason ? ` · ${row.dispositionReason}` : ''}`).join('\n')}`
+        : qc?.deviations?.length ? `${qc.deviations.every(row => row.qcStatus === 'NOT_REQUIRED') ? labels.qcNotRequired : labels.qcDeviations}\n${qc.deviations.map(row =>
+            `${row.analysisCode} · ${row.batchId || labels.noBatch}: ${row.qcStatus === 'NOT_REQUIRED' ? labels.qcNotRequired : row.qcStatus}${row.dispositionReason ? ` · ${row.dispositionReason}` : ''}`).join('\n')}`
             : labels.qcNotRecorded;
     const preparationStatement = ['DRYING', 'PREPARATION'].map(analysis => {
         const records = (evidence?.preparation || []).filter(record => record.analysis === analysis);

@@ -179,4 +179,4 @@ async function reopenInTransaction(tx, batch, actor, reason, now) {
 async function reopenCompatibilityRun(db, batchId, actor, reason) {
     return inTransaction(db, async tx => reopenInTransaction(tx, await editableRun(tx, batchId, actor), actor, reason, new Date()));
 }
-module.exports = { createProfileRun, writeCompatibilityMeasurements, reopenCompatibilityRun };
+module.exports = { createProfileRun, writeCompatibilityMeasurements, reopenCompatibilityRun, editableRun };

@@ -279,7 +279,9 @@ function canFinalApprove(sample, workItems = [], orderLines = [], user = null, o
     }
 
     // 7. QC Batch resolution
-    const qcBatches = options.qcBatches || [];
+    const qcBatches = (options.qcBatches || []).flatMap(batch => Array.isArray(batch.analytes)
+        ? [...new Set(workItems.filter(item => item.batchId === batch.id && !['WAIVED', 'CANCELLED'].includes(item.status)).map(item => item.analysis))]
+            .map(code => require('./qcRunGateService').analyteGateView(batch, code)) : [batch]);
     const failedQc = qcBatches.find(b => {
         const isFailedStatus = b.status === 'QC_FAIL' || b.status === 'FAILED';
         if (!isFailedStatus) return false;
