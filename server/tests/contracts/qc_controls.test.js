@@ -97,12 +97,13 @@ describe('BLK-2: Minimum Viable Typed QC Controls Contract', () => {
     });
 
     test('3. Batch evaluation endpoint transitions status to QC_FAIL when any control fails', async () => {
+        const parent = await prisma.batchPosition.findFirst({ where: { batchId, kind: 'SAMPLE' } });
         const evalRes = await request(app)
             .post(`/api/qc/batches/${batchId}/evaluate`)
             .set('Authorization', `Bearer ${techToken}`)
             .send({
                 blanks: [{ id: 'B1', value: 0.02, maxAllowed: 0.05 }],
-                duplicates: [{ id: 'D1', value1: 6.8, value2: 7.9, maxRpd: 10.0 }], // RPD ~15% -> FAIL
+                duplicates: [{ id: 'D1', duplicateOfPositionId: parent.id, value1: 6.8, value2: 7.9, maxRpd: 10.0 }], // RPD ~15% -> FAIL
                 controls: [{ id: 'C1', expected: 7.0, measured: 6.9, minRecovery: 90, maxRecovery: 110 }]
             });
 

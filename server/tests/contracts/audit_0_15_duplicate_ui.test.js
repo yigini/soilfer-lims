@@ -53,6 +53,7 @@ function modalHost() {
         if (name.includes('messageFormatter')) return parser;
         if (name === '@lims/number-parse') return require('../../../shared/numberParse');
         if (name === './NumberPreview') return () => null;
+        if (name === './NativeRunPanel') return () => null; // Native handlers have separate actual-component contracts.
         throw new Error(`Unexpected component dependency: ${name}`);
     }).default;
     let tree;

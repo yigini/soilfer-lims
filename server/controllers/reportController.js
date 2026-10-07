@@ -17,7 +17,7 @@ async function pdfPublication(report) {
     return { status: report.status, publishedAt: report.publishedAt, reportNumber: number(report), replacementNumber: number(replacement) };
 }
 const policyService = require('../services/policyService');
-const { linkedBatchIds } = require('../services/reportResultGovernance');
+const { linkedBatchIds, resolveReportingModes } = require('../services/reportResultGovernance');
 
 // ─── HELPERS ─────────────────────────────────────────────
 
@@ -127,12 +127,7 @@ async function generateReport(req, res) {
             const batchIds = [...new Set(currentSample.results.flatMap(result => linkedBatchIds(result, currentSample.workItems)))];
             const qcBatches = batchIds.length ? await tx.batch.findMany({ where: { id: { in: batchIds } },
                 include: require('../services/qcRunViewService').QC_RUN_INCLUDE }) : [];
-            const qcModes = {};
-            for (const result of currentSample.results) {
-                qcModes[result.id] = await policyService.get(currentSample.assignedLab || currentSample.labId, 'qc.mode', {
-                    analysisCode: result.param, methodologyId: result.methodologyId || null, db: tx
-                });
-            }
+            const { qcModes, qcModeEvidence } = await resolveReportingModes(currentSample, qcBatches, { db: tx });
             const { canPublish } = require('../services/workEligibility');
             const { SPECTRAL_ACQUISITION_CODES } = require('../config/spectralAcquisition');
             const spectralItemIds = currentSample.workItems.filter(item => SPECTRAL_ACQUISITION_CODES.includes(item.analysis)).map(item => item.id);
@@ -142,7 +137,7 @@ async function generateReport(req, res) {
             const publishCheck = canPublish(currentSample, null, req.user, { qcBatches, qcModes, spectralScans });
             if (!publishCheck.allowed) {
                 const statusCode = publishCheck.code === 'PERMISSION_DENIED' ? 403 : 409;
-                throw Object.assign(new Error(publishCheck.reason), { statusCode, publishCheck });
+                throw Object.assign(new Error(publishCheck.reason), { statusCode, publishCheck, qcModeEvidence });
             }
             const maxReport = await tx.report.findFirst({ where: { sampleId }, orderBy: { version: 'desc' } });
             const version = (maxReport?.version || 0) + 1;
@@ -152,9 +147,9 @@ async function generateReport(req, res) {
             const identity = await allocateReportIdentity(tx, { sampleId, lab, publishedAt,
                 resolveFormat: () => policyService.get(lab.id, 'report.numberFormat', { db: tx }) });
             const policySnapshot = await policyService.snapshot(lab.id, { db: tx });
-            const { content, searchKeys } = await assembleReport(sampleId, req.user, { db: tx, qcBatches, qcModes });
+            const { content, searchKeys } = await assembleReport(sampleId, req.user, { db: tx, qcBatches, qcModes, qcModeEvidence });
             content.policy = { version: policySnapshot.version, presetCode: policySnapshot.presetCode,
-                reportNumberFormat: policySnapshot.values['report.numberFormat'], qcModes };
+                reportNumberFormat: policySnapshot.values['report.numberFormat'], qcModes, qcModeEvidence };
             content.reportNumber = displayNumber(identity.reportNumberBase, identity.revision);
             content.publication = { ...identity, publishedAt: publishedAt.toISOString(), status: 'PUBLISHED' };
             await tx.reportShareLink.updateMany({
@@ -213,7 +208,8 @@ async function generateReport(req, res) {
         }
         if (err.statusCode) {
             const { code, workItemIds, params } = err.publishCheck || {};
-            return res.status(err.statusCode).json({ error: err.message, code: code || err.code, workItemIds, params });
+            return res.status(err.statusCode).json({ error: err.message, code: code || err.code, workItemIds, params,
+                ...(err.qcModeEvidence && { qcModeEvidence: err.qcModeEvidence }) });
         }
         console.error('[Report] Generate error:', err);
         res.status(500).json({ error: err.message || 'Failed to generate report' });

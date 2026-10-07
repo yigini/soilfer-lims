@@ -86,14 +86,17 @@ describe('Audit 0.14: normalized entries and lab number policy', () => {
     test('QC uses the same comma parsing and typed new QC details preserve original strings', async () => {
         const batchId = id('B014');
         await prisma.batch.create({ data: { id: batchId, labId: lab, analysis: 'PH_H2O', status: 'OPEN', profile: 'RACK_40', createdBy: actor.username } });
+        await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, batchId);
         const response = await request(app).post(`/api/qc/batches/${batchId}/evaluate`).set('Authorization', `Bearer ${token}`).send({
             blanks: [{ value: '0,01' }], controls: [{ expected: '7,00', measured: '7,00' }], duplicates: [{ value1: '6,85', value2: '6,87' }] });
         expect(response.status).toBe(200); expect(response.body.evaluation.duplicates[0].value1).toBe(6.85);
-        const row = await prisma.batchQcResult.findFirst({ where: { batchId, type: 'DUPLICATE' } });
+        const normalized = await prisma.batch.findUnique({ where: { id: batchId }, include: require('../../services/qcRunViewService').QC_RUN_INCLUDE });
+        const row = require('../../services/qcRunViewService').batchApiView(normalized).qcItems.find(item => item.type === 'DUPLICATE');
         expect(JSON.parse(row.details).rawInput).toEqual({ value1: '6,85', value2: '6,87' });
     });
     test('an ambiguous QC value fails before any batch, typed QC or audit writes', async () => {
         const batchId = id('B014'); await prisma.batch.create({ data: { id: batchId, labId: lab, analysis: 'PH_H2O', status: 'OPEN', profile: 'RACK_40', createdBy: actor.username } });
+        await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, batchId);
         const response = await request(app).post(`/api/qc/batches/${batchId}/evaluate`).set('Authorization', `Bearer ${token}`).send({ blanks: [{ value: '1,234' }], controls: [{ expected: 7, measured: 7 }], duplicates: [{ value1: 7, value2: 7 }] });
         expect(response.status).toBe(400); expect(response.body.code).toBe('AMBIGUOUS_NUMBER');
         expect((await prisma.batch.findUnique({ where: { id: batchId } })).status).toBe('OPEN');

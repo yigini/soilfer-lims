@@ -22,13 +22,18 @@ const { mutateQcRun } = require('../../services/qcRunMutationService');
 const { dispositionBatch } = require('../../services/qcDispositionStateService');
 const { createResultFixture } = require('../../services/resultWriteService');
 const { createProfileRun } = require('../../services/qcCompatibilityRunService');
+const { writeCompatibilityMeasurements } = require('../../services/qcCompatibilityRunService');
+const { resolveReportingModes } = require('../../services/reportResultGovernance');
+const { assembleReport } = require('../../services/reportAssembly');
+const { canPublish } = require('../../services/workEligibility');
+const { QC_RUN_INCLUDE } = require('../../services/qcRunViewService');
 const { reorderNativeRun } = require('../../services/qcRunOrderService');
 const request = require('supertest');
 const { withQcRunHttp } = require('../helpers/qcRunHttpHarness');
 const owned = [];
 
-async function fixture(count = 1, criteria = { crmEveryNBatches: 0 }) {
-    const labId = randomUUID(), analysisCode = `NATIVE-${randomUUID()}`, username = 'system:fixture';
+async function fixture(count = 1, criteria = { crmEveryNBatches: 0 }, recordedAnalysisCode = null) {
+    const labId = randomUUID(), analysisCode = recordedAnalysisCode || `NATIVE-${randomUUID()}`, username = 'system:fixture';
     const historical = beforeGuards({ actor: username, schemaVariant: 'PRE_1_3_SAMPLE_CODES', relatedRows: {
         Lab: [{ id: labId, code: labId, name: 'Native run fixture', country: 'TEST', updatedAt: Date.now() }],
         User: [{ id: username, username, email: 'native@example.test', password: 'fixture', role: 'SUPER_ADMIN', updatedAt: Date.now() }]
@@ -104,6 +109,108 @@ function readings(run, { blank = 0.0123456789, control = 7.123456789, duplicate 
     return run.positions.filter(row => row.kind !== 'SAMPLE' || parents.has(row.id)).map(row => ({ positionId: row.id,
         value: ['BLANK', 'CCB'].includes(row.kind) ? blank : ['SAMPLE', 'DUPLICATE'].includes(row.kind) ? duplicate : control }));
 }
+
+async function reviewedSample(f) {
+    const item = await f.db.workItem.findUnique({ where: { id: f.workItemIds[0] } });
+    for (const status of ['COMPLETED', 'SUBMITTED', 'ACCEPTED']) {
+        await require('../../services/workItemStateService').transitionWorkItem(item.id, status, f.actor,
+            'Reviewed report-policy fixture', {}, f.db);
+    }
+    await require('../../services/sampleStateService').transitionSample(item.sampleId, 'APPROVED', f.actor,
+        'Approved report-policy fixture', {}, f.db);
+    return f.db.sample.findUnique({ where: { id: item.sampleId }, include: { workItems: true, results: true } });
+}
+
+test('a real failed Native blocking run remains excluded from reports and publication after live QC becomes OFF', async () => {
+    const f = await fixture(), lot = await referenceLot(f);
+    const run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, { ...f.input,
+        analyses: [{ analysisCode: f.analysisCode, references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] }] })).id, f.actor);
+    const item = await f.db.workItem.findUnique({ where: { id: f.workItemIds[0] } });
+    const result = await createResultFixture(f.db, { data: { id: randomUUID(), sampleId: item.sampleId, param: f.analysisCode,
+        batchId: run.id, value: '2.123456789', numericValue: 2.123456789, isCurrent: true, isValid: true, flags: '[]' } });
+    await writeNativeMeasurements(f.db, run.id, f.actor, { measurements: readings(run, { blank: 10 }) });
+    await policies.change(f.actor, f.labId, { reason: 'Later live policy must not reinterpret a started run',
+        changes: [{ key: 'qc.mode', value: 'OFF' }] }, { db: f.db });
+    const sample = await reviewedSample(f), batch = await f.db.batch.findUnique({ where: { id: run.id }, include: QC_RUN_INCLUDE });
+    const resolved = await resolveReportingModes(sample, [batch], { db: f.db });
+    expect(resolved.qcModes[result.id]).toBe('REQUIRED_BLOCKING');
+    expect(resolved.qcModeEvidence[0]).toMatchObject({ resultId: result.id, effectiveMode: 'REQUIRED_BLOCKING',
+        source: 'FROZEN', contributingBatchIds: [run.id] });
+    expect(canPublish(sample, null, f.actor, { ...resolved, qcBatches: [batch] })).toMatchObject({ allowed: false, code: 'QC_BATCH_FAILED' });
+    const { content } = await assembleReport(sample.id, f.actor, { db: f.db });
+    expect(content.resultGroups.flatMap(group => group.items)).toEqual([]);
+    expect(content.evidence.qcModes).toEqual(resolved.qcModeEvidence);
+    const before = await evidence(f.db), reports = await f.db.report.count();
+    await withQcRunHttp(f.db, f.actor, async (app, token) => {
+        const response = await request(app).post(`/api/reports/generate/${sample.id}`).set('Authorization', `Bearer ${token}`);
+        expect(response.status).toBe(409); expect(response.body.code).toBe('QC_BATCH_FAILED');
+        expect(response.body.qcModeEvidence).toEqual(resolved.qcModeEvidence);
+    }, { reports: true });
+    expect(await evidence(f.db)).toEqual(before); expect(await f.db.report.count()).toBe(reports);
+});
+
+test('mixed actual Native ADVISORY and compatibility live BLOCKING batches use the strictest effective report mode', async () => {
+    const f = await fixture();
+    await policies.change(f.actor, f.labId, { reason: 'Freeze advisory Native mode', changes: [{ key: 'qc.mode', value: 'ADVISORY' }] }, { db: f.db });
+    const native = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, f.input)).id, f.actor);
+    const compatibility = await createProfileRun(f.db, f.actor, { analysis: f.analysisCode, profile: 'RACK_40' });
+    const item = await f.db.workItem.findUnique({ where: { id: f.workItemIds[0] } });
+    const result = await createResultFixture(f.db, { data: { id: randomUUID(), sampleId: item.sampleId, param: f.analysisCode,
+        batchId: compatibility.id, value: '7', isCurrent: true, isValid: true, flags: '[]' } });
+    await policies.change(f.actor, f.labId, { reason: 'Require live compatibility QC', changes: [{ key: 'qc.mode', value: 'REQUIRED_BLOCKING' }] }, { db: f.db });
+    const sample = await reviewedSample(f), batches = await f.db.batch.findMany({ include: QC_RUN_INCLUDE });
+    const resolved = await resolveReportingModes(sample, batches, { db: f.db });
+    expect(resolved.qcModes[result.id]).toBe('REQUIRED_BLOCKING');
+    expect(resolved.qcModeEvidence[0]).toMatchObject({ source: 'LIVE', contributingBatchIds: [compatibility.id, native.id],
+        contributions: [{ batchId: compatibility.id, mode: 'REQUIRED_BLOCKING', source: 'LIVE' }, { batchId: native.id, mode: 'ADVISORY', source: 'FROZEN' }] });
+    expect(canPublish(sample, null, f.actor, { ...resolved, qcBatches: batches }).allowed).toBe(false);
+});
+
+test('a compatibility-only failed run retains live policy changes for report validity and publication', async () => {
+    const f = await fixture(), run = await createProfileRun(f.db, f.actor, { analysis: f.analysisCode, profile: 'RACK_40' });
+    const item = await f.db.workItem.findUnique({ where: { id: f.workItemIds[0] } });
+    const result = await createResultFixture(f.db, { data: { id: randomUUID(), sampleId: item.sampleId, param: f.analysisCode,
+        batchId: run.id, value: '7', isCurrent: true, isValid: true, flags: '[]' } });
+    await writeCompatibilityMeasurements(f.db, run.id, f.actor, { blanks: [{ value: 10 }], controls: [{ expected: 7, measured: 7 }],
+        duplicates: [{ value1: 7, value2: 7 }, { value1: 7, value2: 7 }] });
+    const sample = await reviewedSample(f), batches = await f.db.batch.findMany({ include: QC_RUN_INCLUDE });
+    const blocking = await resolveReportingModes(sample, batches, { db: f.db });
+    expect(blocking.qcModes[result.id]).toBe('REQUIRED_BLOCKING');
+    expect(canPublish(sample, null, f.actor, { ...blocking, qcBatches: batches }).allowed).toBe(false);
+    await policies.change(f.actor, f.labId, { reason: 'Live compatibility policy remains authoritative', changes: [{ key: 'qc.mode', value: 'OFF' }] }, { db: f.db });
+    const off = await resolveReportingModes(sample, batches, { db: f.db });
+    expect(off.qcModeEvidence[0]).toMatchObject({ resultId: result.id, effectiveMode: 'OFF', source: 'LIVE', contributingBatchIds: [run.id] });
+    expect(canPublish(sample, null, f.actor, { ...off, qcBatches: batches }).allowed).toBe(true);
+    const { content } = await assembleReport(sample.id, f.actor, { db: f.db });
+    expect(content.resultGroups.flatMap(group => group.items)).toEqual([expect.objectContaining({ param: f.analysisCode, value: '7' })]);
+    expect(content.evidence.qcModes).toEqual(off.qcModeEvidence);
+});
+
+test('Native texture QC flags its governed fractions independently and preserves their values on deviation acceptance', async () => {
+    const f = await fixture(1, { crmEveryNBatches: 0 }, 'PSA'), b = await secondAnalyte(f), lot = await referenceLot(f);
+    await f.db.referenceValue.create({ data: { id: randomUUID(), referenceMaterialId: lot.id, analysisCode: b.analysisCode,
+        assignedValue: 7.123456789, unit: 'fixture-unit', valueType: 'LAB_ASSIGNED', createdBy: f.actor.username } });
+    const run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.actor, { ...f.input, workItemIds: [...f.workItemIds, b.item.id],
+        analyses: [f.analysisCode, b.analysisCode].map(analysisCode => ({ analysisCode,
+            references: [{ positionKind: 'LRM', referenceMaterialLotId: lot.id }] })) })).id, f.actor);
+    const fractions = [];
+    for (const [param, value] of [['SAND', '45'], ['SILT', '30'], ['CLAY', '25']]) {
+        fractions.push(await createResultFixture(f.db, { data: { id: randomUUID(), sampleId: b.sampleId, param, value,
+            numericValue: Number(value), rawInput: value, methodologyId: f.method.id, batchId: run.id, isCurrent: true, isValid: true, flags: '[]' } }));
+    }
+    const unrelated = await createResultFixture(f.db, { data: { id: randomUUID(), sampleId: b.sampleId, param: b.analysisCode,
+        methodologyId: b.method.id, value: '7', batchId: run.id, isCurrent: true, isValid: true, flags: '[]' } });
+    await writeNativeMeasurements(f.db, run.id, f.actor, { analysisCode: f.analysisCode, measurements: readings(run, { control: 20 }) });
+    for (const original of fractions) expect(await f.db.result.findUnique({ where: { id: original.id } }))
+        .toEqual({ ...original, updatedAt: expect.any(Date), isValid: false, flags: '["QC_BATCH_FAILED"]' });
+    expect(await f.db.result.findUnique({ where: { id: unrelated.id } })).toEqual(unrelated);
+    const failedEvidence = await f.db.qcMeasurement.findMany(), evaluations = await f.db.qcEvaluation.findMany();
+    await dispositionBatch(run.id, 'ACCEPT_WITH_DEVIATION', 'Reviewed texture control deviation', f.actor, f.db, { analysisCode: f.analysisCode });
+    for (const original of fractions) expect(await f.db.result.findUnique({ where: { id: original.id } }))
+        .toEqual({ ...original, updatedAt: expect.any(Date), flags: '["QC_WARNING_OVERRIDDEN"]' });
+    expect(await f.db.result.findUnique({ where: { id: unrelated.id } })).toEqual(unrelated);
+    expect(await f.db.qcMeasurement.findMany()).toEqual(failedEvidence); expect(await f.db.qcEvaluation.findMany()).toEqual(evaluations);
+});
 
 test('test-owned cleanup retains QC-referenced workflow evidence and still removes unrelated explicit fixture ids', async () => {
     const f = await fixture(), run = await buildNativeRun(f.db, f.actor, f.input);

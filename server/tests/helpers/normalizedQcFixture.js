@@ -6,9 +6,21 @@ const { inventoryLegacyQcRuns } = require('../../services/qcRunBackfillPlan');
 // Translate that fixture through the actual reviewed importer plan, on the
 // disposable test DB only. Every release trigger remains installed and active.
 async function normalizeLegacyQcFixture(client, batchId) {
-    const file = path.resolve(process.env.DATABASE_PATH || '');
+    require('../../services/workflowStateRules').assertFixtureContext();
+    const databases = await client.$queryRawUnsafe('PRAGMA database_list');
+    const file = path.resolve(databases.find(row => row.name === 'main')?.file || '');
     if (process.env.NODE_ENV !== 'test' || path.dirname(file) !== path.resolve(__dirname, '../.tmp') ||
-        !/^test_\d+_[a-z0-9]+\.db$/.test(path.basename(file)) || !fs.existsSync(file)) throw Error('QC fixture translation requires its disposable test database.');
+        !/^[^/\\]+\.db$/.test(path.basename(file)) || !fs.existsSync(file) || fs.realpathSync(file) !== file) throw Error('QC fixture translation requires its disposable test database.');
+    const guardReader = new Database(file, { readonly: true, fileMustExist: true });
+    let installed;
+    try { installed = guardReader.prepare("SELECT count(*) n FROM sqlite_master WHERE type='trigger' AND name IN ('Batch_legacy_qc_immutable','BatchPosition_membership_insert_guard','QcMeasurement_insert_guard')").get().n; }
+    finally { guardReader.close(); }
+    if (installed === 0) {
+        const { installQcRuns } = require('../../scripts/install_qc_runs');
+        const reviewed = installQcRuns({ dbPath: file });
+        installQcRuns({ dbPath: file, apply: true, planSha256: reviewed.backfillFingerprint });
+        return;
+    }
     const db = new Database(file, { readonly: true, fileMustExist: true });
     let planned;
     try {

@@ -29,12 +29,12 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     afterEach(() => jest.restoreAllMocks());
     afterAll(async () => { for (const database of ownedDatabases) await database.close(); });
     const call = (path, body) => request(app).post(path).set('Authorization', `Bearer ${token}`).send(body);
-    async function fixture({ status = 'APPROVED', itemStatus = 'ACCEPTED', param = 'PH_H2O', batchStatus, flags = [], valid = true } = {}) {
+    async function fixture({ status = 'APPROVED', itemStatus = 'ACCEPTED', param = 'PH_H2O', batchStatus, flags = [], valid = true, linkItemBatch = true } = {}) {
         const sampleId = id('SMP-03'), workItemId = id('WI-03'), resultId = id('RES-03');
         const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-03'), analysis: param, status: batchStatus, labId, createdBy: 'review-test' } }) : null;
         const sampleData = { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status,
             receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' };
-        const itemData = { id: workItemId, sampleId, analysis: param, status: itemStatus, result: '7.2', assignedLab: labId, batchId: batch?.id };
+        const itemData = { id: workItemId, sampleId, analysis: param, status: itemStatus, result: '7.2', assignedLab: labId, batchId: linkItemBatch ? batch?.id : null };
         let item;
         if (status === 'COMPLETED' || itemStatus === 'CANCELLED') {
             const now = Date.now();
@@ -151,8 +151,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         expect(res.status).toBe(409); expect(res.body.code).toBe('QC_BATCH_PENDING');
     });
     test('QC attached only to a result still blocks', async () => {
-        const f = await fixture({ batchStatus: 'RUNNING' });
-        await prisma.workItem.update({ where: { id: f.item.id }, data: { batchId: null } });
+        const f = await fixture({ batchStatus: 'RUNNING', linkItemBatch: false });
         expect((await generate(f)).body.code).toBe('QC_BATCH_PENDING');
     });
     test('a missing linked batch fails closed', () => {

@@ -84,7 +84,12 @@ function currentAnalyteEvidence(batch, analysisCode = batch.analysis) {
             label: row.label ?? null, expected: row.expected ?? null, measured: row.value ?? row.measured ?? null,
             value1: row.value1 ?? null, value2: row.value2 ?? null, recoveryPct: row.recoveryPct ?? null, rpd: row.rpd ?? null,
             status: row.status, details: JSON.stringify({ evaluation: row.details ?? null, rawInput: row.rawInput,
-                policyVersion: evaluation?.policyVersion ?? null, qcRule: evaluated?.qcRule ?? null, referenceSnapshot: row.referenceSnapshot ?? null }),
+                policyVersion: evaluation?.policyVersion ?? null, qcRule: evaluated?.qcRule ?? null,
+                criterion: row.criterion, loq: row.loq, loqSource: row.loqSource, methodologyId: row.methodologyId,
+                notes: row.notes || [], failAction: row.failAction, maxAllowed: row.maxAllowed,
+                absMax: row.absMax ?? null, absoluteDifference: row.absoluteDifference ?? null,
+                censoringLimits: row.censoringLimits ?? null, crmAbsWindow: row.crmAbsWindow, lrmWindowPct: row.lrmWindowPct,
+                referenceUse: row.referenceUse ?? null, referenceSnapshot: row.referenceSnapshot ?? null }),
             referenceMaterialId: row.referenceMaterialId ?? null, referenceValueId: row.referenceValueId ?? null });
     }
     return { analysisCode, result: evaluation?.verdict ?? null, evaluation, positions, measurements: current,

@@ -624,6 +624,7 @@ describe('Candidate Release Review Remediation (R1 - R5)', () => {
                     labId: labId
                 }
             });
+            await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, batchId);
         });
 
         test('REANALYZE_BATCH transitions completed-unsubmitted work to REPEAT_REQUIRED while preserving immutable history', async () => {

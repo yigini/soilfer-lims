@@ -1,5 +1,5 @@
 const { analyteGateView } = require('../../services/qcRunGateService');
-const { reportingQc } = require('../../services/reportResultGovernance');
+const { reportingQc, resolveReportingModes } = require('../../services/reportResultGovernance');
 const { freezeReportEvidence, describeReportEvidence } = require('../../services/reportTruthfulnessService');
 const { checkBatchDisposition } = require('../../services/qcService');
 function run() {
@@ -42,4 +42,23 @@ test('closed deviation acceptance allows the gate but retains failed evidence an
     expect(view.result).toBe('FAIL'); expect(checkBatchDisposition(view)).toMatchObject({ allowed: true, status: 'QC_PASS_WITH_WARNING' });
     const evidence = freezeReportEvidence([result('B')], [item('B')], [batch]);
     expect(evidence.qc.withinLimits).toBe(false); expect(evidence.qc.deviations[0].dispositionReason).toBe('Matrix interference reviewed');
+});
+
+test.each([null, '{broken', '{"qcMode":"UNKNOWN"}', '{}'])('a malformed started Native mode %s fails closed without live-policy fallback', async criteriaSnapshot => {
+    const batch = run(); batch.startedAt = new Date();
+    batch.analytes[0] = { ...batch.analytes[0], provenance: 'NATIVE', criteriaSnapshot };
+    const live = jest.spyOn(require('../../services/policyService'), 'get');
+    try {
+        await expect(resolveReportingModes({ results: [result('A')], workItems: [item('A')] }, [batch]))
+            .rejects.toMatchObject({ statusCode: 409, code: 'QC_POLICY_UNRESOLVED' });
+        expect(live).not.toHaveBeenCalled();
+    } finally { live.mockRestore(); }
+});
+
+test('derived texture reporting resolves the frozen mode through its governing PSA analysis', async () => {
+    const batch = { id: 'psa', startedAt: new Date(), analytes: [{ analysisCode: 'PSA', provenance: 'NATIVE', criteriaSnapshot: '{"qcMode":"REQUIRED_WARN"}' }] };
+    const sample = { results: [{ ...result('SAND'), batchId: 'psa' }], workItems: [{ ...item('PSA'), batchId: 'psa' }] };
+    expect(await resolveReportingModes(sample, [batch])).toMatchObject({ qcModes: { SAND: 'REQUIRED_WARN' },
+        qcModeEvidence: [{ resultId: 'SAND', effectiveMode: 'REQUIRED_WARN', source: 'FROZEN', contributingBatchIds: ['psa'],
+            contributions: [{ analysisCode: 'PSA' }] }] });
 });

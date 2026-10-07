@@ -209,10 +209,11 @@ test('a failed analysis audit rolls back a waiver and preserves its original his
     expect(await snapshot(sample.id)).toEqual(before);
 });
 
-async function failedQcFixture(status = 'IN_PROGRESS', sampleStatus = 'PROCESSING') {
+async function failedQcFixture(status = 'IN_PROGRESS', sampleStatus = 'PROCESSING', { normalize = true } = {}) {
     const { sample, item } = await fixture(sampleStatus, 'PH_H2O', status);
     const batch = await client.batch.create({ data: { id: id(), analysis: 'PH_H2O', labId: manager.labId, status: 'QC_FAIL', createdBy: technician.username } });
     await client.workItem.update({ where: { id: item.id }, data: { batchId: batch.id, history: '[{"note":"Existing task history"}]' } });
+    if (normalize) await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(client, batch.id);
     return { sample, item, batch };
 }
 
@@ -244,9 +245,10 @@ test.each(['REPEAT_REQUIRED', 'REANALYSIS_REQUIRED'])('QC preserves the %s alias
 
 test.each([['ON_HOLD', 'QC_DISPOSITION_ITEMS_ON_HOLD'], ['AWAITING_VERIFICATION', 'QC_DISPOSITION_ITEMS_UNVERIFIED']])
     ('a batch member in %s refuses the whole QC decision before writes', async (status, code) => {
-        const { sample, item, batch } = await failedQcFixture(status);
+        const { sample, item, batch } = await failedQcFixture(status, 'PROCESSING', { normalize: false });
         const second = await fixture('PROCESSING', 'PH_H2O', 'IN_PROGRESS');
         await client.workItem.update({ where: { id: second.item.id }, data: { batchId: batch.id } });
+        await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(client, batch.id);
         const before = await snapshot(sample.id), secondBefore = await snapshot(second.sample.id);
         const batchBefore = await client.batch.findUnique({ where: { id: batch.id } });
         await expect(qcDispositions.dispositionBatch(batch.id, 'REJECT_BATCH', 'Rejected failed QC batch', manager, client))
@@ -287,6 +289,7 @@ test('QC also preserves a RELEASED sample that existed before the additive state
         'system:fixture', { context: 'fixture', tx: client });
     await createResultFixture(client, { data: { id: id(), sampleId, param: 'PH_H2O', value: '6.24', numericValue: 6.24,
         unit: 'pH', batchId: batch.id, flags: '["RETAINED_LEGACY_FLAG"]' } });
+    await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(client, batch.id);
     const before = await snapshot(sampleId);
     await qcDispositions.dispositionBatch(batch.id, 'REJECT_BATCH', 'Rejected failed QC batch', manager, client);
     expect(await snapshot(sampleId)).toEqual(before);
