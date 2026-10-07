@@ -54,7 +54,7 @@ function resolvedFromState(current, key, context = {}) {
         ...(analysisCode && methodologyId ? [[analysisCode, methodologyId, 'METHOD_OVERRIDE']] : []),
         ...(analysisCode ? [[analysisCode, null, 'ANALYSIS_OVERRIDE']] : []), [null, null, 'LAB_OVERRIDE']
     ] : [
-        ...(d.analysisOverrides?.includes(analysisCode) ? [[analysisCode, null, 'ANALYSIS_OVERRIDE']] : []),
+        ...(analysisCode && (d.analysisOverridesAll || d.analysisOverrides?.includes(analysisCode)) ? [[analysisCode, null, 'ANALYSIS_OVERRIDE']] : []),
         [null, null, 'LAB_OVERRIDE']
     ];
     for (const [analysis, method, source] of candidates) {
@@ -124,7 +124,7 @@ async function validateChange(change, db) {
     const analysisCode = change.analysisCode ?? null, methodologyId = change.methodologyId ?? null;
     if ((analysisCode !== null && (typeof analysisCode !== 'string' || !analysisCode.trim())) ||
         (methodologyId !== null && (typeof methodologyId !== 'string' || !methodologyId.trim())) ||
-        (d.scope === 'LAB' && (methodologyId !== null || (analysisCode !== null && !d.analysisOverrides?.includes(analysisCode)))) ||
+        (d.scope === 'LAB' && (methodologyId !== null || (analysisCode !== null && !d.analysisOverridesAll && !d.analysisOverrides?.includes(analysisCode)))) ||
         (methodologyId !== null && analysisCode === null)) {
         throw error(422, 'POLICY_SCOPE_INVALID', 'Invalid policy scope.');
     }
