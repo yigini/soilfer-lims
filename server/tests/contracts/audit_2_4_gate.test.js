@@ -71,3 +71,18 @@ test('a gate reader error fails closed with stable evidence and no writes', asyn
     expect(qcGate.decision(gate)).toMatchObject({ allowed: false, code: 'QC_GATE_NOT_EVALUATED' });
     expect(db.auditLog.create).not.toHaveBeenCalled();
 });
+
+test('repeat scope takes priority across linked runs and NOT_REQUIRED never erases another evaluated warning', () => {
+    const f = fixture(), second = { ...f.batch, id: 'other', analytes: [{ ...f.batch.analytes[0], status: 'QC_WARN' }],
+        evaluations: [{ ...f.batch.evaluations[0], id: 'other-evaluation', verdict: 'WARN' }] };
+    f.item.batchId = 'other'; f.batch.evaluations[0].verdict = 'NOT_REQUIRED';
+    const gate = qcGate.gateFromEvidence(f.result, [f.item], [f.batch, second], f.options);
+    expect(gate.value).toBe('WARN');
+    const evidence = require('../../services/reportTruthfulnessService').freezeReportEvidence([f.result], [f.item], [f.batch, second],
+        { qcGates: { [f.result.id]: gate } });
+    expect(evidence.qc.deviations[0].qcStatus).toBe('WARN'); expect(evidence.qc.withinLimits).toBe(false);
+    f.batch.dispositions = [{ id: 'repeat', analysisCode: 'A', decision: 'REPEAT_BATCH', decidedAt: new Date(), scope: null }];
+    second.evaluations = [];
+    const repeated = qcGate.gateFromEvidence(f.result, [f.item], [second, f.batch], f.options);
+    expect(repeated.value).toBe('REPEAT'); expect(qcGate.decision(repeated).code).toBe('QC_GATE_REPEAT_ORDERED');
+});

@@ -106,7 +106,8 @@ function reportingQc(sample, options = {}) {
     const warnings = [], gates = [];
     let blocker = null;
     const qcGate = require('./qcGateService');
-    for (const result of results.filter(row => row.isCurrent && !EXCLUDED_GATE_CODES.has(row.param))) {
+    for (const result of results.filter(row => row.isCurrent &&
+        !require('./resultEntryPolicy').isNonMeasurement({ analysis: row.param }))) {
         const governing = governingItems(result, items);
         if (!governing.length || !governing.every(item => item.status === 'ACCEPTED')) continue;
         const mode = getReportingMode(sample, result, options);

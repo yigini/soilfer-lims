@@ -25,13 +25,15 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
         token = await getAuthToken('LAB_MANAGER', labId);
     });
     afterEach(() => jest.restoreAllMocks());
-    async function fixture(batchStatus = 'QC_PASS', disposition) {
+    async function fixture(batchStatus = 'QC_PASS', disposition, { reviewNeeded = false } = {}) {
         const sampleId = id('SMP-08');
         const batch = await prisma.batch.create({ data: { id: id('B-08'), analysis: 'PH_H2O', status: batchStatus,
             disposition: disposition ? JSON.stringify(disposition) : null, labId, createdBy: 'report-test',
             qcResults: JSON.stringify({ blanks: [{ value: batchStatus === 'QC_FAIL' ? 100 : 0.01, status: batchStatus === 'QC_FAIL' ? 'FAIL' : 'PASS' }], controls: [], duplicates: [] }) } });
-        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status: 'APPROVED' } });
-        const item = await createWorkItemFixture(prisma, { data: { id: id('WI-08'), sampleId, analysis: 'PH_H2O', status: 'ACCEPTED', batchId: batch.id } });
+        await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
+            status: reviewNeeded ? 'PROCESSING' : 'APPROVED', receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' } });
+        const item = await createWorkItemFixture(prisma, { data: { id: id('WI-08'), sampleId, analysis: 'PH_H2O',
+            status: reviewNeeded ? 'SUBMITTED' : 'ACCEPTED', result: '6.2', batchId: batch.id } });
         await createResultFixture(prisma, { data: { id: id('R-08'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true, batchId: batch.id } });
         await normalizeLegacyQcFixture(prisma, batch.id);
@@ -153,8 +155,15 @@ describe('Audit 0.8: issued identity and truthful report evidence', () => {
     });
     test('warn-mode unevaluated QC and unlinked historical results never claim QC passed', async () => {
         mockPolicy('qc.mode', 'REQUIRED_WARN');
-        const content = JSON.parse((await generate(await fixture('RUNNING'))).content);
-        expect(content.qcStatement).toContain('RUNNING'); expect(content.evidence.qc.withinLimits).toBe(false);
+        const f = await fixture('RUNNING', undefined, { reviewNeeded: true });
+        const review = await request(app).post(`/api/work/${f.item.id}/review`).set('Authorization', `Bearer ${token}`)
+            .send({ status: 'ACCEPTED', qcAcknowledgement: { reason: 'Unevaluated evidence reviewed under WARN policy' } });
+        expect(review.status).toBe(200);
+        await require('../../services/sampleStateService').transitionSample(f.sampleId, 'APPROVED',
+            JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString()), 'Reviewed warning fixture');
+        const content = JSON.parse((await generate(f)).content);
+        expect(content.qcStatement).toContain('NOT_EVALUATED'); expect(content.evidence.qc.withinLimits).toBe(false);
+        expect(content.qcStatement).toContain('Unevaluated evidence reviewed under WARN policy');
         const missing = freezeReportEvidence([{ sampleId: 's', param: 'SOC' }], [], []);
         expect(missing.qc.withinLimits).toBe(false); expect(missing.qc.deviations[0].qcStatus).toBe('NOT_RECORDED');
     });

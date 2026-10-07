@@ -66,6 +66,10 @@ function classifyQcRunSchema(db, source) {
     if (indexes.length !== 14 || guards.length !== 47) throw fail('QC_RUN_SOURCE_MISMATCH', 'Normalized QC release needs fourteen indexes and forty-seven guards.');
     function present(wanted, type) {
         const actual = db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(wanted.name);
+        if (wanted.name === 'WorkItem_batch_membership_guard') {
+            const extension = require('./qcDispositionScopeSchemaService').inspectScopeExtension(db);
+            if (extension.classification === 'COMPLETE') wanted = { ...wanted, sql: extension.membership.guardSql };
+        }
         if (actual && (actual.type !== type || normalized(actual.sql) !== normalized(wanted.sql))) differences.push(`${wanted.name} differs`);
         return Boolean(actual);
     }

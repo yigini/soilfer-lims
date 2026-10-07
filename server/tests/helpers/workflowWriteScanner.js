@@ -26,6 +26,9 @@ const QC_RUN_SQL_SHA256 = '2f3d7a319d6cbb1fb061092d79e29e03358c28aba9e22190f221d
 const QC_SCOPE_LOADER = 'services/qcDispositionScopeMigrationSource.js';
 const QC_SCOPE_LOADER_SHA256 = 'bbe45a3b77f03082761bd01807baaaf6c8bb803280b5c9a1d3bc9be5df8762e3';
 const QC_SCOPE_SQL_SHA256 = 'fac0023cc90f9d5703ec8d722be55727028c7d24398fbfd4a0aa1cd1bd4fe5bf';
+const QC_MEMBERSHIP_LOADER = 'services/qcBracketMembershipMigrationSource.js';
+const QC_MEMBERSHIP_LOADER_SHA256 = '40c0af827c4d22b6fce1ee5b770f2c0146f456cfeeae85f9afa4d38f4678439f';
+const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572';
 const WORKFLOW_SOURCES = Object.freeze({
     evidence: { directory: '20261005000000_workflow_state_evidence', sha256: 'ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552' },
     guards: { directory: '20261005000100_workflow_state_guards', sha256: '84921ef45fa8609621b38908de5261d716820f2135f2dde1b9a20fafa6fc81ed' }
@@ -205,6 +208,8 @@ function scanSource(source, filename, exceptions = []) {
         if (qcRunSql !== null) return qcRunSql;
         const qcScopeSql = referenceMigrationSql(p, false, false, true);
         if (qcScopeSql !== null) return qcScopeSql;
+        const qcMembershipSql = referenceMigrationSql(p, false, false, false, true);
+        if (qcMembershipSql !== null) return qcMembershipSql;
         const resultSql = resultMigrationSql(p);
         if (resultSql !== null) return resultSql;
         if (p?.isCallExpression() && sourceFunction(p.get('callee'), 'evidenceCreates') && p.node.arguments.length === 1) {
@@ -277,15 +282,15 @@ function scanSource(source, filename, exceptions = []) {
                 p.node.property.name === 'indexSql' ? sql.slice(sql.indexOf('CREATE UNIQUE INDEX'), sql.indexOf('-- Fresh Prisma')) : sql;
         } catch { return null; }
     }
-    function referenceMigrationSql(p, qcRule = false, qcRun = false, qcScope = false) {
-        if (!p?.isMemberExpression() || p.node.computed || !(qcRun ? ['sql', 'schemaSql', 'guardsSql', 'bootstrapSql'] : ['sql', 'guardsSql']).includes(p.node.property.name)) return null;
+    function referenceMigrationSql(p, qcRule = false, qcRun = false, qcScope = false, qcMembership = false) {
+        if (!p?.isMemberExpression() || p.node.computed || !(qcMembership ? ['sql', 'guardSql', 'supersededGuardSql'] : qcRun ? ['sql', 'schemaSql', 'guardsSql', 'bootstrapSql'] : ['sql', 'guardsSql']).includes(p.node.property.name)) return null;
         const object = p.get('object');
         if (!object.isIdentifier()) return null;
         const binding = object.scope.getBinding(object.node.name);
         if (!binding || binding.kind !== 'const' || binding.constantViolations.length || !binding.path.isVariableDeclarator()) return null;
         const init = binding.path.get('init');
-        const functionName = qcScope ? 'loadScopeMigrationSource' : qcRun ? 'loadQcRunMigrationSource' : qcRule ? 'loadQcRuleMigrationSource' : 'loadReferenceMaterialMigrationSource';
-        const loader = qcScope ? QC_SCOPE_LOADER : qcRun ? QC_RUN_LOADER : qcRule ? QC_RULE_LOADER : REFERENCE_LOADER;
+        const functionName = qcMembership ? 'loadBracketMembershipSource' : qcScope ? 'loadScopeMigrationSource' : qcRun ? 'loadQcRunMigrationSource' : qcRule ? 'loadQcRuleMigrationSource' : 'loadReferenceMaterialMigrationSource';
+        const loader = qcMembership ? QC_MEMBERSHIP_LOADER : qcScope ? QC_SCOPE_LOADER : qcRun ? QC_RUN_LOADER : qcRule ? QC_RULE_LOADER : REFERENCE_LOADER;
         if (!init.isCallExpression() || init.node.arguments.length || !init.get('callee').isIdentifier({ name: functionName })) return null;
         const loaderBinding = init.scope.getBinding(functionName), declaration = loaderBinding?.path;
         if (!loaderBinding || loaderBinding.kind !== 'const' || loaderBinding.constantViolations.length || !declaration?.isVariableDeclarator() || !declaration.get('id').isObjectPattern()) return null;
@@ -297,16 +302,17 @@ function scanSource(source, filename, exceptions = []) {
         if (!declaration.node.id.properties.some(property => property.type === 'ObjectProperty' && !property.computed && property.key.name === functionName && property.value.name === functionName)) return null;
         if (binding.referencePaths.some(reference => {
             const member = reference.parentPath;
-            if (!member.isMemberExpression() || member.node.computed || !(qcScope ? ['sql', 'guardsSql', 'sha256'] : qcRun ? ['sql', 'schemaSql', 'guardsSql', 'bootstrapSql', 'sha256', 'oracleSha256', 'freshTables'] : ['sql', 'guardsSql', 'sha256', 'oracleSha256', 'freshTables']).includes(member.node.property.name)) return true;
+            if (!member.isMemberExpression() || member.node.computed || !(qcMembership ? ['sql', 'sha256', 'name', 'guardSql', 'supersededGuardSql', 'guardSha256', 'supersededGuardSha256'] : qcScope ? ['sql', 'guardsSql', 'sha256'] : qcRun ? ['sql', 'schemaSql', 'guardsSql', 'bootstrapSql', 'sha256', 'oracleSha256', 'freshTables'] : ['sql', 'guardsSql', 'sha256', 'oracleSha256', 'freshTables']).includes(member.node.property.name)) return true;
             let end = member;
             while (end.parentPath?.isMemberExpression() && end.parentPath.get('object').node === end.node) end = end.parentPath;
             return (end.parentPath?.isAssignmentExpression() && end.parentPath.get('left').node === end.node) || end.parentPath?.isUpdateExpression() || end.parentPath?.isUnaryExpression({ operator: 'delete' });
         })) return null;
         try {
-            if (createHash('sha256').update(fs.readFileSync(path.join(root, loader))).digest('hex') !== (qcScope ? QC_SCOPE_LOADER_SHA256 : qcRun ? QC_RUN_LOADER_SHA256 : qcRule ? QC_RULE_LOADER_SHA256 : REFERENCE_LOADER_SHA256)) return null;
-            const bytes = fs.readFileSync(path.join(root, qcScope ? 'prisma/migrations/20261007000100_qc_gate_scope/migration.sql' : qcRun ? 'prisma/migrations/20261006000400_normalized_qc_runs/migration.sql' : qcRule ? 'prisma/migrations/20261006000300_qc_rules/migration.sql' : 'prisma/migrations/20261006000200_reference_material_catalogue/migration.sql'));
-            if (createHash('sha256').update(bytes).digest('hex') !== (qcScope ? QC_SCOPE_SQL_SHA256 : qcRun ? QC_RUN_SQL_SHA256 : qcRule ? QC_RULE_SQL_SHA256 : REFERENCE_SQL_SHA256)) return null;
+            if (createHash('sha256').update(fs.readFileSync(path.join(root, loader))).digest('hex') !== (qcMembership ? QC_MEMBERSHIP_LOADER_SHA256 : qcScope ? QC_SCOPE_LOADER_SHA256 : qcRun ? QC_RUN_LOADER_SHA256 : qcRule ? QC_RULE_LOADER_SHA256 : REFERENCE_LOADER_SHA256)) return null;
+            const bytes = fs.readFileSync(path.join(root, qcMembership ? 'prisma/migrations/20261007000200_qc_bracket_membership/migration.sql' : qcScope ? 'prisma/migrations/20261007000100_qc_gate_scope/migration.sql' : qcRun ? 'prisma/migrations/20261006000400_normalized_qc_runs/migration.sql' : qcRule ? 'prisma/migrations/20261006000300_qc_rules/migration.sql' : 'prisma/migrations/20261006000200_reference_material_catalogue/migration.sql'));
+            if (createHash('sha256').update(bytes).digest('hex') !== (qcMembership ? QC_MEMBERSHIP_SQL_SHA256 : qcScope ? QC_SCOPE_SQL_SHA256 : qcRun ? QC_RUN_SQL_SHA256 : qcRule ? QC_RULE_SQL_SHA256 : REFERENCE_SQL_SHA256)) return null;
             const sql = bytes.toString('utf8');
+            if (qcMembership) return p.node.property.name === 'sql' ? sql : require(path.join(root, loader)).loadBracketMembershipSource()[p.node.property.name];
             if (qcScope) return p.node.property.name === 'guardsSql' ? sql.slice(sql.indexOf('CREATE TRIGGER')) : sql;
             if (qcRun) {
                 if (p.node.property.name === 'bootstrapSql') return require(path.join(root, loader)).loadQcRunMigrationSource().bootstrapSql;

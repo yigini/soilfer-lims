@@ -66,7 +66,8 @@ function gateFromEvidence(result, items, batches, { mode, modeSource = 'LIVE', r
     // deviation. Decide each contribution before combining their presentation.
     const refused = contributions.find(row => !decision({ ...base, ...row }).allowed &&
         decision({ ...base, ...row }).code !== 'QC_ACKNOWLEDGEMENT_REQUIRED');
-    const selected = refused || contributions.reduce((a, b) => rank.indexOf(b.value) > rank.indexOf(a.value) ? b : a);
+    const selected = contributions.find(row => row.value === 'REPEAT') || refused ||
+        contributions.reduce((a, b) => rank.indexOf(b.value) > rank.indexOf(a.value) ? b : a);
     return { ...base, ...selected, batchIds, contributions,
         acknowledgementRequired: contributions.some(row => decision({ ...base, ...row }).acknowledgementRequired) };
 }

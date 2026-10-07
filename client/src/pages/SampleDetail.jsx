@@ -169,6 +169,10 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
     const [reviewChecked, setReviewChecked] = useState(false);
     const [qcAcknowledgementReason, setQcAcknowledgementReason] = useState('');
     const [qcAcknowledgementRequested, setQcAcknowledgementRequested] = useState(false);
+    useEffect(() => {
+        setQcAcknowledgementReason('');
+        setQcAcknowledgementRequested(false);
+    }, [id]);
     const [returningSubmissionId, setReturningSubmissionId] = useState(null);
     const [returnReason, setReturnReason] = useState('');
 

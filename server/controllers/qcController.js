@@ -8,9 +8,8 @@ const { apiRunView, scopedBatchWhere } = require('../services/qcRunApiViewServic
 const { resolveRunProfile } = require('../services/qcRunProfileService');
 const { changeRunMembers } = require('../services/qcRunMembershipService');
 const { reorderNativeRun } = require('../services/qcRunOrderService');
-const { checkBatchDisposition } = require('../services/qcService');
+const qcGate = require('../services/qcGateService');
 const { normalizeBatchState } = require('../workflowContract');
-const { analyteGateView } = require('../services/qcRunGateService');
 function respondError(res, error, fallback) {
     if (!error.statusCode) console.error('[QC run]', error);
     return res.status(error.statusCode || 500).json(error.body || { code: error.code || 'QC_OPERATION_FAILED',
@@ -78,11 +77,15 @@ exports.removeItemsFromBatch = async (req, res) => {
 };
 exports.checkItemBatchStatus = async (workItemId) => {
     try {
-        const item = await prisma.workItem.findUnique({ where: { id: workItemId }, include: { batch: { include: QC_RUN_INCLUDE } } });
-        if (!item || !item.batchId) return { batchId: null, status: 'N/A', allowed: true };
-        if (!item.batch) return { batchId: item.batchId, status: 'ERROR', allowed: false };
-        const view = analyteGateView(item.batch, item.analysis), gate = checkBatchDisposition(view);
-        return { ...gate, batchId: item.batchId, disposition: view.disposition, result: view.result };
+        return await prisma.$transaction(async tx => {
+            const item = await tx.workItem.findUnique({ where: { id: workItemId } });
+            if (!item) return { batchId: null, status: 'ERROR', allowed: false };
+            const rows = await qcGate.forWorkItem(item, tx), checks = rows.map(row => qcGate.decision(row.gate));
+            const selected = checks.find(row => !row.allowed) || checks[0];
+            return { batchId: item.batchId, status: selected?.gate.value || 'N/A', allowed: checks.every(row => row.allowed),
+                code: selected?.code || null, acknowledgementRequired: checks.some(row => row.acknowledgementRequired),
+                gates: rows.map(row => row.gate) };
+        });
     } catch (error) {
         console.error('[checkItemBatchStatus] Error:', error);
         return { batchId: null, status: 'ERROR', allowed: false };

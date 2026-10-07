@@ -102,7 +102,7 @@ describe('Scenario E: QC Batch Management', () => {
                 .send({ decisions: [{ workItemId, decision: 'ACCEPT' }] });
 
             expect(reviewRes.status).toBe(409);
-            expect(reviewRes.body.error).toMatch(/FAILED QC Batch/);
+            expect(reviewRes.body.code).toBe('QC_GATE_FAILED');
         }
     });
 

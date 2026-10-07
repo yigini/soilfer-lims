@@ -27,6 +27,9 @@ describe('Guarded profile fixture through the laboratory workflow', () => {
         // fresh owned schema with the real release guards, independent of order.
         rehearsal = beforeGuards({actor: 'system:fixture', installWorkflowStateGuards: true});
         require('../../scripts/install_result_attempt_links').installResultAttemptLinks({dbPath: rehearsal.file, apply: true});
+        const qcPlan = require('../../scripts/install_qc_runs').installQcRuns({dbPath: rehearsal.file});
+        require('../../scripts/install_qc_runs').installQcRuns({dbPath: rehearsal.file, apply: true, planSha256: qcPlan.backfillFingerprint});
+        require('../../scripts/install_qc_gate_scope').installQcGateScope({dbPath: rehearsal.file, apply: true});
         process.env.DATABASE_PATH = rehearsal.file;
         process.env.DATABASE_URL = `file:${rehearsal.file}`;
         jest.resetModules();
@@ -41,6 +44,7 @@ describe('Guarded profile fixture through the laboratory workflow', () => {
         manifest = await fixture.loadFixture(prisma);
         reception = await getAuthToken('SAMPLE_RECEPTION', manifest.labId, ['GTM'], [manifest.projectId]);
         manager = await getAuthToken('LAB_MANAGER', manifest.labId, ['GTM'], [manifest.projectId]);
+        await require('../helpers/qcPolicyFixture').setFixtureQcRequirement(prisma, manager, manifest.labId);
         tech = await getAuthToken('LAB_TECHNICIAN', manifest.labId, ['GTM'], [manifest.projectId]);
         technician = jwt.decode(tech).username;
         await prisma.user.updateMany({where: {id: {in: [reception, manager, tech].map(token => jwt.decode(token).id)}}, data: {mustChangePassword: false}});

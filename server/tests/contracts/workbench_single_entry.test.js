@@ -9,6 +9,8 @@ const workbenchController = require('../../controllers/workbenchController');
 const workItemController = require('../../controllers/workItemController');
 const sampleController = require('../../controllers/sampleController');
 const SampleWorkspaceService = require('../../services/sampleWorkspaceService');
+const { ensureTestLab } = require('../setup');
+const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
 
 describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract', () => {
     let testSampleId;
@@ -16,10 +18,12 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
     let testPrepId;
     let testPhId;
     let testEcId;
-    const testTech = { username: 'tech_marco_single', role: 'LAB_TECHNICIAN', labId: 'LAB-DEFAULT' };
-    const testMgr = { username: 'mgr_gtm_single', role: 'LAB_MANAGER', labId: 'LAB-DEFAULT' };
+    const testTech = { username: 'tech_marco_single', role: 'LAB_TECHNICIAN', labId: 'LAB-SINGLE-ENTRY' };
+    const testMgr = { username: 'mgr_gtm_single', role: 'LAB_MANAGER', labId: 'LAB-SINGLE-ENTRY' };
 
     beforeAll(async () => {
+        await ensureTestLab(testMgr.labId, 'TEST');
+        await setFixtureQcRequirement(prisma, testMgr, testMgr.labId);
         const timestamp = Date.now();
         testSampleId = `SMP-ENTRY-${timestamp}`;
         testDryingId = `WI-DRY-${timestamp}`;
@@ -31,7 +35,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
         for (const u of [testTech, testMgr]) {
             await prisma.user.upsert({
                 where: { username: u.username },
-                update: {},
+                update: { labId: u.labId },
                 create: {
                     id: `USR-${u.username}`,
                     username: u.username,
@@ -68,8 +72,8 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
                 receptionDate: new Date(),
                 dryingStatus: 'PENDING',
                 preparationStatus: 'PENDING',
-                labId: 'LAB-DEFAULT',
-                assignedLab: 'LAB-DEFAULT',
+                labId: 'LAB-SINGLE-ENTRY',
+                assignedLab: 'LAB-SINGLE-ENTRY',
                 requiredAnalyses: JSON.stringify(['PH', 'EC'])
             }
         });
@@ -96,7 +100,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
             data: {
                 id: testDryingId,
                 sampleId: testSampleId,
-                labId: 'LAB-DEFAULT',
+                labId: 'LAB-SINGLE-ENTRY',
                 analysis: 'DRYING',
                 category: 'Operational Gates',
                 assignedTo: testTech.username,
@@ -108,7 +112,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
             data: {
                 id: testPrepId,
                 sampleId: testSampleId,
-                labId: 'LAB-DEFAULT',
+                labId: 'LAB-SINGLE-ENTRY',
                 analysis: 'PREPARATION',
                 category: 'Operational Gates',
                 assignedTo: testTech.username,
@@ -122,7 +126,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
             data: {
                 id: testPhId,
                 sampleId: testSampleId,
-                labId: 'LAB-DEFAULT',
+                labId: 'LAB-SINGLE-ENTRY',
                 analysis: 'PH',
                 category: 'Routine Chemistry',
                 assignedTo: testTech.username,
@@ -134,7 +138,7 @@ describe('Workbench Single-Entry Architecture & Operational Lifecycle Contract',
             data: {
                 id: testEcId,
                 sampleId: testSampleId,
-                labId: 'LAB-DEFAULT',
+                labId: 'LAB-SINGLE-ENTRY',
                 analysis: 'EC',
                 category: 'Routine Chemistry',
                 assignedTo: testTech.username,

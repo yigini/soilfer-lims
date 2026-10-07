@@ -26,7 +26,8 @@ function activeReopenEvent(batch, analysisCode) {
 }
 function currentDisposition(batch, evaluation, analysisCode) {
     const details = parsed(evaluation?.details, {});
-    const latest = (batch.dispositions || []).filter(row => !row.analysisCode || row.analysisCode === analysisCode).sort((a, b) => time(b.decidedAt) - time(a.decidedAt))[0];
+    const latest = (batch.dispositions || []).filter(row => !row.analysisCode || row.analysisCode === analysisCode)
+        .sort((a, b) => time(b.decidedAt) - time(a.decidedAt) || (b.id > a.id ? 1 : b.id < a.id ? -1 : 0))[0];
     if (!latest) return details.legacy ? parsed(details.disposition) : null;
     const reopen = (batch.events || []).filter(row => {
         const payload = parsed(row.payload, {});

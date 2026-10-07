@@ -4,6 +4,7 @@ const { createHash } = require('node:crypto');
 const Database = require('better-sqlite3');
 const { inspectScopeExtension, MARKER } = require('../services/qcDispositionScopeSchemaService');
 const { loadScopeMigrationSource } = require('../services/qcDispositionScopeMigrationSource');
+const { loadBracketMembershipSource } = require('../services/qcBracketMembershipMigrationSource');
 const fail = (code, message) => Object.assign(new Error(message), { code });
 
 function originalFingerprint(db) {
@@ -36,12 +37,15 @@ function installQcGateScope({ dbPath, apply = false } = {}) {
         })();
     } finally { reader.close(); }
     const summary = { classification: planned.classification, migrationSha256: planned.source.sha256,
+        membershipMigrationSha256: planned.membership.sha256, membershipGuardSha256: planned.membership.guardSha256,
+        supersededMembershipGuardSha256: planned.membership.supersededGuardSha256,
         existingDispositionRows: count, originalDispositionFingerprint: fingerprint, backfillCount: 0, bootstrapRebuild: [], totalChanges: 0 };
     if (planned.classification === 'COMPLETE' || !apply) return { ...summary,
         mode: apply ? 'NO_OP' : 'DRY_RUN', ...(planned.receipt && { receipt: planned.receipt }) };
     if (!['PRE_187', 'FRESH_PRISMA'].includes(planned.classification)) throw fail('QC_GATE_SCOPE_SCHEMA_MISMATCH', 'QC scope schema is unexpected.');
     const db = new Database(target, { fileMustExist: true, timeout: 5000 });
     const source = loadScopeMigrationSource();
+    const membership = loadBracketMembershipSource();
     try {
         db.pragma('foreign_keys = ON');
         return db.transaction(() => {
@@ -49,10 +53,13 @@ function installQcGateScope({ dbPath, apply = false } = {}) {
             const locked = inspectScopeExtension(db);
             if (locked.classification !== planned.classification || originalFingerprint(db) !== fingerprint) throw fail('QC_GATE_SCOPE_PLAN_STALE', 'QC disposition evidence changed after planning.');
             db.exec(locked.hasScope ? source.guardsSql : source.sql);
+            db.exec(membership.sql);
             if (originalFingerprint(db) !== fingerprint || db.prepare('SELECT COUNT(*) n FROM "BatchDisposition" WHERE "scope" IS NOT NULL').get().n) {
                 throw fail('QC_GATE_SCOPE_INTEGRITY_REFUSED', 'Existing disposition evidence must remain unchanged with NULL scope.');
             }
             const receipt = { migrationSha256: locked.source.sha256, existingDispositionRows: count,
+                membershipMigrationSha256: membership.sha256, membershipGuardSha256: membership.guardSha256,
+                supersededMembershipGuardSha256: membership.supersededGuardSha256,
                 originalDispositionFingerprint: fingerprint, backfillCount: 0, bootstrapRebuild: [] };
             db.prepare('INSERT INTO "_schema_migrations" (id, appliedAt, details) VALUES (?, CURRENT_TIMESTAMP, ?)').run(MARKER, JSON.stringify(receipt));
             const installed = inspectScopeExtension(db); assertIntegrity(db);

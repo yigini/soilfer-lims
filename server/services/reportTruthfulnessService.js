@@ -17,8 +17,9 @@ function freezeReportEvidence(results, workItems, batches, options = {}) {
             if (acknowledgement) acknowledgements.push({ resultId: result.id, ...acknowledgement });
             const brackets = (gate.contributions || []).filter(row => row.calibrationBracketRepeat && row.value === 'PASS');
             for (const row of brackets) calibrationBracketRepeats.push({ analysisCode: result.param, ...row.calibrationBracketRepeat });
-            if (gate.value === 'PASS' && !gate.contributions?.some(row => row.notRequired) && gate.mode !== 'OFF') continue;
-            const notRequired = gate.mode === 'OFF' || gate.contributions?.some(row => row.notRequired) ||
+            const allNotRequired = gate.contributions?.length > 0 && gate.contributions.every(row => row.notRequired);
+            if (gate.value === 'PASS' && !allNotRequired && gate.mode !== 'OFF') continue;
+            const notRequired = gate.mode === 'OFF' || gate.value === 'PASS' && allNotRequired ||
                 !gate.required && ['NO_BATCH', 'NOT_EVALUATED'].includes(gate.value);
             deviations.push({ analysisCode: result.param, batchId: gate.batchIds[0] || null,
                 qcStatus: gate.value === 'REPEAT' ? 'REPEAT' : notRequired ? 'NOT_REQUIRED' : gate.value,

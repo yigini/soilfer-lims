@@ -7,6 +7,8 @@ const { assertOwnedTestDatabase } = require('../helpers/testOwnedDatabase');
 const { installQcRuns, assertQcRunStartupReady } = require('../../scripts/install_qc_runs');
 const { installQcGateScope, assertQcGateScopeStartupReady, parseArguments } = require('../../scripts/install_qc_gate_scope');
 const { inspectScopeExtension } = require('../../services/qcDispositionScopeSchemaService');
+const { loadBracketMembershipSource } = require('../../services/qcBracketMembershipMigrationSource');
+const { loadScopeMigrationSource } = require('../../services/qcDispositionScopeMigrationSource');
 const { scanSource } = require('../helpers/workflowWriteScanner');
 const files = [];
 const hash = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -59,10 +61,14 @@ test.each([false, true])('scope installation preserves existing evidence without
     expect(hash(f.file)).toBe(before);
     const installed = installQcGateScope({ dbPath: f.file, apply: true });
     expect(installed).toMatchObject({ mode: 'APPLIED', classification: 'COMPLETE', totalChanges: 1, bootstrapRebuild: [], backfillCount: 0 });
+    const membership = loadBracketMembershipSource();
+    expect(installed.receipt).toMatchObject({ membershipMigrationSha256: membership.sha256,
+        membershipGuardSha256: membership.guardSha256, supersededMembershipGuardSha256: membership.supersededGuardSha256 });
     const reader = new Database(f.file);
     try {
         expect(reader.prepare('SELECT * FROM "BatchDisposition" ORDER BY id').all()).toEqual(f.old.map(row => ({ ...row, scope: null })));
         expect(reader.prepare('SELECT * FROM "_schema_migrations" WHERE id=?').get('186_normalized_qc_runs')).toEqual(f.priorReceipt);
+        expect(reader.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(membership.name).sql + ';').toBe(membership.guardSql);
         expect(inspectScopeExtension(reader).baseSql).toBe(fresh ? f.oldTable.replace(/,\s*"scope"\s+TEXT(?=\s*[,)])/, '') : f.oldTable);
         expect(reader.pragma('integrity_check', { simple: true })).toBe('ok');
         expect(reader.pragma('foreign_key_check')).toEqual([]);
@@ -119,6 +125,56 @@ test('a failure inside the scope transaction rolls back all DDL and the retained
         expect(inspectScopeExtension(reader).classification).toBe('PRE_187');
         expect(reader.prepare('SELECT * FROM "BatchDisposition" ORDER BY id').all()).toEqual(f.old);
     } finally { reader.close(); }
+});
+
+test('failure between the membership DROP and CREATE restores the exact old guard and schema', () => {
+    const f = fixture(false), membership = loadBracketMembershipSource(), before = hash(f.file);
+    const originalExec = Database.prototype.exec;
+    const exec = jest.spyOn(Database.prototype, 'exec').mockImplementation(function (sql) {
+        if (path.resolve(this.name) === f.file && sql === membership.sql) {
+            originalExec.call(this, 'DROP TRIGGER "WorkItem_batch_membership_guard";');
+            throw Error('FIXTURE_BETWEEN_DROP_AND_CREATE');
+        }
+        return originalExec.call(this, sql);
+    });
+    try { expect(() => installQcGateScope({ dbPath: f.file, apply: true })).toThrow('FIXTURE_BETWEEN_DROP_AND_CREATE'); }
+    finally { exec.mockRestore(); }
+    expect(hash(f.file)).toBe(before);
+    expect(assertQcRunStartupReady(f.file)).toMatchObject({ classification: 'COMPLETE', totalChanges: 0 });
+    const db = new Database(f.file, { readonly: true });
+    try { expect(db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(membership.name).sql + ';').toBe(membership.supersededGuardSql); }
+    finally { db.close(); }
+});
+
+test.each(['old-with-receipt', 'new-without-receipt', 'other-text'])('membership verifier refuses %s without writes', fault => {
+    const f = fixture(false), membership = loadBracketMembershipSource();
+    if (fault !== 'new-without-receipt') installQcGateScope({ dbPath: f.file, apply: true });
+    const db = new Database(f.file);
+    try {
+        if (fault === 'new-without-receipt') {
+            const source = loadScopeMigrationSource();
+            db.exec(source.sql);
+            db.exec(membership.sql);
+        } else {
+            db.exec('DROP TRIGGER "WorkItem_batch_membership_guard";');
+            if (fault === 'old-with-receipt') db.exec(membership.supersededGuardSql);
+            else db.exec(`CREATE TRIGGER "WorkItem_batch_membership_guard" BEFORE UPDATE ON "WorkItem"
+                BEGIN SELECT RAISE(ABORT,'UNREVIEWED_MEMBERSHIP'); END;`);
+        }
+    } finally { db.close(); }
+    const before = hash(f.file);
+    for (const apply of [false, true]) expect(() => installQcGateScope({ dbPath: f.file, apply })).toThrow();
+    expect(() => assertQcRunStartupReady(f.file)).toThrow();
+    expect(hash(f.file)).toBe(before);
+});
+
+test('the replacement leaves every original membership predicate byte-identical', () => {
+    const source = loadBracketMembershipSource();
+    const from = source.guardSql.indexOf("AND (a.status IN ('REPEAT_ORDERED','REJECTED')");
+    const to = source.guardSql.indexOf('\n    AND (NEW.batchId IS NULL', from);
+    expect(from).toBeGreaterThan(0); expect(to).toBeGreaterThan(from);
+    expect(source.guardSql.slice(0, from) + "AND a.status IN ('REPEAT_ORDERED','REJECTED'))" + source.guardSql.slice(to))
+        .toBe(source.supersededGuardSql);
 });
 
 test('the scope loader is closed to the reviewed source and cannot authorize shadowed or changed SQL', () => {

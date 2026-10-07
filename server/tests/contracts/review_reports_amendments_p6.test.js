@@ -6,6 +6,7 @@ const app = require('../../app');
 const prisma = require('../../prisma');
 const { usersDb } = require('../../db');
 const { generateToken, ensureTestLab } = require('../setup');
+const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
 
 describe('Package P6: Review, Reports & Amendments Verification', () => {
     let mgrUser, techUser, crossLabUser;
@@ -21,6 +22,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
             countries: ['P6C']
         });
         mgrToken = generateToken(mgrUser);
+        await setFixtureQcRequirement(prisma, mgrToken, 'LAB-P6');
 
         techUser = usersDb.create({
             username: 'tech_p6_test',
