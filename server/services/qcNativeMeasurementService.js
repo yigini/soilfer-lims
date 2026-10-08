@@ -7,6 +7,7 @@ const { aggregateBatchStatus } = require('../workflowContract');
 const { parseNumber, parseDuplicateObservation } = require('../../shared/numberParse');
 const { QC_RUN_INCLUDE, batchApiView, currentAnalyteEvidence } = require('./qcRunViewService');
 const { evaluateNativeEvidence } = require('./qcNativeEvaluationService');
+const { buildNativeMeasurementCandidate } = require('./qcNativeCandidateService');
 const { preparePositionBindings, applyPositionBindings } = require('./qcRunReferenceService');
 const { flagBatchResults } = require('./qcService');
 const failure = (statusCode, code, message, details = {}) => Object.assign(new Error(message), { statusCode, code, details });
@@ -89,12 +90,7 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         }
         // Evaluate an in-memory candidate before the first mutation, including
         // every analyte sharing a rebound physical lot. Any refusal writes zero.
-        const candidate = { ...batch, measurements: [...batch.measurements.filter(row => !replacements.some(change => change.previous.id === row.id)), ...observations],
-            positions: batch.positions.map(position => ({ ...position, references: [...(position.references || [])] })) };
-        for (const plan of plans) for (const binding of plan.bindings) {
-            const position = candidate.positions.find(row => row.id === binding.positionId);
-            position.references = position.references.filter(row => row.analysisCode !== binding.analysisCode).concat(binding);
-        }
+        const candidate = buildNativeMeasurementCandidate(batch, { observations, replacements, plans });
         for (const [positionId, source] of Object.entries(input.expectedValues || {})) {
             const position = candidate.positions.find(row => row.id === positionId), reference = position?.references.find(row => row.analysisCode === analysisCode && !row.supersededById);
             const expected = reference?.referenceSnapshot && JSON.parse(reference.referenceSnapshot).expected, provided = parseNumber(source, criteria.numberFormat);
