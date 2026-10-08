@@ -1,0 +1,79 @@
+-- #190 additive metadata. The reviewed installer backfills inside its
+-- transaction between this DDL and the guards/indexes below. It never edits
+-- original attempt fields or already-linked Result evidence.
+ALTER TABLE "WorkAttempt" ADD COLUMN "batchId" TEXT REFERENCES "Batch"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "WorkAttempt" ADD COLUMN "reason" TEXT;
+ALTER TABLE "WorkAttempt" ADD COLUMN "requestedBy" TEXT;
+ALTER TABLE "WorkAttempt" ADD COLUMN "requestedAt" DATETIME;
+ALTER TABLE "WorkAttempt" ADD COLUMN "rawData" TEXT;
+ALTER TABLE "WorkAttempt" ADD COLUMN "calcVersion" TEXT;
+ALTER TABLE "WorkAttempt" ADD COLUMN "dilutionFactor" REAL;
+ALTER TABLE "WorkAttempt" ADD COLUMN "aliquotId" TEXT;
+ALTER TABLE "WorkAttempt" ADD COLUMN "legacyAttemptNoConflict" TEXT;
+ALTER TABLE "ReviewDecision" ADD COLUMN "reasonCode" TEXT;
+
+CREATE INDEX "WorkAttempt_workItemId_attemptNo_idx" ON "WorkAttempt"("workItemId", "attemptNo");
+CREATE INDEX "WorkAttempt_batchId_idx" ON "WorkAttempt"("batchId");
+
+-- INSTALLER_GUARDS_AFTER_BACKFILL
+CREATE UNIQUE INDEX "WorkAttempt_workItemId_attemptNo_unique" ON "WorkAttempt"("workItemId", "attemptNo") WHERE "legacyAttemptNoConflict" IS NULL;
+CREATE UNIQUE INDEX "result_one_current" ON "Result"("sampleId", "param", "replicateNo", "attemptId") WHERE "isCurrent" = 1;
+
+CREATE TRIGGER "WorkAttempt_status_insert" BEFORE INSERT ON "WorkAttempt"
+WHEN NEW."status" IS NULL OR NEW."status" NOT IN ('OPEN','RECORDED','SUBMITTED','ACCEPTED','QUESTIONED','INVALIDATED','SUPERSEDED')
+BEGIN
+    SELECT RAISE(ABORT, 'WORK_ATTEMPT_STATUS_INVALID');
+END;
+
+CREATE TRIGGER "WorkAttempt_status_update" BEFORE UPDATE OF "status" ON "WorkAttempt"
+WHEN NEW."status" IS NULL OR NEW."status" NOT IN ('OPEN','RECORDED','SUBMITTED','ACCEPTED','QUESTIONED','INVALIDATED','SUPERSEDED')
+BEGIN
+    SELECT RAISE(ABORT, 'WORK_ATTEMPT_STATUS_INVALID');
+END;
+
+CREATE TRIGGER "WorkAttempt_conflict_flag_insert" BEFORE INSERT ON "WorkAttempt"
+WHEN NEW."legacyAttemptNoConflict" IS NOT NULL
+BEGIN
+    SELECT RAISE(ABORT, 'WORK_ATTEMPT_CONFLICT_FLAG_FORBIDDEN');
+END;
+
+CREATE TRIGGER "WorkAttempt_conflict_flag_update" BEFORE UPDATE OF "legacyAttemptNoConflict" ON "WorkAttempt"
+BEGIN
+    SELECT RAISE(ABORT, 'WORK_ATTEMPT_CONFLICT_FLAG_IMMUTABLE');
+END;
+
+CREATE TRIGGER "WorkAttempt_evidence_update" BEFORE UPDATE ON "WorkAttempt"
+WHEN NEW."evidenceData" IS NOT OLD."evidenceData" OR NEW."evidenceHash" IS NOT OLD."evidenceHash" OR NEW."instrumentId" IS NOT OLD."instrumentId"
+BEGIN
+    SELECT RAISE(ABORT, 'WORK_ATTEMPT_EVIDENCE_IMMUTABLE');
+END;
+
+CREATE TRIGGER "WorkAttempt_identity_update" BEFORE UPDATE ON "WorkAttempt"
+WHEN NEW."id" IS NOT OLD."id" OR NEW."workItemId" IS NOT OLD."workItemId" OR NEW."orderLineId" IS NOT OLD."orderLineId"
+ OR NEW."attemptNo" IS NOT OLD."attemptNo" OR NEW."executedMethodRevision" IS NOT OLD."executedMethodRevision"
+ OR NEW."author" IS NOT OLD."author" OR NEW."authorName" IS NOT OLD."authorName" OR NEW."materialAliquot" IS NOT OLD."materialAliquot"
+ OR NEW."qcBatchId" IS NOT OLD."qcBatchId" OR NEW."version" IS NOT OLD."version"
+ OR NEW."createdAt" IS NOT OLD."createdAt" OR NEW."updatedAt" IS NOT OLD."updatedAt"
+ OR NEW."reason" IS NOT OLD."reason" OR NEW."requestedBy" IS NOT OLD."requestedBy" OR NEW."requestedAt" IS NOT OLD."requestedAt"
+ OR NEW."rawData" IS NOT OLD."rawData" OR NEW."calcVersion" IS NOT OLD."calcVersion"
+ OR NEW."dilutionFactor" IS NOT OLD."dilutionFactor" OR NEW."aliquotId" IS NOT OLD."aliquotId"
+BEGIN
+    SELECT RAISE(ABORT, 'WORK_ATTEMPT_IDENTITY_IMMUTABLE');
+END;
+
+CREATE TRIGGER "WorkAttempt_batchId_update" BEFORE UPDATE OF "batchId" ON "WorkAttempt"
+WHEN OLD."batchId" IS NOT NULL AND NEW."batchId" IS NOT OLD."batchId"
+BEGIN
+    SELECT RAISE(ABORT, 'WORK_ATTEMPT_BATCH_IMMUTABLE');
+END;
+
+CREATE TRIGGER "WorkAttempt_number_insert" BEFORE INSERT ON "WorkAttempt"
+WHEN typeof(NEW."attemptNo") IS NOT 'integer' OR NEW."attemptNo" < 1
+BEGIN
+    SELECT RAISE(ABORT, 'WORK_ATTEMPT_NUMBER_INVALID');
+END;
+
+CREATE TRIGGER "WorkAttempt_delete" BEFORE DELETE ON "WorkAttempt"
+BEGIN
+    SELECT RAISE(ABORT, 'WORK_ATTEMPT_DELETE_REFUSED');
+END;

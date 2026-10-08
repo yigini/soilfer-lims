@@ -428,6 +428,7 @@ model Batch {
   evaluations QcEvaluation[]
   dispositions BatchDisposition[]
   events      BatchEvent[]
+  workAttempts WorkAttempt[]
 }
 
 // #186 scope pins 1–12. String enums and immutable evidence are guarded by the
@@ -1528,14 +1529,27 @@ model WorkAttempt {
   materialAliquot        String?
   instrumentId           String?
   qcBatchId              String?
+  batchId                String?
+  batch                  Batch?      @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  reason                 String?     // RepeatReason; null on historical first attempts.
+  requestedBy            String?
+  requestedAt            DateTime?
+  rawData                String?     // Immutable JSON text; calculation templates are #199.
+  calcVersion            String?
+  dilutionFactor         Float?
+  aliquotId              String?     // Structured aliquots are #206.
+  legacyAttemptNoConflict String?    // Migration-only, write-once conflict exemption.
   version                Int         @default(1)
-  status                 String      @default("RECORDED") // RECORDED, SUBMITTED, ACCEPTED, RETURNED, REJECTED
+  status                 String      @default("RECORDED") // Canonical shared statuses; historical RETURNED/REJECTED remain stored.
   evidenceHash           String?
   evidenceData           String?     // JSON snapshot of recorded evidence
   createdAt              DateTime    @default(now())
   updatedAt              DateTime    @updatedAt
 
   @@index([workItemId])
+  // Partial uniqueness is installed by the additive #190 SQL in every lab.
+  @@index([workItemId, attemptNo])
+  @@index([batchId])
   @@index([orderLineId])
 }
 
@@ -1549,6 +1563,7 @@ model ReviewDecision {
   attemptId        String?
   decision         String    // ACCEPT, RETURN, REJECT, OMIT
   reason           String?
+  reasonCode       String?
   evidenceVersion  Int?
   evidenceHash     String?
   reviewerId       String
