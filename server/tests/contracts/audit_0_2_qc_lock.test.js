@@ -7,6 +7,7 @@ const { getAuthToken } = require('../setup');
 const { canPublish } = require('../../services/workEligibility');
 const qcController = require('../../controllers/qcController');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const { createLegacyClosureDatabase, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
 const { QC_RUN_INCLUDE, batchApiView } = require('../../services/qcRunViewService');
 const { legacyBatchAnalyteStatus } = require('../../workflowContract');
@@ -62,7 +63,7 @@ describe('Audit 0.2: batch QC lock and durable evidence', () => {
         expect(res.status).toBe(200);
         expect(res.body.status).toBe('QC_PASS');
     }
-    async function reviewFixture(status, disposition) {
+    async function reviewFixture(status, disposition, { seedCachedEvidence = false } = {}) {
         let batchId;
         if (status === 'UNKNOWN') {
             batchId = id('BATCH-UNKNOWN-LEGACY');
@@ -98,6 +99,10 @@ describe('Audit 0.2: batch QC lock and durable evidence', () => {
                 expect(approved.status).toBe(200);
             }
         }
+        // Pin6060005962: only the three successful warning reviews opt in.
+        if (seedCachedEvidence) await createExecutionResultFixture(prisma, { attemptStatus: 'SUBMITTED',
+            data: { id: id('RESULT'), sampleId, param: 'PH_H2O', value: '7', numericValue: 7,
+                provenance: 'MEASURED', batchId, isCurrent: true } });
         return { batchId, workItemId, submissionId };
     }
     const review = (path, fixture) => {
@@ -237,7 +242,7 @@ describe('Audit 0.2: batch QC lock and durable evidence', () => {
     });
 
     test.each(['individual', 'bulk', 'submission'])('%s review accepts PROCEED_WITH_WARNING but keeps failed evidence locked', async path => {
-        const fixture = await reviewFixture('QC_FAIL', { decision: 'PROCEED_WITH_WARNING', reason: 'Manager accepted documented warning' });
+        const fixture = await reviewFixture('QC_FAIL', { decision: 'PROCEED_WITH_WARNING', reason: 'Manager accepted documented warning' }, { seedCachedEvidence: true });
         const res = await review(path, fixture);
         expect(res.status).toBe(200);
         expect((await prisma.workItem.findUnique({ where: { id: fixture.workItemId } })).status).toBe('ACCEPTED');

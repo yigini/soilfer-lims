@@ -1,7 +1,8 @@
 'use strict';
 const { createResultFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { cleanupWorkflowFixtures } = require('../helpers/workflowFixtures');
 
-const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Contract Test Suite: QC Batch Inspection, Disposition & Release Gates (Refs #118)
  *
@@ -141,7 +142,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Link work item to batch
-        await createResultFixture(prisma, { data: { id: `RES-118-${Date.now()}`, sampleId: sample1.id,
+        await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data: { id: `RES-118-${Date.now()}`, sampleId: sample1.id,
             param: 'PH_H2O', value: '6.45', isCurrent: true, isValid: true, batchId: batch1.id } });
         await prisma.workItem.update({
             where: { id: workItem1.id },
@@ -150,25 +151,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         await normalizeLegacyQcFixture(prisma, batch1.id);
     });
 
-    afterAll(async () => {
-        await prisma.result.deleteMany({ where: { sampleId: { in: reportFixtureIds } } });
-        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: { in: reportFixtureIds } } }), select: { id: true } })).map(row => row.id), { single: false });
-        await prisma.auditLog.deleteMany({ where: { sampleId: { in: reportFixtureIds } } });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: reportFixtureIds } } }), select: { id: true } })).map(row => row.id), { single: false });
-        // Clean up test data
-        await prisma.report.deleteMany({ where: { sampleId: sample1.id } }).catch(() => {});
-        await prisma.result.deleteMany({ where: { sampleId: sample1.id } });
-        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: workItem1.id } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample1.id } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
-        await prisma.batch.deleteMany({ where: { id: batch1.id } }).catch(() => {});
-        await prisma.auditLog.deleteMany({ where: { entityId: batch1.id } }).catch(() => {});
-        await prisma.user.deleteMany({
-            where: { id: { in: [lab1Manager.id, lab2Manager.id, lab1Tech.id] } }
-        }).catch(() => {});
-        await prisma.lab.deleteMany({
-            where: { id: { in: [testLab1.id, testLab2.id] } }
-        }).catch(() => {});
-    });
+    // Pin6056586906: retain QC/evidence parents until the whole owned database is torn down.
 
     // ─── Test 1: Canonical Batch Inspection ───
     test('1. GET /api/qc/batches/:id returns canonical batch with actual control values, affected items, and scope protection', async () => {
@@ -227,7 +210,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         await prisma.batch.create({ data: { ...batch1, id: reportBatchId, workItemIds: JSON.stringify([`WI-${reportId}`]) } });
         await createSampleFixture(prisma, { data: { ...sample1, id: reportId, originalId: reportId, status: 'APPROVED' } });
         await createWorkItemFixture(prisma, { data: { ...workItem1, id: `WI-${reportId}`, sampleId: reportId, batchId: reportBatchId } });
-        await createResultFixture(prisma, { data: { id: `RES-${reportId}`, sampleId: reportId,
+        await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data: { id: `RES-${reportId}`, sampleId: reportId,
             param: 'PH_H2O', value: '6.45', isCurrent: true, isValid: true, batchId: reportBatchId } });
         await normalizeLegacyQcFixture(prisma, reportBatchId);
         const reportSample = await prisma.sample.findUnique({ where: { id: reportId }, include: { workItems: true, results: true } });

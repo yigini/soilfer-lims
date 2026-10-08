@@ -13,6 +13,24 @@ module.exports = async function globalSetup() {
     const testDbPath = path.resolve(tmpDir, `test_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.db`);
     const sourceDbPath = path.resolve(__dirname, '../prisma/dev.db');
 
+    // Pin6059793372: CI/local provision the same published, test-only baseline.
+    const helpPrerequisite = 'Test template lacks the published help release. Run the existing seed_help_content.cjs and publish_help_release.cjs with NODE_ENV=test against the owned server/prisma/dev.db template.';
+    if (!fs.existsSync(sourceDbPath)) throw new Error(helpPrerequisite);
+    const TemplateDatabase = require('better-sqlite3');
+    const template = new TemplateDatabase(sourceDbPath, { readonly: true, fileMustExist: true });
+    try {
+        if (!template.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='HelpPublication'").get()) throw new Error(helpPrerequisite);
+        const requiredArticles = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../data/help/content.en.json'), 'utf8')).articles;
+        const publications = template.prepare('SELECT articleId, approvedLocales FROM HelpPublication WHERE isCurrent = 1').all();
+        const complete = new Set(publications.filter(row => {
+            try {
+                const locales = JSON.parse(row.approvedLocales);
+                return Array.isArray(locales) && ['en', 'es', 'es-419', 'fr', 'pt'].every(locale => locales.includes(locale));
+            } catch (_) { return false; }
+        }).map(row => row.articleId));
+        if (requiredArticles.some(article => !complete.has(article.id))) throw new Error(helpPrerequisite);
+    } finally { template.close(); }
+
     if (fs.existsSync(sourceDbPath)) {
         fs.copyFileSync(sourceDbPath, testDbPath);
         // Prisma db push cannot express this partial index. Install the actual

@@ -1,4 +1,4 @@
-const { createResultFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const jwt = require('jsonwebtoken');
 const { randomUUID } = require('node:crypto');
 const prisma = require('../../prisma');
@@ -19,7 +19,7 @@ async function fixture(status = 'PROCESSING') {
         status, receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' } });
     const item = await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, analysis,
         assignedLab: labId, assignedTo: actor.username, status: 'ASSIGNED', version: 0 } });
-    const result = await createResultFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, param: analysis,
+    const result = await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, param: analysis,
         value: '6.2', numericValue: 6.2, flags: '["ORIGINAL_NOTE"]', isCurrent: true } });
     return { sample, item, result };
 }
@@ -62,7 +62,19 @@ test('offline completion centrally records provenance and preserves superseded a
     expect(after.results.find(result => result.id === row.result.id)).toMatchObject({ value: '6.2', numericValue: 6.2,
         flags: '["ORIGINAL_NOTE"]', isCurrent: false });
     expect(after.results.find(result => result.isCurrent)).toMatchObject({ value: '7.2', enteredBy: actor.username });
-    expect(after.attempts).toHaveLength(1); expect(after.receipts).toHaveLength(1);
+    // Pin6060005962: a re-record binds a new attempt and preserves the first.
+    expect(before.attempts).toHaveLength(1);
+    const priorAttempt = before.attempts.find(attempt => attempt.id === row.result.attemptId);
+    expect(priorAttempt).toMatchObject({ workItemId: row.item.id, attemptNo: 1, status: 'RECORDED' });
+    expect(after.attempts).toHaveLength(2);
+    expect(after.attempts.find(attempt => attempt.id === priorAttempt.id)).toEqual(priorAttempt);
+    const currentResult = after.results.find(result => result.id === receipt.outcome.resultId);
+    expect(currentResult).toMatchObject({ isCurrent: true, attemptId: receipt.outcome.attemptId });
+    expect(currentResult.attemptId).not.toBe(priorAttempt.id);
+    expect(after.attempts.find(attempt => attempt.id === currentResult.attemptId))
+        .toMatchObject({ workItemId: row.item.id, attemptNo: 2 });
+    expect(after.results.find(result => result.id === row.result.id)).toMatchObject({ attemptId: priorAttempt.id, isCurrent: false });
+    expect(after.receipts).toHaveLength(1);
     expect(after.audits.filter(audit => audit.action !== 'RESULT_RECORDED')).toHaveLength(before.audits.length + 1);
     const resultAudits = after.audits.filter(audit => audit.action === 'RESULT_RECORDED');
     expect(resultAudits).toHaveLength(1);

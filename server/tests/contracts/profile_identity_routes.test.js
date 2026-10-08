@@ -1,5 +1,4 @@
-const { createResultFixture } = require('../../services/resultWriteService');
-const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
@@ -28,19 +27,9 @@ describe('Mounted profile correction, scope and immutable export contracts',()=>
         for (const [name,id] of Object.entries(ids)) await createSampleFixture(prisma, {data:{id,originalId:`FIELD-${id}`,labId:`ACCESSION-${id}`,assignedLab:lab,projectId:project,projectCode:project,country:'GTM',status:name==='draft'?'RECEIVED':'APPROVED',approvedAt:name==='draft'?null:new Date(),fieldMetadata:JSON.stringify({site_id:{value:'SITE-OLD'},pit_id:{value:'PIT-FIELD'}})}});
         await createWorkItemFixture(prisma, { data: { id: `${ids.released}-PH`, sampleId: ids.released,
             assignedLab: lab, analysis: 'PH_H2O', status: 'ACCEPTED' } });
-        await createResultFixture(prisma, {data:{id:'PROFILE-RESULT-UNCHANGED',sampleId:ids.released,param:'PH_H2O',value:'6.4',numericValue:6.4,unit:'pH',isCurrent:true,isValid:true}});
+        await createExecutionResultFixture(prisma, {attemptStatus:'ACCEPTED',data:{id:'PROFILE-RESULT-UNCHANGED',sampleId:ids.released,param:'PH_H2O',value:'6.4',numericValue:6.4,unit:'pH',isCurrent:true,isValid:true}});
     });
-    afterAll(async()=>{
-        await prisma.commandReceipt.deleteMany({where:{idempotencyKey:'profile-correction-operation'}});
-        await prisma.sampleAmendment.deleteMany({where:{sampleId:{in:Object.values(ids)}}});
-        await prisma.auditLog.deleteMany({where:{sampleId:{in:Object.values(ids)}}});
-        await prisma.result.deleteMany({where:{sampleId:{in:Object.values(ids)}}});
-        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({where:{sampleId:{in:Object.values(ids)}}}), select: { id: true } })).map(row => row.id), { single: false });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({where:{id:{in:Object.values(ids)}}}), select: { id: true } })).map(row => row.id), { single: false });
-        await prisma.project.deleteMany({where:{id:{in:[project,project+'-NEXT']}}});
-        await prisma.user.update({where:{id:managerId},data:{labId:null}});
-        await prisma.lab.deleteMany({where:{id:{in:[lab,foreignLab]}}});
-    });
+    // Pin6056586906: retain execution, audit and profile parents until owned database teardown.
     const put = (id,token,metadata)=>request(app).put(`/api/samples/${id}/metadata`).set('Authorization',`Bearer ${token}`).send({metadata});
     test('foreign manager cannot edit; valid receiving capture records server actor and preserves independent site',async()=>{
         expect((await put(ids.draft,foreign,{profileReference:{code:'PIT-X'}})).status).toBe(403);
