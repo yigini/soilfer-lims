@@ -1367,7 +1367,11 @@
     "failAction": "Ação em caso de falha",
     "fullRecord": "Avaliação armazenada completa",
     "nativeRun": "Corrida nativa",
-    "preview": "Prévia — não salva"
+    "preview": "Prévia — não salva",
+    "parentObservation": "Observação QC da amostra original",
+    "runSetup": "Configuração da corrida",
+    "saveBindings": "Salvar referências vinculadas",
+    "serverParse": "Observação interpretada pelo servidor"
   },
   "proficiencyTesting": {
     "legacySigmaMissing": "Esta pontuação histórica de proficiência foi registrada sem sigma de avaliação. Não foi recalculada; forneça um sigma válido em uma correção explícita.",

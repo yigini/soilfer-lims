@@ -3,14 +3,13 @@ const { actorName } = require('./workflowStateRules');
 const { readQcRun, currentAnalyteEvidence } = require('./qcRunViewService');
 const { buildNativeMeasurementCandidate, prepareNativeObservationEntries } = require('./qcNativeCandidateService');
 const { evaluateNativeEvidence, nativeCheckPolicy } = require('./qcNativeEvaluationService');
+const { nativePositionParameters, LIMIT_FIELDS } = require('./qcNativeEntryViewService');
 const failure = (statusCode, code, message) => Object.assign(new Error(message), { statusCode, code });
 
 function positionView(batch, analyte, evaluated) {
     const criteria = JSON.parse(analyte.criteriaSnapshot), evidence = currentAnalyteEvidence(batch, analyte.analysisCode);
     const checks = [...evaluated.evaluation.blanks, ...evaluated.evaluation.duplicates, ...evaluated.evaluation.controls];
     const parents = new Set(evidence.positions.filter(row => row.kind === 'DUPLICATE').map(row => row.duplicateOfPositionId));
-    const limitFields = ['maxAllowed', 'maxRpd', 'absMax', 'absMaxBelow5LOQ', 'nearLoqMultiplier', 'loq',
-        'minRecovery', 'maxRecovery', 'crmAbsWindow', 'lrmWindowPct', 'mode', 'crmMode', 'lrmMode'];
     return evidence.positions.filter(row => row.kind !== 'CAL_STD' && (row.kind !== 'SAMPLE' || parents.has(row.id))).map(position => {
         const check = checks.find(row => row.positionId === position.id);
         const observation = evidence.measurements.find(row => row.positionId === position.id && row.replicateNo === 1);
@@ -19,12 +18,15 @@ function positionView(batch, analyte, evaluated) {
         const policy = nativeCheckPolicy(criteria, position);
         // The preview displays the frozen parameters and any more specific
         // limits returned by the same check that performs real evaluation.
-        const limits = Object.fromEntries(limitFields.filter(key => (check?.[key] ?? policy[key]) !== undefined)
-            .map(key => [key, check?.[key] ?? policy[key]]));
+        const parameters = nativePositionParameters(criteria, position, analyte.analysisCode);
+        const limits = Object.fromEntries(LIMIT_FIELDS.filter(key => (check?.[key] ?? parameters.limits[key]) !== undefined)
+            .map(key => [key, check?.[key] ?? parameters.limits[key]]));
         return { positionId: position.id, position: position.position, kind: position.kind,
             duplicateOfPositionId: position.duplicateOfPositionId, referenceSnapshot: reference,
             expected: reference?.expected ?? check?.expected ?? null, limits,
             measured: observation?.value ?? null, rawInput: observation?.rawInput ?? null,
+            parsedObservation: observation ? { numericValue: observation.value, qualifier: observation.censoring,
+                censoringLimit: observation.censoringLimit } : null,
             status: check?.status ?? null, criterion: check?.criterion ?? policy.mode ?? null,
             failAction: check?.failAction ?? null, details: check ?? null };
     });

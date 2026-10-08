@@ -2943,7 +2943,11 @@
     "failAction": "Failure action",
     "fullRecord": "Full stored evaluation",
     "nativeRun": "Native run",
-    "preview": "Preview — not saved"
+    "preview": "Preview — not saved",
+    "parentObservation": "QC parent observation",
+    "runSetup": "Run setup",
+    "saveBindings": "Save reference bindings",
+    "serverParse": "Server parsed observation"
   },
   "proficiencyTesting": {
     "legacySigmaMissing": "This historical PT score was recorded without an assessment sigma. It has not been recomputed; supply a valid sigma in an explicit correction.",

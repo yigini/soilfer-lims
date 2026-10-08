@@ -1367,7 +1367,11 @@
     "failAction": "Action en cas d’échec",
     "fullRecord": "Évaluation enregistrée complète",
     "nativeRun": "Série native",
-    "preview": "Aperçu — non enregistré"
+    "preview": "Aperçu — non enregistré",
+    "parentObservation": "Observation QC de l’échantillon parent",
+    "runSetup": "Configuration de la série",
+    "saveBindings": "Enregistrer les références liées",
+    "serverParse": "Observation interprétée par le serveur"
   },
   "proficiencyTesting": {
     "legacySigmaMissing": "Ce score historique d’aptitude a été enregistré sans sigma d’évaluation. Il n’a pas été recalculé ; fournissez un sigma valide dans une correction explicite.",

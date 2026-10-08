@@ -13,6 +13,7 @@ const policies = require('../../services/policyService');
 const { buildNativeRun, startNativeRun } = require('../../services/qcNativeRunService');
 const { writeNativeMeasurements } = require('../../services/qcNativeMeasurementService');
 const { previewQcRun } = require('../../services/qcRunPreviewService');
+const { apiRunView } = require('../../services/qcRunApiViewService');
 const owned = [];
 
 async function fixture(criteria = {}, { mode = 'ADVISORY', start = true } = {}) {
@@ -27,7 +28,8 @@ async function fixture(criteria = {}, { mode = 'ADVISORY', start = true } = {}) 
     connection.exec('CREATE TABLE IF NOT EXISTS "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL,"appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"details" TEXT)');
     connection.close();
     for (const [script, installer] of [['result_attempt_links', 'installResultAttemptLinks'], ['sample_holds', 'installSampleHolds'],
-        ['reference_materials', 'installReferenceMaterials'], ['qc_rules', 'installQcRules'], ['qc_runs', 'installQcRuns'], ['qc_gate_scope', 'installQcGateScope']]) {
+        ['reference_materials', 'installReferenceMaterials'], ['qc_rules', 'installQcRules'], ['qc_runs', 'installQcRuns'], ['qc_gate_scope', 'installQcGateScope'],
+        ['proficiency_evidence', 'installProficiencyEvidence'], ['result_equipment_evidence', 'installResultEquipmentEvidence']]) {
         require(`../../scripts/install_${script}`)[installer]({ dbPath: file, apply: true });
     }
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) }); resource.db = db;
@@ -101,13 +103,26 @@ test('a set of preview calls never writes rows/schema and keeps the started rule
     }
 });
 
+test('initial run view supplies the frozen actual blank bound without a candidate or stored verdict', async () => {
+    const f = await fixture({ blankLimitMode: 'LT_HALF_LOQ' }), before = snapshot(f.file);
+    const view = await apiRunView(f.db, f.run, { detail: true });
+    const entry = view.analytes[0].entryEvidence.find(row => row.positionId === f.run.positions.find(row => row.kind === 'BLANK').id);
+    expect(entry).toMatchObject({ expected: null, limits: { maxAllowed: 0.123456789 / 2, mode: 'LT_HALF_LOQ', loq: 0.123456789 }, status: null });
+    expect(entry).not.toHaveProperty('verdict');
+    expect(snapshot(f.file)).toEqual(before);
+    const closed = { ...f.run, status: 'CLOSED', analytes: f.run.analytes.map(row => ({ ...row, status: 'CLOSED' })) };
+    expect((await apiRunView(f.db, closed, { detail: true })).analytes[0].entryEvidence).toEqual([]);
+    expect(snapshot(f.file)).toEqual(before);
+});
+
 test.each(['<LOQ', '<0.05'])('censored parent/duplicate %s shares real parsing, LOQ and verdict without writes', async rawInput => {
     const f = await fixture({ duplicateEvery: 1 });
     const input = f.run.positions.map(row => ({ analysisCode: f.analysisCode, positionId: row.id, rawInput: row.kind === 'BLANK' ? '0.01' : rawInput }));
     const before = snapshot(f.file), preview = await previewQcRun(f.db, f.run.id, f.actor, input);
     expect(snapshot(f.file)).toEqual(before);
     const duplicate = preview.analytes[0].positions.find(row => row.kind === 'DUPLICATE');
-    expect(duplicate).toMatchObject({ rawInput, measured: null, limits: { loq: 0.123456789 } });
+    expect(duplicate).toMatchObject({ rawInput, measured: null, limits: { loq: 0.123456789 },
+        parsedObservation: { numericValue: null, qualifier: '<', censoringLimit: rawInput === '<LOQ' ? 0.123456789 : 0.05 } });
     const actual = await writeNativeMeasurements(f.db, f.run.id, f.actor, { measurements: input.map(({ positionId, rawInput }) => ({ positionId, rawInput })) }, { explicit: true });
     expect(JSON.parse(actual.evaluations.at(-1).details).evaluation).toEqual(preview.analytes[0].evaluation);
     expect(actual.measurements.filter(row => row.censoring)).toHaveLength(2);

@@ -192,3 +192,61 @@ test('a stored evaluation without a limit never invents a policy or recomputes i
     expect(nodes(evidence).some(node => node.type === 'input')).toBe(false);
     expect(view.axios.post).not.toHaveBeenCalled();
 });
+
+test('the native grid opens with one row per real position, empty QC parent observation and no automatic requests', async () => {
+    const batch = fixture(); batch.workItems = [{ sampleId: 's', sample: { originalId: 'SERVER-SAMPLE' }, draft: { value: '91' } }];
+    const view = mount(batch); await view.render();
+    expect(view.all().filter(node => node.type === 'table')).toHaveLength(1);
+    expect(view.all().filter(node => String(node.props?.['data-testid'] || '').startsWith('native-position-'))).toHaveLength(batch.positions.length);
+    expect(view.find('native-value-sample').props.value).toBe('');
+    expect(view.find('native-value-sample').props['aria-label']).toContain('qcWorksheet.parentObservation');
+    expect(view.find('native-qc-evaluate').props.disabled).toBe(true);
+    await view.find('native-qc-evaluate').props.onClick();
+    expect(view.axios.post).not.toHaveBeenCalled(); expect(view.axios.put).not.toHaveBeenCalled();
+    expect(view.all().some(node => node.type === 'select' && String(node.props?.['data-testid'] || '').includes('parent'))).toBe(false);
+});
+
+test('every required cell is needed for evaluate and the zero/comma payload contains only raw measurements', async () => {
+    const batch = fixture(); batch.analytes[0].numberFormat = { decimal: ',', thousands: null };
+    const view = mount(batch); await view.render();
+    for (const [id, raw] of [['blank', '0'], ['lrm', '7,03'], ['sample', '7,03']]) {
+        view.find(`native-value-${id}`).props.onChange({ target: { value: raw } }); await view.render();
+    }
+    expect(view.find('native-qc-evaluate').props.disabled).toBe(true);
+    await view.find('native-qc-evaluate').props.onClick(); expect(view.axios.post).not.toHaveBeenCalled();
+    view.find('native-value-duplicate').props.onChange({ target: { value: '7,03' } }); await view.render();
+    expect(view.find('native-qc-evaluate').props.disabled).toBe(false);
+    await view.find('native-qc-evaluate').props.onClick();
+    expect(view.axios.post).toHaveBeenCalledWith('/api/qc/batches/native-run/evaluate', { analysisCode: 'A', references: [], measurements: [
+        { positionId: 'blank', replicateNo: 1, rawInput: '0' }, { positionId: 'lrm', replicateNo: 1, rawInput: '7,03' },
+        { positionId: 'sample', replicateNo: 1, rawInput: '7,03' }, { positionId: 'duplicate', replicateNo: 1, rawInput: '7,03' }
+    ] });
+    expect(JSON.stringify(view.axios.post.mock.calls[0][1])).not.toMatch(/referenceUse|expected|methodologyId|referenceMaterialId|referenceValueId|duplicateOfPositionId/);
+});
+
+test('reference correction stays in setup and the grid refetches the new server-bound certificate without editable reference fields', async () => {
+    const batch = fixture(), lrm = batch.positions.find(row => row.id === 'lrm');
+    lrm.references = [{ id: 'binding', analysisCode: 'A', referenceMaterialId: 'old-lot', referenceSnapshot: JSON.stringify({ code: 'OLD', lotNumber: '7', expected: 7.123456 }) }];
+    const view = mount(batch); await view.render({ referenceMaterials: [
+        { id: 'new-lot', kind: 'LRM', code: 'NEW', lotNumber: '8', eligible: true },
+        { id: 'ineligible', kind: 'LRM', code: 'INELIGIBLE', lotNumber: '9', eligible: false }
+    ] });
+    expect(nodes(view.find('native-lot-lrm')).find(node => node.type === 'option' && node.props.value === 'ineligible').props.disabled).toBe(true);
+    expect(contents(view.find('native-reference-lrm'))).toContain('OLD');
+    view.find('native-lot-lrm').props.onChange({ target: { value: 'new-lot' } }); await view.render();
+    expect(view.find('native-bindings-save').props.disabled).toBe(true);
+    view.find('native-correction-reason').props.onChange({ target: { value: 'Reviewed certificate correction' } }); await view.render();
+    view.props.onChanged.mockImplementation(async () => {
+        lrm.references = [{ id: 'corrected-binding', analysisCode: 'A', referenceMaterialId: 'new-lot', referenceSnapshot: JSON.stringify({ code: 'NEW-SERVER', lotNumber: '8', expected: 8.7654321 }) }];
+        batch.analytes[0].evaluation = { id: 'corrected-evaluation', details: JSON.stringify({ evaluation: {
+            controls: [{ positionId: 'lrm', expected: 8.7654321, minRecovery: 83.2345, maxRecovery: 117.8765, status: 'INCOMPLETE' }] } }) };
+    });
+    await view.find('native-bindings-save').props.onClick(); await view.render();
+    expect(view.axios.post).toHaveBeenCalledWith('/api/qc/batches/native-run/corrections', { analysisCode: 'A', corrections: [],
+        references: [{ positionId: 'lrm', referenceMaterialId: 'new-lot' }], reason: 'Reviewed certificate correction' });
+    expect(contents(view.find('native-reference-lrm'))).toContain('NEW-SERVER');
+    const evidence = view.find('native-evidence-lrm');
+    expect(contents(evidence)).toContain('8.7654321'); expect(contents(evidence)).toContain('83.2345'); expect(contents(evidence)).toContain('117.8765');
+    for (const cell of [view.find('native-reference-lrm'), evidence]) expect(nodes(cell).some(node => ['input', 'select', 'textarea'].includes(node.type))).toBe(false);
+    expect(view.find('native-qc-preview-verdict')).toBeUndefined();
+});
