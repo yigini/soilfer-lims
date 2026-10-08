@@ -20,14 +20,14 @@ const verdictColour = status => status === 'PASS' || status === 'NOT_REQUIRED' ?
     : status === 'FAIL' ? 'text-red-700 dark:text-red-300' : 'text-amber-700 dark:text-amber-300';
 
 export default function NativeRunPanel({ batch, referenceMaterials, onChanged, loading, setLoading, setError, setSuccessMsg,
-    renderWorksheet = null, canEdit = true }) {
+    renderWorksheet = null, canEdit = true, analysisCode = null, onAnalysisChanged = null }) {
     const { t } = useLanguage();
     const [selectedCode, setSelectedCode] = useState(batch.analysis);
     const [values, setValues] = useState({}), [lots, setLots] = useState({}), [correcting, setCorrecting] = useState({});
     const [reason, setReason] = useState(''), [draggedId, setDraggedId] = useState(null);
     const [preview, setPreview] = useState(null), [previewError, setPreviewError] = useState(null);
     const previewGeneration = useRef(0);
-    const analyte = batch.analytes.find(row => row.analysisCode === selectedCode) || batch.analytes.find(row => row.analysisCode === batch.analysis) || batch.analytes[0];
+    const analyte = batch.analytes.find(row => row.analysisCode === (analysisCode || selectedCode)) || batch.analytes.find(row => row.analysisCode === batch.analysis) || batch.analytes[0];
     const positions = batch.positions || [], served = new Set(analyte.positions.map(row => row.id));
     const parents = new Set(positions.filter(row => row.kind === 'DUPLICATE' && served.has(row.id)).map(row => row.duplicateOfPositionId));
     const measured = id => analyte.measurements?.find(row => row.positionId === id && row.replicateNo === 1);
@@ -35,11 +35,12 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
     const locked = !canEdit || batch.status === 'CLOSED' || ['QC_FAIL', 'REJECTED', 'REPEAT_ORDERED', 'CLOSED'].includes(analyte.status) || Boolean(analyte.disposition);
     const accepted = ['QC_PASS', 'QC_WARN'].includes(analyte.status);
     const sequenceKey = positions.map(row => `${row.id}:${row.position}`).join(',');
+    const bindingKey = positions.flatMap(row => (row.references || []).map(reference => `${reference.id}:${reference.supersededById || ''}`)).join(',');
     useEffect(() => { setSelectedCode(batch.analysis); }, [batch.id, batch.analysis]);
     useEffect(() => {
         setValues({}); setLots({}); setCorrecting({}); setReason('');
         previewGeneration.current++; setPreview(null); setPreviewError(null);
-    }, [batch.id, analyte.analysisCode, analyte.evaluation?.id, batch.startedAt, sequenceKey]);
+    }, [batch.id, analyte.analysisCode, analyte.evaluation?.id, batch.startedAt, sequenceKey, bindingKey]);
     const isDuplicate = row => ['SAMPLE', 'DUPLICATE'].includes(row.kind);
     const canMeasure = row => served.has(row.id) && row.kind !== 'CAL_STD' && (row.kind !== 'SAMPLE' || parents.has(row.id));
     const corrections = Object.keys(correcting).filter(id => correcting[id]);
@@ -160,7 +161,7 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
     return <section className="space-y-3" data-testid="native-qc-run">
         {batch.analytes.length > 1 && <label className="grid gap-1 text-xs">{t('qcRuns.analysis')}
             <select value={analyte.analysisCode} data-testid="native-analysis-select" disabled={loading}
-                onChange={event => setSelectedCode(event.target.value)} className="p-2 rounded border border-sf-divider bg-sf-canvas text-sf-text">
+                onChange={event => { setSelectedCode(event.target.value); onAnalysisChanged?.(event.target.value); }} className="p-2 rounded border border-sf-divider bg-sf-canvas text-sf-text">
                 {batch.analytes.map(row => <option key={row.analysisCode} value={row.analysisCode}>{row.analysisCode}</option>)}
             </select>
         </label>}

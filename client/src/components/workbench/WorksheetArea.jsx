@@ -14,6 +14,15 @@ import SingleSampleEditor from './SingleSampleEditor';
 import { useHelp } from '../../context/HelpContext';
 import { isEntryReady } from './entryReadiness';
 import PreviousResultHint from './PreviousResultHint';
+import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
+import NativeRunPanel from './NativeRunPanel';
+import QcRunHistory, { isHistoricalRun } from './QcRunHistory';
+import { runWorksheetRows, advanceWorksheetCell } from './qcWorksheetNavigation';
+
+const isOperationalGroup = group => group?.category === 'Operational Gates' ||
+    ['SPEC_VIS_NIR', 'SPEC_MIR', 'SPEC_NIR', 'SPEC_FTIR'].includes(group?.analysis);
 
 /**
  * WorksheetArea
@@ -58,6 +67,50 @@ export default function WorksheetArea({
     const [viewMode, setViewMode] = useState(() => (typeof window !== 'undefined' && window.innerWidth < 768) ? 'single' : 'table');
     const inputRefs = useRef(new Map());
     const reviewButtonRef = useRef(null);
+    const { t } = useLanguage(), { hasPermission } = useAuth();
+    const canEditQc = hasPermission?.('CHANGE_STATUS') === true;
+    const [runList, setRunList] = useState([]), [selectedRun, setSelectedRun] = useState('');
+    const [runBatch, setRunBatch] = useState(null), [referenceMaterials, setReferenceMaterials] = useState([]);
+    const [runLoading, setRunLoading] = useState(false), [runError, setRunError] = useState(null), [runSuccess, setRunSuccess] = useState(null);
+    const runRequest = useRef(0);
+    useEffect(() => {
+        let current = true;
+        setRunList([]);
+        if (activeGroup?.analysis && !isOperationalGroup(activeGroup)) axios.get('/api/qc/batches', { params: { analysis: activeGroup.analysis } })
+            .then(response => { if (current) setRunList(response.data.data || []); })
+            .catch(error => { if (current) setRunError(error.response?.data?.error || error.message); });
+        return () => { current = false; };
+    }, [activeGroup?.analysis, activeGroup?.category, isBatchModalOpen]);
+    useEffect(() => {
+        const generation = ++runRequest.current;
+        setRunBatch(null); setRunError(null); setRunSuccess(null); setReferenceMaterials([]);
+        if (!selectedRun) { setRunLoading(false); return; }
+        setRunLoading(true);
+        axios.get(`/api/qc/batches/${encodeURIComponent(selectedRun)}`)
+            .then(response => { if (runRequest.current === generation) setRunBatch(response.data.data); })
+            .catch(error => { if (runRequest.current === generation) setRunError(error.response?.data?.error || error.message); })
+            .finally(() => { if (runRequest.current === generation) setRunLoading(false); });
+        return () => { if (runRequest.current === generation) runRequest.current++; };
+    }, [selectedRun]);
+    useEffect(() => {
+        let current = true;
+        setReferenceMaterials([]);
+        if (runBatch?.labId) axios.get('/api/reference-materials', { params: { labId: runBatch.labId } })
+            .then(response => { if (current) setReferenceMaterials(response.data.data || []); })
+            .catch(() => { if (current) setRunError(t('referenceMaterials.loadFailed')); });
+        return () => { current = false; };
+    }, [runBatch?.labId, t]);
+    const refreshRun = async () => {
+        const generation = ++runRequest.current;
+        const response = await axios.get(`/api/qc/batches/${encodeURIComponent(selectedRun)}`);
+        if (runRequest.current !== generation) return;
+        setRunBatch(response.data.data);
+        await onBatchUpdated?.();
+    };
+    const openWorksheet = id => {
+        setSelectedRun(id); setViewMode('table'); setSearchQuery(''); setSelectedRows(new Set());
+        setIsBatchModalOpen(false);
+    };
 
     useEffect(() => {
         if (initialWorkItemId && items.length > 0) {
@@ -99,13 +152,17 @@ export default function WorksheetArea({
         });
     }, [items, searchQuery]);
 
+    const visibleItems = runBatch && selectedRun ? runWorksheetRows(runBatch.positions || [], items, activeGroup?.analysis)
+        .map(row => row.item).filter(Boolean) : filteredItems;
+    useEffect(() => { setSelectedRows(new Set()); }, [selectedRun, activeGroup?.analysis]);
+
     // Active inspected item
     const inspectedItem = useMemo(() => {
-        if (!selectedItemId && filteredItems.length > 0) {
-            return filteredItems[0];
+        if (!selectedItemId && visibleItems.length > 0) {
+            return visibleItems[0];
         }
-        return filteredItems.find(i => i.workItemId === selectedItemId) || filteredItems[0] || null;
-    }, [filteredItems, selectedItemId]);
+        return visibleItems.find(i => i.workItemId === selectedItemId) || visibleItems[0] || null;
+    }, [visibleItems, selectedItemId]);
 
     // Synchronize execution readiness blockers with contextual help
     useEffect(() => {
@@ -133,12 +190,12 @@ export default function WorksheetArea({
     }, [inspectedItem, registerBlockers, clearBlockers]);
 
     // Select all handler
-    const allSelected = filteredItems.length > 0 && filteredItems.every(i => selectedRows.has(i.workItemId));
+    const allSelected = visibleItems.length > 0 && visibleItems.every(i => selectedRows.has(i.workItemId));
     const toggleSelectAll = () => {
         if (allSelected) {
             setSelectedRows(new Set());
         } else {
-            setSelectedRows(new Set(filteredItems.map(i => i.workItemId)));
+            setSelectedRows(new Set(visibleItems.map(i => i.workItemId)));
         }
     };
 
@@ -171,118 +228,14 @@ export default function WorksheetArea({
         }
     };
 
-    return (
-        <div className="flex flex-col gap-4">
-            {/* Toolbar */}
-            <div className="flex items-center justify-between flex-wrap gap-3 pb-2">
-                <div className="flex items-center gap-3">
-                    <label className="flex items-center gap-2 text-xs font-semibold text-sf-text">
-                        <span>Work type:</span>
-                        <select
-                            value={activeGroup?.analysis || ''}
-                            onChange={(e) => onSelectGroup(e.target.value)}
-                            className="px-3 py-1.5 rounded-lg border border-sf-divider bg-sf-surface text-sf-text text-xs font-medium focus:outline-none focus:ring-1 focus:ring-sf-primary"
-                        >
-                            {allGroups.map(g => (
-                                <option key={g.analysis} value={g.analysis}>
-                                    {getAnalysisDisplayName(g.analysis, g.analysisName)} ({g.items.length})
-                                </option>
-                            ))}
-                        </select>
-                    </label>
-
-                    {!isSpectral && !isOperationalGate && (
-                        <>
-                            <button
-                                type="button"
-                                onClick={() => setIsPasteModalOpen(true)}
-                                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-sf-divider bg-sf-surface hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
-                            >
-                                <Clipboard size={13} />
-                                <span>Paste Values</span>
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => setIsBatchModalOpen(true)}
-                                data-testid="open-batch-modal-btn"
-                                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-sf-divider bg-sf-surface hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
-                            >
-                                <Layers size={13} />
-                                <span>Batch & QC Runs</span>
-                            </button>
-                        </>
-                    )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <button
-                        type="button"
-                        onClick={() => setViewMode(prev => prev === 'single' ? 'table' : 'single')}
-                        className="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-sf-divider bg-sf-surface hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
-                        title={viewMode === 'single' ? 'Switch to Batch Table' : 'Switch to Single Sample Card'}
-                    >
-                        {viewMode === 'single' ? <TableIcon size={13} /> : <LayoutList size={13} />}
-                        <span>{viewMode === 'single' ? 'Table View' : 'Card View'}</span>
-                    </button>
-
-                    <div className="relative">
-                        <Search size={14} className="absolute left-2.5 top-2.5 text-sf-muted" />
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Find sample ID..."
-                            className="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-sf-divider bg-sf-surface text-sf-text placeholder:text-sf-muted focus:outline-none focus:ring-1 focus:ring-sf-primary w-44 sm:w-56"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Method Banner (SoilFER Signature Earth Accent) */}
-            <div className="sf-method-banner p-4 flex items-center justify-between flex-wrap gap-3 text-xs mb-4">
-                <div>
-                    <h3 className="font-bold text-base text-[var(--sf-earth)] flex items-center gap-2">
-                        <span>{getAnalysisDisplayName(activeGroup?.analysis, activeGroup?.analysisName)}</span>
-                    </h3>
-                    <p className="text-sf-muted text-xs mt-0.5">
-                        {activeGroup?.category} {activeGroup?.unit ? `· Target unit: ${activeGroup.unit}` : ''}
-                    </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    {activeGroup?.unit && (
-                        <span className="px-2.5 py-1 rounded text-xs font-semibold bg-sf-surface text-sf-text border border-sf-divider shadow-xs">
-                            Unit: {activeGroup.unit}
-                        </span>
-                    )}
-                    <span className="px-2.5 py-1 rounded text-xs font-semibold bg-sf-surface text-sf-text border border-sf-divider shadow-xs">
-                        {filteredItems.length} assigned sample{filteredItems.length === 1 ? '' : 's'}
-                    </span>
-                </div>
-            </div>
-
-            {viewMode === 'single' ? (
-                <SingleSampleEditor
-                    activeGroup={activeGroup}
-                    items={filteredItems}
-                    currentIndex={Math.max(0, filteredItems.findIndex(i => i.workItemId === inspectedItem?.workItemId))}
-                    onIndexChange={(idx) => {
-                        if (filteredItems[idx]) setSelectedItemId(filteredItems[idx].workItemId);
-                    }}
-                    onDraftChange={onDraftChange}
-                    onUpdateItemMeta={onUpdateItemMeta}
-                    onReviewRecord={onReviewRecord}
-                    onConfirmOperation={onConfirmOperation}
-                    onOpenSpectralIntake={onOpenSpectralIntake}
-                />
-            ) : (
-                /* Main Work Area: Table + Docked 240px Inspector */
+    const renderTable = (nativeControls = null) => (
+/* Main Work Area: Table + Docked 240px Inspector */
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
                     {/* Worksheet Table (3 cols) */}
                     <div className="lg:col-span-3 rounded-xl border border-sf-divider overflow-hidden bg-sf-surface flex flex-col shadow-sm">
                     <div className="overflow-x-auto">
-                        <table className="w-full border-collapse text-left text-xs">
+                        <table className="w-full border-collapse text-left text-xs" data-testid="worksheet-grid"
+                            onKeyDownCapture={nativeControls ? event => advanceWorksheetCell(event, reviewButtonRef.current) : undefined}>
                             <thead>
                                 <tr className="bg-sf-inset text-sf-muted border-b border-sf-divider">
                                     <th className="py-2.5 px-3 w-8">
@@ -294,19 +247,26 @@ export default function WorksheetArea({
                                             className="w-4 h-4 rounded text-sf-primary focus:ring-sf-primary"
                                         />
                                     </th>
-                                    <th className="py-2.5 px-3 font-semibold min-w-[130px]">Sample</th>
+                                    <th className="py-2.5 px-3 font-semibold min-w-[130px]">{nativeControls ? t('qcWorksheet.position') : 'Sample'}</th>
                                     <th className="py-2.5 px-3 font-semibold min-w-[220px]">
                                         {isTexture ? 'Fractions (Sand / Silt / Clay %)' :
                                          isOperationalGate ? 'Completion checklist' :
                                          isSpectral ? 'Spectra Acquisition Status' :
                                          `Determination (${activeGroup?.unit || 'value'})`}
                                     </th>
-                                    <th className="py-2.5 px-3 font-semibold min-w-[120px]">Readiness & State</th>
+                                    <th className="py-2.5 px-3 font-semibold min-w-[120px]">{nativeControls ? t('qcWorksheet.storedEvidence') : 'Readiness & State'}</th>
                                     <th className="py-2.5 px-3 font-semibold text-right w-20">Details</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-sf-divider">
-                                {filteredItems.map((item, idx) => {
+                                {(nativeControls ? runWorksheetRows(nativeControls.positions, nativeControls.analyte.analysisCode === activeGroup?.analysis ? items : [], nativeControls.analyte.analysisCode) : filteredItems.map(item => ({ item }))).map(({ item, position }, idx) => {
+                                    if (!item) return <tr key={position.id} {...nativeControls.positionProps(position)}>
+                                        <td className="p-3" />
+                                        <td className="p-3">{nativeControls.renderType(position)}</td>
+                                        <td className="p-3">{nativeControls.renderObservation(position)}</td>
+                                        <td className="p-3">{nativeControls.renderEvidence(position)}</td>
+                                        <td className="p-3" />
+                                    </tr>;
                                     const isSelected = item.workItemId === inspectedItem?.workItemId;
                                     const isChecked = selectedRows.has(item.workItemId);
                                     const draft = item.draft;
@@ -330,7 +290,8 @@ export default function WorksheetArea({
 
                                     return (
                                         <tr
-                                            key={item.workItemId}
+                                            key={position?.id || item.workItemId}
+                                            {...(position ? nativeControls.positionProps(position) : {})}
                                             onClick={() => setSelectedItemId(item.workItemId)}
                                             className={`cursor-pointer transition-colors ${
                                                 isSelected
@@ -350,6 +311,7 @@ export default function WorksheetArea({
                                             </td>
 
                                             <td className="py-3 px-3">
+                                                {position && nativeControls.renderType(position)}
                                                 <div className="flex items-center gap-1.5">
                                                     {item.rackPosition != null && (
                                                         <span
@@ -453,9 +415,11 @@ export default function WorksheetArea({
                                                     />
                                                 )}
                                                 {!isOperationalGate && <PreviousResultHint result={item.previousResult} />}
+                                                {position && nativeControls.renderObservation(position)}
                                             </td>
 
                                             <td className="py-3 px-3">
+                                                {position && nativeControls.renderEvidence(position)}
                                                 <div className="flex flex-col gap-1">
                                                     <div className="flex items-center gap-1.5 flex-wrap">
                                                         {item.readiness?.isReady ? (
@@ -509,7 +473,7 @@ export default function WorksheetArea({
                                     );
                                 })}
 
-                                {filteredItems.length === 0 && (
+                                {(nativeControls ? nativeControls.positions.length === 0 : filteredItems.length === 0) && (
                                     <tr>
                                         <td colSpan={5} className="py-8 text-center text-sf-muted">
                                             No samples found matching your filter.
@@ -570,6 +534,135 @@ export default function WorksheetArea({
                     isDiscarding={isDiscarding}
                 />
             </div>
+    );
+
+    return (
+        <div className="flex flex-col gap-4">
+            {/* Toolbar */}
+            <div className="flex items-center justify-between flex-wrap gap-3 pb-2">
+                <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 text-xs font-semibold text-sf-text">
+                        <span>Work type:</span>
+                        <select
+                            value={activeGroup?.analysis || ''}
+                            onChange={(e) => { if (!runBatch?.analytes?.some(row => row.analysisCode === e.target.value)) setSelectedRun(''); onSelectGroup(e.target.value); }}
+                            className="px-3 py-1.5 rounded-lg border border-sf-divider bg-sf-surface text-sf-text text-xs font-medium focus:outline-none focus:ring-1 focus:ring-sf-primary"
+                        >
+                            {allGroups.map(g => (
+                                <option key={g.analysis} value={g.analysis}>
+                                    {getAnalysisDisplayName(g.analysis, g.analysisName)} ({g.items.length})
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+
+                    {!isSpectral && !isOperationalGate && (
+                        <>
+                            <button
+                                type="button"
+                                onClick={() => setIsPasteModalOpen(true)}
+                                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-sf-divider bg-sf-surface hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
+                            >
+                                <Clipboard size={13} />
+                                <span>Paste Values</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setIsBatchModalOpen(true)}
+                                data-testid="open-batch-modal-btn"
+                                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-sf-divider bg-sf-surface hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
+                            >
+                                <Layers size={13} />
+                                <span>Batch & QC Runs</span>
+                            </button>
+                        </>
+                    )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                    {!isSpectral && !isOperationalGate && <label className="grid gap-1 text-xs">
+                        {t('qcWorksheet.selectRun')}
+                        <select data-testid="worksheet-run-select" value={selectedRun} onChange={event => openWorksheet(event.target.value)}>
+                            <option value="">{t('qcWorksheet.assignedSamples')}</option>
+                            {(runBatch && !runList.some(row => row.id === runBatch.id) ? [runBatch, ...runList] : runList)
+                                .map(row => <option key={row.id} value={row.id}>{row.id} · {row.status}</option>)}
+                        </select>
+                    </label>}
+                    <button
+                        type="button"
+                        disabled={Boolean(selectedRun)}
+                        onClick={() => setViewMode(prev => prev === 'single' ? 'table' : 'single')}
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-sf-divider bg-sf-surface hover:bg-sf-hover transition-colors flex items-center gap-1.5 text-sf-text"
+                        title={viewMode === 'single' ? 'Switch to Batch Table' : 'Switch to Single Sample Card'}
+                    >
+                        {viewMode === 'single' ? <TableIcon size={13} /> : <LayoutList size={13} />}
+                        <span>{viewMode === 'single' ? 'Table View' : 'Card View'}</span>
+                    </button>
+
+                    <div className="relative">
+                        <Search size={14} className="absolute left-2.5 top-2.5 text-sf-muted" />
+                        <input
+                            type="text"
+                            disabled={Boolean(selectedRun)}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Find sample ID..."
+                            className="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-sf-divider bg-sf-surface text-sf-text placeholder:text-sf-muted focus:outline-none focus:ring-1 focus:ring-sf-primary w-44 sm:w-56"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {runError && <p role="alert" data-testid="worksheet-run-error">{runError}</p>}
+            {runSuccess && <p role="status">{runSuccess}</p>}
+
+            {/* Method Banner (SoilFER Signature Earth Accent) */}
+            <div className="sf-method-banner p-4 flex items-center justify-between flex-wrap gap-3 text-xs mb-4">
+                <div>
+                    <h3 className="font-bold text-base text-[var(--sf-earth)] flex items-center gap-2">
+                        <span>{getAnalysisDisplayName(activeGroup?.analysis, activeGroup?.analysisName)}</span>
+                    </h3>
+                    <p className="text-sf-muted text-xs mt-0.5">
+                        {activeGroup?.category} {activeGroup?.unit ? `· Target unit: ${activeGroup.unit}` : ''}
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    {activeGroup?.unit && (
+                        <span className="px-2.5 py-1 rounded text-xs font-semibold bg-sf-surface text-sf-text border border-sf-divider shadow-xs">
+                            Unit: {activeGroup.unit}
+                        </span>
+                    )}
+                    <span className="px-2.5 py-1 rounded text-xs font-semibold bg-sf-surface text-sf-text border border-sf-divider shadow-xs">
+                        {filteredItems.length} assigned sample{filteredItems.length === 1 ? '' : 's'}
+                    </span>
+                </div>
+            </div>
+
+            {viewMode === 'single' ? (
+                <SingleSampleEditor
+                    activeGroup={activeGroup}
+                    items={filteredItems}
+                    currentIndex={Math.max(0, filteredItems.findIndex(i => i.workItemId === inspectedItem?.workItemId))}
+                    onIndexChange={(idx) => {
+                        if (filteredItems[idx]) setSelectedItemId(filteredItems[idx].workItemId);
+                    }}
+                    onDraftChange={onDraftChange}
+                    onUpdateItemMeta={onUpdateItemMeta}
+                    onReviewRecord={onReviewRecord}
+                    onConfirmOperation={onConfirmOperation}
+                    onOpenSpectralIntake={onOpenSpectralIntake}
+                />
+            ) : (
+                selectedRun ? (runLoading || !runBatch ? <p>{t('qcWorksheet.loading')}</p> :
+                    isHistoricalRun(runBatch, activeGroup?.analysis) ?
+                        <QcRunHistory batch={runBatch} onChanged={refreshRun} loading={runLoading} setLoading={setRunLoading} setError={setRunError} /> :
+                        <NativeRunPanel key={runBatch.id} batch={runBatch} referenceMaterials={referenceMaterials}
+                            analysisCode={activeGroup?.analysis} onAnalysisChanged={onSelectGroup} canEdit={canEditQc}
+                            onChanged={refreshRun} loading={runLoading} setLoading={setRunLoading} setError={setRunError}
+                            setSuccessMsg={setRunSuccess} renderWorksheet={renderTable} />
+                ) : renderTable()
             )}
 
             {/* Paste Preview Modal */}
@@ -588,6 +681,7 @@ export default function WorksheetArea({
                 analysisCode={activeGroup?.analysis || ''}
                 selectedWorkItemIds={Array.from(selectedRows)}
                 onBatchUpdated={onBatchUpdated}
+                onOpenWorksheet={openWorksheet}
             />
         </div>
     );

@@ -2947,7 +2947,14 @@
     "parentObservation": "Observation QC de l’échantillon parent",
     "runSetup": "Configuration de la série",
     "saveBindings": "Enregistrer les références liées",
-    "serverParse": "Observation interprétée par le serveur"
+    "serverParse": "Observation interprétée par le serveur",
+    "selectRun": "Série QC",
+    "assignedSamples": "Tous les échantillons affectés",
+    "loading": "Chargement de la série…",
+    "openWorksheet": "Ouvrir la feuille de la série",
+    "legacyReadOnly": "Les données QC historiques sont en lecture seule. Reconstruisez une série ouverte admissible avant de saisir des observations natives.",
+    "rebuild": "Reconstruire la série native",
+    "serverSequence": "Le serveur détermine la capacité et les positions QC de la série."
   },
   "proficiencyTesting": {
     "legacySigmaMissing": "Ce score historique d’aptitude a été enregistré sans sigma d’évaluation. Il n’a pas été recalculé ; fournissez un sigma valide dans une correction explicite.",

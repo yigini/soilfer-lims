@@ -2947,7 +2947,14 @@
     "parentObservation": "Observación de la muestra original para QC",
     "runSetup": "Configuración de la corrida",
     "saveBindings": "Guardar referencias vinculadas",
-    "serverParse": "Observación interpretada por el servidor"
+    "serverParse": "Observación interpretada por el servidor",
+    "selectRun": "Corrida QC",
+    "assignedSamples": "Todas las muestras asignadas",
+    "loading": "Cargando corrida…",
+    "openWorksheet": "Abrir hoja de la corrida",
+    "legacyReadOnly": "La evidencia QC histórica es de solo lectura. Reconstruya una corrida abierta elegible antes de introducir observaciones nativas.",
+    "rebuild": "Reconstruir corrida nativa",
+    "serverSequence": "El servidor determina la capacidad y las posiciones QC de la corrida."
   },
   "proficiencyTesting": {
     "legacySigmaMissing": "Esta puntuación histórica de aptitud se registró sin sigma de evaluación. No se ha recalculado; indique un sigma válido mediante una corrección explícita.",

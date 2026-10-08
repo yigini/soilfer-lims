@@ -2947,7 +2947,14 @@
     "parentObservation": "QC parent observation",
     "runSetup": "Run setup",
     "saveBindings": "Save reference bindings",
-    "serverParse": "Server parsed observation"
+    "serverParse": "Server parsed observation",
+    "selectRun": "QC run",
+    "assignedSamples": "All assigned samples",
+    "loading": "Loading run…",
+    "openWorksheet": "Open run worksheet",
+    "legacyReadOnly": "Historical QC evidence is read only. Rebuild an eligible open run before entering native observations.",
+    "rebuild": "Rebuild native run",
+    "serverSequence": "The server determines the run capacity and QC positions."
   },
   "proficiencyTesting": {
     "legacySigmaMissing": "This historical PT score was recorded without an assessment sigma. It has not been recomputed; supply a valid sigma in an explicit correction.",
