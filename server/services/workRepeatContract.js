@@ -12,6 +12,9 @@ const RETURN_REASON_STATUS = Object.freeze({
 });
 
 function repeatRequest(input = {}) {
+    if (!input || typeof input !== 'object' || Array.isArray(input)) {
+        throw new TransitionError('The repeat request must be an object.', 400, 'REPEAT_FIELDS_INVALID');
+    }
     if (Object.hasOwn(input, 'override') || Object.hasOwn(input, 'ncrId')) {
         throw new TransitionError('NCR overrides are not available until the reviewed NCR workflow is installed.',
             409, 'ATTEMPT_LIMIT_NCR_UNAVAILABLE');
