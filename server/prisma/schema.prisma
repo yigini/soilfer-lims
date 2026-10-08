@@ -1534,6 +1534,8 @@ model WorkAttempt {
   reason                 String?     // RepeatReason; null on historical first attempts.
   requestedBy            String?
   requestedAt            DateTime?
+  parentAttemptId        String?     // Immutable repeat request; SQL checks the canonical parent owner.
+  note                   String?     // Immutable request note; never inferred for historical attempts.
   rawData                String?     // Immutable JSON text; calculation templates are #199.
   calcVersion            String?
   dilutionFactor         Float?
