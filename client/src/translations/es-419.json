@@ -2942,7 +2942,8 @@
     "criterion": "Criterio",
     "failAction": "Acción ante falla",
     "fullRecord": "Evaluación almacenada completa",
-    "nativeRun": "Corrida nativa"
+    "nativeRun": "Corrida nativa",
+    "preview": "Vista previa — sin guardar"
   },
   "proficiencyTesting": {
     "legacySigmaMissing": "Esta puntuación histórica de aptitud se registró sin sigma de evaluación. No se ha recalculado; indique un sigma válido mediante una corrección explícita.",

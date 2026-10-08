@@ -1366,7 +1366,8 @@
     "criterion": "Critério",
     "failAction": "Ação em caso de falha",
     "fullRecord": "Avaliação armazenada completa",
-    "nativeRun": "Corrida nativa"
+    "nativeRun": "Corrida nativa",
+    "preview": "Prévia — não salva"
   },
   "proficiencyTesting": {
     "legacySigmaMissing": "Esta pontuação histórica de proficiência foi registrada sem sigma de avaliação. Não foi recalculada; forneça um sigma válido em uma correção explícita.",

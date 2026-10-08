@@ -2942,7 +2942,8 @@
     "criterion": "Criterion",
     "failAction": "Failure action",
     "fullRecord": "Full stored evaluation",
-    "nativeRun": "Native run"
+    "nativeRun": "Native run",
+    "preview": "Preview — not saved"
   },
   "proficiencyTesting": {
     "legacySigmaMissing": "This historical PT score was recorded without an assessment sigma. It has not been recomputed; supply a valid sigma in an explicit correction.",

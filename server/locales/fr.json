@@ -1366,7 +1366,8 @@
     "criterion": "Critère",
     "failAction": "Action en cas d’échec",
     "fullRecord": "Évaluation enregistrée complète",
-    "nativeRun": "Série native"
+    "nativeRun": "Série native",
+    "preview": "Aperçu — non enregistré"
   },
   "proficiencyTesting": {
     "legacySigmaMissing": "Ce score historique d’aptitude a été enregistré sans sigma d’évaluation. Il n’a pas été recalculé ; fournissez un sigma valide dans une correction explicite.",

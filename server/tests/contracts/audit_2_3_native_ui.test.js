@@ -7,7 +7,8 @@ function mount(batch) {
     const same = (a, b) => a && b && a.length === b.length && a.every((value, index) => value === b[index]);
     const react = { ...React, useState(initial) { const index = cursor++; if (!(index in hooks)) hooks[index] = { value: initial };
         return [hooks[index].value, value => { hooks[index].value = typeof value === 'function' ? value(hooks[index].value) : value; }]; },
-    useEffect(effect, deps) { const index = cursor++; if (!same(hooks[index]?.deps, deps)) effects.push(effect); hooks[index] = { deps }; } };
+    useEffect(effect, deps) { const index = cursor++; if (!same(hooks[index]?.deps, deps)) effects.push(effect); hooks[index] = { deps }; },
+    useRef(initial) { const index = cursor++; if (!(index in hooks)) hooks[index] = { current: initial }; return hooks[index]; } };
     const axios = { put: jest.fn(async () => ({ data: { batch: { result: 'PASS' } } })), post: jest.fn(async () => ({ data: { batch: { result: batch.result } } })) };
     const props = { batch, referenceMaterials: [], loading: false, onChanged: jest.fn(), setError: jest.fn(), setLoading: jest.fn(), setSuccessMsg: jest.fn() };
     const module = { exports: {} };
@@ -95,4 +96,99 @@ test('a failed sibling does not lock the selected analyte’s entry, reopen or c
     await view.find('native-analyte-close').props.onClick();
     expect(view.axios.put).toHaveBeenCalledWith('/api/qc/batches/native-run', { analysisCode: 'B', status: 'CLOSED' });
     expect(batch.analytes[0]).toMatchObject({ status: 'QC_FAIL', disposition: { decision: 'REANALYZE_BATCH' } });
+});
+
+const contents = node => Array.isArray(node) ? node.map(contents).join('') : !node || typeof node !== 'object'
+    ? String(node ?? '') : contents(node.props?.children);
+const previewReply = (status = 'FAIL') => ({ data: { preview: true, analytes: [{ analysisCode: 'A', verdict: status,
+    positions: [{ positionId: 'blank', expected: 0, limits: { maxAllowed: 0.037123456789 }, status,
+        criterion: 'LOQ_FROZEN', failAction: 'FAIL' }] }] } });
+
+test('QC preview runs on cell commit only and sends exact raw observations without client limits', async () => {
+    const view = mount(fixture()); await view.render();
+    view.axios.post.mockResolvedValue(previewReply());
+    view.find('native-value-blank').props.onChange({ target: { value: '0.04123456789' } }); await view.render();
+    expect(view.axios.post).not.toHaveBeenCalled();
+    await view.find('native-value-blank').props.onBlur(); await view.render();
+    expect(view.axios.post).toHaveBeenCalledTimes(1);
+    expect(view.axios.post).toHaveBeenCalledWith('/api/qc/batches/native-run/preview',
+        [{ analysisCode: 'A', positionId: 'blank', rawInput: '0.04123456789' }]);
+    expect(view.axios.put).not.toHaveBeenCalled();
+    expect(contents(view.find('native-qc-preview-verdict'))).toBe('qcWorksheet.preview: FAIL');
+    const evidence = view.find('native-evidence-blank');
+    expect(contents(evidence)).toContain('0.037123456789');
+    expect(contents(evidence)).toContain('LOQ_FROZEN');
+    expect(contents(evidence)).toContain('qcWorksheet.preview: FAIL');
+    expect(nodes(evidence).some(node => ['input', 'select', 'textarea'].includes(node.type))).toBe(false);
+    expect(nodes(evidence).some(node => node.props?.className?.includes('text-red-700'))).toBe(true);
+});
+
+test('typing another value discards the old preview and a late response cannot recolour the cell', async () => {
+    const view = mount(fixture()); await view.render();
+    let completeOld;
+    view.axios.post.mockImplementationOnce(() => new Promise(resolve => { completeOld = resolve; }));
+    view.find('native-value-blank').props.onChange({ target: { value: '0.02' } }); await view.render();
+    const oldRequest = view.find('native-value-blank').props.onBlur();
+    view.find('native-value-blank').props.onChange({ target: { value: '0.09' } }); await view.render();
+    completeOld(previewReply('PASS')); await oldRequest; await view.render();
+    expect(view.find('native-qc-preview-verdict')).toBeUndefined();
+    view.axios.post.mockResolvedValueOnce(previewReply('FAIL'));
+    await view.find('native-value-blank').props.onBlur(); await view.render();
+    expect(contents(view.find('native-qc-preview-verdict'))).toContain('FAIL');
+    expect(view.axios.post.mock.calls[1][1][0].rawInput).toBe('0.09');
+});
+
+test('real submission discards preview and renders only the refetched stored verdict and limits', async () => {
+    const batch = fixture(), view = mount(batch); await view.render();
+    view.axios.post.mockResolvedValue(previewReply('PASS'));
+    view.find('native-value-blank').props.onChange({ target: { value: '0.02' } }); await view.render();
+    await view.find('native-value-blank').props.onBlur(); await view.render();
+    expect(contents(view.find('native-qc-preview-verdict'))).toContain('PASS');
+    await view.find('native-qc-save').props.onClick(); await view.render();
+    expect(view.find('native-qc-preview-verdict')).toBeUndefined();
+    batch.analytes[0].evaluation = { id: 'stored-after-submit', details: JSON.stringify({ evaluation: {
+        blanks: [{ positionId: 'blank', value: 0.02, status: 'FAIL', maxAllowed: '0.011234567890', criterion: 'STORED_ONLY' }] } }) };
+    await view.render();
+    const evidence = view.find('native-evidence-blank');
+    expect(contents(evidence)).toContain('qcWorksheet.verdict: FAIL');
+    expect(contents(evidence)).toContain('0.011234567890');
+    expect(contents(evidence)).toContain('STORED_ONLY');
+    expect(contents(evidence)).not.toContain('qcWorksheet.preview');
+    expect(view.props.onChanged).toHaveBeenCalled();
+});
+
+test('switching runs invalidates the previous in-flight preview', async () => {
+    const view = mount(fixture()); await view.render();
+    let completeOld;
+    view.axios.post.mockImplementationOnce(() => new Promise(resolve => { completeOld = resolve; }));
+    view.find('native-value-blank').props.onChange({ target: { value: '0.02' } }); await view.render();
+    const request = view.find('native-value-blank').props.onBlur();
+    await view.render({ batch: { ...fixture(), id: 'another-run' } });
+    completeOld(previewReply('PASS')); await request; await view.render();
+    expect(view.find('native-qc-preview-verdict')).toBeUndefined();
+    expect(view.find('native-value-blank').props.value).toBe('');
+});
+
+test('preview errors retain the entered observation and cannot submit or colour it as a pass', async () => {
+    const view = mount(fixture()); await view.render();
+    view.axios.post.mockRejectedValue({ response: { data: { code: 'QC_PREVIEW_UNAVAILABLE', error: 'Frozen criteria unavailable' } } });
+    view.find('native-value-blank').props.onChange({ target: { value: '0.02' } }); await view.render();
+    await view.find('native-value-blank').props.onBlur(); await view.render();
+    expect(contents(view.find('native-qc-preview-error'))).toContain('qcRuns.errors.QC_PREVIEW_UNAVAILABLE');
+    expect(view.find('native-value-blank').props.value).toBe('0.02');
+    expect(view.find('native-qc-preview-verdict')).toBeUndefined();
+    expect(view.axios.put).not.toHaveBeenCalled();
+    expect(view.axios.post.mock.calls.every(([url]) => url.endsWith('/preview'))).toBe(true);
+});
+
+test('a stored evaluation without a limit never invents a policy or recomputes its status', async () => {
+    const batch = fixture();
+    batch.analytes[0].evaluation = { id: 'missing-limit', details: JSON.stringify({ evaluation: {
+        blanks: [{ positionId: 'blank', value: 0, status: 'FAIL' }] } }) };
+    const view = mount(batch); await view.render();
+    const evidence = view.find('native-evidence-blank');
+    expect(contents(evidence)).toContain('qcWorksheet.limits: qcWorksheet.notStored');
+    expect(contents(evidence)).toContain('qcWorksheet.verdict: FAIL');
+    expect(nodes(evidence).some(node => node.type === 'input')).toBe(false);
+    expect(view.axios.post).not.toHaveBeenCalled();
 });

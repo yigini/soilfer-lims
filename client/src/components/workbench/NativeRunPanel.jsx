@@ -1,14 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import numberParse from '@lims/number-parse';
 import { useLanguage } from '../../context/LanguageContext';
 import NumberPreview from './NumberPreview';
+
+const LIMIT_FIELDS = ['maxAllowed', 'maxRpd', 'absMax', 'absMaxBelow5LOQ', 'nearLoqMultiplier', 'loq',
+    'minRecovery', 'maxRecovery', 'crmAbsWindow', 'lrmWindowPct', 'mode', 'crmMode', 'lrmMode'];
+export function storedPositionEvidence(analyte, positionId) {
+    let details;
+    try { details = typeof analyte.evaluation?.details === 'string' ? JSON.parse(analyte.evaluation.details) : analyte.evaluation?.details; }
+    catch { return null; }
+    const evaluation = details?.evaluation || details?.qcResults || details || analyte.qcResults;
+    const check = [...(evaluation?.blanks || []), ...(evaluation?.controls || []), ...(evaluation?.duplicates || [])]
+        .find(row => row.positionId === positionId || row.id === positionId);
+    return check ? { ...check, limits: Object.fromEntries(LIMIT_FIELDS.filter(key => check[key] !== undefined)
+        .map(key => [key, check[key]])), preview: false } : null;
+}
+
+const verdictColour = status => status === 'PASS' || status === 'NOT_REQUIRED' ? 'text-emerald-700 dark:text-emerald-300'
+    : status === 'FAIL' ? 'text-red-700 dark:text-red-300' : 'text-amber-700 dark:text-amber-300';
 
 export default function NativeRunPanel({ batch, referenceMaterials, onChanged, loading, setLoading, setError, setSuccessMsg }) {
     const { t } = useLanguage();
     const [selectedCode, setSelectedCode] = useState(batch.analysis);
     const [values, setValues] = useState({}), [lots, setLots] = useState({}), [correcting, setCorrecting] = useState({});
     const [reason, setReason] = useState(''), [draggedId, setDraggedId] = useState(null);
+    const [preview, setPreview] = useState(null), [previewError, setPreviewError] = useState(null);
+    const previewGeneration = useRef(0);
     const analyte = batch.analytes.find(row => row.analysisCode === selectedCode) || batch.analytes.find(row => row.analysisCode === batch.analysis) || batch.analytes[0];
     const positions = batch.positions || [], served = new Set(analyte.positions.map(row => row.id));
     const parents = new Set(positions.filter(row => row.kind === 'DUPLICATE' && served.has(row.id)).map(row => row.duplicateOfPositionId));
@@ -18,7 +36,10 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
     const accepted = ['QC_PASS', 'QC_WARN'].includes(analyte.status);
     const sequenceKey = positions.map(row => `${row.id}:${row.position}`).join(',');
     useEffect(() => { setSelectedCode(batch.analysis); }, [batch.id, batch.analysis]);
-    useEffect(() => { setValues({}); setLots({}); setCorrecting({}); setReason(''); }, [batch.id, analyte.analysisCode, analyte.evaluation?.id, batch.startedAt, sequenceKey]);
+    useEffect(() => {
+        setValues({}); setLots({}); setCorrecting({}); setReason('');
+        previewGeneration.current++; setPreview(null); setPreviewError(null);
+    }, [batch.id, analyte.analysisCode, analyte.evaluation?.id, batch.startedAt, sequenceKey]);
     const isDuplicate = row => ['SAMPLE', 'DUPLICATE'].includes(row.kind);
     const canMeasure = row => served.has(row.id) && row.kind !== 'CAL_STD' && (row.kind !== 'SAMPLE' || parents.has(row.id));
     const corrections = Object.keys(correcting).filter(id => correcting[id]);
@@ -29,7 +50,27 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
         const parsed = isDuplicate(row) ? numberParse.parseDuplicateObservation(values[row.id], analyte.numberFormat) : numberParse.parseNumber(values[row.id], analyte.numberFormat);
         return parsed.valid && (isDuplicate(row) || !parsed.qualifier);
     });
+    const changeObservation = (id, rawInput) => {
+        previewGeneration.current++; setPreview(null); setPreviewError(null);
+        setValues(previous => ({ ...previous, [id]: rawInput }));
+    };
+    const commitPreview = async () => {
+        if (!batch.startedAt || locked || !entered.length) return;
+        const generation = ++previewGeneration.current;
+        try {
+            const response = await axios.post(`/api/qc/batches/${batch.id}/preview`,
+                entered.map(row => ({ analysisCode: analyte.analysisCode, positionId: row.id, rawInput: values[row.id] })));
+            if (previewGeneration.current !== generation) return;
+            setPreview(response.data.analytes?.find(row => row.analysisCode === analyte.analysisCode) || null);
+            setPreviewError(null);
+        } catch (error) {
+            if (previewGeneration.current !== generation) return;
+            setPreview(null);
+            setPreviewError(t(`qcRuns.errors.${error.response?.data?.code}`, error.response?.data?.error || error.message));
+        }
+    };
     const perform = async operation => {
+        previewGeneration.current++; setPreview(null); setPreviewError(null);
         setError(null); setSuccessMsg(null); setLoading(true);
         try { await operation(); await onChanged(); }
         catch (error) { setError(t(`qcRuns.errors.${error.response?.data?.code}`, error.response?.data?.error || error.message)); }
@@ -67,11 +108,15 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
             <p className="text-xs text-sf-muted">{t('qcRuns.reorderHelp')}</p>
         </>}
         {locked && <p role="alert">{t('qcRuns.locked')}</p>}
+        {preview && <p className={verdictColour(preview.verdict)} data-testid="native-qc-preview-verdict">{t('qcWorksheet.preview')}: {preview.verdict}</p>}
+        {previewError && <p role="alert" data-testid="native-qc-preview-error">{previewError}</p>}
         <ol className="space-y-2" data-testid="native-run-sequence">
             {positions.map(row => {
                 const old = measured(row.id), reference = binding(row);
                 const snapshot = reference?.referenceSnapshot && JSON.parse(reference.referenceSnapshot);
                 const needsLot = served.has(row.id) && ['LRM', 'CRM', 'ICV', 'CCV', 'CCB'].includes(row.kind);
+                const previewPosition = preview?.positions?.find(position => position.positionId === row.id);
+                const evidence = previewPosition || storedPositionEvidence(analyte, row.id);
                 const lotKind = { ICV: 'CHECK_STANDARD', CCV: 'CHECK_STANDARD', CCB: 'BLANK_MATRIX' }[row.kind] || row.kind;
                 const sample = batch.workItems?.find(item => item.sampleId === row.sampleId)?.sample;
                 return <li key={row.id} draggable={!batch.startedAt && !locked && !loading}
@@ -82,6 +127,12 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
                     {row.duplicateOfPositionId && <p className="text-xs text-sf-muted">{t('qcRuns.duplicateParent')}: {positions.find(parent => parent.id === row.duplicateOfPositionId)?.position}</p>}
                     {reference && <p className="text-xs">{t('qcRuns.boundLot')}: {snapshot?.code || reference.referenceMaterialId}{snapshot?.lotNumber && ` · ${snapshot.lotNumber}`}
                         {snapshot?.expected != null && ` · ${t('qcRuns.expected')}: ${snapshot.expected}`}</p>}
+                    {canMeasure(row) && <div data-testid={`native-evidence-${row.id}`} className="text-xs space-y-1">
+                        <p>{t('qcWorksheet.expected')}: <output>{evidence?.expected ?? t('qcWorksheet.notStored')}</output></p>
+                        <p>{t('qcWorksheet.limits')}: <output>{Object.keys(evidence?.limits || {}).length ? JSON.stringify(evidence.limits) : t('qcWorksheet.notStored')}</output></p>
+                        <p className={verdictColour(evidence?.status)}>{t(previewPosition ? 'qcWorksheet.preview' : 'qcWorksheet.verdict')}: <output>{evidence?.status ?? t('qcWorksheet.notStored')}</output>
+                            {evidence?.criterion && ` · ${evidence.criterion}`}</p>
+                    </div>}
                     {needsLot && <label className="grid gap-1 text-xs">{t('referenceMaterials.controlMaterial')}
                         <select value={lots[row.id] || reference?.referenceMaterialId || ''} disabled={locked || loading || accepted}
                             onChange={event => setLots(previous => ({ ...previous, [row.id]: event.target.value }))} data-testid={`native-lot-${row.id}`}>
@@ -96,7 +147,8 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
                             onChange={event => setCorrecting(previous => ({ ...previous, [row.id]: event.target.checked }))} />{t('qcRuns.correct')}</label>}
                         {(!old || correcting[row.id]) && <label className="grid gap-1 text-xs">{t('qcRules.fields.measured')}
                             <input type="text" value={values[row.id] || ''} disabled={!batch.startedAt || locked || loading || accepted || correction && !correcting[row.id]}
-                                data-testid={`native-value-${row.id}`} onChange={event => setValues(previous => ({ ...previous, [row.id]: event.target.value }))}
+                                data-testid={`native-value-${row.id}`} onChange={event => changeObservation(row.id, event.target.value)}
+                                onBlur={commitPreview}
                                 className="p-2 rounded border border-sf-divider bg-sf-canvas" />
                             <NumberPreview value={values[row.id] || ''} numberFormat={analyte.numberFormat} duplicateObservation={isDuplicate(row)} />
                         </label>}
