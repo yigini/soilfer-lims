@@ -41,7 +41,16 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
     Object.freeze({ functionName: 'loadWorkAttemptMigrationSource', loader: 'services/workAttemptMigrationSource.js',
         loaderSha256: '4f3012693c7f764d3c0cb09fc0b4235c63cd5525b50b6656351a58c68dca6cd4',
         directory: '20261008000100_work_attempt_contract', sqlSha256: '7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2',
-        boundary: '-- INSTALLER_GUARDS_AFTER_BACKFILL' })
+        boundary: '-- INSTALLER_GUARDS_AFTER_BACKFILL' }),
+    // Pins6061135570/6061301340: inspect the two unchanged #178 sources.
+    Object.freeze({ functionName: 'loadWorkItemDuplicateMarkerSource', loader: 'services/workItemUniquenessMigrationSource.js',
+        loaderSha256: '0d0b17d96c602d69514b9ed38956553ea4c9969726f2a6cafd9b61b7daf689c3',
+        directory: '20261004190000_add_workitem_duplicate_marker',
+        sqlSha256: '80278c2d318bc47fa92746015ec278a204a7ff08a9e36d24faca0a56ef05fa1e', wholeSql: true }),
+    Object.freeze({ functionName: 'loadActiveWorkItemIndexSource', loader: 'services/workItemUniquenessMigrationSource.js',
+        loaderSha256: '0d0b17d96c602d69514b9ed38956553ea4c9969726f2a6cafd9b61b7daf689c3',
+        directory: '20261004190100_unique_active_workitem',
+        sqlSha256: 'a6e1cf6a26319954e35f4008bc4d18e904014f086db0e31d88e42948fac6556e', wholeSql: true })
 ]);
 const WORKFLOW_SOURCES = Object.freeze({
     evidence: { directory: '20261005000000_workflow_state_evidence', sha256: 'ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552' },
@@ -400,7 +409,9 @@ function scanSource(source, filename, exceptions = []) {
             if (createHash('sha256').update(fs.readFileSync(path.join(root, source.loader))).digest('hex') !== source.loaderSha256) return null;
             const bytes = fs.readFileSync(path.join(root, 'prisma/migrations', source.directory, 'migration.sql'));
             if (createHash('sha256').update(bytes).digest('hex') !== source.sqlSha256) return null;
-            const sql = bytes.toString('utf8'), marker = source.boundary || 'CREATE TRIGGER', boundary = sql.indexOf(marker);
+            const sql = bytes.toString('utf8');
+            if (source.wholeSql) return p.node.property.name === 'sql' ? sql : null;
+            const marker = source.boundary || 'CREATE TRIGGER', boundary = sql.indexOf(marker);
             if (boundary < 0 || source.boundary && sql.indexOf(marker, boundary + 1) !== -1) return null;
             return p.node.property.name === 'schemaSql' ? sql.slice(0, boundary) : p.node.property.name === 'guardsSql' ? sql.slice(boundary) : sql;
         } catch { return null; }

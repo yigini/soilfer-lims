@@ -29,18 +29,16 @@ module.exports = async function globalSetup() {
             } catch (_) { return false; }
         }).map(row => row.articleId));
         if (requiredArticles.some(article => !complete.has(article.id))) throw new Error(helpPrerequisite);
+        // Pin6060814553: a live SQLite template may have committed WAL pages.
+        // The owned destination is new; copy the complete database via SQLite.
+        if (fs.existsSync(testDbPath)) throw new Error('Owned test destination already exists.');
+        await template.backup(testDbPath);
     } finally { template.close(); }
 
     if (fs.existsSync(sourceDbPath)) {
-        fs.copyFileSync(sourceDbPath, testDbPath);
-        // Prisma db push cannot express this partial index. Install the actual
-        // release DDL on the disposable test copy so CI checks the same guard.
         const Database = require('better-sqlite3');
         const db = new Database(testDbPath, { fileMustExist: true });
         try {
-            if (!db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'WorkItem_one_active_per_analysis'").get()) {
-                db.exec(fs.readFileSync(path.resolve(__dirname, '../prisma/migrations/20261004190100_unique_active_workitem/migration.sql'), 'utf8'));
-            }
             const stateColumns = ['Sample', 'WorkItem'].map(table => {
                 const columns = db.prepare(`PRAGMA table_info("${table}")`).all().map(row => row.name);
                 return ['holdPriorStatus', 'legacyStatus'].map(column => columns.includes(column));
@@ -70,6 +68,7 @@ module.exports = async function globalSetup() {
         require('../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: testDbPath, apply: true });
         require('../scripts/install_proficiency_evidence').installProficiencyEvidence({ dbPath: testDbPath, apply: true });
         require('../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: testDbPath, apply: true });
+        require('../scripts/install_workitem_uniqueness').installWorkItemUniqueness({ dbPath: testDbPath, apply: true });
         require('../scripts/install_work_attempt_contract').installWorkAttemptContract({dbPath:testDbPath,apply:true});
     }
 

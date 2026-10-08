@@ -5,6 +5,9 @@ const { installWorkAttemptContract, assertWorkAttemptStartupReady, parseArgument
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const { createPre190AttemptFixture } = require('../helpers/workAttemptHistoricalFixtures');
 const { loadWorkAttemptMigrationSource } = require('../../services/workAttemptMigrationSource');
+const { installWorkItemUniqueness, assertWorkItemUniquenessStartupReady, MARKER_ID, INDEX_ID,
+    parseArguments: prerequisiteArguments } = require('../../scripts/install_workitem_uniqueness');
+const { loadWorkItemDuplicateMarkerSource, loadActiveWorkItemIndexSource } = require('../../services/workItemUniquenessMigrationSource');
 const ownedFiles = [];
 const directory = path.resolve(__dirname,'../.tmp');
 function ownedFile() {
@@ -47,6 +50,7 @@ test('read-only PRE_190 dry-run plans one attempt and one link, without changing
     const file=fixture(),before=hash(file);
     const dry=installWorkAttemptContract({dbPath:file});
     expect(dry).toMatchObject({classification:'PRE_190',mode:'DRY_RUN',totalChanges:0,bootstrapRebuild:[],
+        duplicateMarkerPrerequisite:{classification:'PARTIAL'},
         plan:{status:'READY',newAttempts:[{workItemId:'measured',attemptNo:1,status:'ACCEPTED'}],links:[{resultId:'result'}]}});
     expect(hash(file)).toBe(before);
     expect(()=>assertWorkAttemptStartupReady(file)).toThrow(expect.objectContaining({code:'WORK_ATTEMPT_NOT_INSTALLED'}));
@@ -58,7 +62,8 @@ test('atomic additive apply links every Result, records provenance, preserves or
     const applied=installWorkAttemptContract({dbPath:file,apply:true});
     expect(applied).toMatchObject({classification:'COMPLETE',previousClassification:'PRE_190',mode:'APPLIED',
         newAttemptCount:1,linkedResultCount:1,flaggedAttemptCount:0,bootstrapRebuild:[],
-        receipt:{originalRowsAndFieldsPreserved:true,createdAttempts:[{workItemId:'measured',sourceStatus:'ACCEPTED',status:'ACCEPTED',resultIds:['result']}]}});
+        receipt:{originalRowsAndFieldsPreserved:true,duplicateMarkerPrerequisite:{classification:'PARTIAL'},
+            createdAttempts:[{workItemId:'measured',sourceStatus:'ACCEPTED',status:'ACCEPTED',resultIds:['result']}]}});
     const db=new Database(file);
     const result=db.prepare('SELECT * FROM Result').get(),attempt=db.prepare('SELECT * FROM WorkAttempt').get();
     expect(result.attemptId).toBe(attempt.id);expect(attempt.attemptNo).toBe(1);expect(attempt.reason).toBeNull();
@@ -160,9 +165,11 @@ test('fresh Prisma gets partial uniqueness before COMPLETE (actual db push on Li
     // Use the existing closed fixture authority: Linux/CI runs actual db push;
     // the Windows schema engine rejects owned URLs, so Prisma emits its DDL.
     beforeGuards({actor:'system:fixture',file,qcBootstrap:'CREATE_PRISMA'});
-    const db=new Database(file);db.exec('CREATE TABLE _schema_migrations(id TEXT PRIMARY KEY,details TEXT NOT NULL)');db.close();
+    const db=new Database(file);db.exec('CREATE TABLE "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL, "appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "details" TEXT)');db.close();
+    expect(installWorkItemUniqueness({dbPath:file,apply:true})).toMatchObject({classification:'COMPLETE',previousClassification:'FRESH_PRISMA'});
     expect(installWorkAttemptContract({dbPath:file})).toMatchObject({classification:'FRESH_PRISMA',totalChanges:0});
-    expect(installWorkAttemptContract({dbPath:file,apply:true})).toMatchObject({classification:'COMPLETE',previousClassification:'FRESH_PRISMA',newAttemptCount:0,linkedResultCount:0});
+    expect(installWorkAttemptContract({dbPath:file,apply:true})).toMatchObject({classification:'COMPLETE',previousClassification:'FRESH_PRISMA',newAttemptCount:0,linkedResultCount:0,
+        duplicateMarkerPrerequisite:{classification:'COMPLETE'},receipt:{duplicateMarkerPrerequisite:{classification:'COMPLETE'}}});
     const installed=new Database(file,{readonly:true});
     expect(installed.prepare("SELECT sql FROM sqlite_master WHERE name='WorkAttempt_workItemId_attemptNo_unique'").get().sql).toMatch(/WHERE "legacyAttemptNoConflict" IS NULL$/);
     expect(installed.prepare("SELECT count(*) n FROM sqlite_master WHERE type='trigger' AND name LIKE 'WorkAttempt_%'").get().n).toBe(11);
@@ -204,4 +211,168 @@ test('CLI requires a database, refuses conflicting modes and does not default to
     expect(parseArguments(['--db','owned.db','--apply'])).toEqual({dbPath:'owned.db',apply:true});
     for(const args of [[],['--apply'],['--db','owned.db','--apply','--dry-run'],['--db','owned.db','--unknown']])
         expect(()=>parseArguments(args)).toThrow(expect.objectContaining({code:'WORK_ATTEMPT_ARGUMENT_INVALID'}));
+});
+
+function emptyMarkerFixture() {
+    const file=ownedFile();
+    createPre190AttemptFixture({actor:'system:fixture',file,rows:{}});
+    return file;
+}
+function absentMarkerFixture({duplicates=false}={}) {
+    const file=ownedFile(),now=Date.UTC(2026,9,1);
+    beforeGuards({actor:'system:fixture',file,schemaVariant:'PRE_1_1_DUPLICATES',markerPending:true,
+        samples:[{id:'old-sample',originalId:'old-sample',status:'PROCESSING',createdAt:now,updatedAt:now}],
+        workItems:(duplicates?['original-one','original-two']:['original-one']).map(id=>
+            ({id,sampleId:'old-sample',analysis:'PH',status:'NOT_ASSIGNED',updatedAt:now}))});
+    const db=new Database(file);
+    // The prior #179 ledger definition; no receipt or analytical row is invented.
+    db.exec('CREATE TABLE "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL, "appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "details" TEXT)');
+    db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run('prior-retained','{"original":"receipt"}');
+    db.close();return file;
+}
+
+test('ABSENT prerequisite applies the two shipped sources and receipts atomically, preserving every original row',()=>{
+    const file=absentMarkerFixture(),before=retained(file),bytes=hash(file);
+    expect(installWorkItemUniqueness({dbPath:file})).toMatchObject({classification:'ABSENT',mode:'DRY_RUN',
+        workItemCount:1,duplicateGroupCount:0,duplicateGroups:[],totalChanges:0});
+    expect(hash(file)).toBe(bytes);
+    const applied=installWorkItemUniqueness({dbPath:file,apply:true});
+    expect(applied).toMatchObject({previousClassification:'ABSENT',classification:'COMPLETE',mode:'APPLIED',
+        receiptsInserted:2,totalChanges:2,preservation:{originalRowsAndFieldsPreserved:true}});
+    expect(applied.preservation.before).toEqual(applied.preservation.after);
+    const after=retained(file);
+    expect(after.find(row=>row.table==='WorkItem').rows.map(({duplicateOf,...row})=>row))
+        .toEqual(before.find(row=>row.table==='WorkItem').rows);
+    for(const table of ['WorkAttempt','Result','ReviewDecision','AuditLog'])
+        expect(after.find(row=>row.table===table)).toEqual(before.find(row=>row.table===table));
+    const db=new Database(file,{readonly:true});
+    for(const id of [MARKER_ID,INDEX_ID]) {
+        const receipt=JSON.parse(db.prepare('SELECT details FROM _schema_migrations WHERE id=?').get(id).details);
+        expect(receipt).toMatchObject({classification:'ABSENT',mode:'APPLIED',sourceExecuted:true,
+            workItemCount:1,duplicateGroupCount:0,preservation:{originalRowsAndFieldsPreserved:true}});
+        expect(receipt.sqlSha256).toBe(applied.sources.find(row=>row.id===id).sqlSha256);
+    }
+    expect(db.pragma('foreign_key_check')).toEqual([]);db.close();
+    const complete=hash(file);
+    expect(installWorkItemUniqueness({dbPath:file,apply:true})).toMatchObject({classification:'COMPLETE',mode:'NO_OP',totalChanges:0});
+    expect(assertWorkItemUniquenessStartupReady(file).classification).toBe('COMPLETE');expect(hash(file)).toBe(complete);
+});
+
+test('one baseline duplicate group reports every ID and refuses apply and startup with zero changes',()=>{
+    const file=absentMarkerFixture({duplicates:true}),before=retained(file),bytes=hash(file);
+    const report=installWorkItemUniqueness({dbPath:file});
+    expect(report).toMatchObject({classification:'ABSENT',workItemCount:2,duplicateGroupCount:1,
+        duplicateGroups:[{sampleId:'old-sample',analysis:'PH',workItemIds:['original-one','original-two']}],totalChanges:0});
+    expect(()=>installWorkItemUniqueness({dbPath:file,apply:true})).toThrow(expect.objectContaining({
+        code:'WORKITEM_PREREQUISITE_DUPLICATES',report:expect.objectContaining({duplicateGroups:report.duplicateGroups})}));
+    expect(()=>assertWorkItemUniquenessStartupReady(file)).toThrow(expect.objectContaining({code:'WORKITEM_PREREQUISITE_NOT_INSTALLED'}));
+    expect(retained(file)).toEqual(before);expect(hash(file)).toBe(bytes);
+});
+
+test('a second prerequisite receipt failure rolls back both schema objects and the first receipt',()=>{
+    const file=absentMarkerFixture(),db=new Database(file);
+    db.exec(`CREATE TRIGGER owned_prerequisite_receipt_fault BEFORE INSERT ON _schema_migrations WHEN NEW.id='${INDEX_ID}'
+        BEGIN SELECT RAISE(ABORT,'OWNED_PREREQUISITE_RECEIPT_FAULT'); END;`);db.close();
+    const before=retained(file);
+    expect(()=>installWorkItemUniqueness({dbPath:file,apply:true})).toThrow('OWNED_PREREQUISITE_RECEIPT_FAULT');
+    expect(retained(file)).toEqual(before);expect(installWorkItemUniqueness({dbPath:file}).classification).toBe('ABSENT');
+});
+
+test('empty Prisma bootstrap verifies the existing column/FK, executes only the shipped index and records honest receipts',()=>{
+    const file=emptyMarkerFixture(),before=retained(file);
+    expect(installWorkItemUniqueness({dbPath:file})).toMatchObject({classification:'FRESH_PRISMA',workItemCount:0,duplicateGroupCount:0,totalChanges:0});
+    const applied=installWorkItemUniqueness({dbPath:file,apply:true});
+    expect(applied).toMatchObject({classification:'COMPLETE',previousClassification:'FRESH_PRISMA',receiptsInserted:2,totalChanges:2});
+    expect(applied.preservation.before).toEqual(applied.preservation.after);
+    const db=new Database(file,{readonly:true});
+    expect(db.prepare('PRAGMA table_xinfo("WorkItem")').all().filter(row=>row.name==='duplicateOf')).toHaveLength(1);
+    expect(db.prepare('PRAGMA foreign_key_list("WorkItem")').all().filter(row=>row.from==='duplicateOf'))
+        .toEqual([expect.objectContaining({table:'WorkItem',to:'id',on_delete:'RESTRICT',on_update:'CASCADE'})]);
+    const marker=JSON.parse(db.prepare('SELECT details FROM _schema_migrations WHERE id=?').get(MARKER_ID).details);
+    const index=JSON.parse(db.prepare('SELECT details FROM _schema_migrations WHERE id=?').get(INDEX_ID).details);
+    expect(marker).toMatchObject({mode:'FRESH_PRISMA_BOOTSTRAP',sourceExecuted:false,columnAndForeignKeyVerified:true});
+    expect(index).toMatchObject({mode:'APPLIED',sourceExecuted:true});db.close();
+    for(const row of before.filter(row=>row.table && row.table!=='_schema_migrations'))
+        expect(retained(file).find(after=>after.table===row.table)).toEqual(row);
+});
+
+test('populated Prisma-shaped WorkItem without prerequisite receipts is PARTIAL and refuses all writes',()=>{
+    const file=fixture(),before=retained(file),bytes=hash(file);
+    expect(installWorkItemUniqueness({dbPath:file})).toMatchObject({classification:'PARTIAL',workItemCount:1});
+    expect(()=>installWorkItemUniqueness({dbPath:file,apply:true})).toThrow(expect.objectContaining({code:'WORKITEM_PREREQUISITE_SCHEMA_MISMATCH'}));
+    expect(retained(file)).toEqual(before);expect(hash(file)).toBe(bytes);
+});
+
+test('an empty Prisma schema with the index but no receipts is PARTIAL, never adopted or repaired',()=>{
+    const file=emptyMarkerFixture(),db=new Database(file),source=loadActiveWorkItemIndexSource();db.exec(source.sql);db.close();
+    const before=retained(file),bytes=hash(file);
+    expect(installWorkItemUniqueness({dbPath:file})).toMatchObject({classification:'PARTIAL',workItemCount:0});
+    expect(()=>installWorkItemUniqueness({dbPath:file,apply:true})).toThrow(expect.objectContaining({code:'WORKITEM_PREREQUISITE_SCHEMA_MISMATCH'}));
+    expect(retained(file)).toEqual(before);expect(hash(file)).toBe(bytes);
+});
+
+test('Prisma-shaped historical Results prevent fresh bootstrap even when WorkItem and WorkAttempt are empty',()=>{
+    const file=ownedFile();
+    createPre190AttemptFixture({actor:'system:fixture',file,rows:{Sample:[sampleRow('imported')],
+        Result:[resultRow('imported-result','imported',{provenance:'IMPORTED'})]}});
+    const before=retained(file),bytes=hash(file);
+    expect(installWorkItemUniqueness({dbPath:file})).toMatchObject({classification:'PARTIAL',workItemCount:0,executionTablesEmpty:false});
+    expect(()=>installWorkItemUniqueness({dbPath:file,apply:true})).toThrow(expect.objectContaining({code:'WORKITEM_PREREQUISITE_SCHEMA_MISMATCH'}));
+    expect(retained(file)).toEqual(before);expect(hash(file)).toBe(bytes);
+});
+
+test('an unexpected index definition is FOREIGN and refused even on an empty owned schema',()=>{
+    const file=emptyMarkerFixture(),db=new Database(file);
+    db.exec('CREATE UNIQUE INDEX "WorkItem_one_active_per_analysis" ON "WorkItem"("id")');db.close();
+    const before=retained(file),bytes=hash(file);
+    expect(installWorkItemUniqueness({dbPath:file})).toMatchObject({classification:'FOREIGN',differences:['Active WorkItem index definition differs']});
+    expect(()=>installWorkItemUniqueness({dbPath:file,apply:true})).toThrow(expect.objectContaining({code:'WORKITEM_PREREQUISITE_SCHEMA_MISMATCH'}));
+    expect(retained(file)).toEqual(before);expect(hash(file)).toBe(bytes);
+});
+
+test('legacy #178 receipts match only their source digests and remain byte-for-byte unchanged on COMPLETE NO_OP',()=>{
+    const file=emptyMarkerFixture(),db=new Database(file),source=loadActiveWorkItemIndexSource();db.exec(source.sql);
+    const markerSource=loadWorkItemDuplicateMarkerSource();
+    for(const [id,sqlSha256] of [[MARKER_ID,markerSource.sha256],[INDEX_ID,source.sha256]])
+        db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run(id,JSON.stringify({
+            release:'1.8.0-audit-1.1-pr243',sqlSha256,backupSha256:'original-backup',
+            backfill:{originalCount:8},duplicatesResolved:0}));
+    db.close();const before=retained(file),bytes=hash(file);
+    expect(installWorkItemUniqueness({dbPath:file,apply:true})).toMatchObject({classification:'COMPLETE',mode:'NO_OP',totalChanges:0});
+    expect(retained(file)).toEqual(before);expect(hash(file)).toBe(bytes);
+});
+
+test('COMPLETE legacy prerequisite remains intact when the separate #190 migration later refuses',()=>{
+    const file=fixture({status:'unknown'}),db=new Database(file),source=loadActiveWorkItemIndexSource();db.exec(source.sql);
+    const markerSource=loadWorkItemDuplicateMarkerSource();
+    for(const [id,sqlSha256] of [[MARKER_ID,markerSource.sha256],[INDEX_ID,source.sha256]])
+        db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run(id,JSON.stringify({sqlSha256,release:'retained #178'}));
+    db.close();const before=retained(file),bytes=hash(file);
+    expect(installWorkItemUniqueness({dbPath:file,apply:true})).toMatchObject({classification:'COMPLETE',mode:'NO_OP',totalChanges:0});
+    expect(installWorkAttemptContract({dbPath:file})).toMatchObject({duplicateMarkerPrerequisite:{classification:'COMPLETE'},plan:{status:'REFUSED'}});
+    expect(()=>installWorkAttemptContract({dbPath:file,apply:true})).toThrow(expect.objectContaining({code:'WORK_ATTEMPT_BACKFILL_REFUSED'}));
+    expect(retained(file)).toEqual(before);expect(hash(file)).toBe(bytes);
+    expect(()=>assertWorkAttemptStartupReady(file)).toThrow(expect.objectContaining({code:'WORK_ATTEMPT_NOT_INSTALLED'}));
+    expect(assertWorkItemUniquenessStartupReady(file).classification).toBe('COMPLETE');
+});
+
+test.each(['unparseable','missing-sha','wrong-sha','missing-object'])(
+    'a foreign prerequisite receipt (%s) refuses without rewriting provenance',kind=>{
+        const file=emptyMarkerFixture(),db=new Database(file),source=loadActiveWorkItemIndexSource();
+        if(kind!=='missing-object')db.exec(source.sql);
+        const markerSource=loadWorkItemDuplicateMarkerSource();
+        db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run(MARKER_ID,
+            kind==='unparseable'?'{':JSON.stringify(kind==='missing-sha'?{}:{sqlSha256:kind==='wrong-sha'?'foreign-source':markerSource.sha256}));
+        db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run(INDEX_ID,JSON.stringify({sqlSha256:source.sha256}));
+        db.close();const before=retained(file),bytes=hash(file);
+        expect(installWorkItemUniqueness({dbPath:file}).classification).toBe('FOREIGN');
+        expect(()=>installWorkItemUniqueness({dbPath:file,apply:true})).toThrow(expect.objectContaining({code:'WORKITEM_PREREQUISITE_SCHEMA_MISMATCH'}));
+        expect(retained(file)).toEqual(before);expect(hash(file)).toBe(bytes);
+    });
+
+test('prerequisite CLI needs an explicit owned path and refuses duplicate, incomplete and conflicting options',()=>{
+    expect(prerequisiteArguments(['--db','owned.db','--apply'])).toEqual({dbPath:'owned.db',apply:true});
+    expect(prerequisiteArguments(['--db','owned.db','--dry-run'])).toEqual({dbPath:'owned.db',apply:false});
+    for(const args of [[],['--db'],['--db','owned.db','--apply','--dry-run'],['--db','owned.db','--db','other.db'],['--db','owned.db','--unknown']])
+        expect(()=>prerequisiteArguments(args)).toThrow(expect.objectContaining({code:'WORKITEM_PREREQUISITE_ARGUMENT_INVALID'}));
 });

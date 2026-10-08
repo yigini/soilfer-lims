@@ -1058,6 +1058,30 @@ async function runSuite() {
         workflowStartup.inventory.blockedCount !== 0) throw new Error(`Upgraded workflow startup inventory mismatch: ${workflowStartupOutput}`);
     console.log('  ✓ Upgraded installer classification COMPLETE; candidates/unmapped/blocked 0; read-only gate writes 0');
 
+    // #190 pins6061135570/6061301340: prove the genuine baseline received
+    // the unchanged #178 sources before #190. Inspect; never repair here.
+    const prerequisiteOutput = cp.execFileSync('docker', [
+        'run', '--rm', '-v', `${upgDataVol}:/app/server/prisma`, IMAGE_TAG, 'node', '-e',
+        `const Database = require('better-sqlite3');
+         const { assertWorkItemUniquenessStartupReady, MARKER_ID, INDEX_ID } = require('./scripts/install_workitem_uniqueness');
+         const { assertWorkAttemptStartupReady } = require('./scripts/install_work_attempt_contract');
+         const prerequisite = assertWorkItemUniquenessStartupReady('prisma/dev.db');
+         const attempts = assertWorkAttemptStartupReady('prisma/dev.db');
+         const db = new Database('prisma/dev.db', { readonly: true });
+         const receipts = [MARKER_ID,INDEX_ID].map(id => JSON.parse(db.prepare('SELECT details FROM _schema_migrations WHERE id=?').get(id).details));
+         db.close(); console.log(JSON.stringify({ prerequisite, attempts, receipts }));`
+    ], { encoding: 'utf8' }).trim();
+    const prerequisiteProof = JSON.parse(prerequisiteOutput);
+    if (prerequisiteProof.prerequisite.classification !== 'COMPLETE' || prerequisiteProof.prerequisite.totalChanges !== 0 ||
+        prerequisiteProof.attempts.classification !== 'COMPLETE' || prerequisiteProof.attempts.totalChanges !== 0 ||
+        prerequisiteProof.attempts.receipt.duplicateMarkerPrerequisite.classification !== 'COMPLETE' ||
+        prerequisiteProof.receipts.length !== 2 || prerequisiteProof.receipts.some(receipt =>
+            receipt.classification !== 'ABSENT' || receipt.mode !== 'APPLIED' || receipt.sourceExecuted !== true ||
+            receipt.duplicateGroupCount !== 0 || receipt.preservation.originalRowsAndFieldsPreserved !== true)) {
+        throw new Error(`Upgraded duplicate-marker/attempt prerequisite mismatch: ${prerequisiteOutput}`);
+    }
+    console.log('  ✓ Baseline ABSENT → duplicate-marker COMPLETE → #190 COMPLETE; both source receipts and preservation verified; read-only writes 0');
+
     // Verify pre-upgrade operational token continues to authenticate (signing secret preservation)
     const preUpgApiRes = await fetch(`http://127.0.0.1:${upgTargetPort}/api/labs`, {
         headers: { 'Authorization': `Bearer ${preUpgradeToken}` }

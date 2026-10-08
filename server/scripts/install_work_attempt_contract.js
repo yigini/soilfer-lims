@@ -3,6 +3,7 @@ const path = require('node:path'), Database = require('better-sqlite3');
 const { randomUUID, createHash } = require('node:crypto');
 const { loadWorkAttemptMigrationSource } = require('../services/workAttemptMigrationSource');
 const { planHistoricalAttempts } = require('../services/workAttemptBackfillPlan');
+const { classifyDuplicateMarkerPrerequisite } = require('./install_workitem_uniqueness');
 const MARKER = '190_work_attempt_contract';
 const COLUMNS = Object.freeze({ batchId: 'TEXT', reason: 'TEXT', requestedBy: 'TEXT', requestedAt: 'DATETIME',
     rawData: 'TEXT', calcVersion: 'TEXT', dilutionFactor: 'REAL', aliquotId: 'TEXT', legacyAttemptNoConflict: 'TEXT' });
@@ -68,11 +69,15 @@ function classify(db, source) {
         }
     }
     if (differences.length) throw fail('WORK_ATTEMPT_SCHEMA_MISMATCH', 'WorkAttempt evidence differs from the release.', { differences });
+    // Pin6061301340: report the real prerequisite state; standalone historical
+    // rehearsals retain their own guards and never adopt prerequisite receipts.
+    const prerequisite = classifyDuplicateMarkerPrerequisite(db);
+    const duplicateMarkerPrerequisite = { classification: prerequisite.classification, sources: prerequisite.sources };
     const plan = planHistoricalAttempts(db);
     if (classification === 'COMPLETE' && (plan.status !== 'READY' || plan.links.length)) {
         throw fail('WORK_ATTEMPT_INTEGRITY_REFUSED', 'Completed WorkAttempt installation has unlinked or conflicting Results.', { plan });
     }
-    return { classification, sources, plan, ...(receipt && { receipt }), bootstrapRebuild: [] };
+    return { classification, sources, plan, duplicateMarkerPrerequisite, ...(receipt && { receipt }), bootstrapRebuild: [] };
 }
 
 function applyBackfill(db, plan) {
@@ -146,6 +151,7 @@ function installWorkAttemptContract({ dbPath, apply = false } = {}) {
             const backfill = applyBackfill(db,current.plan);
             db.exec(source.guardsSql);
             const receipt = { sources:current.sources, originalPlanSha256:current.plan.planSha256,
+                duplicateMarkerPrerequisite:current.duplicateMarkerPrerequisite,
                 originalAttemptSha256:current.plan.originalAttemptSha256, originalResultSha256:current.plan.originalResultSha256,
                 matchedWorkItemSourceSha256:current.plan.matchedWorkItemSourceSha256, ...backfill };
             receipt.receiptSha256=fingerprint(receipt);

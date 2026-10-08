@@ -180,6 +180,33 @@ test.each(['services/workAttemptMigrationSource.js', 'prisma/migrations/20261008
         } finally { spy.mockRestore(); }
     });
 
+test.each(['loadWorkItemDuplicateMarkerSource', 'loadActiveWorkItemIndexSource'])(
+    'the unchanged duplicate-marker prerequisite %s is inspected without writer exemptions', functionName => {
+        const source = `const { ${functionName} } = require('../services/workItemUniquenessMigrationSource'); const release = ${functionName}(); db.exec(release.sql);`;
+        expect(scanSource(source, 'scripts/duplicate-marker-probe.cjs', exceptions)).toEqual([]);
+        expect(scanSource(source.replace(`${functionName}()`, `${functionName}(arbitrary)`), 'scripts/duplicate-marker-probe.cjs', exceptions))
+            .toEqual([expect.objectContaining({ code: 'UNRESOLVED_WORKFLOW_SQL' })]);
+    });
+
+test.each([
+    ['loadWorkItemDuplicateMarkerSource', 'services/workItemUniquenessMigrationSource.js'],
+    ['loadActiveWorkItemIndexSource', 'services/workItemUniquenessMigrationSource.js'],
+    ['loadWorkItemDuplicateMarkerSource', 'prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql'],
+    ['loadActiveWorkItemIndexSource', 'prisma/migrations/20261004190100_unique_active_workitem/migration.sql']
+])('an altered prerequisite source is a failing finding: %s / %s', (functionName, target) => {
+    const originalRead = fs.readFileSync, changedFile = path.resolve(serverRoot, target);
+    const spy = jest.spyOn(fs, 'readFileSync').mockImplementation((file, ...args) => {
+        const bytes = originalRead(file, ...args);
+        if (typeof file !== 'string' || path.resolve(file) !== changedFile) return bytes;
+        return Buffer.isBuffer(bytes) ? Buffer.concat([bytes, Buffer.from('\n')]) : bytes + '\n';
+    });
+    try {
+        const source = `const { ${functionName} } = require('../services/workItemUniquenessMigrationSource'); const release = ${functionName}(); db.exec(release.sql);`;
+        expect(scanSource(source, 'scripts/duplicate-marker-probe.cjs', exceptions)).toEqual([
+            expect.objectContaining({ code: 'UNRESOLVED_WORKFLOW_SQL' })]);
+    } finally { spy.mockRestore(); }
+});
+
 test('all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities', () => {
     const files = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '--', 'server'],
         { cwd: path.resolve(serverRoot, '..'), encoding: 'utf8' }).split(/\r?\n/).filter(file => /\.(?:js|cjs|mjs|py|sql)$/.test(file))

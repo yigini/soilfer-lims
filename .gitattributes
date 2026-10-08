@@ -40,3 +40,4 @@ server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql text
 server/services/workAttemptMigrationSource.js text eol=lf
 server/tests/helpers/fixtures/pre190_full_application_schema.sql -text
 server/tests/helpers/workAttemptHistoricalFixtures.js text eol=lf
+server/services/workItemUniquenessMigrationSource.js text eol=lf
