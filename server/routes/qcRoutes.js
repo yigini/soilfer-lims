@@ -13,6 +13,7 @@ router.get('/batches', qcController.getBatches);
 router.get('/batches/:id', qcController.getBatchById);
 router.put('/batches/:id', checkPermission('CHANGE_STATUS'), qcController.updateBatch);
 router.post('/batches/:id/evaluate', checkPermission('CHANGE_STATUS'), qcController.evaluateBatch);
+router.post('/batches/:id/preview', checkPermission('CHANGE_STATUS'), qcController.previewBatch);
 router.post('/batches/:id/corrections', checkPermission('CHANGE_STATUS'), qcController.correctMeasurements);
 router.post('/batches/:id/start', checkPermission('CHANGE_STATUS'), qcController.startRun);
 router.post('/batches/:id/rebuild', checkPermission('CHANGE_STATUS'), qcController.rebuildRun);
