@@ -5,6 +5,8 @@ const { installWorkAttemptContract, assertWorkAttemptStartupReady, parseArgument
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
 const { createPre190AttemptFixture } = require('../helpers/workAttemptHistoricalFixtures');
 const { loadWorkAttemptMigrationSource } = require('../../services/workAttemptMigrationSource');
+const { installResultAttemptLinks } = require('../../scripts/install_result_attempt_links');
+const { installResultEquipmentEvidence } = require('../../scripts/install_result_equipment_evidence');
 const { installWorkItemUniqueness, assertWorkItemUniquenessStartupReady, MARKER_ID, INDEX_ID,
     parseArguments: prerequisiteArguments } = require('../../scripts/install_workitem_uniqueness');
 const { loadWorkItemDuplicateMarkerSource, loadActiveWorkItemIndexSource } = require('../../services/workItemUniquenessMigrationSource');
@@ -219,22 +221,17 @@ function emptyMarkerFixture() {
     return file;
 }
 
-// Pin6063339165: an owned pre-190 schema minus only the duplicate column/FK.
-// The four-caller historical factory and its pinned source/DDL stay unchanged.
+// Pin6063339165: the genuine owned ABSENT baseline with the prior reviewed
+// Result additions installed. No ad-hoc SQL loader or factory authority change.
 function absentAttemptMarkerFixture({foreignIndex=false}={}) {
-    const file=ownedFile(),bytes=fs.readFileSync(path.resolve(__dirname,'../helpers/fixtures/pre190_full_application_schema.sql'));
-    expect(createHash('sha256').update(bytes).digest('hex')).toBe('e2496a65a9c607e80a82924ff7ed6a4033d1da05fedb907c83dd0918f022923b');
-    const lines=bytes.toString('utf8').split('\n');
-    const removed=lines.filter(line=>/^    "duplicateOf" TEXT,\r?$/.test(line) ||
-        /^    CONSTRAINT "WorkItem_duplicateOf_fkey" /.test(line));
-    expect(removed).toHaveLength(2);
-    fs.closeSync(fs.openSync(file,'wx'));
+    const file=absentMarkerFixture();
+    expect(installResultAttemptLinks({dbPath:file,apply:true}).classification).toBe('COMPLETE');
+    expect(installResultEquipmentEvidence({dbPath:file,apply:true}).classification).toBe('COMPLETE');
     const db=new Database(file,{fileMustExist:true});
     try {
-        db.pragma('foreign_keys=ON');db.exec(lines.filter(line=>!removed.includes(line)).join('\n'));
-        db.exec('CREATE TABLE "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL, "appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "details" TEXT)');
-        db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run('prior-retained','{"original":"receipt"}');
         if(foreignIndex)db.exec('CREATE UNIQUE INDEX "WorkItem_one_active_per_analysis" ON "WorkItem"("id")');
+        expect(db.prepare('PRAGMA table_xinfo("WorkItem")').all().some(row=>row.name==='duplicateOf')).toBe(false);
+        expect(db.prepare('PRAGMA foreign_key_list("WorkItem")').all().some(row=>row.from==='duplicateOf')).toBe(false);
         expect(db.pragma('foreign_key_check')).toEqual([]);
     } finally { db.close(); }
     return file;
