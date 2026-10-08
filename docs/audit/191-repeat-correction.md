@@ -1,9 +1,10 @@
-# Repeat and correction commands (#191): WIP, not ready for audit
+# Repeat and correction commands (#191)
 
 #190 is merged at a919ad679e7c381c5428cbaaed561295785691a5. #253 is merged
 at 0b5428405f577aab2e6d90634209f8b154bba373 and incorporated here.
-Branch: audit/3.2-repeat-correction. Draft review is being prepared; no audit
-pass or deployment exists. Readiness requires all final-head checks below.
+Branch: audit/3.2-repeat-correction. Review: PR #260. This document records
+scope and the deliberate fixture inventory; current validation and audit
+status are recorded on the PR. Readiness requires all final-head checks below.
 
 Scope authorities are #162 and #191 comments 5975239652, 6055538092,
 6059796291, 6067488471, 6067875897, 6068463777, 6068870369, 6069548259
@@ -12,7 +13,7 @@ CONTRIBUTING.md applies.
 Claude answered the payload, explicit replicate, derived review, historical
 import, causal event and reported-value fixture questions. None is pending.
 
-Implemented, with verification still in progress:
+Implemented:
 
 - A separately hashed additive #191 migration and installer, twelve exact
   receipt-bound release objects, complete startup chain and tamper refusals.
@@ -51,8 +52,8 @@ Implemented, with verification still in progress:
 - A read-only planner lists interim attempt 2+ rows with NULL reason as
   "reason not recorded". Back-fill count is zero; no write mode exists.
 
-Remaining work includes completing verification of the pinned legacy fixture
-adaptations and complete server/client/CI verification at one final head.
+Required checks include the pinned legacy fixture adaptations and complete
+server/client/CI verification at one final head.
 Earlier derived evidence and analytical/QC/audit rows remain intact.
 
 Verification history is diagnostic, not readiness:
@@ -80,6 +81,13 @@ Verification history is diagnostic, not readiness:
   suites passed all 45 tests (11.443s), including actual received-sample
   submission/review/approval with NO_BATCH/required:false, unchanged versions
   0/1, literal method/unit and exact frozen selection audit assertions.
+- c3be599: repeat commands, UUID transactions, offline state and provenance
+  passed all 80 tests in four suites (84.864s), including the full replacement
+  replica set and exact parent-row preservation.
+- 1906ae7: all 74 tests in three complete execution, catalogue and repeat
+  suites passed (76.727s), including missing two/three-replica sets and an
+  extra replica that cannot conceal a missing parent replica. The missing
+  receipt prerequisite and deliberately pinned catalogue409 assertion pass.
 
 Applied by precedent / deliberate setup inventory:
 
