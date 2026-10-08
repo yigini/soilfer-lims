@@ -7,19 +7,19 @@ let db;
 beforeEach(() => {
     db = new Database(':memory:');
     db.exec(`CREATE TABLE Batch(id TEXT PRIMARY KEY);
-        CREATE TABLE WorkItem(id TEXT PRIMARY KEY,sampleId TEXT,analysis TEXT,status TEXT);
+        CREATE TABLE WorkItem(id TEXT PRIMARY KEY,sampleId TEXT,analysis TEXT,status TEXT,duplicateOf TEXT);
         CREATE TABLE WorkAttempt(id TEXT PRIMARY KEY,workItemId TEXT,attemptNo INTEGER,status TEXT,
             evidenceData TEXT,evidenceHash TEXT,instrumentId TEXT,qcBatchId TEXT,createdAt TEXT,updatedAt TEXT);
-        CREATE TABLE Result(id TEXT PRIMARY KEY,sampleId TEXT,param TEXT,attemptId TEXT,replicateNo INTEGER,isCurrent INTEGER,value TEXT,batchId TEXT);
+        CREATE TABLE Result(id TEXT PRIMARY KEY,sampleId TEXT,param TEXT,attemptId TEXT,replicateNo INTEGER,isCurrent INTEGER,value TEXT,batchId TEXT,provenance TEXT DEFAULT 'MEASURED');
         CREATE TABLE AuditLog(id TEXT PRIMARY KEY,detail TEXT);
         INSERT INTO AuditLog VALUES ('retained','scientific audit');`);
 });
 afterEach(() => db.close());
 function item(id, status = 'ACCEPTED', analysis = 'P') {
-    db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run(id, id + '-sample', analysis, status);
+    db.prepare('INSERT INTO WorkItem(id,sampleId,analysis,status) VALUES (?,?,?,?)').run(id, id + '-sample', analysis, status);
 }
 function result(id, workItemId, { attemptId = null, replicateNo = 1, isCurrent = 1, batchId = null } = {}) {
-    db.prepare('INSERT INTO Result VALUES (?,?,?,?,?,?,?,?)').run(id, workItemId + '-sample', 'P', attemptId, replicateNo, isCurrent, '0.123456789', batchId);
+    db.prepare('INSERT INTO Result(id,sampleId,param,attemptId,replicateNo,isCurrent,value,batchId) VALUES (?,?,?,?,?,?,?,?)').run(id, workItemId + '-sample', 'P', attemptId, replicateNo, isCurrent, '0.123456789', batchId);
 }
 function attempt(id, workItemId, attemptNo = 1, status = 'RECORDED') {
     db.prepare('INSERT INTO WorkAttempt VALUES (?,?,?,?,?,?,?,?,?,?)').run(id, workItemId, attemptNo, status,
@@ -88,7 +88,7 @@ test('current-result collisions are reported after proposed links, distinct repl
 test('unmatched and multiple exact WorkItem candidates are reported without guessed texture aliases', () => {
     item('texture', 'ACCEPTED', 'TEXTURE'); result('unmatched', 'texture');
     item('duplicate'); result('ambiguous-workitem', 'duplicate');
-    db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('other', 'duplicate-sample', 'P', 'ACCEPTED');
+    db.prepare('INSERT INTO WorkItem(id,sampleId,analysis,status) VALUES (?,?,?,?)').run('other', 'duplicate-sample', 'P', 'ACCEPTED');
     expect(readonlyPlan().blockers.map(row => row.code)).toEqual(['WORK_ATTEMPT_WORKITEM_AMBIGUOUS', 'WORK_ATTEMPT_WORKITEM_UNMATCHED']);
 });
 
@@ -97,6 +97,31 @@ test('planning CLI requires an explicit database and dry-run and refuses apply',
     for (const args of [[], ['--db', 'owned.db', '--apply'], ['--db', 'owned.db'], ['--db', 'owned.db', '--dry-run', '--apply']]) {
         expect(() => parseArguments(args)).toThrow(expect.objectContaining({ code: 'WORK_ATTEMPT_PLAN_ARGUMENT_INVALID' }));
     }
+});
+
+test('only imported rows without a canonical WorkItem are exempt, including a duplicate child',()=>{
+    result('orphan-import','orphan');
+    item('child');result('child-import','child');
+    db.exec("UPDATE WorkItem SET duplicateOf='parent' WHERE id='child'; UPDATE Result SET provenance='IMPORTED'");
+    expect(readonlyPlan()).toMatchObject({status:'READY',exemptImportCount:2,newAttempts:[],links:[],blockers:[],
+        exemptImports:[{resultId:'child-import'},{resultId:'orphan-import'}]});
+});
+
+test('an imported row with canonical work uses the normal historical attempt mapping',()=>{
+    item('imported');result('result','imported');db.exec("UPDATE Result SET provenance='IMPORTED'");
+    expect(readonlyPlan()).toMatchObject({status:'READY',exemptImportCount:0,newAttempts:[{workItemId:'imported'}],links:[{resultId:'result'}]});
+});
+
+test.each(['MEASURED','PREDICTED','DERIVED',null])('unmatched %s has no historical-import exemption',provenance=>{
+    result('orphan','missing');db.prepare('UPDATE Result SET provenance=?').run(provenance);
+    expect(readonlyPlan()).toMatchObject({status:'REFUSED',exemptImportCount:0,blockers:[{code:'WORK_ATTEMPT_WORKITEM_UNMATCHED'}]});
+});
+
+test('unmapped statuses report grouped WorkItem and Result counts and every id',()=>{
+    item('first','REPEAT_REQUIRED');item('second','REPEAT_REQUIRED');
+    result('one','first');result('two','first',{replicateNo:2});result('three','second');
+    expect(readonlyPlan().unmappedStatusGroups).toEqual([{sourceStatus:'REPEAT_REQUIRED',workItemIds:['first','second'],
+        resultIds:['one','three','two'],workItemCount:2,resultCount:3}]);
 });
 
 test('new historical attempts copy only identical frozen Result evidence and its instrument, with no request or equipment lookup', () => {

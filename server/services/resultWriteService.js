@@ -8,6 +8,7 @@ const { evaluateExecutionReadiness } = require('./workbenchReadinessService');
 const { getNumberFormat } = require('./numberFormatService');
 const { validateNumericMethod, validateTextureFractions } = require('./workbenchValidationService');
 const { TransitionError } = rules;
+const { canonicalWorkItemWhere } = require('./workAttemptContract');
 const TEXTURE_ANALYSES = new Set(['TEXTURE', 'SAND', 'SILT', 'CLAY', 'pSA', 'PSA', 'textureSum']);
 const FRACTIONS = ['SAND', 'SILT', 'CLAY'];
 const ATTEMPT_ERRORS = ['RESULT_ATTEMPT_NOT_FOUND', 'RESULT_ATTEMPT_SAMPLE_MISMATCH', 'RESULT_ATTEMPT_REFERENCED'];
@@ -55,7 +56,7 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     const attempt = attemptId ? await tx.workAttempt.findUnique({ where: { id: attemptId }, include: { workItem: true } }) : null;
     if (attemptId && !attempt) throw new TransitionError('Result attempt not found.', 409, 'RESULT_ATTEMPT_NOT_FOUND');
     let item = workItemId ? await tx.workItem.findUnique({ where: { id: workItemId }, include: { sample: true } })
-        : attempt?.workItem || await tx.workItem.findFirst({ where: { sampleId, analysis: measurement.param, duplicateOf: null }, include: { sample: true } });
+        : attempt?.workItem || await tx.workItem.findFirst({ where: canonicalWorkItemWhere(sampleId,measurement.param), include: { sample: true } });
     if (workItemId && !item) throw new TransitionError('Work item not found.', 404, 'WORK_ITEM_NOT_FOUND');
     if (item && item.sampleId !== sampleId || attempt && (attempt.workItem.sampleId !== sampleId || item && attempt.workItemId !== item.id)) {
         throw new TransitionError('Result, attempt and work item must share a sample.', 409, 'RESULT_ATTEMPT_SAMPLE_MISMATCH');

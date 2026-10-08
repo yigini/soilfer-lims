@@ -1,21 +1,22 @@
 const Database = require('better-sqlite3');
 const { loadWorkAttemptMigrationSource } = require('../../services/workAttemptMigrationSource');
-const { WORK_ATTEMPT_STATUS_LIST, LEGACY_WORK_ATTEMPT_STATUS_LIST } = require('../../services/workAttemptContract');
+const { WORK_ATTEMPT_STATUS_LIST, LEGACY_WORK_ATTEMPT_STATUS_LIST, REPEAT_REASON_LIST, assertRepeatReason, canonicalWorkItemWhere } = require('../../services/workAttemptContract');
 let db, source;
 beforeEach(() => {
     db = new Database(':memory:'); db.pragma('foreign_keys=ON');
     db.exec(`CREATE TABLE Batch(id TEXT PRIMARY KEY);
+        CREATE TABLE WorkItem(id TEXT PRIMARY KEY,sampleId TEXT,analysis TEXT,duplicateOf TEXT);
         CREATE TABLE WorkAttempt(id TEXT PRIMARY KEY,workItemId TEXT,orderLineId TEXT,attemptNo INTEGER DEFAULT 1,
             executedMethodRevision TEXT,author TEXT,authorName TEXT,materialAliquot TEXT,instrumentId TEXT,qcBatchId TEXT,
             version INTEGER DEFAULT 1,status TEXT DEFAULT 'RECORDED',evidenceHash TEXT,evidenceData TEXT,createdAt DATETIME,updatedAt DATETIME);
-        CREATE TABLE Result(id TEXT PRIMARY KEY,sampleId TEXT,param TEXT,replicateNo INTEGER,attemptId TEXT,isCurrent INTEGER);
+        CREATE TABLE Result(id TEXT PRIMARY KEY,sampleId TEXT,param TEXT,replicateNo INTEGER,attemptId TEXT,isCurrent INTEGER,provenance TEXT DEFAULT 'MEASURED');
         CREATE TABLE ReviewDecision(id TEXT PRIMARY KEY);`);
     source = loadWorkAttemptMigrationSource(); db.exec(source.schemaSql);
 });
 afterEach(() => db.close());
-function insert(id, { workItemId = 'item', attemptNo = 1, status = 'RECORDED', flag = null, evidenceData = null, batchId = null } = {}) {
-    return db.prepare(`INSERT INTO WorkAttempt(id,workItemId,attemptNo,status,legacyAttemptNoConflict,evidenceData,batchId)
-        VALUES (?,?,?,?,?,?,?)`).run(id,workItemId,attemptNo,status,flag,evidenceData,batchId);
+function insert(id, { workItemId = 'item', attemptNo = 1, status = 'RECORDED', flag = null, evidenceData = null, batchId = null, reason = null } = {}) {
+    return db.prepare(`INSERT INTO WorkAttempt(id,workItemId,attemptNo,status,legacyAttemptNoConflict,evidenceData,batchId,reason)
+        VALUES (?,?,?,?,?,?,?,?)`).run(id,workItemId,attemptNo,status,flag,evidenceData,batchId,reason);
 }
 
 test('every lab installs partial attempt uniqueness and current-result uniqueness with all guards', () => {
@@ -24,7 +25,7 @@ test('every lab installs partial attempt uniqueness and current-result uniquenes
         .toMatch(/WHERE "legacyAttemptNoConflict" IS NULL$/);
     expect(() => insert('collision')).toThrow(/UNIQUE/);
     insert('next', { attemptNo: 2 }); insert('another-item', { workItemId: 'other' });
-    const result = db.prepare('INSERT INTO Result VALUES (?,?,?,?,?,?)');
+    const result = db.prepare('INSERT INTO Result(id,sampleId,param,replicateNo,attemptId,isCurrent) VALUES (?,?,?,?,?,?)');
     result.run('original','sample','P',1,'first',1);
     expect(() => result.run('duplicate','sample','P',1,'first',1)).toThrow(/UNIQUE/);
     result.run('replicate','sample','P',2,'first',1);
@@ -88,4 +89,33 @@ test('batch FK is additive, reference checked and write-once when recorded', () 
     expect(() => insert('dangling', {workItemId:'different',batchId:'missing'})).toThrow(/FOREIGN KEY/);
     expect(() => db.prepare("DELETE FROM Batch WHERE id='batch'").run()).toThrow(/FOREIGN KEY/);
     expect(() => db.prepare('DELETE FROM WorkAttempt').run()).toThrow('WORK_ATTEMPT_DELETE_REFUSED');
+});
+
+test.each(REPEAT_REASON_LIST)('canonical reason %s is accepted by both the shared contract and SQL',reason=>{
+    db.exec(source.guardsSql);expect(assertRepeatReason(reason)).toBe(reason);insert('canonical-reason',{reason});
+});
+
+test('reason remains nullable for a second execution, while noncanonical values are refused',()=>{
+    db.exec(source.guardsSql);insert('first');insert('second',{attemptNo:2});
+    expect(db.prepare("SELECT reason FROM WorkAttempt WHERE id='second'").get().reason).toBeNull();
+    expect(assertRepeatReason(null)).toBeNull();
+    for(const reason of ['free text','',1]) {
+        expect(()=>assertRepeatReason(reason)).toThrow(expect.objectContaining({code:'WORK_ATTEMPT_REASON_INVALID',statusCode:409}));
+        expect(()=>insert('invalid',{workItemId:'another',reason})).toThrow('WORK_ATTEMPT_REASON_INVALID');
+    }
+});
+
+test('SQL and runtime canonical lookup agree: only orphan historical imports can omit an attempt',()=>{
+    db.exec(source.guardsSql);
+    const result=db.prepare('INSERT INTO Result(id,sampleId,param,replicateNo,attemptId,isCurrent,provenance) VALUES (?,?,?,?,?,?,?)');
+    result.run('orphan','sample','P',1,null,1,'IMPORTED');
+    db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('child','sample','P','parent');
+    result.run('duplicate-child-import','sample','P',2,null,1,'IMPORTED');
+    expect(canonicalWorkItemWhere('sample','P')).toEqual({sampleId:'sample',analysis:'P',duplicateOf:null});
+    db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('canonical','sample','P',null);
+    expect(()=>result.run('nonexempt-import','sample','P',3,null,1,'IMPORTED')).toThrow('RESULT_ATTEMPT_REQUIRED');
+    result.run('linked-import','sample','P',3,'valid-attempt',1,'IMPORTED');
+    for(const provenance of ['MEASURED','PREDICTED','DERIVED',null]) {
+        expect(()=>result.run('refused','other-sample','P',1,null,1,provenance)).toThrow('RESULT_ATTEMPT_REQUIRED');
+    }
 });

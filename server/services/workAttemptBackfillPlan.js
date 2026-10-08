@@ -1,5 +1,5 @@
 const { createHash } = require('node:crypto');
-const { HISTORICAL_ATTEMPT_STATUS } = require('./workAttemptContract');
+const { HISTORICAL_ATTEMPT_STATUS, canonicalWorkItemWhere, isLegacyImportExempt } = require('./workAttemptContract');
 const { historicalAttemptEvidence } = require('./workAttemptEvidence');
 
 function fingerprint(value) {
@@ -13,7 +13,7 @@ function planHistoricalAttempts(db) {
     return db.transaction(() => {
         const attempts = db.prepare('SELECT * FROM "WorkAttempt" ORDER BY id').all();
         const results = db.prepare('SELECT * FROM "Result" ORDER BY id').all();
-        const items = db.prepare('SELECT id,sampleId,analysis,status FROM "WorkItem" ORDER BY id').all();
+        const items = db.prepare('SELECT id,sampleId,analysis,status,duplicateOf FROM "WorkItem" ORDER BY id').all();
         const batchIds = db.prepare('SELECT id FROM "Batch" ORDER BY id').all().map(row => row.id);
         const knownBatchIds = new Set(batchIds);
         const attemptsByItem = new Map(), itemsByMeasurement = new Map(), duplicateNumbers = new Map();
@@ -25,6 +25,7 @@ function planHistoricalAttempts(db) {
             numbered.push(attempt.id); duplicateNumbers.set(key, numbered);
         }
         for (const item of items) {
+            if (item.duplicateOf !== canonicalWorkItemWhere(item.sampleId,item.analysis).duplicateOf) continue;
             const key = JSON.stringify([item.sampleId, item.analysis]);
             const group = itemsByMeasurement.get(key) || [];
             group.push(item); itemsByMeasurement.set(key, group);
@@ -45,12 +46,17 @@ function planHistoricalAttempts(db) {
             const group = matchingResultIds.get(selected.id) || [];
             group.push(result.id); matchingResultIds.set(selected.id, group);
         }
-        const newAttempts = new Map(), links = [], blockers = [], currentKeys = new Map();
+        const newAttempts = new Map(), links = [], blockers = [], currentKeys = new Map(), exemptImports = [];
         for (const result of results) {
             // A non-null link is retained even when a newer attempt exists.
             let destination = result.attemptId;
             if (destination == null) {
                 const candidates = itemsByMeasurement.get(JSON.stringify([result.sampleId, result.param])) || [];
+                if (isLegacyImportExempt(result,candidates)) {
+                    exemptImports.push({resultId:result.id,sampleId:result.sampleId,param:result.param,provenance:result.provenance,
+                        rule:'LEGACY_IMPORT_WITHOUT_CANONICAL_WORKITEM'});
+                    continue;
+                }
                 if (candidates.length !== 1) {
                     blockers.push({ code: candidates.length ? 'WORK_ATTEMPT_WORKITEM_AMBIGUOUS' : 'WORK_ATTEMPT_WORKITEM_UNMATCHED',
                         resultId: result.id, workItemIds: candidates.map(row => row.id) });
@@ -99,6 +105,12 @@ function planHistoricalAttempts(db) {
         for (const conflict of currentResultConflicts) blockers.push({ code: 'WORK_ATTEMPT_CURRENT_RESULT_CONFLICT', ...conflict });
         const duplicateAttemptNumberGroups = [...duplicateNumbers].filter(([, ids]) => ids.length > 1)
             .map(([key, attemptIds]) => { const [workItemId, attemptNo] = JSON.parse(key); return { workItemId, attemptNo, attemptIds }; });
+        const unmappedStatuses = new Map();
+        for (const entry of blockers.filter(row=>row.code==='WORK_ATTEMPT_STATUS_UNMAPPED')) {
+            const group=unmappedStatuses.get(entry.sourceStatus) || {sourceStatus:entry.sourceStatus,workItemIds:[],resultIds:[]};
+            if (!group.workItemIds.includes(entry.workItemId)) group.workItemIds.push(entry.workItemId);
+            group.resultIds.push(entry.resultId);unmappedStatuses.set(entry.sourceStatus,group);
+        }
         const resultsById = new Map(results.map(row => [row.id, row]));
         const historicalEquipmentEvidence = [...newAttempts.values()].map(plan => ({ workItemId: plan.workItemId,
             resultIds: plan.resultIds, ...historicalAttemptEvidence(plan.resultIds.map(id => resultsById.get(id))) }));
@@ -122,6 +134,8 @@ function planHistoricalAttempts(db) {
         const output = { status: blockers.length ? 'REFUSED' : 'READY',
             existingAttemptCount: attempts.length, resultCount: results.length,
             alreadyLinkedResultCount: results.filter(row => row.attemptId != null).length,
+            exemptImportCount:exemptImports.length,exemptImports,
+            unmappedStatusGroups:[...unmappedStatuses.values()].map(row=>({...row,workItemCount:row.workItemIds.length,resultCount:row.resultIds.length})),
             newAttempts: [...newAttempts.values()], links, blockers, duplicateAttemptNumberGroups, currentResultConflicts,
             historicalEquipmentEvidence, historicalBatchEvidence,
             originalAttemptSha256: fingerprint(attempts), originalResultSha256: fingerprint(results),

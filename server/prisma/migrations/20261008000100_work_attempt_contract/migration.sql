@@ -16,6 +16,24 @@ CREATE INDEX "WorkAttempt_workItemId_attemptNo_idx" ON "WorkAttempt"("workItemId
 CREATE INDEX "WorkAttempt_batchId_idx" ON "WorkAttempt"("batchId");
 
 -- INSTALLER_GUARDS_AFTER_BACKFILL
+CREATE TRIGGER "Result_attempt_required_insert" BEFORE INSERT ON "Result"
+WHEN NEW."attemptId" IS NULL AND NOT COALESCE((NEW."provenance" = 'IMPORTED' AND NOT EXISTS (SELECT 1 FROM "WorkItem" w WHERE w."sampleId" = NEW."sampleId" AND w."analysis" = NEW."param" AND w."duplicateOf" IS NULL)), 0)
+BEGIN
+    SELECT RAISE(ABORT, 'RESULT_ATTEMPT_REQUIRED');
+END;
+
+CREATE TRIGGER "WorkAttempt_reason_insert" BEFORE INSERT ON "WorkAttempt"
+WHEN NEW."reason" IS NOT NULL AND NEW."reason" NOT IN ('QC_BATCH_FAIL','REVIEW_OUTLIER','DUPLICATE_DISAGREEMENT','ABOVE_RANGE_DILUTION','INSTRUMENT_FAULT','PREP_ERROR','TRANSCRIPTION_ERROR','CLIENT_RETEST','CONFIRMATION','OTHER')
+BEGIN
+    SELECT RAISE(ABORT, 'WORK_ATTEMPT_REASON_INVALID');
+END;
+
+CREATE TRIGGER "WorkAttempt_reason_update" BEFORE UPDATE OF "reason" ON "WorkAttempt"
+WHEN NEW."reason" IS NOT NULL AND NEW."reason" NOT IN ('QC_BATCH_FAIL','REVIEW_OUTLIER','DUPLICATE_DISAGREEMENT','ABOVE_RANGE_DILUTION','INSTRUMENT_FAULT','PREP_ERROR','TRANSCRIPTION_ERROR','CLIENT_RETEST','CONFIRMATION','OTHER')
+BEGIN
+    SELECT RAISE(ABORT, 'WORK_ATTEMPT_REASON_INVALID');
+END;
+
 CREATE UNIQUE INDEX "WorkAttempt_workItemId_attemptNo_unique" ON "WorkAttempt"("workItemId", "attemptNo") WHERE "legacyAttemptNoConflict" IS NULL;
 CREATE UNIQUE INDEX "result_one_current" ON "Result"("sampleId", "param", "replicateNo", "attemptId") WHERE "isCurrent" = 1;
 

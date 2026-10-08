@@ -15,19 +15,19 @@ function fixture() {
         INSERT INTO _schema_migrations VALUES ('prior-retained','{"original":"receipt"}');
         CREATE TABLE Batch(id TEXT PRIMARY KEY);
         INSERT INTO Batch VALUES ('batch');
-        CREATE TABLE WorkItem(id TEXT PRIMARY KEY,sampleId TEXT,analysis TEXT,status TEXT,result TEXT);
+        CREATE TABLE WorkItem(id TEXT PRIMARY KEY,sampleId TEXT,analysis TEXT,status TEXT,result TEXT,duplicateOf TEXT);
         CREATE TABLE WorkAttempt(id TEXT PRIMARY KEY,workItemId TEXT REFERENCES WorkItem(id),orderLineId TEXT,
             attemptNo INTEGER DEFAULT 1,executedMethodRevision TEXT,author TEXT,authorName TEXT,materialAliquot TEXT,
             instrumentId TEXT,qcBatchId TEXT,version INTEGER DEFAULT 1,status TEXT DEFAULT 'RECORDED',
             evidenceHash TEXT,evidenceData TEXT,createdAt DATETIME NOT NULL,updatedAt DATETIME NOT NULL);
         CREATE TABLE Result(id TEXT PRIMARY KEY,sampleId TEXT,param TEXT,replicateNo INTEGER,attemptId TEXT,
-            isCurrent INTEGER,value TEXT,equipmentReadiness TEXT,batchId TEXT,updatedAt TEXT);
+            isCurrent INTEGER,value TEXT,equipmentReadiness TEXT,batchId TEXT,updatedAt TEXT,provenance TEXT DEFAULT 'MEASURED');
         CREATE TABLE ReviewDecision(id TEXT PRIMARY KEY,reason TEXT);
         INSERT INTO ReviewDecision VALUES ('legacy-review','stored reason');
         CREATE TABLE AuditLog(id TEXT PRIMARY KEY,details TEXT);
         INSERT INTO AuditLog VALUES ('original','unchanged technical audit');
-        INSERT INTO WorkItem VALUES ('measured','sample','P','ACCEPTED','original cache');
-        INSERT INTO Result VALUES ('result','sample','P',1,NULL,1,'0.123456789',NULL,'batch','original-timestamp');`);
+        INSERT INTO WorkItem(id,sampleId,analysis,status,result) VALUES ('measured','sample','P','ACCEPTED','original cache');
+        INSERT INTO Result(id,sampleId,param,replicateNo,attemptId,isCurrent,value,equipmentReadiness,batchId,updatedAt) VALUES ('result','sample','P',1,NULL,1,'0.123456789',NULL,'batch','original-timestamp');`);
     db.close();return file;
 }
 const hash=file=>createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -77,8 +77,8 @@ test('atomic additive apply links every Result, records provenance, preserves or
 
 test('all duplicate attempts are flagged without rewriting original fields, legacy evidence is retained, and frozen new evidence is copied',()=>{
     const file=fixture(),db=new Database(file);
-    db.exec(`INSERT INTO WorkItem VALUES ('duplicates','other-sample','P','REPEAT_REQUIRED','retained');
-        INSERT INTO WorkItem VALUES ('empty','empty-sample','P','NOT_ASSIGNED',NULL);
+    db.exec(`INSERT INTO WorkItem(id,sampleId,analysis,status,result) VALUES ('duplicates','other-sample','P','REPEAT_REQUIRED','retained');
+        INSERT INTO WorkItem(id,sampleId,analysis,status,result) VALUES ('empty','empty-sample','P','NOT_ASSIGNED',NULL);
         INSERT INTO WorkAttempt(id,workItemId,attemptNo,status,qcBatchId,evidenceData,evidenceHash,instrumentId,createdAt,updatedAt)
         VALUES ('old-one','duplicates',4,'RETURNED','batch','{"old":1}','hash-one','old-one-instrument','old-created','old-updated'),
             ('old-two','duplicates',4,'REJECTED','missing-batch','{"old":2}','hash-two','old-two-instrument','old-created','old-updated');`);
@@ -113,8 +113,8 @@ test.each(['REPEAT_REQUIRED','REANALYSIS_REQUIRED','REJECTED','NOT_ASSIGNED','PE
 
 test('unmatched Results and current-result collisions are both reported and never partially applied',()=>{
     const file=fixture(),db=new Database(file);
-    db.exec(`INSERT INTO Result VALUES ('conflict','sample','P',1,NULL,1,'other retained value',NULL,'batch','retained');
-        INSERT INTO Result VALUES ('unmatched','missing-sample','P',1,NULL,1,'unmatched scientific value',NULL,NULL,'retained');`);db.close();
+    db.exec(`INSERT INTO Result(id,sampleId,param,replicateNo,attemptId,isCurrent,value,equipmentReadiness,batchId,updatedAt) VALUES ('conflict','sample','P',1,NULL,1,'other retained value',NULL,'batch','retained');
+        INSERT INTO Result(id,sampleId,param,replicateNo,attemptId,isCurrent,value,equipmentReadiness,batchId,updatedAt) VALUES ('unmatched','missing-sample','P',1,NULL,1,'unmatched scientific value',NULL,NULL,'retained');`);db.close();
     const before=hash(file),dry=installWorkAttemptContract({dbPath:file});
     expect(dry.plan.blockers.map(row=>row.code)).toEqual(expect.arrayContaining(['WORK_ATTEMPT_WORKITEM_UNMATCHED','WORK_ATTEMPT_CURRENT_RESULT_CONFLICT']));
     expect(()=>installWorkAttemptContract({dbPath:file,apply:true})).toThrow(expect.objectContaining({code:'WORK_ATTEMPT_BACKFILL_REFUSED'}));
@@ -145,6 +145,19 @@ test('existing exchange UDF triggers compile without emitting amendments for an 
     after.close();
 });
 
+test('historical orphan imports are separately receipted and never get fabricated work or attempts',()=>{
+    const file=fixture(),db=new Database(file);
+    db.prepare(`INSERT INTO Result(id,sampleId,param,replicateNo,attemptId,isCurrent,value,provenance,updatedAt)
+        VALUES ('orphan-import','orphan','P',1,NULL,1,'<0.0000123','IMPORTED','retained-time')`).run();
+    const original=db.prepare("SELECT * FROM Result WHERE id='orphan-import'").get();db.close();
+    const applied=installWorkAttemptContract({dbPath:file,apply:true});
+    expect(applied).toMatchObject({newAttemptCount:1,linkedResultCount:1,receipt:{exemptImportCount:1,exemptImports:[{resultId:'orphan-import'}]}});
+    const after=new Database(file,{readonly:true});
+    expect(after.prepare("SELECT * FROM Result WHERE id='orphan-import'").get()).toEqual(original);
+    expect(after.prepare("SELECT count(*) n FROM WorkItem WHERE sampleId='orphan'").get().n).toBe(0);after.close();
+    expect(assertWorkAttemptStartupReady(file)).toMatchObject({classification:'COMPLETE',plan:{exemptImportCount:1}});
+});
+
 test('fresh Prisma gets partial uniqueness before COMPLETE (actual db push on Linux, compiler-emitted DDL on Windows)',()=>{
     const file=ownedFile();
     // Use the existing closed fixture authority: Linux/CI runs actual db push;
@@ -155,7 +168,7 @@ test('fresh Prisma gets partial uniqueness before COMPLETE (actual db push on Li
     expect(installWorkAttemptContract({dbPath:file,apply:true})).toMatchObject({classification:'COMPLETE',previousClassification:'FRESH_PRISMA',newAttemptCount:0,linkedResultCount:0});
     const installed=new Database(file,{readonly:true});
     expect(installed.prepare("SELECT sql FROM sqlite_master WHERE name='WorkAttempt_workItemId_attemptNo_unique'").get().sql).toMatch(/WHERE "legacyAttemptNoConflict" IS NULL$/);
-    expect(installed.prepare("SELECT count(*) n FROM sqlite_master WHERE type='trigger' AND name LIKE 'WorkAttempt_%'").get().n).toBe(9);
+    expect(installed.prepare("SELECT count(*) n FROM sqlite_master WHERE type='trigger' AND name LIKE 'WorkAttempt_%'").get().n).toBe(11);
     installed.close();expect(assertWorkAttemptStartupReady(file).classification).toBe('COMPLETE');
 },60000);
 
