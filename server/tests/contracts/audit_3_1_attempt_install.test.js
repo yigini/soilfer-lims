@@ -151,6 +151,17 @@ test('startup refuses removed or altered guards without repairing schema automat
     expect(hash(file)).toBe(before);
 });
 
+test('fresh unmarked conflict flags are refused rather than treated as trusted migration provenance',()=>{
+    const file=fixture(),db=new Database(file);
+    db.exec(require('../../services/workAttemptMigrationSource').loadWorkAttemptMigrationSource().schemaSql);
+    db.prepare(`INSERT INTO WorkAttempt(id,workItemId,attemptNo,status,legacyAttemptNoConflict,createdAt,updatedAt)
+        VALUES ('pretended','measured',1,'RECORDED','not-a-reviewed-migration','created','updated')`).run();db.close();
+    const before=hash(file);
+    expect(()=>installWorkAttemptContract({dbPath:file,apply:true})).toThrow(expect.objectContaining({code:'WORK_ATTEMPT_SCHEMA_MISMATCH',
+        differences:expect.arrayContaining(['Unmarked conflict flags cannot be trusted as migration provenance'])}));
+    expect(hash(file)).toBe(before);
+});
+
 test('CLI requires a database, refuses conflicting modes and does not default to a production path',()=>{
     expect(parseArguments(['--db','owned.db','--dry-run'])).toEqual({dbPath:'owned.db',apply:false});
     expect(parseArguments(['--db','owned.db','--apply'])).toEqual({dbPath:'owned.db',apply:true});
