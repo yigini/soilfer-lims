@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const prisma = require('../prisma');
-const { writeResult, deriveTextureResult, selectMeasurement } = require('../services/resultWriteService');
+const { writeResultsExecution, deriveTextureResult, selectMeasurement } = require('../services/resultWriteService');
 const validationController = require('./validationController');
 const { validateResultEntries } = require('../services/resultEntryPolicy');
 const stateRules = require('../services/workflowStateRules');
@@ -135,9 +135,16 @@ exports.saveResults = async (req, res) => {
             const validatedMeasurements = [];
             const operations = [];
             const now = new Date();
-            for (const measurement of measurements) {
-                const row = await writeResult(tx, { sampleId, measurement: selectMeasurement(measurement), actor: user, now });
-                validatedMeasurements.push({ ...measurement, validation: { valid: row.isValid, flags: JSON.parse(row.flags || '[]') } });
+            const groups=new Map(),recorded=new Map();
+            for(const [index,measurement] of measurements.entries()) {
+                const group=groups.get(measurement.param) || [];group.push({index,measurement});groups.set(measurement.param,group);
+            }
+            for(const group of groups.values()) {
+                const rows=await writeResultsExecution(tx,{sampleId,measurements:group.map(row=>selectMeasurement(row.measurement)),actor:user,now});
+                for(const [index,row] of rows.entries())recorded.set(group[index].index,row);
+            }
+            for(const [index,measurement] of measurements.entries()) {
+                const row=recorded.get(index);validatedMeasurements.push({ ...measurement, validation: { valid: row.isValid, flags: JSON.parse(row.flags || '[]') } });
             }
 
             operations.push(db => db.auditLog.create({
@@ -155,21 +162,29 @@ exports.saveResults = async (req, res) => {
 
             for (const operation of operations) await operation(tx);
             const replicates = new Set(validatedMeasurements.filter(m => ['SAND', 'SILT', 'CLAY'].includes(m.param)).map(m => Number(m.replicateNo ?? 1)));
-            for (const replicateNo of replicates) await deriveTextureResult(tx, { sampleId, replicateNo, actor: user, now });
+            let derivation;
+            for (const replicateNo of replicates) {
+                try {await deriveTextureResult(tx, { sampleId, replicateNo, actor: user, now });}
+                catch(error) {
+                    if(error.code!=='RESULT_WORKITEM_REQUIRED')throw error;
+                    derivation={skipped:error.code};
+                }
+            }
 
             // Compute cross-parameter sample matrix diagnostics
             const allActiveResults = await tx.result.findMany({
                 where: { sampleId, isCurrent: true }
             });
             const matrixDiagnostics = validationController.validateSampleMatrix(allActiveResults);
-            return { validatedMeasurements, matrixDiagnostics };
+            return { validatedMeasurements, matrixDiagnostics,derivation };
         });
 
         // Return validation feedback
         res.json({
             success: true,
             validation: outcome.validatedMeasurements.map(m => ({ param: m.param, flags: m.validation.flags })),
-            matrixDiagnostics: outcome.matrixDiagnostics
+            matrixDiagnostics: outcome.matrixDiagnostics,
+            ...(outcome.derivation && {derivation:outcome.derivation})
         });
 
     } catch (error) {

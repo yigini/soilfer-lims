@@ -1,4 +1,5 @@
-const { createResultFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { installWorkAttemptContract } = require('../../scripts/install_work_attempt_contract');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const request = require('supertest');
@@ -26,11 +27,12 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
             const database = await createLegacyClosureDatabase({ analysis, labId });
             legacyDatabases.push(database);
             useLegacyRouteDatabase(prisma, database.client);
+            expect(installWorkAttemptContract({ dbPath: database.file, apply: true }).classification).toBe('COMPLETE');
             const submitter = jwt.decode(technician);
             await database.client.user.create({ data: { id: submitter.id, username: submitter.username,
                 email: `${submitter.username}@example.test`, password: 'isolated-fixture', role: 'LAB_TECHNICIAN', labId } });
             const item = await prisma.workItem.findUnique({ where: { id: database.workItemId } });
-            const result = await createResultFixture(prisma, { data: { id: id('R-06-LEGACY'), sampleId: database.sampleId, param: analysis,
+            const result = await createExecutionResultFixture(prisma, { data: { id: id('R-06-LEGACY'), sampleId: database.sampleId, param: analysis,
                 value: '6.2', numericValue: 6.2, isCurrent: true, isValid: true, flags: '[]' } });
             return { sampleId: database.sampleId, item, result, batch: null };
         }
@@ -41,7 +43,8 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
             qcResults: batchStatus === 'QC_FAIL' ? JSON.stringify({ blanks: [{ value: 2, maxAllowed: 1, status: 'FAIL' }], duplicates: [], controls: [] }) : null } }) : null;
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-06'), sampleId, analysis, assignedLab: labId,
             status, result: '6.2', history: '[]', batchId: batch?.id } });
-        const result = await createResultFixture(prisma, { data: { id: id('R-06'), sampleId, param: analysis, value: '6.2',
+        const result = await createExecutionResultFixture(prisma, { ...(status === 'ACCEPTED' && { attemptStatus: 'ACCEPTED' }),
+            data: { id: id('R-06'), sampleId, param: analysis, value: '6.2',
             numericValue: 6.2, isCurrent: true, isValid: true, flags: '[]', batchId: batch?.id } });
         if (batch) await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, batch.id);
         return { sampleId, item, result, batch };
@@ -53,12 +56,21 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
             reviews: await prisma.reviewDecision.findMany({ where: { workItemId: f.item.id } }),
             audits: await prisma.auditLog.findMany({ where: { OR: [{ entityId: f.item.id }, { entityId: f.sampleId }] } }) };
     }
-    async function packageFixture(states) {
+    async function packageFixture(states, { seedCachedEvidence = false } = {}) {
         const f = await fixture({ status: states[0] });
         const items = [f.item];
         for (const status of states.slice(1)) items.push(await createWorkItemFixture(prisma, { data: {
             id: id('WI-06-PACKAGE'), sampleId: f.sampleId, assignedLab: labId, analysis: 'EC', status, result: '5.4', history: '[]', duplicateOf: items.find(item => item.analysis === 'EC')?.id || null
         } }));
+        // Pin6059085200: opt-in evidence for an existing canonical cached member.
+        if (seedCachedEvidence) for (const item of items.slice(1).filter(row => row.duplicateOf == null && row.result != null)) {
+            const attemptStatus = {
+                SUBMITTED: 'SUBMITTED', ACCEPTED: 'ACCEPTED', COMPLETED: 'RECORDED', AWAITING_VERIFICATION: 'RECORDED'
+            }[item.status];
+            if (!attemptStatus) throw Error('Cached package evidence requires a pinned final work state.');
+            await createExecutionResultFixture(prisma, { attemptStatus, data: { id: id('R-06-CACHED'), sampleId: f.sampleId, param: item.analysis,
+                value: item.result, numericValue: Number(item.result), provenance: 'MEASURED', isCurrent: true } });
+        }
         const submission = await prisma.submission.create({ data: { id: id('SUB-06'), sampleId: f.sampleId, assignedLab: labId,
             status: 'PENDING_REVIEW', type: 'PARTIAL', submittedBy: jwt.decode(technician).username, workItemCount: items.length,
             workItemIds: JSON.stringify(items.map(item => item.id)) } });
@@ -240,7 +252,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         expect(await snapshot(f)).toEqual(before);
     });
     test('a moved item is a per-row refusal while current members commit and determine the old package status', async () => {
-        const f = await packageFixture(['SUBMITTED', 'SUBMITTED']);
+        const f = await packageFixture(['SUBMITTED', 'SUBMITTED'], { seedCachedEvidence: true });
         const newer = await prisma.submission.create({ data: { id: id('SUB-06-NEWER'), sampleId: f.sampleId,
             assignedLab: labId, status: 'PENDING_REVIEW', type: 'PARTIAL', submittedBy: jwt.decode(technician).username,
             workItemCount: 1, workItemIds: JSON.stringify([f.item.id]) } });

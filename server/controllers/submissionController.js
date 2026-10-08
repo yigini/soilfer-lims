@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { assertReviewable, commitReview, reconcileSubmission } = require('../services/reviewCommitService');
+const { createReviewDecision,inReviewTransaction } = require('../services/reviewAttemptService');
 const { hasPermission } = require('../config/roles');
 const scopeGuard = require('../utils/scopeGuard');
 const { invalidateReturnedResults } = require('../services/reportResultGovernance');
@@ -214,7 +215,7 @@ exports.reviewSubmission = async (req, res) => {
             }
             const reason = (decision.reason || decision.note || '').trim();
             if (verdict !== 'ACCEPT' && !reason) return res.status(400).json({ error: 'RETURN and WAIVE require a reason.', code: 'REVIEW_REASON_REQUIRED' });
-            validated.push({ workItemId: decision.workItemId, decision: verdict, reason: reason || 'Item accepted' });
+            validated.push({ workItemId: decision.workItemId, decision: verdict, reason: reason || 'Item accepted',attemptId:decision.attemptId });
         }
         normalizedDecisions = validated;
 
@@ -256,7 +257,9 @@ exports.reviewSubmission = async (req, res) => {
         const now = new Date();
         const results = [];
         const errors = [];
-
+        const analysisNames=new Map(await Promise.all(dbItems.map(async item=>[item.analysis,await getAnalysisName(item.analysis)])));
+        await inReviewTransaction(prisma,normalizedDecisions.filter(row=>dbItems.some(item=>item.id===row.workItemId && item.submissionId===id && item.status==='SUBMITTED'))
+            .map(row=>({...row,decision:row.decision==='ACCEPT'?'ACCEPT':row.decision==='WAIVE'?'OMIT':'RETURN'})),user,async reviewDb=>{
         for (const decision of normalizedDecisions) {
             const { workItemId, decision: verdict, reason } = decision;
 
@@ -317,14 +320,14 @@ exports.reviewSubmission = async (req, res) => {
             }
 
 
-            const analysisName = await getAnalysisName(item.analysis);
+            const analysisName = analysisNames.get(item.analysis);
 
 
-            operations.push(tx => tx.reviewDecision.create({
-                data: {
+            operations.push(tx => createReviewDecision(tx, {
                     id: `rd-sub-${workItemId}-${Date.now()}`,
                     sampleId: String(submission.sampleId),
                     workItemId,
+                    attemptId:decision.attemptId,
                     submissionItemId: submission.id,
                     decision: verdict === 'ACCEPT' ? 'ACCEPT' : (verdict === 'REJECT_REANALYSIS' ? 'RETURN' : 'OMIT'),
                     reason: reason || null,
@@ -333,11 +336,10 @@ exports.reviewSubmission = async (req, res) => {
                     authorization: user.role,
                     policyVersion: 'v1',
                     createdAt: now
-                }
-            }));
+            },user));
 
             try {
-                await commitReview(prisma, item, newStatus, user, updates, async tx => {
+                await commitReview(reviewDb, item, newStatus, user, updates, async tx => {
                     const rows = [];
                     for (const operation of operations) rows.push(await operation(tx));
                     if (newStatus === workflow.WORK_ITEM_STATES.ACCEPTED && workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis)) {
@@ -361,7 +363,7 @@ exports.reviewSubmission = async (req, res) => {
                 errors.push({ workItemId, code: error.code });
             }
         }
-
+        });
         if (!results.length) return res.status(409).json({ error: 'No work items were eligible for review.', code: 'ITEM_NOT_SUBMITTED', results, errors });
         await reconcileSubmission(prisma, id, user, results, errors);
         res.json({ success: true, results, errors });

@@ -1069,28 +1069,10 @@ exports.batchSave = async (req, res) => {
                         basis: entry.basis, methodologyId: item.methodologyId, equipmentId: entry.equipmentId,
                         overrideReason: entry.overrideReason,
                         ...(Object.hasOwn(entry, 'batchId') && { batchId: entry.batchId }) };
-                    let attemptId = null;
-                    // Link the texture attempt that this path already produced;
-                    // general attempt creation/numbering remains in #190.
                     if (isTextureTask && textureClassification) {
-                        attemptId = `att-${item.id}-${crypto.randomUUID()}`;
-                        await tx.workAttempt.create({ data: {
-                            id: attemptId, workItemId: item.id, attemptNo: 1, author: user.username,
-                            authorName: user.name || user.username, materialAliquot: 'FINE_EARTH_2MM',
-                            instrumentId: entry.equipmentId || item.equipmentId || null, qcBatchId: item.batchId || null,
-                            version: expectedVersion + 1, status: 'RECORDED',
-                            evidenceData: JSON.stringify({ fractions: textureClassification.fractions,
-                                className: textureClassification.className, closureError: textureClassification.closureError }),
-                            createdAt: now, updatedAt: now
-                        } });
-                        const texture = await writeTextureDetermination(tx, { sampleId: item.sampleId, workItemId: item.id,
-                            attemptId, actor: user, measurement, fractions: textureFractions, now });
-                        const sourceResults = await tx.result.findMany({ where: { attemptId }, select: { id: true } });
-                        await tx.workAttempt.update({ where: { id: attemptId }, data: { evidenceData: JSON.stringify({
-                            fractions: textureClassification.fractions, className: texture.value,
-                            closureError: textureClassification.closureError, sourceResultIds: sourceResults.map(row => row.id),
-                            equipmentReadiness: texture.equipmentReadiness == null ? null : JSON.parse(texture.equipmentReadiness)
-                        }) } });
+                        await writeTextureDetermination(tx, { sampleId: item.sampleId, workItemId: item.id,
+                            actor: user, measurement, fractions: textureFractions, now,
+                            attemptMetadata:{materialAliquot:'FINE_EARTH_2MM',version:expectedVersion+1} });
                     } else {
                         await writeResult(tx, { sampleId: item.sampleId, workItemId: item.id, actor: user, measurement, now });
                     }
@@ -1159,7 +1141,12 @@ exports.batchSave = async (req, res) => {
                     const key = JSON.stringify([bundle.texture.sampleId, bundle.texture.replicateNo]);
                     if (derived.has(key)) continue;
                     derived.add(key);
-                    await deriveTextureResult(tx, bundle.texture);
+                    try {await deriveTextureResult(tx, bundle.texture);}
+                    catch(error) {
+                        if(error.code!=='RESULT_WORKITEM_REQUIRED')throw error;
+                        const result=results.find(row=>row.workItemId===bundle.workItemId);
+                        if(result)result.derivation={skipped:error.code};
+                    }
                 }
             });
             try {

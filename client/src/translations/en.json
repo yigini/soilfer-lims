@@ -2960,6 +2960,24 @@
     "legacySigmaMissing": "This historical PT score was recorded without an assessment sigma. It has not been recomputed; supply a valid sigma in an explicit correction.",
     "legacySigmaNonpositive": "This historical PT score used a nonpositive or nonfinite assessment sigma. It has not been recomputed; supply a valid sigma in an explicit correction."
   },
+  "attemptEvidence": {
+    "title": "Attempts",
+    "number": "Attempt #{number}",
+    "importedNoAttempt": "Imported, no attempt",
+    "legacy": "legacy",
+    "notRecorded": "Not recorded",
+    "status": {
+      "open": "Open",
+      "recorded": "Recorded",
+      "submitted": "Submitted",
+      "accepted": "Accepted",
+      "questioned": "Questioned",
+      "invalidated": "Invalidated",
+      "superseded": "Superseded",
+      "returnedLegacy": "Returned (legacy)",
+      "rejectedLegacy": "Rejected (legacy)"
+    }
+  },
   "qcMembership": {
     "membership": "Run membership",
     "selectedWork": "Selected work items",

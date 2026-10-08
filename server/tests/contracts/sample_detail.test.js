@@ -1,4 +1,4 @@
-const { createResultFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
@@ -75,14 +75,7 @@ describe('SD-15: Comprehensive Sample Detail End-to-End Contract Suite', () => {
         });
     });
 
-    afterAll(async () => {
-        await prisma.auditLog.deleteMany({ where: { sampleId: `${sampleLabGtmId}-approved` } });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: `${sampleLabGtmId}-approved` } }), select: { id: true } })).map(row => row.id), { single: false });
-        await prisma.result.deleteMany({ where: { sampleId: sampleLabGtmId } });
-        await prisma.auditLog.deleteMany({ where: { sampleId: sampleLabGtmId } });
-        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: sampleLabGtmId } }), select: { id: true } })).map(row => row.id), { single: false });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleLabGtmId } }), select: { id: true } })).map(row => row.id), { single: false });
-    });
+    // Pin6056586906: retain immutable execution and audit parents until owned database teardown.
 
     describe('1. Cross-Laboratory Assignment Refusal for Every Role (SD-02)', () => {
         test('1.1. Super Admin is blocked with HTTP 403 from assigning a GTM sample to an HND technician', async () => {
@@ -218,7 +211,7 @@ describe('SD-15: Comprehensive Sample Detail End-to-End Contract Suite', () => {
 
         test('3.4. Removing an analysis with recorded results is refused with HTTP 409 Conflict (Branch C)', async () => {
             // Record result on EC
-            await createResultFixture(prisma, {
+            await createExecutionResultFixture(prisma, {
                 data: {
                     id: 'RES-SD15-EC-01',
                     sampleId: sampleLabGtmId,
@@ -240,8 +233,7 @@ describe('SD-15: Comprehensive Sample Detail End-to-End Contract Suite', () => {
             expect(res.status).toBe(409);
             expect(res.body.error).toMatch(/Cannot remove analysis 'EC_1_5'/i);
 
-            // Cleanup result
-            await prisma.result.deleteMany({ where: { sampleId: sampleLabGtmId } });
+            // Retain the recorded result and its immutable execution until owned database teardown.
         });
     });
 

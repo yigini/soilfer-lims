@@ -47,10 +47,13 @@ jobs:
           node seeds/references.js
           node seeds/catalogue.js --confirm
           node seed_languages.js
+          node scripts/seed_help_content.cjs
+          node scripts/publish_help_release.cjs
         working-directory: server
         env:
           NODE_ENV: test
           JWT_SECRET: ci-test-secret-key-12345
+          DATABASE_PATH: ${{ github.workspace }}/server/prisma/dev.db
 
       - name: Run server test suite
         run: npm test

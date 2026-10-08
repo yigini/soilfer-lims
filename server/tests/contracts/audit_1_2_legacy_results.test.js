@@ -1,4 +1,4 @@
-const { createResultFixture, createResultsFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const { randomUUID } = require('node:crypto');
@@ -20,7 +20,7 @@ async function fixture(status = 'PROCESSING', flags = {}, itemStatus = 'IN_PROGR
         status, receptionDate: new Date(), requiredAnalyses: JSON.stringify([analysis]), dryingStatus: 'DONE', preparationStatus: 'DONE', ...flags } });
     const item = await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, assignedLab: labId,
         assignedTo: actor.username, analysis, status: itemStatus } });
-    const result = await createResultFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, param: analysis, value: '6.2',
+    const result = await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id, param: analysis, value: '6.2',
         numericValue: 6.2, unit: 'pH', isCurrent: true, isValid: true, flags: '["ORIGINAL_NOTE"]', ...resultData } });
     return { sample, item, result };
 }
@@ -121,8 +121,13 @@ test.each(['NOT_ASSIGNED', 'ON_HOLD', 'REPEAT_REQUIRED', 'AWAITING_VERIFICATION'
 
 test('blocking matrix diagnostics retain 422 before any lifecycle or submission write', async () => {
     const row = await fixture();
-    await createResultsFixture(prisma, { data: [['SAND', '40'], ['SILT', '30'], ['CLAY', '17']].map(([param, value]) => ({
-        id: randomUUID(), sampleId: row.sample.id, param, value, numericValue: Number(value), isCurrent: true })) });
+    // #190 pin6058914209: explicit measured fraction work, same state/lab/actor.
+    for (const [param, value] of [['SAND', '40'], ['SILT', '30'], ['CLAY', '17']]) {
+        await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId: row.sample.id, analysis: param,
+            status: row.item.status, assignedLab: labId, assignedTo: actor.username } });
+        await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: row.sample.id, param,
+            value, numericValue: Number(value), isCurrent: true } });
+    }
     const before = await snapshot(row), response = await submit(row);
     expect(response.status).toBe(422); expect(response.body.error).toBe('BLOCKING_MATRIX_DIAGNOSTICS');
     expect(response.body.blockingErrors.some(error => error.check === 'TEXTURE_CLOSURE')).toBe(true);

@@ -84,6 +84,129 @@ test('FK OFF is confined to the exact pinned synthetic branch, export and helper
         expect.objectContaining({ code: 'WORKFLOW_GUARD_DISABLED' })]);
 });
 
+test.each(['sql', 'schemaSql', 'guardsSql'])('the #190 source resolver inspects the exact checked-in %s asset', field => {
+    const source = `const { loadWorkAttemptMigrationSource } = require('../services/workAttemptMigrationSource');
+        const release = loadWorkAttemptMigrationSource(); db.exec(release.${field});`;
+    expect(scanSource(source, 'scripts/attempt-source-probe.cjs', exceptions)).toEqual([]);
+});
+test.each(['services/probe.js','controllers/probe.js','routes/probe.js','scripts/probe.js','../client/src/probe.js'])(
+    'the #190 historical factory cannot be imported by runtime or client: %s', filename => {
+        const specifier = filename.startsWith('../client') ? '../../server/tests/helpers/workAttemptHistoricalFixtures'
+            : '../tests/helpers/workAttemptHistoricalFixtures';
+        expect(scanSource(`require('${specifier}')`, filename, exceptions)).toEqual([
+            expect.objectContaining({ code: 'TEST_HELPER_IMPORTED_BY_RUNTIME' })]);
+    });
+test('the #190 factory import allowlist is exact, including the named spectral refusal', () => {
+    const source = "require('../helpers/workAttemptHistoricalFixtures')";
+    for (const filename of ['audit_3_1_attempt_backfill_plan.test.js','audit_3_1_attempt_install.test.js','audit_3_1_attempt_sql_guards.test.js']) {
+        expect(scanSource(source, 'tests/contracts/' + filename, exceptions)).toEqual([]);
+    }
+    expect(scanSource(source, 'tests/contracts/new_attempt.test.js', exceptions)).toEqual([
+        expect.objectContaining({ code: 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' })]);
+    expect(scanSource(source, 'tests/contracts/audit_1_2_spectral_state.test.js', exceptions)).toEqual([
+        expect.objectContaining({ code: 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' })]);
+    const named = `test('a literal pre-190 measured orphan refuses the installer and COMPLETE startup without writes',()=>{${source}})`;
+    expect(scanSource(named, 'tests/contracts/audit_1_2_spectral_state.test.js', exceptions)).toEqual([]);
+    expect(scanSource(named.replace('a literal pre-190 measured orphan refuses the installer and COMPLETE startup without writes','another route test'),
+        'tests/contracts/audit_1_2_spectral_state.test.js', exceptions)).toEqual([
+        expect.objectContaining({ code: 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' })]);
+});
+
+test('the #190 composite positive fixture has exactly two named publication callers', () => {
+    const names = ['composite texture governs sand, silt, clay and texture without duplicating values',
+        'RETURN of composite texture invalidates all four current parameters'];
+    const setup = "const {createCompositeTextureExecutionFixture}=require('../helpers/workAttemptFixtures');await createCompositeTextureExecutionFixture(db,{data:rows});";
+    for (const name of names) {
+        const source = `test('${name}',async()=>{${setup}})`;
+        expect(scanSource(source, 'tests/contracts/audit_0_3_publication.test.js', exceptions)).toEqual([]);
+        expect(scanSource(source, 'tests/contracts/new_composite.test.js', exceptions)).toEqual([
+            expect.objectContaining({ code: 'POSITIVE_FIXTURE_CALLER_NOT_ALLOWED' })]);
+    }
+    for (const source of [
+        setup,
+        `test('another publication case',async()=>{${setup}})`,
+        `test('${names[0]}',async()=>{${setup.replace('await createCompositeTextureExecutionFixture(db,{data:rows});', 'runLater(createCompositeTextureExecutionFixture);')}})`,
+        "const fixtures=require('../helpers/workAttemptFixtures');fixtures.createCompositeTextureExecutionFixture(db,{data:rows});",
+        "require('../helpers/workAttemptFixtures')[name](db,{data:rows});"
+    ]) expect(scanSource(source, 'tests/contracts/audit_0_3_publication.test.js', exceptions)).toEqual([
+        expect.objectContaining({ code: 'POSITIVE_FIXTURE_CALLER_NOT_ALLOWED' })]);
+    // A valid import never grants direct workflow or Result-write permission.
+    expect(scanSource(`test('${names[0]}',async()=>{${setup}prisma.result.create({data:{}});})`,
+        'tests/contracts/audit_0_3_publication.test.js', exceptions)).toEqual([
+        expect.objectContaining({ code: 'RESULT_CREATE_OUTSIDE_AUTHORITY' })]);
+});
+
+test.each(['services/probe.js', 'controllers/probe.js', 'routes/probe.js', 'scripts/probe.js', '../client/src/probe.js'])(
+    'positive attempt fixtures cannot be imported by runtime or client: %s', filename => {
+        const specifier = filename.startsWith('../client') ? '../../server/tests/helpers/workAttemptFixtures'
+            : '../tests/helpers/workAttemptFixtures';
+        expect(scanSource(`require('${specifier}')`, filename, exceptions)).toEqual([
+            expect.objectContaining({ code: 'TEST_HELPER_IMPORTED_BY_RUNTIME' })]);
+    });
+test.each(['sample','workItem','result'])('a direct %s write in a #190 test remains a finding outside the factory', model => {
+    expect(scanSource(`prisma.${model}.create({data:{}})`, 'tests/contracts/audit_3_1_attempt_install.test.js', exceptions))
+        .toEqual([expect.objectContaining({ code: model === 'result' ? 'RESULT_CREATE_OUTSIDE_AUTHORITY' : 'WORKFLOW_WRITE_OUTSIDE_AUTHORITY' })]);
+});
+test.each(['factory','DDL'])('a changed #190 historical %s digest is a scanner finding', kind => {
+    const factory = 'tests/helpers/workAttemptHistoricalFixtures.js';
+    const originalRead = fs.readFileSync, source = originalRead(path.resolve(serverRoot, factory), 'utf8');
+    let spy;
+    if (kind === 'DDL') {
+        const target = path.resolve(serverRoot, 'tests/helpers/fixtures/pre190_full_application_schema.sql');
+        spy = jest.spyOn(fs, 'readFileSync').mockImplementation((file, ...args) => {
+            const value = originalRead(file, ...args);
+            return typeof file === 'string' && path.resolve(file) === target ? Buffer.concat([value, Buffer.from('\n')]) : value;
+        });
+    }
+    try {
+        expect(scanSource(kind === 'factory' ? source + '\n' : source, factory, exceptions)).toEqual(expect.arrayContaining([
+            expect.objectContaining({ code: 'HISTORICAL_FIXTURE_SOURCE_MISMATCH' })]));
+    } finally { spy?.mockRestore(); }
+});
+
+test.each(['services/workAttemptMigrationSource.js', 'prisma/migrations/20261008000100_work_attempt_contract/migration.sql'])(
+    'an altered #190 loader or SQL digest restores a failing source finding: %s', target => {
+        const originalRead = fs.readFileSync;
+        const changedFile = path.resolve(serverRoot, target);
+        const spy = jest.spyOn(fs, 'readFileSync').mockImplementation((file, ...args) => {
+            const bytes = originalRead(file, ...args);
+            if (typeof file !== 'string' || path.resolve(file) !== changedFile) return bytes;
+            return Buffer.isBuffer(bytes) ? Buffer.concat([bytes, Buffer.from('\n')]) : bytes + '\n';
+        });
+        try {
+            const source = "const { loadWorkAttemptMigrationSource } = require('../services/workAttemptMigrationSource'); const release = loadWorkAttemptMigrationSource(); db.exec(release.sql);";
+            expect(scanSource(source, 'scripts/attempt-source-probe.cjs', exceptions)).toEqual([
+                expect.objectContaining({ code: 'UNRESOLVED_WORKFLOW_SQL' })]);
+        } finally { spy.mockRestore(); }
+    });
+
+test.each(['loadWorkItemDuplicateMarkerSource', 'loadActiveWorkItemIndexSource'])(
+    'the unchanged duplicate-marker prerequisite %s is inspected without writer exemptions', functionName => {
+        const source = `const { ${functionName} } = require('../services/workItemUniquenessMigrationSource'); const release = ${functionName}(); db.exec(release.sql);`;
+        expect(scanSource(source, 'scripts/duplicate-marker-probe.cjs', exceptions)).toEqual([]);
+        expect(scanSource(source.replace(`${functionName}()`, `${functionName}(arbitrary)`), 'scripts/duplicate-marker-probe.cjs', exceptions))
+            .toEqual([expect.objectContaining({ code: 'UNRESOLVED_WORKFLOW_SQL' })]);
+    });
+
+test.each([
+    ['loadWorkItemDuplicateMarkerSource', 'services/workItemUniquenessMigrationSource.js'],
+    ['loadActiveWorkItemIndexSource', 'services/workItemUniquenessMigrationSource.js'],
+    ['loadWorkItemDuplicateMarkerSource', 'prisma/migrations/20261004190000_add_workitem_duplicate_marker/migration.sql'],
+    ['loadActiveWorkItemIndexSource', 'prisma/migrations/20261004190100_unique_active_workitem/migration.sql']
+])('an altered prerequisite source is a failing finding: %s / %s', (functionName, target) => {
+    const originalRead = fs.readFileSync, changedFile = path.resolve(serverRoot, target);
+    const spy = jest.spyOn(fs, 'readFileSync').mockImplementation((file, ...args) => {
+        const bytes = originalRead(file, ...args);
+        if (typeof file !== 'string' || path.resolve(file) !== changedFile) return bytes;
+        return Buffer.isBuffer(bytes) ? Buffer.concat([bytes, Buffer.from('\n')]) : bytes + '\n';
+    });
+    try {
+        const source = `const { ${functionName} } = require('../services/workItemUniquenessMigrationSource'); const release = ${functionName}(); db.exec(release.sql);`;
+        expect(scanSource(source, 'scripts/duplicate-marker-probe.cjs', exceptions)).toEqual([
+            expect.objectContaining({ code: 'UNRESOLVED_WORKFLOW_SQL' })]);
+    } finally { spy.mockRestore(); }
+});
+
 test('all handwritten runtime, script, seed and test Sample/WorkItem writes use central authorities', () => {
     const files = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '--', 'server'],
         { cwd: path.resolve(serverRoot, '..'), encoding: 'utf8' }).split(/\r?\n/).filter(file => /\.(?:js|cjs|mjs|py|sql)$/.test(file))

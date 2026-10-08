@@ -1,5 +1,5 @@
-const { createResultFixture } = require('../../services/resultWriteService');
-const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -33,7 +33,10 @@ describe('WP-22: Dual Export Paths (As-Measured & Normalized Controlled Units)',
         sampleId = testSample.id;
 
         const now = new Date();
-        await createResultFixture(prisma, {
+        // Pin6060286651: exact original parameter and lab; no alias mapping.
+        await createWorkItemFixture(prisma, { data: { id: `${testSample.id}-SOC`, sampleId: testSample.id,
+            analysis: 'SOC', assignedLab: testSample.assignedLab, status: 'ACCEPTED' } });
+        await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
             data: {
                 id: `RES-EXP-${Date.now()}`,
                 sampleId: testSample.id,

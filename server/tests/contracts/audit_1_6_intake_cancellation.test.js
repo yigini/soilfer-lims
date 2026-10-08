@@ -8,7 +8,7 @@ const work = require('../../services/workItemStateService');
 const { transitionSample } = require('../../services/sampleStateService');
 const holds = require('../../services/sampleHoldService');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
-const { createResultFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const { getAuthToken } = require('../setup');
 const { scanSource } = require('../helpers/workflowWriteScanner');
 const labId = `CANCEL-LAB-${randomUUID()}`;
@@ -60,7 +60,7 @@ test.each(['result', 'scan', 'attempt', 'draft', 'evidence-event', 'equipment-us
     const unstarted = await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id,
         analysis: 'SOC', status: 'NOT_ASSIGNED', assignedLab: labId } });
     if (['result', 'evidence-event'].includes(evidence)) {
-        const result = await createResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id, param: f.item.analysis, value: '1.2', numericValue: 1.2 } });
+        const result = await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id, param: f.item.analysis, value: '1.2', numericValue: 1.2 } });
         if (evidence === 'evidence-event') await prisma.resultEvidenceEvent.create({ data: { id: randomUUID(), resultId: result.id,
             sampleId: f.sample.id, eventType: 'PREP_REVERTED', gate: 'PREPARATION', reason: 'Reverted preparation evidence', actor: actor.username } });
     }
@@ -167,7 +167,7 @@ test('re-acceptance normalizes expanding and alias analysis codes before reactiv
 
 test('generic rejection of accepted work with a result is refused without changing any table', async () => {
     const f = await fixture('IN_PROGRESS');
-    await createResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id, param: f.item.analysis, value: '1.2', numericValue: 1.2 } });
+    await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id, param: f.item.analysis, value: '1.2', numericValue: 1.2 } });
     const before = snapshot();
     const response = await request(routes(actor)).put(`/api/samples/${f.sample.id}/status`).send({ status: 'RECEIVED_REJECTED', reason: 'Reject' });
     expect(response.status).toBe(403);
@@ -298,7 +298,7 @@ test('the scanner confines reactivation to the central sample re-acceptance tran
 
 test('undo-intake HTTP route refuses analytical evidence with 409 and no table writes', async () => {
     const f = await fixture('IN_PROGRESS');
-    await createResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id, param: f.item.analysis, value: '1.2', numericValue: 1.2 } });
+    await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id, param: f.item.analysis, value: '1.2', numericValue: 1.2 } });
     const app = express();
     app.use(express.json());
     app.use((req, _res, next) => { req.user = actor; next(); });

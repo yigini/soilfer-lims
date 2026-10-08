@@ -160,6 +160,12 @@ echo "📦 Installing proficiency evidence..."
 node scripts/install_proficiency_evidence.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 node scripts/install_result_equipment_evidence.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
 
+echo "📦 Installing duplicate-marker prerequisite..."
+node scripts/install_workitem_uniqueness.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+
+echo "📦 Installing WorkAttempt execution evidence..."
+node scripts/install_work_attempt_contract.js --db "${DATABASE_PATH:-$DB_FILE}" --apply
+
 # Start the server
 echo "🚀 Starting SoilFER-LIMS..."
 exec node index.js
