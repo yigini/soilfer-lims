@@ -88,7 +88,8 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     if (!sample) throw new TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
     rules.assertScope(actor, sample);
     const importing = source === 'legacy-import';
-    if (!hasPermission(actor, importing ? 'RECEIVE_SAMPLE' : 'ENTER_RESULTS')) {
+    if (!hasPermission(actor, importing ? 'RECEIVE_SAMPLE' : 'ENTER_RESULTS') &&
+        !(source==='derived' && hasPermission(actor,'APPROVE_RESULTS'))) {
         throw new TransitionError('Result recording is not authorized.', 403, 'RESULT_WRITE_FORBIDDEN');
     }
     const attempt = attemptId ? await tx.workAttempt.findUnique({ where: { id: attemptId }, include: { workItem: true } }) : null;
@@ -405,11 +406,45 @@ async function deriveTextureResult(tx, { sampleId, replicateNo = 1, actor, now =
     const sharedAttemptId=fractions.every(row=>row.attemptId && row.attemptId===fractions[0].attemptId)?fractions[0].attemptId:null;
     const sharedAttempt=sharedAttemptId?await tx.workAttempt.findUnique({where:{id:sharedAttemptId}}):null;
     const reusing=sharedAttempt?.workItemId===item.id;
-    const existing = await tx.result.findFirst({ where: { sampleId, replicateNo, param: 'TEXTURE',
-        ...(reusing?{attemptId:sharedAttemptId}:{isCurrent:true}) } });
+    const existingRows=await tx.result.findMany({where:{sampleId,replicateNo,param:'TEXTURE',isCurrent:true,supersededBy:null}});
+    if(existingRows.length>1)throw new TransitionError('Resolve ambiguous current derived evidence.',409,'WORK_ATTEMPT_EVIDENCE_MISMATCH');
+    const existing=existingRows[0];
     if (existing && existing.flags === JSON.stringify(flags)) return existing;
-    const measurement={id:randomUUID(),param:'TEXTURE'},allocation=await allocateExecution(tx,ctx,reusing?{attemptId:sharedAttemptId}:{});
-    if (reusing) {
+    const previousAttempt=existing?.attemptId ? await tx.workAttempt.findUnique({where:{id:existing.attemptId}}) : null;
+    if(existing && (!previousAttempt || previousAttempt.workItemId!==item.id || !['RECORDED','SUBMITTED','ACCEPTED'].includes(previousAttempt.status))) {
+        throw new TransitionError('The derived Result requires its canonical execution.',409,'WORK_ATTEMPT_EVIDENCE_MISMATCH');
+    }
+    let oldSources,sourceEventIds;
+    if(existing) {
+        const previousFlags=parseJson(existing.flags,[]),evidence=parseJson(previousAttempt.evidenceData,{});
+        const explicit=evidence.measurements?.find(row=>row.resultId===existing.id)?.sourceResultIds;
+        const sourceIds=FRACTIONS.map(param=>previousFlags.find(flag=>typeof flag==='string' && flag.startsWith(`SOURCE_${param}_`))?.slice(`SOURCE_${param}_`.length));
+        const oldIds=sourceIds.every(Boolean)?sourceIds:explicit || evidence.sourceResultIds;
+        if(!Array.isArray(oldIds))throw new TransitionError('Previous derived source links are unavailable.',409,'WORK_ATTEMPT_EVIDENCE_MISMATCH');
+        const oldRows=await tx.result.findMany({where:{id:{in:oldIds},sampleId,param:{in:FRACTIONS},replicateNo}});
+        oldSources=FRACTIONS.map(param=>oldRows.find(row=>row.param===param));
+        if(oldRows.length!==3 || oldSources.some(row=>!row))throw new TransitionError('Previous derived source links are ambiguous.',409,'WORK_ATTEMPT_EVIDENCE_MISMATCH');
+        const changed=fractions.filter((row,index)=>row.id!==oldSources[index].id);
+        const events=require('./workAttemptEventService').attemptEventsInTransaction(tx).filter(event=>
+            event.sampleId===sampleId && ['CORRECTED','FIRST_FILL'].includes(event.action) &&
+            changed.some(row=>row.attemptId===event.entityId && parseJson(event.details,{}).newResultIds?.includes(row.id)));
+        const stored=await tx.auditLog.findMany({where:{id:{in:events.map(event=>event.id)},entity:'WORK_ATTEMPT',sampleId}});
+        if(!changed.length || !events.length || stored.length!==events.length || events.some(event=>
+            !stored.some(row=>row.id===event.id && row.entityId===event.entityId && row.action===event.action && row.details===event.details)) ||
+            changed.some(row=>!events.some(event=>event.entityId===row.attemptId && parseJson(event.details,{}).newResultIds?.includes(row.id)))) {
+            throw new TransitionError('Changed source fractions require their events in this transaction.',409,'WORK_ATTEMPT_EVENT_INVALID');
+        }
+        sourceEventIds=events.sort((a,b)=>a.timestamp.getTime()-b.timestamp.getTime() || a.id.localeCompare(b.id)).map(row=>row.id);
+    }
+    const measurement={id:randomUUID(),param:'TEXTURE'},allocation=existing
+        ? {id:previousAttempt.id,existing:true,status:previousAttempt.status}
+        : await allocateExecution(tx,ctx,reusing?{attemptId:sharedAttemptId}:{});
+    if(existing) {
+        ctx.attemptId=previousAttempt.id;ctx.equipmentReadinessText=existing.equipmentReadiness;
+        ctx.equipmentReadiness=parseJson(existing.equipmentReadiness,null);ctx.equipmentId=existing.equipmentId;
+        ctx.methodId=existing.methodologyId;ctx.batchId=existing.batchId;ctx.basis=existing.basis;
+        ctx.correctionTargetId=existing.id;ctx.correctionOriginalUpdatedAt=existing.updatedAt;
+    } else if (reusing) {
         const snapshot=fractions[0].equipmentReadiness;
         const recorded=parseJson(sharedAttempt.evidenceData,{})?.equipmentReadiness || null;
         if (fractions.some(row=>row.equipmentReadiness!==snapshot) || JSON.stringify(recorded)!==(snapshot || 'null')) {
@@ -425,9 +460,17 @@ async function deriveTextureResult(tx, { sampleId, replicateNo = 1, actor, now =
     await insertExecution(tx,ctx,allocation,{source:'derived',fractions:Object.fromEntries(fractions.map(row=>[row.param.toLowerCase(),row.numericValue])),
         className:classification.className,closureError:classification.closureError,
         sourceResultIds:fractions.map(row=>row.id),sourceAttemptIds:fractions.map(row=>row.attemptId)},now);
-    return appendResult(tx, ctx, measurement, { value: classification.className,
+    const result=await appendResult(tx, ctx, measurement, { value: classification.className,
         rawInput: JSON.stringify(Object.fromEntries(fractions.map(row => [row.param.toLowerCase(), row.rawInput]))),
         numericValue: null, unit: 'USDA_12_CLASS', flags: JSON.stringify(flags), isValid: true, censoring: 'NONE', provenance: 'DERIVED' }, now);
+    if(existing) {
+        const event=await require('./workAttemptEventService').appendAttemptEvent(tx,ctx.item,previousAttempt.id,actor,
+            {action:'DERIVED_RECALCULATED',from:previousAttempt.status,to:previousAttempt.status,oldResultIds:[existing.id],newResultIds:[result.id],
+                oldSourceResultIds:oldSources.map(row=>row.id),newSourceResultIds:fractions.map(row=>row.id),sourceEventIds});
+        await require('./derivedResultReviewService').resetDerivedReview(tx,ctx.item,previousAttempt,event,result,actor);
+    }
+    await cacheResult(tx,ctx.item,result.value);
+    return result;
 }
 
 async function writeNonMeasurementSummary(tx, expectedItem, { kind, text, actor }) {

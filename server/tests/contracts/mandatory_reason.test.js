@@ -90,7 +90,7 @@ describe('SD-10: Mandatory Reason on Rejection and Reopening Contract', () => {
         const res = await request(app)
             .post(`/api/work/${wiId}/review`)
             .set('Authorization', `Bearer ${mgrGtmToken}`)
-            .send({ decision: 'REJECT', note: 'Duplicate electrode drift exceeded ±0.2 pH tolerance' });
+            .send({ decision: 'REJECT', reasonCode:'DUPLICATE_DISAGREEMENT', note: 'Duplicate electrode drift exceeded ±0.2 pH tolerance' });
         expect(res.status).toBe(409);
         expect(res.body.code).toBe('REVIEW_ATTEMPT_REQUIRED');
         expect(await rejectionSnapshot()).toEqual(before);
@@ -107,6 +107,7 @@ describe('SD-10: Mandatory Reason on Rejection and Reopening Contract', () => {
             .set('Authorization', `Bearer ${mgrGtmToken}`)
             .send({
                 decision: 'REJECT',
+                reasonCode:'DUPLICATE_DISAGREEMENT',
                 note: rejectionNote
             });
 

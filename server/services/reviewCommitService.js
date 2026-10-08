@@ -68,7 +68,7 @@ async function commitReview(prisma, item, status, user, data, operations, submis
             if(status==='ACCEPTED' && measured) {
                 const selected=(Array.isArray(decisions)?decisions:[decisions]).find(row=>row?.workItemId===current.id && row.decision==='ACCEPT');
                 if(!selected?.attemptId)throw Object.assign(new Error('Acceptance must identify its ReviewDecision attempt.'),{statusCode:409,code:'REVIEW_DECISION_REQUIRED'});
-                await require('./workAttemptEventService').transitionAttempt(tx,current,selected.attemptId,'ACCEPTED',user);
+                await require('./workAttemptEventService').transitionAttempt(tx,current,selected.attemptId,'ACCEPTED',user,{reviewDecisionId:selected.id});
             }
             if (returned && sample.status === 'SUBMITTED_FULL') {
                 const decision = (Array.isArray(decisions) ? decisions : [decisions]).find(row =>

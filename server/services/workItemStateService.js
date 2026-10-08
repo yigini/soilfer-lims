@@ -79,6 +79,15 @@ function assertActionEdge(item, sample, nextStatus, actor, reason, options) {
         }
         return true;
     }
+    if(action==='DERIVED_RECALCULATED') {
+        rules.requireReason(reason);
+        require('./resultEvidenceService').assertAmendable(sample);
+        if(item.analysis!=='TEXTURE' || nextStatus!=='SUBMITTED' || !['SUBMITTED','ACCEPTED'].includes(current) ||
+            !hasPermission(actor,'ENTER_RESULTS') && !hasPermission(actor,'APPROVE_RESULTS')) {
+            throw new TransitionError('The derived work is not eligible for fresh review.',409,'WORK_ATTEMPT_TRANSITION_REFUSED');
+        }
+        return true;
+    }
     if (action === 'GATE_REVERTED') {
         rules.requireReason(reason);
         require('./resultEvidenceService').assertAmendable(sample);
@@ -127,6 +136,10 @@ async function transitionWorkItem(workItemId, requestedStatus, actor, reason = n
         const sample = await client.sample.findUnique({ where: { id: item.sampleId } });
         if (!sample) throw new TransitionError('Sample not found.', 404, 'SAMPLE_NOT_FOUND');
         rules.assertScope(actor, sample);
+        if(options.action==='DERIVED_RECALCULATED') {
+            await require('./sampleHoldService').assertNotHeld(client,sample);
+            await require('./derivedResultReviewService').assertPendingDerivedEvent(client,item,options.derivedEventId,options.derivedResultId);
+        }
         let provenance = {};
         let gateAudit = {};
         if (migrating) {

@@ -51,6 +51,10 @@ async function correctAttempt(db, attemptId, actor, input) {
         }, tx, { expected: item, action: 'ATTEMPT_CORRECTED' });
         await appendAttemptEvent(tx, item, attempt.id, actor, { action: 'CORRECTED', from: attempt.status, to: attempt.status,
             reason: request.reason, note: request.note, oldResultIds: [target.id], newResultIds: [corrected.id] });
+        if(['SAND','SILT','CLAY'].includes(target.param)) {
+            try {await require('./resultWriteService').deriveTextureResult(tx,{sampleId:sample.id,replicateNo:target.replicateNo,actor});}
+            catch(error) {if(error.code!=='RESULT_WORKITEM_REQUIRED')throw error;}
+        }
         return { workItem: updated, attemptId: attempt.id, oldResultId: target.id, result: corrected, requiresReview: attempt.status === 'SUBMITTED' };
     });
 }

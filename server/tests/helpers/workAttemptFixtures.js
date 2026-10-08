@@ -90,7 +90,7 @@ async function createCompositeTextureExecutionFixture(db, args) {
     await assertExecutionFixtureDatabase(db);
     if (!args || Object.keys(args).some(key => !['data', 'attemptStatus'].includes(key)) ||
         !Array.isArray(args.data) || args.data.length !== 4 ||
-        args.attemptStatus != null && !['RECORDED', 'ACCEPTED'].includes(args.attemptStatus)) {
+        args.attemptStatus != null && !['RECORDED', 'SUBMITTED', 'ACCEPTED'].includes(args.attemptStatus)) {
         throw Error('Composite texture fixture requires exactly four explicit rows and a permitted final status.');
     }
     const rows = args.data, parameters = ['TEXTURE', 'SAND', 'SILT', 'CLAY'];
@@ -126,7 +126,7 @@ async function createCompositeTextureExecutionFixture(db, args) {
 // result set. It never reuses or edits a previously recorded execution.
 async function createExecutionResultsFixture(db, args) {
     await assertExecutionFixtureDatabase(db);
-    if(!args || Object.keys(args).some(key=>!['data','attemptStatus'].includes(key)) ||
+    if(!args || Object.keys(args).some(key=>!['data','attemptStatus','textureSourceResultIds'].includes(key)) ||
         !Array.isArray(args.data) || !args.data.length)throw Error('Execution fixture requires an explicit nonempty result set.');
     const rows=args.data;
     if(rows.some(row=>!row || !row.id || !row.sampleId || row.sampleId!==rows[0].sampleId || row.param!==rows[0].param ||
@@ -142,14 +142,38 @@ async function createExecutionResultsFixture(db, args) {
         if(items.length!==1)throw Error('Execution fixture requires exactly one existing canonical WorkItem.');
         const item=items[0];
         if(await tx.workAttempt.count({where:{workItemId:item.id}}))throw Error('Execution result set refuses reuse of an existing attempt.');
+        const sourceGroups=[];
+        if(args.textureSourceResultIds!=null) {
+            // Pins6059445324 /6069938801 together: each explicitly supplied
+            // texture replica retains its three existing fraction owners.
+            if(rows[0].param!=='TEXTURE' || args.attemptStatus!=null && args.attemptStatus!=='RECORDED' ||
+                !Array.isArray(args.textureSourceResultIds) || args.textureSourceResultIds.length!==rows.length)throw Error('Texture result set requires explicit source groups.');
+            for(const [index,ids] of args.textureSourceResultIds.entries()) {
+                if(!Array.isArray(ids) || ids.length!==3 || new Set(ids).size!==3)throw Error('Texture fixture requires three explicit sources.');
+                const candidates=await tx.result.findMany({where:{id:{in:ids}}});
+                const sources=['SAND','SILT','CLAY'].map(param=>candidates.find(row=>row.param===param));
+                if(candidates.length!==3 || sources.some(row=>!row || row.sampleId!==rows[index].sampleId || row.replicateNo!==(rows[index].replicateNo ?? 1) ||
+                    !row.isCurrent || row.provenance!=='MEASURED' || !row.attemptId))throw Error('Texture fixture refuses unrelated fraction sources.');
+                for(const source of sources) {
+                    const owners=await tx.workItem.findMany({where:canonicalWorkItemWhere(source.sampleId,source.param)});
+                    const attempt=await tx.workAttempt.findUnique({where:{id:source.attemptId}});
+                    if(owners.length!==1 || attempt?.workItemId!==owners[0].id || attempt.status!=='RECORDED')throw Error('Texture fixture requires recorded canonical fraction owners.');
+                }
+                sourceGroups.push(sources);
+            }
+        }
         const batch=rows[0].batchId ? await tx.batch.findUnique({where:{id:rows[0].batchId},select:{id:true}}) : null;
         const ctx={item,performedBy:'system:fixture',batchId:batch?.id ?? null,method:null,
             equipmentReadiness:rows[0].equipmentReadiness ? JSON.parse(rows[0].equipmentReadiness) : null,
             equipmentReadinessText:rows[0].equipmentReadiness ?? null};
         const allocation=await allocateExecution(tx,ctx);
-        const evidence={source:'fixture',sourceResultIds:rows.map(row=>row.id),measurements:rows.map(row=>({resultId:row.id,param:row.param,
+        const evidence={source:sourceGroups.length?'test-fixture':'fixture',
+            sourceResultIds:sourceGroups.length?sourceGroups.flat().map(row=>row.id):rows.map(row=>row.id),
+            ...(sourceGroups.length && {sourceAttemptIds:sourceGroups.flat().map(row=>row.attemptId)}),
+            measurements:rows.map((row,index)=>({resultId:row.id,param:row.param,
             replicateNo:row.replicateNo ?? 1,value:row.value,rawInput:row.rawInput ?? null,numericValue:row.numericValue ?? null,
-            methodologyId:row.methodologyId ?? null,unit:row.unit ?? null,isCurrent:row.isCurrent ?? true,isValid:row.isValid ?? true}))};
+            methodologyId:row.methodologyId ?? null,unit:row.unit ?? null,isCurrent:row.isCurrent ?? true,isValid:row.isValid ?? true,
+            ...(sourceGroups.length && {sourceResultIds:sourceGroups[index].map(source=>source.id),sourceAttemptIds:sourceGroups[index].map(source=>source.attemptId)})}))};
         await insertFixtureExecution(tx,ctx,allocation,evidence,args.attemptStatus);
         const inserted=[];
         for(const data of rows)inserted.push(await createResultFixture(tx,{data:{...data,attemptId:allocation.id}}));

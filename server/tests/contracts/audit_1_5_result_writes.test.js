@@ -337,11 +337,12 @@ test('offline texture supersedes legacy non-numeric PSA classes, preserves numer
     await prisma.analysis.upsert({ where: { code: 'PSA' }, update: {},
         create: { code: 'PSA', name: 'Legacy particle size analysis', units: '%', validation: '{"type":"texture","tolerance":2}' } });
     const f = await fixture({ analysis: 'PSA' });
-    const oldClass = await require('../helpers/workAttemptFixtures').createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id,
-        param: 'PSA', value: 'Sandy clay', numericValue: null, rawInput: 'historical class', flags: '["HISTORICAL"]' } });
-    const numeric = await require('../helpers/workAttemptFixtures').createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: f.sample.id,
-        param: 'PSA', value: '50', numericValue: 50 } });
-    const operation = { operationId: randomUUID(), type: 'COMPLETE_WORK', target: { workItemId: f.item.id }, baseVersion: 0,
+    const [oldClass,numeric]=await require('../helpers/workAttemptFixtures').createExecutionResultsFixture(prisma,{data:[
+        {id:randomUUID(),sampleId:f.sample.id,param:'PSA',value:'Sandy clay',numericValue:null,rawInput:'historical class',flags:'["HISTORICAL"]',replicateNo:1},
+        {id:randomUUID(),sampleId:f.sample.id,param:'PSA',value:'50',numericValue:50,replicateNo:2}]});
+    const repeat=await require('../../services/workRepeatService').requestRepeat(prisma,f.item.id,actor,
+        {reason:'CONFIRMATION',note:'New fraction execution confirms the retained class'});
+    const operation = { operationId: randomUUID(), type: 'COMPLETE_WORK', target: { workItemId: f.item.id }, baseVersion: repeat.workItem.version,
         payload: { values: { sand: '50', silt: '35', clay: '15' }, flags: ['OFFLINE_CAPTURE'] } };
     expect((await sync.applySyncOperations(actor, [operation])).receipts[0]).toMatchObject({ status: 'APPLIED' });
     const texture = await prisma.result.findFirstOrThrow({ where: { sampleId: f.sample.id, param: 'TEXTURE', isCurrent: true } });
@@ -386,9 +387,9 @@ test('measurement cache-only summary and operational scalar writes are refused w
 });
 
 test('attempt insert/update and delete guards preserve every table and map stable 409s', async () => {
-    const f = await fixture(), other = await fixture(), attemptId = randomUUID();
-    await prisma.workAttempt.create({ data: { id: attemptId, workItemId: f.item.id, author: actor.username } });
-    const row = await prisma.$transaction(tx => writer.writeResult(tx, { sampleId: f.sample.id, workItemId: f.item.id, attemptId, actor, measurement: measurement() }));
+    const f = await fixture(), other = await fixture();
+    const row = await prisma.$transaction(tx => writer.writeResult(tx, { sampleId: f.sample.id, workItemId: f.item.id, actor, measurement: measurement() }));
+    const attemptId=row.attemptId;
     const otherRow = await prisma.$transaction(tx => writer.writeResult(tx,
         { sampleId: other.sample.id, workItemId: other.item.id, actor, measurement: measurement() }));
     const file = path.resolve(__dirname, '../.tmp', `audit_result_link_${randomUUID()}.db`);
