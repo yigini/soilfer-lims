@@ -3,6 +3,7 @@ const policyService = require('../services/policyService');
 const { buildNativeRun, rebuildNativeRun, startNativeRun } = require('../services/qcNativeRunService');
 const { createProfileRun } = require('../services/qcCompatibilityRunService');
 const { mutateQcRun } = require('../services/qcRunMutationService');
+const { previewQcRun } = require('../services/qcRunPreviewService');
 const { QC_RUN_INCLUDE, readQcRun, batchApiView, currentAnalyteEvidence } = require('../services/qcRunViewService');
 const { apiRunView, scopedBatchWhere } = require('../services/qcRunApiViewService');
 const { resolveRunProfile } = require('../services/qcRunProfileService');
@@ -50,6 +51,10 @@ exports.evaluateBatch = async (req, res) => {
         const outcome = await mutateQcRun(prisma, req.params.id, req.user, req.body, { explicit: true });
         return res.json({ ...outcome, batch: batchApiView(outcome.batch, { serialized: true }) });
     } catch (error) { return respondError(res, error, 'Failed to evaluate batch'); }
+};
+exports.previewBatch = async (req, res) => {
+    try { return res.json(await previewQcRun(prisma, req.params.id, req.user, req.body)); }
+    catch (error) { return respondError(res, error, 'Failed to preview QC run'); }
 };
 exports.correctMeasurements = async (req, res) => {
     try { return res.json(await mutateQcRun(prisma, req.params.id, req.user, req.body, { correction: true })); }

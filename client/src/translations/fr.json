@@ -2905,7 +2905,9 @@
       "REASON_REQUIRED": "Enregistrez un motif pour ce changement de CQ.",
       "REFERENCE_VALUE_MISMATCH": "La valeur de référence soumise doit correspondre au placement enregistré.",
       "QC_SUPERSEDE_TARGET_MISMATCH": "Le remplacement doit correspondre à la même observation ou position de référence enregistrée.",
-      "QC_BATCH_SCOPE_DENIED": "Vous n’avez pas accès à la série de CQ de ce laboratoire."
+      "QC_BATCH_SCOPE_DENIED": "Vous n’avez pas accès à la série de CQ de ce laboratoire.",
+      "QC_PREVIEW_UNAVAILABLE": "L’aperçu nécessite une série native démarrée avec des critères figés.",
+      "QC_PREVIEW_INPUT_INVALID": "Envoyez uniquement les observations proposées."
     },
     "chooseDuplicateParent": "Sélectionnez la position de l’échantillon d’origine",
     "analysis": "Analyse",
@@ -2925,6 +2927,34 @@
       "QC_GATE_NO_BATCH": "Cette méthode nécessite un lot de CQ lié.",
       "QC_GATE_REPEAT_ORDERED": "Une nouvelle analyse est requise avant l’acceptation ou la publication."
     }
+  },
+  "qcWorksheet": {
+    "notStored": "non enregistré dans cette évaluation",
+    "storedEvidence": "Évaluation QC enregistrée — lecture seule",
+    "verdict": "Résultat",
+    "ruleVersion": "Version de la règle",
+    "policyVersion": "Version de la politique",
+    "position": "Position",
+    "type": "Type",
+    "expected": "Attendu",
+    "measured": "Mesuré",
+    "limits": "Limites",
+    "criterion": "Critère",
+    "failAction": "Action en cas d’échec",
+    "fullRecord": "Évaluation enregistrée complète",
+    "nativeRun": "Série native",
+    "preview": "Aperçu — non enregistré",
+    "parentObservation": "Observation QC de l’échantillon parent",
+    "runSetup": "Configuration de la série",
+    "saveBindings": "Enregistrer les références liées",
+    "serverParse": "Observation interprétée par le serveur",
+    "selectRun": "Série QC",
+    "assignedSamples": "Tous les échantillons affectés",
+    "loading": "Chargement de la série…",
+    "openWorksheet": "Ouvrir la feuille de la série",
+    "legacyReadOnly": "Les données QC historiques sont en lecture seule. Reconstruisez une série ouverte admissible avant de saisir des observations natives.",
+    "rebuild": "Reconstruire la série native",
+    "serverSequence": "Le serveur détermine la capacité et les positions QC de la série."
   },
   "proficiencyTesting": {
     "legacySigmaMissing": "Ce score historique d’aptitude a été enregistré sans sigma d’évaluation. Il n’a pas été recalculé ; fournissez un sigma valide dans une correction explicite.",

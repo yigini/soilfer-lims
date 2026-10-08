@@ -2905,7 +2905,9 @@
       "REASON_REQUIRED": "Registre un motivo para este cambio de QC.",
       "REFERENCE_VALUE_MISMATCH": "El valor de referencia enviado debe coincidir con la colocación registrada.",
       "QC_SUPERSEDE_TARGET_MISMATCH": "El reemplazo debe corresponder a la misma observación o posición de referencia registrada.",
-      "QC_BATCH_SCOPE_DENIED": "No tiene acceso a la serie de CC de este laboratorio."
+      "QC_BATCH_SCOPE_DENIED": "No tiene acceso a la serie de CC de este laboratorio.",
+      "QC_PREVIEW_UNAVAILABLE": "La vista previa requiere una corrida nativa iniciada con criterios fijados.",
+      "QC_PREVIEW_INPUT_INVALID": "Envíe únicamente las observaciones propuestas."
     },
     "chooseDuplicateParent": "Seleccione la posición de la muestra original",
     "analysis": "Análisis",
@@ -2925,6 +2927,34 @@
       "QC_GATE_NO_BATCH": "Este método requiere un lote de QC vinculado.",
       "QC_GATE_REPEAT_ORDERED": "Se requiere repetir el análisis antes de aceptar o publicar."
     }
+  },
+  "qcWorksheet": {
+    "notStored": "no consta en esta evaluación",
+    "storedEvidence": "Evaluación QC almacenada — solo lectura",
+    "verdict": "Resultado",
+    "ruleVersion": "Versión de la regla",
+    "policyVersion": "Versión de la política",
+    "position": "Posición",
+    "type": "Tipo",
+    "expected": "Esperado",
+    "measured": "Medido",
+    "limits": "Límites",
+    "criterion": "Criterio",
+    "failAction": "Acción ante falla",
+    "fullRecord": "Evaluación almacenada completa",
+    "nativeRun": "Corrida nativa",
+    "preview": "Vista previa — sin guardar",
+    "parentObservation": "Observación de la muestra original para QC",
+    "runSetup": "Configuración de la corrida",
+    "saveBindings": "Guardar referencias vinculadas",
+    "serverParse": "Observación interpretada por el servidor",
+    "selectRun": "Corrida QC",
+    "assignedSamples": "Todas las muestras asignadas",
+    "loading": "Cargando corrida…",
+    "openWorksheet": "Abrir hoja de la corrida",
+    "legacyReadOnly": "La evidencia QC histórica es de solo lectura. Reconstruya una corrida abierta elegible antes de introducir observaciones nativas.",
+    "rebuild": "Reconstruir corrida nativa",
+    "serverSequence": "El servidor determina la capacidad y las posiciones QC de la corrida."
   },
   "proficiencyTesting": {
     "legacySigmaMissing": "Esta puntuación histórica de aptitud se registró sin sigma de evaluación. No se ha recalculado; indique un sigma válido mediante una corrección explícita.",

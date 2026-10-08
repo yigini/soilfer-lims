@@ -2905,7 +2905,9 @@
       "REASON_REQUIRED": "Record a reason for this QC change.",
       "REFERENCE_VALUE_MISMATCH": "The submitted reference value must match the recorded placement.",
       "QC_SUPERSEDE_TARGET_MISMATCH": "The replacement must belong to the same recorded observation or reference position.",
-      "QC_BATCH_SCOPE_DENIED": "You do not have access to this laboratory’s QC run."
+      "QC_BATCH_SCOPE_DENIED": "You do not have access to this laboratory’s QC run.",
+      "QC_PREVIEW_UNAVAILABLE": "Preview requires a started native run with frozen criteria.",
+      "QC_PREVIEW_INPUT_INVALID": "Submit candidate observations only."
     },
     "chooseDuplicateParent": "Select the original sample position",
     "analysis": "Analysis",
@@ -2925,6 +2927,34 @@
       "QC_GATE_NO_BATCH": "This method requires a linked QC batch.",
       "QC_GATE_REPEAT_ORDERED": "Repeat analysis is required before acceptance or publication."
     }
+  },
+  "qcWorksheet": {
+    "notStored": "not stored in this evaluation",
+    "storedEvidence": "Stored QC evaluation — read only",
+    "verdict": "Verdict",
+    "ruleVersion": "Rule version",
+    "policyVersion": "Policy version",
+    "position": "Position",
+    "type": "Type",
+    "expected": "Expected",
+    "measured": "Measured",
+    "limits": "Limits",
+    "criterion": "Criterion",
+    "failAction": "Failure action",
+    "fullRecord": "Full stored evaluation",
+    "nativeRun": "Native run",
+    "preview": "Preview — not saved",
+    "parentObservation": "QC parent observation",
+    "runSetup": "Run setup",
+    "saveBindings": "Save reference bindings",
+    "serverParse": "Server parsed observation",
+    "selectRun": "QC run",
+    "assignedSamples": "All assigned samples",
+    "loading": "Loading run…",
+    "openWorksheet": "Open run worksheet",
+    "legacyReadOnly": "Historical QC evidence is read only. Rebuild an eligible open run before entering native observations.",
+    "rebuild": "Rebuild native run",
+    "serverSequence": "The server determines the run capacity and QC positions."
   },
   "proficiencyTesting": {
     "legacySigmaMissing": "This historical PT score was recorded without an assessment sigma. It has not been recomputed; supply a valid sigma in an explicit correction.",

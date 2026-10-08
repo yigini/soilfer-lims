@@ -36,52 +36,37 @@ function host(filename, responses, props) {
         all: () => nodes(tree), find: id => nodes(tree).find(node => node.props?.['data-testid'] === id),
         button: label => nodes(tree).find(node => node.type === 'button' && text(node) === label) };
 }
-const batch = mode => ({ id: 'qc-fixture', labId: 'fixture', status: 'OPEN', qcMode: mode, numberFormat: { decimal: '.', thousands: null },
-    qcRequirements: { BLANK: { required: 0, source: 'NOT_USED' }, DUPLICATE: { required: mode === 'REQUIRED_BLOCKING' ? 4 : 0, source: 'RULE' },
-        CONTROL: { required: mode === 'REQUIRED_BLOCKING' ? 2 : 0, source: 'PROFILE' }, LRM: { required: mode === 'REQUIRED_BLOCKING' ? 2 : 0, source: 'RULE' } } });
-const modal = mode => host('src/components/workbench/BatchModal.jsx', { '/api/qc/batches': [batch(mode)] }, { isOpen: true, analysisCode: 'PH_H2O', selectedWorkItemIds: [] });
-async function primary(view) {
-    for (const [id, value] of [['qc-ctrl-exp-input', '7'], ['qc-ctrl-meas-input', '7'], ['qc-dup1-input', '7'], ['qc-dup2-input', '7.1']]) {
-        view.find(id).props.onChange({ target: { value } }); await view.render();
-    }
-}
-
-test('multi-entry form starts empty, collects four duplicates and two controls, and omits unused blank', async () => {
-    const view = modal('REQUIRED_BLOCKING'); await view.render();
-    view.find('batch-tab-qc').props.onClick(); await view.render();
-    expect(view.find('evaluate-qc-btn').props.disabled).toBe(true);
-    expect(view.all().filter(node => String(node.props?.['data-testid'] || '').startsWith('qc-extra-')).every(node => node.props.value === '')).toBe(true);
-    await primary(view);
-    expect(view.find('evaluate-qc-btn').props.disabled).toBe(true);
-    for (const input of view.all().filter(node => String(node.props?.['data-testid'] || '').startsWith('qc-extra-'))) {
-        input.props.onChange({ target: { value: '7' } }); await view.render();
-    }
-    expect(view.find('evaluate-qc-btn').props.disabled).toBe(false);
-    await view.find('evaluate-qc-btn').props.onClick();
-    const payload = view.axios.post.mock.calls[0][1];
-    expect(payload.blanks).toEqual([]); expect(payload.duplicates).toHaveLength(4); expect(payload.controls).toHaveLength(2);
-    expect(payload.duplicates[0].rawInput).toEqual({ value1: '7', value2: '7.1' });
+// Entry cases migrated under #188 pin 6052289128; rule-editor cases below remain unchanged.
+const { nativeHost, nativeFixture, enter } = require('../helpers/qcWorksheetUi');
+test('native grid starts empty with four duplicates and two actual controls, no unused blank or add-extra action', async () => {
+    const batch = nativeFixture({ duplicates: 4, controls: 2, blank: false }), view = nativeHost(batch); await view.render();
+    const inputs = view.all().filter(node => node.type === 'input' && String(node.props['data-testid']).startsWith('native-value-'));
+    expect(inputs).toHaveLength(10); expect(inputs.every(node => node.props.value === '')).toBe(true);
+    expect(view.find('native-value-blank')).toBeUndefined(); expect(view.find('qc-add-DUPLICATE')).toBeUndefined();
+    const entries = Object.fromEntries(batch.positions.map(row => [row.id, row.id === 'duplicate-0' ? '7.1' : '7']));
+    delete entries['duplicate-3']; await enter(view, entries); expect(view.find('native-qc-evaluate').props.disabled).toBe(true);
+    await view.find('native-qc-evaluate').props.onClick(); expect(view.axios.post).not.toHaveBeenCalled();
+    await enter(view, { 'duplicate-3': '7' }); expect(view.find('native-qc-evaluate').props.disabled).toBeFalsy(); await view.find('native-qc-evaluate').props.onClick();
+    const payload = view.axios.post.mock.calls[0][1]; expect(payload.measurements).toHaveLength(10);
+    expect(payload.measurements.filter(row => row.positionId.startsWith('duplicate-'))).toHaveLength(4);
+    expect(payload.measurements.filter(row => row.positionId.startsWith('control-'))).toHaveLength(2);
+    expect(payload.measurements.find(row => row.positionId === 'duplicate-0').rawInput).toBe('7.1');
+    expect(payload.measurements.some(row => row.positionId === 'blank')).toBe(false);
 });
-
-test.each(['ADVISORY', 'OFF'])('%s offers every type but allows only an explicitly entered optional blank', async mode => {
-    const view = modal(mode); await view.render(); view.find('batch-tab-qc').props.onClick(); await view.render();
-    expect(view.find('evaluate-qc-btn').props.disabled).toBe(true);
-    expect(view.find('qc-add-CONTROL')).toBeDefined(); expect(view.find('qc-add-DUPLICATE')).toBeDefined();
-    view.find('qc-blank-input').props.onChange({ target: { value: '0' } }); await view.render();
-    expect(view.find('evaluate-qc-btn').props.disabled).toBe(false);
-    await view.find('evaluate-qc-btn').props.onClick();
-    expect(view.axios.post.mock.calls[0][1]).toMatchObject({ blanks: [{ value: 0 }], controls: [], duplicates: [] });
+test.each(['ADVISORY', 'OFF'])('%s changes the gate, never invents positions or observations', async mode => {
+    const view = nativeHost(nativeFixture({ mode })); await view.render();
+    expect(view.all().filter(node => node.type === 'input')).toHaveLength(4);
+    for (const id of ['blank', 'control-0', 'parent-0', 'duplicate-0']) expect(view.find('native-value-' + id).props.value).toBe('');
+    expect(view.find('qc-add-DUPLICATE')).toBeUndefined(); expect(view.find('qc-add-CONTROL')).toBeUndefined();
+    await enter(view, { blank: '0' }); expect(view.find('native-qc-evaluate').props.disabled).toBeFalsy(); await view.find('native-qc-evaluate').props.onClick();
+    expect(view.axios.post).toHaveBeenCalledWith('/api/qc/batches/worksheet-run/evaluate', { analysisCode: 'A', references: [], measurements: [{ positionId: 'blank', replicateNo: 1, rawInput: '0' }] });
 });
-
-test('an extra partial measurement blocks submission until completed or removed', async () => {
-    const view = modal('ADVISORY'); await view.render(); view.find('batch-tab-qc').props.onClick(); await view.render();
-    view.find('qc-blank-input').props.onChange({ target: { value: '0' } }); await view.render();
-    view.find('qc-add-DUPLICATE').props.onClick(); await view.render();
-    view.find('qc-extra-DUPLICATE-0-value1').props.onChange({ target: { value: '7' } }); await view.render();
-    expect(view.find('evaluate-qc-btn').props.disabled).toBe(true);
-    await view.find('evaluate-qc-btn').props.onClick(); expect(view.axios.post).not.toHaveBeenCalled();
-    view.button('policies.remove').props.onClick(); await view.render();
-    expect(view.find('evaluate-qc-btn').props.disabled).toBe(false);
+test('a partial actual duplicate pair blocks evaluation until both observations are entered', async () => {
+    const view = nativeHost(nativeFixture({ mode: 'ADVISORY' })); await view.render();
+    await enter(view, { blank: '0', 'parent-0': '7' }); expect(view.find('native-qc-evaluate').props.disabled).toBe(true);
+    await view.find('native-qc-evaluate').props.onClick(); expect(view.axios.post).not.toHaveBeenCalled();
+    await enter(view, { 'duplicate-0': '7.03' }); expect(view.find('native-qc-evaluate').props.disabled).toBeFalsy(); await view.find('native-qc-evaluate').props.onClick();
+    expect(view.axios.post.mock.calls[0][1].measurements).toEqual([{ positionId: 'blank', replicateNo: 1, rawInput: '0' }, { positionId: 'parent-0', replicateNo: 1, rawInput: '7' }, { positionId: 'duplicate-0', replicateNo: 1, rawInput: '7.03' }]);
 });
 
 const Editor = () => null;

@@ -5,6 +5,7 @@ const { resolveQcPolicy } = require('./qcPolicyService');
 const { countRequirements } = require('./qcRequirementService');
 const { resolveRunProfile, resolveBatchRunProfile } = require('./qcRunProfileService');
 const { currentAnalyteEvidence, batchApiView } = require('./qcRunViewService');
+const { nativePositionParameters } = require('./qcNativeEntryViewService');
 
 async function scopedBatchWhere(db, actor, filter = {}) {
     const lab = await policyService.resolveLab(actor.labId, db);
@@ -42,7 +43,9 @@ async function apiRunView(db, batch, { detail = false } = {}) {
     for (const row of batch.analytes) {
         const evidence = currentAnalyteEvidence(batch, row.analysisCode), criteria = row.provenance === 'NATIVE' && forecast(batch, row.analysisCode);
         if (criteria) decorated.push({ ...view.analytes.find(analyte => analyte.id === row.id), numberFormat: criteria.numberFormat,
-            qcRule: criteria.qcRule, qcMode: criteria.qcMode, qcRequirements: nativeRequirements(criteria, evidence) });
+            qcRule: criteria.qcRule, qcMode: criteria.qcMode, qcRequirements: nativeRequirements(criteria, evidence),
+            entryEvidence: batch.startedAt && batch.status !== 'CLOSED' && row.status !== 'CLOSED' && row.criteriaSnapshot
+                ? evidence.positions.map(position => nativePositionParameters(criteria, position, row.analysisCode)) : [] });
         else {
             const numberFormat = await getNumberFormat(batch.labId, { db });
             const policy = await resolveQcPolicy({ ...batchApiView(batch), analysis: row.analysisCode }, db, numberFormat);

@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
     X, AlertTriangle, ShieldCheck, CheckCircle2,
     Clock, RefreshCw, AlertCircle, CheckCircle, FileText,
-    Layers, Cpu, User, Calendar, Microscope, ShieldAlert,
+    Layers, Cpu, User, Calendar, ShieldAlert,
     ChevronDown, ChevronUp, Check, Info
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -90,54 +90,76 @@ export function getDispositionInfo(disposition, t = key => key) {
     }
 }
 
-function parseFiniteNumber(val) {
-    if (typeof val === 'number') {
-        return Number.isFinite(val) ? val : null;
-    }
-    if (typeof val === 'string') {
-        const trimmed = val.trim();
-        if (trimmed === '') return null;
-        const num = Number(trimmed);
-        return Number.isFinite(num) ? num : null;
-    }
-    return null;
-}
-
 export function formatBlankLimit(b, t = (k, def) => def) {
-    if (!b) return t('common.notRecorded', 'Not recorded');
+    if (!b) return t('qcWorksheet.notStored', 'not stored in this evaluation');
     const recordedLimit = (b.limit !== undefined && b.limit !== null)
         ? b.limit
         : (b.upperLimit !== undefined && b.upperLimit !== null)
             ? b.upperLimit
-            : null;
+            : b.maxAllowed ?? null;
     if (recordedLimit !== null) {
         if (typeof recordedLimit === 'number' && Number.isFinite(recordedLimit)) {
             return String(recordedLimit);
         }
         if (typeof recordedLimit === 'string' && recordedLimit.trim() !== '') {
-            return recordedLimit.trim();
+            return recordedLimit;
         }
     }
-    return t('common.notRecorded', 'Not recorded');
+    return t('qcWorksheet.notStored', 'not stored in this evaluation');
 }
 
 export function evaluateBlankStatus(b) {
-    if (!b) return null;
-    if (b.status) return b.status;
-    const rawLimit = (b.limit !== undefined && b.limit !== null)
-        ? b.limit
-        : (b.upperLimit !== undefined && b.upperLimit !== null)
-            ? b.upperLimit
-            : null;
-    const rawMeasured = b.measured !== undefined ? b.measured : b.value !== undefined ? b.value : null;
+    return b?.status || null;
+}
 
-    const parsedLimit = parseFiniteNumber(rawLimit);
-    const parsedMeasured = parseFiniteNumber(rawMeasured);
+const storedJson = value => {
+    if (typeof value !== 'string') return value;
+    try { return JSON.parse(value); } catch { return null; }
+};
+const storedText = (value, t) => value === undefined || value === null || value === ''
+    ? t('qcWorksheet.notStored', 'not stored in this evaluation')
+    : typeof value === 'object' ? JSON.stringify(value) : String(value);
+const storedLimits = row => Object.fromEntries(['limit', 'upperLimit', 'maxAllowed', 'maxRpd', 'absMax', 'absMaxBelow5LOQ', 'loq',
+    'minRecovery', 'maxRecovery', 'crmAbsWindow', 'lrmWindowPct'].filter(key => row[key] !== undefined && row[key] !== null).map(key => [key, row[key]]));
 
-    if (parsedLimit !== null && parsedMeasured !== null) {
-        return parsedMeasured <= parsedLimit ? 'PASS' : 'FAIL';
-    }
-    return null;
+// Render retained evidence, including historical compatibility records. No
+// live policy, catalogue fallback, recomputation or numeric rounding is used.
+export function StoredQcEvidence({ batch, t = (key, fallback) => fallback || key }) {
+    const recorded = (batch?.analytes || []).filter(row => row.evaluation?.details).map(row => ({
+        analysisCode: row.analysisCode, record: row.evaluation, details: storedJson(row.evaluation.details)
+    }));
+    const records = recorded.length ? recorded : [{ analysisCode: batch?.analysis, record: null, details: storedJson(batch?.qcResults) }];
+    return <section className="space-y-3" data-testid="stored-qc-evidence">
+        <h3 className="font-bold text-sm">{t('qcWorksheet.storedEvidence', 'Stored QC evaluation — read only')}</h3>
+        {records.map(({ analysisCode, record, details }, index) => {
+            const evaluation = details?.evaluation || details?.qcResults || details || {};
+            const rows = ['blanks', 'controls', 'duplicates'].flatMap(collection => evaluation[collection] || []);
+            return <div key={`${analysisCode}-${index}`} className="space-y-2">
+                <p>{analysisCode} · {t('qcWorksheet.verdict', 'Verdict')}: {storedText(record?.verdict ?? details?.verdict ?? evaluation.result, t)}
+                    {' · '}{t('qcWorksheet.ruleVersion', 'Rule version')}: {storedText(record?.ruleVersion ?? evaluation.qcRule?.version, t)}
+                    {' · '}{t('qcWorksheet.policyVersion', 'Policy version')}: {storedText(record?.policyVersion ?? evaluation.policyVersion, t)}</p>
+                <div className="overflow-x-auto"><table className="w-full text-left text-xs" data-testid="stored-qc-table">
+                    <thead><tr>{['position', 'type', 'expected', 'measured', 'limits', 'criterion', 'failAction', 'verdict'].map(field =>
+                        <th key={field} className="p-2">{t(`qcWorksheet.${field}`, field)}</th>)}</tr></thead>
+                    <tbody>{rows.map((row, rowIndex) => <tr key={row.id || rowIndex} className="border-t border-sf-divider">
+                        <td className="p-2">{storedText(row.position ?? row.slot, t)}</td>
+                        <td className="p-2">{storedText(row.kind ?? row.type ?? row.label, t)}</td>
+                        <td className="p-2">{storedText(row.expected, t)}</td>
+                        <td className="p-2 font-mono">{storedText(row.rawInput ?? row.measured ?? row.value ??
+                            (row.value1 !== undefined || row.value2 !== undefined ? { value1: row.value1, value2: row.value2 } : undefined), t)}</td>
+                        <td className="p-2 font-mono" data-testid={`stored-limits-${row.id || rowIndex}`}>{Object.keys(storedLimits(row)).length
+                            ? JSON.stringify(storedLimits(row)) : storedText(undefined, t)}</td>
+                        <td className="p-2">{storedText(row.criterion, t)}</td>
+                        <td className="p-2">{storedText(row.failAction, t)}</td>
+                        <td className="p-2">{storedText(row.status, t)}</td>
+                    </tr>)}</tbody>
+                </table></div>
+                {!rows.length && <p>{t('qcWorksheet.notStored', 'not stored in this evaluation')}</p>}
+                {details && <details><summary>{t('qcWorksheet.fullRecord', 'Full stored evaluation')}</summary>
+                    <pre className="whitespace-pre-wrap break-all text-xs">{JSON.stringify(details, null, 2)}</pre></details>}
+            </div>;
+        })}
+    </section>;
 }
 
 export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispositionSuccess, initialBatch = null }) {
@@ -147,7 +169,6 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [batch, setBatch] = useState(initialBatch);
-    const [runProfile, setRunProfile] = useState(null);
 
     // Disposition form state
     const [decision, setDecision] = useState('PROCEED_WITH_WARNING');
@@ -169,7 +190,6 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                 headers: { Authorization: `Bearer ${token}` }
             });
             setBatch(res.data.data);
-            setRunProfile(res.data.runProfile);
         } catch (err) {
             console.error('[BatchInspectionModal] Error fetching batch:', err);
             setError(err.response?.data?.error || err.message || 'Failed to load QC batch');
@@ -184,7 +204,6 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
             setDispositionError(null);
         } else {
             setBatch(initialBatch);
-            setRunProfile(null);
             setReason('');
             setDispositionError(null);
         }
@@ -242,17 +261,6 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
     const dispInfo = getDispositionInfo(disposition, t);
     const bracketAnalytes = (batch?.analytes || []).filter(row => row.repeatBracketScope);
     const bracketAnalyte = bracketAnalytes.find(row => row.analysisCode === bracketAnalysisCode) || bracketAnalytes[0];
-
-    // QC measurements from qcResults or qcItems
-    const qcResults = batch?.qcResults || {};
-    const blanks = qcResults.blanks || [];
-    const controls = qcResults.controls || [];
-    const duplicates = qcResults.duplicates || [];
-
-    // Fallback: if structured qcResults empty, check typed qcItems
-    const typedBlanks = (batch?.qcItems || []).filter(item => item.type === 'BLANK');
-    const typedControls = (batch?.qcItems || []).filter(item => item.type === 'CONTROL');
-    const typedDuplicates = (batch?.qcItems || []).filter(item => item.type === 'DUPLICATE');
 
     const workItems = batch?.workItems || [];
     const historyEvents = batch?.history || [];
@@ -384,7 +392,7 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                 </div>
                                 <div className="p-3 bg-sf-canvas rounded-xl border border-sf-divider">
                                     <div className="text-[10px] font-semibold text-sf-muted uppercase tracking-wider">Run Profile</div>
-                                    <div className="font-bold text-sf-text mt-0.5">{runProfile?.name || batch.profile || 'Standard Rack'} ({batch.maxCapacity || runProfile?.capacity || 40})</div>
+                                    <div className="font-bold text-sf-text mt-0.5">{batch.profile || t('qcWorksheet.nativeRun', 'Native run')} · {Array.isArray(batch.positions) ? batch.positions.length : t('qcWorksheet.notStored', 'not stored in this evaluation')}</div>
                                 </div>
                             </div>
 
@@ -395,157 +403,7 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                 </div>
                             )}
 
-                            {/* QC Control Values Section */}
-                            <div className="space-y-3">
-                                <div className="font-bold text-sm text-sf-text flex items-center gap-2">
-                                    <Microscope className="w-4 h-4 text-indigo-600" />
-                                    <span>QC Control Measurements</span>
-                                </div>
-
-                                {/* Blanks Table */}
-                                <div className="border border-sf-divider rounded-xl overflow-hidden">
-                                    <div className="bg-sf-canvas px-4 py-2 border-b border-sf-divider font-semibold text-sf-text flex justify-between items-center">
-                                        <span>Reagent / Method Blanks</span>
-                                        <span className="text-[11px] text-sf-muted font-normal">Limit: ≤ method background</span>
-                                    </div>
-                                    {blanks.length > 0 || typedBlanks.length > 0 ? (
-                                        <table className="w-full text-left">
-                                            <thead className="bg-sf-surface border-b border-sf-divider text-gray-500 font-semibold text-[11px]">
-                                                <tr>
-                                                    <th className="py-2 px-4">Position / Slot</th>
-                                                    <th className="py-2 px-4">Label</th>
-                                                    <th className="py-2 px-4">Measured Value</th>
-                                                    <th className="py-2 px-4">Upper Limit</th>
-                                                    <th className="py-2 px-4 text-right">Evaluation</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-sf-divider">
-                                                {(blanks.length > 0 ? blanks : typedBlanks).map((b, idx) => {
-                                                    const limitText = formatBlankLimit(b, t);
-                                                    const evalStatus = evaluateBlankStatus(b);
-                                                    const measuredVal = b.measured !== undefined ? b.measured : b.value !== undefined ? b.value : null;
-
-                                                    return (
-                                                        <tr key={idx} className="hover:bg-sf-raised/50">
-                                                            <td className="py-2 px-4 font-mono">{b.position || b.details || `Slot ${idx + 1}`}</td>
-                                                            <td className="py-2 px-4">{b.label || 'Reagent Blank'}</td>
-                                                            <td className="py-2 px-4 font-mono font-bold">{measuredVal !== null ? measuredVal : '—'}</td>
-                                                            <td className="py-2 px-4 font-mono text-sf-muted">
-                                                                {limitText === 'Not recorded' ? (
-                                                                    <span className="italic text-sf-muted">{limitText}</span>
-                                                                ) : (
-                                                                    limitText
-                                                                )}
-                                                            </td>
-                                                            <td className="py-2 px-4 text-right">
-                                                                {evalStatus ? (
-                                                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                                                        evalStatus === 'PASS'
-                                                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
-                                                                            : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
-                                                                    }`}>
-                                                                        {evalStatus}
-                                                                    </span>
-                                                                ) : (
-                                                                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-sf-canvas border border-sf-divider text-sf-muted">
-                                                                        {t('common.notEvaluated', 'Not evaluated')}
-                                                                    </span>
-                                                                )}
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
-                                    ) : (
-                                        <div className="p-4 text-center text-sf-muted text-xs">No blank measurements recorded for this batch.</div>
-                                    )}
-                                </div>
-
-                                {/* Controls / CRM Table */}
-                                <div className="border border-sf-divider rounded-xl overflow-hidden">
-                                    <div className="bg-sf-canvas px-4 py-2 border-b border-sf-divider font-semibold text-sf-text flex justify-between items-center">
-                                        <span>Certified Reference Materials (CRM) / Controls</span>
-                                        <span className="text-[11px] text-sf-muted font-normal">Acceptance: 90% – 110% Recovery</span>
-                                    </div>
-                                    {controls.length > 0 || typedControls.length > 0 ? (
-                                        <table className="w-full text-left">
-                                            <thead className="bg-sf-surface border-b border-sf-divider text-gray-500 font-semibold text-[11px]">
-                                                <tr>
-                                                    <th className="py-2 px-4">Standard / Material</th>
-                                                    <th className="py-2 px-4">Measured</th>
-                                                    <th className="py-2 px-4">Expected</th>
-                                                    <th className="py-2 px-4">Recovery %</th>
-                                                    <th className="py-2 px-4 text-right">Evaluation</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-sf-divider">
-                                                {(controls.length > 0 ? controls : typedControls).map((c, idx) => (
-                                                    <tr key={idx} className="hover:bg-sf-raised/50">
-                                                        <td className="py-2 px-4 font-medium">{c.standard || c.label || `CRM Standard ${idx + 1}`}</td>
-                                                        <td className="py-2 px-4 font-mono font-bold">{c.measured !== undefined ? c.measured : '—'}</td>
-                                                        <td className="py-2 px-4 font-mono text-sf-muted">{c.expected !== undefined ? c.expected : '—'}</td>
-                                                        <td className="py-2 px-4 font-mono">
-                                                            {c.recovery !== undefined ? `${Number(c.recovery).toFixed(1)}%` : c.recoveryPct !== undefined ? `${Number(c.recoveryPct).toFixed(1)}%` : '—'}
-                                                        </td>
-                                                        <td className="py-2 px-4 text-right">
-                                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                                                c.status === 'PASS' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
-                                                            }`}>
-                                                                {c.status || 'EVALUATED'}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    ) : (
-                                        <div className="p-4 text-center text-sf-muted text-xs">No CRM control measurements recorded for this batch.</div>
-                                    )}
-                                </div>
-
-                                {/* Duplicates Table */}
-                                <div className="border border-sf-divider rounded-xl overflow-hidden">
-                                    <div className="bg-sf-canvas px-4 py-2 border-b border-sf-divider font-semibold text-sf-text flex justify-between items-center">
-                                        <span>Analytical Duplicates (Precision)</span>
-                                        <span className="text-[11px] text-sf-muted font-normal">Tolerance: RPD ≤ 10%</span>
-                                    </div>
-                                    {duplicates.length > 0 || typedDuplicates.length > 0 ? (
-                                        <table className="w-full text-left">
-                                            <thead className="bg-sf-surface border-b border-sf-divider text-gray-500 font-semibold text-[11px]">
-                                                <tr>
-                                                    <th className="py-2 px-4">Replicate Pair</th>
-                                                    <th className="py-2 px-4">Value 1</th>
-                                                    <th className="py-2 px-4">Value 2</th>
-                                                    <th className="py-2 px-4">RPD %</th>
-                                                    <th className="py-2 px-4 text-right">Evaluation</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-sf-divider">
-                                                {(duplicates.length > 0 ? duplicates : typedDuplicates).map((d, idx) => (
-                                                    <tr key={idx} className="hover:bg-sf-raised/50">
-                                                        <td className="py-2 px-4 font-medium">{d.pair || d.label || `Duplicate Pair ${idx + 1}`}</td>
-                                                        <td className="py-2 px-4 font-mono">{d.val1 !== undefined ? d.val1 : d.value1 !== undefined ? d.value1 : '—'}</td>
-                                                        <td className="py-2 px-4 font-mono">{d.val2 !== undefined ? d.val2 : d.value2 !== undefined ? d.value2 : '—'}</td>
-                                                        <td className="py-2 px-4 font-mono font-bold">
-                                                            {d.rpd !== undefined ? `${Number(d.rpd).toFixed(1)}%` : '—'}
-                                                        </td>
-                                                        <td className="py-2 px-4 text-right">
-                                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                                                d.status === 'PASS' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
-                                                            }`}>
-                                                                {d.status || 'EVALUATED'}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    ) : (
-                                        <div className="p-4 text-center text-sf-muted text-xs">No duplicate measurements recorded for this batch.</div>
-                                    )}
-                                </div>
-                            </div>
+                            <StoredQcEvidence batch={batch} t={t} />
 
                             {/* Affected Work Items Table */}
                             <div className="border border-sf-divider rounded-xl overflow-hidden">
