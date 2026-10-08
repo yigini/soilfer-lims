@@ -9,7 +9,7 @@ beforeEach(() => {
     db.exec(`CREATE TABLE WorkItem(id TEXT PRIMARY KEY,sampleId TEXT,analysis TEXT,status TEXT);
         CREATE TABLE WorkAttempt(id TEXT PRIMARY KEY,workItemId TEXT,attemptNo INTEGER,status TEXT,
             evidenceData TEXT,evidenceHash TEXT,instrumentId TEXT,qcBatchId TEXT,createdAt TEXT,updatedAt TEXT);
-        CREATE TABLE Result(id TEXT PRIMARY KEY,sampleId TEXT,param TEXT,attemptId TEXT,replicateNo INTEGER,isCurrent INTEGER,value TEXT);
+        CREATE TABLE Result(id TEXT PRIMARY KEY,sampleId TEXT,param TEXT,attemptId TEXT,replicateNo INTEGER,isCurrent INTEGER,value TEXT,batchId TEXT);
         CREATE TABLE AuditLog(id TEXT PRIMARY KEY,detail TEXT);
         INSERT INTO AuditLog VALUES ('retained','scientific audit');`);
 });
@@ -17,8 +17,8 @@ afterEach(() => db.close());
 function item(id, status = 'ACCEPTED', analysis = 'P') {
     db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run(id, id + '-sample', analysis, status);
 }
-function result(id, workItemId, { attemptId = null, replicateNo = 1, isCurrent = 1 } = {}) {
-    db.prepare('INSERT INTO Result VALUES (?,?,?,?,?,?,?)').run(id, workItemId + '-sample', 'P', attemptId, replicateNo, isCurrent, '0.123456789');
+function result(id, workItemId, { attemptId = null, replicateNo = 1, isCurrent = 1, batchId = null } = {}) {
+    db.prepare('INSERT INTO Result VALUES (?,?,?,?,?,?,?,?)').run(id, workItemId + '-sample', 'P', attemptId, replicateNo, isCurrent, '0.123456789', batchId);
 }
 function attempt(id, workItemId, attemptNo = 1, status = 'RECORDED') {
     db.prepare('INSERT INTO WorkAttempt VALUES (?,?,?,?,?,?,?,?,?,?)').run(id, workItemId, attemptNo, status,
@@ -96,4 +96,33 @@ test('planning CLI requires an explicit database and dry-run and refuses apply',
     for (const args of [[], ['--db', 'owned.db', '--apply'], ['--db', 'owned.db'], ['--db', 'owned.db', '--dry-run', '--apply']]) {
         expect(() => parseArguments(args)).toThrow(expect.objectContaining({ code: 'WORK_ATTEMPT_PLAN_ARGUMENT_INVALID' }));
     }
+});
+
+function batchPair() {
+    item('repeated'); attempt('first', 'repeated', 1, 'SUPERSEDED'); attempt('second', 'repeated', 2);
+    db.prepare('UPDATE WorkAttempt SET qcBatchId=? WHERE id=?').run('batch-one', 'first');
+    db.prepare('UPDATE WorkAttempt SET qcBatchId=? WHERE id=?').run('batch-two', 'second');
+    result('run-one', 'repeated', { batchId: 'batch-one', isCurrent: 0 });
+    result('run-two', 'repeated', { batchId: 'batch-two' });
+}
+test('the pinned historical pair links only by frozen batch, preserving both attempts and their status', () => {
+    batchPair();
+    expect(readonlyPlan()).toMatchObject({ status: 'READY', newAttempts: [], currentResultConflicts: [], links: [
+        { resultId: 'run-one', attemptId: 'first', attemptNo: 1, attemptStatus: 'SUPERSEDED',
+            attemptQcBatchId: 'batch-one', resultBatchId: 'batch-one', isCurrent: 0, rule: 'EXISTING_ATTEMPT_ONE_TO_ONE_BATCH_MATCH' },
+        { resultId: 'run-two', attemptId: 'second', attemptNo: 2, attemptStatus: 'RECORDED',
+            attemptQcBatchId: 'batch-two', resultBatchId: 'batch-two', isCurrent: 1, rule: 'EXISTING_ATTEMPT_ONE_TO_ONE_BATCH_MATCH' }
+    ] });
+});
+test.each([
+    "UPDATE WorkAttempt SET qcBatchId='batch-one' WHERE id='second'",
+    "UPDATE Result SET batchId=NULL WHERE id='run-two'",
+    "UPDATE WorkAttempt SET qcBatchId=NULL WHERE id='second'",
+    "UPDATE Result SET isCurrent=1 WHERE id='run-one'",
+    "UPDATE Result SET batchId='batch-two' WHERE id='run-one'"
+])('invalid historical batch pairing refuses the whole read-only plan: %s', sql => {
+    batchPair(); db.exec(sql);
+    expect(readonlyPlan()).toMatchObject({ status: 'REFUSED', blockers: expect.arrayContaining([
+        expect.objectContaining({ code: 'WORK_ATTEMPT_LINK_AMBIGUOUS' })
+    ]) });
 });

@@ -26,6 +26,22 @@ function planHistoricalAttempts(db) {
             const group = itemsByMeasurement.get(key) || [];
             group.push(item); itemsByMeasurement.set(key, group);
         }
+        // Pin 6054084454 permits only a one-to-one, non-null batch match for
+        // several existing attempts. It never uses dates, numbers or values.
+        const batchMatches = new Map(), matchingResultIds = new Map();
+        for (const result of results.filter(row => row.attemptId == null)) {
+            const candidates = itemsByMeasurement.get(JSON.stringify([result.sampleId, result.param])) || [];
+            if (candidates.length !== 1) continue;
+            const existing = attemptsByItem.get(candidates[0].id) || [];
+            if (existing.length < 2 || result.batchId == null) continue;
+            const matches = existing.filter(row => row.qcBatchId != null && row.qcBatchId === result.batchId);
+            if (matches.length !== 1) continue;
+            const selected = matches[0];
+            if (result.isCurrent && selected.status === 'SUPERSEDED') continue;
+            batchMatches.set(result.id, selected);
+            const group = matchingResultIds.get(selected.id) || [];
+            group.push(result.id); matchingResultIds.set(selected.id, group);
+        }
         const newAttempts = new Map(), links = [], blockers = [], currentKeys = new Map();
         for (const result of results) {
             // A non-null link is retained even when a newer attempt exists.
@@ -38,12 +54,18 @@ function planHistoricalAttempts(db) {
                     continue;
                 }
                 const item = candidates[0], existing = attemptsByItem.get(item.id) || [];
+                let batchMatched = null;
                 if (existing.length > 1) {
-                    blockers.push({ code: 'WORK_ATTEMPT_LINK_AMBIGUOUS', resultId: result.id,
-                        workItemId: item.id, attemptIds: existing.map(row => row.id) });
-                    continue;
+                    batchMatched = batchMatches.get(result.id);
+                    if (!batchMatched || matchingResultIds.get(batchMatched.id).length !== 1) {
+                        blockers.push({ code: 'WORK_ATTEMPT_LINK_AMBIGUOUS', resultId: result.id,
+                            workItemId: item.id, attemptIds: existing.map(row => row.id),
+                            rule: 'EXISTING_ATTEMPT_ONE_TO_ONE_BATCH_MATCH' });
+                        continue;
+                    }
+                    destination = batchMatched.id;
                 }
-                if (existing.length === 1) destination = existing[0].id;
+                else if (existing.length === 1) destination = existing[0].id;
                 else {
                     // Match the literal stored status. Do not apply WorkItem
                     // compatibility normalization before the pinned table.
@@ -58,7 +80,10 @@ function planHistoricalAttempts(db) {
                     plan.resultIds.push(result.id); newAttempts.set(item.id, plan);
                 }
                 links.push({ resultId: result.id, workItemId: item.id,
-                    ...(existing.length ? { attemptId: destination } : { newAttemptForWorkItemId: item.id }) });
+                    ...(existing.length ? { attemptId: destination } : { newAttemptForWorkItemId: item.id }),
+                    ...(batchMatched && { rule: 'EXISTING_ATTEMPT_ONE_TO_ONE_BATCH_MATCH',
+                        attemptNo: batchMatched.attemptNo, attemptStatus: batchMatched.status,
+                        attemptQcBatchId: batchMatched.qcBatchId, resultBatchId: result.batchId, isCurrent: result.isCurrent }) });
             }
             if (result.isCurrent) {
                 const key = JSON.stringify([result.sampleId, result.param, result.replicateNo, destination]);
