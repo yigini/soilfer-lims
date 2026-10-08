@@ -19,6 +19,11 @@ async function fixture({ replicates = 1, role = 'LAB_TECHNICIAN' } = {}) {
         measurements: Array.from({ length: count }, (_, index) => ({ param: f.analysisCode, value: String(7 + index / 10),
             equipmentId: f.instrument.id, replicateNo: index + 1 })), ...extra
     }));
+    f.submit=async()=> {
+        await require('../../services/workItemStateService').transitionWorkItem(f.items[0].id,'COMPLETED',f.actor,'Recorded execution ready for submission',{},f.db);
+        return require('../../services/submissionStateService').createSubmissionForItems({db:f.db,actor:f.actor,sampleId:f.items[0].sampleId,
+            type:'FULL',workItemIds:[f.items[0].id]});
+    };
     f.results = await f.record(replicates);
     f.attempt = await f.db.workAttempt.findUnique({ where: { id: f.results[0].attemptId } });
     f.all = async () => ({ evidence: await f.snapshot(), attempts: await f.db.workAttempt.findMany({ orderBy: { id:'asc' } }) });
@@ -141,4 +146,85 @@ test('a reviewer may request REVIEW_OUTLIER and a technician cannot request it',
     expect(accepted.status).toBe(201);
     const previous=await f.db.workAttempt.findUnique({where:{id:f.attempt.id}});expect(previous.status).toBe('QUESTIONED');
     expect({...previous,status:f.attempt.status}).toEqual(f.attempt);
+});
+
+test('actual submission changes only the attempt status; a technician cannot repeat or correct afterwards',async()=>{
+    const f=await fixture(),before=f.attempt;
+    await f.submit();
+    expect(await f.db.workAttempt.findUnique({where:{id:before.id}})).toEqual({...before,status:'SUBMITTED'});
+    const evidence=await f.all();
+    for(const response of [await f.command({reason:'INSTRUMENT_FAULT'}),
+        await f.correction({value:'7.5',reason:'TRANSCRIPTION_ERROR',note:'Submitted typo'})]) {
+        expect(response.status).toBe(403);expect(await f.all()).toEqual(evidence);
+    }
+});
+
+test('a submitted reviewer correction preserves submitted execution evidence and needs a new explicit acceptance',async()=>{
+    const f=await fixture(),manager=await reviewer(f);await f.submit();
+    const before=await f.db.workAttempt.findUnique({where:{id:f.attempt.id}});
+    const response=await f.correction({value:'7.5',reason:'TRANSCRIPTION_ERROR',note:'Corrected against the original worksheet'},manager);
+    expect(response.status).toBe(201);expect(response.body.requiresReview).toBe(true);
+    expect(response.body.workItem).toMatchObject({status:'SUBMITTED',reviewDecision:null,reviewedBy:null,reviewedAt:null});
+    expect(await f.db.workAttempt.findUnique({where:{id:before.id}})).toEqual(before);
+    expect(await f.db.reviewDecision.count({where:{workItemId:f.items[0].id}})).toBe(0);
+    await require('../helpers/qcPolicyFixture').setFixtureQcRequirement(f.db,manager,f.labId);
+    await f.http(manager,async(app,token)=>{
+        const accepted=await request(app).post('/api/work/'+f.items[0].id+'/review').set('Authorization','Bearer '+token)
+            .send({decision:'ACCEPT',attemptId:before.id,note:'Reviewed corrected Result'});
+        expect({status:accepted.status,code:accepted.body.code}).toMatchObject({status:200});
+    });
+    expect(await f.db.workAttempt.findUnique({where:{id:before.id}})).toEqual({...before,status:'ACCEPTED'});
+});
+
+test.each(Object.entries(require('../../services/workRepeatContract').RETURN_REASON_STATUS))(
+    'actual reviewer RETURN with %s records %s and a new OPEN request atomically',async(reasonCode,status)=>{
+        const f=await fixture(),manager=await reviewer(f);await f.submit();
+        const before=await f.db.workAttempt.findUnique({where:{id:f.attempt.id}});
+        await f.http(manager,async(app,token)=>{
+            const returned=await request(app).post('/api/work/'+f.items[0].id+'/review').set('Authorization','Bearer '+token)
+                .send({decision:'RETURN',attemptId:before.id,reasonCode,note:'Explicit reviewed return reason'});
+            expect({status:returned.status,code:returned.body.code}).toMatchObject({status:200});
+        });
+        const attempts=await f.db.workAttempt.findMany({where:{workItemId:f.items[0].id},orderBy:{attemptNo:'asc'}});
+        expect(attempts[0]).toEqual({...before,status});
+        expect(attempts[1]).toMatchObject({status:'OPEN',attemptNo:2,reason:reasonCode,parentAttemptId:before.id,requestedBy:manager.username,evidenceData:null,evidenceHash:null});
+        const decision=await f.db.reviewDecision.findFirst({where:{workItemId:f.items[0].id}});
+        expect(decision).toMatchObject({attemptId:before.id,decision:'RETURN',reasonCode});
+        expect(await f.db.workItem.findUnique({where:{id:f.items[0].id}})).toMatchObject({status:'REPEAT_REQUIRED',submissionId:null,batchId:null});
+        expect((await f.db.sample.findUnique({where:{id:f.items[0].sampleId}})).status).toBe('PROCESSING');
+    });
+
+test('missing RETURN reason and a cross-lab repeat/correction preserve the complete owned evidence',async()=>{
+    const f=await fixture(),manager=await reviewer(f);await f.submit();
+    const foreign=await reviewer(f);
+    const otherLab=await f.db.lab.create({data:{id:randomUUID(),code:randomUUID(),name:'Other owned test laboratory',country:'TEST'}});
+    await f.db.user.update({where:{id:foreign.id},data:{labId:otherLab.id}});
+    const before=await f.all();
+    await f.http(manager,async(app,token)=>{
+        const returned=await request(app).post('/api/work/'+f.items[0].id+'/review').set('Authorization','Bearer '+token)
+            .send({decision:'RETURN',note:'A free-text note is not a reason code'});
+        expect(returned.status).toBe(409);expect(returned.body.code).toBe('WORK_ATTEMPT_REASON_REQUIRED');
+    });
+    expect(await f.all()).toEqual(before);
+    for(const response of [await f.command({reason:'REVIEW_OUTLIER'},foreign),
+        await f.correction({value:'7.9',reason:'TRANSCRIPTION_ERROR',note:'Outside scope'},foreign)]) {
+        expect(response.status).toBe(403);expect(await f.all()).toEqual(before);
+    }
+});
+
+test('a repeated work item cannot join a reopened batch retaining a FAIL for its analyte through the real membership API',async()=>{
+    const f=await fixture(),manager=await reviewer(f);
+    expect((await f.command({reason:'INSTRUMENT_FAULT'})).status).toBe(201);
+    const batch=await f.db.batch.create({data:{id:randomUUID(),analysis:f.analysisCode,labId:f.labId,status:'OPEN',createdBy:manager.username,maxCapacity:40}});
+    await f.db.batchAnalyte.create({data:{id:randomUUID(),batchId:batch.id,analysisCode:f.analysisCode,labId:f.labId,
+        methodologyId:f.method.id,provenance:'NATIVE',status:'OPEN',methodResolution:'RESOLVED'}});
+    await f.db.qcEvaluation.create({data:{id:randomUUID(),batchId:batch.id,analysisCode:f.analysisCode,version:1,verdict:'FAIL',
+        details:'{"retained":true}',evaluatedBy:manager.username,evaluatedAt:new Date()}});
+    const before=await f.all(),qc=await f.db.qcEvaluation.findMany({where:{batchId:batch.id}});
+    await f.http(manager,async(app,token)=>{
+        const response=await request(app).post('/api/qc/batches/'+batch.id+'/items').set('Authorization','Bearer '+token)
+            .send({workItemIds:[f.items[0].id]});
+        expect({status:response.status,code:response.body.code}).toEqual({status:409,code:'REPEAT_FAILED_BATCH'});
+    });
+    expect(await f.all()).toEqual(before);expect(await f.db.qcEvaluation.findMany({where:{batchId:batch.id}})).toEqual(qc);
 });

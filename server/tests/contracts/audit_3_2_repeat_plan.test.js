@@ -9,6 +9,7 @@ test('actual mandatory-reason repeats are excluded from the interim list with ze
     // installer rehearsal in audit_3_1_attempt_install. This current fixture
     // runs the full chain and requests its new repeat through the real service.
     const fixture = await qcGateFixture(); owned.push(fixture);
+    await fixture.result(fixture.items[0]);
     await require('../../services/workRepeatService').requestRepeat(fixture.db,fixture.items[0].id,fixture.actor,
         {reason:'CONFIRMATION',note:'Explicit current execution repeat'});
     await fixture.result(fixture.items[0]);
