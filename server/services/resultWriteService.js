@@ -48,11 +48,20 @@ async function recordedExecution(db, item, param) {
         attemptId:{in:attempts.map(row=>row.id)}}});
     if(!results.length)return null;
     const ids=new Set(results.map(row=>row.attemptId));
-    const attempt=ids.size===1 ? attempts.find(row=>row.id===results[0].attemptId) : null;
+    let attempt=ids.size===1 ? attempts.find(row=>row.id===results[0].attemptId) : null;
+    if (!attempt && ids.size === 2) {
+        // Pin6070797814: a partially filled replacement may finish its
+        // parent's replica set. Prove the exact parent/child relationship;
+        // do not select a latest attempt or filter review/report candidates.
+        const replacements = attempts.filter(child => ids.has(child.id) && child.status === 'RECORDED' &&
+            child.parentAttemptId && ids.has(child.parentAttemptId) && attempts.some(parent =>
+                parent.id === child.parentAttemptId && ['QUESTIONED', 'INVALIDATED'].includes(parent.status)));
+        if (replacements.length === 1) attempt = replacements[0];
+    }
     if(!attempt || attempt.status!=='RECORDED' || ['SUBMITTED','ACCEPTED'].includes(item.status)) {
         throw new TransitionError('Use the correction route or request a reasoned repeat.',409,'ATTEMPT_CORRECTION_REQUIRED');
     }
-    return {attempt,results};
+    return {attempt,results:results.filter(row=>row.attemptId===attempt.id)};
 }
 
 // The HTTP preflight and the transactional writer use the same ownership
@@ -172,10 +181,23 @@ async function validateExecutionReadiness(tx,ctx) {
 
 async function appendResult(tx, ctx, measurement, values, now) {
     const id = measurement.id || randomUUID();
+    let targetId = ctx.correctionTargetId, targetUpdatedAt = ctx.correctionOriginalUpdatedAt;
+    if (!targetId && ctx.attemptId) {
+        const child = await tx.workAttempt.findUnique({ where: { id: ctx.attemptId }, select: { parentAttemptId: true } });
+        if (child?.parentAttemptId) {
+            const current = await tx.result.findMany({ where: { sampleId: ctx.sample.id, param: measurement.param,
+                replicateNo: ctx.replicateNo, isCurrent: true } });
+            if (current.length > 1 || current.some(row => row.attemptId !== child.parentAttemptId)) {
+                throw new TransitionError('The replacement replica does not belong to its parent.',409,'ATTEMPT_CONTEXT_MISMATCH');
+            }
+            if (current.length === 1) { targetId = current[0].id; targetUpdatedAt = current[0].updatedAt; }
+        }
+    }
     const superseded=await tx.result.updateMany({ where: { sampleId: ctx.sample.id, param: measurement.param, replicateNo: ctx.replicateNo, isCurrent: true,
-        ...(ctx.correctionTargetId && { id: ctx.correctionTargetId, attemptId: ctx.attemptId }) },
-        data: { isCurrent: false, supersededBy: id, ...(ctx.correctionTargetId && {updatedAt:ctx.correctionOriginalUpdatedAt}) } });
-    if(ctx.correctionTargetId && superseded.count!==1)throw new TransitionError('The correction Result changed; reload before retrying.',409,'ATTEMPT_CORRECTION_TARGET_INVALID');
+        ...(targetId && { id: targetId }), ...(ctx.correctionTargetId && { attemptId: ctx.attemptId }) },
+        data: { isCurrent: false, supersededBy: id, ...(targetId && {updatedAt:targetUpdatedAt}) } });
+    if(targetId && superseded.count!==1)throw new TransitionError('The superseded Result changed; reload before retrying.',409,
+        ctx.correctionTargetId?'ATTEMPT_CORRECTION_TARGET_INVALID':'ATTEMPT_CONTEXT_MISMATCH');
     let row;
     try {
         row = await tx.result.create({ data: { id, sampleId: ctx.sample.id, param: measurement.param,

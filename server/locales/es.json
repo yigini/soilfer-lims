@@ -1446,6 +1446,7 @@
       "WORK_ATTEMPT_REASON_REQUIRED": "Seleccione un motivo de repetición.",
       "WORK_ATTEMPT_REASON_INVALID": "Seleccione un motivo de repetición válido.",
       "REPEAT_NOTE_REQUIRED": "Explique el motivo en una nota.",
+      "ATTEMPT_REPLICATE_SET_INCOMPLETE": "Registre todas las réplicas del intento anterior antes de enviar.",
       "ATTEMPT_LIMIT": "Se alcanzó el límite de intentos configurado para este laboratorio.",
       "ATTEMPT_LIMIT_NCR_UNAVAILABLE": "Las excepciones vinculadas a una no conformidad aún no están disponibles.",
       "WORK_REPEAT_ALREADY_OPEN": "Ya hay una repetición pendiente de registro.",

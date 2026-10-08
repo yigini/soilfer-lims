@@ -47,6 +47,10 @@ async function transitionAttempt(tx, item, attemptId, nextStatus, actor, { reaso
 async function submitRecordedAttempt(tx,item,actor) {
     rules.requireTransaction(tx);
     if(require('./workItemKinds').isNonMeasurement(item))return null;
+    const parents=await tx.workAttempt.findMany({where:{workItemId:item.id,status:{in:['QUESTIONED','INVALIDATED']}},select:{id:true}});
+    const residual=await tx.result.findMany({where:{attemptId:{in:parents.map(row=>row.id)},isCurrent:true},select:{replicateNo:true}});
+    if(residual.length)throw new rules.TransitionError('Record the full parent replica set before submission.',409,
+        'ATTEMPT_REPLICATE_SET_INCOMPLETE',{workItemId:item.id,missingReplicateNumbers:[...new Set(residual.map(row=>row.replicateNo))].sort((a,b)=>a-b)});
     const attemptId=await require('./reviewAttemptService').resolveReviewAttempt(tx,item,'ACCEPT');
     return transitionAttempt(tx,item,attemptId,'SUBMITTED',actor);
 }

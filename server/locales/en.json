@@ -1446,6 +1446,7 @@
       "WORK_ATTEMPT_REASON_REQUIRED": "Choose a repeat reason.",
       "WORK_ATTEMPT_REASON_INVALID": "Choose a valid repeat reason.",
       "REPEAT_NOTE_REQUIRED": "Explain the reason in a note.",
+      "ATTEMPT_REPLICATE_SET_INCOMPLETE": "Record every replicate from the previous attempt before submitting.",
       "ATTEMPT_LIMIT": "This laboratory’s configured attempt limit has been reached.",
       "ATTEMPT_LIMIT_NCR_UNAVAILABLE": "NCR-linked attempt overrides are not available yet.",
       "WORK_REPEAT_ALREADY_OPEN": "A repeat is already waiting to be recorded.",

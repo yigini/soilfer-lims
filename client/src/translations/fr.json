@@ -3040,6 +3040,7 @@
       "WORK_ATTEMPT_REASON_REQUIRED": "Choisissez un motif de répétition.",
       "WORK_ATTEMPT_REASON_INVALID": "Choisissez un motif de répétition valide.",
       "REPEAT_NOTE_REQUIRED": "Expliquez le motif dans une note.",
+      "ATTEMPT_REPLICATE_SET_INCOMPLETE": "Enregistrez toutes les répétitions de la tentative précédente avant de soumettre.",
       "ATTEMPT_LIMIT": "La limite de tentatives configurée pour ce laboratoire est atteinte.",
       "ATTEMPT_LIMIT_NCR_UNAVAILABLE": "Les dérogations liées à une non-conformité ne sont pas encore disponibles.",
       "WORK_REPEAT_ALREADY_OPEN": "Une répétition attend déjà son enregistrement.",

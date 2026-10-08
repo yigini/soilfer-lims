@@ -263,6 +263,38 @@ test('a failed correction event rolls back the new Result, old supersession and 
     expect(await f.all()).toEqual(before);
 });
 
+test.each([[2,1,[2]],[3,2,[3]]])('a %i-replica repeat refuses submission until the full parent set is recorded',async(replicates,filled,missing)=>{
+    const f=await fixture({replicates,role:'LAB_MANAGER'}),original=f.results,parent=f.attempt;
+    const repeat=await f.command({reason:'CONFIRMATION',note:'Remeasure the complete parent execution'});
+    expect(repeat.status).toBe(201);
+    const child=repeat.body.attempt;
+    await f.record(filled);
+    for(const old of original.filter(row=>missing.includes(row.replicateNo))) {
+        expect(await f.db.result.findUnique({where:{id:old.id}})).toEqual(old);
+    }
+    await require('../../services/workItemStateService').transitionWorkItem(f.items[0].id,'COMPLETED',f.actor,
+        'Recorded replacement ready for review',{},f.db);
+    const before=await f.all();
+    const submit=()=>require('../../services/submissionStateService').createSubmissionForItems({db:f.db,actor:f.actor,
+        sampleId:f.items[0].sampleId,type:'FULL',workItemIds:[f.items[0].id]});
+    await expect(submit()).rejects.toMatchObject({statusCode:409,code:'ATTEMPT_REPLICATE_SET_INCOMPLETE',
+        details:{workItemId:f.items[0].id,missingReplicateNumbers:missing}});
+    expect(await f.all()).toEqual(before);
+    const appended=await f.save(missing.map(replicateNo=>({param:f.analysisCode,value:String(7+replicateNo/10),
+        replicateNo,equipmentId:f.instrument.id})));
+    expect({status:appended.status,body:appended.body}).toMatchObject({status:200});
+    const current=await f.db.result.findMany({where:{sampleId:f.items[0].sampleId,isCurrent:true},orderBy:{replicateNo:'asc'}});
+    expect(current).toHaveLength(replicates);
+    expect(current.map(row=>row.replicateNo)).toEqual(Array.from({length:replicates},(_,index)=>index+1));
+    expect(current.every(row=>row.attemptId===child.id)).toBe(true);
+    for(const old of original)expect(await f.db.result.findUnique({where:{id:old.id}}))
+        .toEqual({...old,isCurrent:false,supersededBy:current.find(row=>row.replicateNo===old.replicateNo).id});
+    expect(await f.db.workAttempt.findUnique({where:{id:parent.id}})).toEqual({...parent,status:'QUESTIONED'});
+    await submit();
+    expect(await f.db.workAttempt.findUnique({where:{id:child.id}})).toMatchObject({status:'SUBMITTED'});
+    expect(await f.db.result.count({where:{sampleId:f.items[0].sampleId}})).toBe(replicates*2);
+});
+
 test('the ordinary save appends an absent replicate to the same frozen RECORDED attempt, then refuses cell changes and post-submit additions',async()=>{
     const f=await fixture(),attempt=f.attempt,original=f.results[0];
     const response=await f.save([{param:f.analysisCode,value:'7.12456789',replicateNo:2,equipmentId:f.instrument.id}]);

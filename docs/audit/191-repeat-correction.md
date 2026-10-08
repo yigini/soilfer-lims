@@ -7,7 +7,8 @@ pass or deployment exists. Readiness requires all final-head checks below.
 
 Scope authorities are #162 and #191 comments 5975239652, 6055538092,
 6059796291, 6067488471, 6067875897, 6068463777, 6068870369, 6069548259
-and 6069938801, 6070309684, 6070420159, 6070565847, 6070675563. CONTRIBUTING.md applies.
+and 6069938801, 6070309684, 6070420159, 6070565847, 6070675563, 6070797814.
+CONTRIBUTING.md applies.
 Claude answered the payload, explicit replicate, derived review, historical
 import, causal event and reported-value fixture questions. None is pending.
 
@@ -34,6 +35,12 @@ Implemented, with verification still in progress:
 - Missing replicas may append only to the single current RECORDED attempt
   with its frozen method/instrument. Recorded-cell replacement requires a
   correction or reasoned repeat. Parent evidence is unchanged.
+- A replacement must record the full parent replica set before submission.
+  A partial set refuses ATTEMPT_REPLICATE_SET_INCOMPLETE with missing numbers
+  and zero writes. Completing an exact QUESTIONED/INVALIDATED parent/child
+  set uses the frozen child context and supersedes each parent Result while
+  preserving every other column. Review/report candidate resolution has no
+  status filter and no latest-row selection (6070797814).
 - An owned result-set fixture creates explicit determinations under one new
   execution, refusing reuse and duplicate current replicas. No historical
   factory caller or runtime guard exception is added.
