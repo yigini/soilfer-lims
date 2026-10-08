@@ -232,6 +232,7 @@ test('real legacy-imported NULL authors and historical snapshots stay locked wit
         const install = require(`../../scripts/${script}`)[installer], dry = install({ dbPath: historical.file });
         install({ dbPath: historical.file, apply: true, ...(script === 'install_qc_runs' && { planSha256: dry.backfillFingerprint }) });
     }
+    require('../../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: historical.file, apply: true });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${historical.file}` }) });
     owned.push({ close: async () => {
         await db.$disconnect();
