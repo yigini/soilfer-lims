@@ -90,6 +90,7 @@ const RESULT_SET_FIXTURE = Object.freeze({
     exportName: 'createExecutionResultsFixture',
     callers: Object.freeze([
         'tests/contracts/audit_0_10_current_result_views.test.js',
+        'tests/contracts/audit_0_11_workbench_queue.test.js',
         'tests/contracts/audit_1_4_uuid_transactions.test.js',
         'tests/contracts/audit_1_5_result_writes.test.js',
         'tests/contracts/audit_3_2_repeat_commands.test.js',

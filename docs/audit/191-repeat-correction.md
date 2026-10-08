@@ -109,6 +109,10 @@ Applied by precedent / deliberate setup inventory:
 - audit_0_10_current_result_views: original mixed-method/unit/qualified
   ambiguity and normalization values use explicit replicas 1/2. The invalid
   current sentinel uses replica 3; all sentinel/export assertions remain.
+- audit_0_11_workbench_queue: the current-invalid zero and superseded99
+  hint share one explicit owned execution (6069938801). All queue, draft,
+  currentness and cached88 assertions remain unchanged. This seventh caller
+  has the same closed import boundary and no direct-write exemption.
 - audit_0_10_current_result_views and audit_1_0_lab_policies LATEST_VALID:
   one retained initial value is corrected through the actual route, then
   submitted/reviewed/approved. An owned lab/method/SOC zero-frequency rule is

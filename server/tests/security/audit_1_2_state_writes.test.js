@@ -112,9 +112,9 @@ test('the #190 factory import allowlist is exact, including the named spectral r
         expect.objectContaining({ code: 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' })]);
 });
 
-test('the #191 owned result-set export is confined to six inventoried test files without writer exemptions', () => {
+test('the #191 owned result-set export is confined to seven inventoried test files without writer exemptions', () => {
     const source = "const {createExecutionResultsFixture}=require('../helpers/workAttemptFixtures');await createExecutionResultsFixture(db,{data:rows});";
-    for (const filename of ['audit_0_10_current_result_views', 'audit_1_4_uuid_transactions', 'audit_1_5_result_writes',
+    for (const filename of ['audit_0_10_current_result_views', 'audit_0_11_workbench_queue', 'audit_1_4_uuid_transactions', 'audit_1_5_result_writes',
         'audit_3_2_repeat_commands', 'nsis_v2_exchange', 'qc_disposition_release_gate']) {
         expect(scanSource(source, `tests/contracts/${filename}.test.js`, exceptions)).toEqual([]);
         expect(scanSource(source + 'prisma.result.create({data:{}});', `tests/contracts/${filename}.test.js`, exceptions))
