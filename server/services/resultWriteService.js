@@ -71,11 +71,13 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     let recordedAttempt = null, recordedResults = [];
     if (allowRecordedReplicates && item && source !== 'legacy-import' &&
         !await tx.workAttempt.count({ where: { workItemId: item.id, status: 'OPEN' } })) {
+        // Result.attemptId is a guarded scalar, not a Prisma relation.
+        const executions = await tx.workAttempt.findMany({ where: { workItemId: item.id } });
         recordedResults = await tx.result.findMany({ where: { sampleId, param: measurement.param, isCurrent: true,
-            supersededBy: null, attempt: { workItemId: item.id } }, include: { attempt: true } });
+            supersededBy: null, attemptId: { in: executions.map(row => row.id) } } });
         if (recordedResults.length) {
             const ids = new Set(recordedResults.map(row => row.attemptId));
-            recordedAttempt = ids.size === 1 ? recordedResults[0].attempt : null;
+            recordedAttempt = ids.size === 1 ? executions.find(row => row.id === recordedResults[0].attemptId) : null;
             if (!recordedAttempt || recordedAttempt.status !== 'RECORDED' || item.status === 'SUBMITTED') {
                 throw new TransitionError('Use a correction or a reasoned repeat for recorded work.',409,'ATTEMPT_CORRECTION_REQUIRED');
             }
