@@ -1,5 +1,6 @@
 const { createHash } = require('node:crypto');
 const { HISTORICAL_ATTEMPT_STATUS } = require('./workAttemptContract');
+const { historicalAttemptEvidence } = require('./workAttemptEvidence');
 
 function fingerprint(value) {
     return createHash('sha256').update(JSON.stringify(value)).digest('hex');
@@ -96,10 +97,14 @@ function planHistoricalAttempts(db) {
         for (const conflict of currentResultConflicts) blockers.push({ code: 'WORK_ATTEMPT_CURRENT_RESULT_CONFLICT', ...conflict });
         const duplicateAttemptNumberGroups = [...duplicateNumbers].filter(([, ids]) => ids.length > 1)
             .map(([key, attemptIds]) => { const [workItemId, attemptNo] = JSON.parse(key); return { workItemId, attemptNo, attemptIds }; });
+        const resultsById = new Map(results.map(row => [row.id, row]));
+        const historicalEquipmentEvidence = [...newAttempts.values()].map(plan => ({ workItemId: plan.workItemId,
+            resultIds: plan.resultIds, ...historicalAttemptEvidence(plan.resultIds.map(id => resultsById.get(id))) }));
         const output = { status: blockers.length ? 'REFUSED' : 'READY',
             existingAttemptCount: attempts.length, resultCount: results.length,
             alreadyLinkedResultCount: results.filter(row => row.attemptId != null).length,
             newAttempts: [...newAttempts.values()], links, blockers, duplicateAttemptNumberGroups, currentResultConflicts,
+            historicalEquipmentEvidence,
             originalAttemptSha256: fingerprint(attempts), originalResultSha256: fingerprint(results),
             matchedWorkItemSourceSha256: fingerprint(items), totalChanges: 0 };
         return { ...output, planSha256: fingerprint(output) };

@@ -98,6 +98,36 @@ test('planning CLI requires an explicit database and dry-run and refuses apply',
     }
 });
 
+test('new historical attempts copy only identical frozen Result evidence and its instrument, with no request or equipment lookup', () => {
+    item('frozen'); result('first', 'frozen'); result('second', 'frozen', { replicateNo: 2 });
+    db.exec('ALTER TABLE Result ADD COLUMN equipmentReadiness TEXT');
+    const snapshot = { equipmentId: 'frozen-instrument', assetStatus: 'IN_SERVICE', evaluatedAt: 'historical-time' };
+    db.prepare('UPDATE Result SET equipmentReadiness=?').run(JSON.stringify(snapshot));
+    expect(readonlyPlan().historicalEquipmentEvidence).toEqual([{ workItemId: 'frozen', resultIds: ['first', 'second'],
+        outcome: 'COPIED', reason: null, instrumentId: 'frozen-instrument', evidenceData: JSON.stringify({ equipmentReadiness: snapshot }) }]);
+});
+
+test.each(['MISSING', 'DIFFERENT', 'INVALID'])('historical %s snapshots stay not recorded and are reported without invented evidence', kind => {
+    item('frozen'); result('first', 'frozen'); result('second', 'frozen', { replicateNo: 2 });
+    db.exec('ALTER TABLE Result ADD COLUMN equipmentReadiness TEXT');
+    const snapshot = JSON.stringify({ equipmentId: 'frozen-instrument' });
+    db.prepare('UPDATE Result SET equipmentReadiness=? WHERE id=?').run(kind === 'INVALID' ? '{broken' : snapshot, 'first');
+    db.prepare('UPDATE Result SET equipmentReadiness=? WHERE id=?').run(kind === 'MISSING' ? null :
+        kind === 'INVALID' ? '{broken' : JSON.stringify({ equipmentId: 'other-instrument' }), 'second');
+    expect(readonlyPlan().historicalEquipmentEvidence).toEqual([{ workItemId: 'frozen', resultIds: ['first', 'second'],
+        outcome: 'NOT_RECORDED', reason: kind === 'MISSING' ? 'SNAPSHOT_NOT_RECORDED' : kind === 'INVALID' ? 'SNAPSHOT_INVALID' : 'SNAPSHOTS_DIFFER',
+        evidenceData: null, instrumentId: null }]);
+});
+
+test('historical existing attempts never receive evidence copies, even when linked Results have snapshots', () => {
+    item('legacy'); attempt('retained', 'legacy', 1, 'RETURNED'); result('result', 'legacy');
+    db.exec('ALTER TABLE Result ADD COLUMN equipmentReadiness TEXT');
+    db.prepare('UPDATE Result SET equipmentReadiness=?').run(JSON.stringify({ equipmentId: 'different-from-old-attempt' }));
+    expect(readonlyPlan().historicalEquipmentEvidence).toEqual([]);
+    expect(db.prepare('SELECT instrumentId,evidenceData FROM WorkAttempt WHERE id=?').get('retained'))
+        .toEqual({ instrumentId: 'old-instrument', evidenceData: '{"fractions":[1,2,3],"original":"kept"}' });
+});
+
 function batchPair() {
     item('repeated'); attempt('first', 'repeated', 1, 'SUPERSEDED'); attempt('second', 'repeated', 2);
     db.prepare('UPDATE WorkAttempt SET qcBatchId=? WHERE id=?').run('batch-one', 'first');
