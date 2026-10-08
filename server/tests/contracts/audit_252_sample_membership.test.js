@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { randomUUID } = require('node:crypto');
 const app = require('../../app');
 const prisma = require('../../prisma');
-const { getAuthToken } = require('../setup');
+const { getAuthToken, ensureTestLab } = require('../setup');
 const { createStoredProfileRunFixture } = require('../helpers/storedProfileRunFixture');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 
@@ -11,6 +11,7 @@ let token, actor;
 beforeAll(async () => {
     token = await getAuthToken('LAB_MANAGER', `QC252-${randomUUID()}`, ['GTM'], ['QC252']);
     actor = await prisma.user.findUnique({ where: { id: jwt.decode(token).id } });
+    await ensureTestLab(actor.labId, 'GTM');
 });
 async function evidence() {
     const tables = ['batch','batchAnalyte','batchPosition','batchPositionWorkItem',
