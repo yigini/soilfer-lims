@@ -115,6 +115,10 @@ export default function WorksheetArea({
         setSelectedRun(id); setViewMode('table'); setSearchQuery(''); setSelectedRows(new Set());
         setIsBatchModalOpen(false);
     };
+    const activeRunId = runBatch?.id;
+    const updateRunLoading = value => { if (selectedRunRef.current === activeRunId) setRunLoading(value); };
+    const updateRunError = value => { if (selectedRunRef.current === activeRunId) setRunError(value); };
+    const updateRunSuccess = value => { if (selectedRunRef.current === activeRunId) setRunSuccess(value); };
 
     useEffect(() => {
         if (initialWorkItemId && items.length > 0) {
@@ -661,11 +665,11 @@ export default function WorksheetArea({
             ) : (
                 selectedRun ? (runLoading || !runBatch ? <p>{t('qcWorksheet.loading')}</p> :
                     isHistoricalRun(runBatch, activeGroup?.analysis) ?
-                        <QcRunHistory batch={runBatch} onChanged={refreshRun} loading={runLoading} setLoading={setRunLoading} setError={setRunError} /> :
+                        <QcRunHistory batch={runBatch} onChanged={refreshRun} loading={runLoading} setLoading={updateRunLoading} setError={updateRunError} /> :
                         <NativeRunPanel key={runBatch.id} batch={runBatch} referenceMaterials={referenceMaterials}
                             analysisCode={activeGroup?.analysis} onAnalysisChanged={onSelectGroup} canEdit={canEditQc}
-                            onChanged={refreshRun} loading={runLoading} setLoading={setRunLoading} setError={setRunError}
-                            setSuccessMsg={setRunSuccess} renderWorksheet={renderTable} />
+                            onChanged={refreshRun} loading={runLoading} setLoading={updateRunLoading} setError={updateRunError}
+                            setSuccessMsg={updateRunSuccess} renderWorksheet={renderTable} />
                 ) : renderTable()
             )}
 

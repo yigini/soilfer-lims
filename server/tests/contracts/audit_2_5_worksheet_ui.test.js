@@ -51,12 +51,15 @@ test('a finished operation from the previous run cannot refetch it over the newl
     const view = mountUi('components/workbench/WorksheetArea.jsx', { activeGroup: { analysis: 'A', items: [] }, allGroups: [] },
         { responses: { '/api/qc/batches': [first, second], '/api/qc/batches/worksheet-run': first, '/api/qc/batches/second-run': second } });
     await view.render(); view.find('worksheet-run-select').props.onChange({ target: { value: first.id } }); await view.render();
-    const previous = view.all().find(node => node.type === view.children['./NativeRunPanel']).props.onChanged;
+    const previous = view.all().find(node => node.type === view.children['./NativeRunPanel']).props;
     view.find('worksheet-run-select').props.onChange({ target: { value: second.id } }); await view.render();
-    view.axios.get.mockClear(); await previous(); await view.render();
+    view.axios.get.mockClear(); await previous.onChanged();
+    previous.setLoading(true); previous.setError('prior failure'); previous.setSuccessMsg('prior saved'); await view.render();
     expect(view.axios.get).not.toHaveBeenCalled();
     expect(view.find('worksheet-run-select').props.value).toBe(second.id);
     expect(view.all().find(node => node.type === view.children['./NativeRunPanel']).props.batch.id).toBe(second.id);
+    expect(view.all().find(node => node.type === view.children['./NativeRunPanel']).props.loading).toBe(false);
+    expect(view.find('worksheet-run-error')).toBeUndefined(); expect(view.text()).not.toContain('prior saved');
 });
 
 test.each(['PROFILE_ONLY', 'LEGACY_MIGRATED', 'NATIVE_CLOSED'])('%s renders stored evidence verbatim without inputs or preview/evaluation requests', async provenance => {
