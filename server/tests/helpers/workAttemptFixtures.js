@@ -8,8 +8,7 @@ const { createResultFixture } = require('../../services/resultWriteService');
 
 // #190 pin6056586906: positive fixtures explicitly request a complete recorded
 // execution. Missing canonical work is refused, never manufactured here.
-async function createExecutionResultFixture(db, args) {
-    const { attemptStatus, ...resultArgs } = args;
+async function assertExecutionFixtureDatabase(db) {
     rules.assertFixtureContext();
     const databases = await db.$queryRawUnsafe('PRAGMA database_list');
     const file = databases.find(row => row.name === 'main')?.file;
@@ -19,6 +18,27 @@ async function createExecutionResultFixture(db, args) {
     if (!/^tests\/\.tmp\/[^/]+\.db$/.test(relative)) throw Error('Execution fixture refuses a non-test-owned file.');
     if (process.env.PRODUCTION_DATABASE_PATH && resolved.toLowerCase() ===
         path.resolve(process.env.PRODUCTION_DATABASE_PATH).toLowerCase()) throw Error('Execution fixture refuses production.');
+}
+
+async function insertFixtureExecution(tx, ctx, allocation, evidence, attemptStatus) {
+    if (['ACCEPTED', 'SUBMITTED'].includes(attemptStatus)) {
+        // Pins6057445449 /6059085200: explicit final status must match the work.
+        if (ctx.item.status !== attemptStatus) throw Error('Final fixture evidence requires matching canonical work.');
+        const evidenceData = JSON.stringify({ ...evidence, equipmentReadiness: ctx.equipmentReadiness }), now = new Date();
+        await tx.workAttempt.create({ data: { id: allocation.id, workItemId: ctx.item.id, attemptNo: allocation.attemptNo,
+            status: attemptStatus, reason: allocation.reason, author: ctx.performedBy, authorName: ctx.performedBy,
+            batchId: ctx.batchId, qcBatchId: ctx.batchId, instrumentId: ctx.equipmentReadiness?.equipmentId || null,
+            executedMethodRevision: null, version: (ctx.item.version || 0) + 1, evidenceData,
+            evidenceHash: createHash('sha256').update(evidenceData).digest('hex'), createdAt: now, updatedAt: now } });
+    } else {
+        if (attemptStatus != null && attemptStatus !== 'RECORDED') throw Error('Unknown positive fixture attempt status.');
+        await insertExecution(tx, ctx, allocation, evidence, new Date());
+    }
+}
+
+async function createExecutionResultFixture(db, args) {
+    const { attemptStatus, ...resultArgs } = args;
+    await assertExecutionFixtureDatabase(db);
     return rules.inTransaction(db, async tx => {
         const data = args.data;
         if (!data?.id || data.attemptId != null) throw Error('Execution fixture requires a new Result id without a supplied attempt.');
@@ -32,22 +52,47 @@ async function createExecutionResultFixture(db, args) {
         const evidence = { source: 'fixture', sourceResultIds: [data.id],
             measurements: [{ resultId: data.id, param: data.param, replicateNo: data.replicateNo ?? 1,
                 value: data.value, rawInput: data.rawInput ?? null, numericValue: data.numericValue ?? null }] };
-        if (attemptStatus === 'ACCEPTED') {
-            // #190 pin6057445449: the explicit accepted spectral bystander is
-            // inserted in its final state before its unchanged measured Result.
-            if (item.status !== 'ACCEPTED') throw Error('Accepted fixture evidence requires accepted canonical work.');
-            const evidenceData = JSON.stringify({ ...evidence, equipmentReadiness }), now = new Date();
-            await tx.workAttempt.create({ data: { id: allocation.id, workItemId: item.id, attemptNo: allocation.attemptNo,
-                status: 'ACCEPTED', reason: allocation.reason, author: ctx.performedBy, authorName: ctx.performedBy,
-                batchId: ctx.batchId, qcBatchId: ctx.batchId, instrumentId: equipmentReadiness?.equipmentId || null,
-                executedMethodRevision: null, version: (item.version || 0) + 1, evidenceData,
-                evidenceHash: createHash('sha256').update(evidenceData).digest('hex'), createdAt: now, updatedAt: now } });
-        } else {
-            if (attemptStatus != null && attemptStatus !== 'RECORDED') throw Error('Unknown positive fixture attempt status.');
-            await insertExecution(tx, ctx, allocation, evidence, new Date());
-        }
+        await insertFixtureExecution(tx, ctx, allocation, evidence, attemptStatus);
         return createResultFixture(tx, { ...resultArgs, data: { ...data, attemptId: allocation.id } });
     });
 }
 
-module.exports = { createExecutionResultFixture };
+// Pin6059042857: only the two named publication tests may request this shape.
+// All four unchanged measured rows belong to one existing TEXTURE execution.
+async function createCompositeTextureExecutionFixture(db, args) {
+    await assertExecutionFixtureDatabase(db);
+    if (!args || Object.keys(args).some(key => !['data', 'attemptStatus'].includes(key)) ||
+        !Array.isArray(args.data) || args.data.length !== 4 ||
+        args.attemptStatus != null && !['RECORDED', 'ACCEPTED'].includes(args.attemptStatus)) {
+        throw Error('Composite texture fixture requires exactly four explicit rows and a permitted final status.');
+    }
+    const rows = args.data, parameters = ['TEXTURE', 'SAND', 'SILT', 'CLAY'];
+    if (rows.some(row => !row || !row.id || !row.sampleId || row.sampleId !== rows[0].sampleId ||
+        ['attemptId', 'attemptNo', 'status'].some(key => Object.hasOwn(row, key)) ||
+        row.provenance != null && row.provenance !== 'MEASURED' || row.equipmentReadiness != null ||
+        (row.batchId ?? null) !== (rows[0].batchId ?? null)) ||
+        new Set(rows.map(row => row.id)).size !== 4 ||
+        parameters.some(param => rows.filter(row => row.param === param).length !== 1)) {
+        throw Error('Composite texture fixture refuses changed ownership, parameters or execution metadata.');
+    }
+    return rules.inTransaction(db, async tx => {
+        const items = await tx.workItem.findMany({ where: { sampleId: rows[0].sampleId, duplicateOf: null,
+            analysis: { in: parameters } } });
+        if (items.length !== 1 || items[0].analysis !== 'TEXTURE') {
+            throw Error('Composite texture fixture requires one existing TEXTURE item and no canonical fraction work.');
+        }
+        const ctx = { item: items[0], performedBy: 'system:fixture', batchId: rows[0].batchId ?? null,
+            method: null, equipmentReadiness: null, equipmentReadinessText: null };
+        const allocation = await allocateExecution(tx, ctx);
+        const evidence = { source: 'test-fixture', sourceResultIds: rows.map(row => row.id),
+            measurements: rows.map(row => ({ resultId: row.id, param: row.param, value: row.value,
+                unit: row.unit ?? null, numericValue: row.numericValue ?? null, rawInput: row.rawInput ?? null,
+                replicateNo: row.replicateNo ?? 1 })) };
+        await insertFixtureExecution(tx, ctx, allocation, evidence, args.attemptStatus);
+        const results = [];
+        for (const data of rows) results.push(await createResultFixture(tx, { data: { ...data, attemptId: allocation.id } }));
+        return results;
+    });
+}
+
+module.exports = { createExecutionResultFixture, createCompositeTextureExecutionFixture };

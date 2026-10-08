@@ -1,4 +1,4 @@
-const { createResultFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -30,7 +30,8 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
             status: 'PENDING_REVIEW', type: 'PARTIAL', workItemCount: 1, workItemIds: JSON.stringify([itemId]) } });
         const item = await createWorkItemFixture(prisma, { data: { id: itemId, sampleId, analysis, assignedLab: labId, assignedTo: username,
             status: itemStatus, result: '6.2', submissionId, batchId: batch?.id, history: JSON.stringify([{ action: 'SUBMITTED', submissionId }]) } });
-        const result = await createResultFixture(prisma, { data: { id: id('R-07'), sampleId, param: analysis, value: '6.2', numericValue: 6.2,
+        const result = await createExecutionResultFixture(prisma, { ...(itemStatus === 'ACCEPTED' && { attemptStatus: 'ACCEPTED' }),
+            data: { id: id('R-07'), sampleId, param: analysis, value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true, flags: '[]', batchId: batch?.id } });
         return { sampleId, analysis, item, submission, result, batch };
     }
@@ -93,6 +94,10 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
         const remaining = await createWorkItemFixture(prisma, { data: { id: id('WI-07-REMAINING'), sampleId: f.sampleId,
             analysis: `${f.analysis}-OTHER`, status: 'SUBMITTED', result: '5.4', assignedLab: labId,
             assignedTo: username, submissionId: f.submission.id } });
+        // Pin6059085200: only this named S1/S2 fixture opts into cached evidence.
+        await createExecutionResultFixture(prisma, { attemptStatus: 'SUBMITTED', data: {
+            id: id('R-07-REMAINING'), sampleId: f.sampleId, param: remaining.analysis, value: remaining.result,
+            numericValue: Number(remaining.result), provenance: 'MEASURED', isCurrent: true } });
         await prisma.submission.update({ where: { id: f.submission.id }, data: {
             workItemIds: JSON.stringify([f.item.id, remaining.id]), workItemCount: 2
         } });

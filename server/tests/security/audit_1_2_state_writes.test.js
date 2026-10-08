@@ -111,6 +111,38 @@ test('the #190 factory import allowlist is exact, including the named spectral r
         'tests/contracts/audit_1_2_spectral_state.test.js', exceptions)).toEqual([
         expect.objectContaining({ code: 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' })]);
 });
+
+test('the #190 composite positive fixture has exactly two named publication callers', () => {
+    const names = ['composite texture governs sand, silt, clay and texture without duplicating values',
+        'RETURN of composite texture invalidates all four current parameters'];
+    const setup = "const {createCompositeTextureExecutionFixture}=require('../helpers/workAttemptFixtures');await createCompositeTextureExecutionFixture(db,{data:rows});";
+    for (const name of names) {
+        const source = `test('${name}',async()=>{${setup}})`;
+        expect(scanSource(source, 'tests/contracts/audit_0_3_publication.test.js', exceptions)).toEqual([]);
+        expect(scanSource(source, 'tests/contracts/new_composite.test.js', exceptions)).toEqual([
+            expect.objectContaining({ code: 'POSITIVE_FIXTURE_CALLER_NOT_ALLOWED' })]);
+    }
+    for (const source of [
+        setup,
+        `test('another publication case',async()=>{${setup}})`,
+        `test('${names[0]}',async()=>{${setup.replace('await createCompositeTextureExecutionFixture(db,{data:rows});', 'runLater(createCompositeTextureExecutionFixture);')}})`,
+        "const fixtures=require('../helpers/workAttemptFixtures');fixtures.createCompositeTextureExecutionFixture(db,{data:rows});",
+        "require('../helpers/workAttemptFixtures')[name](db,{data:rows});"
+    ]) expect(scanSource(source, 'tests/contracts/audit_0_3_publication.test.js', exceptions)).toEqual([
+        expect.objectContaining({ code: 'POSITIVE_FIXTURE_CALLER_NOT_ALLOWED' })]);
+    // A valid import never grants direct workflow or Result-write permission.
+    expect(scanSource(`test('${names[0]}',async()=>{${setup}prisma.result.create({data:{}});})`,
+        'tests/contracts/audit_0_3_publication.test.js', exceptions)).toEqual([
+        expect.objectContaining({ code: 'RESULT_CREATE_OUTSIDE_AUTHORITY' })]);
+});
+
+test.each(['services/probe.js', 'controllers/probe.js', 'routes/probe.js', 'scripts/probe.js', '../client/src/probe.js'])(
+    'positive attempt fixtures cannot be imported by runtime or client: %s', filename => {
+        const specifier = filename.startsWith('../client') ? '../../server/tests/helpers/workAttemptFixtures'
+            : '../tests/helpers/workAttemptFixtures';
+        expect(scanSource(`require('${specifier}')`, filename, exceptions)).toEqual([
+            expect.objectContaining({ code: 'TEST_HELPER_IMPORTED_BY_RUNTIME' })]);
+    });
 test.each(['sample','workItem','result'])('a direct %s write in a #190 test remains a finding outside the factory', model => {
     expect(scanSource(`prisma.${model}.create({data:{}})`, 'tests/contracts/audit_3_1_attempt_install.test.js', exceptions))
         .toEqual([expect.objectContaining({ code: model === 'result' ? 'RESULT_CREATE_OUTSIDE_AUTHORITY' : 'WORKFLOW_WRITE_OUTSIDE_AUTHORITY' })]);

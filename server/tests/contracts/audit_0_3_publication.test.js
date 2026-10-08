@@ -1,4 +1,5 @@
-const { createResultFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { installWorkAttemptContract } = require('../../scripts/install_work_attempt_contract');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const { createLegacyClosureDatabase, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
 const crypto = require('crypto');
@@ -30,7 +31,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     afterEach(() => jest.restoreAllMocks());
     afterAll(async () => { for (const database of ownedDatabases) await database.close(); });
     const call = (path, body) => request(app).post(path).set('Authorization', `Bearer ${token}`).send(body);
-    async function fixture({ status = 'APPROVED', itemStatus = 'ACCEPTED', param = 'PH_H2O', batchStatus, flags = [], valid = true, linkItemBatch = true } = {}) {
+    async function fixture({ status = 'APPROVED', itemStatus = 'ACCEPTED', param = 'PH_H2O', batchStatus, flags = [], valid = true, linkItemBatch = true, recordResult = true } = {}) {
         const sampleId = id('SMP-03'), workItemId = id('WI-03'), resultId = id('RES-03');
         const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-03'), analysis: param, status: batchStatus, labId, createdBy: 'review-test',
             qcResults: batchStatus === 'QC_FAIL' ? JSON.stringify({ blanks: [{ value: 2, maxAllowed: 1, status: 'FAIL' }], duplicates: [], controls: [] }) : null } }) : null;
@@ -45,16 +46,19 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
                 workItems: [{ ...itemData, createdAt: now, updatedAt: now }],
                 batches: batch ? [{ ...batch, createdAt: batch.createdAt.getTime() }] : [] });
             ownedDatabases.push(database); useLegacyRouteDatabase(prisma, database.client);
+            expect(installWorkAttemptContract({ dbPath: database.file, apply: true }).classification).toBe('COMPLETE');
             item = await database.client.workItem.findUnique({ where: { id: workItemId } });
         } else {
             await createSampleFixture(prisma, { data: sampleData });
             item = await createWorkItemFixture(prisma, { data: itemData });
         }
-        const result = await createResultFixture(prisma, { data: { id: resultId, sampleId, param, value: '7.2', numericValue: 7.2, isCurrent: true,
-            isValid: valid, flags: JSON.stringify(flags), batchId: batch?.id } });
+        const resultData = { id: resultId, sampleId, param, value: '7.2', numericValue: 7.2, isCurrent: true,
+            isValid: valid, flags: JSON.stringify(flags), batchId: batch?.id };
+        const result = recordResult ? await createExecutionResultFixture(prisma, {
+            ...(itemStatus === 'ACCEPTED' && { attemptStatus: 'ACCEPTED' }), data: resultData }) : null;
         await setFixtureQcRequirement(prisma, token, labId, batch ? 'REQUIRED' : 'NOT_REQUIRED');
         if (batch) await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, batch.id);
-        return { sampleId, item, result, batch };
+        return { sampleId, item, result, batch, resultData };
     }
     const generate = f => call(`/api/reports/generate/${f.sampleId}`, {});
     async function spectralFixture(analysis = 'SPEC_MIR', scanOverrides = {}) {
@@ -205,8 +209,14 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         expect((await reviewedState(f)).result).toEqual(before.result);
     });
     test('composite texture governs sand, silt, clay and texture without duplicating values', async () => {
-        const f = await fixture({ param: 'TEXTURE' });
-        for (const param of ['SAND', 'SILT', 'CLAY']) await createResultFixture(prisma, { data: { id: id('TEXT-03'), sampleId: f.sampleId, param, value: '25', isCurrent: true } });
+        const { createCompositeTextureExecutionFixture } = require('../helpers/workAttemptFixtures');
+        const f = await fixture({ param: 'TEXTURE', recordResult: false });
+        const results = await createCompositeTextureExecutionFixture(prisma, { attemptStatus: 'ACCEPTED',
+            data: [f.resultData, ...['SAND', 'SILT', 'CLAY'].map(param => ({ id: id('TEXT-03'),
+                sampleId: f.sampleId, param, value: '25', isCurrent: true }))] });
+        f.result = results.find(row => row.param === 'TEXTURE');
+        expect(new Set(results.map(row => row.attemptId))).toEqual(new Set([f.result.attemptId]));
+        expect(await prisma.workAttempt.findUnique({ where: { id: f.result.attemptId } })).toMatchObject({ workItemId: f.item.id });
         expect((await reportValues(f)).values.map(row => row.param).sort()).toEqual(['CLAY', 'SAND', 'SILT', 'TEXTURE']);
         expect(governsResult({ ...f.item, analysis: 'SAND' }, { ...f.result, param: 'CLAY' })).toBe(false);
     });
@@ -292,10 +302,14 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         expect(values).toHaveLength(0); expect(content.workItems[0].result).toBeNull();
     });
     test('RETURN of composite texture invalidates all four current parameters', async () => {
-        const f = await fixture({ status: 'PROCESSING', itemStatus: 'SUBMITTED', param: 'TEXTURE' });
-        for (const param of ['SAND', 'SILT', 'CLAY']) await createResultFixture(prisma, { data: {
-            id: id('TEXT-RETURN-03'), sampleId: f.sampleId, param, value: '25', isCurrent: true, isValid: true, flags: '["METHOD_NOTE"]'
-        } });
+        const { createCompositeTextureExecutionFixture } = require('../helpers/workAttemptFixtures');
+        const f = await fixture({ status: 'PROCESSING', itemStatus: 'SUBMITTED', param: 'TEXTURE', recordResult: false });
+        const recorded = await createCompositeTextureExecutionFixture(prisma, { data: [f.resultData,
+            ...['SAND', 'SILT', 'CLAY'].map(param => ({ id: id('TEXT-RETURN-03'), sampleId: f.sampleId,
+                param, value: '25', isCurrent: true, isValid: true, flags: '["METHOD_NOTE"]' }))] });
+        f.result = recorded.find(row => row.param === 'TEXTURE');
+        expect(new Set(recorded.map(row => row.attemptId))).toEqual(new Set([f.result.attemptId]));
+        expect(await prisma.workAttempt.findUnique({ where: { id: f.result.attemptId } })).toMatchObject({ workItemId: f.item.id });
         expect((await returnItem('individual', f)).status).toBe(200);
         const results = await prisma.result.findMany({ where: { sampleId: f.sampleId } });
         expect(results).toHaveLength(4);

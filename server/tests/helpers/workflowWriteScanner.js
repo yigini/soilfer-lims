@@ -59,6 +59,16 @@ const mutations = new Set(['create', 'createMany', 'createManyAndReturn', 'updat
 const sqlMethods = new Set(['prepare', 'exec', 'execute', 'pragma', '$executeRaw', '$executeRawUnsafe', '$queryRaw', '$queryRawUnsafe']);
 const workflowModels = new Map([['sample', 'Sample'], ['samples', 'Sample'], ['workItem', 'WorkItem'], ['workItems', 'WorkItem'], ['result', 'Result'], ['results', 'Result']]);
 const union = sets => [...new Set(sets.flat())];
+// Pin6059042857: positive composite setup is confined to these two tests.
+// This registry grants no direct Result/WorkItem/SQL writer exemption.
+const COMPOSITE_FIXTURE = Object.freeze({
+    file: 'tests/helpers/workAttemptFixtures.js', exportName: 'createCompositeTextureExecutionFixture',
+    caller: 'tests/contracts/audit_0_3_publication.test.js',
+    tests: Object.freeze([
+        'composite texture governs sand, silt, clay and texture without duplicating values',
+        'RETURN of composite texture invalidates all four current parameters'
+    ])
+});
 // #190 pin6057064901: one byte-bound export, four exact callers. This is a
 // fixture authority with an enforced import boundary, never a file exemption.
 const ATTEMPT_FIXTURE = Object.freeze({
@@ -550,6 +560,36 @@ function scanSource(source, filename, exceptions = []) {
             const root = path.resolve(__dirname, '../..');
             const resolved = path.relative(root, path.resolve(root, path.dirname(filename), specifier))
                 .replace(/\\/g, '/').replace(/\.(?:js|cjs)$/, '');
+            if (resolved === COMPOSITE_FIXTURE.file.replace(/\.js$/, '')) {
+                if (!filename.startsWith('tests/')) {
+                    report(p.node, 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
+                } else {
+                    const inNamedTest = reference => filename === COMPOSITE_FIXTURE.caller && Boolean(reference.findParent(parent =>
+                        parent.isCallExpression() && parent.get('callee').isIdentifier({ name: 'test' }) &&
+                        parent.get('arguments.0').isStringLiteral() && COMPOSITE_FIXTURE.tests.includes(parent.node.arguments[0].value)));
+                    const directCallsOnly = binding => binding && binding.constantViolations.length === 0 &&
+                        binding.referencePaths.length > 0 && binding.referencePaths.every(reference =>
+                            reference.parentPath.isCallExpression() && reference.key === 'callee' && inNamedTest(reference));
+                    let allowed = false;
+                    const declaration = p.parentPath;
+                    if (declaration.isVariableDeclarator() && declaration.get('id').isObjectPattern()) {
+                        allowed = declaration.get('id.properties').every(property => {
+                            if (!property.isObjectProperty() || property.node.computed || !property.get('value').isIdentifier()) return false;
+                            const name = property.node.key.name || property.node.key.value;
+                            if (name === 'createExecutionResultFixture') return true;
+                            return name === COMPOSITE_FIXTURE.exportName && inNamedTest(p) &&
+                                directCallsOnly(declaration.scope.getBinding(property.node.value.name));
+                        });
+                    } else if (p.isImportDeclaration()) {
+                        allowed = p.get('specifiers').every(property => property.isImportSpecifier() &&
+                            (property.node.imported.name === 'createExecutionResultFixture' ||
+                            property.node.imported.name === COMPOSITE_FIXTURE.exportName &&
+                            directCallsOnly(p.scope.getBinding(property.node.local.name))));
+                    } else if (declaration.isMemberExpression() && !declaration.node.computed &&
+                        declaration.node.property.name === 'createExecutionResultFixture') allowed = true;
+                    if (!allowed) report(p.node, 'POSITIVE_FIXTURE_CALLER_NOT_ALLOWED', specifier);
+                }
+            }
             if (resolved === ATTEMPT_FIXTURE.file.replace(/\.js$/, '')) {
                 const callerAllowed = Object.hasOwn(ATTEMPT_FIXTURE.callers, filename);
                 const namedOrphan = filename !== 'tests/contracts/audit_1_2_spectral_state.test.js' || Boolean(p.findParent(parent =>
