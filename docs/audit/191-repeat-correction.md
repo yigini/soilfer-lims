@@ -6,7 +6,7 @@ Branch: audit/3.2-repeat-correction. No #191 PR, audit pass or deployment exists
 
 Scope authorities are #162 and #191 comments 5975239652, 6055538092,
 6059796291, 6067488471, 6067875897, 6068463777, 6068870369, 6069548259
-and 6069938801, 6070309684, 6070420159, 6070565847. CONTRIBUTING.md applies.
+and 6069938801, 6070309684, 6070420159, 6070565847, 6070675563. CONTRIBUTING.md applies.
 Claude answered the payload, explicit replicate, derived review, historical
 import, causal event and reported-value fixture questions. None is pending.
 
@@ -83,7 +83,7 @@ Applied by precedent / deliberate setup inventory:
 - result_provenance: two typed-to-spectral scenarios now request a real
   CONFIRMATION repeat before the later prediction; scientific assertions and
   the incremental-replica case are unchanged (6069938801).
-- nsis_result_import: two explicit replicas share one execution; values 6.4
+- nsis_v2_exchange: two explicit replicas share one execution; values 6.4
   and 6.5 and replica numbers 1/2 are unchanged. Attempt-count expectations
   deliberately become one, with both Result IDs bound to it (6069938801).
 - audit_1_5_result_writes: seven smuggled metadata scenarios retain their
@@ -104,8 +104,10 @@ Applied by precedent / deliberate setup inventory:
   one retained initial value is corrected through the actual route, then
   submitted/reviewed/approved. An owned lab/method/SOC zero-frequency rule is
   created by qcRuleService with the actual manager; the actual gate must say
-  NOT_REQUIRED. Literal method/unit, policy versions 0/1 and original export
-  assertions are unchanged (6070309684/6070565847). No QC test uses this setup.
+  NO_BATCH with required:false and no linked batches, and permit actual
+  approval. Literal method/unit, policy versions 0/1 and original export
+  assertions are unchanged (6070309684/6070565847/6070675563). No QC test uses
+  this setup; qcGateService is unchanged.
 - audit_0_3_publication: both scalar acquisition confirmations explicitly
   request a repeat before the second workbench save, retaining original
   scalar publication and acquisition assertions.

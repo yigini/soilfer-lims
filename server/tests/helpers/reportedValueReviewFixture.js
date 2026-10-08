@@ -2,7 +2,7 @@
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 
-// #191 pins6070309684 /6070565847: isolated report-selection cases retain
+// #191 pins6070309684 /6070565847 /6070675563: isolated selection cases retain
 // their policy version and use actual correction, QC, submission and review.
 // This zero-frequency rule is confined to these non-QC cases.
 async function correctAndApproveReportedValue(db, { app, token, labId, item, original, value }) {
@@ -20,7 +20,9 @@ async function correctAndApproveReportedValue(db, { app, token, labId, item, ori
     expect(result).toMatchObject({ attemptId: original.attemptId, methodologyId: original.methodologyId, unit: original.unit });
     expect(await db.result.findUnique({ where: { id: original.id } }))
         .toEqual({ ...original, isCurrent: false, supersededBy: result.id });
-    expect((await require('../../services/qcGateService').forResult(result, { db })).value).toBe('NOT_REQUIRED');
+    const gate = await require('../../services/qcGateService').forResult(result, { db });
+    expect(gate).toMatchObject({ value: 'NO_BATCH', required: false, batchIds: [] });
+    expect(require('../../services/qcGateService').decision(gate).allowed).toBe(true);
     await require('../../services/workItemStateService').transitionWorkItem(item.id, 'COMPLETED', actor,
         'Recorded report-selection determination', {}, db);
     await require('../../services/submissionStateService').createSubmissionForItems({ db, actor,
