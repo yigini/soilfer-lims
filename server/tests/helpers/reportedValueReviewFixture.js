@@ -31,6 +31,7 @@ async function correctAndApproveReportedValue(db, { app, token, labId, item, ori
         .send({ decision: 'ACCEPT', attemptId: original.attemptId, note: 'Reviewed corrected determination' });
     expect({ status: reviewed.status, body: reviewed.body }).toMatchObject({ status: 200 });
     const approved = await request(app).post(`/api/samples/${item.sampleId}/approve`).set('Authorization', `Bearer ${token}`).send({});
+    if (approved.status !== 200) throw new Error('Owned report-selection approval refused: ' + JSON.stringify(approved.body));
     expect({ status: approved.status, body: approved.body }).toMatchObject({ status: 200 });
     return result;
 }
