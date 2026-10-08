@@ -114,7 +114,8 @@ async function validateExecutionReadiness(tx,ctx) {
 
 async function appendResult(tx, ctx, measurement, values, now) {
     const id = measurement.id || randomUUID();
-    await tx.result.updateMany({ where: { sampleId: ctx.sample.id, param: measurement.param, replicateNo: ctx.replicateNo, isCurrent: true },
+    await tx.result.updateMany({ where: { sampleId: ctx.sample.id, param: measurement.param, replicateNo: ctx.replicateNo, isCurrent: true,
+        ...(ctx.correctionTargetId && { id: ctx.correctionTargetId, attemptId: ctx.attemptId }) },
         data: { isCurrent: false, supersededBy: id } });
     let row;
     try {
@@ -135,6 +136,47 @@ async function cacheResult(tx, item, text) {
     if (!item) return;
     // State/version changes still belong to workItemStateService, in this same transaction.
     await tx.workItem.update({ where: { id: item.id }, data: { result: text } });
+}
+
+// #191: a correction appends within the actual recorded attempt. Neither its
+// execution/readiness evidence nor another replicate is replaced or refilled.
+async function appendAttemptCorrection(tx, { item, sample, attempt, target, actor, value }) {
+    rules.requireTransaction(tx);
+    const original = await tx.result.findFirst({ where: { id: target.id, attemptId: attempt.id, isCurrent: true, supersededBy: null } });
+    const owner = await tx.workAttempt.findUnique({ where: { id: attempt.id }, include: { workItem: { include: { sample: true } } } });
+    if (!original || !owner || owner.workItemId !== item.id || owner.workItem.sampleId !== sample.id || original.sampleId !== sample.id) {
+        throw new TransitionError('Choose a current Result on this attempt.', 409, 'ATTEMPT_CORRECTION_TARGET_INVALID');
+    }
+    item = owner.workItem; sample = item.sample; attempt = owner;
+    rules.assertScope(actor, sample);
+    const reviewer = hasPermission(actor, 'APPROVE_RESULTS');
+    if (!reviewer && (!hasPermission(actor, 'ENTER_RESULTS') || item.assignedTo !== rules.actorName(actor) || attempt.status !== 'RECORDED') ||
+        attempt.status === 'SUBMITTED' && !reviewer) {
+        throw new TransitionError('This correction requires a reviewer.', 403, 'ATTEMPT_CORRECTION_FORBIDDEN');
+    }
+    if (!['RECORDED','SUBMITTED'].includes(attempt.status) || !['IN_PROGRESS','COMPLETED','SUBMITTED'].includes(item.status)) {
+        throw new TransitionError('This attempt is no longer eligible for correction.',409,'ATTEMPT_CORRECTION_STATE_REFUSED');
+    }
+    require('./resultEvidenceService').assertAmendable(sample);
+    await require('./sampleHoldService').assertNotHeld(tx,sample);
+    await require('./resultEvidenceService').assertNoPreparationRevert(tx,sample.id);
+    const labId = sample.assignedLab || item.labId, analysis = await tx.analysis.findUnique({ where: { code: item.analysis } });
+    if (!analysis || analysis.labId && analysis.labId !== labId || configurationIssues(analysis).length) {
+        throw new TransitionError('The correction parameter configuration is unavailable.',409,'RESULT_CONFIGURATION_INVALID');
+    }
+    const method = original.methodologyId ? await tx.methodology.findUnique({ where: { id: original.methodologyId } }) : null;
+    if (original.methodologyId && !isAvailable(method,item.analysis,labId)) throw new TransitionError('The original method is unavailable in this laboratory.',409,'RESULT_METHOD_MISMATCH');
+    let equipmentReadiness;
+    try { equipmentReadiness = original.equipmentReadiness == null ? null : JSON.parse(original.equipmentReadiness); }
+    catch (_) { throw new TransitionError('The recorded correction evidence is unavailable.',409,'ATTEMPT_CORRECTION_EVIDENCE_UNAVAILABLE'); }
+    const ctx = { sample,item,attemptId:attempt.id,correctionTargetId:original.id,actor,performedBy:rules.actorName(actor),labId,
+        analysis,method,methodId:original.methodologyId,batchId:original.batchId,replicateNo:original.replicateNo,
+        basis:original.basis,equipmentId:original.equipmentId,equipmentReadiness,equipmentReadinessText:original.equipmentReadiness,source:'measurement' };
+    const measurement = { param:original.param,value,unit:original.unit,replicateNo:original.replicateNo }, now = new Date();
+    const values = await numericValues(tx,ctx,measurement);
+    const row = await appendResult(tx,ctx,measurement,{...values,provenance:original.provenance},now);
+    if (row.param === item.analysis) await cacheResult(tx,item,row.value);
+    return row;
 }
 
 async function numericValues(tx, ctx, measurement, parsedValue=null, numberFormat=null) {
@@ -377,5 +419,5 @@ function createRawResultFixture(db, data) {
 }
 
 module.exports = { writeResult, writeSpectralPrediction, selectMeasurement, writeTextureDetermination, deriveTextureResult, writeNonMeasurementSummary, writeFixtureCache,
-    writeResultsExecution,
+    writeResultsExecution, appendAttemptCorrection,
     createResultFixture, createResultsFixture, createRawResultFixture, mapResultWriteError };

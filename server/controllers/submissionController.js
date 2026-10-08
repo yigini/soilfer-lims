@@ -328,6 +328,7 @@ exports.reviewSubmission = async (req, res) => {
                     sampleId: String(submission.sampleId),
                     workItemId,
                     attemptId:decision.attemptId,
+                    reasonCode:decision.reasonCode ?? null,
                     submissionItemId: submission.id,
                     decision: verdict === 'ACCEPT' ? 'ACCEPT' : (verdict === 'REJECT_REANALYSIS' ? 'RETURN' : 'OMIT'),
                     reason: reason || null,
@@ -354,7 +355,7 @@ exports.reviewSubmission = async (req, res) => {
                         await invalidateReturnedResults(tx, item, user, reason);
                     }
                     return rows;
-                }, id, { reason, qcAcknowledgement: req.body.qcAcknowledgement,
+                }, id, { reason, reasonCode:decision.reasonCode, attemptId:decision.attemptId, qcAcknowledgement: req.body.qcAcknowledgement,
                     action: verdict === 'REJECT_REANALYSIS' ? 'REANALYSIS_REQUESTED' : 'REVIEW_DECISION_MADE',
                     details: `${user.username} ${verdict.toLowerCase()}ed ${analysisName}` });
                 results.push({ workItemId, status: newStatus, decision: verdict });

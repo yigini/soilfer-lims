@@ -43,6 +43,10 @@ async function createSubmissionForItems({ db, actor, sampleId, type, workItemIds
                 submissionId, submittedAt: now, history: JSON.stringify(history)
             }, tx, { expected: { status: item.status, version: item.version }, audit: {
                 action: 'WORKITEM_SUBMITTED', details: `${performedBy} submitted ${await getAnalysisName(item.analysis, tx)}` } });
+            if (!require('./workItemKinds').isNonMeasurement(item)) {
+                const attemptId=await require('./reviewAttemptService').resolveReviewAttempt(tx,item,'ACCEPT');
+                await require('./workAttemptEventService').transitionAttempt(tx,item,attemptId,'SUBMITTED',actor);
+            }
         }
         const derived = await deriveSubmissionLifecycle(tx, sample.id);
         assertRequestedType(type, derived);

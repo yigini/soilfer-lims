@@ -35,6 +35,13 @@ async function commitReview(prisma, item, status, user, data, operations, submis
             assertReviewable(current, status, sample);
             const returned = status === 'REPEAT_REQUIRED' && !workflow.CLOSURE_TASK_ANALYSES.includes(current.analysis);
             if (returned) require('./resultEvidenceService').assertAmendable(sample);
+            const measured=!require('./workItemKinds').isNonMeasurement(current);
+            let repeatRequest, repeatPlan;
+            if(returned && measured) {
+                repeatRequest=require('./workRepeatContract').repeatRequest({reason:audit.reasonCode,note:audit.note || audit.reason || data.reanalysisReason});
+                repeatPlan=await require('./workRepeatService').preflightRepeat(tx,current,sample,user,repeatRequest,audit.attemptId);
+                data={...data,submissionId:null,batchId:null,rackPosition:null,submittedAt:null,completedAt:null};
+            }
             const qcGate = require('./qcGateService');
             const qcRows = status === 'ACCEPTED' ? await qcGate.requireAcceptance([{ ...current, sample }], audit.qcAcknowledgement, tx) : [];
             const history = typeof data.history === 'string' ? JSON.parse(data.history) : data.history;
@@ -52,6 +59,13 @@ async function commitReview(prisma, item, status, user, data, operations, submis
             });
             await qcGate.recordAcknowledgements(qcRows, audit.qcAcknowledgement, user, tx);
             const decisions = await operations(tx);
+            if(returned && measured) {
+                await require('./workRepeatService').reserveRepeat(tx,current,sample,user,repeatRequest,repeatPlan);
+            } else if(status==='ACCEPTED' && measured) {
+                const selected=(Array.isArray(decisions)?decisions:[decisions]).find(row=>row?.workItemId===current.id && row.decision==='ACCEPT');
+                if(!selected?.attemptId)throw Object.assign(new Error('Acceptance must identify its ReviewDecision attempt.'),{statusCode:409,code:'REVIEW_DECISION_REQUIRED'});
+                await require('./workAttemptEventService').transitionAttempt(tx,current,selected.attemptId,'ACCEPTED',user);
+            }
             if (returned && sample.status === 'SUBMITTED_FULL') {
                 const decision = (Array.isArray(decisions) ? decisions : [decisions]).find(row =>
                     row?.workItemId === current.id && row.decision === 'RETURN');

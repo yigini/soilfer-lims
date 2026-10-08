@@ -10,7 +10,7 @@ async function appendAttemptEvent(tx, item, attemptId, actor, { action, from, to
     return tx.auditLog.create({ data: { id: randomUUID(), entity: 'WORK_ATTEMPT', entityId: attemptId, action,
         performedBy, performedByName: actor?.name || performedBy, timestamp: now,
         sampleId: item.sampleId, labId: item.labId || item.sample?.assignedLab || null, analysisCode: item.analysis,
-        details: JSON.stringify({ from, to, reason, note, oldResultIds, newResultIds }),
+        details: JSON.stringify({ from, to, reason, note, resultId: oldResultIds.length === 1 ? oldResultIds[0] : null, oldResultIds, newResultIds }),
         before: JSON.stringify({ status: from, resultIds: oldResultIds }), after: JSON.stringify({ status: to, resultIds: newResultIds }) } });
 }
 async function transitionAttempt(tx, item, attemptId, nextStatus, actor, { reason = null, note = null } = {}) {
