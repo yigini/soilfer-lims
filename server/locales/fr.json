@@ -942,7 +942,8 @@
       "qc_calibrationFailAction": "Action après échec de l’étalonnage",
       "equipment_requireEquipment": "Équipement requis",
       "equipment_unconfiguredReadiness": "Disponibilité des équipements non configurés",
-      "pt_zScoreLimits": "Limites du score z des essais d’aptitude"
+      "pt_zScoreLimits": "Limites du score z des essais d’aptitude",
+      "qc_reviewedTranscriptionCorrectionEnabled": "Autoriser la correction révisée des erreurs de transcription du CQ échoué sans décision"
     },
     "title": "Politiques",
     "yes": "Oui",
@@ -1404,5 +1405,23 @@
       "QC_WORK_ITEMS_REQUIRED": "Sélectionnez des travaux dans la feuille avant de créer une série.",
       "QC_RUN_PROFILE_ONLY_STORED": "Cette série stockée conserve ses preuves originales. Créez une nouvelle série pour les mesures natives."
     }
+  },
+  "qcReviewedCorrection": {
+    "policyDescription": "Autoriser la correction révisée des erreurs de transcription du CQ échoué sans décision",
+    "title": "Examiner une correction de transcription",
+    "help": "Un second réviseur peut corriger une erreur de saisie enregistrée. Identifiez la feuille ou le fichier original. La lecture échouée reste dans l’historique et les futurs rapports.",
+    "analysis": "Analyse",
+    "original": "Lecture originale",
+    "correctedValue": "Lecture corrigée",
+    "reason": "Motif",
+    "sourceReference": "Référence de la source enregistrée",
+    "submit": "Approuver la correction et réévaluer",
+    "saving": "Enregistrement de la correction…",
+    "refused": "Correction refusée",
+    "disclosure": "Correction révisée de transcription du CQ",
+    "originalFailure": "Évaluation échouée originale",
+    "replacement": "Évaluation de remplacement",
+    "reviewer": "Réviseur",
+    "authors": "Auteurs des observations originales"
   }
 }

@@ -15,10 +15,11 @@ const { linkReferences, retainReferences } = require('./referencePlacementServic
 const { resolveBatchRunProfile } = require('./qcRunProfileService');
 const { QC_RUN_INCLUDE, batchApiView, currentAnalyteEvidence, activeReopenEvent } = require('./qcRunViewService');
 const { snapshotEvidence, recordBatchAudit, withQcAudit, auditRunCommand } = require('./qcRunAuditService');
+const { authorizeReviewedCorrection } = require('./qcReviewedCorrectionService');
 const failure = (statusCode, code, message, details = {}) => Object.assign(new Error(message), { statusCode, code, details });
 const parsed = (value, fallback = null) => typeof value === 'string' ? JSON.parse(value) : value ?? fallback;
 
-async function editableRun(tx, batchId, actor, analysisCode = null) {
+async function editableRun(tx, batchId, actor, analysisCode = null, { reviewedInput = null } = {}) {
     const batch = await tx.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE });
     if (!batch) throw failure(404, 'BATCH_NOT_FOUND', 'Batch not found.');
     const [actorLab, targetLab] = await Promise.all([policyService.resolveLab(actor.labId, tx), policyService.resolveLab(batch.labId, tx)]);
@@ -29,7 +30,8 @@ async function editableRun(tx, batchId, actor, analysisCode = null) {
     }
     const selected = batch.analytes.find(row => row.analysisCode === (analysisCode || batch.analysis));
     if (!selected) throw failure(400, 'QC_ANALYSIS_NOT_IN_RUN', 'The analysis is not a member of this run.');
-    if (['QC_FAIL', 'REJECTED', 'REPEAT_ORDERED', 'CLOSED'].includes(selected.status) || currentAnalyteEvidence(batch, selected.analysisCode).disposition) {
+    const reviewed = reviewedInput ? await authorizeReviewedCorrection(tx, batch, actor, reviewedInput) : null;
+    if (!reviewed && (['QC_FAIL', 'REJECTED', 'REPEAT_ORDERED', 'CLOSED'].includes(selected.status) || currentAnalyteEvidence(batch, selected.analysisCode).disposition)) {
         throw failure(409, 'QC_BATCH_LOCKED', 'Failed or dispositioned QC evidence is locked.');
     }
     // Never silently discard an invalid legacy history when creating its next

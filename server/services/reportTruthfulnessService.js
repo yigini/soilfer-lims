@@ -1,6 +1,7 @@
 const { linkedBatchIds } = require('./reportResultGovernance');
 const { governingItems } = require('./reportResultGovernance');
 const { analyteGateView } = require('./qcRunGateService');
+const { reviewedCorrections } = require('./qcReviewedCorrectionHistory');
 
 function parseObject(value) {
     if (typeof value === 'object' && value !== null) return value;
@@ -10,8 +11,14 @@ function parseObject(value) {
 function freezeReportEvidence(results, workItems, batches, options = {}) {
     const deviations = [];
     const acknowledgements = [], calibrationBracketRepeats = [];
+    const corrections = new Map();
     for (const result of results) {
         const gate = options.qcGates?.[result.id];
+        for (const batchId of new Set([...(gate?.batchIds || []), ...linkedBatchIds(result, workItems)])) {
+            const source = batches.find(row => row.id === batchId);
+            const analysisCode = governingItems(result, workItems).find(item => item.batchId === batchId)?.analysis || result.param;
+            for (const correction of reviewedCorrections(source, analysisCode)) corrections.set(correction.id, correction);
+        }
         if (gate) {
             const acknowledgement = options.qcAcknowledgements?.[result.id];
             if (acknowledgement) acknowledgements.push({ resultId: result.id, ...acknowledgement });
@@ -55,7 +62,8 @@ function freezeReportEvidence(results, workItems, batches, options = {}) {
             recordedAt: receipt.recordedAt || null, recordedBy: receipt.recordedBy || null, observations: receipt.observations || null }];
     });
     return { qc: { withinLimits: results.length > 0 && deviations.length === 0, deviations,
-        ...(acknowledgements.length && { acknowledgements }), ...(calibrationBracketRepeats.length && { calibrationBracketRepeats }) }, preparation };
+        ...(acknowledgements.length && { acknowledgements }), ...(calibrationBracketRepeats.length && { calibrationBracketRepeats }),
+        ...(corrections.size && { reviewedCorrections: [...corrections.values()] }) }, preparation };
 }
 
 function describeReportEvidence(evidence, locale = 'en') {
@@ -77,7 +85,14 @@ function describeReportEvidence(evidence, locale = 'en') {
     }).join('\n');
     const bracketStatement = (qc?.calibrationBracketRepeats || []).map(row =>
         `${labels.qcCalibrationBracketRepeatInfo}: ${row.analysisCode} · ${row.batchId}`).join('\n');
-    return { qcStatement: bracketStatement ? `${qcStatement}\n${bracketStatement}` : qcStatement, preparationStatement };
+    const correctionLabels = require(`../locales/${canonical}.json`).qcReviewedCorrection;
+    const correctionStatement = (qc?.reviewedCorrections || []).map(row =>
+        `${correctionLabels.disclosure}: ${row.analysisCode} · ${row.batchId} · ${correctionLabels.originalFailure}: ${row.previousVerdict} (${row.previousEvaluationId}) · ` +
+        `${correctionLabels.replacement}: ${row.replacementEvaluation?.verdict || ''} (${row.evaluationId}) · ${correctionLabels.reviewer}: ${row.reviewer?.username || row.by} · ` +
+        `${correctionLabels.reason}: ${row.reason} · ${correctionLabels.sourceReference}: ${row.sourceReference}\n` +
+        row.replacements.map(change => `${change.original.positionId}/${change.original.replicateNo}: ` +
+            `${change.original.rawInput ?? change.original.value} (${change.original.id}) → ${change.replacement.rawInput ?? change.replacement.value} (${change.replacement.id})`).join('\n')).join('\n');
+    return { qcStatement: [qcStatement, bracketStatement, correctionStatement].filter(Boolean).join('\n'), preparationStatement };
 }
 
 module.exports = { freezeReportEvidence, describeReportEvidence };

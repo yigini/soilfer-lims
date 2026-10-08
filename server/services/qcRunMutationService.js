@@ -11,6 +11,7 @@ const { reopenNativeRun } = require('./qcNativeLifecycleService');
 const { startNativeRun, instrumentFor } = require('./qcNativeRunService');
 const { correctCompatibilityMeasurements } = require('./qcCompatibilityCorrectionService');
 const { flagBatchResults } = require('./qcService');
+const { MODE, authorizeReviewedCorrection } = require('./qcReviewedCorrectionService');
 const failure = (statusCode, code, message) => Object.assign(new Error(message), { statusCode, code });
 const isNative = batch => batch.analytes.length > 0 && batch.analytes.every(row => row.provenance === 'NATIVE');
 
@@ -24,12 +25,15 @@ async function mutateQcRun(db, batchId, actor, input = {}, { explicit = false, c
         let batch = await readQcRun(tx, batchId, actor);
         if (batch.status === 'CLOSED') throw failure(400, 'QC_BATCH_LOCKED', 'Batch is CLOSED and cannot be modified.');
         if (!batch.analytes.length) throw failure(409, 'QC_RUN_STORAGE_REQUIRED', 'Install the reviewed QC run migration before modifying this batch.');
+        if (input.mode === MODE && !correction) throw failure(400, 'QC_REVIEWED_ROUTE_REQUIRED', 'Use the explicit corrections route.');
+        const reviewed = correction ? await authorizeReviewedCorrection(tx, batch, actor, input) : null;
         const native = isNative(batch), payload = hasQcPayload(input) || correction, clear = payload && !explicit && !correction && emptyQcPayload(input);
-        const targetCode = input.analysisCode || (native && (payload || explicit) ? batch.analysis : null);
+        const targetCode = reviewed?.analysisCode || input.analysisCode || (native && (payload || explicit) ? batch.analysis : null);
         const targetsOf = run => targetCode ? run.analytes.filter(row => row.analysisCode === targetCode) : run.analytes;
         let targets = targetsOf(batch);
         if (!targets.length) throw failure(400, 'QC_ANALYSIS_NOT_IN_RUN', 'The analysis is not a member of this run.');
-        const locked = row => ['QC_FAIL', 'REJECTED', 'REPEAT_ORDERED'].includes(row.status) || Boolean(row.disposition);
+        const locked = row => reviewed?.analysisCode !== row.analysisCode &&
+            (['QC_FAIL', 'REJECTED', 'REPEAT_ORDERED'].includes(row.status) || Boolean(row.disposition));
         const accepted = targets.some(row => ['QC_PASS', 'QC_WARN'].includes(row.status));
         const reopen = accepted && (['OPEN', 'RUNNING'].includes(requested) || clear);
         const statusTargets = reopen ? targets.filter(row => ['QC_PASS', 'QC_WARN'].includes(row.status)) : targets;

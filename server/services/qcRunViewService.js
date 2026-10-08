@@ -2,6 +2,7 @@ const scopeGuard = require('../utils/scopeGuard');
 const policyService = require('./policyService');
 const { runAnalyteCode } = require('./analysisCodesService');
 const { requireBatchHistory } = require('./qcHistoryService');
+const { reviewedCorrections } = require('./qcReviewedCorrectionHistory');
 const WORK_ITEM_SELECT = { id: true, sampleId: true, analysis: true, status: true, rackPosition: true, batchId: true,
     methodologyId: true, sample: { select: { id: true, originalId: true, labId: true, assignedLab: true } } };
 const QC_RUN_INCLUDE = {
@@ -107,6 +108,7 @@ function currentAnalyteEvidence(batch, analysisCode = batch.analysis) {
             referenceMaterialId: row.referenceMaterialId ?? null, referenceValueId: row.referenceValueId ?? null });
     }
     return { analysisCode, result: currentVerdict, evaluation, positions, measurements: current,
+        reviewedCorrections: reviewedCorrections(batch, analysisCode),
         qcResults: qcItems.length || currentVerdict === 'NOT_REQUIRED' ? { ...qcResults, result: currentVerdict } : null, qcItems,
         disposition: currentDisposition(batch, evaluation, analysisCode) };
 }
@@ -138,7 +140,7 @@ function batchApiView(batch, { serialized = false } = {}) {
     const workItems = [...new Map((batch.positions || []).filter(position => position.kind === 'SAMPLE')
         .flatMap(position => (position.workItems || []).filter(link => link.workItem).map(link => [link.workItemId,
             { ...link.workItem, rackPosition: position.position, currentBatchId: link.workItem.batchId }]))).values()].sort((a, b) => a.rackPosition - b.rackPosition);
-    return { ...batch, analytes, result: current.result, qcItems: current.qcItems, qcResults: serialized && current.qcResults !== null ? JSON.stringify(current.qcResults) : current.qcResults,
+    return { ...batch, analytes, reviewedCorrections: reviewedCorrections(batch), result: current.result, qcItems: current.qcItems, qcResults: serialized && current.qcResults !== null ? JSON.stringify(current.qcResults) : current.qcResults,
         workItemIds: serialized ? JSON.stringify(workItemIds) : workItemIds,
         workItems: Array.isArray(batch.positions) ? workItems : batch.workItems || [],
         disposition: serialized && current.disposition !== null ? JSON.stringify(current.disposition) : current.disposition,

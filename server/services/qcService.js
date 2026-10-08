@@ -161,7 +161,7 @@ function evaluateDuplicate(dup = {}, policy = {}) {
 
     const difference = Math.abs(v1 - v2);
     if ((policy.mode || defaults.getStrict('qc.duplicateMode')) === 'ABS_DIFF') {
-        const limit = policy.absMax ?? defaults.getStrict('qc.duplicateAbsMax');
+        const limit = policy.recordedCriteria ? policy.absMax : policy.absMax ?? defaults.getStrict('qc.duplicateAbsMax');
         if (limit === null) return { id, label, type: 'DUPLICATE', value1: v1, value2: v2, rpd: null, maxRpd,
             ...evidence, status: 'INVALID', criterion: 'ABS_DIFF_UNSET', details: 'ABS_DIFF_UNSET' };
         const passed = withinAbsoluteLimit(difference, limit);
@@ -273,13 +273,24 @@ function evaluateBatchQc(qcData = {}, options = {}) {
     const rawControls = Array.isArray(qcData.controls) ? qcData.controls : [];
 
     const policy = options.policy || {};
-    const evaluatedBlanks = rawBlanks.map(b => evaluateBlank(b, policy.blank));
-    const evaluatedDuplicates = rawDuplicates.map(d => evaluateDuplicate(d, policy.duplicate));
-    const evaluatedControls = rawControls.map(c => evaluateControl(c, policy.control));
+    const observationPolicy = (row, ordinary) => {
+        if (!options.recordedObservationPolicies) return ordinary;
+        const recorded = options.recordedObservationPolicies[row.positionId || row.id];
+        if (!recorded) throw Object.assign(new Error('The original observation criteria are incomplete.'),
+            { statusCode: 409, code: 'QC_REVIEWED_CRITERIA_UNAVAILABLE' });
+        return recorded;
+    };
+    const evaluatedBlanks = rawBlanks.map(b => evaluateBlank(b, observationPolicy(b, policy.blank)));
+    const evaluatedDuplicates = rawDuplicates.map(d => evaluateDuplicate(d, observationPolicy(d, policy.duplicate)));
+    const evaluatedControls = rawControls.map(c => evaluateControl(c, observationPolicy(c, policy.control)));
 
     const allEvaluated = [...evaluatedBlanks, ...evaluatedDuplicates, ...evaluatedControls];
     if (policy.qcRule) {
-        const requirements = require('./qcRequirementService').countRequirements(policy.qcRule, policy.sampleCount, options.runProfile, qcData, policy.qcMode);
+        const found = { BLANK: rawBlanks.length, DUPLICATE: rawDuplicates.length, CONTROL: rawControls.length,
+            LRM: rawControls.filter(row => row.referenceUse !== 'CRM').length };
+        const requirements = options.recordedRequirements ? Object.fromEntries(Object.entries(options.recordedRequirements)
+            .map(([type, row]) => [type, { ...row, found: found[type] }]))
+            : require('./qcRequirementService').countRequirements(policy.qcRule, policy.sampleCount, options.runProfile, qcData, policy.qcMode);
         const missingRequired = Object.entries(requirements).filter(([, row]) => row.found < row.required).map(([type, row]) => ({ type, ...row }));
         const failAction = policy.qcRule.resolved.failAction.value;
         const warnings = [];
