@@ -225,6 +225,7 @@ test('real legacy-imported NULL authors and historical snapshots stay locked wit
         batches: [{ id: batchId, labId, analysis, status: 'QC_FAIL', createdBy: username, workItemIds: '[]',
             qcResults: JSON.stringify(failed(9.123456789)), history: JSON.stringify([{ action: 'QC_EVIDENCE_SNAPSHOT', seq: 1,
                 snapshot: { qcResults: failed(8.123456789), qcItems: [], status: 'QC_FAIL', disposition: null, workItemIds: [] } }]) }] });
+    historical.applyPendingMigration({ migration: 'SAMPLE_CODES' });
     const connection = new Database(historical.file, { fileMustExist: true });
     try { connection.exec('CREATE TABLE "_schema_migrations" ("id" TEXT PRIMARY KEY NOT NULL,"appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"details" TEXT)'); }
     finally { connection.close(); }
