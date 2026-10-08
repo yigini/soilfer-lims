@@ -88,32 +88,38 @@ test('manual status change requires a reason and uses the audited status endpoin
     expect(view.axios.patch).toHaveBeenCalledWith('/api/reference-materials/owned-reference/status', { status: 'QUARANTINED', reason: 'Damaged seal' });
 });
 
-async function measurements(view) {
-    for (const [id, value] of [['qc-blank-input', '0'], ['qc-ctrl-meas-input', '7.12'], ['qc-dup1-input', '7'], ['qc-dup2-input', '7']]) {
-        view.find(id).props.onChange({ target: { value } }); await view.render();
-    }
+// Reference-entry cases migrated under #188 comment 6052289128; catalogue cases remain unchanged.
+const { nativeHost, nativeFixture, enter } = require('../helpers/qcWorksheetUi');
+function boundRun() {
+    const batch = nativeFixture(); const control = batch.positions.find(row => row.id === 'control-0'); control.kind = 'CRM';
+    control.references = [{ id: 'placed-control', analysisCode: 'A', referenceMaterialId: material.id, referenceValueId: 'original-certificate',
+        referenceUse: 'CRM', referenceSnapshot: { code: 'ORIGINAL-CERT', lotNumber: 'LOT-A', expected: 7.123456, referenceValueId: 'original-certificate' } }];
+    batch.analytes[0].entryEvidence = [{ positionId: 'control-0', expected: 7.123456, limits: { crmAbsWindow: 0.023456789 }, status: null }];
+    return batch;
 }
-test('linked QC requires explicit use, derives expected on the server, and disables ineligible new lots', async () => {
-    const view = host('src/components/workbench/BatchModal.jsx', { materials: [material, { ...material, id: 'expired', eligible: false }] });
-    await view.render(); view.button('QC Measurements & State').props.onClick(); await view.render();
-    expect(nodes(view.find('qc-reference-material')).find(node => node.type === 'option' && node.props.value === 'expired').props.disabled).toBe(true);
-    view.find('qc-reference-material').props.onChange({ target: { value: material.id } }); await view.render(); await measurements(view);
-    expect(view.find('qc-ctrl-exp-input').props.disabled).toBe(true); expect(view.find('evaluate-qc-btn').props.disabled).toBe(true);
-    await view.find('evaluate-qc-btn').props.onClick(); expect(view.axios.post).not.toHaveBeenCalled();
-    view.find('qc-reference-use').props.onChange({ target: { value: 'CRM' } }); await view.render();
-    expect(view.find('evaluate-qc-btn').props.disabled).toBe(false); await view.find('evaluate-qc-btn').props.onClick();
-    const control = view.axios.post.mock.calls[0][1].controls[0];
-    expect(control).toEqual({ referenceMaterialId: material.id, referenceUse: 'CRM', measured: 7.12, rawInput: { expected: null, measured: '7.12' } });
-    expect(Object.hasOwn(control, 'expected')).toBe(false); expect(Object.hasOwn(control, 'methodologyId')).toBe(false);
+test('native control use, expected and limits come from the server; setup disables ineligible lots', async () => {
+    const view = nativeHost(boundRun(), { referenceMaterials: [material, { ...material, id: 'expired', eligible: false }] }); await view.render();
+    expect(nodes(view.find('native-lot-control-0')).find(node => node.type === 'option' && node.props.value === 'expired').props.disabled).toBe(true);
+    expect(content(view.find('native-reference-control-0'))).toContain('CRM');
+    expect(content(view.find('native-reference-control-0'))).toContain('ORIGINAL-CERT');
+    expect(content(view.find('native-evidence-control-0'))).toContain('7.123456'); expect(content(view.find('native-evidence-control-0'))).toContain('0.023456789');
+    expect(nodes(view.find('native-evidence-control-0')).some(node => ['input', 'select', 'textarea'].includes(node.type))).toBe(false);
+    await enter(view, { blank: '0', 'control-0': '7.12', 'parent-0': '7', 'duplicate-0': '7' }); await view.find('native-qc-evaluate').props.onClick();
+    expect(view.axios.post).toHaveBeenCalledTimes(1);
+    const payload = view.axios.post.mock.calls[0][1]; expect(payload.references).toEqual([]);
+    expect(payload.measurements.find(row => row.positionId === 'control-0')).toEqual({ positionId: 'control-0', replicateNo: 1, rawInput: '7.12' });
+    for (const row of payload.measurements) expect(Object.keys(row).sort()).toEqual(['positionId', 'rawInput', 'replicateNo']);
 });
-
-test('re-evaluation keeps a saved value id and control identity after the placed lot becomes ineligible', async () => {
-    const view = host('src/components/workbench/BatchModal.jsx', { materials: [{ ...material, eligible: false }],
-        savedControl: { id: 'placed-control', referenceMaterialId: material.id, referenceValueId: 'original-certificate', referenceUse: 'CRM' } });
-    await view.render(); view.button('QC Measurements & State').props.onClick(); await view.render(); await measurements(view);
-    expect(nodes(view.find('qc-reference-material')).find(node => node.type === 'option' && node.props.value === material.id).props.disabled).toBe(false);
-    await view.find('evaluate-qc-btn').props.onClick();
-    expect(view.axios.post.mock.calls[0][1].controls[0]).toMatchObject({ id: 'placed-control', referenceValueId: 'original-certificate', referenceUse: 'CRM' });
+test('re-entry preserves the original bound certificate when the placed lot is ineligible and posts no binding fields', async () => {
+    const batch = boundRun(), before = JSON.stringify(batch.positions.find(row => row.id === 'control-0').references);
+    const view = nativeHost(batch, { referenceMaterials: [{ ...material, eligible: false, code: 'LIVE-CHANGED', values: [{ assignedValue: 999 }] }] });
+    await view.render();
+    expect(nodes(view.find('native-lot-control-0')).find(node => node.type === 'option' && node.props.value === material.id).props.disabled).toBe(true);
+    expect(content(view.find('native-reference-control-0'))).toContain('ORIGINAL-CERT'); expect(content(view.find('native-evidence-control-0'))).toContain('7.123456');
+    await enter(view, { blank: '0', 'control-0': '7.12', 'parent-0': '7', 'duplicate-0': '7' }); await view.find('native-qc-evaluate').props.onClick();
+    const payload = view.axios.post.mock.calls[0][1]; expect(payload.references).toEqual([]);
+    expect(payload.measurements.every(row => Object.keys(row).sort().join(',') === 'positionId,rawInput,replicateNo')).toBe(true);
+    expect(JSON.stringify(batch.positions.find(row => row.id === 'control-0').references)).toBe(before);
 });
 
 test.each(['en', 'es', 'es-419', 'fr', 'pt'])('reference strings and server rule codes are translated in %s', locale => {

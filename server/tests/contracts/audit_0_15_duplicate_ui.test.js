@@ -1,131 +1,48 @@
-const fs = require('fs');
-const path = require('path');
-const vm = require('vm');
-const clientRoot = path.resolve(__dirname, '../../../client');
-const esbuild = require(path.join(clientRoot, 'node_modules/esbuild'));
-const React = require(path.join(clientRoot, 'node_modules/react'));
+const { nativeHost, nativeFixture, enter, nodes, content } = require('../helpers/qcWorksheetUi');
 
-function modalHost(batchPatch = {}) {
-    const hooks = [];
-    let cursor = 0;
-    let pendingEffects = [];
-    const sameDeps = (a, b) => a && b && a.length === b.length && a.every((value, i) => value === b[i]);
-    const react = { ...React,
-        useState(initial) {
-            const index = cursor++;
-            if (!(index in hooks)) hooks[index] = { value: typeof initial === 'function' ? initial() : initial };
-            return [hooks[index].value, value => {
-                hooks[index].value = typeof value === 'function' ? value(hooks[index].value) : value;
-            }];
-        },
-        useEffect(effect, deps) {
-            const index = cursor++;
-            if (!sameDeps(hooks[index]?.deps, deps)) pendingEffects.push(effect);
-            hooks[index] = { deps };
-        },
-        useCallback(callback, deps) {
-            const index = cursor++;
-            if (!sameDeps(hooks[index]?.deps, deps)) hooks[index] = { deps, value: callback };
-            return hooks[index].value;
-        }
-    };
-    const axios = {
-        get: jest.fn().mockResolvedValue({ data: { data: [
-            { id: 'fixture-batch', status: 'OPEN', profile: 'RACK_40', numberFormat: { decimal: '.', thousands: null }, ...batchPatch },
-            { id: 'second-batch', status: 'OPEN', profile: 'RACK_40', numberFormat: { decimal: '.', thousands: null } }
-        ] } }),
-        post: jest.fn().mockResolvedValue({ data: { status: 'QC_PASS' } }),
-        put: jest.fn()
-    };
-    const load = (file, resolve) => {
-        const module = { exports: {} };
-        vm.runInNewContext(esbuild.transformSync(fs.readFileSync(file, 'utf8'), { loader: 'jsx', format: 'cjs' }).code,
-            { module, exports: module.exports, require: resolve, console });
-        return module.exports;
-    };
-    const parser = load(path.join(clientRoot, 'src/utils/messageFormatter.js'), () => ({}));
-    const Component = load(path.join(clientRoot, 'src/components/workbench/BatchModal.jsx'), name => {
-        if (name === 'react') return react;
-        if (name === 'axios') return axios;
-        if (name === 'lucide-react') return new Proxy({}, { get: () => () => null });
-        if (name.includes('AnalysisCatalogueContext')) return { useAnalysisNames: () => code => code };
-        if (name.includes('LanguageContext')) return { useLanguage: () => ({ t: key => key }) };
-        if (name.includes('messageFormatter')) return parser;
-        if (name === '@lims/number-parse') return require('../../../shared/numberParse');
-        if (name === './NumberPreview') return () => null;
-        if (name === './NativeRunPanel') return () => null; // Native handlers have separate actual-component contracts.
-        throw new Error(`Unexpected component dependency: ${name}`);
-    }).default;
-    let tree;
-    const nodes = node => {
-        if (Array.isArray(node)) return node.flatMap(nodes);
-        if (!node || typeof node !== 'object') return [];
-        return [node, ...nodes(node.props?.children)];
-    };
-    return {
-        axios,
-        async render(isOpen = true) {
-            for (let i = 0; i < 4; i++) {
-                cursor = 0;
-                tree = Component({ isOpen, analysisCode: 'PH_H2O', selectedWorkItemIds: [] });
-                const effects = pendingEffects;
-                pendingEffects = [];
-                effects.forEach(effect => effect());
-                await new Promise(resolve => setImmediate(resolve));
-            }
-            return tree;
-        },
-        find(id) { return nodes(tree).find(node => node.props?.['data-testid'] === id); },
-        qcTab() { return nodes(tree).find(node => node.type === 'button' && node.props.children === 'QC Measurements & State'); }
-    };
-}
-
-describe('Audit 0.15: actual BatchModal censored duplicate entry', () => {
-    const enter = async (host, first, second, blank = '0') => {
-        await host.render(); host.qcTab().props.onClick(); await host.render();
-        for (const [field, value] of Object.entries({ 'qc-blank-input': blank, 'qc-ctrl-exp-input': '7', 'qc-ctrl-meas-input': '7', 'qc-dup1-input': first, 'qc-dup2-input': second })) {
-            host.find(field).props.onChange({ target: { value } }); await host.render();
-        }
-    };
-    test.each([[' <loq', '≤0,05 '], ['>100', '100'], ['<0.1', '0.05']])('explicit observations %s / %s reach evaluation with exact original input', async (first, second) => {
-        const host = modalHost(); await enter(host, first, second);
-        expect(host.find('evaluate-qc-btn').props.disabled).toBe(false);
-        await host.find('evaluate-qc-btn').props.onClick();
-        expect(host.axios.post).toHaveBeenCalledTimes(1);
-        expect(host.axios.post.mock.calls[0][1].duplicates[0].rawInput).toEqual({ value1: first, value2: second });
-        expect(host.axios.post.mock.calls[0][1].duplicates[0].value1).toBe(first.trim().toLowerCase() === '<loq' ? '<LOQ' : first);
+// Obsolete profile input cases migrated under Claude's #188 pin 6052289128.
+describe('Audit 0.15: native worksheet censored duplicate entry', () => {
+    test.each([[' <loq', '≤0,05 '], ['>100', '100'], ['<0.1', '0.05']])('observations %s / %s reach preview and evaluation verbatim', async (first, second) => {
+        const view = nativeHost(); await view.render();
+        const serverParse = { qualifier: '<', numericValue: null, censoringLimit: 0.05 };
+        view.axios.post.mockResolvedValueOnce({ data: { preview: true, analytes: [{ analysisCode: 'A', verdict: 'INCOMPLETE', positions: [{ positionId: 'parent-0', parsedObservation: serverParse }] }] } });
+        await enter(view, { blank: '0', 'control-0': '7', 'parent-0': first, 'duplicate-0': second });
+        await view.find('native-value-parent-0').props.onBlur(); await view.render();
+        expect(view.axios.post.mock.calls[0]).toEqual(['/api/qc/batches/worksheet-run/preview', [
+            { analysisCode: 'A', positionId: 'blank', rawInput: '0' }, { analysisCode: 'A', positionId: 'control-0', rawInput: '7' },
+            { analysisCode: 'A', positionId: 'parent-0', rawInput: first }, { analysisCode: 'A', positionId: 'duplicate-0', rawInput: second }
+        ]]);
+        expect(content(view.find('native-parsed-parent-0'))).toBe(JSON.stringify(serverParse));
+        expect(view.find('native-value-parent-0').props.value).toBe(first); expect(view.find('native-value-duplicate-0').props.value).toBe(second);
+        expect(view.find('native-qc-evaluate').props.disabled).toBeFalsy(); await view.find('native-qc-evaluate').props.onClick();
+        expect(view.axios.post.mock.calls[1]).toEqual(['/api/qc/batches/worksheet-run/evaluate', { analysisCode: 'A', references: [], measurements: [
+            { positionId: 'blank', replicateNo: 1, rawInput: '0' }, { positionId: 'control-0', replicateNo: 1, rawInput: '7' },
+            { positionId: 'parent-0', replicateNo: 1, rawInput: first }, { positionId: 'duplicate-0', replicateNo: 1, rawInput: second }
+        ] }]);
     });
-    test.each([['<0.1', '7', '<0.1'], ['<bad', '7', '0'], ['', '7', '0']])('a censored blank or invalid duplicate never submits (%s / %s / %s)', async (first, second, blank) => {
-        const host = modalHost(); await enter(host, first, second, blank);
-        expect(host.find('evaluate-qc-btn').props.disabled).toBe(true);
-        await host.find('evaluate-qc-btn').props.onClick();
-        expect(host.axios.post).not.toHaveBeenCalled();
+    test.each([['<0.1', '7', '<0.1'], ['<bad', '7', '0'], ['', '7', '0']])('server rejection blocks invalid observations (%s / %s / %s)', async (first, second, blank) => {
+        const view = nativeHost(); await view.render(); await enter(view, { blank, 'control-0': '7', 'parent-0': first, 'duplicate-0': second });
+        view.axios.post.mockRejectedValueOnce({ response: { data: { code: 'QC_VALUES_MISSING', error: 'Invalid observation' } } });
+        await view.find('native-value-duplicate-0').props.onBlur(); await view.render();
+        expect(content(view.find('native-qc-preview-error'))).toBe('qcRuns.errors.QC_VALUES_MISSING');
+        expect(view.find('native-qc-evaluate').props.disabled).toBe(true); await view.find('native-qc-evaluate').props.onClick();
+        expect(view.axios.post).toHaveBeenCalledTimes(1); expect(view.axios.post.mock.calls[0][0]).toBe('/api/qc/batches/worksheet-run/preview');
+        expect(view.axios.put).not.toHaveBeenCalled();
     });
-    test.each(['PROFILE_ONLY', 'LEGACY_MIGRATED'])('primary and extra duplicates require selected physical SAMPLE parents on %s runs', async provenance => {
-        const positions = [{ id: 'sample-parent-1', kind: 'SAMPLE', position: 3, sampleId: 'sample-1' },
-            { id: 'sample-parent-2', kind: 'SAMPLE', position: 7, sampleId: 'sample-2' }];
-        const host = modalHost({ analysis: 'PH_H2O', positions,
-            analytes: [{ analysisCode: 'PH_H2O', provenance, positions }],
-            workItems: [{ sampleId: 'sample-1', sample: { originalId: 'SPECIMEN-1' } }, { sampleId: 'sample-2', sample: { originalId: 'SPECIMEN-2' } }] });
-        await enter(host, '7.123456789', '7.123456780');
-        expect(host.find('qc-duplicate-parent').props.value).toBe('');
-        expect(host.find('evaluate-qc-btn').props.disabled).toBe(true);
-        await host.find('evaluate-qc-btn').props.onClick(); expect(host.axios.post).not.toHaveBeenCalled();
-        host.find('qc-duplicate-parent').props.onChange({ target: { value: 'sample-parent-1' } }); await host.render();
-        expect(host.find('evaluate-qc-btn').props.disabled).toBe(false);
-        host.find('qc-add-DUPLICATE').props.onClick(); await host.render();
-        for (const field of ['value1', 'value2']) {
-            host.find(`qc-extra-DUPLICATE-0-${field}`).props.onChange({ target: { value: '2.123456789' } }); await host.render();
-        }
-        expect(host.find('evaluate-qc-btn').props.disabled).toBe(true);
-        host.find('qc-extra-DUPLICATE-0-parent').props.onChange({ target: { value: 'sample-parent-2' } }); await host.render();
-        expect(host.find('evaluate-qc-btn').props.disabled).toBe(false);
-        await host.find('evaluate-qc-btn').props.onClick();
-        expect(host.axios.post.mock.calls[0][1].duplicates).toEqual([
-            { duplicateOfPositionId: 'sample-parent-1', value1: 7.123456789, value2: 7.123456780, rawInput: { value1: '7.123456789', value2: '7.123456780' } },
-            { duplicateOfPositionId: 'sample-parent-2', value1: 2.123456789, value2: 2.123456789, rawInput: { value1: '2.123456789', value2: '2.123456789' } }
-        ]);
-        host.find('qc-duplicate-parent').props.onChange({ target: { value: 'outside-run-position' } }); await host.render();
-        expect(host.find('evaluate-qc-btn').props.disabled).toBe(true);
+    test.each(['parent-0', 'parent-1'])('duplicate uses only server parent %s without a chooser or Result copy', async parentId => {
+        const batch = nativeFixture({ duplicates: 2 }); batch.positions = batch.positions.filter(row => row.id !== 'duplicate-1');
+        batch.positions.find(row => row.id === 'duplicate-0').duplicateOfPositionId = parentId; batch.analytes[0].positions = batch.positions;
+        batch.analytes[0].criteriaSnapshot = JSON.stringify({ requiredPositions: { BLANK: ['blank'], LRM: ['control-0'], DUPLICATE: ['duplicate-0'] } });
+        batch.workItems.forEach(item => { item.draft = { value: '99.999999' }; });
+        const view = nativeHost(batch); await view.render(); expect(view.find('native-value-' + parentId).props.value).toBe('');
+        expect(view.find('native-value-' + (parentId === 'parent-0' ? 'parent-1' : 'parent-0'))).toBeUndefined();
+        expect(nodes(view.find('native-run-sequence')).some(node => node.type === 'select')).toBe(false);
+        expect(view.text()).toContain('CODE-' + parentId.at(-1)); expect(view.text()).not.toContain('99.999999');
+        await enter(view, { blank: '0', 'control-0': '7', [parentId]: '7.123456789', 'duplicate-0': '7.123456780' });
+        await view.find('native-qc-evaluate').props.onClick(); expect(view.axios.post).toHaveBeenCalledTimes(1);
+        const measurements = view.axios.post.mock.calls[0][1].measurements;
+        expect(measurements).toContainEqual({ positionId: parentId, replicateNo: 1, rawInput: '7.123456789' });
+        expect(measurements).toContainEqual({ positionId: 'duplicate-0', replicateNo: 1, rawInput: '7.123456780' });
+        expect(measurements.every(row => Object.keys(row).sort().join(',') === 'positionId,rawInput,replicateNo')).toBe(true);
     });
 });

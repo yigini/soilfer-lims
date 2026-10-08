@@ -1,6 +1,19 @@
 const { evaluateBlank, evaluateDuplicate, evaluateControl } = require('./qcService');
 const { currentAnalyteEvidence } = require('./qcRunViewService');
 
+function nativeCheckPolicy(criteria, position) {
+    const values = Object.fromEntries(Object.entries(criteria.qcRule.resolved).map(([key, row]) => [key, row.value]));
+    const method = criteria.methodContext;
+    if (['BLANK', 'CCB'].includes(position.kind)) return { maxAllowed: values.blankAbsLimit, mode: values.blankLimitMode, ...method };
+    if (['SAMPLE', 'DUPLICATE'].includes(position.kind)) return { ...method, numberFormat: criteria.numberFormat,
+        maxRpd: values.duplicateRpdMax, mode: values.duplicateMode, absMax: values.duplicateAbsMax,
+        absMaxBelow5LOQ: values.duplicateAbsMaxBelow5LOQ, nearLoqMultiplier: criteria.policySnapshot.values['qc.duplicateNearLoqMultiplier'] };
+    return ['ICV', 'CCV'].includes(position.kind)
+        ? { minRecovery: values.ccvMin, maxRecovery: values.ccvMax, lrmWindowPct: null, lrmMode: 'FIXED_WINDOW' }
+        : { minRecovery: values.crmRecoveryMin, maxRecovery: values.crmRecoveryMax, crmMode: values.crmMode,
+            crmAbsWindow: values.crmAbsWindow, lrmMode: values.lrmMode, lrmWindowPct: values.lrmWindowPct };
+}
+
 // A started run never reads current policy, method limits or catalogue values.
 // The result is separate from the aggregate state: NOT_REQUIRED is not a pass.
 function evaluateNativeEvidence(batch, analyte) {
@@ -8,7 +21,6 @@ function evaluateNativeEvidence(batch, analyte) {
     const values = Object.fromEntries(Object.entries(criteria.qcRule.resolved).map(([key, row]) => [key, row.value]));
     const calibrationActions = criteria.policySnapshot.values['qc.calibrationFailAction'];
     const calibrationFailActionSource = calibrationActions ? 'SNAPSHOT' : 'LEGACY_SNAPSHOT_FALLBACK';
-    const method = criteria.methodContext, format = criteria.numberFormat;
     const at = positionId => evidence.measurements.find(row => row.positionId === positionId && row.replicateNo === 1);
     const binding = position => (position.references || []).find(row => row.analysisCode === analyte.analysisCode && !row.supersededById);
     const frozenRequired = new Set(Object.values(criteria.requiredPositions).flat());
@@ -25,7 +37,7 @@ function evaluateNativeEvidence(batch, analyte) {
         let evaluated;
         if (['BLANK', 'CCB'].includes(position.kind)) {
             evaluated = evaluateBlank({ id: position.id, value: measurement.value },
-                { maxAllowed: values.blankAbsLimit, mode: values.blankLimitMode, ...method });
+                nativeCheckPolicy(criteria, position));
             evaluated.value = measurement.value;
             evaluated.rawInput = { value: measurement.rawInput };
             blanks.push(evaluated);
@@ -35,9 +47,7 @@ function evaluateNativeEvidence(batch, analyte) {
             const observation = row => row.censoring ? row.rawInput : row.value;
             evaluated = evaluateDuplicate({ id: position.id, value1: parent.value, value2: measurement.value,
                 rawInput: { value1: observation(parent), value2: observation(measurement) } },
-            { ...method, numberFormat: format, maxRpd: values.duplicateRpdMax, mode: values.duplicateMode,
-                absMax: values.duplicateAbsMax, absMaxBelow5LOQ: values.duplicateAbsMaxBelow5LOQ,
-                nearLoqMultiplier: criteria.policySnapshot.values['qc.duplicateNearLoqMultiplier'] });
+            nativeCheckPolicy(criteria, position));
             evaluated.value1 = parent.value; evaluated.value2 = measurement.value;
             evaluated.rawInput = { value1: parent.rawInput, value2: measurement.rawInput };
             evaluated.duplicateOfPositionId = position.duplicateOfPositionId;
@@ -47,10 +57,7 @@ function evaluateNativeEvidence(batch, analyte) {
             if (!reference) continue;
             const snapshot = JSON.parse(reference.referenceSnapshot), calibration = ['ICV', 'CCV'].includes(position.kind);
             evaluated = evaluateControl({ id: position.id, measured: measurement.value, expected: snapshot.expected,
-                referenceUse: position.kind === 'CRM' ? 'CRM' : 'LRM' }, calibration
-                ? { minRecovery: values.ccvMin, maxRecovery: values.ccvMax, lrmWindowPct: null, lrmMode: 'FIXED_WINDOW' }
-                : { minRecovery: values.crmRecoveryMin, maxRecovery: values.crmRecoveryMax,
-                    crmMode: values.crmMode, crmAbsWindow: values.crmAbsWindow, lrmMode: values.lrmMode, lrmWindowPct: values.lrmWindowPct });
+                referenceUse: position.kind === 'CRM' ? 'CRM' : 'LRM' }, nativeCheckPolicy(criteria, position));
             if (calibration) evaluated.criterion = 'CALIBRATION_RECOVERY';
             Object.assign(evaluated, { expected: snapshot.expected, measured: measurement.value, rawInput: { measured: measurement.rawInput },
                 referenceSnapshot: snapshot, referenceMaterialId: reference.referenceMaterialId, referenceValueId: reference.referenceValueId,
@@ -81,4 +88,4 @@ function evaluateNativeEvidence(batch, analyte) {
         criteriaSnapshot: analyte.criteriaSnapshot, mode: criteria.qcMode };
 }
 
-module.exports = { evaluateNativeEvidence };
+module.exports = { evaluateNativeEvidence, nativeCheckPolicy };

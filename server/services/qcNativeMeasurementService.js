@@ -5,24 +5,13 @@ const scopeGuard = require('../utils/scopeGuard');
 const policyService = require('./policyService');
 const { actorName, inTransaction } = require('./workflowStateRules');
 const { aggregateBatchStatus } = require('../workflowContract');
-const { parseNumber, parseDuplicateObservation } = require('../../shared/numberParse');
+const { parseNumber } = require('../../shared/numberParse');
 const { QC_RUN_INCLUDE, batchApiView, currentAnalyteEvidence } = require('./qcRunViewService');
 const { evaluateNativeEvidence } = require('./qcNativeEvaluationService');
+const { buildNativeMeasurementCandidate, prepareNativeObservationEntries } = require('./qcNativeCandidateService');
 const { preparePositionBindings, applyPositionBindings } = require('./qcRunReferenceService');
 const { flagBatchResults } = require('./qcService');
 const failure = (statusCode, code, message, details = {}) => Object.assign(new Error(message), { statusCode, code, details });
-
-function observation(entry, position, criteria, enteredBy, enteredAt) {
-    if (!entry || typeof entry !== 'object' || (entry.replicateNo ?? 1) !== 1) throw failure(400, 'QC_VALUES_MISSING', 'A native position has one observation.', { positionId: position.id });
-    const source = Object.prototype.hasOwnProperty.call(entry, 'rawInput') ? entry.rawInput : entry.value;
-    const duplicate = ['SAMPLE', 'DUPLICATE'].includes(position.kind);
-    const parsed = duplicate ? parseDuplicateObservation(source, criteria.numberFormat) : parseNumber(source, criteria.numberFormat);
-    if (!parsed.valid || !duplicate && parsed.qualifier) throw failure(400, parsed.code === 'AMBIGUOUS_NUMBER' ? parsed.code : 'QC_VALUES_MISSING',
-        'A valid QC observation is required.', { positionIds: [position.id] });
-    return { id: randomUUID(), positionId: position.id, replicateNo: 1, value: parsed.censored ? null : parsed.value,
-        rawInput: parsed.rawInput, censoring: parsed.censored ? parsed.qualifier : null,
-        censoringLimit: parsed.censored ? parsed.literalLoq ? criteria.methodContext.loq : parsed.value : null, enteredBy, enteredAt };
-}
 
 // This transaction is the native arm of the shared write path. The compatibility
 // arm appends isolated rounds; native observations require explicit corrections.
@@ -48,21 +37,7 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
             throw failure(400, 'REFERENCE_VALUE_MISMATCH', 'Submit expected values by actual position id.');
         }
         const entries = input[correction ? 'corrections' : 'measurements'] ?? [];
-        if (!Array.isArray(entries) || new Set(entries.map(row => row?.positionId)).size !== entries.length) {
-            throw failure(400, 'QC_VALUES_MISSING', 'Submit distinct position observations.');
-        }
-        const evidence = currentAnalyteEvidence(batch, analysisCode), replacements = [], observations = [];
-        for (const entry of entries) {
-            if (entry?.replicateNo !== undefined && entry.replicateNo !== 1) throw failure(400, 'QC_POSITION_NOT_IN_ANALYSIS', 'A Native physical position uses replicate 1.', { positionId: entry.positionId });
-            const position = evidence.positions.find(row => row.id === entry?.positionId);
-            if (!position || position.kind === 'CAL_STD') throw failure(400, 'QC_POSITION_NOT_IN_ANALYSIS', 'The position does not serve this analysis.', { positionId: entry?.positionId });
-            const previous = evidence.measurements.find(row => row.positionId === position.id && row.replicateNo === 1);
-            if (previous && !correction) throw failure(400, 'QC_CORRECTION_REASON_REQUIRED', 'A measured position can only be changed by a reasoned correction.', { positionId: position.id });
-            if (correction && !previous) throw failure(404, 'QC_MEASUREMENT_NOT_FOUND', 'There is no observation to correct.', { positionId: position.id });
-            const next = { ...observation(entry, position, criteria, performedBy, now), batchId, analysisCode, correctionReason: correction ? reason : null };
-            observations.push(next);
-            if (previous) replacements.push({ previous, next });
-        }
+        const { observations, replacements } = prepareNativeObservationEntries(batch, analysisCode, entries, { correction, performedBy, now, reason });
         const references = input.references ?? [];
         if (!Array.isArray(references) || new Set(references.map(row => row?.positionId)).size !== references.length) throw failure(400, 'REFERENCE_VALUE_MISMATCH', 'Submit distinct reference placements.');
         const plans = [], affected = new Set([analysisCode]);
@@ -90,12 +65,7 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         }
         // Evaluate an in-memory candidate before the first mutation, including
         // every analyte sharing a rebound physical lot. Any refusal writes zero.
-        const candidate = { ...batch, measurements: [...batch.measurements.filter(row => !replacements.some(change => change.previous.id === row.id)), ...observations],
-            positions: batch.positions.map(position => ({ ...position, references: [...(position.references || [])] })) };
-        for (const plan of plans) for (const binding of plan.bindings) {
-            const position = candidate.positions.find(row => row.id === binding.positionId);
-            position.references = position.references.filter(row => row.analysisCode !== binding.analysisCode).concat(binding);
-        }
+        const candidate = buildNativeMeasurementCandidate(batch, { observations, replacements, plans });
         for (const [positionId, source] of Object.entries(input.expectedValues || {})) {
             const position = candidate.positions.find(row => row.id === positionId), reference = position?.references.find(row => row.analysisCode === analysisCode && !row.supersededById);
             const expected = reference?.referenceSnapshot && JSON.parse(reference.referenceSnapshot).expected, provided = parseNumber(source, criteria.numberFormat);
