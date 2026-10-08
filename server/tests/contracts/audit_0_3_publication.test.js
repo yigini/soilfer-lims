@@ -102,7 +102,8 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     });
     test.each(['SPEC_GRS', 'SPEC_XRF'])('%s continues to require and record scalar Results', async analysis => {
         const f = await fixture({ param: analysis });
-        expect((await generate(f)).status).toBe(200);
+        const response=await generate(f);
+        expect({status:response.status,body:response.body}).toMatchObject({status:200});
         const techToken = await getAuthToken('LAB_TECHNICIAN', labId);
         const acquisition = await fixture({ status: 'PROCESSING', itemStatus: 'IN_PROGRESS', param: analysis });
         await prisma.workItem.update({ where: { id: acquisition.item.id }, data: { assignedTo: jwt.decode(techToken).username } });

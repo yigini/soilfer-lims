@@ -1,4 +1,4 @@
-const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { createExecutionResultFixture,createExecutionResultsFixture } = require('../helpers/workAttemptFixtures');
 const { createWorkItemFixture, createSampleFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const request = require('supertest');
@@ -33,12 +33,14 @@ describe('Audit 0.10: current results in exports and working grid', () => {
             data: { id: id('R-010'), sampleId: f.sample.id, param: 'SOC', value: String(value), unit: 'g/kg',
             isCurrent: true, isValid: true, ...data } });
     }
+    const resultSet=(f,entries)=>createExecutionResultsFixture(prisma,{attemptStatus:'ACCEPTED',data:entries.map(({value,...data})=>({
+        id:id('R-010'),sampleId:f.sample.id,param:'SOC',value:String(value),unit:'g/kg',isCurrent:true,isValid:true,...data}))});
     const exportData = (project, auth = token) => request(app).post('/api/exports/data').set('Authorization', `Bearer ${auth}`).send({ type: 'WET_CHEM', project });
     const grid = (query, auth = token) => request(app).get('/api/data-results').set('Authorization', `Bearer ${auth}`).query(query);
     test('superseded, invalid and cached WorkItem values never appear; the grid shows each valid current replicate', async () => {
         const f = await fixture();
-        await result(f, 7777, { isCurrent: false }); await result(f, 8888, { isValid: false });
-        const first = await result(f, 10, { replicateNo: 1 }), second = await result(f, 20, { replicateNo: 2 });
+        const [,,first,second]=await resultSet(f,[{value:7777,isCurrent:false},{value:8888,isValid:false,replicateNo:3},
+            {value:10,replicateNo:1},{value:20,replicateNo:2}]);
         const exported = await exportData(f.projectCode);
         expect(exported.status).toBe(200);
         expect(exported.body.data[0]).toMatchObject({ SOC: 15, soc_as_measured: '', soc_unit: 'g/kg', soc_normalized: 15,
@@ -55,15 +57,15 @@ describe('Audit 0.10: current results in exports and working grid', () => {
         expect(await prisma.result.count({ where: { sampleId: f.sample.id } })).toBe(4);
     });
     test('numeric replicates normalize before averaging and no single as-measured value is invented', async () => {
-        const f = await fixture(); await result(f, 1, { unit: '%' }); await result(f, 20);
+        const f=await fixture();await resultSet(f,[{value:1,unit:'%',replicateNo:1},{value:20,replicateNo:2}]);
         const response = await exportData(f.projectCode);
         expect(response.status).toBe(200); expect(response.body.data[0]).toMatchObject({ SOC: 15, soc_as_measured: '', soc_unit: 'g/kg', soc_n: 2, soc_flag: 'MEAN_UNCHECKED' });
     });
     test.each(['methodology', 'unit', 'qualified'])('ambiguous %s groups are blank and flagged; other samples still export and audit records the count', async kind => {
         const good = await fixture(), bad = await fixture({ projectCode: good.projectCode });
         await result(good, 42);
-        await result(bad, 10, { methodologyId: kind === 'methodology' ? 'method-a' : null });
-        await result(bad, kind === 'qualified' ? '<0.1' : 20, { methodologyId: kind === 'methodology' ? 'method-b' : null, unit: kind === 'unit' ? 'mg/L' : 'g/kg' });
+        await resultSet(bad,[{value:10,replicateNo:1,methodologyId:kind==='methodology'?'method-a':null},
+            {value:kind==='qualified'?'<0.1':20,replicateNo:2,methodologyId:kind==='methodology'?'method-b':null,unit:kind==='unit'?'mg/L':'g/kg'}]);
         const response = await exportData(good.projectCode);
         expect(response.status).toBe(200);
         expect(response.body.data.find(row => row['Sample ID'] === bad.sample.id)).toMatchObject({ SOC: '', soc_as_measured: '', soc_normalized: '', soc_n: 0, soc_flag: 'REPLICATES_AMBIGUOUS' });

@@ -336,7 +336,9 @@ test('historical import retains invalid text and out-of-range pH while importing
 test('offline texture supersedes legacy non-numeric PSA classes, preserves numeric rows, and replays without writes', async () => {
     await prisma.analysis.upsert({ where: { code: 'PSA' }, update: {},
         create: { code: 'PSA', name: 'Legacy particle size analysis', units: '%', validation: '{"type":"texture","tolerance":2}' } });
-    const f = await fixture({ analysis: 'PSA' });
+    // The retained PSA rows are unbatched; the unrelated OPEN default batch
+    // is not QC authorization for this historical class fixture.
+    const f = await fixture({ analysis: 'PSA', batch:null });
     const [oldClass,numeric]=await require('../helpers/workAttemptFixtures').createExecutionResultsFixture(prisma,{data:[
         {id:randomUUID(),sampleId:f.sample.id,param:'PSA',value:'Sandy clay',numericValue:null,rawInput:'historical class',flags:'["HISTORICAL"]',replicateNo:1},
         {id:randomUUID(),sampleId:f.sample.id,param:'PSA',value:'50',numericValue:50,replicateNo:2}]});

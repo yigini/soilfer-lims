@@ -146,6 +146,9 @@ describe('Audit 0.7: returned work can be recorded and submitted again', () => {
         const f = await fixture({ batchStatus: 'QC_FAIL' });
         await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, f.batch.id);
         expect((await post(`/api/qc/batches/${f.batch.id}/disposition`, { decision: 'REANALYZE_BATCH', reason })).status).toBe(200);
+        // The whole-run disposition releases failed QC; the new per-item
+        // execution still needs its actual canonical repeat request.
+        expect((await post(`/api/work-items/${f.item.id}/repeats`,{reason:'QC_BATCH_FAIL',note:reason})).status).toBe(201);
         expect((await post('/api/workbench/batch-save', { draft: false, entries: [{ workItemId: f.item.id, value: '6.4' }] }, technician)).body.saved).toBe(1);
         const submitted = await post('/api/workbench/v2/submissions/commit', { sampleIds: [f.sampleId], workItemIds: [f.item.id] }, technician);
         expect(submitted.status).toBe(200);
