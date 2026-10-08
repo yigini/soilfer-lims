@@ -70,6 +70,8 @@ export default function WorksheetArea({
     const { t } = useLanguage(), { hasPermission } = useAuth();
     const canEditQc = hasPermission?.('CHANGE_STATUS') === true;
     const [runList, setRunList] = useState([]), [selectedRun, setSelectedRun] = useState('');
+    const selectedRunRef = useRef(selectedRun);
+    selectedRunRef.current = selectedRun;
     const [runBatch, setRunBatch] = useState(null), [referenceMaterials, setReferenceMaterials] = useState([]);
     const [runLoading, setRunLoading] = useState(false), [runError, setRunError] = useState(null), [runSuccess, setRunSuccess] = useState(null);
     const runRequest = useRef(0);
@@ -101,13 +103,15 @@ export default function WorksheetArea({
         return () => { current = false; };
     }, [runBatch?.labId, t]);
     const refreshRun = async () => {
+        if (selectedRunRef.current !== selectedRun) return;
         const generation = ++runRequest.current;
         const response = await axios.get(`/api/qc/batches/${encodeURIComponent(selectedRun)}`);
-        if (runRequest.current !== generation) return;
+        if (runRequest.current !== generation || selectedRunRef.current !== selectedRun) return;
         setRunBatch(response.data.data);
         await onBatchUpdated?.();
     };
     const openWorksheet = id => {
+        selectedRunRef.current = id;
         setSelectedRun(id); setViewMode('table'); setSearchQuery(''); setSelectedRows(new Set());
         setIsBatchModalOpen(false);
     };
@@ -545,7 +549,7 @@ export default function WorksheetArea({
                         <span>Work type:</span>
                         <select
                             value={activeGroup?.analysis || ''}
-                            onChange={(e) => { if (!runBatch?.analytes?.some(row => row.analysisCode === e.target.value)) setSelectedRun(''); onSelectGroup(e.target.value); }}
+                            onChange={(e) => { if (!runBatch?.analytes?.some(row => row.analysisCode === e.target.value)) { selectedRunRef.current = ''; setSelectedRun(''); } onSelectGroup(e.target.value); }}
                             className="px-3 py-1.5 rounded-lg border border-sf-divider bg-sf-surface text-sf-text text-xs font-medium focus:outline-none focus:ring-1 focus:ring-sf-primary"
                         >
                             {allGroups.map(g => (
