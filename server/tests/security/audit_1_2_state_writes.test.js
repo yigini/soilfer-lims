@@ -112,6 +112,22 @@ test('the #190 factory import allowlist is exact, including the named spectral r
         expect.objectContaining({ code: 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' })]);
 });
 
+test('the #191 owned result-set export is confined to six inventoried test files without writer exemptions', () => {
+    const source = "const {createExecutionResultsFixture}=require('../helpers/workAttemptFixtures');await createExecutionResultsFixture(db,{data:rows});";
+    for (const filename of ['audit_0_10_current_result_views', 'audit_1_4_uuid_transactions', 'audit_1_5_result_writes',
+        'audit_3_2_repeat_commands', 'nsis_v2_exchange', 'qc_disposition_release_gate']) {
+        expect(scanSource(source, `tests/contracts/${filename}.test.js`, exceptions)).toEqual([]);
+        expect(scanSource(source + 'prisma.result.create({data:{}});', `tests/contracts/${filename}.test.js`, exceptions))
+            .toEqual([expect.objectContaining({ code: 'RESULT_CREATE_OUTSIDE_AUTHORITY' })]);
+    }
+    for (const sourceText of [source,
+        "const fixtures=require('../helpers/workAttemptFixtures');fixtures.createExecutionResultsFixture(db,{data:rows});",
+        "require('../helpers/workAttemptFixtures')[name](db,{data:rows});"]) {
+        expect(scanSource(sourceText, 'tests/contracts/unlisted_result_set.test.js', exceptions))
+            .toEqual([expect.objectContaining({ code: 'POSITIVE_FIXTURE_CALLER_NOT_ALLOWED' })]);
+    }
+});
+
 test('the #190 composite positive fixture has exactly two named publication callers', () => {
     const names = ['composite texture governs sand, silt, clay and texture without duplicating values',
         'RETURN of composite texture invalidates all four current parameters'];

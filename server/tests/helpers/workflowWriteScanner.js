@@ -84,6 +84,19 @@ const COMPOSITE_FIXTURE = Object.freeze({
         'RETURN of composite texture invalidates all four current parameters'
     ])
 });
+// #191 pin6069938801: explicit result sets use one owned execution. Only
+// these inventoried tests may import this export; no writer is exempted.
+const RESULT_SET_FIXTURE = Object.freeze({
+    exportName: 'createExecutionResultsFixture',
+    callers: Object.freeze([
+        'tests/contracts/audit_0_10_current_result_views.test.js',
+        'tests/contracts/audit_1_4_uuid_transactions.test.js',
+        'tests/contracts/audit_1_5_result_writes.test.js',
+        'tests/contracts/audit_3_2_repeat_commands.test.js',
+        'tests/contracts/nsis_v2_exchange.test.js',
+        'tests/contracts/qc_disposition_release_gate.test.js'
+    ])
+});
 // #190 pin6057064901: one byte-bound export, four exact callers. This is a
 // fixture authority with an enforced import boundary, never a file exemption.
 const ATTEMPT_FIXTURE = Object.freeze({
@@ -581,6 +594,7 @@ function scanSource(source, filename, exceptions = []) {
                 if (!filename.startsWith('tests/')) {
                     report(p.node, 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
                 } else {
+                    const resultSetImport = name => name === RESULT_SET_FIXTURE.exportName && RESULT_SET_FIXTURE.callers.includes(filename);
                     const inNamedTest = reference => filename === COMPOSITE_FIXTURE.caller && Boolean(reference.findParent(parent =>
                         parent.isCallExpression() && parent.get('callee').isIdentifier({ name: 'test' }) &&
                         parent.get('arguments.0').isStringLiteral() && COMPOSITE_FIXTURE.tests.includes(parent.node.arguments[0].value)));
@@ -593,17 +607,17 @@ function scanSource(source, filename, exceptions = []) {
                         allowed = declaration.get('id.properties').every(property => {
                             if (!property.isObjectProperty() || property.node.computed || !property.get('value').isIdentifier()) return false;
                             const name = property.node.key.name || property.node.key.value;
-                            if (name === 'createExecutionResultFixture') return true;
+                            if (name === 'createExecutionResultFixture' || resultSetImport(name)) return true;
                             return name === COMPOSITE_FIXTURE.exportName && inNamedTest(p) &&
                                 directCallsOnly(declaration.scope.getBinding(property.node.value.name));
                         });
                     } else if (p.isImportDeclaration()) {
                         allowed = p.get('specifiers').every(property => property.isImportSpecifier() &&
-                            (property.node.imported.name === 'createExecutionResultFixture' ||
+                            (property.node.imported.name === 'createExecutionResultFixture' || resultSetImport(property.node.imported.name) ||
                             property.node.imported.name === COMPOSITE_FIXTURE.exportName &&
                             directCallsOnly(p.scope.getBinding(property.node.local.name))));
                     } else if (declaration.isMemberExpression() && !declaration.node.computed &&
-                        declaration.node.property.name === 'createExecutionResultFixture') allowed = true;
+                        (declaration.node.property.name === 'createExecutionResultFixture' || resultSetImport(declaration.node.property.name))) allowed = true;
                     if (!allowed) report(p.node, 'POSITIVE_FIXTURE_CALLER_NOT_ALLOWED', specifier);
                 }
             }
