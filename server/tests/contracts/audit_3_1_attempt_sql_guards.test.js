@@ -68,7 +68,10 @@ describe('all #190 refusals remain effective after the receipt-verified #191 suc
     test('canonical reasons, positive numbers, conflict flags and both unique indexes retain their original refusals',async()=>{
         await guarded({successor:true,attempts:[historicalAttempt('first'),historicalAttempt('flagged','another'),historicalAttempt('flagged-peer','another')]});
         probe(attemptInsert,['collision','item',1,'RECORDED',null,timestamp,timestamp],'SQLITE_CONSTRAINT_UNIQUE','WorkAttempt_workItemId_attemptNo_unique');
-        for(const number of [0,-1,1.5])probe(attemptInsert,['bad-number','other',number,'RECORDED',null,timestamp,timestamp],'WORK_ATTEMPT_NUMBER_INVALID');
+        // Supply a canonical reason so the independent #191 mandatory-reason
+        // check does not mask #190's fractional-number refusal.
+        for(const number of [0,-1,1.5])probe('INSERT INTO WorkAttempt (id,workItemId,attemptNo,status,reason,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?)',
+            ['bad-number','other',number,'RECORDED','CONFIRMATION',timestamp,timestamp],'WORK_ATTEMPT_NUMBER_INVALID');
         for(const reason of ['free text','',1])probe('INSERT INTO WorkAttempt (id,workItemId,attemptNo,status,reason,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?)',
             ['invalid-reason','other',1,'RECORDED',reason,timestamp,timestamp],'WORK_ATTEMPT_REASON_INVALID');
         probe('UPDATE WorkAttempt SET reason=? WHERE id=?',['free text','first'],'WORK_ATTEMPT_IDENTITY_IMMUTABLE');
