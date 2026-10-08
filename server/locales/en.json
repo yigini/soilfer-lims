@@ -942,7 +942,8 @@
       "qc_calibrationFailAction": "Calibration failure action",
       "equipment_requireEquipment": "Required equipment",
       "equipment_unconfiguredReadiness": "Unconfigured equipment readiness",
-      "pt_zScoreLimits": "PT z-score limits"
+      "pt_zScoreLimits": "PT z-score limits",
+      "qc_reviewedTranscriptionCorrectionEnabled": "Allow reviewed transcription correction of undispositioned failed QC"
     },
     "title": "Policies",
     "yes": "Yes",

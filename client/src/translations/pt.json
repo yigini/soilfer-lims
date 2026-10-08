@@ -2518,7 +2518,8 @@
       "qc_calibrationFailAction": "Ação após falha de calibração",
       "equipment_requireEquipment": "Equipamento obrigatório",
       "equipment_unconfiguredReadiness": "Disponibilidade do equipamento não configurado",
-      "pt_zScoreLimits": "Limites do escore z de proficiência"
+      "pt_zScoreLimits": "Limites do escore z de proficiência",
+      "qc_reviewedTranscriptionCorrectionEnabled": "Permitir correção revisada de erros de transcrição em CQ reprovado sem decisão"
     },
     "title": "Políticas",
     "yes": "Sim",

@@ -942,7 +942,8 @@
       "qc_calibrationFailAction": "Action après échec de l’étalonnage",
       "equipment_requireEquipment": "Équipement requis",
       "equipment_unconfiguredReadiness": "Disponibilité des équipements non configurés",
-      "pt_zScoreLimits": "Limites du score z des essais d’aptitude"
+      "pt_zScoreLimits": "Limites du score z des essais d’aptitude",
+      "qc_reviewedTranscriptionCorrectionEnabled": "Autoriser la correction révisée des erreurs de transcription du CQ échoué sans décision"
     },
     "title": "Politiques",
     "yes": "Oui",

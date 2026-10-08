@@ -2,6 +2,9 @@
 
 Scope pins: issue comments 6064618293 and 6066668666. Ordinary entry,
 correction, reference rebinding, reopen and disposition retain their guards.
+Pin 6068086333 additionally permits the one canonical policy description leaf,
+`policies.keys.qc_reviewedTranscriptionCorrectionEnabled`, in all ten locale
+files. Existing policy catalogue assertions and existing keys remain unchanged.
 
 The existing `POST /api/qc/batches/:id/corrections` accepts a narrow
 `mode: "REVIEWED_TRANSCRIPTION"` submission with `analysisCode`, `corrections`,

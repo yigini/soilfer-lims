@@ -942,7 +942,8 @@
       "qc_calibrationFailAction": "Acción ante fallo de calibración",
       "equipment_requireEquipment": "Equipo obligatorio",
       "equipment_unconfiguredReadiness": "Disponibilidad del equipo sin configurar",
-      "pt_zScoreLimits": "Límites de puntuación z de aptitud"
+      "pt_zScoreLimits": "Límites de puntuación z de aptitud",
+      "qc_reviewedTranscriptionCorrectionEnabled": "Permitir la corrección revisada de errores de transcripción en CC fallido sin disposición"
     },
     "title": "Políticas",
     "yes": "Sí",
