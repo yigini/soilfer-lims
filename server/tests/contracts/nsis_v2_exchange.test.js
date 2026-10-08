@@ -1,6 +1,5 @@
-const { createResultsFixture } = require('../../services/resultWriteService');
-const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
-const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -41,7 +40,10 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
                 })
             }
         });
-        await createResultsFixture(prisma, { data: [
+        // Pin6060286651: explicit accepted owners and one final attempt per original row.
+        await createWorkItemFixture(prisma, { data: { id: `${sample1.id}-PH_H2O`, sampleId: sample1.id,
+            analysis: 'PH_H2O', assignedLab: sample1.assignedLab, status: 'ACCEPTED' } });
+        for (const data of [
                         {
                             id: `res-v2-1-${timestamp}`,
                             param: 'PH_H2O',
@@ -64,7 +66,14 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
                             censoring: 'NONE',
                             isCurrent: true
                         }
-                    ].map(result => ({ ...result, sampleId: sample1.id })) });
+                    ].map(result => ({ ...result, sampleId: sample1.id }))) await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data });
+        const attempts = await prisma.workAttempt.findMany({ where: { workItemId: `${sample1.id}-PH_H2O` }, orderBy: { attemptNo: 'asc' } });
+        expect(attempts).toHaveLength(2);
+        expect(attempts.map(attempt => attempt.attemptNo)).toEqual([1, 2]);
+        const results = await prisma.result.findMany({ where: { sampleId: sample1.id }, orderBy: { replicateNo: 'asc' } });
+        expect(results.map(result => result.attemptId)).toEqual(attempts.map(attempt => attempt.id));
+        expect(results.map(result => ({ value: result.value, replicateNo: result.replicateNo })))
+            .toEqual([{ value: '6.4', replicateNo: 1 }, { value: '6.5', replicateNo: 2 }]);
 
         // 2. Approved sample WITHOUT labId (walk-in or field registry without lab accession)
         sample2NoLabId = await createSampleFixture(prisma, {
@@ -126,27 +135,7 @@ describe('Issue #140 Work Packages P3 & P4: V2 Data Exchange API Contracts', () 
         testKey.rawKey = rawKey;
     });
 
-    afterAll(async () => {
-        // Clean up
-        try {
-            const { getDb } = require('../../services/exchangeStateService');
-            const db = getDb();
-            db.prepare('DELETE FROM _exchange_connections WHERE id = ?').run(`conn_${testKey?.id}`);
-            db.prepare('DELETE FROM _exchange_connection_keys WHERE api_key_id = ?').run(testKey?.id);
-        } catch (e) {}
-
-        await prisma.result.deleteMany({
-            where: { sampleId: { in: [sample1?.id, sample2NoLabId?.id].filter(Boolean) } }
-        }).catch(() => {});
-
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
-            where: { id: { in: [sample1?.id, sample2NoLabId?.id].filter(Boolean) } }
-        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
-
-        await prisma.apiKey.deleteMany({
-            where: { id: testKey?.id }
-        }).catch(() => {});
-    });
+    // Pin6060286651: retain analytical and scope parents until whole-owned-DB teardown.
 
     test('1. GET /api/v2/data-exchange/capabilities advertises supported contracts & features', async () => {
         const res = await request(app)

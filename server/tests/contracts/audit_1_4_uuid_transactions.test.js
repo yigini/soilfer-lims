@@ -1,4 +1,5 @@
 const { createResultFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const { createSampleFixture, createWorkItemFixture, createSamplesFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -138,12 +139,33 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: `CODE-${sampleId}`, labId, assignedLab: labId,
             status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE', receptionDate: new Date(),
             requiredAnalyses: '["SAND","SILT","CLAY"]' } });
-        const rows = [];
-        for (const replicateNo of [1, 2]) for (const [param, value] of [['SAND', '20'], ['SILT', '20'], ['CLAY', '60'], ['TEXTURE', 'Old class']]) {
-            rows.push(await createResultFixture(prisma, { data: { id: id(), sampleId, param, value,
-                numericValue: param === 'TEXTURE' ? null : Number(value), replicateNo, unit: '%', isCurrent: true, isValid: true } }));
+        // Pin6059445324: explicit ordered owners, with the original workbench state.
+        const items = {};
+        for (const analysis of ['SAND', 'SILT', 'CLAY', 'TEXTURE']) {
+            items[analysis] = await createWorkItemFixture(prisma, { data: { id: id(), sampleId, assignedLab: labId,
+                labId, analysis, status: 'ASSIGNED', assignedTo: username, version: 0 } });
         }
-        return { sampleId, rows };
+        const rows = [];
+        for (const replicateNo of [1, 2]) {
+            const fractions = [];
+            for (const [param, value] of [['SAND', '20'], ['SILT', '20'], ['CLAY', '60']]) {
+                const row = await createExecutionResultFixture(prisma, { data: { id: id(), sampleId, param, value,
+                    numericValue: Number(value), replicateNo, unit: '%', isCurrent: true, isValid: true } });
+                rows.push(row); fractions.push(row);
+            }
+            const texture = await createExecutionResultFixture(prisma, { textureSourceResultIds: fractions.map(row => row.id),
+                data: { id: id(), sampleId, param: 'TEXTURE', value: 'Old class', numericValue: null,
+                    replicateNo, unit: '%', isCurrent: true, isValid: true } });
+            rows.push(texture);
+            const attempt = await prisma.workAttempt.findUnique({ where: { id: texture.attemptId } });
+            expect(attempt).toMatchObject({ workItemId: items.TEXTURE.id, status: 'RECORDED', attemptNo: replicateNo });
+            expect(JSON.parse(attempt.evidenceData)).toMatchObject({ sourceResultIds: fractions.map(row => row.id),
+                sourceAttemptIds: fractions.map(row => row.attemptId) });
+            for (const fraction of fractions) expect(await prisma.workAttempt.findUnique({ where: { id: fraction.attemptId } }))
+                .toMatchObject({ workItemId: items[fraction.param].id, status: 'RECORDED', attemptNo: replicateNo });
+        }
+        for (const analysis of Object.keys(items)) items[analysis] = await prisma.workItem.findUnique({ where: { id: items[analysis].id } });
+        return { sampleId, rows, items };
     }
     const sampleSave = (f, measurements) => request(app).post(`/api/results/${f.sampleId}`)
         .set('Authorization', `Bearer ${token}`).send({ measurements });
@@ -234,8 +256,7 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
 
     test.each([false, true])('workbench fraction save is atomic with derived texture (storage failure: %s)', async fail => {
         const f = await textureFixture();
-        const item = await createWorkItemFixture(prisma, { data: { id: id(), sampleId: f.sampleId, assignedLab: labId,
-            analysis: 'SAND', status: 'ASSIGNED', assignedTo: username, version: 0 } });
+        const item = f.items.SAND;
         const audits = await prisma.auditLog.count();
         if (fail) failCreate('result', row => row.sampleId === f.sampleId && row.param === 'TEXTURE');
         const response = await request(app).post('/api/workbench/batch-save').set('Authorization', `Bearer ${token}`)
@@ -266,7 +287,8 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId, assignedLab: labId, status: 'APPROVED' } });
         const rows = [];
         for (const replicateNo of [1, 2]) rows.push(await createResultFixture(prisma, { data: {
-            id: id(), sampleId, param: analysis.code, value: '5', replicateNo, isCurrent: true, isValid: true } }));
+            id: id(), sampleId, param: analysis.code, value: '5', replicateNo, isCurrent: true, isValid: true,
+            provenance: 'IMPORTED', attemptId: null } }));
         return { sampleId, rows, request: { body: { sampleIdColumn: 'sample', labId,
             columnMappings: [{ column: 'value', analysisCode: analysis.code, methodologyId: method.id, unitCode: unit.code }],
             rows: [{ sample: sampleId, value: '6.5' }] }, user: { username, role: 'LAB_MANAGER', labId } } };
@@ -281,6 +303,8 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
         const f = await importFixture();
         const response = await executeImport(f.request);
         expect(response.status).toBe(200); expect(response.body.importedResults).toBe(1);
+        expect(await prisma.workItem.count({ where: { sampleId: f.sampleId } })).toBe(0);
+        expect(await prisma.workAttempt.count({ where: { workItem: { sampleId: f.sampleId } } })).toBe(0);
         const rows = await prisma.result.findMany({ where: { sampleId: f.sampleId } });
         expect(rows.find(row => row.id === f.rows[0].id)).toMatchObject({ value: '5', isCurrent: false });
         expect(rows.find(row => row.id === f.rows[1].id)).toEqual(f.rows[1]);
@@ -297,6 +321,8 @@ describe('Audit 1.4: UUID writes and atomic replicate supersession', () => {
         const audits = await prisma.auditLog.count();
         failCreate(model, row => model === 'result' ? row.sampleId === newSampleId : row.action === 'IMPORT_LEGACY_DATA');
         expect((await executeImport(f.request)).status).toBe(500);
+        expect(await prisma.workItem.count({ where: { sampleId: f.sampleId } })).toBe(0);
+        expect(await prisma.workAttempt.count({ where: { workItem: { sampleId: f.sampleId } } })).toBe(0);
         expect(await prisma.sample.findUnique({ where: { id: newSampleId } })).toBeNull();
         expect(await prisma.result.findMany({ where: { sampleId: f.sampleId }, orderBy: { replicateNo: 'asc' } })).toEqual(f.rows);
         expect(await prisma.auditLog.count()).toBe(audits);

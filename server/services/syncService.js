@@ -699,45 +699,22 @@ class SyncService {
                     // Execute atomic record transaction
                     await prisma.$transaction(async (tx) => {
                         item = await freshExecutableItem(tx, item, user);
-                        // Create WorkAttempt record
-                        const attemptId = `att-${item.id}-${crypto.randomUUID()}`;
-                        await tx.workAttempt.create({
-                            data: {
-                                id: attemptId,
-                                workItemId,
-                                attemptNo: 1,
-                                author: user.username,
-                                authorName: user.name || user.username,
-                                materialAliquot: op.payload?.aliquot || 'FINE_EARTH_2MM',
-                                instrumentId: op.payload?.equipmentId || item.equipmentId || null,
-                                qcBatchId: item.batchId || null,
-                                version: (item.version || 0) + 1,
-                                status: 'RECORDED',
-                                evidenceData: JSON.stringify({
-                                    rawValue: String(rawVal),
-                                    normalizedValue: parsed.normalizedValue,
-                                    qualifier: parsed.censoring !== 'NONE' ? parsed.censoring : null,
-                                    recordedAt: now.toISOString(),
-                                    resultId: newResultId
-                                }),
-                                createdAt: now,
-                                updatedAt: now
-                            }
-                        });
-
                         const measurement = { param: item.analysis, value: op.payload?.value ?? op.payload?.result,
                             replicateNo: repNo, basis: validBasis, equipmentId: op.payload?.equipmentId,
                             methodologyId: item.methodologyId,
                             unit: op.payload?.unit, overrideReason: op.payload?.overrideReason,
                             ...(Object.hasOwn(op.payload || {}, 'batchId') && { batchId: op.payload.batchId }) };
                         const writer = require('./resultWriteService');
-                        const resultOptions = { sampleId: item.sampleId, workItemId: item.id, attemptId, actor: user, measurement, now,
-                            syncResult: { id: newResultId, flags: op.payload?.flags || [] } };
+                        const resultOptions = { sampleId: item.sampleId, workItemId: item.id, actor: user, measurement, now,
+                            syncResult: { id: newResultId, flags: op.payload?.flags || [],rawValue:String(rawVal) },
+                            attemptMetadata:{materialAliquot:op.payload?.aliquot || 'FINE_EARTH_2MM',version:(item.version || 0)+1} };
+                        let recordedResult;
                         if (isTextureTask && textVal && textureFractions) {
-                            await writer.writeTextureDetermination(tx, { ...resultOptions, fractions: textureFractions });
+                            recordedResult=await writer.writeTextureDetermination(tx, { ...resultOptions, fractions: textureFractions });
                         } else {
-                            await writer.writeResult(tx, resultOptions);
+                            recordedResult=await writer.writeResult(tx, resultOptions);
                         }
+                        const attemptId=recordedResult.attemptId;
 
                         // Clean up working draft if present
                         if (tx.workItemDraft) {

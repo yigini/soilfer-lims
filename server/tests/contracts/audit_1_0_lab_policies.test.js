@@ -1,4 +1,4 @@
-const { createResultFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -190,7 +190,8 @@ describe('Audit 1.0: persistent lab policies', () => {
         await edit([{ key: 'results.reportedValueRule', value: 'LATEST_VALID' }]);
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, assignedLab: labId, projectCode: project, status: 'APPROVED', requiredAnalyses: '["SOC"]' } });
         await createWorkItemFixture(prisma, { data: { id: id('POL-EXPORT-WI'), sampleId, assignedLab: labId, analysis: 'SOC', status: 'ACCEPTED', result: '9999' } });
-        for (const value of [10, 20]) await createResultFixture(prisma, { data: { id: id('POL-EXPORT-RES'), sampleId, param: 'SOC', value: String(value), unit: 'g/kg', isValid: true, isCurrent: true,
+        for (const value of [10, 20]) await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
+            data: { id: id('POL-EXPORT-RES'), sampleId, param: 'SOC', value: String(value), unit: 'g/kg', isValid: true, isCurrent: true,
             createdAt: new Date(`2026-10-0${value / 10}T12:00:00Z`) } });
         const response = await request(app).post('/api/exports/data').set('Authorization', `Bearer ${manager}`).send({ type: 'WET_CHEM', project });
         expect(response.status).toBe(200); expect(response.body.data[0].SOC).toBe(20);
@@ -236,7 +237,7 @@ describe('Audit 1.0: persistent lab policies', () => {
         await edit([], { presetCode: 'ADVISORY' });
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status: 'APPROVED' } });
         await createWorkItemFixture(prisma, { data: { id: id('POL-REPORT-WI'), sampleId, assignedLab: labId, analysis: 'PH_H2O', status: 'ACCEPTED', result: '7.2' } });
-        await createResultFixture(prisma, { data: { id: id('POL-REPORT-RES'), sampleId, param: 'PH_H2O', value: '7.2', numericValue: 7.2, isValid: true, isCurrent: true } });
+        await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data: { id: id('POL-REPORT-RES'), sampleId, param: 'PH_H2O', value: '7.2', numericValue: 7.2, isValid: true, isCurrent: true } });
         const response = await request(app).post(`/api/reports/generate/${sampleId}`).set('Authorization', `Bearer ${manager}`).send({});
         expect({ status: response.status, body: response.body }).toMatchObject({ status: 200 });
         const report = await prisma.report.findFirst({ where: { sampleId } });

@@ -1,5 +1,6 @@
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -52,13 +53,21 @@ describe('SD-10: Mandatory Reason on Rejection and Reopening Contract', () => {
         });
     });
 
-    afterAll(async () => {
-        await prisma.auditLog.deleteMany({ where: { sampleId: approvedSampleId } });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: approvedSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
-        await prisma.auditLog.deleteMany({ where: { sampleId } });
-        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sampleId } }), select: { id: true } })).map(row => row.id), { single: false });
-    });
+    // Pin6060110991: retain the recorded execution and its parents until owned database teardown.
+    async function rejectionSnapshot() {
+        return {
+            sample: await prisma.sample.findUnique({ where: { id: sampleId } }),
+            work: await prisma.workItem.findMany({ where: { sampleId }, orderBy: { id: 'asc' } }),
+            results: await prisma.result.findMany({ where: { sampleId }, orderBy: { id: 'asc' } }),
+            attempts: await prisma.workAttempt.findMany({ where: { workItemId: wiId }, orderBy: { id: 'asc' } }),
+            decisions: await prisma.reviewDecision.findMany({ where: { sampleId }, orderBy: { id: 'asc' } }),
+            events: await prisma.resultEvidenceEvent.findMany({ where: { sampleId }, orderBy: { id: 'asc' } }),
+            audits: await prisma.auditLog.findMany({ where: { sampleId }, orderBy: { id: 'asc' } }),
+            submissions: await prisma.submission.findMany({ where: { sampleId }, orderBy: { id: 'asc' } }),
+            drafts: await prisma.workItemDraft.findMany({ where: { workItemId: wiId }, orderBy: { id: 'asc' } }),
+            receipts: await prisma.commandReceipt.findMany({ where: { targetResource: wiId }, orderBy: { id: 'asc' } })
+        };
+    }
 
     test('1. Calling reviewWorkItem with REJECT and no note/reason returns HTTP 400', async () => {
         const res = await request(app)
@@ -76,7 +85,22 @@ describe('SD-10: Mandatory Reason on Rejection and Reopening Contract', () => {
         expect(wi.status).toBe('SUBMITTED');
     });
 
-    test('2. Calling reviewWorkItem with REJECT and note records note in reanalysisReason (HTTP 200)', async () => {
+    test('2a. REJECT with a note and no analytical attempt refuses with zero writes', async () => {
+        const before = await rejectionSnapshot();
+        const res = await request(app)
+            .post(`/api/work/${wiId}/review`)
+            .set('Authorization', `Bearer ${mgrGtmToken}`)
+            .send({ decision: 'REJECT', note: 'Duplicate electrode drift exceeded ±0.2 pH tolerance' });
+        expect(res.status).toBe(409);
+        expect(res.body.code).toBe('REVIEW_ATTEMPT_REQUIRED');
+        expect(await rejectionSnapshot()).toEqual(before);
+    });
+
+    test('2b. Calling reviewWorkItem with REJECT and note records note in reanalysisReason (HTTP 200)', async () => {
+        // Pin6060110991: 6.5 is a synthetic fixture value for the rejection-note contract.
+        await createExecutionResultFixture(prisma, { attemptStatus: 'SUBMITTED', data: {
+            id: 'RES-SD10-PH-01', sampleId, param: 'PH_H2O', value: '6.5', unit: 'pH',
+            provenance: 'MEASURED', isCurrent: true } });
         const rejectionNote = 'Duplicate electrode drift exceeded ±0.2 pH tolerance';
         const res = await request(app)
             .post(`/api/work/${wiId}/review`)

@@ -1,7 +1,7 @@
 'use strict';
-const { createResultFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { cleanupWorkflowFixtures } = require('../helpers/workflowFixtures');
 
-const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 /**
  * Contract Test Suite: QC Batch Inspection, Disposition & Release Gates (Refs #118)
  *
@@ -141,7 +141,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Link work item to batch
-        await createResultFixture(prisma, { data: { id: `RES-118-${Date.now()}`, sampleId: sample1.id,
+        await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data: { id: `RES-118-${Date.now()}`, sampleId: sample1.id,
             param: 'PH_H2O', value: '6.45', isCurrent: true, isValid: true, batchId: batch1.id } });
         await prisma.workItem.update({
             where: { id: workItem1.id },
@@ -150,25 +150,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         await normalizeLegacyQcFixture(prisma, batch1.id);
     });
 
-    afterAll(async () => {
-        await prisma.result.deleteMany({ where: { sampleId: { in: reportFixtureIds } } });
-        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: { in: reportFixtureIds } } }), select: { id: true } })).map(row => row.id), { single: false });
-        await prisma.auditLog.deleteMany({ where: { sampleId: { in: reportFixtureIds } } });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: { in: reportFixtureIds } } }), select: { id: true } })).map(row => row.id), { single: false });
-        // Clean up test data
-        await prisma.report.deleteMany({ where: { sampleId: sample1.id } }).catch(() => {});
-        await prisma.result.deleteMany({ where: { sampleId: sample1.id } });
-        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { id: workItem1.id } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample1.id } }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
-        await prisma.batch.deleteMany({ where: { id: batch1.id } }).catch(() => {});
-        await prisma.auditLog.deleteMany({ where: { entityId: batch1.id } }).catch(() => {});
-        await prisma.user.deleteMany({
-            where: { id: { in: [lab1Manager.id, lab2Manager.id, lab1Tech.id] } }
-        }).catch(() => {});
-        await prisma.lab.deleteMany({
-            where: { id: { in: [testLab1.id, testLab2.id] } }
-        }).catch(() => {});
-    });
+    // Pin6056586906: retain QC/evidence parents until the whole owned database is torn down.
 
     // ─── Test 1: Canonical Batch Inspection ───
     test('1. GET /api/qc/batches/:id returns canonical batch with actual control values, affected items, and scope protection', async () => {
@@ -227,7 +209,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         await prisma.batch.create({ data: { ...batch1, id: reportBatchId, workItemIds: JSON.stringify([`WI-${reportId}`]) } });
         await createSampleFixture(prisma, { data: { ...sample1, id: reportId, originalId: reportId, status: 'APPROVED' } });
         await createWorkItemFixture(prisma, { data: { ...workItem1, id: `WI-${reportId}`, sampleId: reportId, batchId: reportBatchId } });
-        await createResultFixture(prisma, { data: { id: `RES-${reportId}`, sampleId: reportId,
+        await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data: { id: `RES-${reportId}`, sampleId: reportId,
             param: 'PH_H2O', value: '6.45', isCurrent: true, isValid: true, batchId: reportBatchId } });
         await normalizeLegacyQcFixture(prisma, reportBatchId);
         const reportSample = await prisma.sample.findUnique({ where: { id: reportId }, include: { workItems: true, results: true } });
@@ -410,7 +392,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result 1: Has both QC_BATCH_FAILED and MANUAL_INVALID on active sample
-        const resWithManualInvalid = await createResultFixture(prisma, {
+        // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
+        await createWorkItemFixture(prisma, { data: { id: `${activeSample.id}-PH`, sampleId: activeSample.id,
+            analysis: 'PH', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        const resWithManualInvalid = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-manual-inv-${Date.now()}`,
                 sampleId: activeSample.id,
@@ -436,7 +421,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result 2: Belongs to already approved sample (must be immutable)
-        const resReleased = await createResultFixture(prisma, {
+        // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
+        await createWorkItemFixture(prisma, { data: { id: `${releasedSample.id}-PH`, sampleId: releasedSample.id,
+            analysis: 'PH', assignedLab: testLab1.id, status: 'ACCEPTED' } });
+        const resReleased = await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
             data: {
                 id: `res-released-${Date.now()}`,
                 sampleId: releasedSample.id,
@@ -451,7 +439,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result 3: Superseded historical result (must be immutable)
-        const resSuperseded = await createResultFixture(prisma, {
+        const resSuperseded = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-super-${Date.now()}`,
                 sampleId: activeSample.id,
@@ -498,12 +486,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const flags3 = JSON.parse(refreshedRes3.flags);
         expect(flags3).toEqual(['QC_BATCH_FAILED']); // Untouched
 
-        // Cleanup
-        await prisma.result.deleteMany({ where: { id: { in: [resWithManualInvalid.id, resReleased.id, resSuperseded.id] } } });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: activeSample.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: releasedSample.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
-        await prisma.batch.delete({ where: { id: testBatchId } }).catch(() => {});
-        await prisma.auditLog.deleteMany({ where: { entityId: testBatchId } }).catch(() => {});
+        // Retain QC, report and execution parents until whole-owned-DB teardown.
     });
 
     async function activeQcSample() {
@@ -592,7 +575,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Unflagged invalid result (isValid: false, flags: [])
-        const resUnflagged = await createResultFixture(prisma, {
+        // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
+        await createWorkItemFixture(prisma, { data: { id: `${activeSample.id}-PH`, sampleId: activeSample.id,
+            analysis: 'PH', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        const resUnflagged = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-unflagged-${Date.now()}`,
                 sampleId: activeSample.id,
@@ -607,7 +593,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result with unknown / non-QC flag (isValid: false, flags: ['SENSOR_FAILURE'])
-        const resSensorFailure = await createResultFixture(prisma, {
+        // Pin6060110991: explicit canonical EC owner; original Result fields stay unchanged.
+        await createWorkItemFixture(prisma, { data: { id: `${activeSample.id}-EC`, sampleId: activeSample.id,
+            analysis: 'EC', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        const resSensorFailure = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-sensor-${Date.now()}`,
                 sampleId: activeSample.id,
@@ -622,7 +611,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result with prior rejection (isValid: false, flags: ['QC_BATCH_REJECTED'])
-        const resPriorReject = await createResultFixture(prisma, {
+        // Pin6060110991: explicit canonical OC owner; original Result fields stay unchanged.
+        await createWorkItemFixture(prisma, { data: { id: `${activeSample.id}-OC`, sampleId: activeSample.id,
+            analysis: 'OC', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        const resPriorReject = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-reject-${Date.now()}`,
                 sampleId: activeSample.id,
@@ -637,7 +629,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result whose ONLY reason for invalidity was QC_BATCH_FAILED
-        const resQcOnly = await createResultFixture(prisma, {
+        // Pin6060110991: explicit canonical TN owner; original Result fields stay unchanged.
+        await createWorkItemFixture(prisma, { data: { id: `${activeSample.id}-TN`, sampleId: activeSample.id,
+            analysis: 'TN', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        const resQcOnly = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-qconly-${Date.now()}`,
                 sampleId: activeSample.id,
@@ -673,11 +668,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         expect(refQcOnly.isValid).toBe(true);
         expect(JSON.parse(refQcOnly.flags)).not.toContain('QC_BATCH_FAILED');
 
-        // Cleanup
-        await prisma.result.deleteMany({
-            where: { id: { in: [resUnflagged.id, resSensorFailure.id, resPriorReject.id, resQcOnly.id] } }
-        });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: activeSample.id } }), select: { id: true } })).map(row => row.id), { single: true }).catch(() => {});
+        // Retain QC, report and execution parents until whole-owned-DB teardown.
     });
 
     // ─── Test 12: flagBatchResults Strictly Preserves Immutability for Published Reports & Terminal Samples ───
@@ -695,7 +686,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
                 assignedLab: testLab1.id
             }
         });
-        const resArchived = await createResultFixture(prisma, {
+        // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
+        await createWorkItemFixture(prisma, { data: { id: `${archivedSample.id}-PH`, sampleId: archivedSample.id,
+            analysis: 'PH', assignedLab: testLab1.id, status: 'ACCEPTED' } });
+        const resArchived = await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
             data: {
                 id: `res-arch-${Date.now()}`,
                 sampleId: archivedSample.id,
@@ -719,7 +713,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
                 assignedLab: testLab1.id
             }
         });
-        const resDisposed = await createResultFixture(prisma, {
+        // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
+        await createWorkItemFixture(prisma, { data: { id: `${disposedSample.id}-PH`, sampleId: disposedSample.id,
+            analysis: 'PH', assignedLab: testLab1.id, status: 'ACCEPTED' } });
+        const resDisposed = await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
             data: {
                 id: `res-disp-${Date.now()}`,
                 sampleId: disposedSample.id,
@@ -751,7 +748,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
                 generatedBy: lab1Manager.username
             }
         });
-        const resPublished = await createResultFixture(prisma, {
+        // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
+        await createWorkItemFixture(prisma, { data: { id: `${pubSample.id}-PH`, sampleId: pubSample.id,
+            analysis: 'PH', assignedLab: testLab1.id, status: 'ACCEPTED' } });
+        const resPublished = await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
             data: {
                 id: `res-pub-${Date.now()}`,
                 sampleId: pubSample.id,
@@ -780,14 +780,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const refPub = await prisma.result.findUnique({ where: { id: resPublished.id } });
         expect(JSON.parse(refPub.flags)).toEqual(['QC_BATCH_FAILED']);
 
-        // Cleanup
-        await prisma.result.deleteMany({
-            where: { id: { in: [resArchived.id, resDisposed.id, resPublished.id] } }
-        });
-        await prisma.report.delete({ where: { id: pubReport.id } }).catch(() => {});
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
-            where: { id: { in: [archivedSample.id, disposedSample.id, pubSample.id] } }
-        }), select: { id: true } })).map(row => row.id), { single: false });
+        // Retain QC, report and execution parents until whole-owned-DB teardown.
     });
 
     // ─── Test 13: Conflicting Disposition Rejected with 409 DISPOSITION_CONFLICT ───
@@ -988,7 +981,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Step 1: Initial row isValid: false, flags: []
-        const res = await createResultFixture(prisma, {
+        // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
+        await createWorkItemFixture(prisma, { data: { id: `${sample.id}-PH`, sampleId: sample.id,
+            analysis: 'PH', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        const res = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-probe-${Date.now()}`,
                 sampleId: sample.id,
@@ -1018,9 +1014,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const passFlags = JSON.parse(afterPass.flags);
         expect(passFlags).not.toContain('QC_BATCH_FAILED');
 
-        // Cleanup
-        await prisma.result.delete({ where: { id: res.id } });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample.id } }), select: { id: true } })).map(row => row.id), { single: true });
+        // Retain QC, report and execution parents until whole-owned-DB teardown.
     });
 
     // ─── Test 17: Multi-Step Validity Provenance: Unflagged Invalid Stays Invalid Across FAIL -> PROCEED_WITH_WARNING ───
@@ -1038,7 +1032,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             }
         });
 
-        const res = await createResultFixture(prisma, {
+        // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
+        await createWorkItemFixture(prisma, { data: { id: `${sample.id}-PH`, sampleId: sample.id,
+            analysis: 'PH', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        const res = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-warn-${Date.now()}`,
                 sampleId: sample.id,
@@ -1062,9 +1059,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         expect(warnFlags).toContain('QC_WARNING_OVERRIDDEN');
         expect(warnFlags).not.toContain('QC_BATCH_FAILED');
 
-        // Cleanup
-        await prisma.result.delete({ where: { id: res.id } });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample.id } }), select: { id: true } })).map(row => row.id), { single: true });
+        // Retain QC, report and execution parents until whole-owned-DB teardown.
     });
 
     // ─── Test 18: Multi-Step Validity Provenance: Initially Valid Results Correctly Restored ───
@@ -1083,7 +1078,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Initially valid result
-        const res = await createResultFixture(prisma, {
+        // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
+        await createWorkItemFixture(prisma, { data: { id: `${sample.id}-PH`, sampleId: sample.id,
+            analysis: 'PH', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        const res = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-valid-${Date.now()}`,
                 sampleId: sample.id,
@@ -1115,9 +1113,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         expect(afterWarn.isValid).toBe(true);
         expect(JSON.parse(afterWarn.flags)).toContain('QC_WARNING_OVERRIDDEN');
 
-        // Cleanup
-        await prisma.result.delete({ where: { id: res.id } });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample.id } }), select: { id: true } })).map(row => row.id), { single: true });
+        // Retain QC, report and execution parents until whole-owned-DB teardown.
     });
 
     // ─── Test 19: Unknown and Malformed Flags Handled Safely and Remain Invalid ───
@@ -1136,7 +1132,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result with unknown flag
-        const resUnknown = await createResultFixture(prisma, {
+        // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
+        await createWorkItemFixture(prisma, { data: { id: `${sample.id}-PH`, sampleId: sample.id,
+            analysis: 'PH', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        const resUnknown = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-unknown-${Date.now()}`,
                 sampleId: sample.id,
@@ -1151,7 +1150,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         });
 
         // Result with malformed JSON string flags
-        const resMalformed = await createResultFixture(prisma, {
+        // Pin6060110991: explicit canonical EC owner; original Result fields stay unchanged.
+        await createWorkItemFixture(prisma, { data: { id: `${sample.id}-EC`, sampleId: sample.id,
+            analysis: 'EC', assignedLab: testLab1.id, status: 'COMPLETED' } });
+        const resMalformed = await createExecutionResultFixture(prisma, {
             data: {
                 id: `res-malformed-${Date.now()}`,
                 sampleId: sample.id,
@@ -1175,9 +1177,7 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const refMalformed = await prisma.result.findUnique({ where: { id: resMalformed.id } });
         expect(refMalformed.isValid).toBe(false);
 
-        // Cleanup
-        await prisma.result.deleteMany({ where: { id: { in: [resUnknown.id, resMalformed.id] } } });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: sample.id } }), select: { id: true } })).map(row => row.id), { single: true });
+        // Retain QC, report and execution parents until whole-owned-DB teardown.
     });
 
     // ─── Test 20: History Protection Accounts for SUPERSEDED Reports and Fails Closed on DB Error ───
@@ -1204,7 +1204,10 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
             }
         });
 
-        const resSupersededReport = await createResultFixture(prisma, {
+        // Pin6060110991: explicit canonical PH owner; original Result fields stay unchanged.
+        await createWorkItemFixture(prisma, { data: { id: `${histSample.id}-PH`, sampleId: histSample.id,
+            analysis: 'PH', assignedLab: testLab1.id, status: 'ACCEPTED' } });
+        const resSupersededReport = await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
             data: {
                 id: `res-hist-${Date.now()}`,
                 sampleId: histSample.id,
@@ -1239,9 +1242,6 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
 
         await expect(flagBatchResults(mockPrismaError, 'batch-err', 'QC_PASS')).rejects.toThrow('Database connection failed');
 
-        // Cleanup
-        await prisma.result.delete({ where: { id: resSupersededReport.id } });
-        await prisma.report.delete({ where: { id: supersededReport.id } });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: histSample.id } }), select: { id: true } })).map(row => row.id), { single: true });
+        // Retain QC, report and execution parents until whole-owned-DB teardown.
     });
 });

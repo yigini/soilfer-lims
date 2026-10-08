@@ -1,5 +1,5 @@
-const { createResultFixture } = require('../../services/resultWriteService');
-const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const qcService = require('../../services/qcService');
 const qcController = require('../../controllers/qcController');
@@ -25,8 +25,12 @@ describe('WP-29: QC Service & Batch Disposition Result Flagging', () => {
             }
         });
 
+        // Pin6060110991: explicit PH owner; the Batch is still absent at execution time.
+        await createWorkItemFixture(prisma, { data: { id: `WI-${testSampleId}-PH`, sampleId: testSampleId,
+            analysis: 'PH', assignedLab: 'LAB-TEST', status: 'COMPLETED' } });
+
         // Create result attached to batchId
-        await createResultFixture(prisma, {
+        await createExecutionResultFixture(prisma, {
             data: {
                 id: testResultId,
                 sampleId: testSampleId,

@@ -1,4 +1,4 @@
-const { createResultFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const { randomUUID } = require('node:crypto');
 const prisma = require('../../prisma');
 const samples = require('../../services/sampleStateService');
@@ -32,7 +32,8 @@ afterEach(() => jest.restoreAllMocks());
 test('final approval returns the preparation-reversion 409 and preserves every row', async () => {
     const row = await fixture('SUBMITTED_FULL', 'ACCEPTED');
     await prisma.sample.update({ where: { id: row.sample.id }, data: { receptionDate: new Date() } });
-    const result = await createResultFixture(prisma, { data: { id: randomUUID(), sampleId: row.sample.id, param: row.item.analysis,
+    const result = await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
+        data: { id: randomUUID(), sampleId: row.sample.id, param: row.item.analysis,
         value: '6.25', numericValue: 6.25, unit: 'pH_units', isCurrent: true } });
     await prisma.resultEvidenceEvent.create({ data: { id: randomUUID(), sampleId: row.sample.id, resultId: result.id,
         gate: 'PREPARATION', eventType: 'PREP_REVERTED', reason: 'Preparation recheck required', actor: manager.username } });
@@ -105,7 +106,8 @@ async function snapshot(sampleIds) {
         submissions: await prisma.submission.findMany({ where: sampleWhere, orderBy: { id: 'asc' } }),
         audits: await prisma.auditLog.findMany({ where: sampleWhere, orderBy: { id: 'asc' } }),
         events: await prisma.resultEvidenceEvent.findMany({ where: sampleWhere, orderBy: { id: 'asc' } }),
-        decisions: await prisma.reviewDecision.findMany({ where: sampleWhere, orderBy: { id: 'asc' } })
+        decisions: await prisma.reviewDecision.findMany({ where: sampleWhere, orderBy: { id: 'asc' } }),
+        attempts: await prisma.workAttempt.findMany({ where: { workItem: { sampleId: { in: sampleIds } } }, orderBy: { id: 'asc' } })
     };
 }
 async function call(handler, body, params = {}, user = technician) {
@@ -179,7 +181,7 @@ const paths = [
 ];
 test.each(paths)('%s submission refuses current preparation-revert evidence before writes', async (_, handler, body) => {
     const row = await fixture();
-    await createResultFixture(prisma, { data: { id: randomUUID(), sampleId: row.sample.id, param: 'PH', value: '6.25', isCurrent: true } });
+    await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: row.sample.id, param: 'PH', value: '6.25', isCurrent: true } });
     await prisma.$transaction(tx => evidence.recordPreparationRevert(tx, row.sample, 'PREPARATION', 'Reprepare specimen', manager));
     const before = await snapshot([row.sample.id]);
     expect(await call(handler, body(row))).toMatchObject({ statusCode: 409, body: { code: 'PREP_REVERTED_RESULTS' } });
@@ -199,7 +201,7 @@ test.each(paths)('%s submission rolls back sample/work/submit/audit after a late
 });
 test('one preparation-blocked sample rolls back the whole workbench submission batch', async () => {
     const first = await fixture(), second = await fixture(), ids = [first.sample.id, second.sample.id];
-    await createResultFixture(prisma, { data: { id: randomUUID(), sampleId: second.sample.id, param: 'PH', value: '6.25', isCurrent: true } });
+    await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: second.sample.id, param: 'PH', value: '6.25', isCurrent: true } });
     await prisma.$transaction(tx => evidence.recordPreparationRevert(tx, second.sample, 'PREPARATION', 'Reprepare specimen', manager));
     const before = await snapshot(ids);
     expect(await call(workbench.commitSubmissions, { sampleIds: ids })).toMatchObject({ statusCode: 409, body: { code: 'PREP_REVERTED_RESULTS' } });
@@ -310,54 +312,75 @@ const reviewPaths = [
         decision: status === 'REPEAT_REQUIRED' ? 'RETURN' : status === 'WAIVED' ? 'OMIT' : 'ACCEPT', reason: 'Repeat review reason' }] },
     { id: row.item.submissionId }]]
 ];
-async function submittedFixture(sampleStatus = 'SUBMITTED_FULL') {
+async function submittedFixture(sampleStatus = 'SUBMITTED_FULL', { seedCachedEvidence = false } = {}) {
     const row = await fixture(sampleStatus, 'SUBMITTED');
     const sub = await prisma.submission.create({ data: { id: randomUUID(), sampleId: row.sample.id, assignedLab: labId, labId,
         submittedBy: technician.username, type: sampleStatus === 'SUBMITTED_FULL' ? 'FULL' : 'PARTIAL', status: 'PENDING_REVIEW',
         workItemIds: JSON.stringify([row.item.id]), workItemCount: 1 } });
     row.item = await prisma.workItem.update({ where: { id: row.item.id }, data: { submissionId: sub.id } });
+    // Pin6059400910: only the named later-contract tests request this evidence.
+    if (seedCachedEvidence) {
+        row.result = await createExecutionResultFixture(prisma, { attemptStatus: 'SUBMITTED',
+            data: { id: randomUUID(), sampleId: row.sample.id, param: row.item.analysis, value: row.item.result,
+                provenance: 'MEASURED', isCurrent: true } });
+        row.attempt = await prisma.workAttempt.findUnique({ where: { id: row.result.attemptId } });
+    }
     return row;
 }
+async function assertReturnedAttemptUnchanged(row) {
+    const attempt = await prisma.workAttempt.findUnique({ where: { id: row.result.attemptId } });
+    // Pin6059793372: reason-coded RETURN status changes are deferred to #191.
+    expect(attempt.status).toBe('SUBMITTED');
+    expect(attempt).toEqual(row.attempt);
+}
 test.each(reviewPaths)('%s review RETURN reopens FULL atomically and records its decision in Sample history/audit', async (_, handler, payload) => {
-    const row = await submittedFixture(), [body, params] = payload(row, 'REPEAT_REQUIRED');
+    const row = await submittedFixture('SUBMITTED_FULL', { seedCachedEvidence: true }), [body, params] = payload(row, 'REPEAT_REQUIRED');
     expect((await call(handler, body, params, manager)).statusCode).toBe(200);
     const decision = await prisma.reviewDecision.findFirst({ where: { workItemId: row.item.id, decision: 'RETURN' } });
     const sample = await prisma.sample.findUnique({ where: { id: row.sample.id } });
     expect(sample).toMatchObject({ status: 'PROCESSING', approvedAt: row.sample.approvedAt, approvedBy: row.sample.approvedBy });
     expect(JSON.parse(sample.history).at(-1)).toMatchObject({ action: 'REVIEW_RETURNED', reviewDecisionId: decision.id, reason: decision.reason });
-    const audit = await prisma.auditLog.findFirst({ where: { sampleId: row.sample.id, action: 'REVIEW_RETURNED' } });
+    const audit = await prisma.auditLog.findFirst({ where: { sampleId: row.sample.id, entity: 'SAMPLE', action: 'REVIEW_RETURNED' } });
     expect(JSON.parse(audit.after)).toMatchObject({ status: 'PROCESSING', reviewDecisionId: decision.id, reason: decision.reason });
+    expect(await prisma.auditLog.count({ where: { sampleId: row.sample.id, entity: 'RESULT', entityId: row.result.id,
+        action: 'REVIEW_RETURNED' } })).toBe(1);
+    await assertReturnedAttemptUnchanged(row);
     expect(await prisma.workItem.findUnique({ where: { id: row.item.id } })).toMatchObject({ status: 'REPEAT_REQUIRED', result: row.item.result });
 });
 test.each(reviewPaths)('%s review RETURN retains a partial lifecycle', async (_, handler, payload) => {
-    const row = await submittedFixture('SUBMITTED_PARTIAL'), [body, params] = payload(row, 'REPEAT_REQUIRED');
+    const row = await submittedFixture('SUBMITTED_PARTIAL', { seedCachedEvidence: true }), [body, params] = payload(row, 'REPEAT_REQUIRED');
     expect((await call(handler, body, params, manager)).statusCode).toBe(200);
     expect(await prisma.sample.findUnique({ where: { id: row.sample.id } })).toMatchObject({ status: 'SUBMITTED_PARTIAL' });
-    expect(await prisma.auditLog.count({ where: { sampleId: row.sample.id, action: 'REVIEW_RETURNED' } })).toBe(0);
+    expect(await prisma.auditLog.count({ where: { sampleId: row.sample.id, entity: 'SAMPLE', action: 'REVIEW_RETURNED' } })).toBe(0);
+    expect(await prisma.auditLog.count({ where: { sampleId: row.sample.id, entity: 'RESULT', entityId: row.result.id,
+        action: 'REVIEW_RETURNED' } })).toBe(1);
+    await assertReturnedAttemptUnchanged(row);
 });
 test.each(reviewPaths.flatMap(([name, handler, payload]) => ['ACCEPTED', 'WAIVED'].map(status => [name, status, handler, payload])))
     ('%s review %s leaves FULL lifecycle unchanged', async (_, status, handler, payload) => {
-        const row = await submittedFixture(), [body, params] = payload(row, status);
+        const row = await submittedFixture('SUBMITTED_FULL', { seedCachedEvidence: status === 'ACCEPTED' }), [body, params] = payload(row, status);
         expect((await call(handler, body, params, manager)).statusCode).toBe(200);
         expect(await prisma.sample.findUnique({ where: { id: row.sample.id } })).toMatchObject({ status: 'SUBMITTED_FULL' });
     });
 test.each(reviewPaths)('%s review RETURN refuses an approved Sample with zero writes', async (_, handler, payload) => {
-    const row = await submittedFixture('APPROVED'), [body, params] = payload(row, 'REPEAT_REQUIRED'), before = await snapshot([row.sample.id]);
+    const row = await submittedFixture('APPROVED', { seedCachedEvidence: ['bulk', 'submission'].includes(_) }),
+        [body, params] = payload(row, 'REPEAT_REQUIRED'), before = await snapshot([row.sample.id]);
     expect(await call(handler, body, params, manager)).toMatchObject({ statusCode: 409, body: { code: 'AMENDMENT_WORKFLOW_REQUIRED' } });
     expect(await snapshot([row.sample.id])).toEqual(before);
 });
 test('a Sample status change during FULL review rolls back its decision and WorkItem', async () => {
-    const row = await submittedFixture(), before = await snapshot([row.sample.id]);
+    const row = await submittedFixture('SUBMITTED_FULL', { seedCachedEvidence: true }), before = await snapshot([row.sample.id]);
     await expect(commitReview(prisma, row.item, 'REPEAT_REQUIRED', manager, { reanalysisReason: 'Repeat review reason' }, async tx => {
         const decision = await tx.reviewDecision.create({ data: { id: randomUUID(), sampleId: row.sample.id, workItemId: row.item.id,
-            decision: 'RETURN', reviewerId: manager.username, reviewerName: manager.username, reason: 'Repeat review reason' } });
+            decision: 'RETURN', reviewerId: manager.username, reviewerName: manager.username, reason: 'Repeat review reason',
+            attemptId: row.result.attemptId } });
         await samples.transitionSample(row.sample.id, 'ON_HOLD', manager, 'Concurrent manager hold', {}, tx);
         return [decision];
     })).rejects.toMatchObject({ statusCode: 409, code: 'SAMPLE_STATE_CHANGED' });
     expect(await snapshot([row.sample.id])).toEqual(before);
 });
 test('a failed FULL review lifecycle audit rolls back its decision, history and WorkItem', async () => {
-    const row = await submittedFixture(), before = await snapshot([row.sample.id]);
+    const row = await submittedFixture('SUBMITTED_FULL', { seedCachedEvidence: true }), before = await snapshot([row.sample.id]);
     failAudit('REVIEW_RETURNED');
     expect((await call(workController.reviewWorkItem, { status: 'REPEAT_REQUIRED', reason: 'Repeat review reason' }, { id: row.item.id }, manager)).statusCode).toBe(500);
     expect(await snapshot([row.sample.id])).toEqual(before);

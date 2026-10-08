@@ -36,7 +36,21 @@ const QC_EVIDENCE_SOURCES = Object.freeze([
         directory: '20261007000300_proficiency_evidence', sqlSha256: 'bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a' }),
     Object.freeze({ functionName: 'loadResultEquipmentMigrationSource', loader: 'services/resultEquipmentMigrationSource.js',
         loaderSha256: '4b5a2ea2ef7ee02da46336efaa495520f93cecf9056fa91fdef78b30172acad5',
-        directory: '20261007000400_result_equipment_evidence', sqlSha256: 'bd409a6e5d4d8aea357991450025601d73c4c4729cb46473d847c17cb66319d4' })
+        directory: '20261007000400_result_equipment_evidence', sqlSha256: 'bd409a6e5d4d8aea357991450025601d73c4c4729cb46473d847c17cb66319d4' }),
+    // #190 pin6057064901: inspect both byte-bound assets; no writer exception.
+    Object.freeze({ functionName: 'loadWorkAttemptMigrationSource', loader: 'services/workAttemptMigrationSource.js',
+        loaderSha256: '4f3012693c7f764d3c0cb09fc0b4235c63cd5525b50b6656351a58c68dca6cd4',
+        directory: '20261008000100_work_attempt_contract', sqlSha256: '7e7d5679c9aeeea45ac3c2bac09e4db31dd15b52fe37c743080aa0e3473c8fe2',
+        boundary: '-- INSTALLER_GUARDS_AFTER_BACKFILL' }),
+    // Pins6061135570/6061301340: inspect the two unchanged #178 sources.
+    Object.freeze({ functionName: 'loadWorkItemDuplicateMarkerSource', loader: 'services/workItemUniquenessMigrationSource.js',
+        loaderSha256: '0d0b17d96c602d69514b9ed38956553ea4c9969726f2a6cafd9b61b7daf689c3',
+        directory: '20261004190000_add_workitem_duplicate_marker',
+        sqlSha256: '80278c2d318bc47fa92746015ec278a204a7ff08a9e36d24faca0a56ef05fa1e', wholeSql: true }),
+    Object.freeze({ functionName: 'loadActiveWorkItemIndexSource', loader: 'services/workItemUniquenessMigrationSource.js',
+        loaderSha256: '0d0b17d96c602d69514b9ed38956553ea4c9969726f2a6cafd9b61b7daf689c3',
+        directory: '20261004190100_unique_active_workitem',
+        sqlSha256: 'a6e1cf6a26319954e35f4008bc4d18e904014f086db0e31d88e42948fac6556e', wholeSql: true })
 ]);
 const WORKFLOW_SOURCES = Object.freeze({
     evidence: { directory: '20261005000000_workflow_state_evidence', sha256: 'ae3accea0c276aab9ea3ed443b44d89ac05e52ef38a39345aa33e8744f019552' },
@@ -54,10 +68,43 @@ const mutations = new Set(['create', 'createMany', 'createManyAndReturn', 'updat
 const sqlMethods = new Set(['prepare', 'exec', 'execute', 'pragma', '$executeRaw', '$executeRawUnsafe', '$queryRaw', '$queryRawUnsafe']);
 const workflowModels = new Map([['sample', 'Sample'], ['samples', 'Sample'], ['workItem', 'WorkItem'], ['workItems', 'WorkItem'], ['result', 'Result'], ['results', 'Result']]);
 const union = sets => [...new Set(sets.flat())];
+// Pin6059042857: positive composite setup is confined to these two tests.
+// This registry grants no direct Result/WorkItem/SQL writer exemption.
+const COMPOSITE_FIXTURE = Object.freeze({
+    file: 'tests/helpers/workAttemptFixtures.js', exportName: 'createCompositeTextureExecutionFixture',
+    caller: 'tests/contracts/audit_0_3_publication.test.js',
+    tests: Object.freeze([
+        'composite texture governs sand, silt, clay and texture without duplicating values',
+        'RETURN of composite texture invalidates all four current parameters'
+    ])
+});
+// #190 pin6057064901: one byte-bound export, four exact callers. This is a
+// fixture authority with an enforced import boundary, never a file exemption.
+const ATTEMPT_FIXTURE = Object.freeze({
+    file: 'tests/helpers/workAttemptHistoricalFixtures.js', exportName: 'createPre190AttemptFixture',
+    sha256: 'ec972abe235214a89c84f6cc2f880286ea3e5cca075338d659bda4a8bbb74aec',
+    ddl: 'tests/helpers/fixtures/pre190_full_application_schema.sql',
+    ddlSha256: 'e2496a65a9c607e80a82924ff7ed6a4033d1da05fedb907c83dd0918f022923b',
+    callers: Object.freeze({
+        'tests/contracts/audit_3_1_attempt_backfill_plan.test.js': 'Historical matching and refusal.',
+        'tests/contracts/audit_3_1_attempt_install.test.js': 'Atomic migration preservation.',
+        'tests/contracts/audit_3_1_attempt_sql_guards.test.js': 'Legacy setup before actual guard probes.',
+        'tests/contracts/audit_1_2_spectral_state.test.js': 'One named orphan-refusal rehearsal.'
+    }),
+    orphanTest: 'a literal pre-190 measured orphan refuses the installer and COMPLETE startup without writes'
+});
 
 function scanSource(source, filename, exceptions = []) {
     const violations = [];
     const report = (node, code, detail) => violations.push({ file: filename, line: node?.loc?.start?.line || node?.loc?.line || 1, code, detail });
+    let validAttemptFixture = false;
+    if (filename === ATTEMPT_FIXTURE.file) {
+        try {
+            validAttemptFixture = createHash('sha256').update(source).digest('hex') === ATTEMPT_FIXTURE.sha256 &&
+                createHash('sha256').update(fs.readFileSync(path.resolve(__dirname, '../..', ATTEMPT_FIXTURE.ddl))).digest('hex') === ATTEMPT_FIXTURE.ddlSha256;
+        } catch { validAttemptFixture = false; }
+        if (!validAttemptFixture) report(null, 'HISTORICAL_FIXTURE_SOURCE_MISMATCH', 'The pinned #190 factory or pre-190 DDL digest differs.');
+    }
     const sqlTable = '(?:["`\\[]?\\w+["`\\]]?\\s*\\.\\s*)?["`\\[]?(?:Sample|WorkItem)(?:["`\\]]|\\b)';
     const rawWrite = text => new RegExp('\\b(?:INSERT\\s+(?:OR\\s+\\w+\\s+)?INTO|REPLACE\\s+INTO|DELETE\\s+FROM)\\s+' + sqlTable, 'i').test(text) ||
         [...text.matchAll(new RegExp('\\bUPDATE(?:\\s+OR\\s+\\w+)?\\s+' + sqlTable + '\\s+SET\\s+([\\s\\S]*?)(?=\\bWHERE\\b|;|$)', 'gi'))]
@@ -362,7 +409,10 @@ function scanSource(source, filename, exceptions = []) {
             if (createHash('sha256').update(fs.readFileSync(path.join(root, source.loader))).digest('hex') !== source.loaderSha256) return null;
             const bytes = fs.readFileSync(path.join(root, 'prisma/migrations', source.directory, 'migration.sql'));
             if (createHash('sha256').update(bytes).digest('hex') !== source.sqlSha256) return null;
-            const sql = bytes.toString('utf8'), boundary = sql.indexOf('CREATE TRIGGER');
+            const sql = bytes.toString('utf8');
+            if (source.wholeSql) return p.node.property.name === 'sql' ? sql : null;
+            const marker = source.boundary || 'CREATE TRIGGER', boundary = sql.indexOf(marker);
+            if (boundary < 0 || source.boundary && sql.indexOf(marker, boundary + 1) !== -1) return null;
             return p.node.property.name === 'schemaSql' ? sql.slice(0, boundary) : p.node.property.name === 'guardsSql' ? sql.slice(boundary) : sql;
         } catch { return null; }
     }
@@ -489,6 +539,7 @@ function scanSource(source, filename, exceptions = []) {
     function authorized(p, entities, operation) {
         const name = owner(p);
         if (!exportedNames.has(name)) return false;
+        if (validAttemptFixture && name === ATTEMPT_FIXTURE.exportName) return true;
         const removal = ['delete', 'deleteMany'].includes(operation);
         if (filename === 'services/sampleStateService.js' && (['createSample', 'transitionSample', 'writeSampleHoldCompatibility'].includes(name) || removal && name === 'removePreAnalyticSample') && entities.every(entity => entity === 'Sample')) return true;
         if (filename === 'services/workItemStateService.js' && (['createWorkItem', 'transitionWorkItem'].includes(name) || removal && name === 'removeUnstartedWorkItems') && entities.every(entity => entity === 'WorkItem')) return true;
@@ -497,6 +548,7 @@ function scanSource(source, filename, exceptions = []) {
     }
     function resultProbe(p) {
         const name = owner(p);
+        if (validAttemptFixture && name === ATTEMPT_FIXTURE.exportName && exportedNames.has(name)) return true;
         return exportedNames.has(name) && exceptions.some(entry => entry.file === filename && entry.exportName === name);
     }
     function pinnedCorruptProjectConnection(p, sql) {
@@ -513,11 +565,51 @@ function scanSource(source, filename, exceptions = []) {
         return false;
     }
     function helperImport(p, specifiers) {
-        if (filename.startsWith('tests/')) return;
         const rehearsalLauncher = /^scripts\/(?:run_manager_dashboard_tasklist_side_by_side|run_test_rehearsal|verify_issue149_[^/]+)\.cjs$/.test(filename);
         for (const specifier of specifiers) {
             if (specifier.includes('<unknown>')) continue;
-            const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(filename), specifier.replace(/\\/g, '/'))).replace(/\.(?:js|cjs)$/, '');
+            const root = path.resolve(__dirname, '../..');
+            const resolved = path.relative(root, path.resolve(root, path.dirname(filename), specifier))
+                .replace(/\\/g, '/').replace(/\.(?:js|cjs)$/, '');
+            if (resolved === COMPOSITE_FIXTURE.file.replace(/\.js$/, '')) {
+                if (!filename.startsWith('tests/')) {
+                    report(p.node, 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
+                } else {
+                    const inNamedTest = reference => filename === COMPOSITE_FIXTURE.caller && Boolean(reference.findParent(parent =>
+                        parent.isCallExpression() && parent.get('callee').isIdentifier({ name: 'test' }) &&
+                        parent.get('arguments.0').isStringLiteral() && COMPOSITE_FIXTURE.tests.includes(parent.node.arguments[0].value)));
+                    const directCallsOnly = binding => binding && binding.constantViolations.length === 0 &&
+                        binding.referencePaths.length > 0 && binding.referencePaths.every(reference =>
+                            reference.parentPath.isCallExpression() && reference.key === 'callee' && inNamedTest(reference));
+                    let allowed = false;
+                    const declaration = p.parentPath;
+                    if (declaration.isVariableDeclarator() && declaration.get('id').isObjectPattern()) {
+                        allowed = declaration.get('id.properties').every(property => {
+                            if (!property.isObjectProperty() || property.node.computed || !property.get('value').isIdentifier()) return false;
+                            const name = property.node.key.name || property.node.key.value;
+                            if (name === 'createExecutionResultFixture') return true;
+                            return name === COMPOSITE_FIXTURE.exportName && inNamedTest(p) &&
+                                directCallsOnly(declaration.scope.getBinding(property.node.value.name));
+                        });
+                    } else if (p.isImportDeclaration()) {
+                        allowed = p.get('specifiers').every(property => property.isImportSpecifier() &&
+                            (property.node.imported.name === 'createExecutionResultFixture' ||
+                            property.node.imported.name === COMPOSITE_FIXTURE.exportName &&
+                            directCallsOnly(p.scope.getBinding(property.node.local.name))));
+                    } else if (declaration.isMemberExpression() && !declaration.node.computed &&
+                        declaration.node.property.name === 'createExecutionResultFixture') allowed = true;
+                    if (!allowed) report(p.node, 'POSITIVE_FIXTURE_CALLER_NOT_ALLOWED', specifier);
+                }
+            }
+            if (resolved === ATTEMPT_FIXTURE.file.replace(/\.js$/, '')) {
+                const callerAllowed = Object.hasOwn(ATTEMPT_FIXTURE.callers, filename);
+                const namedOrphan = filename !== 'tests/contracts/audit_1_2_spectral_state.test.js' || Boolean(p.findParent(parent =>
+                    parent.isCallExpression() && parent.get('callee').isIdentifier({ name: 'test' }) &&
+                    parent.get('arguments.0').isStringLiteral({ value: ATTEMPT_FIXTURE.orphanTest })));
+                if (!callerAllowed || !namedOrphan) report(p.node,
+                    filename.startsWith('tests/') ? 'HISTORICAL_FIXTURE_CALLER_NOT_ALLOWED' : 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
+            }
+            if (filename.startsWith('tests/')) continue;
             if (exceptions.some(entry => resolved === entry.file.replace(/\.js$/, '')) || (rehearsalLauncher && resolved.startsWith('tests/'))) {
                 report(p.node, 'TEST_HELPER_IMPORTED_BY_RUNTIME', specifier);
             }

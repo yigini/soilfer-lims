@@ -2960,6 +2960,24 @@
     "legacySigmaMissing": "Esta puntuación histórica de aptitud se registró sin sigma de evaluación. No se ha recalculado; indique un sigma válido mediante una corrección explícita.",
     "legacySigmaNonpositive": "Esta puntuación histórica de aptitud usó un sigma de evaluación no positivo o no finito. No se ha recalculado; indique un sigma válido mediante una corrección explícita."
   },
+  "attemptEvidence": {
+    "title": "Intentos",
+    "number": "Intento #{number}",
+    "importedNoAttempt": "Importado, sin intento",
+    "legacy": "histórico",
+    "notRecorded": "No registrado",
+    "status": {
+      "open": "Abierto",
+      "recorded": "Registrado",
+      "submitted": "Enviado",
+      "accepted": "Aceptado",
+      "questioned": "Cuestionado",
+      "invalidated": "Invalidado",
+      "superseded": "Reemplazado",
+      "returnedLegacy": "Devuelto (histórico)",
+      "rejectedLegacy": "Rechazado (histórico)"
+    }
+  },
   "qcMembership": {
     "membership": "Miembros de la corrida",
     "selectedWork": "Trabajos seleccionados",

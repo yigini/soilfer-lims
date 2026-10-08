@@ -34,8 +34,10 @@ function parseDeterminationValue(rawInput, numberFormat = require('./policyServi
  * @param {object|null} rules
  * @returns {object}
  */
-function validateNumericMethod(value, rules = null, numberFormat = require('./policyService').getStrictNumberFormat()) {
-    const parsed = parseDeterminationValue(value, numberFormat);
+function validateNumericMethod(value, rules = null, numberFormat = require('./policyService').getStrictNumberFormat(), parsedValue = null) {
+    // Execution validation can reuse the trusted fraction parser output. No
+    // request can supply this internal argument through the result authority.
+    const parsed = parsedValue || parseDeterminationValue(value, numberFormat);
     if (parsed.isBlank) {
         return {
             ...parsed,
@@ -177,6 +179,7 @@ function validateTextureFractions(sandOrObj, siltOrTol, clay, tolerance = 2.0, n
         className: textureResult.className,
         code: textureResult.code,
         fractions: { sand: s, silt: si, clay: c },
+        parsedFractions:{SAND:pSand,SILT:pSilt,CLAY:pClay},
         flags,
         error: textureResult.isValid ? null : (textureResult.error || `Soil texture fractions sum to ${sum}%, exceeding closure tolerance of ±${tolDisplay}%`)
     };

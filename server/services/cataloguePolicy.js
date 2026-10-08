@@ -1,7 +1,7 @@
 const prisma = require('../prisma');
 
 const MATRICES = ['SOIL', 'PLANT', 'WATER', 'AMENDMENT', 'FERTILIZER', 'LIMING'];
-const GATE_CODES = new Set(['DRYING', 'PREPARATION', 'ARCHIVING', 'DISPOSAL']);
+const {GATE_CODES}=require('./workItemKinds');
 
 function parseJson(value, fallback = null) {
     if (value == null || value === '') return fallback;

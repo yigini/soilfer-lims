@@ -1,6 +1,6 @@
-const { createResultsFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
-const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -13,6 +13,13 @@ describe('API Key Scoping Isolation Contract (SL-22 Security Fix)', () => {
 
     const sampleGtmId = 'TEST-ISO-SMP-GTM';
     const sampleMozId = 'TEST-ISO-SMP-MOZ';
+    async function assertNoForeignExecution(response, foreignSampleId) {
+        const workItemId = `${foreignSampleId}-pH`;
+        const attempts = await prisma.workAttempt.findMany({ where: { workItemId } });
+        expect(attempts).toHaveLength(1);
+        const body = JSON.stringify(response.body);
+        for (const id of [workItemId, attempts[0].id]) expect(body).not.toContain(id);
+    }
 
     beforeAll(async () => {
         // Cleanup
@@ -93,8 +100,10 @@ describe('API Key Scoping Isolation Contract (SL-22 Security Fix)', () => {
         });
 
         // Create results
-        await createResultsFixture(prisma, {
-            data: [
+        // Pin6060286651: explicit accepted owners and one final attempt per original row.
+        for (const scope of [{ sampleId: sampleGtmId, assignedLab: 'LAB-GTM' }, { sampleId: sampleMozId, assignedLab: 'LAB-MOZ' }])
+            await createWorkItemFixture(prisma, { data: { ...scope, id: `${scope.sampleId}-pH`, analysis: 'pH', status: 'ACCEPTED' } });
+        for (const data of [
                 {
                     id: 'res-iso-gtm-1',
                     sampleId: sampleGtmId,
@@ -113,24 +122,10 @@ describe('API Key Scoping Isolation Contract (SL-22 Security Fix)', () => {
                     isCurrent: true,
                     provenance: 'MEASURED'
                 }
-            ]
-        });
+            ]) await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data });
     });
 
-    afterAll(async () => {
-        await prisma.result.deleteMany({
-            where: { sampleId: { in: [sampleGtmId, sampleMozId] } }
-        });
-        await prisma.spectralData.deleteMany({
-            where: { sampleId: { in: [sampleGtmId, sampleMozId] } }
-        });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
-            where: { id: { in: [sampleGtmId, sampleMozId] } }
-        }), select: { id: true } })).map(row => row.id), { single: false });
-        await prisma.apiKey.deleteMany({
-            where: { id: { in: ['test-iso-key-gtm', 'test-iso-key-moz', 'test-iso-key-unscoped'] } }
-        });
-    });
+    // Pin6060286651: retain analytical and scope parents until whole-owned-DB teardown.
 
     test('1. Unscoped API key (absent labs) is strictly DENIED across all shared endpoints', async () => {
         // /samples
@@ -205,5 +200,18 @@ describe('API Key Scoping Isolation Contract (SL-22 Security Fix)', () => {
             .set('X-API-KEY', keyGtmToken);
         expect(resGtmDetail.status).toBe(200);
         expect(resGtmDetail.body.data.id).toBe(sampleGtmId);
+        // Pin6060286651: ownership must not expose the other lab's execution.
+        for (const response of [resSamples, resResults, resMozDetail, resGtmDetail])
+            await assertNoForeignExecution(response, sampleMozId);
+    });
+
+    test.each([
+        ['GTM', keyGtmToken, sampleMozId], ['MOZ', keyMozToken, sampleGtmId]
+    ])('%s key never exposes the other laboratory WorkItem or attempt on shared endpoints', async (_, token, foreignSampleId) => {
+        for (const endpoint of ['samples', 'results', 'spectra', 'stats', `samples/${foreignSampleId}`]) {
+            const response = await request(app).get(`/api/v1/data-exchange/${endpoint}`).set('X-API-KEY', token);
+            expect(response.status).toBe(endpoint.startsWith('samples/') ? 404 : 200);
+            await assertNoForeignExecution(response, foreignSampleId);
+        }
     });
 });

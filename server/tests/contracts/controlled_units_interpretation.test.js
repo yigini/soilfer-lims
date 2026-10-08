@@ -1,4 +1,4 @@
-const { createResultsFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -41,8 +41,8 @@ describe('BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine', 
         }
 
         const now = new Date();
-        await createResultsFixture(prisma, {
-            data: [
+        // Pin6056586906: each row binds its existing canonical owner.
+        for (const data of [
                 { id: `RES-I1-${Date.now()}`, sampleId: s.id, param: 'PH_H2O', value: '5.2', unit: 'pH', isValid: true, createdAt: now, updatedAt: now },
                 { id: `RES-I2-${Date.now()}`, sampleId: s.id, param: 'SOC', value: '1.5', unit: '%', isValid: true, createdAt: now, updatedAt: now }, // Should convert to 15.0 g/kg
                 { id: `RES-I3-${Date.now()}`, sampleId: s.id, param: 'TN', value: '0.12', unit: '%', isValid: true, createdAt: now, updatedAt: now }, // Should convert to 1.2 g/kg
@@ -54,8 +54,7 @@ describe('BLK-1: Controlled Unit Vocabulary & Agronomic Interpretation Engine', 
                 { id: `RES-I9-${Date.now()}`, sampleId: s.id, param: 'SAND', value: '620', unit: 'g/kg', isValid: true, createdAt: now, updatedAt: now }, // Should convert to 62.0%
                 { id: `RES-I10-${Date.now()}`, sampleId: s.id, param: 'SILT', value: '230', unit: 'g/kg', isValid: true, createdAt: now, updatedAt: now }, // Should convert to 23.0%
                 { id: `RES-I11-${Date.now()}`, sampleId: s.id, param: 'CLAY', value: '150', unit: 'g/kg', isValid: true, createdAt: now, updatedAt: now }  // Should convert to 15.0%
-            ]
-        });
+            ]) await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data });
     });
 
     test('1. Normalizes synonym units and applies scientific conversion factors', () => {

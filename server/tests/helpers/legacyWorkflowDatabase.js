@@ -201,6 +201,10 @@ function beforeGuards(options) {
             // historical schema literal and continue refusing every other gap.
             expected.push({ table: 'ProficiencyRound', fields: ['ncrStatus', 'classificationLimits',
                 'legacyScoreFlag', 'legacyFlaggedAt', 'deletedAt', 'deletedBy', 'deleteReason'] });
+            // #190 is additive. Never reinterpret a captured historical schema
+            // as a fresh one when its attempt/review metadata is absent.
+            expected.push({table:'WorkAttempt',fields:['batchId','reason','requestedBy','requestedAt','rawData','calcVersion','dilutionFactor','aliquotId','legacyAttemptNoConflict']},
+                {table:'ReviewDecision',fields:['reasonCode']});
             const order = Prisma.dmmf.datamodel.models.map(model => model.dbName || model.name);
             expected.sort((left, right) => order.indexOf(left.table) - order.indexOf(right.table));
         }
@@ -276,7 +280,7 @@ function beforeGuards(options) {
             const tables = source.prepare("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma_%' AND name != 'ResultEvidenceEvent'").all();
             // Copy schema-only indexes, leaving every additive release guard
             // and partial index for its actual installer on this new file.
-            const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent' AND name NOT IN ('ReferenceValue_current_generic','ReferenceValue_current_method','QcRule_scope_version_unique','BatchAnalyte_crm_ordinal_unique','BatchPositionReference_current_unique','QcMeasurement_current_unique')").all();
+            const indexes = source.prepare("SELECT sql FROM sqlite_master WHERE type='index' AND sql IS NOT NULL AND tbl_name != 'ResultEvidenceEvent' AND name NOT IN ('ReferenceValue_current_generic','ReferenceValue_current_method','QcRule_scope_version_unique','BatchAnalyte_crm_ordinal_unique','BatchPositionReference_current_unique','QcMeasurement_current_unique','WorkAttempt_workItemId_attemptNo_unique','result_one_current')").all();
             source.close();
             for (const table of tables) db.exec(['Sample', 'WorkItem'].includes(table.name)
                 ? table.sql.replace(/,\s*"(?:holdPriorStatus|legacyStatus)"\s+TEXT(?=\s*[,)])/g, '') : table.sql);

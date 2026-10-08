@@ -1,5 +1,4 @@
-const { createResultsFixture } = require('../../services/resultWriteService');
-const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -79,8 +78,8 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
         }
 
         // Add valid results for both items
-        await createResultsFixture(prisma, {
-            data: [
+        // Pin6056586906: each row binds its existing canonical owner.
+        for (const data of [
                 {
                     id: 'p6-res-ph-01',
                     sampleId: sampleForReview.id,
@@ -101,8 +100,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
                     isCurrent: true,
                     enteredBy: techUser.username
                 }
-            ]
-        });
+            ]) await createExecutionResultFixture(prisma, { attemptStatus: 'SUBMITTED', data });
 
         // Create a submission for this sample
         await prisma.submission.create({
@@ -137,26 +135,7 @@ describe('Package P6: Review, Reports & Amendments Verification', () => {
         });
     });
 
-    afterAll(async () => {
-        await prisma.result.deleteMany({
-            where: { sampleId: { in: [sampleForReview.id, sampleDisposed.id] } }
-        });
-        await prisma.report.deleteMany({
-            where: { sampleId: { in: [sampleForReview.id, sampleDisposed.id] } }
-        });
-        await prisma.submission.deleteMany({
-            where: { sampleId: { in: [sampleForReview.id, sampleDisposed.id] } }
-        });
-        await prisma.sampleAmendment.deleteMany({
-            where: { sampleId: { in: [sampleForReview.id, sampleDisposed.id] } }
-        });
-        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({
-            where: { sampleId: { in: [sampleForReview.id, sampleDisposed.id] } }
-        }), select: { id: true } })).map(row => row.id), { single: false });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
-            where: { id: { in: [sampleForReview.id, sampleDisposed.id] } }
-        }), select: { id: true } })).map(row => row.id), { single: false });
-    });
+    // Pin6056586906: retain execution, report and submission parents until owned database teardown.
 
     test('1. Review submission accepts normalized decisions and updates status to ACCEPTED', async () => {
         const res = await request(app)

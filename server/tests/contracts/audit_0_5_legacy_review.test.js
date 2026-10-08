@@ -1,4 +1,4 @@
-const { createResultFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const crypto = require('crypto');
 const request = require('supertest');
@@ -26,7 +26,8 @@ describe('Audit 0.5: legacy review delegates to the guarded authority', () => {
             qcResults: batchStatus === 'QC_FAIL' ? JSON.stringify({ blanks: [{ value: 2, maxAllowed: 1, status: 'FAIL' }], duplicates: [], controls: [] }) : null } }) : null;
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-05'), sampleId, analysis: 'PH_H2O', assignedLab, status,
             result: evidence ? '6.2' : null, batchId: batch?.id } });
-        const result = evidence ? await createResultFixture(prisma, { data: { id: id('R-05'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
+        const result = evidence ? await createExecutionResultFixture(prisma, { ...(status === 'ACCEPTED' && { attemptStatus: 'ACCEPTED' }),
+            data: { id: id('R-05'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true, flags: JSON.stringify(['METHOD_NOTE']), batchId: batch?.id } }) : null;
         if (batch) {
             await setFixtureQcRequirement(prisma, manager, labId, 'REQUIRED');

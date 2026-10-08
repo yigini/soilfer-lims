@@ -1,6 +1,5 @@
-const { createResultsFixture } = require('../../services/resultWriteService');
-const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
-const { createSampleFixture } = require('../helpers/workflowFixtures');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
@@ -32,7 +31,10 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
                 depthBottomCm: 20
             }
         });
-        await createResultsFixture(prisma, { data: [
+        // Pin6060286651: explicit accepted owners and one final attempt per original row.
+        await createWorkItemFixture(prisma, { data: { id: `${sampleApprovedGtm.id}-PH_H2O`, sampleId: sampleApprovedGtm.id,
+            analysis: 'PH_H2O', assignedLab: sampleApprovedGtm.assignedLab, status: 'ACCEPTED' } });
+        for (const data of [
                         {
                             id: `res-app-gtm-${timestamp}`,
                             param: 'PH_H2O',
@@ -41,7 +43,7 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
                             unit: 'pH_units',
                             isCurrent: true
                         }
-                    ].map(result => ({ ...result, sampleId: sampleApprovedGtm.id })) });
+                    ].map(result => ({ ...result, sampleId: sampleApprovedGtm.id }))) await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data });
 
         // 2. Pending / Unapproved GTM Sample
         samplePendingGtm = await createSampleFixture(prisma, {
@@ -122,24 +124,7 @@ describe('Issue #140 Work Package P2: SIS Shared Access & Publication Policy Con
         testKeyUnscoped.rawKey = rawUnscoped;
     });
 
-    afterAll(async () => {
-        // Clean up test data
-        await prisma.result.deleteMany({
-            where: { id: { in: [`res-app-gtm-${sampleApprovedGtm?.id.split('-').pop()}`] } }
-        }).catch(() => {});
-
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({
-            where: {
-                id: { in: [sampleApprovedGtm?.id, samplePendingGtm?.id, sampleApprovedHnd?.id, sampleHoldGtm?.id].filter(Boolean) }
-            }
-        }), select: { id: true } })).map(row => row.id), { single: false }).catch(() => {});
-
-        await prisma.apiKey.deleteMany({
-            where: {
-                id: { in: [testKeyScoped?.id, testKeyUnscoped?.id].filter(Boolean) }
-            }
-        }).catch(() => {});
-    });
+    // Pin6060286651: retain analytical and scope parents until whole-owned-DB teardown.
 
     test('1. External consumer strictly receives APPROVED samples; excludes PROCESSING and HOLD', async () => {
         const res = await request(app)

@@ -381,6 +381,7 @@ test('a complete guarded database passes the read-only gate, listens and answers
     require('../../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_proficiency_evidence').installProficiencyEvidence({ dbPath: fixture.file, apply: true });
     require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: fixture.file, apply: true });
+    require('../../scripts/install_work_attempt_contract').installWorkAttemptContract({ dbPath: fixture.file, apply: true });
     const child = await realStartup(fixture.file, true);
     expect(child.accepted).toBe(true);
     const ready = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"WORKFLOW_STARTUP_READY"')));
@@ -395,6 +396,9 @@ test('a complete guarded database passes the read-only gate, listens and answers
     const qcReady = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"QC_RUN_STARTUP_READY"')));
     expect(qcReady).toMatchObject({ classification: 'COMPLETE', totalChanges: 0 });
     expect(child.stdout.indexOf('QC_RUN_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
+    const attemptsReady = JSON.parse(child.stdout.split('\n').find(line => line.startsWith('{"event":"WORK_ATTEMPT_STARTUP_READY"')));
+    expect(attemptsReady).toMatchObject({ classification: 'COMPLETE', totalChanges: 0 });
+    expect(child.stdout.indexOf('WORK_ATTEMPT_STARTUP_READY')).toBeLessThan(child.stdout.indexOf('Enterprise Server running on'));
 });
 
 test.each([

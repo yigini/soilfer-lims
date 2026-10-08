@@ -1,4 +1,4 @@
-const { createResultsFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
 const { createSampleFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
@@ -46,13 +46,11 @@ describe('WP-15: Blocking vs Advisory Scientific Matrix Diagnostics', () => {
 
     test('1. Invalid texture closure (Sand+Silt+Clay = 87%) is strictly BLOCKED (HTTP 422)', async () => {
         // Seed invalid texture results
-        await createResultsFixture(prisma, {
-            data: [
-                { id: `r1-${Date.now()}`, sampleId: testSampleId, param: 'SAND', value: '40', numericValue: 40, isCurrent: true },
-                { id: `r2-${Date.now()}`, sampleId: testSampleId, param: 'SILT', value: '30', numericValue: 30, isCurrent: true },
-                { id: `r3-${Date.now()}`, sampleId: testSampleId, param: 'CLAY', value: '17', numericValue: 17, isCurrent: true } // sum = 87%
-            ]
-        });
+        for (const data of [
+            { id: `r1-${Date.now()}`, sampleId: testSampleId, param: 'SAND', value: '40', numericValue: 40, isCurrent: true },
+            { id: `r2-${Date.now()}`, sampleId: testSampleId, param: 'SILT', value: '30', numericValue: 30, isCurrent: true },
+            { id: `r3-${Date.now()}`, sampleId: testSampleId, param: 'CLAY', value: '17', numericValue: 17, isCurrent: true } // sum = 87%
+        ]) await createExecutionResultFixture(prisma, { data });
 
         const res = await request(app)
             .post(`/api/results/${testSampleId}/submit`)
@@ -70,15 +68,13 @@ describe('WP-15: Blocking vs Advisory Scientific Matrix Diagnostics', () => {
 
     test('2. Valid texture with advisory C:N warning (C:N = 45) SUCCEEDS with warnings', async () => {
         // Seed valid texture (40 + 40 + 20 = 100%) and high C:N (SOC=90, TN=2 -> C:N=45)
-        await createResultsFixture(prisma, {
-            data: [
-                { id: `r1-${Date.now()}`, sampleId: testSampleId, param: 'SAND', value: '40', numericValue: 40, isCurrent: true },
-                { id: `r2-${Date.now()}`, sampleId: testSampleId, param: 'SILT', value: '40', numericValue: 40, isCurrent: true },
-                { id: `r3-${Date.now()}`, sampleId: testSampleId, param: 'CLAY', value: '20', numericValue: 20, isCurrent: true },
-                { id: `r4-${Date.now()}`, sampleId: testSampleId, param: 'SOC', value: '90', numericValue: 90, unit: 'g/kg', isCurrent: true },
-                { id: `r5-${Date.now()}`, sampleId: testSampleId, param: 'TN', value: '2', numericValue: 2, unit: 'g/kg', isCurrent: true }
-            ]
-        });
+        for (const data of [
+            { id: `r1-${Date.now()}`, sampleId: testSampleId, param: 'SAND', value: '40', numericValue: 40, isCurrent: true },
+            { id: `r2-${Date.now()}`, sampleId: testSampleId, param: 'SILT', value: '40', numericValue: 40, isCurrent: true },
+            { id: `r3-${Date.now()}`, sampleId: testSampleId, param: 'CLAY', value: '20', numericValue: 20, isCurrent: true },
+            { id: `r4-${Date.now()}`, sampleId: testSampleId, param: 'SOC', value: '90', numericValue: 90, unit: 'g/kg', isCurrent: true },
+            { id: `r5-${Date.now()}`, sampleId: testSampleId, param: 'TN', value: '2', numericValue: 2, unit: 'g/kg', isCurrent: true }
+        ]) await createExecutionResultFixture(prisma, { data });
 
         const res = await request(app)
             .post(`/api/results/${testSampleId}/submit`)

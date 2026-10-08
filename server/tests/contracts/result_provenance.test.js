@@ -1,6 +1,6 @@
-const { createResultFixture, writeSpectralPrediction } = require('../../services/resultWriteService');
-const { cleanupWorkflowFixtures } = require("../helpers/workflowFixtures");
-const { createSampleFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
+const { writeSpectralPrediction } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
+const { createSampleFixture, createWorkItemFixture, createWorkItemsFixture } = require('../helpers/workflowFixtures');
 const prisma = require('../../prisma');
 const { transitionWorkItem } = require('../../services/workItemStateService');
 const resultsController = require('../../controllers/resultsController');
@@ -44,17 +44,12 @@ describe('WP-31: Result Provenance Tracking', () => {
         })) });
     });
 
-    afterAll(async () => {
-        if (createdResultIds.length > 0) {
-            await prisma.result.deleteMany({ where: { id: { in: createdResultIds } } });
-        }
-        await prisma.result.deleteMany({ where: { sampleId: testSampleId } });
-        await cleanupWorkflowFixtures(prisma, "workItem", (await prisma.workItem.findMany({ ...({ where: { sampleId: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
-        await cleanupWorkflowFixtures(prisma, "sample", (await prisma.sample.findMany({ ...({ where: { id: testSampleId } }), select: { id: true } })).map(row => row.id), { single: false });
-    });
+    // Pin6059445324: immutable execution parents remain until owned database teardown.
 
     test('1. Direct prisma create defaults Result.provenance to MEASURED', async () => {
-        const r = await createResultFixture(prisma, {
+        await createWorkItemFixture(prisma, { data: { id: `entry-${testSampleId}-PH`, sampleId: testSampleId,
+            analysis: 'PH', status: 'IN_PROGRESS', assignedLab: analyst.labId, assignedTo: analyst.username } });
+        const r = await createExecutionResultFixture(prisma, {
             data: {
                 id: `RES-DEF-${Date.now()}`,
                 sampleId: testSampleId,
@@ -105,8 +100,11 @@ describe('WP-31: Result Provenance Tracking', () => {
     });
 
     test('3. assembleReport includes provenance for each result item', async () => {
-        // Also add a DERIVED result
-        const derivedRes = await createResultFixture(prisma, {
+        await reviewFixture(['EC', 'CLAY_PRED', 'PH']);
+        await createWorkItemFixture(prisma, { data: { id: `reviewed-${testSampleId}-TEXTURE`, sampleId: testSampleId,
+            analysis: 'TEXTURE', status: 'ACCEPTED', assignedLab: analyst.labId } });
+        // Also add the unchanged DERIVED result after its explicit accepted owner.
+        const derivedRes = await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED',
             data: {
                 id: `RES-DER-${Date.now()}`,
                 sampleId: testSampleId,
@@ -117,11 +115,6 @@ describe('WP-31: Result Provenance Tracking', () => {
             }
         });
         createdResultIds.push(derivedRes.id);
-
-        await reviewFixture(['EC', 'CLAY_PRED']);
-        await createWorkItemsFixture(prisma, { data: ['PH', 'TEXTURE'].map(analysis => ({
-            id: `reviewed-${testSampleId}-${analysis}`, sampleId: testSampleId, analysis, status: 'ACCEPTED'
-        })) });
 
         const { content } = await assembleReport(testSampleId, { username: 'admin' });
         expect(content).toBeDefined();

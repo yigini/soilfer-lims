@@ -1,4 +1,4 @@
-const { createResultsFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const request = require('supertest');
 const app = require('../../app');
@@ -39,15 +39,14 @@ describe('BLK-3: Report & Certificate PDF Generation Contract', () => {
 
         // Add verified results to the sample in DB
         const now = new Date();
-        await createResultsFixture(prisma, {
-            data: [
+        // Pin6056586906: each row binds its existing canonical owner.
+        for (const data of [
                 { id: `RES-1-${Date.now()}`, sampleId: s.id, param: 'PH_H2O', value: '6.8', unit: 'pH units', isValid: true, createdAt: now, updatedAt: now },
                 { id: `RES-2-${Date.now()}`, sampleId: s.id, param: 'SOC', value: '18.5', unit: 'g/kg', isValid: true, createdAt: now, updatedAt: now },
                 { id: `RES-3-${Date.now()}`, sampleId: s.id, param: 'SAND', value: '60.0', unit: '%', isValid: true, createdAt: now, updatedAt: now },
                 { id: `RES-4-${Date.now()}`, sampleId: s.id, param: 'SILT', value: '25.0', unit: '%', isValid: true, createdAt: now, updatedAt: now },
                 { id: `RES-5-${Date.now()}`, sampleId: s.id, param: 'CLAY', value: '15.0', unit: '%', isValid: true, createdAt: now, updatedAt: now }
-            ]
-        });
+            ]) await createExecutionResultFixture(prisma, { attemptStatus: 'ACCEPTED', data });
 
         // 1. Generate Report
         const genRes = await request(app)

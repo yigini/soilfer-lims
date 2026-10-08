@@ -1,5 +1,6 @@
 const { createStoredProfileRunFixture } = require('../helpers/storedProfileRunFixture');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const request = require('supertest');
 const app = require('../../app');
 const { getAuthToken } = require('../setup');
@@ -133,6 +134,11 @@ describe('BLK-2: Minimum Viable Typed QC Controls Contract', () => {
     });
 
     test('5. Manager disposition override (PROCEED_WITH_WARNING) allows submission acceptance', async () => {
+        // Pin6060005962: test 4 retains its evidence-free failed-QC refusal.
+        const item = await prisma.workItem.findUnique({ where: { id: workItemId } });
+        await createExecutionResultFixture(prisma, { attemptStatus: 'SUBMITTED', data: {
+            id: `RES-QC2-${workItemId}`, sampleId, param: item.analysis, value: item.result,
+            numericValue: 6.8, provenance: 'MEASURED', batchId, isCurrent: true } });
         // Manager dispositions the failed batch
         const dispRes = await request(app)
             .post(`/api/qc/batches/${batchId}/disposition`)

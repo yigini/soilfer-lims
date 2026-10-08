@@ -314,18 +314,23 @@ bash "${entryScript.replace(/\\/g, '/')}"
         expect(res.stdout).not.toMatch(/LIMS_STARTED_SUCCESS/);
     });
 
-    test('docker-entrypoint.sh database inspection passes cleanly on valid populated database', () => {
+    test('docker-entrypoint.sh database inspection passes cleanly on valid populated database', async () => {
         const testDir = path.join(scratchDir, 'valid_db_inspect_test');
         fs.mkdirSync(path.join(testDir, 'prisma'), { recursive: true });
 
         const serverDir = path.resolve(__dirname, '..', '..');
         const targetDb = path.join(testDir, 'prisma', 'dev.db');
-        const fixture = beforeGuards({ actor: 'system:fixture', installWorkflowStateGuards: true });
+        // Pin6061301340: generate an actually fresh Prisma shape. A schema-only
+        // copy of the installed test DB would inherit its index without receipts.
+        const fixture = beforeGuards({ actor: 'system:fixture',
+            file: path.resolve(__dirname, '../.tmp', `audit_legacy_bootstrap_${TS}.db`), qcBootstrap: 'CREATE_PRISMA' });
         ownedSchemaDatabases.push(fixture.file);
+        require('../../scripts/install_workflow_state_guards').installWorkflowStateGuards({ dbPath: fixture.file, apply: true });
         // The inspection uses a fresh guarded schema, never working specimens.
-        fs.copyFileSync(fixture.file, targetDb, fs.constants.COPYFILE_EXCL);
-
         const Database = require('better-sqlite3');
+        if (fs.existsSync(targetDb)) throw new Error('Owned startup target already exists.');
+        const template = new Database(fixture.file, { readonly: true, fileMustExist: true });
+        try { await template.backup(targetDb); } finally { template.close(); }
         const db = new Database(targetDb);
         const existing = db.prepare('SELECT count(*) as count FROM User').get();
         if (!existing || existing.count === 0) {
@@ -342,6 +347,8 @@ bash "${entryScript.replace(/\\/g, '/')}"
         require('../../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: targetDb, apply: true });
         require('../../scripts/install_proficiency_evidence').installProficiencyEvidence({ dbPath: targetDb, apply: true });
         require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: targetDb, apply: true });
+        require('../../scripts/install_workitem_uniqueness').installWorkItemUniqueness({ dbPath: targetDb, apply: true });
+        require('../../scripts/install_work_attempt_contract').installWorkAttemptContract({ dbPath: targetDb, apply: true });
         const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');
         const beforeSha = hashDb();
         fs.writeFileSync(path.join(testDir, 'prisma', '.seed_complete'), 'done');
@@ -369,6 +376,10 @@ bash "${entryScript.replace(/\\/g, '/')}"
                 `node "${path.join(serverDir, 'scripts/install_proficiency_evidence.js').replace(/\\/g, '/')}"`)
             .replaceAll('node scripts/install_result_equipment_evidence.js',
                 `node "${path.join(serverDir, 'scripts/install_result_equipment_evidence.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_workitem_uniqueness.js',
+                `node "${path.join(serverDir, 'scripts/install_workitem_uniqueness.js').replace(/\\/g, '/')}"`)
+            .replaceAll('node scripts/install_work_attempt_contract.js',
+                `node "${path.join(serverDir, 'scripts/install_work_attempt_contract.js').replace(/\\/g, '/')}"`)
             .replace(/node scripts\/migrate_[^\n]+/g, '# noop migration');
 
         const entryScript = path.join(testDir, 'entrypoint.sh');
@@ -393,6 +404,9 @@ bash "${entryScript.replace(/\\/g, '/')}"
         expect(res.stdout).toContain('"mode": "NO_OP"');
         expect(res.stdout).toContain('"classification": "COMPLETE"');
         expect(res.stdout).toContain('"totalChanges": 0');
+        expect(res.stdout).toContain('Installing duplicate-marker prerequisite');
+        expect(res.stdout).toContain('20261004190000_add_workitem_duplicate_marker');
+        expect(res.stdout).toContain('20261004190100_unique_active_workitem');
         expect(hashDb()).toBe(beforeSha);
     });
 

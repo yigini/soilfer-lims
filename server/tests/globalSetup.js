@@ -13,16 +13,32 @@ module.exports = async function globalSetup() {
     const testDbPath = path.resolve(tmpDir, `test_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.db`);
     const sourceDbPath = path.resolve(__dirname, '../prisma/dev.db');
 
+    // Pin6059793372: CI/local provision the same published, test-only baseline.
+    const helpPrerequisite = 'Test template lacks the published help release. Run the existing seed_help_content.cjs and publish_help_release.cjs with NODE_ENV=test against the owned server/prisma/dev.db template.';
+    if (!fs.existsSync(sourceDbPath)) throw new Error(helpPrerequisite);
+    const TemplateDatabase = require('better-sqlite3');
+    const template = new TemplateDatabase(sourceDbPath, { readonly: true, fileMustExist: true });
+    try {
+        if (!template.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='HelpPublication'").get()) throw new Error(helpPrerequisite);
+        const requiredArticles = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../data/help/content.en.json'), 'utf8')).articles;
+        const publications = template.prepare('SELECT articleId, approvedLocales FROM HelpPublication WHERE isCurrent = 1').all();
+        const complete = new Set(publications.filter(row => {
+            try {
+                const locales = JSON.parse(row.approvedLocales);
+                return Array.isArray(locales) && ['en', 'es', 'es-419', 'fr', 'pt'].every(locale => locales.includes(locale));
+            } catch (_) { return false; }
+        }).map(row => row.articleId));
+        if (requiredArticles.some(article => !complete.has(article.id))) throw new Error(helpPrerequisite);
+        // Pin6060814553: a live SQLite template may have committed WAL pages.
+        // The owned destination is new; copy the complete database via SQLite.
+        if (fs.existsSync(testDbPath)) throw new Error('Owned test destination already exists.');
+        await template.backup(testDbPath);
+    } finally { template.close(); }
+
     if (fs.existsSync(sourceDbPath)) {
-        fs.copyFileSync(sourceDbPath, testDbPath);
-        // Prisma db push cannot express this partial index. Install the actual
-        // release DDL on the disposable test copy so CI checks the same guard.
         const Database = require('better-sqlite3');
         const db = new Database(testDbPath, { fileMustExist: true });
         try {
-            if (!db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'WorkItem_one_active_per_analysis'").get()) {
-                db.exec(fs.readFileSync(path.resolve(__dirname, '../prisma/migrations/20261004190100_unique_active_workitem/migration.sql'), 'utf8'));
-            }
             const stateColumns = ['Sample', 'WorkItem'].map(table => {
                 const columns = db.prepare(`PRAGMA table_info("${table}")`).all().map(row => row.name);
                 return ['holdPriorStatus', 'legacyStatus'].map(column => columns.includes(column));
@@ -52,6 +68,8 @@ module.exports = async function globalSetup() {
         require('../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: testDbPath, apply: true });
         require('../scripts/install_proficiency_evidence').installProficiencyEvidence({ dbPath: testDbPath, apply: true });
         require('../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: testDbPath, apply: true });
+        require('../scripts/install_workitem_uniqueness').installWorkItemUniqueness({ dbPath: testDbPath, apply: true });
+        require('../scripts/install_work_attempt_contract').installWorkAttemptContract({dbPath:testDbPath,apply:true});
     }
 
     process.env.DATABASE_PATH = testDbPath;
