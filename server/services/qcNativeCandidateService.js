@@ -10,18 +10,22 @@ function observation(entry, position, criteria, enteredBy, enteredAt) {
     const parsed = duplicate ? parseDuplicateObservation(source, criteria.numberFormat) : parseNumber(source, criteria.numberFormat);
     if (!parsed.valid || !duplicate && parsed.qualifier) throw failure(400, parsed.code === 'AMBIGUOUS_NUMBER' ? parsed.code : 'QC_VALUES_MISSING',
         'A valid QC observation is required.', { positionIds: [position.id] });
+    if (criteria.reviewedCorrection && parsed.literalLoq && !Number.isFinite(criteria.methodContext.loq)) {
+        throw failure(409, 'QC_REVIEWED_CRITERIA_UNAVAILABLE', 'The original criteria do not record an LOQ for this observation.');
+    }
     return { id: randomUUID(), positionId: position.id, replicateNo: 1, value: parsed.censored ? null : parsed.value,
         rawInput: parsed.rawInput, censoring: parsed.censored ? parsed.qualifier : null,
         censoringLimit: parsed.censored ? parsed.literalLoq ? criteria.methodContext.loq : parsed.value : null, enteredBy, enteredAt };
 }
 
-function prepareNativeObservationEntries(batch, analysisCode, entries, { correction = false, preview = false, performedBy, now = new Date(), reason = '' } = {}) {
+function prepareNativeObservationEntries(batch, analysisCode, entries, { correction = false, preview = false, performedBy, now = new Date(), reason = '', numberFormat = null } = {}) {
     if (!Array.isArray(entries) || new Set(entries.map(row => row?.positionId)).size !== entries.length) {
         throw failure(400, 'QC_VALUES_MISSING', 'Submit distinct position observations.');
     }
     const analyte = batch.analytes.find(row => row.analysisCode === analysisCode);
     if (!analyte) throw failure(400, 'QC_ANALYSIS_NOT_IN_RUN', 'The analysis is not a member of this run.');
     const criteria = JSON.parse(analyte.criteriaSnapshot), evidence = currentAnalyteEvidence(batch, analysisCode);
+    if (numberFormat) { criteria.numberFormat = numberFormat; criteria.reviewedCorrection = true; }
     const replacements = [], observations = [];
     for (const entry of entries) {
         if (entry?.replicateNo !== undefined && entry.replicateNo !== 1) throw failure(400, 'QC_POSITION_NOT_IN_ANALYSIS', 'A Native physical position uses replicate 1.', { positionId: entry.positionId });

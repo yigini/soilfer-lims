@@ -66,6 +66,13 @@ function loadBatchInspectionModalModule() {
             if (mod.includes('LanguageContext')) return mockLanguage;
             if (mod.includes('AuthContext')) return mockAuth;
             if (mod === 'axios') return { get: jest.fn(), post: jest.fn() };
+            if (mod === './ReviewedQcCorrection') {
+                const correctionModule = { exports: {} };
+                const correctionPath = path.join(path.dirname(componentPath), 'ReviewedQcCorrection.jsx');
+                const correction = esbuild.transformSync(fs.readFileSync(correctionPath, 'utf8'), { loader: 'jsx', format: 'cjs' });
+                vm.runInNewContext(correction.code, { ...runContext, module: correctionModule, exports: correctionModule.exports });
+                return correctionModule.exports;
+            }
             return {};
         },
         console

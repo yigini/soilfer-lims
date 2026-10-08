@@ -28,6 +28,8 @@ key('qc.lrmPerBatch', 'integer', 1, 0, 0, integer);
 key('qc.crmEveryNBatches', 'integer', 10, 0, 0, { ...integer, unit: 'batches' });
 key('qc.ccvEvery', 'integer', 10, 20, 0, { ...integer, unit: 'samples' });
 key('qc.calibrationVerification', 'boolean', false);
+key('qc.reviewedTranscriptionCorrectionEnabled', 'boolean', false, false, false,
+    { scope: 'LAB' });
 key('qc.calibrationFailAction', 'calibrationFailAction', { ICV: 'FAIL_BATCH', CCV: 'REPEAT_BRACKET', CCB: 'REPEAT_BRACKET' }, undefined, undefined, {
     allowedActions: { ICV: ['FAIL_BATCH', 'WARN'], CCV: ['FAIL_BATCH', 'REPEAT_BRACKET', 'WARN'], CCB: ['FAIL_BATCH', 'REPEAT_BRACKET', 'WARN'] },
     help: 'policies.help.qc_calibrationFailAction' });

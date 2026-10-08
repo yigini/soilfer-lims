@@ -219,5 +219,14 @@ export default function NativeRunPanel({ batch, referenceMaterials, onChanged, l
             <button type="button" data-testid="native-qc-save" disabled={!submitAllowed || changedLots.length > 0 || !entered.length} onClick={() => submit(false)}>{t('qcRuns.save')}</button>
             <button type="button" data-testid="native-qc-evaluate" disabled={!submitAllowed || !complete || Boolean(previewError) || changedLots.length > 0} onClick={() => submit(true)}>{t('qcRuns.evaluate')}</button>
         </div>
+        {analyte.reviewedCorrections?.length > 0 && <aside className="border border-sf-divider rounded-lg p-3 space-y-2" data-testid="native-reviewed-qc-history">
+            <h3 className="font-bold">{t('qcReviewedCorrection.disclosure')}</h3>
+            {analyte.reviewedCorrections.map(row => <div key={row.id}>
+                <p>{t('qcReviewedCorrection.originalFailure')}: {row.previousVerdict} ({row.previousEvaluationId})
+                    {' · '}{t('qcReviewedCorrection.replacement')}: {row.replacementEvaluation?.verdict} ({row.evaluationId})</p>
+                <p>{t('qcReviewedCorrection.reviewer')}: {row.reviewer?.username || row.by} · {row.reason} · {row.sourceReference}</p>
+                <details><summary>{t('qcWorksheet.fullRecord')}</summary><pre className="whitespace-pre-wrap break-all text-xs">{JSON.stringify(row, null, 2)}</pre></details>
+            </div>)}
+        </aside>}
     </section>;
 }

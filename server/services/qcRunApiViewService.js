@@ -61,7 +61,9 @@ async function apiRunView(db, batch, { detail = false } = {}) {
         }
     }
     const primary = decorated.find(row => row.analysisCode === batch.analysis) || decorated[0];
-    const output = { ...view, analytes: decorated, runProfile, ...(primary && { numberFormat: primary.numberFormat,
+    const reviewedTranscriptionCorrectionEnabled = await policyService.get(batch.labId, 'qc.reviewedTranscriptionCorrectionEnabled', { db });
+    const reviewedCorrectionNumberFormat = reviewedTranscriptionCorrectionEnabled ? await getNumberFormat(batch.labId, { db }) : null;
+    const output = { ...view, analytes: decorated, runProfile, reviewedTranscriptionCorrectionEnabled, reviewedCorrectionNumberFormat, ...(primary && { numberFormat: primary.numberFormat,
         qcRule: primary.qcRule, qcMode: primary.qcMode, qcRequirements: primary.qcRequirements }) };
     if (detail) for (const key of ['qcResults', 'disposition', 'history']) output[key] = typeof output[key] === 'string' ? JSON.parse(output[key]) : output[key];
     return output;

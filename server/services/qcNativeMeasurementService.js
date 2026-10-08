@@ -11,6 +11,8 @@ const { evaluateNativeEvidence } = require('./qcNativeEvaluationService');
 const { buildNativeMeasurementCandidate, prepareNativeObservationEntries } = require('./qcNativeCandidateService');
 const { preparePositionBindings, applyPositionBindings } = require('./qcRunReferenceService');
 const { flagBatchResults } = require('./qcService');
+const { getNumberFormat } = require('./numberFormatService');
+const { MODE, EVENT, authorizeReviewedCorrection, reviewedCorrectionPayload, nativeCriteria } = require('./qcReviewedCorrectionService');
 const failure = (statusCode, code, message, details = {}) => Object.assign(new Error(message), { statusCode, code, details });
 
 // This transaction is the native arm of the shared write path. The compatibility
@@ -29,15 +31,19 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         if (correction && !reason) throw failure(400, 'QC_CORRECTION_REASON_REQUIRED', 'A correction reason is required.');
         const analysisCode = input.analysisCode || batch.analysis, selected = batch.analytes.find(row => row.analysisCode === analysisCode);
         if (!selected) throw failure(400, 'QC_ANALYSIS_NOT_IN_RUN', 'The analysis is not a member of this run.');
-        const locked = row => ['QC_FAIL', 'REJECTED', 'REPEAT_ORDERED', 'CLOSED'].includes(row.status) ||
-            Boolean(currentAnalyteEvidence(batch, row.analysisCode).disposition);
+        if (input.mode === MODE && !correction) throw failure(400, 'QC_REVIEWED_ROUTE_REQUIRED', 'Use the explicit corrections route.');
+        const reviewed = correction ? await authorizeReviewedCorrection(tx, batch, actor, input) : null;
+        const criteriaSource = reviewed ? nativeCriteria(selected, currentAnalyteEvidence(batch, analysisCode)) : null;
+        const locked = row => reviewed?.analysisCode !== row.analysisCode && (['QC_FAIL', 'REJECTED', 'REPEAT_ORDERED', 'CLOSED'].includes(row.status) ||
+            Boolean(currentAnalyteEvidence(batch, row.analysisCode).disposition));
         if (locked(selected)) throw failure(409, 'QC_BATCH_LOCKED', 'Failed or dispositioned analyte evidence is locked; use batch disposition.');
         const criteria = JSON.parse(selected.criteriaSnapshot), now = new Date();
         if (input.expectedValues !== undefined && (!input.expectedValues || typeof input.expectedValues !== 'object' || Array.isArray(input.expectedValues))) {
             throw failure(400, 'REFERENCE_VALUE_MISMATCH', 'Submit expected values by actual position id.');
         }
         const entries = input[correction ? 'corrections' : 'measurements'] ?? [];
-        const { observations, replacements } = prepareNativeObservationEntries(batch, analysisCode, entries, { correction, performedBy, now, reason });
+        const numberFormat = reviewed ? await getNumberFormat(batch.labId, { db: tx }) : null;
+        const { observations, replacements } = prepareNativeObservationEntries(batch, analysisCode, entries, { correction, performedBy, now, reason, numberFormat });
         const references = input.references ?? [];
         if (!Array.isArray(references) || new Set(references.map(row => row?.positionId)).size !== references.length) throw failure(400, 'REFERENCE_VALUE_MISMATCH', 'Submit distinct reference placements.');
         const plans = [], affected = new Set([analysisCode]);
@@ -79,7 +85,7 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         const evaluations = [];
         for (const code of affected) {
             const analyte = batch.analytes.find(row => row.analysisCode === code), previousEvidence = currentAnalyteEvidence(batch, code), previous = previousEvidence.evaluation;
-            const evaluated = evaluateNativeEvidence(candidate, analyte), requested = explicit && (code === analysisCode || input.analysisCode === undefined && evaluated.mode === 'OFF');
+            const evaluated = evaluateNativeEvidence(candidate, analyte, { recordedObservations: Boolean(reviewed) }), requested = explicit && (code === analysisCode || input.analysisCode === undefined && evaluated.mode === 'OFF');
             if (!previous && !observations.some(row => row.analysisCode === code) && plans.some(plan =>
                 plan.bindings.some(row => row.analysisCode === code && row.serviceStatus === 'NOT_SERVED'))) continue;
             const changed = observations.some(row => row.analysisCode === code) || plans.some(plan => plan.replacements.some(row => row.previous.analysisCode === code) ||
@@ -102,12 +108,15 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
             !evaluations.some(evaluation => evaluation.analyte.analysisCode === analyte.analysisCode))) {
             await tx.batchAnalyte.update({ where: { id: row.id }, data: { status: 'QC_PENDING' } }); row.status = 'QC_PENDING';
         }
+        let reviewedEvaluationId = null;
         for (const { analyte, previous, evaluated } of evaluations) {
             const id = randomUUID();
+            if (reviewed && analyte.analysisCode === analysisCode) reviewedEvaluationId = id;
             await tx.qcEvaluation.create({ data: { id, batchId, analysisCode: analyte.analysisCode, version: (previous?.version || 0) + 1,
                 ruleId: analyte.qcRuleId, ruleVersion: analyte.qcRuleVersion, policyVersion: analyte.policyVersion,
                 verdict: evaluated.verdict, evaluatedBy: performedBy, evaluatedAt: now, supersedesId: previous?.id || null,
-                details: JSON.stringify({ ...evaluated, entryMode: correction ? 'CORRECTION' : 'NATIVE_ENTRY', correctionReason: correction ? reason : null }) } });
+                details: JSON.stringify({ ...evaluated, entryMode: correction ? 'CORRECTION' : 'NATIVE_ENTRY', correctionReason: correction ? reason : null,
+                    ...(reviewed && { correctionMode: MODE, sourceReference: reviewed.sourceReference, criteriaSource }) }) } });
             await tx.batchAnalyte.update({ where: { id: analyte.id }, data: { status: evaluated.status } });
             analyte.status = evaluated.status;
             if (['QC_FAIL', 'QC_PASS', 'QC_WARN'].includes(evaluated.status)) {
@@ -116,9 +125,10 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
         }
         if (observations.length || plans.length || evaluations.length) {
             await tx.batch.update({ where: { id: batchId }, data: { status: aggregateBatchStatus(batch.analytes, { startedAt: batch.startedAt }) } });
-            await tx.batchEvent.create({ data: { id: randomUUID(), batchId, type: correction ? 'QC_CORRECTED' : 'QC_ENTERED', by: performedBy, at: now,
-                payload: JSON.stringify({ analysisCodes: [...affected], measurementIds: observations.map(row => row.id), reason: correction ? reason : null,
-                    evaluations: evaluations.map(row => ({ analysisCode: row.analyte.analysisCode, result: row.evaluated.verdict })) }) } });
+            await tx.batchEvent.create({ data: { id: randomUUID(), batchId, type: reviewed ? EVENT : correction ? 'QC_CORRECTED' : 'QC_ENTERED', by: performedBy, at: now,
+                payload: JSON.stringify(reviewed ? reviewedCorrectionPayload(reviewed, replacements, reviewedEvaluationId, criteriaSource)
+                    : { analysisCodes: [...affected], measurementIds: observations.map(row => row.id), reason: correction ? reason : null,
+                        evaluations: evaluations.map(row => ({ analysisCode: row.analyte.analysisCode, result: row.evaluated.verdict })) }) } });
         }
         return batchApiView(await tx.batch.findUnique({ where: { id: batchId }, include: QC_RUN_INCLUDE }));
     });

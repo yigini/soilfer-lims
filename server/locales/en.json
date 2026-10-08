@@ -942,7 +942,8 @@
       "qc_calibrationFailAction": "Calibration failure action",
       "equipment_requireEquipment": "Required equipment",
       "equipment_unconfiguredReadiness": "Unconfigured equipment readiness",
-      "pt_zScoreLimits": "PT z-score limits"
+      "pt_zScoreLimits": "PT z-score limits",
+      "qc_reviewedTranscriptionCorrectionEnabled": "Allow reviewed transcription correction of undispositioned failed QC"
     },
     "title": "Policies",
     "yes": "Yes",
@@ -1404,5 +1405,23 @@
       "QC_WORK_ITEMS_REQUIRED": "Select work items in the worksheet before creating a run.",
       "QC_RUN_PROFILE_ONLY_STORED": "This stored profile-only run retains its original evidence. Create a new run for native measurements."
     }
+  },
+  "qcReviewedCorrection": {
+    "policyDescription": "Allow reviewed transcription correction of undispositioned failed QC",
+    "title": "Review a transcription correction",
+    "help": "A second reviewer may correct a recorded entry error. Identify the original worksheet or file. The failed reading remains in history and future reports.",
+    "analysis": "Analysis",
+    "original": "Original reading",
+    "correctedValue": "Corrected reading",
+    "reason": "Reason",
+    "sourceReference": "Recorded source reference",
+    "submit": "Approve correction and re-evaluate",
+    "saving": "Saving correction…",
+    "refused": "Correction refused",
+    "disclosure": "Reviewed QC transcription correction",
+    "originalFailure": "Original failed evaluation",
+    "replacement": "Replacement evaluation",
+    "reviewer": "Reviewer",
+    "authors": "Original observation authors"
   }
 }

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import ReviewedQcCorrection from './ReviewedQcCorrection';
 
 export function getDispositionInfo(disposition, t = key => key) {
     if (!disposition || !disposition.decision) return null;
@@ -131,6 +132,20 @@ export function StoredQcEvidence({ batch, t = (key, fallback) => fallback || key
     const records = recorded.length ? recorded : [{ analysisCode: batch?.analysis, record: null, details: storedJson(batch?.qcResults) }];
     return <section className="space-y-3" data-testid="stored-qc-evidence">
         <h3 className="font-bold text-sm">{t('qcWorksheet.storedEvidence', 'Stored QC evaluation — read only')}</h3>
+        {(batch?.reviewedCorrections || []).map(row => <div key={row.id} className="border border-sf-divider rounded-lg p-3 text-sm space-y-1" data-testid={`reviewed-qc-disclosure-${row.id}`}>
+            <h4 className="font-bold">{t('qcReviewedCorrection.disclosure')}</h4>
+            <p>{row.analysisCode} · {t('qcReviewedCorrection.originalFailure')}: {row.previousVerdict} ({row.previousEvaluationId})
+                {' · '}{t('qcReviewedCorrection.replacement')}: {row.replacementEvaluation?.verdict} ({row.evaluationId})</p>
+            <p>{t('qcReviewedCorrection.reviewer')}: {row.reviewer?.username || row.by} · {row.at}</p>
+            <p>{t('qcReviewedCorrection.reason')}: {row.reason}</p>
+            <p>{t('qcReviewedCorrection.sourceReference')}: {row.sourceReference}</p>
+            <p>{t('qcReviewedCorrection.authors')}: {(row.observationAuthors || []).map(author => author.username).join(', ')}</p>
+            {(row.replacements || []).map(change => <p className="font-mono" key={change.original.id}>
+                {change.original.positionId}/{change.original.replicateNo}: {change.original.rawInput ?? change.original.value} ({change.original.id})
+                {' → '}{change.replacement.rawInput ?? change.replacement.value} ({change.replacement.id})
+            </p>)}
+            <details><summary>{t('qcReviewedCorrection.originalFailure')}</summary><pre className="whitespace-pre-wrap break-all text-xs">{JSON.stringify(row.originalEvaluation, null, 2)}</pre></details>
+        </div>)}
         {records.map(({ analysisCode, record, details }, index) => {
             const evaluation = details?.evaluation || details?.qcResults || details || {};
             const rows = ['blanks', 'controls', 'duplicates'].flatMap(collection => evaluation[collection] || []);
@@ -163,7 +178,7 @@ export function StoredQcEvidence({ batch, t = (key, fallback) => fallback || key
 }
 
 export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispositionSuccess, initialBatch = null }) {
-    const { token, user } = useAuth();
+    const { token, user, hasPermission } = useAuth();
     const { t } = useLanguage();
 
     const [loading, setLoading] = useState(false);
@@ -404,6 +419,9 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                             )}
 
                             <StoredQcEvidence batch={batch} t={t} />
+                            <ReviewedQcCorrection batch={batch} token={token} t={t}
+                                canReview={Boolean(hasPermission?.('APPROVE_RESULTS') && hasPermission?.('CHANGE_STATUS'))}
+                                onSubmitted={async () => { await fetchBatch(); onDispositionSuccess?.(); }} />
 
                             {/* Affected Work Items Table */}
                             <div className="border border-sf-divider rounded-xl overflow-hidden">
