@@ -7,7 +7,7 @@ const { writeResultsExecution } = require('../../services/resultWriteService');
 const owned = [];
 afterEach(async () => { for (const f of owned.splice(0)) await f.close(); });
 
-async function fixture({ replicates = 1, role = 'LAB_TECHNICIAN', criteria = {} } = {}) {
+async function fixture({ replicates = 1, role = 'LAB_TECHNICIAN', criteria = {}, recorded = true } = {}) {
     const f = await qcGateFixture({criteria}); owned.push(f);
     const username = 'repeat-actor-' + randomUUID();
     const user = await f.db.user.create({ data: { id: randomUUID(), username, email: randomUUID() + '@example.test',
@@ -24,8 +24,8 @@ async function fixture({ replicates = 1, role = 'LAB_TECHNICIAN', criteria = {} 
         return require('../../services/submissionStateService').createSubmissionForItems({db:f.db,actor:f.actor,sampleId:f.items[0].sampleId,
             type:'FULL',workItemIds:[f.items[0].id]});
     };
-    f.results = await f.record(replicates);
-    f.attempt = await f.db.workAttempt.findUnique({ where: { id: f.results[0].attemptId } });
+    f.results = recorded ? await f.record(replicates) : [];
+    f.attempt = recorded ? await f.db.workAttempt.findUnique({ where: { id: f.results[0].attemptId } }) : null;
     f.all = async () => ({ evidence: await f.snapshot(), attempts: await f.db.workAttempt.findMany({ orderBy: { id:'asc' } }) });
     f.http = (actor, exercise) => withQcRunHttp(f.db, actor, exercise, { repeatCommands: true, reviews: true });
     f.command = async (input, actor = f.actor) => {
@@ -46,6 +46,19 @@ async function reviewer(f) {
     const user = await f.db.user.create({ data: { id:randomUUID(),username:'repeat-reviewer-' + randomUUID(),
         email:randomUUID() + '@example.test',password:'owned-http-fixture',role:'LAB_MANAGER',labId:f.labId } });
     return { id:user.id,username:user.username,role:user.role,labId:f.labId };
+}
+async function nativeFixture({blankValue=0,started=true}={}) {
+    const f=await fixture({recorded:false,criteria:{blankPerBatch:1,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0}});
+    f.manager=await reviewer(f);
+    const {buildNativeRun,startNativeRun}=require('../../services/qcNativeRunService');
+    let run=await buildNativeRun(f.db,f.manager,f.input);
+    if(started)run=await startNativeRun(f.db,run.id,f.manager);
+    f.results=await f.record();f.attempt=await f.db.workAttempt.findUnique({where:{id:f.results[0].attemptId}});
+    if(started && blankValue!==null)run=await require('../../services/qcNativeMeasurementService').writeNativeMeasurements(f.db,run.id,f.actor,
+        {measurements:[{positionId:run.positions.find(row=>row.kind==='BLANK').id,value:blankValue}]});
+    f.run=run;
+    f.runEvidence=()=>f.db.batch.findUnique({where:{id:run.id},include:require('../../services/qcRunViewService').QC_RUN_INCLUDE});
+    return f;
 }
 
 test('a scoped technician requests INSTRUMENT_FAULT before submission, reserving exactly one immutable OPEN attempt', async () => {
@@ -244,14 +257,14 @@ test('missing RETURN reason and a cross-lab repeat/correction preserve the compl
     }
 });
 
-test('a repeated work item retains the failed native run, refuses reuse and records only in a new run',async()=>{
-    const f=await fixture({criteria:{blankPerBatch:1,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0}}),manager=await reviewer(f);
-    const {buildNativeRun,startNativeRun}=require('../../services/qcNativeRunService');
-    const batch=await startNativeRun(f.db,(await buildNativeRun(f.db,manager,f.input)).id,manager);
-    const blank=batch.positions.find(row=>row.kind==='BLANK');
-    const failed=await require('../../services/qcNativeMeasurementService').writeNativeMeasurements(f.db,batch.id,f.actor,
-        {measurements:[{positionId:blank.id,value:9.123456789}]});
-    expect(failed.analytes[0].status).toBe('QC_FAIL');
+test('a failed undispositioned native run refuses atomically; after REPEAT_BATCH a request records only in a new run',async()=>{
+    const f=await nativeFixture({blankValue:9.123456789}),manager=f.manager,batch=f.run;
+    expect(batch.analytes[0].status).toBe('QC_FAIL');
+    const unreviewed=await f.all(),failedEvidence=await f.runEvidence();
+    const refused=await f.command({reason:'INSTRUMENT_FAULT'});
+    expect({status:refused.status,code:refused.body.code}).toEqual({status:409,code:'ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED'});
+    expect(await f.all()).toEqual(unreviewed);expect(await f.runEvidence()).toEqual(failedEvidence);
+    await require('../../services/qcDispositionStateService').dispositionBatch(batch.id,'REPEAT_BATCH','Reviewed failed QC requires a new run',manager,f.db);
     expect((await f.command({reason:'INSTRUMENT_FAULT'})).status).toBe(201);
     const before=await f.all(),qc=await f.db.qcEvaluation.findMany({where:{batchId:batch.id}});
     await expect(inTransaction(f.db,tx=>require('../../services/workRepeatBatchService').assertRepeatBatchAllowed(tx,
@@ -263,7 +276,34 @@ test('a repeated work item retains the failed native run, refuses reuse and reco
         expect({status:response.status,code:response.body.code}).toEqual({status:409,code:'BATCH_MEMBERSHIP_FROZEN'});
     });
     expect(await f.all()).toEqual(before);expect(await f.db.qcEvaluation.findMany({where:{batchId:batch.id}})).toEqual(qc);
-    const next=await buildNativeRun(f.db,manager,f.input);expect(next.id).not.toBe(batch.id);
+    const next=await require('../../services/qcNativeRunService').buildNativeRun(f.db,manager,f.input);expect(next.id).not.toBe(batch.id);
     const recorded=await f.record();expect(recorded[0]).toMatchObject({batchId:next.id});
     expect(await f.db.qcEvaluation.findMany({where:{batchId:batch.id}})).toEqual(qc);
+});
+
+test.each([{started:false,blankValue:null},{started:true,blankValue:null}])('an open or pending native run refuses %j without any request or evidence writes',async options=>{
+    const f=await nativeFixture(options),before=await f.all(),run=await f.runEvidence();
+    const response=await f.command({reason:'INSTRUMENT_FAULT'});
+    expect({status:response.status,code:response.body.code}).toEqual({status:409,code:'ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED'});
+    expect(await f.all()).toEqual(before);expect(await f.runEvidence()).toEqual(run);
+});
+
+test('RETURN from a passed native run hands off one WorkItem and preserves all original membership and QC evidence byte for byte',async()=>{
+    const f=await nativeFixture();expect(f.run.analytes[0].status).toBe('QC_PASS');
+    await f.submit();const run=await f.runEvidence(),parent=await f.db.workAttempt.findUnique({where:{id:f.attempt.id}});
+    await f.http(f.manager,async(app,token)=>{
+        const response=await request(app).post('/api/work/'+f.items[0].id+'/review').set('Authorization','Bearer '+token)
+            .send({decision:'RETURN',attemptId:parent.id,reasonCode:'REVIEW_OUTLIER',note:'Outlier checked against the worksheet'});
+        expect({status:response.status,code:response.body.code}).toMatchObject({status:200});
+    });
+    const after=await f.runEvidence();
+    for(const key of ['analytes','measurements','evaluations','dispositions','events'])expect(after[key]).toEqual(run[key]);
+    // Compare every stored position/join field; the nested WorkItem in this
+    // reader is deliberately changing state and its current batch pointer.
+    const retainedPositions=value=>value.positions.map(position=>({...position,
+        workItems:position.workItems.map(({workItem,...membership})=>membership)}));
+    expect(retainedPositions(after)).toEqual(retainedPositions(run));
+    expect(await f.db.workAttempt.findUnique({where:{id:parent.id}})).toEqual({...parent,status:'QUESTIONED'});
+    expect(await f.db.workItem.findUnique({where:{id:f.items[0].id}})).toMatchObject({status:'REPEAT_REQUIRED',batchId:null,rackPosition:null,submissionId:null});
+    expect(await f.db.workAttempt.findFirst({where:{workItemId:f.items[0].id,status:'OPEN'}})).toMatchObject({parentAttemptId:parent.id,reason:'REVIEW_OUTLIER'});
 });
