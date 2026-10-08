@@ -171,7 +171,7 @@ test('later generated report and PDF disclose the original failed evaluation and
     const PDFDocument = require('pdfkit'), text = jest.spyOn(PDFDocument.prototype, 'text');
     try {
         for (const locale of ['en', 'es', 'es-419', 'fr', 'pt']) {
-            const report = await require('../../services/reportAssembly').assembleReport(item.sampleId, { ...f.reviewer, language: locale }, { db: f.db });
+            const { content: report } = await require('../../services/reportAssembly').assembleReport(item.sampleId, { ...f.reviewer, language: locale }, { db: f.db });
             expect(report.evidence.qc.withinLimits).toBe(true);
             expect(report.evidence.qc.reviewedCorrections).toHaveLength(1);
             const correction = report.evidence.qc.reviewedCorrections[0];
