@@ -5,6 +5,16 @@ describe('WP-03: Dead-Code & System Wiring Regression Tests', () => {
     const serverDir = path.resolve(__dirname, '../..');
     const clientDir = path.resolve(serverDir, '../client/src');
 
+    test('Audit 2.5: QC preview has the evaluate permission and uses the scoped read authority', () => {
+        const routes = fs.readFileSync(path.join(serverDir, 'routes/qcRoutes.js'), 'utf8');
+        expect(routes).toMatch(/router\.post\(['"]\/batches\/:id\/preview['"],\s*checkPermission\(['"]CHANGE_STATUS['"]\),\s*qcController\.previewBatch\)/);
+        const preview = fs.readFileSync(path.join(serverDir, 'services/qcRunPreviewService.js'), 'utf8');
+        expect(preview).toContain("hasPermission(actor, 'CHANGE_STATUS')");
+        expect(preview).toContain('readQcRun(tx, batchId, actor)');
+        const read = fs.readFileSync(path.join(serverDir, 'services/qcRunViewService.js'), 'utf8');
+        expect(read).toContain('scopeGuard.ensureScope');
+    });
+
     function getAllFiles(dir, exts = ['.js', '.jsx']) {
         let results = [];
         if (!fs.existsSync(dir)) return results;
