@@ -1423,5 +1423,35 @@
     "replacement": "Replacement evaluation",
     "reviewer": "Reviewer",
     "authors": "Original observation authors"
+  },
+  "repeatCommands": {
+    "returnTitle": "Return for repeat testing",
+    "returnHelp": "Choose the recorded reason and explain the repeat request. The original execution and review remain in the audit trail.",
+    "reasonLabel": "Repeat reason",
+    "chooseReason": "Choose a reason",
+    "noteLabel": "Review note",
+    "notePlaceholder": "Explain the evidence and what needs to be checked.",
+    "confirmReturn": "Confirm return",
+    "reasons": {
+      "REVIEW_OUTLIER": "Review outlier",
+      "DUPLICATE_DISAGREEMENT": "Duplicate disagreement",
+      "CONFIRMATION": "Confirmation",
+      "QC_BATCH_FAIL": "QC batch failure",
+      "ABOVE_RANGE_DILUTION": "Above range: dilution required",
+      "INSTRUMENT_FAULT": "Instrument fault",
+      "PREP_ERROR": "Preparation error",
+      "OTHER": "Other"
+    },
+    "errors": {
+      "WORK_ATTEMPT_REASON_REQUIRED": "Choose a repeat reason.",
+      "WORK_ATTEMPT_REASON_INVALID": "Choose a valid repeat reason.",
+      "REPEAT_NOTE_REQUIRED": "Explain the reason in a note.",
+      "ATTEMPT_LIMIT": "This laboratory’s configured attempt limit has been reached.",
+      "ATTEMPT_LIMIT_NCR_UNAVAILABLE": "NCR-linked attempt overrides are not available yet.",
+      "WORK_REPEAT_ALREADY_OPEN": "A repeat is already waiting to be recorded.",
+      "REPEAT_FAILED_BATCH": "Use a new batch for this repeat; the previous QC failure is retained.",
+      "ATTEMPT_CORRECTION_REQUIRED": "Use a transcription correction for a typo.",
+      "AMENDMENT_WORKFLOW_REQUIRED": "A client retest requires the amendment workflow."
+    }
   }
 }

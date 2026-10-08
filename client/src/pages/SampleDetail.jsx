@@ -9,6 +9,7 @@ import { getStatusLabel } from '../utils/i18nHelper';
 import { useDialog } from '../context/DialogContext';
 import { useNotifications } from '../context/NotificationContext';
 import WorkItemsTable from '../components/sample/WorkItemsTable';
+import RepeatReasonFields from '../components/sample/RepeatReasonFields';
 import FieldMetadataCard from '../components/sample/FieldMetadataCard';
 import {ProfileReferenceSummary} from '../components/reception/ProfileReferenceFields';
 import ProfileCorrectionDialog from '../components/sample/ProfileCorrectionDialog';
@@ -175,6 +176,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
     }, [id]);
     const [returningSubmissionId, setReturningSubmissionId] = useState(null);
     const [returnReason, setReturnReason] = useState('');
+    const [returnReasonCode, setReturnReasonCode] = useState('');
 
     // Confirmation & Alert Modals
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
@@ -338,15 +340,25 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
         navigate(`/workbench?workItemId=${encodeURIComponent(itemId)}`);
     };
 
-    const handleReviewItem = async (itemId, status, note = 'Item review decision') => {
+    const handleReviewItem = async (itemId, status, note = 'Item review decision', reasonCode = '') => {
+        if (status === 'REANALYSIS_REQUIRED' && !reasonCode) {
+            setReturningSubmissionId(itemId);
+            setReturnReason('');
+            setReturnReasonCode('');
+            return false;
+        }
         try {
             await axios.post(`/api/work/${itemId}/review`, { status, note,
+                ...(status === 'REANALYSIS_REQUIRED' && { reasonCode }),
                 ...(status === 'ACCEPTED' && qcAcknowledgementReason.trim() && { qcAcknowledgement: { reason: qcAcknowledgementReason.trim() } }) });
             fetchWorkspaceData(true);
+            return true;
         } catch (err) {
             console.error('Item review failed', err);
             if (err.response?.data?.code === 'QC_ACKNOWLEDGEMENT_REQUIRED') setQcAcknowledgementRequested(true);
-            showInfo(t('common.error', 'Error'), t(`qcGate.errors.${err.response?.data?.code}`, err.response?.data?.error || err.message));
+            showInfo(t('common.error', 'Error'), t(`repeatCommands.errors.${err.response?.data?.code}`,
+                t(`qcGate.errors.${err.response?.data?.code}`, err.response?.data?.error || err.message)));
+            return false;
         }
     };
 
@@ -1191,10 +1203,7 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
                                                             <Check size={16} />
                                                         </button>
                                                         <button
-                                                            onClick={() => {
-                                                                setReturningSubmissionId(item.id);
-                                                                setReturnReason('');
-                                                            }}
+                                                            onClick={() => handleReviewItem(item.id, 'REANALYSIS_REQUIRED')}
                                                             className="p-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
                                                             title="Return for correction"
                                                         >
@@ -1572,32 +1581,27 @@ const SampleDetail = ({ initialWorkspace = null, initialSample = null }) => {
             {returningSubmissionId && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <div className="bg-sf-surface rounded-2xl shadow-2xl w-full max-w-md p-6 border border-sf-divider">
-                        <h3 className="text-lg font-bold text-sf-text mb-2">Return Item for Correction</h3>
-                        <p className="text-xs text-gray-500 mb-4">Under laboratory review policy, a mandatory reason is required to return a submitted result.</p>
-                        <textarea
-                            value={returnReason}
-                            onChange={(e) => setReturnReason(e.target.value)}
-                            placeholder="Enter specific correction requirements (e.g., Re-check dilution factor, baseline drift on scan)..."
-                            className="w-full text-xs p-3 rounded-lg border border-sf-divider bg-sf-canvas text-sf-text outline-none resize-none h-24 mb-4 focus:border-sf-emerald"
-                            autoFocus
-                        />
+                        <h3 className="text-lg font-bold text-sf-text mb-2">{t('repeatCommands.returnTitle')}</h3>
+                        <p className="text-xs text-gray-500 mb-4">{t('repeatCommands.returnHelp')}</p>
+                        <RepeatReasonFields reasonCode={returnReasonCode} note={returnReason}
+                            onReasonChange={setReturnReasonCode} onNoteChange={setReturnReason} />
                         <div className="flex justify-end gap-2">
                             <button
                                 onClick={() => setReturningSubmissionId(null)}
                                 className="px-4 py-2 text-xs font-bold text-sf-muted hover:bg-sf-raised rounded-lg"
                             >
-                                Cancel
+                                {t('common.cancel', 'Cancel')}
                             </button>
                             <button
                                 onClick={async () => {
-                                    if (!returnReason.trim()) return;
-                                    await handleReviewItem(returningSubmissionId, 'REANALYSIS_REQUIRED', returnReason.trim());
-                                    setReturningSubmissionId(null);
+                                    if (!returnReasonCode || !returnReason.trim()) return;
+                                    const reviewed = await handleReviewItem(returningSubmissionId, 'REANALYSIS_REQUIRED', returnReason.trim(), returnReasonCode);
+                                    if (reviewed) setReturningSubmissionId(null);
                                 }}
-                                disabled={!returnReason.trim()}
+                                disabled={!returnReasonCode || !returnReason.trim()}
                                 className="px-4 py-2 text-xs font-bold bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50"
                             >
-                                Confirm Return
+                                {t('repeatCommands.confirmReturn')}
                             </button>
                         </div>
                     </div>

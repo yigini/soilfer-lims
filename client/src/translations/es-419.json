@@ -3017,5 +3017,35 @@
     "replacement": "Evaluación de reemplazo",
     "reviewer": "Revisor",
     "authors": "Autores de las observaciones originales"
+  },
+  "repeatCommands": {
+    "returnTitle": "Devolver para repetir el análisis",
+    "returnHelp": "Seleccione el motivo y explique la solicitud de repetición. La ejecución y la revisión originales se conservan en el historial de auditoría.",
+    "reasonLabel": "Motivo de repetición",
+    "chooseReason": "Seleccione un motivo",
+    "noteLabel": "Nota de revisión",
+    "notePlaceholder": "Explique la evidencia y lo que se debe comprobar.",
+    "confirmReturn": "Confirmar devolución",
+    "reasons": {
+      "REVIEW_OUTLIER": "Valor atípico en la revisión",
+      "DUPLICATE_DISAGREEMENT": "Discrepancia entre duplicados",
+      "CONFIRMATION": "Confirmación",
+      "QC_BATCH_FAIL": "Fallo del lote de control de calidad",
+      "ABOVE_RANGE_DILUTION": "Fuera de rango: requiere dilución",
+      "INSTRUMENT_FAULT": "Fallo del instrumento",
+      "PREP_ERROR": "Error de preparación",
+      "OTHER": "Otro"
+    },
+    "errors": {
+      "WORK_ATTEMPT_REASON_REQUIRED": "Seleccione un motivo de repetición.",
+      "WORK_ATTEMPT_REASON_INVALID": "Seleccione un motivo de repetición válido.",
+      "REPEAT_NOTE_REQUIRED": "Explique el motivo en una nota.",
+      "ATTEMPT_LIMIT": "Se alcanzó el límite de intentos configurado para este laboratorio.",
+      "ATTEMPT_LIMIT_NCR_UNAVAILABLE": "Las excepciones vinculadas a una no conformidad aún no están disponibles.",
+      "WORK_REPEAT_ALREADY_OPEN": "Ya hay una repetición pendiente de registro.",
+      "REPEAT_FAILED_BATCH": "Utilice un lote nuevo para esta repetición; se conserva el fallo previo del control de calidad.",
+      "ATTEMPT_CORRECTION_REQUIRED": "Utilice una corrección de transcripción para un error de escritura.",
+      "AMENDMENT_WORKFLOW_REQUIRED": "Una repetición solicitada por el cliente requiere el flujo de enmiendas."
+    }
   }
 }

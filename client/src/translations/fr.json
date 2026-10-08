@@ -3017,5 +3017,35 @@
     "replacement": "Évaluation de remplacement",
     "reviewer": "Réviseur",
     "authors": "Auteurs des observations originales"
+  },
+  "repeatCommands": {
+    "returnTitle": "Renvoyer pour une nouvelle analyse",
+    "returnHelp": "Choisissez le motif et expliquez la demande de répétition. L’exécution et la revue originales restent dans la piste d’audit.",
+    "reasonLabel": "Motif de répétition",
+    "chooseReason": "Choisissez un motif",
+    "noteLabel": "Note de revue",
+    "notePlaceholder": "Expliquez les éléments de preuve et les vérifications nécessaires.",
+    "confirmReturn": "Confirmer le renvoi",
+    "reasons": {
+      "REVIEW_OUTLIER": "Valeur aberrante lors de la revue",
+      "DUPLICATE_DISAGREEMENT": "Écart entre duplicatas",
+      "CONFIRMATION": "Confirmation",
+      "QC_BATCH_FAIL": "Échec du contrôle qualité du lot",
+      "ABOVE_RANGE_DILUTION": "Hors plage : dilution requise",
+      "INSTRUMENT_FAULT": "Défaillance de l’instrument",
+      "PREP_ERROR": "Erreur de préparation",
+      "OTHER": "Autre"
+    },
+    "errors": {
+      "WORK_ATTEMPT_REASON_REQUIRED": "Choisissez un motif de répétition.",
+      "WORK_ATTEMPT_REASON_INVALID": "Choisissez un motif de répétition valide.",
+      "REPEAT_NOTE_REQUIRED": "Expliquez le motif dans une note.",
+      "ATTEMPT_LIMIT": "La limite de tentatives configurée pour ce laboratoire est atteinte.",
+      "ATTEMPT_LIMIT_NCR_UNAVAILABLE": "Les dérogations liées à une non-conformité ne sont pas encore disponibles.",
+      "WORK_REPEAT_ALREADY_OPEN": "Une répétition attend déjà son enregistrement.",
+      "REPEAT_FAILED_BATCH": "Utilisez un nouveau lot pour cette répétition ; l’échec précédent du contrôle qualité est conservé.",
+      "ATTEMPT_CORRECTION_REQUIRED": "Utilisez une correction de transcription pour une faute de saisie.",
+      "AMENDMENT_WORKFLOW_REQUIRED": "Une nouvelle analyse demandée par le client nécessite le processus de modification."
+    }
   }
 }
