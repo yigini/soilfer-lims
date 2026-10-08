@@ -70,6 +70,15 @@ function assertActionEdge(item, sample, nextStatus, actor, reason, options) {
         }
         return true;
     }
+    if (action === 'ATTEMPT_CORRECTED') {
+        rules.requireReason(reason);
+        require('./resultEvidenceService').assertAmendable(sample);
+        if (operational || nextStatus !== current || !['IN_PROGRESS','COMPLETED','SUBMITTED'].includes(current) ||
+            !hasPermission(actor,'APPROVE_RESULTS') && (!hasPermission(actor,'ENTER_RESULTS') || current === 'SUBMITTED' || item.assignedTo !== rules.actorName(actor))) {
+            throw new TransitionError('The work item is not eligible for this correction.',409,'ATTEMPT_CORRECTION_FORBIDDEN');
+        }
+        return true;
+    }
     if (action === 'GATE_REVERTED') {
         rules.requireReason(reason);
         require('./resultEvidenceService').assertAmendable(sample);
