@@ -89,8 +89,13 @@ function rejectedGuardWrite(options) {
             const release = require('../../services/workAttemptMigrationSource').loadWorkAttemptMigrationSource();
             const prior = require('../../services/resultAttemptMigrationSource').loadResultAttemptMigrationSource();
             for (const sql of [prior.guardsSql,release.guardsSql]) for (const match of sql.matchAll(/^CREATE (?:TRIGGER "([^"]+)"[\s\S]*?^END;|UNIQUE INDEX "([^"]+)"[^;]*;)/gm)) {
-                const name = match[1] || match[2], actual = db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(name);
-                assert.equal(actual?.sql.trim(), match[0].trim().replace(/;$/,''), `Missing or changed actual release guard/index ${name}`);
+                const name = match[1] || match[2], actual = db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(name);
+                const originalMatches = actual?.sql.trim() === match[0].trim().replace(/;$/,'');
+                // The only successors accepted by #190 itself require both
+                // exact #191 DDL and its complete predecessor-bound receipt.
+                const verifiedSuccessor = !originalMatches && actual &&
+                    require('../../services/workRepeatInstallationEvidence').isVerifiedRepeatSuccessor(db,name,actual);
+                assert.ok(originalMatches || verifiedSuccessor, `Missing or changed actual release guard/index ${name}`);
             }
         }
         if (batchForeignKeyProbe) {
