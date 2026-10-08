@@ -53,7 +53,11 @@ test('offline draft start preserves analytical base version and commits its cent
 });
 
 test('offline completion centrally records provenance and preserves superseded analytical values', async () => {
-    const row = await fixture(), before = await snapshot(row), receipt = await perform(row);
+    const row=await fixture(),original=await snapshot(row);
+    const repeat=await require('../../services/workRepeatService').requestRepeat(prisma,row.item.id,manager,
+        {reason:'CONFIRMATION',note:'Independent offline determination confirms the original reading'});
+    row.item=repeat.workItem;
+    const before=await snapshot(row),receipt=await perform(row);
     expect(receipt.status).toBe('APPLIED');
     const after = await snapshot(row);
     expect(after.sample).toEqual(before.sample);
@@ -62,10 +66,12 @@ test('offline completion centrally records provenance and preserves superseded a
     expect(after.results.find(result => result.id === row.result.id)).toMatchObject({ value: '6.2', numericValue: 6.2,
         flags: '["ORIGINAL_NOTE"]', isCurrent: false });
     expect(after.results.find(result => result.isCurrent)).toMatchObject({ value: '7.2', enteredBy: actor.username });
-    // Pin6060005962: a re-record binds a new attempt and preserves the first.
-    expect(before.attempts).toHaveLength(1);
+    // Pins6060005962 /6069938801: the explicit request reserves the second
+    // execution before recording; parent evidence changes only its status.
+    expect(before.attempts).toHaveLength(2);
     const priorAttempt = before.attempts.find(attempt => attempt.id === row.result.attemptId);
-    expect(priorAttempt).toMatchObject({ workItemId: row.item.id, attemptNo: 1, status: 'RECORDED' });
+    expect(priorAttempt).toEqual({...original.attempts[0],status:'QUESTIONED'});
+    expect(before.attempts.find(attempt=>attempt.id===repeat.attempt.id)).toMatchObject({status:'OPEN',reason:'CONFIRMATION'});
     expect(after.attempts).toHaveLength(2);
     expect(after.attempts.find(attempt => attempt.id === priorAttempt.id)).toEqual(priorAttempt);
     const currentResult = after.results.find(result => result.id === receipt.outcome.resultId);
@@ -76,7 +82,13 @@ test('offline completion centrally records provenance and preserves superseded a
         .toMatchObject({ workItemId: row.item.id, attemptNo: 2 });
     expect(after.results.find(result => result.id === row.result.id)).toMatchObject({ attemptId: priorAttempt.id, isCurrent: false });
     expect(after.receipts).toHaveLength(1);
-    expect(after.audits.filter(audit => audit.action !== 'RESULT_RECORDED')).toHaveLength(before.audits.length + 1);
+    const workflowAudits=audits=>audits.filter(audit=>audit.action!=='RESULT_RECORDED' && audit.entity!=='WORK_ATTEMPT');
+    expect(workflowAudits(after.audits)).toHaveLength(workflowAudits(before.audits).length+1);
+    const attemptEvents=audits=>audits.filter(audit=>audit.entity==='WORK_ATTEMPT');
+    expect(attemptEvents(after.audits)).toHaveLength(attemptEvents(before.audits).length+1);
+    expect(attemptEvents(after.audits).filter(event=>!attemptEvents(before.audits).some(old=>old.id===event.id)))
+        .toEqual([expect.objectContaining({action:'FIRST_FILL',entityId:repeat.attempt.id})]);
+    for(const event of before.audits)expect(after.audits.find(row=>row.id===event.id)).toEqual(event);
     const resultAudits = after.audits.filter(audit => audit.action === 'RESULT_RECORDED');
     expect(resultAudits).toHaveLength(1);
     expect(resultAudits[0]).toMatchObject({ entityId: receipt.outcome.resultId, performedBy: actor.username });

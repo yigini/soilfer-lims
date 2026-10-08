@@ -15,8 +15,8 @@ const { governsResult } = require('../services/reportResultGovernance');
 async function assertResultSaveReadiness(db, sample, user, measurements) {
     stateRules.assertScope(user, sample);
     resultEvidence.assertAmendable(sample);
-    await require('../services/resultWriteService').assertRecordedResultSave(db,sample,measurements);
     if (!['PROCESSING', 'SUBMITTED_PARTIAL'].includes(sample.status)) {
+        if(sample.status==='SUBMITTED_FULL')await require('../services/resultWriteService').assertRecordedResultSave(db,sample,measurements);
         throw new stateRules.TransitionError(`Sample is not in Processing phase (current: ${sample.status})`, 400, 'SAMPLE_NOT_PROCESSING');
     }
     const report = await gateEvidence.loadGateEvidence(db, sample);
@@ -24,6 +24,7 @@ async function assertResultSaveReadiness(db, sample, user, measurements) {
     for (const [gate, message] of [['PREPARATION', 'Sample preparation has not been completed'], ['DRYING', 'Sample drying has not been completed']]) {
         if (report.blocked.some(blocked => blocked.analysis === gate)) throw Object.assign(new Error(message), { statusCode: 412 });
     }
+    await require('../services/resultWriteService').assertRecordedResultSave(db,sample,measurements);
     return report;
 }
 

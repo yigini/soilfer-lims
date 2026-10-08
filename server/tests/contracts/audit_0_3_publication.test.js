@@ -107,6 +107,8 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         const techToken = await getAuthToken('LAB_TECHNICIAN', labId);
         const acquisition = await fixture({ status: 'PROCESSING', itemStatus: 'IN_PROGRESS', param: analysis });
         await prisma.workItem.update({ where: { id: acquisition.item.id }, data: { assignedTo: jwt.decode(techToken).username } });
+        await require('../../services/workRepeatService').requestRepeat(prisma,acquisition.item.id,jwt.decode(token),
+            {reason:'CONFIRMATION',note:'Independent scalar determination confirms the original recorded acquisition'});
         const saved = await request(app).post('/api/workbench/batch-save').set('Authorization', `Bearer ${techToken}`)
             .send({ draft: false, entries: [{ workItemId: acquisition.item.id, value: '12' }] });
         expect(saved.status).toBe(200);

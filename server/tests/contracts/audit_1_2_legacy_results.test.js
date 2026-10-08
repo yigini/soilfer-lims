@@ -7,10 +7,11 @@ const prisma = require('../../prisma');
 const { getAuthToken } = require('../setup');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const labId = 'LAB-LEGACY-RESULTS-179', analysis = 'PH_LEGACY_RESULT_179';
-let token, actor;
+let token, actor, repeatReviewer;
 beforeAll(async () => {
     token = await getAuthToken('LAB_TECHNICIAN', labId);
     actor = jwt.decode(token);
+    repeatReviewer=jwt.decode(await getAuthToken('LAB_MANAGER',labId));
     await prisma.analysis.create({ data: { code: analysis, name: 'Legacy result test pH', units: 'pH',
         prerequisites: '[]', validation: '{"min":0,"max":14}' } });
 });
@@ -26,6 +27,12 @@ async function fixture(status = 'PROCESSING', flags = {}, itemStatus = 'IN_PROGR
 }
 const save = row => request(app).post(`/api/results/${row.sample.id}`).set('Authorization', `Bearer ${token}`)
     .send({ measurements: [{ param: analysis, value: '7.2', unit: 'pH' }] });
+async function saveFixture(...args) {
+    const row=await fixture(...args);
+    const repeat=await require('../../services/workRepeatService').requestRepeat(prisma,row.item.id,repeatReviewer,
+        {reason:'CONFIRMATION',note:'New determination confirms the retained reading'});
+    row.item=repeat.workItem;return row;
+}
 const submit = row => request(app).post(`/api/results/${row.sample.id}/submit`).set('Authorization', `Bearer ${token}`);
 async function snapshot(row) {
     return { sample: await prisma.sample.findUnique({ where: { id: row.sample.id } }),
@@ -36,7 +43,7 @@ async function snapshot(row) {
 }
 
 test.each(['PROCESSING', 'SUBMITTED_PARTIAL'])('saving results keeps %s lifecycle and WorkItem state while refreshing only its result cache', async status => {
-    const row = await fixture(status), before = await snapshot(row);
+    const row = await saveFixture(status), before = await snapshot(row);
     expect((await save(row)).status).toBe(200);
     const after = await snapshot(row);
     expect(after.sample).toEqual(before.sample);
@@ -54,7 +61,7 @@ test.each(['PROCESSING', 'SUBMITTED_PARTIAL'])('saving results keeps %s lifecycl
 });
 
 test.each(['scope', 'gate', 'audit'])('a %s refusal inside the result-save transaction writes nothing', async kind => {
-    const row = await fixture(), before = await snapshot(row), transaction = prisma.$transaction.bind(prisma);
+    const row = await saveFixture(), before = await snapshot(row), transaction = prisma.$transaction.bind(prisma);
     jest.spyOn(prisma, '$transaction').mockImplementationOnce(callback => transaction(async tx => {
         if (kind === 'scope') await tx.sample.update({ where: { id: row.sample.id }, data: { assignedLab: 'OTHER-LAB' } });
         if (kind === 'gate') await tx.sample.update({ where: { id: row.sample.id }, data: { preparationStatus: 'PENDING' } });
@@ -70,7 +77,7 @@ test.each([
     [{ preparationStatus: 'PENDING' }, 'Sample preparation has not been completed'],
     [{ dryingStatus: 'PENDING' }, 'Sample drying has not been completed']
 ])('missing preparation evidence retains HTTP 412 and its existing message', async (flags, message) => {
-    const row = await fixture('PROCESSING', flags), before = await snapshot(row);
+    const row = await saveFixture('PROCESSING', flags), before = await snapshot(row);
     const response = await save(row);
     expect(response.status).toBe(412); expect(response.body.error).toBe(message);
     expect(await snapshot(row)).toEqual(before);
