@@ -1,166 +1,141 @@
-const Database = require('better-sqlite3');
-const { loadWorkAttemptMigrationSource } = require('../../services/workAttemptMigrationSource');
-const { WORK_ATTEMPT_STATUS_LIST, LEGACY_WORK_ATTEMPT_STATUS_LIST, REPEAT_REASON_LIST, assertRepeatReason, canonicalWorkItemWhere } = require('../../services/workAttemptContract');
-let db, source;
-beforeEach(() => {
-    db = new Database(':memory:'); db.pragma('foreign_keys=ON');
-    db.exec(`CREATE TABLE Batch(id TEXT PRIMARY KEY);
-        CREATE TABLE WorkItem(id TEXT PRIMARY KEY,sampleId TEXT,analysis TEXT,duplicateOf TEXT);
-        CREATE TABLE WorkAttempt(id TEXT PRIMARY KEY,workItemId TEXT,orderLineId TEXT,attemptNo INTEGER DEFAULT 1,
-            executedMethodRevision TEXT,author TEXT,authorName TEXT,materialAliquot TEXT,instrumentId TEXT,qcBatchId TEXT,
-            version INTEGER DEFAULT 1,status TEXT DEFAULT 'RECORDED',evidenceHash TEXT,evidenceData TEXT,createdAt DATETIME,updatedAt DATETIME);
-        CREATE TABLE Result(id TEXT PRIMARY KEY,sampleId TEXT,param TEXT,replicateNo INTEGER,attemptId TEXT,isCurrent INTEGER,provenance TEXT DEFAULT 'MEASURED');
-        CREATE TABLE ReviewDecision(id TEXT PRIMARY KEY,workItemId TEXT,sampleId TEXT,attemptId TEXT,decision TEXT);`);
-    source = loadWorkAttemptMigrationSource(); db.exec(source.schemaSql);
-});
-afterEach(() => db.close());
-function insert(id, { workItemId = 'item', attemptNo = 1, status = 'RECORDED', flag = null, evidenceData = null, batchId = null, reason = null } = {}) {
-    return db.prepare(`INSERT INTO WorkAttempt(id,workItemId,attemptNo,status,legacyAttemptNoConflict,evidenceData,batchId,reason)
-        VALUES (?,?,?,?,?,?,?,?)`).run(id,workItemId,attemptNo,status,flag,evidenceData,batchId,reason);
+const fs=require('node:fs'),path=require('node:path'),Database=require('better-sqlite3');
+const {randomUUID,createHash}=require('node:crypto');
+const {PrismaClient}=require('../../prisma_client');
+const {PrismaBetterSqlite3}=require('@prisma/adapter-better-sqlite3');
+const {createPre190AttemptFixture}=require('../helpers/workAttemptHistoricalFixtures');
+const {rejectedGuardWrite}=require('../helpers/rejectedGuardWrite');
+const {createWorkItemFixture}=require('../helpers/workflowFixtures');
+const {createRawResultFixture}=require('../../services/resultWriteService');
+const {installWorkflowStateGuards}=require('../../scripts/install_workflow_state_guards');
+const {installResultAttemptLinks}=require('../../scripts/install_result_attempt_links');
+const {installWorkAttemptContract}=require('../../scripts/install_work_attempt_contract');
+const {WORK_ATTEMPT_STATUS_LIST,LEGACY_WORK_ATTEMPT_STATUS_LIST,REPEAT_REASON_LIST,assertRepeatReason,canonicalWorkItemWhere}=require('../../services/workAttemptContract');
+const directory=path.resolve(__dirname,'../.tmp'),timestamp=Date.parse('2026-10-01T12:00:00Z');
+let db,client,file;
+const itemRow=(id,analysis='P')=>({id,sampleId:'sample',analysis,status:'COMPLETED',updatedAt:timestamp});
+const historicalAttempt=(id,workItemId='item',options={})=>({id,workItemId,attemptNo:1,status:'RECORDED',createdAt:timestamp,updatedAt:timestamp,...options});
+async function guarded({items=[itemRow('item'),itemRow('other','Q'),itemRow('another','R'),itemRow('new','S'),itemRow('different','T')],attempts=[],batches=[]}={}){
+    fs.mkdirSync(directory,{recursive:true});file=path.join(directory,`audit_legacy_190_sql-${randomUUID()}.db`);
+    createPre190AttemptFixture({actor:'system:fixture',file,rows:{Sample:['sample','other-sample'].map(id=>({id,originalId:id,status:'PROCESSING',updatedAt:timestamp})),WorkItem:items,WorkAttempt:attempts,Batch:batches}});
+    // Actual complete release chain: no copied trigger subset or simplified FK.
+    expect(installWorkflowStateGuards({dbPath:file,apply:true}).mode).toBe('APPLIED');
+    expect(installWorkflowStateGuards({dbPath:file}).classification).toBe('COMPLETE');
+    expect(installResultAttemptLinks({dbPath:file,apply:true}).classification).toBe('COMPLETE');
+    expect(installWorkAttemptContract({dbPath:file,apply:true}).classification).toBe('COMPLETE');
+    db=new Database(file);db.pragma('foreign_keys=ON');client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
 }
-
-test('every lab installs partial attempt uniqueness and current-result uniqueness with all guards', () => {
-    db.exec(source.guardsSql); insert('first');
-    expect(db.prepare("SELECT sql FROM sqlite_master WHERE name='WorkAttempt_workItemId_attemptNo_unique'").get().sql)
-        .toMatch(/WHERE "legacyAttemptNoConflict" IS NULL$/);
-    expect(() => insert('collision')).toThrow(/UNIQUE/);
-    insert('next', { attemptNo: 2 }); insert('another-item', { workItemId: 'other' });
-    const result = db.prepare('INSERT INTO Result(id,sampleId,param,replicateNo,attemptId,isCurrent) VALUES (?,?,?,?,?,?)');
-    result.run('original','sample','P',1,'first',1);
-    expect(() => result.run('duplicate','sample','P',1,'first',1)).toThrow(/UNIQUE/);
-    result.run('replicate','sample','P',2,'first',1);
-    result.run('other-attempt','sample','P',1,'next',1);
-    result.run('historical','sample','P',1,'first',0);
+afterEach(async()=>{
+    await client?.$disconnect();client=null;db?.close();db=null;
+    if(file){if(path.dirname(file)!==directory||!path.basename(file).startsWith('audit_legacy_190_sql-'))throw Error('Unexpected owned guard fixture.');for(const suffix of ['','-wal','-shm'])fs.rmSync(file+suffix,{force:true});file=null;}
 });
+function insert(id,{workItemId='item',attemptNo=1,status='RECORDED',evidenceData=null,batchId=null,reason=null}={}){
+    return client.workAttempt.create({data:{id,workItemId,attemptNo,status,evidenceData,batchId,reason,createdAt:new Date(timestamp),updatedAt:new Date(timestamp)}});
+}
+function result(id,{sampleId='sample',param='P',replicateNo=1,attemptId=null,isCurrent=1,provenance='MEASURED'}={}){
+    return createRawResultFixture(db,{id,sampleId,param,replicateNo,attemptId,isCurrent,provenance,value:'0.123456789',updatedAt:timestamp});
+}
+function probe(statement,parameters,expectedGuardCode,expectedConstraint){return rejectedGuardWrite({actor:'system:fixture',file,statement,parameters,expectedGuardCode,...(expectedConstraint&&{expectedConstraint})});}
+const attemptInsert='INSERT INTO WorkAttempt (id,workItemId,attemptNo,status,batchId,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?)';
 
-test.each(WORK_ATTEMPT_STATUS_LIST)('canonical insert and status update %s are accepted', status => {
-    db.exec(source.guardsSql); insert('canonical', { status });
-    db.prepare('UPDATE WorkAttempt SET status=? WHERE id=?').run(status,'canonical');
+test('every lab installs partial attempt uniqueness and current-result uniqueness with all guards',async()=>{
+    await guarded();await insert('first');
+    expect(db.prepare("SELECT sql FROM sqlite_master WHERE name='WorkAttempt_workItemId_attemptNo_unique'").get().sql).toMatch(/WHERE "legacyAttemptNoConflict" IS NULL$/);
+    probe(attemptInsert,['collision','item',1,'RECORDED',null,timestamp,timestamp],'SQLITE_CONSTRAINT_UNIQUE','WorkAttempt_workItemId_attemptNo_unique');
+    await insert('next',{attemptNo:2});await insert('another-item',{workItemId:'other'});result('original',{attemptId:'first'});
+    probe('INSERT INTO Result (id,sampleId,param,value,replicateNo,attemptId,isCurrent,provenance,updatedAt) VALUES (?,?,?,?,?,?,?,?,?)',['duplicate','sample','P','retained',1,'first',1,'MEASURED',timestamp],'SQLITE_CONSTRAINT_UNIQUE','result_one_current');
+    result('replicate',{replicateNo:2,attemptId:'first'});result('other-attempt',{attemptId:'next'});result('historical',{attemptId:'first',isCurrent:0});
 });
-
-test.each(LEGACY_WORK_ATTEMPT_STATUS_LIST)('historical %s stays stored but cannot be newly inserted or updated', status => {
-    insert('historical', { status, evidenceData: '{"retained":"exact bytes"}' });
-    const original = db.prepare('SELECT * FROM WorkAttempt').all(); db.exec(source.guardsSql);
-    expect(db.prepare('SELECT * FROM WorkAttempt').all()).toEqual(original);
-    expect(() => insert('new-legacy', { workItemId: 'another', status })).toThrow('WORK_ATTEMPT_STATUS_INVALID');
-    expect(() => db.prepare('UPDATE WorkAttempt SET status=?').run(status)).toThrow('WORK_ATTEMPT_STATUS_INVALID');
-    db.prepare("UPDATE WorkAttempt SET status='SUPERSEDED'").run();
-    expect(db.prepare('SELECT evidenceData,status FROM WorkAttempt').get()).toEqual({ evidenceData:'{"retained":"exact bytes"}',status:'SUPERSEDED' });
+test.each(WORK_ATTEMPT_STATUS_LIST)('canonical insert and status update %s are accepted',async status=>{await guarded();await insert('canonical',{status});db.prepare('UPDATE WorkAttempt SET status=? WHERE id=?').run(status,'canonical');});
+test.each(LEGACY_WORK_ATTEMPT_STATUS_LIST)('historical %s stays stored but cannot be newly inserted or updated',async status=>{
+    const original=historicalAttempt('historical','item',{status,evidenceData:'{"retained":"exact bytes"}'});await guarded({attempts:[original]});
+    const retained=db.prepare('SELECT * FROM WorkAttempt').all();expect(retained[0]).toMatchObject(original);
+    probe(attemptInsert,['new-legacy','another',1,status,null,timestamp,timestamp],'WORK_ATTEMPT_STATUS_INVALID');
+    probe('UPDATE WorkAttempt SET status=? WHERE id=?',[status,'historical'],'WORK_ATTEMPT_STATUS_INVALID');expect(db.prepare('SELECT * FROM WorkAttempt').all()).toEqual(retained);
+    db.prepare('UPDATE WorkAttempt SET status=? WHERE id=?').run('SUPERSEDED','historical');expect(db.prepare('SELECT evidenceData,status FROM WorkAttempt').get()).toEqual({evidenceData:'{"retained":"exact bytes"}',status:'SUPERSEDED'});
 });
-
-test('the migration can flag every historical duplicate before guards, without renumbering', () => {
-    insert('duplicate-one', { flag: 'migration-group', evidenceData: '{"original":1}' });
-    insert('duplicate-two', { flag: 'migration-group', evidenceData: '{"original":2}' });
-    const original = db.prepare('SELECT * FROM WorkAttempt ORDER BY id').all(); db.exec(source.guardsSql);
-    expect(db.prepare('SELECT * FROM WorkAttempt ORDER BY id').all()).toEqual(original);
-    insert('next', { attemptNo: 2 });
-    expect(() => insert('forced-next-duplicate', { attemptNo: 2 })).toThrow(/UNIQUE/);
-    db.prepare("UPDATE WorkAttempt SET status='SUPERSEDED' WHERE id='duplicate-one'").run();
-    expect(db.prepare("SELECT attemptNo,legacyAttemptNoConflict,evidenceData FROM WorkAttempt WHERE id='duplicate-one'").get())
-        .toEqual({attemptNo:1,legacyAttemptNoConflict:'migration-group',evidenceData:'{"original":1}'});
+test('the migration can flag every historical duplicate before guards, without renumbering',async()=>{
+    await guarded({attempts:[historicalAttempt('duplicate-one','item',{evidenceData:'{"original":1}'}),historicalAttempt('duplicate-two','item',{evidenceData:'{"original":2}'})]});
+    const original=db.prepare('SELECT * FROM WorkAttempt ORDER BY id').all();expect(original).toHaveLength(2);expect(original.every(row=>row.attemptNo===1&&/^190:/.test(row.legacyAttemptNoConflict))).toBe(true);expect(original[0].legacyAttemptNoConflict).toBe(original[1].legacyAttemptNoConflict);
+    await insert('next',{attemptNo:2});probe(attemptInsert,['forced-next-duplicate','item',2,'RECORDED',null,timestamp,timestamp],'SQLITE_CONSTRAINT_UNIQUE','WorkAttempt_workItemId_attemptNo_unique');
+    db.prepare('UPDATE WorkAttempt SET status=? WHERE id=?').run('SUPERSEDED','duplicate-one');const after=db.prepare('SELECT * FROM WorkAttempt WHERE id=?').get('duplicate-one');expect({...after,status:original[0].status}).toEqual(original[0]);
 });
-
-test.each([['unflagged','flag'],['flagged',null],['flagged','same'],['unflagged',null]])('all conflict flag updates %s -> %s are refused', (id,value) => {
-    insert('unflagged'); insert('flagged', { workItemId:'another',flag:'same' }); db.exec(source.guardsSql);
-    expect(() => db.prepare('UPDATE WorkAttempt SET legacyAttemptNoConflict=? WHERE id=?').run(value,id))
-        .toThrow('WORK_ATTEMPT_CONFLICT_FLAG_IMMUTABLE');
-    expect(() => insert('new-flagged', { workItemId:'new',flag:'pretended-migration' })).toThrow('WORK_ATTEMPT_CONFLICT_FLAG_FORBIDDEN');
+test.each([['unflagged','flag'],['flagged',null],['flagged','same'],['unflagged',null]])('all conflict flag updates %s -> %s are refused',async(id,value)=>{
+    await guarded({attempts:[historicalAttempt('unflagged'),historicalAttempt('flagged','another'),historicalAttempt('flagged-peer','another')]});
+    probe('UPDATE WorkAttempt SET legacyAttemptNoConflict=? WHERE id=?',[value,id],'WORK_ATTEMPT_CONFLICT_FLAG_IMMUTABLE');
+    probe('INSERT INTO WorkAttempt (id,workItemId,attemptNo,status,legacyAttemptNoConflict,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?)',['new-flagged','new',1,'RECORDED','pretended-migration',timestamp,timestamp],'WORK_ATTEMPT_CONFLICT_FLAG_FORBIDDEN');
 });
-
-test.each(['evidenceData','evidenceHash','instrumentId'])('evidence field %s is immutable even within its creating transaction', field => {
-    db.exec(source.guardsSql);
-    expect(() => db.transaction(() => {
-        insert('new', { evidenceData:'{"final":"inserted"}' });
-        db.prepare(`UPDATE WorkAttempt SET "${field}"=? WHERE id='new'`).run('changed');
-    })()).toThrow('WORK_ATTEMPT_EVIDENCE_IMMUTABLE');
+test.each(['evidenceData','evidenceHash','instrumentId'])('evidence field %s is immutable even within its creating transaction',async field=>{
+    await guarded();const evidenceData='{"final":"inserted","equipmentReadiness":{"equipmentId":"frozen-instrument"}}';
+    rejectedGuardWrite({actor:'system:fixture',file,case:'WorkAttempt_evidence_immutable_same_transaction',values:{id:'new',workItemId:'item',evidenceData,evidenceHash:createHash('sha256').update(evidenceData).digest('hex'),field,replacement:'changed'}});
     expect(db.prepare('SELECT count(*) n FROM WorkAttempt').get().n).toBe(0);
 });
-
-test.each(['attemptNo','workItemId','author','createdAt','updatedAt','qcBatchId','rawData'])('recorded identity field %s cannot change', field => {
-    insert('recorded', { flag:'historical-group' }); db.exec(source.guardsSql);
-    expect(() => db.prepare(`UPDATE WorkAttempt SET "${field}"=?`).run(field==='attemptNo'?2:'changed'))
-        .toThrow('WORK_ATTEMPT_IDENTITY_IMMUTABLE');
-});
-
-test('batch FK is additive, reference checked and write-once when recorded', () => {
-    db.prepare('INSERT INTO Batch VALUES (?)').run('batch'); db.prepare('INSERT INTO Batch VALUES (?)').run('another');
-    insert('historical'); db.prepare("UPDATE WorkAttempt SET batchId='batch'").run(); db.exec(source.guardsSql);
-    for (const value of [null,'another']) expect(() => db.prepare('UPDATE WorkAttempt SET batchId=?').run(value)).toThrow('WORK_ATTEMPT_BATCH_IMMUTABLE');
-    expect(() => insert('dangling', {workItemId:'different',batchId:'missing'})).toThrow(/FOREIGN KEY/);
-    expect(() => db.prepare("DELETE FROM Batch WHERE id='batch'").run()).toThrow(/FOREIGN KEY/);
-    expect(() => db.prepare('DELETE FROM WorkAttempt').run()).toThrow('WORK_ATTEMPT_DELETE_REFUSED');
-});
-
-test.each(REPEAT_REASON_LIST)('canonical reason %s is accepted by both the shared contract and SQL',reason=>{
-    db.exec(source.guardsSql);expect(assertRepeatReason(reason)).toBe(reason);insert('canonical-reason',{reason});
-});
-
-test('reason remains nullable for a second execution, while noncanonical values are refused',()=>{
-    db.exec(source.guardsSql);insert('first');insert('second',{attemptNo:2});
-    expect(db.prepare("SELECT reason FROM WorkAttempt WHERE id='second'").get().reason).toBeNull();
-    expect(assertRepeatReason(null)).toBeNull();
-    for(const reason of ['free text','',1]) {
-        expect(()=>assertRepeatReason(reason)).toThrow(expect.objectContaining({code:'WORK_ATTEMPT_REASON_INVALID',statusCode:409}));
-        expect(()=>insert('invalid',{workItemId:'another',reason})).toThrow('WORK_ATTEMPT_REASON_INVALID');
+test('the fixed evidence case refuses caller SQL, unknown fields and invalid parents without writes',async()=>{
+    await guarded();
+    const evidenceData='{"final":"bound values only"}',values={id:'new',workItemId:'item',evidenceData,
+        evidenceHash:createHash('sha256').update(evidenceData).digest('hex'),field:'evidenceData',replacement:'changed'};
+    const options={actor:'system:fixture',file,case:'WorkAttempt_evidence_immutable_same_transaction',values};
+    const before=fs.readFileSync(file);
+    for(const invalid of [
+        {...options,statement:'UPDATE WorkAttempt SET evidenceData=? WHERE id=?'},
+        {...options,callback:()=>{throw Error('Caller callback must never run.');}},
+        {...options,case:'arbitrary-two-step-writer'},
+        {...options,values:{...values,field:'status'}},
+        {...options,values:{...values,evidenceHash:'invalid'}},
+        {...options,values:{...values,workItemId:'absent'}}
+    ]){
+        expect(()=>rejectedGuardWrite(invalid)).toThrow();
+        expect(fs.readFileSync(file)).toEqual(before);
+        expect(db.prepare('SELECT count(*) n FROM WorkAttempt').get().n).toBe(0);
     }
 });
-
-test('SQL and runtime canonical lookup agree: only orphan historical imports can omit an attempt',()=>{
-    db.exec(source.guardsSql);
-    const result=db.prepare('INSERT INTO Result(id,sampleId,param,replicateNo,attemptId,isCurrent,provenance) VALUES (?,?,?,?,?,?,?)');
-    result.run('orphan','sample','P',1,null,1,'IMPORTED');
-    db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('child','sample','P','parent');
-    result.run('duplicate-child-import','sample','P',2,null,1,'IMPORTED');
-    expect(canonicalWorkItemWhere('sample','P')).toEqual({sampleId:'sample',analysis:'P',duplicateOf:null});
-    db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('canonical','sample','P',null);
-    expect(()=>result.run('nonexempt-import','sample','P',3,null,1,'IMPORTED')).toThrow('RESULT_ATTEMPT_REQUIRED');
-    insert('valid-attempt',{workItemId:'canonical'});
-    insert('replacement',{workItemId:'canonical',attemptNo:2});
-    result.run('linked-import','sample','P',3,'valid-attempt',1,'IMPORTED');
-    for(const attemptId of [null,'replacement']) {
-        expect(()=>db.prepare("UPDATE Result SET attemptId=? WHERE id='linked-import'").run(attemptId)).toThrow('RESULT_ATTEMPT_IMMUTABLE');
+test('the new native FK identity cannot authorize arbitrary WorkAttempt SQL or an invalid parent',async()=>{
+    await guarded();const before=fs.readFileSync(file);
+    for(const [statement,parameters] of [
+        ['DELETE FROM WorkAttempt WHERE id=?',['item']],
+        [attemptInsert,['dangling','absent',1,'RECORDED','missing',timestamp,timestamp]],
+        [attemptInsert,['dangling','item',1,'RECORDED',null,timestamp,timestamp]]
+    ]){
+        expect(()=>probe(statement,parameters,'SQLITE_CONSTRAINT_FOREIGNKEY','WorkAttempt_batchId_foreign_key')).toThrow();
+        expect(fs.readFileSync(file)).toEqual(before);
     }
-    db.prepare("UPDATE Result SET attemptId='valid-attempt' WHERE id='linked-import'").run();
-    for(const provenance of ['MEASURED','PREDICTED','DERIVED',null]) {
-        expect(()=>result.run('refused','other-sample','P',1,null,1,provenance)).toThrow('RESULT_ATTEMPT_REQUIRED');
-    }
+    expect(()=>probe(attemptInsert,['dangling','item',1,'RECORDED','missing',timestamp,timestamp],
+        'SQLITE_CONSTRAINT_FOREIGNKEY','arbitrary-foreign-key')).toThrow('single workflow guard probe');
+    expect(fs.readFileSync(file)).toEqual(before);
 });
-
-test('raw review inserts require a current attempt of the same work item and sample', () => {
-    db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('item','sample','P',null);
-    db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('other','sample','Q',null);
-    insert('current'); insert('historical',{attemptNo:2}); insert('wrong-item',{workItemId:'other'});
-    db.exec(source.guardsSql);
-    const result=db.prepare('INSERT INTO Result(id,sampleId,param,replicateNo,attemptId,isCurrent) VALUES (?,?,?,?,?,?)');
-    result.run('current-result','sample','P',1,'current',1);
-    result.run('old-result','sample','P',1,'historical',0);
-    result.run('other-result','sample','Q',1,'wrong-item',1);
-    const decision=db.prepare('INSERT INTO ReviewDecision(id,workItemId,sampleId,attemptId,decision) VALUES (?,?,?,?,?)');
-    for (const [attemptId,sampleId,code] of [[null,'sample','REVIEW_ATTEMPT_REQUIRED'],
-        ['historical','sample','REVIEW_ATTEMPT_INVALID'],['wrong-item','sample','REVIEW_ATTEMPT_INVALID'],
-        ['current','other-sample','REVIEW_ATTEMPT_INVALID'],['missing','sample','REVIEW_ATTEMPT_INVALID']]) {
-        expect(()=>decision.run('invalid','item',sampleId,attemptId,'ACCEPT')).toThrow(code);
-        expect(db.prepare('SELECT count(*) n FROM ReviewDecision').get().n).toBe(0);
-    }
-    decision.run('accepted','item','sample','current','ACCEPT');
-    expect(()=>db.prepare('UPDATE ReviewDecision SET attemptId=NULL').run()).toThrow('REVIEW_DECISION_IMMUTABLE');
-    expect(db.prepare('SELECT attemptId FROM ReviewDecision').get().attemptId).toBe('current');
+test.each(['attemptNo','workItemId','author','createdAt','updatedAt','qcBatchId','rawData'])('recorded identity field %s cannot change',async field=>{
+    await guarded({attempts:[historicalAttempt('recorded'),historicalAttempt('recorded-peer')]});probe(`UPDATE WorkAttempt SET "${field}"=? WHERE id=?`,[field==='attemptNo'?2:'changed','recorded'],'WORK_ATTEMPT_IDENTITY_IMMUTABLE');
 });
-
-test('the raw review guard permits only an unexecuted analytical OMIT with no attempt', () => {
-    db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('item','sample','P',null);
-    db.exec(source.guardsSql);
-    const decision=db.prepare('INSERT INTO ReviewDecision(id,workItemId,sampleId,decision) VALUES (?,?,?,?)');
-    decision.run('unexecuted-waiver','item','sample','OMIT');
-    expect(()=>decision.run('unexecuted-accept','item','sample','ACCEPT')).toThrow('REVIEW_ATTEMPT_REQUIRED');
-    insert('executed-without-current-result');
-    expect(()=>decision.run('executed-waiver','item','sample','OMIT')).toThrow('REVIEW_ATTEMPT_REQUIRED');
+test('batch FK is additive, reference checked and write-once when recorded',async()=>{
+    const batch=id=>({id,analysis:'P',status:'COMPLETED',createdBy:'system:fixture'});await guarded({batches:[batch('batch'),batch('another')],attempts:[historicalAttempt('historical','item',{qcBatchId:'batch'})]});
+    expect(db.prepare('SELECT batchId FROM WorkAttempt WHERE id=?').get('historical').batchId).toBe('batch');
+    for(const value of [null,'another'])probe('UPDATE WorkAttempt SET batchId=? WHERE id=?',[value,'historical'],'WORK_ATTEMPT_BATCH_IMMUTABLE');
+    probe(attemptInsert,['dangling','different',1,'RECORDED','missing',timestamp,timestamp],'SQLITE_CONSTRAINT_FOREIGNKEY','WorkAttempt_batchId_foreign_key');
+    probe('DELETE FROM Batch WHERE id = ?',['batch'],'SQLITE_CONSTRAINT_TRIGGER','Batch_WorkAttempt_restrict');probe('DELETE FROM WorkAttempt WHERE id=?',['historical'],'WORK_ATTEMPT_DELETE_REFUSED');
 });
-
-test.each(require('../../services/workItemKinds').NON_MEASUREMENT_CODES)(
-    'SQL keeps non-measurement %s review on its separate evidence workflow', analysis => {
-        db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('item','sample',analysis,null);
-        db.exec(source.guardsSql);
-        db.prepare('INSERT INTO ReviewDecision(id,workItemId,sampleId,decision) VALUES (?,?,?,?)').run('review','item','sample','ACCEPT');
-        expect(db.prepare('SELECT attemptId FROM ReviewDecision').get().attemptId).toBeNull();
-    });
+test.each(REPEAT_REASON_LIST)('canonical reason %s is accepted by both the shared contract and SQL',async reason=>{await guarded();expect(assertRepeatReason(reason)).toBe(reason);await insert('canonical-reason',{reason});});
+test('reason remains nullable for a second execution, while noncanonical values are refused',async()=>{
+    await guarded();await insert('first');await insert('second',{attemptNo:2});expect(db.prepare('SELECT reason FROM WorkAttempt WHERE id=?').get('second').reason).toBeNull();expect(assertRepeatReason(null)).toBeNull();
+    for(const reason of ['free text','',1]){expect(()=>assertRepeatReason(reason)).toThrow(expect.objectContaining({code:'WORK_ATTEMPT_REASON_INVALID',statusCode:409}));probe('INSERT INTO WorkAttempt (id,workItemId,attemptNo,status,reason,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?)',['invalid','another',1,'RECORDED',reason,timestamp,timestamp],'WORK_ATTEMPT_REASON_INVALID');}
+});
+test('SQL and runtime canonical lookup agree: only orphan historical imports can omit an attempt',async()=>{
+    await guarded({items:[itemRow('parent','OTHER')]});result('orphan',{provenance:'IMPORTED'});
+    await createWorkItemFixture(client,{data:{id:'child',sampleId:'sample',analysis:'P',status:'COMPLETED',duplicateOf:'parent'}});result('duplicate-child-import',{replicateNo:2,provenance:'IMPORTED'});
+    expect(canonicalWorkItemWhere('sample','P')).toEqual({sampleId:'sample',analysis:'P',duplicateOf:null});await createWorkItemFixture(client,{data:{id:'canonical',sampleId:'sample',analysis:'P',status:'COMPLETED'}});
+    const insertResult='INSERT INTO Result (id,sampleId,param,value,replicateNo,attemptId,isCurrent,provenance,updatedAt) VALUES (?,?,?,?,?,?,?,?,?)';
+    probe(insertResult,['nonexempt-import','sample','P','retained',3,null,1,'IMPORTED',timestamp],'RESULT_ATTEMPT_REQUIRED');await insert('valid-attempt',{workItemId:'canonical'});await insert('replacement',{workItemId:'canonical',attemptNo:2});result('linked-import',{replicateNo:3,attemptId:'valid-attempt',provenance:'IMPORTED'});
+    for(const attemptId of [null,'replacement'])probe('UPDATE Result SET attemptId=? WHERE id=?',[attemptId,'linked-import'],'RESULT_ATTEMPT_IMMUTABLE');db.prepare('UPDATE Result SET attemptId=? WHERE id=?').run('valid-attempt','linked-import');
+    for(const provenance of ['MEASURED','PREDICTED','DERIVED',null])probe(insertResult,['refused','other-sample','P','retained',1,null,1,provenance,timestamp],'RESULT_ATTEMPT_REQUIRED');
+});
+test('raw review inserts require a current attempt of the same work item and sample',async()=>{
+    await guarded();await insert('current');await insert('historical',{attemptNo:2});await insert('wrong-item',{workItemId:'other'});result('current-result',{attemptId:'current'});result('old-result',{attemptId:'historical',isCurrent:0});result('other-result',{param:'Q',attemptId:'wrong-item'});
+    const decision='INSERT INTO ReviewDecision (id,workItemId,sampleId,attemptId,decision,reviewerId) VALUES (?,?,?,?,?,?)';
+    for(const [attemptId,sampleId,code] of [[null,'sample','REVIEW_ATTEMPT_REQUIRED'],['historical','sample','REVIEW_ATTEMPT_INVALID'],['wrong-item','sample','REVIEW_ATTEMPT_INVALID'],['current','other-sample','REVIEW_ATTEMPT_INVALID'],['missing','sample','REVIEW_ATTEMPT_INVALID']]){probe(decision,['invalid','item',sampleId,attemptId,'ACCEPT','system:fixture'],code);expect(db.prepare('SELECT count(*) n FROM ReviewDecision').get().n).toBe(0);}
+    db.prepare(decision).run('accepted','item','sample','current','ACCEPT','system:fixture');probe('UPDATE ReviewDecision SET attemptId=? WHERE id=?',[null,'accepted'],'REVIEW_DECISION_IMMUTABLE');expect(db.prepare('SELECT attemptId FROM ReviewDecision').get().attemptId).toBe('current');
+});
+test('the raw review guard permits only an unexecuted analytical OMIT with no attempt',async()=>{
+    await guarded();const decision='INSERT INTO ReviewDecision (id,workItemId,sampleId,decision,reviewerId) VALUES (?,?,?,?,?)';db.prepare(decision).run('unexecuted-waiver','item','sample','OMIT','system:fixture');
+    probe(decision,['unexecuted-accept','item','sample','ACCEPT','system:fixture'],'REVIEW_ATTEMPT_REQUIRED');await insert('executed-without-current-result');probe(decision,['executed-waiver','item','sample','OMIT','system:fixture'],'REVIEW_ATTEMPT_REQUIRED');
+});
+test.each(require('../../services/workItemKinds').NON_MEASUREMENT_CODES)('SQL keeps non-measurement %s review on its separate evidence workflow',async analysis=>{
+    await guarded({items:[itemRow('item',analysis)]});db.prepare('INSERT INTO ReviewDecision (id,workItemId,sampleId,decision,reviewerId) VALUES (?,?,?,?,?)').run('review','item','sample','ACCEPT','system:fixture');expect(db.prepare('SELECT attemptId FROM ReviewDecision').get().attemptId).toBeNull();
+});

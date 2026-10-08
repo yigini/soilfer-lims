@@ -128,7 +128,7 @@ function installWorkAttemptContract({ dbPath, apply = false } = {}) {
     const target = path.resolve(dbPath), source = loadWorkAttemptMigrationSource();
     const reader = new Database(target, { readonly:true,fileMustExist:true });
     let before;
-    try { before = reader.transaction(() => classify(reader,source))(); } finally { reader.close(); }
+    try { before = reader.transaction(() => classify(reader,{guardsSql:source.guardsSql,sha256:source.sha256}))(); } finally { reader.close(); }
     if (!apply || before.classification === 'COMPLETE') return { ...before, mode:apply?'NO_OP':'DRY_RUN',totalChanges:0 };
     if (before.plan.status !== 'READY') throw fail('WORK_ATTEMPT_BACKFILL_REFUSED', 'Resolve every backfill blocker before apply.', { plan:before.plan });
     const db = new Database(target, { fileMustExist:true,timeout:5000 });
@@ -139,7 +139,7 @@ function installWorkAttemptContract({ dbPath, apply = false } = {}) {
         require('../services/exchangeDbFunctions').registerDbFunctions(db);
         db.pragma('foreign_keys=ON');
         return db.transaction(() => {
-            const current = classify(db,source);
+            const current = classify(db,{guardsSql:source.guardsSql,sha256:source.sha256});
             if (current.classification === 'COMPLETE') return { ...current,mode:'NO_OP',totalChanges:0 };
             if (current.plan.status !== 'READY') throw fail('WORK_ATTEMPT_BACKFILL_REFUSED', 'Resolve every backfill blocker before apply.', { plan:current.plan });
             if (current.classification === 'PRE_190') db.exec(source.schemaSql);
@@ -150,7 +150,7 @@ function installWorkAttemptContract({ dbPath, apply = false } = {}) {
                 matchedWorkItemSourceSha256:current.plan.matchedWorkItemSourceSha256, ...backfill };
             receipt.receiptSha256=fingerprint(receipt);
             db.prepare('INSERT INTO "_schema_migrations"(id,details) VALUES (?,?)').run(MARKER,JSON.stringify(receipt));
-            const after = classify(db,source);
+            const after = classify(db,{guardsSql:source.guardsSql,sha256:source.sha256});
             if (after.classification !== 'COMPLETE' || db.pragma('integrity_check',{simple:true}) !== 'ok' || db.pragma('foreign_key_check').length) {
                 throw fail('WORK_ATTEMPT_INTEGRITY_REFUSED', 'WorkAttempt installation failed integrity checks.');
             }

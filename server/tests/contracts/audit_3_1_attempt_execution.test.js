@@ -85,14 +85,8 @@ test.each(['measurement','spectral-prediction'])('ordered %s without work refuse
     await expect(validateResultEntries(client,f.sample,[options(f).measurement],actor)).rejects.toMatchObject({code:'RESULT_WORKITEM_REQUIRED',statusCode:409});
     expect(await all(f)).toEqual(before);
 });
-test('an orphan historical import stays exempt, while an import with canonical work gets an attempt',async()=>{
-    const orphan=await fixture(['AT190'],{work:false}),normal=await fixture();
-    const imported=await client.$transaction(tx=>writer.writeResult(tx,{...options(orphan),source:'legacy-import'}));
-    expect(imported).toMatchObject({provenance:'IMPORTED',attemptId:null,value:'6.42'});
-    const linked=await client.$transaction(tx=>writer.writeResult(tx,{...options(normal),source:'legacy-import'}));
-    expect(linked.attemptId).toEqual(expect.any(String));expect(linked.provenance).toBe('IMPORTED');
-    expect(JSON.parse((await client.workAttempt.findUnique({where:{id:linked.attemptId}})).evidenceData).source).toBe('legacy-import');
-});
+// #190 pin6058155230: the import cases run through the real authenticated HTTP
+// route in audit_1_5_result_writes.test.js, never this direct writer harness.
 test('separate fraction work produces one TEXTURE attempt with source ids and leaves fraction attempts untouched',async()=>{
     const f=await fixture(['SAND','SILT','CLAY','TEXTURE']);
     const fractions=[];

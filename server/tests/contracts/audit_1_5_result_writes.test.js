@@ -104,6 +104,82 @@ test('unbatched measurement gets an attempt; the orphan historical import remain
         value: '<0.5', numericValue: 0.5, censoring: 'BELOW_LOQ', rawInput: '<0,5' });
 });
 
+// #190 pin6058155230: runtime import exemptions use the authenticated route on
+// the actual COMPLETE schema; the historical factory remains out of this suite.
+test.each(['orphan', 'canonical', 'duplicate-child'])('#190 real import route preserves the %s contract and unrelated rows', async kind => {
+    expect(require('../../scripts/install_work_attempt_contract')
+        .assertWorkAttemptStartupReady(process.env.DATABASE_PATH).classification).toBe('COMPLETE');
+    let sample, canonical = null;
+    if (kind === 'canonical') {
+        const f = await fixture({ batch: null }); sample = f.sample; canonical = f.item;
+        for (const attemptNo of [4, 9]) {
+            const evidenceData = JSON.stringify({ retained: 'pre-existing execution', attemptNo });
+            await prisma.workAttempt.create({ data: { id: randomUUID(), workItemId: canonical.id, attemptNo,
+                status: 'RECORDED', evidenceData, evidenceHash: createHash('sha256').update(evidenceData).digest('hex') } });
+        }
+    } else {
+        const sampleId = randomUUID();
+        sample = await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId,
+            assignedLab: labId, status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE',
+            requiredAnalyses: JSON.stringify([code]) } });
+        if (kind === 'duplicate-child') {
+            const parentAnalysis = `IMPORT_PARENT_${randomUUID().replaceAll('-', '')}`;
+            await prisma.analysis.create({ data: { code: parentAnalysis, name: 'Other controlled fixture parameter',
+                units: 'g/kg', validation: '{"type":"numeric"}' } });
+            const parent = await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId,
+                analysis: parentAnalysis, assignedLab: labId, status: 'IN_PROGRESS' } });
+            await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId, analysis: code,
+                assignedLab: labId, status: 'IN_PROGRESS', duplicateOf: parent.id } });
+        }
+    }
+    const before = {
+        samples: await prisma.sample.findMany({ orderBy: { id: 'asc' } }),
+        items: await prisma.workItem.findMany({ orderBy: { id: 'asc' } }),
+        attempts: await prisma.workAttempt.findMany({ orderBy: { id: 'asc' } }),
+        results: await prisma.result.findMany({ orderBy: { id: 'asc' } }),
+        audits: await prisma.auditLog.findMany({ orderBy: { id: 'asc' } }), tables: snapshot()
+    };
+    const response = await importSave(sample.id);
+    expect(response).toMatchObject({ status: 200, body: { importedSamples: 0, importedResults: 1 } });
+    const rows = await prisma.result.findMany({ where: { sampleId: sample.id } });
+    expect(rows).toHaveLength(1);
+    const row = rows[0];
+    expect(row).toMatchObject({ provenance: 'IMPORTED', value: '6.42', rawInput: '6.42' });
+    const attempts = await prisma.workAttempt.findMany({ orderBy: { id: 'asc' } });
+    const newAttempts = attempts.filter(attempt => !before.attempts.some(old => old.id === attempt.id));
+    expect(attempts.filter(attempt => before.attempts.some(old => old.id === attempt.id))).toEqual(before.attempts);
+    if (canonical) {
+        expect(newAttempts).toHaveLength(1);
+        expect(newAttempts[0]).toMatchObject({ id: row.attemptId, workItemId: canonical.id, attemptNo: 10, status: 'RECORDED' });
+        const evidence = JSON.parse(newAttempts[0].evidenceData);
+        expect(evidence.source).toBe('legacy-import');
+        expect(evidence).toMatchObject({ rawValue: '6.42', resultId: row.id, sourceResultIds: [row.id] });
+        expect(newAttempts[0].evidenceHash).toBe(createHash('sha256').update(newAttempts[0].evidenceData).digest('hex'));
+    } else {
+        expect(row.attemptId).toBeNull(); expect(newAttempts).toEqual([]);
+    }
+    expect(await prisma.sample.findMany({ orderBy: { id: 'asc' } })).toEqual(before.samples);
+    const items = await prisma.workItem.findMany({ orderBy: { id: 'asc' } });
+    expect(items).toHaveLength(before.items.length);
+    expect(items.map(item => canonical && item.id === canonical.id
+        ? { ...item, result: canonical.result, updatedAt: canonical.updatedAt } : item)).toEqual(before.items);
+    if (canonical) expect(items.find(item => item.id === canonical.id).result).toBe('6.42');
+    const allResults = await prisma.result.findMany({ orderBy: { id: 'asc' } });
+    expect(allResults.filter(result => result.id !== row.id)).toEqual(before.results);
+    const audits = await prisma.auditLog.findMany({ orderBy: { id: 'asc' } });
+    expect(audits.filter(audit => before.audits.some(old => old.id === audit.id))).toEqual(before.audits);
+    const addedAudits = audits.filter(audit => !before.audits.some(old => old.id === audit.id));
+    expect(addedAudits).toHaveLength(2);
+    const resultAudit = addedAudits.find(audit => audit.action === 'RESULT_RECORDED');
+    expect(resultAudit).toMatchObject({ entity: 'RESULT', entityId: row.id, sampleId: sample.id,
+        labId, analysisCode: code, performedBy: actor.username });
+    expect(JSON.parse(resultAudit.details)).toMatchObject({ provenance: 'IMPORTED', attemptId: row.attemptId });
+    expect(addedAudits.find(audit => audit.action === 'IMPORT_LEGACY_DATA')).toMatchObject({ entity: 'LEGACY_IMPORT',
+        performedBy: actor.username, details: 'Imported 0 historical samples and 1 results with provenance IMPORTED' });
+    const stableTables = tables => tables.filter(table => !['WorkAttempt', 'Result', 'WorkItem', 'AuditLog'].includes(table.name));
+    expect(stableTables(snapshot())).toEqual(stableTables(before.tables));
+});
+
 test.each(['COMPLETED', 'SUBMITTED', 'ACCEPTED', 'WAIVED'])('import refuses sealed %s work with all-table zero changes', async itemStatus => {
     const f = await fixture({ itemStatus }), before = snapshot();
     expect(await importSave(f.sample.id)).toMatchObject({ status: 409, body: { code: 'RESULT_WORKITEM_SEALED' } });
