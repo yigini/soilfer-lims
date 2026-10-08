@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
+const { createStoredProfileRunFixture } = require('../helpers/storedProfileRunFixture');
 const policy = require('../../services/policyService');
 const { registry, valid, DEFAULT_RUN_PROFILES } = require('../../config/policyRegistry');
 const { getAuthToken } = require('../setup');
@@ -222,13 +223,13 @@ describe('Audit 1.0: persistent lab policies', () => {
         expect(await prisma.batch.findUnique({ where: { id: batch.id } })).toEqual(evaluated);
         expect(await prisma.batchQcResult.findMany({ where: { batchId: batch.id }, orderBy: { id: 'asc' } })).toEqual(typed);
     });
-    test('batch creation uses the lab tray layout and keeps analytical batch size separate', async () => {
+    test('stored profile run uses the lab tray layout and keeps analytical batch size separate', async () => {
         const profiles = { CUSTOM: { name: 'Small tray', capacity: 7, qcSlots: [{ position: 2, type: 'BLANK', label: 'Blank' }] } };
         await edit([{ key: 'qc.runProfiles', value: profiles }, { key: 'qc.maxBatchSize', value: 1 }]);
-        const response = await request(app).post('/api/qc/batches').set('Authorization', `Bearer ${technician}`)
-            .send({ analysis: analysisCode, profile: 'CUSTOM' });
-        expect(response.status).toBe(201);
-        expect(response.body).toMatchObject({ profile: 'CUSTOM', maxCapacity: 7 });
+        // Preexisting stored PROFILE_ONLY data, pin6062398663; policy capacity assertions unchanged.
+        const stored = await createStoredProfileRunFixture(prisma, { actor: jwt.decode(technician),
+            input: { analysis: analysisCode, profile: 'CUSTOM' } });
+        expect(stored).toMatchObject({ profile: 'CUSTOM', maxCapacity: 7 });
     });
     test('report generation freezes the lab policy version and content across later changes', async () => {
         const sampleId = id('POL-REPORT');

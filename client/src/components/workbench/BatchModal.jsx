@@ -12,6 +12,7 @@ export default function BatchModal({
     onClose,
     analysisCode = '',
     selectedWorkItemIds = [],
+    selectedWorkItems = [],
     onBatchUpdated,
     onOpenWorksheet = null
 }) {
@@ -21,7 +22,7 @@ export default function BatchModal({
     const canEditQc = hasPermission?.('CHANGE_STATUS') === true;
     const qcError = (error, fallback) => {
         const code = error.response?.data?.code, message = error.response?.data?.error || error.message || fallback;
-        return code ? t(`${code.startsWith('REFERENCE_') ? 'referenceMaterials' : 'qcRuns'}.errors.${code}`, message) : message;
+        return code ? t(`${code === 'QC_RUN_PROFILE_ONLY_STORED' || code === 'QC_WORK_ITEMS_REQUIRED' ? 'qcMembership' : code.startsWith('REFERENCE_') ? 'referenceMaterials' : 'qcRuns'}.errors.${code}`, message) : message;
     };
     const [activeTab, setActiveTab] = useState('create'); // 'create' | 'allocate' | 'qc'
     const [batches, setBatches] = useState([]);
@@ -33,10 +34,21 @@ export default function BatchModal({
     // Form state for Create
     const [createForm, setCreateForm] = useState({
         id: '',
-        profile: 'RACK_40',
-        instrument: 'Metrohm 914 pH/Conductometer',
+        instrument: '',
         notes: ''
     });
+    const [methods, setMethods] = useState([]);
+    const [methodId, setMethodId] = useState('');
+    const [methodsLoading, setMethodsLoading] = useState(false);
+    const [methodsError, setMethodsError] = useState(false);
+    const members = selectedWorkItemIds.map(id => selectedWorkItems.find(item => (item.workItemId || item.id) === id));
+    const membershipKnown = members.every(Boolean);
+    const recordedMethods = [...new Set(members.map(item => item?.methodologyId).filter(Boolean))];
+    const recordedMethod = recordedMethods.length === 1 ? recordedMethods[0] : null;
+    const needsMethod = !recordedMethod;
+    const offeredMethods = methods.filter(method => method.analysisCode === analysisCode);
+    const creationBlocked = !canEditQc || !selectedWorkItemIds.length || !membershipKnown || recordedMethods.length > 1 ||
+        needsMethod && (methodsLoading || methodsError || !offeredMethods.some(method => method.id === methodId));
 
     const currentBatch = batches.find(b => b.id === selectedBatchId) || batches[0] || null;
     const native = isNativeRun(currentBatch);
@@ -67,18 +79,31 @@ export default function BatchModal({
         }
     }, [isOpen, fetchBatches]);
 
+    useEffect(() => {
+        if (!isOpen) return;
+        let current = true;
+        setMethods([]); setMethodId(''); setMethodsError(false); setMethodsLoading(true);
+        axios.get('/api/config/methodologies').then(response => {
+            if (current) setMethods(Array.isArray(response.data) ? response.data : response.data.data || []);
+        }).catch(() => { if (current) setMethodsError(true); })
+            .finally(() => { if (current) setMethodsLoading(false); });
+        return () => { current = false; };
+    }, [isOpen, analysisCode]);
+
     if (!isOpen) return null;
 
     // Handle Create Batch
     const handleCreateBatch = async (e) => {
         e.preventDefault();
+        if (loading || creationBlocked) return;
         setError(null);
         setSuccessMsg(null);
         try {
             setLoading(true);
             const payload = {
                 analysis: analysisCode,
-                profile: createForm.profile,
+                workItemIds: selectedWorkItemIds,
+                analyses: [{ analysisCode, ...((needsMethod || members.some(item => !item.methodologyId)) && { methodologyId: recordedMethod || methodId }) }],
                 instrument: createForm.instrument,
                 notes: createForm.notes
             };
@@ -88,14 +113,15 @@ export default function BatchModal({
 
             const res = await axios.post('/api/qc/batches', payload);
             const created = res.data;
-            setSuccessMsg(`Batch run "${created.id}" created successfully (${createForm.profile})`);
-            setCreateForm({ id: '', profile: 'RACK_40', instrument: 'Metrohm 914 pH/Conductometer', notes: '' });
+            setSuccessMsg(t('qcMembership.created'));
+            setCreateForm({ id: '', instrument: '', notes: '' });
             await fetchBatches();
             setSelectedBatchId(created.id);
-            setActiveTab('allocate');
+            setActiveTab('qc');
             if (onBatchUpdated) onBatchUpdated();
+            onOpenWorksheet?.(created.id);
         } catch (err) {
-            setError(qcError(err, 'Failed to create batch'));
+            setError(qcError(err, t('qcMembership.createFailed')));
         } finally {
             setLoading(false);
         }
@@ -222,17 +248,26 @@ export default function BatchModal({
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-sf-text mb-1">
-                                        Run Profile Architecture *
+                                        {t('qcMembership.membership')}
                                     </label>
-                                    <select
-                                        value={createForm.profile}
-                                        onChange={(e) => setCreateForm({ ...createForm, profile: e.target.value })}
-                                        className="w-full text-xs p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sf-text focus:ring-1 focus:ring-emerald-500"
-                                    >
-                                        <option value="RACK_40">RACK_40 (40 Places: 36 Samples max, 4 QC slots)</option>
-                                        <option value="MICROPLATE_96">MICROPLATE_96 (96 Wells: 92 Samples max, 4 QC slots)</option>
-                                        <option value="CENTRIFUGE_24">CENTRIFUGE_24 (24 Tubes: 21 Samples max, 3 QC slots)</option>
-                                    </select>
+                                    <p data-testid="batch-membership-count">{selectedWorkItemIds.length} · {t('qcMembership.selectedWork')}</p>
+                                    {!selectedWorkItemIds.length && <p data-testid="batch-membership-required">{t('qcMembership.selectWork')}</p>}
+                                    {!membershipKnown && <p>{t('qcMembership.reloadWork')}</p>}
+                                    {recordedMethods.length > 1 && <p data-testid="batch-method-conflict">{t('qcMembership.methodConflict')}</p>}
+                                    {recordedMethod && <p data-testid="batch-recorded-method">{t('qcMembership.recordedMethod')} · {methods.find(method => method.id === recordedMethod)?.name || recordedMethod}</p>}
+                                    {needsMethod && recordedMethods.length === 0 && <>
+                                        <label htmlFor="batch-run-method">{t('qcMembership.method')}</label>
+                                        <select id="batch-run-method" data-testid="batch-method-select" value={methodId}
+                                            disabled={methodsLoading || methodsError || !offeredMethods.length}
+                                            onChange={event => setMethodId(event.target.value)}
+                                            className="w-full text-xs p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sf-text">
+                                            <option value="">{t('qcMembership.chooseMethod')}</option>
+                                            {offeredMethods.map(method => <option key={method.id} value={method.id}>{method.name}</option>)}
+                                        </select>
+                                        {methodsLoading && <p>{t('qcMembership.loadingMethods')}</p>}
+                                        {methodsError && <p data-testid="batch-method-unavailable">{t('qcMembership.methodsUnavailable')}</p>}
+                                        {!methodsLoading && !methodsError && !offeredMethods.length && <p data-testid="batch-method-none">{t('qcMembership.noMethods')}</p>}
+                                    </>}
                                     <p className="text-[11px] text-sf-muted mt-1">
                                         {t('qcWorksheet.serverSequence')}
                                     </p>
@@ -246,7 +281,7 @@ export default function BatchModal({
                                         type="text"
                                         value={createForm.instrument}
                                         onChange={(e) => setCreateForm({ ...createForm, instrument: e.target.value })}
-                                        placeholder="e.g. Metrohm 914 pH/Conductometer"
+                                        placeholder={t('qcMembership.instrumentPlaceholder')}
                                         className="w-full text-xs p-2.5 rounded-xl border border-sf-divider bg-sf-canvas text-sf-text focus:ring-1 focus:ring-emerald-500"
                                     />
                                 </div>
@@ -282,7 +317,7 @@ export default function BatchModal({
                             <div className="flex justify-end pt-2">
                                 <button
                                     type="submit"
-                                    disabled={loading}
+                                    disabled={loading || creationBlocked}
                                     data-testid="create-batch-btn"
                                     className="px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white flex items-center gap-1.5 shadow transition-all"
                                 >

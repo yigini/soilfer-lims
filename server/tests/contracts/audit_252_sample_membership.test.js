@@ -38,6 +38,17 @@ test('a stored PROFILE_ONLY run cannot rebuild into native under its existing ID
     expect((await prisma.batchAnalyte.findMany({ where: { batchId: stored.id } })).every(row=>row.provenance==='PROFILE_ONLY')).toBe(true);
 });
 
+test('refused new no-membership run cannot receive QC and leaves no run or evidence behind', async () => {
+    const id = `QC252-NO-MEMBERS-${randomUUID()}`, before = await evidence();
+    const created = await request(app).post('/api/qc/batches').set('Authorization', `Bearer ${token}`)
+        .send({ id, analysis: 'PH_H2O' });
+    expect(created.status).toBe(400); expect(created.body.code).toBe('QC_WORK_ITEMS_REQUIRED');
+    const evaluated = await request(app).post(`/api/qc/batches/${id}/evaluate`).set('Authorization', `Bearer ${token}`)
+        .send({ blanks: [{ value: 0 }], controls: [{ expected: 7, measured: 7 }], duplicates: [{ value1: 7, value2: 7 }] });
+    expect(evaluated.status).toBe(404); expect(evaluated.body.code).toBe('BATCH_NOT_FOUND');
+    expect(await evidence()).toEqual(before);
+});
+
 test('stored PROFILE_ONLY QC entry remains usable without relabeling the original run', async () => {
     // The original compatibility success values, held as preexisting data.
     const stored = await createStoredProfileRunFixture(prisma, { actor,
