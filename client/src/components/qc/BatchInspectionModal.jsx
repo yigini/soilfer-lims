@@ -9,9 +9,9 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 
-export function getDispositionInfo(disposition) {
+export function getDispositionInfo(disposition, t = key => key) {
     if (!disposition || !disposition.decision) return null;
-    const dec = String(disposition.decision).trim();
+    const dec = disposition.canonicalDecision === 'REPEAT_BRACKET' ? 'REPEAT_BRACKET' : String(disposition.decision).trim();
 
     switch (dec) {
         case 'PROCEED_WITH_WARNING':
@@ -26,17 +26,18 @@ export function getDispositionInfo(disposition) {
                 noteColor: 'text-amber-700 dark:text-amber-400',
                 note: 'Analytical release is authorized under recorded manager justification. Control measurement failure remains permanently recorded in audit history.'
             };
+        case 'REPEAT_BRACKET':
         case 'REANALYZE_BATCH':
             return {
                 type: 'REANALYSIS_REQUIRED',
-                title: 'RE-ANALYZE BATCH',
+                title: dec === 'REPEAT_BRACKET' ? t('qcGate.repeatBracket') : 'RE-ANALYZE BATCH',
                 badgeText: 'Re-analysis Required',
                 badgeStyle: 'bg-rose-200 dark:bg-rose-900 text-rose-800 dark:text-rose-200 border border-rose-300 dark:border-rose-700',
                 bannerStyle: 'bg-rose-50 dark:bg-rose-950/50 border-2 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-200',
                 titleColor: 'text-rose-700 dark:text-rose-400',
                 boxStyle: 'bg-rose-100/60 dark:bg-rose-900/40 border-rose-200 dark:border-rose-800',
                 noteColor: 'text-rose-700 dark:text-rose-400',
-                note: 'Batch results rejected by laboratory management. Associated sample work items are flagged for repeat preparation and re-analysis. Sample approval and report release remain blocked.'
+                note: dec === 'REPEAT_BRACKET' ? t('qcGate.repeatBracketHelp') : 'Batch results rejected by laboratory management. Associated sample work items are flagged for repeat preparation and re-analysis. Sample approval and report release remain blocked.'
             };
         case 'REJECT_REANALYSIS':
             return {
@@ -153,6 +154,8 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
     const [reason, setReason] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [dispositionError, setDispositionError] = useState(null);
+    const [bracketAnalysisCode, setBracketAnalysisCode] = useState('');
+    const [amendmentRequired, setAmendmentRequired] = useState([]);
     const [showHistory, setShowHistory] = useState(false);
 
     const isManager = user && ['LAB_MANAGER', 'SUPER_ADMIN'].includes(user.role);
@@ -213,11 +216,14 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
         try {
             const res = await axios.post(
                 `/api/qc/batches/${encodeURIComponent(batchId)}/disposition`,
-                { decision, reason: reason.trim() },
+                { decision, reason: reason.trim(), ...(decision === 'REPEAT_BRACKET' && { analysisCode: bracketAnalyte?.analysisCode,
+                    scope: { affectedPositionIds: bracketAnalyte?.repeatBracketScope.affectedPositionIds,
+                        affectedWorkItemIds: bracketAnalyte?.repeatBracketScope.affectedWorkItemIds } }) },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
             if (res.data.success) {
+                setAmendmentRequired(res.data.amendmentRequired || []);
                 await fetchBatch();
                 if (onDispositionSuccess) {
                     onDispositionSuccess(res.data.disposition);
@@ -233,7 +239,9 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
 
     const isFailed = batch && (batch.status === 'QC_FAIL' || batch.status === 'FAILED');
     const disposition = batch?.disposition;
-    const dispInfo = getDispositionInfo(disposition);
+    const dispInfo = getDispositionInfo(disposition, t);
+    const bracketAnalytes = (batch?.analytes || []).filter(row => row.repeatBracketScope);
+    const bracketAnalyte = bracketAnalytes.find(row => row.analysisCode === bracketAnalysisCode) || bracketAnalytes[0];
 
     // QC measurements from qcResults or qcItems
     const qcResults = batch?.qcResults || {};
@@ -304,6 +312,9 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                         </div>
                     ) : batch ? (
                         <>
+                            {amendmentRequired.length > 0 && <div className="p-4 rounded-xl bg-amber-50 text-amber-900 text-sm">
+                                {t('qcGate.amendmentRequired')} {amendmentRequired.map(row => row.sampleId).join(', ')}
+                            </div>}
                             {/* Prominent QC Status / Disposition Banner */}
                             {isFailed && !dispInfo && (
                                 <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/50 border-2 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-200 space-y-1">
@@ -651,6 +662,10 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                             Manager Decision
                                         </label>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            {bracketAnalyte && <label className="flex items-start gap-2.5 p-3 rounded-xl border border-sf-divider cursor-pointer">
+                                                <input type="radio" name="decision" value="REPEAT_BRACKET" checked={decision === 'REPEAT_BRACKET'} onChange={event => setDecision(event.target.value)} />
+                                                <span className="text-xs"><strong>{t('qcGate.repeatBracket')}</strong><br />{t('qcGate.repeatBracketHelp')}</span>
+                                            </label>}
                                             <label className={`flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition-all ${
                                                 decision === 'PROCEED_WITH_WARNING'
                                                     ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/30'
@@ -693,6 +708,13 @@ export default function BatchInspectionModal({ batchId, isOpen, onClose, onDispo
                                                 </div>
                                             </label>
                                         </div>
+                                        {decision === 'REPEAT_BRACKET' && bracketAnalyte && <div className="text-xs space-y-2">
+                                            <select value={bracketAnalyte.analysisCode} onChange={event => setBracketAnalysisCode(event.target.value)}
+                                                className="p-2 bg-sf-surface border border-sf-divider rounded-lg">
+                                                {bracketAnalytes.map(row => <option key={row.analysisCode} value={row.analysisCode}>{row.analysisCode}</option>)}
+                                            </select>
+                                            <p>{t('qcGate.affectedItems')}: {bracketAnalyte.repeatBracketScope.affectedWorkItemIds.length}</p>
+                                        </div>}
                                     </div>
 
                                     <div className="space-y-1.5">

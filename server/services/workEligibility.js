@@ -129,24 +129,22 @@ function canReview(submission, sample, user, options = {}) {
         return { allowed: false, canAccept: false, blockers: ['NOT_PENDING_REVIEW'], reason: 'Submission is not pending review' };
     }
 
-    // Inspect linked QC batches
-    const qcBatches = options.qcBatches || [];
-    const failedQc = qcBatches.find(b => b.status === 'FAILED');
-    const pendingQc = qcBatches.find(b => b.status === 'PENDING');
-
-    if (failedQc) {
-        canAccept = false;
-        blockers.push(`QC_FAILED: Batch ${failedQc.batchNumber || failedQc.id} failed quality control tolerance`);
-    }
-    if (pendingQc) {
-        canAccept = false;
-        blockers.push(`QC_PENDING: Batch ${pendingQc.batchNumber || pendingQc.id} quality control is pending evaluation`);
-    }
+    const qcGate = require('./qcGateService');
+    const gates = options.qcGates || (sample?.results || []).filter(result => result.isCurrent &&
+        !require('./resultEntryPolicy').isNonMeasurement({ analysis: result.param })).map(result =>
+        qcGate.gateFromEvidence(result, sample.workItems || [], options.qcBatches || [], {
+            mode: getReportingMode(sample, result, options) }));
+    const checks = (Array.isArray(gates) ? gates : Object.values(gates)).map(row =>
+        qcGate.decision(row.gate || row, { acknowledgement: options.qcAcknowledgement }));
+    const refused = checks.filter(row => !row.allowed);
+    if (refused.length) { canAccept = false; blockers.push(...refused.map(row => row.code)); }
 
     // Submission can be opened/inspected even if QC is blocked
     return {
         allowed: true, // can inspect
         canAccept,     // can manager accept
+        gate: checks.map(row => row.gate),
+        acknowledgementRequired: checks.some(row => row.acknowledgementRequired),
         blockers,
         reason: canAccept ? null : blockers[0]
     };
@@ -278,33 +276,12 @@ function canFinalApprove(sample, workItems = [], orderLines = [], user = null, o
         }
     }
 
-    // 7. QC Batch resolution
-    const qcBatches = (options.qcBatches || []).flatMap(batch => Array.isArray(batch.analytes)
-        ? [...new Set(workItems.filter(item => (item.batchId === batch.id || batch.workItems?.some(member => member.id === item.id)) &&
-            !['WAIVED', 'CANCELLED'].includes(item.status)).map(item => item.analysis))]
-            .map(code => require('./qcRunGateService').analyteGateView(batch, code)) : [batch]);
-    const failedQc = qcBatches.find(b => {
-        const isFailedStatus = b.status === 'QC_FAIL' || b.status === 'FAILED';
-        if (!isFailedStatus) return false;
-        let hasValidDisposition = false;
-        if (b.disposition) {
-            try {
-                const disp = typeof b.disposition === 'string' ? JSON.parse(b.disposition) : b.disposition;
-                if (disp && disp.decision === 'PROCEED_WITH_WARNING') {
-                    hasValidDisposition = true;
-                }
-            } catch (e) {}
-        }
-        return !hasValidDisposition;
-    });
-
-    const pendingQc = qcBatches.find(b => ['OPEN', 'RUNNING', 'PENDING'].includes(b.status));
-    if (failedQc) {
-        blockers.push(`QC_BATCH_FAILED: Linked QC batch ${failedQc.batchNumber || failedQc.id} failed quality control and lacks an authorized manager disposition override`);
-    }
-    if (pendingQc) {
-        blockers.push(`QC_BATCH_PENDING: Linked QC batch ${pendingQc.batchNumber || pendingQc.id} has not been evaluated`);
-    }
+    // 7. Use the same result identity, frozen mode and durable acknowledgement
+    // as publication. A bracket disposition does not fail unrelated results.
+    const qc = reportingQc(sample, { ...options, workItems });
+    const qcFailure = qc.blocker?.gate;
+    if (qcFailure) blockers.push(qcFailure.code ||
+        (['QC_FAIL', 'FAILED'].includes(qc.blocker.batch.status) ? 'QC_BATCH_FAILED' : 'QC_BATCH_PENDING'));
 
     // 8. Holds and historical evidence gaps
     if (sample.holdReason || options.hasActiveHold) {
@@ -318,7 +295,9 @@ function canFinalApprove(sample, workItems = [], orderLines = [], user = null, o
     return {
         allowed,
         blockers,
-        reason: allowed ? null : blockers[0]
+        reason: allowed ? null : blockers[0],
+        ...(qcFailure && { code: qcFailure.code, gate: qcFailure.gate,
+            acknowledgementRequired: qcFailure.acknowledgementRequired })
     };
 }
 
@@ -349,8 +328,9 @@ function canPublish(sample, report, user, options = {}) {
     const qc = reportingQc(sample, options);
     if (qc.blocker) {
         const { batch, gate } = qc.blocker;
-        return { allowed: false, code: batch.status === 'QC_FAIL' ? 'QC_BATCH_FAILED' : 'QC_BATCH_PENDING',
-            reason: `Cannot publish report: ${gate.error}` };
+        return { allowed: false, code: gate.code || (batch.status === 'QC_FAIL' ? 'QC_BATCH_FAILED' : 'QC_BATCH_PENDING'),
+            reason: gate.code || `Cannot publish report: ${gate.error}`, gate: gate.gate,
+            acknowledgementRequired: gate.acknowledgementRequired };
     }
 
     const validResults = (options.results || sample.results || []).filter(result =>

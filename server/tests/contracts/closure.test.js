@@ -3,6 +3,8 @@ const request = require('supertest');
 const app = require('../../app');
 const { generateToken } = require('../setup');
 const { usersDb, workItemsDb, samplesDb } = require('../../db');
+const prisma = require('../../prisma');
+const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
 
 describe('8.1 Section E: Approval & Closure Rules', () => {
     let mgrToken, techToken, technicianUsername;
@@ -16,6 +18,7 @@ describe('8.1 Section E: Approval & Closure Rules', () => {
         technicianUsername = tech.username;
         techToken = generateToken(tech);
         mgrToken = generateToken(mgr);
+        await setFixtureQcRequirement(prisma, mgrToken, 'LAB-CLO');
     });
 
     test('Setup: Create Sample and WorkItems', async () => {

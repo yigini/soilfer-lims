@@ -5,6 +5,7 @@ const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
 const { getAuthToken, ensureTestLab } = require('../setup');
+const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
 
 const id = prefix => `${prefix}-${crypto.randomUUID()}`;
 const labId = 'LAB-AUDIT-09';
@@ -14,6 +15,7 @@ describe('Audit 0.9: superseded public links', () => {
     beforeAll(async () => {
         await ensureTestLab(labId, 'GTM');
         token = await getAuthToken('LAB_MANAGER', labId);
+        await setFixtureQcRequirement(prisma, token, labId);
         username = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString()).username;
     });
     afterEach(() => jest.restoreAllMocks());

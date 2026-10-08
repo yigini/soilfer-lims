@@ -218,8 +218,6 @@ exports.reviewSubmission = async (req, res) => {
         }
         normalizedDecisions = validated;
 
-        const qcController = require('./qcController');
-
         // SECURITY: Trojan Horse Prevention
         // Verify that all decided items actually belong to this submission
         const validItemSet = new Set(workItemIds);
@@ -252,24 +250,8 @@ exports.reviewSubmission = async (req, res) => {
             return res.json({ success: true, results: [], errors: [] });
         }
 
-        const batchFailures = [];
-        for (const wiId of normalizedDecisions.filter(decision => decision.decision === 'ACCEPT' && currentMemberIds.has(decision.workItemId)).map(decision => decision.workItemId)) {
-            const batchInfo = await qcController.checkItemBatchStatus(wiId);
-            if (batchInfo.allowed === false) {
-                batchFailures.push({ workItemId: wiId, batchId: batchInfo.batchId });
-            }
-        }
-
-        for (const failure of batchFailures) {
-            const decision = normalizedDecisions.find(d => d.workItemId === failure.workItemId);
-            if (decision && decision.decision === 'ACCEPT') {
-                return res.status(409).json({
-                    error: `Cannot ACCEPT work item ${failure.workItemId} because it belongs to a FAILED QC Batch (${failure.batchId}). You must WAIVE or REJECT it.`,
-                    code: 'QC_FAIL_BLOCKER',
-                    batchId: failure.batchId
-                });
-            }
-        }
+        const acceptingIds = new Set(normalizedDecisions.filter(row => row.decision === 'ACCEPT' && currentMemberIds.has(row.workItemId)).map(row => row.workItemId));
+        await require('../services/qcGateService').requireAcceptance(dbItems.filter(item => acceptingIds.has(item.id) && item.status === 'SUBMITTED'), req.body.qcAcknowledgement, prisma);
 
         const now = new Date();
         const results = [];
@@ -370,7 +352,7 @@ exports.reviewSubmission = async (req, res) => {
                         await invalidateReturnedResults(tx, item, user, reason);
                     }
                     return rows;
-                }, id, { reason,
+                }, id, { reason, qcAcknowledgement: req.body.qcAcknowledgement,
                     action: verdict === 'REJECT_REANALYSIS' ? 'REANALYSIS_REQUESTED' : 'REVIEW_DECISION_MADE',
                     details: `${user.username} ${verdict.toLowerCase()}ed ${analysisName}` });
                 results.push({ workItemId, status: newStatus, decision: verdict });
@@ -386,7 +368,7 @@ exports.reviewSubmission = async (req, res) => {
 
     } catch (error) {
         console.error('[reviewSubmission] Error:', error);
-        res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review submission', ...(error.code && { code: error.code }) });
+        res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Failed to review submission', ...(error.code && { code: error.code }), ...(error.details || {}) });
     }
 };
 

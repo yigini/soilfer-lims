@@ -128,13 +128,14 @@ async function generateReport(req, res) {
             const qcBatches = batchIds.length ? await tx.batch.findMany({ where: { id: { in: batchIds } },
                 include: require('../services/qcRunViewService').QC_RUN_INCLUDE }) : [];
             const { qcModes, qcModeEvidence } = await resolveReportingModes(currentSample, qcBatches, { db: tx });
+            const { qcGates, qcAcknowledgements } = await require('../services/qcGateService').resolveForSample(currentSample, qcBatches, tx);
             const { canPublish } = require('../services/workEligibility');
             const { SPECTRAL_ACQUISITION_CODES } = require('../config/spectralAcquisition');
             const spectralItemIds = currentSample.workItems.filter(item => SPECTRAL_ACQUISITION_CODES.includes(item.analysis)).map(item => item.id);
             const spectralScans = spectralItemIds.length ? await tx.spectralData.findMany({ where: {
                 sampleId, workItemId: { in: spectralItemIds }, isCurrent: true, status: 'APPROVED'
             } }) : [];
-            const publishCheck = canPublish(currentSample, null, req.user, { qcBatches, qcModes, spectralScans });
+            const publishCheck = canPublish(currentSample, null, req.user, { qcBatches, qcModes, qcGates, qcAcknowledgements, spectralScans });
             if (!publishCheck.allowed) {
                 const statusCode = publishCheck.code === 'PERMISSION_DENIED' ? 403 : 409;
                 throw Object.assign(new Error(publishCheck.reason), { statusCode, publishCheck, qcModeEvidence });
@@ -147,7 +148,7 @@ async function generateReport(req, res) {
             const identity = await allocateReportIdentity(tx, { sampleId, lab, publishedAt,
                 resolveFormat: () => policyService.get(lab.id, 'report.numberFormat', { db: tx }) });
             const policySnapshot = await policyService.snapshot(lab.id, { db: tx });
-            const { content, searchKeys } = await assembleReport(sampleId, req.user, { db: tx, qcBatches, qcModes, qcModeEvidence });
+            const { content, searchKeys } = await assembleReport(sampleId, req.user, { db: tx, qcBatches, qcModes, qcModeEvidence, qcGates, qcAcknowledgements });
             content.policy = { version: policySnapshot.version, presetCode: policySnapshot.presetCode,
                 reportNumberFormat: policySnapshot.values['report.numberFormat'], qcModes, qcModeEvidence };
             content.reportNumber = displayNumber(identity.reportNumberBase, identity.revision);
@@ -207,8 +208,8 @@ async function generateReport(req, res) {
             return res.status(409).json({ error: 'The report number was already issued.', code: 'REPORT_NUMBER_CONFLICT' });
         }
         if (err.statusCode) {
-            const { code, workItemIds, params } = err.publishCheck || {};
-            return res.status(err.statusCode).json({ error: err.message, code: code || err.code, workItemIds, params,
+            const { code, workItemIds, params, gate, acknowledgementRequired } = err.publishCheck || {};
+            return res.status(err.statusCode).json({ error: err.message, code: code || err.code, workItemIds, params, gate, acknowledgementRequired,
                 ...(err.qcModeEvidence && { qcModeEvidence: err.qcModeEvidence }) });
         }
         console.error('[Report] Generate error:', err);

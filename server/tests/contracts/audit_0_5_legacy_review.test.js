@@ -4,25 +4,34 @@ const crypto = require('crypto');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
-const { getAuthToken } = require('../setup');
+const { getAuthToken, ensureTestLab } = require('../setup');
+const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
+const { normalizeLegacyQcFixture } = require('../helpers/normalizedQcFixture');
 const labId = 'LAB-AUDIT-05';
 const id = prefix => `${prefix}-${crypto.randomUUID()}`;
 
 describe('Audit 0.5: legacy review delegates to the guarded authority', () => {
     let manager, technician;
     beforeAll(async () => {
+        await ensureTestLab(labId, 'TEST');
         manager = await getAuthToken('LAB_MANAGER', labId);
         technician = await getAuthToken('LAB_TECHNICIAN', labId);
+        await setFixtureQcRequirement(prisma, manager, labId);
     });
     async function fixture({ status = 'SUBMITTED', evidence = true, batchStatus, assignedLab = labId } = {}) {
         const sampleId = id('SMP-05');
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab, status: 'PROCESSING',
             dryingStatus: 'DONE', preparationStatus: 'DONE' } });
-        const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-05'), analysis: 'PH_H2O', status: batchStatus, labId: assignedLab, createdBy: 'test' } }) : null;
+        const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-05'), analysis: 'PH_H2O', status: batchStatus, labId: assignedLab, createdBy: 'test',
+            qcResults: batchStatus === 'QC_FAIL' ? JSON.stringify({ blanks: [{ value: 2, maxAllowed: 1, status: 'FAIL' }], duplicates: [], controls: [] }) : null } }) : null;
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-05'), sampleId, analysis: 'PH_H2O', assignedLab, status,
             result: evidence ? '6.2' : null, batchId: batch?.id } });
         const result = evidence ? await createResultFixture(prisma, { data: { id: id('R-05'), sampleId, param: 'PH_H2O', value: '6.2', numericValue: 6.2,
             isCurrent: true, isValid: true, flags: JSON.stringify(['METHOD_NOTE']), batchId: batch?.id } }) : null;
+        if (batch) {
+            await setFixtureQcRequirement(prisma, manager, labId, 'REQUIRED');
+            await normalizeLegacyQcFixture(prisma, batch.id);
+        } else if (assignedLab === labId) await setFixtureQcRequirement(prisma, manager, labId);
         return { sampleId, item, result };
     }
     const review = (f, body, token = manager) => request(app).post(`/api/reviews/${f.item.id}`).set('Authorization', `Bearer ${token}`).send(body);
@@ -47,7 +56,7 @@ describe('Audit 0.5: legacy review delegates to the guarded authority', () => {
     test.each(['QC_FAIL', 'RUNNING'])('legacy ACCEPT enforces the %s batch verdict', async batchStatus => {
         const f = await fixture({ batchStatus }), before = await state(f);
         const response = await review(f, { decision: 'ACCEPT' });
-        expect(response.status).toBe(409); expect(response.body.code).toBe('QC_FAIL_BLOCKER');
+        expect(response.status).toBe(409); expect(response.body.code).toBe(batchStatus === 'QC_FAIL' ? 'QC_GATE_FAILED' : 'QC_GATE_NOT_EVALUATED');
         expect(await state(f)).toEqual(before);
     });
     test('legacy ACCEPT requires actual evidence', async () => {

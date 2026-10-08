@@ -2219,8 +2219,10 @@
     "see": "see",
     "replaces": "Replaces",
     "preparationRecords": "Preparation records",
-    "qcNotRequired": "QC not required (mode OFF)",
-    "qcEvidenceIncomplete": "Historical QC acceptance has incomplete recorded evidence"
+    "qcNotRequired": "QC not required",
+    "qcEvidenceIncomplete": "Historical QC acceptance has incomplete recorded evidence",
+    "qcAcknowledgedBy": "Acknowledged by",
+    "qcCalibrationBracketRepeatInfo": "A calibration bracket is being repeated; this result is outside the affected scope"
   },
   "qaSection": {
     "kicker": "Quality & Regulatory Compliance",
@@ -2510,7 +2512,9 @@
       "qc_curveMinR": "Minimum curve correlation",
       "qc_repeatabilityLimit": "Repeatability limit",
       "qc_blankCorrection": "Blank correction",
-      "qc_failAction": "Action on QC failure"
+      "qc_failAction": "Action on QC failure",
+      "qc_requireBatchQc": "Batch QC requirement",
+      "qc_calibrationFailAction": "Calibration failure action"
     },
     "title": "Policies",
     "yes": "Yes",
@@ -2608,7 +2612,10 @@
       "NONE": "None",
       "SUBTRACT_MEAN_BLANK": "Blank correction",
       "FAIL_BATCH": "Fail batch",
-      "WARN": "Warn"
+      "WARN": "Warn",
+      "AUTO": "Automatic",
+      "REQUIRED": "Required",
+      "NOT_REQUIRED": "Not required"
     },
     "units": {
       "samples": "samples",
@@ -2632,6 +2639,10 @@
       "POLICY_STORED_VALUE_INVALID": "A stored policy value is invalid.",
       "POLICY_SCOPE_CONFLICT": "Several current overrides exist for this setting and scope.",
       "LAB_SETTINGS_INVALID": "Stored laboratory settings are invalid. The change was not saved."
+    },
+    "help": {
+      "qc_requireBatchQc": "AUTO requires batch QC for measurement methods with enabled resolved QC criteria. A method override can require or waive batch membership and evaluation.",
+      "qc_calibrationFailAction": "Choose the action for failed initial or continuing calibration verification and calibration blanks."
     }
   },
   "referenceMaterials": {
@@ -2781,7 +2792,8 @@
     },
     "actions": {
       "FAIL_BATCH": "Fail batch",
-      "WARN": "Warn"
+      "WARN": "Warn",
+      "REPEAT_BRACKET": "Repeat calibration bracket"
     },
     "errors": {
       "QC_RULE_VERSION_CONFLICT": "QC rule changed. Refresh before saving.",
@@ -2883,5 +2895,20 @@
     "chooseDuplicateParent": "Select the original sample position",
     "analysis": "Analysis",
     "closeAnalyte": "Close this analyte"
+  },
+  "qcGate": {
+    "acknowledgementReason": "QC acknowledgement reason (required)",
+    "acknowledgementHelp": "Record why you accept the QC warning or deviation. Your name and reason will appear in the report evidence.",
+    "repeatBracket": "Repeat calibration bracket",
+    "repeatBracketHelp": "Repeat only the work covered by the failed continuing calibration checks.",
+    "affectedItems": "Affected work items",
+    "amendmentRequired": "Sealed results require amendments:",
+    "errors": {
+      "QC_ACKNOWLEDGEMENT_REQUIRED": "Enter a QC acknowledgement reason before acceptance.",
+      "QC_GATE_FAILED": "Failed batch QC requires a manager disposition.",
+      "QC_GATE_NOT_EVALUATED": "Required batch QC has not been evaluated.",
+      "QC_GATE_NO_BATCH": "This method requires a linked QC batch.",
+      "QC_GATE_REPEAT_ORDERED": "Repeat analysis is required before acceptance or publication."
+    }
   }
 }

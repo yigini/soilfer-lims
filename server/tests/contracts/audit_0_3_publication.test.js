@@ -12,6 +12,7 @@ const { assembleReport } = require('../../services/reportAssembly');
 const { governsResult, isReviewedReportResult } = require('../../services/reportResultGovernance');
 const { isInvalidOnlyByQcFailure } = require('../../services/qcService');
 const policyService = require('../../services/policyService');
+const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
 const { SPECTRAL_ACQUISITION_CODES } = require('../../config/spectralAcquisition');
 const labId = 'LAB-AUDIT-03';
 const id = prefix => `${prefix}-${crypto.randomUUID()}`;
@@ -31,7 +32,8 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     const call = (path, body) => request(app).post(path).set('Authorization', `Bearer ${token}`).send(body);
     async function fixture({ status = 'APPROVED', itemStatus = 'ACCEPTED', param = 'PH_H2O', batchStatus, flags = [], valid = true, linkItemBatch = true } = {}) {
         const sampleId = id('SMP-03'), workItemId = id('WI-03'), resultId = id('RES-03');
-        const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-03'), analysis: param, status: batchStatus, labId, createdBy: 'review-test' } }) : null;
+        const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-03'), analysis: param, status: batchStatus, labId, createdBy: 'review-test',
+            qcResults: batchStatus === 'QC_FAIL' ? JSON.stringify({ blanks: [{ value: 2, maxAllowed: 1, status: 'FAIL' }], duplicates: [], controls: [] }) : null } }) : null;
         const sampleData = { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId, status,
             receptionDate: new Date(), dryingStatus: 'DONE', preparationStatus: 'DONE' };
         const itemData = { id: workItemId, sampleId, analysis: param, status: itemStatus, result: '7.2', assignedLab: labId, batchId: linkItemBatch ? batch?.id : null };
@@ -50,6 +52,7 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         }
         const result = await createResultFixture(prisma, { data: { id: resultId, sampleId, param, value: '7.2', numericValue: 7.2, isCurrent: true,
             isValid: valid, flags: JSON.stringify(flags), batchId: batch?.id } });
+        await setFixtureQcRequirement(prisma, token, labId, batch ? 'REQUIRED' : 'NOT_REQUIRED');
         if (batch) await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, batch.id);
         return { sampleId, item, result, batch };
     }
@@ -148,22 +151,22 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
     test('RUNNING QC blocks with a stable 409', async () => {
         const f = await fixture({ batchStatus: 'RUNNING' });
         const res = await generate(f);
-        expect(res.status).toBe(409); expect(res.body.code).toBe('QC_BATCH_PENDING');
+        expect(res.status).toBe(409); expect(res.body.code).toBe('QC_GATE_NOT_EVALUATED');
     });
     test('QC attached only to a result still blocks', async () => {
         const f = await fixture({ batchStatus: 'RUNNING', linkItemBatch: false });
-        expect((await generate(f)).body.code).toBe('QC_BATCH_PENDING');
+        expect((await generate(f)).body.code).toBe('QC_GATE_NOT_EVALUATED');
     });
     test('a missing linked batch fails closed', () => {
         const result = { id: 'r', sampleId: 's', param: 'PH_H2O', isCurrent: true, isValid: true, batchId: 'missing' };
-        expect(canPublish({ status: 'APPROVED', workItems: [{ id: 'w', sampleId: 's', analysis: 'PH_H2O', status: 'ACCEPTED' }], results: [result] }, null, manager).code).toBe('QC_BATCH_PENDING');
+        expect(canPublish({ status: 'APPROVED', workItems: [{ id: 'w', sampleId: 's', analysis: 'PH_H2O', status: 'ACCEPTED' }], results: [result] }, null, manager).code).toBe('QC_GATE_NOT_EVALUATED');
     });
     test('unresolved policy mode fails closed', async () => {
         mockQcMode('UNKNOWN');
         const res = await generate(await fixture());
         expect(res.status).toBe(409); expect(res.body.code).toBe('QC_POLICY_UNRESOLVED');
     });
-    test('legacy accepted no-batch work can publish', async () => expect((await generate(await fixture())).status).toBe(200));
+    test('legacy accepted no-batch work with an explicit lab waiver can publish', async () => expect((await generate(await fixture())).status).toBe(200));
     test('unfinished drying and preparation gates do not count as analytical publication work', async () => {
         const f = await fixture();
         for (const analysis of ['DRYING', 'PREPARATION']) await createWorkItemFixture(prisma, { data: {
@@ -224,20 +227,36 @@ describe('Audit 0.3: reviewed results and policy-aware publication', () => {
         expect((await prisma.workItem.findUnique({ where: { id: other.id } })).status).toBe('ACCEPTED');
     });
     test.each(modes)('QC_FAIL in %s retains storage and applies the policy at read time', async mode => {
-        const f = await fixture({ batchStatus: 'QC_FAIL', valid: false, flags: ['QC_BATCH_FAILED'] });
+        const f = await fixture({ batchStatus: 'QC_FAIL', valid: false, flags: ['QC_BATCH_FAILED'],
+            ...(mode === 'REQUIRED_WARN' && { status: 'PROCESSING', itemStatus: 'SUBMITTED' }) });
         const policy = mockQcMode(mode);
+        if (mode === 'REQUIRED_WARN') {
+            const review = await call(`/api/work/${f.item.id}/review`, { status: 'ACCEPTED', qcAcknowledgement: { reason: 'Retained QC warning checked' } });
+            expect(review.status).toBe(200);
+            await require('../../services/sampleStateService').transitionSample(f.sampleId, 'APPROVED', jwt.decode(token), 'Reviewed warning fixture');
+        }
         const before = await reviewedState(f);
         const res = await generate(f);
         expect(policy).toHaveBeenCalledWith(labId, 'qc.mode', { analysisCode: 'PH_H2O', methodologyId: null,
             db: expect.objectContaining({ lab: expect.anything() }) });
-        if (mode === 'REQUIRED_BLOCKING') { expect(res.status).toBe(409); expect(res.body.code).toBe('QC_BATCH_FAILED'); }
+        if (mode === 'REQUIRED_BLOCKING') { expect(res.status).toBe(409); expect(res.body.code).toBe('QC_GATE_FAILED'); }
         else {
             expect(res.status).toBe(200);
             const report = await prisma.report.findUnique({ where: { id: res.body.id } });
             const content = JSON.parse(report.content);
             expect(content.resultGroups.flatMap(group => group.items)).toHaveLength(1);
-            expect(content.qcWarnings).toEqual([{ batchId: f.batch.id, analysisCode: 'PH_H2O', qcStatus: 'QC_FAIL', dispositionDecision: null }]);
-            expect(content.qcWarningStatement).toMatch(/QC warning/);
+            if (mode === 'OFF') {
+                expect(content.qcWarnings).toEqual([]);
+                expect(content.qcStatement).toContain(require('../../locales/en.json').resultReports.qcNotRequired);
+            } else {
+                expect(content.qcWarnings).toEqual([expect.objectContaining({ resultId: f.result.id, batchId: f.batch.id,
+                    analysisCode: 'PH_H2O', qcStatus: 'FAIL', dispositionDecision: null, dispositionReason: null })]);
+                expect(content.qcWarningStatement).toMatch(/QC warning/);
+                if (mode === 'REQUIRED_WARN') {
+                    expect(content.qcWarnings[0].acknowledgement).toMatchObject({ actor: jwt.decode(token).username, reason: 'Retained QC warning checked' });
+                    expect(content.qcStatement).toContain('Retained QC warning checked');
+                }
+            }
             await prisma.batch.update({ where: { id: f.batch.id }, data: { status: 'QC_PASS' } });
             expect((await prisma.report.findUnique({ where: { id: res.body.id } })).content).toBe(report.content);
         }

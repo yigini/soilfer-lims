@@ -6,6 +6,8 @@ const { currentAnalyteEvidence } = require('./qcRunViewService');
 function evaluateNativeEvidence(batch, analyte) {
     const criteria = JSON.parse(analyte.criteriaSnapshot), evidence = currentAnalyteEvidence(batch, analyte.analysisCode);
     const values = Object.fromEntries(Object.entries(criteria.qcRule.resolved).map(([key, row]) => [key, row.value]));
+    const calibrationActions = criteria.policySnapshot.values['qc.calibrationFailAction'];
+    const calibrationFailActionSource = calibrationActions ? 'SNAPSHOT' : 'LEGACY_SNAPSHOT_FALLBACK';
     const method = criteria.methodContext, format = criteria.numberFormat;
     const at = positionId => evidence.measurements.find(row => row.positionId === positionId && row.replicateNo === 1);
     const binding = position => (position.references || []).find(row => row.analysisCode === analyte.analysisCode && !row.supersededById);
@@ -55,10 +57,13 @@ function evaluateNativeEvidence(batch, analyte) {
                 referenceUse: position.kind });
             controls.push(evaluated);
         }
+        const calibration = ['ICV', 'CCV', 'CCB'].includes(position.kind);
         Object.assign(evaluated, { positionId: position.id, position: position.position, kind: position.kind,
-            qcRule: criteria.qcRule, failAction: values.failAction[position.kind] || values.failAction[position.kind === 'CCB' ? 'BLANK' : 'LRM'] });
+            qcRule: criteria.qcRule, failAction: calibration && calibrationActions ? calibrationActions[position.kind]
+                : values.failAction[position.kind] || values.failAction[position.kind === 'CCB' ? 'BLANK' : 'LRM'] });
         if (['FAIL', 'INVALID'].includes(evaluated.status) && evaluated.failAction === 'WARN') {
             warnings.push({ positionId: position.id, kind: position.kind, status: evaluated.status, criterion: evaluated.criterion });
+            if (calibration && calibrationActions) { evaluated.observedStatus = evaluated.status; evaluated.status = 'WARN'; }
         }
     }
     const checks = [...blanks, ...duplicates, ...controls], failed = checks.filter(row => ['FAIL', 'INVALID'].includes(row.status) && row.failAction !== 'WARN').length;
@@ -69,7 +74,9 @@ function evaluateNativeEvidence(batch, analyte) {
         result: verdict, overallStatus: verdict === 'FAIL' ? 'QC_FAIL' : verdict === 'INCOMPLETE' ? 'OPEN' : 'QC_PASS',
         summary: { totalQcSamples: checks.length, passed: checks.filter(row => row.status === 'PASS').length, failed, warnings,
             missingPositions, unboundPositions, mode: criteria.qcMode, notRequired: verdict === 'NOT_REQUIRED' } };
-    return { verdict, status, evaluation, missingPositions, unboundPositions,
+    const calibrationBrackets = criteria.calibrationVerification && criteria.qcMode !== 'OFF'
+        ? require('./qcCalibrationBracketService').calibrationBrackets(batch, analyte.analysisCode, evidence.positions, checks) : [];
+    return { verdict, status, evaluation, missingPositions, unboundPositions, calibrationBrackets, calibrationFailActionSource,
         positionIds: evidence.positions.map(row => row.id), measurementIds: evidence.measurements.map(row => row.id),
         criteriaSnapshot: analyte.criteriaSnapshot, mode: criteria.qcMode };
 }

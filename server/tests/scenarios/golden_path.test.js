@@ -6,6 +6,7 @@ const app = require('../../app');
 const prisma = require('../../prisma');
 const { generateToken } = require('../setup');
 const { usersDb, workItemsDb, samplesDb, submissionsDb } = require('../../db');
+const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
 
 async function completeAnalyticalWork(workItemId, token, value) {
     const res = await request(app).post('/api/workbench/batch-save')
@@ -59,6 +60,7 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         const tech = usersDb.create({ username: techUsername, role: 'LAB_TECHNICIAN', labId: 'LAB-GOLD' });
 
         mgrToken = generateToken(mgr);
+        await setFixtureQcRequirement(prisma, mgrToken, 'LAB-GOLD');
         techToken = generateToken(tech);
 
         // SILVER LAB Setup for Scenario B
@@ -68,6 +70,7 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         const techSilver = usersDb.create({ username: techSilverUsername, role: 'LAB_TECHNICIAN', labId: 'LAB-SILVER' });
 
         mgrSilverToken = generateToken(mgrSilver);
+        await setFixtureQcRequirement(prisma, mgrSilverToken, 'LAB-SILVER');
         techSilverToken = generateToken(techSilver);
 
         // RED LAB Setup for Scenario C
@@ -77,6 +80,7 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         const techRed = usersDb.create({ username: techRedUsername, role: 'LAB_TECHNICIAN', labId: 'LAB-RED' });
 
         mgrRedToken = generateToken(mgrRed);
+        await setFixtureQcRequirement(prisma, mgrRedToken, 'LAB-RED');
         techRedToken = generateToken(techRed);
 
         // BLUE LAB Setup for Scenario D
@@ -86,6 +90,7 @@ describe('8.2 Integration: Golden Path Scenarios', () => {
         const techBlue = usersDb.create({ username: techBlueUsername, role: 'LAB_TECHNICIAN', labId: 'LAB-BLUE' });
 
         mgrBlueToken = generateToken(mgrBlue);
+        await setFixtureQcRequirement(prisma, mgrBlueToken, 'LAB-BLUE');
         techBlueToken = generateToken(techBlue);
     });
 

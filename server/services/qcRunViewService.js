@@ -26,7 +26,8 @@ function activeReopenEvent(batch, analysisCode) {
 }
 function currentDisposition(batch, evaluation, analysisCode) {
     const details = parsed(evaluation?.details, {});
-    const latest = (batch.dispositions || []).filter(row => !row.analysisCode || row.analysisCode === analysisCode).sort((a, b) => time(b.decidedAt) - time(a.decidedAt))[0];
+    const latest = (batch.dispositions || []).filter(row => !row.analysisCode || row.analysisCode === analysisCode)
+        .sort((a, b) => time(b.decidedAt) - time(a.decidedAt) || (b.id > a.id ? 1 : b.id < a.id ? -1 : 0))[0];
     if (!latest) return details.legacy ? parsed(details.disposition) : null;
     const reopen = (batch.events || []).filter(row => {
         const payload = parsed(row.payload, {});
@@ -34,7 +35,7 @@ function currentDisposition(batch, evaluation, analysisCode) {
             : !payload.analysisCode || payload.analysisCode === analysisCode);
     }).sort((a, b) => time(b.at) - time(a.at))[0];
     if (reopen && time(reopen.at) >= time(latest.decidedAt)) return null;
-    return { decision: decisions[latest.decision] || latest.decision, canonicalDecision: latest.decision,
+    return { id: latest.id, scope: parsed(latest.scope), decision: decisions[latest.decision] || latest.decision, canonicalDecision: latest.decision,
         reason: latest.reason, by: latest.decidedBy, at: latest.decidedAt, analysisCode: latest.analysisCode };
 }
 function currentAnalyteEvidence(batch, analysisCode = batch.analysis) {

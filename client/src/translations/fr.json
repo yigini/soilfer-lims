@@ -2219,8 +2219,10 @@
     "see": "voir",
     "replaces": "Remplace",
     "preparationRecords": "Enregistrements de préparation",
-    "qcNotRequired": "CQ non requis (mode OFF)",
-    "qcEvidenceIncomplete": "L’acceptation historique du CQ dispose de preuves enregistrées incomplètes"
+    "qcNotRequired": "CQ non requis",
+    "qcEvidenceIncomplete": "L’acceptation historique du CQ dispose de preuves enregistrées incomplètes",
+    "qcAcknowledgedBy": "Accepté par",
+    "qcCalibrationBracketRepeatInfo": "Un intervalle d’étalonnage est répété ; ce résultat est hors du périmètre concerné"
   },
   "qaSection": {
     "kicker": "Assurance qualité et conformité réglementaire",
@@ -2510,7 +2512,9 @@
       "qc_curveMinR": "Corrélation minimale de la courbe",
       "qc_repeatabilityLimit": "Limite de répétabilité",
       "qc_blankCorrection": "Correction du blanc",
-      "qc_failAction": "Action en cas de défaut de QC"
+      "qc_failAction": "Action en cas de défaut de QC",
+      "qc_requireBatchQc": "Exigence de CQ du lot",
+      "qc_calibrationFailAction": "Action après échec de l’étalonnage"
     },
     "title": "Politiques",
     "yes": "Oui",
@@ -2608,7 +2612,10 @@
       "NONE": "Aucun",
       "SUBTRACT_MEAN_BLANK": "Correction du blanc",
       "FAIL_BATCH": "Rejeter le lot",
-      "WARN": "Avertir"
+      "WARN": "Avertir",
+      "AUTO": "Automatique",
+      "REQUIRED": "Obligatoire",
+      "NOT_REQUIRED": "Non obligatoire"
     },
     "units": {
       "samples": "échantillons",
@@ -2632,6 +2639,10 @@
       "POLICY_STORED_VALUE_INVALID": "Une valeur de politique enregistrée est invalide.",
       "POLICY_SCOPE_CONFLICT": "Plusieurs dérogations actuelles existent pour ce paramètre et cette portée.",
       "LAB_SETTINGS_INVALID": "Les paramètres enregistrés du laboratoire sont invalides. Le changement n’a pas été sauvegardé."
+    },
+    "help": {
+      "qc_requireBatchQc": "AUTO exige le CQ du lot pour les méthodes de mesure dont les critères de CQ résolus sont actifs. Une dérogation de méthode peut exiger ou dispenser l’appartenance au lot et son évaluation.",
+      "qc_calibrationFailAction": "Choisir l’action après un échec de vérification initiale ou continue de l’étalonnage ou d’un blanc d’étalonnage."
     }
   },
   "referenceMaterials": {
@@ -2781,7 +2792,8 @@
     },
     "actions": {
       "FAIL_BATCH": "Rejeter le lot",
-      "WARN": "Avertir"
+      "WARN": "Avertir",
+      "REPEAT_BRACKET": "Répéter l’intervalle d’étalonnage"
     },
     "errors": {
       "QC_RULE_VERSION_CONFLICT": "La règle a changé. Actualisez avant de sauvegarder.",
@@ -2883,5 +2895,20 @@
     "chooseDuplicateParent": "Sélectionnez la position de l’échantillon d’origine",
     "analysis": "Analyse",
     "closeAnalyte": "Clôturer cet analyte"
+  },
+  "qcGate": {
+    "acknowledgementReason": "Motif d’acceptation du contrôle qualité (obligatoire)",
+    "acknowledgementHelp": "Indiquez pourquoi vous acceptez l’avertissement ou l’écart de CQ. Votre nom et le motif figureront dans les preuves du rapport.",
+    "repeatBracket": "Répéter l’intervalle d’étalonnage",
+    "repeatBracketHelp": "Répéter uniquement le travail couvert par les contrôles d’étalonnage continu en échec.",
+    "affectedItems": "Tâches concernées",
+    "amendmentRequired": "Les résultats scellés nécessitent des amendements :",
+    "errors": {
+      "QC_ACKNOWLEDGEMENT_REQUIRED": "Saisissez un motif d’acceptation du CQ avant d’accepter.",
+      "QC_GATE_FAILED": "Le CQ du lot a échoué et nécessite une décision du responsable.",
+      "QC_GATE_NOT_EVALUATED": "Le CQ obligatoire du lot n’a pas été évalué.",
+      "QC_GATE_NO_BATCH": "Cette méthode nécessite un lot de CQ lié.",
+      "QC_GATE_REPEAT_ORDERED": "Une nouvelle analyse est requise avant l’acceptation ou la publication."
+    }
   }
 }

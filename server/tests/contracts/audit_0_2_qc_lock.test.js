@@ -75,7 +75,7 @@ describe('Audit 0.2: batch QC lock and durable evidence', () => {
                 await database.client.user.create({ data: { id: actor.id, username: actor.username, email: `${actor.username}@example.test`,
                     password: 'isolated-fixture', role, labId } });
             }
-        } else batchId = await batch(status, disposition);
+        } else batchId = await batch(status === 'QC_FAIL' ? 'OPEN' : status);
         const sampleId = id('SMP');
         const workItemId = id('WI');
         const submissionId = id('SUB');
@@ -90,6 +90,14 @@ describe('Audit 0.2: batch QC lock and durable evidence', () => {
             id: workItemId, sampleId, batchId, submissionId, analysis: 'PH_H2O',
             status: 'SUBMITTED', result: '7', assignedLab: labId
         } });
+        if (status === 'QC_FAIL') {
+            const failed = await call('post', `/api/qc/batches/${batchId}/evaluate`, { ...readings, blanks: [{ value: 100 }] });
+            expect(failed.status).toBe(200); expect(failed.body.status).toBe('QC_FAIL');
+            if (disposition) {
+                const approved = await call('post', `/api/qc/batches/${batchId}/disposition`, disposition, 'LAB_MANAGER');
+                expect(approved.status).toBe(200);
+            }
+        }
         return { batchId, workItemId, submissionId };
     }
     const review = (path, fixture) => {
@@ -223,7 +231,7 @@ describe('Audit 0.2: batch QC lock and durable evidence', () => {
         const fixture = await reviewFixture(status);
         const res = await review(path, fixture);
         expect(res.status).toBe(409);
-        expect(res.body.code).toBe('QC_FAIL_BLOCKER');
+        expect(res.body.code).toBe(status === 'QC_FAIL' ? 'QC_GATE_FAILED' : 'QC_GATE_NOT_EVALUATED');
         expect((await prisma.workItem.findUnique({ where: { id: fixture.workItemId } })).status).toBe('SUBMITTED');
         expect(await prisma.reviewDecision.count({ where: { workItemId: fixture.workItemId } })).toBe(0);
     });

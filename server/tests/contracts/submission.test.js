@@ -2,6 +2,7 @@ const { ensureTestLab } = require('../setup');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
+const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
 const { generateToken } = require('../setup');
 const { usersDb, workItemsDb, samplesDb, submissionsDb } = require('../../db');
 
@@ -19,6 +20,7 @@ describe('8.1 Section D: Submission Rules', () => {
         const tech = usersDb.create({ username: techUsername, role: 'LAB_TECHNICIAN', labId: 'LAB-SUB' });
 
         mgrToken = generateToken(mgr);
+        await setFixtureQcRequirement(prisma, mgrToken, 'LAB-SUB');
         techToken = generateToken(tech);
     });
 

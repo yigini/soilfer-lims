@@ -15,6 +15,7 @@ const { deriveSubmissionLifecycle } = require('../../services/submissionLifecycl
 const workflow = require('../../workflowContract');
 const { commitReview } = require('../../services/reviewCommitService');
 const { requestClosure } = require('../../services/closureTaskService');
+const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
 const labId = randomUUID();
 const technician = { username: `state-tech-${randomUUID()}`, role: 'LAB_TECHNICIAN', labId };
 const manager = { username: `state-manager-${randomUUID()}`, role: 'LAB_MANAGER', labId };
@@ -23,6 +24,7 @@ beforeAll(async () => {
     await prisma.lab.create({ data: { id: labId, code: labId, name: 'Workbench state laboratory', country: 'TEST' } });
     for (const actor of [technician, manager]) await prisma.user.create({ data: { id: actor.username, username: actor.username,
         email: `${actor.username}@example.test`, role: actor.role, labId, password: 'isolated-fixture' } });
+    await setFixtureQcRequirement(prisma, manager, labId);
     await prisma.analysis.upsert({ where: { code: 'PREPARATION' }, update: {}, create: { code: 'PREPARATION', name: 'Preparation' } });
 });
 afterEach(() => jest.restoreAllMocks());

@@ -4,6 +4,10 @@ import { useLanguage } from '../../context/LanguageContext';
 import QcRules from './QcRules';
 
 export function PolicyValueEditor({ definition, value, onChange, t }) {
+    if (definition.type === 'calibrationFailAction') return <div className="space-y-2">{Object.entries(definition.allowedActions).map(([kind, actions]) => <label key={kind}>
+        {t(`qcRuns.kinds.${kind}`, kind)}<select value={value[kind]} onChange={e => onChange({ ...value, [kind]: e.target.value })}>
+            {actions.map(action => <option key={action} value={action}>{t(`qcRules.actions.${action}`)}</option>)}
+        </select></label>)}</div>;
     if (definition.type === 'boolean') return <select value={String(value)} onChange={e => onChange(e.target.value === 'true')}>
         <option value="true">{t('policies.yes')}</option><option value="false">{t('policies.no')}</option></select>;
     if (definition.type === 'enum') return <select value={value === null ? '__null' : value} onChange={e => onChange(e.target.value === '__null' ? null : e.target.value)}>
@@ -73,7 +77,7 @@ export default function LabPolicies({ labId }) {
         if (typeof value === 'boolean') return t(value ? 'policies.yes' : 'policies.no');
         if (definition.type === 'westgard') return `${t('policies.reject')}: ${value.reject.join(', ') || '—'}; ${t('policies.warn')}: ${value.warn.join(', ') || '—'}`;
         if (definition.type === 'runProfiles') return Object.values(value).map(p => `${p.name} (${p.capacity})`).join('; ');
-        if (definition.type === 'qcFailAction') return Object.entries(value).map(([type, action]) => `${t(`qcRules.types.${type}`)}: ${t(`qcRules.actions.${action}`)}`).join('; ');
+        if (['qcFailAction', 'calibrationFailAction'].includes(definition.type)) return Object.entries(value).map(([type, action]) => `${t(definition.type === 'calibrationFailAction' ? `qcRuns.kinds.${type}` : `qcRules.types.${type}`, type)}: ${t(`qcRules.actions.${action}`)}`).join('; ');
         if (definition.key === 'numbers.thousandsSeparator' && value === ' ') return t('numbers.space');
         return definition.type === 'enum' ? t(`policies.options.${value}`, value) : String(value);
     };
@@ -103,7 +107,7 @@ export default function LabPolicies({ labId }) {
                 const row = data.resolved[key], presetValue = definition.presets[data.presetCode || data.inheritedPreset];
                 const canChangeScope = definition.scope === 'LAB+METHOD' || !analysisCode ||
                     (!methodologyId && definition.analysisOverrides?.includes(analysisCode));
-                return <tr key={key} className="border-t"><td className="p-2">{t(definition.description)}{definition.unit && <span> ({t(`policies.units.${definition.unit}`, definition.unit)})</span>}</td>
+                return <tr key={key} className="border-t"><td className="p-2">{t(definition.description)}{definition.unit && <span> ({t(`policies.units.${definition.unit}`, definition.unit)})</span>}{definition.help && <p className="text-xs">{t(definition.help)}</p>}</td>
                     <td className="p-2">{display(definition, row.value)}
                         {definition.type === 'sampleFormat' && !row.value.includes('{CHK}') && <p role="alert">{t('policies.sampleCodeNoCheck')}</p>}</td><td className="p-2">{t(`policies.sources.${row.source}`)}
                         {row.scope?.analysisCode && ` · ${row.scope.analysisCode}`}{row.scope?.methodologyId && ` · ${data.methodologies.find(m => m.id === row.scope.methodologyId)?.name || row.scope.methodologyId}`}

@@ -439,6 +439,16 @@ async function flagBatchResults(prismaClient, batchId, status, disposition = nul
     const isProceedWarning = decision === 'PROCEED_WITH_WARNING';
     const isReanalyze = decision === 'REANALYZE_BATCH';
     const isReject = decision === 'REJECT_BATCH';
+    const isBracketRepeat = parsedDisp?.canonicalDecision === 'REPEAT_BRACKET';
+    const bracketScope = isBracketRepeat ? parsedDisp.scope : null;
+    let bracketItems = [], affectedSampleIds = new Set();
+    if (isBracketRepeat) {
+        const links = await prismaClient.batchPositionWorkItem.findMany({ where: { position: { batchId }, analysisCode },
+            select: { workItemId: true } });
+        bracketItems = await prismaClient.workItem.findMany({ where: { id: { in: links.map(row => row.workItemId) } } });
+        const positions = await prismaClient.batchPosition.findMany({ where: { id: { in: bracketScope.affectedPositionIds } }, select: { sampleId: true } });
+        affectedSampleIds = new Set(positions.map(row => row.sampleId).filter(Boolean));
+    }
 
     let results = await prismaClient.result.findMany({
         where: { batchId },
@@ -448,7 +458,7 @@ async function flagBatchResults(prismaClient, batchId, status, disposition = nul
         // Derived texture fractions are governed by their PSA/texture work,
         // while other analytes in the physical run retain independent flags.
         const { governingItems } = require('./reportResultGovernance');
-        const items = await prismaClient.workItem.findMany({ where: { batchId, analysis: analysisCode } });
+        const items = isBracketRepeat ? bracketItems : await prismaClient.workItem.findMany({ where: { batchId, analysis: analysisCode } });
         results = results.filter(result => result.param === analysisCode || governingItems(result, items).length > 0);
     }
     let count = 0;
@@ -470,10 +480,12 @@ async function flagBatchResults(prismaClient, batchId, status, disposition = nul
 
     for (const res of results) {
         // Protection for terminal, published, and superseded records: immutable history
-        const isSampleTerminal = res.sample && ['RELEASED', 'APPROVED', 'ARCHIVED', 'DISPOSED'].includes(res.sample.status);
+        const isSampleTerminal = res.sample && ['RELEASED', 'APPROVED', 'PUBLISHED', 'ARCHIVED', 'DISPOSED'].includes(res.sample.status);
         const isPublished = publishedSampleIds.has(res.sampleId) || res.isPublished;
         const isSuperseded = res.isCurrent === false || Boolean(res.supersededBy);
-        if (isSampleTerminal || isPublished || isSuperseded) {
+        const bracketAffected = isBracketRepeat && (affectedSampleIds.has(res.sampleId) ||
+            require('./reportResultGovernance').governingItems(res, bracketItems).some(item => bracketScope.affectedWorkItemIds.includes(item.id)));
+        if ((isSampleTerminal || isPublished || isSuperseded) && !bracketAffected) {
             continue;
         }
 
@@ -503,6 +515,26 @@ async function flagBatchResults(prismaClient, batchId, status, disposition = nul
         const hadPriorProvenanceInvalid = initialFlags.some(f => PROVENANCE_INVALID_FLAGS.includes(f));
         const hadPriorRejection = initialFlags.includes('QC_BATCH_REJECTED') || initialFlags.includes('QC_BATCH_REANALYZE_REQUESTED');
         const nonQcFlags = initialFlags.filter(f => !QC_OWNED_FLAGS.includes(f) && !PROVENANCE_INVALID_FLAGS.includes(f));
+
+        if (isBracketRepeat) {
+            if (isMalformedFlags) throw Object.assign(new Error('Result flags require repair before a bracket repeat.'),
+                { statusCode: 409, code: 'INVALID_RESULT_FLAGS' });
+            if (bracketAffected) {
+                // Sealed result values and validity stay intact. Append the
+                // repeat evidence; publication uses the durable scoped gate.
+                if (!flags.includes('QC_BATCH_REANALYZE_REQUESTED')) {
+                    flags.push('QC_BATCH_REANALYZE_REQUESTED');
+                    await prismaClient.result.update({ where: { id: res.id }, data: { flags: JSON.stringify(flags) } });
+                    count++;
+                }
+            } else if (hadQcBatchFailed) {
+                await prismaClient.result.update({ where: { id: res.id }, data: {
+                    isValid: wasInitiallyValid || isInvalidOnlyByQcFailure(res),
+                    flags: JSON.stringify(flags.filter(flag => flag !== 'QC_BATCH_FAILED')) } });
+                count++;
+            }
+            continue;
+        }
 
         if (status === 'QC_FAIL') {
             if (isProceedWarning) {

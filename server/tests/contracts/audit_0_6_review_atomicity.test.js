@@ -5,8 +5,9 @@ const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
 const workflow = require('../../workflowContract');
-const qcController = require('../../controllers/qcController');
-const { getAuthToken } = require('../setup');
+const qcGate = require('../../services/qcGateService');
+const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
+const { getAuthToken, ensureTestLab } = require('../setup');
 const { createLegacyClosureDatabase, useLegacyRouteDatabase } = require('../helpers/legacyWorkflowDatabase');
 const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 const labId = 'LAB-AUDIT-06';
@@ -15,7 +16,8 @@ const id = prefix => `${prefix}-${crypto.randomUUID()}`;
 describe('Audit 0.6: review state and atomic status/version compare-and-set', () => {
     let manager, technician;
     const legacyDatabases = [];
-    beforeAll(async () => { manager = await getAuthToken('LAB_MANAGER', labId); technician = await getAuthToken('LAB_TECHNICIAN', labId); });
+    beforeAll(async () => { await ensureTestLab(labId, 'TEST'); manager = await getAuthToken('LAB_MANAGER', labId); technician = await getAuthToken('LAB_TECHNICIAN', labId);
+        await setFixtureQcRequirement(prisma, manager, labId); });
     afterEach(() => jest.restoreAllMocks());
     afterAll(async () => { for (const database of legacyDatabases) await database.close(); });
     const post = (path, body) => request(app).post(path).set('Authorization', `Bearer ${manager}`).send(body);
@@ -35,11 +37,13 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         const sampleId = id('S-06');
         await createSampleFixture(prisma, { data: { id: sampleId, originalId: sampleId, labId: sampleId, assignedLab: labId,
             status: sampleStatus, dryingStatus: 'DONE', preparationStatus: 'DONE' } });
-        const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-06'), analysis, labId, status: batchStatus, createdBy: 'test' } }) : null;
+        const batch = batchStatus ? await prisma.batch.create({ data: { id: id('B-06'), analysis, labId, status: batchStatus, createdBy: 'test',
+            qcResults: batchStatus === 'QC_FAIL' ? JSON.stringify({ blanks: [{ value: 2, maxAllowed: 1, status: 'FAIL' }], duplicates: [], controls: [] }) : null } }) : null;
         const item = await createWorkItemFixture(prisma, { data: { id: id('WI-06'), sampleId, analysis, assignedLab: labId,
             status, result: '6.2', history: '[]', batchId: batch?.id } });
         const result = await createResultFixture(prisma, { data: { id: id('R-06'), sampleId, param: analysis, value: '6.2',
             numericValue: 6.2, isCurrent: true, isValid: true, flags: '[]', batchId: batch?.id } });
+        if (batch) await require('../helpers/normalizedQcFixture').normalizeLegacyQcFixture(prisma, batch.id);
         return { sampleId, item, result, batch };
     }
     async function snapshot(f) {
@@ -83,9 +87,10 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
     test('a changed version with the same submitted status loses the CAS with no review writes', async () => {
         const f = await fixture();
         const beforeAudits = await prisma.auditLog.findMany({ where: { entityId: f.item.id }, orderBy: { id: 'asc' } });
-        jest.spyOn(qcController, 'checkItemBatchStatus').mockImplementationOnce(async () => {
+        const requireAcceptance = qcGate.requireAcceptance;
+        jest.spyOn(qcGate, 'requireAcceptance').mockImplementationOnce(async (...args) => {
             await prisma.workItem.update({ where: { id: f.item.id }, data: { version: { increment: 1 } } });
-            return { allowed: true };
+            return requireAcceptance(...args);
         });
         const res = await post(`/api/work/${f.item.id}/review`, { status: 'ACCEPTED' });
         expect(res.status).toBe(409); expect(res.body.code).toBe('ITEM_NOT_SUBMITTED');
@@ -193,7 +198,7 @@ describe('Audit 0.6: review state and atomic status/version compare-and-set', ()
         const good = await fixture(), failed = await fixture({ batchStatus: 'QC_FAIL' });
         const goodBefore = await snapshot(good), failedBefore = await snapshot(failed);
         const res = await post('/api/work/review/bulk', { workItemIds: [good.item.id, failed.item.id], status: 'ACCEPTED' });
-        expect(res.status).toBe(409); expect(res.body.code).toBe('QC_FAIL_BLOCKER');
+        expect(res.status).toBe(409); expect(res.body.code).toBe('QC_GATE_FAILED');
         expect(await snapshot(good)).toEqual(goodBefore); expect(await snapshot(failed)).toEqual(failedBefore);
     });
     test.each(workflow.CLOSURE_TASK_ANALYSES)('%s can be accepted once from COMPLETED and a second decision cannot change custody or audit', async analysis => {
