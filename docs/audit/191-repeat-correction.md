@@ -6,9 +6,9 @@ Branch: audit/3.2-repeat-correction. No #191 PR, audit pass or deployment exists
 
 Scope authorities are #162 and #191 comments 5975239652, 6055538092,
 6059796291, 6067488471, 6067875897, 6068463777, 6068870369, 6069548259
-and 6069938801. CONTRIBUTING.md applies. Questions 6070204858 remain pending
-for the closed correction payload, formerly implicit replicate fixtures,
-fresh review of accepted derived work and the canonical historical import.
+and 6069938801, 6070309684, 6070420159, 6070565847. CONTRIBUTING.md applies.
+Claude answered the payload, explicit replicate, derived review, historical
+import, causal event and reported-value fixture questions. None is pending.
 
 Implemented, with verification still in progress:
 
@@ -36,13 +36,16 @@ Implemented, with verification still in progress:
 - An owned result-set fixture creates explicit determinations under one new
   execution, refusing reuse and duplicate current replicas. No historical
   factory caller or runtime guard exception is added.
+- TEXTURE recalculation keeps its original attempt and appends a new derived
+  Result and DERIVED_RECALCULATED event with all sourceEventIds written in
+  the same transaction. Submitted/accepted work requires a new actual review
+  decision before publication; accepted attempt evidence stays unchanged.
 - A read-only planner lists interim attempt 2+ rows with NULL reason as
   "reason not recorded". Back-fill count is zero; no write mode exists.
 
-Remaining work includes causal DERIVED_RECALCULATED events on the same
-TEXTURE attempt, fresh derived review, the pinned legacy fixture adaptations,
-and complete server/client/CI verification at one final head. Earlier
-derived evidence and analytical/QC/audit rows must remain intact.
+Remaining work includes completing verification of the pinned legacy fixture
+adaptations and complete server/client/CI verification at one final head.
+Earlier derived evidence and analytical/QC/audit rows remain intact.
 
 Verification history is diagnostic, not readiness:
 
@@ -55,6 +58,12 @@ Verification history is diagnostic, not readiness:
 - 405bf37 replicate diagnostic: 4/8 suites and 84/134 tests passed, 160.485s.
   The new query incorrectly used a nonexistent Result.attempt Prisma
   relation. 12f9b1f uses guarded scalar IDs; affected tests are rerunning.
+- f365c31: five focused suites passed all 105 tests (22.165s), including
+  all four UUID transactions, three/single causal events, prior-transaction
+  zero-write refusal, accepted derived re-review, result payload/import,
+  equipment, QC retained evidence and SQL scanner. A separate retained-read
+  run passed 100/103 tests in three suites (14.259s); two scalar replacement
+  setups and LATEST_VALID were then restaged under Claude's scope pins.
 
 Applied by precedent / deliberate setup inventory:
 
@@ -71,6 +80,43 @@ Applied by precedent / deliberate setup inventory:
 - Incremental-replica assertions in result_provenance remain unchanged
   (6069938801). Every subsequent legacy result-set/correction/repeat setup
   change must be listed by file and test before requesting audit.
+- result_provenance: two typed-to-spectral scenarios now request a real
+  CONFIRMATION repeat before the later prediction; scientific assertions and
+  the incremental-replica case are unchanged (6069938801).
+- nsis_result_import: two explicit replicas share one execution; values 6.4
+  and 6.5 and replica numbers 1/2 are unchanged. Attempt-count expectations
+  deliberately become one, with both Result IDs bound to it (6069938801).
+- audit_1_5_result_writes: seven smuggled metadata scenarios retain their
+  injected values and scientific assertions, route the second write through
+  correction, and assert that injected metadata has no effect (6070309684).
+- audit_1_4_uuid_transactions: four positive/rollback scenarios retain their
+  numerical values and rollback assertions. Explicit per-replica source IDs
+  share one initial fraction/TEXTURE execution; subsequent determinations
+  use actual reasoned repeats. Initial attemptNo is one for every replica.
+- audit_2_6_equipment_commit: the second instrument snapshot follows a real
+  CONFIRMATION repeat; original readiness and result assertions remain.
+- qc_disposition_release_gate: retained current-invalid and superseded pH
+  readings share one explicit execution; no QC rule or scientific value changes.
+- audit_0_10_current_result_views: original mixed-method/unit/qualified
+  ambiguity and normalization values use explicit replicas 1/2. The invalid
+  current sentinel uses replica 3; all sentinel/export assertions remain.
+- audit_0_10_current_result_views and audit_1_0_lab_policies LATEST_VALID:
+  one retained initial value is corrected through the actual route, then
+  submitted/reviewed/approved. An owned lab/method/SOC zero-frequency rule is
+  created by qcRuleService with the actual manager; the actual gate must say
+  NOT_REQUIRED. Literal method/unit, policy versions 0/1 and original export
+  assertions are unchanged (6070309684/6070565847). No QC test uses this setup.
+- audit_0_3_publication: both scalar acquisition confirmations explicitly
+  request a repeat before the second workbench save, retaining original
+  scalar publication and acquisition assertions.
+- audit_1_2_legacy_results and audit_1_2_offline_state: successful re-record
+  and late-refusal cases reserve a real CONFIRMATION child before the original
+  save. Offline expectations include the retained QUESTIONED parent, OPEN
+  reservation and mandatory FIRST_FILL event; all prior audit rows remain exact.
+- Canonical historical import's former reasonless success is deliberately
+  replaced by WORK_ATTEMPT_REASON_REQUIRED with an exact zero-write snapshot
+  (6070309684). Orphan, duplicate-owner and separate TEXTURE historical import
+  successes and counts are unchanged; no new historical factory caller exists.
 
 Reported-value selection belongs to #192; NCR validation belongs to #193.
 No production-host action is permitted under #162's demo freeze. Deployment

@@ -90,6 +90,27 @@ test('the owned result-set fixture refuses duplicate current replicas before any
     expect(await f.all()).toEqual(before);
 });
 
+test.each(['status', 'equipmentId', 'timestamp', 'sourceEventIds'])('an unknown correction key %s refuses with zero writes', async key => {
+    const f = await fixture(), before = await f.all();
+    const response = await f.correction({ value: '7.25', reason: 'TRANSCRIPTION_ERROR', note: 'Controlled correction',
+        [key]: 'untrusted-extra' });
+    expect(response.status).toBe(400);
+    expect(response.body.code).toBe('ATTEMPT_CORRECTION_FIELDS_INVALID');
+    expect(await f.all()).toEqual(before);
+});
+
+test('the four named compatibility keys cannot affect a correction Result, event or response', async () => {
+    const f = await fixture(), before = await f.all(), marker = 'discarded-input-' + randomUUID();
+    const response = await f.correction({ value: '7.25', reason: 'TRANSCRIPTION_ERROR', note: 'Controlled correction',
+        id: marker + '-id', rawInput: marker + '-raw', flags: [marker + '-flags'], provenance: marker + '-provenance' });
+    expect(response.status).toBe(201);
+    const current = await f.db.result.findUnique({ where: { id: response.body.result.id } });
+    const event = await f.db.auditLog.findFirst({ where: { entity: 'WORK_ATTEMPT', entityId: f.attempt.id, action: 'CORRECTED' } });
+    expect(JSON.stringify([current, event, response.body])).not.toContain(marker);
+    expect(current).toMatchObject({ value: '7.25', numericValue: 7.25, attemptId: f.attempt.id });
+    expect(await f.db.workAttempt.findUnique({ where: { id: f.attempt.id } })).toEqual(before.attempts[0]);
+});
+
 test('a scoped technician requests INSTRUMENT_FAULT before submission, reserving exactly one immutable OPEN attempt', async () => {
     const f=await fixture(), previous=f.attempt;
     const response=await f.command({reason:'INSTRUMENT_FAULT',note:'Instrument alarm confirmed',sameBatchAllowed:false});
