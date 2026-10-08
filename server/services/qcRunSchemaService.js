@@ -70,7 +70,9 @@ function classifyQcRunSchema(db, source) {
             const extension = require('./qcDispositionScopeSchemaService').inspectScopeExtension(db);
             if (extension.classification === 'COMPLETE') wanted = { ...wanted, sql: extension.membership.guardSql };
         }
-        if (actual && (actual.type !== type || normalized(actual.sql) !== normalized(wanted.sql))) differences.push(`${wanted.name} differs`);
+        if (actual && (actual.type !== type || normalized(actual.sql) !== normalized(wanted.sql)) &&
+            !(wanted.name==='WorkItem_batch_membership_guard' &&
+              require('./workRepeatInstallationEvidence').isVerifiedRepeatMembershipSuccessor(db,actual))) differences.push(`${wanted.name} differs`);
         return Boolean(actual);
     }
     const installedIndexes = indexes.map(row => present(row, 'index')), installedGuards = guards.map(row => present(row, 'trigger'));

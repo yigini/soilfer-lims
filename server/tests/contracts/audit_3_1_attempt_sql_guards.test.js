@@ -26,7 +26,10 @@ async function guarded({items=[itemRow('item'),itemRow('other','Q'),itemRow('ano
     // The predecessor guard suite intentionally remains pre-191 (including
     // its historical nullable-reason case). Add only the nullable model
     // columns so the current generated client can read its literal old rows.
-    if(successor) expect(require('../../scripts/install_work_repeat_contract').installWorkRepeatContract({dbPath:file,apply:true}).classification).toBe('COMPLETE');
+    if(successor) {
+        require('../helpers/repeatQcPredecessors').installRepeatQcPredecessors(file);
+        expect(require('../../scripts/install_work_repeat_contract').installWorkRepeatContract({dbPath:file,apply:true}).classification).toBe('COMPLETE');
+    }
     else {
         const modelColumns=loadWorkRepeatMigrationSource();
         const shape=new Database(file);shape.exec(modelColumns.schemaSql);shape.close();

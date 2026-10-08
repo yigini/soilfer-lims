@@ -22,7 +22,8 @@ function assertReviewable(item, status, sample = item.sample) {
     if (!allowed) throw itemStateError(item);
 }
 
-// The first transaction write is the CAS. A refused row creates no side effects.
+// The guarded attempt handoff and WorkItem CAS commit together. A refused
+// CAS or later decision/audit rolls back every attempt, event and pointer.
 async function commitReview(prisma, item, status, user, data, operations, submissionId, audit = {}) {
     status = workflow.normalizeWorkItemState(status);
     try {
@@ -52,6 +53,11 @@ async function commitReview(prisma, item, status, user, data, operations, submis
                     gate: row.gate, changedBy: user.username, timestamp: new Date().toISOString() }));
                 data = { ...data, history: JSON.stringify([...require('./workflowStateRules').requireHistory(history), ...acknowledgements]) };
             }
+            if(returned && measured) {
+                // Pin6069548259: the canonical child and immutable event must
+                // already exist before the accepted-QC pointer can move.
+                await require('./workRepeatService').reserveRepeat(tx,current,sample,user,repeatRequest,repeatPlan);
+            }
             await transitionWorkItem(item.id, status, user, reason, data, tx, {
                 expected: item, submissionId, conflictCode: 'ITEM_NOT_SUBMITTED',
                 action: workflow.CLOSURE_TASK_ANALYSES.includes(item.analysis) ? 'CLOSURE_REVIEW' : 'REVIEW',
@@ -59,9 +65,7 @@ async function commitReview(prisma, item, status, user, data, operations, submis
             });
             await qcGate.recordAcknowledgements(qcRows, audit.qcAcknowledgement, user, tx);
             const decisions = await operations(tx);
-            if(returned && measured) {
-                await require('./workRepeatService').reserveRepeat(tx,current,sample,user,repeatRequest,repeatPlan);
-            } else if(status==='ACCEPTED' && measured) {
+            if(status==='ACCEPTED' && measured) {
                 const selected=(Array.isArray(decisions)?decisions:[decisions]).find(row=>row?.workItemId===current.id && row.decision==='ACCEPT');
                 if(!selected?.attemptId)throw Object.assign(new Error('Acceptance must identify its ReviewDecision attempt.'),{statusCode:409,code:'REVIEW_DECISION_REQUIRED'});
                 await require('./workAttemptEventService').transitionAttempt(tx,current,selected.attemptId,'ACCEPTED',user);
@@ -83,6 +87,7 @@ async function commitReview(prisma, item, status, user, data, operations, submis
         });
     } catch (error) {
         if (['P2025', 'P2034', 'STATE_CHANGED'].includes(error.code)) throw itemStateError(item);
+        if(status==='REPEAT_REQUIRED')throw require('./workRepeatBatchService').mapRepeatRunError(error);
         throw error;
     }
 }

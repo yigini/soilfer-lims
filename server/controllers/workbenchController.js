@@ -1787,12 +1787,15 @@ exports.commitSubmissions = async (req, res) => {
                         workItemCount: itemIds.length
                     }
                 });
-                for (const item of items) await transitionWorkItem(item.id, 'SUBMITTED', user, 'Workbench submission', {
+                for (const item of items) {
+                    await transitionWorkItem(item.id, 'SUBMITTED', user, 'Workbench submission', {
                         submissionId: subId,
                         submittedAt: now,
                         history: JSON.stringify([...stateRules.requireHistory(item.history), { status: 'SUBMITTED', action: 'SUBMITTED',
                             submissionId: subId, timestamp: now.toISOString(), changedBy: user.username }])
-                }, tx, { expected: { status: item.status, version: item.version }, audit: { action: 'WORKITEM_SUBMITTED' } });
+                    }, tx, { expected: { status: item.status, version: item.version }, audit: { action: 'WORKITEM_SUBMITTED' } });
+                    await require('../services/workAttemptEventService').submitRecordedAttempt(tx,item,user);
+                }
                 const derived = await deriveSubmissionLifecycle(tx, sampleId);
                 await tx.submission.update({ where: { id: subId }, data: { type: derived.type } });
                 await transitionSample(sampleId, derived.sampleStatus, user, 'Workbench submission', {

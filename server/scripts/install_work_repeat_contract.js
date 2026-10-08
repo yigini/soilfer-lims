@@ -3,19 +3,25 @@ const path = require('node:path'), Database = require('better-sqlite3');
 const { loadWorkRepeatMigrationSource } = require('../services/workRepeatMigrationSource');
 const { loadWorkAttemptMigrationSource } = require('../services/workAttemptMigrationSource');
 const { classifyWorkAttemptContract } = require('./install_work_attempt_contract');
-const { MARKER, SUCCESSORS, repeatReleaseObjects, repeatSources, inspectRepeatColumns,
+const { MARKER, SUCCESSORS, MEMBERSHIP_SUCCESSOR, repeatReleaseObjects, repeatSources, inspectRepeatColumns,
     assertRepeatInstallationEvidence, normalize, fingerprint } = require('../services/workRepeatInstallationEvidence');
 const { planInterimRepeatReasons } = require('../services/workRepeatBackfillPlan');
 const fail = (code, message, details = {}) => Object.assign(new Error(message), { code, totalChanges: 0, ...details });
 function classify(db) {
+    const qc=require('../services/qcRunSchemaService').classifyQcRunSchema(db,require('../services/qcRunMigrationSource').loadQcRunMigrationSource());
+    const scope=require('../services/qcDispositionScopeSchemaService').inspectScopeExtension(db);
+    if(qc.classification!=='COMPLETE' || scope.classification!=='COMPLETE')throw fail('WORK_REPEAT_PREREQUISITE_NOT_INSTALLED',
+        'Install the complete reviewed #186/#187 QC predecessors first.');
     const predecessorSource = loadWorkAttemptMigrationSource();
     const predecessor = classifyWorkAttemptContract(db, { guardsSql: predecessorSource.guardsSql, sha256: predecessorSource.sha256 });
     if (predecessor.classification !== 'COMPLETE' || predecessor.code) throw fail('WORK_REPEAT_PREREQUISITE_NOT_INSTALLED', 'Install the complete reviewed #190 predecessor first.');
     const { added, differences } = inspectRepeatColumns(db);
     const originals = [...predecessorSource.guardsSql.matchAll(/^CREATE TRIGGER "([^"]+)"[\s\S]*?^END;/gm)]
         .filter(match => SUCCESSORS.includes(match[1]));
-    const predecessorGuards = originals.every(match => normalize(db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(match[1])?.sql || '') === normalize(match[0]));
-    const newGuards = repeatReleaseObjects().filter(row => !SUCCESSORS.includes(row.name))
+    const membership=require('../services/qcBracketMembershipMigrationSource').loadBracketMembershipSource();
+    const predecessorGuards = originals.every(match => normalize(db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(match[1])?.sql || '') === normalize(match[0])) &&
+        normalize(db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(MEMBERSHIP_SUCCESSOR)?.sql || '')===normalize(membership.guardSql);
+    const newGuards = repeatReleaseObjects().filter(row => !SUCCESSORS.includes(row.name) && row.name!==MEMBERSHIP_SUCCESSOR)
         .map(row => Boolean(db.prepare('SELECT name FROM sqlite_master WHERE name=?').get(row.name)));
     const marker = Boolean(db.prepare('SELECT id FROM "_schema_migrations" WHERE id=?').get(MARKER));
     let classification, verified;
@@ -30,7 +36,8 @@ function classify(db) {
             receiptSha256: predecessor.receipt.receiptSha256 }, plan: planInterimRepeatReasons(db), bootstrapRebuild: [] };
 }
 function retainedRows(db) {
-    return Object.fromEntries(['WorkAttempt', 'WorkItem', 'Result', 'ReviewDecision', 'AuditLog', '_schema_migrations']
+    return Object.fromEntries(['WorkAttempt', 'WorkItem', 'Result', 'ReviewDecision', 'AuditLog', '_schema_migrations',
+        'Batch','BatchAnalyte','BatchPosition','BatchPositionWorkItem','BatchPositionReference','QcMeasurement','QcEvaluation','BatchDisposition','BatchEvent']
         .map(table => [table, db.prepare(`SELECT * FROM "${table}" ORDER BY id`).all()]));
 }
 function installWorkRepeatContract({ dbPath, apply = false } = {}) {

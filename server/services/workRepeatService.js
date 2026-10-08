@@ -30,6 +30,7 @@ async function preflightRepeat(tx, item, sample, actor, request, attemptId) {
             throw new rules.TransitionError('This repeat requires a reviewer.', 403, 'WORK_REPEAT_FORBIDDEN');
         }
     }
+    await require('./workRepeatBatchService').assertRepeatSourceReleased(tx,item);
     const attempts = await tx.workAttempt.findMany({ where: { workItemId: item.id }, orderBy: { attemptNo: 'asc' } });
     if (attempts.some(row => row.status === 'OPEN')) throw new rules.TransitionError('An OPEN repeat already exists for this work.', 409, 'WORK_REPEAT_ALREADY_OPEN');
     // Selecting the parent never guesses between multiple execution owners.
@@ -74,6 +75,6 @@ async function requestRepeat(db, workItemId, actor, input) {
                 { expectedStatus: sample.status, action: 'REVIEW_RETURNED', details: JSON.stringify({ attemptId: attempt.id, reasonCode: request.reason }) });
         }
         return { workItem: updated, attempt };
-    });
+    }).catch(error=>{throw require('./workRepeatBatchService').mapRepeatRunError(error);});
 }
 module.exports = { assertRepeatCapacity, preflightRepeat, reserveRepeat, requestRepeat };

@@ -15,4 +15,26 @@ async function assertRepeatBatchAllowed(db, item, batchId) {
     if (forbidden) throw new TransitionError('Choose a new batch for this repeat; the previous QC failure or repeat/reject decision is retained.',
         409, 'REPEAT_FAILED_BATCH', { workItemId: item.id, batchId, analysisCode: code });
 }
-module.exports = { assertRepeatBatchAllowed };
+async function assertRepeatSourceReleased(db,item) {
+    if(!item.batchId)return;
+    const batch=await db.batch.findUnique({where:{id:item.batchId},include:QC_RUN_INCLUDE});
+    const code=batch && runAnalyteCode(batch,item.analysis);
+    const member=batch?.positions.some(position=>position.workItems.some(link=>link.workItemId===item.id && runAnalyteCode(batch,link.analysisCode)===code));
+    const analyte=batch?.analytes.find(row=>row.analysisCode===code);
+    if(member && ['QC_PASS','QC_WARN'].includes(analyte?.status))return;
+    if(member) {
+        // The existing #187 disposition authority remains the only way out
+        // of failed, pending or otherwise unaccepted run evidence.
+        try { if(await require('./qcRunRepeatService').repeatSource(db,item,null))return; }
+        catch(error){if(error.code!=='QC_WORK_ITEM_ALREADY_BATCHED')throw error;}
+    }
+    throw new TransitionError('Disposition the current run before requesting this repeat.',409,'ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED',
+        {workItemId:item.id,batchId:item.batchId,analysisCode:code || item.analysis});
+}
+function mapRepeatRunError(error) {
+    const text=`${error.message || ''} ${JSON.stringify(error.meta || {})}`;
+    if(text.includes('BATCH_MEMBERSHIP_FROZEN'))return new TransitionError('Disposition the current run before requesting this repeat.',409,
+        'ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED');
+    return error;
+}
+module.exports = { assertRepeatBatchAllowed, assertRepeatSourceReleased, mapRepeatRunError };

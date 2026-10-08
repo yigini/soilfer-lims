@@ -421,6 +421,7 @@ function repeatFixture({ interim = false } = {}) {
                 author: 'historical-tech', evidenceData: '{"retained":true}', evidenceHash: 'historical-hash', createdAt: timestamp, updatedAt: timestamp }] : [])]
     } });
     expect(installWorkAttemptContract({ dbPath: file, apply: true }).classification).toBe('COMPLETE');
+    require('../helpers/repeatQcPredecessors').installRepeatQcPredecessors(file);
     return file;
 }
 
@@ -560,6 +561,6 @@ test('#191 attempt audit events cannot be rewritten, retagged or deleted; other 
 
 test('#191 release objects include the two exact successors and both append-only event guards', () => {
     expect(repeatReleaseObjects().map(row => row.name)).toEqual(expect.arrayContaining([
-        'WorkAttempt_evidence_update', 'WorkAttempt_identity_update', 'AuditLog_attempt_event_update', 'AuditLog_attempt_event_delete'
+        'WorkAttempt_evidence_update', 'WorkAttempt_identity_update', 'WorkItem_batch_membership_guard', 'AuditLog_attempt_event_update', 'AuditLog_attempt_event_delete'
     ]));
 });

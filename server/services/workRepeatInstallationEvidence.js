@@ -4,6 +4,7 @@ const { loadWorkAttemptMigrationSource } = require('./workAttemptMigrationSource
 const MARKER = '191_repeat_correction_contract';
 const PREDECESSOR_MARKER = '190_work_attempt_contract';
 const SUCCESSORS = Object.freeze(['WorkAttempt_evidence_update', 'WorkAttempt_identity_update']);
+const MEMBERSHIP_SUCCESSOR = 'WorkItem_batch_membership_guard';
 const COLUMN_NAMES = Object.freeze(['id','workItemId','orderLineId','attemptNo','executedMethodRevision','author','authorName',
     'materialAliquot','instrumentId','qcBatchId','batchId','reason','requestedBy','requestedAt','parentAttemptId','note',
     'rawData','calcVersion','dilutionFactor','aliquotId','legacyAttemptNoConflict','version','status','evidenceHash','evidenceData','createdAt','updatedAt']);
@@ -16,7 +17,7 @@ function repeatReleaseObjects() {
     const source = loadWorkRepeatMigrationSource();
     const objects = [...source.guardsSql.matchAll(/^CREATE TRIGGER "([^"]+)"[\s\S]*?^END;/gm)]
         .map(match => ({ name: match[1], type: 'trigger', sql: match[0] }));
-    if (objects.length !== 11) throw Object.assign(new Error('Repeat release requires eleven exact guards.'), { code: 'WORK_REPEAT_SOURCE_MISMATCH' });
+    if (objects.length !== 12) throw Object.assign(new Error('Repeat release requires twelve exact guards.'), { code: 'WORK_REPEAT_SOURCE_MISMATCH' });
     return objects;
 }
 function predecessorReceipt(db) {
@@ -35,7 +36,22 @@ function repeatSources(db) {
     const source = loadWorkRepeatMigrationSource(), predecessor = predecessorReceipt(db);
     return { migrationSha256: source.sha256, contractVersion: '191-v1', predecessor: {
         marker: PREDECESSOR_MARKER, ...predecessor.sources, receiptSha256: predecessor.receiptSha256
-    } };
+    }, qcPredecessors: qcPredecessorReceipts(db) };
+}
+function qcPredecessorReceipts(db) {
+    const runSource=require('./qcRunMigrationSource').loadQcRunMigrationSource();
+    const scopeSource=require('./qcDispositionScopeMigrationSource').loadScopeMigrationSource();
+    const membership=require('./qcBracketMembershipMigrationSource').loadBracketMembershipSource();
+    const entries=[['186_normalized_qc_runs',receipt=>receipt.migrationSha256===runSource.sha256 && receipt.oracleSha256===runSource.oracleSha256],
+        ['187_qc_gate_scope',receipt=>receipt.migrationSha256===scopeSource.sha256 && receipt.membershipMigrationSha256===membership.sha256 &&
+            receipt.membershipGuardSha256===membership.guardSha256 && receipt.supersededMembershipGuardSha256===membership.supersededGuardSha256]];
+    return Object.fromEntries(entries.map(([marker,valid])=>{
+        const row=db.prepare('SELECT details FROM "_schema_migrations" WHERE id=?').get(marker);
+        let receipt;try{receipt=row && JSON.parse(row.details);}catch(_){/* Refuse below. */}
+        if(!receipt || !valid(receipt))throw fail([`QC predecessor receipt ${marker} is absent or altered`]);
+        // Bind the entire original receipt, including its backfill proof.
+        return [marker,{receiptSha256:fingerprint(row.details)}];
+    }));
 }
 function inspectRepeatColumns(db) {
     const columns = db.prepare('PRAGMA table_xinfo("WorkAttempt")').all(), differences = [];
@@ -75,5 +91,12 @@ function isVerifiedRepeatSuccessor(db, expectedName, actual) {
     assertRepeatInstallationEvidence(db);
     return true;
 }
-module.exports = { MARKER, PREDECESSOR_MARKER, SUCCESSORS, COLUMN_NAMES, fingerprint, normalize,
-    repeatReleaseObjects, repeatSources, inspectRepeatColumns, assertRepeatInstallationEvidence, isVerifiedRepeatSuccessor };
+function isVerifiedRepeatMembershipSuccessor(db,actual) {
+    const successor=repeatReleaseObjects().find(row=>row.name===MEMBERSHIP_SUCCESSOR);
+    if(!actual || actual.type!==successor.type || normalize(actual.sql)!==normalize(successor.sql))return false;
+    assertRepeatInstallationEvidence(db);
+    return true;
+}
+module.exports = { MARKER, PREDECESSOR_MARKER, SUCCESSORS, MEMBERSHIP_SUCCESSOR, COLUMN_NAMES, fingerprint, normalize,
+    repeatReleaseObjects, repeatSources, inspectRepeatColumns, assertRepeatInstallationEvidence, isVerifiedRepeatSuccessor,
+    isVerifiedRepeatMembershipSuccessor };

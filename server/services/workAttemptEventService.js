@@ -24,4 +24,10 @@ async function transitionAttempt(tx, item, attemptId, nextStatus, actor, { reaso
     await appendAttemptEvent(tx, item, attempt.id, actor, { action: nextStatus, from: attempt.status, to: nextStatus, reason, note });
     return { ...attempt, status: nextStatus };
 }
-module.exports = { ACTIONS, appendAttemptEvent, transitionAttempt };
+async function submitRecordedAttempt(tx,item,actor) {
+    rules.requireTransaction(tx);
+    if(require('./workItemKinds').isNonMeasurement(item))return null;
+    const attemptId=await require('./reviewAttemptService').resolveReviewAttempt(tx,item,'ACCEPT');
+    return transitionAttempt(tx,item,attemptId,'SUBMITTED',actor);
+}
+module.exports = { ACTIONS, appendAttemptEvent, transitionAttempt, submitRecordedAttempt };

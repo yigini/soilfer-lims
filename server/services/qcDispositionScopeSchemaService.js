@@ -18,7 +18,10 @@ function inspectScopeExtension(db) {
     const marker = db.prepare('SELECT details FROM "_schema_migrations" WHERE id=?').get(MARKER);
     const membershipGuard = db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(membership.name);
     const expectedMembership = marker ? membership.guardSql : membership.supersededGuardSql;
-    if (membershipGuard && (membershipGuard.type !== 'trigger' || normalized(membershipGuard.sql) !== normalized(expectedMembership)) ||
+    const membershipMatches=membershipGuard && membershipGuard.type==='trigger' && normalized(membershipGuard.sql)===normalized(expectedMembership);
+    const repeatSuccessor=marker && membershipGuard && !membershipMatches &&
+        require('./workRepeatInstallationEvidence').isVerifiedRepeatMembershipSuccessor(db,membershipGuard);
+    if (membershipGuard && !membershipMatches && !repeatSuccessor ||
         marker && !membershipGuard) throw fail('QC bracket membership guard/receipt differs.');
     const guards = source.guards.map(wanted => {
         const row = db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(wanted.name);

@@ -110,6 +110,12 @@ async function snapshot(sampleIds) {
         attempts: await prisma.workAttempt.findMany({ where: { workItem: { sampleId: { in: sampleIds } } }, orderBy: { id: 'asc' } })
     };
 }
+async function seedSubmissionAttempt(row,item=row.item) {
+    // Apply6061487810's final-execution fixture precedent to the named
+    // submission tests: cached display values cannot identify an attempt.
+    await createExecutionResultFixture(prisma,{attemptStatus:'RECORDED',data:{id:randomUUID(),sampleId:row.sample.id,
+        param:item.analysis,value:item.result,isCurrent:true,provenance:'MEASURED'}});
+}
 async function call(handler, body, params = {}, user = technician) {
     const res = { statusCode: 200, status(code) { this.statusCode = code; return this; }, json(value) { this.body = value; return this; } };
     await handler({ user, body, params }, res);
@@ -194,7 +200,7 @@ test.each(paths.flatMap(([name, handler, body]) => ['APPROVED', 'ARCHIVED', 'DIS
         expect(await snapshot([row.sample.id])).toEqual(before);
     });
 test.each(paths)('%s submission rolls back sample/work/submit/audit after a later audit failure', async (name, handler, body) => {
-    const row = await fixture(), before = await snapshot([row.sample.id]);
+    const row = await fixture();await seedSubmissionAttempt(row);const before = await snapshot([row.sample.id]);
     failAudit(name === 'legacy' ? 'SUBMISSION_CREATED' : 'WORKBENCH_SUBMIT');
     expect((await call(handler, body(row))).statusCode).toBe(500);
     expect(await snapshot([row.sample.id])).toEqual(before);
@@ -237,7 +243,7 @@ const submissionMatrix = [
 ];
 test.each(paths.flatMap(([name, handler, body]) => submissionMatrix.map(([status, type]) => [name, status, type, handler, body])))
     ('%s submission derives %s companion work as %s after selected work is submitted', async (_, status, type, handler, body) => {
-        const row = await fixture();
+        const row = await fixture();await seedSubmissionAttempt(row);
         await additionalItem(row, status);
         const response = await call(handler, body(row));
         expect(response.statusCode).toBeLessThan(300);
@@ -265,7 +271,7 @@ test('FULL derivation excludes duplicates, gates and every closure alias', async
 
 test.each(['COMPLETED', 'ON_HOLD', 'REPEAT_REQUIRED', 'AWAITING_VERIFICATION', 'NOT_ASSIGNED', 'ASSIGNED', 'IN_PROGRESS'])
     ('an explicit FULL request lists its %s blocker and rolls back every write', async status => {
-        const row = await fixture(), other = await additionalItem(row, status), before = await snapshot([row.sample.id]);
+        const row = await fixture(), other = await additionalItem(row, status);await seedSubmissionAttempt(row);const before = await snapshot([row.sample.id]);
         expect(await call(submissions.createSubmission, { sampleId: row.sample.id, workItemIds: [row.item.id], type: 'FULL' }))
             .toMatchObject({ statusCode: 409, body: { code: 'SUBMISSION_NOT_FULL', details: {
                 blocking: [{ workItemId: other.id, analysis: other.analysis, status }]
@@ -274,7 +280,7 @@ test.each(['COMPLETED', 'ON_HOLD', 'REPEAT_REQUIRED', 'AWAITING_VERIFICATION', '
     });
 
 test('requested PARTIAL is preserved in the audit when the derived lifecycle becomes FULL', async () => {
-    const row = await fixture();
+    const row = await fixture();await seedSubmissionAttempt(row);
     expect((await call(submissions.createSubmission, { sampleId: row.sample.id, workItemIds: [row.item.id], type: 'PARTIAL' })).statusCode).toBe(201);
     const audit = await prisma.auditLog.findFirst({ where: { sampleId: row.sample.id, action: 'SUBMISSION_CREATED' } });
     expect(JSON.parse(audit.after)).toMatchObject({ requestedType: 'PARTIAL', derivedType: 'FULL', sampleStatus: 'SUBMITTED_FULL' });
@@ -287,7 +293,8 @@ test('a counted set containing only waived/cancelled work does not create a full
 });
 
 test('submission preview projects only selected items and reads leave every fixture row unchanged', async () => {
-    const row = await fixture(), other = await additionalItem(row, 'COMPLETED'), before = await snapshot([row.sample.id]);
+    const row = await fixture(), other = await additionalItem(row, 'COMPLETED');
+    await seedSubmissionAttempt(row);await seedSubmissionAttempt(row,other);const before = await snapshot([row.sample.id]);
     const preview = await call(workbench.previewSubmissions, { sampleIds: [row.sample.id], workItemIds: [row.item.id] });
     expect(preview).toMatchObject({ statusCode: 200, body: { eligibleSamples: [{ submissionType: 'PARTIAL', totalCount: 2, completedCount: 1 }] } });
     expect(await snapshot([row.sample.id])).toEqual(before);
