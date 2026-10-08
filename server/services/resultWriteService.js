@@ -114,9 +114,10 @@ async function validateExecutionReadiness(tx,ctx) {
 
 async function appendResult(tx, ctx, measurement, values, now) {
     const id = measurement.id || randomUUID();
-    await tx.result.updateMany({ where: { sampleId: ctx.sample.id, param: measurement.param, replicateNo: ctx.replicateNo, isCurrent: true,
+    const superseded=await tx.result.updateMany({ where: { sampleId: ctx.sample.id, param: measurement.param, replicateNo: ctx.replicateNo, isCurrent: true,
         ...(ctx.correctionTargetId && { id: ctx.correctionTargetId, attemptId: ctx.attemptId }) },
-        data: { isCurrent: false, supersededBy: id } });
+        data: { isCurrent: false, supersededBy: id, ...(ctx.correctionTargetId && {updatedAt:ctx.correctionOriginalUpdatedAt}) } });
+    if(ctx.correctionTargetId && superseded.count!==1)throw new TransitionError('The correction Result changed; reload before retrying.',409,'ATTEMPT_CORRECTION_TARGET_INVALID');
     let row;
     try {
         row = await tx.result.create({ data: { id, sampleId: ctx.sample.id, param: measurement.param,
@@ -169,7 +170,7 @@ async function appendAttemptCorrection(tx, { item, sample, attempt, target, acto
     let equipmentReadiness;
     try { equipmentReadiness = original.equipmentReadiness == null ? null : JSON.parse(original.equipmentReadiness); }
     catch (_) { throw new TransitionError('The recorded correction evidence is unavailable.',409,'ATTEMPT_CORRECTION_EVIDENCE_UNAVAILABLE'); }
-    const ctx = { sample,item,attemptId:attempt.id,correctionTargetId:original.id,actor,performedBy:rules.actorName(actor),labId,
+    const ctx = { sample,item,attemptId:attempt.id,correctionTargetId:original.id,correctionOriginalUpdatedAt:original.updatedAt,actor,performedBy:rules.actorName(actor),labId,
         analysis,method,methodId:original.methodologyId,batchId:original.batchId,replicateNo:original.replicateNo,
         basis:original.basis,equipmentId:original.equipmentId,equipmentReadiness,equipmentReadinessText:original.equipmentReadiness,source:'measurement' };
     const measurement = { param:original.param,value,unit:original.unit,replicateNo:original.replicateNo }, now = new Date();
