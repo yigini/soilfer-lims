@@ -132,7 +132,7 @@ describe('BLK-2: Minimum Viable Typed QC Controls Contract', () => {
             });
 
         expect(reviewRes.status).toBe(409);
-        expect(reviewRes.body.error).toMatch(/FAILED QC Batch/);
+        expect(reviewRes.body.code).toBe('QC_GATE_FAILED');
     });
 
     test('5. Manager disposition override (PROCEED_WITH_WARNING) allows submission acceptance', async () => {

@@ -3,8 +3,7 @@ const scopeGuard = require('../utils/scopeGuard');
 const { hasPermission } = require('../config/roles');
 const sampleHolds = require('./sampleHoldService');
 const { QC_RUN_INCLUDE } = require('./qcRunViewService');
-const { analyteGateView } = require('./qcRunGateService');
-const { checkBatchDisposition } = require('./qcService');
+const qcGateService = require('./qcGateService');
 
 const TEXTURE_ALIASES = new Set([
     'TEXTURE',
@@ -199,22 +198,13 @@ class SampleWorkspaceService {
             const linkedScans = item.spectralScans.filter(s => s.isCurrent && !s.isDeleted);
             
             // Batch QC status
-            let qcStatus = 'QC_PASS';
-            let qcDetails = null;
-            if (item.batch) {
-                const view = analyteGateView(item.batch, item.analysis), gate = checkBatchDisposition(view);
-                if (!gate.allowed && view.status === 'QC_FAIL') {
-                    qcStatus = 'QC_FAIL';
-                    activeQcFailCount++;
-                } else if (!gate.allowed) {
-                    qcStatus = 'QC_PENDING';
-                } else if (view.result === 'NOT_REQUIRED') qcStatus = 'NOT_REQUIRED';
-                qcDetails = {
-                    batchId: item.batch.id,
-                    batchStatus: view.status, result: view.result, disposition: view.disposition,
-                    notes: item.batch.notes
-                };
-            }
+            const qcRows = await qcGateService.forWorkItem({ ...item, sample }, prisma);
+            const qcChecks = qcRows.map(row => qcGateService.decision(row.gate));
+            const qcRefused = qcChecks.find(row => !row.allowed);
+            const qcStatus = qcRefused ? qcRefused.gate.value : qcRows[0]?.gate.value || 'NOT_REQUIRED';
+            const qcDetails = { batchId: item.batchId, batchStatus: item.batch?.status,
+                gates: qcRows, notes: item.batch?.notes || null };
+            if (qcChecks.some(row => ['QC_GATE_FAILED', 'QC_GATE_REPEAT_ORDERED'].includes(row.code))) activeQcFailCount++;
 
             // S003 Historical Evidence Gap check:
             // Accepted analytical item with 0 results, 0 valid spectral scans, and no waiveReason
@@ -290,6 +280,9 @@ class SampleWorkspaceService {
                 })),
                 qcStatus,
                 qcDetails,
+                qcCanAccept: !qcRefused,
+                qcGateCode: qcRefused?.code || null,
+                qcAcknowledgementRequired: qcChecks.some(row => row.acknowledgementRequired),
                 isHistoricalGap,
                 blockers,
                 reanalysisReason: item.reanalysisReason,
@@ -532,14 +525,21 @@ class SampleWorkspaceService {
         const isReception = ['SAMPLE_RECEPTION', 'LAB_MANAGER', 'SUPER_ADMIN', 'MASTER_USER'].includes(userRole);
 
         const { canFinalApprove: evaluateFinalApproval } = require('./workEligibility');
-        const linkedBatches = (sample.workItems || []).map(w => w.batch).filter(Boolean);
+        const { linkedBatchIds, resolveReportingModes } = require('./reportResultGovernance');
+        const batchIds = [...new Set([...sample.workItems.map(item => item.batchId),
+            ...sample.results.flatMap(result => linkedBatchIds(result, sample.workItems))].filter(Boolean))];
+        const linkedBatches = await prisma.batch.findMany({ where: { id: { in: batchIds } }, include: QC_RUN_INCLUDE });
+        const qcModes = await resolveReportingModes(sample, linkedBatches, { db: prisma });
+        const qcEvidence = await qcGateService.resolveForSample(sample, linkedBatches, prisma);
         const finalApprovalEval = evaluateFinalApproval(
             sample,
             sample.workItems,
             activeRevision?.lines || orderLines || [],
             user,
-            { qcBatches: linkedBatches, hasHistoricalGap }
+            { qcBatches: linkedBatches, hasHistoricalGap, ...qcModes, ...qcEvidence }
         );
+        const reviewEval = require('./workEligibility').canReview({ status: 'PENDING_REVIEW' }, sample, user, {
+            qcGates: enrichedWorkItems.filter(item => item.status === 'SUBMITTED').flatMap(item => item.qcDetails.gates) });
 
         const capabilities = {
             canReceive: {
@@ -567,7 +567,11 @@ class SampleWorkspaceService {
             },
             canReview: {
                 allowed: isManagerOrAdmin && submittedCount > 0,
-                reason: submittedCount === 0 ? 'No work items currently submitted for review' : (isManagerOrAdmin ? null : 'Requires reviewer authority')
+                canAccept: submittedCount > 0 && reviewEval.canAccept,
+                gate: reviewEval.gate,
+                acknowledgementRequired: reviewEval.acknowledgementRequired,
+                blockers: reviewEval.blockers,
+                reason: submittedCount === 0 ? 'No work items currently submitted for review' : (isManagerOrAdmin ? reviewEval.reason : 'Requires reviewer authority')
             },
             canFinalApprove: {
                 allowed: isManagerOrAdmin && finalApprovalEval.allowed,

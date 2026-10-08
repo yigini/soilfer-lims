@@ -31,6 +31,12 @@ function classifyQcRunSchema(db, source) {
     if (differences.length) throw fail('QC_RUN_SCHEMA_MISMATCH', 'Install the prior application schema first.', differences);
     const tables = TABLES.map(name => {
         const actual = db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(name);
+        if (name === 'BatchDisposition' && actual?.type === 'table') {
+            // #187 parts 2–3: recognize only its reviewed nullable column and
+            // exact guards/receipt. Its separate startup gate rejects pending
+            // installation; all #186 DDL, digests and receipts stay unchanged.
+            actual.sql = require('./qcDispositionScopeSchemaService').inspectScopeExtension(db).baseSql;
+        }
         const wanted = source.sql.match(new RegExp(`CREATE TABLE "${name}" \\([\\s\\S]*?\\n\\);`))?.[0];
         // #186 part 19: Prisma cannot emit deferred FKs. Only these two exact
         // self-FK clauses may differ by this suffix; all other DDL is exact.
@@ -60,6 +66,10 @@ function classifyQcRunSchema(db, source) {
     if (indexes.length !== 14 || guards.length !== 47) throw fail('QC_RUN_SOURCE_MISMATCH', 'Normalized QC release needs fourteen indexes and forty-seven guards.');
     function present(wanted, type) {
         const actual = db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(wanted.name);
+        if (wanted.name === 'WorkItem_batch_membership_guard') {
+            const extension = require('./qcDispositionScopeSchemaService').inspectScopeExtension(db);
+            if (extension.classification === 'COMPLETE') wanted = { ...wanted, sql: extension.membership.guardSql };
+        }
         if (actual && (actual.type !== type || normalized(actual.sql) !== normalized(wanted.sql))) differences.push(`${wanted.name} differs`);
         return Boolean(actual);
     }

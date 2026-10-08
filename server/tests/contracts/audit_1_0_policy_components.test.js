@@ -84,6 +84,17 @@ describe('Audit 1.0: real policy page controls', () => {
         elements(tree).find(node => node.type === 'input').props.onChange({ target: { checked: true } });
         expect(change).toHaveBeenCalledWith({ reject: ['1-2s'], warn: [] });
     });
+    test('calibration action editor offers bracket repeats only for continuing checks and preserves other kinds', async () => {
+        const h = await fixture(), change = jest.fn();
+        const value = registry['qc.calibrationFailAction'].presets.ISO17025_STRICT;
+        const tree = h.editor({ definition: registry['qc.calibrationFailAction'], value, t, onChange: change });
+        const selects = elements(tree).filter(node => node.type === 'select');
+        expect(selects).toHaveLength(3);
+        expect(elements(selects[0]).filter(node => node.type === 'option').map(node => node.props.value)).toEqual(['FAIL_BATCH', 'WARN']);
+        for (const select of selects.slice(1)) expect(elements(select).filter(node => node.type === 'option').map(node => node.props.value)).toEqual(['FAIL_BATCH', 'REPEAT_BRACKET', 'WARN']);
+        selects[1].props.onChange({ target: { value: 'WARN' } });
+        expect(change).toHaveBeenCalledWith({ ICV: 'FAIL_BATCH', CCV: 'WARN', CCB: 'REPEAT_BRACKET' });
+    });
     test('sample-code editor warns when the check character is omitted, and allows the lab to keep that format', async () => {
         const h = await fixture(), change = jest.fn();
         const tree = h.editor({ definition: registry['sample.codeFormat'], value: '{LAB}-{SEQ:6}', t, onChange: change });

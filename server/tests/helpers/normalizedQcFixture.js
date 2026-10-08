@@ -19,6 +19,7 @@ async function normalizeLegacyQcFixture(client, batchId) {
         const { installQcRuns } = require('../../scripts/install_qc_runs');
         const reviewed = installQcRuns({ dbPath: file });
         installQcRuns({ dbPath: file, apply: true, planSha256: reviewed.backfillFingerprint });
+        require('../../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: file, apply: true });
         return;
     }
     const db = new Database(file, { readonly: true, fileMustExist: true });

@@ -5,6 +5,7 @@ const app = require('../../app');
 const { getAuthToken, ensureTestLab } = require('../setup');
 const { samplesDb, usersDb } = require('../../db');
 const prisma = require('../../prisma');
+const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
 
 describe('BLK-3: Report & Certificate PDF Generation Contract', () => {
     let mgrToken, sampleId, reportId, shareToken;
@@ -12,6 +13,7 @@ describe('BLK-3: Report & Certificate PDF Generation Contract', () => {
     beforeAll(async () => {
         await ensureTestLab('LAB-PDF', 'PDF');
         mgrToken = await getAuthToken('LAB_MANAGER', 'LAB-PDF', ['PDF'], ['PDF-PROJ']);
+        await setFixtureQcRequirement(prisma, mgrToken, 'LAB-PDF');
 
         // Create an approved sample with results
         const s = await createSampleFixture(prisma, { data: { id: `SMP-PDF-${Date.now()}`,

@@ -571,6 +571,7 @@ model BatchDisposition {
   decidedBy               String?
   decidedAt               DateTime?
   legacySource            String?
+  scope                   String?
 
   @@index([batchId, analysisCode])
 }

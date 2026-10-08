@@ -233,14 +233,14 @@ describe('QC Batch Inspection, Disposition & Release Gates Contract Tests (#118)
         const reportSample = await prisma.sample.findUnique({ where: { id: reportId }, include: { workItems: true, results: true } });
         const publishCheck = canPublish(reportSample, null, lab1Manager, { qcBatches: [await evidenceBatch(reportBatchId)] });
         expect(publishCheck.allowed).toBe(false);
-        expect(publishCheck.code).toBe('QC_BATCH_FAILED');
+        expect(publishCheck.code).toBe('QC_GATE_FAILED');
 
-        // C. POST /api/reports/generate/:sampleId returns 409 Conflict with code QC_BATCH_FAILED
+        // C. Publication uses the same result-level gate as review.
         const genRes = await request(app)
             .post(`/api/reports/generate/${reportId}`)
             .set('Authorization', `Bearer ${lab1Manager.token}`);
         expect(genRes.status).toBe(409);
-        expect(genRes.body.code).toBe('QC_BATCH_FAILED');
+        expect(genRes.body.code).toBe('QC_GATE_FAILED');
     });
 
     // ─── Test 3: Manager QC Disposition Authorization & Validation ───

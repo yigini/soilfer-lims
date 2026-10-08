@@ -150,6 +150,10 @@ else
     node scripts/install_qc_runs.js --apply
 fi
 
+# #187 must complete before the independent #189 evidence extensions.
+echo "📦 Installing QC disposition scope guards..."
+node scripts/install_qc_gate_scope.js --db "${DATABASE_PATH:-/app/server/prisma/dev.db}" --apply
+
 # Install nullable PT evidence only. Legacy sigma/NCR backfill remains a
 # separate reviewed command; startup never approves its own backfill plan.
 echo "📦 Installing proficiency evidence..."

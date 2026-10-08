@@ -48,6 +48,7 @@ async function fixture(count = 1, criteria = { crmEveryNBatches: 0 }, recordedAn
     installResultAttemptLinks({ dbPath: file, apply: true }); installSampleHolds({ dbPath: file, apply: true });
     installReferenceMaterials({ dbPath: file, apply: true }); installQcRules({ dbPath: file, apply: true });
     installQcRuns({ dbPath: file, apply: true });
+    require('../../scripts/install_qc_gate_scope').installQcGateScope({ dbPath: file, apply: true });
     require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: file, apply: true });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     ownedFile.db = db;
@@ -189,14 +190,14 @@ test('a real failed Native blocking run remains excluded from reports and public
     expect(resolved.qcModes[result.id]).toBe('REQUIRED_BLOCKING');
     expect(resolved.qcModeEvidence[0]).toMatchObject({ resultId: result.id, effectiveMode: 'REQUIRED_BLOCKING',
         source: 'FROZEN', contributingBatchIds: [run.id] });
-    expect(canPublish(sample, null, f.actor, { ...resolved, qcBatches: [batch] })).toMatchObject({ allowed: false, code: 'QC_BATCH_FAILED' });
+    expect(canPublish(sample, null, f.actor, { ...resolved, qcBatches: [batch] })).toMatchObject({ allowed: false, code: 'QC_GATE_FAILED' });
     const { content } = await assembleReport(sample.id, f.actor, { db: f.db });
     expect(content.resultGroups.flatMap(group => group.items)).toEqual([]);
     expect(content.evidence.qcModes).toEqual(resolved.qcModeEvidence);
     const before = await evidence(f.db), reports = await f.db.report.count();
     await withQcRunHttp(f.db, f.actor, async (app, token) => {
         const response = await request(app).post(`/api/reports/generate/${sample.id}`).set('Authorization', `Bearer ${token}`);
-        expect(response.status).toBe(409); expect(response.body.code).toBe('QC_BATCH_FAILED');
+        expect(response.status).toBe(409); expect(response.body.code).toBe('QC_GATE_FAILED');
         expect(response.body.qcModeEvidence).toEqual(resolved.qcModeEvidence);
     }, { reports: true });
     expect(await evidence(f.db)).toEqual(before); expect(await f.db.report.count()).toBe(reports);

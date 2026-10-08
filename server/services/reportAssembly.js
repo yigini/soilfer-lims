@@ -35,7 +35,9 @@ async function assembleReport(sampleId, user, options = {}) {
         include: require('./qcRunViewService').QC_RUN_INCLUDE }) : []);
     const { qcModes, qcModeEvidence } = options.qcModes && options.qcModeEvidence
         ? options : await resolveReportingModes(sample, qcBatches, { db });
-    const reportOptions = { qcModes, qcBatches };
+    const { qcGates, qcAcknowledgements } = options.qcGates && options.qcAcknowledgements ? options
+        : await require('./qcGateService').resolveForSample(sample, qcBatches, db);
+    const reportOptions = { qcModes, qcBatches, qcGates, qcAcknowledgements };
     const reportableResults = sample.results.filter(result =>
         isReviewedReportResult(result, sample.workItems, getReportingMode(sample, result, reportOptions)));
     const omittedByDisposition = sample.results.filter(result =>
@@ -249,7 +251,7 @@ async function assembleReport(sampleId, user, options = {}) {
     const warningLocale = ['en', 'es', 'es-419', 'fr', 'pt'].includes(reportLocale) ? reportLocale : 'en';
     const qcWarningStatement = qcWarnings.length
         ? require(`../locales/${warningLocale}.json`).resultReports.qcWarningStatement : null;
-    const evidence = freezeReportEvidence(reportableResults, sample.workItems, qcBatches);
+    const evidence = freezeReportEvidence(reportableResults, sample.workItems, qcBatches, reportOptions);
     evidence.qcModes = qcModeEvidence;
     const evidenceText = describeReportEvidence(evidence, warningLocale);
     const reportContent = {

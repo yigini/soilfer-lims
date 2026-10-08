@@ -5,16 +5,19 @@ const jwt = require('jsonwebtoken');
 const request = require('supertest');
 const app = require('../../app');
 const prisma = require('../../prisma');
-const { getAuthToken } = require('../setup');
+const { getAuthToken, ensureTestLab } = require('../setup');
+const { setFixtureQcRequirement } = require('../helpers/qcPolicyFixture');
 const id = prefix => `${prefix}-${crypto.randomUUID()}`;
 const labId = 'LAB-AUDIT-07';
 
 describe('Audit 0.7: returned work can be recorded and submitted again', () => {
     let manager, technician, username;
     beforeAll(async () => {
+        await ensureTestLab(labId, 'TEST');
         manager = await getAuthToken('LAB_MANAGER', labId);
         technician = await getAuthToken('LAB_TECHNICIAN', labId);
         username = jwt.decode(technician).username;
+        await setFixtureQcRequirement(prisma, manager, labId);
     });
     async function fixture({ batchStatus, itemStatus = 'SUBMITTED' } = {}) {
         const sampleId = id('SMP-07'), analysis = id('ANALYSIS-07');
