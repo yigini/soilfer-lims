@@ -102,6 +102,7 @@ function compatibilityCriteria(review, evidence, numberFormat) {
             if (!finite(original.maxAllowed) && !(original.criterion === 'NO_LOQ' && original.loq === null)) throw missingCriteria();
             policies[id] = { maxAllowed: finite(original.maxAllowed) ? original.maxAllowed : value('blankAbsLimit'), mode: blankMode,
                 loq: original.loq, loqSource: original.loqSource, methodologyId: original.methodologyId };
+            if (!finite(policies[id].maxAllowed)) throw missingCriteria();
         } else if (collection === 'duplicates') {
             const nearLoqMultiplier = stored.policyValues?.['qc.duplicateNearLoqMultiplier'];
             if (!finite(original.maxRpd) || !finite(nearLoqMultiplier) || !Object.hasOwn(original, 'loq') ||

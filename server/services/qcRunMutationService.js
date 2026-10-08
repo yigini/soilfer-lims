@@ -28,7 +28,7 @@ async function mutateQcRun(db, batchId, actor, input = {}, { explicit = false, c
         if (input.mode === MODE && !correction) throw failure(400, 'QC_REVIEWED_ROUTE_REQUIRED', 'Use the explicit corrections route.');
         const reviewed = correction ? await authorizeReviewedCorrection(tx, batch, actor, input) : null;
         const native = isNative(batch), payload = hasQcPayload(input) || correction, clear = payload && !explicit && !correction && emptyQcPayload(input);
-        const targetCode = input.analysisCode || (native && (payload || explicit) ? batch.analysis : null);
+        const targetCode = reviewed?.analysisCode || input.analysisCode || (native && (payload || explicit) ? batch.analysis : null);
         const targetsOf = run => targetCode ? run.analytes.filter(row => row.analysisCode === targetCode) : run.analytes;
         let targets = targetsOf(batch);
         if (!targets.length) throw failure(400, 'QC_ANALYSIS_NOT_IN_RUN', 'The analysis is not a member of this run.');

@@ -184,3 +184,32 @@ test('later generated report and PDF disclose the original failed evaluation and
         }
     } finally { text.mockRestore(); }
 });
+
+test.each(['requirements', 'qcMode', 'failAction', 'blankLimit'])('the actual route refuses incomplete recorded %s with zero writes', async field => {
+    const f = await failedFixture(false), beforeIncompleteRecord = await f.read(), previous = beforeIncompleteRecord.evaluations[0];
+    const details = JSON.parse(previous.details);
+    if (field === 'requirements') delete details.evaluation.qcRule.requirements;
+    if (field === 'qcMode') delete details.evaluation.policyValues['qc.mode'];
+    if (field === 'failAction') delete details.evaluation.qcRule.resolved.failAction;
+    if (field === 'blankLimit') delete details.evaluation.blanks[0].maxAllowed;
+    // Intentional incomplete retained-record fixture on this independently
+    // owned database. Append it through Prisma; never rewrite the real failed
+    // evaluation, alter guards, or change historical fixture authorities.
+    await f.db.qcEvaluation.create({ data: { ...previous, id: randomUUID(), version: previous.version + 1,
+        supersedesId: previous.id, details: JSON.stringify(details) } });
+    const before = await f.allEvidence(), response = await f.submit(f.reviewer);
+    expect(response.status).toBe(409); expect(response.body.code).toBe('QC_REVIEWED_CRITERIA_UNAVAILABLE');
+    expect(await f.allEvidence()).toEqual(before);
+    expect((await f.read()).evaluations[0]).toEqual(previous);
+});
+
+test('compatibility replay retains required counts when the current run profile changes', async () => {
+    const f = await failedFixture(false), original = await f.read();
+    const profiles = structuredClone(require('../../config/policyRegistry').strict('qc.runProfiles'));
+    profiles.RACK_40.qcSlots.push({ position: 3, type: 'BLANK', label: 'New profile blank' });
+    await f.setPolicy([{ key: 'qc.runProfiles', value: profiles }]);
+    const response = await f.submit(f.reviewer); expect(response.status).toBe(200); expect(response.body.batch.analytes[0].status).toBe('QC_PASS');
+    const after = await f.read(), evaluation = JSON.parse(after.evaluations[1].details).evaluation;
+    expect(evaluation.qcRule.requirements.BLANK.required).toBe(1); expect(evaluation.qcRule.requirements.BLANK.found).toBe(1);
+    expect(after.evaluations[0]).toEqual(original.evaluations[0]);
+});
