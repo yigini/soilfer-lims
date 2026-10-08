@@ -148,6 +148,38 @@ test('a reviewer may request REVIEW_OUTLIER and a technician cannot request it',
     expect({...previous,status:f.attempt.status}).toEqual(f.attempt);
 });
 
+test('a failed attempt event rolls back the parent transition, OPEN request and WorkItem together',async()=>{
+    const f=await fixture(),before=await f.all();
+    const fault=f.db.$extends({query:{auditLog:{create({args,query}){
+        if(args.data.entity==='WORK_ATTEMPT' && args.data.action==='CREATED')throw Error('Owned attempt-event storage failure');
+        return query(args);
+    }}}});
+    await expect(require('../../services/workRepeatService').requestRepeat(fault,f.items[0].id,f.actor,
+        {reason:'INSTRUMENT_FAULT',note:'Check event atomicity'})).rejects.toThrow('Owned attempt-event storage failure');
+    expect(await f.all()).toEqual(before);
+});
+
+test('a failed first Result rolls back its first fill and immutable event, allowing the same OPEN request to be retried',async()=>{
+    const f=await fixture();expect((await f.command({reason:'PREP_ERROR'})).status).toBe(201);
+    const before=await f.all();
+    const fault=f.db.$extends({query:{result:{create(){throw Error('Owned Result storage failure');}}}});
+    await expect(inTransaction(fault,tx=>writeResultsExecution(tx,{sampleId:f.items[0].sampleId,workItemId:f.items[0].id,actor:f.actor,
+        measurements:[{param:f.analysisCode,value:'7.3',equipmentId:f.instrument.id,replicateNo:1}]}))).rejects.toThrow('Owned Result storage failure');
+    expect(await f.all()).toEqual(before);
+    const recorded=await f.record();expect(recorded[0].attemptId).toBe(before.attempts.find(row=>row.status==='OPEN').id);
+});
+
+test('a failed correction event rolls back the new Result, old supersession and review metadata without deleting audit rows',async()=>{
+    const f=await fixture(),before=await f.all();
+    const fault=f.db.$extends({query:{auditLog:{create({args,query}){
+        if(args.data.entity==='WORK_ATTEMPT' && args.data.action==='CORRECTED')throw Error('Owned correction-event storage failure');
+        return query(args);
+    }}}});
+    await expect(require('../../services/workAttemptCorrectionService').correctAttempt(fault,f.attempt.id,f.actor,
+        {value:'7.7',reason:'TRANSCRIPTION_ERROR',note:'Check correction atomicity'})).rejects.toThrow('Owned correction-event storage failure');
+    expect(await f.all()).toEqual(before);
+});
+
 test('actual submission changes only the attempt status; a technician cannot repeat or correct afterwards',async()=>{
     const f=await fixture(),before=f.attempt;
     await f.submit();
