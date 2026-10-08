@@ -6,7 +6,8 @@ const { parseArguments } = require('../../scripts/plan_work_attempt_backfill');
 let db;
 beforeEach(() => {
     db = new Database(':memory:');
-    db.exec(`CREATE TABLE WorkItem(id TEXT PRIMARY KEY,sampleId TEXT,analysis TEXT,status TEXT);
+    db.exec(`CREATE TABLE Batch(id TEXT PRIMARY KEY);
+        CREATE TABLE WorkItem(id TEXT PRIMARY KEY,sampleId TEXT,analysis TEXT,status TEXT);
         CREATE TABLE WorkAttempt(id TEXT PRIMARY KEY,workItemId TEXT,attemptNo INTEGER,status TEXT,
             evidenceData TEXT,evidenceHash TEXT,instrumentId TEXT,qcBatchId TEXT,createdAt TEXT,updatedAt TEXT);
         CREATE TABLE Result(id TEXT PRIMARY KEY,sampleId TEXT,param TEXT,attemptId TEXT,replicateNo INTEGER,isCurrent INTEGER,value TEXT,batchId TEXT);
@@ -25,7 +26,7 @@ function attempt(id, workItemId, attemptNo = 1, status = 'RECORDED') {
         '{"fractions":[1,2,3],"original":"kept"}', 'original-hash', 'old-instrument', 'old-batch', 'old-created', 'old-updated');
 }
 function evidence() {
-    return ['WorkItem', 'WorkAttempt', 'Result', 'AuditLog'].map(table => db.prepare(`SELECT * FROM "${table}" ORDER BY id`).all())
+    return ['Batch', 'WorkItem', 'WorkAttempt', 'Result', 'AuditLog'].map(table => db.prepare(`SELECT * FROM "${table}" ORDER BY id`).all())
         .concat([db.prepare('SELECT * FROM sqlite_master ORDER BY name').all()]);
 }
 function readonlyPlan() {
@@ -126,6 +127,42 @@ test('historical existing attempts never receive evidence copies, even when link
     expect(readonlyPlan().historicalEquipmentEvidence).toEqual([]);
     expect(db.prepare('SELECT instrumentId,evidenceData FROM WorkAttempt WHERE id=?').get('retained'))
         .toEqual({ instrumentId: 'old-instrument', evidenceData: '{"fractions":[1,2,3],"original":"kept"}' });
+});
+
+test('new historical batch FK plans only the single existing batch shared by all linked Results', () => {
+    item('batched'); result('first', 'batched', { batchId: 'existing-batch' });
+    result('second', 'batched', { batchId: 'existing-batch', replicateNo: 2 });
+    db.prepare('INSERT INTO Batch VALUES (?)').run('existing-batch');
+    expect(readonlyPlan().historicalBatchEvidence).toEqual([{ newAttemptForWorkItemId: 'batched', resultIds: ['first', 'second'],
+        outcome: 'COPIED', reason: null, batchId: 'existing-batch' }]);
+});
+
+test.each([
+    [null, 'BATCH_NOT_RECORDED'], ['different-batch', 'BATCHES_DIFFER'], ['dangling-batch', 'BATCH_REFERENCE_MISSING']
+])('missing, mixed or dangling historical batch %s is reported without blocking or inventing a reference', (other, reason) => {
+    item('batched'); result('first', 'batched', { batchId: other === 'dangling-batch' ? other : 'existing-batch' });
+    result('second', 'batched', { batchId: other, replicateNo: 2 });
+    db.prepare('INSERT INTO Batch VALUES (?)').run('existing-batch');
+    expect(readonlyPlan()).toMatchObject({ status: 'READY', historicalBatchEvidence: [{
+        newAttemptForWorkItemId: 'batched', resultIds: ['first', 'second'], outcome: 'NOT_RECORDED', reason, batchId: null }] });
+});
+
+test('existing attempts plan batch FK only from their exact qcBatchId and retain every original field', () => {
+    item('old'); attempt('retained', 'old');
+    db.prepare('INSERT INTO Batch VALUES (?)').run('old-batch');
+    expect(readonlyPlan().historicalBatchEvidence).toEqual([{ attemptId: 'retained', workItemId: 'old',
+        outcome: 'COPIED', reason: null, batchId: 'old-batch' }]);
+    db.prepare('DELETE FROM Batch').run();
+    expect(readonlyPlan().historicalBatchEvidence).toEqual([{ attemptId: 'retained', workItemId: 'old',
+        outcome: 'NOT_RECORDED', reason: 'BATCH_REFERENCE_MISSING', batchId: null }]);
+});
+
+test('already populated additive batch FK is retained without re-copying historical qcBatchId', () => {
+    item('old'); attempt('retained', 'old');
+    db.exec('ALTER TABLE WorkAttempt ADD COLUMN batchId TEXT');
+    db.prepare('UPDATE WorkAttempt SET batchId=? WHERE id=?').run('recorded-batch', 'retained');
+    expect(readonlyPlan().historicalBatchEvidence).toEqual([{ attemptId: 'retained', workItemId: 'old',
+        outcome: 'RETAINED', reason: null, batchId: 'recorded-batch' }]);
 });
 
 function batchPair() {

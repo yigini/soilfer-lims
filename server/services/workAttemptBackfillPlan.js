@@ -14,6 +14,8 @@ function planHistoricalAttempts(db) {
         const attempts = db.prepare('SELECT * FROM "WorkAttempt" ORDER BY id').all();
         const results = db.prepare('SELECT * FROM "Result" ORDER BY id').all();
         const items = db.prepare('SELECT id,sampleId,analysis,status FROM "WorkItem" ORDER BY id').all();
+        const batchIds = db.prepare('SELECT id FROM "Batch" ORDER BY id').all().map(row => row.id);
+        const knownBatchIds = new Set(batchIds);
         const attemptsByItem = new Map(), itemsByMeasurement = new Map(), duplicateNumbers = new Map();
         for (const attempt of attempts) {
             const group = attemptsByItem.get(attempt.workItemId) || [];
@@ -100,13 +102,30 @@ function planHistoricalAttempts(db) {
         const resultsById = new Map(results.map(row => [row.id, row]));
         const historicalEquipmentEvidence = [...newAttempts.values()].map(plan => ({ workItemId: plan.workItemId,
             resultIds: plan.resultIds, ...historicalAttemptEvidence(plan.resultIds.map(id => resultsById.get(id))) }));
+        // Pin 6054855429: populate only the new additive FK; qcBatchId and
+        // every original field remain untouched. Missing/mixed/dangling batch
+        // metadata is reported, rather than invented or treated as a blocker.
+        const batchEvidence = values => {
+            if (values.some(value => value == null) || !values.length) return { outcome: 'NOT_RECORDED', reason: 'BATCH_NOT_RECORDED', batchId: null };
+            const distinct = [...new Set(values)];
+            if (distinct.length !== 1) return { outcome: 'NOT_RECORDED', reason: 'BATCHES_DIFFER', batchId: null };
+            if (!knownBatchIds.has(distinct[0])) return { outcome: 'NOT_RECORDED', reason: 'BATCH_REFERENCE_MISSING', batchId: null };
+            return { outcome: 'COPIED', reason: null, batchId: distinct[0] };
+        };
+        const historicalBatchEvidence = [
+            ...attempts.map(row => ({ attemptId: row.id, workItemId: row.workItemId,
+                ...(row.batchId != null ? { outcome: 'RETAINED', reason: null, batchId: row.batchId }
+                    : batchEvidence([row.qcBatchId])) })),
+            ...[...newAttempts.values()].map(plan => ({ newAttemptForWorkItemId: plan.workItemId, resultIds: plan.resultIds,
+                ...batchEvidence(plan.resultIds.map(id => resultsById.get(id).batchId)) }))
+        ];
         const output = { status: blockers.length ? 'REFUSED' : 'READY',
             existingAttemptCount: attempts.length, resultCount: results.length,
             alreadyLinkedResultCount: results.filter(row => row.attemptId != null).length,
             newAttempts: [...newAttempts.values()], links, blockers, duplicateAttemptNumberGroups, currentResultConflicts,
-            historicalEquipmentEvidence,
+            historicalEquipmentEvidence, historicalBatchEvidence,
             originalAttemptSha256: fingerprint(attempts), originalResultSha256: fingerprint(results),
-            matchedWorkItemSourceSha256: fingerprint(items), totalChanges: 0 };
+            matchedWorkItemSourceSha256: fingerprint(items), batchReferenceSha256: fingerprint(batchIds), totalChanges: 0 };
         return { ...output, planSha256: fingerprint(output) };
     })();
 }
