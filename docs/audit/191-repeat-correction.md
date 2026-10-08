@@ -2,7 +2,8 @@
 
 #190 is merged at a919ad679e7c381c5428cbaaed561295785691a5. #253 is merged
 at 0b5428405f577aab2e6d90634209f8b154bba373 and incorporated here.
-Branch: audit/3.2-repeat-correction. No #191 PR, audit pass or deployment exists.
+Branch: audit/3.2-repeat-correction. Draft review is being prepared; no audit
+pass or deployment exists. Readiness requires all final-head checks below.
 
 Scope authorities are #162 and #191 comments 5975239652, 6055538092,
 6059796291, 6067488471, 6067875897, 6068463777, 6068870369, 6069548259
@@ -64,6 +65,14 @@ Verification history is diagnostic, not readiness:
   equipment, QC retained evidence and SQL scanner. A separate retained-read
   run passed 100/103 tests in three suites (14.259s); two scalar replacement
   setups and LATEST_VALID were then restaged under Claude's scope pins.
+- 0f5a4c7: repeat commands and state-write scanner passed all 147 tests in
+  two suites (72.967s), including closed metadata discard/refusal and the
+  six-file positive result-set import boundary. Client build passed (13.78s);
+  lint passed with zero errors and fourteen existing warnings.
+- 144ea42: both complete reported-value/current-view and persistent-policy
+  suites passed all 45 tests (11.443s), including actual received-sample
+  submission/review/approval with NO_BATCH/required:false, unchanged versions
+  0/1, literal method/unit and exact frozen selection audit assertions.
 
 Applied by precedent / deliberate setup inventory:
 
