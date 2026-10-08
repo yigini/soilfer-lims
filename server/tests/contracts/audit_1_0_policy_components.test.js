@@ -61,6 +61,23 @@ describe('Audit 1.0: real policy page controls', () => {
         const state = await snapshot(null, { profile: { overrides: { 'qc.mode': 'ADVISORY' } } });
         const h = await fixture(true, state); expect(find(h.render(), 'button', 'Clear override')).toBeUndefined();
     });
+    test('manager edits PT limits at analysis scope and submits the exact structured thresholds', async () => {
+        const h = await fixture(); let tree = h.render();
+        elements(tree).find(node => node.type === 'select' && elements(node).some(option => option.props?.value === 'PH'))
+            .props.onChange({ target: { value: 'PH' } });
+        h.render(); await new Promise(resolve => setImmediate(resolve)); tree = h.render();
+        const row = elements(tree).find(node => node.type === 'tr' && node.key === 'pt.zScoreLimits');
+        find(row, 'button', 'Edit').props.onClick(); tree = h.render();
+        const editor = elements(tree).find(node => node.type === h.editor);
+        const controls = h.editor(editor.props);
+        elements(controls).filter(node => node.type === 'input')[1].props.onChange({ target: { value: '4' } });
+        tree = h.render();
+        elements(tree).filter(node => node.type === 'input').at(-1).props.onChange({ target: { value: 'Scheme limits reviewed' } });
+        tree = h.render(); elements(tree).filter(node => node.type === 'form').at(-1).props.onSubmit({ preventDefault() {} });
+        await new Promise(resolve => setImmediate(resolve));
+        expect(h.axios.patch).toHaveBeenCalledWith('/api/labs/lab/policies', expect.objectContaining({
+            reason: 'Scheme limits reviewed', changes: [{ key: 'pt.zScoreLimits', value: { questionable: 2, unsatisfactory: 4 }, analysisCode: 'PH', methodologyId: null }] }));
+    });
     test('Westgard editor keeps reject and warning lists exclusive', async () => {
         const h = await fixture(), change = jest.fn();
         const tree = h.editor({ definition: registry['qc.westgardRules'], value: { reject: [], warn: ['1-2s'] }, t, onChange: change });

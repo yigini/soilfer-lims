@@ -1,5 +1,7 @@
 const prisma = require('../../prisma');
-const { evaluateProficiency, recordRound, getSummary } = require('../../controllers/ptController');
+const { recordRound, getSummary } = require('../../controllers/ptController');
+const { evaluateProficiency } = require('../../services/proficiencyAssessmentService');
+const ptLimits = require('../../services/policyService').getStrict('pt.zScoreLimits');
 
 describe('WP-30: Proficiency Testing Model & Reportable Indicators', () => {
     let createdRoundIds = [];
@@ -25,22 +27,22 @@ describe('WP-30: Proficiency Testing Model & Reportable Indicators', () => {
         // Assigned: 50.0, std dev: 5.0
 
         // Lab result: 52.0 -> z = +0.40 -> SATISFACTORY (|z| <= 2)
-        const res1 = evaluateProficiency(50.0, 52.0, 5.0);
+        const res1 = evaluateProficiency(50.0, 52.0, 5.0, ptLimits);
         expect(res1.zScore).toBe(0.40);
         expect(res1.outcome).toBe('SATISFACTORY');
 
         // Lab result: 62.0 -> z = +2.40 -> QUESTIONABLE (2 < |z| <= 3)
-        const res2 = evaluateProficiency(50.0, 62.0, 5.0);
+        const res2 = evaluateProficiency(50.0, 62.0, 5.0, ptLimits);
         expect(res2.zScore).toBe(2.40);
         expect(res2.outcome).toBe('QUESTIONABLE');
 
         // Lab result: 70.0 -> z = +4.00 -> UNSATISFACTORY (|z| > 3)
-        const res3 = evaluateProficiency(50.0, 70.0, 5.0);
+        const res3 = evaluateProficiency(50.0, 70.0, 5.0, ptLimits);
         expect(res3.zScore).toBe(4.00);
         expect(res3.outcome).toBe('UNSATISFACTORY');
 
         // Negative z-score
-        const res4 = evaluateProficiency(50.0, 42.0, 5.0);
+        const res4 = evaluateProficiency(50.0, 42.0, 5.0, ptLimits);
         expect(res4.zScore).toBe(-1.60);
         expect(res4.outcome).toBe('SATISFACTORY');
     });
@@ -76,7 +78,8 @@ describe('WP-30: Proficiency Testing Model & Reportable Indicators', () => {
 
         expect(round.assignedValue).toBe(6.50);
         expect(round.labResult).toBe(6.60);
-        expect(round.zScore).toBe(0.40);
+        // Audit #189 stores the unrounded score; rounding is only for display.
+        expect(round.zScore).toBe((6.60 - 6.50) / 0.25);
         expect(round.outcome).toBe('SATISFACTORY');
 
         const dbRecord = await prisma.proficiencyRound.findUnique({ where: { id: round.id } });

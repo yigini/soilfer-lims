@@ -1,4 +1,5 @@
 const { randomUUID } = require('node:crypto');
+const { auditRunCommand } = require('./qcRunAuditService');
 const { hasPermission } = require('../config/roles');
 const scopeGuard = require('../utils/scopeGuard');
 const policyService = require('./policyService');
@@ -123,4 +124,5 @@ async function writeNativeMeasurements(db, batchId, actor, input = {}, { correct
     });
 }
 
-module.exports = { writeNativeMeasurements };
+module.exports = { writeNativeMeasurements: auditRunCommand(writeNativeMeasurements, (input = {}, options = {}) =>
+    options.correction ? 'MEASUREMENT_CORRECTION' : (input.measurements?.length || input.references?.length) ? 'MEASUREMENT_WRITE' : 'EVALUATION') };

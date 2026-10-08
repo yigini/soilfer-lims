@@ -823,7 +823,7 @@ export default function WorkbenchShell({
                 assignedWorkItems={currentGroup?.items || []}
                 selectedItem={selectedSpectralItem}
                 modality={selectedSpectralItem?.analysis || 'SPEC_MIR'}
-                eligibleEquipment={currentGroup?.eligibleEquipment || []}
+                eligibleEquipment={selectedSpectralItem?.eligibleEquipment || currentGroup?.eligibleEquipment || []}
             />
 
             {/* Toast Notification */}

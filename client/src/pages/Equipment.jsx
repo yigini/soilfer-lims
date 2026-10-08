@@ -229,7 +229,9 @@ const Equipment = () => {
                                     </td>
                                     <td className="px-4 py-3 text-center">
                                         <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${READINESS_BADGES[asset.readiness]}`}>
-                                            {t(`equipment.${asset.readiness.toLowerCase()}`, asset.readiness)}
+                                            {asset.readinessWarnings?.includes('EQUIPMENT_NOT_CONFIGURED_WARNING')
+                                                ? t('equipment.unconfiguredWarning')
+                                                : t(`equipment.${asset.readiness.toLowerCase()}`, asset.readiness)}
                                         </span>
                                     </td>
                                     <td className="px-4 py-3">

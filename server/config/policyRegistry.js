@@ -76,6 +76,11 @@ key('numbers.thousandsSeparator', 'enum', null, null, null, { scope: 'LAB', null
 key('intake.defaultAnalysisMassG', 'number', 10, 10, 10, { min: 0, unit: 'g' });
 key('intake.retentionMassG', 'number', 100, 100, 100, { scope: 'LAB', min: 0, unit: 'g' });
 key('referenceMaterials.expiryWarningDays', 'integer', 30, 30, 30, { ...integer, scope: 'LAB', unit: 'days' });
+key('equipment.requireEquipment', 'enum', 'AUTO', 'AUTO', 'AUTO', { allowedValues: ['AUTO', 'REQUIRED', 'NOT_REQUIRED'] });
+key('equipment.unconfiguredReadiness', 'equipmentReadinessMap', { CRITICAL: 'BLOCK', IMPORTANT: 'WARN', NON_CRITICAL: 'ALLOW' },
+    undefined, undefined, { scope: 'LAB' });
+key('pt.zScoreLimits', 'ptZScoreLimits', { questionable: 2, unsatisfactory: 3 }, undefined, undefined,
+    { scope: 'LAB', analysisOverridesAll: true });
 
 function clone(value) { return JSON.parse(JSON.stringify(value)); }
 function definition(name) {
@@ -96,6 +101,11 @@ function valid(name, value) {
     case 'calibrationFailAction': return !!value && typeof value === 'object' && !Array.isArray(value) &&
         Object.keys(value).length === Object.keys(d.allowedActions).length &&
         Object.entries(d.allowedActions).every(([kind, actions]) => actions.includes(value[kind]));
+    case 'equipmentReadinessMap': return !!value && typeof value === 'object' && !Array.isArray(value) &&
+        Object.keys(value).length === 3 && ['CRITICAL', 'IMPORTANT', 'NON_CRITICAL'].every(type => ['BLOCK', 'WARN', 'ALLOW'].includes(value[type]));
+    case 'ptZScoreLimits': return !!value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 2 &&
+        Number.isFinite(value.questionable) && Number.isFinite(value.unsatisfactory) &&
+        value.questionable > 0 && value.questionable < value.unsatisfactory;
     case 'westgard': {
         if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(k => !['reject', 'warn'].includes(k))) return false;
         if (!['reject', 'warn'].every(k => Array.isArray(value[k]) && value[k].every(v => d.allowedValues.includes(v)))) return false;

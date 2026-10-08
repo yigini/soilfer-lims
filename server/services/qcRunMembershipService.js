@@ -1,4 +1,5 @@
 const { randomUUID } = require('node:crypto');
+const { auditRunCommand } = require('./qcRunAuditService');
 const { hasPermission } = require('../config/roles');
 const scopeGuard = require('../utils/scopeGuard');
 const policyService = require('./policyService');
@@ -130,4 +131,4 @@ async function changeRunMembers(db, batchId, actor, input, { remove = false } = 
                 positions: Object.fromEntries(view.workItems.filter(row => ids.includes(row.id)).map(row => [row.id, row.rackPosition])), batch: view };
     });
 }
-module.exports = { changeRunMembers };
+module.exports = { changeRunMembers: auditRunCommand(changeRunMembers, 'MEMBERSHIP_CHANGE') };
