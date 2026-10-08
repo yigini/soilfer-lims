@@ -5,6 +5,7 @@ const app = require('../../app');
 const prisma = require('../../prisma');
 const { getAuthToken } = require('../setup');
 const { createStoredProfileRunFixture } = require('../helpers/storedProfileRunFixture');
+const { createSampleFixture, createWorkItemFixture } = require('../helpers/workflowFixtures');
 
 let token, actor;
 beforeAll(async () => {
@@ -47,6 +48,28 @@ test('refused new no-membership run cannot receive QC and leaves no run or evide
         .send({ blanks: [{ value: 0 }], controls: [{ expected: 7, measured: 7 }], duplicates: [{ value1: 7, value2: 7 }] });
     expect(evaluated.status).toBe(404); expect(evaluated.body.code).toBe('BATCH_NOT_FOUND');
     expect(await evidence()).toEqual(before);
+});
+
+test('new explicit-method creation builds native sample membership without writing the selected method onto work items', async () => {
+    const analysisCode = `QC252-${randomUUID()}`;
+    await prisma.analysis.create({ data: { code: analysisCode, name: 'Membership fixture analysis' } });
+    const method = await prisma.methodology.create({ data: { analysisCode, labId: actor.labId, name: 'Controlled fixture method', loq: 0.1 } });
+    const ids = [];
+    for (let i = 0; i < 2; i++) {
+        const sample = await createSampleFixture(prisma, { data: { id: randomUUID(), originalId: randomUUID(),
+            assignedLab: actor.labId, country: 'GTM', projectCode: 'QC252', status: 'PROCESSING', dryingStatus: 'DONE', preparationStatus: 'DONE' } });
+        const item = await createWorkItemFixture(prisma, { data: { id: randomUUID(), sampleId: sample.id,
+            analysis: analysisCode, assignedLab: actor.labId, status: 'IN_PROGRESS', methodologyId: null } });
+        ids.push(item.id);
+    }
+    const response = await request(app).post('/api/qc/batches').set('Authorization', `Bearer ${token}`)
+        .send({ workItemIds: ids, analysis: analysisCode, analyses: [{ analysisCode, methodologyId: method.id }] });
+    expect(response.status).toBe(201); expect(response.body.workItems.map(row => row.id).sort()).toEqual(ids.slice().sort());
+    expect(response.body.analytes).toHaveLength(1);
+    expect(response.body.analytes[0]).toMatchObject({ provenance: 'NATIVE', analysisCode, methodologyId: method.id, methodResolution: 'EXPLICIT_SELECTION' });
+    const positions = await prisma.batchPositionWorkItem.findMany({ where: { workItemId: { in: ids } } });
+    expect(positions.map(row => row.workItemId).sort()).toEqual(ids.slice().sort());
+    expect((await prisma.workItem.findMany({ where: { id: { in: ids } } })).every(row => row.methodologyId === null)).toBe(true);
 });
 
 test('stored PROFILE_ONLY QC entry remains usable without relabeling the original run', async () => {

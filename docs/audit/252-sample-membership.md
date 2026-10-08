@@ -34,10 +34,10 @@ checks formerly reached by conversion. The open compatibility rebuild UI test
 now exercises LEGACY_MIGRATED; a new PROFILE_ONLY test proves no conversion
 action. Each affected fixture case is listed in the PR's Applied by precedent.
 
-This remains a WIP checkpoint pending complete server verification and CI.
-Client build passes (16.00s), lint passes (0 errors, 14 existing warnings).
-There is no schema migration or backfill (0 rows). No production operation,
-merge, deployment or audit-ready claim is made at this checkpoint.
+The PR records the complete server, client build/lint and CI receipts for its
+exact head. There is no schema migration or backfill (0 rows). Audit readiness
+depends on successful verification and Claude's exact-head verdict; production
+operations remain subject to the recorded freeze.
 
 The branch starts at main283a8bb and does not contain #190. Its core,
 historical factory and owner/attempt fixture hunks must remain untouched.

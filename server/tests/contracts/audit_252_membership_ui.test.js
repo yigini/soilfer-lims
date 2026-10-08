@@ -47,7 +47,7 @@ test('conflicting recorded methods block creation without changing either work i
     expect(view.find('create-batch-btn').props.disabled).toBe(true); await submit(view); expect(axios.post).not.toHaveBeenCalled();
 });
 
-test.each(['empty', 'failed'])('an %s method catalogue cannot fall back to a default method', async state => {
+test.each(['empty', 'failed'])('unavailable method catalogue (%s) cannot fall back to a default method', async state => {
     const axios = client([]); if (state === 'failed') axios.get.mockImplementation(async url => {
         if (url === '/api/config/methodologies') throw Error('Unavailable'); return { data: { data: [] } };
     });
