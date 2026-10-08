@@ -31,6 +31,12 @@ const QC_MEMBERSHIP_LOADER_SHA256 = '40c0af827c4d22b6fce1ee5b770f2c0146f456cfeea
 const QC_MEMBERSHIP_SQL_SHA256 = '1bc85113a3b6b7da327265bc7005eb4a1c97855943c599b1fe5ed8b126cf8572';
 // #189 additive evidence sources are inspected, never exempted as writers.
 const QC_EVIDENCE_SOURCES = Object.freeze([
+    // #191 pin6067875897: inspect the independently byte-bound successor DDL.
+    // Existing sources and writer restrictions retain their exact behaviour.
+    Object.freeze({ functionName: 'loadWorkRepeatMigrationSource', loader: 'services/workRepeatMigrationSource.js',
+        loaderSha256: '63d8db946cc4264e2fb423b39835ff771510e996bdddc3bd084e20f61849f429',
+        directory: '20261008000200_repeat_correction_contract', sqlSha256: 'c6101c330e10e6800dc9d36d2d96faa2fbfd15bcc9330837ab9c563fc0d47e53',
+        boundary: '-- INSTALLER_GUARDS_AFTER_SCHEMA' }),
     Object.freeze({ functionName: 'loadProficiencyMigrationSource', loader: 'services/proficiencyMigrationSource.js',
         loaderSha256: 'e4210caee7aa209d3fdc438b268d72e0728eb6b3a7a2ab102e4b9c8eedfdea0f',
         directory: '20261007000300_proficiency_evidence', sqlSha256: 'bab161fb91e649a33454086aff12eca8ad0b56d16b9f5f47c278a7c20e4fc77a' }),

@@ -10,6 +10,9 @@ const { installResultEquipmentEvidence } = require('../../scripts/install_result
 const { installWorkItemUniqueness, assertWorkItemUniquenessStartupReady, MARKER_ID, INDEX_ID,
     parseArguments: prerequisiteArguments } = require('../../scripts/install_workitem_uniqueness');
 const { loadWorkItemDuplicateMarkerSource, loadActiveWorkItemIndexSource } = require('../../services/workItemUniquenessMigrationSource');
+const { installWorkRepeatContract, assertWorkRepeatStartupReady, MARKER: REPEAT_MARKER } = require('../../scripts/install_work_repeat_contract');
+const { loadWorkRepeatMigrationSource } = require('../../services/workRepeatMigrationSource');
+const { repeatReleaseObjects } = require('../../services/workRepeatInstallationEvidence');
 const ownedFiles = [];
 const directory = path.resolve(__dirname,'../.tmp');
 function ownedFile() {
@@ -406,4 +409,153 @@ test('prerequisite CLI needs an explicit owned path and refuses duplicate, incom
     expect(prerequisiteArguments(['--db','owned.db','--dry-run'])).toEqual({dbPath:'owned.db',apply:false});
     for(const args of [[],['--db'],['--db','owned.db','--apply','--dry-run'],['--db','owned.db','--db','other.db'],['--db','owned.db','--unknown']])
         expect(()=>prerequisiteArguments(args)).toThrow(expect.objectContaining({code:'WORKITEM_PREREQUISITE_ARGUMENT_INVALID'}));
+});
+
+// #191 chain rehearsals stay in this already authorized, literal historical
+// factory caller. The factory bytes and its closed caller list are unchanged.
+function repeatFixture({ interim = false } = {}) {
+    const file = fixture({ extra: {
+        WorkItem: [{ id: 'open-work', sampleId: 'sample', analysis: 'Q', status: 'IN_PROGRESS', updatedAt: timestamp }],
+        WorkAttempt: [{ id: 'open-attempt', workItemId: 'open-work', attemptNo: 1, status: 'OPEN', createdAt: timestamp, updatedAt: timestamp },
+            ...(interim ? [{ id: 'interim-repeat', workItemId: 'open-work', attemptNo: 2, status: 'RECORDED',
+                author: 'historical-tech', evidenceData: '{"retained":true}', evidenceHash: 'historical-hash', createdAt: timestamp, updatedAt: timestamp }] : [])]
+    } });
+    expect(installWorkAttemptContract({ dbPath: file, apply: true }).classification).toBe('COMPLETE');
+    return file;
+}
+
+test('#191 retained dry-run/apply/no-op preserves every original field and the exact #190 receipt', () => {
+    const file = repeatFixture({ interim: true }), before = retained(file), bytes = hash(file);
+    expect(installWorkRepeatContract({ dbPath: file })).toMatchObject({ classification: 'PRE_191', mode: 'DRY_RUN', totalChanges: 0,
+        plan: { reasonNotRecordedCount: 1, backfilledCount: 0, reasonNotRecorded: [{ id: 'interim-repeat', description: 'reason not recorded', reason: null }] } });
+    expect(hash(file)).toBe(bytes);
+    expect(() => assertWorkRepeatStartupReady(file)).toThrow(expect.objectContaining({ code: 'WORK_REPEAT_NOT_INSTALLED' }));
+    const applied = installWorkRepeatContract({ dbPath: file, apply: true });
+    expect(applied).toMatchObject({ classification: 'COMPLETE', previousClassification: 'PRE_191', mode: 'APPLIED', totalChanges: 1,
+        newAttemptCount: 0, linkedResultCount: 0, backfilledCount: 0, receipt: { originalRowsAndFieldsPreserved: true, reasonNotRecordedCount: 1 } });
+    const after = retained(file);
+    for (const group of before.filter(row => row.table)) {
+        const rows = after.find(row => row.table === group.table).rows;
+        expect(group.table === '_schema_migrations' ? rows.filter(row => row.id !== REPEAT_MARKER) : rows)
+            .toEqual(group.table === 'WorkAttempt' ? group.rows.map(row => ({ ...row, parentAttemptId: null, note: null })) : group.rows);
+    }
+    const installedBytes = hash(file);
+    expect(installWorkRepeatContract({ dbPath: file, apply: true })).toMatchObject({ classification: 'COMPLETE', mode: 'NO_OP', totalChanges: 0 });
+    expect(installWorkAttemptContract({ dbPath: file, apply: true })).toMatchObject({ classification: 'COMPLETE', mode: 'NO_OP', totalChanges: 0 });
+    expect(assertWorkAttemptStartupReady(file).classification).toBe('COMPLETE');
+    expect(assertWorkRepeatStartupReady(file).classification).toBe('COMPLETE');
+    expect(hash(file)).toBe(installedBytes);
+});
+
+test('#191 installs the same verified chain on an empty current-Prisma column shape', () => {
+    const file = repeatFixture(), db = new Database(file), source = loadWorkRepeatMigrationSource();
+    db.exec(source.schemaSql); db.close();
+    expect(installWorkRepeatContract({ dbPath: file })).toMatchObject({ classification: 'FRESH_PRISMA', totalChanges: 0 });
+    expect(installWorkRepeatContract({ dbPath: file, apply: true })).toMatchObject({ classification: 'COMPLETE', previousClassification: 'FRESH_PRISMA', mode: 'APPLIED' });
+});
+
+test.each(['missing-190-receipt', 'missing-191-receipt', 'tampered-190-receipt', 'tampered-191-receipt',
+    'missing-successor', 'altered-successor', 'missing-event-guard', 'partial-column', 'receipt-before-guards'])(
+    '#191 broken chain (%s) refuses dry-run/apply/startup without changing database bytes', kind => {
+        const file = repeatFixture();
+        if (!['partial-column', 'receipt-before-guards'].includes(kind)) installWorkRepeatContract({ dbPath: file, apply: true });
+        const db = new Database(file);
+        if (kind.startsWith('missing-') && kind.endsWith('-receipt')) db.prepare('DELETE FROM _schema_migrations WHERE id=?').run(kind === 'missing-190-receipt' ? MARKER : REPEAT_MARKER);
+        if (kind.startsWith('tampered-')) db.prepare('UPDATE _schema_migrations SET details=? WHERE id=?').run('{}', kind === 'tampered-190-receipt' ? MARKER : REPEAT_MARKER);
+        if (kind === 'missing-successor') db.exec('DROP TRIGGER WorkAttempt_evidence_update');
+        if (kind === 'altered-successor') db.exec("DROP TRIGGER WorkAttempt_identity_update; CREATE TRIGGER WorkAttempt_identity_update BEFORE UPDATE ON WorkAttempt BEGIN SELECT RAISE(ABORT,'foreign guard'); END;");
+        if (kind === 'missing-event-guard') db.exec('DROP TRIGGER AuditLog_attempt_event_update');
+        if (kind === 'partial-column') db.exec('ALTER TABLE WorkAttempt ADD COLUMN parentAttemptId TEXT');
+        if (kind === 'receipt-before-guards') db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run(REPEAT_MARKER, '{}');
+        db.close(); const before = retained(file), bytes = hash(file);
+        for (const run of [() => installWorkRepeatContract({ dbPath: file }), () => installWorkRepeatContract({ dbPath: file, apply: true }), () => assertWorkRepeatStartupReady(file)]) {
+            expect(run).toThrow(); expect(retained(file)).toEqual(before); expect(hash(file)).toBe(bytes);
+        }
+    });
+
+test('#191 receipt-write failure rolls back columns and all guard replacements together', () => {
+    const file = repeatFixture(), db = new Database(file);
+    db.exec(`CREATE TRIGGER owned_repeat_receipt_fault BEFORE INSERT ON _schema_migrations WHEN NEW.id='${REPEAT_MARKER}' BEGIN SELECT RAISE(ABORT,'OWNED_REPEAT_RECEIPT_FAULT'); END;`);
+    db.close(); const before = retained(file);
+    expect(() => installWorkRepeatContract({ dbPath: file, apply: true })).toThrow('OWNED_REPEAT_RECEIPT_FAULT');
+    expect(retained(file)).toEqual(before);
+    expect(installWorkRepeatContract({ dbPath: file }).classification).toBe('PRE_191');
+    expect(assertWorkAttemptStartupReady(file).classification).toBe('COMPLETE');
+});
+
+const firstFill = { status: 'RECORDED', evidenceData: '{"equipmentReadiness":{"equipmentId":"actual-instrument"}}',
+    instrumentId: 'actual-instrument', executedMethodRevision: 'method-v2', author: 'authenticated-tech', authorName: 'Authenticated Technician',
+    qcBatchId: 'batch', materialAliquot: 'aliquot-ref' };
+firstFill.evidenceHash = createHash('sha256').update(firstFill.evidenceData).digest('hex');
+function fill(db, changes = {}) {
+    const values = { ...firstFill, ...changes }, names = Object.keys(values);
+    return db.prepare(`UPDATE WorkAttempt SET ${names.map(name => `"${name}"=?`).join(',')} WHERE id=?`)
+        .run(...Object.values(values), 'open-attempt');
+}
+test('#191 actual SQLite guards permit exactly one NULL-only first fill and freeze it immediately', () => {
+    const file = repeatFixture(); installWorkRepeatContract({ dbPath: file, apply: true });
+    const db = new Database(file); db.pragma('foreign_keys=ON');
+    try {
+        const before = db.prepare('SELECT * FROM WorkAttempt WHERE id=?').get('open-attempt');
+        expect(fill(db).changes).toBe(1);
+        const after = db.prepare('SELECT * FROM WorkAttempt WHERE id=?').get('open-attempt');
+        expect(after).toEqual({ ...before, ...firstFill });
+        for (const name of Object.keys(firstFill).filter(name => name !== 'status')) {
+            expect(() => db.prepare(`UPDATE WorkAttempt SET "${name}"=? WHERE id=?`).run('second fill', 'open-attempt')).toThrow();
+            expect(db.prepare('SELECT * FROM WorkAttempt WHERE id=?').get('open-attempt')).toEqual(after);
+        }
+        expect(() => db.prepare('UPDATE WorkAttempt SET status=? WHERE id=?').run('OPEN', 'open-attempt')).toThrow('WORK_ATTEMPT_TRANSITION_REFUSED');
+    } finally { db.close(); }
+});
+
+test.each(['id','workItemId','orderLineId','attemptNo','batchId','reason','requestedBy','requestedAt','parentAttemptId','note',
+    'rawData','calcVersion','dilutionFactor','aliquotId','legacyAttemptNoConflict','version','createdAt','updatedAt'])(
+    '#191 refuses changing frozen %s during first fill with zero changes', name => {
+        const file = repeatFixture(); installWorkRepeatContract({ dbPath: file, apply: true });
+        const db = new Database(file); db.pragma('foreign_keys=ON');
+        try {
+            const before = db.prepare('SELECT * FROM WorkAttempt WHERE id=?').get('open-attempt');
+            const changesBefore = db.prepare('SELECT total_changes() n').get().n;
+            const value = ['attemptNo', 'version'].includes(name) ? 3 : name === 'dilutionFactor' ? 2 : 'changed';
+            expect(() => fill(db, { [name]: value })).toThrow();
+            expect(db.prepare('SELECT total_changes() n').get().n).toBe(changesBefore);
+            expect(db.prepare('SELECT * FROM WorkAttempt WHERE id=?').get('open-attempt')).toEqual(before);
+        } finally { db.close(); }
+    });
+
+test('#191 an unreviewed added column is frozen by default under actual SQLite triggers', () => {
+    const file = repeatFixture(); installWorkRepeatContract({ dbPath: file, apply: true });
+    const db = new Database(file);
+    try {
+        db.exec('ALTER TABLE WorkAttempt ADD COLUMN unreviewedEvidence TEXT');
+        expect(() => fill(db, { unreviewedEvidence: 'caller value' })).toThrow('WORK_ATTEMPT_COLUMN_CONTRACT_MISMATCH');
+        expect(() => fill(db)).toThrow('WORK_ATTEMPT_COLUMN_CONTRACT_MISMATCH');
+    } finally { db.close(); }
+    const bytes = hash(file);
+    expect(() => assertWorkRepeatStartupReady(file)).toThrow(expect.objectContaining({ code: 'WORK_REPEAT_SCHEMA_MISMATCH' }));
+    expect(hash(file)).toBe(bytes);
+});
+
+test('#191 attempt audit events cannot be rewritten, retagged or deleted; other audit entities retain their behaviour', () => {
+    const file = repeatFixture(); installWorkRepeatContract({ dbPath: file, apply: true });
+    const db = new Database(file);
+    try {
+        db.prepare('INSERT INTO AuditLog(id,entity,entityId,action,performedBy,details) VALUES (?,?,?,?,?,?)')
+            .run('attempt-event', 'WORK_ATTEMPT', 'open-attempt', 'CREATED', 'authenticated-tech', '{"from":null,"to":"OPEN"}');
+        const before = db.prepare('SELECT * FROM AuditLog WHERE id=?').get('attempt-event');
+        for (const sql of ['UPDATE AuditLog SET details=? WHERE id=?', 'UPDATE AuditLog SET entity=? WHERE id=?']) {
+            expect(() => db.prepare(sql).run('changed', 'attempt-event')).toThrow('WORK_ATTEMPT_EVENT_IMMUTABLE');
+        }
+        expect(() => db.prepare('DELETE FROM AuditLog WHERE id=?').run('attempt-event')).toThrow('WORK_ATTEMPT_EVENT_IMMUTABLE');
+        expect(db.prepare('SELECT * FROM AuditLog WHERE id=?').get('attempt-event')).toEqual(before);
+        expect(db.prepare('UPDATE AuditLog SET details=? WHERE id=?').run('ordinary updated details', 'original').changes).toBe(1);
+        expect(() => db.prepare('UPDATE AuditLog SET entity=? WHERE id=?').run('WORK_ATTEMPT', 'original')).toThrow('WORK_ATTEMPT_EVENT_IMMUTABLE');
+        expect(db.prepare('DELETE FROM AuditLog WHERE id=?').run('original').changes).toBe(1);
+    } finally { db.close(); }
+});
+
+test('#191 release objects include the two exact successors and both append-only event guards', () => {
+    expect(repeatReleaseObjects().map(row => row.name)).toEqual(expect.arrayContaining([
+        'WorkAttempt_evidence_update', 'WorkAttempt_identity_update', 'AuditLog_attempt_event_update', 'AuditLog_attempt_event_delete'
+    ]));
 });

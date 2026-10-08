@@ -39,9 +39,13 @@ try {
     const attemptsReady=require('./scripts/install_work_attempt_contract').assertWorkAttemptStartupReady(dbPath);
     console.log(JSON.stringify({event:'WORK_ATTEMPT_STARTUP_READY',classification:attemptsReady.classification,
         sources:attemptsReady.sources,totalChanges:attemptsReady.totalChanges}));
+    const repeatsReady=require('./scripts/install_work_repeat_contract').assertWorkRepeatStartupReady(dbPath);
+    console.log(JSON.stringify({event:'WORK_REPEAT_STARTUP_READY',classification:repeatsReady.classification,
+        sources:repeatsReady.sources,totalChanges:repeatsReady.totalChanges}));
 } catch (error) {
     console.error(JSON.stringify({ error: error.code || 'WORKFLOW_STARTUP_REFUSED', message: error.message,
         nextStep: error.code?.startsWith('QC_GATE_SCOPE_') ? 'Keep the lab stopped and follow docs/audit/2.4-qc-gate.md.'
+            : error.code?.startsWith('WORK_REPEAT_') ? 'Keep the lab stopped and follow docs/audit/191-repeat-correction.md.'
             : error.code?.startsWith('WORK_ATTEMPT_') ? 'Keep the lab stopped and follow docs/audit/3.1-work-attempts.md.'
             : error.code?.startsWith('PT_') || error.code?.startsWith('RESULT_EQUIPMENT_') ? 'Keep the lab stopped and follow docs/audit/2.6-qc-audit-pt-equipment.md.'
             : error.code?.startsWith('QC_RUN_') ? 'Keep the lab stopped and follow docs/audit-2.3-normalized-qc-migration.md.'

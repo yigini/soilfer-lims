@@ -35,7 +35,8 @@ function classify(db, source) {
     if (objects.length !== 17) throw fail('WORK_ATTEMPT_SOURCE_MISMATCH', 'The release requires two partial indexes and fifteen guards.');
     const installedObjects = objects.map(expected => {
         const actual = db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(expected.name);
-        if (actual && (actual.type !== expected.type || normalize(actual.sql) !== normalize(expected.sql))) differences.push(`${expected.name} differs`);
+        if (actual && (actual.type !== expected.type || normalize(actual.sql) !== normalize(expected.sql)) &&
+            !require('../services/workRepeatInstallationEvidence').isVerifiedRepeatSuccessor(db, expected.name, actual)) differences.push(`${expected.name} differs`);
         return Boolean(actual);
     });
     const sources = { migrationSha256: source.sha256, contractVersion: '190-v1' };
@@ -204,4 +205,4 @@ if (require.main === module) {
         ...(error.duplicateMarkerPrerequisite && {classification:error.classification,
             duplicateMarkerPrerequisite:error.duplicateMarkerPrerequisite,totalChanges:error.totalChanges})})+'\n');process.exitCode=1; }
 }
-module.exports = { installWorkAttemptContract,assertWorkAttemptStartupReady,parseArguments,MARKER };
+module.exports = { installWorkAttemptContract,assertWorkAttemptStartupReady,parseArguments,MARKER, classifyWorkAttemptContract:classify };
