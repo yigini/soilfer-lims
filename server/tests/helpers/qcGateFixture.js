@@ -22,7 +22,8 @@ async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS',
         ['install_reference_materials', 'installReferenceMaterials'], ['install_qc_rules', 'installQcRules'], ['install_qc_runs', 'installQcRuns'],
         ['install_qc_gate_scope', 'installQcGateScope'], ['install_proficiency_evidence', 'installProficiencyEvidence'],
         ['install_result_equipment_evidence', 'installResultEquipmentEvidence'],
-        ['install_work_attempt_contract','installWorkAttemptContract']]) require(`../../scripts/${script}`)[method]({ dbPath: file, apply: true });
+        ['install_work_attempt_contract','installWorkAttemptContract'],
+        ['install_work_repeat_contract','installWorkRepeatContract']]) require(`../../scripts/${script}`)[method]({ dbPath: file, apply: true });
     const db = new PrismaClient({ adapter: new PrismaBetterSqlite3({ url: `file:${file}` }) });
     const actor = { username, role: 'SUPER_ADMIN', labId };
     await db.unit.create({ data: { code: 'fixture-unit', display: 'Fixture unit', quantityKind: 'MASS_FRACTION', factorToBase: 1 } });
@@ -48,7 +49,8 @@ async function qcGateFixture({ count = 1, criteria = {}, status = 'IN_PROGRESS',
     const f = { file, db, actor, labId, analysisCode: items[0].analysis, method: methods[0], methods, instrument, items,
         workItemIds: items.map(item => item.id), input: { instrumentId: instrument.id, workItemIds: items.map(item => item.id), seed: 'gate-fixture' } };
     f.setPolicy = changes => require('../../services/policyService').change(actor, labId, { reason: 'Reviewed test policy', changes }, { db });
-    f.result = item => require('./workAttemptFixtures').createExecutionResultFixture(db, { data: { id: randomUUID(), sampleId: item.sampleId,
+    f.result = item => require('./workAttemptFixtures').createExecutionResultFixture(db, {
+        ...( ['SUBMITTED','ACCEPTED'].includes(item.status) && {attemptStatus:item.status}), data: { id: randomUUID(), sampleId: item.sampleId,
         param: item.analysis, methodologyId: item.methodologyId, batchId: item.batchId, value: '7.123456789', numericValue: 7.123456789,
         isCurrent: true, isValid: true, flags: '[]', unit: 'fixture-unit' } });
     f.snapshot = async () => JSON.parse(JSON.stringify(await Promise.all([

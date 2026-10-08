@@ -17,6 +17,8 @@ beforeAll(async()=>{
     fs.mkdirSync(directory,{recursive:true});beforeGuards({actor:'system:fixture',file,qcBootstrap:'CREATE_PRISMA'});
     const db=new Database(file);db.exec('CREATE TABLE _schema_migrations(id TEXT PRIMARY KEY,details TEXT NOT NULL)');db.close();
     installWorkAttemptContract({dbPath:file,apply:true});
+    const modelColumns=require('../../services/workRepeatMigrationSource').loadWorkRepeatMigrationSource();
+    const shape=new Database(file);shape.exec(modelColumns.schemaSql);shape.close();
     client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
 },60000);
 afterAll(async()=>{

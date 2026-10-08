@@ -22,6 +22,11 @@ async function guarded({items=[itemRow('item'),itemRow('other','Q'),itemRow('ano
     expect(installWorkflowStateGuards({dbPath:file}).classification).toBe('COMPLETE');
     expect(installResultAttemptLinks({dbPath:file,apply:true}).classification).toBe('COMPLETE');
     expect(installWorkAttemptContract({dbPath:file,apply:true}).classification).toBe('COMPLETE');
+    // The predecessor guard suite intentionally remains pre-191 (including
+    // its historical nullable-reason case). Add only the nullable model
+    // columns so the current generated client can read its literal old rows.
+    const modelColumns=require('../../services/workRepeatMigrationSource').loadWorkRepeatMigrationSource();
+    const shape=new Database(file);shape.exec(modelColumns.schemaSql);shape.close();
     db=new Database(file);db.pragma('foreign_keys=ON');client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
 }
 afterEach(async()=>{

@@ -15,7 +15,9 @@ let client;
 beforeAll(async()=>{
     fs.mkdirSync(directory,{recursive:true});beforeGuards({actor:'system:fixture',file,qcBootstrap:'CREATE_PRISMA'});
     const db=new Database(file);db.exec('CREATE TABLE _schema_migrations(id TEXT PRIMARY KEY,details TEXT NOT NULL)');db.close();
-    installWorkAttemptContract({dbPath:file,apply:true});client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
+    installWorkAttemptContract({dbPath:file,apply:true});
+    require('../../scripts/install_work_repeat_contract').installWorkRepeatContract({dbPath:file,apply:true});
+    client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
     await client.lab.create({data:{id:labId,code:labId,name:'Attempt execution laboratory',country:'TEST'}});
     await client.unit.create({data:{code:'%',display:'%',quantityKind:'MASS_FRACTION',factorToBase:1}});
     for(const code of ['AT190','TEXTURE','SAND','SILT','CLAY'])await client.analysis.create({data:{code,name:'Controlled '+code+' measurand',
