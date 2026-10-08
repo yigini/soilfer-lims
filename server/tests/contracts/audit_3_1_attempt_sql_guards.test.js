@@ -87,7 +87,7 @@ describe('all #190 refusals remain effective after the receipt-verified #191 suc
             ['collision-result','sample','P','retained',1,'first',1,'MEASURED',timestamp],'SQLITE_CONSTRAINT_UNIQUE','result_one_current');
     });
     test('batch FK, write-once batch and deletion refusals survive the successor chain',async()=>{
-        const batch=id=>({id,analysis:'P',status:'COMPLETED',createdBy:'system:fixture'});
+        const batch=id=>({id,analysis:'P',status:'OPEN',createdBy:'system:fixture'});
         await guarded({successor:true,batches:[batch('batch'),batch('other-batch')],attempts:[historicalAttempt('historical','item',{qcBatchId:'batch'})]});
         for(const value of [null,'other-batch'])probe('UPDATE WorkAttempt SET batchId=? WHERE id=?',[value,'historical'],'WORK_ATTEMPT_BATCH_IMMUTABLE');
         probe(attemptInsert,['dangling','other',1,'RECORDED','missing',timestamp,timestamp],'SQLITE_CONSTRAINT_FOREIGNKEY','WorkAttempt_batchId_foreign_key');

@@ -12,7 +12,7 @@ module.exports = async function ownedSuiteSetup() {
         path.dirname(path.resolve(template)) !== directory || !path.basename(template).startsWith('test_')) {
         throw Error('Suite isolation requires the real global-setup owned template.');
     }
-    const file = path.join(directory, 'audit_suite_' + randomUUID() + '.db');
+    const file = path.join(directory, 'test_suite_' + randomUUID() + '.db');
     assertOwnedTestDatabase(file, 'system:fixture');
     if (fs.existsSync(file)) throw Error('Suite isolation refuses an existing destination.');
     const reader = new Database(template, { readonly: true, fileMustExist: true });

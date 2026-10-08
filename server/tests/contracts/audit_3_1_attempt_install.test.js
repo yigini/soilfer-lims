@@ -23,9 +23,9 @@ const timestamp='2026-10-01T12:00:00Z';
 const sampleRow=id=>({id,originalId:id,status:'PROCESSING',updatedAt:timestamp});
 const resultRow=(id,sampleId,options={})=>({id,sampleId,param:'P',replicateNo:1,attemptId:null,isCurrent:1,
     value:'0.123456789',provenance:'MEASURED',updatedAt:'original-timestamp',...options});
-function fixture({status='ACCEPTED',equipmentReadiness=null,extra={}}={}) {
+function fixture({status='ACCEPTED',equipmentReadiness=null,extra={},batchStatus='COMPLETED'}={}) {
     const file=ownedFile();
-    const rows={Sample:[sampleRow('sample')],Batch:[{id:'batch',analysis:'P',status:'COMPLETED',createdBy:'system:fixture'}],
+    const rows={Sample:[sampleRow('sample')],Batch:[{id:'batch',analysis:'P',status:batchStatus,createdBy:'system:fixture'}],
         WorkItem:[{id:'measured',sampleId:'sample',analysis:'P',status,result:'original cache',updatedAt:timestamp}],
         Result:[resultRow('result','sample',{equipmentReadiness,batchId:'batch'})],
         ReviewDecision:[{id:'legacy-review',sampleId:'sample',workItemId:'measured',decision:'ACCEPT',reviewerId:'system:fixture',reason:'stored reason'}],
@@ -414,7 +414,7 @@ test('prerequisite CLI needs an explicit owned path and refuses duplicate, incom
 // #191 chain rehearsals stay in this already authorized, literal historical
 // factory caller. The factory bytes and its closed caller list are unchanged.
 function repeatFixture({ interim = false } = {}) {
-    const file = fixture({ extra: {
+    const file = fixture({ batchStatus: 'OPEN', extra: {
         WorkItem: [{ id: 'open-work', sampleId: 'sample', analysis: 'Q', status: 'IN_PROGRESS', updatedAt: timestamp }],
         WorkAttempt: [{ id: 'open-attempt', workItemId: 'open-work', attemptNo: 1, status: 'OPEN', createdAt: timestamp, updatedAt: timestamp },
             ...(interim ? [{ id: 'interim-repeat', workItemId: 'open-work', attemptNo: 2, status: 'RECORDED',
@@ -445,6 +445,10 @@ test('#191 retained dry-run/apply/no-op preserves every original field and the e
     expect(installWorkAttemptContract({ dbPath: file, apply: true })).toMatchObject({ classification: 'COMPLETE', mode: 'NO_OP', totalChanges: 0 });
     expect(assertWorkAttemptStartupReady(file).classification).toBe('COMPLETE');
     expect(assertWorkRepeatStartupReady(file).classification).toBe('COMPLETE');
+    expect(require('../../scripts/install_qc_runs').assertQcRunStartupReady(file).classification).toBe('COMPLETE');
+    expect(require('../../scripts/install_qc_gate_scope').assertQcGateScopeStartupReady(file).classification).toBe('COMPLETE');
+    expect(require('../../scripts/install_qc_runs').installQcRuns({dbPath:file,apply:true})).toMatchObject({mode:'NO_OP',totalChanges:0});
+    expect(require('../../scripts/install_qc_gate_scope').installQcGateScope({dbPath:file,apply:true})).toMatchObject({mode:'NO_OP',totalChanges:0});
     expect(hash(file)).toBe(installedBytes);
 });
 

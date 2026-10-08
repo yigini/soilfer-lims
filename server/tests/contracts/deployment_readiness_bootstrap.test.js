@@ -349,6 +349,7 @@ bash "${entryScript.replace(/\\/g, '/')}"
         require('../../scripts/install_result_equipment_evidence').installResultEquipmentEvidence({ dbPath: targetDb, apply: true });
         require('../../scripts/install_workitem_uniqueness').installWorkItemUniqueness({ dbPath: targetDb, apply: true });
         require('../../scripts/install_work_attempt_contract').installWorkAttemptContract({ dbPath: targetDb, apply: true });
+        require('../../scripts/install_work_repeat_contract').installWorkRepeatContract({ dbPath: targetDb, apply: true });
         const hashDb = () => createHash('sha256').update(fs.readFileSync(targetDb)).digest('hex');
         const beforeSha = hashDb();
         fs.writeFileSync(path.join(testDir, 'prisma', '.seed_complete'), 'done');

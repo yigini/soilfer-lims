@@ -42,13 +42,13 @@ async function fixture({ replicates = 1, role = 'LAB_TECHNICIAN', criteria = {},
     };
     return f;
 }
-async function reviewer(f) {
+async function reviewer(f,role='LAB_MANAGER') {
     const user = await f.db.user.create({ data: { id:randomUUID(),username:'repeat-reviewer-' + randomUUID(),
-        email:randomUUID() + '@example.test',password:'owned-http-fixture',role:'LAB_MANAGER',labId:f.labId } });
+        email:randomUUID() + '@example.test',password:'owned-http-fixture',role,labId:f.labId } });
     return { id:user.id,username:user.username,role:user.role,labId:f.labId };
 }
-async function nativeFixture({blankValue=0,started=true}={}) {
-    const f=await fixture({recorded:false,criteria:{blankPerBatch:1,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0}});
+async function nativeFixture({blankValue=0,started=true,criteria={}}={}) {
+    const f=await fixture({recorded:false,criteria:{blankPerBatch:1,lrmPerBatch:0,duplicateEvery:0,crmEveryNBatches:0,...criteria}});
     f.manager=await reviewer(f);
     const {buildNativeRun,startNativeRun}=require('../../services/qcNativeRunService');
     let run=await buildNativeRun(f.db,f.manager,f.input);
@@ -159,6 +159,24 @@ test('a reviewer may request REVIEW_OUTLIER and a technician cannot request it',
     expect(accepted.status).toBe(201);
     const previous=await f.db.workAttempt.findUnique({where:{id:f.attempt.id}});expect(previous.status).toBe('QUESTIONED');
     expect({...previous,status:f.attempt.status}).toEqual(f.attempt);
+});
+
+test('the route permission admits a scoped MASTER_USER reviewer and refuses read-only roles before any writes',async()=>{
+    const f=await fixture(),before=await f.all();
+    for(const role of ['AUDIT_USER','VIEWER','SAMPLE_RECEPTION']) {
+        const actor=await reviewer(f,role),actorSnapshot=await f.all();
+        const response=await f.command({reason:'REVIEW_OUTLIER'},actor);
+        expect({status:response.status,code:response.body.code}).toEqual({status:403,code:'WORK_ATTEMPT_FORBIDDEN'});
+        expect(await f.all()).toEqual(actorSnapshot);
+        const corrected=await f.correction({value:'7.2',reason:'TRANSCRIPTION_ERROR',note:'Forbidden mutation'},actor);
+        expect({status:corrected.status,code:corrected.body.code}).toEqual({status:403,code:'WORK_ATTEMPT_FORBIDDEN'});
+        expect(await f.all()).toEqual(actorSnapshot);
+    }
+    // User rows are outside this snapshot; all scientific/audit rows stayed.
+    expect(await f.all()).toEqual(before);
+    const master=await reviewer(f,'MASTER_USER');
+    expect((await f.correction({value:'7.3',reason:'TRANSCRIPTION_ERROR',note:'Scoped reviewer correction'},master)).status).toBe(201);
+    expect((await f.command({reason:'REVIEW_OUTLIER',note:'Scoped reviewer repeat'},master)).status).toBe(201);
 });
 
 test('a failed attempt event rolls back the parent transition, OPEN request and WorkItem together',async()=>{
@@ -288,8 +306,11 @@ test.each([{started:false,blankValue:null},{started:true,blankValue:null}])('an 
     expect(await f.all()).toEqual(before);expect(await f.runEvidence()).toEqual(run);
 });
 
-test('RETURN from a passed native run hands off one WorkItem and preserves all original membership and QC evidence byte for byte',async()=>{
-    const f=await nativeFixture();expect(f.run.analytes[0].status).toBe('QC_PASS');
+test.each([
+    {status:'QC_PASS',blankValue:0},
+    {status:'QC_WARN',blankValue:9.123456789,criteria:{failAction:{BLANK:'WARN',DUPLICATE:'WARN',LRM:'FAIL_BATCH',CRM:'WARN'}}}
+])('RETURN from an accepted native run (%s) hands off one WorkItem and preserves all original membership and QC evidence byte for byte',async options=>{
+    const f=await nativeFixture(options);expect(f.run.analytes[0].status).toBe(options.status);
     await f.submit();const run=await f.runEvidence(),parent=await f.db.workAttempt.findUnique({where:{id:f.attempt.id}});
     await f.http(f.manager,async(app,token)=>{
         const response=await request(app).post('/api/work/'+f.items[0].id+'/review').set('Authorization','Bearer '+token)

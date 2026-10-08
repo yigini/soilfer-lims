@@ -207,6 +207,7 @@ test.each(paths)('%s submission rolls back sample/work/submit/audit after a late
 });
 test('one preparation-blocked sample rolls back the whole workbench submission batch', async () => {
     const first = await fixture(), second = await fixture(), ids = [first.sample.id, second.sample.id];
+    await seedSubmissionAttempt(first);
     await createExecutionResultFixture(prisma, { data: { id: randomUUID(), sampleId: second.sample.id, param: 'PH', value: '6.25', isCurrent: true } });
     await prisma.$transaction(tx => evidence.recordPreparationRevert(tx, second.sample, 'PREPARATION', 'Reprepare specimen', manager));
     const before = await snapshot(ids);

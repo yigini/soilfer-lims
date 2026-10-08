@@ -1452,6 +1452,7 @@
       "REPEAT_FAILED_BATCH": "Utilisez un nouveau lot pour cette répétition ; l’échec précédent du contrôle qualité est conservé.",
       "ATTEMPT_CORRECTION_REQUIRED": "Utilisez une correction de transcription pour une faute de saisie.",
       "AMENDMENT_WORKFLOW_REQUIRED": "Une nouvelle analyse demandée par le client nécessite le processus de modification.",
+      "WORK_ATTEMPT_FORBIDDEN": "Votre rôle ne permet pas de demander une nouvelle analyse ni de corriger une tentative.",
       "ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED": "Une décision sur le contrôle qualité de cette série est nécessaire avant de demander une nouvelle analyse."
     }
   }

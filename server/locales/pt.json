@@ -1452,6 +1452,7 @@
       "REPEAT_FAILED_BATCH": "Use um novo lote para esta repetição; a falha anterior no controle de qualidade é mantida.",
       "ATTEMPT_CORRECTION_REQUIRED": "Use uma correção de transcrição para um erro de digitação.",
       "AMENDMENT_WORKFLOW_REQUIRED": "Uma repetição solicitada pelo cliente requer o fluxo de alterações.",
+      "WORK_ATTEMPT_FORBIDDEN": "Sua função não permite solicitar repetições nem corrigir tentativas.",
       "ATTEMPT_REPEAT_RUN_DISPOSITION_REQUIRED": "Este lote requer uma decisão sobre o controle de qualidade antes de solicitar uma repetição."
     }
   }

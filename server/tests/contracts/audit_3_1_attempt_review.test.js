@@ -19,7 +19,11 @@ beforeAll(async()=>{
     const db=new Database(file);db.exec('CREATE TABLE _schema_migrations(id TEXT PRIMARY KEY,details TEXT NOT NULL)');db.close();
     installWorkAttemptContract({dbPath:file,apply:true});
     const modelColumns=loadWorkRepeatMigrationSource();
-    const shape=new Database(file);shape.exec(modelColumns.schemaSql);shape.close();
+    const shape=new Database(file);
+    const added=shape.prepare('PRAGMA table_info("WorkAttempt")').all().filter(row=>['parentAttemptId','note'].includes(row.name));
+    if(added.length===0)shape.exec(modelColumns.schemaSql);
+    else if(added.length!==2 || added.some(row=>row.type!=='TEXT' || row.notnull || row.dflt_value!==null))throw Error('Unexpected nullable repeat model columns.');
+    shape.close();
     client=new PrismaClient({adapter:new PrismaBetterSqlite3({url:'file:'+file})});
 },60000);
 afterAll(async()=>{
