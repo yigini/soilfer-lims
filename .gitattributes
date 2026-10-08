@@ -38,3 +38,5 @@ server/prisma/migrations/20261007000400_result_equipment_evidence/migration.sql 
 server/services/resultEquipmentMigrationSource.js text eol=lf
 server/prisma/migrations/20261008000100_work_attempt_contract/migration.sql text eol=lf
 server/services/workAttemptMigrationSource.js text eol=lf
+server/tests/helpers/fixtures/pre190_full_application_schema.sql -text
+server/tests/helpers/workAttemptHistoricalFixtures.js text eol=lf

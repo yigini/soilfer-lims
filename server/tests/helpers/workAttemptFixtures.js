@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const { createHash } = require('node:crypto');
 const rules = require('../../services/workflowStateRules');
 const { canonicalWorkItemWhere } = require('../../services/workAttemptContract');
 const { allocateExecution, insertExecution } = require('../../services/workAttemptWriteService');
@@ -8,6 +9,7 @@ const { createResultFixture } = require('../../services/resultWriteService');
 // #190 pin6056586906: positive fixtures explicitly request a complete recorded
 // execution. Missing canonical work is refused, never manufactured here.
 async function createExecutionResultFixture(db, args) {
+    const { attemptStatus, ...resultArgs } = args;
     rules.assertFixtureContext();
     const databases = await db.$queryRawUnsafe('PRAGMA database_list');
     const file = databases.find(row => row.name === 'main')?.file;
@@ -27,10 +29,24 @@ async function createExecutionResultFixture(db, args) {
         const ctx = { item, performedBy: 'system:fixture', batchId: data.batchId ?? null,
             method: null, equipmentReadiness, equipmentReadinessText: data.equipmentReadiness ?? null };
         const allocation = await allocateExecution(tx, ctx);
-        await insertExecution(tx, ctx, allocation, { source: 'fixture', sourceResultIds: [data.id],
+        const evidence = { source: 'fixture', sourceResultIds: [data.id],
             measurements: [{ resultId: data.id, param: data.param, replicateNo: data.replicateNo ?? 1,
-                value: data.value, rawInput: data.rawInput ?? null, numericValue: data.numericValue ?? null }] }, new Date());
-        return createResultFixture(tx, { ...args, data: { ...data, attemptId: allocation.id } });
+                value: data.value, rawInput: data.rawInput ?? null, numericValue: data.numericValue ?? null }] };
+        if (attemptStatus === 'ACCEPTED') {
+            // #190 pin6057445449: the explicit accepted spectral bystander is
+            // inserted in its final state before its unchanged measured Result.
+            if (item.status !== 'ACCEPTED') throw Error('Accepted fixture evidence requires accepted canonical work.');
+            const evidenceData = JSON.stringify({ ...evidence, equipmentReadiness }), now = new Date();
+            await tx.workAttempt.create({ data: { id: allocation.id, workItemId: item.id, attemptNo: allocation.attemptNo,
+                status: 'ACCEPTED', reason: allocation.reason, author: ctx.performedBy, authorName: ctx.performedBy,
+                batchId: ctx.batchId, qcBatchId: ctx.batchId, instrumentId: equipmentReadiness?.equipmentId || null,
+                executedMethodRevision: null, version: (item.version || 0) + 1, evidenceData,
+                evidenceHash: createHash('sha256').update(evidenceData).digest('hex'), createdAt: now, updatedAt: now } });
+        } else {
+            if (attemptStatus != null && attemptStatus !== 'RECORDED') throw Error('Unknown positive fixture attempt status.');
+            await insertExecution(tx, ctx, allocation, evidence, new Date());
+        }
+        return createResultFixture(tx, { ...resultArgs, data: { ...data, attemptId: allocation.id } });
     });
 }
 

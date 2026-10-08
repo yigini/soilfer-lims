@@ -3,32 +3,29 @@ const { createHash, randomUUID } = require('node:crypto');
 const Database = require('better-sqlite3');
 const { installWorkAttemptContract, assertWorkAttemptStartupReady, parseArguments, MARKER } = require('../../scripts/install_work_attempt_contract');
 const { beforeGuards } = require('../helpers/legacyWorkflowDatabase');
+const { createPre190AttemptFixture } = require('../helpers/workAttemptHistoricalFixtures');
+const { loadWorkAttemptMigrationSource } = require('../../services/workAttemptMigrationSource');
 const ownedFiles = [];
 const directory = path.resolve(__dirname,'../.tmp');
 function ownedFile() {
     fs.mkdirSync(directory,{recursive:true});
     const file=path.join(directory,'audit_legacy_190_attempt_install-'+randomUUID()+'.db');ownedFiles.push(file);return file;
 }
-function fixture() {
-    const file=ownedFile(),db=new Database(file);
-    db.exec(`CREATE TABLE _schema_migrations(id TEXT PRIMARY KEY,details TEXT NOT NULL);
-        CREATE TABLE Sample(id TEXT PRIMARY KEY,assignedLab TEXT,requiredAnalyses TEXT);
-        INSERT INTO _schema_migrations VALUES ('prior-retained','{"original":"receipt"}');
-        CREATE TABLE Batch(id TEXT PRIMARY KEY);
-        INSERT INTO Batch VALUES ('batch');
-        CREATE TABLE WorkItem(id TEXT PRIMARY KEY,sampleId TEXT,analysis TEXT,status TEXT,result TEXT,duplicateOf TEXT);
-        CREATE TABLE WorkAttempt(id TEXT PRIMARY KEY,workItemId TEXT REFERENCES WorkItem(id),orderLineId TEXT,
-            attemptNo INTEGER DEFAULT 1,executedMethodRevision TEXT,author TEXT,authorName TEXT,materialAliquot TEXT,
-            instrumentId TEXT,qcBatchId TEXT,version INTEGER DEFAULT 1,status TEXT DEFAULT 'RECORDED',
-            evidenceHash TEXT,evidenceData TEXT,createdAt DATETIME NOT NULL,updatedAt DATETIME NOT NULL);
-        CREATE TABLE Result(id TEXT PRIMARY KEY,sampleId TEXT,param TEXT,replicateNo INTEGER,attemptId TEXT,
-            isCurrent INTEGER,value TEXT,equipmentReadiness TEXT,batchId TEXT,updatedAt TEXT,provenance TEXT DEFAULT 'MEASURED');
-        CREATE TABLE ReviewDecision(id TEXT PRIMARY KEY,reason TEXT,workItemId TEXT,sampleId TEXT,attemptId TEXT,decision TEXT);
-        INSERT INTO ReviewDecision(id,reason) VALUES ('legacy-review','stored reason');
-        CREATE TABLE AuditLog(id TEXT PRIMARY KEY,details TEXT);
-        INSERT INTO AuditLog VALUES ('original','unchanged technical audit');
-        INSERT INTO WorkItem(id,sampleId,analysis,status,result) VALUES ('measured','sample','P','ACCEPTED','original cache');
-        INSERT INTO Result(id,sampleId,param,replicateNo,attemptId,isCurrent,value,equipmentReadiness,batchId,updatedAt) VALUES ('result','sample','P',1,NULL,1,'0.123456789',NULL,'batch','original-timestamp');`);
+const timestamp='2026-10-01T12:00:00Z';
+const sampleRow=id=>({id,originalId:id,status:'PROCESSING',updatedAt:timestamp});
+const resultRow=(id,sampleId,options={})=>({id,sampleId,param:'P',replicateNo:1,attemptId:null,isCurrent:1,
+    value:'0.123456789',provenance:'MEASURED',updatedAt:'original-timestamp',...options});
+function fixture({status='ACCEPTED',equipmentReadiness=null,extra={}}={}) {
+    const file=ownedFile();
+    const rows={Sample:[sampleRow('sample')],Batch:[{id:'batch',analysis:'P',status:'COMPLETED',createdBy:'system:fixture'}],
+        WorkItem:[{id:'measured',sampleId:'sample',analysis:'P',status,result:'original cache',updatedAt:timestamp}],
+        Result:[resultRow('result','sample',{equipmentReadiness,batchId:'batch'})],
+        ReviewDecision:[{id:'legacy-review',sampleId:'sample',workItemId:'measured',decision:'ACCEPT',reviewerId:'system:fixture',reason:'stored reason'}],
+        AuditLog:[{id:'original',entity:'Sample',entityId:'sample',action:'RETAINED',performedBy:'system:fixture',details:'unchanged technical audit'}]};
+    for(const [table,entries] of Object.entries(extra))rows[table]=[...(rows[table]||[]),...entries];
+    createPre190AttemptFixture({actor:'system:fixture',file,rows});
+    const db=new Database(file);
+    db.prepare('INSERT INTO _schema_migrations(id,details) VALUES (?,?)').run('prior-retained','{"original":"receipt"}');
     db.close();return file;
 }
 const hash=file=>createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -77,14 +74,14 @@ test('atomic additive apply links every Result, records provenance, preserves or
 });
 
 test('all duplicate attempts are flagged without rewriting original fields, legacy evidence is retained, and frozen new evidence is copied',()=>{
-    const file=fixture(),db=new Database(file);
-    db.exec(`INSERT INTO WorkItem(id,sampleId,analysis,status,result) VALUES ('duplicates','other-sample','P','REPEAT_REQUIRED','retained');
-        INSERT INTO WorkItem(id,sampleId,analysis,status,result) VALUES ('empty','empty-sample','P','NOT_ASSIGNED',NULL);
-        INSERT INTO WorkAttempt(id,workItemId,attemptNo,status,qcBatchId,evidenceData,evidenceHash,instrumentId,createdAt,updatedAt)
-        VALUES ('old-one','duplicates',4,'RETURNED','batch','{"old":1}','hash-one','old-one-instrument','old-created','old-updated'),
-            ('old-two','duplicates',4,'REJECTED','missing-batch','{"old":2}','hash-two','old-two-instrument','old-created','old-updated');`);
     const frozen=JSON.stringify({equipmentId:'frozen-id',evaluatedAt:'retained-measurement-time',readiness:'READY'});
-    db.prepare('UPDATE Result SET equipmentReadiness=?').run(frozen);
+    const file=fixture({equipmentReadiness:frozen,extra:{Sample:[sampleRow('other-sample'),sampleRow('empty-sample')],
+        WorkItem:[{id:'duplicates',sampleId:'other-sample',analysis:'P',status:'REPEAT_REQUIRED',result:'retained',updatedAt:timestamp},
+            {id:'empty',sampleId:'empty-sample',analysis:'P',status:'NOT_ASSIGNED',result:null,updatedAt:timestamp}],
+        WorkAttempt:[{id:'old-one',workItemId:'duplicates',attemptNo:4,status:'RETURNED',qcBatchId:'batch',evidenceData:'{"old":1}',
+            evidenceHash:'hash-one',instrumentId:'old-one-instrument',createdAt:'old-created',updatedAt:'old-updated'},
+            {id:'old-two',workItemId:'duplicates',attemptNo:4,status:'REJECTED',qcBatchId:'missing-batch',evidenceData:'{"old":2}',
+                evidenceHash:'hash-two',instrumentId:'old-two-instrument',createdAt:'old-created',updatedAt:'old-updated'}]}}),db=new Database(file);
     const before=db.prepare('SELECT * FROM WorkAttempt ORDER BY id').all();db.close();
     const applied=installWorkAttemptContract({dbPath:file,apply:true});
     expect(applied).toMatchObject({newAttemptCount:1,linkedResultCount:1,flaggedAttemptCount:2});
@@ -105,7 +102,7 @@ test('all duplicate attempts are flagged without rewriting original fields, lega
 });
 
 test.each(['REPEAT_REQUIRED','REANALYSIS_REQUIRED','REJECTED','NOT_ASSIGNED','PENDING','ASSIGNED','IN_PROGRESS','ON_HOLD','WAIVED','CANCELLED','unknown'])('unmapped stored %s refuses whole apply without schema or data changes',status=>{
-    const file=fixture(),db=new Database(file);db.prepare('UPDATE WorkItem SET status=?').run(status);db.close();
+    const file=fixture({status});
     const before=hash(file);
     expect(installWorkAttemptContract({dbPath:file})).toMatchObject({plan:{status:'REFUSED',blockers:[{sourceStatus:status}]},totalChanges:0});
     expect(()=>installWorkAttemptContract({dbPath:file,apply:true})).toThrow(expect.objectContaining({code:'WORK_ATTEMPT_BACKFILL_REFUSED'}));
@@ -113,9 +110,9 @@ test.each(['REPEAT_REQUIRED','REANALYSIS_REQUIRED','REJECTED','NOT_ASSIGNED','PE
 });
 
 test('unmatched Results and current-result collisions are both reported and never partially applied',()=>{
-    const file=fixture(),db=new Database(file);
-    db.exec(`INSERT INTO Result(id,sampleId,param,replicateNo,attemptId,isCurrent,value,equipmentReadiness,batchId,updatedAt) VALUES ('conflict','sample','P',1,NULL,1,'other retained value',NULL,'batch','retained');
-        INSERT INTO Result(id,sampleId,param,replicateNo,attemptId,isCurrent,value,equipmentReadiness,batchId,updatedAt) VALUES ('unmatched','missing-sample','P',1,NULL,1,'unmatched scientific value',NULL,NULL,'retained');`);db.close();
+    const file=fixture({extra:{Sample:[sampleRow('missing-sample')],Result:[
+        resultRow('conflict','sample',{value:'other retained value',equipmentReadiness:null,batchId:'batch',updatedAt:'retained'}),
+        resultRow('unmatched','missing-sample',{value:'unmatched scientific value',equipmentReadiness:null,batchId:null,updatedAt:'retained'})]}});
     const before=hash(file),dry=installWorkAttemptContract({dbPath:file});
     expect(dry.plan.blockers.map(row=>row.code)).toEqual(expect.arrayContaining(['WORK_ATTEMPT_WORKITEM_UNMATCHED','WORK_ATTEMPT_CURRENT_RESULT_CONFLICT']));
     expect(()=>installWorkAttemptContract({dbPath:file,apply:true})).toThrow(expect.objectContaining({code:'WORK_ATTEMPT_BACKFILL_REFUSED'}));
@@ -147,9 +144,8 @@ test('existing exchange UDF triggers compile without emitting amendments for an 
 });
 
 test('historical orphan imports are separately receipted and never get fabricated work or attempts',()=>{
-    const file=fixture(),db=new Database(file);
-    db.prepare(`INSERT INTO Result(id,sampleId,param,replicateNo,attemptId,isCurrent,value,provenance,updatedAt)
-        VALUES ('orphan-import','orphan','P',1,NULL,1,'<0.0000123','IMPORTED','retained-time')`).run();
+    const file=fixture({extra:{Sample:[sampleRow('orphan')],Result:[
+        resultRow('orphan-import','orphan',{value:'<0.0000123',provenance:'IMPORTED',updatedAt:'retained-time'})]}}),db=new Database(file);
     const original=db.prepare("SELECT * FROM Result WHERE id='orphan-import'").get();db.close();
     const applied=installWorkAttemptContract({dbPath:file,apply:true});
     expect(applied).toMatchObject({newAttemptCount:1,linkedResultCount:1,receipt:{exemptImportCount:1,exemptImports:[{resultId:'orphan-import'}]}});
@@ -194,7 +190,7 @@ test('startup refuses edited backfill provenance even when the release source fi
 
 test('fresh unmarked conflict flags are refused rather than treated as trusted migration provenance',()=>{
     const file=fixture(),db=new Database(file);
-    db.exec(require('../../services/workAttemptMigrationSource').loadWorkAttemptMigrationSource().schemaSql);
+    const source=loadWorkAttemptMigrationSource(); db.exec(source.schemaSql);
     db.prepare(`INSERT INTO WorkAttempt(id,workItemId,attemptNo,status,legacyAttemptNoConflict,createdAt,updatedAt)
         VALUES ('pretended','measured',1,'RECORDED','not-a-reviewed-migration','created','updated')`).run();db.close();
     const before=hash(file);

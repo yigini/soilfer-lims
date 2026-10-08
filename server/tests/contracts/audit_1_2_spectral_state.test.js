@@ -1,9 +1,11 @@
-const { createResultFixture } = require('../../services/resultWriteService');
+const { createExecutionResultFixture } = require('../helpers/workAttemptFixtures');
 const request = require('supertest');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const Database = require('better-sqlite3');
+const { createHash } = require('node:crypto');
+const { installWorkAttemptContract, assertWorkAttemptStartupReady } = require('../../scripts/install_work_attempt_contract');
 const app = require('../../app');
 const prisma = require('../../prisma');
 const { getAuthToken, ensureTestLab } = require('../setup');
@@ -13,13 +15,23 @@ const { createLegacyClosureDatabase, useLegacyRouteDatabase } = require('../help
 const labId = 'LAB-SPECTRAL-STATE-179';
 let token, equipmentId;
 const databases = [];
+let bystanders = [];
+beforeEach(() => { bystanders = []; });
 beforeAll(async () => {
     await ensureTestLab(labId, 'TEST'); token = await getAuthToken('LAB_MANAGER', labId);
     equipmentId = randomUUID();
     await prisma.equipmentAsset.create({ data: { id: equipmentId, labId, assetType: 'SPECTROMETER', name: 'Spectral audit fixture',
         status: 'IN_SERVICE', criticality: 'HIGH' } });
 });
-afterEach(() => jest.restoreAllMocks());
+afterEach(async () => {
+    jest.restoreAllMocks();
+    // #190 pin6057445449: every route retains all three full scientific rows.
+    for (const { db, item, attempt, result } of bystanders) {
+        expect(await db.workItem.findUnique({ where: { id: item.id } })).toEqual(item);
+        expect(await db.workAttempt.findUnique({ where: { id: attempt.id } })).toEqual(attempt);
+        expect(await db.result.findUnique({ where: { id: result.id } })).toEqual(result);
+    }
+});
 afterAll(async () => { for (const database of databases) await database.close(); });
 const post = (path, body) => request(app).post(path).set('Authorization', `Bearer ${token}`).send(body);
 const remove = (id, body = { reason: 'Repeat acquisition after handling error' }) => request(app).delete(`/api/spectral/${id}`)
@@ -38,14 +50,20 @@ async function fixture({ status = 'COMPLETED', parentStatus = 'PROCESSING' } = {
             samples: [{ ...sampleData, createdAt: now, updatedAt: now }],
             workItems: [{ ...itemData, createdAt: now, updatedAt: now }] });
         databases.push(database); db = database.client; useLegacyRouteDatabase(prisma, db);
+        expect(installWorkAttemptContract({dbPath:database.file,apply:true}).classification).toBe('COMPLETE');
         sample = await db.sample.findUnique({ where: { id: sampleData.id } });
         item = await db.workItem.findUnique({ where: { id: itemData.id } });
     } else {
         sample = await createSampleFixture(db, { data: sampleData });
         item = await createWorkItemFixture(db, { data: itemData });
     }
-    const result = await createResultFixture(db, { data: { id: randomUUID(), sampleId: sample.id, param: 'PH_H2O',
-        value: '6.27', numericValue: 6.27, unit: 'pH', flags: '["RETAINED_SCIENTIFIC_FLAG"]' } });
+    const bystander = await createWorkItemFixture(db, { data: { id: randomUUID(), sampleId: sample.id,
+        analysis: 'PH_H2O', assignedLab: labId, status: 'ACCEPTED' } });
+    const result = await createExecutionResultFixture(db, { attemptStatus: 'ACCEPTED', data: { id: randomUUID(), sampleId: sample.id, param: 'PH_H2O',
+        value: '6.27', numericValue: 6.27, unit: 'pH', provenance: 'MEASURED', flags: '["RETAINED_SCIENTIFIC_FLAG"]' } });
+    const attempt = await db.workAttempt.findUnique({ where: { id: result.attemptId } });
+    expect(attempt).toMatchObject({ workItemId: bystander.id, status: 'ACCEPTED' });
+    bystanders.push({ db, item: bystander, attempt, result });
     const scan = await db.spectralData.create({ data: { id: randomUUID(), sampleId: sample.id, workItemId: item.id,
         labId, filename: `${randomUUID()}.csv`, modality: 'MIR', quantity: 'ABSORBANCE', qcStatus: 'PASS',
         status: 'VALIDATED', isCurrent: true, metadata: '{"retainedMetadata":true}' } });
@@ -61,6 +79,35 @@ async function snapshot(f) {
 }
 const link = (f, body = {}) => post('/api/spectral/link-task', { scanId: f.scan.id, workItemId: f.item.id, ...body });
 const review = (f, body = {}) => post(`/api/spectral/${f.scan.id}/review`, { action: 'APPROVE', ...body });
+const targetItem = (state, f) => {
+    const item = state.items.find(row => row.id === f.item.id);
+    expect(item).toBeDefined(); return item;
+};
+
+test('a literal pre-190 measured orphan refuses the installer and COMPLETE startup without writes', () => {
+    const { createPre190AttemptFixture } = require('../helpers/workAttemptHistoricalFixtures');
+    const directory = path.resolve(__dirname, '../.tmp'), file = path.join(directory, `audit_legacy_190_spectral-orphan-${randomUUID()}.db`);
+    const timestamp = '2026-10-01T12:00:00Z';
+    try {
+        createPre190AttemptFixture({actor:'system:fixture',file,rows:{
+            Sample:[{id:'orphan-sample',originalId:'orphan-sample',assignedLab:labId,status:'PROCESSING',updatedAt:timestamp}],
+            WorkItem:[{id:'only-spectrum',sampleId:'orphan-sample',analysis:'SPEC_MIR',status:'COMPLETED',updatedAt:timestamp}],
+            Result:[{id:'measured-orphan',sampleId:'orphan-sample',param:'PH_H2O',value:'6.27',numericValue:6.27,
+                unit:'pH',flags:'["RETAINED_SCIENTIFIC_FLAG"]',provenance:'MEASURED',attemptId:null,updatedAt:timestamp}]
+        }});
+        const before = createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+        expect(installWorkAttemptContract({dbPath:file})).toMatchObject({totalChanges:0,plan:{status:'REFUSED',
+            blockers:[{code:'WORK_ATTEMPT_WORKITEM_UNMATCHED',resultId:'measured-orphan'}]}});
+        expect(() => installWorkAttemptContract({dbPath:file,apply:true})).toThrow(expect.objectContaining({
+            code:'WORK_ATTEMPT_BACKFILL_REFUSED',plan:expect.objectContaining({blockers:expect.arrayContaining([
+                expect.objectContaining({code:'WORK_ATTEMPT_WORKITEM_UNMATCHED',resultId:'measured-orphan'})])})}));
+        expect(() => assertWorkAttemptStartupReady(file)).toThrow(expect.objectContaining({code:'WORK_ATTEMPT_NOT_INSTALLED'}));
+        expect(createHash('sha256').update(fs.readFileSync(file)).digest('hex')).toBe(before);
+    } finally {
+        if (path.dirname(file) !== directory || !path.basename(file).startsWith('audit_legacy_190_spectral-orphan-')) throw Error('Unexpected owned orphan fixture.');
+        for (const suffix of ['', '-wal', '-shm']) fs.rmSync(file + suffix, {force:true});
+    }
+});
 
 function prepareAcquisition(mode, fixtures) {
     const scans = fixtures.map(f => ({ id: randomUUID(), filename: `${randomUUID()}.csv`, sampleId: f.sample.id,
@@ -100,7 +147,7 @@ test('reasoned link atomically reopens and completes work, snapshots prior evide
     const f = await fixture(), before = await snapshot(f), reason = 'Acquisition correction requested by manager';
     const response = await link(f, { reopenReason: reason });
     expect(response.status).toBe(200); expect(response.body.workItemStatus).toBe('COMPLETED');
-    const after = await snapshot(f), item = after.items[0];
+    const after = await snapshot(f), item = targetItem(after, f);
     expect(after.sample).toEqual(before.sample); expect(after.results).toEqual(before.results);
     expect(item.version).toBe(f.item.version + 2);
     expect(JSON.parse(item.history)).toEqual([JSON.parse(f.item.history)[0],
@@ -119,7 +166,7 @@ test('trash on COMPLETED preserves the summary, clears only completion time and 
     const f = await fixture(), before = await snapshot(f), reason = 'Wrong sample preparation used for acquisition';
     const response = await remove(f.scan.id, { reason });
     expect(response.status).toBe(200);
-    const after = await snapshot(f), item = after.items[0];
+    const after = await snapshot(f), item = targetItem(after, f);
     expect(item).toMatchObject({ status: 'IN_PROGRESS', result: f.item.result, completedAt: null, version: f.item.version + 1 });
     expect(after.results).toEqual(before.results); expect(after.sample).toEqual(before.sample);
     expect(after.scans[0]).toMatchObject({ status: 'DELETED', isCurrent: true, workItemId: f.item.id });
@@ -228,9 +275,9 @@ test.each(['upload', 'commit'])('%s with a reason reopens, adds and completes at
     const response = await acquire(mode, [f], { reopenReason: reason });
     expect(response.status).toBe(200); expect((mode === 'upload' ? response.body.results : response.body)).toMatchObject({ success: 1, failed: 0 });
     const after = await snapshot(f);
-    expect(after.scans).toHaveLength(2); expect(after.items[0]).toMatchObject({ status: 'COMPLETED', version: f.item.version + 2 });
+    expect(after.scans).toHaveLength(2); expect(targetItem(after, f)).toMatchObject({ status: 'COMPLETED', version: f.item.version + 2 });
     expect(after.results).toEqual(before.results); expect(after.sample).toEqual(before.sample);
-    expect(JSON.parse(after.items[0].history).at(-2)).toMatchObject({ reason, priorResult: f.item.result,
+    expect(JSON.parse(targetItem(after, f).history).at(-2)).toMatchObject({ reason, priorResult: f.item.result,
         priorCompletedAt: f.item.completedAt.toISOString() });
     expect(after.audits.filter(row => row.action !== 'NON_MEASUREMENT_SUMMARY')).toHaveLength(before.audits.length + 3);
     expect(after.audits.filter(row => row.action === 'NON_MEASUREMENT_SUMMARY')).toHaveLength(1);
@@ -340,7 +387,7 @@ test.each(['upload', 'commit'])('%s uses the trimmed entry reason when the reque
     batch.scans[0].reopenReason = '  Reviewed acquisition correction  ';
     const response = await batch.send({ reopenReason: '   ', decisions: { [batch.scans[0].id]: { reopenReason: batch.scans[0].reopenReason } } });
     expect(response.status).toBe(200); expect((mode === 'upload' ? response.body.results : response.body)).toMatchObject({ success: 1, failed: 0 });
-    expect(JSON.parse((await snapshot(f)).items[0].history).at(-2).reason).toBe('Reviewed acquisition correction');
+    expect(JSON.parse(targetItem(await snapshot(f), f).history).at(-2).reason).toBe('Reviewed acquisition correction');
 });
 
 test.each(['SUBMITTED', 'ACCEPTED', 'WAIVED', 'CANCELLED', 'ON_HOLD', 'AWAITING_VERIFICATION', 'NOT_ASSIGNED']
@@ -369,7 +416,7 @@ test.each(['upload', 'commit'])('%s mixed acquisition commits ready work and wri
     const response = await acquire(mode, [good, blocked]);
     expect(response.status).toBe(200); expect((mode === 'upload' ? response.body.results : response.body)).toMatchObject({ success: 1, failed: 1,
         errors: [expect.objectContaining({ code: 'WORKITEM_STATE_CONFLICT' })] });
-    expect((await snapshot(good)).items[0].status).toBe('COMPLETED'); expect(await snapshot(blocked)).toEqual(before);
+    expect(targetItem(await snapshot(good), good).status).toBe('COMPLETED'); expect(await snapshot(blocked)).toEqual(before);
 });
 
 test.each(['upload', 'commit'])('%s late audit failure rolls back new scans, supersession and both item transitions', async mode => {
@@ -409,9 +456,9 @@ test('reasoned rejection of the sole counted scan leaves work in progress and pr
     const response = await review(f, { action: 'REJECT', reopenReason: reason });
     expect(response.status).toBe(200);
     const after = await snapshot(f);
-    expect(after.items[0]).toMatchObject({ status: 'IN_PROGRESS', completedAt: null, result: f.item.result, version: f.item.version + 1 });
+    expect(targetItem(after, f)).toMatchObject({ status: 'IN_PROGRESS', completedAt: null, result: f.item.result, version: f.item.version + 1 });
     expect(after.scans[0].status).toBe('REJECTED'); expect(after.results).toEqual(before.results);
-    expect(JSON.parse(after.items[0].history).at(-1)).toMatchObject({ reason, priorResult: f.item.result,
+    expect(JSON.parse(targetItem(after, f).history).at(-1)).toMatchObject({ reason, priorResult: f.item.result,
         priorCompletedAt: f.item.completedAt.toISOString() });
     expect(after.audits).toHaveLength(before.audits.length + 2);
 });
@@ -424,8 +471,8 @@ test.each(['REJECT', 'UNDO'])('reasoned %s review recompletes only when current 
     const before = await snapshot(f), response = await review(f, { action, reopenReason: reason });
     expect(response.status).toBe(200);
     const after = await snapshot(f);
-    expect(after.items[0]).toMatchObject({ status: 'COMPLETED', version: f.item.version + 2 });
-    expect(JSON.parse(after.items[0].history).at(-2)).toMatchObject({ reason, priorResult: f.item.result });
+    expect(targetItem(after, f)).toMatchObject({ status: 'COMPLETED', version: f.item.version + 2 });
+    expect(JSON.parse(targetItem(after, f).history).at(-2)).toMatchObject({ reason, priorResult: f.item.result });
     expect(after.results).toEqual(before.results);
     expect(after.audits.filter(row => row.action !== 'NON_MEASUREMENT_SUMMARY')).toHaveLength(before.audits.length + 3);
     expect(after.audits.filter(row => row.action === 'NON_MEASUREMENT_SUMMARY')).toHaveLength(1);
