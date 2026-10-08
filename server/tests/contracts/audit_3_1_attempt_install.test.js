@@ -12,6 +12,7 @@ function ownedFile() {
 function fixture() {
     const file=ownedFile(),db=new Database(file);
     db.exec(`CREATE TABLE _schema_migrations(id TEXT PRIMARY KEY,details TEXT NOT NULL);
+        CREATE TABLE Sample(id TEXT PRIMARY KEY,assignedLab TEXT,requiredAnalyses TEXT);
         INSERT INTO _schema_migrations VALUES ('prior-retained','{"original":"receipt"}');
         CREATE TABLE Batch(id TEXT PRIMARY KEY);
         INSERT INTO Batch VALUES ('batch');
@@ -177,6 +178,17 @@ test('startup refuses removed or altered guards without repairing schema automat
     db.exec('DROP TRIGGER WorkAttempt_evidence_update');db.close();const before=hash(file);
     expect(()=>assertWorkAttemptStartupReady(file)).toThrow(expect.objectContaining({code:'WORK_ATTEMPT_SCHEMA_MISMATCH'}));
     expect(()=>installWorkAttemptContract({dbPath:file,apply:true})).toThrow(expect.objectContaining({code:'WORK_ATTEMPT_SCHEMA_MISMATCH'}));
+    expect(hash(file)).toBe(before);
+});
+
+test('startup refuses edited backfill provenance even when the release source fields stay unchanged',()=>{
+    const file=fixture();installWorkAttemptContract({dbPath:file,apply:true});const db=new Database(file);
+    const receipt=JSON.parse(db.prepare('SELECT details FROM _schema_migrations WHERE id=?').get(MARKER).details);
+    receipt.links[0].attemptId='altered-history';
+    db.prepare('UPDATE _schema_migrations SET details=? WHERE id=?').run(JSON.stringify(receipt),MARKER);db.close();
+    const before=hash(file);
+    expect(()=>assertWorkAttemptStartupReady(file)).toThrow(expect.objectContaining({code:'WORK_ATTEMPT_SCHEMA_MISMATCH',
+        differences:expect.arrayContaining(['WorkAttempt receipt integrity differs'])}));
     expect(hash(file)).toBe(before);
 });
 

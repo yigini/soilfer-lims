@@ -7,6 +7,7 @@ let db;
 beforeEach(() => {
     db = new Database(':memory:');
     db.exec(`CREATE TABLE Batch(id TEXT PRIMARY KEY);
+        CREATE TABLE Sample(id TEXT PRIMARY KEY,assignedLab TEXT,requiredAnalyses TEXT);
         CREATE TABLE WorkItem(id TEXT PRIMARY KEY,sampleId TEXT,analysis TEXT,status TEXT,duplicateOf TEXT);
         CREATE TABLE WorkAttempt(id TEXT PRIMARY KEY,workItemId TEXT,attemptNo INTEGER,status TEXT,
             evidenceData TEXT,evidenceHash TEXT,instrumentId TEXT,qcBatchId TEXT,createdAt TEXT,updatedAt TEXT);
@@ -122,6 +123,16 @@ test('unmapped statuses report grouped WorkItem and Result counts and every id',
     result('one','first');result('two','first',{replicateNo:2});result('three','second');
     expect(readonlyPlan().unmappedStatusGroups).toEqual([{sourceStatus:'REPEAT_REQUIRED',workItemIds:['first','second'],
         resultIds:['one','three','two'],workItemCount:2,resultCount:3}]);
+});
+
+test('ordered parameters missing canonical work are reported by laboratory and parameter, without creating work',()=>{
+    db.exec(`INSERT INTO Sample VALUES ('one','lab-a','["P","P","TEXTURE"]'),('two','lab-a','["P"]'),
+        ('three','lab-b','["P"]'),('invalid','lab-b','invalid JSON');
+        INSERT INTO WorkItem(id,sampleId,analysis,status,duplicateOf) VALUES ('child','one','P','ACCEPTED','parent'),
+        ('canonical','three','P','ACCEPTED',NULL);`);
+    expect(readonlyPlan()).toMatchObject({status:'READY',missingOrderedWorkCount:3,samplesWithMissingOrderedWorkCount:2,
+        missingOrderedWorkGroups:[{labId:'lab-a',param:'P',sampleIds:['one','two'],sampleCount:2},
+            {labId:'lab-a',param:'TEXTURE',sampleIds:['one'],sampleCount:1}],invalidOrderMetadata:[{sampleId:'invalid'}],newAttempts:[]});
 });
 
 test('new historical attempts copy only identical frozen Result evidence and its instrument, with no request or equipment lookup', () => {

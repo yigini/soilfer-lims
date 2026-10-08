@@ -9,6 +9,7 @@ const { getNumberFormat } = require('./numberFormatService');
 const { validateNumericMethod, validateTextureFractions } = require('./workbenchValidationService');
 const { TransitionError } = rules;
 const { canonicalWorkItemWhere } = require('./workAttemptContract');
+const { allocateExecution,insertExecution } = require('./workAttemptWriteService');
 const TEXTURE_ANALYSES = new Set(['TEXTURE', 'SAND', 'SILT', 'CLAY', 'pSA', 'PSA', 'textureSum']);
 const FRACTIONS = ['SAND', 'SILT', 'CLAY'];
 const ATTEMPT_ERRORS = ['RESULT_ATTEMPT_NOT_FOUND', 'RESULT_ATTEMPT_SAMPLE_MISMATCH', 'RESULT_ATTEMPT_REFERENCED'];
@@ -58,6 +59,7 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     let item = workItemId ? await tx.workItem.findUnique({ where: { id: workItemId }, include: { sample: true } })
         : attempt?.workItem || await tx.workItem.findFirst({ where: canonicalWorkItemWhere(sampleId,measurement.param), include: { sample: true } });
     if (workItemId && !item) throw new TransitionError('Work item not found.', 404, 'WORK_ITEM_NOT_FOUND');
+    if (!item && !importing) throw new TransitionError('Reconcile the order before recording this parameter.',409,'RESULT_WORKITEM_REQUIRED');
     if (item && item.sampleId !== sampleId || attempt && (attempt.workItem.sampleId !== sampleId || item && attempt.workItemId !== item.id)) {
         throw new TransitionError('Result, attempt and work item must share a sample.', 409, 'RESULT_ATTEMPT_SAMPLE_MISMATCH');
     }
@@ -87,7 +89,6 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
     if (methodId && !isAvailable(method, analysisCode, labId)) throw new TransitionError('Method belongs to another parameter or laboratory.', 409, 'RESULT_METHOD_MISMATCH');
     // #182 pin 6005018712: historical imports have no work to execute. An
     // existing canonical item must satisfy the same commit rules as every path.
-    let equipmentReadiness = null;
     if (!importing || item) {
         require('./resultEvidenceService').assertAmendable(sample);
         if (item) {
@@ -95,19 +96,20 @@ async function context(tx, { sampleId, workItemId, attemptId = null, actor, meas
                 throw new TransitionError('Recorded or sealed work requires its correction workflow.', 409, 'RESULT_WORKITEM_SEALED');
             }
             item = { ...item, sample, equipmentId: measurement.equipmentId || item.equipmentId };
-            const ready = await evaluateExecutionReadiness(tx, item, actor);
-            if (!ready.isReady) throw new TransitionError(ready.reasons.join('; '), 409,
-                ready.blockers[0] || 'EXECUTION_BLOCKED', { equipmentBlocked: ready.equipmentBlocked });
-            equipmentReadiness = ready.equipmentSnapshot;
-        } else if (!parseJson(sample.requiredAnalyses, []).includes(measurement.param) &&
-            !(source === 'derived' && measurement.param === 'TEXTURE' &&
-                FRACTIONS.every(param => parseJson(sample.requiredAnalyses, []).includes(param)))) {
-            throw new TransitionError('Parameter is not ordered for the sample.', 409, 'RESULT_NOT_ORDERED');
         }
     }
     return { sample, item, attemptId, batchId, replicateNo, performedBy, labId, methodId, analysis, method, source,
         basis: ['AIR_DRY', 'OVEN_DRY', 'FIELD_MOIST'].includes(measurement.basis) ? measurement.basis : 'AIR_DRY',
-        equipmentId: measurement.equipmentId || item?.equipmentId || null, equipmentReadiness };
+        equipmentId: measurement.equipmentId || item?.equipmentId || null, equipmentReadiness:null,equipmentReadinessText:null };
+}
+
+async function validateExecutionReadiness(tx,ctx) {
+    if (!ctx.item) return;
+    const ready=await evaluateExecutionReadiness(tx,ctx.item,ctx.actor);
+    if (!ready.isReady) throw new TransitionError(ready.reasons.join('; '),409,
+        ready.blockers[0] || 'EXECUTION_BLOCKED',{equipmentBlocked:ready.equipmentBlocked});
+    ctx.equipmentReadiness=ctx.source==='derived'?null:ready.equipmentSnapshot;
+    ctx.equipmentReadinessText=ctx.equipmentReadiness?JSON.stringify(ctx.equipmentReadiness):null;
 }
 
 async function appendResult(tx, ctx, measurement, values, now) {
@@ -119,7 +121,7 @@ async function appendResult(tx, ctx, measurement, values, now) {
         row = await tx.result.create({ data: { id, sampleId: ctx.sample.id, param: measurement.param,
             ...values, basis: ctx.basis, methodologyId: ctx.methodId, replicateNo: ctx.replicateNo,
             isCurrent: true, enteredBy: ctx.performedBy, analysedAt: now, equipmentId: ctx.equipmentId,
-            equipmentReadiness: ctx.equipmentReadiness ? JSON.stringify(ctx.equipmentReadiness) : null,
+            equipmentReadiness: ctx.equipmentReadinessText,
             batchId: ctx.batchId, attemptId: ctx.attemptId, createdAt: now, updatedAt: now } });
     } catch (error) { throw mapResultWriteError(error); }
     await tx.auditLog.create({ data: { id: randomUUID(), entity: 'RESULT', entityId: row.id, action: 'RESULT_RECORDED',
@@ -135,8 +137,8 @@ async function cacheResult(tx, item, text) {
     await tx.workItem.update({ where: { id: item.id }, data: { result: text } });
 }
 
-async function numericValues(tx, ctx, measurement) {
-    const format = await getNumberFormat(ctx.labId, { db: tx, analysisCode: ctx.analysis.code, methodologyId: ctx.methodId });
+async function numericValues(tx, ctx, measurement, parsedValue=null, numberFormat=null) {
+    const format = numberFormat || await getNumberFormat(ctx.labId, { db: tx, analysisCode: ctx.analysis.code, methodologyId: ctx.methodId });
     let validationRules = { ...parseJson(ctx.analysis.validation, {}),
         ...(ctx.method?.loq != null && { loq: ctx.method.loq }), ...(ctx.method?.lod != null && { lod: ctx.method.lod }) };
     // Existing pH policies apply to each lab and method; no local limits are invented.
@@ -145,7 +147,7 @@ async function numericValues(tx, ctx, measurement) {
         validationRules.min = await policy.get(ctx.labId, 'results.phMin', scope);
         validationRules.max = await policy.get(ctx.labId, 'results.phMax', scope);
     }
-    const validation = validateNumericMethod(measurement.value, validationRules, format);
+    const validation = validateNumericMethod(measurement.value, validationRules, format,parsedValue);
     const importing = ctx.source === 'legacy-import';
     if (!importing && !validation.isValid && (!validation.normalizedValue && validation.normalizedValue !== 0 || validation.flags.includes('INVALID_FORMAT') || validation.isBlank)) {
         throw new TransitionError('Enter a valid numeric value or censoring qualifier.', 400, validation.code || 'INVALID_NUMBER');
@@ -169,17 +171,50 @@ async function numericValues(tx, ctx, measurement) {
 }
 
 async function writeResult(tx, options) {
-    options = writeOptions(options);
+    return (await writeResultsExecution(tx,{...options,measurements:[options.measurement]}))[0];
+}
+
+async function writeResultsExecution(tx, options) {
+    const measurements=options.measurements.map(selectMeasurement);
+    if (!measurements.length) throw new TransitionError('Choose a parameter.',400,'RESULT_PARAMETER_REQUIRED');
+    options = writeOptions({...options,measurement:measurements[0]});
+    measurements[0]=options.measurement;
     const ctx = await context(tx, options);
     ctx.actor = options.actor;
     if (options.measurement.param !== ctx.item?.analysis && ctx.item &&
         !(TEXTURE_ANALYSES.has(ctx.item.analysis) && FRACTIONS.includes(options.measurement.param))) {
         throw new TransitionError('Result parameter differs from its work item.', 409, 'RESULT_PARAMETER_MISMATCH');
     }
-    const values = await numericValues(tx, ctx, options.measurement);
-    const row = await appendResult(tx, ctx, options.measurement, values, options.now || new Date());
-    if (!options.deferCache) await cacheResult(tx, ctx.item, row.value);
-    return row;
+    const now=options.now || new Date();
+    const prepared=measurements.map(measurement=>({...measurement,id:measurement.id || randomUUID()}));
+    const seenReplicates=new Set();
+    for(const measurement of prepared) {
+        if (measurement.param!==options.measurement.param) throw new TransitionError('One execution must belong to one work item.',409,'RESULT_PARAMETER_MISMATCH');
+        const replicateNo=Number(measurement.replicateNo ?? 1);
+        if(!Number.isInteger(replicateNo) || replicateNo<1 || seenReplicates.has(replicateNo)) {
+            throw new TransitionError('Use a distinct positive replicate number.',400,'RESULT_REPLICATE_INVALID');
+        }
+        seenReplicates.add(replicateNo);
+        if(measurement.methodologyId && measurement.methodologyId!==ctx.methodId)throw new TransitionError('Use the assigned method.',409,'RESULT_METHOD_MISMATCH');
+        if(Object.hasOwn(measurement,'batchId') && measurement.batchId!==ctx.batchId)throw new TransitionError('Supplied result batch differs from the server batch.',409,'RESULT_BATCH_MISMATCH');
+        if(measurement.equipmentId && measurement.equipmentId!==ctx.equipmentId || measurement.basis && measurement.basis!==ctx.basis) {
+            throw new TransitionError('Replicates must share their execution context.',409,'RESULT_EXECUTION_CONTEXT_MISMATCH');
+        }
+    }
+    const allocation=await allocateExecution(tx,ctx,options);
+    await validateExecutionReadiness(tx,ctx);
+    const format=await getNumberFormat(ctx.labId,{db:tx,analysisCode:ctx.analysis.code,methodologyId:ctx.methodId});
+    const values=[];
+    for(const measurement of prepared)values.push(await numericValues(tx,ctx,measurement,null,format));
+    const evidence={source:ctx.source,param:prepared[0].param,rawValue:values[0].rawInput,normalizedValue:values[0].numericValue,
+        qualifier:values[0].censoring==='NONE'?null:values[0].censoring,recordedAt:now.toISOString(),resultId:prepared[0].id,
+        sourceResultIds:prepared.map(row=>row.id),measurements:prepared.map((row,index)=>({resultId:row.id,replicateNo:Number(row.replicateNo ?? 1),
+            rawValue:values[index].rawInput,normalizedValue:values[index].numericValue,censoring:values[index].censoring}))};
+    await insertExecution(tx,ctx,allocation,evidence,now,options.attemptMetadata);
+    const rows=[];
+    for(const [index,measurement] of prepared.entries())rows.push(await appendResult(tx,{...ctx,replicateNo:Number(measurement.replicateNo ?? 1)},measurement,values[index],now));
+    if (!options.deferCache) await cacheResult(tx, ctx.item, rows.at(-1).value);
+    return rows;
 }
 
 // Internal spectral ingestion uses an explicit option; a typed API measurement
@@ -198,6 +233,12 @@ async function writeTextureDetermination(tx, options) {
         const existing = await tx.result.findFirst({ where: { sampleId: ctx.sample.id, attemptId: ctx.attemptId, param: 'TEXTURE', replicateNo: ctx.replicateNo } });
         if (existing) return existing;
     }
+    const now=options.now || new Date();
+    const classMeasurement={...measurement,id:measurement.id || randomUUID()};
+    const fractionMeasurements=FRACTIONS.map(param=>({...measurement,id:randomUUID(),param,
+        value:options.fractions[param.toLowerCase()] ?? options.fractions[param]}));
+    const allocation=await allocateExecution(tx,ctx,options);
+    await validateExecutionReadiness(tx,ctx);
     const format = await getNumberFormat(ctx.labId, { db: tx });
     const tolerance = parseJson(ctx.analysis.validation, {})?.tolerance;
     const classification = validateTextureFractions(options.fractions, tolerance, format);
@@ -207,16 +248,19 @@ async function writeTextureDetermination(tx, options) {
     if (!classification.isValid && (!measurement.overrideReason?.trim() || !hasPermission(options.actor, 'APPROVE_RESULTS'))) {
         throw new TransitionError(classification.error, 422, 'TEXTURE_CLOSURE_FAILED');
     }
-    const now = options.now || new Date(), rows = [];
-    for (const param of FRACTIONS) {
-        const value = options.fractions[param.toLowerCase()] ?? options.fractions[param];
-        const fraction = { ...measurement, id: randomUUID(), param, value, rawInput: String(value) };
-        rows.push(await appendResult(tx, ctx, fraction, await numericValues(tx, ctx, fraction), now));
-    }
-    const flags = ['DERIVED_USDA_12_CLASS', ...rows.map(row => `SOURCE_${row.param}_${row.id}`),
+    const preparedFractions=[];
+    for(const fraction of fractionMeasurements)preparedFractions.push({measurement:fraction,
+        values:await numericValues(tx,ctx,fraction,classification.parsedFractions[fraction.param],format)});
+    const flags = ['DERIVED_USDA_12_CLASS', ...fractionMeasurements.map(row => `SOURCE_${row.param}_${row.id}`),
         `CLOSURE_ERROR_${classification.closureError ?? 0}`, ...(measurement.flags || []),
         ...(measurement.overrideReason?.trim() ? ['TEXTURE_CLOSURE_OVERRIDE', 'MANAGER_OVERRIDE'] : [])];
-    const row = await appendResult(tx, ctx, measurement, { value: classification.className,
+    const evidence={source:ctx.source,fractions:classification.fractions,className:classification.className,
+        closureError:classification.closureError,sourceResultIds:[...fractionMeasurements.map(row=>row.id),classMeasurement.id],
+        ...(options.syncResult && {rawValue:options.syncResult.rawValue ?? String(measurement.value ?? classification.className),
+            normalizedValue:null,qualifier:null,recordedAt:now.toISOString(),resultId:classMeasurement.id})};
+    await insertExecution(tx,ctx,allocation,evidence,now,options.attemptMetadata);
+    for(const fraction of preparedFractions)await appendResult(tx,ctx,fraction.measurement,fraction.values,now);
+    const row = await appendResult(tx, ctx, classMeasurement, { value: classification.className,
         rawInput: JSON.stringify(options.fractions), numericValue: null, unit: 'USDA_12_CLASS',
         flags: JSON.stringify(flags), isValid: classification.isValid || Boolean(measurement.overrideReason?.trim()),
         censoring: 'NONE', provenance: 'DERIVED' }, now);
@@ -236,15 +280,35 @@ async function deriveTextureResult(tx, { sampleId, replicateNo = 1, actor, now =
     const rows = await tx.result.findMany({ where: { sampleId, replicateNo, isCurrent: true, param: { in: FRACTIONS } }, orderBy: { createdAt: 'desc' } });
     const fractions = FRACTIONS.map(param => rows.find(row => row.param === param));
     if (fractions.some(row => !row || row.censoring !== 'NONE' || row.numericValue == null)) return null;
+    const item=await tx.workItem.findFirst({where:canonicalWorkItemWhere(sampleId,'TEXTURE')});
+    if (!item) throw new TransitionError('Reconcile the order before recording this parameter.',409,'RESULT_WORKITEM_REQUIRED');
     const classification = require('../utils/soilCalculations').calculateUsdaTexture(...fractions.map(row => row.numericValue));
     if (!classification.isValid) return null;
     const flags = ['DERIVED_USDA_12_CLASS', ...fractions.map(row => `SOURCE_${row.param}_${row.id}`), `CLOSURE_ERROR_${classification.closureError ?? 0}`];
-    const item = options.workItemId ? null : await tx.workItem.findFirst({ where: { sampleId, analysis: { in: ['TEXTURE', ...FRACTIONS] }, duplicateOf: null } });
-    const ctx = await context(tx, { sampleId, actor, ...options, workItemId: options.workItemId || item?.id,
+    const ctx = await context(tx, { sampleId, actor, workItemId:item.id,
         source: 'derived', measurement: { param: 'TEXTURE', replicateNo } });
-    const existing = await tx.result.findFirst({ where: { sampleId, replicateNo, param: 'TEXTURE', ...(options.attemptId ? { attemptId: options.attemptId } : { isCurrent: true }) } });
-    if (existing && (options.attemptId || existing.flags === JSON.stringify(flags))) return existing;
-    return appendResult(tx, ctx, { param: 'TEXTURE' }, { value: classification.className,
+    ctx.actor=actor;
+    const sharedAttemptId=fractions.every(row=>row.attemptId && row.attemptId===fractions[0].attemptId)?fractions[0].attemptId:null;
+    const sharedAttempt=sharedAttemptId?await tx.workAttempt.findUnique({where:{id:sharedAttemptId}}):null;
+    const reusing=sharedAttempt?.workItemId===item.id;
+    const existing = await tx.result.findFirst({ where: { sampleId, replicateNo, param: 'TEXTURE',
+        ...(reusing?{attemptId:sharedAttemptId}:{isCurrent:true}) } });
+    if (existing && existing.flags === JSON.stringify(flags)) return existing;
+    const measurement={id:randomUUID(),param:'TEXTURE'},allocation=await allocateExecution(tx,ctx,reusing?{attemptId:sharedAttemptId}:{});
+    if (reusing) {
+        const snapshot=fractions[0].equipmentReadiness;
+        const recorded=parseJson(sharedAttempt.evidenceData,{})?.equipmentReadiness || null;
+        if (fractions.some(row=>row.equipmentReadiness!==snapshot) || JSON.stringify(recorded)!==(snapshot || 'null')) {
+            throw new TransitionError('Attempt and Result readiness must match.',409,'WORK_ATTEMPT_EVIDENCE_MISMATCH');
+        }
+        ctx.attemptId=sharedAttemptId;ctx.equipmentReadiness=recorded;ctx.equipmentReadinessText=snapshot;ctx.equipmentId=sharedAttempt.instrumentId;
+    } else {
+        await validateExecutionReadiness(tx,ctx);ctx.equipmentReadiness=null;ctx.equipmentReadinessText=null;ctx.equipmentId=null;
+    }
+    await insertExecution(tx,ctx,allocation,{source:'derived',fractions:Object.fromEntries(fractions.map(row=>[row.param.toLowerCase(),row.numericValue])),
+        className:classification.className,closureError:classification.closureError,
+        sourceResultIds:fractions.map(row=>row.id),sourceAttemptIds:fractions.map(row=>row.attemptId)},now);
+    return appendResult(tx, ctx, measurement, { value: classification.className,
         rawInput: JSON.stringify(Object.fromEntries(fractions.map(row => [row.param.toLowerCase(), row.rawInput]))),
         numericValue: null, unit: 'USDA_12_CLASS', flags: JSON.stringify(flags), isValid: true, censoring: 'NONE', provenance: 'DERIVED' }, now);
 }
@@ -310,4 +374,5 @@ function createRawResultFixture(db, data) {
 }
 
 module.exports = { writeResult, writeSpectralPrediction, selectMeasurement, writeTextureDetermination, deriveTextureResult, writeNonMeasurementSummary, writeFixtureCache,
+    writeResultsExecution,
     createResultFixture, createResultsFixture, createRawResultFixture, mapResultWriteError };

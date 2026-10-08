@@ -26,7 +26,7 @@ function assertReviewable(item, status, sample = item.sample) {
 async function commitReview(prisma, item, status, user, data, operations, submissionId, audit = {}) {
     status = workflow.normalizeWorkItemState(status);
     try {
-        return await prisma.$transaction(async tx => {
+        return await require('./workflowStateRules').inTransaction(prisma,async tx => {
             const current = await tx.workItem.findUnique({ where: { id: item.id } });
             if (submissionId && current?.submissionId !== submissionId) throw Object.assign(itemStateError(item), { code: 'ITEM_NOT_IN_SUBMISSION' });
             if (!current || current.status !== item.status || current.version !== item.version) throw itemStateError(item);
@@ -74,7 +74,7 @@ async function commitReview(prisma, item, status, user, data, operations, submis
 }
 
 async function reconcileSubmission(prisma, submissionId, user, results, errors = []) {
-    return prisma.$transaction(async tx => {
+    return require('./workflowStateRules').inTransaction(prisma,async tx => {
         const submission = await tx.submission.findUnique({ where: { id: submissionId } });
         if (!submission) return;
         const ids = typeof submission.workItemIds === 'string' ? JSON.parse(submission.workItemIds) : (submission.workItemIds || []);

@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { assertReviewable, commitReview, reconcileSubmission } = require('../services/reviewCommitService');
+const { createReviewDecision,inReviewTransaction } = require('../services/reviewAttemptService');
 const { hasPermission } = require('../config/roles');
 const { invalidateReturnedResults } = require('../services/reportResultGovernance');
 const { normalizeAnalysisCodes } = require('../services/analysisCodesService');
@@ -930,11 +931,11 @@ exports.reviewWorkItem = async (req, res) => {
             ? 'ACCEPT'
             : (status === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED ? 'RETURN' : 'OMIT');
 
-        operations.push(tx => tx.reviewDecision.create({
-            data: {
+        operations.push(tx => createReviewDecision(tx, {
                 id: `rd-${id}-${Date.now()}`,
                 sampleId: String(item.sampleId),
                 workItemId: id,
+                attemptId:req.body.attemptId,
                 submissionItemId: item.submissionId || null,
                 decision: decisionVerdict,
                 reason: effectiveReason || note || 'Manager Review',
@@ -943,8 +944,7 @@ exports.reviewWorkItem = async (req, res) => {
                 authorization: user.role,
                 policyVersion: 'v1',
                 createdAt: now
-            }
-        }));
+        },user));
 
 
 
@@ -1162,6 +1162,11 @@ exports.reviewWorkItemsBulk = async (req, res) => {
         const now = new Date();
         const results = [];
         const errors = [];
+        const pendingNotifications=[];
+        const decisionForStatus=status==='ACCEPTED'?'ACCEPT':status==='REPEAT_REQUIRED'?'RETURN':'OMIT';
+        await inReviewTransaction(prisma,items.filter(item=>item.status==='SUBMITTED').map(item=>({
+            workItemId:item.id,decision:decisionForStatus,attemptId:req.body.attemptIds?.[item.id]
+        })),user,async reviewDb=>{
         for (const item of items) {
             try { assertReviewable(item, status); }
             catch (error) {
@@ -1217,11 +1222,11 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                 ? 'ACCEPT'
                 : (status === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED ? 'RETURN' : 'OMIT');
 
-            operations.push(tx => tx.reviewDecision.create({
-                data: {
+            operations.push(tx => createReviewDecision(tx, {
                     id: `rd-bulk-${item.id}-${Date.now()}`,
                     sampleId: String(item.sampleId),
                     workItemId: item.id,
+                    attemptId:req.body.attemptIds?.[item.id],
                     submissionItemId: item.submissionId || null,
                     decision: decisionVerdict,
                     reason: effectiveReason || note || 'Bulk Manager Review',
@@ -1230,13 +1235,12 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                     authorization: user.role,
                     policyVersion: 'v1',
                     createdAt: now
-                }
-            }));
+            },user));
 
             // Send message to technician if assigned
             if (item.assignedTo) {
                 // Lookup recipient user ID (assignedTo is username, not ID)
-                const recipient = await prisma.user.findFirst({
+                const recipient = await reviewDb.user.findFirst({
                     where: { username: item.assignedTo },
                     select: { id: true }
                 });
@@ -1258,7 +1262,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                 }
 
                 // Only create message if we have a valid recipient ID and sender ID
-                const senderId = user.id || (await prisma.user.findFirst({ where: { username: user.username }, select: { id: true } }))?.id;
+                const senderId = user.id || (await reviewDb.user.findFirst({ where: { username: user.username }, select: { id: true } }))?.id;
                 if (subject && body && recipient?.id && senderId) {
                     operations.push(tx => tx.message.create({
                         data: {
@@ -1289,7 +1293,7 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                 }
             }
             try {
-                await commitReview(prisma, item, status, user, updateData, async tx => {
+                await commitReview(reviewDb, item, status, user, updateData, async tx => {
                     const rows = [];
                     for (const operation of operations) rows.push(await operation(tx));
                     if (status === workflow.WORK_ITEM_STATES.REPEAT_REQUIRED) {
@@ -1301,18 +1305,20 @@ exports.reviewWorkItemsBulk = async (req, res) => {
                     return rows;
                 }, undefined, { qcAcknowledgement: req.body.qcAcknowledgement });
                 results.push({ workItemId: item.id, status, decision: decisionVerdict });
-                for (const notify of notifications) await notify();
+                pendingNotifications.push(...notifications);
             } catch (error) {
                 if (error.code !== 'ITEM_NOT_SUBMITTED') throw error;
                 errors.push({ workItemId: item.id, code: error.code });
             }
         }
+        });
         if (!results.length) return res.status(409).json({ error: 'No work items were eligible for review.', code: 'ITEM_NOT_SUBMITTED', results, errors });
         const committedIds = new Set(results.map(row => row.workItemId));
         const committedItems = items.filter(item => committedIds.has(item.id));
         for (const subId of [...new Set(committedItems.map(item => item.submissionId).filter(Boolean))]) {
             await reconcileSubmission(prisma, subId, user, results, errors);
         }
+        for(const notify of pendingNotifications)await notify();
 
         // Real-time push: broadcast WORKITEM_UPDATE to all connected users
         if (results.length > 0) {

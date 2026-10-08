@@ -115,6 +115,10 @@ test('SQL and runtime canonical lookup agree: only orphan historical imports can
     db.prepare('INSERT INTO WorkItem VALUES (?,?,?,?)').run('canonical','sample','P',null);
     expect(()=>result.run('nonexempt-import','sample','P',3,null,1,'IMPORTED')).toThrow('RESULT_ATTEMPT_REQUIRED');
     result.run('linked-import','sample','P',3,'valid-attempt',1,'IMPORTED');
+    for(const attemptId of [null,'replacement']) {
+        expect(()=>db.prepare("UPDATE Result SET attemptId=? WHERE id='linked-import'").run(attemptId)).toThrow('RESULT_ATTEMPT_IMMUTABLE');
+    }
+    db.prepare("UPDATE Result SET attemptId='valid-attempt' WHERE id='linked-import'").run();
     for(const provenance of ['MEASURED','PREDICTED','DERIVED',null]) {
         expect(()=>result.run('refused','other-sample','P',1,null,1,provenance)).toThrow('RESULT_ATTEMPT_REQUIRED');
     }

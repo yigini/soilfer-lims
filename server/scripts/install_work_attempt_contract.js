@@ -31,7 +31,7 @@ function classify(db, source) {
     if (reason && (reason.type !== 'TEXT' || reason.notnull || reason.dflt_value !== null || reason.pk || reason.hidden)) differences.push('ReviewDecision.reasonCode differs');
     installedColumns.push(Boolean(reason));
     const objects = releaseObjects(source);
-    if (objects.length !== 14) throw fail('WORK_ATTEMPT_SOURCE_MISMATCH', 'The release requires two partial indexes and twelve guards.');
+    if (objects.length !== 15) throw fail('WORK_ATTEMPT_SOURCE_MISMATCH', 'The release requires two partial indexes and thirteen guards.');
     const installedObjects = objects.map(expected => {
         const actual = db.prepare('SELECT type,sql FROM sqlite_master WHERE name=?').get(expected.name);
         if (actual && (actual.type !== expected.type || normalize(actual.sql) !== normalize(expected.sql))) differences.push(`${expected.name} differs`);
@@ -43,6 +43,13 @@ function classify(db, source) {
     if (marker) {
         try { receipt = JSON.parse(marker.details); } catch (_) { /* Refuse altered receipts. */ }
         if (JSON.stringify(receipt?.sources) !== JSON.stringify(sources)) differences.push('WorkAttempt receipt source differs');
+        const {receiptSha256,...content}=receipt || {};
+        if(receiptSha256!==fingerprint(content))differences.push('WorkAttempt receipt integrity differs');
+        for(const group of receipt?.flaggedGroups || []) {
+            const rows=db.prepare('SELECT id,workItemId,attemptNo,legacyAttemptNoConflict FROM "WorkAttempt" WHERE legacyAttemptNoConflict=? ORDER BY id').all(group.flag);
+            if(JSON.stringify(rows.map(row=>row.id).sort())!==JSON.stringify([...group.attemptIds].sort()) ||
+                rows.some(row=>row.workItemId!==group.workItemId || row.attemptNo!==group.attemptNo))differences.push('WorkAttempt conflict flag provenance differs');
+        }
     }
     let classification;
     if (![...installedColumns,...installedObjects,Boolean(marker)].some(Boolean)) classification = 'PRE_190';
@@ -110,6 +117,8 @@ function applyBackfill(db, plan) {
         throw fail('WORK_ATTEMPT_PRESERVATION_REFUSED', 'Backfill changed original WorkItems.');
     }
     return { createdAttempts, links, flaggedGroups, exemptImportCount:plan.exemptImportCount,exemptImports:plan.exemptImports,
+        missingOrderedWorkGroups:plan.missingOrderedWorkGroups,missingOrderedWorkCount:plan.missingOrderedWorkCount,
+        samplesWithMissingOrderedWorkCount:plan.samplesWithMissingOrderedWorkCount,invalidOrderMetadata:plan.invalidOrderMetadata,
         historicalBatchEvidence: plan.historicalBatchEvidence,
         historicalEquipmentEvidence: plan.historicalEquipmentEvidence, originalRowsAndFieldsPreserved: true };
 }
@@ -139,6 +148,7 @@ function installWorkAttemptContract({ dbPath, apply = false } = {}) {
             const receipt = { sources:current.sources, originalPlanSha256:current.plan.planSha256,
                 originalAttemptSha256:current.plan.originalAttemptSha256, originalResultSha256:current.plan.originalResultSha256,
                 matchedWorkItemSourceSha256:current.plan.matchedWorkItemSourceSha256, ...backfill };
+            receipt.receiptSha256=fingerprint(receipt);
             db.prepare('INSERT INTO "_schema_migrations"(id,details) VALUES (?,?)').run(MARKER,JSON.stringify(receipt));
             const after = classify(db,source);
             if (after.classification !== 'COMPLETE' || db.pragma('integrity_check',{simple:true}) !== 'ok' || db.pragma('foreign_key_check').length) {

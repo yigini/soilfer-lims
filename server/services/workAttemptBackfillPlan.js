@@ -14,6 +14,7 @@ function planHistoricalAttempts(db) {
         const attempts = db.prepare('SELECT * FROM "WorkAttempt" ORDER BY id').all();
         const results = db.prepare('SELECT * FROM "Result" ORDER BY id').all();
         const items = db.prepare('SELECT id,sampleId,analysis,status,duplicateOf FROM "WorkItem" ORDER BY id').all();
+        const samples=db.prepare('SELECT id,assignedLab,requiredAnalyses FROM "Sample" ORDER BY id').all();
         const batchIds = db.prepare('SELECT id FROM "Batch" ORDER BY id').all().map(row => row.id);
         const knownBatchIds = new Set(batchIds);
         const attemptsByItem = new Map(), itemsByMeasurement = new Map(), duplicateNumbers = new Map();
@@ -30,6 +31,21 @@ function planHistoricalAttempts(db) {
             const group = itemsByMeasurement.get(key) || [];
             group.push(item); itemsByMeasurement.set(key, group);
         }
+        const missingOrderedWork=new Map(),invalidOrders=[];
+        for(const sample of samples) {
+            let ordered;
+            try {ordered=JSON.parse(sample.requiredAnalyses || '[]');}catch(_){ordered=null;}
+            if(!Array.isArray(ordered) || ordered.some(param=>typeof param!=='string')) {
+                invalidOrders.push({sampleId:sample.id,labId:sample.assignedLab});continue;
+            }
+            for(const param of new Set(ordered)) {
+                if(itemsByMeasurement.has(JSON.stringify([sample.id,param])))continue;
+                const key=JSON.stringify([sample.assignedLab,param]);
+                const group=missingOrderedWork.get(key) || {labId:sample.assignedLab,param,sampleIds:[]};
+                group.sampleIds.push(sample.id);missingOrderedWork.set(key,group);
+            }
+        }
+        const missingOrderedWorkGroups=[...missingOrderedWork.values()].map(row=>({...row,sampleCount:row.sampleIds.length}));
         // Pin 6054084454 permits only a one-to-one, non-null batch match for
         // several existing attempts. It never uses dates, numbers or values.
         const batchMatches = new Map(), matchingResultIds = new Map();
@@ -135,6 +151,9 @@ function planHistoricalAttempts(db) {
             existingAttemptCount: attempts.length, resultCount: results.length,
             alreadyLinkedResultCount: results.filter(row => row.attemptId != null).length,
             exemptImportCount:exemptImports.length,exemptImports,
+            missingOrderedWorkGroups,missingOrderedWorkCount:missingOrderedWorkGroups.reduce((sum,row)=>sum+row.sampleCount,0),
+            samplesWithMissingOrderedWorkCount:new Set(missingOrderedWorkGroups.flatMap(row=>row.sampleIds)).size,
+            invalidOrderMetadata:invalidOrders,
             unmappedStatusGroups:[...unmappedStatuses.values()].map(row=>({...row,workItemCount:row.workItemIds.length,resultCount:row.resultIds.length})),
             newAttempts: [...newAttempts.values()], links, blockers, duplicateAttemptNumberGroups, currentResultConflicts,
             historicalEquipmentEvidence, historicalBatchEvidence,
