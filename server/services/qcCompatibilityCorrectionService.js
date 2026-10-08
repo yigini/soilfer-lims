@@ -67,7 +67,7 @@ async function correctCompatibilityMeasurements(db, batchId, actor, input) {
         for (const [collection, fields] of [['blanks', ['value']], ['controls', ['expected', 'measured']], ['duplicates', ['value1', 'value2']]]) {
             for (const row of arithmetic[collection] || []) for (const field of fields) if (row.rawInput?.[field] == null && row[field] != null && row.rawInput) delete row.rawInput[field];
         }
-        const payload = normalizeQcNumbers(arithmetic, numberFormat);
+        const payload = reviewed ? arithmetic : normalizeQcNumbers(arithmetic, numberFormat);
         const missing = getMissingQcValueTypes(payload, { qcSlots: ['BLANK', 'DUPLICATE', 'CONTROL'].filter((type, index) => payload[['blanks', 'duplicates', 'controls'][index]]?.length).map(type => ({ type })) }, numberFormat);
         if (missing.length) throw failure(400, 'QC_VALUES_MISSING', 'Correct the unresolved observations before re-evaluating this round.');
         const evaluated = retainReferences(retainQcRawInput(evaluateBatchQc(payload, { runProfile, policy,

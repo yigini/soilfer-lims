@@ -10,8 +10,9 @@ const { QC_RUN_INCLUDE } = require('../../services/qcRunViewService');
 const { MODE } = require('../../services/qcReviewedCorrectionService');
 const owned = [];
 
-async function failedFixture(native, { author = 'analyst', enabled = true } = {}) {
-    const f = await qcGateFixture({ criteria: { blankPerBatch: 1, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0 } });
+async function failedFixture(native, { author = 'analyst', enabled = true, duplicate = false } = {}) {
+    const criteria = { blankPerBatch: 1, lrmPerBatch: 0, duplicateEvery: duplicate ? 1 : 0, crmEveryNBatches: 0 };
+    const f = await qcGateFixture({ criteria });
     owned.push(f);
     for (const name of ['analyst', 'reviewer', 'other']) {
         const user = await f.db.user.create({ data: { id: randomUUID(), username: `${name}-${randomUUID()}`, email: `${randomUUID()}@example.test`,
@@ -20,16 +21,19 @@ async function failedFixture(native, { author = 'analyst', enabled = true } = {}
     }
     if (enabled) await f.setPolicy([{ key: 'qc.reviewedTranscriptionCorrectionEnabled', value: true }]);
     if (!native) await require('../../services/qcRuleService').change(f.actor, { labId: f.labId, analysisCode: f.analysisCode,
-        criteria: { blankPerBatch: 1, lrmPerBatch: 0, duplicateEvery: 0, crmEveryNBatches: 0 }, expectedVersion: 0,
+        criteria, expectedVersion: 0,
         reason: 'Analysis-wide criteria for unresolved compatibility method' }, { db: f.db });
     const authorActor = author === 'system' ? f.actor : f[author];
     if (native) {
         f.run = await startNativeRun(f.db, (await buildNativeRun(f.db, f.analyst, f.input)).id, f.analyst);
         f.blank = f.run.positions.find(row => row.kind === 'BLANK');
-        f.run = await writeNativeMeasurements(f.db, f.run.id, authorActor, { measurements: [{ positionId: f.blank.id, value: 9.123456789 }] });
+        const measurements = [{ positionId: f.blank.id, value: 9.123456789 }];
+        if (duplicate) for (const position of f.run.positions.filter(row => ['SAMPLE', 'DUPLICATE'].includes(row.kind))) measurements.push({ positionId: position.id, rawInput: '2.1234' });
+        f.run = await writeNativeMeasurements(f.db, f.run.id, authorActor, { measurements });
     } else {
         f.run = await createStoredProfileRunFixture(f.db, { actor: f.analyst, input: { analysis: f.analysisCode, profile: 'RACK_40' } });
-        f.run = (await writeCompatibilityMeasurements(f.db, f.run.id, authorActor, { blanks: [{ value: 9.123456789 }] })).batch;
+        f.run = (await writeCompatibilityMeasurements(f.db, f.run.id, authorActor, { blanks: [{ value: 9.123456789 }],
+            ...(duplicate && { duplicates: [{ rawInput: { value1: '2.1234', value2: '2.1234' } }, { rawInput: { value1: '2.1234', value2: '2.1234' } }] }) })).batch;
         f.blank = f.run.positions.find(row => row.kind === 'BLANK');
     }
     expect(f.run.analytes[0].status).toBe('QC_FAIL');
@@ -111,4 +115,72 @@ test.each([true, false])('a reviewed replacement that still fails retains the fa
     expect(response.status).toBe(200); expect(response.body.batch.analytes[0].status).toBe('QC_FAIL');
     const after = await f.read(); expect(after.evaluations.map(row => row.verdict)).toEqual(['FAIL', 'FAIL']);
     expect(after.evaluations[0]).toEqual(original.evaluations[0]); expect(after.dispositions).toHaveLength(0);
+});
+
+test.each([true, false])('new observations use current input format while unchanged stored numbers remain exact (native=%s)', async native => {
+    const f = await failedFixture(native, { duplicate: true }), original = await f.read();
+    await f.setPolicy([{ key: 'numbers.decimalSeparator', value: ',' }, { key: 'numbers.thousandsSeparator', value: '.' }]);
+    const response = await f.submit(f.reviewer, { ...f.inputCorrection, corrections: [{ positionId: f.blank.id, rawInput: '0,0123456789' }] });
+    expect(response.status).toBe(200); expect(response.body.batch.analytes[0].status).toBe('QC_PASS');
+    const after = await f.read();
+    for (const old of original.measurements.filter(row => row.positionId !== f.blank.id)) expect(after.measurements.find(row => row.id === old.id)).toEqual(old);
+    expect(after.measurements.find(row => row.positionId === f.blank.id && !row.supersededById)).toMatchObject({ rawInput: '0,0123456789', value: 0.0123456789 });
+    for (const row of JSON.parse(after.evaluations[1].details).evaluation.duplicates) expect(row).toMatchObject({ value1: 2.1234, value2: 2.1234, status: 'PASS' });
+});
+
+test.each(['ACCEPT_WITH_DEVIATION', 'REJECT', 'REPEAT_BATCH'])('disposition %s stays locked to reviewed transcription correction', async decision => {
+    const f = await failedFixture(true);
+    await require('../../services/qcDispositionStateService').dispositionBatch(f.run.id, decision, 'Recorded disposition decision', f.reviewer, f.db, { analysisCode: f.analysisCode });
+    const before = await f.allEvidence();
+    expect((await f.submit(f.reviewer)).body.code).toBe('QC_REVIEWED_STATE_LOCKED');
+    expect(await f.allEvidence()).toEqual(before);
+});
+
+test('closed accepted QC stays locked and lab scope cannot be supplied by the caller', async () => {
+    const f = await failedFixture(true); expect((await f.submit(f.reviewer)).status).toBe(200);
+    await require('../../services/qcRunMutationService').mutateQcRun(f.db, f.run.id, f.reviewer, { analysisCode: f.analysisCode, status: 'CLOSED' });
+    const before = await f.allEvidence();
+    expect((await f.submit(f.reviewer)).body.code).toBe('QC_BATCH_LOCKED'); expect(await f.allEvidence()).toEqual(before);
+    const lab = await f.db.lab.create({ data: { id: randomUUID(), code: randomUUID(), name: 'Other lab', country: 'TEST' } });
+    const user = await f.db.user.create({ data: { id: randomUUID(), username: randomUUID(), email: `${randomUUID()}@example.test`, password: 'fixture', role: 'LAB_MANAGER', labId: lab.id } });
+    const scopedBefore = await f.allEvidence();
+    const response = await f.submit({ ...user, labId: lab.id }); expect(response.status).toBe(403);
+    expect(await f.allEvidence()).toEqual(scopedBefore);
+});
+
+test('all preset defaults keep reviewed corrections off and missing recorded criteria refuse', async () => {
+    const key = require('../../config/policyRegistry').registry['qc.reviewedTranscriptionCorrectionEnabled'];
+    expect(key.scope).toBe('LAB'); expect(Object.values(key.presets)).toEqual([false, false, false]);
+    const f = await failedFixture(false), batch = await f.read();
+    const evidence = require('../../services/qcRunViewService').currentAnalyteEvidence(batch, f.analysisCode);
+    const { compatibilityCriteria } = require('../../services/qcReviewedCorrectionService');
+    for (const transform of [stored => { delete stored.qcRule.requirements; }, stored => { delete stored.policyValues['qc.mode']; },
+        stored => { delete stored.qcRule.resolved.failAction; }, stored => { delete stored.blanks[0].maxAllowed; }]) {
+        const original = JSON.parse(evidence.evaluation.details); transform(original.evaluation);
+        const before = await f.allEvidence();
+        expect(() => compatibilityCriteria({ previousEvaluation: { ...evidence.evaluation, details: JSON.stringify(original) } }, evidence, { decimal: '.', thousands: null }))
+            .toThrow(expect.objectContaining({ statusCode: 409, code: 'QC_REVIEWED_CRITERIA_UNAVAILABLE' }));
+        expect(await f.allEvidence()).toEqual(before);
+    }
+});
+
+test('later generated report and PDF disclose the original failed evaluation and reviewed replacement in every locale', async () => {
+    const f = await failedFixture(true); expect((await f.submit(f.reviewer)).status).toBe(200);
+    const item = await f.db.workItem.findUnique({ where: { id: f.workItemIds[0] } }); await f.result(item);
+    for (const status of ['COMPLETED', 'SUBMITTED', 'ACCEPTED']) await require('../../services/workItemStateService').transitionWorkItem(item.id, status, f.actor, 'Reviewed report fixture', {}, f.db);
+    const PDFDocument = require('pdfkit'), text = jest.spyOn(PDFDocument.prototype, 'text');
+    try {
+        for (const locale of ['en', 'es', 'es-419', 'fr', 'pt']) {
+            const report = await require('../../services/reportAssembly').assembleReport(item.sampleId, { ...f.reviewer, language: locale }, { db: f.db });
+            expect(report.evidence.qc.withinLimits).toBe(true);
+            expect(report.evidence.qc.reviewedCorrections).toHaveLength(1);
+            const correction = report.evidence.qc.reviewedCorrections[0];
+            expect(correction.originalEvaluation.verdict).toBe('FAIL'); expect(correction.replacementEvaluation.verdict).toBe('PASS');
+            for (const value of [f.reviewer.username, f.inputCorrection.reason, f.inputCorrection.sourceReference, '9.123456789', '0.0123456789', correction.previousEvaluationId]) expect(report.qcStatement).toContain(value);
+            expect(report.qcStatement).toContain(require(`../../locales/${locale}.json`).qcReviewedCorrection.disclosure);
+            text.mockClear();
+            const pdf = await require('../../services/pdfGenerator').generateReportPdfBuffer(report, { status: 'DRAFT' });
+            expect(pdf.subarray(0, 5).toString()).toBe('%PDF-'); expect(text.mock.calls.map(([value]) => String(value))).toContain(report.qcStatement);
+        }
+    } finally { text.mockRestore(); }
 });
