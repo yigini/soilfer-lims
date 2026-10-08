@@ -13,6 +13,9 @@ which supersedes a Result in the same attempt, and CLIENT_RETEST, which needs
 an amendment. OTHER requires a note. An unchecked NCR/override is refused
 until #193. Laboratory limits and technician self-repeat enablement come
 from policyService; no command may infer a reason from historical free text.
+The read-only interim-row planner now lists the actual attempt 2+ rows whose
+reason is NULL, with deterministic identifiers and the explicit description
+"reason not recorded". It plans zero backfilled rows and has no write path.
 
 Remaining implementation and verification:
 
