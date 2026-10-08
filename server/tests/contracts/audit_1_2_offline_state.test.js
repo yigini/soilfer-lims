@@ -69,7 +69,8 @@ test('offline completion centrally records provenance and preserves superseded a
     expect(after.attempts).toHaveLength(2);
     expect(after.attempts.find(attempt => attempt.id === priorAttempt.id)).toEqual(priorAttempt);
     const currentResult = after.results.find(result => result.id === receipt.outcome.resultId);
-    expect(currentResult).toMatchObject({ isCurrent: true, attemptId: receipt.outcome.attemptId });
+    expect(currentResult).toMatchObject({ id: receipt.outcome.resultId, isCurrent: true });
+    expect(JSON.parse(after.receipts[0].outcome)).toMatchObject({ resultId: currentResult.id, attemptId: currentResult.attemptId });
     expect(currentResult.attemptId).not.toBe(priorAttempt.id);
     expect(after.attempts.find(attempt => attempt.id === currentResult.attemptId))
         .toMatchObject({ workItemId: row.item.id, attemptNo: 2 });

@@ -68,7 +68,10 @@ async function createExecutionResultFixture(db, args) {
                 }
             }
         }
-        const ctx = { item, performedBy: 'system:fixture', batchId: data.batchId ?? null,
+        // Pin6060110991: preserve a Result's literal batch id; executions only
+        // reference a Batch that exists when this fixture is inserted.
+        const batch = data.batchId ? await tx.batch.findUnique({ where: { id: data.batchId }, select: { id: true } }) : null;
+        const ctx = { item, performedBy: 'system:fixture', batchId: batch?.id ?? null,
             method: null, equipmentReadiness, equipmentReadinessText: data.equipmentReadiness ?? null };
         const allocation = await allocateExecution(tx, ctx);
         const evidence = { source: textureSources || data.provenance === 'DERIVED' ? 'test-fixture' : 'fixture',
